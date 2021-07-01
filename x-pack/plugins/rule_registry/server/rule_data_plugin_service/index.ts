@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { ClusterPutComponentTemplate } from '@elastic/elasticsearch/api/requestParams';
-import { IndicesRolloverResponse } from '@elastic/elasticsearch/api/types';
 import { estypes } from '@elastic/elasticsearch';
 import { ElasticsearchClient, Logger } from 'kibana/server';
 import { get, isEmpty } from 'lodash';
@@ -50,6 +49,12 @@ function createSignal() {
   }
 
   return { wait, complete, isReady: () => ready };
+}
+
+function incrementIndexName(oldIndex: string) {
+  const baseIndexString = oldIndex.slice(0, -6);
+  const newIndexNumber = Number(oldIndex.slice(-6)) + 1;
+  return baseIndexString + String(newIndexNumber).padStart(6, '0');
 }
 
 export class RuleDataPluginService {
@@ -130,34 +135,16 @@ export class RuleDataPluginService {
     return clusterClient.ilm.putLifecycle(policy);
   }
 
-  private async updateAliasWriteIndexMapping(alias: string) {
+  private async updateAliasWriteIndexMapping({ index, alias }: { index: string; alias: string }) {
     const clusterClient = await this.getClusterClient();
-    let simulatedRollover: IndicesRolloverResponse;
-    try {
-      // Simulating the rollover here acts like the start of a transaction. If we determine that a rollover
-      // is necessary because the putMapping call below fails, then we know that this simulated rollover *would*
-      // have been the correct thing to do. When we do the real rollover, we provide the new_index from the simulation
-      // as the target index so that if another Kibana instance has rolled over in the meantime then the rollover returns
-      // an error that we suppress. This prevents multiple rollovers from happening accidentally.
-      // The simulated rollover doubles as a convenient way to get the current write index for an alias.
-      ({ body: simulatedRollover } = await clusterClient.indices.rollover({
-        alias,
-        dry_run: true,
-      }));
-    } catch (err) {
-      if (err?.meta?.body?.error?.type !== 'index_not_found_exception') {
-        throw err;
-      }
-      return;
-    }
 
     const simulatedIndexMapping = await clusterClient.indices.simulateIndexTemplate({
-      name: simulatedRollover.new_index,
+      name: index,
     });
     const simulatedMapping = get(simulatedIndexMapping, ['body', 'template', 'mappings']);
     try {
       await clusterClient.indices.putMapping({
-        index: simulatedRollover.old_index,
+        index,
         body: simulatedMapping,
       });
       return;
@@ -168,7 +155,7 @@ export class RuleDataPluginService {
       try {
         await clusterClient.indices.rollover({
           alias,
-          new_index: simulatedRollover.new_index,
+          new_index: incrementIndexName(index),
         });
       } catch (e) {
         if (e?.meta?.body?.error?.type !== 'resource_already_exists_exception') {
@@ -199,14 +186,22 @@ export class RuleDataPluginService {
     await this.wait();
     const clusterClient = await this.getClusterClient();
     const { body: aliasesResponse } = await clusterClient.indices.getAlias({ index: pattern });
-    const uniqueAliases = new Set<string>();
+    const writeIndicesAndAliases: Array<{ index: string; alias: string }> = [];
     // Sadly the get alias API returns an entry for every concrete index associated with an alias
     // So we loop over the concrete indices, then for each concrete index add all of its aliases
     // to the set of unique aliases
-    Object.entries(aliasesResponse).forEach(([_, aliases]) => {
-      Object.keys(aliases.aliases).forEach((alias) => uniqueAliases.add(alias));
+    Object.entries(aliasesResponse).forEach(([index, aliases]) => {
+      Object.entries(aliases.aliases).forEach(([aliasName, aliasProperties]) => {
+        if (aliasProperties.is_write_index) {
+          writeIndicesAndAliases.push({ index, alias: aliasName });
+        }
+      });
     });
-    await Promise.all([...uniqueAliases].map((alias) => this.updateAliasWriteIndexMapping(alias)));
+    await Promise.all(
+      writeIndicesAndAliases.map((indexAndAlias) =>
+        this.updateAliasWriteIndexMapping(indexAndAlias)
+      )
+    );
   }
 
   isReady() {
