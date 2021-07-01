@@ -43,7 +43,7 @@ import { ElasticSearchHit } from '../../../../doc_views/doc_views_types';
  */
 const FIELDS_PER_PAGE = 50;
 
-export interface DiscoverSidebarProps extends DiscoverSidebarResponsiveProps {
+export interface DiscoverSidebarProps extends Omit<DiscoverSidebarResponsiveProps, 'documents$'> {
   /**
    * Current state of the field filter, filtering fields by name, type, ...
    */

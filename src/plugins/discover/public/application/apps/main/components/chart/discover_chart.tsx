@@ -108,7 +108,6 @@ export function DiscoverChart({
                 onChangeInterval={onChangeInterval}
                 stateInterval={state.interval || ''}
                 savedSearchData$={savedSearchDataChart$}
-                bucketInterval={bucketInterval}
               />
             </EuiFlexItem>
           )}
