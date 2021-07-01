@@ -30,6 +30,7 @@ import { withKibana } from '../../../../../../../../src/plugins/kibana_react/pub
 import { OnCloseFn } from '../share_menu.component';
 import { ZIP } from '../../../../../i18n/constants';
 import { WithKibanaProps } from '../../../../index';
+import { pluginServices } from '../../../../services';
 
 export { OnDownloadFn, OnCopyFn } from './flyout.component';
 
@@ -95,7 +96,7 @@ export const ShareWebsiteFlyout = compose<ComponentProps, Pick<Props, 'onClose'>
       unsupportedRenderers,
       onClose,
       onCopy: () => {
-        kibana.services.canvas.notify.info(strings.getCopyShareConfigMessage());
+        pluginServices.getServices().notify.info(strings.getCopyShareConfigMessage());
       },
       onDownload: (type) => {
         switch (type) {
@@ -111,7 +112,7 @@ export const ShareWebsiteFlyout = compose<ComponentProps, Pick<Props, 'onClose'>
               .post(`${basePath}${API_ROUTE_SHAREABLE_ZIP}`, JSON.stringify(renderedWorkpad))
               .then((blob) => downloadZippedRuntime(blob.data))
               .catch((err: Error) => {
-                kibana.services.canvas.notify.error(err, {
+                pluginServices.getServices().notify.error(err, {
                   title: strings.getShareableZipErrorTitle(workpad.name),
                 });
               });

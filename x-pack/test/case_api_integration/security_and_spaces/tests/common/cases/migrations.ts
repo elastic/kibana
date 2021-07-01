@@ -7,7 +7,11 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
+import {
+  CASES_URL,
+  SECURITY_SOLUTION_OWNER,
+} from '../../../../../../plugins/cases/common/constants';
+import { getCase } from '../../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {
@@ -105,6 +109,25 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             subcategory: null,
           },
         });
+      });
+    });
+
+    describe('7.13.2', () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/cases/migrations/7.13.2');
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/cases/migrations/7.13.2');
+      });
+
+      it('adds the owner field', async () => {
+        const theCase = await getCase({
+          supertest,
+          caseId: 'e49ad6e0-cf9d-11eb-a603-13e7747d215c',
+        });
+
+        expect(theCase.owner).to.be(SECURITY_SOLUTION_OWNER);
       });
     });
   });
