@@ -87,11 +87,6 @@ export const isEndpointPolicyValidForLicense = (
   if (policy.windows.ransomware.supported !== defaults.windows.ransomware.supported) {
     return false;
   }
-  //
-  // only platinum or higher may enable memory_protection
-  if (policy.windows.memory_protection.mode !== defaults.windows.memory_protection.mode) {
-    return false;
-  }
   // only platinum or higher may enable memory_protection
   if (policy.windows.memory_protection.mode !== defaults.windows.memory_protection.mode) {
     return false;
