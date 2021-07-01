@@ -51,7 +51,10 @@ describe('EphemeralTaskLifecycle', () => {
         monitored_aggregated_stats_refresh_rate: 5000,
         monitored_stats_required_freshness: 5000,
         monitored_stats_running_average_window: 50,
-        monitored_stats_warn_delayed_task_start_in_seconds: 60,
+        monitored_stats_health_verbose_log: {
+          enabled: true,
+          warn_delayed_task_start_in_seconds: 60,
+        },
         monitored_task_execution_thresholds: {
           default: {
             error_threshold: 90,
