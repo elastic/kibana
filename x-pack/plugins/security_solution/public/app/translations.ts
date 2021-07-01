@@ -54,7 +54,7 @@ export const TRUSTED_APPLICATIONS = i18n.translate(
 export const EVENT_FILTERS = i18n.translate(
   'xpack.securitySolution.search.administration.eventFilters',
   {
-    defaultMessage: 'Event filtering',
+    defaultMessage: 'Event filters',
   }
 );
 

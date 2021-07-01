@@ -306,7 +306,7 @@ const nestedDeepLinks: SecurityDeepLinks = {
       {
         id: SecurityPageName.eventFilters,
         title: i18n.translate('xpack.securitySolution.search.administration.eventFilters', {
-          defaultMessage: 'Event filtering',
+          defaultMessage: 'Event filters',
         }),
         path: EVENT_FILTERS_PATH,
       },
