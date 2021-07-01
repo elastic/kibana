@@ -14,7 +14,7 @@ import set from 'set-value';
  * @param path The path of the sub-property to set
  * @param val The value to set the sub-property to
  */
-export function overwrite(obj, path, val) {
+export function overwrite(obj: Record<string, unknown>, path: string, val: unknown) {
   set(obj, path, undefined);
   set(obj, path, val);
 }

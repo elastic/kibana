@@ -6,11 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { _legacyBuildProcessorFunction } from '../build_processor_function';
-import { processors } from '../request_processors/table';
-
-export async function buildRequestBody(...args) {
-  const processor = _legacyBuildProcessorFunction(processors, ...args);
-  const doc = await processor({});
-  return doc;
-}
+export { dateHistogram } from './date_histogram';
+export { query } from './query';
+export { topHits } from './top_hits';

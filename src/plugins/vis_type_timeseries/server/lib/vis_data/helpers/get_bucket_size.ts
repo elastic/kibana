@@ -15,15 +15,18 @@ import {
 import { getTimerange } from './get_timerange';
 import { INTERVAL_STRING_RE, GTE_INTERVAL_RE } from '../../../../common/interval_regexp';
 import { search } from '../../../../../data/server';
+import type { SearchCapabilities } from '../../search_strategies';
+import type { VisTypeTimeseriesVisDataRequest } from '../../../types';
 
-const calculateBucketData = (timeInterval, capabilities) => {
+const calculateBucketData = (timeInterval: string, capabilities: SearchCapabilities) => {
   let intervalString = capabilities
     ? capabilities.getValidTimeInterval(timeInterval)
     : timeInterval;
   const intervalStringMatch = intervalString.match(INTERVAL_STRING_RE);
   const parsedInterval = parseInterval(intervalString);
 
-  let bucketSize = Number(intervalStringMatch[1]) * getUnitValue(intervalStringMatch[2]);
+  let bucketSize =
+    Number(intervalStringMatch?.[1] ?? 0) * getUnitValue(intervalStringMatch?.[2] ?? 0);
 
   // don't go too small
   if (bucketSize < 1) {
@@ -56,14 +59,22 @@ const calculateBucketData = (timeInterval, capabilities) => {
   };
 };
 
-const calculateBucketSizeForAutoInterval = (req, maxBars) => {
+const calculateBucketSizeForAutoInterval = (
+  req: VisTypeTimeseriesVisDataRequest,
+  maxBars: number
+) => {
   const { from, to } = getTimerange(req);
   const timerange = to.valueOf() - from.valueOf();
 
   return search.aggs.calcAutoIntervalLessThan(maxBars, timerange).asSeconds();
 };
 
-export const getBucketSize = (req, interval, capabilities, bars) => {
+export const getBucketSize = (
+  req: VisTypeTimeseriesVisDataRequest,
+  interval: string,
+  capabilities: SearchCapabilities,
+  bars: number
+) => {
   const defaultBucketSize = calculateBucketSizeForAutoInterval(req, bars);
   let intervalString = `${defaultBucketSize}s`;
 

@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { query } from './query';
-import { dateHistogram } from './date_histogram';
-import { topHits } from './top_hits';
-
-export const processors = [query, dateHistogram, topHits];
+export type RequestProcessorsFunction<
+  TParams = unknown,
+  TInput = Record<string, any>,
+  TOutput = Record<string, any>
+> = (
+  params: TParams
+) => (next: RequestProcessorsFunction) => (doc: TInput) => TOutput | Promise<TOutput>;

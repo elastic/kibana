@@ -9,20 +9,22 @@
 import { overwrite } from '../../helpers';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { getTimerange } from '../../helpers/get_timerange';
-import { search, UI_SETTINGS } from '../../../../../../../plugins/data/server';
 import { validateField } from '../../../../../common/fields_utils';
+
+import { search, UI_SETTINGS } from '../../../../../../../plugins/data/server';
+
+import type { AnnotationsRequestProcessorsFunction } from './types';
 
 const { dateHistogramInterval } = search.aggs;
 
-export function dateHistogram(
+export const dateHistogram: AnnotationsRequestProcessorsFunction = ({
   req,
   panel,
   annotation,
-  esQueryConfig,
   annotationIndex,
   capabilities,
-  uiSettings
-) {
+  uiSettings,
+}) => {
   return (next) => async (doc) => {
     const barTargetUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
     const timeField = annotation.time_field || annotationIndex.indexPattern?.timeFieldName || '';
@@ -52,4 +54,4 @@ export function dateHistogram(
     });
     return next(doc);
   };
-}
+};
