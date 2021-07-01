@@ -27,6 +27,10 @@ export function pluckCategoryFieldMeta(
     }
   }
 
+  return trimCategories(counts, size);
+}
+
+export function trimCategories(counts: Map<string, number>, size: number): CategoryFieldMeta {
   const ordered = [];
   for (const [key, value] of counts) {
     ordered.push({ key, count: value });

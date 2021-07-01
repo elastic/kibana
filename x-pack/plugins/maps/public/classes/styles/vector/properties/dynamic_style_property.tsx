@@ -9,6 +9,7 @@ import _ from 'lodash';
 import React from 'react';
 import { Feature, FeatureCollection } from 'geojson';
 import type { FeatureIdentifier, Map as MbMap } from '@kbn/mapbox-gl';
+import { Map } from '@kbn/mapbox-gl';
 import { AbstractStyleProperty, IStyleProperty } from './style_property';
 import { DEFAULT_SIGMA } from '../vector_style_defaults';
 import {
@@ -27,6 +28,7 @@ import {
   OrdinalDataMappingPopover,
 } from '../components/data_mapping';
 import {
+  Category,
   CategoryFieldMeta,
   FieldMetaOptions,
   PercentilesFieldMeta,
@@ -40,7 +42,10 @@ import { InnerJoin } from '../../../joins/inner_join';
 import { IVectorStyle } from '../vector_style';
 import { getComputedFieldName } from '../style_util';
 import { pluckRangeFieldMeta } from '../../../../../common/pluck_range_field_meta';
-import { pluckCategoryFieldMeta } from '../../../../../common/pluck_category_field_meta';
+import {
+  pluckCategoryFieldMeta,
+  trimCategories,
+} from '../../../../../common/pluck_category_field_meta';
 
 export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   getFieldMetaOptions(): FieldMetaOptions;
@@ -327,14 +332,36 @@ export class DynamicStyleProperty<T>
   }
 
   pluckCategoricalStyleMetaFromTileMetaFeatures(
-    features: TileMetaFeature[]
+    metaFeatures: TileMetaFeature[]
   ): CategoryFieldMeta | null {
     const size = this.getNumberOfCategories();
     if (!this.isCategorical() || size <= 0) {
       return null;
     }
 
-    throw new Error('not implemented');
+    const name = this.getFieldName();
+
+    const counts = new Map();
+    for (let i = 0; i < metaFeatures.length; i++) {
+      const fieldMeta = metaFeatures[i].properties.fieldMeta;
+      if (fieldMeta && fieldMeta[name] && fieldMeta[name].categories) {
+        const categoryFieldMeta: CategoryFieldMeta = fieldMeta[name]
+          .categories as CategoryFieldMeta;
+        for (let c = 0; c < categoryFieldMeta.categories.length; c++) {
+          const category: Category = categoryFieldMeta.categories[c];
+          // properties object may be sparse, so need to check if the field is effectively present
+          if (typeof category.key !== undefined) {
+            if (counts.has(category.key)) {
+              counts.set(category.key, counts.get(category.key) + category.count);
+            } else {
+              counts.set(category.key, category.count);
+            }
+          }
+        }
+      }
+    }
+
+    return trimCategories(counts, size);
   }
 
   pluckOrdinalStyleMetaFromFeatures(features: Feature[]): RangeFieldMeta | null {
