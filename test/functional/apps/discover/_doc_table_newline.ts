@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.setRoles(['kibana_admin', 'kibana_message_with_newline']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/message_with_newline');
       await kibanaServer.uiSettings.replace({
-        defaultIndex: 'message_with_newline',
+        defaultIndex: 'newline-test',
         'doc_table:legacy': true,
       });
       await PageObjects.common.navigateToApp('discover');
