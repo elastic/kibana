@@ -49,11 +49,10 @@ export function fetchTotalHits(
       inspector: {
         adapter: inspectorAdapters.requests,
         title: i18n.translate('discover.inspectorRequestDataTitleTotalHits', {
-          defaultMessage: 'Total hits data',
+          defaultMessage: 'Total hits',
         }),
         description: i18n.translate('discover.inspectorRequestDescriptionTotalHits', {
-          defaultMessage:
-            'This request queries Elasticsearch to fetch the total hits number for the search.',
+          defaultMessage: 'This request queries Elasticsearch to fetch the total hits.',
         }),
       },
       abortSignal: abortController.signal,

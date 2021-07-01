@@ -15,6 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const inspector = getService('inspector');
+  const testSubjects = getService('testSubjects');
 
   const STATS_ROW_NAME_INDEX = 0;
   const STATS_ROW_VALUE_INDEX = 1;
@@ -50,15 +51,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should display request stats with no results', async () => {
       await inspector.open();
-      const requestStats = await inspector.getTableData();
-
-      expect(getHitCount(requestStats)).to.be('0');
+      await testSubjects.click('inspectorRequestChooser');
+      await testSubjects.click(`inspectorRequestChooserTotal hits`);
+      if (testSubjects.exists('inspectorRequestDetailStatistics')) {
+        await testSubjects.click(`inspectorRequestDetailStatistics`);
+        const requestStatsTotalHits = getHitCount(await inspector.getTableData());
+        expect(requestStatsTotalHits).to.be('0');
+      } else {
+        await testSubjects.click(`inspectorRequestChooserDocuments`);
+        await testSubjects.click(`inspectorRequestDetailStatistics`);
+        const requestStatsDocuments = getHitCount(await inspector.getTableData());
+        expect(requestStatsDocuments).to.be('0');
+      }
     });
 
     it('should display request stats with results', async () => {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
-
       await inspector.open();
+      await testSubjects.click('inspectorRequestChooser');
+      await testSubjects.click(`inspectorRequestChooserTotal hits`);
       const requestStats = await inspector.getTableData();
 
       expect(getHitCount(requestStats)).to.be('500');

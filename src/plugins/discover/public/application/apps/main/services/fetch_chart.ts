@@ -61,11 +61,11 @@ export function fetchChart(
       inspector: {
         adapter: inspectorAdapters.requests,
         title: i18n.translate('discover.inspectorRequestDataTitleChart', {
-          defaultMessage: 'chart data',
+          defaultMessage: 'Chart data',
         }),
         description: i18n.translate('discover.inspectorRequestDescriptionChart', {
           defaultMessage:
-            'This request queries Elasticsearch to fetch the chart data for the search.',
+            'This request queries Elasticsearch to fetch the aggregation data for the chart.',
         }),
       },
     })

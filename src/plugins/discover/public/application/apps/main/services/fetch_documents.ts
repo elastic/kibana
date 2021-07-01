@@ -41,11 +41,10 @@ export const fetchDocuments = (
       inspector: {
         adapter: inspectorAdapters.requests,
         title: i18n.translate('discover.inspectorRequestDataTitleDocuments', {
-          defaultMessage: 'Documents data',
+          defaultMessage: 'Documents',
         }),
         description: i18n.translate('discover.inspectorRequestDescriptionDocument', {
-          defaultMessage:
-            'This request queries Elasticsearch to fetch the documents for the search.',
+          defaultMessage: 'This request queries Elasticsearch to fetch the documents.',
         }),
       },
     })

@@ -71,6 +71,7 @@ const indexPattern = ({
   getSourceFiltering: () => ({}),
   getFieldByName: (name: string) => fields.getByName(name),
   timeFieldName: 'timestamp',
+  getFormatterForField: () => ({ convert: () => 'formatted' }),
 } as unknown) as IndexPattern;
 
 indexPattern.flattenHit = indexPatterns.flattenHitWrapper(indexPattern, indexPattern.metaFields);
