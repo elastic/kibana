@@ -1,6 +1,6 @@
 # expressionShape
 
-Expression Shape plugin adds a `shape` function to the expression plugin and an associated renderer. @TODO add some description later.
+Expression Shape plugin adds a `shape` function to the expression plugin and an associated renderer. The renderer will display the given shape with selected decorations.
 
 ---
 
