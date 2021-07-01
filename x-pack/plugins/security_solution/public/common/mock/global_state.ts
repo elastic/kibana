@@ -60,7 +60,7 @@ export const mockGlobalState: State = {
         events: { activePage: 0, limit: 10 },
         uncommonProcesses: { activePage: 0, limit: 10 },
         anomalies: null,
-        alerts: { activePage: 0, limit: 10 },
+        externalAlerts: { activePage: 0, limit: 10 },
       },
     },
     details: {
@@ -75,7 +75,7 @@ export const mockGlobalState: State = {
         events: { activePage: 0, limit: 10 },
         uncommonProcesses: { activePage: 0, limit: 10 },
         anomalies: null,
-        alerts: { activePage: 0, limit: 10 },
+        externalAlerts: { activePage: 0, limit: 10 },
       },
     },
   },

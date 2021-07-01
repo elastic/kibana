@@ -126,6 +126,25 @@ describe('createLifecycleRuleTypeFactory', () => {
       helpers = createRule();
     });
 
+    describe('when writing is disabled', () => {
+      beforeEach(() => {
+        helpers.ruleDataClientMock.isWriteEnabled.mockReturnValue(false);
+      });
+
+      it("doesn't persist anything", async () => {
+        await helpers.alertWithLifecycle([
+          {
+            id: 'opbeans-java',
+            fields: {
+              'service.name': 'opbeans-java',
+            },
+          },
+        ]);
+
+        expect(helpers.ruleDataClientMock.getWriter().bulk).toHaveBeenCalledTimes(0);
+      });
+    });
+
     describe('when alerts are new', () => {
       beforeEach(async () => {
         await helpers.alertWithLifecycle([

@@ -166,16 +166,21 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     }
 
     // Keep this import async so that we do not load any FullStory code into the browser when it is disabled.
-    const { initializeFullStory } = await import('./fullstory');
+    const fullStoryChunkPromise = import('./fullstory');
     const userIdPromise: Promise<string | undefined> = security
       ? loadFullStoryUserId({ getCurrentUser: security.authc.getCurrentUser })
       : Promise.resolve(undefined);
+
+    const [{ initializeFullStory }, userId] = await Promise.all([
+      fullStoryChunkPromise,
+      userIdPromise,
+    ]);
 
     initializeFullStory({
       basePath,
       orgId,
       packageInfo: this.initializerContext.env.packageInfo,
-      userIdPromise,
+      userId,
     });
   }
 }
