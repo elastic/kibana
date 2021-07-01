@@ -79,8 +79,8 @@ export class ApmConfiguration {
   private getConfigFromEnv(): ApmAgentConfig {
     const config: ApmAgentConfig = {};
 
-    if (process.env.ELASTIC_APM_ACTIVE) {
-      config.active = process.env.ELASTIC_APM_ACTIVE === 'true';
+    if (process.env.ELASTIC_APM_ACTIVE === 'true') {
+      config.active = true;
     }
 
     if (process.env.ELASTIC_APM_ENVIRONMENT || process.env.NODE_ENV) {
