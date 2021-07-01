@@ -239,10 +239,12 @@ export class TelemetryEndpointTask {
         agent_id: fleetAgentId,
         endpoint_id: endpointAgentId,
         endpoint_metrics: {
-          os: endpoint.endpoint_metrics.host.os,
           cpu: endpoint.endpoint_metrics.Endpoint.metrics.cpu,
           memory: endpoint.endpoint_metrics.Endpoint.metrics.memory,
           uptime: endpoint.endpoint_metrics.Endpoint.metrics.uptime,
+        },
+        endpoint_meta: {
+          os: endpoint.endpoint_metrics.host.os,
         },
         policy_config: policyConfig,
         policy_failure: failedPolicy,
