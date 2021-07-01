@@ -32,6 +32,7 @@ import {
   PercentilesFieldMeta,
   RangeFieldMeta,
   StyleMetaData,
+  TileMetaFeature,
 } from '../../../../../common/descriptor_types';
 import { IField } from '../../../fields/field';
 import { IVectorLayer } from '../../../layers/vector_layer';
@@ -58,6 +59,10 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   getFieldMetaRequest(): Promise<unknown | null>;
   pluckOrdinalStyleMetaFromFeatures(features: Feature[]): RangeFieldMeta | null;
   pluckCategoricalStyleMetaFromFeatures(features: Feature[]): CategoryFieldMeta | null;
+  pluckOrdinalStyleMetaFromTileMetaFeatures(features: TileMetaFeature[]): RangeFieldMeta | null;
+  pluckCategoricalStyleMetaFromTileMetaFeatures(
+    features: TileMetaFeature[]
+  ): CategoryFieldMeta | null;
   getValueSuggestions(query: string): Promise<string[]>;
   enrichGeoJsonAndMbFeatureState(
     featureCollection: FeatureCollection,
@@ -295,6 +300,41 @@ export class DynamicStyleProperty<T>
     return 'dataMappingFunction' in this._options
       ? (this._options as T & { dataMappingFunction: DATA_MAPPING_FUNCTION }).dataMappingFunction
       : DATA_MAPPING_FUNCTION.INTERPOLATE;
+  }
+
+  pluckOrdinalStyleMetaFromTileMetaFeatures(
+    metaFeatures: TileMetaFeature[]
+  ): RangeFieldMeta | null {
+    if (!this.isOrdinal()) {
+      return null;
+    }
+
+    const name = this.getFieldName();
+    let min = Infinity;
+    let max = -Infinity;
+    for (let i = 0; i < metaFeatures.length; i++) {
+      const fieldMeta = metaFeatures[i].properties.fieldMeta;
+      if (fieldMeta && fieldMeta[name] && fieldMeta[name].range) {
+        min = Math.min(fieldMeta[name].range?.min as number, min);
+        max = Math.max(fieldMeta[name].range?.max as number, max);
+      }
+    }
+    return {
+      min,
+      max,
+      delta: max - min,
+    };
+  }
+
+  pluckCategoricalStyleMetaFromTileMetaFeatures(
+    features: TileMetaFeature[]
+  ): CategoryFieldMeta | null {
+    const size = this.getNumberOfCategories();
+    if (!this.isCategorical() || size <= 0) {
+      return null;
+    }
+
+    throw new Error('not implemented');
   }
 
   pluckOrdinalStyleMetaFromFeatures(features: Feature[]): RangeFieldMeta | null {

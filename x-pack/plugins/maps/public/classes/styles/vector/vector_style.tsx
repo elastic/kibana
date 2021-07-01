@@ -507,27 +507,18 @@ export class VectorStyle implements IVectorStyle {
 
     dynamicProperties.forEach((dynamicProperty) => {
       const name = dynamicProperty.getFieldName();
+
+      const ordinalStyleMeta = dynamicProperty.pluckOrdinalStyleMetaFromTileMetaFeatures(
+        metaFeatures
+      );
+
       if (!styleMeta.fieldMeta[name]) {
         styleMeta.fieldMeta[name] = {};
       }
 
-      let min = Infinity;
-      let max = -Infinity;
-      for (let i = 0; i < metaFeatures.length; i++) {
-        const fieldMeta = metaFeatures[i].properties.fieldMeta;
-        if (fieldMeta && fieldMeta[name] && fieldMeta[name].range) {
-          min = Math.min(fieldMeta[name].range?.min as number, min);
-          max = Math.max(fieldMeta[name].range?.max as number, max);
-        }
+      if (ordinalStyleMeta) {
+        styleMeta.fieldMeta[name].range = ordinalStyleMeta;
       }
-
-      styleMeta.fieldMeta[name] = {
-        range: {
-          min,
-          max,
-          delta: max - min,
-        },
-      };
     });
 
     return styleMeta;
