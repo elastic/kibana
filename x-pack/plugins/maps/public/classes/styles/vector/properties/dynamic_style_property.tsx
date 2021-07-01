@@ -378,6 +378,9 @@ export class DynamicStyleProperty<T>
   }
 
   renderDataMappingPopover(onChange: (updatedOptions: Partial<T>) => void) {
+    if (!this.supportsFieldMeta()) {
+      return null;
+    }
     return this.isCategorical() ? (
       <CategoricalDataMappingPopover<T>
         fieldMetaOptions={this.getFieldMetaOptions()}
