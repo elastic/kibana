@@ -60,6 +60,37 @@ describe('Action Log API', () => {
       }).not.toThrow();
     });
 
+    it('should work with all query params', () => {
+      expect(() => {
+        EndpointActionLogRequestSchema.query.validate({
+          page: 10,
+          page_size: 100,
+          start_date: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), // yesterday
+          end_date: new Date().toISOString(), // today
+        });
+      }).not.toThrow();
+    });
+
+    it('should work with just startDate', () => {
+      expect(() => {
+        EndpointActionLogRequestSchema.query.validate({
+          page: 1,
+          page_size: 100,
+          start_date: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), // yesterday
+        });
+      }).not.toThrow();
+    });
+
+    it('should work with just endDate', () => {
+      expect(() => {
+        EndpointActionLogRequestSchema.query.validate({
+          page: 1,
+          page_size: 100,
+          end_date: new Date().toISOString(), // today
+        });
+      }).not.toThrow();
+    });
+
     it('should not work without allowed page and page_size params', () => {
       expect(() => {
         EndpointActionLogRequestSchema.query.validate({ page_size: 101 });
