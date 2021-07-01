@@ -46,6 +46,7 @@ describe('Row renderers', () => {
     loginAndWaitForPage(HOSTS_URL);
     openTimelineUsingToggle();
     populateTimeline();
+    cy.get(TIMELINE_SHOW_ROW_RENDERERS_GEAR).should('exist');
     cy.get(TIMELINE_SHOW_ROW_RENDERERS_GEAR).first().click({ force: true });
   });
 
@@ -59,6 +60,7 @@ describe('Row renderers', () => {
   });
 
   it('Selected renderer can be disabled and enabled', () => {
+    cy.get(TIMELINE_ROW_RENDERERS_SEARCHBOX).should('exist');
     cy.get(TIMELINE_ROW_RENDERERS_SEARCHBOX).type('flow');
 
     cy.get(TIMELINE_ROW_RENDERERS_MODAL_ITEMS_CHECKBOX).first().uncheck();
@@ -76,7 +78,22 @@ describe('Row renderers', () => {
   });
 
   it('Selected renderer can be disabled with one click', () => {
-    cy.get(TIMELINE_ROW_RENDERERS_DISABLE_ALL_BTN).click({ force: true });
+    // Ensure these elements are visible before continuing since sometimes it takes a second for the modal to show up
+    // and it gives the click handlers a bit of time to be initialized as well to reduce chances of flake but you still
+    // have to use pipe() below as an additional measure.
+    cy.get(TIMELINE_ROW_RENDERERS_DISABLE_ALL_BTN).should('exist');
+    cy.get(TIMELINE_ROW_RENDERERS_MODAL_ITEMS_CHECKBOX).should('be.checked');
+
+    // Keep clicking on the disable all button until the first element of all the elements are no longer checked.
+    // In cases where the click handler is not present on the page just yet, this will cause the button to be clicked
+    // multiple times until it sees that the click took effect. You could go through the whole list but I just check
+    // for the first to be unchecked and then assume the click was successful
+    cy.root()
+      .pipe(($el) => {
+        $el.find(TIMELINE_ROW_RENDERERS_DISABLE_ALL_BTN).trigger('click');
+        return $el.find(TIMELINE_ROW_RENDERERS_MODAL_ITEMS_CHECKBOX).first();
+      })
+      .should('not.be.checked');
 
     cy.intercept('PATCH', '/api/timeline').as('updateTimeline');
     cy.wait('@updateTimeline').its('response.statusCode').should('eq', 200);
