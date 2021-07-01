@@ -367,7 +367,7 @@ log(sum(bytes), 2)
         type: getTypeI18n('number'),
       },
     ],
-    help: i18n.translate('xpack.lens.formula.logFunction.markdown', {
+    help: i18n.translate('xpack.lens.formula.modFunction.markdown', {
       defaultMessage: `
 Remainder after dividing the function by a number
 
@@ -387,7 +387,7 @@ Example: Calculate last three digits of a value
         type: getTypeI18n('number'),
       },
     ],
-    help: i18n.translate('xpack.lens.formula.addFunction.markdown', {
+    help: i18n.translate('xpack.lens.formula.powFunction.markdown', {
       defaultMessage: `
 Raises the value to a certain power. The second argument is required
 
@@ -409,7 +409,7 @@ Example: Calculate volume based on side length
         type: getTypeI18n('number'),
       },
     ],
-    help: i18n.translate('xpack.lens.formula.addFunction.markdown', {
+    help: i18n.translate('xpack.lens.formula.roundFunction.markdown', {
       defaultMessage: `
 Rounds to a specific number of decimal places, default of 0
 
@@ -428,7 +428,7 @@ round(sum(bytes), 2)
         type: getTypeI18n('number'),
       },
     ],
-    help: i18n.translate('xpack.lens.formula.addFunction.markdown', {
+    help: i18n.translate('xpack.lens.formula.sqrtFunction.markdown', {
       defaultMessage: `
 Square root of a positive value only
 
@@ -444,7 +444,7 @@ Example: Calculate side length based on area
         type: getTypeI18n('number'),
       },
     ],
-    help: i18n.translate('xpack.lens.formula.addFunction.markdown', {
+    help: i18n.translate('xpack.lens.formula.squareFunction.markdown', {
       defaultMessage: `
 Raise the value to the 2nd power
 
