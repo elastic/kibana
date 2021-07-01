@@ -54,16 +54,21 @@ export class ApmConfiguration {
         DEFAULT_CONFIG,
         this.getUuidConfig(),
         this.getGitConfig(),
+        this.getCiConfig(),
         this.getConfigFromKibanaConfig(),
         this.getDevConfig(),
-        this.getCIConfig(),
         this.getConfigFromEnv()
       );
 
-      // If the user didn't point APM to a serverUrl then we should point
-      // the configuration to our centralized APM server
-      if (!this.baseConfig?.serverUrl) {
-        this.baseConfig = merge(this.baseConfig, this.getCentralizedServiceConfig());
+      const centralizedConfig = this.getCentralizedApmServerConfig();
+      // If the user didn't point APM to a serverUrl, or explicitly pointed it to our
+      // centralized APM server, overwrite several config options based on how we want
+      // Kibana talking to that server
+      if (
+        !this.baseConfig?.serverUrl ||
+        this.baseConfig.serverUrl === centralizedConfig.serverUrl
+      ) {
+        this.baseConfig = merge(this.baseConfig, centralizedConfig);
       }
     }
 
@@ -154,7 +159,7 @@ export class ApmConfiguration {
     }
   }
 
-  private getCIConfig(): ApmAgentConfig {
+  private getCiConfig(): ApmAgentConfig {
     if (process.env.ELASTIC_APM_ENVIRONMENT !== 'ci') {
       return {};
     }
@@ -198,7 +203,7 @@ export class ApmConfiguration {
    * as the serverUrl along with a few other overrides to prevent potentially
    * sensitive data from being sent to this service.
    */
-  private getCentralizedServiceConfig(): ApmAgentConfig {
+  private getCentralizedApmServerConfig(): ApmAgentConfig {
     const baseCentralizedServiceConfig: ApmAgentConfig = {
       serverUrl: 'https://38b80fbd79fb4c91bae06b4642d4d093.apm.us-east-1.aws.cloud.es.io',
 
