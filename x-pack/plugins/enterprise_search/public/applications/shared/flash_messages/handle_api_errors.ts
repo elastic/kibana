@@ -31,12 +31,13 @@ interface Options {
   isQueued?: boolean;
 }
 
+// TODO I know our error messages from the BE are not i18n-ized but should this be?
+export const defaultErrorMessage = 'An unexpected error occurred';
+
 /**
  * Converts API/HTTP errors into user-facing Flash Messages
  */
 export const flashAPIErrors = (error: HttpResponse<ErrorResponse>, { isQueued }: Options = {}) => {
-  const defaultErrorMessage = 'An unexpected error occurred';
-
   const errorFlashMessages: IFlashMessage[] = Array.isArray(error?.body?.attributes?.errors)
     ? error.body!.attributes.errors.map((message) => ({ type: 'error', message }))
     : [{ type: 'error', message: error?.body?.message || defaultErrorMessage }];
