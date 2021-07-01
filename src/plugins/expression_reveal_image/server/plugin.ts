@@ -29,8 +29,11 @@ export class ExpressionRevealImagePlugin
       SetupDeps,
       StartDeps
     > {
-  public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionRevealImagePluginSetup {
-    expressions.registerFunction(revealImageFunction);
+  public async setup(
+    core: CoreSetup,
+    { expressions }: SetupDeps
+  ): Promise<ExpressionRevealImagePluginSetup> {
+    await expressions.registerFunctionAsync(revealImageFunction);
   }
 
   public start(core: CoreStart): ExpressionRevealImagePluginStart {}
