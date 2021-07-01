@@ -200,7 +200,7 @@ describe('EventsViewer', () => {
           <EventsViewer {...disableSubTitle} graphEventId="a valid id" />
         </TestProviders>
       );
-      expect(wrapper.find(`[data-test-subj="header-panel-subtitle"]`).exists()).toBe(false);
+      expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).first().text()).toEqual('');
     });
 
     test('it renders the Fields Browser as a settings gear', () => {
