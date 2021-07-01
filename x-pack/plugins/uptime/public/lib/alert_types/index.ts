@@ -7,20 +7,24 @@
 
 import { CoreStart } from 'kibana/public';
 import { FormattableAlertTypeModel } from '../../../../observability/public';
+import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
 import { initMonitorStatusAlertType } from './monitor_status';
 import { initTlsAlertType } from './tls';
 import { initTlsLegacyAlertType } from './tls_legacy';
 import { ClientPluginsStart } from '../../apps/plugin';
 import { initDurationAnomalyAlertType } from './duration_anomaly';
 
-export type AlertTypeInitializer = (dependenies: {
+export type AlertTypeInitializer<TAlertTypeModel = FormattableAlertTypeModel> = (dependenies: {
   core: CoreStart;
   plugins: ClientPluginsStart;
-}) => FormattableAlertTypeModel;
+}) => TAlertTypeModel;
 
 export const alertTypeInitializers: AlertTypeInitializer[] = [
   initMonitorStatusAlertType,
   initTlsAlertType,
-  initTlsLegacyAlertType,
   initDurationAnomalyAlertType,
+];
+
+export const legacyAlertTypeInitializers: Array<AlertTypeInitializer<AlertTypeModel>> = [
+  initTlsLegacyAlertType,
 ];

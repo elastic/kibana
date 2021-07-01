@@ -13,7 +13,7 @@ import { AlertTypeInitializer } from '.';
 
 const { defaultActionMessage, description } = TlsTranslationsLegacy;
 const TLSAlert = React.lazy(() => import('./lazy_wrapper/tls_alert'));
-export const initTlsLegacyAlertType: AlertTypeInitializer = ({
+export const initTlsLegacyAlertType: AlertTypeInitializer<AlertTypeModel> = ({
   core,
   plugins,
 }): AlertTypeModel => ({

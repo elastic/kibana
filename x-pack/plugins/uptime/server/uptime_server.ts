@@ -42,7 +42,10 @@ export const initUptimeServer = (
   });
 
   registerType(createLifecycleRuleType(statusAlert));
-  registerType(createLifecycleRuleType(tlsLegacyAlert));
   registerType(createLifecycleRuleType(tlsAlert));
   registerType(createLifecycleRuleType(durationAlert));
+
+  /* TLS Legacy rule supported at least through 8.0.
+   * Not registered with RAC */
+  registerType(tlsLegacyAlert);
 };

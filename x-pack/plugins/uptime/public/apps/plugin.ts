@@ -28,7 +28,7 @@ import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../../src/plugins/data/public';
-import { alertTypeInitializers } from '../lib/alert_types';
+import { alertTypeInitializers, legacyAlertTypeInitializers } from '../lib/alert_types';
 import { FleetStart } from '../../../fleet/public';
 import {
   FetchDataParams,
@@ -152,6 +152,19 @@ export class UptimePlugin
           !clientPluginsStart.triggersActionsUi.alertTypeRegistry.has(alertInitializer.id)
         ) {
           observabilityRuleTypeRegistry.register(alertInitializer);
+        }
+      });
+
+      legacyAlertTypeInitializers.forEach((init) => {
+        const alertInitializer = init({
+          core: coreStart,
+          plugins: clientPluginsStart,
+        });
+        if (
+          clientPluginsStart.triggersActionsUi &&
+          !clientPluginsStart.triggersActionsUi.alertTypeRegistry.has(alertInitializer.id)
+        ) {
+          plugins.triggersActionsUi.alertTypeRegistry.register(alertInitializer);
         }
       });
     });
