@@ -9,9 +9,6 @@ import {
   EuiTabbedContent,
   EuiTabbedContentTab,
   EuiSpacer,
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiLoadingContent,
   EuiLoadingSpinner,
 } from '@elastic/eui';
@@ -100,9 +97,6 @@ const EventDetailsComponent: React.FC<Props> = ({
     (tab: EuiTabbedContentTab) => setSelectedTabId(tab.id as EventViewId),
     [setSelectedTabId]
   );
-  const viewThreatIntelTab = useCallback(() => setSelectedTabId(EventsViewType.threatIntelView), [
-    setSelectedTabId,
-  ]);
 
   const eventFields = useMemo(() => getEnrichmentFields(data ?? []), [data]);
   const existingEnrichments = useMemo(
@@ -149,19 +143,11 @@ const EventDetailsComponent: React.FC<Props> = ({
                   </>
                 )}
                 {enrichmentCount > 0 && (
-                  <>
-                    <ThreatSummaryView
-                      eventId={id}
-                      timelineId={timelineId}
-                      enrichments={allEnrichments}
-                    />
-                    <EuiSpacer size="s" />
-                    <EuiFlexGroup>
-                      <EuiFlexItem grow={false}>
-                        <EuiButton onClick={viewThreatIntelTab}>{i18n.VIEW_CTI_DATA}</EuiButton>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </>
+                  <ThreatSummaryView
+                    eventId={id}
+                    timelineId={timelineId}
+                    enrichments={allEnrichments}
+                  />
                 )}
               </>
             ),
@@ -176,7 +162,6 @@ const EventDetailsComponent: React.FC<Props> = ({
       enrichmentsLoading,
       enrichmentCount,
       allEnrichments,
-      viewThreatIntelTab,
     ]
   );
 

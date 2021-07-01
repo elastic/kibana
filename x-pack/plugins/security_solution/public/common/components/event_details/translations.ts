@@ -23,10 +23,6 @@ export const THREAT_SUMMARY = i18n.translate('xpack.securitySolution.alertDetail
   defaultMessage: 'Threat Summary',
 });
 
-export const VIEW_CTI_DATA = i18n.translate('xpack.securitySolution.alertDetails.threatIntelCta', {
-  defaultMessage: 'View threat intel data',
-});
-
 export const INVESTIGATION_GUIDE = i18n.translate(
   'xpack.securitySolution.alertDetails.summary.investigationGuide',
   {
