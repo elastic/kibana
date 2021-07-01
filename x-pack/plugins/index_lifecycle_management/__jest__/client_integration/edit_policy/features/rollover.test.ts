@@ -6,12 +6,11 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { licensingMock } from '../../../../../licensing/public/mocks';
 import { setupEnvironment } from '../../helpers';
-import { EditPolicyTestBed, setup } from '../edit_policy.helpers';
+import { RolloverTestBed, setupRolloverTestBed } from './rollover.helpers';
 
 describe('<EditPolicy /> rollover', () => {
-  let testBed: EditPolicyTestBed;
+  let testBed: RolloverTestBed;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
   afterAll(() => {
@@ -22,11 +21,7 @@ describe('<EditPolicy /> rollover', () => {
     httpRequestsMockHelpers.setDefaultResponses();
 
     await act(async () => {
-      testBed = await setup({
-        appServicesContext: {
-          license: licensingMock.createLicense({ license: { type: 'enterprise' } }),
-        },
-      });
+      testBed = await setupRolloverTestBed();
     });
 
     const { component } = testBed;
@@ -35,14 +30,14 @@ describe('<EditPolicy /> rollover', () => {
 
   test('shows forcemerge when rollover enabled', async () => {
     const { actions } = testBed;
-    expect(actions.hot.forceMergeFieldExists()).toBeTruthy();
+    expect(actions.hot.forceMergeExists()).toBeTruthy();
   });
 
   test('hides forcemerge when rollover is disabled', async () => {
     const { actions } = testBed;
     await actions.rollover.toggleDefault();
     await actions.rollover.toggle();
-    expect(actions.hot.forceMergeFieldExists()).toBeFalsy();
+    expect(actions.hot.forceMergeExists()).toBeFalsy();
   });
 
   test('shows shrink input when rollover enabled', async () => {
@@ -71,6 +66,8 @@ describe('<EditPolicy /> rollover', () => {
 
   test('hides and disables searchable snapshot field', async () => {
     const { actions } = testBed;
+
+    expect(actions.hot.searchableSnapshotsExists()).toBeTruthy();
     await actions.rollover.toggleDefault();
     await actions.rollover.toggle();
     await actions.togglePhase('cold');

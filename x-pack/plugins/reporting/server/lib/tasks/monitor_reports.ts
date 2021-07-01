@@ -11,21 +11,29 @@ import { ReportingCore } from '../../';
 import { TaskManagerStartContract, TaskRunCreatorFunction } from '../../../../task_manager/server';
 import { numberToDuration } from '../../../common/schema_utils';
 import { ReportingConfigType } from '../../config';
+import { statuses } from '../statuses';
 import { Report } from '../store';
-import {
-  ReportingExecuteTaskInstance,
-  ReportingTask,
-  ReportingTaskStatus,
-  REPORTING_EXECUTE_TYPE,
-  REPORTING_MONITOR_TYPE,
-  ReportTaskParams,
-} from './';
+import { ReportingTask, ReportingTaskStatus, REPORTING_MONITOR_TYPE, ReportTaskParams } from './';
 
 /*
- * Task for finding the ReportingRecords left in the ReportingStore and stuck
- * in pending or processing. It could happen if the server crashed while running
- * a report and was cancelled. Normally a failure would mean scheduling a
- * retry or failing the report, but the retry is not guaranteed to be scheduled.
+ * Task for finding the ReportingRecords left in the ReportingStore (.reporting index) and stuck in
+ * a pending or processing status.
+ *
+ *  Stuck in pending:
+ *    - This can happen if the report was scheduled in an earlier version of Kibana that used ESQueue.
+ *    - Task Manager doesn't know about these types of reports because there was never a task
+ *      scheduled for them.
+ *  Stuck in processing:
+ *    - This can could happen if the server crashed while a report was executing.
+ *    - Task Manager doesn't know about these reports, because the task is completed in Task
+ *      Manager when Reporting starts executing the report. We are not using Task Manager's retry
+ *      mechanisms, which defer the retry for a few minutes.
+ *
+ * These events require us to reschedule the report with Task Manager, so that the jobs can be
+ * distributed and executed.
+ *
+ * The runner function reschedules a single report job per task run, to avoid flooding Task Manager
+ * in case many report jobs need to be recovered.
  */
 export class MonitorReportsTask implements ReportingTask {
   public TYPE = REPORTING_MONITOR_TYPE;
@@ -77,36 +85,41 @@ export class MonitorReportsTask implements ReportingTask {
           const reportingStore = await this.getStore();
 
           try {
-            const results = await reportingStore.findZombieReportDocuments();
-            if (results && results.length) {
-              this.logger.info(
-                `Found ${results.length} reports to reschedule: ${results
-                  .map((pending) => pending._id)
-                  .join(',')}`
-              );
-            } else {
-              this.logger.debug(`Found 0 pending reports.`);
+            const recoveredJob = await reportingStore.findStaleReportJob();
+            if (!recoveredJob) {
+              // no reports need to be rescheduled
               return;
             }
 
-            for (const pending of results) {
-              const {
-                _id: jobId,
-                _source: { process_expiration: processExpiration, status },
-              } = pending;
-              const expirationTime = moment(processExpiration); // If it is the start of the Epoch, something went wrong
-              const timeWaitValue = moment().valueOf() - expirationTime.valueOf();
-              const timeWaitTime = moment.duration(timeWaitValue);
-              this.logger.info(
-                `Task ${jobId} has ${status} status for ${timeWaitTime.humanize()}. The queue timeout is ${this.timeout.humanize()}.`
-              );
+            const {
+              _id: jobId,
+              _source: { process_expiration: processExpiration, status },
+            } = recoveredJob;
 
-              // clear process expiration and reschedule
-              const oldReport = new Report({ ...pending, ...pending._source });
-              const reschedulingTask = oldReport.toReportTaskJSON();
-              await reportingStore.clearExpiration(oldReport);
-              await this.rescheduleTask(reschedulingTask, this.logger);
+            if (![statuses.JOB_STATUS_PENDING, statuses.JOB_STATUS_PROCESSING].includes(status)) {
+              throw new Error(`Invalid job status in the monitoring search result: ${status}`); // only pending or processing jobs possibility need rescheduling
             }
+
+            if (status === statuses.JOB_STATUS_PENDING) {
+              this.logger.info(
+                `${jobId} was scheduled in a previous version and left in [${status}] status. Rescheduling...`
+              );
+            }
+
+            if (status === statuses.JOB_STATUS_PROCESSING) {
+              const expirationTime = moment(processExpiration);
+              const overdueValue = moment().valueOf() - expirationTime.valueOf();
+              this.logger.info(
+                `${jobId} status is [${status}] and the expiration time was [${overdueValue}ms] ago. Rescheduling...`
+              );
+            }
+
+            // clear process expiration and set status to pending
+            const report = new Report({ ...recoveredJob, ...recoveredJob._source });
+            await reportingStore.prepareReportForRetry(report); // if there is a version conflict response, this just throws and logs an error
+
+            // clear process expiration and reschedule
+            await this.rescheduleTask(report.toReportTaskJSON(), this.logger); // a recovered report job must be scheduled by only a sinle Kibana instance
           } catch (err) {
             this.logger.error(err);
           }
@@ -126,33 +139,19 @@ export class MonitorReportsTask implements ReportingTask {
       createTaskRunner: this.getTaskRunner(),
       maxAttempts: 1,
       // round the timeout value up to the nearest second, since Task Manager
-      // doesn't support milliseconds
+      // doesn't support milliseconds or > 1s
       timeout: Math.ceil(this.timeout.asSeconds()) + 's',
     };
   }
 
-  // reschedule the task with TM and update the report document status to "Pending"
+  // reschedule the task with TM
   private async rescheduleTask(task: ReportTaskParams, logger: LevelLogger) {
     if (!this.taskManagerStart) {
       throw new Error('Reporting task runner has not been initialized!');
     }
-    logger.info(`Rescheduling ${task.id} to retry after timeout expiration.`);
+    logger.info(`Rescheduling task:${task.id} to retry.`);
 
-    const store = await this.getStore();
-
-    const oldTaskInstance: ReportingExecuteTaskInstance = {
-      taskType: REPORTING_EXECUTE_TYPE, // schedule a task to EXECUTE
-      state: {},
-      params: task,
-    };
-
-    const [report, newTask] = await Promise.all([
-      await store.findReportFromTask(task),
-      await this.taskManagerStart.schedule(oldTaskInstance),
-    ]);
-
-    await store.setReportPending(report);
-
+    const newTask = await this.reporting.scheduleTask(task);
     return newTask;
   }
 

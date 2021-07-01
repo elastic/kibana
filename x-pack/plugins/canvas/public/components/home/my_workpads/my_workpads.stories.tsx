@@ -5,52 +5,29 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { EuiPanel } from '@elastic/eui';
 
-import {
-  reduxDecorator,
-  getAddonPanelParameters,
-  servicesContextDecorator,
-  getDisableStoryshotsParameter,
-} from '../../../../storybook';
-import { getSomeWorkpads } from '../../../services/stubs/workpad';
+import { reduxDecorator } from '../../../../storybook';
+import { argTypes } from '../../../services/storybook';
 
-import { MyWorkpads, WorkpadsContext } from './my_workpads';
-import { MyWorkpads as MyWorkpadsComponent } from './my_workpads.component';
+import { MyWorkpads as Component } from './my_workpads';
+
+const { workpadCount, useStaticData } = argTypes;
 
 export default {
-  title: 'Home/My Workpads',
-  argTypes: {},
+  title: 'Home/Tabs/My Workpads',
+  component: Component,
+  argTypes: {
+    workpadCount,
+    useStaticData,
+  },
   decorators: [reduxDecorator()],
-  parameters: { ...getAddonPanelParameters(), ...getDisableStoryshotsParameter() },
+  parameters: {},
 };
 
-export const NoWorkpads = () => {
-  return <MyWorkpads />;
-};
-
-export const HasWorkpads = () => {
-  return (
-    <EuiPanel>
-      <MyWorkpads />
-    </EuiPanel>
-  );
-};
-
-NoWorkpads.decorators = [servicesContextDecorator()];
-HasWorkpads.decorators = [servicesContextDecorator({ findWorkpads: 5 })];
-
-export const Component = ({ workpadCount }: { workpadCount: number }) => {
-  const [workpads, setWorkpads] = useState(getSomeWorkpads(workpadCount));
-
-  return (
-    <WorkpadsContext.Provider value={{ workpads, setWorkpads }}>
-      <EuiPanel>
-        <MyWorkpadsComponent {...{ workpads }} />
-      </EuiPanel>
-    </WorkpadsContext.Provider>
-  );
-};
-
-Component.args = { workpadCount: 5 };
+export const MyWorkpads = () => (
+  <EuiPanel>
+    <Component />
+  </EuiPanel>
+);

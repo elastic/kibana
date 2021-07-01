@@ -16,7 +16,7 @@
     "../../../typings/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "public/**/*.json",
-    "server/**/*.json",
+    "server/**/*.json"
   ],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
@@ -28,7 +28,6 @@
     { "path": "../license_management/tsconfig.json" },
     { "path": "../licensing/tsconfig.json" },
     { "path": "../maps/tsconfig.json" },
-    { "path": "../lens/tsconfig.json" },
     { "path": "../security/tsconfig.json" },
     { "path": "../spaces/tsconfig.json" },
     { "path": "../alerting/tsconfig.json" },

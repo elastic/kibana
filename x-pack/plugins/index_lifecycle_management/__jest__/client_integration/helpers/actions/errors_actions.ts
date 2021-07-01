@@ -32,9 +32,11 @@ const createExpectMessagesAction = (testBed: TestBed) => (
 export const createErrorsActions = (testBed: TestBed) => {
   const { exists } = testBed;
   return {
-    waitForValidation: createWaitForValidationAction(testBed),
-    haveGlobalCallout: () => exists('policyFormErrorsCallout'),
-    havePhaseCallout: (phase: Phase) => exists(`phaseErrorIndicator-${phase}`),
-    expectMessages: createExpectMessagesAction(testBed),
+    errors: {
+      waitForValidation: createWaitForValidationAction(testBed),
+      haveGlobalCallout: () => exists('policyFormErrorsCallout'),
+      havePhaseCallout: (phase: Phase) => exists(`phaseErrorIndicator-${phase}`),
+      expectMessages: createExpectMessagesAction(testBed),
+    },
   };
 };

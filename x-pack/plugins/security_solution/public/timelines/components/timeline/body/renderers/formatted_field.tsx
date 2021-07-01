@@ -32,7 +32,7 @@ import {
   REFERENCE_URL_FIELD_NAME,
   EVENT_URL_FIELD_NAME,
   SIGNAL_STATUS_FIELD_NAME,
-  HOST_STATUS_FIELD_NAME,
+  AGENT_STATUS_FIELD_NAME,
   GEO_FIELD_TYPE,
 } from './constants';
 import { RenderRuleName, renderEventModule, renderUrl } from './formatted_field_helpers';
@@ -120,13 +120,13 @@ const FormattedFieldValueComponent: React.FC<{
     return (
       <RuleStatus contextId={contextId} eventId={eventId} fieldName={fieldName} value={value} />
     );
-  } else if (fieldName === HOST_STATUS_FIELD_NAME) {
+  } else if (fieldName === AGENT_STATUS_FIELD_NAME) {
     return (
       <AgentStatuses
         contextId={contextId}
         eventId={eventId}
         fieldName={fieldName}
-        value={value as string}
+        value={typeof value === 'string' ? value : ''}
       />
     );
   } else if (

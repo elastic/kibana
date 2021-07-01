@@ -14,10 +14,9 @@ import { i18n } from '@kbn/i18n';
 
 import { FlashMessagesLogic } from '../../../shared/flash_messages';
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
-import { AppLogic } from '../../app_logic';
 import { WorkplaceSearchPageTemplate } from '../../components/layout';
 import { NAV } from '../../constants';
-import { getGroupPath, USERS_PATH } from '../../routes';
+import { getGroupPath, USERS_AND_ROLES_PATH } from '../../routes';
 
 import { AddGroupModal } from './components/add_group_modal';
 import { ClearFiltersLink } from './components/clear_filters_link';
@@ -43,8 +42,6 @@ export const Groups: React.FC = () => {
     filterValue,
   } = useValues(GroupsLogic);
 
-  const { isFederatedAuth } = useValues(AppLogic);
-
   const hasMessages = messages.length > 0;
 
   useEffect(() => {
@@ -68,7 +65,7 @@ export const Groups: React.FC = () => {
 
   const clearFilters = hasFiltersSet && <ClearFiltersLink />;
   const inviteUsersButton = (
-    <EuiButtonTo to={USERS_PATH} data-test-subj="InviteUsersButton">
+    <EuiButtonTo to={USERS_AND_ROLES_PATH} data-test-subj="InviteUsersButton">
       {i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.inviteUsers.action', {
         defaultMessage: 'Invite users',
       })}
@@ -81,9 +78,7 @@ export const Groups: React.FC = () => {
       })}
     </EuiButton>
   );
-  const headerActions = !isFederatedAuth
-    ? [inviteUsersButton, createGroupButton]
-    : [createGroupButton];
+  const headerActions = [inviteUsersButton, createGroupButton];
 
   const noResults = (
     <EuiFlexGroup justifyContent="spaceAround">

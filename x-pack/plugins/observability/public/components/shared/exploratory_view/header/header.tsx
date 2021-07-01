@@ -13,6 +13,7 @@ import { useKibana } from '../../../../../../../../src/plugins/kibana_react/publ
 import { DataViewLabels } from '../configurations/constants';
 import { ObservabilityAppServices } from '../../../../application/types';
 import { useSeriesStorage } from '../hooks/use_series_storage';
+import { combineTimeRanges } from '../exploratory_view';
 
 interface Props {
   seriesId: string;
@@ -24,13 +25,15 @@ export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
 
   const { lens } = kServices;
 
-  const { getSeries } = useSeriesStorage();
+  const { getSeries, allSeries } = useSeriesStorage();
 
   const series = getSeries(seriesId);
 
   const [isSaveOpen, setIsSaveOpen] = useState(false);
 
   const LensSaveModalComponent = lens.SaveModalComponent;
+
+  const timeRange = combineTimeRanges(allSeries, series);
 
   return (
     <>
@@ -63,7 +66,7 @@ export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
                 lens.navigateToPrefilledEditor(
                   {
                     id: '',
-                    timeRange: series.time,
+                    timeRange,
                     attributes: lensAttributes,
                   },
                   true
@@ -96,7 +99,6 @@ export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
 
       {isSaveOpen && lensAttributes && (
         <LensSaveModalComponent
-          isVisible={isSaveOpen}
           initialInput={(lensAttributes as unknown) as LensEmbeddableInput}
           onClose={() => setIsSaveOpen(false)}
           onSave={() => {}}

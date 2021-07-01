@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { EuiFocusTrap, EuiOutsideClickDetector } from '@elastic/eui';
 import React, { useEffect, useMemo, useCallback, useState, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-import styled from 'styled-components';
 
 import { AppLeaveHandler } from '../../../../../../../src/core/public';
 import { TimelineId, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
@@ -18,12 +17,6 @@ import { timelineActions } from '../../store/timeline';
 import { FlyoutBottomBar } from './bottom_bar';
 import { Pane } from './pane';
 import { getTimelineShowStatusByIdSelector } from './selectors';
-
-const Visible = styled.div<{ show?: boolean }>`
-  visibility: ${({ show }) => (show ? 'visible' : 'hidden')};
-`;
-
-Visible.displayName = 'Visible';
 
 interface OwnProps {
   timelineId: TimelineId;
@@ -124,9 +117,7 @@ const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
     <EuiOutsideClickDetector onOutsideClick={onOutsideClick}>
       <>
         <EuiFocusTrap disabled={!focusOwnership}>
-          <Visible show={show} data-test-subj="flyout-pane-wrapper">
-            <Pane timelineId={timelineId} />
-          </Visible>
+          <Pane timelineId={timelineId} visible={show} />
         </EuiFocusTrap>
         <FlyoutBottomBar activeTab={activeTab} timelineId={timelineId} showDataproviders={!show} />
       </>

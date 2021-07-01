@@ -22,13 +22,33 @@ import {
   EuiToolTip,
   htmlIdGenerator,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
 import { timeDuration } from '../../../lib/time_duration';
+import { UnitStrings } from '../../../../i18n';
 import { CustomInterval } from './custom_interval';
 
-import { ComponentStrings, UnitStrings } from '../../../../i18n';
-const { WorkpadHeaderAutoRefreshControls: strings } = ComponentStrings;
 const { time: timeStrings } = UnitStrings;
 const { getSecondsText, getMinutesText, getHoursText } = timeStrings;
+
+const strings = {
+  getDisableTooltip: () =>
+    i18n.translate('xpack.canvas.workpadHeaderAutoRefreshControls.disableTooltip', {
+      defaultMessage: 'Disable auto-refresh',
+    }),
+  getIntervalFormLabelText: () =>
+    i18n.translate('xpack.canvas.workpadHeaderAutoRefreshControls.intervalFormLabel', {
+      defaultMessage: 'Change auto-refresh interval',
+    }),
+  getRefreshListDurationManualText: () =>
+    i18n.translate('xpack.canvas.workpadHeaderAutoRefreshControls.refreshListDurationManualText', {
+      defaultMessage: 'Manually',
+    }),
+  getRefreshListTitle: () =>
+    i18n.translate('xpack.canvas.workpadHeaderAutoRefreshControls.refreshListTitle', {
+      defaultMessage: 'Refresh elements',
+    }),
+};
 
 interface Props {
   refreshInterval: number;
