@@ -20,6 +20,8 @@ describe('Host Isolation utils isVersionSupported', () => {
     ${'7.14.0-SNAPSHOT'}      | ${'7.14.0'} | ${true}
     ${'7.14.0-SNAPSHOT-beta'} | ${'7.14.0'} | ${true}
     ${'7.14.0-alpha'}         | ${'7.14.0'} | ${true}
+    ${'8.0.0-SNAPSHOT'}       | ${'7.14.0'} | ${true}
+    ${'8.0.0'}                | ${'7.14.0'} | ${true}
   `('should validate that version $a is compatible($expected) to $b', ({ a, b, expected }) => {
     expect(
       isVersionSupported({
