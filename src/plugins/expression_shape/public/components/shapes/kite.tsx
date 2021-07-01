@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getShapeComponent } from '../shape';
+import { getShapeComponent } from '../../../../presentation_util/public';
 
 export const Kite = getShapeComponent({
   viewBox: {

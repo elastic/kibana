@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SvgElementTypes } from '../types';
-import { getShapeComponent } from '../shape';
+import { getShapeComponent, SvgElementTypes } from '../../../../presentation_util/public';
 
 export const Square = getShapeComponent({
   viewBox: {

@@ -9,8 +9,7 @@ import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { ShapePickerPopover } from '../shape_picker_popover';
-
-import { shapes } from '../../../../canvas_plugin_src/renderers/shape/shapes';
+import { shapes } from '../../../../../../../src/plugins/expression_shape/public';
 
 class Interactive extends React.Component<{}, { value: string }> {
   public state = {
