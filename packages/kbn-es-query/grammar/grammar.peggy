@@ -1,8 +1,3 @@
-/**
- * To generate the parsing module (kuery.js), run `grunt peg`
- * To watch changes and generate on file change, run `grunt watch:peg`
- */
-
 // Initialization block
 {
   const { parseCursor, cursorSymbol, allowLeadingWildcards = true, helpers: { nodeTypes } } = options;

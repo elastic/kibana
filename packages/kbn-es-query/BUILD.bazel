@@ -1,4 +1,5 @@
 load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
+load("@npm//peggy:index.bzl", "peggy")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
 
 PKG_BASE_NAME = "kbn-es-query"
@@ -8,7 +9,10 @@ SOURCE_FILES = glob(
   [
     "src/**/*",
   ],
-  exclude = ["**/*.test.*"],
+  exclude = [
+    "**/*.test.*",
+    "**/__fixtures__",
+  ],
 )
 
 SRCS = SOURCE_FILES
@@ -24,22 +28,37 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 SRC_DEPS = [
+  "//packages/kbn-common-utils",
   "//packages/kbn-config-schema",
+  "//packages/kbn-i18n",
+  "@npm//@elastic/elasticsearch",
   "@npm//load-json-file",
-  "@npm//tslib",
+  "@npm//lodash",
   "@npm//moment-timezone",
+  "@npm//tslib",
 ]
 
 TYPES_DEPS = [
-  "@npm//@types/moment-timezone",
-  "@npm//@elastic/elasticsearch",
-  "//packages/kbn-common-utils",
-  "//packages/kbn-i18n",
   "@npm//@types/jest",
+  "@npm//@types/lodash",
+  "@npm//@types/moment-timezone",
   "@npm//@types/node",
 ]
 
 DEPS = SRC_DEPS + TYPES_DEPS
+
+peggy(
+  name = "grammar",
+  data = [
+    ":grammar/grammar.peggy"
+  ],
+  output_dir = True,
+  args = [
+    "-o",
+    "$(@D)/index.js",
+    "./%s/grammar/grammar.peggy" % package_name()
+  ],
+)
 
 ts_config(
   name = "tsconfig",
@@ -54,7 +73,6 @@ ts_project(
   args = ['--pretty'],
   srcs = SRCS,
   deps = DEPS,
-  allow_js = True,
   declaration = True,
   declaration_map = True,
   incremental = True,
@@ -66,7 +84,7 @@ ts_project(
 
 js_library(
   name = PKG_BASE_NAME,
-  srcs = NPM_MODULE_EXTRA_FILES,
+  srcs = NPM_MODULE_EXTRA_FILES + [":grammar"],
   deps = DEPS + [":tsc"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],

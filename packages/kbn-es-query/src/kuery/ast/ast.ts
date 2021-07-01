@@ -11,8 +11,8 @@ import { nodeTypes } from '../node_types/index';
 import { KQLSyntaxError } from '../kuery_syntax_error';
 import { KueryNode, DslQuery, KueryParseOptions } from '../types';
 
-// @ts-ignore
-import { parse as parseKuery } from './_generated_/kuery';
+// @ts-expect-error
+import { parse as parseKuery } from '../../../grammar';
 import { IndexPatternBase } from '../..';
 
 const fromExpression = (
