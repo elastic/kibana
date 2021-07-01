@@ -97,9 +97,6 @@ export function getPackagePolicyWithSourceMap({
   packagePolicy: PackagePolicy;
   artifacts: ArtifactSourceMap[];
 }) {
-  if (!artifacts.length) {
-    return packagePolicy;
-  }
   const [firstInput, ...restInputs] = packagePolicy.inputs;
   return {
     ...packagePolicy,

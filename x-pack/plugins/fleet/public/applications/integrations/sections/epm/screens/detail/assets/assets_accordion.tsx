@@ -20,7 +20,7 @@ import {
   EuiNotificationBadge,
 } from '@elastic/eui';
 
-import { AssetTitleMap } from '../../../../../constants';
+import { AssetTitleMap } from '../../../constants';
 
 import { getHrefToObjectInKibanaApp, useStartServices } from '../../../../../hooks';
 

@@ -6,7 +6,7 @@
  */
 
 import { from } from 'rxjs';
-import { debounceTime, first, switchMap } from 'rxjs/operators';
+import { debounceTime, first, map, switchMap } from 'rxjs/operators';
 import { getLayerList } from '../../../selectors/map_selectors';
 import { MapStore } from '../../../reducers/store';
 
@@ -31,6 +31,11 @@ export function waitUntilTimeLayersLoad$(store: MapStore) {
         .filter(({ isFilteredByGlobalTime }) => isFilteredByGlobalTime)
         .some(({ layer }) => layer.isLayerLoading());
       return !areTimeLayersStillLoading;
+    }),
+    map(() => {
+      // Observable notifies subscriber when loading is finished
+      // Return void to not expose internal implemenation details of observabale
+      return;
     })
   );
 }

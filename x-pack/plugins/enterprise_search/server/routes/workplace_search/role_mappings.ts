@@ -93,8 +93,37 @@ export function registerOrgRoleMappingRoute({
   );
 }
 
+export function registerOrgUserRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.post(
+    {
+      path: '/api/workplace_search/org/single_user_role_mapping',
+      validate: {
+        body: schema.object({
+          roleMapping: schema.object({
+            groups: schema.arrayOf(schema.string()),
+            roleType: schema.string(),
+            allGroups: schema.boolean(),
+            id: schema.maybe(schema.string()),
+          }),
+          elasticsearchUser: schema.object({
+            username: schema.string(),
+            email: schema.string(),
+          }),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/role_mappings/upsert_single_user_role_mapping',
+    })
+  );
+}
+
 export const registerRoleMappingsRoutes = (dependencies: RouteDependencies) => {
   registerOrgEnableRoleMappingsRoute(dependencies);
   registerOrgRoleMappingsRoute(dependencies);
   registerOrgRoleMappingRoute(dependencies);
+  registerOrgUserRoute(dependencies);
 };

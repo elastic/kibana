@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { CASES_APP_ID } from '../../../../common/const';
+import { observabilityFeatureId } from '../../../../common';
 
-export { CASES_APP_ID };
-export const CASES_OWNER = 'observability';
+export const CASES_OWNER = observabilityFeatureId;

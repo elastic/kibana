@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiBadgeProps } from '@elastic/eui';
 import type React from 'react';
 export type TitleProp = string | React.ReactNode;
 
@@ -17,4 +18,5 @@ export interface BadgeOptions {
   beta?: boolean;
   text: string;
   tooltip?: string;
+  color?: EuiBadgeProps['color'];
 }

@@ -482,6 +482,9 @@ of buckets to try to represent.
 [[visualization-visualize-chartslibrary]]`visualization:visualize:legacyChartsLibrary`::
 Enables the legacy charts library for aggregation-based area, line, and bar charts in *Visualize*.
 
+[[visualization-visualize-pieChartslibrary]]`visualization:visualize:legacyPieChartsLibrary`::
+Enables the legacy charts library for aggregation-based pie charts in *Visualize*.
+
 [[visualization-colormapping]]`visualization:colorMapping`::
 **This setting is deprecated and will not be supported as of 8.0.**
 Maps values to specific colors in charts using the *Compatibility* palette.

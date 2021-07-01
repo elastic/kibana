@@ -13,7 +13,7 @@ import { shallow } from 'enzyme';
 
 import { EuiFormRow } from '@elastic/eui';
 
-import { Role as ASRole } from '../../app_search/types';
+import { RoleTypes as ASRole } from '../../app_search/types';
 
 import { REQUIRED_LABEL, USERNAME_NO_USERS_TEXT } from './constants';
 
@@ -34,6 +34,7 @@ describe('UserSelector', () => {
 
   const props = {
     isNewUser: true,
+    smtpSettingsPresent: false,
     userFormUserIsExisting: true,
     elasticsearchUsers,
     elasticsearchUser: elasticsearchUsers[0],
@@ -101,12 +102,11 @@ describe('UserSelector', () => {
         {...props}
         userFormUserIsExisting={false}
         elasticsearchUsers={[]}
-        elasticsearchUser={{ email: '', username: '' }}
+        elasticsearchUser={{ email: '', username: '', enabled: true }}
       />
     );
 
     expect(wrapper.find(EuiFormRow).at(0).prop('helpText')).toEqual(USERNAME_NO_USERS_TEXT);
     expect(wrapper.find(EuiFormRow).at(1).prop('helpText')).toEqual(REQUIRED_LABEL);
-    expect(wrapper.find(EuiFormRow).at(2).prop('helpText')).toEqual(REQUIRED_LABEL);
   });
 });

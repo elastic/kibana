@@ -103,12 +103,51 @@ const artifacts = [
 
 describe('Source maps', () => {
   describe('getPackagePolicyWithSourceMap', () => {
-    it('returns unchanged package policy when artifacts is empty', () => {
+    it('removes source map from package policy', () => {
+      const packagePolicyWithSourceMaps = {
+        ...packagePolicy,
+        inputs: [
+          {
+            ...packagePolicy.inputs[0],
+            compiled_input: {
+              'apm-server': {
+                ...packagePolicy.inputs[0].compiled_input['apm-server'],
+                value: {
+                  rum: {
+                    source_mapping: {
+                      metadata: [
+                        {
+                          'service.name': 'service_name',
+                          'service.version': '1.0.0',
+                          'bundle.filepath':
+                            'http://localhost:3000/static/js/main.chunk.js',
+                          'sourcemap.url':
+                            '/api/fleet/artifacts/service_name-1.0.0/my-id-1',
+                        },
+                        {
+                          'service.name': 'service_name',
+                          'service.version': '2.0.0',
+                          'bundle.filepath':
+                            'http://localhost:3000/static/js/main.chunk.js',
+                          'sourcemap.url':
+                            '/api/fleet/artifacts/service_name-2.0.0/my-id-2',
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+          },
+        ],
+      };
       const updatedPackagePolicy = getPackagePolicyWithSourceMap({
-        packagePolicy,
+        packagePolicy: packagePolicyWithSourceMaps,
         artifacts: [],
       });
-      expect(updatedPackagePolicy).toEqual(packagePolicy);
+      expect(updatedPackagePolicy.inputs[0].config).toEqual({
+        'apm-server': { value: { rum: { source_mapping: { metadata: [] } } } },
+      });
     });
     it('adds source maps into the package policy', () => {
       const updatedPackagePolicy = getPackagePolicyWithSourceMap({

@@ -15,6 +15,7 @@ import { WSRoleMapping } from '../../workplace_search/types';
 
 import {
   INVITATION_PENDING_LABEL,
+  DEACTIVATED_LABEL,
   ALL_LABEL,
   FILTER_USERS_LABEL,
   NO_USERS_LABEL,
@@ -37,6 +38,7 @@ interface SharedUser extends SingleUserRoleMapping<ASRoleMapping | WSRoleMapping
   email: string | null;
   roleType: string;
   id: string;
+  enabled: boolean;
 }
 
 interface SharedRoleMapping extends ASRoleMapping, WSRoleMapping {
@@ -46,12 +48,13 @@ interface SharedRoleMapping extends ASRoleMapping, WSRoleMapping {
 interface Props {
   accessItemKey: 'groups' | 'engines';
   singleUserRoleMappings: Array<SingleUserRoleMapping<ASRoleMapping | WSRoleMapping>>;
-  initializeSingleUserRoleMapping(roleId: string): string;
-  handleDeleteMapping(roleId: string): string;
+  initializeSingleUserRoleMapping(roleMappingId: string): void;
+  handleDeleteMapping(roleMappingId: string): void;
 }
 
 const noItemsPlaceholder = <EuiTextColor color="subdued">&mdash;</EuiTextColor>;
 const invitationBadge = <EuiBadge color="hollow">{INVITATION_PENDING_LABEL}</EuiBadge>;
+const deactivatedBadge = <EuiBadge color="hollow">{DEACTIVATED_LABEL}</EuiBadge>;
 
 export const UsersTable: React.FC<Props> = ({
   accessItemKey,
@@ -63,6 +66,7 @@ export const UsersTable: React.FC<Props> = ({
   const users = ((singleUserRoleMappings as SharedUser[]).map((user) => ({
     username: user.elasticsearchUser.username,
     email: user.elasticsearchUser.email,
+    enabled: user.elasticsearchUser.enabled,
     roleType: user.roleMapping.roleType,
     id: user.roleMapping.id,
     accessItems: (user.roleMapping as SharedRoleMapping)[accessItemKey],
@@ -73,7 +77,11 @@ export const UsersTable: React.FC<Props> = ({
     {
       field: 'username',
       name: USERNAME_LABEL,
-      render: (_, { username }: SharedUser) => username,
+      render: (_, { username, invitation, enabled }: SharedUser) => (
+        <div data-test-subj="UsernameCell">
+          {username} {!invitation && !enabled && deactivatedBadge}
+        </div>
+      ),
     },
     {
       field: 'email',
@@ -110,6 +118,7 @@ export const UsersTable: React.FC<Props> = ({
     {
       field: 'id',
       name: '',
+      align: 'right',
       render: (_, { id, username }: SharedUser) => (
         <UsersAndRolesRowActions
           username={username}

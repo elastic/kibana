@@ -18,6 +18,8 @@ import {
 import { ecsComponentTemplate } from '../../common/assets/component_templates/ecs_component_template';
 import { defaultLifecyclePolicy } from '../../common/assets/lifecycle_policies/default_lifecycle_policy';
 import { ClusterPutComponentTemplateBody, PutIndexTemplateRequest } from '../../common/types';
+import { RuleDataClient } from '../rule_data_client';
+import { RuleDataWriteDisabledError } from './errors';
 
 const BOOTSTRAP_TIMEOUT = 60000;
 
@@ -56,8 +58,8 @@ export class RuleDataPluginService {
   constructor(private readonly options: RuleDataPluginServiceConstructorOptions) {}
 
   private assertWriteEnabled() {
-    if (!this.isWriteEnabled) {
-      throw new Error('Write operations are disabled');
+    if (!this.isWriteEnabled()) {
+      throw new RuleDataWriteDisabledError();
     }
   }
 
@@ -66,7 +68,7 @@ export class RuleDataPluginService {
   }
 
   async init() {
-    if (!this.isWriteEnabled) {
+    if (!this.isWriteEnabled()) {
       this.options.logger.info('Write is disabled, not installing assets');
       this.signal.complete();
       return;
@@ -226,5 +228,14 @@ export class RuleDataPluginService {
 
   getFullAssetName(assetName?: string) {
     return [this.options.index, assetName].filter(Boolean).join('-');
+  }
+
+  getRuleDataClient(alias: string, initialize: () => Promise<void>) {
+    return new RuleDataClient({
+      alias,
+      getClusterClient: () => this.getClusterClient(),
+      isWriteEnabled: this.isWriteEnabled(),
+      ready: initialize,
+    });
   }
 }

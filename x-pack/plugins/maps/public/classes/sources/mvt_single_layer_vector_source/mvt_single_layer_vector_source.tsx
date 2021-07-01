@@ -102,6 +102,10 @@ export class MVTSingleLayerVectorSource
     throw new Error('Does not implement addFeature');
   }
 
+  deleteFeature(featureId: string): Promise<void> {
+    throw new Error('Does not implement deleteFeature');
+  }
+
   getMVTFields(): MVTField[] {
     return this._descriptor.fields.map((field: MVTFieldDescriptor) => {
       return new MVTField({

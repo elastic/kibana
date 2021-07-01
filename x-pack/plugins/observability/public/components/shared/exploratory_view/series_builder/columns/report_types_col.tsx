@@ -15,7 +15,7 @@ import { ReportViewType, SeriesUrl } from '../../types';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { DEFAULT_TIME } from '../../configurations/constants';
 import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
-import { ReportTypeItem, SELECT_DATA_TYPE } from '../series_builder';
+import { ReportTypeItem } from '../series_builder';
 
 interface Props {
   seriesId: string;
@@ -30,7 +30,12 @@ export function ReportTypesCol({ seriesId, reportTypes }: Props) {
   const { loading, hasData } = useAppIndexPatternContext(restSeries.dataType);
 
   if (!restSeries.dataType) {
-    return <span>{SELECT_DATA_TYPE}</span>;
+    return (
+      <FormattedMessage
+        id="xpack.observability.expView.seriesBuilder.selectDataType"
+        defaultMessage="No data type selected"
+      />
+    );
   }
 
   if (!loading && !hasData) {
@@ -72,8 +77,7 @@ export function ReportTypesCol({ seriesId, reportTypes }: Props) {
                 setSeries(seriesId, {
                   ...restSeries,
                   reportType,
-                  operationType: undefined,
-                  reportDefinitions: {},
+                  selectedMetricField: undefined,
                   time: restSeries?.time ?? DEFAULT_TIME,
                 });
               }
