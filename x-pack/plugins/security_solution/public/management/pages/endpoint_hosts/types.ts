@@ -43,6 +43,8 @@ export interface EndpointState {
         disabled: boolean;
         page: number;
         pageSize: number;
+        startDate?: string;
+        endDate?: string;
       };
       logData: AsyncResourceState<ActivityLog>;
     };

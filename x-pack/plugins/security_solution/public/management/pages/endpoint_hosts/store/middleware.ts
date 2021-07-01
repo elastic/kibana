@@ -409,12 +409,17 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       });
 
       try {
-        const { page, pageSize } = getActivityLogDataPaging(getState());
+        const { page, pageSize, startDate, endDate } = getActivityLogDataPaging(getState());
         const route = resolvePathVariables(ENDPOINT_ACTION_LOG_ROUTE, {
           agent_id: selectedAgent(getState()),
         });
         const activityLog = await coreStart.http.get<ActivityLog>(route, {
-          query: { page, page_size: pageSize },
+          query: {
+            page,
+            page_size: pageSize,
+            start_date: startDate,
+            end_date: endDate,
+          },
         });
 
         const lastLoadedLogData = getLastLoadedActivityLogData(getState());
@@ -428,6 +433,8 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
           const updatedLogData = {
             page: activityLog.page,
             pageSize: activityLog.pageSize,
+            startDate: activityLog.startDate,
+            endDate: activityLog.endDate,
             data: activityLog.page === 1 ? activityLog.data : updatedLogDataItems,
           };
           dispatch({
@@ -441,6 +448,8 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
                 disabled: true,
                 page: activityLog.page - 1,
                 pageSize: activityLog.pageSize,
+                startDate: activityLog.startDate,
+                endDate: activityLog.endDate,
               },
             });
           }

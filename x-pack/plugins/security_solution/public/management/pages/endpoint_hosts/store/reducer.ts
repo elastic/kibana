@@ -41,6 +41,8 @@ const handleEndpointDetailsActivityLogChanged: CaseReducer<EndpointDetailsActivi
             ...state.endpointDetails.activityLog.paging,
             page: action.payload.data.page,
             pageSize: action.payload.data.pageSize,
+            startDate: action.payload.data.startDate,
+            endDate: action.payload.data.endDate,
           },
         }
       : { ...state.endpointDetails.activityLog };
@@ -167,6 +169,8 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
       disabled: state.endpointDetails.activityLog.paging.disabled,
       page: action.payload.page,
       pageSize: action.payload.pageSize,
+      startDate: action.payload.startDate,
+      endDate: action.payload.endDate,
     };
     return {
       ...state,

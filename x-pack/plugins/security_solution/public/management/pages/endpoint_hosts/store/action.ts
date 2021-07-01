@@ -151,6 +151,8 @@ export interface AppRequestedEndpointActivityLog {
   payload: {
     page: number;
     pageSize: number;
+    startDate?: string;
+    endDate?: string;
   };
 }
 export type EndpointDetailsActivityLogChanged = Action<'endpointDetailsActivityLogChanged'> & {
@@ -168,6 +170,8 @@ export interface EndpointDetailsActivityLogUpdatePaging {
     disabled: boolean;
     page: number;
     pageSize: number;
+    startDate?: string;
+    endDate?: string;
   };
 }
 
