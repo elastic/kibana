@@ -26,7 +26,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         // a space deletes all of the associated saved objects
         // await esArchiver.load('x-pack/test/functional/es_archives/timelion/feature_controls');
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/timelion.json'
+          'x-pack/test/functional/fixtures/kbn_archiver/timelion/feature_controls.json'
         );
 
         await spacesService.create({
@@ -36,7 +36,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/timelion_custom_space.json',
+          'x-pack/test/functional/fixtures/kbn_archiver/timelion/timelion_custom_space.json',
           { space: 'custom_space' }
         );
       });
@@ -44,7 +44,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       after(async () => {
         await spacesService.delete('custom_space');
         await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/timelion.json'
+          'x-pack/test/functional/fixtures/kbn_archiver/timelion/feature_controls.json'
         );
       });
 
@@ -73,7 +73,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         // await esArchiver.load('x-pack/test/functional/es_archives/timelion/feature_controls');
 
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/timelion.json'
+          'x-pack/test/functional/fixtures/kbn_archiver/timelion/feature_controls.json'
         );
 
         await spacesService.create({
@@ -83,7 +83,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/timelion_custom_space.json',
+          'x-pack/test/functional/fixtures/kbn_archiver/timelion/timelion_custom_space.json',
           { space: 'custom_space' }
         );
       });
@@ -91,7 +91,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       after(async () => {
         await spacesService.delete('custom_space');
         await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/timelion.json'
+          'x-pack/test/functional/fixtures/kbn_archiver/timelion/feature_controls.json'
         );
       });
 

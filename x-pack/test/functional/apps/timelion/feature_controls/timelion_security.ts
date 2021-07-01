@@ -26,14 +26,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('feature controls security', () => {
     before(async () => {
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/timelion.json'
+        'x-pack/test/functional/fixtures/kbn_archiver/timelion/feature_controls.json'
       );
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
     });
 
     after(async () => {
       await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/timelion.json'
+        'x-pack/test/functional/fixtures/kbn_archiver/timelion/feature_controls.json'
       );
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
     });

@@ -3,7 +3,7 @@
     "buildNum": 9007199254740991,
     "defaultIndex": "logstash-*"
   },
-  "coreMigrationVersion": "8.0.0",
+  "coreMigrationVersion": "7.14.0",
   "id": "7.0.0",
   "migrationVersion": {
     "config": "7.13.0"
@@ -28,7 +28,7 @@
     "title": "i-exist",
     "version": 1
   },
-  "coreMigrationVersion": "8.0.0",
+  "coreMigrationVersion": "7.14.0",
   "id": "i-exist",
   "references": [],
   "type": "timelion-sheet",
@@ -41,7 +41,7 @@
     "timeFieldName": "@timestamp",
     "title": "logstash-*"
   },
-  "coreMigrationVersion": "8.0.0",
+  "coreMigrationVersion": "7.14.0",
   "id": "logstash-*",
   "migrationVersion": {
     "index-pattern": "7.11.0"
