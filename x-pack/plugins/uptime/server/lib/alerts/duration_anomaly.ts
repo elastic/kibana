@@ -41,6 +41,7 @@ export const getAnomalySummary = (anomaly: AnomaliesTableRecord, monitorInfo: Pi
     slowestAnomalyResponse: Math.round(anomaly.actualSort / 1000) + ' ms',
     expectedResponseTime: Math.round(anomaly.typicalSort / 1000) + ' ms',
     observerLocation: anomaly.entityValue,
+    bucketSpan: anomaly.source.bucket_span,
   };
 };
 
@@ -131,6 +132,7 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
             'url.full': summary.monitorUrl,
             'observer.geo.name': summary.observerLocation,
             'anomaly.start': summary.anomalyStartTimestamp,
+            'anomaly.bucket_span': summary.bucketSpan,
             [ALERT_EVALUATION_VALUE]: anomaly.actualSort,
             [ALERT_EVALUATION_THRESHOLD]: anomaly.typicalSort,
             [ALERT_SEVERITY_LEVEL]: summary.severity,
