@@ -25,14 +25,14 @@ import {
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
-import { px, unit } from '../../../../style/variables';
+import { unit } from '../../../../style/variables';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { MetricOverviewLink } from '../../../shared/Links/apm/MetricOverviewLink';
 import { ServiceNodeMetricOverviewLink } from '../../../shared/Links/apm/ServiceNodeMetricOverviewLink';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { getLatencyColumnLabel } from '../get_latency_column_label';
-import { InstanceActionsMenu } from './instance_actions_menu';
 import { MainStatsServiceInstanceItem } from '../service_overview_instances_chart_and_table';
+import { InstanceActionsMenu } from './instance_actions_menu';
 
 type ServiceInstanceDetailedStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
 

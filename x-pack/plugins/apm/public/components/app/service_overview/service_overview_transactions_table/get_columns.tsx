@@ -16,7 +16,7 @@ import {
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
-import { px, unit } from '../../../../style/variables';
+import { unit } from '../../../../style/variables';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ImpactBar } from '../../../shared/ImpactBar';
 import { TransactionDetailLink } from '../../../shared/Links/apm/transaction_detail_link';

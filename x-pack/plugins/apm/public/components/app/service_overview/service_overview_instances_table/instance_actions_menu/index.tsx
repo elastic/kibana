@@ -20,8 +20,7 @@ import { SERVICE_NODE_NAME } from '../../../../../../common/elasticsearch_fieldn
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 import { useUrlParams } from '../../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
-import { px } from '../../../../../style/variables';
-import { pushNewItemToKueryBar } from '../../../../shared/KueryBar/utils';
+import { pushNewItemToKueryBar } from '../../../../shared/kuery_bar/utils';
 import { useMetricOverviewHref } from '../../../../shared/Links/apm/MetricOverviewLink';
 import { useServiceNodeMetricOverviewHref } from '../../../../shared/Links/apm/ServiceNodeMetricOverviewLink';
 import { useInstanceDetailsFetcher } from '../use_instance_details_fetcher';

@@ -5,21 +5,20 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiIconTip, EuiToolTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { EuiIconTip } from '@elastic/eui';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import { truncate, unit } from '../../../../style/variables';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { ManagedTable } from '../../../shared/ManagedTable';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { truncate, unit } from '../../../../style/variables';
 import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
-import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
 import { APMQueryParams } from '../../../shared/Links/url_helpers';
+import { ManagedTable } from '../../../shared/managed_table';
+import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 
 const GroupIdLink = euiStyled(ErrorDetailLink)`
   font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};

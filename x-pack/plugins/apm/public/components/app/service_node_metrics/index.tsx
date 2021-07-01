@@ -20,12 +20,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useServiceMetricChartsFetcher } from '../../../hooks/use_service_metric_charts_fetcher';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
-import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { px, truncate, unit } from '../../../style/variables';
+import { truncate, unit } from '../../../style/variables';
 import { MetricsChart } from '../../shared/charts/metrics_chart';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 

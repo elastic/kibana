@@ -15,19 +15,19 @@ import {
 import { i18n } from '@kbn/i18n';
 import { keyBy } from 'lodash';
 import React from 'react';
-import { offsetPreviousPeriodCoordinates } from '../../../../../common/utils/offset_previous_period_coordinate';
-import { Coordinate } from '../../../../../typings/timeseries';
 import { getNextEnvironmentUrlParam } from '../../../../../common/environment_filter_values';
 import {
   asMillisecondDuration,
   asPercent,
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
+import { offsetPreviousPeriodCoordinates } from '../../../../../common/utils/offset_previous_period_coordinate';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ServiceDependencyItem } from '../../../../../server/lib/services/get_service_dependencies';
+import { Coordinate } from '../../../../../typings/timeseries';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { px, unit } from '../../../../style/variables';
+import { unit } from '../../../../style/variables';
 import { AgentIcon } from '../../../shared/agent_icon';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ImpactBar } from '../../../shared/ImpactBar';

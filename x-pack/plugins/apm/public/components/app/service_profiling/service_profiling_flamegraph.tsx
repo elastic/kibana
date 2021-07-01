@@ -13,16 +13,16 @@ import {
   Settings,
   TooltipInfo,
 } from '@elastic/charts';
-import { EuiInMemoryTable } from '@elastic/eui';
-import { EuiFieldText } from '@elastic/eui';
-import { EuiToolTip } from '@elastic/eui';
 import {
   EuiCheckbox,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiInMemoryTable,
   euiPaletteForTemperature,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { find, sumBy } from 'lodash';
@@ -44,7 +44,7 @@ import {
 } from '../../../../common/utils/formatters';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
-import { px, unit } from '../../../style/variables';
+import { unit } from '../../../style/variables';
 
 const colors = euiPaletteForTemperature(100).slice(50, 85);
 

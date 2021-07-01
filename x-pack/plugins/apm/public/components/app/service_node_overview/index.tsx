@@ -19,9 +19,9 @@ import {
 } from '../../../../common/utils/formatters';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
-import { px, truncate, unit } from '../../../style/variables';
+import { truncate, unit } from '../../../style/variables';
 import { ServiceNodeMetricOverviewLink } from '../../shared/Links/apm/ServiceNodeMetricOverviewLink';
-import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';
+import { ITableColumn, ManagedTable } from '../../shared/managed_table';
 
 const INITIAL_PAGE_SIZE = 25;
 const INITIAL_SORT_FIELD = 'cpu';

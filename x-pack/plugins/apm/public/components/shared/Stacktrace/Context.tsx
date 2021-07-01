@@ -8,14 +8,13 @@
 import { size } from 'lodash';
 import { tint } from 'polished';
 import React from 'react';
+import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
 import javascript from 'react-syntax-highlighter/dist/cjs/languages/hljs/javascript';
 import python from 'react-syntax-highlighter/dist/cjs/languages/hljs/python';
 import ruby from 'react-syntax-highlighter/dist/cjs/languages/hljs/ruby';
 import xcode from 'react-syntax-highlighter/dist/cjs/styles/hljs/xcode';
-import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { StackframeWithLineContext } from '../../../../typings/es_schemas/raw/fields/stackframe';
-import { px } from '../../../style/variables';
 
 SyntaxHighlighter.registerLanguage('javascript', javascript);
 SyntaxHighlighter.registerLanguage('python', python);

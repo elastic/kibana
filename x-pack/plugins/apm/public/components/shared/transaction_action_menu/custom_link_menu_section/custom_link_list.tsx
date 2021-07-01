@@ -8,12 +8,12 @@
 import Mustache from 'mustache';
 import React from 'react';
 import {
-  SectionLinks,
   SectionLink,
+  SectionLinks,
 } from '../../../../../../observability/public';
 import { CustomLink } from '../../../../../common/custom_link/custom_link_types';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
-import { px, unit } from '../../../../style/variables';
+import { unit } from '../../../../style/variables';
 
 export function CustomLinkList({
   customLinks,
