@@ -270,7 +270,7 @@ export const ResultsLinks: FC<Props> = ({
           <EuiFlexItem>
             <EuiCard
               icon={<EuiIcon size="xxl" type={link.icon} />}
-              data-test-subj="fileDataVisLink-"
+              data-test-subj="fileDataVisLink"
               title={link.title}
               description={link.description}
               href={generatedLinks[link.id]}
