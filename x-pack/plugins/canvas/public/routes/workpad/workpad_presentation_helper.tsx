@@ -14,21 +14,21 @@ import { getWorkpad } from '../../state/selectors/workpad';
 import { useFullscreenPresentationHelper } from './hooks/use_fullscreen_presentation_helper';
 import { useAutoplayHelper } from './hooks/use_autoplay_helper';
 import { useRefreshHelper } from './hooks/use_refresh_helper';
-import { useServices } from '../../services';
+import { usePlatformService } from '../../services';
 
 export const WorkpadPresentationHelper: FC = ({ children }) => {
-  const services = useServices();
+  const platformService = usePlatformService();
   const workpad = useSelector(getWorkpad);
   useFullscreenPresentationHelper();
   useAutoplayHelper();
   useRefreshHelper();
 
   useEffect(() => {
-    services.platform.setBreadcrumbs([
+    platformService.setBreadcrumbs([
       getBaseBreadcrumb(),
       getWorkpadBreadcrumb({ name: workpad.name }),
     ]);
-  }, [workpad.name, workpad.id, services.platform]);
+  }, [workpad.name, workpad.id, platformService]);
 
   useEffect(() => {
     setDocTitle(workpad.name);
