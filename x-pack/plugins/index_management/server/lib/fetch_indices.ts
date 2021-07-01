@@ -81,7 +81,6 @@ async function fetchIndicesCall(
   // In the future, we should migrate away from using cat APIs (https://github.com/elastic/kibana/issues/57286)
   const filteredCatHits = catHits.filter((hit) => typeof indices[hit.index] !== 'undefined');
 
-  // The two responses should be equal in the number of indices returned
   return filteredCatHits.map((hit) => {
     const index = indices[hit.index];
     const aliases = Object.keys(index.aliases);
