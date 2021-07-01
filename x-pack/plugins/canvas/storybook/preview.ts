@@ -6,6 +6,7 @@
  */
 
 import { action } from '@storybook/addon-actions';
+import { addParameters } from '@storybook/react';
 
 import { startServices } from '../public/services/stubs';
 import { addDecorators } from './decorators';
@@ -23,3 +24,6 @@ startServices({
 });
 
 addDecorators();
+addParameters({
+  controls: { hideNoControlsWarning: true },
+});
