@@ -33,7 +33,6 @@ interface Options {
   isQueued?: boolean;
 }
 
-// TODO I know our error messages from the BE are not i18n-ized but should this be?
 export const defaultErrorMessage = i18n.translate(
   'xpack.enterpriseSearch.shared.flashMessages.defaultErrorMessage',
   {
