@@ -15,7 +15,6 @@ import {
   HostPolicyResponse,
   HostResultList,
   HostStatus,
-  MetadataQueryStrategyVersions,
 } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import {
@@ -52,7 +51,6 @@ export const endpointMetadataHttpMocks = httpHandlerMockFactory<EndpointMetadata
             const endpoint = {
               metadata: generator.generateHostMetadata(),
               host_status: HostStatus.UNHEALTHY,
-              query_strategy_version: MetadataQueryStrategyVersions.VERSION_2,
             };
 
             generator.updateCommonInfo();
@@ -62,7 +60,6 @@ export const endpointMetadataHttpMocks = httpHandlerMockFactory<EndpointMetadata
           total: 10,
           request_page_size: 10,
           request_page_index: 0,
-          query_strategy_version: MetadataQueryStrategyVersions.VERSION_2,
         };
       },
     },
@@ -76,7 +73,6 @@ export const endpointMetadataHttpMocks = httpHandlerMockFactory<EndpointMetadata
         return {
           metadata: generator.generateHostMetadata(),
           host_status: HostStatus.UNHEALTHY,
-          query_strategy_version: MetadataQueryStrategyVersions.VERSION_2,
         };
       },
     },
