@@ -7,9 +7,9 @@
 
 import { get } from 'lodash/fp';
 import { set } from '@elastic/safer-lodash-set/fp';
-import { SignalSource, SignalSourceHit } from '../../types';
+import { SignalSource } from '../../types';
 import { filterFieldEntries } from '../utils/filter_field_entries';
-import type { FieldsType } from '../types';
+import type { FieldsType, MergeStrategyFunction } from '../types';
 import { isObjectLikeOrArrayOfObjectLikes } from '../utils/is_objectlike_or_array_of_objectlikes';
 import { isNestedObject } from '../utils/is_nested_object';
 import { recursiveUnboxingFields } from '../utils/recursive_unboxing_fields';
@@ -26,7 +26,7 @@ import { isTypeObject } from '../utils/is_type_object';
  * @param throwOnFailSafe Defaults to false, but if set to true it will cause a throw if the fail safe is triggered to indicate we need to add a new explicit test condition
  * @returns The two merged together in one object where we can
  */
-export const mergeAllFieldsWithSource = ({ doc }: { doc: SignalSourceHit }): SignalSourceHit => {
+export const mergeAllFieldsWithSource: MergeStrategyFunction = ({ doc }) => {
   const source = doc._source ?? {};
   const fields = doc.fields ?? {};
   const fieldEntries = Object.entries(fields);
