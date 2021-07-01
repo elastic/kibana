@@ -19,6 +19,7 @@ import { NoCases } from './no_cases';
 import { isSubCase } from '../all_cases/helpers';
 import { MarkdownRenderer } from '../markdown_editor';
 import { FilterOptions } from '../../containers/types';
+import { TruncatedText } from '../truncated_text';
 
 const MarkdownContainer = styled.div`
   max-height: 150px;
@@ -80,7 +81,7 @@ export const RecentCasesComp = ({
                 title={c.title}
                 subCaseId={isSubCase(c) ? c.id : undefined}
               >
-                {c.title}
+                <TruncatedText text={c.title} />
               </CaseDetailsLink>
             </EuiText>
 
