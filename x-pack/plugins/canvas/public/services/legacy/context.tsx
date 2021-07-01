@@ -22,7 +22,6 @@ export interface WithServicesProps {
 const defaultContextValue = {
   embeddables: {},
   expressions: {},
-  platform: {},
   navLink: {},
   search: {},
 };
@@ -30,7 +29,6 @@ const defaultContextValue = {
 const context = createContext<CanvasServices>(defaultContextValue as CanvasServices);
 
 export const useServices = () => useContext(context);
-export const usePlatformService = () => useServices().platform;
 export const useEmbeddablesService = () => useServices().embeddables;
 export const useExpressionsService = () => useServices().expressions;
 export const useNavLinkService = () => useServices().navLink;
@@ -50,7 +48,6 @@ export const LegacyServicesProvider: FC<{
   const value = {
     embeddables: specifiedProviders.embeddables.getService(),
     expressions: specifiedProviders.expressions.getService(),
-    platform: specifiedProviders.platform.getService(),
     navLink: specifiedProviders.navLink.getService(),
     search: specifiedProviders.search.getService(),
     reporting: specifiedProviders.reporting.getService(),

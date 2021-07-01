@@ -13,16 +13,16 @@ import {
   Settings,
   TooltipInfo,
 } from '@elastic/charts';
-import { EuiInMemoryTable } from '@elastic/eui';
-import { EuiFieldText } from '@elastic/eui';
-import { EuiToolTip } from '@elastic/eui';
 import {
   EuiCheckbox,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiInMemoryTable,
   euiPaletteForTemperature,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { find, sumBy } from 'lodash';
@@ -44,7 +44,7 @@ import {
 } from '../../../../common/utils/formatters';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
-import { px, unit } from '../../../style/variables';
+import { unit } from '../../../utils/style';
 
 const colors = euiPaletteForTemperature(100).slice(50, 85);
 
@@ -335,7 +335,7 @@ export function ServiceProfilingFlamegraph({
           />
         </Chart>
       </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ width: px(unit * 24) }}>
+      <EuiFlexItem grow={false} style={{ width: unit * 24 }}>
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiCheckbox
@@ -405,7 +405,7 @@ export function ServiceProfilingFlamegraph({
                     defaultMessage: 'Self',
                   }),
                   render: (_, item) => formatValue(item.value, valueUnit),
-                  width: px(unit * 6),
+                  width: `${unit * 6}px`,
                 },
               ]}
             />
