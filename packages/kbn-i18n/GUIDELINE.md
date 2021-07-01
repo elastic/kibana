@@ -111,7 +111,7 @@ Currently, we support the following AngluarJS `i18n` tools, but they will be rem
 ### Naming convention
 
 The message ids chosen for message keys should always be descriptive of the string, and its role in the interface (button label, title, etc.). Think of them as long variable names. When you have to change a message id, adding a progressive number to the existing key should always be used as a last resort.
-Here's a rule of id maning:
+Here's a rule of id naming:
 
 `{plugin}.{area}.[{sub-area}].{element}`
 
@@ -402,7 +402,7 @@ There is some support for using markdown and you can use any of the following sy
 
 #### Headers
 
-  ```js
+  ```md
     # This is an <h1> tag
     ## This is an <h2> tag
     ###### This is an <h6> tag
@@ -410,68 +410,68 @@ There is some support for using markdown and you can use any of the following sy
 
 #### Emphasis
 
-  ```js
-    *This text will be italic*
-    _This will also be italic_
+```md
+  *This text will be italic*
+  _This will also be italic_
 
-    **This text will be bold**
-    __This will also be bold__
+  **This text will be bold**
+  __This will also be bold__
 
-    _You **can** combine them_
-  ```
+  _You **can** combine them_
+```
 
 #### Lists
   ##### Unordered
 
-  ```js
-    * Item 1
-    * Item 2
-      * Item 2a
-      * Item 2b
-  ```
+```md
+  * Item 1
+  * Item 2
+    * Item 2a
+    * Item 2b
+```
   ##### Ordered
 
-  ```js
-    1. Item 1
-    1. Item 2
-    1. Item 3
-      1. Item 3a
-      1. Item 3b
-  ```
+```md
+  1. Item 1
+  1. Item 2
+  1. Item 3
+    1. Item 3a
+    1. Item 3b
+```
 #### Images
 
-  ```js
-    ![Github Logo](/images/logo.png)
-    Format: ![Alt Text](url)
-  ```
+```md
+  ![Github Logo](/images/logo.png)
+  Format: ![Alt Text](url)
+```
   
 #### Links
 
-  ```js
-    http://github.com - automatic!
-    [GitHub](http://github.com)
-  ```
+```md
+  http://github.com - automatic!
+  [GitHub](http://github.com)
+```
   
 #### Blockquotes
 
-  ```js
-  As Kanye West said:
-  
-  > We're living the future so
-  > the present is our past.
-  ```
+```md
+As Kanye West said:
+
+> We're living the future so
+> the present is our past.
+```
 #### Code Blocks
 
-  ```js
-  var a = 13;
-  ```
+```md
+var a = 13;
+```
 
 #### Inline code
 
-  ```js
-    I think you should use an
-    `<addr>` element here instead
-  ```
+```md
+  I think you should use an
+  `<addr>` element here instead
+```
 ### Splitting
 
 Splitting sentences into several keys often inadvertently presumes a grammar, a sentence structure, and such composite strings are often very difficult to translate.
