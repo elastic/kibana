@@ -99,4 +99,6 @@ export const workpadServiceFactory: CanvasWorkpadServiceFactory = () => ({
   update: (id, workpad) => Promise.resolve(),
   updateWorkpad: (id, workpad) => Promise.resolve(),
   updateAssets: (id, assets) => Promise.resolve(),
+  getRuntimeZip: (workpad) =>
+    Promise.resolve(new Blob([JSON.stringify(workpad)], { type: 'application/json' })),
 });

@@ -6,6 +6,7 @@
  */
 
 import { CanvasWorkpad, CanvasTemplate } from '../../types';
+import { CanvasRenderedWorkpad } from '../../shareable_runtime/types';
 
 export type FoundWorkpads = Array<Pick<CanvasWorkpad, 'name' | 'id' | '@timestamp' | '@created'>>;
 export type FoundWorkpad = FoundWorkpads[number];
@@ -27,4 +28,5 @@ export interface CanvasWorkpadService {
   update: (id: string, workpad: CanvasWorkpad) => Promise<void>;
   updateWorkpad: (id: string, workpad: CanvasWorkpad) => Promise<void>;
   updateAssets: (id: string, assets: CanvasWorkpad['assets']) => Promise<void>;
+  getRuntimeZip: (workpad: CanvasRenderedWorkpad) => Promise<Blob>;
 }

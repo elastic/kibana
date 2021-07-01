@@ -8,13 +8,10 @@
 import { useCallback } from 'react';
 import fileSaver from 'file-saver';
 import { i18n } from '@kbn/i18n';
-import {
-  API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD,
-  API_ROUTE_SHAREABLE_ZIP,
-} from '../../../../../../common/lib/constants';
+import { API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD } from '../../../../../../common/lib/constants';
 import { ZIP } from '../../../../../../i18n/constants';
 
-import { usePlatformService, useNotifyService } from '../../../../../services';
+import { usePlatformService, useNotifyService, useWorkpadService } from '../../../../../services';
 import { CanvasRenderedWorkpad } from '../../../../../../shareable_runtime/types';
 
 const strings = {
@@ -55,7 +52,7 @@ export const useDownloadRuntime = () => {
 };
 
 export const useDownloadZippedRuntime = () => {
-  const platformService = usePlatformService();
+  const workpadService = useWorkpadService();
   const notifyService = useNotifyService();
 
   const downloadZippedRuntime = useCallback(
@@ -64,11 +61,7 @@ export const useDownloadZippedRuntime = () => {
         try {
           let runtimeZipBlob: Blob | undefined;
           try {
-            runtimeZipBlob = await platformService
-              .getHttpClient()
-              .post<Blob>(API_ROUTE_SHAREABLE_ZIP, {
-                body: JSON.stringify(workpad),
-              });
+            runtimeZipBlob = await workpadService.getRuntimeZip(workpad);
           } catch (err) {
             notifyService.error(err, {
               title: strings.getShareableZipErrorTitle(workpad.name),
@@ -87,7 +80,7 @@ export const useDownloadZippedRuntime = () => {
 
       downloadZip();
     },
-    [platformService, notifyService]
+    [notifyService, workpadService]
   );
   return downloadZippedRuntime;
 };

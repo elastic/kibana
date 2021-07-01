@@ -12,7 +12,6 @@ import {
   ChromeBreadcrumb,
   IBasePath,
   ChromeStart,
-  HttpStart,
 } from '../../../../../../src/core/public';
 import { CanvasServiceFactory } from '.';
 
@@ -32,7 +31,6 @@ export interface PlatformService {
   getSavedObjects: () => SavedObjectsStart;
   getSavedObjectsClient: () => SavedObjectsClientContract;
   getUISettings: () => IUiSettingsClient;
-  getHttpClient: () => HttpStart;
 }
 
 export const platformServiceFactory: CanvasServiceFactory<PlatformService> = (
@@ -57,6 +55,5 @@ export const platformServiceFactory: CanvasServiceFactory<PlatformService> = (
     getSavedObjects: () => coreStart.savedObjects,
     getSavedObjectsClient: () => coreStart.savedObjects.client,
     getUISettings: () => coreStart.uiSettings,
-    getHttpClient: () => coreStart.http,
   };
 };

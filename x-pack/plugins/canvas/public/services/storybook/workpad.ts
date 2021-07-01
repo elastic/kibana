@@ -109,4 +109,6 @@ export const workpadServiceFactory: CanvasWorkpadServiceFactory = ({
     action('workpadService.updateAssets')(assets, id);
     return Promise.resolve();
   },
+  getRuntimeZip: (workpad) =>
+    Promise.resolve(new Blob([JSON.stringify(workpad)], { type: 'application/json' })),
 });

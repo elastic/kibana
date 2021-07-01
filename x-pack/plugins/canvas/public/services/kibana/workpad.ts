@@ -16,6 +16,7 @@ import {
   API_ROUTE_TEMPLATES,
   API_ROUTE_WORKPAD_ASSETS,
   API_ROUTE_WORKPAD_STRUCTURES,
+  API_ROUTE_SHAREABLE_ZIP,
 } from '../../../common/lib/constants';
 import { CanvasWorkpad } from '../../../types';
 
@@ -108,6 +109,11 @@ export const workpadServiceFactory: CanvasWorkpadServiceFactory = ({ coreStart, 
     updateAssets: (id, assets) => {
       return coreStart.http.put(`${API_ROUTE_WORKPAD_ASSETS}/${id}`, {
         body: JSON.stringify(assets),
+      });
+    },
+    getRuntimeZip: (workpad) => {
+      return coreStart.http.post<Blob>(API_ROUTE_SHAREABLE_ZIP, {
+        body: JSON.stringify(workpad),
       });
     },
   };
