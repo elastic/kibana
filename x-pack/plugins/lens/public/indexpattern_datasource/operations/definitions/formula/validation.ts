@@ -7,7 +7,7 @@
 
 import { isObject, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { parse, TinymathLocation } from '@kbn/tinymath';
+import { parse, TinymathLocation, TinymathVariable } from '@kbn/tinymath';
 import type { TinymathAST, TinymathFunction, TinymathNamedArgument } from '@kbn/tinymath';
 import { esKuery, esQuery } from '../../../../../../../../src/plugins/data/public';
 import {
@@ -62,6 +62,10 @@ interface ValidationErrors {
   tooManyQueries: {
     message: string;
     type: {};
+  };
+  tooManyFirstArguments: {
+    message: string;
+    type: { operation: string; type: string; count: number; text: string };
   };
 }
 
@@ -274,6 +278,13 @@ function getMessageFromId<K extends ErrorTypes>({
     case 'tooManyQueries':
       message = i18n.translate('xpack.lens.indexPattern.formulaOperationDoubleQueryError', {
         defaultMessage: 'Use only one of kql= or lucene=, not both',
+      });
+      break;
+    case 'tooManyFirstArguments':
+      message = i18n.translate('xpack.lens.indexPattern.formulaOperationTooManyFirstArguments', {
+        defaultMessage:
+          'The operation {operation} in the Formula requires a single {type}, but found {count}: {text}',
+        values: { operation: out.operation, text: out.text, count: out.count, type: out.type },
       });
       break;
     // case 'mathRequiresFunction':
@@ -531,7 +542,7 @@ function runFullASTValidation(
     } else {
       if (nodeOperation.input === 'field') {
         if (shouldHaveFieldArgument(node)) {
-          if (!isFirstArgumentValidType(firstArg, 'variable')) {
+          if (!isArgumentValidType(firstArg, 'variable')) {
             if (isMathNode(firstArg)) {
               errors.push(
                 getMessageFromId({
@@ -556,6 +567,24 @@ function runFullASTValidation(
                       i18n.translate('xpack.lens.indexPattern.formulaNoFieldForOperation', {
                         defaultMessage: 'no field',
                       }),
+                  },
+                  locations: node.location ? [node.location] : [],
+                })
+              );
+            }
+          } else {
+            const fields = variables.filter(
+              (arg) => isArgumentValidType(arg, 'variable') && !isMathNode(arg)
+            );
+            if (fields.length > 1) {
+              errors.push(
+                getMessageFromId({
+                  messageId: 'tooManyFirstArguments',
+                  values: {
+                    operation: node.name,
+                    type: 'field',
+                    text: (fields as TinymathVariable[]).map(({ text }) => text).join(', '),
+                    count: fields.length,
                   },
                   locations: node.location ? [node.location] : [],
                 })
@@ -603,7 +632,7 @@ function runFullASTValidation(
         // What about fn(7 + 1)? We may want to allow that
         // In general this should be handled down the Esaggs route rather than here
         if (
-          !isFirstArgumentValidType(firstArg, 'function') ||
+          !isArgumentValidType(firstArg, 'function') ||
           (isMathNode(firstArg) && validateMathNodes(firstArg, missingVariablesSet).length)
         ) {
           errors.push(
@@ -621,6 +650,21 @@ function runFullASTValidation(
               locations: node.location ? [node.location] : [],
             })
           );
+        } else {
+          if (functions.length > 1) {
+            errors.push(
+              getMessageFromId({
+                messageId: 'tooManyFirstArguments',
+                values: {
+                  operation: node.name,
+                  type: 'metric',
+                  text: (functions as TinymathFunction[]).map(({ text }) => text).join(', '),
+                  count: functions.length,
+                },
+                locations: node.location ? [node.location] : [],
+              })
+            );
+          }
         }
         if (!canHaveParams(nodeOperation) && namedArguments.length) {
           errors.push(
@@ -736,7 +780,7 @@ export function hasFunctionFieldArgument(type: string) {
   return !['count'].includes(type);
 }
 
-export function isFirstArgumentValidType(arg: TinymathAST, type: TinymathNodeTypes['type']) {
+export function isArgumentValidType(arg: TinymathAST | string, type: TinymathNodeTypes['type']) {
   return isObject(arg) && arg.type === type;
 }
 

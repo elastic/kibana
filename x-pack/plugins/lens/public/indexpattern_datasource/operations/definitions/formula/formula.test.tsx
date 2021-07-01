@@ -887,6 +887,32 @@ invalid: "
       ).toEqual(['The operation average does not accept any parameter']);
     });
 
+    it('returns an error if first argument type is passed multiple times', () => {
+      const formulas = [
+        'average(bytes, bytes)',
+        'moving_average(average(bytes), average(bytes))',
+        'moving_average(average(bytes, bytes), count())',
+        'moving_average(moving_average(average(bytes, bytes), count(), count()))',
+      ];
+      for (const formula of formulas) {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(formula),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+          // TODO: use regex here
+        ).toEqual(
+          expect.arrayContaining([
+            expect.stringMatching(
+              /The operation (moving_average|average) in the Formula requires a single (field|metric), but found \d+/
+            ),
+          ])
+        );
+      }
+    });
+
     it('returns an error if the parameter passed to an operation is of the wrong type', () => {
       expect(
         formulaOperation.getErrorMessage!(
