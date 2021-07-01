@@ -6,17 +6,16 @@
  */
 
 import { Subscription } from 'rxjs';
-import { IClusterClient, ILegacyClusterClient } from 'kibana/server';
+import { ICustomClusterClient } from 'kibana/server';
 import { ILicense, LicenseFeature } from '../../licensing/common/types';
 import { LicensingPluginStart } from '../../licensing/server';
 import { MonitoringConfig } from './config';
 import { Logger } from '../../../../src/core/server';
 import { MonitoringLicenseService } from './types';
-import { EndpointTypes, Globals, ClientParams } from './static_globals';
 
 interface SetupDeps {
   licensing: LicensingPluginStart;
-  monitoringClient: IClusterClient;
+  monitoringClient: ICustomClusterClient;
   config: MonitoringConfig;
   log: Logger;
 }
@@ -28,15 +27,8 @@ const defaultLicenseFeature: LicenseFeature = {
 
 export class LicenseService {
   public setup({ licensing, monitoringClient, config, log }: SetupDeps): MonitoringLicenseService {
-    // TODO: This needs to be changed to an IClusterClient as when the Licensing server
-    // is upgraded to the new client.
-    const fakeLegacyClusterClient = {
-      callAsInternalUser: (endpoint: EndpointTypes, options: ClientParams) =>
-        Globals.app.getLegacyClusterShim(monitoringClient.asInternalUser, endpoint, options),
-    } as ILegacyClusterClient;
-
     const { refresh, license$ } = licensing.createLicensePoller(
-      fakeLegacyClusterClient,
+      monitoringClient,
       config.licensing.api_polling_frequency.asMilliseconds()
     );
 

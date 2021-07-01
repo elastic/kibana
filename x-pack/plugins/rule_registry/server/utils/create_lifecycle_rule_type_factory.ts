@@ -235,16 +235,18 @@ export const createLifecycleRuleTypeFactory: CreateLifecycleRuleTypeFactory = ({
           });
         }
 
-        await ruleDataClient.getWriter().bulk({
-          body: eventsToIndex
-            .flatMap((event) => [{ index: {} }, event])
-            .concat(
-              Array.from(alertEvents.values()).flatMap((event) => [
-                { index: { _id: event[ALERT_UUID]! } },
-                event,
-              ])
-            ),
-        });
+        if (ruleDataClient.isWriteEnabled()) {
+          await ruleDataClient.getWriter().bulk({
+            body: eventsToIndex
+              .flatMap((event) => [{ index: {} }, event])
+              .concat(
+                Array.from(alertEvents.values()).flatMap((event) => [
+                  { index: { _id: event[ALERT_UUID]! } },
+                  event,
+                ])
+              ),
+          });
+        }
       }
 
       const nextTrackedAlerts = Object.fromEntries(
@@ -260,7 +262,7 @@ export const createLifecycleRuleTypeFactory: CreateLifecycleRuleTypeFactory = ({
 
       return {
         wrapped: nextWrappedState ?? {},
-        trackedAlerts: nextTrackedAlerts,
+        trackedAlerts: ruleDataClient.isWriteEnabled() ? nextTrackedAlerts : {},
       };
     },
   };

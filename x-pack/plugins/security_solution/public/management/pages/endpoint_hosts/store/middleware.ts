@@ -36,8 +36,7 @@ import {
   getLastLoadedActivityLogData,
   detailsData,
   getEndpointDetailsFlyoutView,
-  getIsEndpointPackageInfoPending,
-  getIsEndpointPackageInfoSuccessful,
+  getIsEndpointPackageInfoUninitialized,
 } from './selectors';
 import { AgentIdsPendingActions, EndpointState, PolicyIds } from '../types';
 import {
@@ -598,7 +597,7 @@ async function getEndpointPackageInfo(
   dispatch: Dispatch<EndpointPackageInfoStateChanged>,
   coreStart: CoreStart
 ) {
-  if (getIsEndpointPackageInfoPending(state) || getIsEndpointPackageInfoSuccessful(state)) return;
+  if (!getIsEndpointPackageInfoUninitialized(state)) return;
 
   dispatch({
     type: 'endpointPackageInfoStateChanged',
