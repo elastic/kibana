@@ -42,17 +42,29 @@ const migrationV3: MigrateFunction<StateV2, StateV3> = ({ firstName, lastName })
 };
 
 test('returns the same object if there are no migrations to be applied', () => {
-  const migrated = migrateToLatest({}, [{ name: 'Foo' }, '0.0.1']);
+  const migrated = migrateToLatest(
+    {},
+    {
+      state: { name: 'Foo' },
+      version: '0.0.1',
+    }
+  );
 
-  expect(migrated).toEqual([{ name: 'Foo' }, '0.0.1']);
+  expect(migrated).toEqual({
+    state: { name: 'Foo' },
+    version: '0.0.1',
+  });
 });
 
 test('applies a single migration', () => {
-  const [newState, newVersion] = migrateToLatest(
+  const { state: newState, version: newVersion } = migrateToLatest(
     {
       '0.0.2': (migrationV2 as unknown) as MigrateFunction,
     },
-    [{ name: 'Foo' }, '0.0.1']
+    {
+      state: { name: 'Foo' },
+      version: '0.0.1',
+    }
   );
 
   expect(newState).toEqual({
@@ -63,11 +75,14 @@ test('applies a single migration', () => {
 });
 
 test('does not apply migration if it has the same version as state', () => {
-  const [newState, newVersion] = migrateToLatest(
+  const { state: newState, version: newVersion } = migrateToLatest(
     {
       '0.0.54': (migrationV2 as unknown) as MigrateFunction,
     },
-    [{ name: 'Foo' }, '0.0.54']
+    {
+      state: { name: 'Foo' },
+      version: '0.0.54',
+    }
   );
 
   expect(newState).toEqual({
@@ -77,11 +92,14 @@ test('does not apply migration if it has the same version as state', () => {
 });
 
 test('does not apply migration if it has lower version', () => {
-  const [newState, newVersion] = migrateToLatest(
+  const { state: newState, version: newVersion } = migrateToLatest(
     {
       '0.2.2': (migrationV2 as unknown) as MigrateFunction,
     },
-    [{ name: 'Foo' }, '0.3.1']
+    {
+      state: { name: 'Foo' },
+      version: '0.3.1',
+    }
   );
 
   expect(newState).toEqual({
@@ -91,12 +109,15 @@ test('does not apply migration if it has lower version', () => {
 });
 
 test('applies two migrations consecutively', () => {
-  const [newState, newVersion] = migrateToLatest(
+  const { state: newState, version: newVersion } = migrateToLatest(
     {
       '7.14.0': (migrationV2 as unknown) as MigrateFunction,
       '7.14.2': (migrationV3 as unknown) as MigrateFunction,
     },
-    [{ name: 'Foo' }, '7.13.4']
+    {
+      state: { name: 'Foo' },
+      version: '7.13.4',
+    }
   );
 
   expect(newState).toEqual({
@@ -109,13 +130,16 @@ test('applies two migrations consecutively', () => {
 });
 
 test('applies only migrations which are have higher semver version', () => {
-  const [newState, newVersion] = migrateToLatest(
+  const { state: newState, version: newVersion } = migrateToLatest(
     {
       '7.14.0': (migrationV2 as unknown) as MigrateFunction, // not applied
       '7.14.1': (() => ({})) as MigrateFunction, // not applied
       '7.14.2': (migrationV3 as unknown) as MigrateFunction,
     },
-    [{ firstName: 'FooBar', lastName: 'Baz' }, '7.14.1']
+    {
+      state: { firstName: 'FooBar', lastName: 'Baz' },
+      version: '7.14.1',
+    }
   );
 
   expect(newState).toEqual({
