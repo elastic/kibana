@@ -31,6 +31,7 @@ export function readCliArgs(argv: string[]) {
       'verbose',
       'debug',
       'all-platforms',
+      'build-example-plugins',
       'verbose',
       'quiet',
       'silent',
@@ -43,6 +44,7 @@ export function readCliArgs(argv: string[]) {
     },
     default: {
       debug: true,
+      'build-example-plugins': false,
       rpm: null,
       deb: null,
       'docker-images': null,
@@ -103,6 +105,7 @@ export function readCliArgs(argv: string[]) {
     createDockerUBI: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-ubi']),
     createDockerContexts: !Boolean(flags['skip-docker-contexts']),
     targetAllPlatforms: Boolean(flags['all-platforms']),
+    buildExamplePlugins: Boolean(flags['build-example-plugins']),
   };
 
   return {
