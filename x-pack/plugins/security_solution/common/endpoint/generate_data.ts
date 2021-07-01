@@ -400,37 +400,6 @@ const alertsDefaultDataStream = {
   namespace: 'default',
 };
 
-const alertsDefaultDll = [
-  {
-    pe: {
-      architecture: 'x64',
-    },
-    code_signature: {
-      subject_name: 'Cybereason Inc',
-      trusted: true,
-    },
-
-    hash: {
-      md5: '1f2d082566b0fc5f2c238a5180db7451',
-      sha1: 'ca85243c0af6a6471bdaa560685c51eefd6dbc0d',
-      sha256: '8ad40c90a611d36eb8f9eb24fa04f7dbca713db383ff55a03aa0f382e92061a2',
-    },
-
-    path: 'C:\\Program Files\\Cybereason ActiveProbe\\AmSvc.exe',
-    Ext: {
-      compile_time: 1534424710,
-      mapped_address: 5362483200,
-      mapped_size: 0,
-      malware_classification: {
-        identifier: 'Whitelisted',
-        score: 0,
-        threshold: 0,
-        version: '3.0.0',
-      },
-    },
-  },
-];
-
 export class EndpointDocGenerator extends BaseDataGenerator {
   commonInfo: HostInfo;
   sequence: number = 0;
@@ -656,7 +625,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
           },
         },
       },
-      dll: alertsDefaultDll,
+      dll: this.getAlertsDefaultDll(),
     };
   }
 
@@ -741,7 +710,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
           },
         },
       },
-      dll: alertsDefaultDll,
+      dll: this.getAlertsDefaultDll(),
     };
 
     // shellcode_thread memory alert have an additional process field
@@ -812,6 +781,42 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       default:
         return assertNever(alertType);
     }
+  }
+
+  /**
+   * Returns the default DLLs used in alerts
+   */
+  private getAlertsDefaultDll() {
+    return [
+      {
+        pe: {
+          architecture: 'x64',
+        },
+        code_signature: {
+          subject_name: 'Cybereason Inc',
+          trusted: true,
+        },
+
+        hash: {
+          md5: '1f2d082566b0fc5f2c238a5180db7451',
+          sha1: 'ca85243c0af6a6471bdaa560685c51eefd6dbc0d',
+          sha256: '8ad40c90a611d36eb8f9eb24fa04f7dbca713db383ff55a03aa0f382e92061a2',
+        },
+
+        path: 'C:\\Program Files\\Cybereason ActiveProbe\\AmSvc.exe',
+        Ext: {
+          compile_time: 1534424710,
+          mapped_address: 5362483200,
+          mapped_size: 0,
+          malware_classification: {
+            identifier: 'Whitelisted',
+            score: 0,
+            threshold: 0,
+            version: '3.0.0',
+          },
+        },
+      },
+    ];
   }
 
   /**
