@@ -11,6 +11,7 @@ import {
   CoreSetup,
   Plugin as PluginType,
   ISavedObjectsRepository,
+  Logger,
 } from '../../../../src/core/server';
 import { uptimeRuleFieldMap } from '../common/rules/uptime_rule_field_map';
 import { initServerWithKibana } from './kibana.index';
@@ -25,14 +26,14 @@ export type UptimeRuleRegistry = ReturnType<Plugin['setup']>['ruleRegistry'];
 export class Plugin implements PluginType {
   private savedObjectsClient?: ISavedObjectsRepository;
   private initContext: PluginInitializerContext;
+  private logger?: Logger;
 
   constructor(_initializerContext: PluginInitializerContext) {
     this.initContext = _initializerContext;
   }
 
   public setup(core: CoreSetup, plugins: UptimeCorePlugins) {
-    const getCoreStart = () => core.getStartServices().then(([coreStart]) => coreStart);
-
+    this.logger = this.initContext.logger.get();
     const { ruleDataService } = plugins.ruleRegistry;
 
     const ready = once(async () => {
@@ -66,20 +67,21 @@ export class Plugin implements PluginType {
       });
     });
 
-    const ruleDataClient = new RuleDataClient({
-      alias: ruleDataService.getFullAssetName('observability-synthetics'),
-      getClusterClient: async () => {
-        const coreStart = await getCoreStart();
-        return coreStart.elasticsearch.client.asInternalUser;
-      },
-      ready,
+    // initialize eagerly
+    const initializeRuleDataTemplatesPromise = ready().catch((err) => {
+      this.logger!.error(err);
     });
+
+    const ruleDataClient = ruleDataService.getRuleDataClient(
+      ruleDataService.getFullAssetName('observability-synthetics'),
+      () => initializeRuleDataTemplatesPromise
+    );
 
     initServerWithKibana(
       { router: core.http.createRouter() },
       plugins,
       ruleDataClient,
-      this.initContext.logger.get()
+      this.logger
     );
     core.savedObjects.registerType(umDynamicSettings);
     KibanaTelemetryAdapter.registerUsageCollector(
