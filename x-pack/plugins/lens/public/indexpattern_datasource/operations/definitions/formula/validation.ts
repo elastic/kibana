@@ -67,6 +67,10 @@ interface ValidationErrors {
     message: string;
     type: { operation: string; type: string; count: number; text: string };
   };
+  wrongArgument: {
+    message: string;
+    type: { operation: string; text: string; type: string };
+  };
 }
 
 type ErrorTypes = keyof ValidationErrors;
@@ -283,8 +287,15 @@ function getMessageFromId<K extends ErrorTypes>({
     case 'tooManyFirstArguments':
       message = i18n.translate('xpack.lens.indexPattern.formulaOperationTooManyFirstArguments', {
         defaultMessage:
-          'The operation {operation} in the Formula requires a single {type}, but found {count}: {text}',
+          'The operation {operation} in the Formula requires a single {type}, found {count}: {text}',
         values: { operation: out.operation, text: out.text, count: out.count, type: out.type },
+      });
+      break;
+    case 'wrongArgument':
+      message = i18n.translate('xpack.lens.indexPattern.formulaOperationwrongArgument', {
+        defaultMessage:
+          'The operation {operation} in the Formula does not support {type} parameters, found: {text}',
+        values: { operation: out.operation, text: out.text, type: out.type },
       });
       break;
     // case 'mathRequiresFunction':
@@ -591,6 +602,19 @@ function runFullASTValidation(
               );
             }
           }
+          if (functions.length) {
+            errors.push(
+              getMessageFromId({
+                messageId: 'wrongArgument',
+                values: {
+                  operation: node.name,
+                  text: (functions as TinymathFunction[]).map(({ text }) => text).join(', '),
+                  type: 'metric',
+                },
+                locations: node.location ? [node.location] : [],
+              })
+            );
+          }
         } else {
           // Named arguments only
           if (functions?.length || variables?.length) {
@@ -677,6 +701,22 @@ function runFullASTValidation(
             })
           );
         } else {
+          const fields = variables.filter(
+            (arg) => isArgumentValidType(arg, 'variable') && !isMathNode(arg)
+          );
+          if (fields.length) {
+            errors.push(
+              getMessageFromId({
+                messageId: 'wrongArgument',
+                values: {
+                  operation: node.name,
+                  text: (fields as TinymathVariable[]).map(({ text }) => text).join(', '),
+                  type: 'field',
+                },
+                locations: node.location ? [node.location] : [],
+              })
+            );
+          }
           const argumentsErrors = validateNameArguments(
             node,
             nodeOperation,

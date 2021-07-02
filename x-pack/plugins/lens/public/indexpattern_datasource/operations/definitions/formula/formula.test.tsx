@@ -890,7 +890,9 @@ invalid: "
     it('returns an error if first argument type is passed multiple times', () => {
       const formulas = [
         'average(bytes, bytes)',
+        'average(bytes, kql="category.keyword: *", bytes)',
         'moving_average(average(bytes), average(bytes))',
+        'moving_average(average(bytes), kql="category.keyword: *", average(bytes))',
         'moving_average(average(bytes, bytes), count())',
         'moving_average(moving_average(average(bytes, bytes), count(), count()))',
       ];
@@ -905,7 +907,32 @@ invalid: "
         ).toEqual(
           expect.arrayContaining([
             expect.stringMatching(
-              /The operation (moving_average|average) in the Formula requires a single (field|metric), but found \d+/
+              /The operation (moving_average|average) in the Formula requires a single (field|metric), found \d+/
+            ),
+          ])
+        );
+      }
+    });
+
+    it('returns an error if a metric is passed to a field-only operation', () => {
+      const formulas = [
+        'average(bytes, count())',
+        'average(bytes, kql="category.keyword: *", count())',
+        'average(bytes, kql="category.keyword: *", count(), count())',
+        'moving_average(average(bytes), bytes)',
+      ];
+      for (const formula of formulas) {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(formula),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual(
+          expect.arrayContaining([
+            expect.stringMatching(
+              /The operation (moving_average|average) in the Formula does not support (metric|field) parameters, found:/
             ),
           ])
         );
