@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionAstFunction } from './types';
+import { ExpressionAstExpression, ExpressionAstFunction } from './types';
 import {
   AnyExpressionFunctionDefinition,
   ExpressionFunctionDefinition,
@@ -164,7 +164,9 @@ export function buildExpressionFunction<
     [K in keyof FunctionArgs<FnDef>]:
       | FunctionArgs<FnDef>[K]
       | ExpressionAstExpressionBuilder
-      | ExpressionAstExpressionBuilder[];
+      | ExpressionAstExpressionBuilder[]
+      | ExpressionAstExpression
+      | ExpressionAstExpression[];
   }
 ): ExpressionAstFunctionBuilder<FnDef> {
   const args = Object.entries(initialArgs).reduce(
