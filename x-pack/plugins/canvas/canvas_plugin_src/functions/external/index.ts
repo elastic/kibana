@@ -9,5 +9,6 @@ import { savedLens } from './saved_lens';
 import { savedMap } from './saved_map';
 import { savedSearch } from './saved_search';
 import { savedVisualization } from './saved_visualization';
+import { shapeFunction } from '../../../../../../src/plugins/expression_shape/public';
 
-export const functions = [savedLens, savedMap, savedSearch, savedVisualization];
+export const functions = [savedLens, savedMap, savedSearch, savedVisualization, shapeFunction];
