@@ -36,9 +36,10 @@ describe('agg_expression_functions', () => {
 
     test('includes optional params when they are provided', () => {
       const actual = fn({
-        geo_bounding_box: JSON.stringify({
+        geo_bounding_box: {
+          type: 'geo_bounding_box',
           wkt: 'BBOX (-74.1, -71.12, 40.73, 40.01)',
-        }),
+        },
       });
 
       expect(actual.value).toMatchInlineSnapshot(`
@@ -71,9 +72,10 @@ describe('agg_expression_functions', () => {
       expect(() =>
         fn({
           filter: '{ "language": "kuery", "query": "a: b" }',
-          geo_bounding_box: JSON.stringify({
+          geo_bounding_box: {
+            type: 'geo_bounding_box',
             wkt: 'BBOX (-74.1, -71.12, 40.73, 40.01)',
-          }),
+          },
         })
       ).toThrow();
     });

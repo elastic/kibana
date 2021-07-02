@@ -6,9 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+
+import { GeoBoundingBoxOutput } from '../../expressions';
 import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '../';
 import { getParsedValue } from '../utils/get_parsed_value';
 
@@ -17,7 +20,7 @@ export const aggFilterFnName = 'aggFilter';
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.FILTER>;
 
-type Arguments = Assign<AggArgs, { geo_bounding_box?: string; filter?: string }>;
+type Arguments = Assign<AggArgs, { geo_bounding_box?: GeoBoundingBoxOutput; filter?: string }>;
 
 type Output = AggExpressionType;
 type FunctionDefinition = ExpressionFunctionDefinition<
@@ -54,7 +57,7 @@ export const aggFilter = (): FunctionDefinition => ({
       }),
     },
     geo_bounding_box: {
-      types: ['string'],
+      types: ['geo_bounding_box'],
       help: i18n.translate('data.search.aggs.buckets.filter.geoBoundingBox.help', {
         defaultMessage: 'Filter results based on a point location within a bounding box',
       }),
@@ -79,11 +82,8 @@ export const aggFilter = (): FunctionDefinition => ({
       }),
     },
   },
-  fn: (input, args) => {
-    const { id, enabled, schema, ...rest } = args;
-
-    const geoBoundingBox = getParsedValue(args, 'geo_bounding_box');
-    const filter = getParsedValue(args, 'filter');
+  fn: (input, { id, enabled, schema, geo_bounding_box: geoBoundingBox, ...params }) => {
+    const filter = getParsedValue(params, 'filter');
 
     if (geoBoundingBox && filter) {
       throw new Error("filter and geo_bounding_box can't be used together");
@@ -95,12 +95,12 @@ export const aggFilter = (): FunctionDefinition => ({
         id,
         enabled,
         schema,
-        type: BUCKET_TYPES.FILTER,
         params: {
-          ...rest,
-          geo_bounding_box: geoBoundingBox,
+          ...params,
+          geo_bounding_box: geoBoundingBox && omit(geoBoundingBox, 'type'),
           filter,
         },
+        type: BUCKET_TYPES.FILTER,
       },
     };
   },
