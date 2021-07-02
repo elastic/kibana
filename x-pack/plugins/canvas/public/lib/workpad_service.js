@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// TODO: clint - move to workpad service.
 import {
   API_ROUTE_WORKPAD,
   API_ROUTE_WORKPAD_ASSETS,
@@ -12,7 +13,7 @@ import {
   DEFAULT_WORKPAD_CSS,
 } from '../../common/lib/constants';
 import { fetch } from '../../common/lib/fetch';
-import { platformService } from '../services';
+import { pluginServices } from '../services';
 
 /*
   Remove any top level keys from the workpad which will be rejected by validation
@@ -46,17 +47,20 @@ const sanitizeWorkpad = function (workpad) {
 };
 
 const getApiPath = function () {
-  const basePath = platformService.getService().getBasePath();
+  const platformService = pluginServices.getServices().platform;
+  const basePath = platformService.getBasePath();
   return `${basePath}${API_ROUTE_WORKPAD}`;
 };
 
 const getApiPathStructures = function () {
-  const basePath = platformService.getService().getBasePath();
+  const platformService = pluginServices.getServices().platform;
+  const basePath = platformService.getBasePath();
   return `${basePath}${API_ROUTE_WORKPAD_STRUCTURES}`;
 };
 
 const getApiPathAssets = function () {
-  const basePath = platformService.getService().getBasePath();
+  const platformService = pluginServices.getServices().platform;
+  const basePath = platformService.getBasePath();
   return `${basePath}${API_ROUTE_WORKPAD_ASSETS}`;
 };
 

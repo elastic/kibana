@@ -113,7 +113,7 @@ export const ExpandableEvent = React.memo<Props>(
             <EuiDescriptionList data-test-subj="event-message" compressed>
               <EuiDescriptionListTitle>{i18n.MESSAGE}</EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
-                <LineClamp content={message} />
+                <LineClamp>{message}</LineClamp>
               </EuiDescriptionListDescription>
             </EuiDescriptionList>
             <EuiSpacer size="m" />
@@ -122,7 +122,7 @@ export const ExpandableEvent = React.memo<Props>(
         <StyledEuiFlexItem grow={true}>
           <EventDetails
             browserFields={browserFields}
-            data={detailsData!}
+            data={detailsData ?? []}
             id={event.eventId!}
             isAlert={isAlert}
             timelineId={timelineId}

@@ -624,7 +624,7 @@ describe('Workload Statistics Aggregator', () => {
         expect(result.key).toEqual('workload');
 
         expect(result.value).toMatchObject({
-          capacity_requirments: {
+          capacity_requirements: {
             // these are buckets of required capacity, rather than aggregated requirmenets.
             per_minute: 150,
             per_hour: 360,

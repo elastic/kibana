@@ -1368,6 +1368,45 @@ describe('utils', () => {
       const date = getValidDateFromDoc({ doc, timestampOverride: 'different_timestamp' });
       expect(date?.toISOString()).toEqual(override);
     });
+
+    test('It returns the timestamp if the timestamp happens to be a string of an epoch when it has it in _source and fields', () => {
+      const doc = sampleDocNoSortId();
+      const testDateString = '2021-06-25T15:53:56.590Z';
+      const testDate = `${new Date(testDateString).valueOf()}`;
+      doc._source['@timestamp'] = testDate;
+      if (doc.fields != null) {
+        doc.fields['@timestamp'] = [testDate];
+      }
+      const date = getValidDateFromDoc({ doc, timestampOverride: undefined });
+      expect(date?.toISOString()).toEqual(testDateString);
+    });
+
+    test('It returns the timestamp if the timestamp happens to be a string of an epoch when it has it in _source and fields is nonexistent', () => {
+      const doc = sampleDocNoSortId();
+      const testDateString = '2021-06-25T15:53:56.590Z';
+      const testDate = `${new Date(testDateString).valueOf()}`;
+      doc._source['@timestamp'] = testDate;
+      doc.fields = undefined;
+      const date = getValidDateFromDoc({ doc, timestampOverride: undefined });
+      expect(date?.toISOString()).toEqual(testDateString);
+    });
+
+    test('It returns the timestamp if the timestamp happens to be a string of an epoch in an override field', () => {
+      const override = '2020-10-07T19:36:31.110Z';
+      const testDate = `${new Date(override).valueOf()}`;
+      let doc = sampleDocNoSortId();
+      if (doc == null) {
+        throw new TypeError('Test requires one element');
+      }
+      doc = {
+        ...doc,
+        fields: {
+          different_timestamp: [testDate],
+        },
+      };
+      const date = getValidDateFromDoc({ doc, timestampOverride: 'different_timestamp' });
+      expect(date?.toISOString()).toEqual(override);
+    });
   });
 
   describe('createSearchAfterReturnType', () => {

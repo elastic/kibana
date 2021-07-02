@@ -36,8 +36,7 @@ import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { UrlGeneratorState } from '../../share/public';
 import { DocViewInput, DocViewInputFn } from './application/doc_views/doc_views_types';
 import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
-import { DocViewTable } from './application/components/table/table';
-
+import { DocViewerTable } from './application/components/table/table';
 import {
   setDocViewsRegistry,
   setUrlTracker,
@@ -251,7 +250,7 @@ export class DiscoverPlugin
         defaultMessage: 'Table',
       }),
       order: 10,
-      component: DocViewTable,
+      component: DocViewerTable,
     });
     this.docViewsRegistry.addDocView({
       title: i18n.translate('discover.docViews.json.jsonTitle', {
