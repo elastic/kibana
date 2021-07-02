@@ -22,6 +22,7 @@ import {
   CaseType,
   OWNER_FIELD,
   ENABLE_CASE_CONNECTOR,
+  MAX_TITLE_LENGTH,
 } from '../../../common';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 import { getConnectorFromConfiguration } from '../utils';
@@ -71,6 +72,12 @@ export const create = async (
     }),
     fold(throwErrors(Boom.badRequest), identity)
   );
+
+  if (query.title.length > MAX_TITLE_LENGTH) {
+    throw Boom.badRequest(
+      `The length of the title is too long. The maximum length is ${MAX_TITLE_LENGTH}.`
+    );
+  }
 
   try {
     const savedObjectID = SavedObjectsUtils.generateId();

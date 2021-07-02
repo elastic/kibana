@@ -112,16 +112,17 @@ export class Execution<Input = unknown, Output = unknown, InspectorAdapters exte
     // (undocumented)
     get inspectorAdapters(): InspectorAdapters;
     // (undocumented)
-    interpret<T>(ast: ExpressionAstNode, input: T): Observable<unknown>;
+    interpret<T>(ast: ExpressionAstNode, input: T): Observable<ExecutionResult<unknown>>;
     // (undocumented)
     invokeChain(chainArr: ExpressionAstFunction[], input: unknown): Observable<any>;
     // (undocumented)
     invokeFunction(fn: ExpressionFunction, input: unknown, args: Record<string, unknown>): Observable<any>;
     // (undocumented)
     resolveArgs(fnDef: ExpressionFunction, input: unknown, argAsts: any): Observable<any>;
-    readonly result: Observable<Output | ExpressionValueError>;
-    start(input?: Input): Observable<Output | ExpressionValueError>;
-    readonly state: ExecutionContainer<Output | ExpressionValueError>;
+    readonly result: Observable<ExecutionResult<Output | ExpressionValueError>>;
+    start(input?: Input): Observable<ExecutionResult<Output | ExpressionValueError>>;
+    // Warning: (ae-forgotten-export) The symbol "ExecutionResult" needs to be exported by the entry point index.d.ts
+    readonly state: ExecutionContainer<ExecutionResult<Output | ExpressionValueError>>;
 }
 
 // Warning: (ae-forgotten-export) The symbol "StateContainer" needs to be exported by the entry point index.d.ts
@@ -155,7 +156,7 @@ export class ExecutionContract<Input = unknown, Output = unknown, InspectorAdapt
     // (undocumented)
     protected readonly execution: Execution<Input, Output, InspectorAdapters>;
     getAst: () => ExpressionAstExpression;
-    getData: () => Promise<Output | ExpressionValueError>;
+    getData: () => Observable<ExecutionResult<Output | ExpressionValueError>>;
     getExpression: () => string;
     inspect: () => InspectorAdapters;
     // (undocumented)
@@ -232,7 +233,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     registerFunctionAsync(functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition) | (() => Promise<AnyExpressionFunctionDefinition>)): Promise<void>;
     // (undocumented)
     registerType(typeDefinition: AnyExpressionTypeDefinition | (() => AnyExpressionTypeDefinition)): void;
-    run<Input, Output>(ast: string | ExpressionAstExpression, input: Input, params?: ExpressionExecutionParams): Observable<Output | ExpressionValueError>;
+    run<Input, Output>(ast: string | ExpressionAstExpression, input: Input, params?: ExpressionExecutionParams): Observable<ExecutionResult<Output | ExpressionValueError>>;
     // (undocumented)
     readonly state: ExecutorContainer<Context>;
     // (undocumented)
@@ -641,7 +642,7 @@ export interface ExpressionsServiceStart {
     getFunction: (name: string) => ReturnType<Executor['getFunction']>;
     getRenderer: (name: string) => ReturnType<ExpressionRendererRegistry['get']>;
     getType: (name: string) => ReturnType<Executor['getType']>;
-    run: <Input, Output>(ast: string | ExpressionAstExpression, input: Input, params?: ExpressionExecutionParams) => Promise<Output>;
+    run: <Input, Output>(ast: string | ExpressionAstExpression, input: Input, params?: ExpressionExecutionParams) => Observable<ExecutionResult<Output | ExpressionValueError>>;
 }
 
 // Warning: (ae-missing-release-tag) "ExpressionsSetup" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -911,6 +912,8 @@ export interface IExpressionLoaderParams {
     //
     // (undocumented)
     onRenderError?: RenderErrorHandlerFnType;
+    // (undocumented)
+    partial?: boolean;
     // Warning: (ae-forgotten-export) The symbol "RenderMode" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -1077,7 +1080,7 @@ export interface ReactExpressionRendererProps extends IExpressionLoaderParams {
     // (undocumented)
     expression: string | ExpressionAstExpression;
     // (undocumented)
-    onData$?: <TData, TInspectorAdapters>(data: TData, adapters?: TInspectorAdapters) => void;
+    onData$?: <TData, TInspectorAdapters>(data: TData, adapters?: TInspectorAdapters, partial?: boolean) => void;
     // (undocumented)
     onEvent?: (event: ExpressionRendererEvent) => void;
     // (undocumented)
