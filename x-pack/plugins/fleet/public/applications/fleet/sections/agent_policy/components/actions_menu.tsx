@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useState, useMemo } from 'react';
+import React, { memo, useState, useMemo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
 
@@ -36,6 +36,15 @@ export const AgentPolicyActionMenu = memo<{
       enrollmentFlyoutOpenByDefault
     );
 
+    const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
+
+    const onContextMenuChange = useCallback(
+      (open: boolean) => {
+        setIsContextMenuOpen(open);
+      },
+      [setIsContextMenuOpen]
+    );
+
     const onClose = useMemo(() => {
       if (onCancelEnrollment) {
         return onCancelEnrollment;
@@ -50,7 +59,10 @@ export const AgentPolicyActionMenu = memo<{
           const viewPolicyItem = (
             <EuiContextMenuItem
               icon="inspect"
-              onClick={() => setIsYamlFlyoutOpen(!isYamlFlyoutOpen)}
+              onClick={() => {
+                setIsContextMenuOpen(false);
+                setIsYamlFlyoutOpen(!isYamlFlyoutOpen);
+              }}
               key="viewPolicy"
             >
               <FormattedMessage
@@ -66,7 +78,10 @@ export const AgentPolicyActionMenu = memo<{
                 <EuiContextMenuItem
                   disabled={!hasWriteCapabilities}
                   icon="plusInCircle"
-                  onClick={() => setIsEnrollmentFlyoutOpen(true)}
+                  onClick={() => {
+                    setIsContextMenuOpen(false);
+                    setIsEnrollmentFlyoutOpen(true);
+                  }}
                   key="enrollAgents"
                 >
                   <FormattedMessage
@@ -79,6 +94,7 @@ export const AgentPolicyActionMenu = memo<{
                   disabled={!hasWriteCapabilities}
                   icon="copy"
                   onClick={() => {
+                    setIsContextMenuOpen(false);
                     copyAgentPolicyPrompt(agentPolicy, onCopySuccess);
                   }}
                   key="copyPolicy"
@@ -105,6 +121,8 @@ export const AgentPolicyActionMenu = memo<{
                 </EuiPortal>
               )}
               <ContextMenuActions
+                isOpen={isContextMenuOpen}
+                onChange={onContextMenuChange}
                 button={
                   fullButton
                     ? {

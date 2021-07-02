@@ -143,9 +143,9 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
       hasShadow={false}
       data-test-subj="timeline-flyout-header-panel"
     >
-      <EuiFlexGroup alignItems="center" gutterSize="s">
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <AddTimelineButton timelineId={timelineId} />
-        <EuiFlexItem grow>
+        <EuiFlexItem grow={false}>
           <ActiveTimelines
             timelineId={timelineId}
             timelineType={timelineType}
@@ -156,8 +156,8 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
           />
         </EuiFlexItem>
         {show && (
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem>
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
               {(activeTab === TimelineTabs.query || activeTab === TimelineTabs.eql) && (
                 <EuiFlexItem grow={false}>
                   <InspectButton

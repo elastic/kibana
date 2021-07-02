@@ -90,6 +90,38 @@ export class ApiService {
 
     return result;
   }
+
+  public async upgradeMlSnapshot(body: { jobId: string; snapshotId: string }) {
+    const result = await this.sendRequest({
+      path: `${API_BASE_PATH}/ml_snapshots`,
+      method: 'post',
+      body,
+    });
+
+    return result;
+  }
+
+  public async deleteMlSnapshot({ jobId, snapshotId }: { jobId: string; snapshotId: string }) {
+    const result = await this.sendRequest({
+      path: `${API_BASE_PATH}/ml_snapshots/${jobId}/${snapshotId}`,
+      method: 'delete',
+    });
+
+    return result;
+  }
+
+  public async getMlSnapshotUpgradeStatus({
+    jobId,
+    snapshotId,
+  }: {
+    jobId: string;
+    snapshotId: string;
+  }) {
+    return await this.sendRequest({
+      path: `${API_BASE_PATH}/ml_snapshots/${jobId}/${snapshotId}`,
+      method: 'get',
+    });
+  }
 }
 
 export const apiService = new ApiService();

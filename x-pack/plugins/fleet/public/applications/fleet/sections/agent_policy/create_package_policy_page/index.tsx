@@ -425,7 +425,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     [params, updatePackageInfo, agentPolicy, updateAgentPolicy, queryParamsPolicyId]
   );
 
-  const ExtensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-create');
+  const extensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-create');
 
   const stepConfigurePackagePolicy = useMemo(
     () =>
@@ -444,7 +444,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
           />
 
           {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
-          {!ExtensionView && (
+          {!extensionView && (
             <StepConfigurePackagePolicy
               packageInfo={packageInfo}
               showOnlyIntegration={integrationInfo?.name}
@@ -456,9 +456,12 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
           )}
 
           {/* If an Agent Policy and a package has been selected, then show UI extension (if any) */}
-          {ExtensionView && packagePolicy.policy_id && packagePolicy.package?.name && (
+          {extensionView && packagePolicy.policy_id && packagePolicy.package?.name && (
             <ExtensionWrapper>
-              <ExtensionView newPolicy={packagePolicy} onChange={handleExtensionViewOnChange} />
+              <extensionView.Component
+                newPolicy={packagePolicy}
+                onChange={handleExtensionViewOnChange}
+              />
             </ExtensionWrapper>
           )}
         </>
@@ -474,7 +477,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       validationResults,
       formState,
       integrationInfo?.name,
-      ExtensionView,
+      extensionView,
       handleExtensionViewOnChange,
     ]
   );

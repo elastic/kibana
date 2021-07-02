@@ -27,6 +27,7 @@ const spyScrollTo = jest.fn();
 Object.defineProperty(global.window, 'scrollTo', { value: spyScrollTo });
 
 import { ADD, UPDATE } from '../../../../../shared/constants/operations';
+import { defaultErrorMessage } from '../../../../../shared/flash_messages/handle_api_errors';
 import { SchemaType } from '../../../../../shared/schema/types';
 import { AppLogic } from '../../../../app_logic';
 
@@ -390,13 +391,25 @@ describe('SchemaLogic', () => {
           expect(onSchemaSetSuccessSpy).toHaveBeenCalledWith(serverResponse);
         });
 
-        it('handles error', async () => {
+        it('handles error with message', async () => {
           const onSchemaSetFormErrorsSpy = jest.spyOn(SchemaLogic.actions, 'onSchemaSetFormErrors');
-          http.post.mockReturnValue(Promise.reject({ message: 'this is an error' }));
+          // We expect body.message to be a string[] when it is present
+          http.post.mockReturnValue(Promise.reject({ body: { message: ['this is an error'] } }));
           SchemaLogic.actions.setServerField(schema, ADD);
           await nextTick();
 
-          expect(onSchemaSetFormErrorsSpy).toHaveBeenCalledWith('this is an error');
+          expect(onSchemaSetFormErrorsSpy).toHaveBeenCalledWith(['this is an error']);
+          expect(spyScrollTo).toHaveBeenCalledWith(0, 0);
+        });
+
+        it('handles error with no message', async () => {
+          const onSchemaSetFormErrorsSpy = jest.spyOn(SchemaLogic.actions, 'onSchemaSetFormErrors');
+          http.post.mockReturnValue(Promise.reject());
+          SchemaLogic.actions.setServerField(schema, ADD);
+          await nextTick();
+
+          expect(onSchemaSetFormErrorsSpy).toHaveBeenCalledWith([defaultErrorMessage]);
+          expect(spyScrollTo).toHaveBeenCalledWith(0, 0);
         });
       });
 
