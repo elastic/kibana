@@ -62,16 +62,18 @@ describe('agg_expression_functions', () => {
 
     test('correctly parses filter string argument', () => {
       const actual = fn({
-        filter: '{ "language": "kuery", "query": "a: b" }',
+        filter: { type: 'kibana_query', language: 'kuery', query: 'a: b' },
       });
 
-      expect(actual.value.params.filter).toEqual({ language: 'kuery', query: 'a: b' });
+      expect(actual.value.params.filter).toEqual(
+        expect.objectContaining({ language: 'kuery', query: 'a: b' })
+      );
     });
 
     test('errors out if geo_bounding_box is used together with filter', () => {
       expect(() =>
         fn({
-          filter: '{ "language": "kuery", "query": "a: b" }',
+          filter: { type: 'kibana_query', language: 'kuery', query: 'a: b' },
           geo_bounding_box: {
             type: 'geo_bounding_box',
             wkt: 'BBOX (-74.1, -71.12, 40.73, 40.01)',

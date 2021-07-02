@@ -10,7 +10,7 @@ import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { buildEsQuery, Query } from '@kbn/es-query';
 
-import { GeoBoundingBox, geoBoundingBoxToAst } from '../../expressions';
+import { GeoBoundingBox, QueryFilter, geoBoundingBoxToAst, queryToAst } from '../../expressions';
 import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { aggFilterFnName } from './filter_fn';
@@ -23,6 +23,7 @@ const filterTitle = i18n.translate('data.search.aggs.buckets.filterTitle', {
 
 export interface AggParamsFilter extends BaseAggParams {
   geo_bounding_box?: GeoBoundingBox;
+  filter?: QueryFilter;
 }
 
 export const getFilterBucketAgg = ({ getConfig }: { getConfig: <T = any>(key: string) => any }) =>
@@ -57,6 +58,7 @@ export const getFilterBucketAgg = ({ getConfig }: { getConfig: <T = any>(key: st
 
           output.params = query;
         },
+        toExpressionAst: queryToAst,
       },
     ],
   });

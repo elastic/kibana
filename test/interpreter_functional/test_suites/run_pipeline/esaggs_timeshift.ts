@@ -147,7 +147,7 @@ export default function ({
               id="2-filter"
               enabled=true
               schema="bucket"
-              filter='{"language":"kuery","query":"geo.src:US"}'
+              filter={kql "geo.src:US"}
             }
             customMetric={aggAvg id="3"
               field="bytes"
@@ -164,7 +164,7 @@ export default function ({
               id="4-filter"
               enabled=true
               schema="bucket"
-              filter='{"language":"kuery","query":"geo.src:US"}'
+              filter={kql "geo.src:US"}
             }
             customMetric={aggAvg id="5"
               field="bytes"

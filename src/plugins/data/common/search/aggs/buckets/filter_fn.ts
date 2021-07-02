@@ -11,16 +11,18 @@ import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 
-import { GeoBoundingBoxOutput } from '../../expressions';
+import { GeoBoundingBoxOutput, KibanaQueryOutput } from '../../expressions';
 import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '../';
-import { getParsedValue } from '../utils/get_parsed_value';
 
 export const aggFilterFnName = 'aggFilter';
 
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.FILTER>;
 
-type Arguments = Assign<AggArgs, { geo_bounding_box?: GeoBoundingBoxOutput; filter?: string }>;
+type Arguments = Assign<
+  AggArgs,
+  { geo_bounding_box?: GeoBoundingBoxOutput; filter?: KibanaQueryOutput }
+>;
 
 type Output = AggExpressionType;
 type FunctionDefinition = ExpressionFunctionDefinition<
@@ -63,7 +65,7 @@ export const aggFilter = (): FunctionDefinition => ({
       }),
     },
     filter: {
-      types: ['string'],
+      types: ['kibana_query'],
       help: i18n.translate('data.search.aggs.buckets.filter.filter.help', {
         defaultMessage:
           'Filter results based on a kql or lucene query. Do not use together with geo_bounding_box',
@@ -82,9 +84,7 @@ export const aggFilter = (): FunctionDefinition => ({
       }),
     },
   },
-  fn: (input, { id, enabled, schema, geo_bounding_box: geoBoundingBox, ...params }) => {
-    const filter = getParsedValue(params, 'filter');
-
+  fn: (input, { id, enabled, schema, geo_bounding_box: geoBoundingBox, filter, ...params }) => {
     if (geoBoundingBox && filter) {
       throw new Error("filter and geo_bounding_box can't be used together");
     }
@@ -98,7 +98,7 @@ export const aggFilter = (): FunctionDefinition => ({
         params: {
           ...params,
           geo_bounding_box: geoBoundingBox && omit(geoBoundingBox, 'type'),
-          filter,
+          filter: filter && omit(filter, 'type'),
         },
         type: BUCKET_TYPES.FILTER,
       },
