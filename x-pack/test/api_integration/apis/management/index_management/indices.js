@@ -177,12 +177,19 @@ export default function ({ getService }) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/64473
-    describe.skip('list', function () {
+    describe('list', function () {
       this.tags(['skipCloud']);
 
       it('should list all the indices with the expected properties and data enrichers', async function () {
-        const { body } = await list().expect(200);
+        // Create an index that we can assert against
+        await createIndex('test_index');
+
+        // Verify indices request
+        const { body: indices } = await list().expect(200);
+
+        // Find the "test_index" created to verify expected keys
+        const indexCreated = indices.find((index) => index.name === 'test_index');
+
         const expectedKeys = [
           'health',
           'hidden',
@@ -203,7 +210,8 @@ export default function ({ getService }) {
         // We need to sort the keys before comparing then, because race conditions
         // can cause enrichers to register in non-deterministic order.
         const sortedExpectedKeys = expectedKeys.sort();
-        const sortedReceivedKeys = Object.keys(body[0]).sort();
+        const sortedReceivedKeys = Object.keys(indexCreated).sort();
+
         expect(sortedReceivedKeys).to.eql(sortedExpectedKeys);
       });
     });
