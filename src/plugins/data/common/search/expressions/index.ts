@@ -24,6 +24,8 @@ export * from './kql';
 export * from './lucene';
 export * from './numerical_range';
 export * from './numerical_range_to_ast';
+export * from './query_filter';
+export * from './query_filter_to_ast';
 export * from './query_to_ast';
 export * from './timerange_to_ast';
 export * from './kibana_context_type';

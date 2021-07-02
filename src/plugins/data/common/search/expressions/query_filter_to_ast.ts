@@ -7,17 +7,14 @@
  */
 
 import { buildExpression, buildExpressionFunction } from '../../../../expressions/common';
-import { Query } from '../../query';
-import { ExpressionFunctionKql } from './kql';
-import { ExpressionFunctionLucene } from './lucene';
+import { ExpressionFunctionQueryFilter, QueryFilter } from './query_filter';
+import { queryToAst } from './query_to_ast';
 
-export const queryToAst = (query: Query) => {
-  if (query.language === 'kuery') {
-    return buildExpression([
-      buildExpressionFunction<ExpressionFunctionKql>('kql', { q: query.query as string }),
-    ]).toAst();
-  }
+export const queryFilterToAst = ({ input, label }: QueryFilter) => {
   return buildExpression([
-    buildExpressionFunction<ExpressionFunctionLucene>('lucene', { q: JSON.stringify(query.query) }),
+    buildExpressionFunction<ExpressionFunctionQueryFilter>('queryFilter', {
+      label,
+      input: queryToAst(input),
+    }),
   ]).toAst();
 };
