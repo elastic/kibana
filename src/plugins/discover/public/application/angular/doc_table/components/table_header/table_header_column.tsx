@@ -47,8 +47,11 @@ export function TableHeaderColumn({
   const currentColumnSort = sortOrder.find((pair) => pair[0] === name);
   const currentColumnSortDirection = (currentColumnSort && currentColumnSort[1]) || '';
 
-  const btnSortIconType = sortDirectionToIcon[sortDirection];
-  const btnSortClassName = sortDirection && `kbnDocTableHeader__sortChange`;
+  const btnSortProps = {
+    iconType: sortDirectionToIcon[sortDirection],
+    className: sortDirection && `kbnDocTableHeader__sortChange`,
+    testSubject: `docTableHeaderFieldSort_${name}_${currentColumnSortDirection}`
+  }
 
   const handleChangeSortOrder = () => {
     if (!onChangeSortOrder) return;
@@ -105,12 +108,10 @@ export function TableHeaderColumn({
   const buttons = [
     // Sort Button
     {
+      ...btnSortProps,
       active: isSortable && typeof onChangeSortOrder === 'function',
       ariaLabel: getSortButtonAriaLabel(),
-      className: btnSortClassName,
-      iconType: btnSortIconType,
       onClick: handleChangeSortOrder,
-      testSubject: `docTableHeaderFieldSort_${name}`,
       tooltip: getSortButtonAriaLabel(),
     },
     // Remove Button
@@ -121,7 +122,7 @@ export function TableHeaderColumn({
         values: { columnName: name },
       }),
       className: 'kbnDocTableHeader__move',
-      iconType: 'minus',
+      iconType: 'cross',
       onClick: () => onRemoveColumn && onRemoveColumn(name),
       testSubject: `docTableRemoveHeader-${name}`,
       tooltip: i18n.translate('discover.docTable.tableHeader.removeColumnButtonTooltip', {
