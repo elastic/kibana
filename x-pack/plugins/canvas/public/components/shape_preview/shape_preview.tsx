@@ -52,5 +52,5 @@ export const ShapePreview: FC<Props> = ({ shape: Shape }) => {
 };
 
 ShapePreview.propTypes = {
-  shape: PropTypes.string,
+  shape: PropTypes.func,
 };
