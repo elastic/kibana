@@ -7,15 +7,15 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
-import { ExpressionsStart, ExpressionsSetup } from '../../expressions/public';
-import { shapeRenderer } from './expression_renderers';
+import { ExpressionsServerStart, ExpressionsServerSetup } from '../../expressions/server';
+import { shapeFunction } from '../common';
 
 interface SetupDeps {
-  expressions: ExpressionsSetup;
+  expressions: ExpressionsServerSetup;
 }
 
 interface StartDeps {
-  expression: ExpressionsStart;
+  expression: ExpressionsServerStart;
 }
 
 export type ExpressionShapePluginSetup = void;
@@ -24,7 +24,7 @@ export type ExpressionShapePluginStart = void;
 export class ExpressionShapePlugin
   implements Plugin<ExpressionShapePluginSetup, ExpressionShapePluginStart, SetupDeps, StartDeps> {
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionShapePluginSetup {
-    expressions.registerRenderer(shapeRenderer);
+    expressions.registerFunction(shapeFunction);
   }
 
   public start(core: CoreStart): ExpressionShapePluginStart {}

@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
-export * from './constants';
-export * from './types';
-export * from './expression_functions';
+import { ExpressionShapePlugin } from './plugin';
+
+export type { ExpressionShapePluginSetup, ExpressionShapePluginStart } from './plugin';
+
+export function plugin() {
+  return new ExpressionShapePlugin();
+}

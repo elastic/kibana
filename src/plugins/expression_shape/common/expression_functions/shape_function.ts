@@ -7,8 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionShapeFunction, Shape } from '../../common/types';
-import { SVG } from '../../common';
+import { ExpressionShapeFunction, Shape } from '../types';
+import { SVG } from '../constants';
 
 export const strings = {
   help: i18n.translate('expressionShape.functions.shapeHelpText', {
