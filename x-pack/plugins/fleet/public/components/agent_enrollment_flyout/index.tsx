@@ -45,7 +45,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
   onClose,
   agentPolicy,
   agentPolicies,
-  viewDataStepContent,
+  viewDataStep,
   defaultMode = 'managed',
 }) => {
   const [mode, setMode] = useState<FlyoutMode>(defaultMode);
@@ -119,14 +119,10 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
           <ManagedInstructions
             agentPolicy={agentPolicy}
             agentPolicies={agentPolicies}
-            viewDataStepContent={viewDataStepContent}
+            viewDataStep={viewDataStep}
           />
         ) : (
-          <StandaloneInstructions
-            agentPolicy={agentPolicy}
-            agentPolicies={agentPolicies}
-            viewDataStepContent={viewDataStepContent}
-          />
+          <StandaloneInstructions agentPolicy={agentPolicy} agentPolicies={agentPolicies} />
         )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
