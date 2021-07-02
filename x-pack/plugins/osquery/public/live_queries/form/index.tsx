@@ -198,12 +198,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({ defaultValue, on
           defaultMessage: 'Check results',
         }),
         children: actionId ? (
-          <ResultTabs
-            actionId={actionId}
-            expirationDate={expirationDate}
-            agentIds={agentIds}
-            isLive={true}
-          />
+          <ResultTabs actionId={actionId} expirationDate={expirationDate} agentIds={agentIds} />
         ) : null,
         status: resultsStatus,
       },

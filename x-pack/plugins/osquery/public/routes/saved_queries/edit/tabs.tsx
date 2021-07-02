@@ -10,12 +10,12 @@ import React, { useMemo } from 'react';
 
 import { ResultsTable } from '../../../results/results_table';
 import { ActionResultsSummary } from '../../../action_results/action_results_summary';
+import { ActionAgentsStatus } from '../../../action_results/action_agents_status';
 
 interface ResultTabsProps {
   actionId: string;
   agentIds?: string[];
   expirationDate: Date;
-  isLive?: boolean;
   startDate?: string;
   endDate?: string;
 }
@@ -25,7 +25,6 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
   agentIds,
   endDate,
   expirationDate,
-  isLive,
   startDate,
 }) => {
   const tabs = useMemo(
@@ -39,7 +38,6 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
             <ResultsTable
               actionId={actionId}
               agentIds={agentIds}
-              isLive={isLive}
               startDate={startDate}
               endDate={endDate}
             />
@@ -56,22 +54,25 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
               actionId={actionId}
               agentIds={agentIds}
               expirationDate={expirationDate}
-              isLive={isLive}
             />
           </>
         ),
       },
     ],
-    [actionId, agentIds, endDate, expirationDate, isLive, startDate]
+    [actionId, agentIds, endDate, expirationDate, startDate]
   );
 
   return (
-    <EuiTabbedContent
-      tabs={tabs}
-      initialSelectedTab={tabs[0]}
-      autoFocus="selected"
-      expand={false}
-    />
+    <>
+      <ActionAgentsStatus actionId={actionId} agentIds={agentIds} expirationDate={expirationDate} />
+      <EuiSpacer size="s" />
+      <EuiTabbedContent
+        tabs={tabs}
+        initialSelectedTab={tabs[0]}
+        autoFocus="selected"
+        expand={false}
+      />
+    </>
   );
 };
 

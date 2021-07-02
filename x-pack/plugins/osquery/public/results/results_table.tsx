@@ -14,6 +14,7 @@ import {
   EuiDataGridColumn,
   EuiLink,
   EuiLoadingContent,
+  EuiProgress,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
@@ -37,17 +38,16 @@ interface ResultsTableComponentProps {
   selectedAgent?: string;
   agentIds?: string[];
   endDate?: string;
-  isLive?: boolean;
   startDate?: string;
 }
 
 const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   actionId,
   agentIds,
-  isLive,
   startDate,
   endDate,
 }) => {
+  const [isLive, setIsLive] = useState(false);
   const {
     // @ts-expect-error update types
     data: { aggregations },
@@ -66,7 +66,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   const getFleetAppUrl = useCallback(
     (agentId) =>
       getUrlForApp('fleet', {
-        path: `#` + pagePathGetters.agent_details({ agentId }),
+        path: `#` + pagePathGetters.agent_details({ agentId })[1],
       }),
     [getUrlForApp]
   );
@@ -216,6 +216,11 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     [actionId, endDate, startDate]
   );
 
+  useEffect(() => setIsLive(aggregations.totalResponded !== agentIds?.length), [
+    agentIds?.length,
+    aggregations.totalResponded,
+  ]);
+
   if (!aggregations.totalResponded) {
     return <EuiLoadingContent lines={5} />;
   }
@@ -225,20 +230,25 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   }
 
   return (
-    // @ts-expect-error update types
-    <DataContext.Provider value={allResultsData?.edges}>
-      <EuiDataGrid
-        aria-label="Osquery results"
-        columns={columns}
-        columnVisibility={columnVisibility}
-        rowCount={allResultsData?.totalCount ?? 0}
-        renderCellValue={renderCellValue}
-        sorting={tableSorting}
-        pagination={tablePagination}
-        height="500px"
-        toolbarVisibility={toolbarVisibility}
-      />
-    </DataContext.Provider>
+    <>
+      {!isLive && <EuiProgress color="primary" size="xs" />}
+      {
+        // @ts-expect-error update types
+        <DataContext.Provider value={allResultsData?.edges}>
+          <EuiDataGrid
+            aria-label="Osquery results"
+            columns={columns}
+            columnVisibility={columnVisibility}
+            rowCount={allResultsData?.totalCount ?? 0}
+            renderCellValue={renderCellValue}
+            sorting={tableSorting}
+            pagination={tablePagination}
+            height="500px"
+            toolbarVisibility={toolbarVisibility}
+          />
+        </DataContext.Provider>
+      }
+    </>
   );
 };
 
