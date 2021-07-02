@@ -178,7 +178,7 @@ export function TableHeaderColumn({
                 data-test-subj={button.testSubject}
                 onClick={button.onClick}
               >
-                <EuiIcon type={button.iconType} />
+                <EuiIcon type={button.iconType} size="s" />
               </button>
             </EuiToolTip>
           ))}

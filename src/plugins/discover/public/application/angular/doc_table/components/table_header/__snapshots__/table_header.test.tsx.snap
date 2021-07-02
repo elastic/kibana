@@ -12,6 +12,7 @@ exports[`TableHeader with time column renders correctly 1`] = `
     data-test-subj="docTableHeaderField"
   >
     <span
+      class="kbnDocTableHeader__actions"
       data-test-subj="docTableHeader-time"
     >
       Time
@@ -20,9 +21,13 @@ exports[`TableHeader with time column renders correctly 1`] = `
       >
         <button
           aria-label="Sort time descending"
-          class="fa fa-sort-up"
+          class="kbnDocTableHeader__sortChange"
           data-test-subj="docTableHeaderFieldSort_time"
-        />
+        >
+          <span
+            data-euiicon-type="sortUp"
+          />
+        </button>
       </span>
     </span>
   </th>
@@ -30,6 +35,7 @@ exports[`TableHeader with time column renders correctly 1`] = `
     data-test-subj="docTableHeaderField"
   >
     <span
+      class="kbnDocTableHeader__actions"
       data-test-subj="docTableHeader-first"
     >
       first
@@ -38,18 +44,26 @@ exports[`TableHeader with time column renders correctly 1`] = `
       >
         <button
           aria-label="Remove first column"
-          class="fa fa-remove kbnDocTableHeader__move"
+          class="kbnDocTableHeader__move"
           data-test-subj="docTableRemoveHeader-first"
-        />
+        >
+          <span
+            data-euiicon-type="minus"
+          />
+        </button>
       </span>
       <span
         class="euiToolTipAnchor"
       >
         <button
           aria-label="Move first column to the right"
-          class="fa fa-angle-double-right kbnDocTableHeader__move"
+          class="kbnDocTableHeader__move"
           data-test-subj="docTableMoveRightHeader-first"
-        />
+        >
+          <span
+            data-euiicon-type="sortRight"
+          />
+        </button>
       </span>
     </span>
   </th>
@@ -57,6 +71,7 @@ exports[`TableHeader with time column renders correctly 1`] = `
     data-test-subj="docTableHeaderField"
   >
     <span
+      class="kbnDocTableHeader__actions"
       data-test-subj="docTableHeader-middle"
     >
       middle
@@ -65,27 +80,39 @@ exports[`TableHeader with time column renders correctly 1`] = `
       >
         <button
           aria-label="Remove middle column"
-          class="fa fa-remove kbnDocTableHeader__move"
+          class="kbnDocTableHeader__move"
           data-test-subj="docTableRemoveHeader-middle"
-        />
+        >
+          <span
+            data-euiicon-type="minus"
+          />
+        </button>
       </span>
       <span
         class="euiToolTipAnchor"
       >
         <button
           aria-label="Move middle column to the left"
-          class="fa fa-angle-double-left kbnDocTableHeader__move"
+          class="kbnDocTableHeader__move"
           data-test-subj="docTableMoveLeftHeader-middle"
-        />
+        >
+          <span
+            data-euiicon-type="sortLeft"
+          />
+        </button>
       </span>
       <span
         class="euiToolTipAnchor"
       >
         <button
           aria-label="Move middle column to the right"
-          class="fa fa-angle-double-right kbnDocTableHeader__move"
+          class="kbnDocTableHeader__move"
           data-test-subj="docTableMoveRightHeader-middle"
-        />
+        >
+          <span
+            data-euiicon-type="sortRight"
+          />
+        </button>
       </span>
     </span>
   </th>
@@ -93,6 +120,7 @@ exports[`TableHeader with time column renders correctly 1`] = `
     data-test-subj="docTableHeaderField"
   >
     <span
+      class="kbnDocTableHeader__actions"
       data-test-subj="docTableHeader-last"
     >
       last
@@ -101,18 +129,26 @@ exports[`TableHeader with time column renders correctly 1`] = `
       >
         <button
           aria-label="Remove last column"
-          class="fa fa-remove kbnDocTableHeader__move"
+          class="kbnDocTableHeader__move"
           data-test-subj="docTableRemoveHeader-last"
-        />
+        >
+          <span
+            data-euiicon-type="minus"
+          />
+        </button>
       </span>
       <span
         class="euiToolTipAnchor"
       >
         <button
           aria-label="Move last column to the left"
-          class="fa fa-angle-double-left kbnDocTableHeader__move"
+          class="kbnDocTableHeader__move"
           data-test-subj="docTableMoveLeftHeader-last"
-        />
+        >
+          <span
+            data-euiicon-type="sortLeft"
+          />
+        </button>
       </span>
     </span>
   </th>
@@ -131,6 +167,7 @@ exports[`TableHeader without time column renders correctly 1`] = `
     data-test-subj="docTableHeaderField"
   >
     <span
+      class="kbnDocTableHeader__actions"
       data-test-subj="docTableHeader-first"
     >
       first
@@ -139,18 +176,26 @@ exports[`TableHeader without time column renders correctly 1`] = `
       >
         <button
           aria-label="Remove first column"
-          class="fa fa-remove kbnDocTableHeader__move"
+          class="kbnDocTableHeader__move"
           data-test-subj="docTableRemoveHeader-first"
-        />
+        >
+          <span
+            data-euiicon-type="minus"
+          />
+        </button>
       </span>
       <span
         class="euiToolTipAnchor"
       >
         <button
           aria-label="Move first column to the right"
-          class="fa fa-angle-double-right kbnDocTableHeader__move"
+          class="kbnDocTableHeader__move"
           data-test-subj="docTableMoveRightHeader-first"
-        />
+        >
+          <span
+            data-euiicon-type="sortRight"
+          />
+        </button>
       </span>
     </span>
   </th>
@@ -158,6 +203,7 @@ exports[`TableHeader without time column renders correctly 1`] = `
     data-test-subj="docTableHeaderField"
   >
     <span
+      class="kbnDocTableHeader__actions"
       data-test-subj="docTableHeader-middle"
     >
       middle
@@ -166,27 +212,39 @@ exports[`TableHeader without time column renders correctly 1`] = `
       >
         <button
           aria-label="Remove middle column"
-          class="fa fa-remove kbnDocTableHeader__move"
+          class="kbnDocTableHeader__move"
           data-test-subj="docTableRemoveHeader-middle"
-        />
+        >
+          <span
+            data-euiicon-type="minus"
+          />
+        </button>
       </span>
       <span
         class="euiToolTipAnchor"
       >
         <button
           aria-label="Move middle column to the left"
-          class="fa fa-angle-double-left kbnDocTableHeader__move"
+          class="kbnDocTableHeader__move"
           data-test-subj="docTableMoveLeftHeader-middle"
-        />
+        >
+          <span
+            data-euiicon-type="sortLeft"
+          />
+        </button>
       </span>
       <span
         class="euiToolTipAnchor"
       >
         <button
           aria-label="Move middle column to the right"
-          class="fa fa-angle-double-right kbnDocTableHeader__move"
+          class="kbnDocTableHeader__move"
           data-test-subj="docTableMoveRightHeader-middle"
-        />
+        >
+          <span
+            data-euiicon-type="sortRight"
+          />
+        </button>
       </span>
     </span>
   </th>
@@ -194,6 +252,7 @@ exports[`TableHeader without time column renders correctly 1`] = `
     data-test-subj="docTableHeaderField"
   >
     <span
+      class="kbnDocTableHeader__actions"
       data-test-subj="docTableHeader-last"
     >
       last
@@ -202,18 +261,26 @@ exports[`TableHeader without time column renders correctly 1`] = `
       >
         <button
           aria-label="Remove last column"
-          class="fa fa-remove kbnDocTableHeader__move"
+          class="kbnDocTableHeader__move"
           data-test-subj="docTableRemoveHeader-last"
-        />
+        >
+          <span
+            data-euiicon-type="minus"
+          />
+        </button>
       </span>
       <span
         class="euiToolTipAnchor"
       >
         <button
           aria-label="Move last column to the left"
-          class="fa fa-angle-double-left kbnDocTableHeader__move"
+          class="kbnDocTableHeader__move"
           data-test-subj="docTableMoveLeftHeader-last"
-        />
+        >
+          <span
+            data-euiicon-type="sortLeft"
+          />
+        </button>
       </span>
     </span>
   </th>

@@ -2,7 +2,7 @@
   white-space: nowrap;
 }
 .kbnDocTableHeader button {
-  margin-left: $euiSizeXS;
+  margin-left: $euiSizeXS * .5;
 }
 .kbnDocTableHeader__move,
 .kbnDocTableHeader__sortChange {
