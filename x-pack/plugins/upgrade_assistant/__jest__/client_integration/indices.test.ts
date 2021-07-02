@@ -7,7 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 import { indexSettingDeprecations } from '../../common/constants';
-import { MIGRATION_DEPRECATION_LEVEL } from '../../common/types';
+import { UpgradeAssistantStatus } from '../../common/types';
 
 import { IndicesTestBed, setupIndicesPage, setupEnvironment } from './helpers';
 
@@ -20,16 +20,19 @@ describe('Indices tab', () => {
   });
 
   describe('with deprecations', () => {
-    const upgradeStatusMockResponse = {
+    const upgradeStatusMockResponse: UpgradeAssistantStatus = {
       readyForUpgrade: false,
       cluster: [],
       indices: [
         {
-          level: 'warning' as MIGRATION_DEPRECATION_LEVEL,
+          level: 'warning',
           message: indexSettingDeprecations.translog.deprecationMessage,
           url: 'doc_url',
           index: 'my_index',
-          deprecatedIndexSettings: indexSettingDeprecations.translog.settings,
+          correctiveAction: {
+            type: 'indexSetting',
+            deprecatedSettings: indexSettingDeprecations.translog.settings,
+          },
         },
       ],
     };
@@ -56,6 +59,7 @@ describe('Indices tab', () => {
 
     test('renders deprecations', () => {
       const { exists, find } = testBed;
+      expect(exists('indexTabContent')).toBe(true);
       expect(exists('deprecationsContainer')).toBe(true);
       expect(find('indexCount').text()).toEqual('1');
     });

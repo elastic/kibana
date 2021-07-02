@@ -9,7 +9,6 @@ import React, { FunctionComponent, useState } from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonEmpty, EuiContextMenu, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IBasePath } from 'kibana/public';
 import {
   withSuspense,
   LazyPopoverComponent,
@@ -18,6 +17,7 @@ import {
 import { ReportingStart } from '../../../../../reporting/public';
 import { PDF, JSON } from '../../../../i18n/constants';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
+import { usePlatformService } from '../../../services';
 import { ShareWebsiteFlyout } from './flyout';
 import { CanvasWorkpadSharingData, getPdfJobParams } from './utils';
 
@@ -64,8 +64,6 @@ export interface Props {
   /** Canvas workpad to export as PDF **/
   sharingData: CanvasWorkpadSharingData;
   sharingServices: {
-    /** BasePath dependency **/
-    basePath: IBasePath;
     /** Reporting dependency **/
     reporting?: ReportingStart;
   };
@@ -81,6 +79,7 @@ export const ShareMenu: FunctionComponent<Props> = ({
   sharingServices: services,
   onExport,
 }) => {
+  const platformService = usePlatformService();
   const [showFlyout, setShowFlyout] = useState(false);
 
   const onClose = () => {
@@ -107,7 +106,9 @@ export const ShareMenu: FunctionComponent<Props> = ({
               title: strings.getShareDownloadPDFTitle(),
               content: (
                 <services.reporting.components.ReportingPanelPDF
-                  getJobParams={() => getPdfJobParams(sharingData, services.basePath)}
+                  getJobParams={() =>
+                    getPdfJobParams(sharingData, platformService.getBasePathInterface())
+                  }
                   layoutOption="canvas"
                   onClose={closePopover}
                 />
