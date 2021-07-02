@@ -18,7 +18,6 @@ import { initServerWithKibana } from './kibana.index';
 import { KibanaTelemetryAdapter, UptimeCorePlugins } from './lib/adapters';
 import { umDynamicSettings } from './lib/saved_objects';
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
-import { RuleDataClient } from '../../rule_registry/server';
 import { TECHNICAL_COMPONENT_TEMPLATE_NAME } from '../../rule_registry/common/assets';
 
 export type UptimeRuleRegistry = ReturnType<Plugin['setup']>['ruleRegistry'];
