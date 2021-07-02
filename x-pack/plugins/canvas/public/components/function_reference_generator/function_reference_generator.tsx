@@ -23,12 +23,10 @@ export const FunctionReferenceGenerator: FC<Props> = ({ functionRegistry }) => {
   const copyDocs = async () => {
     const functionRefs = await generateFunctionReference(functionDefinitions);
     copy(functionRefs);
-    notifyService
-      .getService()
-      .success(
-        `Please paste updated docs into '/kibana/docs/canvas/canvas-function-reference.asciidoc' and commit your changes.`,
-        { title: 'Copied function docs to clipboard' }
-      );
+    notifyService.success(
+      `Please paste updated docs into '/kibana/docs/canvas/canvas-function-reference.asciidoc' and commit your changes.`,
+      { title: 'Copied function docs to clipboard' }
+    );
   };
 
   return (
