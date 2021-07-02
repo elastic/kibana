@@ -6378,7 +6378,6 @@
     "expressionShape.functions.shape.args.fillHelpText": "図形を塗りつぶす {SVG} カラーです。",
     "expressionShape.functions.shape.args.maintainAspectHelpText": "図形の元の横縦比を維持しますか？",
     "expressionShape.functions.shape.args.shapeHelpText": "図形を選択します。",
-    "xpack.canvas.functions.shapeHelpText": "図形を作成します。",
     "xpack.canvas.functions.sort.args.byHelpText": "並べ替えの基準となる列です。指定されていない場合、{DATATABLE}は初めの列で並べられます。",
     "xpack.canvas.functions.sort.args.reverseHelpText": "並び順を反転させます。指定されていない場合、{DATATABLE}は昇順で並べられます。",
     "xpack.canvas.functions.sortHelpText": "{DATATABLE}を指定された列で並べ替えます。",
