@@ -131,10 +131,6 @@ const buildThreatDetailsItems = (enrichment: CtiEnrichment) =>
 const ThreatDetailsViewComponent: React.FC<{
   enrichments: CtiEnrichment[];
 }> = ({ enrichments }) => {
-  if (enrichments.length < 1) {
-    return <EmptyThreatDetailsView />;
-  }
-
   const sortedEnrichments = enrichments.sort((a, b) => getFirstSeen(b) - getFirstSeen(a));
 
   return (
