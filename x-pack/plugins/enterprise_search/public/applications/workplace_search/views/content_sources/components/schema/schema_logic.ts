@@ -17,6 +17,7 @@ import {
   setErrorMessage,
   clearFlashMessages,
 } from '../../../../../shared/flash_messages';
+import { defaultErrorMessage } from '../../../../../shared/flash_messages/handle_api_errors';
 import { HttpLogic } from '../../../../../shared/http';
 import {
   IndexJob,
@@ -349,7 +350,9 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
       } catch (e) {
         window.scrollTo(0, 0);
         if (isAdding) {
-          actions.onSchemaSetFormErrors(e?.message);
+          // We expect body.message to be a string[] for actions.onSchemaSetFormErrors
+          const message: string[] = e?.body?.message || [defaultErrorMessage];
+          actions.onSchemaSetFormErrors(message);
         } else {
           flashAPIErrors(e);
         }
