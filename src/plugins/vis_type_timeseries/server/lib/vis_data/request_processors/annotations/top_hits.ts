@@ -30,9 +30,7 @@ export const topHits: AnnotationsRequestProcessorsFunction = ({
           [timeField]: { order: 'desc' },
         },
       ],
-      _source: {
-        includes: [...fields, timeField],
-      },
+      fields: [...fields, timeField],
       size: 5,
     });
     return next(doc);

@@ -7,7 +7,6 @@
  */
 
 export { overwrite } from './overwrite';
-export { extractData } from './extract_data';
 export { getTimerange } from './get_timerange';
 export { getBucketSize } from './get_bucket_size';
 export { mapEmptyToZero } from './map_empty_to_zero';

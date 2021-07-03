@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { get, isEmpty } from 'lodash';
+import { get, isEmpty, mapValues } from 'lodash';
 
 export function getAnnotationBuckets(resp, annotation) {
   return get(resp, `aggregations.${annotation.id}.buckets`, [])
     .filter((bucket) => !isEmpty(bucket.hits.hits.hits))
     .map((bucket) => ({
       key: bucket.key,
-      docs: bucket.hits.hits.hits.map((doc) => doc._source),
+      docs: bucket.hits.hits.hits.map((doc) => mapValues(doc.fields, (doc) => doc.join(','))),
     }));
 }

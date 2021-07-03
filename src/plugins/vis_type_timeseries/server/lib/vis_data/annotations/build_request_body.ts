@@ -16,7 +16,8 @@ import type {
 export function buildAnnotationRequest(params: AnnotationsRequestProcessorsParams) {
   const processor = buildProcessorFunction<
     AnnotationsRequestProcessorsFunction,
-    AnnotationsRequestProcessorsParams
+    AnnotationsRequestProcessorsParams,
+    Record<string, any>
   >([query, dateHistogram, topHits], params);
 
   return processor({});
