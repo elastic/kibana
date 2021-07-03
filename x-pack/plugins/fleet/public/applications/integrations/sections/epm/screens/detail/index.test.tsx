@@ -113,7 +113,7 @@ describe('when on integration detail', () => {
     });
   });
 
-  describe('and a custom UI extension is registered', () => {
+  describe('and a custom tab UI extension is registered', () => {
     // Because React Lazy components are loaded async (Promise), we setup this "watcher" Promise
     // that is `resolved` once the lazy components actually renders.
     let lazyComponentWasRendered: Promise<void>;
@@ -136,7 +136,7 @@ describe('when on integration detail', () => {
       testRenderer.startInterface.registerExtension({
         package: 'nginx',
         view: 'package-detail-custom',
-        component: CustomComponent,
+        Component: CustomComponent,
       });
 
       render();
@@ -155,6 +155,53 @@ describe('when on integration detail', () => {
       act(() => {
         testRenderer.history.push(
           pagePathGetters.integration_details_custom({ pkgkey: 'nginx-0.3.7' })[1]
+        );
+      });
+      await lazyComponentWasRendered;
+      expect(renderResult.getByTestId('custom-hello'));
+    });
+  });
+
+  describe('and a custom assets UI extension is registered', () => {
+    let lazyComponentWasRendered: Promise<void>;
+
+    beforeEach(() => {
+      let setWasRendered: () => void;
+      lazyComponentWasRendered = new Promise((resolve) => {
+        setWasRendered = resolve;
+      });
+
+      const CustomComponent = lazy(async () => {
+        return {
+          default: memo(() => {
+            setWasRendered();
+            return <div data-test-subj="custom-hello">hello</div>;
+          }),
+        };
+      });
+
+      testRenderer.startInterface.registerExtension({
+        package: 'nginx',
+        view: 'package-detail-assets',
+        Component: CustomComponent,
+      });
+
+      render();
+    });
+
+    afterEach(() => {
+      // @ts-ignore
+      lazyComponentWasRendered = undefined;
+    });
+
+    it('should display "assets" tab in navigation', () => {
+      expect(renderResult.getByTestId('tab-assets'));
+    });
+
+    it('should display custom assets when tab is clicked', async () => {
+      act(() => {
+        testRenderer.history.push(
+          pagePathGetters.integration_details_assets({ pkgkey: 'nginx-0.3.7' })[1]
         );
       });
       await lazyComponentWasRendered;
