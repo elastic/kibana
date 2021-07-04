@@ -21,12 +21,11 @@ import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import {
   OsqueryPluginSetup,
   OsqueryPluginStart,
-  // SetupPlugins,
   StartPlugins,
   AppPluginStartDependencies,
 } from './types';
 import { OSQUERY_INTEGRATION_NAME, PLUGIN_NAME } from '../common';
-import { epmRouteService, GetPackagesResponse } from '../../fleet/common';
+import { Installation } from '../../fleet/common';
 import {
   LazyOsqueryManagedPolicyCreateImportExtension,
   LazyOsqueryManagedPolicyEditExtension,
@@ -47,12 +46,9 @@ export function toggleOsqueryPlugin(
   }
 
   http
-    .fetch<GetPackagesResponse>(epmRouteService.getListPath(), { query: { experimental: true } })
-    .then(({ response }) => {
-      const installed = response.find(
-        (integration) =>
-          integration?.name === OSQUERY_INTEGRATION_NAME && integration?.status === 'installed'
-      );
+    .fetch<Installation | undefined>(`/internal/osquery/status`)
+    .then((response) => {
+      const installed = response?.install_status === 'installed';
 
       if (installed && registerExtension) {
         registerExtension({

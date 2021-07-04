@@ -8,7 +8,7 @@
 import type { KibanaRequest } from 'kibana/server';
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 
-import type { AgentStatus, Agent, EsAssetReference } from '../types';
+import type { AgentStatus, Agent, Installation } from '../types';
 
 import type { getAgentById, getAgentsByKuery } from './agents';
 import type { agentPolicyService } from './agent_policy';
@@ -33,10 +33,10 @@ export interface ESIndexPatternService {
  */
 
 export interface PackageService {
-  getInstalledEsAssetReferences(
+  getInstallation(
     savedObjectsClient: SavedObjectsClientContract,
     pkgName: string
-  ): Promise<EsAssetReference[]>;
+  ): Promise<Installation | undefined>;
 }
 
 /**

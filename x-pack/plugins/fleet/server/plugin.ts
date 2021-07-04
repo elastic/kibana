@@ -31,8 +31,8 @@ import type {
 import type { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import type {
-  EsAssetReference,
   FleetConfigType,
+  Installation,
   NewPackagePolicy,
   UpdatePackagePolicy,
 } from '../common';
@@ -83,7 +83,7 @@ import {
   getAgentById,
 } from './services/agents';
 import { registerFleetUsageCollector } from './collectors/register';
-import { getInstallation } from './services/epm/packages';
+import { getInstallation as getPackageInstallation } from './services/epm/packages';
 import { makeRouterEnforcingSuperuser } from './routes/security';
 import { startFleetServerSetup } from './services/fleet_server';
 import { FleetArtifactsClient } from './services/artifacts';
@@ -309,13 +309,11 @@ export class FleetPlugin
         }),
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
       packageService: {
-        getInstalledEsAssetReferences: async (
+        getInstallation: async (
           savedObjectsClient: SavedObjectsClientContract,
           pkgName: string
-        ): Promise<EsAssetReference[]> => {
-          const installation = await getInstallation({ savedObjectsClient, pkgName });
-          return installation?.installed_es || [];
-        },
+        ): Promise<Installation | undefined> =>
+          getPackageInstallation({ savedObjectsClient, pkgName }),
       },
       agentService: {
         getAgent: getAgentById,
