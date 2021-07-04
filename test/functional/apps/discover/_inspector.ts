@@ -52,17 +52,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should display request stats with no results', async () => {
       await inspector.open();
       await testSubjects.click('inspectorRequestChooser');
-      await testSubjects.click(`inspectorRequestChooserTotal hits`);
-      if (testSubjects.exists('inspectorRequestDetailStatistics')) {
-        await testSubjects.click(`inspectorRequestDetailStatistics`);
-        const requestStatsTotalHits = getHitCount(await inspector.getTableData());
-        expect(requestStatsTotalHits).to.be('0');
-      } else {
-        await testSubjects.click(`inspectorRequestChooserDocuments`);
-        await testSubjects.click(`inspectorRequestDetailStatistics`);
-        const requestStatsDocuments = getHitCount(await inspector.getTableData());
-        expect(requestStatsDocuments).to.be('0');
+      let foundZero = false;
+      for (const subj of ['Documents', 'Total hits', 'Charts']) {
+        await testSubjects.click(`inspectorRequestChooser${subj}`);
+        if (testSubjects.exists('inspectorRequestDetailStatistics')) {
+          await testSubjects.click(`inspectorRequestDetailStatistics`);
+          const requestStatsTotalHits = getHitCount(await inspector.getTableData());
+          if (requestStatsTotalHits === '0') {
+            foundZero = true;
+            break;
+          }
+        }
       }
+      expect(foundZero).to.be(true);
     });
 
     it('should display request stats with results', async () => {
