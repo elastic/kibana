@@ -27,7 +27,7 @@ import {
 import { DiscoverServices } from '../../../../../build_services';
 import { ElasticSearchHit } from '../../../../doc_views/doc_views_types';
 import { FetchStatus } from '../../../../types';
-import { SavedSearchDataDocumentsSubject } from '../../services/use_saved_search';
+import { DataDocuments$ } from '../../services/use_saved_search';
 
 const mockServices = ({
   history: () => ({
@@ -92,7 +92,7 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
     documents$: new BehaviorSubject({
       fetchStatus: FetchStatus.COMPLETE,
       result: hits as ElasticSearchHit[],
-    }) as SavedSearchDataDocumentsSubject,
+    }) as DataDocuments$,
     indexPatternList,
     onChangeIndexPattern: jest.fn(),
     onAddFilter: jest.fn(),

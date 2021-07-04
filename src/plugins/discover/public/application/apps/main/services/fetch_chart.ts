@@ -20,39 +20,36 @@ import { tabifyAggResponse } from '../../../../../../data/common';
 import { buildPointSeriesData, Chart } from '../components/chart/point_series';
 import { TimechartBucketInterval } from '../components/timechart_header/timechart_header';
 import { FetchStatus } from '../../../types';
-import { SavedSearchChartsSubject } from './use_saved_search';
+import { DataCharts$ } from './use_saved_search';
+import { AppState } from './discover_state';
+import { ReduxLikeStateContainer } from '../../../../../../kibana_utils/common';
+import { sendErrorMsg, sendLoadingMsg } from './use_saved_search_messages';
 
 export function fetchChart(
-  dataCharts$: SavedSearchChartsSubject,
-
+  dataCharts$: DataCharts$,
   {
     abortController,
+    appStateContainer,
     data,
     inspectorAdapters,
-    interval = 'auto',
     onResults,
-    searchSource,
     searchSessionId,
+    searchSource,
   }: {
     abortController: AbortController;
+    appStateContainer: ReduxLikeStateContainer<AppState>;
     data: DataPublicPluginStart;
     inspectorAdapters: Adapters;
-    interval: string;
-    onResults: (isEmpty: boolean) => void;
-    searchSource: SearchSource;
+    onResults: (foundDocuments: boolean) => void;
     searchSessionId: string;
+    searchSource: SearchSource;
   }
 ): Observable<{ chartData: Chart; bucketInterval?: TimechartBucketInterval } | undefined> {
+  const interval = appStateContainer.getState().interval ?? 'auto';
   const childSearchSource = searchSource.createCopy();
-  const indexPattern = searchSource.getField('index')!;
-  childSearchSource.setField(
-    'filter',
-    data.query.timefilter.timefilter.createFilter(indexPattern!)
-  );
-  childSearchSource.setField('size', 0);
-  childSearchSource.setField('trackTotalHits', false);
-  const chartAggConfigs = getChartAggConfigs(childSearchSource, interval, data);
-  childSearchSource.setField('aggs', chartAggConfigs.toDsl());
+  const chartAggConfigs = updateSearchSource(childSearchSource, interval, data);
+
+  sendLoadingMsg(dataCharts$);
 
   const fetch$ = childSearchSource
     .fetch$({
@@ -77,7 +74,7 @@ export function fetchChart(
         const dimensions = getDimensions(chartAggConfigs, data);
         if (dimensions) {
           const chartData = buildPointSeriesData(tabifiedData, dimensions);
-          onResults(false);
+          onResults(true);
           return {
             chartData,
             bucketInterval: search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)
@@ -91,24 +88,32 @@ export function fetchChart(
 
   fetch$.subscribe(
     (res) => {
-      if (res) {
-        dataCharts$.next({
-          fetchStatus: FetchStatus.COMPLETE,
-          chartData: res.chartData,
-          bucketInterval: res.bucketInterval,
-        });
-      }
+      dataCharts$.next({
+        fetchStatus: FetchStatus.COMPLETE,
+        chartData: res?.chartData,
+        bucketInterval: res?.bucketInterval,
+      });
     },
     (error) => {
       if (error instanceof Error && error.name === 'AbortError') {
         return;
       }
-
-      dataCharts$.next({
-        fetchStatus: FetchStatus.ERROR,
-        error,
-      });
+      sendErrorMsg(dataCharts$, error);
     }
   );
   return fetch$;
+}
+
+export function updateSearchSource(
+  searchSource: SearchSource,
+  interval: string,
+  data: DataPublicPluginStart
+) {
+  const indexPattern = searchSource.getField('index')!;
+  searchSource.setField('filter', data.query.timefilter.timefilter.createFilter(indexPattern!));
+  searchSource.setField('size', 0);
+  searchSource.setField('trackTotalHits', false);
+  const chartAggConfigs = getChartAggConfigs(searchSource, interval, data);
+  searchSource.setField('aggs', chartAggConfigs.toDsl());
+  return chartAggConfigs;
 }

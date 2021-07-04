@@ -1,0 +1,103 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+import { forkJoin, of } from 'rxjs';
+import {
+  sendCompleteMsg,
+  sendErrorMsg,
+  sendLoadingMsg,
+  sendPartialMsg,
+  sendResetMsg,
+} from './use_saved_search_messages';
+import { updateSearchSource } from '../utils/update_search_source';
+import { SortOrder } from '../../../../saved_searches/types';
+import { fetchDocuments } from './fetch_documents';
+import { fetchTotalHits } from './fetch_total_hits';
+import { fetchChart } from './fetch_chart';
+import { SearchSource } from '../../../../../../data/common';
+import { Adapters } from '../../../../../../inspector';
+import { AppState } from './discover_state';
+import { FetchStatus } from '../../../types';
+import { DataPublicPluginStart } from '../../../../../../data/public';
+import { SavedSearchData } from './use_saved_search';
+import { DiscoverServices } from '../../../../build_services';
+import { ReduxLikeStateContainer } from '../../../../../../kibana_utils/common';
+
+export function fetch(
+  reset = false,
+  fetchDeps: {
+    abortController: AbortController;
+    appStateContainer: ReduxLikeStateContainer<AppState>;
+    inspectorAdapters: Adapters;
+    data: DataPublicPluginStart;
+    dataSubjects: SavedSearchData;
+    initialFetchStatus: FetchStatus;
+    searchSource: SearchSource;
+    searchSessionId: string;
+    services: DiscoverServices;
+    useNewFieldsApi: boolean;
+  }
+) {
+  const {
+    abortController,
+    dataSubjects,
+    initialFetchStatus,
+    appStateContainer,
+    services,
+    searchSource,
+    useNewFieldsApi,
+    data,
+  } = fetchDeps;
+
+  const indexPattern = searchSource.getField('index')!;
+
+  if (reset) {
+    sendResetMsg(dataSubjects, initialFetchStatus);
+  }
+
+  sendLoadingMsg(dataSubjects.main$);
+
+  const { hideChart, sort } = appStateContainer.getState();
+  // Update the base searchSource, base for all child fetches
+  updateSearchSource(searchSource, false, {
+    indexPattern,
+    services,
+    sort: sort as SortOrder[],
+    useNewFieldsApi,
+  });
+
+  const subFetchDeps = {
+    ...fetchDeps,
+    onResults: (foundDocuments: boolean) => {
+      if (!foundDocuments) {
+        sendCompleteMsg(dataSubjects.main$, foundDocuments);
+        abortController!.abort();
+      } else {
+        sendPartialMsg(dataSubjects.main$);
+      }
+    },
+  };
+
+  const all = forkJoin({
+    documents: fetchDocuments(dataSubjects.documents$, subFetchDeps),
+    totalHits: fetchTotalHits(dataSubjects.totalHits$, subFetchDeps),
+    chart:
+      !hideChart && indexPattern.timeFieldName
+        ? fetchChart(dataSubjects.charts$, subFetchDeps)
+        : of(null),
+  });
+
+  all.subscribe(
+    () => sendCompleteMsg(dataSubjects.main$, true),
+    (error) => {
+      if (error instanceof Error && error.name === 'AbortError') return;
+      data.search.showError(error);
+      sendErrorMsg(dataSubjects.main$, error);
+    }
+  );
+  return all;
+}

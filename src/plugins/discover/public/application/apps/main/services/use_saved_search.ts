@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { BehaviorSubject, forkJoin, merge, of, Subject } from 'rxjs';
+import { BehaviorSubject, merge, Subject } from 'rxjs';
 import { debounceTime, filter, tap } from 'rxjs/operators';
 import { DiscoverServices } from '../../../../build_services';
 import { DiscoverSearchSessionManager } from './discover_search_session';
@@ -20,58 +20,56 @@ import { Chart } from '../components/chart/point_series';
 import { TimechartBucketInterval } from '../components/timechart_header/timechart_header';
 import { useSingleton } from '../utils/use_singleton';
 import { FetchStatus } from '../../../types';
-import { fetchTotalHits } from './fetch_total_hits';
-import { fetchChart } from './fetch_chart';
-import { fetchDocuments } from './fetch_documents';
-import { updateSearchSource } from '../utils/update_search_source';
-import { SortOrder } from '../../../../saved_searches/types';
+
+import { fetch } from './use_saved_search_fetch';
+import { useBehaviorSubject } from '../utils/use_behavior_subject';
+import { sendResetMsg } from './use_saved_search_messages';
 
 export interface SavedSearchData {
-  main$: SavedSearchDataSubject;
-  documents$: SavedSearchDataDocumentsSubject;
-  totalHits$: SavedSearchTotalHitsSubject;
-  charts$: SavedSearchChartsSubject;
+  main$: DataMain$;
+  documents$: DataDocuments$;
+  totalHits$: DataTotalHits$;
+  charts$: DataCharts$;
 }
-export type SavedSearchDataSubject = BehaviorSubject<SavedSearchDataMessage>;
-export type SavedSearchTotalHitsSubject = BehaviorSubject<SavedSearchDataTotalHitsMessage>;
-export type SavedSearchChartsSubject = BehaviorSubject<SavedSearchDataChartsMessage>;
 
-export type SavedSearchDataDocumentsSubject = BehaviorSubject<SavedSearchDataDocumentsMessage>;
-export type SavedSearchRefetchSubject = Subject<SavedSearchRefetchMsg>;
+export type DataMain$ = BehaviorSubject<DataMainMsg>;
+export type DataDocuments$ = BehaviorSubject<DataDocumentsMsg>;
+export type DataTotalHits$ = BehaviorSubject<DataTotalHitsMsg>;
+export type DataCharts$ = BehaviorSubject<DataChartsMessage>;
+
+export type DataRefetch$ = Subject<DataRefetchMsg>;
 
 export interface UseSavedSearch {
-  refetch$: SavedSearchRefetchSubject;
+  refetch$: DataRefetch$;
   data$: SavedSearchData;
   reset: () => void;
   inspectorAdapters: { requests: RequestAdapter };
 }
 
-export type SavedSearchRefetchMsg = 'reset' | undefined;
+export type DataRefetchMsg = 'reset' | undefined;
 
-export interface SavedSearchDataDocumentsMessage {
+export interface DataMsg {
   fetchStatus: FetchStatus;
-  result?: ElasticSearchHit[];
   error?: Error;
 }
 
-export interface SavedSearchDataTotalHitsMessage {
-  fetchStatus: FetchStatus;
-  result?: number;
-  error?: Error;
-}
-
-export interface SavedSearchDataChartsMessage {
-  fetchStatus: FetchStatus;
-  chartData?: Chart;
-  error?: Error;
-  bucketInterval?: TimechartBucketInterval;
-}
-
-export interface SavedSearchDataMessage {
-  error?: Error;
-  fetchCounter?: number;
-  fetchStatus: FetchStatus;
+export interface DataMainMsg extends DataMsg {
   foundDocuments?: boolean;
+}
+
+export interface DataDocumentsMsg extends DataMsg {
+  result?: ElasticSearchHit[];
+}
+
+export interface DataTotalHitsMsg extends DataMsg {
+  fetchStatus: FetchStatus;
+  error?: Error;
+  result?: number;
+}
+
+export interface DataChartsMessage extends DataMsg {
+  bucketInterval?: TimechartBucketInterval;
+  chartData?: Chart;
 }
 
 /**
@@ -79,7 +77,6 @@ export interface SavedSearchDataMessage {
  * to the data fetching
  */
 export const useSavedSearch = ({
-  indexPattern,
   initialFetchStatus,
   searchSessionManager,
   searchSource,
@@ -87,7 +84,6 @@ export const useSavedSearch = ({
   stateContainer,
   useNewFieldsApi,
 }: {
-  indexPattern: IndexPattern;
   initialFetchStatus: FetchStatus;
   searchSessionManager: DiscoverSearchSessionManager;
   searchSource: SearchSource;
@@ -101,274 +97,130 @@ export const useSavedSearch = ({
   const inspectorAdapters = useMemo(() => ({ requests: new RequestAdapter() }), []);
 
   /**
-   * The observable the UI (aka React component) subscribes to get notified about
+   * The observables the UI (aka React component) subscribes to get notified about
    * the changes in the data fetching process (high level: fetching started, data was received)
    */
-  const main$: SavedSearchDataSubject = useSingleton(
-    () =>
-      new BehaviorSubject<SavedSearchDataMessage>({
-        fetchStatus: initialFetchStatus,
-        fetchCounter: initialFetchStatus === FetchStatus.LOADING ? 1 : 0,
-      })
-  );
+  const main$: DataMain$ = useBehaviorSubject({ fetchStatus: initialFetchStatus });
 
-  const dataDocuments$: SavedSearchDataDocumentsSubject = useSingleton(
-    () =>
-      new BehaviorSubject<SavedSearchDataMessage>({
-        fetchStatus: initialFetchStatus,
-      })
-  );
+  const documents$: DataDocuments$ = useBehaviorSubject({ fetchStatus: initialFetchStatus });
 
-  const dataTotalHits$: SavedSearchTotalHitsSubject = useSingleton(
-    () =>
-      new BehaviorSubject<SavedSearchDataTotalHitsMessage>({
-        fetchStatus: initialFetchStatus,
-      })
-  );
+  const totalHits$: DataTotalHits$ = useBehaviorSubject({ fetchStatus: initialFetchStatus });
 
-  const dataCharts$: SavedSearchChartsSubject = useSingleton(
-    () =>
-      new BehaviorSubject<SavedSearchDataChartsMessage>({
-        fetchStatus: initialFetchStatus,
-      })
-  );
+  const charts$: DataCharts$ = useBehaviorSubject({ fetchStatus: initialFetchStatus });
+
+  const dataSubjects = useMemo(() => {
+    return {
+      main$,
+      documents$,
+      totalHits$,
+      charts$,
+    };
+  }, [main$, charts$, documents$, totalHits$]);
+
   /**
    * The observable to trigger data fetching in UI
    * By refetch$.next('reset') rows and fieldcounts are reset to allow e.g. editing of runtime fields
    * to be processed correctly
    */
-  const refetch$ = useSingleton(() => new Subject<SavedSearchRefetchMsg>());
+  const refetch$ = useSingleton(() => new Subject<DataRefetchMsg>());
 
   /**
    * Values that shouldn't trigger re-rendering when changed
    */
   const refs = useRef<{
     abortController?: AbortController;
-    /**
-     * handler emitted by `timefilter.getAutoRefreshFetch$()`
-     * to notify when data completed loading and to start a new autorefresh loop
-     */
-    autoRefreshDoneCb?: AutoRefreshDoneFn;
-    /**
-     * Number of fetches used for functional testing
-     */
-    fetchCounter: number;
-    /**
-     * needed to right auto refresh behavior, a new auto refresh shouldnt be triggered when
-     * loading is still ongoing
-     */
-    fetchStatus: FetchStatus;
-  }>({
-    fetchCounter: 0,
-    fetchStatus: initialFetchStatus,
-  });
-
-  /**
-   * Resets the fieldCounts cache and sends a reset message
-   * It is set to initial state (no documents, fetchCounter to 0)
-   * Needed when index pattern is switched or a new runtime field is added
-   */
-  const sendResetMsg = useCallback(
-    (fetchStatus?: FetchStatus, fetchCounter = 0) => {
-      refs.current.fetchStatus = fetchStatus ?? initialFetchStatus;
-      main$.next({
-        fetchStatus: initialFetchStatus,
-        fetchCounter,
-      });
-      dataDocuments$.next({
-        fetchStatus: initialFetchStatus,
-        result: [],
-      });
-      dataCharts$.next({
-        fetchStatus: initialFetchStatus,
-      });
-      dataTotalHits$.next({
-        fetchStatus: initialFetchStatus,
-      });
-    },
-    [main$, dataCharts$, dataDocuments$, dataTotalHits$, initialFetchStatus]
-  );
-  /**
-   * Function to fetch data from ElasticSearch
-   */
-  const fetchAll = useCallback(
-    (reset = false) => {
-      if (!validateTimeRange(timefilter.getTime(), services.toastNotifications)) {
-        return Promise.reject();
-      }
-      inspectorAdapters.requests.reset();
-
-      if (refs.current.abortController) refs.current.abortController.abort();
-      refs.current.abortController = new AbortController();
-      const sessionId = searchSessionManager.getNextSearchSessionId();
-      const fetchCounter = ++refs.current.fetchCounter;
-
-      if (reset) {
-        sendResetMsg(FetchStatus.LOADING, fetchCounter);
-      } else {
-        // Let the UI know, data fetching started
-        main$.next({
-          fetchStatus: FetchStatus.LOADING,
-          fetchCounter,
-        });
-        [dataDocuments$, dataTotalHits$, dataCharts$].map((subject$) => {
-          subject$.next({
-            fetchStatus: FetchStatus.LOADING,
-          });
-        });
-
-        refs.current.fetchStatus = FetchStatus.LOADING;
-      }
-
-      const sendPartialStateMsg = () => {
-        refs.current.fetchStatus = FetchStatus.PARTIAL;
-        main$.next({
-          fetchStatus: FetchStatus.PARTIAL,
-        });
-      };
-
-      const sendCompleteStateMsg = (foundDocuments = true) => {
-        refs.current.fetchStatus = FetchStatus.COMPLETE;
-        main$.next({
-          fetchStatus: FetchStatus.COMPLETE,
-          foundDocuments,
-        });
-        if (!foundDocuments) {
-          refs.current.abortController!.abort();
-        }
-      };
-
-      const { hideChart, interval, sort } = stateContainer.appStateContainer.getState();
-      // let's update the base searchSource
-      updateSearchSource(searchSource, false, {
-        indexPattern,
-        services,
-        sort: sort as SortOrder[],
-        useNewFieldsApi,
-      });
-
-      const fetchDeps = {
-        abortController: refs.current.abortController!,
-        inspectorAdapters,
-        onResults: (isEmpty: boolean) => {
-          if (isEmpty) {
-            refs.current.abortController!.abort();
-            sendCompleteStateMsg(false);
-          } else {
-            sendPartialStateMsg();
-          }
-        },
-        searchSessionId: sessionId,
-        searchSource,
-      };
-
-      const fetchAndSubscribeDocuments = () => {
-        return fetchDocuments(dataDocuments$, fetchDeps);
-      };
-
-      const fetchAndSubscribeChart = () => {
-        return fetchChart(dataCharts$, {
-          ...fetchDeps,
-          data,
-          interval: interval ?? 'auto',
-        });
-      };
-
-      const fetchAndSubscribeTotalHits = () => {
-        return fetchTotalHits(dataTotalHits$, { ...fetchDeps, data });
-      };
-
-      const all = {
-        documents: fetchAndSubscribeDocuments(),
-        totalHits: fetchAndSubscribeTotalHits(),
-        chart: !hideChart && indexPattern.timeFieldName ? fetchAndSubscribeChart() : of(null),
-      };
-
-      forkJoin(all).subscribe(
-        () => {
-          main$.next({ fetchStatus: FetchStatus.COMPLETE, foundDocuments: true });
-        },
-        (error) => {
-          if (error instanceof Error && error.name === 'AbortError') return;
-          refs.current.fetchStatus = FetchStatus.ERROR;
-          data.search.showError(error);
-          main$.next({
-            fetchStatus: FetchStatus.ERROR,
-            error,
-          });
-        },
-        () => {
-          refs.current.autoRefreshDoneCb?.();
-          refs.current.autoRefreshDoneCb = undefined;
-        }
-      );
-    },
-    [
-      inspectorAdapters,
-      timefilter,
-      services,
-      searchSessionManager,
-      stateContainer,
-      searchSource,
-      data,
-      indexPattern,
-      useNewFieldsApi,
-      sendResetMsg,
-      main$,
-      dataDocuments$,
-      dataTotalHits$,
-      dataCharts$,
-    ]
-  );
+  }>({});
 
   /**
    * This part takes care of triggering the data fetching by creating and subscribing
    * to an observable of various possible changes in state
    */
   useEffect(() => {
+    /**
+     * handler emitted by `timefilter.getAutoRefreshFetch$()`
+     * to notify when data completed loading and to start a new autorefresh loop
+     */
+    let autoRefreshDoneCb: AutoRefreshDoneFn | undefined;
     const fetch$ = merge(
       refetch$,
       filterManager.getFetches$(),
       timefilter.getFetch$(),
       timefilter.getAutoRefreshFetch$().pipe(
         tap((done) => {
-          refs.current.autoRefreshDoneCb = done;
+          autoRefreshDoneCb = done;
         }),
-        filter(() => refs.current.fetchStatus !== FetchStatus.LOADING)
+        filter(() => {
+          /**
+           * filter to prevent auto-refresh triggered fetch when
+           * loading is still ongoing
+           */
+          const currentFetchStatus = main$.getValue().fetchStatus;
+          return (
+            currentFetchStatus !== FetchStatus.LOADING && currentFetchStatus !== FetchStatus.PARTIAL
+          );
+        })
       ),
       data.query.queryString.getUpdates$(),
       searchSessionManager.newSearchSessionIdFromURL$.pipe(filter((sessionId) => !!sessionId))
     ).pipe(debounceTime(100));
 
     const subscription = fetch$.subscribe((val) => {
-      fetchAll(val === 'reset');
+      if (!validateTimeRange(timefilter.getTime(), services.toastNotifications)) {
+        return;
+      }
+      inspectorAdapters.requests.reset();
+
+      if (refs.current.abortController) refs.current.abortController.abort();
+      refs.current.abortController = new AbortController();
+      fetch(val === 'reset', {
+        abortController: refs.current.abortController,
+        appStateContainer: stateContainer.appStateContainer,
+        inspectorAdapters,
+        data,
+        dataSubjects,
+        initialFetchStatus,
+        searchSource,
+        searchSessionId: searchSessionManager.getNextSearchSessionId(),
+        services,
+        useNewFieldsApi,
+      }).subscribe({
+        complete: () => {
+          // if this function was set and is executed, another refresh fetch can be triggered
+          autoRefreshDoneCb?.();
+          autoRefreshDoneCb = undefined;
+        },
+      });
     });
 
-    return () => {
-      subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, [
+    data,
     data.query.queryString,
+    dataSubjects,
     filterManager,
+    initialFetchStatus,
+    inspectorAdapters,
+    main$,
     refetch$,
+    searchSessionManager,
     searchSessionManager.newSearchSessionIdFromURL$,
+    searchSource,
+    services,
+    services.toastNotifications,
+    stateContainer.appStateContainer,
     timefilter,
-    fetchAll,
+    useNewFieldsApi,
   ]);
 
-  const dataSubjects = useMemo(() => {
-    return {
-      main$,
-      documents$: dataDocuments$,
-      totalHits$: dataTotalHits$,
-      charts$: dataCharts$,
-    };
-  }, [main$, dataCharts$, dataDocuments$, dataTotalHits$]);
+  const reset = useCallback(() => sendResetMsg(dataSubjects, initialFetchStatus), [
+    dataSubjects,
+    initialFetchStatus,
+  ]);
 
   return {
     refetch$,
     data$: dataSubjects,
-    reset: sendResetMsg,
+    reset,
     inspectorAdapters,
   };
 };

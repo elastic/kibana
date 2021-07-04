@@ -15,10 +15,11 @@ import {
 } from '../../../../../../data/public';
 import { Adapters } from '../../../../../../inspector/common';
 import { FetchStatus } from '../../../types';
-import { SavedSearchTotalHitsSubject } from './use_saved_search';
+import { DataTotalHits$ } from './use_saved_search';
+import { sendErrorMsg, sendLoadingMsg } from './use_saved_search_messages';
 
 export function fetchTotalHits(
-  dataTotalHits$: SavedSearchTotalHitsSubject,
+  dataTotalHits$: DataTotalHits$,
   {
     abortController,
     data,
@@ -29,7 +30,7 @@ export function fetchTotalHits(
   }: {
     abortController: AbortController;
     data: DataPublicPluginStart;
-    onResults: (isEmpty: boolean) => void;
+    onResults: (foundDocuments: boolean) => void;
     inspectorAdapters: Adapters;
     searchSessionId: string;
     searchSource: SearchSource;
@@ -43,6 +44,8 @@ export function fetchTotalHits(
     data.query.timefilter.timefilter.createFilter(indexPattern!)
   );
   childSearchSource.setField('size', 0);
+
+  sendLoadingMsg(dataTotalHits$);
 
   const fetch$ = childSearchSource
     .fetch$({
@@ -64,17 +67,13 @@ export function fetchTotalHits(
     (res) => {
       const totalHitsNr = res.rawResponse.hits.total as number;
       dataTotalHits$.next({ fetchStatus: FetchStatus.COMPLETE, result: totalHitsNr });
-      onResults(totalHitsNr === 0);
+      onResults(totalHitsNr > 0);
     },
     (error) => {
       if (error instanceof Error && error.name === 'AbortError') {
         return;
       }
-
-      dataTotalHits$.next({
-        fetchStatus: FetchStatus.ERROR,
-        error,
-      });
+      sendErrorMsg(dataTotalHits$, error);
     }
   );
 

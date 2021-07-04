@@ -19,7 +19,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { formatNumWithCommas } from '../../../../helpers';
-import { SavedSearchTotalHitsSubject } from '../../services/use_saved_search';
+import { DataTotalHits$ } from '../../services/use_saved_search';
 import { FetchStatus } from '../../../../types';
 
 export interface HitsCounterProps {
@@ -32,7 +32,7 @@ export interface HitsCounterProps {
    */
   onResetQuery: () => void;
 
-  savedSearchData$: SavedSearchTotalHitsSubject;
+  savedSearchData$: DataTotalHits$;
 }
 
 interface HitsCounterState {

@@ -35,13 +35,13 @@ import {
   getAdjustedInterval,
   renderEndzoneTooltip,
 } from '../../../../../../../charts/public';
-import { SavedSearchChartsSubject } from '../../services/use_saved_search';
+import { DataCharts$ } from '../../services/use_saved_search';
 import { FetchStatus } from '../../../../types';
 import { TimechartBucketInterval } from '../timechart_header/timechart_header';
 import { DiscoverServices } from '../../../../../build_services';
 
 export interface DiscoverHistogramProps {
-  savedSearchData$: SavedSearchChartsSubject;
+  savedSearchData$: DataCharts$;
   timefilterUpdateHandler: (ranges: { from: number; to: number }) => void;
   services: DiscoverServices;
 }

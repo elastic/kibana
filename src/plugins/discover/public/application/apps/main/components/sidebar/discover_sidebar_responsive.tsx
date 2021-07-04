@@ -35,7 +35,7 @@ import { DiscoverSidebar } from './discover_sidebar';
 import { DiscoverServices } from '../../../../../build_services';
 import { AppState } from '../../services/discover_state';
 import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
-import { SavedSearchDataDocumentsSubject } from '../../services/use_saved_search';
+import { DataDocuments$ } from '../../services/use_saved_search';
 import { calcFieldCounts } from '../../utils/calc_field_counts';
 
 export interface DiscoverSidebarResponsiveProps {
@@ -50,7 +50,7 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * hits fetched from ES, displayed in the doc table
    */
-  documents$: SavedSearchDataDocumentsSubject;
+  documents$: DataDocuments$;
   /**
    * List of available index patterns
    */

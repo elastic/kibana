@@ -21,10 +21,10 @@ import { indexPatternWithTimefieldMock } from '../../../../../__mocks__/index_pa
 import { GetStateReturn } from '../../services/discover_state';
 import { DiscoverLayoutProps } from './types';
 import {
-  SavedSearchChartsSubject,
-  SavedSearchDataDocumentsSubject,
-  SavedSearchDataSubject,
-  SavedSearchTotalHitsSubject,
+  DataCharts$,
+  DataDocuments$,
+  DataMain$,
+  DataTotalHits$,
 } from '../../services/use_saved_search';
 import { discoverServiceMock } from '../../../../../__mocks__/services';
 import { FetchStatus } from '../../../../types';
@@ -47,19 +47,18 @@ function getProps(indexPattern: IndexPattern): DiscoverLayoutProps {
 
   const main$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
-    fetchCounter: 1,
     foundDocuments: true,
-  }) as SavedSearchDataSubject;
+  }) as DataMain$;
 
   const documents$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
     result: esHits as ElasticSearchHit[],
-  }) as SavedSearchDataDocumentsSubject;
+  }) as DataDocuments$;
 
   const totalHits$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
     result: Number(esHits.length),
-  }) as SavedSearchTotalHitsSubject;
+  }) as DataTotalHits$;
 
   const chartData = ({
     xAxisOrderedValues: [
@@ -120,7 +119,7 @@ function getProps(indexPattern: IndexPattern): DiscoverLayoutProps {
       description: 'test',
       scale: 2,
     },
-  }) as SavedSearchChartsSubject;
+  }) as DataCharts$;
 
   const savedSearchData$ = {
     main$,

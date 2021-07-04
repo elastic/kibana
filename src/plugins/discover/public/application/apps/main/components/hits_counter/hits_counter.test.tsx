@@ -13,7 +13,7 @@ import { HitsCounter, HitsCounterProps } from './hits_counter';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { BehaviorSubject } from 'rxjs';
 import { FetchStatus } from '../../../../types';
-import { SavedSearchTotalHitsSubject } from '../../services/use_saved_search';
+import { DataTotalHits$ } from '../../services/use_saved_search';
 
 describe('hits counter', function () {
   let props: HitsCounterProps;
@@ -26,7 +26,7 @@ describe('hits counter', function () {
       savedSearchData$: new BehaviorSubject({
         fetchStatus: FetchStatus.COMPLETE,
         result: 2,
-      }) as SavedSearchTotalHitsSubject,
+      }) as DataTotalHits$,
     };
   });
 
@@ -50,7 +50,7 @@ describe('hits counter', function () {
     const data$ = new BehaviorSubject({
       fetchStatus: FetchStatus.COMPLETE,
       result: 1899,
-    }) as SavedSearchTotalHitsSubject;
+    }) as DataTotalHits$;
     component = mountWithIntl(
       <HitsCounter
         {...props}

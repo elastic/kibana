@@ -39,9 +39,11 @@ import { DiscoverChart } from '../chart';
 import { getResultState } from '../../utils/get_result_state';
 import { InspectorSession } from '../../../../../../../inspector/public';
 import { DiscoverUninitialized } from '../uninitialized/uninitialized';
-import { SavedSearchDataMessage } from '../../services/use_saved_search';
+import { DataMainMsg } from '../../services/use_saved_search';
 import { useDataGridColumns } from '../../../../helpers/use_data_grid_columns';
 import { DiscoverDocuments } from './discover_documents';
+import { FetchStatus } from '../../../../types';
+import { useDataState } from '../../utils/use_data_state';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
@@ -68,20 +70,16 @@ export function DiscoverLayout({
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
   const collapseIcon = useRef<HTMLButtonElement>(null);
+  const fetchCounter = useRef<number>(0);
   const { main$, charts$, totalHits$ } = savedSearchData$;
 
-  const [fetchState, setFetchState] = useState<SavedSearchDataMessage>(main$.getValue());
-
-  const { fetchCounter } = fetchState;
+  const fetchState: DataMainMsg = useDataState(main$);
 
   useEffect(() => {
-    const subscription = main$.subscribe((next) => {
-      if (next.fetchStatus !== fetchState.fetchStatus) {
-        setFetchState({ ...fetchState, ...next });
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [main$, fetchState, setFetchState]);
+    if (fetchState.fetchStatus === FetchStatus.LOADING) {
+      fetchCounter.current++;
+    }
+  }, [fetchState.fetchStatus]);
 
   // collapse icon isn't displayed in mobile view, use it to detect which view is displayed
   const isMobile = useCallback(() => collapseIcon && !collapseIcon.current, []);
@@ -153,7 +151,7 @@ export function DiscoverLayout({
 
   return (
     <I18nProvider>
-      <EuiPage className="dscPage" data-fetch-counter={fetchCounter ?? 0}>
+      <EuiPage className="dscPage" data-fetch-counter={fetchCounter.current}>
         <TopNavMemoized
           indexPattern={indexPattern}
           onOpenInspector={onOpenInspector}

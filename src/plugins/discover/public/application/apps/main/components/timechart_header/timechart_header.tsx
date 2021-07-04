@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import dateMath from '@elastic/datemath';
 import './timechart_header.scss';
 import { DataPublicPluginStart } from '../../../../../../../data/public';
-import { SavedSearchChartsSubject } from '../../services/use_saved_search';
+import { DataCharts$ } from '../../services/use_saved_search';
 import { FetchStatus } from '../../../../types';
 import { Chart } from '../chart/point_series';
 
@@ -50,7 +50,7 @@ export interface TimechartHeaderProps {
    */
   stateInterval: string;
 
-  savedSearchData$: SavedSearchChartsSubject;
+  savedSearchData$: DataCharts$;
 }
 
 interface ChartDataState {

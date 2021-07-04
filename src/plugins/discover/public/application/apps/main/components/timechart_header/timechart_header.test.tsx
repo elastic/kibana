@@ -16,7 +16,7 @@ import { DataPublicPluginStart } from '../../../../../../../data/public';
 import { FetchStatus } from '../../../../types';
 import { BehaviorSubject } from 'rxjs';
 import { Chart } from '../chart/point_series';
-import { SavedSearchChartsSubject } from '../../services/use_saved_search';
+import { DataCharts$ } from '../../services/use_saved_search';
 
 const chartData = ({
   xAxisOrderedValues: [
@@ -111,7 +111,7 @@ describe('timechart header', function () {
           description: 'second',
           scale: undefined,
         },
-      }) as SavedSearchChartsSubject,
+      }) as DataCharts$,
     };
   });
 
@@ -129,7 +129,7 @@ describe('timechart header', function () {
         description: 'second',
         scale: undefined,
       },
-    }) as SavedSearchChartsSubject;
+    }) as DataCharts$;
     component = mountWithIntl(<TimechartHeader {...props} />);
     expect(component.find(EuiIconTip).length).toBe(1);
   });

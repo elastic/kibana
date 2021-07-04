@@ -41,7 +41,7 @@ export function useDiscoverState({
   const [indexPattern, setIndexPattern] = useState(initialIndexPattern);
   const [savedSearch, setSavedSearch] = useState(initialSavedSearch);
   const useNewFieldsApi = useMemo(() => !config.get(SEARCH_FIELDS_FROM_SOURCE), [config]);
-  const timefilter = data.query.timefilter.timefilter;
+  const { timefilter } = data.query.timefilter;
 
   const searchSource = useMemo(() => {
     savedSearch.searchSource.setField('index', indexPattern);
@@ -100,9 +100,7 @@ export function useDiscoverState({
 
   useEffect(() => {
     const stopSync = stateContainer.initializeAndSync(indexPattern, filterManager, data);
-    return () => {
-      stopSync();
-    };
+    return () => stopSync();
   }, [stateContainer, filterManager, data, indexPattern]);
 
   /**
@@ -140,6 +138,9 @@ export function useDiscoverState({
     return () => unsubscribe();
   }, [config, indexPatterns, appStateContainer, setState, state, refetch$, reset]);
 
+  /**
+   * function to revert any changes to a given saved search
+   */
   const resetSavedSearch = useCallback(
     async (id?: string) => {
       const newSavedSearch = await services.getSavedSearchById(id);

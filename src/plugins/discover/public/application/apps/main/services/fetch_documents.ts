@@ -7,14 +7,14 @@
  */
 import { i18n } from '@kbn/i18n';
 import { filter } from 'rxjs/operators';
-import { ISearchSource } from '../../../../kibana_services';
 import { Adapters } from '../../../../../../inspector/common';
-import { isCompleteResponse } from '../../../../../../data/common';
+import { isCompleteResponse, SearchSource } from '../../../../../../data/common';
 import { FetchStatus } from '../../../types';
-import { SavedSearchDataDocumentsSubject } from './use_saved_search';
+import { DataDocuments$ } from './use_saved_search';
+import { sendErrorMsg, sendLoadingMsg } from './use_saved_search_messages';
 
 export const fetchDocuments = (
-  dataDocuments$: SavedSearchDataDocumentsSubject,
+  dataDocuments$: DataDocuments$,
   {
     abortController,
     inspectorAdapters,
@@ -24,15 +24,17 @@ export const fetchDocuments = (
   }: {
     abortController: AbortController;
     inspectorAdapters: Adapters;
-    onResults: (isEmpty: boolean) => void;
+    onResults: (foundDocuments: boolean) => void;
     searchSessionId: string;
-    searchSource: ISearchSource;
+    searchSource: SearchSource;
   }
 ) => {
   const childSearchSource = searchSource.createCopy();
   childSearchSource.setField('trackTotalHits', false);
   childSearchSource.setField('highlightAll', true);
   childSearchSource.setField('version', false);
+
+  sendLoadingMsg(dataDocuments$);
 
   const fetch$ = childSearchSource
     .fetch$({
@@ -58,17 +60,14 @@ export const fetchDocuments = (
         fetchStatus: FetchStatus.COMPLETE,
         result: documents,
       });
-      onResults(documents.length === 0);
+      onResults(documents.length > 0);
     },
     (error) => {
       if (error instanceof Error && error.name === 'AbortError') {
         return;
       }
 
-      dataDocuments$.next({
-        fetchStatus: FetchStatus.ERROR,
-        error,
-      });
+      sendErrorMsg(dataDocuments$, error);
     }
   );
   return fetch$;

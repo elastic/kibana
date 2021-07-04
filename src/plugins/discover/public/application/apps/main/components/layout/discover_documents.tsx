@@ -22,10 +22,7 @@ import {
 import { useDataGridColumns } from '../../../../helpers/use_data_grid_columns';
 import { IndexPattern } from '../../../../../../../data/common';
 import { SavedSearch } from '../../../../../saved_searches';
-import {
-  SavedSearchDataDocumentsMessage,
-  SavedSearchDataDocumentsSubject,
-} from '../../services/use_saved_search';
+import { DataDocumentsMsg, DataDocuments$ } from '../../services/use_saved_search';
 import { DiscoverServices } from '../../../../../build_services';
 import { AppState, GetStateReturn } from '../../services/discover_state';
 
@@ -44,7 +41,7 @@ function DiscoverDocumentsComponent({
   state,
   stateContainer,
 }: {
-  documents$: SavedSearchDataDocumentsSubject;
+  documents$: DataDocuments$;
   expandedDoc?: ElasticSearchHit;
   indexPattern: IndexPattern;
   isMobile: () => boolean;
@@ -62,7 +59,7 @@ function DiscoverDocumentsComponent({
   const scrollableDesktop = useRef<HTMLDivElement>(null);
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
   const sampleSize = useMemo(() => uiSettings.get(SAMPLE_SIZE_SETTING), [uiSettings]);
-  const [documentState, setDocumentState] = useState<SavedSearchDataDocumentsMessage>({
+  const [documentState, setDocumentState] = useState<DataDocumentsMsg>({
     fetchStatus: documents$.getValue().fetchStatus,
     result: documents$.getValue().result,
   });
