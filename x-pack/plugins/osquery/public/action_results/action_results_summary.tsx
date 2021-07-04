@@ -41,7 +41,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   // @ts-expect-error update types
   const [pageSize, setPageSize] = useState(50);
   const expired = useMemo(() => expirationDate < new Date(), [expirationDate]);
-  const [isLive, setIsLive] = useState(false);
+  const [isLive, setIsLive] = useState(true);
   const {
     // @ts-expect-error update types
     data: { aggregations, edges },

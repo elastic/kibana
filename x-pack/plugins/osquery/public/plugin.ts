@@ -32,6 +32,7 @@ import {
   LazyOsqueryManagedPolicyEditExtension,
   LazyOsqueryManagedCustomButtonExtension,
 } from './fleet_integration';
+import { getLazyOsqueryAction } from './shared_components';
 
 export function toggleOsqueryPlugin(
   updater$: Subject<AppUpdater>,
@@ -162,7 +163,14 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       }));
     }
 
-    return {};
+    return {
+      OsqueryAction: getLazyOsqueryAction({
+        ...core,
+        ...plugins,
+        storage: this.storage,
+        kibanaVersion: this.kibanaVersion,
+      }),
+    };
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function

@@ -15,6 +15,7 @@ import {
   EuiLink,
   EuiLoadingContent,
   EuiProgress,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
@@ -47,7 +48,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   startDate,
   endDate,
 }) => {
-  const [isLive, setIsLive] = useState(false);
+  const [isLive, setIsLive] = useState(true);
   const {
     // @ts-expect-error update types
     data: { aggregations },
@@ -216,22 +217,34 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     [actionId, endDate, startDate]
   );
 
-  useEffect(() => setIsLive(aggregations.totalResponded !== agentIds?.length), [
-    agentIds?.length,
-    aggregations.totalResponded,
-  ]);
+  useEffect(
+    () =>
+      setIsLive(
+        aggregations.totalResponded !== agentIds?.length ||
+          // @ts-expect-error-type
+          allResultsData?.rawResponse.aggregations?.unique_agents.value !== agentIds?.length
+      ),
+    [
+      agentIds?.length,
+      aggregations.totalResponded,
+      // @ts-expect-error-type
+      allResultsData?.rawResponse.aggregations?.unique_agents.value,
+    ]
+  );
 
   if (!aggregations.totalResponded) {
     return <EuiLoadingContent lines={5} />;
   }
 
-  if (aggregations.totalResponded && isFetched && !allResultsData?.edges.length) {
-    return <EuiCallOut title={generateEmptyDataMessage(aggregations.totalResponded)} />;
-  }
-
   return (
     <>
-      {!isLive && <EuiProgress color="primary" size="xs" />}
+      {aggregations.totalResponded && isFetched && !allResultsData?.edges.length ? (
+        <>
+          <EuiCallOut title={generateEmptyDataMessage(aggregations.totalResponded)} />
+          <EuiSpacer />
+        </>
+      ) : null}
+      {isLive && <EuiProgress color="primary" size="xs" />}
       {
         // @ts-expect-error update types
         <DataContext.Provider value={allResultsData?.edges}>

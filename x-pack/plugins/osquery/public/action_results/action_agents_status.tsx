@@ -25,7 +25,7 @@ const ActionAgentsStatusComponent: React.FC<ActionAgentsStatusProps> = ({
   expirationDate,
   agentIds,
 }) => {
-  const [isLive, setIsLive] = useState(false);
+  const [isLive, setIsLive] = useState(true);
   const expired = useMemo(() => expirationDate < new Date(), [expirationDate]);
   const {
     // @ts-expect-error update types
