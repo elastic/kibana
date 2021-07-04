@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       let foundZero = false;
       for (const subj of ['Documents', 'Total hits', 'Charts']) {
         await testSubjects.click(`inspectorRequestChooser${subj}`);
-        if (testSubjects.exists('inspectorRequestDetailStatistics')) {
+        if (testSubjects.exists('inspectorRequestDetailStatistics', { timeout: 500 })) {
           await testSubjects.click(`inspectorRequestDetailStatistics`);
           const requestStatsTotalHits = getHitCount(await inspector.getTableData());
           if (requestStatsTotalHits === '0') {
@@ -71,7 +71,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await inspector.open();
       await testSubjects.click('inspectorRequestChooser');
-      await testSubjects.click(`inspectorRequestChooserTotal hits`);
+      await testSubjects.click(`inspectorRequestChooserDocuments`);
+      await testSubjects.click(`inspectorRequestDetailStatistics`);
       const requestStats = await inspector.getTableData();
 
       expect(getHitCount(requestStats)).to.be('500');
