@@ -48,7 +48,7 @@ exports[`TableHeader with time column renders correctly 1`] = `
           data-test-subj="docTableRemoveHeader-first"
         >
           <span
-            data-euiicon-type="minus"
+            data-euiicon-type="cross"
           />
         </button>
       </span>
@@ -84,7 +84,7 @@ exports[`TableHeader with time column renders correctly 1`] = `
           data-test-subj="docTableRemoveHeader-middle"
         >
           <span
-            data-euiicon-type="minus"
+            data-euiicon-type="cross"
           />
         </button>
       </span>
@@ -133,7 +133,7 @@ exports[`TableHeader with time column renders correctly 1`] = `
           data-test-subj="docTableRemoveHeader-last"
         >
           <span
-            data-euiicon-type="minus"
+            data-euiicon-type="cross"
           />
         </button>
       </span>
@@ -180,7 +180,7 @@ exports[`TableHeader without time column renders correctly 1`] = `
           data-test-subj="docTableRemoveHeader-first"
         >
           <span
-            data-euiicon-type="minus"
+            data-euiicon-type="cross"
           />
         </button>
       </span>
@@ -216,7 +216,7 @@ exports[`TableHeader without time column renders correctly 1`] = `
           data-test-subj="docTableRemoveHeader-middle"
         >
           <span
-            data-euiicon-type="minus"
+            data-euiicon-type="cross"
           />
         </button>
       </span>
@@ -265,7 +265,7 @@ exports[`TableHeader without time column renders correctly 1`] = `
           data-test-subj="docTableRemoveHeader-last"
         >
           <span
-            data-euiicon-type="minus"
+            data-euiicon-type="cross"
           />
         </button>
       </span>

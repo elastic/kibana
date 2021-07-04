@@ -116,7 +116,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('doc view should sort ascending', async function () {
           const expectedTimeStamp = 'Sep 20, 2015 @ 00:00:00.000';
-          await testSubjects.click('docTableHeaderFieldSort_@timestamp_desc'); 
+          await testSubjects.click('docTableHeaderFieldSort_@timestamp');
 
           // we don't technically need this sleep here because the tryForTime will retry and the
           // results will match on the 2nd or 3rd attempt, but that debug output is huge in this

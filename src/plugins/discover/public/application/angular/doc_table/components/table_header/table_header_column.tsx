@@ -43,30 +43,24 @@ export function TableHeaderColumn({
   sortOrder,
 }: Props) {
   const [, sortDirection = ''] = sortOrder.find((sortPair) => name === sortPair[0]) || [];
-  const currentSortWithoutColumn = sortOrder.filter((pair) => pair[0] !== name);
-  const currentColumnSort = sortOrder.find((pair) => pair[0] === name);
-  const currentColumnSortDirection = (currentColumnSort && currentColumnSort[1]) || '';
-
-  const btnSortProps = {
-    iconType: sortDirectionToIcon[sortDirection],
-    className: sortDirection && `kbnDocTableHeader__sortChange`,
-    testSubject: `docTableHeaderFieldSort_${name}_${currentColumnSortDirection}`
-  }
+  const curSortWithoutCol = sortOrder.filter((pair) => pair[0] !== name);
+  const curColSort = sortOrder.find((pair) => pair[0] === name);
+  const curColSortDir = (curColSort && curColSort[1]) || '';
 
   const handleChangeSortOrder = () => {
     if (!onChangeSortOrder) return;
 
     // Cycle goes Unsorted -> Asc -> Desc -> Unsorted
-    if (currentColumnSort === undefined) {
-      onChangeSortOrder([...currentSortWithoutColumn, [name, 'asc']]);
-    } else if (currentColumnSortDirection === 'asc') {
-      onChangeSortOrder([...currentSortWithoutColumn, [name, 'desc']]);
-    } else if (currentColumnSortDirection === 'desc' && currentSortWithoutColumn.length === 0) {
+    if (curColSort === undefined) {
+      onChangeSortOrder([...curSortWithoutCol, [name, 'asc']]);
+    } else if (curColSortDir === 'asc') {
+      onChangeSortOrder([...curSortWithoutCol, [name, 'desc']]);
+    } else if (curColSortDir === 'desc' && curSortWithoutCol.length === 0) {
       // If we're at the end of the cycle and this is the only existing sort, we switch
       // back to ascending sort instead of removing it.
       onChangeSortOrder([[name, 'asc']]);
     } else {
-      onChangeSortOrder(currentSortWithoutColumn);
+      onChangeSortOrder(curSortWithoutCol);
     }
   };
 
@@ -93,11 +87,11 @@ export function TableHeaderColumn({
       }
     );
 
-    if (currentColumnSort === undefined) {
+    if (curColSort === undefined) {
       return sortAscendingMessage;
     } else if (sortDirection === 'asc') {
       return sortDescendingMessage;
-    } else if (sortDirection === 'desc' && currentSortWithoutColumn.length === 0) {
+    } else if (sortDirection === 'desc' && curSortWithoutCol.length === 0) {
       return sortAscendingMessage;
     } else {
       return stopSortingMessage;
@@ -108,10 +102,12 @@ export function TableHeaderColumn({
   const buttons = [
     // Sort Button
     {
-      ...btnSortProps,
       active: isSortable && typeof onChangeSortOrder === 'function',
       ariaLabel: getSortButtonAriaLabel(),
+      className: sortDirection && `kbnDocTableHeader__sortChange`,
+      iconType: sortDirectionToIcon[sortDirection],
       onClick: handleChangeSortOrder,
+      testSubject: `docTableHeaderFieldSort_${name}`,
       tooltip: getSortButtonAriaLabel(),
     },
     // Remove Button
