@@ -15,7 +15,7 @@
     "observability",
     "ruleRegistry"
   ],
-  "optionalPlugins": ["ml", "home", "embeddable"],
+  "optionalPlugins": ["ml", "home", "embeddable", "osquery"],
   "server": true,
   "ui": true,
   "configPath": ["xpack", "infra"],
