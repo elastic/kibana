@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { mountWithIntl, setMockActions, setMockValues } from '../../../../__mocks__';
+import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
 import { EuiInMemoryTable, EuiButtonIcon } from '@elastic/eui';
+
+import { mountWithIntl } from '../../../../test_helpers';
 
 import { SourceEnginesTable } from './source_engines_table';
 

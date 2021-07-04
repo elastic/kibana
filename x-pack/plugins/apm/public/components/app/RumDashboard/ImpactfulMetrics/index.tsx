@@ -11,7 +11,7 @@ import { JSErrors } from './JSErrors';
 
 export function ImpactfulMetrics() {
   return (
-    <EuiPanel>
+    <EuiPanel hasBorder={true}>
       <EuiSpacer size="xs" />
       <EuiFlexGroup wrap>
         <EuiFlexItem style={{ flexBasis: 650 }}>

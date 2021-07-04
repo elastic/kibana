@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { PresentationUtilPluginStart } from '../types';
 import { PluginServices } from './create';
 import { PresentationCapabilitiesService } from './capabilities';
 import { PresentationDashboardsService } from './dashboards';
 import { PresentationLabsService } from './labs';
+import { registry as stubRegistry } from './stub';
 
 export { PresentationCapabilitiesService } from './capabilities';
 export { PresentationDashboardsService } from './dashboards';
@@ -21,3 +23,11 @@ export interface PresentationUtilServices {
 }
 
 export const pluginServices = new PluginServices<PresentationUtilServices>();
+
+export const getStubPluginServices = (): PresentationUtilPluginStart => {
+  pluginServices.setRegistry(stubRegistry.start({}));
+  return {
+    ContextProvider: pluginServices.getContextProvider(),
+    labsService: pluginServices.getServices().labs,
+  };
+};

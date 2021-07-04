@@ -41,6 +41,7 @@ export interface HeaderSectionProps extends HeaderProps {
   children?: React.ReactNode;
   height?: number;
   id?: string;
+  isInspectDisabled?: boolean;
   split?: boolean;
   subtitle?: string | React.ReactNode;
   title: string | React.ReactNode;
@@ -55,6 +56,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
   children,
   height,
   id,
+  isInspectDisabled,
   split,
   subtitle,
   title,
@@ -85,7 +87,12 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
 
           {id && (
             <EuiFlexItem grow={false}>
-              <InspectButton queryId={id} multiple={inspectMultiple} title={title} />
+              <InspectButton
+                isDisabled={isInspectDisabled}
+                queryId={id}
+                multiple={inspectMultiple}
+                title={title}
+              />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

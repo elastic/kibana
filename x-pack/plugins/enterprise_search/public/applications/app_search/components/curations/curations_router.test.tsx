@@ -19,6 +19,6 @@ describe('CurationsRouter', () => {
     const wrapper = shallow(<CurationsRouter />);
 
     expect(wrapper.find(Switch)).toHaveLength(1);
-    expect(wrapper.find(Route)).toHaveLength(4);
+    expect(wrapper.find(Route)).toHaveLength(3);
   });
 });

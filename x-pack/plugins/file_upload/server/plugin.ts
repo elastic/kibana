@@ -10,14 +10,9 @@ import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '
 import { schema } from '@kbn/config-schema';
 import { fileUploadRoutes } from './routes';
 import { initFileUploadTelemetry } from './telemetry';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { UI_SETTING_MAX_FILE_SIZE, MAX_FILE_SIZE } from '../common';
-import { StartDeps } from './types';
 import { setupCapabilities } from './capabilities';
-
-interface SetupDeps {
-  usageCollection: UsageCollectionSetup;
-}
+import { StartDeps, SetupDeps } from './types';
 
 export class FileUploadPlugin implements Plugin {
   private readonly _logger: Logger;
@@ -41,13 +36,15 @@ export class FileUploadPlugin implements Plugin {
           defaultMessage:
             'Sets the file size limit when importing files. The highest supported value for this setting is 1GB.',
         }),
-        schema: schema.string(),
-        validation: {
-          regexString: '\\d+[mMgG][bB]',
-          message: i18n.translate('xpack.fileUpload.maxFileSizeUiSetting.error', {
-            defaultMessage: 'Should be a valid data size. e.g. 200MB, 1GB',
-          }),
-        },
+        schema: schema.string({
+          validate: (value) => {
+            if (!/^\d+[mg][b]$/i.test(value)) {
+              return i18n.translate('xpack.fileUpload.maxFileSizeUiSetting.error', {
+                defaultMessage: 'Should be a valid data size. e.g. 200MB, 1GB',
+              });
+            }
+          },
+        }),
       },
     });
 

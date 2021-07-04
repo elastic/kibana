@@ -8,6 +8,8 @@
   ],
   "requiredPlugins": [
     "alerting",
+    "data",
+    "spaces",
     "triggersActionsUi"
   ],
   "server": true

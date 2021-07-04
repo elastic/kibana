@@ -28,11 +28,9 @@ import { SELECTABLE_MESSAGE_COLLECTIONS } from '../../common/translations';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { useGetCases } from '../../containers/use_get_cases';
 import { usePostComment } from '../../containers/use_post_comment';
-import { CaseCallOut } from '../callout';
 import { CaseDetailsHrefSchema, CasesNavigation } from '../links';
 import { Panel } from '../panel';
 import { getActionLicenseError } from '../use_push_to_service/helpers';
-import { ERROR_PUSH_SERVICE_CALLOUT_TITLE } from '../use_push_to_service/translations';
 import { useCasesColumns } from './columns';
 import { getExpandedRowMap } from './expanded_row';
 import { CasesTableHeader } from './header';
@@ -40,6 +38,7 @@ import { CasesTableFilters } from './table_filters';
 import { EuiBasicTableOnChange } from './types';
 
 import { CasesTable } from './table';
+
 const ProgressLoader = styled(EuiProgress)`
   ${({ $isShow }: { $isShow: boolean }) =>
     $isShow
@@ -61,9 +60,11 @@ interface AllCasesGenericProps {
   caseDetailsNavigation?: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>; // if not passed, case name is not displayed as a link (Formerly dependant on isSelectorView)
   configureCasesNavigation?: CasesNavigation; // if not passed, header with nav is not displayed (Formerly dependant on isSelectorView)
   createCaseNavigation: CasesNavigation;
+  disableAlerts?: boolean;
   hiddenStatuses?: CaseStatusWithAllStatus[];
   isSelectorView?: boolean;
   onRowClick?: (theCase?: Case | SubCase) => void;
+  showTitle?: boolean;
   updateCase?: (newCase: Case) => void;
   userCanCrud: boolean;
 }
@@ -74,13 +75,16 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
     caseDetailsNavigation,
     configureCasesNavigation,
     createCaseNavigation,
+    disableAlerts,
     hiddenStatuses = [],
     isSelectorView,
     onRowClick,
+    showTitle,
     updateCase,
     userCanCrud,
   }) => {
     const { actionLicense } = useGetActionLicense();
+
     const firstAvailableStatus = head(difference(caseStatuses, hiddenStatuses));
     const initialFilterOptions =
       !isEmpty(hiddenStatuses) && firstAvailableStatus ? { status: firstAvailableStatus } : {};
@@ -96,7 +100,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
       setFilters,
       setQueryParams,
       setSelectedCases,
-    } = useGetCases({}, initialFilterOptions);
+    } = useGetCases({ initialFilterOptions });
 
     // Post Comment to Case
     const { postComment, isLoading: isCommentUpdating } = usePostComment();
@@ -188,12 +192,14 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
 
     const columns = useCasesColumns({
       caseDetailsNavigation,
+      disableAlerts,
       dispatchUpdateCaseProperty,
       filterStatus: filterOptions.status,
       handleIsLoading,
       isLoadingCases: loading,
       refreshCases,
       showActions,
+      userCanCrud,
     });
 
     const itemIdToExpandedRowMap = useMemo(
@@ -260,15 +266,13 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
 
     return (
       <>
-        {!isEmpty(actionsErrors) && (
-          <CaseCallOut title={ERROR_PUSH_SERVICE_CALLOUT_TITLE} messages={actionsErrors} />
-        )}
         {configureCasesNavigation != null && (
           <CasesTableHeader
             actionsErrors={actionsErrors}
             createCaseNavigation={createCaseNavigation}
             configureCasesNavigation={configureCasesNavigation}
             refresh={refresh}
+            showTitle={showTitle}
             userCanCrud={userCanCrud}
           />
         )}

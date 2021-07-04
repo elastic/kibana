@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ThreatMap, ThreatMapEntry } from '../../../../common/detection_engine/schemas/types';
+import { ThreatMap, ThreatMapEntry } from '@kbn/securitysolution-io-ts-alerting-types';
 import { IFieldType } from '../../../../../../../src/plugins/data/common';
 
 export interface FormattedEntry {

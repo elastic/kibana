@@ -165,8 +165,10 @@ describe('<ComponentTemplateList />', () => {
       const { exists, find } = testBed;
 
       expect(exists('componentTemplatesLoadError')).toBe(true);
+      // The text here looks weird because the child elements' text values (title and description)
+      // are concatenated when we retrive the error element's text value.
       expect(find('componentTemplatesLoadError').text()).toContain(
-        'Unable to load component templates. Try again.'
+        'Error loading component templatesInternal server error'
       );
     });
   });

@@ -53,6 +53,7 @@ export const UI_SETTINGS_CSV_QUOTE_VALUES = 'csv:quoteValues';
 export const UI_SETTINGS_DATEFORMAT_TZ = 'dateFormat:tz';
 
 export const LAYOUT_TYPES = {
+  CANVAS: 'canvas',
   PRESERVE_LAYOUT: 'preserve_layout',
   PRINT: 'print',
 };

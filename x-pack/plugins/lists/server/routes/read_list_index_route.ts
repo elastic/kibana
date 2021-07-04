@@ -7,10 +7,10 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { listItemIndexExistSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { LIST_INDEX } from '@kbn/securitysolution-list-constants';
 
 import type { ListsPluginRouter } from '../types';
-import { LIST_INDEX } from '../../common/constants';
-import { listItemIndexExistSchema } from '../../common/schemas';
 
 import { buildSiemResponse } from './utils';
 

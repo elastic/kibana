@@ -40,10 +40,10 @@ describe('ElasticIndex', () => {
         return elasticsearchClientMock.createSuccessTransportRequestPromise({
           [index]: {
             aliases: { foo: index },
-            mappings: { dynamic: 'strict', properties: { a: 'b' } },
+            mappings: { dynamic: 'strict', properties: { a: 'b' } as any },
             settings: {},
           },
-        } as estypes.GetIndexResponse);
+        } as estypes.IndicesGetResponse);
       });
 
       const info = await Index.fetchInfo(client, '.baz');
@@ -164,7 +164,7 @@ describe('ElasticIndex', () => {
       client.tasks.get.mockResolvedValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise({
           completed: true,
-        } as estypes.GetTaskResponse)
+        } as estypes.TaskGetResponse)
       );
 
       const info = {
@@ -175,7 +175,7 @@ describe('ElasticIndex', () => {
           dynamic: 'strict' as const,
           properties: { foo: { type: 'keyword' } },
         },
-      };
+      } as const;
 
       await Index.convertToAlias(
         client,
@@ -248,7 +248,7 @@ describe('ElasticIndex', () => {
             reason: 'all shards failed',
             failed_shards: [],
           },
-        } as estypes.GetTaskResponse)
+        } as estypes.TaskGetResponse)
       );
 
       const info = {

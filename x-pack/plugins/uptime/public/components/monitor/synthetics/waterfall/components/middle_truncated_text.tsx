@@ -6,12 +6,25 @@
  */
 
 import React, { useMemo } from 'react';
-import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiScreenReaderOnly, EuiToolTip, EuiButtonEmpty, EuiLink } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiScreenReaderOnly,
+  EuiToolTip,
+  EuiLink,
+  EuiText,
+  EuiIcon,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { WaterfallTooltipContent } from './waterfall_tooltip_content';
+import { WaterfallTooltipResponsiveMaxWidth } from './styles';
 import { FIXED_AXIS_HEIGHT } from './constants';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { formatTooltipHeading } from '../../step_detail/waterfall/data_formatting';
 
 interface Props {
+  index: number;
+  highestIndex: number;
   ariaLabel: string;
   text: string;
   onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
@@ -19,7 +32,7 @@ interface Props {
   url: string;
 }
 
-const OuterContainer = styled.span`
+const OuterContainer = euiStyled.span`
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -28,13 +41,21 @@ const OuterContainer = styled.span`
   }
 `; // NOTE: min-width: 0 ensures flexbox and no-wrap children can co-exist
 
-const InnerContainer = styled.span`
+const InnerContainer = euiStyled.span`
   overflow: hidden;
   display: flex;
   align-items: center;
 `;
 
-const FirstChunk = styled.span`
+const IndexNumber = euiStyled(EuiText)`
+  font-family: ${(props) => props.theme.eui.euiCodeFontFamily};
+  margin-right: ${(props) => props.theme.eui.euiSizeXS};
+  line-height: ${FIXED_AXIS_HEIGHT}px;
+  text-align: right;
+  background-color: ${(props) => props.theme.eui.euiColorLightestShade};
+`;
+
+const FirstChunk = euiStyled.span`
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
@@ -42,13 +63,13 @@ const FirstChunk = styled.span`
   text-align: left;
 `; // safari doesn't auto align text left in some cases
 
-const LastChunk = styled.span`
+const LastChunk = euiStyled.span`
   flex-shrink: 0;
   line-height: ${FIXED_AXIS_HEIGHT}px;
   text-align: left;
 `; // safari doesn't auto align text left in some cases
 
-const StyledButton = styled(EuiButtonEmpty)`
+const StyledButton = euiStyled(EuiButtonEmpty)`
   &&& {
     border: none;
 
@@ -57,6 +78,10 @@ const StyledButton = styled(EuiButtonEmpty)`
       padding: 0;
     }
   }
+`;
+
+const SecureIcon = euiStyled(EuiIcon)`
+  margin-right: ${(props) => props.theme.eui.euiSizeXS};
 `;
 
 export const getChunks = (text: string = '') => {
@@ -70,7 +95,18 @@ export const getChunks = (text: string = '') => {
 // Helper component for adding middle text truncation, e.g.
 // really-really-really-long....ompressed.js
 // Can be used to accomodate content in sidebar item rendering.
-export const MiddleTruncatedText = ({ ariaLabel, text, onClick, setButtonRef, url }: Props) => {
+export const MiddleTruncatedText = ({
+  index,
+  ariaLabel,
+  text: fullText,
+  onClick,
+  setButtonRef,
+  url,
+  highestIndex,
+}: Props) => {
+  const secureHttps = fullText.startsWith('https://');
+  const text = fullText.replace(/https:\/\/www.|http:\/\/www.|http:\/\/|https:\/\//, '');
+
   const chunks = useMemo(() => {
     return getChunks(text);
   }, [text]);
@@ -78,29 +114,57 @@ export const MiddleTruncatedText = ({ ariaLabel, text, onClick, setButtonRef, ur
   return (
     <OuterContainer aria-label={ariaLabel} data-test-subj="middleTruncatedTextContainer">
       <EuiScreenReaderOnly>
-        <span data-test-subj="middleTruncatedTextSROnly">{text}</span>
+        <span data-test-subj="middleTruncatedTextSROnly">{fullText}</span>
       </EuiScreenReaderOnly>
-      <EuiToolTip content={text} position="top" data-test-subj="middleTruncatedTextToolTip">
+      <WaterfallTooltipResponsiveMaxWidth
+        as={EuiToolTip}
+        content={
+          <WaterfallTooltipContent {...{ text: formatTooltipHeading(index, fullText), url }} />
+        }
+        data-test-subj="middleTruncatedTextToolTip"
+        delay="long"
+        position="top"
+      >
         <>
           {onClick ? (
             <StyledButton
               onClick={onClick}
-              data-test-subj="middleTruncatedTextButton"
+              data-test-subj={`middleTruncatedTextButton${index}`}
               buttonRef={setButtonRef}
+              flush={'left'}
             >
               <InnerContainer>
+                <IndexNumber
+                  color="subdued"
+                  size="s"
+                  style={{ minWidth: String(highestIndex).length + 1 + 'ch' }}
+                >
+                  {index + '.'}
+                </IndexNumber>
+                {secureHttps && (
+                  <SecureIcon
+                    type="lock"
+                    size="s"
+                    color="secondary"
+                    aria-label={i18n.translate('xpack.uptime.waterfallChart.sidebar.url.https', {
+                      defaultMessage: 'https',
+                    })}
+                  />
+                )}
                 <FirstChunk>{chunks.first}</FirstChunk>
                 <LastChunk>{chunks.last}</LastChunk>
               </InnerContainer>
             </StyledButton>
           ) : (
             <InnerContainer aria-hidden={true}>
-              <FirstChunk>{chunks.first}</FirstChunk>
+              <FirstChunk>
+                {index}. {chunks.first}
+              </FirstChunk>
               <LastChunk>{chunks.last}</LastChunk>
             </InnerContainer>
           )}
         </>
-      </EuiToolTip>
+      </WaterfallTooltipResponsiveMaxWidth>
       <span>
         <EuiLink href={url} external target="_blank">
           <EuiScreenReaderOnly>

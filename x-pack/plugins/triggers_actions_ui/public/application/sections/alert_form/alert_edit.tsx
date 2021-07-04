@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useReducer, useState } from 'react';
+import React, { useReducer, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiTitle,
@@ -20,16 +20,12 @@ import {
   EuiPortal,
   EuiCallOut,
   EuiSpacer,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import {
-  ActionTypeRegistryContract,
-  Alert,
-  AlertFlyoutCloseReason,
-  AlertTypeRegistryContract,
-} from '../../../types';
-import { AlertForm, getAlertErrors, isValidAlert } from './alert_form';
+import { Alert, AlertFlyoutCloseReason, AlertEditProps, IErrorObject } from '../../../types';
+import { AlertForm, getAlertActionErrors, getAlertErrors, isValidAlert } from './alert_form';
 import { alertReducer, ConcreteAlertReducer } from './alert_reducer';
 import { updateAlert } from '../../lib/alert_api';
 import { HealthCheck } from '../../components/health_check';
@@ -38,17 +34,6 @@ import { useKibana } from '../../../common/lib/kibana';
 import { ConfirmAlertClose } from './confirm_alert_close';
 import { hasAlertChanged } from './has_alert_changed';
 import { getAlertWithInvalidatedFields } from '../../lib/value_validators';
-
-export interface AlertEditProps<MetaData = Record<string, any>> {
-  initialAlert: Alert;
-  alertTypeRegistry: AlertTypeRegistryContract;
-  actionTypeRegistry: ActionTypeRegistryContract;
-  onClose: (reason: AlertFlyoutCloseReason) => void;
-  /** @deprecated use `onSave` as a callback after an alert is saved*/
-  reloadAlerts?: () => Promise<void>;
-  onSave?: () => Promise<void>;
-  metadata?: MetaData;
-}
 
 export const AlertEdit = ({
   initialAlert,
@@ -69,6 +54,8 @@ export const AlertEdit = ({
     false
   );
   const [isConfirmAlertCloseModalOpen, setIsConfirmAlertCloseModalOpen] = useState<boolean>(false);
+  const [alertActionsErrors, setAlertActionsErrors] = useState<IErrorObject[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const {
     http,
@@ -80,9 +67,17 @@ export const AlertEdit = ({
 
   const alertType = alertTypeRegistry.get(alert.alertTypeId);
 
-  const { alertActionsErrors, alertBaseErrors, alertErrors, alertParamsErrors } = getAlertErrors(
+  useEffect(() => {
+    (async () => {
+      setIsLoading(true);
+      const res = await getAlertActionErrors(alert as Alert, actionTypeRegistry);
+      setAlertActionsErrors([...res]);
+      setIsLoading(false);
+    })();
+  }, [alert, actionTypeRegistry]);
+
+  const { alertBaseErrors, alertErrors, alertParamsErrors } = getAlertErrors(
     alert as Alert,
-    actionTypeRegistry,
     alertType
   );
 
@@ -96,7 +91,11 @@ export const AlertEdit = ({
 
   async function onSaveAlert(): Promise<Alert | undefined> {
     try {
-      if (isValidAlert(alert, alertErrors, alertActionsErrors) && !hasActionsWithBrokenConnector) {
+      if (
+        !isLoading &&
+        isValidAlert(alert, alertErrors, alertActionsErrors) &&
+        !hasActionsWithBrokenConnector
+      ) {
         const newAlert = await updateAlert({ http, alert, id: alert.id });
         toasts.addSuccess(
           i18n.translate('xpack.triggersActionsUI.sections.alertEdit.saveSuccessNotificationText', {
@@ -149,7 +148,7 @@ export const AlertEdit = ({
           <HealthCheck inFlyout={true} waitForCheck={true}>
             <EuiFlyoutBody>
               {hasActionsDisabled && (
-                <Fragment>
+                <>
                   <EuiCallOut
                     size="s"
                     color="danger"
@@ -161,7 +160,7 @@ export const AlertEdit = ({
                     )}
                   />
                   <EuiSpacer />
-                </Fragment>
+                </>
               )}
               <AlertForm
                 alert={alert}
@@ -193,6 +192,14 @@ export const AlertEdit = ({
                     )}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
+                {isLoading ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiSpacer size="s" />
+                    <EuiLoadingSpinner size="l" />
+                  </EuiFlexItem>
+                ) : (
+                  <></>
+                )}
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     fill

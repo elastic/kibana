@@ -16,10 +16,10 @@ import {
 import React, { useMemo, Fragment } from 'react';
 import styled, { css } from 'styled-components';
 
-import { DescriptionListItem } from '../../types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { DescriptionListItem } from '../../types';
 import { getDescriptionListContent } from '../helpers';
 import * as i18n from '../../translations';
-import { ExceptionListItemSchema } from '../../../../../../public/lists_plugin_deps';
 
 const MyExceptionDetails = styled(EuiFlexItem)`
   ${({ theme }) => css`
@@ -82,7 +82,9 @@ const ExceptionDetailsComponent = ({
             {descriptionListItems.map((item) => (
               <Fragment key={`${item.title}`}>
                 <MyDescriptionListTitle>{item.title}</MyDescriptionListTitle>
-                <MyDescriptionListDescription>{item.description}</MyDescriptionListDescription>
+                <MyDescriptionListDescription className="eui-textBreakWord">
+                  {item.description}
+                </MyDescriptionListDescription>
               </Fragment>
             ))}
           </EuiDescriptionList>

@@ -7,14 +7,11 @@
  */
 import { SavedObjectsClientContract } from '../saved_objects/types';
 import { UiSettingsParams, UserProvidedValues, PublicUiSettingsParams } from '../../types';
+
 export type {
   UiSettingsParams,
   PublicUiSettingsParams,
-  StringValidationRegexString,
-  StringValidationRegex,
-  StringValidation,
   DeprecationSettings,
-  ImageValidation,
   UiSettingsType,
   UserProvidedValues,
 } from '../../types';

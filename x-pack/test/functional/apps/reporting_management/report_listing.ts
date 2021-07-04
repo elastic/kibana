@@ -30,23 +30,23 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         ],
       });
       await security.testUser.setRoles(['kibana_admin', 'test_reporting_user']);
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     beforeEach(async () => {
       // to reset the data after deletion testing
-      await esArchiver.load('reporting/archived_reports');
+      await esArchiver.load('x-pack/test/functional/es_archives/reporting/archived_reports');
       await pageObjects.common.navigateToApp('reporting');
       await testSubjects.existOrFail('reportJobListing', { timeout: 200000 });
     });
 
     after(async () => {
-      await esArchiver.unload('empty_kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
       await security.testUser.restoreDefaults();
     });
 
     afterEach(async () => {
-      await esArchiver.unload('reporting/archived_reports');
+      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/archived_reports');
     });
 
     it('Confirm single report deletion works', async () => {

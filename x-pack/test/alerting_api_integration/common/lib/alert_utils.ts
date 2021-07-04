@@ -308,7 +308,7 @@ export function getConsumerUnauthorizedErrorMessage(
   alertType: string,
   consumer: string
 ) {
-  return `Unauthorized to ${operation} a "${alertType}" alert for "${consumer}"`;
+  return `Unauthorized to ${operation} a "${alertType}" rule for "${consumer}"`;
 }
 
 export function getProducerUnauthorizedErrorMessage(
@@ -316,7 +316,7 @@ export function getProducerUnauthorizedErrorMessage(
   alertType: string,
   producer: string
 ) {
-  return `Unauthorized to ${operation} a "${alertType}" alert by "${producer}"`;
+  return `Unauthorized to ${operation} a "${alertType}" rule by "${producer}"`;
 }
 
 function getDefaultAlwaysFiringAlertData(reference: string, actionId: string) {

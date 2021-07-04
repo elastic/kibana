@@ -34,6 +34,9 @@
             "__pagerduty": {
               "type": "long"
             },
+            "__swimlane": {
+              "type": "long"
+            },
             "__server-log": {
               "type": "long"
             },
@@ -69,6 +72,9 @@
               "type": "long"
             },
             "__pagerduty": {
+              "type": "long"
+            },
+            "__swimlane": {
               "type": "long"
             },
             "__server-log": {
@@ -313,6 +319,9 @@
             "dotnet": {
               "type": "long"
             },
+            "iOS/swift": {
+              "type": "long"
+            },
             "go": {
               "type": "long"
             },
@@ -367,6 +376,9 @@
             "opentelemetry/ruby": {
               "type": "long"
             },
+            "opentelemetry/swift": {
+              "type": "long"
+            },
             "opentelemetry/webjs": {
               "type": "long"
             }
@@ -375,6 +387,90 @@
         "agents": {
           "properties": {
             "dotnet": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "iOS/swift": {
               "properties": {
                 "agent": {
                   "properties": {
@@ -1254,6 +1350,20 @@
             }
           }
         },
+        "host": {
+          "properties": {
+            "os": {
+              "properties": {
+                "platform": {
+                  "type": "array",
+                  "items": {
+                    "type": "keyword"
+                  }
+                }
+              }
+            }
+          }
+        },
         "counts": {
           "properties": {
             "transaction": {
@@ -1536,6 +1646,17 @@
               }
             },
             "cloud": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "host": {
               "properties": {
                 "took": {
                   "properties": {
@@ -1924,9 +2045,6 @@
             "create_first_engine_button": {
               "type": "long"
             },
-            "header_launch_button": {
-              "type": "long"
-            },
             "engine_table_link": {
               "type": "long"
             }
@@ -2041,6 +2159,12 @@
                 "description": "The total number of enrolled agents in an unhealthy state"
               }
             },
+            "updating": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled agents in an updating state"
+              }
+            },
             "offline": {
               "type": "long",
               "_meta": {
@@ -2051,6 +2175,52 @@
               "type": "long",
               "_meta": {
                 "description": "The total number of agents in any state, both enrolled and inactive"
+              }
+            }
+          }
+        },
+        "fleet_server": {
+          "properties": {
+            "total_enrolled": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled Fleet Server agents, in any state"
+              }
+            },
+            "total_all_statuses": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of Fleet Server agents in any state, both enrolled and inactive."
+              }
+            },
+            "healthy": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled Fleet Server agents in a healthy state."
+              }
+            },
+            "unhealthy": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled Fleet Server agents in an unhealthy state"
+              }
+            },
+            "updating": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled Fleet Server agents in an updating state"
+              }
+            },
+            "offline": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled Fleet Server agents currently offline"
+              }
+            },
+            "num_host_urls": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of Fleet Server hosts configured in Fleet settings."
               }
             }
           }
@@ -2110,6 +2280,18 @@
                 "description": "Number of times the user opened one of the in-product help popovers."
               }
             },
+            "open_formula_popover": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user opened the in-product formula help popover."
+              }
+            },
+            "toggle_fullscreen_formula": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user toggled fullscreen mode on formula."
+              }
+            },
             "indexpattern_field_info_click": {
               "type": "long"
             },
@@ -2318,6 +2500,12 @@
               "type": "long",
               "_meta": {
                 "description": "Number of times the moving average function was selected"
+              }
+            },
+            "indexpattern_dimension_operation_formula": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the formula function was selected"
               }
             }
           }
@@ -2333,6 +2521,18 @@
                 "description": "Number of times the user opened one of the in-product help popovers."
               }
             },
+            "open_formula_popover": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user opened the in-product formula help popover."
+              }
+            },
+            "toggle_fullscreen_formula": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user toggled fullscreen mode on formula."
+              }
+            },
             "indexpattern_field_info_click": {
               "type": "long"
             },
@@ -2541,6 +2741,12 @@
               "type": "long",
               "_meta": {
                 "description": "Number of times the moving average function was selected"
+              }
+            },
+            "indexpattern_dimension_operation_formula": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the formula function was selected"
               }
             }
           }
@@ -2614,6 +2820,12 @@
             },
             "lnsMetric": {
               "type": "long"
+            },
+            "formula": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of saved lens visualizations which are using at least one formula"
+              }
             }
           }
         },
@@ -2657,6 +2869,12 @@
             },
             "lnsMetric": {
               "type": "long"
+            },
+            "formula": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of saved lens visualizations which are using at least one formula"
+              }
             }
           }
         },
@@ -2700,6 +2918,12 @@
             },
             "lnsMetric": {
               "type": "long"
+            },
+            "formula": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of saved lens visualizations which are using at least one formula"
+              }
             }
           }
         }
@@ -3216,6 +3440,122 @@
             }
           }
         },
+        "resolutions": {
+          "properties": {
+            "coarse": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of grid-agg layers with coarse resolution"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of grid-agg layers with coarse resolution"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of grid-agg layers with coarse resolution"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of grid-agg layers with coarse resolution"
+                  }
+                }
+              }
+            },
+            "fine": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of grid-agg layers with fine resolution"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of grid-agg layers with fine resolution"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of grid-agg layers with fine resolution"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of grid-agg layers with fine resolution"
+                  }
+                }
+              }
+            },
+            "most_fine": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of grid-agg layers with most_fine resolution"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of grid-agg layers with most_fine resolution"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of grid-agg layers with most_fine resolution"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of grid-agg layers with most_fine resolution"
+                  }
+                }
+              }
+            },
+            "super_fine": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of grid-agg layers with super_fine resolution"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of grid-agg layers with super_fine resolution"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of grid-agg layers with super_fine resolution"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of grid-agg layers with super_fine resolution"
+                  }
+                }
+              }
+            }
+          }
+        },
         "joins": {
           "properties": {
             "term": {
@@ -3555,6 +3895,126 @@
                   },
                   "metricbeatUsed": {
                     "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "osquery": {
+      "properties": {
+        "live_query_usage": {
+          "properties": {
+            "session": {
+              "properties": {
+                "count": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of osquery action requests"
+                  }
+                },
+                "errors": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of osquery action requests that resulted in errors"
+                  }
+                }
+              }
+            },
+            "cumulative": {
+              "properties": {
+                "queries": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of osquery actions stored in Elasticsearch"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "scheduled_queries": {
+          "properties": {
+            "queryGroups": {
+              "properties": {
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of osquery policies/query groups"
+                  }
+                },
+                "empty": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of empty osquery policies/query groups"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "agent_info": {
+          "properties": {
+            "enrolled": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of agents enrolled in a policy with an osquery integration"
+              }
+            }
+          }
+        },
+        "beat_metrics": {
+          "properties": {
+            "usage": {
+              "properties": {
+                "cpu": {
+                  "properties": {
+                    "latest": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Latest cpu usage sample in ms"
+                      }
+                    },
+                    "max": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Max cpu usage sample over 24 hours in ms"
+                      }
+                    },
+                    "avg": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Mean cpu usage over 24 hours in ms"
+                      }
+                    }
+                  }
+                },
+                "memory": {
+                  "properties": {
+                    "rss": {
+                      "properties": {
+                        "latest": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Latest resident set size sample"
+                          }
+                        },
+                        "max": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Max resident set size sample over 24 hours"
+                          }
+                        },
+                        "avg": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Mean resident set size sample over 24 hours"
+                          }
+                        }
+                      }
+                    }
                   }
                 }
               }
@@ -4548,58 +5008,6 @@
     },
     "security_solution": {
       "properties": {
-        "detections": {
-          "properties": {
-            "detection_rules": {
-              "properties": {
-                "custom": {
-                  "properties": {
-                    "enabled": {
-                      "type": "long"
-                    },
-                    "disabled": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "elastic": {
-                  "properties": {
-                    "enabled": {
-                      "type": "long"
-                    },
-                    "disabled": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "ml_jobs": {
-              "properties": {
-                "custom": {
-                  "properties": {
-                    "enabled": {
-                      "type": "long"
-                    },
-                    "disabled": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "elastic": {
-                  "properties": {
-                    "enabled": {
-                      "type": "long"
-                    },
-                    "disabled": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
         "detectionMetrics": {
           "properties": {
             "detection_rules": {
@@ -4862,10 +5270,10 @@
                           "description": "The number of daily alerts generated by a rule"
                         }
                       },
-                      "cases_count_daily": {
+                      "cases_count_total": {
                         "type": "long",
                         "_meta": {
-                          "description": "The number of daily cases generated by a rule"
+                          "description": "The number of total cases generated by a rule"
                         }
                       }
                     }
@@ -4874,160 +5282,241 @@
               }
             },
             "ml_jobs": {
-              "type": "array",
-              "items": {
-                "properties": {
-                  "job_id": {
-                    "type": "keyword"
-                  },
-                  "open_time": {
-                    "type": "keyword"
-                  },
-                  "create_time": {
-                    "type": "keyword"
-                  },
-                  "finished_time": {
-                    "type": "keyword"
-                  },
-                  "state": {
-                    "type": "keyword"
-                  },
-                  "data_counts": {
-                    "properties": {
-                      "bucket_count": {
-                        "type": "long"
-                      },
-                      "empty_bucket_count": {
-                        "type": "long"
-                      },
-                      "input_bytes": {
-                        "type": "long"
-                      },
-                      "input_record_count": {
-                        "type": "long"
-                      },
-                      "last_data_time": {
-                        "type": "long"
-                      },
-                      "processed_record_count": {
-                        "type": "long"
+              "properties": {
+                "ml_job_usage": {
+                  "properties": {
+                    "custom": {
+                      "properties": {
+                        "enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "The number of custom ML jobs rules enabled"
+                          }
+                        },
+                        "disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "The number of custom ML jobs rules disabled"
+                          }
+                        }
                       }
-                    }
-                  },
-                  "model_size_stats": {
-                    "properties": {
-                      "bucket_allocation_failures_count": {
-                        "type": "long"
-                      },
-                      "model_bytes": {
-                        "type": "long"
-                      },
-                      "model_bytes_exceeded": {
-                        "type": "long"
-                      },
-                      "model_bytes_memory_limit": {
-                        "type": "long"
-                      },
-                      "peak_model_bytes": {
-                        "type": "long"
-                      }
-                    }
-                  },
-                  "timing_stats": {
-                    "properties": {
-                      "bucket_count": {
-                        "type": "long"
-                      },
-                      "exponential_average_bucket_processing_time_ms": {
-                        "type": "long"
-                      },
-                      "exponential_average_bucket_processing_time_per_hour_ms": {
-                        "type": "long"
-                      },
-                      "maximum_bucket_processing_time_ms": {
-                        "type": "long"
-                      },
-                      "minimum_bucket_processing_time_ms": {
-                        "type": "long"
-                      },
-                      "total_bucket_processing_time_ms": {
-                        "type": "long"
-                      }
-                    }
-                  },
-                  "datafeed": {
-                    "properties": {
-                      "datafeed_id": {
-                        "type": "keyword"
-                      },
-                      "state": {
-                        "type": "keyword"
-                      },
-                      "timing_stats": {
-                        "properties": {
-                          "average_search_time_per_bucket_ms": {
-                            "type": "long"
-                          },
-                          "bucket_count": {
-                            "type": "long"
-                          },
-                          "exponential_average_search_time_per_hour_ms": {
-                            "type": "long"
-                          },
-                          "search_count": {
-                            "type": "long"
-                          },
-                          "total_search_time_ms": {
-                            "type": "long"
+                    },
+                    "elastic": {
+                      "properties": {
+                        "enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "The number of elastic provided ML jobs rules enabled"
+                          }
+                        },
+                        "disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "The number of elastic provided ML jobs rules disabled"
                           }
                         }
                       }
                     }
                   }
-                }
-              }
-            }
-          }
-        },
-        "endpoints": {
-          "properties": {
-            "total_installed": {
-              "type": "long"
-            },
-            "active_within_last_24_hours": {
-              "type": "long"
-            },
-            "os": {
-              "type": "array",
-              "items": {
-                "properties": {
-                  "full_name": {
-                    "type": "keyword"
-                  },
-                  "platform": {
-                    "type": "keyword"
-                  },
-                  "version": {
-                    "type": "keyword"
-                  },
-                  "count": {
-                    "type": "long"
-                  }
-                }
-              }
-            },
-            "policies": {
-              "properties": {
-                "malware": {
-                  "properties": {
-                    "active": {
-                      "type": "long"
-                    },
-                    "inactive": {
-                      "type": "long"
-                    },
-                    "failure": {
-                      "type": "long"
+                },
+                "ml_job_metrics": {
+                  "type": "array",
+                  "items": {
+                    "properties": {
+                      "job_id": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "Identifier for the anomaly detection job"
+                        }
+                      },
+                      "open_time": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "For open jobs only, the elapsed time for which the job has been open"
+                        }
+                      },
+                      "create_time": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "The time the job was created"
+                        }
+                      },
+                      "finished_time": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "If the job closed or failed, this is the time the job finished"
+                        }
+                      },
+                      "state": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "The status of the anomaly detection job"
+                        }
+                      },
+                      "data_counts": {
+                        "properties": {
+                          "bucket_count": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The number of buckets processed"
+                            }
+                          },
+                          "empty_bucket_count": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The number of buckets which did not contain any data"
+                            }
+                          },
+                          "input_bytes": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The number of bytes of input data posted to the anomaly detection job"
+                            }
+                          },
+                          "input_record_count": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The number of input documents posted to the anomaly detection job"
+                            }
+                          },
+                          "last_data_time": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The timestamp at which data was last analyzed, according to server time"
+                            }
+                          },
+                          "processed_record_count": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The number of input documents that have been processed by the anomaly detection job"
+                            }
+                          }
+                        }
+                      },
+                      "model_size_stats": {
+                        "properties": {
+                          "bucket_allocation_failures_count": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The number of buckets for which new entities in incoming data were not processed due to insufficient model memory"
+                            }
+                          },
+                          "model_bytes": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The number of bytes of memory used by the models"
+                            }
+                          },
+                          "model_bytes_exceeded": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The number of bytes over the high limit for memory usage at the last allocation failure"
+                            }
+                          },
+                          "model_bytes_memory_limit": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The upper limit for model memory usage, checked on increasing values"
+                            }
+                          },
+                          "peak_model_bytes": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The peak number of bytes of memory ever used by the models"
+                            }
+                          }
+                        }
+                      },
+                      "timing_stats": {
+                        "properties": {
+                          "bucket_count": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The number of buckets processed"
+                            }
+                          },
+                          "exponential_average_bucket_processing_time_ms": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "Exponential moving average of all bucket processing times, in milliseconds"
+                            }
+                          },
+                          "exponential_average_bucket_processing_time_per_hour_ms": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "Exponentially-weighted moving average of bucket processing times calculated in a 1 hour time window, in milliseconds"
+                            }
+                          },
+                          "maximum_bucket_processing_time_ms": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "Maximum among all bucket processing times, in milliseconds"
+                            }
+                          },
+                          "minimum_bucket_processing_time_ms": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "Minimum among all bucket processing times, in milliseconds"
+                            }
+                          },
+                          "total_bucket_processing_time_ms": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "Sum of all bucket processing times, in milliseconds"
+                            }
+                          }
+                        }
+                      },
+                      "datafeed": {
+                        "properties": {
+                          "datafeed_id": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "A numerical character string that uniquely identifies the datafeed"
+                            }
+                          },
+                          "state": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "The status of the datafeed"
+                            }
+                          },
+                          "timing_stats": {
+                            "properties": {
+                              "average_search_time_per_bucket_ms": {
+                                "type": "long",
+                                "_meta": {
+                                  "description": "The average search time per bucket, in milliseconds"
+                                }
+                              },
+                              "bucket_count": {
+                                "type": "long",
+                                "_meta": {
+                                  "description": "The number of buckets processed"
+                                }
+                              },
+                              "exponential_average_search_time_per_hour_ms": {
+                                "type": "long",
+                                "_meta": {
+                                  "description": "The exponential average search time per hour, in milliseconds"
+                                }
+                              },
+                              "search_count": {
+                                "type": "long",
+                                "_meta": {
+                                  "description": "The number of searches run by the datafeed"
+                                }
+                              },
+                              "total_search_time_ms": {
+                                "type": "long",
+                                "_meta": {
+                                  "description": "The total time the datafeed spent searching, in milliseconds"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
                     }
                   }
                 }
@@ -5327,6 +5816,12 @@
           "type": "long",
           "_meta": {
             "description": "The number of times the \"Resolve Copy Saved Objects Errors\" API has been called with \"createNewCopies\" set to false."
+          }
+        },
+        "apiCalls.disableLegacyUrlAliases.total": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Disable Legacy URL Aliases\" API has been called."
           }
         }
       }

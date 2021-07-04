@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { AnySchema } from 'joi';
 import typeDetect from 'type-detect';
-import { AnySchema, internals } from '../internals';
+import { internals } from '../internals';
 import { Type, TypeOptions } from './type';
 import { ValidationError } from '../errors';
 
@@ -185,7 +186,7 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
         return `expected a plain object value, but found [${typeDetect(value)}] instead.`;
       case 'object.parse':
         return `could not parse object value from json input`;
-      case 'object.allowUnknown':
+      case 'object.unknown':
         return `definition for this key is missing`;
       case 'object.child':
         return reason[0];

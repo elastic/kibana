@@ -52,12 +52,6 @@ describe('Executor', () => {
       executor.registerFunction(expressionFunctions.clog);
     });
 
-    test('can register all functions', () => {
-      const executor = new Executor();
-      for (const functionDefinition of expressionFunctions.functionSpecs)
-        executor.registerFunction(functionDefinition);
-    });
-
     test('can retrieve all functions', () => {
       const executor = new Executor();
       executor.registerFunction(expressionFunctions.clog);
@@ -67,12 +61,24 @@ describe('Executor', () => {
 
     test('can retrieve all functions - 2', () => {
       const executor = new Executor();
-      for (const functionDefinition of expressionFunctions.functionSpecs)
+      const functionSpecs = [
+        expressionFunctions.clog,
+        expressionFunctions.font,
+        expressionFunctions.variableSet,
+        expressionFunctions.variable,
+        expressionFunctions.theme,
+        expressionFunctions.cumulativeSum,
+        expressionFunctions.derivative,
+        expressionFunctions.movingAverage,
+        expressionFunctions.mapColumn,
+        expressionFunctions.math,
+      ];
+      for (const functionDefinition of functionSpecs) {
         executor.registerFunction(functionDefinition);
+      }
       const functions = executor.getFunctions();
-      expect(Object.keys(functions).sort()).toEqual(
-        expressionFunctions.functionSpecs.map((spec) => spec.name).sort()
-      );
+
+      expect(Object.keys(functions).sort()).toEqual(functionSpecs.map((spec) => spec.name).sort());
     });
   });
 

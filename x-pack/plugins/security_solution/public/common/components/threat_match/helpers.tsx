@@ -6,15 +6,11 @@
  */
 
 import uuid from 'uuid';
-import {
-  ThreatMap,
-  threatMap,
-  ThreatMapping,
-} from '../../../../common/detection_engine/schemas/types';
+import { addIdToItem } from '@kbn/securitysolution-utils';
+import { ThreatMap, threatMap, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import { IndexPattern, IFieldType } from '../../../../../../../src/plugins/data/common';
 import { Entry, FormattedEntry, ThreatMapEntries, EmptyEntry } from './types';
-import { addIdToItem } from '../../../../common/add_remove_id_to_item';
 
 /**
  * Formats the entry into one that is easily usable for the UI.

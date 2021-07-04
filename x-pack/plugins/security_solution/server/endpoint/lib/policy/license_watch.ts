@@ -24,9 +24,9 @@ import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
 import { ILicense } from '../../../../../licensing/common/types';
 import {
   isEndpointPolicyValidForLicense,
-  unsetPolicyFeaturesAboveLicenseLevel,
+  unsetPolicyFeaturesAccordingToLicenseLevel,
 } from '../../../../common/license/policy_config';
-import { isAtLeast, LicenseService } from '../../../../common/license/license';
+import { LicenseService } from '../../../../common/license/license';
 
 export class PolicyWatcher {
   private logger: Logger;
@@ -76,10 +76,6 @@ export class PolicyWatcher {
   }
 
   public async watch(license: ILicense) {
-    if (isAtLeast(license, 'platinum')) {
-      return;
-    }
-
     let page = 1;
     let response: {
       items: PackagePolicy[];
@@ -114,7 +110,7 @@ export class PolicyWatcher {
         };
         const policyConfig = updatePolicy.inputs[0].config?.policy.value;
         if (!isEndpointPolicyValidForLicense(policyConfig, license)) {
-          updatePolicy.inputs[0].config!.policy.value = unsetPolicyFeaturesAboveLicenseLevel(
+          updatePolicy.inputs[0].config!.policy.value = unsetPolicyFeaturesAccordingToLicenseLevel(
             policyConfig,
             license
           );

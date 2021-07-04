@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import React, { PureComponent, Fragment } from 'react';
 import { intersection, union, get } from 'lodash';
 
@@ -100,7 +100,7 @@ export interface FieldEditorState {
   isReady: boolean;
   isCreating: boolean;
   isDeprecatedLang: boolean;
-  scriptingLangs: string[];
+  scriptingLangs: estypes.ScriptLanguage[];
   fieldTypes: string[];
   fieldTypeFormats: FieldTypeFormat[];
   existingFieldNames: string[];
@@ -131,8 +131,8 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
   public readonly context!: IndexPatternManagmentContextValue;
 
-  supportedLangs: string[] = [];
-  deprecatedLangs: string[] = [];
+  supportedLangs: estypes.ScriptLanguage[] = [];
+  deprecatedLangs: estypes.ScriptLanguage[] = [];
   constructor(props: FieldEdiorProps, context: IndexPatternManagmentContextValue) {
     super(props, context);
 
@@ -189,6 +189,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     this.setState({
       isReady: true,
       isCreating: !indexPattern.fields.getByName(spec.name),
+      // @ts-expect-error '' is not a valid ScriptLanguage
       isDeprecatedLang: this.deprecatedLangs.includes(spec.lang || ''),
       errors: [],
       scriptingLangs,
@@ -224,7 +225,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     });
   };
 
-  onLangChange = (lang: string) => {
+  onLangChange = (lang: estypes.ScriptLanguage) => {
     const { spec } = this.state;
     const fieldTypes = get(FIELD_TYPES_BY_LANG, lang, DEFAULT_FIELD_TYPES);
     spec.lang = lang;
@@ -373,7 +374,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           })}
           data-test-subj="editorFieldLang"
           onChange={(e) => {
-            this.onLangChange(e.target.value);
+            this.onLangChange(e.target.value as estypes.ScriptLanguage);
           }}
         />
       </EuiFormRow>

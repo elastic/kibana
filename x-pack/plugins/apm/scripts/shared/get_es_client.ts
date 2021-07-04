@@ -10,7 +10,7 @@ import { ApiKeyAuth, BasicAuth } from '@elastic/elasticsearch/lib/pool';
 import {
   ESSearchResponse,
   ESSearchRequest,
-} from '../../../../../typings/elasticsearch';
+} from '../../../../../src/core/types/elasticsearch';
 
 export type ESClient = ReturnType<typeof getEsClient>;
 

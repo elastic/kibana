@@ -90,7 +90,7 @@ describe('fetchIndexPattern', () => {
       ] as IndexPattern[];
 
       const value = await fetchIndexPattern('indexTitle', indexPatternsService, {
-        fetchKibabaIndexForStringIndexes: true,
+        fetchKibanaIndexForStringIndexes: true,
       });
 
       expect(value).toMatchInlineSnapshot(`
@@ -104,9 +104,9 @@ describe('fetchIndexPattern', () => {
       `);
     });
 
-    test('should return only indexPatternString if Kibana index does not exist (fetchKibabaIndexForStringIndexes is true)', async () => {
+    test('should return only indexPatternString if Kibana index does not exist (fetchKibanaIndexForStringIndexes is true)', async () => {
       const value = await fetchIndexPattern('indexTitle', indexPatternsService, {
-        fetchKibabaIndexForStringIndexes: true,
+        fetchKibanaIndexForStringIndexes: true,
       });
 
       expect(value).toMatchInlineSnapshot(`

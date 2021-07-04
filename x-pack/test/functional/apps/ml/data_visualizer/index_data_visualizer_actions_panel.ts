@@ -15,18 +15,19 @@ export default function ({ getService }: FtrProviderContext) {
     this.tags(['mlqa']);
 
     const indexPatternName = 'ft_farequote';
-    const advancedJobWizardDatafeedQuery = `{
-  "bool": {
-    "must": [
-      {
-        "match_all": {}
-      }
-    ]
-  }
-}`; // Note query is not currently passed to the wizard
+    // @TODO: Re-enable in follow up
+    //     const advancedJobWizardDatafeedQuery = `{
+    //   "bool": {
+    //     "must": [
+    //       {
+    //         "match_all": {}
+    //       }
+    //     ]
+    //   }
+    // }`; // Note query is not currently passed to the wizard
 
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.createIndexPatternIfNeeded(indexPatternName, '@timestamp');
       await ml.testResources.createSavedSearchFarequoteKueryIfNeeded();
       await ml.testResources.setKibanaTimeZoneToUTC();
@@ -47,19 +48,20 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(indexPatternName);
       });
 
-      it('opens the advanced job wizard', async () => {
-        await ml.testExecution.logTestStep('displays the actions panel with advanced job card');
-        await ml.dataVisualizerIndexBased.assertActionsPanelExists();
-        await ml.dataVisualizerIndexBased.assertCreateAdvancedJobCardExists();
-        await ml.dataVisualizerIndexBased.assertCreateDataFrameAnalyticsCardExists();
-
-        // Note the search is not currently passed to the wizard, just the index.
-        await ml.testExecution.logTestStep('displays the actions panel with advanced job card');
-        await ml.dataVisualizerIndexBased.clickCreateAdvancedJobButton();
-        await ml.jobTypeSelection.assertAdvancedJobWizardOpen();
-        await ml.jobWizardAdvanced.assertDatafeedQueryEditorExists();
-        await ml.jobWizardAdvanced.assertDatafeedQueryEditorValue(advancedJobWizardDatafeedQuery);
-      });
+      // @TODO: Re-enable in follow up
+      // it('opens the advanced job wizard', async () => {
+      // await ml.testExecution.logTestStep('displays the actions panel with advanced job card');
+      // await ml.dataVisualizerIndexBased.assertActionsPanelExists();
+      // await ml.dataVisualizerIndexBased.assertCreateAdvancedJobCardExists();
+      // await ml.dataVisualizerIndexBased.assertCreateDataFrameAnalyticsCardExists();
+      //
+      // // Note the search is not currently passed to the wizard, just the index.
+      // await ml.testExecution.logTestStep('displays the actions panel with advanced job card');
+      // await ml.dataVisualizerIndexBased.clickCreateAdvancedJobButton();
+      // await ml.jobTypeSelection.assertAdvancedJobWizardOpen();
+      // await ml.jobWizardAdvanced.assertDatafeedQueryEditorExists();
+      // await ml.jobWizardAdvanced.assertDatafeedQueryEditorValue(advancedJobWizardDatafeedQuery);
+      // });
     });
 
     describe('view in discover page action', function () {

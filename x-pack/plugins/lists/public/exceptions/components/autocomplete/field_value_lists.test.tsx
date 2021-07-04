@@ -9,10 +9,10 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { waitFor } from '@testing-library/react';
+import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { getField } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
-import { ListSchema } from '../../../../common';
 import { getFoundListSchemaMock } from '../../../../../lists/common/schemas/response/found_list_schema.mock';
 import { getListResponseMock } from '../../../../../lists/common/schemas/response/list_schema.mock';
 import { DATE_NOW, IMMUTABLE, VERSION } from '../../../../../lists/common/constants.mock';
@@ -30,8 +30,8 @@ const mockKeywordList: ListSchema = {
 };
 const mockResult = { ...getFoundListSchemaMock() };
 mockResult.data = [...mockResult.data, mockKeywordList];
-jest.mock('../../..', () => {
-  const originalModule = jest.requireActual('../../..');
+jest.mock('@kbn/securitysolution-list-hooks', () => {
+  const originalModule = jest.requireActual('@kbn/securitysolution-list-hooks');
 
   return {
     ...originalModule,

@@ -125,7 +125,7 @@ const ScheduledQueryGroupDetailsPageComponent = () => {
 
   return (
     <WithHeaderLayout leftColumn={LeftColumn} rightColumn={RightColumn} rightColumnGrow={false}>
-      {data && <ScheduledQueryGroupQueriesTable data={data} />}
+      {data && <ScheduledQueryGroupQueriesTable data={data.inputs[0].streams} />}
     </WithHeaderLayout>
   );
 };

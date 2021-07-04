@@ -9,13 +9,13 @@
 import { handleNestedFilter } from './handle_nested_filter';
 import { fields } from '../../index_patterns/mocks';
 import { buildPhraseFilter, buildQueryFilter } from '../filters';
-import { IFieldType, IIndexPattern } from '../../index_patterns';
+import { IndexPatternBase } from './types';
 
 describe('handleNestedFilter', function () {
-  const indexPattern: IIndexPattern = ({
+  const indexPattern: IndexPatternBase = {
     id: 'logstash-*',
     fields,
-  } as unknown) as IIndexPattern;
+  };
 
   it("should return the filter's query wrapped in nested query if the target field is nested", () => {
     const field = getField('nestedField.child');
@@ -44,8 +44,12 @@ describe('handleNestedFilter', function () {
   });
 
   it('should return filter untouched if it does not target a field from the given index pattern', () => {
-    const field = { ...getField('extension'), name: 'notarealfield' };
-    const filter = buildPhraseFilter(field as IFieldType, 'jpg', indexPattern);
+    const field = getField('extension');
+    const unrealField = {
+      ...field!,
+      name: 'notarealfield',
+    };
+    const filter = buildPhraseFilter(unrealField, 'jpg', indexPattern);
     const result = handleNestedFilter(filter, indexPattern);
     expect(result).toBe(filter);
   });

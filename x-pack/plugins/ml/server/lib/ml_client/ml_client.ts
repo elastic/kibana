@@ -242,6 +242,7 @@ export function getMlClient(
         }>(...p);
         const jobs = await jobSavedObjectService.filterJobsForSpace<DataFrameAnalyticsConfig>(
           'data-frame-analytics',
+          // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
           body.data_frame_analytics,
           'id'
         );
@@ -494,12 +495,13 @@ function getDFAJobIdsFromRequest([params]: MlGetDFAParams): string[] {
 }
 
 function getADJobIdsFromRequest([params]: MlGetADParams): string[] {
-  const ids = params?.job_id?.split(',');
+  const ids = typeof params?.job_id === 'string' ? params?.job_id.split(',') : params?.job_id;
   return ids || [];
 }
 
 function getDatafeedIdsFromRequest([params]: MlGetDatafeedParams): string[] {
-  const ids = params?.datafeed_id?.split(',');
+  const ids =
+    typeof params?.datafeed_id === 'string' ? params?.datafeed_id.split(',') : params?.datafeed_id;
   return ids || [];
 }
 

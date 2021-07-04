@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// @ts-ignore
 import minimist from 'minimist';
 import { ToolingLog } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/test';

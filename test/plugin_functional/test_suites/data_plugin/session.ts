@@ -70,9 +70,11 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
     describe('Dashboard', () => {
       before(async () => {
-        await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/dashboard/current/data');
         await esArchiver.loadIfNeeded(
-          '../functional/fixtures/es_archiver/dashboard/current/kibana'
+          'test/functional/fixtures/es_archiver/dashboard/current/data'
+        );
+        await esArchiver.loadIfNeeded(
+          'test/functional/fixtures/es_archiver/dashboard/current/kibana'
         );
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.loadSavedDashboard('dashboard with filter');
@@ -85,8 +87,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       });
 
       after(async () => {
-        await esArchiver.unload('../functional/fixtures/es_archiver/dashboard/current/data');
-        await esArchiver.unload('../functional/fixtures/es_archiver/dashboard/current/kibana');
+        await esArchiver.unload('test/functional/fixtures/es_archiver/dashboard/current/data');
+        await esArchiver.unload('test/functional/fixtures/es_archiver/dashboard/current/kibana');
       });
 
       it('on load there is a single session', async () => {

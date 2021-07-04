@@ -28,7 +28,7 @@ import { getDataTelemetry, DATA_TELEMETRY_ID, DataTelemetryPayload } from './get
  */
 export function handleLocalStats<ClusterStats extends estypes.ClusterStatsResponse>(
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  { cluster_name, cluster_uuid, version }: estypes.RootNodeInfoResponse,
+  { cluster_name, cluster_uuid, version }: estypes.InfoResponse,
   { _nodes, cluster_name: clusterName, ...clusterStats }: ClusterStats,
   kibana: KibanaUsageStats | undefined,
   dataTelemetry: DataTelemetryPayload | undefined,

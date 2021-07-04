@@ -141,7 +141,7 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
               <EuiButtonEmpty data-test-subj="cancelExceptionAddButton" onClick={handleOnCancel}>
                 <FormattedMessage
                   id="xpack.securitySolution.eventFilters.eventFiltersFlyout.actions.cancel"
-                  defaultMessage="cancel"
+                  defaultMessage="Cancel"
                 />
               </EuiButtonEmpty>
             </EuiFlexItem>

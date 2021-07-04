@@ -153,7 +153,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     searchId?: string
   ) {
     if (this.trackUiMetric) {
-      this.trackUiMetric(METRIC_TYPE.CLICK, visType.name);
+      this.trackUiMetric(METRIC_TYPE.CLICK, `${visType.name}:create`);
     }
 
     let params;

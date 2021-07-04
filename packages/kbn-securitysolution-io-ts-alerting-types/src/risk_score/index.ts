@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+/* eslint-disable @typescript-eslint/naming-convention */
+
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
 
@@ -26,3 +28,9 @@ export const RiskScore = new t.Type<number, number, unknown>(
 );
 
 export type RiskScoreC = typeof RiskScore;
+
+export const risk_score = RiskScore;
+export type RiskScore = t.TypeOf<typeof risk_score>;
+
+export const riskScoreOrUndefined = t.union([risk_score, t.undefined]);
+export type RiskScoreOrUndefined = t.TypeOf<typeof riskScoreOrUndefined>;

@@ -11,9 +11,9 @@ import { waitFor } from '@testing-library/react';
 
 import { TestProviders } from '../../../common/mock';
 import { ValueListsForm } from './form';
-import { useImportList } from '../../../shared_imports';
+import { useImportList } from '@kbn/securitysolution-list-hooks';
 
-jest.mock('../../../shared_imports');
+jest.mock('@kbn/securitysolution-list-hooks');
 const mockUseImportList = useImportList as jest.Mock;
 
 const mockFile = ({

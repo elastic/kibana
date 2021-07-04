@@ -7,7 +7,7 @@ Object {
   ],
   "mappings": Object {
     "_meta": Object {
-      "version": 35,
+      "version": 45,
     },
     "dynamic": false,
     "properties": Object {
@@ -361,6 +361,19 @@ Object {
           },
           "runtime": Object {
             "ignore_above": 1024,
+            "type": "keyword",
+          },
+        },
+      },
+      "data_stream": Object {
+        "properties": Object {
+          "dataset": Object {
+            "type": "keyword",
+          },
+          "namespace": Object {
+            "type": "keyword",
+          },
+          "type": Object {
             "type": "keyword",
           },
         },
@@ -1902,6 +1915,54 @@ Object {
             "type": "keyword",
           },
           "version": Object {
+            "ignore_above": 1024,
+            "type": "keyword",
+          },
+        },
+      },
+      "orchestrator": Object {
+        "properties": Object {
+          "api_version": Object {
+            "ignore_above": 1024,
+            "type": "keyword",
+          },
+          "cluster": Object {
+            "properties": Object {
+              "name": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "url": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "version": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+            },
+          },
+          "namespace": Object {
+            "ignore_above": 1024,
+            "type": "keyword",
+          },
+          "organization": Object {
+            "ignore_above": 1024,
+            "type": "keyword",
+          },
+          "resource": Object {
+            "properties": Object {
+              "name": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "type": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+            },
+          },
+          "type": Object {
             "ignore_above": 1024,
             "type": "keyword",
           },
@@ -4467,6 +4528,6 @@ Object {
       },
     },
   },
-  "version": 35,
+  "version": 45,
 }
 `;

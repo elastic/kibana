@@ -127,7 +127,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('switch index patterns', () => {
       before(async () => {
-        await esArchiver.loadIfNeeded('index_pattern_without_timefield');
+        await esArchiver.loadIfNeeded(
+          'test/functional/fixtures/es_archiver/index_pattern_without_timefield'
+        );
       });
 
       beforeEach(async () => {
@@ -146,7 +148,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       after(async () => {
         await security.testUser.restoreDefaults();
-        await esArchiver.load('empty_kibana');
+        await esArchiver.load('test/functional/fixtures/es_archiver/empty_kibana');
         await PageObjects.visualize.initTests();
       });
 

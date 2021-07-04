@@ -4,9 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { TypeMapping } from '@elastic/elasticsearch/api/types';
+
+import { isEmpty } from 'lodash';
+import type { estypes } from '@elastic/elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { IndexPatternsFetcher } from '../../../../../src/plugins/data/server';
+import { RuleDataWriteDisabledError } from '../rule_data_plugin_service/errors';
 import {
   IRuleDataClient,
   RuleDataClientConstructorOptions,
@@ -24,6 +27,10 @@ export class RuleDataClient implements IRuleDataClient {
   private async getClusterClient() {
     await this.options.ready();
     return await this.options.getClusterClient();
+  }
+
+  isWriteEnabled(): boolean {
+    return this.options.isWriteEnabled;
   }
 
   getReader(options: { namespace?: string } = {}): RuleDataReader {
@@ -44,24 +51,41 @@ export class RuleDataClient implements IRuleDataClient {
         const clusterClient = await this.getClusterClient();
         const indexPatternsFetcher = new IndexPatternsFetcher(clusterClient);
 
-        const fields = await indexPatternsFetcher.getFieldsForWildcard({
-          pattern: index,
-        });
+        try {
+          const fields = await indexPatternsFetcher.getFieldsForWildcard({
+            pattern: index,
+          });
 
-        return {
-          fields,
-          timeFieldName: '@timestamp',
-          title: index,
-        };
+          return {
+            fields,
+            timeFieldName: '@timestamp',
+            title: index,
+          };
+        } catch (err) {
+          if (err.output?.payload?.code === 'no_matching_indices') {
+            return {
+              fields: [],
+              timeFieldName: '@timestamp',
+              title: index,
+            };
+          }
+          throw err;
+        }
       },
     };
   }
 
   getWriter(options: { namespace?: string } = {}): RuleDataWriter {
     const { namespace } = options;
+    const isWriteEnabled = this.isWriteEnabled();
     const alias = getNamespacedAlias({ alias: this.options.alias, namespace });
+
     return {
       bulk: async (request) => {
+        if (!isWriteEnabled) {
+          throw new RuleDataWriteDisabledError();
+        }
+
         const clusterClient = await this.getClusterClient();
 
         const requestWithDefaultParameters = {
@@ -73,8 +97,8 @@ export class RuleDataClient implements IRuleDataClient {
         return clusterClient.bulk(requestWithDefaultParameters).then((response) => {
           if (response.body.errors) {
             if (
-              response.body.items.length === 1 &&
-              response.body.items[0]?.index?.error?.type === 'index_not_found_exception'
+              response.body.items.length > 0 &&
+              response.body.items?.[0]?.index?.error?.type === 'index_not_found_exception'
             ) {
               return this.createOrUpdateWriteTarget({ namespace }).then(() => {
                 return clusterClient.bulk(requestWithDefaultParameters);
@@ -125,7 +149,13 @@ export class RuleDataClient implements IRuleDataClient {
       path: `/_index_template/_simulate_index/${concreteIndexName}`,
     });
 
-    const mappings: TypeMapping = simulateResponse.template.mappings;
+    const mappings: estypes.MappingTypeMapping = simulateResponse.template.mappings;
+
+    if (isEmpty(mappings)) {
+      throw new Error(
+        'No mappings would be generated for this index, possibly due to failed/misconfigured bootstrapping'
+      );
+    }
 
     await clusterClient.indices.putMapping({ index: `${alias}*`, body: mappings });
   }

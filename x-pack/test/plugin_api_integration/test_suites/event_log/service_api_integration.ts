@@ -7,12 +7,12 @@
 
 import _ from 'lodash';
 import uuid from 'uuid';
-import expect from '@kbn/expect/expect.js';
+import expect from '@kbn/expect';
 import { IEvent } from '../../../../plugins/event_log/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
-  const es = getService('legacyEs');
+  const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
   const config = getService('config');
@@ -41,7 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
         .find((val: string) => val === '--xpack.eventLog.indexEntries=true');
       const result = await isIndexingEntries();
       const exists = await es.indices.exists({ index: '.kibana-event-log-*' });
-      expect(exists).to.be.eql(true);
+      expect(exists.body).to.be.eql(true);
       expect(configValue).to.be.eql(
         `--xpack.eventLog.indexEntries=${result.body.isIndexingEntries}`
       );

@@ -17,6 +17,7 @@ export { DotExpander } from './dot_expander';
 export { Drop } from './drop';
 export { Enrich } from './enrich';
 export { Fail } from './fail';
+export { Fingerprint } from './fingerprint';
 export { Foreach } from './foreach';
 export { GeoIP } from './geoip';
 export { Grok } from './grok';

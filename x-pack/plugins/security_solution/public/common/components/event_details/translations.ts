@@ -23,23 +23,8 @@ export const THREAT_SUMMARY = i18n.translate('xpack.securitySolution.alertDetail
   defaultMessage: 'Threat Summary',
 });
 
-export const NO_ENRICHMENT_FOUND = i18n.translate(
-  'xpack.securitySolution.alertDetails.noEnrichmentFound',
-  {
-    defaultMessage: 'No Threat Intel Enrichment Found',
-  }
-);
-
-export const IF_CTI_NOT_ENABLED = i18n.translate(
-  'xpack.securitySolution.alertDetails.ifCtiNotEnabled',
-  {
-    defaultMessage:
-      "If you haven't enabled any threat intelligence sources and want to learn more about this capability, ",
-  }
-);
-
-export const CHECK_DOCS = i18n.translate('xpack.securitySolution.alertDetails.checkDocs', {
-  defaultMessage: 'please check out our documentation.',
+export const VIEW_CTI_DATA = i18n.translate('xpack.securitySolution.alertDetails.threatIntelCta', {
+  defaultMessage: 'View threat intel data',
 });
 
 export const INVESTIGATION_GUIDE = i18n.translate(
@@ -99,3 +84,7 @@ export const NESTED_COLUMN = (field: string) =>
     defaultMessage:
       'The {field} field is an object, and is broken down into nested fields which can be added as column',
   });
+
+export const AGENT_STATUS = i18n.translate('xpack.securitySolution.detections.alerts.agentStatus', {
+  defaultMessage: 'Agent status',
+});

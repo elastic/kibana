@@ -17,7 +17,7 @@ import {
   USER_AGENT_OS,
 } from '../../../../../common/elasticsearch_fieldnames';
 
-import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../../../../src/plugins/apm_oss/public';
+import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../common/index_pattern_constants';
 
 const getWildcardFilter = (field: string, value: string): Filter => {
   return {
@@ -49,7 +49,11 @@ const getMatchFilter = (field: string, value: string): Filter => {
   };
 };
 
-const getMultiMatchFilter = (field: string, values: string[]): Filter => {
+const getMultiMatchFilter = (
+  field: string,
+  values: string[],
+  negate = false
+): Filter => {
   return {
     meta: {
       index: APM_STATIC_INDEX_PATTERN_ID,
@@ -58,7 +62,7 @@ const getMultiMatchFilter = (field: string, values: string[]): Filter => {
       value: values.join(', '),
       params: values,
       alias: null,
-      negate: false,
+      negate,
       disabled: false,
     },
     query: {
@@ -70,27 +74,38 @@ const getMultiMatchFilter = (field: string, values: string[]): Filter => {
   };
 };
 
+const existFilter: Filter = {
+  meta: {
+    index: APM_STATIC_INDEX_PATTERN_ID,
+    alias: null,
+    negate: false,
+    disabled: false,
+    type: 'exists',
+    key: 'transaction.marks.navigationTiming.fetchStart',
+    value: 'exists',
+  },
+  exists: {
+    field: 'transaction.marks.navigationTiming.fetchStart',
+  },
+};
+
 export const useMapFilters = (): Filter[] => {
-  const { urlParams, uiFilters } = useUrlParams();
+  const { urlParams, uxUiFilters } = useUrlParams();
 
   const { serviceName, searchTerm } = urlParams;
 
-  const { browser, device, os, location, transactionUrl } = uiFilters;
-
-  const existFilter: Filter = {
-    meta: {
-      index: APM_STATIC_INDEX_PATTERN_ID,
-      alias: null,
-      negate: false,
-      disabled: false,
-      type: 'exists',
-      key: 'transaction.marks.navigationTiming.fetchStart',
-      value: 'exists',
-    },
-    exists: {
-      field: 'transaction.marks.navigationTiming.fetchStart',
-    },
-  };
+  const {
+    browser,
+    device,
+    os,
+    location,
+    transactionUrl,
+    browserExcluded,
+    deviceExcluded,
+    osExcluded,
+    locationExcluded,
+    transactionUrlExcluded,
+  } = uxUiFilters;
 
   return useMemo(() => {
     const filters = [existFilter];
@@ -112,12 +127,44 @@ export const useMapFilters = (): Filter[] => {
     if (transactionUrl) {
       filters.push(getMultiMatchFilter(TRANSACTION_URL, transactionUrl));
     }
+    if (browserExcluded) {
+      filters.push(getMultiMatchFilter(USER_AGENT_NAME, browserExcluded, true));
+    }
+    if (deviceExcluded) {
+      filters.push(
+        getMultiMatchFilter(USER_AGENT_DEVICE, deviceExcluded, true)
+      );
+    }
+    if (osExcluded) {
+      filters.push(getMultiMatchFilter(USER_AGENT_OS, osExcluded, true));
+    }
+    if (locationExcluded) {
+      filters.push(
+        getMultiMatchFilter(CLIENT_GEO_COUNTRY_ISO_CODE, locationExcluded, true)
+      );
+    }
+    if (transactionUrlExcluded) {
+      filters.push(
+        getMultiMatchFilter(TRANSACTION_URL, transactionUrlExcluded, true)
+      );
+    }
     if (searchTerm) {
       filters.push(getWildcardFilter(TRANSACTION_URL, searchTerm));
     }
 
     return filters;
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [serviceName, browser, device, os, location, searchTerm]);
+  }, [
+    serviceName,
+    browser,
+    device,
+    os,
+    location,
+    transactionUrl,
+    browserExcluded,
+    deviceExcluded,
+    osExcluded,
+    locationExcluded,
+    transactionUrlExcluded,
+    searchTerm,
+  ]);
 };

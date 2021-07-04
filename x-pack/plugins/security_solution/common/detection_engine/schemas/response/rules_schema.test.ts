@@ -21,8 +21,7 @@ import {
   addThreatMatchFields,
   addEqlFields,
 } from './rules_schema';
-import { exactCheck } from '../../../exact_check';
-import { foldLeftRight, getPaths } from '../../../test_utils';
+import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { TypeAndTimelineOnly } from './type_timeline_only_schema';
 import {
   getRulesSchemaMock,
@@ -30,7 +29,7 @@ import {
   getThreatMatchingSchemaMock,
   getRulesEqlSchemaMock,
 } from './rules_schema.mocks';
-import { ListArray } from '../types/lists';
+import type { ListArray } from '@kbn/securitysolution-io-ts-list-types';
 
 export const ANCHOR_DATE = '2020-02-20T03:57:54.037Z';
 

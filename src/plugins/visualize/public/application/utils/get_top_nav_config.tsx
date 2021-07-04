@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 import { Capabilities } from 'src/core/public';
 import { TopNavMenuData } from 'src/plugins/navigation/public';
@@ -29,7 +30,7 @@ import {
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
 } from '../types';
-import { VisualizeConstants } from '../visualize_constants';
+import { APP_NAME, VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from './breadcrumbs';
 import { EmbeddableStateTransfer } from '../../../../embeddable/public';
 
@@ -92,10 +93,22 @@ export const getTopNavConfig = (
     dashboard,
     savedObjectsTagging,
     presentationUtil,
+    usageCollection,
   }: VisualizeServices
 ) => {
   const { vis, embeddableHandler } = visInstance;
   const savedVis = visInstance.savedVis;
+
+  const doTelemetryForSaveEvent = (visType: string) => {
+    if (usageCollection) {
+      usageCollection.reportUiCounter(
+        originatingApp ?? APP_NAME,
+        METRIC_TYPE.CLICK,
+        `${visType}:save`
+      );
+    }
+  };
+
   /**
    * Called when the user clicks "Save" button.
    */
@@ -394,6 +407,8 @@ export const getTopNavConfig = (
                   return { id: true };
                 }
 
+                doTelemetryForSaveEvent(vis.type.name);
+
                 // We're adding the viz to a library so we need to save it and then
                 // add to a dashboard if necessary
                 const response = await doSave(saveOptions);
@@ -503,6 +518,8 @@ export const getTopNavConfig = (
               }
             },
             run: async () => {
+              doTelemetryForSaveEvent(vis.type.name);
+
               if (!savedVis?.id) {
                 return createVisReference();
               }

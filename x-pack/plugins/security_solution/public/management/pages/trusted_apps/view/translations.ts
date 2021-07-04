@@ -77,10 +77,10 @@ export const PROPERTY_TITLES: Readonly<
     defaultMessage: 'Created By',
   }),
   updated_at: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.updatedAt', {
-    defaultMessage: 'Date Updated',
+    defaultMessage: 'Date Modified',
   }),
   updated_by: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.updatedBy', {
-    defaultMessage: 'Updated By',
+    defaultMessage: 'Modified By',
   }),
   description: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.description', {
     defaultMessage: 'Description',

@@ -7,7 +7,7 @@
 
 import path from 'path';
 import fs from 'fs';
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -30,9 +30,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     servers: integrationConfig.get('servers'),
     esTestCluster: integrationConfig.get('esTestCluster'),
     apps: integrationConfig.get('apps'),
-    esArchiver: {
-      directory: path.resolve(__dirname, '../functional/es_archives'),
-    },
     screenshots: integrationConfig.get('screenshots'),
     junit: {
       reportName: 'Plugin Functional Tests',

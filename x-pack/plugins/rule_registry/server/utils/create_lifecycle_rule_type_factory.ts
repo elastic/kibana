@@ -32,7 +32,7 @@ import { AlertTypeWithExecutor } from '../types';
 import { ParsedTechnicalFields, parseTechnicalFields } from '../../common/parse_technical_fields';
 import { getRuleExecutorData } from './get_rule_executor_data';
 
-type LifecycleAlertService<TAlertInstanceContext extends Record<string, unknown>> = (alert: {
+export type LifecycleAlertService<TAlertInstanceContext extends Record<string, unknown>> = (alert: {
   id: string;
   fields: Record<string, unknown>;
 }) => AlertInstance<AlertInstanceState, TAlertInstanceContext, string>;
@@ -179,7 +179,7 @@ export const createLifecycleRuleTypeFactory: CreateLifecycleRuleTypeFactory = ({
           ...alertData,
           ...ruleExecutorData,
           [TIMESTAMP]: timestamp,
-          [EVENT_KIND]: 'state',
+          [EVENT_KIND]: 'event',
           [ALERT_ID]: alertId,
         };
 
@@ -221,9 +221,32 @@ export const createLifecycleRuleTypeFactory: CreateLifecycleRuleTypeFactory = ({
       });
 
       if (eventsToIndex.length) {
-        await ruleDataClient.getWriter().bulk({
-          body: eventsToIndex.flatMap((event) => [{ index: {} }, event]),
-        });
+        const alertEvents: Map<string, ParsedTechnicalFields> = new Map();
+
+        for (const event of eventsToIndex) {
+          const uuid = event[ALERT_UUID]!;
+          let storedEvent = alertEvents.get(uuid);
+          if (!storedEvent) {
+            storedEvent = event;
+          }
+          alertEvents.set(uuid, {
+            ...storedEvent,
+            [EVENT_KIND]: 'signal',
+          });
+        }
+
+        if (ruleDataClient.isWriteEnabled()) {
+          await ruleDataClient.getWriter().bulk({
+            body: eventsToIndex
+              .flatMap((event) => [{ index: {} }, event])
+              .concat(
+                Array.from(alertEvents.values()).flatMap((event) => [
+                  { index: { _id: event[ALERT_UUID]! } },
+                  event,
+                ])
+              ),
+          });
+        }
       }
 
       const nextTrackedAlerts = Object.fromEntries(
@@ -238,8 +261,8 @@ export const createLifecycleRuleTypeFactory: CreateLifecycleRuleTypeFactory = ({
       );
 
       return {
-        wrapped: nextWrappedState,
-        trackedAlerts: nextTrackedAlerts,
+        wrapped: nextWrappedState ?? {},
+        trackedAlerts: ruleDataClient.isWriteEnabled() ? nextTrackedAlerts : {},
       };
     },
   };

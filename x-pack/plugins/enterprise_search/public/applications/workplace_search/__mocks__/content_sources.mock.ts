@@ -24,6 +24,7 @@ export const contentSources = [
     errorReason: null,
     allowsReauth: true,
     boost: 1,
+    activities: [],
   },
   {
     id: '124',
@@ -38,6 +39,7 @@ export const contentSources = [
     errorReason: null,
     allowsReauth: true,
     boost: 0.5,
+    activities: [],
   },
 ];
 
@@ -303,6 +305,10 @@ export const exampleResult = {
     urlField: 'myLink',
     color: '#e3e3e3',
     descriptionField: 'about',
+    typeField: 'otherType',
+    mediaTypeField: 'otherMediaType',
+    createdByField: 'otherCreatedBy',
+    updatedByField: 'otherUpdatedBy',
     detailFields: [
       { fieldName: 'cats', label: 'Felines' },
       { fieldName: 'dogs', label: 'Canines' },

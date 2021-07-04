@@ -5,31 +5,28 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, memo, useMemo } from 'react';
+import { useDispatch } from 'react-redux';
+import React, { useCallback, useEffect, useMemo, memo } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutBody,
-  EuiFlyoutHeader,
+  EuiFlyoutFooter,
   EuiLoadingContent,
-  EuiTitle,
   EuiText,
   EuiSpacer,
   EuiEmptyPrompt,
-  EuiToolTip,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
 import { useToasts } from '../../../../../common/lib/kibana';
 import { useEndpointSelector } from '../hooks';
-import { urlFromQueryParams } from '../url_from_query_params';
 import {
   uiQueryParams,
   detailsData,
   detailsError,
+  getActivityLogData,
   showView,
-  detailsLoading,
   policyResponseConfigurations,
   policyResponseActions,
   policyResponseFailedOrWarningActionCount,
@@ -41,16 +38,27 @@ import {
   policyResponseAppliedRevision,
 } from '../../store/selectors';
 import { EndpointDetails } from './endpoint_details';
+import { EndpointActivityLog } from './endpoint_activity_log';
 import { PolicyResponse } from './policy_response';
+import * as i18 from '../translations';
 import { HostMetadata } from '../../../../../../common/endpoint/types';
-import { FlyoutSubHeader, FlyoutSubHeaderProps } from './components/flyout_sub_header';
-import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
-import { getEndpointListPath } from '../../../../common/routing';
-import { SecurityPageName } from '../../../../../app/types';
-import { useFormatUrl } from '../../../../../common/components/link_to';
+import {
+  EndpointDetailsFlyoutTabs,
+  EndpointDetailsTabsTypes,
+} from './components/endpoint_details_tabs';
+
 import { PreferenceFormattedDateFromPrimitive } from '../../../../../common/components/formatted_date';
+import { EndpointIsolationFlyoutPanel } from './components/endpoint_isolate_flyout_panel';
+import { BackToEndpointDetailsFlyoutSubHeader } from './components/back_to_endpoint_details_flyout_subheader';
+import { FlyoutBodyNoTopPadding } from './components/flyout_body_no_top_padding';
+import { getEndpointListPath } from '../../../../common/routing';
+import { ActionsMenu } from './components/actions_menu';
+import { EndpointIndexUIQueryParams } from '../../types';
+import { EndpointAction } from '../../store/action';
+import { EndpointDetailsFlyoutHeader } from './components/flyout_header';
 
 export const EndpointDetailsFlyout = memo(() => {
+  const dispatch = useDispatch<(action: EndpointAction) => void>();
   const history = useHistory();
   const toasts = useToasts();
   const queryParams = useEndpointSelector(uiQueryParams);
@@ -58,19 +66,73 @@ export const EndpointDetailsFlyout = memo(() => {
     selected_endpoint: selectedEndpoint,
     ...queryParamsWithoutSelectedEndpoint
   } = queryParams;
-  const details = useEndpointSelector(detailsData);
+
+  const activityLog = useEndpointSelector(getActivityLogData);
+  const hostDetails = useEndpointSelector(detailsData);
+  const hostDetailsError = useEndpointSelector(detailsError);
+
   const policyInfo = useEndpointSelector(policyVersionInfo);
   const hostStatus = useEndpointSelector(hostStatusInfo);
-  const loading = useEndpointSelector(detailsLoading);
-  const error = useEndpointSelector(detailsError);
   const show = useEndpointSelector(showView);
 
+  const setFlyoutView = useCallback(
+    (flyoutView: EndpointIndexUIQueryParams['show']) => {
+      dispatch({
+        type: 'endpointDetailsFlyoutTabChanged',
+        payload: {
+          flyoutView,
+        },
+      });
+    },
+    [dispatch]
+  );
+
+  const ContentLoadingMarkup = useMemo(
+    () => (
+      <>
+        <EuiLoadingContent lines={3} />
+        <EuiSpacer size="l" />
+        <EuiLoadingContent lines={3} />
+      </>
+    ),
+    []
+  );
+
+  const tabs = [
+    {
+      id: EndpointDetailsTabsTypes.overview,
+      name: i18.OVERVIEW,
+      content:
+        hostDetails === undefined ? (
+          ContentLoadingMarkup
+        ) : (
+          <EndpointDetails details={hostDetails} policyInfo={policyInfo} hostStatus={hostStatus} />
+        ),
+    },
+    {
+      id: EndpointDetailsTabsTypes.activityLog,
+      name: i18.ACTIVITY_LOG.tabTitle,
+      content: <EndpointActivityLog activityLog={activityLog} />,
+    },
+  ];
+
+  const showFlyoutFooter =
+    show === 'details' || show === 'policy_response' || show === 'activity_log';
+
   const handleFlyoutClose = useCallback(() => {
-    history.push(urlFromQueryParams(queryParamsWithoutSelectedEndpoint));
-  }, [history, queryParamsWithoutSelectedEndpoint]);
+    const { show: _show, ...urlSearchParams } = queryParamsWithoutSelectedEndpoint;
+    history.push(
+      getEndpointListPath({
+        name: 'endpointList',
+        ...urlSearchParams,
+      })
+    );
+    setFlyoutView(undefined);
+  }, [setFlyoutView, history, queryParamsWithoutSelectedEndpoint]);
 
   useEffect(() => {
-    if (error !== undefined) {
+    setFlyoutView(show);
+    if (hostDetailsError !== undefined) {
       toasts.addDanger({
         title: i18n.translate('xpack.securitySolution.endpoint.details.errorTitle', {
           defaultMessage: 'Could not find host',
@@ -80,7 +142,10 @@ export const EndpointDetailsFlyout = memo(() => {
         }),
       });
     }
-  }, [error, toasts]);
+    return () => {
+      setFlyoutView(undefined);
+    };
+  }, [hostDetailsError, setFlyoutView, show, toasts]);
 
   return (
     <EuiFlyout
@@ -88,43 +153,37 @@ export const EndpointDetailsFlyout = memo(() => {
       style={{ zIndex: 4001 }}
       data-test-subj="endpointDetailsFlyout"
       size="m"
+      paddingSize="l"
+      ownFocus={false}
     >
-      <EuiFlyoutHeader hasBorder>
-        {loading ? (
-          <EuiLoadingContent lines={1} />
-        ) : (
-          <EuiToolTip content={details?.host?.hostname} anchorClassName="eui-textTruncate">
-            <EuiTitle size="s">
-              <h2
-                style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
-                data-test-subj="endpointDetailsFlyoutTitle"
-              >
-                {details?.host?.hostname}
-              </h2>
-            </EuiTitle>
-          </EuiToolTip>
-        )}
-      </EuiFlyoutHeader>
-      {details === undefined ? (
-        <>
-          <EuiFlyoutBody>
-            <EuiLoadingContent lines={3} /> <EuiSpacer size="l" /> <EuiLoadingContent lines={3} />
-          </EuiFlyoutBody>
-        </>
+      {(show === 'policy_response' || show === 'isolate' || show === 'unisolate') && (
+        <EndpointDetailsFlyoutHeader hostname={hostDetails?.host?.hostname} />
+      )}
+      {hostDetails === undefined ? (
+        <EuiFlyoutBody>
+          <EuiLoadingContent lines={3} /> <EuiSpacer size="l" /> <EuiLoadingContent lines={3} />
+        </EuiFlyoutBody>
       ) : (
         <>
-          {show === 'details' && (
-            <>
-              <EuiFlyoutBody data-test-subj="endpointDetailsFlyoutBody">
-                <EndpointDetails
-                  details={details}
-                  policyInfo={policyInfo}
-                  hostStatus={hostStatus}
-                />
-              </EuiFlyoutBody>
-            </>
+          {(show === 'details' || show === 'activity_log') && (
+            <EndpointDetailsFlyoutTabs
+              hostname={hostDetails?.host?.hostname}
+              show={show}
+              tabs={tabs}
+            />
           )}
-          {show === 'policy_response' && <PolicyResponseFlyoutPanel hostMeta={details} />}
+
+          {show === 'policy_response' && <PolicyResponseFlyoutPanel hostMeta={hostDetails} />}
+
+          {(show === 'isolate' || show === 'unisolate') && (
+            <EndpointIsolationFlyoutPanel hostMeta={hostDetails} />
+          )}
+
+          {showFlyoutFooter && (
+            <EuiFlyoutFooter className="eui-textRight" data-test-subj="endpointDetailsFlyoutFooter">
+              <ActionsMenu />
+            </EuiFlyoutFooter>
+          )}
         </>
       )}
     </EuiFlyout>
@@ -133,59 +192,22 @@ export const EndpointDetailsFlyout = memo(() => {
 
 EndpointDetailsFlyout.displayName = 'EndpointDetailsFlyout';
 
-const PolicyResponseFlyoutBody = styled(EuiFlyoutBody)`
-  .euiFlyoutBody__overflowContent {
-    padding-top: 0;
-  }
-`;
-
 const PolicyResponseFlyoutPanel = memo<{
   hostMeta: HostMetadata;
 }>(({ hostMeta }) => {
-  const { show, ...queryParams } = useEndpointSelector(uiQueryParams);
   const responseConfig = useEndpointSelector(policyResponseConfigurations);
   const responseActions = useEndpointSelector(policyResponseActions);
   const responseAttentionCount = useEndpointSelector(policyResponseFailedOrWarningActionCount);
   const loading = useEndpointSelector(policyResponseLoading);
   const error = useEndpointSelector(policyResponseError);
-  const { formatUrl } = useFormatUrl(SecurityPageName.administration);
   const responseTimestamp = useEndpointSelector(policyResponseTimestamp);
   const responsePolicyRevisionNumber = useEndpointSelector(policyResponseAppliedRevision);
-  const [detailsUri, detailsRoutePath] = useMemo(
-    () => [
-      formatUrl(
-        getEndpointListPath({
-          name: 'endpointList',
-          ...queryParams,
-          selected_endpoint: hostMeta.agent.id,
-        })
-      ),
-      getEndpointListPath({
-        name: 'endpointList',
-        ...queryParams,
-        selected_endpoint: hostMeta.agent.id,
-      }),
-    ],
-    [hostMeta.agent.id, formatUrl, queryParams]
-  );
-  const backToDetailsClickHandler = useNavigateByRouterEventHandler(detailsRoutePath);
-  const backButtonProp = useMemo((): FlyoutSubHeaderProps['backButton'] => {
-    return {
-      title: i18n.translate('xpack.securitySolution.endpoint.policyResponse.backLinkTitle', {
-        defaultMessage: 'Endpoint Details',
-      }),
-      href: detailsUri,
-      onClick: backToDetailsClickHandler,
-    };
-  }, [backToDetailsClickHandler, detailsUri]);
 
   return (
     <>
-      <FlyoutSubHeader
-        backButton={backButtonProp}
-        data-test-subj="endpointDetailsPolicyResponseFlyoutHeader"
-      />
-      <PolicyResponseFlyoutBody
+      <BackToEndpointDetailsFlyoutSubHeader endpointId={hostMeta.agent.id} />
+
+      <FlyoutBodyNoTopPadding
         data-test-subj="endpointDetailsPolicyResponseFlyoutBody"
         className="endpointDetailsPolicyResponseFlyoutBody"
       >
@@ -227,7 +249,7 @@ const PolicyResponseFlyoutPanel = memo<{
             responseAttentionCount={responseAttentionCount}
           />
         )}
-      </PolicyResponseFlyoutBody>
+      </FlyoutBodyNoTopPadding>
     </>
   );
 });

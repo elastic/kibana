@@ -52,6 +52,6 @@ export interface ASRoleMapping extends RoleMapping {
 }
 
 export interface AdvanceRoleType {
-  type: RoleTypes;
+  id: RoleTypes;
   description: string;
 }

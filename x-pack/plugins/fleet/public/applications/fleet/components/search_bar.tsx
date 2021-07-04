@@ -97,6 +97,8 @@ export const SearchBar: React.FunctionComponent<Props> = ({
         onChange(newQuery.query as string, true);
       }}
       submitOnBlur
+      isClearable
+      autoSubmit
     />
   );
 };

@@ -12,7 +12,10 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { NotificationsStart } from 'kibana/public';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public/context';
-import { CreateExceptionListItemSchema, ExceptionListItemSchema } from '../../../../shared_imports';
+import type {
+  CreateExceptionListItemSchema,
+  ExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 
 import {
   createdEventFilterEntryMock,

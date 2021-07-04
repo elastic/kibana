@@ -230,7 +230,12 @@ describe('IndexPatterns', () => {
 
   test('createAndSave', async () => {
     const title = 'kibana-*';
-    indexPatterns.createSavedObject = jest.fn();
+
+    indexPatterns.createSavedObject = jest.fn(() =>
+      Promise.resolve(({
+        id: 'id',
+      } as unknown) as IndexPattern)
+    );
     indexPatterns.setDefault = jest.fn();
     await indexPatterns.createAndSave({ title });
     expect(indexPatterns.createSavedObject).toBeCalled();

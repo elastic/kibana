@@ -38,7 +38,12 @@ export const APM_FEATURE = {
         read: [],
       },
       alerting: {
-        all: Object.values(AlertType),
+        rule: {
+          all: Object.values(AlertType),
+        },
+        alert: {
+          all: Object.values(AlertType),
+        },
       },
       management: {
         insightsAndAlerting: ['triggersActions'],
@@ -54,7 +59,12 @@ export const APM_FEATURE = {
         read: [],
       },
       alerting: {
-        read: Object.values(AlertType),
+        rule: {
+          read: Object.values(AlertType),
+        },
+        alert: {
+          read: Object.values(AlertType),
+        },
       },
       management: {
         insightsAndAlerting: ['triggersActions'],

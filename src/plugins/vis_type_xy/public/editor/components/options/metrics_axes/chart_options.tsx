@@ -15,6 +15,7 @@ import { SelectOption } from '../../../../../../vis_default_editor/public';
 
 import { SeriesParam, ValueAxis, ChartMode, AxisMode } from '../../../../types';
 import { LineOptions } from './line_options';
+import { PointOptions } from './point_options';
 import { SetParamByIndex, ChangeValueAxis } from '.';
 import { ChartType } from '../../../../../common';
 import { getConfigCollections } from '../../../collections';
@@ -143,6 +144,9 @@ function ChartOptions({
       )}
 
       {chart.type === ChartType.Line && <LineOptions chart={chart} setChart={setChart} />}
+      {(chart.type === ChartType.Area || chart.type === ChartType.Line) && (
+        <PointOptions chart={chart} setChart={setChart} />
+      )}
     </>
   );
 }

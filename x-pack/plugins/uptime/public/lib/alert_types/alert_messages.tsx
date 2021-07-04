@@ -14,7 +14,7 @@ import { ActionConnector } from '../../state/alerts/alerts';
 export const simpleAlertEnabled = (defaultActions: ActionConnector[]) => {
   return {
     title: i18n.translate('xpack.uptime.overview.alerts.enabled.success', {
-      defaultMessage: 'Alert successfully enabled ',
+      defaultMessage: 'Rule successfully enabled ',
     }),
     text: toMountPoint(
       <FormattedMessage

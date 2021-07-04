@@ -79,6 +79,10 @@ const explorerAppState$: Observable<ExplorerAppState> = explorerState$.pipe(
         appState.mlExplorerSwimlane.viewByPerPage = state.viewByPerPage;
       }
 
+      if (state.swimLaneSeverity !== undefined) {
+        appState.mlExplorerSwimlane.severity = state.swimLaneSeverity;
+      }
+
       if (state.filterActive) {
         appState.mlExplorerFilter.influencersFilterQuery = state.influencersFilterQuery;
         appState.mlExplorerFilter.filterActive = state.filterActive;
@@ -160,6 +164,9 @@ export const explorerService = {
   },
   setViewByPerPage: (payload: number) => {
     explorerAction$.next({ type: EXPLORER_ACTION.SET_VIEW_BY_PER_PAGE, payload });
+  },
+  setSwimLaneSeverity: (payload: number) => {
+    explorerAction$.next({ type: EXPLORER_ACTION.SET_SWIM_LANE_SEVERITY, payload });
   },
 };
 

@@ -7,6 +7,7 @@
 
 import { cloneDeep } from 'lodash/fp';
 import {
+  ColumnHeaderOptions,
   TimelineType,
   TimelineStatus,
   TimelineTabs,
@@ -47,7 +48,7 @@ import {
   upsertTimelineColumn,
   updateGraphEventId,
 } from './helpers';
-import { ColumnHeaderOptions, TimelineModel } from './model';
+import { TimelineModel } from './model';
 import { timelineDefaults } from './defaults';
 import { TimelineById } from './types';
 import { Direction } from '../../../../common/search_strategy';

@@ -15,29 +15,84 @@ export const DEFAULT_TIME_SCALE = 's' as TimeScaleUnit;
 describe('time scale utils', () => {
   describe('adjustTimeScaleLabelSuffix', () => {
     it('should should remove existing suffix', () => {
-      expect(adjustTimeScaleLabelSuffix('abc per second', 's', undefined)).toEqual('abc');
-      expect(adjustTimeScaleLabelSuffix('abc per hour', 'h', undefined)).toEqual('abc');
+      expect(
+        adjustTimeScaleLabelSuffix('abc per second', 's', undefined, undefined, undefined)
+      ).toEqual('abc');
+      expect(
+        adjustTimeScaleLabelSuffix('abc per hour', 'h', undefined, undefined, undefined)
+      ).toEqual('abc');
+      expect(adjustTimeScaleLabelSuffix('abc -3d', undefined, undefined, '3d', undefined)).toEqual(
+        'abc'
+      );
+      expect(
+        adjustTimeScaleLabelSuffix('abc per hour -3d', 'h', undefined, '3d', undefined)
+      ).toEqual('abc');
     });
 
     it('should add suffix', () => {
-      expect(adjustTimeScaleLabelSuffix('abc', undefined, 's')).toEqual('abc per second');
-      expect(adjustTimeScaleLabelSuffix('abc', undefined, 'd')).toEqual('abc per day');
+      expect(adjustTimeScaleLabelSuffix('abc', undefined, 's', undefined, undefined)).toEqual(
+        'abc per second'
+      );
+      expect(adjustTimeScaleLabelSuffix('abc', undefined, 'd', undefined, undefined)).toEqual(
+        'abc per day'
+      );
+      expect(adjustTimeScaleLabelSuffix('abc', undefined, undefined, undefined, '12h')).toEqual(
+        'abc -12h'
+      );
+      expect(adjustTimeScaleLabelSuffix('abc', undefined, 'h', undefined, '12h')).toEqual(
+        'abc per hour -12h'
+      );
+    });
+
+    it('should add and remove at the same time', () => {
+      expect(adjustTimeScaleLabelSuffix('abc per hour', 'h', undefined, undefined, '1d')).toEqual(
+        'abc -1d'
+      );
+      expect(adjustTimeScaleLabelSuffix('abc -1d', undefined, 'h', '1d', undefined)).toEqual(
+        'abc per hour'
+      );
     });
 
     it('should change suffix', () => {
-      expect(adjustTimeScaleLabelSuffix('abc per second', 's', 'd')).toEqual('abc per day');
-      expect(adjustTimeScaleLabelSuffix('abc per day', 'd', 's')).toEqual('abc per second');
+      expect(adjustTimeScaleLabelSuffix('abc per second', 's', 'd', undefined, undefined)).toEqual(
+        'abc per day'
+      );
+      expect(adjustTimeScaleLabelSuffix('abc per day', 'd', 's', undefined, undefined)).toEqual(
+        'abc per second'
+      );
+      expect(adjustTimeScaleLabelSuffix('abc per day -3h', 'd', 's', '3h', '3h')).toEqual(
+        'abc per second -3h'
+      );
+      expect(adjustTimeScaleLabelSuffix('abc per day -3h', 'd', 'd', '3h', '4h')).toEqual(
+        'abc per day -4h'
+      );
     });
 
     it('should keep current state', () => {
-      expect(adjustTimeScaleLabelSuffix('abc', undefined, undefined)).toEqual('abc');
-      expect(adjustTimeScaleLabelSuffix('abc per day', 'd', 'd')).toEqual('abc per day');
+      expect(adjustTimeScaleLabelSuffix('abc', undefined, undefined, undefined, undefined)).toEqual(
+        'abc'
+      );
+      expect(adjustTimeScaleLabelSuffix('abc per day', 'd', 'd', undefined, undefined)).toEqual(
+        'abc per day'
+      );
+      expect(adjustTimeScaleLabelSuffix('abc -1h', undefined, undefined, '1h', '1h')).toEqual(
+        'abc -1h'
+      );
+      expect(adjustTimeScaleLabelSuffix('abc per day -1h', 'd', 'd', '1h', '1h')).toEqual(
+        'abc per day -1h'
+      );
     });
 
     it('should not fail on inconsistent input', () => {
-      expect(adjustTimeScaleLabelSuffix('abc', 's', undefined)).toEqual('abc');
-      expect(adjustTimeScaleLabelSuffix('abc', 's', 'd')).toEqual('abc per day');
-      expect(adjustTimeScaleLabelSuffix('abc per day', 's', undefined)).toEqual('abc per day');
+      expect(adjustTimeScaleLabelSuffix('abc', 's', undefined, undefined, undefined)).toEqual(
+        'abc'
+      );
+      expect(adjustTimeScaleLabelSuffix('abc', 's', 'd', undefined, undefined)).toEqual(
+        'abc per day'
+      );
+      expect(
+        adjustTimeScaleLabelSuffix('abc per day', 's', undefined, undefined, undefined)
+      ).toEqual('abc per day');
     });
   });
 

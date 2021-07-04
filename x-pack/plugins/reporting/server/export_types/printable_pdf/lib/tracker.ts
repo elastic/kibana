@@ -8,6 +8,7 @@
 import apm from 'elastic-apm-node';
 
 interface PdfTracker {
+  setByteLength: (byteLength: number) => void;
   startLayout: () => void;
   endLayout: () => void;
   startScreenshots: () => void;
@@ -76,6 +77,9 @@ export function getTracker(): PdfTracker {
     },
     endGetBuffer() {
       if (apmGetBuffer) apmGetBuffer.end();
+    },
+    setByteLength(byteLength: number) {
+      apmTrans?.setLabel('byte_length', byteLength, false);
     },
     end() {
       if (apmTrans) apmTrans.end();

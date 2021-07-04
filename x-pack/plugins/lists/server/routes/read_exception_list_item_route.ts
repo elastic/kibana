@@ -7,14 +7,14 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
-import type { ListsPluginRouter } from '../types';
-import { EXCEPTION_LIST_ITEM_URL } from '../../common/constants';
 import {
   ReadExceptionListItemSchemaDecoded,
   exceptionListItemSchema,
   readExceptionListItemSchema,
-} from '../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+
+import type { ListsPluginRouter } from '../types';
 
 import {
   buildRouteValidation,

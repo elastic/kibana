@@ -8,9 +8,7 @@
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import isEmpty from 'lodash/isEmpty';
+import { isEmpty } from 'lodash';
 
 import { throwErrors } from '../../../../cases/common';
 import {
@@ -41,9 +39,9 @@ import {
 } from '../../../common/constants';
 
 import { KibanaServices } from '../../common/lib/kibana';
-import { ExportSelectedData } from '../../common/components/generic_downloader';
 import { ToasterError } from '../../common/components/toasters';
 import {
+  ExportDocumentsProps,
   ImportDataProps,
   ImportDataResponse,
 } from '../../detections/containers/detection_engine/rules';
@@ -221,11 +219,11 @@ export const importTimelines = async ({
   });
 };
 
-export const exportSelectedTimeline: ExportSelectedData = ({
+export const exportSelectedTimeline = ({
   filename = `timelines_export.ndjson`,
   ids = [],
   signal,
-}): Promise<Blob | TimelineErrorResponse> => {
+}: ExportDocumentsProps): Promise<Blob | TimelineErrorResponse> => {
   let requestBody;
   try {
     requestBody = ids.length > 0 ? JSON.stringify({ ids }) : undefined;

@@ -44,6 +44,7 @@ const mockCore = {
       ml: {},
     },
     currentAppId$: new Observable(),
+    getUrlForApp: (appId: string) => '',
     navigateToUrl: (url: string) => {},
   },
   chrome: {

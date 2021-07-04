@@ -7,5 +7,5 @@
  */
 export { NavLinksService } from './nav_links_service';
 
-export type { ChromeNavLink, ChromeNavLinkUpdateableFields } from './nav_link';
+export type { ChromeNavLink } from './nav_link';
 export type { ChromeNavLinks } from './nav_links_service';

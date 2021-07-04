@@ -13,3 +13,6 @@ import { PositiveIntegerGreaterThanZero } from '@kbn/securitysolution-io-ts-type
 
 export const max_signals = PositiveIntegerGreaterThanZero;
 export type MaxSignals = t.TypeOf<typeof max_signals>;
+
+export const maxSignalsOrUndefined = t.union([max_signals, t.undefined]);
+export type MaxSignalsOrUndefined = t.TypeOf<typeof maxSignalsOrUndefined>;

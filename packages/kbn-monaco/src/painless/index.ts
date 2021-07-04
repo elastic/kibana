@@ -9,8 +9,9 @@
 import { ID } from './constants';
 import { lexerRules, languageConfiguration } from './lexer_rules';
 import { getSuggestionProvider, getSyntaxErrors } from './language';
+import { CompleteLangModule as CompleteLangModuleType } from '../types';
 
-export const PainlessLang = {
+export const PainlessLang: CompleteLangModuleType = {
   ID,
   getSuggestionProvider,
   lexerRules,

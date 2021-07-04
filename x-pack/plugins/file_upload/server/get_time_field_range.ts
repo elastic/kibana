@@ -5,11 +5,15 @@
  * 2.0.
  */
 import { IScopedClusterClient } from 'kibana/server';
+import { estypes } from '@elastic/elasticsearch';
+import { isPopulatedObject } from './utils/runtime_field_utils';
+
 export async function getTimeFieldRange(
   client: IScopedClusterClient,
   index: string[] | string,
   timeFieldName: string,
-  query: any
+  query: any,
+  runtimeMappings?: estypes.MappingRuntimeFields
 ): Promise<{
   success: boolean;
   start: { epoch: number; string: string };
@@ -36,6 +40,7 @@ export async function getTimeFieldRange(
           },
         },
       },
+      ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     },
   });
 

@@ -6,11 +6,11 @@
  */
 
 import { Action } from 'redux';
-import {
+import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
   UpdateExceptionListItemSchema,
-} from '../../../../shared_imports';
+} from '@kbn/securitysolution-io-ts-list-types';
 import { AsyncResourceState } from '../../../state/async_resource_state';
 import { EventFiltersListPageState } from '../types';
 
@@ -66,6 +66,12 @@ export type EventFiltersFormStateChanged = Action<'eventFiltersFormStateChanged'
   payload: AsyncResourceState<ExceptionListItemSchema>;
 };
 
+export type EventFiltersForceRefresh = Action<'eventFiltersForceRefresh'> & {
+  payload: {
+    forceRefresh: boolean;
+  };
+};
+
 export type EventFiltersPageAction =
   | EventFiltersListPageDataChanged
   | EventFiltersListPageDataExistsChanged
@@ -81,4 +87,5 @@ export type EventFiltersPageAction =
   | EventFilterForDeletion
   | EventFilterDeletionReset
   | EventFilterDeleteSubmit
-  | EventFilterDeleteStatusChanged;
+  | EventFilterDeleteStatusChanged
+  | EventFiltersForceRefresh;

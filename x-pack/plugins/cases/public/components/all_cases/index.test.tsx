@@ -13,7 +13,7 @@ import '../../common/mock/match_media';
 import { TestProviders } from '../../common/mock';
 import { casesStatus, useGetCasesMockState, collectionCase } from '../../containers/mock';
 
-import { CaseStatuses, CaseType, StatusAll } from '../../../common';
+import { CaseStatuses, CaseType, SECURITY_SOLUTION_OWNER, StatusAll } from '../../../common';
 import { getEmptyTagValue } from '../empty_value';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { useGetCases } from '../../containers/use_get_cases';
@@ -36,7 +36,24 @@ const useGetCasesStatusMock = useGetCasesStatus as jest.Mock;
 const useUpdateCasesMock = useUpdateCases as jest.Mock;
 const useGetActionLicenseMock = useGetActionLicense as jest.Mock;
 
-jest.mock('../../common/lib/kibana');
+jest.mock('../../common/lib/kibana', () => {
+  const originalModule = jest.requireActual('../../common/lib/kibana');
+  return {
+    ...originalModule,
+    useKibana: () => ({
+      services: {
+        triggersActionsUi: {
+          actionTypeRegistry: {
+            get: jest.fn().mockReturnValue({
+              actionTypeTitle: '.jira',
+              iconClass: 'logoSecurity',
+            }),
+          },
+        },
+      },
+    }),
+  };
+});
 
 describe('AllCasesGeneric', () => {
   const defaultAllCasesProps: AllCasesProps = {
@@ -53,6 +70,7 @@ describe('AllCasesGeneric', () => {
       onClick: jest.fn(),
     },
     userCanCrud: true,
+    owner: [SECURITY_SOLUTION_OWNER],
   };
 
   const dispatchResetIsDeleted = jest.fn();
@@ -118,6 +136,7 @@ describe('AllCasesGeneric', () => {
     handleIsLoading: jest.fn(),
     isLoadingCases: [],
     showActions: true,
+    userCanCrud: true,
   };
 
   beforeEach(() => {
@@ -273,7 +292,7 @@ describe('AllCasesGeneric', () => {
     });
   });
 
-  it('should render correct actions for case (with type individual and filter status open)', async () => {
+  it('should render delete actions for case', async () => {
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
       filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.open },
@@ -283,18 +302,12 @@ describe('AllCasesGeneric', () => {
         <AllCases {...defaultAllCasesProps} />
       </TestProviders>
     );
-    wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]').first().simulate('click');
     await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="action-open"]').exists()).toBeFalsy();
-      expect(
-        wrapper.find('[data-test-subj="action-in-progress"]').first().props().disabled
-      ).toBeFalsy();
-      expect(wrapper.find('[data-test-subj="action-close"]').first().props().disabled).toBeFalsy();
       expect(wrapper.find('[data-test-subj="action-delete"]').first().props().disabled).toBeFalsy();
     });
   });
 
-  it('should enable correct actions for sub cases', async () => {
+  it.skip('should enable correct actions for sub cases', async () => {
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
       data: {
@@ -326,25 +339,9 @@ describe('AllCasesGeneric', () => {
       </TestProviders>
     );
 
-    wrapper
-      .find(
-        '[data-test-subj="sub-cases-table-my-case-with-subcases"] [data-test-subj="euiCollapsedItemActionsButton"]'
-      )
-      .last()
-      .simulate('click');
-
-    await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="action-open"]').first().props().disabled).toEqual(true);
-      expect(
-        wrapper.find('[data-test-subj="action-in-progress"]').first().props().disabled
-      ).toEqual(true);
-      expect(wrapper.find('[data-test-subj="action-close"]').first().props().disabled).toEqual(
-        true
-      );
-      expect(wrapper.find('[data-test-subj="action-delete"]').first().props().disabled).toEqual(
-        false
-      );
-    });
+    expect(wrapper.find('[data-test-subj="action-delete"]').first().props().disabled).toEqual(
+      false
+    );
   });
 
   it('should not render case link when caseDetailsNavigation is not passed or actions on showActions=false', async () => {
@@ -361,6 +358,7 @@ describe('AllCasesGeneric', () => {
         filterStatus: CaseStatuses.open,
         handleIsLoading: jest.fn(),
         showActions: false,
+        userCanCrud: true,
       })
     );
     await waitFor(() => {
@@ -386,14 +384,17 @@ describe('AllCasesGeneric', () => {
     });
   });
 
-  it('closes case when row action icon clicked', async () => {
+  it('Updates status when status context menu is updated', async () => {
     const wrapper = mount(
       <TestProviders>
         <AllCases {...defaultAllCasesProps} />
       </TestProviders>
     );
-    wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]').first().simulate('click');
-    wrapper.find('[data-test-subj="action-close"]').first().simulate('click');
+    wrapper.find(`[data-test-subj="case-view-status-dropdown"] button`).first().simulate('click');
+    wrapper
+      .find(`[data-test-subj="case-view-status-dropdown-closed"] button`)
+      .first()
+      .simulate('click');
 
     await waitFor(() => {
       const firstCase = useGetCasesMockState.data.cases[0];
@@ -402,66 +403,6 @@ describe('AllCasesGeneric', () => {
           caseId: firstCase.id,
           updateKey: 'status',
           updateValue: CaseStatuses.closed,
-          version: firstCase.version,
-        })
-      );
-    });
-  });
-
-  it('opens case when row action icon clicked', async () => {
-    useGetCasesMock.mockReturnValue({
-      ...defaultGetCases,
-      data: {
-        ...defaultGetCases.data,
-        cases: [
-          {
-            ...defaultGetCases.data.cases[0],
-            status: CaseStatuses.closed,
-          },
-        ],
-      },
-      filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.closed },
-    });
-
-    const wrapper = mount(
-      <TestProviders>
-        <AllCases {...defaultAllCasesProps} />
-      </TestProviders>
-    );
-
-    wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]').first().simulate('click');
-    wrapper.find('[data-test-subj="action-open"]').first().simulate('click');
-
-    await waitFor(() => {
-      const firstCase = useGetCasesMockState.data.cases[0];
-      expect(dispatchUpdateCaseProperty.mock.calls[0][0]).toEqual(
-        expect.objectContaining({
-          caseId: firstCase.id,
-          updateKey: 'status',
-          updateValue: CaseStatuses.open,
-          version: firstCase.version,
-        })
-      );
-    });
-  });
-
-  it('put case in progress when row action icon clicked', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <AllCases {...defaultAllCasesProps} />
-      </TestProviders>
-    );
-
-    wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]').first().simulate('click');
-    wrapper.find('[data-test-subj="action-in-progress"]').first().simulate('click');
-
-    await waitFor(() => {
-      const firstCase = useGetCasesMockState.data.cases[0];
-      expect(dispatchUpdateCaseProperty.mock.calls[0][0]).toEqual(
-        expect.objectContaining({
-          caseId: firstCase.id,
-          updateKey: 'status',
-          updateValue: CaseStatuses['in-progress'],
           version: firstCase.version,
         })
       );
@@ -793,7 +734,7 @@ describe('AllCasesGeneric', () => {
         closedAt: null,
         closedBy: null,
         comments: [],
-        connector: { fields: null, id: '123', name: 'My Connector', type: '.none' },
+        connector: { fields: null, id: '123', name: 'My Connector', type: '.jira' },
         createdAt: '2020-02-19T23:06:33.798Z',
         createdBy: {
           email: 'leslie.knope@elastic.co',
@@ -815,6 +756,7 @@ describe('AllCasesGeneric', () => {
           },
         },
         id: '1',
+        owner: SECURITY_SOLUTION_OWNER,
         status: 'open',
         subCaseIds: [],
         tags: ['coke', 'pepsi'],

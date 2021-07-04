@@ -6,19 +6,24 @@
  */
 
 import { RequestHandlerContext } from 'src/core/server';
+import { License } from '../../shared_imports';
 
-export function mockRouteContext({
-  callAsCurrentUser,
-}: {
-  callAsCurrentUser: any;
-}): RequestHandlerContext {
+export function mockRouteContext(mockedFunctions: unknown): RequestHandlerContext {
   const routeContextMock = ({
-    crossClusterReplication: {
-      client: {
-        callAsCurrentUser,
+    core: {
+      elasticsearch: {
+        client: {
+          asCurrentUser: mockedFunctions,
+        },
       },
     },
   } as unknown) as RequestHandlerContext;
 
   return routeContextMock;
 }
+
+export const mockLicense = {
+  guardApiRoute: (route: any) => route,
+} as License;
+
+export const mockError = { name: 'ResponseError', statusCode: 400 };

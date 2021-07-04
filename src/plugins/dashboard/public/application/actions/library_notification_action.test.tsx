@@ -27,6 +27,7 @@ import {
   ContactCardEmbeddableOutput,
   CONTACT_CARD_EMBEDDABLE,
 } from '../../services/embeddable_test_samples';
+import { getStubPluginServices } from '../../../../presentation_util/public';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
 setup.registerEmbeddableFactory(
@@ -60,6 +61,7 @@ beforeEach(async () => {
     uiActions: {} as any,
     uiSettings: uiSettingsServiceMock.createStartContract(),
     http: coreStart.http,
+    presentationUtil: getStubPluginServices(),
   };
 
   container = new DashboardContainer(getSampleDashboardInput(), containerOptions);

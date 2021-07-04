@@ -7,15 +7,24 @@
 
 import React, { FC } from 'react';
 import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
 import {
   SavedObjectFinderUi,
   SavedObjectMetaData,
 } from '../../../../../../src/plugins/saved_objects/public/';
-import { ComponentStrings } from '../../../i18n';
-import { useServices } from '../../services';
+import { usePlatformService, useServices } from '../../services';
 
-const { AddEmbeddableFlyout: strings } = ComponentStrings;
-
+const strings = {
+  getNoItemsText: () =>
+    i18n.translate('xpack.canvas.embedObject.noMatchingObjectsMessage', {
+      defaultMessage: 'No matching objects found.',
+    }),
+  getTitleText: () =>
+    i18n.translate('xpack.canvas.embedObject.titleText', {
+      defaultMessage: 'Add from Kibana',
+    }),
+};
 export interface Props {
   onClose: () => void;
   onSelect: (id: string, embeddableType: string) => void;
@@ -24,9 +33,10 @@ export interface Props {
 
 export const AddEmbeddableFlyout: FC<Props> = ({ onSelect, availableEmbeddables, onClose }) => {
   const services = useServices();
-  const { embeddables, platform } = services;
+  const platformService = usePlatformService();
+  const { embeddables } = services;
   const { getEmbeddableFactories } = embeddables;
-  const { getSavedObjects, getUISettings } = platform;
+  const { getSavedObjects, getUISettings } = platformService;
 
   const onAddPanel = (id: string, savedObjectType: string, name: string) => {
     const embeddableFactories = getEmbeddableFactories();

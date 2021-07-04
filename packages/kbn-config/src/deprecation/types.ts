@@ -25,8 +25,8 @@ export interface DeprecatedConfigDetails {
   silent?: boolean;
   /* (optional) link to the documentation for more details on the deprecation. */
   documentationUrl?: string;
-  /* (optional) corrective action needed to fix this deprecation. */
-  correctiveActions?: {
+  /* corrective action needed to fix this deprecation. */
+  correctiveActions: {
     /**
      * Specify a list of manual steps our users need to follow
      * to fix the deprecation before upgrade.
@@ -54,6 +54,16 @@ export type ConfigDeprecation = (
   fromPath: string,
   addDeprecation: AddConfigDeprecation
 ) => void | ConfigDeprecationCommand;
+
+/**
+ * List of config paths changed during deprecation.
+ *
+ * @public
+ */
+export interface ChangedDeprecatedPaths {
+  set: string[];
+  unset: string[];
+}
 
 /**
  * Outcome of deprecation operation. Allows mutating config values in a declarative way.

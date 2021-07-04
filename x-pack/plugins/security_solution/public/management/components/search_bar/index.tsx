@@ -25,7 +25,7 @@ export const SearchBar = memo<SearchBarProps>(({ defaultValue = '', onSearch, pl
   const handleOnSearch = useCallback(() => onSearch(query), [query, onSearch]);
 
   return (
-    <EuiFlexGroup direction="row" alignItems="center" gutterSize="l">
+    <EuiFlexGroup data-test-subj="searchBar" direction="row" alignItems="center" gutterSize="l">
       <EuiFlexItem>
         <EuiFieldSearch
           defaultValue={defaultValue}

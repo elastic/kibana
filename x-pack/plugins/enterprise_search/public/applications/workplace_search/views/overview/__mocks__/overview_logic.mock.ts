@@ -6,7 +6,7 @@
  */
 
 import { DEFAULT_INITIAL_APP_DATA } from '../../../../../../common/__mocks__';
-import { setMockValues as setMockKeaValues, setMockActions } from '../../../../__mocks__/kea.mock';
+import { setMockValues as setMockKeaValues, setMockActions } from '../../../../__mocks__/kea_logic';
 
 const { workplaceSearch: mockAppValues } = DEFAULT_INITIAL_APP_DATA;
 
@@ -27,7 +27,7 @@ export const mockActions = {
   initializeOverview: jest.fn(() => ({})),
 };
 
-const mockValues = { ...mockOverviewValues, ...mockAppValues, isFederatedAuth: true };
+const mockValues = { ...mockOverviewValues, ...mockAppValues };
 
 setMockActions({ ...mockActions });
 setMockKeaValues({ ...mockValues });

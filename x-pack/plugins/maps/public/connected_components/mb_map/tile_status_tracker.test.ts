@@ -7,7 +7,7 @@
 
 // eslint-disable-next-line max-classes-per-file
 import { TileStatusTracker } from './tile_status_tracker';
-import { Map as MbMap } from 'mapbox-gl';
+import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { ILayer } from '../../classes/layers/layer';
 
 class MockMbMap {

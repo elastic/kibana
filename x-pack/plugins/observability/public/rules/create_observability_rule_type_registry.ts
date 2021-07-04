@@ -9,7 +9,7 @@ import { AlertTypeModel, AlertTypeRegistryContract } from '../../../triggers_act
 import { ParsedTechnicalFields } from '../../../rule_registry/common/parse_technical_fields';
 import { AsDuration, AsPercent } from '../../common/utils/formatters';
 
-type Formatter = (options: {
+export type Formatter = (options: {
   fields: ParsedTechnicalFields & Record<string, any>;
   formatters: { asDuration: AsDuration; asPercent: AsPercent };
 }) => { reason: string; link: string };

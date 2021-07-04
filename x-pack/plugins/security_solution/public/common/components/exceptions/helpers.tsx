@@ -22,18 +22,19 @@ import {
   OsTypeArray,
   ExceptionListType,
   ListOperatorTypeEnum as OperatorTypeEnum,
-} from '@kbn/securitysolution-io-ts-list-types';
-
-import * as i18n from './translations';
-import { AlertData, ExceptionsBuilderExceptionItem, Flattened } from './types';
-import {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
   UpdateExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+
+import {
   getOperatorType,
   getNewExceptionItem,
   addIdToEntries,
-} from '../../../shared_imports';
+  ExceptionsBuilderExceptionItem,
+} from '@kbn/securitysolution-list-utils';
+import * as i18n from './translations';
+import { AlertData, Flattened } from './types';
 
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import { Ecs } from '../../../../common/ecs';
@@ -235,7 +236,10 @@ export const enrichExceptionItemsWithOS = (
 export const retrieveAlertOsTypes = (alertData?: AlertData): OsTypeArray => {
   const osDefaults: OsTypeArray = ['windows', 'macos'];
   if (alertData != null) {
-    const os = alertData.host && alertData.host.os && alertData.host.os.family;
+    const os =
+      alertData?.agent?.type === 'endpoint'
+        ? alertData.host?.os?.name?.toLowerCase()
+        : alertData.host?.os?.family;
     if (os != null) {
       return osType.is(os) ? [os] : osDefaults;
     }
@@ -360,48 +364,64 @@ export const getPrepopulatedEndpointException = ({
   const { file, host } = alertEcsData;
   const filePath = file?.path ?? '';
   const sha256Hash = file?.hash?.sha256 ?? '';
-  const filePathDefault = host?.os?.family === 'linux' ? 'file.path' : 'file.path.caseless';
+  const isLinux = host?.os?.name === 'Linux';
+
+  const commonFields: Array<{
+    field: string;
+    operator: 'excluded' | 'included';
+    type: 'match';
+    value: string;
+  }> = [
+    {
+      field: isLinux ? 'file.path' : 'file.path.caseless',
+      operator: 'included',
+      type: 'match',
+      value: filePath ?? '',
+    },
+    {
+      field: 'file.hash.sha256',
+      operator: 'included',
+      type: 'match',
+      value: sha256Hash ?? '',
+    },
+    {
+      field: 'event.code',
+      operator: 'included',
+      type: 'match',
+      value: eventCode ?? '',
+    },
+  ];
+  const entriesToAdd = () => {
+    if (isLinux) {
+      return addIdToEntries(commonFields);
+    } else {
+      return addIdToEntries([
+        {
+          field: 'file.Ext.code_signature',
+          type: 'nested',
+          entries: [
+            {
+              field: 'subject_name',
+              operator: 'included',
+              type: 'match',
+              value: codeSignature != null ? codeSignature.subjectName : '',
+            },
+            {
+              field: 'trusted',
+              operator: 'included',
+              type: 'match',
+              value: codeSignature != null ? codeSignature.trusted : '',
+            },
+          ],
+        },
+        ...commonFields,
+      ]);
+    }
+  };
 
   return {
     ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
-    entries: addIdToEntries([
-      {
-        field: 'file.Ext.code_signature',
-        type: 'nested',
-        entries: [
-          {
-            field: 'subject_name',
-            operator: 'included',
-            type: 'match',
-            value: codeSignature != null ? codeSignature.subjectName : '',
-          },
-          {
-            field: 'trusted',
-            operator: 'included',
-            type: 'match',
-            value: codeSignature != null ? codeSignature.trusted : '',
-          },
-        ],
-      },
-      {
-        field: filePathDefault,
-        operator: 'included',
-        type: 'match',
-        value: filePath ?? '',
-      },
-      {
-        field: 'file.hash.sha256',
-        operator: 'included',
-        type: 'match',
-        value: sha256Hash ?? '',
-      },
-      {
-        field: 'event.code',
-        operator: 'included',
-        type: 'match',
-        value: eventCode ?? '',
-      },
-    ]),
+    entries: entriesToAdd(),
   };
 };
 

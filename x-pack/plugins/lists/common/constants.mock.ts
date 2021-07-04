@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import {
+import type {
   EndpointEntriesArray,
   EntriesArray,
   Entry,

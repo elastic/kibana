@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { EuiFieldText, EuiFormRow, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -19,9 +19,11 @@ const SlackActionFields: React.FunctionComponent<
 > = ({ action, editActionSecrets, errors, readOnly }) => {
   const { docLinks } = useKibana().services;
   const { webhookUrl } = action.secrets;
+  const isWebhookUrlInvalid: boolean =
+    errors.webhookUrl !== undefined && errors.webhookUrl.length > 0 && webhookUrl !== undefined;
 
   return (
-    <Fragment>
+    <>
       <EuiFormRow
         id="webhookUrl"
         fullWidth
@@ -34,7 +36,7 @@ const SlackActionFields: React.FunctionComponent<
           </EuiLink>
         }
         error={errors.webhookUrl}
-        isInvalid={errors.webhookUrl.length > 0 && webhookUrl !== undefined}
+        isInvalid={isWebhookUrlInvalid}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.slackAction.webhookUrlTextFieldLabel',
           {
@@ -42,7 +44,7 @@ const SlackActionFields: React.FunctionComponent<
           }
         )}
       >
-        <Fragment>
+        <>
           {getEncryptedFieldNotifyLabel(
             !action.id,
             1,
@@ -54,7 +56,7 @@ const SlackActionFields: React.FunctionComponent<
           )}
           <EuiFieldText
             fullWidth
-            isInvalid={errors.webhookUrl.length > 0 && webhookUrl !== undefined}
+            isInvalid={isWebhookUrlInvalid}
             name="webhookUrl"
             readOnly={readOnly}
             value={webhookUrl || ''}
@@ -68,9 +70,9 @@ const SlackActionFields: React.FunctionComponent<
               }
             }}
           />
-        </Fragment>
+        </>
       </EuiFormRow>
-    </Fragment>
+    </>
   );
 };
 

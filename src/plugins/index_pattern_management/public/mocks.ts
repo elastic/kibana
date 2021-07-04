@@ -19,17 +19,7 @@ import {
 } from './plugin';
 import { IndexPatternManagmentContext } from './types';
 
-const createSetupContract = (): IndexPatternManagementSetup => ({
-  creation: {
-    addCreationConfig: jest.fn(),
-  } as any,
-  list: {
-    addListConfig: jest.fn(),
-  } as any,
-  environment: {
-    update: jest.fn(),
-  },
-});
+const createSetupContract = (): IndexPatternManagementSetup => {};
 
 const createStartContract = (): IndexPatternManagementStart => ({
   creation: {
@@ -93,7 +83,6 @@ const createIndexPatternManagmentContext = (): {
     indexPatternFieldEditor,
     indexPatternManagementStart: createStartContract(),
     setBreadcrumbs: () => {},
-    getMlCardState: () => 2,
     fieldFormatEditors: indexPatternFieldEditor.fieldFormatEditors,
   };
 };

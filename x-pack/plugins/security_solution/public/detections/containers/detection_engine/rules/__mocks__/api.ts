@@ -68,7 +68,7 @@ export const getRuleStatusById = async ({
         gap: null,
         bulk_create_time_durations: ['2235.01'],
         search_after_time_durations: ['616.97'],
-        last_look_back_date: '2020-03-19T00:32:07.996Z',
+        last_look_back_date: '2020-03-19T00:32:07.996Z', // NOTE: This is no longer used on the UI, but left here in case users are using it within the API
       },
       failures: [],
     },
@@ -94,7 +94,7 @@ export const getRulesStatusByIds = async ({
         gap: null,
         bulk_create_time_durations: ['2235.01'],
         search_after_time_durations: ['616.97'],
-        last_look_back_date: '2020-03-19T00:32:07.996Z',
+        last_look_back_date: '2020-03-19T00:32:07.996Z', // NOTE: This is no longer used on the UI, but left here in case users are using it within the API
       },
       failures: [],
     },

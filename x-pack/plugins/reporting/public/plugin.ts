@@ -29,13 +29,11 @@ import { constants, getDefaultLayoutSelectors } from '../common';
 import { durationToNumber } from '../common/schema_utils';
 import { JobId, JobSummarySet } from '../common/types';
 import { ReportingSetup, ReportingStart } from './';
-import {
-  getGeneralErrorToast,
-  ScreenCapturePanelContent as ScreenCapturePanel,
-} from './components';
 import { ReportingAPIClient } from './lib/reporting_api_client';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
+import { getGeneralErrorToast } from './notifier';
 import { ReportingCsvPanelAction } from './panel_actions/get_csv_panel_action';
+import { getSharedComponents } from './shared';
 import { ReportingCsvShareProvider } from './share_context_menu/register_csv_reporting';
 import { reportingScreenshotShareProvider } from './share_context_menu/register_pdf_png_reporting';
 
@@ -86,7 +84,6 @@ export class ReportingPublicPlugin
       ReportingPublicPluginSetupDendencies,
       ReportingPublicPluginStartDendencies
     > {
-  private readonly contract: ReportingStart;
   private readonly stop$ = new Rx.ReplaySubject(1);
   private readonly title = i18n.translate('xpack.reporting.management.reportingTitle', {
     defaultMessage: 'Reporting',
@@ -95,21 +92,30 @@ export class ReportingPublicPlugin
     defaultMessage: 'Reporting',
   });
   private config: ClientConfigType;
+  private contract?: ReportingSetup;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ClientConfigType>();
+  }
 
-    this.contract = {
-      ReportingAPIClient,
-      components: { ScreenCapturePanel },
-      getDefaultLayoutSelectors,
-      usesUiCapabilities: () => this.config.roles?.enabled === false,
-    };
+  private getContract(core?: CoreSetup) {
+    if (core) {
+      this.contract = {
+        getDefaultLayoutSelectors,
+        usesUiCapabilities: () => this.config.roles?.enabled === false,
+        components: getSharedComponents(core),
+      };
+    }
+
+    if (!this.contract) {
+      throw new Error(`Setup error in Reporting plugin!`);
+    }
+
+    return this.contract;
   }
 
   public setup(core: CoreSetup, setupDeps: ReportingPublicPluginSetupDendencies) {
-    const { http, notifications, getStartServices, uiSettings } = core;
-    const { toasts } = notifications;
+    const { http, getStartServices, uiSettings } = core;
     const {
       home,
       management,
@@ -145,7 +151,7 @@ export class ReportingPublicPlugin
         params.setBreadcrumbs([{ text: this.breadcrumbText }]);
         const [[start], { mountManagementSection }] = await Promise.all([
           getStartServices(),
-          import('./mount_management_section'),
+          import('./management/mount_management_section'),
         ]);
         return await mountManagementSection(
           core,
@@ -163,6 +169,9 @@ export class ReportingPublicPlugin
       new ReportingCsvPanelAction({ core, startServices$, license$, usesUiCapabilities })
     );
 
+    const reportingStart = this.getContract(core);
+    const { toasts } = core.notifications;
+
     share.register(
       ReportingCsvShareProvider({
         apiClient,
@@ -173,6 +182,7 @@ export class ReportingPublicPlugin
         usesUiCapabilities,
       })
     );
+
     share.register(
       reportingScreenshotShareProvider({
         apiClient,
@@ -184,7 +194,7 @@ export class ReportingPublicPlugin
       })
     );
 
-    return this.contract;
+    return reportingStart;
   }
 
   public start(core: CoreStart) {
@@ -203,7 +213,7 @@ export class ReportingPublicPlugin
       )
       .subscribe();
 
-    return this.contract;
+    return this.getContract();
   }
 
   public stop() {

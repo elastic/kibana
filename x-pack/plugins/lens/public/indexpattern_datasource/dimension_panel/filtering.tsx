@@ -114,7 +114,7 @@ export function Filtering({
             }
           >
             <QueryInput
-              indexPattern={indexPattern}
+              indexPatternTitle={indexPattern.title}
               data-test-subj="indexPattern-filter-by-input"
               value={selectedColumn.filter || defaultFilter}
               onChange={(newQuery) => {

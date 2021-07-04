@@ -22,7 +22,13 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  ExceptionListType,
+  OsTypeArray,
+  OsType,
+  ExceptionListItemSchema,
+  CreateExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import {
   hasEqlSequenceQuery,
   isEqlRule,
@@ -31,11 +37,7 @@ import {
 import { useFetchIndex } from '../../../containers/source';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
-import {
-  ExceptionListItemSchema,
-  CreateExceptionListItemSchema,
-  ExceptionBuilder,
-} from '../../../../../public/shared_imports';
+import { ExceptionBuilder } from '../../../../../public/shared_imports';
 
 import * as i18n from './translations';
 import * as sharedI18n from '../translations';
@@ -54,7 +56,6 @@ import {
 import { Loader } from '../../loader';
 import { ErrorInfo, ErrorCallout } from '../error_callout';
 import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
-import { OsTypeArray, OsType } from '../../../../../../lists/common/schemas';
 
 interface EditExceptionModalProps {
   ruleName: string;

@@ -72,7 +72,6 @@ export const getSignalsIndicesInRange = async ({
     },
   });
 
-  // @ts-expect-error @elastic/elasticsearch no way to declare a type for aggregation in the search response
-  const body = response.body as IndexesResponse;
-  return body.aggregations.indexes.buckets.map((bucket) => bucket.key);
+  const aggs = response.body.aggregations as IndexesResponse['aggregations'];
+  return aggs.indexes.buckets.map((bucket) => bucket.key);
 };

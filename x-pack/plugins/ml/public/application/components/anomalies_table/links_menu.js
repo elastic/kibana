@@ -232,6 +232,7 @@ class LinksMenuUI extends Component {
     }
     const categorizationFieldName = job.analysis_config.categorization_field_name;
     const datafeedIndices = job.datafeed_config.indices;
+
     // Find the type of the categorization field i.e. text (preferred) or keyword.
     // Uses the first matching field found in the list of indices in the datafeed_config.
     // attempt to load the field type using each index. we have to do it this way as _field_caps
@@ -349,7 +350,7 @@ class LinksMenuUI extends Component {
       getFieldTypeFromMapping(index, categorizationFieldName)
         .then((resp) => {
           if (resp !== '') {
-            createAndOpenUrl(index, resp);
+            createAndOpenUrl(datafeedIndices.join(), resp);
           } else {
             i++;
             if (i < datafeedIndices.length) {

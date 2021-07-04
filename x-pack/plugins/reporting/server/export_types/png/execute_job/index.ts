@@ -7,7 +7,7 @@
 
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
-import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
+import { catchError, finalize, map, mergeMap, takeUntil } from 'rxjs/operators';
 import { PNG_JOB_TYPE } from '../../../../common/constants';
 import { TaskRunResult } from '../../../lib/tasks';
 import { RunTaskFn, RunTaskFnFactory } from '../../../types';
@@ -51,20 +51,17 @@ export const runTaskFnFactory: RunTaskFnFactory<
           job.layout
         );
       }),
-      map(({ base64, warnings }) => {
-        if (apmGeneratePng) apmGeneratePng.end();
-
-        return {
-          content_type: 'image/png',
-          content: base64,
-          size: (base64 && base64.length) || 0,
-          warnings,
-        };
-      }),
+      map(({ base64, warnings }) => ({
+        content_type: 'image/png',
+        content: base64,
+        size: (base64 && base64.length) || 0,
+        warnings,
+      })),
       catchError((err) => {
         jobLogger.error(err);
         return Rx.throwError(err);
-      })
+      }),
+      finalize(() => apmGeneratePng?.end())
     );
 
     const stop$ = Rx.fromEventPattern(cancellationToken.on);

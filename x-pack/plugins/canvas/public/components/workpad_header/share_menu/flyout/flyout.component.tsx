@@ -21,25 +21,83 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { ComponentStrings } from '../../../../../i18n/components';
+import { arrayBufferFetch } from '../../../../../common/lib/fetch';
+import { API_ROUTE_SHAREABLE_ZIP } from '../../../../../common/lib/constants';
+import { CanvasRenderedWorkpad } from '../../../../../shareable_runtime/types';
+import {
+  downloadRenderedWorkpad,
+  downloadRuntime,
+  downloadZippedRuntime,
+} from '../../../../lib/download_workpad';
 import { ZIP, CANVAS, HTML } from '../../../../../i18n/constants';
 import { OnCloseFn } from '../share_menu.component';
 import { WorkpadStep } from './workpad_step';
 import { RuntimeStep } from './runtime_step';
 import { SnippetsStep } from './snippets_step';
+import { useNotifyService, usePlatformService } from '../../../../services';
 
-const { ShareWebsiteFlyout: strings } = ComponentStrings;
+const strings = {
+  getCopyShareConfigMessage: () =>
+    i18n.translate('xpack.canvas.workpadHeaderShareMenu.copyShareConfigMessage', {
+      defaultMessage: 'Copied share markup to clipboard',
+    }),
+  getShareableZipErrorTitle: (workpadName: string) =>
+    i18n.translate('xpack.canvas.workpadHeaderShareMenu.shareWebsiteErrorTitle', {
+      defaultMessage:
+        "Failed to create {ZIP} file for '{workpadName}'. The workpad may be too large. You'll need to download the files separately.",
+      values: {
+        ZIP,
+        workpadName,
+      },
+    }),
+  getUnknownExportErrorMessage: (type: string) =>
+    i18n.translate('xpack.canvas.workpadHeaderShareMenu.unknownExportErrorMessage', {
+      defaultMessage: 'Unknown export type: {type}',
+      values: {
+        type,
+      },
+    }),
+  getRuntimeStepTitle: () =>
+    i18n.translate('xpack.canvas.shareWebsiteFlyout.snippetsStep.downloadRuntimeTitle', {
+      defaultMessage: 'Download runtime',
+    }),
+  getSnippentsStepTitle: () =>
+    i18n.translate('xpack.canvas.shareWebsiteFlyout.snippetsStep.addSnippetsTitle', {
+      defaultMessage: 'Add snippets to website',
+    }),
+  getStepsDescription: () =>
+    i18n.translate('xpack.canvas.shareWebsiteFlyout.description', {
+      defaultMessage:
+        'Follow these steps to share a static version of this workpad on an external website. It will be a visual snapshot of the current workpad, and will not have access to live data.',
+    }),
+  getTitle: () =>
+    i18n.translate('xpack.canvas.shareWebsiteFlyout.flyoutTitle', {
+      defaultMessage: 'Share on a website',
+    }),
+  getUnsupportedRendererWarning: () =>
+    i18n.translate('xpack.canvas.workpadHeaderShareMenu.unsupportedRendererWarning', {
+      defaultMessage:
+        'This workpad contains render functions that are not supported by the {CANVAS} Shareable Workpad Runtime. These elements will not be rendered:',
+      values: {
+        CANVAS,
+      },
+    }),
+  getWorkpadStepTitle: () =>
+    i18n.translate('xpack.canvas.shareWebsiteFlyout.snippetsStep.downloadWorkpadTitle', {
+      defaultMessage: 'Download workpad',
+    }),
+};
 
 export type OnDownloadFn = (type: 'share' | 'shareRuntime' | 'shareZip') => void;
 export type OnCopyFn = () => void;
 
 export interface Props {
-  onCopy: OnCopyFn;
-  onDownload: OnDownloadFn;
   onClose: OnCloseFn;
   unsupportedRenderers?: string[];
+  renderedWorkpad: CanvasRenderedWorkpad;
 }
 
 const steps = (onDownload: OnDownloadFn, onCopy: OnCopyFn) => [
@@ -58,11 +116,39 @@ const steps = (onDownload: OnDownloadFn, onCopy: OnCopyFn) => [
 ];
 
 export const ShareWebsiteFlyout: FC<Props> = ({
-  onCopy,
-  onDownload,
   onClose,
   unsupportedRenderers,
+  renderedWorkpad,
 }) => {
+  const notifyService = useNotifyService();
+  const platformService = usePlatformService();
+  const onCopy = () => {
+    notifyService.info(strings.getCopyShareConfigMessage());
+  };
+
+  const onDownload = (type: 'share' | 'shareRuntime' | 'shareZip') => {
+    switch (type) {
+      case 'share':
+        downloadRenderedWorkpad(renderedWorkpad);
+        return;
+      case 'shareRuntime':
+        downloadRuntime(platformService.getBasePath());
+      case 'shareZip':
+        const basePath = platformService.getBasePath();
+        arrayBufferFetch
+          .post(`${basePath}${API_ROUTE_SHAREABLE_ZIP}`, JSON.stringify(renderedWorkpad))
+          .then((blob) => downloadZippedRuntime(blob.data))
+          .catch((err: Error) => {
+            notifyService.error(err, {
+              title: strings.getShareableZipErrorTitle(renderedWorkpad.name),
+            });
+          });
+        return;
+      default:
+        throw new Error(strings.getUnknownExportErrorMessage(type));
+    }
+  };
+
   const link = (
     <EuiLink
       style={{ textDecoration: 'underline' }}

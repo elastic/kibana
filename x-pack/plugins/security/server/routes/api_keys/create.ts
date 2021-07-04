@@ -29,6 +29,7 @@ export function defineCreateApiKeyRoutes({
               defaultValue: {},
             }
           ),
+          metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
         }),
       },
     },

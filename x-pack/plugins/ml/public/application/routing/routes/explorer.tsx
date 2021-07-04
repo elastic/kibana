@@ -177,7 +177,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
       explorerService.setFilterData(filterData);
     }
 
-    const { viewByFieldName, viewByFromPage, viewByPerPage } =
+    const { viewByFieldName, viewByFromPage, viewByPerPage, severity } =
       explorerUrlState?.mlExplorerSwimlane ?? {};
 
     if (viewByFieldName !== undefined) {
@@ -190,6 +190,10 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
 
     if (viewByFromPage !== undefined) {
       explorerService.setViewByFromPage(viewByFromPage);
+    }
+
+    if (severity !== undefined) {
+      explorerService.setSwimLaneSeverity(severity);
     }
   }, []);
 
@@ -238,6 +242,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
           swimlaneContainerWidth: explorerState.swimlaneContainerWidth,
           viewByPerPage: explorerState.viewByPerPage,
           viewByFromPage: explorerState.viewByFromPage,
+          swimLaneSeverity: explorerState.swimLaneSeverity,
         }
       : undefined;
 

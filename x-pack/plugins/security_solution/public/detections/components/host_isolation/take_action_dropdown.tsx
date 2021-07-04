@@ -7,30 +7,33 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { EuiContextMenuItem, EuiContextMenuPanel, EuiButton, EuiPopover } from '@elastic/eui';
-import { ISOLATE_HOST } from './translations';
+import { ISOLATE_HOST, UNISOLATE_HOST } from './translations';
 import { TAKE_ACTION } from '../alerts_table/alerts_utility_bar/translations';
+import { useHostIsolationStatus } from '../../containers/detection_engine/alerts/use_host_isolation_status';
 
 export const TakeActionDropdown = React.memo(
-  ({ onChange }: { onChange: (action: 'isolateHost') => void }) => {
+  ({
+    onChange,
+    agentId,
+  }: {
+    onChange: (action: 'isolateHost' | 'unisolateHost') => void;
+    agentId: string;
+  }) => {
+    const { loading, isIsolated: isolationStatus } = useHostIsolationStatus({ agentId });
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
     const closePopoverHandler = useCallback(() => {
       setIsPopoverOpen(false);
     }, []);
 
-    const takeActionItems = useMemo(() => {
-      return [
-        <EuiContextMenuItem
-          key="isolateHost"
-          onClick={() => {
-            setIsPopoverOpen(false);
-            onChange('isolateHost');
-          }}
-        >
-          {ISOLATE_HOST}
-        </EuiContextMenuItem>,
-      ];
-    }, [onChange]);
+    const isolateHostHandler = useCallback(() => {
+      setIsPopoverOpen(false);
+      if (isolationStatus === false) {
+        onChange('isolateHost');
+      } else {
+        onChange('unisolateHost');
+      }
+    }, [onChange, isolationStatus]);
 
     const takeActionButton = useMemo(() => {
       return (
@@ -38,6 +41,7 @@ export const TakeActionDropdown = React.memo(
           iconSide="right"
           fill
           iconType="arrowDown"
+          disabled={loading}
           onClick={() => {
             setIsPopoverOpen(!isPopoverOpen);
           }}
@@ -45,7 +49,7 @@ export const TakeActionDropdown = React.memo(
           {TAKE_ACTION}
         </EuiButton>
       );
-    }, [isPopoverOpen]);
+    }, [isPopoverOpen, loading]);
 
     return (
       <EuiPopover
@@ -56,7 +60,17 @@ export const TakeActionDropdown = React.memo(
         panelPaddingSize="none"
         anchorPosition="downLeft"
       >
-        <EuiContextMenuPanel size="s" items={takeActionItems} />
+        <EuiContextMenuPanel size="s">
+          {isolationStatus === false ? (
+            <EuiContextMenuItem key="isolateHost" onClick={isolateHostHandler}>
+              {ISOLATE_HOST}
+            </EuiContextMenuItem>
+          ) : (
+            <EuiContextMenuItem key="unisolateHost" onClick={isolateHostHandler}>
+              {UNISOLATE_HOST}
+            </EuiContextMenuItem>
+          )}
+        </EuiContextMenuPanel>
       </EuiPopover>
     );
   }

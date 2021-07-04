@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "timelines"],
+  "extraPublicDirs": ["common"],
   "server": true,
   "ui": true,
-  "requiredPlugins": [],
+  "requiredPlugins": ["data", "dataEnhanced", "kibanaReact", "kibanaUtils"],
   "optionalPlugins": []
 }

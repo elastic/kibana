@@ -6,13 +6,11 @@
  */
 
 import useDebounce from 'react-use/lib/useDebounce';
-import React, { useEffect, useState, FormEvent, useCallback } from 'react';
-import { useHistory } from 'react-router-dom';
-import { EuiTitle } from '@elastic/eui';
+import React, { useEffect, useState, FormEvent } from 'react';
+import { map } from 'lodash';
 import { useUrlParams } from '../../../../../context/url_params_context/use_url_params';
 import { useFetcher } from '../../../../../hooks/use_fetcher';
 import { I18LABELS } from '../../translations';
-import { fromQuery, toQuery } from '../../../../shared/Links/url_helpers';
 import { formatToSec } from '../../UXMetrics/KeyUXMetrics';
 import { SelectableUrlList } from './SelectableUrlList';
 import { UrlOption } from './RenderOption';
@@ -20,21 +18,64 @@ import { useUxQuery } from '../../hooks/useUxQuery';
 import { getPercentileLabel } from '../../UXMetrics/translations';
 
 interface Props {
-  onChange: (value: string[]) => void;
+  onChange: (value?: string[], excludedValue?: string[]) => void;
+  updateSearchTerm: (value: string) => void;
 }
 
-export function URLSearch({ onChange: onFilterChange }: Props) {
-  const history = useHistory();
+interface URLItem {
+  url: string;
+  count: number;
+  pld: number;
+}
 
-  const { uiFilters, urlParams } = useUrlParams();
+const formatOptions = (
+  urlItems: URLItem[],
+  includedUrls?: string[],
+  excludedUrls?: string[],
+  percentile?: number
+): UrlOption[] => {
+  const percTitle = getPercentileLabel(percentile!);
+
+  return urlItems.map((item) => ({
+    label: item.url,
+    key: item.url,
+    meta: [
+      I18LABELS.pageViews + ': ' + item.count,
+      I18LABELS.pageLoadDuration +
+        ': ' +
+        formatToSec(item.pld) +
+        ` (${percTitle})`,
+    ],
+    url: item.url,
+    checked: includedUrls?.includes(item.url)
+      ? 'on'
+      : excludedUrls?.includes(item.url)
+      ? 'off'
+      : undefined,
+  }));
+};
+
+export function URLSearch({
+  onChange: onFilterChange,
+  updateSearchTerm,
+}: Props) {
+  const { uxUiFilters, urlParams } = useUrlParams();
+
+  const {
+    transactionUrl,
+    transactionUrlExcluded,
+    ...restFilters
+  } = uxUiFilters;
 
   const { searchTerm, percentile } = urlParams;
 
-  const [popoverIsOpen, setPopoverIsOpen] = useState(false);
+  const [popoverIsOpen, setPopoverIsOpen] = useState<boolean | undefined>();
 
   const [searchValue, setSearchValue] = useState(searchTerm ?? '');
 
   const [debouncedValue, setDebouncedValue] = useState(searchTerm ?? '');
+
+  const [items, setItems] = useState<UrlOption[]>([]);
 
   useDebounce(
     () => {
@@ -44,33 +85,11 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
     [debouncedValue]
   );
 
-  const updateSearchTerm = useCallback(
-    (searchTermN: string) => {
-      const newQuery = {
-        ...toQuery(history.location.search),
-        searchTerm: searchTermN || undefined,
-      };
-      if (!searchTermN) {
-        delete newQuery.searchTerm;
-      }
-      const newLocation = {
-        ...history.location,
-        search: fromQuery(newQuery),
-      };
-      history.push(newLocation);
-    },
-    [history]
-  );
-
-  const [checkedUrls, setCheckedUrls] = useState<string[]>([]);
-
   const uxQuery = useUxQuery();
 
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (uxQuery && popoverIsOpen) {
-        const { transactionUrl, ...restFilters } = uiFilters;
-
         return callApmApi({
           endpoint: 'GET /api/apm/rum-client/url-search',
           params: {
@@ -89,8 +108,15 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
   );
 
   useEffect(() => {
-    setCheckedUrls(uiFilters.transactionUrl || []);
-  }, [uiFilters]);
+    setItems(
+      formatOptions(
+        data?.items ?? [],
+        transactionUrl,
+        transactionUrlExcluded,
+        percentile
+      )
+    );
+  }, [data, percentile, transactionUrl, transactionUrlExcluded]);
 
   useEffect(() => {
     if (searchTerm && searchValue === '') {
@@ -99,28 +125,20 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
   }, [searchValue, updateSearchTerm, searchTerm]);
 
   const onChange = (updatedOptions: UrlOption[]) => {
-    const clickedItems = updatedOptions.filter(
-      (option) => option.checked === 'on'
+    const includedItems = map(
+      updatedOptions.filter((option) => option.checked === 'on'),
+      'label'
     );
 
-    setCheckedUrls(clickedItems.map((item) => item.url));
+    const excludedItems = map(
+      updatedOptions.filter((option) => option.checked === 'off'),
+      'label'
+    );
+
+    setItems(
+      formatOptions(data?.items ?? [], includedItems, excludedItems, percentile)
+    );
   };
-
-  const percTitle = getPercentileLabel(percentile!);
-
-  const items: UrlOption[] = (data?.items ?? []).map((item) => ({
-    label: item.url,
-    key: item.url,
-    meta: [
-      I18LABELS.pageViews + ': ' + item.count,
-      I18LABELS.pageLoadDuration +
-        ': ' +
-        formatToSec(item.pld) +
-        ` (${percTitle})`,
-    ],
-    url: item.url,
-    checked: checkedUrls?.includes(item.url) ? 'on' : undefined,
-  }));
 
   const onInputChange = (e: FormEvent<HTMLInputElement>) => {
     setDebouncedValue(e.currentTarget.value);
@@ -132,29 +150,32 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
     updateSearchTerm(searchValue);
   };
 
-  const onClose = () => {
-    if (uiFilters.transactionUrl || checkedUrls.length > 0) {
-      onFilterChange(checkedUrls);
-    }
+  const onApply = () => {
+    const includedItems = map(
+      items.filter((option) => option.checked === 'on'),
+      'label'
+    );
+
+    const excludedItems = map(
+      items.filter((option) => option.checked === 'off'),
+      'label'
+    );
+
+    onFilterChange(includedItems, excludedItems);
   };
 
   return (
-    <>
-      <EuiTitle size="xxxs" textTransform="uppercase">
-        <h4>{I18LABELS.url}</h4>
-      </EuiTitle>
-      <SelectableUrlList
-        initialValue={searchTerm}
-        loading={isLoading}
-        onInputChange={onInputChange}
-        onTermChange={onTermChange}
-        data={{ items, total: data?.total ?? 0 }}
-        onChange={onChange}
-        onClose={onClose}
-        searchValue={searchValue}
-        popoverIsOpen={popoverIsOpen}
-        setPopoverIsOpen={setPopoverIsOpen}
-      />
-    </>
+    <SelectableUrlList
+      initialValue={searchTerm}
+      loading={isLoading}
+      onInputChange={onInputChange}
+      onTermChange={onTermChange}
+      data={{ items, total: data?.total ?? 0 }}
+      onChange={onChange}
+      searchValue={searchValue}
+      popoverIsOpen={Boolean(popoverIsOpen)}
+      setPopoverIsOpen={setPopoverIsOpen}
+      onApply={onApply}
+    />
   );
 }

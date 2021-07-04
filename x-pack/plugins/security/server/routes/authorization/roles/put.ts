@@ -72,7 +72,6 @@ export function definePutRolesRoutes({
         const body = transformPutPayloadToElasticsearchRole(
           request.body,
           authz.applicationName,
-          // @ts-expect-error @elastic/elasticsearch `XPackRole` type doesn't define `applications`.
           rawRoles[name] ? rawRoles[name].applications : []
         );
 

@@ -54,7 +54,7 @@ describe('math(resp, panel, series)', () => {
       aggregations: {
         test: {
           meta: {
-            bucketSize: 5,
+            intervalString: '5s',
           },
           buckets: [
             {
@@ -119,6 +119,25 @@ describe('math(resp, panel, series)', () => {
         data: [
           [1, null],
           [2, 1],
+        ],
+      })
+    );
+  });
+
+  test('should works with predefined variables (params._interval)', async () => {
+    const expectedInterval = 5000;
+
+    series.metrics[2].script = 'params._interval';
+
+    const next = await mathAgg(resp, panel, series)((results) => results);
+    const results = await stdMetric(resp, panel, series)(next)([]);
+
+    expect(results).toHaveLength(1);
+    expect(results[0]).toEqual(
+      expect.objectContaining({
+        data: [
+          [1, expectedInterval],
+          [2, expectedInterval],
         ],
       })
     );

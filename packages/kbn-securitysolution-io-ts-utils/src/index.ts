@@ -7,6 +7,7 @@
  */
 
 export * from './format_errors';
+export * from './parse_schedule_dates';
 export * from './exact_check';
 export * from './format_errors';
 export * from './test_utils';

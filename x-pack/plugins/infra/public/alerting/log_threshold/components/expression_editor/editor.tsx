@@ -23,6 +23,7 @@ import {
   PartialRatioAlertParams,
   ThresholdType,
   timeUnitRT,
+  isOptimizableGroupedThreshold,
 } from '../../../../../common/alerting/logs/log_threshold/types';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 import { ObjectEntries } from '../../../../../common/utility_types';
@@ -255,6 +256,15 @@ export const Editor: React.FC<
     setHasSetDefaults(true);
   });
 
+  const shouldShowGroupByOptimizationWarning = useMemo(() => {
+    const hasSetGroupBy = alertParams.groupBy && alertParams.groupBy.length > 0;
+    return (
+      hasSetGroupBy &&
+      alertParams.count &&
+      !isOptimizableGroupedThreshold(alertParams.count.comparator, alertParams.count.value)
+    );
+  }, [alertParams]);
+
   // Wait until the alert param defaults have been set
   if (!hasSetDefaults) return null;
 
@@ -298,6 +308,21 @@ export const Editor: React.FC<
       />
 
       {alertParams.criteria && isRatioAlert(alertParams.criteria) && criteriaComponent}
+
+      {shouldShowGroupByOptimizationWarning && (
+        <>
+          <EuiSpacer size="l" />
+          <EuiCallOut color="warning">
+            {i18n.translate('xpack.infra.logs.alertFlyout.groupByOptimizationWarning', {
+              defaultMessage:
+                'When setting a "group by" we highly recommend using the "{comparator}" comparator for your threshold. This can lead to significant performance improvements.',
+              values: {
+                comparator: Comparator.GT,
+              },
+            })}
+          </EuiCallOut>
+        </>
+      )}
 
       <EuiSpacer size="l" />
     </>

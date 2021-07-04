@@ -11,12 +11,122 @@ import moment from 'moment';
 import { VisToExpressionAst, getVisSchemas } from '../../visualizations/public';
 import { buildExpression, buildExpressionFunction } from '../../expressions/public';
 import { BUCKET_TYPES } from '../../data/public';
+import { Labels } from '../../charts/public';
 
-import { DateHistogramParams, Dimensions, HistogramParams, VisParams } from './types';
-import { visName, VisTypeXyExpressionFunctionDefinition } from './xy_vis_fn';
+import {
+  DateHistogramParams,
+  Dimensions,
+  Dimension,
+  HistogramParams,
+  VisParams,
+  CategoryAxis,
+  SeriesParam,
+  ThresholdLine,
+  ValueAxis,
+  Scale,
+  TimeMarker,
+} from './types';
+import { visName, VisTypeXyExpressionFunctionDefinition } from './expression_functions/xy_vis_fn';
 import { XyVisType } from '../common';
 import { getEsaggsFn } from './to_ast_esaggs';
 import { TimeRangeBounds } from '../../data/common';
+
+const prepareLabel = (data: Labels) => {
+  const label = buildExpressionFunction('label', {
+    ...data,
+  });
+
+  return buildExpression([label]);
+};
+
+const prepareScale = (data: Scale) => {
+  const scale = buildExpressionFunction('visscale', {
+    ...data,
+  });
+
+  return buildExpression([scale]);
+};
+
+const prepareThresholdLine = (data: ThresholdLine) => {
+  const thresholdLine = buildExpressionFunction('thresholdline', {
+    ...data,
+  });
+
+  return buildExpression([thresholdLine]);
+};
+
+const prepareTimeMarker = (data: TimeMarker) => {
+  const timeMarker = buildExpressionFunction('timemarker', {
+    ...data,
+  });
+
+  return buildExpression([timeMarker]);
+};
+
+const prepareCategoryAxis = (data: CategoryAxis) => {
+  const categoryAxis = buildExpressionFunction('categoryaxis', {
+    id: data.id,
+    show: data.show,
+    position: data.position,
+    type: data.type,
+    title: data.title.text,
+    scale: prepareScale(data.scale),
+    labels: prepareLabel(data.labels),
+  });
+
+  return buildExpression([categoryAxis]);
+};
+
+const prepareValueAxis = (data: ValueAxis) => {
+  const categoryAxis = buildExpressionFunction('valueaxis', {
+    name: data.name,
+    axisParams: prepareCategoryAxis({
+      ...data,
+    }),
+  });
+
+  return buildExpression([categoryAxis]);
+};
+
+const prepareSeriesParam = (data: SeriesParam) => {
+  const seriesParam = buildExpressionFunction('seriesparam', {
+    label: data.data.label,
+    id: data.data.id,
+    drawLinesBetweenPoints: data.drawLinesBetweenPoints,
+    interpolate: data.interpolate,
+    lineWidth: data.lineWidth,
+    mode: data.mode,
+    show: data.show,
+    showCircles: data.showCircles,
+    circlesRadius: data.circlesRadius,
+    type: data.type,
+    valueAxis: data.valueAxis,
+  });
+
+  return buildExpression([seriesParam]);
+};
+
+const prepareVisDimension = (data: Dimension) => {
+  const visDimension = buildExpressionFunction('visdimension', { accessor: data.accessor });
+
+  if (data.format) {
+    visDimension.addArgument('format', data.format.id);
+    visDimension.addArgument('formatParams', JSON.stringify(data.format.params));
+  }
+
+  return buildExpression([visDimension]);
+};
+
+const prepareXYDimension = (data: Dimension) => {
+  const xyDimension = buildExpressionFunction('xydimension', {
+    params: JSON.stringify(data.params),
+    aggType: data.aggType,
+    label: data.label,
+    visDimension: prepareVisDimension(data),
+  });
+
+  return buildExpression([xyDimension]);
+};
 
 export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params) => {
   const schemas = getVisSchemas(vis, params);
@@ -62,15 +172,13 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
     }
   }
 
-  const visConfig = { ...vis.params };
-
   (dimensions.y || []).forEach((yDimension) => {
     const yAgg = responseAggs[yDimension.accessor];
-    const seriesParam = (visConfig.seriesParams || []).find(
+    const seriesParam = (vis.params.seriesParams || []).find(
       (param: any) => param.data.id === yAgg.id
     );
     if (seriesParam) {
-      const usedValueAxis = (visConfig.valueAxes || []).find(
+      const usedValueAxis = (vis.params.valueAxes || []).find(
         (valueAxis: any) => valueAxis.id === seriesParam.valueAxis
       );
       if (usedValueAxis?.scale.mode === 'percentage') {
@@ -79,11 +187,35 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
     }
   });
 
-  visConfig.dimensions = dimensions;
-
   const visTypeXy = buildExpressionFunction<VisTypeXyExpressionFunctionDefinition>(visName, {
     type: vis.type.name as XyVisType,
-    visConfig: JSON.stringify(visConfig),
+    chartType: vis.params.type,
+    addTimeMarker: vis.params.addTimeMarker,
+    addLegend: vis.params.addLegend,
+    addTooltip: vis.params.addTooltip,
+    legendPosition: vis.params.legendPosition,
+    orderBucketsBySum: vis.params.orderBucketsBySum,
+    categoryAxes: vis.params.categoryAxes.map(prepareCategoryAxis),
+    valueAxes: vis.params.valueAxes.map(prepareValueAxis),
+    seriesParams: vis.params.seriesParams.map(prepareSeriesParam),
+    labels: prepareLabel(vis.params.labels),
+    thresholdLine: prepareThresholdLine(vis.params.thresholdLine),
+    gridCategoryLines: vis.params.grid.categoryLines,
+    gridValueAxis: vis.params.grid.valueAxis,
+    radiusRatio: vis.params.radiusRatio,
+    isVislibVis: vis.params.isVislibVis,
+    detailedTooltip: vis.params.detailedTooltip,
+    fittingFunction: vis.params.fittingFunction,
+    times: vis.params.times.map(prepareTimeMarker),
+    palette: vis.params.palette.name,
+    fillOpacity: vis.params.fillOpacity,
+    xDimension: dimensions.x ? prepareXYDimension(dimensions.x) : null,
+    yDimension: dimensions.y.map(prepareXYDimension),
+    zDimension: dimensions.z?.map(prepareXYDimension),
+    widthDimension: dimensions.width?.map(prepareXYDimension),
+    seriesDimension: dimensions.series?.map(prepareXYDimension),
+    splitRowDimension: dimensions.splitRow?.map(prepareXYDimension),
+    splitColumnDimension: dimensions.splitColumn?.map(prepareXYDimension),
   });
 
   const ast = buildExpression([getEsaggsFn(vis), visTypeXy]);

@@ -7,6 +7,7 @@
 
 import { SavedObjectReference } from 'kibana/public';
 import { Ast } from '@kbn/interpreter/common';
+import memoizeOne from 'memoize-one';
 import {
   Datasource,
   DatasourcePublicAPI,
@@ -18,7 +19,7 @@ import {
 import { buildExpression } from './expression_helpers';
 import { Document } from '../../persistence/saved_object_store';
 import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
-import { getActiveDatasourceIdFromDoc } from './state_management';
+import { getActiveDatasourceIdFromDoc } from '../../utils';
 import { ErrorMessage } from '../types';
 import {
   getMissingCurrentDatasource,
@@ -53,7 +54,7 @@ export async function initializeDatasources(
   return states;
 }
 
-export function createDatasourceLayers(
+export const createDatasourceLayers = memoizeOne(function createDatasourceLayers(
   datasourceMap: Record<string, Datasource>,
   datasourceStates: Record<string, { state: unknown; isLoading: boolean }>
 ) {
@@ -73,7 +74,7 @@ export function createDatasourceLayers(
       });
     });
   return datasourceLayers;
-}
+});
 
 export async function persistedStateToExpression(
   datasources: Record<string, Datasource>,

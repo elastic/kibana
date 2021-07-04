@@ -66,7 +66,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   const getFleetAppUrl = useCallback(
     (agentId) =>
       getUrlForApp('fleet', {
-        path: `#` + pagePathGetters.fleet_agent_details({ agentId }),
+        path: `#` + pagePathGetters.agent_details({ agentId }),
       }),
     [getUrlForApp]
   );
