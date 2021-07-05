@@ -62,6 +62,8 @@ export const EndpointDetailsFlyoutTabs = memo(
               disabled: false,
               page: 1,
               pageSize,
+              startDate: undefined,
+              endDate: undefined,
             },
           });
         }
