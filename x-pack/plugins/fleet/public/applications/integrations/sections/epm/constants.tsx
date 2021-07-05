@@ -19,7 +19,7 @@ export const DisplayedAssets: ServiceNameToAssetTypes = {
   elasticsearch: Object.values(ElasticsearchAssetType),
 };
 
-export type DisplayedAssetType = ElasticsearchAssetType | KibanaAssetType;
+export type DisplayedAssetType = ElasticsearchAssetType | KibanaAssetType | 'view';
 
 export const AssetTitleMap: Record<DisplayedAssetType, string> = {
   dashboard: 'Dashboard',
@@ -36,6 +36,7 @@ export const AssetTitleMap: Record<DisplayedAssetType, string> = {
   lens: 'Lens',
   security_rule: 'Security Rule',
   ml_module: 'ML Module',
+  view: 'Views',
 };
 
 export const ServiceTitleMap: Record<ServiceName, string> = {
