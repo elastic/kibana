@@ -27,7 +27,7 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
 
       const packageInfo = await osqueryContext.service
         .getPackageService()
-        ?.getInstallation(soClient, OSQUERY_INTEGRATION_NAME);
+        ?.getInstallation({ savedObjectsClient: soClient, pkgName: OSQUERY_INTEGRATION_NAME });
 
       return response.ok({ body: packageInfo });
     }

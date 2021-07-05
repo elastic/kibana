@@ -15,7 +15,6 @@ import type {
   PluginInitializerContext,
   SavedObjectsServiceStart,
   HttpServiceSetup,
-  SavedObjectsClientContract,
   RequestHandlerContext,
   KibanaRequest,
 } from 'kibana/server';
@@ -30,12 +29,7 @@ import type {
 } from '../../encrypted_saved_objects/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import type {
-  FleetConfigType,
-  Installation,
-  NewPackagePolicy,
-  UpdatePackagePolicy,
-} from '../common';
+import type { FleetConfigType, NewPackagePolicy, UpdatePackagePolicy } from '../common';
 import { INTEGRATIONS_PLUGIN_ID } from '../common';
 import type { CloudSetup } from '../../cloud/server';
 
@@ -83,7 +77,7 @@ import {
   getAgentById,
 } from './services/agents';
 import { registerFleetUsageCollector } from './collectors/register';
-import { getInstallation as getPackageInstallation } from './services/epm/packages';
+import { getInstallation } from './services/epm/packages';
 import { makeRouterEnforcingSuperuser } from './routes/security';
 import { startFleetServerSetup } from './services/fleet_server';
 import { FleetArtifactsClient } from './services/artifacts';
@@ -309,11 +303,7 @@ export class FleetPlugin
         }),
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
       packageService: {
-        getInstallation: async (
-          savedObjectsClient: SavedObjectsClientContract,
-          pkgName: string
-        ): Promise<Installation | undefined> =>
-          getPackageInstallation({ savedObjectsClient, pkgName }),
+        getInstallation,
       },
       agentService: {
         getAgent: getAgentById,
