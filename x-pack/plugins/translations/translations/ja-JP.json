@@ -23592,7 +23592,6 @@
     "xpack.uptime.monitorDetails.title.pingType.icmp": "ICMP ping",
     "xpack.uptime.monitorDetails.title.pingType.tcp": "TCP ping",
     "xpack.uptime.monitorList.anomalyColumn.label": "レスポンス異常スコア",
-    "xpack.uptime.monitorList.defineConnector.description": "アラートを有効にするには、デフォルトのアラートアクションコネクターを定義してください。",
     "xpack.uptime.monitorList.downLineSeries.downLabel": "ダウン",
     "xpack.uptime.monitorList.drawer.missingLocation": "一部の Heartbeat インスタンスには位置情報が定義されていません。Heartbeat 構成への{link}。",
     "xpack.uptime.monitorList.drawer.mostRecentRun": "直近のテスト実行",

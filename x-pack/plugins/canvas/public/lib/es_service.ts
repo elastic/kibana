@@ -6,28 +6,29 @@
  */
 
 // TODO - clint: convert to service abstraction
-
 import { IndexPatternAttributes } from 'src/plugins/data/public';
 
 import { API_ROUTE } from '../../common/lib/constants';
 import { fetch } from '../../common/lib/fetch';
 import { ErrorStrings } from '../../i18n';
 import { pluginServices } from '../services';
-import { platformService } from '../services';
 
 const { esService: strings } = ErrorStrings;
 
 const getApiPath = function () {
-  const basePath = platformService.getService().getBasePath();
+  const platformService = pluginServices.getServices().platform;
+  const basePath = platformService.getBasePath();
   return basePath + API_ROUTE;
 };
 
 const getSavedObjectsClient = function () {
-  return platformService.getService().getSavedObjectsClient();
+  const platformService = pluginServices.getServices().platform;
+  return platformService.getSavedObjectsClient();
 };
 
 const getAdvancedSettings = function () {
-  return platformService.getService().getUISettings();
+  const platformService = pluginServices.getServices().platform;
+  return platformService.getUISettings();
 };
 
 export const getFields = (index = '_all') => {

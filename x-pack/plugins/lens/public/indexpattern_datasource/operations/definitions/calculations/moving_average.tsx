@@ -137,7 +137,7 @@ export const movingAverageOperation: OperationDefinition<
     signature: i18n.translate('xpack.lens.indexPattern.moving_average.signature', {
       defaultMessage: 'metric: number, [window]: number',
     }),
-    description: i18n.translate('xpack.lens.indexPattern.movingAverage.documentation', {
+    description: i18n.translate('xpack.lens.indexPattern.movingAverage.documentation.markdown', {
       defaultMessage: `
 Calculates the moving average of a metric over time, averaging the last n-th values to calculate the current value. To use this function, you need to configure a date histogram dimension as well.
 The default window value is {defaultValue}.
