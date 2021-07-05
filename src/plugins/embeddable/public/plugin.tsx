@@ -208,8 +208,8 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       inject: getInjectFunction(commonContract),
       getAllMigrations: () =>
         getAllMigrations(
-          this.embeddableFactories.values(),
-          this.enhancements.values(),
+          Array.from(this.embeddableFactories.values()),
+          Array.from(this.enhancements.values()),
           getMigrateFunction(commonContract)
         ),
     };
