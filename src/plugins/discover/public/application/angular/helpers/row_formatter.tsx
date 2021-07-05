@@ -7,7 +7,6 @@
  */
 
 import React, { Fragment } from 'react';
-import ReactDOM from 'react-dom/server';
 import { MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
 import { getServices, IndexPattern } from '../../../kibana_services';
 
@@ -44,9 +43,7 @@ export const formatRow = (hit: Record<string, any>, indexPattern: IndexPattern) 
     pairs.push([displayKey ? displayKey : key, val]);
   });
   const maxEntries = getServices().uiSettings.get(MAX_DOC_FIELDS_DISPLAYED);
-  return ReactDOM.renderToStaticMarkup(
-    <TemplateComponent defPairs={[...highlightPairs, ...sourcePairs].slice(0, maxEntries)} />
-  );
+  return <TemplateComponent defPairs={[...highlightPairs, ...sourcePairs].slice(0, maxEntries)} />;
 };
 
 export const formatTopLevelObject = (
@@ -80,7 +77,5 @@ export const formatTopLevelObject = (
     pairs.push([displayKey ? displayKey : key, formatted]);
   });
   const maxEntries = getServices().uiSettings.get(MAX_DOC_FIELDS_DISPLAYED);
-  return ReactDOM.renderToStaticMarkup(
-    <TemplateComponent defPairs={[...highlightPairs, ...sourcePairs].slice(0, maxEntries)} />
-  );
+  return <TemplateComponent defPairs={[...highlightPairs, ...sourcePairs].slice(0, maxEntries)} />;
 };

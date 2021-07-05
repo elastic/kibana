@@ -1,8 +1,7 @@
 /**
  * 1. Stack content vertically so the table can scroll when its constrained by a fixed container height.
  */
-// stylelint-disable selector-no-qualifying-type
-doc-table {
+.kbnDocTableWrapper {
   @include euiScrollBar;
   overflow: auto;
   flex: 1 1 100%;

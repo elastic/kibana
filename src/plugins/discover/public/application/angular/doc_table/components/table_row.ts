@@ -7,6 +7,7 @@
  */
 
 import { find } from 'lodash';
+import ReactDOM from 'react-dom/server';
 import $ from 'jquery';
 import openRowHtml from './table_row/open.html';
 import detailsHtml from './table_row/details.html';
@@ -136,7 +137,7 @@ export function createTableRowDirective($compile: ng.ICompileService) {
             cell({
               timefield: false,
               sourcefield: true,
-              formatted,
+              formatted: ReactDOM.renderToStaticMarkup(formatted),
               filterable: false,
               column: '__document__',
             })
@@ -154,7 +155,9 @@ export function createTableRowDirective($compile: ng.ICompileService) {
                 cell({
                   timefield: false,
                   sourcefield: true,
-                  formatted: formatTopLevelObject(row, innerColumns, indexPattern),
+                  formatted: ReactDOM.renderToStaticMarkup(
+                    formatTopLevelObject(row, innerColumns, indexPattern)
+                  ),
                   filterable: false,
                   column,
                 })

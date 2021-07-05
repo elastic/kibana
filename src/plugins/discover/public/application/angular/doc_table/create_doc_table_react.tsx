@@ -8,21 +8,23 @@
 
 import angular, { auto, ICompileService, IScope } from 'angular';
 import { render } from 'react-dom';
-import React, { useRef, useEffect, useState, useCallback } from 'react';
-import type { estypes } from '@elastic/elasticsearch';
+import React, { useRef, useEffect, useState, useCallback, memo } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { getServices, IIndexPattern } from '../../../kibana_services';
-import { IndexPatternField } from '../../../../../data/common';
+import { getServices, IndexPattern } from '../../../kibana_services';
 import { SkipBottomButton } from '../../apps/main/components/skip_bottom_button';
+import { DocTable } from './doc_table_component';
+import { SortOrder } from './components/table_header/helpers';
+import { DocTableRow } from './components/table_row/table_row';
+import { DocViewFilterFn } from '../../doc_views/doc_views_types';
 
 export interface DocTableLegacyProps {
   columns: string[];
   searchDescription?: string;
   searchTitle?: string;
-  onFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
-  rows: estypes.SearchHit[];
-  indexPattern: IIndexPattern;
+  onFilter: DocViewFilterFn;
+  rows: DocTableRow[];
+  indexPattern: IndexPattern;
   minimumVisibleRows?: number;
   onAddColumn?: (column: string) => void;
   onBackToTop: () => void;
@@ -30,8 +32,10 @@ export interface DocTableLegacyProps {
   onMoveColumn?: (columns: string, newIdx: number) => void;
   onRemoveColumn?: (column: string) => void;
   sampleSize: number;
-  sort?: string[][];
+  sort: SortOrder[];
   useNewFieldsApi?: boolean;
+  totalHitCount?: number;
+  isLoading?: boolean;
 }
 export interface AngularDirective {
   template: string;
@@ -66,7 +70,7 @@ export async function injectAngularElement(
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getRenderFn(domNode: Element, props: any) {
+export function getRenderFn(domNode: Element, props: any) {
   const directive = {
     template: `<doc-table
                 columns="renderProps.columns"
@@ -97,6 +101,8 @@ function getRenderFn(domNode: Element, props: any) {
     }
   };
 }
+
+const DocTableMemoized = memo(DocTable);
 
 export function DocTableLegacy(renderProps: DocTableLegacyProps) {
   const ref = useRef<HTMLDivElement>(null);
@@ -145,7 +151,22 @@ export function DocTableLegacy(renderProps: DocTableLegacyProps) {
   return (
     <div>
       <SkipBottomButton onClick={onSkipBottomButtonClick} />
-      <div ref={ref} />
+      <DocTableMemoized
+        columns={renderProps.columns}
+        rows={renderProps.rows}
+        minimumVisibleRows={renderProps.minimumVisibleRows}
+        infiniteScroll={true}
+        totalHitCount={renderProps.totalHitCount}
+        isLoading={renderProps.isLoading}
+        indexPattern={renderProps.indexPattern}
+        onSort={renderProps.onSort}
+        onAddColumn={renderProps.onAddColumn}
+        onMoveColumn={renderProps.onMoveColumn}
+        onRemoveColumn={renderProps.onRemoveColumn}
+        sorting={renderProps.sort}
+        filter={renderProps.onFilter}
+        useNewFieldsApi={renderProps.useNewFieldsApi}
+      />
       {renderProps.rows.length === renderProps.sampleSize ? (
         <div
           className="dscTable__footer"

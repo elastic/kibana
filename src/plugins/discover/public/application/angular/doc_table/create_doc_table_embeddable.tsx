@@ -11,10 +11,11 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { IScope } from 'angular';
 import { getServices } from '../../../kibana_services';
 import { DocTableLegacyProps, injectAngularElement } from './create_doc_table_react';
+import { DocTable } from './doc_table_component';
 
 type AngularEmbeddableScope = IScope & { renderProps?: DocTableEmbeddableProps };
 
-export interface DocTableEmbeddableProps extends Partial<DocTableLegacyProps> {
+export interface DocTableEmbeddableProps extends DocTableLegacyProps {
   refs: HTMLElement;
 }
 
@@ -53,10 +54,25 @@ function getRenderFn(domNode: Element, props: DocTableEmbeddableProps) {
   };
 }
 
-export function DiscoverDocTableEmbeddable(props: DocTableEmbeddableProps) {
+export function DiscoverDocTableEmbeddable(renderProps: DocTableEmbeddableProps) {
   return (
     <I18nProvider>
-      <DocTableLegacyInner {...props} />
+      <DocTable
+        columns={renderProps.columns}
+        rows={renderProps.rows}
+        minimumVisibleRows={renderProps.minimumVisibleRows}
+        infiniteScroll={true}
+        totalHitCount={renderProps.totalHitCount}
+        isLoading={renderProps.isLoading}
+        indexPattern={renderProps.indexPattern}
+        onSort={renderProps.onSort}
+        onAddColumn={renderProps.onAddColumn}
+        onMoveColumn={renderProps.onMoveColumn}
+        onRemoveColumn={renderProps.onRemoveColumn}
+        sorting={renderProps.sort}
+        filter={renderProps.onFilter}
+        useNewFieldsApi={renderProps.useNewFieldsApi}
+      />
     </I18nProvider>
   );
 }

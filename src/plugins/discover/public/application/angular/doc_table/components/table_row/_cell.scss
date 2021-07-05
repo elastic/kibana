@@ -8,6 +8,10 @@
   right: 0;
 }
 
+.kbnDocTableCell__filterButton {
+  font-size: $euiFontSizeXS;
+}
+
 /**
  * 1. Align icon with text in cell.
  * 2. Use opacity to make this element accessible to screen readers and keyboard.
