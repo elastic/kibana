@@ -12,7 +12,8 @@
       ],
       "types": [],
       "timeout": "",
-      "include_segment_file_sizes": "__flag__"
+      "include_segment_file_sizes": "__flag__",
+      "include_unloaded_segments": "__flag__"
     },
     "methods": [
       "GET"
