@@ -105,27 +105,25 @@ export class EditorFrameService {
       ]);
 
       const { EditorFrame } = await import('../async_services');
-      const palettes = await plugins.charts.palettes.getPalettes();
 
       return {
-        EditorFrameContainer: ({ onError, showNoDataPopover, initialContext }) => {
+        EditorFrameContainer: ({ showNoDataPopover }) => {
           return (
             <div className="lnsApp__frame">
               <EditorFrame
                 data-test-subj="lnsEditorFrame"
-                onError={onError}
-                datasourceMap={resolvedDatasources}
-                visualizationMap={resolvedVisualizations}
                 core={core}
                 plugins={plugins}
-                ExpressionRenderer={plugins.expressions.ReactExpressionRenderer}
-                palettes={palettes}
                 showNoDataPopover={showNoDataPopover}
-                initialContext={initialContext}
+                datasourceMap={resolvedDatasources}
+                visualizationMap={resolvedVisualizations}
+                ExpressionRenderer={plugins.expressions.ReactExpressionRenderer}
               />
             </div>
           );
         },
+        datasourceMap: resolvedDatasources,
+        visualizationMap: resolvedVisualizations,
       };
     };
 

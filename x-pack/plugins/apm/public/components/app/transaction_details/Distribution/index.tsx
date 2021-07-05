@@ -29,7 +29,7 @@ import type { IUrlParams } from '../../../../context/url_params_context/types';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
-import { unit } from '../../../../style/variables';
+import { unit } from '../../../../utils/style';
 import { ChartContainer } from '../../../shared/charts/chart_container';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
 import { CustomTooltip } from './custom_tooltip';

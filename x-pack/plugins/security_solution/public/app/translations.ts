@@ -24,7 +24,7 @@ export const RULES = i18n.translate('xpack.securitySolution.navigation.rules', {
 });
 
 export const EXCEPTIONS = i18n.translate('xpack.securitySolution.navigation.exceptions', {
-  defaultMessage: 'Exceptions',
+  defaultMessage: 'Exception list',
 });
 
 export const ALERTS = i18n.translate('xpack.securitySolution.navigation.alerts', {
@@ -48,13 +48,13 @@ export const ENDPOINTS = i18n.translate('xpack.securitySolution.search.administr
 export const TRUSTED_APPLICATIONS = i18n.translate(
   'xpack.securitySolution.search.administration.trustedApps',
   {
-    defaultMessage: 'Trusted Applications',
+    defaultMessage: 'Trusted applications',
   }
 );
 export const EVENT_FILTERS = i18n.translate(
   'xpack.securitySolution.search.administration.eventFilters',
   {
-    defaultMessage: 'Event Filters',
+    defaultMessage: 'Event filters',
   }
 );
 
