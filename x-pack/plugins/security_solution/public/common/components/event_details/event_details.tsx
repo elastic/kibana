@@ -104,7 +104,7 @@ const EventDetailsComponent: React.FC<Props> = ({
     setSelectedTabId,
   ]);
 
-  const eventFields = useMemo(() => getEnrichmentFields(data ?? []), [data]);
+  const eventFields = useMemo(() => getEnrichmentFields(data), [data]);
   const existingEnrichments = useMemo(
     () =>
       isAlert
@@ -242,7 +242,7 @@ const EventDetailsComponent: React.FC<Props> = ({
     );
   }, [summaryTab, threatIntelTab, tableTab, jsonTab]);
 
-  const selectedTab = useMemo(() => tabs.find((tab) => tab.id === selectedTabId), [
+  const selectedTab = useMemo(() => tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0], [
     tabs,
     selectedTabId,
   ]);

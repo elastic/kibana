@@ -165,7 +165,7 @@ const nestedDeepLinks: SecurityDeepLinks = {
         navLinkStatus: AppNavLinkStatus.hidden,
         keywords: [
           i18n.translate('xpack.securitySolution.search.exceptions', {
-            defaultMessage: 'Exceptions',
+            defaultMessage: 'Exception list',
           }),
         ],
         searchable: true,
@@ -299,14 +299,14 @@ const nestedDeepLinks: SecurityDeepLinks = {
       {
         id: SecurityPageName.trustedApps,
         title: i18n.translate('xpack.securitySolution.search.administration.trustedApps', {
-          defaultMessage: 'Trusted Applications',
+          defaultMessage: 'Trusted applications',
         }),
         path: TRUSTED_APPS_PATH,
       },
       {
         id: SecurityPageName.eventFilters,
         title: i18n.translate('xpack.securitySolution.search.administration.eventFilters', {
-          defaultMessage: 'Event Filters',
+          defaultMessage: 'Event filters',
         }),
         path: EVENT_FILTERS_PATH,
       },
