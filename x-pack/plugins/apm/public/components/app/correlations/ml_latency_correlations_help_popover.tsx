@@ -32,7 +32,7 @@ export function LatencyCorrelationsHelpPopover() {
       <p>
         <FormattedMessage
           id="xpack.apm.correlations.latencyPopoverBasicExplanation"
-          defaultMessage="Correlations help you discover which fields are contributing to increased service response times or latency."
+          defaultMessage="Correlations help you discover which attributes are contributing to increased service response times or latency."
         />
       </p>
       <p>
@@ -44,7 +44,7 @@ export function LatencyCorrelationsHelpPopover() {
       <p>
         <FormattedMessage
           id="xpack.apm.correlations.latencyPopoverTableExplanation"
-          defaultMessage="The table is sorted by correlation values, which are Pearson correlation coefficients (PCC) that range from 0 to 1. A Kolmogorov–Smirnov (K-S) test is used to verify that the impact is statistically significant. Attributes with a high correlation are likely to contribute to increased latency."
+          defaultMessage="The table is sorted by correlation values ranging from 0 to 1. Attributes with higher correlation values are more likely to contribute to high latency transactions."
         />
       </p>
       <p>
