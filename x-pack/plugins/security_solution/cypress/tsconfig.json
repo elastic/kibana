@@ -5,6 +5,7 @@
     "./**/*"
   ],
   "compilerOptions": {
+    "target": "ES2019",
     "tsBuildInfoFile": "../../../../build/tsbuildinfo/security_solution/cypress",
     "types": [
       "cypress",
