@@ -44,30 +44,33 @@ const clientSearchMock = (
       }
     | undefined;
 
-  // fetchTransactionDurationPercentiles
-  if (req?.body?.aggs?.transaction_duration_percentiles !== undefined) {
-    aggregations = { transaction_duration_percentiles: { values: {} } };
-  }
+  if (req?.body?.aggs !== undefined) {
+    const aggs = req.body.aggs;
+    // fetchTransactionDurationPercentiles
+    if (aggs.transaction_duration_percentiles !== undefined) {
+      aggregations = { transaction_duration_percentiles: { values: {} } };
+    }
 
-  // fetchTransactionDurationHistogramInterval
-  if (
-    req?.body?.aggs?.transaction_duration_min !== undefined &&
-    req?.body?.aggs?.transaction_duration_max !== undefined
-  ) {
-    aggregations = {
-      transaction_duration_min: { value: 0 },
-      transaction_duration_max: { value: 1234 },
-    };
-  }
+    // fetchTransactionDurationHistogramInterval
+    if (
+      aggs.transaction_duration_min !== undefined &&
+      aggs.transaction_duration_max !== undefined
+    ) {
+      aggregations = {
+        transaction_duration_min: { value: 0 },
+        transaction_duration_max: { value: 1234 },
+      };
+    }
 
-  // fetchTransactionDurationCorrelation
-  if (req?.body?.aggs?.logspace_ranges !== undefined) {
-    aggregations = { logspace_ranges: { buckets: [] } };
-  }
+    // fetchTransactionDurationCorrelation
+    if (aggs.logspace_ranges !== undefined) {
+      aggregations = { logspace_ranges: { buckets: [] } };
+    }
 
-  // fetchTransactionDurationFractions
-  if (req?.body?.aggs?.latency_ranges !== undefined) {
-    aggregations = { latency_ranges: { buckets: [] } };
+    // fetchTransactionDurationFractions
+    if (aggs.latency_ranges !== undefined) {
+      aggregations = { latency_ranges: { buckets: [] } };
+    }
   }
 
   return {
