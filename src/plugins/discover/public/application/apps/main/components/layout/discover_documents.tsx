@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useState, useRef, useMemo, useCallback, useEffect, memo } from 'react';
+import React, { useRef, useMemo, useCallback, memo } from 'react';
 import { EuiFlexItem, EuiSpacer, EuiText, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DocTableLegacy } from '../../../../angular/doc_table/create_doc_table_react';
@@ -25,6 +25,7 @@ import { SavedSearch } from '../../../../../saved_searches';
 import { DataDocumentsMsg, DataDocuments$ } from '../../services/use_saved_search';
 import { DiscoverServices } from '../../../../../build_services';
 import { AppState, GetStateReturn } from '../../services/discover_state';
+import { useDataState } from '../../utils/use_data_state';
 
 const DocTableLegacyMemoized = React.memo(DocTableLegacy);
 const DataGridMemoized = React.memo(DiscoverGrid);
@@ -59,19 +60,10 @@ function DiscoverDocumentsComponent({
   const scrollableDesktop = useRef<HTMLDivElement>(null);
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
   const sampleSize = useMemo(() => uiSettings.get(SAMPLE_SIZE_SETTING), [uiSettings]);
-  const [documentState, setDocumentState] = useState<DataDocumentsMsg>({
-    fetchStatus: documents$.getValue().fetchStatus,
-    result: documents$.getValue().result,
-  });
-  useEffect(() => {
-    const subscription = documents$.subscribe((next) => {
-      if (next.fetchStatus !== documentState.fetchStatus) {
-        setDocumentState({ ...documentState, ...next });
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [documents$, documentState, setDocumentState]);
-  const rows = useMemo(() => documentState.result, [documentState.result]);
+
+  const documentState: DataDocumentsMsg = useDataState(documents$);
+
+  const rows = useMemo(() => documentState.result || [], [documentState.result]);
 
   const { columns, onAddColumn, onRemoveColumn, onMoveColumn, onSetColumns } = useDataGridColumns({
     capabilities,

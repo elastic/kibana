@@ -8,7 +8,7 @@
 
 import './hits_counter.scss';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -19,8 +19,9 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { formatNumWithCommas } from '../../../../helpers';
-import { DataTotalHits$ } from '../../services/use_saved_search';
+import { DataTotalHits$, DataTotalHitsMsg } from '../../services/use_saved_search';
 import { FetchStatus } from '../../../../types';
+import { useDataState } from '../../utils/use_data_state';
 
 export interface HitsCounterProps {
   /**
@@ -35,24 +36,9 @@ export interface HitsCounterProps {
   savedSearchData$: DataTotalHits$;
 }
 
-interface HitsCounterState {
-  fetchStatus: FetchStatus;
-  result?: number;
-  error?: Error;
-}
-
 export function HitsCounter({ showResetButton, onResetQuery, savedSearchData$ }: HitsCounterProps) {
-  const [data, setData] = useState<HitsCounterState>({
-    fetchStatus: FetchStatus.LOADING,
-  });
-  useEffect(() => {
-    const subscription = savedSearchData$.subscribe((res) => {
-      if (res.fetchStatus !== data.fetchStatus) {
-        setData(res);
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [data.fetchStatus, savedSearchData$]);
+  const data: DataTotalHitsMsg = useDataState(savedSearchData$);
+
   const hits = data.result || 0;
   if (!hits && data.fetchStatus === FetchStatus.LOADING) {
     return <EuiLoadingSpinner />;

@@ -73,13 +73,13 @@ export function DiscoverLayout({
   const fetchCounter = useRef<number>(0);
   const { main$, charts$, totalHits$ } = savedSearchData$;
 
-  const fetchState: DataMainMsg = useDataState(main$);
+  const dataState: DataMainMsg = useDataState(main$);
 
   useEffect(() => {
-    if (fetchState.fetchStatus === FetchStatus.LOADING) {
+    if (dataState.fetchStatus === FetchStatus.LOADING) {
       fetchCounter.current++;
     }
-  }, [fetchState.fetchStatus]);
+  }, [dataState.fetchStatus]);
 
   // collapse icon isn't displayed in mobile view, use it to detect which view is displayed
   const isMobile = useCallback(() => collapseIcon && !collapseIcon.current, []);
@@ -92,8 +92,8 @@ export function DiscoverLayout({
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
   const resultState = useMemo(
-    () => getResultState(fetchState.fetchStatus, fetchState.foundDocuments!),
-    [fetchState.fetchStatus, fetchState.foundDocuments]
+    () => getResultState(dataState.fetchStatus, dataState.foundDocuments!),
+    [dataState.fetchStatus, dataState.foundDocuments]
   );
 
   const onOpenInspector = useCallback(() => {
@@ -222,7 +222,7 @@ export function DiscoverLayout({
                     timeFieldName={timeField}
                     queryLanguage={state.query?.language ?? ''}
                     data={data}
-                    error={fetchState.error}
+                    error={dataState.error}
                   />
                 )}
                 {resultState === 'uninitialized' && (
