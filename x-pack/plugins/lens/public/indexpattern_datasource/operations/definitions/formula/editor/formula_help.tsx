@@ -79,8 +79,10 @@ function FormulaHelp({
         }),
         description: (
           <Markdown
-            markdown={i18n.translate('xpack.lens.formulaDocumentation.filterRatioDescription', {
-              defaultMessage: `### Filter ratio:
+            markdown={i18n.translate(
+              'xpack.lens.formulaDocumentation.filterRatioDescription.markdown',
+              {
+                defaultMessage: `### Filter ratio:
 
 Use \`kql=''\` to filter one set of documents and compare it to other documents within the same grouping.
 For example, to see how the error rate changes over time:
@@ -90,9 +92,10 @@ count(kql='response.status_code > 400') / count()
 \`\`\`
         `,
 
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            })}
+                description:
+                  'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              }
+            )}
           />
         ),
       },
@@ -102,8 +105,10 @@ count(kql='response.status_code > 400') / count()
         }),
         description: (
           <Markdown
-            markdown={i18n.translate('xpack.lens.formulaDocumentation.weekOverWeekDescription', {
-              defaultMessage: `### Week over week:
+            markdown={i18n.translate(
+              'xpack.lens.formulaDocumentation.weekOverWeekDescription.markdown',
+              {
+                defaultMessage: `### Week over week:
 
 Use \`shift='1w'\` to get the value of each grouping from
 the previous week. Time shift should not be used with the *Top values* function.
@@ -114,9 +119,10 @@ percentile(system.network.in.bytes, percentile=99, shift='1w')
 \`\`\`
         `,
 
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            })}
+                description:
+                  'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              }
+            )}
           />
         ),
       },
@@ -126,8 +132,10 @@ percentile(system.network.in.bytes, percentile=99, shift='1w')
         }),
         description: (
           <Markdown
-            markdown={i18n.translate('xpack.lens.formulaDocumentation.percentOfTotalDescription', {
-              defaultMessage: `### Percent of total
+            markdown={i18n.translate(
+              'xpack.lens.formulaDocumentation.percentOfTotalDescription.markdown',
+              {
+                defaultMessage: `### Percent of total
 
 Formulas can calculate \`overall_sum\` for all the groupings,
 which lets you convert each grouping into a percent of total:
@@ -137,9 +145,10 @@ sum(products.base_price) / overall_sum(sum(products.base_price))
 \`\`\`
         `,
 
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            })}
+                description:
+                  'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              }
+            )}
           />
         ),
       },
@@ -372,9 +381,8 @@ sum(products.base_price) / overall_sum(sum(products.base_price))
               }}
             >
               <Markdown
-                markdown={i18n.translate('xpack.lens.formulaDocumentation', {
-                  defaultMessage: `
-## How it works
+                markdown={i18n.translate('xpack.lens.formulaDocumentation.markdown', {
+                  defaultMessage: `## How it works
 
 Lens formulas let you do math using a combination of Elasticsearch aggregations and
 math functions. There are three main types of functions:
