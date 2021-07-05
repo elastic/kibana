@@ -15,7 +15,7 @@ import { setAssets, resetAssets } from '../actions/assets';
 import * as transientActions from '../actions/transient';
 import * as resolvedArgsActions from '../actions/resolved_args';
 import { update, updateAssets, updateWorkpad } from '../../lib/workpad_service';
-import { services } from '../../services';
+import { pluginServices } from '../../services';
 import { canUserWrite } from '../selectors/app';
 
 const { esPersist: strings } = ErrorStrings;
@@ -61,17 +61,19 @@ export const esPersistMiddleware = ({ getState }) => {
 
     const notifyError = (err) => {
       const statusCode = err.response && err.response.status;
+      const notifyService = pluginServices.getServices().notify;
+
       switch (statusCode) {
         case 400:
-          return services.notify.getService().error(err.response, {
+          return notifyService.error(err.response, {
             title: strings.getSaveFailureTitle(),
           });
         case 413:
-          return services.notify.getService().error(strings.getTooLargeErrorMessage(), {
+          return notifyService.error(strings.getTooLargeErrorMessage(), {
             title: strings.getSaveFailureTitle(),
           });
         default:
-          return services.notify.getService().error(err, {
+          return notifyService.error(err, {
             title: strings.getUpdateFailureTitle(),
           });
       }
