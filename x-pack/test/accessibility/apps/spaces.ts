@@ -49,14 +49,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('a11y test for for customize space card', async () => {
-      await PageObjects.spaceSelector.clickEnterSpaceName();
-      await PageObjects.spaceSelector.addSpaceName('space_a');
-      await PageObjects.spaceSelector.clickCustomizeSpaceAvatar('space_a');
-      await a11y.testAppSnapshot();
-      await browser.pressKeys(browser.keys.ESCAPE);
-    });
-
     // EUI issue - https://github.com/elastic/eui/issues/3999
     it.skip('a11y test for color picker', async () => {
       await PageObjects.spaceSelector.clickColorPicker();
