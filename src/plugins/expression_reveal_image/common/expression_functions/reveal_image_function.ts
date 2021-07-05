@@ -23,6 +23,7 @@ export const revealImageFunction: ExpressionRevealImageFunction = () => {
       image: {
         types: ['string', 'null'],
         help: argHelp.image,
+        default: null,
       },
       emptyImage: {
         types: ['string', 'null'],
