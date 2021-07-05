@@ -13,12 +13,19 @@ import { MonitoringViewBaseEuiTableController } from '../../';
 import template from './index.html';
 import { Listing } from '../../../components/cluster/listing';
 import { CODE_PATH_ALL } from '../../../../common/constants';
+import { EnableAlertsModal } from '../../../alerts/enable_alerts_modal.tsx';
 
 const CODE_PATHS = [CODE_PATH_ALL];
 
 const getPageData = ($injector) => {
   const monitoringClusters = $injector.get('monitoringClusters');
   return monitoringClusters(undefined, undefined, CODE_PATHS);
+};
+
+const getAlerts = (clusters) => {
+  const alerts = clusters.reduce((alerts, cluster) => ({ ...alerts, ...cluster.alerts.list }), {});
+
+  return alerts;
 };
 
 uiRoutes
@@ -71,18 +78,21 @@ uiRoutes
           () => this.data,
           (data) => {
             this.renderReact(
-              <Listing
-                clusters={data}
-                angular={{
-                  scope: $scope,
-                  globalState,
-                  storage,
-                  showLicenseExpiration,
-                }}
-                sorting={this.sorting}
-                pagination={this.pagination}
-                onTableChange={this.onTableChange}
-              />
+              <>
+                <Listing
+                  clusters={data}
+                  angular={{
+                    scope: $scope,
+                    globalState,
+                    storage,
+                    showLicenseExpiration,
+                  }}
+                  sorting={this.sorting}
+                  pagination={this.pagination}
+                  onTableChange={this.onTableChange}
+                />
+                <EnableAlertsModal alerts={getAlerts(this.data)} />
+              </>
             );
           }
         );
