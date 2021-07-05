@@ -213,6 +213,7 @@ export class Execution<
       },
       isSyncColorsEnabled: () => execution.params.syncColors,
       ...(execution.params as any).extraContext,
+      executionContext: execution.params.executionContext,
     };
 
     this.result = this.input$.pipe(

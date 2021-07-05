@@ -391,6 +391,12 @@ export class VisualizeEmbeddable
       syncColors: this.input.syncColors,
       uiState: this.vis.uiState,
       inspectorAdapters: this.inspectorAdapters,
+      executionContext: {
+        type: this.vis.params.type,
+        name: this.vis.type.name,
+        id: this.vis.id ?? 'unknown_id',
+        description: this.vis.title ?? this.vis.type.title,
+      },
     };
     if (this.abortController) {
       this.abortController.abort();

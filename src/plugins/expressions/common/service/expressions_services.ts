@@ -9,6 +9,7 @@
 import { Observable } from 'rxjs';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { KibanaRequest } from 'src/core/server';
+import type { KibanaExecutionContext } from 'src/core/public';
 
 import { Executor } from '../executor';
 import { AnyExpressionRenderDefinition, ExpressionRendererRegistry } from '../expression_renderers';
@@ -77,6 +78,8 @@ export interface ExpressionExecutionParams {
   syncColors?: boolean;
 
   inspectorAdapters?: Adapters;
+
+  executionContext?: KibanaExecutionContext;
 }
 
 /**

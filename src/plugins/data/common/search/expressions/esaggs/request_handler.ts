@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { KibanaExecutionContext } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import { Adapters } from 'src/plugins/inspector/common';
 
@@ -30,6 +30,7 @@ export interface RequestHandlerParams {
   timeFields?: string[];
   timeRange?: TimeRange;
   getNow?: () => Date;
+  executionContext?: KibanaExecutionContext;
 }
 
 export const handleRequest = async ({
@@ -45,6 +46,7 @@ export const handleRequest = async ({
   timeFields,
   timeRange,
   getNow,
+  executionContext,
 }: RequestHandlerParams) => {
   const forceNow = getNow?.();
   const searchSource = await searchSourceService.create();
@@ -116,6 +118,7 @@ export const handleRequest = async ({
             'This request queries Elasticsearch to fetch the data for the visualization.',
         }),
       },
+      executionContext,
     })
     .toPromise();
 
