@@ -17561,7 +17561,6 @@
     "xpack.osquery.liveQueryActions.table.createdAtColumnTitle": "创建于",
     "xpack.osquery.liveQueryActions.table.queryColumnTitle": "查询",
     "xpack.osquery.liveQueryActions.table.viewDetailsColumnTitle": "查看详情",
-    "xpack.osquery.liveQueryDetails.kpis.agentsQueriedLabelText": "查询的代理",
     "xpack.osquery.liveQueryDetails.pageTitle": "实时查询详情",
     "xpack.osquery.liveQueryDetails.viewLiveQueriesHistoryTitle": "查看实时查询历史记录",
     "xpack.osquery.liveQueryForm.form.submitButtonLabel": "提交",
