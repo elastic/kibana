@@ -584,6 +584,7 @@ function runFullASTValidation(
               );
             }
           } else {
+            // Check that no more than one field is passed to the operation
             const fields = variables.filter(
               (arg) => isArgumentValidType(arg, 'variable') && !isMathNode(arg)
             );
@@ -675,7 +676,7 @@ function runFullASTValidation(
             })
           );
         } else {
-          if (functions.length > 1) {
+          if (functions.length > nodeOperation.requiredReferences.length) {
             errors.push(
               getMessageFromId({
                 messageId: 'tooManyFirstArguments',
