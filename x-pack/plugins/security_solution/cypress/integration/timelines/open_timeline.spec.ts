@@ -40,8 +40,8 @@ describe('Open timeline', () => {
     waitForTimelinesPanelToBeLoaded();
 
     createTimeline(timeline)
-      .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
-      .then((timelineId: string) => {
+      .then<string>((response) => response.body.data.persistTimeline.timeline.savedObjectId)
+      .then((timelineId) => {
         refreshTimelinesUntilTimeLinePresent(timelineId)
           // This cy.wait is here because we cannot do a pipe on a timeline as that will introduce multiple URL
           // request responses and indeterminism since on clicks to activates URL's.

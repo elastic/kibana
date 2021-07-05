@@ -54,8 +54,8 @@ describe('Overview Page', () => {
   describe('Favorite Timelines', () => {
     it('should appear on overview page', () => {
       createTimeline(timeline)
-        .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
-        .then((timelineId: string) => {
+        .then<string>((response) => response.body.data.persistTimeline.timeline.savedObjectId)
+        .then((timelineId) => {
           favoriteTimeline({ timelineId, timelineType: 'default' }).then(() => {
             cy.stubSearchStrategyApi(overviewFixture, 'overviewNetwork');
             loginAndWaitForPage(OVERVIEW_URL);
