@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects([
     'common',
     'error',
@@ -24,8 +25,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('feature controls security', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/timelion/feature_controls');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/timelion/feature_controls.json'
+      );
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+    });
+
+    after(async () => {
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/timelion/feature_controls.json'
+      );
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
     });
 
     describe('global timelion all privileges', () => {
