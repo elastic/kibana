@@ -89,7 +89,6 @@ export function useDiscoverState({
    * Data fetching logic
    */
   const { data$, refetch$, reset, inspectorAdapters } = useSavedSearchData({
-    indexPattern,
     initialFetchStatus,
     searchSessionManager,
     searchSource,

@@ -28,7 +28,6 @@ describe('test useSavedSearch', () => {
 
     const { result } = renderHook(() => {
       return useSavedSearch({
-        indexPattern: indexPatternMock,
         initialFetchStatus: FetchStatus.LOADING,
         searchSessionManager,
         searchSource: savedSearchMock.searchSource.createCopy(),
@@ -67,7 +66,6 @@ describe('test useSavedSearch', () => {
 
     const { result, waitForValueToChange } = renderHook(() => {
       return useSavedSearch({
-        indexPattern: indexPatternMock,
         initialFetchStatus: FetchStatus.LOADING,
         searchSessionManager,
         searchSource: resultState.current.searchSource,
@@ -110,7 +108,6 @@ describe('test useSavedSearch', () => {
 
     const { result, waitForValueToChange } = renderHook(() => {
       return useSavedSearch({
-        indexPattern: indexPatternMock,
         initialFetchStatus: FetchStatus.LOADING,
         searchSessionManager,
         searchSource: resultState.current.searchSource,
