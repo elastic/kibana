@@ -537,6 +537,7 @@ const endpointsTotal = async (http: HttpStart): Promise<number> => {
       })
     ).total;
   } catch (error) {
+    // TODO
     logError(`error while trying to check for total endpoints`);
     logError(error);
   }
@@ -547,6 +548,7 @@ const doEndpointsExist = async (http: HttpStart): Promise<boolean> => {
   try {
     return (await endpointsTotal(http)) > 0;
   } catch (error) {
+    // TODO
     logError(`error while trying to check if endpoints exist`);
     logError(error);
   }
@@ -614,6 +616,7 @@ async function getEndpointPackageInfo(
     });
   } catch (error) {
     // Ignore Errors, since this should not hinder the user's ability to use the UI
+    // TODO
     logError(error);
     dispatch({
       type: 'endpointPackageInfoStateChanged',
@@ -663,6 +666,7 @@ const loadEndpointsPendingActions = async ({
       payload: createLoadedResourceState(agentIdToPendingActions),
     });
   } catch (error) {
+    // TODO
     logError(error);
   }
 };
