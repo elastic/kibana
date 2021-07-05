@@ -26,7 +26,13 @@ interface GetUrlParams {
 export const FileDataVisualizerPage: FC = () => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const {
-    services: { docLinks, dataVisualizer },
+    services: {
+      docLinks,
+      dataVisualizer,
+      data: {
+        indexPatterns: { get: getIndexPattern },
+      },
+    },
   } = useMlKibana();
   const mlUrlGenerator = useMlUrlGenerator();
   getMlNodeCount();
@@ -52,8 +58,15 @@ export const FileDataVisualizerPage: FC = () => {
             },
           });
         },
-        canDisplay: async () => {
-          return isFullLicense() && checkPermission('canCreateJob') && mlNodesAvailable();
+        canDisplay: async ({ indexPatternId }) => {
+          const { timeFieldName } = await getIndexPattern(indexPatternId);
+
+          return (
+            isFullLicense() &&
+            timeFieldName !== undefined &&
+            checkPermission('canCreateJob') &&
+            mlNodesAvailable()
+          );
         },
       },
       {

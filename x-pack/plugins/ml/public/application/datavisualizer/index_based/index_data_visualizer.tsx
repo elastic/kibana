@@ -25,7 +25,13 @@ interface GetUrlParams {
 export const IndexDataVisualizerPage: FC = () => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const {
-    services: { docLinks, dataVisualizer },
+    services: {
+      docLinks,
+      dataVisualizer,
+      data: {
+        indexPatterns: { get: getIndexPattern },
+      },
+    },
   } = useMlKibana();
   const mlUrlGenerator = useMlUrlGenerator();
   getMlNodeCount();
@@ -66,8 +72,14 @@ export const IndexDataVisualizerPage: FC = () => {
             },
           });
         },
-        canDisplay: async () => {
-          return isFullLicense() && checkPermission('canCreateJob') && mlNodesAvailable();
+        canDisplay: async ({ indexPatternId }) => {
+          const { timeFieldName } = await getIndexPattern(indexPatternId);
+          return (
+            isFullLicense() &&
+            timeFieldName !== undefined &&
+            checkPermission('canCreateJob') &&
+            mlNodesAvailable()
+          );
         },
         dataTestSubj: 'dataVisualizerCreateAdvancedJobCard',
       },

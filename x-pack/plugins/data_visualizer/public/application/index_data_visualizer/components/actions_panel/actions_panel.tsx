@@ -86,7 +86,7 @@ export const ActionsPanel: FC<Props> = ({
 
     Promise.all(
       additionalLinks.map(async ({ canDisplay, getUrl }) => {
-        if ((await canDisplay()) === false) {
+        if ((await canDisplay({ indexPatternId })) === false) {
           return null;
         }
         return getUrl({ globalState, indexPatternId });
