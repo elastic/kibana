@@ -20,6 +20,10 @@ import type { Field } from '../../fields/field';
 import { getPipelineNameForInstallation } from '../ingest_pipeline/install';
 import { getAsset, getPathParts } from '../../archive';
 import { removeAssetTypesFromInstalledEs, saveInstalledEsRefs } from '../../packages/install';
+import {
+  FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME,
+  FLEET_GLOBAL_COMPONENT_TEMPLATE_CONTENT,
+} from '../../../../constants';
 
 import {
   generateMappings,
@@ -164,7 +168,7 @@ export async function installTemplateForDataStream({
 }
 
 interface TemplateMapEntry {
-  _meta: { package: { name: string } };
+  _meta: { package?: { name: string } };
   template:
     | {
         mappings: NonNullable<RegistryElasticsearch['index_template.mappings']>;
@@ -277,6 +281,28 @@ async function installDataStreamComponentTemplates(params: {
   return templateNames;
 }
 
+export async function ensureDefaultComponentTemplate(esClient: ElasticsearchClient) {
+  const { body: getTemplateRes } = await esClient.cluster.getComponentTemplate(
+    {
+      name: FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME,
+    },
+    {
+      ignore: [404],
+    }
+  );
+
+  const existingTemplate = getTemplateRes?.component_templates?.[0];
+  if (!existingTemplate) {
+    await putComponentTemplate(esClient, {
+      name: FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME,
+      body: FLEET_GLOBAL_COMPONENT_TEMPLATE_CONTENT,
+      create: true,
+    });
+  }
+
+  return { isCreated: !existingTemplate };
+}
+
 export async function installTemplate({
   esClient,
   fields,
@@ -378,12 +404,13 @@ export function getAllTemplateRefs(installedTemplates: IndexTemplateEntry[]) {
         type: ElasticsearchAssetType.indexTemplate,
       },
     ];
-    const componentTemplates = installedTemplate.indexTemplate.composed_of.map(
-      (componentTemplateId) => ({
+    const componentTemplates = installedTemplate.indexTemplate.composed_of
+      // Filter global component template shared between integrations
+      .filter((componentTemplateId) => componentTemplateId !== FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME)
+      .map((componentTemplateId) => ({
         id: componentTemplateId,
         type: ElasticsearchAssetType.componentTemplate,
-      })
-    );
+      }));
     return indexTemplates.concat(componentTemplates);
   });
 }

@@ -15,18 +15,15 @@ import { useGetOneEnrollmentAPIKey, useGetSettings, useLink, useFleetStatus } fr
 
 import { ManualInstructions } from '../../components/enrollment_instructions';
 import {
-  FleetServerRequirementPage,
+  deploymentModeStep,
   ServiceTokenStep,
   FleetServerCommandStep,
   useFleetServerInstructions,
-} from '../../applications/fleet/sections/agents/agent_requirements_page';
+  addFleetServerHostStep,
+} from '../../applications/fleet/sections/agents/agent_requirements_page/components';
+import { FleetServerRequirementPage } from '../../applications/fleet/sections/agents/agent_requirements_page';
 
-import {
-  DownloadStep,
-  AgentPolicySelectionStep,
-  AgentEnrollmentKeySelectionStep,
-  ViewDataStep,
-} from './steps';
+import { DownloadStep, AgentPolicySelectionStep, AgentEnrollmentKeySelectionStep } from './steps';
 import type { BaseProps } from './types';
 
 type Props = BaseProps;
@@ -59,17 +56,17 @@ const FleetServerMissingRequirements = () => {
 };
 
 export const ManagedInstructions = React.memo<Props>(
-  ({ agentPolicy, agentPolicies, viewDataStepContent }) => {
+  ({ agentPolicy, agentPolicies, viewDataStep }) => {
     const fleetStatus = useFleetStatus();
 
-    const [selectedAPIKeyId, setSelectedAPIKeyId] = useState<string | undefined>();
+    const [selectedApiKeyId, setSelectedAPIKeyId] = useState<string | undefined>();
     const [isFleetServerPolicySelected, setIsFleetServerPolicySelected] = useState<boolean>(false);
 
-    const apiKey = useGetOneEnrollmentAPIKey(selectedAPIKeyId);
+    const apiKey = useGetOneEnrollmentAPIKey(selectedApiKeyId);
     const settings = useGetSettings();
     const fleetServerInstructions = useFleetServerInstructions(apiKey?.data?.item?.policy_id);
 
-    const steps = useMemo(() => {
+    const fleetServerSteps = useMemo(() => {
       const {
         serviceToken,
         getServiceToken,
@@ -77,50 +74,60 @@ export const ManagedInstructions = React.memo<Props>(
         installCommand,
         platform,
         setPlatform,
+        deploymentMode,
+        setDeploymentMode,
+        addFleetServerHost,
       } = fleetServerInstructions;
+
+      return [
+        deploymentModeStep({ deploymentMode, setDeploymentMode }),
+        addFleetServerHostStep({ addFleetServerHost }),
+        ServiceTokenStep({ serviceToken, getServiceToken, isLoadingServiceToken }),
+        FleetServerCommandStep({ serviceToken, installCommand, platform, setPlatform }),
+      ];
+    }, [fleetServerInstructions]);
+
+    const steps = useMemo(() => {
       const fleetServerHosts = settings.data?.item?.fleet_server_hosts || [];
       const baseSteps: EuiContainedStepProps[] = [
         DownloadStep(),
         !agentPolicy
           ? AgentPolicySelectionStep({
               agentPolicies,
+              selectedApiKeyId,
               setSelectedAPIKeyId,
               setIsFleetServerPolicySelected,
             })
-          : AgentEnrollmentKeySelectionStep({ agentPolicy, setSelectedAPIKeyId }),
+          : AgentEnrollmentKeySelectionStep({ agentPolicy, selectedApiKeyId, setSelectedAPIKeyId }),
       ];
       if (isFleetServerPolicySelected) {
-        baseSteps.push(
-          ...[
-            ServiceTokenStep({ serviceToken, getServiceToken, isLoadingServiceToken }),
-            FleetServerCommandStep({ serviceToken, installCommand, platform, setPlatform }),
-          ]
-        );
+        baseSteps.push(...fleetServerSteps);
       } else {
         baseSteps.push({
           title: i18n.translate('xpack.fleet.agentEnrollment.stepEnrollAndRunAgentTitle', {
             defaultMessage: 'Enroll and start the Elastic Agent',
           }),
-          children: selectedAPIKeyId && apiKey.data && (
+          children: selectedApiKeyId && apiKey.data && (
             <ManualInstructions apiKey={apiKey.data.item} fleetServerHosts={fleetServerHosts} />
           ),
         });
       }
 
-      if (viewDataStepContent) {
-        baseSteps.push(ViewDataStep(viewDataStepContent));
+      if (viewDataStep) {
+        baseSteps.push({ 'data-test-subj': 'view-data-step', ...viewDataStep });
       }
 
       return baseSteps;
     }, [
       agentPolicy,
+      selectedApiKeyId,
+      setSelectedAPIKeyId,
       agentPolicies,
-      selectedAPIKeyId,
       apiKey.data,
+      fleetServerSteps,
       isFleetServerPolicySelected,
       settings.data?.item?.fleet_server_hosts,
-      fleetServerInstructions,
-      viewDataStepContent,
+      viewDataStep,
     ]);
 
     return (

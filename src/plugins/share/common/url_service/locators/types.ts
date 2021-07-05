@@ -25,7 +25,7 @@ export interface ILocatorClient {
    *
    * @param id Unique ID of the locator.
    */
-  get<P>(id: string): undefined | LocatorPublic<P>;
+  get<P extends SerializableState>(id: string): undefined | LocatorPublic<P>;
 }
 
 /**
@@ -50,7 +50,7 @@ export interface LocatorDefinition<P extends SerializableState>
 /**
  * Public interface of a registered locator.
  */
-export interface LocatorPublic<P> {
+export interface LocatorPublic<P extends SerializableState> extends PersistableState<P> {
   /**
    * Returns a reference to a Kibana client-side location.
    *

@@ -55,6 +55,11 @@ exports[`tests loading fields.yml: base.yml 1`] = `
     "name": "validarray",
     "type": "array",
     "object_type": "integer"
+  },
+  {
+    "name": "cycle_type",
+    "type": "constant_keyword",
+    "value": "bicycle"
   }
 ]
 `;

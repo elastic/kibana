@@ -7,6 +7,8 @@
 
 import { setMockValues } from '../../__mocks__/kea_logic';
 
+jest.mock('./beta', () => ({ appendBetaNotificationItem: jest.fn() })); // Mostly adding this to get tests passing. Should be removed once we're out of beta
+
 import React from 'react';
 
 import { shallow } from 'enzyme';

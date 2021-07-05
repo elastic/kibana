@@ -72,6 +72,17 @@ export const CLS_LABEL = i18n.translate('xpack.observability.expView.fieldLabels
   defaultMessage: 'Cumulative layout shift',
 });
 
+export const DCL_LABEL = i18n.translate('xpack.observability.expView.fieldLabels.dcl', {
+  defaultMessage: 'DOM content loaded',
+});
+
+export const DOCUMENT_ONLOAD_LABEL = i18n.translate(
+  'xpack.observability.expView.fieldLabels.onload',
+  {
+    defaultMessage: 'Document complete (onLoad)',
+  }
+);
+
 export const BACKEND_TIME_LABEL = i18n.translate(
   'xpack.observability.expView.fieldLabels.backend',
   {
@@ -272,7 +283,7 @@ export const CARRIER_LOCATION = i18n.translate(
 export const RESPONSE_LATENCY = i18n.translate(
   'xpack.observability.expView.fieldLabels.responseLatency',
   {
-    defaultMessage: 'Response latency',
+    defaultMessage: 'Latency',
   }
 );
 
@@ -294,7 +305,7 @@ export const CPU_USAGE = i18n.translate('xpack.observability.expView.fieldLabels
 export const TRANSACTIONS_PER_MINUTE = i18n.translate(
   'xpack.observability.expView.fieldLabels.transactionPerMinute',
   {
-    defaultMessage: 'Transactions per minute',
+    defaultMessage: 'Throughput',
   }
 );
 

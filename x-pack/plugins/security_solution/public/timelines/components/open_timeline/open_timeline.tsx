@@ -194,7 +194,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
           title={i18n.IMPORT_TIMELINE}
         />
 
-        <EuiPanel className={OPEN_TIMELINE_CLASS_NAME}>
+        <EuiPanel className={OPEN_TIMELINE_CLASS_NAME} hasBorder>
           {!!timelineFilter && timelineFilter}
           <SearchRow
             data-test-subj="search-row"

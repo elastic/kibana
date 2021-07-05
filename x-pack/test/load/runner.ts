@@ -18,7 +18,7 @@ const simulationPackage = 'org.kibanaLoadTest.simulation';
 const simulationFIleExtension = '.scala';
 const gatlingProjectRootPath: string =
   process.env.GATLING_PROJECT_PATH || resolve(REPO_ROOT, '../kibana-load-testing');
-const simulationEntry: string = process.env.GATLING_SIMULATIONS || 'DemoJourney';
+const simulationEntry: string = process.env.GATLING_SIMULATIONS || 'branch.DemoJourney';
 
 if (!Fs.existsSync(gatlingProjectRootPath)) {
   throw createFlagError(

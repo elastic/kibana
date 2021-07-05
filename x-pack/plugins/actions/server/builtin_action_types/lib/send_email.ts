@@ -12,7 +12,7 @@ import { default as MarkdownIt } from 'markdown-it';
 import { Logger } from '../../../../../../src/core/server';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { CustomHostSettings } from '../../config';
-import { getNodeTLSOptions, getTLSSettingsFromConfig } from './get_node_tls_options';
+import { getNodeSSLOptions, getSSLSettingsFromConfig } from './get_node_ssl_options';
 
 // an email "service" which doesn't actually send, just returns what it would send
 export const JSON_TRANSPORT_SERVICE = '__json';
@@ -59,7 +59,7 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const transportConfig: Record<string, any> = {};
   const proxySettings = configurationUtilities.getProxySettings();
-  const generalTLSSettings = configurationUtilities.getTLSSettings();
+  const generalSSLSettings = configurationUtilities.getSSLSettings();
 
   if (hasAuth && user != null && password != null) {
     transportConfig.auth = {
@@ -92,9 +92,9 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
     customHostSettings = configurationUtilities.getCustomHostSettings(`smtp://${host}:${port}`);
 
     if (proxySettings && useProxy) {
-      transportConfig.tls = getNodeTLSOptions(
+      transportConfig.tls = getNodeSSLOptions(
         logger,
-        proxySettings?.proxyTLSSettings.verificationMode
+        proxySettings?.proxySSLSettings.verificationMode
       );
       transportConfig.proxy = proxySettings.proxyUrl;
       transportConfig.headers = proxySettings.proxyHeaders;
@@ -104,25 +104,25 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
       // authenticate rarely have valid certs; eg cloud proxy, and npm maildev
       transportConfig.tls = { rejectUnauthorized: false };
     } else {
-      transportConfig.tls = getNodeTLSOptions(logger, generalTLSSettings.verificationMode);
+      transportConfig.tls = getNodeSSLOptions(logger, generalSSLSettings.verificationMode);
     }
 
     // finally, allow customHostSettings to override some of the settings
     // see: https://nodemailer.com/smtp/
     if (customHostSettings) {
       const tlsConfig: Record<string, unknown> = {};
-      const tlsSettings = customHostSettings.tls;
+      const sslSettings = customHostSettings.ssl;
       const smtpSettings = customHostSettings.smtp;
 
-      if (tlsSettings?.certificateAuthoritiesData) {
-        tlsConfig.ca = tlsSettings?.certificateAuthoritiesData;
+      if (sslSettings?.certificateAuthoritiesData) {
+        tlsConfig.ca = sslSettings?.certificateAuthoritiesData;
       }
 
-      const tlsSettingsFromConfig = getTLSSettingsFromConfig(
-        tlsSettings?.verificationMode,
-        tlsSettings?.rejectUnauthorized
+      const sslSettingsFromConfig = getSSLSettingsFromConfig(
+        sslSettings?.verificationMode,
+        sslSettings?.rejectUnauthorized
       );
-      const nodeTLSOptions = getNodeTLSOptions(logger, tlsSettingsFromConfig.verificationMode);
+      const nodeTLSOptions = getNodeSSLOptions(logger, sslSettingsFromConfig.verificationMode);
       if (!transportConfig.tls) {
         transportConfig.tls = { ...tlsConfig, ...nodeTLSOptions };
       } else {

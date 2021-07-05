@@ -15,7 +15,7 @@
   "license": "Elastic License v2",
   "name": "Azure Resource Group Deletion",
   "note": "## Config\n\nThe Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:azure.activitylogs and azure.activitylogs.operation_name:\"MICROSOFT.RESOURCES/SUBSCRIPTIONS/RESOURCEGROUPS/DELETE\" and event.outcome:(Success or success)",
+  "query": "event.dataset:azure.activitylogs and azure.activitylogs.operation_name:\"MICROSOFT.RESOURCES/SUBSCRIPTIONS/RESOURCEGROUPS/DELETE\" and event.outcome:(Success or success)\n",
   "references": [
     "https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/manage-resource-groups-portal"
   ],

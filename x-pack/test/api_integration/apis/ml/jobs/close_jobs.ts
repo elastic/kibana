@@ -20,68 +20,6 @@ export default ({ getService }: FtrProviderContext) => {
 
   const testSetupJobConfigs = [SINGLE_METRIC_JOB_CONFIG, MULTI_METRIC_JOB_CONFIG];
 
-  const testDataList = [
-    {
-      testTitle: 'as ML Poweruser',
-      user: USER.ML_POWERUSER,
-      requestBody: {
-        jobIds: [SINGLE_METRIC_JOB_CONFIG.job_id, MULTI_METRIC_JOB_CONFIG.job_id],
-      },
-      expected: {
-        responseCode: 200,
-        responseBody: {
-          [SINGLE_METRIC_JOB_CONFIG.job_id]: { closed: true },
-          [MULTI_METRIC_JOB_CONFIG.job_id]: { closed: true },
-        },
-      },
-    },
-  ];
-
-  const testDataListFailed = [
-    {
-      testTitle: 'as ML Poweruser',
-      user: USER.ML_POWERUSER,
-      requestBody: {
-        jobIds: [SINGLE_METRIC_JOB_CONFIG.job_id, MULTI_METRIC_JOB_CONFIG.job_id],
-      },
-      expected: {
-        responseCode: 200,
-
-        responseBody: {
-          [SINGLE_METRIC_JOB_CONFIG.job_id]: { closed: false, error: { status: 409 } },
-          [MULTI_METRIC_JOB_CONFIG.job_id]: { closed: false, error: { status: 409 } },
-        },
-      },
-    },
-  ];
-
-  const testDataListUnauthorized = [
-    {
-      testTitle: 'as ML Unauthorized user',
-      user: USER.ML_UNAUTHORIZED,
-      requestBody: {
-        jobIds: [SINGLE_METRIC_JOB_CONFIG.job_id, MULTI_METRIC_JOB_CONFIG.job_id],
-      },
-      // Note that the jobs and datafeeds are loaded async so the actual error message is not deterministic.
-      expected: {
-        responseCode: 403,
-        error: 'Forbidden',
-      },
-    },
-    {
-      testTitle: 'as ML Viewer',
-      user: USER.ML_VIEWER,
-      requestBody: {
-        jobIds: [SINGLE_METRIC_JOB_CONFIG.job_id, MULTI_METRIC_JOB_CONFIG.job_id],
-      },
-      // Note that the jobs and datafeeds are loaded async so the actual error message is not deterministic.
-      expected: {
-        responseCode: 403,
-        error: 'Forbidden',
-      },
-    },
-  ];
-
   async function runCloseJobsRequest(
     user: USER,
     requestBody: object,
@@ -97,19 +35,22 @@ export default ({ getService }: FtrProviderContext) => {
     return body;
   }
 
-  // failing ES snapshot promotion after backend change, see https://github.com/elastic/kibana/issues/103023
-  describe.skip('close_jobs', function () {
+  async function startDatafeedsInRealtime() {
+    for (const job of testSetupJobConfigs) {
+      const datafeedId = `datafeed-${job.job_id}`;
+      await ml.api.startDatafeed(datafeedId, { start: '0' });
+      await ml.api.waitForDatafeedState(datafeedId, DATAFEED_STATE.STARTED);
+    }
+  }
+
+  describe('close_jobs', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
     });
 
-    after(async () => {
-      await ml.api.cleanMlIndices();
-    });
-
-    it('sets up jobs', async () => {
+    beforeEach(async () => {
       for (const job of testSetupJobConfigs) {
         const datafeedId = `datafeed-${job.job_id}`;
         await ml.api.createAnomalyDetectionJob(job);
@@ -119,98 +60,132 @@ export default ({ getService }: FtrProviderContext) => {
           datafeed_id: datafeedId,
           job_id: job.job_id,
         });
-        await ml.api.startDatafeed(datafeedId, { start: '0' });
-        await ml.api.waitForDatafeedState(datafeedId, DATAFEED_STATE.STARTED);
       }
     });
 
-    describe('rejects request', function () {
-      for (const testData of testDataListUnauthorized) {
-        describe('fails to close job ID supplied', function () {
-          it(`${testData.testTitle}`, async () => {
-            const body = await runCloseJobsRequest(
-              testData.user,
-              testData.requestBody,
-              testData.expected.responseCode
-            );
+    afterEach(async () => {
+      for (const job of testSetupJobConfigs) {
+        await ml.api.deleteAnomalyDetectionJobES(job.job_id);
+      }
+      await ml.api.cleanMlIndices();
+    });
 
-            expect(body).to.have.property('error').eql(testData.expected.error);
+    it('rejects request for ML Unauthorized user', async () => {
+      await startDatafeedsInRealtime();
 
-            // ensure jobs are still open
-            for (const id of testData.requestBody.jobIds) {
-              await ml.api.waitForJobState(id, JOB_STATE.OPENED);
-            }
-          });
-        });
+      const jobIds = [SINGLE_METRIC_JOB_CONFIG.job_id, MULTI_METRIC_JOB_CONFIG.job_id];
+      const body = await runCloseJobsRequest(USER.ML_UNAUTHORIZED, { jobIds }, 403);
+
+      expect(body).to.have.property('error').eql('Forbidden');
+
+      // ensure jobs are still open
+      for (const id of jobIds) {
+        await ml.api.waitForJobState(id, JOB_STATE.OPENED);
       }
     });
 
-    describe('close jobs fail because they are running', function () {
-      for (const testData of testDataListFailed) {
-        it(`${testData.testTitle}`, async () => {
-          const body = await runCloseJobsRequest(
-            testData.user,
-            testData.requestBody,
-            testData.expected.responseCode
-          );
-          const expectedResponse = testData.expected.responseBody;
-          const expectedRspJobIds = Object.keys(expectedResponse).sort((a, b) =>
-            a.localeCompare(b)
-          );
-          const actualRspJobIds = Object.keys(body).sort((a, b) => a.localeCompare(b));
+    it('rejects request for ML Viewer user', async () => {
+      await startDatafeedsInRealtime();
 
-          expect(actualRspJobIds).to.have.length(expectedRspJobIds.length);
-          expect(actualRspJobIds).to.eql(expectedRspJobIds);
+      const jobIds = [SINGLE_METRIC_JOB_CONFIG.job_id, MULTI_METRIC_JOB_CONFIG.job_id];
+      const body = await runCloseJobsRequest(USER.ML_VIEWER, { jobIds }, 403);
 
-          expectedRspJobIds.forEach((id) => {
-            expect(body[id].closed).to.eql(testData.expected.responseBody[id].closed);
-            expect(body[id].error.status).to.eql(testData.expected.responseBody[id].error.status);
-          });
+      expect(body).to.have.property('error').eql('Forbidden');
 
-          // ensure jobs are still open
-          for (const id of testData.requestBody.jobIds) {
-            await ml.api.waitForJobState(id, JOB_STATE.OPENED);
-          }
-        });
+      // ensure jobs are still open
+      for (const id of jobIds) {
+        await ml.api.waitForJobState(id, JOB_STATE.OPENED);
       }
     });
 
-    describe('stops datafeeds', function () {
-      it('stops datafeeds', async () => {
-        for (const job of testSetupJobConfigs) {
-          const datafeedId = `datafeed-${job.job_id}`;
-          await ml.api.stopDatafeed(datafeedId);
-          await ml.api.waitForDatafeedState(datafeedId, DATAFEED_STATE.STOPPED);
-        }
+    it('succeeds for ML Poweruser with datafeed started', async () => {
+      await startDatafeedsInRealtime();
+
+      const jobIds = [SINGLE_METRIC_JOB_CONFIG.job_id, MULTI_METRIC_JOB_CONFIG.job_id];
+      const body = await runCloseJobsRequest(USER.ML_POWERUSER, { jobIds }, 200);
+
+      const expectedRspBody = {
+        [SINGLE_METRIC_JOB_CONFIG.job_id]: { closed: true },
+        [MULTI_METRIC_JOB_CONFIG.job_id]: { closed: true },
+      };
+      const expectedRspJobIds = Object.keys(expectedRspBody).sort((a, b) => a.localeCompare(b));
+      const actualRspJobIds = Object.keys(body).sort((a, b) => a.localeCompare(b));
+
+      expect(actualRspJobIds).to.have.length(expectedRspJobIds.length);
+      expect(actualRspJobIds).to.eql(expectedRspJobIds);
+
+      expectedRspJobIds.forEach((id) => {
+        expect(body[id].closed).to.eql(expectedRspBody[id].closed);
       });
+
+      // datafeeds should be stopped automatically
+      for (const id of jobIds) {
+        await ml.api.waitForDatafeedState(`datafeed-${id}`, DATAFEED_STATE.STOPPED);
+      }
+
+      // ensure jobs are actually closed
+      for (const id of jobIds) {
+        await ml.api.waitForJobState(id, JOB_STATE.CLOSED);
+      }
     });
 
-    describe('close jobs succeed', function () {
-      for (const testData of testDataList) {
-        it(`${testData.testTitle}`, async () => {
-          const body = await runCloseJobsRequest(
-            testData.user,
-            testData.requestBody,
-            testData.expected.responseCode
-          );
-          const expectedResponse = testData.expected.responseBody;
-          const expectedRspJobIds = Object.keys(expectedResponse).sort((a, b) =>
-            a.localeCompare(b)
-          );
-          const actualRspJobIds = Object.keys(body).sort((a, b) => a.localeCompare(b));
+    it('succeeds for ML Poweruser with datafeed stopped', async () => {
+      const jobIds = [SINGLE_METRIC_JOB_CONFIG.job_id, MULTI_METRIC_JOB_CONFIG.job_id];
+      const body = await runCloseJobsRequest(USER.ML_POWERUSER, { jobIds }, 200);
 
-          expect(actualRspJobIds).to.have.length(expectedRspJobIds.length);
-          expect(actualRspJobIds).to.eql(expectedRspJobIds);
+      const expectedRspBody = {
+        [SINGLE_METRIC_JOB_CONFIG.job_id]: { closed: true },
+        [MULTI_METRIC_JOB_CONFIG.job_id]: { closed: true },
+      };
+      const expectedRspJobIds = Object.keys(expectedRspBody).sort((a, b) => a.localeCompare(b));
+      const actualRspJobIds = Object.keys(body).sort((a, b) => a.localeCompare(b));
 
-          expectedRspJobIds.forEach((id) => {
-            expect(body[id].closed).to.eql(testData.expected.responseBody[id].closed);
-          });
+      expect(actualRspJobIds).to.have.length(expectedRspJobIds.length);
+      expect(actualRspJobIds).to.eql(expectedRspJobIds);
 
-          // ensure jobs are now closed
-          for (const id of testData.requestBody.jobIds) {
-            await ml.api.waitForJobState(id, JOB_STATE.CLOSED);
-          }
-        });
+      expectedRspJobIds.forEach((id) => {
+        expect(body[id].closed).to.eql(expectedRspBody[id].closed);
+      });
+
+      // datafeeds should still be stopped
+      for (const id of jobIds) {
+        await ml.api.waitForDatafeedState(`datafeed-${id}`, DATAFEED_STATE.STOPPED);
+      }
+
+      // ensure jobs are actually closed
+      for (const id of jobIds) {
+        await ml.api.waitForJobState(id, JOB_STATE.CLOSED);
+      }
+    });
+
+    it('succeeds for ML Poweruser with job already closed', async () => {
+      const jobIds = [SINGLE_METRIC_JOB_CONFIG.job_id, MULTI_METRIC_JOB_CONFIG.job_id];
+      await runCloseJobsRequest(USER.ML_POWERUSER, { jobIds }, 200);
+
+      const body = await runCloseJobsRequest(USER.ML_POWERUSER, { jobIds }, 200);
+
+      const expectedRspBody = {
+        [SINGLE_METRIC_JOB_CONFIG.job_id]: { closed: true },
+        [MULTI_METRIC_JOB_CONFIG.job_id]: { closed: true },
+      };
+      const expectedRspJobIds = Object.keys(expectedRspBody).sort((a, b) => a.localeCompare(b));
+      const actualRspJobIds = Object.keys(body).sort((a, b) => a.localeCompare(b));
+
+      expect(actualRspJobIds).to.have.length(expectedRspJobIds.length);
+      expect(actualRspJobIds).to.eql(expectedRspJobIds);
+
+      expectedRspJobIds.forEach((id) => {
+        expect(body[id].closed).to.eql(expectedRspBody[id].closed);
+      });
+
+      // datafeeds should still be stopped
+      for (const id of jobIds) {
+        await ml.api.waitForDatafeedState(`datafeed-${id}`, DATAFEED_STATE.STOPPED);
+      }
+
+      // jobs should still be closed
+      for (const id of jobIds) {
+        await ml.api.waitForJobState(id, JOB_STATE.CLOSED);
       }
     });
   });

@@ -24,8 +24,7 @@ import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { Ast, toExpression } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import { DataPublicPluginStart, ExecutionContextSearch } from 'src/plugins/data/public';
-import { Action, PreviewState } from './state_management';
+import { ExecutionContextSearch } from 'src/plugins/data/public';
 import { Datasource, Visualization, FramePublicAPI, DatasourcePublicAPI } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
 import {
@@ -35,6 +34,12 @@ import {
 import { prependDatasourceExpression } from './expression_helpers';
 import { trackUiEvent, trackSuggestionEvent } from '../../lens_ui_telemetry';
 import { getMissingIndexPattern, validateDatasourceAndVisualization } from './state_helpers';
+import {
+  PreviewState,
+  rollbackSuggestion,
+  submitSuggestion,
+  useLensDispatch,
+} from '../../state_management';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
 
@@ -51,11 +56,9 @@ export interface SuggestionPanelProps {
   activeVisualizationId: string | null;
   visualizationMap: Record<string, Visualization>;
   visualizationState: unknown;
-  dispatch: (action: Action) => void;
   ExpressionRenderer: ReactExpressionRendererType;
   frame: FramePublicAPI;
   stagedPreview?: PreviewState;
-  plugins: { data: DataPublicPluginStart };
 }
 
 const PreviewRenderer = ({
@@ -170,12 +173,12 @@ export function SuggestionPanel({
   activeVisualizationId,
   visualizationMap,
   visualizationState,
-  dispatch,
   frame,
   ExpressionRenderer: ExpressionRendererComponent,
   stagedPreview,
-  plugins,
 }: SuggestionPanelProps) {
+  const dispatchLens = useLensDispatch();
+
   const currentDatasourceStates = stagedPreview ? stagedPreview.datasourceStates : datasourceStates;
   const currentVisualizationState = stagedPreview
     ? stagedPreview.visualization.state
@@ -320,9 +323,7 @@ export function SuggestionPanel({
     if (lastSelectedSuggestion !== -1) {
       trackSuggestionEvent('back_to_current');
       setLastSelectedSuggestion(-1);
-      dispatch({
-        type: 'ROLLBACK_SUGGESTION',
-      });
+      dispatchLens(rollbackSuggestion());
     }
   }
 
@@ -352,9 +353,7 @@ export function SuggestionPanel({
                 iconType="refresh"
                 onClick={() => {
                   trackUiEvent('suggestion_confirmed');
-                  dispatch({
-                    type: 'SUBMIT_SUGGESTION',
-                  });
+                  dispatchLens(submitSuggestion());
                 }}
               >
                 {i18n.translate('xpack.lens.sugegstion.refreshSuggestionLabel', {
@@ -401,7 +400,7 @@ export function SuggestionPanel({
                   rollbackToCurrentVisualization();
                 } else {
                   setLastSelectedSuggestion(index);
-                  switchToSuggestion(dispatch, suggestion);
+                  switchToSuggestion(dispatchLens, suggestion);
                 }
               }}
               selected={index === lastSelectedSuggestion}

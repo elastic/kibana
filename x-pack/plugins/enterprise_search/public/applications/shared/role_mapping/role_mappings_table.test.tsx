@@ -13,7 +13,7 @@ import { mount } from 'enzyme';
 
 import { EuiInMemoryTable, EuiTableHeaderCell } from '@elastic/eui';
 
-import { ALL_LABEL, ANY_AUTH_PROVIDER_OPTION_LABEL } from './constants';
+import { engines } from '../../app_search/__mocks__/engines.mock';
 
 import { RoleMappingsTable } from './role_mappings_table';
 import { UsersAndRolesRowActions } from './users_and_roles_row_actions';
@@ -57,11 +57,13 @@ describe('RoleMappingsTable', () => {
   });
 
   it('renders auth provider display names', () => {
-    const wrapper = mount(<RoleMappingsTable {...props} />);
+    const roleMappingWithAuths = {
+      ...wsRoleMapping,
+      authProvider: ['saml', 'native'],
+    };
+    const wrapper = mount(<RoleMappingsTable {...props} roleMappings={[roleMappingWithAuths]} />);
 
-    expect(wrapper.find('[data-test-subj="AuthProviderDisplayValue"]').prop('children')).toEqual(
-      `${ANY_AUTH_PROVIDER_OPTION_LABEL}, other_auth`
-    );
+    expect(wrapper.find('[data-test-subj="ProviderSpecificList"]')).toHaveLength(1);
   });
 
   it('handles manage click', () => {
@@ -78,28 +80,30 @@ describe('RoleMappingsTable', () => {
     expect(handleDeleteMapping).toHaveBeenCalled();
   });
 
-  it('shows default message when "accessAllEngines" is true', () => {
+  it('handles access items display for all items', () => {
     const wrapper = mount(
       <RoleMappingsTable {...props} roleMappings={[asRoleMapping as any]} accessItemKey="engines" />
     );
 
-    expect(wrapper.find('[data-test-subj="AccessItemsList"]').prop('children')).toEqual(ALL_LABEL);
+    expect(wrapper.find('[data-test-subj="AllItems"]')).toHaveLength(1);
   });
 
-  it('handles display when no items present', () => {
-    const noItemsRoleMapping = { ...asRoleMapping, engines: [] };
-    noItemsRoleMapping.accessAllEngines = false;
+  it('handles access items display more than 2 items', () => {
+    const extraEngine = {
+      ...engines[0],
+      id: '3',
+    };
 
+    const roleMapping = {
+      ...asRoleMapping,
+      engines: [...engines, extraEngine],
+      accessAllEngines: false,
+    };
     const wrapper = mount(
-      <RoleMappingsTable
-        {...props}
-        roleMappings={[noItemsRoleMapping as any]}
-        accessItemKey="engines"
-      />
+      <RoleMappingsTable {...props} roleMappings={[roleMapping as any]} accessItemKey="engines" />
     );
-
-    expect(wrapper.find('[data-test-subj="AccessItemsList"]').children().children().text()).toEqual(
-      '—'
+    expect(wrapper.find('[data-test-subj="AccessItems"]').prop('children')).toEqual(
+      `${engines[0].name}, ${engines[1].name} + 1`
     );
   });
 });

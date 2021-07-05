@@ -21,7 +21,7 @@ import {
   ANY_AUTH_PROVIDER,
   ANY_AUTH_PROVIDER_OPTION_LABEL,
   ATTRIBUTE_VALUE_LABEL,
-  ATTRIBUTE_VALUE_ERROR,
+  REQUIRED_LABEL,
   AUTH_ANY_PROVIDER_LABEL,
   AUTH_INDIVIDUAL_PROVIDER_LABEL,
   AUTH_PROVIDER_LABEL,
@@ -129,8 +129,7 @@ export const AttributeSelector: React.FC<Props> = ({
       <EuiFormRow
         label={ATTRIBUTE_VALUE_LABEL}
         fullWidth
-        isInvalid={attributeValueInvalid}
-        error={[ATTRIBUTE_VALUE_ERROR]}
+        helpText={attributeValueInvalid && REQUIRED_LABEL}
       >
         {attributeName === 'role' ? (
           <EuiSelect

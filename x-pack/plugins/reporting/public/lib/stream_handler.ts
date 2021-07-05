@@ -17,7 +17,7 @@ import {
   getSuccessToast,
   getWarningFormulasToast,
   getWarningMaxSizeToast,
-} from '../components';
+} from '../notifier';
 import { ReportingAPIClient } from './reporting_api_client';
 
 function updateStored(jobIds: JobId[]): void {

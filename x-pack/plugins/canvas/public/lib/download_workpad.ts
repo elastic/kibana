@@ -8,7 +8,10 @@
 import fileSaver from 'file-saver';
 import { API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD } from '../../common/lib/constants';
 import { ErrorStrings } from '../../i18n';
-import { notifyService } from '../services';
+
+// TODO: clint - convert this whole file to hooks
+import { pluginServices } from '../services';
+
 // @ts-expect-error untyped local
 import * as workpadService from './workpad_service';
 import { CanvasRenderedWorkpad } from '../../shareable_runtime/types';
@@ -21,7 +24,8 @@ export const downloadWorkpad = async (workpadId: string) => {
     const jsonBlob = new Blob([JSON.stringify(workpad)], { type: 'application/json' });
     fileSaver.saveAs(jsonBlob, `canvas-workpad-${workpad.name}-${workpad.id}.json`);
   } catch (err) {
-    notifyService.getService().error(err, { title: strings.getDownloadFailureErrorMessage() });
+    const notifyService = pluginServices.getServices().notify;
+    notifyService.error(err, { title: strings.getDownloadFailureErrorMessage() });
   }
 };
 
@@ -33,9 +37,8 @@ export const downloadRenderedWorkpad = async (renderedWorkpad: CanvasRenderedWor
       `canvas-embed-workpad-${renderedWorkpad.name}-${renderedWorkpad.id}.json`
     );
   } catch (err) {
-    notifyService
-      .getService()
-      .error(err, { title: strings.getDownloadRenderedWorkpadFailureErrorMessage() });
+    const notifyService = pluginServices.getServices().notify;
+    notifyService.error(err, { title: strings.getDownloadRenderedWorkpadFailureErrorMessage() });
   }
 };
 
@@ -45,9 +48,8 @@ export const downloadRuntime = async (basePath: string) => {
     window.open(path);
     return;
   } catch (err) {
-    notifyService
-      .getService()
-      .error(err, { title: strings.getDownloadRuntimeFailureErrorMessage() });
+    const notifyService = pluginServices.getServices().notify;
+    notifyService.error(err, { title: strings.getDownloadRuntimeFailureErrorMessage() });
   }
 };
 
@@ -56,8 +58,7 @@ export const downloadZippedRuntime = async (data: any) => {
     const zip = new Blob([data], { type: 'octet/stream' });
     fileSaver.saveAs(zip, 'canvas-workpad-embed.zip');
   } catch (err) {
-    notifyService
-      .getService()
-      .error(err, { title: strings.getDownloadZippedRuntimeFailureErrorMessage() });
+    const notifyService = pluginServices.getServices().notify;
+    notifyService.error(err, { title: strings.getDownloadZippedRuntimeFailureErrorMessage() });
   }
 };

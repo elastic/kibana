@@ -101,6 +101,7 @@ describe('Security Plugin', () => {
             },
             "checkPrivilegesDynamicallyWithRequest": [Function],
             "checkPrivilegesWithRequest": [Function],
+            "checkSavedObjectsPrivilegesWithRequest": [Function],
             "mode": Object {
               "useRbacForRequest": [Function],
             },
@@ -171,6 +172,7 @@ describe('Security Plugin', () => {
             },
             "checkPrivilegesDynamicallyWithRequest": [Function],
             "checkPrivilegesWithRequest": [Function],
+            "checkSavedObjectsPrivilegesWithRequest": [Function],
             "mode": Object {
               "useRbacForRequest": [Function],
             },

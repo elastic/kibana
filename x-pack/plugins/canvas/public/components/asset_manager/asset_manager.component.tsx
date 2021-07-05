@@ -24,14 +24,47 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { ASSET_MAX_SIZE } from '../../../common/lib/constants';
 import { Loading } from '../loading';
 import { Asset } from './asset';
 import { AssetType } from '../../../types';
-import { ComponentStrings } from '../../../i18n';
 
-const { AssetManager: strings } = ComponentStrings;
+const strings = {
+  getDescription: () =>
+    i18n.translate('xpack.canvas.assetModal.modalDescription', {
+      defaultMessage:
+        'Below are the image assets in this workpad. Any assets that are currently in use cannot be determined at this time. To reclaim space, delete assets.',
+    }),
+  getEmptyAssetsDescription: () =>
+    i18n.translate('xpack.canvas.assetModal.emptyAssetsDescription', {
+      defaultMessage: 'Import your assets to get started',
+    }),
+  getFilePickerPromptText: () =>
+    i18n.translate('xpack.canvas.assetModal.filePickerPromptText', {
+      defaultMessage: 'Select or drag and drop images',
+    }),
+  getLoadingText: () =>
+    i18n.translate('xpack.canvas.assetModal.loadingText', {
+      defaultMessage: 'Uploading images',
+    }),
+  getModalCloseButtonLabel: () =>
+    i18n.translate('xpack.canvas.assetModal.modalCloseButtonLabel', {
+      defaultMessage: 'Close',
+    }),
+  getModalTitle: () =>
+    i18n.translate('xpack.canvas.assetModal.modalTitle', {
+      defaultMessage: 'Manage workpad assets',
+    }),
+  getSpaceUsedText: (percentageUsed: number) =>
+    i18n.translate('xpack.canvas.assetModal.spacedUsedText', {
+      defaultMessage: '{percentageUsed}% space used',
+      values: {
+        percentageUsed,
+      },
+    }),
+};
 
 export interface Props {
   /** The assets to display within the modal */

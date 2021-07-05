@@ -20,7 +20,7 @@ import {
   EuiNotificationBadge,
 } from '@elastic/eui';
 
-import { AssetTitleMap } from '../../../../../constants';
+import { AssetTitleMap } from '../../../constants';
 
 import { getHrefToObjectInKibanaApp, useStartServices } from '../../../../../hooks';
 
@@ -55,6 +55,11 @@ export const AssetsAccordion: FunctionComponent<Props> = ({ savedObjects, type }
         <EuiSpacer size="m" />
         <EuiSplitPanel.Outer hasBorder hasShadow={false}>
           {savedObjects.map(({ id, attributes: { title, description } }, idx) => {
+            // Ignore custom asset views
+            if (type === 'view') {
+              return;
+            }
+
             const pathToObjectInApp = getHrefToObjectInKibanaApp({
               http,
               id,
