@@ -129,7 +129,10 @@ const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.communityId.ianaNumberHelpText"
-        defaultMessage="Field containing the IANA number."
+        defaultMessage="Field containing the IANA number. Used only when {field} is not specified."
+        values={{
+          field: <EuiCode>{'transport'}</EuiCode>,
+        }}
       />
     ),
   },
@@ -142,7 +145,10 @@ const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.communityId.transportHelpText"
-        defaultMessage="Field containing the transport protocol."
+        defaultMessage="Field containing the transport protocol. Used only when {field} is not specified."
+        values={{
+          field: <EuiCode>{'iana_number'}</EuiCode>,
+        }}
       />
     ),
   },
@@ -214,49 +220,44 @@ export const CommunityId: FunctionComponent = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <UseField
-            config={fieldsConfig.icmp_type}
-            component={Field}
-            path="fields.icmp_type"
-            data-test-subj="icmpTypeField"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <UseField
-            config={fieldsConfig.icmp_code}
-            component={Field}
-            path="fields.icmp_code"
-            data-test-subj="icmpCodeField"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiFlexGroup>
-        {!fields?.transport && (
-          <EuiFlexItem>
-            <UseField
-              config={fieldsConfig.iana_number}
-              component={Field}
-              path="fields.iana_number"
-              data-test-subj="ianaField"
-            />
-          </EuiFlexItem>
-        )}
-        {!fields?.iana_number && (
-          <EuiFlexItem>
-            <UseField
-              config={fieldsConfig.transport}
-              component={Field}
-              path="fields.transport"
-              data-test-subj="transportField"
-            />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-
       <EuiSpacer size="m" />
+
+      <UseField
+        config={fieldsConfig.iana_number}
+        component={Field}
+        path="fields.iana_number"
+        data-test-subj="ianaField"
+        componentProps={{
+          euiFieldProps: {
+            disabled: fields?.transport,
+          },
+        }}
+      />
+      <UseField
+        config={fieldsConfig.transport}
+        component={Field}
+        path="fields.transport"
+        data-test-subj="transportField"
+        componentProps={{
+          euiFieldProps: {
+            disabled: fields?.iana_number,
+          },
+        }}
+      />
+
+      <UseField
+        config={fieldsConfig.icmp_type}
+        component={Field}
+        path="fields.icmp_type"
+        data-test-subj="icmpTypeField"
+      />
+
+      <UseField
+        config={fieldsConfig.icmp_code}
+        component={Field}
+        path="fields.icmp_code"
+        data-test-subj="icmpCodeField"
+      />
 
       <UseField
         config={fieldsConfig.seed}
