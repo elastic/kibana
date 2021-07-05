@@ -140,6 +140,7 @@ type TestSubject =
   | 'appendValueField.input'
   | 'formatsValueField.input'
   | 'timezoneField.input'
+  | 'outputFormatField.input'
   | 'localeField.input'
   | 'processorTypeSelector.input'
   | 'fieldNameField.input'
