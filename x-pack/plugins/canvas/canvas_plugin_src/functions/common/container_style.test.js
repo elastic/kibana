@@ -15,16 +15,14 @@ import { containerStyle } from './containerStyle';
 const errors = getFunctionErrors().containerStyle;
 
 describe('containerStyle', () => {
+  const fn = functionWrapper(containerStyle);
+
   let elasticLogo;
-  let fn;
   beforeEach(async () => {
     elasticLogo = await (await getElasticLogo()).elasticLogo;
-    fn = await functionWrapper(containerStyle);
   });
 
   describe('default output', () => {
-    console.log(fn);
-
     it('returns a containerStyle', () => {
       const result = fn(null);
 

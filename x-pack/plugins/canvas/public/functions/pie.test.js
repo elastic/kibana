@@ -15,16 +15,13 @@ import {
 import { pieFunctionFactory } from './pie';
 
 describe('pie', () => {
-  let fn;
-  beforeEach(async () => {
-    fn = await functionWrapper(
-      pieFunctionFactory({
-        get: () => ({
-          getCategoricalColors: () => ['red', 'black'],
-        }),
-      })
-    );
-  });
+  const fn = functionWrapper(
+    pieFunctionFactory({
+      get: () => ({
+        getCategoricalColors: () => ['red', 'black'],
+      }),
+    })
+  );
 
   it('returns a render as pie', () => {
     const result = fn(testPie);
@@ -61,7 +58,7 @@ describe('pie', () => {
     describe('palette', () => {
       it('sets the color palette', async () => {
         const mockedColors = jest.fn(() => ['#FFFFFF', '#888888', '#000000']);
-        const mockedFn = await functionWrapper(
+        const mockedFn = functionWrapper(
           pieFunctionFactory({
             get: () => ({
               getCategoricalColors: mockedColors,

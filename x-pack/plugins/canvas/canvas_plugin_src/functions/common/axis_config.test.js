@@ -13,10 +13,7 @@ import { axisConfig } from './axisConfig';
 const errors = getFunctionErrors().axisConfig;
 
 describe('axisConfig', () => {
-  let fn;
-  beforeEach(async () => {
-    fn = await functionWrapper(axisConfig);
-  });
+  const fn = functionWrapper(axisConfig);
 
   it('returns an axisConfig', () => {
     const result = fn(testTable, { show: true, position: 'right' });

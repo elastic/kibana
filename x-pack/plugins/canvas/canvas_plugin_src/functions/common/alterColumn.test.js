@@ -13,10 +13,7 @@ import { alterColumn } from './alterColumn';
 const errors = getFunctionErrors().alterColumn;
 
 describe('alterColumn', () => {
-  let fn;
-  beforeEach(async () => {
-    fn = await functionWrapper(alterColumn);
-  });
+  const fn = functionWrapper(alterColumn);
 
   const nameColumnIndex = testTable.columns.findIndex(({ name }) => name === 'name');
   const timeColumnIndex = testTable.columns.findIndex(({ name }) => name === 'time');

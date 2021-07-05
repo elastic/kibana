@@ -9,10 +9,7 @@ import { functionWrapper } from '../../../../../../src/plugins/presentation_util
 import { neq } from './neq';
 
 describe('neq', () => {
-  let fn;
-  beforeEach(async () => {
-    fn = await functionWrapper(neq);
-  });
+  const fn = functionWrapper(neq);
 
   it('should return true when the types are different', () => {
     expect(fn(1, { value: '1' })).toBe(true);

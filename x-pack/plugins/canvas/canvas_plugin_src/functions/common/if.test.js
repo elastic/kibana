@@ -11,10 +11,7 @@ import { functionWrapper } from '../../../../../../src/plugins/presentation_util
 import { ifFn } from './if';
 
 describe('if', () => {
-  let fn;
-  beforeEach(async () => {
-    fn = await functionWrapper(ifFn);
-  });
+  const fn = functionWrapper(ifFn);
 
   let testScheduler;
 

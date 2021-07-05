@@ -10,10 +10,7 @@ import { testTable, emptyTable } from './__fixtures__/test_tables';
 import { staticColumn } from './staticColumn';
 
 describe('staticColumn', () => {
-  let fn;
-  beforeEach(async () => {
-    fn = await functionWrapper(staticColumn);
-  });
+  const fn = functionWrapper(staticColumn);
 
   it('adds a column to a datatable with a static value in every row', () => {
     const result = fn(testTable, { name: 'foo', value: 'bar' });

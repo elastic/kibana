@@ -13,10 +13,7 @@ import { joinRows } from './join_rows';
 const errors = getFunctionErrors().joinRows;
 
 describe('joinRows', () => {
-  let fn;
-  beforeEach(async () => {
-    fn = await functionWrapper(joinRows);
-  });
+  const fn = functionWrapper(joinRows);
 
   const joesTable = {
     type: 'datatable',

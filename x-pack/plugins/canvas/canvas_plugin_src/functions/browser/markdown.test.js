@@ -11,11 +11,7 @@ import { fontStyle } from '../common/__fixtures__/test_styles';
 import { markdown } from './markdown';
 
 describe('markdown', () => {
-  let fn;
-
-  beforeEach(async () => {
-    fn = await functionWrapper(markdown);
-  });
+  const fn = functionWrapper(markdown);
 
   it('returns a render as markdown', async () => {
     const result = await fn(null, { content: [''], font: fontStyle });

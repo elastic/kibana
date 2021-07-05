@@ -23,10 +23,10 @@ const renderTable = {
 };
 
 describe('render', () => {
-  let fn;
+  const fn = functionWrapper(render);
+
   let containerStyle;
   beforeEach(async () => {
-    fn = await functionWrapper(render);
     containerStyle = await getContainerStyle();
   });
 

@@ -14,11 +14,7 @@ import { Adapters } from 'src/plugins/inspector';
 const errors = getFunctionErrors().csv;
 
 describe('csv', () => {
-  let fn: ReturnType<typeof csv>['fn'];
-
-  beforeEach(async () => {
-    fn = await functionWrapper(csv);
-  });
+  const fn = functionWrapper(csv);
 
   const expected: Datatable = {
     type: 'datatable',

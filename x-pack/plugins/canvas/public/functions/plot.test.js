@@ -18,16 +18,13 @@ import {
 import { plotFunctionFactory } from './plot';
 
 describe('plot', () => {
-  let fn;
-  beforeEach(async () => {
-    fn = await functionWrapper(
-      plotFunctionFactory({
-        get: () => ({
-          getCategoricalColors: () => ['red', 'black'],
-        }),
-      })
-    );
-  });
+  const fn = functionWrapper(
+    plotFunctionFactory({
+      get: () => ({
+        getCategoricalColors: () => ['red', 'black'],
+      }),
+    })
+  );
 
   it('returns a render as plot', () => {
     const result = fn(testPlot);
@@ -124,10 +121,10 @@ describe('plot', () => {
     });
 
     describe('palette', () => {
-      it('sets the color palette', async () => {
+      it('sets the color palette', () => {
         const mockedColors = jest.fn(() => ['#FFFFFF', '#888888', '#000000']);
 
-        const mockedFn = await functionWrapper(
+        const mockedFn = functionWrapper(
           plotFunctionFactory({
             get: () => ({
               getCategoricalColors: mockedColors,

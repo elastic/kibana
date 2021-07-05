@@ -13,11 +13,11 @@ import { timefilter } from './timefilter';
 
 const errors = getFunctionErrors().timefilter;
 
+const fn = functionWrapper(timefilter);
+
 let clock = null;
-let fn;
 beforeEach(async function () {
   clock = sinon.useFakeTimers();
-  fn = await functionWrapper(timefilter);
 });
 
 afterEach(function () {

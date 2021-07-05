@@ -9,10 +9,7 @@ import { functionWrapper } from '../../../../../../src/plugins/presentation_util
 import { timefilterControl } from './timefilterControl';
 
 describe('timefilterControl', () => {
-  let fn;
-  beforeEach(async () => {
-    fn = await functionWrapper(timefilterControl);
-  });
+  const fn = functionWrapper(timefilterControl);
 
   it('returns a render as time_filter', () => {
     expect(fn(null, { column: 'time', compact: false })).toHaveProperty('type', 'render');

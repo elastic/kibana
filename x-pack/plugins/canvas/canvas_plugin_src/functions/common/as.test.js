@@ -9,10 +9,7 @@ import { functionWrapper } from '../../../../../../src/plugins/presentation_util
 import { asFn } from './as';
 
 describe('as', () => {
-  let fn;
-  beforeEach(async () => {
-    fn = await functionWrapper(asFn);
-  });
+  const fn = functionWrapper(asFn);
 
   it('returns a datatable with a single column and single row', () => {
     expect(fn('foo', { name: 'bar' })).toEqual({

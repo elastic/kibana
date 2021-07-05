@@ -9,10 +9,7 @@ import { functionWrapper } from '../../../../../../src/plugins/presentation_util
 import { gt } from './gt';
 
 describe('gt', () => {
-  let fn;
-  beforeEach(async () => {
-    fn = await functionWrapper(gt);
-  });
+  const fn = functionWrapper(gt);
 
   it('should return false when the types are different', () => {
     expect(fn(1, { value: '1' })).toBe(false);

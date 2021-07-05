@@ -9,10 +9,7 @@ import { functionWrapper } from '../../../../../../src/plugins/presentation_util
 import { doFn } from './do';
 
 describe('do', () => {
-  let fn;
-  beforeEach(async () => {
-    fn = await functionWrapper(doFn);
-  });
+  const fn = functionWrapper(doFn);
 
   it('should only pass context', () => {
     expect(fn(1, { fn: '1' })).toEqual(1);

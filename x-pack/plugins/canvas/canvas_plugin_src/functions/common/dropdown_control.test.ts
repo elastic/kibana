@@ -12,10 +12,7 @@ import { ExecutionContext, SerializableState } from 'src/plugins/expressions';
 import { Adapters } from 'src/plugins/inspector';
 
 describe('dropdownControl', () => {
-  let fn: ReturnType<typeof dropdownControl>['fn'];
-  beforeEach(async () => {
-    fn = await functionWrapper(dropdownControl);
-  });
+  const fn = functionWrapper(dropdownControl);
 
   it('returns a render as dropdown_filter', () => {
     expect(

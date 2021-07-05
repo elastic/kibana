@@ -28,11 +28,13 @@ export interface Return {
   emptyImage: string | null;
 }
 
-export async function repeatImage(): Promise<
-  ExpressionFunctionDefinition<'repeatImage', number, Arguments, Render<Arguments>>
+export function repeatImage(): ExpressionFunctionDefinition<
+  'repeatImage',
+  number,
+  Arguments,
+  Promise<Render<Arguments>>
 > {
   const { help, args: argHelp } = getFunctionHelp().repeatImage;
-  const { elasticOutline } = await getElasticOutline();
   return {
     name: 'repeatImage',
     aliases: [],
@@ -48,7 +50,7 @@ export async function repeatImage(): Promise<
       image: {
         types: ['string', 'null'],
         help: argHelp.image,
-        default: elasticOutline,
+        default: null,
       },
       max: {
         types: ['number'],
@@ -61,7 +63,12 @@ export async function repeatImage(): Promise<
         help: argHelp.size,
       },
     },
-    fn: (count, args) => {
+    fn: async (count, args) => {
+      const { elasticOutline } = await getElasticOutline();
+      if (args.image === null) {
+        args.image = elasticOutline;
+      }
+
       return {
         type: 'render',
         as: 'repeatImage',

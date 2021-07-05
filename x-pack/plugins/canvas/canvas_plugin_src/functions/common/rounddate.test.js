@@ -9,10 +9,7 @@ import { functionWrapper } from '../../../../../../src/plugins/presentation_util
 import { rounddate } from './rounddate';
 
 describe('rounddate', () => {
-  let fn;
-  beforeEach(async () => {
-    fn = await functionWrapper(rounddate);
-  });
+  const fn = functionWrapper(rounddate);
 
   const date = new Date('2011-10-31T00:00:00.000Z').valueOf();
 

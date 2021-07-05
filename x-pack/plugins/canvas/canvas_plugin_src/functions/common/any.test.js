@@ -8,10 +8,7 @@ import { functionWrapper } from '../../../../../../src/plugins/presentation_util
 import { any } from './any';
 
 describe('any', () => {
-  let fn;
-  beforeEach(async () => {
-    fn = await functionWrapper(any);
-  });
+  const fn = functionWrapper(any);
 
   it('should return false with no conditions', () => {
     expect(fn(null, {})).toBe(false);

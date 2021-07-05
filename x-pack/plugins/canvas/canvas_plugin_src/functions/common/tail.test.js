@@ -10,10 +10,7 @@ import { emptyTable, testTable } from './__fixtures__/test_tables';
 import { tail } from './tail';
 
 describe('tail', () => {
-  let fn;
-  beforeEach(async () => {
-    fn = await functionWrapper(tail);
-  });
+  const fn = functionWrapper(tail);
 
   const lastIndex = testTable.rows.length - 1;
 

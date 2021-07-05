@@ -10,10 +10,7 @@ import { fontStyle } from './__fixtures__/test_styles';
 import { metric } from './metric';
 
 describe('metric', () => {
-  let fn;
-  beforeEach(async () => {
-    fn = await functionWrapper(metric);
-  });
+  const fn = functionWrapper(metric);
 
   it('returns a render as metric', () => {
     const result = fn(null);

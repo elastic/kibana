@@ -11,10 +11,7 @@ import { fontStyle } from './__fixtures__/test_styles';
 import { table } from './table';
 
 describe('table', () => {
-  let fn;
-  beforeEach(async () => {
-    fn = await functionWrapper(table);
-  });
+  const fn = functionWrapper(table);
 
   it('returns a render as table', () => {
     const result = fn(testTable, {

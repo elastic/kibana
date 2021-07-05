@@ -10,10 +10,7 @@ import { emptyTable, testTable } from './__fixtures__/test_tables';
 import { head } from './head';
 
 describe('head', () => {
-  let fn;
-  beforeEach(async () => {
-    fn = await functionWrapper(head);
-  });
+  const fn = functionWrapper(head);
 
   it('returns a datatable with the first N rows of the context', () => {
     const result = fn(testTable, { count: 2 });

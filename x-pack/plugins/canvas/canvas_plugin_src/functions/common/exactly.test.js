@@ -10,10 +10,7 @@ import { emptyFilter } from './__fixtures__/test_filters';
 import { exactly } from './exactly';
 
 describe('exactly', () => {
-  let fn;
-  beforeEach(async () => {
-    fn = await functionWrapper(exactly);
-  });
+  const fn = functionWrapper(exactly);
 
   it('returns a filter', () => {
     const args = { column: 'name', value: 'product2' };

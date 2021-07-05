@@ -12,10 +12,7 @@ import { caseFn } from './case';
 
 describe('case', () => {
   let testScheduler;
-  let fn;
-  beforeEach(async () => {
-    fn = await functionWrapper(caseFn);
-  });
+  const fn = functionWrapper(caseFn);
 
   beforeEach(() => {
     testScheduler = new TestScheduler((actual, expected) => expect(actual).toStrictEqual(expected));

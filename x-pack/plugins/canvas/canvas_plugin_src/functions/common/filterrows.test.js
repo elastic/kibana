@@ -16,10 +16,7 @@ const returnFalse = () => of(false);
 
 describe('filterrows', () => {
   let testScheduler;
-  let fn;
-  beforeEach(async () => {
-    fn = await functionWrapper(filterrows);
-  });
+  const fn = functionWrapper(filterrows);
 
   beforeEach(() => {
     testScheduler = new TestScheduler((actual, expected) => expect(actual).toStrictEqual(expected));

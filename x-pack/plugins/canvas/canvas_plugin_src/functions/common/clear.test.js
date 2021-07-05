@@ -9,10 +9,7 @@ import { testTable } from './__fixtures__/test_tables';
 import { clear } from './clear';
 
 describe('clear', () => {
-  let fn;
-  beforeEach(async () => {
-    fn = await functionWrapper(clear);
-  });
+  const fn = functionWrapper(clear);
 
   it('returns null for any context', () => {
     expect(fn()).toBe(null);
