@@ -12,5 +12,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Reporting API Integration Tests with Security disabled', function () {
     this.tags('ciGroup13');
     loadTestFile(require.resolve('./job_apis'));
+    loadTestFile(require.resolve('./ilm_migration_apis'));
   });
 }
