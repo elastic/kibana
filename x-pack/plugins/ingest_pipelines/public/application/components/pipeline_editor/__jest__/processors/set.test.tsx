@@ -66,7 +66,11 @@ describe('Processor: Set', () => {
     await saveNewProcessor();
 
     // Expect form error as "field" is required parameter
-    expect(form.getErrorsMessages()).toEqual(['A field value is required.']);
+    expect(form.getErrorsMessages()).toEqual([
+      'Either value or copy_from should be specified.',
+      'Either copy_from or value should be specified.',
+      'A field value is required.',
+    ]);
   });
 
   test('saves with default parameter value', async () => {
@@ -75,7 +79,8 @@ describe('Processor: Set', () => {
       form,
     } = testBed;
 
-    // Add "field" value (required)
+    // Add required fields
+    form.setInputValue('valueFieldInput', 'value');
     form.setInputValue('fieldNameField.input', 'field_1');
     // Save the field
     await saveNewProcessor();
@@ -84,6 +89,7 @@ describe('Processor: Set', () => {
     expect(processors[0][SET_TYPE]).toEqual({
       ...defaultSetParameters,
       field: 'field_1',
+      value: 'value',
     });
   });
 
@@ -94,11 +100,11 @@ describe('Processor: Set', () => {
     expect(find('copyFromField.input').exists()).toBe(true);
 
     form.setInputValue('valueFieldInput', 'value');
-    expect(find('copyFromField').exists()).toBe(false);
+    expect(find('copyFromField.input').props().disabled).toBeTruthy();
 
     form.setInputValue('valueFieldInput', '');
     form.setInputValue('copyFromField.input', 'copy_from');
-    expect(find('valueFieldInput').exists()).toBe(false);
+    expect(find('valueFieldInput').props().disabled).toBeTruthy();
   });
   test('should allow to set mediaType when value is a template snippet', async () => {
     const {

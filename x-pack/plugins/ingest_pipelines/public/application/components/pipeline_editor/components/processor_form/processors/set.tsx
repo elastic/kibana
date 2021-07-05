@@ -7,8 +7,9 @@
 
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
+import { isEmpty } from 'lodash';
+import { EuiCode } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCode, EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 
 import {
   FIELD_TYPES,
@@ -29,7 +30,7 @@ const fieldsConfig: FieldsConfig = {
   // This is a required field, but we exclude validation because we accept empty values as ''
   value: {
     type: FIELD_TYPES.TEXT,
-    deserializer: String,
+    serializer: from.emptyStringToUndefined,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.setForm.valueFieldLabel', {
       defaultMessage: 'Value',
     }),
@@ -42,6 +43,16 @@ const fieldsConfig: FieldsConfig = {
         }}
       />
     ),
+    fieldsToValidateOnChange: ['fields.copy_from', 'fields.value'],
+    validations: [
+      {
+        validator: ({ value, path, formData }) => {
+          if (isEmpty(value) && isEmpty(formData['fields.copy_from'])) {
+            return { path, message: 'Either value or copy_from should be specified.' };
+          }
+        },
+      },
+    ],
   },
   copy_from: {
     type: FIELD_TYPES.TEXT,
@@ -55,6 +66,16 @@ const fieldsConfig: FieldsConfig = {
         defaultMessage="The origin field which will be copied to field"
       />
     ),
+    fieldsToValidateOnChange: ['fields.copy_from', 'fields.value'],
+    validations: [
+      {
+        validator: ({ value, path, formData }) => {
+          if (isEmpty(value) && isEmpty(formData['fields.value'])) {
+            return { path, message: 'Either copy_from or value should be specified.' };
+          }
+        },
+      },
+    ],
   },
   mediaType: {
     type: FIELD_TYPES.SELECT,
@@ -122,34 +143,29 @@ export const SetProcessor: FunctionComponent = () => {
 
   return (
     <>
-      <EuiFlexGroup>
-        {!fields?.copy_from && (
-          <EuiFlexItem>
-            <UseField
-              config={fieldsConfig.value}
-              component={Field}
-              componentProps={{
-                euiFieldProps: {
-                  'data-test-subj': 'valueFieldInput',
-                },
-              }}
-              path="fields.value"
-            />
-          </EuiFlexItem>
-        )}
-        {!fields?.value && (
-          <EuiFlexItem>
-            <UseField
-              config={fieldsConfig.copy_from}
-              component={Field}
-              path="fields.copy_from"
-              data-test-subj="copyFromField"
-            />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+      <UseField
+        config={fieldsConfig.value}
+        component={Field}
+        componentProps={{
+          euiFieldProps: {
+            'data-test-subj': 'valueFieldInput',
+            disabled: fields?.copy_from,
+          },
+        }}
+        path="fields.value"
+      />
 
-      <EuiSpacer size="m" />
+      <UseField
+        config={fieldsConfig.copy_from}
+        component={Field}
+        path="fields.copy_from"
+        componentProps={{
+          euiFieldProps: {
+            disabled: fields?.value,
+          },
+        }}
+        data-test-subj="copyFromField"
+      />
 
       {hasTemplateSnippet(fields?.value) && (
         <UseField
