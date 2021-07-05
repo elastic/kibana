@@ -6,14 +6,14 @@
  */
 
 import { useDispatch } from 'react-redux';
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import moment, { Moment } from 'moment';
 import { EuiFlexGroup, EuiFlexItem, EuiDatePicker, EuiDatePickerRange } from '@elastic/eui';
 
 import * as i18 from '../../translations';
 import { useEndpointSelector } from '../../hooks';
-import { getActivityLogDataPaging } from '../../../store/selectors';
+import { getActivityLogDataPaging, selectedAgent } from '../../../store/selectors';
 
 const DatePickerWrapper = styled.div`
   width: ${(props) => props.theme.eui.fractions.single.percentage};
@@ -26,6 +26,17 @@ const StickyFlexItem = styled(EuiFlexItem)`
 `;
 
 export const DateRangePicker = memo(() => {
+  // clear dates on endpoint selection
+  const elasticAgentId = useEndpointSelector(selectedAgent);
+  useEffect(() => {
+    return () => {
+      if (elasticAgentId) {
+        setStartDate(undefined);
+        setEndDate(undefined);
+      }
+    };
+  }, [elasticAgentId]);
+
   const dispatch = useDispatch();
   const {
     page,
@@ -46,6 +57,7 @@ export const DateRangePicker = memo(() => {
       dispatch({
         type: 'endpointDetailsActivityLogUpdatePaging',
         payload: {
+          disabled: false,
           page,
           pageSize,
           startDate: date ? date?.toISOString() : undefined,
@@ -62,6 +74,7 @@ export const DateRangePicker = memo(() => {
       dispatch({
         type: 'endpointDetailsActivityLogUpdatePaging',
         payload: {
+          disabled: false,
           page,
           pageSize,
           startDate: startDate ? startDate.toISOString() : undefined,
