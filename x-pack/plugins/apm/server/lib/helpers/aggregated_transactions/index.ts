@@ -71,6 +71,7 @@ export async function getSearchAggregatedTransactions({
     config['xpack.apm.searchAggregatedTransactions'];
 
   if (
+    kuery ||
     searchAggregatedTransactions === SearchAggregatedTransactionSetting.auto
   ) {
     return getHasAggregatedTransactions({ start, end, apmEventClient, kuery });
