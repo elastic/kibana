@@ -50,8 +50,6 @@ export const getRandomDocsRequest = (
         random_score: {},
       },
     },
-    // Required value for later correlation queries
-    track_total_hits: true,
     size: POPULATED_DOC_COUNT_SAMPLE_SIZE,
   },
 });
@@ -59,7 +57,7 @@ export const getRandomDocsRequest = (
 export const fetchTransactionDurationFieldCandidates = async (
   esClient: ElasticsearchClient,
   params: SearchServiceParams
-): Promise<{ fieldCandidates: Field[]; totalHits: number }> => {
+): Promise<{ fieldCandidates: Field[] }> => {
   const { index } = params;
   // Get all fields with keyword mapping
   const respMapping = await esClient.fieldCaps({
@@ -100,6 +98,5 @@ export const fetchTransactionDurationFieldCandidates = async (
 
   return {
     fieldCandidates: [...finalFieldCandidates],
-    totalHits: (resp.body.hits.total as estypes.SearchTotalHits).value,
   };
 };

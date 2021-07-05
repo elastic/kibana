@@ -68,7 +68,6 @@ describe('query_field_candidates', () => {
             },
           },
           size: 1000,
-          track_total_hits: true,
         },
         index: params.index,
       });
@@ -77,8 +76,6 @@ describe('query_field_candidates', () => {
 
   describe('fetchTransactionDurationFieldCandidates()', () => {
     it('returns field candidates and total hits', async () => {
-      const totalHits = 1234;
-
       const esClientFieldCapsMock = jest.fn(() => ({
         body: {
           fields: {
@@ -104,7 +101,6 @@ describe('query_field_candidates', () => {
                   },
                 },
               ],
-              total: { value: totalHits },
             },
           } as unknown) as estypes.SearchResponse,
         };
@@ -141,7 +137,6 @@ describe('query_field_candidates', () => {
           'myIpFieldName',
           'myKeywordFieldName',
         ],
-        totalHits,
       });
       expect(esClientFieldCapsMock).toHaveBeenCalledTimes(1);
       expect(esClientSearchMock).toHaveBeenCalledTimes(1);
