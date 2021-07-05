@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-onData$?: <TData, TInspectorAdapters>(data: TData, adapters?: TInspectorAdapters) => void;
+onData$?: <TData, TInspectorAdapters>(data: TData, adapters?: TInspectorAdapters, partial?: boolean) => void;
 ```
