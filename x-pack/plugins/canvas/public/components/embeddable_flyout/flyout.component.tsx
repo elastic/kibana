@@ -13,7 +13,7 @@ import {
   SavedObjectFinderUi,
   SavedObjectMetaData,
 } from '../../../../../../src/plugins/saved_objects/public/';
-import { useServices } from '../../services';
+import { usePlatformService, useServices } from '../../services';
 
 const strings = {
   getNoItemsText: () =>
@@ -33,9 +33,10 @@ export interface Props {
 
 export const AddEmbeddableFlyout: FC<Props> = ({ onSelect, availableEmbeddables, onClose }) => {
   const services = useServices();
-  const { embeddables, platform } = services;
+  const platformService = usePlatformService();
+  const { embeddables } = services;
   const { getEmbeddableFactories } = embeddables;
-  const { getSavedObjects, getUISettings } = platform;
+  const { getSavedObjects, getUISettings } = platformService;
 
   const onAddPanel = (id: string, savedObjectType: string, name: string) => {
     const embeddableFactories = getEmbeddableFactories();
