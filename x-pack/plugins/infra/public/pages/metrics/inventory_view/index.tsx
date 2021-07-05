@@ -8,7 +8,6 @@
 import { EuiButton, EuiErrorBoundary, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
-
 import { FilterBar } from './components/filter_bar';
 
 import { DocumentTitle } from '../../../components/document_title';
@@ -19,6 +18,7 @@ import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { ViewSourceConfigurationButton } from '../../../components/source_configuration/view_source_configuration_button';
 import { Source } from '../../../containers/metrics_source';
 import { useTrackPageview } from '../../../../../observability/public';
+import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { LayoutView } from './components/layout_view';
 import { useLinkProps } from '../../../hooks/use_link_props';
@@ -28,10 +28,7 @@ import { useWaffleOptionsContext } from './hooks/use_waffle_options';
 import { MetricsPageTemplate } from '../page_template';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { APP_WRAPPER_CLASS } from '../../../../../../../src/core/public';
-
-const inventoryTitle = i18n.translate('xpack.infra.metrics.inventoryPageTitle', {
-  defaultMessage: 'Inventory',
-});
+import { inventoryTitle } from '../../../translations';
 
 export const SnapshotPage = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
@@ -51,6 +48,12 @@ export const SnapshotPage = () => {
     app: 'home',
     hash: '/tutorial_directory/metrics',
   });
+
+  useMetricsBreadcrumbs([
+    {
+      text: inventoryTitle,
+    },
+  ]);
 
   return (
     <EuiErrorBoundary>

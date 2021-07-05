@@ -26,7 +26,7 @@ import { UserActionTree } from '../user_action_tree';
 import { UserList } from '../user_list';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { getTypedPayload } from '../../containers/utils';
-import { WhitePageWrapper, HeaderWrapper } from '../wrappers';
+import { ContentWrapper, WhitePageWrapper, HeaderWrapper } from '../wrappers';
 import { CaseActionBar } from '../case_action_bar';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 import { EditConnector } from '../edit_connector';
@@ -40,8 +40,6 @@ import { CasesNavigation } from '../links';
 import { OwnerProvider } from '../owner_context';
 import { getConnectorById } from '../utils';
 import { DoesNotExist } from './does_not_exist';
-
-const gutterTimeline = '70px'; // seems to be a timeline reference from the original file
 
 export interface CaseViewComponentProps {
   allCasesNavigation: CasesNavigation;
@@ -74,11 +72,6 @@ export interface OnUpdateFields {
   onSuccess?: () => void;
   onError?: () => void;
 }
-
-const MyWrapper = styled.div`
-  padding: ${({ theme }) =>
-    `${theme.eui.paddingSizes.l} ${theme.eui.paddingSizes.l} ${gutterTimeline} ${theme.eui.paddingSizes.l}`};
-`;
 
 const MyEuiFlexGroup = styled(EuiFlexGroup)`
   height: 100%;
@@ -404,7 +397,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
           </HeaderPage>
         </HeaderWrapper>
         <WhitePageWrapper>
-          <MyWrapper>
+          <ContentWrapper>
             <EuiFlexGroup>
               <EuiFlexItem grow={6}>
                 {initLoadingData && (
@@ -491,7 +484,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
-          </MyWrapper>
+          </ContentWrapper>
         </WhitePageWrapper>
         {timelineUi?.renderTimelineDetailsPanel ? timelineUi.renderTimelineDetailsPanel() : null}
       </>
