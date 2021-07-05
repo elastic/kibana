@@ -2797,6 +2797,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/typed-react-router-config@link:bazel-bin/packages/kbn-typed-react-router-config":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ui-framework@link:bazel-bin/packages/kbn-ui-framework":
   version "0.0.0"
   uid ""

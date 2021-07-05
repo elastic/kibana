@@ -4,10 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import * as t from 'io-ts';
 import { i18n } from '@kbn/i18n';
+import { Outlet } from '@kbn/typed-react-router-config/target/outlet';
+import { createRouter } from '@kbn/typed-react-router-config/target/create_router';
+import { unconst } from '@kbn/typed-react-router-config/target/unconst';
 import React from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import { Redirect, RouteComponentProps } from 'react-router-dom';
 import { getServiceNodeName } from '../../../common/service_nodes';
 import { APMRouteDefinition } from '../../application/routes';
 import { toQuery } from '../shared/Links/url_helpers';
@@ -340,6 +343,51 @@ const SettingsTitle = i18n.translate('xpack.apm.views.listSettings.title', {
  * The array of route definitions to be used when the application
  * creates the routes.
  */
+const apmRoutes = [
+  {
+    path: '/',
+    element: <Outlet />,
+    children: [
+      {
+        path: '/services',
+        element: <ServiceInventoryView />,
+        params: t.partial({
+          query: t.partial({
+            rangeFrom: t.string,
+            rangeTo: t.string,
+          }),
+        }),
+      },
+      {
+        path: '/traces',
+        element: <TraceOverviewView />,
+        params: t.partial({
+          query: t.partial({
+            rangeFrom: t.string,
+            rangeTo: t.string,
+          }),
+        }),
+      },
+      {
+        path: '/service-map',
+        element: <ServiceMapView />,
+        params: t.partial({
+          query: t.partial({
+            rangeFrom: t.string,
+            rangeTo: t.string,
+          }),
+        }),
+      },
+      {
+        path: '/',
+        element: <Redirect to="/services" />,
+      },
+    ],
+  },
+] as const;
+
+export const apmRouter = createRouter(unconst(apmRoutes));
+
 export const apmRouteConfig: APMRouteDefinition[] = [
   /*
    * Home routes

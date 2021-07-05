@@ -154,6 +154,7 @@
     "@kbn/securitysolution-utils": "link:bazel-bin/packages/kbn-securitysolution-utils",
     "@kbn/server-http-tools": "link:bazel-bin/packages/kbn-server-http-tools",
     "@kbn/server-route-repository": "link:bazel-bin/packages/kbn-server-route-repository",
+    "@kbn/typed-react-router-config": "link:bazel-bin/packages/kbn-typed-react-router-config",
     "@kbn/std": "link:bazel-bin/packages/kbn-std",
     "@kbn/tinymath": "link:bazel-bin/packages/kbn-tinymath",
     "@kbn/ui-framework": "link:bazel-bin/packages/kbn-ui-framework",

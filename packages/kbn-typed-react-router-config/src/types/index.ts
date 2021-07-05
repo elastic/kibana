@@ -28,9 +28,12 @@ export type PathsOf<Routes extends any[], TPrefix extends string = ''> = Routes 
     : never
   : never;
 
-interface RouteMatch<TRoute extends Route = Route> {
+export interface RouteMatch<TRoute extends Route = Route> {
   route: TRoute;
   match: {
+    isExact: boolean;
+    path: string;
+    url: string;
     params: TRoute extends { params: t.Type<any> } ? t.OutputOf<TRoute['params']> : {};
   };
 }

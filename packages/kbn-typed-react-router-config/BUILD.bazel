@@ -7,7 +7,11 @@ PKG_REQUIRE_NAME = "@kbn/typed-react-router-config"
 SOURCE_FILES = glob(
   [
     "src/**/*.ts",
+    "src/**/*.tsx",
   ],
+  exclude = [
+    "**/*.test.*",
+  ]
 )
 
 SRCS = SOURCE_FILES
@@ -24,9 +28,10 @@ NPM_MODULE_EXTRA_FILES = [
 SRC_DEPS = [
   "@npm//tslib",
   "@npm//utility-types",
-  "@npm//react-router-dom",
-  "@npm//react-router",
+  "@npm//io-ts",
+  "@npm//query-string",
   "@npm//react-router-config",
+  "@npm//react-router-dom",
   "//packages/kbn-io-ts-utils",
 ]
 
@@ -34,6 +39,7 @@ TYPES_DEPS = [
   "@npm//@types/jest",
   "@npm//@types/node",
   "@npm//@types/react-router-config",
+  "@npm//@types/react-router-dom",
 ]
 
 DEPS = SRC_DEPS + TYPES_DEPS
@@ -42,6 +48,7 @@ ts_config(
   name = "tsconfig",
   src = "tsconfig.json",
   deps = [
+    "//:tsconfig.browser.json",
     "//:tsconfig.base.json",
   ],
 )

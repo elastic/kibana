@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { ApmRoute } from '@elastic/apm-rum-react';
+// import { ApmRoute } from '@elastic/apm-rum-react';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import { RoutesRenderer } from '@kbn/typed-react-router-config/target/routes_renderer';
 import React from 'react';
-import { Route, Router, Switch } from 'react-router-dom';
+import { Route, Router } from 'react-router-dom';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
 import { APP_WRAPPER_CLASS } from '../../../../../../src/core/public';
 import {
@@ -30,7 +31,7 @@ import { HeaderMenuPortal } from '../../../../observability/public';
 import { ApmHeaderActionMenu } from '../shared/apm_header_action_menu';
 import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
 import { AnomalyDetectionJobsContextProvider } from '../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
-import { apmRouteConfig } from './apm_route_config';
+import { apmRouteConfig, apmRouter } from './apm_route_config';
 
 export function ApmAppRoot({
   apmPluginContextValue,
@@ -61,11 +62,7 @@ export function ApmAppRoot({
                       <MountApmHeaderActionMenu />
 
                       <Route component={ScrollToTopOnPathChange} />
-                      <Switch>
-                        {apmRouteConfig.map((route, i) => (
-                          <ApmRoute key={i} {...route} />
-                        ))}
-                      </Switch>
+                      <RoutesRenderer router={apmRouter} />
                     </ApmThemeProvider>
                   </AnomalyDetectionJobsContextProvider>
                 </LicenseProvider>

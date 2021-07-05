@@ -19,6 +19,7 @@ import { Route, Router } from './types';
 
 export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<TRoutes> {
   const routesByReactRouterConfig = new Map<ReactRouterConfig, Route>();
+  const reactRouterConfigsByRoute = new Map<Route, ReactRouterConfig>();
 
   const reactRouterConfigs = routes.map((route) => toReactRouterConfigRoute(route));
 
@@ -32,12 +33,23 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
     };
 
     routesByReactRouterConfig.set(reactRouterConfig, route);
+    reactRouterConfigsByRoute.set(route, reactRouterConfig);
 
     return reactRouterConfig;
   }
 
   const matchRoutes = (path: string, location: Location) => {
-    const matches = matchRoutesConfig(reactRouterConfigs, location.pathname);
+    if (!path) {
+      path = '/';
+    }
+
+    const matches = matchRoutesConfig(reactRouterConfigs, location.pathname || '/');
+
+    console.log({
+      path,
+      location,
+      matches,
+    });
 
     const indexOfMatch = findLastIndex(matches, (match) => match.match.path === path);
 
@@ -60,6 +72,7 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
 
         return {
           match: {
+            ...matchedRoute.match,
             params: decoded.right,
           },
           route,
@@ -68,6 +81,7 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
 
       return {
         match: {
+          ...matchedRoute.match,
           params: {},
         },
         route,
