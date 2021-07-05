@@ -104,6 +104,7 @@ export async function SecuritySolutionCypressCcsTestRunner({ getService }: FtrPr
         CYPRESS_ELASTICSEARCH_PASSWORD: process.env.ELASTICSEARCH_PASSWORD,
         CYPRESS_CCS_KIBANA_URL: process.env.TEST_KIBANA_URLDATA,
         CYPRESS_CCS_ELASTICSEARCH_URL: process.env.TEST_ES_URLDATA,
+        CYPRESS_CCS_REMOTE_NAME: process.env.TEST_CCS_REMOTE_NAME,
         ...process.env,
       },
       wait: true,
