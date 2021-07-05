@@ -30,7 +30,8 @@
     "kibanaUtils",
     "home",
     "data",
-    "ml"
+    "ml",
+    "fleet"
   ],
   "owner": {
     "name": "Uptime",

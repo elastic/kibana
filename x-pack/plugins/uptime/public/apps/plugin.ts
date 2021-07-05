@@ -41,6 +41,7 @@ import {
   LazySyntheticsPolicyCreateExtension,
   LazySyntheticsPolicyEditExtension,
 } from '../components/fleet_package';
+import { LazySyntheticsCustomAssetsExtension } from '../components/fleet_package/lazy_synthetics_custom_assets_extension';
 
 export interface ClientPluginsSetup {
   data: DataPublicPluginSetup;
@@ -211,13 +212,19 @@ export class UptimePlugin
       registerExtension({
         package: 'synthetics',
         view: 'package-policy-create',
-        component: LazySyntheticsPolicyCreateExtension,
+        Component: LazySyntheticsPolicyCreateExtension,
       });
 
       registerExtension({
         package: 'synthetics',
         view: 'package-policy-edit',
-        component: LazySyntheticsPolicyEditExtension,
+        Component: LazySyntheticsPolicyEditExtension,
+      });
+
+      registerExtension({
+        package: 'synthetics',
+        view: 'package-detail-assets',
+        Component: LazySyntheticsCustomAssetsExtension,
       });
     }
   }
