@@ -8,6 +8,7 @@
 import { isEqual, uniqBy } from 'lodash';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import type { KibanaExecutionContext } from 'src/core/public';
 import {
   ExecutionContextSearch,
   Filter,
@@ -324,6 +325,12 @@ export class Embeddable
       this.input.onLoad(true);
     }
     const input = this.getInput();
+    const executionContext: KibanaExecutionContext = {
+      type: this.savedVis.type ?? 'lens',
+      name: this.savedVis.visualizationType ?? '',
+      description: this.savedVis.title ?? this.savedVis.description ?? '',
+      id: this.id,
+    };
     render(
       <ExpressionWrapper
         ExpressionRenderer={this.expressionRenderer}
@@ -339,6 +346,7 @@ export class Embeddable
         hasCompatibleActions={this.hasCompatibleActions}
         className={input.className}
         style={input.style}
+        executionContext={executionContext}
         canEdit={this.getIsEditable() && input.viewMode === 'edit'}
         onRuntimeError={() => {
           this.logError('runtime');
