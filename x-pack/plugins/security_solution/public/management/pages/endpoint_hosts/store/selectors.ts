@@ -33,6 +33,7 @@ import {
   isFailedResourceState,
   isLoadedResourceState,
   isLoadingResourceState,
+  isUninitialisedResourceState,
 } from '../../../state';
 
 import { ServerApiError } from '../../../../common/types';
@@ -69,15 +70,10 @@ export const policyItemsLoading = (state: Immutable<EndpointState>) => state.pol
 export const selectedPolicyId = (state: Immutable<EndpointState>) => state.selectedPolicyId;
 
 export const endpointPackageInfo = (state: Immutable<EndpointState>) => state.endpointPackageInfo;
-export const getIsEndpointPackageInfoPending: (
+export const getIsEndpointPackageInfoUninitialized: (
   state: Immutable<EndpointState>
 ) => boolean = createSelector(endpointPackageInfo, (packageInfo) =>
-  isLoadingResourceState(packageInfo)
-);
-export const getIsEndpointPackageInfoSuccessful: (
-  state: Immutable<EndpointState>
-) => boolean = createSelector(endpointPackageInfo, (packageInfo) =>
-  isLoadedResourceState(packageInfo)
+  isUninitialisedResourceState(packageInfo)
 );
 
 export const isAutoRefreshEnabled = (state: Immutable<EndpointState>) => state.isAutoRefreshEnabled;
