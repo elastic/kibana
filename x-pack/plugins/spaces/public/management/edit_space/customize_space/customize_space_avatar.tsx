@@ -123,7 +123,7 @@ export class CustomizeSpaceAvatar extends Component<Props> {
               },
             ]}
             idSelected={space.avatarType ?? 'initials'}
-            onChange={(avatarType) =>
+            onChange={(avatarType: string) =>
               this.props.onChange({
                 ...space,
                 avatarType: avatarType as FormValues['avatarType'],
