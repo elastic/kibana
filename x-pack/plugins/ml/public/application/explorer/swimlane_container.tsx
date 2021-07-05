@@ -40,7 +40,6 @@ import { SWIMLANE_TYPE, SwimlaneType } from './explorer_constants';
 import { mlEscape } from '../util/string_utils';
 import { FormattedTooltip, MlTooltipComponent } from '../components/chart_tooltip/chart_tooltip';
 import { formatHumanReadableDateTime } from '../../../common/util/date_utils';
-import { getFormattedSeverityScore } from '../../../common/util/anomaly_utils';
 
 import './_explorer.scss';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
@@ -62,6 +61,9 @@ declare global {
   }
 }
 
+function getFormattedSeverityScore(score: number): string {
+  return String(parseInt(String(score), 10));
+}
 /**
  * Ignore insignificant resize, e.g. browser scrollbar appearance.
  */
@@ -122,7 +124,7 @@ const SwimLaneTooltip = (fieldName?: string): FC<{ values: TooltipValue[] }> => 
       label: i18n.translate('xpack.ml.explorer.swimlane.maxAnomalyScoreLabel', {
         defaultMessage: 'Max anomaly score',
       }),
-      value: cell.formattedValue,
+      value: cell.formattedValue === '0' ? ' < 1' : cell.formattedValue,
       color: cell.color,
       // @ts-ignore
       seriesIdentifier: {
