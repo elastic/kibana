@@ -47,9 +47,9 @@ import {
   REDIRECT_SECURE_ERROR_TEXT,
   REDIRECT_URIS_LABEL,
   SAVE_CHANGES_BUTTON,
-  LICENSE_MODAL_TITLE,
-  LICENSE_MODAL_DESCRIPTION,
-  LICENSE_MODAL_LINK,
+  NON_PLATINUM_OAUTH_TITLE,
+  NON_PLATINUM_OAUTH_DESCRIPTION,
+  NON_PLATINUM_OAUTH_LINK,
 } from '../../../constants';
 import { ENT_SEARCH_LICENSE_MANAGEMENT } from '../../../routes';
 import { SettingsLogic } from '../settings_logic';
@@ -98,13 +98,13 @@ export const OauthApplication: React.FC = () => {
         <LicenseBadge />
         <EuiSpacer />
         <EuiTitle size="l">
-          <h1>{LICENSE_MODAL_TITLE}</h1>
+          <h1>{NON_PLATINUM_OAUTH_TITLE}</h1>
         </EuiTitle>
         <EuiSpacer size="s" />
-        <EuiText color="subdued">{LICENSE_MODAL_DESCRIPTION}</EuiText>
+        <EuiText color="subdued">{NON_PLATINUM_OAUTH_DESCRIPTION}</EuiText>
         <EuiSpacer />
         <EuiLink external target="_blank" href={ENT_SEARCH_LICENSE_MANAGEMENT}>
-          {LICENSE_MODAL_LINK}
+          {NON_PLATINUM_OAUTH_LINK}
         </EuiLink>
         <EuiSpacer />
       </EuiModalBody>
