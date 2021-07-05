@@ -7,40 +7,34 @@
 
 import React from 'react';
 
-import {
-  CanvasServiceFactory,
-  CanvasServiceProvider,
-  ServicesProvider,
-} from '../../public/services';
-import {
-  findNoWorkpads,
-  findSomeWorkpads,
-  workpadService,
-  findSomeTemplates,
-  findNoTemplates,
-} from '../../public/services/stubs/workpad';
-import { WorkpadService } from '../../public/services/workpad';
+import { DecoratorFn } from '@storybook/react';
+import { I18nProvider } from '@kbn/i18n/react';
 
-interface Params {
-  findWorkpads?: number;
-  findTemplates?: boolean;
-}
+import { PluginServiceRegistry } from '../../../../../src/plugins/presentation_util/public';
+import { pluginServices, LegacyServicesProvider } from '../../public/services';
+import { CanvasPluginServices } from '../../public/services';
+import { pluginServiceProviders, StorybookParams } from '../../public/services/storybook';
 
-export const servicesContextDecorator = ({
-  findWorkpads = 0,
-  findTemplates: findTemplatesOption = false,
-}: Params = {}) => {
-  const workpadServiceFactory: CanvasServiceFactory<WorkpadService> = (): WorkpadService => ({
-    ...workpadService,
-    find: findWorkpads > 0 ? findSomeWorkpads(findWorkpads) : findNoWorkpads(),
-    findTemplates: findTemplatesOption ? findSomeTemplates() : findNoTemplates(),
-  });
+export const servicesContextDecorator: DecoratorFn = (story: Function, storybook) => {
+  if (process.env.JEST_WORKER_ID !== undefined) {
+    storybook.args.useStaticData = true;
+  }
 
-  const workpad = new CanvasServiceProvider(workpadServiceFactory);
-  // @ts-expect-error This is a hack at the moment, until we can get Canvas moved over to the new services architecture.
-  workpad.start();
+  const pluginServiceRegistry = new PluginServiceRegistry<CanvasPluginServices, StorybookParams>(
+    pluginServiceProviders
+  );
 
-  return (story: Function) => (
-    <ServicesProvider providers={{ workpad }}>{story()}</ServicesProvider>
+  pluginServices.setRegistry(pluginServiceRegistry.start(storybook.args));
+
+  const ContextProvider = pluginServices.getContextProvider();
+
+  return (
+    <I18nProvider>
+      <ContextProvider>{story()}</ContextProvider>
+    </I18nProvider>
   );
 };
+
+export const legacyContextDecorator = () => (story: Function) => (
+  <LegacyServicesProvider>{story()}</LegacyServicesProvider>
+);

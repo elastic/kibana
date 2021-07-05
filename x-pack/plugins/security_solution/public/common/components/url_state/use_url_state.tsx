@@ -19,6 +19,7 @@ import {
   replaceStateInLocation,
   updateUrlStateString,
   decodeRisonUrlState,
+  isDetectionsPages,
 } from './helpers';
 import {
   UrlStateContainerPropTypes,
@@ -29,7 +30,6 @@ import {
   UrlStateToRedux,
   UrlState,
 } from './types';
-import { SecurityPageName } from '../../../app/types';
 import { TimelineUrl } from '../../../timelines/store/timeline/model';
 
 function usePrevious(value: PreviousLocationUrlState) {
@@ -221,7 +221,7 @@ export const useUrlStateHooks = ({
         }
       });
     } else if (pathName !== prevProps.pathName) {
-      handleInitialize(type, pageName === SecurityPageName.detections);
+      handleInitialize(type, isDetectionsPages(pageName));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isInitializing, history, pathName, pageName, prevProps, urlState]);

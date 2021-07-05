@@ -24,6 +24,8 @@ import {
 import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
 import { getHostMetaData } from '../../../../../endpoint/routes/metadata/handlers';
 import { EndpointAppContext } from '../../../../../endpoint/types';
+import { fleetAgentStatusToEndpointHostStatus } from '../../../../../endpoint/utils';
+import { getPendingActionCounts } from '../../../../../endpoint/services';
 
 export const HOST_FIELDS = [
   '_id',
@@ -200,15 +202,30 @@ export const getHostEndpoint = async (
         ? await getHostMetaData(metadataRequestContext, id, undefined)
         : null;
 
+    const fleetAgentId = endpointData?.metadata.elastic.agent.id;
+    const [fleetAgentStatus, pendingActions] = !fleetAgentId
+      ? [undefined, {}]
+      : await Promise.all([
+          // Get Agent Status
+          agentService.getAgentStatusById(esClient.asCurrentUser, fleetAgentId),
+          // Get a list of pending actions (if any)
+          getPendingActionCounts(esClient.asCurrentUser, [fleetAgentId]).then((results) => {
+            return results[0].pending_actions;
+          }),
+        ]);
+
     return endpointData != null && endpointData.metadata
       ? {
           endpointPolicy: endpointData.metadata.Endpoint.policy.applied.name,
           policyStatus: endpointData.metadata.Endpoint.policy.applied.status,
           sensorVersion: endpointData.metadata.agent.version,
+          elasticAgentStatus: fleetAgentStatusToEndpointHostStatus(fleetAgentStatus!),
+          isolation: endpointData.metadata.Endpoint.state?.isolation ?? false,
+          pendingActions,
         }
       : null;
   } catch (err) {
-    logger.warn(JSON.stringify(err, null, 2));
+    logger.warn(err);
     return null;
   }
 };

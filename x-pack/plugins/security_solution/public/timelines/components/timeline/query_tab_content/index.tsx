@@ -21,6 +21,7 @@ import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
 
+import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { CellValueElementProps } from '../cell_rendering';
 import { Direction, TimelineItem } from '../../../../../common/search_strategy';
@@ -197,7 +198,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const kqlQuery: {
     query: string;
     language: KueryFilterQueryKind;
-  } = { query: kqlQueryExpression, language: 'kuery' };
+  } = useMemo(() => ({ query: kqlQueryExpression, language: 'kuery' }), [kqlQueryExpression]);
 
   const combinedQueries = combineQueries({
     config: esQueryConfig,
@@ -207,6 +208,15 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     filters,
     kqlQuery,
     kqlMode,
+  });
+
+  useInvalidFilterQuery({
+    id: timelineId,
+    filterQuery: combinedQueries?.filterQuery,
+    kqlError: combinedQueries?.kqlError,
+    query: kqlQuery,
+    startDate: start,
+    endDate: end,
   });
 
   const isBlankTimeline: boolean =
@@ -252,9 +262,9 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     fields: getTimelineQueryFields(),
     language: kqlQuery.language,
     limit: itemsPerPage,
-    filterQuery: combinedQueries?.filterQuery ?? '',
+    filterQuery: combinedQueries?.filterQuery,
     startDate: start,
-    skip: !canQueryTimeline(),
+    skip: !canQueryTimeline() || combinedQueries?.filterQuery === undefined,
     sort: timelineQuerySortField,
     timerangeKind,
   });

@@ -11,7 +11,7 @@ export const config = {
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     write: schema.object({
-      enabled: schema.boolean({ defaultValue: true }),
+      enabled: schema.boolean({ defaultValue: false }),
     }),
     index: schema.string({ defaultValue: '.alerts' }),
   }),
