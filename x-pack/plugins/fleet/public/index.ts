@@ -21,3 +21,7 @@ export * from './types/ui_extensions';
 
 export { pagePathGetters } from './constants';
 export { pkgKeyFromPackageInfo } from './services';
+export {
+  CustomAssetsAccordion,
+  CustomAssetsAccordionProps,
+} from './components/custom_assets_accordion';

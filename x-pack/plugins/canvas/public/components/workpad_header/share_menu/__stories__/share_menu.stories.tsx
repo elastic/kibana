@@ -8,7 +8,6 @@
 import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { platformService } from '../../../../services/legacy/stubs/platform';
 import { reportingService } from '../../../../services/legacy/stubs/reporting';
 import { ShareMenu } from '../share_menu.component';
 
@@ -18,7 +17,7 @@ storiesOf('components/WorkpadHeader/ShareMenu', module).add('minimal', () => (
       workpad: { id: 'coolworkpad', name: 'Workpad of Cool', height: 10, width: 7 },
       pageCount: 11,
     }}
-    sharingServices={{ basePath: platformService.getBasePathInterface() }}
+    sharingServices={{}}
     onExport={action('onExport')}
   />
 ));
@@ -30,7 +29,6 @@ storiesOf('components/WorkpadHeader/ShareMenu', module).add('with Reporting', ()
       pageCount: 11,
     }}
     sharingServices={{
-      basePath: platformService.getBasePathInterface(),
       reporting: reportingService.start,
     }}
     onExport={action('onExport')}
