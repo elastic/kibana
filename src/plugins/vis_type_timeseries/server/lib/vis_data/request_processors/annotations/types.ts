@@ -24,4 +24,6 @@ export interface AnnotationsRequestProcessorsParams {
   uiSettings: IUiSettingsClient;
 }
 
+export type AnnotationSearchRequest = Record<string, unknown>;
+
 export type AnnotationsRequestProcessorsFunction = RequestProcessorsFunction<AnnotationsRequestProcessorsParams>;

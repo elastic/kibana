@@ -7,6 +7,7 @@
  */
 
 import { last } from 'lodash';
+import { PanelSeries } from '../../../../common/types/vis_data';
 
 /**
  * @param {Array} seriesGroup
@@ -27,14 +28,17 @@ import { last } from 'lodash';
  * ]
  * @return {number} lastTimestamp
  */
-export function getLastSeriesTimestamp(seriesGroup = []) {
-  let lastTimestamp = null;
+export function getLastSeriesTimestamp(seriesGroup: Array<PanelSeries['series']> = []) {
+  let lastTimestamp: number | undefined;
 
   seriesGroup.forEach((series) => {
     series.forEach(({ data }) => {
-      const [dataLastTimestamp] = last(data);
+      const lastValue = last(data);
 
-      lastTimestamp = Math.max(lastTimestamp, dataLastTimestamp);
+      if (lastValue) {
+        const [dataLastTimestamp] = lastValue;
+        lastTimestamp = Math.max(dataLastTimestamp, lastTimestamp ?? dataLastTimestamp);
+      }
     });
   });
 

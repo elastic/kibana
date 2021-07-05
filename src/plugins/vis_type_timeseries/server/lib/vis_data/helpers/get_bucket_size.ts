@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import type { Unit } from '@elastic/datemath';
 
 import {
   getUnitValue,
@@ -26,7 +27,7 @@ const calculateBucketData = (timeInterval: string, capabilities: SearchCapabilit
   const parsedInterval = parseInterval(intervalString);
 
   let bucketSize =
-    Number(intervalStringMatch?.[1] ?? 0) * getUnitValue(intervalStringMatch?.[2] ?? 0);
+    Number(intervalStringMatch?.[1] ?? 0) * getUnitValue(intervalStringMatch?.[2] as Unit);
 
   // don't go too small
   if (bucketSize < 1) {

@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { flow } from 'lodash';
-import { filterAnnotations } from './filter';
-import { getAnnotationBuckets } from './buckets';
+import type { Annotation } from '../../../../../common/types/vis_data';
 
-export const handleAnnotationResponse = (timestamp) =>
-  flow(getAnnotationBuckets, filterAnnotations(timestamp));
+export const filterAnnotations = (filterValue?: number) => (annotations: Annotation[]) =>
+  annotations.filter(({ key }) => filterValue && key <= filterValue);

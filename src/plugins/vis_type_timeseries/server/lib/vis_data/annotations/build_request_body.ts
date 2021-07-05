@@ -8,7 +8,9 @@
 
 import { buildProcessorFunction } from '../build_processor_function';
 import { query, dateHistogram, topHits } from '../request_processors/annotations';
+
 import type {
+  AnnotationSearchRequest,
   AnnotationsRequestProcessorsFunction,
   AnnotationsRequestProcessorsParams,
 } from '../request_processors/annotations/types';
@@ -17,7 +19,7 @@ export function buildAnnotationRequest(params: AnnotationsRequestProcessorsParam
   const processor = buildProcessorFunction<
     AnnotationsRequestProcessorsFunction,
     AnnotationsRequestProcessorsParams,
-    Record<string, any>
+    AnnotationSearchRequest
   >([query, dateHistogram, topHits], params);
 
   return processor({});
