@@ -19,9 +19,8 @@ import { enableInspectEsQueries } from '../../../../observability/public';
 import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
 import { useKibanaUrl } from '../../hooks/useKibanaUrl';
 import { useBreakPoints } from '../../hooks/use_break_points';
-import { px } from '../../style/variables';
 import { DatePicker } from './DatePicker';
-import { KueryBar } from './KueryBar';
+import { KueryBar } from './kuery_bar';
 import { TimeComparison } from './time_comparison';
 import { TransactionTypeSelect } from './transaction_type_select';
 
@@ -125,7 +124,7 @@ export function SearchBar({
             responsive={false}
           >
             {showTimeComparison && (
-              <EuiFlexItem grow={isXXL} style={{ minWidth: px(300) }}>
+              <EuiFlexItem grow={isXXL} style={{ minWidth: 300 }}>
                 <TimeComparison />
               </EuiFlexItem>
             )}
