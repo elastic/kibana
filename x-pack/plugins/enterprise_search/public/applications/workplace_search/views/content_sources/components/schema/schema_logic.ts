@@ -301,15 +301,15 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
     addNewField: ({ fieldName, newFieldType }) => {
       if (fieldName in values.activeSchema) {
         window.scrollTo(0, 0);
-        setErrorMessage(
+        actions.onSchemaSetFormErrors([
           i18n.translate(
             'xpack.enterpriseSearch.workplaceSearch.contentSource.schema.newFieldExists.message',
             {
               defaultMessage: 'New field already exists: {fieldName}.',
               values: { fieldName },
             }
-          )
-        );
+          ),
+        ]);
       } else {
         const schema = cloneDeep(values.activeSchema);
         schema[fieldName] = newFieldType;

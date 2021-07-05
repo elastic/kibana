@@ -325,10 +325,11 @@ describe('SchemaLogic', () => {
       });
 
       it('handles duplicate', () => {
+        const onSchemaSetFormErrorsSpy = jest.spyOn(SchemaLogic.actions, 'onSchemaSetFormErrors');
         SchemaLogic.actions.onInitializeSchema(serverResponse);
         SchemaLogic.actions.addNewField('foo', SchemaType.Number);
 
-        expect(setErrorMessage).toHaveBeenCalledWith('New field already exists: foo.');
+        expect(onSchemaSetFormErrorsSpy).toHaveBeenCalledWith(['New field already exists: foo.']);
       });
     });
 
