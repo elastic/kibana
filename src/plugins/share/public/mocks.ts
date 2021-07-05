@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { SerializableState } from 'src/plugins/kibana_utils/common';
 import { SharePluginSetup, SharePluginStart } from '.';
-import { UrlService } from '../common/url_service';
+import { LocatorPublic, UrlService } from '../common/url_service';
 
 export type Setup = jest.Mocked<SharePluginSetup>;
 export type Start = jest.Mocked<SharePluginStart>;
@@ -41,7 +42,21 @@ const createStartContract = (): Start => {
   return startContract;
 };
 
+const createLocator = <T extends SerializableState = SerializableState>(): jest.Mocked<
+  LocatorPublic<T>
+> => ({
+  getLocation: jest.fn(),
+  getUrl: jest.fn(),
+  useUrl: jest.fn(),
+  navigate: jest.fn(),
+  extract: jest.fn(),
+  inject: jest.fn(),
+  telemetry: jest.fn(),
+  migrations: {},
+});
+
 export const sharePluginMock = {
   createSetupContract,
   createStartContract,
+  createLocator,
 };
