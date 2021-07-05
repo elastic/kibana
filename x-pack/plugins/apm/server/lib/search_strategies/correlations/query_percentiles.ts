@@ -55,7 +55,7 @@ export const getTransactionDurationPercentilesRequest = (
   };
 };
 
-export const fetchTransactionDurationPecentiles = async (
+export const fetchTransactionDurationPercentiles = async (
   esClient: ElasticsearchClient,
   params: SearchServiceParams,
   percents?: number[],
@@ -73,7 +73,7 @@ export const fetchTransactionDurationPecentiles = async (
 
   if (resp.body.aggregations === undefined) {
     throw new Error(
-      'fetchTransactionDurationPecentiles failed, did not return aggregations.'
+      'fetchTransactionDurationPercentiles failed, did not return aggregations.'
     );
   }
   return (
