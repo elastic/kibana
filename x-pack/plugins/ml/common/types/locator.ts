@@ -243,7 +243,7 @@ export type ExplorationPageUrlState = {
 /**
  * Union type of ML URL state based on page
  */
-export type MlUrlGeneratorState =
+export type MlLocatorState =
   | AnomalyDetectionUrlState
   | ExplorerUrlState
   | TimeSeriesExplorerUrlState
@@ -253,6 +253,6 @@ export type MlUrlGeneratorState =
   | FilterEditUrlState
   | MlGenericUrlState;
 
-export type MlLocatorParams = MlUrlGeneratorState & SerializableState;
+export type MlLocatorParams = MlLocatorState & SerializableState;
 
 export type MlLocator = LocatorPublic<MlLocatorParams>;
