@@ -70,7 +70,10 @@ export const IlmPolicyMigrationNeededCallOut: FunctionComponent<Props> = ({
       onMigrationDone();
       toasts.addSuccess({ title: i18nTexts.migrateSuccessTitle });
     } catch (e) {
-      toasts.addError(e, { title: i18nTexts.migrateErrorTitle });
+      toasts.addError(e, {
+        title: i18nTexts.migrateErrorTitle,
+        toastMessage: e.body?.message,
+      });
     } finally {
       setIsMigratingIndices(false);
     }
