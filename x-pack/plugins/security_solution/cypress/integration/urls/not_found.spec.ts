@@ -71,7 +71,7 @@ describe('Display not found page', () => {
     cy.get(NOT_FOUND).should('exist');
   });
 
-  it('navigates to the trusted applications page with incorrect link', () => {
+  it('navigates to the event filters page with incorrect link', () => {
     loginAndWaitForPage(`${EVENT_FILTERS_URL}/randomUrl`);
     cy.get(NOT_FOUND).should('exist');
   });
