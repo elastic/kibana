@@ -8,13 +8,9 @@
 import React, { FunctionComponent, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import { EuiButtonEmpty, EuiCode } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiButtonEmpty, EuiCode } from '@elastic/eui';
 
-import { FieldsConfig, from, to } from './shared';
-import { TargetField } from './common_fields/target_field';
-import { SerializerFunc } from '../../../../../../shared_imports';
-import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 import {
   FIELD_TYPES,
   UseField,
@@ -22,7 +18,11 @@ import {
   Field,
   FieldHook,
   FieldConfig,
+  SerializerFunc,
 } from '../../../../../../shared_imports';
+import { FieldsConfig, from, to } from './shared';
+import { TargetField } from './common_fields/target_field';
+import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 
 interface InternalNetworkTypes {
   internal_networks: string[];
