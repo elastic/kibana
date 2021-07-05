@@ -126,60 +126,70 @@ describe('APM Correlations search strategy', () => {
     });
 
     describe('async functionality', () => {
-      it('throws an error if no params are provided', async () => {
-        const searchStrategy = await apmCorrelationsSearchStrategyProvider();
-        expect(() => searchStrategy.search({}, {}, mockDeps)).toThrow(
-          'Invalid request parameters.'
-        );
+      describe('when no params are provided', () => {
+        it('throws an error', async () => {
+          const searchStrategy = await apmCorrelationsSearchStrategyProvider();
+          expect(() => searchStrategy.search({}, {}, mockDeps)).toThrow(
+            'Invalid request parameters.'
+          );
+        });
       });
 
-      it('performs a client search with params when no ID is provided', async () => {
-        const searchStrategy = await apmCorrelationsSearchStrategyProvider();
-        await searchStrategy.search({ params }, {}, mockDeps).toPromise();
-        const [[request]] = mockClientSearch.mock.calls;
+      describe('when no ID is provided', () => {
+        it('performs a client search with params', async () => {
+          const searchStrategy = await apmCorrelationsSearchStrategyProvider();
+          await searchStrategy.search({ params }, {}, mockDeps).toPromise();
+          const [[request]] = mockClientSearch.mock.calls;
 
-        expect(request.index).toEqual('apm-*');
-        expect(request.body).toEqual(
-          expect.objectContaining({
-            aggs: {
-              transaction_duration_percentiles: {
-                percentiles: {
-                  field: 'transaction.duration.us',
-                  hdr: { number_of_significant_value_digits: 3 },
+          expect(request.index).toEqual('apm-*');
+          expect(request.body).toEqual(
+            expect.objectContaining({
+              aggs: {
+                transaction_duration_percentiles: {
+                  percentiles: {
+                    field: 'transaction.duration.us',
+                    hdr: { number_of_significant_value_digits: 3 },
+                  },
                 },
               },
-            },
-            query: {
-              bool: {
-                filter: [{ term: { 'processor.event': 'transaction' } }],
+              query: {
+                bool: {
+                  filter: [{ term: { 'processor.event': 'transaction' } }],
+                },
               },
-            },
-            size: 0,
-          })
-        );
+              size: 0,
+            })
+          );
+        });
       });
 
-      it('retrieves the current request if an id is provided', async () => {
-        const searchStrategy = await apmCorrelationsSearchStrategyProvider();
-        const response = await searchStrategy
-          .search({ id: 'my-search-id', params }, {}, mockDeps)
-          .toPromise();
+      describe('when an ID with params is provided', () => {
+        it('retrieves the current request', async () => {
+          const searchStrategy = await apmCorrelationsSearchStrategyProvider();
+          const response = await searchStrategy
+            .search({ id: 'my-search-id', params }, {}, mockDeps)
+            .toPromise();
 
-        expect(response).toEqual(
-          expect.objectContaining({ id: 'my-search-id' })
-        );
+          expect(response).toEqual(
+            expect.objectContaining({ id: 'my-search-id' })
+          );
+        });
       });
 
-      it('does not emit an error if the client throws', async () => {
-        mockClientSearch
-          .mockReset()
-          .mockRejectedValueOnce(new Error('client error'));
-        const searchStrategy = await apmCorrelationsSearchStrategyProvider();
-        const response = await searchStrategy
-          .search({ params }, {}, mockDeps)
-          .toPromise();
+      describe('if the client throws', () => {
+        it('does not emit an error', async () => {
+          mockClientSearch
+            .mockReset()
+            .mockRejectedValueOnce(new Error('client error'));
+          const searchStrategy = await apmCorrelationsSearchStrategyProvider();
+          const response = await searchStrategy
+            .search({ params }, {}, mockDeps)
+            .toPromise();
 
-        expect(response).toEqual(expect.objectContaining({ isRunning: true }));
+          expect(response).toEqual(
+            expect.objectContaining({ isRunning: true })
+          );
+        });
       });
 
       it('triggers the subscription only once', async () => {
