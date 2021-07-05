@@ -32,6 +32,7 @@ export class SecurityPageObject extends FtrService {
   private readonly deployment = this.ctx.getService('deployment');
   private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
+  private readonly monacoEditor = this.ctx.getService('monacoEditor');
 
   public loginPage = Object.freeze({
     login: async (username?: string, password?: string, options: LoginOptions = {}) => {
@@ -467,7 +468,10 @@ export class SecurityPageObject extends FtrService {
 
     if (roleObj.elasticsearch.indices[0].query) {
       await this.testSubjects.click('restrictDocumentsQuery0');
-      await this.testSubjects.setValue('queryInput0', roleObj.elasticsearch.indices[0].query);
+      await this.monacoEditor.setCodeEditorValue(
+        0,
+        JSON.stringify(roleObj.elasticsearch.indices[0].query)
+      );
     }
 
     const globalPrivileges = (roleObj.kibana as any).global;

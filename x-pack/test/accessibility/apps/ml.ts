@@ -59,7 +59,8 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      describe('with data loaded', function () {
+      // FLAKY: https://github.com/elastic/kibana/issues/103538
+      describe.skip('with data loaded', function () {
         const adJobId = 'fq_single_a11y';
         const dfaOutlierJobId = 'iph_outlier_a11y';
         const calendarId = 'calendar_a11y';

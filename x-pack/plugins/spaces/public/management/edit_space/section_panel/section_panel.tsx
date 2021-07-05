@@ -18,7 +18,7 @@ interface Props {
 export class SectionPanel extends Component<Props, {}> {
   public render() {
     return (
-      <EuiPanel>
+      <EuiPanel hasShadow={false} hasBorder={true}>
         {this.getTitle()}
         {this.getForm()}
       </EuiPanel>

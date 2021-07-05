@@ -10,8 +10,8 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPageContentBody,
+  EuiPageContent,
+  EuiPageHeader,
   EuiSpacer,
   EuiTitle,
   hexToHsv,
@@ -25,8 +25,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import type { Capabilities, NotificationsStart, ScopedHistory } from 'src/core/public';
 import type { Space } from 'src/plugins/spaces_oss/common';
 
+import { SectionLoading } from '../../../../../../src/plugins/es_ui_shared/public';
 import type { FeaturesPluginStart, KibanaFeature } from '../../../../features/public';
 import { isReservedSpace } from '../../../common';
+import { getSpacesFeatureDescription } from '../../constants';
 import { getSpaceColor, getSpaceInitials } from '../../space_avatar';
 import type { SpacesManager } from '../../spaces_manager';
 import { UnauthorizedPrompt } from '../components';
@@ -115,33 +117,48 @@ export class ManageSpacePage extends Component<Props, State> {
   }
 
   public render() {
-    const content = this.state.isLoading ? this.getLoadingIndicator() : this.getForm();
+    if (!this.props.capabilities.spaces.manage) {
+      return (
+        <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+          <UnauthorizedPrompt />
+        </EuiPageContent>
+      );
+    }
 
-    return <EuiPageContentBody>{content}</EuiPageContentBody>;
+    if (this.state.isLoading) {
+      return this.getLoadingIndicator();
+    }
+
+    return (
+      <>
+        <EuiPageHeader
+          bottomBorder
+          pageTitle={this.getTitle()}
+          description={getSpacesFeatureDescription()}
+        />
+        <EuiSpacer size="l" />
+
+        {this.getForm()}
+      </>
+    );
   }
 
   public getLoadingIndicator = () => (
-    <div>
-      <EuiLoadingSpinner size={'xl'} />
-      <EuiTitle>
-        <h1>Loading...</h1>
-      </EuiTitle>
-    </div>
+    <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+      <SectionLoading>
+        <FormattedMessage
+          id="xpack.spaces.management.manageSpacePage.loadingMessage"
+          defaultMessage="Loading…"
+        />
+      </SectionLoading>
+    </EuiPageContent>
   );
 
   public getForm = () => {
-    if (!this.props.capabilities.spaces.manage) {
-      return <UnauthorizedPrompt />;
-    }
-
     const { showAlteringActiveSpaceDialog } = this.state;
 
     return (
       <div data-test-subj="spaces-edit-page">
-        {this.getFormHeading()}
-
-        <EuiSpacer />
-
         <CustomizeSpace
           space={this.state.space}
           onChange={this.onSpaceChange}
@@ -172,19 +189,6 @@ export class ManageSpacePage extends Component<Props, State> {
       </div>
     );
   };
-
-  public getFormHeading = () => (
-    <EuiFlexGroup alignItems="center" gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <EuiTitle size="m">
-          <h1>{this.getTitle()}</h1>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <ReservedSpaceBadge space={this.state.space as Space} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
 
   public getTitle = () => {
     if (this.editingExistingSpace()) {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isArray } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiButtonIcon, EuiCodeBlock, formatDate } from '@elastic/eui';
 import React, { useState, useCallback, useMemo } from 'react';
@@ -54,6 +55,8 @@ const ActionsTableComponent = () => {
 
   const renderAgentsColumn = useCallback((_, item) => <>{item.fields.agents?.length ?? 0}</>, []);
 
+  const renderCreatedByColumn = useCallback((userId) => (isArray(userId) ? userId[0] : '-'), []);
+
   const renderTimestampColumn = useCallback(
     (_, item) => <>{formatDate(item.fields['@timestamp'][0])}</>,
     []
@@ -91,6 +94,14 @@ const ActionsTableComponent = () => {
         render: renderTimestampColumn,
       },
       {
+        field: 'fields.user_id',
+        name: i18n.translate('xpack.osquery.liveQueryActions.table.createdByColumnTitle', {
+          defaultMessage: 'Run by',
+        }),
+        width: '200px',
+        render: renderCreatedByColumn,
+      },
+      {
         name: i18n.translate('xpack.osquery.liveQueryActions.table.viewDetailsColumnTitle', {
           defaultMessage: 'View details',
         }),
@@ -101,7 +112,13 @@ const ActionsTableComponent = () => {
         ],
       },
     ],
-    [renderActionsColumn, renderAgentsColumn, renderQueryColumn, renderTimestampColumn]
+    [
+      renderActionsColumn,
+      renderAgentsColumn,
+      renderCreatedByColumn,
+      renderQueryColumn,
+      renderTimestampColumn,
+    ]
   );
 
   const pagination = useMemo(

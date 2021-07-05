@@ -100,7 +100,7 @@ export async function getLogs(
   const params = {
     index: filebeatIndexPattern,
     size: Math.min(50, config.get('monitoring.ui.elasticsearch.logFetchCount')),
-    filterPath: [
+    filter_path: [
       'hits.hits._source.message',
       'hits.hits._source.log.level',
       'hits.hits._source.@timestamp',
@@ -109,7 +109,7 @@ export async function getLogs(
       'hits.hits._source.elasticsearch.index.name',
       'hits.hits._source.elasticsearch.node.name',
     ],
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       sort: { '@timestamp': { order: 'desc', unmapped_type: 'long' } },
       query: {
