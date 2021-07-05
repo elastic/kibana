@@ -28,7 +28,7 @@ export const getLastTaskExecutionTimestamp = (
  *
  * @param telemetryRecords
  * @param batchSize
- * @returns
+ * @returns the batch of records
  */
 export const batchTelemetryRecords = (
   telemetryRecords: unknown[],

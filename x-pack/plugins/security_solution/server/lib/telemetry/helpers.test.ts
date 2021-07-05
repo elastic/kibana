@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { getLastTaskExecutionTimestamp } from './helpers';
+import { getLastTaskExecutionTimestamp, batchTelemetryRecords } from './helpers';
 
 describe('test scheduled task helpers', () => {
   test('test -5 mins is returned when there is no previous task run', async () => {
@@ -33,5 +33,29 @@ describe('test scheduled task helpers', () => {
     const newExecuteFrom = getLastTaskExecutionTimestamp(executeTo, executeFrom);
 
     expect(newExecuteFrom).toEqual(moment(executeTo).subtract(10, 'minutes').toISOString());
+  });
+
+  test('records can be batched oddly as they are sent to the telemetry channel', async () => {
+    const stubTelemetryRecords = [...Array(10).keys()];
+    const batchSize = 3;
+
+    const records = batchTelemetryRecords(stubTelemetryRecords, batchSize);
+    expect(records.length).toEqual(4);
+  });
+
+  test('records can be batched evenly as they are sent to the telemetry channel', async () => {
+    const stubTelemetryRecords = [...Array(299).keys()];
+    const batchSize = 100;
+
+    const records = batchTelemetryRecords(stubTelemetryRecords, batchSize);
+    expect(records.length).toEqual(3);
+  });
+
+  test('empty telemetry records wont be batched', async () => {
+    const stubTelemetryRecords = [...Array(0).keys()];
+    const batchSize = 100;
+
+    const records = batchTelemetryRecords(stubTelemetryRecords, batchSize);
+    expect(records.length).toEqual(0);
   });
 });
