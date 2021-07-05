@@ -112,23 +112,19 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>
-              <FormattedMessage
-                id="xpack.securitySolution.eventFilters.eventFiltersFlyout.title"
-                defaultMessage="Endpoint Security"
-              />
+              {id ? (
+                <FormattedMessage
+                  id="xpack.securitySolution.eventFilters.eventFiltersFlyout.subtitle.update"
+                  defaultMessage="Update event filter"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.securitySolution.eventFilters.eventFiltersFlyout.subtitle.create"
+                  defaultMessage="Add event filter"
+                />
+              )}
             </h2>
           </EuiTitle>
-          {id ? (
-            <FormattedMessage
-              id="xpack.securitySolution.eventFilters.eventFiltersFlyout.subtitle.update"
-              defaultMessage="Update Endpoint Event Filter"
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.securitySolution.eventFilters.eventFiltersFlyout.subtitle.create"
-              defaultMessage="Add Endpoint Event Filter"
-            />
-          )}
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody>
