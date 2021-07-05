@@ -149,7 +149,7 @@ Specify the {ref}/common-options.html#time-units[time] to allow the Reporting br
  Specify the {ref}/common-options.html#time-units[time] to allow the Reporting browser to wait for all visualization panels to load on the page. If the time is exceeded, a screenshot is captured showing the current page, and the download link shows a warning message. Can be specified as number of milliseconds. Defaults to `30s`.
 
 `xpack.reporting.capture.timeouts.renderComplete` {ess-icon}::
- Specify the {time-units}[time] to allow the Reporting browser to wait for all visualizations to fetch and render the data. If the time is exceeded, a screenshot is captured showing the current page, and the download link shows a warning message. Can be specified as number of milliseconds. Defaults to `30s`.
+ Specify the {ref}/common-options.html#time-units[time] to allow the Reporting browser to wait for all visualizations to fetch and render the data. If the time is exceeded, a screenshot is captured showing the current page, and the download link shows a warning message. Can be specified as number of milliseconds. Defaults to `30s`.
 
 NOTE: If any timeouts from `xpack.reporting.capture.timeouts.*` settings occur when
 running a report job, Reporting will log the error and try to continue
