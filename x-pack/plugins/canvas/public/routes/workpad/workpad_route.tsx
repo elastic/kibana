@@ -13,7 +13,7 @@ import { ExportApp } from '../../components/export_app';
 import { CanvasLoading } from '../../components/canvas_loading';
 // @ts-expect-error
 import { fetchAllRenderables } from '../../state/actions/elements';
-import { useServices } from '../../services';
+import { useNotifyService } from '../../services';
 import { CanvasWorkpad } from '../../../types';
 import { ErrorStrings } from '../../../i18n';
 import { useWorkpad } from './hooks/use_workpad';
@@ -98,13 +98,13 @@ const WorkpadLoaderComponent: FC<{
   children: (workpad: CanvasWorkpad) => JSX.Element;
 }> = ({ params, children, loadPages }) => {
   const [workpad, error] = useWorkpad(params.id, loadPages);
-  const services = useServices();
+  const notifyService = useNotifyService();
 
   useEffect(() => {
     if (error) {
-      services.notify.error(error, { title: strings.getLoadFailureErrorMessage() });
+      notifyService.error(error, { title: strings.getLoadFailureErrorMessage() });
     }
-  }, [error, services.notify]);
+  }, [error, notifyService]);
 
   if (error) {
     return <Redirect to="/" />;

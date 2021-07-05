@@ -18,7 +18,7 @@ import { ServiceNodeStats } from '../../../../../common/service_map';
 import { ServiceStatsList } from './ServiceStatsList';
 import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { AnomalyDetection } from './AnomalyDetection';
+import { AnomalyDetection } from './anomaly_detection';
 import { ServiceAnomalyStats } from '../../../../../common/anomaly_detection';
 
 interface ServiceStatsFetcherProps {
