@@ -23,12 +23,7 @@ import {
 } from '../../applications/fleet/sections/agents/agent_requirements_page/components';
 import { FleetServerRequirementPage } from '../../applications/fleet/sections/agents/agent_requirements_page';
 
-import {
-  DownloadStep,
-  AgentPolicySelectionStep,
-  AgentEnrollmentKeySelectionStep,
-  ViewDataStep,
-} from './steps';
+import { DownloadStep, AgentPolicySelectionStep, AgentEnrollmentKeySelectionStep } from './steps';
 import type { BaseProps } from './types';
 
 type Props = BaseProps;
@@ -61,7 +56,7 @@ const FleetServerMissingRequirements = () => {
 };
 
 export const ManagedInstructions = React.memo<Props>(
-  ({ agentPolicy, agentPolicies, viewDataStepContent }) => {
+  ({ agentPolicy, agentPolicies, viewDataStep }) => {
     const fleetStatus = useFleetStatus();
 
     const [selectedApiKeyId, setSelectedAPIKeyId] = useState<string | undefined>();
@@ -118,8 +113,8 @@ export const ManagedInstructions = React.memo<Props>(
         });
       }
 
-      if (viewDataStepContent) {
-        baseSteps.push(ViewDataStep(viewDataStepContent));
+      if (viewDataStep) {
+        baseSteps.push({ 'data-test-subj': 'view-data-step', ...viewDataStep });
       }
 
       return baseSteps;
@@ -127,12 +122,12 @@ export const ManagedInstructions = React.memo<Props>(
       agentPolicy,
       selectedApiKeyId,
       setSelectedAPIKeyId,
-      viewDataStepContent,
       agentPolicies,
       apiKey.data,
       fleetServerSteps,
       isFleetServerPolicySelected,
       settings.data?.item?.fleet_server_hosts,
+      viewDataStep,
     ]);
 
     return (
