@@ -8,8 +8,8 @@
 
 import { get } from 'lodash';
 import { nodeTypes } from '../node_types';
-import { fields } from '../../../index_patterns/mocks';
-import { IIndexPattern } from '../../../index_patterns';
+import { fields } from '../../filters/stubs';
+import { IndexPatternBase } from '../..';
 
 // @ts-ignore
 import * as geoBoundingBox from './geo_bounding_box';
@@ -27,12 +27,12 @@ const params = {
 
 describe('kuery functions', () => {
   describe('geoBoundingBox', () => {
-    let indexPattern: IIndexPattern;
+    let indexPattern: IndexPatternBase;
 
     beforeEach(() => {
-      indexPattern = ({
+      indexPattern = {
         fields,
-      } as unknown) as IIndexPattern;
+      };
     });
 
     describe('buildNodeParams', () => {

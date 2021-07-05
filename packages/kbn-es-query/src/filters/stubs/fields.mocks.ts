@@ -18,6 +18,11 @@ export const fields: IndexPatternFieldBase[] = [
     scripted: false,
   },
   {
+    name: 'ssl',
+    type: 'boolean',
+    scripted: false,
+  },
+  {
     name: '@timestamp',
     type: 'date',
     scripted: false,
@@ -32,4 +37,20 @@ export const fields: IndexPatternFieldBase[] = [
     type: 'string',
     scripted: false,
   },
+  {
+    name: 'script number',
+    type: 'number',
+    scripted: true,
+    script: '1234',
+    lang: 'expression',
+  },
+  {
+    name: 'script date',
+    type: 'date',
+    scripted: true,
+    script: '1234',
+    lang: 'painless',
+  },
 ];
+
+export const getField = (name: string) => fields.find((field) => field.name === name);

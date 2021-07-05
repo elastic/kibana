@@ -7,7 +7,7 @@
  */
 
 import { IndexPatternBase } from '../../..';
-import { fields } from '../../../../index_patterns/mocks';
+import { fields } from '../../../filters/stubs';
 
 import { nodeTypes } from '../../index';
 

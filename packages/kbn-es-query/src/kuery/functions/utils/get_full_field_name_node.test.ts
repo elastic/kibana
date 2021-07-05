@@ -7,19 +7,19 @@
  */
 
 import { nodeTypes } from '../../node_types';
-import { fields } from '../../../../index_patterns/mocks';
-import { IIndexPattern } from '../../../../index_patterns';
+import { fields } from '../../../filters/stubs';
+import { IndexPatternBase } from '../../..';
 
 // @ts-ignore
 import { getFullFieldNameNode } from './get_full_field_name_node';
 
 describe('getFullFieldNameNode', function () {
-  let indexPattern: IIndexPattern;
+  let indexPattern: IndexPatternBase;
 
   beforeEach(() => {
-    indexPattern = ({
+    indexPattern = {
       fields,
-    } as unknown) as IIndexPattern;
+    };
   });
 
   test('should return unchanged name node if no nested path is passed in', () => {

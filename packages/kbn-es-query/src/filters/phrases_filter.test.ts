@@ -7,7 +7,7 @@
  */
 
 import { buildPhrasesFilter, getPhrasesFilterField } from './phrases_filter';
-import { IndexPatternBase } from '..';
+import { IndexPatternBase } from '../..';
 import { fields } from './stubs/fields.mocks';
 
 describe('phrases filter', function () {

@@ -8,7 +8,7 @@
 
 import { each } from 'lodash';
 import { buildRangeFilter, getRangeFilterField, RangeFilter } from './range_filter';
-import { fields, getField } from '../../index_patterns/mocks';
+import { fields, getField } from '../filters/stubs';
 import { IndexPatternBase, IndexPatternFieldBase } from '../es_query';
 
 describe('Range filter builder', () => {
@@ -27,7 +27,7 @@ describe('Range filter builder', () => {
   it('should return a range filter when passed a standard field', () => {
     const field = getField('bytes');
 
-    expect(buildRangeFilter(field, { gte: 1, lte: 3 }, indexPattern)).toEqual({
+    expect(buildRangeFilter(field!, { gte: 1, lte: 3 }, indexPattern)).toEqual({
       meta: {
         index: 'id',
         params: {},
@@ -44,7 +44,7 @@ describe('Range filter builder', () => {
   it('should return a script filter when passed a scripted field', () => {
     const field = getField('script number');
 
-    expect(buildRangeFilter(field, { gte: 1, lte: 3 }, indexPattern)).toEqual({
+    expect(buildRangeFilter(field!, { gte: 1, lte: 3 }, indexPattern)).toEqual({
       meta: {
         field: 'script number',
         index: 'id',
@@ -67,7 +67,7 @@ describe('Range filter builder', () => {
   it('should convert strings to numbers if the field is scripted and type number', () => {
     const field = getField('script number');
 
-    expect(buildRangeFilter(field, { gte: '1', lte: '3' }, indexPattern)).toEqual({
+    expect(buildRangeFilter(field!, { gte: '1', lte: '3' }, indexPattern)).toEqual({
       meta: {
         field: 'script number',
         index: 'id',
@@ -95,7 +95,7 @@ describe('Range filter builder', () => {
       `gte(() -> { ${field!.script} }, params.gte) && ` +
       `lte(() -> { ${field!.script} }, params.lte)`;
 
-    const rangeFilter = buildRangeFilter(field, { gte: 1, lte: 3 }, indexPattern);
+    const rangeFilter = buildRangeFilter(field!, { gte: 1, lte: 3 }, indexPattern);
 
     expect(rangeFilter.script!.script.source).toBe(expected);
   });
@@ -104,11 +104,11 @@ describe('Range filter builder', () => {
     const field = getField('script number');
 
     expect(() => {
-      buildRangeFilter(field, { gte: 1, gt: 3 }, indexPattern);
+      buildRangeFilter(field!, { gte: 1, gt: 3 }, indexPattern);
     }).toThrowError();
 
     expect(() => {
-      buildRangeFilter(field, { lte: 1, lt: 3 }, indexPattern);
+      buildRangeFilter(field!, { lte: 1, lt: 3 }, indexPattern);
     }).toThrowError();
   });
 
@@ -120,7 +120,7 @@ describe('Range filter builder', () => {
         [key]: 5,
       };
 
-      const filter = buildRangeFilter(field, params, indexPattern);
+      const filter = buildRangeFilter(field!, params, indexPattern);
       const script = filter.script!.script;
 
       expect(script.source).toBe('(' + field!.script + ')' + operator + key);
@@ -134,7 +134,7 @@ describe('Range filter builder', () => {
     let filter: RangeFilter;
 
     beforeEach(() => {
-      field = getField('script number');
+      field = getField('script number')!;
       filter = buildRangeFilter(field, { gte: 0, lt: Infinity }, indexPattern);
     });
 
@@ -164,7 +164,7 @@ describe('Range filter builder', () => {
     let filter: RangeFilter;
 
     beforeEach(() => {
-      field = getField('script number');
+      field = getField('script number')!;
       filter = buildRangeFilter(field, { gte: -Infinity, lt: Infinity }, indexPattern);
     });
 

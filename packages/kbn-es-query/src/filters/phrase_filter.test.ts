@@ -11,16 +11,17 @@ import {
   buildPhraseFilter,
   getPhraseFilterField,
 } from './phrase_filter';
-import { fields, getField } from '../../index_patterns/mocks';
-import { IIndexPattern } from '../../index_patterns';
+import { fields, getField } from '../filters/stubs';
+import { IndexPatternBase } from '../es_query';
 
 describe('Phrase filter builder', () => {
-  let indexPattern: IIndexPattern;
+  let indexPattern: IndexPatternBase;
 
   beforeEach(() => {
     indexPattern = {
       id: 'id',
-    } as IIndexPattern;
+      fields,
+    };
   });
 
   it('should be a function', () => {
@@ -30,7 +31,7 @@ describe('Phrase filter builder', () => {
   it('should return a match query filter when passed a standard string field', () => {
     const field = getField('extension');
 
-    expect(buildPhraseFilter(field, 'jpg', indexPattern)).toEqual({
+    expect(buildPhraseFilter(field!, 'jpg', indexPattern)).toEqual({
       meta: {
         index: 'id',
       },
@@ -45,7 +46,7 @@ describe('Phrase filter builder', () => {
   it('should return a match query filter when passed a standard numeric field', () => {
     const field = getField('bytes');
 
-    expect(buildPhraseFilter(field, '5', indexPattern)).toEqual({
+    expect(buildPhraseFilter(field!, '5', indexPattern)).toEqual({
       meta: {
         index: 'id',
       },
@@ -60,7 +61,7 @@ describe('Phrase filter builder', () => {
   it('should return a match query filter when passed a standard bool field', () => {
     const field = getField('ssl');
 
-    expect(buildPhraseFilter(field, 'true', indexPattern)).toEqual({
+    expect(buildPhraseFilter(field!, 'true', indexPattern)).toEqual({
       meta: {
         index: 'id',
       },
@@ -75,7 +76,7 @@ describe('Phrase filter builder', () => {
   it('should return a script filter when passed a scripted field', () => {
     const field = getField('script number');
 
-    expect(buildPhraseFilter(field, 5, indexPattern)).toEqual({
+    expect(buildPhraseFilter(field!, 5, indexPattern)).toEqual({
       meta: {
         index: 'id',
         field: 'script number',
@@ -95,7 +96,7 @@ describe('Phrase filter builder', () => {
   it('should return a script filter when passed a scripted field with numeric conversion', () => {
     const field = getField('script number');
 
-    expect(buildPhraseFilter(field, '5', indexPattern)).toEqual({
+    expect(buildPhraseFilter(field!, '5', indexPattern)).toEqual({
       meta: {
         index: 'id',
         field: 'script number',
@@ -140,9 +141,9 @@ describe('buildInlineScriptForPhraseFilter', () => {
 });
 
 describe('getPhraseFilterField', function () {
-  const indexPattern: IIndexPattern = ({
+  const indexPattern: IndexPatternBase = {
     fields,
-  } as unknown) as IIndexPattern;
+  };
 
   it('should return the name of the field a phrase query is targeting', () => {
     const field = indexPattern.fields.find((patternField) => patternField.name === 'extension');

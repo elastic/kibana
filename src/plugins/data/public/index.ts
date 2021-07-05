@@ -105,7 +105,7 @@ export const esFilters = {
 /**
  * @deprecated Import from `@kbn/es-query` directly.
  */
-export type {
+export {
   RangeFilter,
   RangeFilterMeta,
   RangeFilterParams,
@@ -115,6 +115,8 @@ export type {
   CustomFilter,
   MatchAllFilter,
   IFieldSubType,
+  isFilter,
+  isFilters,
 } from '@kbn/es-query';
 
 import { getEsQueryConfig } from '../common';

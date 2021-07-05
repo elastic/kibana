@@ -7,14 +7,14 @@
  */
 
 import { buildQueryFromFilters } from './from_filters';
-import { IIndexPattern } from '../../index_patterns';
 import { ExistsFilter, Filter, MatchAllFilter } from '../filters';
-import { fields } from '../../index_patterns/mocks';
+import { fields } from '../filters/stubs';
+import { IndexPatternBase } from './types';
 
 describe('build query', () => {
-  const indexPattern: IIndexPattern = ({
+  const indexPattern: IndexPatternBase = {
     fields,
-  } as unknown) as IIndexPattern;
+  };
 
   describe('buildQueryFromFilters', () => {
     test('should return the parameters of an Elasticsearch bool query', () => {

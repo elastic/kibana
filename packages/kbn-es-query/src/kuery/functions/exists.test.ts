@@ -7,20 +7,20 @@
  */
 
 import { nodeTypes } from '../node_types';
-import { fields } from '../../../index_patterns/mocks';
-import { IIndexPattern } from '../../../index_patterns';
+import { fields } from '../../filters/stubs';
+import { IndexPatternBase } from '../..';
 
 // @ts-ignore
 import * as exists from './exists';
 
 describe('kuery functions', () => {
   describe('exists', () => {
-    let indexPattern: IIndexPattern;
+    let indexPattern: IndexPatternBase;
 
     beforeEach(() => {
-      indexPattern = ({
+      indexPattern = {
         fields,
-      } as unknown) as IIndexPattern;
+      };
     });
 
     describe('buildNodeParams', () => {

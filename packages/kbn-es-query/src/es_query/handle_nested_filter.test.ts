@@ -7,7 +7,7 @@
  */
 
 import { handleNestedFilter } from './handle_nested_filter';
-import { fields } from '../../index_patterns/mocks';
+import { fields } from '../filters/stubs';
 import { buildPhraseFilter, buildQueryFilter } from '../filters';
 import { IndexPatternBase } from './types';
 

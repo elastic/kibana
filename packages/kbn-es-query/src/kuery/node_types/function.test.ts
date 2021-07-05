@@ -6,22 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { fields } from '../../../index_patterns/mocks';
-
 import { nodeTypes } from './index';
-import { IIndexPattern } from '../../../index_patterns';
 
 import { buildNode, buildNodeWithArgumentNodes, toElasticsearchQuery } from './function';
 import { toElasticsearchQuery as isFunctionToElasticsearchQuery } from '../functions/is';
+import { IndexPatternBase } from '../../es_query';
+import { fields } from '../../filters/stubs/fields.mocks';
 
 describe('kuery node types', () => {
   describe('function', () => {
-    let indexPattern: IIndexPattern;
+    let indexPattern: IndexPatternBase;
 
     beforeEach(() => {
-      indexPattern = ({
+      indexPattern = {
         fields,
-      } as unknown) as IIndexPattern;
+      };
     });
 
     describe('buildNode', () => {

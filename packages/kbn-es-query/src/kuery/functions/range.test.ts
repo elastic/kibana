@@ -8,8 +8,8 @@
 
 import { get } from 'lodash';
 import { nodeTypes } from '../node_types';
-import { fields } from '../../../index_patterns/mocks';
-import { IIndexPattern } from '../../../index_patterns';
+import { fields } from '../../filters/stubs';
+import { IndexPatternBase } from '../..';
 import { RangeFilterParams } from '../../filters';
 
 // @ts-ignore
@@ -17,12 +17,12 @@ import * as range from './range';
 
 describe('kuery functions', () => {
   describe('range', () => {
-    let indexPattern: IIndexPattern;
+    let indexPattern: IndexPatternBase;
 
     beforeEach(() => {
-      indexPattern = ({
+      indexPattern = {
         fields,
-      } as unknown) as IIndexPattern;
+      };
     });
 
     describe('buildNodeParams', () => {

@@ -8,7 +8,7 @@
 
 import { buildExistsFilter, getExistsFilterField } from './exists_filter';
 import { fields } from './stubs/fields.mocks';
-import { IndexPatternBase } from '..';
+import { IndexPatternBase } from '../..';
 
 describe('exists filter', function () {
   const indexPattern: IndexPatternBase = {
