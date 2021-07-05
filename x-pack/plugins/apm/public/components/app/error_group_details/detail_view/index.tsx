@@ -157,9 +157,9 @@ export function DetailView({ errorGroup, urlParams }: Props) {
             <EuiTab
               onClick={() => {
                 history.replace({
-                  ...location,
+                  ...history.location,
                   search: fromQuery({
-                    ...toQuery(location.search),
+                    ...toQuery(history.location.search),
                     detailTab: key,
                   }),
                 });
@@ -189,6 +189,7 @@ function TabContent({
   const exceptions = error.error.exception || [];
   const logStackframes = error.error.log?.stacktrace;
 
+  console.log('### caue ~ currentTab.key', currentTab.key);
   switch (currentTab.key) {
     case logStacktraceTab.key:
       return (

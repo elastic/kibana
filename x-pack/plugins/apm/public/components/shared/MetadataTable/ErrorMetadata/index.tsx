@@ -16,6 +16,7 @@ interface Props {
 }
 
 export function ErrorMetadata({ error }: Props) {
+  console.log('### caue ~ error', error);
   const sectionsWithRows = useMemo(
     () => getSectionsWithRows(ERROR_METADATA_SECTIONS, error),
     [error]
