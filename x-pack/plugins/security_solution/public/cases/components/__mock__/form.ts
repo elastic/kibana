@@ -35,7 +35,7 @@ export const mockFormHook = {
   __validateFields: jest.fn(),
   __updateFormDataAt: jest.fn(),
   __readFieldConfigFromSchema: jest.fn(),
-  __getFieldDefaultValue: jest.fn(),
+  getFieldDefaultValue: jest.fn(),
 };
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getFormMock = (sampleData: any) => ({

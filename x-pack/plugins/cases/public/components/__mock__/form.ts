@@ -33,7 +33,7 @@ export const mockFormHook = {
   __validateFields: jest.fn(),
   __updateFormDataAt: jest.fn(),
   __readFieldConfigFromSchema: jest.fn(),
-  __getFieldDefaultValue: jest.fn(),
+  getFieldDefaultValue: jest.fn(),
 };
 
 export const getFormMock = (sampleData: any) => ({
