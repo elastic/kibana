@@ -13,7 +13,6 @@ import {
   EuiPageContent,
   EuiPageHeader,
   EuiSpacer,
-  EuiTitle,
   hexToHsv,
   hsvToHex,
 } from '@elastic/eui';
@@ -38,7 +37,6 @@ import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal
 import { CustomizeSpace } from './customize_space';
 import { DeleteSpacesButton } from './delete_spaces_button';
 import { EnabledFeatures } from './enabled_features';
-import { ReservedSpaceBadge } from './reserved_space_badge';
 
 export interface FormValues extends Partial<Space> {
   customIdentifier?: boolean;

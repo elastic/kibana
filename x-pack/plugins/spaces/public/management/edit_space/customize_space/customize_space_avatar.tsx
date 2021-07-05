@@ -6,30 +6,19 @@
  */
 
 import {
-  EuiAvatar,
   EuiButtonGroup,
   EuiColorPicker,
   EuiFieldText,
   EuiFilePicker,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFormRow,
-  EuiIcon,
-  EuiKeyPadMenu,
-  EuiKeyPadMenuItem,
-  EuiLoadingSpinner,
-  EuiRadioGroup,
-  EuiSpacer,
 } from '@elastic/eui';
-import type { ChangeEvent, FunctionComponent } from 'react';
-import React, { Component, lazy, Suspense } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 
 import { MAX_SPACE_INITIALS } from '../../../../common';
 import { encode, imageTypes } from '../../../../common/lib/dataurl';
-import { getSpaceAvatarComponent } from '../../../space_avatar';
 import type { SpaceValidator } from '../../lib';
 import type { FormValues } from '../manage_space_page';
 
@@ -38,11 +27,6 @@ interface Props {
   onChange: (space: FormValues) => void;
   validator: SpaceValidator;
 }
-
-// No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
-const LazySpaceAvatar = lazy(() =>
-  getSpaceAvatarComponent().then((component) => ({ default: component }))
-);
 
 export class CustomizeSpaceAvatar extends Component<Props> {
   private storeImageChanges(imageUrl: string) {
@@ -256,19 +240,3 @@ export class CustomizeSpaceAvatar extends Component<Props> {
     });
   };
 }
-
-const InitialsIcon: FunctionComponent = () => (
-  <svg
-    width="15"
-    height="10"
-    viewBox="0 0 15 10"
-    className="euiIcon euiIcon--large"
-    focusable="false"
-    role="img"
-    aria-hidden="true"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path d="M1.97923 8.99998L2.85707 6.52839H6.38548L7.26332 8.99998H8.37128L5.16673 0.272705H4.07582L0.871277 8.99998H1.97923ZM3.18946 5.59089L4.58719 1.65339H4.65537L6.0531 5.59089H3.18946Z" />
-    <path d="M11.5204 9.15339C12.6625 9.15339 13.2591 8.53975 13.4636 8.11361H13.5147V8.99998H14.5204V4.68748C14.5204 2.60793 12.9352 2.3693 12.1 2.3693C11.1113 2.3693 9.98633 2.71021 9.47497 3.90339L10.4295 4.2443C10.6511 3.76702 11.1753 3.25566 12.1341 3.25566C13.0588 3.25566 13.5147 3.74572 13.5147 4.58521V4.6193C13.5147 5.10509 13.0204 5.06248 11.8272 5.21589C10.6128 5.37356 9.28747 5.64202 9.28747 7.14202C9.28747 8.42043 10.2761 9.15339 11.5204 9.15339ZM11.6738 8.24998C10.8727 8.24998 10.2932 7.89202 10.2932 7.19316C10.2932 6.42611 10.992 6.18748 11.7761 6.08521C12.2022 6.03407 13.3443 5.91475 13.5147 5.71021V6.63066C13.5147 7.44884 12.867 8.24998 11.6738 8.24998Z" />
-  </svg>
-);
