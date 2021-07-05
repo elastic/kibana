@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FormEvent, useState } from 'react';
+import React, { FormEvent } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -19,8 +19,6 @@ import {
   EuiCode,
   EuiSpacer,
   EuiLink,
-  EuiModal,
-  EuiModalBody,
   EuiTitle,
   EuiText,
 } from '@elastic/eui';
@@ -59,9 +57,6 @@ export const OauthApplication: React.FC = () => {
   const { oauthApplication } = useValues(SettingsLogic);
   const { hasPlatinumLicense } = useValues(LicensingLogic);
 
-  const [isLicenseModalVisible, setIsLicenseModalVisible] = useState(!hasPlatinumLicense);
-  const closeLicenseModal = () => setIsLicenseModalVisible(false);
-
   if (!oauthApplication) return null;
 
   const persisted = !!(oauthApplication.uid && oauthApplication.secret);
@@ -91,38 +86,47 @@ export const OauthApplication: React.FC = () => {
     updateOauthApplication();
   };
 
-  const licenseModal = (
-    <EuiModal maxWidth={500} onClose={closeLicenseModal} data-test-subj="LicenseModal">
-      <EuiModalBody>
-        <EuiSpacer size="xl" />
-        <LicenseBadge />
-        <EuiSpacer />
-        <EuiTitle size="l">
-          <h1>{NON_PLATINUM_OAUTH_TITLE}</h1>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiText color="subdued">{NON_PLATINUM_OAUTH_DESCRIPTION}</EuiText>
-        <EuiSpacer />
-        <EuiLink external target="_blank" href={ENT_SEARCH_LICENSE_MANAGEMENT}>
-          {NON_PLATINUM_OAUTH_LINK}
-        </EuiLink>
-        <EuiSpacer />
-      </EuiModalBody>
-    </EuiModal>
+  const nonPlatinumTitle = (
+    <>
+      <LicenseBadge />
+      <EuiSpacer size="s" />
+      <EuiTitle size="l">
+        <h1>{NON_PLATINUM_OAUTH_TITLE}</h1>
+      </EuiTitle>
+    </>
+  );
+
+  const nonPlatinumDescription = (
+    <>
+      <EuiText color="subdued">{NON_PLATINUM_OAUTH_DESCRIPTION}</EuiText>
+      <EuiSpacer />
+      <EuiLink external target="_blank" href={ENT_SEARCH_LICENSE_MANAGEMENT}>
+        {NON_PLATINUM_OAUTH_LINK}
+      </EuiLink>
+    </>
   );
 
   return (
     <WorkplaceSearchPageTemplate
       pageChrome={[NAV.SETTINGS, NAV.SETTINGS_OAUTH]}
-      pageHeader={{ pageTitle: NAV.SETTINGS_OAUTH, description }}
+      pageHeader={{
+        pageTitle: hasPlatinumLicense ? NAV.SETTINGS_OAUTH : nonPlatinumTitle,
+        description: hasPlatinumLicense ? description : nonPlatinumDescription,
+      }}
     >
       <EuiForm component="form" onSubmit={handleSubmit}>
+        <EuiSpacer />
         <ContentSection>
           <EuiFormRow label={NAME_LABEL}>
             <EuiFieldText
               value={oauthApplication.name}
               data-test-subj="OAuthAppName"
-              onChange={(e) => setOauthApplication({ ...oauthApplication, name: e.target.value })}
+              onChange={(e) =>
+                setOauthApplication({
+                  ...oauthApplication,
+                  name: e.target.value,
+                })
+              }
               required
               disabled={!hasPlatinumLicense}
             />
@@ -139,7 +143,10 @@ export const OauthApplication: React.FC = () => {
               value={oauthApplication.redirectUri}
               data-test-subj="RedirectURIsTextArea"
               onChange={(e) =>
-                setOauthApplication({ ...oauthApplication, redirectUri: e.target.value })
+                setOauthApplication({
+                  ...oauthApplication,
+                  redirectUri: e.target.value,
+                })
               }
               required
               disabled={!hasPlatinumLicense}
@@ -152,7 +159,10 @@ export const OauthApplication: React.FC = () => {
               checked={oauthApplication.confidential}
               data-test-subj="ConfidentialToggle"
               onChange={(e) =>
-                setOauthApplication({ ...oauthApplication, confidential: e.target.checked })
+                setOauthApplication({
+                  ...oauthApplication,
+                  confidential: e.target.checked,
+                })
               }
               disabled={!hasPlatinumLicense}
             />
@@ -193,7 +203,6 @@ export const OauthApplication: React.FC = () => {
           </ContentSection>
         )}
       </EuiForm>
-      {isLicenseModalVisible && licenseModal}
     </WorkplaceSearchPageTemplate>
   );
 };
