@@ -355,7 +355,7 @@ const EditRulePageComponent: FC = () => {
           <MaxWidthEuiFlexItem>
             <DetectionEngineHeaderPage
               backOptions={{
-                href: getRuleDetailsUrl(ruleId ?? ''),
+                path: getRuleDetailsUrl(ruleId ?? ''),
                 text: `${i18n.BACK_TO} ${rule?.name ?? ''}`,
                 pageId: SecurityPageName.rules,
                 dataTestSubj: 'ruleEditBackToRuleDetails',
