@@ -8,46 +8,61 @@
 
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
-import { getServices } from '../../../../../kibana_services';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHideFor,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import { DataPublicPluginStart } from '../../../../../../../data/public';
-import { getLuceneQueryMessage, getTimeFieldMessage } from './no_results_helper';
+import { AdjustSearch, getTimeFieldMessage } from './no_results_helper';
 import './_no_results.scss';
-import { Illustration } from './assets/no_results_illustration';
+import { NoResultsIllustration } from './assets/no_results_illustration';
 
 export interface DiscoverNoResultsProps {
   timeFieldName?: string;
-  queryLanguage?: string;
   error?: Error;
   data?: DataPublicPluginStart;
+  hasQuery?: boolean;
+  hasFilters?: boolean;
+  onDisableFilters: () => void;
 }
 
 export function DiscoverNoResults({
   timeFieldName,
-  queryLanguage,
   error,
   data,
+  hasFilters,
+  hasQuery,
+  onDisableFilters,
 }: DiscoverNoResultsProps) {
   const callOut = !error ? (
     <EuiFlexItem grow={false} className="dscNoResults">
-      <EuiText>
+      <EuiHideFor sizes={['xs', 's', 'm']}>
+        <EuiSpacer size="xl" />
+      </EuiHideFor>
+      <EuiTitle>
         <h2 data-test-subj="discoverNoResults">
           <FormattedMessage
             id="discover.noResults.searchExamples.noResultsMatchSearchCriteriaTitle"
             defaultMessage="No results match your search criteria"
           />
         </h2>
-      </EuiText>
+      </EuiTitle>
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="xl" alignItems="center" direction="rowReverse" wrap>
-        <EuiFlexItem grow={1} className="dscNoResults__illustration">
-          <Illustration />
+        <EuiFlexItem grow={1}>
+          <NoResultsIllustration />
         </EuiFlexItem>
-        <EuiFlexItem grow={2} className="dscNoResults__text">
-          {timeFieldName ? getTimeFieldMessage() : null}
-          {queryLanguage === 'lucene'
-            ? getLuceneQueryMessage(getServices().docLinks.links.query.luceneQuerySyntax)
-            : null}
+        <EuiFlexItem grow={2}>
+          {!!timeFieldName && getTimeFieldMessage()}
+          {timeFieldName && (hasFilters || hasQuery) && <EuiSpacer size="m" />}
+          {(hasFilters || hasQuery) && (
+            <AdjustSearch hasFilters={hasFilters} onDisableFilters={onDisableFilters} />
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>

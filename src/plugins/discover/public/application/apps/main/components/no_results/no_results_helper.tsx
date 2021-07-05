@@ -8,18 +8,21 @@
 
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCode, EuiDescriptionList, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
 export function getTimeFieldMessage() {
   return (
     <Fragment>
-      <EuiText grow={false}>
+      <EuiTitle size="xs">
         <h3 data-test-subj="discoverNoResultsTimefilter">
           <FormattedMessage
             id="discover.noResults.expandYourTimeRangeTitle"
             defaultMessage="Expand your time range"
           />
         </h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiText grow={false}>
         <p>
           <FormattedMessage
             id="discover.noResults.queryMayNotMatchTitle"
@@ -33,104 +36,43 @@ export function getTimeFieldMessage() {
   );
 }
 
-export function getLuceneQueryMessage(link: string) {
-  const searchExamples = [
-    {
-      description: <EuiCode>200</EuiCode>,
-      title: (
-        <EuiText>
-          <strong>
-            <FormattedMessage
-              id="discover.noResults.searchExamples.anyField200StatusCodeExampleTitle"
-              defaultMessage="Find requests that contain the number 200, in any field"
-            />
-          </strong>
-        </EuiText>
-      ),
-    },
-    {
-      description: <EuiCode>status:200</EuiCode>,
-      title: (
-        <EuiText>
-          <strong>
-            <FormattedMessage
-              id="discover.noResults.searchExamples.statusField200StatusCodeExampleTitle"
-              defaultMessage="Find 200 in the status field"
-            />
-          </strong>
-        </EuiText>
-      ),
-    },
-    {
-      description: <EuiCode>status:[400 TO 499]</EuiCode>,
-      title: (
-        <EuiText>
-          <strong>
-            <FormattedMessage
-              id="discover.noResults.searchExamples.400to499StatusCodeExampleTitle"
-              defaultMessage="Find all status codes between 400-499"
-            />
-          </strong>
-        </EuiText>
-      ),
-    },
-    {
-      description: <EuiCode>status:[400 TO 499] AND extension:PHP</EuiCode>,
-      title: (
-        <EuiText>
-          <strong>
-            <FormattedMessage
-              id="discover.noResults.searchExamples.400to499StatusCodeWithPhpExtensionExampleTitle"
-              defaultMessage="Find status codes 400-499 with the extension php"
-            />
-          </strong>
-        </EuiText>
-      ),
-    },
-    {
-      description: <EuiCode>status:[400 TO 499] AND (extension:php OR extension:html)</EuiCode>,
-      title: (
-        <EuiText>
-          <strong>
-            <FormattedMessage
-              id="discover.noResults.searchExamples.400to499StatusCodeWithPhpOrHtmlExtensionExampleTitle"
-              defaultMessage="Find status codes 400-499 with the extension php or html"
-            />
-          </strong>
-        </EuiText>
-      ),
-    },
-  ];
+interface AdjustSearchProps {
+  onDisableFilters: () => void;
+  hasFilters?: boolean;
+}
+
+export function AdjustSearch({ hasFilters, onDisableFilters }: AdjustSearchProps) {
   return (
     <Fragment>
-      <EuiSpacer size="m" />
-      <EuiText data-test-subj="discoverNoResultsLucene">
-        <h3>
+      <EuiTitle size="xs">
+        <h3 data-test-subj="discoverNoResultsAdjustSearch">
           <FormattedMessage
-            id="discover.noResults.searchExamples.refineYourQueryTitle"
-            defaultMessage="Refine your query"
+            id="discover.noResults.adjustSearch"
+            defaultMessage="Adjust your search"
           />
         </h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiText grow={false}>
         <p>
           <FormattedMessage
-            id="discover.noResults.searchExamples.howTosearchForWebServerLogsDescription"
-            defaultMessage="The search bar at the top uses Elasticsearch&rsquo;s support for Lucene {queryStringSyntaxLink}.
-                Here are some examples of how you can search for web server logs that have been parsed into a few fields."
-            values={{
-              queryStringSyntaxLink: (
-                <EuiLink target="_blank" href={link}>
-                  <FormattedMessage
-                    id="discover.noResults.searchExamples.queryStringSyntaxLinkText"
-                    defaultMessage="Query String syntax"
-                  />
-                </EuiLink>
-              ),
-            }}
+            id="discover.noResults.adjustSearchDescription"
+            defaultMessage="You have filtered down your result on the top of the screen.
+              Changing your search or filters might reveal more documents."
           />
         </p>
       </EuiText>
-      <EuiDescriptionList type="column" listItems={searchExamples} />
-      <EuiSpacer size="xl" />
+      <EuiSpacer size="m" />
+      {hasFilters && (
+        <div>
+          <EuiButton data-test-subj="discoverNoResultsDisableFilters" onClick={onDisableFilters}>
+            <FormattedMessage
+              id="discover.noResults.disableFilters"
+              defaultMessage="Temporarily disable all filters"
+            />
+          </EuiButton>
+        </div>
+      )}
     </Fragment>
   );
 }
