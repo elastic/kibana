@@ -61,11 +61,11 @@ describe("Migrate existing indices' ILM policy deprecations", () => {
               "path": "/api/reporting/deprecations/migrate_ilm_policy",
             },
             "manualSteps": Array [
-              "Send a request to Elasticsearch that configures indices matching \\".reporting-*\\" to be managed by the \\"kibana-reporting\\" Index Lifecycle Policy.",
+              "Update all reporting indices to use the \\"kibana-reporting\\" policy using the index settings API.",
             ],
           },
           "level": "warning",
-          "message": "All new reporting indices will be managed by a provisioned ILM policy: \\"kibana-reporting\\". To manage the lifecycle of reports edit the kibana-reporting policy. Please note, this action will target all indices prefixed with \\".reporting-*\\".",
+          "message": "New reporting indices will be managed by the \\"kibana-reporting\\" provisioned ILM policy. You must edit this policy to manage the report lifecycle. This change targets all indices prefixed with \\".reporting-*\\".",
         },
       ]
     `);

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { CoreSetup, DeprecationsDetails, RegisterDeprecationsConfig } from 'src/core/server';
-import { ReportingCore } from '.';
+import type { GetDeprecationsContext, DeprecationsDetails } from 'src/core/server';
+import { ReportingCore } from '..';
 
 const deprecatedRole = 'reporting_user';
 const upgradableConfig = 'xpack.reporting.roles.enabled: false';
