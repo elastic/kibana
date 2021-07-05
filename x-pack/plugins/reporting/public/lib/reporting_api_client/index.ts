@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export { ReportDocument } from '../../../common/types';
-export { Report } from './report';
-export { ReportingStore } from './store';
-export { IlmPolicyManager } from './ilm_policy_manager';
+export * from './reporting_api_client';
+
+export * from './hooks';
+
+export { InternalApiClientClientProvider, useInternalApiClient } from './context';
