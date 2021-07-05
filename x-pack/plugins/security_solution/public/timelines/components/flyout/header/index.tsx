@@ -221,7 +221,7 @@ const TimelineNameComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
     [timelineType]
   );
 
-  const content = useMemo(() => (title ? title : placeholder), [title, placeholder]);
+  const content = useMemo(() => title || placeholder, [title, placeholder]);
 
   return (
     <EuiText>
@@ -240,9 +240,7 @@ const TimelineDescriptionComponent: React.FC<FlyoutHeaderProps> = ({ timelineId 
   return (
     <EuiText size="s" data-test-subj="timeline-description">
       {description ? (
-        <LineClamp key={description} lineClampHeight={4.5}>
-          {description}
-        </LineClamp>
+        <LineClamp lineClampHeight={4.5}>{description}</LineClamp>
       ) : (
         commonI18n.DESCRIPTION
       )}
