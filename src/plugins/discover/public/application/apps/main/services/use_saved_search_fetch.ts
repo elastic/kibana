@@ -43,7 +43,6 @@ export function fetch(
   }
 ) {
   const {
-    abortController,
     dataSubjects,
     initialFetchStatus,
     appStateContainer,
@@ -75,7 +74,7 @@ export function fetch(
     onResults: (foundDocuments: boolean) => {
       if (!foundDocuments) {
         sendCompleteMsg(dataSubjects.main$, foundDocuments);
-        abortController!.abort();
+        // abortController!.abort();
       } else {
         sendPartialMsg(dataSubjects.main$);
       }

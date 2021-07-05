@@ -130,7 +130,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       if (next.fetchStatus !== documentState.fetchStatus) {
         if (next.result) {
           fieldCounts.current = calcFieldCounts(
-            fieldCounts.current,
+            next.result.length ? fieldCounts.current : {},
             next.result,
             props.selectedIndexPattern!
           );
