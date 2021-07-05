@@ -7,11 +7,11 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiSideNavItemType } from '@elastic/eui/src/components/side_nav/side_nav_types';
-import { navTabGroups } from '../../../../app/home/home_navigations';
-import { APP_ID } from '../../../../../common/constants';
+import { securityNavGroup } from '../../../../app/home/home_navigations';
 import { getSearch } from '../helpers';
 import { PrimaryNavigationItemsProps } from './types';
-import { useGetUserCasesPermissions, useKibana } from '../../../lib/kibana';
+import { useGetUserCasesPermissions } from '../../../lib/kibana';
+import { useNavigation } from '../../../lib/kibana/hooks';
 import { NavTab } from '../types';
 
 export const usePrimaryNavigationItems = ({
@@ -19,7 +19,7 @@ export const usePrimaryNavigationItems = ({
   selectedTabId,
   ...urlStateProps
 }: PrimaryNavigationItemsProps): Array<EuiSideNavItemType<{}>> => {
-  const { navigateToApp, getUrlForApp } = useKibana().services.application;
+  const { navigateTo, getAppUrl } = useNavigation();
 
   const getSideNav = useCallback(
     (tab: NavTab) => {
@@ -29,10 +29,10 @@ export const usePrimaryNavigationItems = ({
 
       const handleClick = (ev: React.MouseEvent) => {
         ev.preventDefault();
-        navigateToApp(APP_ID, { deepLinkId: id, path: urlSearch });
+        navigateTo({ deepLinkId: id, path: urlSearch });
       };
 
-      const appHref = getUrlForApp(APP_ID, { deepLinkId: id, path: urlSearch });
+      const appHref = getAppUrl({ deepLinkId: id, path: urlSearch });
 
       return {
         'data-href': appHref,
@@ -45,7 +45,7 @@ export const usePrimaryNavigationItems = ({
         onClick: handleClick,
       };
     },
-    [getUrlForApp, navigateToApp, selectedTabId, urlStateProps]
+    [getAppUrl, navigateTo, selectedTabId, urlStateProps]
   );
 
   const navItemsToDisplay = usePrimaryNavigationItemsToDisplay(navTabs);
@@ -63,27 +63,30 @@ export const usePrimaryNavigationItems = ({
 function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
   const hasCasesReadPermissions = useGetUserCasesPermissions()?.read;
 
-  return [
-    {
-      id: APP_ID,
-      name: '',
-      items: [navTabs.overview],
-    },
-    {
-      ...navTabGroups.detect,
-      items: [navTabs.alerts, navTabs.rules, navTabs.exceptions],
-    },
-    {
-      ...navTabGroups.explore,
-      items: [navTabs.hosts, navTabs.network],
-    },
-    {
-      ...navTabGroups.investigate,
-      items: hasCasesReadPermissions ? [navTabs.timelines, navTabs.case] : [navTabs.timelines],
-    },
-    {
-      ...navTabGroups.manage,
-      items: [navTabs.endpoints, navTabs.trusted_apps, navTabs.event_filters],
-    },
-  ];
+  return useMemo(
+    () => [
+      {
+        id: 'main',
+        name: '',
+        items: [navTabs.overview],
+      },
+      {
+        ...securityNavGroup.detect,
+        items: [navTabs.alerts, navTabs.rules, navTabs.exceptions],
+      },
+      {
+        ...securityNavGroup.explore,
+        items: [navTabs.hosts, navTabs.network],
+      },
+      {
+        ...securityNavGroup.investigate,
+        items: hasCasesReadPermissions ? [navTabs.timelines, navTabs.case] : [navTabs.timelines],
+      },
+      {
+        ...securityNavGroup.manage,
+        items: [navTabs.endpoints, navTabs.trusted_apps, navTabs.event_filters],
+      },
+    ],
+    [navTabs, hasCasesReadPermissions]
+  );
 }
