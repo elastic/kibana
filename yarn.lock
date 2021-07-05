@@ -1284,10 +1284,10 @@
     snap-shot-compare "2.8.3"
     snap-shot-store "1.2.3"
 
-"@cypress/webpack-preprocessor@^5.9.1":
-  version "5.9.1"
-  resolved "https://registry.yarnpkg.com/@cypress/webpack-preprocessor/-/webpack-preprocessor-5.9.1.tgz#2694aa832baf3984d90bcb899e1ecff377560904"
-  integrity sha512-cg1ikftIo7NdlRA8ocNSxWjHJlh1JlTkN9ZfXUuKWWcJgrEdYLjXk0UzY6gYbLLaFka4oIhN6SvL5Y/7iELvgg==
+"@cypress/webpack-preprocessor@^5.6.0":
+  version "5.6.0"
+  resolved "https://registry.yarnpkg.com/@cypress/webpack-preprocessor/-/webpack-preprocessor-5.6.0.tgz#9648ae22d2e52f17a604e2a493af27a9c96568bd"
+  integrity sha512-kSelTDe6gs3Skp4vPP2vfTvAl+Ua+9rR/AMTir7bgJihDvzFESqnjWtF6N1TrPo+vCFVGx0VUA6JUvDkhvpwhA==
   dependencies:
     bluebird "^3.7.1"
     debug "4.3.2"
