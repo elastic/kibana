@@ -350,8 +350,8 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
       } catch (e) {
         window.scrollTo(0, 0);
         if (isAdding) {
-          // We expect body.message to be a string[] for actions.onSchemaSetFormErrors
-          const message: string[] = e?.body?.message || [defaultErrorMessage];
+          // We expect body.attributes.errors to be a string[] for actions.onSchemaSetFormErrors
+          const message: string[] = e?.body?.attributes?.errors || [defaultErrorMessage];
           actions.onSchemaSetFormErrors(message);
         } else {
           flashAPIErrors(e);

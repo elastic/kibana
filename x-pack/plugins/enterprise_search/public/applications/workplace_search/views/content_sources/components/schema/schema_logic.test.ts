@@ -393,8 +393,10 @@ describe('SchemaLogic', () => {
 
         it('handles error with message', async () => {
           const onSchemaSetFormErrorsSpy = jest.spyOn(SchemaLogic.actions, 'onSchemaSetFormErrors');
-          // We expect body.message to be a string[] when it is present
-          http.post.mockReturnValue(Promise.reject({ body: { message: ['this is an error'] } }));
+          // We expect body.attributes.errors to be a string[] when it is present
+          http.post.mockReturnValue(
+            Promise.reject({ body: { attributes: { errors: ['this is an error'] } } })
+          );
           SchemaLogic.actions.setServerField(schema, ADD);
           await nextTick();
 
