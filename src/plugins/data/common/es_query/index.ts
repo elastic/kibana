@@ -14,6 +14,16 @@ export { getEsQueryConfig } from './get_es_query_config';
  */
 export {
   nodeBuilder,
+  isFilters,
+  isExistsFilter,
+  isMatchAllFilter,
+  isGeoBoundingBoxFilter,
+  isGeoPolygonFilter,
+  isMissingFilter,
+  isPhraseFilter,
+  isPhrasesFilter,
+  isRangeFilter,
+  isQueryStringFilter,
   buildQueryFilter,
   buildPhrasesFilter,
   buildPhraseFilter,

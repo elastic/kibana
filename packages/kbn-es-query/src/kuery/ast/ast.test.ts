@@ -8,17 +8,17 @@
 
 import { fromKueryExpression, fromLiteralExpression, toElasticsearchQuery } from './ast';
 import { nodeTypes } from '../node_types';
-import { fields } from '../../../index_patterns/mocks';
-import { IIndexPattern } from '../../../index_patterns';
+import { IndexPatternBase } from '../..';
 import { KueryNode } from '../types';
+import { fields } from '../../filters/stubs';
 
 describe('kuery AST API', () => {
-  let indexPattern: IIndexPattern;
+  let indexPattern: IndexPatternBase;
 
   beforeEach(() => {
-    indexPattern = ({
+    indexPattern = {
       fields,
-    } as unknown) as IIndexPattern;
+    };
   });
 
   describe('fromKueryExpression', () => {
