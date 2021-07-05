@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiStepProps } from '@elastic/eui';
 import type { ComponentType, LazyExoticComponent } from 'react';
 
 import type { NewPackagePolicy, PackageInfo, PackagePolicy } from './index';
@@ -48,7 +49,7 @@ export interface PackagePolicyEditExtensionComponentProps {
 export interface PackagePolicyEditExtension {
   package: string;
   view: 'package-policy-edit';
-  component: LazyExoticComponent<PackagePolicyEditExtensionComponent>;
+  Component: LazyExoticComponent<PackagePolicyEditExtensionComponent>;
 }
 
 /**
@@ -76,7 +77,7 @@ export interface PackagePolicyCreateExtensionComponentProps {
 export interface PackagePolicyCreateExtension {
   package: string;
   view: 'package-policy-create';
-  component: LazyExoticComponent<PackagePolicyCreateExtensionComponent>;
+  Component: LazyExoticComponent<PackagePolicyCreateExtensionComponent>;
 }
 
 /**
@@ -94,11 +95,32 @@ export interface PackageCustomExtensionComponentProps {
 export interface PackageCustomExtension {
   package: string;
   view: 'package-detail-custom';
-  component: LazyExoticComponent<PackageCustomExtensionComponent>;
+  Component: LazyExoticComponent<PackageCustomExtensionComponent>;
+}
+
+/**
+ * UI Component Extension for displaying custom views under the Assets tab for a given Integration
+ */
+export type PackageAssetsComponent = ComponentType<{}>;
+
+/** Extension point registration contract for Integration details Assets view */
+export interface PackageAssetsExtension {
+  package: string;
+  view: 'package-detail-assets';
+  Component: LazyExoticComponent<PackageAssetsComponent>;
+}
+
+export interface AgentEnrollmentFlyoutFinalStepExtension {
+  package: string;
+  view: 'agent-enrollment-flyout';
+  title: EuiStepProps['title'];
+  Component: ComponentType<{}>;
 }
 
 /** Fleet UI Extension Point */
 export type UIExtensionPoint =
   | PackagePolicyEditExtension
   | PackageCustomExtension
-  | PackagePolicyCreateExtension;
+  | PackagePolicyCreateExtension
+  | PackageAssetsExtension
+  | AgentEnrollmentFlyoutFinalStepExtension;
