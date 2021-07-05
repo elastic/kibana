@@ -174,7 +174,7 @@ Represents all the URLs used during the tests execution.
 The data the tests need:
 
 - Is generated on the fly using our application APIs (preferred way)
-- Is ingested on the ELS instance using the `es_archive` utility
+- Is ingested on the ELS instance using the `es_archiver` utility
 
 By default, when running the tests in Jenkins mode, a base set of data is ingested on the ELS instance: an empty kibana index and a set of auditbeat data (the `empty_kibana` and `auditbeat` archives, respectively). This is usually enough to cover most of the scenarios that we are testing.
 
@@ -199,6 +199,14 @@ node ../../../scripts/es_archiver save custom_rules ".kibana",".siem-signal*"  -
 ```
 
 Note that the command will create the folder if it does not exist.
+
+### Using an archive from within the Cypress tests
+
+Task [cypress/tasks/es_archiver.ts](https://github.com/elastic/kibana/blob/master/x-pack/plugins/security_solution/cypress/tasks/es_archiver.ts) provides helpers such as `esArchiverLoad` and `esArchiverUnload` by means of `es_archiver`'s CLI.
+
+Because of `cy.exec`, used to invoke `es_archiver`, it's necessary to override its environment with `NODE_TLS_REJECT_UNAUTHORIZED=1`. It indeed would inject `NODE_TLS_REJECT_UNAUTHORIZED=0` and make `es_archive` otherwise abort with the following warning if used over https:
+
+> Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
 
 ## Development Best Practices
 
