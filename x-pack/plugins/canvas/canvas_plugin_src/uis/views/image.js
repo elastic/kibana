@@ -13,8 +13,7 @@ import { ViewStrings } from '../../../i18n';
 
 const { Image: strings } = ViewStrings;
 
-export const image = async () => {
-  const { elasticLogo } = await getElasticLogo();
+export const image = () => {
   return {
     name: 'image',
     displayName: strings.getDisplayName(),
@@ -24,7 +23,8 @@ export const image = async () => {
       {
         name: 'dataurl',
         argType: 'imageUpload',
-        resolve: ({ args }) => {
+        resolve: async ({ args }) => {
+          const { elasticLogo } = await getElasticLogo();
           return { dataurl: resolveFromArgs(args, elasticLogo) };
         },
       },

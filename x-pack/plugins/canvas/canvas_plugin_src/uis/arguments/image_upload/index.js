@@ -168,8 +168,7 @@ class ImageUpload extends React.Component {
   }
 }
 
-export const imageUpload = async () => {
-  const { elasticOutline } = await getElasticOutline();
+export const imageUpload = () => {
   return {
     name: 'imageUpload',
     displayName: strings.getDisplayName(),
@@ -177,6 +176,7 @@ export const imageUpload = async () => {
     resolveArgValue: true,
     template: templateFromReactComponent(ImageUpload),
     resolve: async ({ args }) => {
+      const { elasticOutline } = await getElasticOutline();
       return { dataurl: resolveFromArgs(args, elasticOutline) };
     },
   };
