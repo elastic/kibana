@@ -19,7 +19,7 @@ describe('containerStyle', () => {
 
   let elasticLogo;
   beforeEach(async () => {
-    elasticLogo = await (await getElasticLogo()).elasticLogo;
+    elasticLogo = (await getElasticLogo()).elasticLogo;
   });
 
   describe('default output', () => {

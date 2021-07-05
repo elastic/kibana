@@ -53,12 +53,6 @@ export const viewSpecs = [
 
 export const viewInitializers = [metricInitializer];
 
-export const initializeViews: SetupInitializer<Promise<unknown[]>> = async (core, plugins) => {
-  const views = await Promise.all(
-    viewSpecs.map(async (fn) => {
-      const fnResult = await fn();
-      return () => fnResult;
-    })
-  );
-  return [...views, ...viewInitializers.map((initializer) => initializer(core, plugins))];
+export const initializeViews: SetupInitializer<Promise<unknown[]>> = (core, plugins) => {
+  return [...viewSpecs, ...viewInitializers.map((initializer) => initializer(core, plugins))];
 };

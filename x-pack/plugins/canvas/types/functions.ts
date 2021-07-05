@@ -72,9 +72,8 @@ import { initFunctions } from '../public/functions';
  * in Kibana and Canvas.
  */
 // prettier-ignore
-export type ExpressionFunctionFactory<Name extends string, Input, Arguments, Output> = () =>
-  | ExpressionFunctionDefinition<Name, Input, Arguments, Output>
-  | Promise<ExpressionFunctionDefinition<Name, Input, Arguments, Output>>;
+export type ExpressionFunctionFactory<Name extends string, Input, Arguments, Output> = 
+  () => ExpressionFunctionDefinition<Name, Input, Arguments, Output>
 
 /**
  * `FunctionFactory` exists as a name shim between the `ExpressionFunction` type and

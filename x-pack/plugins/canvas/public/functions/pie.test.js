@@ -56,7 +56,7 @@ describe('pie', () => {
 
   describe('args', () => {
     describe('palette', () => {
-      it('sets the color palette', async () => {
+      it('sets the color palette', () => {
         const mockedColors = jest.fn(() => ['#FFFFFF', '#888888', '#000000']);
         const mockedFn = functionWrapper(
           pieFunctionFactory({

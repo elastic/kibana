@@ -63,12 +63,12 @@ export class CanvasSrcPlugin implements Plugin<void, void, SetupDeps, StartDeps>
     plugins.canvas.addViewUIs(async () => {
       const { initializeViews } = await import('./canvas_addons');
 
-      return await initializeViews(core, plugins);
+      return initializeViews(core, plugins);
     });
 
     plugins.canvas.addArgumentUIs(async () => {
       const { initializeArgs } = await import('./canvas_addons');
-      return await initializeArgs(core, plugins);
+      return initializeArgs(core, plugins);
     });
 
     plugins.canvas.addTagUIs(async () => {

@@ -18,7 +18,7 @@ const setup = expressionsPlugin.setup(placeholder);
 export const expressionsService: ExpressionsService = setup.fork();
 
 export function setupExpressionsService() {
-  functionDefinitions.map((fn) => expressionsService.registerFunction(fn));
+  functionDefinitions.forEach((fn) => expressionsService.registerFunction(fn));
   renderFunctions.forEach((fn) => {
     expressionsService.registerRenderer((fn as unknown) as AnyExpressionRenderDefinition);
   });

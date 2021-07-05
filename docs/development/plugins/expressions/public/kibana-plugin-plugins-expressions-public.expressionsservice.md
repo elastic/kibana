@@ -60,7 +60,6 @@ expressions.registerFunction({
 
 ```
 The actual function is defined in the <code>fn</code> key. The function can be \*async\*. It receives three arguments: (1) <code>input</code> is the output of the previous function or the initial input of the expression if the function is first in chain; (2) <code>args</code> are function arguments as defined in expression string, that can be edited by user (e.g in case of Canvas); (3) <code>context</code> is a shared object passed to all functions that can be used for side-effects. |
-gt; AnyExpressionFunctionDefinition) &#124; (() =&gt; Promise&lt;AnyExpressionFunctionDefinition&gt;)) =&gt; Promise&lt;void&gt;</code> |  |
 |  [registerRenderer](./kibana-plugin-plugins-expressions-public.expressionsservice.registerrenderer.md) |  | <code>(definition: AnyExpressionRenderDefinition &#124; (() =&gt; AnyExpressionRenderDefinition)) =&gt; void</code> |  |
 |  [registerType](./kibana-plugin-plugins-expressions-public.expressionsservice.registertype.md) |  | <code>(typeDefinition: AnyExpressionTypeDefinition &#124; (() =&gt; AnyExpressionTypeDefinition)) =&gt; void</code> |  |
 |  [renderers](./kibana-plugin-plugins-expressions-public.expressionsservice.renderers.md) |  | <code>ExpressionRendererRegistry</code> |  |

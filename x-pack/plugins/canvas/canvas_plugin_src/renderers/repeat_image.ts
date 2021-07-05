@@ -26,7 +26,7 @@ export const repeatImage: RendererFactory<Arguments> = () => ({
   render: async (domNode, config, handlers) => {
     let image = config.image;
     if (!isValidUrl(config.image)) {
-      image = await (await getElasticOutline()).elasticOutline;
+      image = (await getElasticOutline()).elasticOutline;
     }
     const settings = {
       ...config,

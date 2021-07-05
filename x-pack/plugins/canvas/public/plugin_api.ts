@@ -72,7 +72,7 @@ export function getPluginApi(
   const api: CanvasApi = {
     // Functions, types and renderers are registered directly to expression plugin
     addFunctions: (fns) => {
-      fns.map((fn) => expressionsPluginSetup.registerFunction(fn));
+      fns.forEach((fn) => expressionsPluginSetup.registerFunction(fn));
     },
     addTypes: (types) => {
       types.forEach((type) => {
