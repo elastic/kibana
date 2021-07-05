@@ -59,14 +59,17 @@ export const FileDataVisualizerPage: FC = () => {
           });
         },
         canDisplay: async ({ indexPatternId }) => {
-          const { timeFieldName } = await getIndexPattern(indexPatternId);
-
-          return (
-            isFullLicense() &&
-            timeFieldName !== undefined &&
-            checkPermission('canCreateJob') &&
-            mlNodesAvailable()
-          );
+          try {
+            const { timeFieldName } = await getIndexPattern(indexPatternId);
+            return (
+              isFullLicense() &&
+              timeFieldName !== undefined &&
+              checkPermission('canCreateJob') &&
+              mlNodesAvailable()
+            );
+          } catch (error) {
+            return false;
+          }
         },
       },
       {
