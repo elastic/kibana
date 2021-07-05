@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-/** @internal */
+/** @public */
 export interface KibanaExecutionContext {
   /**
    * Kibana application initated an operation.

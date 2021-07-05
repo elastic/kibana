@@ -28,7 +28,15 @@ function parseHeader(header?: string): KibanaExecutionContext | undefined {
   }
 }
 
-export class ExecutionContextContainer {
+/**
+ * @public
+ */
+export interface IExecutionContextContainer {
+  toString(): string;
+  toJSON(): Readonly<KibanaServerExecutionContext>;
+}
+
+export class ExecutionContextContainer implements IExecutionContextContainer {
   readonly #context: Readonly<KibanaServerExecutionContext>;
   constructor(context: Readonly<KibanaServerExecutionContext>) {
     this.#context = context;

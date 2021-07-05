@@ -10,7 +10,7 @@ import { Client } from '@elastic/elasticsearch';
 import { Logger } from '../../logging';
 import { GetAuthHeaders, Headers, isRealRequest } from '../../http';
 import { ensureRawRequest, filterHeaders } from '../../http/router';
-import type { ExecutionContextContainer } from '../../execution_context';
+import type { IExecutionContextContainer } from '../../execution_context';
 import { ScopeableRequest } from '../types';
 import { ElasticsearchClient } from './types';
 import { configureClient } from './configure_client';
@@ -64,7 +64,7 @@ export class ClusterClient implements ICustomClusterClient {
     logger: Logger,
     type: string,
     private readonly getAuthHeaders: GetAuthHeaders = noop,
-    getExecutionContext: () => ExecutionContextContainer | undefined = noop
+    getExecutionContext: () => IExecutionContextContainer | undefined = noop
   ) {
     this.asInternalUser = configureClient(config, { logger, type, getExecutionContext });
     this.rootScopedClient = configureClient(config, {

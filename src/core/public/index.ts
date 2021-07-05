@@ -186,6 +186,12 @@ export type {
 
 export type { DeprecationsServiceStart, ResolveDeprecationResponse } from './deprecations';
 
+export type {
+  IExecutionContextContainer,
+  ExecutionContextServiceStart,
+  KibanaExecutionContext,
+} from './execution_context';
+
 export type { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
 
 export { URL_MAX_LENGTH } from './core_app';

@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-context?: ExecutionContextContainer;
+context?: IExecutionContextContainer;
 ```

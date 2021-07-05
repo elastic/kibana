@@ -69,8 +69,6 @@ import {
   CoreServicesUsageData,
 } from './core_usage_data';
 
-import type { ExecutionContextSetup, ExecutionContextStart } from './execution_context';
-
 export type {
   CoreUsageStats,
   CoreUsageData,
@@ -79,6 +77,16 @@ export type {
   CoreServicesUsageData,
   ConfigUsageData,
 };
+
+import type { ExecutionContextSetup, ExecutionContextStart } from './execution_context';
+
+export type {
+  ExecutionContextSetup,
+  ExecutionContextStart,
+  IExecutionContextContainer,
+  KibanaServerExecutionContext,
+  KibanaExecutionContext,
+} from './execution_context';
 
 export { bootstrap } from './bootstrap';
 export type {

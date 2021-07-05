@@ -432,9 +432,6 @@ export interface CoreStart {
     deprecations: DeprecationsServiceStart;
     // (undocumented)
     docLinks: DocLinksStart;
-    // Warning: (ae-forgotten-export) The symbol "ExecutionContextServiceStart" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ExecutionContextServiceStart"
-    //
     // (undocumented)
     executionContext: ExecutionContextServiceStart;
     // (undocumented)
@@ -719,6 +716,11 @@ export interface ErrorToastOptions extends ToastOptions {
     toastMessage?: string;
 }
 
+// @public (undocumented)
+export interface ExecutionContextServiceStart {
+    create: (context: KibanaExecutionContext) => IExecutionContextContainer;
+}
+
 // @public
 export interface FatalErrorInfo {
     // (undocumented)
@@ -757,10 +759,8 @@ export class HttpFetchError extends Error implements IHttpFetchError {
 export interface HttpFetchOptions extends HttpRequestInit {
     asResponse?: boolean;
     asSystemRequest?: boolean;
-    // Warning: (ae-forgotten-export) The symbol "ExecutionContextContainer" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
-    context?: ExecutionContextContainer;
+    context?: IExecutionContextContainer;
     headers?: HttpHeadersInit;
     prependBasePath?: boolean;
     query?: HttpFetchQuery;
@@ -896,6 +896,12 @@ export interface IBasePath {
     readonly serverBasePath: string;
 }
 
+// @public (undocumented)
+export interface IExecutionContextContainer {
+    // (undocumented)
+    toHeader: () => Record<string, string>;
+}
+
 // @public
 export interface IExternalUrl {
     validateUrl(relativeOrAbsoluteUrl: string): URL | null;
@@ -956,6 +962,15 @@ export interface IUiSettingsClient {
     isOverridden: (key: string) => boolean;
     remove: (key: string) => Promise<boolean>;
     set: (key: string, value: any) => Promise<boolean>;
+}
+
+// @public (undocumented)
+export interface KibanaExecutionContext {
+    readonly description: string;
+    readonly id: string;
+    readonly name: string;
+    readonly type: string;
+    readonly url?: string;
 }
 
 // @public

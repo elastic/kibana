@@ -14,7 +14,7 @@ import type {
   TransportRequestParams,
   TransportRequestOptions,
 } from '@elastic/elasticsearch/lib/Transport';
-import type { ExecutionContextContainer } from '../../execution_context';
+import type { IExecutionContextContainer } from '../../execution_context';
 import { Logger } from '../../logging';
 import { parseClientOptions, ElasticsearchClientConfig } from './client_config';
 
@@ -31,7 +31,7 @@ export const configureClient = (
     logger: Logger;
     type: string;
     scoped?: boolean;
-    getExecutionContext?: () => ExecutionContextContainer | undefined;
+    getExecutionContext?: () => IExecutionContextContainer | undefined;
   }
 ): Client => {
   const clientOptions = parseClientOptions(config, scoped);

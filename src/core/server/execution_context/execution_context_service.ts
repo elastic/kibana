@@ -11,7 +11,11 @@ import type { CoreService, KibanaExecutionContext } from '../../types';
 import type { CoreContext } from '../core_context';
 import type { Logger } from '../logging';
 
-import { ExecutionContextContainer, getParentContextFrom } from './execution_context_container';
+import {
+  ExecutionContextContainer,
+  IExecutionContextContainer,
+  getParentContextFrom,
+} from './execution_context_container';
 
 /**
  * @public
@@ -27,7 +31,7 @@ export interface IExecutionContext {
   getParentContextFrom(headers: Record<string, string>): KibanaExecutionContext | undefined;
   set(context: Partial<KibanaServerExecutionContext>): void;
   reset(): void;
-  get(): ExecutionContextContainer | undefined;
+  get(): IExecutionContextContainer | undefined;
 }
 
 /**
@@ -53,7 +57,7 @@ export interface ExecutionContextSetup {
   /**
    * Retrieves an opearation meta-data for the current async context.
    **/
-  get(): ExecutionContextContainer | undefined;
+  get(): IExecutionContextContainer | undefined;
 }
 
 /**
@@ -64,11 +68,11 @@ export type ExecutionContextStart = ExecutionContextSetup;
 export class ExecutionContextService
   implements CoreService<InternalExecutionContextSetup, InternalExecutionContextStart> {
   private readonly log: Logger;
-  private readonly asyncLocalStorage: AsyncLocalStorage<ExecutionContextContainer>;
+  private readonly asyncLocalStorage: AsyncLocalStorage<IExecutionContextContainer>;
 
   constructor(coreContext: CoreContext) {
     this.log = coreContext.logger.get('execution_context');
-    this.asyncLocalStorage = new AsyncLocalStorage<ExecutionContextContainer>();
+    this.asyncLocalStorage = new AsyncLocalStorage<IExecutionContextContainer>();
   }
 
   setup(): InternalExecutionContextSetup {
@@ -105,7 +109,7 @@ export class ExecutionContextService
     this.asyncLocalStorage.enterWith(undefined);
   }
 
-  private get(): ExecutionContextContainer | undefined {
+  private get(): IExecutionContextContainer | undefined {
     return this.asyncLocalStorage.getStore();
   }
 }

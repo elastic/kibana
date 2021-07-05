@@ -6,8 +6,14 @@
  * Side Public License, v 1.
  */
 import type { CoreService, KibanaExecutionContext } from '../../types';
-import { ExecutionContextContainer } from './execution_context_container';
+import {
+  ExecutionContextContainer,
+  IExecutionContextContainer,
+} from './execution_context_container';
 
+/**
+ * @public
+ */
 export interface ExecutionContextServiceStart {
   /**
    * Creates a context container carrying the meta-data of a runtime operation.
@@ -17,7 +23,7 @@ export interface ExecutionContextServiceStart {
    * http.fetch('/endpoint/', { context });
    * ```
    */
-  create: (context: KibanaExecutionContext) => ExecutionContextContainer;
+  create: (context: KibanaExecutionContext) => IExecutionContextContainer;
 }
 
 export class ExecutionContextService implements CoreService<void, ExecutionContextServiceStart> {

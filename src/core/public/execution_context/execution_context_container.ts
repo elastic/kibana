@@ -23,7 +23,14 @@ function enforceMaxLength(header: string): string {
   return header.slice(0, MAX_BAGGAGE_LENGTH);
 }
 
-export class ExecutionContextContainer {
+/**
+ * @public
+ */
+export interface IExecutionContextContainer {
+  toHeader: () => Record<string, string>;
+}
+
+export class ExecutionContextContainer implements IExecutionContextContainer {
   readonly #context: Readonly<KibanaExecutionContext>;
   constructor(context: Readonly<KibanaExecutionContext>) {
     this.#context = context;
