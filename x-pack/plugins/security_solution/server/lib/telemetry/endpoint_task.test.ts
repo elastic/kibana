@@ -6,9 +6,11 @@
  */
 
 import { loggingSystemMock } from 'src/core/server/mocks';
+import { TaskStatus } from '../../../../task_manager/server';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
-import { TelemetryEndpointTask } from './endpoint_task';
-import { createMockTelemetryEventsSender } from './mocks';
+
+import { TelemetryEndpointTask, TelemetryEndpointTaskConstants } from './endpoint_task';
+import { createMockTelemetryEventsSender, MockTelemetryEndpointTask } from './mocks';
 
 describe('test', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -18,7 +20,7 @@ describe('test', () => {
   });
 
   describe('endpoint alert telemetry checks', () => {
-    test('the task can register', () => {
+    test('the endpoint task can register', () => {
       const telemetryEndpointTask = new TelemetryEndpointTask(
         logger,
         taskManagerMock.createSetup(),
@@ -47,5 +49,31 @@ describe('test', () => {
     const mockTaskManagerStart = taskManagerMock.createStart();
     await telemetryEndpointTask.start(mockTaskManagerStart);
     expect(mockTaskManagerStart.ensureScheduled).toHaveBeenCalled();
+  });
+
+  test('endpoint task should not query elastic if telemetry is not opted in', async () => {
+    const mockSender = createMockTelemetryEventsSender(false);
+    const mockTaskManager = taskManagerMock.createSetup();
+    new MockTelemetryEndpointTask(logger, mockTaskManager, mockSender);
+
+    const mockTaskInstance = {
+      id: TelemetryEndpointTaskConstants.TYPE,
+      runAt: new Date(),
+      attempts: 0,
+      ownerId: '',
+      status: TaskStatus.Running,
+      startedAt: new Date(),
+      scheduledAt: new Date(),
+      retryAt: new Date(),
+      params: {},
+      state: {},
+      taskType: TelemetryEndpointTaskConstants.TYPE,
+    };
+    const createTaskRunner =
+      mockTaskManager.registerTaskDefinitions.mock.calls[0][0][TelemetryEndpointTaskConstants.TYPE]
+        .createTaskRunner;
+    const taskRunner = createTaskRunner({ taskInstance: mockTaskInstance });
+    await taskRunner.run();
+    expect(mockSender.fetchDiagnosticAlerts).not.toHaveBeenCalled();
   });
 });
