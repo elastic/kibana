@@ -204,10 +204,11 @@ export function DashboardTopNav({
         path,
         state: {
           originatingApp: DashboardConstants.DASHBOARDS_ID,
+          searchSessionId: data.search.session.getSessionId(),
         },
       });
     },
-    [trackUiMetric, stateTransferService]
+    [stateTransferService, data.search.session, trackUiMetric]
   );
 
   const clearAddPanel = useCallback(() => {
