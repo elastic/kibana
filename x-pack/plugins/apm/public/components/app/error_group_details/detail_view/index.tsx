@@ -189,7 +189,6 @@ function TabContent({
   const exceptions = error.error.exception || [];
   const logStackframes = error.error.log?.stacktrace;
 
-  console.log('### caue ~ currentTab.key', currentTab.key);
   switch (currentTab.key) {
     case logStacktraceTab.key:
       return (
