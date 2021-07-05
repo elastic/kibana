@@ -56,11 +56,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.pressKeys(browser.keys.ESCAPE);
     });
 
-    it('a11y test for describe space text space', async () => {
-      await PageObjects.spaceSelector.clickOnDescriptionOfSpace();
-      await a11y.testAppSnapshot();
-    });
-
     it('a11y test for toggling an entire feature category', async () => {
       await PageObjects.spaceSelector.toggleFeatureCategoryVisibility('kibana');
       await a11y.testAppSnapshot();
