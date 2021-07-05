@@ -20,6 +20,7 @@ import { ConfigSchema } from '../../../config';
 import {
   createSessionStateContainer,
   SearchSessionState,
+  SessionStateInternal,
   SessionMeta,
   SessionStateContainer,
 } from './search_session_state';
@@ -34,6 +35,11 @@ export type ISessionService = PublicContract<SessionService>;
 export interface TrackSearchDescriptor {
   abort: () => void;
 }
+
+/**
+ * Represents a search session state in {@link SessionService} in any given moment of time
+ */
+export type SessionSnapshot = SessionStateInternal<TrackSearchDescriptor>;
 
 /**
  * Provide info about current search session to be stored in the Search Session saved object
@@ -88,6 +94,13 @@ export class SessionService {
 
   private toastService?: ToastService;
 
+  /**
+   * Holds snapshot of last cleared session so that it can be continued
+   * Can be used to re-use a session between apps
+   * @private
+   */
+  private lastSessionSnapshot?: SessionSnapshot;
+
   constructor(
     initializerContext: PluginInitializerContext<ConfigSchema>,
     getStartServices: StartServicesAccessor,
@@ -128,6 +141,21 @@ export class SessionService {
       this.subscription.add(
         coreStart.application.currentAppId$.subscribe((newAppName) => {
           this.currentApp = newAppName;
+          if (!this.getSessionId()) return;
+
+          // Apps required to clean up their sessions before unmounting
+          // Make sure that apps don't leave sessions open by throwing an error in DEV mode
+          const message = `Application '${
+            this.state.get().appName
+          }' had an open session while navigating`;
+          if (initializerContext.env.mode.dev) {
+            coreStart.fatalErrors.add(message);
+          } else {
+            // this should never happen in prod because should be caught in dev mode
+            // in case this happen we don't want to throw fatal error, as most likely possible bugs are not that critical
+            // eslint-disable-next-line no-console
+            console.warn(message);
+          }
         })
       );
     });
@@ -158,6 +186,7 @@ export class SessionService {
   public destroy() {
     this.subscription.unsubscribe();
     this.clear();
+    this.lastSessionSnapshot = undefined;
   }
 
   /**
@@ -198,7 +227,9 @@ export class SessionService {
    */
   public start() {
     if (!this.currentApp) throw new Error('this.currentApp is missing');
+
     this.state.transitions.start({ appName: this.currentApp });
+
     return this.getSessionId()!;
   }
 
@@ -212,9 +243,51 @@ export class SessionService {
   }
 
   /**
+   * Continue previous search session
+   * Can be used to share a running search session between different apps, so they can reuse search cache
+   *
+   * This is different from {@link restore} as it reuses search session state and search results held in client memory instead of restoring search results from elasticsearch
+   * @param sessionId
+   */
+  public continue(sessionId: string) {
+    if (this.lastSessionSnapshot?.sessionId === sessionId) {
+      this.state.set({
+        ...this.lastSessionSnapshot,
+        // have to change a name, so that current app can cancel a session that it continues
+        appName: this.currentApp,
+        // also have to drop all pending searches which are used to derive client side state of search session indicator,
+        // if we weren't dropping this searches, then we would get into "infinite loading" state when continuing a session that was cleared with pending searches
+        // possible solution to this problem is to refactor session service to support multiple sessions
+        pendingSearches: [],
+      });
+      this.lastSessionSnapshot = undefined;
+    } else {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `Continue search session: last known search session id: "${this.lastSessionSnapshot?.sessionId}", but received ${sessionId}`
+      );
+    }
+  }
+
+  /**
    * Cleans up current state
    */
   public clear() {
+    // make sure apps can't clear other apps' sessions
+    const currentSessionApp = this.state.get().appName;
+    if (currentSessionApp && currentSessionApp !== this.currentApp) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `Skip clearing session "${this.getSessionId()}" because it belongs to a different app. current: "${
+          this.currentApp
+        }", owner: "${currentSessionApp}"`
+      );
+      return;
+    }
+
+    if (this.getSessionId()) {
+      this.lastSessionSnapshot = this.state.get();
+    }
     this.state.transitions.clear();
     this.searchSessionInfoProvider = undefined;
     this.searchSessionIndicatorUiConfig = undefined;
