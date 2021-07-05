@@ -15,14 +15,14 @@ export default function ({ loadTestFile, getService }) {
 
   describe('canvas app visual regression', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.load('canvas/default');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.load('x-pack/test/functional/es_archives/canvas/default');
 
       await browser.setWindowSize(SCREEN_WIDTH, 1000);
     });
 
     after(async () => {
-      await esArchiver.unload('canvas/default');
+      await esArchiver.unload('x-pack/test/functional/es_archives/canvas/default');
     });
 
     this.tags('ciGroup10');

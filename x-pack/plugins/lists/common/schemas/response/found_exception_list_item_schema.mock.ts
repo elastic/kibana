@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+
 import { getExceptionListItemSchemaMock } from './exception_list_item_schema.mock';
-import { FoundExceptionListItemSchema } from './found_exception_list_item_schema';
 
 export const getFoundExceptionListItemSchemaMock = (): FoundExceptionListItemSchema => ({
   data: [getExceptionListItemSchemaMock()],

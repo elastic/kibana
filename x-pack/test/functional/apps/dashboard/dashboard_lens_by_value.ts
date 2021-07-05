@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'dashboard', 'visualize', 'lens', 'header']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'visualize', 'lens', 'timePicker']);
 
   const find = getService('find');
   const esArchiver = getService('esArchiver');
@@ -18,8 +18,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('dashboard lens by value', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.loadIfNeeded('lens/basic');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/basic');
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.clickNewDashboard();
@@ -69,11 +69,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(titles.indexOf(newTitle)).to.not.be(-1);
     });
 
-    it('is no longer linked to a dashboard after visiting the visuali1ze listing page', async () => {
-      await PageObjects.visualize.gotoVisualizationLandingPage();
+    it('is no longer linked to a dashboard after visiting the visualize listing page', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickLensWidget();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.timePicker.ensureHiddenNoDataPopover();
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
@@ -84,8 +83,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         operation: 'average',
         field: 'bytes',
       });
+      await PageObjects.lens.waitForVisualization();
       await PageObjects.lens.notLinkedToOriginatingApp();
-      await PageObjects.header.waitUntilLoadingHasFinished();
 
       // return to origin should not be present in save modal
       await testSubjects.click('lnsApp_saveButton');

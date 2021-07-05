@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { functionWrapper } from '../../test_helpers/function_wrapper';
 import { testPie } from '../../canvas_plugin_src/functions/common/__fixtures__/test_pointseries';
+import { functionWrapper } from '../../../../../src/plugins/presentation_util/public';
 import {
   fontStyle,
   grayscalePalette,
@@ -18,7 +18,7 @@ describe('pie', () => {
   const fn = functionWrapper(
     pieFunctionFactory({
       get: () => ({
-        getColors: () => ['red', 'black'],
+        getCategoricalColors: () => ['red', 'black'],
       }),
     })
   );
@@ -59,7 +59,7 @@ describe('pie', () => {
         const mockedFn = functionWrapper(
           pieFunctionFactory({
             get: () => ({
-              getColors: mockedColors,
+              getCategoricalColors: mockedColors,
             }),
           })
         );

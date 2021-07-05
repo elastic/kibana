@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { readPrivileges, transformError } from '@kbn/securitysolution-es-utils';
 import { merge } from 'lodash/fp';
+import { LIST_PRIVILEGES_URL } from '@kbn/securitysolution-list-constants';
 
 import type { ListsPluginRouter } from '../types';
-import { LIST_PRIVILEGES_URL } from '../../common/constants';
-import { buildSiemResponse, readPrivileges, transformError } from '../siem_server_deps';
 
-import { getListClient } from './utils';
+import { buildSiemResponse, getListClient } from './utils';
 
 export const readPrivilegesRoute = (router: ListsPluginRouter): void => {
   router.get(

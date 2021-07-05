@@ -28,6 +28,7 @@ import { AppState } from '../../state';
 import { stringifyUrlParams } from './stringify_url_params';
 import { ClientPluginsStart } from '../../apps/plugin';
 import { triggersActionsUiMock } from '../../../../triggers_actions_ui/public/mocks';
+import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 
 interface KibanaProps {
   services?: KibanaServices;
@@ -78,6 +79,12 @@ const createMockStore = () => {
   };
 };
 
+const mockAppUrls: Record<string, string> = {
+  uptime: '/app/uptime',
+  observability: '/app/observability',
+  '/home#/tutorial/uptimeMonitors': '/home#/tutorial/uptimeMonitors',
+};
+
 /* default mock core */
 const defaultCore = coreMock.createStart();
 const mockCore: () => Partial<CoreStart> = () => {
@@ -85,7 +92,7 @@ const mockCore: () => Partial<CoreStart> = () => {
     ...defaultCore,
     application: {
       ...defaultCore.application,
-      getUrlForApp: () => '/app/uptime',
+      getUrlForApp: (app: string) => mockAppUrls[app],
       navigateToUrl: jest.fn(),
       capabilities: {
         ...defaultCore.application.capabilities,
@@ -104,6 +111,7 @@ const mockCore: () => Partial<CoreStart> = () => {
     },
     triggersActionsUi: triggersActionsUiMock.createStart(),
     storage: createMockStore(),
+    data: dataPluginMock.createStartContract(),
   };
 
   return core;

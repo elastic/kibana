@@ -12,6 +12,7 @@ import { shallow, mount } from 'enzyme';
 import { ChartOptions, ChartOptionsParams } from './chart_options';
 import { SeriesParam, ChartMode, AxisMode } from '../../../../types';
 import { LineOptions } from './line_options';
+import { PointOptions } from './point_options';
 import { valueAxis, seriesParam } from './mocks';
 import { ChartType } from '../../../../../common';
 
@@ -41,11 +42,24 @@ describe('ChartOptions component', () => {
     expect(comp).toMatchSnapshot();
   });
 
+  it('should hide the PointOptions when type is bar', () => {
+    const comp = shallow(<ChartOptions {...defaultProps} />);
+
+    expect(comp.find(PointOptions).exists()).toBeFalsy();
+  });
+
   it('should show LineOptions when type is line', () => {
     chart.type = ChartType.Line;
     const comp = shallow(<ChartOptions {...defaultProps} />);
 
     expect(comp.find(LineOptions).exists()).toBeTruthy();
+  });
+
+  it('should show PointOptions when type is area', () => {
+    chart.type = ChartType.Area;
+    const comp = shallow(<ChartOptions {...defaultProps} />);
+
+    expect(comp.find(PointOptions).exists()).toBeTruthy();
   });
 
   it('should show line mode when type is area', () => {

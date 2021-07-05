@@ -8,3 +8,5 @@
 
 export { IndexPatternListConfig } from './config';
 export { IndexPatternListManager } from './manager';
+// @ts-ignore
+export { RollupIndexPatternListConfig } from './rollup_list_config';

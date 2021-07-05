@@ -18,6 +18,7 @@ import {
   routeValidationObject,
 } from '@kbn/server-route-repository';
 import { mergeRt, jsonRt } from '@kbn/io-ts-utils';
+import { UsageCollectionSetup } from '../../../../../../src/plugins/usage_collection/server';
 import { pickKeys } from '../../../common/utils/pick_keys';
 import { APMRouteHandlerResources, InspectResponse } from '../typings';
 import type { ApmPluginRequestHandlerContext } from '../typings';
@@ -39,14 +40,18 @@ export function registerRoutes({
   plugins,
   logger,
   config,
-  apmRuleRegistry,
+  ruleDataClient,
+  telemetryUsageCounter,
 }: {
   core: APMRouteHandlerResources['core'];
   plugins: APMRouteHandlerResources['plugins'];
   logger: APMRouteHandlerResources['logger'];
   repository: ServerRouteRepository<APMRouteHandlerResources>;
   config: APMRouteHandlerResources['config'];
-  apmRuleRegistry: APMRouteHandlerResources['apmRuleRegistry'];
+  ruleDataClient: APMRouteHandlerResources['ruleDataClient'];
+  telemetryUsageCounter?: ReturnType<
+    UsageCollectionSetup['createUsageCounter']
+  >;
 }) {
   const routes = repository.getRoutes();
 
@@ -99,7 +104,7 @@ export function registerRoutes({
               },
               validatedParams
             ),
-            apmRuleRegistry,
+            ruleDataClient,
           })) as any;
 
           if (Array.isArray(data)) {
@@ -116,9 +121,22 @@ export function registerRoutes({
           // cleanup
           inspectableEsQueriesMap.delete(request);
 
+          if (!options.disableTelemetry && telemetryUsageCounter) {
+            telemetryUsageCounter.incrementCounter({
+              counterName: `${method.toUpperCase()} ${pathname}`,
+              counterType: 'success',
+            });
+          }
+
           return response.ok({ body });
         } catch (error) {
           logger.error(error);
+          if (!options.disableTelemetry && telemetryUsageCounter) {
+            telemetryUsageCounter.incrementCounter({
+              counterName: `${method.toUpperCase()} ${pathname}`,
+              counterType: 'error',
+            });
+          }
           const opts = {
             statusCode: 500,
             body: {

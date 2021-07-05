@@ -6,9 +6,8 @@
  */
 
 import { QuerySignalsSchema, querySignalsSchema } from './query_signals_index_schema';
-import { exactCheck } from '../../../exact_check';
+import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { foldLeftRight, getPaths } from '../../../test_utils';
 import { left } from 'fp-ts/lib/Either';
 
 describe('query, aggs, size, _source and track_total_hits on signals index', () => {

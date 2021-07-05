@@ -17,6 +17,7 @@ import {
   getCurrentListPageDataState,
   getListApiSuccessResponse,
   getListItems,
+  getTotalCountListItems,
   getCurrentListItemsQuery,
   getListPagination,
   getListFetchError,
@@ -26,8 +27,7 @@ import {
 } from './selector';
 import { ecsEventMock } from '../test_utils';
 import { getInitialExceptionFromEvent } from './utils';
-import { EventFiltersPageLocation } from '../types';
-import { EventFiltersListPageState } from '../state';
+import { EventFiltersListPageState, EventFiltersPageLocation } from '../types';
 import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../../common/constants';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 import {
@@ -47,14 +47,14 @@ describe('event filters selectors', () => {
 
   const setToLoadedState = () => {
     initialState.listPage.data = createLoadedResourceState({
-      query: { page: 2, perPage: 10 },
+      query: { page: 2, perPage: 10, filter: '' },
       content: getFoundExceptionListItemSchemaMock(),
     });
   };
 
   const setToLoadingState = (
     previousState: EventFiltersListPageState['listPage']['data'] = createLoadedResourceState({
-      query: { page: 5, perPage: 50 },
+      query: { page: 5, perPage: 50, filter: '' },
       content: getFoundExceptionListItemSchemaMock(),
     })
   ) => {
@@ -121,6 +121,19 @@ describe('event filters selectors', () => {
     });
   });
 
+  describe('getTotalCountListItems()', () => {
+    it('should return the list items from api response', () => {
+      setToLoadedState();
+      expect(getTotalCountListItems(initialState)).toEqual(
+        getLastLoadedResourceState(initialState.listPage.data)?.data.content.total
+      );
+    });
+
+    it('should return empty array if no api response', () => {
+      expect(getTotalCountListItems(initialState)).toEqual(0);
+    });
+  });
+
   describe('getCurrentListItemsQuery()', () => {
     it('should return empty object if Uninitialized', () => {
       expect(getCurrentListItemsQuery(initialState)).toEqual({});
@@ -128,12 +141,12 @@ describe('event filters selectors', () => {
 
     it('should return query from current loaded state', () => {
       setToLoadedState();
-      expect(getCurrentListItemsQuery(initialState)).toEqual({ page: 2, perPage: 10 });
+      expect(getCurrentListItemsQuery(initialState)).toEqual({ page: 2, perPage: 10, filter: '' });
     });
 
     it('should return query from previous state while Loading new page', () => {
       setToLoadingState();
-      expect(getCurrentListItemsQuery(initialState)).toEqual({ page: 5, perPage: 50 });
+      expect(getCurrentListItemsQuery(initialState)).toEqual({ page: 5, perPage: 50, filter: '' });
     });
   });
 
@@ -187,14 +200,14 @@ describe('event filters selectors', () => {
   });
 
   describe('getListPageDoesDataExist()', () => {
-    it('should return true (default) until we get a Loaded Resource state', () => {
-      expect(getListPageDoesDataExist(initialState)).toBe(true);
+    it('should return false (default) until we get a Loaded Resource state', () => {
+      expect(getListPageDoesDataExist(initialState)).toBe(false);
 
       // Set DataExists to Loading
       // ts-ignore will be fixed when AsyncResourceState is refactored (#830)
       // @ts-ignore
       initialState.listPage.dataExist = createLoadingResourceState(initialState.listPage.dataExist);
-      expect(getListPageDoesDataExist(initialState)).toBe(true);
+      expect(getListPageDoesDataExist(initialState)).toBe(false);
 
       // Set DataExists to Failure
       initialState.listPage.dataExist = createFailedResourceState({
@@ -202,7 +215,7 @@ describe('event filters selectors', () => {
         error: 'Internal Server Error',
         message: 'Something is not right',
       });
-      expect(getListPageDoesDataExist(initialState)).toBe(true);
+      expect(getListPageDoesDataExist(initialState)).toBe(false);
     });
 
     it('should return false if no data exists', () => {

@@ -26,6 +26,8 @@ import { AppLogic } from '../../../app_logic';
 import { ContentSection } from '../../../components/shared/content_section';
 import { SourceConfigFields } from '../../../components/shared/source_config_fields';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
+import { NAV } from '../../../constants';
+
 import {
   CANCEL_BUTTON,
   OK_BUTTON,
@@ -51,6 +53,8 @@ import {
 } from '../constants';
 import { staticSourceData } from '../source_data';
 import { SourceLogic } from '../source_logic';
+
+import { SourceLayout } from './source_layout';
 
 export const SourceSettings: React.FC = () => {
   const { updateContentSource, removeContentSource } = useActions(SourceLogic);
@@ -128,7 +132,7 @@ export const SourceSettings: React.FC = () => {
   );
 
   return (
-    <>
+    <SourceLayout pageChrome={[NAV.SETTINGS]} pageViewTelemetry="source_settings">
       <ViewContentHeader title={SOURCE_SETTINGS_HEADING} />
       <ContentSection title={SOURCE_SETTINGS_TITLE} description={SOURCE_SETTINGS_DESCRIPTION}>
         <form onSubmit={submitNameChange}>
@@ -197,6 +201,6 @@ export const SourceSettings: React.FC = () => {
         </EuiButton>
         {confirmModalVisible && confirmModal}
       </ContentSection>
-    </>
+    </SourceLayout>
   );
 };

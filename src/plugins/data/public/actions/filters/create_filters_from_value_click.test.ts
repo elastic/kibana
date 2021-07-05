@@ -105,4 +105,11 @@ describe('createFiltersFromValueClick', () => {
       expect(rangeFilter.range.bytes.lt).toEqual(2078);
     }
   });
+
+  test('handles non-unique filters', async () => {
+    const [point] = dataPoints;
+    const filters = await createFiltersFromValueClickAction({ data: [point, point] });
+
+    expect(filters.length).toEqual(1);
+  });
 });

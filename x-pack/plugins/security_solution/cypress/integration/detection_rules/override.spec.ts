@@ -68,7 +68,7 @@ import {
   waitForAlertsPanelToBeLoaded,
 } from '../../tasks/alerts';
 import {
-  changeRowsPerPageTo300,
+  changeRowsPerPageTo100,
   filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
@@ -86,7 +86,7 @@ import {
 } from '../../tasks/create_new_rule';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
-import { DETECTIONS_URL } from '../../urls/navigation';
+import { ALERTS_URL } from '../../urls/navigation';
 
 describe('Detection rules, override', () => {
   const expectedUrls = newOverrideRule.referenceUrls.join('');
@@ -108,7 +108,7 @@ describe('Detection rules, override', () => {
   });
 
   it('Creates and activates a new custom rule with override option', function () {
-    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
@@ -121,7 +121,7 @@ describe('Detection rules, override', () => {
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-    changeRowsPerPageTo300();
+    changeRowsPerPageTo100();
 
     const expectedNumberOfRules = 1;
     cy.get(RULES_TABLE).then(($table) => {
@@ -140,7 +140,7 @@ describe('Detection rules, override', () => {
 
     goToRuleDetails();
 
-    cy.get(RULE_NAME_HEADER).should('have.text', `${this.rule.name}`);
+    cy.get(RULE_NAME_HEADER).should('contain', `${this.rule.name}`);
     cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', this.rule.description);
     cy.get(ABOUT_DETAILS).within(() => {
       getDetails(SEVERITY_DETAILS).should('have.text', this.rule.severity);

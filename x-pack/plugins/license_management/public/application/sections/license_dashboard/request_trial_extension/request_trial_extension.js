@@ -37,6 +37,7 @@ export const RequestTrialExtension = ({ shouldShowRequestTrialExtension }) => {
   return (
     <EuiFlexItem>
       <EuiCard
+        hasBorder
         title={
           <FormattedMessage
             id="xpack.licenseMgmt.licenseDashboard.requestTrialExtension.extendYourTrialTitle"

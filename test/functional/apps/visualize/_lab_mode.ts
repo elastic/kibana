@@ -13,9 +13,12 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
-  const PageObjects = getPageObjects(['common', 'header', 'discover', 'settings']);
+  const PageObjects = getPageObjects(['common', 'header', 'discover', 'settings', 'visualize']);
 
   describe('visualize lab mode', () => {
+    before(async () => {
+      await PageObjects.visualize.initTests();
+    });
     it('disabling does not break loading saved searches', async () => {
       await PageObjects.common.navigateToUrl('discover', '', { useActualUrl: true });
       await PageObjects.discover.saveSearch('visualize_lab_mode_test');

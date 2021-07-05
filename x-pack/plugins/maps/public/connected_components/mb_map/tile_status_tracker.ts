@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Map as MapboxMap, MapSourceDataEvent } from 'mapbox-gl';
+import type { Map as MapboxMap, MapSourceDataEvent } from '@kbn/mapbox-gl';
 import _ from 'lodash';
 import { ILayer } from '../../classes/layers/layer';
 import { SPATIAL_FILTERS_LAYER_ID } from '../../../common/constants';

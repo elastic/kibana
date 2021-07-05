@@ -78,17 +78,6 @@ function LineOptions({ chart, setChart }: LineOptionsParams) {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-
-      <EuiSpacer size="m" />
-
-      <SwitchOption
-        label={i18n.translate('visTypeXy.controls.pointSeries.series.showDotsLabel', {
-          defaultMessage: 'Show dots',
-        })}
-        paramName="showCircles"
-        value={chart.showCircles}
-        setValue={setChart}
-      />
     </>
   );
 }

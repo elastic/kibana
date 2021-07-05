@@ -1,0 +1,11 @@
+.kbnPageTemplate__pageSideBar {
+  overflow: hidden;
+
+  @include euiCanAnimate {
+    transition: min-width $euiAnimSpeedFast $euiAnimSlightResistance;
+  }
+
+  &.kbnPageTemplate__pageSideBar--shrink {
+    min-width: $euiSizeXXL + $euiSize;
+  }
+}

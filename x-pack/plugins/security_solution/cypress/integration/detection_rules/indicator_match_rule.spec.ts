@@ -16,7 +16,6 @@ import {
   ALERT_RULE_VERSION,
   NUMBER_OF_ALERTS,
 } from '../../screens/alerts';
-import { JSON_LINES } from '../../screens/alerts_details';
 import {
   CUSTOM_RULES_BTN,
   RISK_SCORE,
@@ -51,21 +50,17 @@ import {
   SCHEDULE_DETAILS,
   SEVERITY_DETAILS,
   TAGS_DETAILS,
-  TIMELINE_FIELD,
   TIMELINE_TEMPLATE_DETAILS,
 } from '../../screens/rule_details';
 import { INDICATOR_MATCH_ROW_RENDER, PROVIDER_BADGE } from '../../screens/timeline';
-
 import {
-  expandFirstAlert,
   goToManageAlertsDetectionRules,
   investigateFirstAlertInTimeline,
   waitForAlertsIndexToBeCreated,
   waitForAlertsPanelToBeLoaded,
 } from '../../tasks/alerts';
-import { openJsonView, scrollJsonViewToBottom } from '../../tasks/alerts_details';
 import {
-  changeRowsPerPageTo300,
+  changeRowsPerPageTo100,
   duplicateFirstRule,
   duplicateSelectedRules,
   duplicateRuleFromMenu,
@@ -108,9 +103,9 @@ import {
 import { goBackToRuleDetails, waitForKibana } from '../../tasks/edit_rule';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
-import { addsFieldsToTimeline, goBackToAllRulesTable } from '../../tasks/rule_details';
+import { goBackToAllRulesTable } from '../../tasks/rule_details';
 
-import { DETECTIONS_URL, RULE_CREATION } from '../../urls/navigation';
+import { ALERTS_URL, RULE_CREATION } from '../../urls/navigation';
 
 describe('indicator match', () => {
   describe('Detection rules, Indicator Match', () => {
@@ -394,7 +389,7 @@ describe('indicator match', () => {
     describe('Generating signals', () => {
       beforeEach(() => {
         cleanKibana();
-        loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+        loginAndWaitForPageWithoutDateRange(ALERTS_URL);
       });
 
       it('Creates and activates a new Indicator Match rule', () => {
@@ -411,7 +406,7 @@ describe('indicator match', () => {
 
         cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-        changeRowsPerPageTo300();
+        changeRowsPerPageTo100();
 
         cy.get(RULES_TABLE).then(($table) => {
           cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
@@ -429,7 +424,7 @@ describe('indicator match', () => {
 
         goToRuleDetails();
 
-        cy.get(RULE_NAME_HEADER).should('have.text', `${newThreatIndicatorRule.name}`);
+        cy.get(RULE_NAME_HEADER).should('contain', `${newThreatIndicatorRule.name}`);
         cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', newThreatIndicatorRule.description);
         cy.get(ABOUT_DETAILS).within(() => {
           getDetails(SEVERITY_DETAILS).should('have.text', newThreatIndicatorRule.severity);
@@ -507,82 +502,14 @@ describe('indicator match', () => {
         cy.get(PROVIDER_BADGE).should('have.length', 3);
         cy.get(PROVIDER_BADGE).should(
           'have.text',
-          `threat.indicator.matched.atomic: "${newThreatIndicatorRule.atomic}"threat.indicator.matched.type: "${newThreatIndicatorRule.type}"threat.indicator.matched.field: "${newThreatIndicatorRule.indicatorMappingField}"`
+          `threat.indicator.matched.atomic: "${newThreatIndicatorRule.atomic}"threat.indicator.matched.type: "indicator_match_rule"threat.indicator.matched.field: "${newThreatIndicatorRule.indicatorMappingField}"`
         );
 
         cy.readFile(threatIndicatorPath).then((threatIndicator) => {
           cy.get(INDICATOR_MATCH_ROW_RENDER).should(
             'have.text',
-            `threat.indicator.matched.field${newThreatIndicatorRule.indicatorMappingField}${accessibilityText}matched${newThreatIndicatorRule.indicatorMappingField}${newThreatIndicatorRule.atomic}${accessibilityText}threat.indicator.matched.type${newThreatIndicatorRule.type}${accessibilityText}fromthreat.indicator.event.dataset${threatIndicator.value.source.event.dataset}${accessibilityText}:threat.indicator.event.reference${threatIndicator.value.source.event.reference}(opens in a new tab or window)${accessibilityText}`
+            `threat.indicator.matched.field${newThreatIndicatorRule.indicatorMappingField}${accessibilityText}matched${newThreatIndicatorRule.indicatorMappingField}${newThreatIndicatorRule.atomic}${accessibilityText}threat.indicator.matched.typeindicator_match_rule${accessibilityText}fromthreat.indicator.event.dataset${threatIndicator.value.source.event.dataset}${accessibilityText}:threat.indicator.event.reference${threatIndicator.value.source.event.reference}(opens in a new tab or window)${accessibilityText}`
           );
-        });
-      });
-    });
-
-    describe('Enrichment', () => {
-      const fieldSearch = 'threat.indicator.matched';
-      const fields = [
-        'threat.indicator.matched.atomic',
-        'threat.indicator.matched.type',
-        'threat.indicator.matched.field',
-      ];
-      const expectedFieldsText = [
-        newThreatIndicatorRule.atomic,
-        newThreatIndicatorRule.type,
-        newThreatIndicatorRule.indicatorMappingField,
-      ];
-
-      const expectedEnrichment = [
-        { line: 4, text: '  "threat": {' },
-        {
-          line: 3,
-          text:
-            '    "indicator": "{\\"first_seen\\":\\"2021-03-10T08:02:14.000Z\\",\\"file\\":{\\"size\\":80280,\\"pe\\":{},\\"type\\":\\"elf\\",\\"hash\\":{\\"sha256\\":\\"a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3\\",\\"tlsh\\":\\"6D7312E017B517CC1371A8353BED205E9128223972AE35302E97528DF957703BAB2DBE\\",\\"ssdeep\\":\\"1536:87vbq1lGAXSEYQjbChaAU2yU23M51DjZgSQAvcYkFtZTjzBht5:8D+CAXFYQChaAUk5ljnQssL\\",\\"md5\\":\\"9b6c3518a91d23ed77504b5416bfb5b3\\"}},\\"type\\":\\"file\\",\\"event\\":{\\"reference\\":\\"https://urlhaus-api.abuse.ch/v1/download/a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3/\\",\\"ingested\\":\\"2021-03-10T14:51:09.809069Z\\",\\"created\\":\\"2021-03-10T14:51:07.663Z\\",\\"kind\\":\\"enrichment\\",\\"module\\":\\"threatintel\\",\\"category\\":\\"threat\\",\\"type\\":\\"indicator\\",\\"dataset\\":\\"threatintel.abusemalware\\"},\\"matched\\":{\\"atomic\\":\\"a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3\\",\\"field\\":\\"myhash.mysha256\\",\\"id\\":\\"84cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb74f\\",\\"index\\":\\"filebeat-7.12.0-2021.03.10-000001\\",\\"type\\":\\"file\\"}}"',
-        },
-        { line: 2, text: '  }' },
-      ];
-
-      before(() => {
-        cleanKibana();
-        esArchiverLoad('threat_indicator');
-        esArchiverLoad('suspicious_source_event');
-        loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
-        goToManageAlertsDetectionRules();
-        createCustomIndicatorRule(newThreatIndicatorRule);
-        reload();
-      });
-
-      after(() => {
-        esArchiverUnload('threat_indicator');
-        esArchiverUnload('suspicious_source_event');
-      });
-
-      beforeEach(() => {
-        loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
-        goToManageAlertsDetectionRules();
-        goToRuleDetails();
-      });
-
-      it('Displays matches on the timeline', () => {
-        addsFieldsToTimeline(fieldSearch, fields);
-
-        fields.forEach((field, index) => {
-          cy.get(TIMELINE_FIELD(field)).should('have.text', expectedFieldsText[index]);
-        });
-      });
-
-      it('Displays enrichment on the JSON view', () => {
-        expandFirstAlert();
-        openJsonView();
-        scrollJsonViewToBottom();
-
-        cy.get(JSON_LINES).then((elements) => {
-          const length = elements.length;
-          expectedEnrichment.forEach((enrichment) => {
-            cy.wrap(elements)
-              .eq(length - enrichment.line)
-              .should('have.text', enrichment.text);
-          });
         });
       });
     });
@@ -590,7 +517,7 @@ describe('indicator match', () => {
     describe('Duplicates the indicator rule', () => {
       beforeEach(() => {
         cleanKibana();
-        loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+        loginAndWaitForPageWithoutDateRange(ALERTS_URL);
         goToManageAlertsDetectionRules();
         createCustomIndicatorRule(newThreatIndicatorRule);
         reload();

@@ -30,12 +30,6 @@ import { EMSTermJoinConfig } from '../../../../maps/public';
 import { AnomaliesTableRecord } from '../../../common/types/anomalies';
 
 const MAX_ENTITY_VALUES = 3;
-const COMMON_EMS_LAYER_IDS = [
-  'world_countries',
-  'administrative_regions_lvl2',
-  'usa_zip_codes',
-  'usa_states',
-];
 
 function getAnomalyRows(anomalies: AnomaliesTableRecord[], jobId: string) {
   const anomalyRows: Record<
@@ -182,7 +176,6 @@ export const AnomaliesMap: FC<Props> = ({ anomalies, jobIds }) => {
         }
 
         const suggestion: EMSTermJoinConfig | null = await mapsPlugin.suggestEMSTermJoinConfig({
-          emsLayerIds: COMMON_EMS_LAYER_IDS,
           sampleValues: Array.from(entityValues),
           sampleValuesColumnName: entityName || '',
         });

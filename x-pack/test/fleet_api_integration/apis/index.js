@@ -48,5 +48,8 @@ export default function ({ loadTestFile }) {
 
     // Outputs
     loadTestFile(require.resolve('./outputs'));
+
+    // Telemetry
+    loadTestFile(require.resolve('./fleet_telemetry'));
   });
 }

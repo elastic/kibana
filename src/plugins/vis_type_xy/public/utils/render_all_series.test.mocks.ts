@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { VisConfig } from '../types';
+import { AxisMode, VisConfig } from '../types';
 
 export const getVisConfig = (): VisConfig => {
   return {
@@ -109,7 +109,7 @@ export const getVisConfig = (): VisConfig => {
           show: false,
         },
         scale: {
-          mode: 'normal',
+          mode: AxisMode.Normal,
           type: 'linear',
         },
         domain: {},
@@ -243,7 +243,7 @@ export const getVisConfigMutipleYaxis = (): VisConfig => {
           show: false,
         },
         scale: {
-          mode: 'normal',
+          mode: AxisMode.Normal,
           type: 'linear',
         },
         domain: {},
@@ -432,7 +432,7 @@ export const getVisConfigPercentiles = (): VisConfig => {
           show: false,
         },
         scale: {
-          mode: 'normal',
+          mode: AxisMode.Normal,
           type: 'linear',
         },
         domain: {},

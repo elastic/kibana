@@ -15,7 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('classification creation', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/bm_classification');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/bm_classification');
       await ml.testResources.createIndexPatternIfNeeded('ft_bank_marketing', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
 

@@ -12,7 +12,7 @@ export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
 
   describe('list', () => {
-    const archive = 'monitoring/apm';
+    const archive = 'x-pack/test/functional/es_archives/monitoring/apm';
     const timeRange = {
       min: '2018-08-31T12:59:49.104Z',
       max: '2018-08-31T13:59:49.104Z',
@@ -67,6 +67,7 @@ export default function ({ getService }) {
             time_of_last_event: '2018-08-31T13:59:21.163Z',
           },
         ],
+        cgroup: false,
       };
 
       expect(body).to.eql(expected);

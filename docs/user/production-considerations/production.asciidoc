@@ -8,7 +8,6 @@
 * <<configuring-kibana-shield>>
 * <<csp-strict-mode>>
 * <<enabling-ssl>>
-* <<load-balancing-es>>
 * <<load-balancing-kibana>>
 * <<accessing-load-balanced-kibana>>
 * <<high-availability>>
@@ -22,9 +21,8 @@ Kibana instances that are all connected to the same Elasticsearch instance.
 
 While Kibana isn't terribly resource intensive, we still recommend running Kibana
 separate from  your Elasticsearch data or master nodes. To distribute Kibana
-traffic across the nodes in your Elasticsearch cluster, you can run Kibana
-and an Elasticsearch client node on the same machine. For more information, see
-<<load-balancing-es, Load balancing across multiple Elasticsearch nodes>>.
+traffic across the nodes in your Elasticsearch cluster,
+you can configure Kibana to use a list of Elasticsearch hosts.
 
 [float]
 [[configuring-kibana-shield]]
@@ -68,58 +66,6 @@ csp.strict: true
 === Enable SSL
 
 See <<configuring-tls>>.
-
-[float]
-[[load-balancing-es]]
-=== Load Balancing across multiple {es} nodes
-If you have multiple nodes in your Elasticsearch cluster, the easiest way to distribute Kibana requests
-across the nodes is to run an Elasticsearch _Coordinating only_ node on the same machine as Kibana.
-Elasticsearch Coordinating only nodes are essentially smart load balancers that are part of the cluster. They
-process incoming HTTP requests, redirect operations to the other nodes in the cluster as needed, and
-gather and return the results. For more information, see
-{ref}/modules-node.html[Node] in the Elasticsearch reference.
-
-To use a local client node to load balance Kibana requests:
-
-. Install Elasticsearch on the same machine as Kibana.
-. Configure the node as a Coordinating only node. In `elasticsearch.yml`, set `node.data`, `node.master` and `node.ingest` to `false`:
-+
-[source,js]
---------
-# 3. You want this node to be neither master nor data node nor ingest node, but
-#    to act as a "search load balancer" (fetching data from nodes,
-#    aggregating results, etc.)
-#
-node.master: false
-node.data: false
-node.ingest: false
---------
-. Configure the client node to join your Elasticsearch cluster. In `elasticsearch.yml`, set the `cluster.name` to the
-name of your cluster.
-+
-[source,js]
---------
-cluster.name: "my_cluster"
---------
-. Check your transport and HTTP host configs in `elasticsearch.yml` under `network.host` and `transport.host`. The `transport.host` needs to be on the network reachable to the cluster members, the `network.host` is the network for the HTTP connection for Kibana (localhost:9200 by default).
-+
-[source,js]
---------
-network.host: localhost
-http.port: 9200
-
-# by default transport.host refers to network.host
-transport.host: <external ip>
-transport.tcp.port: 9300 - 9400
---------
-. Make sure Kibana is configured to point to your local client node. In `kibana.yml`, the `elasticsearch.hosts` setting should be set to
-`["localhost:9200"]`.
-+
-[source,js]
---------
-# The Elasticsearch instance to use for all your queries.
-elasticsearch.hosts: ["http://localhost:9200"]
---------
 
 [float]
 [[load-balancing-kibana]]
@@ -175,8 +121,6 @@ active in case of failure from the currently used instance.
 === High availability across multiple {es} nodes
 Kibana can be configured to connect to multiple Elasticsearch nodes in the same cluster.  In situations where a node becomes unavailable,
 Kibana will transparently connect to an available node and continue operating.  Requests to available hosts will be routed in a round robin fashion.
-
-Currently the Console application is limited to connecting to the first node listed.
 
 In kibana.yml:
 [source,js]

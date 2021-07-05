@@ -27,6 +27,7 @@ describe('Background Search Session management status labels', () => {
       id: 'wtywp9u2802hahgp-gsla',
       restoreUrl: '/app/great-app-url/#45',
       reloadUrl: '/app/great-app-url/#45',
+      numSearches: 1,
       appId: 'security',
       status: SearchSessionStatus.IN_PROGRESS,
       created: '2020-12-02T00:19:32Z',

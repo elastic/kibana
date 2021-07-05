@@ -10,6 +10,46 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { KibanaPageTemplate } from './page_template';
 import { EuiEmptyPrompt } from '@elastic/eui';
+import { KibanaPageTemplateSolutionNavProps } from './solution_nav';
+
+const navItems: KibanaPageTemplateSolutionNavProps['items'] = [
+  {
+    name: 'Ingest',
+    id: '1',
+    items: [
+      {
+        name: 'Ingest Node Pipelines',
+        id: '1.1',
+      },
+      {
+        name: 'Logstash Pipelines',
+        id: '1.2',
+      },
+      {
+        name: 'Beats Central Management',
+        id: '1.3',
+      },
+    ],
+  },
+  {
+    name: 'Data',
+    id: '2',
+    items: [
+      {
+        name: 'Index Management',
+        id: '2.1',
+      },
+      {
+        name: 'Index Lifecycle Policies',
+        id: '2.2',
+      },
+      {
+        name: 'Snapshot and Restore',
+        id: '2.3',
+      },
+    ],
+  },
+];
 
 describe('KibanaPageTemplate', () => {
   test('render default empty prompt', () => {
@@ -61,6 +101,25 @@ describe('KibanaPageTemplate', () => {
           title: 'test',
           description: 'test',
           rightSideItems: ['test'],
+        }}
+      />
+    );
+    expect(component).toMatchSnapshot();
+  });
+
+  test('render solutionNav', () => {
+    const component = shallow(
+      <KibanaPageTemplate
+        pageHeader={{
+          iconType: 'test',
+          title: 'test',
+          description: 'test',
+          rightSideItems: ['test'],
+        }}
+        solutionNav={{
+          name: 'Solution',
+          icon: 'solution',
+          items: navItems,
         }}
       />
     );

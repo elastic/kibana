@@ -229,7 +229,23 @@
             "path": "src/plugins/telemetry_management_section/public/plugin.tsx",
             "lineNumber": 38
           },
-          "deprecated": false
+          "deprecated": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "telemetryManagementSection",
+              "id": "def-public.enabled",
+              "type": "boolean",
+              "tags": [],
+              "label": "enabled",
+              "description": [],
+              "source": {
+                "path": "src/plugins/telemetry_management_section/public/plugin.tsx",
+                "lineNumber": 38
+              },
+              "deprecated": false
+            }
+          ]
         }
       ],
       "lifecycle": "setup",

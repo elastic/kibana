@@ -26,6 +26,7 @@ export async function getSeriesRequestParams(
     esShardTimeout,
     uiSettings,
     cachedIndexPatternFetcher,
+    buildSeriesMetaParams,
   }: VisTypeTimeseriesRequestServices
 ) {
   let seriesIndex = panelIndex;
@@ -41,7 +42,8 @@ export async function getSeriesRequestParams(
     esQueryConfig,
     seriesIndex,
     capabilities,
-    uiSettings
+    uiSettings,
+    () => buildSeriesMetaParams(seriesIndex, Boolean(panel.use_kibana_indexes), series)
   );
 
   return {

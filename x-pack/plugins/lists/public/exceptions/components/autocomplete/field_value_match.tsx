@@ -14,8 +14,8 @@ import {
   EuiSuperSelect,
 } from '@elastic/eui';
 import { uniq } from 'lodash';
+import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
-import { OperatorTypeEnum } from '../../../../common';
 import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
 

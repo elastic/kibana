@@ -12,6 +12,7 @@ import { loadTracer } from '../load_tracer';
 import { createAsyncInstance, isAsyncInstance } from './async_instance';
 import { Providers } from './read_provider_spec';
 import { createVerboseInstance } from './verbose_instance';
+import { GenericFtrService } from '../../public_types';
 
 export class ProviderCollection {
   private readonly instances = new Map();
@@ -58,12 +59,19 @@ export class ProviderCollection {
   }
 
   public invokeProviderFn(provider: (args: any) => any) {
-    return provider({
+    const ctx = {
       getService: this.getService,
       hasService: this.hasService,
       getPageObject: this.getPageObject,
       getPageObjects: this.getPageObjects,
-    });
+    };
+
+    if (provider.prototype instanceof GenericFtrService) {
+      const Constructor = (provider as any) as new (ctx: any) => any;
+      return new Constructor(ctx);
+    }
+
+    return provider(ctx);
   }
 
   private findProvider(type: string, name: string) {

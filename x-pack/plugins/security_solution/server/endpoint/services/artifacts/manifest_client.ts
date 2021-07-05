@@ -10,11 +10,11 @@ import {
   SavedObjectsClientContract,
   SavedObjectsUpdateResponse,
 } from 'src/core/server';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 import {
   manifestSchemaVersion,
   ManifestSchemaVersion,
 } from '../../../../common/endpoint/schema/common';
-import { validate } from '../../../../common/validate';
 import { ManifestConstants } from '../../lib/artifacts';
 import { InternalManifestSchema, InternalManifestCreateSchema } from '../../schemas/artifacts';
 

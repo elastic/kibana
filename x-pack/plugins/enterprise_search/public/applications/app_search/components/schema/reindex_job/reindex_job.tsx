@@ -5,41 +5,56 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
-import { EuiPageHeader, EuiPageContentBody } from '@elastic/eui';
+import { useActions, useValues } from 'kea';
+
 import { i18n } from '@kbn/i18n';
 
-import { FlashMessages } from '../../../../shared/flash_messages';
-import { SetAppSearchChrome as SetPageChrome } from '../../../../shared/kibana_chrome';
-import { BreadcrumbTrail } from '../../../../shared/kibana_chrome/generate_breadcrumbs';
+import { SchemaErrorsAccordion } from '../../../../shared/schema';
+import { ENGINE_DOCUMENT_DETAIL_PATH } from '../../../routes';
+import { EngineLogic, generateEnginePath, getEngineBreadcrumbs } from '../../engine';
+import { AppSearchPageTemplate } from '../../layout';
+import { SCHEMA_TITLE } from '../constants';
 
-interface Props {
-  schemaBreadcrumb: BreadcrumbTrail;
-}
+import { ReindexJobLogic } from './reindex_job_logic';
 
-export const ReindexJob: React.FC<Props> = ({ schemaBreadcrumb }) => {
+export const ReindexJob: React.FC = () => {
   const { reindexJobId } = useParams() as { reindexJobId: string };
+  const { loadReindexJob } = useActions(ReindexJobLogic);
+  const { dataLoading, fieldCoercionErrors } = useValues(ReindexJobLogic);
+  const {
+    engine: { schema },
+  } = useValues(EngineLogic);
+
+  useEffect(() => {
+    loadReindexJob(reindexJobId);
+  }, [reindexJobId]);
 
   return (
-    <>
-      <SetPageChrome
-        trail={[
-          ...schemaBreadcrumb,
-          i18n.translate('xpack.enterpriseSearch.appSearch.engine.schema.reindexErrorsBreadcrumb', {
-            defaultMessage: 'Reindex errors',
-          }),
-        ]}
-      />
-      <EuiPageHeader
-        pageTitle={i18n.translate(
+    <AppSearchPageTemplate
+      pageChrome={getEngineBreadcrumbs([
+        SCHEMA_TITLE,
+        i18n.translate('xpack.enterpriseSearch.appSearch.engine.schema.reindexErrorsBreadcrumb', {
+          defaultMessage: 'Reindex errors',
+        }),
+      ])}
+      pageHeader={{
+        pageTitle: i18n.translate(
           'xpack.enterpriseSearch.appSearch.engine.schema.reindexJob.title',
           { defaultMessage: 'Schema change errors' }
-        )}
+        ),
+      }}
+      isLoading={dataLoading}
+    >
+      <SchemaErrorsAccordion
+        fieldCoercionErrors={fieldCoercionErrors}
+        schema={schema!}
+        generateViewPath={(documentId: string) =>
+          generateEnginePath(ENGINE_DOCUMENT_DETAIL_PATH, { documentId })
+        }
       />
-      <FlashMessages />
-      <EuiPageContentBody>{reindexJobId}</EuiPageContentBody>
-    </>
+    </AppSearchPageTemplate>
   );
 };

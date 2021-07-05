@@ -33,8 +33,8 @@ describe('add_tags', () => {
     const tags2 = addTags(tags1, 'rule-1', false);
     expect(tags2).toEqual([
       'tag-1',
-      `${INTERNAL_RULE_ID_KEY}:rule-1`,
       `${INTERNAL_IMMUTABLE_KEY}:false`,
+      `${INTERNAL_RULE_ID_KEY}:rule-1`,
     ]);
   });
 });

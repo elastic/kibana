@@ -36,6 +36,8 @@ import {
   CountCriteria,
   CountAlertParams,
   RatioAlertParams,
+  isOptimizedGroupedSearchQueryResponse,
+  isOptimizableGroupedThreshold,
 } from '../../../../common/alerting/logs/log_threshold/types';
 import { InfraBackendLibs } from '../../infra_types';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
@@ -57,7 +59,7 @@ type LogThresholdAlertExecutorOptions = AlertExecutorOptions<
   LogThresholdActionGroups
 >;
 
-const COMPOSITE_GROUP_SIZE = 40;
+const COMPOSITE_GROUP_SIZE = 2000;
 
 const checkValueAgainstComparatorMap: {
   [key: string]: (a: number, b: number) => boolean;
@@ -67,6 +69,10 @@ const checkValueAgainstComparatorMap: {
   [Comparator.LT]: (a: number, b: number) => a < b,
   [Comparator.LT_OR_EQ]: (a: number, b: number) => a <= b,
 };
+
+// The executor execution roughly follows a pattern of:
+// ES Query generation -> fetching of results -> processing of results.
+// With forks for group_by vs ungrouped, and ratio vs non-ratio.
 
 export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
   async function ({ services, params }: LogThresholdAlertExecutorOptions) {
@@ -113,7 +119,7 @@ async function executeAlert(
   alertParams: CountAlertParams,
   timestampField: string,
   indexPattern: string,
-  runtimeMappings: estypes.RuntimeFields,
+  runtimeMappings: estypes.MappingRuntimeFields,
   esClient: ElasticsearchClient,
   alertInstanceFactory: LogThresholdAlertServices['alertInstanceFactory']
 ) {
@@ -144,7 +150,7 @@ async function executeRatioAlert(
   alertParams: RatioAlertParams,
   timestampField: string,
   indexPattern: string,
-  runtimeMappings: estypes.RuntimeFields,
+  runtimeMappings: estypes.MappingRuntimeFields,
   esClient: ElasticsearchClient,
   alertInstanceFactory: LogThresholdAlertServices['alertInstanceFactory']
 ) {
@@ -198,7 +204,7 @@ const getESQuery = (
   alertParams: Omit<AlertParams, 'criteria'> & { criteria: CountCriteria },
   timestampField: string,
   indexPattern: string,
-  runtimeMappings: estypes.RuntimeFields
+  runtimeMappings: estypes.MappingRuntimeFields
 ) => {
   return hasGroupBy(alertParams)
     ? getGroupedESQuery(alertParams, timestampField, indexPattern, runtimeMappings)
@@ -277,11 +283,26 @@ type ReducedGroupByResults = ReducedGroupByResult[];
 const getReducedGroupByResults = (
   results: GroupedSearchQueryResponse['aggregations']['groups']['buckets']
 ): ReducedGroupByResults => {
-  return results.reduce<ReducedGroupByResults>((acc, groupBucket) => {
-    const groupName = Object.values(groupBucket.key).join(', ');
-    const groupResult = { name: groupName, documentCount: groupBucket.filtered_results.doc_count };
-    return [...acc, groupResult];
-  }, []);
+  const getGroupName = (
+    key: GroupedSearchQueryResponse['aggregations']['groups']['buckets'][0]['key']
+  ) => Object.values(key).join(', ');
+
+  if (isOptimizedGroupedSearchQueryResponse(results)) {
+    return results.reduce<ReducedGroupByResults>((acc, groupBucket) => {
+      const groupName = getGroupName(groupBucket.key);
+      const groupResult = { name: groupName, documentCount: groupBucket.doc_count };
+      return [...acc, groupResult];
+    }, []);
+  } else {
+    return results.reduce<ReducedGroupByResults>((acc, groupBucket) => {
+      const groupName = getGroupName(groupBucket.key);
+      const groupResult = {
+        name: groupName,
+        documentCount: groupBucket.filtered_results.doc_count,
+      };
+      return [...acc, groupResult];
+    }, []);
+  }
 };
 
 export const processGroupByResults = (
@@ -430,12 +451,29 @@ export const buildFiltersFromCriteria = (
 };
 
 export const getGroupedESQuery = (
-  params: Pick<AlertParams, 'timeSize' | 'timeUnit' | 'groupBy'> & { criteria: CountCriteria },
+  params: Pick<AlertParams, 'timeSize' | 'timeUnit' | 'groupBy'> & {
+    criteria: CountCriteria;
+    count: {
+      comparator: AlertParams['count']['comparator'];
+      value?: AlertParams['count']['value'];
+    };
+  },
   timestampField: string,
   index: string,
-  runtimeMappings: estypes.RuntimeFields
+  runtimeMappings: estypes.MappingRuntimeFields
 ): estypes.SearchRequest | undefined => {
-  const { groupBy } = params;
+  // IMPORTANT:
+  // For the group by scenario we need to account for users utilizing "less than" configurations
+  // to attempt to match on "0", e.g. something has stopped reporting. We need to cast a wider net for these
+  // configurations to try and capture more documents, so that the filtering doesn't make the group "disappear".
+  // Due to this there are two forks in the group by code, one where we can optimize the filtering early, and one where
+  // it is an inner aggregation. "Less than" configurations with high cardinality group by fields can cause severe performance
+  // problems.
+
+  const {
+    groupBy,
+    count: { comparator, value },
+  } = params;
 
   if (!groupBy || !groupBy.length) {
     return;
@@ -446,54 +484,88 @@ export const getGroupedESQuery = (
     timestampField
   );
 
-  const aggregations = {
-    groups: {
-      composite: {
-        size: COMPOSITE_GROUP_SIZE,
-        sources: groupBy.map((field, groupIndex) => ({
-          [`group-${groupIndex}-${field}`]: {
-            terms: { field },
-          },
-        })),
+  if (isOptimizableGroupedThreshold(comparator, value)) {
+    const aggregations = {
+      groups: {
+        composite: {
+          size: COMPOSITE_GROUP_SIZE,
+          sources: groupBy.map((field, groupIndex) => ({
+            [`group-${groupIndex}-${field}`]: {
+              terms: { field },
+            },
+          })),
+        },
       },
-      aggregations: {
-        filtered_results: {
-          filter: {
-            bool: {
-              // Scope the inner filtering back to the unpadded range
-              filter: [rangeFilter, ...mustFilters],
-              ...(mustNotFilters.length > 0 && { must_not: mustNotFilters }),
+    };
+
+    const body: estypes.SearchRequest['body'] = {
+      query: {
+        bool: {
+          filter: [rangeFilter, ...mustFilters],
+          ...(mustNotFilters.length > 0 && { must_not: mustNotFilters }),
+        },
+      },
+      aggregations,
+      runtime_mappings: runtimeMappings,
+      size: 0,
+    };
+
+    return {
+      index,
+      allow_no_indices: true,
+      ignore_unavailable: true,
+      body,
+    };
+  } else {
+    const aggregations = {
+      groups: {
+        composite: {
+          size: COMPOSITE_GROUP_SIZE,
+          sources: groupBy.map((field, groupIndex) => ({
+            [`group-${groupIndex}-${field}`]: {
+              terms: { field },
+            },
+          })),
+        },
+        aggregations: {
+          filtered_results: {
+            filter: {
+              bool: {
+                // Scope the inner filtering back to the unpadded range
+                filter: [rangeFilter, ...mustFilters],
+                ...(mustNotFilters.length > 0 && { must_not: mustNotFilters }),
+              },
             },
           },
         },
       },
-    },
-  };
+    };
 
-  const body: estypes.SearchRequest['body'] = {
-    query: {
-      bool: {
-        filter: [groupedRangeFilter],
+    const body: estypes.SearchRequest['body'] = {
+      query: {
+        bool: {
+          filter: [groupedRangeFilter],
+        },
       },
-    },
-    aggregations,
-    runtime_mappings: runtimeMappings,
-    size: 0,
-  };
+      aggregations,
+      runtime_mappings: runtimeMappings,
+      size: 0,
+    };
 
-  return {
-    index,
-    allow_no_indices: true,
-    ignore_unavailable: true,
-    body,
-  };
+    return {
+      index,
+      allow_no_indices: true,
+      ignore_unavailable: true,
+      body,
+    };
+  }
 };
 
 export const getUngroupedESQuery = (
   params: Pick<AlertParams, 'timeSize' | 'timeUnit'> & { criteria: CountCriteria },
   timestampField: string,
   index: string,
-  runtimeMappings: estypes.RuntimeFields
+  runtimeMappings: estypes.MappingRuntimeFields
 ): object => {
   const { rangeFilter, mustFilters, mustNotFilters } = buildFiltersFromCriteria(
     params,

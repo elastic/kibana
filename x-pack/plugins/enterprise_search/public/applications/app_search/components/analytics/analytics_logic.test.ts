@@ -10,7 +10,7 @@ import {
   mockKibanaValues,
   mockHttpValues,
   mockFlashMessageHelpers,
-} from '../../../__mocks__';
+} from '../../../__mocks__/kea_logic';
 
 jest.mock('../engine', () => ({
   EngineLogic: { values: { engineName: 'test-engine' } },

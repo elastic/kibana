@@ -27,9 +27,9 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { SAVE_BUTTON_LABEL } from '../../../../shared/constants';
-import { Loading } from '../../../../shared/loading';
+import { WorkplaceSearchPageTemplate } from '../../../components/layout';
 import { SourceIcon } from '../../../components/shared/source_icon';
-import { ViewContentHeader } from '../../../components/shared/view_content_header';
+import { NAV } from '../../../constants';
 import { ContentSource } from '../../../types';
 import { GroupLogic } from '../group_logic';
 
@@ -76,13 +76,11 @@ export const GroupSourcePrioritization: React.FC = () => {
   );
 
   const {
-    group: { contentSources, name: groupName },
+    group: { contentSources = [], name: groupName },
     dataLoading,
     activeSourcePriorities,
     groupPrioritiesUnchanged,
   } = useValues(GroupLogic);
-
-  if (dataLoading) return <Loading />;
 
   const headerAction = (
     <EuiButton
@@ -167,13 +165,17 @@ export const GroupSourcePrioritization: React.FC = () => {
   );
 
   return (
-    <>
-      <ViewContentHeader
-        title={HEADER_TITLE}
-        description={HEADER_DESCRIPTION}
-        action={headerAction}
-      />
+    <WorkplaceSearchPageTemplate
+      pageChrome={[NAV.GROUPS, groupName || '...', NAV.SOURCE_PRIORITIZATION]}
+      pageViewTelemetry="group_overview"
+      pageHeader={{
+        pageTitle: HEADER_TITLE,
+        description: HEADER_DESCRIPTION,
+        rightSideItems: [headerAction],
+      }}
+      isLoading={dataLoading}
+    >
       {hasSources ? sourceTable : zeroState}
-    </>
+    </WorkplaceSearchPageTemplate>
   );
 };

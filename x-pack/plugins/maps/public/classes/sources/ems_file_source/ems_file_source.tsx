@@ -196,7 +196,7 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
     return fields.map((f) => this.createField({ fieldName: f.name }));
   }
 
-  canFormatFeatureProperties() {
+  hasTooltipProperties() {
     return this._tooltipFields.length > 0;
   }
 

@@ -5,111 +5,34 @@
  * 2.0.
  */
 
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ElasticsearchClient, SavedObjectsClientContract, Logger } from 'kibana/server';
-import { ActionsClient } from '../../../actions/server';
+import { User } from '../../common';
+import { Authorization } from '../authorization/authorization';
 import {
-  CasePostRequest,
-  CaseResponse,
-  CasesPatchRequest,
-  CasesResponse,
-  CaseStatuses,
-  CommentRequest,
-  ConnectorMappingsAttributes,
-  GetFieldsResponse,
-  CaseUserActionsResponse,
-  User,
-} from '../../common';
-import { AlertInfo } from '../common';
-import {
-  CaseConfigureServiceSetup,
-  CaseServiceSetup,
-  CaseUserActionServiceSetup,
   AlertServiceContract,
+  CaseConfigureService,
+  CasesService,
+  CaseUserActionService,
+  ConnectorMappingsService,
+  AttachmentService,
 } from '../services';
-import { ConnectorMappingsServiceSetup } from '../services/connector_mappings';
-import { CasesClientGetAlertsResponse } from './alerts/types';
-
-export interface CasesClientGet {
-  id: string;
-  includeComments?: boolean;
-  includeSubCaseComments?: boolean;
-}
-
-export interface CasesClientPush {
-  actionsClient: ActionsClient;
-  caseId: string;
-  connectorId: string;
-}
-
-export interface CasesClientAddComment {
-  caseId: string;
-  comment: CommentRequest;
-}
-
-export interface CasesClientUpdateAlertsStatus {
-  alerts: UpdateAlertRequest[];
-}
-
-export interface CasesClientGetAlerts {
-  alertsInfo: AlertInfo[];
-}
-
-export interface CasesClientGetUserActions {
-  caseId: string;
-  subCaseId?: string;
-}
-
-export interface MappingsClient {
-  actionsClient: ActionsClient;
-  connectorId: string;
-  connectorType: string;
-}
-
-export interface CasesClientFactoryArguments {
-  scopedClusterClient: ElasticsearchClient;
-  caseConfigureService: CaseConfigureServiceSetup;
-  caseService: CaseServiceSetup;
-  connectorMappingsService: ConnectorMappingsServiceSetup;
-  user: User;
-  savedObjectsClient: SavedObjectsClientContract;
-  userActionService: CaseUserActionServiceSetup;
-  alertsService: AlertServiceContract;
-  logger: Logger;
-}
-
-export interface ConfigureFields {
-  actionsClient: ActionsClient;
-  connectorId: string;
-  connectorType: string;
-}
+import { ActionsClient } from '../../../actions/server';
 
 /**
- * Defines the fields necessary to update an alert's status.
+ * Parameters for initializing a cases client
  */
-export interface UpdateAlertRequest {
-  id: string;
-  index: string;
-  status: CaseStatuses;
-}
-
-/**
- * This represents the interface that other plugins can access.
- */
-export interface CasesClient {
-  addComment(args: CasesClientAddComment): Promise<CaseResponse>;
-  create(theCase: CasePostRequest): Promise<CaseResponse>;
-  get(args: CasesClientGet): Promise<CaseResponse>;
-  getAlerts(args: CasesClientGetAlerts): Promise<CasesClientGetAlertsResponse>;
-  getFields(args: ConfigureFields): Promise<GetFieldsResponse>;
-  getMappings(args: MappingsClient): Promise<ConnectorMappingsAttributes[]>;
-  getUserActions(args: CasesClientGetUserActions): Promise<CaseUserActionsResponse>;
-  push(args: CasesClientPush): Promise<CaseResponse>;
-  update(args: CasesPatchRequest): Promise<CasesResponse>;
-  updateAlertsStatus(args: CasesClientUpdateAlertsStatus): Promise<void>;
-}
-
-export interface MappingsClient {
-  actionsClient: ActionsClient;
-  connectorId: string;
-  connectorType: string;
+export interface CasesClientArgs {
+  readonly scopedClusterClient: ElasticsearchClient;
+  readonly caseConfigureService: CaseConfigureService;
+  readonly caseService: CasesService;
+  readonly connectorMappingsService: ConnectorMappingsService;
+  readonly user: User;
+  readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  readonly userActionService: CaseUserActionService;
+  readonly alertsService: AlertServiceContract;
+  readonly attachmentService: AttachmentService;
+  readonly logger: Logger;
+  readonly authorization: PublicMethodsOf<Authorization>;
+  readonly actionsClient: PublicMethodsOf<ActionsClient>;
 }

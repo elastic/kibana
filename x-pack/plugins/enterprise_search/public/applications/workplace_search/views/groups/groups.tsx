@@ -12,12 +12,11 @@ import { useActions, useValues } from 'kea';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { FlashMessages, FlashMessagesLogic } from '../../../shared/flash_messages';
-import { Loading } from '../../../shared/loading';
+import { FlashMessagesLogic } from '../../../shared/flash_messages';
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
-import { AppLogic } from '../../app_logic';
-import { ViewContentHeader } from '../../components/shared/view_content_header';
-import { getGroupPath, USERS_PATH } from '../../routes';
+import { WorkplaceSearchPageTemplate } from '../../components/layout';
+import { NAV } from '../../constants';
+import { getGroupPath, USERS_AND_ROLES_PATH } from '../../routes';
 
 import { AddGroupModal } from './components/add_group_modal';
 import { ClearFiltersLink } from './components/clear_filters_link';
@@ -43,18 +42,12 @@ export const Groups: React.FC = () => {
     filterValue,
   } = useValues(GroupsLogic);
 
-  const { isFederatedAuth } = useValues(AppLogic);
-
   const hasMessages = messages.length > 0;
 
   useEffect(() => {
     getSearchResults(true);
     return resetGroups;
   }, [filteredSources, filteredUsers, filterValue]);
-
-  if (groupsDataLoading) {
-    return <Loading />;
-  }
 
   if (newGroup && hasMessages) {
     messages[0].description = (
@@ -71,26 +64,21 @@ export const Groups: React.FC = () => {
   }
 
   const clearFilters = hasFiltersSet && <ClearFiltersLink />;
-  const inviteUsersButton = !isFederatedAuth ? (
-    <EuiButtonTo to={USERS_PATH} data-test-subj="InviteUsersButton">
+  const inviteUsersButton = (
+    <EuiButtonTo to={USERS_AND_ROLES_PATH} data-test-subj="InviteUsersButton">
       {i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.inviteUsers.action', {
         defaultMessage: 'Invite users',
       })}
     </EuiButtonTo>
-  ) : null;
-
-  const headerAction = (
-    <EuiFlexGroup responsive={false} gutterSize="m">
-      <EuiFlexItem grow={false}>
-        <EuiButton data-test-subj="AddGroupButton" fill onClick={openNewGroupModal}>
-          {i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.addGroupForm.action', {
-            defaultMessage: 'Create a group',
-          })}
-        </EuiButton>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>{inviteUsersButton}</EuiFlexItem>
-    </EuiFlexGroup>
   );
+  const createGroupButton = (
+    <EuiButton data-test-subj="AddGroupButton" fill onClick={openNewGroupModal}>
+      {i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.addGroupForm.action', {
+        defaultMessage: 'Create a group',
+      })}
+    </EuiButton>
+  );
+  const headerActions = [inviteUsersButton, createGroupButton];
 
   const noResults = (
     <EuiFlexGroup justifyContent="spaceAround">
@@ -115,23 +103,25 @@ export const Groups: React.FC = () => {
   );
 
   return (
-    <>
-      <FlashMessages />
-      <ViewContentHeader
-        title={i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.heading', {
+    <WorkplaceSearchPageTemplate
+      pageChrome={[NAV.GROUPS]}
+      pageViewTelemetry="groups"
+      pageHeader={{
+        pageTitle: i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.heading', {
           defaultMessage: 'Manage groups',
-        })}
-        description={i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.description', {
+        }),
+        description: i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.description', {
           defaultMessage:
             'Assign shared content sources and users to groups to create relevant search experiences for various internal teams.',
-        })}
-        action={headerAction}
-      />
-      <EuiSpacer size="m" />
+        }),
+        rightSideItems: headerActions,
+      }}
+      isLoading={groupsDataLoading}
+    >
       <TableFilters />
       <EuiSpacer />
       {numGroups > 0 && !groupListLoading ? <GroupsTable /> : noResults}
       {newGroupModalOpen && <AddGroupModal />}
-    </>
+    </WorkplaceSearchPageTemplate>
   );
 };

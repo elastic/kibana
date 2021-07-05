@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useState } from 'react';
+import React, { useState } from 'react';
 import moment, { Duration } from 'moment';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiHealth, EuiSpacer, EuiSwitch, EuiToolTip } from '@elastic/eui';
@@ -112,7 +112,7 @@ export const alertInstancesTableColumns = (
     ),
     render: (alertInstance: AlertInstanceListItem) => {
       return (
-        <Fragment>
+        <>
           <EuiSwitch
             label="mute"
             showLabel={false}
@@ -122,7 +122,7 @@ export const alertInstancesTableColumns = (
             data-test-subj={`muteAlertInstanceButton_${alertInstance.instance}`}
             onChange={() => onMuteAction(alertInstance)}
           />
-        </Fragment>
+        </>
       );
     },
     sortable: false,
@@ -167,7 +167,7 @@ export function AlertInstances({
   };
 
   return (
-    <Fragment>
+    <>
       <EuiSpacer size="xl" />
       <input
         type="hidden"
@@ -196,7 +196,7 @@ export function AlertInstances({
         tableLayout="fixed"
         className="alertInstancesList"
       />
-    </Fragment>
+    </>
   );
 }
 export const AlertInstancesWithApi = withBulkAlertOperations(AlertInstances);
@@ -226,7 +226,7 @@ const ACTIVE_LABEL = i18n.translate(
 
 const INACTIVE_LABEL = i18n.translate(
   'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.status.inactive',
-  { defaultMessage: 'OK' }
+  { defaultMessage: 'Recovered' }
 );
 
 function getActionGroupName(alertType: AlertType, actionGroupId?: string): string | undefined {

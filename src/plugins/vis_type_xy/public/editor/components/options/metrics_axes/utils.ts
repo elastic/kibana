@@ -26,6 +26,7 @@ export const makeSerie = (
     type: ChartType.Line,
     drawLinesBetweenPoints: true,
     showCircles: true,
+    circlesRadius: 3,
     interpolate: InterpolationMode.Linear,
     lineWidth: 2,
     valueAxis: defaultValueAxis,

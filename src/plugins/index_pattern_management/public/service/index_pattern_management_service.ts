@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { HttpSetup } from '../../../../core/public';
-import { IndexPatternCreationManager, IndexPatternCreationConfig } from './creation';
-import { IndexPatternListManager, IndexPatternListConfig } from './list';
-import { EnvironmentService } from './environment';
-interface SetupDependencies {
-  httpClient: HttpSetup;
+import { HttpStart, CoreStart } from '../../../../core/public';
+import { IndexPatternCreationManager } from './creation';
+import { IndexPatternListManager } from './list';
+
+interface StartDependencies {
+  httpClient: HttpStart;
+  uiSettings: CoreStart['uiSettings'];
 }
 
 /**
@@ -22,32 +23,18 @@ interface SetupDependencies {
 export class IndexPatternManagementService {
   indexPatternCreationManager: IndexPatternCreationManager;
   indexPatternListConfig: IndexPatternListManager;
-  environmentService: EnvironmentService;
 
   constructor() {
     this.indexPatternCreationManager = new IndexPatternCreationManager();
     this.indexPatternListConfig = new IndexPatternListManager();
-    this.environmentService = new EnvironmentService();
   }
 
-  public setup({ httpClient }: SetupDependencies) {
-    const creationManagerSetup = this.indexPatternCreationManager.setup(httpClient);
-    creationManagerSetup.addCreationConfig(IndexPatternCreationConfig);
+  public setup() {}
 
-    const indexPatternListConfigSetup = this.indexPatternListConfig.setup();
-    indexPatternListConfigSetup.addListConfig(IndexPatternListConfig);
-
+  public start({ httpClient, uiSettings }: StartDependencies) {
     return {
-      creation: creationManagerSetup,
-      list: indexPatternListConfigSetup,
-      environment: this.environmentService.setup(),
-    };
-  }
-
-  public start() {
-    return {
-      creation: this.indexPatternCreationManager.start(),
-      list: this.indexPatternListConfig.start(),
+      creation: this.indexPatternCreationManager.start({ httpClient, uiSettings }),
+      list: this.indexPatternListConfig.start({ uiSettings }),
     };
   }
 

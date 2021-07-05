@@ -78,6 +78,7 @@ const callAPI = async (
  * See {@link LegacyClusterClient}.
  *
  * @deprecated Use {@link IClusterClient}.
+ * @removeBy 7.16
  * @public
  */
 export type ILegacyClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
@@ -89,6 +90,7 @@ export type ILegacyClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser
  *
  * See {@link LegacyClusterClient}.
  * @deprecated Use {@link ICustomClusterClient}.
+ * @removeBy 7.16
  * @public
  */
 export type ILegacyCustomClusterClient = Pick<
@@ -99,6 +101,7 @@ export type ILegacyCustomClusterClient = Pick<
 /**
  * {@inheritDoc IClusterClient}
  * @deprecated Use {@link IClusterClient}.
+ * @removeBy 7.16
  * @public
  */
 export class LegacyClusterClient implements ILegacyClusterClient {

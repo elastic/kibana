@@ -85,7 +85,7 @@ describe('reassignAgents (plural)', () => {
     // calls ES update with correct values
     const calledWith = esClient.bulk.mock.calls[0][0];
     // only 1 are regular and bulk write two line per update
-    expect(calledWith.body.length).toBe(2);
+    expect(calledWith.body?.length).toBe(2);
     // @ts-expect-error
     expect(calledWith.body[0].update._id).toEqual(agentInRegularDoc._id);
   });

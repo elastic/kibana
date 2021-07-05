@@ -89,7 +89,10 @@ describe('buildRequestBody(req)', () => {
       capabilities,
       {
         get: async () => 50,
-      }
+      },
+      jest.fn().mockResolvedValue({
+        timeField: '@timestamp',
+      })
     );
 
     expect(doc).toEqual({
@@ -153,10 +156,10 @@ describe('buildRequestBody(req)', () => {
             time_zone: 'UTC',
           },
           meta: {
-            bucketSize: 10,
             intervalString: '10s',
             seriesId: 'c9b5f9c0-e403-11e6-be91-6f7688e9fac7',
             timeField: '@timestamp',
+            panelId: 'c9b5d2b0-e403-11e6-be91-6f7688e9fac7',
           },
         },
       },

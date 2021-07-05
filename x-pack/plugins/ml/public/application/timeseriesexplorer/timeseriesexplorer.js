@@ -26,15 +26,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiIcon,
   EuiSpacer,
   EuiPanel,
   EuiTitle,
-  EuiToolTip,
   EuiAccordion,
   EuiBadge,
 } from '@elastic/eui';
 import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
+import { TimeSeriesExplorerHelpPopover } from './timeseriesexplorer_help_popover';
 
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
 import {
@@ -1085,58 +1084,67 @@ export class TimeSeriesExplorer extends React.Component {
           hasResults === true && (
             <div>
               <div className="results-container">
-                <EuiTitle className="panel-title">
-                  <h2 style={{ display: 'inline' }}>
-                    <span>
-                      {i18n.translate('xpack.ml.timeSeriesExplorer.singleTimeSeriesAnalysisTitle', {
-                        defaultMessage: 'Single time series analysis of {functionLabel}',
-                        values: { functionLabel: chartDetails.functionLabel },
-                      })}
-                    </span>
-                    &nbsp;
-                    {chartDetails.entityData.count === 1 && (
-                      <span className="entity-count-text">
-                        {chartDetails.entityData.entities.length > 0 && '('}
-                        {chartDetails.entityData.entities
-                          .map((entity) => {
-                            return `${entity.fieldName}: ${entity.fieldValue}`;
-                          })
-                          .join(', ')}
-                        {chartDetails.entityData.entities.length > 0 && ')'}
+                <EuiFlexGroup gutterSize="xs" alignItems="center">
+                  <EuiTitle className="panel-title">
+                    <h2 style={{ display: 'inline' }}>
+                      <span>
+                        {i18n.translate(
+                          'xpack.ml.timeSeriesExplorer.singleTimeSeriesAnalysisTitle',
+                          {
+                            defaultMessage: 'Single time series analysis of {functionLabel}',
+                            values: { functionLabel: chartDetails.functionLabel },
+                          }
+                        )}
                       </span>
-                    )}
-                    {chartDetails.entityData.count !== 1 && (
-                      <span className="entity-count-text">
-                        {chartDetails.entityData.entities.map((countData, i) => {
-                          return (
-                            <Fragment key={countData.fieldName}>
-                              {i18n.translate(
-                                'xpack.ml.timeSeriesExplorer.countDataInChartDetailsDescription',
-                                {
-                                  defaultMessage:
-                                    '{openBrace}{cardinalityValue} distinct {fieldName} {cardinality, plural, one {} other { values}}{closeBrace}',
-                                  values: {
-                                    openBrace: i === 0 ? '(' : '',
-                                    closeBrace:
-                                      i === chartDetails.entityData.entities.length - 1 ? ')' : '',
-                                    cardinalityValue:
-                                      countData.cardinality === 0
-                                        ? allValuesLabel
-                                        : countData.cardinality,
-                                    cardinality: countData.cardinality,
-                                    fieldName: countData.fieldName,
-                                  },
-                                }
-                              )}
-                              {i !== chartDetails.entityData.entities.length - 1 ? ', ' : ''}
-                            </Fragment>
-                          );
-                        })}
-                      </span>
-                    )}
-                  </h2>
-                </EuiTitle>
-
+                      &nbsp;
+                      {chartDetails.entityData.count === 1 && (
+                        <span className="entity-count-text">
+                          {chartDetails.entityData.entities.length > 0 && '('}
+                          {chartDetails.entityData.entities
+                            .map((entity) => {
+                              return `${entity.fieldName}: ${entity.fieldValue}`;
+                            })
+                            .join(', ')}
+                          {chartDetails.entityData.entities.length > 0 && ')'}
+                        </span>
+                      )}
+                      {chartDetails.entityData.count !== 1 && (
+                        <span className="entity-count-text">
+                          {chartDetails.entityData.entities.map((countData, i) => {
+                            return (
+                              <Fragment key={countData.fieldName}>
+                                {i18n.translate(
+                                  'xpack.ml.timeSeriesExplorer.countDataInChartDetailsDescription',
+                                  {
+                                    defaultMessage:
+                                      '{openBrace}{cardinalityValue} distinct {fieldName} {cardinality, plural, one {} other { values}}{closeBrace}',
+                                    values: {
+                                      openBrace: i === 0 ? '(' : '',
+                                      closeBrace:
+                                        i === chartDetails.entityData.entities.length - 1
+                                          ? ')'
+                                          : '',
+                                      cardinalityValue:
+                                        countData.cardinality === 0
+                                          ? allValuesLabel
+                                          : countData.cardinality,
+                                      cardinality: countData.cardinality,
+                                      fieldName: countData.fieldName,
+                                    },
+                                  }
+                                )}
+                                {i !== chartDetails.entityData.entities.length - 1 ? ', ' : ''}
+                              </Fragment>
+                            );
+                          })}
+                        </span>
+                      )}
+                    </h2>
+                  </EuiTitle>
+                  <EuiFlexItem grow={false}>
+                    <TimeSeriesExplorerHelpPopover />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
                 <EuiFlexGroup style={{ float: 'right' }}>
                   {showModelBoundsCheckbox && (
                     <EuiFlexItem grow={false}>
@@ -1273,41 +1281,12 @@ export class TimeSeriesExplorer extends React.Component {
                     />
                   </h2>
                 </EuiTitle>
-                <EuiFlexGroup
-                  direction="row"
-                  gutterSize="l"
-                  responsive={true}
-                  className="ml-anomalies-controls"
-                >
-                  <EuiFlexItem grow={false} style={{ width: '170px' }}>
-                    <EuiFormRow
-                      label={i18n.translate('xpack.ml.timeSeriesExplorer.severityThresholdLabel', {
-                        defaultMessage: 'Severity threshold',
-                      })}
-                    >
-                      <SelectSeverity />
-                    </EuiFormRow>
+                <EuiFlexGroup direction="row" gutterSize="l" responsive={true}>
+                  <EuiFlexItem grow={false}>
+                    <SelectSeverity />
                   </EuiFlexItem>
-                  <EuiFlexItem grow={false} style={{ width: '170px' }}>
-                    <EuiFormRow
-                      label={
-                        <EuiToolTip
-                          content={i18n.translate('xpack.ml.timeSeriesExplorer.intervalTooltip', {
-                            defaultMessage:
-                              'Show only the highest severity anomaly for each interval (such as hour or day) or show all anomalies in the selected time period.',
-                          })}
-                        >
-                          <span>
-                            {i18n.translate('xpack.ml.timeSeriesExplorer.intervalLabel', {
-                              defaultMessage: 'Interval',
-                            })}
-                            <EuiIcon type="questionInCircle" color="subdued" />
-                          </span>
-                        </EuiToolTip>
-                      }
-                    >
-                      <SelectInterval />
-                    </EuiFormRow>
+                  <EuiFlexItem grow={false}>
+                    <SelectInterval />
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer size="m" />

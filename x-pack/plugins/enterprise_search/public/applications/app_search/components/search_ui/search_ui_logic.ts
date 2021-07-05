@@ -7,9 +7,11 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { flashAPIErrors } from '../../../shared/flash_messages';
+import { flashAPIErrors, setErrorMessage } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { EngineLogic } from '../engine';
+
+import { NO_SEARCH_KEY_ERROR } from './i18n';
 
 import { ActiveField } from './types';
 
@@ -17,6 +19,8 @@ interface InitialFieldValues {
   validFields: string[];
   validSortFields: string[];
   validFacetFields: string[];
+  urlField?: string;
+  titleField?: string;
 }
 interface SearchUIActions {
   loadFieldData(): void;
@@ -25,7 +29,7 @@ interface SearchUIActions {
   onFacetFieldsChange(facetFields: string[]): { facetFields: string[] };
   onSortFieldsChange(sortFields: string[]): { sortFields: string[] };
   onTitleFieldChange(titleField: string): { titleField: string };
-  onURLFieldChange(urlField: string): { urlField: string };
+  onUrlFieldChange(urlField: string): { urlField: string };
 }
 
 interface SearchUIValues {
@@ -49,7 +53,7 @@ export const SearchUILogic = kea<MakeLogicType<SearchUIValues, SearchUIActions>>
     onFacetFieldsChange: (facetFields) => ({ facetFields }),
     onSortFieldsChange: (sortFields) => ({ sortFields }),
     onTitleFieldChange: (titleField) => ({ titleField }),
-    onURLFieldChange: (urlField) => ({ urlField }),
+    onUrlFieldChange: (urlField) => ({ urlField }),
   }),
   reducers: () => ({
     dataLoading: [
@@ -61,8 +65,20 @@ export const SearchUILogic = kea<MakeLogicType<SearchUIValues, SearchUIActions>>
     validFields: [[], { onFieldDataLoaded: (_, { validFields }) => validFields }],
     validSortFields: [[], { onFieldDataLoaded: (_, { validSortFields }) => validSortFields }],
     validFacetFields: [[], { onFieldDataLoaded: (_, { validFacetFields }) => validFacetFields }],
-    titleField: ['', { onTitleFieldChange: (_, { titleField }) => titleField }],
-    urlField: ['', { onURLFieldChange: (_, { urlField }) => urlField }],
+    titleField: [
+      '',
+      {
+        onTitleFieldChange: (_, { titleField }) => titleField,
+        onFieldDataLoaded: (_, { titleField }) => titleField || '',
+      },
+    ],
+    urlField: [
+      '',
+      {
+        onUrlFieldChange: (_, { urlField }) => urlField,
+        onFieldDataLoaded: (_, { urlField }) => urlField || '',
+      },
+    ],
     facetFields: [[], { onFacetFieldsChange: (_, { facetFields }) => facetFields }],
     sortFields: [[], { onSortFieldsChange: (_, { sortFields }) => sortFields }],
     activeField: [ActiveField.None, { onActiveFieldChange: (_, { activeField }) => activeField }],
@@ -70,14 +86,31 @@ export const SearchUILogic = kea<MakeLogicType<SearchUIValues, SearchUIActions>>
   listeners: ({ actions }) => ({
     loadFieldData: async () => {
       const { http } = HttpLogic.values;
-      const { engineName } = EngineLogic.values;
+      const { searchKey, engineName } = EngineLogic.values;
+
+      if (!searchKey) {
+        setErrorMessage(NO_SEARCH_KEY_ERROR(engineName));
+        return;
+      }
 
       const url = `/api/app_search/engines/${engineName}/search_ui/field_config`;
 
       try {
         const initialFieldValues = await http.get(url);
+        const {
+          defaultValues: { urlField, titleField },
+          validFields,
+          validSortFields,
+          validFacetFields,
+        } = initialFieldValues;
 
-        actions.onFieldDataLoaded(initialFieldValues);
+        actions.onFieldDataLoaded({
+          validFields,
+          validSortFields,
+          validFacetFields,
+          urlField,
+          titleField,
+        });
       } catch (e) {
         flashAPIErrors(e);
       }

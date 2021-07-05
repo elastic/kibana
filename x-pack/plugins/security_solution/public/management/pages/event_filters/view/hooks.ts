@@ -26,8 +26,7 @@ import {
 } from './translations';
 
 import { State } from '../../../../common/store';
-import { EventFiltersListPageState } from '../state';
-import { EventFiltersPageLocation } from '../types';
+import { EventFiltersListPageState, EventFiltersPageLocation } from '../types';
 import { getEventFiltersListPath } from '../../../common/routing';
 
 import {

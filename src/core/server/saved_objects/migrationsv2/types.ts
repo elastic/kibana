@@ -6,18 +6,29 @@
  * Side Public License, v 1.
  */
 
+import * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as Option from 'fp-ts/lib/Option';
 import { estypes } from '@elastic/elasticsearch';
 import { ControlState } from './state_action_machine';
 import { AliasAction } from './actions';
 import { IndexMapping } from '../mappings';
 import { SavedObjectsRawDoc } from '..';
+import { TransformErrorObjects } from '../migrations/core';
+import {
+  DocumentsTransformFailed,
+  DocumentsTransformSuccess,
+} from '../migrations/core/migrate_raw_docs';
 
 export type MigrationLogLevel = 'error' | 'info';
 
 export interface MigrationLog {
   level: MigrationLogLevel;
   message: string;
+}
+
+export interface Progress {
+  processed: number | undefined;
+  total: number | undefined;
 }
 
 export interface BaseState extends ControlState {
@@ -42,7 +53,7 @@ export interface BaseState extends ControlState {
   readonly tempIndexMappings: IndexMapping;
   /** Script to apply to a legacy index before it can be used as a migration source */
   readonly preMigrationScript: Option.Option<string>;
-  readonly outdatedDocumentsQuery: estypes.QueryContainer;
+  readonly outdatedDocumentsQuery: estypes.QueryDslQueryContainer;
   readonly retryCount: number;
   readonly retryDelay: number;
   /**
@@ -97,11 +108,16 @@ export interface BaseState extends ControlState {
    * prevents lost deletes e.g. `.kibana_7.11.0_reindex`.
    */
   readonly tempIndex: string;
-  /* When reindexing we use a source query to exclude saved objects types which
+  /**
+   * When reindexing we use a source query to exclude saved objects types which
    * are no longer used. These saved objects will still be kept in the outdated
    * index for backup purposes, but won't be available in the upgraded index.
    */
-  readonly unusedTypesQuery: estypes.QueryContainer;
+  readonly unusedTypesQuery: estypes.QueryDslQueryContainer;
+  /**
+   * The list of known SO types that are registered.
+   */
+  readonly knownTypes: string[];
 }
 
 export interface InitState extends BaseState {
@@ -121,7 +137,7 @@ export interface PostInitState extends BaseState {
   /** The target index is the index to which the migration writes */
   readonly targetIndex: string;
   readonly versionIndexReadyActions: Option.Option<AliasAction[]>;
-  readonly outdatedDocumentsQuery: estypes.QueryContainer;
+  readonly outdatedDocumentsQuery: estypes.QueryDslQueryContainer;
 }
 
 export interface DoneState extends PostInitState {
@@ -139,6 +155,13 @@ export interface FatalState extends BaseState {
 export interface WaitForYellowSourceState extends BaseState {
   /** Wait for the source index to be yellow before requesting it. */
   readonly controlState: 'WAIT_FOR_YELLOW_SOURCE';
+  readonly sourceIndex: Option.Some<string>;
+  readonly sourceIndexMappings: IndexMapping;
+}
+
+export interface CheckUnknownDocumentsState extends BaseState {
+  /** Check if any unknown document is present in the source index */
+  readonly controlState: 'CHECK_UNKNOWN_DOCUMENTS';
   readonly sourceIndex: Option.Some<string>;
   readonly sourceIndexMappings: IndexMapping;
 }
@@ -175,6 +198,9 @@ export interface ReindexSourceToTempRead extends PostInitState {
   readonly controlState: 'REINDEX_SOURCE_TO_TEMP_READ';
   readonly sourceIndexPitId: string;
   readonly lastHitSortValue: number[] | undefined;
+  readonly corruptDocumentIds: string[];
+  readonly transformErrors: TransformErrorObjects[];
+  readonly progress: Progress;
 }
 
 export interface ReindexSourceToTempClosePit extends PostInitState {
@@ -187,6 +213,17 @@ export interface ReindexSourceToTempIndex extends PostInitState {
   readonly outdatedDocuments: SavedObjectsRawDoc[];
   readonly sourceIndexPitId: string;
   readonly lastHitSortValue: number[] | undefined;
+  readonly corruptDocumentIds: string[];
+  readonly transformErrors: TransformErrorObjects[];
+  readonly progress: Progress;
+}
+
+export interface ReindexSourceToTempIndexBulk extends PostInitState {
+  readonly controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK';
+  readonly transformedDocs: SavedObjectsRawDoc[];
+  readonly sourceIndexPitId: string;
+  readonly lastHitSortValue: number[] | undefined;
+  readonly progress: Progress;
 }
 
 export type SetTempWriteBlock = PostInitState & {
@@ -233,6 +270,9 @@ export interface OutdatedDocumentsSearchRead extends PostInitState {
   readonly pitId: string;
   readonly lastHitSortValue: number[] | undefined;
   readonly hasTransformedDocs: boolean;
+  readonly corruptDocumentIds: string[];
+  readonly transformErrors: TransformErrorObjects[];
+  readonly progress: Progress;
 }
 
 export interface OutdatedDocumentsSearchClosePit extends PostInitState {
@@ -249,12 +289,27 @@ export interface OutdatedDocumentsRefresh extends PostInitState {
 }
 
 export interface OutdatedDocumentsTransform extends PostInitState {
-  /** Transform a batch of outdated documents to their latest version and write them to the target index */
+  /** Transform a batch of outdated documents to their latest version*/
   readonly controlState: 'OUTDATED_DOCUMENTS_TRANSFORM';
   readonly pitId: string;
   readonly outdatedDocuments: SavedObjectsRawDoc[];
   readonly lastHitSortValue: number[] | undefined;
   readonly hasTransformedDocs: boolean;
+  readonly corruptDocumentIds: string[];
+  readonly transformErrors: TransformErrorObjects[];
+  readonly progress: Progress;
+}
+
+export interface TransformedDocumentsBulkIndex extends PostInitState {
+  /**
+   * Write the up-to-date transformed documents to the target index
+   */
+  readonly controlState: 'TRANSFORMED_DOCUMENTS_BULK_INDEX';
+  readonly transformedDocs: SavedObjectsRawDoc[];
+  readonly lastHitSortValue: number[] | undefined;
+  readonly hasTransformedDocs: boolean;
+  readonly pitId: string;
+  readonly progress: Progress;
 }
 
 export interface MarkVersionIndexReady extends PostInitState {
@@ -339,11 +394,12 @@ export interface LegacyDeleteState extends LegacyBaseState {
   readonly controlState: 'LEGACY_DELETE';
 }
 
-export type State =
+export type State = Readonly<
   | FatalState
   | InitState
   | DoneState
   | WaitForYellowSourceState
+  | CheckUnknownDocumentsState
   | SetSourceWriteBlockState
   | CreateNewTargetState
   | CreateReindexTempState
@@ -351,6 +407,7 @@ export type State =
   | ReindexSourceToTempRead
   | ReindexSourceToTempClosePit
   | ReindexSourceToTempIndex
+  | ReindexSourceToTempIndexBulk
   | SetTempWriteBlock
   | CloneTempToSource
   | UpdateTargetMappingsState
@@ -363,11 +420,13 @@ export type State =
   | OutdatedDocumentsRefresh
   | MarkVersionIndexReady
   | MarkVersionIndexReadyConflict
+  | TransformedDocumentsBulkIndex
   | LegacyCreateReindexTargetState
   | LegacySetWriteBlockState
   | LegacyReindexState
   | LegacyReindexWaitForTaskState
-  | LegacyDeleteState;
+  | LegacyDeleteState
+>;
 
 export type AllControlStates = State['controlState'];
 /**
@@ -376,4 +435,6 @@ export type AllControlStates = State['controlState'];
  */
 export type AllActionStates = Exclude<AllControlStates, 'FATAL' | 'DONE'>;
 
-export type TransformRawDocs = (rawDocs: SavedObjectsRawDoc[]) => Promise<SavedObjectsRawDoc[]>;
+export type TransformRawDocs = (
+  rawDocs: SavedObjectsRawDoc[]
+) => TaskEither.TaskEither<DocumentsTransformFailed, DocumentsTransformSuccess>;

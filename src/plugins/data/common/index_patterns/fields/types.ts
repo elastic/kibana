@@ -5,14 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { IndexPatternFieldBase, FieldSpec, IndexPattern } from '../..';
 
-import { FieldSpec, IFieldSubType, IndexPattern } from '../..';
-
-export interface IFieldType {
-  name: string;
-  type: string;
-  script?: string;
-  lang?: string;
+/**
+ * @deprecated
+ * Use IndexPatternField or FieldSpec instead
+ */
+export interface IFieldType extends IndexPatternFieldBase {
   count?: number;
   // esTypes might be undefined on old index patterns that have not been refreshed since we added
   // this prop. It is also undefined on scripted fields.
@@ -23,8 +22,6 @@ export interface IFieldType {
   sortable?: boolean;
   visualizable?: boolean;
   readFromDocValues?: boolean;
-  scripted?: boolean;
-  subType?: IFieldSubType;
   displayName?: string;
   customLabel?: string;
   format?: any;

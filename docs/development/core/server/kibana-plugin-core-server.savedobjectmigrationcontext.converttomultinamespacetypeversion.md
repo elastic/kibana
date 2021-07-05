@@ -9,5 +9,5 @@ The version in which this object type is being converted to a multi-namespace ty
 <b>Signature:</b>
 
 ```typescript
-convertToMultiNamespaceTypeVersion?: string;
+readonly convertToMultiNamespaceTypeVersion?: string;
 ```

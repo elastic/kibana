@@ -91,7 +91,7 @@ export interface VisTypeDefinition<TVisParams> {
   /**
    * If given, it will return the supported triggers for this vis.
    */
-  readonly getSupportedTriggers?: () => string[];
+  readonly getSupportedTriggers?: (params?: VisParams) => string[];
 
   /**
    * Some visualizations are created without SearchSource and may change the used indexes during the visualization configuration.

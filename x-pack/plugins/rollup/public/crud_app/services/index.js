@@ -11,17 +11,6 @@ export { showApiError, showApiWarning } from './api_errors';
 
 export { listBreadcrumb, createBreadcrumb } from './breadcrumbs';
 
-export {
-  setEsBaseAndXPackBase,
-  getLogisticalDetailsUrl,
-  getDateHistogramDetailsUrl,
-  getDateHistogramAggregationUrl,
-  getTermsDetailsUrl,
-  getHistogramDetailsUrl,
-  getMetricsDetailsUrl,
-  getCronUrl,
-} from './documentation_links';
-
 export { filterItems } from './filter_items';
 
 export { flattenPanelTree } from './flatten_panel_tree';
@@ -47,3 +36,5 @@ export { sortTable } from './sort_table';
 export { retypeMetrics } from './retype_metrics';
 
 export { METRIC_TYPE } from './track_ui_metric';
+
+export { init } from './documentation_links';

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import {
+import type {
   SavedObject,
   SavedObjectsExportTransformContext,
   SavedObjectsServiceSetup,
+  SavedObjectsTypeMappingDefinition,
 } from 'kibana/server';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import mappings from './mappings.json';
@@ -31,13 +32,13 @@ export function setupSavedObjects(
     name: ACTION_SAVED_OBJECT_TYPE,
     hidden: true,
     namespaceType: 'single',
-    mappings: mappings.action,
+    mappings: mappings.action as SavedObjectsTypeMappingDefinition,
     migrations: getMigrations(encryptedSavedObjects),
     management: {
       defaultSearchField: 'name',
       importableAndExportable: true,
-      getTitle(obj) {
-        return `Connector: [${obj.attributes.name}]`;
+      getTitle(savedObject: SavedObject<RawAction>) {
+        return `Connector: [${savedObject.attributes.name}]`;
       },
       onExport<RawAction>(
         context: SavedObjectsExportTransformContext,
@@ -67,7 +68,7 @@ export function setupSavedObjects(
     name: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
     hidden: true,
     namespaceType: 'single',
-    mappings: mappings.action_task_params,
+    mappings: mappings.action_task_params as SavedObjectsTypeMappingDefinition,
   });
   encryptedSavedObjects.registerType({
     type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,

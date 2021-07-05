@@ -388,6 +388,9 @@
       },
       "type": "sharedtype",
       "namespaces": ["default"],
+      "references": [
+        { "type": "sharedtype", "id": "each_space", "name": "refname" }
+      ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"
@@ -405,9 +408,30 @@
       },
       "type": "sharedtype",
       "namespaces": ["space_1"],
+      "references": [
+        { "type": "sharedtype", "id": "each_space", "name": "refname" }
+      ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "legacy-url-alias:space_1:sharedtype:default_only",
+    "index": ".kibana",
+    "source": {
+      "type": "legacy-url-alias",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "legacy-url-alias": {
+        "sourceId": "default_only",
+        "targetNamespace": "space_1",
+        "targetType": "sharedtype",
+        "targetId": "space_1_only"
+      }
+    }
   }
 }
 
@@ -422,9 +446,49 @@
       },
       "type": "sharedtype",
       "namespaces": ["space_2"],
+      "references": [
+        { "type": "sharedtype", "id": "each_space", "name": "refname" }
+      ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "legacy-url-alias:space_2:sharedtype:default_only",
+    "index": ".kibana",
+    "source": {
+      "type": "legacy-url-alias",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "legacy-url-alias": {
+        "sourceId": "default_only",
+        "targetNamespace": "space_2",
+        "targetType": "sharedtype",
+        "targetId": "space_2_only"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "legacy-url-alias:other_space:sharedtype:default_only",
+    "index": ".kibana",
+    "source": {
+      "type": "legacy-url-alias",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "legacy-url-alias": {
+        "sourceId": "default_only",
+        "targetNamespace": "other_space",
+        "targetType": "sharedtype",
+        "targetId": "other_id",
+        "disabled": true
+      }
+    }
   }
 }
 
@@ -490,6 +554,12 @@
       },
       "type": "sharedtype",
       "namespaces": ["default", "space_1", "space_2"],
+      "references": [
+        { "type": "sharedtype", "id": "default_only", "name": "refname" },
+        { "type": "sharedtype", "id": "space_1_only", "name": "refname" },
+        { "type": "sharedtype", "id": "space_2_only", "name": "refname" },
+        { "type": "sharedtype", "id": "all_spaces", "name": "refname" }
+      ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"

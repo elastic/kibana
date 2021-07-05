@@ -5,45 +5,99 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, Plugin, CoreSetup } from 'src/core/server';
-import { PluginSetupContract as AlertingPluginSetupContract } from '../../alerting/server';
-import { RuleRegistry } from './rule_registry';
-import { defaultIlmPolicy } from './rule_registry/defaults/ilm_policy';
-import { BaseRuleFieldMap, baseRuleFieldMap } from '../common';
-import { RuleRegistryConfig } from '.';
+import { PluginInitializerContext, Plugin, CoreSetup, Logger } from 'src/core/server';
+import { SpacesPluginStart } from '../../spaces/server';
 
-export type RuleRegistryPluginSetupContract = RuleRegistry<BaseRuleFieldMap>;
+import { RuleRegistryPluginConfig } from './config';
+import { RuleDataPluginService } from './rule_data_plugin_service';
+import { EventLogService, IEventLogService } from './event_log';
 
-export class RuleRegistryPlugin implements Plugin<RuleRegistryPluginSetupContract> {
-  constructor(private readonly initContext: PluginInitializerContext) {
-    this.initContext = initContext;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface RuleRegistryPluginSetupDependencies {}
+
+interface RuleRegistryPluginStartDependencies {
+  spaces: SpacesPluginStart;
+}
+
+export interface RuleRegistryPluginSetupContract {
+  ruleDataService: RuleDataPluginService;
+  eventLogService: IEventLogService;
+}
+
+export type RuleRegistryPluginStartContract = void;
+
+export class RuleRegistryPlugin
+  implements
+    Plugin<
+      RuleRegistryPluginSetupContract,
+      RuleRegistryPluginStartContract,
+      RuleRegistryPluginSetupDependencies,
+      RuleRegistryPluginStartDependencies
+    > {
+  private readonly config: RuleRegistryPluginConfig;
+  private readonly logger: Logger;
+  private eventLogService: EventLogService | null;
+
+  constructor(initContext: PluginInitializerContext) {
+    this.config = initContext.config.get<RuleRegistryPluginConfig>();
+    this.logger = initContext.logger.get();
+    this.eventLogService = null;
   }
 
   public setup(
-    core: CoreSetup,
-    plugins: { alerting: AlertingPluginSetupContract }
+    core: CoreSetup<RuleRegistryPluginStartDependencies, RuleRegistryPluginStartContract>
   ): RuleRegistryPluginSetupContract {
-    const globalConfig = this.initContext.config.legacy.get();
-    const config = this.initContext.config.get<RuleRegistryConfig>();
+    const { config, logger } = this;
 
-    const logger = this.initContext.logger.get();
-
-    const rootRegistry = new RuleRegistry({
-      coreSetup: core,
-      ilmPolicy: defaultIlmPolicy,
-      fieldMap: baseRuleFieldMap,
-      kibanaIndex: globalConfig.kibana.index,
-      name: 'alerts',
-      kibanaVersion: this.initContext.env.packageInfo.version,
-      logger: logger.get('root'),
-      alertingPluginSetupContract: plugins.alerting,
-      writeEnabled: config.unsafe.write.enabled,
+    const startDependencies = core.getStartServices().then(([coreStart, pluginStart]) => {
+      return {
+        core: coreStart,
+        ...pluginStart,
+      };
     });
 
-    return rootRegistry;
+    const ruleDataService = new RuleDataPluginService({
+      logger,
+      isWriteEnabled: config.write.enabled,
+      index: config.index,
+      getClusterClient: async () => {
+        const deps = await startDependencies;
+        return deps.core.elasticsearch.client.asInternalUser;
+      },
+    });
+
+    ruleDataService.init().catch((originalError) => {
+      const error = new Error('Failed installing assets');
+      // @ts-ignore
+      error.stack = originalError.stack;
+      logger.error(error);
+    });
+
+    const eventLogService = new EventLogService({
+      config: {
+        indexPrefix: this.config.index,
+        isWriteEnabled: this.config.write.enabled,
+      },
+      dependencies: {
+        clusterClient: startDependencies.then((deps) => deps.core.elasticsearch.client),
+        spacesService: startDependencies.then((deps) => deps.spaces.spacesService),
+        logger: logger.get('eventLog'),
+      },
+    });
+
+    this.eventLogService = eventLogService;
+    return { ruleDataService, eventLogService };
   }
 
-  public start() {}
+  public start(): RuleRegistryPluginStartContract {}
 
-  public stop() {}
+  public stop() {
+    const { eventLogService, logger } = this;
+
+    if (eventLogService) {
+      eventLogService.stop().catch((e) => {
+        logger.error(e);
+      });
+    }
+  }
 }

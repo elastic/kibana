@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 
-import { useDebounce } from 'react-use';
+import useDebounce from 'react-use/lib/useDebounce';
 import { useValuesList } from '../../../hooks/use_values_list';
 import { FieldValueSelection } from './field_value_selection';
 import { FieldValueSuggestionsProps } from './types';
@@ -17,15 +17,20 @@ export function FieldValueSuggestions({
   fullWidth,
   sourceField,
   label,
-  indexPattern,
+  indexPatternTitle,
   selectedValue,
+  excludedValue,
   filters,
   button,
   time,
   width,
   forceOpen,
+  setForceOpen,
   anchorPosition,
   singleSelection,
+  compressed,
+  asFilterButton,
+  allowAllValuesSelection,
   asCombobox = true,
   onChange: onSelectionChange,
 }: FieldValueSuggestionsProps) {
@@ -33,7 +38,7 @@ export function FieldValueSuggestions({
   const [debouncedValue, setDebouncedValue] = useState('');
 
   const { values, loading } = useValuesList({
-    indexPattern,
+    indexPatternTitle,
     query,
     sourceField,
     filters,
@@ -55,16 +60,21 @@ export function FieldValueSuggestions({
     <SelectionComponent
       fullWidth={fullWidth}
       singleSelection={singleSelection}
-      values={values as string[]}
+      values={values}
       label={label}
       onChange={onSelectionChange}
       setQuery={setDebouncedValue}
       loading={loading}
       selectedValue={selectedValue}
+      excludedValue={excludedValue}
       button={button}
       forceOpen={forceOpen}
+      setForceOpen={setForceOpen}
       anchorPosition={anchorPosition}
       width={width}
+      compressed={compressed}
+      asFilterButton={asFilterButton}
+      allowAllValuesSelection={allowAllValuesSelection}
     />
   );
 }

@@ -13,7 +13,7 @@ import { FieldMappingRowStatic } from './field_mapping_row_static';
 import * as i18n from './translations';
 
 import { CaseConnectorMapping } from '../../containers/configure/types';
-import { connectorsConfiguration } from '../connectors';
+import { useKibana } from '../../common/lib/kibana';
 
 const FieldRowWrapper = styled.div`
   margin: 10px 0;
@@ -31,8 +31,10 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
   isLoading,
   mappings,
 }) => {
+  const { triggersActionsUi } = useKibana().services;
   const selectedConnector = useMemo(
-    () => connectorsConfiguration[connectorActionTypeId] ?? { fields: {} },
+    () => triggersActionsUi.actionTypeRegistry.get(connectorActionTypeId) ?? { fields: {} },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [connectorActionTypeId]
   );
   return mappings.length ? (
@@ -45,7 +47,7 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <span className="euiFormLabel">
-              {i18n.FIELD_MAPPING_SECOND_COL(selectedConnector.name)}
+              {i18n.FIELD_MAPPING_SECOND_COL(selectedConnector.actionTypeTitle ?? '')}
             </span>
           </EuiFlexItem>
           <EuiFlexItem>

@@ -14,6 +14,7 @@ import {
   isMultiMetricJobCreator,
   isPopulationJobCreator,
   isAdvancedJobCreator,
+  isRareJobCreator,
 } from '../../../../../common/job_creator';
 import { ml } from '../../../../../../../services/ml_api_service';
 import { useMlContext } from '../../../../../../../contexts/ml';
@@ -42,15 +43,20 @@ export function useEstimateBucketSpan() {
     splitField: undefined,
     timeField: mlContext.currentIndexPattern.timeFieldName,
     runtimeMappings: jobCreator.runtimeMappings ?? undefined,
-    // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
     indicesOptions: jobCreator.datafeedConfig.indices_options,
   };
 
-  if (
-    (isMultiMetricJobCreator(jobCreator) || isPopulationJobCreator(jobCreator)) &&
-    jobCreator.splitField !== null
-  ) {
+  if (isMultiMetricJobCreator(jobCreator) && jobCreator.splitField !== null) {
     data.splitField = jobCreator.splitField.id;
+  } else if (isPopulationJobCreator(jobCreator) && jobCreator.populationField !== null) {
+    data.splitField = jobCreator.populationField.id;
+  } else if (isRareJobCreator(jobCreator)) {
+    data.fields = [null];
+    if (jobCreator.populationField) {
+      data.splitField = jobCreator.populationField.id;
+    } else {
+      data.splitField = jobCreator.rareField?.id;
+    }
   } else if (isAdvancedJobCreator(jobCreator)) {
     jobCreator.richDetectors.some((d) => {
       if (d.partitionField !== null) {

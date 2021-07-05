@@ -11,6 +11,7 @@ import { PolicyConfig } from '../endpoint/types';
 import {
   DefaultMalwareMessage,
   policyFactoryWithoutPaidFeatures,
+  policyFactoryWithSupportedFeatures,
 } from '../endpoint/models/policy_config';
 
 /**
@@ -22,6 +23,13 @@ export const isEndpointPolicyValidForLicense = (
   license: ILicense | null
 ): boolean => {
   if (isAtLeast(license, 'platinum')) {
+    const defaults = policyFactoryWithSupportedFeatures();
+
+    // only platinum or higher may enable ransomware
+    if (policy.windows.ransomware.supported !== defaults.windows.ransomware.supported) {
+      return false;
+    }
+
     return true; // currently, platinum allows all features
   }
 
@@ -62,6 +70,11 @@ export const isEndpointPolicyValidForLicense = (
     return false;
   }
 
+  // only platinum or higher may enable ransomware
+  if (policy.windows.ransomware.supported !== defaults.windows.ransomware.supported) {
+    return false;
+  }
+
   return true;
 };
 
@@ -69,12 +82,12 @@ export const isEndpointPolicyValidForLicense = (
  * Resets paid features in a PolicyConfig back to default values
  * when unsupported by the given license level.
  */
-export const unsetPolicyFeaturesAboveLicenseLevel = (
+export const unsetPolicyFeaturesAccordingToLicenseLevel = (
   policy: PolicyConfig,
   license: ILicense | null
 ): PolicyConfig => {
   if (isAtLeast(license, 'platinum')) {
-    return policy;
+    return policyFactoryWithSupportedFeatures(policy);
   }
 
   // set any license-gated features back to the defaults

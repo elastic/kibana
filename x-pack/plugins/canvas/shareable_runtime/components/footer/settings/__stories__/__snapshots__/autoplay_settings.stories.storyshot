@@ -101,7 +101,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
                   className="euiFormControlLayout__childrenWrapper"
                 >
                   <input
-                    aria-describedby="generated-id-help"
+                    aria-describedby="generated-id-help-0"
                     className="euiFieldText euiFieldText--compressed"
                     id="generated-id"
                     onBlur={[Function]}
@@ -114,7 +114,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
               </div>
               <div
                 className="euiFormHelpText euiFormRow__text"
-                id="generated-id-help"
+                id="generated-id-help-0"
               >
                 Use shorthand notation, like 30s, 10m, or 1h
               </div>
@@ -264,7 +264,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
                   className="euiFormControlLayout__childrenWrapper"
                 >
                   <input
-                    aria-describedby="generated-id-help"
+                    aria-describedby="generated-id-help-0"
                     className="euiFieldText euiFieldText--compressed"
                     id="generated-id"
                     onBlur={[Function]}
@@ -277,7 +277,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
               </div>
               <div
                 className="euiFormHelpText euiFormRow__text"
-                id="generated-id-help"
+                id="generated-id-help-0"
               >
                 Use shorthand notation, like 30s, 10m, or 1h
               </div>
@@ -427,7 +427,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
                   className="euiFormControlLayout__childrenWrapper"
                 >
                   <input
-                    aria-describedby="generated-id-help"
+                    aria-describedby="generated-id-help-0"
                     className="euiFieldText euiFieldText--compressed"
                     id="generated-id"
                     onBlur={[Function]}
@@ -440,7 +440,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
               </div>
               <div
                 className="euiFormHelpText euiFormRow__text"
-                id="generated-id-help"
+                id="generated-id-help-0"
               >
                 Use shorthand notation, like 30s, 10m, or 1h
               </div>

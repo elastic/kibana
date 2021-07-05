@@ -7,7 +7,7 @@
 
 import '../../../../__mocks__/shallow_useeffect.mock';
 
-import { setMockValues, setMockActions } from '../../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 import { oauthApplication } from '../../../__mocks__/content_sources.mock';
 
 import React from 'react';
@@ -16,8 +16,9 @@ import { shallow } from 'enzyme';
 
 import { EuiModal, EuiForm } from '@elastic/eui';
 
+import { getPageDescription } from '../../../../test_helpers';
+
 import { CredentialItem } from '../../../components/shared/credential_item';
-import { ViewContentHeader } from '../../../components/shared/view_content_header';
 import { OAUTH_DESCRIPTION, REDIRECT_INSECURE_ERROR_TEXT } from '../../../constants';
 
 import { OauthApplication } from './oauth_application';
@@ -77,7 +78,7 @@ describe('OauthApplication', () => {
   it('handles form submission', () => {
     const wrapper = shallow(<OauthApplication />);
     const preventDefault = jest.fn();
-    wrapper.find('form').simulate('submit', { preventDefault });
+    wrapper.find(EuiForm).simulate('submit', { preventDefault });
 
     expect(updateOauthApplication).toHaveBeenCalled();
   });
@@ -127,7 +128,7 @@ describe('OauthApplication', () => {
     });
     const wrapper = shallow(<OauthApplication />);
 
-    expect(wrapper.find(ViewContentHeader).prop('description')).toEqual(OAUTH_DESCRIPTION);
+    expect(getPageDescription(wrapper)).toEqual(OAUTH_DESCRIPTION);
     expect(wrapper.find('[data-test-subj="RedirectURIsRow"]').prop('error')).toEqual(
       REDIRECT_INSECURE_ERROR_TEXT
     );

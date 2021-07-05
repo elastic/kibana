@@ -138,12 +138,13 @@ export const useUpdateCase = ({
     [caseId, subCaseId]
   );
 
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       isCancelledRef.current = true;
       abortCtrlRef.current.abort();
-    };
-  }, []);
+    },
+    []
+  );
 
   return { ...state, updateCaseProperty: dispatchUpdateCaseProperty };
 };

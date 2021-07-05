@@ -84,6 +84,7 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
 
     describe('services/annotations', function () {
       loadTestFile(require.resolve('./services/annotations'));
+      loadTestFile(require.resolve('./services/derived_annotations'));
     });
 
     describe('services/service_details', function () {

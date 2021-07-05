@@ -100,7 +100,7 @@ export enum AlertStates {
   ERROR,
 }
 
-const ThresholdRT = rt.type({
+export const ThresholdRT = rt.type({
   comparator: ComparatorRT,
   value: rt.number,
 });
@@ -240,31 +240,43 @@ const chartPreviewHistogramBucket = rt.type({
   doc_count: rt.number,
 });
 
+const ChartPreviewBucketsRT = rt.partial({
+  histogramBuckets: rt.type({
+    buckets: rt.array(chartPreviewHistogramBucket),
+  }),
+});
+
 // ES query responses //
+const hitsRT = rt.type({
+  total: rt.type({
+    value: rt.number,
+  }),
+});
+
+const bucketFieldsRT = rt.type({
+  key: rt.record(rt.string, rt.string),
+  doc_count: rt.number,
+});
+
+const afterKeyRT = rt.partial({
+  after_key: rt.record(rt.string, rt.string),
+});
+
 export const UngroupedSearchQueryResponseRT = rt.intersection([
   commonSearchSuccessResponseFieldsRT,
   rt.intersection([
     rt.type({
-      hits: rt.type({
-        total: rt.type({
-          value: rt.number,
-        }),
-      }),
+      hits: hitsRT,
     }),
-    // Chart preview buckets
     rt.partial({
-      aggregations: rt.type({
-        histogramBuckets: rt.type({
-          buckets: rt.array(chartPreviewHistogramBucket),
-        }),
-      }),
+      aggregations: ChartPreviewBucketsRT,
     }),
   ]),
 ]);
 
 export type UngroupedSearchQueryResponse = rt.TypeOf<typeof UngroupedSearchQueryResponseRT>;
 
-export const GroupedSearchQueryResponseRT = rt.intersection([
+export const UnoptimizedGroupedSearchQueryResponseRT = rt.intersection([
   commonSearchSuccessResponseFieldsRT,
   rt.type({
     aggregations: rt.type({
@@ -272,33 +284,73 @@ export const GroupedSearchQueryResponseRT = rt.intersection([
         rt.type({
           buckets: rt.array(
             rt.type({
-              key: rt.record(rt.string, rt.string),
-              doc_count: rt.number,
+              ...bucketFieldsRT.props,
               filtered_results: rt.intersection([
                 rt.type({
                   doc_count: rt.number,
                 }),
-                // Chart preview buckets
-                rt.partial({
-                  histogramBuckets: rt.type({
-                    buckets: rt.array(chartPreviewHistogramBucket),
-                  }),
-                }),
+                ChartPreviewBucketsRT,
               ]),
             })
           ),
         }),
-        rt.partial({
-          after_key: rt.record(rt.string, rt.string),
-        }),
+        afterKeyRT,
       ]),
     }),
-    hits: rt.type({
-      total: rt.type({
-        value: rt.number,
-      }),
-    }),
+    hits: hitsRT,
   }),
 ]);
 
+export type UnoptimizedGroupedSearchQueryResponse = rt.TypeOf<
+  typeof UnoptimizedGroupedSearchQueryResponseRT
+>;
+
+export const OptimizedGroupedSearchQueryResponseRT = rt.intersection([
+  commonSearchSuccessResponseFieldsRT,
+  rt.type({
+    aggregations: rt.type({
+      groups: rt.intersection([
+        rt.type({
+          buckets: rt.array(rt.intersection([bucketFieldsRT, ChartPreviewBucketsRT])),
+        }),
+        afterKeyRT,
+      ]),
+    }),
+    hits: hitsRT,
+  }),
+]);
+
+export type OptimizedGroupedSearchQueryResponse = rt.TypeOf<
+  typeof OptimizedGroupedSearchQueryResponseRT
+>;
+
+export const GroupedSearchQueryResponseRT = rt.union([
+  UnoptimizedGroupedSearchQueryResponseRT,
+  OptimizedGroupedSearchQueryResponseRT,
+]);
+
 export type GroupedSearchQueryResponse = rt.TypeOf<typeof GroupedSearchQueryResponseRT>;
+
+export const isOptimizedGroupedSearchQueryResponse = (
+  response: GroupedSearchQueryResponse['aggregations']['groups']['buckets']
+): response is OptimizedGroupedSearchQueryResponse['aggregations']['groups']['buckets'] => {
+  const result = response[0];
+  return result && !result.hasOwnProperty('filtered_results');
+};
+
+export const isOptimizableGroupedThreshold = (
+  selectedComparator: AlertParams['count']['comparator'],
+  selectedValue?: AlertParams['count']['value']
+) => {
+  if (selectedComparator === Comparator.GT) {
+    return true;
+  } else if (
+    typeof selectedValue === 'number' &&
+    selectedComparator === Comparator.GT_OR_EQ &&
+    selectedValue > 0
+  ) {
+    return true;
+  } else {
+    return false;
+  }
+};

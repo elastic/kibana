@@ -1,149 +1,161 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
-    "type": "doc",
     "id": "test-export-transform:type_1-obj_1",
+    "index": ".kibana",
     "source": {
+      "coreMigrationVersion": "7.14.0",
+      "references": [
+      ],
       "test-export-transform": {
-        "title": "test_1-obj_1",
-        "enabled": true
+        "enabled": true,
+        "title": "test_1-obj_1"
       },
       "type": "test-export-transform",
-      "migrationVersion": {},
       "updated_at": "2018-12-21T00:43:07.096Z"
-    }
+    },
+    "type": "_doc"
   }
 }
 
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
-    "type": "doc",
     "id": "test-export-transform:type_1-obj_2",
+    "index": ".kibana",
     "source": {
+      "coreMigrationVersion": "7.14.0",
+      "references": [
+      ],
       "test-export-transform": {
-        "title": "test_1-obj_2",
-        "enabled": true
+        "enabled": true,
+        "title": "test_1-obj_2"
       },
       "type": "test-export-transform",
-      "migrationVersion": {},
       "updated_at": "2018-12-21T00:43:07.096Z"
-    }
+    },
+    "type": "_doc"
   }
 }
 
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
-    "type": "doc",
     "id": "test-export-add:type_2-obj_1",
+    "index": ".kibana",
     "source": {
+      "coreMigrationVersion": "7.14.0",
+      "references": [
+      ],
       "test-export-add": {
         "title": "test_2-obj_1"
       },
       "type": "test-export-add",
-      "migrationVersion": {},
       "updated_at": "2018-12-21T00:43:07.096Z"
-    }
+    },
+    "type": "_doc"
   }
 }
 
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
-    "type": "doc",
     "id": "test-export-add:type_2-obj_2",
+    "index": ".kibana",
     "source": {
+      "coreMigrationVersion": "7.14.0",
+      "references": [
+      ],
       "test-export-add": {
         "title": "test_2-obj_2"
       },
       "type": "test-export-add",
-      "migrationVersion": {},
       "updated_at": "2018-12-21T00:43:07.096Z"
-    }
+    },
+    "type": "_doc"
   }
 }
 
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
-    "type": "doc",
     "id": "test-export-add-dep:type_dep-obj_1",
+    "index": ".kibana",
     "source": {
+      "coreMigrationVersion": "7.14.0",
+      "references": [
+        {
+          "id": "type_2-obj_1",
+          "type": "test-export-add"
+        }
+      ],
       "test-export-add-dep": {
         "title": "type_dep-obj_1"
       },
       "type": "test-export-add-dep",
-      "migrationVersion": {},
-      "updated_at": "2018-12-21T00:43:07.096Z",
-      "references": [
-        {
-          "type": "test-export-add",
-          "id": "type_2-obj_1"
-        }
-      ]
-    }
+      "updated_at": "2018-12-21T00:43:07.096Z"
+    },
+    "type": "_doc"
   }
 }
 
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
-    "type": "doc",
     "id": "test-export-add-dep:type_dep-obj_2",
+    "index": ".kibana",
     "source": {
+      "coreMigrationVersion": "7.14.0",
+      "references": [
+        {
+          "id": "type_2-obj_2",
+          "type": "test-export-add"
+        }
+      ],
       "test-export-add-dep": {
         "title": "type_dep-obj_2"
       },
       "type": "test-export-add-dep",
-      "migrationVersion": {},
-      "updated_at": "2018-12-21T00:43:07.096Z",
-      "references": [
-        {
-          "type": "test-export-add",
-          "id": "type_2-obj_2"
-        }
-      ]
-    }
+      "updated_at": "2018-12-21T00:43:07.096Z"
+    },
+    "type": "_doc"
   }
 }
 
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
-    "type": "doc",
     "id": "test-export-invalid-transform:type_3-obj_1",
+    "index": ".kibana",
     "source": {
+      "coreMigrationVersion": "7.14.0",
+      "references": [
+      ],
       "test-export-invalid-transform": {
         "title": "test_2-obj_1"
       },
       "type": "test-export-invalid-transform",
-      "migrationVersion": {},
       "updated_at": "2018-12-21T00:43:07.096Z"
-    }
+    },
+    "type": "_doc"
   }
 }
 
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
-    "type": "doc",
     "id": "test-export-transform-error:type_4-obj_1",
+    "index": ".kibana",
     "source": {
+      "coreMigrationVersion": "7.14.0",
+      "references": [
+      ],
       "test-export-transform-error": {
         "title": "test_2-obj_1"
       },
       "type": "test-export-transform-error",
-      "migrationVersion": {},
       "updated_at": "2018-12-21T00:43:07.096Z"
-    }
+    },
+    "type": "_doc"
   }
 }

@@ -35,7 +35,7 @@ SRC_DEPS = [
 TYPES_DEPS = [
   "@npm//@types/jest",
   "@npm//@types/node",
-  "@npm//@types/uuid"  
+  "@npm//@types/uuid"
 ]
 
 DEPS = SRC_DEPS + TYPES_DEPS
@@ -67,7 +67,7 @@ js_library(
   package_name = PKG_REQUIRE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
   visibility = ["//visibility:public"],
-  deps = [":tsc"] + DEPS,
+  deps = DEPS + [":tsc"],
 )
 
 pkg_npm(

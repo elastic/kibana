@@ -6,16 +6,18 @@
  */
 
 import { HttpStart } from 'kibana/public';
-import {
+import type {
+  FoundExceptionListItemSchema,
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
-  ENDPOINT_EVENT_FILTERS_LIST_ID,
   UpdateExceptionListItemSchema,
-} from '../../../../shared_imports';
+  ExceptionListSummarySchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
+
 import { Immutable } from '../../../../../common/endpoint/types';
 
 import { EVENT_FILTER_LIST, EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '../constants';
-import { FoundExceptionListItemSchema } from '../../../../../../lists/common/schemas';
 import { EventFiltersService } from '../types';
 
 export class EventFiltersHttpService implements EventFiltersService {
@@ -48,11 +50,13 @@ export class EventFiltersHttpService implements EventFiltersService {
     page,
     sortField,
     sortOrder,
+    filter,
   }: Partial<{
     page: number;
     perPage: number;
     sortField: string;
     sortOrder: string;
+    filter: string;
   }> = {}): Promise<FoundExceptionListItemSchema> {
     const http = await this.httpWrapper();
     return http.get(`${EXCEPTION_LIST_ITEM_URL}/_find`, {
@@ -63,6 +67,7 @@ export class EventFiltersHttpService implements EventFiltersService {
         sort_order: sortOrder,
         list_id: [ENDPOINT_EVENT_FILTERS_LIST_ID],
         namespace_type: ['agnostic'],
+        filter,
       },
     });
   }
@@ -88,5 +93,26 @@ export class EventFiltersHttpService implements EventFiltersService {
     return (await this.httpWrapper()).put<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
       body: JSON.stringify(exception),
     });
+  }
+
+  async deleteOne(id: string): Promise<ExceptionListItemSchema> {
+    return (await this.httpWrapper()).delete<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+      query: {
+        id,
+        namespace_type: 'agnostic',
+      },
+    });
+  }
+
+  async getSummary(): Promise<ExceptionListSummarySchema> {
+    return (await this.httpWrapper()).get<ExceptionListSummarySchema>(
+      `${EXCEPTION_LIST_URL}/summary`,
+      {
+        query: {
+          list_id: ENDPOINT_EVENT_FILTERS_LIST_ID,
+          namespace_type: 'agnostic',
+        },
+      }
+    );
   }
 }

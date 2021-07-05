@@ -30,14 +30,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('discover field visualize button', () => {
     beforeEach(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.loadIfNeeded('lens/basic');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/basic');
       await PageObjects.common.navigateToApp('discover');
       await setDiscoverTimeRange();
     });
 
     after(async () => {
-      await esArchiver.unload('lens/basic');
+      await esArchiver.unload('x-pack/test/functional/es_archives/lens/basic');
     });
 
     it('shows "visualize" field button', async () => {

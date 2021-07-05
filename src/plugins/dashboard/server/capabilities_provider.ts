@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-export const capabilitiesProvider = () => ({
+import { DashboardCapabilities } from '../common/types';
+
+export const capabilitiesProvider = (): {
+  dashboard: DashboardCapabilities;
+} => ({
   dashboard: {
     createNew: true,
     show: true,

@@ -85,9 +85,8 @@ describe('features', () => {
       }),
     ];
 
-    const mockFeaturesPlugin = {
-      getKibanaFeatures: jest.fn().mockReturnValue(features),
-    };
+    const mockFeaturesPlugin = featuresPluginMock.createSetup();
+    mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
     const mockLicenseService = {
       getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
       getType: jest.fn().mockReturnValue('basic'),
@@ -190,9 +189,8 @@ describe('features', () => {
       }),
     ];
 
-    const mockFeaturesPlugin = {
-      getKibanaFeatures: jest.fn().mockReturnValue(features),
-    };
+    const mockFeaturesPlugin = featuresPluginMock.createSetup();
+    mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
     const mockLicenseService = {
       getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
       getType: jest.fn().mockReturnValue('basic'),
@@ -268,9 +266,8 @@ describe('features', () => {
           }),
         ];
 
-        const mockFeaturesPlugin = {
-          getKibanaFeatures: jest.fn().mockReturnValue(features),
-        };
+        const mockFeaturesPlugin = featuresPluginMock.createSetup();
+        mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
         const mockLicenseService = {
           getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
           getType: jest.fn().mockReturnValue('basic'),
@@ -413,9 +410,8 @@ describe('features', () => {
           }),
         ];
 
-        const mockFeaturesPlugin = {
-          getKibanaFeatures: jest.fn().mockReturnValue(features),
-        };
+        const mockFeaturesPlugin = featuresPluginMock.createSetup();
+        mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
         const mockLicenseService = {
           getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
           getType: jest.fn().mockReturnValue('basic'),
@@ -502,9 +498,8 @@ describe('features', () => {
           }),
         ];
 
-        const mockFeaturesPlugin = {
-          getKibanaFeatures: jest.fn().mockReturnValue(features),
-        };
+        const mockFeaturesPlugin = featuresPluginMock.createSetup();
+        mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
         const mockLicenseService = {
           getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
           getType: jest.fn().mockReturnValue('basic'),
@@ -577,9 +572,8 @@ describe('features', () => {
           }),
         ];
 
-        const mockFeaturesPlugin = {
-          getKibanaFeatures: jest.fn().mockReturnValue(features),
-        };
+        const mockFeaturesPlugin = featuresPluginMock.createSetup();
+        mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
         const mockLicenseService = {
           getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
           getType: jest.fn().mockReturnValue('basic'),
@@ -653,9 +647,8 @@ describe('features', () => {
           }),
         ];
 
-        const mockFeaturesPlugin = {
-          getKibanaFeatures: jest.fn().mockReturnValue(features),
-        };
+        const mockFeaturesPlugin = featuresPluginMock.createSetup();
+        mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
         const mockLicenseService = {
           getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
           getType: jest.fn().mockReturnValue('basic'),
@@ -723,9 +716,8 @@ describe('reserved', () => {
       }),
     ];
 
-    const mockFeaturesPlugin = {
-      getKibanaFeatures: jest.fn().mockReturnValue(features),
-    };
+    const mockFeaturesPlugin = featuresPluginMock.createSetup();
+    mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
     const mockLicenseService = {
       getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
       getType: jest.fn().mockReturnValue('basic'),
@@ -762,9 +754,8 @@ describe('reserved', () => {
       }),
     ];
 
-    const mockFeaturesPlugin = {
-      getKibanaFeatures: jest.fn().mockReturnValue(features),
-    };
+    const mockFeaturesPlugin = featuresPluginMock.createSetup();
+    mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
     const mockLicenseService = {
       getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
       getType: jest.fn().mockReturnValue('basic'),
@@ -837,9 +828,8 @@ describe('reserved', () => {
       }),
     ];
 
-    const mockFeaturesPlugin = {
-      getKibanaFeatures: jest.fn().mockReturnValue(features),
-    };
+    const mockFeaturesPlugin = featuresPluginMock.createSetup();
+    mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
     const mockLicenseService = {
       getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
       getType: jest.fn().mockReturnValue('basic'),
@@ -901,9 +891,8 @@ describe('subFeatures', () => {
         }),
       ];
 
-      const mockFeaturesPlugin = {
-        getKibanaFeatures: jest.fn().mockReturnValue(features),
-      };
+      const mockFeaturesPlugin = featuresPluginMock.createSetup();
+      mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
       const mockLicenseService = {
         getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
         getType: jest.fn().mockReturnValue('basic'),
@@ -1036,9 +1025,8 @@ describe('subFeatures', () => {
         }),
       ];
 
-      const mockFeaturesPlugin = {
-        getKibanaFeatures: jest.fn().mockReturnValue(features),
-      };
+      const mockFeaturesPlugin = featuresPluginMock.createSetup();
+      mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
       const mockLicenseService = {
         getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
         getType: jest.fn().mockReturnValue('basic'),
@@ -1274,9 +1262,8 @@ describe('subFeatures', () => {
         }),
       ];
 
-      const mockFeaturesPlugin = {
-        getKibanaFeatures: jest.fn().mockReturnValue(features),
-      };
+      const mockFeaturesPlugin = featuresPluginMock.createSetup();
+      mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
       const mockLicenseService = {
         getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
         getType: jest.fn().mockReturnValue('basic'),
@@ -1435,9 +1422,8 @@ describe('subFeatures', () => {
         }),
       ];
 
-      const mockFeaturesPlugin = {
-        getKibanaFeatures: jest.fn().mockReturnValue(features),
-      };
+      const mockFeaturesPlugin = featuresPluginMock.createSetup();
+      mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
       const mockLicenseService = {
         getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
         getType: jest.fn().mockReturnValue('basic'),
@@ -1622,9 +1608,8 @@ describe('subFeatures', () => {
         }),
       ];
 
-      const mockFeaturesPlugin = {
-        getKibanaFeatures: jest.fn().mockReturnValue(features),
-      };
+      const mockFeaturesPlugin = featuresPluginMock.createSetup();
+      mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
       const mockLicenseService = {
         getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
         getType: jest.fn().mockReturnValue('basic'),
@@ -1766,9 +1751,8 @@ describe('subFeatures', () => {
         }),
       ];
 
-      const mockFeaturesPlugin = {
-        getKibanaFeatures: jest.fn().mockReturnValue(features),
-      };
+      const mockFeaturesPlugin = featuresPluginMock.createSetup();
+      mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
       const mockLicenseService = {
         getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: false }),
         getType: jest.fn().mockReturnValue('basic'),
@@ -1993,9 +1977,8 @@ describe('subFeatures', () => {
         }),
       ];
 
-      const mockFeaturesPlugin = {
-        getKibanaFeatures: jest.fn().mockReturnValue(features),
-      };
+      const mockFeaturesPlugin = featuresPluginMock.createSetup();
+      mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
       const mockLicenseService = {
         getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
         getType: jest.fn().mockReturnValue('gold'),
@@ -2229,9 +2212,8 @@ describe('subFeatures', () => {
         }),
       ];
 
-      const mockFeaturesPlugin = {
-        getKibanaFeatures: jest.fn().mockReturnValue(features),
-      };
+      const mockFeaturesPlugin = featuresPluginMock.createSetup();
+      mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
       const mockLicenseService = {
         getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
         getType: jest.fn().mockReturnValue('platinum'),

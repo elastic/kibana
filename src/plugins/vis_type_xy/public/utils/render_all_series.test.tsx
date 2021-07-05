@@ -31,6 +31,7 @@ const defaultSeriesParams = [
     mode: 'stacked',
     show: true,
     showCircles: true,
+    circlesRadius: 3,
     type: 'area',
     valueAxis: 'ValueAxis-1',
   },

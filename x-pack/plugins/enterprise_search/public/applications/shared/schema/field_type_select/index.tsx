@@ -23,10 +23,12 @@ export const SchemaFieldTypeSelect: React.FC<Props> = ({
   fieldType,
   updateExistingFieldType,
   disabled,
+  ...rest
 }) => {
   const fieldTypeOptions = Object.values(SchemaType).map((type) => ({ value: type, text: type }));
   return (
     <EuiSelect
+      {...rest}
       name={fieldName}
       required
       value={fieldType}

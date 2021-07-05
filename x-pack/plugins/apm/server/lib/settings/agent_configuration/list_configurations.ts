@@ -8,7 +8,6 @@
 import { Setup } from '../../helpers/setup_request';
 import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 import { convertConfigSettingsToString } from './convert_settings_to_string';
-import { withApmSpan } from '../../../utils/with_apm_span';
 
 export async function listConfigurations({ setup }: { setup: Setup }) {
   const { internalClient, indices } = setup;
@@ -18,8 +17,9 @@ export async function listConfigurations({ setup }: { setup: Setup }) {
     size: 200,
   };
 
-  const resp = await withApmSpan('list_agent_configurations', () =>
-    internalClient.search<AgentConfiguration>(params)
+  const resp = await internalClient.search<AgentConfiguration>(
+    'list_agent_configuration',
+    params
   );
 
   return resp.hits.hits

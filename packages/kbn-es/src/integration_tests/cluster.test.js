@@ -71,9 +71,15 @@ function mockEsBin({ exitCode, start }) {
   );
 }
 
+const initialEnv = { ...process.env };
+
 beforeEach(() => {
   jest.resetAllMocks();
   extractConfigFiles.mockImplementation((config) => config);
+});
+
+afterEach(() => {
+  process.env = { ...initialEnv };
 });
 
 describe('#installSource()', () => {
@@ -354,6 +360,25 @@ describe('#run()', () => {
         ],
       ]
     `);
+  });
+
+  it('sets default Java heap', async () => {
+    mockEsBin({ start: true });
+
+    const cluster = new Cluster({ log });
+    await cluster.run();
+
+    expect(execa.mock.calls[0][2].env.ES_JAVA_OPTS).toEqual('-Xms1g -Xmx1g');
+  });
+
+  it('allows Java heap to be overwritten', async () => {
+    mockEsBin({ start: true });
+    process.env.ES_JAVA_OPTS = '-Xms5g -Xmx5g';
+
+    const cluster = new Cluster({ log });
+    await cluster.run();
+
+    expect(execa.mock.calls[0][2].env.ES_JAVA_OPTS).toEqual('-Xms5g -Xmx5g');
   });
 });
 

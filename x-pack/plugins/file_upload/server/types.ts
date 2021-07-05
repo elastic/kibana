@@ -6,7 +6,12 @@
  */
 
 import { SecurityPluginStart } from '../..//security/server';
+import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 
 export interface StartDeps {
   security?: SecurityPluginStart;
+}
+
+export interface SetupDeps {
+  usageCollection: UsageCollectionSetup;
 }

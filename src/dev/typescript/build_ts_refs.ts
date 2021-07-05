@@ -13,12 +13,20 @@ import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
 
 export const REF_CONFIG_PATHS = [Path.resolve(REPO_ROOT, 'tsconfig.refs.json')];
 
-export async function buildAllTsRefs(log: ToolingLog) {
+export async function buildAllTsRefs(log: ToolingLog): Promise<{ failed: boolean }> {
   for (const path of REF_CONFIG_PATHS) {
     const relative = Path.relative(REPO_ROOT, path);
     log.debug(`Building TypeScript projects refs for ${relative}...`);
-    await execa(require.resolve('typescript/bin/tsc'), ['-b', relative, '--pretty'], {
-      cwd: REPO_ROOT,
-    });
+    const { failed, stdout } = await execa(
+      require.resolve('typescript/bin/tsc'),
+      ['-b', relative, '--pretty'],
+      {
+        cwd: REPO_ROOT,
+        reject: false,
+      }
+    );
+    log.info(stdout);
+    if (failed) return { failed };
   }
+  return { failed: false };
 }

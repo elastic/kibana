@@ -25,6 +25,7 @@ describe('MapToolTip', () => {
         id: 1,
         layerId: 'layerId',
         mbProperties: {},
+        actions: [],
       },
     ];
     const getLayerName = jest.fn();

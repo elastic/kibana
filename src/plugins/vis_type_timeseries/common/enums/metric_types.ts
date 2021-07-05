@@ -27,6 +27,7 @@ export enum METRIC_TYPES {
 // We should probably use BUCKET_TYPES from data plugin in future.
 export enum BUCKET_TYPES {
   TERMS = 'terms',
+  FILTERS = 'filters',
 }
 
 export const EXTENDED_STATS_TYPES = [

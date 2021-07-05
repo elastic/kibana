@@ -12,7 +12,7 @@ import {
   isFilterable,
   IIndexPattern,
   IFieldType,
-  Ipv4Address,
+  IpAddress,
   Filter,
   FieldFilter,
 } from '../../../../../common';
@@ -44,7 +44,7 @@ export function validateParams(params: any, type: string) {
       return Boolean(typeof params === 'string' && moment && moment.isValid());
     case 'ip':
       try {
-        return Boolean(new Ipv4Address(params));
+        return Boolean(new IpAddress(params));
       } catch (e) {
         return false;
       }

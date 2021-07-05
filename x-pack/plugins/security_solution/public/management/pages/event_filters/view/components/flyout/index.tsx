@@ -108,27 +108,23 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
     );
 
     return (
-      <EuiFlyout size="l" onClose={handleOnCancel}>
+      <EuiFlyout size="l" onClose={handleOnCancel} data-test-subj="eventFiltersCreateEditFlyout">
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>
-              <FormattedMessage
-                id="xpack.securitySolution.eventFilters.eventFiltersFlyout.title"
-                defaultMessage="Endpoint Security"
-              />
+              {id ? (
+                <FormattedMessage
+                  id="xpack.securitySolution.eventFilters.eventFiltersFlyout.subtitle.update"
+                  defaultMessage="Update event filter"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.securitySolution.eventFilters.eventFiltersFlyout.subtitle.create"
+                  defaultMessage="Add event filter"
+                />
+              )}
             </h2>
           </EuiTitle>
-          {id ? (
-            <FormattedMessage
-              id="xpack.securitySolution.eventFilters.eventFiltersFlyout.subtitle.update"
-              defaultMessage="Update Endpoint Event Filter"
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.securitySolution.eventFilters.eventFiltersFlyout.subtitle.create"
-              defaultMessage="Add Endpoint Event Filter"
-            />
-          )}
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody>
@@ -141,7 +137,7 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
               <EuiButtonEmpty data-test-subj="cancelExceptionAddButton" onClick={handleOnCancel}>
                 <FormattedMessage
                   id="xpack.securitySolution.eventFilters.eventFiltersFlyout.actions.cancel"
-                  defaultMessage="cancel"
+                  defaultMessage="Cancel"
                 />
               </EuiButtonEmpty>
             </EuiFlexItem>

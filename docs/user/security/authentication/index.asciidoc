@@ -4,9 +4,12 @@
 ++++
 <titleabbrev>Authentication</titleabbrev>
 ++++
+:keywords: administrator, concept, security, authentication
+:description: A list of the supported authentication mechanisms in {kib}. 
 
 {kib} supports the following authentication mechanisms:
 
+- <<multiple-authentication-providers>>
 - <<basic-authentication>>
 - <<token-authentication>>
 - <<pki-authentication>>
@@ -15,8 +18,15 @@
 - <<kerberos>>
 - <<anonymous-authentication>>
 - <<http-authentication>>
+- <<embedded-content-authentication>>
 
-Enable multiple authentication mechanisms at the same time specifying a prioritized list of the authentication _providers_ (typically of various types) in the configuration. Providers are consulted in ascending order. Make sure each configured provider has a unique name (e.g. `basic1` or `saml1` in the configuration example) and `order` setting. In the event that two or more providers have the same name or `order`, {kib} will fail to start.
+
+For an introduction to {kib}'s security features, including the login process, refer to <<tutorial-secure-access-to-kibana>>.
+
+[[multiple-authentication-providers]]
+==== Multiple authentication providers
+
+Enable multiple authentication mechanisms at the same time by specifying a prioritized list of the authentication _providers_ (typically of various types) in the configuration. Providers are consulted in ascending order. Make sure each configured provider has a unique name (e.g. `basic1` or `saml1` in the configuration example) and `order` setting. In the event that two or more providers have the same name or `order`, {kib} will fail to start.
 
 When two or more providers are configured, you can choose the provider you want to use on the Login Selector UI. The order the providers appear is determined by the `order` setting. The appearance of the specific provider entry can be customized with the `description`, `hint`, and `icon` settings.
 
@@ -24,7 +34,7 @@ TIP: To provide login instructions to users, use the `xpack.security.loginHelp` 
 
 If you don't want a specific provider to show up at the Login Selector UI (e.g. to only support third-party initiated login) you can hide it with `showInSelector` setting set to `false`. However, in this case, the provider is presented in the provider chain and may be consulted during authentication based on its `order`. To disable the provider, use the `enabled` setting.
 
-TIP: The Login Selector UI can also be disabled or enabled with `xpack.security.authc.selector.enabled` setting. 
+TIP: The Login Selector UI can also be disabled or enabled with `xpack.security.authc.selector.enabled` setting.
 
 Here is how your `kibana.yml` and Login Selector UI can look like if you deal with multiple authentication providers:
 
@@ -292,9 +302,9 @@ xpack.security.authc.providers:
     order: 1
 -----------------------------------------------
 
-IMPORTANT: {kib} uses SPNEGO, which wraps the Kerberos protocol for use with HTTP, extending it to web applications. 
+IMPORTANT: {kib} uses SPNEGO, which wraps the Kerberos protocol for use with HTTP, extending it to web applications.
 At the end of the Kerberos handshake, {kib} forwards the service ticket to {es}, then {es} unpacks the service ticket and responds with an access and refresh token, which are used for subsequent authentication.
-On every {es} node that {kib} connects to, the keytab file should always contain the HTTP service principal for the {kib} host. 
+On every {es} node that {kib} connects to, the keytab file should always contain the HTTP service principal for the {kib} host.
 The HTTP service principal name must have the `HTTP/kibana.domain.local@KIBANA.DOMAIN.LOCAL` format.
 
 
@@ -386,20 +396,10 @@ xpack.security.authc.providers:
 [[anonymous-access-and-embedding]]
 ===== Anonymous access and embedding
 
-One of the most popular use cases for anonymous access is when you embed {kib} into other applications and don't want to force your users to log in to view it. 
+One of the most popular use cases for anonymous access is when you embed {kib} into other applications and don't want to force your users to log in to view it.
 If you configured {kib} to use anonymous access as the sole authentication mechanism, you don't need to do anything special while embedding {kib}.
 
-If you have multiple authentication providers enabled, and you want to automatically log in anonymous users when embedding dashboards and visualizations:
-
-. Open the main menu, then click *Dashboard* or *Visualize Library*.
-. Open then dashboard or visualization you want to embed.
-. Open the *Share* menu, then click *Embed code > Public URL*.
-+
-You can also use *Public URL* when you're generating permanent links to dashboards, visualizations, and saved searches.
-+
-NOTE: *Public URL* is available only when anonymous access is configured and your anonymous service account has privileges to access what you want to embed or share.
-+
-For more information, refer to <<embedding, Embed {kib} content in a web page>>.
+For information on how to embed, refer to <<embedding, Embed {kib} content in a web page>>.
 
 [float]
 [[anonymous-access-session]]
@@ -431,3 +431,42 @@ xpack.security.authc.http.schemes: [apikey, basic, something-custom]
 --------------------------------------------------------------------------------
 
 With this configuration, you can send requests to {kib} with the `Authorization` header using `ApiKey`, `Basic` or `Something-Custom` HTTP schemes (case insensitive). Under the hood, {kib} relays this header to {es}, then {es} authenticates the request using the credentials in the header.
+
+[float]
+[[embedded-content-authentication]]
+==== Embedded content authentication
+
+Once you create a dashboard or a visualization, you might want to share it with your colleagues or friends. The easiest way to do this is to share a direct link to your dashboard or visualization. However, some users might not have access to your {kib}. With the {kib} embedding functionality, you can display the content you created in {kib} to an internal company website or a personal web page.
+
+[[embedding-cookies]]
+To minimize security risk, embedding with iframes requires careful consideration. By default, modern web browsers enforce the
+https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy[same-origin policy] to restrict the behavior of framed pages. When
+{stack-security-features} are enabled on your cluster, make sure the browsers can transmit session cookies to a {kib} server. The setting you need to be aware of is <<xpack-security-sameSiteCookies, `xpack.security.sameSiteCookies`>>. To support modern browsers, you must set it to `None`:
+
+[source,yaml]
+--
+xpack.security.sameSiteCookies: "None"
+--
+
+For more information about possible values and implications, refer to <<xpack-security-sameSiteCookies, xpack.security.sameSiteCookies>>.
+For more information about iframe and cookies, refer to https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe[iframe] and https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite[SameSite cookies].
+
+If you're embedding {kib} in a website that supports Single Sign-On with SAML, OpenID Connect, Kerberos, or PKI, it's highly advisable to configure {kib} as a part of the Single Sign-On setup. Operating in a single and properly configured security domain provides you with the most secure and seamless user experience.
+
+If you have multiple authentication providers enabled, and you want to automatically log in anonymous users when embedding anything other than dashboards and visualizations, then you will need to add the `auth_provider_hint=<anonymous-provider-name>` query string parameter to the {kib} URL that you're embedding.
+
+For example, if you craft the iframe code to embed {kib}, it might look like this:
+
+```html
+<iframe src="https://localhost:5601/app/monitoring#/elasticsearch/nodes?embed=true&_g=(....)" height="600" width="800"></iframe>
+```
+
+To make this iframe leverage anonymous access automatically, you will need to modify a link to {kib} in the `src` iframe attribute to look like this:
+
+```html
+<iframe src="https://localhost:5601/app/monitoring?auth_provider_hint=anonymous1#/elasticsearch/nodes?embed=true&_g=(....)" height="600" width="800"></iframe>
+```
+
+NOTE: `auth_provider_hint` query string parameter goes *before* the hash URL fragment.
+
+For more information on how to embed, refer to <<embedding, Embed {kib} content in a web page>>.

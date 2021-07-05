@@ -54,13 +54,14 @@ import { IVectorStyle } from '../classes/styles/vector/vector_style';
 const FIT_TO_BOUNDS_SCALE_FACTOR = 0.1;
 
 export type DataRequestContext = {
-  startLoading(dataId: string, requestToken: symbol, requestMeta: DataMeta): void;
+  startLoading(dataId: string, requestToken: symbol, requestMeta?: DataMeta): void;
   stopLoading(dataId: string, requestToken: symbol, data: object, resultsMeta?: DataMeta): void;
   onLoadError(dataId: string, requestToken: symbol, errorMessage: string): void;
   updateSourceData(newData: unknown): void;
   isRequestStillActive(dataId: string, requestToken: symbol): boolean;
   registerCancelCallback(requestToken: symbol, callback: () => void): void;
   dataFilters: MapFilters;
+  forceRefresh: boolean;
 };
 
 export function clearDataRequests(layer: ILayer) {
@@ -113,7 +114,8 @@ export function updateStyleMeta(layerId: string | null) {
 function getDataRequestContext(
   dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
   getState: () => MapStoreState,
-  layerId: string
+  layerId: string,
+  forceRefresh: boolean = false
 ): DataRequestContext {
   return {
     dataFilters: getDataFilters(getState()),
@@ -123,7 +125,7 @@ function getDataRequestContext(
       dispatch(endDataLoad(layerId, dataId, requestToken, data, meta)),
     onLoadError: (dataId: string, requestToken: symbol, errorMessage: string) =>
       dispatch(onDataLoadError(layerId, dataId, requestToken, errorMessage)),
-    updateSourceData: (newData: unknown) => {
+    updateSourceData: (newData: object) => {
       dispatch(updateSourceDataRequest(layerId, newData));
     },
     isRequestStillActive: (dataId: string, requestToken: symbol) => {
@@ -135,6 +137,7 @@ function getDataRequestContext(
     },
     registerCancelCallback: (requestToken: symbol, callback: () => void) =>
       dispatch(registerCancelCallback(requestToken, callback)),
+    forceRefresh,
   };
 }
 
@@ -166,9 +169,14 @@ function syncDataForAllJoinLayers() {
   };
 }
 
-export function syncDataForLayer(layer: ILayer) {
+export function syncDataForLayer(layer: ILayer, forceRefresh: boolean = false) {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
-    const dataRequestContext = getDataRequestContext(dispatch, getState, layer.getId());
+    const dataRequestContext = getDataRequestContext(
+      dispatch,
+      getState,
+      layer.getId(),
+      forceRefresh
+    );
     if (!layer.isVisible() || !layer.showAtZoomLevel(dataRequestContext.dataFilters.zoom)) {
       return;
     }
@@ -316,7 +324,7 @@ function onDataLoadError(
   };
 }
 
-export function updateSourceDataRequest(layerId: string, newData: unknown) {
+export function updateSourceDataRequest(layerId: string, newData: object) {
   return (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
     dispatch({
       type: UPDATE_SOURCE_DATA_REQUEST,

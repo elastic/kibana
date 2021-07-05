@@ -8,7 +8,6 @@
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
-import { getSearchListItemMock } from '../../../common/schemas/elastic_response/search_es_list_item_schema.mock';
 import { getListItemResponseMock } from '../../../common/schemas/response/list_item_schema.mock';
 import {
   DATE_NOW,
@@ -18,6 +17,7 @@ import {
   TIE_BREAKER,
   USER,
 } from '../../../common/constants.mock';
+import { getSearchListItemMock } from '../../schemas/elastic_response/search_es_list_item_schema.mock';
 
 import { getListItem } from './get_list_item';
 

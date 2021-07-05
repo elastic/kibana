@@ -10,7 +10,7 @@ import { difference } from 'lodash';
 import { EventManager } from './event_manager';
 import type { MlClient } from '../../lib/ml_client';
 
-type ScheduledEvent = estypes.ScheduledEvent;
+type ScheduledEvent = estypes.MlCalendarEvent;
 
 interface BasicCalendar {
   job_ids: string[];

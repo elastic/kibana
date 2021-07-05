@@ -18,8 +18,6 @@ export interface MinAgeField {
   minAgeToMilliSeconds: number;
 }
 
-export type MinAgePhase = 'warm' | 'cold' | 'frozen' | 'delete';
-
 export interface ForcemergeFields {
   bestCompression: boolean;
 }

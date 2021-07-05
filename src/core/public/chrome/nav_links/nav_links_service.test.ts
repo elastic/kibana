@@ -20,6 +20,22 @@ const availableApps = new Map([
       order: -10,
       title: 'App 2',
       euiIconType: 'canvasApp',
+      deepLinks: [
+        {
+          id: 'deepApp1',
+          order: 50,
+          title: 'Deep App 1',
+          path: '/deepapp1',
+          deepLinks: [
+            {
+              id: 'deepApp2',
+              order: 40,
+              title: 'Deep App 2',
+              path: '/deepapp2',
+            },
+          ],
+        },
+      ],
     },
   ],
   ['chromelessApp', { id: 'chromelessApp', order: 20, title: 'Chromless App', chromeless: true }],
@@ -66,20 +82,17 @@ describe('NavLinksService', () => {
             map((links) => links.map((l) => l.id))
           )
           .toPromise()
-      ).toEqual(['app2', 'app1']);
+      ).toEqual(['app2', 'app1', 'app2:deepApp2', 'app2:deepApp1']);
     });
 
     it('emits multiple values', async () => {
       const navLinkIds$ = start.getNavLinks$().pipe(map((links) => links.map((l) => l.id)));
       const emittedLinks: string[][] = [];
       navLinkIds$.subscribe((r) => emittedLinks.push(r));
-      start.update('app1', { href: '/foo' });
+      start.showOnly('app1');
 
       service.stop();
-      expect(emittedLinks).toEqual([
-        ['app2', 'app1'],
-        ['app2', 'app1'],
-      ]);
+      expect(emittedLinks).toEqual([['app2', 'app1', 'app2:deepApp2', 'app2:deepApp1'], ['app1']]);
     });
 
     it('completes when service is stopped', async () => {
@@ -101,7 +114,12 @@ describe('NavLinksService', () => {
 
   describe('#getAll()', () => {
     it('returns a sorted array of navlinks', () => {
-      expect(start.getAll().map((l) => l.id)).toEqual(['app2', 'app1']);
+      expect(start.getAll().map((l) => l.id)).toEqual([
+        'app2',
+        'app1',
+        'app2:deepApp2',
+        'app2:deepApp1',
+      ]);
     });
   });
 
@@ -126,7 +144,7 @@ describe('NavLinksService', () => {
             map((links) => links.map((l) => l.id))
           )
           .toPromise()
-      ).toEqual(['app2', 'app1']);
+      ).toEqual(['app2', 'app1', 'app2:deepApp2', 'app2:deepApp1']);
     });
 
     it('does nothing on chromeless applications', async () => {
@@ -139,7 +157,7 @@ describe('NavLinksService', () => {
             map((links) => links.map((l) => l.id))
           )
           .toPromise()
-      ).toEqual(['app2', 'app1']);
+      ).toEqual(['app2', 'app1', 'app2:deepApp2', 'app2:deepApp1']);
     });
 
     it('removes all other links', async () => {
@@ -155,6 +173,19 @@ describe('NavLinksService', () => {
       ).toEqual(['app2']);
     });
 
+    it('show only deep link', async () => {
+      start.showOnly('app2:deepApp1');
+      expect(
+        await start
+          .getNavLinks$()
+          .pipe(
+            take(1),
+            map((links) => links.map((l) => l.id))
+          )
+          .toPromise()
+      ).toEqual(['app2:deepApp1']);
+    });
+
     it('still removes all other links when availableApps are re-emitted', async () => {
       start.showOnly('app2');
       mockAppService.applications$.next(mockAppService.applications$.value);
@@ -167,45 +198,6 @@ describe('NavLinksService', () => {
           )
           .toPromise()
       ).toEqual(['app2']);
-    });
-  });
-
-  describe('#update()', () => {
-    it('updates the navlinks and returns the updated link', async () => {
-      expect(start.update('app2', { hidden: true })).toEqual(
-        expect.objectContaining({
-          hidden: true,
-          id: 'app2',
-          order: -10,
-          title: 'App 2',
-          euiIconType: 'canvasApp',
-        })
-      );
-      const hiddenLinkIds = await start
-        .getNavLinks$()
-        .pipe(
-          take(1),
-          map((links) => links.filter((l) => l.hidden).map((l) => l.id))
-        )
-        .toPromise();
-      expect(hiddenLinkIds).toEqual(['app2']);
-    });
-
-    it('returns undefined if link does not exist', () => {
-      expect(start.update('fake', { hidden: true })).toBeUndefined();
-    });
-
-    it('keeps the updated link when availableApps are re-emitted', async () => {
-      start.update('app2', { hidden: true });
-      mockAppService.applications$.next(mockAppService.applications$.value);
-      const hiddenLinkIds = await start
-        .getNavLinks$()
-        .pipe(
-          take(1),
-          map((links) => links.filter((l) => l.hidden).map((l) => l.id))
-        )
-        .toPromise();
-      expect(hiddenLinkIds).toEqual(['app2']);
     });
   });
 

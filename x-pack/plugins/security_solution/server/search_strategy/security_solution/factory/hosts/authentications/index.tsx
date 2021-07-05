@@ -58,7 +58,6 @@ export const authentications: SecuritySolutionFactory<HostsQueries.authenticatio
       dsl: [inspectStringifyObject(buildAuthenticationQuery(options))],
     };
     const showMorePagesIndicator = totalCount > fakeTotalCount;
-
     return {
       ...response,
       inspect,

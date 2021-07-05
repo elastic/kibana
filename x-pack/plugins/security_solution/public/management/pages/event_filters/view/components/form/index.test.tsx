@@ -17,6 +17,7 @@ import { createGlobalNoMiddlewareStore, ecsEventMock } from '../../../test_utils
 import { getMockTheme } from '../../../../../../common/lib/kibana/kibana_react.mock';
 import { NAME_ERROR, NAME_PLACEHOLDER } from './translations';
 import { useCurrentUser, useKibana } from '../../../../../../common/lib/kibana';
+import { ExceptionBuilder } from '../../../../../../shared_imports';
 
 jest.mock('../../../../../../common/lib/kibana');
 jest.mock('../../../../../../common/containers/source');
@@ -53,6 +54,9 @@ describe('Event filter form', () => {
   };
 
   beforeEach(() => {
+    const emptyComp = <span data-test-subj="alert-exception-builder" />;
+    jest.spyOn(ExceptionBuilder, 'getExceptionBuilderComponentLazy').mockReturnValue(emptyComp);
+
     (useFetchIndex as jest.Mock).mockImplementation(() => [
       false,
       {
@@ -77,8 +81,17 @@ describe('Event filter form', () => {
   it('should renders correctly with data', () => {
     component = renderComponentWithdata();
 
-    expect(component.getByText(ecsEventMock().process!.executable![0])).not.toBeNull();
-    expect(component.getByText(NAME_ERROR)).not.toBeNull();
+    expect(component.getByTestId('alert-exception-builder')).not.toBeNull();
+  });
+
+  it('should display name error only when on blur and empty name', () => {
+    component = renderComponentWithdata();
+    expect(component.queryByText(NAME_ERROR)).toBeNull();
+    const nameInput = component.getByPlaceholderText(NAME_PLACEHOLDER);
+    act(() => {
+      fireEvent.blur(nameInput);
+    });
+    expect(component.queryByText(NAME_ERROR)).not.toBeNull();
   });
 
   it('should change name', async () => {
@@ -96,6 +109,23 @@ describe('Event filter form', () => {
 
     expect(store.getState()!.management!.eventFilters!.form!.entry!.name).toBe('Exception name');
     expect(store.getState()!.management!.eventFilters!.form!.hasNameError).toBeFalsy();
+  });
+
+  it('should change name with a white space still shows an error', async () => {
+    component = renderComponentWithdata();
+
+    const nameInput = component.getByPlaceholderText(NAME_PLACEHOLDER);
+
+    act(() => {
+      fireEvent.change(nameInput, {
+        target: {
+          value: ' ',
+        },
+      });
+    });
+
+    expect(store.getState()!.management!.eventFilters!.form!.entry!.name).toBe('');
+    expect(store.getState()!.management!.eventFilters!.form!.hasNameError).toBeTruthy();
   });
 
   it('should change comments', async () => {

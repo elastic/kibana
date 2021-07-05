@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
+import uuid from 'uuid/v4';
 import { TSVB_EDITOR_NAME } from './application/editor_controller';
 import { PANEL_TYPES, TOOLTIP_MODES } from '../common/enums';
 import { isStringTypeIndexPattern } from '../common/index_patterns_utils';
@@ -25,11 +25,11 @@ export const metricsVisDefinition = {
   group: VisGroups.PROMOTED,
   visConfig: {
     defaults: {
-      id: '61ca57f0-469d-11e7-af02-69e470af7417',
+      id: uuid(),
       type: PANEL_TYPES.TIMESERIES,
       series: [
         {
-          id: '61ca57f1-469d-11e7-af02-69e470af7417',
+          id: uuid(),
           color: '#68BC00',
           split_mode: 'everything',
           palette: {
@@ -38,7 +38,7 @@ export const metricsVisDefinition = {
           },
           metrics: [
             {
-              id: '61ca57f2-469d-11e7-af02-69e470af7417',
+              id: uuid(),
               type: 'count',
             },
           ],
@@ -74,8 +74,11 @@ export const metricsVisDefinition = {
     showIndexSelection: false,
   },
   toExpressionAst,
-  getSupportedTriggers: () => {
-    return [VIS_EVENT_TO_TRIGGER.brush];
+  getSupportedTriggers: (params?: VisParams) => {
+    if (params?.type === PANEL_TYPES.TIMESERIES) {
+      return [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush];
+    }
+    return [];
   },
   inspectorAdapters: {},
   getUsedIndexPattern: async (params: VisParams) => {

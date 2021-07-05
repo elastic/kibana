@@ -11,7 +11,11 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { visualBuilder, timePicker } = getPageObjects(['visualBuilder', 'timePicker']);
+  const { visualBuilder, timePicker, visualize } = getPageObjects([
+    'visualBuilder',
+    'timePicker',
+    'visualize',
+  ]);
   const retry = getService('retry');
 
   async function cleanupMarkdownData(variableName: 'variable' | 'label', checkedValue: string) {
@@ -31,6 +35,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('visual builder', function describeIndexTests() {
     describe('markdown', () => {
       before(async () => {
+        await visualize.initTests();
         await visualBuilder.resetPage();
         await visualBuilder.clickMarkdown();
         await timePicker.setAbsoluteRange(
