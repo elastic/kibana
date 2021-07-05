@@ -676,7 +676,10 @@ function runFullASTValidation(
             })
           );
         } else {
-          if (functions.length > nodeOperation.requiredReferences.length) {
+          const requiredFunctions = nodeOperation.requiredReferences
+            ? nodeOperation.requiredReferences.length
+            : 1;
+          if (functions.length > requiredFunctions) {
             errors.push(
               getMessageFromId({
                 messageId: 'tooManyFirstArguments',
