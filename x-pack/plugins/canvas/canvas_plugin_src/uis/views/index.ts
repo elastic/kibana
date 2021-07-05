@@ -53,6 +53,6 @@ export const viewSpecs = [
 
 export const viewInitializers = [metricInitializer];
 
-export const initializeViews: SetupInitializer<Promise<unknown[]>> = (core, plugins) => {
+export const initializeViews: SetupInitializer<unknown[]> = (core, plugins) => {
   return [...viewSpecs, ...viewInitializers.map((initializer) => initializer(core, plugins))];
 };

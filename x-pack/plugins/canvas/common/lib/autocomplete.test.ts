@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { UnwrapPromiseOrReturn } from '@kbn/utility-types';
 import { getFunctionSpecs } from '../../__fixtures__/function_specs';
 
 import {
