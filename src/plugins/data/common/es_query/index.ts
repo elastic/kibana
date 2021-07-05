@@ -9,6 +9,22 @@
 export { getEsQueryConfig } from './get_es_query_config';
 
 /**
+ * Legacy re-exports from package.
  * @deprecated Use imports from `@kbn/es-query` directly
  */
-export { nodeBuilder, Filter, FilterMeta, FilterStateStore, FILTERS } from '@kbn/es-query';
+export {
+  nodeBuilder,
+  buildQueryFilter,
+  buildPhrasesFilter,
+  buildPhraseFilter,
+  buildRangeFilter,
+  buildCustomFilter,
+  buildFilter,
+  buildEmptyFilter,
+  buildExistsFilter,
+  toggleFilterNegated,
+  Filter,
+  FilterMeta,
+  FilterStateStore,
+  FILTERS,
+} from '@kbn/es-query';
