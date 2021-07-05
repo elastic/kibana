@@ -18,7 +18,7 @@ const params = { index: 'apm-*' };
 const ranges = [{ to: 1 }, { from: 1, to: 3 }, { from: 3, to: 5 }, { from: 5 }];
 
 describe('query_fractions', () => {
-  describe('getTransactionDurationRangesRequest()', () => {
+  describe('getTransactionDurationRangesRequest', () => {
     it('returns the request body for the transaction duration ranges aggregation', () => {
       const req = getTransactionDurationRangesRequest(params, ranges);
 
@@ -29,7 +29,7 @@ describe('query_fractions', () => {
     });
   });
 
-  describe('fetchTransactionDurationFractions()', () => {
+  describe('fetchTransactionDurationFractions', () => {
     it('computes the actual percentile bucket counts and actual fractions', async () => {
       const esClientSearchMock = jest.fn((req: estypes.SearchRequest): {
         body: estypes.SearchResponse;

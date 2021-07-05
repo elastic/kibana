@@ -8,7 +8,7 @@
 import { computeExpectationsAndRanges } from './aggregation_utils';
 
 describe('aggregation utils', () => {
-  describe('computeExpectationsAndRanges()', () => {
+  describe('computeExpectationsAndRanges', () => {
     it('returns expectations and ranges based on given percentiles #1', async () => {
       const { expectations, ranges } = computeExpectationsAndRanges([0, 1]);
       expect(expectations).toEqual([0, 0.5, 1]);

@@ -18,7 +18,7 @@ const params = { index: 'apm-*' };
 const interval = 100;
 
 describe('query_histogram', () => {
-  describe('getTransactionDurationHistogramRequest()', () => {
+  describe('getTransactionDurationHistogramRequest', () => {
     it('returns the request body for the histogram request', () => {
       const req = getTransactionDurationHistogramRequest(params, interval);
 
@@ -50,7 +50,7 @@ describe('query_histogram', () => {
     });
   });
 
-  describe('fetchTransactionDurationHistogram()', () => {
+  describe('fetchTransactionDurationHistogram', () => {
     it('returns the buckets from the histogram aggregation', async () => {
       const histogramBucket = [
         {

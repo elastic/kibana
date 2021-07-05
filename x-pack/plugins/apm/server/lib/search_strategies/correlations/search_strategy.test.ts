@@ -103,7 +103,7 @@ describe('APM Correlations search strategy', () => {
     });
   });
 
-  describe('search()', () => {
+  describe('search', () => {
     let mockClientFieldCaps: jest.Mock;
     let mockClientSearch: jest.Mock;
     let mockDeps: SearchStrategyDependencies;

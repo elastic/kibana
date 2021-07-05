@@ -8,7 +8,7 @@
 import { getRandomInt } from './math_utils';
 
 describe('math utils', () => {
-  describe('getRandomInt()', () => {
+  describe('getRandomInt', () => {
     it('returns a random integer within the given range', () => {
       const min = 0.9;
       const max = 11.1;

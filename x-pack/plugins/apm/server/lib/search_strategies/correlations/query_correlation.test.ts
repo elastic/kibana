@@ -22,7 +22,7 @@ const fractions = [1, 2, 4, 5];
 const totalDocCount = 1234;
 
 describe('query_correlation', () => {
-  describe('getTransactionDurationCorrelationRequest()', () => {
+  describe('getTransactionDurationCorrelationRequest', () => {
     it('applies options to the returned query with aggregations for correlations and k-test', () => {
       const query = getTransactionDurationCorrelationRequest(
         params,
@@ -55,7 +55,7 @@ describe('query_correlation', () => {
     });
   });
 
-  describe('fetchTransactionDurationCorrelation()', () => {
+  describe('fetchTransactionDurationCorrelation', () => {
     it('returns the data from the aggregations', async () => {
       const latencyRangesBuckets = [{ to: 1 }, { from: 1, to: 2 }, { from: 2 }];
       const transactionDurationCorrelationValue = 0.45;

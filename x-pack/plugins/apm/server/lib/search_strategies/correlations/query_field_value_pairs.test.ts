@@ -19,7 +19,7 @@ import {
 const params = { index: 'apm-*' };
 
 describe('query_field_value_pairs', () => {
-  describe('getTermsAggRequest()', () => {
+  describe('getTermsAggRequest', () => {
     it('returns the most basic request body for a terms aggregation', () => {
       const fieldName = 'myFieldName';
       const req = getTermsAggRequest(params, fieldName);
@@ -27,7 +27,7 @@ describe('query_field_value_pairs', () => {
     });
   });
 
-  describe('fetchTransactionDurationFieldValuePairs()', () => {
+  describe('fetchTransactionDurationFieldValuePairs', () => {
     it('returns field/value pairs for field candidates', async () => {
       const fieldCandidates = [
         'myFieldCandidate1',

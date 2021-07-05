@@ -19,7 +19,7 @@ import {
 const params = { index: 'apm-*' };
 
 describe('query_field_candidates', () => {
-  describe('shouldBeExcluded()', () => {
+  describe('shouldBeExcluded', () => {
     it('does not exclude a completely custom field name', () => {
       expect(shouldBeExcluded('myFieldName')).toBe(false);
     });
@@ -33,7 +33,7 @@ describe('query_field_candidates', () => {
     });
   });
 
-  describe('hasPrefixToInclude()', () => {
+  describe('hasPrefixToInclude', () => {
     it('identifies if a field name is prefixed to be included', () => {
       expect(hasPrefixToInclude('myFieldName')).toBe(false);
       expect(hasPrefixToInclude('somePrefix.myFieldName')).toBe(false);
@@ -43,7 +43,7 @@ describe('query_field_candidates', () => {
     });
   });
 
-  describe('getRandomDocsRequest()', () => {
+  describe('getRandomDocsRequest', () => {
     it('returns the most basic request body for a sample of random documents', () => {
       const req = getRandomDocsRequest(params);
 
@@ -74,7 +74,7 @@ describe('query_field_candidates', () => {
     });
   });
 
-  describe('fetchTransactionDurationFieldCandidates()', () => {
+  describe('fetchTransactionDurationFieldCandidates', () => {
     it('returns field candidates and total hits', async () => {
       const esClientFieldCapsMock = jest.fn(() => ({
         body: {

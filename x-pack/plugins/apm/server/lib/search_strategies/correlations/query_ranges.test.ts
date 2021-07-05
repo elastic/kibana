@@ -18,7 +18,7 @@ const params = { index: 'apm-*' };
 const rangeSteps = [1, 3, 5];
 
 describe('query_ranges', () => {
-  describe('getTransactionDurationRangesRequest()', () => {
+  describe('getTransactionDurationRangesRequest', () => {
     it('returns the request body for the duration percentiles request', () => {
       const req = getTransactionDurationRangesRequest(params, rangeSteps);
 
@@ -69,7 +69,7 @@ describe('query_ranges', () => {
     });
   });
 
-  describe('fetchTransactionDurationRanges()', () => {
+  describe('fetchTransactionDurationRanges', () => {
     it('fetches the percentiles', async () => {
       const logspaceRangesBuckets = [
         {

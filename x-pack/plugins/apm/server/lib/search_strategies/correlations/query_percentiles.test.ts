@@ -17,7 +17,7 @@ import {
 const params = { index: 'apm-*' };
 
 describe('query_percentiles', () => {
-  describe('getTransactionDurationPercentilesRequest()', () => {
+  describe('getTransactionDurationPercentilesRequest', () => {
     it('returns the request body for the duration percentiles request', () => {
       const req = getTransactionDurationPercentilesRequest(params);
 
@@ -51,7 +51,7 @@ describe('query_percentiles', () => {
     });
   });
 
-  describe('fetchTransactionDurationPercentiles()', () => {
+  describe('fetchTransactionDurationPercentiles', () => {
     it('fetches the percentiles', async () => {
       const percentilesValues = {
         '1.0': 5.0,

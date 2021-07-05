@@ -8,7 +8,7 @@
 import { getQueryWithParams } from './get_query_with_params';
 
 describe('correlations', () => {
-  describe('getQueryWithParams()', () => {
+  describe('getQueryWithParams', () => {
     it('returns the most basic query filtering on processor.event=transaction', () => {
       const query = getQueryWithParams({ params: { index: 'apm-*' } });
       expect(query).toEqual({

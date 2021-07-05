@@ -17,7 +17,7 @@ import {
 const params = { index: 'apm-*' };
 
 describe('query_histogram_rangesteps', () => {
-  describe('getHistogramIntervalRequest()', () => {
+  describe('getHistogramIntervalRequest', () => {
     it('returns the request body for the histogram interval request', () => {
       const req = getHistogramIntervalRequest(params);
 
@@ -53,7 +53,7 @@ describe('query_histogram_rangesteps', () => {
     });
   });
 
-  describe('fetchTransactionDurationHistogramRangesteps()', () => {
+  describe('fetchTransactionDurationHistogramRangesteps', () => {
     it('fetches the range steps for the log histogram', async () => {
       const esClientSearchMock = jest.fn((req: estypes.SearchRequest): {
         body: estypes.SearchResponse;
