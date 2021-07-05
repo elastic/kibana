@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState, useEffect } from 'react';
+import React, { FunctionComponent, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { EuiButtonEmpty, EuiCode } from '@elastic/eui';
@@ -18,8 +18,7 @@ import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 import {
   FIELD_TYPES,
   UseField,
-  UseMultiFields,
-  useFormData,
+  useFormContext,
   Field,
   FieldHook,
   FieldConfig,
@@ -87,10 +86,17 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
-const internalNetworkConfig: Record<
+const getInternalNetworkConfig: (
+  toggleCustom: () => void
+) => Record<
   keyof InternalNetworkFields,
-  { path: string; config?: FieldConfig<any>; euiFieldProps?: Record<string, any> }
-> = {
+  {
+    path: string;
+    config?: FieldConfig<any>;
+    euiFieldProps?: Record<string, any>;
+    labelAppend: JSX.Element;
+  }
+> = (toggleCustom: () => void) => ({
   internal_networks: {
     path: 'fields.internal_networks',
     euiFieldProps: {
@@ -124,6 +130,14 @@ const internalNetworkConfig: Record<
         />
       ),
     },
+    labelAppend: (
+      <EuiButtonEmpty size="xs" onClick={toggleCustom} data-test-subj="toggleCustomField">
+        {i18n.translate('xpack.ingestPipelines.pipelineEditor.internalNetworkCustomLabel', {
+          defaultMessage: 'Use custom field',
+        })}
+      </EuiButtonEmpty>
+    ),
+    key: 'preset',
   },
   internal_networks_field: {
     path: 'fields.internal_networks_field',
@@ -156,23 +170,34 @@ const internalNetworkConfig: Record<
         />
       ),
     },
+    labelAppend: (
+      <EuiButtonEmpty size="xs" onClick={toggleCustom} data-test-subj="toggleCustomField">
+        {i18n.translate('xpack.ingestPipelines.pipelineEditor.internalNetworkPredefinedLabel', {
+          defaultMessage: 'Use preset field',
+        })}
+      </EuiButtonEmpty>
+    ),
+    key: 'custom',
   },
-};
+});
 
 export const NetworkDirection: FunctionComponent = () => {
-  const [{ fields }] = useFormData({ watch: 'fields.internal_networks_field' });
-  const [isCustom, setIsCustom] = useState<boolean | undefined>();
+  const { getFieldDefaultValue } = useFormContext();
+  const isInternalNetowrksFieldDefined =
+    getFieldDefaultValue('fields.internal_networks_field') !== undefined;
+  const [isCustom, setIsCustom] = useState<boolean>(isInternalNetowrksFieldDefined);
 
-  // On initial render the fields variable is undefined and eventually get loaded
-  // with data as the form-lib fields get rendered. Since the state of the UI for the
-  // `NetworksFields` depends on that, we need to have an effect that runs only once
-  // when the `fields` have been loaded and when the isCustom hasnt been yet set.
-  const internalNetworksFieldValue = fields?.internal_networks_field;
-  useEffect(() => {
-    if (internalNetworksFieldValue && isCustom === undefined) {
-      setIsCustom(internalNetworksFieldValue?.length > 0);
-    }
-  }, [internalNetworksFieldValue, isCustom]);
+  const toggleCustom = useCallback(() => {
+    setIsCustom((prev) => !prev);
+  }, []);
+
+  const internalNetworkFieldProps = useMemo(
+    () =>
+      isCustom
+        ? getInternalNetworkConfig(toggleCustom).internal_networks_field
+        : getInternalNetworkConfig(toggleCustom).internal_networks,
+    [isCustom, toggleCustom]
+  );
 
   return (
     <>
@@ -202,58 +227,11 @@ export const NetworkDirection: FunctionComponent = () => {
         }
       />
 
-      <UseMultiFields fields={internalNetworkConfig}>
-        {({
-          internal_networks: internalNetworks,
-          internal_networks_field: internalNetworksField,
-        }) => {
-          const field = isCustom ? internalNetworksField : internalNetworks;
-          const configKey: keyof InternalNetworkTypes = isCustom
-            ? 'internal_networks_field'
-            : 'internal_networks';
-
-          const toggleCustom = (currentField: FieldHook) => () => {
-            if (isCustom) {
-              currentField.setValue('');
-            } else {
-              currentField.setValue([]);
-            }
-
-            currentField.reset({ resetValue: false });
-
-            setIsCustom(!isCustom);
-          };
-
-          return (
-            <Field
-              field={field}
-              euiFieldProps={internalNetworkConfig[configKey].euiFieldProps}
-              data-test-subj="networkDirectionField"
-              labelAppend={
-                <EuiButtonEmpty
-                  size="xs"
-                  onClick={toggleCustom(field)}
-                  data-test-subj="toggleCustomField"
-                >
-                  {isCustom
-                    ? i18n.translate(
-                        'xpack.ingestPipelines.pipelineEditor.internalNetworkPredefinedLabel',
-                        {
-                          defaultMessage: 'Use preset field',
-                        }
-                      )
-                    : i18n.translate(
-                        'xpack.ingestPipelines.pipelineEditor.internalNetworkCustomLabel',
-                        {
-                          defaultMessage: 'Use custom field',
-                        }
-                      )}
-                </EuiButtonEmpty>
-              }
-            />
-          );
-        }}
-      </UseMultiFields>
+      <UseField
+        {...internalNetworkFieldProps}
+        component={Field}
+        data-test-subj="networkDirectionField"
+      />
 
       <IgnoreMissingField
         defaultValue={true}
