@@ -212,8 +212,6 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     // (undocumented)
     registerFunction(functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)): void;
     // (undocumented)
-    registerFunctionAsync(functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition) | (() => Promise<AnyExpressionFunctionDefinition>)): Promise<void>;
-    // (undocumented)
     registerType(typeDefinition: AnyExpressionTypeDefinition | (() => AnyExpressionTypeDefinition)): void;
     run<Input, Output>(ast: string | ExpressionAstExpression, input: Input, params?: ExpressionExecutionParams): Observable<ExecutionResult<Output | ExpressionValueError>>;
     // (undocumented)

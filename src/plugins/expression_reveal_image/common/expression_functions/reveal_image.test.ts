@@ -15,23 +15,22 @@ import { getFunctionErrors } from '../../common/i18n';
 import { revealImageFunction } from './reveal_image_function';
 import { Origin } from '../types';
 import { ExecutionContext } from 'src/plugins/expressions';
-import { UnwrapPromiseOrReturn } from '@kbn/utility-types';
 
 const errors = getFunctionErrors().revealImage;
 
 describe('revealImageFunction', () => {
-  let fn: UnwrapPromiseOrReturn<ReturnType<typeof revealImageFunction>>['fn'];
+  const fn = functionWrapper(revealImageFunction);
+
   let elasticLogo = '';
   let elasticOutline = '';
 
   beforeEach(async () => {
-    fn = await functionWrapper(revealImageFunction);
     elasticLogo = await (await getElasticLogo()).elasticLogo;
     elasticOutline = await (await getElasticOutline()).elasticOutline;
   });
 
-  it('returns a render as revealImage', () => {
-    const result = fn(
+  it('returns a render as revealImage', async () => {
+    const result = await fn(
       0.5,
       {
         image: null,
@@ -45,130 +44,147 @@ describe('revealImageFunction', () => {
   });
 
   describe('context', () => {
-    it('throws when context is not a number between 0 and 1', () => {
-      expect(() => {
-        fn(
-          10,
-          {
-            image: elasticLogo,
-            emptyImage: elasticOutline,
-            origin: Origin.TOP,
-          },
-          {} as ExecutionContext
-        );
-      }).toThrow(new RegExp(errors.invalidPercent(10).message));
+    it('throws when context is not a number between 0 and 1', async () => {
+      expect.assertions(2);
+      await fn(
+        10,
+        {
+          image: elasticLogo,
+          emptyImage: elasticOutline,
+          origin: Origin.TOP,
+        },
+        {} as ExecutionContext
+      ).catch((e: any) => {
+        expect(e.message).toMatch(new RegExp(errors.invalidPercent(10).message));
+      });
 
-      expect(() => {
-        fn(
-          -0.1,
-          {
-            image: elasticLogo,
-            emptyImage: elasticOutline,
-            origin: Origin.TOP,
-          },
-          {} as ExecutionContext
-        );
-      }).toThrow(new RegExp(errors.invalidPercent(-0.1).message));
+      await fn(
+        -0.1,
+        {
+          image: elasticLogo,
+          emptyImage: elasticOutline,
+          origin: Origin.TOP,
+        },
+        {} as ExecutionContext
+      ).catch((e: any) => {
+        expect(e.message).toMatch(new RegExp(errors.invalidPercent(-0.1).message));
+      });
     });
   });
 
   describe('args', () => {
     describe('image', () => {
-      it('sets the image', () => {
-        const result = fn(
-          0.89,
-          {
-            emptyImage: null,
-            origin: Origin.TOP,
-            image: elasticLogo,
-          },
-          {} as ExecutionContext
+      it('sets the image', async () => {
+        const result = (
+          await fn(
+            0.89,
+            {
+              emptyImage: null,
+              origin: Origin.TOP,
+              image: elasticLogo,
+            },
+            {} as ExecutionContext
+          )
         ).value;
         expect(result).toHaveProperty('image', elasticLogo);
       });
 
-      it('defaults to the Elastic outline logo', () => {
-        const result = fn(
-          0.89,
-          {
-            emptyImage: null,
-            origin: Origin.TOP,
-            image: null,
-          },
-          {} as ExecutionContext
+      it('defaults to the Elastic outline logo', async () => {
+        const result = (
+          await fn(
+            0.89,
+            {
+              emptyImage: null,
+              origin: Origin.TOP,
+              image: null,
+            },
+            {} as ExecutionContext
+          )
         ).value;
         expect(result).toHaveProperty('image', elasticOutline);
       });
     });
 
     describe('emptyImage', () => {
-      it('sets the background image', () => {
-        const result = fn(
-          0,
-          {
-            emptyImage: elasticLogo,
-            origin: Origin.TOP,
-            image: null,
-          },
-          {} as ExecutionContext
+      it('sets the background image', async () => {
+        const result = (
+          await fn(
+            0,
+            {
+              emptyImage: elasticLogo,
+              origin: Origin.TOP,
+              image: null,
+            },
+            {} as ExecutionContext
+          )
         ).value;
         expect(result).toHaveProperty('emptyImage', elasticLogo);
       });
 
-      it('sets emptyImage to null', () => {
-        const result = fn(
-          0,
-          {
-            emptyImage: null,
-            origin: Origin.TOP,
-            image: null,
-          },
-          {} as ExecutionContext
+      it('sets emptyImage to null', async () => {
+        const result = (
+          await fn(
+            0,
+            {
+              emptyImage: null,
+              origin: Origin.TOP,
+              image: null,
+            },
+            {} as ExecutionContext
+          )
         ).value;
         expect(result).toHaveProperty('emptyImage', null);
       });
     });
 
     describe('origin', () => {
-      it('sets which side to start the reveal from', () => {
-        let result = fn(
-          1,
-          {
-            emptyImage: null,
-            origin: Origin.TOP,
-            image: null,
-          },
-          {} as ExecutionContext
+      it('sets which side to start the reveal from', async () => {
+        let result = (
+          await fn(
+            1,
+            {
+              emptyImage: null,
+              origin: Origin.TOP,
+              image: null,
+            },
+            {} as ExecutionContext
+          )
         ).value;
         expect(result).toHaveProperty('origin', 'top');
-        result = fn(
-          1,
-          {
-            emptyImage: null,
-            origin: Origin.LEFT,
-            image: null,
-          },
-          {} as ExecutionContext
+        result = (
+          await fn(
+            1,
+            {
+              emptyImage: null,
+              origin: Origin.LEFT,
+              image: null,
+            },
+            {} as ExecutionContext
+          )
         ).value;
         expect(result).toHaveProperty('origin', 'left');
-        result = fn(
-          1,
-          {
-            emptyImage: null,
-            origin: Origin.BOTTOM,
-            image: null,
-          },
-          {} as ExecutionContext
+        result = (
+          await fn(
+            1,
+            {
+              emptyImage: null,
+              origin: Origin.BOTTOM,
+              image: null,
+            },
+            {} as ExecutionContext
+          )
         ).value;
         expect(result).toHaveProperty('origin', 'bottom');
-        result = fn(
-          1,
-          {
-            emptyImage: null,
-            origin: Origin.RIGHT,
-            image: null,
-          },
-          {} as ExecutionContext
+        result = (
+          await fn(
+            1,
+            {
+              emptyImage: null,
+              origin: Origin.RIGHT,
+              image: null,
+            },
+            {} as ExecutionContext
+          )
         ).value;
         expect(result).toHaveProperty('origin', 'right');
       });

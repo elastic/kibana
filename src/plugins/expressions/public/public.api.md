@@ -230,8 +230,6 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     // (undocumented)
     registerFunction(functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)): void;
     // (undocumented)
-    registerFunctionAsync(functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition) | (() => Promise<AnyExpressionFunctionDefinition>)): Promise<void>;
-    // (undocumented)
     registerType(typeDefinition: AnyExpressionTypeDefinition | (() => AnyExpressionTypeDefinition)): void;
     run<Input, Output>(ast: string | ExpressionAstExpression, input: Input, params?: ExpressionExecutionParams): Observable<ExecutionResult<Output | ExpressionValueError>>;
     // (undocumented)
@@ -612,8 +610,6 @@ export class ExpressionsService implements PersistableStateService<ExpressionAst
     readonly migrate: (state: SerializableState, version: string) => ExpressionAstExpression;
     readonly registerFunction: (functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)) => void;
     // (undocumented)
-    readonly registerFunctionAsync: (functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition) | (() => Promise<AnyExpressionFunctionDefinition>)) => Promise<void>;
-    // (undocumented)
     readonly registerRenderer: (definition: AnyExpressionRenderDefinition | (() => AnyExpressionRenderDefinition)) => void;
     // (undocumented)
     readonly registerType: (typeDefinition: AnyExpressionTypeDefinition | (() => AnyExpressionTypeDefinition)) => void;
@@ -631,7 +627,7 @@ export class ExpressionsService implements PersistableStateService<ExpressionAst
 // Warning: (ae-missing-release-tag) "ExpressionsServiceSetup" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
-export type ExpressionsServiceSetup = Pick<ExpressionsService, 'getFunction' | 'getFunctions' | 'getRenderer' | 'getRenderers' | 'getType' | 'getTypes' | 'registerFunction' | 'registerFunctionAsync' | 'registerRenderer' | 'registerType' | 'run' | 'fork'>;
+export type ExpressionsServiceSetup = Pick<ExpressionsService, 'getFunction' | 'getFunctions' | 'getRenderer' | 'getRenderers' | 'getType' | 'getTypes' | 'registerFunction' | 'registerRenderer' | 'registerType' | 'run' | 'fork'>;
 
 // Warning: (ae-missing-release-tag) "ExpressionsServiceStart" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //

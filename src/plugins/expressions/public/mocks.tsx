@@ -24,7 +24,6 @@ const createSetupContract = (): Setup => {
     getType: jest.fn(),
     getTypes: jest.fn(),
     registerFunction: jest.fn(),
-    registerFunctionAsync: jest.fn(),
     registerRenderer: jest.fn(),
     registerType: jest.fn(),
     run: jest.fn(),

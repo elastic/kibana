@@ -10,10 +10,9 @@ import { resolveWithMissingImage, getElasticOutline } from '../../../presentatio
 import { getFunctionHelp, getFunctionErrors } from '../../common/i18n';
 import { ExpressionRevealImageFunction, Origin } from '../../common/types';
 
-export const revealImageFunction: ExpressionRevealImageFunction = async () => {
+export const revealImageFunction: ExpressionRevealImageFunction = () => {
   const { help, args: argHelp } = getFunctionHelp().revealImage;
   const errors = getFunctionErrors().revealImage;
-  const { elasticOutline } = await getElasticOutline();
   return {
     name: 'revealImage',
     aliases: [],
@@ -24,7 +23,6 @@ export const revealImageFunction: ExpressionRevealImageFunction = async () => {
       image: {
         types: ['string', 'null'],
         help: argHelp.image,
-        default: elasticOutline,
       },
       emptyImage: {
         types: ['string', 'null'],
@@ -38,11 +36,12 @@ export const revealImageFunction: ExpressionRevealImageFunction = async () => {
         options: Object.values(Origin),
       },
     },
-    fn: (percent, args) => {
+    fn: async (percent, args) => {
       if (percent > 1 || percent < 0) {
         throw errors.invalidPercent(percent);
       }
 
+      const { elasticOutline } = await getElasticOutline();
       return {
         type: 'render',
         as: 'revealImage',
