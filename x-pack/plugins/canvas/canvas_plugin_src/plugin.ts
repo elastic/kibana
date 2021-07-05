@@ -31,8 +31,8 @@ export type StartInitializer<T> = (core: CoreStart, plugins: StartDeps) => T;
 
 /** @internal */
 export class CanvasSrcPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
-  public async setup(core: CoreSetup<StartDeps>, plugins: SetupDeps) {
-    await plugins.canvas.addFunctions(functions);
+  public setup(core: CoreSetup<StartDeps>, plugins: SetupDeps) {
+    plugins.canvas.addFunctions(functions);
     plugins.canvas.addTypes(typeFunctions);
 
     plugins.canvas.addRenderers(renderFunctions);

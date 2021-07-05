@@ -20,8 +20,8 @@ export const FunctionReferenceGenerator: FC<Props> = ({ functionRegistry }) => {
   const notifyService = useNotifyService();
   const functionDefinitions = Object.values(functionRegistry);
 
-  const copyDocs = async () => {
-    const functionRefs = await generateFunctionReference(functionDefinitions);
+  const copyDocs = () => {
+    const functionRefs = generateFunctionReference(functionDefinitions);
     copy(functionRefs);
     notifyService.success(
       `Please paste updated docs into '/kibana/docs/canvas/canvas-function-reference.asciidoc' and commit your changes.`,

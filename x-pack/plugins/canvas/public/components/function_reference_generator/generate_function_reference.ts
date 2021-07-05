@@ -22,23 +22,18 @@ const ANY_TYPE = '`any`';
 
 const examplesDict = getFunctionExamples();
 
-let fnList: string[] = [];
-
-async function getFnList() {
-  const browserFuncs = await Promise.all(browserFunctions.map(async (fn) => (await fn()).name));
-  return [
-    ...browserFuncs,
-    ...serverFunctions.map((fn) => fn().name),
-    'asset',
-    'filters',
-    'timelion',
-    'to',
-    'font',
-    'var',
-    'var_set',
-    // ignore unsupported embeddables functions for now
-  ].filter((fn) => !['savedSearch'].includes(fn));
-}
+const fnList = [
+  ...browserFunctions.map((fn) => fn().name),
+  ...serverFunctions.map((fn) => fn().name),
+  'asset',
+  'filters',
+  'timelion',
+  'to',
+  'font',
+  'var',
+  'var_set',
+  // ignore unsupported embeddables functions for now
+].filter((fn) => !['savedSearch'].includes(fn));
 
 interface FunctionDictionary {
   [key: string]: ExpressionFunction[];
@@ -75,8 +70,7 @@ const addFunctionLinks = (help: string, options?: { ignoreList?: string[] }) => 
   return help;
 };
 
-export const generateFunctionReference = async (functionDefinitions: ExpressionFunction[]) => {
-  fnList = await getFnList();
+export const generateFunctionReference = (functionDefinitions: ExpressionFunction[]) => {
   const functionDefs = functionDefinitions.filter((fn: ExpressionFunction) =>
     fnList.includes(fn.name)
   );

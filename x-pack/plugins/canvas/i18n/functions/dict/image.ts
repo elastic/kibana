@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { image } from '../../../canvas_plugin_src/functions/common/image';
 import { FunctionHelp } from '../function_help';
-import { FunctionFactory, FromAsyncFunction } from '../../../types';
+import { FunctionFactory } from '../../../types';
 import {
   URL,
   BASE64,
@@ -17,7 +17,7 @@ import {
   IMAGE_MODE_STRETCH,
 } from '../../constants';
 
-export const help: FunctionHelp<FunctionFactory<FromAsyncFunction<typeof image>>> = {
+export const help: FunctionHelp<FunctionFactory<typeof image>> = {
   help: i18n.translate('xpack.canvas.functions.imageHelpText', {
     defaultMessage:
       'Displays an image. Provide an image asset as a {BASE64} data {URL}, or pass in a sub-expression.',
