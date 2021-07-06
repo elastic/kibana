@@ -52,8 +52,8 @@ export default function ({ getService }) {
         __kbn_feature_count__: 1,
         __kbn_is_tile_complete__: true,
         __kbn_vector_shape_type_counts__: '{"POINT":1,"LINE":0,"POLYGON":0}',
-        doc_count: '{"min":1,"max":1}',
-        avg_of_bytes: '{"min":9252,"max":9252}',
+        fieldMeta:
+          '{"doc_count":{"range":{"min":1,"max":1,"delta":0},"categories":{"categories":[{"key":1,"count":1}]}},"avg_of_bytes":{"range":{"min":9252,"max":9252,"delta":0},"categories":{"categories":[{"key":9252,"count":1}]}}}',
       });
       expect(metadataFeature.loadGeometry()).to.eql([
         [
@@ -108,8 +108,8 @@ export default function ({ getService }) {
         __kbn_feature_count__: 1,
         __kbn_is_tile_complete__: true,
         __kbn_vector_shape_type_counts__: '{"POINT":0,"LINE":0,"POLYGON":1}',
-        doc_count: '{"min":1,"max":1}',
-        avg_of_bytes: '{"min":9252,"max":9252}',
+        fieldMeta:
+          '{"doc_count":{"range":{"min":1,"max":1,"delta":0},"categories":{"categories":[{"key":1,"count":1}]}},"avg_of_bytes":{"range":{"min":9252,"max":9252,"delta":0},"categories":{"categories":[{"key":9252,"count":1}]}}}',
       });
       expect(metadataFeature.loadGeometry()).to.eql([
         [
