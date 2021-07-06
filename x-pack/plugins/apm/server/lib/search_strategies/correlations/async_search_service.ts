@@ -9,7 +9,7 @@ import { shuffle, range } from 'lodash';
 import type { ElasticsearchClient } from 'src/core/server';
 import { fetchTransactionDurationFieldCandidates } from './query_field_candidates';
 import { fetchTransactionDurationFieldValuePairs } from './query_field_value_pairs';
-import { fetchTransactionDurationPecentiles } from './query_percentiles';
+import { fetchTransactionDurationPercentiles } from './query_percentiles';
 import { fetchTransactionDurationCorrelation } from './query_correlation';
 import { fetchTransactionDurationHistogramRangesteps } from './query_histogram_rangesteps';
 import { fetchTransactionDurationRanges, HistogramItem } from './query_ranges';
@@ -59,7 +59,7 @@ export const asyncSearchServiceProvider = (
   const fetchCorrelations = async () => {
     try {
       // 95th percentile to be displayed as a marker in the log log chart
-      const percentileThreshold = await fetchTransactionDurationPecentiles(
+      const percentileThreshold = await fetchTransactionDurationPercentiles(
         esClient,
         params,
         params.percentileThreshold ? [params.percentileThreshold] : undefined
@@ -93,7 +93,7 @@ export const asyncSearchServiceProvider = (
 
       // Create an array of ranges [2, 4, 6, ..., 98]
       const percents = Array.from(range(2, 100, 2));
-      const percentilesRecords = await fetchTransactionDurationPecentiles(
+      const percentilesRecords = await fetchTransactionDurationPercentiles(
         esClient,
         params,
         percents
