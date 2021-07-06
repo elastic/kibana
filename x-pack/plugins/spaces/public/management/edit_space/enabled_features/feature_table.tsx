@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './feature_table.scss';
-
 import type { EuiCheckboxProps } from '@elastic/eui';
 import {
   EuiAccordion,
