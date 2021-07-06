@@ -41,12 +41,11 @@ export const ShareMenu = compose<ComponentProps, {}>(
   withProps(
     ({ workpad, pageCount, services }: Props & WithServicesProps): ComponentProps => {
       const {
-        platform,
         reporting: { start: reporting },
       } = services;
 
       return {
-        sharingServices: { basePath: platform.getBasePathInterface(), reporting },
+        sharingServices: { reporting },
         sharingData: { workpad, pageCount },
         onExport: (type) => {
           switch (type) {
