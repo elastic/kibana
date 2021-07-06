@@ -18,7 +18,7 @@ export const useCtiEventCounts = ({
   from,
   setQuery,
   to,
-}: ThreatIntelLinkPanelProps) => {
+}: Omit<ThreatIntelLinkPanelProps, 'isThreatIntelModuleEnabled'>) => {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   const [loading, { data, inspect, totalCount, refetch }] = useRequestEventCounts(to, from);

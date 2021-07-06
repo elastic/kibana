@@ -32,4 +32,10 @@ const ThreatIntelLinkPanelComponent: React.FC<ThreatIntelLinkPanelProps> = (prop
 
 ThreatIntelLinkPanelComponent.displayName = 'ThreatIntelDashboardLinksComponent';
 
-export const ThreatIntelLinkPanel = React.memo(ThreatIntelLinkPanelComponent);
+export const ThreatIntelLinkPanel = React.memo(
+  ThreatIntelLinkPanelComponent,
+  (prevProps, nextProps) =>
+    prevProps.to === nextProps.to &&
+    prevProps.from === nextProps.from &&
+    prevProps.isThreatIntelModuleEnabled === nextProps.isThreatIntelModuleEnabled
+);

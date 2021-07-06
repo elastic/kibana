@@ -38,4 +38,12 @@ export const CtiWithEventsComponent = ({
 
 CtiWithEventsComponent.displayName = 'CtiWithEvents';
 
-export const CtiWithEvents = React.memo(CtiWithEventsComponent);
+export const CtiWithEvents = React.memo(
+  CtiWithEventsComponent,
+  (prevProps, nextProps) =>
+    prevProps.to === nextProps.to &&
+    prevProps.from === nextProps.from &&
+    prevProps.totalCount === nextProps.totalCount &&
+    JSON.stringify(prevProps.eventCountsByDataset) ===
+      JSON.stringify(nextProps.eventCountsByDataset)
+);

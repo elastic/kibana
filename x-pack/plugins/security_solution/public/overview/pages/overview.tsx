@@ -72,6 +72,7 @@ const OverviewComponent = () => {
   }, [addMessage]);
   const { allEnabled: isIngestEnabled } = useIngestEnabledCheck();
   const isThreatIntelModuleEnabled = useIsThreatIntelModuleEnabled();
+
   return (
     <>
       {indicesExist ? (
