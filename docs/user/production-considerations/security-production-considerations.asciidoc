@@ -10,7 +10,7 @@
 
 [float]
 [[enabling-ssl]]
-=== Enable SSL
+=== Enable SSL/TLS
 
 See <<configuring-tls>>.
 
@@ -30,6 +30,34 @@ are not authorized to view, they get an error that indicates the index does
 not exist.
 
 For more information on granting access to {kib}, see <<xpack-security-authorization>>.
+
+[float]
+[[configuring-security-headers]]
+=== Use secure HTTP headers
+
+The {kib} server can instruct browsers to enable additional security controls using HTTP headers.
+
+1. Enable HTTP Strict-Transport-Security
++
+You can use <<server-securityResponseHeaders-strictTransportSecurity, `strictTransportSecurity`>> to ensure that browsers will only attempt
+to access {kib} with SSL/TLS encryption. This is designed to prevent man-in-the-middle attacks. To configure this with a lifetime of one
+year in your `kibana.yml`:
++
+[source,js]
+--------
+server.securityResponseHeaders.strictTransportSecurity: "max-age=31536000"
+--------
++
+WARNING: This header will block unencrypted connections for the entire domain. If you host more than one web application on the same domain using different ports or paths, all of them will be affected.
+
+2. Disable embedding
++
+You can use <server-securityResponseHeaders-disableEmbedding, `disableEmbedding`> to ensure that {kib} cannot be embedded in other website. To configure this in your `kibana.yml`:
++
+[source,js]
+--------
+server.securityResponseHeaders.disableEmbedding: true
+--------
 
 [float]
 [[csp-strict-mode]]
