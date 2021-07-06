@@ -24,7 +24,6 @@ import {
   registerAccountSourceDisplaySettingsConfig,
   registerAccountSourceSchemasRoute,
   registerAccountSourceReindexJobRoute,
-  registerAccountSourceDownloadDiagnosticsRoute,
   registerOrgSourcesRoute,
   registerOrgSourcesStatusRoute,
   registerOrgSourceRoute,
@@ -39,7 +38,6 @@ import {
   registerOrgSourceDisplaySettingsConfig,
   registerOrgSourceSchemasRoute,
   registerOrgSourceReindexJobRoute,
-  registerOrgSourceDownloadDiagnosticsRoute,
   registerOrgSourceOauthConfigurationsRoute,
   registerOrgSourceOauthConfigurationRoute,
   registerOauthConnectorParamsRoute,
@@ -540,29 +538,6 @@ describe('sources routes', () => {
     });
   });
 
-  describe('GET /api/workplace_search/account/sources/{sourceId}/download_diagnostics', () => {
-    let mockRouter: MockRouter;
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-      mockRouter = new MockRouter({
-        method: 'get',
-        path: '/api/workplace_search/account/sources/{sourceId}/download_diagnostics',
-      });
-
-      registerAccountSourceDownloadDiagnosticsRoute({
-        ...mockDependencies,
-        router: mockRouter.router,
-      });
-    });
-
-    it('creates a request handler', () => {
-      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/ws/sources/:sourceId/download_diagnostics',
-      });
-    });
-  });
-
   describe('GET /api/workplace_search/org/sources', () => {
     let mockRouter: MockRouter;
 
@@ -1034,29 +1009,6 @@ describe('sources routes', () => {
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/ws/org/sources/:sourceId/reindex_job/:jobId',
-      });
-    });
-  });
-
-  describe('GET /api/workplace_search/org/sources/{sourceId}/download_diagnostics', () => {
-    let mockRouter: MockRouter;
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-      mockRouter = new MockRouter({
-        method: 'get',
-        path: '/api/workplace_search/org/sources/{sourceId}/download_diagnostics',
-      });
-
-      registerOrgSourceDownloadDiagnosticsRoute({
-        ...mockDependencies,
-        router: mockRouter.router,
-      });
-    });
-
-    it('creates a request handler', () => {
-      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/ws/org/sources/:sourceId/download_diagnostics',
       });
     });
   });
