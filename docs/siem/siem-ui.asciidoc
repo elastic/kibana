@@ -23,7 +23,7 @@ and detection rules
 The following diagram provides a comprehensive illustration of the Elastic Security workflow.
 
 [role="screenshot"]
-image::../siem/images/workflow.png[Elastic Security workflow]
+image::/siem/images/workflow.png[Elastic Security workflow]
 
 Here's an overview of the flow and its components:
 
