@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { getWorkplaceSearchUrl } from '../../../../shared/enterprise_search_url';
 import { AppLogic } from '../../../app_logic';
 import { ContentSection } from '../../../components/shared/content_section';
 import { SourceConfigFields } from '../../../components/shared/source_config_fields';
@@ -89,9 +90,8 @@ export const SourceSettings: React.FC = () => {
 
   const { clientId, clientSecret, publicKey, consumerKey, baseUrl } = configuredFields || {};
 
-  const diagnosticsPath = isOrganization
-    ? `/api/workplace_search/org/sources/${id}/download_diagnostics`
-    : `/api/workplace_search/account/sources/${id}/download_diagnostics`;
+  const pathPrefix = isOrganization ? '/org' : '';
+  const diagnosticsPath = getWorkplaceSearchUrl(`${pathPrefix}/sources/${id}/download_diagnostics`);
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => setValue(e.target.value);
 

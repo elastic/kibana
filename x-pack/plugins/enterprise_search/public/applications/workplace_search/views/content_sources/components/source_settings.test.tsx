@@ -16,6 +16,7 @@ import { shallow } from 'enzyme';
 
 import { EuiConfirmModal } from '@elastic/eui';
 
+import { getWorkplaceSearchUrl } from '../../../../shared/enterprise_search_url';
 import { SourceConfigFields } from '../../../components/shared/source_config_fields';
 
 import { SourceSettings } from './source_settings';
@@ -110,7 +111,7 @@ describe('SourceSettings', () => {
       const wrapper = shallow(<SourceSettings />);
 
       expect(wrapper.find('[data-test-subj="DownloadDiagnosticsButton"]').prop('href')).toEqual(
-        '/api/workplace_search/org/sources/123/download_diagnostics'
+        getWorkplaceSearchUrl('/org/sources/123/download_diagnostics')
       );
     });
 
@@ -122,7 +123,7 @@ describe('SourceSettings', () => {
       const wrapper = shallow(<SourceSettings />);
 
       expect(wrapper.find('[data-test-subj="DownloadDiagnosticsButton"]').prop('href')).toEqual(
-        '/api/workplace_search/account/sources/123/download_diagnostics'
+        getWorkplaceSearchUrl('/sources/123/download_diagnostics')
       );
     });
   });
