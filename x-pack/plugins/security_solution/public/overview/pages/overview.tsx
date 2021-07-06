@@ -27,12 +27,12 @@ import { SecurityPageName } from '../../app/types';
 import { EndpointNotice } from '../components/endpoint_notice';
 import { useMessagesStorage } from '../../common/containers/local_storage/use_messages_storage';
 import { ENDPOINT_METADATA_INDEX } from '../../../common/constants';
-import { useIngestEnabledCheck } from '../../common/hooks/endpoint/ingest_enabled';
 import { useSourcererScope } from '../../common/containers/sourcerer';
 import { Sourcerer } from '../../common/components/sourcerer';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { ThreatIntelLinkPanel } from '../components/overview_cti_links';
+import { useUserPrivileges } from '../../common/components/user_privileges';
 
 const SidebarFlexItem = styled(EuiFlexItem)`
   margin-right: 24px;
@@ -69,7 +69,7 @@ const OverviewComponent = () => {
     setDismissMessage(true);
     addMessage('management', 'dismissEndpointNotice');
   }, [addMessage]);
-  const { allEnabled: isIngestEnabled } = useIngestEnabledCheck();
+  const canAccessFleet = useUserPrivileges().endpointPrivileges.canAccessFleet;
   return (
     <>
       {indicesExist ? (
@@ -79,7 +79,7 @@ const OverviewComponent = () => {
           </FiltersGlobal>
 
           <StyledSecuritySolutionPageWrapper>
-            {!dismissMessage && !metadataIndexExists && isIngestEnabled && (
+            {!dismissMessage && !metadataIndexExists && canAccessFleet && (
               <>
                 <EndpointNotice onDismiss={dismissEndpointNotice} />
                 <EuiSpacer size="l" />
