@@ -15,7 +15,7 @@ export interface KibanaExecutionContext {
   readonly type: string; // 'visualization' | 'actions' | 'server' | ..;
   /** public name of a user-facing feature */
   readonly name: string; // 'TSVB' | 'Lens' |  'action_execution' | ..;
-  /** unique value to indentify find the source */
+  /** unique value to identify the source */
   readonly id: string;
   /** human readable description. For example, a vis title, action name */
   readonly description: string;
