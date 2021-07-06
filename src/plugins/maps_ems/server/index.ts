@@ -13,7 +13,7 @@ import {
   PluginConfigDescriptor,
 } from 'src/core/server';
 import { MapsEmsConfig, emsConfigSchema } from '../config';
-import type { EMSSettings } from '../common';
+import { EMSSettings } from '../common';
 export type { EMSSettings } from '../common';
 
 export const config: PluginConfigDescriptor<MapsEmsConfig> = {

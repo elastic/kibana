@@ -162,7 +162,7 @@ export class MapsPlugin implements Plugin {
 
     let isEnterprisePlus = false;
     let lastLicenseId: string | undefined;
-    const emsSettings = new EMSSettings(mapsEms.config, () => isEnterprisePlus);
+    const emsSettings = new plugins.mapsEms.EMSSettings(mapsEms.config, () => isEnterprisePlus);
     licensing.license$.subscribe((license: ILicense) => {
       const enterprise = license.check(APP_ID, 'enterprise');
       isEnterprisePlus = enterprise.state === 'valid';
