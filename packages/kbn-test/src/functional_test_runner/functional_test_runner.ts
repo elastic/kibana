@@ -46,6 +46,8 @@ export class FunctionalTestRunner {
     return await this._run(async (config, coreProviders) => {
       SuiteTracker.startTracking(this.lifecycle, this.configFile);
 
+      this.log.info(`FTR Running ${relative(process.cwd(), this.configFile)}`);
+
       const providers = new ProviderCollection(this.log, [
         ...coreProviders,
         ...readProviderSpec('Service', config.get('services')),
@@ -120,9 +122,6 @@ export class FunctionalTestRunner {
       ) {
         throw new Error('No tests defined.');
       }
-
-      // eslint-disable-next-line
-      console.log(`--- Running ${relative(process.cwd(), this.configFile)}`);
 
       const dockerServers = new DockerServersService(
         config.get('dockerServers'),
