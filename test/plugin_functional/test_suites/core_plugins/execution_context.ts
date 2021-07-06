@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
               type: 'execution_context_app',
               name: 'Execution context app',
               id: '42',
-              // add a non-ASCII symbols to make it doesn't break the context propagation mechanism
+              // add a non-ASCII symbols to make sure it doesn't break the context propagation mechanism
               description: 'какое-то странное описание',
             });
 
