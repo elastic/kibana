@@ -578,7 +578,7 @@ const RuleDetailsPageComponent = () => {
             <Display show={!globalFullScreen}>
               <DetectionEngineHeaderPage
                 backOptions={{
-                  href: getRulesUrl(),
+                  path: getRulesUrl(),
                   text: i18n.BACK_TO_RULES,
                   pageId: SecurityPageName.rules,
                   dataTestSubj: 'ruleDetailsBackToAllRules',

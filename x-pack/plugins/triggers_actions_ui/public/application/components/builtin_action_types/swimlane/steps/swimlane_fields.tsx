@@ -6,13 +6,7 @@
  */
 
 import React, { useMemo, useCallback, useEffect, useRef } from 'react';
-import {
-  EuiButton,
-  EuiFormRow,
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiButtonGroup,
-} from '@elastic/eui';
+import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption, EuiButtonGroup } from '@elastic/eui';
 import * as i18n from '../translations';
 import {
   SwimlaneActionConnector,
@@ -102,10 +96,6 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({
     [errors]
   );
 
-  const resetConnection = useCallback(() => {
-    updateCurrentStep(1);
-  }, [updateCurrentStep]);
-
   const editMappings = useCallback(
     (key: keyof SwimlaneMappingConfig, e: Array<EuiComboBoxOptionOption<string>>) => {
       if (e.length === 0) {
@@ -131,14 +121,6 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({
     },
     [editActionConfig, fieldIdMap, mappings]
   );
-
-  /**
-   * Connector type needs to be updated on mount to All.
-   * Otherwise it is undefined and this will cause an error
-   * if the user saves the connector without any mapping
-   */
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => editActionConfig('connectorType', connectorType), []);
 
   useEffect(() => {
     if (connectorType !== prevConnectorType.current) {
@@ -305,7 +287,6 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({
           </EuiFormRow>
         </>
       )}
-      <EuiButton onClick={resetConnection}>{i18n.SW_CONFIGURE_API_LABEL}</EuiButton>
     </>
   );
 };

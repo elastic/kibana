@@ -26,8 +26,8 @@ export declare class Execution<Input = unknown, Output = unknown, InspectorAdapt
 |  [expression](./kibana-plugin-plugins-expressions-server.execution.expression.md) |  | <code>string</code> |  |
 |  [input](./kibana-plugin-plugins-expressions-server.execution.input.md) |  | <code>Input</code> | Initial input of the execution.<!-- -->N.B. It is initialized to <code>null</code> rather than <code>undefined</code> for legacy reasons, because in legacy interpreter it was set to <code>null</code> by default. |
 |  [inspectorAdapters](./kibana-plugin-plugins-expressions-server.execution.inspectoradapters.md) |  | <code>InspectorAdapters</code> |  |
-|  [result](./kibana-plugin-plugins-expressions-server.execution.result.md) |  | <code>Observable&lt;Output &#124; ExpressionValueError&gt;</code> | Future that tracks result or error of this execution. |
-|  [state](./kibana-plugin-plugins-expressions-server.execution.state.md) |  | <code>ExecutionContainer&lt;Output &#124; ExpressionValueError&gt;</code> | Dynamic state of the execution. |
+|  [result](./kibana-plugin-plugins-expressions-server.execution.result.md) |  | <code>Observable&lt;ExecutionResult&lt;Output &#124; ExpressionValueError&gt;&gt;</code> | Future that tracks result or error of this execution. |
+|  [state](./kibana-plugin-plugins-expressions-server.execution.state.md) |  | <code>ExecutionContainer&lt;ExecutionResult&lt;Output &#124; ExpressionValueError&gt;&gt;</code> | Dynamic state of the execution. |
 
 ## Methods
 

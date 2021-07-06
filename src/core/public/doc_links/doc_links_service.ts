@@ -249,7 +249,7 @@ export class DocLinksService {
           customUrls: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-configuring-url.html`,
           dataFrameAnalytics: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfanalytics.html`,
           featureImportance: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-feature-importance.html`,
-          outlierDetectionRoc: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfanalytics-evaluate.html#ml-dfanalytics-roc`,
+          outlierDetectionRoc: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfa-finding-outliers.html#ml-dfanalytics-roc`,
           regressionEvaluation: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfanalytics-evaluate.html#ml-dfanalytics-regression-evaluation`,
           classificationAucRoc: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfanalytics-evaluate.html#ml-dfanalytics-class-aucroc`,
         },
@@ -263,6 +263,7 @@ export class DocLinksService {
           lensPanels: `${KIBANA_DOCS}lens.html`,
           maps: `${ELASTIC_WEBSITE_URL}maps`,
           vega: `${KIBANA_DOCS}vega.html`,
+          tsvbIndexPatternMode: `${KIBANA_DOCS}tsvb.html#tsvb-index-pattern-mode`,
         },
         observability: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/index.html`,
@@ -328,7 +329,7 @@ export class DocLinksService {
         },
         apis: {
           bulkIndexAlias: `${ELASTICSEARCH_DOCS}indices-aliases.html`,
-          byteSizeUnits: `${ELASTICSEARCH_DOCS}common-options.html#byte-units`,
+          byteSizeUnits: `${ELASTICSEARCH_DOCS}api-conventions.html#byte-units`,
           createAutoFollowPattern: `${ELASTICSEARCH_DOCS}ccr-put-auto-follow-pattern.html`,
           createFollower: `${ELASTICSEARCH_DOCS}ccr-put-follow.html`,
           createIndex: `${ELASTICSEARCH_DOCS}indices-create-index.html`,
@@ -352,7 +353,7 @@ export class DocLinksService {
           putSnapshotLifecyclePolicy: `${ELASTICSEARCH_DOCS}slm-api-put-policy.html`,
           putWatch: `${ELASTICSEARCH_DOCS}watcher-api-put-watch.html`,
           simulatePipeline: `${ELASTICSEARCH_DOCS}simulate-pipeline-api.html`,
-          timeUnits: `${ELASTICSEARCH_DOCS}common-options.html#time-units`,
+          timeUnits: `${ELASTICSEARCH_DOCS}api-conventions.html#time-units`,
           updateTransform: `${ELASTICSEARCH_DOCS}update-transform.html`,
         },
         plugins: {
