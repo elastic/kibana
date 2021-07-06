@@ -1,5 +1,5 @@
 [role="xpack"]
-[[maps-asset-tracking]]
+[[asset-tracking-tutorial]]
 == Track, visualize, and alert on assets in real time
 
 Are you interested in asset tracking? Good news! Visualizing and analyzing data that moves is easy with *Maps*. You can track the location of an IoT device and monitor a package or vehicle in transit.
