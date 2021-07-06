@@ -6,8 +6,8 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { useFetchDetectionEnginePrivileges } from './use_fetch_detection_engine_privileges';
-import { useFetchListPrivileges } from './use_fetch_list_privileges';
+import { useFetchDetectionEnginePrivileges } from '../../../detections/components/user_privileges/use_fetch_detection_engine_privileges';
+import { useFetchListPrivileges } from '../../../detections/components/user_privileges/use_fetch_list_privileges';
 
 export interface UserPrivilegesState {
   listPrivileges: ReturnType<typeof useFetchListPrivileges>;
