@@ -198,7 +198,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.missingOrFail('lnsXY_yDimensionPanel > lns-dimensionTrigger');
     });
 
-    it('should allow creation of a multi-axis chart', async () => {
+    it('should allow creation of a multi-axis chart with color control', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
       await elasticChart.setNewChartUiDebugFlag(true);
@@ -225,6 +225,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.lens.changeAxisSide('right');
+      await PageObjects.lens.editDimensionColor('#0000ff');
 
       await PageObjects.lens.closeDimensionEditor();
 
@@ -233,6 +234,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const data = await PageObjects.lens.getCurrentChartDebugState();
       expect(data?.axes?.y.length).to.eql(2);
       expect(data?.axes?.y.some(({ position }) => position === 'right')).to.eql(true);
+      expect(data?.legend!.items[1].color).to.eql('#0000ff');
     });
 
     it('should show value labels on bar charts when enabled', async () => {
