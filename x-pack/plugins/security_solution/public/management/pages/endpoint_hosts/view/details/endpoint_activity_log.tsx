@@ -53,6 +53,10 @@ export const EndpointActivityLog = memo(
       getActivityLogDataPaging
     );
 
+    const hasActiveDateRange = !!startDate || !!endDate;
+    const showEmptyState =
+      (activityLogLoaded && !activityLogSize && !hasActiveDateRange) || activityLogError;
+
     const loadMoreTrigger = useRef<HTMLInputElement | null>(null);
     const getActivityLog = useCallback(
       (entries: IntersectionObserverEntry[]) => {
@@ -86,7 +90,7 @@ export const EndpointActivityLog = memo(
     return (
       <>
         <StyledEuiFlexGroup direction="column" responsive={false}>
-          {(activityLogLoaded && !activityLogSize) || activityLogError ? (
+          {showEmptyState ? (
             <EuiFlexItem>
               <EuiEmptyPrompt
                 iconType="editorUnorderedList"

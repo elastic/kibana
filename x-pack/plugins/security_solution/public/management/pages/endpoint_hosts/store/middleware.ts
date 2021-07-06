@@ -404,15 +404,22 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       action.type === 'endpointDetailsActivityLogUpdatePaging' &&
       hasSelectedEndpoint(getState())
     ) {
-      dispatch({
-        type: 'endpointDetailsActivityLogChanged',
-        // ts error to be fixed when AsyncResourceState is refactored (#830)
-        // @ts-expect-error
-        payload: createLoadingResourceState<ActivityLog>(getActivityLogData(getState())),
-      });
-
       try {
-        const { page, pageSize, startDate, endDate } = getActivityLogDataPaging(getState());
+        const { disabled, page, pageSize, startDate, endDate } = getActivityLogDataPaging(
+          getState()
+        );
+
+        // don't page when paging is disabled
+        if (disabled) {
+          return;
+        }
+
+        dispatch({
+          type: 'endpointDetailsActivityLogChanged',
+          // ts error to be fixed when AsyncResourceState is refactored (#830)
+          // @ts-expect-error
+          payload: createLoadingResourceState<ActivityLog>(getActivityLogData(getState())),
+        });
         const route = resolvePathVariables(ENDPOINT_ACTION_LOG_ROUTE, {
           agent_id: selectedAgent(getState()),
         });
@@ -449,7 +456,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
               type: 'endpointDetailsActivityLogUpdatePaging',
               payload: {
                 disabled: true,
-                page: activityLog.page - 1,
+                page: activityLog.page > 1 ? activityLog.page - 1 : 1,
                 pageSize: activityLog.pageSize,
                 startDate: activityLog.startDate,
                 endDate: activityLog.endDate,
