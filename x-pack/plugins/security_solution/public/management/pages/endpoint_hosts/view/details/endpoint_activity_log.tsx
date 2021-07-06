@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useRef } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import styled from 'styled-components';
 
 import {
@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { LogEntry } from './components/log_entry';
-import { DateRangePicker } from './components/date_range_picker';
+import { DateRangePicker } from './components/activity_log_date_range_picker';
 import * as i18 from '../translations';
 import { Immutable, ActivityLog } from '../../../../../../common/endpoint/types';
 import { AsyncResourceState } from '../../../../state';
@@ -53,9 +53,11 @@ export const EndpointActivityLog = memo(
       getActivityLogDataPaging
     );
 
-    const hasActiveDateRange = !!startDate || !!endDate;
-    const showEmptyState =
-      (activityLogLoaded && !activityLogSize && !hasActiveDateRange) || activityLogError;
+    const hasActiveDateRange = useMemo(() => !!startDate || !!endDate, [startDate, endDate]);
+    const showEmptyState = useMemo(
+      () => (activityLogLoaded && !activityLogSize && !hasActiveDateRange) || activityLogError,
+      [activityLogLoaded, activityLogSize, hasActiveDateRange, activityLogError]
+    );
 
     const loadMoreTrigger = useRef<HTMLInputElement | null>(null);
     const getActivityLog = useCallback(

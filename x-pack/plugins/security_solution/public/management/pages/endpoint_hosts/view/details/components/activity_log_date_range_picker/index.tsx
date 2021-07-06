@@ -6,14 +6,14 @@
  */
 
 import { useDispatch } from 'react-redux';
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import moment, { Moment } from 'moment';
+import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem, EuiDatePicker, EuiDatePickerRange } from '@elastic/eui';
 
-import * as i18 from '../../translations';
-import { useEndpointSelector } from '../../hooks';
-import { getActivityLogDataPaging, selectedAgent } from '../../../store/selectors';
+import * as i18 from '../../../translations';
+import { useEndpointSelector } from '../../../hooks';
+import { getActivityLogDataPaging } from '../../../../store/selectors';
 
 const DatePickerWrapper = styled.div`
   width: ${(props) => props.theme.eui.fractions.single.percentage};
@@ -26,34 +26,35 @@ const StickyFlexItem = styled(EuiFlexItem)`
 `;
 
 export const DateRangePicker = memo(() => {
-  // clear dates on endpoint selection
-  const elasticAgentId = useEndpointSelector(selectedAgent);
-  useEffect(() => {
-    return () => {
-      if (elasticAgentId) {
-        setStartDate(undefined);
-        setEndDate(undefined);
-      }
-    };
-  }, [elasticAgentId]);
-
   const dispatch = useDispatch();
-  const {
-    page,
-    pageSize,
-    startDate: initialStartDate,
-    endDate: initialEndDate,
-  } = useEndpointSelector(getActivityLogDataPaging);
-  const [startDate, setStartDate] = useState<Moment | undefined>(
-    initialStartDate ? moment(initialStartDate) : undefined
+  const { page, pageSize, startDate, endDate } = useEndpointSelector(getActivityLogDataPaging);
+
+  const isInvalidDateRange = useMemo(
+    () => (startDate && endDate ? moment(startDate) > moment(endDate) : false),
+    [startDate, endDate]
   );
-  const [endDate, setEndDate] = useState<Moment | undefined>(
-    initialEndDate ? moment(initialEndDate) : undefined
+
+  const onClear = useCallback(
+    ({ clearStart = false, clearEnd = false }: { clearStart?: boolean; clearEnd?: boolean }) => {
+      dispatch({
+        type: 'endpointDetailsActivityLogUpdatePaging',
+        payload: {
+          disabled: false,
+          page,
+          pageSize,
+          startDate: clearStart ? undefined : startDate,
+          endDate: clearEnd ? undefined : endDate,
+        },
+      });
+    },
+    [dispatch, endDate, startDate, page, pageSize]
   );
 
   const onChangeStartDate = useCallback(
     (date) => {
-      setStartDate(date);
+      if (isInvalidDateRange) {
+        return;
+      }
       dispatch({
         type: 'endpointDetailsActivityLogUpdatePaging',
         payload: {
@@ -61,30 +62,32 @@ export const DateRangePicker = memo(() => {
           page,
           pageSize,
           startDate: date ? date?.toISOString() : undefined,
-          endDate: endDate ? endDate.toISOString() : undefined,
+          endDate: endDate ? endDate : undefined,
         },
       });
     },
-    [dispatch, endDate, page, pageSize]
+    [dispatch, isInvalidDateRange, endDate, page, pageSize]
   );
 
   const onChangeEndDate = useCallback(
     (date) => {
-      setEndDate(date);
+      if (isInvalidDateRange) {
+        return;
+      }
       dispatch({
         type: 'endpointDetailsActivityLogUpdatePaging',
         payload: {
           disabled: false,
           page,
           pageSize,
-          startDate: startDate ? startDate.toISOString() : undefined,
+          startDate: startDate ? startDate : undefined,
           endDate: date ? date.toISOString() : undefined,
         },
       });
     },
-    [dispatch, startDate, page, pageSize]
+    [dispatch, isInvalidDateRange, startDate, page, pageSize]
   );
-  const isInvalidDateRange = startDate && endDate ? startDate > endDate : false;
+
   return (
     <StickyFlexItem grow={false}>
       <EuiFlexGroup justifyContent="flexEnd" responsive>
@@ -95,27 +98,30 @@ export const DateRangePicker = memo(() => {
               startDateControl={
                 <EuiDatePicker
                   aria-label="Start date"
-                  endDate={endDate}
+                  endDate={endDate ? moment(endDate) : undefined}
                   isInvalid={isInvalidDateRange}
+                  maxDate={moment(startDate) || moment()}
                   onChange={onChangeStartDate}
-                  onClear={() => onChangeStartDate(undefined)}
+                  onClear={() => onClear({ clearStart: true })}
                   placeholderText={i18.ACTIVITY_LOG.datePicker.startDate}
-                  selected={startDate}
+                  selected={startDate ? moment(startDate) : undefined}
                   showTimeSelect
-                  startDate={startDate}
+                  startDate={startDate ? moment(startDate) : undefined}
                 />
               }
               endDateControl={
                 <EuiDatePicker
                   aria-label="End date"
-                  endDate={endDate}
+                  endDate={endDate ? moment(endDate) : undefined}
                   isInvalid={isInvalidDateRange}
+                  maxDate={moment()}
+                  minDate={startDate ? moment(startDate) : undefined}
                   onChange={onChangeEndDate}
-                  onClear={() => onChangeEndDate(undefined)}
+                  onClear={() => onClear({ clearEnd: true })}
                   placeholderText={i18.ACTIVITY_LOG.datePicker.endDate}
-                  selected={endDate}
+                  selected={endDate ? moment(endDate) : undefined}
                   showTimeSelect
-                  startDate={startDate}
+                  startDate={startDate ? moment(startDate) : undefined}
                 />
               }
             />

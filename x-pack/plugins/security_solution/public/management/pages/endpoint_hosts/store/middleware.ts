@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { Dispatch } from 'redux';
 import { CoreStart, HttpStart } from 'kibana/public';
 import {
@@ -408,9 +409,10 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
         const { disabled, page, pageSize, startDate, endDate } = getActivityLogDataPaging(
           getState()
         );
-
+        const isInvalidDateRange =
+          startDate && endDate ? moment(startDate) > moment(endDate) : false;
         // don't page when paging is disabled
-        if (disabled) {
+        if (disabled || isInvalidDateRange) {
           return;
         }
 
