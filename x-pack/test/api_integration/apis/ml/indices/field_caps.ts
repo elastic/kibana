@@ -48,7 +48,10 @@ export default ({ getService }: FtrProviderContext) => {
       const fieldsLength = Object.keys(fields).length;
       expect(fieldsLength).to.eql(2, `Expected number of fields to be 2, but got ${fieldsLength}`);
       expect(fields.airline.keyword.type).to.eql('keyword', 'Expected airline type to be keyword');
-      expect(fields.responsetime.float.type).to.eql('float', 'Expected airline type to be float');
+      expect(fields.responsetime.float.type).to.eql(
+        'float',
+        'Expected responsetime type to be float'
+      );
     });
 
     it('all fields in index', async () => {
@@ -58,7 +61,10 @@ export default ({ getService }: FtrProviderContext) => {
         `Expected number of indices to be 1, but got ${indices.length}`
       );
       const fieldsLength = Object.keys(fields).length;
-      expect(fieldsLength).to.eql(21, `Expected number of fields to be 2, but got ${fieldsLength}`);
+      expect(fieldsLength).to.eql(
+        21,
+        `Expected number of fields to be 21, but got ${fieldsLength}`
+      );
     });
   });
 };
