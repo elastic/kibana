@@ -13272,7 +13272,6 @@
     "xpack.ingestPipelines.pipelineEditor.setForm.overrideFieldHelpText": "如果启用，则覆盖现有字段值。如果禁用，则仅更新 {nullValue} 字段。",
     "xpack.ingestPipelines.pipelineEditor.setForm.overrideFieldLabel": "覆盖",
     "xpack.ingestPipelines.pipelineEditor.setForm.propertiesFieldHelpText": "要添加的用户详情。默认为 {value}",
-    "xpack.ingestPipelines.pipelineEditor.setForm.valueFieldHelpText": "字段的值。空值将设置 {emptyString}。",
     "xpack.ingestPipelines.pipelineEditor.setForm.valueFieldLabel": "值",
     "xpack.ingestPipelines.pipelineEditor.setSecurityUserForm.fieldNameField": "输出字段。",
     "xpack.ingestPipelines.pipelineEditor.setSecurityUserForm.propertiesFieldLabel": "属性（可选）",
