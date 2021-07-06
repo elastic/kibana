@@ -7,7 +7,6 @@
 
 import React, { FC } from 'react';
 import { useSelector } from 'react-redux';
-import { i18n } from '@kbn/i18n';
 
 import {
   getWorkpad,
