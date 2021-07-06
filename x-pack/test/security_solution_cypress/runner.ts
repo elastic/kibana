@@ -88,6 +88,30 @@ export async function SecuritySolutionCypressCliFirefoxTestRunner({
   });
 }
 
+export async function SecuritySolutionCypressCcsTestRunner({ getService }: FtrProviderContext) {
+  const log = getService('log');
+
+  await withProcRunner(log, async (procs) => {
+    await procs.run('cypress', {
+      cmd: 'yarn',
+      args: ['cypress:run:ccs'],
+      cwd: resolve(__dirname, '../../plugins/security_solution'),
+      env: {
+        FORCE_COLOR: '1',
+        CYPRESS_BASE_URL: process.env.TEST_KIBANA_URL,
+        CYPRESS_ELASTICSEARCH_URL: process.env.TEST_ES_URL,
+        CYPRESS_ELASTICSEARCH_USERNAME: process.env.ELASTICSEARCH_USERNAME,
+        CYPRESS_ELASTICSEARCH_PASSWORD: process.env.ELASTICSEARCH_PASSWORD,
+        CYPRESS_CCS_KIBANA_URL: process.env.TEST_KIBANA_URLDATA,
+        CYPRESS_CCS_ELASTICSEARCH_URL: process.env.TEST_ES_URLDATA,
+        CYPRESS_CCS_REMOTE_NAME: process.env.TEST_CCS_REMOTE_NAME,
+        ...process.env,
+      },
+      wait: true,
+    });
+  });
+}
+
 export async function SecuritySolutionCypressVisualTestRunner({ getService }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');

@@ -52,7 +52,7 @@ export const fetchTransactionDurationFieldValuePairs = async (
 ): Promise<FieldValuePairs> => {
   const fieldValuePairs: FieldValuePairs = [];
 
-  let fieldValuePairsProgress = 0;
+  let fieldValuePairsProgress = 1;
 
   for (let i = 0; i < fieldCandidates.length; i++) {
     const fieldName = fieldCandidates[i];
