@@ -11,6 +11,7 @@ import { WebDriver, WebElement, By, until } from 'selenium-webdriver';
 import { Browsers } from '../remote/browsers';
 import { FtrService, FtrProviderContext } from '../../ftr_provider_context';
 import { WebElementWrapper } from '../lib/web_element_wrapper';
+import { ContextualLocator } from '../lib/contextual_locator';
 
 export class FindService extends FtrService {
   private readonly log = this.ctx.getService('log');
@@ -138,8 +139,9 @@ export class FindService extends FtrService {
     parentElement: WebElementWrapper
   ): Promise<WebElementWrapper | never> {
     this.log.debug(`Find.descendantDisplayedByCssSelector('${selector}')`);
-    const element = await parentElement._webElement.findElement(By.css(selector));
-    const descendant = this.wrap(element, By.css(selector));
+    const locator = By.css(selector);
+    const element = await parentElement._webElement.findElement(locator);
+    const descendant = this.wrap(element, new ContextualLocator(parentElement, locator));
     const isDisplayed = await descendant.isDisplayed();
     if (isDisplayed) {
       return descendant;
@@ -452,7 +454,10 @@ export class FindService extends FtrService {
     }
   }
 
-  private wrap(webElement: WebElement | WebElementWrapper, locator: By | null = null) {
+  private wrap(
+    webElement: WebElement | WebElementWrapper,
+    locator: By | ContextualLocator | null = null
+  ) {
     return WebElementWrapper.create(
       webElement,
       locator,
