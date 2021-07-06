@@ -22,6 +22,30 @@ const DEFAULT_CONFIG: ApmAgentConfig = {
   globalLabels: {},
 };
 
+const CENTRALIZED_SERVICE_BASE_CONFIG: ApmAgentConfig = {
+  serverUrl: 'https://38b80fbd79fb4c91bae06b4642d4d093.apm.us-east-1.aws.cloud.es.io',
+
+  // The secretToken below is intended to be hardcoded in this file even though
+  // it makes it public. This is not a security/privacy issue. Normally we'd
+  // instead disable the need for a secretToken in the APM Server config where
+  // the data is transmitted to, but due to how it's being hosted, it's easier,
+  // for now, to simply leave it in.
+  secretToken: 'ZQHYvrmXEx04ozge8F',
+
+  centralConfig: false,
+  metricsInterval: '30s',
+  captureSpanStackTraces: false,
+  transactionSampleRate: 1.0,
+  breakdownMetrics: true,
+};
+
+const CENTRALIZED_SERVICE_DIST_CONFIG: ApmAgentConfig = {
+  metricsInterval: '120s',
+  captureBody: 'off',
+  captureHeaders: false,
+  breakdownMetrics: false,
+};
+
 export class ApmConfiguration {
   private baseConfig?: ApmAgentConfig;
   private kibanaVersion: string;
@@ -60,10 +84,15 @@ export class ApmConfiguration {
         this.getConfigFromEnv()
       );
 
-      const centralizedConfig = this.getCentralizedApmServerConfig();
-      // If the user didn't point APM to a serverUrl, or explicitly pointed it to our
-      // centralized APM server, overwrite several config options based on how we want
-      // Kibana talking to that server
+      /**
+       * When the user doesn't override the serverUrl we define our central APM service
+       * as the serverUrl along with a few other overrides to prevent potentially
+       * sensitive data from being sent to this service.
+       */
+      const centralizedConfig = this.isDistributable
+        ? merge(CENTRALIZED_SERVICE_BASE_CONFIG, CENTRALIZED_SERVICE_DIST_CONFIG)
+        : CENTRALIZED_SERVICE_BASE_CONFIG;
+
       if (
         !this.baseConfig?.serverUrl ||
         this.baseConfig.serverUrl === centralizedConfig.serverUrl
@@ -196,43 +225,5 @@ export class ApmConfiguration {
     } catch {
       return {};
     }
-  }
-
-  /**
-   * When the user doesn't define a serverUrl we define our central APM service
-   * as the serverUrl along with a few other overrides to prevent potentially
-   * sensitive data from being sent to this service.
-   */
-  private getCentralizedApmServerConfig(): ApmAgentConfig {
-    const baseCentralizedServiceConfig: ApmAgentConfig = {
-      serverUrl: 'https://38b80fbd79fb4c91bae06b4642d4d093.apm.us-east-1.aws.cloud.es.io',
-
-      // The secretToken below is intended to be hardcoded in this file even though
-      // it makes it public. This is not a security/privacy issue. Normally we'd
-      // instead disable the need for a secretToken in the APM Server config where
-      // the data is transmitted to, but due to how it's being hosted, it's easier,
-      // for now, to simply leave it in.
-      secretToken: 'ZQHYvrmXEx04ozge8F',
-
-      centralConfig: false,
-      metricsInterval: '30s',
-      captureSpanStackTraces: false,
-      transactionSampleRate: 1.0,
-      breakdownMetrics: true,
-    };
-
-    const distributableCentralizedServiceConfig: ApmAgentConfig = {
-      metricsInterval: '120s',
-
-      captureBody: 'off',
-      captureHeaders: false,
-      breakdownMetrics: false,
-    };
-
-    if (this.isDistributable) {
-      return merge(baseCentralizedServiceConfig, distributableCentralizedServiceConfig);
-    }
-
-    return baseCentralizedServiceConfig;
   }
 }
