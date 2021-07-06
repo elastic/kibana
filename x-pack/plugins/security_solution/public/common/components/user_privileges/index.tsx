@@ -8,15 +8,18 @@
 import React, { createContext, useContext } from 'react';
 import { useFetchDetectionEnginePrivileges } from '../../../detections/components/user_privileges/use_fetch_detection_engine_privileges';
 import { useFetchListPrivileges } from '../../../detections/components/user_privileges/use_fetch_list_privileges';
+import { EndpointPrivileges, useEndpointPrivileges } from './use_endpoint_privileges';
 
 export interface UserPrivilegesState {
   listPrivileges: ReturnType<typeof useFetchListPrivileges>;
   detectionEnginePrivileges: ReturnType<typeof useFetchDetectionEnginePrivileges>;
+  endpointPrivileges: EndpointPrivileges;
 }
 
 const UserPrivilegesContext = createContext<UserPrivilegesState>({
   listPrivileges: { loading: false, error: undefined, result: undefined },
   detectionEnginePrivileges: { loading: false, error: undefined, result: undefined },
+  endpointPrivileges: { loading: false, canAccessEndpointManagement: false, canAccessFleet: false },
 });
 
 interface UserPrivilegesProviderProps {
@@ -26,12 +29,14 @@ interface UserPrivilegesProviderProps {
 export const UserPrivilegesProvider = ({ children }: UserPrivilegesProviderProps) => {
   const listPrivileges = useFetchListPrivileges();
   const detectionEnginePrivileges = useFetchDetectionEnginePrivileges();
+  const endpointPrivileges = useEndpointPrivileges();
 
   return (
     <UserPrivilegesContext.Provider
       value={{
         listPrivileges,
         detectionEnginePrivileges,
+        endpointPrivileges,
       }}
     >
       {children}
