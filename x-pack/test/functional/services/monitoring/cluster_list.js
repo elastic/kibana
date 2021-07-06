@@ -41,6 +41,10 @@ export function MonitoringClusterListProvider({ getService, getPageObjects }) {
       return PageObjects.monitoring.tableClearFilter(SUBJ_SEARCH_BAR);
     }
 
+    closeAlertsModal() {
+      return testSubjects.click('alerts-modal-button');
+    }
+
     getClusterLink(clusterUuid) {
       return testSubjects.find(`${SUBJ_CLUSTER_ROW_PREFIX}${clusterUuid} > clusterLink`);
     }
