@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 7.13.x releases.
 
+* <<release-notes-7.13.3>>
 * <<release-notes-7.13.2>>
 * <<release-notes-7.13.1>>
 * <<release-notes-7.13.0>>
@@ -54,6 +55,35 @@ Review important information about the {kib} 7.13.x releases.
 // * <<release-notes-7.0.0-alpha1>>
 
 --
+
+[[release-notes-7.13.3]]
+== {kib} 7.13.3
+
+coming::[7.13.3]
+
+The 7.13.3 release includes the following bug fixes.
+
+[float]
+[[fixes-v7.13.3]]
+=== Bug Fixes
+Dashboard::
+* Fixes disabled viz filter is applied {kibana-pull}101859[#101859]
+Discover::
+* Fixes filters getting lost when hiding the chart {kibana-pull}103100[#103100]
+Lens & Visualize Editors::
+* Fixes wrong labels, for values that are implicitly cast to false in *TSVB* {kibana-pull}103631[#103631]
+* *TSVB* visualizations with no timefield do not render after upgrading from 7.12.1 to 7.13.0 {kibana-pull}102494[#102494]
+* Index pattern select field disappears on *Annotation* tab in *TSVB* {kibana-pull}102314[#102314]
+Maps::
+* Fixes geo alerts handling of multi-fields {kibana-pull}100348[#100348]
+Operations::
+* Fixes the Windows kibana-encryption-keys CLI by adding an entry point {kibana-pull}102070[#102070]
+Platform::
+* Fixes delayed status API updates in alerting and task_manager {kibana-pull}101778[#101778]
+Reporting::
+* Fixes too_long_frame_exception by passing scroll_id in the request body {kibana-pull}102972[#102972]
+Uptime::
+* Fixes environment filter in the User Experience app {kibana-pull}102063[#102063]
 
 [[release-notes-7.13.2]]
 == {kib} 7.13.2
