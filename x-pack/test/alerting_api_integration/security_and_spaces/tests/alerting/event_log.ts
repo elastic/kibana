@@ -29,7 +29,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
         .send(
           getTestAlertData({
             rule_type_id: 'test.noop',
-            schedule: { interval: '1s' },
+            schedule: { interval: '500ms' },
             throttle: null,
           })
         );

@@ -811,7 +811,7 @@ instanceStateValue: true
           const response = await alertUtils.createAlwaysFiringAction({
             reference,
             overwrites: {
-              schedule: { interval: '1s' },
+              schedule: { interval: '500ms' },
             },
           });
 
@@ -865,7 +865,7 @@ instanceStateValue: true
           const response = await alertUtils.createAlwaysFiringAction({
             reference,
             overwrites: {
-              schedule: { interval: '1s' },
+              schedule: { interval: '500ms' },
               params: {
                 index: ES_TEST_INDEX_NAME,
                 reference,
@@ -948,7 +948,7 @@ instanceStateValue: true
           const response = await alertUtils.createAlwaysFiringAction({
             reference,
             overwrites: {
-              schedule: { interval: '1s' },
+              schedule: { interval: '500ms' },
               params: {
                 index: ES_TEST_INDEX_NAME,
                 reference,
@@ -1022,7 +1022,7 @@ instanceStateValue: true
           const response = await alertUtils.createAlwaysFiringAction({
             reference,
             overwrites: {
-              schedule: { interval: '1s' },
+              schedule: { interval: '500ms' },
               params: {
                 index: ES_TEST_INDEX_NAME,
                 reference,
@@ -1082,7 +1082,7 @@ instanceStateValue: true
             reference,
             overwrites: {
               enabled: false,
-              schedule: { interval: '1s' },
+              schedule: { interval: '500ms' },
             },
           });
 
@@ -1140,7 +1140,7 @@ instanceStateValue: true
             reference,
             overwrites: {
               enabled: false,
-              schedule: { interval: '1s' },
+              schedule: { interval: '500ms' },
             },
           });
 
@@ -1198,7 +1198,7 @@ instanceStateValue: true
             reference,
             overwrites: {
               enabled: false,
-              schedule: { interval: '1s' },
+              schedule: { interval: '500ms' },
             },
           });
 

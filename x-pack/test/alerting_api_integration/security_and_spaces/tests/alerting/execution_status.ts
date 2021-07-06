@@ -30,7 +30,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
         .send(
           getTestAlertData({
             rule_type_id: 'test.noop',
-            schedule: { interval: '1s' },
+            schedule: { interval: '500ms' },
           })
         );
       expect(response.status).to.eql(200);

@@ -859,7 +859,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               tags: ['foo'],
               rule_type_id: 'test.longRunning',
               consumer: 'alertsFixture',
-              schedule: { interval: '1s' },
+              schedule: { interval: '500ms' },
               throttle: '1m',
               actions: [],
               params: {},
@@ -950,7 +950,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             params: {
               foo: true,
             },
-            schedule: { interval: '1s' },
+            schedule: { interval: '500ms' },
             actions: [],
             throttle: '1m',
             notify_when: 'onThrottleInterval',
@@ -985,7 +985,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 const alertTask = (await getAlertingTaskById(createdAlert.scheduled_task_id))
                   .docs[0];
                 expect(alertTask.status).to.eql('idle');
-                expect(alertTask.schedule).to.eql({ interval: '1s' });
+                expect(alertTask.schedule).to.eql({ interval: '500ms' });
               });
               break;
             default:
