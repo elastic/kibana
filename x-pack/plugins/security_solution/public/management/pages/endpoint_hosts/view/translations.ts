@@ -16,6 +16,26 @@ export const ACTIVITY_LOG = {
     defaultMessage: 'Activity Log',
   }),
   LogEntry: {
+    endOfLog: i18n.translate(
+      'xpack.securitySolution.endpointDetails.activityLog.logEntry.action.endOfLog',
+      {
+        defaultMessage: 'Nothing more to show',
+      }
+    ),
+    emptyState: {
+      title: i18n.translate(
+        'xpack.securitySolution.endpointDetails.activityLog.logEntry.emptyState.title',
+        {
+          defaultMessage: 'No logged actions',
+        }
+      ),
+      body: i18n.translate(
+        'xpack.securitySolution.endpointDetails.activityLog.logEntry.emptyState.body',
+        {
+          defaultMessage: 'No actions have been logged for this endpoint.',
+        }
+      ),
+    },
     action: {
       isolatedAction: i18n.translate(
         'xpack.securitySolution.endpointDetails.activityLog.logEntry.action.isolated',

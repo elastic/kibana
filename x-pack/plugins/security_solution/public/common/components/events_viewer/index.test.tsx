@@ -22,6 +22,8 @@ import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell
 import { useTimelineEvents } from '../../../timelines/containers';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 
+jest.mock('../../../common/lib/kibana');
+
 jest.mock('../../../timelines/containers', () => ({
   useTimelineEvents: jest.fn(),
 }));
@@ -60,7 +62,9 @@ describe('StatefulEventsViewer', () => {
     await waitFor(() => {
       wrapper.update();
 
-      expect(wrapper.find('[data-test-subj="events-viewer-panel"]').first().exists()).toBe(true);
+      expect(wrapper.text()).toMatchInlineSnapshot(
+        `"Showing: 12 events1 fields sorted@timestamp1event.severityevent.categoryevent.actionhost.namesource.ipdestination.ipdestination.bytesuser.name_idmessage0 of 12 events123"`
+      );
     });
   });
 

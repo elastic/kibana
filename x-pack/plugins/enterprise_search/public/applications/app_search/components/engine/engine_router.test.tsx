@@ -41,7 +41,13 @@ describe('EngineRouter', () => {
     engineNotFound: false,
     myRole: {},
   };
-  const actions = { setEngineName: jest.fn(), initializeEngine: jest.fn(), clearEngine: jest.fn() };
+  const actions = {
+    setEngineName: jest.fn(),
+    initializeEngine: jest.fn(),
+    pollEmptyEngine: jest.fn(),
+    stopPolling: jest.fn(),
+    clearEngine: jest.fn(),
+  };
 
   beforeEach(() => {
     setMockValues(values);
@@ -58,12 +64,14 @@ describe('EngineRouter', () => {
       expect(actions.setEngineName).toHaveBeenCalledWith('some-engine');
     });
 
-    it('initializes/fetches engine API data', () => {
+    it('initializes/fetches engine API data and starts a poll for empty engines', () => {
       expect(actions.initializeEngine).toHaveBeenCalled();
+      expect(actions.pollEmptyEngine).toHaveBeenCalled();
     });
 
-    it('clears engine on unmount and on update', () => {
+    it('clears engine and stops polling on unmount / on engine change', () => {
       unmountHandler();
+      expect(actions.stopPolling).toHaveBeenCalled();
       expect(actions.clearEngine).toHaveBeenCalled();
     });
   });

@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Subtitle it renders 1`] = `
+<Wrapper
+  className="siemSubtitle"
+>
+  <SubtitleItem>
+    Test subtitle
+  </SubtitleItem>
+</Wrapper>
+`;

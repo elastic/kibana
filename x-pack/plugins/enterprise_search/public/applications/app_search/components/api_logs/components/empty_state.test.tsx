@@ -19,7 +19,7 @@ describe('EmptyState', () => {
       .find(EuiEmptyPrompt)
       .dive();
 
-    expect(wrapper.find('h2').text()).toEqual('Perform your first API call');
+    expect(wrapper.find('h2').text()).toEqual('No API events in the last 24 hours');
     expect(wrapper.find(EuiButton).prop('href')).toEqual(
       expect.stringContaining('/api-reference.html')
     );

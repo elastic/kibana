@@ -7,12 +7,26 @@
 
 import React, { FC } from 'react';
 import { EuiText, EuiSpacer, EuiButton } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-import { ComponentStrings } from '../../../../../i18n/components';
+import { JSON } from '../../../../../i18n/constants';
 
 import { OnDownloadFn } from './flyout';
 
-const { ShareWebsiteWorkpadStep: strings } = ComponentStrings;
+const strings = {
+  getDownloadLabel: () =>
+    i18n.translate('xpack.canvas.shareWebsiteFlyout.workpadStep.downloadLabel', {
+      defaultMessage: 'Download workpad',
+    }),
+  getStepDescription: () =>
+    i18n.translate('xpack.canvas.shareWebsiteFlyout.workpadStep.description', {
+      defaultMessage:
+        'The workpad will be exported as a single {JSON} file for sharing in another site.',
+      values: {
+        JSON,
+      },
+    }),
+};
 
 export const WorkpadStep: FC<{ onDownload: OnDownloadFn }> = ({ onDownload }) => (
   <EuiText size="s">

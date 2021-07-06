@@ -9,10 +9,8 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiPageHeader } from '@elastic/eui';
-
-import { FlashMessages } from '../../../shared/flash_messages';
-import { Loading } from '../../../shared/loading';
+import { getEngineBreadcrumbs } from '../engine';
+import { AppSearchPageTemplate } from '../layout';
 
 import { DomainsTable } from './components/domains_table';
 import { CRAWLER_TITLE } from './constants';
@@ -27,15 +25,13 @@ export const CrawlerOverview: React.FC = () => {
     fetchCrawlerData();
   }, []);
 
-  if (dataLoading) {
-    return <Loading />;
-  }
-
   return (
-    <>
-      <EuiPageHeader pageTitle={CRAWLER_TITLE} />
-      <FlashMessages />
+    <AppSearchPageTemplate
+      pageChrome={getEngineBreadcrumbs([CRAWLER_TITLE])}
+      pageHeader={{ pageTitle: CRAWLER_TITLE }}
+      isLoading={dataLoading}
+    >
       <DomainsTable />
-    </>
+    </AppSearchPageTemplate>
   );
 };

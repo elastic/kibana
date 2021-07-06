@@ -49,7 +49,6 @@ export function render(): ExpressionFunctionDefinition<
           'plot',
           'progress',
           'repeatImage',
-          'revealImage',
           'shape',
           'table',
           'time_filter',

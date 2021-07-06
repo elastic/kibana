@@ -79,7 +79,11 @@ describe('core lifecycle handlers', () => {
         } as any);
       }
       if (path === 'csp') {
-        return new BehaviorSubject({} as any);
+        return new BehaviorSubject({
+          strict: false,
+          disableEmbedding: false,
+          warnLegacyBrowsers: true,
+        });
       }
       throw new Error(`Unexpected config path: ${path}`);
     });

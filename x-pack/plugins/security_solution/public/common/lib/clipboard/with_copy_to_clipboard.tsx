@@ -6,9 +6,10 @@
  */
 
 import { EuiToolTip } from '@elastic/eui';
+
 import React from 'react';
 
-import { TooltipWithKeyboardShortcut } from '../../components/accessibility/tooltip_with_keyboard_shortcut';
+import { TooltipWithKeyboardShortcut } from '../../components/accessibility';
 import * as i18n from '../../components/drag_and_drop/translations';
 
 import { Clipboard } from './clipboard';

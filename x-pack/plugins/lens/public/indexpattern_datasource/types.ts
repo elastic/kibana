@@ -32,6 +32,9 @@ export {
   CounterRateIndexPatternColumn,
   DerivativeIndexPatternColumn,
   MovingAverageIndexPatternColumn,
+  FormulaIndexPatternColumn,
+  MathIndexPatternColumn,
+  OverallSumIndexPatternColumn,
 } from './operations';
 
 export type DraggedField = DragDropIdentifier & {

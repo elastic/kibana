@@ -11,21 +11,26 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
-import { CellValueElementProps } from '../cell_rendering';
-import { DEFAULT_COLUMN_MIN_WIDTH } from './constants';
-import { ControlColumnProps } from './control_columns';
-import { RowRendererId, TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import {
   FIRST_ARIA_INDEX,
   ARIA_COLINDEX_ATTRIBUTE,
   ARIA_ROWINDEX_ATTRIBUTE,
   onKeyDownFocusHandler,
-} from '../../../../common/components/accessibility/helpers';
+} from '../../../../../../timelines/public';
+import { CellValueElementProps } from '../cell_rendering';
+import { DEFAULT_COLUMN_MIN_WIDTH } from './constants';
+import {
+  ColumnHeaderOptions,
+  ControlColumnProps,
+  RowRendererId,
+  RowRenderer,
+  TimelineId,
+  TimelineTabs,
+} from '../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../common/containers/source';
 import { TimelineItem } from '../../../../../common/search_strategy/timeline';
 import { inputsModel, State } from '../../../../common/store';
-import { useManageTimeline } from '../../manage_timeline';
-import { ColumnHeaderOptions, TimelineModel } from '../../../store/timeline/model';
+import { TimelineModel } from '../../../store/timeline/model';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { OnRowSelected, OnSelectAll } from '../events';
@@ -33,11 +38,11 @@ import { getActionsColumnWidth, getColumnHeaders } from './column_headers/helper
 import { getEventIdToDataMapping } from './helpers';
 import { Sort } from './sort';
 import { plainRowRenderer } from './renderers/plain_row_renderer';
-import { RowRenderer } from './renderers/row_renderer';
 import { EventsTable, TimelineBody, TimelineBodyGlobalStyle } from '../styles';
 import { ColumnHeaders } from './column_headers';
 import { Events } from './events';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 
 interface OwnProps {
   activePage: number;
@@ -99,11 +104,10 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     trailingControlColumns = [],
   }) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
-    const { getManageTimelineById } = useManageTimeline();
-    const { queryFields, selectAll } = useMemo(() => getManageTimelineById(id), [
-      getManageTimelineById,
-      id,
-    ]);
+    const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
+    const { queryFields, selectAll } = useDeepEqualSelector((state) =>
+      getManageTimeline(state, id)
+    );
 
     const onRowSelected: OnRowSelected = useCallback(
       ({ eventIds, isSelected }: { eventIds: string[]; isSelected: boolean }) => {

@@ -774,7 +774,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <div
-                  class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+                  class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder"
                   data-test-subj="trustedAppCard"
                 >
                   <div

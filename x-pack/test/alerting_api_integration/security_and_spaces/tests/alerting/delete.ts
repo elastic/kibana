@@ -19,7 +19,7 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function createDeleteTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
+  const es = getService('es');
   const retry = getService('retry');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
@@ -78,7 +78,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
                 await getScheduledTask(createdAlert.scheduled_task_id);
                 throw new Error('Should have removed scheduled task');
               } catch (e) {
-                expect(e.status).to.eql(404);
+                expect(e.meta.statusCode).to.eql(404);
               }
               break;
             default:
@@ -131,7 +131,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
                 await getScheduledTask(createdAlert.scheduled_task_id);
                 throw new Error('Should have removed scheduled task');
               } catch (e) {
-                expect(e.status).to.eql(404);
+                expect(e.meta.statusCode).to.eql(404);
               }
               break;
             default:
@@ -198,7 +198,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
                 await getScheduledTask(createdAlert.scheduled_task_id);
                 throw new Error('Should have removed scheduled task');
               } catch (e) {
-                expect(e.status).to.eql(404);
+                expect(e.meta.statusCode).to.eql(404);
               }
               break;
             default:
@@ -258,7 +258,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
                 await getScheduledTask(createdAlert.scheduled_task_id);
                 throw new Error('Should have removed scheduled task');
               } catch (e) {
-                expect(e.status).to.eql(404);
+                expect(e.meta.statusCode).to.eql(404);
               }
               break;
             default:
@@ -353,7 +353,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
                 await getScheduledTask(createdAlert.scheduled_task_id);
                 throw new Error('Should have removed scheduled task');
               } catch (e) {
-                expect(e.status).to.eql(404);
+                expect(e.meta.statusCode).to.eql(404);
               }
               break;
             default:

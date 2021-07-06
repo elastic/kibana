@@ -11,14 +11,14 @@ import styled from 'styled-components';
 import { SecurityPageName } from '../../app/types';
 import { getCaseUrl } from '../../common/components/link_to';
 import { useGetUrlSearch } from '../../common/components/navigation/use_get_url_search';
-import { WrapperPage } from '../../common/components/wrapper_page';
+import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useGetUserCasesPermissions, useKibana } from '../../common/lib/kibana';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { navTabs } from '../../app/home/home_navigations';
 import { CaseHeaderPage } from '../components/case_header_page';
 import { WhitePageWrapper, SectionWrapper } from '../components/wrappers';
 import * as i18n from './translations';
-import { APP_ID, CASES_APP_ID } from '../../../common/constants';
+import { APP_ID } from '../../../common/constants';
 
 const ConfigureCasesPageComponent: React.FC = () => {
   const {
@@ -30,7 +30,7 @@ const ConfigureCasesPageComponent: React.FC = () => {
 
   const backOptions = useMemo(
     () => ({
-      href: getCaseUrl(search),
+      path: getCaseUrl(search),
       text: i18n.BACK_TO_ALL,
       pageId: SecurityPageName.case,
     }),
@@ -39,7 +39,8 @@ const ConfigureCasesPageComponent: React.FC = () => {
 
   useEffect(() => {
     if (userPermissions != null && !userPermissions.read) {
-      navigateToApp(CASES_APP_ID, {
+      navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.case,
         path: getCaseUrl(search),
       });
     }
@@ -51,7 +52,7 @@ const ConfigureCasesPageComponent: React.FC = () => {
 
   return (
     <>
-      <WrapperPage noPadding>
+      <SecuritySolutionPageWrapper noPadding>
         <SectionWrapper>
           <HeaderWrapper>
             <CaseHeaderPage title={i18n.CONFIGURE_CASES_PAGE_TITLE} backOptions={backOptions} />
@@ -63,7 +64,7 @@ const ConfigureCasesPageComponent: React.FC = () => {
             owner: [APP_ID],
           })}
         </WhitePageWrapper>
-      </WrapperPage>
+      </SecuritySolutionPageWrapper>
       <SpyRoute pageName={SecurityPageName.case} />
     </>
   );

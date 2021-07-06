@@ -15,10 +15,17 @@ import { groups } from '../../__mocks__/groups.mock';
 
 import { nextTick } from '@kbn/test/jest';
 
-import { wsRoleMapping } from '../../../shared/role_mapping/__mocks__/roles';
+import { elasticsearchUsers } from '../../../shared/role_mapping/__mocks__/elasticsearch_users';
+
+import {
+  wsRoleMapping,
+  wsSingleUserRoleMapping,
+} from '../../../shared/role_mapping/__mocks__/roles';
 import { ANY_AUTH_PROVIDER } from '../../../shared/role_mapping/constants';
 
 import { RoleMappingsLogic } from './role_mappings_logic';
+
+const emptyUser = { username: '', email: '' };
 
 describe('RoleMappingsLogic', () => {
   const { http } = mockHttpValues;
@@ -28,6 +35,8 @@ describe('RoleMappingsLogic', () => {
     attributes: [],
     availableAuthProviders: [],
     elasticsearchRoles: [],
+    elasticsearchUser: emptyUser,
+    elasticsearchUsers: [],
     roleMapping: null,
     roleMappingFlyoutOpen: false,
     roleMappings: [],
@@ -42,6 +51,14 @@ describe('RoleMappingsLogic', () => {
     selectedAuthProviders: [ANY_AUTH_PROVIDER],
     selectedOptions: [],
     roleMappingErrors: [],
+    singleUserRoleMapping: null,
+    singleUserRoleMappings: [],
+    singleUserRoleMappingFlyoutOpen: false,
+    userCreated: false,
+    userFormIsNewUser: true,
+    userFormUserIsExisting: true,
+    smtpSettingsPresent: false,
+    formLoading: false,
   };
   const roleGroup = {
     id: '123',
@@ -59,6 +76,9 @@ describe('RoleMappingsLogic', () => {
     authProviders: [],
     availableGroups: [roleGroup, defaultGroup],
     elasticsearchRoles: [],
+    singleUserRoleMappings: [wsSingleUserRoleMapping],
+    elasticsearchUsers,
+    smtpSettingsPresent: false,
   };
 
   beforeEach(() => {
@@ -71,23 +91,63 @@ describe('RoleMappingsLogic', () => {
   });
 
   describe('actions', () => {
-    it('setRoleMappingsData', () => {
-      RoleMappingsLogic.actions.setRoleMappingsData(mappingsServerProps);
+    describe('setRoleMappingsData', () => {
+      it('sets data based on server response from the `mappings` (plural) endpoint', () => {
+        RoleMappingsLogic.actions.setRoleMappingsData(mappingsServerProps);
+
+        expect(RoleMappingsLogic.values.roleMappings).toEqual([wsRoleMapping]);
+        expect(RoleMappingsLogic.values.dataLoading).toEqual(false);
+        expect(RoleMappingsLogic.values.multipleAuthProvidersConfig).toEqual(true);
+        expect(RoleMappingsLogic.values.dataLoading).toEqual(false);
+        expect(RoleMappingsLogic.values.attributes).toEqual(mappingsServerProps.attributes);
+        expect(RoleMappingsLogic.values.availableGroups).toEqual(
+          mappingsServerProps.availableGroups
+        );
+        expect(RoleMappingsLogic.values.includeInAllGroups).toEqual(false);
+        expect(RoleMappingsLogic.values.elasticsearchRoles).toEqual(
+          mappingsServerProps.elasticsearchRoles
+        );
+        expect(RoleMappingsLogic.values.selectedOptions).toEqual([
+          { label: defaultGroup.name, value: defaultGroup.id },
+        ]);
+        expect(RoleMappingsLogic.values.selectedGroups).toEqual(new Set([defaultGroup.id]));
+      });
+
+      it('handles fallback if no elasticsearch users present', () => {
+        RoleMappingsLogic.actions.setRoleMappingsData({
+          ...mappingsServerProps,
+          elasticsearchUsers: [],
+        });
+
+        expect(RoleMappingsLogic.values.elasticsearchUser).toEqual(emptyUser);
+      });
+    });
+
+    it('setRoleMappings', () => {
+      RoleMappingsLogic.actions.setRoleMappings({ roleMappings: [wsRoleMapping] });
 
       expect(RoleMappingsLogic.values.roleMappings).toEqual([wsRoleMapping]);
       expect(RoleMappingsLogic.values.dataLoading).toEqual(false);
-      expect(RoleMappingsLogic.values.multipleAuthProvidersConfig).toEqual(true);
-      expect(RoleMappingsLogic.values.dataLoading).toEqual(false);
-      expect(RoleMappingsLogic.values.attributes).toEqual(mappingsServerProps.attributes);
-      expect(RoleMappingsLogic.values.availableGroups).toEqual(mappingsServerProps.availableGroups);
-      expect(RoleMappingsLogic.values.includeInAllGroups).toEqual(false);
-      expect(RoleMappingsLogic.values.elasticsearchRoles).toEqual(
-        mappingsServerProps.elasticsearchRoles
-      );
-      expect(RoleMappingsLogic.values.selectedOptions).toEqual([
-        { label: defaultGroup.name, value: defaultGroup.id },
-      ]);
-      expect(RoleMappingsLogic.values.selectedGroups).toEqual(new Set([defaultGroup.id]));
+    });
+
+    describe('setElasticsearchUser', () => {
+      it('sets user', () => {
+        RoleMappingsLogic.actions.setElasticsearchUser(elasticsearchUsers[0]);
+
+        expect(RoleMappingsLogic.values.elasticsearchUser).toEqual(elasticsearchUsers[0]);
+      });
+
+      it('handles fallback if no user present', () => {
+        RoleMappingsLogic.actions.setElasticsearchUser(undefined);
+
+        expect(RoleMappingsLogic.values.elasticsearchUser).toEqual(emptyUser);
+      });
+    });
+
+    it('setSingleUserRoleMapping', () => {
+      RoleMappingsLogic.actions.setSingleUserRoleMapping(wsSingleUserRoleMapping);
+
+      expect(RoleMappingsLogic.values.singleUserRoleMapping).toEqual(wsSingleUserRoleMapping);
     });
 
     it('handleRoleChange', () => {
@@ -124,6 +184,12 @@ describe('RoleMappingsLogic', () => {
       RoleMappingsLogic.actions.handleAllGroupsSelectionChange(true);
 
       expect(RoleMappingsLogic.values.includeInAllGroups).toEqual(true);
+    });
+
+    it('setUserExistingRadioValue', () => {
+      RoleMappingsLogic.actions.setUserExistingRadioValue(false);
+
+      expect(RoleMappingsLogic.values.userFormUserIsExisting).toEqual(false);
     });
 
     describe('handleAttributeSelectorChange', () => {
@@ -221,19 +287,77 @@ describe('RoleMappingsLogic', () => {
       expect(clearFlashMessages).toHaveBeenCalled();
     });
 
-    it('closeRoleMappingFlyout', () => {
+    it('openSingleUserRoleMappingFlyout', () => {
+      mount(mappingsServerProps);
+      RoleMappingsLogic.actions.openSingleUserRoleMappingFlyout();
+
+      expect(RoleMappingsLogic.values.singleUserRoleMappingFlyoutOpen).toEqual(true);
+      expect(clearFlashMessages).toHaveBeenCalled();
+    });
+
+    it('closeUsersAndRolesFlyout', () => {
       mount({
         ...mappingsServerProps,
         roleMappingFlyoutOpen: true,
       });
-      RoleMappingsLogic.actions.closeRoleMappingFlyout();
+      RoleMappingsLogic.actions.closeUsersAndRolesFlyout();
 
       expect(RoleMappingsLogic.values.roleMappingFlyoutOpen).toEqual(false);
       expect(clearFlashMessages).toHaveBeenCalled();
     });
+
+    it('setElasticsearchUsernameValue', () => {
+      const username = 'newName';
+      RoleMappingsLogic.actions.setElasticsearchUsernameValue(username);
+
+      expect(RoleMappingsLogic.values.elasticsearchUser).toEqual({
+        ...RoleMappingsLogic.values.elasticsearchUser,
+        username,
+      });
+    });
+
+    it('setElasticsearchEmailValue', () => {
+      const email = 'newEmail@foo.cats';
+      RoleMappingsLogic.actions.setElasticsearchEmailValue(email);
+
+      expect(RoleMappingsLogic.values.elasticsearchUser).toEqual({
+        ...RoleMappingsLogic.values.elasticsearchUser,
+        email,
+      });
+    });
+
+    it('setUserCreated', () => {
+      RoleMappingsLogic.actions.setUserCreated();
+
+      expect(RoleMappingsLogic.values.userCreated).toEqual(true);
+    });
   });
 
   describe('listeners', () => {
+    describe('enableRoleBasedAccess', () => {
+      it('calls API and sets values', async () => {
+        const setRoleMappingsSpy = jest.spyOn(RoleMappingsLogic.actions, 'setRoleMappings');
+        http.post.mockReturnValue(Promise.resolve(mappingsServerProps));
+        RoleMappingsLogic.actions.enableRoleBasedAccess();
+
+        expect(RoleMappingsLogic.values.dataLoading).toEqual(true);
+
+        expect(http.post).toHaveBeenCalledWith(
+          '/api/workplace_search/org/role_mappings/enable_role_based_access'
+        );
+        await nextTick();
+        expect(setRoleMappingsSpy).toHaveBeenCalledWith(mappingsServerProps);
+      });
+
+      it('handles error', async () => {
+        http.post.mockReturnValue(Promise.reject('this is an error'));
+        RoleMappingsLogic.actions.enableRoleBasedAccess();
+        await nextTick();
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
+      });
+    });
+
     describe('initializeRoleMappings', () => {
       it('calls API and sets values', async () => {
         const setRoleMappingsDataSpy = jest.spyOn(RoleMappingsLogic.actions, 'setRoleMappingsData');
@@ -269,6 +393,39 @@ describe('RoleMappingsLogic', () => {
         RoleMappingsLogic.actions.initializeRoleMapping();
 
         expect(setRoleMappingDataSpy).not.toHaveBeenCalledWith(wsRoleMapping);
+      });
+    });
+
+    describe('initializeSingleUserRoleMapping', () => {
+      let setElasticsearchUserSpy: jest.MockedFunction<any>;
+      let setRoleMappingSpy: jest.MockedFunction<any>;
+      let setSingleUserRoleMappingSpy: jest.MockedFunction<any>;
+      beforeEach(() => {
+        setElasticsearchUserSpy = jest.spyOn(RoleMappingsLogic.actions, 'setElasticsearchUser');
+        setRoleMappingSpy = jest.spyOn(RoleMappingsLogic.actions, 'setRoleMapping');
+        setSingleUserRoleMappingSpy = jest.spyOn(
+          RoleMappingsLogic.actions,
+          'setSingleUserRoleMapping'
+        );
+      });
+
+      it('should handle the new user state and only set an empty mapping', () => {
+        RoleMappingsLogic.actions.initializeSingleUserRoleMapping();
+
+        expect(setElasticsearchUserSpy).not.toHaveBeenCalled();
+        expect(setRoleMappingSpy).not.toHaveBeenCalled();
+        expect(setSingleUserRoleMappingSpy).toHaveBeenCalledWith(undefined);
+      });
+
+      it('should handle an existing user state and set mapping', () => {
+        RoleMappingsLogic.actions.setRoleMappingsData(mappingsServerProps);
+        RoleMappingsLogic.actions.initializeSingleUserRoleMapping(
+          wsSingleUserRoleMapping.roleMapping.id
+        );
+
+        expect(setElasticsearchUserSpy).toHaveBeenCalled();
+        expect(setRoleMappingSpy).toHaveBeenCalled();
+        expect(setSingleUserRoleMappingSpy).toHaveBeenCalledWith(wsSingleUserRoleMapping);
       });
     });
 
@@ -350,18 +507,102 @@ describe('RoleMappingsLogic', () => {
       });
     });
 
+    describe('handleSaveUser', () => {
+      it('calls API and refreshes list when new mapping', async () => {
+        const initializeRoleMappingsSpy = jest.spyOn(
+          RoleMappingsLogic.actions,
+          'initializeRoleMappings'
+        );
+        const setUserCreatedSpy = jest.spyOn(RoleMappingsLogic.actions, 'setUserCreated');
+        const setSingleUserRoleMappingSpy = jest.spyOn(
+          RoleMappingsLogic.actions,
+          'setSingleUserRoleMapping'
+        );
+        RoleMappingsLogic.actions.setRoleMappingsData(mappingsServerProps);
+
+        http.post.mockReturnValue(Promise.resolve(mappingsServerProps));
+        RoleMappingsLogic.actions.handleSaveUser();
+
+        expect(http.post).toHaveBeenCalledWith(
+          '/api/workplace_search/org/single_user_role_mapping',
+          {
+            body: JSON.stringify({
+              roleMapping: {
+                groups: [defaultGroup.id],
+                roleType: 'admin',
+                allGroups: false,
+              },
+              elasticsearchUser: {
+                username: elasticsearchUsers[0].username,
+                email: elasticsearchUsers[0].email,
+              },
+            }),
+          }
+        );
+        await nextTick();
+
+        expect(initializeRoleMappingsSpy).toHaveBeenCalled();
+        expect(setUserCreatedSpy).toHaveBeenCalled();
+        expect(setSingleUserRoleMappingSpy).toHaveBeenCalled();
+      });
+
+      it('calls API and refreshes list when existing mapping', async () => {
+        const initializeRoleMappingsSpy = jest.spyOn(
+          RoleMappingsLogic.actions,
+          'initializeRoleMappings'
+        );
+        RoleMappingsLogic.actions.setSingleUserRoleMapping(wsSingleUserRoleMapping);
+        RoleMappingsLogic.actions.handleAllGroupsSelectionChange(true);
+
+        http.put.mockReturnValue(Promise.resolve(mappingsServerProps));
+        RoleMappingsLogic.actions.handleSaveUser();
+
+        expect(http.post).toHaveBeenCalledWith(
+          '/api/workplace_search/org/single_user_role_mapping',
+          {
+            body: JSON.stringify({
+              roleMapping: {
+                groups: [],
+                roleType: 'admin',
+                allGroups: true,
+                id: wsSingleUserRoleMapping.roleMapping.id,
+              },
+              elasticsearchUser: {
+                username: '',
+                email: '',
+              },
+            }),
+          }
+        );
+        await nextTick();
+
+        expect(initializeRoleMappingsSpy).toHaveBeenCalled();
+      });
+
+      it('handles error', async () => {
+        const setRoleMappingErrorsSpy = jest.spyOn(
+          RoleMappingsLogic.actions,
+          'setRoleMappingErrors'
+        );
+
+        http.post.mockReturnValue(
+          Promise.reject({
+            body: {
+              attributes: {
+                errors: ['this is an error'],
+              },
+            },
+          })
+        );
+        RoleMappingsLogic.actions.handleSaveUser();
+        await nextTick();
+
+        expect(setRoleMappingErrorsSpy).toHaveBeenCalledWith(['this is an error']);
+      });
+    });
+
     describe('handleDeleteMapping', () => {
-      let confirmSpy: any;
       const roleMappingId = 'r1';
-
-      beforeEach(() => {
-        confirmSpy = jest.spyOn(window, 'confirm');
-        confirmSpy.mockImplementation(jest.fn(() => true));
-      });
-
-      afterEach(() => {
-        confirmSpy.mockRestore();
-      });
 
       it('calls API and refreshes list', async () => {
         const initializeRoleMappingsSpy = jest.spyOn(
@@ -388,14 +629,52 @@ describe('RoleMappingsLogic', () => {
 
         expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
+    });
 
-      it('will do nothing if not confirmed', async () => {
-        RoleMappingsLogic.actions.setRoleMapping(wsRoleMapping);
-        window.confirm = () => false;
-        RoleMappingsLogic.actions.handleDeleteMapping(roleMappingId);
+    describe('handleUsernameSelectChange', () => {
+      it('sets elasticsearchUser when match found', () => {
+        RoleMappingsLogic.actions.setRoleMappingsData(mappingsServerProps);
+        const setElasticsearchUserSpy = jest.spyOn(
+          RoleMappingsLogic.actions,
+          'setElasticsearchUser'
+        );
+        RoleMappingsLogic.actions.handleUsernameSelectChange(elasticsearchUsers[0].username);
 
-        expect(http.delete).not.toHaveBeenCalled();
-        await nextTick();
+        expect(setElasticsearchUserSpy).toHaveBeenCalledWith(elasticsearchUsers[0]);
+      });
+
+      it('does not set elasticsearchUser when no match found', () => {
+        RoleMappingsLogic.actions.setRoleMappingsData(mappingsServerProps);
+        const setElasticsearchUserSpy = jest.spyOn(
+          RoleMappingsLogic.actions,
+          'setElasticsearchUser'
+        );
+        RoleMappingsLogic.actions.handleUsernameSelectChange('bogus');
+
+        expect(setElasticsearchUserSpy).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('setUserExistingRadioValue', () => {
+      it('handles existing user', () => {
+        RoleMappingsLogic.actions.setRoleMappingsData(mappingsServerProps);
+        const setElasticsearchUserSpy = jest.spyOn(
+          RoleMappingsLogic.actions,
+          'setElasticsearchUser'
+        );
+        RoleMappingsLogic.actions.setUserExistingRadioValue(true);
+
+        expect(setElasticsearchUserSpy).toHaveBeenCalledWith(elasticsearchUsers[0]);
+      });
+
+      it('handles new user', () => {
+        const setElasticsearchUserSpy = jest.spyOn(
+          RoleMappingsLogic.actions,
+          'setElasticsearchUser'
+        );
+        RoleMappingsLogic.actions.setUserExistingRadioValue(false);
+
+        expect(setElasticsearchUserSpy).toHaveBeenCalledWith(emptyUser);
       });
     });
   });

@@ -13,11 +13,9 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiPageHeader } from '@elastic/eui';
-
 import { UnsavedChangesPrompt } from '../../../shared/unsaved_changes_prompt';
+import { getPageHeaderActions } from '../../../test_helpers';
 
-import { EmptyState } from './components';
 import { ResultSettings } from './result_settings';
 import { ResultSettingsTable } from './result_settings_table';
 import { SampleResponse } from './sample_response';
@@ -46,8 +44,6 @@ describe('ResultSettings', () => {
   });
 
   const subject = () => shallow(<ResultSettings />);
-  const findButtons = (wrapper: ShallowWrapper) =>
-    wrapper.find(EuiPageHeader).prop('rightSideItems') as React.ReactElement[];
 
   it('renders', () => {
     const wrapper = subject();
@@ -60,19 +56,10 @@ describe('ResultSettings', () => {
     expect(actions.initializeResultSettingsData).toHaveBeenCalled();
   });
 
-  it('renders a loading screen if data has not loaded yet', () => {
-    setMockValues({
-      dataLoading: true,
-    });
-    const wrapper = subject();
-    expect(wrapper.find(ResultSettingsTable).exists()).toBe(false);
-    expect(wrapper.find(SampleResponse).exists()).toBe(false);
-  });
-
   it('renders a "save" button that will save the current changes', () => {
-    const buttons = findButtons(subject());
-    expect(buttons.length).toBe(3);
-    const saveButton = shallow(buttons[0]);
+    const buttons = getPageHeaderActions(subject());
+    expect(buttons.children().length).toBe(3);
+    const saveButton = buttons.find('[data-test-subj="SaveResultSettings"]');
     saveButton.simulate('click');
     expect(actions.saveResultSettings).toHaveBeenCalled();
   });
@@ -82,8 +69,8 @@ describe('ResultSettings', () => {
       ...values,
       stagedUpdates: false,
     });
-    const buttons = findButtons(subject());
-    const saveButton = shallow(buttons[0]);
+    const buttons = getPageHeaderActions(subject());
+    const saveButton = buttons.find('[data-test-subj="SaveResultSettings"]');
     expect(saveButton.prop('disabled')).toBe(true);
   });
 
@@ -93,15 +80,15 @@ describe('ResultSettings', () => {
       stagedUpdates: true,
       resultFieldsEmpty: true,
     });
-    const buttons = findButtons(subject());
-    const saveButton = shallow(buttons[0]);
+    const buttons = getPageHeaderActions(subject());
+    const saveButton = buttons.find('[data-test-subj="SaveResultSettings"]');
     expect(saveButton.prop('disabled')).toBe(true);
   });
 
   it('renders a "restore defaults" button that will reset all values to their defaults', () => {
-    const buttons = findButtons(subject());
-    expect(buttons.length).toBe(3);
-    const resetButton = shallow(buttons[1]);
+    const buttons = getPageHeaderActions(subject());
+    expect(buttons.children().length).toBe(3);
+    const resetButton = buttons.find('[data-test-subj="ResetResultSettings"]');
     resetButton.simulate('click');
     expect(actions.confirmResetAllFields).toHaveBeenCalled();
   });
@@ -111,15 +98,15 @@ describe('ResultSettings', () => {
       ...values,
       resultFieldsAtDefaultSettings: true,
     });
-    const buttons = findButtons(subject());
-    const resetButton = shallow(buttons[1]);
+    const buttons = getPageHeaderActions(subject());
+    const resetButton = buttons.find('[data-test-subj="ResetResultSettings"]');
     expect(resetButton.prop('disabled')).toBe(true);
   });
 
   it('renders a "clear" button that will remove all selected options', () => {
-    const buttons = findButtons(subject());
-    expect(buttons.length).toBe(3);
-    const clearButton = shallow(buttons[2]);
+    const buttons = getPageHeaderActions(subject());
+    expect(buttons.children().length).toBe(3);
+    const clearButton = buttons.find('[data-test-subj="ClearResultSettings"]');
     clearButton.simulate('click');
     expect(actions.clearAllFields).toHaveBeenCalled();
   });
@@ -143,17 +130,12 @@ describe('ResultSettings', () => {
     });
 
     it('will not render action buttons', () => {
-      const buttons = findButtons(wrapper);
-      expect(buttons.length).toBe(0);
-    });
-
-    it('will not render the main page content', () => {
-      expect(wrapper.find(ResultSettingsTable).exists()).toBe(false);
-      expect(wrapper.find(SampleResponse).exists()).toBe(false);
+      const buttons = getPageHeaderActions(wrapper);
+      expect(buttons.children().length).toBe(0);
     });
 
     it('will render an empty state', () => {
-      expect(wrapper.find(EmptyState).exists()).toBe(true);
+      expect(wrapper.prop('isEmptyState')).toBe(true);
     });
   });
 });

@@ -8,43 +8,41 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import styled from 'styled-components';
-import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
-import { CustomReportField } from '../custom_report_field';
-import { DataSeries, URLReportDefinition } from '../../types';
+import { ReportMetricOptions } from '../report_metric_options';
+import { SeriesConfig } from '../../types';
 import { SeriesChartTypesSelect } from './chart_types';
 import { OperationTypeSelect } from './operation_type_select';
 import { DatePickerCol } from './date_picker_col';
 import { parseCustomFieldName } from '../../configurations/lens_attributes';
 import { ReportDefinitionField } from './report_definition_field';
 
-function getColumnType(dataView: DataSeries, selectedDefinition: URLReportDefinition) {
-  const { reportDefinitions } = dataView;
-  const customColumn = reportDefinitions.find((item) => item.custom);
-  if (customColumn?.field && selectedDefinition[customColumn?.field]) {
-    const { columnType } = parseCustomFieldName(customColumn.field, dataView, selectedDefinition);
+function getColumnType(seriesConfig: SeriesConfig, selectedMetricField?: string) {
+  const { columnType } = parseCustomFieldName(seriesConfig, selectedMetricField);
 
-    return columnType;
-  }
-  return null;
+  return columnType;
 }
 
 export function ReportDefinitionCol({
-  dataViewSeries,
+  seriesConfig,
   seriesId,
 }: {
-  dataViewSeries: DataSeries;
+  seriesConfig: SeriesConfig;
   seriesId: string;
 }) {
-  const { indexPattern } = useAppIndexPatternContext();
-
   const { getSeries, setSeries } = useSeriesStorage();
 
   const series = getSeries(seriesId);
 
-  const { reportDefinitions: selectedReportDefinitions = {} } = series ?? {};
+  const { reportDefinitions: selectedReportDefinitions = {}, selectedMetricField } = series ?? {};
 
-  const { reportDefinitions, defaultSeriesType, hasOperationType, yAxisColumns } = dataViewSeries;
+  const {
+    definitionFields,
+    defaultSeriesType,
+    hasOperationType,
+    yAxisColumns,
+    metricOptions,
+  } = seriesConfig;
 
   const onChange = (field: string, value?: string[]) => {
     if (!value?.[0]) {
@@ -61,7 +59,7 @@ export function ReportDefinitionCol({
     }
   };
 
-  const columnType = getColumnType(dataViewSeries, selectedReportDefinitions);
+  const columnType = getColumnType(seriesConfig, selectedMetricField);
 
   return (
     <FlexGroup direction="column" gutterSize="s">
@@ -69,21 +67,21 @@ export function ReportDefinitionCol({
         <DatePickerCol seriesId={seriesId} />
       </EuiFlexItem>
       <EuiHorizontalRule margin="xs" />
-      {indexPattern &&
-        reportDefinitions.map(({ field, custom, options }) => (
-          <EuiFlexItem key={field}>
-            {!custom ? (
-              <ReportDefinitionField
-                seriesId={seriesId}
-                dataSeries={dataViewSeries}
-                field={field}
-                onChange={onChange}
-              />
-            ) : (
-              <CustomReportField field={field} options={options} seriesId={seriesId} />
-            )}
-          </EuiFlexItem>
-        ))}
+      {definitionFields.map((field) => (
+        <EuiFlexItem key={field}>
+          <ReportDefinitionField
+            seriesId={seriesId}
+            seriesConfig={seriesConfig}
+            field={field}
+            onChange={onChange}
+          />
+        </EuiFlexItem>
+      ))}
+      {metricOptions && (
+        <EuiFlexItem>
+          <ReportMetricOptions options={metricOptions} seriesId={seriesId} />
+        </EuiFlexItem>
+      )}
       {(hasOperationType || columnType === 'operation') && (
         <EuiFlexItem>
           <OperationTypeSelect
@@ -96,7 +94,7 @@ export function ReportDefinitionCol({
         <SeriesChartTypesSelect
           seriesId={seriesId}
           defaultChartType={defaultSeriesType}
-          seriesTypes={dataViewSeries.seriesTypes}
+          seriesTypes={seriesConfig.seriesTypes}
         />
       </EuiFlexItem>
     </FlexGroup>

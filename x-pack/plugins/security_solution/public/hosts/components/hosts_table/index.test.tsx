@@ -23,6 +23,8 @@ import { HostsTableType } from '../../../hosts/store/model';
 import { HostsTable } from './index';
 import { mockData } from './mock';
 
+jest.mock('../../../common/lib/kibana');
+
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
 jest.mock('../../../common/components/search_bar', () => ({

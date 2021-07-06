@@ -415,7 +415,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('Make sure that we get Timeline data', async () => {
       await retry.try(async () => {
         const resp = await supertest
-          .post('/internal/search/securitySolutionTimelineSearchStrategy/')
+          .post('/internal/search/timelineSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .set('Content-Type', 'application/json')
           .send({
@@ -457,7 +457,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('Make sure that pagination is working in Timeline query', async () => {
       await retry.try(async () => {
         const resp = await supertest
-          .post('/internal/search/securitySolutionTimelineSearchStrategy/')
+          .post('/internal/search/timelineSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .set('Content-Type', 'application/json')
           .send({

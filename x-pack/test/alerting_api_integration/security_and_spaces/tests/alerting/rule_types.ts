@@ -30,6 +30,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
     },
     producer: 'alertsFixture',
     minimum_license_required: 'basic',
+    is_exportable: true,
     recovery_action_group: {
       id: 'recovered',
       name: 'Recovered',
@@ -56,6 +57,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
     },
     producer: 'alertsRestrictedFixture',
     minimum_license_required: 'basic',
+    is_exportable: true,
     enabled_in_license: true,
   };
 

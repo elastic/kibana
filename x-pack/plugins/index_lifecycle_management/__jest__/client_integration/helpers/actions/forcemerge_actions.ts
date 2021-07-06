@@ -25,7 +25,7 @@ export const createForceMergeActions = (testBed: TestBed, phase: Phase) => {
   const { exists } = testBed;
   const toggleSelector = `${phase}-forceMergeSwitch`;
   return {
-    forceMergeFieldExists: () => exists(toggleSelector),
+    forceMergeExists: () => exists(toggleSelector),
     toggleForceMerge: createFormToggleAction(testBed, toggleSelector),
     setForcemergeSegmentsCount: createFormSetValueAction(
       testBed,

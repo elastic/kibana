@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { RequestHandlerContext } from 'kibana/server';
+import { estypes } from '@elastic/elasticsearch';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
   INDEX_PATTERN_KIBANA,
@@ -44,11 +45,11 @@ const queryBody = {
 };
 
 const checkLatestMonitoringIsLegacy = async (context: RequestHandlerContext, index: string) => {
-  const { client: esClient } = context.core.elasticsearch.legacy;
-  const result = await esClient.callAsCurrentUser('search', {
+  const client = context.core.elasticsearch.client.asCurrentUser;
+  const { body: result } = await client.search<estypes.SearchResponse<unknown>>({
     index,
     body: queryBody,
-  });
+  } as estypes.SearchRequest);
 
   const { aggregations } = result;
   const counts = {
@@ -62,7 +63,7 @@ const checkLatestMonitoringIsLegacy = async (context: RequestHandlerContext, ind
 
   const {
     types: { buckets },
-  } = aggregations;
+  } = aggregations as { types: { buckets: Array<{ key: string }> } };
   counts.mbIndicesCount = buckets.filter(({ key }: { key: string }) => key.includes('-mb-')).length;
 
   counts.legacyIndicesCount = buckets.length - counts.mbIndicesCount;

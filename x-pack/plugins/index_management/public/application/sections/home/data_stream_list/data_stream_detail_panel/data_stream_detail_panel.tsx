@@ -24,8 +24,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { reactRouterNavigate } from '../../../../../shared_imports';
-import { SectionLoading, SectionError, Error, DataHealth } from '../../../../components';
+import { SectionLoading, reactRouterNavigate } from '../../../../../shared_imports';
+import { SectionError, Error, DataHealth } from '../../../../components';
 import { useLoadDataStream } from '../../../../services/api';
 import { DeleteDataStreamConfirmationModal } from '../delete_data_stream_confirmation_modal';
 import { humanizeTimeStamp } from '../humanize_time_stamp';
