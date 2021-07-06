@@ -30,7 +30,7 @@ export interface LocatorDependencies {
   getUrl: (location: KibanaLocation, getUrlParams: LocatorGetUrlParams) => Promise<string>;
 }
 
-export class Locator<P extends SerializableState> implements PersistableState<P>, LocatorPublic<P> {
+export class Locator<P extends SerializableState> implements LocatorPublic<P> {
   public readonly migrations: PersistableState<P>['migrations'];
 
   constructor(
