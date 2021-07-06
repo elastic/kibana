@@ -12,7 +12,7 @@ describe('is_filter_query_compatible', () => {
     expect(isFilterQueryCompatible(undefined)).toEqual(true);
   });
 
-  test('returns true if given a match all object', () => {
+  test('returns "true" if given a match all object', () => {
     expect(
       isFilterQueryCompatible({
         bool: {
@@ -25,7 +25,7 @@ describe('is_filter_query_compatible', () => {
     ).toEqual(true);
   });
 
-  test('returns false if given a match all object with something inside of it such as match_none', () => {
+  test('returns "false" if given a match all object with something inside of it such as match_none', () => {
     expect(
       isFilterQueryCompatible({
         bool: {
@@ -38,7 +38,7 @@ describe('is_filter_query_compatible', () => {
     ).toEqual(false);
   });
 
-  test('returns true if given empty array for a filter', () => {
+  test('returns "true" if given empty array for a filter', () => {
     expect(
       isFilterQueryCompatible({
         bool: {
@@ -51,7 +51,7 @@ describe('is_filter_query_compatible', () => {
     ).toEqual(true);
   });
 
-  test('returns true if given match all object as a string', () => {
+  test('returns "true" if given match all object as a string', () => {
     expect(
       isFilterQueryCompatible(
         JSON.stringify({
@@ -66,7 +66,7 @@ describe('is_filter_query_compatible', () => {
     ).toEqual(true);
   });
 
-  test('returns true if given empty array for a filter as a string', () => {
+  test('returns "true" if given empty array for a filter as a string', () => {
     expect(
       isFilterQueryCompatible(
         JSON.stringify({
@@ -79,5 +79,9 @@ describe('is_filter_query_compatible', () => {
         })
       )
     ).toEqual(true);
+  });
+
+  test('returns "false" if given an invalid string', () => {
+    expect(isFilterQueryCompatible('invalid string')).toEqual(false);
   });
 });
