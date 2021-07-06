@@ -49,7 +49,7 @@ export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
   const { onFailure = defaultOnFailure(methodName) } = options;
 
   const start = Date.now();
-  const retryDelay = 502;
+  const retryDelay = 100;
   let lastError;
 
   while (true) {
