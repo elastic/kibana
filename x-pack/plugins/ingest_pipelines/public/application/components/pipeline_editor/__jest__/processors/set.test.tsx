@@ -8,19 +8,6 @@
 import { act } from 'react-dom/test-utils';
 import { setup, SetupResult, getProcessorValue } from './processor.helpers';
 
-// Default parameter values automatically added to the set processor when saved
-const defaultSetParameters = {
-  value: '',
-  if: undefined,
-  tag: undefined,
-  override: undefined,
-  media_type: undefined,
-  description: undefined,
-  ignore_missing: undefined,
-  ignore_failure: undefined,
-  ignore_empty_value: undefined,
-};
-
 const SET_TYPE = 'set';
 
 describe('Processor: Set', () => {
@@ -67,8 +54,8 @@ describe('Processor: Set', () => {
 
     // Expect form error as "field" is required parameter
     expect(form.getErrorsMessages()).toEqual([
-      'Either value or copy_from should be specified.',
-      'Either copy_from or value should be specified.',
+      'Either this field or copy_from should be specified.',
+      'Either this field or value should be specified.',
       'A field value is required.',
     ]);
   });
@@ -87,7 +74,6 @@ describe('Processor: Set', () => {
 
     const processors = getProcessorValue(onUpdate, SET_TYPE);
     expect(processors[0][SET_TYPE]).toEqual({
-      ...defaultSetParameters,
       field: 'field_1',
       value: 'value',
     });
@@ -129,7 +115,6 @@ describe('Processor: Set', () => {
 
     const processors = getProcessorValue(onUpdate, SET_TYPE);
     expect(processors[0][SET_TYPE]).toEqual({
-      ...defaultSetParameters,
       field: 'field_1',
       value: '{{{hello}}}',
       media_type: 'text/plain',
@@ -155,7 +140,6 @@ describe('Processor: Set', () => {
 
     const processors = getProcessorValue(onUpdate, SET_TYPE);
     expect(processors[0][SET_TYPE]).toEqual({
-      ...defaultSetParameters,
       field: 'field_1',
       value: '{{{hello}}}',
       ignore_empty_value: true,
