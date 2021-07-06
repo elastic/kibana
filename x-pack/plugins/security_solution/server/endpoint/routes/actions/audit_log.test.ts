@@ -207,5 +207,20 @@ describe('Action Log API', () => {
         expect(error.message).toEqual(`Error fetching actions log for agent_id ${mockID}`);
       }
     });
+
+    it('should return date ranges if present in the query', async () => {
+      havingActionsAndResponses([], []);
+      const startDate = new Date(new Date().setDate(new Date().getDate() - 1)).toISOString();
+      const endDate = new Date().toISOString();
+      const response = await getActivityLog({
+        page: 1,
+        page_size: 50,
+        start_date: startDate,
+        end_date: endDate,
+      });
+      expect(response.ok).toBeCalled();
+      expect((response.ok.mock.calls[0][0]?.body as ActivityLog).startDate).toEqual(startDate);
+      expect((response.ok.mock.calls[0][0]?.body as ActivityLog).endDate).toEqual(endDate);
+    });
   });
 });
