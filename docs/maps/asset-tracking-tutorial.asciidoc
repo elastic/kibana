@@ -1,0 +1,147 @@
+[role="xpack"]
+[[maps-asset-tracking]]
+== Track, visualize, and alert on assets in real time
+
+Are you interested in asset tracking? Good news! Visualizing and analyzing data that moves is easy with *Maps*. You can track the location of an IoT device and monitor a package or vehicle in transit.
+
+In this tutorial, you’ll look at live urban transit data from the city of Portland, Oregon. You’ll watch the city buses, use the data to visualize congestion, and notify a dispatch team when a bus enters a construction zone.
+
+You’ll learn to:
+
+- Use Logstash to ingest the TriMet REST API into Elasticsearch.
+- Create a map with layers that visualize asset tracks and last-known locations.
+- Use symbols and colors to style data values and show which direction an asset is heading.
+- Set up tracking containment alerts to monitor moving vehicles.
+
+When you complete this tutorial, you’ll have a map that works like this:
+
+[float]
+=== Prerequisites
+
+- If you don’t already have {kib}, set it up with https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&elektra=docs[our free trial]. Download the deployment credentials.
+- Obtain an API key for https://developer.trimet.org/[TriMet web services] at https://developer.trimet.org/appid/registration/.
+- https://www.elastic.co/guide/en/logstash/current/getting-started-with-logstash.html[Install Logstash].
+
+[float]
+=== Part 1: Ingest the Portland bus data
+Before you can get to the fun of visualizing and alerting on Portland buses, you must create a  Logstash pipeline to ingest the TriMet Portland bus data into {es}.
+
+[float]
+==== Step 1: Set up an Elasticsearch index
+
+. In Kibana, open the main menu, then click *Dev Tools > Console*.
+. To create the `tri_met_tracks index`, run:
+    [source,js]
+    ----------------------------------
+    PUT tri_met_tracks
+    ----------------------------------
+. To configure the `tri_met_tracks` index mappings, run:
+    [source,js]
+    ----------------------------------
+    PUT tri_met_tracks/_mapping
+    {
+      "properties": {
+        "in_congestion": {
+          "type": "boolean"
+        },
+        "location": {
+          "type": "geo_point"
+        },
+        "route": {
+          "type": "keyword"
+        },
+        "time": {
+          "type": "date",
+          "format": "epoch_millis"
+        },
+        "type": {
+          "type": "keyword"
+        },
+        "vehicle_id": {
+          "type": "keyword"
+        }
+      }
+    }
+    ----------------------------------
+
+[float]
+==== Step 2: Start Logstash
+
+. In your `logstash/config` folder, create the file `trimet-pipeline.conf`.
+. Copy the pipeline script into your trimet-pipeline.conf file.
+    [source]
+    ----------------------------------
+    input {
+      http_poller {
+        urls => {
+          trimet => "https://developer.trimet.org/ws/v2/vehicles?appID=<tri_met_app_id>"
+        }
+        request_timeout => 60
+        schedule => { cron => "* * * * * UTC"}
+        codec => "json"
+      }
+    }
+
+    filter {
+      split {
+        field => "[resultSet][vehicle]"
+      }
+
+      if ![resultSet][vehicle][inCongestion] {
+        mutate {
+          update => {
+            "[resultSet][vehicle][inCongestion]" => "false"
+          }
+        }
+      }
+
+      mutate {
+        add_field => {
+          "bearing" => "%{[resultSet][vehicle][bearing]}"
+          "in_congestion" => "%{[resultSet][vehicle][inCongestion]}"
+          "location" => "%{[resultSet][vehicle][latitude]},%{[resultSet][vehicle][longitude]}"
+          "route" => "%{[resultSet][vehicle][routeNumber]}"
+          "time" => "%{[resultSet][vehicle][time]}"
+          "type" => "%{[resultSet][vehicle][type]}"
+          "vehicle_id" => "%{[resultSet][vehicle][vehicleID]}"
+        }
+        remove_field => [ "resultSet", "@version", "@timestamp" ]
+      }
+
+      mutate {
+        convert => {
+          "bearing" => "float"
+      "in_congestion" => "boolean"
+          "time" => "integer"
+        }
+      }
+    }
+
+    output {
+      stdout {
+        codec => rubydebug
+      }
+
+      elasticsearch {
+        cloud_auth => "<username:password>"
+        cloud_id => "<cloud_id>"
+        index => "tri_met_tracks"
+        document_id => "%{[vehicle_id]}_%{[time]}"
+      }
+    }
+    ----------------------------------
+. Replace `<tri_met_app_id>` with your TriMet application id.
+. Replace `<username:password>` with your Elastic Cloud deployment credentials.
+. Replace `<cloud_id>` with your https://www.elastic.co/guide/en/cloud-enterprise/current/ece-cloud-id.html[elastic cloud id].
+. Open a terminal window, and then navigate to the Logstash folder.
+. Run Logstash with the TriMet pipeline:
+    [source]
+    ----------------------------------
+    bin/logstash -f config/trimet-pipeline.conf
+    ----------------------------------
+. Wait for Logstash to initialize and confirm data is flowing. You should see messages similar to this:
+    [role="screenshot"]
+    image::maps/images/asset_tracking_tutorial/logstash_output.png[]
+. Leave the terminal window open and Logstash running throughout this tutorial.
+
+
