@@ -101,30 +101,20 @@ module.exports = {
     ],
   },
   create: (context) => {
-    const _mappings = context.options[0];
     const filename = path.relative(KIBANA_ROOT, context.getFilename());
 
-    const mappings = _mappings.filter((mapping) => {
-      if (mapping.include || mapping.exclude) {
-        if (mapping.include) {
-          let include = false;
-          mapping.include.forEach((rgx) => {
-            if (rgx.test(filename)) {
-              include = true;
-            }
-          });
-          return include;
-        }
-        if (mapping.exclude) {
-          let include = true;
-          mapping.exclude.forEach((rgx) => {
-            if (rgx.test(filename)) {
-              include = false;
-            }
-          });
-          return include;
-        }
+    const mappings = context.options[0].filter((mapping) => {
+      // exclude mapping rule if it is explicitly excluded from this file
+      if (mapping.exclude && mapping.exclude.some((p) => p.test(filename))) {
+        return false;
       }
+
+      // if this mapping rule is only included in specific files, optionally include it
+      if (mapping.include) {
+        return mapping.include.some((p) => p.test(filename));
+      }
+
+      // include all mapping rules by default
       return true;
     });
 
