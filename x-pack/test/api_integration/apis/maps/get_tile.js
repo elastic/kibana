@@ -55,6 +55,8 @@ export default function ({ getService }) {
         __kbn_is_tile_complete__: true,
         __kbn_metadata_feature__: true,
         __kbn_vector_shape_type_counts__: '{"POINT":2,"LINE":0,"POLYGON":0}',
+        fieldMeta:
+          '{"machine.os.raw":{"categories":{"categories":[{"key":"ios","count":1},{"count":1}]}},"bytes":{"range":{"min":9252,"max":9583,"delta":331},"categories":{"categories":[{"key":9252,"count":1},{"key":9583,"count":1}]}},"_index":{"categories":{"categories":[{"key":"logstash-2015.09.20","count":2}]}},"_id":{"categories":{"categories":[{"key":"AU_x3_BsGFA8no6Qjjug","count":1},{"key":"AU_x3_g3GFA8no6QjkGu","count":1}]}},"__kbn__feature_id__":{"categories":{"categories":[{"key":"logstash-2015.09.20:AU_x3_BsGFA8no6Qjjug:0","count":1},{"key":"logstash-2015.09.20:AU_x3_g3GFA8no6QjkGu:0","count":1}]}}}',
       });
       expect(metadataFeature.loadGeometry()).to.eql([
         [
