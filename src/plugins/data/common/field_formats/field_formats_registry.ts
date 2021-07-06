@@ -169,7 +169,7 @@ export class FieldFormatsRegistry {
 
       return new ConcreteFieldFormat(params, this.getConfig);
     },
-    (formatId: FieldFormatId, params: Record<string, any> = {}) =>
+    (formatId: FieldFormatId, params: Record<string, any>) =>
       JSON.stringify({
         formatId,
         ...params,
@@ -207,7 +207,7 @@ export class FieldFormatsRegistry {
    * @param  {ES_FIELD_TYPES[]} esTypes
    * @return {String}
    */
-  getDefaultInstanceCacheResolver(fieldType: KBN_FIELD_TYPES, esTypes?: ES_FIELD_TYPES[]): string {
+  getDefaultInstanceCacheResolver(fieldType: KBN_FIELD_TYPES, esTypes: ES_FIELD_TYPES[]): string {
     // @ts-ignore
     return Array.isArray(esTypes) && esTypes.indexOf(fieldType) === -1
       ? [fieldType, ...esTypes].join('-')

@@ -65,12 +65,12 @@ export function usageProvider(core: CoreSetup): SearchUsage {
   const trackSuccess = (duration: number) => {
     collectedUsage.successCount++;
     collectedUsage.totalDuration += duration;
-    return updateSearchUsage()!;
+    return updateSearchUsage();
   };
 
   const trackError = () => {
     collectedUsage.errorCount++;
-    return updateSearchUsage()!;
+    return updateSearchUsage();
   };
 
   return { trackSuccess, trackError };
