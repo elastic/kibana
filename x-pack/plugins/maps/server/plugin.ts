@@ -43,7 +43,7 @@ import { EMSSettings } from '../common/ems_settings';
 import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 import { EmbeddableSetup } from '../../../../src/plugins/embeddable/server';
 import { embeddableMigrations } from './embeddable_migrations';
-import { SecurityPluginStart } from '../../security/server';
+import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 
 interface SetupDeps {
   features: FeaturesPluginSetupContract;
@@ -52,6 +52,7 @@ interface SetupDeps {
   licensing: LicensingPluginSetup;
   mapsEms: MapsEmsPluginSetup;
   embeddable: EmbeddableSetup;
+  security: SecurityPluginSetup;
 }
 
 export interface StartDeps {
@@ -154,7 +155,7 @@ export class MapsPlugin implements Plugin {
 
   // @ts-ignore
   setup(core: CoreSetup, plugins: SetupDeps) {
-    const { usageCollection, home, licensing, features, mapsEms } = plugins;
+    const { usageCollection, home, licensing, features, mapsEms, security } = plugins;
     const mapsEmsConfig = mapsEms.config;
     const config$ = this._initializerContext.config.create();
     const currentConfig = this._initializerContext.config.get();
@@ -176,7 +177,7 @@ export class MapsPlugin implements Plugin {
       lastLicenseId = license.uid;
     });
 
-    initRoutes(core, () => lastLicenseId, emsSettings, this.kibanaVersion, this._logger);
+    initRoutes(core, security, () => lastLicenseId, emsSettings, this.kibanaVersion, this._logger);
 
     this._initHomeData(home, core.http.basePath.prepend, emsSettings);
 

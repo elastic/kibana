@@ -21,7 +21,8 @@
     "usageCollection",
     "savedObjects",
     "share",
-    "presentationUtil"
+    "presentationUtil",
+    "security"
   ],
   "optionalPlugins": [
     "home",

@@ -19,15 +19,18 @@ import { createDocSource } from './create_doc_source';
 import { writeDataToIndex } from './index_data';
 import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
 import { getMatchingIndexes } from './get_indexes_matching_pattern';
+import { SecurityPluginSetup } from '../../../security/server';
 
 export function initIndexingRoutes({
   router,
   logger,
   dataPlugin,
+  securityPlugin,
 }: {
   router: IRouter<DataRequestHandlerContext>;
   logger: Logger;
   dataPlugin: DataPluginStart;
+  securityPlugin: SecurityPluginSetup;
 }) {
   router.post(
     {
@@ -95,7 +98,8 @@ export function initIndexingRoutes({
         request.body.data,
         context.core.elasticsearch.client.asCurrentUser,
         request.body.applyDefaultFields,
-        request
+        request,
+        securityPlugin
       );
       if (result.success) {
         return response.ok({ body: result });

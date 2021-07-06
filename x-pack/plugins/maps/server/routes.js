@@ -54,7 +54,7 @@ const EMPTY_EMS_CLIENT = {
   addQueryParams() {},
 };
 
-export async function initRoutes(core, getLicenseId, emsSettings, kbnVersion, logger) {
+export async function initRoutes(core, security, getLicenseId, emsSettings, kbnVersion, logger) {
   let emsClient;
   let lastLicenseId;
   const router = core.http.createRouter();
@@ -617,5 +617,5 @@ export async function initRoutes(core, getLicenseId, emsSettings, kbnVersion, lo
   }
 
   initMVTRoutes({ router, logger });
-  initIndexingRoutes({ router, logger, dataPlugin });
+  initIndexingRoutes({ router, logger, dataPlugin, securityPlugin: security });
 }
