@@ -104,7 +104,9 @@ export class ApmConfiguration {
     return this.baseConfig;
   }
 
-  // when specific environment variables are used they can overwrite items in the configuration
+  /**
+   * Override some config values when specific environment variables are used
+   */
   private getConfigFromEnv(): ApmAgentConfig {
     const config: ApmAgentConfig = {};
 
@@ -149,7 +151,7 @@ export class ApmConfiguration {
   }
 
   /**
-   * Determine the Kibana UUID, forces the value of `globalLabels.kibana_uuid`
+   * Determine the Kibana UUID, initialized the value of `globalLabels.kibana_uuid`
    * when the UUID can be determined.
    */
   private getUuidConfig(): ApmAgentConfig {
@@ -188,6 +190,10 @@ export class ApmConfiguration {
     }
   }
 
+  /**
+   * When running Kibana with ELASTIC_APM_ENVIRONMENT=ci we attempt to grab
+   * some environment variables we populate in CI related to the build under test
+   */
   private getCiConfig(): ApmAgentConfig {
     if (process.env.ELASTIC_APM_ENVIRONMENT !== 'ci') {
       return {};
@@ -204,6 +210,10 @@ export class ApmConfiguration {
     };
   }
 
+  /**
+   * When running from the distributable pull the build sha from the package.json
+   * file. Otherwise attempt to read the current HEAD sha using `git`.
+   */
   private getGitConfig() {
     if (this.isDistributable) {
       return {
