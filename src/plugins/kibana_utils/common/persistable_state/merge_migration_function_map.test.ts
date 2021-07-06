@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { mergeSavedObjectMigrationMaps } from './';
+import { mergeMigrationFunctionMaps } from './merge_migration_function_map';
 
 describe('mergeSavedObjectMigrationMaps', () => {
   const obj1 = {
@@ -20,7 +20,7 @@ describe('mergeSavedObjectMigrationMaps', () => {
   };
 
   test('correctly merges two saved object migration maps', () => {
-    const result = mergeSavedObjectMigrationMaps(obj1, obj2);
+    const result = mergeMigrationFunctionMaps(obj1, obj2);
     expect(result['7.12.0'](5)).toEqual(3);
     expect(result['7.12.1'](5)).toEqual(6);
     expect(result['7.12.2'](5)).toEqual(9);

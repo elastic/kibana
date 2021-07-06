@@ -14,12 +14,14 @@ import { SecuritySolutionAppWrapper } from '../../common/components/page';
 import { HelpMenu } from '../../common/components/help_menu';
 import { UseUrlState } from '../../common/components/url_state';
 import { navTabs } from './home_navigations';
-import { useInitSourcerer, useSourcererScope } from '../../common/containers/sourcerer';
-import { SourcererScopeName } from '../../common/store/sourcerer/model';
+import {
+  useInitSourcerer,
+  useSourcererScope,
+  getScopeFromPath,
+} from '../../common/containers/sourcerer';
 import { useUpgradeSecurityPackages } from '../../common/hooks/use_upgrade_security_packages';
 import { GlobalHeader } from './global_header';
 import { SecuritySolutionTemplateWrapper } from './template_wrapper';
-import { isDetectionsPath } from '../../helpers';
 
 interface HomePageProps {
   children: React.ReactNode;
@@ -34,13 +36,9 @@ const HomePageComponent: React.FC<HomePageProps> = ({
 }) => {
   const { pathname } = useLocation();
 
-  useInitSourcerer(
-    isDetectionsPath(pathname) ? SourcererScopeName.detections : SourcererScopeName.default
-  );
+  useInitSourcerer(getScopeFromPath(pathname));
 
-  const { browserFields, indexPattern } = useSourcererScope(
-    isDetectionsPath(pathname) ? SourcererScopeName.detections : SourcererScopeName.default
-  );
+  const { browserFields, indexPattern } = useSourcererScope(getScopeFromPath(pathname));
 
   // side effect: this will attempt to upgrade the endpoint package if it is not up to date
   // this will run when a user navigates to the Security Solution app and when they navigate between
