@@ -90,7 +90,7 @@ export class ApmConfiguration {
        * sensitive data from being sent to this service.
        */
       const centralizedConfig = this.isDistributable
-        ? merge(CENTRALIZED_SERVICE_BASE_CONFIG, CENTRALIZED_SERVICE_DIST_CONFIG)
+        ? merge({}, CENTRALIZED_SERVICE_BASE_CONFIG, CENTRALIZED_SERVICE_DIST_CONFIG)
         : CENTRALIZED_SERVICE_BASE_CONFIG;
 
       if (
