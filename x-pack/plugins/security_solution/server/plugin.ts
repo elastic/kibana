@@ -49,9 +49,9 @@ import { ILicense, LicensingPluginStart } from '../../licensing/server';
 import { FleetStartContract } from '../../fleet/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { compose } from './lib/compose/kibana';
-import { createQueryAlertType } from './lib/detection_engine/reference_rules/query';
-import { createEqlAlertType } from './lib/detection_engine/reference_rules/eql';
-import { createThresholdAlertType } from './lib/detection_engine/reference_rules/threshold';
+import { createQueryAlertType } from './lib/detection_engine/rule_types/query';
+import { createEqlAlertType } from './lib/detection_engine/rule_types/eql';
+import { createThresholdAlertType } from './lib/detection_engine/rule_types/threshold';
 import { initRoutes } from './routes';
 import { isAlertExecutor } from './lib/detection_engine/signals/types';
 import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule_alert_type';
@@ -243,7 +243,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
       // sec
 
-      // Register reference rule types via rule-registry
+      // Register rule types via rule-registry
       this.setupPlugins.alerting.registerType(createQueryAlertType(ruleDataClient, this.logger));
       this.setupPlugins.alerting.registerType(createEqlAlertType(ruleDataClient, this.logger));
       this.setupPlugins.alerting.registerType(

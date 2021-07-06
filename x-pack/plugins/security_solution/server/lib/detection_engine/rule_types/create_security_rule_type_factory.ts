@@ -5,10 +5,10 @@
  * 2.0.
  */
 import { flow } from 'fp-ts/lib/function';
-import { chain, tryCatch } from 'fp-ts/lib/Either';
+import { Either, chain, fold, tryCatch } from 'fp-ts/lib/Either';
 import { Logger } from '@kbn/logging';
 import { SavedObjectsClientContract } from 'kibana/server';
-import { toError, toPromise } from '@kbn/securitysolution-list-api';
+import { toError } from '@kbn/securitysolution-list-api';
 import { ExceptionListItemSchema, ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import {
   createPersistenceRuleTypeFactory,
@@ -126,31 +126,40 @@ export const createSecurityRuleTypeFactory: (
               }),
             ]);
 
-            wroteWarningStatus = await flow(
-              () =>
-                tryCatch(
-                  () =>
-                    hasReadIndexPrivileges(privileges, logger, buildRuleMessage, ruleStatusService),
-                  toError
-                ),
-              chain((wroteStatus: unknown) =>
-                tryCatch(
-                  () =>
-                    hasTimestampFields(
-                      wroteStatus as boolean,
-                      hasTimestampOverride ? (timestampOverride as string) : '@timestamp',
-                      name,
-                      timestampFieldCaps,
-                      inputIndices,
-                      ruleStatusService,
-                      logger,
-                      buildRuleMessage
-                    ),
-                  toError
+            fold<Error, Promise<boolean>, void>(
+              async (error: Error) => logger.error(buildRuleMessage(error.message)),
+              async (status: Promise<boolean>) => (wroteWarningStatus = await status)
+            )(
+              flow(
+                () =>
+                  tryCatch(
+                    () =>
+                      hasReadIndexPrivileges(
+                        privileges,
+                        logger,
+                        buildRuleMessage,
+                        ruleStatusService
+                      ),
+                    toError
+                  ),
+                chain((wroteStatus: unknown) =>
+                  tryCatch(
+                    () =>
+                      hasTimestampFields(
+                        wroteStatus as boolean,
+                        hasTimestampOverride ? (timestampOverride as string) : '@timestamp',
+                        name,
+                        timestampFieldCaps,
+                        inputIndices,
+                        ruleStatusService,
+                        logger,
+                        buildRuleMessage
+                      ),
+                    toError
+                  )
                 )
-              ),
-              toPromise
-            )();
+              )() as Either<Error, Promise<boolean>>
+            );
           }
         } catch (exc) {
           logger.error(buildRuleMessage(`Check privileges failed to execute ${exc}`));
