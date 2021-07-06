@@ -60,3 +60,5 @@ export const sharePluginMock = {
   createStartContract,
   createLocator,
 };
+
+export * from '../common/mocks';
