@@ -12,8 +12,9 @@ import {
   API_BASE_GENERATE,
   API_BASE_URL,
   API_LIST_URL,
+  API_MIGRATE_ILM_POLICY_URL,
   REPORTING_MANAGEMENT_HOME,
-} from '../../common/constants';
+} from '../../../common/constants';
 import {
   DownloadReportFn,
   JobId,
@@ -21,8 +22,8 @@ import {
   ReportApiJSON,
   ReportDocument,
   ReportSource,
-} from '../../common/types';
-import { add } from '../notifier/job_completion_notifications';
+} from '../../../common/types';
+import { add } from '../../notifier/job_completion_notifications';
 
 export interface JobQueueEntry {
   _id: string;
@@ -167,4 +168,8 @@ export class ReportingAPIClient {
     this.http.post(`${API_BASE_URL}/diagnose/screenshot`, {
       asSystemRequest: true,
     });
+
+  public migrateReportingIndicesIlmPolicy = (): Promise<void> => {
+    return this.http.put(`${API_MIGRATE_ILM_POLICY_URL}`);
+  };
 }

@@ -12,12 +12,10 @@ import { useLocation } from 'react-router-dom';
 import { KibanaPageTemplateProps } from '../../../../../../../../src/plugins/kibana_react/public';
 import { AppLeaveHandler } from '../../../../../../../../src/core/public';
 import { useShowTimeline } from '../../../../common/utils/timeline/use_show_timeline';
-import { useSourcererScope } from '../../../../common/containers/sourcerer';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { useSourcererScope, getScopeFromPath } from '../../../../common/containers/sourcerer';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { AutoSaveWarningMsg } from '../../../../timelines/components/timeline/auto_save_warning';
 import { Flyout } from '../../../../timelines/components/flyout';
-import { isDetectionsPath } from '../../../../../public/helpers';
 
 export const BOTTOM_BAR_CLASSNAME = 'timeline-bottom-bar';
 
@@ -27,9 +25,7 @@ export const SecuritySolutionBottomBar = React.memo(
 
     const [showTimeline] = useShowTimeline();
 
-    const { indicesExist } = useSourcererScope(
-      isDetectionsPath(pathname) ? SourcererScopeName.detections : SourcererScopeName.default
-    );
+    const { indicesExist } = useSourcererScope(getScopeFromPath(pathname));
 
     return indicesExist && showTimeline ? (
       <>

@@ -196,7 +196,7 @@ export const IntegrationsAppContext: React.FC<{
       const unlistenParentHistory = history.listen(() => {
         const newHash = createHashHistory();
         if (newHash.location.pathname !== routerHistoryInstance.location.pathname) {
-          routerHistoryInstance.replace(newHash.location.pathname);
+          routerHistoryInstance.replace(newHash.location.pathname + newHash.location.search || '');
         }
       });
 
