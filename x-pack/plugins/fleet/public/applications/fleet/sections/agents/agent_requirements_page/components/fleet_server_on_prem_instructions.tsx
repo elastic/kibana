@@ -253,6 +253,7 @@ export const useFleetServerInstructions = (policyId?: string) => {
   const fleetServerHost = settings?.item.fleet_server_hosts?.[0];
   const output = outputsRequest.data?.items?.[0];
   const esHost = output?.hosts?.[0];
+  const refreshOutputs = outputsRequest.resendRequest;
 
   const installCommand = useMemo((): string => {
     if (!serviceToken || !esHost) {
@@ -288,8 +289,8 @@ export const useFleetServerInstructions = (policyId?: string) => {
   }, [notifications.toasts]);
 
   const refresh = useCallback(() => {
-    return Promise.all([outputsRequest.resendRequest(), refreshSettings()]);
-  }, [outputsRequest, refreshSettings]);
+    return Promise.all([refreshOutputs, refreshSettings()]);
+  }, [refreshOutputs, refreshSettings]);
 
   const addFleetServerHost = useCallback(
     async (host: string) => {
