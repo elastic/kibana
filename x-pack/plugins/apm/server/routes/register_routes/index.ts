@@ -18,6 +18,7 @@ import {
   routeValidationObject,
 } from '@kbn/server-route-repository';
 import { mergeRt, jsonRt } from '@kbn/io-ts-utils';
+import { UsageCollectionSetup } from '../../../../../../src/plugins/usage_collection/server';
 import { pickKeys } from '../../../common/utils/pick_keys';
 import { APMRouteHandlerResources, InspectResponse } from '../typings';
 import type { ApmPluginRequestHandlerContext } from '../typings';
@@ -40,6 +41,7 @@ export function registerRoutes({
   logger,
   config,
   ruleDataClient,
+  telemetryUsageCounter,
 }: {
   core: APMRouteHandlerResources['core'];
   plugins: APMRouteHandlerResources['plugins'];
@@ -47,6 +49,9 @@ export function registerRoutes({
   repository: ServerRouteRepository<APMRouteHandlerResources>;
   config: APMRouteHandlerResources['config'];
   ruleDataClient: APMRouteHandlerResources['ruleDataClient'];
+  telemetryUsageCounter?: ReturnType<
+    UsageCollectionSetup['createUsageCounter']
+  >;
 }) {
   const routes = repository.getRoutes();
 
@@ -116,9 +121,22 @@ export function registerRoutes({
           // cleanup
           inspectableEsQueriesMap.delete(request);
 
+          if (!options.disableTelemetry && telemetryUsageCounter) {
+            telemetryUsageCounter.incrementCounter({
+              counterName: `${method.toUpperCase()} ${pathname}`,
+              counterType: 'success',
+            });
+          }
+
           return response.ok({ body });
         } catch (error) {
           logger.error(error);
+          if (!options.disableTelemetry && telemetryUsageCounter) {
+            telemetryUsageCounter.incrementCounter({
+              counterName: `${method.toUpperCase()} ${pathname}`,
+              counterType: 'error',
+            });
+          }
           const opts = {
             statusCode: 500,
             body: {

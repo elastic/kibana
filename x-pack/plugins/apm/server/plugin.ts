@@ -18,7 +18,6 @@ import {
 import { mapValues, once } from 'lodash';
 import { TECHNICAL_COMPONENT_TEMPLATE_NAME } from '../../rule_registry/common/assets';
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
-import { RuleDataClient } from '../../rule_registry/server';
 import { APMConfig, APMXPackConfig } from '.';
 import { mergeConfigs } from './index';
 import { UI_SETTINGS } from '../../../../src/plugins/data/common';
@@ -28,10 +27,11 @@ import { registerFleetPolicyCallbacks } from './lib/fleet/register_fleet_policy_
 import { createApmTelemetry } from './lib/apm_telemetry';
 import { createApmEventClient } from './lib/helpers/create_es_client/create_apm_event_client';
 import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_objects_client';
+import { apmCorrelationsSearchStrategyProvider } from './lib/search_strategies/correlations';
 import { createApmAgentConfigurationIndex } from './lib/settings/agent_configuration/create_agent_config_index';
 import { getApmIndices } from './lib/settings/apm_indices/get_apm_indices';
 import { createApmCustomLinkIndex } from './lib/settings/custom_link/create_custom_link_index';
-import { apmIndices, apmTelemetry } from './saved_objects';
+import { apmIndices, apmTelemetry, apmServerSettings } from './saved_objects';
 import { uiSettings } from './ui_settings';
 import type {
   ApmPluginRequestHandlerContext,
@@ -78,6 +78,7 @@ export class APMPlugin
 
     core.savedObjects.registerType(apmIndices);
     core.savedObjects.registerType(apmTelemetry);
+    core.savedObjects.registerType(apmServerSettings);
 
     core.uiSettings.register(uiSettings);
 
@@ -126,7 +127,7 @@ export class APMPlugin
     const getCoreStart = () =>
       core.getStartServices().then(([coreStart]) => coreStart);
 
-    const ready = once(async () => {
+    const initializeRuleDataTemplates = once(async () => {
       const componentTemplateName = ruleDataService.getFullAssetName(
         'apm-mappings'
       );
@@ -174,18 +175,17 @@ export class APMPlugin
       });
     });
 
-    ready().catch((err) => {
-      this.logger!.error(err);
-    });
+    // initialize eagerly
+    const initializeRuleDataTemplatesPromise = initializeRuleDataTemplates().catch(
+      (err) => {
+        this.logger!.error(err);
+      }
+    );
 
-    const ruleDataClient = new RuleDataClient({
-      alias: ruleDataService.getFullAssetName('observability-apm'),
-      getClusterClient: async () => {
-        const coreStart = await getCoreStart();
-        return coreStart.elasticsearch.client.asInternalUser;
-      },
-      ready,
-    });
+    const ruleDataClient = ruleDataService.getRuleDataClient(
+      ruleDataService.getFullAssetName('observability-apm'),
+      () => initializeRuleDataTemplatesPromise
+    );
 
     const resourcePlugins = mapValues(plugins, (value, key) => {
       return {
@@ -200,6 +200,10 @@ export class APMPlugin
       };
     }) as APMRouteHandlerResources['plugins'];
 
+    const telemetryUsageCounter = resourcePlugins.usageCollection?.setup.createUsageCounter(
+      'apm'
+    );
+
     registerRoutes({
       core: {
         setup: core,
@@ -210,6 +214,7 @@ export class APMPlugin
       repository: getGlobalApmServerRouteRepository(),
       ruleDataClient,
       plugins: resourcePlugins,
+      telemetryUsageCounter,
     });
 
     const boundGetApmIndices = async () =>
@@ -235,6 +240,13 @@ export class APMPlugin
       logger: this.logger,
     });
 
+    // search strategies for async partial search results
+    if (plugins.data?.search?.registerSearchStrategy !== undefined) {
+      plugins.data.search.registerSearchStrategy(
+        'apmCorrelationsSearchStrategy',
+        apmCorrelationsSearchStrategyProvider()
+      );
+    }
     return {
       config$: mergedConfig$,
       getApmIndices: boundGetApmIndices,

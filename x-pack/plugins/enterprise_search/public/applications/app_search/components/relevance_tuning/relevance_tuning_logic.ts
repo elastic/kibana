@@ -268,7 +268,7 @@ export const RelevanceTuningLogic = kea<
       const { engineName } = EngineLogic.values;
       const { http } = HttpLogic.values;
       const { search_fields: searchFields, boosts } = removeBoostStateProps(values.searchSettings);
-      const url = `/api/app_search/engines/${engineName}/search_settings_search`;
+      const url = `/api/app_search/engines/${engineName}/search`;
 
       actions.setResultsLoading(true);
 

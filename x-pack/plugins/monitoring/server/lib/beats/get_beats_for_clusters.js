@@ -44,8 +44,8 @@ export function getBeatsForClusters(req, beatsIndexPattern, clusters) {
       const params = {
         index: beatsIndexPattern,
         size: 0,
-        ignoreUnavailable: true,
-        filterPath: beatsAggFilterPath,
+        ignore_unavailable: true,
+        filter_path: beatsAggFilterPath,
         body: {
           query: createBeatsQuery({
             start,

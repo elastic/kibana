@@ -58,6 +58,7 @@ describe('aggregate()', () => {
       actionVariables: undefined,
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      isExportable: true,
       recoveryActionGroup: RecoveredActionGroup,
       id: 'myType',
       name: 'myType',
@@ -110,6 +111,7 @@ describe('aggregate()', () => {
           actionGroups: [{ id: 'default', name: 'Default' }],
           defaultActionGroupId: 'default',
           minimumLicenseRequired: 'basic',
+          isExportable: true,
           recoveryActionGroup: RecoveredActionGroup,
           producer: 'alerts',
           authorizedConsumers: {

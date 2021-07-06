@@ -10,6 +10,7 @@ import Url, { UrlObject } from 'url';
 
 import { ROLES } from '../../common/test';
 import { TIMELINE_FLYOUT_BODY } from '../screens/timeline';
+import { hostDetailsUrl } from '../urls/navigation';
 
 /**
  * Credentials in the `kibana.dev.yml` config file will be used to authenticate
@@ -310,6 +311,11 @@ export const loginAndWaitForTimeline = (timelineId: string, role?: ROLES) => {
   cy.visit(role ? getUrlWithRoute(role, route) : route);
   cy.get('[data-test-subj="headerGlobalNav"]');
   cy.get(TIMELINE_FLYOUT_BODY).should('be.visible');
+};
+
+export const loginAndWaitForHostDetailsPage = () => {
+  loginAndWaitForPage(hostDetailsUrl('suricata-iowa'));
+  cy.get('[data-test-subj="loading-spinner"]', { timeout: 12000 }).should('not.exist');
 };
 
 export const waitForPageWithoutDateRange = (url: string, role?: ROLES) => {
