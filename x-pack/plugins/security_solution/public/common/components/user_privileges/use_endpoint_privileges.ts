@@ -17,6 +17,12 @@ export interface EndpointPrivileges {
   canAccessEndpointManagement: boolean;
 }
 
+/**
+ * Retrieve the endpoint privileges for the current user.
+ *
+ * **NOTE:** Consider using `usePriviliges().endpointPrivileges` instead of this hook in order
+ * to keep API calls to a minimum.
+ */
 export const useEndpointPrivileges = (): EndpointPrivileges => {
   const http = useHttp();
   const user = useCurrentUser();
@@ -38,7 +44,7 @@ export const useEndpointPrivileges = (): EndpointPrivileges => {
         .get<CheckPermissionsResponse>(appRoutesService.getCheckPermissionsPath())
         .then((fleetPermissionsResponse) => {
           if (isMounted.current) {
-            setCanAccessFleet(fleetPermissionsResponse.success && !fleetPermissionsResponse.error);
+            setCanAccessFleet(fleetPermissionsResponse.success);
           }
         })
         .finally(() => {
