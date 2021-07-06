@@ -285,18 +285,6 @@ export function SchemaOverviewHeading() {
         />
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="s">
-            <h2>
-              {i18n.translate('xpack.apm.settings.schema.title', {
-                defaultMessage: 'Schema',
-              })}
-            </h2>
-          </EuiTitle>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
     </>
   );
 }
