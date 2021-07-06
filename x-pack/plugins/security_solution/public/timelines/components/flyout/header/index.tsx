@@ -53,6 +53,7 @@ import * as commonI18n from '../../timeline/properties/translations';
 import { getTimelineStatusByIdSelector } from './selectors';
 import { TimelineKPIs } from './kpis';
 import { LineClamp } from '../../../../common/components/line_clamp';
+import { setActiveTabTimeline } from '../../../store/timeline/actions';
 
 // to hide side borders
 const StyledPanel = styled(EuiPanel)`
@@ -66,6 +67,10 @@ interface FlyoutHeaderProps {
 interface FlyoutHeaderPanelProps {
   timelineId: string;
 }
+
+const ActiveTimelinesContainer = styled(EuiFlexItem)`
+  overflow: hidden;
+`;
 
 const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timelineId }) => {
   const dispatch = useDispatch();
@@ -145,7 +150,7 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <AddTimelineButton timelineId={timelineId} />
-        <EuiFlexItem grow={false}>
+        <ActiveTimelinesContainer grow={false}>
           <ActiveTimelines
             timelineId={timelineId}
             timelineType={timelineType}
@@ -154,7 +159,7 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
             isOpen={show}
             updated={updated}
           />
-        </EuiFlexItem>
+        </ActiveTimelinesContainer>
         {show && (
           <EuiFlexItem>
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
@@ -197,6 +202,7 @@ const StyledTimelineHeader = styled(EuiFlexGroup)`
 
 const TimelineStatusInfoContainer = styled.span`
   ${({ theme }) => `margin-left: ${theme.eui.euiSizeS};`}
+  white-space: nowrap;
 `;
 
 const KpisContainer = styled.div`
@@ -206,6 +212,14 @@ const KpisContainer = styled.div`
 const RowFlexItem = styled(EuiFlexItem)`
   flex-direction: row;
   align-items: center;
+`;
+
+const TimelineTitleContainer = styled.h3`
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  word-break: break-word;
 `;
 
 const TimelineNameComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
@@ -224,9 +238,11 @@ const TimelineNameComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
   const content = useMemo(() => title || placeholder, [title, placeholder]);
 
   return (
-    <EuiText>
-      <h3 data-test-subj="timeline-title">{content}</h3>
-    </EuiText>
+    <EuiToolTip content={content} position="bottom">
+      <EuiText>
+        <TimelineTitleContainer data-test-subj="timeline-title">{content}</TimelineTitleContainer>
+      </EuiText>
+    </EuiToolTip>
   );
 };
 
@@ -237,10 +253,26 @@ const TimelineDescriptionComponent: React.FC<FlyoutHeaderProps> = ({ timelineId 
   const description = useDeepEqualSelector(
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).description
   );
+  const dispatch = useDispatch();
+
   return (
     <EuiText size="s" data-test-subj="timeline-description">
       {description ? (
-        <LineClamp key={description.length} lineClampHeight={4.5}>
+        <LineClamp
+          key={description.length}
+          lineClampHeight={1.5}
+          onReadMore={() => {
+            dispatch(setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.notes }));
+
+            setTimeout(() => {
+              // Allows the tab to update before scrolling to the element
+              const moveToTarget = document.getElementById('note-preview-description');
+              if (moveToTarget) {
+                moveToTarget.scrollIntoView({ behavior: 'smooth' });
+              }
+            }, 100);
+          }}
+        >
           {description}
         </LineClamp>
       ) : (

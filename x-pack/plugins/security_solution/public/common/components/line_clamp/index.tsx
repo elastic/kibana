@@ -38,7 +38,11 @@ const StyledLineClamp = styled.div<{ lineClampHeight: number }>`
 const LineClampComponent: React.FC<{
   children: ReactNode;
   lineClampHeight?: number;
-}> = ({ children, lineClampHeight = LINE_CLAMP_HEIGHT }) => {
+  /**
+   * Overwrites tooggle behaviour.
+   */
+  onReadMore?: () => void;
+}> = ({ children, lineClampHeight = LINE_CLAMP_HEIGHT, onReadMore }) => {
   const [isOverflow, setIsOverflow] = useState<boolean | null>(null);
   const [isExpanded, setIsExpanded] = useState<boolean | null>(null);
   const descriptionRef = useRef<HTMLDivElement>(null);
@@ -91,7 +95,11 @@ const LineClampComponent: React.FC<{
         children
       )}
       {isOverflow && (
-        <ReadMore onClick={toggleReadMore} size="s" data-test-subj="summary-view-readmore">
+        <ReadMore
+          onClick={onReadMore ?? toggleReadMore}
+          size="s"
+          data-test-subj="summary-view-readmore"
+        >
           {i18n.READ_MORE}
         </ReadMore>
       )}

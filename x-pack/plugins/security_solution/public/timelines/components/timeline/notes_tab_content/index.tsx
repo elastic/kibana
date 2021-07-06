@@ -208,7 +208,12 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
             <h3>{NOTES}</h3>
           </EuiTitle>
           <EuiSpacer />
-          <NotePreviews eventIdToNoteIds={eventIdToNoteIds} notes={notes} timelineId={timelineId} />
+          <NotePreviews
+            eventIdToNoteIds={eventIdToNoteIds}
+            notes={notes}
+            timelineId={timelineId}
+            showTimelineDescription
+          />
           <EuiSpacer size="s" />
           {!isImmutable && (
             <AddNote associateNote={associateNote} newNote={newNote} updateNewNote={setNewNote} />

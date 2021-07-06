@@ -63,6 +63,8 @@ export type TimelineModel = TGridModelForTimeline & {
   status: TimelineStatus;
   /** updated saved object timestamp */
   updated?: number;
+  /** updated saved object user */
+  updatedBy?: string | null;
   /** timeline is saving */
   isSaving: boolean;
   version: string | null;
