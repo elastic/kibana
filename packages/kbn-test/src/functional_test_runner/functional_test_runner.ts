@@ -43,6 +43,8 @@ export class FunctionalTestRunner {
   }
 
   async run() {
+    const startTime = Date.now();
+
     return await this._run(async (config, coreProviders) => {
       SuiteTracker.startTracking(this.lifecycle, this.configFile);
 
@@ -68,7 +70,18 @@ export class FunctionalTestRunner {
       await this.lifecycle.beforeTests.trigger(mocha.suite);
       this.log.info('Starting tests');
 
-      return await runTests(this.lifecycle, mocha);
+      const failures = await runTests(this.lifecycle, mocha);
+      const sec = ((Date.now() - startTime) / 1000).toFixed(2);
+      const success = failures.length ? 'success' : 'failure';
+      const msg = `--- Tests finished after ${sec} seconds, ${failures.length} failures, ${success}`;
+
+      if (success === 'success') {
+        this.log.error(msg);
+      } else {
+        this.log.success(msg);
+      }
+
+      return failures;
     });
   }
 
