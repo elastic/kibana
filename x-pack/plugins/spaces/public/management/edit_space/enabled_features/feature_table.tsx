@@ -101,9 +101,6 @@ export class FeatureTable extends Component<Props, {}> {
             }
           }}
         >
-          <EuiFlexItem grow={false}>
-            <EuiCheckbox {...checkboxProps} />
-          </EuiFlexItem>
           {category.euiIconType ? (
             <EuiFlexItem grow={false}>
               <EuiIcon size="m" type={category.euiIconType} />
@@ -133,46 +130,50 @@ export class FeatureTable extends Component<Props, {}> {
       const helpText = this.getCategoryHelpText(category);
 
       const accordion = (
-        <EuiAccordion
-          id={`featureCategory_${category.id}`}
-          data-test-subj={`featureCategory_${category.id}`}
-          key={category.id}
-          arrowDisplay={canExpandCategory ? 'right' : 'none'}
-          forceState={canExpandCategory ? undefined : 'closed'}
-          buttonContent={buttonContent}
-          extraAction={canExpandCategory ? extraAction : undefined}
-        >
-          <div className="spcFeatureTableAccordionContent">
-            <EuiSpacer size="m" />
-            {helpText && (
-              <>
-                <EuiCallOut iconType="iInCircle" size="s">
-                  {helpText}
-                </EuiCallOut>
-                <EuiSpacer size="m" />
-              </>
-            )}
-            {featuresInCategory.map((feature) => {
-              const featureChecked = !(
-                space.disabledFeatures && space.disabledFeatures.includes(feature.id)
-              );
+        <EuiFlexGroup key={category.id} alignItems="baseline" responsive={false} gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiCheckbox {...checkboxProps} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={1}>
+            <EuiAccordion
+              id={`featureCategory_${category.id}`}
+              data-test-subj={`featureCategory_${category.id}`}
+              arrowDisplay={canExpandCategory ? 'right' : 'none'}
+              forceState={canExpandCategory ? undefined : 'closed'}
+              buttonContent={buttonContent}
+              extraAction={canExpandCategory ? extraAction : undefined}
+            >
+              <EuiSpacer size="m" />
+              {helpText && (
+                <>
+                  <EuiCallOut iconType="iInCircle" size="s">
+                    {helpText}
+                  </EuiCallOut>
+                  <EuiSpacer size="m" />
+                </>
+              )}
+              {featuresInCategory.map((feature) => {
+                const featureChecked = !(
+                  space.disabledFeatures && space.disabledFeatures.includes(feature.id)
+                );
 
-              return (
-                <EuiFlexGroup key={`${feature.id}-toggle`}>
-                  <EuiFlexItem grow={false}>
-                    <EuiCheckbox
-                      id={`featureCheckbox_${feature.id}`}
-                      data-test-subj={`featureCheckbox_${feature.id}`}
-                      checked={featureChecked}
-                      onChange={this.onChange(feature.id) as any}
-                      label={feature.name}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              );
-            })}
-          </div>
-        </EuiAccordion>
+                return (
+                  <EuiFlexGroup key={`${feature.id}-toggle`}>
+                    <EuiFlexItem grow={false}>
+                      <EuiCheckbox
+                        id={`featureCheckbox_${feature.id}`}
+                        data-test-subj={`featureCheckbox_${feature.id}`}
+                        checked={featureChecked}
+                        onChange={this.onChange(feature.id) as any}
+                        label={feature.name}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                );
+              })}
+            </EuiAccordion>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       );
 
       accordions.push({
