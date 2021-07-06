@@ -98,7 +98,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   // Handle the "add agent" link displayed in post-installation toast notifications in the case
   // where a user is clicking the link while on the package policies listing page
   useEffect(() => {
-    history.listen((location) => {
+    const unlisten = history.listen((location) => {
       const params = new URLSearchParams(location.search);
       const addAgentToPolicyId = params.get('addAgentToPolicyId');
 
@@ -106,6 +106,8 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         setFlyoutOpenForPolicyId(addAgentToPolicyId);
       }
     });
+
+    return () => unlisten();
   }, [history]);
 
   const handleTableOnChange = useCallback(
