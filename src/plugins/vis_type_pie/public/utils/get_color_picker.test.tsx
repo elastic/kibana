@@ -13,13 +13,11 @@ import { mountWithIntl } from '@kbn/test/jest';
 import { ComponentType, ReactWrapper } from 'enzyme';
 import { getColorPicker } from './get_color_picker';
 import { ColorPicker } from '../../../charts/public';
-import { dataPluginMock } from '../../../data/public/mocks';
 import type { PersistedState } from '../../../visualizations/public';
 import { createMockBucketColumns, createMockVisData } from '../mocks';
 
 const bucketColumns = createMockBucketColumns();
 const visData = createMockVisData();
-const dataMock = dataPluginMock.createStartContract();
 
 jest.mock('@elastic/charts', () => {
   const original = jest.requireActual('@elastic/charts');
@@ -49,8 +47,7 @@ describe('getColorPicker', function () {
     'default',
     visData.rows,
     uiState,
-    false,
-    dataMock.fieldFormats
+    false
   );
   let wrapper: ReactWrapper<LegendColorPickerProps>;
 
@@ -109,8 +106,7 @@ describe('getColorPicker', function () {
       'kibana_palette',
       visData.rows,
       uiState,
-      true,
-      dataMock.fieldFormats
+      true
     );
     const newProps = { ...wrapperProps, seriesIdentifier: { key: '1', specId: 'pie' } };
     wrapper = mountWithIntl(<LegacyPaletteComponent {...newProps} />);

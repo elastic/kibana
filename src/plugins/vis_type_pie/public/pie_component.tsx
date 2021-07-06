@@ -248,8 +248,7 @@ const PieComponent = (props: PieComponentProps) => {
         visParams.palette.name,
         visData.rows,
         props.uiState,
-        visParams.distinctColors,
-        services.fieldFormats
+        visParams.distinctColors
       ),
     [
       legendPosition,
@@ -259,7 +258,6 @@ const PieComponent = (props: PieComponentProps) => {
       visParams.distinctColors,
       visData.rows,
       props.uiState,
-      services.fieldFormats,
     ]
   );
 

@@ -92,7 +92,7 @@ export class PieChartService extends FtrService {
         (await this.visChart.getEsChartDebugState(pieChartSelector))?.partition?.[0]?.partitions ??
         [];
       const selectedSlice = slices.filter((slice) => {
-        return slice.name.toString() === name;
+        return slice.name.toString() === name.replace(',', '');
       });
       return selectedSlice[0]?.color;
     }

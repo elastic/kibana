@@ -13,7 +13,6 @@ import { PopoverAnchorPosition, EuiPopover, EuiOutsideClickDetector } from '@ela
 import type { DatatableRow } from '../../../expressions/public';
 import type { PersistedState } from '../../../visualizations/public';
 import { ColorPicker } from '../../../charts/public';
-import type { DataPublicPluginStart } from '../../../data/public';
 import { BucketColumns } from '../types';
 
 const KEY_CODE_ENTER = 13;
@@ -56,8 +55,7 @@ export const getColorPicker = (
   palette: string,
   data: DatatableRow[],
   uiState: PersistedState,
-  distinctColors: boolean,
-  formatter: DataPublicPluginStart['fieldFormats']
+  distinctColors: boolean
 ): LegendColorPicker => ({
   anchor,
   color,
@@ -66,18 +64,14 @@ export const getColorPicker = (
   seriesIdentifiers: [seriesIdentifier],
 }) => {
   const seriesName = seriesIdentifier.key;
-  const bucketIndex = getLayerIndex(seriesName, data, bucketColumns) - 1;
-  const formattedName = bucketColumns[bucketIndex]?.format
-    ? formatter.deserialize(bucketColumns[bucketIndex].format).convert(seriesName)
-    : seriesName;
   const overwriteColors: Record<string, string> = uiState?.get('vis.colors', {}) ?? {};
-  const colorIsOverwritten = Object.keys(overwriteColors).includes(formattedName.toString());
+  const colorIsOverwritten = Object.keys(overwriteColors).includes(seriesName.toString());
   let keyDownEventOn = false;
   const handleChange = (newColor: string | null) => {
     if (newColor) {
       onChange(newColor);
     }
-    setColor(newColor, formattedName);
+    setColor(newColor, seriesName);
     // close the popover if no color is applied or the user has clicked a color
     if (!newColor || !keyDownEventOn) {
       onClose();
