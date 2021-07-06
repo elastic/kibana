@@ -42,7 +42,7 @@ const breadcrumbGetters: {
     BASE_BREADCRUMB,
     {
       text: i18n.translate('xpack.fleet.breadcrumbs.policiesPageTitle', {
-        defaultMessage: 'Policies',
+        defaultMessage: 'Agent Policies',
       }),
     },
   ],
@@ -50,7 +50,7 @@ const breadcrumbGetters: {
     BASE_BREADCRUMB,
     {
       text: i18n.translate('xpack.fleet.breadcrumbs.policiesPageTitle', {
-        defaultMessage: 'Policies',
+        defaultMessage: 'Agent Policies',
       }),
     },
   ],
@@ -59,7 +59,7 @@ const breadcrumbGetters: {
     {
       href: pagePathGetters.policies()[1],
       text: i18n.translate('xpack.fleet.breadcrumbs.policiesPageTitle', {
-        defaultMessage: 'Policies',
+        defaultMessage: 'Agent Policies',
       }),
     },
     { text: policyName },
@@ -69,7 +69,7 @@ const breadcrumbGetters: {
     {
       href: pagePathGetters.policies()[1],
       text: i18n.translate('xpack.fleet.breadcrumbs.policiesPageTitle', {
-        defaultMessage: 'Policies',
+        defaultMessage: 'Agent Policies',
       }),
     },
     {
@@ -100,7 +100,7 @@ const breadcrumbGetters: {
     {
       href: pagePathGetters.policies()[1],
       text: i18n.translate('xpack.fleet.breadcrumbs.policiesPageTitle', {
-        defaultMessage: 'Policies',
+        defaultMessage: 'Agent Policies',
       }),
     },
     {
