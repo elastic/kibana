@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
+import escape from 'lodash/escape';
 import { i18n } from '@kbn/i18n';
-import { asPrettyString } from '../utils';
+import { asPrettyString, getHighlightHtml } from '../utils';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
-import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
+import { TextContextTypeConvert, FIELD_FORMAT_IDS, HtmlContextTypeConvert } from '../types';
 import { shortenDottedString } from '../../utils';
 
-export const emptyLabel = i18n.translate('data.fieldFormats.string.emptyLabel', {
+const emptyLabel = i18n.translate('data.fieldFormats.string.emptyLabel', {
   defaultMessage: '(empty)',
 });
 
@@ -126,5 +127,15 @@ export class StringFormat extends FieldFormat {
       default:
         return asPrettyString(val);
     }
+  };
+
+  htmlConvert: HtmlContextTypeConvert = (val, { hit, field } = {}) => {
+    if (val === '') {
+      return `<span class="ffString__emptyValue">${emptyLabel}</span>`;
+    }
+
+    return hit?.highlight?.[field?.name]
+      ? getHighlightHtml(val, hit.highlight[field.name])
+      : escape(this.textConvert(val));
   };
 }

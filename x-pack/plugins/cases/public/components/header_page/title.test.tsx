@@ -36,4 +36,10 @@ describe('Title', () => {
 
     expect(wrapper.find('[data-test-subj="header-page-title"]').first().exists()).toBe(true);
   });
+
+  test('it renders the title if is not a string', () => {
+    const wrapper = shallow(<Title title={<span>{'Test title'}</span>} />);
+
+    expect(wrapper).toMatchSnapshot();
+  });
 });

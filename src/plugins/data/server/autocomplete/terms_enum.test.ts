@@ -22,6 +22,8 @@ const mockResponse = {
   body: { terms: ['whoa', 'amazing'] },
 };
 
+jest.mock('../index_patterns');
+
 describe('_terms_enum suggestions', () => {
   beforeEach(() => {
     const requestHandlerContext = coreMock.createRequestHandlerContext();
@@ -48,6 +50,47 @@ describe('_terms_enum suggestions', () => {
       Object {
         "body": Object {
           "field": "field_name",
+          "index_filter": Object {
+            "bool": Object {
+              "must": Array [
+                Object {
+                  "terms": Object {
+                    "_tier": Array [
+                      "data_hot",
+                      "data_warm",
+                      "data_content",
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          "string": "query",
+        },
+        "method": "POST",
+        "path": "/index/_terms_enum",
+      }
+    `);
+    expect(result).toEqual(mockResponse.body.terms);
+  });
+
+  it('calls the _terms_enum API and fallback to fieldName when field is null', async () => {
+    const result = await termsEnumSuggestions(
+      configMock,
+      savedObjectsClientMock,
+      esClientMock,
+      'index',
+      'fieldName',
+      'query',
+      []
+    );
+
+    const [[args]] = esClientMock.transport.request.mock.calls;
+
+    expect(args).toMatchInlineSnapshot(`
+      Object {
+        "body": Object {
+          "field": "fieldName",
           "index_filter": Object {
             "bool": Object {
               "must": Array [

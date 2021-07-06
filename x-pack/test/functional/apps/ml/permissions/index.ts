@@ -8,7 +8,8 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('permissions', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/104042
+  describe.skip('permissions', function () {
     this.tags(['skipFirefox']);
 
     loadTestFile(require.resolve('./full_ml_access'));

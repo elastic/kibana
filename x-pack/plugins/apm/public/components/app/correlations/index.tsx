@@ -39,7 +39,7 @@ import { IUrlParams } from '../../../context/url_params_context/types';
 import {
   IStickyProperty,
   StickyProperties,
-} from '../../shared/StickyProperties';
+} from '../../shared/sticky_properties';
 import {
   getEnvironmentLabel,
   getNextEnvironmentUrlParam,
@@ -131,6 +131,7 @@ export function Correlations() {
   return (
     <>
       <EuiButton
+        fill
         onClick={() => {
           setIsFlyoutVisible(true);
         }}
