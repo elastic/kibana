@@ -10,7 +10,7 @@ import { LensPlugin } from './plugin';
 export type {
   EmbeddableComponentProps,
   TypedLensByValueInput,
-} from './editor_frame_service/embeddable/embeddable_component';
+} from './embeddable/embeddable_component';
 export type {
   XYState,
   AxesSettingsConfig,
@@ -58,7 +58,7 @@ export type {
   MathIndexPatternColumn,
   OverallSumIndexPatternColumn,
 } from './indexpattern_datasource/types';
-export type { LensEmbeddableInput } from './editor_frame_service/embeddable';
+export type { LensEmbeddableInput } from './embeddable';
 
 export { LensPublicStart } from './plugin';
 

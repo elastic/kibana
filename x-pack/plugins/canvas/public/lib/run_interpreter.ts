@@ -6,8 +6,9 @@
  */
 
 import { fromExpression, getType } from '@kbn/interpreter/common';
+import { pluck } from 'rxjs/operators';
 import { ExpressionValue, ExpressionAstExpression } from 'src/plugins/expressions/public';
-import { notifyService, expressionsService } from '../services';
+import { pluginServices, expressionsService } from '../services';
 
 interface Options {
   castToRender?: boolean;
@@ -21,7 +22,12 @@ export async function interpretAst(
   variables: Record<string, any>
 ): Promise<ExpressionValue> {
   const context = { variables };
-  return await expressionsService.getService().execute(ast, null, context).getData();
+  return await expressionsService
+    .getService()
+    .execute(ast, null, context)
+    .getData()
+    .pipe(pluck('result'))
+    .toPromise();
 }
 
 /**
@@ -43,7 +49,12 @@ export async function runInterpreter(
   const context = { variables };
 
   try {
-    const renderable = await expressionsService.getService().execute(ast, input, context).getData();
+    const renderable = await expressionsService
+      .getService()
+      .execute(ast, input, context)
+      .getData()
+      .pipe(pluck('result'))
+      .toPromise();
 
     if (getType(renderable) === 'render') {
       return renderable;
@@ -57,7 +68,8 @@ export async function runInterpreter(
 
     throw new Error(`Ack! I don't know how to render a '${getType(renderable)}'`);
   } catch (err) {
-    notifyService.getService().error(err);
+    const { error: displayError } = pluginServices.getServices().notify;
+    displayError(err);
     throw err;
   }
 }

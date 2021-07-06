@@ -33,6 +33,7 @@ import {
   isFailedResourceState,
   isLoadedResourceState,
   isLoadingResourceState,
+  isUninitialisedResourceState,
 } from '../../../state';
 
 import { ServerApiError } from '../../../../common/types';
@@ -69,6 +70,11 @@ export const policyItemsLoading = (state: Immutable<EndpointState>) => state.pol
 export const selectedPolicyId = (state: Immutable<EndpointState>) => state.selectedPolicyId;
 
 export const endpointPackageInfo = (state: Immutable<EndpointState>) => state.endpointPackageInfo;
+export const getIsEndpointPackageInfoUninitialized: (
+  state: Immutable<EndpointState>
+) => boolean = createSelector(endpointPackageInfo, (packageInfo) =>
+  isUninitialisedResourceState(packageInfo)
+);
 
 export const isAutoRefreshEnabled = (state: Immutable<EndpointState>) => state.isAutoRefreshEnabled;
 
@@ -86,9 +92,8 @@ export const agentsWithEndpointsTotalError = (state: Immutable<EndpointState>) =
 export const endpointsTotalError = (state: Immutable<EndpointState>) => state.endpointsTotalError;
 const queryStrategyVersion = (state: Immutable<EndpointState>) => state.queryStrategyVersion;
 
-export const endpointPackageVersion = createSelector(
-  endpointPackageInfo,
-  (info) => info?.version ?? undefined
+export const endpointPackageVersion = createSelector(endpointPackageInfo, (info) =>
+  isLoadedResourceState(info) ? info.data.version : undefined
 );
 
 export const isTransformEnabled = createSelector(

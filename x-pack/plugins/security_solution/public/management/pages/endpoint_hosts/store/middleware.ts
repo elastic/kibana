@@ -36,6 +36,7 @@ import {
   getLastLoadedActivityLogData,
   detailsData,
   getEndpointDetailsFlyoutView,
+  getIsEndpointPackageInfoUninitialized,
 } from './selectors';
 import { AgentIdsPendingActions, EndpointState, PolicyIds } from '../types';
 import {
@@ -44,7 +45,7 @@ import {
   sendGetAgentPolicyList,
   sendGetFleetAgentsWithEndpoint,
 } from '../../policy/store/services/ingest';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../fleet/common';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE, PackageListItem } from '../../../../../../fleet/common';
 import {
   ENDPOINT_ACTION_LOG_ROUTE,
   HOST_METADATA_GET_ROUTE,
@@ -61,7 +62,7 @@ import {
 import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint_isolation';
 import { AppAction } from '../../../../common/store/actions';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
-import { ServerReturnedEndpointPackageInfo } from './action';
+import { EndpointPackageInfoStateChanged } from './action';
 import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint_pending_actions';
 import { EndpointDetailsTabsTypes } from '../view/details/components/endpoint_details_tabs';
 
@@ -165,6 +166,8 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
             });
           }
         } catch (error) {
+          // TODO should handle the error instead of logging it to the browser
+          // Also this is an anti-pattern we shouldn't use
           // Ignore Errors, since this should not hinder the user's ability to use the UI
           logError(error);
         }
@@ -285,6 +288,8 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
               });
             }
           } catch (error) {
+            // TODO should handle the error instead of logging it to the browser
+            // Also this is an anti-pattern we shouldn't use
             // Ignore Errors, since this should not hinder the user's ability to use the UI
             logError(error);
           }
@@ -330,6 +335,8 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
             });
           }
         } catch (error) {
+          // TODO should handle the error instead of logging it to the browser
+          // Also this is an anti-pattern we shouldn't use
           // Ignore Errors, since this should not hinder the user's ability to use the UI
           logError(error);
         }
@@ -412,9 +419,11 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
 
         const lastLoadedLogData = getLastLoadedActivityLogData(getState());
         if (lastLoadedLogData !== undefined) {
-          const updatedLogDataItems = [
+          const updatedLogDataItems = ([
             ...new Set([...lastLoadedLogData.data, ...activityLog.data]),
-          ] as ActivityLog['data'];
+          ] as ActivityLog['data']).sort((a, b) =>
+            new Date(b.item.data['@timestamp']) > new Date(a.item.data['@timestamp']) ? 1 : -1
+          );
 
           const updatedLogData = {
             page: activityLog.page,
@@ -534,6 +543,8 @@ const endpointsTotal = async (http: HttpStart): Promise<number> => {
       })
     ).total;
   } catch (error) {
+    // TODO should handle the error instead of logging it to the browser
+    // Also this is an anti-pattern we shouldn't use
     logError(`error while trying to check for total endpoints`);
     logError(error);
   }
@@ -544,6 +555,8 @@ const doEndpointsExist = async (http: HttpStart): Promise<boolean> => {
   try {
     return (await endpointsTotal(http)) > 0;
   } catch (error) {
+    // TODO should handle the error instead of logging it to the browser
+    // Also this is an anti-pattern we shouldn't use
     logError(`error while trying to check if endpoints exist`);
     logError(error);
   }
@@ -591,20 +604,33 @@ const handleIsolateEndpointHost = async (
 
 async function getEndpointPackageInfo(
   state: ImmutableObject<EndpointState>,
-  dispatch: Dispatch<ServerReturnedEndpointPackageInfo>,
+  dispatch: Dispatch<EndpointPackageInfoStateChanged>,
   coreStart: CoreStart
 ) {
-  if (endpointPackageInfo(state)) return;
+  if (!getIsEndpointPackageInfoUninitialized(state)) return;
+
+  dispatch({
+    type: 'endpointPackageInfoStateChanged',
+    // Ignore will be fixed with when AsyncResourceState is refactored (#830)
+    // @ts-ignore
+    payload: createLoadingResourceState<PackageListItem>(endpointPackageInfo(state)),
+  });
 
   try {
     const packageInfo = await sendGetEndpointSecurityPackage(coreStart.http);
     dispatch({
-      type: 'serverReturnedEndpointPackageInfo',
-      payload: packageInfo,
+      type: 'endpointPackageInfoStateChanged',
+      payload: createLoadedResourceState(packageInfo),
     });
   } catch (error) {
+    // TODO should handle the error instead of logging it to the browser
+    // Also this is an anti-pattern we shouldn't use
     // Ignore Errors, since this should not hinder the user's ability to use the UI
     logError(error);
+    dispatch({
+      type: 'endpointPackageInfoStateChanged',
+      payload: createFailedResourceState(error),
+    });
   }
 }
 
@@ -649,6 +675,8 @@ const loadEndpointsPendingActions = async ({
       payload: createLoadedResourceState(agentIdToPendingActions),
     });
   } catch (error) {
+    // TODO should handle the error instead of logging it to the browser
+    // Also this is an anti-pattern we shouldn't use
     logError(error);
   }
 };
