@@ -17,10 +17,9 @@ import { timeRangeMiddleware } from './time_range_middleware';
 import { Observable, Subject } from 'rxjs';
 import { DataPublicPluginStart, esFilters } from '../../../../../src/plugins/data/public';
 import moment from 'moment';
-import { initialState } from './app_slice';
+import { initialState } from './lens_slice';
 import { LensAppState } from './types';
 import { PayloadAction } from '@reduxjs/toolkit';
-import { Document } from '../persistence';
 
 const sessionIdSubject = new Subject<string>();
 
@@ -132,7 +131,7 @@ function makeDefaultData(): jest.Mocked<DataPublicPluginStart> {
 const createMiddleware = (data: DataPublicPluginStart) => {
   const middleware = timeRangeMiddleware(data);
   const store = {
-    getState: jest.fn(() => ({ app: initialState })),
+    getState: jest.fn(() => ({ lens: initialState })),
     dispatch: jest.fn(),
   };
   const next = jest.fn();
@@ -157,8 +156,13 @@ describe('timeRangeMiddleware', () => {
       });
       const { next, invoke, store } = createMiddleware(data);
       const action = {
-        type: 'app/setState',
-        payload: { lastKnownDoc: ('new' as unknown) as Document },
+        type: 'lens/setState',
+        payload: {
+          visualization: {
+            state: {},
+            activeId: 'id2',
+          },
+        },
       };
       invoke(action);
       expect(store.dispatch).toHaveBeenCalledWith({
@@ -169,7 +173,7 @@ describe('timeRangeMiddleware', () => {
           },
           searchSessionId: 'sessionId-1',
         },
-        type: 'app/setState',
+        type: 'lens/setState',
       });
       expect(next).toHaveBeenCalledWith(action);
     });
@@ -187,8 +191,39 @@ describe('timeRangeMiddleware', () => {
       });
       const { next, invoke, store } = createMiddleware(data);
       const action = {
-        type: 'app/setState',
-        payload: { lastKnownDoc: ('new' as unknown) as Document },
+        type: 'lens/setState',
+        payload: {
+          visualization: {
+            state: {},
+            activeId: 'id2',
+          },
+        },
+      };
+      invoke(action);
+      expect(store.dispatch).not.toHaveBeenCalled();
+      expect(next).toHaveBeenCalledWith(action);
+    });
+    it('does not trigger another update when the update already contains searchSessionId', () => {
+      const data = makeDefaultData();
+      (data.nowProvider.get as jest.Mock).mockReturnValue(new Date(Date.now() - 30000));
+      (data.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue({
+        from: 'now-2m',
+        to: 'now',
+      });
+      (data.query.timefilter.timefilter.getBounds as jest.Mock).mockReturnValue({
+        min: moment(Date.now() - 100000),
+        max: moment(Date.now() - 30000),
+      });
+      const { next, invoke, store } = createMiddleware(data);
+      const action = {
+        type: 'lens/setState',
+        payload: {
+          visualization: {
+            state: {},
+            activeId: 'id2',
+          },
+          searchSessionId: 'searchSessionId',
+        },
       };
       invoke(action);
       expect(store.dispatch).not.toHaveBeenCalled();

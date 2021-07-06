@@ -360,7 +360,7 @@ function getMockMonitoredHealth(overrides = {}): MonitoredHealth {
           non_recurring: 20,
           owner_ids: 2,
           estimated_schedule_density: [],
-          capacity_requirments: {
+          capacity_requirements: {
             per_minute: 150,
             per_hour: 360,
             per_day: 820,
