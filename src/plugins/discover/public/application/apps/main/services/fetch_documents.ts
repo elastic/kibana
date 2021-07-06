@@ -15,28 +15,26 @@ import { sendErrorMsg, sendLoadingMsg } from './use_saved_search_messages';
 
 export const fetchDocuments = (
   dataDocuments$: DataDocuments$,
+  searchSource: SearchSource,
   {
     abortController,
     inspectorAdapters,
     onResults,
     searchSessionId,
-    searchSource,
   }: {
     abortController: AbortController;
     inspectorAdapters: Adapters;
     onResults: (foundDocuments: boolean) => void;
     searchSessionId: string;
-    searchSource: SearchSource;
   }
 ) => {
-  const childSearchSource = searchSource.createCopy();
-  childSearchSource.setField('trackTotalHits', false);
-  childSearchSource.setField('highlightAll', true);
-  childSearchSource.setField('version', false);
+  searchSource.setField('trackTotalHits', false);
+  searchSource.setField('highlightAll', true);
+  searchSource.setField('version', false);
 
   sendLoadingMsg(dataDocuments$);
 
-  const fetch$ = childSearchSource
+  const fetch$ = searchSource
     .fetch$({
       abortSignal: abortController.signal,
       sessionId: searchSessionId,

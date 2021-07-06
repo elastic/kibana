@@ -27,30 +27,22 @@ import { SavedSearchData } from './use_saved_search';
 import { DiscoverServices } from '../../../../build_services';
 import { ReduxLikeStateContainer } from '../../../../../../kibana_utils/common';
 
-export function fetch(
+export function fetchAll(
+  dataSubjects: SavedSearchData,
+  searchSource: SearchSource,
   reset = false,
   fetchDeps: {
     abortController: AbortController;
     appStateContainer: ReduxLikeStateContainer<AppState>;
     inspectorAdapters: Adapters;
     data: DataPublicPluginStart;
-    dataSubjects: SavedSearchData;
     initialFetchStatus: FetchStatus;
-    searchSource: SearchSource;
     searchSessionId: string;
     services: DiscoverServices;
     useNewFieldsApi: boolean;
   }
 ) {
-  const {
-    dataSubjects,
-    initialFetchStatus,
-    appStateContainer,
-    services,
-    searchSource,
-    useNewFieldsApi,
-    data,
-  } = fetchDeps;
+  const { initialFetchStatus, appStateContainer, services, useNewFieldsApi, data } = fetchDeps;
 
   const indexPattern = searchSource.getField('index')!;
 
@@ -82,11 +74,11 @@ export function fetch(
   };
 
   const all = forkJoin({
-    documents: fetchDocuments(dataSubjects.documents$, subFetchDeps),
-    totalHits: fetchTotalHits(dataSubjects.totalHits$, subFetchDeps),
+    documents: fetchDocuments(dataSubjects.documents$, searchSource.createCopy(), subFetchDeps),
+    totalHits: fetchTotalHits(dataSubjects.totalHits$, searchSource.createCopy(), subFetchDeps),
     chart:
       !hideChart && indexPattern.timeFieldName
-        ? fetchChart(dataSubjects.charts$, subFetchDeps)
+        ? fetchChart(dataSubjects.charts$, searchSource.createCopy(), subFetchDeps)
         : of(null),
   });
 

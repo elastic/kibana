@@ -20,34 +20,29 @@ import { sendErrorMsg, sendLoadingMsg } from './use_saved_search_messages';
 
 export function fetchTotalHits(
   dataTotalHits$: DataTotalHits$,
+  searchSource: SearchSource,
   {
     abortController,
     data,
     inspectorAdapters,
     onResults,
     searchSessionId,
-    searchSource,
   }: {
     abortController: AbortController;
     data: DataPublicPluginStart;
     onResults: (foundDocuments: boolean) => void;
     inspectorAdapters: Adapters;
     searchSessionId: string;
-    searchSource: SearchSource;
   }
 ) {
-  const childSearchSource = searchSource.createCopy();
   const indexPattern = searchSource.getField('index');
-  childSearchSource.setField('trackTotalHits', true);
-  childSearchSource.setField(
-    'filter',
-    data.query.timefilter.timefilter.createFilter(indexPattern!)
-  );
-  childSearchSource.setField('size', 0);
+  searchSource.setField('trackTotalHits', true);
+  searchSource.setField('filter', data.query.timefilter.timefilter.createFilter(indexPattern!));
+  searchSource.setField('size', 0);
 
   sendLoadingMsg(dataTotalHits$);
 
-  const fetch$ = childSearchSource
+  const fetch$ = searchSource
     .fetch$({
       inspector: {
         adapter: inspectorAdapters.requests,

@@ -27,6 +27,7 @@ import { sendErrorMsg, sendLoadingMsg } from './use_saved_search_messages';
 
 export function fetchChart(
   dataCharts$: DataCharts$,
+  searchSource: SearchSource,
   {
     abortController,
     appStateContainer,
@@ -34,7 +35,6 @@ export function fetchChart(
     inspectorAdapters,
     onResults,
     searchSessionId,
-    searchSource,
   }: {
     abortController: AbortController;
     appStateContainer: ReduxLikeStateContainer<AppState>;
@@ -42,16 +42,14 @@ export function fetchChart(
     inspectorAdapters: Adapters;
     onResults: (foundDocuments: boolean) => void;
     searchSessionId: string;
-    searchSource: SearchSource;
   }
 ): Observable<{ chartData: Chart; bucketInterval?: TimechartBucketInterval } | undefined> {
   const interval = appStateContainer.getState().interval ?? 'auto';
-  const childSearchSource = searchSource.createCopy();
-  const chartAggConfigs = updateSearchSource(childSearchSource, interval, data);
+  const chartAggConfigs = updateSearchSource(searchSource, interval, data);
 
   sendLoadingMsg(dataCharts$);
 
-  const fetch$ = childSearchSource
+  const fetch$ = searchSource
     .fetch$({
       abortSignal: abortController.signal,
       sessionId: searchSessionId,

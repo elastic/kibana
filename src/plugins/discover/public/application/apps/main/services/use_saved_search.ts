@@ -21,7 +21,7 @@ import { TimechartBucketInterval } from '../components/timechart_header/timechar
 import { useSingleton } from '../utils/use_singleton';
 import { FetchStatus } from '../../../types';
 
-import { fetch } from './use_saved_search_fetch';
+import { fetchAll } from './fetch_all';
 import { useBehaviorSubject } from '../utils/use_behavior_subject';
 import { sendResetMsg } from './use_saved_search_messages';
 
@@ -172,14 +172,12 @@ export const useSavedSearch = ({
 
       if (refs.current.abortController) refs.current.abortController.abort();
       refs.current.abortController = new AbortController();
-      fetch(val === 'reset', {
+      fetchAll(dataSubjects, searchSource, val === 'reset', {
         abortController: refs.current.abortController,
         appStateContainer: stateContainer.appStateContainer,
         inspectorAdapters,
         data,
-        dataSubjects,
         initialFetchStatus,
-        searchSource,
         searchSessionId: searchSessionManager.getNextSearchSessionId(),
         services,
         useNewFieldsApi,
