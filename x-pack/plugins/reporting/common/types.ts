@@ -65,6 +65,7 @@ export interface ReportSource {
     objectType: string;
     title: string;
     layout?: LayoutParams;
+    isDeprecated?: boolean;
   };
   meta: { objectType: string; layout?: string };
   browser_type: string;
@@ -130,6 +131,7 @@ export interface ReportApiJSON {
     layout?: LayoutParams;
     title: string;
     browserTimezone?: string;
+    isDeprecated?: boolean;
   };
   meta: {
     layout?: string;
