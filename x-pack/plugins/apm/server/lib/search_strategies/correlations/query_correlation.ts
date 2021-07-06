@@ -26,7 +26,7 @@ interface ResponseHit {
   _source: ResponseHitSource;
 }
 
-interface BucketCorrelation {
+export interface BucketCorrelation {
   buckets_path: string;
   function: {
     count_correlation: {
@@ -80,8 +80,7 @@ export const getTransactionDurationCorrelationRequest = (
       // KS test p value = ks_test.less
       ks_test: {
         bucket_count_ks_test: {
-          // Remove 0 after https://github.com/elastic/elasticsearch/pull/74624 is merged
-          fractions: [0, ...fractions],
+          fractions,
           buckets_path: 'latency_ranges>_count',
           alternative: ['less', 'greater', 'two_sided'],
         },

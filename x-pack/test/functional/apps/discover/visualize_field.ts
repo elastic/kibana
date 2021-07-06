@@ -28,7 +28,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await PageObjects.timePicker.setDefaultAbsoluteRange();
   }
 
-  describe('discover field visualize button', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/104469
+  describe.skip('discover field visualize button', () => {
     beforeEach(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/basic');
