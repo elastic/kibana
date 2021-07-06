@@ -7,9 +7,22 @@
 
 import React from 'react';
 import { Observable } from 'rxjs';
-import { mountWithIntl } from '@kbn/test/jest';
-import { ILicense } from '../../../licensing/public';
-import { ReportingAPIClient } from '../lib/reporting_api_client';
+import { UnwrapPromise } from '@kbn/utility-types';
+
+import { act } from 'react-dom/test-utils';
+
+import { registerTestBed } from '@kbn/test/jest';
+
+import type { SharePluginSetup, LocatorPublic } from '../../../../../src/plugins/share/public';
+import type { NotificationsSetup } from '../../../../../src/core/public';
+import { httpServiceMock, notificationServiceMock } from '../../../../../src/core/public/mocks';
+
+import type { ILicense } from '../../../licensing/public';
+
+import { IlmPolicyMigrationStatus } from '../../common/types';
+
+import { ReportingAPIClient, InternalApiClientClientProvider } from '../lib/reporting_api_client';
+import { IlmPolicyStatusContextProvider } from '../lib/ilm_policy_status_context';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
   return {
@@ -17,7 +30,7 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
   };
 });
 
-import { ReportListing } from './report_listing';
+import { ReportListing, Props } from './report_listing';
 
 const reportingAPIClient = {
   list: () =>
@@ -33,6 +46,7 @@ const reportingAPIClient = {
       { _id: 'k8t4ylcb07mi9d006214ifyg', _index: '.reporting-2020.04.05', _score: null, _source: { attempts: 1, browser_type: 'chromium', completed_at: '2020-04-09T19:10:10.049Z', created_at: '2020-04-09T19:09:52.139Z', created_by: 'elastic', jobtype: 'PNG', kibana_id: 'f2e59b4e-f79b-4a48-8a7d-6d50a3c1d914', kibana_name: 'spicy.local', max_attempts: 1, meta: { layout: 'png', objectType: 'visualization', }, output: { content_type: 'image/png', }, payload: { basePath: '/kbn', browserTimezone: 'America/Phoenix', forceNow: '2020-04-09T19:09:52.137Z', layout: { dimensions: { height: 1575, width: 1423, }, id: 'png', }, objectType: 'visualization', relativeUrl: "/s/hsyjklk/app/visualize#/edit/94d1fe40-7a94-11ea-b373-0749f92ad295?_a=(filters:!(),linked:!f,query:(language:kuery,query:''),uiState:(),vis:(aggs:!((enabled:!t,id:'1',params:(),schema:metric,type:count)),params:(addLegend:!f,addTooltip:!t,metric:(colorSchema:'Green%20to%20Red',colorsRange:!((from:0,to:10000)),invertColors:!f,labels:(show:!t),metricColorMode:None,percentageMode:!f,style:(bgColor:!f,bgFill:%23000,fontSize:60,labelColor:!f,subText:''),useRanges:!f),type:metric),title:count,type:metric))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15y,to:now))&indexPattern=d81752b0-7434-11ea-be36-1f978cda44d4&type=metric", title: 'count', }, priority: 10, process_expiration: '2020-04-09T19:14:54.570Z', started_at: '2020-04-09T19:09:54.570Z', status: 'completed', timeout: 300000, }, sort: [1586459392139], },
     ]), // prettier-ignore
   total: () => Promise.resolve(18),
+  migrateReportingIndicesIlmPolicy: jest.fn(),
 } as any;
 
 const validCheck = {
@@ -48,10 +62,6 @@ const license$ = {
   },
 } as Observable<ILicense>;
 
-const toasts = {
-  addDanger: jest.fn(),
-} as any;
-
 const mockPollConfig = {
   jobCompletionNotifier: {
     interval: 5000,
@@ -64,22 +74,87 @@ const mockPollConfig = {
 };
 
 describe('ReportListing', () => {
-  it('Report job listing with some items', () => {
-    const wrapper = mountWithIntl(
-      <ReportListing
+  let httpService: ReturnType<typeof httpServiceMock.createSetupContract>;
+  let ilmLocator: undefined | LocatorPublic<any>;
+  let urlService: SharePluginSetup['url'];
+  let testBed: UnwrapPromise<ReturnType<typeof setup>>;
+  let toasts: NotificationsSetup['toasts'];
+
+  const createTestBed = registerTestBed(
+    (props?: Partial<Props>) => (
+      <InternalApiClientClientProvider
         apiClient={reportingAPIClient as ReportingAPIClient}
-        license$={license$}
-        pollConfig={mockPollConfig}
-        redirect={jest.fn()}
-        toasts={toasts}
-      />
-    );
-    wrapper.update();
-    const input = wrapper.find('[data-test-subj="reportJobListing"]');
-    expect(input).toMatchSnapshot();
+        http={httpService}
+      >
+        <IlmPolicyStatusContextProvider>
+          <ReportListing
+            license$={license$}
+            pollConfig={mockPollConfig}
+            redirect={jest.fn()}
+            navigateToUrl={jest.fn()}
+            urlService={urlService}
+            toasts={toasts}
+            {...props}
+          />
+        </IlmPolicyStatusContextProvider>
+      </InternalApiClientClientProvider>
+    ),
+    { memoryRouter: { wrapComponent: false } }
+  );
+
+  const setup = async (props?: Partial<Props>) => {
+    const tb = await createTestBed(props);
+    const { find, exists, component } = tb;
+
+    return {
+      ...tb,
+      actions: {
+        findListTable: () => find('reportJobListing'),
+        hasIlmMigrationBanner: () => exists('migrateReportingIndicesPolicyCallOut'),
+        hasIlmPolicyLink: () => exists('ilmPolicyLink'),
+        migrateIndices: async () => {
+          await act(async () => {
+            find('migrateReportingIndicesButton').simulate('click');
+          });
+          component.update();
+        },
+      },
+    };
+  };
+
+  const runSetup = async (props?: Partial<Props>) => {
+    await act(async () => {
+      testBed = await setup(props);
+    });
+    testBed.component.update();
+  };
+
+  beforeEach(async () => {
+    toasts = notificationServiceMock.createSetupContract().toasts;
+    httpService = httpServiceMock.createSetupContract();
+    ilmLocator = ({
+      getUrl: jest.fn(),
+    } as unknown) as LocatorPublic<any>;
+
+    urlService = ({
+      locators: {
+        get: () => ilmLocator,
+      },
+    } as unknown) as SharePluginSetup['url'];
+    await runSetup();
   });
 
-  it('subscribes to license changes, and unsubscribes on dismount', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('Report job listing with some items', () => {
+    const { actions } = testBed;
+    const table = actions.findListTable();
+    expect(table).toMatchSnapshot();
+  });
+
+  it('subscribes to license changes, and unsubscribes on dismount', async () => {
     const unsubscribeMock = jest.fn();
     const subMock = {
       subscribe: jest.fn().mockReturnValue({
@@ -87,19 +162,103 @@ describe('ReportListing', () => {
       }),
     } as any;
 
-    const wrapper = mountWithIntl(
-      <ReportListing
-        apiClient={reportingAPIClient as ReportingAPIClient}
-        license$={subMock as Observable<ILicense>}
-        pollConfig={mockPollConfig}
-        redirect={jest.fn()}
-        toasts={toasts}
-      />
-    );
-    wrapper.update();
+    await runSetup({ license$: subMock });
+
     expect(subMock.subscribe).toHaveBeenCalled();
     expect(unsubscribeMock).not.toHaveBeenCalled();
-    wrapper.unmount();
+    testBed.component.unmount();
     expect(unsubscribeMock).toHaveBeenCalled();
+  });
+
+  describe('ILM policy', () => {
+    beforeEach(async () => {
+      httpService = httpServiceMock.createSetupContract();
+      ilmLocator = ({
+        getUrl: jest.fn(),
+      } as unknown) as LocatorPublic<any>;
+
+      urlService = ({
+        locators: {
+          get: () => ilmLocator,
+        },
+      } as unknown) as SharePluginSetup['url'];
+
+      await runSetup();
+    });
+
+    it('shows the migrate banner when migration status is not "OK"', async () => {
+      const status: IlmPolicyMigrationStatus = 'indices-not-managed-by-policy';
+      httpService.get.mockResolvedValue({ status });
+      await runSetup();
+      const { actions } = testBed;
+      expect(actions.hasIlmMigrationBanner()).toBe(true);
+    });
+
+    it('does not show the migrate banner when migration status is "OK"', async () => {
+      const status: IlmPolicyMigrationStatus = 'ok';
+      httpService.get.mockResolvedValue({ status });
+      await runSetup();
+      const { actions } = testBed;
+      expect(actions.hasIlmMigrationBanner()).toBe(false);
+    });
+
+    it('hides the ILM policy link if there is no ILM policy', async () => {
+      const status: IlmPolicyMigrationStatus = 'policy-not-found';
+      httpService.get.mockResolvedValue({ status });
+      await runSetup();
+      const { actions } = testBed;
+      expect(actions.hasIlmPolicyLink()).toBe(false);
+    });
+
+    it('hides the ILM policy link if there is no ILM policy locator', async () => {
+      ilmLocator = undefined;
+      const status: IlmPolicyMigrationStatus = 'ok'; // should never happen, but need to test that when the locator is missing we don't render the link
+      httpService.get.mockResolvedValue({ status });
+      await runSetup();
+      const { actions } = testBed;
+      expect(actions.hasIlmPolicyLink()).toBe(false);
+    });
+
+    it('always shows the ILM policy link if there is an ILM policy', async () => {
+      const status: IlmPolicyMigrationStatus = 'ok';
+      httpService.get.mockResolvedValue({ status });
+      await runSetup();
+      const { actions } = testBed;
+      expect(actions.hasIlmPolicyLink()).toBe(true);
+
+      const status2: IlmPolicyMigrationStatus = 'indices-not-managed-by-policy';
+      httpService.get.mockResolvedValue({ status: status2 });
+      await runSetup();
+      expect(actions.hasIlmPolicyLink()).toBe(true);
+    });
+
+    it('hides the banner after migrating indices', async () => {
+      const status: IlmPolicyMigrationStatus = 'indices-not-managed-by-policy';
+      const status2: IlmPolicyMigrationStatus = 'ok';
+      httpService.get.mockResolvedValueOnce({ status });
+      httpService.get.mockResolvedValueOnce({ status: status2 });
+      await runSetup();
+      const { actions } = testBed;
+
+      expect(actions.hasIlmMigrationBanner()).toBe(true);
+      await actions.migrateIndices();
+      expect(actions.hasIlmMigrationBanner()).toBe(false);
+      expect(actions.hasIlmPolicyLink()).toBe(true);
+      expect(toasts.addSuccess).toHaveBeenCalledTimes(1);
+    });
+
+    it('informs users when migrations failed', async () => {
+      const status: IlmPolicyMigrationStatus = 'indices-not-managed-by-policy';
+      httpService.get.mockResolvedValueOnce({ status });
+      reportingAPIClient.migrateReportingIndicesIlmPolicy.mockRejectedValueOnce(new Error('oops!'));
+      await runSetup();
+      const { actions } = testBed;
+
+      expect(actions.hasIlmMigrationBanner()).toBe(true);
+      await actions.migrateIndices();
+      expect(toasts.addError).toHaveBeenCalledTimes(1);
+      expect(actions.hasIlmMigrationBanner()).toBe(true);
+      expect(actions.hasIlmPolicyLink()).toBe(true);
+    });
   });
 });
