@@ -28,6 +28,20 @@ function parseHeader(header?: string): KibanaExecutionContext | undefined {
   }
 }
 
+// Maximum number of bytes per a single name-value pair allowed by w3c spec
+// https://w3c.github.io/baggage/
+export const BAGGAGE_MAX_PER_NAME_VALUE_PAIRS = 4096;
+
+// a single character can use up to 4 bytes
+const MAX_BAGGAGE_LENGTH = BAGGAGE_MAX_PER_NAME_VALUE_PAIRS / 4;
+
+// Limits the header value to max allowed "baggage" header property name-value pair
+// It will help us switch to the "baggage" header when it becomes the standard.
+// The trimmed value in the logs is better than nothing.
+function enforceMaxLength(header: string): string {
+  return header.slice(0, MAX_BAGGAGE_LENGTH);
+}
+
 /**
  * @public
  */
@@ -44,7 +58,8 @@ export class ExecutionContextContainer implements IExecutionContextContainer {
   toString(): string {
     const ctx = this.#context;
     const contextStringified = ctx.type && ctx.id ? `kibana:${ctx.type}:${ctx.id}` : '';
-    return contextStringified ? `${ctx.requestId};${contextStringified}` : ctx.requestId;
+    const result = contextStringified ? `${ctx.requestId};${contextStringified}` : ctx.requestId;
+    return enforceMaxLength(result);
   }
   toJSON(): Readonly<KibanaServerExecutionContext> {
     return this.#context;

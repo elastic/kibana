@@ -10,6 +10,7 @@ import {
   ExecutionContextContainer,
   getParentContextFrom,
   BAGGAGE_HEADER,
+  BAGGAGE_MAX_PER_NAME_VALUE_PAIRS,
 } from './execution_context_container';
 
 describe('KibanaExecutionContext', () => {
@@ -34,6 +35,28 @@ describe('KibanaExecutionContext', () => {
 
       const value = new ExecutionContextContainer(context).toString();
       expect(value).toMatchInlineSnapshot(`"1234-5678"`);
+    });
+
+    it('trims a string representation of provided execution context if it is bigger max allowed size', () => {
+      expect(
+        new Blob([
+          new ExecutionContextContainer({
+            requestId: '1234-5678'.repeat(1000),
+          }).toString(),
+        ]).size
+      ).toBeLessThanOrEqual(BAGGAGE_MAX_PER_NAME_VALUE_PAIRS);
+
+      expect(
+        new Blob([
+          new ExecutionContextContainer({
+            type: 'test-type'.repeat(1000),
+            name: 'test-name',
+            id: '42'.repeat(1000),
+            description: 'test-descripton',
+            requestId: '1234-5678',
+          }).toString(),
+        ]).size
+      ).toBeLessThanOrEqual(BAGGAGE_MAX_PER_NAME_VALUE_PAIRS);
     });
   });
 

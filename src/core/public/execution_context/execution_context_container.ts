@@ -18,7 +18,9 @@ export const BAGGAGE_MAX_PER_NAME_VALUE_PAIRS = 4096;
 // a single character can use up to 4 bytes
 const MAX_BAGGAGE_LENGTH = BAGGAGE_MAX_PER_NAME_VALUE_PAIRS / 4;
 
-// the trimmed value in the server logs is better than nothing.
+// Limits the header value to max allowed "baggage" header property name-value pair
+// It will help us switch to the "baggage" header when it becomes the standard.
+// The trimmed value in the logs is better than nothing.
 function enforceMaxLength(header: string): string {
   return header.slice(0, MAX_BAGGAGE_LENGTH);
 }
