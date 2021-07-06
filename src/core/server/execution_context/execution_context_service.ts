@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 import { AsyncLocalStorage } from 'async_hooks';
+import type { Subscription } from 'rxjs';
 
 import type { CoreService, KibanaExecutionContext } from '../../types';
 import type { CoreContext } from '../core_context';
 import type { Logger } from '../logging';
+import type { ExecutionContextConfigType } from './execution_context_config';
 
 import {
   ExecutionContextContainer,
@@ -69,13 +71,21 @@ export class ExecutionContextService
   implements CoreService<InternalExecutionContextSetup, InternalExecutionContextStart> {
   private readonly log: Logger;
   private readonly asyncLocalStorage: AsyncLocalStorage<IExecutionContextContainer>;
+  private enabled = false;
+  private configSubscription?: Subscription;
 
-  constructor(coreContext: CoreContext) {
+  constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('execution_context');
     this.asyncLocalStorage = new AsyncLocalStorage<IExecutionContextContainer>();
   }
 
   setup(): InternalExecutionContextSetup {
+    this.configSubscription = this.coreContext.configService
+      .atPath<ExecutionContextConfigType>('execution_context')
+      .subscribe((config) => {
+        this.enabled = config.enabled;
+      });
+
     return {
       getParentContextFrom,
       set: this.set.bind(this),
@@ -92,9 +102,17 @@ export class ExecutionContextService
       get: this.get.bind(this),
     };
   }
-  stop() {}
+
+  stop() {
+    this.enabled = false;
+    if (this.configSubscription) {
+      this.configSubscription.unsubscribe();
+      this.configSubscription = undefined;
+    }
+  }
 
   private set(context: KibanaServerExecutionContext) {
+    if (!this.enabled) return;
     const prevValue = this.asyncLocalStorage.getStore();
     // merges context objects shallowly. repeats the deafult logic of apm.setCustomContext(ctx)
     const contextContainer = new ExecutionContextContainer({ ...prevValue?.toJSON(), ...context });
@@ -105,11 +123,13 @@ export class ExecutionContextService
   }
 
   private reset() {
+    if (!this.enabled) return;
     // @ts-expect-error "undefined" is not supported in type definitions, which is wrong
     this.asyncLocalStorage.enterWith(undefined);
   }
 
   private get(): IExecutionContextContainer | undefined {
+    if (!this.enabled) return;
     return this.asyncLocalStorage.getStore();
   }
 }

@@ -8,7 +8,7 @@
 
 import { Client } from '@elastic/elasticsearch';
 import { Logger } from '../../logging';
-import { GetAuthHeaders, Headers, isRealRequest } from '../../http';
+import { GetAuthHeaders, Headers, isKibanaRequest, isRealRequest } from '../../http';
 import { ensureRawRequest, filterHeaders } from '../../http/router';
 import type { IExecutionContextContainer } from '../../execution_context';
 import { ScopeableRequest } from '../types';
@@ -73,7 +73,8 @@ export class ClusterClient implements ICustomClusterClient {
       getExecutionContext,
       scoped: true,
     });
-    this.allowListHeaders = this.config.requestHeadersWhitelist;
+
+    this.allowListHeaders = ['x-opaque-id', ...this.config.requestHeadersWhitelist];
   }
 
   asScoped(request: ScopeableRequest) {
@@ -96,9 +97,13 @@ export class ClusterClient implements ICustomClusterClient {
     let scopedHeaders: Headers;
     if (isRealRequest(request)) {
       const requestHeaders = ensureRawRequest(request).headers;
+      const requestIdHeaders = isKibanaRequest(request) ? { 'x-opaque-id': request.id } : {};
       const authHeaders = this.getAuthHeaders(request);
 
-      scopedHeaders = filterHeaders({ ...requestHeaders, ...authHeaders }, this.allowListHeaders);
+      scopedHeaders = filterHeaders(
+        { ...requestHeaders, ...requestIdHeaders, ...authHeaders },
+        this.allowListHeaders
+      );
     } else {
       scopedHeaders = filterHeaders(request?.headers ?? {}, this.config.requestHeadersWhitelist);
     }

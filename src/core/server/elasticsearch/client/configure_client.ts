@@ -40,6 +40,7 @@ export const configureClient = (
       const opts = options || {};
       const opaqueId = getExecutionContext()?.toString();
       if (opaqueId && !opts.opaqueId) {
+        // rewrites headers['x-opaque-id'] if it presents
         opts.opaqueId = opaqueId;
       }
       return super.request(params, opts);

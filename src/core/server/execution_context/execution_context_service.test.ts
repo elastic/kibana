@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { BehaviorSubject } from 'rxjs';
 import {
   ExecutionContextService,
   InternalExecutionContextSetup,
@@ -16,6 +17,7 @@ describe('ExecutionContextService', () => {
   describe('setup', () => {
     let service: InternalExecutionContextSetup;
     const core = mockCoreContext.create();
+    core.configService.atPath.mockReturnValue(new BehaviorSubject({ enabled: true }));
     beforeEach(() => {
       service = new ExecutionContextService(core).setup();
     });
@@ -79,6 +81,51 @@ describe('ExecutionContextService', () => {
           requestId: '1111',
         },
       ]);
+    });
+  });
+
+  describe('config', () => {
+    it('can be disabled', async () => {
+      const core = mockCoreContext.create();
+      core.configService.atPath.mockReturnValue(new BehaviorSubject({ enabled: false }));
+      const service = new ExecutionContextService(core).setup();
+      const chainA = await Promise.resolve().then(async () => {
+        service.set({
+          requestId: '0000',
+        });
+        await delay(100);
+        return service.get();
+      });
+
+      expect(chainA).toBeUndefined();
+    });
+
+    it('reacts to config changes', async () => {
+      const core = mockCoreContext.create();
+      const config$ = new BehaviorSubject({ enabled: false });
+      core.configService.atPath.mockReturnValue(config$);
+      const service = new ExecutionContextService(core).setup();
+      function exec() {
+        return Promise.resolve().then(async () => {
+          service.set({
+            requestId: '0000',
+          });
+          await delay(100);
+          return service.get();
+        });
+      }
+      expect(await exec()).toBeUndefined();
+
+      config$.next({
+        enabled: true,
+      });
+      expect(await exec()).toBeDefined();
+
+      config$.next({
+        enabled: false,
+      });
+
+      expect(await exec()).toBeUndefined();
     });
   });
 });

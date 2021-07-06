@@ -49,6 +49,7 @@ import { CoreUsageDataService } from './core_usage_data';
 import { DeprecationsService } from './deprecations';
 import { CoreRouteHandlerContext } from './core_route_handler_context';
 import { config as externalUrlConfig } from './external_url';
+import { config as executionContextConfig } from './execution_context';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
@@ -306,6 +307,7 @@ export class Server {
 
   public setupCoreConfig() {
     const configDescriptors: Array<ServiceConfigDescriptor<unknown>> = [
+      executionContextConfig,
       pathConfig,
       cspConfig,
       elasticsearchConfig,
