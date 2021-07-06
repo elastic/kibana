@@ -182,9 +182,7 @@ type TestSubject =
   | 'destinationPortField.input'
   | 'icmpTypeField.input'
   | 'icmpCodeField.input'
-  | 'ianaField'
   | 'ianaField.input'
-  | 'transportField'
   | 'transportField.input'
   | 'seedField.input'
   | 'trimSwitch.input';
