@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import { UebaEdges } from '../../../../common/search_strategy/security_solution/ueba';
+import { RiskScoreEdges } from '../../../../common/search_strategy/security_solution/ueba';
 
-export const mockData: UebaEdges[] = [
+export const mockData: RiskScoreEdges[] = [
   {
     node: {
       _id: 'beats-ci-immutable-ubuntu-1804-1615475026535098510',
-      lastSeen: ['2021-03-11T15:05:36.783Z'],
-      host: {
-        name: ['beats-ci-immutable-ubuntu-1804-1615475026535098510'],
-        os: { name: ['Ubuntu'], version: ['18.04.5 LTS (Bionic Beaver)'] },
-      },
+      risk_score: 73.0,
+      risk_keyword: 'High',
+      host_name: 'Dr Evil',
     },
     cursor: { value: 'beats-ci-immutable-ubuntu-1804-1615475026535098510', tiebreaker: null },
   },

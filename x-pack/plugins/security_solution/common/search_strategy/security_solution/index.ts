@@ -166,8 +166,6 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? HostDetailsRequestOptions
   : T extends HostsQueries.overview
   ? HostOverviewRequestOptions
-  : T extends UebaQueries.riskScore
-  ? RiskScoreRequestOptions
   : T extends HostsQueries.authentications
   ? HostAuthenticationsRequestOptions
   : T extends HostsQueries.firstOrLastSeen
@@ -206,6 +204,8 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? NetworkKpiUniqueFlowsRequestOptions
   : T extends NetworkKpiQueries.uniquePrivateIps
   ? NetworkKpiUniquePrivateIpsRequestOptions
+  : T extends UebaQueries.riskScore
+  ? RiskScoreRequestOptions
   : T extends typeof MatrixHistogramQuery
   ? MatrixHistogramRequestOptions
   : T extends CtiQueries.eventEnrichment

@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { RiskScoreRequestOptions } from '../../../../../../common/search_strategy';
+import { Direction, RiskScoreRequestOptions } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
 export const buildRiskScoreQuery = ({
@@ -42,7 +42,7 @@ export const buildRiskScoreQuery = ({
           terms: {
             field: 'host.name',
             order: {
-              risk_score: 'desc',
+              risk_score: Direction.desc,
             },
             size: 20,
           },

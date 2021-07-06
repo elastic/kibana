@@ -14,7 +14,7 @@ export enum RiskScoreFields {
 }
 export interface RiskScoreItem {
   _id?: Maybe<string>;
-  host_name: string;
-  risk_score: number;
-  risk_keyword: string;
+  host_name: Maybe<string>;
+  risk_score: Maybe<number>;
+  risk_keyword: Maybe<string>;
 }

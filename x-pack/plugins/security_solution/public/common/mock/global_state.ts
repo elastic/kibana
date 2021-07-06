@@ -13,6 +13,7 @@ import {
   NetworkTopTablesFields,
   NetworkTlsFields,
   NetworkUsersFields,
+  RiskScoreFields,
 } from '../../../common/search_strategy';
 import { State } from '../store';
 
@@ -171,7 +172,7 @@ export const mockGlobalState: State = {
         [uebaModel.UebaTableType.riskScore]: {
           activePage: 0,
           limit: 10,
-          sort: { field: NetworkTopTablesFields.bytes_out, direction: Direction.desc },
+          sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
         },
       },
     },
@@ -180,7 +181,7 @@ export const mockGlobalState: State = {
         [uebaModel.UebaTableType.riskScore]: {
           activePage: 0,
           limit: 10,
-          sort: { field: NetworkTopTablesFields.bytes_out, direction: Direction.desc },
+          sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
         },
       },
     },

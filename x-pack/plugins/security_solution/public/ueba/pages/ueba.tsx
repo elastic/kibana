@@ -9,22 +9,20 @@ import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import styled from 'styled-components';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef } from 'react';
-import { useDispatch } from 'react-redux';
+// import { useDispatch } from 'react-redux';
 import { isTab } from '../../../../timelines/public';
 
 import { SecurityPageName } from '../../app/types';
-import { UpdateDateRange } from '../../common/components/charts/common';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { HeaderPage } from '../../common/components/header_page';
 import { LastEventTime } from '../../common/components/last_event_time';
-import { hasMlUserPermissions } from '../../../common/machine_learning/has_ml_user_permissions';
 import { SecuritySolutionTabNavigation } from '../../common/components/navigation';
-// import { UebaKpiComponent } from '../components/kpi_ueba';
+
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useGlobalFullScreen } from '../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../common/containers/use_global_time';
-import { TimelineId } from '../../../common/types/timeline';
+import { TimelineId } from '../../../common';
 import { LastEventIndexKey } from '../../../common/search_strategy';
 import { useKibana } from '../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../common/lib/keury';
@@ -33,7 +31,6 @@ import { setAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
 
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { esQuery } from '../../../../../../src/plugins/data/public';
-import { useMlCapabilities } from '../../common/components/ml/hooks/use_ml_capabilities';
 import { OverviewEmpty } from '../../overview/components/overview_empty';
 import { Display } from './display';
 import { UebaTabs } from './ueba_tabs';
@@ -50,7 +47,7 @@ import { timelineDefaults } from '../../timelines/store/timeline/defaults';
 import { useSourcererScope } from '../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
-// import { ID } from '../containers/ueba';
+
 const ID = 'UebaQueryId';
 
 /**
@@ -63,7 +60,7 @@ const StyledFullHeightContainer = styled.div`
 `;
 
 const UebaComponent = () => {
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
@@ -80,7 +77,6 @@ const UebaComponent = () => {
 
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
   const { globalFullScreen } = useGlobalFullScreen();
-  const capabilities = useMlCapabilities();
   const { uiSettings } = useKibana().services;
   const tabsFilters = filters;
   // const narrowDateRange = useCallback<UpdateDateRange>(
@@ -181,9 +177,7 @@ const UebaComponent = () => {
 
               {/* <EuiSpacer />*/}
 
-              <SecuritySolutionTabNavigation
-                navTabs={navTabsUeba(hasMlUserPermissions(capabilities))}
-              />
+              <SecuritySolutionTabNavigation navTabs={navTabsUeba} />
 
               <EuiSpacer />
             </Display>

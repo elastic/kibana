@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import { UebaType } from '../../store/model';
+import { UebaTableType, UebaType } from '../../store/model';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { ESTermQuery } from '../../../../common/typed_json';
 import { DocValueFields } from '../../../../../timelines/common';
 import { Filter } from '../../../../../../../src/plugins/data/common';
 import { UpdateDateRange } from '../../../common/components/charts/common';
 import { NarrowDateRange } from '../../../common/components/ml/types';
+import { NavTab } from '../../../common/components/navigation/types';
 
+type KeyUebaNavTab = UebaTableType.riskScore;
+
+export type UebaNavTab = Record<KeyUebaNavTab, NavTab>;
 export interface QueryTabBodyProps {
   type: UebaType;
   startDate: GlobalTimeArgs['from'];

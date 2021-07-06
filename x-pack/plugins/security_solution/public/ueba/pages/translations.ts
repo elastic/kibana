@@ -10,3 +10,6 @@ import { i18n } from '@kbn/i18n';
 export const PAGE_TITLE = i18n.translate('xpack.securitySolution.ueba.pageTitle', {
   defaultMessage: 'UEBA',
 });
+export const NAVIGATION_RISK_SCORE_TITLE = i18n.translate('xpack.securitySolution.ueba.riskScore', {
+  defaultMessage: 'Risk score',
+});

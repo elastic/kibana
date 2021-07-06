@@ -70,8 +70,11 @@ export const hostFieldsMap: Readonly<Record<string, string>> = {
 };
 
 export const riskScoreFieldsMap: Readonly<Record<string, string>> = {
+  // NOTE: This field is not tested and available from ECS. Please remove this tag once it is
   'risk.score': 'risk_score',
+  // NOTE: This field is not tested and available from ECS. Please remove this tag once it is
   'risk.keyword': 'risk.keyword',
+  // NOTE: I don't know what I'm doing here TO DO
   'host.name': 'host.name',
 };
 
