@@ -8,11 +8,15 @@
 :keywords: administrator, analyst, concept, setup, security
 :description: Consider the production components for {kib} security.
 
+To secure your {kib} installation in production, there are a few high priority topics to consider to ensure that {kib} can only be accessed
+by authorized users. For more information on {kib}'s security controls, see <<using-kibana-with-security>>.
+
 [float]
 [[enabling-ssl]]
 === Enable SSL/TLS
 
-See <<configuring-tls>>.
+You should use SSL/TLS encryption to ensure that traffic between browsers and the {kib} server cannot be viewed or tampered with by third
+parties. See <<configuring-tls>>.
 
 [float]
 [[configuring-kibana-shield]]
@@ -48,11 +52,13 @@ year in your `kibana.yml`:
 server.securityResponseHeaders.strictTransportSecurity: "max-age=31536000"
 --------
 +
-WARNING: This header will block unencrypted connections for the entire domain. If you host more than one web application on the same domain using different ports or paths, all of them will be affected.
+WARNING: This header will block unencrypted connections for the entire domain. If you host more than one web application on the same domain
+using different ports or paths, all of them will be affected.
 
 2. Disable embedding
 +
-You can use <server-securityResponseHeaders-disableEmbedding, `disableEmbedding`> to ensure that {kib} cannot be embedded in other website. To configure this in your `kibana.yml`:
+You can use <server-securityResponseHeaders-disableEmbedding, `disableEmbedding`> to ensure that {kib} cannot be embedded in other website.
+To configure this in your `kibana.yml`:
 +
 [source,js]
 --------
