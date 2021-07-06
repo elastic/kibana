@@ -5,22 +5,21 @@
  * 2.0.
  */
 
-import { connect } from 'react-redux';
-import { compose, withProps } from 'recompose';
+import React, { FC } from 'react';
+import { useSelector } from 'react-redux';
 
 import {
   getWorkpad,
   getRenderedWorkpad,
   getRenderedWorkpadExpressions,
 } from '../../../../state/selectors/workpad';
-import { ShareWebsiteFlyout as Component, Props as ComponentProps } from './flyout.component';
+
+import { ShareWebsiteFlyout as FlyoutComponent } from './flyout.component';
 import { State, CanvasWorkpad } from '../../../../../types';
 import { CanvasRenderedWorkpad } from '../../../../../shareable_runtime/types';
 import { renderFunctionNames } from '../../../../../shareable_runtime/supported_renderers';
 
-import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public/';
 import { OnCloseFn } from '../share_menu.component';
-
 export { OnDownloadFn, OnCopyFn } from './flyout.component';
 
 const getUnsupportedRenderers = (state: State) => {
@@ -35,12 +34,6 @@ const getUnsupportedRenderers = (state: State) => {
   return renderers;
 };
 
-const mapStateToProps = (state: State) => ({
-  renderedWorkpad: getRenderedWorkpad(state),
-  unsupportedRenderers: getUnsupportedRenderers(state),
-  workpad: getWorkpad(state),
-});
-
 interface Props {
   onClose: OnCloseFn;
   renderedWorkpad: CanvasRenderedWorkpad;
@@ -48,14 +41,18 @@ interface Props {
   workpad: CanvasWorkpad;
 }
 
-export const ShareWebsiteFlyout = compose<ComponentProps, Pick<Props, 'onClose'>>(
-  connect(mapStateToProps),
-  withKibana,
-  withProps(
-    ({ unsupportedRenderers, renderedWorkpad, onClose, workpad }: Props): ComponentProps => ({
-      renderedWorkpad,
-      unsupportedRenderers,
-      onClose,
-    })
-  )
-)(Component);
+export const ShareWebsiteFlyout: FC<Pick<Props, 'onClose'>> = ({ onClose }) => {
+  const { renderedWorkpad, unsupportedRenderers } = useSelector((state: State) => ({
+    renderedWorkpad: getRenderedWorkpad(state),
+    unsupportedRenderers: getUnsupportedRenderers(state),
+    workpad: getWorkpad(state),
+  }));
+
+  return (
+    <FlyoutComponent
+      onClose={onClose}
+      unsupportedRenderers={unsupportedRenderers}
+      renderedWorkpad={renderedWorkpad}
+    />
+  );
+};
