@@ -141,7 +141,7 @@ Before you can get to the fun of visualizing and alerting on Portland buses, you
     ----------------------------------
 . Wait for Logstash to initialize and confirm data is flowing. You should see messages similar to this:
     [role="screenshot"]
-    image::maps/images/asset_tracking_tutorial/logstash_output.png[]
+    image::maps/images/asset-tracking-tutorial/logstash_output.png[]
 . Leave the terminal window open and Logstash running throughout this tutorial.
 
 
