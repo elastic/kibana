@@ -15,7 +15,6 @@ import {
 import { batchTelemetryRecords, getLastTaskExecutionTimestamp } from './helpers';
 import { TelemetryEventsSender } from './sender';
 import { FullAgentPolicyInput } from '../../../../fleet/common/types/models/agent_policy';
-// import { PolicyData } from '../../../common/endpoint/types';
 import {
   EndpointMetricsAggregation,
   EndpointPolicyResponseAggregation,
@@ -263,8 +262,19 @@ export class TelemetryEndpointTask {
         endpoint_meta: {
           os: endpoint.endpoint_metrics.host.os,
         },
-        policy_config: policyConfig,
-        policy_failure: failedPolicy,
+        policy_config: policyConfig.policy,
+        policy_failure:
+          failedPolicy !== null && failedPolicy !== undefined
+            ? {
+                agent_policy_status: failedPolicy?._source.event.agent_id_status,
+                manifest_version:
+                  failedPolicy?._source.Endpoint.policy.applied.artifacts.global.version,
+                status: failedPolicy?._source.Endpoint.policy.applied.status,
+                actions: failedPolicy?._source.Endpoint.policy.applied.actions
+                  .map((action) => (action.status !== 'success' ? action : null))
+                  .filter((action) => action !== null),
+              }
+            : null,
         telemetry_meta: {
           metrics_timestamp: endpoint.endpoint_metrics['@timestamp'],
         },
