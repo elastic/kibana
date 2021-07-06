@@ -158,9 +158,9 @@ export function DetailView({ errorGroup, urlParams }: Props) {
             <EuiTab
               onClick={() => {
                 history.replace({
-                  ...location,
+                  ...history.location,
                   search: fromQuery({
-                    ...toQuery(location.search),
+                    ...toQuery(history.location.search),
                     detailTab: key,
                   }),
                 });
