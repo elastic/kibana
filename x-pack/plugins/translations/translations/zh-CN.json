@@ -21142,7 +21142,6 @@
     "xpack.securitySolution.rowRenderer.wasPreventedFromExecutingAMaliciousProcessDescription": "被阻止执行恶意进程",
     "xpack.securitySolution.rowRenderer.wasPreventedFromModifyingAMaliciousFileDescription": "被阻止修改恶意文件",
     "xpack.securitySolution.rowRenderer.wasPreventedFromRenamingAMaliciousFileDescription": "被阻止重命名恶意文件",
-    "xpack.securitySolution.search.administration": "终端管理",
     "xpack.securitySolution.search.administration.trustedApps": "受信任的应用程序",
     "xpack.securitySolution.search.cases": "案例",
     "xpack.securitySolution.search.cases.configure": "配置案例",

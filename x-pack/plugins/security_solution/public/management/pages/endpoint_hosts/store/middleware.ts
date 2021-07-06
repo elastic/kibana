@@ -166,6 +166,8 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
             });
           }
         } catch (error) {
+          // TODO should handle the error instead of logging it to the browser
+          // Also this is an anti-pattern we shouldn't use
           // Ignore Errors, since this should not hinder the user's ability to use the UI
           logError(error);
         }
@@ -286,6 +288,8 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
               });
             }
           } catch (error) {
+            // TODO should handle the error instead of logging it to the browser
+            // Also this is an anti-pattern we shouldn't use
             // Ignore Errors, since this should not hinder the user's ability to use the UI
             logError(error);
           }
@@ -331,6 +335,8 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
             });
           }
         } catch (error) {
+          // TODO should handle the error instead of logging it to the browser
+          // Also this is an anti-pattern we shouldn't use
           // Ignore Errors, since this should not hinder the user's ability to use the UI
           logError(error);
         }
@@ -537,6 +543,8 @@ const endpointsTotal = async (http: HttpStart): Promise<number> => {
       })
     ).total;
   } catch (error) {
+    // TODO should handle the error instead of logging it to the browser
+    // Also this is an anti-pattern we shouldn't use
     logError(`error while trying to check for total endpoints`);
     logError(error);
   }
@@ -547,6 +555,8 @@ const doEndpointsExist = async (http: HttpStart): Promise<boolean> => {
   try {
     return (await endpointsTotal(http)) > 0;
   } catch (error) {
+    // TODO should handle the error instead of logging it to the browser
+    // Also this is an anti-pattern we shouldn't use
     logError(`error while trying to check if endpoints exist`);
     logError(error);
   }
@@ -613,6 +623,8 @@ async function getEndpointPackageInfo(
       payload: createLoadedResourceState(packageInfo),
     });
   } catch (error) {
+    // TODO should handle the error instead of logging it to the browser
+    // Also this is an anti-pattern we shouldn't use
     // Ignore Errors, since this should not hinder the user's ability to use the UI
     logError(error);
     dispatch({
@@ -663,6 +675,8 @@ const loadEndpointsPendingActions = async ({
       payload: createLoadedResourceState(agentIdToPendingActions),
     });
   } catch (error) {
+    // TODO should handle the error instead of logging it to the browser
+    // Also this is an anti-pattern we shouldn't use
     logError(error);
   }
 };

@@ -20810,7 +20810,6 @@
     "xpack.securitySolution.rowRenderer.wasPreventedFromExecutingAMaliciousProcessDescription": "悪意のあるファイルの実行が防止されました",
     "xpack.securitySolution.rowRenderer.wasPreventedFromModifyingAMaliciousFileDescription": "悪意のあるファイルの修正が防止されました",
     "xpack.securitySolution.rowRenderer.wasPreventedFromRenamingAMaliciousFileDescription": "悪意のあるファイルの名前変更が防止されました",
-    "xpack.securitySolution.search.administration": "エンドポイント管理",
     "xpack.securitySolution.search.administration.trustedApps": "信頼できるアプリケーション",
     "xpack.securitySolution.search.cases": "ケース",
     "xpack.securitySolution.search.cases.configure": "ケースを構成",
