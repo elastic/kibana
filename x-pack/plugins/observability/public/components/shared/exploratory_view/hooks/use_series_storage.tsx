@@ -59,6 +59,7 @@ export function UrlStorageContextProvider({
     convertAllShortSeries(storage.get(allSeriesKey) ?? {})
   );
   const [firstSeriesId, setFirstSeriesId] = useState('');
+  const [firstSeries, setFirstSeries] = useState<SeriesUrl>();
 
   useEffect(() => {
     const allSeriesIds = Object.keys(allShortSeries);
@@ -66,6 +67,7 @@ export function UrlStorageContextProvider({
 
     setAllSeries(allSeriesN);
     setFirstSeriesId(allSeriesIds?.[0]);
+    setFirstSeries(allSeriesN?.[0]);
     (storage as IKbnUrlStateStorage).set(allSeriesKey, allShortSeries);
   }, [allShortSeries, storage]);
 
@@ -100,7 +102,7 @@ export function UrlStorageContextProvider({
     firstSeriesId,
     allSeries,
     allSeriesIds,
-    firstSeries: allSeries?.[firstSeriesId],
+    firstSeries: firstSeries!,
   };
   return <UrlStorageContext.Provider value={value}>{children}</UrlStorageContext.Provider>;
 }
@@ -110,7 +112,7 @@ export function useSeriesStorage() {
 }
 
 function convertFromShortUrl(newValue: ShortUrlSeries): SeriesUrl {
-  const { dt, op, st, rt, bd, ft, time, rdf, ...restSeries } = newValue;
+  const { dt, op, st, rt, bd, ft, time, rdf, mt, ...restSeries } = newValue;
   return {
     operationType: op,
     reportType: rt!,
@@ -120,6 +122,7 @@ function convertFromShortUrl(newValue: ShortUrlSeries): SeriesUrl {
     time: time!,
     reportDefinitions: rdf,
     dataType: dt!,
+    selectedMetricField: mt,
     ...restSeries,
   };
 }
@@ -132,6 +135,7 @@ interface ShortUrlSeries {
   [URL_KEYS.BREAK_DOWN]?: string;
   [URL_KEYS.FILTERS]?: UrlFilter[];
   [URL_KEYS.REPORT_DEFINITIONS]?: URLReportDefinition;
+  [URL_KEYS.SELECTED_METRIC]?: string;
   time?: {
     to: string;
     from: string;

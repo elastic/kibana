@@ -14,6 +14,7 @@ import type { StartServicesAccessor } from 'src/core/public';
 import type { RegisterManagementAppArgs } from 'src/plugins/management/public';
 import type { Space } from 'src/plugins/spaces_oss/common';
 
+import { APP_WRAPPER_CLASS } from '../../../../../src/core/public';
 import {
   KibanaContextProvider,
   RedirectAppLinks,
@@ -125,7 +126,7 @@ export const spacesManagementApp = Object.freeze({
         render(
           <KibanaContextProvider services={coreStart}>
             <i18nStart.Context>
-              <RedirectAppLinks application={application}>
+              <RedirectAppLinks application={application} className={APP_WRAPPER_CLASS}>
                 <Router history={history}>
                   <Switch>
                     <Route path={['', '/']} exact>

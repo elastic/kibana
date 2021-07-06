@@ -9,10 +9,12 @@ import React, { MouseEvent, useEffect } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { nextAriaLabel, prevAriaLabel } from './translations';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { ScreenshotRefImageData } from '../../../../../../common/runtime_types';
 
 export interface StepImageCaptionProps {
   captionContent: string;
   imgSrc?: string;
+  imgRef?: ScreenshotRefImageData;
   maxSteps?: number;
   setStepNumber: React.Dispatch<React.SetStateAction<number>>;
   stepNumber: number;
@@ -30,6 +32,7 @@ const ImageCaption = euiStyled.div`
 
 export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
   captionContent,
+  imgRef,
   imgSrc,
   maxSteps,
   setStepNumber,
@@ -54,7 +57,7 @@ export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
       }}
     >
       <div className="stepArrowsFullScreen">
-        {imgSrc && (
+        {(imgSrc || imgRef) && (
           <EuiFlexGroup alignItems="center" justifyContent="center">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty

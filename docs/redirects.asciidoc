@@ -308,3 +308,12 @@ This content has moved. Refer to <<discover-view-surrounding-documents>>.
 
 This content has moved. Refer to <<string-field-formatters>>.
 
+[role="exclude",id="embedding"]
+== Embed {kib} content in a web page
+
+This content has moved. Refer to <<embedded-content-authentication>> and <<embed-code>>.
+
+[role="exclude",id="reporting-troubleshooting-system-dependencies"]
+== System dependencies
+
+This content has moved. Refer to <<install-reporting-packages>>.

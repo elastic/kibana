@@ -1197,10 +1197,10 @@
   resolved "https://registry.yarnpkg.com/@bazel/ibazel/-/ibazel-0.15.10.tgz#cf0cff1aec6d8e7bb23e1fc618d09fbd39b7a13f"
   integrity sha512-0v+OwCQ6fsGFa50r6MXWbUkSGuWOoZ22K4pMSdtWiL5LKFIE4kfmMmtQS+M7/ICNwk2EIYob+NRreyi/DGUz5A==
 
-"@bazel/typescript@^3.5.1":
-  version "3.5.1"
-  resolved "https://registry.yarnpkg.com/@bazel/typescript/-/typescript-3.5.1.tgz#c6027d683adeefa2c3cebfa3ed5efa17c405a63b"
-  integrity sha512-dU5sGgaGdFWV1dJ1B+9iFbttgcKtmob+BvlM8mY7Nxq4j7/wVbgPjiVLOBeOD7kpzYep8JHXfhAokHt486IG+Q==
+"@bazel/typescript@^3.6.0":
+  version "3.6.0"
+  resolved "https://registry.yarnpkg.com/@bazel/typescript/-/typescript-3.6.0.tgz#4dda2e39505cde4a190f51118fbb82ea0e80fde6"
+  integrity sha512-cO58iHmSxM4mRHJLLbb3FfoJJxv0pMiVGFLORoiUy/EhLtyYGZ1e7ntf4GxEovwK/E4h/awjSUlQkzPThcukTg==
   dependencies:
     protobufjs "6.8.8"
     semver "5.6.0"
@@ -1359,10 +1359,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@30.1.0":
-  version "30.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-30.1.0.tgz#eb9b3348c149ce13f74876738a9d2899b6b10067"
-  integrity sha512-aUfXRQYQopm+6O48tEO0v/w6fETYORGiSPBRtqlq5xPncZGhGnQbgXVNQsPngYqapnKpOupXAqzjopF+RJ4QWg==
+"@elastic/charts@31.0.0":
+  version "31.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-31.0.0.tgz#c0b177313192bf5999835b8e01dc20471a8e7ef8"
+  integrity sha512-k8IJEwUBzzAjjkw1GDbt3laUfBoyc2t46+i1hs0Ni3ehb9jVntJSbYMBDReUDjWQSrUvrgHM6Xht1urBsdLS8Q==
   dependencies:
     "@popperjs/core" "^2.4.0"
     chroma-js "^2.1.0"
@@ -1381,7 +1381,7 @@
     redux "^4.0.4"
     reselect "^4.0.0"
     resize-observer-polyfill "^1.5.1"
-    ts-debounce "^1.0.0"
+    ts-debounce "^3.0.0"
     utility-types "^3.10.0"
     uuid "^3.3.2"
 
@@ -1436,10 +1436,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@34.3.0":
-  version "34.3.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-34.3.0.tgz#5cd7d66c86d9644991c4391682f84824126361df"
-  integrity sha512-cUFh5H7Y95lzbsyRP1yL88mVVe5MAODOhV+O+8jYmuDQH6WrEiDhtSljTKfVYssbP7Bv+qFraVwyUj623dfr2w==
+"@elastic/eui@34.5.2":
+  version "34.5.2"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-34.5.2.tgz#6aad49945a894fb77785a48c281cd0bd5e9e87ba"
+  integrity sha512-+ColXEaZ8Oa8lJ/ixayiLuWlYUggoTTW0Q5sWXOolR94PlekxsdSpu5f0kVyxlz7ECdkHz3ttOu9RYM7Z6ARyA==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
@@ -1475,6 +1475,7 @@
     tabbable "^3.0.0"
     text-diff "^1.0.1"
     unified "^9.2.0"
+    unist-util-visit "^2.0.3"
     url-parse "^1.5.0"
     uuid "^8.3.0"
     vfile "^4.2.0"
@@ -2644,7 +2645,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/es-archiver@link:packages/kbn-es-archiver":
+"@kbn/es-archiver@link:bazel-bin/packages/kbn-es-archiver":
   version "0.0.0"
   uid ""
 
@@ -2768,6 +2769,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/spec-to-console@link:bazel-bin/packages/kbn-spec-to-console":
+  version "0.0.0"
+  uid ""
+
 "@kbn/std@link:bazel-bin/packages/kbn-std":
   version "0.0.0"
   uid ""
@@ -2780,11 +2785,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/test-subj-selector@link:packages/kbn-test-subj-selector":
+"@kbn/test-subj-selector@link:bazel-bin/packages/kbn-test-subj-selector":
   version "0.0.0"
   uid ""
 
-"@kbn/test@link:packages/kbn-test":
+"@kbn/test@link:bazel-bin/packages/kbn-test":
   version "0.0.0"
   uid ""
 
@@ -4301,6 +4306,11 @@
     prettier "~2.0.5"
     regenerator-runtime "^0.13.7"
     source-map "^0.7.3"
+
+"@storybook/testing-react@^0.0.17":
+  version "0.0.17"
+  resolved "https://registry.yarnpkg.com/@storybook/testing-react/-/testing-react-0.0.17.tgz#632dd22f8815743f78c182b126f444cf51d92d71"
+  integrity sha512-93nbA/JSWDEys1msd438+wzETRFDEgT2aFqJL2y46++zsyv8g2mCYKZkf9E36KQHMQbO1uJBHT8CmrLQa8VmZw==
 
 "@storybook/theming@6.1.20", "@storybook/theming@^6.1.20":
   version "6.1.20"
@@ -27109,10 +27119,10 @@ trough@^1.0.0:
   dependencies:
     glob "^6.0.4"
 
-ts-debounce@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/ts-debounce/-/ts-debounce-1.0.0.tgz#e433301744ba75fe25466f7f23e1382c646aae6a"
-  integrity sha512-V+IzWj418IoqqxVJD6I0zjPtgIyvAJ8VyViqzcxZ0JRiJXsi5mCmy1yUKkWd2gUygT28a8JsVFCgqdrf2pLUHQ==
+ts-debounce@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/ts-debounce/-/ts-debounce-3.0.0.tgz#9beedf59c04de3b5bef8ff28bd6885624df357be"
+  integrity sha512-7jiRWgN4/8IdvCxbIwnwg2W0bbYFBH6BxFqBjMKk442t7+liF2Z1H6AUCcl8e/pD93GjPru+axeiJwFmRww1WQ==
 
 ts-dedent@^2.0.0:
   version "2.0.0"
@@ -27733,7 +27743,7 @@ unist-util-visit-parents@^3.0.0:
     "@types/unist" "^2.0.0"
     unist-util-is "^4.0.0"
 
-unist-util-visit@2.0.3, unist-util-visit@^2.0.0, unist-util-visit@^2.0.2:
+unist-util-visit@2.0.3, unist-util-visit@^2.0.0, unist-util-visit@^2.0.2, unist-util-visit@^2.0.3:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/unist-util-visit/-/unist-util-visit-2.0.3.tgz#c3703893146df47203bb8a9795af47d7b971208c"
   integrity sha512-iJ4/RczbJMkD0712mGktuGpm/U4By4FfDonL7N/9tATGIF4imikjOuagyMY53tnZq3NP6BcmlrHhEKAfGWjh7Q==

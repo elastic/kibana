@@ -152,7 +152,7 @@ export const getXyVisualization = ({
 
   getSuggestions,
 
-  initialize(frame, state) {
+  initialize(addNewLayer, state) {
     return (
       state || {
         title: 'Empty XY chart',
@@ -161,7 +161,7 @@ export const getXyVisualization = ({
         preferredSeriesType: defaultSeriesType,
         layers: [
           {
-            layerId: frame.addNewLayer(),
+            layerId: addNewLayer(),
             accessors: [],
             position: Position.Top,
             seriesType: defaultSeriesType,
