@@ -16,6 +16,10 @@ export class MonitoringPageObject extends FtrService {
     return this.testSubjects.getVisibleText('accessDeniedTitle');
   }
 
+  async closeAlertsModal() {
+    return this.testSubjects.click('alerts-modal-button');
+  }
+
   async clickBreadcrumb(subj: string) {
     return this.testSubjects.click(subj);
   }

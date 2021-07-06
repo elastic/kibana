@@ -28,9 +28,13 @@ readonly links: {
             readonly elasticsearchModule: string;
             readonly startup: string;
             readonly exportedFields: string;
+            readonly suricataModule: string;
+            readonly zeekModule: string;
         };
         readonly auditbeat: {
             readonly base: string;
+            readonly auditdModule: string;
+            readonly systemModule: string;
         };
         readonly metricbeat: {
             readonly base: string;
@@ -46,6 +50,9 @@ readonly links: {
         };
         readonly heartbeat: {
             readonly base: string;
+        };
+        readonly libbeat: {
+            readonly getStarted: string;
         };
         readonly logstash: {
             readonly base: string;
@@ -123,6 +130,10 @@ readonly links: {
         readonly siem: {
             readonly guide: string;
             readonly gettingStarted: string;
+            readonly ml: string;
+            readonly ruleChangeLog: string;
+            readonly detectionsReq: string;
+            readonly networkMap: string;
         };
         readonly query: {
             readonly eql: string;
@@ -201,5 +212,8 @@ readonly links: {
             upgradeElasticAgent: string;
             upgradeElasticAgent712lower: string;
         }>;
+        readonly ecs: {
+            readonly guide: string;
+        };
     };
 ```
