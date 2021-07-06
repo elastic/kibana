@@ -7,7 +7,6 @@
  */
 
 import { mergeWith } from 'lodash';
-import { SavedObjectMigrationMap } from 'kibana/server';
 import { SavedObjectReference } from '../../../../core/types';
 
 export type SerializableValue = string | number | boolean | null | undefined | SerializableState;
@@ -26,9 +25,9 @@ export type MigrateFunctionsObject = {
   [key: string]: MigrateFunction<any, any>;
 };
 
-export const mergeSavedObjectMigrationMaps = (
-  obj1: SavedObjectMigrationMap,
-  obj2: SavedObjectMigrationMap
+export const mergeMigrationFunctionMaps = (
+  obj1: MigrateFunctionsObject,
+  obj2: MigrateFunctionsObject
 ) => {
   const customizer = (objValue: MigrateFunction, srcValue: MigrateFunction) => {
     if (!srcValue || !objValue) {
@@ -37,7 +36,7 @@ export const mergeSavedObjectMigrationMaps = (
     return (state: SerializableState) => objValue(srcValue(state));
   };
 
-  return mergeWith(obj1, obj2, customizer);
+  return mergeWith({ ...obj1 }, obj2, customizer);
 };
 
 /**

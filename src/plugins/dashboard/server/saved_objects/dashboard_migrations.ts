@@ -26,8 +26,9 @@ import {
 import { SavedObjectEmbeddableInput } from '../../../embeddable/common';
 import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../../data/common';
 import {
-  mergeSavedObjectMigrationMaps,
+  mergeMigrationFunctionMaps,
   MigrateFunction,
+  MigrateFunctionsObject,
   SerializableValue,
 } from '../../../kibana_utils/common';
 import { replaceIndexPatternReference } from './replace_index_pattern_reference';
@@ -219,7 +220,7 @@ export const createDashboardSavedObjectTypeMigrations = (
   const embeddableMigrations = (mapValues(
     deps.embeddable.getAllMigrations(),
     migrateByValuePanels
-  ) as any) as SavedObjectMigrationMap;
+  ) as any) as MigrateFunctionsObject;
 
   const dashboardMigrations = {
     /**
@@ -247,5 +248,5 @@ export const createDashboardSavedObjectTypeMigrations = (
     '7.14.0': flow(replaceIndexPatternReference),
   };
 
-  return mergeSavedObjectMigrationMaps(dashboardMigrations, embeddableMigrations);
+  return mergeMigrationFunctionMaps(dashboardMigrations, embeddableMigrations);
 };

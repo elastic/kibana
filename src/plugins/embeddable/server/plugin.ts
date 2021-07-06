@@ -58,9 +58,9 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
       inject: getInjectFunction(commonContract),
       getAllMigrations: () =>
         getAllMigrations(
-          this.embeddableFactories.values(),
-          this.enhancements.values(),
-          this.migrateFn
+          Array.from(this.embeddableFactories.values()),
+          Array.from(this.enhancements.values()),
+          this.migrateFn!
         ),
     };
   }
@@ -77,9 +77,9 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
       inject: getInjectFunction(commonContract),
       getAllMigrations: () =>
         getAllMigrations(
-          this.embeddableFactories.values(),
-          this.enhancements.values(),
-          this.migrateFn
+          Array.from(this.embeddableFactories.values()),
+          Array.from(this.enhancements.values()),
+          this.migrateFn!
         ),
     };
   }
