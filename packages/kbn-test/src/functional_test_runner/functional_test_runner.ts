@@ -72,13 +72,13 @@ export class FunctionalTestRunner {
 
       const failures = await runTests(this.lifecycle, mocha);
       const sec = ((Date.now() - startTime) / 1000).toFixed(2);
-      const success = failures.length ? 'success' : 'failure';
-      const msg = `--- Tests finished after ${sec} seconds, ${failures.length} failures, ${success}`;
+      const success = failures === 0 ? 'success' : 'failure';
+      const msg = `--- Tests finished after ${sec} seconds, ${failures} failures, ${success}`;
 
       if (success === 'success') {
-        this.log.error(msg);
-      } else {
         this.log.success(msg);
+      } else {
+        this.log.error(msg);
       }
 
       return failures;

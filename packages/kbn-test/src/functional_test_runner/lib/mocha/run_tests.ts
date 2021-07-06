@@ -16,7 +16,6 @@ import { Mocha } from '../../fake_mocha_types';
  *  @param  {Lifecycle} lifecycle
  *  @param  {ToolingLog} log
  *  @param  {Mocha} mocha
- *  @return {Promise<Number>} resolves to the number of test failures
  */
 export async function runTests(lifecycle: Lifecycle, mocha: Mocha) {
   let runComplete = false;
@@ -28,7 +27,7 @@ export async function runTests(lifecycle: Lifecycle, mocha: Mocha) {
     if (!runComplete) runner.abort();
   });
 
-  return new Promise<unknown[]>((resolve) => {
+  return new Promise<number>((resolve) => {
     const respond = () => resolve(runner.failures);
 
     // if there are no tests, mocha.run() is sync
