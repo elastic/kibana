@@ -13,16 +13,22 @@ import {
 } from '../../../../../../src/plugins/presentation_util/public';
 
 import { workpadServiceFactory } from './workpad';
+import { notifyServiceFactory } from './notify';
+import { platformServiceFactory } from './platform';
 import { CanvasPluginServices } from '..';
 import { CanvasStartDeps } from '../../plugin';
 
 export { workpadServiceFactory } from './workpad';
+export { notifyServiceFactory } from './notify';
+export { platformServiceFactory } from './platform';
 
 export const pluginServiceProviders: PluginServiceProviders<
   CanvasPluginServices,
   KibanaPluginServiceParams<CanvasStartDeps>
 > = {
   workpad: new PluginServiceProvider(workpadServiceFactory),
+  notify: new PluginServiceProvider(notifyServiceFactory),
+  platform: new PluginServiceProvider(platformServiceFactory),
 };
 
 export const pluginServiceRegistry = new PluginServiceRegistry<
