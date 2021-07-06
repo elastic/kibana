@@ -128,7 +128,7 @@ describe('trace', () => {
       expect(header).toEqual(expect.any(String));
     });
 
-    it('can be rewritten during Elasticsearch client call', async () => {
+    it('can be overriden during Elasticsearch client call', async () => {
       const { http } = await root.setup();
       const { createRouter } = http;
 
@@ -155,8 +155,24 @@ describe('trace', () => {
       expect(header).toBe('new-opaque-id');
     });
   });
+
   describe('execution context', () => {
-    it('sets execution context for a request handler', async () => {
+    it('sets execution context for a sync request handler', async () => {
+      const { executionContext, http } = await root.setup();
+      const { createRouter } = http;
+
+      const router = createRouter('');
+      router.get({ path: '/execution-context', validate: false }, async (context, req, res) => {
+        executionContext.set(parentContext);
+        return res.ok({ body: executionContext.get() });
+      });
+
+      await root.start();
+      const response = await kbnTestServer.request.get(root, '/execution-context').expect(200);
+      expect(response.body).toEqual({ ...parentContext, requestId: expect.any(String) });
+    });
+
+    it('sets execution context for an async request handler', async () => {
       const { executionContext, http } = await root.setup();
       const { createRouter } = http;
 
@@ -221,6 +237,39 @@ describe('trace', () => {
       expect(bodyA.requestId).not.toBe(bodyB.requestId);
       expect(bodyB.requestId).not.toBe(bodyC.requestId);
       expect(bodyA.requestId).not.toBe(bodyC.requestId);
+    });
+
+    it('execution context is uniq for concurrent requests when "x-opaque-id" provided', async () => {
+      const { executionContext, http } = await root.setup();
+      const { createRouter } = http;
+
+      const router = createRouter('');
+      let id = 2;
+      router.get({ path: '/execution-context', validate: false }, async (context, req, res) => {
+        executionContext.set(parentContext);
+        await delay(id-- * 100);
+        return res.ok({ body: executionContext.get() });
+      });
+
+      await root.start();
+      const responseA = kbnTestServer.request
+        .get(root, '/execution-context')
+        .set('x-opaque-id', 'req-1');
+      const responseB = kbnTestServer.request
+        .get(root, '/execution-context')
+        .set('x-opaque-id', 'req-2');
+      const responseC = kbnTestServer.request
+        .get(root, '/execution-context')
+        .set('x-opaque-id', 'req-3');
+
+      const [{ body: bodyA }, { body: bodyB }, { body: bodyC }] = await Promise.all([
+        responseA,
+        responseB,
+        responseC,
+      ]);
+      expect(bodyA.requestId).toBe('req-1');
+      expect(bodyB.requestId).toBe('req-2');
+      expect(bodyC.requestId).toBe('req-3');
     });
 
     it('parses the parent context if present', async () => {

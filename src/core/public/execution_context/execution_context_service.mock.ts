@@ -10,7 +10,7 @@ import type { Plugin } from 'src/core/public';
 import type { ExecutionContextServiceStart } from './execution_context_service';
 import type { ExecutionContextContainer } from './execution_context_container';
 
-const creteContainerMock = () => {
+const createContainerMock = () => {
   const mock: jest.Mocked<PublicMethodsOf<ExecutionContextContainer>> = {
     toHeader: jest.fn(),
   };
@@ -18,7 +18,7 @@ const creteContainerMock = () => {
 };
 const createStartContractMock = () => {
   const mock: jest.Mocked<ExecutionContextServiceStart> = {
-    create: jest.fn().mockReturnValue(creteContainerMock()),
+    create: jest.fn().mockReturnValue(createContainerMock()),
   };
   return mock;
 };
@@ -32,4 +32,5 @@ const createMock = (): jest.Mocked<Plugin> => ({
 export const executionContextServiceMock = {
   create: createMock,
   createStartContract: createStartContractMock,
+  createContainer: createContainerMock,
 };

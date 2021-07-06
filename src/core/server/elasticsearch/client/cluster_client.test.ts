@@ -29,6 +29,8 @@ const createConfig = (
   };
 };
 
+const getExecutionContextMock = jest.fn();
+
 describe('ClusterClient', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let getAuthHeaders: jest.MockedFunction<GetAuthHeaders>;
@@ -56,18 +58,18 @@ describe('ClusterClient', () => {
   it('creates a single internal and scoped client during initialization', () => {
     const config = createConfig();
 
-    new ClusterClient(config, logger, 'custom-type', getAuthHeaders);
+    new ClusterClient(config, logger, 'custom-type', getAuthHeaders, getExecutionContextMock);
 
     expect(configureClientMock).toHaveBeenCalledTimes(2);
     expect(configureClientMock).toHaveBeenCalledWith(config, {
       logger,
       type: 'custom-type',
-      getExecutionContext: expect.any(Function),
+      getExecutionContext: getExecutionContextMock,
     });
     expect(configureClientMock).toHaveBeenCalledWith(config, {
       logger,
       type: 'custom-type',
-      getExecutionContext: expect.any(Function),
+      getExecutionContext: getExecutionContextMock,
       scoped: true,
     });
   });
