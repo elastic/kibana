@@ -94,12 +94,12 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
           {id ? (
             <FormattedMessage
               id="xpack.securitySolution.eventFilters.eventFiltersFlyout.actions.confirm.update"
-              defaultMessage="Update Endpoint Event Filter"
+              defaultMessage="Update event filter"
             />
           ) : (
             <FormattedMessage
               id="xpack.securitySolution.eventFilters.eventFiltersFlyout.actions.confirm.create"
-              defaultMessage="Add Endpoint Event Filter"
+              defaultMessage="Add event filter"
             />
           )}
         </EuiButton>
