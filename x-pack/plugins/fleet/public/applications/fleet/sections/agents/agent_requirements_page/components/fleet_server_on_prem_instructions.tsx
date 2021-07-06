@@ -482,7 +482,7 @@ export const AddFleetServerHostStepContent = ({
           <EuiFieldText
             fullWidth
             placeholder={'e.g. http://127.0.0.1:8220'}
-            value={calloutHost}
+            value={fleetServerHost}
             isInvalid={!!error}
             onChange={onChange}
             prepend={
