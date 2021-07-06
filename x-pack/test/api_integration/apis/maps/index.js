@@ -16,6 +16,7 @@ export default function ({ loadTestFile, getService }) {
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.unload('x-pack/test/functional/es_archives/maps/data');
     });
 
     describe('', () => {

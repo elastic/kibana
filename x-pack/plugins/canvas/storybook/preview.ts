@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { action } from '@storybook/addon-actions';
+import { addParameters } from '@storybook/react';
 
 import { startServices } from '../public/services/stubs';
 import { addDecorators } from './decorators';
@@ -13,13 +13,9 @@ import { addDecorators } from './decorators';
 // Import Canvas CSS
 import '../public/style/index.scss';
 
-startServices({
-  notify: {
-    success: (message) => action(`success: ${message}`)(),
-    error: (message) => action(`error: ${message}`)(),
-    info: (message) => action(`info: ${message}`)(),
-    warning: (message) => action(`warning: ${message}`)(),
-  },
-});
+startServices();
 
 addDecorators();
+addParameters({
+  controls: { hideNoControlsWarning: true },
+});

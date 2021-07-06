@@ -63,16 +63,11 @@ describe('Cloud Plugin', () => {
         });
 
         expect(initializeFullStoryMock).toHaveBeenCalled();
-        const {
-          basePath,
-          orgId,
-          packageInfo,
-          userIdPromise,
-        } = initializeFullStoryMock.mock.calls[0][0];
+        const { basePath, orgId, packageInfo, userId } = initializeFullStoryMock.mock.calls[0][0];
         expect(basePath.prepend).toBeDefined();
         expect(orgId).toEqual('foo');
         expect(packageInfo).toEqual(initContext.env.packageInfo);
-        expect(await userIdPromise).toEqual('1234');
+        expect(userId).toEqual('1234');
       });
 
       it('passes undefined user ID when security is not available', async () => {
@@ -82,9 +77,9 @@ describe('Cloud Plugin', () => {
         });
 
         expect(initializeFullStoryMock).toHaveBeenCalled();
-        const { orgId, userIdPromise } = initializeFullStoryMock.mock.calls[0][0];
+        const { orgId, userId } = initializeFullStoryMock.mock.calls[0][0];
         expect(orgId).toEqual('foo');
-        expect(await userIdPromise).toEqual(undefined);
+        expect(userId).toEqual(undefined);
       });
 
       it('does not call initializeFullStory when enabled=false', async () => {

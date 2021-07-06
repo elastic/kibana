@@ -79,6 +79,7 @@ import {
 import { bulkCreateFactory } from './bulk_create_factory';
 import { wrapHitsFactory } from './wrap_hits_factory';
 import { wrapSequencesFactory } from './wrap_sequences_factory';
+import { ConfigType } from '../../../config';
 
 export const signalRulesAlertType = ({
   logger,
@@ -86,12 +87,14 @@ export const signalRulesAlertType = ({
   version,
   ml,
   lists,
+  mergeStrategy,
 }: {
   logger: Logger;
   eventsTelemetry: TelemetryEventsSender | undefined;
   version: string;
   ml: SetupPlugins['ml'];
   lists: SetupPlugins['lists'] | undefined;
+  mergeStrategy: ConfigType['alertMergeStrategy'];
 }): SignalRuleAlertTypeDefinition => {
   return {
     id: SIGNALS_ID,
@@ -244,11 +247,13 @@ export const signalRulesAlertType = ({
         const wrapHits = wrapHitsFactory({
           ruleSO: savedObject,
           signalsIndex: params.outputIndex,
+          mergeStrategy,
         });
 
         const wrapSequences = wrapSequencesFactory({
           ruleSO: savedObject,
           signalsIndex: params.outputIndex,
+          mergeStrategy,
         });
 
         if (isMlRule(type)) {

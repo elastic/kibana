@@ -15,6 +15,7 @@ import { set } from '@elastic/safer-lodash-set';
 import { APP_ID, DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../../../common/constants';
 import { errorToToaster, useStateToaster } from '../../components/toasters';
 import { AuthenticatedUser } from '../../../../../security/common/model';
+import { NavigateToAppOptions } from '../../../../../../../src/core/public';
 import { StartServices } from '../../../types';
 import { useUiSetting, useKibana } from './kibana_react';
 
@@ -169,8 +170,15 @@ export const useAppUrl = () => {
   const { getUrlForApp } = useKibana().services.application;
 
   const getAppUrl = useCallback(
-    ({ appId = APP_ID, ...options }: { appId?: string; deepLinkId?: string; path?: string }) =>
-      getUrlForApp(appId, options),
+    ({
+      appId = APP_ID,
+      ...options
+    }: {
+      appId?: string;
+      deepLinkId?: string;
+      path?: string;
+      absolute?: boolean;
+    }) => getUrlForApp(appId, options),
     [getUrlForApp]
   );
   return { getAppUrl };
@@ -191,9 +199,7 @@ export const useNavigateTo = () => {
     }: {
       url?: string;
       appId?: string;
-      deepLinkId?: string;
-      path?: string;
-    }) => {
+    } & NavigateToAppOptions) => {
       if (url) {
         navigateToUrl(url);
       } else {
