@@ -118,7 +118,36 @@ export async function SecuritySolutionCypressVisualTestRunner({ getService }: Ft
           protocol: config.get('servers.kibana.protocol'),
           hostname: config.get('servers.kibana.hostname'),
           port: config.get('servers.kibana.port'),
-        }),
+         }),
+        ...process.env,
+      },
+      wait: true,
+    });
+  });
+}
+
+export async function SecuritySolutionUpgradeCliTestRunner({ getService }: FtrProviderContext) {
+  const log = getService('log');
+
+  await withProcRunner(log, async (procs) => {
+    await procs.run('cypress', {
+      cmd: 'yarn',
+      args: ['cypress:upgrade:run'],
+      cwd: resolve(__dirname, '../../plugins/security_solution'),
+      env: {
+        FORCE_COLOR: '1',
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        CYPRESS_baseUrl: process.env.TEST_KIBANA_URL,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        CYPRESS_protocol:  process.env.TEST_KIBANA_PROTOCOL,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        CYPRESS_hostname: process.env.TEST_KIBANA_HOSTNAME,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        CYPRESS_configport: process.env.TEST_KIBANA_PORT,
+        CYPRESS_ELASTICSEARCH_URL: process.env.TEST_ELASTICSEARCH_URL,
+        CYPRESS_ELASTICSEARCH_USERNAME: process.env.TEST_ES_USER,
+        CYPRESS_ELASTICSEARCH_PASSWORD: process.env.TESTES_PASSWORD,
+        CYPRESS_KIBANA_URL: process.env.TEST_KIBANA_URL,,
         ...process.env,
       },
       wait: true,
