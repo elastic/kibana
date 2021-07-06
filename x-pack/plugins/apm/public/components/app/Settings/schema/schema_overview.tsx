@@ -5,26 +5,25 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
-  EuiText,
-  EuiCard,
-  EuiIcon,
   EuiButton,
   EuiCallOut,
+  EuiCard,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
   EuiLoadingSpinner,
+  EuiSpacer,
+  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ElasticDocsLink } from '../../../shared/Links/ElasticDocsLink';
-import rocketLaunchGraphic from './blog-rocket-720x420.png';
+import React from 'react';
 import { APMLink } from '../../../shared/Links/apm/APMLink';
+import { ElasticDocsLink } from '../../../shared/Links/ElasticDocsLink';
 import { useFleetCloudAgentPolicyHref } from '../../../shared/Links/kibana';
+import rocketLaunchGraphic from './blog-rocket-720x420.png';
 
 interface Props {
   onSwitch: () => void;
