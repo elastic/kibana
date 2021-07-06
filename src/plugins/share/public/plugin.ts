@@ -19,6 +19,7 @@ import {
   UrlGeneratorsStart,
 } from './url_generators/url_generator_service';
 import { UrlService } from '../common/url_service';
+import { RedirectManager } from './url_service';
 
 export interface ShareSetupDependencies {
   securityOss?: SecurityOssPluginSetup;
@@ -85,6 +86,11 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
         return url;
       },
     });
+
+    const redirectManager = new RedirectManager({
+      url: this.url,
+    });
+    redirectManager.registerRedirectApp(core);
 
     return {
       ...this.shareMenuRegistry.setup(),

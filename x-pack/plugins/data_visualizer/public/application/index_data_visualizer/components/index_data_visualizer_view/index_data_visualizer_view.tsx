@@ -67,6 +67,7 @@ import { HelpMenu } from '../../../common/components/help_menu';
 import { TimeBuckets } from '../../services/time_buckets';
 import { extractSearchData } from '../../utils/saved_search_utils';
 import { DataVisualizerIndexPatternManagement } from '../index_pattern_management';
+import { ResultLink } from '../../../common/components/results_links';
 
 interface DataVisualizerPageState {
   overallStats: OverallStats;
@@ -120,6 +121,7 @@ export const getDefaultDataVisualizerListState = (): Required<DataVisualizerInde
 export interface IndexDataVisualizerViewProps {
   currentIndexPattern: IndexPattern;
   currentSavedSearch: SavedSearchSavedObject | null;
+  additionalLinks?: ResultLink[];
 }
 const restorableDefaults = getDefaultDataVisualizerListState();
 
@@ -138,7 +140,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     dataVisualizerProps.currentSavedSearch
   );
 
-  const { currentIndexPattern } = dataVisualizerProps;
+  const { currentIndexPattern, additionalLinks } = dataVisualizerProps;
 
   useEffect(() => {
     if (dataVisualizerProps?.currentSavedSearch !== undefined) {
@@ -886,6 +888,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                   indexPattern={currentIndexPattern}
                   searchQueryLanguage={searchQueryLanguage}
                   searchString={searchString}
+                  additionalLinks={additionalLinks ?? []}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

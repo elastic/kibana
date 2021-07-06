@@ -12,23 +12,28 @@ const CONFIG_PATH = '../../test/functional/config.js';
 const ES_URL = Cypress.env('ELASTICSEARCH_URL');
 const KIBANA_URL = Cypress.config().baseUrl;
 
+// Otherwise cy.exec would inject NODE_TLS_REJECT_UNAUTHORIZED=0 and node would abort if used over https
+const NODE_TLS_REJECT_UNAUTHORIZED = '1';
+
 export const esArchiverLoad = (folder: string) => {
   const path = Path.join(ES_ARCHIVE_DIR, folder);
   cy.exec(
-    `node ../../../scripts/es_archiver load "${path}" --config "${CONFIG_PATH}" --es-url "${ES_URL}" --kibana-url "${KIBANA_URL}"`
+    `node ../../../scripts/es_archiver load "${path}" --config "${CONFIG_PATH}" --es-url "${ES_URL}" --kibana-url "${KIBANA_URL}"`,
+    { env: { NODE_TLS_REJECT_UNAUTHORIZED } }
   );
 };
 
 export const esArchiverUnload = (folder: string) => {
   const path = Path.join(ES_ARCHIVE_DIR, folder);
   cy.exec(
-    `node ../../../scripts/es_archiver unload "${path}" --config "${CONFIG_PATH}" --es-url "${ES_URL}" --kibana-url "${KIBANA_URL}"`
+    `node ../../../scripts/es_archiver unload "${path}" --config "${CONFIG_PATH}" --es-url "${ES_URL}" --kibana-url "${KIBANA_URL}"`,
+    { env: { NODE_TLS_REJECT_UNAUTHORIZED } }
   );
 };
 
 export const esArchiverResetKibana = () => {
   cy.exec(
     `node ../../../scripts/es_archiver empty-kibana-index --config "${CONFIG_PATH}" --es-url "${ES_URL}" --kibana-url "${KIBANA_URL}"`,
-    { failOnNonZeroExit: false }
+    { env: { NODE_TLS_REJECT_UNAUTHORIZED }, failOnNonZeroExit: false }
   );
 };
