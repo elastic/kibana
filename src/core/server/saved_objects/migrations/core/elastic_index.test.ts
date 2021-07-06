@@ -426,6 +426,11 @@ describe('ElasticIndex', () => {
                   },
                 },
                 {
+                  term: {
+                    type: 'ml-telemetry',
+                  },
+                },
+                {
                   bool: {
                     must: [
                       {

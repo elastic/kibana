@@ -95,6 +95,11 @@ describe('createInitialState', () => {
                 },
               },
               Object {
+                "term": Object {
+                  "type": "ml-telemetry",
+                },
+              },
+              Object {
                 "bool": Object {
                   "must": Array [
                     Object {

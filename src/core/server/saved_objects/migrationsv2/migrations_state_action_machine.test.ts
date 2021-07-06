@@ -315,6 +315,11 @@ describe('migrationsStateActionMachine', () => {
                         },
                       },
                       Object {
+                        "term": Object {
+                          "type": "ml-telemetry",
+                        },
+                      },
+                      Object {
                         "bool": Object {
                           "must": Array [
                             Object {
@@ -410,6 +415,11 @@ describe('migrationsStateActionMachine', () => {
                       Object {
                         "term": Object {
                           "type": "tsvb-validation-telemetry",
+                        },
+                      },
+                      Object {
+                        "term": Object {
+                          "type": "ml-telemetry",
                         },
                       },
                       Object {
@@ -599,6 +609,11 @@ describe('migrationsStateActionMachine', () => {
                         },
                       },
                       Object {
+                        "term": Object {
+                          "type": "ml-telemetry",
+                        },
+                      },
+                      Object {
                         "bool": Object {
                           "must": Array [
                             Object {
@@ -689,6 +704,11 @@ describe('migrationsStateActionMachine', () => {
                       Object {
                         "term": Object {
                           "type": "tsvb-validation-telemetry",
+                        },
+                      },
+                      Object {
+                        "term": Object {
+                          "type": "ml-telemetry",
                         },
                       },
                       Object {

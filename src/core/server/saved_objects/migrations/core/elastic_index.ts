@@ -47,6 +47,12 @@ export const excludeUnusedTypesQuery: estypes.QueryDslQueryContainer = {
           type: 'tsvb-validation-telemetry',
         },
       },
+      // Was removed in 7.12
+      {
+        term: {
+          type: 'ml-telemetry',
+        },
+      },
       // https://github.com/elastic/kibana/issues/96131
       {
         bool: {
