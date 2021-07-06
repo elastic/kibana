@@ -13,6 +13,7 @@ import {
 } from '../index';
 import { ReferenceBasedIndexPatternColumn } from '../column_types';
 import { IndexPatternLayer } from '../../../types';
+import { unquotedStringRegex } from './util';
 
 // Just handle two levels for now
 type OperationParams = Record<string, string | number | Record<string, string | number>>;
@@ -24,6 +25,9 @@ export function getSafeFieldName({
   // return empty for the records field
   if (!fieldName || operationType === 'count') {
     return '';
+  }
+  if (unquotedStringRegex.test(fieldName)) {
+    return `'${fieldName.replaceAll(`'`, "\\'")}'`;
   }
   return fieldName;
 }

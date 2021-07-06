@@ -157,7 +157,7 @@ export function TimeShift({
               isClearable={false}
               data-test-subj="indexPattern-dimension-time-shift"
               placeholder={i18n.translate('xpack.lens.indexPattern.timeShiftPlaceholder', {
-                defaultMessage: 'Time shift (e.g. 1d)',
+                defaultMessage: 'Type custom values (e.g. 8w)',
               })}
               options={timeShiftOptions.filter(({ value }) => {
                 const parsedValue = parseTimeShift(value);

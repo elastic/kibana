@@ -365,6 +365,7 @@ export interface EmbeddableEditorState {
     embeddableId?: string;
     // (undocumented)
     originatingApp: string;
+    searchSessionId?: string;
     // (undocumented)
     valueInput?: EmbeddableInput;
 }
@@ -467,6 +468,7 @@ export interface EmbeddablePackageState {
     embeddableId?: string;
     // (undocumented)
     input: Optional<EmbeddableInput, 'id'> | Optional<SavedObjectEmbeddableInput, 'id'>;
+    searchSessionId?: string;
     // (undocumented)
     type: string;
 }
@@ -842,6 +844,11 @@ export interface SavedObjectEmbeddableInput extends EmbeddableInput {
 //
 // @public (undocumented)
 export const SELECT_RANGE_TRIGGER = "SELECT_RANGE_TRIGGER";
+
+// Warning: (ae-missing-release-tag) "useEmbeddableFactory" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export function useEmbeddableFactory<I extends EmbeddableInput>({ input, factory, onInputUpdated, }: EmbeddableRendererWithFactory<I>): readonly [ErrorEmbeddable | IEmbeddable<I, import("./i_embeddable").EmbeddableOutput> | undefined, boolean, string | undefined];
 
 // Warning: (ae-missing-release-tag) "VALUE_CLICK_TRIGGER" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //

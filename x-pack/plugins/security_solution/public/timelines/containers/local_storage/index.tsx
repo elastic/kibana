@@ -9,8 +9,8 @@ import { isEmpty } from 'lodash/fp';
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
 import { TimelinesStorage } from './types';
 import { useKibana } from '../../../common/lib/kibana';
-import { ColumnHeaderOptions, TimelineModel } from '../../store/timeline/model';
-import { TimelineIdLiteral } from '../../../../common/types/timeline';
+import { TimelineModel } from '../../store/timeline/model';
+import { ColumnHeaderOptions, TimelineIdLiteral } from '../../../../common/types/timeline';
 
 export const LOCAL_STORAGE_TIMELINE_KEY = 'timelines';
 const EMPTY_TIMELINE = {} as {

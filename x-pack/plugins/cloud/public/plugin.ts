@@ -5,9 +5,20 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext, HttpStart } from 'src/core/public';
+import {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+  HttpStart,
+  IBasePath,
+} from 'src/core/public';
 import { i18n } from '@kbn/i18n';
-import { SecurityPluginSetup, SecurityPluginStart } from '../../security/public';
+import type {
+  AuthenticatedUser,
+  SecurityPluginSetup,
+  SecurityPluginStart,
+} from '../../security/public';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { ELASTIC_SUPPORT_LINK } from '../common/constants';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
@@ -21,6 +32,10 @@ export interface CloudConfigType {
   profile_url?: string;
   deployment_url?: string;
   organization_url?: string;
+  full_story: {
+    enabled: boolean;
+    org_id?: string;
+  };
 }
 
 interface CloudSetupDependencies {
@@ -51,7 +66,12 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     this.isCloudEnabled = false;
   }
 
-  public setup(core: CoreSetup, { home }: CloudSetupDependencies) {
+  public setup(core: CoreSetup, { home, security }: CloudSetupDependencies) {
+    this.setupFullstory({ basePath: core.http.basePath, security }).catch((e) =>
+      // eslint-disable-next-line no-console
+      console.debug(`Error setting up FullStory: ${e.toString()}`)
+    );
+
     const {
       id,
       cname,
@@ -135,4 +155,62 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     const user = await security.authc.getCurrentUser().catch(() => null);
     return user?.roles.includes('superuser') ?? true;
   }
+
+  private async setupFullstory({
+    basePath,
+    security,
+  }: CloudSetupDependencies & { basePath: IBasePath }) {
+    const { enabled, org_id: orgId } = this.config.full_story;
+    if (!enabled || !orgId) {
+      return;
+    }
+
+    // Keep this import async so that we do not load any FullStory code into the browser when it is disabled.
+    const fullStoryChunkPromise = import('./fullstory');
+    const userIdPromise: Promise<string | undefined> = security
+      ? loadFullStoryUserId({ getCurrentUser: security.authc.getCurrentUser })
+      : Promise.resolve(undefined);
+
+    const [{ initializeFullStory }, userId] = await Promise.all([
+      fullStoryChunkPromise,
+      userIdPromise,
+    ]);
+
+    initializeFullStory({
+      basePath,
+      orgId,
+      packageInfo: this.initializerContext.env.packageInfo,
+      userId,
+    });
+  }
 }
+
+/** @internal exported for testing */
+export const loadFullStoryUserId = async ({
+  getCurrentUser,
+}: {
+  getCurrentUser: () => Promise<AuthenticatedUser>;
+}) => {
+  try {
+    const currentUser = await getCurrentUser().catch(() => undefined);
+    if (!currentUser) {
+      return undefined;
+    }
+
+    // Log very defensively here so we can debug this easily if it breaks
+    if (!currentUser.username) {
+      // eslint-disable-next-line no-console
+      console.debug(
+        `[cloud.full_story] username not specified. User metadata: ${JSON.stringify(
+          currentUser.metadata
+        )}`
+      );
+    }
+
+    return currentUser.username;
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error(`[cloud.full_story] Error loading the current user: ${e.toString()}`, e);
+    return undefined;
+  }
+};

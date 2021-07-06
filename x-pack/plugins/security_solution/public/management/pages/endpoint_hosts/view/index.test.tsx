@@ -17,6 +17,7 @@ import {
 } from '../store/mock_endpoint_result_list';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import {
+  ActivityLog,
   HostInfo,
   HostPolicyResponse,
   HostPolicyResponseActionStatus,
@@ -32,12 +33,16 @@ import { KibanaServices, useKibana, useToasts } from '../../../../common/lib/kib
 import { hostIsolationHttpMocks } from '../../../../common/lib/endpoint_isolation/mocks';
 import { fireEvent } from '@testing-library/dom';
 import {
+  createFailedResourceState,
+  createLoadedResourceState,
   isFailedResourceState,
   isLoadedResourceState,
   isUninitialisedResourceState,
 } from '../../../state';
 import { getCurrentIsolationRequestState } from '../store/selectors';
 import { licenseService } from '../../../../common/hooks/use_license';
+import { FleetActionGenerator } from '../../../../../common/endpoint/data_generators/fleet_action_generator';
+import { APP_PATH, MANAGEMENT_PATH } from '../../../../../common/constants';
 
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';
 // but sure enough it needs to be inline in this one file
@@ -90,7 +95,7 @@ describe('when on the endpoint list page', () => {
     ({ history, store, coreStart, middlewareSpy } = mockedContext);
     render = () => mockedContext.render(<EndpointList />);
     reactTestingLibrary.act(() => {
-      history.push('/endpoints');
+      history.push(`${MANAGEMENT_PATH}/endpoints`);
     });
 
     // Because `.../common/lib/kibana` was mocked, we need to alter these hooks (which are jest.MockFunctions)
@@ -438,7 +443,9 @@ describe('when on the endpoint list page', () => {
         });
         const firstPolicyName = (await renderResult.findAllByTestId('policyNameCellLink'))[0];
         expect(firstPolicyName).not.toBeNull();
-        expect(firstPolicyName.getAttribute('href')).toContain(`policy/${firstPolicyID}`);
+        expect(firstPolicyName.getAttribute('href')).toEqual(
+          `${APP_PATH}${MANAGEMENT_PATH}/policy/${firstPolicyID}`
+        );
       });
 
       describe('when the user clicks the first hostname in the table', () => {
@@ -625,11 +632,35 @@ describe('when on the endpoint list page', () => {
       });
     };
 
+    const dispatchEndpointDetailsActivityLogChanged = (
+      dataState: 'failed' | 'success',
+      data: ActivityLog
+    ) => {
+      reactTestingLibrary.act(() => {
+        const getPayload = () => {
+          switch (dataState) {
+            case 'failed':
+              return createFailedResourceState({
+                statusCode: 500,
+                error: 'Internal Server Error',
+                message: 'An internal server error occurred.',
+              });
+            case 'success':
+              return createLoadedResourceState(data);
+          }
+        };
+        store.dispatch({
+          type: 'endpointDetailsActivityLogChanged',
+          payload: getPayload(),
+        });
+      });
+    };
+
     beforeEach(async () => {
       mockEndpointListApi();
 
       reactTestingLibrary.act(() => {
-        history.push('/endpoints?selected_endpoint=1');
+        history.push(`${MANAGEMENT_PATH}/endpoints?selected_endpoint=1`);
       });
 
       renderAndWaitForData = async () => {
@@ -654,7 +685,7 @@ describe('when on the endpoint list page', () => {
       const policyDetailsLink = await renderResult.findByTestId('policyDetailsValue');
       expect(policyDetailsLink).not.toBeNull();
       expect(policyDetailsLink.getAttribute('href')).toEqual(
-        `/policy/${hostDetails.metadata.Endpoint.policy.applied.id}`
+        `${APP_PATH}${MANAGEMENT_PATH}/policy/${hostDetails.metadata.Endpoint.policy.applied.id}`
       );
     });
 
@@ -676,7 +707,7 @@ describe('when on the endpoint list page', () => {
       });
       const changedUrlAction = await userChangedUrlChecker;
       expect(changedUrlAction.payload.pathname).toEqual(
-        `/policy/${hostDetails.metadata.Endpoint.policy.applied.id}`
+        `${MANAGEMENT_PATH}/policy/${hostDetails.metadata.Endpoint.policy.applied.id}`
       );
     });
 
@@ -685,7 +716,7 @@ describe('when on the endpoint list page', () => {
       const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
       expect(policyStatusLink).not.toBeNull();
       expect(policyStatusLink.getAttribute('href')).toEqual(
-        '/endpoints?page_index=0&page_size=10&selected_endpoint=1&show=policy_response'
+        `${APP_PATH}${MANAGEMENT_PATH}/endpoints?page_index=0&page_size=10&selected_endpoint=1&show=policy_response`
       );
     });
 
@@ -744,6 +775,120 @@ describe('when on the endpoint list page', () => {
     it('should show the Take Action button', async () => {
       const renderResult = await renderAndWaitForData();
       expect(renderResult.getByTestId('endpointDetailsActionsButton')).not.toBeNull();
+    });
+
+    describe('when showing Activity Log panel', () => {
+      let renderResult: ReturnType<typeof render>;
+      const agentId = 'some_agent_id';
+
+      let getMockData: () => ActivityLog;
+      beforeEach(async () => {
+        window.IntersectionObserver = jest.fn(() => ({
+          root: null,
+          rootMargin: '',
+          thresholds: [],
+          takeRecords: jest.fn(),
+          observe: jest.fn(),
+          unobserve: jest.fn(),
+          disconnect: jest.fn(),
+        }));
+
+        const fleetActionGenerator = new FleetActionGenerator('seed');
+        const responseData = fleetActionGenerator.generateResponse({
+          agent_id: agentId,
+        });
+        const actionData = fleetActionGenerator.generate({
+          agents: [agentId],
+        });
+        getMockData = () => ({
+          page: 1,
+          pageSize: 50,
+          data: [
+            {
+              type: 'response',
+              item: {
+                id: 'some_id_0',
+                data: responseData,
+              },
+            },
+            {
+              type: 'action',
+              item: {
+                id: 'some_id_1',
+                data: actionData,
+              },
+            },
+          ],
+        });
+
+        renderResult = render();
+        await reactTestingLibrary.act(async () => {
+          await middlewareSpy.waitForAction('serverReturnedEndpointList');
+        });
+        const hostNameLinks = await renderResult.getAllByTestId('hostnameCellLink');
+        reactTestingLibrary.fireEvent.click(hostNameLinks[0]);
+      });
+
+      afterEach(reactTestingLibrary.cleanup);
+
+      it('should show the endpoint details flyout', async () => {
+        const activityLogTab = await renderResult.findByTestId('activity_log');
+        reactTestingLibrary.act(() => {
+          reactTestingLibrary.fireEvent.click(activityLogTab);
+        });
+        await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
+        reactTestingLibrary.act(() => {
+          dispatchEndpointDetailsActivityLogChanged('success', getMockData());
+        });
+        const endpointDetailsFlyout = await renderResult.queryByTestId('endpointDetailsFlyoutBody');
+        expect(endpointDetailsFlyout).not.toBeNull();
+      });
+
+      it('should display log accurately', async () => {
+        const activityLogTab = await renderResult.findByTestId('activity_log');
+        reactTestingLibrary.act(() => {
+          reactTestingLibrary.fireEvent.click(activityLogTab);
+        });
+        await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
+        reactTestingLibrary.act(() => {
+          dispatchEndpointDetailsActivityLogChanged('success', getMockData());
+        });
+        const logEntries = await renderResult.queryAllByTestId('timelineEntry');
+        expect(logEntries.length).toEqual(2);
+        expect(`${logEntries[0]} .euiCommentTimeline__icon--update`).not.toBe(null);
+        expect(`${logEntries[1]} .euiCommentTimeline__icon--regular`).not.toBe(null);
+      });
+
+      it('should display empty state when API call has failed', async () => {
+        const activityLogTab = await renderResult.findByTestId('activity_log');
+        reactTestingLibrary.act(() => {
+          reactTestingLibrary.fireEvent.click(activityLogTab);
+        });
+        await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
+        reactTestingLibrary.act(() => {
+          dispatchEndpointDetailsActivityLogChanged('failed', getMockData());
+        });
+        const emptyState = await renderResult.queryByTestId('activityLogEmpty');
+        expect(emptyState).not.toBe(null);
+      });
+
+      it('should display empty state when no log data', async () => {
+        const activityLogTab = await renderResult.findByTestId('activity_log');
+        reactTestingLibrary.act(() => {
+          reactTestingLibrary.fireEvent.click(activityLogTab);
+        });
+        await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
+        reactTestingLibrary.act(() => {
+          dispatchEndpointDetailsActivityLogChanged('success', {
+            page: 1,
+            pageSize: 50,
+            data: [],
+          });
+        });
+
+        const emptyState = await renderResult.queryByTestId('activityLogEmpty');
+        expect(emptyState).not.toBe(null);
+      });
     });
 
     describe('when showing host Policy Response panel', () => {
@@ -861,8 +1006,8 @@ describe('when on the endpoint list page', () => {
       it('should include the back to details link', async () => {
         const subHeaderBackLink = await renderResult.findByTestId('flyoutSubHeaderBackButton');
         expect(subHeaderBackLink.textContent).toBe('Endpoint Details');
-        expect(subHeaderBackLink.getAttribute('href')).toBe(
-          '/endpoints?page_index=0&page_size=10&selected_endpoint=1'
+        expect(subHeaderBackLink.getAttribute('href')).toEqual(
+          `${APP_PATH}${MANAGEMENT_PATH}/endpoints?page_index=0&page_size=10&selected_endpoint=1`
         );
       });
 
@@ -913,7 +1058,7 @@ describe('when on the endpoint list page', () => {
       beforeEach(async () => {
         getKibanaServicesMock.mockReturnValue(coreStart);
         reactTestingLibrary.act(() => {
-          history.push('/endpoints?selected_endpoint=1&show=isolate');
+          history.push(`${MANAGEMENT_PATH}/endpoints?selected_endpoint=1&show=isolate`);
         });
         renderResult = await renderAndWaitForData();
         // Need to reset `http.post` and adjust it so that the mock for http host
@@ -931,12 +1076,12 @@ describe('when on the endpoint list page', () => {
         const backButtonLink = renderResult.getByTestId('flyoutSubHeaderBackButton');
 
         expect(backButtonLink.getAttribute('href')).toEqual(
-          getEndpointDetailsPath({
+          `${APP_PATH}${getEndpointDetailsPath({
             name: 'endpointDetails',
             page_index: '0',
             page_size: '10',
             selected_endpoint: '1',
-          })
+          })}`
         );
 
         const changeUrlAction = middlewareSpy.waitForAction('userChangedUrl');
@@ -946,7 +1091,7 @@ describe('when on the endpoint list page', () => {
         });
 
         expect((await changeUrlAction).payload).toMatchObject({
-          pathname: '/endpoints',
+          pathname: `${MANAGEMENT_PATH}/endpoints`,
           search: '?page_index=0&page_size=10&selected_endpoint=1',
         });
       });
@@ -959,7 +1104,7 @@ describe('when on the endpoint list page', () => {
         });
 
         expect((await changeUrlAction).payload).toMatchObject({
-          pathname: '/endpoints',
+          pathname: `${MANAGEMENT_PATH}/endpoints`,
           search: '?page_index=0&page_size=10&selected_endpoint=1',
         });
       });
@@ -979,7 +1124,7 @@ describe('when on the endpoint list page', () => {
         });
 
         expect((await changeUrlAction).payload).toMatchObject({
-          pathname: '/endpoints',
+          pathname: `${MANAGEMENT_PATH}/endpoints`,
           search: '?page_index=0&page_size=10&selected_endpoint=1',
         });
       });
@@ -1007,7 +1152,7 @@ describe('when on the endpoint list page', () => {
         });
 
         expect((await changeUrlAction).payload).toMatchObject({
-          pathname: '/endpoints',
+          pathname: `${MANAGEMENT_PATH}/endpoints`,
           search: '?page_index=0&page_size=10',
         });
 
@@ -1044,6 +1189,17 @@ describe('when on the endpoint list page', () => {
               isolation: false,
             },
           },
+          host: {
+            ...hosts[0].metadata.host,
+            os: {
+              ...hosts[0].metadata.host.os,
+              name: 'Windows',
+            },
+          },
+          agent: {
+            ...hosts[0].metadata.agent,
+            version: '7.14.0',
+          },
         },
         query_strategy_version: queryStrategyVersion,
       };
@@ -1065,17 +1221,7 @@ describe('when on the endpoint list page', () => {
       mockEndpointListApi();
 
       reactTestingLibrary.act(() => {
-        history.push('/endpoints');
-      });
-
-      coreStart.application.getUrlForApp.mockImplementation((appName) => {
-        switch (appName) {
-          case 'securitySolution':
-            return '/app/security';
-          case 'fleet':
-            return '/app/fleet';
-        }
-        return appName;
+        history.push(`${MANAGEMENT_PATH}/endpoints`);
       });
 
       renderResult = render();
@@ -1096,19 +1242,19 @@ describe('when on the endpoint list page', () => {
     it('navigates to the Host Details Isolate flyout', async () => {
       const isolateLink = await renderResult.findByTestId('isolateLink');
       expect(isolateLink.getAttribute('href')).toEqual(
-        getEndpointDetailsPath({
+        `${APP_PATH}${getEndpointDetailsPath({
           name: 'endpointIsolate',
           page_index: '0',
           page_size: '10',
           selected_endpoint: hostInfo.metadata.agent.id,
-        })
+        })}`
       );
     });
 
     it('navigates to the Security Solution Host Details page', async () => {
       const hostLink = await renderResult.findByTestId('hostLink');
       expect(hostLink.getAttribute('href')).toEqual(
-        `/app/security/hosts/${hostInfo.metadata.host.hostname}`
+        `${APP_PATH}/hosts/${hostInfo.metadata.host.hostname}`
       );
     });
     it('navigates to the Ingest Agent Policy page', async () => {

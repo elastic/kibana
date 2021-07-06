@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
+import { IndexPatternBase } from '../../..';
 import { fields } from '../../../../index_patterns/mocks';
 
 import { nodeTypes } from '../../index';
-import { IIndexPattern, IFieldType } from '../../../../index_patterns';
 
 // @ts-ignore
 import { getFields } from './get_fields';
 
 describe('getFields', () => {
-  let indexPattern: IIndexPattern;
+  let indexPattern: IndexPatternBase;
 
   beforeEach(() => {
     indexPattern = ({
       fields,
-    } as unknown) as IIndexPattern;
+    } as unknown) as IndexPatternBase;
   });
 
   describe('field names without a wildcard', () => {
@@ -41,14 +41,14 @@ describe('getFields', () => {
     });
 
     test('should not match a wildcard in a literal node', () => {
-      const indexPatternWithWildField = {
+      const indexPatternWithWildField: IndexPatternBase = ({
         title: 'wildIndex',
         fields: [
           {
             name: 'foo*',
           },
         ],
-      } as IIndexPattern;
+      } as unknown) as IndexPatternBase;
 
       const fieldNameNode = nodeTypes.literal.buildNode('foo*');
       const results = getFields(fieldNameNode, indexPatternWithWildField);
@@ -76,8 +76,8 @@ describe('getFields', () => {
 
       expect(Array.isArray(results)).toBeTruthy();
       expect(results).toHaveLength(2);
-      expect(results!.find((field: IFieldType) => field.name === 'machine.os')).toBeDefined();
-      expect(results!.find((field: IFieldType) => field.name === 'machine.os.raw')).toBeDefined();
+      expect(results!.find((field) => field.name === 'machine.os')).toBeDefined();
+      expect(results!.find((field) => field.name === 'machine.os.raw')).toBeDefined();
     });
   });
 });

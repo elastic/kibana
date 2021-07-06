@@ -671,6 +671,7 @@ Array [
         },
       },
       "api": Array [
+        "fileUpload:analyzeFile",
         "store_search_session",
       ],
       "app": Array [
@@ -1199,6 +1200,7 @@ Array [
         },
       },
       "api": Array [
+        "fileUpload:analyzeFile",
         "store_search_session",
       ],
       "app": Array [

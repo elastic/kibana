@@ -30,15 +30,18 @@ import {
 } from '../common/util/url_state';
 import { useDataVisualizerKibana } from '../kibana_context';
 import { IndexPattern } from '../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import { ResultLink } from '../common/components/results_links';
 
 export type IndexDataVisualizerSpec = typeof IndexDataVisualizer;
 
 export interface DataVisualizerUrlStateContextProviderProps {
   IndexDataVisualizerComponent: FC<IndexDataVisualizerViewProps>;
+  additionalLinks: ResultLink[];
 }
 
 export const DataVisualizerUrlStateContextProvider: FC<DataVisualizerUrlStateContextProviderProps> = ({
   IndexDataVisualizerComponent,
+  additionalLinks,
 }) => {
   const {
     services: {
@@ -168,6 +171,7 @@ export const DataVisualizerUrlStateContextProvider: FC<DataVisualizerUrlStateCon
         <IndexDataVisualizerComponent
           currentIndexPattern={currentIndexPattern}
           currentSavedSearch={currentSavedSearch}
+          additionalLinks={additionalLinks}
         />
       ) : (
         <div />
@@ -176,9 +180,18 @@ export const DataVisualizerUrlStateContextProvider: FC<DataVisualizerUrlStateCon
   );
 };
 
-export const IndexDataVisualizer: FC = () => {
+export const IndexDataVisualizer: FC<{ additionalLinks: ResultLink[] }> = ({ additionalLinks }) => {
   const coreStart = getCoreStart();
-  const { data, maps, embeddable, share, security, fileUpload, lens } = getPluginsStart();
+  const {
+    data,
+    maps,
+    embeddable,
+    share,
+    security,
+    fileUpload,
+    lens,
+    indexPatternFieldEditor,
+  } = getPluginsStart();
   const services = {
     data,
     maps,
@@ -187,6 +200,7 @@ export const IndexDataVisualizer: FC = () => {
     security,
     fileUpload,
     lens,
+    indexPatternFieldEditor,
     ...coreStart,
   };
 
@@ -194,6 +208,7 @@ export const IndexDataVisualizer: FC = () => {
     <KibanaContextProvider services={{ ...services }}>
       <DataVisualizerUrlStateContextProvider
         IndexDataVisualizerComponent={IndexDataVisualizerView}
+        additionalLinks={additionalLinks}
       />
     </KibanaContextProvider>
   );

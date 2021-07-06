@@ -28,12 +28,19 @@ import {
   deleteAllCaseItems,
   superUserSpace1Auth,
   createCaseWithConnector,
+  createConnector,
+  getServiceNowConnector,
+  getConnectorMappingsFromES,
 } from '../../../../common/lib/utils';
 import {
   ExternalServiceSimulator,
   getExternalServiceSimulatorPath,
 } from '../../../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
-import { CaseStatuses, CaseUserActionResponse } from '../../../../../../plugins/cases/common/api';
+import {
+  CaseConnector,
+  CaseStatuses,
+  CaseUserActionResponse,
+} from '../../../../../../plugins/cases/common/api';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -93,6 +100,56 @@ export default ({ getService }: FtrProviderContext): void => {
           'api/_actions-FTS-external-service-simulators/servicenow/nav_to.do?uri=incident.do?sys_id=123'
         )
       ).to.equal(true);
+    });
+
+    it('should create the mappings when pushing a case', async () => {
+      // create a connector but not a configuration so that the mapping will not be present
+      const connector = await createConnector({
+        supertest,
+        req: {
+          ...getServiceNowConnector(),
+          config: { apiUrl: servicenowSimulatorURL },
+        },
+      });
+
+      actionsRemover.add('default', connector.id, 'action', 'actions');
+
+      const postedCase = await createCase(
+        supertest,
+        {
+          ...getPostCaseRequest(),
+          connector: {
+            id: connector.id,
+            name: connector.name,
+            type: connector.connector_type_id,
+            fields: {
+              urgency: '2',
+              impact: '2',
+              severity: '2',
+              category: 'software',
+              subcategory: 'os',
+            },
+          } as CaseConnector,
+        },
+        200
+      );
+
+      // there should be no mappings initially
+      let mappings = await getConnectorMappingsFromES({ es });
+      expect(mappings.body.hits.hits.length).to.eql(0);
+
+      await pushCase({
+        supertest,
+        caseId: postedCase.id,
+        connectorId: connector.id,
+      });
+
+      // the mappings should now be created after the push
+      mappings = await getConnectorMappingsFromES({ es });
+      expect(mappings.body.hits.hits.length).to.be(1);
+      expect(
+        mappings.body.hits.hits[0]._source?.['cases-connector-mappings'].mappings.length
+      ).to.be.above(0);
     });
 
     it('pushes a comment appropriately', async () => {

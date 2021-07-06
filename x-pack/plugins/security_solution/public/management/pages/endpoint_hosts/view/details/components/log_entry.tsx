@@ -78,7 +78,7 @@ const useLogEntryUIProps = (
         if (isSuccessful) {
           return i18.ACTIVITY_LOG.LogEntry.response.isolationSuccessful;
         } else {
-          return i18.ACTIVITY_LOG.LogEntry.response.isolationSuccessful;
+          return i18.ACTIVITY_LOG.LogEntry.response.isolationFailed;
         }
       } else {
         if (isSuccessful) {

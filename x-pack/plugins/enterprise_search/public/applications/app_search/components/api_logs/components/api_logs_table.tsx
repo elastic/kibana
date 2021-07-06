@@ -26,6 +26,8 @@ import { ApiLogsLogic } from '../index';
 import { ApiLog } from '../types';
 import { getStatusColor } from '../utils';
 
+import { EmptyState } from './';
+
 import './api_logs_table.scss';
 
 interface Props {
@@ -108,6 +110,7 @@ export const ApiLogsTable: React.FC<Props> = ({ hasPagination }) => {
       items={apiLogs}
       responsive
       loading={dataLoading}
+      noItemsMessage={<EmptyState />}
       {...paginationProps}
     />
   );
