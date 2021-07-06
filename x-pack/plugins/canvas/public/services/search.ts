@@ -6,19 +6,9 @@
  */
 
 import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { CanvasServiceFactory } from '.';
 
-export interface SearchService {
-  search: DataPublicPluginStart['search'];
+type SearchClient = DataPublicPluginStart['search']['search'];
+
+export interface CanvasSearchService {
+  search: SearchClient;
 }
-
-export const searchServiceFactory: CanvasServiceFactory<SearchService> = (
-  setup,
-  start,
-  canvasSetup,
-  canvasStart
-) => {
-  return {
-    search: canvasStart.data.search,
-  };
-};

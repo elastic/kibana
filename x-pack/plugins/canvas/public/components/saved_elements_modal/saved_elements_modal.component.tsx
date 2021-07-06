@@ -12,6 +12,7 @@ import React, {
   useState,
   useEffect,
   useRef,
+  useCallback,
 } from 'react';
 import PropTypes from 'prop-types';
 import {
@@ -27,7 +28,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { sortBy } from 'lodash';
+import { sortBy, camelCase } from 'lodash';
+
+import { useCustomElementService, useNotifyService } from '../../services';
 import { CustomElement } from '../../../types';
 import { ConfirmModal } from '../confirm_modal/confirm_modal';
 import { CustomElementModal } from '../custom_element_modal';
@@ -84,22 +87,11 @@ export interface Props {
    * Adds the custom element to the workpad
    */
   addCustomElement: (customElement: CustomElement) => void;
-  /**
-   * Queries ES for custom element saved objects
-   */
-  findCustomElements: () => void;
+  onElementsChange: (customElements: CustomElement[]) => void;
   /**
    * Handler invoked when the modal closes
    */
   onClose: () => void;
-  /**
-   * Deletes the custom element
-   */
-  removeCustomElement: (id: string) => void;
-  /**
-   * Saved edits to the custom element
-   */
-  updateCustomElement: (id: string, name: string, description: string, image: string) => void;
   /**
    * Array of custom elements to display
    */
@@ -118,15 +110,60 @@ export const SavedElementsModal: FunctionComponent<Props> = ({
   search,
   setSearch,
   customElements,
-  addCustomElement,
-  findCustomElements,
   onClose,
-  removeCustomElement,
-  updateCustomElement,
+  onElementsChange,
+  addCustomElement,
 }) => {
   const hasLoadedElements = useRef<boolean>(false);
+  const customElementService = useCustomElementService();
+  const notifyService = useNotifyService();
   const [elementToDelete, setElementToDelete] = useState<CustomElement | null>(null);
   const [elementToEdit, setElementToEdit] = useState<CustomElement | null>(null);
+
+  const findCustomElements = useCallback(
+    async (text: string = '') => {
+      try {
+        const elements = await customElementService.find(text);
+        onElementsChange(elements.customElements);
+      } catch (err) {
+        notifyService.error(err, { title: `Couldn't find custom elements` });
+      }
+    },
+    [customElementService, notifyService, onElementsChange]
+  );
+
+  const removeCustomElement = useCallback(
+    async (id: string) => {
+      try {
+        await customElementService.remove(id);
+        await findCustomElements();
+      } catch (err) {
+        notifyService.error(err, {
+          title: `Couldn't delete custom elements`,
+        });
+      }
+    },
+    [findCustomElements, customElementService, notifyService]
+  );
+
+  const updateCustomElement = useCallback(
+    async (id: string, name: string, description: string, image: string) => {
+      try {
+        await customElementService.update(id, {
+          name: camelCase(name),
+          displayName: name,
+          image,
+          help: description,
+        });
+        await findCustomElements();
+      } catch (err) {
+        notifyService.error(err, {
+          title: `Couldn't update custom elements`,
+        });
+      }
+    },
+    [findCustomElements, customElementService, notifyService]
+  );
 
   useEffect(() => {
     if (!hasLoadedElements.current) {
@@ -255,8 +292,5 @@ export const SavedElementsModal: FunctionComponent<Props> = ({
 
 SavedElementsModal.propTypes = {
   addCustomElement: PropTypes.func.isRequired,
-  findCustomElements: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
-  removeCustomElement: PropTypes.func.isRequired,
-  updateCustomElement: PropTypes.func.isRequired,
 };

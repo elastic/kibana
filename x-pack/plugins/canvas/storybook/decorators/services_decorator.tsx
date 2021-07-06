@@ -11,7 +11,8 @@ import { DecoratorFn } from '@storybook/react';
 import { I18nProvider } from '@kbn/i18n/react';
 
 import { PluginServiceRegistry } from '../../../../../src/plugins/presentation_util/public';
-import { pluginServices, LegacyServicesProvider } from '../../public/services';
+
+import { pluginServices } from '../../public/services';
 import { CanvasPluginServices } from '../../public/services';
 import { pluginServiceProviders, StorybookParams } from '../../public/services/storybook';
 
@@ -34,7 +35,3 @@ export const servicesContextDecorator: DecoratorFn = (story: Function, storybook
     </I18nProvider>
   );
 };
-
-export const legacyContextDecorator = () => (story: Function) => (
-  <LegacyServicesProvider>{story()}</LegacyServicesProvider>
-);

@@ -6,8 +6,7 @@
  */
 
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/public';
-// @ts-expect-error unconverted local lib
-import { getState } from '../state/store';
+import { UNSAFE_getState } from '../state/store';
 import { getAssetById } from '../state/selectors/assets';
 import { getFunctionHelp, getFunctionErrors } from '../../i18n';
 
@@ -35,7 +34,7 @@ export function asset(): ExpressionFunctionDefinition<'asset', null, Arguments, 
     },
     fn: (input, args) => {
       const assetId = args.id;
-      const storedAsset = getAssetById(getState(), assetId);
+      const storedAsset = getAssetById(UNSAFE_getState(), assetId);
       if (storedAsset !== undefined) {
         return storedAsset.value;
       }

@@ -5,23 +5,26 @@
  * 2.0.
  */
 
-import { ReportingStart } from '../../../../reporting/public';
-import { CanvasServiceFactory } from './';
+import { KibanaPluginServiceFactory } from '../../../../../../src/plugins/presentation_util/public';
 
-export interface ReportingService {
-  start?: ReportingStart;
-}
+import { CanvasStartDeps } from '../../plugin';
+import { CanvasReportingService } from '../reporting';
 
-export const reportingServiceFactory: CanvasServiceFactory<ReportingService> = (
-  _coreSetup,
+export type CanvasReportingServiceFactory = KibanaPluginServiceFactory<
+  CanvasReportingService,
+  CanvasStartDeps
+>;
+
+export const reportingServiceFactory: CanvasReportingServiceFactory = ({
+  startPlugins,
   coreStart,
-  _setupPlugins,
-  startPlugins
-): ReportingService => {
+}) => {
   const { reporting } = startPlugins;
 
-  const reportingEnabled = () => ({ start: reporting });
-  const reportingDisabled = () => ({ start: undefined });
+  const reportingEnabled = () => ({
+    getReportingPanelPDFComponent: () => reporting?.components.ReportingPanelPDF || null,
+  });
+  const reportingDisabled = () => ({ getReportingPanelPDFComponent: () => null });
 
   if (!reporting) {
     // Reporting is not enabled

@@ -30,8 +30,8 @@ storiesOf('components/WorkpadHeader/ShareMenu/ShareWebsiteFlyout', module)
   ))
   .add('unsupported renderers', () => (
     <ShareWebsiteFlyout
+      renderedWorkpad={{} as any}
       onClose={action('onClose')}
       unsupportedRenderers={['rendererOne', 'rendererTwo']}
-      renderedWorkpad={{} as any}
     />
   ));

@@ -9,7 +9,6 @@ import { camelCase } from 'lodash';
 import { getClipboardData, setClipboardData } from './clipboard';
 import { cloneSubgraphs } from './clone_subgraphs';
 import { pluginServices } from '../services';
-import * as customElementService from './custom_element_service';
 import { getId } from './get_id';
 import { PositionedElement } from '../../types';
 import { ELEMENT_NUDGE_OFFSET, ELEMENT_SHIFT_OFFSET } from '../../common/lib/constants';
@@ -71,6 +70,7 @@ export const basicHandlerCreators = {
     image = ''
   ): void => {
     const notifyService = pluginServices.getServices().notify;
+    const customElementService = pluginServices.getServices().customElement;
 
     if (selectedNodes.length) {
       const content = JSON.stringify({ selectedNodes });

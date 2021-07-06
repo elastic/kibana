@@ -11,11 +11,10 @@ import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
-import { BehaviorSubject } from 'rxjs';
 
 import { includes, remove } from 'lodash';
 
-import { AppMountParameters, CoreStart, CoreSetup, AppUpdater } from 'kibana/public';
+import { AppMountParameters, CoreStart } from 'kibana/public';
 
 import { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
 import { PluginServices } from '../../../../src/plugins/presentation_util/public';
@@ -32,7 +31,8 @@ import { init as initStatsReporter } from './lib/ui_metric';
 
 import { CapabilitiesStrings } from '../i18n';
 
-import { startServices, services, LegacyServicesProvider, CanvasPluginServices } from './services';
+import { CanvasPluginServices } from './services';
+
 import { initFunctions } from './functions';
 // @ts-expect-error untyped local
 import { appUnload } from './state/actions/app';
@@ -68,19 +68,18 @@ export const renderApp = ({
   ReactDOM.render(
     <KibanaContextProvider services={{ ...startPlugins, ...coreStart }}>
       <ServicesContextProvider>
-        <LegacyServicesProvider providers={services}>
-          <presentationUtil.ContextProvider>
-            <I18nProvider>
-              <Provider store={canvasStore}>
-                <App />
-              </Provider>
-            </I18nProvider>
-          </presentationUtil.ContextProvider>
-        </LegacyServicesProvider>
+        <presentationUtil.ContextProvider>
+          <I18nProvider>
+            <Provider store={canvasStore}>
+              <App />
+            </Provider>
+          </I18nProvider>
+        </presentationUtil.ContextProvider>
       </ServicesContextProvider>
     </KibanaContextProvider>,
     element
   );
+
   return () => {
     ReactDOM.unmountComponentAtNode(element);
     canvasStore.dispatch(appUnload());
@@ -88,15 +87,10 @@ export const renderApp = ({
 };
 
 export const initializeCanvas = async (
-  coreSetup: CoreSetup,
   coreStart: CoreStart,
   setupPlugins: CanvasSetupDeps,
-  startPlugins: CanvasStartDeps,
-  registries: SetupRegistries,
-  appUpdater: BehaviorSubject<AppUpdater>
+  registries: SetupRegistries
 ) => {
-  await startServices(coreSetup, coreStart, setupPlugins, startPlugins, appUpdater);
-
   // Adding these functions here instead of in plugin.ts.
   // Some of these functions have deep dependencies into Canvas, which was bulking up the size
   // of our bundle entry point. Moving them here pushes that load to when canvas is actually loaded.
@@ -108,13 +102,13 @@ export const initializeCanvas = async (
   });
 
   for (const fn of canvasFunctions) {
-    services.expressions.getService().registerFunction(fn);
+    setupPlugins.expressions.registerFunction(fn);
   }
 
   // Create Store
-  const canvasStore = await createStore(coreSetup);
+  const canvasStore = await createStore(coreStart);
 
-  registerLanguage(Object.values(services.expressions.getService().getFunctions()));
+  registerLanguage(Object.values(setupPlugins.expressions.getFunctions()));
 
   // Init Registries
   initRegistries();
@@ -146,7 +140,7 @@ export const initializeCanvas = async (
     ],
     content: (domNode) => {
       ReactDOM.render(
-        <HelpMenu functionRegistry={services.expressions.getService().getFunctions()} />,
+        <HelpMenu functionRegistry={setupPlugins.expressions.getFunctions()} />,
         domNode
       );
       return () => ReactDOM.unmountComponentAtNode(domNode);

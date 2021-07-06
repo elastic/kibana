@@ -9,8 +9,7 @@ import { fromExpression } from '@kbn/interpreter/common';
 import { get } from 'lodash';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/public';
 import { interpretAst } from '../lib/run_interpreter';
-// @ts-expect-error untyped local
-import { getState } from '../state/store';
+import { UNSAFE_getState } from '../state/store';
 import { getGlobalFilters, getWorkpadVariablesAsObject } from '../state/selectors/workpad';
 import { ExpressionValueFilter } from '../../types';
 import { getFunctionHelp } from '../../i18n';
@@ -75,12 +74,12 @@ export function filtersFunctionFactory(initialize: InitializeArguments): () => F
         },
       },
       fn: (input, { group, ungrouped }) => {
-        const filterList = getFiltersByGroup(getGlobalFilters(getState()), group, ungrouped);
+        const filterList = getFiltersByGroup(getGlobalFilters(UNSAFE_getState()), group, ungrouped);
 
         if (filterList && filterList.length) {
           const filterExpression = filterList.join(' | ');
           const filterAST = fromExpression(filterExpression);
-          return interpretAst(filterAST, getWorkpadVariablesAsObject(getState()));
+          return interpretAst(filterAST, getWorkpadVariablesAsObject(UNSAFE_getState()));
         } else {
           const filterType = initialize.types.filter;
           return filterType?.from(null, {});

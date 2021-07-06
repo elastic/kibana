@@ -87,6 +87,7 @@ export class CanvasPlugin
     const lastPath = getSessionStorage().get(
       `${SESSIONSTORAGE_LASTPATH}:${coreSetup.http.basePath.get()}`
     );
+
     if (lastPath) {
       this.appUpdater.next(() => ({
         defaultPath: `#${lastPath}`,
@@ -107,14 +108,7 @@ export class CanvasPlugin
         // Get start services
         const [coreStart, startPlugins] = await coreSetup.getStartServices();
 
-        const canvasStore = await initializeCanvas(
-          coreSetup,
-          coreStart,
-          setupPlugins,
-          startPlugins,
-          registries,
-          this.appUpdater
-        );
+        const canvasStore = await initializeCanvas(coreStart, setupPlugins, registries);
 
         const unmount = renderApp({ coreStart, startPlugins, params, canvasStore, pluginServices });
 
@@ -134,6 +128,7 @@ export class CanvasPlugin
       const { argTypeSpecs } = await import('./expression_types/arg_types');
       return argTypeSpecs;
     });
+
     canvasApi.addTransitions(async () => {
       const { transitions } = await import('./transitions');
       return transitions;
@@ -148,5 +143,10 @@ export class CanvasPlugin
     this.srcPlugin.start(coreStart, startPlugins);
     pluginServices.setRegistry(pluginServiceRegistry.start({ coreStart, startPlugins }));
     initLoadingIndicator(coreStart.http.addLoadingCountSource);
+
+    return {
+      ContextProvider: pluginServices.getContextProvider(),
+      labsService: pluginServices.getServices().labs,
+    };
   }
 }

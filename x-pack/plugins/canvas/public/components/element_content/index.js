@@ -9,8 +9,8 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
 import { get } from 'lodash';
-import { withServices } from '../../services';
 import { getSelectedPage, getPageById } from '../../state/selectors/workpad';
+import { pluginServices } from '../../services';
 import { ElementContent as Component } from './element_content';
 
 const mapStateToProps = (state) => ({
@@ -19,9 +19,8 @@ const mapStateToProps = (state) => ({
 
 export const ElementContent = compose(
   connect(mapStateToProps),
-  withServices,
-  withProps(({ renderable, services }) => ({
-    renderFunction: services.expressions.getRenderer(get(renderable, 'as')),
+  withProps(({ renderable }) => ({
+    renderFunction: pluginServices.getServices().expressions.getRenderer(get(renderable, 'as')),
   }))
 )(Component);
 

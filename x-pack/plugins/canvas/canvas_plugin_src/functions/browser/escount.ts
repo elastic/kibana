@@ -13,7 +13,7 @@ import {
 // @ts-expect-error untyped local
 import { buildESRequest } from '../../../common/lib/request/build_es_request';
 
-import { searchService } from '../../../public/services';
+import { pluginServices } from '../../../public/services';
 
 import { getFunctionHelp } from '../../../i18n';
 
@@ -76,15 +76,14 @@ export function escount(): ExpressionFunctionDefinition<
         input
       );
 
-      const search = searchService.getService().search;
+      const { search } = pluginServices.getServices().search;
       const req = {
         params: {
           ...esRequest,
         },
       };
 
-      return search
-        .search(req)
+      return search(req)
         .toPromise()
         .then((resp: any) => {
           return resp.rawResponse.hits.total;

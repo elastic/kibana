@@ -6,14 +6,21 @@
  */
 
 import { addParameters } from '@storybook/react';
-
-import { startServices } from '../public/services/stubs';
 import { addDecorators } from './decorators';
 
 // Import Canvas CSS
 import '../public/style/index.scss';
 
-startServices();
+import { PluginServiceRegistry } from '../../../../src/plugins/presentation_util/public';
+import { pluginServices } from '../public/services';
+import { CanvasPluginServices } from '../public/services';
+import { pluginServiceProviders, StorybookParams } from '../public/services/storybook';
+
+const pluginServiceRegistry = new PluginServiceRegistry<CanvasPluginServices, StorybookParams>(
+  pluginServiceProviders
+);
+
+pluginServices.setRegistry(pluginServiceRegistry.start({}));
 
 addDecorators();
 addParameters({

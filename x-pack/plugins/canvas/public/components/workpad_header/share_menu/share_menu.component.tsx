@@ -9,11 +9,9 @@ import React, { FunctionComponent, useState } from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonEmpty, EuiContextMenu, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-import { ReportingStart } from '../../../../../reporting/public';
 import { PDF, JSON } from '../../../../i18n/constants';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
-import { usePlatformService } from '../../../services';
+import { usePlatformService, useReportingService } from '../../../services';
 import { ClosePopoverFn, Popover } from '../../popover';
 import { ShareWebsiteFlyout } from './flyout';
 import { CanvasWorkpadSharingData, getPdfJobParams } from './utils';
@@ -58,10 +56,6 @@ export type OnCloseFn = (type: CloseTypes) => void;
 export interface Props {
   /** Canvas workpad to export as PDF **/
   sharingData: CanvasWorkpadSharingData;
-  sharingServices: {
-    /** Reporting dependency **/
-    reporting?: ReportingStart;
-  };
   /** Handler to invoke when an end product is exported. */
   onExport: OnExportFn;
 }
@@ -69,13 +63,12 @@ export interface Props {
 /**
  * The Menu for Exporting a Workpad from Canvas.
  */
-export const ShareMenu: FunctionComponent<Props> = ({
-  sharingData,
-  sharingServices: services,
-  onExport,
-}) => {
+export const ShareMenu: FunctionComponent<Props> = ({ sharingData, onExport }) => {
+  const reportingService = useReportingService();
   const platformService = usePlatformService();
   const [showFlyout, setShowFlyout] = useState(false);
+
+  const ReportingPanelPDFComponent = reportingService.getReportingPanelPDFComponent();
 
   const onClose = () => {
     setShowFlyout(false);
@@ -92,7 +85,7 @@ export const ShareMenu: FunctionComponent<Props> = ({
           closePopover();
         },
       },
-      services.reporting != null
+      ReportingPanelPDFComponent !== null
         ? {
             name: strings.getShareDownloadPDFTitle(),
             icon: 'document',
@@ -100,7 +93,7 @@ export const ShareMenu: FunctionComponent<Props> = ({
               id: 1,
               title: strings.getShareDownloadPDFTitle(),
               content: (
-                <services.reporting.components.ReportingPanelPDF
+                <ReportingPanelPDFComponent
                   getJobParams={() =>
                     getPdfJobParams(sharingData, platformService.getBasePathInterface())
                   }

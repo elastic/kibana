@@ -5,24 +5,33 @@
  * 2.0.
  */
 
-import { createStore as createReduxStore } from 'redux';
+import { createStore as createReduxStore, Store, AnyAction } from 'redux';
 import { isPlainObject } from 'lodash';
+
+import { State } from '../../types';
+
+// @ts-expect-error Untyped local
 import { middleware } from './middleware';
+// @ts-expect-error Untyped local
 import { getRootReducer } from './reducers';
 
-let store;
+let store: Store<State, AnyAction> | undefined;
 
 export function getStore() {
   return store;
 }
 
 export function cloneStore() {
+  if (!store) {
+    throw new Error('Redux store has not been created yet.');
+  }
+
   const state = store.getState();
   store = undefined;
   return createStore(state);
 }
 
-export function createStore(initialState) {
+export function createStore(initialState: State) {
   if (typeof store !== 'undefined') {
     throw new Error('Redux store can only be initialized once');
   }
@@ -37,14 +46,12 @@ export function createStore(initialState) {
   return store;
 }
 
-export function destroyStore() {
-  if (store) {
-    // Replace reducer so that anything that gets fired after navigating away doesn't really do anything
-    store.replaceReducer((state) => state);
+// This function is a big no-no.
+// https://redux.js.org/faq/code-structure#how-can-i-use-the-redux-store-in-non-component-files
+export function UNSAFE_getState() {
+  if (!store) {
+    throw new Error('Redux store has not been created yet.');
   }
-  store = undefined;
-}
 
-export function getState() {
   return store.getState();
 }

@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { NavLinkService } from '../nav_link';
+import {
+  projectIDs,
+  PresentationLabsService,
+} from '../../../../../src/plugins/presentation_util/public';
 
-const noop = (..._args: any[]): any => {};
-
-export const navLinkService: NavLinkService = {
-  updatePath: noop,
-};
+export interface CanvasLabsService extends PresentationLabsService {
+  projectIDs: typeof projectIDs;
+  isLabsEnabled: () => boolean;
+}

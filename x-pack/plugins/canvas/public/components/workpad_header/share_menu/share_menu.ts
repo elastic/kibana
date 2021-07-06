@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 
 import { CanvasWorkpad, State } from '../../../../types';
 import { downloadWorkpad } from '../../../lib/download_workpad';
-import { withServices, WithServicesProps } from '../../../services';
 import { getPages, getWorkpad } from '../../../state/selectors/workpad';
 import { Props as ComponentProps, ShareMenu as Component } from './share_menu.component';
 
@@ -37,15 +36,9 @@ interface Props {
 
 export const ShareMenu = compose<ComponentProps, {}>(
   connect(mapStateToProps),
-  withServices,
   withProps(
-    ({ workpad, pageCount, services }: Props & WithServicesProps): ComponentProps => {
-      const {
-        reporting: { start: reporting },
-      } = services;
-
+    ({ workpad, pageCount }: Props): ComponentProps => {
       return {
-        sharingServices: { reporting },
         sharingData: { workpad, pageCount },
         onExport: (type) => {
           switch (type) {

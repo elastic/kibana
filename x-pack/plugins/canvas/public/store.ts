@@ -5,35 +5,31 @@
  * 2.0.
  */
 
-import {
-  createStore as createReduxStore,
-  destroyStore as destroy,
-  getStore,
-  cloneStore,
-  // @ts-expect-error untyped local
-} from './state/store';
-// @ts-expect-error untyped local
+import { createStore as createReduxStore, getStore, cloneStore } from './state/store';
+
+// @ts-expect-error Untyped local
 import { getInitialState } from './state/initial_state';
 
-import { CoreSetup } from '../../../../src/core/public';
+import { CoreStart } from '../../../../src/core/public';
 import { API_ROUTE_FUNCTIONS } from '../common/lib/constants';
+import { ExpressionFunction } from '../types';
 
-export async function createStore(core: CoreSetup) {
+export async function createStore(coreStart: CoreStart) {
   if (getStore()) {
     return cloneStore();
   }
 
-  return createFreshStore(core);
+  return createFreshStore(coreStart);
 }
 
-export async function createFreshStore(core: CoreSetup) {
+async function createFreshStore(coreStart: CoreStart) {
   const initialState = getInitialState();
 
-  const basePath = core.http.basePath.get();
+  const basePath = coreStart.http.basePath.get();
 
   // Retrieve server functions
-  const serverFunctionsResponse = await core.http.get(API_ROUTE_FUNCTIONS);
-  const serverFunctions = Object.values(serverFunctionsResponse);
+  const serverFunctionsResponse = await coreStart.http.get(API_ROUTE_FUNCTIONS);
+  const serverFunctions = Object.values(serverFunctionsResponse) as ExpressionFunction[];
 
   initialState.app = {
     basePath,
@@ -42,8 +38,4 @@ export async function createFreshStore(core: CoreSetup) {
   };
 
   return createReduxStore(initialState);
-}
-
-export function destroyStore() {
-  destroy();
 }

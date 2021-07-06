@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import { EmbeddablesService } from '../embeddables';
-
-const noop = (..._args: any[]): any => {};
-
-export const embeddablesService: EmbeddablesService = {
-  getEmbeddableFactories: noop,
-};
+export interface CanvasNavLinkService {
+  updatePath: (path: string) => void;
+}

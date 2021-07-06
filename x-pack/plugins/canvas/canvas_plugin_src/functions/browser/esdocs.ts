@@ -13,7 +13,7 @@ import {
 // @ts-expect-error untyped local
 import { buildESRequest } from '../../../common/lib/request/build_es_request';
 
-import { searchService } from '../../../public/services';
+import { pluginServices } from '../../../public/services';
 import { ESSQL_SEARCH_STRATEGY } from '../../../common/lib/constants';
 import { EssqlSearchStrategyRequest, EssqlSearchStrategyResponse } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
@@ -112,7 +112,7 @@ export function esdocs(): ExpressionFunctionDefinition<
         }
       }
 
-      const search = searchService.getService().search;
+      const { search } = pluginServices.getServices().search;
 
       const req = {
         count,
@@ -122,10 +122,9 @@ export function esdocs(): ExpressionFunctionDefinition<
 
       // We're requesting the data using the ESSQL strategy because
       // the SQL routes return type information with the result set
-      return search
-        .search<EssqlSearchStrategyRequest, EssqlSearchStrategyResponse>(req, {
-          strategy: ESSQL_SEARCH_STRATEGY,
-        })
+      return search<EssqlSearchStrategyRequest, EssqlSearchStrategyResponse>(req, {
+        strategy: ESSQL_SEARCH_STRATEGY,
+      })
         .toPromise()
         .then((resp: EssqlSearchStrategyResponse) => {
           return {

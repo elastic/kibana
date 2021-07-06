@@ -20,9 +20,7 @@ storiesOf('components/SavedElementsModal', module)
       setSearch={action('setSearch')}
       onClose={action('onClose')}
       addCustomElement={action('addCustomElement')}
-      findCustomElements={action('findCustomElements')}
-      updateCustomElement={action('updateCustomElement')}
-      removeCustomElement={action('removeCustomElement')}
+      onElementsChange={action('onElementsChange')}
     />
   ))
   .add('with custom elements', () => (
@@ -32,9 +30,7 @@ storiesOf('components/SavedElementsModal', module)
       setSearch={action('setSearch')}
       onClose={action('onClose')}
       addCustomElement={action('addCustomElement')}
-      findCustomElements={action('findCustomElements')}
-      updateCustomElement={action('updateCustomElement')}
-      removeCustomElement={action('removeCustomElement')}
+      onElementsChange={action('onElementsChange')}
     />
   ))
   .add('with text filter', () => (
@@ -44,8 +40,6 @@ storiesOf('components/SavedElementsModal', module)
       onClose={action('onClose')}
       setSearch={action('setSearch')}
       addCustomElement={action('addCustomElement')}
-      findCustomElements={action('findCustomElements')}
-      updateCustomElement={action('updateCustomElement')}
-      removeCustomElement={action('removeCustomElement')}
+      onElementsChange={action('onElementsChange')}
     />
   ));
