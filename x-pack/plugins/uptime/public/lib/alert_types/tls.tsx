@@ -11,6 +11,8 @@ import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
 import { TlsTranslations } from '../../../common/translations';
 import { AlertTypeInitializer } from '.';
 
+import { CERTIFICATES_ROUTE } from '../../../common/constants';
+
 const { defaultActionMessage, description } = TlsTranslations;
 const TLSAlert = React.lazy(() => import('./lazy_wrapper/tls_alert'));
 export const initTlsAlertType: AlertTypeInitializer = ({
@@ -31,6 +33,6 @@ export const initTlsAlertType: AlertTypeInitializer = ({
   requiresAppContext: false,
   format: ({ fields }) => ({
     reason: fields.reason,
-    link: '/app/uptime/certificates',
+    link: `/app/uptime${CERTIFICATES_ROUTE}`,
   }),
 });

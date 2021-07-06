@@ -69,6 +69,7 @@ const mockAnomaliesResult: MockAnomalyResult = {
       source: {
         timestamp: 1622137799,
         'monitor.id': 'uptime-monitor',
+        bucket_span: 900,
       },
       actualSort: 200000,
       typicalSort: 10000,
@@ -79,6 +80,7 @@ const mockAnomaliesResult: MockAnomalyResult = {
       source: {
         timestamp: 1622137799,
         'monitor.id': 'uptime-monitor',
+        bucket_span: 900,
       },
       actualSort: 300000,
       typicalSort: 20000,
@@ -165,6 +167,7 @@ describe('duration anomaly alert', () => {
             'monitor.id': options.params.monitorId,
             'url.full': mockPing.url?.full,
             'anomaly.start': mockDate,
+            'anomaly.bucket_span.minutes': anomaly.source.bucket_span,
             'observer.geo.name': anomaly.entityValue,
             [ALERT_EVALUATION_VALUE]: anomaly.actualSort,
             [ALERT_EVALUATION_THRESHOLD]: anomaly.typicalSort,
@@ -197,6 +200,7 @@ Response times as high as ${slowestResponse} ms have been detected from location
           severity: getSeverityType(anomaly.severity),
           severityScore: anomaly.severity,
           slowestAnomalyResponse: `${slowestResponse} ms`,
+          bucketSpan: anomaly.source.bucket_span,
         });
       });
       expect(alertInstanceMock.scheduleActions).toHaveBeenCalledTimes(2);

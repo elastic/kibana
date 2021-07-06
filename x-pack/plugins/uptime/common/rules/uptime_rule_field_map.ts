@@ -52,7 +52,7 @@ export const uptimeRuleFieldMap = {
   'anomaly.start': {
     type: 'date',
   },
-  'anomaly.bucket_span': {
+  'anomaly.bucket_span.minutes': {
     type: 'keyword',
   },
 } as const;
