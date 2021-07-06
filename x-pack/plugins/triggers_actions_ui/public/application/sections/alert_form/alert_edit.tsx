@@ -133,6 +133,7 @@ export const AlertEdit = ({
         aria-labelledby="flyoutAlertEditTitle"
         size="m"
         maxWidth={620}
+        ownFocus={false}
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s" data-test-subj="editAlertFlyoutTitle">

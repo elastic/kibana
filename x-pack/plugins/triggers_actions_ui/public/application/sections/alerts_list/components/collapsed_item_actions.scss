@@ -8,7 +8,7 @@
   padding: $euiSizeM;
 }
 
-.actCollapsedItemActions__delete {
+.actCollapsedItemActions {
   display: flex;
 
   .actCollapsedItemActions__deleteIcon {
@@ -16,7 +16,7 @@
     text-align: center;
   }
 
-  .actCollapsedItemActions__deleteLabel {
+  .actCollapsedItemActions__Label {
     padding-left: $euiSizeS;
     padding-top: $euiSizeXS * .5;
   }
