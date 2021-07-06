@@ -28,10 +28,9 @@ import { useUrlParams } from '../../../../context/url_params_context/use_url_par
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
-import { pct } from '../../../../style/variables';
 import { getAgentIcon } from '../../../shared/agent_icon/get_agent_icon';
 import { KeyValueFilterList } from '../../../shared/key_value_filter_list';
-import { pushNewItemToKueryBar } from '../../../shared/KueryBar/utils';
+import { pushNewItemToKueryBar } from '../../../shared/kuery_bar/utils';
 import { getCloudIcon, getContainerIcon } from '../../../shared/service_icons';
 import { useInstanceDetailsFetcher } from './use_instance_details_fetcher';
 
@@ -78,7 +77,7 @@ export function InstanceDetails({ serviceName, serviceNodeName }: Props) {
     status === FETCH_STATUS.NOT_INITIATED
   ) {
     return (
-      <div style={{ width: pct(50) }}>
+      <div style={{ width: '50%' }}>
         <EuiLoadingContent data-test-subj="loadingSpinner" />
       </div>
     );

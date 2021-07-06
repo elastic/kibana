@@ -143,9 +143,9 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
       hasShadow={false}
       data-test-subj="timeline-flyout-header-panel"
     >
-      <EuiFlexGroup alignItems="center" gutterSize="s">
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <AddTimelineButton timelineId={timelineId} />
-        <EuiFlexItem grow>
+        <EuiFlexItem grow={false}>
           <ActiveTimelines
             timelineId={timelineId}
             timelineType={timelineType}
@@ -156,8 +156,8 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
           />
         </EuiFlexItem>
         {show && (
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem>
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
               {(activeTab === TimelineTabs.query || activeTab === TimelineTabs.eql) && (
                 <EuiFlexItem grow={false}>
                   <InspectButton
@@ -221,7 +221,7 @@ const TimelineNameComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
     [timelineType]
   );
 
-  const content = useMemo(() => (title.length ? title : placeholder), [title, placeholder]);
+  const content = useMemo(() => title || placeholder, [title, placeholder]);
 
   return (
     <EuiText>
@@ -239,10 +239,8 @@ const TimelineDescriptionComponent: React.FC<FlyoutHeaderProps> = ({ timelineId 
   );
   return (
     <EuiText size="s" data-test-subj="timeline-description">
-      {description.length ? (
-        <LineClamp key={description.length} lineClampHeight={4.5}>
-          {description}
-        </LineClamp>
+      {description ? (
+        <LineClamp lineClampHeight={4.5}>{description}</LineClamp>
       ) : (
         commonI18n.DESCRIPTION
       )}

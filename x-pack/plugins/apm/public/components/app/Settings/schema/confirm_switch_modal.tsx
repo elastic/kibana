@@ -57,7 +57,7 @@ export function ConfirmSwitchModal({
       <p>
         {i18n.translate('xpack.apm.settings.schema.confirm.descriptionText', {
           defaultMessage:
-            'If you have custom dashboards, machine learning jobs, or source maps that use classic APM indices, you must reconfigure them for data streams. Stack monitoring is not currently supported with Fleet-managed APM.',
+            'Please note Stack monitoring is not currently supported with Fleet-managed APM.',
         })}
       </p>
       {!hasUnsupportedConfigs && (
