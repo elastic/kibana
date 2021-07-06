@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useCallback } from 'react';
 import {
   EuiText,
   EuiSpacer,
@@ -24,34 +24,20 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { arrayBufferFetch } from '../../../../../common/lib/fetch';
-import { API_ROUTE_SHAREABLE_ZIP } from '../../../../../common/lib/constants';
 import { CanvasRenderedWorkpad } from '../../../../../shareable_runtime/types';
-import {
-  downloadRenderedWorkpad,
-  downloadRuntime,
-  downloadZippedRuntime,
-} from '../../../../lib/download_workpad';
+import { useDownloadRenderedWorkpad } from '../../../hooks';
+import { useDownloadRuntime, useDownloadZippedRuntime } from './hooks';
 import { ZIP, CANVAS, HTML } from '../../../../../i18n/constants';
 import { OnCloseFn } from '../share_menu.component';
 import { WorkpadStep } from './workpad_step';
 import { RuntimeStep } from './runtime_step';
 import { SnippetsStep } from './snippets_step';
-import { useNotifyService, usePlatformService } from '../../../../services';
+import { useNotifyService } from '../../../../services';
 
 const strings = {
   getCopyShareConfigMessage: () =>
     i18n.translate('xpack.canvas.workpadHeaderShareMenu.copyShareConfigMessage', {
       defaultMessage: 'Copied share markup to clipboard',
-    }),
-  getShareableZipErrorTitle: (workpadName: string) =>
-    i18n.translate('xpack.canvas.workpadHeaderShareMenu.shareWebsiteErrorTitle', {
-      defaultMessage:
-        "Failed to create {ZIP} file for '{workpadName}'. The workpad may be too large. You'll need to download the files separately.",
-      values: {
-        ZIP,
-        workpadName,
-      },
     }),
   getUnknownExportErrorMessage: (type: string) =>
     i18n.translate('xpack.canvas.workpadHeaderShareMenu.unknownExportErrorMessage', {
@@ -121,33 +107,33 @@ export const ShareWebsiteFlyout: FC<Props> = ({
   renderedWorkpad,
 }) => {
   const notifyService = useNotifyService();
-  const platformService = usePlatformService();
-  const onCopy = () => {
-    notifyService.info(strings.getCopyShareConfigMessage());
-  };
 
-  const onDownload = (type: 'share' | 'shareRuntime' | 'shareZip') => {
-    switch (type) {
-      case 'share':
-        downloadRenderedWorkpad(renderedWorkpad);
-        return;
-      case 'shareRuntime':
-        downloadRuntime(platformService.getBasePath());
-      case 'shareZip':
-        const basePath = platformService.getBasePath();
-        arrayBufferFetch
-          .post(`${basePath}${API_ROUTE_SHAREABLE_ZIP}`, JSON.stringify(renderedWorkpad))
-          .then((blob) => downloadZippedRuntime(blob.data))
-          .catch((err: Error) => {
-            notifyService.error(err, {
-              title: strings.getShareableZipErrorTitle(renderedWorkpad.name),
-            });
-          });
-        return;
-      default:
-        throw new Error(strings.getUnknownExportErrorMessage(type));
-    }
-  };
+  const onCopy = useCallback(() => notifyService.info(strings.getCopyShareConfigMessage()), [
+    notifyService,
+  ]);
+
+  const downloadRenderedWorkpad = useDownloadRenderedWorkpad();
+  const downloadRuntime = useDownloadRuntime();
+  const downloadZippedRuntime = useDownloadZippedRuntime();
+
+  const onDownload = useCallback(
+    (type: 'share' | 'shareRuntime' | 'shareZip') => {
+      switch (type) {
+        case 'share':
+          downloadRenderedWorkpad(renderedWorkpad);
+          return;
+        case 'shareRuntime':
+          downloadRuntime();
+          return;
+        case 'shareZip':
+          downloadZippedRuntime(renderedWorkpad);
+          return;
+        default:
+          throw new Error(strings.getUnknownExportErrorMessage(type));
+      }
+    },
+    [downloadRenderedWorkpad, downloadRuntime, downloadZippedRuntime, renderedWorkpad]
+  );
 
   const link = (
     <EuiLink

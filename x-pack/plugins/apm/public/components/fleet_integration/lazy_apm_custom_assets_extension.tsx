@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
-import { downloadWorkpad as downloadWorkpadFn } from '../../../lib/download_workpad';
+import { lazy } from 'react';
 
-export const useDownloadWorkpad = () =>
-  useCallback((workpadId: string) => downloadWorkpadFn(workpadId), []);
+export const LazyApmCustomAssetsExtension = lazy(async () => {
+  const { ApmCustomAssetsExtension } = await import(
+    './apm_custom_assets_extension'
+  );
+
+  return {
+    default: ApmCustomAssetsExtension,
+  };
+});
