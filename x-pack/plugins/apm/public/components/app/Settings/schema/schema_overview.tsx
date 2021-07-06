@@ -23,9 +23,11 @@ import { APMLink } from '../../../shared/Links/apm/APMLink';
 import { ElasticDocsLink } from '../../../shared/Links/ElasticDocsLink';
 import { useFleetCloudAgentPolicyHref } from '../../../shared/Links/kibana';
 import rocketLaunchGraphic from './blog-rocket-720x420.png';
+import { MigrationInProgressPanel } from './migration_in_progress_panel';
 
 interface Props {
   onSwitch: () => void;
+  isMigrating: boolean;
   isMigrated: boolean;
   isLoading: boolean;
   isLoadingConfirmation: boolean;
@@ -35,6 +37,7 @@ interface Props {
 }
 export function SchemaOverview({
   onSwitch,
+  isMigrating,
   isMigrated,
   isLoading,
   isLoadingConfirmation,
@@ -53,6 +56,15 @@ export function SchemaOverview({
         <EuiFlexGroup justifyContent="center">
           <EuiLoadingSpinner size="xl" />
         </EuiFlexGroup>
+      </>
+    );
+  }
+
+  if (isMigrating && !isMigrated) {
+    return (
+      <>
+        <SchemaOverviewHeading />
+        <MigrationInProgressPanel />
       </>
     );
   }
