@@ -26,6 +26,11 @@ import { ReplaceStateInLocation, UpdateUrlStateString } from './types';
 import { sourcererSelectors } from '../../store/sourcerer';
 import { SourcererScopeName, SourcererScopePatterns } from '../../store/sourcerer/model';
 
+export const isDetectionsPages = (pageName: string) =>
+  pageName === SecurityPageName.alerts ||
+  pageName === SecurityPageName.rules ||
+  pageName === SecurityPageName.exceptions;
+
 export const decodeRisonUrlState = <T>(value: string | undefined): T | null => {
   try {
     return value ? ((decode(value) as unknown) as T) : null;
@@ -92,8 +97,12 @@ export const getUrlType = (pageName: string): UrlStateType => {
     return 'host';
   } else if (pageName === SecurityPageName.network) {
     return 'network';
-  } else if (pageName === SecurityPageName.detections) {
-    return 'detections';
+  } else if (pageName === SecurityPageName.alerts) {
+    return 'alerts';
+  } else if (pageName === SecurityPageName.rules) {
+    return 'rules';
+  } else if (pageName === SecurityPageName.exceptions) {
+    return 'exceptions';
   } else if (pageName === SecurityPageName.timelines) {
     return 'timeline';
   } else if (pageName === SecurityPageName.case) {

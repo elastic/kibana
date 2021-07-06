@@ -15,7 +15,7 @@
   "server": true,
   "ui": true,
   "version": "8.0.0",
-  "requiredBundles": ["observability", "kibanaReact", "kibanaUtils", "home", "data", "ml"],
+  "requiredBundles": ["observability", "kibanaReact", "kibanaUtils", "home", "data", "ml", "fleet"],
   "owner": {
     "name": "Uptime",
     "githubTeam": "uptime"

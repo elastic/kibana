@@ -33,7 +33,7 @@ import {
 } from '../../tasks/rule_details';
 import { refreshPage } from '../../tasks/security_header';
 
-import { DETECTIONS_URL } from '../../urls/navigation';
+import { ALERTS_URL } from '../../urls/navigation';
 import { cleanKibana } from '../../tasks/common';
 
 describe('From alert', () => {
@@ -41,7 +41,7 @@ describe('From alert', () => {
 
   beforeEach(() => {
     cleanKibana();
-    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsIndexToBeCreated();
     createCustomRule(newRule, 'rule_testing', '10s');
     goToManageAlertsDetectionRules();

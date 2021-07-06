@@ -6,25 +6,13 @@
  */
 
 import React, { FC, memo } from 'react';
-import { EuiPanel, EuiSpacer, CommonProps } from '@elastic/eui';
+import { EuiPanel, CommonProps } from '@elastic/eui';
 import styled from 'styled-components';
 import { SecurityPageName } from '../../../common/constants';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { HeaderPage } from '../../common/components/header_page';
-import { SecuritySolutionTabNavigation } from '../../common/components/navigation';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { AdministrationSubTab } from '../types';
-import {
-  ENDPOINTS_TAB,
-  TRUSTED_APPS_TAB,
-  BETA_BADGE_LABEL,
-  EVENT_FILTERS_TAB,
-} from '../common/translations';
-import {
-  getEndpointListPath,
-  getEventFiltersListPath,
-  getTrustedAppsListPath,
-} from '../common/routing';
+import { BETA_BADGE_LABEL } from '../common/translations';
 
 /** Ensure that all flyouts z-index in Administation area show the flyout header */
 const EuiPanelStyled = styled(EuiPanel)`
@@ -56,37 +44,6 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
         >
           {actions}
         </HeaderPage>
-
-        <SecuritySolutionTabNavigation
-          navTabs={{
-            [AdministrationSubTab.endpoints]: {
-              name: ENDPOINTS_TAB,
-              id: AdministrationSubTab.endpoints,
-              href: getEndpointListPath({ name: 'endpointList' }),
-              urlKey: 'administration',
-              pageId: SecurityPageName.administration,
-              disabled: false,
-            },
-            [AdministrationSubTab.trustedApps]: {
-              name: TRUSTED_APPS_TAB,
-              id: AdministrationSubTab.trustedApps,
-              href: getTrustedAppsListPath(),
-              urlKey: 'administration',
-              pageId: SecurityPageName.administration,
-              disabled: false,
-            },
-            [AdministrationSubTab.eventFilters]: {
-              name: EVENT_FILTERS_TAB,
-              id: AdministrationSubTab.eventFilters,
-              href: getEventFiltersListPath(),
-              urlKey: 'administration',
-              pageId: SecurityPageName.administration,
-              disabled: false,
-            },
-          }}
-        />
-
-        <EuiSpacer />
 
         <EuiPanelStyled hasBorder>{children}</EuiPanelStyled>
 
