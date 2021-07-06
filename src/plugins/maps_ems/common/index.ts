@@ -9,4 +9,5 @@
 export const TMS_IN_YML_ID = 'TMS in config/kibana.yml';
 
 export * from './ems_defaults';
+export * from './ems_settings';
 export { ORIGIN } from './origin';

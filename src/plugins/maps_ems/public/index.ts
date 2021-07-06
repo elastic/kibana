@@ -10,6 +10,7 @@ import { PluginInitializerContext } from 'kibana/public';
 import { MapsEmsPlugin } from './plugin';
 import { IServiceSettings } from './service_settings';
 import type { MapsEmsConfig } from '../config';
+import { EMSSettings } from '../common';
 
 /** @public */
 export {
@@ -31,5 +32,6 @@ export * from '../common';
 export interface MapsEmsPluginSetup {
   config: MapsEmsConfig;
   getServiceSettings: () => Promise<IServiceSettings>;
+  EMSSettings: EMSSettings;
 }
 export type MapsEmsPluginStart = ReturnType<MapsEmsPlugin['start']>;

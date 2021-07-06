@@ -63,7 +63,6 @@ import {
   registerLicensedFeatures,
   setLicensingPluginStart,
 } from './licensed_features';
-import { EMSSettings } from '../common/ems_settings';
 import type { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
 import type { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 import {
@@ -130,7 +129,10 @@ export class MapsPlugin
     setMapAppConfig(config);
     setKibanaVersion(this._initializerContext.env.packageInfo.version);
 
-    const emsSettings = new EMSSettings(plugins.mapsEms.config, getIsEnterprisePlus);
+    const emsSettings = new plugins.mapsEms.EMSSettings(
+      plugins.mapsEms.config,
+      getIsEnterprisePlus
+    );
     setEMSSettings(emsSettings);
 
     const locator = plugins.share.url.locators.create(

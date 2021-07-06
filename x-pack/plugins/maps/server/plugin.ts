@@ -35,7 +35,7 @@ import { ILicense } from '../../licensing/common/types';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
 import { MapsEmsPluginSetup } from '../../../../src/plugins/maps_ems/server';
-import { EMSSettings } from '../common/ems_settings';
+import type { EMSSettings } from '../../../../src/plugins/maps_ems/server';
 import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 import { EmbeddableSetup } from '../../../../src/plugins/embeddable/server';
 import { embeddableMigrations } from './embeddable_migrations';
@@ -149,7 +149,6 @@ export class MapsPlugin implements Plugin {
   // @ts-ignore
   setup(core: CoreSetup, plugins: SetupDeps) {
     const { usageCollection, home, licensing, features, mapsEms } = plugins;
-    const mapsEmsConfig = mapsEms.config;
     const config$ = this._initializerContext.config.create();
     const currentConfig = this._initializerContext.config.get();
 
@@ -163,7 +162,7 @@ export class MapsPlugin implements Plugin {
 
     let isEnterprisePlus = false;
     let lastLicenseId: string | undefined;
-    const emsSettings = new EMSSettings(mapsEmsConfig, () => isEnterprisePlus);
+    const emsSettings = new EMSSettings(mapsEms.config, () => isEnterprisePlus);
     licensing.license$.subscribe((license: ILicense) => {
       const enterprise = license.check(APP_ID, 'enterprise');
       isEnterprisePlus = enterprise.state === 'valid';

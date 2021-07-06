@@ -14,6 +14,7 @@ import { setKibanaVersion, setMapsEmsConfig } from './kibana_services';
 import { MapsEmsPluginSetup, MapsEmsPluginStart } from './index';
 import type { MapsEmsConfig } from '../config';
 import { getServiceSettings } from './lazy_load_bundle/get_service_settings';
+import { EMSSettings } from './index';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -43,6 +44,7 @@ export class MapsEmsPlugin implements Plugin<MapsEmsPluginSetup, MapsEmsPluginSt
     return {
       getServiceSettings,
       config,
+      EMSSettings,
     };
   }
 
