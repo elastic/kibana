@@ -55,6 +55,10 @@ image::user/security/images/kibana-login.png["Login Selector UI"]
 
 For more information, refer to <<authentication-security-settings, authentication security settings>>.
 
+TIP: If you have multiple authentication providers configured, you can use the `auth_provider_hint` URL query parameter to create a deep
+link to any provider and bypass the Login Selector UI. Using the `kibana.yml` above as an example, you can add `?auth_provider_hint=basic1`
+to the login page URL, which will take you directly to the basic login page.
+
 [[basic-authentication]]
 ==== Basic authentication
 
