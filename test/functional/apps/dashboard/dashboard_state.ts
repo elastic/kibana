@@ -317,9 +317,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('resets a pie slice color to the original when removed', async function () {
           const currentUrl = await getUrlFromShare();
-          const newUrl = isNewChartsLibraryEnabled
-            ? currentUrl.replace(`'80000':%23FFFFFF`, '')
-            : currentUrl.replace(`vis:(colors:('80,000':%23FFFFFF))`, '');
+          const newUrl = currentUrl.replace(`vis:(colors:('80,000':%23FFFFFF))`, '');
 
           await hardRefresh(newUrl);
           await PageObjects.header.waitUntilLoadingHasFinished();
