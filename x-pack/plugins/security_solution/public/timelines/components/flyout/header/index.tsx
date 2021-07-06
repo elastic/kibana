@@ -221,7 +221,7 @@ const TimelineNameComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
     [timelineType]
   );
 
-  const content = useMemo(() => (title.length ? title : placeholder), [title, placeholder]);
+  const content = useMemo(() => (title?.length ? title : placeholder), [title, placeholder]);
 
   return (
     <EuiText>
