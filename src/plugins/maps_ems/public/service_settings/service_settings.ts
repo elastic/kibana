@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { getKibanaVersion } from '../kibana_services';
 import { FileLayer, IServiceSettings, TmsLayer } from './service_settings_types';
 import { ORIGIN, TMS_IN_YML_ID } from '../../common';
+import { EMSSettings } from '../../common';
 import type { MapsEmsConfig, TileMapConfig } from '../../config';
 
 /**
@@ -30,13 +31,17 @@ export class ServiceSettings implements IServiceSettings {
     this._tilemapsConfig = tilemapsConfig;
     this._hasTmsConfigured = typeof tilemapsConfig.url === 'string' && tilemapsConfig.url !== '';
 
+    const emsSettings = new EMSSettings(mapConfig, () => {
+      return false;
+    });
+
     this._emsClient = new EMSClient({
       language: i18n.getLocale(),
       appVersion: getKibanaVersion(),
       appName: 'kibana',
-      fileApiUrl: this._mapConfig.emsFileApiUrl,
-      tileApiUrl: this._mapConfig.emsTileApiUrl,
-      landingPageUrl: this._mapConfig.emsLandingPageUrl,
+      fileApiUrl: emsSettings.getEMSFileApiUrl(),
+      tileApiUrl: emsSettings.getEMSTileApiUrl(),
+      landingPageUrl: emsSettings.getEMSLandingPageUrl(),
       // Wrap to avoid errors passing window fetch
       fetchFunction(...args: any[]) {
         // @ts-expect-error
