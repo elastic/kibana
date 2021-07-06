@@ -5,9 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useCurrentRoute } from './use_current_route';
 
-export function Outlet() {
-  const { element } = useCurrentRoute();
-  return element;
+import { Match, PathsOf, Route } from './types';
+import { useRouter } from './use_router';
+
+export function useMatchRoutes<TRoutes extends Route[], TPath extends PathsOf<TRoutes>>(
+  path: TPath
+): Match<TRoutes, TPath> {
+  const router = useRouter();
+  return router.matchRoutes(path) as any;
 }

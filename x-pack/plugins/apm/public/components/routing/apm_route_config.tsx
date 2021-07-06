@@ -7,7 +7,6 @@
 import * as t from 'io-ts';
 import { i18n } from '@kbn/i18n';
 import { Outlet } from '@kbn/typed-react-router-config/target/outlet';
-import { createRouter } from '@kbn/typed-react-router-config/target/create_router';
 import { unconst } from '@kbn/typed-react-router-config/target/unconst';
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
@@ -343,7 +342,7 @@ const SettingsTitle = i18n.translate('xpack.apm.views.listSettings.title', {
  * The array of route definitions to be used when the application
  * creates the routes.
  */
-const apmRoutes = [
+const apmRoutesAsConst = [
   {
     path: '/',
     element: <Outlet />,
@@ -386,7 +385,9 @@ const apmRoutes = [
   },
 ] as const;
 
-export const apmRouter = createRouter(unconst(apmRoutes));
+export const apmRoutes = unconst(apmRoutesAsConst);
+
+export type ApmRoutes = typeof apmRoutes;
 
 export const apmRouteConfig: APMRouteDefinition[] = [
   /*

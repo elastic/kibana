@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import * as t from 'io-ts';
 
 export type MaybeOutputOf<T> = T extends t.Type<any> ? [t.OutputOf<T>] : [];
-
 export type NormalizePath<T extends string> = T extends `//${infer TRest}`
   ? NormalizePath<`/${TRest}`>
   : T extends '/'
@@ -16,7 +16,6 @@ export type NormalizePath<T extends string> = T extends `//${infer TRest}`
   : T extends `${infer TRest}/`
   ? TRest
   : T;
-
 export type DeeplyMutableRoutes<T> = T extends React.ReactElement
   ? T
   : T extends t.Type<any>
@@ -26,7 +25,9 @@ export type DeeplyMutableRoutes<T> = T extends React.ReactElement
   : T extends readonly [infer U, ...infer V]
   ? [DeeplyMutableRoutes<U>, ...DeeplyMutableRoutes<V>]
   : T extends Record<any, any>
-  ? { -readonly [key in keyof T]: DeeplyMutableRoutes<T[key]> }
+  ? {
+      -readonly [key in keyof T]: DeeplyMutableRoutes<T[key]>;
+    }
   : T;
 
 type PickProperty<
@@ -35,16 +36,16 @@ type PickProperty<
 > = TObject extends {
   [key in TProperty]: any;
 }
-  ? TObject[TProperty]
-  : never;
+  ? [TObject[TProperty]]
+  : [];
 
 export type MapProperty<
   TArray extends Array<Record<any, any>>,
   TProperty extends string | number | symbol
 > = TArray extends [infer TObject]
-  ? [PickProperty<TObject, TProperty>]
+  ? [...PickProperty<TObject, TProperty>]
   : TArray extends [infer TObject, ...infer TTail]
   ? TTail extends Array<Record<any, any>>
-    ? [PickProperty<TObject, TProperty>, ...MapProperty<TTail, TProperty>]
+    ? [...PickProperty<TObject, TProperty>, ...MapProperty<TTail, TProperty>]
     : []
   : [];
