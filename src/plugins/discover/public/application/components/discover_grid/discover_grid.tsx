@@ -7,7 +7,6 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import './discover_grid.scss';
 import {
@@ -151,12 +150,8 @@ export interface DiscoverGridProps {
   controlColumnIds?: string[];
 }
 
-const styles = css`
-  background: coral;
-`;
-
 export const EuiDataGridMemoized = React.memo((props: EuiDataGridProps) => {
-  return <EuiDataGrid {...props} css={styles} />;
+  return <EuiDataGrid {...props} />;
 });
 
 export const DiscoverGrid = ({

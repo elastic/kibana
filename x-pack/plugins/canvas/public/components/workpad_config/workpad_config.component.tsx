@@ -7,7 +7,6 @@
 
 import React, { FunctionComponent, useState } from 'react';
 import PropTypes from 'prop-types';
-import { css as emotionCss } from '@emotion/react';
 import {
   EuiFieldText,
   EuiFieldNumber,
@@ -126,14 +125,10 @@ export const WorkpadConfig: FunctionComponent<Props> = (props) => {
     },
   ];
 
-  const styles = emotionCss`
-    background: coral;
-  `;
-
   return (
     <div>
       <div className="canvasLayout__sidebarHeaderWorkpad">
-        <EuiTitle size="xs" css={styles}>
+        <EuiTitle size="xs">
           <h4>{strings.getTitle()}</h4>
         </EuiTitle>
       </div>
@@ -199,7 +194,7 @@ export const WorkpadConfig: FunctionComponent<Props> = (props) => {
 
       <VarConfig variables={variables} setVariables={setWorkpadVariables} />
 
-      <div className="canvasSidebar__expandable" css={{ color: 'coral' }}>
+      <div className="canvasSidebar__expandable">
         <EuiAccordion
           id="accordion-global-css"
           className="canvasSidebar__accordion"
@@ -213,7 +208,6 @@ export const WorkpadConfig: FunctionComponent<Props> = (props) => {
               <span>{strings.getGlobalCSSLabel()}</span>
             </EuiToolTip>
           }
-          css={{ color: 'coral' }}
         >
           <div className="canvasSidebar__accordionContent">
             <EuiTextArea

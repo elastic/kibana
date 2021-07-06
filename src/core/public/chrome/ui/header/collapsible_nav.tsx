@@ -22,7 +22,6 @@ import { groupBy, sortBy } from 'lodash';
 import React, { Fragment, useRef } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
-import { css } from '@emotion/react';
 import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '../..';
 import { AppCategory } from '../../../../types';
 import { InternalApplicationStart } from '../../../application/types';
@@ -116,10 +115,6 @@ export function CollapsibleNav({
     });
   };
 
-  const styles = css`
-    background: coral;
-  `;
-
   return (
     <EuiCollapsibleNav
       data-test-subj="collapsibleNav"
@@ -132,7 +127,6 @@ export function CollapsibleNav({
       button={button}
       ownFocus={false}
       size={240}
-      css={styles}
     >
       {customNavLink && (
         <Fragment>
@@ -197,7 +191,6 @@ export function CollapsibleNav({
             color="text"
             gutterSize="none"
             size="s"
-            css={{ background: 'coral' }}
           />
         </EuiCollapsibleNavGroup>
       </EuiFlexItem>
