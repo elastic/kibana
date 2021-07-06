@@ -9,6 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import semver from 'semver';
 
 import type { AgentPolicy, PackagePolicy } from '../../types';
 import { sendGetOneAgentPolicy, useKibanaVersion } from '../../hooks';
@@ -19,7 +20,13 @@ import { AdvancedAgentAuthenticationSettings } from './advanced_agent_authentica
 
 export const DownloadStep = () => {
   const kibanaVersion = useKibanaVersion();
-  const kibanaVersionURLString = useMemo(() => kibanaVersion.replace(/\./g, '-'), [kibanaVersion]);
+  const kibanaVersionURLString = useMemo(
+    () =>
+      `${semver.major(kibanaVersion)}-${semver.minor(kibanaVersion)}-${semver.patch(
+        kibanaVersion
+      )}`,
+    [kibanaVersion]
+  );
   return {
     title: i18n.translate('xpack.fleet.agentEnrollment.stepDownloadAgentTitle', {
       defaultMessage: 'Download the Elastic Agent to your host',
