@@ -46,6 +46,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('a11y test for click on create space page', async () => {
       await PageObjects.spaceSelector.clickCreateSpace();
+      await PageObjects.spaceSelector.clickEnterSpaceName();
+      await PageObjects.spaceSelector.addSpaceName('space_a');
       await a11y.testAppSnapshot();
     });
 
