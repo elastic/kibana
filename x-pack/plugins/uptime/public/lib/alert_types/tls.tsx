@@ -11,7 +11,7 @@ import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
 import { TlsTranslations } from '../../../common/translations';
 import { AlertTypeInitializer } from '.';
 
-import { CERTIFICATES_ROUTE } from '../../../common/constants';
+import { CERTIFICATES_ROUTE } from '../../../common/constants/ui';
 
 const { defaultActionMessage, description } = TlsTranslations;
 const TLSAlert = React.lazy(() => import('./lazy_wrapper/tls_alert'));
