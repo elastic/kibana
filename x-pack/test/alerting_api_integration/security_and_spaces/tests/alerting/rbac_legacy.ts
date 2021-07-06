@@ -29,7 +29,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
     superuser: 'b384be60-ec53-4b26-857e-0253ee55b277',
   };
 
-  describe('alerts', () => {
+  describe.skip('alerts', () => {
     const authorizationIndex = '.kibana-test-authorization';
     const objectRemover = new ObjectRemover(supertest);
 
