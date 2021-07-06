@@ -152,8 +152,6 @@ export class HttpServer {
     this.setupConditionalCompression(config);
     this.setupResponseLogging();
     this.setupGracefulShutdownHandlers();
-    // cleanup context is the last operation to keep the context for the internal on('response' handlers.
-    this.setupContextExecutionCleanup(executionContext);
 
     return {
       registerRouter: this.registerRouter.bind(this),
@@ -339,7 +337,10 @@ export class HttpServer {
       const requestId = getRequestId(request, config.requestId);
 
       const parentContext = executionContext?.getParentContextFrom(request.headers);
-      executionContext?.set({ ...parentContext, requestId });
+      executionContext?.set({
+        ...parentContext,
+        requestId,
+      });
 
       request.app = {
         ...(request.app ?? {}),
@@ -347,13 +348,6 @@ export class HttpServer {
         requestUuid: uuid.v4(),
       } as KibanaRequestState;
       return responseToolkit.continue;
-    });
-  }
-
-  private setupContextExecutionCleanup(executionContext?: InternalExecutionContextSetup) {
-    if (!executionContext) return;
-    this.server!.events.on('response', function () {
-      executionContext.reset();
     });
   }
 
