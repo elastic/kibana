@@ -485,6 +485,7 @@ export const AddFleetServerHostStepContent = ({
             value={fleetServerHost}
             isInvalid={!!error}
             onChange={onChange}
+            disabled={isLoading}
             prepend={
               <EuiText>
                 <FormattedMessage
