@@ -16,11 +16,13 @@ export interface UserPrivilegesState {
   endpointPrivileges: EndpointPrivileges;
 }
 
-const UserPrivilegesContext = createContext<UserPrivilegesState>({
+export const initialUserPrivilegesState = (): UserPrivilegesState => ({
   listPrivileges: { loading: false, error: undefined, result: undefined },
   detectionEnginePrivileges: { loading: false, error: undefined, result: undefined },
-  endpointPrivileges: { loading: false, canAccessEndpointManagement: false, canAccessFleet: false },
+  endpointPrivileges: { loading: true, canAccessEndpointManagement: false, canAccessFleet: false },
 });
+
+const UserPrivilegesContext = createContext<UserPrivilegesState>(initialUserPrivilegesState());
 
 interface UserPrivilegesProviderProps {
   children: React.ReactNode;
