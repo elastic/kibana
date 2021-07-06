@@ -204,6 +204,10 @@ export interface SearchResultConfig {
   titleField: string | null;
   subtitleField: string | null;
   descriptionField: string | null;
+  typeField: string | null;
+  mediaTypeField: string | null;
+  createdByField: string | null;
+  updatedByField: string | null;
   urlField: string | null;
   color: string;
   detailFields: DetailField[];

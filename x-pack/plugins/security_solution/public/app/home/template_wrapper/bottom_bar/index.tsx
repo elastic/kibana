@@ -7,14 +7,12 @@
 
 /* eslint-disable react/display-name */
 
-import React, { useRef } from 'react';
+import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { KibanaPageTemplateProps } from '../../../../../../../../src/plugins/kibana_react/public';
 import { AppLeaveHandler } from '../../../../../../../../src/core/public';
-import { useKibana } from '../../../../common/lib/kibana';
 import { useShowTimeline } from '../../../../common/utils/timeline/use_show_timeline';
-import { useSourcererScope } from '../../../../common/containers/sourcerer';
-import { DETECTIONS_SUB_PLUGIN_ID } from '../../../../../common/constants';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { useSourcererScope, getScopeFromPath } from '../../../../common/containers/sourcerer';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { AutoSaveWarningMsg } from '../../../../timelines/components/timeline/auto_save_warning';
 import { Flyout } from '../../../../timelines/components/flyout';
@@ -23,19 +21,11 @@ export const BOTTOM_BAR_CLASSNAME = 'timeline-bottom-bar';
 
 export const SecuritySolutionBottomBar = React.memo(
   ({ onAppLeave }: { onAppLeave: (handler: AppLeaveHandler) => void }) => {
-    const subPluginId = useRef<string>('');
-    const { application } = useKibana().services;
-    application.currentAppId$.subscribe((appId) => {
-      subPluginId.current = appId ?? '';
-    });
+    const { pathname } = useLocation();
 
     const [showTimeline] = useShowTimeline();
 
-    const { indicesExist } = useSourcererScope(
-      subPluginId.current === DETECTIONS_SUB_PLUGIN_ID
-        ? SourcererScopeName.detections
-        : SourcererScopeName.default
-    );
+    const { indicesExist } = useSourcererScope(getScopeFromPath(pathname));
 
     return indicesExist && showTimeline ? (
       <>

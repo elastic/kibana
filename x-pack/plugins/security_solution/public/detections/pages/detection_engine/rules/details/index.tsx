@@ -22,7 +22,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
@@ -86,7 +86,7 @@ import { SecurityPageName } from '../../../../../app/types';
 import { LinkButton } from '../../../../../common/components/links';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { ExceptionsViewer } from '../../../../../common/components/exceptions/viewer';
-import { DEFAULT_INDEX_PATTERN } from '../../../../../../common/constants';
+import { APP_ID, DEFAULT_INDEX_PATTERN } from '../../../../../../common/constants';
 import { useGlobalFullScreen } from '../../../../../common/containers/use_full_screen';
 import { Display } from '../../../../../hosts/pages/display';
 
@@ -153,6 +153,7 @@ const ruleDetailTabs = [
 ];
 
 const RuleDetailsPageComponent = () => {
+  const { navigateToApp } = useKibana().services.application;
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -220,8 +221,7 @@ const RuleDetailsPageComponent = () => {
   const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
   const [showOnlyThreatIndicatorAlerts, setShowOnlyThreatIndicatorAlerts] = useState(false);
   const mlCapabilities = useMlCapabilities();
-  const history = useHistory();
-  const { formatUrl } = useFormatUrl(SecurityPageName.detections);
+  const { formatUrl } = useFormatUrl(SecurityPageName.rules);
   const { globalFullScreen } = useGlobalFullScreen();
 
   // TODO: Once we are past experimental phase this code should be removed
@@ -442,9 +442,12 @@ const RuleDetailsPageComponent = () => {
   const goToEditRule = useCallback(
     (ev) => {
       ev.preventDefault();
-      history.push(getEditRuleUrl(ruleId ?? ''));
+      navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.rules,
+        path: getEditRuleUrl(ruleId ?? ''),
+      });
     },
-    [history, ruleId]
+    [navigateToApp, ruleId]
   );
 
   const editRule = useMemo(() => {
@@ -548,7 +551,10 @@ const RuleDetailsPageComponent = () => {
       needsListsConfiguration
     )
   ) {
-    history.replace(getDetectionEngineUrl());
+    navigateToApp(APP_ID, {
+      deepLinkId: SecurityPageName.alerts,
+      path: getDetectionEngineUrl(),
+    });
     return null;
   }
 
@@ -572,9 +578,9 @@ const RuleDetailsPageComponent = () => {
             <Display show={!globalFullScreen}>
               <DetectionEngineHeaderPage
                 backOptions={{
-                  href: getRulesUrl(),
+                  path: getRulesUrl(),
                   text: i18n.BACK_TO_RULES,
-                  pageId: SecurityPageName.detections,
+                  pageId: SecurityPageName.rules,
                   dataTestSubj: 'ruleDetailsBackToAllRules',
                 }}
                 border
@@ -744,7 +750,7 @@ const RuleDetailsPageComponent = () => {
         </SecuritySolutionPageWrapper>
       )}
 
-      <SpyRoute pageName={SecurityPageName.detections} state={{ ruleName: rule?.name }} />
+      <SpyRoute pageName={SecurityPageName.rules} state={{ ruleName: rule?.name }} />
     </>
   );
 };

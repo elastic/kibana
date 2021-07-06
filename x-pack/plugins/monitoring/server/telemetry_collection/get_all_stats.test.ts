@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ElasticsearchClient } from 'kibana/server';
 import sinon from 'sinon';
 import { getStackStats, getAllStats, handleAllStats } from './get_all_stats';
 import { ESClusterStats } from './get_es_stats';
@@ -13,7 +14,11 @@ import { LogstashStatsByClusterUuid } from './get_logstash_stats';
 
 describe('get_all_stats', () => {
   const timestamp = Date.now();
-  const callCluster = sinon.stub();
+  const searchMock = sinon.stub();
+  const callCluster = ({ search: searchMock } as unknown) as ElasticsearchClient;
+  afterEach(() => {
+    searchMock.reset();
+  });
 
   const esClusters = [
     { cluster_uuid: 'a' },
@@ -157,18 +162,20 @@ describe('get_all_stats', () => {
         },
       ];
 
-      callCluster
-        .withArgs('search')
+      searchMock
         .onCall(0)
-        .returns(Promise.resolve(esStatsResponse))
+        .returns(Promise.resolve({ body: esStatsResponse }))
         .onCall(1)
-        .returns(Promise.resolve(kibanaStatsResponse))
+        .returns(Promise.resolve({ body: kibanaStatsResponse }))
         .onCall(2)
-        .returns(Promise.resolve(logstashStatsResponse))
+        .returns(Promise.resolve({ body: logstashStatsResponse }))
+        .returns(Promise.resolve({ body: logstashStatsResponse }))
         .onCall(3)
-        .returns(Promise.resolve({})) // Beats stats
+        .returns(Promise.resolve({ body: {} })) // Beats stats
         .onCall(4)
-        .returns(Promise.resolve({})); // Beats state
+        .returns(Promise.resolve({ body: {} })) // Beats state
+        .onCall(5)
+        .returns(Promise.resolve({ body: {} })); // Logstash state
 
       expect(await getAllStats(['a'], callCluster, timestamp, 1)).toStrictEqual(allClusters);
     });
@@ -178,7 +185,7 @@ describe('get_all_stats', () => {
         aggregations: { cluster_uuids: { buckets: [] } },
       };
 
-      callCluster.withArgs('search').returns(Promise.resolve(clusterUuidsResponse));
+      searchMock.returns(Promise.resolve({ body: clusterUuidsResponse }));
 
       expect(await getAllStats([], callCluster, timestamp, 1)).toStrictEqual([]);
     });
