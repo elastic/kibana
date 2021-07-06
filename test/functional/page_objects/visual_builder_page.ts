@@ -447,7 +447,9 @@ export class VisualBuilderPageObject extends FtrService {
     const metricsIndexPatternInput = 'metricsIndexPatternInput';
 
     if (useKibanaIndices !== undefined) {
-      await this.switchIndexPatternSelectionMode(useKibanaIndices);
+      await this.retry.try(async () => {
+        await this.switchIndexPatternSelectionMode(useKibanaIndices);
+      });
     }
 
     if (useKibanaIndices === false) {

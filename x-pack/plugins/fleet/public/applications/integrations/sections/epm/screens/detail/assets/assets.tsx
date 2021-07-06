@@ -10,12 +10,17 @@ import { Redirect } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
 
-import { Loading, Error } from '../../../../../components';
+import { Loading, Error, ExtensionWrapper } from '../../../../../components';
 
 import type { PackageInfo } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
 
-import { useGetPackageInstallStatus, useLink, useStartServices } from '../../../../../hooks';
+import {
+  useGetPackageInstallStatus,
+  useLink,
+  useStartServices,
+  useUIExtension,
+} from '../../../../../hooks';
 
 import type { AssetSavedObject } from './types';
 import { allowedAssetTypes } from './constants';
@@ -27,9 +32,12 @@ interface AssetsPanelProps {
 
 export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
   const { name, version } = packageInfo;
+  const pkgkey = `${name}-${version}`;
+
   const {
     savedObjects: { client: savedObjectsClient },
   } = useStartServices();
+  const customAssetsExtension = useUIExtension(packageInfo.name, 'package-detail-assets');
 
   const { getPath } = useLink();
   const getPackageInstallStatus = useGetPackageInstallStatus();
@@ -76,13 +84,7 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
   // if they arrive at this page and the package is not installed, send them to overview
   // this happens if they arrive with a direct url or they uninstall while on this tab
   if (packageInstallStatus.status !== InstallStatus.installed) {
-    return (
-      <Redirect
-        to={getPath('integration_details_overview', {
-          pkgkey: `${name}-${version}`,
-        })}
-      />
-    );
+    return <Redirect to={getPath('integration_details_overview', { pkgkey })} />;
   }
 
   let content: JSX.Element | Array<JSX.Element | null>;
@@ -102,31 +104,49 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
       />
     );
   } else if (assetSavedObjects === undefined) {
-    content = (
-      <EuiTitle>
-        <h2>
-          <FormattedMessage
-            id="xpack.fleet.epm.packageDetails.assets.noAssetsFoundLabel"
-            defaultMessage="No assets found"
-          />
-        </h2>
-      </EuiTitle>
-    );
-  } else {
-    content = allowedAssetTypes.map((assetType) => {
-      const sectionAssetSavedObjects = assetSavedObjects.filter((so) => so.type === assetType);
-
-      if (!sectionAssetSavedObjects.length) {
-        return null;
-      }
-
-      return (
-        <>
-          <AssetsAccordion savedObjects={sectionAssetSavedObjects} type={assetType} />
-          <EuiSpacer size="l" />
-        </>
+    if (customAssetsExtension) {
+      // If a UI extension for custom asset entries is defined, render the custom component here depisite
+      // there being no saved objects found
+      content = (
+        <ExtensionWrapper>
+          <customAssetsExtension.Component />
+        </ExtensionWrapper>
       );
-    });
+    } else {
+      content = (
+        <EuiTitle>
+          <h2>
+            <FormattedMessage
+              id="xpack.fleet.epm.packageDetails.assets.noAssetsFoundLabel"
+              defaultMessage="No assets found"
+            />
+          </h2>
+        </EuiTitle>
+      );
+    }
+  } else {
+    content = [
+      ...allowedAssetTypes.map((assetType) => {
+        const sectionAssetSavedObjects = assetSavedObjects.filter((so) => so.type === assetType);
+
+        if (!sectionAssetSavedObjects.length) {
+          return null;
+        }
+
+        return (
+          <>
+            <AssetsAccordion savedObjects={sectionAssetSavedObjects} type={assetType} />
+            <EuiSpacer size="l" />
+          </>
+        );
+      }),
+      // Ensure we add any custom assets provided via UI extension to the end of the list of other assets
+      customAssetsExtension ? (
+        <ExtensionWrapper>
+          <customAssetsExtension.Component />
+        </ExtensionWrapper>
+      ) : null,
+    ];
   }
 
   return (
