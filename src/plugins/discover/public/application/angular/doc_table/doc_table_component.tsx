@@ -17,8 +17,9 @@ import { UI_SETTINGS } from '../../../../../data/public';
 import { SortOrder } from './components/table_header/helpers';
 import { DocTableRow, TableRow } from './components/table_row/table_row';
 import { DocViewFilterFn } from '../../doc_views/doc_views_types';
+import { DocTableEmbeddable } from './doc_table_embeddable';
 
-interface DocTableProps {
+export interface DocTableProps {
   columns: string[];
   rows: DocTableRow[];
   minimumVisibleRows?: number;
@@ -134,7 +135,22 @@ export const DocTable = ({
             <tbody>{tableRows}</tbody>
           </table>
         ) : (
-          <div />
+          <DocTableEmbeddable
+            columns={columns}
+            rows={rows}
+            totalHitCount={totalHitCount!}
+            indexPattern={indexPattern}
+            onSort={onSort}
+            onAddColumn={onAddColumn}
+            onMoveColumn={onMoveColumn}
+            onRemoveColumn={onRemoveColumn}
+            sorting={sorting}
+            filter={filter}
+            useNewFieldsApi={useNewFieldsApi}
+            defaultSortOrder={defaultSortOrder}
+            hideTimeColumn={hideTimeColumn}
+            isShortDots={isShortDots}
+          />
         ))}
       {rows && !rows.length && (
         <div className="kbnDocTable__error">
