@@ -238,6 +238,13 @@ export default ({ getService }: FtrProviderContext): void => {
           .send({ ...req, status: CaseStatuses.open })
           .expect(400);
       });
+
+      it('400s if the title is too long', async () => {
+        const longTitle =
+          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed nulla enim, rutrum sit amet euismod venenatis, blandit et massa. Nulla id consectetur enim.';
+
+        await createCase(supertest, getPostCaseRequest({ title: longTitle }), 400);
+      });
     });
 
     describe('rbac', () => {

@@ -53,6 +53,7 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
 
           // @ts-expect-error
           expect(Object.keys(body._inspect[0])).to.eql([
+            'operationName',
             'response',
             'duration',
             'requestType',

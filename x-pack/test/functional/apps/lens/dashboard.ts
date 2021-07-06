@@ -223,10 +223,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // remove the x dimension to trigger the validation error
       await PageObjects.lens.removeDimension('lnsXY_xDimensionPanel');
-      await PageObjects.lens.saveAndReturn();
-
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail('embeddable-lens-failure');
+      await PageObjects.lens.expectSaveAndReturnButtonDisabled();
     });
   });
 }

@@ -248,7 +248,7 @@ The API returns the following:
         "overdue": 10,
         "overdue_non_recurring": 10,
         "estimated_schedule_density": [0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 3, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0],
-        "capacity_requirments": {
+        "capacity_requirements": {
           "per_minute": 6,
           "per_hour": 28,
           "per_day": 2
@@ -737,7 +737,7 @@ Evaluating the preceding health stats in the previous example, you see the follo
     0, 3, 0, 0, 0, 1, 0, 1, 0, 1,
     0, 0, 0, 1, 0, 0, 1, 1, 1, 0
   ],
-  "capacity_requirments": { # <10>
+  "capacity_requirements": { # <10>
     "per_minute": 14,
     "per_hour": 240,
     "per_day": 0
@@ -819,7 +819,7 @@ Suppose the output of `stats.workload.value` looked something like this:
     0, 31, 0, 12, 16, 31, 0, 10, 0, 10,
     3, 22, 0, 10, 0, 2, 10, 10, 1, 0
   ],
-  "capacity_requirments": {
+  "capacity_requirements": {
     "per_minute": 329, # <4>
     "per_hour": 4272, # <5>
     "per_day": 61 # <6>
