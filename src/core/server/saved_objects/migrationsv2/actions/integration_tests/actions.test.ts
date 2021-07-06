@@ -188,7 +188,14 @@ describe('migration actions', () => {
           transformedDocs: sourceDocs,
           refresh: 'wait_for',
         })()
-      ).rejects.toMatchObject(expect.anything());
+      ).resolves.toMatchInlineSnapshot(`
+              Object {
+                "_tag": "Left",
+                "left": Object {
+                  "type": "target_index_had_write_block",
+                },
+              }
+            `);
     });
     it('resolves left index_not_found_exception when the index does not exist', async () => {
       expect.assertions(1);
@@ -1496,7 +1503,7 @@ describe('migration actions', () => {
                 }
               `);
     });
-    it('rejects if there are errors', async () => {
+    it('resolves left if there are write_block errors', async () => {
       const newDocs = ([
         { _source: { title: 'doc 5' } },
         { _source: { title: 'doc 6' } },
@@ -1509,7 +1516,14 @@ describe('migration actions', () => {
           transformedDocs: newDocs,
           refresh: 'wait_for',
         })()
-      ).rejects.toMatchObject(expect.anything());
+      ).resolves.toMatchInlineSnapshot(`
+              Object {
+                "_tag": "Left",
+                "left": Object {
+                  "type": "target_index_had_write_block",
+                },
+              }
+            `);
     });
   });
 });
