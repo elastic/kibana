@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './types';
-export { migrateToLatest } from './migrate_to_latest';
+export * from './url_service/mocks';
