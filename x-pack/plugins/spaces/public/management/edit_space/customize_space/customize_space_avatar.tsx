@@ -99,8 +99,6 @@ export class CustomizeSpaceAvatar extends Component<Props> {
               defaultMessage: 'Avatar type',
             }
           )}
-          role="radiogroup"
-          aria-owns="avatar_type_initials avatar_type_image"
           fullWidth
         >
           <EuiButtonGroup
@@ -130,32 +128,6 @@ export class CustomizeSpaceAvatar extends Component<Props> {
               })
             }
           />
-          {/* <EuiRadioGroup
-            options={[
-              {
-                id: `initials`,
-                label: i18n.translate(
-                  'xpack.spaces.management.customizeSpaceAvatar.initialsLabel',
-                  {
-                    defaultMessage: 'Initials',
-                  }
-                ),
-              },
-              {
-                id: `image`,
-                label: i18n.translate('xpack.spaces.management.customizeSpaceAvatar.imageLabel', {
-                  defaultMessage: 'Image',
-                }),
-              },
-            ]}
-            idSelected={space.avatarType ?? 'initials'}
-            onChange={(avatarType) =>
-              this.props.onChange({
-                ...space,
-                avatarType: avatarType as FormValues['avatarType'],
-              })
-            }
-          /> */}
         </EuiFormRow>
         {space.avatarType !== 'image' ? (
           <EuiFormRow

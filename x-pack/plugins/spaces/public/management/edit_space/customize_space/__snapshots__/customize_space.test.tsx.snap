@@ -97,7 +97,25 @@ exports[`renders correctly 1`] = `
     </EuiFormRow>
   </EuiDescribedFormGroup>
   <EuiDescribedFormGroup
-    description="Choose how your space avatar appears across Kibana."
+    description={
+      <React.Fragment>
+        <p>
+          Choose how your space avatar appears across Kibana.
+        </p>
+        <EuiAvatar
+          color={null}
+          name="?"
+          size="xl"
+          style={
+            Object {
+              "background": "#d3dae6",
+              "color": "#6a717d",
+            }
+          }
+          type="space"
+        />
+      </React.Fragment>
+    }
     fullWidth={true}
     title={
       <EuiTitle
