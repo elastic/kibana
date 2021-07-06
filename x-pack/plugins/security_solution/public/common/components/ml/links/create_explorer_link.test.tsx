@@ -12,7 +12,7 @@ import { cloneDeep } from 'lodash/fp';
 import { ExplorerLink } from './create_explorer_link';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public/context';
 import { MlLocatorDefinition } from '../../../../../../ml/public/locator';
-import { UrlService } from '../../../../../../../../src/plugins/share/common/url_service';
+import { MockUrlService } from '../../../../../../../../src/plugins/share/common/mocks';
 
 describe('create_explorer_link', () => {
   let anomalies = cloneDeep(mockAnomalies);
@@ -22,12 +22,7 @@ describe('create_explorer_link', () => {
   });
 
   test('it returns expected link', async () => {
-    const urlService = new UrlService({
-      navigate: async () => {},
-      getUrl: async ({ app, path }, { absolute }) => {
-        return `${absolute ? 'http://localhost:8888' : ''}/app/${app}${path}`;
-      },
-    });
+    const urlService = new MockUrlService();
     const locator = urlService.locators.create(new MlLocatorDefinition());
     const ml = { locator };
     const http = { basePath: { get: jest.fn(() => {}) } };

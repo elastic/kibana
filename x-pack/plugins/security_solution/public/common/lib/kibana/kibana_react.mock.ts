@@ -40,6 +40,7 @@ import { createSecuritySolutionStorageMock } from '../../mock/mock_local_storage
 import { MlLocatorDefinition } from '../../../../../ml/public';
 import { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
 import { UrlService } from 'src/plugins/share/common/url_service';
+import { MockUrlService } from 'src/plugins/share/common/mocks';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
@@ -94,12 +95,7 @@ export const createStartServicesMock = (): StartServices => {
   const { storage } = createSecuritySolutionStorageMock();
   const data = dataPluginMock.createStartContract();
   const security = securityMock.createSetup();
-  const urlService = new UrlService({
-    navigate: async () => {},
-    getUrl: async ({ app, path }, { absolute }) => {
-      return `${absolute ? 'http://localhost:8888' : ''}/app/${app}${path}`;
-    },
-  });
+  const urlService = new MockUrlService();
   const locator = urlService.locators.create(new MlLocatorDefinition());
 
   return ({
