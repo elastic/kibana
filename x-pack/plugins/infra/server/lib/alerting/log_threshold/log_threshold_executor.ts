@@ -5,43 +5,47 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { ElasticsearchClient } from 'kibana/server';
 import { estypes } from '@elastic/elasticsearch';
+import { i18n } from '@kbn/i18n';
+import { ALERT_EVALUATION_THRESHOLD, ALERT_EVALUATION_VALUE } from '@kbn/rule-data-utils';
+import { ElasticsearchClient } from 'kibana/server';
 import {
-  AlertServices,
-  AlertInstance,
-  AlertTypeState,
-  AlertInstanceContext,
-  AlertInstanceState,
   ActionGroup,
   ActionGroupIdsOf,
+  AlertInstance,
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertTypeState,
 } from '../../../../../alerting/server';
 import {
+  logThresholdRuleDataNamespace,
+  logThresholdRuleDataRT,
+} from '../../../../common/alerting/logs/log_threshold';
+import {
+  AlertParams,
+  alertParamsRT,
   AlertStates,
   Comparator,
-  AlertParams,
-  Criterion,
-  GroupedSearchQueryResponseRT,
-  UngroupedSearchQueryResponseRT,
-  UngroupedSearchQueryResponse,
-  GroupedSearchQueryResponse,
-  alertParamsRT,
-  isRatioAlertParams,
-  hasGroupBy,
-  getNumerator,
-  getDenominator,
-  CountCriteria,
   CountAlertParams,
-  RatioAlertParams,
-  isOptimizedGroupedSearchQueryResponse,
+  CountCriteria,
+  Criterion,
+  getDenominator,
+  getNumerator,
+  GroupedSearchQueryResponse,
+  GroupedSearchQueryResponseRT,
+  hasGroupBy,
   isOptimizableGroupedThreshold,
+  isOptimizedGroupedSearchQueryResponse,
+  isRatioAlertParams,
+  RatioAlertParams,
+  UngroupedSearchQueryResponse,
+  UngroupedSearchQueryResponseRT,
 } from '../../../../common/alerting/logs/log_threshold/types';
-import { InfraBackendLibs } from '../../infra_types';
-import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
-import { decodeOrThrow } from '../../../../common/runtime_types';
-import { UNGROUPED_FACTORY_KEY } from '../common/utils';
 import { resolveLogSourceConfiguration } from '../../../../common/log_sources';
+import { decodeOrThrow } from '../../../../common/runtime_types';
+import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
+import { InfraBackendLibs } from '../../infra_types';
+import { UNGROUPED_FACTORY_KEY } from '../common/utils';
 
 export type LogThresholdActionGroups = ActionGroupIdsOf<typeof FIRED_ACTIONS>;
 export type LogThresholdAlertTypeParams = AlertParams;
@@ -49,11 +53,16 @@ export type LogThresholdAlertTypeState = AlertTypeState; // no specific state us
 export type LogThresholdAlertInstanceState = AlertInstanceState; // no specific state used
 export type LogThresholdAlertInstanceContext = AlertInstanceContext; // no specific instance context used
 
-type LogThresholdAlertInstanceFactory = AlertServices<
+type LogThresholdAlertInstance = AlertInstance<
   LogThresholdAlertInstanceState,
   LogThresholdAlertInstanceContext,
   LogThresholdActionGroups
->['alertInstanceFactory'];
+>;
+type LogThresholdAlertInstanceFactory = (
+  id: string,
+  threshold: number,
+  value: number
+) => LogThresholdAlertInstance;
 
 const COMPOSITE_GROUP_SIZE = 2000;
 
@@ -80,10 +89,20 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
   >(async ({ services, params }) => {
     const { alertWithLifecycle, savedObjectsClient, scopedClusterClient } = services;
     const { sources } = libs;
-    const alertInstanceFactory = (id: string) =>
+    const alertInstanceFactory: LogThresholdAlertInstanceFactory = (id, threshold, value) =>
       alertWithLifecycle({
         id,
-        fields: {},
+        fields: {
+          [ALERT_EVALUATION_THRESHOLD]: threshold,
+          [ALERT_EVALUATION_VALUE]: value,
+          ...logThresholdRuleDataRT.encode({
+            [logThresholdRuleDataNamespace]: [
+              {
+                params,
+              },
+            ],
+          }),
+        },
       });
 
     const sourceConfiguration = await sources.getSourceConfiguration(savedObjectsClient, 'default');
@@ -228,7 +247,7 @@ export const processUngroupedResults = (
   const documentCount = results.hits.total.value;
 
   if (checkValueAgainstComparatorMap[count.comparator](documentCount, count.value)) {
-    const alertInstance = alertInstanceFactory(UNGROUPED_FACTORY_KEY);
+    const alertInstance = alertInstanceFactory(UNGROUPED_FACTORY_KEY, count.value, documentCount);
     alertInstaceUpdater(alertInstance, AlertStates.ALERT, [
       {
         actionGroup: FIRED_ACTIONS.id,
@@ -257,7 +276,7 @@ export const processUngroupedRatioResults = (
   const ratio = getRatio(numeratorCount, denominatorCount);
 
   if (ratio !== undefined && checkValueAgainstComparatorMap[count.comparator](ratio, count.value)) {
-    const alertInstance = alertInstanceFactory(UNGROUPED_FACTORY_KEY);
+    const alertInstance = alertInstanceFactory(UNGROUPED_FACTORY_KEY, count.value, ratio);
     alertInstaceUpdater(alertInstance, AlertStates.ALERT, [
       {
         actionGroup: FIRED_ACTIONS.id,
@@ -326,7 +345,7 @@ export const processGroupByResults = (
     const documentCount = group.documentCount;
 
     if (checkValueAgainstComparatorMap[count.comparator](documentCount, count.value)) {
-      const alertInstance = alertInstanceFactory(group.name);
+      const alertInstance = alertInstanceFactory(group.name, count.value, documentCount);
       alertInstaceUpdater(alertInstance, AlertStates.ALERT, [
         {
           actionGroup: FIRED_ACTIONS.id,
@@ -367,7 +386,7 @@ export const processGroupByRatioResults = (
       ratio !== undefined &&
       checkValueAgainstComparatorMap[count.comparator](ratio, count.value)
     ) {
-      const alertInstance = alertInstanceFactory(numeratorGroup.name);
+      const alertInstance = alertInstanceFactory(numeratorGroup.name, count.value, ratio);
       alertInstaceUpdater(alertInstance, AlertStates.ALERT, [
         {
           actionGroup: FIRED_ACTIONS.id,

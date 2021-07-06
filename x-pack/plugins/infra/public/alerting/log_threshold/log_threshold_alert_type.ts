@@ -12,6 +12,7 @@ import {
   LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
   PartialAlertParams,
 } from '../../../common/alerting/logs/log_threshold/types';
+import { formatReason } from './rule_data_formatters';
 import { validateExpression } from './validation';
 
 export function getLogThresholdAlertType(): ObservabilityRuleTypeModel<PartialAlertParams> {
@@ -33,10 +34,6 @@ export function getLogThresholdAlertType(): ObservabilityRuleTypeModel<PartialAl
       }
     ),
     requiresAppContext: false,
-    format: ({ fields }) => ({
-      reason: 'x',
-      link: '/',
-      // TODO: pass through params of alert and generate reason
-    }),
+    format: formatReason,
   };
 }
