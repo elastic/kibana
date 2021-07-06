@@ -7,13 +7,13 @@
 
 import { Logger } from '@kbn/logging';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { ESSearchRequest } from 'src/core/types/elasticsearch';
 import {
   AlertInstance,
   AlertInstanceContext,
   AlertInstanceState,
   AlertTypeParams,
 } from '../../../alerting/server';
-import { ESSearchRequest } from '../../../../../typings/elasticsearch';
 import { AlertTypeWithExecutor } from '../types';
 import { RuleDataClient } from '../../target/types/server';
 import { ListClient } from '../../../lists/target/types/server';
