@@ -69,9 +69,8 @@ describe('Event filter flyout', () => {
 
   it('should renders correctly', () => {
     const component = render();
-    expect(component.getAllByText('Add Endpoint Event Filter')).not.toBeNull();
+    expect(component.getAllByText('Add event filter')).not.toBeNull();
     expect(component.getByText('Cancel')).not.toBeNull();
-    expect(component.getByText('Endpoint Security')).not.toBeNull();
   });
 
   it('should dispatch action to init form store on mount', async () => {
@@ -183,9 +182,8 @@ describe('Event filter flyout', () => {
   it('should renders correctly when id and edit type', () => {
     const component = render({ id: 'fakeId', type: 'edit' });
 
-    expect(component.getAllByText('Update Endpoint Event Filter')).not.toBeNull();
+    expect(component.getAllByText('Update event filter')).not.toBeNull();
     expect(component.getByText('Cancel')).not.toBeNull();
-    expect(component.getByText('Endpoint Security')).not.toBeNull();
   });
 
   it('should dispatch action to init form store on mount with id', async () => {
