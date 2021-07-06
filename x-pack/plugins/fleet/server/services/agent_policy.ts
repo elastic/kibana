@@ -773,10 +773,10 @@ class AgentPolicyService {
     ) {
       const names: string[] = [];
       if (fullAgentPolicy.agent.monitoring.logs) {
-        names.push(`logs-elastic_agent.*-${monitoringNamespace}`);
+        names.push(`logs-elastic_agent*-${monitoringNamespace}`);
       }
       if (fullAgentPolicy.agent.monitoring.metrics) {
-        names.push(`metrics-elastic_agent.*-${monitoringNamespace}`);
+        names.push(`metrics-elastic_agent*-${monitoringNamespace}`);
       }
 
       permissions._elastic_agent_checks.indices = [
