@@ -26,9 +26,10 @@ const tracesRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const { params } = resources;
     const { environment, kuery } = params.query;
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
-      setup
-    );
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      ...setup,
+      kuery,
+    });
 
     return getTransactionGroupList(
       { environment, kuery, type: 'top_traces', searchAggregatedTransactions },
