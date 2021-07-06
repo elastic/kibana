@@ -33,6 +33,7 @@ import { Sourcerer } from '../../common/components/sourcerer';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { ThreatIntelLinkPanel } from '../components/overview_cti_links';
+import { useIsThreatIntelModuleEnabled } from '../containers/overview_cti_links/use_is_threat_intel_module_enabled';
 
 const SidebarFlexItem = styled(EuiFlexItem)`
   margin-right: 24px;
@@ -70,6 +71,7 @@ const OverviewComponent = () => {
     addMessage('management', 'dismissEndpointNotice');
   }, [addMessage]);
   const { allEnabled: isIngestEnabled } = useIngestEnabledCheck();
+  const isThreatIntelModuleEnabled = useIsThreatIntelModuleEnabled();
   return (
     <>
       {indicesExist ? (
@@ -143,6 +145,7 @@ const OverviewComponent = () => {
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <ThreatIntelLinkPanel
+                      isThreatIntelModuleEnabled={isThreatIntelModuleEnabled}
                       deleteQuery={deleteQuery}
                       from={from}
                       setQuery={setQuery}
