@@ -99,7 +99,7 @@ export interface PersistableState<P extends SerializableState = SerializableStat
  * accumulated over time. Migration functions are keyed using semver version
  * of Kibana releases.
  */
-export type MigrateFunctionsObject = { [semver: string]: MigrateFunction };
+export type MigrateFunctionsObject = { [semver: string]: MigrateFunction<any, any> };
 export type MigrateFunction<
   FromVersion extends SerializableState = SerializableState,
   ToVersion extends SerializableState = SerializableState
