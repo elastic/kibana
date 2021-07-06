@@ -70,7 +70,7 @@ let emsSettings: EMSSettings;
 export const setEMSSettings = (value: EMSSettings) => {
   emsSettings = value;
 };
-export const getEMSSettings = () => {
+export const getEMSSettings: () => EMSSettings = () => {
   return emsSettings;
 };
 
