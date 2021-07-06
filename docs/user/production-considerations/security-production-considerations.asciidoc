@@ -9,6 +9,12 @@
 :description: Consider the production components for {kib} security.
 
 [float]
+[[enabling-ssl]]
+=== Enable SSL
+
+See <<configuring-tls>>.
+
+[float]
 [[configuring-kibana-shield]]
 === Use {stack} {security-features}
 
@@ -43,10 +49,3 @@ To do this, set `csp.strict` to `true` in your `kibana.yml`:
 --------
 csp.strict: true
 --------
-
-
-[float]
-[[enabling-ssl]]
-=== Enable SSL
-
-See <<configuring-tls>>.
