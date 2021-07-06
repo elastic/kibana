@@ -260,6 +260,7 @@ export async function mountApp({
   }
   render(app, element);
   return () => {
+    dataStart.search.session.clear();
     unlistenParentHistory();
     unmountComponentAtNode(element);
     appUnMounted();
