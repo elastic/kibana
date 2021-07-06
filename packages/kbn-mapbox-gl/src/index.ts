@@ -24,14 +24,15 @@ import type {
   MapboxGeoJSONFeature,
   Point,
   CustomLayerInterface,
-} from 'mapbox-gl';
-import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
+} from 'maplibre-gl';
+import maplibregl from 'maplibre-gl/dist/maplibre-gl-csp';
 // @ts-expect-error
 import mbRtlPlugin from '!!file-loader!@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js';
 // @ts-expect-error
-import mbWorkerUrl from '!!file-loader!mapbox-gl/dist/mapbox-gl-csp-worker';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import mbWorkerUrl from '!!file-loader!maplibre-gl/dist/maplibre-gl-csp-worker';
+import 'maplibre-gl/dist/maplibre-gl.css';
 
+const mapboxgl = maplibregl;
 mapboxgl.workerUrl = mbWorkerUrl;
 mapboxgl.setRTLTextPlugin(mbRtlPlugin);
 

@@ -5370,10 +5370,10 @@
   resolved "https://registry.yarnpkg.com/@types/lru-cache/-/lru-cache-5.1.0.tgz#57f228f2b80c046b4a1bd5cac031f81f207f4f03"
   integrity sha512-RaE0B+14ToE4l6UqdarKPnXwVDuigfFv+5j9Dze/Nqr23yyuqdNvzcZi3xB+3Agvi5R4EOgAksfv3lXX4vBt9w==
 
-"@types/mapbox-gl@1.13.1":
+"@types/maplibre-gl@1.13.1":
   version "1.13.1"
-  resolved "https://registry.yarnpkg.com/@types/mapbox-gl/-/mapbox-gl-1.13.1.tgz#bd8108f912f32c895117e2970b6d4fbbecbe42a1"
-  integrity sha512-Yqv1eFAzG2gdecc94higNC8KE+BR6t8QhFgbQGGEpKr3OgSVVtr2qaBNBPaGlIAtCoKDF6JGB2haOhvijYC4Bg==
+  resolved "https://registry.yarnpkg.com/@types/maplibre-gl/-/maplibre-gl-1.13.1.tgz#d043f48e9f08e1b6a9aa7e924d2b86306f843f2b"
+  integrity sha512-AD7gFneLUYOWKhiwUvfD3LmQy4agJ2k2fe2V6XWCmt6R41d1q1H+BuyHJxFg31OTtDCag4u9ZZpQbjUmUG0gjQ==
   dependencies:
     "@types/geojson" "*"
 
@@ -18882,10 +18882,15 @@ mapbox-gl-draw-rectangle-mode@1.0.4:
   resolved "https://registry.yarnpkg.com/mapbox-gl-draw-rectangle-mode/-/mapbox-gl-draw-rectangle-mode-1.0.4.tgz#42987d68872a5fb5cc5d76d3375ee20cd8bab8f7"
   integrity sha512-BdF6nwEK2p8n9LQoMPzBO8LhddW1fe+d5vK8HQIei+4VcRnUbKNsEj7Z15FsJxCHzsc2BQKXbESx5GaE8x0imQ==
 
-mapbox-gl@1.13.1:
-  version "1.13.1"
-  resolved "https://registry.yarnpkg.com/mapbox-gl/-/mapbox-gl-1.13.1.tgz#322efe75ab4c764fc4c776da1506aad58d5a5b9d"
-  integrity sha512-GSyubcoSF5MyaP8z+DasLu5v7KmDK2pp4S5+VQ5WdVQUOaAqQY4jwl4JpcdNho3uWm2bIKs7x1l7q3ynGmW60g==
+mapcap@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/mapcap/-/mapcap-1.0.0.tgz#e8e29d04a160eaf8c92ec4bcbd2c5d07ed037e5a"
+  integrity sha512-KcNlZSlFPx+r1jYZmxEbTVymG+dIctf10WmWkuhrhrblM+KMoF77HelwihL5cxYlORye79KoR4IlOOk99lUJ0g==
+
+maplibre-gl@1.15.0:
+  version "1.15.0"
+  resolved "https://registry.yarnpkg.com/maplibre-gl/-/maplibre-gl-1.15.0.tgz#6efa96b5fdda218390cb9db3eb1e901dc6ca9f51"
+  integrity sha512-C3Mq7HDTndvAs8w+Ai1QzvVdN7xG2+2iHjtp3Pkmk7tJeSMcqZzQYHKyOCBkpTs7g2P/aFqMU8Tg853RIZxIZg==
   dependencies:
     "@mapbox/geojson-rewind" "^0.5.0"
     "@mapbox/geojson-types" "^1.0.2"
@@ -18910,11 +18915,6 @@ mapbox-gl@1.13.1:
     supercluster "^7.1.0"
     tinyqueue "^2.0.3"
     vt-pbf "^3.1.1"
-
-mapcap@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/mapcap/-/mapcap-1.0.0.tgz#e8e29d04a160eaf8c92ec4bcbd2c5d07ed037e5a"
-  integrity sha512-KcNlZSlFPx+r1jYZmxEbTVymG+dIctf10WmWkuhrhrblM+KMoF77HelwihL5cxYlORye79KoR4IlOOk99lUJ0g==
 
 marge@^1.0.1:
   version "1.0.1"

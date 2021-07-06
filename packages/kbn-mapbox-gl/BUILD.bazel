@@ -29,11 +29,11 @@ NPM_MODULE_EXTRA_FILES = [
 SRC_DEPS = [
   "@npm//@mapbox/mapbox-gl-rtl-text",
   "@npm//file-loader",
-  "@npm//mapbox-gl",
+  "@npm//maplibre-gl",
 ]
 
 TYPES_DEPS = [
-  "@npm//@types/mapbox-gl",
+  "@npm//@types/maplibre-gl",
 ]
 
 DEPS = SRC_DEPS + TYPES_DEPS
