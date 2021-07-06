@@ -368,6 +368,13 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
         earliest,
         latest
       );
+      // Because load overall stats perform queries in batches
+      // there could be multiple errors
+      if (Array.isArray(allStats.errors) && allStats.errors.length > 0) {
+        allStats.errors.forEach((err: any) => {
+          dataLoader.displayError(err.body?.message?.output?.payload ?? err);
+        });
+      }
       setOverallStats(allStats);
     } catch (err) {
       dataLoader.displayError(err.body ?? err);
