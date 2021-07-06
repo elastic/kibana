@@ -8,16 +8,6 @@
 import { act } from 'react-dom/test-utils';
 import { setup, SetupResult, getProcessorValue } from './processor.helpers';
 
-// Default parameter values automatically added to the community_id processor when saved
-const defaultCommunityIdParams = {
-  if: undefined,
-  tag: undefined,
-  description: undefined,
-  target_field: undefined,
-  ignore_missing: undefined,
-  ignore_failure: undefined,
-};
-
 const COMMUNITY_ID_TYPE = 'community_id';
 
 describe('Processor: Community id', () => {
@@ -103,7 +93,6 @@ describe('Processor: Community id', () => {
 
     const processors = getProcessorValue(onUpdate, COMMUNITY_ID_TYPE);
     expect(processors[0][COMMUNITY_ID_TYPE]).toEqual({
-      ...defaultCommunityIdParams,
       ignore_failure: true,
       ignore_missing: false,
       target_field: 'target_field',
