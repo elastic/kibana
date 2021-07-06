@@ -44,7 +44,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const updatedPanel = await testSubjects.find('embeddablePanelHeading-RenderingTest:heatmap');
       const libraryActionExists = await testSubjects.descendantExists(
         'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION',
-        updatedPanel
+        updatedPanel,
+        10
       );
       expect(libraryActionExists).to.be(false);
 
@@ -84,7 +85,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const updatedPanel = await testSubjects.find('embeddablePanelHeading-RenderingTest:geomap');
       const libraryActionExists = await testSubjects.descendantExists(
         'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION',
-        updatedPanel
+        updatedPanel,
+        10
       );
       expect(libraryActionExists).to.be(false);
 

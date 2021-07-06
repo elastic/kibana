@@ -25,6 +25,11 @@ export class RenderableService extends FtrService {
    * @param count {Number} Number of RENDER_COMPLETE_SELECTORs to wait for.
    */
   public async waitForRender(count: number = 1): Promise<void> {
+    if (count < 1) {
+      this.log.debug(`Renderable.waitForRender for ${count} elements, skipping.`);
+      return;
+    }
+
     this.log.debug(`Renderable.waitForRender for ${count} elements`);
     await this.retry.try(async () => {
       const completedElements = await this.find.allByCssSelector(RENDER_COMPLETE_SELECTOR);

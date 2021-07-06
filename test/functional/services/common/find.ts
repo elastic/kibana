@@ -129,8 +129,13 @@ export class FindService extends FtrService {
     timeout: number = this.WAIT_FOR_EXISTS_TIME
   ): Promise<boolean> {
     this.log.debug(`Find.descendantExistsByCssSelector('${selector}') with timeout=${timeout}`);
-    const els = await parentElement._webElement.findElements(By.css(selector));
-    return await this.exists(async () => this.wrapAll(els), timeout);
+    await this._withTimeout(timeout);
+    try {
+      const els = await parentElement._webElement.findElements(By.css(selector));
+      return await this.exists(async () => this.wrapAll(els), timeout);
+    } finally {
+      await this._withTimeout(this.defaultFindTimeout);
+    }
   }
 
   public async descendantDisplayedByCssSelector(
