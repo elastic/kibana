@@ -41,9 +41,10 @@ export const waitForReindexTask = flow(
           throw new Error('Reindex failed with the following error:\n' + JSON.stringify(res.error));
         }
       } else if (Option.isSome(res.failures)) {
-        if (res.failures.value.every(isWriteBlockException)) {
+        const failureCauses = res.failures.value.map((failure) => failure.cause);
+        if (failureCauses.every(isWriteBlockException)) {
           return TaskEither.left({ type: 'target_index_had_write_block' as const });
-        } else if (res.failures.value.every(isIncompatibleMappingException)) {
+        } else if (failureCauses.every(isIncompatibleMappingException)) {
           return TaskEither.left({ type: 'incompatible_mapping_exception' as const });
         } else {
           throw new Error(
