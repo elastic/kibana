@@ -37,9 +37,9 @@ const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.setForm.valueFieldHelpText"
-        defaultMessage="Value for the field. A blank value will set {emptyString}."
+        defaultMessage="Value for the field. Used only when {field} is not specified."
         values={{
-          emptyString: <EuiCode>{'""'}</EuiCode>,
+          field: <EuiCode>{'copy_from'}</EuiCode>,
         }}
       />
     ),
@@ -48,7 +48,7 @@ const fieldsConfig: FieldsConfig = {
       {
         validator: ({ value, path, formData }) => {
           if (isEmpty(value) && isEmpty(formData['fields.copy_from'])) {
-            return { path, message: 'Either value or copy_from should be specified.' };
+            return { path, message: 'Either this field or copy_from should be specified.' };
           }
         },
       },
@@ -63,7 +63,10 @@ const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.setForm.copyFromFieldHelpText"
-        defaultMessage="The origin field which will be copied to field"
+        defaultMessage="The origin field which will be copied to field. Used only when {field} is not specified."
+        values={{
+          field: <EuiCode>{'value'}</EuiCode>,
+        }}
       />
     ),
     fieldsToValidateOnChange: ['fields.copy_from', 'fields.value'],
@@ -71,7 +74,7 @@ const fieldsConfig: FieldsConfig = {
       {
         validator: ({ value, path, formData }) => {
           if (isEmpty(value) && isEmpty(formData['fields.value'])) {
-            return { path, message: 'Either copy_from or value should be specified.' };
+            return { path, message: 'Either this field or value should be specified.' };
           }
         },
       },
