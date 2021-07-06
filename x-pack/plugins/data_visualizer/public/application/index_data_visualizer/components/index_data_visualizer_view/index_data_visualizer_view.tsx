@@ -370,7 +370,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
       );
       setOverallStats(allStats);
     } catch (err) {
-      dataLoader.displayError(err);
+      dataLoader.displayError(err.body ?? err);
     }
   }
 
