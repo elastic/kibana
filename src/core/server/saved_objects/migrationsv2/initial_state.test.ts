@@ -86,17 +86,32 @@ describe('createInitialState', () => {
             "must_not": Array [
               Object {
                 "term": Object {
+                  "type": "background-session",
+                },
+              },
+              Object {
+                "term": Object {
+                  "type": "cases-sub-case",
+                },
+              },
+              Object {
+                "term": Object {
+                  "type": "file-upload-telemetry",
+                },
+              },
+              Object {
+                "term": Object {
                   "type": "fleet-agent-events",
                 },
               },
               Object {
                 "term": Object {
-                  "type": "tsvb-validation-telemetry",
+                  "type": "ml-telemetry",
                 },
               },
               Object {
                 "term": Object {
-                  "type": "ml-telemetry",
+                  "type": "tsvb-validation-telemetry",
                 },
               },
               Object {

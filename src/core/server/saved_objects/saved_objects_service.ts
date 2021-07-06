@@ -149,6 +149,7 @@ export interface SavedObjectsServiceSetup {
  */
 export interface InternalSavedObjectsServiceSetup extends SavedObjectsServiceSetup {
   status$: Observable<ServiceStatus<SavedObjectStatusMeta>>;
+  getTypeRegistry: () => ISavedObjectTypeRegistry;
 }
 
 /**
@@ -338,6 +339,7 @@ export class SavedObjectsService
         }
         this.typeRegistry.registerType(type);
       },
+      getTypeRegistry: () => this.typeRegistry,
     };
   }
 

@@ -417,17 +417,32 @@ describe('ElasticIndex', () => {
               must_not: [
                 {
                   term: {
+                    type: 'background-session',
+                  },
+                },
+                {
+                  term: {
+                    type: 'cases-sub-case',
+                  },
+                },
+                {
+                  term: {
+                    type: 'file-upload-telemetry',
+                  },
+                },
+                {
+                  term: {
                     type: 'fleet-agent-events',
                   },
                 },
                 {
                   term: {
-                    type: 'tsvb-validation-telemetry',
+                    type: 'ml-telemetry',
                   },
                 },
                 {
                   term: {
-                    type: 'ml-telemetry',
+                    type: 'tsvb-validation-telemetry',
                   },
                 },
                 {

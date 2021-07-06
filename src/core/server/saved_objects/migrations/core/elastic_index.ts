@@ -32,13 +32,16 @@ export interface FullIndexInfo {
  * Types that are no longer registered and need to be removed
  */
 export const REMOVED_TYPES: string[] = [
+  'background-session',
+  'cases-sub-case',
+  'file-upload-telemetry',
   // https://github.com/elastic/kibana/issues/91869
   'fleet-agent-events',
   // Was removed in 7.12
   'ml-telemetry',
   // https://github.com/elastic/kibana/issues/95617
   'tsvb-validation-telemetry',
-];
+].sort();
 
 // When migrating from the outdated index we use a read query which excludes
 // saved objects which are no longer used. These saved objects will still be
