@@ -18,18 +18,26 @@ import type { IndexPattern } from '../../../../../../../../src/plugins/data/comm
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { useUrlState } from '../../../common/util/url_state';
 import { LinkCard } from '../../../common/components/link_card';
+import { ResultLink } from '../../../common/components/results_links';
 
 interface Props {
   indexPattern: IndexPattern;
   searchString?: string | { [key: string]: any };
   searchQueryLanguage?: string;
+  additionalLinks: ResultLink[];
 }
 
-// @todo: Add back create job card in a follow up PR
-export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQueryLanguage }) => {
+export const ActionsPanel: FC<Props> = ({
+  indexPattern,
+  searchString,
+  searchQueryLanguage,
+  additionalLinks,
+}) => {
   const [globalState] = useUrlState('_g');
 
   const [discoverLink, setDiscoverLink] = useState('');
+  const [generatedLinks, setGeneratedLinks] = useState<Record<string, string>>({});
+
   const {
     services: {
       application: { capabilities },
@@ -76,17 +84,56 @@ export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQuer
       }
     };
 
+    Promise.all(
+      additionalLinks.map(async ({ canDisplay, getUrl }) => {
+        if ((await canDisplay({ indexPatternId })) === false) {
+          return null;
+        }
+        return getUrl({ globalState, indexPatternId });
+      })
+    ).then((urls) => {
+      const linksById = urls.reduce((acc, url, i) => {
+        if (url !== null) {
+          acc[additionalLinks[i].id] = url;
+        }
+        return acc;
+      }, {} as Record<string, string>);
+      setGeneratedLinks(linksById);
+    });
+
     getDiscoverUrl();
     return () => {
       unmounted = true;
     };
-  }, [indexPattern, searchString, searchQueryLanguage, globalState, capabilities, getUrlGenerator]);
+  }, [
+    indexPattern,
+    searchString,
+    searchQueryLanguage,
+    globalState,
+    capabilities,
+    getUrlGenerator,
+    additionalLinks,
+  ]);
 
   // Note we use display:none for the DataRecognizer section as it needs to be
   // passed the recognizerResults object, and then run the recognizer check which
   // controls whether the recognizer section is ultimately displayed.
   return (
     <div data-test-subj="dataVisualizerActionsPanel">
+      {additionalLinks
+        .filter(({ id }) => generatedLinks[id] !== undefined)
+        .map((link) => (
+          <>
+            <LinkCard
+              href={generatedLinks[link.id]}
+              icon={link.icon}
+              description={link.description}
+              title={link.title}
+              data-test-subj={link.dataTestSubj}
+            />
+            <EuiSpacer size="m" />
+          </>
+        ))}
       {discoverLink && (
         <>
           <EuiTitle size="s">
