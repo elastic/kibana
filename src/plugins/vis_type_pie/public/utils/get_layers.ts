@@ -15,8 +15,8 @@ import {
 } from '@elastic/charts';
 import { isEqual } from 'lodash';
 import { SeriesLayer, PaletteRegistry, lightenColor } from '../../../charts/public';
-import { DataPublicPluginStart } from '../../../data/public';
-import { DatatableRow } from '../../../expressions/public';
+import type { DataPublicPluginStart } from '../../../data/public';
+import type { DatatableRow } from '../../../expressions/public';
 import type { BucketColumns, PieVisParams, SplitDimensionParams } from '../types';
 import { getDistinctSeries } from './get_distinct_series';
 
