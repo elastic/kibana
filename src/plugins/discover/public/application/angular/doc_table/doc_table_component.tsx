@@ -7,7 +7,8 @@
  */
 
 import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { debounce } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { TableHeader } from './components/table_header/table_header';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
@@ -56,9 +57,51 @@ export const DocTable = ({
   const hideTimeColumn = uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false);
   const isShortDots = uiSettings.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
 
-  const tableRows = rows.map((current) => {
+  const [limit, setLimit] = useState(minimumVisibleRows || 50);
+
+  // Reset infinite scroll limit
+  useEffect(() => {
+    setLimit(minimumVisibleRows || 50);
+  }, [rows, minimumVisibleRows]);
+
+  /**
+   * depending on which version of Discover is displayed, different elements are scrolling
+   * and have therefore to be considered for calculation of infinite scrolling
+   */
+  useEffect(() => {
+    if (!infiniteScroll) return;
+
+    const scrollDiv = document.querySelector('.dscTable') as HTMLElement;
+    const scrollMobileElem = document.documentElement;
+
+    const scheduleCheck = debounce(() => {
+      const isMobileView = document.getElementsByClassName('dscSidebar__mobile').length > 0;
+      const usedScrollDiv = isMobileView ? scrollMobileElem : scrollDiv;
+
+      const scrollusedHeight = usedScrollDiv.scrollHeight;
+      const scrollTop = Math.abs(usedScrollDiv.scrollTop);
+      const clientHeight = usedScrollDiv.clientHeight;
+
+      if (scrollTop + clientHeight === scrollusedHeight) {
+        setLimit((prevLimit) => prevLimit + 50);
+      }
+    }, 50);
+
+    scrollDiv.addEventListener('scroll', scheduleCheck);
+    window.addEventListener('scroll', scheduleCheck);
+
+    scheduleCheck();
+
+    return () => {
+      scrollDiv.removeEventListener('scroll', scheduleCheck);
+      window.addEventListener('scroll', scheduleCheck);
+    };
+  }, [infiniteScroll]);
+
+  const tableRows = rows.slice(0, limit).map((current) => {
     return (
       <TableRow
+        key={`${current._index}${current._type}${current._id}${current._score}${current._version}${current._routing}`}
         columns={columns}
         filter={filter}
         indexPattern={indexPattern}

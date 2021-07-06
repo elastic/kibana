@@ -154,7 +154,7 @@ export function DocTableLegacy(renderProps: DocTableLegacyProps) {
       <DocTableMemoized
         columns={renderProps.columns}
         rows={renderProps.rows}
-        minimumVisibleRows={renderProps.minimumVisibleRows}
+        minimumVisibleRows={minimumVisibleRows}
         infiniteScroll={true}
         totalHitCount={renderProps.totalHitCount}
         isLoading={renderProps.isLoading}

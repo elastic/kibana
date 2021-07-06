@@ -61,7 +61,7 @@ export function DiscoverDocTableEmbeddable(renderProps: DocTableEmbeddableProps)
         columns={renderProps.columns}
         rows={renderProps.rows}
         minimumVisibleRows={renderProps.minimumVisibleRows}
-        infiniteScroll={true}
+        infiniteScroll={false}
         totalHitCount={renderProps.totalHitCount}
         isLoading={renderProps.isLoading}
         indexPattern={renderProps.indexPattern}
