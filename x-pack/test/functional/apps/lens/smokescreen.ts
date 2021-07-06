@@ -234,7 +234,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const data = await PageObjects.lens.getCurrentChartDebugState();
       expect(data?.axes?.y.length).to.eql(2);
       expect(data?.axes?.y.some(({ position }) => position === 'right')).to.eql(true);
-      expect(data?.legend!.items[1].color).to.eql('#0000ff');
+      expect(data?.legend!.items[0].color).to.eql('#0000ff');
     });
 
     it('should show value labels on bar charts when enabled', async () => {
