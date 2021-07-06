@@ -68,6 +68,12 @@ export const createRuleTypeMocks = () => {
       return alertExecutor({
         services,
         params,
+        rule: {
+          name: 'name',
+          producer: 'producer',
+          ruleTypeId: 'ruleTypeId',
+          ruleTypeName: 'ruleTypeName',
+        },
         startedAt: new Date(),
       });
     },
