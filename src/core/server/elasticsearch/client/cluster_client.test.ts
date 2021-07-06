@@ -29,8 +29,6 @@ const createConfig = (
   };
 };
 
-const getExecutionContextMock = jest.fn();
-
 describe('ClusterClient', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let getAuthHeaders: jest.MockedFunction<GetAuthHeaders>;
@@ -57,7 +55,7 @@ describe('ClusterClient', () => {
 
   it('creates a single internal and scoped client during initialization', () => {
     const config = createConfig();
-
+    const getExecutionContextMock = jest.fn();
     new ClusterClient(config, logger, 'custom-type', getAuthHeaders, getExecutionContextMock);
 
     expect(configureClientMock).toHaveBeenCalledTimes(2);
@@ -292,31 +290,6 @@ describe('ClusterClient', () => {
       });
     });
 
-    it('respect the precedence of x-opaque-id header over config headers', () => {
-      const config = createConfig({
-        customHeaders: {
-          'x-opaque-id': 'from config',
-        },
-      });
-      getAuthHeaders.mockReturnValue({});
-
-      const clusterClient = new ClusterClient(config, logger, 'custom-type', getAuthHeaders);
-      const request = httpServerMock.createKibanaRequest({
-        headers: { foo: 'request' },
-        kibanaRequestState: { requestId: 'from request', requestUuid: 'ignore-this-id' },
-      });
-
-      clusterClient.asScoped(request);
-
-      expect(scopedClient.child).toHaveBeenCalledTimes(1);
-      expect(scopedClient.child).toHaveBeenCalledWith({
-        headers: {
-          ...DEFAULT_HEADERS,
-          'x-opaque-id': 'from request',
-        },
-      });
-    });
-
     it('respect the precedence of config headers over default headers', () => {
       const headerKey = Object.keys(DEFAULT_HEADERS)[0];
       const config = createConfig({
@@ -359,6 +332,31 @@ describe('ClusterClient', () => {
         headers: {
           [headerKey]: 'foo',
           'x-opaque-id': expect.any(String),
+        },
+      });
+    });
+
+    it('respect the precedence of x-opaque-id header over config headers', () => {
+      const config = createConfig({
+        customHeaders: {
+          'x-opaque-id': 'from config',
+        },
+      });
+      getAuthHeaders.mockReturnValue({});
+
+      const clusterClient = new ClusterClient(config, logger, 'custom-type', getAuthHeaders);
+      const request = httpServerMock.createKibanaRequest({
+        headers: { foo: 'request' },
+        kibanaRequestState: { requestId: 'from request', requestUuid: 'ignore-this-id' },
+      });
+
+      clusterClient.asScoped(request);
+
+      expect(scopedClient.child).toHaveBeenCalledTimes(1);
+      expect(scopedClient.child).toHaveBeenCalledWith({
+        headers: {
+          ...DEFAULT_HEADERS,
+          'x-opaque-id': 'from request',
         },
       });
     });
