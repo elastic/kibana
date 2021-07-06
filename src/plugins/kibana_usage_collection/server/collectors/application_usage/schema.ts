@@ -129,6 +129,7 @@ export const applicationUsageSchema = {
   error: commonSchema,
   status: commonSchema,
   kibanaOverview: commonSchema,
+  r: commonSchema,
 
   // X-Pack
   apm: commonSchema,
