@@ -19,6 +19,7 @@ import { defaultLifecyclePolicy } from '../../common/assets/lifecycle_policies/d
 import { ClusterPutComponentTemplateBody, PutIndexTemplateRequest } from '../../common/types';
 import { RuleDataClient } from '../rule_data_client';
 import { RuleDataWriteDisabledError } from './errors';
+import { incrementIndexName } from './utils';
 
 const BOOTSTRAP_TIMEOUT = 60000;
 
@@ -49,12 +50,6 @@ function createSignal() {
   }
 
   return { wait, complete, isReady: () => ready };
-}
-
-function incrementIndexName(oldIndex: string) {
-  const baseIndexString = oldIndex.slice(0, -6);
-  const newIndexNumber = Number(oldIndex.slice(-6)) + 1;
-  return baseIndexString + String(newIndexNumber).padStart(6, '0');
 }
 
 export class RuleDataPluginService {
@@ -150,16 +145,22 @@ export class RuleDataPluginService {
       return;
     } catch (err) {
       if (err.meta?.body?.error?.type !== 'illegal_argument_exception') {
-        throw err;
+        this.options.logger.error(`Failed to PUT mapping for alias ${alias}: ${err.message}`);
+        return;
+      }
+      const newIndexName = incrementIndexName(index);
+      if (newIndexName == null) {
+        this.options.logger.error(`Failed to increment write index name for alias: ${alias}`);
+        return;
       }
       try {
         await clusterClient.indices.rollover({
           alias,
-          new_index: incrementIndexName(index),
+          new_index: newIndexName,
         });
       } catch (e) {
         if (e?.meta?.body?.error?.type !== 'resource_already_exists_exception') {
-          throw e;
+          this.options.logger.error(`Failed to rollover index for alias ${alias}: ${e.message}`);
         }
       }
     }
