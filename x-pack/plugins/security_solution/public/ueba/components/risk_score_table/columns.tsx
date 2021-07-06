@@ -31,7 +31,7 @@ export const getRiskScoreColumns = (): RiskScoreColumns => [
     sortable: true,
     render: (hostName) => {
       if (hostName != null && hostName.length > 0) {
-        const id = escapeDataProviderId(`ueba-table-hostName-${hostName[0]}`);
+        const id = escapeDataProviderId(`ueba-table-hostName-${hostName}`);
         return (
           <DraggableWrapper
             key={id}
@@ -40,9 +40,9 @@ export const getRiskScoreColumns = (): RiskScoreColumns => [
               enabled: true,
               excluded: false,
               id,
-              name: hostName[0],
+              name: hostName,
               kqlQuery: '',
-              queryMatch: { field: 'host.name', value: hostName[0], operator: IS_OPERATOR },
+              queryMatch: { field: 'host.name', value: hostName, operator: IS_OPERATOR },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
@@ -50,7 +50,7 @@ export const getRiskScoreColumns = (): RiskScoreColumns => [
                   <Provider dataProvider={dataProvider} />
                 </DragEffects>
               ) : (
-                <HostDetailsLink hostName={hostName[0]} />
+                <HostDetailsLink hostName={hostName} />
               )
             }
           />

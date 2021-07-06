@@ -134,7 +134,6 @@ export const useRiskScore = ({
           .subscribe({
             next: (response) => {
               if (isCompleteResponse(response)) {
-                setLoading(false);
                 setRiskScoreResponse((prevResponse) => ({
                   ...prevResponse,
                   data: response.edges,

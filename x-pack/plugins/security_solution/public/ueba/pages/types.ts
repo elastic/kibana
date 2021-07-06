@@ -12,7 +12,7 @@ import { uebaModel } from '../../ueba/store';
 import { DocValueFields } from '../../../../timelines/common';
 import { InputsModelId } from '../../common/store/inputs/constants';
 
-export const hostDetailsPagePath = `${UEBA_PATH}/:detailName`;
+export const uebaDetailsPagePath = `${UEBA_PATH}/:detailName`;
 
 export type UebaTabsProps = GlobalTimeArgs & {
   docValueFields: DocValueFields[];

@@ -7,14 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const HOSTS = i18n.translate('xpack.securitySolution.uebaTable.uebaTitle', {
-  defaultMessage: 'All ueba',
-});
-
 export const UNIT = (totalCount: number) =>
   i18n.translate('xpack.securitySolution.uebaTable.unit', {
     values: { totalCount },
-    defaultMessage: `{totalCount, plural, =1 {host} other {ueba}}`,
+    defaultMessage: `{totalCount, plural, =1 {user} other {users}}`,
   });
 
 export const NAME = i18n.translate('xpack.securitySolution.uebaTable.nameTitle', {

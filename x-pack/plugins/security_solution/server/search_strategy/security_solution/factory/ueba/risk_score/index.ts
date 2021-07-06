@@ -36,13 +36,9 @@ export const riskScore: SecuritySolutionFactory<UebaQueries.riskScore> = {
     const totalCount = getOr(0, 'aggregations.host_count.value', response.rawResponse);
 
     const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
-    const buckets: RiskScoreHit[] = getOr(
-      [],
-      'aggregations.host_data.buckets',
-      response.rawResponse
-    );
-    const riskScoreEdges: RiskScoreEdges[] = buckets.map((bucket) =>
-      formatRiskScoreData(RISK_SCORE_FIELDS, bucket)
+
+    const riskScoreEdges: RiskScoreEdges[] = formatRiskScoreData(
+      getOr([], 'aggregations.host_data.buckets', response.rawResponse)
     );
 
     const edges = riskScoreEdges.splice(cursorStart, querySize - cursorStart);

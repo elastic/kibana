@@ -26,10 +26,10 @@ export const updateTableLimit = actionCreator<{
   uebaType: uebaModel.UebaType;
   limit: number;
   tableType: uebaModel.UebaTableType;
-}>('UPDATE_HOST_TABLE_LIMIT');
+}>('UPDATE_UEBA_TABLE_LIMIT');
 
 export const updateTableActivePage = actionCreator<{
   uebaType: uebaModel.UebaType;
   activePage: number;
   tableType: uebaModel.UebaTableType;
-}>('UPDATE_HOST_TABLE_LIMIT');
+}>('UPDATE_UEBA_ACTIVE_PAGE');
