@@ -9,6 +9,7 @@ import { difference, isEmpty } from 'lodash/fp';
 import { useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 
+import { useDispatch } from 'react-redux';
 import { useKibana } from '../../lib/kibana';
 import { CONSTANTS, UrlStateType } from './constants';
 import {
@@ -31,6 +32,8 @@ import {
   UrlState,
 } from './types';
 import { TimelineUrl } from '../../../timelines/store/timeline/model';
+import { timelineActions } from '../../../timelines/store/timeline';
+import { TimelineId } from '../../../../../timelines/common';
 
 function usePrevious(value: PreviousLocationUrlState) {
   const ref = useRef<PreviousLocationUrlState>(value);
@@ -71,6 +74,7 @@ export const useUrlStateHooks = ({
   const [isInitializing, setIsInitializing] = useState(true);
   const { filterManager, savedQueries } = useKibana().services.data.query;
   const prevProps = usePrevious({ pathName, pageName, urlState });
+  const dispatch = useDispatch();
 
   const handleInitialize = (type: UrlStateType, needUpdate?: boolean) => {
     let mySearch = search;
@@ -222,9 +226,10 @@ export const useUrlStateHooks = ({
       });
     } else if (pathName !== prevProps.pathName) {
       handleInitialize(type, isDetectionsPages(pageName));
+      dispatch(timelineActions.showTimeline({ id: TimelineId.active, show: false }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isInitializing, history, pathName, pageName, prevProps, urlState]);
+  }, [isInitializing, history, pathName, pageName, prevProps, urlState, dispatch]);
 
   useEffect(() => {
     document.title = `${getTitle(pageName, detailName, navTabs)} - Kibana`;
