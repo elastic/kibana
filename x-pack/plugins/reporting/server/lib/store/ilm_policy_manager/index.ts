@@ -5,14 +5,5 @@
  * 2.0.
  */
 
-import { IlmPutLifecycleRequest } from '@elastic/elasticsearch/api/types';
-
-export const reportingIlmPolicy: IlmPutLifecycleRequest['body'] = {
-  policy: {
-    phases: {
-      hot: {
-        actions: {},
-      },
-    },
-  },
-};
+export { reportingIlmPolicy } from './constants';
+export { IlmPolicyManager } from './ilm_policy_manager';
