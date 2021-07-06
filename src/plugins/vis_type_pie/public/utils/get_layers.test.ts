@@ -7,6 +7,7 @@
  */
 import { ShapeTreeNode } from '@elastic/charts';
 import { PaletteDefinition, SeriesLayer } from '../../../charts/public';
+import { dataPluginMock } from '../../../data/public/mocks';
 import { computeColor } from './get_layers';
 import { createMockVisData, createMockBucketColumns, createMockPieParams } from '../mocks';
 
@@ -14,6 +15,7 @@ const visData = createMockVisData();
 const buckets = createMockBucketColumns();
 const visParams = createMockPieParams();
 const colors = ['color1', 'color2', 'color3', 'color4'];
+const dataMock = dataPluginMock.createStartContract();
 export const getPaletteRegistry = () => {
   const mockPalette1: jest.Mocked<PaletteDefinition> = {
     id: 'default',
@@ -60,7 +62,8 @@ describe('computeColor', () => {
       visData.rows,
       visParams,
       getPaletteRegistry(),
-      false
+      false,
+      dataMock.fieldFormats
     );
     expect(color).toEqual(colors[0]);
   });
@@ -84,7 +87,8 @@ describe('computeColor', () => {
       visData.rows,
       visParams,
       getPaletteRegistry(),
-      false
+      false,
+      dataMock.fieldFormats
     );
     expect(color).toEqual('color3');
   });
@@ -107,7 +111,8 @@ describe('computeColor', () => {
       visData.rows,
       visParams,
       getPaletteRegistry(),
-      false
+      false,
+      dataMock.fieldFormats
     );
     expect(color).toEqual('#000028');
   });
