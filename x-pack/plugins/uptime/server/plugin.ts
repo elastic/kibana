@@ -57,7 +57,7 @@ export class Plugin implements PluginType {
       await ruleDataService.createOrUpdateIndexTemplate({
         name: ruleDataService.getFullAssetName('synthetics-index-template'),
         body: {
-          index_patterns: [ruleDataService.getFullAssetName('observability-synthetics*')],
+          index_patterns: [ruleDataService.getFullAssetName('observability.synthetics*')],
           composed_of: [
             ruleDataService.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
             componentTemplateName,
@@ -72,7 +72,7 @@ export class Plugin implements PluginType {
     });
 
     const ruleDataClient = ruleDataService.getRuleDataClient(
-      ruleDataService.getFullAssetName('observability-synthetics'),
+      ruleDataService.getFullAssetName('observability.synthetics'),
       () => initializeRuleDataTemplatesPromise
     );
 
