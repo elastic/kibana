@@ -142,7 +142,7 @@ describe('ClusterClient', () => {
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith({
-        headers: { ...DEFAULT_HEADERS, foo: 'bar' },
+        headers: { ...DEFAULT_HEADERS, foo: 'bar', 'x-opaque-id': expect.any(String) },
       });
     });
 
@@ -162,7 +162,7 @@ describe('ClusterClient', () => {
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith({
-        headers: { ...DEFAULT_HEADERS, authorization: 'auth' },
+        headers: { ...DEFAULT_HEADERS, authorization: 'auth', 'x-opaque-id': expect.any(String) },
       });
     });
 
@@ -186,7 +186,7 @@ describe('ClusterClient', () => {
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith({
-        headers: { ...DEFAULT_HEADERS, authorization: 'auth' },
+        headers: { ...DEFAULT_HEADERS, authorization: 'auth', 'x-opaque-id': expect.any(String) },
       });
     });
 
@@ -211,6 +211,27 @@ describe('ClusterClient', () => {
           ...DEFAULT_HEADERS,
           foo: 'bar',
           hello: 'dolly',
+          'x-opaque-id': expect.any(String),
+        },
+      });
+    });
+
+    it('adds the x-opaque-id header based on the request id', () => {
+      const config = createConfig();
+      getAuthHeaders.mockReturnValue({});
+
+      const clusterClient = new ClusterClient(config, logger, 'custom-type', getAuthHeaders);
+      const request = httpServerMock.createKibanaRequest({
+        kibanaRequestState: { requestId: 'my-fake-id', requestUuid: 'ignore-this-id' },
+      });
+
+      clusterClient.asScoped(request);
+
+      expect(scopedClient.child).toHaveBeenCalledTimes(1);
+      expect(scopedClient.child).toHaveBeenCalledWith({
+        headers: {
+          ...DEFAULT_HEADERS,
+          'x-opaque-id': 'my-fake-id',
         },
       });
     });
@@ -238,6 +259,7 @@ describe('ClusterClient', () => {
           ...DEFAULT_HEADERS,
           foo: 'auth',
           hello: 'dolly',
+          'x-opaque-id': expect.any(String),
         },
       });
     });
@@ -265,6 +287,32 @@ describe('ClusterClient', () => {
           ...DEFAULT_HEADERS,
           foo: 'request',
           hello: 'dolly',
+          'x-opaque-id': expect.any(String),
+        },
+      });
+    });
+
+    it('respect the precedence of x-opaque-id header over config headers', () => {
+      const config = createConfig({
+        customHeaders: {
+          'x-opaque-id': 'from config',
+        },
+      });
+      getAuthHeaders.mockReturnValue({});
+
+      const clusterClient = new ClusterClient(config, logger, 'custom-type', getAuthHeaders);
+      const request = httpServerMock.createKibanaRequest({
+        headers: { foo: 'request' },
+        kibanaRequestState: { requestId: 'from request', requestUuid: 'ignore-this-id' },
+      });
+
+      clusterClient.asScoped(request);
+
+      expect(scopedClient.child).toHaveBeenCalledTimes(1);
+      expect(scopedClient.child).toHaveBeenCalledWith({
+        headers: {
+          ...DEFAULT_HEADERS,
+          'x-opaque-id': 'from request',
         },
       });
     });
@@ -287,6 +335,7 @@ describe('ClusterClient', () => {
       expect(scopedClient.child).toHaveBeenCalledWith({
         headers: {
           [headerKey]: 'foo',
+          'x-opaque-id': expect.any(String),
         },
       });
     });
@@ -309,6 +358,7 @@ describe('ClusterClient', () => {
       expect(scopedClient.child).toHaveBeenCalledWith({
         headers: {
           [headerKey]: 'foo',
+          'x-opaque-id': expect.any(String),
         },
       });
     });
