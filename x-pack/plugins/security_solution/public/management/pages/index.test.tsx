@@ -23,17 +23,17 @@ describe('when in the Administration tab', () => {
     mockedContext.history.push('/administration/endpoints');
   });
 
-  it('should display the No Permissions view when Ingest is OFF', async () => {
+  it('should display the No Permissions if no sufficient privileges', async () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
-      endpointPrivileges: { loading: false, canAccessFleet: false },
+      endpointPrivileges: { loading: false, canAccessEndpointManagement: false },
     });
 
     expect(await render().findByTestId('noIngestPermissions')).not.toBeNull();
   });
 
-  it('should display the Management view when Ingest is ON', async () => {
+  it('should display the Management view if user has privileges', async () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
-      endpointPrivileges: { loading: false, canAccessFleet: true },
+      endpointPrivileges: { loading: false, canAccessEndpointManagement: true },
     });
 
     expect(await render().findByTestId('endpointPage')).not.toBeNull();

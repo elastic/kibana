@@ -15,7 +15,7 @@ import { UseAlertsPrivelegesReturn, useAlertsPrivileges } from './use_alerts_pri
 
 jest.mock('./api');
 jest.mock('../../../../common/hooks/use_app_toasts');
-jest.mock('../../../components/user_privileges');
+jest.mock('../../../../common/components/user_privileges');
 
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock<ReturnType<typeof useUserPrivileges>>;
 
@@ -86,6 +86,7 @@ const userPrivilegesInitial: ReturnType<typeof useUserPrivileges> = {
     result: undefined,
     error: undefined,
   },
+  endpointPrivileges: { loading: true, canAccessEndpointManagement: false, canAccessFleet: false },
 };
 
 describe('usePrivilegeUser', () => {
