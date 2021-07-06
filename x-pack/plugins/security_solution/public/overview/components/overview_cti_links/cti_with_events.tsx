@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { isEqual } from 'lodash';
 import { useCtiDashboardLinks } from '../../containers/overview_cti_links';
 import { ThreatIntelPanelView } from './threat_intel_panel_view';
 
@@ -44,6 +45,5 @@ export const CtiWithEvents = React.memo(
     prevProps.to === nextProps.to &&
     prevProps.from === nextProps.from &&
     prevProps.totalCount === nextProps.totalCount &&
-    JSON.stringify(prevProps.eventCountsByDataset) ===
-      JSON.stringify(nextProps.eventCountsByDataset)
+    isEqual(prevProps.eventCountsByDataset, nextProps.eventCountsByDataset)
 );
