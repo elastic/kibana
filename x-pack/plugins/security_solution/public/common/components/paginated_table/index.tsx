@@ -46,6 +46,7 @@ import { useStateToaster } from '../toasters';
 import * as i18n from './translations';
 import { Panel } from '../panel';
 import { InspectButtonContainer } from '../inspect';
+import { RiskScoreColumns } from '../../../ueba/components/risk_score_table';
 
 const DEFAULT_DATA_TEST_SUBJ = 'paginated-table';
 
@@ -82,6 +83,8 @@ declare type BasicTableColumns =
   | NetworkTopCountriesColumnsNetworkDetails
   | NetworkTopNFlowColumns
   | NetworkTopNFlowColumnsNetworkDetails
+  | NetworkHttpColumns
+  | RiskScoreColumns
   | TlsColumns
   | UncommonProcessTableColumns
   | UsersColumns;

@@ -21,3 +21,15 @@ export const setUebaDetailsTablesActivePageToZero = actionCreator(
 );
 
 export const setUebaTablesActivePageToZero = actionCreator('SET_UEBA_TABLES_ACTIVE_PAGE_TO_ZERO');
+
+export const updateTableLimit = actionCreator<{
+  uebaType: uebaModel.UebaType;
+  limit: number;
+  tableType: uebaModel.UebaTableType;
+}>('UPDATE_HOST_TABLE_LIMIT');
+
+export const updateTableActivePage = actionCreator<{
+  uebaType: uebaModel.UebaType;
+  activePage: number;
+  tableType: uebaModel.UebaTableType;
+}>('UPDATE_HOST_TABLE_LIMIT');

@@ -71,14 +71,17 @@ import {
   CtiEventEnrichmentStrategyResponse,
   CtiQueries,
 } from './cti';
+import { UebaQueries, RiskScoreStrategyResponse, RiskScoreRequestOptions } from './ueba';
 
 export * from './hosts';
 export * from './matrix_histogram';
 export * from './network';
+export * from './ueba';
 
 export type FactoryQueryTypes =
   | HostsQueries
   | HostsKpiQueries
+  | UebaQueries
   | NetworkQueries
   | NetworkKpiQueries
   | CtiQueries
@@ -109,6 +112,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostsStrategyResponse
   : T extends HostsQueries.details
   ? HostDetailsStrategyResponse
+  : T extends UebaQueries.riskScore
+  ? RiskScoreStrategyResponse
   : T extends HostsQueries.overview
   ? HostsOverviewStrategyResponse
   : T extends HostsQueries.authentications
@@ -161,6 +166,8 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? HostDetailsRequestOptions
   : T extends HostsQueries.overview
   ? HostOverviewRequestOptions
+  : T extends UebaQueries.riskScore
+  ? RiskScoreRequestOptions
   : T extends HostsQueries.authentications
   ? HostAuthenticationsRequestOptions
   : T extends HostsQueries.firstOrLastSeen

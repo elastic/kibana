@@ -14,7 +14,7 @@ import { Anomaly } from '../../common/components/ml/types';
 import { UebaTableType } from '../store/model';
 import { UpdateDateRange } from '../../common/components/charts/common';
 import { UEBA_PATH } from '../../../common/constants';
-import { UebaQueryTabBody } from './navigation';
+import { RiskScoreQueryTabBody } from './navigation';
 
 export const UebaTabs = memo<UebaTabsProps>(
   ({
@@ -72,7 +72,7 @@ export const UebaTabs = memo<UebaTabsProps>(
     return (
       <Switch>
         <Route path={`${UEBA_PATH}/:tabName(${UebaTableType.riskScore})`}>
-          <UebaQueryTabBody docValueFields={docValueFields} {...tabProps} />
+          <RiskScoreQueryTabBody docValueFields={docValueFields} {...tabProps} />
         </Route>
       </Switch>
     );

@@ -69,6 +69,12 @@ export const hostFieldsMap: Readonly<Record<string, string>> = {
   ...extendMap('host', osFieldsMap),
 };
 
+export const riskScoreFieldsMap: Readonly<Record<string, string>> = {
+  'risk.score': 'risk_score',
+  'risk.keyword': 'risk.keyword',
+  'host.name': 'host.name',
+};
+
 export const processFieldsMap: Readonly<Record<string, string>> = {
   'process.hash.md5': 'process.hash.md5',
   'process.hash.sha1': 'process.hash.sha1',
@@ -356,4 +362,5 @@ export const eventFieldsMap: Readonly<Record<string, string>> = {
   ...{ ...userFieldsMap },
   ...{ ...winlogFieldsMap },
   ...{ ...processFieldsMap },
+  ...{ ...riskScoreFieldsMap },
 };

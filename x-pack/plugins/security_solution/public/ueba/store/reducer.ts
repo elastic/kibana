@@ -7,13 +7,15 @@
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 import { get } from 'lodash/fp';
-import { Direction } from '../../../common/search_strategy';
+import { Direction, RiskScoreFields } from '../../../common/search_strategy';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../common/store/constants';
 
 import {
   setUebaDetailsTablesActivePageToZero,
   setUebaTablesActivePageToZero,
   updateUebaTable,
+  updateTableActivePage,
+  updateTableLimit,
 } from './actions';
 import {
   setUebaDetailsQueriesActivePageToZero,
@@ -28,7 +30,7 @@ export const initialUebaState: UebaModel = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         sort: {
-          field: 'UebaTopTablesFields', // TO DO Steph this should be real
+          field: RiskScoreFields.riskScore,
           direction: Direction.desc,
         },
       },
@@ -40,7 +42,7 @@ export const initialUebaState: UebaModel = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         sort: {
-          field: 'UebaTopTablesFields', // TO DO Steph this should be real
+          field: RiskScoreFields.riskScore,
           direction: Direction.desc,
         },
       },
@@ -78,6 +80,32 @@ export const uebaReducer = reducerWithInitialState(initialUebaState)
     details: {
       ...state.details,
       queries: setUebaDetailsQueriesActivePageToZero(state),
+    },
+  }))
+  .case(updateTableActivePage, (state, { activePage, uebaType, tableType }) => ({
+    ...state,
+    [uebaType]: {
+      ...state[uebaType],
+      queries: {
+        ...state[uebaType].queries,
+        [tableType]: {
+          ...state[uebaType].queries[tableType],
+          activePage,
+        },
+      },
+    },
+  }))
+  .case(updateTableLimit, (state, { limit, uebaType, tableType }) => ({
+    ...state,
+    [uebaType]: {
+      ...state[uebaType],
+      queries: {
+        ...state[uebaType].queries,
+        [tableType]: {
+          ...state[uebaType].queries[tableType],
+          limit,
+        },
+      },
     },
   }))
   .build();

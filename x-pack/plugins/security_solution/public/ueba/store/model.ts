@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  // UebaTopTablesFields,
-  SortField,
-} from '../../../common/search_strategy';
-export interface UebaTopTablesFields {}
+import { RiskScoreFields, RiskScoreSortField, SortField } from '../../../common/search_strategy';
+
 export enum UebaType {
   page = 'page',
   details = 'details',
@@ -18,8 +15,6 @@ export enum UebaType {
 export enum UebaTableType {
   riskScore = 'riskScore',
 }
-
-export type TopNTableType = UebaDetailsTableType.riskScore | UebaTableType.riskScore;
 
 export enum UebaDetailsTableType {
   riskScore = 'riskScore',
@@ -33,19 +28,19 @@ export interface BasicQueryPaginated {
 }
 
 // Ueba Page Models
-export interface TopNFlowQuery extends BasicQueryPaginated {
-  sort: SortField<UebaTopTablesFields>;
+export interface RiskScoreQuery extends BasicQueryPaginated {
+  sort: RiskScoreSortField;
 }
 
 export interface TableUpdates {
   activePage?: number;
   limit?: number;
   isPtrIncluded?: boolean;
-  sort?: SortField<UebaTopTablesFields>;
+  sort?: SortField<RiskScoreFields>;
 }
 
 export interface UebaQueries {
-  [UebaTableType.riskScore]: TopNFlowQuery;
+  [UebaTableType.riskScore]: RiskScoreQuery;
 }
 
 export interface UebaPageModel {
@@ -53,7 +48,7 @@ export interface UebaPageModel {
 }
 
 export interface UebaDetailsQueries {
-  [UebaDetailsTableType.riskScore]: TopNFlowQuery;
+  [UebaDetailsTableType.riskScore]: RiskScoreQuery;
 }
 
 export interface UebaDetailsModel {
