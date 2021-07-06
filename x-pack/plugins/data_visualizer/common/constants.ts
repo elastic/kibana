@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { KBN_FIELD_TYPES } from '../../../../src/plugins/data/common';
+
 export const UI_SETTING_MAX_FILE_SIZE = 'fileUpload:maxFileSize';
 
 export const MB = Math.pow(2, 20);
@@ -27,7 +29,13 @@ export const JOB_FIELD_TYPES = {
   KEYWORD: 'keyword',
   NUMBER: 'number',
   TEXT: 'text',
+  HISTOGRAM: 'histogram',
   UNKNOWN: 'unknown',
 } as const;
 
 export const OMIT_FIELDS: string[] = ['_source', '_type', '_index', '_id', '_version', '_score'];
+
+export const NON_AGGREGATABLE_FIELD_TYPES = new Set<string>([
+  KBN_FIELD_TYPES.GEO_SHAPE,
+  KBN_FIELD_TYPES.HISTOGRAM,
+]);
