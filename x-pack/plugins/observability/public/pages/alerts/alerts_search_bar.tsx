@@ -7,17 +7,17 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
-import { SearchBar, TimeHistory } from '../../../../../../src/plugins/data/public';
+import { IIndexPattern, SearchBar, TimeHistory } from '../../../../../../src/plugins/data/public';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
-import { useFetcher } from '../../hooks/use_fetcher';
-import { callObservabilityApi } from '../../services/call_observability_api';
 
 export function AlertsSearchBar({
+  dynamicIndexPattern,
   rangeFrom,
   rangeTo,
   onQueryChange,
   query,
 }: {
+  dynamicIndexPattern: IIndexPattern[];
   rangeFrom?: string;
   rangeTo?: string;
   query?: string;
@@ -31,16 +31,9 @@ export function AlertsSearchBar({
   }, []);
   const [queryLanguage, setQueryLanguage] = useState<'lucene' | 'kuery'>('kuery');
 
-  const { data: dynamicIndexPattern } = useFetcher(({ signal }) => {
-    return callObservabilityApi({
-      signal,
-      endpoint: 'GET /api/observability/rules/alerts/dynamic_index_pattern',
-    });
-  }, []);
-
   return (
     <SearchBar
-      indexPatterns={dynamicIndexPattern ? [dynamicIndexPattern] : []}
+      indexPatterns={dynamicIndexPattern}
       placeholder={i18n.translate('xpack.observability.alerts.searchBarPlaceholder', {
         defaultMessage: '"domain": "ecommerce" AND ("service.name": "ProductCatalogService" …)',
       })}
