@@ -364,8 +364,7 @@ export class FindService extends FtrService {
     topOffset?: number
   ): Promise<void> {
     this.log.debug(`Find.clickByCssSelector('${selector}') with timeout=${timeout}`);
-    await this.retry.try(async () => {
-      await this.existsByDisplayedByCssSelector(selector, timeout);
+    await this.retry.tryForTime(1000, async () => {
       const element = await this.byCssSelector(selector, timeout);
       if (element) {
         // await element.moveMouseTo();
