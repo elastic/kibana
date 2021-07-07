@@ -98,6 +98,22 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts');
     });
 
+    it('should return a 404 when superuser accesses not-existent alert', async () => {
+      await supertestWithoutAuth
+        .get(`${getSpaceUrlPrefix()}${TEST_URL}?id=myfakeid&index=${APM_ALERT_INDEX}`)
+        .auth(superUser.username, superUser.password)
+        .set('kbn-xsrf', 'true')
+        .expect(404);
+    });
+
+    it('should return a 404 when superuser accesses not-existent alerts as data index', async () => {
+      await supertestWithoutAuth
+        .get(`${getSpaceUrlPrefix()}${TEST_URL}?id=${APM_ALERT_ID}&index=myfakeindex`)
+        .auth(superUser.username, superUser.password)
+        .set('kbn-xsrf', 'true')
+        .expect(404);
+    });
+
     function addTests({ space, authorizedUsers, unauthorizedUsers, alertId, index }: TestCase) {
       authorizedUsers.forEach(({ username, password }) => {
         it(`${username} should be able to access alert ${alertId} in ${space}/${index}`, async () => {
