@@ -184,6 +184,7 @@ export class AlertsClient {
         alertAuditEvent({
           action: AlertAuditAction.UPDATE,
           id,
+          outcome: 'unknown',
         })
       );
 
