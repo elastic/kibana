@@ -21,7 +21,7 @@ import { getLazyOsqueryAction } from './shared_components';
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsqueryPluginSetup {}
 export interface OsqueryPluginStart {
-  OsqueryAction: ReturnType<typeof getLazyOsqueryAction>;
+  OsqueryAction?: ReturnType<typeof getLazyOsqueryAction>;
 }
 
 export interface AppPluginStartDependencies {
