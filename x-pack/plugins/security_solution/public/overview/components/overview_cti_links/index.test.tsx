@@ -20,13 +20,8 @@ import {
   SUB_PLUGINS_REDUCER,
 } from '../../../common/mock';
 import { mockTheme, mockProps } from './mock';
-import { useIsThreatIntelModuleEnabled } from '../../containers/overview_cti_links/use_is_threat_intel_module_enabled';
 
 jest.mock('../../../common/lib/kibana');
-
-jest.mock('../../containers/overview_cti_links/use_is_threat_intel_module_enabled');
-const useIsThreatIntelModuleEnabledMock = useIsThreatIntelModuleEnabled as jest.Mock;
-useIsThreatIntelModuleEnabledMock.mockReturnValue(true);
 
 describe('ThreatIntelLinkPanel', () => {
   const state: State = mockGlobalState;
@@ -44,7 +39,7 @@ describe('ThreatIntelLinkPanel', () => {
       <Provider store={store}>
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
-            <ThreatIntelLinkPanel {...mockProps} />
+            <ThreatIntelLinkPanel {...mockProps} isThreatIntelModuleEnabled={true} />
           </ThemeProvider>
         </I18nProvider>
       </Provider>
@@ -54,12 +49,11 @@ describe('ThreatIntelLinkPanel', () => {
   });
 
   it('renders CtiDisabledModule when Threat Intel module is disabled', () => {
-    useIsThreatIntelModuleEnabledMock.mockReturnValueOnce(false);
     const wrapper = mount(
       <Provider store={store}>
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
-            <ThreatIntelLinkPanel {...mockProps} />
+            <ThreatIntelLinkPanel {...mockProps} isThreatIntelModuleEnabled={false} />
           </ThemeProvider>
         </I18nProvider>
       </Provider>
@@ -69,12 +63,11 @@ describe('ThreatIntelLinkPanel', () => {
   });
 
   it('renders null while Threat Intel module state is loading', () => {
-    useIsThreatIntelModuleEnabledMock.mockReturnValueOnce(undefined);
     const wrapper = mount(
       <Provider store={store}>
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
-            <ThreatIntelLinkPanel {...mockProps} />
+            <ThreatIntelLinkPanel {...mockProps} isThreatIntelModuleEnabled={undefined} />
           </ThemeProvider>
         </I18nProvider>
       </Provider>
