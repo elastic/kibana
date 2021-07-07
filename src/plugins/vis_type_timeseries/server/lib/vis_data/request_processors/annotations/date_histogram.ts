@@ -7,8 +7,7 @@
  */
 
 import { overwrite } from '../../helpers';
-import { getBucketSize } from '../../helpers/get_bucket_size';
-import { getTimerange } from '../../helpers/get_timerange';
+import { getBucketSize, getTimerange } from '../../helpers';
 import { validateField } from '../../../../../common/fields_utils';
 
 import { search, UI_SETTINGS } from '../../../../../../../plugins/data/server';

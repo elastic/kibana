@@ -14,6 +14,12 @@ export function _legacyBuildProcessorFunction(chain: any[], ...args: any) {
   );
 }
 
+export type ProcessorFunction<TParams = unknown, TInput = unknown, TOutput = TInput> = (
+  params: TParams
+) => (
+  next: (doc: TOutput) => TOutput | Promise<TOutput>
+) => (doc: TInput) => TOutput | Promise<TOutput>;
+
 export const buildProcessorFunction = <
   TFunction extends Function = Function,
   TArgs = unknown,

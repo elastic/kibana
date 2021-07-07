@@ -12,7 +12,7 @@ import type { Annotation, FetchedIndexPattern, Panel } from '../../../../../comm
 import type { EsQueryConfig } from '../../../../../../data/common';
 import type { SearchCapabilities } from '../../../search_strategies';
 
-import type { RequestProcessorsFunction } from '../types';
+import type { ProcessorFunction } from '../../build_processor_function';
 
 export interface AnnotationsRequestProcessorsParams {
   req: VisTypeTimeseriesVisDataRequest;
@@ -26,4 +26,7 @@ export interface AnnotationsRequestProcessorsParams {
 
 export type AnnotationSearchRequest = Record<string, unknown>;
 
-export type AnnotationsRequestProcessorsFunction = RequestProcessorsFunction<AnnotationsRequestProcessorsParams>;
+export type AnnotationsRequestProcessorsFunction = ProcessorFunction<
+  AnnotationsRequestProcessorsParams,
+  AnnotationSearchRequest
+>;
