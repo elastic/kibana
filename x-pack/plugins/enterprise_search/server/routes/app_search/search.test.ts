@@ -28,7 +28,7 @@ describe('search routes', () => {
 
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v1/engines/:engineName/search.json',
+        path: '/as/engines/:engineName/dashboard_search',
       });
     });
   });

@@ -19,8 +19,10 @@ import { WorkplaceSearchHeaderActions } from './components/layout';
 import {
   GROUPS_PATH,
   SETUP_GUIDE_PATH,
+  SEARCH_AUTHORIZE_PATH,
   SOURCES_PATH,
   SOURCE_ADDED_PATH,
+  OAUTH_AUTHORIZE_PATH,
   PERSONAL_SOURCES_PATH,
   ORG_SETTINGS_PATH,
   USERS_AND_ROLES_PATH,
@@ -34,8 +36,10 @@ import { SourceAdded } from './views/content_sources/components/source_added';
 import { ErrorState } from './views/error_state';
 import { GroupsRouter } from './views/groups';
 import { NotFound } from './views/not_found';
+import { OAuthAuthorize } from './views/oauth_authorize';
 import { Overview } from './views/overview';
 import { RoleMappings } from './views/role_mappings';
+import { SearchAuthorize } from './views/search_authorize';
 import { Security } from './views/security';
 import { SettingsRouter } from './views/settings';
 import { SetupGuide } from './views/setup_guide';
@@ -95,6 +99,12 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
           </Route>
           <Route path={PERSONAL_SETTINGS_PATH}>
             <AccountSettings />
+          </Route>
+          <Route path={OAUTH_AUTHORIZE_PATH}>
+            <OAuthAuthorize />
+          </Route>
+          <Route path={SEARCH_AUTHORIZE_PATH}>
+            <SearchAuthorize />
           </Route>
           <Route>
             <NotFound isOrganization={false} />

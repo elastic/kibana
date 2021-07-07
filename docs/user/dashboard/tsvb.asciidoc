@@ -31,6 +31,29 @@ By default, *TSVB* drops the last bucket because the time filter intersects the 
 .. To view a filtered set of documents, enter <<kuery-query, KQL filters>> in the *Panel filter* field.
 
 [float]
+[[tsvb-index-pattern-mode]]
+==== Index pattern mode
+Create *TSVB* visualizations with {kib} index patterns. 
+
+IMPORTANT: Creating *TSVB* visualizations with an {es} index string is deprecated and will be removed in a future release.
+It is the default one for new visualizations but it can also be switched for the old implementations:
+
+. Click *Panel options*, then click the gear icon to open the *Index pattern selection mode* options.
+. Select *Use only Kibana index patterns*.
+. Reselect the index pattern from the dropdown, then select the *Time field*.
+
+image::images/tsvb_index_pattern_selection_mode.png[Change index pattern selection mode action]
+
+The index pattern mode unlocks many new features, such as:
+* Runtime fields
+
+* URL drilldowns
+
+* Interactive filters for time series visualizations
+
+* Better performance
+
+[float]
 [[configure-the-data-series]]
 ==== Configure the series
 
@@ -177,4 +200,4 @@ To group with multiple fields, create runtime fields in the index pattern you ar
 [role="screenshot"]
 image::images/tsvb_group_by_multiple_fields.png[Group by multiple fields]
 
-. Create a new *TSVB* visualization and group by this field.
+. Create a *TSVB* visualization and group by this field.

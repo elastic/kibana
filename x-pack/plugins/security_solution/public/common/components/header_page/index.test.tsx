@@ -15,17 +15,7 @@ import { HeaderPage } from './index';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { SecurityPageName } from '../../../app/types';
 
-jest.mock('react-router-dom', () => {
-  const original = jest.requireActual('react-router-dom');
-
-  return {
-    ...original,
-    useHistory: () => ({
-      useHistory: jest.fn(),
-    }),
-  };
-});
-
+jest.mock('../../lib/kibana');
 jest.mock('../link_to');
 
 describe('HeaderPage', () => {
@@ -51,7 +41,7 @@ describe('HeaderPage', () => {
     const wrapper = mount(
       <TestProviders>
         <HeaderPage
-          backOptions={{ href: '#', text: 'Test link', pageId: SecurityPageName.hosts }}
+          backOptions={{ path: '#', text: 'Test link', pageId: SecurityPageName.hosts }}
           title="Test title"
         />
       </TestProviders>
