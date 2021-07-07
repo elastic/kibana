@@ -24,7 +24,7 @@ export interface QueryTabBodyProps {
   filterQuery?: string | ESTermQuery;
 }
 
-export type UebaComponentsQueryProps = QueryTabBodyProps & {
+export type RiskScoreQueryProps = QueryTabBodyProps & {
   deleteQuery?: GlobalTimeArgs['deleteQuery'];
   docValueFields?: DocValueFields[];
   indexNames: string[];
@@ -33,4 +33,7 @@ export type UebaComponentsQueryProps = QueryTabBodyProps & {
   setQuery: GlobalTimeArgs['setQuery'];
   updateDateRange?: UpdateDateRange;
   narrowDateRange?: NarrowDateRange;
+};
+export type HostRulesQueryProps = RiskScoreQueryProps & {
+  hostName: string;
 };

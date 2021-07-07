@@ -13,8 +13,7 @@ export const buildHostRulesQuery = ({
   defaultIndex,
   docValueFields,
   filterQuery,
-  pagination: { querySize },
-  sort,
+  hostName,
   timerange: { from, to },
 }: HostRulesRequestOptions) => {
   const filter = [
@@ -32,40 +31,65 @@ export const buildHostRulesQuery = ({
 
   return {
     allowNoIndices: true,
-    index: defaultIndex,
+    index: defaultIndex, // can stop getting this from sourcerer and assume default detections index if we want
     ignoreUnavailable: true,
     track_total_hits: true,
     body: {
       ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
-      aggregations: {
+      aggs: {
         host_data: {
           terms: {
             field: 'host.name',
             order: {
               risk_score: Direction.desc,
             },
-            size: 20,
           },
           aggs: {
             risk_score: {
               sum: {
-                field: 'risk_score',
+                field: 'signal.rule.risk_score',
               },
             },
-            risk_keyword: {
+            rule_name: {
               terms: {
-                field: 'risk.keyword',
+                field: 'signal.rule.name',
+                order: {
+                  risk_score: Direction.desc,
+                },
+              },
+              aggs: {
+                risk_score: {
+                  sum: {
+                    field: 'signal.rule.risk_score',
+                  },
+                },
+                rule_type: {
+                  terms: {
+                    field: 'signal.rule.type',
+                  },
+                },
               },
             },
-          },
-        },
-        host_count: {
-          cardinality: {
-            field: 'host.name',
+            rule_count: {
+              cardinality: {
+                field: 'signal.rule.name',
+              },
+            },
           },
         },
       },
-      query: { bool: { filter } },
+      query: {
+        bool: {
+          filter,
+          must: [
+            {
+              term: {
+                'host.name': hostName,
+              },
+            },
+          ],
+        },
+      },
       size: 0,
     },
   };

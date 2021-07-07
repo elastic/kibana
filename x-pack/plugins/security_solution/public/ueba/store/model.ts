@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { RiskScoreFields, RiskScoreSortField, SortField } from '../../../common/search_strategy';
+import {
+  HostRulesSortField,
+  RiskScoreFields,
+  RiskScoreSortField,
+  SortField,
+} from '../../../common/search_strategy';
 
 export enum UebaType {
   page = 'page',
@@ -51,8 +56,8 @@ export interface UebaPageModel {
 
 export interface UebaDetailsQueries {
   [UebaTableType.hostRules]: HostRulesQuery;
-  [UebaTableType.hostTactics]: RiskScoreQuery;
-  [UebaTableType.userRules]: RiskScoreQuery;
+  [UebaTableType.hostTactics]: HostRulesQuery;
+  [UebaTableType.userRules]: HostRulesQuery;
 }
 
 export interface UebaDetailsModel {

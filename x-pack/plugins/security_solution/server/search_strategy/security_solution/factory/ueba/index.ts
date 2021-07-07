@@ -11,7 +11,9 @@ import {
 } from '../../../../../common/search_strategy/security_solution';
 import { SecuritySolutionFactory } from '../types';
 import { riskScore } from './risk_score';
+import { hostRules } from './host_rules';
 
 export const uebaFactory: Record<UebaQueries, SecuritySolutionFactory<FactoryQueryTypes>> = {
   [UebaQueries.riskScore]: riskScore,
+  [UebaQueries.hostRules]: hostRules,
 };

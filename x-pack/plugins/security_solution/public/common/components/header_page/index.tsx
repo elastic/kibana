@@ -79,6 +79,7 @@ export interface HeaderPageProps extends HeaderProps {
   children?: React.ReactNode;
   draggableArguments?: DraggableArguments;
   hideSourcerer?: boolean;
+  sourcererScope?: SourcererScopeName;
   subtitle?: SubtitleProps['items'];
   subtitle2?: SubtitleProps['items'];
   title: TitleProp;
@@ -94,6 +95,7 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   draggableArguments,
   hideSourcerer = false,
   isLoading,
+  sourcererScope = SourcererScopeName.default,
   subtitle,
   subtitle2,
   title,
@@ -149,7 +151,7 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
             {children}
           </EuiPageHeaderSection>
         )}
-        {!hideSourcerer && <Sourcerer scope={SourcererScopeName.default} />}
+        {!hideSourcerer && <Sourcerer scope={sourcererScope} />}
       </EuiPageHeader>
       {/* Manually add a 'padding-bottom' to header */}
       <EuiSpacer size="l" />

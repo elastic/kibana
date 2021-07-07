@@ -9,11 +9,15 @@ import { createSelector } from 'reselect';
 
 import { State } from '../../common/store/types';
 
-import { UebaPageModel, UebaTableType } from './model';
+import { UebaDetailsModel, UebaPageModel, UebaTableType } from './model';
 
 const selectUebaPage = (state: State): UebaPageModel => state.ueba.page;
+const selectUebaDetailsPage = (state: State): UebaDetailsModel => state.ueba.details;
 
 // const selectUebaDetails = (state: State): UebaDetailsModel => state.ueba.details;
 
 export const riskScoreSelector = () =>
   createSelector(selectUebaPage, (ueba) => ueba.queries[UebaTableType.riskScore]);
+
+export const hostRulesSelector = () =>
+  createSelector(selectUebaDetailsPage, (ueba) => ueba.queries[UebaTableType.hostRules]);

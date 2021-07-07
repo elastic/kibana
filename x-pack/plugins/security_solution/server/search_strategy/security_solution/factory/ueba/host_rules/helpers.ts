@@ -6,15 +6,21 @@
  */
 
 import { getOr } from 'lodash/fp';
-import { HostRulesHit, HostRulesEdges } from '../../../../../../common';
+import {
+  HostRulesHit,
+  HostRulesEdges,
+  HostRulesFields,
+  RuleNameHit,
+} from '../../../../../../common';
 
 export const formatHostRulesData = (buckets: HostRulesHit[]): HostRulesEdges[] =>
-  buckets.map((bucket) => ({
+  getOr([], '[0].rule_name.buckets', buckets).map((bucket: RuleNameHit) => ({
     node: {
       _id: bucket.key,
-      host_name: bucket.key,
-      risk_score: getOr(0, 'risk_score.value', bucket),
-      risk_keyword: getOr(0, 'risk_keyword.buckets[0].key', bucket),
+      [HostRulesFields.hits]: bucket.doc_count,
+      [HostRulesFields.riskScore]: getOr(0, 'risk_score.value', bucket),
+      [HostRulesFields.ruleName]: bucket.key,
+      [HostRulesFields.ruleType]: getOr(0, 'rule_type.buckets[0].key', bucket),
     },
     cursor: {
       value: bucket.key,

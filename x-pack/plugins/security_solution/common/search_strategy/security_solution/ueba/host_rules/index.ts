@@ -10,7 +10,19 @@ import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/comm
 import { HostRulesItem, HostRulesFields } from '../common';
 import { CursorType, Hit, Inspect, Maybe, PageInfoPaginated, SortField } from '../../../common';
 import { RequestOptionsPaginated } from '../..';
-
+export interface RuleNameHit {
+  key: string;
+  doc_count: number;
+  risk_score: {
+    value?: number;
+  };
+  rule_type: {
+    buckets?: Array<{
+      key: string;
+      doc_count: number;
+    }>;
+  };
+}
 export interface HostRulesHit extends Hit {
   _source: {
     '@timestamp': string;
@@ -20,11 +32,8 @@ export interface HostRulesHit extends Hit {
   risk_score: {
     value?: number;
   };
-  risk_keyword: {
-    buckets?: Array<{
-      key: string;
-      doc_count: number;
-    }>;
+  rule_name: {
+    buckets?: RuleNameHit[];
   };
 }
 
@@ -42,6 +51,7 @@ export interface HostRulesStrategyResponse extends IEsSearchResponse {
 
 export interface HostRulesRequestOptions extends RequestOptionsPaginated<HostRulesFields> {
   defaultIndex: string[];
+  hostName: string;
 }
 
 export type HostRulesSortField = SortField<HostRulesFields>;

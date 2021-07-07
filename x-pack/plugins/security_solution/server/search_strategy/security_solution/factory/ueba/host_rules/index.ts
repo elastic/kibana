@@ -32,7 +32,11 @@ export const hostRules: SecuritySolutionFactory<UebaQueries.hostRules> = {
     response: IEsSearchResponse<unknown>
   ): Promise<HostRulesStrategyResponse> => {
     const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
-    const totalCount = getOr(0, 'aggregations.host_count.value', response.rawResponse);
+    const totalCount = getOr(
+      0,
+      'aggregations.host_data.buckets[0].rule_count.value',
+      response.rawResponse
+    );
     const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
 
     const hostRulesEdges: HostRulesEdges[] = formatHostRulesData(

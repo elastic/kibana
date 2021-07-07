@@ -8,7 +8,7 @@
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { useRiskScore } from '../../containers/risk_score';
-import { UebaComponentsQueryProps } from './types';
+import { RiskScoreQueryProps } from './types';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { RiskScoreTable } from '../../components/risk_score_table';
 
@@ -24,7 +24,7 @@ export const RiskScoreQueryTabBody = ({
   setQuery,
   startDate,
   type,
-}: UebaComponentsQueryProps) => {
+}: RiskScoreQueryProps) => {
   const [
     loading,
     { data, totalCount, pageInfo, loadPage, id, inspect, isInspected, refetch },

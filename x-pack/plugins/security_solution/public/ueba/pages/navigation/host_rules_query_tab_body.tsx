@@ -7,31 +7,41 @@
 
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { useRiskScore } from '../../containers/risk_score';
-import { UebaComponentsQueryProps } from './types';
+import { useHostRules } from '../../containers/host_rules';
+import { HostRulesQueryProps } from './types';
 import { manageQuery } from '../../../common/components/page/manage_query';
-import { RiskScoreTable } from '../../components/risk_score_table';
+import { HostRulesTable } from '../../components/host_rules_table';
 
-const RiskScoreTableManage = manageQuery(RiskScoreTable);
+const HostRulesTableManage = manageQuery(HostRulesTable);
 
 export const HostRulesQueryTabBody = ({
   deleteQuery,
   docValueFields,
   endDate,
   filterQuery,
+  hostName,
   indexNames,
   skip,
   setQuery,
   startDate,
   type,
-}: UebaComponentsQueryProps) => {
+}: HostRulesQueryProps) => {
   const [
     loading,
     { data, totalCount, pageInfo, loadPage, id, inspect, isInspected, refetch },
-  ] = useRiskScore({ docValueFields, endDate, filterQuery, indexNames, skip, startDate, type });
+  ] = useHostRules({
+    docValueFields,
+    endDate,
+    filterQuery,
+    hostName,
+    indexNames,
+    skip,
+    startDate,
+    type,
+  });
 
   return (
-    <RiskScoreTableManage
+    <HostRulesTableManage
       deleteQuery={deleteQuery}
       data={data}
       fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}

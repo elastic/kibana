@@ -8,24 +8,26 @@
 import { Maybe } from '../../../common';
 
 export enum RiskScoreFields {
-  hostName = 'hostName',
-  riskScore = 'riskScore',
-  riskKeyword = 'riskKeyword',
+  hostName = 'host_name',
+  riskKeyword = 'risk_keyword',
+  riskScore = 'risk_score',
 }
 export interface RiskScoreItem {
   _id?: Maybe<string>;
-  host_name: Maybe<string>;
-  risk_score: Maybe<number>;
-  risk_keyword: Maybe<string>;
+  [RiskScoreFields.hostName]: Maybe<string>;
+  [RiskScoreFields.riskKeyword]: Maybe<string>;
+  [RiskScoreFields.riskScore]: Maybe<number>;
 }
 export enum HostRulesFields {
-  hostName = 'hostName',
-  riskScore = 'riskScore',
-  riskKeyword = 'riskKeyword',
+  hits = 'hits',
+  riskScore = 'risk_score',
+  ruleName = 'rule_name',
+  ruleType = 'rule_type',
 }
 export interface HostRulesItem {
   _id?: Maybe<string>;
-  host_name: Maybe<string>;
-  risk_score: Maybe<number>;
-  risk_keyword: Maybe<string>;
+  [HostRulesFields.hits]: Maybe<number>;
+  [HostRulesFields.riskScore]: Maybe<number>;
+  [HostRulesFields.ruleName]: Maybe<string>;
+  [HostRulesFields.ruleType]: Maybe<string>;
 }

@@ -44,7 +44,6 @@ export const buildRiskScoreQuery = ({
             order: {
               risk_score: Direction.desc,
             },
-            size: 20,
           },
           aggs: {
             risk_score: {

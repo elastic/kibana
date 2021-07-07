@@ -17,20 +17,21 @@ import {
 } from '../../../common/components/paginated_table';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { uebaActions, uebaModel, uebaSelectors } from '../../store';
-import { getRiskScoreColumns } from './columns';
+import { getHostRulesColumns } from './columns';
 import * as i18n from './translations';
 import {
-  RiskScoreEdges,
-  RiskScoreItem,
-  RiskScoreSortField,
-  RiskScoreFields,
+  HostRulesEdges,
+  HostRulesItem,
+  HostRulesSortField,
+  HostRulesFields,
 } from '../../../../common';
 import { Direction } from '../../../../common/search_strategy';
+import { HOST_RULES } from '../../pages/translations';
 
-const tableType = uebaModel.UebaTableType.riskScore;
+const tableType = uebaModel.UebaTableType.hostRules;
 
-interface RiskScoreTableProps {
-  data: RiskScoreEdges[];
+interface HostRulesTableProps {
+  data: HostRulesEdges[];
   fakeTotalCount: number;
   id: string;
   isInspect: boolean;
@@ -41,10 +42,11 @@ interface RiskScoreTableProps {
   type: uebaModel.UebaType;
 }
 
-export type RiskScoreColumns = [
-  Columns<RiskScoreItem['host_name']>,
-  Columns<RiskScoreItem['risk_score']>,
-  Columns<RiskScoreItem['risk_keyword']>
+export type HostRulesColumns = [
+  Columns<HostRulesItem[HostRulesFields.ruleName]>,
+  Columns<HostRulesItem[HostRulesFields.ruleType]>,
+  Columns<HostRulesItem[HostRulesFields.riskScore]>,
+  Columns<HostRulesItem[HostRulesFields.hits]>
 ];
 
 const rowItems: ItemsPerRow[] = [
@@ -57,12 +59,12 @@ const rowItems: ItemsPerRow[] = [
     numberOfRow: 10,
   },
 ];
-const getSorting = (sortField: RiskScoreFields, direction: Direction): SortingBasicTable => ({
+const getSorting = (sortField: HostRulesFields, direction: Direction): SortingBasicTable => ({
   field: getNodeField(sortField),
   direction,
 });
 
-const RiskScoreTableComponent: React.FC<RiskScoreTableProps> = ({
+const HostRulesTableComponent: React.FC<HostRulesTableProps> = ({
   data,
   fakeTotalCount,
   id,
@@ -74,8 +76,7 @@ const RiskScoreTableComponent: React.FC<RiskScoreTableProps> = ({
   type,
 }) => {
   const dispatch = useDispatch();
-  // const getRiskScoreSelector = useMemo(() => uebaSelectors.riskScoreSelector(), []);
-  const { activePage, limit, sort } = useDeepEqualSelector(uebaSelectors.riskScoreSelector());
+  const { activePage, limit, sort } = useDeepEqualSelector(uebaSelectors.hostRulesSelector());
   const updateLimitPagination = useCallback(
     (newLimit) =>
       dispatch(
@@ -103,13 +104,13 @@ const RiskScoreTableComponent: React.FC<RiskScoreTableProps> = ({
   const onChange = useCallback(
     (criteria: Criteria) => {
       if (criteria.sort != null) {
-        const newSort: RiskScoreSortField = {
+        const newSort: HostRulesSortField = {
           field: getSortField(criteria.sort.field),
           direction: criteria.sort.direction as Direction,
         };
         if (newSort.direction !== sort.direction || newSort.field !== sort.field) {
           // dispatch(
-          //   uebaActions.updateRiskScoreSort({
+          //   uebaActions.updateHostRulesSort({
           //     sort,
           //     uebaType: type,
           //   })
@@ -120,7 +121,7 @@ const RiskScoreTableComponent: React.FC<RiskScoreTableProps> = ({
     [sort]
   );
 
-  const columns = useMemo(() => getRiskScoreColumns(), []);
+  const columns = useMemo(() => getHostRulesColumns(), []);
 
   const sorting = useMemo(() => getSorting(sort.field, sort.direction), [sort]);
 
@@ -130,7 +131,7 @@ const RiskScoreTableComponent: React.FC<RiskScoreTableProps> = ({
       columns={columns}
       dataTestSubj={`table-${tableType}`}
       headerCount={totalCount}
-      headerTitle={i18n.RISK_SCORE}
+      headerTitle={HOST_RULES}
       headerUnit={i18n.UNIT(totalCount)}
       id={id}
       isInspect={isInspect}
@@ -149,21 +150,21 @@ const RiskScoreTableComponent: React.FC<RiskScoreTableProps> = ({
   );
 };
 
-RiskScoreTableComponent.displayName = 'RiskScoreTableComponent';
+HostRulesTableComponent.displayName = 'HostRulesTableComponent';
 
-const getSortField = (field: string): RiskScoreFields => {
+const getSortField = (field: string): HostRulesFields => {
   switch (field) {
-    case `node.${RiskScoreFields.hostName}`:
-      return RiskScoreFields.hostName;
-    case `node.${RiskScoreFields.riskScore}`:
-      return RiskScoreFields.riskScore;
+    case `node.${HostRulesFields.ruleName}`:
+      return HostRulesFields.ruleName;
+    case `node.${HostRulesFields.riskScore}`:
+      return HostRulesFields.riskScore;
     default:
-      return RiskScoreFields.riskScore;
+      return HostRulesFields.riskScore;
   }
 };
 
-const getNodeField = (field: RiskScoreFields): string => `node.${field}`;
+const getNodeField = (field: HostRulesFields): string => `node.${field}`;
 
-export const RiskScoreTable = React.memo(RiskScoreTableComponent);
+export const HostRulesTable = React.memo(HostRulesTableComponent);
 
-RiskScoreTable.displayName = 'RiskScoreTable';
+HostRulesTable.displayName = 'HostRulesTable';

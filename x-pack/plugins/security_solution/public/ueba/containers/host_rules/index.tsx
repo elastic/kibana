@@ -53,6 +53,7 @@ interface UseHostRules {
   docValueFields?: DocValueFields[];
   endDate: string;
   filterQuery?: ESTermQuery | string;
+  hostName: string;
   indexNames: string[];
   skip?: boolean;
   startDate: string;
@@ -63,6 +64,7 @@ export const useHostRules = ({
   docValueFields,
   endDate,
   filterQuery,
+  hostName,
   indexNames,
   skip = false,
   startDate,
@@ -179,6 +181,7 @@ export const useHostRules = ({
       });
       const myRequest = {
         ...(prevRequest ?? {}),
+        hostName,
         defaultIndex: indices,
         docValueFields: docValueFields ?? [],
         factoryQueryType,
@@ -202,6 +205,7 @@ export const useHostRules = ({
     startDate,
     sort,
     getTransformChangesIfTheyExist,
+    hostName,
   ]);
 
   useEffect(() => {
