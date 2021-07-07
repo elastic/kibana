@@ -147,3 +147,8 @@ export const OVERVIEW_NETWORK_STATS = '[data-test-subj="overview-network-stats"]
 export const OVERVIEW_EMPTY_PAGE = '[data-test-subj="empty-page"]';
 
 export const OVERVIEW_REVENT_TIMELINES = '[data-test-subj="overview-recent-timelines"]';
+
+export const OVERVIEW_CTI_LINKS = '[data-test-subj="cti-dashboard-links"]';
+export const OVERVIEW_CTI_LINKS_ERROR_INNER_PANEL = '[data-test-subj="cti-inner-panel-danger"]';
+export const OVERVIEW_CTI_LINKS_WARNING_INNER_PANEL = '[data-test-subj="cti-inner-panel-warning"]';
+export const OVERVIEW_CTI_LINKS_INFO_INNER_PANEL = '[data-test-subj="cti-inner-panel-info"]';

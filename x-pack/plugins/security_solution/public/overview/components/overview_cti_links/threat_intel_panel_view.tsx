@@ -113,7 +113,7 @@ export const ThreatIntelPanelView: React.FC<ThreatIntelPanelViewProps> = ({
     () =>
       isDashboardPluginDisabled ? (
         <CtiInnerPanel
-          data-test-subj="cti-inner-panel-info"
+          dataTestSubj="cti-inner-panel-info"
           color={'primary'}
           title={i18n.INFO_TITLE}
           body={i18n.INFO_BODY}
