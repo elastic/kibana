@@ -125,17 +125,19 @@ export class LensAttributes {
   getBreakdownColumn({
     sourceField,
     layerId,
+    labels,
     indexPattern,
   }: {
     sourceField: string;
     layerId: string;
+    labels: Record<string, string>;
     indexPattern: IndexPattern;
   }): TermsIndexPatternColumn {
     const fieldMeta = indexPattern.getFieldByName(sourceField);
 
     return {
       sourceField,
-      label: `Top values of ${FieldLabels[sourceField]}`,
+      label: `Top values of ${labels[sourceField]}`,
       dataType: fieldMeta?.type as DataType,
       operationType: 'terms',
       scale: 'ordinal',
@@ -304,6 +306,7 @@ export class LensAttributes {
         layerId,
         indexPattern: layerConfig.indexPattern,
         sourceField: layerConfig.breakdown || layerConfig.seriesConfig.breakdownFields[0],
+        labels: layerConfig.seriesConfig.labels,
       });
     }
 
@@ -583,6 +586,7 @@ export class LensAttributes {
                   layerId,
                   sourceField: breakdown,
                   indexPattern: layerConfig.indexPattern,
+                  labels: layerConfig.seriesConfig.labels,
                 }),
               }
             : {}),
