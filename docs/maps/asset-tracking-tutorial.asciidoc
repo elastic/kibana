@@ -325,7 +325,7 @@ PUT bus_alerts/_mapping
 . Click *Create index pattern*.
 . Give the index pattern a name: *bus_alerts**.
 . Click *Next step*.
-. Set the *Time field* to *time*.
+. Set the *Time field* to *detectionDateTime*.
 . Click *Create index pattern*.
 
 [float]
@@ -378,3 +378,21 @@ The *Bus Alert connector* is added to the *Rules and Connectors* page. For more 
 
 [role="screenshot"]
 image::maps/images/asset-tracking-tutorial/rules_and_connectors.png[]
+
+[float]
+==== Step 4. Visualize the alerts on the operational map
+
+Add a layer to the existing map based on the alert index. The end result will show a map with active bus locations, their direction, their routes, the construction zones, and the alerts for when a bus entered a construction zone.
+
+. Go to the map that you built in this tutorial.
+. Click *Add layer*, and then select *Documents*.
+. Select the *bus_alerts** index pattern.
+. Accept the defaults and click *Add layer*.
+. Click *Save & close*.
+
+Congratulations! Your map is now complete.
+
+[float]
+=== What’s next?
+
+You have successfully completed the asset tracking tutorial. You now have the recipe. Now it’s your turn to try replicating the same analysis with your data. Have fun!
