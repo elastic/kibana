@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { useGetSettings, useUrlModal, sendGetOneAgentPolicy } from '../../hooks';
+import { useGetSettings, useUrlModal, sendGetOneAgentPolicy, useFleetStatus } from '../../hooks';
 import { FLEET_SERVER_PACKAGE } from '../../constants';
 import type { PackagePolicy } from '../../types';
 
@@ -65,6 +65,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
     }
   }, [modal, lastModal, settings]);
 
+  const fleetStatus = useFleetStatus();
   const [policyId, setSelectedPolicyId] = useState(agentPolicy?.id);
   const [isFleetServerPolicySelected, setIsFleetServerPolicySelected] = useState<boolean>(false);
 
@@ -135,6 +136,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
 
       <EuiFlyoutBody
         banner={
+          fleetStatus.isReady &&
           !isFleetServerPolicySelected &&
           !isLoadingInitialRequest &&
           fleetServerHosts.length === 0 &&
@@ -143,10 +145,9 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
           ) : undefined
         }
       >
-        {!isFleetServerPolicySelected &&
-        fleetServerHosts.length === 0 &&
-        mode === 'managed' ? null : mode === 'managed' ? (
+        {mode === 'managed' ? (
           <ManagedInstructions
+            settings={settings.data?.item}
             setSelectedPolicyId={setSelectedPolicyId}
             agentPolicy={agentPolicy}
             agentPolicies={agentPolicies}
