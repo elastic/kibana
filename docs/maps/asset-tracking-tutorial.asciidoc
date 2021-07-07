@@ -250,3 +250,32 @@ Your map should automatically refresh every 10 seconds to show the lastest bus p
 [role="screenshot"]
 image::maps/images/asset-tracking-tutorial/tracks_and_top_hits.png[]
 
+[float]
+=== Part 3: Setup geo-fencing alerts
+
+[float]
+==== Step 1. Add a construction zone
+
+Add a layer for construction zones. You will draw the construction zones on a map. This construction zones will be used as your geofence boundary or threshold that serves as the basis for triggering alerts.
+
+. Click *Add layer*.
+. Click *Create index*.
+. Set *Index name* to *construction_zones*.
+. Click *Create index*.
+. Draw 2 or 3 construction zones on your map
+.. Select bounding box icon image:maps/images/asset-tracking-tutorial/bounding_box_icon.png[bounding box icon] in the toolbar on the left side of the map.
+.. Move your mouse to an area of the map where you would like to draw a construction zone bounding box.
+.. Click to start rectangle.
+.. Move mouse to adjust rectangle size.
+.. Click again to finish.
+. When finished drawing construction zones, click *Exit* under the layer name in the legend.
+. In *Layer settings*, set *Name* to *Construction zones*.
+. Scroll to *Layer Style*, set *Fill color* to yellow.
+. Click *Save & close*.
+. *Save* the map. Give the map a title, and under *Add to dashboard*, select *None*. Click *Save and add to library*.
+
+The map now represents an operational view of live bus traffic.  You’ll see the direction that the buses are traveling, and whether they are near or have entered a construction zone.
+
+[role="screenshot"]
+image::maps/images/asset-tracking-tutorial/construction_zones.png[]
+
