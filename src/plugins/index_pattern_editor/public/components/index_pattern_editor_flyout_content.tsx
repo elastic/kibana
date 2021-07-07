@@ -194,6 +194,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
   const loadTimestampFieldOptions = useCallback(
     async (query: string, exactMatched: MatchedItem[]) => {
+      let timestampOptions: TimestampOption[] = [];
       const isValidResult = !existingIndexPatterns.includes(title) && exactMatched.length > 0;
       if (isValidResult) {
         setIsLoadingTimestampFields(true);
@@ -208,14 +209,21 @@ const IndexPatternEditorFlyoutContentComponent = ({
         const fields = await ensureMinimumTime(
           indexPatternService.getFieldsForWildcard(getFieldsOptions)
         );
-        const timeFields = extractTimeFields(fields, requireTimestampField);
-        setIsLoadingTimestampFields(false);
-        setTimestampFieldOptions(timeFields);
-      } else {
-        setTimestampFieldOptions([]);
+        timestampOptions = extractTimeFields(fields, requireTimestampField);
       }
+      setIsLoadingTimestampFields(false);
+      setTimestampFieldOptions(timestampOptions);
+      form.getFields().timestampField.reset();
     },
-    [existingIndexPatterns, indexPatternService, requireTimestampField, rollupIndex, title, type]
+    [
+      existingIndexPatterns,
+      indexPatternService,
+      requireTimestampField,
+      rollupIndex,
+      title,
+      type,
+      form,
+    ]
   );
 
   const reloadMatchedIndices = useCallback(
