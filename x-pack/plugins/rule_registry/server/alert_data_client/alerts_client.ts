@@ -76,7 +76,10 @@ export class AlertsClient {
     );
   }
 
-  private async fetchAlert({ id, index }: GetAlertParams): Promise<AlertType | null | undefined> {
+  private async fetchAlert({
+    id,
+    index,
+  }: GetAlertParams): Promise<(AlertType & { _version: string | undefined }) | null | undefined> {
     try {
       const result = await this.esClient.search<ParsedTechnicalFields>({
         // Context: Originally thought of always just searching `.alerts-*` but that could
