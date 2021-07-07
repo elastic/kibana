@@ -36,6 +36,7 @@ Before you can get to the fun of visualizing and alerting on Portland buses, you
 ----------------------------------
 PUT tri_met_tracks
 ----------------------------------
+
 . To configure the `tri_met_tracks` index mappings, run:
 +
 [source,js]
@@ -144,6 +145,7 @@ output {
 ----------------------------------
 bin/logstash -f config/trimet-pipeline.conf
 ----------------------------------
+
 . Wait for Logstash to initialize and confirm data is flowing. You should see messages similar to this:
 +
 [role="screenshot"]
@@ -290,6 +292,7 @@ Every time a bus enters the construction zone, it will cause an alert. In this c
 ----------------------------------
 PUT bus_alerts
 ----------------------------------
+
 . To configure the `bus_alerts` index mappings, run:
 +
 [source,js]
@@ -321,6 +324,7 @@ PUT bus_alerts/_mapping
   }
 }
 ----------------------------------
+
 . Open the main menu, and click *Stack Management > Index Patterns*.
 . Click *Create index pattern*.
 . Give the index pattern a name: *bus_alerts**.
@@ -372,6 +376,7 @@ image::maps/images/asset-tracking-tutorial/tracking_containment_configuration.pn
   "containingBoundaryName": "{{context.containingBoundaryName}}"
 }
 ----------------------------------
+
 . Click *Save*.
 
 The *Bus Alert connector* is added to the *Rules and Connectors* page. For more information on common connectors, refer to the <<slack-action-type, Slack>> and <<email-action-type, Email>> connectors.
