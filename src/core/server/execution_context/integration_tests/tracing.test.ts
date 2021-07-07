@@ -155,69 +155,69 @@ describe('trace', () => {
       expect(header).toBe('new-opaque-id');
     });
 
-    it('passed to Elasticsearch scoped client calls even if ExecutionContext Serivce is disabled', async () => {
-      const kibana = kbnTestServer.createRootWithCorePlugins({
-        execution_context: { enabled: false },
-        plugins: { initialize: false },
-        server: {
-          requestId: {
-            allowFromAnyIp: true,
+    describe('ExecutionContext Serivce is disabled', () => {
+      let rootExecutionContextDisabled: ReturnType<typeof kbnTestServer.createRoot>;
+      beforeEach(async () => {
+        rootExecutionContextDisabled = kbnTestServer.createRootWithCorePlugins({
+          execution_context: { enabled: false },
+          plugins: { initialize: false },
+          server: {
+            requestId: {
+              allowFromAnyIp: true,
+            },
           },
-        },
-      });
-      const { http } = await kibana.setup();
-      const { createRouter } = http;
-
-      const router = createRouter('');
-      router.get({ path: '/execution-context', validate: false }, async (context, req, res) => {
-        const { headers } = await context.core.elasticsearch.client.asCurrentUser.ping();
-        return res.ok({ body: headers || {} });
-      });
-
-      await kibana.start();
-
-      const myOpaqueId = 'my-opaque-id';
-      const response = await kbnTestServer.request
-        .get(kibana, '/execution-context')
-        .set('x-opaque-id', myOpaqueId)
-        .expect(200);
-
-      const header = response.body['x-opaque-id'];
-      expect(header).toBe(myOpaqueId);
-    });
-
-    it('does not pass context if ExecutionContext Serivce is disabled', async () => {
-      const kibana = kbnTestServer.createRootWithCorePlugins({
-        execution_context: { enabled: false },
-        plugins: { initialize: false },
-        server: {
-          requestId: {
-            allowFromAnyIp: true,
-          },
-        },
-      });
-      const { http, executionContext } = await kibana.setup();
-      const { createRouter } = http;
-
-      const router = createRouter('');
-      router.get({ path: '/execution-context', validate: false }, async (context, req, res) => {
-        executionContext.set(parentContext);
-        const { headers } = await context.core.elasticsearch.client.asCurrentUser.ping();
-        return res.ok({
-          body: { context: executionContext.get()?.toJSON(), header: headers?.['x-opaque-id'] },
         });
+      }, 30000);
+
+      afterEach(async () => {
+        await rootExecutionContextDisabled.shutdown();
+      });
+      it('passed to Elasticsearch scoped client calls even if ExecutionContext Serivce is disabled', async () => {
+        const { http } = await rootExecutionContextDisabled.setup();
+        const { createRouter } = http;
+
+        const router = createRouter('');
+        router.get({ path: '/execution-context', validate: false }, async (context, req, res) => {
+          const { headers } = await context.core.elasticsearch.client.asCurrentUser.ping();
+          return res.ok({ body: headers || {} });
+        });
+
+        await rootExecutionContextDisabled.start();
+
+        const myOpaqueId = 'my-opaque-id';
+        const response = await kbnTestServer.request
+          .get(rootExecutionContextDisabled, '/execution-context')
+          .set('x-opaque-id', myOpaqueId)
+          .expect(200);
+
+        const header = response.body['x-opaque-id'];
+        expect(header).toBe(myOpaqueId);
       });
 
-      await kibana.start();
+      it('does not pass context if ExecutionContext Serivce is disabled', async () => {
+        const { http, executionContext } = await rootExecutionContextDisabled.setup();
+        const { createRouter } = http;
 
-      const myOpaqueId = 'my-opaque-id';
-      const response = await kbnTestServer.request
-        .get(kibana, '/execution-context')
-        .set('x-opaque-id', myOpaqueId)
-        .expect(200);
+        const router = createRouter('');
+        router.get({ path: '/execution-context', validate: false }, async (context, req, res) => {
+          executionContext.set(parentContext);
+          const { headers } = await context.core.elasticsearch.client.asCurrentUser.ping();
+          return res.ok({
+            body: { context: executionContext.get()?.toJSON(), header: headers?.['x-opaque-id'] },
+          });
+        });
 
-      expect(response.body).toEqual({
-        header: 'my-opaque-id',
+        await rootExecutionContextDisabled.start();
+
+        const myOpaqueId = 'my-opaque-id';
+        const response = await kbnTestServer.request
+          .get(rootExecutionContextDisabled, '/execution-context')
+          .set('x-opaque-id', myOpaqueId)
+          .expect(200);
+
+        expect(response.body).toEqual({
+          header: 'my-opaque-id',
+        });
       });
     });
   });
