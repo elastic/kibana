@@ -100,6 +100,30 @@ export const hostIsolationComment: Comment = {
   version: 'WzQ3LDFc',
 };
 
+export const hostReleaseComment: Comment = {
+  type: CommentType.actions,
+  comment: 'I just released the host!',
+  id: 'isolate-comment-id',
+  actions: {
+    targets: [
+      {
+        hostname: 'host1',
+        endpointId: '001',
+      },
+    ],
+    type: 'unisolate',
+  },
+  associationType: AssociationType.case,
+  createdAt: basicCreatedAt,
+  createdBy: elasticUser,
+  owner: SECURITY_SOLUTION_OWNER,
+  pushedAt: null,
+  pushedBy: null,
+  updatedAt: null,
+  updatedBy: null,
+  version: 'WzQ3LDFc',
+};
+
 export const basicCase: Case = {
   type: CaseType.individual,
   owner: SECURITY_SOLUTION_OWNER,
