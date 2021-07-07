@@ -65,7 +65,12 @@ interface ValidationErrors {
   };
   tooManyFirstArguments: {
     message: string;
-    type: { operation: string; type: string; count: number; text: string };
+    type: {
+      operation: string;
+      type: string;
+      text: string;
+      supported?: number;
+    };
   };
   wrongArgument: {
     message: string;
@@ -287,8 +292,13 @@ function getMessageFromId<K extends ErrorTypes>({
     case 'tooManyFirstArguments':
       message = i18n.translate('xpack.lens.indexPattern.formulaOperationTooManyFirstArguments', {
         defaultMessage:
-          'The operation {operation} in the Formula requires a single {type}, found {count}: {text}',
-        values: { operation: out.operation, text: out.text, count: out.count, type: out.type },
+          'The operation {operation} in the Formula requires a {supported, plural, one {single} other {supported}} {type}, found: {text}',
+        values: {
+          operation: out.operation,
+          text: out.text,
+          type: out.type,
+          supported: out.supported || 1,
+        },
       });
       break;
     case 'wrongArgument':
@@ -560,7 +570,9 @@ function runFullASTValidation(
                   messageId: 'wrongFirstArgument',
                   values: {
                     operation: node.name,
-                    type: 'field',
+                    type: i18n.translate('xpack.lens.indexPattern.formulaFieldValue', {
+                      defaultMessage: 'field',
+                    }),
                     argument: `math operation`,
                   },
                   locations: node.location ? [node.location] : [],
@@ -572,7 +584,9 @@ function runFullASTValidation(
                   messageId: 'wrongFirstArgument',
                   values: {
                     operation: node.name,
-                    type: 'field',
+                    type: i18n.translate('xpack.lens.indexPattern.formulaFieldValue', {
+                      defaultMessage: 'field',
+                    }),
                     argument:
                       getValueOrName(firstArg) ||
                       i18n.translate('xpack.lens.indexPattern.formulaNoFieldForOperation', {
@@ -584,37 +598,24 @@ function runFullASTValidation(
               );
             }
           } else {
-            // Check that no more than one field is passed to the operation
-            const fields = variables.filter(
-              (arg) => isArgumentValidType(arg, 'variable') && !isMathNode(arg)
-            );
-            if (fields.length > 1) {
-              errors.push(
-                getMessageFromId({
-                  messageId: 'tooManyFirstArguments',
-                  values: {
-                    operation: node.name,
-                    type: 'field',
-                    text: (fields as TinymathVariable[]).map(({ text }) => text).join(', '),
-                    count: fields.length,
-                  },
-                  locations: node.location ? [node.location] : [],
-                })
-              );
+            // If the first argument is valid proceed with the other arguments validation
+            const fieldErrors = validateFieldArguments(node, variables, {
+              isFieldOperation: true,
+              firstArg,
+            });
+            if (fieldErrors.length) {
+              errors.push(...fieldErrors);
             }
           }
-          if (functions.length) {
-            errors.push(
-              getMessageFromId({
-                messageId: 'wrongArgument',
-                values: {
-                  operation: node.name,
-                  text: (functions as TinymathFunction[]).map(({ text }) => text).join(', '),
-                  type: 'metric',
-                },
-                locations: node.location ? [node.location] : [],
-              })
-            );
+          const functionErrors = validateFunctionArguments(node, functions, 0, {
+            isFieldOperation: true,
+            type: i18n.translate('xpack.lens.indexPattern.formulaFieldValue', {
+              defaultMessage: 'field',
+            }),
+            firstArgValidation: false,
+          });
+          if (functionErrors.length) {
+            errors.push(...functionErrors);
           }
         } else {
           // Named arguments only
@@ -656,16 +657,20 @@ function runFullASTValidation(
       if (nodeOperation.input === 'fullReference') {
         // What about fn(7 + 1)? We may want to allow that
         // In general this should be handled down the Esaggs route rather than here
-        if (
+        const isFirstArgumentNotValid = Boolean(
           !isArgumentValidType(firstArg, 'function') ||
-          (isMathNode(firstArg) && validateMathNodes(firstArg, missingVariablesSet).length)
-        ) {
+            (isMathNode(firstArg) && validateMathNodes(firstArg, missingVariablesSet).length)
+        );
+        // First field has a special handling
+        if (isFirstArgumentNotValid) {
           errors.push(
             getMessageFromId({
               messageId: 'wrongFirstArgument',
               values: {
                 operation: node.name,
-                type: 'operation',
+                type: i18n.translate('xpack.lens.indexPattern.formulaOperationValue', {
+                  defaultMessage: 'operation',
+                }),
                 argument:
                   getValueOrName(firstArg) ||
                   i18n.translate('xpack.lens.indexPattern.formulaNoOperation', {
@@ -675,25 +680,22 @@ function runFullASTValidation(
               locations: node.location ? [node.location] : [],
             })
           );
-        } else {
-          const requiredFunctions = nodeOperation.requiredReferences
-            ? nodeOperation.requiredReferences.length
-            : 1;
-          if (functions.length > requiredFunctions) {
-            errors.push(
-              getMessageFromId({
-                messageId: 'tooManyFirstArguments',
-                values: {
-                  operation: node.name,
-                  type: 'metric',
-                  text: (functions as TinymathFunction[]).map(({ text }) => text).join(', '),
-                  count: functions.length,
-                },
-                locations: node.location ? [node.location] : [],
-              })
-            );
-          }
         }
+        // Check for multiple function passed
+        const requiredFunctions = nodeOperation.requiredReferences
+          ? nodeOperation.requiredReferences.length
+          : 1;
+        const functionErrors = validateFunctionArguments(node, functions, requiredFunctions, {
+          isFieldOperation: false,
+          firstArgValidation: isFirstArgumentNotValid,
+          type: i18n.translate('xpack.lens.indexPattern.formulaMetricValue', {
+            defaultMessage: 'metric',
+          }),
+        });
+        if (functionErrors.length) {
+          errors.push(...functionErrors);
+        }
+
         if (!canHaveParams(nodeOperation) && namedArguments.length) {
           errors.push(
             getMessageFromId({
@@ -705,21 +707,13 @@ function runFullASTValidation(
             })
           );
         } else {
-          const fields = variables.filter(
-            (arg) => isArgumentValidType(arg, 'variable') && !isMathNode(arg)
-          );
-          if (fields.length) {
-            errors.push(
-              getMessageFromId({
-                messageId: 'wrongArgument',
-                values: {
-                  operation: node.name,
-                  text: (fields as TinymathVariable[]).map(({ text }) => text).join(', '),
-                  type: 'field',
-                },
-                locations: node.location ? [node.location] : [],
-              })
-            );
+          // check for fields passed at any position
+          const fieldErrors = validateFieldArguments(node, variables, {
+            isFieldOperation: false,
+            firstArg,
+          });
+          if (fieldErrors.length) {
+            errors.push(...fieldErrors);
           }
           const argumentsErrors = validateNameArguments(
             node,
@@ -898,5 +892,111 @@ export function validateMathNodes(root: TinymathAST, missingVariableSet: Set<str
       );
     }
   });
+  return errors;
+}
+
+function validateFieldArguments(
+  node: TinymathFunction,
+  variables: Array<string | number | TinymathVariable>,
+  { isFieldOperation, firstArg }: { isFieldOperation: boolean; firstArg: TinymathAST }
+) {
+  const fields = variables.filter(
+    (arg) => isArgumentValidType(arg, 'variable') && !isMathNode(arg)
+  );
+  const errors = [];
+  if (isFieldOperation && (fields.length > 1 || (fields.length === 1 && fields[0] !== firstArg))) {
+    errors.push(
+      getMessageFromId({
+        messageId: 'tooManyFirstArguments',
+        values: {
+          operation: node.name,
+          type: i18n.translate('xpack.lens.indexPattern.formulaFieldValue', {
+            defaultMessage: 'field',
+          }),
+          supported: 1,
+          text: (fields as TinymathVariable[]).map(({ text }) => text).join(', '),
+        },
+        locations: node.location ? [node.location] : [],
+      })
+    );
+  }
+  if (!isFieldOperation && fields.length) {
+    errors.push(
+      getMessageFromId({
+        messageId: 'wrongArgument',
+        values: {
+          operation: node.name,
+          text: (fields as TinymathVariable[]).map(({ text }) => text).join(', '),
+          type: i18n.translate('xpack.lens.indexPattern.formulaFieldValue', {
+            defaultMessage: 'field',
+          }),
+        },
+        locations: node.location ? [node.location] : [],
+      })
+    );
+  }
+  return errors;
+}
+
+function validateFunctionArguments(
+  node: TinymathFunction,
+  functions: TinymathFunction[],
+  requiredFunctions: number = 0,
+  {
+    isFieldOperation,
+    firstArgValidation,
+    type,
+  }: { isFieldOperation: boolean; firstArgValidation: boolean; type: string }
+) {
+  const errors = [];
+  // For math operation let the native operation run its own validation
+  const [esOperations, mathOperations] = partition(functions, (arg) => !isMathNode(arg));
+  if (esOperations.length > requiredFunctions) {
+    if (isFieldOperation) {
+      errors.push(
+        getMessageFromId({
+          messageId: 'wrongArgument',
+          values: {
+            operation: node.name,
+            text: (esOperations as TinymathFunction[]).map(({ text }) => text).join(', '),
+            type: i18n.translate('xpack.lens.indexPattern.formulaMetricValue', {
+              defaultMessage: 'metric',
+            }),
+          },
+          locations: node.location ? [node.location] : [],
+        })
+      );
+    } else {
+      errors.push(
+        getMessageFromId({
+          messageId: 'tooManyFirstArguments',
+          values: {
+            operation: node.name,
+            type,
+            supported: requiredFunctions,
+            text: (esOperations as TinymathFunction[]).map(({ text }) => text).join(', '),
+          },
+          locations: node.location ? [node.location] : [],
+        })
+      );
+    }
+  }
+  // full reference operation have another way to handle math operations
+  if (
+    isFieldOperation &&
+    ((!firstArgValidation && mathOperations.length) || mathOperations.length > 1)
+  ) {
+    errors.push(
+      getMessageFromId({
+        messageId: 'wrongArgument',
+        values: {
+          operation: node.name,
+          type,
+          text: (mathOperations as TinymathFunction[]).map(({ text }) => text).join(', '),
+        },
+        locations: node.location ? [node.location] : [],
+      })
+    );
+  }
   return errors;
 }
