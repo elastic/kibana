@@ -167,7 +167,7 @@ describe('useEngineNav', () => {
       const myRole = { canViewEngineCrawler: true };
 
       it('returns a crawler nav item', () => {
-        setMockValues({ ...values, myRole });
+        setMockValues({ ...values, myRole, canCrawl: true });
         expect(useEngineNav()).toEqual([
           ...BASE_NAV,
           {
@@ -179,8 +179,8 @@ describe('useEngineNav', () => {
         ]);
       });
 
-      it('does not return a crawler nav item for meta engines', () => {
-        setMockValues({ ...values, myRole, isMetaEngine: true });
+      it('does not return a crawler nav item for engines that cannot crawl (e.g. meta engines, sample engine)', () => {
+        setMockValues({ ...values, myRole, canCrawl: false });
         expect(useEngineNav()).toEqual(BASE_NAV);
       });
     });

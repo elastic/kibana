@@ -68,6 +68,7 @@ export const useEngineNav = () => {
     dataLoading,
     isSampleEngine,
     isMetaEngine,
+    canCrawl,
     hasSchemaErrors,
     hasSchemaConflicts,
     hasUnconfirmedSchemaFields,
@@ -185,7 +186,7 @@ export const useEngineNav = () => {
     });
   }
 
-  if (canViewEngineCrawler && !isMetaEngine) {
+  if (canViewEngineCrawler && canCrawl) {
     navItems.push({
       id: 'crawler',
       name: CRAWLER_TITLE,
