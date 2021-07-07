@@ -25,6 +25,7 @@ type I18nServiceContract = PublicMethodsOf<I18nService>;
 
 const createMock = () => {
   const mock: jest.Mocked<I18nServiceContract> = {
+    preboot: jest.fn(),
     setup: jest.fn(),
   };
 

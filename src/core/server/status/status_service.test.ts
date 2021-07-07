@@ -15,7 +15,9 @@ import { mockCoreContext } from '../core_context.mock';
 import { ServiceStatusLevelSnapshotSerializer } from './test_utils';
 import { environmentServiceMock } from '../environment/environment_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
+import { mockRouter, RouterMock } from '../http/router/router.mock';
 import { metricsServiceMock } from '../metrics/metrics_service.mock';
+import { configServiceMock } from '../config/mocks';
 
 expect.addSnapshotSerializer(ServiceStatusLevelSnapshotSerializer);
 
@@ -36,8 +38,14 @@ describe('StatusService', () => {
     summary: 'This is degraded!',
   };
 
+  const prebootDeps = () => {
+    return {
+      http: httpServiceMock.createInternalPrebootContract(),
+    };
+  };
+
   type SetupDeps = Parameters<StatusService['setup']>[0];
-  const setupDeps = (overrides: Partial<SetupDeps>): SetupDeps => {
+  const setupDeps = (overrides: Partial<SetupDeps> = {}): SetupDeps => {
     return {
       elasticsearch: {
         status$: of(available),
@@ -46,7 +54,7 @@ describe('StatusService', () => {
         status$: of(available),
       },
       pluginDependencies: new Map(),
-      environment: environmentServiceMock.createSetupContract(),
+      environment: environmentServiceMock.createPrebootContract(),
       http: httpServiceMock.createInternalSetupContract(),
       metrics: metricsServiceMock.createInternalSetupContract(),
       ...overrides,
@@ -55,6 +63,10 @@ describe('StatusService', () => {
 
   describe('setup', () => {
     describe('core$', () => {
+      beforeEach(async () => {
+        await service.preboot(prebootDeps());
+      });
+
       it('rolls up core status observables into single observable', async () => {
         const setup = await service.setup(
           setupDeps({
@@ -166,6 +178,10 @@ describe('StatusService', () => {
     });
 
     describe('overall$', () => {
+      beforeEach(async () => {
+        await service.preboot(prebootDeps());
+      });
+
       it('exposes an overall summary', async () => {
         const setup = await service.setup(
           setupDeps({
@@ -320,6 +336,47 @@ describe('StatusService', () => {
             },
           ]
         `);
+      });
+    });
+
+    describe('preboot server', () => {
+      let prebootRouterMock: RouterMock;
+      beforeEach(async () => {
+        prebootRouterMock = mockRouter.create();
+      });
+
+      it('does not register `status` route if anonymous access is not allowed', async () => {
+        const deps = prebootDeps();
+        deps.http.registerRoutes.mockImplementation((path, callback) =>
+          callback(prebootRouterMock)
+        );
+        await service.preboot(deps);
+        await service.setup(setupDeps());
+
+        expect(prebootRouterMock.get).not.toHaveBeenCalled();
+      });
+
+      it('registers `status` route if anonymous access is allowed', async () => {
+        const configService = configServiceMock.create();
+        configService.atPath.mockReturnValue(new BehaviorSubject({ allowAnonymous: true }));
+        service = new StatusService(mockCoreContext.create({ configService }));
+
+        const deps = prebootDeps();
+        deps.http.registerRoutes.mockImplementation((path, callback) =>
+          callback(prebootRouterMock)
+        );
+        await service.preboot(deps);
+        await service.setup(setupDeps());
+
+        expect(prebootRouterMock.get).toHaveBeenCalledTimes(1);
+        expect(prebootRouterMock.get).toHaveBeenCalledWith(
+          {
+            path: '/api/status',
+            options: { authRequired: false, tags: ['api'] },
+            validate: expect.anything(),
+          },
+          expect.any(Function)
+        );
       });
     });
   });

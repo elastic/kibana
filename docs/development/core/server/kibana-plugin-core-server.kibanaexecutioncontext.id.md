@@ -4,7 +4,7 @@
 
 ## KibanaExecutionContext.id property
 
-unique value to indentify find the source
+unique value to identify the source
 
 <b>Signature:</b>
 

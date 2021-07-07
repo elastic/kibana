@@ -7,25 +7,25 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { EnvironmentService, InternalEnvironmentServiceSetup } from './environment_service';
+import type { EnvironmentService, InternalEnvironmentServicePreboot } from './environment_service';
 
-const createSetupContractMock = () => {
-  const setupContract: jest.Mocked<InternalEnvironmentServiceSetup> = {
+const createPrebootContractMock = () => {
+  const prebootContract: jest.Mocked<InternalEnvironmentServicePreboot> = {
     instanceUuid: 'uuid',
   };
-  return setupContract;
+  return prebootContract;
 };
 
 type EnvironmentServiceContract = PublicMethodsOf<EnvironmentService>;
 const createMock = () => {
   const mocked: jest.Mocked<EnvironmentServiceContract> = {
-    setup: jest.fn(),
+    preboot: jest.fn(),
   };
-  mocked.setup.mockResolvedValue(createSetupContractMock());
+  mocked.preboot.mockResolvedValue(createPrebootContractMock());
   return mocked;
 };
 
 export const environmentServiceMock = {
   create: createMock,
-  createSetupContract: createSetupContractMock,
+  createPrebootContract: createPrebootContractMock,
 };

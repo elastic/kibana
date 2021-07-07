@@ -19,6 +19,7 @@ import { savedObjectsClientMock } from '../mocks';
 import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
 import { mockCoreContext } from '../core_context.mock';
 import { uiSettingsType } from './saved_objects';
+import { UiSettingsClient } from './ui_settings_client';
 
 const overrides = {
   overrideBaz: 'baz',
@@ -54,16 +55,34 @@ describe('uiSettings', () => {
     getCoreSettingsMock.mockClear();
   });
 
+  describe('#preboot', () => {
+    it('calls `getCoreSettings`', async () => {
+      await service.preboot();
+      expect(getCoreSettingsMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('#defaultsClient', async () => {
+      const { defaultsClient } = await service.preboot();
+
+      const client = defaultsClient();
+      expect(client).toBeInstanceOf(UiSettingsClient);
+
+      expect(MockUiSettingsClientConstructor).toBeCalledTimes(1);
+      const [[constructorArgs]] = MockUiSettingsClientConstructor.mock.calls;
+      expect(constructorArgs).toMatchObject({ type: 'config', overrides, defaults: {} });
+      expect(constructorArgs.overrides).toBe(overrides);
+    });
+  });
+
   describe('#setup', () => {
+    beforeEach(async () => {
+      await service.preboot();
+    });
+
     it('registers the uiSettings type to the savedObjects registry', async () => {
       await service.setup(setupDeps);
       expect(setupDeps.savedObjects.registerType).toHaveBeenCalledTimes(1);
       expect(setupDeps.savedObjects.registerType).toHaveBeenCalledWith(uiSettingsType);
-    });
-
-    it('calls `getCoreSettings`', async () => {
-      await service.setup(setupDeps);
-      expect(getCoreSettingsMock).toHaveBeenCalledTimes(1);
     });
 
     describe('#register', () => {
@@ -78,6 +97,10 @@ describe('uiSettings', () => {
   });
 
   describe('#start', () => {
+    beforeEach(async () => {
+      await service.preboot();
+    });
+
     describe('validation', () => {
       it('throws if validation schema is not provided', async () => {
         const { register } = await service.setup(setupDeps);

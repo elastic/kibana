@@ -12,13 +12,17 @@ import { pluginServiceMock } from '../../plugins/plugins_service.mock';
 import { statusServiceMock } from '../../status/status_service.mock';
 
 const context = mockCoreContext.create();
-const http = httpServiceMock.createInternalSetupContract();
-const uiPlugins = pluginServiceMock.createUiPlugins();
+const httpPreboot = httpServiceMock.createInternalPrebootContract();
+const httpSetup = httpServiceMock.createInternalSetupContract();
 const status = statusServiceMock.createInternalSetupContract();
 
 export const mockRenderingServiceParams = context;
+export const mockRenderingPrebootDeps = {
+  http: httpPreboot,
+  uiPlugins: pluginServiceMock.createUiPlugins(),
+};
 export const mockRenderingSetupDeps = {
-  http,
-  uiPlugins,
+  http: httpSetup,
+  uiPlugins: pluginServiceMock.createUiPlugins(),
   status,
 };

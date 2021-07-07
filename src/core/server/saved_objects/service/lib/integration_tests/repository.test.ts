@@ -27,6 +27,7 @@ describe('SavedObjectsRepository', () => {
       },
     });
 
+    await root.preboot();
     const setup = await root.setup();
     setup.savedObjects.registerType({
       hidden: false,

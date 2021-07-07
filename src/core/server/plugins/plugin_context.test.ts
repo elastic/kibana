@@ -15,7 +15,7 @@ import { CoreContext } from '../core_context';
 import { Env } from '../config';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 import { rawConfigServiceMock, getEnvOptions } from '../config/mocks';
-import { PluginManifest } from './types';
+import { PluginManifest, PluginType } from './types';
 import { Server } from '../server';
 import { schema, ByteSizeValue } from '@kbn/config-schema';
 import { ConfigService } from '@kbn/config';
@@ -26,6 +26,7 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
     version: 'some-version',
     configPath: 'path',
     kibanaVersion: '7.0.0',
+    type: PluginType.standard,
     requiredPlugins: ['some-required-dep'],
     requiredBundles: [],
     optionalPlugins: ['some-optional-dep'],
@@ -140,6 +141,28 @@ describe('createPluginInitializerContext', () => {
         instanceInfo
       );
       expect(pluginInitializerContext.env.instanceUuid).toBe('kibana-uuid');
+    });
+
+    it('should expose paths to the config files', () => {
+      coreContext = {
+        ...coreContext,
+        env: Env.createDefault(
+          REPO_ROOT,
+          getEnvOptions({
+            configs: ['/home/kibana/config/kibana.yml', '/home/kibana/config/kibana.dev.yml'],
+          })
+        ),
+      };
+      const pluginInitializerContext = createPluginInitializerContext(
+        coreContext,
+        opaqueId,
+        createPluginManifest(),
+        instanceInfo
+      );
+      expect(pluginInitializerContext.env.configs).toEqual([
+        '/home/kibana/config/kibana.yml',
+        '/home/kibana/config/kibana.dev.yml',
+      ]);
     });
   });
 });

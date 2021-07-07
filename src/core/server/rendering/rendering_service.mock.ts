@@ -6,7 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { InternalRenderingServiceSetup } from './types';
+import { InternalRenderingServicePreboot, InternalRenderingServiceSetup } from './types';
+
+function createRenderingPreboot() {
+  const mocked: jest.Mocked<InternalRenderingServicePreboot> = {
+    render: jest.fn().mockResolvedValue('<body />'),
+  };
+  return mocked;
+}
 
 function createRenderingSetup() {
   const mocked: jest.Mocked<InternalRenderingServiceSetup> = {
@@ -16,5 +23,6 @@ function createRenderingSetup() {
 }
 
 export const renderingMock = {
+  createPrebootContract: createRenderingPreboot,
   createSetupContract: createRenderingSetup,
 };

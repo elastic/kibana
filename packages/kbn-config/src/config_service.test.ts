@@ -37,6 +37,7 @@ const getRawConfigProvider = (rawConfig: Record<string, any>) =>
 
 beforeEach(() => {
   logger = loggerMock.create();
+  mockApplyDeprecations.mockClear();
 });
 
 test('returns config at path as observable', async () => {
@@ -482,6 +483,16 @@ test('does not log warnings for silent deprecations during validation', async ()
   `);
   loggerMock.clear(logger);
   await configService.validate();
+  expect(loggerMock.collect(logger).warn).toMatchInlineSnapshot(`Array []`);
+});
+
+test('does not log warnings during validation if specifically requested', async () => {
+  const configService = new ConfigService(getRawConfigProvider({}), defaultEnv, logger);
+  loggerMock.clear(logger);
+
+  await configService.validate({ logDeprecations: false });
+
+  expect(mockApplyDeprecations).not.toHaveBeenCalled();
   expect(loggerMock.collect(logger).warn).toMatchInlineSnapshot(`Array []`);
 });
 

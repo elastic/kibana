@@ -107,6 +107,7 @@ const previouslyRegisteredTypes = [
 describe('SO type registrations', () => {
   it('does not remove types from registrations without updating unusedTypesQuery', async () => {
     const root = kbnTestServer.createRoot({}, { oss: false });
+    await root.preboot();
     const setup = await root.setup();
     const currentlyRegisteredTypes = setup.savedObjects
       .getTypeRegistry()

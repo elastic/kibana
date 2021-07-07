@@ -20,7 +20,7 @@ import { writePidFile } from './write_pid_file';
 /**
  * @internal
  */
-export interface InternalEnvironmentServiceSetup {
+export interface InternalEnvironmentServicePreboot {
   /**
    * Retrieve the Kibana instance uuid.
    */
@@ -40,7 +40,9 @@ export class EnvironmentService {
     this.configService = core.configService;
   }
 
-  public async setup() {
+  public async preboot() {
+    // IMPORTANT: This code is based on the assumption that none of the configuration values used
+    // here is supposed to change during preboot phase and it's safe to read them only once.
     const [pathConfig, serverConfig, pidConfig] = await Promise.all([
       this.configService.atPath<PathConfigType>(pathConfigDef.path).pipe(take(1)).toPromise(),
       this.configService.atPath<HttpConfigType>(httpConfigDef.path).pipe(take(1)).toPromise(),

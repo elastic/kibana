@@ -19,9 +19,26 @@ import { ElasticsearchClientConfig } from './client';
 import { legacyClientMock } from './legacy/mocks';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService } from './elasticsearch_service';
-import { InternalElasticsearchServiceSetup, ElasticsearchStatusMeta } from './types';
+import {
+  InternalElasticsearchServiceSetup,
+  ElasticsearchStatusMeta,
+  InternalElasticsearchServicePreboot,
+  ElasticsearchServicePreboot,
+} from './types';
 import { NodesVersionCompatibility } from './version_check/ensure_es_version';
 import { ServiceStatus, ServiceStatusLevels } from '../status';
+
+type MockedElasticSearchServicePreboot = jest.Mocked<ElasticsearchServicePreboot>;
+const createPrebootContractMock = () => {
+  const prebootContract: MockedElasticSearchServicePreboot = {
+    config: {} as ElasticsearchConfig,
+    createClient: jest.fn(),
+  };
+  prebootContract.createClient.mockImplementation(() =>
+    elasticsearchClientMock.createCustomClusterClient()
+  );
+  return prebootContract;
+};
 
 export interface MockedElasticSearchServiceSetup {
   legacy: {
@@ -75,6 +92,18 @@ const createStartContractMock = () => {
 
 const createInternalStartContractMock = createStartContractMock;
 
+type MockedInternalElasticSearchServicePreboot = jest.Mocked<InternalElasticsearchServicePreboot>;
+const createInternalPrebootContractMock = () => {
+  const prebootContract: MockedInternalElasticSearchServicePreboot = {
+    config: {} as ElasticsearchConfig,
+    createClient: jest.fn(),
+  };
+  prebootContract.createClient.mockImplementation(() =>
+    elasticsearchClientMock.createCustomClusterClient()
+  );
+  return prebootContract;
+};
+
 type MockedInternalElasticSearchServiceSetup = jest.Mocked<
   InternalElasticsearchServiceSetup & {
     legacy: { client: jest.Mocked<ILegacyClusterClient> };
@@ -105,10 +134,12 @@ const createInternalSetupContractMock = () => {
 type ElasticsearchServiceContract = PublicMethodsOf<ElasticsearchService>;
 const createMock = () => {
   const mocked: jest.Mocked<ElasticsearchServiceContract> = {
+    preboot: jest.fn(),
     setup: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
   };
+  mocked.preboot.mockResolvedValue(createInternalPrebootContractMock());
   mocked.setup.mockResolvedValue(createInternalSetupContractMock());
   mocked.start.mockResolvedValueOnce(createInternalStartContractMock());
   mocked.stop.mockResolvedValue();
@@ -117,6 +148,8 @@ const createMock = () => {
 
 export const elasticsearchServiceMock = {
   create: createMock,
+  createInternalPreboot: createInternalPrebootContractMock,
+  createPreboot: createPrebootContractMock,
   createInternalSetup: createInternalSetupContractMock,
   createSetup: createSetupContractMock,
   createInternalStart: createInternalStartContractMock,

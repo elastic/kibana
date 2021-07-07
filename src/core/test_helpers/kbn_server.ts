@@ -237,6 +237,7 @@ export function createTestServers({
     startKibana: async () => {
       const root = createRootWithCorePlugins(kbnSettings);
 
+      await root.preboot();
       const coreSetup = await root.setup();
       const coreStart = await root.start();
 

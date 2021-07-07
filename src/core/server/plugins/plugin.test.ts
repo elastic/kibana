@@ -15,10 +15,10 @@ import { Env } from '../config';
 import { CoreContext } from '../core_context';
 import { coreMock } from '../mocks';
 import { loggingSystemMock } from '../logging/logging_system.mock';
-import { getEnvOptions, configServiceMock } from '../config/mocks';
+import { configServiceMock, getEnvOptions } from '../config/mocks';
 
 import { PluginWrapper } from './plugin';
-import { PluginManifest } from './types';
+import { PluginManifest, PluginType } from './types';
 import {
   createPluginInitializerContext,
   createPluginSetupContext,
@@ -45,6 +45,7 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
     version: 'some-version',
     configPath: 'path',
     kibanaVersion: '7.0.0',
+    type: PluginType.standard,
     requiredPlugins: ['some-required-dep'],
     optionalPlugins: ['some-optional-dep'],
     requiredBundles: [],
@@ -240,6 +241,31 @@ test('`start` fails if setup is not called first', () => {
 
   expect(() => plugin.start({} as any, {} as any)).toThrowErrorMatchingInlineSnapshot(
     `"Plugin \\"some-plugin-id\\" can't be started since it isn't set up."`
+  );
+});
+
+test('`start` fails invoked for the `preboot` plugin', async () => {
+  const manifest = createPluginManifest({ type: PluginType.preboot });
+  const opaqueId = Symbol();
+  const plugin = new PluginWrapper({
+    path: 'plugin-with-initializer-path',
+    manifest,
+    opaqueId,
+    initializerContext: createPluginInitializerContext(
+      coreContext,
+      opaqueId,
+      manifest,
+      instanceInfo
+    ),
+  });
+
+  const mockPluginInstance = { setup: jest.fn() };
+  mockPluginInitializer.mockReturnValue(mockPluginInstance);
+
+  await plugin.setup({} as any, {} as any);
+
+  expect(() => plugin.start({} as any, {} as any)).toThrowErrorMatchingInlineSnapshot(
+    `"Plugin \\"some-plugin-id\\" is a preboot plugin and cannot be started."`
   );
 });
 

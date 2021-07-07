@@ -69,6 +69,67 @@ beforeEach(() => {
 
 afterEach(() => jest.clearAllMocks());
 
+describe('#preboot', () => {
+  it('gives access to the current config', async () => {
+    const prebootContract = await elasticsearchService.preboot();
+    expect(prebootContract.config).toBeInstanceOf(ElasticsearchConfig);
+  });
+
+  describe('#createClient', () => {
+    it('allows to specify config properties', async () => {
+      const prebootContract = await elasticsearchService.preboot();
+      const customConfig = { keepAlive: true };
+      const clusterClient = prebootContract.createClient('custom-type', customConfig);
+
+      expect(clusterClient).toBe(mockClusterClientInstance);
+
+      expect(MockClusterClient).toHaveBeenCalledTimes(1);
+      expect(MockClusterClient.mock.calls[0][0]).toEqual(expect.objectContaining(customConfig));
+    });
+
+    it('creates a new client on each call', async () => {
+      const prebootContract = await elasticsearchService.preboot();
+
+      const customConfig = { keepAlive: true };
+
+      prebootContract.createClient('custom-type', customConfig);
+      prebootContract.createClient('another-type', customConfig);
+
+      expect(MockClusterClient).toHaveBeenCalledTimes(2);
+    });
+
+    it('falls back to elasticsearch default config values if property not specified', async () => {
+      const prebootContract = await elasticsearchService.preboot();
+
+      const customConfig = {
+        hosts: ['http://8.8.8.8'],
+        logQueries: true,
+        ssl: { certificate: 'certificate-value' },
+      };
+
+      prebootContract.createClient('some-custom-type', customConfig);
+      const config = MockClusterClient.mock.calls[0][0];
+
+      expect(config).toMatchInlineSnapshot(`
+        Object {
+          "healthCheckDelay": "PT0.01S",
+          "hosts": Array [
+            "http://8.8.8.8",
+          ],
+          "logQueries": true,
+          "requestHeadersWhitelist": Array [
+            undefined,
+          ],
+          "ssl": Object {
+            "certificate": "certificate-value",
+            "verificationMode": "none",
+          },
+        }
+      `);
+    });
+  });
+});
+
 describe('#setup', () => {
   it('returns legacy Elasticsearch config as a part of the contract', async () => {
     const setupContract = await elasticsearchService.setup(setupDeps);

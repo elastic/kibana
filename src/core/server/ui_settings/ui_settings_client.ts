@@ -20,7 +20,7 @@ export interface UiSettingsServiceOptions {
   type: string;
   id: string;
   buildNum: number;
-  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsClient?: SavedObjectsClientContract;
   overrides?: Record<string, any>;
   defaults?: Record<string, UiSettingsParams>;
   log: Logger;
@@ -36,6 +36,14 @@ interface UserProvidedValue<T = unknown> {
 }
 
 type UserProvided<T = unknown> = Record<string, UserProvidedValue<T>>;
+
+function assertSavedObjectsClient(
+  savedObjectsClient?: SavedObjectsClientContract
+): asserts savedObjectsClient is SavedObjectsClientContract {
+  if (!savedObjectsClient) {
+    throw new Error('Saved Objects Client is not available.');
+  }
+}
 
 export class UiSettingsClient implements IUiSettingsClient {
   private readonly type: UiSettingsServiceOptions['type'];
@@ -193,6 +201,7 @@ export class UiSettingsClient implements IUiSettingsClient {
     changes: Record<string, any>;
     autoCreateOrUpgradeIfMissing?: boolean;
   }) {
+    assertSavedObjectsClient(this.savedObjectsClient);
     try {
       await this.savedObjectsClient.update(this.type, this.id, changes);
     } catch (error) {
@@ -218,6 +227,7 @@ export class UiSettingsClient implements IUiSettingsClient {
   private async read({ autoCreateOrUpgradeIfMissing = true }: ReadOptions = {}): Promise<
     Record<string, any>
   > {
+    assertSavedObjectsClient(this.savedObjectsClient);
     try {
       const resp = await this.savedObjectsClient.get<Record<string, any>>(this.type, this.id);
       return resp.attributes;
@@ -247,6 +257,7 @@ export class UiSettingsClient implements IUiSettingsClient {
   }
 
   private isIgnorableError(error: Error) {
+    assertSavedObjectsClient(this.savedObjectsClient);
     const { isForbiddenError, isEsUnavailableError } = this.savedObjectsClient.errors;
 
     return isForbiddenError(error) || isEsUnavailableError(error);

@@ -67,8 +67,8 @@ interface CreateRootConfig {
   logFileName: string;
 }
 
-function createRoot({ logFileName }: CreateRootConfig) {
-  return kbnTestServer.createRoot({
+async function createRoot({ logFileName }: CreateRootConfig) {
+  const root = kbnTestServer.createRoot({
     elasticsearch: {
       hosts: [esTestConfig.getUrl()],
       username: kibanaServerTestUser.username,
@@ -102,6 +102,10 @@ function createRoot({ logFileName }: CreateRootConfig) {
       ],
     },
   });
+
+  await root.preboot();
+
+  return root;
 }
 
 describe('migration v2', () => {
@@ -133,13 +137,13 @@ describe('migration v2', () => {
   beforeEach(async () => {
     await removeLogFiles();
 
-    rootA = createRoot({
+    rootA = await createRoot({
       logFileName: Path.join(__dirname, `${LOG_FILE_PREFIX}_A.log`),
     });
-    rootB = createRoot({
+    rootB = await createRoot({
       logFileName: Path.join(__dirname, `${LOG_FILE_PREFIX}_B.log`),
     });
-    rootC = createRoot({
+    rootC = await createRoot({
       logFileName: Path.join(__dirname, `${LOG_FILE_PREFIX}_C.log`),
     });
 

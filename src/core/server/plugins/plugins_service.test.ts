@@ -9,7 +9,7 @@
 import { mockDiscover, mockPackage } from './plugins_service.test.mocks';
 
 import { resolve, join } from 'path';
-import { BehaviorSubject, from } from 'rxjs';
+import { BehaviorSubject, combineLatest, from } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 import { createAbsolutePathSerializer, REPO_ROOT } from '@kbn/dev-utils';
 
@@ -24,7 +24,7 @@ import { PluginsService } from './plugins_service';
 import { PluginsSystem } from './plugins_system';
 import { config } from './plugins_config';
 import { take } from 'rxjs/operators';
-import { DiscoveredPlugin } from './types';
+import { DiscoveredPlugin, PluginType } from './types';
 
 const MockPluginsSystem: jest.Mock<PluginsSystem> = PluginsSystem as any;
 
@@ -34,16 +34,21 @@ let configService: ConfigService;
 let coreId: symbol;
 let env: Env;
 let mockPluginSystem: jest.Mocked<PluginsSystem>;
-let environmentSetup: ReturnType<typeof environmentServiceMock.createSetupContract>;
+let environmentPreboot: ReturnType<typeof environmentServiceMock.createPrebootContract>;
 
+const prebootDeps = coreMock.createInternalPreboot();
 const setupDeps = coreMock.createInternalSetup();
+const startDeps = coreMock.createInternalStart();
 const logger = loggingSystemMock.create();
+const pluginTypes = [PluginType.preboot, PluginType.standard];
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
 ['path-1', 'path-2', 'path-3', 'path-4', 'path-5', 'path-6', 'path-7', 'path-8'].forEach((path) => {
-  jest.doMock(join(path, 'server'), () => ({}), {
-    virtual: true,
+  pluginTypes.forEach((type) => {
+    jest.doMock(join(`${path}-${type}`, 'server'), () => ({}), {
+      virtual: true,
+    });
   });
 });
 
@@ -53,6 +58,7 @@ const createPlugin = (
     path = id,
     disabled = false,
     version = 'some-version',
+    type = PluginType.standard,
     requiredPlugins = [],
     requiredBundles = [],
     optionalPlugins = [],
@@ -64,6 +70,7 @@ const createPlugin = (
     path?: string;
     disabled?: boolean;
     version?: string;
+    type?: PluginType;
     requiredPlugins?: string[];
     requiredBundles?: string[];
     optionalPlugins?: string[];
@@ -80,6 +87,7 @@ const createPlugin = (
       version,
       configPath: disabled ? configPath.concat('-disabled') : configPath,
       kibanaVersion,
+      type,
       requiredPlugins,
       requiredBundles,
       optionalPlugins,
@@ -115,7 +123,7 @@ async function testSetup() {
   mockPluginSystem.uiPlugins.mockReturnValue(new Map());
   mockPluginSystem.getPlugins.mockReturnValue([]);
 
-  environmentSetup = environmentServiceMock.createSetupContract();
+  environmentPreboot = environmentServiceMock.createPrebootContract();
 }
 
 afterEach(() => {
@@ -134,7 +142,7 @@ describe('PluginsService', () => {
         plugin$: from([]),
       });
 
-      await expect(pluginsService.discover({ environment: environmentSetup })).rejects
+      await expect(pluginsService.discover({ environment: environmentPreboot })).rejects
         .toMatchInlineSnapshot(`
               [Error: Failed to initialize plugins:
               	Invalid JSON (invalid-manifest, path-1)]
@@ -156,7 +164,7 @@ describe('PluginsService', () => {
         plugin$: from([]),
       });
 
-      await expect(pluginsService.discover({ environment: environmentSetup })).rejects
+      await expect(pluginsService.discover({ environment: environmentPreboot })).rejects
         .toMatchInlineSnapshot(`
               [Error: Failed to initialize plugins:
               	Incompatible version (incompatible-version, path-3)]
@@ -175,14 +183,14 @@ describe('PluginsService', () => {
         error$: from([]),
         plugin$: from([
           createPlugin('conflicting-id', {
-            path: 'path-4',
+            path: 'path-4-standard',
             version: 'some-version',
             configPath: 'path',
             requiredPlugins: ['some-required-plugin', 'some-required-plugin-2'],
             optionalPlugins: ['some-optional-plugin'],
           }),
           createPlugin('conflicting-id', {
-            path: 'path-4',
+            path: 'path-4-standard',
             version: 'some-version',
             configPath: 'path',
             requiredPlugins: ['some-required-plugin', 'some-required-plugin-2'],
@@ -192,7 +200,39 @@ describe('PluginsService', () => {
       });
 
       await expect(
-        pluginsService.discover({ environment: environmentSetup })
+        pluginsService.discover({ environment: environmentPreboot })
+      ).rejects.toMatchInlineSnapshot(
+        `[Error: Plugin with id "conflicting-id" is already registered!]`
+      );
+
+      expect(mockPluginSystem.addPlugin).not.toHaveBeenCalled();
+      expect(mockPluginSystem.setupPlugins).not.toHaveBeenCalled();
+    });
+
+    it('throws if discovered standard and preboot plugins with conflicting names', async () => {
+      mockDiscover.mockReturnValue({
+        error$: from([]),
+        plugin$: from([
+          createPlugin('conflicting-id', {
+            type: PluginType.preboot,
+            path: 'path-4-preboot',
+            version: 'some-version',
+            configPath: 'path',
+            requiredPlugins: ['some-required-plugin', 'some-required-plugin-2'],
+            optionalPlugins: ['some-optional-plugin'],
+          }),
+          createPlugin('conflicting-id', {
+            path: 'path-4-standard',
+            version: 'some-version',
+            configPath: 'path',
+            requiredPlugins: ['some-required-plugin', 'some-required-plugin-2'],
+            optionalPlugins: ['some-optional-plugin'],
+          }),
+        ]),
+      });
+
+      await expect(
+        pluginsService.discover({ environment: environmentPreboot })
       ).rejects.toMatchInlineSnapshot(
         `[Error: Plugin with id "conflicting-id" is already registered!]`
       );
@@ -210,156 +250,235 @@ describe('PluginsService', () => {
 
       mockDiscover.mockReturnValue({
         error$: from([]),
-        plugin$: from([
-          createPlugin('explicitly-disabled-plugin', {
-            disabled: true,
-            path: 'path-1',
-            configPath: 'path-1',
-          }),
-          createPlugin('plugin-with-missing-required-deps', {
-            path: 'path-2',
-            configPath: 'path-2',
-            requiredPlugins: ['missing-plugin'],
-          }),
-          createPlugin('plugin-with-disabled-transitive-dep', {
-            path: 'path-3',
-            configPath: 'path-3',
-            requiredPlugins: ['another-explicitly-disabled-plugin'],
-          }),
-          createPlugin('another-explicitly-disabled-plugin', {
-            disabled: true,
-            path: 'path-4',
-            configPath: 'path-4-disabled',
-          }),
-          createPlugin('plugin-with-disabled-optional-dep', {
-            path: 'path-5',
-            configPath: 'path-5',
-            optionalPlugins: ['explicitly-disabled-plugin'],
-          }),
-          createPlugin('plugin-with-missing-optional-dep', {
-            path: 'path-6',
-            configPath: 'path-6',
-            optionalPlugins: ['missing-plugin'],
-          }),
-          createPlugin('plugin-with-disabled-nested-transitive-dep', {
-            path: 'path-7',
-            configPath: 'path-7',
-            requiredPlugins: ['plugin-with-disabled-transitive-dep'],
-          }),
-          createPlugin('plugin-with-missing-nested-dep', {
-            path: 'path-8',
-            configPath: 'path-8',
-            requiredPlugins: ['plugin-with-missing-required-deps'],
-          }),
-        ]),
+        plugin$: from(
+          pluginTypes.flatMap((type) => [
+            createPlugin(`explicitly-disabled-plugin-${type}`, {
+              disabled: true,
+              path: `path-1-${type}`,
+              configPath: `path-1-${type}`,
+            }),
+            createPlugin(`plugin-with-missing-required-deps-${type}`, {
+              path: `path-2-${type}`,
+              configPath: `path-2-${type}`,
+              requiredPlugins: ['missing-plugin'],
+            }),
+            createPlugin(`plugin-with-disabled-transitive-dep-${type}`, {
+              path: `path-3-${type}`,
+              configPath: `path-3-${type}`,
+              requiredPlugins: [`another-explicitly-disabled-plugin-${type}`],
+            }),
+            createPlugin(`another-explicitly-disabled-plugin-${type}`, {
+              disabled: true,
+              path: `path-4-${type}`,
+              configPath: `path-4-disabled-${type}`,
+            }),
+            createPlugin(`plugin-with-disabled-optional-dep-${type}`, {
+              path: `path-5-${type}`,
+              configPath: `path-5-${type}`,
+              optionalPlugins: [`explicitly-disabled-plugin-${type}`],
+            }),
+            createPlugin(`plugin-with-missing-optional-dep-${type}`, {
+              path: `path-6-${type}`,
+              configPath: `path-6-${type}`,
+              optionalPlugins: ['missing-plugin'],
+            }),
+            createPlugin(`plugin-with-disabled-nested-transitive-dep-${type}`, {
+              path: `path-7-${type}`,
+              configPath: `path-7-${type}`,
+              requiredPlugins: [`plugin-with-disabled-transitive-dep-${type}`],
+            }),
+            createPlugin(`plugin-with-missing-nested-dep-${type}`, {
+              path: `path-8-${type}`,
+              configPath: `path-8-${type}`,
+              requiredPlugins: [`plugin-with-missing-required-deps-${type}`],
+            }),
+          ])
+        ),
       });
 
-      await pluginsService.discover({ environment: environmentSetup });
+      await pluginsService.discover({ environment: environmentPreboot });
+      await pluginsService.preboot(prebootDeps);
       const setup = await pluginsService.setup(setupDeps);
 
       expect(setup.contracts).toBeInstanceOf(Map);
-      expect(mockPluginSystem.addPlugin).toHaveBeenCalledTimes(2);
-      expect(mockPluginSystem.setupPlugins).toHaveBeenCalledTimes(1);
-      expect(mockPluginSystem.setupPlugins).toHaveBeenCalledWith(setupDeps);
+      expect(mockPluginSystem.addPlugin).toHaveBeenCalledTimes(4);
+      expect(mockPluginSystem.setupPlugins).toHaveBeenCalledTimes(2);
+      expect(mockPluginSystem.setupPlugins).toHaveBeenCalledWith(PluginType.preboot, prebootDeps);
+      expect(mockPluginSystem.setupPlugins).toHaveBeenCalledWith(PluginType.standard, setupDeps);
 
       expect(loggingSystemMock.collect(logger).info).toMatchInlineSnapshot(`
         Array [
           Array [
-            "Plugin \\"explicitly-disabled-plugin\\" is disabled.",
+            "Plugin \\"explicitly-disabled-plugin-preboot\\" is disabled.",
           ],
           Array [
-            "Plugin \\"plugin-with-missing-required-deps\\" has been disabled since the following direct or transitive dependencies are missing or disabled: [missing-plugin]",
+            "Plugin \\"plugin-with-missing-required-deps-preboot\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible type: [missing-plugin]",
           ],
           Array [
-            "Plugin \\"plugin-with-disabled-transitive-dep\\" has been disabled since the following direct or transitive dependencies are missing or disabled: [another-explicitly-disabled-plugin]",
+            "Plugin \\"plugin-with-disabled-transitive-dep-preboot\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible type: [another-explicitly-disabled-plugin-preboot]",
           ],
           Array [
-            "Plugin \\"another-explicitly-disabled-plugin\\" is disabled.",
+            "Plugin \\"another-explicitly-disabled-plugin-preboot\\" is disabled.",
           ],
           Array [
-            "Plugin \\"plugin-with-disabled-nested-transitive-dep\\" has been disabled since the following direct or transitive dependencies are missing or disabled: [plugin-with-disabled-transitive-dep]",
+            "Plugin \\"plugin-with-disabled-nested-transitive-dep-preboot\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible type: [plugin-with-disabled-transitive-dep-preboot]",
           ],
           Array [
-            "Plugin \\"plugin-with-missing-nested-dep\\" has been disabled since the following direct or transitive dependencies are missing or disabled: [plugin-with-missing-required-deps]",
+            "Plugin \\"plugin-with-missing-nested-dep-preboot\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible type: [plugin-with-missing-required-deps-preboot]",
+          ],
+          Array [
+            "Plugin \\"explicitly-disabled-plugin-standard\\" is disabled.",
+          ],
+          Array [
+            "Plugin \\"plugin-with-missing-required-deps-standard\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible type: [missing-plugin]",
+          ],
+          Array [
+            "Plugin \\"plugin-with-disabled-transitive-dep-standard\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible type: [another-explicitly-disabled-plugin-standard]",
+          ],
+          Array [
+            "Plugin \\"another-explicitly-disabled-plugin-standard\\" is disabled.",
+          ],
+          Array [
+            "Plugin \\"plugin-with-disabled-nested-transitive-dep-standard\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible type: [plugin-with-disabled-transitive-dep-standard]",
+          ],
+          Array [
+            "Plugin \\"plugin-with-missing-nested-dep-standard\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible type: [plugin-with-missing-required-deps-standard]",
           ],
         ]
       `);
     });
 
     it('does not throw in case of mutual plugin dependencies', async () => {
-      const firstPlugin = createPlugin('first-plugin', {
-        path: 'path-1',
-        requiredPlugins: ['second-plugin'],
-      });
-      const secondPlugin = createPlugin('second-plugin', {
-        path: 'path-2',
-        requiredPlugins: ['first-plugin'],
-      });
+      const plugins = pluginTypes.flatMap((type) => [
+        createPlugin(`first-plugin-${type}`, {
+          type,
+          path: `path-1-${type}`,
+          requiredPlugins: [`second-plugin-${type}`],
+        }),
+        createPlugin(`second-plugin-${type}`, {
+          type,
+          path: `path-2-${type}`,
+          requiredPlugins: [`first-plugin-${type}`],
+        }),
+      ]);
 
       mockDiscover.mockReturnValue({
         error$: from([]),
-        plugin$: from([firstPlugin, secondPlugin]),
+        plugin$: from(plugins),
       });
 
-      const { pluginTree } = await pluginsService.discover({ environment: environmentSetup });
-      expect(pluginTree).toBeUndefined();
+      const { preboot, standard } = await pluginsService.discover({
+        environment: environmentPreboot,
+      });
+      expect(preboot.pluginTree).toBeUndefined();
+      expect(standard.pluginTree).toBeUndefined();
 
       expect(mockDiscover).toHaveBeenCalledTimes(1);
-      expect(mockPluginSystem.addPlugin).toHaveBeenCalledTimes(2);
-      expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(firstPlugin);
-      expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(secondPlugin);
+      for (const plugin of plugins) {
+        expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(plugin);
+      }
+    });
+
+    it('does not throw in case of mutual plugin dependencies between preboot and standard plugins', async () => {
+      mockDiscover.mockReturnValue({
+        error$: from([]),
+        plugin$: from(
+          pluginTypes.flatMap((type) => {
+            const oppositeType =
+              type === PluginType.preboot ? PluginType.standard : PluginType.preboot;
+            return [
+              createPlugin(`first-plugin-${type}`, {
+                type,
+                path: `path-1-${type}`,
+                requiredPlugins: [`second-plugin-${oppositeType}`],
+              }),
+              createPlugin(`second-plugin-${oppositeType}`, {
+                type: oppositeType,
+                path: `path-2-${oppositeType}`,
+                requiredPlugins: [`first-plugin-${type}`],
+              }),
+            ];
+          })
+        ),
+      });
+
+      const { preboot, standard } = await pluginsService.discover({
+        environment: environmentPreboot,
+      });
+      expect(preboot.pluginTree).toBeUndefined();
+      expect(standard.pluginTree).toBeUndefined();
+
+      expect(mockDiscover).toHaveBeenCalledTimes(1);
+      expect(mockPluginSystem.addPlugin).not.toHaveBeenCalled();
     });
 
     it('does not throw in case of cyclic plugin dependencies', async () => {
-      const firstPlugin = createPlugin('first-plugin', {
-        path: 'path-1',
-        requiredPlugins: ['second-plugin'],
-      });
-      const secondPlugin = createPlugin('second-plugin', {
-        path: 'path-2',
-        requiredPlugins: ['third-plugin', 'last-plugin'],
-      });
-      const thirdPlugin = createPlugin('third-plugin', {
-        path: 'path-3',
-        requiredPlugins: ['last-plugin', 'first-plugin'],
-      });
-      const lastPlugin = createPlugin('last-plugin', {
-        path: 'path-4',
-        requiredPlugins: ['first-plugin'],
-      });
-      const missingDepsPlugin = createPlugin('missing-deps-plugin', {
-        path: 'path-5',
-        requiredPlugins: ['not-a-plugin'],
-      });
+      const plugins = pluginTypes.flatMap((type) => [
+        createPlugin(`first-plugin-${type}`, {
+          type,
+          path: `path-1-${type}`,
+          requiredPlugins: [`second-plugin-${type}`],
+        }),
+        createPlugin(`second-plugin-${type}`, {
+          type,
+          path: `path-2-${type}`,
+          requiredPlugins: [`third-plugin-${type}`, `last-plugin-${type}`],
+        }),
+        createPlugin(`third-plugin-${type}`, {
+          type,
+          path: `path-3-${type}`,
+          requiredPlugins: [`last-plugin-${type}`, `first-plugin-${type}`],
+        }),
+        createPlugin(`last-plugin-${type}`, {
+          type,
+          path: `path-4-${type}`,
+          requiredPlugins: [`first-plugin-${type}`],
+        }),
+        createPlugin(`missing-deps-plugin-${type}`, {
+          type,
+          path: `path-5-${type}`,
+          requiredPlugins: [`not-a-plugin-${type}`],
+        }),
+      ]);
 
       mockDiscover.mockReturnValue({
         error$: from([]),
-        plugin$: from([firstPlugin, secondPlugin, thirdPlugin, lastPlugin, missingDepsPlugin]),
+        plugin$: from(plugins),
       });
 
-      const { pluginTree } = await pluginsService.discover({ environment: environmentSetup });
-      expect(pluginTree).toBeUndefined();
+      const { standard, preboot } = await pluginsService.discover({
+        environment: environmentPreboot,
+      });
+      expect(preboot.pluginTree).toBeUndefined();
+      expect(standard.pluginTree).toBeUndefined();
 
       expect(mockDiscover).toHaveBeenCalledTimes(1);
-      expect(mockPluginSystem.addPlugin).toHaveBeenCalledTimes(4);
-      expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(firstPlugin);
-      expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(secondPlugin);
-      expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(thirdPlugin);
-      expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(lastPlugin);
+      expect(mockPluginSystem.addPlugin).toHaveBeenCalledTimes(8);
+      for (const plugin of plugins) {
+        if (plugin.name.startsWith('missing-deps')) {
+          expect(mockPluginSystem.addPlugin).not.toHaveBeenCalledWith(plugin);
+        } else {
+          expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(plugin);
+        }
+      }
     });
 
     it('properly invokes plugin discovery and ignores non-critical errors.', async () => {
-      const firstPlugin = createPlugin('some-id', {
-        path: 'path-1',
-        configPath: 'path',
-        requiredPlugins: ['some-other-id'],
-        optionalPlugins: ['missing-optional-dep'],
-      });
-      const secondPlugin = createPlugin('some-other-id', {
-        path: 'path-2',
-        version: 'some-other-version',
-        configPath: ['plugin', 'path'],
-      });
+      const plugins = pluginTypes.flatMap((type) => [
+        createPlugin(`some-id-${type}`, {
+          type,
+          path: `path-1-${type}`,
+          configPath: `path-${type}`,
+          requiredPlugins: [`some-other-id-${type}`],
+          optionalPlugins: ['missing-optional-dep'],
+        }),
+        createPlugin(`some-other-id-${type}`, {
+          type,
+          path: `path-2-${type}`,
+          version: 'some-other-version',
+          configPath: [`plugin-other-${type}`, 'path'],
+        }),
+      ]);
 
       mockDiscover.mockReturnValue({
         error$: from([
@@ -367,13 +486,14 @@ describe('PluginsService', () => {
           PluginDiscoveryError.invalidSearchPath('dir-1', new Error('No dir')),
           PluginDiscoveryError.invalidPluginPath('path4-1', new Error('No path')),
         ]),
-        plugin$: from([firstPlugin, secondPlugin]),
+        plugin$: from(plugins),
       });
 
-      await pluginsService.discover({ environment: environmentSetup });
-      expect(mockPluginSystem.addPlugin).toHaveBeenCalledTimes(2);
-      expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(firstPlugin);
-      expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(secondPlugin);
+      await pluginsService.discover({ environment: environmentPreboot });
+      expect(mockPluginSystem.addPlugin).toHaveBeenCalledTimes(plugins.length);
+      for (const plugin of plugins) {
+        expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(plugin);
+      }
       expect(mockDiscover).toHaveBeenCalledTimes(1);
       expect(mockDiscover).toHaveBeenCalledWith(
         {
@@ -398,28 +518,28 @@ describe('PluginsService', () => {
     it('registers plugin config schema in config service', async () => {
       const configSchema = schema.string();
       jest.spyOn(configService, 'setSchema').mockImplementation(() => Promise.resolve());
-      jest.doMock(
-        join('path-with-schema', 'server'),
-        () => ({
-          config: {
-            schema: configSchema,
-          },
-        }),
-        {
-          virtual: true,
-        }
+      pluginTypes.forEach((type) =>
+        jest.doMock(
+          join(`path-with-schema-${type}`, 'server'),
+          () => ({ config: { schema: configSchema } }),
+          { virtual: true }
+        )
       );
       mockDiscover.mockReturnValue({
         error$: from([]),
-        plugin$: from([
-          createPlugin('some-id', {
-            path: 'path-with-schema',
-            configPath: 'path',
-          }),
-        ]),
+        plugin$: from(
+          pluginTypes.flatMap((type) => [
+            createPlugin(`some-id-${type}`, {
+              type,
+              path: `path-with-schema-${type}`,
+              configPath: `path-${type}`,
+            }),
+          ])
+        ),
       });
-      await pluginsService.discover({ environment: environmentSetup });
-      expect(configService.setSchema).toBeCalledWith('path', configSchema);
+      await pluginsService.discover({ environment: environmentPreboot });
+      expect(configService.setSchema).toBeCalledWith('path-preboot', configSchema);
+      expect(configService.setSchema).toBeCalledWith('path-standard', configSchema);
     });
 
     it('registers plugin config deprecation provider in config service', async () => {
@@ -427,127 +547,139 @@ describe('PluginsService', () => {
       jest.spyOn(configService, 'setSchema').mockImplementation(() => Promise.resolve());
       jest.spyOn(configService, 'addDeprecationProvider');
 
-      const deprecationProvider = () => [];
-      jest.doMock(
-        join('path-with-provider', 'server'),
-        () => ({
-          config: {
-            schema: configSchema,
-            deprecations: deprecationProvider,
-          },
-        }),
-        {
-          virtual: true,
-        }
-      );
+      const deprecationProviders = pluginTypes.map((type) => {
+        const deprecationProvider = () => [];
+        jest.doMock(
+          join(`path-with-provider-${type}`, 'server'),
+          () => ({ config: { schema: configSchema, deprecations: deprecationProvider } }),
+          { virtual: true }
+        );
+        return { type, deprecationProvider };
+      });
+
       mockDiscover.mockReturnValue({
         error$: from([]),
-        plugin$: from([
-          createPlugin('some-id', {
-            path: 'path-with-provider',
-            configPath: 'config-path',
-          }),
-        ]),
+        plugin$: from(
+          pluginTypes.flatMap((type) => [
+            createPlugin(`some-id-${type}`, {
+              type,
+              path: `path-with-provider-${type}`,
+              configPath: `config-path-${type}`,
+            }),
+          ])
+        ),
       });
-      await pluginsService.discover({ environment: environmentSetup });
-      expect(configService.addDeprecationProvider).toBeCalledWith(
-        'config-path',
-        deprecationProvider
-      );
+      await pluginsService.discover({ environment: environmentPreboot });
+      for (const { type, deprecationProvider } of deprecationProviders) {
+        expect(configService.addDeprecationProvider).toBeCalledWith(
+          `config-path-${type}`,
+          deprecationProvider
+        );
+      }
     });
 
     it('returns the paths of the plugins', async () => {
-      const pluginA = createPlugin('A', { path: '/plugin-A-path', configPath: 'pathA' });
-      const pluginB = createPlugin('B', { path: '/plugin-B-path', configPath: 'pathB' });
-
       mockDiscover.mockReturnValue({
         error$: from([]),
         plugin$: from([]),
       });
 
-      mockPluginSystem.getPlugins.mockReturnValue([pluginA, pluginB]);
+      mockPluginSystem.getPlugins.mockImplementation((type) => [
+        createPlugin(`A-${type}`, {
+          type,
+          path: `/plugin-A-path-${type}`,
+          configPath: `pathA-${type}`,
+        }),
+        createPlugin(`B-${type}`, {
+          type,
+          path: `/plugin-B-path-${type}`,
+          configPath: `pathB-${type}`,
+        }),
+      ]);
 
-      const { pluginPaths } = await pluginsService.discover({ environment: environmentSetup });
+      const { preboot, standard } = await pluginsService.discover({
+        environment: environmentPreboot,
+      });
 
-      expect(pluginPaths).toEqual(['/plugin-A-path', '/plugin-B-path']);
+      expect(preboot.pluginPaths).toEqual(['/plugin-A-path-preboot', '/plugin-B-path-preboot']);
+      expect(standard.pluginPaths).toEqual(['/plugin-A-path-standard', '/plugin-B-path-standard']);
     });
 
-    it('ppopulates pluginConfigUsageDescriptors with plugins exposeToUsage property', async () => {
-      const pluginA = createPlugin('plugin-with-expose-usage', {
-        path: 'plugin-with-expose-usage',
-        configPath: 'pathA',
-      });
-
-      jest.doMock(
-        join('plugin-with-expose-usage', 'server'),
-        () => ({
-          config: {
-            exposeToUsage: {
-              test: true,
-              nested: {
-                prop: true,
-              },
+    it('populates pluginConfigUsageDescriptors with plugins exposeToUsage property', async () => {
+      const plugins = pluginTypes.flatMap((type) => {
+        const pluginA = createPlugin(`plugin-with-expose-usage-${type}`, {
+          type,
+          path: `plugin-with-expose-usage-${type}`,
+          configPath: `pathA-${type}`,
+        });
+        jest.doMock(
+          join(pluginA.path, 'server'),
+          () => ({
+            config: {
+              exposeToUsage: { test: true, nested: { prop: true } },
+              schema: schema.maybe(schema.any()),
             },
-            schema: schema.maybe(schema.any()),
-          },
-        }),
-        {
-          virtual: true,
-        }
-      );
+          }),
+          { virtual: true }
+        );
 
-      const pluginB = createPlugin('plugin-with-array-configPath', {
-        path: 'plugin-with-array-configPath',
-        configPath: ['plugin', 'pathB'],
-      });
-
-      jest.doMock(
-        join('plugin-with-array-configPath', 'server'),
-        () => ({
-          config: {
-            exposeToUsage: {
-              test: true,
+        const pluginB = createPlugin(`plugin-with-array-configPath-${type}`, {
+          type,
+          path: `plugin-with-array-configPath-${type}`,
+          version: 'some-other-version',
+          configPath: [`plugin-${type}`, 'pathB'],
+        });
+        jest.doMock(
+          join(pluginB.path, 'server'),
+          () => ({
+            config: {
+              exposeToUsage: { test: true },
+              schema: schema.maybe(schema.any()),
             },
-            schema: schema.maybe(schema.any()),
-          },
-        }),
-        {
-          virtual: true,
-        }
-      );
+          }),
+          { virtual: true }
+        );
 
-      jest.doMock(
-        join('plugin-without-expose', 'server'),
-        () => ({
-          config: {
-            schema: schema.maybe(schema.any()),
-          },
-        }),
-        {
-          virtual: true,
-        }
-      );
+        const pluginC = createPlugin(`plugin-without-expose-${type}`, {
+          type,
+          path: `plugin-without-expose-${type}`,
+          configPath: `pathC-${type}`,
+        });
+        jest.doMock(
+          join(pluginC.path, 'server'),
+          () => ({
+            config: {
+              schema: schema.maybe(schema.any()),
+            },
+          }),
+          { virtual: true }
+        );
 
-      const pluginC = createPlugin('plugin-without-expose', {
-        path: 'plugin-without-expose',
-        configPath: 'pathC',
+        return [pluginA, pluginB, pluginC];
       });
 
       mockDiscover.mockReturnValue({
         error$: from([]),
-        plugin$: from([pluginA, pluginB, pluginC]),
+        plugin$: from(plugins),
       });
 
-      await pluginsService.discover({ environment: environmentSetup });
+      await pluginsService.discover({ environment: environmentPreboot });
 
       // eslint-disable-next-line dot-notation
       expect(pluginsService['pluginConfigUsageDescriptors']).toMatchInlineSnapshot(`
         Map {
-          "pathA" => Object {
+          "pathA-preboot" => Object {
             "nested.prop": true,
             "test": true,
           },
-          "plugin.pathB" => Object {
+          "plugin-preboot.pathB" => Object {
+            "test": true,
+          },
+          "pathA-standard" => Object {
+            "nested.prop": true,
+            "test": true,
+          },
+          "plugin-standard.pathB" => Object {
             "test": true,
           },
         }
@@ -560,6 +692,7 @@ describe('PluginsService', () => {
       plugin.name,
       {
         id: plugin.name,
+        type: plugin.manifest.type,
         configPath: plugin.manifest.configPath,
         requiredPlugins: [],
         requiredBundles: [],
@@ -568,140 +701,244 @@ describe('PluginsService', () => {
     ];
 
     it('properly generates client configs for plugins according to `exposeToBrowser`', async () => {
-      jest.doMock(
-        join('plugin-with-expose', 'server'),
-        () => ({
-          config: {
-            exposeToBrowser: {
-              sharedProp: true,
+      const plugins = pluginTypes.map((type) => {
+        const plugin = createPlugin(`plugin-with-expose-${type}`, {
+          type,
+          path: `plugin-with-expose-${type}`,
+          configPath: `path-${type}`,
+        });
+        jest.doMock(
+          join(plugin.path, 'server'),
+          () => ({
+            config: {
+              exposeToBrowser: {
+                sharedProp: true,
+              },
+              schema: schema.object({
+                serverProp: schema.string({ defaultValue: `serverProp default value ${type}` }),
+                sharedProp: schema.string({ defaultValue: `sharedProp default value ${type}` }),
+              }),
             },
-            schema: schema.object({
-              serverProp: schema.string({ defaultValue: 'serverProp default value' }),
-              sharedProp: schema.string({ defaultValue: 'sharedProp default value' }),
-            }),
-          },
-        }),
-        {
-          virtual: true,
-        }
-      );
-      const plugin = createPlugin('plugin-with-expose', {
-        path: 'plugin-with-expose',
-        configPath: 'path',
+          }),
+          { virtual: true }
+        );
+        return plugin;
       });
+
       mockDiscover.mockReturnValue({
         error$: from([]),
-        plugin$: from([plugin]),
+        plugin$: from(plugins),
       });
-      mockPluginSystem.uiPlugins.mockReturnValue(new Map([pluginToDiscoveredEntry(plugin)]));
+      mockPluginSystem.uiPlugins.mockImplementation(
+        (type) =>
+          new Map(
+            plugins
+              .filter((plugin) => plugin.manifest.type === type)
+              .map((plugin) => pluginToDiscoveredEntry(plugin))
+          )
+      );
 
-      const { uiPlugins } = await pluginsService.discover({ environment: environmentSetup });
-      const uiConfig$ = uiPlugins.browserConfigs.get('plugin-with-expose');
-      expect(uiConfig$).toBeDefined();
+      const { preboot, standard } = await pluginsService.discover({
+        environment: environmentPreboot,
+      });
 
-      const uiConfig = await uiConfig$!.pipe(take(1)).toPromise();
+      const prebootUIConfig$ = preboot.uiPlugins.browserConfigs.get('plugin-with-expose-preboot');
+      expect(prebootUIConfig$).toBeDefined();
+
+      const standardUIConfig$ = standard.uiPlugins.browserConfigs.get(
+        'plugin-with-expose-standard'
+      );
+      expect(standardUIConfig$).toBeDefined();
+
+      const uiConfig = await combineLatest([prebootUIConfig$!, standardUIConfig$!])
+        .pipe(take(1))
+        .toPromise();
       expect(uiConfig).toMatchInlineSnapshot(`
-        Object {
-          "sharedProp": "sharedProp default value",
-        }
+        Array [
+          Object {
+            "sharedProp": "sharedProp default value preboot",
+          },
+          Object {
+            "sharedProp": "sharedProp default value standard",
+          },
+        ]
       `);
     });
 
     it('does not generate config for plugins not exposing to client', async () => {
-      jest.doMock(
-        join('plugin-without-expose', 'server'),
-        () => ({
-          config: {
-            schema: schema.object({
-              serverProp: schema.string({ defaultValue: 'serverProp default value' }),
-            }),
-          },
-        }),
-        {
-          virtual: true,
-        }
-      );
-      const plugin = createPlugin('plugin-without-expose', {
-        path: 'plugin-without-expose',
-        configPath: 'path',
+      const plugins = pluginTypes.map((type) => {
+        const plugin = createPlugin(`plugin-without-expose-${type}`, {
+          type,
+          path: `plugin-without-expose-${type}`,
+          configPath: `path-${type}`,
+        });
+        jest.doMock(
+          join(plugin.path, 'server'),
+          () => ({
+            config: {
+              schema: schema.object({
+                serverProp: schema.string({ defaultValue: 'serverProp default value' }),
+              }),
+            },
+          }),
+          { virtual: true }
+        );
+        return plugin;
       });
       mockDiscover.mockReturnValue({
         error$: from([]),
-        plugin$: from([plugin]),
+        plugin$: from(plugins),
       });
-      mockPluginSystem.uiPlugins.mockReturnValue(new Map([pluginToDiscoveredEntry(plugin)]));
+      mockPluginSystem.uiPlugins.mockImplementation(
+        (type) =>
+          new Map(
+            plugins
+              .filter((plugin) => plugin.manifest.type === type)
+              .map((plugin) => pluginToDiscoveredEntry(plugin))
+          )
+      );
 
-      const { uiPlugins } = await pluginsService.discover({ environment: environmentSetup });
-      expect([...uiPlugins.browserConfigs.entries()]).toHaveLength(0);
+      const { preboot, standard } = await pluginsService.discover({
+        environment: environmentPreboot,
+      });
+      expect([
+        ...preboot.uiPlugins.browserConfigs.entries(),
+        ...standard.uiPlugins.browserConfigs.entries(),
+      ]).toHaveLength(0);
     });
   });
 
-  describe('#setup()', () => {
+  describe('plugin initialization', () => {
     beforeEach(() => {
       mockDiscover.mockReturnValue({
         error$: from([]),
-        plugin$: from([
-          createPlugin('plugin-1', {
-            path: 'path-1',
-            version: 'version-1',
-            configPath: 'plugin1',
-          }),
-          createPlugin('plugin-2', {
-            path: 'path-2',
-            version: 'version-2',
-            configPath: 'plugin2',
-          }),
-        ]),
+        plugin$: from(
+          pluginTypes.flatMap((type) => [
+            createPlugin(`plugin-1-${type}`, {
+              type,
+              path: `path-1-${type}`,
+              version: 'version-1',
+              configPath: `plugin1_${type}`,
+            }),
+            createPlugin(`plugin-2-${type}`, {
+              type,
+              path: `path-2-${type}`,
+              version: 'version-2',
+              configPath: `plugin2_${type}`,
+            }),
+          ])
+        ),
       });
 
       mockPluginSystem.uiPlugins.mockReturnValue(new Map());
     });
 
-    describe('uiPlugins.internal', () => {
-      it('contains internal properties for plugins', async () => {
-        config$.next({ plugins: { initialize: true }, plugin1: { enabled: false } });
-        const { uiPlugins } = await pluginsService.discover({ environment: environmentSetup });
-        expect(uiPlugins.internal).toMatchInlineSnapshot(`
+    it('`uiPlugins.internal` contains internal properties for plugins', async () => {
+      config$.next({
+        plugins: { initialize: true },
+        plugin1_preboot: { enabled: false },
+        plugin1_standard: { enabled: false },
+      });
+      const { preboot, standard } = await pluginsService.discover({
+        environment: environmentPreboot,
+      });
+      expect([preboot.uiPlugins.internal, standard.uiPlugins.internal]).toMatchInlineSnapshot(`
+        Array [
           Map {
-            "plugin-1" => Object {
-              "publicAssetsDir": <absolute path>/path-1/public/assets,
-              "publicTargetDir": <absolute path>/path-1/target/public,
+            "plugin-1-preboot" => Object {
+              "publicAssetsDir": <absolute path>/path-1-preboot/public/assets,
+              "publicTargetDir": <absolute path>/path-1-preboot/target/public,
               "requiredBundles": Array [],
               "version": "version-1",
             },
-            "plugin-2" => Object {
-              "publicAssetsDir": <absolute path>/path-2/public/assets,
-              "publicTargetDir": <absolute path>/path-2/target/public,
+            "plugin-2-preboot" => Object {
+              "publicAssetsDir": <absolute path>/path-2-preboot/public/assets,
+              "publicTargetDir": <absolute path>/path-2-preboot/target/public,
               "requiredBundles": Array [],
               "version": "version-2",
             },
-          }
-        `);
-      });
-
-      it('includes disabled plugins', async () => {
-        config$.next({ plugins: { initialize: true }, plugin1: { enabled: false } });
-        const { uiPlugins } = await pluginsService.discover({ environment: environmentSetup });
-        expect([...uiPlugins.internal.keys()].sort()).toEqual(['plugin-1', 'plugin-2']);
-      });
+          },
+          Map {
+            "plugin-1-standard" => Object {
+              "publicAssetsDir": <absolute path>/path-1-standard/public/assets,
+              "publicTargetDir": <absolute path>/path-1-standard/target/public,
+              "requiredBundles": Array [],
+              "version": "version-1",
+            },
+            "plugin-2-standard" => Object {
+              "publicAssetsDir": <absolute path>/path-2-standard/public/assets,
+              "publicTargetDir": <absolute path>/path-2-standard/target/public,
+              "requiredBundles": Array [],
+              "version": "version-2",
+            },
+          },
+        ]
+      `);
     });
 
-    describe('plugin initialization', () => {
-      it('does initialize if plugins.initialize is true', async () => {
-        config$.next({ plugins: { initialize: true } });
-        await pluginsService.discover({ environment: environmentSetup });
-        const { initialized } = await pluginsService.setup(setupDeps);
-        expect(mockPluginSystem.setupPlugins).toHaveBeenCalled();
-        expect(initialized).toBe(true);
+    it('`uiPlugins.internal` includes disabled plugins', async () => {
+      config$.next({
+        plugins: { initialize: true },
+        plugin1_preboot: { enabled: false },
+        plugin1_standard: { enabled: false },
       });
+      const { preboot, standard } = await pluginsService.discover({
+        environment: environmentPreboot,
+      });
+      expect([
+        [...preboot.uiPlugins.internal.keys()].sort(),
+        [...standard.uiPlugins.internal.keys()].sort(),
+      ]).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "plugin-1-preboot",
+            "plugin-2-preboot",
+          ],
+          Array [
+            "plugin-1-standard",
+            "plugin-2-standard",
+          ],
+        ]
+      `);
+    });
 
-      it('does not initialize if plugins.initialize is false', async () => {
-        config$.next({ plugins: { initialize: false } });
-        await pluginsService.discover({ environment: environmentSetup });
-        const { initialized } = await pluginsService.setup(setupDeps);
-        expect(mockPluginSystem.setupPlugins).not.toHaveBeenCalled();
-        expect(initialized).toBe(false);
-      });
+    it('#preboot does initialize `preboot` plugins if plugins.initialize is true', async () => {
+      config$.next({ plugins: { initialize: true } });
+      await pluginsService.discover({ environment: environmentPreboot });
+      await pluginsService.preboot(prebootDeps);
+
+      expect(mockPluginSystem.setupPlugins).toHaveBeenCalledTimes(1);
+      expect(mockPluginSystem.setupPlugins).toHaveBeenCalledWith(PluginType.preboot, prebootDeps);
+    });
+
+    it('#preboot does not initialize `preboot` plugins if plugins.initialize is false', async () => {
+      config$.next({ plugins: { initialize: false } });
+      await pluginsService.discover({ environment: environmentPreboot });
+      await pluginsService.preboot(prebootDeps);
+
+      expect(mockPluginSystem.setupPlugins).not.toHaveBeenCalled();
+    });
+
+    it('#setup does initialize `standard` plugins if plugins.initialize is true', async () => {
+      config$.next({ plugins: { initialize: true } });
+      await pluginsService.discover({ environment: environmentPreboot });
+      await pluginsService.preboot(prebootDeps);
+      // Reset call information related to `preboot` plugins initialization.
+      mockPluginSystem.setupPlugins.mockClear();
+
+      const { initialized } = await pluginsService.setup(setupDeps);
+      expect(mockPluginSystem.setupPlugins).toHaveBeenCalledTimes(1);
+      expect(mockPluginSystem.setupPlugins).toHaveBeenCalledWith(PluginType.standard, setupDeps);
+      expect(initialized).toBe(true);
+    });
+
+    it('#setup does not initialize `standard` plugins if plugins.initialize is false', async () => {
+      config$.next({ plugins: { initialize: false } });
+      await pluginsService.discover({ environment: environmentPreboot });
+      await pluginsService.preboot(prebootDeps);
+      const { initialized } = await pluginsService.setup(setupDeps);
+      expect(mockPluginSystem.setupPlugins).not.toHaveBeenCalled();
+      expect(initialized).toBe(false);
     });
   });
 
@@ -719,10 +956,41 @@ describe('PluginsService', () => {
     });
   });
 
+  describe('#start()', () => {
+    beforeEach(() => {
+      mockDiscover.mockReturnValue({
+        error$: from([]),
+        plugin$: from(
+          pluginTypes.map((type) =>
+            createPlugin(`plugin-1-${type}`, { type, path: `path-1-${type}` })
+          )
+        ),
+      });
+    });
+
+    it('starts `standard` plugins and stops `preboot` ones', async () => {
+      await pluginsService.discover({ environment: environmentPreboot });
+      await pluginsService.preboot(prebootDeps);
+      await pluginsService.setup(setupDeps);
+
+      expect(mockPluginSystem.startPlugins).not.toHaveBeenCalled();
+      expect(mockPluginSystem.stopPlugins).not.toHaveBeenCalled();
+
+      await pluginsService.start(startDeps);
+
+      expect(mockPluginSystem.startPlugins).toHaveBeenCalledTimes(1);
+      expect(mockPluginSystem.startPlugins).toHaveBeenCalledWith(PluginType.standard, startDeps);
+      expect(mockPluginSystem.stopPlugins).toHaveBeenCalledTimes(1);
+      expect(mockPluginSystem.stopPlugins).toHaveBeenCalledWith(PluginType.preboot);
+    });
+  });
+
   describe('#stop()', () => {
     it('`stop` stops plugins system', async () => {
       await pluginsService.stop();
-      expect(mockPluginSystem.stopPlugins).toHaveBeenCalledTimes(1);
+      expect(mockPluginSystem.stopPlugins).toHaveBeenCalledTimes(2);
+      expect(mockPluginSystem.stopPlugins).toHaveBeenCalledWith(PluginType.preboot);
+      expect(mockPluginSystem.stopPlugins).toHaveBeenCalledWith(PluginType.standard);
     });
   });
 });

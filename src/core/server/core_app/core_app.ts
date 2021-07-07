@@ -12,7 +12,8 @@ import { Env } from '@kbn/config';
 import { schema } from '@kbn/config-schema';
 import { fromRoot } from '@kbn/utils';
 
-import { InternalCoreSetup } from '../internal_types';
+import { IRouter, IBasePath } from '../http';
+import { InternalCorePreboot, InternalCoreSetup } from '../internal_types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { registerBundleRoutes } from './bundle_routes';
@@ -28,10 +29,62 @@ export class CoreApp {
     this.env = core.env;
   }
 
+  preboot(corePreboot: InternalCorePreboot, uiPlugins: UiPlugins) {
+    this.logger.debug('Prebooting core app.');
+
+    // We register app-serving routes only if there are `preboot` plugins that may need them.
+    if (uiPlugins.public.size > 0) {
+      this.registerPrebootDefaultRoutes(corePreboot, uiPlugins);
+      this.registerStaticDirs(corePreboot);
+    }
+  }
+
   setup(coreSetup: InternalCoreSetup, uiPlugins: UiPlugins) {
     this.logger.debug('Setting up core app.');
     this.registerDefaultRoutes(coreSetup, uiPlugins);
     this.registerStaticDirs(coreSetup);
+  }
+
+  private registerPrebootDefaultRoutes(corePreboot: InternalCorePreboot, uiPlugins: UiPlugins) {
+    corePreboot.http.registerRoutes('', (router) => {
+      const resources = corePreboot.httpResources.createRegistrar(router);
+      resources.register(
+        {
+          path: '/{path*}',
+          validate: {
+            params: schema.object({
+              path: schema.maybe(schema.string()),
+            }),
+            query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+          },
+        },
+        async (context, req, res) => {
+          const { query, params } = req;
+          const { path } = params;
+          if (!path || !path.endsWith('/') || path.startsWith('/')) {
+            return res.renderAnonymousCoreApp();
+          }
+
+          // remove trailing slash
+          const basePath = corePreboot.http.basePath.get(req);
+          let rewrittenPath = path.slice(0, -1);
+          if (`/${path}`.startsWith(basePath)) {
+            rewrittenPath = rewrittenPath.substring(basePath.length);
+          }
+
+          const querystring = query ? stringify(query) : undefined;
+          const url = `${basePath}/${rewrittenPath}${querystring ? `?${querystring}` : ''}`;
+
+          return res.redirected({
+            headers: {
+              location: url,
+            },
+          });
+        }
+      );
+
+      this.registerCommonDefaultRoutes(router, corePreboot.http.basePath, uiPlugins);
+    });
   }
 
   private registerDefaultRoutes(coreSetup: InternalCoreSetup, uiPlugins: UiPlugins) {
@@ -86,16 +139,7 @@ export class CoreApp {
       }
     );
 
-    router.get({ path: '/core', validate: false }, async (context, req, res) =>
-      res.ok({ body: { version: '0.0.1' } })
-    );
-
-    registerBundleRoutes({
-      router,
-      uiPlugins,
-      packageInfo: this.env.packageInfo,
-      serverBasePath: coreSetup.http.basePath.serverBasePath,
-    });
+    this.registerCommonDefaultRoutes(router, coreSetup.http.basePath, uiPlugins);
 
     resources.register(
       {
@@ -129,10 +173,23 @@ export class CoreApp {
     );
   }
 
-  private registerStaticDirs(coreSetup: InternalCoreSetup) {
-    coreSetup.http.registerStaticDir('/ui/{path*}', Path.resolve(__dirname, './assets'));
+  private registerCommonDefaultRoutes(router: IRouter, basePath: IBasePath, uiPlugins: UiPlugins) {
+    router.get({ path: '/core', validate: false }, async (context, req, res) =>
+      res.ok({ body: { version: '0.0.1' } })
+    );
 
-    coreSetup.http.registerStaticDir(
+    registerBundleRoutes({
+      router,
+      uiPlugins,
+      packageInfo: this.env.packageInfo,
+      serverBasePath: basePath.serverBasePath,
+    });
+  }
+
+  private registerStaticDirs(core: InternalCoreSetup | InternalCorePreboot) {
+    core.http.registerStaticDir('/ui/{path*}', Path.resolve(__dirname, './assets'));
+
+    core.http.registerStaticDir(
       '/node_modules/@kbn/ui-framework/dist/{path*}',
       fromRoot('node_modules/@kbn/ui-framework/dist')
     );

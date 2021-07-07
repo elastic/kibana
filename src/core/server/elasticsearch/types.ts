@@ -22,6 +22,43 @@ import { ServiceStatus } from '../status';
 /**
  * @public
  */
+export interface ElasticsearchServicePreboot {
+  /**
+   * Default Elasticsearch config.
+   *
+   * @example
+   * ```js
+   * const defaultConfig = core.elasticsearch.config;
+   * ```
+   */
+  readonly config: ElasticsearchConfig;
+
+  /**
+   * Create application specific Elasticsearch cluster API client with customized config. See {@link IClusterClient}.
+   *
+   * @param type Unique identifier of the client
+   * @param clientConfig A config consists of Elasticsearch JS client options and
+   * valid sub-set of Elasticsearch service config.
+   * We fill all the missing properties in the `clientConfig` using the default
+   * Elasticsearch config so that we don't depend on default values set and
+   * controlled by underlying Elasticsearch JS client.
+   * We don't run validation against the passed config and expect it to be valid.
+   *
+   * @example
+   * ```js
+   * const client = elasticsearch.createClient('my-app-name', config);
+   * const data = await client.asInternalUser.search();
+   * ```
+   */
+  readonly createClient: (
+    type: string,
+    clientConfig?: Partial<ElasticsearchClientConfig>
+  ) => ICustomClusterClient;
+}
+
+/**
+ * @public
+ */
 export interface ElasticsearchServiceSetup {
   /**
    * @deprecated
@@ -75,6 +112,15 @@ export interface ElasticsearchServiceSetup {
      */
     readonly client: ILegacyClusterClient;
   };
+}
+
+/** @internal */
+export interface InternalElasticsearchServicePreboot {
+  readonly config: ElasticsearchConfig;
+  readonly createClient: (
+    type: string,
+    clientConfig?: Partial<ElasticsearchClientConfig>
+  ) => ICustomClusterClient;
 }
 
 /** @internal */

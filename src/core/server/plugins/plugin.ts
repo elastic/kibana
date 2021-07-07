@@ -15,15 +15,17 @@ import { isConfigSchema } from '@kbn/config-schema';
 
 import { Logger } from '../logging';
 import {
-  Plugin,
   AsyncPlugin,
+  Plugin,
+  PluginConfigDescriptor,
+  PluginInitializer,
   PluginInitializerContext,
   PluginManifest,
-  PluginInitializer,
   PluginOpaqueId,
-  PluginConfigDescriptor,
+  PluginType,
+  PrebootPlugin,
 } from './types';
-import { CoreSetup, CoreStart } from '..';
+import { CorePreboot, CoreSetup, CoreStart } from '..';
 
 /**
  * Lightweight wrapper around discovered plugin that is responsible for instantiating
@@ -53,6 +55,7 @@ export class PluginWrapper<
 
   private instance?:
     | Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
+    | PrebootPlugin<TSetup, TPluginsSetup>
     | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
   private readonly startDependencies$ = new Subject<[CoreStart, TPluginsStart, TStart]>();
@@ -88,11 +91,16 @@ export class PluginWrapper<
    * is the contract returned by the dependency's `setup` function.
    */
   public setup(
-    setupContext: CoreSetup<TPluginsStart>,
+    setupContext: CoreSetup<TPluginsStart> | CorePreboot,
     plugins: TPluginsSetup
   ): TSetup | Promise<TSetup> {
     this.instance = this.createPluginInstance();
-    return this.instance.setup(setupContext, plugins);
+
+    if (this.isPrebootPluginInstance(this.instance)) {
+      return this.instance.setup(setupContext as CorePreboot, plugins);
+    }
+
+    return this.instance.setup(setupContext as CoreSetup, plugins);
   }
 
   /**
@@ -105,6 +113,10 @@ export class PluginWrapper<
   public start(startContext: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart> {
     if (this.instance === undefined) {
       throw new Error(`Plugin "${this.name}" can't be started since it isn't set up.`);
+    }
+
+    if (this.isPrebootPluginInstance(this.instance)) {
+      throw new Error(`Plugin "${this.name}" is a preboot plugin and cannot be started.`);
     }
 
     const startContract = this.instance.start(startContext, plugins);
@@ -184,5 +196,11 @@ export class PluginWrapper<
     }
 
     return instance;
+  }
+
+  private isPrebootPluginInstance(
+    instance: PluginWrapper['instance']
+  ): instance is PrebootPlugin<TSetup, TPluginsSetup> {
+    return this.manifest.type === PluginType.preboot;
   }
 }

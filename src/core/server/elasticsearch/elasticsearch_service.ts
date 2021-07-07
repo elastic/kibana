@@ -18,11 +18,15 @@ import {
   ILegacyCustomClusterClient,
   LegacyElasticsearchClientConfig,
 } from './legacy';
-import { ClusterClient, ICustomClusterClient, ElasticsearchClientConfig } from './client';
+import { ClusterClient, ElasticsearchClientConfig } from './client';
 import { ElasticsearchConfig, ElasticsearchConfigType } from './elasticsearch_config';
-import type { InternalHttpServiceSetup, GetAuthHeaders } from '../http/';
+import type { InternalHttpServiceSetup, GetAuthHeaders } from '../http';
 import type { InternalExecutionContextSetup, IExecutionContext } from '../execution_context';
-import { InternalElasticsearchServiceSetup, InternalElasticsearchServiceStart } from './types';
+import {
+  InternalElasticsearchServicePreboot,
+  InternalElasticsearchServiceSetup,
+  InternalElasticsearchServiceStart,
+} from './types';
 import { pollEsNodesVersion } from './version_check/ensure_es_version';
 import { calculateStatus$ } from './status';
 
@@ -55,6 +59,16 @@ export class ElasticsearchService
     this.config$ = coreContext.configService
       .atPath<ElasticsearchConfigType>('elasticsearch')
       .pipe(map((rawConfig) => new ElasticsearchConfig(rawConfig)));
+  }
+
+  public async preboot(): Promise<InternalElasticsearchServicePreboot> {
+    this.log.debug('Prebooting elasticsearch service');
+
+    const config = await this.config$.pipe(first()).toPromise();
+    return {
+      config,
+      createClient: (type, clientConfig) => this.createClusterClient(type, config, clientConfig),
+    };
   }
 
   public async setup(deps: SetupDeps): Promise<InternalElasticsearchServiceSetup> {
@@ -96,18 +110,9 @@ export class ElasticsearchService
     }
 
     const config = await this.config$.pipe(first()).toPromise();
-
-    const createClient = (
-      type: string,
-      clientConfig: Partial<ElasticsearchClientConfig> = {}
-    ): ICustomClusterClient => {
-      const finalConfig = merge({}, config, clientConfig);
-      return this.createClusterClient(type, finalConfig);
-    };
-
     return {
       client: this.client!,
-      createClient,
+      createClient: (type, clientConfig) => this.createClusterClient(type, config, clientConfig),
       legacy: {
         config$: this.config$,
         client: this.legacyClient,
@@ -127,7 +132,12 @@ export class ElasticsearchService
     }
   }
 
-  private createClusterClient(type: string, config: ElasticsearchClientConfig) {
+  private createClusterClient(
+    type: string,
+    baseConfig: ElasticsearchConfig,
+    clientConfig?: Partial<ElasticsearchClientConfig>
+  ) {
+    const config = clientConfig ? merge({}, baseConfig, clientConfig) : baseConfig;
     return new ClusterClient(
       config,
       this.coreContext.logger.get('elasticsearch'),

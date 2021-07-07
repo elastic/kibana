@@ -58,6 +58,7 @@ describe('migration v2', () => {
     root = createRoot();
 
     esServer = await startES();
+    await root.preboot();
     await root.setup();
 
     try {

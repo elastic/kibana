@@ -12,16 +12,25 @@ import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { ConfigDeprecationProvider } from './config';
 import { ContextSetup } from './context';
 import {
+  InternalElasticsearchServicePreboot,
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
 } from './elasticsearch';
-import { InternalHttpServiceSetup, InternalHttpServiceStart } from './http';
+import {
+  InternalHttpServicePreboot,
+  InternalHttpServiceSetup,
+  InternalHttpServiceStart,
+} from './http';
 import {
   InternalSavedObjectsServiceSetup,
   InternalSavedObjectsServiceStart,
 } from './saved_objects';
-import { InternalUiSettingsServiceSetup, InternalUiSettingsServiceStart } from './ui_settings';
-import { InternalEnvironmentServiceSetup } from './environment';
+import {
+  InternalUiSettingsServicePreboot,
+  InternalUiSettingsServiceSetup,
+  InternalUiSettingsServiceStart,
+} from './ui_settings';
+import { InternalEnvironmentServicePreboot } from './environment';
 import { InternalMetricsServiceSetup, InternalMetricsServiceStart } from './metrics';
 import { InternalRenderingServiceSetup } from './rendering';
 import { InternalHttpResourcesSetup } from './http_resources';
@@ -34,6 +43,18 @@ import type {
   InternalExecutionContextSetup,
   InternalExecutionContextStart,
 } from './execution_context';
+import { InternalPrebootServicePreboot } from './preboot';
+
+/** @internal */
+export interface InternalCorePreboot {
+  context: ContextSetup;
+  http: InternalHttpServicePreboot;
+  elasticsearch: InternalElasticsearchServicePreboot;
+  uiSettings: InternalUiSettingsServicePreboot;
+  httpResources: InternalHttpResourcesSetup;
+  logging: InternalLoggingServiceSetup;
+  preboot: InternalPrebootServicePreboot;
+}
 
 /** @internal */
 export interface InternalCoreSetup {
@@ -46,7 +67,7 @@ export interface InternalCoreSetup {
   savedObjects: InternalSavedObjectsServiceSetup;
   status: InternalStatusServiceSetup;
   uiSettings: InternalUiSettingsServiceSetup;
-  environment: InternalEnvironmentServiceSetup;
+  environment: InternalEnvironmentServicePreboot;
   rendering: InternalRenderingServiceSetup;
   httpResources: InternalHttpResourcesSetup;
   logging: InternalLoggingServiceSetup;

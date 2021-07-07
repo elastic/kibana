@@ -87,6 +87,8 @@ export type {
   RequestHandlerContextContainer,
   RequestHandlerContextProvider,
   HttpAuth,
+  HttpServicePreboot,
+  InternalHttpServicePreboot,
   HttpServiceSetup,
   InternalHttpServiceSetup,
   HttpServiceStart,

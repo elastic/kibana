@@ -19,6 +19,7 @@ import { InternalHttpServiceSetup } from '../http';
 import { UiSettingsConfigType, config as uiConfigDefinition } from './ui_settings_config';
 import { UiSettingsClient } from './ui_settings_client';
 import {
+  InternalUiSettingsServicePreboot,
   InternalUiSettingsServiceSetup,
   InternalUiSettingsServiceStart,
   UiSettingsParams,
@@ -47,16 +48,33 @@ export class UiSettingsService
     this.config$ = coreContext.configService.atPath<UiSettingsConfigType>(uiConfigDefinition.path);
   }
 
+  public async preboot(): Promise<InternalUiSettingsServicePreboot> {
+    this.log.debug('Prebooting ui settings service');
+
+    const { overrides } = await this.config$.pipe(first()).toPromise();
+    this.overrides = overrides;
+
+    this.register(getCoreSettings({ isDist: this.isDist }));
+
+    const { version, buildNum } = this.coreContext.env.packageInfo;
+    return {
+      defaultsClient: () =>
+        new UiSettingsClient({
+          type: 'config',
+          id: version,
+          buildNum,
+          defaults: mapToObject(this.uiSettingsDefaults),
+          overrides: this.overrides,
+          log: this.log,
+        }),
+    };
+  }
+
   public async setup({ http, savedObjects }: SetupDeps): Promise<InternalUiSettingsServiceSetup> {
     this.log.debug('Setting up ui settings service');
 
     savedObjects.registerType(uiSettingsType);
     registerRoutes(http.createRouter(''));
-    this.register(
-      getCoreSettings({
-        isDist: this.isDist,
-      })
-    );
 
     const config = await this.config$.pipe(first()).toPromise();
     this.overrides = config.overrides;

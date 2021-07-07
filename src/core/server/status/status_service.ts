@@ -14,12 +14,12 @@ import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { Logger, LogMeta } from '../logging';
 import { InternalElasticsearchServiceSetup } from '../elasticsearch';
-import { InternalHttpServiceSetup } from '../http';
+import { InternalHttpServicePreboot, InternalHttpServiceSetup } from '../http';
 import { InternalSavedObjectsServiceSetup } from '../saved_objects';
 import { PluginName } from '../plugins';
 import { InternalMetricsServiceSetup } from '../metrics';
 import { registerStatusRoute } from './routes';
-import { InternalEnvironmentServiceSetup } from '../environment';
+import { InternalEnvironmentServicePreboot } from '../environment';
 
 import { config, StatusConfigType } from './status_config';
 import { ServiceStatus, CoreStatus, InternalStatusServiceSetup } from './types';
@@ -31,9 +31,13 @@ interface StatusLogMeta extends LogMeta {
   kibana: { status: ServiceStatus };
 }
 
+interface PrebootSetupDeps {
+  http: InternalHttpServicePreboot;
+}
+
 interface SetupDeps {
   elasticsearch: Pick<InternalElasticsearchServiceSetup, 'status$'>;
-  environment: InternalEnvironmentServiceSetup;
+  environment: InternalEnvironmentServicePreboot;
   pluginDependencies: ReadonlyMap<PluginName, PluginName[]>;
   http: InternalHttpServiceSetup;
   metrics: InternalMetricsServiceSetup;
@@ -48,10 +52,15 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
   private overall$?: Observable<ServiceStatus>;
   private pluginsStatus?: PluginsStatusService;
   private overallSubscription?: Subscription;
+  private httpPrebootSetup?: InternalHttpServicePreboot;
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('status');
     this.config$ = coreContext.configService.atPath<StatusConfigType>(config.path);
+  }
+
+  public async preboot({ http }: PrebootSetupDeps) {
+    this.httpPrebootSetup = http;
   }
 
   public async setup({
@@ -109,10 +118,10 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
       ...commonRouteDeps,
     });
 
-    if (http.notReadyServer && commonRouteDeps.config.allowAnonymous) {
-      http.notReadyServer.registerRoutes('', (notReadyRouter) => {
+    if (commonRouteDeps.config.allowAnonymous) {
+      this.httpPrebootSetup?.registerRoutes('', (prebootRouter) => {
         registerStatusRoute({
-          router: notReadyRouter,
+          router: prebootRouter,
           ...commonRouteDeps,
           config: {
             ...commonRouteDeps.config,

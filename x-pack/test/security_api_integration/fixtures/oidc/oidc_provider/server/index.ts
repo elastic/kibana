@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { PluginInitializer } from '../../../../../../../src/core/server';
+import type { PluginInitializer, Plugin } from '../../../../../../../src/core/server';
 import { initRoutes } from './init_routes';
 
-export const plugin: PluginInitializer<void, void> = () => ({
+export const plugin: PluginInitializer<void, void> = (): Plugin => ({
   setup: (core) => initRoutes(core.http.createRouter()),
   start: () => {},
   stop: () => {},

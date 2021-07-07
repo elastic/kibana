@@ -21,4 +21,5 @@ export interface DiscoveredPlugin
 |  [optionalPlugins](./kibana-plugin-core-server.discoveredplugin.optionalplugins.md) | <code>readonly PluginName[]</code> | An optional list of the other plugins that if installed and enabled \*\*may be\*\* leveraged by this plugin for some additional functionality but otherwise are not required for this plugin to work properly. |
 |  [requiredBundles](./kibana-plugin-core-server.discoveredplugin.requiredbundles.md) | <code>readonly PluginName[]</code> | List of plugin ids that this plugin's UI code imports modules from that are not in <code>requiredPlugins</code>. |
 |  [requiredPlugins](./kibana-plugin-core-server.discoveredplugin.requiredplugins.md) | <code>readonly PluginName[]</code> | An optional list of the other plugins that \*\*must be\*\* installed and enabled for this plugin to function properly. |
+|  [type](./kibana-plugin-core-server.discoveredplugin.type.md) | <code>PluginType</code> | Type of the plugin, defaults to <code>standard</code>. |
 
