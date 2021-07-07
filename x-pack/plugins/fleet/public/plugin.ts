@@ -32,7 +32,7 @@ import type { CheckPermissionsResponse, PostIngestSetupResponse } from '../commo
 
 import type { FleetConfigType } from '../common/types';
 
-import { FLEET_BASE_PATH } from './constants';
+import { CUSTOM_LOGS_INTEGRATION_NAME, FLEET_BASE_PATH } from './constants';
 import { licenseService } from './hooks';
 import { setHttpClient } from './hooks/use_request';
 import { createPackageSearchProvider } from './search_provider';
@@ -43,6 +43,7 @@ import {
 } from './components/home_integration';
 import { createExtensionRegistrationCallback } from './services/ui_extensions';
 import type { UIExtensionRegistrationCallback, UIExtensionsStorage } from './types';
+import { LazyCustomLogsAssetsExtension } from './lazy_custom_logs_assets_extension';
 
 export { FleetConfigType } from '../common/types';
 
@@ -204,6 +205,13 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
 
   public start(core: CoreStart): FleetStart {
     let successPromise: ReturnType<FleetStart['isInitialized']>;
+    const registerExtension = createExtensionRegistrationCallback(this.extensions);
+
+    registerExtension({
+      package: CUSTOM_LOGS_INTEGRATION_NAME,
+      view: 'package-detail-assets',
+      Component: LazyCustomLogsAssetsExtension,
+    });
 
     return {
       isInitialized: () => {
@@ -229,8 +237,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
 
         return successPromise;
       },
-
-      registerExtension: createExtensionRegistrationCallback(this.extensions),
+      registerExtension,
     };
   }
 

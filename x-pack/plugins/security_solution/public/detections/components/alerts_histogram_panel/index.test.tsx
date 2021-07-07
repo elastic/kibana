@@ -27,8 +27,8 @@ jest.mock('react-router-dom', () => {
 });
 
 const mockNavigateToApp = jest.fn();
-jest.mock('../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../common/lib/kibana');
+jest.mock('../../../common/lib/kibana/kibana_react', () => {
+  const original = jest.requireActual('../../../common/lib/kibana/kibana_react');
 
   return {
     ...original,
@@ -43,6 +43,13 @@ jest.mock('../../../common/lib/kibana', () => {
         },
       },
     }),
+  };
+});
+
+jest.mock('../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../common/lib/kibana');
+  return {
+    ...original,
     useUiSetting$: jest.fn().mockReturnValue([]),
     useGetUserSavedObjectPermissions: jest.fn(),
   };
