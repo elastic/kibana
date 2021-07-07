@@ -9,8 +9,6 @@ import React, { memo, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { AppLocation } from '../../../../common/endpoint/types';
-import { timelineActions } from '../../../timelines/store/timeline';
-import { TimelineId } from '../../../../../timelines/common';
 
 /**
  * This component should be used above all routes, but below the Provider.
@@ -19,10 +17,6 @@ import { TimelineId } from '../../../../../timelines/common';
 export const RouteCapture = memo(({ children }) => {
   const location: AppLocation = useLocation();
   const dispatch = useDispatch();
-
-  useEffect(() => {
-    dispatch(timelineActions.showTimeline({ id: TimelineId.active, show: false }));
-  }, [dispatch, location.pathname]);
 
   useEffect(() => {
     dispatch({ type: 'userChangedUrl', payload: location });

@@ -6,7 +6,7 @@
  */
 
 import React, { Component } from 'react';
-import { Map as MbMap, Point as MbPoint } from 'mapbox-gl';
+import { Map as MbMap, Point as MbPoint } from '@kbn/mapbox-gl';
 // @ts-expect-error
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { Feature, Geometry, Position } from 'geojson';
