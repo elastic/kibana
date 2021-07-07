@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { setGlobalConfig } from '@storybook/testing-react';
-import * as globalStorybookConfig from '../.storybook/preview'; // path of your preview.js file
+import * as globalStorybookConfig from './preview';
 
 setGlobalConfig(globalStorybookConfig);

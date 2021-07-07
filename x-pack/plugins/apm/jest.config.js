@@ -11,6 +11,6 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: path.resolve(__dirname, '../../..'),
   roots: ['<rootDir>/x-pack/plugins/apm'],
-  setupFiles: ['<rootDir>/x-pack/plugins/apm/common/jest_setup.ts'],
+  setupFiles: ['<rootDir>/x-pack/plugins/apm/.storybook/jest_setup.ts'],
   testPathIgnorePatterns: ['<rootDir>/x-pack/plugins/apm/e2e/'],
 };

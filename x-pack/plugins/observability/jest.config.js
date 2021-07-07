@@ -9,5 +9,5 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
   roots: ['<rootDir>/x-pack/plugins/observability'],
-  setupFiles: ['<rootDir>/x-pack/plugins/observability/common/jest_setup.ts'],
+  setupFiles: ['<rootDir>/x-pack/plugins/observability/.storybook/jest_setup.ts'],
 };
