@@ -121,14 +121,14 @@ export const AgentEnrollmentKeySelectionStep = ({
 }) => {
   return {
     title: i18n.translate('xpack.fleet.agentEnrollment.stepConfigurePolicyAuthenticationTitle', {
-      defaultMessage: 'Configure agent authentication',
+      defaultMessage: 'Select enrollment token',
     }),
     children: (
       <>
         <EuiText>
           <FormattedMessage
             id="xpack.fleet.agentEnrollment.agentAuthenticationSettings"
-            defaultMessage="{agentPolicyName} has been selected. Configure agent authentication based on the available policy options."
+            defaultMessage="{agentPolicyName} has been selected. Select which enrollment token to use when enrolling agents."
             values={{
               agentPolicyName: <strong>{agentPolicy.name}</strong>,
             }}
@@ -138,6 +138,7 @@ export const AgentEnrollmentKeySelectionStep = ({
         <AdvancedAgentAuthenticationSettings
           agentPolicyId={agentPolicy.id}
           selectedApiKeyId={selectedApiKeyId}
+          initialAuthenticationSettingsOpen
           onKeyChange={setSelectedAPIKeyId}
         />
       </>
