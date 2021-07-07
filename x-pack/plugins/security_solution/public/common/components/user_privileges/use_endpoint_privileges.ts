@@ -20,7 +20,7 @@ export interface EndpointPrivileges {
 /**
  * Retrieve the endpoint privileges for the current user.
  *
- * **NOTE:** Consider using `usePriviliges().endpointPrivileges` instead of this hook in order
+ * **NOTE:** Consider using `usePrivileges().endpointPrivileges` instead of this hook in order
  * to keep API calls to a minimum.
  */
 export const useEndpointPrivileges = (): EndpointPrivileges => {
