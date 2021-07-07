@@ -177,11 +177,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('collapsedItemActions');
 
-      await pageObjects.triggersActionsUI.toggleSwitch('disableSwitch');
+      await testSubjects.click('disableButton');
 
       await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
         createdAlert.name,
-        'disableSwitch',
+        'enableSwitch',
         'true'
       );
     });
@@ -194,10 +194,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('collapsedItemActions');
 
-      await pageObjects.triggersActionsUI.toggleSwitch('disableSwitch');
+      await testSubjects.click('disableButton');
       await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
         createdAlert.name,
-        'disableSwitch',
+        'enableSwitch',
         'false'
       );
     });
@@ -209,12 +209,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('collapsedItemActions');
 
-      await pageObjects.triggersActionsUI.toggleSwitch('muteSwitch');
-      await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
-        createdAlert.name,
-        'muteSwitch',
-        'true'
-      );
+      await testSubjects.click('muteButton');
+
+      await retry.tryForTime(30000, async () => {
+        await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+        await testSubjects.find('unmuteIconButton');
+        expect(await testSubjects.find('unmuteIconButton')).length(1);
+      });
     });
 
     it('should unmute single alert', async () => {
@@ -226,12 +227,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('collapsedItemActions');
 
-      await pageObjects.triggersActionsUI.toggleSwitch('muteSwitch');
-      await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
-        createdAlert.name,
-        'muteSwitch',
-        'false'
-      );
+      await testSubjects.click('muteButton');
+      await retry.tryForTime(30000, async () => {
+        await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+        await testSubjects.find('muteIconButton');
+        expect(await testSubjects.find('muteIconButton')).length(1);
+      });
     });
 
     it('should delete single alert', async () => {

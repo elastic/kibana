@@ -61,7 +61,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
       items: [
         {
           disabled: !(item.isEditable && !isDisabled) || !item.enabledInLicense,
-          'data-test-subj': 'muteSwitch',
+          'data-test-subj': 'muteButton',
           onClick: async () => {
             const muteAll = isMuted;
             asyncScheduler.schedule(async () => {
@@ -86,7 +86,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
         },
         {
           disabled: !item.isEditable || !item.enabledInLicense,
-          'data-test-subj': 'disableSwitch',
+          'data-test-subj': 'disableButton',
           onClick: async () => {
             const enabled = !isDisabled;
             asyncScheduler.schedule(async () => {
@@ -140,7 +140,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
       panelPaddingSize="none"
       data-test-subj="collapsedItemActions"
     >
-      <EuiContextMenu initialPanelId={0} panels={panels} />
+      <EuiContextMenu initialPanelId={0} panels={panels} className="actCollapsedItemActions" />
     </EuiPopover>
   );
 };

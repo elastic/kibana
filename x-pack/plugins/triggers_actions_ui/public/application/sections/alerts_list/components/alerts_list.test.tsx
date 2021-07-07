@@ -368,7 +368,7 @@ describe('alerts_list component with items', () => {
   it('sorts alerts when clicking the name column', async () => {
     await setup();
     wrapper
-      .find('[data-test-subj="tableHeaderCell_name_0"] .euiTableHeaderButton')
+      .find('[data-test-subj="tableHeaderCell_name_1"] .euiTableHeaderButton')
       .first()
       .simulate('click');
 

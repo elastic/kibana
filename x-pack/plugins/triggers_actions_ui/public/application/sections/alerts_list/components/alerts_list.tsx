@@ -36,7 +36,6 @@ import {
 import { useHistory } from 'react-router-dom';
 
 import { isEmpty } from 'lodash';
-import moment from 'moment';
 import { ActionType, Alert, AlertTableItem, AlertTypeIndex, Pagination } from '../../../../types';
 import { AlertAdd, AlertEdit } from '../../alert_form';
 import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
@@ -323,30 +322,24 @@ export const AlertsList: React.FunctionComponent = () => {
     );
   };
 
-  const disabledLabel = i18n.translate(
-    'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.disabledLabel',
-    { defaultMessage: 'Disabled' }
-  );
-  const enabledLabel = i18n.translate(
-    'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.enabledLabel',
-    { defaultMessage: 'Active' }
-  );
-
   const alertsTableColumns = [
     {
-      name: '',
-      width: '120px',
-      render(item: AlertTableItem) {
-        let isEnabled = !!item.enabled;
+      field: 'enabled',
+      name: i18n.translate(
+        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.enabledTitle',
+        { defaultMessage: 'Enabled' }
+      ),
+      width: '90px',
+      render(enabled: boolean | undefined, item: AlertTableItem) {
+        let isEnabled = !!enabled;
         return (
           <EuiSwitch
-            name="disable"
+            name="enable"
             disabled={!item.isEditable || !item.enabledInLicense}
             compressed
             checked={isEnabled}
-            data-test-subj="disableSwitch"
+            data-test-subj="enableSwitch"
             onChange={async () => {
-              const enabled = item.enabled;
               asyncScheduler.schedule(async () => {
                 if (enabled) {
                   await disableAlert({ http, id: item.id });
@@ -358,10 +351,11 @@ export const AlertsList: React.FunctionComponent = () => {
                 loadAlertsData();
               }, 10);
             }}
-            label={!item.enabled ? disabledLabel : enabledLabel}
+            label=""
           />
         );
       },
+      sortable: true,
       'data-test-subj': 'alertsTableCell-enabled',
     },
     {
@@ -419,27 +413,6 @@ export const AlertsList: React.FunctionComponent = () => {
       },
     },
     {
-      field: 'lastUpdated',
-      width: '100px',
-      name: i18n.translate(
-        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.lastUpdatedTitle',
-        { defaultMessage: 'Last updated' }
-      ),
-      render: (_count: number, item: AlertTableItem) => {
-        const today = moment(Date.now());
-        const updatedAt = moment(item.updatedAt);
-        const lastUpdatedMin = today.diff(updatedAt, 'minutes');
-        const lastUpdatedSec = today.diff(updatedAt, 'seconds');
-        return (
-          <EuiText size="s" key={item.id}>
-            {lastUpdatedMin === 0 ? `${lastUpdatedSec}s ago` : `${lastUpdatedMin}m ago`}
-          </EuiText>
-        );
-      },
-      sortable: true,
-      'data-test-subj': 'alertsTableCell-lastUpdated',
-    },
-    {
       field: 'alertType',
       name: i18n.translate(
         'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.alertTypeTitle',
@@ -468,25 +441,38 @@ export const AlertsList: React.FunctionComponent = () => {
     },
     {
       field: 'schedule.interval',
-      width: '15%',
+      width: '6%',
       name: i18n.translate(
         'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.scheduleTitle',
         { defaultMessage: 'Schedule' }
       ),
-      render: (interval: number, item: AlertTableItem) => {
+      render: (interval: number) => {
         return (
-          <EuiFlexGroup wrap responsive={false} gutterSize="xs">
-            <EuiFlexItem>
-              <EuiText size="s">
-                <EuiIcon color="subdued" type="clock" />
-                &nbsp;
-                {interval}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
+          <EuiText size="s">
+            <EuiIcon color="subdued" type="clock" />
+            &nbsp;
+            {interval}
+          </EuiText>
+        );
+      },
+      sortable: false,
+      truncateText: false,
+      'data-test-subj': 'alertsTableCell-interval',
+    },
+    {
+      width: '9%',
+      name: i18n.translate(
+        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.actionsTitle',
+        { defaultMessage: 'Actions' }
+      ),
+      render: (item: AlertTableItem) => {
+        return (
+          <EuiFlexGroup wrap responsive={false} gutterSize="s">
+            <EuiFlexItem grow={false}>
               <div>
                 <EuiText
-                  size="s"
+                  size="m"
+                  data-test-subj="actionsCount"
                   title={i18n.translate(
                     'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.actionsCountTooltip',
                     { defaultMessage: 'Number of actions attached to the rule' }
@@ -498,9 +484,9 @@ export const AlertsList: React.FunctionComponent = () => {
                 </EuiText>
               </div>
             </EuiFlexItem>
-            <EuiFlexItem>
-              {item.muteAll ? (
-                <div>
+            <EuiFlexItem grow={false}>
+              <div>
+                {item.muteAll ? (
                   <EuiToolTip
                     position="bottom"
                     content={
@@ -512,6 +498,7 @@ export const AlertsList: React.FunctionComponent = () => {
                   >
                     <EuiButtonIcon
                       color={'danger'}
+                      data-test-subj="unmuteIconButton"
                       onClick={async () => {
                         asyncScheduler.schedule(async () => {
                           await unmuteAlert({ http, id: item.id });
@@ -522,11 +509,10 @@ export const AlertsList: React.FunctionComponent = () => {
                       aria-label={'unmute'}
                     />
                   </EuiToolTip>
-                </div>
-              ) : (
-                <div className="alertSidebarItem">
+                ) : (
                   <EuiToolTip
                     position="bottom"
+                    data-test-subj="muteButton"
                     content={
                       <FormattedMessage
                         id="xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.muteButtonTooltip"
@@ -536,7 +522,7 @@ export const AlertsList: React.FunctionComponent = () => {
                   >
                     <EuiButtonIcon
                       color={'primary'}
-                      className="alertSidebarItem__action"
+                      data-test-subj="muteIconButton"
                       onClick={async () => {
                         asyncScheduler.schedule(async () => {
                           await muteAlert({ http, id: item.id });
@@ -547,15 +533,13 @@ export const AlertsList: React.FunctionComponent = () => {
                       aria-label={'mute'}
                     />
                   </EuiToolTip>
-                </div>
-              )}
+                )}
+              </div>
             </EuiFlexItem>
           </EuiFlexGroup>
         );
       },
-      sortable: false,
-      truncateText: false,
-      'data-test-subj': 'alertsTableCell-interval',
+      'data-test-subj': 'alertsTableCell-actions',
     },
     {
       name: '',

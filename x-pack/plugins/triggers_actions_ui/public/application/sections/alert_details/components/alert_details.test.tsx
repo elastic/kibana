@@ -359,16 +359,16 @@ describe('disable button', () => {
       <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
     )
       .find(EuiSwitch)
-      .find('[name="disable"]')
+      .find('[name="enable"]')
       .first();
 
     expect(enableButton.props()).toMatchObject({
-      checked: false,
+      checked: true,
       disabled: false,
     });
   });
 
-  it('should render a disable button when alert is disabled', () => {
+  it('should render a enable button when alert is disabled', () => {
     const alert = mockAlert({
       enabled: false,
     });
@@ -390,11 +390,11 @@ describe('disable button', () => {
       <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
     )
       .find(EuiSwitch)
-      .find('[name="disable"]')
+      .find('[name="enable"]')
       .first();
 
     expect(enableButton.props()).toMatchObject({
-      checked: true,
+      checked: false,
       disabled: false,
     });
   });
@@ -428,7 +428,7 @@ describe('disable button', () => {
       />
     )
       .find(EuiSwitch)
-      .find('[name="disable"]')
+      .find('[name="enable"]')
       .first();
 
     enableButton.simulate('click');
@@ -468,7 +468,7 @@ describe('disable button', () => {
       />
     )
       .find(EuiSwitch)
-      .find('[name="disable"]')
+      .find('[name="enable"]')
       .first();
 
     enableButton.simulate('click');
@@ -531,14 +531,14 @@ describe('disable button', () => {
 
     // Disable the alert
     await act(async () => {
-      wrapper.find('[data-test-subj="disableSwitch"] .euiSwitch__button').first().simulate('click');
+      wrapper.find('[data-test-subj="enableSwitch"] .euiSwitch__button').first().simulate('click');
       await nextTick();
     });
     expect(disableAlert).toHaveBeenCalled();
 
     // Enable the alert
     await act(async () => {
-      wrapper.find('[data-test-subj="disableSwitch"] .euiSwitch__button').first().simulate('click');
+      wrapper.find('[data-test-subj="enableSwitch"] .euiSwitch__button').first().simulate('click');
       await nextTick();
     });
     expect(enableAlert).toHaveBeenCalled();
