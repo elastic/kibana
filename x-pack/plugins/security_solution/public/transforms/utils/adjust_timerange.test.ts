@@ -11,10 +11,21 @@ import moment from 'moment';
 /** Get the return type of adjustTimeRange for TypeScript checks against expected */
 type ReturnTypeAdjustTimeRange = ReturnType<typeof adjustTimeRange>;
 
-// @ts-expect-error
-moment.suppressDeprecationWarnings = true;
-
 describe('adjust_timerange', () => {
+  beforeEach(() => {
+    // Adds extra switch to suppress deprecation warnings that moment does not expose in TypeScript
+    (moment as typeof moment & {
+      suppressDeprecationWarnings: boolean;
+    }).suppressDeprecationWarnings = true;
+  });
+
+  afterEach(() => {
+    // Adds extra switch to suppress deprecation warnings that moment does not expose in TypeScript
+    (moment as typeof moment & {
+      suppressDeprecationWarnings: boolean;
+    }).suppressDeprecationWarnings = false;
+  });
+
   test('it will adjust the time range from by rounding down by an hour within "from"', () => {
     expect(
       adjustTimeRange({

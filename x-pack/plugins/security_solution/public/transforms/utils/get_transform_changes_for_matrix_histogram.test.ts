@@ -11,8 +11,8 @@ import {
   MatrixHistogramQueryEntities,
 } from '../../../common/search_strategy';
 import { getTransformChangesForMatrixHistogram } from './get_transform_changes_for_matrix_histogram';
-import { TransformConfigSchema } from '../../../common/transforms/types';
 import { HostsQueries } from '../../../common/search_strategy/security_solution/hosts';
+import { getTransformConfigSchemaMock } from './transform_config_schema.mock';
 
 /** Get the return type of getTransformChangesForMatrixHistogram for TypeScript checks against expected */
 type ReturnTypeGetTransformChangesForMatrixHistogram = ReturnType<
@@ -20,22 +20,12 @@ type ReturnTypeGetTransformChangesForMatrixHistogram = ReturnType<
 >;
 
 describe('get_transform_changes_for_matrix_histogram', () => {
-  const mockTransformSetting: TransformConfigSchema['settings'][0] = {
-    prefix: 'all',
-    indices: ['auditbeat-*', 'endgame-*', 'filebeat-*', 'logs-*', 'packetbeat-*', 'winlogbeat-*'],
-    data_sources: [
-      ['auditbeat-*', 'endgame-*', 'filebeat-*', 'logs-*', 'packetbeat-*', 'winlogbeat-*'],
-      ['auditbeat-*', 'filebeat-*', 'logs-*', 'winlogbeat-*'],
-      ['auditbeat-*'],
-    ],
-  };
-
   test('it gets a transform change for authentications', () => {
     expect(
       getTransformChangesForMatrixHistogram({
         factoryQueryType: MatrixHistogramQuery,
         histogramType: MatrixHistogramType.authentications,
-        settings: mockTransformSetting,
+        settings: getTransformConfigSchemaMock().settings[0],
       })
     ).toEqual<ReturnTypeGetTransformChangesForMatrixHistogram>({
       histogramType: MatrixHistogramType.authenticationsEntities,
@@ -48,7 +38,7 @@ describe('get_transform_changes_for_matrix_histogram', () => {
     expect(
       getTransformChangesForMatrixHistogram({
         factoryQueryType: HostsQueries.firstOrLastSeen,
-        settings: mockTransformSetting,
+        settings: getTransformConfigSchemaMock().settings[0],
       })
     ).toEqual<ReturnTypeGetTransformChangesForMatrixHistogram>(undefined);
   });

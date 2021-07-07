@@ -6,29 +6,19 @@
  */
 
 import { getTransformChangesForNetwork } from './get_transform_changes_for_network';
-import { TransformConfigSchema } from '../../../common/transforms/types';
 import { NetworkKpiQueries, NetworkQueries } from '../../../common/search_strategy';
 import { HostsQueries } from '../../../common/search_strategy/security_solution/hosts';
+import { getTransformConfigSchemaMock } from './transform_config_schema.mock';
 
 /** Get the return type of getTransformChangesForNetwork for TypeScript checks against expected */
 type ReturnTypeGetTransformChangesForNetwork = ReturnType<typeof getTransformChangesForNetwork>;
 
 describe('get_transform_changes_for_network', () => {
-  const mockTransformSetting: TransformConfigSchema['settings'][0] = {
-    prefix: 'all',
-    indices: ['auditbeat-*', 'endgame-*', 'filebeat-*', 'logs-*', 'packetbeat-*', 'winlogbeat-*'],
-    data_sources: [
-      ['auditbeat-*', 'endgame-*', 'filebeat-*', 'logs-*', 'packetbeat-*', 'winlogbeat-*'],
-      ['auditbeat-*', 'filebeat-*', 'logs-*', 'winlogbeat-*'],
-      ['auditbeat-*'],
-    ],
-  };
-
   test('it gets a transform change for topCountries', () => {
     expect(
       getTransformChangesForNetwork({
         factoryQueryType: NetworkQueries.topCountries,
-        settings: mockTransformSetting,
+        settings: getTransformConfigSchemaMock().settings[0],
       })
     ).toEqual<ReturnTypeGetTransformChangesForNetwork>({
       factoryQueryType: NetworkQueries.topCountriesEntities,
@@ -40,7 +30,7 @@ describe('get_transform_changes_for_network', () => {
     expect(
       getTransformChangesForNetwork({
         factoryQueryType: NetworkQueries.topNFlow,
-        settings: mockTransformSetting,
+        settings: getTransformConfigSchemaMock().settings[0],
       })
     ).toEqual<ReturnTypeGetTransformChangesForNetwork>({
       factoryQueryType: NetworkQueries.topNFlowEntities,
@@ -52,7 +42,7 @@ describe('get_transform_changes_for_network', () => {
     expect(
       getTransformChangesForNetwork({
         factoryQueryType: NetworkKpiQueries.dns,
-        settings: mockTransformSetting,
+        settings: getTransformConfigSchemaMock().settings[0],
       })
     ).toEqual<ReturnTypeGetTransformChangesForNetwork>({
       factoryQueryType: NetworkKpiQueries.dnsEntities,
@@ -64,7 +54,7 @@ describe('get_transform_changes_for_network', () => {
     expect(
       getTransformChangesForNetwork({
         factoryQueryType: NetworkKpiQueries.networkEvents,
-        settings: mockTransformSetting,
+        settings: getTransformConfigSchemaMock().settings[0],
       })
     ).toEqual<ReturnTypeGetTransformChangesForNetwork>({
       factoryQueryType: NetworkKpiQueries.networkEventsEntities,
@@ -76,7 +66,7 @@ describe('get_transform_changes_for_network', () => {
     expect(
       getTransformChangesForNetwork({
         factoryQueryType: NetworkKpiQueries.tlsHandshakes,
-        settings: mockTransformSetting,
+        settings: getTransformConfigSchemaMock().settings[0],
       })
     ).toEqual<ReturnTypeGetTransformChangesForNetwork>({
       factoryQueryType: NetworkKpiQueries.tlsHandshakesEntities,
@@ -88,7 +78,7 @@ describe('get_transform_changes_for_network', () => {
     expect(
       getTransformChangesForNetwork({
         factoryQueryType: NetworkKpiQueries.uniquePrivateIps,
-        settings: mockTransformSetting,
+        settings: getTransformConfigSchemaMock().settings[0],
       })
     ).toEqual<ReturnTypeGetTransformChangesForNetwork>({
       factoryQueryType: NetworkKpiQueries.uniquePrivateIpsEntities,
@@ -100,7 +90,7 @@ describe('get_transform_changes_for_network', () => {
     expect(
       getTransformChangesForNetwork({
         factoryQueryType: HostsQueries.firstOrLastSeen,
-        settings: mockTransformSetting,
+        settings: getTransformConfigSchemaMock().settings[0],
       })
     ).toEqual<ReturnTypeGetTransformChangesForNetwork>(undefined);
   });

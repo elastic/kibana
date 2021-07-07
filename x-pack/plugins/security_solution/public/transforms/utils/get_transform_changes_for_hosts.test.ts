@@ -6,28 +6,18 @@
  */
 
 import { getTransformChangesForHosts } from './get_transform_changes_for_hosts';
-import { TransformConfigSchema } from '../../../common/transforms/types';
 import { HostsQueries } from '../../../common/search_strategy/security_solution/hosts';
+import { getTransformConfigSchemaMock } from './transform_config_schema.mock';
 
 /** Get the return type of getTransformChangesForHosts for TypeScript checks against expected */
 type ReturnTypeGetTransformChangesForHosts = ReturnType<typeof getTransformChangesForHosts>;
 
 describe('get_transform_changes_for_host', () => {
-  const mockTransformSetting: TransformConfigSchema['settings'][0] = {
-    prefix: 'all',
-    indices: ['auditbeat-*', 'endgame-*', 'filebeat-*', 'logs-*', 'packetbeat-*', 'winlogbeat-*'],
-    data_sources: [
-      ['auditbeat-*', 'endgame-*', 'filebeat-*', 'logs-*', 'packetbeat-*', 'winlogbeat-*'],
-      ['auditbeat-*', 'filebeat-*', 'logs-*', 'winlogbeat-*'],
-      ['auditbeat-*'],
-    ],
-  };
-
   test('it gets a transform change for hosts', () => {
     expect(
       getTransformChangesForHosts({
         factoryQueryType: HostsQueries.hosts,
-        settings: mockTransformSetting,
+        settings: getTransformConfigSchemaMock().settings[0],
       })
     ).toEqual<ReturnTypeGetTransformChangesForHosts>({
       factoryQueryType: HostsQueries.hostsEntities,
@@ -39,7 +29,7 @@ describe('get_transform_changes_for_host', () => {
     expect(
       getTransformChangesForHosts({
         factoryQueryType: HostsQueries.authentications,
-        settings: mockTransformSetting,
+        settings: getTransformConfigSchemaMock().settings[0],
       })
     ).toEqual<ReturnTypeGetTransformChangesForHosts>({
       factoryQueryType: HostsQueries.authenticationsEntities,
@@ -51,7 +41,7 @@ describe('get_transform_changes_for_host', () => {
     expect(
       getTransformChangesForHosts({
         factoryQueryType: HostsQueries.firstOrLastSeen,
-        settings: mockTransformSetting,
+        settings: getTransformConfigSchemaMock().settings[0],
       })
     ).toEqual<ReturnTypeGetTransformChangesForHosts>(undefined);
   });

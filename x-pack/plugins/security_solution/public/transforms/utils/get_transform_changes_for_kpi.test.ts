@@ -6,29 +6,19 @@
  */
 
 import { getTransformChangesForKpi } from './get_transform_changes_for_kpi';
-import { TransformConfigSchema } from '../../../common/transforms/types';
 import { HostsKpiQueries } from '../../../common/search_strategy';
 import { HostsQueries } from '../../../common/search_strategy/security_solution/hosts';
+import { getTransformConfigSchemaMock } from './transform_config_schema.mock';
 
 /** Get the return type of getTransformChangesForKpi for TypeScript checks against expected */
 type ReturnTypeGetTransformChangesForKpi = ReturnType<typeof getTransformChangesForKpi>;
 
 describe('get_transform_changes_for_kpi', () => {
-  const mockTransformSetting: TransformConfigSchema['settings'][0] = {
-    prefix: 'all',
-    indices: ['auditbeat-*', 'endgame-*', 'filebeat-*', 'logs-*', 'packetbeat-*', 'winlogbeat-*'],
-    data_sources: [
-      ['auditbeat-*', 'endgame-*', 'filebeat-*', 'logs-*', 'packetbeat-*', 'winlogbeat-*'],
-      ['auditbeat-*', 'filebeat-*', 'logs-*', 'winlogbeat-*'],
-      ['auditbeat-*'],
-    ],
-  };
-
   test('it gets a transform change for kpiHosts', () => {
     expect(
       getTransformChangesForKpi({
         factoryQueryType: HostsKpiQueries.kpiHosts,
-        settings: mockTransformSetting,
+        settings: getTransformConfigSchemaMock().settings[0],
       })
     ).toEqual<ReturnTypeGetTransformChangesForKpi>({
       factoryQueryType: HostsKpiQueries.kpiHostsEntities,
@@ -40,7 +30,7 @@ describe('get_transform_changes_for_kpi', () => {
     expect(
       getTransformChangesForKpi({
         factoryQueryType: HostsKpiQueries.kpiAuthentications,
-        settings: mockTransformSetting,
+        settings: getTransformConfigSchemaMock().settings[0],
       })
     ).toEqual<ReturnTypeGetTransformChangesForKpi>({
       factoryQueryType: HostsKpiQueries.kpiAuthenticationsEntities,
@@ -52,7 +42,7 @@ describe('get_transform_changes_for_kpi', () => {
     expect(
       getTransformChangesForKpi({
         factoryQueryType: HostsKpiQueries.kpiUniqueIps,
-        settings: mockTransformSetting,
+        settings: getTransformConfigSchemaMock().settings[0],
       })
     ).toEqual<ReturnTypeGetTransformChangesForKpi>({
       factoryQueryType: HostsKpiQueries.kpiUniqueIpsEntities,
@@ -64,7 +54,7 @@ describe('get_transform_changes_for_kpi', () => {
     expect(
       getTransformChangesForKpi({
         factoryQueryType: HostsQueries.firstOrLastSeen,
-        settings: mockTransformSetting,
+        settings: getTransformConfigSchemaMock().settings[0],
       })
     ).toEqual<ReturnTypeGetTransformChangesForKpi>(undefined);
   });

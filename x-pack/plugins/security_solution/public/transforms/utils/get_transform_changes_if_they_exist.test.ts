@@ -4,76 +4,234 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { TransformConfigSchema } from '../../../common/transforms/types';
 import { getTransformChangesIfTheyExist } from './get_transform_changes_if_they_exist';
-import { HostsQueries } from '../../../common/search_strategy';
+import { HostsKpiQueries, HostsQueries } from '../../../common/search_strategy';
+import moment from 'moment';
+import { getTransformConfigSchemaMock } from './transform_config_schema.mock';
 
 /** Get the return type of createIndicesFromPrefix for TypeScript checks against expected */
 type ReturnTypeGetTransformChangesIfTheyExist = ReturnType<typeof getTransformChangesIfTheyExist>;
 
 describe('get_transform_changes_if_they_exist', () => {
-  let mockTransformSetting: TransformConfigSchema = {
-    enabled: true,
-    auto_start: true,
-    auto_create: true,
-    query: {
-      range: {
-        '@timestamp': {
-          gte: 'now-1d/d',
-          format: 'strict_date_optional_time',
-        },
-      },
-    },
-    retention_policy: {
-      time: {
-        field: '@timestamp',
-        max_age: '1w',
-      },
-    },
-    max_page_search_size: 5000,
-    settings: [
-      {
-        prefix: 'all',
-        indices: [
-          'auditbeat-*',
-          'endgame-*',
-          'filebeat-*',
-          'logs-*',
-          'packetbeat-*',
-          'winlogbeat-*',
-        ],
-        data_sources: [
-          ['auditbeat-*', 'endgame-*', 'filebeat-*', 'logs-*', 'packetbeat-*', 'winlogbeat-*'],
-          ['auditbeat-*', 'filebeat-*', 'logs-*', 'winlogbeat-*'],
-          ['auditbeat-*'],
-        ],
-      },
-    ],
-  };
-
   beforeEach(() => {
-    mockTransformSetting = {
-      enabled: true,
-      auto_start: true,
-      auto_create: true,
-      query: {
-        range: {
-          '@timestamp': {
-            gte: 'now-1d/d',
-            format: 'strict_date_optional_time',
+    // Adds extra switch to suppress deprecation warnings that moment does not expose in TypeScript
+    (moment as typeof moment & {
+      suppressDeprecationWarnings: boolean;
+    }).suppressDeprecationWarnings = true;
+  });
+
+  afterEach(() => {
+    // Adds extra switch to suppress deprecation warnings that moment does not expose in TypeScript
+    (moment as typeof moment & {
+      suppressDeprecationWarnings: boolean;
+    }).suppressDeprecationWarnings = false;
+  });
+
+  describe('transformSettings enabled conditional logic', () => {
+    test('returns transformed settings if our settings is enabled', () => {
+      expect(
+        getTransformChangesIfTheyExist({
+          factoryQueryType: HostsQueries.authentications,
+          indices: ['auditbeat-*'],
+          transformSettings: { ...getTransformConfigSchemaMock(), enabled: true }, // sets enabled to true
+          filterQuery: undefined,
+          histogramType: undefined,
+          timerange: {
+            to: '2021-07-06T23:49:38.643Z',
+            from: '2021-07-06T20:49:38.643Z',
+            interval: '5m',
           },
-        },
-      },
-      retention_policy: {
-        time: {
-          field: '@timestamp',
-          max_age: '1w',
-        },
-      },
-      max_page_search_size: 5000,
-      settings: [
-        {
-          prefix: 'all',
+        })
+      ).toMatchObject<Partial<ReturnTypeGetTransformChangesIfTheyExist>>({
+        indices: ['.estc_all_user_ent*'],
+        factoryQueryType: HostsQueries.authenticationsEntities,
+      });
+    });
+
+    test('returns regular settings if our settings is disabled', () => {
+      expect(
+        getTransformChangesIfTheyExist({
+          factoryQueryType: HostsQueries.authentications,
+          indices: ['auditbeat-*'],
+          transformSettings: { ...getTransformConfigSchemaMock(), enabled: false }, // sets enabled to false
+          filterQuery: undefined,
+          histogramType: undefined,
+          timerange: {
+            to: '2021-07-06T23:49:38.643Z',
+            from: '2021-07-06T20:49:38.643Z',
+            interval: '5m',
+          },
+        })
+      ).toMatchObject<Partial<ReturnTypeGetTransformChangesIfTheyExist>>({
+        indices: ['auditbeat-*'],
+        factoryQueryType: HostsQueries.authentications,
+      });
+    });
+  });
+
+  describe('filter query compatibility conditional logic', () => {
+    test('returns regular settings if filter is set to something other than match_all', () => {
+      expect(
+        getTransformChangesIfTheyExist({
+          factoryQueryType: HostsQueries.authentications,
+          indices: ['auditbeat-*'],
+          transformSettings: getTransformConfigSchemaMock(),
+          filterQuery: {
+            bool: {
+              must: [],
+              filter: [{ match_none: {} }], // match_none shouldn't return transform
+              should: [],
+              must_not: [],
+            },
+          },
+          histogramType: undefined,
+          timerange: {
+            to: '2021-07-06T23:49:38.643Z',
+            from: '2021-07-06T20:49:38.643Z',
+            interval: '5m',
+          },
+        })
+      ).toMatchObject<Partial<ReturnTypeGetTransformChangesIfTheyExist>>({
+        indices: ['auditbeat-*'],
+        factoryQueryType: HostsQueries.authentications,
+      });
+    });
+
+    test('returns transformed settings if filter is set to something such as match_all', () => {
+      expect(
+        getTransformChangesIfTheyExist({
+          factoryQueryType: HostsQueries.authentications,
+          indices: ['auditbeat-*'],
+          transformSettings: getTransformConfigSchemaMock(),
+          filterQuery: {
+            bool: {
+              must: [],
+              filter: [{ match_all: {} }], // match_all should return transform
+              should: [],
+              must_not: [],
+            },
+          },
+          histogramType: undefined,
+          timerange: {
+            to: '2021-07-06T23:49:38.643Z',
+            from: '2021-07-06T20:49:38.643Z',
+            interval: '5m',
+          },
+        })
+      ).toMatchObject<Partial<ReturnTypeGetTransformChangesIfTheyExist>>({
+        indices: ['.estc_all_user_ent*'],
+        factoryQueryType: HostsQueries.authenticationsEntities,
+      });
+    });
+
+    test('returns transformed settings if filter is set to undefined', () => {
+      expect(
+        getTransformChangesIfTheyExist({
+          factoryQueryType: HostsQueries.authentications,
+          indices: ['auditbeat-*'],
+          transformSettings: getTransformConfigSchemaMock(),
+          filterQuery: undefined, // undefined should return transform
+          histogramType: undefined,
+          timerange: {
+            to: '2021-07-06T23:49:38.643Z',
+            from: '2021-07-06T20:49:38.643Z',
+            interval: '5m',
+          },
+        })
+      ).toMatchObject<Partial<ReturnTypeGetTransformChangesIfTheyExist>>({
+        indices: ['.estc_all_user_ent*'],
+        factoryQueryType: HostsQueries.authenticationsEntities,
+      });
+    });
+  });
+
+  describe('timerange adjustments conditional logic', () => {
+    test('returns regular settings if timerange is less than an hour', () => {
+      expect(
+        getTransformChangesIfTheyExist({
+          factoryQueryType: HostsQueries.authentications,
+          indices: ['auditbeat-*'],
+          transformSettings: getTransformConfigSchemaMock(),
+          filterQuery: undefined,
+          histogramType: undefined,
+          timerange: {
+            to: '2021-07-06T23:49:38.643Z', // Less than hour
+            from: '2021-07-06T23:39:38.643Z', // Less than hour
+            interval: '5m',
+          },
+        })
+      ).toMatchObject<Partial<ReturnTypeGetTransformChangesIfTheyExist>>({
+        indices: ['auditbeat-*'],
+        factoryQueryType: HostsQueries.authentications,
+      });
+    });
+
+    test('returns regular settings if timerange is invalid', () => {
+      expect(
+        getTransformChangesIfTheyExist({
+          factoryQueryType: HostsQueries.authentications,
+          indices: ['auditbeat-*'],
+          transformSettings: getTransformConfigSchemaMock(),
+          filterQuery: undefined,
+          histogramType: undefined,
+          timerange: {
+            to: 'now-invalid', // invalid to
+            from: 'now-invalid2', // invalid from
+            interval: '5m',
+          },
+        })
+      ).toMatchObject<Partial<ReturnTypeGetTransformChangesIfTheyExist>>({
+        indices: ['auditbeat-*'],
+        factoryQueryType: HostsQueries.authentications,
+      });
+    });
+
+    test('returns transformed settings if timerange is greater than an hour', () => {
+      expect(
+        getTransformChangesIfTheyExist({
+          factoryQueryType: HostsQueries.authentications,
+          indices: ['auditbeat-*'],
+          transformSettings: getTransformConfigSchemaMock(),
+          filterQuery: undefined,
+          histogramType: undefined,
+          timerange: {
+            to: '2021-07-06T23:49:38.643Z', // Greater than an hour
+            from: '2021-07-06T20:49:38.643Z', // Greater than an hour
+            interval: '5m',
+          },
+        })
+      ).toMatchObject<Partial<ReturnTypeGetTransformChangesIfTheyExist>>({
+        indices: ['.estc_all_user_ent*'],
+        factoryQueryType: HostsQueries.authenticationsEntities,
+      });
+    });
+  });
+
+  describe('settings match conditional logic', () => {
+    test('it returns regular settings if settings do not match', () => {
+      expect(
+        getTransformChangesIfTheyExist({
+          factoryQueryType: HostsQueries.authentications,
+          indices: ['should-not-match-*'], // index doesn't match anything
+          transformSettings: getTransformConfigSchemaMock(),
+          filterQuery: undefined,
+          histogramType: undefined,
+          timerange: {
+            to: '2021-07-06T23:49:38.643Z',
+            from: '2021-07-06T20:49:38.643Z',
+            interval: '5m',
+          },
+        })
+      ).toMatchObject<Partial<ReturnTypeGetTransformChangesIfTheyExist>>({
+        indices: ['should-not-match-*'],
+        factoryQueryType: HostsQueries.authentications,
+      });
+    });
+
+    test('it returns transformed settings if settings do match', () => {
+      expect(
+        getTransformChangesIfTheyExist({
+          factoryQueryType: HostsQueries.authentications,
           indices: [
             'auditbeat-*',
             'endgame-*',
@@ -81,110 +239,63 @@ describe('get_transform_changes_if_they_exist', () => {
             'logs-*',
             'packetbeat-*',
             'winlogbeat-*',
+            '-subtract-something',
           ],
-          data_sources: [
-            ['auditbeat-*', 'endgame-*', 'filebeat-*', 'logs-*', 'packetbeat-*', 'winlogbeat-*'],
-            ['auditbeat-*', 'filebeat-*', 'logs-*', 'winlogbeat-*'],
-            ['auditbeat-*'],
-          ],
-        },
-      ],
-    };
-  });
-
-  test('returns transformed settings if we have a matching index to data source and our timerange is greater than an hour', () => {
-    expect(
-      getTransformChangesIfTheyExist({
-        factoryQueryType: HostsQueries.authentications,
-        indices: ['auditbeat-*'],
-        transformSettings: mockTransformSetting,
-        filterQuery: undefined,
-        histogramType: undefined,
-        timerange: {
-          to: '2021-07-06T23:49:38.643Z',
-          from: '2021-07-06T20:49:38.643Z',
-          interval: '5m',
-        },
-      })
-    ).toMatchObject<Partial<ReturnTypeGetTransformChangesIfTheyExist>>({
-      indices: ['.estc_all_user_ent*'],
-      factoryQueryType: HostsQueries.authenticationsEntities,
-    });
-  });
-
-  test('returns transformed settings if we have a matching index to data source and our timerange is greater than an hour and we have a filter set', () => {
-    expect(
-      getTransformChangesIfTheyExist({
-        factoryQueryType: HostsQueries.authentications,
-        indices: ['auditbeat-*'],
-        transformSettings: mockTransformSetting,
-        filterQuery: {
-          bool: {
-            must: [],
-            filter: [{ match_all: {} }],
-            should: [],
-            must_not: [],
+          transformSettings: getTransformConfigSchemaMock(),
+          filterQuery: undefined,
+          histogramType: undefined,
+          timerange: {
+            to: '2021-07-06T23:49:38.643Z',
+            from: '2021-07-06T20:49:38.643Z',
+            interval: '5m',
           },
-        },
-        histogramType: undefined,
-        timerange: {
-          to: '2021-07-06T23:49:38.643Z',
-          from: '2021-07-06T20:49:38.643Z',
-          interval: '5m',
-        },
-      })
-    ).toMatchObject<Partial<ReturnTypeGetTransformChangesIfTheyExist>>({
-      indices: ['.estc_all_user_ent*'],
-      factoryQueryType: HostsQueries.authenticationsEntities,
+        })
+      ).toMatchObject<Partial<ReturnTypeGetTransformChangesIfTheyExist>>({
+        indices: ['.estc_all_user_ent*'],
+        factoryQueryType: HostsQueries.authenticationsEntities,
+      });
     });
   });
 
-  test('returns regular settings if our settings is disabled', () => {
-    mockTransformSetting = { ...mockTransformSetting, enabled: false };
-    expect(
-      getTransformChangesIfTheyExist({
-        factoryQueryType: HostsQueries.authentications,
-        indices: ['auditbeat-*'],
-        transformSettings: mockTransformSetting,
-        filterQuery: undefined,
-        histogramType: undefined,
-        timerange: {
-          to: '2021-07-06T23:49:38.643Z',
-          from: '2021-07-06T20:49:38.643Z',
-          interval: '5m',
-        },
-      })
-    ).toMatchObject<Partial<ReturnTypeGetTransformChangesIfTheyExist>>({
-      indices: ['auditbeat-*'],
-      factoryQueryType: HostsQueries.authentications,
-    });
-  });
-
-  test('returns regular settings if filter is set to something other than match_all', () => {
-    mockTransformSetting = { ...mockTransformSetting, enabled: false };
-    expect(
-      getTransformChangesIfTheyExist({
-        factoryQueryType: HostsQueries.authentications,
-        indices: ['auditbeat-*'],
-        transformSettings: mockTransformSetting,
-        filterQuery: {
-          bool: {
-            must: [],
-            filter: [{ match_none: {} }],
-            should: [],
-            must_not: [],
+  describe('transform changes conditional logic', () => {
+    test('it returns regular settings if it does not match a transform factory type', () => {
+      expect(
+        getTransformChangesIfTheyExist({
+          factoryQueryType: HostsQueries.firstOrLastSeen, // query type not used for any transforms yet
+          indices: ['auditbeat-*'],
+          transformSettings: getTransformConfigSchemaMock(),
+          filterQuery: undefined,
+          histogramType: undefined,
+          timerange: {
+            to: '2021-07-06T23:49:38.643Z',
+            from: '2021-07-06T20:49:38.643Z',
+            interval: '5m',
           },
-        },
-        histogramType: undefined,
-        timerange: {
-          to: '2021-07-06T23:49:38.643Z',
-          from: '2021-07-06T20:49:38.643Z',
-          interval: '5m',
-        },
-      })
-    ).toMatchObject<Partial<ReturnTypeGetTransformChangesIfTheyExist>>({
-      indices: ['auditbeat-*'],
-      factoryQueryType: HostsQueries.authentications,
+        })
+      ).toMatchObject<Partial<ReturnTypeGetTransformChangesIfTheyExist>>({
+        indices: ['auditbeat-*'],
+        factoryQueryType: HostsQueries.firstOrLastSeen,
+      });
+    });
+
+    test('it returns transformed settings if it does match a transform factory type', () => {
+      expect(
+        getTransformChangesIfTheyExist({
+          factoryQueryType: HostsKpiQueries.kpiHosts, // valid kpiHosts for a transform
+          indices: ['auditbeat-*'],
+          transformSettings: getTransformConfigSchemaMock(),
+          filterQuery: undefined,
+          histogramType: undefined,
+          timerange: {
+            to: '2021-07-06T23:49:38.643Z',
+            from: '2021-07-06T20:49:38.643Z',
+            interval: '5m',
+          },
+        })
+      ).toMatchObject<Partial<ReturnTypeGetTransformChangesIfTheyExist>>({
+        indices: ['.estc_all_host_ent*'],
+        factoryQueryType: HostsKpiQueries.kpiHostsEntities,
+      });
     });
   });
 });
