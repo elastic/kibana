@@ -15,14 +15,17 @@ export default ({ getService }: FtrProviderContext) => {
   const ml = getService('ml');
 
   describe('GET trained_models', () => {
+    let testModelIds: string[] = [];
+
     before(async () => {
       await ml.testResources.setKibanaTimeZoneToUTC();
-      await ml.api.createdTestTrainedModels('regression', 5, true);
+      testModelIds = await ml.api.createdTestTrainedModels('regression', 5, true);
     });
 
     after(async () => {
       await ml.api.cleanMlIndices();
       // delete created ingest pipelines
+      await Promise.all(testModelIds.map((modelId) => ml.api.deleteIngestPipeline(modelId)));
     });
 
     it('returns all trained models with associated pipelined', async () => {
