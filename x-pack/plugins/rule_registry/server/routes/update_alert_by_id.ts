@@ -51,6 +51,13 @@ export const updateAlertByIdRoute = (router: IRouter<RacRequestHandlerContext>) 
           _version,
           index,
         });
+
+        if (updatedAlert == null) {
+          return response.notFound({
+            body: { message: `alerts with ids ${ids} and index ${index} not found` },
+          });
+        }
+
         return response.ok({ body: { success: true, ...updatedAlert } });
       } catch (exc) {
         const err = transformError(exc);

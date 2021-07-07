@@ -43,6 +43,11 @@ export const getAlertByIdRoute = (router: IRouter<RacRequestHandlerContext>) => 
         const alertsClient = await context.rac.getAlertsClient();
         const { id, index } = request.query;
         const alert = await alertsClient.get({ id, index });
+        if (alert == null) {
+          return response.notFound({
+            body: { message: `alert with id ${id} and index ${index} not found` },
+          });
+        }
         return response.ok({
           body: alert,
         });

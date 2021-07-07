@@ -98,6 +98,34 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(403);
       });
 
+      it('should return a 404 when superuser accesses not-existent alert', async () => {
+        await supertestWithoutAuth
+          .post(`${getSpaceUrlPrefix()}${TEST_URL}`)
+          .auth(superUser.username, superUser.password)
+          .set('kbn-xsrf', 'true')
+          .send({
+            ids: ['this id does not exist'],
+            status: 'closed',
+            index: apmIndex,
+            _version: Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'),
+          })
+          .expect(404);
+      });
+
+      it('should return a 404 when superuser accesses not-existent alerts as data index', async () => {
+        await supertestWithoutAuth
+          .post(`${getSpaceUrlPrefix()}${TEST_URL}`)
+          .auth(superUser.username, superUser.password)
+          .set('kbn-xsrf', 'true')
+          .send({
+            ids: [APM_ALERT_ID],
+            status: 'closed',
+            index: 'this index does not exist',
+            _version: Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'),
+          })
+          .expect(404);
+      });
+
       it('should return expected update confirmation upon successful update', async () => {
         const res = await supertestWithoutAuth
           .post(`${getSpaceUrlPrefix()}${TEST_URL}`)

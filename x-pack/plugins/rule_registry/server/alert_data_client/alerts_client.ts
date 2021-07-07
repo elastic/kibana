@@ -76,7 +76,7 @@ export class AlertsClient {
     );
   }
 
-  private async fetchAlert({ id, index }: GetAlertParams): Promise<AlertType> {
+  private async fetchAlert({ id, index }: GetAlertParams): Promise<AlertType | null | undefined> {
     try {
       const result = await this.esClient.search<ParsedTechnicalFields>({
         // Context: Originally thought of always just searching `.alerts-*` but that could
@@ -87,6 +87,10 @@ export class AlertsClient {
         body: { query: { term: { _id: id } } },
         seq_no_primary_term: true,
       });
+
+      if (result == null || result.body == null || result.body.hits.hits.length === 0) {
+        return;
+      }
 
       if (!isValidAlert(result.body.hits.hits[0]._source)) {
         const errorMessage = `Unable to retrieve alert details for alert with id of "${id}".`;
@@ -105,13 +109,20 @@ export class AlertsClient {
     }
   }
 
-  public async get({ id, index }: GetAlertParams): Promise<ParsedTechnicalFields> {
+  public async get({
+    id,
+    index,
+  }: GetAlertParams): Promise<ParsedTechnicalFields | null | undefined> {
     try {
       // first search for the alert by id, then use the alert info to check if user has access to it
       const alert = await this.fetchAlert({
         id,
         index,
       });
+
+      if (alert == null) {
+        return;
+      }
 
       // this.authorization leverages the alerting plugin's authorization
       // client exposed to us for reuse
@@ -154,6 +165,10 @@ export class AlertsClient {
         id,
         index,
       });
+
+      if (alert == null) {
+        return;
+      }
 
       await this.authorization.ensureAuthorized({
         ruleTypeId: alert[RULE_ID],

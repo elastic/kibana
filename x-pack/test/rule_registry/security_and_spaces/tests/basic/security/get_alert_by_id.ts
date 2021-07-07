@@ -110,6 +110,22 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(403);
       });
 
+      it('should return a 404 when superuser accesses not-existent alert', async () => {
+        await supertestWithoutAuth
+          .get(`${getSpaceUrlPrefix()}${TEST_URL}?id=myfakeid&index=${apmIndex}`)
+          .auth(superUser.username, superUser.password)
+          .set('kbn-xsrf', 'true')
+          .expect(404);
+      });
+
+      it('should return a 404 when superuser accesses not-existent alerts as data index', async () => {
+        await supertestWithoutAuth
+          .get(`${getSpaceUrlPrefix()}${TEST_URL}?id=${APM_ALERT_ID}&index=myfakeindex`)
+          .auth(superUser.username, superUser.password)
+          .set('kbn-xsrf', 'true')
+          .expect(404);
+      });
+
       describe('Security Solution', () => {
         describe('"read"', () => {
           [secOnlyReadSpacesAll]
