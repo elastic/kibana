@@ -21,6 +21,9 @@ import {
  * 2.) all fetches resolved, and there are documents
  */
 export function sendCompleteMsg(main$: DataMain$, foundDocuments = true) {
+  if (main$.getValue().fetchStatus === FetchStatus.COMPLETE) {
+    return;
+  }
   main$.next({
     fetchStatus: FetchStatus.COMPLETE,
     foundDocuments,
