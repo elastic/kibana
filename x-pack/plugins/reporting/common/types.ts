@@ -56,8 +56,6 @@ export interface TaskRunResult {
 
 export interface ReportSource {
   jobtype: string;
-  kibana_name: string;
-  kibana_id: string;
   created_by: string | false;
   payload: {
     headers: string; // encrypted headers
@@ -68,17 +66,20 @@ export interface ReportSource {
     isDeprecated?: boolean;
   };
   meta: { objectType: string; layout?: string };
-  browser_type: string;
   migration_version: string;
-  max_attempts: number;
-  timeout: number;
-
   status: JobStatus;
   attempts: number;
   output: TaskRunResult | null;
+  created_at: string;
+
+  // fields with undefined values exist in report jobs that have not been claimed
+  kibana_name?: string;
+  kibana_id?: string;
+  browser_type?: string;
+  timeout?: number;
+  max_attempts?: number;
   started_at?: string;
   completed_at?: string;
-  created_at: string;
   process_expiration?: string | null; // must be set to null to clear the expiration
 }
 
@@ -108,37 +109,20 @@ export interface JobContent {
   content: string;
 }
 
-export interface ReportApiJSON {
+/* Info API response: report query results do not need to include the
+ * payload.headers or output.content */
+type ReportSimple = Omit<ReportSource, 'payload' | 'output'> & {
+  payload: Omit<ReportSource['payload'], 'headers'>;
+} & {
+  output?: Omit<Partial<TaskRunResult>, 'content'>; // is undefined for report jobs that are not completed
+};
+
+/*
+ * The response format for all of the report job APIs
+ */
+export interface ReportApiJSON extends ReportSimple {
   id: string;
   index: string;
-  kibana_name: string;
-  kibana_id: string;
-  browser_type: string | undefined;
-  created_at: string;
-  jobtype: string;
-  created_by: string | false;
-  timeout?: number;
-  output?: {
-    content_type: string;
-    size: number;
-    warnings?: string[];
-  };
-  process_expiration?: string;
-  completed_at: string | undefined;
-  payload: {
-    layout?: LayoutParams;
-    title: string;
-    browserTimezone?: string;
-    isDeprecated?: boolean;
-  };
-  meta: {
-    layout?: string;
-    objectType: string;
-  };
-  max_attempts: number;
-  started_at: string | undefined;
-  attempts: number;
-  status: string;
 }
 
 export interface LicenseCheckResults {
@@ -147,13 +131,14 @@ export interface LicenseCheckResults {
   message: string;
 }
 
+/* Notifier Toasts */
 export interface JobSummary {
   id: JobId;
   status: JobStatus;
-  title: string;
-  jobtype: string;
-  maxSizeReached?: boolean;
-  csvContainsFormulas?: boolean;
+  jobtype: ReportSource['jobtype'];
+  title: ReportSource['payload']['title'];
+  maxSizeReached: TaskRunResult['max_size_reached'];
+  csvContainsFormulas: TaskRunResult['csv_contains_formulas'];
 }
 
 export interface JobSummarySet {
