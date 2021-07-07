@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
-import { Observable } from 'rxjs';
-import { map, filter } from 'rxjs/operators';
+import { filter } from 'rxjs/operators';
 import {
   DataPublicPluginStart,
   isCompleteResponse,
@@ -17,8 +16,7 @@ import {
 import { Adapters } from '../../../../../../inspector';
 import { getChartAggConfigs, getDimensions } from '../utils';
 import { tabifyAggResponse } from '../../../../../../data/common';
-import { buildPointSeriesData, Chart } from '../components/chart/point_series';
-import { TimechartBucketInterval } from '../components/timechart_header/timechart_header';
+import { buildPointSeriesData } from '../components/chart/point_series';
 import { FetchStatus } from '../../../types';
 import { DataCharts$ } from './use_saved_search';
 import { AppState } from './discover_state';
@@ -43,7 +41,7 @@ export function fetchChart(
     onResults: (foundDocuments: boolean) => void;
     searchSessionId: string;
   }
-): Observable<{ chartData: Chart; bucketInterval?: TimechartBucketInterval } | undefined> {
+) {
   const interval = appStateContainer.getState().interval ?? 'auto';
   const chartAggConfigs = updateSearchSource(searchSource, interval, data);
 
@@ -64,33 +62,30 @@ export function fetchChart(
         }),
       },
     })
-    .pipe(filter((res) => isCompleteResponse(res)))
-    .pipe(
-      map((res) => {
-        const bucketAggConfig = chartAggConfigs.aggs[1];
-        const tabifiedData = tabifyAggResponse(chartAggConfigs, res.rawResponse);
-        const dimensions = getDimensions(chartAggConfigs, data);
-        if (dimensions) {
-          const chartData = buildPointSeriesData(tabifiedData, dimensions);
-          onResults(true);
-          return {
-            chartData,
-            bucketInterval: search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)
-              ? bucketAggConfig?.buckets?.getInterval()
-              : undefined,
-          };
-        }
-        return undefined;
-      })
-    );
+    .pipe(filter((res) => isCompleteResponse(res)));
 
   fetch$.subscribe(
     (res) => {
-      dataCharts$.next({
-        fetchStatus: FetchStatus.COMPLETE,
-        chartData: res?.chartData,
-        bucketInterval: res?.bucketInterval,
-      });
+      try {
+        const bucketAggConfig = chartAggConfigs.aggs[1];
+        const tabifiedData = tabifyAggResponse(chartAggConfigs, res.rawResponse);
+        const dimensions = getDimensions(chartAggConfigs, data);
+        const bucketInterval = search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)
+          ? bucketAggConfig?.buckets?.getInterval()
+          : undefined;
+        const chartData = buildPointSeriesData(tabifiedData, dimensions!);
+        onResults(true);
+        dataCharts$.next({
+          fetchStatus: FetchStatus.COMPLETE,
+          chartData,
+          bucketInterval,
+        });
+      } catch (e) {
+        dataCharts$.next({
+          fetchStatus: FetchStatus.ERROR,
+          error: e,
+        });
+      }
     },
     (error) => {
       if (error instanceof Error && error.name === 'AbortError') {
