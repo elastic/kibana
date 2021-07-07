@@ -49,19 +49,16 @@ export function getMobileKPIDistributionConfig({ indexPattern }: ConfigProps): S
         label: RESPONSE_LATENCY,
         field: TRANSACTION_DURATION,
         id: TRANSACTION_DURATION,
-        columnType: OPERATION_COLUMN,
       },
       {
         label: MEMORY_USAGE,
         field: METRIC_SYSTEM_MEMORY_USAGE,
         id: METRIC_SYSTEM_MEMORY_USAGE,
-        columnType: OPERATION_COLUMN,
       },
       {
         label: CPU_USAGE,
         field: METRIC_SYSTEM_CPU_USAGE,
         id: METRIC_SYSTEM_CPU_USAGE,
-        columnType: OPERATION_COLUMN,
       },
     ],
   };
