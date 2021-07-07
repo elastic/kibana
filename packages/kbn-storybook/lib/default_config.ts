@@ -24,6 +24,8 @@ export const defaultConfig: StorybookConfig = {
 
     config.node = { fs: 'empty' };
 
+    // Remove when @storybook has moved to @emotion v11
+    // https://github.com/storybookjs/storybook/issues/13145
     const emotion11CompatibleConfig = {
       ...config,
       resolve: {

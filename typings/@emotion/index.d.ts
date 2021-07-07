@@ -8,4 +8,5 @@
 
 // Stub @emotion/core
 // Remove when @storybook has moved to @emotion v11
+// https://github.com/storybookjs/storybook/issues/13145
 export {};
