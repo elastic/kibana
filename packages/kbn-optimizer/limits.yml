@@ -99,7 +99,7 @@ pageLoadAssetSize:
   watcher: 43598
   runtimeFields: 41752
   stackAlerts: 29684
-  presentationUtil: 49767
+  presentationUtil: 94301
   spacesOss: 18817
   indexPatternFieldEditor: 90489
   osquery: 107090
@@ -111,4 +111,6 @@ pageLoadAssetSize:
   screenshotMode: 17856
   ecsMapper: 23151
   visTypePie: 35583
+  expressionRevealImage: 25675
   cases: 144442
+  userSetup: 18532
