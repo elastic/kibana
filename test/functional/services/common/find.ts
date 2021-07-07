@@ -11,6 +11,7 @@ import { WebDriver, WebElement, By, until } from 'selenium-webdriver';
 import { Browsers } from '../remote/browsers';
 import { FtrService, FtrProviderContext } from '../../ftr_provider_context';
 import { WebElementWrapper } from '../lib/web_element_wrapper';
+import { ContextualLocator } from '../lib/contextual_locator';
 
 export class FindService extends FtrService {
   private readonly log = this.ctx.getService('log');
@@ -18,7 +19,7 @@ export class FindService extends FtrService {
   private readonly retry = this.ctx.getService('retry');
 
   private readonly WAIT_FOR_EXISTS_TIME = this.config.get('timeouts.waitForExists');
-  private readonly POLLING_TIME = 500;
+  private readonly POLLING_TIME = 50;
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
   private readonly fixedHeaderHeight = this.config.get('layout.fixedHeaderHeight');
 
@@ -129,8 +130,13 @@ export class FindService extends FtrService {
     timeout: number = this.WAIT_FOR_EXISTS_TIME
   ): Promise<boolean> {
     this.log.debug(`Find.descendantExistsByCssSelector('${selector}') with timeout=${timeout}`);
-    const els = await parentElement._webElement.findElements(By.css(selector));
-    return await this.exists(async () => this.wrapAll(els), timeout);
+    await this._withTimeout(timeout);
+    try {
+      const els = await parentElement._webElement.findElements(By.css(selector));
+      return await this.exists(async () => this.wrapAll(els), timeout);
+    } finally {
+      await this._withTimeout(this.defaultFindTimeout);
+    }
   }
 
   public async descendantDisplayedByCssSelector(
@@ -138,8 +144,9 @@ export class FindService extends FtrService {
     parentElement: WebElementWrapper
   ): Promise<WebElementWrapper | never> {
     this.log.debug(`Find.descendantDisplayedByCssSelector('${selector}')`);
-    const element = await parentElement._webElement.findElement(By.css(selector));
-    const descendant = this.wrap(element, By.css(selector));
+    const locator = By.css(selector);
+    const element = await parentElement._webElement.findElement(locator);
+    const descendant = this.wrap(element, new ContextualLocator(parentElement, locator));
     const isDisplayed = await descendant.isDisplayed();
     if (isDisplayed) {
       return descendant;
@@ -358,6 +365,7 @@ export class FindService extends FtrService {
   ): Promise<void> {
     this.log.debug(`Find.clickByCssSelector('${selector}') with timeout=${timeout}`);
     await this.retry.try(async () => {
+      await this.existsByDisplayedByCssSelector(selector, timeout);
       const element = await this.byCssSelector(selector, timeout);
       if (element) {
         // await element.moveMouseTo();
@@ -452,7 +460,10 @@ export class FindService extends FtrService {
     }
   }
 
-  private wrap(webElement: WebElement | WebElementWrapper, locator: By | null = null) {
+  private wrap(
+    webElement: WebElement | WebElementWrapper,
+    locator: By | ContextualLocator | null = null
+  ) {
     return WebElementWrapper.create(
       webElement,
       locator,

@@ -202,4 +202,10 @@ export class ListingTableService extends FtrService {
       timeout: 5000,
     });
   }
+
+  public async notOnListingPage(appName: AppName) {
+    return !(await this.testSubjects.exists(`${appName}LandingPage`, {
+      timeout: 10,
+    }));
+  }
 }

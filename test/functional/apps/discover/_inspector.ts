@@ -11,7 +11,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'header', 'visualize', 'timePicker']);
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const inspector = getService('inspector');
@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should display request stats with results', async () => {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
-
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await inspector.open();
       const requestStats = await inspector.getTableData();
 

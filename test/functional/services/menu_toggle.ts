@@ -30,7 +30,7 @@ export class MenuToggleService extends FtrService {
 
       await retry.try(async () => {
         // if the menu is clearly in the expected state already, bail out quickly if so
-        const isOpen = await testSubjects.exists(menuTestSubject, { timeout: 1000 });
+        const isOpen = await testSubjects.exists(menuTestSubject, { timeout: 10 });
         if (isOpen === expectedState) {
           return;
         }
