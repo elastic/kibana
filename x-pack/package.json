@@ -210,7 +210,7 @@
     "moment-timezone": "^0.5.14",
     "ngreact": "^0.5.1",
     "node-fetch": "^2.6.1",
-    "nodemailer": "^6.4.16",
+    "nodemailer": "^6.6.2",
     "object-path-immutable": "^0.5.3",
     "papaparse": "^5.2.0",
     "pdfmake": "^0.1.65",
