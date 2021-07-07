@@ -70,6 +70,12 @@ ruleTester.run('@kbn/eslint/module-migration', rule, {
           message: 'Re-exported module "foo" should be "bar"',
         },
       ],
+      output: dedent`
+        import 'bar'
+        require('bar/foo2')
+        export { foo } from 'bar'
+        export const foo2 = 'bar'
+      `,
     },
   ],
 });
