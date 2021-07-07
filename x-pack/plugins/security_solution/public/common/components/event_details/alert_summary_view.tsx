@@ -42,6 +42,7 @@ import { endpointAlertCheck } from '../../utils/endpoint_alert_check';
 
 const StyledEuiDescriptionList = styled(EuiDescriptionList)`
   padding: 24px 4px 4px;
+  word-break: break-word;
 `;
 
 const fields = [
