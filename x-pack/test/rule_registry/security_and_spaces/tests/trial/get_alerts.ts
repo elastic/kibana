@@ -13,8 +13,6 @@ import {
   obsMinRead,
   obsMinReadAlertsRead,
   obsMinReadAlertsReadSpacesAll,
-  obsAlertsRead,
-  obsAlertsReadSpacesAll,
 } from '../../../common/lib/authentication/users';
 import type { User } from '../../../common/lib/authentication/types';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
@@ -86,44 +84,6 @@ export default ({ getService }: FtrProviderContext) => {
           .set('kbn-xsrf', 'true')
           .expect(403);
       });
-
-      it(`${obsAlertsRead.username} should NOT be able to access the APM alert in ${SPACE1}`, async () => {
-        const apmIndex = await getAPMIndexName(superUser);
-        await supertestWithoutAuth
-          .get(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}?id=NoxgpHkBqbdrfX07MqXV&index=${apmIndex}`)
-          .auth(obsAlertsRead.username, obsAlertsRead.password)
-          .set('kbn-xsrf', 'true')
-          .expect(403);
-      });
-
-      it(`${obsAlertsReadSpacesAll.username} should NOT be able to access the APM alert in ${SPACE1}`, async () => {
-        const apmIndex = await getAPMIndexName(superUser);
-        await supertestWithoutAuth
-          .get(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}?id=NoxgpHkBqbdrfX07MqXV&index=${apmIndex}`)
-          .auth(obsAlertsReadSpacesAll.username, obsAlertsReadSpacesAll.password)
-          .set('kbn-xsrf', 'true')
-          .expect(403);
-      });
-
-      for (const scenario of [
-        {
-          user: obsMinRead,
-        },
-        {
-          user: obsAlertsRead,
-        },
-      ]) {
-        it(`${scenario.user.username} should not be able to access the APM alert in ${SPACE1}`, async () => {
-          const apmIndex = await getAPMIndexName(superUser);
-          await supertestWithoutAuth
-            .get(
-              `${getSpaceUrlPrefix(SPACE1)}${TEST_URL}?id=NoxgpHkBqbdrfX07MqXV&index=${apmIndex}`
-            )
-            .auth(scenario.user.username, scenario.user.password)
-            .set('kbn-xsrf', 'true')
-            .expect(403);
-        });
-      }
     });
 
     describe('Space:', () => {

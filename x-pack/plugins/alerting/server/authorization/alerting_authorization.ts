@@ -142,7 +142,7 @@ export class AlertingAuthorization {
    * This method exposes the private 'augmentRuleTypesWithAuthorization' to be
    * used by the RAC/Alerts client
    */
-  public async getAugmentRuleTypesWithAuthorization(
+  public async getAugmentedRuleTypesWithAuthorization(
     featureIds: readonly string[],
     operations: Array<ReadOperations | WriteOperations>,
     authorizationEntity: AlertingAuthorizationEntity

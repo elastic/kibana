@@ -21,6 +21,6 @@ const space2: Space = {
 
 export const spaces: Space[] = [space1, space2];
 
-export const getSpaceUrlPrefix = (spaceId: string) => {
+export const getSpaceUrlPrefix = (spaceId?: string) => {
   return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
 };

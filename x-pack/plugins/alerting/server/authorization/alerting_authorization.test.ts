@@ -1945,7 +1945,7 @@ describe('AlertingAuthorization', () => {
     });
   });
 
-  describe('getAugmentRuleTypesWithAuthorization', () => {
+  describe('getAugmentedRuleTypesWithAuthorization', () => {
     const myOtherAppAlertType: RegistryAlertType = {
       actionGroups: [],
       actionVariables: undefined,
@@ -2014,7 +2014,7 @@ describe('AlertingAuthorization', () => {
       alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
 
       await expect(
-        alertAuthorization.getAugmentRuleTypesWithAuthorization(
+        alertAuthorization.getAugmentedRuleTypesWithAuthorization(
           ['myApp'],
           [ReadOperations.Find, ReadOperations.Get, WriteOperations.Update],
           AlertingAuthorizationEntity.Alert
@@ -2088,7 +2088,7 @@ describe('AlertingAuthorization', () => {
       alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
 
       await expect(
-        alertAuthorization.getAugmentRuleTypesWithAuthorization(
+        alertAuthorization.getAugmentedRuleTypesWithAuthorization(
           ['myApp'],
           [ReadOperations.Find, ReadOperations.Get, WriteOperations.Update],
           AlertingAuthorizationEntity.Alert

@@ -422,7 +422,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
-      await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts');
+      await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts');
       await deleteSpacesAndUsers(getService);
     });
 

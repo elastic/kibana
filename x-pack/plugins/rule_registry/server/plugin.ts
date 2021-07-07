@@ -23,9 +23,10 @@ import { SpacesPluginStart } from '../../spaces/server';
 import { RuleRegistryPluginConfig } from './config';
 import { RuleDataPluginService } from './rule_data_plugin_service';
 import { EventLogService, IEventLogService } from './event_log';
+import { AlertsClient } from './alert_data_client/alerts_client';
 
 export interface RuleRegistryPluginSetupDependencies {
-  security: SecurityPluginSetup;
+  security?: SecurityPluginSetup;
 }
 
 export interface RuleRegistryPluginStartDependencies {
@@ -38,7 +39,10 @@ export interface RuleRegistryPluginSetupContract {
   eventLogService: IEventLogService;
 }
 
-export type RuleRegistryPluginStartContract = void;
+export interface RuleRegistryPluginStartContract {
+  getRacClientWithRequest: (req: KibanaRequest) => Promise<AlertsClient>;
+  alerting: AlertingStart;
+}
 
 export class RuleRegistryPlugin
   implements
@@ -123,7 +127,10 @@ export class RuleRegistryPlugin
     return { ruleDataService: this.ruleDataService, eventLogService };
   }
 
-  public start(core: CoreStart, plugins: RuleRegistryPluginStartDependencies) {
+  public start(
+    core: CoreStart,
+    plugins: RuleRegistryPluginStartDependencies
+  ): RuleRegistryPluginStartContract {
     const { logger, alertsClientFactory, security } = this;
 
     alertsClientFactory.initialize({

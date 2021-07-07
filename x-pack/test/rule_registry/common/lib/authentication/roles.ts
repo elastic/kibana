@@ -11,12 +11,7 @@ export const noKibanaPrivileges: Role = {
   name: 'no_kibana_privileges',
   privileges: {
     elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
+      indices: [],
     },
   },
 };
@@ -25,20 +20,13 @@ export const globalRead: Role = {
   name: 'global_read',
   privileges: {
     elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
+      indices: [],
     },
     kibana: [
       {
         feature: {
           siem: ['read'],
           apm: ['read'],
-          actions: ['read'],
-          actionsSimulators: ['read'],
         },
         spaces: ['*'],
       },
@@ -47,70 +35,83 @@ export const globalRead: Role = {
 };
 
 export const securitySolutionOnlyAll: Role = {
-  name: 'sec_only_all',
+  name: 'sec_only_all_spaces_space1',
   privileges: {
     elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
+      indices: [],
     },
     kibana: [
       {
         feature: {
           siem: ['all'],
-          actions: ['all'],
-          actionsSimulators: ['all'],
         },
         spaces: ['space1'],
+      },
+    ],
+  },
+};
+
+export const securitySolutionOnlyAllSpace2: Role = {
+  name: 'sec_only_all_spaces_space2',
+  privileges: {
+    elasticsearch: {
+      indices: [],
+    },
+    kibana: [
+      {
+        feature: {
+          siem: ['all'],
+        },
+        spaces: ['space2'],
       },
     ],
   },
 };
 
 export const securitySolutionOnlyRead: Role = {
-  name: 'sec_only_read',
+  name: 'sec_only_read_spaces_space1',
   privileges: {
     elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
+      indices: [],
     },
     kibana: [
       {
         feature: {
           siem: ['read'],
-          actions: ['read'],
-          actionsSimulators: ['read'],
         },
         spaces: ['space1'],
+      },
+    ],
+  },
+};
+
+export const securitySolutionOnlyReadSpace2: Role = {
+  name: 'sec_only_read_spaces_space2',
+  privileges: {
+    elasticsearch: {
+      indices: [],
+    },
+    kibana: [
+      {
+        feature: {
+          siem: ['read'],
+        },
+        spaces: ['space2'],
       },
     ],
   },
 };
 
 export const observabilityOnlyAll: Role = {
-  name: 'obs_only_all',
+  name: 'obs_only_all_spaces_space1',
   privileges: {
     elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
+      indices: [],
     },
     kibana: [
       {
         feature: {
           apm: ['all'],
-          actions: ['all'],
-          actionsSimulators: ['all'],
         },
         spaces: ['space1'],
       },
@@ -118,25 +119,52 @@ export const observabilityOnlyAll: Role = {
   },
 };
 
-export const observabilityOnlyRead: Role = {
-  name: 'obs_only_read',
+export const observabilityOnlyAllSpace2: Role = {
+  name: 'obs_only_all_spaces_space2',
   privileges: {
     elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
+      indices: [],
+    },
+    kibana: [
+      {
+        feature: {
+          apm: ['all'],
         },
-      ],
+        spaces: ['space2'],
+      },
+    ],
+  },
+};
+
+export const observabilityOnlyRead: Role = {
+  name: 'obs_only_read_spaces_space1',
+  privileges: {
+    elasticsearch: {
+      indices: [],
     },
     kibana: [
       {
         feature: {
           apm: ['read'],
-          actions: ['read'],
-          actionsSimulators: ['read'],
         },
         spaces: ['space1'],
+      },
+    ],
+  },
+};
+
+export const observabilityOnlyReadSpace2: Role = {
+  name: 'obs_only_read_spaces_space2',
+  privileges: {
+    elasticsearch: {
+      indices: [],
+    },
+    kibana: [
+      {
+        feature: {
+          apm: ['read'],
+        },
+        spaces: ['space2'],
       },
     ],
   },
@@ -146,22 +174,15 @@ export const observabilityOnlyRead: Role = {
  * These roles have access to all spaces.
  */
 export const securitySolutionOnlyAllSpacesAll: Role = {
-  name: 'sec_only_all',
+  name: 'sec_only_all_spaces_all',
   privileges: {
     elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
+      indices: [],
     },
     kibana: [
       {
         feature: {
           siem: ['all'],
-          actions: ['all'],
-          actionsSimulators: ['all'],
         },
         spaces: ['*'],
       },
@@ -170,22 +191,15 @@ export const securitySolutionOnlyAllSpacesAll: Role = {
 };
 
 export const securitySolutionOnlyReadSpacesAll: Role = {
-  name: 'sec_only_read',
+  name: 'sec_only_read_spaces_all',
   privileges: {
     elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
+      indices: [],
     },
     kibana: [
       {
         feature: {
           siem: ['read'],
-          actions: ['read'],
-          actionsSimulators: ['read'],
         },
         spaces: ['*'],
       },
@@ -194,22 +208,15 @@ export const securitySolutionOnlyReadSpacesAll: Role = {
 };
 
 export const observabilityOnlyAllSpacesAll: Role = {
-  name: 'obs_only_all',
+  name: 'obs_only_all_spaces_all',
   privileges: {
     elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
+      indices: [],
     },
     kibana: [
       {
         feature: {
           apm: ['all'],
-          actions: ['all'],
-          actionsSimulators: ['all'],
         },
         spaces: ['*'],
       },
@@ -218,24 +225,15 @@ export const observabilityOnlyAllSpacesAll: Role = {
 };
 
 export const observabilityOnlyReadSpacesAll: Role = {
-  name: 'obs_only_read_all_spaces',
+  name: 'obs_only_read_all_spaces_all',
   privileges: {
     elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
+      indices: [],
     },
     kibana: [
       {
         feature: {
           apm: ['read'],
-          ruleRegistry: ['all'],
-          actions: ['read'],
-          builtInAlerts: ['all'],
-          alerting: ['all'],
         },
         spaces: ['*'],
       },
@@ -254,20 +252,6 @@ export const roles = [
 ];
 
 /**
- * These roles are specifically for the security_only tests where the spaces plugin is disabled. Most of the roles (except
- * for noKibanaPrivileges) have spaces: ['*'] effectively giving it access to the space1 space since no other spaces
- * will exist when the spaces plugin is disabled.
- */
-export const rolesDefaultSpace = [
-  noKibanaPrivileges,
-  globalRead,
-  securitySolutionOnlyAllSpacesAll,
-  securitySolutionOnlyReadSpacesAll,
-  observabilityOnlyAllSpacesAll,
-  observabilityOnlyReadSpacesAll,
-];
-
-/**
  * These roles are only to be used in the 'trial' tests
  * since they rely on subfeature privileges which are a gold licencse feature
  * maybe put these roles into a separate roles file like "trial_roles"?
@@ -276,12 +260,7 @@ export const observabilityMinReadAlertsRead: Role = {
   name: 'obs_only_alerts_read',
   privileges: {
     elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
+      indices: [],
     },
     kibana: [
       {
@@ -302,21 +281,12 @@ export const observabilityMinReadAlertsReadSpacesAll: Role = {
   name: 'obs_minimal_read_alerts_read_spaces_all',
   privileges: {
     elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
+      indices: [],
     },
     kibana: [
       {
         feature: {
           apm: ['minimal_read', 'alerts_read'],
-          ruleRegistry: ['all'],
-          actions: ['read'],
-          builtInAlerts: ['all'],
-          alerting: ['all'],
         },
         spaces: ['*'],
       },
@@ -325,24 +295,15 @@ export const observabilityMinReadAlertsReadSpacesAll: Role = {
 };
 
 export const observabilityMinimalRead: Role = {
-  name: 'obs_minimal_read_spaces_all',
+  name: 'obs_minimal_read',
   privileges: {
     elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
+      indices: [],
     },
     kibana: [
       {
         feature: {
           apm: ['minimal_read'],
-          ruleRegistry: ['all'],
-          actions: ['read'],
-          builtInAlerts: ['all'],
-          alerting: ['all'],
         },
         spaces: ['space1'],
       },
@@ -354,73 +315,12 @@ export const observabilityMinimalReadSpacesAll: Role = {
   name: 'obs_minimal_read_spaces_all',
   privileges: {
     elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
+      indices: [],
     },
     kibana: [
       {
         feature: {
           apm: ['minimal_read'],
-          ruleRegistry: ['all'],
-          actions: ['read'],
-          builtInAlerts: ['all'],
-          alerting: ['all'],
-        },
-        spaces: ['*'],
-      },
-    ],
-  },
-};
-
-export const observabilityOnlyAlertsRead: Role = {
-  name: 'obs_alerts_read_spaces_all',
-  privileges: {
-    elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
-    },
-    kibana: [
-      {
-        feature: {
-          apm: ['alerts_read'],
-          ruleRegistry: ['all'],
-          actions: ['read'],
-          builtInAlerts: ['all'],
-          alerting: ['all'],
-        },
-        spaces: ['space1'],
-      },
-    ],
-  },
-};
-
-export const observabilityOnlyAlertsReadSpacesAll: Role = {
-  name: 'obs_alerts_read_spaces_all',
-  privileges: {
-    elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
-    },
-    kibana: [
-      {
-        feature: {
-          apm: ['alerts_read'],
-          ruleRegistry: ['all'],
-          actions: ['read'],
-          builtInAlerts: ['all'],
-          alerting: ['all'],
         },
         spaces: ['*'],
       },
@@ -442,24 +342,15 @@ export const observabilityOnlyAlertsReadSpacesAll: Role = {
  */
 
 export const observabilityMinReadAlertsAll: Role = {
-  name: 'obs_only_alerts_read',
+  name: 'obs_only_alerts_all',
   privileges: {
     elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
+      indices: [],
     },
     kibana: [
       {
         feature: {
           apm: ['minimal_read', 'alerts_all'],
-          ruleRegistry: ['all'],
-          actions: ['read'],
-          builtInAlerts: ['all'],
-          alerting: ['all'],
         },
         spaces: ['space1'],
       },
@@ -468,24 +359,15 @@ export const observabilityMinReadAlertsAll: Role = {
 };
 
 export const observabilityMinReadAlertsAllSpacesAll: Role = {
-  name: 'obs_minimal_read_alerts_read_spaces_all',
+  name: 'obs_minimal_read_alerts_all_spaces_all',
   privileges: {
     elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
+      indices: [],
     },
     kibana: [
       {
         feature: {
           apm: ['minimal_read', 'alerts_all'],
-          ruleRegistry: ['all'],
-          actions: ['read'],
-          builtInAlerts: ['all'],
-          alerting: ['all'],
         },
         spaces: ['*'],
       },
@@ -494,24 +376,15 @@ export const observabilityMinReadAlertsAllSpacesAll: Role = {
 };
 
 export const observabilityMinimalAll: Role = {
-  name: 'obs_minimal_read_spaces_all',
+  name: 'obs_minimal_all',
   privileges: {
     elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
+      indices: [],
     },
     kibana: [
       {
         feature: {
           apm: ['minimal_all'],
-          ruleRegistry: ['all'],
-          actions: ['read'],
-          builtInAlerts: ['all'],
-          alerting: ['all'],
         },
         spaces: ['space1'],
       },
@@ -520,24 +393,15 @@ export const observabilityMinimalAll: Role = {
 };
 
 export const observabilityMinimalAllSpacesAll: Role = {
-  name: 'obs_minimal_read_spaces_all',
+  name: 'obs_minimal_all_spaces_all',
   privileges: {
     elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
+      indices: [],
     },
     kibana: [
       {
         feature: {
           apm: ['minimal_all'],
-          ruleRegistry: ['all'],
-          actions: ['read'],
-          builtInAlerts: ['all'],
-          alerting: ['all'],
         },
         spaces: ['*'],
       },
@@ -545,54 +409,27 @@ export const observabilityMinimalAllSpacesAll: Role = {
   },
 };
 
-export const observabilityOnlyAlertsAll: Role = {
-  name: 'obs_alerts_read_spaces_all',
-  privileges: {
-    elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
-    },
-    kibana: [
-      {
-        feature: {
-          apm: ['alerts_all'],
-          ruleRegistry: ['all'],
-          actions: ['read'],
-          builtInAlerts: ['all'],
-          alerting: ['all'],
-        },
-        spaces: ['space1'],
-      },
-    ],
-  },
-};
-
-export const observabilityOnlyAlertsAllSpacesAll: Role = {
-  name: 'obs_alerts_read_spaces_all',
-  privileges: {
-    elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
-    },
-    kibana: [
-      {
-        feature: {
-          apm: ['alerts_all'],
-          ruleRegistry: ['all'],
-          actions: ['read'],
-          builtInAlerts: ['all'],
-          alerting: ['all'],
-        },
-        spaces: ['*'],
-      },
-    ],
-  },
-};
+export const allRoles = [
+  noKibanaPrivileges,
+  globalRead,
+  securitySolutionOnlyAll,
+  securitySolutionOnlyRead,
+  observabilityOnlyAll,
+  observabilityOnlyRead,
+  securitySolutionOnlyAllSpacesAll,
+  securitySolutionOnlyReadSpacesAll,
+  observabilityOnlyAllSpacesAll,
+  observabilityOnlyReadSpacesAll,
+  observabilityMinReadAlertsRead,
+  observabilityMinReadAlertsReadSpacesAll,
+  observabilityMinimalRead,
+  observabilityMinimalReadSpacesAll,
+  observabilityMinReadAlertsAll,
+  observabilityMinReadAlertsAllSpacesAll,
+  observabilityMinimalAll,
+  observabilityMinimalAllSpacesAll,
+  securitySolutionOnlyAllSpace2,
+  securitySolutionOnlyReadSpace2,
+  observabilityOnlyAllSpace2,
+  observabilityOnlyReadSpace2,
+];

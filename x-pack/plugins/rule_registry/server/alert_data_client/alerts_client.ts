@@ -69,7 +69,7 @@ export class AlertsClient {
     featureIds: string[],
     operations: Array<ReadOperations | WriteOperations>
   ) {
-    return this.authorization.getAugmentRuleTypesWithAuthorization(
+    return this.authorization.getAugmentedRuleTypesWithAuthorization(
       featureIds.length !== 0 ? featureIds : validFeatureIds,
       operations,
       AlertingAuthorizationEntity.Alert
@@ -162,6 +162,13 @@ export class AlertsClient {
         entity: AlertingAuthorizationEntity.Alert,
       });
 
+      this.auditLogger?.log(
+        alertAuditEvent({
+          action: AlertAuditAction.UPDATE,
+          id,
+        })
+      );
+
       const { body: response } = await this.esClient.update<ParsedTechnicalFields>({
         ...decodeVersion(_version),
         id,
@@ -173,13 +180,6 @@ export class AlertsClient {
         },
         refresh: 'wait_for',
       });
-
-      this.auditLogger?.log(
-        alertAuditEvent({
-          action: AlertAuditAction.UPDATE,
-          id,
-        })
-      );
 
       return {
         ...response,
@@ -198,7 +198,7 @@ export class AlertsClient {
   }
 
   public async getAuthorizedAlertsIndices(featureIds: string[]): Promise<string[] | undefined> {
-    const augmentedRuleTypes = await this.authorization.getAugmentRuleTypesWithAuthorization(
+    const augmentedRuleTypes = await this.authorization.getAugmentedRuleTypesWithAuthorization(
       featureIds,
       [ReadOperations.Find, ReadOperations.Get, WriteOperations.Update],
       AlertingAuthorizationEntity.Alert

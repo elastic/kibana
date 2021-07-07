@@ -17,12 +17,16 @@ import {
   observabilityOnlyAllSpacesAll,
   observabilityOnlyReadSpacesAll,
   // trial license roles
+  observabilityMinReadAlertsAll,
   observabilityMinReadAlertsRead,
   observabilityMinReadAlertsReadSpacesAll,
   observabilityMinimalRead,
   observabilityMinimalReadSpacesAll,
-  observabilityOnlyAlertsRead,
-  observabilityOnlyAlertsReadSpacesAll,
+  securitySolutionOnlyAllSpace2,
+  securitySolutionOnlyReadSpace2,
+  observabilityOnlyAllSpace2,
+  observabilityOnlyReadSpace2,
+  observabilityMinReadAlertsAllSpacesAll,
 } from './roles';
 import { User } from './types';
 
@@ -33,39 +37,75 @@ export const superUser: User = {
 };
 
 export const secOnly: User = {
-  username: 'sec_only',
-  password: 'sec_only',
+  username: 'sec_only_all_spaces_space1',
+  password: 'sec_only_all_spaces_space1',
   roles: [securitySolutionOnlyAll.name],
 };
 
+export const secOnlySpace2: User = {
+  username: 'sec_only_all_spaces_space2',
+  password: 'sec_only_all_spaces_space2',
+  roles: [securitySolutionOnlyAllSpace2.name],
+};
+
 export const secOnlyRead: User = {
-  username: 'sec_only_read',
-  password: 'sec_only_read',
+  username: 'sec_only_read_spaces_space1',
+  password: 'sec_only_read_spaces_space1',
   roles: [securitySolutionOnlyRead.name],
 };
 
+export const secOnlyReadSpace2: User = {
+  username: 'sec_only_read_spaces_space2',
+  password: 'sec_only_read_spaces_space2',
+  roles: [securitySolutionOnlyReadSpace2.name],
+};
+
 export const obsOnly: User = {
-  username: 'obs_only',
-  password: 'obs_only',
+  username: 'obs_only_all_spaces_space1',
+  password: 'obs_only_all_spaces_space1',
   roles: [observabilityOnlyAll.name],
 };
 
+export const obsOnlySpace2: User = {
+  username: 'obs_only_all_spaces_space2',
+  password: 'obs_only_all_spaces_space2',
+  roles: [observabilityOnlyAllSpace2.name],
+};
+
 export const obsOnlyRead: User = {
-  username: 'obs_only_read',
-  password: 'obs_only_read',
+  username: 'obs_only_read_spaces_space1',
+  password: 'obs_only_read_spaces_space1',
   roles: [observabilityOnlyRead.name],
 };
 
+export const obsOnlyReadSpace2: User = {
+  username: 'obs_only_read_spaces_space2',
+  password: 'obs_only_read_spaces_space2',
+  roles: [observabilityOnlyReadSpace2.name],
+};
+
 export const obsSec: User = {
-  username: 'obs_sec',
-  password: 'obs_sec',
+  username: 'sec_only_all_spaces_space1_and_obs_only_all_spaces_space1',
+  password: 'sec_only_all_spaces_space1_and_obs_only_all_spaces_space1',
   roles: [securitySolutionOnlyAll.name, observabilityOnlyAll.name],
 };
 
+export const obsSecAllSpace2: User = {
+  username: 'sec_only_all_spaces_space2_and_obs_only_all_spaces_space2',
+  password: 'sec_only_all_spaces_space2_and_obs_only_all_spaces_space2',
+  roles: [securitySolutionOnlyAllSpace2.name, observabilityOnlyAllSpace2.name],
+};
+
 export const obsSecRead: User = {
-  username: 'obs_sec_read',
-  password: 'obs_sec_read',
+  username: 'sec_only_read_spaces_space1_and_obs_only_read_spaces_space1',
+  password: 'sec_only_read_spaces_space1_and_obs_only_read_spaces_space1',
   roles: [securitySolutionOnlyRead.name, observabilityOnlyRead.name],
+};
+
+export const obsSecReadSpace2: User = {
+  username: 'sec_only_read_spaces_space2_and_obs_only_read_spaces_space2',
+  password: 'sec_only_read_spaces_space2_and_obs_only_read_spaces_space2',
+  roles: [securitySolutionOnlyReadSpace2.name, observabilityOnlyReadSpace2.name],
 };
 
 export const globalRead: User = {
@@ -81,8 +121,8 @@ export const noKibanaPrivileges: User = {
 };
 
 export const obsOnlyReadSpacesAll: User = {
-  username: 'obs_only_read_all_spaces',
-  password: 'obs_only_read_all_spaces',
+  username: 'obs_only_read_all_spaces_all',
+  password: 'obs_only_read_all_spaces_all',
   roles: [observabilityOnlyReadSpacesAll.name],
 };
 
@@ -104,32 +144,32 @@ export const users = [
  */
 
 export const secOnlySpacesAll: User = {
-  username: 'sec_only',
-  password: 'sec_only',
+  username: 'sec_only_all_spaces_all',
+  password: 'sec_only_all_spaces_all',
   roles: [securitySolutionOnlyAllSpacesAll.name],
 };
 
 export const secOnlyReadSpacesAll: User = {
-  username: 'sec_only_read',
-  password: 'sec_only_read',
+  username: 'sec_only_read_spaces_all',
+  password: 'sec_only_read_spaces_all',
   roles: [securitySolutionOnlyReadSpacesAll.name],
 };
 
 export const obsOnlySpacesAll: User = {
-  username: 'obs_only',
-  password: 'obs_only',
+  username: 'obs_only_all_spaces_all',
+  password: 'obs_only_all_spaces_all',
   roles: [observabilityOnlyAllSpacesAll.name],
 };
 
 export const obsSecSpacesAll: User = {
-  username: 'obs_sec',
-  password: 'obs_sec',
+  username: 'sec_only_all_spaces_all_and_obs_only_all_spaces_all',
+  password: 'sec_only_all_spaces_all_and_obs_only_all_spaces_all',
   roles: [securitySolutionOnlyAllSpacesAll.name, observabilityOnlyAllSpacesAll.name],
 };
 
 export const obsSecReadSpacesAll: User = {
-  username: 'obs_sec_read',
-  password: 'obs_sec_read',
+  username: 'sec_only_read_all_spaces_all_and_obs_only_read_all_spaces_all',
+  password: 'sec_only_read_all_spaces_all_and_obs_only_read_all_spaces_all',
   roles: [securitySolutionOnlyReadSpacesAll.name, observabilityOnlyReadSpacesAll.name],
 };
 
@@ -184,29 +224,13 @@ export const obsMinReadSpacesAll: User = {
   roles: [observabilityMinimalReadSpacesAll.name],
 };
 
-// apm: ['alerts_read']
-// spaces: ['space1]
-export const obsAlertsRead: User = {
-  username: 'obs_alerts_read_single_space',
-  password: 'obs_alerts_read_single_space',
-  roles: [observabilityOnlyAlertsRead.name],
-};
-
-// apm: ['alerts_read']
-// spaces: ['*']
-export const obsAlertsReadSpacesAll: User = {
-  username: 'obs_alerts_read_all_spaces',
-  password: 'obs_alerts_read_all_spaces',
-  roles: [observabilityOnlyAlertsReadSpacesAll.name],
-};
-
 // FOR UPDATES
 // apm: ['minimal_read', 'alerts_all']
 // spaces: ['space1']
 export const obsMinReadAlertsAll: User = {
   username: 'obs_minimal_read_alerts_all_single_space',
   password: 'obs_minimal_read_alerts_all_single_space',
-  roles: [observabilityMinReadAlertsRead.name],
+  roles: [observabilityMinReadAlertsAll.name],
 };
 
 // apm: ['minimal_read', 'alerts_all']
@@ -214,7 +238,7 @@ export const obsMinReadAlertsAll: User = {
 export const obsMinReadAlertsAllSpacesAll: User = {
   username: 'obs_minimal_read_alerts_all_all_spaces',
   password: 'obs_minimal_read_alerts_all_all_spaces',
-  roles: [observabilityMinReadAlertsReadSpacesAll.name],
+  roles: [observabilityMinReadAlertsAllSpacesAll.name],
 };
 
 // apm: ['minimal_all']
@@ -233,18 +257,45 @@ export const obsMinAllSpacesAll: User = {
   roles: [observabilityMinimalReadSpacesAll.name],
 };
 
-// apm: ['alerts_all']
-// spaces: ['space1]
-export const obsAlertsAll: User = {
-  username: 'obs_alerts_all_single_space',
-  password: 'obs_alerts_all_single_space',
-  roles: [observabilityOnlyAlertsRead.name],
-};
+export const trialUsers = [
+  obsMinReadAlertsRead,
+  obsMinReadAlertsReadSpacesAll,
+  obsMinRead,
+  obsMinReadSpacesAll,
+  obsMinReadAlertsAll,
+  obsMinReadAlertsAllSpacesAll,
+  obsMinAll,
+  obsMinAllSpacesAll,
+];
 
-// apm: ['alerts_all']
-// spaces: ['*']
-export const obsAlertsAllSpacesAll: User = {
-  username: 'obs_alerts_all_all_spaces',
-  password: 'obs_alerts_all_all_spaces',
-  roles: [observabilityOnlyAlertsReadSpacesAll.name],
-};
+export const allUsers = [
+  superUser,
+  secOnly,
+  secOnlyRead,
+  obsOnly,
+  obsOnlyRead,
+  obsSec,
+  obsSecRead,
+  globalRead,
+  noKibanaPrivileges,
+  obsOnlyReadSpacesAll,
+  secOnlySpacesAll,
+  secOnlyReadSpacesAll,
+  obsOnlySpacesAll,
+  obsSecSpacesAll,
+  obsSecReadSpacesAll,
+  obsMinReadAlertsRead,
+  obsMinReadAlertsReadSpacesAll,
+  obsMinRead,
+  obsMinReadSpacesAll,
+  obsMinReadAlertsAll,
+  obsMinReadAlertsAllSpacesAll,
+  obsMinAll,
+  obsMinAllSpacesAll,
+  secOnlySpace2,
+  secOnlyReadSpace2,
+  obsOnlySpace2,
+  obsOnlyReadSpace2,
+  obsSecAllSpace2,
+  obsSecReadSpace2,
+];
