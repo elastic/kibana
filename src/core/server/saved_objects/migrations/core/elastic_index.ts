@@ -32,6 +32,7 @@ export interface FullIndexInfo {
  * Types that are no longer registered and need to be removed
  */
 export const REMOVED_TYPES: string[] = [
+  'apm-services-telemetry',
   'background-session',
   'cases-sub-case',
   'file-upload-telemetry',
