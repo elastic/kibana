@@ -47,21 +47,18 @@ attribute to compare the latency distribution of transactions with and without
 the selected attribute.
 //TBD: Talk about interpreting the skew of attributes in chart?
 
-////
-For example, in the screenshot below, the field `user_agent.name` and value `HeadlessChrome`
-exists primarily in higher-latency transactions between 3.7 and 8.7 seconds.
-
-Select the `+` filter to create a new query in the APM app for transactions with
-`user_agent.name: HeadlessChrome`. With the "noise" now filtered out,
-you can begin viewing sample traces to continue your investigation.
-////
-
 If a correlated attribute seems noteworthy, use the **Filter** quick links:
 
 * `+` creates a new query in the APM app for filtering transactions containing
 the selected value.
 * `-` creates a new query in the APM app to filter out transactions containing
 the selected value.
+
+In this example screenshot, the field `labels.orderPriceRange` and value `large`
+exists primarily in higher-latency transactions between 0.1 and 4.0 seconds.
+Select the `+` filter in the first row of the table to create a new query in the
+APM app for transactions with this attribute. With the "noise" now filtered out,
+you can begin viewing sample traces to continue your investigation.
 
 [discrete]
 [[correlations-error-rate]]
