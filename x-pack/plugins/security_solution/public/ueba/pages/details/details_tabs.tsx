@@ -17,7 +17,7 @@ import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { UebaDetailsTabsProps } from './types';
 import { type } from './utils';
 
-// import { HostRulesQueryTabBody } from '../navigation';
+import { HostRulesQueryTabBody } from '../navigation';
 
 export const UebaDetailsTabs = React.memo<UebaDetailsTabsProps>(
   ({
@@ -76,8 +76,7 @@ export const UebaDetailsTabs = React.memo<UebaDetailsTabsProps>(
     return (
       <Switch>
         <Route path={`${uebaDetailsPagePath}/:tabName(${UebaTableType.hostRules})`}>
-          {/* <HostRulesQueryTabBody {...tabProps} />*/}
-          <p {...tabProps}>{`hostRules`}</p>
+          <HostRulesQueryTabBody {...tabProps} />
         </Route>
         <Route path={`${uebaDetailsPagePath}/:tabName(${UebaTableType.hostTactics})`}>
           {/* <HostRulesQueryTabBody {...tabProps} />*/}

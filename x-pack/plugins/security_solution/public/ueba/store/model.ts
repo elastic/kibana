@@ -30,6 +30,9 @@ export interface BasicQueryPaginated {
 export interface RiskScoreQuery extends BasicQueryPaginated {
   sort: RiskScoreSortField;
 }
+export interface HostRulesQuery extends BasicQueryPaginated {
+  sort: HostRulesSortField;
+}
 
 export interface TableUpdates {
   activePage?: number;
@@ -47,7 +50,7 @@ export interface UebaPageModel {
 }
 
 export interface UebaDetailsQueries {
-  [UebaTableType.hostRules]: RiskScoreQuery;
+  [UebaTableType.hostRules]: HostRulesQuery;
   [UebaTableType.hostTactics]: RiskScoreQuery;
   [UebaTableType.userRules]: RiskScoreQuery;
 }

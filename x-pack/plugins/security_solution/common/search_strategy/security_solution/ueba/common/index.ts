@@ -18,3 +18,14 @@ export interface RiskScoreItem {
   risk_score: Maybe<number>;
   risk_keyword: Maybe<string>;
 }
+export enum HostRulesFields {
+  hostName = 'hostName',
+  riskScore = 'riskScore',
+  riskKeyword = 'riskKeyword',
+}
+export interface HostRulesItem {
+  _id?: Maybe<string>;
+  host_name: Maybe<string>;
+  risk_score: Maybe<number>;
+  risk_keyword: Maybe<string>;
+}
