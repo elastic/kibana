@@ -18,6 +18,12 @@ import {
 import { DataRequestDescriptor } from './data_request_descriptor_types';
 import { AbstractSourceDescriptor, TermJoinSourceDescriptor } from './source_descriptor_types';
 import { VectorShapeTypeCounts } from '../get_geometry_counts';
+import {
+  KBN_FEATURE_COUNT,
+  KBN_IS_TILE_COMPLETE,
+  KBN_METADATA_FEATURE,
+  KBN_VECTOR_SHAPE_TYPE_COUNTS,
+} from '../constants';
 
 export type Attribution = {
   label: string;
@@ -31,10 +37,10 @@ export type JoinDescriptor = {
 
 export type TileMetaFeature = Feature & {
   properties: {
-    __kbn_metadata_feature__: true;
-    __kbn_is_tile_complete__: boolean;
-    __kbn_feature_count__: number;
-    __kbn_vector_shape_type_counts__: VectorShapeTypeCounts;
+    [KBN_METADATA_FEATURE]: true;
+    [KBN_IS_TILE_COMPLETE]: boolean;
+    [KBN_FEATURE_COUNT]: number;
+    [KBN_VECTOR_SHAPE_TYPE_COUNTS]: VectorShapeTypeCounts;
     fieldMeta?: FieldMeta;
   };
 };
