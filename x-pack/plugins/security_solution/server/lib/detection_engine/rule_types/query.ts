@@ -14,13 +14,15 @@ import { buildEsQuery, IIndexPattern } from '../../../../../../../src/plugins/da
 
 import { RuleDataClient } from '../../../../../rule_registry/server';
 import { CUSTOM_ALERT_TYPE_ID } from '../../../../common/constants';
+import { SetupPlugins } from '../../../../target/types/server/plugin';
 
 import { createSecurityRuleTypeFactory } from './create_security_rule_type_factory';
 
-export const createQueryAlertType = (ruleDataClient: RuleDataClient, logger: Logger) => {
+export const createQueryAlertType = (lists: SetupPlugins['lists'], ruleDataClient: RuleDataClient, logger: Logger) => {
   const createSecurityRuleType = createSecurityRuleTypeFactory({
-    ruleDataClient,
+    lists,
     logger,
+    ruleDataClient,
   });
   return createSecurityRuleType({
     id: CUSTOM_ALERT_TYPE_ID,
