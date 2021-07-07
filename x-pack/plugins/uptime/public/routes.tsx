@@ -23,7 +23,7 @@ import { UptimePage, useUptimeTelemetry } from './hooks';
 import { OverviewPageComponent } from './pages/overview';
 import { SyntheticsCheckSteps } from './pages/synthetics/synthetics_checks';
 import { ClientPluginsStart } from './apps/plugin';
-import { MonitorPageTitle } from './components/monitor/monitor_title';
+import { MonitorPageTitle, MonitorPageTitleContent } from './components/monitor/monitor_title';
 import { UptimeDatePicker } from './components/common/uptime_date_picker';
 import { useKibana } from '../../../../src/plugins/kibana_react/public';
 import { CertRefreshBtn } from './components/certificates/cert_refresh_btn';
@@ -36,7 +36,11 @@ interface RouteProps {
   dataTestSubj: string;
   title: string;
   telemetryId: UptimePage;
-  pageHeader?: { pageTitle: string | JSX.Element; rightSideItems?: JSX.Element[] };
+  pageHeader?: {
+    children?: JSX.Element;
+    pageTitle: string | JSX.Element;
+    rightSideItems?: JSX.Element[];
+  };
 }
 
 const baseTitle = 'Uptime - Kibana';
@@ -53,6 +57,7 @@ const Routes: RouteProps[] = [
     dataTestSubj: 'uptimeMonitorPage',
     telemetryId: UptimePage.Monitor,
     pageHeader: {
+      children: <MonitorPageTitleContent />,
       pageTitle: <MonitorPageTitle />,
       rightSideItems: [<UptimeDatePicker />],
     },
