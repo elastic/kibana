@@ -21,23 +21,8 @@ export const BuildKibanaExamplePlugins: Task = {
       `--kibana-version=${config.getBuildVersion()}`,
     ];
 
-    // causes build errors
-    const exclude = [
-      'bfetch_explorer',
-      'dashboard_embeddable_examples',
-      'embeddable_examples',
-      'embeddable_explorer',
-      'search_examples',
-      'state_containers_examples',
-      'ui_action_examples',
-      'ui_actions_explorer',
-      'url_generators_examples',
-      'url_generators_explorer',
-    ];
-
     const folders = Fs.readdirSync(examplesDir, { withFileTypes: true })
       .filter((f) => f.isDirectory())
-      .filter((f) => !exclude.includes(f.name))
       .map((f) => Path.resolve(REPO_ROOT, 'examples', f.name));
 
     for (const examplePlugin of folders) {
