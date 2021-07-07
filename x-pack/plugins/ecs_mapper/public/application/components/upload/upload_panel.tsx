@@ -19,7 +19,7 @@ import {
   EuiHorizontalRule,
   EuiFilePicker,
   EuiLoadingSpinner,
-  EuiTitle
+  EuiTitle,
 } from '@elastic/eui';
 
 import { MapperInformational } from './mapper_informational';
@@ -66,7 +66,7 @@ export const AboutPanel: FC<Props> = ({ onFilePickerChange }) => {
 export const LoadingPanel: FC = () => {
   return (
     <EuiPage className="prfDevTool__page mapper-main" data-test-subj="ecsMapperFileLoading">
-       <EuiPageBody className="prfDevTool__page__pageBody">
+      <EuiPageBody className="prfDevTool__page__pageBody">
         <EuiPageContent className="prfDevTool__page__pageBodyContent">
           <div style={{ textAlign: 'center' }}>
             <EuiTitle size="s">

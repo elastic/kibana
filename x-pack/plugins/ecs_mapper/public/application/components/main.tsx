@@ -15,14 +15,12 @@ import { EcsMapperUploadView } from '../components/upload/index';
 export const EcsMapperMainUi: FC = () => {
   const { fileUpload } = getPluginsStart();
   const services = {
-    fileUpload
+    fileUpload,
   };
 
   return (
     <KibanaContextProvider services={{ ...services }}>
-      <EcsMapperUploadView
-        fileUpload={fileUpload}
-      />
+      <EcsMapperUploadView fileUpload={fileUpload} />
     </KibanaContextProvider>
   );
 };

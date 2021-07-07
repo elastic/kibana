@@ -11,110 +11,105 @@ import { AboutPanel, LoadingPanel } from './upload_panel';
 import { readFile } from '../util/utils';
 
 export class EcsMapperUploadView extends Component {
-    constructor(props) {
-      super(props);
-  
-      this.state = {
-        files: {},
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      files: {},
+      fileName: '',
+      fileContents: '',
+      data: [],
+      fileSize: 0,
+      fileTooLarge: false,
+      fileCouldNotBeRead: false,
+    };
+
+    this.maxFileUploadBytes = props.fileUpload.getMaxBytes();
+  }
+
+  async componentDidMount() {
+    // check the user has the correct permission to import data.
+    // note, calling hasImportPermission with no arguments just checks the
+    // cluster privileges, the user will still need index privileges to create and ingest
+    const hasPermissionToImport = await this.props.fileUpload.hasImportPermission({
+      checkCreateIndexPattern: false,
+      checkHasManagePipeline: true,
+    });
+    this.setState({ hasPermissionToImport });
+  }
+
+  onFilePickerChange = (files) => {
+    this.setState(
+      {
+        loading: files.length > 0,
+        bottomBarVisible: files.length > 0,
+        loaded: false,
         fileName: '',
         fileContents: '',
         data: [],
         fileSize: 0,
         fileTooLarge: false,
         fileCouldNotBeRead: false,
-      };
-  
-      this.maxFileUploadBytes = props.fileUpload.getMaxBytes();
-    }
-  
-    async componentDidMount() {
-      // check the user has the correct permission to import data.
-      // note, calling hasImportPermission with no arguments just checks the
-      // cluster privileges, the user will still need index privileges to create and ingest
-      const hasPermissionToImport = await this.props.fileUpload.hasImportPermission({
-        checkCreateIndexPattern: false,
-        checkHasManagePipeline: true,
-      });
-      this.setState({ hasPermissionToImport });
-    }
-  
-    onFilePickerChange = (files) => {
-  
-      this.setState(
-        {
-          loading: files.length > 0,
-          bottomBarVisible: files.length > 0,
-          loaded: false,
-          fileName: '',
-          fileContents: '',
-          data: [],
-          fileSize: 0,
-          fileTooLarge: false,
-          fileCouldNotBeRead: false,
-          fileCouldNotBeReadPermissionError: false,
-        },
-        () => {
-          if (files.length) {
-            this.loadFile(files[0]);
-          }
+        fileCouldNotBeReadPermissionError: false,
+      },
+      () => {
+        if (files.length) {
+          this.loadFile(files[0]);
         }
-      );
-    };
-  
-    async loadFile(file) {
-      if (file.size <= this.maxFileUploadBytes) {
-        try {
-          const { data, fileContents } = await readFile(file, this.maxFileUploadBytes);
-          console.log(fileContents)
-          this.setState({
-            data,
-            fileContents,
-            fileName: file.name,
-            fileSize: file.size,
-            loading: false
-          });
-        } catch (error) {
-          this.setState({
-            loaded: false,
-            loading: false,
-            fileCouldNotBeRead: true,
-          });
-        }
-      } else {
+      }
+    );
+  };
+
+  async loadFile(file) {
+    if (file.size <= this.maxFileUploadBytes) {
+      try {
+        const { data, fileContents } = await readFile(file, this.maxFileUploadBytes);
+        console.log(fileContents);
+        this.setState({
+          data,
+          fileContents,
+          fileName: file.name,
+          fileSize: file.size,
+          loading: false,
+        });
+      } catch (error) {
         this.setState({
           loaded: false,
           loading: false,
-          fileTooLarge: true,
-          fileName: file.name,
-          fileSize: file.size,
+          fileCouldNotBeRead: true,
         });
       }
-    }
-
-    onCancel = () => {
-      this.onFilePickerChange([]);
-    };
-  
-    render() {
-      const {
-        loading,
-        loaded,
-        fileCouldNotBeReadPermissionError,
-      } = this.state;
-  
-      return (
-        <div>
-          <>
-            {!loading && !loaded && (
-              <AboutPanel
-                onFilePickerChange={this.onFilePickerChange}
-                disabled={!fileCouldNotBeReadPermissionError}
-              />
-            )}
-  
-            {loading && <LoadingPanel />}
-          </>
-        </div>
-      );
+    } else {
+      this.setState({
+        loaded: false,
+        loading: false,
+        fileTooLarge: true,
+        fileName: file.name,
+        fileSize: file.size,
+      });
     }
   }
+
+  onCancel = () => {
+    this.onFilePickerChange([]);
+  };
+
+  render() {
+    const { loading, loaded, fileCouldNotBeReadPermissionError } = this.state;
+
+    return (
+      <div>
+        <>
+          {!loading && !loaded && (
+            <AboutPanel
+              onFilePickerChange={this.onFilePickerChange}
+              disabled={!fileCouldNotBeReadPermissionError}
+            />
+          )}
+
+          {loading && <LoadingPanel />}
+        </>
+      </div>
+    );
+  }
+}

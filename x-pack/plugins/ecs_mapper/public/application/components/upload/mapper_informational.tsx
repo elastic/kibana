@@ -8,14 +8,7 @@
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC } from 'react';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLink,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { getPluginsStart } from '../../../kibana_services';
 
@@ -35,7 +28,7 @@ export const MapperInformational: FC = () => {
   return (
     <EuiFlexGroup gutterSize="xl" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiIcon size="xxl" type="addDataApp" className="ecs-mapper-informational__icon"/>
+        <EuiIcon size="xxl" type="addDataApp" className="ecs-mapper-informational__icon" />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiText>
@@ -66,7 +59,7 @@ export const MapperInformational: FC = () => {
               perform field rename and copy operations, as well as some field format adjustments. It's up to you to integrate them in a complete pipeline that ingests and outputs the data however you need."
             />
           </p>
-        </EuiText>        
+        </EuiText>
         <EuiSpacer size="m" />
         <EuiText>
           <p>
@@ -82,4 +75,3 @@ export const MapperInformational: FC = () => {
     </EuiFlexGroup>
   );
 };
-
