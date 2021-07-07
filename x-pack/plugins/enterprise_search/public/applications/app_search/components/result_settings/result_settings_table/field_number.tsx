@@ -43,11 +43,10 @@ const handleFieldNumberBlur = (
   clearAction: (fieldName: string) => void
 ) => {
   return (e: FocusEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value, 10);
-    const fieldValue = Math.min(
-      SIZE_FIELD_MAXIMUM,
-      Math.max(SIZE_FIELD_MINIMUM, isNaN(value) ? 0 : value)
-    );
+    let fieldValue = parseInt(e.target.value, 10);
+    if (!isNaN(fieldValue)) {
+      fieldValue = Math.min(SIZE_FIELD_MAXIMUM, Math.max(SIZE_FIELD_MINIMUM, fieldValue));
+    }
     updateOrClearSizeForField(fieldName, fieldValue, updateAction, clearAction);
   };
 };
