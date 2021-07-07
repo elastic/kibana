@@ -2,20 +2,14 @@
 
 [Home](./index.md) &gt; [kibana-plugin-plugins-data-public](./kibana-plugin-plugins-data-public.md) &gt; [EsQueryConfig](./kibana-plugin-plugins-data-public.esqueryconfig.md)
 
-## EsQueryConfig interface
+## EsQueryConfig type
 
 <b>Signature:</b>
 
 ```typescript
-export interface EsQueryConfig 
+export declare type EsQueryConfig = KueryQueryOptions & {
+    allowLeadingWildcards: boolean;
+    queryStringOptions: Record<string, any>;
+    ignoreFilterIfFieldNotInIndex: boolean;
+};
 ```
-
-## Properties
-
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [allowLeadingWildcards](./kibana-plugin-plugins-data-public.esqueryconfig.allowleadingwildcards.md) | <code>boolean</code> |  |
-|  [dateFormatTZ](./kibana-plugin-plugins-data-public.esqueryconfig.dateformattz.md) | <code>string</code> |  |
-|  [ignoreFilterIfFieldNotInIndex](./kibana-plugin-plugins-data-public.esqueryconfig.ignorefilteriffieldnotinindex.md) | <code>boolean</code> |  |
-|  [queryStringOptions](./kibana-plugin-plugins-data-public.esqueryconfig.querystringoptions.md) | <code>Record&lt;string, any&gt;</code> |  |
-

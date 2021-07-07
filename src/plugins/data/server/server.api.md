@@ -478,19 +478,15 @@ export const esQuery: {
     buildEsQuery: typeof buildEsQuery;
 };
 
+// Warning: (ae-forgotten-export) The symbol "KueryQueryOptions" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "EsQueryConfig" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export interface EsQueryConfig {
-    // (undocumented)
+export type EsQueryConfig = KueryQueryOptions & {
     allowLeadingWildcards: boolean;
-    // (undocumented)
-    dateFormatTZ?: string;
-    // (undocumented)
-    ignoreFilterIfFieldNotInIndex: boolean;
-    // (undocumented)
     queryStringOptions: Record<string, any>;
-}
+    ignoreFilterIfFieldNotInIndex: boolean;
+};
 
 // Warning: (ae-missing-release-tag) "ExecutionContextSearch" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
