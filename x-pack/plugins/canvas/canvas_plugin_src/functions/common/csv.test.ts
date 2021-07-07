@@ -37,7 +37,7 @@ describe('csv', () => {
           data: `name,number
 one,1
 two,2
-fourty two,42 `,
+fourty two,42`,
         },
         {} as ExecutionContext<Adapters, SerializableState>
       )
