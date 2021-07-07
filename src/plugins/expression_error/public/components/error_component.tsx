@@ -10,10 +10,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { EuiIcon, useResizeObserver, EuiPopover } from '@elastic/eui';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { ErrorRendererConfig } from '../../common/types';
-import { withSuspense, LazyErrorComponent } from '../../../presentation_util/public';
+import Error from './error';
 import './error.scss';
-
-const Error = withSuspense(LazyErrorComponent);
 
 interface ErrorComponentProps extends ErrorRendererConfig {
   onLoaded: IInterpreterRenderHandlers['done'];

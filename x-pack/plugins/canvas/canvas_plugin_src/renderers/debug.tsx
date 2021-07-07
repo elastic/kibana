@@ -7,10 +7,8 @@
 
 import ReactDOM from 'react-dom';
 import React from 'react';
-import {
-  withSuspense,
-  LazyDebugComponent,
-} from '../../../../../src/plugins/presentation_util/public';
+import { withSuspense } from '../../../../../src/plugins/presentation_util/public';
+import { LazyDebugComponent } from '../../../../../src/plugins/expression_error/public';
 import { RendererStrings } from '../../i18n';
 import { RendererFactory } from '../../types';
 

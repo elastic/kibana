@@ -7,3 +7,6 @@
  */
 
 export * from './error_component';
+
+export const LazyErrorComponent = React.lazy(() => import('./error'));
+export const LazyDebugComponent = React.lazy(() => import('./debug'));

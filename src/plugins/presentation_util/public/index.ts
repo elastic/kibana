@@ -35,8 +35,6 @@ export {
   LazyLabsFlyout,
   LazyDashboardPicker,
   LazySavedObjectSaveModalDashboard,
-  LazyDebugComponent,
-  LazyErrorComponent,
   withSuspense,
 } from './components';
 
