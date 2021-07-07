@@ -104,7 +104,6 @@ export const MonitorPageTitleContent: React.FC = () => {
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      <EnableMonitorAlert monitorId={monitorId} selectedMonitor={selectedMonitor!} />
     </>
   );
 };
