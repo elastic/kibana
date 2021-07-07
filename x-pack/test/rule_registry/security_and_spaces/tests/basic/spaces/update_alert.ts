@@ -8,25 +8,40 @@ import expect from '@kbn/expect';
 
 import {
   superUser,
+  globalRead,
   obsOnly,
+  obsOnlyRead,
   obsSec,
-  noKibanaPrivileges,
+  obsSecRead,
+  secOnly,
+  secOnlyRead,
+  secOnlySpace2,
+  secOnlyReadSpace2,
+  obsSecAllSpace2,
+  obsSecReadSpace2,
+  obsOnlySpace2,
+  obsOnlyReadSpace2,
   obsOnlySpacesAll,
   obsSecSpacesAll,
-  secOnly,
   secOnlySpacesAll,
-  obsOnlySpace2,
-  obsSecAllSpace2,
+  noKibanaPrivileges,
 } from '../../../../common/lib/authentication/users';
 import type { User } from '../../../../common/lib/authentication/types';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getSpaceUrlPrefix } from '../../../../common/lib/authentication/spaces';
 
-/*
- * Note - these tests focus on ensuring that the correct access
- * is granted based on spaces
- * For read/write and index specific testing see tests in the /spaces folder
- */
+interface TestCase {
+  /** The space where the alert exists */
+  space: string;
+  /** The ID of the alert */
+  alertId: string;
+  /** The index of the alert */
+  index: string;
+  /** Authorized users */
+  authorizedUsers: User[];
+  /** Unauthorized users */
+  unauthorizedUsers: User[];
+}
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -38,7 +53,10 @@ export default ({ getService }: FtrProviderContext) => {
   const SPACE1 = 'space1';
   const SPACE2 = 'space2';
   const APM_ALERT_ID = 'NoxgpHkBqbdrfX07MqXV';
+  const APM_ALERT_INDEX = '.alerts-observability-apm';
   const SECURITY_SOLUTION_ALERT_ID = '020202';
+  const SECURITY_SOLUTION_ALERT_INDEX = '.alerts-security-solution';
+  const ALERT_VERSION = Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'); // required for optimistic concurrency control
 
   const getAPMIndexName = async (user: User) => {
     const {
@@ -49,10 +67,9 @@ export default ({ getService }: FtrProviderContext) => {
       .set('kbn-xsrf', 'true')
       .expect(200);
     const observabilityIndex = indexNames?.index_name?.find(
-      (indexName) => indexName === '.alerts-observability-apm'
+      (indexName) => indexName === APM_ALERT_INDEX
     );
-    expect(observabilityIndex).to.eql('.alerts-observability-apm');
-    return observabilityIndex;
+    expect(observabilityIndex).to.eql(APM_ALERT_INDEX); // assert this here so we can use constants in the dynamically-defined test cases below
   };
 
   const getSecuritySolutionIndexName = async (user: User) => {
@@ -64,238 +81,157 @@ export default ({ getService }: FtrProviderContext) => {
       .set('kbn-xsrf', 'true')
       .expect(200);
     const securitySolution = indexNames?.index_name?.find(
-      (indexName) => indexName === '.alerts-security-solution'
+      (indexName) => indexName === SECURITY_SOLUTION_ALERT_INDEX
     );
-    expect(securitySolution).to.eql('.alerts-security-solution');
-    return securitySolution;
+    expect(securitySolution).to.eql(SECURITY_SOLUTION_ALERT_INDEX); // assert this here so we can use constants in the dynamically-defined test cases below
   };
 
   describe('Alert - Update - RBAC - spaces', () => {
-    let securitySolutionIndex: string | undefined;
-    let apmIndex: string | undefined;
+    before(async () => {
+      await getSecuritySolutionIndexName(superUser);
+      await getAPMIndexName(superUser);
+    });
 
-    beforeEach(async () => {
-      securitySolutionIndex = await getSecuritySolutionIndexName(superUser);
-      apmIndex = await getAPMIndexName(superUser);
-
+    before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts');
     });
 
-    afterEach(async () => {
+    after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts');
     });
 
-    describe('Users:', () => {
-      describe('Security Solution', () => {
-        describe('all spaces', () => {
-          it(`${superUser.username} should be able to update Security Solution alerts in ${SPACE1}`, async () => {
-            await supertestWithoutAuth
-              .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}`)
-              .auth(superUser.username, superUser.password)
-              .set('kbn-xsrf', 'true')
-              .send({
-                ids: [SECURITY_SOLUTION_ALERT_ID],
-                status: 'closed',
-                index: securitySolutionIndex,
-                _version: Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'),
-              })
-              .expect(200);
-          });
-
-          it(`${superUser.username} should be able to update Security Solution alerts in ${SPACE2}`, async () => {
-            await supertestWithoutAuth
-              .post(`${getSpaceUrlPrefix(SPACE2)}${TEST_URL}`)
-              .auth(superUser.username, superUser.password)
-              .set('kbn-xsrf', 'true')
-              .send({
-                ids: [SECURITY_SOLUTION_ALERT_ID],
-                status: 'closed',
-                index: securitySolutionIndex,
-                _version: Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'),
-              })
-              .expect(200);
-          });
+    function addTests({ space, authorizedUsers, unauthorizedUsers, alertId, index }: TestCase) {
+      authorizedUsers.forEach(({ username, password }) => {
+        it(`${username} should be able to update alert ${alertId} in ${space}/${index}`, async () => {
+          await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts'); // since this is a success case, reload the test data immediately beforehand
+          await supertestWithoutAuth
+            .post(`${getSpaceUrlPrefix(space)}${TEST_URL}`)
+            .auth(username, password)
+            .set('kbn-xsrf', 'true')
+            .send({
+              ids: [alertId],
+              status: 'closed',
+              index,
+              _version: ALERT_VERSION,
+            })
+            .expect(200);
         });
 
-        describe('single space', () => {
-          [secOnly, obsSec, secOnlySpacesAll, obsSecSpacesAll]
-            .map((role) => ({
-              user: role,
-            }))
-            .forEach(({ user }) => {
-              it(`${user.username} should be able to update Security Solution alerts in ${SPACE1}`, async () => {
-                await supertestWithoutAuth
-                  .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}`)
-                  .auth(user.username, user.password)
-                  .set('kbn-xsrf', 'true')
-                  .send({
-                    ids: [SECURITY_SOLUTION_ALERT_ID],
-                    status: 'closed',
-                    index: securitySolutionIndex,
-                    _version: Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'),
-                  })
-                  .expect(200);
-              });
-            });
-
-          [secOnly, obsSec, secOnlySpacesAll, obsSecSpacesAll]
-            .map((role) => ({
-              user: role,
-            }))
-            .forEach(({ user }) => {
-              it(`${user.username} should receive a 409 if trying to update an old alert document version`, async () => {
-                await supertestWithoutAuth
-                  .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}`)
-                  .auth(user.username, user.password)
-                  .set('kbn-xsrf', 'true')
-                  .send({
-                    ids: [SECURITY_SOLUTION_ALERT_ID],
-                    status: 'closed',
-                    index: securitySolutionIndex,
-                    _version: Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'),
-                  })
-                  .expect(200);
-
-                await supertestWithoutAuth
-                  .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}`)
-                  .auth(user.username, user.password)
-                  .set('kbn-xsrf', 'true')
-                  .send({
-                    ids: [SECURITY_SOLUTION_ALERT_ID],
-                    status: 'closed',
-                    index: securitySolutionIndex,
-                    _version: Buffer.from(JSON.stringify([999, 999]), 'utf8').toString('base64'),
-                  })
-                  .expect(409);
-              });
-            });
-
-          [noKibanaPrivileges, secOnly, obsSec]
-            .map((role) => ({
-              user: role,
-            }))
-            .forEach(({ user }) => {
-              it(`${user.username} should NOT be able to update Security Solution alerts in ${SPACE2}`, async () => {
-                await supertestWithoutAuth
-                  .post(`${getSpaceUrlPrefix(SPACE2)}${TEST_URL}`)
-                  .auth(user.username, user.password)
-                  .set('kbn-xsrf', 'true')
-                  .send({
-                    ids: [SECURITY_SOLUTION_ALERT_ID],
-                    status: 'closed',
-                    index: securitySolutionIndex,
-                    _version: Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'),
-                  })
-                  .expect(403);
-              });
-            });
+        it(`${username} should fail to update alert ${alertId} in ${space}/${index} with an incorrect version`, async () => {
+          await supertestWithoutAuth
+            .post(`${getSpaceUrlPrefix(space)}${TEST_URL}`)
+            .auth(username, password)
+            .set('kbn-xsrf', 'true')
+            .send({
+              ids: [alertId],
+              status: 'closed',
+              index,
+              _version: Buffer.from(JSON.stringify([999, 999]), 'utf8').toString('base64'),
+            })
+            .expect(409);
         });
+
+        // // NOTE: this test case actually results in a 500 error, not 404
+        // it(`${username} should fail to update a non-existent alert in ${space}/${index}`, async () => {
+        //   const fakeAlertId = 'some-alert-id-that-doesnt-exist';
+        //   await supertestWithoutAuth
+        //     .post(`${getSpaceUrlPrefix(space)}${TEST_URL}`)
+        //     .auth(username, password)
+        //     .set('kbn-xsrf', 'true')
+        //     .send({
+        //       ids: [fakeAlertId],
+        //       status: 'closed',
+        //       index,
+        //       _version: ALERT_VERSION,
+        //     })
+        //     .expect(404);
+        // });
       });
 
-      describe('APM', () => {
-        describe('all spaces', () => {
-          it(`${superUser.username} should be able to update APM alerts in ${SPACE1}`, async () => {
-            await supertestWithoutAuth
-              .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}`)
-              .auth(superUser.username, superUser.password)
-              .set('kbn-xsrf', 'true')
-              .send({
-                ids: [APM_ALERT_ID],
-                status: 'closed',
-                index: apmIndex,
-                _version: Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'),
-              })
-              .expect(200);
-          });
-
-          it(`${superUser.username} should be able to update APM alerts in ${SPACE2}`, async () => {
-            await supertestWithoutAuth
-              .post(`${getSpaceUrlPrefix(SPACE2)}${TEST_URL}`)
-              .auth(superUser.username, superUser.password)
-              .set('kbn-xsrf', 'true')
-              .send({
-                ids: [APM_ALERT_ID],
-                status: 'closed',
-                index: apmIndex,
-                _version: Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'),
-              })
-              .expect(200);
-          });
+      unauthorizedUsers.forEach(({ username, password }) => {
+        it(`${username} should NOT be able to update alert ${alertId} in ${space}/${index}`, async () => {
+          await supertestWithoutAuth
+            .post(`${getSpaceUrlPrefix(space)}${TEST_URL}`)
+            .auth(username, password)
+            .set('kbn-xsrf', 'true')
+            .send({
+              ids: [alertId],
+              status: 'closed',
+              index,
+              _version: ALERT_VERSION,
+            })
+            .expect(403);
         });
+      });
+    }
 
-        describe('single space', () => {
-          [obsOnly, obsSec, obsOnlySpacesAll, obsSecSpacesAll]
-            .map((role) => ({
-              user: role,
-            }))
-            .forEach(({ user }) => {
-              it(`${user.username} should be able to update APM alerts in ${SPACE1}`, async () => {
-                await supertestWithoutAuth
-                  .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}`)
-                  .auth(user.username, user.password)
-                  .set('kbn-xsrf', 'true')
-                  .send({
-                    ids: [APM_ALERT_ID],
-                    status: 'closed',
-                    index: apmIndex,
-                    _version: Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'),
-                  })
-                  .expect(200);
-              });
-            });
+    describe('Security Solution', () => {
+      const authorizedInAllSpaces = [superUser, secOnlySpacesAll, obsSecSpacesAll];
+      const authorizedOnlyInSpace1 = [secOnly, obsSec];
+      const authorizedOnlyInSpace2 = [secOnlySpace2, obsSecAllSpace2];
+      const unauthorized = [
+        // these users are not authorized to update alerts for the Security Solution in any space
+        globalRead,
+        secOnlyRead,
+        obsSecRead,
+        secOnlyReadSpace2,
+        obsSecReadSpace2,
+        obsOnly,
+        obsOnlyRead,
+        obsOnlySpace2,
+        obsOnlyReadSpace2,
+        obsOnlySpacesAll,
+        noKibanaPrivileges,
+      ];
 
-          [obsOnly, obsSec, obsOnlySpacesAll, obsSecSpacesAll]
-            .map((role) => ({
-              user: role,
-            }))
-            .forEach(({ user }) => {
-              it(`${user.username} should receive a 409 if trying to update an old alert document version`, async () => {
-                await supertestWithoutAuth
-                  .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}`)
-                  .auth(user.username, user.password)
-                  .set('kbn-xsrf', 'true')
-                  .send({
-                    ids: [APM_ALERT_ID],
-                    status: 'closed',
-                    index: apmIndex,
-                    _version: Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'),
-                  })
-                  .expect(200);
+      addTests({
+        space: SPACE1,
+        alertId: SECURITY_SOLUTION_ALERT_ID,
+        index: SECURITY_SOLUTION_ALERT_INDEX,
+        authorizedUsers: [...authorizedInAllSpaces, ...authorizedOnlyInSpace1],
+        unauthorizedUsers: [...authorizedOnlyInSpace2, ...unauthorized],
+      });
+      addTests({
+        space: SPACE2,
+        alertId: SECURITY_SOLUTION_ALERT_ID,
+        index: SECURITY_SOLUTION_ALERT_INDEX,
+        authorizedUsers: [...authorizedInAllSpaces, ...authorizedOnlyInSpace2],
+        unauthorizedUsers: [...authorizedOnlyInSpace1, ...unauthorized],
+      });
+    });
 
-                await supertestWithoutAuth
-                  .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}`)
-                  .auth(user.username, user.password)
-                  .set('kbn-xsrf', 'true')
-                  .send({
-                    ids: [APM_ALERT_ID],
-                    status: 'closed',
-                    index: apmIndex,
-                    _version: Buffer.from(JSON.stringify([999, 999]), 'utf8').toString('base64'),
-                  })
-                  .expect(409);
-              });
-            });
+    describe('APM', () => {
+      const authorizedInAllSpaces = [superUser, obsOnlySpacesAll, obsSecSpacesAll];
+      const authorizedOnlyInSpace1 = [obsOnly, obsSec];
+      const authorizedOnlyInSpace2 = [obsOnlySpace2, obsSecAllSpace2];
+      const unauthorized = [
+        // these users are not authorized to update alerts for APM in any space
+        globalRead,
+        obsOnlyRead,
+        obsSecRead,
+        obsOnlyReadSpace2,
+        obsSecReadSpace2,
+        secOnly,
+        secOnlyRead,
+        secOnlySpace2,
+        secOnlyReadSpace2,
+        secOnlySpacesAll,
+        noKibanaPrivileges,
+      ];
 
-          [noKibanaPrivileges, obsOnlySpace2, obsSecAllSpace2]
-            .map((role) => ({
-              user: role,
-            }))
-            .forEach(({ user }) => {
-              it(`${user.username} should NOT be able to update APM alerts in ${SPACE1}`, async () => {
-                await supertestWithoutAuth
-                  .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}`)
-                  .auth(user.username, user.password)
-                  .set('kbn-xsrf', 'true')
-                  .send({
-                    ids: [APM_ALERT_ID],
-                    status: 'closed',
-                    index: apmIndex,
-                    _version: Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'),
-                  })
-                  .expect(403);
-              });
-            });
-        });
+      addTests({
+        space: SPACE1,
+        alertId: APM_ALERT_ID,
+        index: APM_ALERT_INDEX,
+        authorizedUsers: [...authorizedInAllSpaces, ...authorizedOnlyInSpace1],
+        unauthorizedUsers: [...authorizedOnlyInSpace2, ...unauthorized],
+      });
+      addTests({
+        space: SPACE2,
+        alertId: APM_ALERT_ID,
+        index: APM_ALERT_INDEX,
+        authorizedUsers: [...authorizedInAllSpaces, ...authorizedOnlyInSpace2],
+        unauthorizedUsers: [...authorizedOnlyInSpace1, ...unauthorized],
       });
     });
   });
