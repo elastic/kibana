@@ -540,7 +540,10 @@ export function DimensionEditor(
               (yAxisConfig) => yAxisConfig.forAccessor === accessor
             );
             if (existingIndex !== -1) {
-              newYAxisConfigs[existingIndex].axisMode = newMode;
+              newYAxisConfigs[existingIndex] = {
+                ...newYAxisConfigs[existingIndex],
+                axisMode: newMode,
+              };
             } else {
               newYAxisConfigs.push({
                 forAccessor: accessor,
@@ -625,9 +628,9 @@ const ColorPicker = ({
         const existingIndex = newYConfigs.findIndex((yConfig) => yConfig.forAccessor === accessor);
         if (existingIndex !== -1) {
           if (text === '') {
-            delete newYConfigs[existingIndex].color;
+            newYConfigs[existingIndex] = { ...newYConfigs[existingIndex], color: undefined };
           } else {
-            newYConfigs[existingIndex].color = output.hex;
+            newYConfigs[existingIndex] = { ...newYConfigs[existingIndex], color: output.hex };
           }
         } else {
           newYConfigs.push({
