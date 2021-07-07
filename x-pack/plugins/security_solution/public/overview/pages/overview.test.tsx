@@ -311,4 +311,18 @@ describe('Overview', () => {
       });
     });
   });
+
+  describe('Threat Intel Dashboard Links', () => {
+    it('invokes useIsThreatIntelModuleEnabled hook only once', () => {
+      useIsThreatIntelModuleEnabledMock.mockClear();
+      mount(
+        <TestProviders>
+          <MemoryRouter>
+            <Overview />
+          </MemoryRouter>
+        </TestProviders>
+      );
+      expect(useIsThreatIntelModuleEnabledMock).toHaveBeenCalledTimes(1);
+    });
+  });
 });
