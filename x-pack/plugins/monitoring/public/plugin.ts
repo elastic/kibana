@@ -93,6 +93,7 @@ export class MonitoringPlugin
       category: DEFAULT_APP_CATEGORIES.management,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
+        await pluginsStart.kibanaLegacy.loadAngularBootstrap();
         const { AngularApp } = await import('./angular');
         const deps: MonitoringStartPluginDependencies = {
           navigation: pluginsStart.navigation,
