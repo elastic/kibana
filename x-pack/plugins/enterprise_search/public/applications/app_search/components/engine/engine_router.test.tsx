@@ -39,6 +39,7 @@ describe('EngineRouter', () => {
     ...mockEngineValues,
     dataLoading: false,
     engineNotFound: false,
+    isMetaEngine: false,
     canCrawl: false,
     myRole: {},
   };
@@ -176,7 +177,11 @@ describe('EngineRouter', () => {
   });
 
   it('renders a source engines view', () => {
-    setMockValues({ ...values, myRole: { canViewMetaEngineSourceEngines: true } });
+    setMockValues({
+      ...values,
+      myRole: { canViewMetaEngineSourceEngines: true },
+      isMetaEngine: true,
+    });
     const wrapper = shallow(<EngineRouter />);
 
     expect(wrapper.find(SourceEngines)).toHaveLength(1);
