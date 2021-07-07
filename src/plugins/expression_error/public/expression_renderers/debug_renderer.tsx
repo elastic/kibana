@@ -30,7 +30,7 @@ const strings = {
     }),
 };
 
-export const debug = (): ExpressionRenderDefinition<any> => ({
+export const debugRenderer = (): ExpressionRenderDefinition<any> => ({
   name: 'debug',
   displayName: strings.getDisplayName(),
   help: strings.getHelpDescription(),
