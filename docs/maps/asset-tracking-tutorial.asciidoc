@@ -152,4 +152,28 @@ bin/logstash -f config/trimet-pipeline.conf
 image::maps/images/asset-tracking-tutorial/logstash_output.png[]
 . Leave the terminal window open and Logstash running throughout this tutorial.
 
+[float]
+==== Step 3: Create a {kib} index pattern for the tri_met_tracks {es} index
 
+. In Kibana, open the main menu, and click *Stack Management > Index Patterns*.
+. Click *Create index pattern*.
+. Give the index pattern a name: *tri_met_tracks\**.
+. Click *Next step*.
+. Set the *Time field* to *time*.
+. Click *Create index pattern*.
+
+{kib} shows the fields in your index pattern.
+
+[role="screenshot"]
+image::maps/images/asset-tracking-tutorial/index_pattern.png[]
+
+[float]
+==== Step 4: Explore the Portland bus data
+
+. Open the main menu, and click *Discover*.
+. Set the index pattern to *tri_met_tracks\**.
+. Open the <<set-time-filter, time filter>>, and set the time range to the last 15 minutes.
+. Expand a document and explore some of the fields that you will use later in this tutorial: `bearing`, `in_congestion`, `location`, and `vehicle_id`.
+
+[role="screenshot"]
+image::maps/images/asset-tracking-tutorial/discover.png[]
