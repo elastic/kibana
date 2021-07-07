@@ -433,6 +433,8 @@ export class LensAttributes {
     if (yAxisColumns.length === 1) {
       return lensColumns;
     }
+
+    // starting from 1 index since 0 column is used as main column
     for (let i = 1; i < yAxisColumns.length; i++) {
       const { sourceField, operationType, label } = yAxisColumns[i];
 
