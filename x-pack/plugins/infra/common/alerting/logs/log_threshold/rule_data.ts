@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { jsonRt } from '@kbn/io-ts-utils';
+import { jsonRt } from '@kbn/io-ts-utils/target/json_rt';
 import * as rt from 'io-ts';
 import { alertParamsRT as logThresholdAlertParamsRT } from './types';
 
