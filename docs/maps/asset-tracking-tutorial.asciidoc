@@ -29,14 +29,13 @@ Before you can get to the fun of visualizing and alerting on Portland buses, you
 [float]
 ==== Step 1: Set up an Elasticsearch index
 
-. In Kibana, open the main menu, then click *Dev Tools > Console*.
-. To create the `tri_met_tracks index`, run:
+. In Kibana, open the main menu, then click *Dev Tools*.
+. To create the `tri_met_tracks` index, run:
 +
 [source,js]
 ----------------------------------
 PUT tri_met_tracks
 ----------------------------------
-
 . To configure the `tri_met_tracks` index mappings, run:
 +
 [source,js]
@@ -145,7 +144,6 @@ output {
 ----------------------------------
 bin/logstash -f config/trimet-pipeline.conf
 ----------------------------------
-
 . Wait for Logstash to initialize and confirm data is flowing. You should see messages similar to this:
 +
 [role="screenshot"]
@@ -279,3 +277,104 @@ The map now represents an operational view of live bus traffic.  You’ll see th
 [role="screenshot"]
 image::maps/images/asset-tracking-tutorial/construction_zones.png[]
 
+[float]
+====
+Step 2. Create a new index for the alerts
+
+Every time a bus enters the construction zone, it will cause an alert. In this case, each alert will write a new document to the `bus_alerts` index.
+
+. Open the main menu, and click *Dev Tools*.
+. To create the `bus_alerts` index, run:
++
+[source,js]
+----------------------------------
+PUT bus_alerts
+----------------------------------
+. To configure the `bus_alerts` index mappings, run:
++
+[source,js]
+----------------------------------
+PUT bus_alerts/_mapping
+{
+  "properties": {
+    "entityId": {
+      "type": "keyword"
+    },
+    "entityDateTime": {
+      "type": "date"
+    },
+    "entityDocumentId": {
+      "type": "keyword"
+    },
+    "detectionDateTime": {
+      "type": "date"
+    },
+    "entityLocation": {
+      "type": "geo_point"
+    },
+    "containingBoundaryId": {
+      "type": "keyword"
+    },
+    "containingBoundaryName": {
+      "type": "keyword"
+    }
+  }
+}
+----------------------------------
+. Open the main menu, and click *Stack Management > Index Patterns*.
+. Click *Create index pattern*.
+. Give the index pattern a name: *bus_alerts**.
+. Click *Next step*.
+. Set the *Time field* to *time*.
+. Click *Create index pattern*.
+
+[float]
+==== Step 3. Configure an alert
+
+Create a new alert by defining a rule and a connector. The rule includes the conditions that will trigger the alert, and the connector defines what action takes place once the alert is triggered.
+
+. Open *Stack Management*, and then click *Rules and Connectors*.
+. Click *Create rule*.
+. Name the rule *Bus Alerts*.
+. Set *Check every* to *5 seconds*.
+. Notify *Only on status change*.
++
+[role="screenshot"]
+image::maps/images/asset-tracking-tutorial/rule_configuration.png[]
+. Scroll to *Tracking containment* and select.
+. Set *Select entity*:
+.. Set *INDEX* to *tri_met_tracks**.
+.. Set *BY* to *vehicle_id*.
+. Set *Select boundary* *INDEX* to *construction_zones*.
++
+[role="screenshot"]
+image::maps/images/asset-tracking-tutorial/tracking_containment_configuration.png[]
+. Under *Actions*, select the *Index* connector type.
+. Click *Create a connector*.
+. In the *Index connector*, set:
+.. *Connector name* to *Bus alert connector*
+.. Index to *bus-alerts*.
+.. Click Save.
+. Complete the *Actions* configuration.
+.. *Run when*: Tracking containment met
+.. *Index connector*: Bus alert connector
+.. *Document to index*:
++
+[source,js]
+----------------------------------
+{
+  "entityId": "{{context.entityId}}",
+  "entityDateTime": "{{context.entityDateTime}}",
+  "entityDocumentId": "{{context.entityDocumentId}}",
+  "detectionDateTime": "{{context.detectionDateTime}}",
+  "entityLocation": "{{context.entityLocation}}",
+  "containingBoundaryId": "{{context.containingBoundaryId}}",
+  "containingBoundaryName": "{{context.containingBoundaryName}}"
+}
+----------------------------------
+. Click *Save*.
+
+The *Bus Alert connector* is added to the *Rules and Connectors* page. For more information on common connectors, refer to the <<slack-action-type, Slack>> and <<email-action-type, Email>> connectors.
+
+[role="screenshot"]
+image::maps/images/asset-tracking-tutorial/rules_and_connectors.png[]
