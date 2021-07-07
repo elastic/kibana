@@ -325,6 +325,7 @@ class NewCalendarUI extends Component {
       groupIdOptions,
       jobIdOptions,
       saving,
+      loading,
       selectedCalendar,
       selectedJobOptions,
       selectedGroupOptions,
@@ -377,6 +378,7 @@ class NewCalendarUI extends Component {
                 showImportModal={this.showImportModal}
                 onJobSelection={this.onJobSelection}
                 saving={saving}
+                loading={loading}
                 selectedGroupOptions={selectedGroupOptions}
                 selectedJobOptions={selectedJobOptions}
                 onCreateGroupOption={this.onCreateGroupOption}

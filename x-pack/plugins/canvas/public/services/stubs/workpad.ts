@@ -7,26 +7,46 @@
 
 import moment from 'moment';
 
+import { PluginServiceFactory } from '../../../../../../src/plugins/presentation_util/public';
+
 // @ts-expect-error
 import { getDefaultWorkpad } from '../../state/defaults';
-import { WorkpadService } from '../workpad';
-import { getId } from '../../lib/get_id';
+import { CanvasWorkpadService } from '../workpad';
 import { CanvasTemplate } from '../../../types';
 
-const TIMEOUT = 500;
+type CanvasWorkpadServiceFactory = PluginServiceFactory<CanvasWorkpadService>;
 
-const promiseTimeout = (time: number) => () => new Promise((resolve) => setTimeout(resolve, time));
-const getName = () => {
-  const lorem = 'Lorem ipsum dolor sit amet consectetur adipiscing elit Fusce lobortis aliquet arcu ut turpis duis'.split(
-    ' '
-  );
-  return [1, 2, 3].map(() => lorem[Math.floor(Math.random() * lorem.length)]).join(' ');
+export const TIMEOUT = 500;
+export const promiseTimeout = (time: number) => () =>
+  new Promise((resolve) => setTimeout(resolve, time));
+
+const DAY = 86400000;
+const JAN_1_2000 = 946684800000;
+
+const getWorkpads = (count = 3) => {
+  const workpads = [];
+  for (let i = 0; i < count; i++) {
+    workpads[i] = {
+      ...getDefaultWorkpad(),
+      name: `Workpad ${i}`,
+      id: `workpad-${i}`,
+      '@created': moment(JAN_1_2000 + DAY * i).toDate(),
+      '@timestamp': moment(JAN_1_2000 + DAY * (i + 1)).toDate(),
+    };
+  }
+  return workpads;
 };
 
-const randomDate = (
-  start: Date = moment().toDate(),
-  end: Date = moment().subtract(7, 'days').toDate()
-) => new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime())).toISOString();
+export const getSomeWorkpads = (count = 3) => getWorkpads(count);
+
+export const findSomeWorkpads = (count = 3, timeout = TIMEOUT) => (_term: string) => {
+  return Promise.resolve()
+    .then(promiseTimeout(timeout))
+    .then(() => ({
+      total: count,
+      workpads: getSomeWorkpads(count),
+    }));
+};
 
 const templates: CanvasTemplate[] = [
   {
@@ -44,26 +64,6 @@ const templates: CanvasTemplate[] = [
     template_key: 'test2-key',
   },
 ];
-
-export const getSomeWorkpads = (count = 3) =>
-  Array.from({ length: count }, () => ({
-    '@created': randomDate(
-      moment().subtract(3, 'days').toDate(),
-      moment().subtract(10, 'days').toDate()
-    ),
-    '@timestamp': randomDate(),
-    id: getId('workpad'),
-    name: getName(),
-  }));
-
-export const findSomeWorkpads = (count = 3, timeout = TIMEOUT) => (_term: string) => {
-  return Promise.resolve()
-    .then(promiseTimeout(timeout))
-    .then(() => ({
-      total: count,
-      workpads: getSomeWorkpads(count),
-    }));
-};
 
 export const findNoWorkpads = (timeout = TIMEOUT) => (_term: string) => {
   return Promise.resolve()
@@ -89,11 +89,16 @@ export const findNoTemplates = (timeout = TIMEOUT) => () => {
 export const getNoTemplates = () => ({ templates: [] });
 export const getSomeTemplates = () => ({ templates });
 
-export const workpadService: WorkpadService = {
+export const workpadServiceFactory: CanvasWorkpadServiceFactory = () => ({
   get: (id: string) => Promise.resolve({ ...getDefaultWorkpad(), id }),
   findTemplates: findNoTemplates(),
   create: (workpad) => Promise.resolve(workpad),
   createFromTemplate: (_templateId: string) => Promise.resolve(getDefaultWorkpad()),
   find: findNoWorkpads(),
-  remove: (id: string) => Promise.resolve(),
-};
+  remove: (_id: string) => Promise.resolve(),
+  update: (id, workpad) => Promise.resolve(),
+  updateWorkpad: (id, workpad) => Promise.resolve(),
+  updateAssets: (id, assets) => Promise.resolve(),
+  getRuntimeZip: (workpad) =>
+    Promise.resolve(new Blob([JSON.stringify(workpad)], { type: 'application/json' })),
+});
