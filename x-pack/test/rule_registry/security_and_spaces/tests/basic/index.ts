@@ -23,9 +23,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     });
 
     // Basic
-    loadTestFile(require.resolve('./security/get_alert_by_id'));
-    loadTestFile(require.resolve('./security/update_alert'));
-    loadTestFile(require.resolve('./spaces/get_alert_by_id'));
-    loadTestFile(require.resolve('./spaces/update_alert'));
+    loadTestFile(require.resolve('./get_alert_by_id'));
+    loadTestFile(require.resolve('./update_alert'));
   });
 };
