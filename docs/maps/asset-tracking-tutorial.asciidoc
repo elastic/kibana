@@ -243,8 +243,9 @@ Add a layer that uses attributes in the data to set the style and orientation of
 [role="screenshot"]
 image::maps/images/asset-tracking-tutorial/top_hits_layer_style.png[]
 . Click *Save & close*.
+. Open the <<set-time-filter, time filter>>, and set *Refresh every* to 10 seconds, and click *Start*.
 
-Your map should look similar to this:
+Your map should automatically refresh every 10 seconds to show the lastest bus positions and tracks.
 
 [role="screenshot"]
 image::maps/images/asset-tracking-tutorial/tracks_and_top_hits.png[]
