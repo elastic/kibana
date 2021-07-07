@@ -142,15 +142,16 @@ export async function ensurePreconfiguredPackagesAndPolicies(
 
       if (!created) {
         if (!policy?.is_managed) return { created, policy };
-        const configTopLevelFields = omit(preconfiguredAgentPolicy, 'package_policies', 'id');
-        const currentTopLevelFields = pick(policy, ...Object.keys(configTopLevelFields));
-
-        if (!isEqual(configTopLevelFields, currentTopLevelFields)) {
+        const { hasChanged, fields } = comparePreconfiguredPolicyToCurrent(
+          preconfiguredAgentPolicy,
+          policy
+        );
+        if (hasChanged) {
           const updatedPolicy = await agentPolicyService.update(
             soClient,
             esClient,
             String(preconfiguredAgentPolicy.id),
-            configTopLevelFields
+            fields
           );
           return { created, policy: updatedPolicy };
         }
@@ -241,6 +242,19 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     ),
     packages: fulfilledPackages.map((pkg) => pkgToPkgKey(pkg)),
     nonFatalErrors: [...rejectedPackages, ...rejectedPolicies],
+  };
+}
+
+export function comparePreconfiguredPolicyToCurrent(
+  policyFromConfig: PreconfiguredAgentPolicy,
+  currentPolicy: AgentPolicy
+) {
+  const configTopLevelFields = omit(policyFromConfig, 'package_policies', 'id');
+  const currentTopLevelFields = pick(currentPolicy, ...Object.keys(configTopLevelFields));
+
+  return {
+    hasChanged: !isEqual(configTopLevelFields, currentTopLevelFields),
+    fields: configTopLevelFields,
   };
 }
 
