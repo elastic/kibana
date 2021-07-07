@@ -38,8 +38,6 @@ export {
   LazySavedObjectSaveModalDashboard,
   LazyDebugComponent,
   LazyErrorComponent,
-  LazyPopoverComponent,
-  ClosePopoverFn,
   withSuspense,
   createShape,
   ShapeType,
