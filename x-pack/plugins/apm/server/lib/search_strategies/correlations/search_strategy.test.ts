@@ -162,8 +162,8 @@ describe('APM Correlations search strategy', () => {
                       range: {
                         '@timestamp': {
                           format: 'epoch_millis',
-                          gte: '2020',
-                          lte: '2021',
+                          gte: 1577836800000,
+                          lte: 1609459200000,
                         },
                       },
                     },

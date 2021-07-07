@@ -60,17 +60,16 @@ export function MlLatencyCorrelations({ onClose }: Props) {
   } = useApmPluginContext();
 
   const { serviceName } = useParams<{ serviceName: string }>();
-  const { urlParams } = useUrlParams();
-
-  const fetchOptions = useMemo(
-    () => ({
-      ...{
-        serviceName,
-        ...urlParams,
-      },
-    }),
-    [serviceName, urlParams]
-  );
+  const {
+    urlParams: {
+      environment,
+      kuery,
+      transactionName,
+      transactionType,
+      start,
+      end,
+    },
+  } = useUrlParams();
 
   const {
     error,
@@ -84,7 +83,15 @@ export function MlLatencyCorrelations({ onClose }: Props) {
   } = useCorrelations({
     index: 'apm-*',
     ...{
-      ...fetchOptions,
+      ...{
+        environment,
+        kuery,
+        serviceName,
+        transactionName,
+        transactionType,
+        start,
+        end,
+      },
       percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
     },
   });
@@ -332,8 +339,7 @@ export function MlLatencyCorrelations({ onClose }: Props) {
                 {
                   defaultMessage: 'Latency distribution for {name}',
                   values: {
-                    name:
-                      fetchOptions.transactionName ?? fetchOptions.serviceName,
+                    name: transactionName ?? serviceName,
                   },
                 }
               )}
