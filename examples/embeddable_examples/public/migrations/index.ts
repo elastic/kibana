@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from './types';
-export { migrateToLatest } from './migrate_to_latest';
-export { mergeMigrationFunctionMaps } from './merge_migration_function_map';
+export * from './migrations_embeddable';
+export * from './migrations_embeddable_factory';
