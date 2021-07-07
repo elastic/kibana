@@ -18,17 +18,15 @@ import type { ActionAgentStatus } from './types';
 export const ActionAgentsStatusBadges = memo<{
   agentStatus: { [k in ActionAgentStatus]: number };
   expired: boolean;
-}>(({ agentStatus, expired }) => {
-  return (
-    <EuiFlexGroup gutterSize="m">
-      {AGENT_STATUSES.map((status) => (
-        <EuiFlexItem key={status} grow={false}>
-          <AgentStatusBadge expired={expired} status={status} count={agentStatus[status] || 0} />
-        </EuiFlexItem>
-      ))}
-    </EuiFlexGroup>
-  );
-});
+}>(({ agentStatus, expired }) => (
+  <EuiFlexGroup gutterSize="m">
+    {AGENT_STATUSES.map((status) => (
+      <EuiFlexItem key={status} grow={false}>
+        <AgentStatusBadge expired={expired} status={status} count={agentStatus[status] || 0} />
+      </EuiFlexItem>
+    ))}
+  </EuiFlexGroup>
+));
 
 ActionAgentsStatusBadges.displayName = 'ActionAgentsStatusBadges';
 
