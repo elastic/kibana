@@ -18,7 +18,7 @@ export const createAggregations = (options: MetricsAPIRequest) => {
         field: options.timerange.field,
         fixed_interval: intervalString,
         offset: options.alignDataToEnd ? calculateDateHistogramOffset(options.timerange) : '0s',
-        extended_bounds: {
+        hard_bounds: {
           min: options.timerange.from,
           max: options.timerange.to,
         },

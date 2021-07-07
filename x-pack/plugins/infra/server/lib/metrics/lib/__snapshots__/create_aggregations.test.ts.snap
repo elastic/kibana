@@ -11,7 +11,7 @@ Object {
       },
     },
     "date_histogram": Object {
-      "extended_bounds": Object {
+      "hard_bounds": Object {
         "max": 1577838720000,
         "min": 1577835120000,
       },
@@ -36,7 +36,7 @@ Object {
           },
         },
         "date_histogram": Object {
-          "extended_bounds": Object {
+          "hard_bounds": Object {
             "max": 1577840400000,
             "min": 1577836800000,
           },
@@ -73,7 +73,7 @@ Object {
       },
     },
     "date_histogram": Object {
-      "extended_bounds": Object {
+      "hard_bounds": Object {
         "max": 1577840400000,
         "min": 1577836800000,
       },
