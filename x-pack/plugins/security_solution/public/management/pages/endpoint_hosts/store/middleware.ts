@@ -411,7 +411,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
         );
         const isInvalidDateRange =
           startDate && endDate ? moment(startDate) > moment(endDate) : false;
-        // don't page when paging is disabled
+        // don't page when paging is disabled or when date ranges are invalid
         if (disabled || isInvalidDateRange) {
           return;
         }
