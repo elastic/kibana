@@ -8,6 +8,8 @@
 import { estypes } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
+import fs from 'fs';
+import path from 'path';
 import { Calendar } from '../../../../plugins/ml/server/models/calendar/index';
 import { Annotation } from '../../../../plugins/ml/common/types/annotations';
 import { DataFrameAnalyticsConfig } from '../../../../plugins/ml/public/application/data_frame_analytics/common';
@@ -24,6 +26,8 @@ import {
 } from '../../../../plugins/ml/common/constants/index_patterns';
 import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
 import { PutTrainedModelConfig } from '../../../../plugins/ml/common/types/trained_models';
+
+type ModelType = 'regression' | 'classification';
 
 export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
   const es = getService('es');
@@ -942,6 +946,72 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
       log.debug('> Trained model crated');
       return model;
+    },
+
+    async createdTestTrainedModels(
+      modelType: ModelType,
+      count: number = 10,
+      withIngestPipelines = false
+    ) {
+      const compressedDefinition = this.getCompressedModelDefinition(modelType);
+
+      const models = new Array(count).fill(null).map((v, i) => {
+        return {
+          model_id: `dfa_${modelType}_model_n_${i}`,
+          body: {
+            compressed_definition: compressedDefinition,
+            inference_config: {
+              [modelType]: {},
+            },
+            input: {
+              field_names: ['common_field'],
+            },
+          } as PutTrainedModelConfig,
+        };
+      });
+
+      for (const model of models) {
+        await this.createTrainedModel(model.model_id, model.body);
+        if (withIngestPipelines) {
+          await this.createIngestPipeline(model.model_id);
+        }
+      }
+    },
+
+    getCompressedModelDefinition(modelType: ModelType) {
+      return fs.readFileSync(
+        path.resolve(
+          __dirname,
+          'resources',
+          'trained_model_definitions',
+          `minimum_valid_config_${modelType}.json.gz.b64`
+        ),
+        'utf-8'
+      );
+    },
+
+    /**
+     * Creates ingest pipelines for trained model
+     * @param modelId
+     */
+    async createIngestPipeline(modelId: string) {
+      log.debug(`Creating ingest pipeline for trained model with id "${modelId}"`);
+      const ingestPipeline = await esSupertest
+        .put(`/_ingest/pipeline/pipeline_${modelId}`)
+        .send({
+          processors: [
+            {
+              inference: {
+                model_id: modelId,
+              },
+            },
+          ],
+        })
+        .expect(200)
+        .then((res) => res.body);
+
+      log.debug('> Ingest pipeline crated');
+      return ingestPipeline;
     },
   };
 }
