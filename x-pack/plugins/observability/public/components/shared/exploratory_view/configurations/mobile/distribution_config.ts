@@ -6,7 +6,7 @@
  */
 
 import { ConfigProps, SeriesConfig } from '../../types';
-import { FieldLabels, OPERATION_COLUMN, RECORDS_FIELD, REPORT_METRIC_FIELD } from '../constants';
+import { FieldLabels, RECORDS_FIELD, REPORT_METRIC_FIELD } from '../constants';
 import { buildPhrasesFilter } from '../utils';
 import {
   METRIC_SYSTEM_CPU_USAGE,

@@ -30,7 +30,6 @@ import {
 import { urlFiltersToKueryString } from '../utils/stringify_kueries';
 import { ExistsFilter, IndexPattern } from '../../../../../../../../src/plugins/data/common';
 import {
-  FieldLabels,
   FILTER_RECORDS,
   USE_BREAK_DOWN_COLUMN,
   TERMS_COLUMN,
