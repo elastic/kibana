@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`renderDataMappingPopover Switch toggle should be enabled 1`] = `
+exports[`renderDataMappingPopover Should render OrdinalDataMappingPopover 1`] = `
 <OrdinalDataMappingPopover
   dataMappingFunction="INTERPOLATE"
   fieldMetaOptions={
