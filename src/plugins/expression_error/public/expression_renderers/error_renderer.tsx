@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { withSuspense } from '../../../presentation_util/public';
 import { ErrorRendererConfig } from '../../common/types';
+import { LazyErrorRenderComponent } from '../components';
 
 const errorStrings = {
   getDisplayName: () =>
@@ -24,8 +25,7 @@ const errorStrings = {
     }),
 };
 
-const LazyErrorComponent = lazy(() => import('../components/error_component'));
-const ErrorComponent = withSuspense(LazyErrorComponent);
+const ErrorComponent = withSuspense(LazyErrorRenderComponent);
 
 export const errorRenderer = (): ExpressionRenderDefinition<ErrorRendererConfig> => ({
   name: 'error',

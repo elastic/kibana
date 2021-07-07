@@ -8,10 +8,12 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useResizeObserver } from '@elastic/eui';
-import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import { IInterpreterRenderHandlers } from '../../../expressions';
+import { withSuspense } from '../../../presentation_util/public';
 import { NodeDimensions } from '../../common/types';
-import Debug from './debug';
-import './error.scss';
+import { LazyDebugComponent } from '.';
+
+const Debug = withSuspense(LazyDebugComponent);
 
 interface DebugComponentProps {
   onLoaded: IInterpreterRenderHandlers['done'];

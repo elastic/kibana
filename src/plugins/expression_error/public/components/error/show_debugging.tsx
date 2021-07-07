@@ -7,7 +7,6 @@
  */
 
 import React, { FC, useState } from 'react';
-import PropTypes from 'prop-types';
 import { EuiButtonEmpty } from '@elastic/eui';
 import Debug from '../debug';
 import { Props } from './error';
@@ -30,8 +29,4 @@ export const ShowDebugging: FC<Props> = ({ payload }) => {
       )}
     </div>
   );
-};
-
-ShowDebugging.propTypes = {
-  payload: PropTypes.object.isRequired,
 };

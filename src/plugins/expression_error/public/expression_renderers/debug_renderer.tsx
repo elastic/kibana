@@ -11,10 +11,10 @@ import React from 'react';
 import { ExpressionRenderDefinition } from 'src/plugins/expressions/common';
 import { i18n } from '@kbn/i18n';
 import { withSuspense } from '../../../../../src/plugins/presentation_util/public';
-import { LazyDebugComponent } from '../components';
+import { LazyDebugRenderComponent } from '../components';
 import { JSON } from '../../common';
 
-const Debug = withSuspense(LazyDebugComponent);
+const Debug = withSuspense(LazyDebugRenderComponent);
 
 const strings = {
   getDisplayName: () =>

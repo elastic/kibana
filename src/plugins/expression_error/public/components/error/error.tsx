@@ -7,7 +7,6 @@
  */
 
 import React, { FC } from 'react';
-import PropTypes from 'prop-types';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
@@ -46,8 +45,4 @@ export const Error: FC<Props> = ({ payload }) => {
       <ShowDebugging payload={payload} />
     </EuiCallOut>
   );
-};
-
-Error.propTypes = {
-  payload: PropTypes.object.isRequired,
 };
