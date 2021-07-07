@@ -23,7 +23,7 @@ as the legacy audit logger will be removed in an upcoming version.
 ============================================================================
 Audit logs are **disabled** by default. To enable this functionality, you must
 set `xpack.security.audit.enabled` to `true` in `kibana.yml`, and configure
-an <<ecs-audit-logging-settings, appender>> to write the audit log to a location of your choosing.
+an <<audit-logging-settings, appender>> to write the audit log to a location of your choosing.
 ============================================================================
 
 The legacy audit logger uses the standard {kib} logging output,
@@ -50,7 +50,7 @@ events. The following is a list of the events that can be generated:
 ============================================================================
 The following events are only logged if the ECS audit logger is enabled.
 For information on how to configure `xpack.security.audit.appender`, refer to
-<<ecs-audit-logging-settings>>.
+<<audit-logging-settings>>.
 ============================================================================
 
 Refer to the table of events that can be logged for auditing purposes. 

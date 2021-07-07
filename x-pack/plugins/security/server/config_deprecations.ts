@@ -29,7 +29,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
       addDeprecation({
         message: `The legacy audit logger is deprecated in favor of the new ECS-compliant audit logger.`,
         documentationUrl:
-          'https://www.elastic.co/guide/en/kibana/current/security-settings-kb.html#ecs-audit-logging-settings',
+          'https://www.elastic.co/guide/en/kibana/current/security-settings-kb.html#audit-logging-settings',
         correctiveActions: {
           manualSteps: [
             `Declare an audit logger "appender" via "xpack.security.audit.appender" to enable the ECS audit logger.`,

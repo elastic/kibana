@@ -323,7 +323,6 @@ In high-availability deployments, make sure you use the same encryption and decr
 |===
 
 [float]
-[[ecs-audit-logging-settings]]
 [[audit-logging-settings]]
 ==== Audit logging settings
 
