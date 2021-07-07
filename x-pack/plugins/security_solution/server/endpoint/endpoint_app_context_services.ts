@@ -67,10 +67,9 @@ export const createMetadataService = (packageService: PackageService): MetadataS
       }
 
       if (version === MetadataQueryStrategyVersions.VERSION_2 || !version) {
-        const assets = await packageService.getInstalledEsAssetReferences(
-          savedObjectsClient,
-          'endpoint'
-        );
+        const assets =
+          (await packageService.getInstallation({ savedObjectsClient, pkgName: 'endpoint' }))
+            ?.installed_es ?? [];
         const expectedTransformAssets = assets.filter(
           (ref) =>
             ref.type === ElasticsearchAssetType.transform &&
