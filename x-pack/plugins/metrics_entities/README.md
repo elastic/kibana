@@ -2,7 +2,7 @@
 
 This is the metrics and entities plugin where you add can add transforms for your project
 and group those transforms into modules. You can also re-use existing transforms in your
-newly modules as well.
+newly created modules as well.
 
 ## Turn on experimental flags
 During at least phase 1 of this development, please add these to your `kibana.dev.yml` file to turn on the feature:
