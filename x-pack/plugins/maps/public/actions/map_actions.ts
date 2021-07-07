@@ -57,6 +57,7 @@ import {
   MapCenter,
   MapCenterAndZoom,
   MapExtent,
+  MapFilters,
   Timeslice,
 } from '../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../common/constants';
@@ -273,7 +274,7 @@ export function setQuery({
       return timeslice ? timeslice : getTimeslice(getState());
     }
 
-    const nextQueryContext = {
+    const nextQueryContext: MapFilters = {
       timeFilters: timeFilters ? timeFilters : prevTimeFilters,
       timeslice: getNextTimeslice(),
       query: {
@@ -284,9 +285,10 @@ export function setQuery({
       filters: filters ? filters : getFilters(getState()),
       searchSessionId: searchSessionId ? searchSessionId : getSearchSessionId(getState()),
       searchSessionMapBuffer,
+      forceRefresh,
     };
 
-    const prevQueryContext = {
+    const prevQueryContext: MapFilters = {
       timeFilters: prevTimeFilters,
       timeslice: getTimeslice(getState()),
       query: prevQuery,

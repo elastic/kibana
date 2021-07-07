@@ -22,7 +22,7 @@ import { IField } from '../../fields/field';
 import { Query } from '../../../../../../../src/plugins/data/common/query';
 import {
   AbstractVectorSource,
-  BoundsFilters,
+  LayerDataFilters,
   GeoJsonWithMeta,
   IVectorSource,
   SourceTooltipConfig,
@@ -156,7 +156,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
   }
 
   async getBoundsForFilters(
-    boundsFilters: BoundsFilters,
+    boundsFilters: LayerDataFilters,
     registerCancelCallback: (callback: () => void) => void
   ): Promise<MapExtent | null> {
     return null;

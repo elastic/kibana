@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import { Filter, IFieldType, IndexPattern, ISearchSource } from 'src/plugins/data/public';
-import { AbstractVectorSource, BoundsFilters } from '../vector_source';
+import { AbstractVectorSource, LayerDataFilters } from '../vector_source';
 import {
   getAutocompleteService,
   getIndexPatternService,
@@ -88,6 +88,10 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
         typeof descriptor.applyGlobalQuery !== 'undefined' ? descriptor.applyGlobalQuery : true,
       applyGlobalTime:
         typeof descriptor.applyGlobalTime !== 'undefined' ? descriptor.applyGlobalTime : true,
+      respondToForceRefresh:
+        typeof descriptor.respondToForceRefresh !== 'undefined'
+          ? descriptor.respondToForceRefresh
+          : true,
     };
   }
 
@@ -106,6 +110,10 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
 
   getApplyGlobalTime(): boolean {
     return this._descriptor.applyGlobalTime;
+  }
+
+  getRespondToForceRefresh(): boolean {
+    return this._descriptor.respondToForceRefresh;
   }
 
   isFieldAware(): boolean {
@@ -197,7 +205,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   }
 
   async makeSearchSource(
-    searchFilters: VectorSourceRequestMeta | VectorJoinSourceRequestMeta | BoundsFilters,
+    searchFilters: VectorSourceRequestMeta | VectorJoinSourceRequestMeta | LayerDataFilters,
     limit: number,
     initialSearchContext?: object
   ): Promise<ISearchSource> {
@@ -253,7 +261,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   }
 
   async getBoundsForFilters(
-    boundsFilters: BoundsFilters,
+    boundsFilters: LayerDataFilters,
     registerCancelCallback: (callback: () => void) => void
   ): Promise<MapExtent | null> {
     const searchSource = await this.makeSearchSource(boundsFilters, 0);

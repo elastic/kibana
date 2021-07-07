@@ -61,7 +61,7 @@ export type DataRequestContext = {
   isRequestStillActive(dataId: string, requestToken: symbol): boolean;
   registerCancelCallback(requestToken: symbol, callback: () => void): void;
   dataFilters: MapFilters;
-  forceRefresh: boolean;
+  forceRefreshDueToDrawing: boolean;
 };
 
 export function clearDataRequests(layer: ILayer) {
@@ -137,7 +137,7 @@ function getDataRequestContext(
     },
     registerCancelCallback: (requestToken: symbol, callback: () => void) =>
       dispatch(registerCancelCallback(requestToken, callback)),
-    forceRefresh,
+    forceRefreshDueToDrawing: forceRefresh,
   };
 }
 
@@ -147,7 +147,7 @@ export function syncDataForAllLayers() {
     getState: () => MapStoreState
   ) => {
     const syncPromises = getLayerList(getState()).map((layer) => {
-      return dispatch(syncDataForLayer(layer));
+      return dispatch(syncDataForLayer(layer, false));
     });
     await Promise.all(syncPromises);
   };
@@ -163,19 +163,19 @@ function syncDataForAllJoinLayers() {
         return 'hasJoins' in layer ? (layer as IVectorLayer).hasJoins() : false;
       })
       .map((layer) => {
-        return dispatch(syncDataForLayer(layer));
+        return dispatch(syncDataForLayer(layer, false));
       });
     await Promise.all(syncPromises);
   };
 }
 
-export function syncDataForLayer(layer: ILayer, forceRefresh: boolean = false) {
+export function syncDataForLayer(layer: ILayer, forceRefreshDueToDrawing: boolean = false) {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
     const dataRequestContext = getDataRequestContext(
       dispatch,
       getState,
       layer.getId(),
-      forceRefresh
+      forceRefreshDueToDrawing
     );
     if (!layer.isVisible() || !layer.showAtZoomLevel(dataRequestContext.dataFilters.zoom)) {
       return;
@@ -191,7 +191,7 @@ export function syncDataForLayerId(layerId: string | null) {
   ) => {
     const layer = getLayerById(layerId, getState());
     if (layer) {
-      dispatch(syncDataForLayer(layer));
+      dispatch(syncDataForLayer(layer, false));
     }
   };
 }

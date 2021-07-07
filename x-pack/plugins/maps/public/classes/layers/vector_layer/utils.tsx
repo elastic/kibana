@@ -77,7 +77,7 @@ export async function syncVectorSource({
   } = syncContext;
   const dataRequestId = SOURCE_DATA_REQUEST_ID;
   const requestToken = Symbol(`${layerId}-${dataRequestId}`);
-  const canSkipFetch = syncContext.forceRefresh
+  const canSkipFetch = syncContext.forceRefreshDueToDrawing
     ? false
     : await canSkipSourceUpdate({
         source,
