@@ -209,7 +209,7 @@ describe('Package search provider', () => {
         expect(sendGetPackages).toHaveBeenCalledTimes(0);
       });
 
-      test('with packages tag, with no search term', () => {
+      test('with integration tag, with no search term', () => {
         getTestScheduler().run(({ hot, expectObservable }) => {
           mockSendGetPackages.mockReturnValue(
             hot('--(a|)', { a: { data: { response: testResponse } } })
@@ -220,7 +220,7 @@ describe('Package search provider', () => {
           const packageSearchProvider = createPackageSearchProvider(setupMock);
           expectObservable(
             packageSearchProvider.find(
-              { types: ['package'] },
+              { types: ['integration'] },
               { aborted$: NEVER, maxResults: 100, preference: '' }
             )
           ).toBe('--(a|)', {
@@ -252,7 +252,7 @@ describe('Package search provider', () => {
         expect(sendGetPackages).toHaveBeenCalledTimes(1);
       });
 
-      test('with packages tag, with search term', () => {
+      test('with integration tag, with search term', () => {
         getTestScheduler().run(({ hot, expectObservable }) => {
           mockSendGetPackages.mockReturnValue(
             hot('--(a|)', { a: { data: { response: testResponse } } })
@@ -263,7 +263,7 @@ describe('Package search provider', () => {
           const packageSearchProvider = createPackageSearchProvider(setupMock);
           expectObservable(
             packageSearchProvider.find(
-              { term: 'test1', types: ['package'] },
+              { term: 'test1', types: ['integration'] },
               { aborted$: NEVER, maxResults: 100, preference: '' }
             )
           ).toBe('--(a|)', {
