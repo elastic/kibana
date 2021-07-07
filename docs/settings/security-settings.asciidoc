@@ -370,7 +370,7 @@ xpack.security.audit.appender:
 <1> Rotates log files every 24 hours.
 <2> Keeps maximum of 10 log files before deleting older ones.
 
-| `xpack.security.audit.appender.type`
+| `xpack.security.audit.appender.type` {ess-icon}
 | Required. Specifies where audit logs should be written to. Allowed values are `console`, `file`, or `rolling-file`. 
 
 Refer to <<audit-logging-file-appender>> and <<audit-logging-rolling-file-appender>> for appender specific settings.
