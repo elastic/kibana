@@ -29,23 +29,3 @@ export type DeeplyMutableRoutes<T> = T extends React.ReactElement
       -readonly [key in keyof T]: DeeplyMutableRoutes<T[key]>;
     }
   : T;
-
-type PickProperty<
-  TObject extends Record<string, any>,
-  TProperty extends string | number | symbol
-> = TObject extends {
-  [key in TProperty]: any;
-}
-  ? [TObject[TProperty]]
-  : [];
-
-export type MapProperty<
-  TArray extends Array<Record<any, any>>,
-  TProperty extends string | number | symbol
-> = TArray extends [infer TObject]
-  ? [...PickProperty<TObject, TProperty>]
-  : TArray extends [infer TObject, ...infer TTail]
-  ? TTail extends Array<Record<any, any>>
-    ? [...PickProperty<TObject, TProperty>, ...MapProperty<TTail, TProperty>]
-    : []
-  : [];

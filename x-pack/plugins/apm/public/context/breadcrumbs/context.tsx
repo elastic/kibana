@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { Route, RouteMatch } from '@kbn/typed-react-router-config/target/types';
-import { useRouteMatch } from '@kbn/typed-react-router-config/target/use_route_match';
+import { useMatchRoutes } from '@kbn/typed-react-router-config/target/use_match_routes';
 import { ChromeBreadcrumb } from 'kibana/public';
 import { isEqual, compact } from 'lodash';
 import React, { createContext, useState, useMemo } from 'react';
@@ -20,7 +20,7 @@ interface Breadcrumb {
 interface BreadcrumbApi {
   set(route: Route, breadcrumb: Breadcrumb): void;
   unset(route: Route): void;
-  getBreadcrumbs(): Breadcrumb[];
+  getBreadcrumbs(matches: RouteMatch[]): Breadcrumb[];
 }
 
 export const BreadcrumbsContext = createContext<BreadcrumbApi | undefined>(
@@ -40,7 +40,7 @@ export function BreadcrumbsContextProvider({
     return new Map<Route, Breadcrumb>();
   }, []);
 
-  const matches: RouteMatch[] = useRouteMatch('/*' as never);
+  const matches: RouteMatch[] = useMatchRoutes('/*' as never);
 
   const api = useMemo<BreadcrumbApi>(
     () => ({
@@ -56,20 +56,21 @@ export function BreadcrumbsContextProvider({
           forceUpdate({});
         }
       },
-      getBreadcrumbs() {
+      getBreadcrumbs(currentMatches: RouteMatch[]) {
         return compact(
-          matches.map((match) => {
-            return breadcrumbs.get(match.route);
+          currentMatches.map((match) => {
+            const breadcrumb = breadcrumbs.get(match.route);
+
+            return breadcrumb;
           })
         );
       },
     }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [breadcrumbs]
   );
 
   const formattedBreadcrumbs: ChromeBreadcrumb[] = api
-    .getBreadcrumbs()
+    .getBreadcrumbs(matches)
     .map((breadcrumb) => {
       const href = core.http.basePath.prepend(`/app/apm${breadcrumb.href}`);
       return {

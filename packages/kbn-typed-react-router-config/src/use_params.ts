@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { PathsOf, Route, OutputOf } from './types';
+import { useLocation } from 'react-router-dom';
+import { Route } from './types';
 import { useRouter } from './use_router';
 
-export function useParams<TRoutes extends Route[], TPath extends PathsOf<TRoutes, true>>(
-  path: TPath
-): OutputOf<TRoutes, TPath> {
+export function useParams(path: string) {
   // FIXME: using TRoutes instead of Route[] causes tsc
   // to fail with "RangeError: Maximum call stack size exceeded"
   const router = useRouter<Route[]>();
-  return router.getParams(path) as any;
+  const location = useLocation();
+
+  return router.getParams(path as never, location);
 }

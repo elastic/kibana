@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { isLeft } from 'fp-ts/lib/Either';
-import { History } from 'history';
+import { Location } from 'history';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import {
   matchRoutes as matchRoutesConfig,
@@ -18,13 +18,7 @@ import { deepExactRt } from '@kbn/io-ts-utils/target/deep_exact_rt';
 import { mergeRt } from '@kbn/io-ts-utils/target/merge_rt';
 import { Route, Router } from './types';
 
-export function createRouter<TRoutes extends Route[]>({
-  history,
-  routes,
-}: {
-  history: History;
-  routes: TRoutes;
-}): Router<TRoutes> {
+export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<TRoutes> {
   const routesByReactRouterConfig = new Map<ReactRouterConfig, Route>();
   const reactRouterConfigsByRoute = new Map<Route, ReactRouterConfig>();
 
@@ -45,14 +39,22 @@ export function createRouter<TRoutes extends Route[]>({
     return reactRouterConfig;
   }
 
-  const matchRoutes = (path: string) => {
+  const matchRoutes = (...args: any[]) => {
+    let path: string = args[0];
+    let location: Location = args[1];
+
+    if (args.length === 1) {
+      location = args[0] as Location;
+      path = location.pathname;
+    }
+
     const greedy = path.endsWith('/*');
 
     if (!path) {
       path = '/';
     }
 
-    const matches = matchRoutesConfig(reactRouterConfigs, history.location.pathname);
+    const matches = matchRoutesConfig(reactRouterConfigs, location.pathname);
 
     const matchIndex = greedy
       ? matches.length - 1
@@ -68,7 +70,7 @@ export function createRouter<TRoutes extends Route[]>({
       if (route?.params) {
         const decoded = deepExactRt(route.params).decode({
           path: matchedRoute.match.params,
-          query: qs.parse(history.location.search),
+          query: qs.parse(location.search),
         });
 
         if (isLeft(decoded)) {
@@ -139,18 +141,12 @@ export function createRouter<TRoutes extends Route[]>({
     link: (path, ...args) => {
       return link(path, ...args);
     },
-    push: (path, ...args) => {
-      history.push(link(path, ...args));
-    },
-    replace: (path, ...args) => {
-      history.replace(link(path, ...args));
-    },
-    getParams: (path) => {
-      const matches = matchRoutes(path);
+    getParams: (path, location) => {
+      const matches = matchRoutes(path, location);
       return merge({ path: {}, query: {} }, ...matches.map((match) => match.match.params));
     },
-    matchRoutes: (path) => {
-      return matchRoutes(path) as any;
+    matchRoutes: (...args: any[]) => {
+      return matchRoutes(...args) as any;
     },
   };
 }

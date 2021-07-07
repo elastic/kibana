@@ -31,7 +31,8 @@ import { HeaderMenuPortal } from '../../../../observability/public';
 import { ApmHeaderActionMenu } from '../shared/apm_header_action_menu';
 import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
 import { AnomalyDetectionJobsContextProvider } from '../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
-import { apmRoutes } from './apm_route_config';
+import { apmRouter } from './apm_route_config';
+import { BreadcrumbsContextProvider } from '../../context/breadcrumbs/context';
 
 export function ApmAppRoot({
   apmPluginContextValue,
@@ -54,19 +55,21 @@ export function ApmAppRoot({
       <ApmPluginContext.Provider value={apmPluginContextValue}>
         <KibanaContextProvider services={{ ...core, ...pluginsStart }}>
           <i18nCore.Context>
-            <Router history={history} routes={apmRoutes}>
-              <UrlParamsProvider>
-                <LicenseProvider>
-                  <AnomalyDetectionJobsContextProvider>
-                    <ApmThemeProvider>
-                      <MountApmHeaderActionMenu />
+            <Router history={history} router={apmRouter}>
+              <BreadcrumbsContextProvider>
+                <UrlParamsProvider>
+                  <LicenseProvider>
+                    <AnomalyDetectionJobsContextProvider>
+                      <ApmThemeProvider>
+                        <MountApmHeaderActionMenu />
 
-                      <Route component={ScrollToTopOnPathChange} />
-                      <RouteRenderer />
-                    </ApmThemeProvider>
-                  </AnomalyDetectionJobsContextProvider>
-                </LicenseProvider>
-              </UrlParamsProvider>
+                        <Route component={ScrollToTopOnPathChange} />
+                        <RouteRenderer />
+                      </ApmThemeProvider>
+                    </AnomalyDetectionJobsContextProvider>
+                  </LicenseProvider>
+                </UrlParamsProvider>
+              </BreadcrumbsContextProvider>
             </Router>
           </i18nCore.Context>
         </KibanaContextProvider>
@@ -76,7 +79,6 @@ export function ApmAppRoot({
 }
 
 function MountApmHeaderActionMenu() {
-  // useApmBreadcrumbs(apmRouteConfig);
   const { setHeaderActionMenu } = useApmPluginContext().appMountParameters;
 
   return (

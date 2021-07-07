@@ -32,6 +32,12 @@ export function useBreadcrumb({
 
   matchedRoute.current = match?.route;
 
+  console.log({
+    current: matchedRoute.current,
+    title,
+    href,
+  });
+
   if (matchedRoute.current) {
     api.set(matchedRoute.current, { title, href });
   }

@@ -6,25 +6,20 @@
  * Side Public License, v 1.
  */
 import { History } from 'history';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Router as ReactRouter } from 'react-router-dom';
-import { createRouter } from './create_router';
-import { Route } from './types';
+import { Route, Router } from './types';
 import { RouterContextProvider } from './use_router';
 
-export function Router<TRoutes extends Route[]>({
+export function Router({
   children,
+  router,
   history,
-  routes,
 }: {
-  children: React.ReactElement;
-  routes: TRoutes;
+  router: Router<Route[]>;
   history: History;
+  children: React.ReactElement;
 }) {
-  const router = useMemo(() => {
-    return createRouter({ history, routes });
-  }, [history, routes]);
-
   return (
     <ReactRouter history={history}>
       <RouterContextProvider router={router}>{children}</RouterContextProvider>

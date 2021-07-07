@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
 import { i18n } from '@kbn/i18n';
 import { Outlet } from '@kbn/typed-react-router-config/target/outlet';
 import { unconst } from '@kbn/typed-react-router-config/target/unconst';
+import { createRouter } from '@kbn/typed-react-router-config/target/create_router';
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 import { getServiceNodeName } from '../../../common/service_nodes';
@@ -27,7 +27,6 @@ import { TransactionLink } from '../app/transaction_link';
 import { TransactionDetails } from '../app/transaction_details';
 import { enableServiceOverview } from '../../../common/ui_settings_keys';
 import { redirectTo } from './redirect_to';
-import { ApmMainTemplate } from './templates/apm_main_template';
 import { ApmServiceTemplate } from './templates/apm_service_template';
 import { ServiceProfiling } from '../app/service_profiling';
 import { ErrorGroupOverview } from '../app/error_group_overview';
@@ -36,10 +35,11 @@ import { ServiceNodeOverview } from '../app/service_node_overview';
 import { ServiceMetrics } from '../app/service_metrics';
 import { ServiceOverview } from '../app/service_overview';
 import { TransactionOverview } from '../app/transaction_overview';
-import { ServiceInventory } from '../app/service_inventory';
-import { TraceOverview } from '../app/trace_overview';
 import { useFetcher } from '../../hooks/use_fetcher';
 import { AgentConfigurationCreateEdit } from '../app/Settings/agent_configurations/AgentConfigurationCreateEdit';
+import { Breadcrumb } from '../app/breadcrumb';
+import { home } from './home';
+import { settings } from './settings';
 
 // These component function definitions are used below with the `component`
 // property of the route definitions.
@@ -47,46 +47,6 @@ import { AgentConfigurationCreateEdit } from '../app/Settings/agent_configuratio
 // If you provide an inline function to the component prop, you would create a
 // new component every render. This results in the existing component unmounting
 // and the new component mounting instead of just updating the existing component.
-
-const ServiceInventoryTitle = i18n.translate(
-  'xpack.apm.views.serviceInventory.title',
-  { defaultMessage: 'Services' }
-);
-
-function ServiceInventoryView() {
-  return (
-    <ApmMainTemplate pageTitle={ServiceInventoryTitle}>
-      <ServiceInventory />
-    </ApmMainTemplate>
-  );
-}
-
-const TraceOverviewTitle = i18n.translate(
-  'xpack.apm.views.traceOverview.title',
-  {
-    defaultMessage: 'Traces',
-  }
-);
-
-function TraceOverviewView() {
-  return (
-    <ApmMainTemplate pageTitle={TraceOverviewTitle}>
-      <TraceOverview />
-    </ApmMainTemplate>
-  );
-}
-
-const ServiceMapTitle = i18n.translate('xpack.apm.views.serviceMap.title', {
-  defaultMessage: 'Service Map',
-});
-
-function ServiceMapView() {
-  return (
-    <ApmMainTemplate pageTitle={ServiceMapTitle}>
-      <ServiceMap />
-    </ApmMainTemplate>
-  );
-}
 
 function ServiceDetailsErrorsRouteView(
   props: RouteComponentProps<{ serviceName: string }>
@@ -261,50 +221,6 @@ function SettingsSchema() {
   );
 }
 
-export function EditAgentConfigurationRouteView(props: RouteComponentProps) {
-  const { search } = props.history.location;
-
-  // typescript complains because `pageStop` does not exist in `APMQueryParams`
-  // Going forward we should move away from globally declared query params and this is a first step
-  // @ts-expect-error
-  const { name, environment, pageStep } = toQuery(search);
-
-  const res = useFetcher(
-    (callApmApi) => {
-      return callApmApi({
-        endpoint: 'GET /api/apm/settings/agent-configuration/view',
-        params: { query: { name, environment } },
-      });
-    },
-    [name, environment]
-  );
-
-  return (
-    <SettingsTemplate selectedTab="agent-configurations" {...props}>
-      <AgentConfigurationCreateEdit
-        pageStep={pageStep || 'choose-settings-step'}
-        existingConfigResult={res}
-      />
-    </SettingsTemplate>
-  );
-}
-
-export function CreateAgentConfigurationRouteView(props: RouteComponentProps) {
-  const { search } = props.history.location;
-
-  // Ignoring here because we specifically DO NOT want to add the query params to the global route handler
-  // @ts-expect-error
-  const { pageStep } = toQuery(search);
-
-  return (
-    <SettingsTemplate selectedTab="agent-configurations" {...props}>
-      <AgentConfigurationCreateEdit
-        pageStep={pageStep || 'choose-service-step'}
-      />
-    </SettingsTemplate>
-  );
-}
-
 const SettingsApmIndicesTitle = i18n.translate(
   'xpack.apm.views.settings.indices.title',
   { defaultMessage: 'Indices' }
@@ -346,42 +262,7 @@ const apmRoutesAsConst = [
   {
     path: '/',
     element: <Outlet />,
-    children: [
-      {
-        path: '/services',
-        element: <ServiceInventoryView />,
-        params: t.partial({
-          query: t.partial({
-            rangeFrom: t.string,
-            rangeTo: t.string,
-          }),
-        }),
-      },
-      {
-        path: '/traces',
-        element: <TraceOverviewView />,
-        params: t.partial({
-          query: t.partial({
-            rangeFrom: t.string,
-            rangeTo: t.string,
-          }),
-        }),
-      },
-      {
-        path: '/service-map',
-        element: <ServiceMapView />,
-        params: t.partial({
-          query: t.partial({
-            rangeFrom: t.string,
-            rangeTo: t.string,
-          }),
-        }),
-      },
-      {
-        path: '/',
-        element: <Redirect to="/services" />,
-      },
-    ],
+    children: [settings, home],
   },
 ] as const;
 
@@ -389,86 +270,90 @@ export const apmRoutes = unconst(apmRoutesAsConst);
 
 export type ApmRoutes = typeof apmRoutes;
 
+export const apmRouter = createRouter(apmRoutes);
+
+export type ApmRouter = typeof apmRouter;
+
 export const apmRouteConfig: APMRouteDefinition[] = [
   /*
    * Home routes
    */
-  {
-    exact: true,
-    path: '/',
-    render: redirectTo('/services'),
-    breadcrumb: 'APM',
-  },
-  {
-    exact: true,
-    path: '/services', // !! Need to be kept in sync with the deepLinks in x-pack/plugins/apm/public/plugin.ts
-    component: ServiceInventoryView,
-    breadcrumb: ServiceInventoryTitle,
-  },
-  {
-    exact: true,
-    path: '/traces', // !! Need to be kept in sync with the deepLinks in x-pack/plugins/apm/public/plugin.ts
-    component: TraceOverviewView,
-    breadcrumb: TraceOverviewTitle,
-  },
-  {
-    exact: true,
-    path: '/service-map', // !! Need to be kept in sync with the deepLinks in x-pack/plugins/apm/public/plugin.ts
-    component: ServiceMapView,
-    breadcrumb: ServiceMapTitle,
-  },
+  // {
+  //   exact: true,
+  //   path: '/',
+  //   render: redirectTo('/services'),
+  //   breadcrumb: 'APM',
+  // },
+  // {
+  //   exact: true,
+  //   path: '/services', // !! Need to be kept in sync with the deepLinks in x-pack/plugins/apm/public/plugin.ts
+  //   component: ServiceInventoryView,
+  //   breadcrumb: ServiceInventoryTitle,
+  // },
+  // {
+  //   exact: true,
+  //   path: '/traces', // !! Need to be kept in sync with the deepLinks in x-pack/plugins/apm/public/plugin.ts
+  //   component: TraceOverviewView,
+  //   breadcrumb: TraceOverviewTitle,
+  // },
+  // {
+  //   exact: true,
+  //   path: '/service-map', // !! Need to be kept in sync with the deepLinks in x-pack/plugins/apm/public/plugin.ts
+  //   component: ServiceMapView,
+  //   breadcrumb: ServiceMapTitle,
+  // },
 
   /*
    * Settings routes
    */
-  {
-    exact: true,
-    path: '/settings',
-    render: redirectTo('/settings/agent-configuration'),
-    breadcrumb: SettingsTitle,
-  },
-  {
-    exact: true,
-    path: '/settings/agent-configuration',
-    component: SettingsAgentConfigurationRouteView,
-    breadcrumb: SettingsAgentConfigurationTitle,
-  },
-  {
-    exact: true,
-    path: '/settings/agent-configuration/create',
-    component: CreateAgentConfigurationRouteView,
-    breadcrumb: CreateAgentConfigurationTitle,
-  },
-  {
-    exact: true,
-    path: '/settings/agent-configuration/edit',
-    breadcrumb: EditAgentConfigurationTitle,
-    component: EditAgentConfigurationRouteView,
-  },
-  {
-    exact: true,
-    path: '/settings/apm-indices',
-    component: SettingsApmIndicesRouteView,
-    breadcrumb: SettingsApmIndicesTitle,
-  },
-  {
-    exact: true,
-    path: '/settings/customize-ui',
-    component: SettingsCustomizeUI,
-    breadcrumb: SettingsCustomizeUITitle,
-  },
-  {
-    exact: true,
-    path: '/settings/schema',
-    component: SettingsSchema,
-    breadcrumb: SettingsSchemaTitle,
-  },
-  {
-    exact: true,
-    path: '/settings/anomaly-detection',
-    component: SettingsAnomalyDetectionRouteView,
-    breadcrumb: SettingsAnomalyDetectionTitle,
-  },
+  // {
+  //   exact: true,
+  //   path: '/settings',
+  //   render: redirectTo('/settings/agent-configuration'),
+  //   breadcrumb: SettingsTitle,
+  // },
+  // {
+  //   exact: true,
+  //   path: '/settings/agent-configuration',
+  //   component: SettingsAgentConfigurationRouteView,
+  //   breadcrumb: SettingsAgentConfigurationTitle,
+  // },
+  // {
+  //   exact: true,
+  //   path: '/settings/agent-configuration/create',
+  //   component: CreateAgentConfigurationRouteView,
+  //   breadcrumb: CreateAgentConfigurationTitle,
+  // },
+  // {
+  //   exact: true,
+  //   path: '/settings/agent-configuration/edit',
+  //   breadcrumb: EditAgentConfigurationTitle,
+  //   component: EditAgentConfigurationRouteView,
+  // },
+  // {
+  //   exact: true,
+  //   path: '/settings/apm-indices',
+  //   component: SettingsApmIndicesRouteView,
+  //   breadcrumb: SettingsApmIndicesTitle,
+  // },
+  // {
+  //   exact: true,
+  //   path: '/settings/customize-ui',
+  //   component: SettingsCustomizeUI,
+  //   breadcrumb: SettingsCustomizeUITitle,
+  // },
+  // {
+  //   exact: true,
+  //   path: '/settings/schema',
+  //   component: SettingsSchema,
+  //   breadcrumb: SettingsSchemaTitle,
+  // },
+  // {
+  //   exact: true,
+  //   path: '/settings/anomaly-detection',
+  //   component: SettingsAnomalyDetectionRouteView,
+  //   breadcrumb: SettingsAnomalyDetectionTitle,
+  // },
 
   /*
    * Services routes (with APM Service context)

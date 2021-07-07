@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { Location } from 'history';
 import * as t from 'io-ts';
 import { ReactElement } from 'react';
-import { ValuesType } from 'utility-types';
-import { NormalizePath, MapProperty } from './utils';
+import { RequiredKeys, ValuesType } from 'utility-types';
+// import { unconst } from '../unconst';
+import { NormalizePath } from './utils';
 
 type PathsOfRoute<
   TRoute extends Route,
@@ -46,7 +48,7 @@ export type PathsOf<
   : never;
 
 export interface RouteMatch<TRoute extends Route = Route> {
-  route: Omit<TRoute, 'children'>;
+  route: TRoute;
   match: {
     isExact: boolean;
     path: string;
@@ -59,59 +61,28 @@ export interface RouteMatch<TRoute extends Route = Route> {
   };
 }
 
-type ToUnion<TMatches extends any[]> = ValuesType<TMatches>;
+type ToRouteMatch<TRoutes extends Route[]> = TRoutes extends []
+  ? []
+  : TRoutes extends [Route]
+  ? [RouteMatch<TRoutes[0]>]
+  : TRoutes extends [Route, ...infer TTail]
+  ? TTail extends Route[]
+    ? [RouteMatch<TRoutes[0]>, ...ToRouteMatch<TTail>]
+    : []
+  : [];
 
-type MatchRoute<TRoute extends Route, TPath extends string> = TPath extends '/*'
-  ? [
-      ToUnion<
-        [
-          RouteMatch<TRoute>,
-          ...(TRoute extends {
-            children: Route[];
-          }
-            ? Match<TRoute['children'], '/*'>
-            : [])
-        ]
-      >
-    ]
-  : [
-      ...(TPath extends TRoute['path']
-        ? [
-            RouteMatch<TRoute>,
-            ...(TRoute['path'] extends '/'
-              ? TRoute extends {
-                  children: Route[];
-                }
-                ? Match<TRoute['children'], TPath>
-                : []
-              : [])
-          ]
-        : TPath extends `${TRoute['path']}${infer TRest}`
-        ? TRoute extends {
-            children: Route[];
-          }
-          ? TRest extends string
-            ? Match<TRoute['children'], NormalizePath<`/${TRest}`>> extends
-                | [RouteMatch]
-                | [RouteMatch, ...RouteMatch[]]
-              ? [RouteMatch<TRoute>, ...Match<TRoute['children'], NormalizePath<`/${TRest}`>>]
-              : []
-            : []
-          : []
-        : [])
-    ];
+type UnwrapRouteMap<TRoute extends Route & { parents?: Route[] }> = TRoute extends {
+  parents: Route[];
+}
+  ? ToRouteMatch<[...TRoute['parents'], Omit<TRoute, 'parents'>]>
+  : ToRouteMatch<[Omit<TRoute, 'parents'>]>;
 
-export type Match<TRoutes extends any[], TPath extends string> = [
-  ...(TRoutes extends [infer TRoute, ...infer TTail]
-    ? TRoute extends Route
-      ? [...MatchRoute<TRoute, TPath>, ...(TTail extends Route[] ? Match<TTail, TPath> : [])]
-      : []
-    : TRoutes extends [infer TRoute]
-    ? TRoute extends Route
-      ? MatchRoute<TRoute, TPath>
-      : []
-    : [])
-];
+export type Match<TRoutes extends Route[], TPath extends string> = MapRoutes<TRoutes> extends {
+  [key in TPath]: Route;
+}
+  ? UnwrapRouteMap<MapRoutes<TRoutes>[TPath]>
+  : [];
+
 export interface Route {
   path: string;
   element: ReactElement;
@@ -119,52 +90,183 @@ export interface Route {
   params?: t.Type<any>;
 }
 
-type ToIntersectionType<T> = T extends [t.Type<any>]
-  ? T[0]
-  : T extends [t.Type<any>, t.Type<any>]
-  ? t.IntersectionC<[T[0], T[1]]>
-  : T extends [t.Type<any>, t.Type<any>, t.Type<any>]
-  ? t.IntersectionC<[T[0], T[1], T[2]]>
-  : T extends [t.Type<any>, t.Type<any>, t.Type<any>, t.Type<any>]
-  ? t.IntersectionC<[T[0], T[1], T[2], T[3]]>
-  : t.TypeC<{
-      path: t.TypeC<{}>;
-      query: t.TypeC<{}>;
-    }>;
-
 interface DefaultOutput {
   path: {};
   query: {};
 }
 
-export type OutputOf<TRoutes extends Route[], TPath extends PathsOf<TRoutes>> = MapProperty<
-  MapProperty<Match<TRoutes, TPath>, 'route'>,
-  'params'
-> extends []
-  ? DefaultOutput
-  : DefaultOutput &
-      t.OutputOf<
-        ToIntersectionType<MapProperty<MapProperty<Match<TRoutes, TPath>, 'route'>, 'params'>>
-      >;
+type OutputOfRouteMatch<TRouteMatch extends RouteMatch> = TRouteMatch extends {
+  route: { params: t.Type<any> };
+}
+  ? t.OutputOf<TRouteMatch['route']['params']>
+  : DefaultOutput;
 
-export type TypeOf<TRoutes extends Route[], TPath extends PathsOf<TRoutes>> = MapProperty<
-  MapProperty<Match<TRoutes, TPath>, 'route'>,
-  'params'
-> extends []
+type OutputOfMatches<TRouteMatches extends RouteMatch[]> = TRouteMatches extends [RouteMatch]
+  ? OutputOfRouteMatch<TRouteMatches[0]>
+  : TRouteMatches extends [RouteMatch, ...infer TNextRouteMatches]
+  ? OutputOfRouteMatch<TRouteMatches[0]> &
+      (TNextRouteMatches extends RouteMatch[] ? OutputOfMatches<TNextRouteMatches> : DefaultOutput)
+  : DefaultOutput;
+
+export type OutputOf<
+  TRoutes extends Route[],
+  TPath extends PathsOf<TRoutes, true>
+> = OutputOfMatches<Match<TRoutes, TPath>>;
+
+type TypeOfRouteMatch<TRouteMatch extends RouteMatch> = TRouteMatch extends {
+  route: { params: t.Type<any> };
+}
+  ? t.TypeOf<TRouteMatch['route']['params']>
+  : {};
+
+type TypeOfMatches<TRouteMatches extends RouteMatch[]> = TRouteMatches extends [RouteMatch]
+  ? TypeOfRouteMatch<TRouteMatches[0]>
+  : TRouteMatches extends [RouteMatch, ...infer TNextRouteMatches]
+  ? TypeOfRouteMatch<TRouteMatches[0]> &
+      (TNextRouteMatches extends RouteMatch[] ? TypeOfMatches<TNextRouteMatches> : {})
+  : {};
+
+export type TypeOf<TRoutes extends Route[], TPath extends PathsOf<TRoutes, false>> = TypeOfMatches<
+  Match<TRoutes, TPath>
+>;
+
+export type TypeAsArgs<TObject> = keyof TObject extends never
   ? []
-  : [
-      t.TypeOf<
-        ToIntersectionType<MapProperty<MapProperty<Match<TRoutes, TPath>, 'route'>, 'params'>>
-      >
-    ];
+  : RequiredKeys<TObject> extends never
+  ? [TObject] | []
+  : [TObject];
 
 export interface Router<TRoutes extends Route[]> {
-  matchRoutes<TPath extends PathsOf<TRoutes, true>>(path: TPath): Match<TRoutes, TPath>;
-  getParams<TPath extends PathsOf<TRoutes, true>>(path: TPath): OutputOf<TRoutes, TPath>;
-  link<TPath extends PathsOf<TRoutes, false>>(path: TPath, ...args: TypeOf<TRoutes, TPath>): string;
-  push<TPath extends PathsOf<TRoutes, false>>(path: TPath, ...args: TypeOf<TRoutes, TPath>): void;
-  replace<TPath extends PathsOf<TRoutes, false>>(
+  matchRoutes<TPath extends PathsOf<TRoutes, true>>(
     path: TPath,
-    ...args: TypeOf<TRoutes, TPath>
-  ): void;
+    location: Location
+  ): Match<TRoutes, TPath>;
+  matchRoutes(location: Location): Match<TRoutes, PathsOf<TRoutes>>;
+  getParams<TPath extends PathsOf<TRoutes, true>>(
+    path: TPath,
+    location: Location
+  ): OutputOf<TRoutes, TPath>;
+  link<TPath extends PathsOf<TRoutes, false>>(
+    path: TPath,
+    ...args: TypeAsArgs<TypeOf<TRoutes, TPath>>
+  ): string;
 }
+
+type AppendPath<
+  TPrefix extends string,
+  TPath extends string
+> = NormalizePath<`${TPrefix}${NormalizePath<`/${TPath}`>}`>;
+
+type MapRoute<TRoute, TPrefix extends string, TParents extends Route[] = []> = TRoute extends Route
+  ? {
+      [key in AppendPath<TPrefix, TRoute['path']>]: TRoute & { parents: TParents };
+    } &
+      (TRoute extends { children: Route[] }
+        ? {
+            [key in AppendPath<TPrefix, `${TRoute['path']}/*`>]: ValuesType<
+              MapRoutes<
+                TRoute['children'],
+                AppendPath<TPrefix, TRoute['path']>,
+                [...TParents, TRoute]
+              >
+            >;
+          } &
+            MapRoutes<
+              TRoute['children'],
+              AppendPath<TPrefix, TRoute['path']>,
+              [...TParents, TRoute]
+            >
+        : {})
+  : {};
+
+type MapRoutes<
+  TRoutes,
+  TPrefix extends string = '',
+  TParents extends Route[] = []
+> = TRoutes extends [infer TRoute]
+  ? MapRoute<TRoute, TPrefix, TParents>
+  : TRoutes extends [infer TRoute, ...infer TTail]
+  ? MapRoute<TRoute, TPrefix, TParents> & MapRoutes<TTail, TPrefix, TParents>
+  : TRoutes extends []
+  ? {}
+  : {};
+
+// const element = null as any;
+
+// const routes = unconst([
+//   {
+//     path: '/',
+//     element,
+//     children: [
+//       {
+//         path: '/settings',
+//         element,
+//         children: [
+//           {
+//             path: '/agent-configuration',
+//             element,
+//           },
+//           {
+//             path: '/agent-configuration/create',
+//             element,
+//             params: t.partial({
+//               path: t.type({
+//                 serviceName: t.string,
+//               }),
+//             }),
+//           },
+//           {
+//             path: '/agent-configuration/edit',
+//             element,
+//           },
+//           {
+//             path: '/apm-indices',
+//             element,
+//           },
+//           {
+//             path: '/customize-ui',
+//             element,
+//           },
+//           {
+//             path: '/schema',
+//             element,
+//           },
+//           {
+//             path: '/anomaly-detection',
+//             element,
+//           },
+//         ],
+//       },
+//       {
+//         path: '/',
+//         element,
+//         children: [
+//           {
+//             path: '/services',
+//             element,
+//           },
+//           {
+//             path: '/traces',
+//             element,
+//           },
+//           {
+//             path: '/service-map',
+//             element,
+//           },
+//           {
+//             path: '/',
+//             element,
+//           },
+//         ],
+//       },
+//     ],
+//   },
+// ] as const);
+
+// type Routes = typeof routes;
+
+// type Mapped = MapRoutes<Routes>;
+
+// type Bar = Match<Routes, '/settings/agent-configuration/create'>[2];
+
+// type Foo = TypeAsArgs<TypeOf<Routes, '/settings/agent-configuration/create'>>;

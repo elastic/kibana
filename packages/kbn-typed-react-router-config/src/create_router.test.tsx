@@ -75,17 +75,16 @@ describe('createRouter', () => {
   ] as const);
 
   let history = createMemoryHistory();
-  let router = createRouter({ history, routes });
+  const router = createRouter(routes);
 
   beforeEach(() => {
     history = createMemoryHistory();
-    router = createRouter({ history, routes });
   });
 
   describe('getParams', () => {
     it('returns parameters for routes matching the path only', () => {
       history.push('/services?rangeFrom=now-15m&rangeTo=now&transactionType=request');
-      const topLevelParams = router.getParams('/');
+      const topLevelParams = router.getParams('/', history.location);
 
       expect(topLevelParams).toEqual({
         path: {},
@@ -97,7 +96,7 @@ describe('createRouter', () => {
 
       history.push('/services?rangeFrom=now-15m&rangeTo=now&transactionType=request');
 
-      const inventoryParams = router.getParams('/services');
+      const inventoryParams = router.getParams('/services', history.location);
 
       expect(inventoryParams).toEqual({
         path: {},
@@ -110,7 +109,7 @@ describe('createRouter', () => {
 
       history.push('/traces?rangeFrom=now-15m&rangeTo=now&aggregationType=avg');
 
-      const topTracesParams = router.getParams('/traces');
+      const topTracesParams = router.getParams('/traces', history.location);
 
       expect(topTracesParams).toEqual({
         path: {},
@@ -125,7 +124,7 @@ describe('createRouter', () => {
         '/services/opbeans-java?rangeFrom=now-15m&rangeTo=now&environment=production&transactionType=request'
       );
 
-      const serviceOverviewParams = router.getParams('/services/:serviceName');
+      const serviceOverviewParams = router.getParams('/services/:serviceName', history.location);
 
       expect(serviceOverviewParams).toEqual({
         path: {
@@ -142,7 +141,7 @@ describe('createRouter', () => {
 
     it('decodes the path and query parameters based on the route type', () => {
       history.push('/service-map?rangeFrom=now-15m&rangeTo=now&maxNumNodes=3');
-      const topServiceMapParams = router.getParams('/service-map');
+      const topServiceMapParams = router.getParams('/service-map', history.location);
 
       expect(topServiceMapParams).toEqual({
         path: {},
@@ -156,7 +155,7 @@ describe('createRouter', () => {
 
     it('throws an error if the given path does not match any routes', () => {
       expect(() => {
-        router.getParams('/service-map');
+        router.getParams('/service-map', history.location);
       }).toThrowError('No matching route found for /service-map');
     });
   });
@@ -165,15 +164,15 @@ describe('createRouter', () => {
     it('returns only the routes matching the path', () => {
       history.push('/service-map?rangeFrom=now-15m&rangeTo=now&maxNumNodes=3');
 
-      expect(router.matchRoutes('/').length).toEqual(2);
-      expect(router.matchRoutes('/service-map').length).toEqual(3);
+      expect(router.matchRoutes('/', history.location).length).toEqual(2);
+      expect(router.matchRoutes('/service-map', history.location).length).toEqual(3);
     });
 
     it('throws an error if the given path does not match any routes', () => {
       history.push('/service-map?rangeFrom=now-15m&rangeTo=now&maxNumNodes=3');
 
       expect(() => {
-        router.matchRoutes('/traces');
+        router.matchRoutes('/traces', history.location);
       }).toThrowError('No matching route found for /traces');
     });
   });
