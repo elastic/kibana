@@ -66,7 +66,7 @@ export const EngineRouter: React.FC = () => {
   } = useValues(AppLogic);
 
   const { engineName: engineNameFromUrl } = useParams() as { engineName: string };
-  const { engineName, dataLoading, engineNotFound } = useValues(EngineLogic);
+  const { engineName, dataLoading, engineNotFound, canCrawl } = useValues(EngineLogic);
   const { setEngineName, initializeEngine, pollEmptyEngine, stopPolling, clearEngine } = useActions(
     EngineLogic
   );
@@ -125,7 +125,7 @@ export const EngineRouter: React.FC = () => {
           <SourceEngines />
         </Route>
       )}
-      {canViewEngineCrawler && (
+      {canViewEngineCrawler && canCrawl && (
         <Route path={ENGINE_CRAWLER_PATH}>
           <CrawlerRouter />
         </Route>

@@ -39,6 +39,7 @@ describe('EngineRouter', () => {
     ...mockEngineValues,
     dataLoading: false,
     engineNotFound: false,
+    canCrawl: false,
     myRole: {},
   };
   const actions = {
@@ -182,7 +183,7 @@ describe('EngineRouter', () => {
   });
 
   it('renders a crawler view', () => {
-    setMockValues({ ...values, myRole: { canViewEngineCrawler: true } });
+    setMockValues({ ...values, myRole: { canViewEngineCrawler: true }, canCrawl: true });
     const wrapper = shallow(<EngineRouter />);
 
     expect(wrapper.find(CrawlerRouter)).toHaveLength(1);
