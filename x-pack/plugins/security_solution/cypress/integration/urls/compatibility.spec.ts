@@ -9,8 +9,12 @@ import { loginAndWaitForPage, loginAndWaitForPageWithoutDateRange } from '../../
 
 import {
   ALERTS_URL,
+  detectionRuleEditUrl,
   DETECTIONS,
+  detectionsRuleDetailsUrl,
   DETECTIONS_RULE_MANAGEMENT_URL,
+  ruleDetailsUrl,
+  ruleEditUrl,
   RULE_CREATION,
   SECURITY_DETECTIONS_RULES_CREATION_URL,
   SECURITY_DETECTIONS_RULES_URL,
@@ -27,6 +31,8 @@ const ABSOLUTE_DATE = {
   endTime: '2019-08-01T20:33:29.186Z',
   startTime: '2019-08-01T20:03:29.186Z',
 };
+
+const RULE_ID = '5a4a0460-d822-11eb-8962-bfd4aff0a9b3';
 
 describe('URL compatibility', () => {
   before(() => {
@@ -51,6 +57,16 @@ describe('URL compatibility', () => {
   it('Redirects to rules creation from old Detections rules creation URL', () => {
     loginAndWaitForPage(SECURITY_DETECTIONS_RULES_CREATION_URL);
     cy.url().should('include', RULE_CREATION);
+  });
+
+  it('Redirects to rule details from old Detections rule details URL', () => {
+    loginAndWaitForPage(detectionsRuleDetailsUrl(RULE_ID));
+    cy.url().should('include', ruleDetailsUrl(RULE_ID));
+  });
+
+  it('Redirects to rule edit from old Detections rule edit URL', () => {
+    loginAndWaitForPage(detectionRuleEditUrl(RULE_ID));
+    cy.url().should('include', ruleEditUrl(RULE_ID));
   });
 
   it('sets the global start and end dates from the url with timestamps', () => {
