@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getFunctionSpecs } from '../../__fixtures__/function_specs';
+import { functionSpecs } from '../../__fixtures__/function_specs';
 
 import {
   FunctionSuggestion,
@@ -14,8 +14,6 @@ import {
 } from './autocomplete';
 
 describe('autocomplete', () => {
-  const functionSpecs = getFunctionSpecs();
-
   describe('getFnArgDefAtPosition', () => {
     it('should return function definition for plot', () => {
       const expression = 'plot ';

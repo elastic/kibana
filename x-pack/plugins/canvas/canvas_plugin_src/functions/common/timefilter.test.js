@@ -13,9 +13,8 @@ import { timefilter } from './timefilter';
 
 const errors = getFunctionErrors().timefilter;
 
-const fn = functionWrapper(timefilter);
-
 let clock = null;
+
 beforeEach(async function () {
   clock = sinon.useFakeTimers();
 });
@@ -25,6 +24,7 @@ afterEach(function () {
 });
 
 describe('timefilter', () => {
+  const fn = functionWrapper(timefilter);
   const fromDate = '2018-02-06T15:00:00.950Z';
   const toDate = '2018-02-07T15:00:00.950Z';
 
