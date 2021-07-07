@@ -8,8 +8,10 @@
 
 export type RequestProcessorsFunction<
   TParams = unknown,
-  TInput = Record<string, any>,
-  TOutput = Record<string, any>
+  TInput = Record<string, unknown>,
+  TOutput = TInput
 > = (
   params: TParams
-) => (next: RequestProcessorsFunction) => (doc: TInput) => TOutput | Promise<TOutput>;
+) => (
+  next: (doc: TOutput) => TOutput | Promise<TOutput>
+) => (doc: TInput) => TOutput | Promise<TOutput>;
