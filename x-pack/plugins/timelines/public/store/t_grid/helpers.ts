@@ -234,7 +234,6 @@ export const updateTimelineColumns = ({
   timelineById,
 }: UpdateTimelineColumnsParams): TimelineById => {
   const timeline = timelineById[id];
-
   return {
     ...timelineById,
     [id]: {

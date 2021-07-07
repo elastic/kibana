@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
-import { downloadWorkpad as downloadWorkpadFn } from '../../../lib/download_workpad';
-
-export const useDownloadWorkpad = () =>
-  useCallback((workpadId: string) => downloadWorkpadFn(workpadId), []);
+export { useDownloadWorkpad, useDownloadRenderedWorkpad } from './use_download_workpad';
