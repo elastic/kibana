@@ -11,7 +11,7 @@ import { HostIsolationCommentEvent } from './user_action_host_isolation_comment_
 
 const props = {
   type: 'isolate',
-  endpoints: [{ endpointId: 'e1', hostname: 'hostess1' }],
+  endpoints: [{ endpointId: 'e1', hostname: 'host1' }],
   href: jest.fn(),
   onClick: jest.fn(),
 };
@@ -21,10 +21,10 @@ describe('UserActionHostIsolationCommentEvent', () => {
     jest.clearAllMocks();
   });
 
-  it('renders', async () => {
+  it('renders with the correct action and hostname', async () => {
     const wrapper = mount(<HostIsolationCommentEvent {...props} />);
     expect(wrapper.find(`[data-test-subj="actions-link-e1"]`).first().exists()).toBeTruthy();
-    expect(wrapper.text()).toBe('isolated host hostess1');
+    expect(wrapper.text()).toBe('isolated host host1');
   });
 
   it('navigates to app on link click', async () => {
