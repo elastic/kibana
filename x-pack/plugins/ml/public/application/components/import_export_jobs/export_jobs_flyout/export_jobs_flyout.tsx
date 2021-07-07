@@ -30,9 +30,10 @@ import { JobType } from '../../../../../common/types/saved_objects';
 
 interface Props {
   isDisabled: boolean;
+  currentTab: JobType;
 }
 
-export const ExportJobsFlyout: FC<Props> = ({ isDisabled }) => {
+export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
   const {
     getJobs,
     dataFrameAnalytics: { getDataFrameAnalytics },
@@ -42,12 +43,13 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled }) => {
   const [dfaJobIds, setDfaJobIds] = useState<string[]>([]);
   const [selectedJobIds, setSelectedJobIds] = useState<string[]>([]);
   const [exporting, setExporting] = useState(false);
-  const [selectedJobType, setSelectedJobType] = useState<JobType>('anomaly-detector');
+  const [selectedJobType, setSelectedJobType] = useState<JobType>(currentTab);
 
   useEffect(() => {
     setAdJobIds([]);
     setSelectedJobIds([]);
     setExporting(false);
+    setSelectedJobType(currentTab);
 
     if (showFlyout) {
       getJobs().then(({ jobs }) => {
@@ -88,10 +90,11 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled }) => {
   }
 
   function onSelectAll() {
-    if (selectedJobIds.length === adJobIds.length) {
+    const ids = selectedJobType === 'anomaly-detector' ? adJobIds : dfaJobIds;
+    if (selectedJobIds.length === ids.length) {
       setSelectedJobIds([]);
     } else {
-      setSelectedJobIds([...adJobIds]);
+      setSelectedJobIds([...ids]);
     }
   }
 
@@ -105,7 +108,7 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled }) => {
             <EuiTitle size="m">
               <h2>
                 <FormattedMessage
-                  id="xpack.infra.ml.aomalyFlyout.jobSetup.flyoutHeader"
+                  id="xpack.infra.ml.anomalyFlyout.jobSetup.flyoutHeader"
                   defaultMessage="Export jobs"
                 />
               </h2>

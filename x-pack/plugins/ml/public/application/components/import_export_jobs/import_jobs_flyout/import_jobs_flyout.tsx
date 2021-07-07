@@ -25,9 +25,10 @@ import {
 
 import type { Job, Datafeed } from '../../../../../common/types/anomaly_detection_jobs';
 import { DataFrameAnalyticsConfig } from '../../../data_frame_analytics/common';
-import { useMlApiContext } from '../../../contexts/kibana';
+import { useMlApiContext, useMlKibana } from '../../../contexts/kibana';
 import { JobType } from '../../../../../common/types/saved_objects';
 import { JobIdInput } from './job_id_input';
+import { CannotImportJobsCallout, SkippedJobs } from './cannot_import_jobs_callout';
 
 interface ImportedAdJob {
   job: Job;
@@ -51,10 +52,18 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
     jobs: { bulkCreateJobs },
     dataFrameAnalytics: { createDataFrameAnalytics },
   } = useMlApiContext();
+  const {
+    services: {
+      data: {
+        indexPatterns: { getTitles: getIndexPatternTitles },
+      },
+    },
+  } = useMlKibana();
   const [showFlyout, setShowFlyout] = useState(false);
   const [adJobs, setAdJobs] = useState<ImportedAdJob[]>([]);
   const [dfaJobs, setDfaJobs] = useState<DataFrameAnalyticsConfig[]>([]);
   const [jobIds, setJobIds] = useState<string[]>([]);
+  const [skippedJobs, setSkippedJobs] = useState<SkippedJobs[]>([]);
   const [importing, setImporting] = useState(false);
   const [jobType, setJobType] = useState<JobType | null>('anomaly-detector');
   const [jobIdsValid, setJobIdsValid] = useState<boolean[]>([]);
@@ -73,15 +82,27 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
   const onFilePickerChange = useCallback(async (files: any) => {
     if (files.length) {
       try {
-        const gg = await readJobConfigs(files[0]);
-        if (gg.jobType === 'anomaly-detector') {
-          setAdJobs(gg.jobs as ImportedAdJob[]);
-        } else if (gg.jobType === 'data-frame-analytics') {
-          setDfaJobs(gg.jobs as DataFrameAnalyticsConfig[]);
+        const loadedFile = await readJobConfigs(files[0]);
+        if (loadedFile.jobType === null) {
+          throw new Error('AAGGHHH');
         }
-        setJobType(gg.jobType);
-        setJobIds(gg.jobIds);
-        setJobIdsValid(gg.jobIds.map((j) => false));
+
+        if (loadedFile.jobType === 'anomaly-detector') {
+          setAdJobs(loadedFile.jobs as ImportedAdJob[]);
+        } else if (loadedFile.jobType === 'data-frame-analytics') {
+          setDfaJobs(loadedFile.jobs as DataFrameAnalyticsConfig[]);
+        }
+        setJobType(loadedFile.jobType);
+
+        const validatedJobs = await validateJobs(
+          loadedFile.jobs as ImportedAdJob[],
+          loadedFile.jobType,
+          getIndexPatternTitles
+        );
+
+        setJobIds(validatedJobs.jobIds);
+        setSkippedJobs(validatedJobs.skippedJobs);
+        setJobIdsValid(validatedJobs.jobIds.map((j) => false));
       } catch (error) {
         // show error
       }
@@ -191,6 +212,8 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
                       <EuiSpacer size="s" />
                     </div>
                   ))}
+
+                  <CannotImportJobsCallout jobs={skippedJobs} />
                 </>
               )}
               {jobType === 'data-frame-analytics' && dfaJobs.length > 0 && (
@@ -216,6 +239,8 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
                       <EuiSpacer size="s" />
                     </div>
                   ))}
+
+                  <CannotImportJobsCallout jobs={skippedJobs} />
                 </>
               )}
             </>
@@ -340,4 +365,42 @@ function renameDfaJobs(jobIds: string[], jobs: DataFrameAnalyticsConfig[]) {
     j.id = jobId;
     return j;
   });
+}
+
+async function validateJobs(
+  jobs: ImportedAdJob[] | DataFrameAnalyticsConfig[],
+  type: JobType,
+  getIndexPatternTitles: (refresh?: boolean) => Promise<string[]>
+) {
+  const existingIndexPatterns = new Set(await getIndexPatternTitles());
+  const tempJobIds: string[] = [];
+  const tempSkippedJobIds: SkippedJobs[] = [];
+
+  const commonJobs: Array<{ jobId: string; indices: string[] }> =
+    type === 'anomaly-detector'
+      ? (jobs as ImportedAdJob[]).map((j) => ({
+          jobId: j.job.job_id,
+          indices: j.datafeed.indices,
+        }))
+      : (jobs as DataFrameAnalyticsConfig[]).map((j) => ({
+          jobId: j.id,
+          indices: Array.isArray(j.source.index) ? j.source.index : [j.source.index],
+        }));
+
+  commonJobs.forEach(({ jobId, indices }) => {
+    const missingIndices = indices.filter((i) => existingIndexPatterns.has(i) === false);
+    if (missingIndices.length === 0) {
+      tempJobIds.push(jobId);
+    } else {
+      tempSkippedJobIds.push({
+        jobId,
+        missingIndices,
+      });
+    }
+  });
+
+  return {
+    jobIds: tempJobIds,
+    skippedJobs: tempSkippedJobIds,
+  };
 }

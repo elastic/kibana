@@ -8,6 +8,7 @@
 import ReactDOM, { unmountComponentAtNode } from 'react-dom';
 import React from 'react';
 import { CoreSetup, CoreStart } from 'kibana/public';
+import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import { ManagementAppMountParams } from '../../../../../../../src/plugins/management/public/';
 import { MlStartDependencies } from '../../../plugin';
 import { JobsListPage } from './components';
@@ -22,10 +23,11 @@ const renderApp = (
   history: ManagementAppMountParams['history'],
   coreStart: CoreStart,
   share: SharePluginStart,
+  data: DataPublicPluginStart,
   spacesApi?: SpacesPluginStart
 ) => {
   ReactDOM.render(
-    React.createElement(JobsListPage, { coreStart, history, share, spacesApi }),
+    React.createElement(JobsListPage, { coreStart, history, share, data, spacesApi }),
     element
   );
   return () => {
@@ -53,6 +55,7 @@ export async function mountApp(
     params.history,
     coreStart,
     pluginsStart.share,
+    pluginsStart.data,
     pluginsStart.spaces
   );
 }
