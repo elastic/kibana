@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
-import { groupBy, omit, isEqual } from 'lodash';
+import { groupBy, omit, pick, isEqual } from 'lodash';
 
 import type {
   NewPackagePolicy,
@@ -143,7 +143,8 @@ export async function ensurePreconfiguredPackagesAndPolicies(
       if (!created) {
         if (!policy?.is_managed) return { created, policy };
         const configTopLevelFields = omit(preconfiguredAgentPolicy, 'package_policies', 'id');
-        const currentTopLevelFields = omit(policy, 'package_policies');
+        const currentTopLevelFields = pick(policy, ...Object.keys(configTopLevelFields));
+
         if (!isEqual(configTopLevelFields, currentTopLevelFields)) {
           const updatedPolicy = await agentPolicyService.update(
             soClient,
