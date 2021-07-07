@@ -138,6 +138,7 @@ export const AgentEnrollmentKeySelectionStep = ({
         <AdvancedAgentAuthenticationSettings
           agentPolicyId={agentPolicy.id}
           selectedApiKeyId={selectedApiKeyId}
+          initialAuthenticationSettingsOpen
           onKeyChange={setSelectedAPIKeyId}
         />
       </>
