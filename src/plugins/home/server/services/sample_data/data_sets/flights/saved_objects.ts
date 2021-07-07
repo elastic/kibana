@@ -7,7 +7,6 @@
  */
 
 /* eslint max-len: 0 */
-/* eslint-disable */
 
 import { i18n } from '@kbn/i18n';
 import { SavedObject } from 'kibana/server';
@@ -388,7 +387,6 @@ export const getSavedObjects = (): SavedObject[] => [
     ],
     migrationVersion: {
       dashboard: '7.14.0',
-      // dashboard: '7.0.0',
     },
     attributes: {
       title: i18n.translate('home.sampleData.flightsSpec.globalFlightDashboardTitle', {
