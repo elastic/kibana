@@ -8,7 +8,7 @@
 
 import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { ExpressionsStart, ExpressionsSetup } from '../../expressions/public';
-import { errorRenderer } from './expression_renderers';
+import { errorRenderer, debugRenderer } from './expression_renderers';
 
 interface SetupDeps {
   expressions: ExpressionsSetup;
@@ -25,6 +25,7 @@ export class ExpressionErrorPlugin
   implements Plugin<ExpressionErrorPluginSetup, ExpressionErrorPluginStart, SetupDeps, StartDeps> {
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionErrorPluginSetup {
     expressions.registerRenderer(errorRenderer);
+    expressions.registerRenderer(debugRenderer);
   }
 
   public start(core: CoreStart): ExpressionErrorPluginStart {}

@@ -7,7 +7,8 @@
  */
 
 import { errorRenderer } from './error_renderer';
+import { debugRenderer } from './debug_renderer';
 
-export const renderers = [errorRenderer];
+export const renderers = [errorRenderer, debugRenderer];
 
-export { errorRenderer };
+export { errorRenderer, debugRenderer };

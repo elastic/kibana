@@ -7,3 +7,5 @@
  */
 export const PLUGIN_ID = 'expressionError';
 export const PLUGIN_NAME = 'expressionError';
+
+export const JSON = 'JSON';
