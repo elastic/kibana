@@ -71,7 +71,7 @@ const TutorialDirectoryNotice: TutorialDirectoryNoticeComponent = memo(() => {
         title={
           <FormattedMessage
             id="xpack.fleet.homeIntegration.tutorialDirectory.noticeTitle"
-            defaultMessage="{newPrefix} Elastic Agent and Fleet Beta"
+            defaultMessage="{newPrefix} Elastic Agent and Fleet"
             values={{
               newPrefix: (
                 <strong>
@@ -110,7 +110,7 @@ const TutorialDirectoryNotice: TutorialDirectoryNoticeComponent = memo(() => {
                 <EuiButton size="s" href={getHref('overview')}>
                   <FormattedMessage
                     id="xpack.fleet.homeIntegration.tutorialDirectory.fleetAppButtonText"
-                    defaultMessage="Try Fleet Beta"
+                    defaultMessage="Try Fleet"
                   />
                 </EuiButton>
               </RedirectAppLinks>

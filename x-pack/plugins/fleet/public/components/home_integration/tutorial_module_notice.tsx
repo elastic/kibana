@@ -31,7 +31,7 @@ const TutorialModuleNotice: TutorialModuleNoticeComponent = memo(({ moduleName }
           <p>
             <FormattedMessage
               id="xpack.fleet.homeIntegration.tutorialModule.noticeText"
-              defaultMessage="{notePrefix} a newer version of this module is {availableAsIntegrationLink} in Fleet Beta.
+              defaultMessage="{notePrefix} a newer version of this module is {availableAsIntegrationLink} in Fleet.
               To learn more about agent policies and the new Elastic Agent, read our {blogPostLink}."
               values={{
                 notePrefix: (
