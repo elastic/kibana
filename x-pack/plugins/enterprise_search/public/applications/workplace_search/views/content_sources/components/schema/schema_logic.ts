@@ -301,15 +301,15 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
     addNewField: ({ fieldName, newFieldType }) => {
       if (fieldName in values.activeSchema) {
         window.scrollTo(0, 0);
-        setErrorMessage(
+        actions.onSchemaSetFormErrors([
           i18n.translate(
             'xpack.enterpriseSearch.workplaceSearch.contentSource.schema.newFieldExists.message',
             {
               defaultMessage: 'New field already exists: {fieldName}.',
               values: { fieldName },
             }
-          )
-        );
+          ),
+        ]);
       } else {
         const schema = cloneDeep(values.activeSchema);
         schema[fieldName] = newFieldType;
@@ -350,8 +350,8 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
       } catch (e) {
         window.scrollTo(0, 0);
         if (isAdding) {
-          // We expect body.message to be a string[] for actions.onSchemaSetFormErrors
-          const message: string[] = e?.body?.message || [defaultErrorMessage];
+          // We expect body.attributes.errors to be a string[] for actions.onSchemaSetFormErrors
+          const message: string[] = e?.body?.attributes?.errors || [defaultErrorMessage];
           actions.onSchemaSetFormErrors(message);
         } else {
           flashAPIErrors(e);
