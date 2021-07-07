@@ -11,12 +11,9 @@ import {
   getElasticOutline,
   getElasticLogo,
 } from '../../../presentation_util/common/lib';
-import { getFunctionErrors } from '../../common/i18n';
-import { revealImageFunction } from './reveal_image_function';
+import { revealImageFunction, errors } from './reveal_image_function';
 import { Origin } from '../types';
 import { ExecutionContext } from 'src/plugins/expressions';
-
-const errors = getFunctionErrors().revealImage;
 
 describe('revealImageFunction', () => {
   const fn = functionWrapper(revealImageFunction);

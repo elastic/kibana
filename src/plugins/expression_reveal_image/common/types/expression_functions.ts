@@ -21,7 +21,7 @@ interface Arguments {
 }
 
 export interface Output {
-  image: string;
+  image: string | null;
   emptyImage: string;
   origin: Origin;
   percent: number;

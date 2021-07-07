@@ -16,7 +16,6 @@ import './reveal_image.scss';
 interface RevealImageComponentProps extends RevealImageRendererConfig {
   onLoaded: IInterpreterRenderHandlers['done'];
   parentNode: HTMLElement;
-  defaultEmptyImage: string;
 }
 
 interface ImageStyles {
@@ -36,7 +35,6 @@ function RevealImageComponent({
   origin,
   image,
   emptyImage,
-  defaultEmptyImage,
 }: RevealImageComponentProps) {
   const [loaded, setLoaded] = useState(false);
   const [dimensions, setDimensions] = useState<NodeDimensions>({
@@ -101,8 +99,6 @@ function RevealImageComponent({
     return imgStyles;
   }
 
-  const imgSrc = isValidUrl(image ?? '') ? image : defaultEmptyImage;
-
   const alignerStyles: AlignerStyles = {};
 
   if (isValidUrl(emptyImage ?? '')) {
@@ -124,7 +120,7 @@ function RevealImageComponent({
         ref={imgRef}
         onLoad={updateImageView}
         className="revealImage__image"
-        src={imgSrc ?? ''}
+        src={image}
         alt=""
         role="presentation"
         style={imgStyles}

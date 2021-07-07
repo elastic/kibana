@@ -9,19 +9,28 @@ import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from 'src/plugins/expressions';
-import { getElasticOutline, withSuspense } from '../../../presentation_util/public';
-import { getRendererStrings } from '../../common/i18n';
+import { i18n } from '@kbn/i18n';
+import { withSuspense } from '../../../presentation_util/public';
 import { RevealImageRendererConfig } from '../../common/types';
 
-const { revealImage: revealImageStrings } = getRendererStrings();
+export const strings = {
+  getDisplayName: () =>
+    i18n.translate('expressionRevealImage.renderer.revealImage.displayName', {
+      defaultMessage: 'Image reveal',
+    }),
+  getHelpDescription: () =>
+    i18n.translate('expressionRevealImage.renderer.revealImage.helpDescription', {
+      defaultMessage: 'Reveal a percentage of an image to make a custom gauge-style chart',
+    }),
+};
 
 const LazyRevealImageComponent = lazy(() => import('../components/reveal_image_component'));
 const RevealImageComponent = withSuspense(LazyRevealImageComponent, null);
 
 export const revealImageRenderer = (): ExpressionRenderDefinition<RevealImageRendererConfig> => ({
   name: 'revealImage',
-  displayName: revealImageStrings.getDisplayName(),
-  help: revealImageStrings.getHelpDescription(),
+  displayName: strings.getDisplayName(),
+  help: strings.getHelpDescription(),
   reuseDomNode: true,
   render: async (
     domNode: HTMLElement,
@@ -32,15 +41,9 @@ export const revealImageRenderer = (): ExpressionRenderDefinition<RevealImageRen
       unmountComponentAtNode(domNode);
     });
 
-    const { elasticOutline } = await getElasticOutline();
     render(
       <I18nProvider>
-        <RevealImageComponent
-          onLoaded={handlers.done}
-          {...config}
-          parentNode={domNode}
-          defaultEmptyImage={elasticOutline}
-        />
+        <RevealImageComponent onLoaded={handlers.done} {...config} parentNode={domNode} />
       </I18nProvider>,
       domNode
     );
