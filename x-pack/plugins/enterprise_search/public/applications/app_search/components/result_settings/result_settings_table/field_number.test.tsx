@@ -54,7 +54,7 @@ describe('FieldNumber', () => {
         }}
       />
     );
-    expect(wrapper.find(EuiFieldNumber).prop('value')).toEqual('');
+    expect(wrapper.find(EuiFieldNumber).prop('value')).toEqual(' ');
   });
 
   it('is disabled if the [fieldEnabledProperty] in fieldSettings is false', () => {
