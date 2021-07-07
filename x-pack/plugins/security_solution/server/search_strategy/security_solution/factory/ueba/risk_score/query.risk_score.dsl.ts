@@ -59,6 +59,11 @@ export const buildRiskScoreQuery = ({
             },
           },
         },
+        host_count: {
+          cardinality: {
+            field: 'host.name',
+          },
+        },
       },
       query: { bool: { filter } },
       size: 0,

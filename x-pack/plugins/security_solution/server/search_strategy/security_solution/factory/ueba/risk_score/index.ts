@@ -32,7 +32,7 @@ export const riskScore: SecuritySolutionFactory<UebaQueries.riskScore> = {
     response: IEsSearchResponse<unknown>
   ): Promise<RiskScoreStrategyResponse> => {
     const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
-    const totalCount = getOr(0, 'hits.total', response.rawResponse);
+    const totalCount = getOr(0, 'aggregations.host_count.value', response.rawResponse);
     const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
 
     const riskScoreEdges: RiskScoreEdges[] = formatRiskScoreData(

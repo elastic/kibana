@@ -15,7 +15,7 @@ const getTabsOnUebaUrl = (tabName: UebaTableType) => `${UEBA_PATH}/${tabName}`;
 export const navTabsUeba: UebaNavTab = {
   [UebaTableType.riskScore]: {
     id: UebaTableType.riskScore,
-    name: i18n.NAVIGATION_RISK_SCORE_TITLE,
+    name: i18n.RISK_SCORE_TITLE,
     href: getTabsOnUebaUrl(UebaTableType.riskScore),
     disabled: false,
   },

@@ -17,7 +17,9 @@ export enum UebaTableType {
 }
 
 export enum UebaDetailsTableType {
-  riskScore = 'riskScore',
+  hostRules = 'hostRules',
+  hostTactics = 'hostTactics',
+  userRules = 'userRules',
 }
 
 export type AllUebaTables = UebaTableType | UebaDetailsTableType;

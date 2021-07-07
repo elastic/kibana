@@ -165,18 +165,6 @@ const UebaComponent = () => {
                 title={i18n.PAGE_TITLE}
               />
 
-              {/* <UebaKpiComponent*/}
-              {/*  filterQuery={filterQuery}*/}
-              {/*  indexNames={selectedPatterns}*/}
-              {/*  from={from}*/}
-              {/*  setQuery={setQuery}*/}
-              {/*  to={to}*/}
-              {/*  skip={isInitializing || !filterQuery}*/}
-              {/*  narrowDateRange={narrowDateRange}*/}
-              {/* />*/}
-
-              {/* <EuiSpacer />*/}
-
               <SecuritySolutionTabNavigation navTabs={navTabsUeba} />
 
               <EuiSpacer />

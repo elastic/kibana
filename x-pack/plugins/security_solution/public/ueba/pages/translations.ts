@@ -10,6 +10,18 @@ import { i18n } from '@kbn/i18n';
 export const PAGE_TITLE = i18n.translate('xpack.securitySolution.ueba.pageTitle', {
   defaultMessage: 'UEBA',
 });
-export const NAVIGATION_RISK_SCORE_TITLE = i18n.translate('xpack.securitySolution.ueba.riskScore', {
+export const RISK_SCORE_TITLE = i18n.translate('xpack.securitySolution.ueba.riskScore', {
   defaultMessage: 'Risk score',
+});
+
+export const HOST_RULES = i18n.translate('xpack.securitySolution.ueba.hostRules', {
+  defaultMessage: 'Host risk score by rule',
+});
+
+export const HOST_TACTICS = i18n.translate('xpack.securitySolution.ueba.hostTactics', {
+  defaultMessage: 'Host risk score by tactic',
+});
+
+export const USER_RULES = i18n.translate('xpack.securitySolution.ueba.userRules', {
+  defaultMessage: 'User risk score by rule',
 });
