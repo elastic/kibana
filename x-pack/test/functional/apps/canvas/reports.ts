@@ -11,11 +11,12 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const log = getService('log');
   const security = getService('security');
   const PageObjects = getPageObjects(['reporting', 'common', 'canvas']);
+  const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/reports';
 
   describe('Canvas PDF Report Generation', () => {
     before('initialize tests', async () => {
@@ -31,11 +32,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ],
       });
       await security.testUser.setRoles(['kibana_admin', 'test_reporting_user']);
-      await esArchiver.load('x-pack/test/functional/es_archives/canvas/reports');
+      await kibanaServer.importExport.load(archive);
       await browser.setWindowSize(1600, 850);
     });
     after('clean up archives', async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/canvas/reports');
+      await kibanaServer.importExport.unload(archive);
       await es.deleteByQuery({
         index: '.reporting-*',
         refresh: true,
