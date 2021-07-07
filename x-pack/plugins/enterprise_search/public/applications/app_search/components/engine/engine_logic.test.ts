@@ -53,6 +53,7 @@ describe('EngineLogic', () => {
     isEngineSchemaEmpty: true,
     isMetaEngine: false,
     isSampleEngine: false,
+    canCrawl: true,
     hasSchemaErrors: false,
     hasSchemaConflicts: false,
     hasUnconfirmedSchemaFields: false,
@@ -356,7 +357,7 @@ describe('EngineLogic', () => {
       });
     });
 
-    describe('isSampleEngine', () => {
+    describe('isSampleEngine & canCrawl', () => {
       it('should be set based on engine.sample', () => {
         const engine = { ...mockEngineData, sample: true };
         mount({ engine });
@@ -365,11 +366,12 @@ describe('EngineLogic', () => {
           ...DEFAULT_VALUES_WITH_ENGINE,
           engine,
           isSampleEngine: true,
+          canCrawl: false,
         });
       });
     });
 
-    describe('isMetaEngine', () => {
+    describe('isMetaEngine & canCrawl', () => {
       it('should be set based on engine.type', () => {
         const engine = { ...mockEngineData, type: EngineTypes.meta };
         mount({ engine });
@@ -378,6 +380,7 @@ describe('EngineLogic', () => {
           ...DEFAULT_VALUES_WITH_ENGINE,
           engine,
           isMetaEngine: true,
+          canCrawl: false,
         });
       });
     });

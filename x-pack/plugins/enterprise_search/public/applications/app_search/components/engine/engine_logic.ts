@@ -23,6 +23,7 @@ interface EngineValues {
   isEngineSchemaEmpty: boolean;
   isMetaEngine: boolean;
   isSampleEngine: boolean;
+  canCrawl: boolean;
   hasSchemaErrors: boolean;
   hasSchemaConflicts: boolean;
   hasUnconfirmedSchemaFields: boolean;
@@ -101,6 +102,10 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
     ],
     isMetaEngine: [() => [selectors.engine], (engine) => engine?.type === EngineTypes.meta],
     isSampleEngine: [() => [selectors.engine], (engine) => !!engine?.sample],
+    canCrawl: [
+      () => [selectors.isMetaEngine, selectors.isSampleEngine],
+      (isMetaEngine, isSampleEngine) => !isMetaEngine && !isSampleEngine,
+    ],
     // Indexed engines
     hasSchemaErrors: [
       () => [selectors.engine],
