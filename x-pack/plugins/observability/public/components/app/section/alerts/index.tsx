@@ -14,6 +14,8 @@ import {
   EuiLink,
   EuiText,
   EuiSpacer,
+  EuiTitle,
+  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
@@ -49,92 +51,91 @@ export function AlertsSection({ alerts }: Props) {
   }));
 
   return (
-    <SectionContainer
-      title={i18n.translate('xpack.observability.overview.alerts.title', {
-        defaultMessage: 'Alerts',
-      })}
-      appLink={{
-        href,
-        label: i18n.translate('xpack.observability.overview.alert.appLink', {
-          defaultMessage: 'Manage alerts',
-        }),
-      }}
-      hasError={false}
-    >
-      <EuiFlexGroup direction="column" gutterSize="none">
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <EuiSelect
-                compressed
-                id="filterAlerts"
-                options={[allTypes, ...filterOptions]}
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-                prepend={i18n.translate('xpack.observability.overview.alert.view', {
-                  defaultMessage: 'View',
+    <EuiFlexGroup direction="column" gutterSize="none">
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem>
+            <EuiTitle size="xs">
+              <h4>
+                {i18n.translate('xpack.observability.overview.alerts.title', {
+                  defaultMessage: 'Alerts',
                 })}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiHorizontalRule margin="xs" />
-        <EuiFlexItem>
-          {alerts
-            .filter((alert) => filter === ALL_TYPES || alert.consumer === filter)
-            .map((alert, index) => {
-              const isLastElement = index === alerts.length - 1;
-              return (
-                <EuiFlexGroup direction="column" gutterSize="s" key={alert.id}>
-                  <EuiSpacer size="s" />
-                  <EuiFlexItem>
-                    <EuiLink
-                      href={core.http.basePath.prepend(
-                        `/app/management/insightsAndAlerting/triggersActions/alert/${alert.id}`
-                      )}
-                    >
-                      <EuiText size="s">{alert.name}</EuiText>
-                    </EuiLink>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiFlexGroup gutterSize="xs">
-                      <EuiFlexItem grow={false}>
-                        <EuiBadge color="hollow">{alert.alertTypeId}</EuiBadge>
-                      </EuiFlexItem>
-                      {alert.tags.map((tag, idx) => {
-                        return (
-                          <EuiFlexItem key={idx} grow={false}>
-                            <EuiBadge color="default">{tag}</EuiBadge>
-                          </EuiFlexItem>
-                        );
-                      })}
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiFlexGroup gutterSize="s">
-                      <EuiFlexItem grow={false}>
-                        <EuiText color="subdued" size="xs">
-                          Updated {moment.duration(moment().diff(alert.updatedAt)).humanize()} ago
-                        </EuiText>
-                      </EuiFlexItem>
-                      {alert.muteAll && (
-                        <EuiFlexItem grow={false}>
-                          <EuiIconTip
-                            type="minusInCircle"
-                            content={i18n.translate('xpack.observability.overview.alerts.muted', {
-                              defaultMessage: 'Muted',
-                            })}
-                          />
+              </h4>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+            <EuiSelect
+              compressed
+              id="filterAlerts"
+              options={[allTypes, ...filterOptions]}
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              prepend={i18n.translate('xpack.observability.overview.alert.view', {
+                defaultMessage: 'View',
+              })}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton size="s" href="xpack.observability.overview.alert.appLink">
+              Manage alerts
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiHorizontalRule size="s" />
+      <EuiFlexItem grow={false}>
+        {alerts
+          .filter((alert) => filter === ALL_TYPES || alert.consumer === filter)
+          .map((alert, index) => {
+            const isLastElement = index === alerts.length - 1;
+            return (
+              <EuiFlexGroup direction="column" gutterSize="s" key={alert.id}>
+                <EuiFlexItem grow={false}>
+                  <EuiLink
+                    href={core.http.basePath.prepend(
+                      `/app/management/insightsAndAlerting/triggersActions/alert/${alert.id}`
+                    )}
+                  >
+                    <EuiText size="s">{alert.name}</EuiText>
+                  </EuiLink>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup gutterSize="xs">
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge color="hollow">{alert.alertTypeId}</EuiBadge>
+                    </EuiFlexItem>
+                    {alert.tags.map((tag, idx) => {
+                      return (
+                        <EuiFlexItem key={idx} grow={false}>
+                          <EuiBadge color="default">{tag}</EuiBadge>
                         </EuiFlexItem>
-                      )}
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                  {!isLastElement && <EuiHorizontalRule margin="xs" />}
-                </EuiFlexGroup>
-              );
-            })}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </SectionContainer>
+                      );
+                    })}
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup gutterSize="s">
+                    <EuiFlexItem grow={false}>
+                      <EuiText color="subdued" size="xs">
+                        Updated {moment.duration(moment().diff(alert.updatedAt)).humanize()} ago
+                      </EuiText>
+                    </EuiFlexItem>
+                    {alert.muteAll && (
+                      <EuiFlexItem grow={false}>
+                        <EuiIconTip
+                          type="minusInCircle"
+                          content={i18n.translate('xpack.observability.overview.alerts.muted', {
+                            defaultMessage: 'Muted',
+                          })}
+                        />
+                      </EuiFlexItem>
+                    )}
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+                {!isLastElement && <EuiHorizontalRule margin="xs" />}
+              </EuiFlexGroup>
+            );
+          })}
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

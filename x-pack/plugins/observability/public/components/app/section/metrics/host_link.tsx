@@ -21,50 +21,13 @@ import netbsdLogo from './logos/netbsd.svg';
 interface Props {
   name: StringOrNull;
   id: StringOrNull;
-  provider: StringOrNull;
-  platform: StringOrNull;
   timerange: { from: number; to: number };
 }
 
 export function HostLink({ name, id, provider, platform, timerange }: Props) {
-  const providerLogo =
-    provider === 'aws'
-      ? 'logoAWS'
-      : provider === 'gcp'
-      ? 'logoGCP'
-      : provider === 'azure'
-      ? 'logoAzure'
-      : 'compute';
-
-  const platformLogo =
-    platform === 'darwin'
-      ? darwinLogo
-      : platform === 'windows'
-      ? 'logoWindows'
-      : platform === 'linux'
-      ? linuxLogo
-      : platform === 'aix'
-      ? aixLogo
-      : platform === 'andriod'
-      ? androidLogo
-      : platform === 'dragonfly'
-      ? dragonflyLogo
-      : platform === 'illumos'
-      ? illumosLogo
-      : platform === 'freebsd'
-      ? freebsdLogo
-      : platform === 'solaris'
-      ? solarisLogo
-      : platform === 'netbsd'
-      ? netbsdLogo
-      : 'empty';
   const link = `../../app/metrics/link-to/host-detail/${id}?from=${timerange.from}&to=${timerange.to}`;
   return (
     <>
-      {platformLogo !== null && <EuiIcon type={platformLogo} title={`${platform}`} />}
-      &nbsp;
-      {providerLogo !== null && <EuiIcon type={providerLogo} title={`${provider}`} />}
-      &nbsp;
       <a href={link}>{name}</a>
     </>
   );

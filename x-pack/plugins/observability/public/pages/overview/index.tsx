@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useTrackPageview } from '../..';
@@ -91,30 +91,23 @@ export function OverviewPage({ routeParams }: Props) {
         <EuiFlexItem grow={6}>
           {/* Data sections */}
           {hasAnyData && <DataSections bucketSize={bucketSize?.intervalString!} />}
-
           <EmptySections />
-        </EuiFlexItem>
-
-        {/* Alert section */}
-        {!!alerts.length && (
-          <EuiFlexItem grow={3}>
-            <AlertsSection alerts={alerts} />
-          </EuiFlexItem>
-        )}
-
-        {/* Resources section */}
-        <EuiFlexItem grow={1}>
-          <EuiFlexGroup direction="column">
-            <EuiFlexItem grow={false}>
-              <Resources />
-            </EuiFlexItem>
-
-            {!!newsFeed?.items?.length && (
-              <EuiFlexItem grow={false}>
-                <NewsFeed items={newsFeed.items.slice(0, 5)} />
+          <EuiSpacer size="l" />
+          <EuiPanel hasBorder={true}>
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                {/* Resources / What's New sections */}
+                <Resources />
+                <EuiSpacer size="l" />
+                {!!newsFeed?.items?.length && <NewsFeed items={newsFeed.items.slice(0, 5)} />}
               </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
+              {!!alerts.length && (
+                <EuiFlexItem>
+                  <AlertsSection alerts={alerts} />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
     </ObservabilityPageTemplate>
