@@ -14,8 +14,7 @@ import { useTheme } from './use_theme';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
 
 export function useTransactionThroughputChartsFetcher() {
-  const { serviceName } = useParams<{ serviceName?: string }>();
-  const { transactionType } = useApmServiceContext();
+  const { transactionType, serviceName } = useApmServiceContext();
   const theme = useTheme();
   const {
     urlParams: { environment, kuery, start, end, transactionName },

@@ -47,22 +47,25 @@ import {
   createExploratoryViewUrl,
   SeriesUrl,
 } from '../../../../../observability/public';
+import { useApmParams } from '../../../hooks/use_apm_params';
+import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
+import { useApmRouter } from '../../../hooks/use_apm_router';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
     | 'errors'
-    | 'metrics'
-    | 'nodes'
+    // | 'metrics'
+    // | 'nodes'
     | 'overview'
-    | 'service-map'
-    | 'profiling'
+    // | 'service-map'
+    // | 'profiling'
     | 'transactions';
   hidden?: boolean;
 };
 
 interface Props {
+  title: string;
   children: React.ReactNode;
-  serviceName: string;
   selectedTab: Tab['key'];
   searchBarOptions?: React.ComponentProps<typeof SearchBar>;
 }
@@ -76,12 +79,27 @@ export function ApmServiceTemplate(props: Props) {
 }
 
 function TemplateWithContext({
+  title,
   children,
-  serviceName,
   selectedTab,
   searchBarOptions,
 }: Props) {
-  const tabs = useTabs({ serviceName, selectedTab });
+  const {
+    path: { serviceName },
+    query,
+  } = useApmParams('/services/:serviceName/*');
+
+  const router = useApmRouter();
+
+  const tabs = useTabs({ selectedTab });
+
+  useBreadcrumb({
+    title,
+    href: router.link(`/services/:serviceName/${selectedTab}` as const, {
+      path: { serviceName },
+      query,
+    }),
+  });
 
   return (
     <ApmMainTemplate
@@ -167,21 +185,24 @@ function AnalyzeDataButton({ serviceName }: { serviceName: string }) {
   return null;
 }
 
-function useTabs({
-  serviceName,
-  selectedTab,
-}: {
-  serviceName: string;
-  selectedTab: Tab['key'];
-}) {
+function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
   const { agentName, transactionType } = useApmServiceContext();
   const { core, config } = useApmPluginContext();
-  const { urlParams } = useUrlParams();
+
+  const router = useApmRouter();
+
+  const {
+    path: { serviceName },
+    query,
+  } = useApmParams(`/services/:serviceName/${selectedTab}` as const);
 
   const tabs: Tab[] = [
     {
       key: 'overview',
-      href: useServiceOverviewHref({ serviceName, transactionType }),
+      href: router.link('/services/:serviceName/overview', {
+        path: { serviceName },
+        query,
+      }),
       label: i18n.translate('xpack.apm.serviceDetails.overviewTabLabel', {
         defaultMessage: 'Overview',
       }),
@@ -189,10 +210,9 @@ function useTabs({
     },
     {
       key: 'transactions',
-      href: useTransactionsOverviewHref({
-        serviceName,
-        latencyAggregationType: urlParams.latencyAggregationType,
-        transactionType,
+      href: router.link('/services/:serviceName/transactions', {
+        path: { serviceName },
+        query,
       }),
       label: i18n.translate('xpack.apm.serviceDetails.transactionsTabLabel', {
         defaultMessage: 'Transactions',
@@ -200,69 +220,72 @@ function useTabs({
     },
     {
       key: 'errors',
-      href: useErrorOverviewHref(serviceName),
+      href: router.link('/services/:serviceName/errors', {
+        path: { serviceName },
+        query,
+      }),
       label: i18n.translate('xpack.apm.serviceDetails.errorsTabLabel', {
         defaultMessage: 'Errors',
       }),
     },
-    {
-      key: 'nodes',
-      href: useServiceNodeOverviewHref(serviceName),
-      label: i18n.translate('xpack.apm.serviceDetails.nodesTabLabel', {
-        defaultMessage: 'JVMs',
-      }),
-      hidden: !isJavaAgentName(agentName),
-    },
-    {
-      key: 'metrics',
-      href: useMetricOverviewHref(serviceName),
-      label: i18n.translate('xpack.apm.serviceDetails.metricsTabLabel', {
-        defaultMessage: 'Metrics',
-      }),
-      hidden:
-        !agentName ||
-        isRumAgentName(agentName) ||
-        isJavaAgentName(agentName) ||
-        isIosAgentName(agentName),
-    },
-    {
-      key: 'service-map',
-      href: useServiceMapHref(serviceName),
-      label: i18n.translate('xpack.apm.home.serviceMapTabLabel', {
-        defaultMessage: 'Service Map',
-      }),
-    },
-    {
-      key: 'profiling',
-      href: useServiceProfilingHref({ serviceName }),
-      hidden: !config.profilingEnabled,
-      label: (
-        <EuiFlexGroup direction="row" gutterSize="s">
-          <EuiFlexItem>
-            {i18n.translate('xpack.apm.serviceDetails.profilingTabLabel', {
-              defaultMessage: 'Profiling',
-            })}
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiBetaBadge
-              label={i18n.translate(
-                'xpack.apm.serviceDetails.profilingTabExperimentalLabel',
-                {
-                  defaultMessage: 'Experimental',
-                }
-              )}
-              tooltipContent={i18n.translate(
-                'xpack.apm.serviceDetails.profilingTabExperimentalDescription',
-                {
-                  defaultMessage:
-                    'Profiling is highly experimental and for internal use only.',
-                }
-              )}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-    },
+    // {
+    //   key: 'nodes',
+    //   href: useServiceNodeOverviewHref(serviceName),
+    //   label: i18n.translate('xpack.apm.serviceDetails.nodesTabLabel', {
+    //     defaultMessage: 'JVMs',
+    //   }),
+    //   hidden: !isJavaAgentName(agentName),
+    // },
+    // {
+    //   key: 'metrics',
+    //   href: useMetricOverviewHref(serviceName),
+    //   label: i18n.translate('xpack.apm.serviceDetails.metricsTabLabel', {
+    //     defaultMessage: 'Metrics',
+    //   }),
+    //   hidden:
+    //     !agentName ||
+    //     isRumAgentName(agentName) ||
+    //     isJavaAgentName(agentName) ||
+    //     isIosAgentName(agentName),
+    // },
+    // {
+    //   key: 'service-map',
+    //   href: useServiceMapHref(serviceName),
+    //   label: i18n.translate('xpack.apm.home.serviceMapTabLabel', {
+    //     defaultMessage: 'Service Map',
+    //   }),
+    // },
+    // {
+    //   key: 'profiling',
+    //   href: useServiceProfilingHref({ serviceName }),
+    //   hidden: !config.profilingEnabled,
+    //   label: (
+    //     <EuiFlexGroup direction="row" gutterSize="s">
+    //       <EuiFlexItem>
+    //         {i18n.translate('xpack.apm.serviceDetails.profilingTabLabel', {
+    //           defaultMessage: 'Profiling',
+    //         })}
+    //       </EuiFlexItem>
+    //       <EuiFlexItem>
+    //         <EuiBetaBadge
+    //           label={i18n.translate(
+    //             'xpack.apm.serviceDetails.profilingTabExperimentalLabel',
+    //             {
+    //               defaultMessage: 'Experimental',
+    //             }
+    //           )}
+    //           tooltipContent={i18n.translate(
+    //             'xpack.apm.serviceDetails.profilingTabExperimentalDescription',
+    //             {
+    //               defaultMessage:
+    //                 'Profiling is highly experimental and for internal use only.',
+    //             }
+    //           )}
+    //         />
+    //       </EuiFlexItem>
+    //     </EuiFlexGroup>
+    //   ),
+    // },
   ];
 
   return tabs

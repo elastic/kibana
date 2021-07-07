@@ -7,15 +7,10 @@
 
 import { useCurrentRoute } from '@kbn/typed-react-router-config/target/use_current_route';
 import { useContext, useEffect, useRef } from 'react';
-import { BreadcrumbsContext } from './context';
+import { castArray } from 'lodash';
+import { Breadcrumb, BreadcrumbsContext } from './context';
 
-export function useBreadcrumb({
-  title,
-  href,
-}: {
-  title: string;
-  href: string;
-}) {
+export function useBreadcrumb(breadcrumb: Breadcrumb | Breadcrumb[]) {
   const api = useContext(BreadcrumbsContext);
 
   if (!api) {
@@ -32,14 +27,8 @@ export function useBreadcrumb({
 
   matchedRoute.current = match?.route;
 
-  console.log({
-    current: matchedRoute.current,
-    title,
-    href,
-  });
-
   if (matchedRoute.current) {
-    api.set(matchedRoute.current, { title, href });
+    api.set(matchedRoute.current, castArray(breadcrumb));
   }
 
   useEffect(() => {

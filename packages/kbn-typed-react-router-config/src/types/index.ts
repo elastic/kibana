@@ -157,11 +157,14 @@ type AppendPath<
   TPath extends string
 > = NormalizePath<`${TPrefix}${NormalizePath<`/${TPath}`>}`>;
 
+type Assign<T extends Record<string, any>, U extends Record<string, any>> = Omit<T, keyof U> & U;
+
 type MapRoute<TRoute, TPrefix extends string, TParents extends Route[] = []> = TRoute extends Route
-  ? {
-      [key in AppendPath<TPrefix, TRoute['path']>]: TRoute & { parents: TParents };
-    } &
-      (TRoute extends { children: Route[] }
+  ? Assign<
+      {
+        [key in AppendPath<TPrefix, TRoute['path']>]: TRoute & { parents: TParents };
+      },
+      TRoute extends { children: Route[] }
         ? {
             [key in AppendPath<TPrefix, `${TRoute['path']}/*`>]: ValuesType<
               MapRoutes<
@@ -176,7 +179,8 @@ type MapRoute<TRoute, TPrefix extends string, TParents extends Route[] = []> = T
               AppendPath<TPrefix, TRoute['path']>,
               [...TParents, TRoute]
             >
-        : {})
+        : {}
+    >
   : {};
 
 type MapRoutes<
@@ -259,14 +263,35 @@ type MapRoutes<
 //           },
 //         ],
 //       },
+//       {
+//         path: '/services/:serviceName',
+//         element,
+//         params: t.type({
+//           path: t.type({
+//             serviceName: t.string,
+//           }),
+//         }),
+//         children: [
+//           {
+//             path: '/overview',
+//             element,
+//           },
+//           {
+//             path: '/',
+//             element,
+//           },
+//         ],
+//       },
 //     ],
 //   },
 // ] as const);
 
 // type Routes = typeof routes;
 
-// type Mapped = MapRoutes<Routes>;
+// type Mapped = MapRoutes<Routes[0]['children']>;
 
-// type Bar = Match<Routes, '/settings/agent-configuration/create'>[2];
+// type B = MapRoute<Routes[0]['children'][2], ''>['/services/:serviceName'];
 
-// type Foo = TypeAsArgs<TypeOf<Routes, '/settings/agent-configuration/create'>>;
+// type Bar = Match<Routes, '/services/:serviceName'>;
+
+// type Foo = OutputOf<Routes, '/services/:serviceName'>;

@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
 
 export const Breadcrumb = ({
@@ -16,7 +17,8 @@ export const Breadcrumb = ({
   href: string;
   children: React.ReactElement;
 }) => {
-  useBreadcrumb({ title, href });
+  const { core } = useApmPluginContext();
+  useBreadcrumb({ title, href: core.http.basePath.prepend('/app/apm' + href) });
 
   return children;
 };

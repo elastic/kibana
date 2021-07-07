@@ -48,7 +48,7 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
       path = location.pathname;
     }
 
-    const greedy = path.endsWith('/*');
+    const greedy = path.endsWith('/*') || args.length === 1;
 
     if (!path) {
       path = '/';

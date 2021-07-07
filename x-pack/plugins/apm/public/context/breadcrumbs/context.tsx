@@ -12,13 +12,13 @@ import React, { createContext, useState, useMemo } from 'react';
 import { useApmPluginContext } from '../apm_plugin/use_apm_plugin_context';
 import { useBreadcrumbs } from '../../../../observability/public';
 
-interface Breadcrumb {
+export interface Breadcrumb {
   title: string;
   href: string;
 }
 
 interface BreadcrumbApi {
-  set(route: Route, breadcrumb: Breadcrumb): void;
+  set(route: Route, breadcrumb: Breadcrumb[]): void;
   unset(route: Route): void;
   getBreadcrumbs(matches: RouteMatch[]): Breadcrumb[];
 }
@@ -37,10 +37,10 @@ export function BreadcrumbsContextProvider({
   const { core } = useApmPluginContext();
 
   const breadcrumbs = useMemo(() => {
-    return new Map<Route, Breadcrumb>();
+    return new Map<Route, Breadcrumb[]>();
   }, []);
 
-  const matches: RouteMatch[] = useMatchRoutes('/*' as never);
+  const matches: RouteMatch[] = useMatchRoutes();
 
   const api = useMemo<BreadcrumbApi>(
     () => ({
@@ -58,7 +58,7 @@ export function BreadcrumbsContextProvider({
       },
       getBreadcrumbs(currentMatches: RouteMatch[]) {
         return compact(
-          currentMatches.map((match) => {
+          currentMatches.flatMap((match) => {
             const breadcrumb = breadcrumbs.get(match.route);
 
             return breadcrumb;
@@ -71,15 +71,18 @@ export function BreadcrumbsContextProvider({
 
   const formattedBreadcrumbs: ChromeBreadcrumb[] = api
     .getBreadcrumbs(matches)
-    .map((breadcrumb) => {
-      const href = core.http.basePath.prepend(`/app/apm${breadcrumb.href}`);
+    .map((breadcrumb, index, array) => {
       return {
         text: breadcrumb.title,
-        href,
-        onClick: (event) => {
-          event.preventDefault();
-          core.application.navigateToUrl(href);
-        },
+        ...(index === array.length - 1
+          ? {}
+          : {
+              href: breadcrumb.href,
+              onClick: (event) => {
+                event.preventDefault();
+                core.application.navigateToUrl(breadcrumb.href);
+              },
+            }),
       };
     });
 

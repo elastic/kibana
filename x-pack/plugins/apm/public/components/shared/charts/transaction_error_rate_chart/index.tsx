@@ -52,7 +52,6 @@ export function TransactionErrorRateChart({
   showAnnotations = true,
 }: Props) {
   const theme = useTheme();
-  const { serviceName } = useParams<{ serviceName?: string }>();
   const {
     urlParams: {
       environment,
@@ -64,7 +63,7 @@ export function TransactionErrorRateChart({
       comparisonType,
     },
   } = useUrlParams();
-  const { transactionType, alerts } = useApmServiceContext();
+  const { serviceName, transactionType, alerts } = useApmServiceContext();
   const comparisonChartThem = getComparisonChartTheme(theme);
   const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
     start,

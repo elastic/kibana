@@ -40,6 +40,8 @@ import { AgentConfigurationCreateEdit } from '../app/Settings/agent_configuratio
 import { Breadcrumb } from '../app/breadcrumb';
 import { home } from './home';
 import { settings } from './settings';
+import { serviceDetail } from './service_detail';
+import { RedirectToDefaultServiceRouteView } from './service_detail/redirect_to_default_service_route_view';
 
 // These component function definitions are used below with the `component`
 // property of the route definitions.
@@ -181,79 +183,6 @@ function TransactionDetailsRouteView(
   );
 }
 
-function SettingsAgentConfigurationRouteView() {
-  return (
-    <SettingsTemplate selectedTab="agent-configurations">
-      <AgentConfigurations />
-    </SettingsTemplate>
-  );
-}
-
-function SettingsAnomalyDetectionRouteView() {
-  return (
-    <SettingsTemplate selectedTab="anomaly-detection">
-      <AnomalyDetection />
-    </SettingsTemplate>
-  );
-}
-
-function SettingsApmIndicesRouteView() {
-  return (
-    <SettingsTemplate selectedTab="apm-indices">
-      <ApmIndices />
-    </SettingsTemplate>
-  );
-}
-
-function SettingsCustomizeUI() {
-  return (
-    <SettingsTemplate selectedTab="customize-ui">
-      <CustomizeUI />
-    </SettingsTemplate>
-  );
-}
-
-function SettingsSchema() {
-  return (
-    <SettingsTemplate selectedTab="schema">
-      <Schema />
-    </SettingsTemplate>
-  );
-}
-
-const SettingsApmIndicesTitle = i18n.translate(
-  'xpack.apm.views.settings.indices.title',
-  { defaultMessage: 'Indices' }
-);
-
-const SettingsAgentConfigurationTitle = i18n.translate(
-  'xpack.apm.views.settings.agentConfiguration.title',
-  { defaultMessage: 'Agent Configuration' }
-);
-const CreateAgentConfigurationTitle = i18n.translate(
-  'xpack.apm.views.settings.createAgentConfiguration.title',
-  { defaultMessage: 'Create Agent Configuration' }
-);
-const EditAgentConfigurationTitle = i18n.translate(
-  'xpack.apm.views.settings.editAgentConfiguration.title',
-  { defaultMessage: 'Edit Agent Configuration' }
-);
-const SettingsCustomizeUITitle = i18n.translate(
-  'xpack.apm.views.settings.customizeUI.title',
-  { defaultMessage: 'Customize app' }
-);
-const SettingsSchemaTitle = i18n.translate(
-  'xpack.apm.views.settings.schema.title',
-  { defaultMessage: 'Schema' }
-);
-const SettingsAnomalyDetectionTitle = i18n.translate(
-  'xpack.apm.views.settings.anomalyDetection.title',
-  { defaultMessage: 'Anomaly detection' }
-);
-const SettingsTitle = i18n.translate('xpack.apm.views.listSettings.title', {
-  defaultMessage: 'Settings',
-});
-
 /**
  * The array of route definitions to be used when the application
  * creates the routes.
@@ -261,8 +190,12 @@ const SettingsTitle = i18n.translate('xpack.apm.views.listSettings.title', {
 const apmRoutesAsConst = [
   {
     path: '/',
-    element: <Outlet />,
-    children: [settings, home],
+    element: (
+      <Breadcrumb title="APM" href="/">
+        <Outlet />
+      </Breadcrumb>
+    ),
+    children: [settings, serviceDetail, home],
   },
 ] as const;
 
@@ -459,14 +392,3 @@ export const apmRouteConfig: APMRouteDefinition[] = [
     breadcrumb: null,
   },
 ];
-
-function RedirectToDefaultServiceRouteView(
-  props: RouteComponentProps<{ serviceName: string }>
-) {
-  const { uiSettings } = useApmPluginContext().core;
-  const { serviceName } = props.match.params;
-  if (uiSettings.get(enableServiceOverview)) {
-    return redirectTo(`/services/${serviceName}/overview`)(props);
-  }
-  return redirectTo(`/services/${serviceName}/transactions`)(props);
-}

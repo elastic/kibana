@@ -34,6 +34,13 @@ function page<TPath extends string>({
   };
 }
 
+export const ServiceInventoryTitle = i18n.translate(
+  'xpack.apm.views.serviceInventory.title',
+  {
+    defaultMessage: 'Services',
+  }
+);
+
 export const home = {
   path: '/',
   element: <Outlet />,
@@ -46,9 +53,7 @@ export const home = {
   children: [
     page({
       path: '/services',
-      title: i18n.translate('xpack.apm.views.serviceInventory.title', {
-        defaultMessage: 'Services',
-      }),
+      title: ServiceInventoryTitle,
       element: <ServiceInventory />,
     }),
     page({

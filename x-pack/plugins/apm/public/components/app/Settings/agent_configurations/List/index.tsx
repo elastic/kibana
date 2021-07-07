@@ -16,9 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { useState } from 'react';
-import { ENVIRONMENT_ALL } from '../../../../../../common/environment_filter_values';
 import { useApmRouter } from '../../../../../hooks/use_apm_router';
-import { useApmLink } from '../../../../../hooks/use_apm_link';
 import { APIReturnType } from '../../../../../services/rest/createCallApmApi';
 import { getOptionLabel } from '../../../../../../common/agent_configuration/all_option';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
@@ -49,11 +47,11 @@ export function AgentConfigurationList({
     null
   );
 
-  const createAgentConfigurationHref = useApmLink(
+  const apmRouter = useApmRouter();
+
+  const createAgentConfigurationHref = apmRouter.link(
     '/settings/agent-configuration/create'
   );
-
-  const apmRouter = useApmRouter();
 
   const emptyStatePrompt = (
     <EuiEmptyPrompt

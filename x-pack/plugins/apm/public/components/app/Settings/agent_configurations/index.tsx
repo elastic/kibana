@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React from 'react';
-import { useApmLink } from '../../../../hooks/use_apm_link';
+import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useTrackPageview } from '../../../../../../observability/public';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useFetcher } from '../../../../hooks/use_fetcher';
@@ -75,7 +75,7 @@ export function AgentConfigurations() {
 }
 
 function CreateConfigurationButton() {
-  const href = useApmLink('/settings/agent-configuration/create');
+  const href = useApmRouter().link('/settings/agent-configuration/create');
 
   const { core } = useApmPluginContext();
 

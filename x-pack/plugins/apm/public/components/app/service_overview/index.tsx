@@ -28,12 +28,8 @@ import { ServiceOverviewTransactionsTable } from './service_overview_transaction
  */
 export const chartHeight = 288;
 
-interface ServiceOverviewProps {
-  serviceName: string;
-}
-
-export function ServiceOverview({ serviceName }: ServiceOverviewProps) {
-  const { agentName } = useApmServiceContext();
+export function ServiceOverview() {
+  const { agentName, serviceName } = useApmServiceContext();
 
   useTrackPageview({ app: 'apm', path: 'service_overview' });
   useTrackPageview({ app: 'apm', path: 'service_overview', delay: 15000 });
@@ -65,7 +61,7 @@ export function ServiceOverview({ serviceName }: ServiceOverviewProps) {
               </EuiFlexItem>
               <EuiFlexItem grow={7}>
                 <EuiPanel hasBorder={true}>
-                  <ServiceOverviewTransactionsTable serviceName={serviceName} />
+                  <ServiceOverviewTransactionsTable />
                 </EuiPanel>
               </EuiFlexItem>
             </EuiFlexGroup>
