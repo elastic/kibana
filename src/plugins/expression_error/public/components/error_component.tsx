@@ -6,19 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect, useCallback, MouseEventHandler } from 'react';
-import { EuiIcon, useResizeObserver } from '@elastic/eui';
+import React, { useState, useEffect, useCallback } from 'react';
+import { EuiIcon, useResizeObserver, EuiPopover } from '@elastic/eui';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { ErrorRendererConfig } from '../../common/types';
-import {
-  withSuspense,
-  LazyErrorComponent,
-  LazyPopoverComponent,
-} from '../../../presentation_util/public';
+import { withSuspense, LazyErrorComponent } from '../../../presentation_util/public';
 import './error.scss';
 
 const Error = withSuspense(LazyErrorComponent);
-const Popover = withSuspense(LazyPopoverComponent);
 
 interface ErrorComponentProps extends ErrorRendererConfig {
   onLoaded: IInterpreterRenderHandlers['done'];
@@ -30,6 +25,10 @@ function ErrorComponent({ onLoaded, parentNode, error }: ErrorComponentProps) {
   const parentNodeDimensions = useResizeObserver(parentNode);
 
   const [buttonSize, setButtonSize] = useState<number>(getButtonSize(parentNode));
+  const [isPopoverOpen, setPopoverOpen] = useState<boolean>(false);
+
+  const handlePopoverClick = () => setPopoverOpen(!isPopoverOpen);
+  const closePopover = () => setPopoverOpen(false);
 
   const updateErrorView = useCallback(() => {
     setButtonSize(getButtonSize(parentNode));
@@ -40,21 +39,25 @@ function ErrorComponent({ onLoaded, parentNode, error }: ErrorComponentProps) {
     updateErrorView();
   }, [parentNodeDimensions, updateErrorView]);
 
-  const button = (handleClick: MouseEventHandler<any>) => (
-    <EuiIcon
-      className="canvasRenderError__icon"
-      onClick={handleClick}
-      style={{
-        height: buttonSize,
-        width: buttonSize,
-      }}
-      type="alert"
-    />
-  );
-
   return (
     <div className="canvasRenderError">
-      <Popover button={button}>{() => <Error payload={{ error }} />}</Popover>
+      <EuiPopover
+        closePopover={closePopover}
+        button={
+          <EuiIcon
+            className="canvasRenderError__icon"
+            onClick={handlePopoverClick}
+            style={{
+              height: buttonSize,
+              width: buttonSize,
+            }}
+            type="alert"
+          />
+        }
+        isOpen={isPopoverOpen}
+      >
+        <Error payload={{ error }} />
+      </EuiPopover>
     </div>
   );
 }
