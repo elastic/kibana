@@ -454,7 +454,7 @@
     "@elastic/eslint-plugin-eui": "0.0.2",
     "@elastic/github-checks-reporter": "0.0.20b3",
     "@elastic/makelogs": "^6.0.0",
-    "@elastic/synthetics": "^1.0.0-beta.0",
+    "@elastic/synthetics": "^1.0.0-beta.8",
     "@istanbuljs/schema": "^0.1.2",
     "@jest/reporters": "^26.6.2",
     "@kbn/babel-code-parser": "link:bazel-bin/packages/kbn-babel-code-parser",
