@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getBucketSize } from '../../helpers/get_bucket_size';
-import { getTimerange } from '../../helpers/get_timerange';
+import { getBucketSize, getTimerange, overwrite } from '../../helpers';
 import { validateField } from '../../../../../common/fields_utils';
 import { esQuery, UI_SETTINGS } from '../../../../../../data/server';
 
@@ -40,35 +39,36 @@ export const query: AnnotationsRequestProcessorsFunction = ({
 
     doc.query = esQuery.buildEsQuery(indexPattern, queries, filters, esQueryConfig);
 
-    const timerange = {
-      range: {
-        [timeField]: {
-          gte: from.toISOString(),
-          lte: to.subtract(bucketSize, 'seconds').toISOString(),
-          format: 'strict_date_optional_time',
+    const boolFilters: unknown[] = [
+      {
+        range: {
+          [timeField]: {
+            gte: from.toISOString(),
+            lte: to.subtract(bucketSize, 'seconds').toISOString(),
+            format: 'strict_date_optional_time',
+          },
         },
       },
-    };
-    doc.query.bool.must.push(timerange);
+    ];
 
     if (annotation.query_string) {
-      doc.query.bool.must.push(
+      boolFilters.push(
         esQuery.buildEsQuery(indexPattern, [annotation.query_string], [], esQueryConfig)
       );
     }
 
     if (!annotation.ignore_panel_filters && panel.filter) {
-      doc.query.bool.must.push(
-        esQuery.buildEsQuery(indexPattern, [panel.filter], [], esQueryConfig)
-      );
+      boolFilters.push(esQuery.buildEsQuery(indexPattern, [panel.filter], [], esQueryConfig));
     }
 
     if (annotation.fields) {
       const fields = annotation.fields.split(/[,\s]+/) || [];
       fields.forEach((field) => {
-        doc.query.bool.must.push({ exists: { field } });
+        boolFilters.push({ exists: { field } });
       });
     }
+
+    overwrite(doc, 'query.bool.must', boolFilters);
 
     return next(doc);
   };
