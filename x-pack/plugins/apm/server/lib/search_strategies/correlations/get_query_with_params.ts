@@ -43,6 +43,10 @@ const getRangeQuery = (
   start?: string,
   end?: string
 ): estypes.QueryDslQueryContainer[] => {
+  if (start === undefined && end === undefined) {
+    return [];
+  }
+
   return [
     {
       range: {
