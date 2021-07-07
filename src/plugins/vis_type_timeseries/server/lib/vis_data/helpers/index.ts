@@ -10,20 +10,17 @@ export { overwrite } from './overwrite';
 export { getTimerange } from './get_timerange';
 export { getBucketSize } from './get_bucket_size';
 export { mapEmptyToZero } from './map_empty_to_zero';
-
-// @ts-expect-error
-export { bucketTransform } from './bucket_transform';
-// @ts-expect-error
-export { getAggValue } from './get_agg_value';
-// @ts-expect-error
+export { getActiveSeries } from './get_active_series';
 export { getBucketsPath } from './get_buckets_path';
-// @ts-expect-error
-export { getDefaultDecoration } from './get_default_decoration';
-// @ts-expect-error
+export { isEntireTimeRangeMode, isLastValueTimerangeMode } from './get_timerange_mode';
 export { getLastMetric } from './get_last_metric';
-// @ts-expect-error
-export { getSiblingAggValue } from './get_sibling_agg_value';
-// @ts-expect-error
 export { getSplits } from './get_splits';
-// @ts-expect-error
-export { parseSettings } from './parse_settings';
+
+// @ts-expect-error no typed yet
+export { bucketTransform } from './bucket_transform';
+// @ts-expect-error no typed yet
+export { getAggValue } from './get_agg_value';
+// @ts-expect-error no typed yet
+export { getDefaultDecoration } from './get_default_decoration';
+// @ts-expect-error no typed yet
+export { getSiblingAggValue } from './get_sibling_agg_value';

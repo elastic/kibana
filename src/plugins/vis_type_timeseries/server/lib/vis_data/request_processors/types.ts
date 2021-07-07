@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-const percentileNumberTest = /\d+\.\d+/;
-
-export const toPercentileNumber = (value: number | string) =>
-  percentileNumberTest.test(`${value}`) ? value : `${value}.0`;
+export interface BaseMeta {
+  index?: string;
+}

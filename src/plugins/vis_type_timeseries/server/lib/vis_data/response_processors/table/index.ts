@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-const percentileNumberTest = /\d+\.\d+/;
-
-export const toPercentileNumber = (value: number | string) =>
-  percentileNumberTest.test(`${value}`) ? value : `${value}.0`;
+export { stdMetric } from './std_metric';
+export { stdSibling } from './std_sibling';
+export { seriesAgg } from './series_agg';
+export { percentile } from './percentile';
+export { percentileRank } from './percentile_rank';
+export { math } from './math';
+export { dropLastBucketFn } from './drop_last_bucket';

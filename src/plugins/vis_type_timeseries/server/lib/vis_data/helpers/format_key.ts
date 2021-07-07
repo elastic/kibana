@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-const percentileNumberTest = /\d+\.\d+/;
+import { Series } from '../../../../common/types';
 
-export const toPercentileNumber = (value: number | string) =>
-  percentileNumberTest.test(`${value}`) ? value : `${value}.0`;
+export function formatKey(key: string, series: Series) {
+  if (series.label && /{{\s*key\s*}}/.test(series.label)) {
+    return series.label.replace(/{{\s*key\s*}}/, key);
+  }
+  return key;
+}

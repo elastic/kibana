@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-const percentileNumberTest = /\d+\.\d+/;
+import { last } from 'lodash';
 
-export const toPercentileNumber = (value: number | string) =>
-  percentileNumberTest.test(`${value}`) ? value : `${value}.0`;
+import type { Series, Metric } from '../../../../common/types';
+
+export const getLastMetric = (series: Series) =>
+  last(series.metrics.filter((s) => s.type !== 'series_agg')) as Metric;
