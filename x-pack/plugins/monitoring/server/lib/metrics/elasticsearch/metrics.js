@@ -81,7 +81,7 @@ const nodeCpuUtilizationLabel = i18n.translate(
   }
 );
 const nodeGcCount = i18n.translate('xpack.monitoring.metrics.esNode.gsCountTitle', {
-  defaultMessage: 'GC Count',
+  defaultMessage: 'GC Rate',
 });
 const nodeGcDuration = i18n.translate('xpack.monitoring.metrics.esNode.gsDurationTitle', {
   defaultMessage: 'GC Duration',
@@ -825,7 +825,7 @@ export const metrics = {
     description: i18n.translate(
       'xpack.monitoring.metrics.esNode.cgroupCpuPerformance.cgroupThrottlingDescription',
       {
-        defaultMessage: 'The amount of throttled time, reported in nanoseconds, of the Cgroup.',
+        defaultMessage: 'The amount of throttled time, reported in nanoseconds, of the cgroup.',
       }
     ),
     type: 'node',
@@ -846,7 +846,7 @@ export const metrics = {
     description: i18n.translate(
       'xpack.monitoring.metrics.esNode.cgroupCfsStats.cgroupThrottledCountDescription',
       {
-        defaultMessage: 'The number of times that the CPU was throttled by the Cgroup.',
+        defaultMessage: 'The number of times that the CPU was throttled by the cgroup.',
       }
     ),
     type: 'node',
@@ -865,7 +865,7 @@ export const metrics = {
       'xpack.monitoring.metrics.esNode.cgroupCpuPerformance.cgroupUsageDescription',
       {
         defaultMessage:
-          'The usage, reported in nanoseconds, of the Cgroup. Compare this with the throttling to discover issues.',
+          'The usage, reported in nanoseconds, of the cgroup. Compare this with the throttling to discover issues.',
       }
     ),
     type: 'node',

@@ -1,0 +1,10 @@
+{
+  "ml.delete_calendar_job": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_ml/calendars/{calendar_id}/jobs/{job_id}"
+    ]
+  }
+}

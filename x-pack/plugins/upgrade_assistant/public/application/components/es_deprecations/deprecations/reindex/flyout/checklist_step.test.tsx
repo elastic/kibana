@@ -22,11 +22,6 @@ describe('ChecklistFlyout', () => {
     onConfirmInputChange: jest.fn(),
     startReindex: jest.fn(),
     cancelReindex: jest.fn(),
-    http: {
-      basePath: {
-        prepend: jest.fn(),
-      },
-    } as any,
     renderGlobalCallouts: jest.fn(),
     reindexState: {
       loadingState: LoadingState.Success,

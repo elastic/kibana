@@ -73,11 +73,10 @@
 
   .mappingsEditor__createFieldWrapper {
     &--multiField {
+
       .mappingsEditor__createFieldContent {
         padding-left: $euiSize;
-      }
-      // stylelint-disable-next-line no-duplicate-selectors
-      .mappingsEditor__createFieldContent {
+
         &::before, &::after {
           content: none;
         }
@@ -100,12 +99,12 @@
       }
     }
 
-    &--multiField {
-      padding-left: $euiSizeL;
-    }
-
     &--toggle {
       padding-left: 0;
+    }
+
+    &--multiField {
+      padding-left: $euiSizeS;
     }
   }
 }

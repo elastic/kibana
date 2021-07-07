@@ -19,9 +19,9 @@ exports[`StatementListHeading component renders title and icon type 1`] = `
     <EuiTitle
       size="s"
     >
-      <h4>
+      <h2>
         Filters
-      </h4>
+      </h2>
     </EuiTitle>
   </EuiFlexItem>
 </EuiFlexGroup>

@@ -10,7 +10,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { TriggersAndActionsUIPublicPluginStart } from '../../../../triggers_actions_ui/public';
-
 import { getConnectorsAction } from '../../state/alerts/alerts';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { useFetcher } from '../../../../observability/public';

@@ -570,9 +570,6 @@ export const ALERT_REQUIRES_APP_CONTEXT = true;
 
 export const ALERT_EMAIL_SERVICES = ['gmail', 'hotmail', 'icloud', 'outlook365', 'ses', 'yahoo'];
 
-export const MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS = 'monitoring:alertingEmailAddress';
-export const XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING = 'xPack:defaultAdminEmail';
-
 /**
  * The saved object type for various monitoring data
  */

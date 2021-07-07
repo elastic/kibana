@@ -28,18 +28,12 @@ describe('getSettingsCollector / getDefaultAdminEmail', () => {
   describe('monitoring.cluster_alerts.email_notifications.enabled = false', () => {
     it('returns null when email is defined', async () => {
       const config = setup({ enabled: false });
-      expect(async () => {
-        const result = await getDefaultAdminEmail(config);
-        expect(result).toBe(null);
-      });
+      expect(await getDefaultAdminEmail(config)).toBe(null);
     });
 
     it('returns null when email is undefined', async () => {
       const config = setup({ enabled: false });
-      expect(async () => {
-        const result = await getDefaultAdminEmail(config);
-        expect(result).toBe(null);
-      });
+      expect(await getDefaultAdminEmail(config)).toBe(null);
     });
   });
 
@@ -50,10 +44,7 @@ describe('getSettingsCollector / getDefaultAdminEmail', () => {
     });
     it('returns null when email is undefined', async () => {
       const config = setup();
-      expect(async () => {
-        const result = await getDefaultAdminEmail(config);
-        expect(result).toBe(null);
-      });
+      expect(await getDefaultAdminEmail(config)).toBe(null);
     });
   });
 });

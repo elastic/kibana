@@ -17,6 +17,7 @@ export const BasicTable: typeof EuiInMemoryTable & { displayName: string } = sty
     td {
       vertical-align: top;
     }
+
     .euiTableCellContent {
       display: block;
     }

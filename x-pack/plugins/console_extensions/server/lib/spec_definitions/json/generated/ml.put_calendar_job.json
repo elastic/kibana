@@ -1,0 +1,10 @@
+{
+  "ml.put_calendar_job": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_ml/calendars/{calendar_id}/jobs/{job_id}"
+    ]
+  }
+}

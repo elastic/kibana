@@ -1,0 +1,12 @@
+{
+  "watcher.deactivate_watch": {
+    "methods": [
+      "PUT",
+      "POST"
+    ],
+    "patterns": [
+      "_watcher/watch/{watch_id}/_deactivate"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/watcher-api-deactivate-watch.html"
+  }
+}

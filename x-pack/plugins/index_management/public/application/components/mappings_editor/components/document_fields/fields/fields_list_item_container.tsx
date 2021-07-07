@@ -30,22 +30,11 @@ export const FieldsListItemContainer = ({ fieldId, treeDepth, isLastItem }: Prop
   const runtimeFieldNames = Object.values(runtimeFields).map((field) => field.source.name);
 
   const field: NormalizedField = getField(fieldId);
-  const parentField: NormalizedField | undefined =
-    field.parentId === undefined ? undefined : getField(field.parentId);
   const { childFields } = field;
   const isHighlighted = fieldToEdit === fieldId;
   const isDimmed = status === 'editingField' && fieldToEdit !== fieldId;
   const isCreateFieldFormVisible = status === 'creatingField' && fieldToAddFieldTo === fieldId;
   const areActionButtonsVisible = status === 'idle';
-
-  let isChainedMultifieldsWarningVisible = false;
-  // We add "!Boolean(parentField?.hasMultiFields)" as we only want to show a callOut at the "root" of the nested multi-fields
-  if (field.hasMultiFields && !Boolean(parentField?.hasMultiFields)) {
-    isChainedMultifieldsWarningVisible = field
-      .childFields!.map(getField)
-      .some((childField) => Boolean(childField?.hasMultiFields));
-  }
-
   const childFieldsArray = useMemo(
     () => (childFields !== undefined ? childFields.map(getField) : []),
     [childFields, getField]
@@ -84,7 +73,6 @@ export const FieldsListItemContainer = ({ fieldId, treeDepth, isLastItem }: Prop
       isShadowed={isShadowed}
       isCreateFieldFormVisible={isCreateFieldFormVisible}
       areActionButtonsVisible={areActionButtonsVisible}
-      isChainedMultifieldsWarningVisible={isChainedMultifieldsWarningVisible}
       isLastItem={isLastItem}
       childFieldsArray={childFieldsArray}
       maxNestedDepth={maxNestedDepth}

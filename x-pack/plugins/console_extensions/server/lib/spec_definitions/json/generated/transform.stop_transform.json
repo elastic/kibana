@@ -1,0 +1,18 @@
+{
+  "transform.stop_transform": {
+    "url_params": {
+      "force": "__flag__",
+      "wait_for_completion": "__flag__",
+      "timeout": "",
+      "allow_no_match": "__flag__",
+      "wait_for_checkpoint": "__flag__"
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_transform/{transform_id}/_stop"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/stop-transform.html"
+  }
+}

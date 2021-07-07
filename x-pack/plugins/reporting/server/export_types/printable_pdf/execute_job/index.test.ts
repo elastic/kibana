@@ -88,7 +88,7 @@ test(`returns content_type of application/pdf`, async () => {
 
   const { content_type: contentType } = await runTask(
     'pdfJobId',
-    getBasePayload({ objects: [], timeRange: {}, headers: encryptedHeaders }), // 7.x and below only
+    getBasePayload({ relativeUrls: [], headers: encryptedHeaders }),
     cancellationToken
   );
   expect(contentType).toBe('application/pdf');
@@ -103,7 +103,7 @@ test(`returns content of generatePdf getBuffer base64 encoded`, async () => {
   const encryptedHeaders = await encryptHeaders({});
   const { content } = await runTask(
     'pdfJobId',
-    getBasePayload({ objects: [], timeRange: {}, headers: encryptedHeaders }), // 7.x and below only
+    getBasePayload({ relativeUrls: [], headers: encryptedHeaders }),
     cancellationToken
   );
 

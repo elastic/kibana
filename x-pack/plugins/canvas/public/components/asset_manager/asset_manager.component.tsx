@@ -19,6 +19,7 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiPanel,
   EuiProgress,
   EuiSpacer,
   EuiText,
@@ -84,13 +85,13 @@ export const AssetManager: FC<Props> = (props) => {
   const percentageUsed = Math.round((assetsTotal / ASSET_MAX_SIZE) * 100);
 
   const emptyAssets = (
-    <div className="canvasAssetManager__emptyPanel">
+    <EuiPanel className="canvasAssetManager__emptyPanel">
       <EuiEmptyPrompt
         iconType="importAction"
         title={<h2>{strings.getEmptyAssetsDescription()}</h2>}
         titleSize="xs"
       />
-    </div>
+    </EuiPanel>
   );
 
   const onFileUpload = (files: FileList | null) => {

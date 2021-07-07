@@ -53,7 +53,7 @@ async function mountApp(basePath: string, pathname: string, spaceId?: string) {
       history: scopedHistoryMock.create({ pathname }),
     });
 
-  return { unmount, container, setBreadcrumbs };
+  return { unmount, container, setBreadcrumbs, docTitle: coreStart.chrome.docTitle };
 }
 
 describe('spacesManagementApp', () => {
@@ -74,10 +74,12 @@ describe('spacesManagementApp', () => {
   });
 
   it('mount() works for the `grid` page', async () => {
-    const { setBreadcrumbs, container, unmount } = await mountApp('/', '/');
+    const { setBreadcrumbs, container, unmount, docTitle } = await mountApp('/', '/');
 
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
     expect(setBreadcrumbs).toHaveBeenCalledWith([{ href: `/`, text: 'Spaces' }]);
+    expect(docTitle.change).toHaveBeenCalledWith('Spaces');
+    expect(docTitle.reset).not.toHaveBeenCalled();
     expect(container).toMatchInlineSnapshot(`
       <div>
         <div
@@ -90,17 +92,20 @@ describe('spacesManagementApp', () => {
 
     unmount();
 
+    expect(docTitle.reset).toHaveBeenCalledTimes(1);
     expect(container).toMatchInlineSnapshot(`<div />`);
   });
 
   it('mount() works for the `create space` page', async () => {
-    const { setBreadcrumbs, container, unmount } = await mountApp('/', '/create');
+    const { setBreadcrumbs, container, unmount, docTitle } = await mountApp('/', '/create');
 
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
     expect(setBreadcrumbs).toHaveBeenCalledWith([
       { href: `/`, text: 'Spaces' },
       { text: 'Create' },
     ]);
+    expect(docTitle.change).toHaveBeenCalledWith('Spaces');
+    expect(docTitle.reset).not.toHaveBeenCalled();
     expect(container).toMatchInlineSnapshot(`
       <div>
         <div
@@ -112,6 +117,7 @@ describe('spacesManagementApp', () => {
     `);
 
     unmount();
+    expect(docTitle.reset).toHaveBeenCalledTimes(1);
 
     expect(container).toMatchInlineSnapshot(`<div />`);
   });
@@ -119,13 +125,19 @@ describe('spacesManagementApp', () => {
   it('mount() works for the `edit space` page', async () => {
     const spaceId = 'some-space';
 
-    const { setBreadcrumbs, container, unmount } = await mountApp('/', `/edit/${spaceId}`, spaceId);
+    const { setBreadcrumbs, container, unmount, docTitle } = await mountApp(
+      '/',
+      `/edit/${spaceId}`,
+      spaceId
+    );
 
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
     expect(setBreadcrumbs).toHaveBeenCalledWith([
       { href: `/`, text: 'Spaces' },
       { href: `/edit/${spaceId}`, text: `space with id some-space` },
     ]);
+    expect(docTitle.change).toHaveBeenCalledWith('Spaces');
+    expect(docTitle.reset).not.toHaveBeenCalled();
     expect(container).toMatchInlineSnapshot(`
       <div>
         <div
@@ -137,6 +149,7 @@ describe('spacesManagementApp', () => {
     `);
 
     unmount();
+    expect(docTitle.reset).toHaveBeenCalledTimes(1);
 
     expect(container).toMatchInlineSnapshot(`<div />`);
   });

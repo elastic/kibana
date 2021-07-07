@@ -14,9 +14,11 @@ import {
   EuiSpacer,
   EuiFlexGrid,
   EuiFlexItem,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { IndexDetailStatus } from '../index_detail_status';
 import { MonitoringTimeseriesContainer } from '../../chart';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { AlertsCallout } from '../../../alerts/callout';
 
 export const AdvancedIndex = ({ indexSummary, metrics, alerts, ...props }) => {
@@ -37,6 +39,14 @@ export const AdvancedIndex = ({ indexSummary, metrics, alerts, ...props }) => {
   return (
     <EuiPage>
       <EuiPageBody>
+        <EuiScreenReaderOnly>
+          <h1>
+            <FormattedMessage
+              id="xpack.monitoring.elasticsearch.index.advanced.heading"
+              defaultMessage="Elasticsearch index advanced view"
+            />
+          </h1>
+        </EuiScreenReaderOnly>
         <EuiPanel>
           <IndexDetailStatus stats={indexSummary} alerts={alerts} />
         </EuiPanel>

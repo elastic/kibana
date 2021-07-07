@@ -1,0 +1,17 @@
+{
+  "ml.get_calendar_events": {
+    "url_params": {
+      "job_id": "",
+      "start": "",
+      "end": "",
+      "from": 0,
+      "size": 0
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_ml/calendars/{calendar_id}/events"
+    ]
+  }
+}

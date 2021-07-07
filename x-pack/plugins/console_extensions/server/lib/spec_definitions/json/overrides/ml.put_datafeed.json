@@ -1,0 +1,16 @@
+{
+  "ml.put_datafeed": {
+    "data_autocomplete_rules": {
+      "aggregations": {},
+      "chunking_config": {},
+      "frequency": "",
+      "indices": ["INDEX"],
+      "job_id": "",
+      "query": {},
+      "query_delay": "",
+      "script_field": {},
+      "scroll_size": 1000,
+      "types": []
+    }
+  }
+}

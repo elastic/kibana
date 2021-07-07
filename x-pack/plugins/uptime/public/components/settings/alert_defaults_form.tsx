@@ -25,8 +25,8 @@ import { useGetUrlParams, useUrlParams } from '../../hooks';
 import { alertFormI18n } from './translations';
 import { useInitApp } from '../../hooks/use_init_app';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { TriggersAndActionsUIPublicPluginStart } from '../../../../triggers_actions_ui/public/';
 import { ActionTypeId } from './types';
-import { TriggersAndActionsUIPublicPluginStart } from '../../../../triggers_actions_ui/public';
 
 type ConnectorOption = EuiComboBoxOptionOption<string>;
 

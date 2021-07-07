@@ -313,10 +313,7 @@ export class JobsList extends Component {
         field: 'latestTimestampSortValue',
         'data-test-subj': 'mlJobListColumnLatestTimestamp',
         sortable: true,
-        render: (
-          time,
-          item // eslint-disable-line no-unused-vars
-        ) => (
+        render: (time, item) => (
           <span className="euiTableCellContent__text">
             {item.latestTimestampMs === undefined
               ? ''

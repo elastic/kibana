@@ -18,7 +18,6 @@ class DocumentationService {
   private indexV1: string = '';
   private mapping: string = '';
   private mappingAnalyzer: string = '';
-  private mappingBoost: string = '';
   private mappingCoerce: string = '';
   private mappingCopyTo: string = '';
   private mappingDocValues: string = '';
@@ -44,6 +43,7 @@ class DocumentationService {
   private mappingNormalizer: string = '';
   private mappingNorms: string = '';
   private mappingNullValue: string = '';
+  private mappingParameters: string = '';
   private mappingPositionIncrementGap: string = '';
   private mappingRankFeatureFields: string = '';
   private mappingRouting: string = '';
@@ -65,7 +65,6 @@ class DocumentationService {
     this.indexV1 = links.apis.putIndexTemplateV1;
     this.mapping = links.elasticsearch.mapping;
     this.mappingAnalyzer = links.elasticsearch.mappingAnalyzer;
-    this.mappingBoost = links.elasticsearch.mappingBoost;
     this.mappingCoerce = links.elasticsearch.mappingCoerce;
     this.mappingCopyTo = links.elasticsearch.mappingCopyTo;
     this.mappingDocValues = links.elasticsearch.mappingDocValues;
@@ -91,6 +90,7 @@ class DocumentationService {
     this.mappingNormalizer = links.elasticsearch.mappingNormalizer;
     this.mappingNorms = links.elasticsearch.mappingNorms;
     this.mappingNullValue = links.elasticsearch.mappingNullValue;
+    this.mappingParameters = links.elasticsearch.mappingParameters;
     this.mappingPositionIncrementGap = links.elasticsearch.mappingPositionIncrementGap;
     this.mappingRankFeatureFields = links.elasticsearch.mappingRankFeatureFields;
     this.mappingRouting = links.elasticsearch.mappingRouting;
@@ -227,7 +227,7 @@ class DocumentationService {
   }
 
   public getBoostLink() {
-    return this.mappingBoost;
+    return this.mappingParameters;
   }
 
   public getNormalizerLink() {

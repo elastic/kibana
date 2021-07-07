@@ -12,7 +12,6 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
   unused,
 }) => [
   rename('sessionTimeout', 'session.idleTimeout'),
-  rename('authProviders', 'authc.providers'),
 
   rename('audit.appender.kind', 'audit.appender.type'),
   rename('audit.appender.layout.kind', 'audit.appender.layout.type'),

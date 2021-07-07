@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { schema, TypeOf } from '@kbn/config-schema';
 
 import { TemplateDeserialized } from '../../../../common';
 import { RouteDependencies } from '../../../types';
@@ -15,17 +14,12 @@ import { templateSchema } from './validate_schemas';
 import { saveTemplate, doesTemplateExist } from './lib';
 
 const bodySchema = templateSchema;
-const querySchema = schema.object({
-  include_type_name: schema.maybe(schema.string()),
-});
 
 export function registerCreateRoute({ router, lib }: RouteDependencies) {
   router.post(
-    { path: addBasePath('/index_templates'), validate: { body: bodySchema, query: querySchema } },
+    { path: addBasePath('/index_templates'), validate: { body: bodySchema } },
     async (ctx, req, res) => {
       const { callAsCurrentUser } = ctx.dataManagement!.client;
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      const { include_type_name } = req.query as TypeOf<typeof querySchema>;
       const template = req.body as TemplateDeserialized;
       const {
         _kbnMeta: { isLegacy },
@@ -53,12 +47,7 @@ export function registerCreateRoute({ router, lib }: RouteDependencies) {
 
       try {
         // Otherwise create new index template
-        const response = await saveTemplate({
-          template,
-          callAsCurrentUser,
-          isLegacy,
-          include_type_name,
-        });
+        const response = await saveTemplate({ template, callAsCurrentUser, isLegacy });
 
         return res.ok({ body: response });
       } catch (e) {

@@ -59,7 +59,6 @@ In another shell, from **~kibana/x-pack**:
 #### API tests
 
 If instead you need to run API tests, start up the test server and then in another shell, from **~kibana/x-pack**:
-
 `node ../scripts/functional_test_runner.js --config test/api_integration/config.ts --grep="{TEST_NAME}"`.
 
 You can update snapshots by prefixing the runner command with `env UPDATE_UPTIME_FIXTURES=1`

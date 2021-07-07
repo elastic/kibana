@@ -12,6 +12,10 @@ import {
   SavedObjectsClientContract,
 } from 'src/core/server';
 import { ExceptionListClient } from '../../../lists/server';
+import {
+  CasesClient,
+  PluginStartContract as CasesPluginStartContract,
+} from '../../../cases/server';
 import { SecurityPluginStart } from '../../../security/server';
 import {
   AgentService,
@@ -41,10 +45,6 @@ import {
   ExperimentalFeatures,
   parseExperimentalConfigValue,
 } from '../../common/experimental_features';
-import {
-  CasesClient,
-  PluginStartContract as CasesPluginStartContract,
-} from '../../../cases/server';
 
 export interface MetadataService {
   queryStrategy(

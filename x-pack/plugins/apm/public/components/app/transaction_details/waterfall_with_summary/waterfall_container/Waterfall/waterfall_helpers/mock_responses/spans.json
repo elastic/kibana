@@ -1,0 +1,47 @@
+[
+  {
+    "@timestamp": "2018-09-12T15:16:05.351Z",
+    "processor": {
+      "name": "transaction",
+      "event": "span"
+    },
+    "span": {
+      "parent_id": "e070bc3c732087f8",
+      "trace_id": "7d4d29bea37e48ac8ba1f962d5eb8a41",
+      "name": "SELECT",
+      "type": "db.h2.sql",
+      "start": {
+        "us": 9249
+      },
+      "duration": {
+        "us": 1380
+      },
+      "id": "8143a38f3367fd97"
+    },
+    "transaction": {
+      "id": "e070bc3c732087f8"
+    },
+    "service": {
+      "name": "opbeans-java",
+      "agent": {
+        "version": "0.7.0-SNAPSHOT",
+        "name": "java"
+      }
+    },
+    "context": {
+      "db": {
+        "statement": "select order0_.id as col_0_0_, order0_.created_at as col_1_0_, customer1_.full_name as col_2_0_ from orders order0_ left outer join customers customer1_ on order0_.customer_id=customer1_.id",
+        "type": "sql",
+        "user": "SA"
+      }
+    },
+    "beat": {
+      "version": "7.0.0-alpha1",
+      "name": "361022bff072",
+      "hostname": "361022bff072"
+    },
+    "host": {
+      "hostname": "361022bff072"
+    }
+  }
+]

@@ -49,7 +49,6 @@ import {
   LegacyRequest,
   RequestHandlerContextMonitoringPlugin,
 } from './types';
-import { CoreServices } from './core_services';
 
 import { Globals, EndpointTypes } from './static_globals';
 import { instantiateClient } from './es_client/instantiate_client';
@@ -94,8 +93,6 @@ export class MonitoringPlugin
   setup(coreSetup: CoreSetup, plugins: PluginsSetup) {
     this.coreSetup = coreSetup;
     this.setupPlugins = plugins;
-
-    CoreServices.init(coreSetup);
 
     const serverInfo = coreSetup.http.getServerInfo();
     const kibanaMonitoringLog = this.getLogger(KIBANA_MONITORING_LOGGING_TAG);

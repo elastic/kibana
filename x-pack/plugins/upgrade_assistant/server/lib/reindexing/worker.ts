@@ -219,14 +219,7 @@ export class ReindexWorker {
       }
     }
 
-    // Setup a ReindexService specific to these credentials.
-    const fakeRequest: FakeRequest = { headers: credential };
-
-    const scopedClusterClient = this.clusterClient.asScoped(fakeRequest);
-    const callAsCurrentUser = scopedClusterClient.asCurrentUser;
-    const actions = reindexActionsFactory(this.client, callAsCurrentUser);
-
-    const service = reindexServiceFactory(callAsCurrentUser, actions, this.log, this.licensing);
+    const service = this.getCredentialScopedReindexService(credential);
     reindexOp = await swallowExceptions(service.processNextStep, this.log)(reindexOp);
 
     // Update credential store with most recent state.

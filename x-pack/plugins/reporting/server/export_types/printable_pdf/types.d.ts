@@ -18,10 +18,4 @@ interface BaseParamsPDF {
 export type JobParamsPDF = BaseParamsPDF & BaseParams;
 
 // Job payload: structure of stored job data provided by create_job
-export interface TaskPayloadPDF extends BasePayload {
-  layout: LayoutParams;
-  forceNow?: string;
-  objects: Array<{
-    relativeUrl: string;
-  }>;
-}
+export type TaskPayloadPDF = BaseParamsPDF & BasePayload;

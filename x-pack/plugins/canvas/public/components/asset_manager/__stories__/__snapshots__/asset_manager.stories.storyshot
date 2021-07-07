@@ -105,7 +105,7 @@ exports[`Storyshots components/Assets/AssetManager no assets 1`] = `
             className="euiSpacer euiSpacer--l"
           />
           <div
-            className="canvasAssetManager__emptyPanel"
+            className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow canvasAssetManager__emptyPanel"
           >
             <div
               className="euiEmptyPrompt"

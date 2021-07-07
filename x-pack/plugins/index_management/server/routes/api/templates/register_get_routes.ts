@@ -24,9 +24,7 @@ export function registerGetAllRoute({ router, lib: { isEsError } }: RouteDepende
     try {
       const cloudManagedTemplatePrefix = await getCloudManagedTemplatePrefix(callAsCurrentUser);
 
-      const legacyTemplatesEs = await callAsCurrentUser('indices.getTemplate', {
-        include_type_name: true,
-      });
+      const legacyTemplatesEs = await callAsCurrentUser('indices.getTemplate');
       const { index_templates: templatesEs } = await callAsCurrentUser(
         'dataManagement.getComposableIndexTemplates'
       );
@@ -81,10 +79,7 @@ export function registerGetOneRoute({ router, lib }: RouteDependencies) {
         const cloudManagedTemplatePrefix = await getCloudManagedTemplatePrefix(callAsCurrentUser);
 
         if (isLegacy) {
-          const indexTemplateByName = await callAsCurrentUser('indices.getTemplate', {
-            name,
-            include_type_name: true,
-          });
+          const indexTemplateByName = await callAsCurrentUser('indices.getTemplate', { name });
 
           if (indexTemplateByName[name]) {
             return res.ok({

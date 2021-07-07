@@ -73,7 +73,10 @@ export interface InfraDatabaseSearchResponse<Hit = {}, Aggregations = undefined>
   timed_out: boolean;
   aggregations?: Aggregations;
   hits: {
-    total: { value: number };
+    total: {
+      value: number;
+      relation: string;
+    };
     hits: Hit[];
   };
 }

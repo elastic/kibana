@@ -21,6 +21,7 @@ import {
   EuiPanel,
   EuiSwitch,
   EuiSpacer,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -158,6 +159,14 @@ export const ElasticsearchIndices = ({
   return (
     <EuiPage>
       <EuiPageBody>
+        <EuiScreenReaderOnly>
+          <h1>
+            <FormattedMessage
+              id="xpack.monitoring.elasticsearch.indices.heading"
+              defaultMessage="Elasticsearch indices"
+            />
+          </h1>
+        </EuiScreenReaderOnly>
         <EuiPanel>
           <ClusterStatus stats={clusterStatus} alerts={alerts} />
         </EuiPanel>

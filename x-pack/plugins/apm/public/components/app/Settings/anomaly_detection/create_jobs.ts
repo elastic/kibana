@@ -63,7 +63,7 @@ function getSuccessToastMessage(environments: string[]) {
 function getErrorToastMessage(environments: string[], error: Error) {
   return i18n.translate('xpack.apm.anomalyDetection.createJobs.failed.text', {
     defaultMessage:
-      'Something went wrong when creating one ore more anomaly detection jobs for APM service environments [{environments}]. Error: "{errorMessage}"',
+      'Something went wrong when creating one or more anomaly detection jobs for APM service environments [{environments}]. Error: "{errorMessage}"',
     values: {
       environments: environments.join(', '),
       errorMessage: error.message,

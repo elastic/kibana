@@ -10,7 +10,7 @@ import { CursorPagination } from './types';
 import { CursorDirection, SortOrder } from '../../../../common/runtime_types';
 import { getUptimeESMockClient } from '../helper';
 
-describe('QueryContext', () => {
+describe(QueryContext, () => {
   // 10 minute range
   const rangeStart = '2019-02-03T19:06:54.939Z';
   const rangeEnd = '2019-02-03T19:16:54.939Z';

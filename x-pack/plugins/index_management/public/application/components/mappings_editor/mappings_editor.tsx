@@ -41,7 +41,6 @@ interface MappingsEditorParsedMetadata {
     runtime: RuntimeFields;
   };
   multipleMappingsDeclared: boolean;
-  mappingsType?: string;
 }
 
 interface Props {
@@ -55,7 +54,6 @@ export const MappingsEditor = React.memo(({ onChange, value, docLinks, indexSett
   const {
     parsedDefaultValue,
     multipleMappingsDeclared,
-    mappingsType,
   } = useMemo<MappingsEditorParsedMetadata>(() => {
     const mappingsDefinition = extractMappingsDefinition(value);
 
@@ -75,7 +73,8 @@ export const MappingsEditor = React.memo(({ onChange, value, docLinks, indexSett
       date_detection,
       dynamic_date_formats,
       dynamic_templates,
-    } = mappingsDefinition.mappings;
+      /* eslint-enable @typescript-eslint/naming-convention */
+    } = mappingsDefinition;
 
     const parsed = {
       configuration: {
@@ -94,11 +93,7 @@ export const MappingsEditor = React.memo(({ onChange, value, docLinks, indexSett
       runtime,
     };
 
-    return {
-      parsedDefaultValue: parsed,
-      multipleMappingsDeclared: false,
-      mappingsType: mappingsDefinition.type,
-    };
+    return { parsedDefaultValue: parsed, multipleMappingsDeclared: false };
   }, [value]);
 
   /**
@@ -106,7 +101,7 @@ export const MappingsEditor = React.memo(({ onChange, value, docLinks, indexSett
    * 1. "value" prop changes in order to reset the mappings editor
    * 2. "state" changes in order to communicate any updates to the consumer
    */
-  useMappingsStateListener({ onChange, value: parsedDefaultValue, mappingsType });
+  useMappingsStateListener({ onChange, value: parsedDefaultValue });
 
   const { update: updateConfig } = useConfig();
   const state = useMappingsState();

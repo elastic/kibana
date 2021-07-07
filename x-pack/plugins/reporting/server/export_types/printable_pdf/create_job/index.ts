@@ -5,26 +5,21 @@
  * 2.0.
  */
 
-import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import { cryptoFactory } from '../../../lib';
 import { CreateJobFn, CreateJobFnFactory } from '../../../types';
 import { validateUrls } from '../../common';
 import { JobParamsPDF, TaskPayloadPDF } from '../types';
-// @ts-ignore no module def (deprecated module)
-import { compatibilityShimFactory } from './compatibility_shim';
 
 export const createJobFnFactory: CreateJobFnFactory<
   CreateJobFn<JobParamsPDF, TaskPayloadPDF>
 > = function createJobFactoryFn(reporting, logger) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
-  const compatibilityShim = compatibilityShimFactory(logger);
 
-  // 7.x and below only
-  return compatibilityShim(async function createJobFn(
-    { title, relativeUrls, browserTimezone, layout, objectType }: JobParamsPDF,
-    context: RequestHandlerContext,
-    req: KibanaRequest
+  return async function createJob(
+    { title, relativeUrls, browserTimezone, layout, objectType },
+    context,
+    req
   ) {
     const serializedEncryptedHeaders = await crypto.encrypt(req.headers);
 
@@ -36,9 +31,9 @@ export const createJobFnFactory: CreateJobFnFactory<
       browserTimezone,
       forceNow: new Date().toISOString(),
       layout,
-      objects: relativeUrls.map((u) => ({ relativeUrl: u })), // 7.x only: `objects` in the payload
+      relativeUrls,
       title,
       objectType,
     };
-  });
+  };
 };

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const BRANCH = '7.x';
+export const BRANCH = '8.x';

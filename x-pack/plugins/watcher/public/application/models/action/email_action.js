@@ -8,13 +8,12 @@
 import { get, isArray } from 'lodash';
 import { BaseAction } from './base_action';
 import { i18n } from '@kbn/i18n';
-import { getDefaultEmailTo } from '../../7_x_only';
 
 export class EmailAction extends BaseAction {
   constructor(props = {}) {
     super(props);
 
-    const toArray = get(props, 'to', getDefaultEmailTo());
+    const toArray = get(props, 'to');
 
     this.to = isArray(toArray) ? toArray : toArray && [toArray];
 

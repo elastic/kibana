@@ -14,7 +14,7 @@ import {
   Action,
   getNonEmptySections,
   SectionRecord,
-} from '../../../../shared/TransactionActionMenu/sections_helper';
+} from '../../../../shared/transaction_action_menu/sections_helper';
 
 type InstaceDetails = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}'>;
 

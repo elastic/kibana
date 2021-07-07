@@ -15,7 +15,7 @@ import { documentationService } from '../../../services/documentation';
 export const MultipleMappingsWarning = () => (
   <EuiCallOut
     title={i18n.translate('xpack.idxMgmt.mappingsEditor.mappingTypesDetectedCallOutTitle', {
-      defaultMessage: 'Multiple mapping types detected',
+      defaultMessage: 'Mapping types detected',
     })}
     iconType="alert"
     color="warning"
@@ -24,7 +24,7 @@ export const MultipleMappingsWarning = () => (
     <p>
       <FormattedMessage
         id="xpack.idxMgmt.mappingsEditor.mappingTypesDetectedCallOutDescription"
-        defaultMessage="The mappings for this template uses multiple types, which are not supported. {docsLink}"
+        defaultMessage="The mappings for this template uses types, which have been removed. {docsLink}"
         values={{
           docsLink: (
             <EuiLink href={documentationService.getAlternativeToMappingTypesLink()} target="_blank">

@@ -32,10 +32,9 @@ interface Args {
     fields: { [key: string]: Field };
     runtime: RuntimeFields;
   };
-  mappingsType?: string;
 }
 
-export const useMappingsStateListener = ({ onChange, value, mappingsType }: Args) => {
+export const useMappingsStateListener = ({ onChange, value }: Args) => {
   const state = useMappingsState();
   const dispatch = useDispatch();
 
@@ -90,19 +89,7 @@ export const useMappingsStateListener = ({ onChange, value, mappingsType }: Args
           output.runtime = runtime;
         }
 
-        if (Object.keys(output).length > 0) {
-          return mappingsType === undefined
-            ? (output as Mappings)
-            : {
-                [mappingsType]: output as Mappings,
-              };
-        }
-
-        return mappingsType === undefined
-          ? undefined
-          : {
-              [mappingsType]: {}, // We still need to preserve the mappings type even if no fields have been defined
-            };
+        return Object.keys(output).length > 0 ? (output as Mappings) : undefined;
       },
       validate: async () => {
         const configurationFormValidator =
@@ -135,7 +122,7 @@ export const useMappingsStateListener = ({ onChange, value, mappingsType }: Args
       },
       isValid: state.isValid,
     });
-  }, [state, onChange, dispatch, mappingsType]);
+  }, [state, onChange, dispatch]);
 
   useEffect(() => {
     /**

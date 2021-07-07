@@ -116,9 +116,8 @@ export const onKeyDown = (keyboardEvent: React.KeyboardEvent) => {
       // prevent the default behavior of scrolling the table when space is pressed
       keyboardEvent.preventDefault();
     }
-    if (draggableKeyboardWrapper) {
-      draggableKeyboardWrapper.dispatchEvent(newEvent);
-    }
+
+    draggableKeyboardWrapper?.dispatchEvent(newEvent);
   }
 };
 

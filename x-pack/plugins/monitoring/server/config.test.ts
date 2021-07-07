@@ -72,7 +72,7 @@ describe('config schema', () => {
             },
           },
           "elasticsearch": Object {
-            "apiVersion": "7.x",
+            "apiVersion": "master",
             "customHeaders": Object {},
             "healthCheck": Object {
               "delay": "PT2.5S",

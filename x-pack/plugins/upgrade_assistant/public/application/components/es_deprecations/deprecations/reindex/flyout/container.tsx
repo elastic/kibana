@@ -6,8 +6,6 @@
  */
 
 import React from 'react';
-
-import { HttpSetup } from 'src/core/public';
 import { DocLinksStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -21,7 +19,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { EnrichedDeprecationInfo, ReindexStatus } from '../../../../../../../common/types';
+import { ReindexAction, ReindexStatus } from '../../../../../../../common/types';
 
 import { ReindexState } from '../polling_service';
 import { ChecklistFlyoutStep } from './checklist_step';
@@ -34,13 +32,12 @@ enum ReindexFlyoutStep {
 
 interface ReindexFlyoutProps {
   indexName: string;
-  http: HttpSetup;
   closeFlyout: () => void;
   reindexState: ReindexState;
   startReindex: () => void;
   cancelReindex: () => void;
   docLinks: DocLinksStart;
-  reindexBlocker?: EnrichedDeprecationInfo['blockerForReindexing'];
+  reindexBlocker?: ReindexAction['blockerForReindexing'];
 }
 
 interface ReindexFlyoutState {
@@ -137,7 +134,6 @@ export class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFl
       case ReindexFlyoutStep.checklist:
         flyoutContents = (
           <ChecklistFlyoutStep
-            http={this.props.http}
             renderGlobalCallouts={() => globalCallout}
             closeFlyout={closeFlyout}
             reindexState={reindexState}

@@ -168,7 +168,7 @@ export function registerSnapshotsRoutes({
           await clusterClient.asCurrentUser.snapshot
             .delete({ snapshot, repository })
             .then(() => response.itemsDeleted.push({ snapshot, repository }))
-            .catch((e: any) =>
+            .catch((e) =>
               response.errors.push({
                 id: { snapshot, repository },
                 error: wrapEsError(e),

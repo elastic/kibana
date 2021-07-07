@@ -29,6 +29,7 @@ export type InspectResponse = Array<{
   requestType: string;
   requestParams: Record<string, unknown>;
   esError: Error;
+  operationName: string;
 }>;
 
 export interface APMRouteCreateOptions {

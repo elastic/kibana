@@ -12,11 +12,11 @@ export interface UMLicenseStatusResponse {
   message: string;
 }
 export type UMLicenseCheck = (
-  license?: Pick<ILicense, 'isActive' | 'hasAtLeast'> | null
+  license?: Pick<ILicense, 'isActive' | 'hasAtLeast'>
 ) => UMLicenseStatusResponse;
 
 export const licenseCheck: UMLicenseCheck = (license) => {
-  if (license === null || license === undefined) {
+  if (license === undefined) {
     return {
       message: 'Missing license information',
       statusCode: 400,

@@ -7,7 +7,6 @@
 
 import React, { Fragment } from 'react';
 import moment from 'moment';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { uniq, get } from 'lodash';
 import { EuiMonitoringTable } from '../../table';
 import {
@@ -16,8 +15,8 @@ import {
   EuiPageBody,
   EuiPageContent,
   EuiSpacer,
-  EuiPanel,
   EuiScreenReaderOnly,
+  EuiPanel,
 } from '@elastic/eui';
 import { Status } from './status';
 import { formatMetric } from '../../../lib/format_number';
@@ -27,6 +26,7 @@ import { i18n } from '@kbn/i18n';
 import { APM_SYSTEM_ID } from '../../../../common/constants';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
 import { SetupModeBadge } from '../../setup_mode/badge';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
 import { SetupModeFeature } from '../../../../common/enums';
 

@@ -28,13 +28,10 @@ export const saveTemplate = async ({
   template,
   callAsCurrentUser,
   isLegacy,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  include_type_name,
 }: {
   template: TemplateDeserialized;
   callAsCurrentUser: CallAsCurrentUser;
   isLegacy?: boolean;
-  include_type_name?: string;
 }) => {
   const serializedTemplate = isLegacy
     ? serializeLegacyTemplate(template)
@@ -54,7 +51,6 @@ export const saveTemplate = async ({
     return await callAsCurrentUser('indices.putTemplate', {
       name: template.name,
       order,
-      include_type_name,
       body: {
         index_patterns,
         version,

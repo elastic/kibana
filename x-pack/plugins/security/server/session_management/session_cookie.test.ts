@@ -123,20 +123,6 @@ describe('Session cookie', () => {
       expect(mockSessionStorageFactory.asScoped).toHaveBeenCalledWith(request);
       expect(mockSessionStorage.clear).toHaveBeenCalledTimes(1);
     });
-
-    it('returns `null` and clears session value if it is a legacy 6.8 session.', async () => {
-      // Use string format for the `provider` session value field and wrap state/provider in value object to emulate legacy 6.8 session.
-      mockSessionStorage.get.mockResolvedValue({
-        value: { state: {}, provider: 'basic' },
-        expires: null,
-      } as any);
-
-      const request = httpServerMock.createKibanaRequest();
-      await expect(sessionCookie.get(request)).resolves.toBeNull();
-
-      expect(mockSessionStorageFactory.asScoped).toHaveBeenCalledWith(request);
-      expect(mockSessionStorage.clear).toHaveBeenCalledTimes(1);
-    });
   });
 
   describe('#set', () => {

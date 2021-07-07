@@ -35,11 +35,3 @@ While both can be used as a way to build up reports, Canvas and Dashboard have d
 Elasticon 2017 keynote (starts at 01:27:00): https://www.elastic.co/elasticon/conf/2017/sf/opening-keynote
 
 Shane Connelly's SQL webinar: https://www.elastic.co/webinars/introduction-to-elasticsearch-sql
-
-**How can I get an early build?**
-
-Check the technical previews out, see http://canvas.elastic.co/stories/installing.html
-
-**Where can I get screenshots?**
-
-If you want a stream of conciousness of the absolute latest development, check out the technical preview microsite at http://canvas.elastic.co/

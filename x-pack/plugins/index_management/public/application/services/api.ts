@@ -35,7 +35,6 @@ import {
   UIM_TEMPLATE_SIMULATE,
 } from '../../../common/constants';
 import { TemplateDeserialized, TemplateListItem, DataStream } from '../../../common';
-import { doMappingsHaveType } from '../components/mappings_editor';
 import { TAB_SETTINGS, TAB_MAPPING, TAB_STATS } from '../constants';
 import { useRequest, sendRequest } from './use_request';
 import { httpService } from './http';
@@ -277,14 +276,10 @@ export function useLoadIndexTemplate(name: TemplateDeserialized['name'], isLegac
 }
 
 export async function saveTemplate(template: TemplateDeserialized, isClone?: boolean) {
-  const includeTypeName = doMappingsHaveType(template.template?.mappings);
   const result = await sendRequest({
     path: `${API_BASE_PATH}/index_templates`,
     method: 'post',
     body: JSON.stringify(template),
-    query: {
-      include_type_name: includeTypeName,
-    },
   });
 
   const uimActionType = isClone ? UIM_TEMPLATE_CLONE : UIM_TEMPLATE_CREATE;
@@ -295,15 +290,11 @@ export async function saveTemplate(template: TemplateDeserialized, isClone?: boo
 }
 
 export async function updateTemplate(template: TemplateDeserialized) {
-  const includeTypeName = doMappingsHaveType(template.template?.mappings);
   const { name } = template;
   const result = await sendRequest({
     path: `${API_BASE_PATH}/index_templates/${encodeURIComponent(name)}`,
     method: 'put',
     body: JSON.stringify(template),
-    query: {
-      include_type_name: includeTypeName,
-    },
   });
 
   uiMetricService.trackMetric(METRIC_TYPE.COUNT, UIM_TEMPLATE_UPDATE);

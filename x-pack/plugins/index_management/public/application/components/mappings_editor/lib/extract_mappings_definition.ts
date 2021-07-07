@@ -10,11 +10,6 @@ import { isPlainObject } from 'lodash';
 import { GenericObject } from '../types';
 import { validateMappingsConfiguration, VALID_MAPPINGS_PARAMETERS } from './mappings_validator';
 
-interface MappingsWithType {
-  type?: string;
-  mappings: GenericObject;
-}
-
 const isMappingDefinition = (obj: GenericObject): boolean => {
   const areAllKeysValid = Object.keys(obj).every((key) => VALID_MAPPINGS_PARAMETERS.includes(key));
 
@@ -39,29 +34,6 @@ const isMappingDefinition = (obj: GenericObject): boolean => {
   // we can assume that the mapping is declared at root level (no types)
   return isConfigurationValid && isPropertiesValid && isDynamicTemplatesValid && isRuntimeValid;
 };
-
-const getMappingsDefinitionWithType = (mappings: GenericObject): MappingsWithType[] => {
-  if (isMappingDefinition(mappings)) {
-    // No need to go any further
-    return [{ mappings }];
-  }
-
-  // At this point there must be one or more type mappings
-  const typedMappings = Object.entries(mappings).reduce(
-    (acc: Array<{ type: string; mappings: GenericObject }>, [type, value]) => {
-      if (isMappingDefinition(value)) {
-        acc.push({ type, mappings: value as GenericObject });
-      }
-      return acc;
-    },
-    []
-  );
-
-  return typedMappings;
-};
-
-export const doMappingsHaveType = (mappings: GenericObject = {}): boolean =>
-  getMappingsDefinitionWithType(mappings).filter(({ type }) => type !== undefined).length > 0;
 
 /**
  * 5.x index templates can be created with multiple types.
@@ -103,10 +75,19 @@ export const doMappingsHaveType = (mappings: GenericObject = {}): boolean =>
  *
  * @param mappings The mappings object to validate
  */
-export const extractMappingsDefinition = (
-  mappings: GenericObject = {}
-): MappingsWithType | null => {
-  const typedMappings = getMappingsDefinitionWithType(mappings);
+export const extractMappingsDefinition = (mappings: GenericObject = {}): GenericObject | null => {
+  if (isMappingDefinition(mappings)) {
+    // No need to go any further
+    return mappings;
+  }
+
+  // At this point there must be one or more type mappings
+  const typedMappings = Object.values(mappings).reduce((acc: GenericObject[], value) => {
+    if (isMappingDefinition(value)) {
+      acc.push(value as GenericObject);
+    }
+    return acc;
+  }, []);
 
   // If there are no typed mappings found this means that one of the type must did not pass
   // the "isMappingDefinition()" validation.

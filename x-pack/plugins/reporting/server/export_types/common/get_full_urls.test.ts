@@ -28,7 +28,7 @@ const getMockJob = (base: object) => base as TaskPayloadPNG & TaskPayloadPDF;
 test(`fails if no URL is passed`, async () => {
   const fn = () => getFullUrls(mockConfig, getMockJob({}));
   expect(fn).toThrowErrorMatchingInlineSnapshot(
-    `"No valid URL fields found in Job Params! Expected \`job.relativeUrl\` or \`job.objects[{ relativeUrl }]\`"`
+    `"No valid URL fields found in Job Params! Expected \`job.relativeUrl: string\` or \`job.relativeUrls: string[]\`"`
   );
 });
 
@@ -54,7 +54,14 @@ test(`fails if URLs are absolute for PNGs`, async () => {
 test(`fails if URLs are file-protocols for PDF`, async () => {
   const forceNow = '2000-01-01T00:00:00.000Z';
   const relativeUrl = 'file://etc/passwd/#/something';
-  const fn = () => getFullUrls(mockConfig, getMockJob({ objects: [{ relativeUrl }], forceNow }));
+  const fn = () =>
+    getFullUrls(
+      mockConfig,
+      getMockJob({
+        relativeUrls: [relativeUrl],
+        forceNow,
+      })
+    );
   expect(fn).toThrowErrorMatchingInlineSnapshot(
     `"Found invalid URL(s), all URLs must be relative: file://etc/passwd/#/something"`
   );
@@ -68,11 +75,7 @@ test(`fails if URLs are absolute for PDF`, async () => {
     getFullUrls(
       mockConfig,
       getMockJob({
-        objects: [
-          {
-            relativeUrl,
-          },
-        ],
+        relativeUrls: [relativeUrl],
         forceNow,
       })
     );
@@ -83,16 +86,13 @@ test(`fails if URLs are absolute for PDF`, async () => {
 
 test(`fails if any URLs are absolute or file's for PDF`, async () => {
   const forceNow = '2000-01-01T00:00:00.000Z';
-  const objects = [
-    { relativeUrl: '/app/kibana#/something_aaa' },
-    {
-      relativeUrl:
-        'http://169.254.169.254/latest/meta-data/iam/security-credentials/profileName/#/something',
-    },
-    { relativeUrl: 'file://etc/passwd/#/something' },
+  const relativeUrls = [
+    '/app/kibana#/something_aaa',
+    'http://169.254.169.254/latest/meta-data/iam/security-credentials/profileName/#/something',
+    'file://etc/passwd/#/something',
   ];
 
-  const fn = () => getFullUrls(mockConfig, getMockJob({ objects, forceNow }));
+  const fn = () => getFullUrls(mockConfig, getMockJob({ relativeUrls, forceNow }));
   expect(fn).toThrowErrorMatchingInlineSnapshot(
     `"Found invalid URL(s), all URLs must be relative: http://169.254.169.254/latest/meta-data/iam/security-credentials/profileName/#/something file://etc/passwd/#/something"`
   );
@@ -138,14 +138,14 @@ test(`doesn't append forceNow query to url, if it doesn't exists`, async () => {
 
 test(`adds forceNow to each of multiple urls`, async () => {
   const forceNow = '2000-01-01T00:00:00.000Z';
-  const urls = getFullUrls(
+  const urls = await getFullUrls(
     mockConfig,
     getMockJob({
-      objects: [
-        { relativeUrl: '/app/kibana#/something_aaa' },
-        { relativeUrl: '/app/kibana#/something_bbb' },
-        { relativeUrl: '/app/kibana#/something_ccc' },
-        { relativeUrl: '/app/kibana#/something_ddd' },
+      relativeUrls: [
+        '/app/kibana#/something_aaa',
+        '/app/kibana#/something_bbb',
+        '/app/kibana#/something_ccc',
+        '/app/kibana#/something_ddd',
       ],
       forceNow,
     })

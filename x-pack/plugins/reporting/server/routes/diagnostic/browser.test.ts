@@ -53,6 +53,9 @@ describe('POST /diagnose/browser', () => {
     );
 
     const mockSetupDeps = createMockPluginSetup({
+      elasticsearch: {
+        legacy: { client: { callAsInternalUser: jest.fn() } },
+      },
       router: httpSetup.createRouter(''),
     });
 

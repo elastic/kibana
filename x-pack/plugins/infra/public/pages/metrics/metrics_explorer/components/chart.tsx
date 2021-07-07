@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+
 import { EuiTitle, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {
   Axis,

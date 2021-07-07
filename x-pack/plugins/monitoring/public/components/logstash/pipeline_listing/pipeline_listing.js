@@ -17,12 +17,14 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { formatMetric } from '../../../lib/format_number';
 import { ClusterStatus } from '../cluster_status';
 import { Sparkline } from '../../../components/sparkline';
 import { EuiMonitoringSSPTable } from '../../table';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 
 export class PipelineListing extends Component {
@@ -146,6 +148,14 @@ export class PipelineListing extends Component {
     return (
       <EuiPage>
         <EuiPageBody>
+          <EuiScreenReaderOnly>
+            <h1>
+              <FormattedMessage
+                id="xpack.monitoring.logstash.pipline_listing.heading"
+                defaultMessage="Logstash pipelines"
+              />
+            </h1>
+          </EuiScreenReaderOnly>
           <EuiPanel>{this.renderStats()}</EuiPanel>
           <EuiSpacer size="m" />
           <EuiPageContent>

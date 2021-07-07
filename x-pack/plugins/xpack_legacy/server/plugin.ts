@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
-
 import {
-  PluginInitializerContext,
   CoreStart,
   CoreSetup,
   Plugin,
+  PluginInitializerContext,
 } from '../../../../src/core/server';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { registerSettingsRoute } from './routes/settings';
@@ -38,29 +35,6 @@ export class XpackLegacyPlugin implements Plugin {
         kibanaVersion: this.initContext.env.packageInfo.version,
         uuid: this.initContext.env.instanceUuid,
         server: serverInfo,
-      },
-    });
-
-    core.uiSettings.register({
-      'xPack:defaultAdminEmail': {
-        name: i18n.translate('xpack.main.uiSettings.adminEmailTitle', {
-          defaultMessage: 'Admin email',
-        }),
-        description: i18n.translate('xpack.main.uiSettings.adminEmailDescription', {
-          defaultMessage:
-            'Recipient email address for X-Pack admin operations, such as Cluster Alert email notifications from Monitoring.',
-        }),
-        deprecation: {
-          message: i18n.translate('xpack.main.uiSettings.adminEmailDeprecation', {
-            defaultMessage:
-              'This setting is deprecated and will not be supported in Kibana 8.0. Please configure `monitoring.cluster_alerts.email_notifications.email_address` in your kibana.yml settings.',
-          }),
-          docLinksKey: 'kibanaGeneralSettings',
-        },
-        sensitive: true,
-        type: 'string',
-        value: null,
-        schema: schema.maybe(schema.nullable(schema.string())),
       },
     });
   }

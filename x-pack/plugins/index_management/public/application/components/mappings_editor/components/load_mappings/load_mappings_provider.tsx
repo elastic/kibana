@@ -6,13 +6,12 @@
  */
 
 import React, { useState, useRef, useCallback } from 'react';
-import { isPlainObject } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiConfirmModal, EuiCallOut, EuiText, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
 
 import { JsonEditor, OnJsonEditorUpdateHandler } from '../../shared_imports';
-import { validateMappings, MappingsValidationError, VALID_MAPPINGS_PARAMETERS } from '../../lib';
+import { validateMappings, MappingsValidationError } from '../../lib';
 
 const MAX_ERRORS_TO_DISPLAY = 1;
 
@@ -121,13 +120,10 @@ const getErrorMessage = (error: MappingsValidationError) => {
   }
 };
 
-const areAllObjectKeysValidParameters = (obj: { [key: string]: any }) =>
-  Object.keys(obj).every((key) => VALID_MAPPINGS_PARAMETERS.includes(key));
-
 export const LoadMappingsProvider = ({ onJson, children }: Props) => {
   const [state, setState] = useState<State>({ isModalOpen: false });
   const [totalErrorsToDisplay, setTotalErrorsToDisplay] = useState<number>(MAX_ERRORS_TO_DISPLAY);
-  const jsonContent = useRef<Parameters<OnJsonEditorUpdateHandler>['0'] | undefined>(undefined);
+  const jsonContent = useRef<Parameters<OnJsonEditorUpdateHandler>['0'] | undefined>();
   const view: ModalView =
     state.json !== undefined && state.errors !== undefined ? 'validationResult' : 'json';
   const i18nTexts = getTexts(view, state.errors?.length);
@@ -144,44 +140,6 @@ export const LoadMappingsProvider = ({ onJson, children }: Props) => {
     setState({ isModalOpen: false });
   };
 
-  const getMappingsMetadata = (unparsed: {
-    [key: string]: any;
-  }): { customType?: string; isMultiTypeMappings: boolean } => {
-    let hasCustomType = false;
-    let isMultiTypeMappings = false;
-    let customType: string | undefined;
-
-    /**
-     * We need to check if there are single or multi-types mappings declared, for that we will check for the following:
-     *
-     * - Are **all** root level keys valid parameter for the mappings definition. If not, and all keys are plain object, we assume we have multi-type mappings
-     * - If there are more than two types, return "as is" as the UI does not support more than 1 type and will display a warning callout
-     * - If there is only 1 type, validate the mappings definition and return it wrapped inside the the custom type
-     */
-    const areAllKeysValid = areAllObjectKeysValidParameters(unparsed);
-    const areAllValuesPlainObjects = Object.values(unparsed).every(isPlainObject);
-    const areAllValuesObjKeysValidParameterName =
-      areAllValuesPlainObjects && Object.values(unparsed).every(areAllObjectKeysValidParameters);
-
-    if (!areAllKeysValid && areAllValuesPlainObjects) {
-      hasCustomType = true;
-      isMultiTypeMappings = Object.keys(unparsed).length > 1;
-    }
-    // If all root level keys are *valid* parameters BUT they are all plain objects which *also* have ALL valid mappings config parameter
-    // we can assume that they are custom types whose name matches a mappings configuration parameter.
-    // This is to handle the case where a custom type would be for example "dynamic" which is a mappings configuration parameter.
-    else if (areAllKeysValid && areAllValuesPlainObjects && areAllValuesObjKeysValidParameterName) {
-      hasCustomType = true;
-      isMultiTypeMappings = Object.keys(unparsed).length > 1;
-    }
-
-    if (hasCustomType && !isMultiTypeMappings) {
-      customType = Object.keys(unparsed)[0];
-    }
-
-    return { isMultiTypeMappings, customType };
-  };
-
   const loadJson = () => {
     if (jsonContent.current === undefined) {
       // No changes have been made in the JSON, this is probably a "reset()" for the user
@@ -195,41 +153,14 @@ export const LoadMappingsProvider = ({ onJson, children }: Props) => {
     if (isValidJson) {
       // Parse and validate the JSON to make sure it won't break the UI
       const unparsed = jsonContent.current.data.format();
-
-      if (Object.keys(unparsed).length === 0) {
-        // Empty object...exit early
-        onJson(unparsed);
-        closeModal();
-        return;
-      }
-
-      let mappingsToValidate = unparsed;
-      const { isMultiTypeMappings, customType } = getMappingsMetadata(unparsed);
-
-      if (isMultiTypeMappings) {
-        // Exit early, the UI will show a warning
-        onJson(unparsed);
-        closeModal();
-        return;
-      }
-
-      // Custom type can't be "properties", ES will not treat it as such
-      // as it is reserved for fields definition
-      if (customType !== undefined && customType !== 'properties') {
-        mappingsToValidate = unparsed[customType];
-      }
-
-      const { value: parsed, errors } = validateMappings(mappingsToValidate);
-
-      // Wrap the mappings definition with custom type if one was provided.
-      const parsedWithType = customType !== undefined ? { [customType]: parsed } : parsed;
+      const { value: parsed, errors } = validateMappings(unparsed);
 
       if (errors) {
-        setState({ isModalOpen: true, json: { unparsed, parsed: parsedWithType }, errors });
+        setState({ isModalOpen: true, json: { unparsed, parsed }, errors });
         return;
       }
 
-      onJson(parsedWithType);
+      onJson(parsed);
       closeModal();
     }
   };

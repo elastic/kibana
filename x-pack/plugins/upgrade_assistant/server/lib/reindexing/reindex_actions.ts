@@ -85,12 +85,8 @@ export interface ReindexActions {
   /**
    * Retrieve index settings (in flat, dot-notation style) and mappings.
    * @param indexName
-   * @param withTypeName
    */
-  getFlatSettings(
-    indexName: string,
-    withTypeName?: boolean
-  ): Promise<FlatSettings | FlatSettingsWithTypeName | null>;
+  getFlatSettings(indexName: string): Promise<FlatSettings | FlatSettingsWithTypeName | null>;
 
   // ----- Functions below are for enforcing locks around groups of indices like ML or Watcher
 
@@ -241,10 +237,10 @@ export const reindexActionsFactory = (
       return allOps;
     },
 
-    async getFlatSettings(indexName: string, withTypeName?: boolean) {
+    async getFlatSettings(indexName: string) {
       let flatSettings;
 
-      if (versionService.getMajorVersion() === 7 && withTypeName) {
+      if (versionService.getMajorVersion() === 7) {
         // On 7.x, we need to get index settings with mapping type
         flatSettings = await esClient.indices.get<{
           [indexName: string]: FlatSettingsWithTypeName;

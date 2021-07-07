@@ -69,14 +69,17 @@ export const WaffleInventorySwitcher: React.FC = () => {
           id: 'firstPanel',
           items: [
             {
+              'data-test-subj': 'goToHost',
               name: getDisplayNameForType('host'),
               onClick: goToHost,
             },
             {
+              'data-test-subj': 'goToPods',
               name: getDisplayNameForType('pod'),
               onClick: goToK8,
             },
             {
+              'data-test-subj': 'goToDocker',
               name: getDisplayNameForType('container'),
               onClick: goToDocker,
             },
@@ -118,6 +121,7 @@ export const WaffleInventorySwitcher: React.FC = () => {
 
   const button = (
     <DropdownButton
+      data-test-subj={'openInventorySwitcher'}
       onClick={openPopover}
       label={i18n.translate('xpack.infra.waffle.showLabel', { defaultMessage: 'Show' })}
     >

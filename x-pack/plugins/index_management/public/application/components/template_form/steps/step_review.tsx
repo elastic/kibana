@@ -26,7 +26,6 @@ import { serializers } from '../../../../shared_imports';
 
 import { serializeLegacyTemplate, serializeTemplate } from '../../../../../common/lib';
 import { TemplateDeserialized, getTemplateParameter } from '../../../../../common';
-import { doMappingsHaveType } from '../../mappings_editor/lib';
 import { SimulateTemplate } from '../../index_templates';
 import { WizardSection } from '../template_form';
 
@@ -280,11 +279,8 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
     );
 
     const RequestTab = () => {
-      const includeTypeName = doMappingsHaveType(template!.template?.mappings);
       const esApiEndpoint = isLegacy ? '_template' : '_index_template';
-      const endpoint = `PUT ${esApiEndpoint}/${name || '<templateName>'}${
-        includeTypeName ? '?include_type_name' : ''
-      }`;
+      const endpoint = `PUT ${esApiEndpoint}/${name || '<templateName>'}`;
       const templateString = JSON.stringify(serializedTemplate, null, 2);
       const request = `${endpoint}\n${templateString}`;
 

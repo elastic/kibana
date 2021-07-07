@@ -11,7 +11,6 @@ import { SavedObjectsClientContract } from 'kibana/public';
 
 import { App, AppDeps } from './app';
 import { setHttpClient, setSavedObjectsClient } from './lib/api';
-import { setDefaultEmailTo } from './7_x_only';
 
 interface BootDeps extends AppDeps {
   element: HTMLElement;
@@ -22,7 +21,6 @@ interface BootDeps extends AppDeps {
 export const renderApp = (bootDeps: BootDeps) => {
   const { I18nContext, element, savedObjects, ...appDeps } = bootDeps;
 
-  setDefaultEmailTo(bootDeps.uiSettings.get('xPack:defaultAdminEmail'));
   setHttpClient(appDeps.http);
   setSavedObjectsClient(savedObjects);
 

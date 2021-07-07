@@ -44,11 +44,11 @@ const getIcon = (slope) => {
   return null;
 };
 
-const metricVal = (metric, format, isPercent) => {
+const metricVal = (metric, format, isPercent, units) => {
   if (isPercent) {
     return formatMetric(metric, format, '%', { prependSpace: false });
   }
-  return formatMetric(metric, format);
+  return formatMetric(metric, format, units);
 };
 
 function MetricCell({ isOnline, metric = {}, isPercent, ...props }) {

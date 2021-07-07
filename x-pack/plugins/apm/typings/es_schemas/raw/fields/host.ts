@@ -13,5 +13,4 @@ export interface Host {
   os?: {
     platform?: string;
   };
-  [key: string]: unknown;
 }

@@ -24,22 +24,23 @@ interface CreateParams {
 export const roleMappingsManagementApp = Object.freeze({
   id: 'role_mappings',
   create({ getStartServices }: CreateParams) {
+    const title = i18n.translate('xpack.security.management.roleMappingsTitle', {
+      defaultMessage: 'Role Mappings',
+    });
     return {
       id: this.id,
       order: 40,
-      title: i18n.translate('xpack.security.management.roleMappingsTitle', {
-        defaultMessage: 'Role Mappings',
-      }),
+      title,
       async mount({ element, setBreadcrumbs, history }) {
         const [coreStart] = await getStartServices();
         const roleMappingsBreadcrumbs = [
           {
-            text: i18n.translate('xpack.security.roleMapping.breadcrumb', {
-              defaultMessage: 'Role Mappings',
-            }),
+            text: title,
             href: `/`,
           },
         ];
+
+        coreStart.chrome.docTitle.change(title);
 
         const [
           [core],
@@ -119,6 +120,7 @@ export const roleMappingsManagementApp = Object.freeze({
         );
 
         return () => {
+          coreStart.chrome.docTitle.reset();
           unmountComponentAtNode(element);
         };
       },

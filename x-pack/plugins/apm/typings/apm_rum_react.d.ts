@@ -8,6 +8,5 @@
 declare module '@elastic/apm-rum-react' {
   import { RouteProps } from 'react-router-dom';
 
-  export function indexManagementStore(): any;
   export const ApmRoute: React.ComponentClass<RouteProps>;
 }

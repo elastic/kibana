@@ -24,11 +24,13 @@ import {
   EuiCallOut,
   EuiButton,
   EuiText,
+  EuiScreenReaderOnly,
   EuiHealth,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
 import { AlertsStatus } from '../../../alerts/status';
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
@@ -448,6 +450,14 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
   return (
     <EuiPage>
       <EuiPageBody>
+        <EuiScreenReaderOnly>
+          <h1>
+            <FormattedMessage
+              id="xpack.monitoring.elasticsearch.nodes.heading"
+              defaultMessage="Elasticsearch nodes"
+            />
+          </h1>
+        </EuiScreenReaderOnly>
         {renderClusterStatus()}
         {setupModeCallout}
         <EuiPageContent>

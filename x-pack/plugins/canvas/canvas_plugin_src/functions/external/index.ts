@@ -7,8 +7,7 @@
 
 import { savedLens } from './saved_lens';
 import { savedMap } from './saved_map';
+import { savedSearch } from './saved_search';
 import { savedVisualization } from './saved_visualization';
-// TODO: elastic/kibana#44822 Disabling pending filters work
-// import { savedSearch } from './saved_search';
 
-export const functions = [savedLens, savedMap, savedVisualization];
+export const functions = [savedLens, savedMap, savedSearch, savedVisualization];

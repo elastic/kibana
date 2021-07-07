@@ -8,8 +8,7 @@
 import { noop } from 'lodash';
 import { deprecations as deprecationsModule } from './deprecations';
 
-// TODO: tests were not running before and are not up to date
-describe.skip('monitoring plugin deprecations', function () {
+describe('monitoring plugin deprecations', function () {
   let transformDeprecations;
   const rename = jest.fn(() => jest.fn());
   const renameFromRoot = jest.fn(() => jest.fn());

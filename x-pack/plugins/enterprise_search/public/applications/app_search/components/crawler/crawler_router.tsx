@@ -9,12 +9,13 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 
 import { CrawlerLanding } from './crawler_landing';
+import { CrawlerOverview } from './crawler_overview';
 
 export const CrawlerRouter: React.FC = () => {
   return (
     <Switch>
       <Route>
-        <CrawlerLanding />
+        {process.env.NODE_ENV === 'development' ? <CrawlerOverview /> : <CrawlerLanding />}
       </Route>
     </Switch>
   );

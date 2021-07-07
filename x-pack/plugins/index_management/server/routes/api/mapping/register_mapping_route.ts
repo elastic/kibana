@@ -29,7 +29,6 @@ export function registerMappingRoute({ router, lib }: RouteDependencies) {
       const params = {
         expand_wildcards: 'none',
         index: indexName,
-        include_type_name: true,
       };
 
       try {

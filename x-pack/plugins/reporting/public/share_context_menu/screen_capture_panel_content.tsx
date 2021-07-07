@@ -147,8 +147,7 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
     return { id: 'preserve_layout', dimensions, selectors };
   };
 
-  // savedObjectId, queryString: 7.x only
-  private getJobParams = (): Omit<Required<BaseParams>, 'savedObjectId' | 'queryString'> => {
+  private getJobParams = (): Required<BaseParams> => {
     const outerParams = this.props.getJobParams();
     let browserTimezone = outerParams.browserTimezone;
     if (!browserTimezone) {

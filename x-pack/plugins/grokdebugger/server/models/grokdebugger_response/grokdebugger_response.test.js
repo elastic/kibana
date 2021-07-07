@@ -16,7 +16,6 @@ describe('grokdebugger_response', () => {
             {
               doc: {
                 _index: 'grokdebugger',
-                _type: 'grokdebugger',
                 _id: 'grokdebugger',
                 _source: {
                   request: '/index.html',

@@ -151,7 +151,11 @@ export class APIKeys {
     );
 
     try {
-      await this.clusterClient.asInternalUser.security.invalidateApiKey({ body: { ids: [id] } });
+      await this.clusterClient.asInternalUser.security.invalidateApiKey({
+        body: {
+          ids: [id],
+        },
+      });
       return true;
     } catch (e) {
       if (this.doesErrorIndicateAPIKeysAreDisabled(e)) {

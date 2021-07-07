@@ -78,6 +78,12 @@ const resolverTreeResponse = (state: DataState): NewResolverTree | undefined => 
   return state.tree?.lastResponse?.successful ? state.tree?.lastResponse.result : undefined;
 };
 
+export const resolverTreeHasNodes = (state: DataState): boolean => {
+  return state.tree?.lastResponse?.successful
+    ? state.tree?.lastResponse?.result?.nodes.length > 0
+    : false;
+};
+
 const lastResponseIndices = (state: DataState): string[] | undefined => {
   return state.tree?.lastResponse?.successful
     ? state.tree?.lastResponse?.parameters?.indices

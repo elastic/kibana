@@ -27,14 +27,17 @@ interface CreateParams {
 export const rolesManagementApp = Object.freeze({
   id: 'roles',
   create({ license, fatalErrors, getStartServices }: CreateParams) {
+    const title = i18n.translate('xpack.security.management.rolesTitle', {
+      defaultMessage: 'Roles',
+    });
     return {
       id: this.id,
       order: 20,
-      title: i18n.translate('xpack.security.management.rolesTitle', { defaultMessage: 'Roles' }),
+      title,
       async mount({ element, setBreadcrumbs, history }) {
         const rolesBreadcrumbs = [
           {
-            text: i18n.translate('xpack.security.roles.breadcrumb', { defaultMessage: 'Roles' }),
+            text: title,
             href: `/`,
           },
         ];
@@ -57,7 +60,16 @@ export const rolesManagementApp = Object.freeze({
           import('../users'),
         ]);
 
-        const { application, docLinks, http, i18n: i18nStart, notifications } = startServices;
+        const {
+          application,
+          docLinks,
+          http,
+          i18n: i18nStart,
+          notifications,
+          chrome,
+        } = startServices;
+
+        chrome.docTitle.change(title);
 
         const rolesAPIClient = new RolesAPIClient(http);
         const RolesGridPageWithBreadcrumbs = () => {
@@ -136,6 +148,7 @@ export const rolesManagementApp = Object.freeze({
         );
 
         return () => {
+          chrome.docTitle.reset();
           unmountComponentAtNode(element);
         };
       },

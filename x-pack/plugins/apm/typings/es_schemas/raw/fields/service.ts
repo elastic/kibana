@@ -24,5 +24,4 @@ export interface Service {
     version?: string;
   };
   version?: string;
-  [key: string]: unknown;
 }

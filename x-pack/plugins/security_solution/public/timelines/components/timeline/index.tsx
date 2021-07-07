@@ -103,7 +103,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
     containerElement.current
       ?.querySelector<HTMLButtonElement>(`.${EVENTS_COUNT_BUTTON_CLASS_NAME}`)
       ?.focus();
-  }, []);
+  }, [containerElement]);
 
   const onKeyDown = useCallback(
     (keyboardEvent: React.KeyboardEvent) => {

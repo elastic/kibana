@@ -36,7 +36,6 @@ export interface TransactionRaw extends APMBaseDoc {
       agent?: {
         [name: string]: number;
       };
-      [key: string]: unknown;
     };
     name?: string;
     page?: Page; // special property for RUM: shared by error and transaction
@@ -55,7 +54,6 @@ export interface TransactionRaw extends APMBaseDoc {
       headers?: Record<string, unknown>;
     };
   };
-  [key: string]: unknown;
 
   // Shared by errors and transactions
   container?: Container;

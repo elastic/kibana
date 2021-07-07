@@ -168,9 +168,7 @@ const StatefulEventComponent: React.FC<Props> = ({
           const notesButtonElement = trGroupRef.current?.querySelector<HTMLButtonElement>(
             `.${NOTES_BUTTON_CLASS_NAME}`
           );
-          if (notesButtonElement) {
-            notesButtonElement.focus();
-          }
+          notesButtonElement?.focus();
         }, 0);
       }
 

@@ -21,7 +21,7 @@ function isPngJob(job: TaskPayloadPNG | TaskPayloadPDF): job is TaskPayloadPNG {
   return (job as TaskPayloadPNG).relativeUrl !== undefined;
 }
 function isPdfJob(job: TaskPayloadPNG | TaskPayloadPDF): job is TaskPayloadPDF {
-  return (job as TaskPayloadPDF).objects !== undefined; // 7.x only
+  return (job as TaskPayloadPDF).relativeUrls !== undefined;
 }
 
 export function getFullUrls(config: ReportingConfig, job: TaskPayloadPDF | TaskPayloadPNG) {
@@ -39,10 +39,10 @@ export function getFullUrls(config: ReportingConfig, job: TaskPayloadPDF | TaskP
   if (isPngJob(job)) {
     relativeUrls = [job.relativeUrl];
   } else if (isPdfJob(job)) {
-    relativeUrls = job.objects.map((obj) => obj.relativeUrl);
+    relativeUrls = job.relativeUrls;
   } else {
     throw new Error(
-      `No valid URL fields found in Job Params! Expected \`job.relativeUrl\` or \`job.objects[{ relativeUrl }]\``
+      `No valid URL fields found in Job Params! Expected \`job.relativeUrl: string\` or \`job.relativeUrls: string[]\``
     );
   }
 

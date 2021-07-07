@@ -34,7 +34,6 @@ function buildDateAgg({ field, interval, timeZone }) {
 }
 
 function buildAggsCount(body, dateAgg) {
-  // eslint-disable-line no-unused-vars
   return {
     dateAgg,
   };

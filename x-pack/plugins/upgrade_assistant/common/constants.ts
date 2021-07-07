@@ -11,7 +11,7 @@ import SemVer from 'semver/classes/semver';
  * On master, the version should represent the next major version (e.g., master --> 8.0.0)
  * The release branch should match the release version (e.g., 7.x --> 7.0.0)
  */
-export const mockKibanaVersion = '7.0.0';
+export const mockKibanaVersion = '8.0.0';
 export const mockKibanaSemverVersion = new SemVer(mockKibanaVersion);
 
 /*

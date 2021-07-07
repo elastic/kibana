@@ -20,10 +20,7 @@ export const getSectionsWithRows = (
 ) => {
   return sections
     .map((section) => {
-      const sectionData: Record<string, unknown> = get(
-        apmDoc,
-        section.key
-      ) as Record<string, unknown>;
+      const sectionData: Record<string, unknown> = get(apmDoc, section.key);
       const filteredData:
         | Record<string, unknown>
         | undefined = section.properties

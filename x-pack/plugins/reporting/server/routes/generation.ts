@@ -13,7 +13,6 @@ import { API_BASE_URL } from '../../common/constants';
 import { LevelLogger as Logger } from '../lib';
 import { enqueueJobFactory } from '../lib/enqueue_job';
 import { registerGenerateFromJobParams } from './generate_from_jobparams';
-import { registerLegacy } from './legacy';
 import { registerGenerateCsvFromSavedObjectImmediate } from './csv_searchsource_immediate';
 import { HandlerFunction } from './types';
 
@@ -101,6 +100,5 @@ export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Lo
   }
 
   registerGenerateFromJobParams(reporting, handler, handleError);
-  registerLegacy(reporting, handler, handleError, logger); // 7.x only
   registerGenerateCsvFromSavedObjectImmediate(reporting, handleError, logger);
 }

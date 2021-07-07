@@ -16,9 +16,11 @@ import {
   EuiSpacer,
   EuiPageContent,
   EuiPanel,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SummaryStatus } from '../../summary_status';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export function Beat({ summary, metrics, ...props }) {
   const metricsToShow = [
@@ -140,6 +142,11 @@ export function Beat({ summary, metrics, ...props }) {
           <SummaryStatus metrics={summarytStatsBot} data-test-subj="beatSummaryStatus02" />
         </EuiPanel>
         <EuiPageContent>
+          <EuiScreenReaderOnly>
+            <h1>
+              <FormattedMessage id="xpack.monitoring.beats.beat.heading" defaultMessage="Beat" />
+            </h1>
+          </EuiScreenReaderOnly>
           <EuiFlexGrid columns={2} gutterSize="s">
             {metricsToShow.map((metric, index) => (
               <EuiFlexItem key={index}>

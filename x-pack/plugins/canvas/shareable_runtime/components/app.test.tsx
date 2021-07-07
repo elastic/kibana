@@ -101,7 +101,7 @@ describe.skip('<App />', () => {
     expect(center(wrapper).text()).toEqual('Page 6 of 28');
   });
 
-  test.skip('autohide footer functions on mouseEnter + Leave', async () => {
+  test('autohide footer functions on mouseEnter + Leave', async () => {
     const wrapper = getWrapper();
     await openSettings(wrapper);
     await selectMenuItem(wrapper, 1);

@@ -71,12 +71,9 @@ export const getDestinationMap = ({
             },
             aggs: {
               sample: {
-                top_metrics: {
-                  metrics: [
-                    { field: SPAN_TYPE },
-                    { field: SPAN_SUBTYPE },
-                    { field: SPAN_ID },
-                  ],
+                top_hits: {
+                  size: 1,
+                  _source: [SPAN_TYPE, SPAN_SUBTYPE, SPAN_ID],
                   sort: [
                     {
                       '@timestamp': 'desc' as const,
@@ -92,15 +89,15 @@ export const getDestinationMap = ({
 
     const outgoingConnections =
       response.aggregations?.connections.buckets.map((bucket) => {
-        const fieldValues = bucket.sample.top[0].metrics;
+        const sample = bucket.sample.hits.hits[0]._source;
 
         return {
           [SPAN_DESTINATION_SERVICE_RESOURCE]: String(
             bucket.key[SPAN_DESTINATION_SERVICE_RESOURCE]
           ),
-          [SPAN_ID]: (fieldValues[SPAN_ID] ?? '') as string,
-          [SPAN_TYPE]: (fieldValues[SPAN_TYPE] ?? '') as string,
-          [SPAN_SUBTYPE]: (fieldValues[SPAN_SUBTYPE] ?? '') as string,
+          [SPAN_ID]: sample.span.id,
+          [SPAN_TYPE]: sample.span.type,
+          [SPAN_SUBTYPE]: sample.span.subtype,
         };
       }) ?? [];
 

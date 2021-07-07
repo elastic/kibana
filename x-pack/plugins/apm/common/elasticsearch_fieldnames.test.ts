@@ -6,13 +6,14 @@
  */
 
 import { get } from 'lodash';
+import { AllowUnknownProperties } from '../typings/common';
 import { APMError } from '../typings/es_schemas/ui/apm_error';
 import { Span } from '../typings/es_schemas/ui/span';
 import { Transaction } from '../typings/es_schemas/ui/transaction';
 import * as fieldnames from './elasticsearch_fieldnames';
 
 describe('Transaction', () => {
-  const transaction: Transaction = {
+  const transaction: AllowUnknownProperties<Transaction> = {
     '@timestamp': new Date().toString(),
     '@metadata': 'whatever',
     observer: {
@@ -69,7 +70,7 @@ describe('Transaction', () => {
 });
 
 describe('Span', () => {
-  const span: Span = {
+  const span: AllowUnknownProperties<Span> = {
     '@timestamp': new Date().toString(),
     '@metadata': 'whatever',
     observer: {
@@ -123,7 +124,7 @@ describe('Span', () => {
 });
 
 describe('Error', () => {
-  const errorDoc: APMError = {
+  const errorDoc: AllowUnknownProperties<APMError> = {
     '@metadata': 'whatever',
     observer: {
       name: 'an observer',
@@ -185,7 +186,9 @@ describe('Error', () => {
   matchSnapshot(errorDoc);
 });
 
-function matchSnapshot(obj: Span | Transaction | APMError) {
+function matchSnapshot(
+  obj: AllowUnknownProperties<Span | Transaction | APMError>
+) {
   Object.entries(fieldnames).forEach(([key, longKey]) => {
     const value = get(obj, longKey);
     it(key, () => {

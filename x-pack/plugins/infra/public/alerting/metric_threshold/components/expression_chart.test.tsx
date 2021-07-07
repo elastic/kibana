@@ -54,7 +54,6 @@ describe('ExpressionChart', () => {
         metricAlias: 'metricbeat-*',
         inventoryDefaultView: 'host',
         metricsExplorerDefaultView: 'host',
-
         fields: {
           timestamp: '@timestamp',
           container: 'container.id',

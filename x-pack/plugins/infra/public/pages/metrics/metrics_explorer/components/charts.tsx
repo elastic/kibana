@@ -41,6 +41,7 @@ export const MetricsExplorerCharts = ({
   options,
   chartOptions,
   onRefetch,
+
   onFilter,
   source,
   timeRange,
