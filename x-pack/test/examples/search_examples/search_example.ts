@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -13,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'timePicker']);
   const retry = getService('retry');
   const comboBox = getService('comboBox');
+  const toasts = getService('toasts');
 
   describe('Search session example', () => {
     const appId = 'searchExamples';
@@ -26,6 +28,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Mar 1, 2015 @ 00:00:00.000',
         'Nov 1, 2015 @ 00:00:00.000'
       );
+    });
+
+    beforeEach(async () => {
+      await toasts.dismissAllToasts();
+      await retry.waitFor('toasts gone', async () => {
+        return (await toasts.getToastCount()) === 0;
+      });
     });
 
     it('should have an other bucket', async () => {
@@ -52,6 +61,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const buckets = parsedResponse.aggregations[1].buckets;
         return buckets.length === 2;
       });
+    });
+
+    it('should handle warnings', async () => {
+      await testSubjects.click('searchWithWarning');
+      await retry.waitFor('', async () => {
+        const toastCount = await toasts.getToastCount();
+        return toastCount > 1;
+      });
+      const warningToast = await toasts.getToastElement(2);
+      const textEl = await warningToast.findByClassName('euiToastBody');
+      const text: string = await textEl.getVisibleText();
+      expect(text).to.contain('Watch out!');
     });
   });
 }

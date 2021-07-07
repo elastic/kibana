@@ -240,8 +240,11 @@ export const SearchExamplesApp = ({
             searchSubscription$.unsubscribe();
           }
         },
-        error: () => {
-          notifications.toasts.addDanger('Failed to run search');
+        error: (e) => {
+          notifications.toasts.addDanger({
+            title: 'Failed to run search',
+            text: e.message,
+          });
         },
       });
   };
@@ -348,8 +351,11 @@ export const SearchExamplesApp = ({
             searchSubscription$.unsubscribe();
           }
         },
-        error: () => {
-          notifications.toasts.addDanger('Failed to run search');
+        error: (e) => {
+          notifications.toasts.addDanger({
+            title: 'Failed to run search',
+            text: e.message,
+          });
         },
       });
   };
@@ -588,16 +594,26 @@ export const SearchExamplesApp = ({
                 <EuiCode>isWarningResponse</EuiCode> and <EuiCode>isErrorResponse</EuiCode> when
                 handling responses.
                 <EuiSpacer />
-                <EuiButtonEmpty size="xs" onClick={onWarningSearchClickHandler} iconType="play">
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={onWarningSearchClickHandler}
+                  iconType="play"
+                  data-test-subj="searchWithWarning"
+                >
                   <FormattedMessage
-                    id="searchExamples.buttonText"
+                    id="searchExamples.searchWithWarningButtonText"
                     defaultMessage="Request with a warning in response"
                   />
                 </EuiButtonEmpty>
                 <EuiText />
-                <EuiButtonEmpty size="xs" onClick={onErrorSearchClickHandler} iconType="play">
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={onErrorSearchClickHandler}
+                  iconType="play"
+                  data-test-subj="searchWithError"
+                >
                   <FormattedMessage
-                    id="searchExamples.buttonText"
+                    id="searchExamples.searchWithErrorButtonText"
                     defaultMessage="Request with an error in response"
                   />
                 </EuiButtonEmpty>
