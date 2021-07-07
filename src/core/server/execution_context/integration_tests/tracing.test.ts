@@ -155,7 +155,7 @@ describe('trace', () => {
       expect(header).toBe('new-opaque-id');
     });
 
-    describe('ExecutionContext Serivce is disabled', () => {
+    describe('ExecutionContext Service is disabled', () => {
       let rootExecutionContextDisabled: ReturnType<typeof kbnTestServer.createRoot>;
       beforeEach(async () => {
         rootExecutionContextDisabled = kbnTestServer.createRootWithCorePlugins({
@@ -172,7 +172,7 @@ describe('trace', () => {
       afterEach(async () => {
         await rootExecutionContextDisabled.shutdown();
       });
-      it('passed to Elasticsearch scoped client calls even if ExecutionContext Serivce is disabled', async () => {
+      it('passed to Elasticsearch scoped client calls even if ExecutionContext Service is disabled', async () => {
         const { http } = await rootExecutionContextDisabled.setup();
         const { createRouter } = http;
 
@@ -194,7 +194,7 @@ describe('trace', () => {
         expect(header).toBe(myOpaqueId);
       });
 
-      it('does not pass context if ExecutionContext Serivce is disabled', async () => {
+      it('does not pass context if ExecutionContext Service is disabled', async () => {
         const { http, executionContext } = await rootExecutionContextDisabled.setup();
         const { createRouter } = http;
 

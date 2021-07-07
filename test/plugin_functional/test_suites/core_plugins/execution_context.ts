@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
         await PageObjects.common.navigateToApp('home');
       });
 
-      it('manually created context', async () => {
+      it('passes plugin-specific execution context to Elasticsearch server', async () => {
         expect(
           await browser.execute(async () => {
             const coreStart = window._coreProvider.start.core;
