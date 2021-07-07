@@ -12,18 +12,17 @@ import { ESSearchRequest } from 'src/core/types/elasticsearch';
 
 import { buildEsQuery, IIndexPattern } from '../../../../../../../src/plugins/data/common';
 
-import {
-  RuleDataClient,
-  createPersistenceRuleTypeFactory,
-} from '../../../../../rule_registry/server';
+import { RuleDataClient } from '../../../../../rule_registry/server';
 import { CUSTOM_ALERT_TYPE_ID } from '../../../../common/constants';
 
+import { createSecurityRuleTypeFactory } from './create_security_rule_type_factory';
+
 export const createQueryAlertType = (ruleDataClient: RuleDataClient, logger: Logger) => {
-  const createPersistenceRuleType = createPersistenceRuleTypeFactory({
+  const createSecurityRuleType = createSecurityRuleTypeFactory({
     ruleDataClient,
     logger,
   });
-  return createPersistenceRuleType({
+  return createSecurityRuleType({
     id: CUSTOM_ALERT_TYPE_ID,
     name: 'Custom Query Rule',
     validate: {
@@ -73,7 +72,6 @@ export const createQueryAlertType = (ruleDataClient: RuleDataClient, logger: Log
         };
 
         const alerts = await findAlerts(query);
-        // console.log('alerts', alerts);
         alertWithPersistence(alerts).forEach((alert) => {
           alert.scheduleActions('default', { server: 'server-test' });
         });

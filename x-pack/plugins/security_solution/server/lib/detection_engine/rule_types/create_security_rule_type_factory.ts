@@ -67,16 +67,14 @@ export const createSecurityRuleTypeFactory: (
   factoryOptions: FactoryOptions
 ) => (type: AlertTypeWithExecutor) => SecurityRuleType = (factoryOptions: FactoryOptions) => {
   const { ruleDataClient, logger, lists, savedObjectsClient, scopedClusterClient } = factoryOptions;
-  const persistenceRuleTypeFactory = createPersistenceRuleTypeFactory({ ruleDataClient, logger });
+  const persistenceRuleType = createPersistenceRuleTypeFactory({ ruleDataClient, logger });
   return (type: SecurityRuleType) => {
-    return persistenceRuleTypeFactory({
+    return persistenceRuleType({
       ...type,
       async executor(options) {
-        // const { ruleId, maxSignals, meta, outputIndex, timestampOverride, type } = params;
-        const params = options.params as RuleParams;
-        const { alertId } = options;
+        const { alertId, params, previousStartedAt, services, spaceId, updatedBy } = options;
+        const { from, maxSignals, meta, outputIndex, timestampOverride, to } = params;
         const ruleId = type.id;
-        const { timestampOverride } = params;
         const esClient = scopedClusterClient.asCurrentUser;
 
         const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
@@ -95,7 +93,7 @@ export const createSecurityRuleTypeFactory: (
           id: alertId,
           ruleId,
           name,
-          index: params.outputIndex,
+          index: params.outputIndex as string, // FIXME?
         });
 
         logger.debug(buildRuleMessage('[+] Starting Signal Rule execution'));
@@ -108,7 +106,8 @@ export const createSecurityRuleTypeFactory: (
         // move this collection of lines into a function in utils
         // so that we can use it in create rules route, bulk, etc.
         try {
-          if (!isMachineLearningParams(params)) {
+          if (!isMachineLearningParams(params as RuleParams)) {
+            // FIXME?
             const index = params.index;
             const hasTimestampOverride = !!timestampOverride;
 
@@ -118,7 +117,7 @@ export const createSecurityRuleTypeFactory: (
             const [privileges, timestampFieldCaps] = await Promise.all([
               checkPrivilegesFromEsClient(esClient, inputIndices),
               esClient.fieldCaps({
-                index,
+                index: index as string[], // FIXME?
                 fields: hasTimestampOverride
                   ? ['@timestamp', timestampOverride as string]
                   : ['@timestamp'],
@@ -167,9 +166,9 @@ export const createSecurityRuleTypeFactory: (
         let hasError = false;
         const { tuples, remainingGap } = getRuleRangeTuples({
           logger,
-          previousStartedAt: options.previousStartedAt,
-          from: params.from,
-          to: params.to,
+          previousStartedAt,
+          from: from as string,
+          to: to as string,
           interval,
           maxSignals: DEFAULT_MAX_SIGNALS,
           buildRuleMessage,
@@ -185,16 +184,16 @@ export const createSecurityRuleTypeFactory: (
           await ruleStatusService.error(gapMessage, { gap: gapString });
         }
         const { listClient, exceptionsClient } = newGetListsClient({
-          esClient: options.services.scopedClusterClient.asCurrentUser,
-          updatedByUser: options.updatedBy,
-          spaceId: options.spaceId,
+          esClient: services.scopedClusterClient.asCurrentUser,
+          updatedByUser: updatedBy,
+          spaceId,
           lists,
           savedObjectClient: options.services.savedObjectsClient,
         });
 
         const exceptionItems = await getExceptions({
           client: exceptionsClient,
-          lists: (options.params.exceptionsList as ListArray) ?? [],
+          lists: (params.exceptionsList as ListArray) ?? [],
         });
 
         const result = await type.executor({
