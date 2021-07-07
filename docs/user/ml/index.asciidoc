@@ -80,7 +80,7 @@ browser so that it does not block pop-up windows or create an exception for your
 
 For more information about the {anomaly-detect} feature, see
 https://www.elastic.co/what-is/elastic-stack-machine-learning[{ml-cap} in the {stack}]
-and {ml-docs}/xpack-ml.html[{ml-cap} {anomaly-detect}].
+and {ml-docs}/ml-ad-overview.html[{ml-cap} {anomaly-detect}].
 
 [[xpack-ml-dfanalytics]]
 == {dfanalytics-cap}
