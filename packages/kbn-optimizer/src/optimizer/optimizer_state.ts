@@ -143,7 +143,7 @@ export function createOptimizerStateSummarizer(
       }
 
       const offlineBundles: Bundle[] = [];
-      for (const bundle of config.bundles) {
+      for (const bundle of config.filteredBundles) {
         if (!onlineBundles.includes(bundle)) {
           offlineBundles.push(bundle);
         }
