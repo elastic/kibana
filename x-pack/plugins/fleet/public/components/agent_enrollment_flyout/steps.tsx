@@ -9,15 +9,24 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import semver from 'semver';
 
 import type { AgentPolicy, PackagePolicy } from '../../types';
-import { sendGetOneAgentPolicy } from '../../hooks';
+import { sendGetOneAgentPolicy, useKibanaVersion } from '../../hooks';
 import { FLEET_SERVER_PACKAGE } from '../../constants';
 
 import { EnrollmentStepAgentPolicy } from './agent_policy_selection';
 import { AdvancedAgentAuthenticationSettings } from './advanced_agent_authentication_settings';
 
 export const DownloadStep = () => {
+  const kibanaVersion = useKibanaVersion();
+  const kibanaVersionURLString = useMemo(
+    () =>
+      `${semver.major(kibanaVersion)}-${semver.minor(kibanaVersion)}-${semver.patch(
+        kibanaVersion
+      )}`,
+    [kibanaVersion]
+  );
   return {
     title: i18n.translate('xpack.fleet.agentEnrollment.stepDownloadAgentTitle', {
       defaultMessage: 'Download the Elastic Agent to your host',
@@ -30,9 +39,16 @@ export const DownloadStep = () => {
             defaultMessage="Fleet Server runs on an Elastic Agent. You can download the Elastic Agent binaries and verification signatures from Elastic’s download page."
           />
         </EuiText>
+        <EuiSpacer size="s" />
+        <EuiText size="s">
+          <FormattedMessage
+            id="xpack.fleet.agentEnrollment.downloadUseLinuxInstaller"
+            defaultMessage="Linux users: We recommend using the installers over (RPM/DEB) because they provide the ability to upgrade your agent within Fleet."
+          />
+        </EuiText>
         <EuiSpacer size="l" />
         <EuiButton
-          href="https://ela.st/download-elastic-agent"
+          href={`https://www.elastic.co/downloads/past-releases/elastic-agent-${kibanaVersionURLString}`}
           target="_blank"
           iconSide="right"
           iconType="popout"
