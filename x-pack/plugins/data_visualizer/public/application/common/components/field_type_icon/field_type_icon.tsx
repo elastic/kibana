@@ -69,10 +69,12 @@ export const FieldTypeIcon: FC<FieldTypeIconProps> = ({
       color = 'euiColorVis0';
       break;
     case JOB_FIELD_TYPES.NUMBER:
-    case JOB_FIELD_TYPES.HISTOGRAM:
       iconType = 'tokenNumber';
       color = fieldName !== undefined ? 'euiColorVis1' : 'euiColorVis2';
       break;
+    case JOB_FIELD_TYPES.HISTOGRAM:
+      iconType = 'tokenHistogram';
+      color = 'euiColorVis7';
     case JOB_FIELD_TYPES.UNKNOWN:
       // Use defaults
       break;
