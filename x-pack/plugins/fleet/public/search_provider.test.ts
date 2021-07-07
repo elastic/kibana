@@ -90,7 +90,7 @@ describe('Package search provider', () => {
               id: 'test-test',
               score: 80,
               title: 'test',
-              type: 'package',
+              type: 'integration',
               url: {
                 path: 'undefined#/detail/test-test/overview',
                 prependBasePath: false,
@@ -100,7 +100,7 @@ describe('Package search provider', () => {
               id: 'test1-test1',
               score: 80,
               title: 'test1',
-              type: 'package',
+              type: 'integration',
               url: {
                 path: 'undefined#/detail/test1-test1/overview',
                 prependBasePath: false,
@@ -173,7 +173,7 @@ describe('Package search provider', () => {
               id: 'test-test',
               score: 80,
               title: 'test',
-              type: 'package',
+              type: 'integration',
               url: {
                 path: 'undefined#/detail/test-test/overview',
                 prependBasePath: false,
@@ -229,7 +229,7 @@ describe('Package search provider', () => {
                 id: 'test-test',
                 score: 80,
                 title: 'test',
-                type: 'package',
+                type: 'integration',
                 url: {
                   path: 'undefined#/detail/test-test/overview',
                   prependBasePath: false,
@@ -239,7 +239,7 @@ describe('Package search provider', () => {
                 id: 'test1-test1',
                 score: 80,
                 title: 'test1',
-                type: 'package',
+                type: 'integration',
                 url: {
                   path: 'undefined#/detail/test1-test1/overview',
                   prependBasePath: false,
@@ -272,7 +272,7 @@ describe('Package search provider', () => {
                 id: 'test1-test1',
                 score: 80,
                 title: 'test1',
-                type: 'package',
+                type: 'integration',
                 url: {
                   path: 'undefined#/detail/test1-test1/overview',
                   prependBasePath: false,
