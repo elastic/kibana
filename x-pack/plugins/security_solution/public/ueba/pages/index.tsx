@@ -7,29 +7,19 @@
 
 import React from 'react';
 import { Route, Switch, Redirect } from 'react-router-dom';
-import { isEmpty } from 'lodash/fp';
-import { ChromeBreadcrumb } from 'kibana/public';
-import { GetUrlForApp } from '../../common/components/navigation/types';
-import { APP_ID, SecurityPageName, UEBA_PATH } from '../../../common/constants';
+import { UEBA_PATH } from '../../../common/constants';
 import { UebaTableType } from '../store/model';
 import { Ueba } from './ueba';
-import * as i18n from './translations';
-import { UebaRouteSpyState } from '../../common/utils/route/types';
+import { uebaDetailsPagePath } from './types';
+import { UebaDetails } from './details';
 
-const getUebaTabPath = () => `${UEBA_PATH}/:tabName(${UebaTableType.riskScore})`;
-export const getBreadcrumbs = (
-  params: UebaRouteSpyState,
-  search: string[],
-  getUrlForApp: GetUrlForApp
-): ChromeBreadcrumb[] => [
-  {
-    text: i18n.PAGE_TITLE,
-    href: getUrlForApp(APP_ID, {
-      deepLinkId: SecurityPageName.ueba,
-      path: !isEmpty(search[0]) ? search[0] : '',
-    }),
-  },
-];
+const uebaTabPath = `${UEBA_PATH}/:tabName(${UebaTableType.riskScore})`;
+
+const uebaDetailsTabPath =
+  `${uebaDetailsPagePath}/:tabName(` +
+  `${UebaTableType.hostRules}|` +
+  `${UebaTableType.hostTactics}|` +
+  `${UebaTableType.userRules})`;
 
 export const UebaContainer = React.memo(() => (
   <Switch>
@@ -42,9 +32,33 @@ export const UebaContainer = React.memo(() => (
       )}
     />
 
-    <Route path={getUebaTabPath()}>
+    <Route path={uebaTabPath}>
       <Ueba />
     </Route>
+    <Route
+      path={uebaDetailsTabPath}
+      render={({
+        match: {
+          params: { detailName },
+        },
+      }) => <UebaDetails uebaDetailsPagePath={uebaDetailsPagePath} detailName={detailName} />}
+    />
+    <Route
+      path={uebaDetailsPagePath}
+      render={({
+        match: {
+          params: { detailName },
+        },
+        location: { search = '' },
+      }) => (
+        <Redirect
+          to={{
+            pathname: `${UEBA_PATH}/${detailName}/${UebaTableType.hostRules}`,
+            search,
+          }}
+        />
+      )}
+    />
   </Switch>
 ));
 

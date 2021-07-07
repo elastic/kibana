@@ -7,30 +7,30 @@
 
 import * as i18n from '../translations';
 import { UebaDetailsNavTab } from './types';
-import { UebaDetailsTableType } from '../../store/model';
+import { UebaTableType } from '../../store/model';
 import { UEBA_PATH } from '../../../../common/constants';
 
-const getTabsOnUebaDetailsUrl = (hostName: string, tabName: UebaDetailsTableType) =>
+const getTabsOnUebaDetailsUrl = (hostName: string, tabName: UebaTableType) =>
   `${UEBA_PATH}/${hostName}/${tabName}`;
 
 export const navTabsUebaDetails = (hostName: string): UebaDetailsNavTab => {
   return {
-    [UebaDetailsTableType.hostRules]: {
-      id: UebaDetailsTableType.hostRules,
+    [UebaTableType.hostRules]: {
+      id: UebaTableType.hostRules,
       name: i18n.HOST_RULES,
-      href: getTabsOnUebaDetailsUrl(hostName, UebaDetailsTableType.hostRules),
+      href: getTabsOnUebaDetailsUrl(hostName, UebaTableType.hostRules),
       disabled: false,
     },
-    [UebaDetailsTableType.hostTactics]: {
-      id: UebaDetailsTableType.hostTactics,
+    [UebaTableType.hostTactics]: {
+      id: UebaTableType.hostTactics,
       name: i18n.HOST_TACTICS,
-      href: getTabsOnUebaDetailsUrl(hostName, UebaDetailsTableType.hostTactics),
+      href: getTabsOnUebaDetailsUrl(hostName, UebaTableType.hostTactics),
       disabled: false,
     },
-    [UebaDetailsTableType.userRules]: {
-      id: UebaDetailsTableType.userRules,
+    [UebaTableType.userRules]: {
+      id: UebaTableType.userRules,
       name: i18n.USER_RULES,
-      href: getTabsOnUebaDetailsUrl(hostName, UebaDetailsTableType.userRules),
+      href: getTabsOnUebaDetailsUrl(hostName, UebaTableType.userRules),
       disabled: false,
     },
   };

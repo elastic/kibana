@@ -21,7 +21,7 @@ import {
   setUebaDetailsQueriesActivePageToZero,
   setUebaPageQueriesActivePageToZero,
 } from './helpers';
-import { UebaDetailsTableType, UebaModel, UebaTableType } from './model';
+import { UebaTableType, UebaModel } from './model';
 
 export const initialUebaState: UebaModel = {
   page: {
@@ -38,7 +38,23 @@ export const initialUebaState: UebaModel = {
   },
   details: {
     queries: {
-      [UebaDetailsTableType.riskScore]: {
+      [UebaTableType.hostRules]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+        sort: {
+          field: RiskScoreFields.riskScore,
+          direction: Direction.desc,
+        },
+      },
+      [UebaTableType.hostTactics]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+        sort: {
+          field: RiskScoreFields.riskScore,
+          direction: Direction.desc,
+        },
+      },
+      [UebaTableType.userRules]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         sort: {

@@ -11,13 +11,13 @@ import { Route, Switch } from 'react-router-dom';
 import { UpdateDateRange } from '../../../common/components/charts/common';
 import { scoreIntervalToDateTime } from '../../../common/components/ml/score/score_interval_to_datetime';
 import { Anomaly } from '../../../common/components/ml/types';
-import { UebaDetailsTableType } from '../../store/model';
+import { UebaTableType } from '../../store/model';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 
 import { UebaDetailsTabsProps } from './types';
 import { type } from './utils';
 
-import { HostRulesQueryTabBody } from '../navigation';
+// import { HostRulesQueryTabBody } from '../navigation';
 
 export const UebaDetailsTabs = React.memo<UebaDetailsTabsProps>(
   ({
@@ -75,14 +75,17 @@ export const UebaDetailsTabs = React.memo<UebaDetailsTabsProps>(
 
     return (
       <Switch>
-        <Route path={`${uebaDetailsPagePath}/:tabName(${UebaDetailsTableType.hostRules})`}>
-          <HostRulesQueryTabBody {...tabProps} />
+        <Route path={`${uebaDetailsPagePath}/:tabName(${UebaTableType.hostRules})`}>
+          {/* <HostRulesQueryTabBody {...tabProps} />*/}
+          <p {...tabProps}>{`hostRules`}</p>
         </Route>
-        <Route path={`${uebaDetailsPagePath}/:tabName(${UebaDetailsTableType.hostTactics})`}>
-          <HostRulesQueryTabBody {...tabProps} />
+        <Route path={`${uebaDetailsPagePath}/:tabName(${UebaTableType.hostTactics})`}>
+          {/* <HostRulesQueryTabBody {...tabProps} />*/}
+          <p>{`hostTactics`}</p>
         </Route>
-        <Route path={`${uebaDetailsPagePath}/:tabName(${UebaDetailsTableType.userRules})`}>
-          <HostRulesQueryTabBody {...tabProps} />
+        <Route path={`${uebaDetailsPagePath}/:tabName(${UebaTableType.userRules})`}>
+          {/* <HostRulesQueryTabBody {...tabProps} />*/}
+          <p>{`userRules`}</p>
         </Route>
       </Switch>
     );

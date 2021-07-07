@@ -14,15 +14,12 @@ export enum UebaType {
 
 export enum UebaTableType {
   riskScore = 'riskScore',
-}
-
-export enum UebaDetailsTableType {
   hostRules = 'hostRules',
   hostTactics = 'hostTactics',
   userRules = 'userRules',
 }
 
-export type AllUebaTables = UebaTableType | UebaDetailsTableType;
+export type AllUebaTables = UebaTableType;
 
 export interface BasicQueryPaginated {
   activePage: number;
@@ -50,7 +47,9 @@ export interface UebaPageModel {
 }
 
 export interface UebaDetailsQueries {
-  [UebaDetailsTableType.riskScore]: RiskScoreQuery;
+  [UebaTableType.hostRules]: RiskScoreQuery;
+  [UebaTableType.hostTactics]: RiskScoreQuery;
+  [UebaTableType.userRules]: RiskScoreQuery;
 }
 
 export interface UebaDetailsModel {

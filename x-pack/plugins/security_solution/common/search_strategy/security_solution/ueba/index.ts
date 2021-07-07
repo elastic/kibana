@@ -10,4 +10,7 @@ export * from './common';
 
 export enum UebaQueries {
   riskScore = 'riskScore',
+  hostRules = 'hostRules',
+  hostTactics = 'hostTactics',
+  userRules = 'userRules',
 }

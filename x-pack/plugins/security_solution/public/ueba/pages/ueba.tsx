@@ -79,22 +79,7 @@ const UebaComponent = () => {
   const { globalFullScreen } = useGlobalFullScreen();
   const { uiSettings } = useKibana().services;
   const tabsFilters = filters;
-  // const narrowDateRange = useCallback<UpdateDateRange>(
-  //   ({ x }) => {
-  //     if (!x) {
-  //       return;
-  //     }
-  //     const [min, max] = x;
-  //     dispatch(
-  //       setAbsoluteRangeDatePicker({
-  //         id: 'global',
-  //         from: new Date(min).toISOString(),
-  //         to: new Date(max).toISOString(),
-  //       })
-  //     );
-  //   },
-  //   [dispatch]
-  // );
+
   const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
   const [filterQuery, kqlError] = useMemo(
     () =>

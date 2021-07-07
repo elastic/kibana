@@ -8,7 +8,7 @@
 import { ActionCreator } from 'typescript-fsa';
 import { Query, IIndexPattern, Filter } from 'src/plugins/data/public';
 import { InputsModelId } from '../../../common/store/inputs/constants';
-import { UebaDetailsTableType } from '../../store/model';
+import { UebaTableType } from '../../store/model';
 import { UebaQueryProps } from '../types';
 import { NavTab } from '../../../common/components/navigation/types';
 import { uebaModel } from '../../store';
@@ -42,9 +42,9 @@ export type UebaDetailsComponentProps = UebaDetailsComponentReduxProps &
   UebaDetailsComponentDispatchProps &
   UebaQueryProps;
 
-type KeyUebaDetailsNavTab = UebaDetailsTableType.hostRules &
-  UebaDetailsTableType.hostTactics &
-  UebaDetailsTableType.userRules;
+type KeyUebaDetailsNavTab = UebaTableType.hostRules &
+  UebaTableType.hostTactics &
+  UebaTableType.userRules;
 
 export type UebaDetailsNavTab = Record<KeyUebaDetailsNavTab, NavTab>;
 

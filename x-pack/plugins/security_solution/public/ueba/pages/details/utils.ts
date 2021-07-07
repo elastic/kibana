@@ -8,29 +8,27 @@
 import { get, isEmpty } from 'lodash/fp';
 
 import { ChromeBreadcrumb } from '../../../../../../../src/core/public';
-import { hostsModel } from '../../store';
-import { HostsTableType } from '../../store/model';
-import { getUebaDetailsUrl } from '../../../common/components/link_to/redirect_to_hosts';
+import { uebaModel } from '../../store';
+import { UebaTableType } from '../../store/model';
+import { getUebaDetailsUrl } from '../../../common/components/link_to/redirect_to_ueba';
 
 import * as i18n from '../translations';
-import { HostRouteSpyState } from '../../../common/utils/route/types';
+import { UebaRouteSpyState } from '../../../common/utils/route/types';
 import { GetUrlForApp } from '../../../common/components/navigation/types';
 import { APP_ID } from '../../../../common/constants';
 import { SecurityPageName } from '../../../app/types';
 
-export const type = hostsModel.HostsType.details;
+export const type = uebaModel.UebaType.details;
 
-const TabNameMappedToI18nKey: Record<HostsTableType, string> = {
-  [HostsTableType.hosts]: i18n.NAVIGATION_ALL_HOSTS_TITLE,
-  [HostsTableType.authentications]: i18n.NAVIGATION_AUTHENTICATIONS_TITLE,
-  [HostsTableType.uncommonProcesses]: i18n.NAVIGATION_UNCOMMON_PROCESSES_TITLE,
-  [HostsTableType.anomalies]: i18n.NAVIGATION_ANOMALIES_TITLE,
-  [HostsTableType.events]: i18n.NAVIGATION_EVENTS_TITLE,
-  [HostsTableType.alerts]: i18n.NAVIGATION_ALERTS_TITLE,
+const TabNameMappedToI18nKey: Record<UebaTableType, string> = {
+  [UebaTableType.hostRules]: i18n.HOST_RULES,
+  [UebaTableType.hostTactics]: i18n.HOST_TACTICS,
+  [UebaTableType.riskScore]: i18n.RISK_SCORE_TITLE,
+  [UebaTableType.userRules]: i18n.USER_RULES,
 };
 
 export const getBreadcrumbs = (
-  params: HostRouteSpyState,
+  params: UebaRouteSpyState,
   search: string[],
   getUrlForApp: GetUrlForApp
 ): ChromeBreadcrumb[] => {
@@ -39,7 +37,7 @@ export const getBreadcrumbs = (
       text: i18n.PAGE_TITLE,
       href: getUrlForApp(APP_ID, {
         path: !isEmpty(search[0]) ? search[0] : '',
-        deepLinkId: SecurityPageName.hosts,
+        deepLinkId: SecurityPageName.ueba,
       }),
     },
   ];
@@ -51,7 +49,7 @@ export const getBreadcrumbs = (
         text: params.detailName,
         href: getUrlForApp(APP_ID, {
           path: getUebaDetailsUrl(params.detailName, !isEmpty(search[0]) ? search[0] : ''),
-          deepLinkId: SecurityPageName.hosts,
+          deepLinkId: SecurityPageName.ueba,
         }),
       },
     ];

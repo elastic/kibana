@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  UebaModel,
-  UebaType,
-  UebaTableType,
-  UebaDetailsTableType,
-  UebaQueries,
-  UebaDetailsQueries,
-} from './model';
+import { UebaModel, UebaType, UebaTableType, UebaQueries, UebaDetailsQueries } from './model';
 import { DEFAULT_TABLE_ACTIVE_PAGE } from '../../common/store/constants';
 
 export const setUebaPageQueriesActivePageToZero = (state: UebaModel): UebaQueries => ({
@@ -25,8 +18,16 @@ export const setUebaPageQueriesActivePageToZero = (state: UebaModel): UebaQuerie
 
 export const setUebaDetailsQueriesActivePageToZero = (state: UebaModel): UebaDetailsQueries => ({
   ...state.details.queries,
-  [UebaDetailsTableType.riskScore]: {
-    ...state.details.queries[UebaDetailsTableType.riskScore],
+  [UebaTableType.hostRules]: {
+    ...state.details.queries[UebaTableType.hostRules],
+    activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+  },
+  [UebaTableType.hostTactics]: {
+    ...state.details.queries[UebaTableType.hostTactics],
+    activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+  },
+  [UebaTableType.userRules]: {
+    ...state.details.queries[UebaTableType.userRules],
     activePage: DEFAULT_TABLE_ACTIVE_PAGE,
   },
 });

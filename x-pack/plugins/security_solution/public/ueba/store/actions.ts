@@ -12,7 +12,7 @@ const actionCreator = actionCreatorFactory('x-pack/security_solution/local/ueba'
 
 export const updateUebaTable = actionCreator<{
   uebaType: uebaModel.UebaType;
-  tableType: uebaModel.UebaTableType | uebaModel.UebaDetailsTableType;
+  tableType: uebaModel.UebaTableType | uebaModel.UebaTableType;
   updates: uebaModel.TableUpdates;
 }>('UPDATE_NETWORK_TABLE');
 
