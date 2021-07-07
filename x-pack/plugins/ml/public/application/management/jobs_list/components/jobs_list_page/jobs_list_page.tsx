@@ -18,6 +18,8 @@ import {
   EuiSpacer,
   EuiTabbedContent,
   EuiTabbedContentTab,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 
 import type { SpacesContextProps } from 'src/plugins/spaces_oss/public';
@@ -243,17 +245,27 @@ export const JobsListPage: FC<{
                 id="kibanaManagementMLSection"
                 data-test-subj="mlPageStackManagementJobsList"
               >
-                {spacesEnabled && (
-                  <>
-                    <EuiButtonEmpty onClick={() => setShowSyncFlyout(true)}>
-                      {i18n.translate('xpack.ml.management.jobsList.syncFlyoutButton', {
-                        defaultMessage: 'Synchronize saved objects',
-                      })}
-                    </EuiButtonEmpty>
-                    {showSyncFlyout && <JobSpacesSyncFlyout onClose={onCloseSyncFlyout} />}
-                    <EuiSpacer size="s" />
-                  </>
-                )}
+                <EuiFlexGroup>
+                  <EuiFlexItem grow={false}>
+                    {spacesEnabled && (
+                      <>
+                        <EuiButtonEmpty onClick={() => setShowSyncFlyout(true)}>
+                          {i18n.translate('xpack.ml.management.jobsList.syncFlyoutButton', {
+                            defaultMessage: 'Synchronize saved objects',
+                          })}
+                        </EuiButtonEmpty>
+                        {showSyncFlyout && <JobSpacesSyncFlyout onClose={onCloseSyncFlyout} />}
+                        <EuiSpacer size="s" />
+                      </>
+                    )}
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <ExportJobsFlyout isDisabled={false} />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <ImportJobsFlyout refreshJobs={() => {}} isDisabled={false} />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
                 {renderTabs()}
               </EuiPageContentBody>
             </Router>
