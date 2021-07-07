@@ -108,7 +108,7 @@ export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
 
 export const createMockPackageService = (): jest.Mocked<PackageService> => {
   return {
-    getInstalledEsAssetReferences: jest.fn(),
+    getInstallation: jest.fn(),
   };
 };
 

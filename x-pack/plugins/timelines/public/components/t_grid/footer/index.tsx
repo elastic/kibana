@@ -110,7 +110,7 @@ export const EventsCountComponent = ({
   itemsCount: number;
   onClick: () => void;
   serverSideEventCount: number;
-  footerText: string;
+  footerText: string | React.ReactNode;
 }) => {
   const totalCount = useMemo(() => (serverSideEventCount > 0 ? serverSideEventCount : 0), [
     serverSideEventCount,
@@ -144,7 +144,7 @@ export const EventsCountComponent = ({
       >
         <EuiContextMenuPanel items={items} data-test-subj="timelinePickSizeRow" />
       </PopoverRowItems>
-      <EuiToolTip content={`${totalCount} ${footerText}`}>
+      <EuiToolTip content={`${totalCount} ${footerText?.toString()}`}>
         <ServerSideEventCount>
           <EuiBadge color="hollow" data-test-subj="server-side-event-count">
             {totalCount}
@@ -305,7 +305,7 @@ export const FooterComponent = ({
           data-test-subj="LoadingPanelTimeline"
           height="35px"
           showBorder={false}
-          text={`${loadingText}...`}
+          text={loadingText}
           width="100%"
         />
       </LoadingPanelContainer>

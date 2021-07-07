@@ -73,7 +73,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Generate CSV: new search', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/104372
+    describe.skip('Generate CSV: new search', () => {
       beforeEach(async () => {
         await kibanaServer.importExport.load(ecommerceSOPath);
         await PageObjects.common.navigateToApp('discover');
