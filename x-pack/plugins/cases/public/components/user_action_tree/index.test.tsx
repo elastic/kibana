@@ -13,7 +13,13 @@ import routeData from 'react-router';
 
 import { getFormMock, useFormMock, useFormDataMock } from '../__mock__/form';
 import { useUpdateComment } from '../../containers/use_update_comment';
-import { basicCase, basicPush, getUserAction } from '../../containers/mock';
+import {
+  basicCase,
+  basicPush,
+  getUserAction,
+  getHostIsolationUserAction,
+  hostIsolationComment,
+} from '../../containers/mock';
 import { UserActionTree } from '.';
 import { TestProviders } from '../../common/mock';
 import { Ecs } from '../../../common';
@@ -366,6 +372,23 @@ describe(`UserActionTree`, () => {
           .first()
           .hasClass('outlined')
       ).toEqual(true);
+    });
+  });
+  it('render action case comment', async () => {
+    const isolateAction = [getHostIsolationUserAction()];
+    const props = {
+      ...defaultProps,
+      caseUserActions: isolateAction,
+      data: { ...defaultProps.data, comments: [...basicCase.comments, hostIsolationComment] },
+    };
+
+    const wrapper = mount(
+      <TestProviders>
+        <UserActionTree {...props} />
+      </TestProviders>
+    );
+    await waitFor(() => {
+      expect(wrapper.find(`[data-test-subj="endpoint-action"]`).exists()).toBe(true);
     });
   });
 });
