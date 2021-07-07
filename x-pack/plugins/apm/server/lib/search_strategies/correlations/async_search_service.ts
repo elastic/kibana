@@ -67,6 +67,17 @@ export const asyncSearchServiceProvider = (
       percentileThresholdValue =
         percentileThreshold[`${params.percentileThreshold}.0`];
 
+      // finish early if we weren't able to identify the percentileThresholdValue.
+      if (percentileThresholdValue === undefined) {
+        progress.loadedHistogramStepsize = 1;
+        progress.loadedOverallHistogram = 1;
+        progress.loadedFieldCanditates = 1;
+        progress.loadedFieldValuePairs = 1;
+        progress.loadedHistograms = 1;
+        isRunning = false;
+        return;
+      }
+
       const histogramRangeSteps = await fetchTransactionDurationHistogramRangesteps(
         esClient,
         params
@@ -198,11 +209,11 @@ export const asyncSearchServiceProvider = (
         loadedHistograms++;
         progress.loadedHistograms = loadedHistograms / fieldValuePairs.length;
       }
-
-      isRunning = false;
     } catch (e) {
       error = e;
     }
+
+    isRunning = false;
   };
 
   fetchCorrelations();

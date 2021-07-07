@@ -38,6 +38,7 @@ export const getTransactionDurationPercentilesRequest = (
   return {
     index: params.index,
     body: {
+      track_total_hits: true,
       query,
       size: 0,
       aggs: {
@@ -71,11 +72,17 @@ export const fetchTransactionDurationPercentiles = async (
     )
   );
 
+  // return early with no results if the search didn't return any documents
+  if ((resp.body.hits.total as estypes.SearchTotalHits).value === 0) {
+    return {};
+  }
+
   if (resp.body.aggregations === undefined) {
     throw new Error(
       'fetchTransactionDurationPercentiles failed, did not return aggregations.'
     );
   }
+
   return (
     (resp.body.aggregations
       .transaction_duration_percentiles as estypes.AggregationsTDigestPercentilesAggregate)
