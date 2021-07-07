@@ -126,7 +126,9 @@ export async function SecuritySolutionCypressVisualTestRunner({ getService }: Ft
   });
 }
 
-export async function SecuritySolutionUpgradeCliTestRunner({ getService }: FtrProviderContext) {
+export async function SecuritySolutionCypressUpgradeCliTestRunner({
+  getService,
+}: FtrProviderContext) {
   const log = getService('log');
 
   await withProcRunner(log, async (procs) => {
