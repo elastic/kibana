@@ -217,10 +217,10 @@ export interface DashboardSavedObjectTypeMigrationsDeps {
 export const createDashboardSavedObjectTypeMigrations = (
   deps: DashboardSavedObjectTypeMigrationsDeps
 ): SavedObjectMigrationMap => {
-  const embeddableMigrations = (mapValues(
+  const embeddableMigrations = mapValues<MigrateFunctionsObject, SavedObjectMigrationFn>(
     deps.embeddable.getAllMigrations(),
     migrateByValuePanels
-  ) as any) as MigrateFunctionsObject;
+  ) as MigrateFunctionsObject;
 
   const dashboardMigrations = {
     /**

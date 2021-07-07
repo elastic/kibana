@@ -588,15 +588,12 @@ describe('dashboard', () => {
 
     it('runs migrations on by value panels only', () => {
       const newEmbeddableSetupMock = createEmbeddableSetupMock();
-      newEmbeddableSetupMock.getAllMigrations.mockImplementation(
-        () =>
-          ({
-            '7.13.0': (state: SerializableState) => {
-              state.superCoolKey = 'ONLY 4 BY VALUE EMBEDDABLES THANK YOU VERY MUCH';
-              return state;
-            },
-          } as any)
-      );
+      newEmbeddableSetupMock.getAllMigrations.mockImplementation(() => ({
+        '7.13.0': (state: SerializableState) => {
+          state.superCoolKey = 'ONLY 4 BY VALUE EMBEDDABLES THANK YOU VERY MUCH';
+          return state;
+        },
+      }));
       const migrationsList = createDashboardSavedObjectTypeMigrations({
         embeddable: newEmbeddableSetupMock,
       });
