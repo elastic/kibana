@@ -229,7 +229,6 @@ export class CommonPageObject extends FtrService {
         // accept alert if it pops up
         const alert = await this.browser.getAlert();
         await alert?.accept();
-        await this.sleep(700);
         this.log.debug('returned from get, calling refresh');
         await this.browser.refresh();
         let currentUrl = shouldLoginIfPrompted
@@ -256,7 +255,6 @@ export class CommonPageObject extends FtrService {
       });
 
       await this.retry.tryForTime(this.defaultFindTimeout, async () => {
-        await this.sleep(501);
         const currentUrl = await this.browser.getCurrentUrl();
         this.log.debug('in navigateTo url = ' + currentUrl);
         if (lastUrl !== currentUrl) {
