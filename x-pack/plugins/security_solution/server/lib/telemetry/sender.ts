@@ -146,15 +146,15 @@ export class TelemetryEventsSender {
 
     const query = {
       expand_wildcards: 'open,hidden',
-      index: `.ds-metrics-endpoint.metrics*`,
+      index: `.fleet-metrics-endpoint.metrics-*`,
       ignore_unavailable: false,
       size: 0, // no query results required - only aggregation quantity
       body: {
         aggs: {
           endpoint_agents: {
             terms: {
-              size: this.max_records,
               field: 'agent.id.keyword',
+              size: this.max_records,
             },
             aggs: {
               latest_metrics: {
@@ -192,12 +192,12 @@ export class TelemetryEventsSender {
     });
   }
 
-  public async fetchEndpointPolicyConfigs(id: string) {
+  public async fetchPolicyConfigs(id: string) {
     if (this.savedObjectClient === undefined) {
       throw Error('could not fetch endpoint policy configs. saved object client is not available');
     }
 
-    return this.agentPolicyService?.getFullAgentPolicy(this.savedObjectClient, id);
+    return this.agentPolicyService?.get(this.savedObjectClient, id);
   }
 
   public async fetchEndpointPolicyResponses() {
@@ -207,7 +207,7 @@ export class TelemetryEventsSender {
 
     const query = {
       expand_wildcards: 'open,hidden',
-      index: `.ds-metrics-endpoint.policy*`,
+      index: `.fleet-metrics-endpoint.policy-default*`,
       ignore_unavailable: false,
       size: 0, // no query results required - only aggregation quantity
       body: {

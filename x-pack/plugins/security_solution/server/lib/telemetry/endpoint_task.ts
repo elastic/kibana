@@ -14,7 +14,7 @@ import {
 } from '../../../../task_manager/server';
 import { batchTelemetryRecords, getLastTaskExecutionTimestamp } from './helpers';
 import { TelemetryEventsSender } from './sender';
-import { FullAgentPolicyInput } from '../../../../fleet/common/types/models/agent_policy';
+import { PolicyData } from '../../../common/endpoint/types';
 import {
   EndpointMetricsAggregation,
   EndpointPolicyResponseAggregation,
@@ -29,7 +29,7 @@ export const TelemetryEndpointTaskConstants = {
   VERSION: '1.0.0',
 };
 
-const DEFAULT_POLICY_ID = '00000000-0000-0000-0000-000000000000';
+// const DEFAULT_POLICY_ID = '00000000-0000-0000-0000-000000000000';
 
 /** Telemetry Endpoint Task
  *
@@ -178,19 +178,30 @@ export class TelemetryEndpointTask {
       return cache;
     }, new Map<string, FleetAgentCacheItem>());
 
-    const endpointPolicyCache = new Map<string, FullAgentPolicyInput>();
+    const endpointPolicyCache = new Map<string, PolicyData>();
     for (const policyInfo of fleetAgents.values()) {
       if (
         policyInfo.policy_id !== null &&
         policyInfo.policy_id !== undefined &&
         !endpointPolicyCache.has(policyInfo.policy_id)
       ) {
-        const packagePolicies = await this.sender.fetchEndpointPolicyConfigs(policyInfo.policy_id);
-        packagePolicies?.inputs.forEach((input) => {
-          if (input.type === 'endpoint' && policyInfo.policy_id !== undefined) {
-            endpointPolicyCache.set(policyInfo.policy_id, input);
-          }
-        });
+        const packagePolicies = await this.sender.fetchPolicyConfigs(policyInfo.policy_id);
+
+        packagePolicies?.package_policies
+          .map((pPolicy) => pPolicy as PolicyData)
+          .forEach((pPolicy) => {
+            if (pPolicy.inputs[0].config !== undefined) {
+              pPolicy.inputs.forEach((input) => {
+                if (
+                  input.type === 'endpoint' &&
+                  input.config !== undefined &&
+                  policyInfo.policy_id !== undefined
+                ) {
+                  endpointPolicyCache.set(policyInfo.policy_id, pPolicy);
+                }
+              });
+            }
+          });
       }
     }
 
@@ -244,6 +255,7 @@ export class TelemetryEndpointTask {
         agent_id: fleetAgentId,
         endpoint_id: endpointAgentId,
         endpoint_version: endpoint.endpoint_version,
+        endpoint_package_version: policyConfig?.package?.version || null,
         endpoint_metrics: {
           cpu: {
             histogram: endpoint.endpoint_metrics.Endpoint.metrics.cpu.endpoint.histogram,
@@ -262,8 +274,8 @@ export class TelemetryEndpointTask {
         endpoint_meta: {
           os: endpoint.endpoint_metrics.host.os,
         },
-        policy_config: policyConfig.policy,
-        policy_failure:
+        policy_config: policyConfig !== null ? policyConfig?.inputs[0].config.policy : {},
+        policy_response:
           failedPolicy !== null && failedPolicy !== undefined
             ? {
                 agent_policy_status: failedPolicy?._source.event.agent_id_status,
@@ -274,7 +286,7 @@ export class TelemetryEndpointTask {
                   .map((action) => (action.status !== 'success' ? action : null))
                   .filter((action) => action !== null),
               }
-            : null,
+            : {},
         telemetry_meta: {
           metrics_timestamp: endpoint.endpoint_metrics['@timestamp'],
         },

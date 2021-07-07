@@ -45,7 +45,23 @@ export interface EndpointPolicyResponseDocument {
     event: {
       agent_id_status: string;
     };
-    Endpoint: {};
+    Endpoint: {
+      policy: {
+        applied: {
+          actions: Array<{
+            name: string;
+            message: string;
+            status: string;
+          }>;
+          artifacts: {
+            global: {
+              version: string;
+            };
+          };
+          status: string;
+        };
+      };
+    };
   };
 }
 
