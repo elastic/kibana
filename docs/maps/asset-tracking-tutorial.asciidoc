@@ -31,114 +31,121 @@ Before you can get to the fun of visualizing and alerting on Portland buses, you
 
 . In Kibana, open the main menu, then click *Dev Tools > Console*.
 . To create the `tri_met_tracks index`, run:
-    [source,js]
-    ----------------------------------
-    PUT tri_met_tracks
-    ----------------------------------
++
+[source,js]
+----------------------------------
+PUT tri_met_tracks
+----------------------------------
+
 . To configure the `tri_met_tracks` index mappings, run:
-    [source,js]
-    ----------------------------------
-    PUT tri_met_tracks/_mapping
-    {
-      "properties": {
-        "in_congestion": {
-          "type": "boolean"
-        },
-        "location": {
-          "type": "geo_point"
-        },
-        "route": {
-          "type": "keyword"
-        },
-        "time": {
-          "type": "date",
-          "format": "epoch_millis"
-        },
-        "type": {
-          "type": "keyword"
-        },
-        "vehicle_id": {
-          "type": "keyword"
-        }
-      }
++
+[source,js]
+----------------------------------
+PUT tri_met_tracks/_mapping
+{
+  "properties": {
+    "in_congestion": {
+      "type": "boolean"
+    },
+    "location": {
+      "type": "geo_point"
+    },
+    "route": {
+      "type": "keyword"
+    },
+    "time": {
+      "type": "date",
+      "format": "epoch_millis"
+    },
+    "type": {
+      "type": "keyword"
+    },
+    "vehicle_id": {
+      "type": "keyword"
     }
-    ----------------------------------
+  }
+}
+----------------------------------
 
 [float]
 ==== Step 2: Start Logstash
 
 . In your `logstash/config` folder, create the file `trimet-pipeline.conf`.
 . Copy the pipeline script into your trimet-pipeline.conf file.
-    [source]
-    ----------------------------------
-    input {
-      http_poller {
-        urls => {
-          trimet => "https://developer.trimet.org/ws/v2/vehicles?appID=<tri_met_app_id>"
-        }
-        request_timeout => 60
-        schedule => { cron => "* * * * * UTC"}
-        codec => "json"
++
+[source,yaml]
+----------------------------------
+input {
+  http_poller {
+    urls => {
+      trimet => "https://developer.trimet.org/ws/v2/vehicles?appID=<tri_met_app_id>"
+    }
+    request_timeout => 60
+    schedule => { cron => "* * * * * UTC"}
+    codec => "json"
+  }
+}
+
+filter {
+  split {
+    field => "[resultSet][vehicle]"
+  }
+
+  if ![resultSet][vehicle][inCongestion] {
+    mutate {
+      update => {
+        "[resultSet][vehicle][inCongestion]" => "false"
       }
     }
+  }
 
-    filter {
-      split {
-        field => "[resultSet][vehicle]"
-      }
-
-      if ![resultSet][vehicle][inCongestion] {
-        mutate {
-          update => {
-            "[resultSet][vehicle][inCongestion]" => "false"
-          }
-        }
-      }
-
-      mutate {
-        add_field => {
-          "bearing" => "%{[resultSet][vehicle][bearing]}"
-          "in_congestion" => "%{[resultSet][vehicle][inCongestion]}"
-          "location" => "%{[resultSet][vehicle][latitude]},%{[resultSet][vehicle][longitude]}"
-          "route" => "%{[resultSet][vehicle][routeNumber]}"
-          "time" => "%{[resultSet][vehicle][time]}"
-          "type" => "%{[resultSet][vehicle][type]}"
-          "vehicle_id" => "%{[resultSet][vehicle][vehicleID]}"
-        }
-        remove_field => [ "resultSet", "@version", "@timestamp" ]
-      }
-
-      mutate {
-        convert => {
-          "bearing" => "float"
-      "in_congestion" => "boolean"
-          "time" => "integer"
-        }
-      }
+  mutate {
+    add_field => {
+      "bearing" => "%{[resultSet][vehicle][bearing]}"
+      "in_congestion" => "%{[resultSet][vehicle][inCongestion]}"
+      "location" => "%{[resultSet][vehicle][latitude]},%{[resultSet][vehicle][longitude]}"
+      "route" => "%{[resultSet][vehicle][routeNumber]}"
+      "time" => "%{[resultSet][vehicle][time]}"
+      "type" => "%{[resultSet][vehicle][type]}"
+      "vehicle_id" => "%{[resultSet][vehicle][vehicleID]}"
     }
+    remove_field => [ "resultSet", "@version", "@timestamp" ]
+  }
 
-    output {
-      stdout {
-        codec => rubydebug
-      }
-
-      elasticsearch {
-        cloud_auth => "<username:password>"
-        cloud_id => "<cloud_id>"
-        index => "tri_met_tracks"
-        document_id => "%{[vehicle_id]}_%{[time]}"
-      }
+  mutate {
+    convert => {
+      "bearing" => "float"
+  "in_congestion" => "boolean"
+      "time" => "integer"
     }
-    ----------------------------------
+  }
+}
+
+output {
+  stdout {
+    codec => rubydebug
+  }
+
+  elasticsearch {
+    cloud_auth => "<username:password>"
+    cloud_id => "<cloud_id>"
+    index => "tri_met_tracks"
+    document_id => "%{[vehicle_id]}_%{[time]}"
+  }
+}
+----------------------------------
+
 . Replace `<tri_met_app_id>` with your TriMet application id.
 . Replace `<username:password>` with your Elastic Cloud deployment credentials.
 . Replace `<cloud_id>` with your {ece}/ece-cloud-id.html[elastic cloud id].
 . Open a terminal window, and then navigate to the Logstash folder.
 . Run Logstash with the TriMet pipeline:
-    [source]
-    ----------------------------------
-    bin/logstash -f config/trimet-pipeline.conf
-    ----------------------------------
++
+[source,bash]
+----------------------------------
+bin/logstash -f config/trimet-pipeline.conf
+----------------------------------
+
 . Wait for Logstash to initialize and confirm data is flowing. You should see messages similar to this:
     [role="screenshot"]
     image::maps/images/asset-tracking-tutorial/logstash_output.png[]
