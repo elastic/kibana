@@ -5,19 +5,13 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { EuiSteps, EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import {
-  useGetOneEnrollmentAPIKey,
-  useGetSettings,
-  useLink,
-  useFleetStatus,
-  sendGetOneAgentPolicy,
-} from '../../hooks';
+import { useGetOneEnrollmentAPIKey, useGetSettings, useLink, useFleetStatus } from '../../hooks';
 
 import { ManualInstructions } from '../../components/enrollment_instructions';
 import {
@@ -28,8 +22,6 @@ import {
   addFleetServerHostStep,
 } from '../../applications/fleet/sections/agents/agent_requirements_page/components';
 import { FleetServerRequirementPage } from '../../applications/fleet/sections/agents/agent_requirements_page';
-import { FLEET_SERVER_PACKAGE } from '../../constants';
-import type { PackagePolicy } from '../../types';
 
 import { DownloadStep, AgentPolicySelectionStep, AgentEnrollmentKeySelectionStep } from './steps';
 import type { BaseProps } from './types';
@@ -64,36 +56,20 @@ const FleetServerMissingRequirements = () => {
 };
 
 export const ManagedInstructions = React.memo<Props>(
-  ({ agentPolicy, agentPolicies, viewDataStep }) => {
+  ({
+    agentPolicy,
+    agentPolicies,
+    viewDataStep,
+    setSelectedPolicyId,
+    isFleetServerPolicySelected,
+  }) => {
     const fleetStatus = useFleetStatus();
 
     const [selectedApiKeyId, setSelectedAPIKeyId] = useState<string | undefined>();
-    const [isFleetServerPolicySelected, setIsFleetServerPolicySelected] = useState<boolean>(false);
 
     const apiKey = useGetOneEnrollmentAPIKey(selectedApiKeyId);
     const settings = useGetSettings();
     const fleetServerInstructions = useFleetServerInstructions(apiKey?.data?.item?.policy_id);
-    const [policyId, setSelectedPolicyId] = useState(agentPolicy?.id);
-
-    useEffect(() => {
-      async function checkPolicyIsFleetServer() {
-        if (policyId && setIsFleetServerPolicySelected) {
-          const agentPolicyRequest = await sendGetOneAgentPolicy(policyId);
-          if (
-            agentPolicyRequest.data?.item &&
-            (agentPolicyRequest.data.item.package_policies as PackagePolicy[]).some(
-              (packagePolicy) => packagePolicy.package?.name === FLEET_SERVER_PACKAGE
-            )
-          ) {
-            setIsFleetServerPolicySelected(true);
-          } else {
-            setIsFleetServerPolicySelected(false);
-          }
-        }
-      }
-
-      checkPolicyIsFleetServer();
-    }, [policyId]);
 
     const fleetServerSteps = useMemo(() => {
       const {

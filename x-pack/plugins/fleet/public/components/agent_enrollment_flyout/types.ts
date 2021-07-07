@@ -27,4 +27,8 @@ export interface BaseProps {
    * in some way. This is an area for consumers to render a button and text explaining how data can be viewed.
    */
   viewDataStep?: EuiStepProps;
+
+  setSelectedPolicyId?: (policyId?: string) => void;
+
+  isFleetServerPolicySelected?: boolean;
 }
