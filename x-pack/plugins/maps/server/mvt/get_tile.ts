@@ -336,7 +336,12 @@ export async function getTile({
       const fieldNames = new Set<string>();
       features.forEach((feature) => {
         for (const key in feature.properties) {
-          if (feature.properties.hasOwnProperty(key) && key !== 'key' && key !== 'gridCentroid') {
+          if (
+            feature.properties.hasOwnProperty(key) &&
+            key !== '_index' &&
+            key !== '_id' &&
+            key !== FEATURE_ID_PROPERTY_NAME
+          ) {
             fieldNames.add(key);
           }
         }
@@ -344,14 +349,6 @@ export async function getTile({
 
       const fieldMeta: FieldMeta = {};
       fieldNames.forEach((fieldName: string) => {
-        if (
-          fieldName === '_index' ||
-          fieldName === '_id' ||
-          fieldName === FEATURE_ID_PROPERTY_NAME
-        ) {
-          return;
-        }
-
         const rangeMeta = pluckRangeFieldMeta(features, fieldName, (rawValue: unknown) => {
           return typeof rawValue === 'number' ? rawValue : NaN;
         });
