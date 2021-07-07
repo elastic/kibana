@@ -34,7 +34,7 @@ export const buildRiskScoreQuery = ({
     allowNoIndices: true,
     index: defaultIndex,
     ignoreUnavailable: true,
-    track_total_hits: false,
+    track_total_hits: true,
     body: {
       ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggregations: {

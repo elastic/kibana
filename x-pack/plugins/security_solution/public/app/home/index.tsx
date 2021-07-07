@@ -33,7 +33,7 @@ const HomePageComponent: React.FC<HomePageProps> = ({
   setHeaderActionMenu,
 }) => {
   const { pathname } = useLocation();
-
+  console.log('HOME PAGE COMPONENT???', { pathname, isDetectionsPath: isDetectionsPath(pathname) });
   useInitSourcerer(
     isDetectionsPath(pathname) ? SourcererScopeName.detections : SourcererScopeName.default
   );

@@ -102,6 +102,7 @@ export const getSourcererScopeSelector = () => {
 
   const mapStateToProps = (state: State, scopeId: SourcererScopeName): ManageScope => {
     const scope = getScopeIdSelector(state, scopeId);
+    console.log('SOURCERER', scope);
     const selectedPatterns = getSelectedPatterns(scope.selectedPatterns.sort().join());
     const indexPattern = getIndexPattern(scope.indexPattern, selectedPatterns.join());
 

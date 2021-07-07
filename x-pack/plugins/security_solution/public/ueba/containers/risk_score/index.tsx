@@ -155,6 +155,7 @@ export const useRiskScore = ({
               searchSubscription.current.unsubscribe();
             },
           });
+        setLoading(false);
       };
       searchSubscription.current.unsubscribe();
       abortCtrl.current.abort();

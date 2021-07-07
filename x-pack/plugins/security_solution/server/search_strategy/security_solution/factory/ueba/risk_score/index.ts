@@ -8,7 +8,6 @@
 import { getOr } from 'lodash/fp';
 import { SecuritySolutionFactory } from '../../types';
 import {
-  RiskScoreHit,
   RiskScoreEdges,
   RiskScoreRequestOptions,
   RiskScoreStrategyResponse,
@@ -17,7 +16,7 @@ import {
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import { buildRiskScoreQuery } from './query.risk_score.dsl';
 import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
-import { RISK_SCORE_FIELDS, formatRiskScoreData } from './helpers';
+import { formatRiskScoreData } from './helpers';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 
 export const riskScore: SecuritySolutionFactory<UebaQueries.riskScore> = {
@@ -33,8 +32,7 @@ export const riskScore: SecuritySolutionFactory<UebaQueries.riskScore> = {
     response: IEsSearchResponse<unknown>
   ): Promise<RiskScoreStrategyResponse> => {
     const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
-    const totalCount = getOr(0, 'aggregations.host_count.value', response.rawResponse);
-
+    const totalCount = getOr(0, 'hits.total', response.rawResponse);
     const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
 
     const riskScoreEdges: RiskScoreEdges[] = formatRiskScoreData(
