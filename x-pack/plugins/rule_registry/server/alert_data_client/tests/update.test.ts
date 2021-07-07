@@ -174,10 +174,10 @@ describe('update()', () => {
       event: {
         action: 'alert_update',
         category: ['database'],
-        outcome: 'success',
+        outcome: 'unknown',
         type: ['change'],
       },
-      message: 'User has updated alert [id=1]',
+      message: 'User is updating alert [id=1]',
     });
   });
 
