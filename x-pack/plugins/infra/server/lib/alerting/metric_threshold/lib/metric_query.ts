@@ -25,9 +25,9 @@ const getParsedFilterQuery: (filterQuery: string | undefined) => Record<string, 
 export const getElasticsearchMetricQuery = (
   { metric, aggType, timeUnit, timeSize }: MetricExpressionParams,
   timefield: string,
+  timeframe: { start: number; end: number },
   groupBy?: string | string[],
-  filterQuery?: string,
-  timeframe?: { start: number; end: number }
+  filterQuery?: string
 ) => {
   if (aggType === Aggregators.COUNT && metric) {
     throw new Error('Cannot aggregate document count with a metric');
@@ -38,17 +38,8 @@ export const getElasticsearchMetricQuery = (
   const interval = `${timeSize}${timeUnit}`;
   const intervalAsSeconds = getIntervalInSeconds(interval);
   const intervalAsMS = intervalAsSeconds * 1000;
-
-  const to = roundTimestamp(timeframe ? timeframe.end : Date.now(), timeUnit);
-  // We need enough data for 5 buckets worth of data. We also need
-  // to convert the intervalAsSeconds to milliseconds.
-  const minimumFrom = to - intervalAsMS * MINIMUM_BUCKETS;
-
-  const from = roundTimestamp(
-    timeframe && timeframe.start <= minimumFrom ? timeframe.start : minimumFrom,
-    timeUnit
-  );
-
+  const to = timeframe.end;
+  const from = timeframe.start;
   const offset = calculateDateHistogramOffset({ from, to, interval, field: timefield });
   const offsetInMS = parseInt(offset, 10);
 

@@ -134,9 +134,9 @@ const getMetric: (
   const searchBody = getElasticsearchMetricQuery(
     params,
     timefield,
+    { start: from, end: to },
     hasGroupBy ? groupBy : undefined,
-    filterQuery,
-    { start: from, end: to }
+    filterQuery
   );
 
   try {
