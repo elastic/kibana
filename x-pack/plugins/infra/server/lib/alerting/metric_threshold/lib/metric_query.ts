@@ -50,7 +50,7 @@ export const getElasticsearchMetricQuery = (
   );
 
   const offset = calculateDateHistogramOffset({ from, to, interval, field: timefield });
-  const offsetInMS = parseInt(offset, 10) * 1000;
+  const offsetInMS = parseInt(offset, 10);
 
   const aggregations =
     aggType === Aggregators.COUNT

@@ -47,6 +47,7 @@ export const transformRequestToMetricsAPIRequest = async ({
       ? snapshotRequest.overrideCompositeSize
       : compositeSize,
     alignDataToEnd: true,
+    dropPartialBuckets: true,
   };
 
   const filters = [];
