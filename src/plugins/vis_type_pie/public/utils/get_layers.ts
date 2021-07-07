@@ -44,7 +44,10 @@ export const computeColor = (
 
   if (visParams.distinctColors) {
     let overwriteColor;
-    if (Object.keys(overwriteColors).includes(formattedLabel)) {
+    // this is for supporting old visualizations (created by vislib plugin)
+    // it seems that there for some aggs, the uiState saved from vislib is
+    // different than the es-charts handle it
+    if (overwriteColors.hasOwnProperty(formattedLabel)) {
       overwriteColor = overwriteColors[formattedLabel];
     }
 
@@ -96,8 +99,10 @@ export const computeColor = (
   }
 
   let overwriteColor;
-
-  if (Object.keys(overwriteColors).includes(formattedLabel)) {
+  // this is for supporting old visualizations (created by vislib plugin)
+  // it seems that there for some aggs, the uiState saved from vislib is
+  // different than the es-charts handle it
+  if (overwriteColors.hasOwnProperty(formattedLabel)) {
     overwriteColor = overwriteColors[formattedLabel];
   }
 
