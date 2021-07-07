@@ -139,7 +139,7 @@ These can be used to automatically update the list of hosts as a cluster is resi
 Kibana has a default memory limit that scales based on total memory available.  In some scenarios, such as large reporting jobs, 
 it may make sense to tweak limits to meet more specific requirements.
 
-A limit can be defined by setting `--max-old-space-size` in the `node.options` config file that can be found inside `kibana/config` folder or any other configured with the environment variable `KBN_PATH_CONF` (for example in debian based system would be `/etc/kibana`).
+A limit can be defined by setting `--max-old-space-size` in the `node.options` config file found inside the `kibana/config` folder or any other folder configured with the environment variable `KBN_PATH_CONF`. For example, in the Debian-based system, the folder is `/etc/kibana`.
 
 The option accepts a limit in MB:
 [source,js]
