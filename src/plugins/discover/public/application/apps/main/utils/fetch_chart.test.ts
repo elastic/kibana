@@ -11,7 +11,7 @@ import { RequestAdapter } from '../../../../../../inspector';
 import { savedSearchMockWithTimeField } from '../../../../__mocks__/saved_search';
 import { fetchChart } from './fetch_chart';
 import { ReduxLikeStateContainer } from '../../../../../../kibana_utils/common';
-import { AppState } from './discover_state';
+import { AppState } from '../services/discover_state';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { calculateBounds, IKibanaSearchResponse } from '../../../../../../data/common';
 import { estypes } from '@elastic/elasticsearch';

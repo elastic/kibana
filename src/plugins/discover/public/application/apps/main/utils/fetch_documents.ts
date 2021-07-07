@@ -10,8 +10,8 @@ import { filter } from 'rxjs/operators';
 import { Adapters } from '../../../../../../inspector/common';
 import { isCompleteResponse, SearchSource } from '../../../../../../data/common';
 import { FetchStatus } from '../../../types';
-import { DataDocuments$ } from './use_saved_search';
-import { sendErrorMsg, sendLoadingMsg } from './use_saved_search_messages';
+import { DataDocuments$ } from '../services/use_saved_search';
+import { sendErrorMsg, sendLoadingMsg } from '../services/use_saved_search_messages';
 
 export const fetchDocuments = (
   dataDocuments$: DataDocuments$,

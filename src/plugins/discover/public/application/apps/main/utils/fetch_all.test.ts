@@ -10,7 +10,7 @@ import { BehaviorSubject } from 'rxjs';
 import { RequestAdapter } from '../../../../../../inspector';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { ReduxLikeStateContainer } from '../../../../../../kibana_utils/common';
-import { AppState } from './discover_state';
+import { AppState } from '../services/discover_state';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { fetchAll } from './fetch_all';
 

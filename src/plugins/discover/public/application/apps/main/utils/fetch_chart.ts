@@ -14,14 +14,14 @@ import {
   SearchSource,
 } from '../../../../../../data/public';
 import { Adapters } from '../../../../../../inspector';
-import { getChartAggConfigs, getDimensions } from '../utils';
+import { getChartAggConfigs, getDimensions } from './index';
 import { tabifyAggResponse } from '../../../../../../data/common';
 import { buildPointSeriesData } from '../components/chart/point_series';
 import { FetchStatus } from '../../../types';
-import { DataCharts$ } from './use_saved_search';
-import { AppState } from './discover_state';
+import { DataCharts$ } from '../services/use_saved_search';
+import { AppState } from '../services/discover_state';
 import { ReduxLikeStateContainer } from '../../../../../../kibana_utils/common';
-import { sendErrorMsg, sendLoadingMsg } from './use_saved_search_messages';
+import { sendErrorMsg, sendLoadingMsg } from '../services/use_saved_search_messages';
 
 export function fetchChart(
   dataCharts$: DataCharts$,

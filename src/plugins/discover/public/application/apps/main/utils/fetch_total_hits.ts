@@ -15,8 +15,8 @@ import {
 } from '../../../../../../data/public';
 import { Adapters } from '../../../../../../inspector/common';
 import { FetchStatus } from '../../../types';
-import { DataTotalHits$ } from './use_saved_search';
-import { sendErrorMsg, sendLoadingMsg } from './use_saved_search_messages';
+import { DataTotalHits$ } from '../services/use_saved_search';
+import { sendErrorMsg, sendLoadingMsg } from '../services/use_saved_search_messages';
 
 export function fetchTotalHits(
   dataTotalHits$: DataTotalHits$,

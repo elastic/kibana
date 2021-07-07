@@ -21,7 +21,7 @@ import { TimechartBucketInterval } from '../components/timechart_header/timechar
 import { useSingleton } from '../utils/use_singleton';
 import { FetchStatus } from '../../../types';
 
-import { fetchAll } from './fetch_all';
+import { fetchAll } from '../utils/fetch_all';
 import { useBehaviorSubject } from '../utils/use_behavior_subject';
 import { sendResetMsg } from './use_saved_search_messages';
 
