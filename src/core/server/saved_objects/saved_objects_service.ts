@@ -149,6 +149,7 @@ export interface SavedObjectsServiceSetup {
  */
 export interface InternalSavedObjectsServiceSetup extends SavedObjectsServiceSetup {
   status$: Observable<ServiceStatus<SavedObjectStatusMeta>>;
+  /** Note: this must be called after server.setup to get all plugin SO types */
   getTypeRegistry: () => ISavedObjectTypeRegistry;
 }
 
