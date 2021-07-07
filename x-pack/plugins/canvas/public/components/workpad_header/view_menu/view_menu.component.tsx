@@ -14,12 +14,7 @@ import {
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-import {
-  withSuspense,
-  LazyPopoverComponent,
-  ClosePopoverFn,
-} from '../../../../../../../src/plugins/presentation_util/public';
+import { Popover, ClosePopoverFn } from '../../popover';
 import {
   MAX_ZOOM_LEVEL,
   MIN_ZOOM_LEVEL,
@@ -93,8 +88,6 @@ const strings = {
 };
 
 const QUICK_ZOOM_LEVELS = [0.5, 1, 2];
-
-const Popover = withSuspense(LazyPopoverComponent);
 
 export interface Props {
   /**

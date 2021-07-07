@@ -9,11 +9,7 @@ import React, { FunctionComponent, useState } from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonEmpty, EuiContextMenu, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  withSuspense,
-  LazyPopoverComponent,
-  ClosePopoverFn,
-} from '../../../../../../../src/plugins/presentation_util/public';
+import { Popover, ClosePopoverFn } from '../../popover';
 import { ReportingStart } from '../../../../../reporting/public';
 import { PDF, JSON } from '../../../../i18n/constants';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
@@ -57,8 +53,6 @@ type CloseTypes = 'share';
 export type OnCopyFn = (type: CopyTypes) => void;
 export type OnExportFn = (type: ExportTypes) => void;
 export type OnCloseFn = (type: CloseTypes) => void;
-
-const Popover = withSuspense(LazyPopoverComponent);
 
 export interface Props {
   /** Canvas workpad to export as PDF **/

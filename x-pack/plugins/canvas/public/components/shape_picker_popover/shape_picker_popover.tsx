@@ -8,14 +8,9 @@
 import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 import { EuiLink, EuiPanel } from '@elastic/eui';
-import {
-  withSuspense,
-  LazyPopoverComponent,
-} from '../../../../../../src/plugins/presentation_util/public';
+import { Popover } from '../popover';
 import { ShapePicker } from '../shape_picker';
 import { ShapePreview } from '../shape_preview';
-
-const Popover = withSuspense(LazyPopoverComponent);
 
 interface Props {
   shapes: {

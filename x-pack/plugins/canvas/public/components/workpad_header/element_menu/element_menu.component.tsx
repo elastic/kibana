@@ -15,19 +15,13 @@ import {
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  withSuspense,
-  LazyPopoverComponent,
-  ClosePopoverFn,
-} from '../../../../../../../src/plugins/presentation_util/public';
+import { Popover, ClosePopoverFn } from '../../popover';
 import { CONTEXT_MENU_TOP_BORDER_CLASSNAME } from '../../../../common/lib';
 import { ElementSpec } from '../../../../types';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
 import { getId } from '../../../lib/get_id';
 import { AssetManager } from '../../asset_manager';
 import { SavedElementsModal } from '../../saved_elements_modal';
-
-const Popover = withSuspense(LazyPopoverComponent);
 
 interface CategorizedElementLists {
   [key: string]: ElementSpec[];

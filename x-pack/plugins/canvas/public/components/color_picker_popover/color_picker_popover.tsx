@@ -9,15 +9,9 @@ import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 import { EuiLink, PopoverAnchorPosition } from '@elastic/eui';
 import tinycolor from 'tinycolor2';
-
-import {
-  withSuspense,
-  LazyPopoverComponent,
-} from '../../../../../../src/plugins/presentation_util/public';
+import { Popover } from '../popover';
 import { ColorDot } from '../color_dot';
 import { ColorPicker, Props as ColorPickerProps } from '../color_picker';
-
-const Popover = withSuspense(LazyPopoverComponent);
 
 export interface Props extends ColorPickerProps {
   anchorPosition?: PopoverAnchorPosition;
