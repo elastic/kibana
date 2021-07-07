@@ -73,6 +73,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
               onAlertChanged();
             }, 10);
             setIsMuted(!isMuted);
+            setIsPopoverOpen(!isPopoverOpen);
           },
           name: isMuted
             ? i18n.translate(
@@ -98,6 +99,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
               onAlertChanged();
             }, 10);
             setIsDisabled(!isDisabled);
+            setIsPopoverOpen(!isPopoverOpen);
           },
           name: isDisabled
             ? i18n.translate(
@@ -112,7 +114,10 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
         {
           disabled: !item.isEditable,
           'data-test-subj': 'editAlert',
-          onClick: () => onEditAlert(item),
+          onClick: () => {
+            setIsPopoverOpen(!isPopoverOpen);
+            onEditAlert(item);
+          },
           name: i18n.translate(
             'xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.editTitle',
             { defaultMessage: 'Edit rule' }
@@ -121,7 +126,10 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
         {
           disabled: !item.isEditable,
           'data-test-subj': 'deleteAlert',
-          onClick: () => setAlertsToDelete([item.id]),
+          onClick: () => {
+            setIsPopoverOpen(!isPopoverOpen);
+            setAlertsToDelete([item.id]);
+          },
           name: i18n.translate(
             'xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.deleteTitle',
             { defaultMessage: 'Delete rule' }
