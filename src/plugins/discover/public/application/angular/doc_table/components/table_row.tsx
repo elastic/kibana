@@ -8,7 +8,6 @@
 
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import classNames from 'classnames';
-import type { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -19,19 +18,19 @@ import {
   EuiTitle,
   EuiFlexItem,
 } from '@elastic/eui';
-import { getServices, IndexPattern } from '../../../../../kibana_services';
-import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../../../common';
-import { Cell } from './table_cell';
-import { formatRow, formatTopLevelObject } from '../../../helpers';
-import { getContextUrl } from '../../../../helpers/get_context_url';
-import { DocViewer } from '../../../../components/doc_viewer/doc_viewer';
-import { DocViewFilterFn } from '../../../../doc_views/doc_views_types';
+import { getServices, IndexPattern } from '../../../../kibana_services';
+import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../../common';
+import { Cell } from './table_row/table_cell';
+import { formatRow, formatTopLevelObject } from '../../helpers';
+import { getContextUrl } from '../../../helpers/get_context_url';
+import { DocViewer } from '../../../components/doc_viewer/doc_viewer';
+import { DocViewFilterFn, ElasticSearchHit } from '../../../doc_views/doc_views_types';
 
 // guesstimate at the minimum number of chars wide cells in the table should be
 const MIN_LINE_LENGTH = 20;
 
-export type DocTableRow = estypes.SearchHit & {
-  isAnchor: boolean;
+export type DocTableRow = ElasticSearchHit & {
+  isAnchor?: boolean;
 };
 
 interface TableRowProps {

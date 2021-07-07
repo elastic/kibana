@@ -24,7 +24,6 @@ import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
-import { DocTableLegacy } from '../../../../angular/doc_table/create_doc_table_react';
 import {
   esFilters,
   IndexPatternField,
@@ -51,8 +50,10 @@ import { DiscoverUninitialized } from '../uninitialized/uninitialized';
 import { SavedSearchDataMessage } from '../../services/use_saved_search';
 import { useDataGridColumns } from '../../../../helpers/use_data_grid_columns';
 import { FetchStatus } from '../../../../types';
+import { DocTableRow } from '../../../../angular/doc_table/components/table_row';
+import { DocTable } from '../../../../angular/doc_table/doc_table';
 
-const DocTableLegacyMemoized = React.memo(DocTableLegacy);
+const DocTableMemoized = React.memo(DocTable);
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const DataGridMemoized = React.memo(DiscoverGrid);
 const TopNavMemoized = React.memo(DiscoverTopNav);
@@ -338,21 +339,23 @@ export function DiscoverLayout({
                           />
                         </h2>
                         {isLegacy && rows && rows.length && (
-                          <DocTableLegacyMemoized
+                          <DocTableMemoized
                             columns={columns}
                             indexPattern={indexPattern}
-                            rows={rows}
+                            rows={rows as DocTableRow[]}
+                            type="infinite"
                             sort={state.sort || []}
                             searchDescription={savedSearch.description}
-                            searchTitle={savedSearch.lastSavedTitle}
+                            sharedItemTitle={savedSearch.lastSavedTitle}
                             onAddColumn={onAddColumn}
                             onBackToTop={onBackToTop}
-                            onFilter={onAddFilter}
+                            onFilter={onAddFilter as DocViewFilterFn}
                             onMoveColumn={onMoveColumn}
                             onRemoveColumn={onRemoveColumn}
                             onSort={onSort}
                             sampleSize={sampleSize}
                             useNewFieldsApi={useNewFieldsApi}
+                            dataTestSubj="discoverDocTable"
                           />
                         )}
                         {!isLegacy && rows && rows.length && (

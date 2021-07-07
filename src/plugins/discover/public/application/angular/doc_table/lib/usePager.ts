@@ -39,31 +39,11 @@ export const usePager = ({ startingPage, totalItems, pageSize }: PagerProps) => 
     startIndex: 0,
   });
 
-  const nextPage = () => {
-    setMeta(getNewMeta({ currentPage: meta.currentPage + 1 }));
-  };
-
-  const previousPage = () => {
-    setMeta(getNewMeta({ currentPage: meta.currentPage - 1 }));
-  };
-
-  const setTotalItems = (count: number) => {
-    setMeta(getNewMeta({ totalItems: count }));
-  };
-
-  const setPageSize = (count: number) => {
-    setMeta(getNewMeta({ pageSize: count }));
-  };
-
-  const updateMeta = (params: Partial<MetaParams>) => {
-    setMeta(getNewMeta(params));
-  };
-
-  function getNewMeta({
+  const updateMeta = ({
     currentPage: updatedCurrentPage,
     totalItems: updatedTotalItems,
     pageSize: updatedPageSize,
-  }: Partial<MetaParams>): MetaParams {
+  }: Partial<MetaParams>) => {
     const actualCurrentPage = updatedCurrentPage || meta.currentPage;
     const actualTotalItems = updatedTotalItems || totalItems;
     const actualPageSize = updatedPageSize || pageSize;
@@ -79,7 +59,7 @@ export const usePager = ({ startingPage, totalItems, pageSize }: PagerProps) => 
 
     const newStartIndex = newStartItem - 1;
 
-    return {
+    setMeta({
       currentPage: newCurrentPage,
       totalPages: newTotalPages,
       startIndex: newStartIndex,
@@ -87,18 +67,14 @@ export const usePager = ({ startingPage, totalItems, pageSize }: PagerProps) => 
       endItem: newEndItem,
       totalItems: actualTotalItems,
       pageSize: actualPageSize,
-    };
-  }
+    });
+  };
 
   return {
     ...meta,
     pageCount: Math.ceil(totalItems / pageSize),
     hasNextPage: meta.currentPage < meta.totalPages,
     hasPreviousPage: meta.currentPage > 1,
-    nextPage,
-    previousPage,
-    setTotalItems,
-    setPageSize,
     updateMeta,
   };
 };

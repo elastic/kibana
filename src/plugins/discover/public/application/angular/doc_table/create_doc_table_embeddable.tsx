@@ -6,96 +6,31 @@
  * Side Public License, v 1.
  */
 
-import React, { useRef, useEffect } from 'react';
+import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
-import { IScope } from 'angular';
-import { getServices } from '../../../kibana_services';
-import { DocTableLegacyProps, injectAngularElement } from './create_doc_table_react';
-import { DocTable } from './doc_table_component';
+import { DocTable, DocTableProps } from './doc_table';
 
-type AngularEmbeddableScope = IScope & { renderProps?: DocTableEmbeddableProps };
-
-export interface DocTableEmbeddableProps extends DocTableLegacyProps {
-  refs: HTMLElement;
-}
-
-function getRenderFn(domNode: Element, props: DocTableEmbeddableProps) {
-  const directive = {
-    template: `<doc-table
-        class="panel-content"
-        columns="renderProps.columns"
-        data-description="{{renderProps.searchDescription}}"
-        data-shared-item
-        data-test-subj="embeddedSavedSearchDocTable"
-        data-title="{{renderProps.sharedItemTitle}}"
-        filter="renderProps.onFilter"
-        hits="renderProps.rows"
-        index-pattern="renderProps.indexPattern"
-        is-loading="renderProps.isLoading"
-        on-add-column="renderProps.onAddColumn"
-        on-change-sort-order="renderProps.onSort"
-        on-move-column="renderProps.onMoveColumn"
-        on-remove-column="renderProps.onRemoveColumn"
-        render-complete
-        sorting="renderProps.sort"
-        total-hit-count="renderProps.totalHitCount"
-        use-new-fields-api="renderProps.useNewFieldsApi"></doc-table>`,
-  };
-
-  return async () => {
-    try {
-      const injector = await getServices().getEmbeddableInjector();
-      return await injectAngularElement(domNode, directive.template, props, injector);
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.error(e);
-      throw e;
-    }
-  };
-}
-
-export function DiscoverDocTableEmbeddable(renderProps: DocTableEmbeddableProps) {
+export function DiscoverDocTableEmbeddable(renderProps: DocTableProps) {
   return (
     <I18nProvider>
       <DocTable
         columns={renderProps.columns}
         rows={renderProps.rows}
         minimumVisibleRows={renderProps.minimumVisibleRows}
-        infiniteScroll={false}
+        type="embeddable"
         totalHitCount={renderProps.totalHitCount}
-        isLoading={renderProps.isLoading}
         indexPattern={renderProps.indexPattern}
         onSort={renderProps.onSort}
         onAddColumn={renderProps.onAddColumn}
         onMoveColumn={renderProps.onMoveColumn}
         onRemoveColumn={renderProps.onRemoveColumn}
-        sorting={renderProps.sort}
-        filter={renderProps.onFilter}
+        sort={renderProps.sort}
+        onFilter={renderProps.onFilter}
         useNewFieldsApi={renderProps.useNewFieldsApi}
+        searchDescription={renderProps.searchDescription}
+        sharedItemTitle={renderProps.sharedItemTitle}
+        dataTestSubj="embeddedSavedSearchDocTable"
       />
     </I18nProvider>
   );
-}
-
-function DocTableLegacyInner(renderProps: DocTableEmbeddableProps) {
-  const scope = useRef<AngularEmbeddableScope | undefined>();
-
-  useEffect(() => {
-    if (renderProps.refs && !scope.current) {
-      const fn = getRenderFn(renderProps.refs, renderProps);
-      fn().then((newScope) => {
-        scope.current = newScope;
-      });
-    } else if (scope?.current) {
-      scope.current.renderProps = { ...renderProps };
-      scope.current.$applyAsync();
-    }
-  }, [renderProps]);
-
-  useEffect(() => {
-    return () => {
-      scope.current?.$destroy();
-    };
-  }, []);
-  return <React.Fragment />;
 }

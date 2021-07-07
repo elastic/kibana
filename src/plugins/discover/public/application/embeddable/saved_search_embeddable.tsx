@@ -43,18 +43,20 @@ import { getSortForSearchSource, getDefaultSort } from '../angular/doc_table';
 import { handleSourceColumnState } from '../angular/helpers';
 import { DiscoverGridProps } from '../components/discover_grid/discover_grid';
 import { DiscoverGridSettings } from '../components/discover_grid/types';
+import { DocTableProps } from '../angular/doc_table/doc_table_component';
 
-export interface SearchProps extends Partial<DiscoverGridProps> {
-  settings?: DiscoverGridSettings;
-  description?: string;
-  sharedItemTitle?: string;
-  inspectorAdapters?: Adapters;
+export type SearchProps = Partial<DiscoverGridProps> &
+  Partial<DocTableProps> & {
+    settings?: DiscoverGridSettings;
+    description?: string;
+    sharedItemTitle?: string;
+    inspectorAdapters?: Adapters;
 
-  filter?: (field: IFieldType, value: string[], operator: string) => void;
-  hits?: ElasticSearchHit[];
-  totalHitCount?: number;
-  onMoveColumn?: (column: string, index: number) => void;
-}
+    filter?: (field: IFieldType, value: string[], operator: string) => void;
+    hits?: ElasticSearchHit[];
+    totalHitCount?: number;
+    onMoveColumn?: (column: string, index: number) => void;
+  };
 
 interface SearchEmbeddableConfig {
   savedSearch: SavedSearch;
