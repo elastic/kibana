@@ -8,6 +8,8 @@
 
 import { fromKueryExpression } from './ast';
 
+jest.mock('../../grammar');
+
 describe('kql syntax errors', () => {
   it('should throw an error for a field query missing a value', () => {
     expect(() => {

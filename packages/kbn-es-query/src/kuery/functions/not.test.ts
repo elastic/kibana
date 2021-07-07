@@ -11,9 +11,9 @@ import { fields } from '../../filters/stubs';
 import { IndexPatternBase } from '../..';
 
 import * as ast from '../ast';
-
-// @ts-ignore
 import * as not from './not';
+
+jest.mock('../../../grammar');
 
 const childNode = nodeTypes.function.buildNode('is', 'extension', 'jpg');
 

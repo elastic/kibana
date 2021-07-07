@@ -10,8 +10,9 @@ import { nodeTypes } from '../node_types';
 import { fields } from '../../filters/stubs';
 import { IndexPatternBase } from '../..';
 
-// @ts-ignore
 import * as geoPolygon from './geo_polygon';
+
+jest.mock('../../../grammar');
 
 const points = [
   {

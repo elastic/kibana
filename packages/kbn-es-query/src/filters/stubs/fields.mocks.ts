@@ -38,6 +38,11 @@ export const fields: IndexPatternFieldBase[] = [
     scripted: false,
   },
   {
+    name: 'machine.os.raw',
+    type: 'string',
+    scripted: false,
+  },
+  {
     name: 'script number',
     type: 'number',
     scripted: true,
@@ -50,6 +55,25 @@ export const fields: IndexPatternFieldBase[] = [
     scripted: true,
     script: '1234',
     lang: 'painless',
+  },
+  {
+    name: 'script string',
+    type: 'string',
+    scripted: true,
+    script: '1234',
+    lang: 'painless',
+  },
+  {
+    name: 'nestedField.child',
+    type: 'string',
+    scripted: false,
+    subType: { nested: { path: 'nestedField' } },
+  },
+  {
+    name: 'nestedField.nestedChild.doublyNestedChild',
+    type: 'string',
+    scripted: false,
+    subType: { nested: { path: 'nestedField.nestedChild' } },
   },
 ];
 

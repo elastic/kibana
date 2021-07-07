@@ -11,8 +11,9 @@ import { nodeTypes } from '../node_types';
 import { fields } from '../../filters/stubs';
 import { IndexPatternBase } from '../..';
 
-// @ts-ignore
 import * as geoBoundingBox from './geo_bounding_box';
+
+jest.mock('../../../grammar');
 
 const params = {
   bottomRight: {

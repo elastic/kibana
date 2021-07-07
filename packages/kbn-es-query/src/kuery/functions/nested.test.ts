@@ -12,8 +12,9 @@ import { IndexPatternBase } from '../..';
 
 import * as ast from '../ast';
 
-// @ts-ignore
 import * as nested from './nested';
+
+jest.mock('../../../grammar');
 
 const childNode = nodeTypes.function.buildNode('is', 'child', 'foo');
 

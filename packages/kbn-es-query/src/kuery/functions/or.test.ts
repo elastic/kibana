@@ -12,8 +12,8 @@ import { IndexPatternBase } from '../..';
 
 import * as ast from '../ast';
 
-// @ts-ignore
 import * as or from './or';
+jest.mock('../../../grammar');
 
 const childNode1 = nodeTypes.function.buildNode('is', 'machine.os', 'osx');
 const childNode2 = nodeTypes.function.buildNode('is', 'extension', 'jpg');

@@ -7,9 +7,9 @@
  */
 
 import { nodeTypes } from './index';
-
-// @ts-ignore
 import { buildNode, toElasticsearchQuery } from './named_arg';
+
+jest.mock('../../../grammar');
 
 describe('kuery node types', () => {
   describe('named arg', () => {

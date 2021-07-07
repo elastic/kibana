@@ -9,9 +9,10 @@
 import { nodeTypes } from '../node_types';
 import { fields } from '../../filters/stubs';
 
-// @ts-ignore
 import * as is from './is';
 import { IndexPatternBase } from '../..';
+
+jest.mock('../../../grammar');
 
 describe('kuery functions', () => {
   describe('is', () => {

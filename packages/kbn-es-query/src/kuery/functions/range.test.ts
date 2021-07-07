@@ -12,8 +12,8 @@ import { fields } from '../../filters/stubs';
 import { IndexPatternBase } from '../..';
 import { RangeFilterParams } from '../../filters';
 
-// @ts-ignore
 import * as range from './range';
+jest.mock('../../../grammar');
 
 describe('kuery functions', () => {
   describe('range', () => {

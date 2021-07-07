@@ -9,9 +9,9 @@
 import { nodeTypes } from '../../node_types';
 import { fields } from '../../../filters/stubs';
 import { IndexPatternBase } from '../../..';
-
-// @ts-ignore
 import { getFullFieldNameNode } from './get_full_field_name_node';
+
+jest.mock('../../../../grammar');
 
 describe('getFullFieldNameNode', function () {
   let indexPattern: IndexPatternBase;

@@ -13,6 +13,8 @@ import { toElasticsearchQuery as isFunctionToElasticsearchQuery } from '../funct
 import { IndexPatternBase } from '../../es_query';
 import { fields } from '../../filters/stubs/fields.mocks';
 
+jest.mock('../../../grammar');
+
 describe('kuery node types', () => {
   describe('function', () => {
     let indexPattern: IndexPatternBase;

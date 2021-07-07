@@ -16,6 +16,8 @@ import {
   // @ts-ignore
 } from './wildcard';
 
+jest.mock('../../../grammar');
+
 describe('kuery node types', () => {
   describe('wildcard', () => {
     describe('buildNode', () => {

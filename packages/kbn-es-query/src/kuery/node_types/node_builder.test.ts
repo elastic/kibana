@@ -9,6 +9,8 @@
 import { nodeBuilder } from './node_builder';
 import { toElasticsearchQuery } from '../index';
 
+jest.mock('../../../grammar');
+
 describe('nodeBuilder', () => {
   describe('is method', () => {
     test('string value', () => {
