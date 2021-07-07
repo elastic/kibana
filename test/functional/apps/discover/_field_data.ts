@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     this.tags('includeFirefox');
     before(async function () {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
-      await kibanaServer.importExport.load('discover');
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
@@ -33,7 +33,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
     });
-    describe('field data', function () {
+    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/104466
+    describe.skip('field data', function () {
       it('search php should show the correct hit count', async function () {
         const expectedHitCount = '445';
         await retry.try(async function () {

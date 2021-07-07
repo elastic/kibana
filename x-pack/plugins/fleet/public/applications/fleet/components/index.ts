@@ -7,5 +7,4 @@
 
 export * from '../../../components';
 
-export * from './enrollment_instructions';
 export * from './search_bar';

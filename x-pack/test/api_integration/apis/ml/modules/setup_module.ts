@@ -1048,6 +1048,9 @@ export default ({ getService }: FtrProviderContext) => {
           for (const dashboard of testData.expected.dashboards) {
             await ml.testResources.deleteDashboardById(dashboard);
           }
+          for (const job of testData.expected.jobs) {
+            await ml.api.deleteAnomalyDetectionJobES(job.jobId);
+          }
           await ml.api.cleanMlIndices();
         });
 
@@ -1146,8 +1149,8 @@ export default ({ getService }: FtrProviderContext) => {
             if (testData.requestBody.startDatafeed === true) {
               await ml.api.waitForADJobRecordCountToBePositive(job.jobId);
             }
-            await ml.api.waitForJobState(job.jobId, job.jobState);
-            await ml.api.waitForDatafeedState(datafeedId, job.datafeedState);
+            await ml.api.waitForDatafeedState(datafeedId, job.datafeedState, 4 * 60 * 1000);
+            await ml.api.waitForJobState(job.jobId, job.jobState, 4 * 60 * 1000);
 
             // model memory limit should be <= 99mb
             const {

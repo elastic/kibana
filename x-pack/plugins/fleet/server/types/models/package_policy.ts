@@ -45,6 +45,7 @@ const PackagePolicyBaseSchema = {
   inputs: schema.arrayOf(
     schema.object({
       type: schema.string(),
+      policy_template: schema.maybe(schema.string()),
       enabled: schema.boolean(),
       keep_enabled: schema.maybe(schema.boolean()),
       vars: schema.maybe(ConfigRecordSchema),

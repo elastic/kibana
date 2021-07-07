@@ -16,9 +16,9 @@ import type { ShareContext } from '../../../../../src/plugins/share/public';
 import type { LicensingPluginSetup } from '../../../licensing/public';
 import { CSV_JOB_TYPE } from '../../common/constants';
 import type { JobParamsCSV } from '../../server/export_types/csv_searchsource/types';
-import { ReportingPanelContent } from '../components/reporting_panel_content_lazy';
 import { checkLicense } from '../lib/license_check';
 import type { ReportingAPIClient } from '../lib/reporting_api_client';
+import { ReportingPanelContent } from './reporting_panel_content_lazy';
 
 export const ReportingCsvShareProvider = ({
   apiClient,
@@ -65,13 +65,7 @@ export const ReportingCsvShareProvider = ({
       ? moment.tz.guess()
       : uiSettings.get('dateFormat:tz');
 
-  const getShareMenuItems = ({
-    objectType,
-    objectId,
-    sharingData,
-    onClose,
-    isDirty,
-  }: ShareContext) => {
+  const getShareMenuItems = ({ objectType, objectId, sharingData, onClose }: ShareContext) => {
     if ('search' !== objectType) {
       return [];
     }
@@ -114,7 +108,6 @@ export const ReportingCsvShareProvider = ({
               layoutId={undefined}
               objectId={objectId}
               getJobParams={getJobParams}
-              isDirty={isDirty}
               onClose={onClose}
             />
           ),

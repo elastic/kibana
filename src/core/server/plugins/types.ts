@@ -208,6 +208,27 @@ export interface PluginManifest {
    * folders will cause your plugin API reference to be broken up into sub sections.
    */
   readonly serviceFolders?: readonly string[];
+
+  /**
+   * TODO: make required once all internal plugins have this specified.
+   */
+  readonly owner?: {
+    /**
+     * The name of the team that currently owns this plugin.
+     */
+    readonly name: string;
+    /**
+     * All internal plugins should have a github team specified. GitHub teams can be viewed here:
+     * https://github.com/orgs/elastic/teams
+     */
+    readonly githubTeam?: string;
+  };
+
+  /**
+   * TODO: make required once all plugins specify this.
+   * A brief description of what this plugin does and any capabilities it provides.
+   */
+  readonly description?: string;
 }
 
 /**

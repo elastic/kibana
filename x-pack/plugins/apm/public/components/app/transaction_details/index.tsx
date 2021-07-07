@@ -19,7 +19,7 @@ import { HeightRetainer } from '../../shared/HeightRetainer';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
 import { TransactionDistribution } from './Distribution';
 import { useWaterfallFetcher } from './use_waterfall_fetcher';
-import { WaterfallWithSummmary } from './WaterfallWithSummmary';
+import { WaterfallWithSummary } from './waterfall_with_summary';
 
 interface Sample {
   traceId: string;
@@ -76,11 +76,13 @@ export function TransactionDetails() {
 
   return (
     <>
+      <EuiSpacer size="s" />
+
       <EuiTitle>
         <h2>{transactionName}</h2>
       </EuiTitle>
 
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
 
       <ChartPointerEventContextProvider>
         <TransactionCharts />
@@ -88,7 +90,7 @@ export function TransactionDetails() {
 
       <EuiHorizontalRule size="full" margin="l" />
 
-      <EuiPanel>
+      <EuiPanel hasBorder={true}>
         <TransactionDistribution
           distribution={distributionData}
           fetchStatus={distributionStatus}
@@ -105,7 +107,7 @@ export function TransactionDetails() {
       <EuiSpacer size="s" />
 
       <HeightRetainer>
-        <WaterfallWithSummmary
+        <WaterfallWithSummary
           urlParams={urlParams}
           waterfall={waterfall}
           isLoading={waterfallStatus === FETCH_STATUS.LOADING}

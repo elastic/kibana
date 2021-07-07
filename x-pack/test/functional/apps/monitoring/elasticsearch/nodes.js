@@ -29,6 +29,8 @@ export default function ({ getService, getPageObjects }) {
           }
         );
 
+        await overview.closeAlertsModal();
+
         // go to nodes listing
         await overview.clickEsNodes();
         expect(await nodesList.isOnListing()).to.be(true);
@@ -249,7 +251,8 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('with only online nodes', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/100438
+    describe.skip('with only online nodes', () => {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {

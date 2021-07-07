@@ -140,62 +140,72 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
         </span>
       </div>
       <EuiText
+        color="default"
         size="s"
       >
         <div
           className="euiText euiText--small"
         >
-          <EuiText
-            size="s"
+          <EuiTextColor
+            color="default"
+            component="div"
           >
             <div
-              className="euiText euiText--small"
+              className="euiTextColor euiTextColor--default"
             >
-              <p>
-                <FormattedMessage
-                  defaultMessage="For greater flexibility and Painless script support, use {runtimeDocs}."
-                  id="indexPatternManagement.scriptedFieldsDeprecatedBody"
-                  values={
-                    Object {
-                      "runtimeDocs": <EuiLink
-                        target="_blank"
-                      >
-                        <FormattedMessage
-                          defaultMessage="runtime fields"
-                          id="indexPatternManagement.warningCallOutLabel.runtimeLink"
-                          values={Object {}}
-                        />
-                      </EuiLink>,
-                    }
-                  }
+              <EuiText
+                size="s"
+              >
+                <div
+                  className="euiText euiText--small"
                 >
-                  <span>
-                    For greater flexibility and Painless script support, use 
-                    <EuiLink
-                      target="_blank"
+                  <p>
+                    <FormattedMessage
+                      defaultMessage="For greater flexibility and Painless script support, use {runtimeDocs}."
+                      id="indexPatternManagement.scriptedFieldsDeprecatedBody"
+                      values={
+                        Object {
+                          "runtimeDocs": <EuiLink
+                            target="_blank"
+                          >
+                            <FormattedMessage
+                              defaultMessage="runtime fields"
+                              id="indexPatternManagement.warningCallOutLabel.runtimeLink"
+                              values={Object {}}
+                            />
+                          </EuiLink>,
+                        }
+                      }
                     >
-                      <button
-                        className="euiLink euiLink--primary"
-                        disabled={false}
-                        type="button"
-                      >
-                        <FormattedMessage
-                          defaultMessage="runtime fields"
-                          id="indexPatternManagement.warningCallOutLabel.runtimeLink"
-                          values={Object {}}
+                      <span>
+                        For greater flexibility and Painless script support, use 
+                        <EuiLink
+                          target="_blank"
                         >
-                          <span>
-                            runtime fields
-                          </span>
-                        </FormattedMessage>
-                      </button>
-                    </EuiLink>
-                    .
-                  </span>
-                </FormattedMessage>
-              </p>
+                          <button
+                            className="euiLink euiLink--primary"
+                            disabled={false}
+                            type="button"
+                          >
+                            <FormattedMessage
+                              defaultMessage="runtime fields"
+                              id="indexPatternManagement.warningCallOutLabel.runtimeLink"
+                              values={Object {}}
+                            >
+                              <span>
+                                runtime fields
+                              </span>
+                            </FormattedMessage>
+                          </button>
+                        </EuiLink>
+                        .
+                      </span>
+                    </FormattedMessage>
+                  </p>
+                </div>
+              </EuiText>
             </div>
-          </EuiText>
+          </EuiTextColor>
         </div>
       </EuiText>
     </div>

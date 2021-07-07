@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useContext, useEffect, useMemo } from 'react';
+import { EuiSpacer } from '@elastic/eui';
+import React, { useContext, useCallback, useMemo, useEffect } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import type { Query } from '../../../../../../../src/plugins/data/public';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
@@ -208,6 +209,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
       <WithLogTextviewUrlState />
       <WithFlyoutOptionsUrlState />
       <LogsToolbar />
+      <EuiSpacer size="m" />
       <PageViewLogInContext />
       {isFlyoutOpen ? (
         <LogEntryFlyout

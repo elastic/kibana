@@ -27,6 +27,8 @@ import {
 
 import { getCreateThreatMatchRulesSchemaMock } from '../../../../plugins/security_solution/common/detection_engine/schemas/request/rule_schemas.mock';
 import { getThreatMatchingSchemaPartialMock } from '../../../../plugins/security_solution/common/detection_engine/schemas/response/rules_schema.mocks';
+import { SIGNALS_TEMPLATE_VERSION } from '../../../../plugins/security_solution/server/lib/detection_engine/routes/index/get_signals_template';
+import { ENRICHMENT_TYPES } from '../../../../plugins/security_solution/common/cti/constants';
 
 const format = (value: unknown): string => JSON.stringify(value, null, 2);
 
@@ -201,7 +203,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
           signal: {
             _meta: {
-              version: 35,
+              version: SIGNALS_TEMPLATE_VERSION,
             },
             ancestors: [
               {
@@ -424,7 +426,7 @@ export default ({ getService }: FtrProviderContext) => {
                     id: '978783',
                     index: 'filebeat-8.0.0-2021.01.26-000001',
                     field: 'destination.ip',
-                    type: 'url',
+                    type: ENRICHMENT_TYPES.IndicatorMatchRule,
                   },
                   provider: 'geenensp',
                   type: 'url',
@@ -456,7 +458,7 @@ export default ({ getService }: FtrProviderContext) => {
                     id: '978783',
                     index: 'filebeat-8.0.0-2021.01.26-000001',
                     field: 'destination.ip',
-                    type: 'url',
+                    type: ENRICHMENT_TYPES.IndicatorMatchRule,
                   },
                   provider: 'geenensp',
                   type: 'url',
@@ -518,7 +520,7 @@ export default ({ getService }: FtrProviderContext) => {
                 id: '978785',
                 index: 'filebeat-8.0.0-2021.01.26-000001',
                 field: 'source.ip',
-                type: 'url',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
               },
               port: 57324,
               provider: 'geenensp',
@@ -543,7 +545,7 @@ export default ({ getService }: FtrProviderContext) => {
                 id: '978787',
                 index: 'filebeat-8.0.0-2021.01.26-000001',
                 field: 'source.ip',
-                type: 'ip',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
               },
               provider: 'other_provider',
               type: 'ip',
@@ -618,7 +620,7 @@ export default ({ getService }: FtrProviderContext) => {
                 id: '978785',
                 index: 'filebeat-8.0.0-2021.01.26-000001',
                 field: 'source.ip',
-                type: 'url',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
               },
               port: 57324,
               provider: 'geenensp',
@@ -648,7 +650,7 @@ export default ({ getService }: FtrProviderContext) => {
                 id: '978785',
                 index: 'filebeat-8.0.0-2021.01.26-000001',
                 field: 'source.port',
-                type: 'url',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
               },
               port: 57324,
               provider: 'geenensp',
@@ -673,7 +675,7 @@ export default ({ getService }: FtrProviderContext) => {
                 id: '978787',
                 index: 'filebeat-8.0.0-2021.01.26-000001',
                 field: 'source.ip',
-                type: 'ip',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
               },
               provider: 'other_provider',
               type: 'ip',
@@ -753,7 +755,7 @@ export default ({ getService }: FtrProviderContext) => {
                 id: '978783',
                 index: 'filebeat-8.0.0-2021.01.26-000001',
                 field: 'destination.ip',
-                type: 'url',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
               },
               provider: 'geenensp',
               type: 'url',
@@ -784,7 +786,7 @@ export default ({ getService }: FtrProviderContext) => {
                 id: '978783',
                 index: 'filebeat-8.0.0-2021.01.26-000001',
                 field: 'destination.ip',
-                type: 'url',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
               },
               provider: 'geenensp',
               type: 'url',
@@ -812,7 +814,7 @@ export default ({ getService }: FtrProviderContext) => {
                 id: '978785',
                 index: 'filebeat-8.0.0-2021.01.26-000001',
                 field: 'source.ip',
-                type: 'url',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
               },
               port: 57324,
               provider: 'geenensp',
@@ -837,7 +839,7 @@ export default ({ getService }: FtrProviderContext) => {
                 id: '978785',
                 index: 'filebeat-8.0.0-2021.01.26-000001',
                 field: 'source.port',
-                type: 'url',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
               },
               port: 57324,
               provider: 'geenensp',

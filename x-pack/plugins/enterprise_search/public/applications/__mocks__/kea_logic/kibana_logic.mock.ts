@@ -7,6 +7,8 @@
 
 import { chartPluginMock } from '../../../../../../../src/plugins/charts/public/mocks';
 
+import { securityMock } from '../../../../../security/public/mocks';
+
 import { mockHistory } from '../react_router/state.mock';
 
 export const mockKibanaValues = {
@@ -18,6 +20,7 @@ export const mockKibanaValues = {
   },
   history: mockHistory,
   navigateToUrl: jest.fn(),
+  security: securityMock.createStart(),
   setBreadcrumbs: jest.fn(),
   setChromeIsVisible: jest.fn(),
   setDocTitle: jest.fn(),

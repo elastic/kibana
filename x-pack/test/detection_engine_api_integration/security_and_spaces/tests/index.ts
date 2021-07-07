@@ -35,6 +35,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
       loadTestFile(require.resolve('./update_rules'));
       loadTestFile(require.resolve('./update_rules_bulk'));
       loadTestFile(require.resolve('./patch_rules_bulk'));
+      loadTestFile(require.resolve('./perform_bulk_action'));
       loadTestFile(require.resolve('./patch_rules'));
       loadTestFile(require.resolve('./read_privileges'));
       loadTestFile(require.resolve('./query_signals'));

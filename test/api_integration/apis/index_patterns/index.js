@@ -15,5 +15,7 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./scripted_fields_crud'));
     loadTestFile(require.resolve('./fields_api'));
     loadTestFile(require.resolve('./default_index_pattern'));
+    loadTestFile(require.resolve('./runtime_fields_crud'));
+    loadTestFile(require.resolve('./integration'));
   });
 }

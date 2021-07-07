@@ -19,7 +19,7 @@ When relying on rules and actions as mission critical services, make sure you fo
 By default, each {kib} instance polls for work at three second intervals, and can run a maximum of ten concurrent tasks.
 These tasks are then run on the {kib} server.
 
-Rules are recurring background tasks which are rescheduled according to the <<defining-alerts-general-details, check interval>> on completion.
+Rules are recurring background tasks which are rescheduled according to the <<defining-rules-general-details, check interval>> on completion.
 Actions are non-recurring background tasks which are deleted on completion.
 
 For more details on Task Manager, see <<task-manager-background-tasks>>.
@@ -42,7 +42,7 @@ As rules and actions leverage background tasks to perform the majority of work, 
 
 When estimating the required task throughput, keep the following in mind:
 
-* Each rule uses a single recurring task that is scheduled to run at the cadence defined by its <<defining-alerts-general-details,check interval>>.
+* Each rule uses a single recurring task that is scheduled to run at the cadence defined by its <<defining-rules-general-details,check interval>>.
 * Each action uses a single task. However, because <<alerting-concepts-suppressing-duplicate-notifications,actions are taken per instance>>, alerts can generate a large number of non-recurring tasks.
 
 It is difficult to predict how much throughput is needed to ensure all rules and actions are executed at consistent schedules.

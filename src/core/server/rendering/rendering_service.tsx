@@ -78,6 +78,7 @@ export class RenderingService {
           locale: i18n.getLocale(),
           darkMode,
           stylesheetPaths,
+          themeVersion,
           injectedMetadata: {
             version: env.packageInfo.version,
             buildNumber: env.packageInfo.buildNum,

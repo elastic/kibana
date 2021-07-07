@@ -43,11 +43,13 @@ export const usePackagePoliciesWithAgentPolicy = (
   isLoading: boolean;
   error: Error | null;
   data?: GetPackagePoliciesWithAgentPolicy;
+  resendRequest: () => void;
 } => {
   const {
     data: packagePoliciesData,
     error,
     isLoading: isLoadingPackagePolicies,
+    resendRequest,
   } = useGetPackagePolicies(query);
 
   const agentPoliciesFilter = useMemo<string>(() => {
@@ -124,5 +126,6 @@ export const usePackagePoliciesWithAgentPolicy = (
     data: enrichedData,
     error,
     isLoading: isLoadingPackagePolicies || isLoadingAgentPolicies,
+    resendRequest,
   };
 };

@@ -13,9 +13,8 @@ import {
 import { rangeQuery } from '../../../server/utils/queries';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
-import { withApmSpan } from '../../utils/with_apm_span';
 
-export function getServiceAgentName({
+export async function getServiceAgentName({
   serviceName,
   setup,
   searchAggregatedTransactions,
@@ -24,42 +23,41 @@ export function getServiceAgentName({
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
 }) {
-  return withApmSpan('get_service_agent_name', async () => {
-    const { start, end, apmEventClient } = setup;
+  const { start, end, apmEventClient } = setup;
 
-    const params = {
-      terminateAfter: 1,
-      apm: {
-        events: [
-          ProcessorEvent.error,
-          getProcessorEventForAggregatedTransactions(
-            searchAggregatedTransactions
-          ),
-          ProcessorEvent.metric,
-        ],
-      },
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              { term: { [SERVICE_NAME]: serviceName } },
-              ...rangeQuery(start, end),
-            ],
-          },
-        },
-        aggs: {
-          agents: {
-            terms: { field: AGENT_NAME, size: 1 },
-          },
+  const params = {
+    terminateAfter: 1,
+    apm: {
+      events: [
+        ProcessorEvent.error,
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
+        ProcessorEvent.metric,
+      ],
+    },
+    body: {
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            { term: { [SERVICE_NAME]: serviceName } },
+            ...rangeQuery(start, end),
+          ],
         },
       },
-    };
+      aggs: {
+        agents: {
+          terms: { field: AGENT_NAME, size: 1 },
+        },
+      },
+    },
+  };
 
-    const { aggregations } = await apmEventClient.search(params);
-    const agentName = aggregations?.agents.buckets[0]?.key as
-      | string
-      | undefined;
-    return { agentName };
-  });
+  const { aggregations } = await apmEventClient.search(
+    'get_service_agent_name',
+    params
+  );
+  const agentName = aggregations?.agents.buckets[0]?.key as string | undefined;
+  return { agentName };
 }

@@ -7,8 +7,7 @@
 
 import { RouteDeps } from '../../types';
 import { wrapError, escapeHatch } from '../../utils';
-import { CASE_TAGS_URL } from '../../../../../common/constants';
-import { AllTagsFindRequest } from '../../../../../common/api';
+import { CASE_TAGS_URL, AllTagsFindRequest } from '../../../../../common';
 
 export function initGetTagsApi({ router, logger }: RouteDeps) {
   router.get(

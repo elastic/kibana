@@ -47,33 +47,51 @@ export function UXActionMenu({
 
   const uxExploratoryViewLink = createExploratoryViewUrl(
     {
-      'ux-series': {
+      'ux-series': ({
         dataType: 'ux',
+        isNew: true,
         time: { from: rangeFrom, to: rangeTo },
-      } as SeriesUrl,
+      } as unknown) as SeriesUrl,
     },
     http?.basePath.get()
   );
+
+  const kibana = useKibana();
 
   return (
     <HeaderMenuPortal
       setHeaderActionMenu={appMountParameters.setHeaderActionMenu}
     >
       <EuiFlexGroup
-        alignItems="flexEnd"
+        alignItems="center"
+        gutterSize="s"
         responsive={false}
         style={{ paddingRight: 20 }}
       >
         <EuiFlexItem>
           <EuiToolTip position="top" content={<p>{ANALYZE_MESSAGE}</p>}>
             <EuiButtonEmpty
+              size="xs"
+              color="text"
               href={uxExploratoryViewLink}
-              color="primary"
               iconType="visBarVerticalStacked"
             >
               {ANALYZE_DATA}
             </EuiButtonEmpty>
           </EuiToolTip>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiButtonEmpty
+            iconType="indexOpen"
+            iconSide="left"
+            href={kibana.services?.application?.getUrlForApp(
+              '/home#/tutorial/apm'
+            )}
+          >
+            {i18n.translate('xpack.apm.addDataButtonLabel', {
+              defaultMessage: 'Add data',
+            })}
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
     </HeaderMenuPortal>

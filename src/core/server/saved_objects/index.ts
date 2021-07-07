@@ -41,6 +41,7 @@ export type {
   SavedObjectsExportError,
   SavedObjectsExportTransformContext,
   SavedObjectsExportTransform,
+  SavedObjectsExportExcludedObject,
 } from './export';
 
 export { SavedObjectsSerializer } from './serialization';

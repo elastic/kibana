@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { DatasourceDimensionDropProps } from '../../types';
+import memoizeOne from 'memoize-one';
+import { DatasourceDimensionDropProps, OperationMetadata } from '../../types';
 import { OperationType } from '../indexpattern';
-import { memoizedGetAvailableOperationsByMetadata } from '../operations';
+import { memoizedGetAvailableOperationsByMetadata, OperationFieldTuple } from '../operations';
 import { IndexPatternPrivateState } from '../types';
 
 export interface OperationSupportMatrix {
@@ -21,17 +22,16 @@ type Props = Pick<
   'layerId' | 'columnId' | 'state' | 'filterOperations'
 >;
 
-// TODO: the support matrix should be available outside of the dimension panel
-
-// TODO: This code has historically been memoized, as a potentially performance
-// sensitive task. If we can add memoization without breaking the behavior, we should.
-export const getOperationSupportMatrix = (props: Props): OperationSupportMatrix => {
-  const layerId = props.layerId;
-  const currentIndexPattern = props.state.indexPatterns[props.state.layers[layerId].indexPatternId];
-
-  const filteredOperationsByMetadata = memoizedGetAvailableOperationsByMetadata(
-    currentIndexPattern
-  ).filter((operation) => props.filterOperations(operation.operationMetaData));
+function computeOperationMatrix(
+  operationsByMetadata: Array<{
+    operationMetaData: OperationMetadata;
+    operations: OperationFieldTuple[];
+  }>,
+  filterOperations: (operation: OperationMetadata) => boolean
+) {
+  const filteredOperationsByMetadata = operationsByMetadata.filter((operation) =>
+    filterOperations(operation.operationMetaData)
+  );
 
   const supportedOperationsByField: Partial<Record<string, Set<OperationType>>> = {};
   const supportedOperationsWithoutField: Set<OperationType> = new Set();
@@ -59,4 +59,16 @@ export const getOperationSupportMatrix = (props: Props): OperationSupportMatrix 
     operationWithoutField: supportedOperationsWithoutField,
     fieldByOperation: supportedFieldsByOperation,
   };
+}
+
+// memoize based on latest execution. It supports multiple args
+const memoizedComputeOperationsMatrix = memoizeOne(computeOperationMatrix);
+
+// TODO: the support matrix should be available outside of the dimension panel
+export const getOperationSupportMatrix = (props: Props): OperationSupportMatrix => {
+  const layerId = props.layerId;
+  const currentIndexPattern = props.state.indexPatterns[props.state.layers[layerId].indexPatternId];
+
+  const operationsByMetadata = memoizedGetAvailableOperationsByMetadata(currentIndexPattern);
+  return memoizedComputeOperationsMatrix(operationsByMetadata, props.filterOperations);
 };

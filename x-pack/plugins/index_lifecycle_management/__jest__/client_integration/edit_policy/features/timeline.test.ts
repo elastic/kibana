@@ -6,11 +6,11 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { setupEnvironment } from '../../helpers/setup_environment';
-import { EditPolicyTestBed, setup } from '../edit_policy.helpers';
+import { setupEnvironment } from '../../helpers';
+import { setupTimelineTestBed, TimelineTestBed } from './timeline.helpers';
 
 describe('<EditPolicy /> timeline', () => {
-  let testBed: EditPolicyTestBed;
+  let testBed: TimelineTestBed;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
   afterAll(() => {
@@ -21,7 +21,7 @@ describe('<EditPolicy /> timeline', () => {
     httpRequestsMockHelpers.setDefaultResponses();
 
     await act(async () => {
-      testBed = await setup();
+      testBed = await setupTimelineTestBed();
     });
 
     const { component } = testBed;

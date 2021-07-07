@@ -13,15 +13,19 @@ import { debounce } from 'lodash';
  * are in flight because the user is currently modifying the value.
  */
 
-export const useDebouncedValue = <T>({
-  onChange,
-  value,
-}: {
-  onChange: (val: T) => void;
-  value: T;
-}) => {
+export const useDebouncedValue = <T>(
+  {
+    onChange,
+    value,
+  }: {
+    onChange: (val: T) => void;
+    value: T;
+  },
+  { allowEmptyString }: { allowEmptyString?: boolean } = {}
+) => {
   const [inputValue, setInputValue] = useState(value);
   const unflushedChanges = useRef(false);
+  const shouldUpdateWithEmptyString = Boolean(allowEmptyString);
 
   // Save the initial value
   const initialValue = useRef(value);
@@ -45,7 +49,10 @@ export const useDebouncedValue = <T>({
 
   const handleInputChange = (val: T) => {
     setInputValue(val);
-    onChangeDebounced(val || initialValue.current);
+    const valueToUpload = shouldUpdateWithEmptyString
+      ? val ?? initialValue.current
+      : val || initialValue.current;
+    onChangeDebounced(valueToUpload);
   };
 
   return { inputValue, handleInputChange, initialValue: initialValue.current };

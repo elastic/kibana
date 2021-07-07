@@ -25,8 +25,6 @@ export default function ({ getService }: FtrProviderContext) {
       describe(`(${testUser.user})`, function () {
         const ecIndexPattern = 'ft_module_sample_ecommerce';
         const ecExpectedTotalCount = '287';
-        // @TODO: Re-enable in follow up
-        // const ecExpectedModuleId = 'sample_data_ecommerce';
 
         const uploadFilePath = path.join(
           __dirname,
@@ -56,14 +54,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         after(async () => {
           await ml.securityUI.logout();
-        });
-
-        it('should not display the ML file data vis link on the Kibana home page', async () => {
-          await ml.testExecution.logTestStep('should load the Kibana home page');
-          await ml.navigation.navigateToKibanaHome();
-
-          await ml.testExecution.logTestStep('should not display the ML file data vis link');
-          await ml.commonUI.assertKibanaHomeFileDataVisLinkNotExists();
         });
 
         it('should display the ML entry in Kibana app menu', async () => {
@@ -143,11 +133,9 @@ export default function ({ getService }: FtrProviderContext) {
           }
           await ml.dataVisualizerIndexBased.assertViewInDiscoverCard(testUser.discoverAvailable);
 
-          // @TODO: Re-enable in follow up
-          // await ml.testExecution.logTestStep('should not display job cards');
-          // await ml.dataVisualizerIndexBased.assertCreateAdvancedJobCardNotExists();
-          // await ml.dataVisualizerIndexBased.assertRecognizerCardNotExists(ecExpectedModuleId);
-          // await ml.dataVisualizerIndexBased.assertCreateDataFrameAnalyticsCardNotExists();
+          await ml.testExecution.logTestStep('should not display job cards');
+          await ml.dataVisualizerIndexBased.assertCreateAdvancedJobCardNotExists();
+          await ml.dataVisualizerIndexBased.assertCreateDataFrameAnalyticsCardNotExists();
         });
 
         it('should display elements on File Data Visualizer page correctly', async () => {

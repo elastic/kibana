@@ -9,7 +9,7 @@ import { act } from 'react-dom/test-utils';
 import { TestBed } from '@kbn/test/jest';
 
 import { DataTierAllocationType } from '../../../../public/application/sections/edit_policy/types';
-import { Phase } from '../types';
+import { Phase } from '../../../../common/types';
 import { createFormSetValueAction } from './form_set_value_action';
 
 export const createNodeAllocationActions = (testBed: TestBed, phase: Phase) => {

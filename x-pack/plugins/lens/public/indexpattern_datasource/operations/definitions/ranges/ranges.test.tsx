@@ -102,6 +102,10 @@ const defaultOptions = {
     ]),
   },
   operationDefinitionMap: {},
+  isFullscreen: false,
+  toggleFullscreen: jest.fn(),
+  setIsCloseable: jest.fn(),
+  layerId: '1',
 };
 
 describe('ranges', () => {

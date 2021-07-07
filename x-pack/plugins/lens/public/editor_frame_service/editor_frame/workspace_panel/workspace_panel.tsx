@@ -33,7 +33,6 @@ import {
   ExpressionRenderError,
   ReactExpressionRendererType,
 } from '../../../../../../../src/plugins/expressions/public';
-import { Action } from '../state_management';
 import {
   Datasource,
   Visualization,
@@ -46,17 +45,20 @@ import { DragDrop, DragContext, DragDropIdentifier } from '../../../drag_drop';
 import { Suggestion, switchToSuggestion } from '../suggestion_helpers';
 import { buildExpression } from '../expression_helpers';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
-import {
-  UiActionsStart,
-  VisualizeFieldContext,
-} from '../../../../../../../src/plugins/ui_actions/public';
+import { UiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { DropIllustration } from '../../../assets/drop_illustration';
 import { getOriginalRequestErrorMessages } from '../../error_helper';
 import { getMissingIndexPattern, validateDatasourceAndVisualization } from '../state_helpers';
 import { DefaultInspectorAdapters } from '../../../../../../../src/plugins/expressions/common';
-import { onActiveDataChange, useLensDispatch } from '../../../state_management';
+import {
+  onActiveDataChange,
+  useLensDispatch,
+  updateVisualizationState,
+  updateDatasourceState,
+  setSaveable,
+} from '../../../state_management';
 
 export interface WorkspacePanelProps {
   activeVisualizationId: string | null;
@@ -72,13 +74,11 @@ export interface WorkspacePanelProps {
     }
   >;
   framePublicAPI: FramePublicAPI;
-  dispatch: (action: Action) => void;
   ExpressionRenderer: ReactExpressionRendererType;
   core: CoreStart;
   plugins: { uiActions?: UiActionsStart; data: DataPublicPluginStart };
-  title?: string;
-  visualizeTriggerFieldContext?: VisualizeFieldContext;
   getSuggestionForField: (field: DragDropIdentifier) => Suggestion | undefined;
+  isFullscreen: boolean;
 }
 
 interface WorkspaceState {
@@ -127,16 +127,15 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   datasourceMap,
   datasourceStates,
   framePublicAPI,
-  dispatch,
   core,
   plugins,
   ExpressionRenderer: ExpressionRendererComponent,
-  title,
-  visualizeTriggerFieldContext,
   suggestionForDraggedField,
+  isFullscreen,
 }: Omit<WorkspacePanelProps, 'getSuggestionForField'> & {
   suggestionForDraggedField: Suggestion | undefined;
 }) {
+  const dispatchLens = useLensDispatch();
   const [localState, setLocalState] = useState<WorkspaceState>({
     expressionBuildError: undefined,
     expandError: false,
@@ -194,6 +193,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
             datasourceStates,
             datasourceLayers: framePublicAPI.datasourceLayers,
           });
+
           if (ast) {
             // expression has to be turned into a string for dirty checking - if the ast is rebuilt,
             // turning it into a string will make sure the expression renderer only re-renders if the
@@ -231,6 +231,14 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   );
 
   const expressionExists = Boolean(expression);
+  const hasLoaded = Boolean(
+    activeVisualization && visualizationState && datasourceMap && datasourceStates
+  );
+  useEffect(() => {
+    if (hasLoaded) {
+      dispatchLens(setSaveable(expressionExists));
+    }
+  }, [hasLoaded, expressionExists, dispatchLens]);
 
   const onEvent = useCallback(
     (event: ExpressionRendererEvent) => {
@@ -249,14 +257,15 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         });
       }
       if (isLensEditEvent(event) && activeVisualization?.onEditAction) {
-        dispatch({
-          type: 'UPDATE_VISUALIZATION_STATE',
-          visualizationId: activeVisualization.id,
-          updater: (oldState: unknown) => activeVisualization.onEditAction!(oldState, event),
-        });
+        dispatchLens(
+          updateVisualizationState({
+            visualizationId: activeVisualization.id,
+            updater: (oldState: unknown) => activeVisualization.onEditAction!(oldState, event),
+          })
+        );
       }
     },
-    [plugins.uiActions, dispatch, activeVisualization]
+    [plugins.uiActions, activeVisualization, dispatchLens]
   );
 
   useEffect(() => {
@@ -273,9 +282,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     if (suggestionForDraggedField) {
       trackUiEvent('drop_onto_workspace');
       trackUiEvent(expressionExists ? 'drop_non_empty' : 'drop_empty');
-      switchToSuggestion(dispatch, suggestionForDraggedField, 'SWITCH_VISUALIZATION');
+      switchToSuggestion(dispatchLens, suggestionForDraggedField, 'SWITCH_VISUALIZATION');
     }
-  }, [suggestionForDraggedField, expressionExists, dispatch]);
+  }, [suggestionForDraggedField, expressionExists, dispatchLens]);
 
   const renderEmptyWorkspace = () => {
     return (
@@ -325,9 +334,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   };
 
   const renderVisualization = () => {
-    // we don't want to render the emptyWorkspace on visualizing field from Discover
-    // as it is specific for the drag and drop functionality and can confuse the users
-    if (expression === null && !visualizeTriggerFieldContext) {
+    if (expression === null) {
       return renderEmptyWorkspace();
     }
     return (
@@ -335,7 +342,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         expression={expression}
         framePublicAPI={framePublicAPI}
         timefilter={plugins.data.query.timefilter.timefilter}
-        dispatch={dispatch}
         onEvent={onEvent}
         setLocalState={setLocalState}
         localState={{ ...localState, configurationValidationError, missingRefsErrors }}
@@ -345,6 +351,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       />
     );
   };
+
+  const element = expression !== null ? renderVisualization() : renderEmptyWorkspace();
 
   const dragDropContext = useContext(DragContext);
 
@@ -363,7 +371,10 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       customWorkspaceRenderer()
     ) : (
       <DragDrop
-        className="lnsWorkspacePanel__dragDrop"
+        className={classNames('lnsWorkspacePanel__dragDrop', {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          'lnsWorkspacePanel__dragDrop--fullscreen': isFullscreen,
+        })}
         dataTestSubj="lnsWorkspace"
         draggable={false}
         dropTypes={suggestionForDraggedField ? ['field_add'] : undefined}
@@ -372,8 +383,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         order={dropProps.order}
       >
         <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">
-          {renderVisualization()}
-          {Boolean(suggestionForDraggedField) && expression !== null && renderEmptyWorkspace()}
+          {element}
         </EuiPageContentBody>
       </DragDrop>
     );
@@ -381,14 +391,13 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
   return (
     <WorkspacePanelWrapper
-      title={title}
       framePublicAPI={framePublicAPI}
-      dispatch={dispatch}
       visualizationState={visualizationState}
       visualizationId={activeVisualizationId}
       datasourceStates={datasourceStates}
       datasourceMap={datasourceMap}
       visualizationMap={visualizationMap}
+      isFullscreen={isFullscreen}
     >
       {renderDragDrop()}
     </WorkspacePanelWrapper>
@@ -403,7 +412,6 @@ export const VisualizationWrapper = ({
   setLocalState,
   localState,
   ExpressionRendererComponent,
-  dispatch,
   application,
   activeDatasourceId,
 }: {
@@ -411,7 +419,6 @@ export const VisualizationWrapper = ({
   framePublicAPI: FramePublicAPI;
   timefilter: TimefilterContract;
   onEvent: (event: ExpressionRendererEvent) => void;
-  dispatch: (action: Action) => void;
   setLocalState: (dispatch: (prevState: WorkspaceState) => WorkspaceState) => void;
   localState: WorkspaceState & {
     configurationValidationError?: Array<{
@@ -447,7 +454,7 @@ export const VisualizationWrapper = ({
   const onData$ = useCallback(
     (data: unknown, inspectorAdapters?: Partial<DefaultInspectorAdapters>) => {
       if (inspectorAdapters && inspectorAdapters.tables) {
-        dispatchLens(onActiveDataChange({ activeData: { ...inspectorAdapters.tables.tables } }));
+        dispatchLens(onActiveDataChange({ ...inspectorAdapters.tables.tables }));
       }
     },
     [dispatchLens]
@@ -473,11 +480,12 @@ export const VisualizationWrapper = ({
             data-test-subj="errorFixAction"
             onClick={async () => {
               const newState = await validationError.fixAction?.newState(framePublicAPI);
-              dispatch({
-                type: 'UPDATE_DATASOURCE_STATE',
-                datasourceId: activeDatasourceId,
-                updater: newState,
-              });
+              dispatchLens(
+                updateDatasourceState({
+                  updater: newState,
+                  datasourceId: activeDatasourceId,
+                })
+              );
             }}
           >
             {validationError.fixAction.label}

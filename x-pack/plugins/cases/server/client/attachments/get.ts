@@ -5,33 +5,37 @@
  * 2.0.
  */
 import Boom from '@hapi/boom';
-import { SavedObjectsFindResponse } from 'kibana/server';
-import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
+import { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
 
 import {
+  AlertResponse,
   AllCommentsResponse,
   AllCommentsResponseRt,
   AssociationType,
+  AttributesTypeAlerts,
   CommentAttributes,
   CommentResponse,
   CommentResponseRt,
   CommentsResponse,
   CommentsResponseRt,
+  ENABLE_CASE_CONNECTOR,
   FindQueryParams,
-} from '../../../common/api';
+} from '../../../common';
 import {
+  createCaseError,
   checkEnabledCaseConnectorOrThrow,
   defaultSortField,
   transformComments,
   flattenCommentSavedObject,
   flattenCommentSavedObjects,
+  getIDsAndIndicesAsArrays,
 } from '../../common';
-import { createCaseError } from '../../common/error';
 import { defaultPage, defaultPerPage } from '../../routes/api';
 import { CasesClientArgs } from '../types';
 import { combineFilters, stringToKueryNode } from '../utils';
 import { Operations } from '../../authorization';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
+import { CasesClient } from '../client';
 
 /**
  * Parameters for finding attachments of a case
@@ -75,6 +79,71 @@ export interface GetArgs {
    */
   attachmentID: string;
 }
+
+export interface GetAllAlertsAttachToCase {
+  /**
+   * The ID of the case to retrieve the alerts from
+   */
+  caseId: string;
+}
+
+const normalizeAlertResponse = (alerts: Array<SavedObject<AttributesTypeAlerts>>): AlertResponse =>
+  alerts.reduce((acc: AlertResponse, alert) => {
+    const { ids, indices } = getIDsAndIndicesAsArrays(alert.attributes);
+
+    if (ids.length !== indices.length) {
+      return acc;
+    }
+
+    return [
+      ...acc,
+      ...ids.map((id, index) => ({
+        id,
+        index: indices[index],
+        attached_at: alert.attributes.created_at,
+      })),
+    ];
+  }, []);
+
+/**
+ * Retrieves all alerts attached to a specific case.
+ *
+ * @ignore
+ */
+export const getAllAlertsAttachToCase = async (
+  { caseId }: GetAllAlertsAttachToCase,
+  clientArgs: CasesClientArgs,
+  casesClient: CasesClient
+): Promise<AlertResponse> => {
+  const { unsecuredSavedObjectsClient, authorization, attachmentService } = clientArgs;
+
+  // This will perform an authorization check to ensure the user has access to the parent case
+  const theCase = await casesClient.cases.get({
+    id: caseId,
+    includeComments: false,
+    includeSubCaseComments: false,
+  });
+
+  const {
+    filter: authorizationFilter,
+    ensureSavedObjectsAreAuthorized,
+  } = await authorization.getAuthorizationFilter(Operations.getAlertsAttachedToCase);
+
+  const alerts = await attachmentService.getAllAlertsAttachToCase({
+    unsecuredSavedObjectsClient,
+    caseId: theCase.id,
+    filter: authorizationFilter,
+  });
+
+  ensureSavedObjectsAreAuthorized(
+    alerts.map((alert) => ({
+      owner: alert.attributes.owner,
+      id: alert.id,
+    }))
+  );
+
+  return normalizeAlertResponse(alerts);
+};
 
 /**
  * Retrieves the attachments for a case entity. This support pagination.

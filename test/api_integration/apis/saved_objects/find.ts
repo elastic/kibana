@@ -18,12 +18,18 @@ export default function ({ getService }: FtrProviderContext) {
   describe('find', () => {
     before(async () => {
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_ID });
-      await kibanaServer.importExport.load('saved_objects/basic', { space: SPACE_ID });
+      await kibanaServer.importExport.load(
+        'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json',
+        { space: SPACE_ID }
+      );
 
       await kibanaServer.spaces.create({ id: `${SPACE_ID}-foo`, name: `${SPACE_ID}-foo` });
-      await kibanaServer.importExport.load('saved_objects/basic/foo-ns', {
-        space: `${SPACE_ID}-foo`,
-      });
+      await kibanaServer.importExport.load(
+        'test/api_integration/fixtures/kbn_archiver/saved_objects/basic/foo-ns.json',
+        {
+          space: `${SPACE_ID}-foo`,
+        }
+      );
     });
 
     after(async () => {
@@ -255,10 +261,18 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('`has_reference` and `has_reference_operator` parameters', () => {
-      before(() => kibanaServer.importExport.load('saved_objects/references', { space: SPACE_ID }));
-      after(() =>
-        kibanaServer.importExport.unload('saved_objects/references', { space: SPACE_ID })
-      );
+      before(async () => {
+        await kibanaServer.importExport.load(
+          'test/api_integration/fixtures/kbn_archiver/saved_objects/references.json',
+          { space: SPACE_ID }
+        );
+      });
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'test/api_integration/fixtures/kbn_archiver/saved_objects/references.json',
+          { space: SPACE_ID }
+        );
+      });
 
       it('search for a reference', async () => {
         await supertest
@@ -319,12 +333,18 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('searching for special characters', () => {
-      before(() =>
-        kibanaServer.importExport.load('saved_objects/find_edgecases', { space: SPACE_ID })
-      );
-      after(() =>
-        kibanaServer.importExport.unload('saved_objects/find_edgecases', { space: SPACE_ID })
-      );
+      before(async () => {
+        await kibanaServer.importExport.load(
+          'test/api_integration/fixtures/kbn_archiver/saved_objects/find_edgecases.json',
+          { space: SPACE_ID }
+        );
+      });
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'test/api_integration/fixtures/kbn_archiver/saved_objects/find_edgecases.json',
+          { space: SPACE_ID }
+        );
+      });
 
       it('can search for objects with dashes', async () =>
         await supertest

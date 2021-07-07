@@ -14,6 +14,8 @@ import { TestProviders } from '../../mock';
 
 import { DraggableLegendItem, LegendItem } from './draggable_legend_item';
 
+jest.mock('../../../common/lib/kibana');
+
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {

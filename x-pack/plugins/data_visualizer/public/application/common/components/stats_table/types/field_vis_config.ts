@@ -24,17 +24,20 @@ export interface MetricFieldVisStats {
 export interface FieldVisConfig {
   type: JobFieldType;
   fieldName?: string;
+  displayName?: string;
   existsInDocs: boolean;
   aggregatable: boolean;
   loading: boolean;
   stats?: FieldVisStats;
   fieldFormat?: any;
   isUnsupportedType?: boolean;
+  deletable?: boolean;
 }
 
 export interface FileBasedFieldVisConfig {
   type: JobFieldType;
   fieldName?: string;
+  displayName?: string;
   stats?: FieldVisStats;
   format?: string;
 }

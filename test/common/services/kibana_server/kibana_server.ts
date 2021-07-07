@@ -22,7 +22,6 @@ export function KibanaServerProvider({ getService }: FtrProviderContext): KbnCli
     url,
     certificateAuthorities: config.get('servers.kibana.certificateAuthorities'),
     uiSettingDefaults: defaults,
-    importExportDir: config.get('kbnArchiver.directory'),
   });
 
   if (defaults) {

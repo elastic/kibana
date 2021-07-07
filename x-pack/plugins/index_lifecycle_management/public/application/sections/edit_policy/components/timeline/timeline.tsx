@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FunctionComponent, memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiIconTip } from '@elastic/eui';
 
-import { PhasesExceptDelete } from '../../../../../../common/types';
+import { PhaseExceptDelete } from '../../../../../../common/types';
 
 import {
   calculateRelativeFromAbsoluteMilliseconds,
@@ -136,7 +136,7 @@ export const Timeline: FunctionComponent<Props> = memo(
 
     const widths = calculateWidths(phaseAgeInMilliseconds);
 
-    const getDurationInPhaseContent = (phase: PhasesExceptDelete): string | React.ReactNode =>
+    const getDurationInPhaseContent = (phase: PhaseExceptDelete): string | React.ReactNode =>
       phaseAgeInMilliseconds.phases[phase] === Infinity ? (
         <InfinityIcon color="subdued" aria-label={i18nTexts.foreverIcon.ariaLabel} />
       ) : null;

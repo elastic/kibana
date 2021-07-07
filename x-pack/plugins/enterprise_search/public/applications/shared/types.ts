@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { APP_SEARCH_PLUGIN, WORKPLACE_SEARCH_PLUGIN } from '../../../common/constants';
+
 import { ADD, UPDATE } from './constants/operations';
 
 export type TOperation = typeof ADD | typeof UPDATE;
@@ -36,4 +38,21 @@ export interface RoleMapping {
   };
 }
 
-export type ProductName = 'App Search' | 'Workplace Search';
+export type ProductName = typeof APP_SEARCH_PLUGIN.NAME | typeof WORKPLACE_SEARCH_PLUGIN.NAME;
+
+export interface Invitation {
+  email: string;
+  code: string;
+}
+
+export interface ElasticsearchUser {
+  email: string | null;
+  username: string;
+  enabled: boolean;
+}
+
+export interface SingleUserRoleMapping<T> {
+  invitation: Invitation | null;
+  elasticsearchUser: ElasticsearchUser;
+  roleMapping: T;
+}

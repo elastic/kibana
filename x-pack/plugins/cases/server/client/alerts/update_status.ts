@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { UpdateAlertRequest } from './client';
 import { CasesClientArgs } from '..';
+import { UpdateAlertRequest } from './types';
 
 interface UpdateAlertsStatusArgs {
   alerts: UpdateAlertRequest[];

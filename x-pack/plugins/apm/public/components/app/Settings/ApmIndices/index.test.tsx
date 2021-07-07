@@ -26,7 +26,7 @@ describe('ApmIndices', () => {
 
     expect(getByText('Indices')).toMatchInlineSnapshot(`
       <h2
-        class="euiTitle euiTitle--medium"
+        class="euiTitle euiTitle--small"
       >
         Indices
       </h2>

@@ -54,13 +54,14 @@ import { IVectorStyle } from '../classes/styles/vector/vector_style';
 const FIT_TO_BOUNDS_SCALE_FACTOR = 0.1;
 
 export type DataRequestContext = {
-  startLoading(dataId: string, requestToken: symbol, requestMeta: DataMeta): void;
+  startLoading(dataId: string, requestToken: symbol, requestMeta?: DataMeta): void;
   stopLoading(dataId: string, requestToken: symbol, data: object, resultsMeta?: DataMeta): void;
   onLoadError(dataId: string, requestToken: symbol, errorMessage: string): void;
   updateSourceData(newData: unknown): void;
   isRequestStillActive(dataId: string, requestToken: symbol): boolean;
   registerCancelCallback(requestToken: symbol, callback: () => void): void;
   dataFilters: MapFilters;
+  forceRefresh: boolean;
 };
 
 export function clearDataRequests(layer: ILayer) {
@@ -113,7 +114,8 @@ export function updateStyleMeta(layerId: string | null) {
 function getDataRequestContext(
   dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
   getState: () => MapStoreState,
-  layerId: string
+  layerId: string,
+  forceRefresh: boolean = false
 ): DataRequestContext {
   return {
     dataFilters: getDataFilters(getState()),
@@ -135,6 +137,7 @@ function getDataRequestContext(
     },
     registerCancelCallback: (requestToken: symbol, callback: () => void) =>
       dispatch(registerCancelCallback(requestToken, callback)),
+    forceRefresh,
   };
 }
 
@@ -166,9 +169,14 @@ function syncDataForAllJoinLayers() {
   };
 }
 
-export function syncDataForLayer(layer: ILayer) {
+export function syncDataForLayer(layer: ILayer, forceRefresh: boolean = false) {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
-    const dataRequestContext = getDataRequestContext(dispatch, getState, layer.getId());
+    const dataRequestContext = getDataRequestContext(
+      dispatch,
+      getState,
+      layer.getId(),
+      forceRefresh
+    );
     if (!layer.isVisible() || !layer.showAtZoomLevel(dataRequestContext.dataFilters.zoom)) {
       return;
     }

@@ -9,6 +9,7 @@ import { StoryContext } from '@storybook/react';
 import React, { ComponentType } from 'react';
 import { MemoryRouter, Route } from 'react-router-dom';
 import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
+import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import {
   ApmPluginContext,
@@ -48,6 +49,7 @@ export default {
             toasts: { addWarning: () => {}, addDanger: () => {} },
           },
           http: {
+            basePath: { prepend: () => {} },
             get: (endpoint: string) => {
               switch (endpoint) {
                 case '/api/apm/services/test-service/transactions/charts/latency':
@@ -59,7 +61,7 @@ export default {
               }
             },
           },
-          uiSettings: { get: () => true },
+          uiSettings: { get: () => '' },
         },
         plugins: { observability: { isAlertingExperienceEnabled: () => true } },
         observabilityRuleTypeRegistry: { getFormatter: () => undefined },
@@ -71,20 +73,24 @@ export default {
         <ApmPluginContext.Provider value={apmPluginContextMock}>
           <MemoryRouter initialEntries={[`/app/apm/services/test-service`]}>
             <Route path="/app/apm/services/:serviceName">
-              <EuiThemeProvider>
-                <MockUrlParamsContextProvider
-                  params={{
-                    latencyAggregationType: LatencyAggregationType.avg,
-                    transactionType: `${Math.random()}`, // So we don't memoize
-                  }}
-                >
-                  <ApmServiceContextProvider>
-                    <ChartPointerEventContextProvider>
-                      <Story />
-                    </ChartPointerEventContextProvider>
-                  </ApmServiceContextProvider>
-                </MockUrlParamsContextProvider>
-              </EuiThemeProvider>
+              <KibanaContextProvider
+                services={{ ...apmPluginContextMock.core }}
+              >
+                <EuiThemeProvider>
+                  <MockUrlParamsContextProvider
+                    params={{
+                      latencyAggregationType: LatencyAggregationType.avg,
+                      transactionType: `${Math.random()}`, // So we don't memoize
+                    }}
+                  >
+                    <ApmServiceContextProvider>
+                      <ChartPointerEventContextProvider>
+                        <Story />
+                      </ChartPointerEventContextProvider>
+                    </ApmServiceContextProvider>
+                  </MockUrlParamsContextProvider>
+                </EuiThemeProvider>
+              </KibanaContextProvider>
             </Route>
           </MemoryRouter>
         </ApmPluginContext.Provider>

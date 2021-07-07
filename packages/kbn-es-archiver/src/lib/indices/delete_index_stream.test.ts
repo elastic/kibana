@@ -28,7 +28,7 @@ describe('esArchiver: createDeleteIndexStream()', () => {
 
     await createPromiseFromStreams([
       createListStream([createStubIndexRecord('index1')]),
-      createDeleteIndexStream(client, stats, log, []),
+      createDeleteIndexStream(client, stats, log),
     ]);
 
     sinon.assert.notCalled(stats.deletedIndex as sinon.SinonSpy);
@@ -43,7 +43,7 @@ describe('esArchiver: createDeleteIndexStream()', () => {
 
     await createPromiseFromStreams([
       createListStream([createStubIndexRecord('index1')]),
-      createDeleteIndexStream(client, stats, log, []),
+      createDeleteIndexStream(client, stats, log),
     ]);
 
     sinon.assert.calledOnce(stats.deletedIndex as sinon.SinonSpy);

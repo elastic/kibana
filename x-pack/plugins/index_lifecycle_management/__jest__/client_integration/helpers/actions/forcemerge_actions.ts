@@ -7,9 +7,9 @@
 
 import { act } from 'react-dom/test-utils';
 import { TestBed } from '@kbn/test/jest';
+import { Phase } from '../../../../common/types';
 import { createFormToggleAction } from './form_toggle_action';
 import { createFormSetValueAction } from './form_set_value_action';
-import { Phase } from '../types';
 
 const createFormCheckboxAction = (testBed: TestBed, dataTestSubject: string) => async (
   checked: boolean
@@ -25,7 +25,7 @@ export const createForceMergeActions = (testBed: TestBed, phase: Phase) => {
   const { exists } = testBed;
   const toggleSelector = `${phase}-forceMergeSwitch`;
   return {
-    forceMergeFieldExists: () => exists(toggleSelector),
+    forceMergeExists: () => exists(toggleSelector),
     toggleForceMerge: createFormToggleAction(testBed, toggleSelector),
     setForcemergeSegmentsCount: createFormSetValueAction(
       testBed,

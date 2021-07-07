@@ -17,14 +17,15 @@ import {
   ESCaseAttributes,
   ESCasesConfigureAttributes,
   CaseType,
+  ENABLE_CASE_CONNECTOR,
 } from '../../../common';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 
 import { createIncident, getCommentContextFromAttributes } from './utils';
 import { createCaseError, flattenCaseSavedObject, getAlertInfoFromComments } from '../../common';
-import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import { CasesClient, CasesClientArgs, CasesClientInternal } from '..';
 import { Operations } from '../../authorization';
+import { casesConnectors } from '../../connectors';
 
 /**
  * Returns true if the case should be closed based on the configuration settings and whether the case
@@ -109,22 +110,26 @@ export const push = async (
       alertsInfo,
     });
 
-    const connectorMappings = await casesClientInternal.configuration.getMappings({
-      connectorId: connector.id,
-      connectorType: connector.actionTypeId,
+    const getMappingsResponse = await casesClientInternal.configuration.getMappings({
+      connector: theCase.connector,
     });
 
-    if (connectorMappings.length === 0) {
-      throw new Error('Connector mapping has not been created');
-    }
+    const mappings =
+      getMappingsResponse.length === 0
+        ? await casesClientInternal.configuration.createMappings({
+            connector: theCase.connector,
+            owner: theCase.owner,
+          })
+        : getMappingsResponse[0].attributes.mappings;
 
     const externalServiceIncident = await createIncident({
       actionsClient,
       theCase,
       userActions,
       connector: connector as ActionConnector,
-      mappings: connectorMappings[0].attributes.mappings,
+      mappings,
       alerts,
+      casesConnectors,
     });
 
     const pushRes = await actionsClient.execute({

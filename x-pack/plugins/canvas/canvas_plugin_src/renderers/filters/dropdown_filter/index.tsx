@@ -45,9 +45,12 @@ export const dropdownFilter: RendererFactory<Config> = () => ({
   reuseDomNode: true,
   height: 50,
   render(domNode, config, handlers) {
-    const filterExpression = handlers.getFilter();
+    let filterExpression = handlers.getFilter();
 
-    if (filterExpression !== '') {
+    if (filterExpression === undefined || filterExpression.indexOf('exactly')) {
+      filterExpression = '';
+      handlers.setFilter(filterExpression);
+    } else if (filterExpression !== '') {
       // NOTE: setFilter() will cause a data refresh, avoid calling unless required
       // compare expression and filter, update filter if needed
       const { changed, newAst } = syncFilterExpression(config, filterExpression, ['filterGroup']);

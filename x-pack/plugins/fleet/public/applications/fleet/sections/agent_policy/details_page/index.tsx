@@ -28,6 +28,7 @@ import styled from 'styled-components';
 import type { AgentPolicy, AgentPolicyDetailsDeployAgentAction } from '../../../types';
 import { FLEET_ROUTING_PATHS } from '../../../constants';
 import {
+  AgentPolicyRefreshContext,
   useGetOneAgentPolicy,
   useLink,
   useBreadcrumbs,
@@ -39,7 +40,7 @@ import { Loading, Error } from '../../../components';
 import { WithHeaderLayout } from '../../../layouts';
 import { LinkedAgentCount, AgentPolicyActionMenu } from '../components';
 
-import { AgentPolicyRefreshContext, useGetAgentStatus, AgentStatusRefreshContext } from './hooks';
+import { useGetAgentStatus, AgentStatusRefreshContext } from './hooks';
 import { PackagePoliciesView, SettingsView } from './components';
 
 const Divider = styled.div`

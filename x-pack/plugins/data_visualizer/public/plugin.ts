@@ -17,9 +17,10 @@ import type { FileUploadPluginStart } from '../../file_upload/public';
 import type { MapsStartApi } from '../../maps/public';
 import type { SecurityPluginSetup } from '../../security/public';
 import type { LensPublicStart } from '../../lens/public';
+import type { IndexPatternFieldEditorStart } from '../../../../src/plugins/index_pattern_field_editor/public';
 import { getFileDataVisualizerComponent, getIndexDataVisualizerComponent } from './api';
 import { getMaxBytesFormatted } from './application/common/util/get_max_bytes';
-import { registerHomeAddData } from './register_home';
+import { registerHomeAddData, registerHomeFeatureCatalogue } from './register_home';
 
 export interface DataVisualizerSetupDependencies {
   home?: HomePublicPluginSetup;
@@ -32,6 +33,7 @@ export interface DataVisualizerStartDependencies {
   security?: SecurityPluginSetup;
   share: SharePluginStart;
   lens?: LensPublicStart;
+  indexPatternFieldEditor?: IndexPatternFieldEditorStart;
 }
 
 export type DataVisualizerPluginSetup = ReturnType<DataVisualizerPlugin['setup']>;
@@ -48,6 +50,7 @@ export class DataVisualizerPlugin
   public setup(core: CoreSetup, plugins: DataVisualizerSetupDependencies) {
     if (plugins.home) {
       registerHomeAddData(plugins.home);
+      registerHomeFeatureCatalogue(plugins.home);
     }
   }
 

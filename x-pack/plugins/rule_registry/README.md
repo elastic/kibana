@@ -111,9 +111,6 @@ const response = await ruleDataClient.getReader().search({
     },
     size: 100,
     fields: ['*'],
-    collapse: {
-      field: ALERT_UUID,
-    },
     sort: {
       '@timestamp': 'desc',
     },

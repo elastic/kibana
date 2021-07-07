@@ -66,6 +66,11 @@ describe('tagcloud vis toExpressionAst function', () => {
       minFontSize: 5,
       maxFontSize: 15,
       showLabel: true,
+      palette: {
+        type: 'palette',
+        name: 'default',
+      },
+      metric: { accessor: 0, format: { id: 'number' } },
     };
     const actual = toExpressionAst(vis, {} as any);
     expect(actual).toMatchSnapshot();

@@ -46,6 +46,7 @@ const defaultCoreSystemParams = {
     csp: {
       warnLegacyBrowsers: true,
     },
+    version: 'version',
   } as any,
 };
 
@@ -91,12 +92,12 @@ describe('constructor', () => {
     });
   });
 
-  it('passes browserSupportsCsp to ChromeService', () => {
+  it('passes browserSupportsCsp and coreContext to ChromeService', () => {
     createCoreSystem();
-
     expect(ChromeServiceConstructor).toHaveBeenCalledTimes(1);
     expect(ChromeServiceConstructor).toHaveBeenCalledWith({
-      browserSupportsCsp: expect.any(Boolean),
+      browserSupportsCsp: true,
+      kibanaVersion: 'version',
     });
   });
 

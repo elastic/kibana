@@ -17,7 +17,6 @@ import {
 } from '../../../../common/profiling';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getBucketSize } from '../../helpers/get_bucket_size';
-import { withApmSpan } from '../../../utils/with_apm_span';
 import { kqlQuery } from '../../../utils/queries';
 
 const configMap = mapValues(
@@ -38,10 +37,11 @@ export async function getServiceProfilingTimeline({
   setup: Setup & SetupTimeRange;
   environment?: string;
 }) {
-  return withApmSpan('get_service_profiling_timeline', async () => {
-    const { apmEventClient, start, end } = setup;
+  const { apmEventClient, start, end } = setup;
 
-    const response = await apmEventClient.search({
+  const response = await apmEventClient.search(
+    'get_service_profiling_timeline',
+    {
       apm: {
         events: [ProcessorEvent.profile],
       },
@@ -96,29 +96,29 @@ export async function getServiceProfilingTimeline({
           },
         },
       },
-    });
-
-    const { aggregations } = response;
-
-    if (!aggregations) {
-      return [];
     }
+  );
 
-    return aggregations.timeseries.buckets.map((bucket) => {
-      return {
-        x: bucket.key,
-        valueTypes: {
-          unknown: bucket.value_type.buckets.unknown.num_profiles.value,
-          // TODO: use enum as object key. not possible right now
-          // because of https://github.com/microsoft/TypeScript/issues/37888
-          ...mapValues(configMap, (_, key) => {
-            return (
-              bucket.value_type.buckets[key as ProfilingValueType]?.num_profiles
-                .value ?? 0
-            );
-          }),
-        },
-      };
-    });
+  const { aggregations } = response;
+
+  if (!aggregations) {
+    return [];
+  }
+
+  return aggregations.timeseries.buckets.map((bucket) => {
+    return {
+      x: bucket.key,
+      valueTypes: {
+        unknown: bucket.value_type.buckets.unknown.num_profiles.value,
+        // TODO: use enum as object key. not possible right now
+        // because of https://github.com/microsoft/TypeScript/issues/37888
+        ...mapValues(configMap, (_, key) => {
+          return (
+            bucket.value_type.buckets[key as ProfilingValueType]?.num_profiles
+              .value ?? 0
+          );
+        }),
+      },
+    };
   });
 }

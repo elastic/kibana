@@ -28,10 +28,12 @@ import { ColumnState } from './visualization';
 import type { FormatFactory, ILensInterpreterRenderHandlers, LensMultiTable } from '../types';
 import type { DatatableRender } from './components/types';
 import { transposeTable } from './transpose_helpers';
+import { computeSummaryRowForColumn } from './summary';
 
 export type ColumnConfigArg = Omit<ColumnState, 'palette'> & {
   type: 'lens_datatable_column';
   palette?: PaletteOutput<CustomPaletteState>;
+  summaryRowValue?: unknown;
 };
 
 export interface Args {
@@ -116,6 +118,16 @@ export const getDatatable = ({
       return memo;
     }, {});
 
+    const columnsWithSummary = args.columns.filter((c) => c.summaryRow);
+    for (const column of columnsWithSummary) {
+      column.summaryRowValue = computeSummaryRowForColumn(
+        column,
+        firstTable,
+        formatters,
+        formatFactory({ id: 'number' })
+      );
+    }
+
     if (sortBy && columnsReverseLookup[sortBy] && sortDirection !== 'none') {
       // Sort on raw values for these types, while use the formatted value for the rest
       const sortingCriteria = getSortingCriteria(
@@ -173,6 +185,8 @@ export const datatableColumn: ExpressionFunctionDefinition<
       types: ['palette'],
       help: '',
     },
+    summaryRow: { types: ['string'], help: '' },
+    summaryLabel: { types: ['string'], help: '' },
   },
   fn: function fn(input: unknown, args: ColumnState) {
     return {

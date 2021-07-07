@@ -21,40 +21,39 @@ import {
 import { nodeBuilder } from '../../../../../../src/plugins/data/common';
 
 import {
-  throwErrors,
-  excess,
-  CasesResponseRt,
-  ESCasePatchRequest,
-  CasePatchRequest,
-  CasesResponse,
-  CaseStatuses,
-  CasesPatchRequestRt,
-  CommentType,
-  ESCaseAttributes,
-  CaseType,
-  CasesPatchRequest,
   AssociationType,
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+  CasePatchRequest,
+  CasesPatchRequest,
+  CasesPatchRequestRt,
+  CasesResponse,
+  CasesResponseRt,
+  CaseStatuses,
+  CaseType,
   CommentAttributes,
-} from '../../../common/api';
+  CommentType,
+  ENABLE_CASE_CONNECTOR,
+  ESCaseAttributes,
+  ESCasePatchRequest,
+  excess,
+  MAX_CONCURRENT_SEARCHES,
+  SUB_CASE_SAVED_OBJECT,
+  throwErrors,
+  MAX_TITLE_LENGTH,
+} from '../../../common';
 import { buildCaseUserActions } from '../../services/user_actions/helpers';
 import { getCaseToUpdate } from '../utils';
 
 import { CasesService } from '../../services';
 import {
-  CASE_COMMENT_SAVED_OBJECT,
-  CASE_SAVED_OBJECT,
-  MAX_CONCURRENT_SEARCHES,
-  SUB_CASE_SAVED_OBJECT,
-} from '../../../common/constants';
-import {
   createAlertUpdateRequest,
-  transformCaseConnectorToEsConnector,
+  createCaseError,
   flattenCaseSavedObject,
   isCommentRequestTypeAlertOrGenAlert,
+  transformCaseConnectorToEsConnector,
 } from '../../common';
-import { createCaseError } from '../../common/error';
-import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
-import { UpdateAlertRequest } from '../alerts/client';
+import { UpdateAlertRequest } from '../alerts/types';
 import { CasesClientInternal } from '../client_internal';
 import { CasesClientArgs } from '..';
 import { Operations, OwnerEntity } from '../../authorization';
@@ -177,6 +176,24 @@ async function throwIfInvalidUpdateOfTypeWithAlerts({
     const ids = typeUpdateWithAlerts.map((req) => req.id);
     throw Boom.badRequest(
       `Converting a case to a collection is not allowed when it has alert comments, ids: [${ids.join(
+        ', '
+      )}]`
+    );
+  }
+}
+
+/**
+ * Throws an error if any of the requests updates a title and the length is over MAX_TITLE_LENGTH.
+ */
+function throwIfTitleIsInvalid(requests: ESCasePatchRequest[]) {
+  const requestsInvalidTitle = requests.filter(
+    (req) => req.title !== undefined && req.title.length > MAX_TITLE_LENGTH
+  );
+
+  if (requestsInvalidTitle.length > 0) {
+    const ids = requestsInvalidTitle.map((req) => req.id);
+    throw Boom.badRequest(
+      `The length of the title is too long. The maximum length is ${MAX_TITLE_LENGTH}, ids: [${ids.join(
         ', '
       )}]`
     );
@@ -479,6 +496,7 @@ export const update = async (
     }
 
     throwIfUpdateOwner(updateFilterCases);
+    throwIfTitleIsInvalid(updateFilterCases);
     throwIfUpdateStatusOfCollection(updateFilterCases, casesMap);
     throwIfUpdateTypeCollectionToIndividual(updateFilterCases, casesMap);
     await throwIfInvalidUpdateOfTypeWithAlerts({

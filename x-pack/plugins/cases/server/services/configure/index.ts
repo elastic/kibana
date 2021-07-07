@@ -8,8 +8,7 @@
 import { Logger, SavedObjectsClientContract } from 'kibana/server';
 
 import { SavedObjectFindOptionsKueryNode } from '../../common';
-import { ESCasesConfigureAttributes } from '../../../common/api';
-import { CASE_CONFIGURE_SAVED_OBJECT } from '../../../common/constants';
+import { ESCasesConfigureAttributes, CASE_CONFIGURE_SAVED_OBJECT } from '../../../common';
 
 interface ClientArgs {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;

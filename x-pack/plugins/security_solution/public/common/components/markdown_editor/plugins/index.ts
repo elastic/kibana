@@ -12,7 +12,6 @@ import {
   getDefaultEuiMarkdownUiPlugins,
 } from '@elastic/eui';
 // Remove after this issue is resolved: https://github.com/elastic/eui/issues/4688
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { Options as Remark2RehypeOptions } from 'mdast-util-to-hast';
 import { FunctionComponent } from 'react';
 // eslint-disable-next-line import/no-extraneous-dependencies

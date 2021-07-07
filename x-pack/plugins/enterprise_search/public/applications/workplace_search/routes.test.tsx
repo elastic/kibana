@@ -76,13 +76,13 @@ describe('getReindexJobRoute', () => {
 
   it('should format org path', () => {
     expect(getReindexJobRoute(SOURCE_ID, REINDEX_ID, true)).toEqual(
-      `/sources/${SOURCE_ID}/schema_errors/${REINDEX_ID}`
+      `/sources/${SOURCE_ID}/schemas/${REINDEX_ID}`
     );
   });
 
   it('should format user path', () => {
     expect(getReindexJobRoute(SOURCE_ID, REINDEX_ID, false)).toEqual(
-      `/p/sources/${SOURCE_ID}/schema_errors/${REINDEX_ID}`
+      `/p/sources/${SOURCE_ID}/schemas/${REINDEX_ID}`
     );
   });
 });

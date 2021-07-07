@@ -15,7 +15,7 @@ import { CreateCaseForm } from './form';
 import { FormContext } from './form_context';
 import { SubmitCaseButton } from './submit_button';
 import { Case } from '../../containers/types';
-import { CaseType } from '../../../common/api/cases';
+import { CaseType } from '../../../common';
 import { CasesTimelineIntegration, CasesTimelineIntegrationProvider } from '../timeline_context';
 import { fieldName as descriptionFieldName } from './description';
 import { InsertTimeline } from '../insert_timeline';
@@ -34,6 +34,7 @@ const Container = styled.div`
 export interface CreateCaseProps extends Owner {
   afterCaseCreated?: (theCase: Case, postComment: UsePostComment['postComment']) => Promise<void>;
   caseType?: CaseType;
+  disableAlerts?: boolean;
   hideConnectorServiceNowSir?: boolean;
   onCancel: () => void;
   onSuccess: (theCase: Case) => Promise<void>;
@@ -45,6 +46,7 @@ const CreateCaseComponent = ({
   afterCaseCreated,
   caseType,
   hideConnectorServiceNowSir,
+  disableAlerts,
   onCancel,
   onSuccess,
   timelineIntegration,
@@ -59,6 +61,7 @@ const CreateCaseComponent = ({
     >
       <CreateCaseForm
         hideConnectorServiceNowSir={hideConnectorServiceNowSir}
+        disableAlerts={disableAlerts}
         withSteps={withSteps}
       />
       <Container>
@@ -88,12 +91,10 @@ const CreateCaseComponent = ({
   </CasesTimelineIntegrationProvider>
 );
 
-export const CreateCase: React.FC<CreateCaseProps> = React.memo((props) => {
-  return (
-    <OwnerProvider owner={props.owner}>
-      <CreateCaseComponent {...props} />
-    </OwnerProvider>
-  );
-});
+export const CreateCase: React.FC<CreateCaseProps> = React.memo((props) => (
+  <OwnerProvider owner={props.owner}>
+    <CreateCaseComponent {...props} />
+  </OwnerProvider>
+));
 // eslint-disable-next-line import/no-default-export
 export { CreateCase as default };

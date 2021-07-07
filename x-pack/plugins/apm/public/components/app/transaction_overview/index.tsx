@@ -24,7 +24,7 @@ import { useUrlParams } from '../../../context/url_params_context/use_url_params
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
-import { TransactionList } from './TransactionList';
+import { TransactionList } from './transaction_list';
 import { useRedirect } from './useRedirect';
 import { useTransactionListFetcher } from './use_transaction_list';
 
@@ -79,7 +79,7 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
     <>
       <TransactionCharts />
       <EuiSpacer size="s" />
-      <EuiPanel>
+      <EuiPanel hasBorder={true}>
         <EuiTitle size="xs">
           <h3>Transactions</h3>
         </EuiTitle>

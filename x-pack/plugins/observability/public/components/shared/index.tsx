@@ -10,6 +10,7 @@ import type { CoreVitalProps, HeaderMenuPortalProps } from './types';
 import type { FieldValueSuggestionsProps } from './field_value_suggestions/types';
 
 export { createLazyObservabilityPageTemplate } from './page_template';
+export type { LazyObservabilityPageTemplateProps } from './page_template';
 
 const CoreVitalsLazy = lazy(() => import('./core_web_vitals/index'));
 

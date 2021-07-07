@@ -19,14 +19,13 @@ import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana } from '../../tasks/common';
 import { createCase } from '../../tasks/api_calls/cases';
 
-// TODO: enable once attach timeline to cases is re-enabled
-describe.skip('attach timeline to case', () => {
+describe('attach timeline to case', () => {
   context('without cases created', () => {
     beforeEach(() => {
       cleanKibana();
-      createTimeline(timeline).then((response) =>
-        cy.wrap(response.body.data.persistTimeline.timeline).as('myTimeline')
-      );
+      createTimeline(timeline).then((response) => {
+        cy.wrap(response.body.data.persistTimeline.timeline).as('myTimeline');
+      });
     });
 
     it('attach timeline to a new case', function () {

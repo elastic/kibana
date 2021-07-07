@@ -54,6 +54,7 @@ function filterAvailable<T>(m: Map<string, T>, capabilities: Capabilities) {
     )
   );
 }
+
 const findMounter = (mounters: Map<string, Mounter>, appRoute?: string) =>
   [...mounters].find(([, mounter]) => mounter.appRoute === appRoute);
 
@@ -282,8 +283,19 @@ export class ApplicationService {
       history: this.history!,
       getUrlForApp: (
         appId,
-        { path, absolute = false }: { path?: string; absolute?: boolean } = {}
+        {
+          path,
+          absolute = false,
+          deepLinkId,
+        }: { path?: string; absolute?: boolean; deepLinkId?: string } = {}
       ) => {
+        if (deepLinkId) {
+          const deepLinkPath = getAppDeepLinkPath(availableMounters, appId, deepLinkId);
+          if (deepLinkPath) {
+            path = appendAppPath(deepLinkPath, path);
+          }
+        }
+
         const relUrl = http.basePath.prepend(getAppUrl(availableMounters, appId, path));
         return absolute ? relativeToAbsolute(relUrl) : relUrl;
       },
@@ -403,13 +415,11 @@ const updateStatus = (app: App, statusUpdaters: AppUpdaterWrapper[]): App => {
           changes.navLinkStatus ?? AppNavLinkStatus.default,
           fields.navLinkStatus ?? AppNavLinkStatus.default
         ),
-        // deepLinks take the last defined update
-        deepLinks: fields.deepLinks
-          ? populateDeepLinkDefaults(fields.deepLinks)
-          : changes.deepLinks,
+        ...(fields.deepLinks ? { deepLinks: populateDeepLinkDefaults(fields.deepLinks) } : {}),
       };
     }
   });
+
   return {
     ...app,
     ...changes,

@@ -692,11 +692,22 @@ export class WebElementWrapper {
    * @nonstandard
    * @return {Promise<void>}
    */
-  public async scrollIntoViewIfNecessary(topOffset?: number): Promise<void> {
+  public async scrollIntoViewIfNecessary(
+    topOffsetOrOptions?: number | { topOffset?: number; bottomOffset?: number }
+  ): Promise<void> {
+    let topOffset: undefined | number;
+    let bottomOffset: undefined | number;
+    if (typeof topOffsetOrOptions === 'number') {
+      topOffset = topOffsetOrOptions;
+    } else {
+      topOffset = topOffsetOrOptions?.topOffset;
+      bottomOffset = topOffsetOrOptions?.bottomOffset;
+    }
     await this.driver.executeScript(
       scrollIntoViewIfNecessary,
       this._webElement,
-      topOffset || this.fixedHeaderHeight
+      topOffset || this.fixedHeaderHeight,
+      bottomOffset
     );
   }
 

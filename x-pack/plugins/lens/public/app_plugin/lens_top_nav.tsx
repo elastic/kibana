@@ -7,21 +7,21 @@
 
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { TopNavMenuData } from '../../../../../src/plugins/navigation/public';
 import { LensAppServices, LensTopNavActions, LensTopNavMenuProps } from './types';
 import { downloadMultipleAs } from '../../../../../src/plugins/share/public';
 import { trackUiEvent } from '../lens_ui_telemetry';
-import { exporters } from '../../../../../src/plugins/data/public';
-
+import { exporters, IndexPattern } from '../../../../../src/plugins/data/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import {
-  setState as setAppState,
+  setState,
   useLensSelector,
   useLensDispatch,
   LensAppState,
   DispatchSetState,
 } from '../state_management';
+import { getIndexPatternsObjects, getIndexPatternsIds } from '../utils';
 
 function getLensTopNavConfig(options: {
   showSaveAndReturn: boolean;
@@ -127,6 +127,8 @@ export const LensTopNavMenu = ({
   runSave,
   onAppLeave,
   redirectToOrigin,
+  datasourceMap,
+  title,
 }: LensTopNavMenuProps) => {
   const {
     data,
@@ -139,19 +141,52 @@ export const LensTopNavMenu = ({
 
   const dispatch = useLensDispatch();
   const dispatchSetState: DispatchSetState = React.useCallback(
-    (state: Partial<LensAppState>) => dispatch(setAppState(state)),
+    (state: Partial<LensAppState>) => dispatch(setState(state)),
     [dispatch]
   );
+
+  const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>([]);
 
   const {
     isSaveable,
     isLinkedToOriginatingApp,
-    indexPatternsForTopNav,
     query,
-    lastKnownDoc,
     activeData,
     savedQuery,
-  } = useLensSelector((state) => state.app);
+    activeDatasourceId,
+    datasourceStates,
+  } = useLensSelector((state) => state.lens);
+
+  useEffect(() => {
+    const activeDatasource =
+      datasourceMap && activeDatasourceId && !datasourceStates[activeDatasourceId].isLoading
+        ? datasourceMap[activeDatasourceId]
+        : undefined;
+    if (!activeDatasource) {
+      return;
+    }
+    const indexPatternIds = getIndexPatternsIds({
+      activeDatasources: Object.keys(datasourceStates).reduce(
+        (acc, datasourceId) => ({
+          ...acc,
+          [datasourceId]: datasourceMap[datasourceId],
+        }),
+        {}
+      ),
+      datasourceStates,
+    });
+    const hasIndexPatternsChanged =
+      indexPatterns.length !== indexPatternIds.length ||
+      indexPatternIds.some((id) => !indexPatterns.find((indexPattern) => indexPattern.id === id));
+    // Update the cached index patterns if the user made a change to any of them
+    if (hasIndexPatternsChanged) {
+      getIndexPatternsObjects(indexPatternIds, data.indexPatterns).then(
+        ({ indexPatterns: indexPatternObjects }) => {
+          setIndexPatterns(indexPatternObjects);
+        }
+      );
+    }
+  }, [datasourceStates, activeDatasourceId, data.indexPatterns, datasourceMap, indexPatterns]);
 
   const { TopNavMenu } = navigation.ui;
   const { from, to } = data.query.timefilter.timefilter.getTime();
@@ -164,79 +199,152 @@ export const LensTopNavMenu = ({
   const unsavedTitle = i18n.translate('xpack.lens.app.unsavedFilename', {
     defaultMessage: 'unsaved',
   });
-  const topNavConfig = getLensTopNavConfig({
-    showSaveAndReturn: Boolean(
-      isLinkedToOriginatingApp &&
-        // Temporarily required until the 'by value' paradigm is default.
-        (dashboardFeatureFlag.allowByValueEmbeddables || Boolean(initialInput))
-    ),
-    enableExportToCSV: Boolean(isSaveable && activeData && Object.keys(activeData).length),
-    isByValueMode: getIsByValueMode(),
-    allowByValue: dashboardFeatureFlag.allowByValueEmbeddables,
-    showCancel: Boolean(isLinkedToOriginatingApp),
-    savingToLibraryPermitted,
-    savingToDashboardPermitted,
-    actions: {
-      exportToCSV: () => {
-        if (!activeData) {
-          return;
-        }
-        const datatables = Object.values(activeData);
-        const content = datatables.reduce<Record<string, { content: string; type: string }>>(
-          (memo, datatable, i) => {
-            // skip empty datatables
-            if (datatable) {
-              const postFix = datatables.length > 1 ? `-${i + 1}` : '';
+  const topNavConfig = useMemo(
+    () =>
+      getLensTopNavConfig({
+        showSaveAndReturn: Boolean(
+          isLinkedToOriginatingApp &&
+            // Temporarily required until the 'by value' paradigm is default.
+            (dashboardFeatureFlag.allowByValueEmbeddables || Boolean(initialInput))
+        ),
+        enableExportToCSV: Boolean(isSaveable && activeData && Object.keys(activeData).length),
+        isByValueMode: getIsByValueMode(),
+        allowByValue: dashboardFeatureFlag.allowByValueEmbeddables,
+        showCancel: Boolean(isLinkedToOriginatingApp),
+        savingToLibraryPermitted,
+        savingToDashboardPermitted,
+        actions: {
+          exportToCSV: () => {
+            if (!activeData) {
+              return;
+            }
+            const datatables = Object.values(activeData);
+            const content = datatables.reduce<Record<string, { content: string; type: string }>>(
+              (memo, datatable, i) => {
+                // skip empty datatables
+                if (datatable) {
+                  const postFix = datatables.length > 1 ? `-${i + 1}` : '';
 
-              memo[`${lastKnownDoc?.title || unsavedTitle}${postFix}.csv`] = {
-                content: exporters.datatableToCSV(datatable, {
-                  csvSeparator: uiSettings.get('csv:separator', ','),
-                  quoteValues: uiSettings.get('csv:quoteValues', true),
-                  formatFactory: data.fieldFormats.deserialize,
-                }),
-                type: exporters.CSV_MIME_TYPE,
-              };
+                  memo[`${title || unsavedTitle}${postFix}.csv`] = {
+                    content: exporters.datatableToCSV(datatable, {
+                      csvSeparator: uiSettings.get('csv:separator', ','),
+                      quoteValues: uiSettings.get('csv:quoteValues', true),
+                      formatFactory: data.fieldFormats.deserialize,
+                    }),
+                    type: exporters.CSV_MIME_TYPE,
+                  };
+                }
+                return memo;
+              },
+              {}
+            );
+            if (content) {
+              downloadMultipleAs(content);
             }
-            return memo;
           },
-          {}
-        );
-        if (content) {
-          downloadMultipleAs(content);
-        }
-      },
-      saveAndReturn: () => {
-        if (savingToDashboardPermitted && lastKnownDoc) {
-          // disabling the validation on app leave because the document has been saved.
-          onAppLeave((actions) => {
-            return actions.default();
-          });
-          runSave(
-            {
-              newTitle: lastKnownDoc.title,
-              newCopyOnSave: false,
-              isTitleDuplicateConfirmed: false,
-              returnToOrigin: true,
-            },
-            {
-              saveToLibrary:
-                (initialInput && attributeService.inputIsRefType(initialInput)) ?? false,
+          saveAndReturn: () => {
+            if (savingToDashboardPermitted) {
+              // disabling the validation on app leave because the document has been saved.
+              onAppLeave((actions) => {
+                return actions.default();
+              });
+              runSave(
+                {
+                  newTitle: title || '',
+                  newCopyOnSave: false,
+                  isTitleDuplicateConfirmed: false,
+                  returnToOrigin: true,
+                },
+                {
+                  saveToLibrary:
+                    (initialInput && attributeService.inputIsRefType(initialInput)) ?? false,
+                }
+              );
             }
-          );
+          },
+          showSaveModal: () => {
+            if (savingToDashboardPermitted || savingToLibraryPermitted) {
+              setIsSaveModalVisible(true);
+            }
+          },
+          cancel: () => {
+            if (redirectToOrigin) {
+              redirectToOrigin();
+            }
+          },
+        },
+      }),
+    [
+      activeData,
+      attributeService,
+      dashboardFeatureFlag.allowByValueEmbeddables,
+      data.fieldFormats.deserialize,
+      getIsByValueMode,
+      initialInput,
+      isLinkedToOriginatingApp,
+      isSaveable,
+      title,
+      onAppLeave,
+      redirectToOrigin,
+      runSave,
+      savingToDashboardPermitted,
+      savingToLibraryPermitted,
+      setIsSaveModalVisible,
+      uiSettings,
+      unsavedTitle,
+    ]
+  );
+
+  const onQuerySubmitWrapped = useCallback(
+    (payload) => {
+      const { dateRange, query: newQuery } = payload;
+      const currentRange = data.query.timefilter.timefilter.getTime();
+      if (dateRange.from !== currentRange.from || dateRange.to !== currentRange.to) {
+        data.query.timefilter.timefilter.setTime(dateRange);
+        trackUiEvent('app_date_change');
+      } else {
+        // Query has changed, renew the session id.
+        // Time change will be picked up by the time subscription
+        dispatchSetState({ searchSessionId: data.search.session.start() });
+        trackUiEvent('app_query_change');
+      }
+      if (newQuery) {
+        if (!isEqual(newQuery, query)) {
+          dispatchSetState({ query: newQuery });
         }
-      },
-      showSaveModal: () => {
-        if (savingToDashboardPermitted || savingToLibraryPermitted) {
-          setIsSaveModalVisible(true);
-        }
-      },
-      cancel: () => {
-        if (redirectToOrigin) {
-          redirectToOrigin();
-        }
-      },
+      }
     },
-  });
+    [data.query.timefilter.timefilter, data.search.session, dispatchSetState, query]
+  );
+
+  const onSavedWrapped = useCallback(
+    (newSavedQuery) => {
+      dispatchSetState({ savedQuery: newSavedQuery });
+    },
+    [dispatchSetState]
+  );
+
+  const onSavedQueryUpdatedWrapped = useCallback(
+    (newSavedQuery) => {
+      const savedQueryFilters = newSavedQuery.attributes.filters || [];
+      const globalFilters = data.query.filterManager.getGlobalFilters();
+      data.query.filterManager.setFilters([...globalFilters, ...savedQueryFilters]);
+      dispatchSetState({
+        query: newSavedQuery.attributes.query,
+        savedQuery: { ...newSavedQuery },
+      }); // Shallow query for reference issues
+    },
+    [data.query.filterManager, dispatchSetState]
+  );
+
+  const onClearSavedQueryWrapped = useCallback(() => {
+    data.query.filterManager.setFilters(data.query.filterManager.getGlobalFilters());
+    dispatchSetState({
+      filters: data.query.filterManager.getGlobalFilters(),
+      query: data.query.queryString.getDefaultQuery(),
+      savedQuery: undefined,
+    });
+  }, [data.query.filterManager, data.query.queryString, dispatchSetState]);
 
   return (
     <TopNavMenu
@@ -244,45 +352,11 @@ export const LensTopNavMenu = ({
       config={topNavConfig}
       showSaveQuery={Boolean(application.capabilities.visualize.saveQuery)}
       savedQuery={savedQuery}
-      onQuerySubmit={(payload) => {
-        const { dateRange, query: newQuery } = payload;
-        const currentRange = data.query.timefilter.timefilter.getTime();
-        if (dateRange.from !== currentRange.from || dateRange.to !== currentRange.to) {
-          data.query.timefilter.timefilter.setTime(dateRange);
-          trackUiEvent('app_date_change');
-        } else {
-          // Query has changed, renew the session id.
-          // Time change will be picked up by the time subscription
-          dispatchSetState({ searchSessionId: data.search.session.start() });
-          trackUiEvent('app_query_change');
-        }
-        if (newQuery) {
-          if (!isEqual(newQuery, query)) {
-            dispatchSetState({ query: newQuery });
-          }
-        }
-      }}
-      onSaved={(newSavedQuery) => {
-        dispatchSetState({ savedQuery: newSavedQuery });
-      }}
-      onSavedQueryUpdated={(newSavedQuery) => {
-        const savedQueryFilters = newSavedQuery.attributes.filters || [];
-        const globalFilters = data.query.filterManager.getGlobalFilters();
-        data.query.filterManager.setFilters([...globalFilters, ...savedQueryFilters]);
-        dispatchSetState({
-          query: newSavedQuery.attributes.query,
-          savedQuery: { ...newSavedQuery },
-        }); // Shallow query for reference issues
-      }}
-      onClearSavedQuery={() => {
-        data.query.filterManager.setFilters(data.query.filterManager.getGlobalFilters());
-        dispatchSetState({
-          filters: data.query.filterManager.getGlobalFilters(),
-          query: data.query.queryString.getDefaultQuery(),
-          savedQuery: undefined,
-        });
-      }}
-      indexPatterns={indexPatternsForTopNav}
+      onQuerySubmit={onQuerySubmitWrapped}
+      onSaved={onSavedWrapped}
+      onSavedQueryUpdated={onSavedQueryUpdatedWrapped}
+      onClearSavedQuery={onClearSavedQueryWrapped}
+      indexPatterns={indexPatterns}
       query={query}
       dateRangeFrom={from}
       dateRangeTo={to}

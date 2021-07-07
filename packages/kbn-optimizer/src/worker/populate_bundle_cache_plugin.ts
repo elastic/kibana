@@ -54,8 +54,19 @@ export class PopulateBundleCachePlugin {
         for (const module of compilation.modules) {
           if (isNormalModule(module)) {
             moduleCount += 1;
-            const path = getModulePath(module);
-            const parsedPath = parseFilePath(path);
+            let path = getModulePath(module);
+            let parsedPath = parseFilePath(path);
+
+            if (parsedPath.dirs.includes('bazel-out')) {
+              const index = parsedPath.dirs.indexOf('bazel-out');
+              path = Path.join(
+                workerConfig.repoRoot,
+                'bazel-out',
+                ...parsedPath.dirs.slice(index + 1),
+                parsedPath.filename ?? ''
+              );
+              parsedPath = parseFilePath(path);
+            }
 
             if (!parsedPath.dirs.includes('node_modules')) {
               referencedFiles.add(path);

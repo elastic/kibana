@@ -50,7 +50,7 @@ describe('Mapping', () => {
       wrappingComponent: TestProviders,
     });
     expect(wrapper.find('[data-test-subj="field-mapping-desc"]').first().text()).toBe(
-      'Field mappings require an established connection to ServiceNow ITSM. Please check your connection credentials.'
+      'Failed to retrieve mappings for ServiceNow ITSM.'
     );
   });
 });

@@ -7,8 +7,7 @@
 
 import { Logger, SavedObjectReference, SavedObjectsClientContract } from 'kibana/server';
 
-import { ConnectorMappings } from '../../../common/api';
-import { CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT } from '../../../common/constants';
+import { ConnectorMappings, CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT } from '../../../common';
 import { SavedObjectFindOptionsKueryNode } from '../../common';
 
 interface ClientArgs {

@@ -16,6 +16,8 @@ import { mockBrowserFields } from '../../containers/source/mock';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { TimelineTabs } from '../../../../common/types/timeline';
 
+jest.mock('../../lib/kibana');
+
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {

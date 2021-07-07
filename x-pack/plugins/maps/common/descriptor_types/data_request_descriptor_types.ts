@@ -29,9 +29,10 @@ export type MapFilters = {
   timeFilters: TimeRange;
   timeslice?: Timeslice;
   zoom: number;
+  isReadOnly: boolean;
 };
 
-type ESSearchSourceSyncMeta = {
+export type ESSearchSourceSyncMeta = {
   filterByMapBounds: boolean;
   sortField: string;
   sortOrder: SortDirection;
@@ -65,6 +66,7 @@ export type VectorSourceRequestMeta = MapFilters & {
   applyGlobalTime: boolean;
   fieldNames: string[];
   geogridPrecision?: number;
+  timesiceMaskField?: string;
   sourceQuery?: MapQuery;
   sourceMeta: VectorSourceSyncMeta;
 };
@@ -83,6 +85,9 @@ export type VectorStyleRequestMeta = MapFilters & {
 export type ESSearchSourceResponseMeta = {
   areResultsTrimmed?: boolean;
   resultsCount?: number;
+  // results time extent, either Kibana time range or timeslider time slice
+  timeExtent?: Timeslice;
+  isTimeExtentForTimeslice?: boolean;
 
   // top hits meta
   areEntitiesTrimmed?: boolean;

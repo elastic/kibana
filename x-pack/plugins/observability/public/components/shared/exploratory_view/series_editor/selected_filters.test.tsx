@@ -10,22 +10,23 @@ import { screen, waitFor } from '@testing-library/react';
 import { mockAppIndexPattern, mockIndexPattern, render } from '../rtl_helpers';
 import { SelectedFilters } from './selected_filters';
 import { getDefaultConfigs } from '../configurations/default_configs';
-import { NEW_SERIES_KEY } from '../hooks/use_series_storage';
 import { USER_AGENT_NAME } from '../configurations/constants/elasticsearch_fieldnames';
 
 describe('SelectedFilters', function () {
   mockAppIndexPattern();
 
   const dataViewSeries = getDefaultConfigs({
-    reportType: 'pld',
+    reportType: 'data-distribution',
     indexPattern: mockIndexPattern,
-    seriesId: NEW_SERIES_KEY,
+    dataType: 'ux',
   });
 
   it('should render properly', async function () {
     const initSeries = { filters: [{ field: USER_AGENT_NAME, values: ['Chrome'] }] };
 
-    render(<SelectedFilters seriesId={'series-id'} series={dataViewSeries} />, { initSeries });
+    render(<SelectedFilters seriesId={'series-id'} seriesConfig={dataViewSeries} />, {
+      initSeries,
+    });
 
     await waitFor(() => {
       screen.getByText('Chrome');

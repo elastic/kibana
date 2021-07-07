@@ -35,11 +35,14 @@ import { hasField } from '../utils';
 import type { IndexPattern, IndexPatternLayer, IndexPatternPrivateState } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { VisualizationDimensionGroupConfig } from '../../types';
+import { IndexPatternDimensionEditorProps } from './dimension_panel';
 
 const operationPanels = getOperationDisplay();
 
 export interface ReferenceEditorProps {
   layer: IndexPatternLayer;
+  layerId: string;
+  activeData?: IndexPatternDimensionEditorProps['activeData'];
   selectionStyle: 'full' | 'field' | 'hidden';
   validation: RequiredReference;
   columnId: string;
@@ -47,10 +50,14 @@ export interface ReferenceEditorProps {
     setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
   ) => void;
   currentIndexPattern: IndexPattern;
+
   existingFields: IndexPatternPrivateState['existingFields'];
   dateRange: DateRange;
   labelAppend?: EuiFormRowProps['labelAppend'];
   dimensionGroups: VisualizationDimensionGroupConfig[];
+  isFullscreen: boolean;
+  toggleFullscreen: () => void;
+  setIsCloseable: (isCloseable: boolean) => void;
 
   // Services
   uiSettings: IUiSettingsClient;
@@ -63,6 +70,8 @@ export interface ReferenceEditorProps {
 export function ReferenceEditor(props: ReferenceEditorProps) {
   const {
     layer,
+    layerId,
+    activeData,
     columnId,
     updateLayer,
     currentIndexPattern,
@@ -72,6 +81,9 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
     dateRange,
     labelAppend,
     dimensionGroups,
+    isFullscreen,
+    toggleFullscreen,
+    setIsCloseable,
     ...services
   } = props;
 
@@ -343,10 +355,15 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
               updateLayer={updateLayer}
               currentColumn={column}
               layer={layer}
+              layerId={layerId}
+              activeData={activeData}
               columnId={columnId}
               indexPattern={currentIndexPattern}
               dateRange={dateRange}
               operationDefinitionMap={operationDefinitionMap}
+              isFullscreen={isFullscreen}
+              toggleFullscreen={toggleFullscreen}
+              setIsCloseable={setIsCloseable}
               {...services}
             />
           </>

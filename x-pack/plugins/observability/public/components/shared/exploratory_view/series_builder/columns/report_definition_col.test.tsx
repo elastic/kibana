@@ -21,27 +21,27 @@ describe('Series Builder ReportDefinitionCol', function () {
   mockAppIndexPattern();
   const seriesId = 'test-series-id';
 
-  const dataViewSeries = getDefaultConfigs({
-    seriesId,
-    reportType: 'pld',
+  const seriesConfig = getDefaultConfigs({
+    reportType: 'data-distribution',
     indexPattern: mockIndexPattern,
+    dataType: 'ux',
   });
 
   const initSeries = {
     data: {
       [seriesId]: {
         dataType: 'ux' as const,
-        reportType: 'pld' as const,
+        reportType: 'data-distribution' as const,
         time: { from: 'now-30d', to: 'now' },
         reportDefinitions: { [SERVICE_NAME]: ['elastic-co'] },
       },
     },
   };
 
-  mockUseValuesList(['elastic-co']);
+  mockUseValuesList([{ label: 'elastic-co', count: 10 }]);
 
   it('should render properly', async function () {
-    render(<ReportDefinitionCol dataViewSeries={dataViewSeries} seriesId={seriesId} />, {
+    render(<ReportDefinitionCol seriesConfig={seriesConfig} seriesId={seriesId} />, {
       initSeries,
     });
 
@@ -52,7 +52,7 @@ describe('Series Builder ReportDefinitionCol', function () {
   });
 
   it('should render selected report definitions', async function () {
-    render(<ReportDefinitionCol dataViewSeries={dataViewSeries} seriesId={seriesId} />, {
+    render(<ReportDefinitionCol seriesConfig={seriesConfig} seriesId={seriesId} />, {
       initSeries,
     });
 
@@ -63,7 +63,7 @@ describe('Series Builder ReportDefinitionCol', function () {
 
   it('should be able to remove selected definition', async function () {
     const { setSeries } = render(
-      <ReportDefinitionCol dataViewSeries={dataViewSeries} seriesId={seriesId} />,
+      <ReportDefinitionCol seriesConfig={seriesConfig} seriesId={seriesId} />,
       { initSeries }
     );
 
@@ -81,7 +81,7 @@ describe('Series Builder ReportDefinitionCol', function () {
     expect(setSeries).toHaveBeenCalledWith(seriesId, {
       dataType: 'ux',
       reportDefinitions: {},
-      reportType: 'pld',
+      reportType: 'data-distribution',
       time: { from: 'now-30d', to: 'now' },
     });
   });

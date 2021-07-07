@@ -88,7 +88,7 @@ export const getHeatmapVisualization = ({
         defaultMessage: 'Heatmap',
       }),
       groupLabel: groupLabelForBar,
-      showBetaBadge: true,
+      showExperimentalBadge: true,
     },
   ],
 
@@ -119,10 +119,10 @@ export const getHeatmapVisualization = ({
     return CHART_NAMES.heatmap;
   },
 
-  initialize(frame, state, mainPalette) {
+  initialize(addNewLayer, state, mainPalette) {
     return (
       state || {
-        layerId: frame.addNewLayer(),
+        layerId: addNewLayer(),
         title: 'Empty Heatmap chart',
         ...getInitialState(),
       }

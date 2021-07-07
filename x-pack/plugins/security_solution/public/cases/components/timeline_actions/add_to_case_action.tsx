@@ -80,7 +80,8 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
 
   const onViewCaseClick = useCallback(
     (id) => {
-      navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+      navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.case,
         path: getCaseDetailsUrl({ id }),
       });
     },
@@ -132,9 +133,10 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
 
   const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.case);
   const goToCreateCase = useCallback(
-    (ev) => {
+    async (ev) => {
       ev.preventDefault();
-      navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+      return navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.case,
         path: getCreateCaseUrl(urlSearch),
       });
     },
@@ -208,19 +210,21 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
 
   return (
     <>
-      <ActionIconItem>
-        <EuiPopover
-          id="attachAlertToCasePanel"
-          button={button}
-          isOpen={isPopoverOpen}
-          closePopover={closePopover}
-          panelPaddingSize="none"
-          anchorPosition="downLeft"
-          repositionOnScroll
-        >
-          <EuiContextMenuPanel items={items} />
-        </EuiPopover>
-      </ActionIconItem>
+      {userCanCrud && (
+        <ActionIconItem>
+          <EuiPopover
+            id="attachAlertToCasePanel"
+            button={button}
+            isOpen={isPopoverOpen}
+            closePopover={closePopover}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+            repositionOnScroll
+          >
+            <EuiContextMenuPanel items={items} />
+          </EuiPopover>
+        </ActionIconItem>
+      )}
       {isCreateCaseFlyoutOpen && (
         <CreateCaseFlyout
           afterCaseCreated={attachAlertToCase}

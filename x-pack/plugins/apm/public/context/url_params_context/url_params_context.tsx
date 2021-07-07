@@ -14,11 +14,12 @@ import React, {
   useState,
 } from 'react';
 import { withRouter } from 'react-router-dom';
-import { LocalUIFilterName } from '../../../common/ui_filter';
+import {
+  UxLocalUIFilterName,
+  uxLocalUIFilterNames,
+} from '../../../common/ux_ui_filter';
 import { pickKeys } from '../../../common/utils/pick_keys';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { localUIFilterNames } from '../../../server/lib/rum_client/ui_filters/local_ui_filters/config';
-import { UIFilters } from '../../../typings/ui_filters';
+import { UxUIFilters } from '../../../typings/ui_filters';
 import { useDeepObjectIdentity } from '../../hooks/useDeepObjectIdentity';
 import { getDateRange } from './helpers';
 import { resolveUrlParams } from './resolve_url_params';
@@ -29,11 +30,11 @@ export interface TimeRange {
   rangeTo: string;
 }
 
-function useUiFilters(params: IUrlParams): UIFilters {
+function useUxUiFilters(params: IUrlParams): UxUIFilters {
   const localUiFilters = mapValues(
-    pickKeys(params, ...localUIFilterNames),
+    pickKeys(params, ...uxLocalUIFilterNames),
     (val) => (val ? val.split(',') : [])
-  ) as Partial<Record<LocalUIFilterName, string[]>>;
+  ) as Partial<Record<UxLocalUIFilterName, string[]>>;
 
   return useDeepObjectIdentity({
     environment: params.environment,
@@ -46,7 +47,7 @@ const defaultRefresh = (_time: TimeRange) => {};
 const UrlParamsContext = createContext({
   rangeId: 0,
   refreshTimeRange: defaultRefresh,
-  uiFilters: {} as UIFilters,
+  uxUiFilters: {} as UxUIFilters,
   urlParams: {} as IUrlParams,
 });
 
@@ -54,7 +55,14 @@ const UrlParamsProvider: React.ComponentClass<{}> = withRouter(
   ({ location, children }) => {
     const refUrlParams = useRef(resolveUrlParams(location, {}));
 
-    const { start, end, rangeFrom, rangeTo } = refUrlParams.current;
+    const {
+      start,
+      end,
+      rangeFrom,
+      rangeTo,
+      exactStart,
+      exactEnd,
+    } = refUrlParams.current;
 
     // Counter to force an update in useFetcher when the refresh button is clicked.
     const [rangeId, setRangeId] = useState(0);
@@ -66,8 +74,10 @@ const UrlParamsProvider: React.ComponentClass<{}> = withRouter(
           end,
           rangeFrom,
           rangeTo,
+          exactStart,
+          exactEnd,
         }),
-      [location, start, end, rangeFrom, rangeTo]
+      [location, start, end, rangeFrom, rangeTo, exactStart, exactEnd]
     );
 
     refUrlParams.current = urlParams;
@@ -81,16 +91,16 @@ const UrlParamsProvider: React.ComponentClass<{}> = withRouter(
       setRangeId((prevRangeId) => prevRangeId + 1);
     }, []);
 
-    const uiFilters = useUiFilters(urlParams);
+    const uxUiFilters = useUxUiFilters(urlParams);
 
     const contextValue = useMemo(() => {
       return {
         rangeId,
         refreshTimeRange,
         urlParams,
-        uiFilters,
+        uxUiFilters,
       };
-    }, [rangeId, refreshTimeRange, uiFilters, urlParams]);
+    }, [rangeId, refreshTimeRange, uxUiFilters, urlParams]);
 
     return (
       <UrlParamsContext.Provider children={children} value={contextValue} />
@@ -98,4 +108,4 @@ const UrlParamsProvider: React.ComponentClass<{}> = withRouter(
   }
 );
 
-export { UrlParamsContext, UrlParamsProvider, useUiFilters };
+export { UrlParamsContext, UrlParamsProvider, useUxUiFilters };

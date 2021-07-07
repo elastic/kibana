@@ -7,17 +7,17 @@
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { MANAGEMENT_APP_ID } from '../../../../common/constants';
-import { APP_ID, SecurityPageName } from '../../../../../../common/constants';
+import { APP_ID } from '../../../../../../common/constants';
 import { pagePathGetters } from '../../../../../../../fleet/public';
 import { getEndpointDetailsPath } from '../../../../common/routing';
 import { HostMetadata, MaybeImmutable } from '../../../../../../common/endpoint/types';
-import { useFormatUrl } from '../../../../../common/components/link_to';
 import { useEndpointSelector } from './hooks';
 import { agentPolicies, uiQueryParams } from '../../store/selectors';
-import { useKibana } from '../../../../../common/lib/kibana';
+import { useAppUrl } from '../../../../../common/lib/kibana/hooks';
 import { ContextMenuItemNavByRouterProps } from '../components/context_menu_item_nav_by_rotuer';
-import { isEndpointHostIsolated } from '../../../../../common/utils/validators/is_endpoint_host_isolated';
+import { isEndpointHostIsolated } from '../../../../../common/utils/validators';
+import { useLicense } from '../../../../../common/hooks/use_license';
+import { isIsolationSupported } from '../../../../../../common/endpoint/service/host_isolation/utils';
 
 /**
  * Returns a list (array) of actions for an individual endpoint
@@ -26,14 +26,10 @@ import { isEndpointHostIsolated } from '../../../../../common/utils/validators/i
 export const useEndpointActionItems = (
   endpointMetadata: MaybeImmutable<HostMetadata> | undefined
 ): ContextMenuItemNavByRouterProps[] => {
-  const { formatUrl } = useFormatUrl(SecurityPageName.administration);
+  const isPlatinumPlus = useLicense().isPlatinumPlus();
+  const { getAppUrl } = useAppUrl();
   const fleetAgentPolicies = useEndpointSelector(agentPolicies);
   const allCurrentUrlParams = useEndpointSelector(uiQueryParams);
-  const {
-    services: {
-      application: { getUrlForApp },
-    },
-  } = useKibana();
 
   return useMemo<ContextMenuItemNavByRouterProps[]>(() => {
     if (endpointMetadata) {
@@ -42,6 +38,10 @@ export const useEndpointActionItems = (
       const endpointPolicyId = endpointMetadata.Endpoint.policy.applied.id;
       const endpointHostName = endpointMetadata.host.hostname;
       const fleetAgentId = endpointMetadata.elastic.agent.id;
+      const isolationSupported = isIsolationSupported({
+        osName: endpointMetadata.host.os.name,
+        version: endpointMetadata.agent.version,
+      });
       const {
         show,
         selected_endpoint: _selectedEndpoint,
@@ -58,47 +58,55 @@ export const useEndpointActionItems = (
         selected_endpoint: endpointId,
       });
 
+      const isolationActions = [];
+
+      if (isIsolated) {
+        // Un-isolate is always available to users regardless of license level
+        isolationActions.push({
+          'data-test-subj': 'unIsolateLink',
+          icon: 'logoSecurity',
+          key: 'unIsolateHost',
+          navigateAppId: APP_ID,
+          navigateOptions: {
+            path: endpointUnIsolatePath,
+          },
+          href: getAppUrl({ path: endpointUnIsolatePath }),
+          children: (
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.actions.unIsolateHost"
+              defaultMessage="Release host"
+            />
+          ),
+        });
+      } else if (isPlatinumPlus && isolationSupported) {
+        // For Platinum++ licenses, users also have ability to isolate
+        isolationActions.push({
+          'data-test-subj': 'isolateLink',
+          icon: 'logoSecurity',
+          key: 'isolateHost',
+          navigateAppId: APP_ID,
+          navigateOptions: {
+            path: endpointIsolatePath,
+          },
+          href: getAppUrl({ path: endpointIsolatePath }),
+          children: (
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.actions.isolateHost"
+              defaultMessage="Isolate host"
+            />
+          ),
+        });
+      }
+
       return [
-        isIsolated
-          ? {
-              'data-test-subj': 'unIsolateLink',
-              icon: 'logoSecurity',
-              key: 'unIsolateHost',
-              navigateAppId: MANAGEMENT_APP_ID,
-              navigateOptions: {
-                path: endpointUnIsolatePath,
-              },
-              href: formatUrl(endpointUnIsolatePath),
-              children: (
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.actions.unIsolateHost"
-                  defaultMessage="Unisolate host"
-                />
-              ),
-            }
-          : {
-              'data-test-subj': 'isolateLink',
-              icon: 'logoSecurity',
-              key: 'isolateHost',
-              navigateAppId: MANAGEMENT_APP_ID,
-              navigateOptions: {
-                path: endpointIsolatePath,
-              },
-              href: formatUrl(endpointIsolatePath),
-              children: (
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.actions.isolateHost"
-                  defaultMessage="Isolate host"
-                />
-              ),
-            },
+        ...isolationActions,
         {
           'data-test-subj': 'hostLink',
           icon: 'logoSecurity',
           key: 'hostDetailsLink',
           navigateAppId: APP_ID,
-          navigateOptions: { path: `hosts/${endpointHostName}` },
-          href: `${getUrlForApp('securitySolution')}/hosts/${endpointHostName}`,
+          navigateOptions: { path: `/hosts/${endpointHostName}` },
+          href: getAppUrl({ path: `/hosts/${endpointHostName}` }),
           children: (
             <FormattedMessage
               id="xpack.securitySolution.endpoint.actions.hostDetails"
@@ -118,7 +126,7 @@ export const useEndpointActionItems = (
               })[1]
             }`,
           },
-          href: `${getUrlForApp('fleet')}#${
+          href: `${getAppUrl({ appId: 'fleet' })}#${
             pagePathGetters.policy_details({
               policyId: fleetAgentPolicies[endpointPolicyId],
             })[1]
@@ -138,13 +146,13 @@ export const useEndpointActionItems = (
           navigateAppId: 'fleet',
           navigateOptions: {
             path: `#${
-              pagePathGetters.fleet_agent_details({
+              pagePathGetters.agent_details({
                 agentId: fleetAgentId,
               })[1]
             }`,
           },
-          href: `${getUrlForApp('fleet')}#${
-            pagePathGetters.fleet_agent_details({
+          href: `${getAppUrl({ appId: 'fleet' })}#${
+            pagePathGetters.agent_details({
               agentId: fleetAgentId,
             })[1]
           }`,
@@ -155,9 +163,33 @@ export const useEndpointActionItems = (
             />
           ),
         },
+        {
+          icon: 'gear',
+          key: 'agentPolicyReassignLink',
+          'data-test-subj': 'agentPolicyReassignLink',
+          navigateAppId: 'fleet',
+          navigateOptions: {
+            path: `#${
+              pagePathGetters.agent_details({
+                agentId: fleetAgentId,
+              })[1]
+            }/activity?openReassignFlyout=true`,
+          },
+          href: `${getAppUrl({ appId: 'fleet' })}#${
+            pagePathGetters.agent_details({
+              agentId: fleetAgentId,
+            })[1]
+          }/activity?openReassignFlyout=true`,
+          children: (
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.actions.agentPolicyReassign"
+              defaultMessage="Reassign agent policy"
+            />
+          ),
+        },
       ];
     }
 
     return [];
-  }, [allCurrentUrlParams, endpointMetadata, fleetAgentPolicies, formatUrl, getUrlForApp]);
+  }, [allCurrentUrlParams, endpointMetadata, fleetAgentPolicies, getAppUrl, isPlatinumPlus]);
 };

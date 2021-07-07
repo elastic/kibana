@@ -23,7 +23,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'kibana_large_strings']);
 
-      await kibanaServer.importExport.load('testlargestring');
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/testlargestring.json'
+      );
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/hamlet');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'testlargestring' });
     });

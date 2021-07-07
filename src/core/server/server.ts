@@ -248,6 +248,7 @@ export class Server {
       savedObjects: savedObjectsStart,
       exposedConfigsToUsage: this.plugins.getExposedPluginConfigsToUsage(),
     });
+    this.status.start();
 
     this.coreStart = {
       capabilities: capabilitiesStart,

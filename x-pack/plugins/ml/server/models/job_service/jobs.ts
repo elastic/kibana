@@ -226,6 +226,7 @@ export function jobsProvider(
         deleting: job.deleting || undefined,
         awaitingNodeAssignment: isJobAwaitingNodeAssignment(job),
         alertingRules: job.alerting_rules,
+        jobTags: job.custom_settings?.job_tags ?? {},
       };
       if (jobIds.find((j) => j === tempJob.id)) {
         tempJob.fullJob = job;

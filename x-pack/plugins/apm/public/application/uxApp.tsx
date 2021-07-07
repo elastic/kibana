@@ -78,7 +78,7 @@ export function UXAppRoot({
   core,
   deps,
   config,
-  corePlugins: { embeddable, maps, observability },
+  corePlugins: { embeddable, maps, observability, data },
   observabilityRuleTypeRegistry,
 }: {
   appMountParameters: AppMountParameters;
@@ -103,7 +103,9 @@ export function UXAppRoot({
   return (
     <RedirectAppLinks application={core.application}>
       <ApmPluginContext.Provider value={apmPluginContextValue}>
-        <KibanaContextProvider services={{ ...core, ...plugins, embeddable }}>
+        <KibanaContextProvider
+          services={{ ...core, ...plugins, embeddable, data }}
+        >
           <i18nCore.Context>
             <Router history={history}>
               <UrlParamsProvider>

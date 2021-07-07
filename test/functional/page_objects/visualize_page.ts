@@ -49,12 +49,15 @@ export class VisualizePageObject extends FtrService {
 
   public async initTests(isNewLibrary = false) {
     await this.kibanaServer.savedObjects.clean({ types: ['visualization'] });
-    await this.kibanaServer.importExport.load('visualize');
+    await this.kibanaServer.importExport.load(
+      'test/functional/fixtures/kbn_archiver/visualize.json'
+    );
 
     await this.kibanaServer.uiSettings.replace({
       defaultIndex: 'logstash-*',
       [UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0,0.[000]b',
       'visualization:visualize:legacyChartsLibrary': !isNewLibrary,
+      'visualization:visualize:legacyPieChartsLibrary': !isNewLibrary,
     });
   }
 

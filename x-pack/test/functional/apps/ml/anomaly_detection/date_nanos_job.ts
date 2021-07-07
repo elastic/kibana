@@ -123,8 +123,6 @@ export default function ({ getService }: FtrProviderContext) {
         '@timestamp'
       );
       await ml.testResources.setKibanaTimeZoneToUTC();
-
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/event_rate_nanos');
       await ml.securityUI.loginAsMlPowerUser();
     });
 

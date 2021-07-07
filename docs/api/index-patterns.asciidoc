@@ -20,6 +20,12 @@ The following index patterns APIs are available:
     ** <<index-patterns-api-default-set, Set default index pattern API>> to set a default index pattern
 * Fields
     ** <<index-patterns-fields-api-update, Update index pattern field>> to change field metadata, such as `count`, `customLabel` and `format`
+* Runtime fields
+    ** <<index-patterns-runtime-field-api-get, Get runtime field API>> to retrieve a runtime field
+    ** <<index-patterns-runtime-field-api-create, Create runtime field API>> to create a runtime field
+    ** <<index-patterns-runtime-field-api-upsert, Upsert runtime field API>> to create or update a runtime field
+    ** <<index-patterns-runtime-field-api-update, Update runtime field API>> to partially update an existing runtime field
+    ** <<index-patterns-runtime-field-api-delete, Delete runtime field API>> to delete a runtime field
 
 include::index-patterns/get.asciidoc[]
 include::index-patterns/create.asciidoc[]
@@ -28,3 +34,9 @@ include::index-patterns/delete.asciidoc[]
 include::index-patterns/default-get.asciidoc[]
 include::index-patterns/default-set.asciidoc[]
 include::index-patterns/update-fields.asciidoc[]
+include::index-patterns/runtime-fields/get.asciidoc[]
+include::index-patterns/runtime-fields/create.asciidoc[]
+include::index-patterns/runtime-fields/upsert.asciidoc[]
+include::index-patterns/runtime-fields/update.asciidoc[]
+include::index-patterns/runtime-fields/delete.asciidoc[]
+

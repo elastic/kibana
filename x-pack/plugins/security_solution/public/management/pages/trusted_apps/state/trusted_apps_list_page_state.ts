@@ -65,4 +65,5 @@ export interface TrustedAppsListPageState {
   policies: AsyncResourceState<GetPolicyListResponse>;
   location: TrustedAppsListPageLocation;
   active: boolean;
+  forceRefresh: boolean;
 }

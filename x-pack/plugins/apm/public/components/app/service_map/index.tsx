@@ -146,7 +146,7 @@ export function ServiceMap({
   return (
     <>
       <SearchBar showKueryBar={false} />
-      <EuiPanel paddingSize="none">
+      <EuiPanel hasBorder={true} paddingSize="none">
         <div
           data-test-subj="ServiceMap"
           style={{ height: heightWithPadding }}

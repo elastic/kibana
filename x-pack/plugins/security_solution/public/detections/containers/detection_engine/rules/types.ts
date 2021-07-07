@@ -28,6 +28,7 @@ import {
   rule_name_override,
   timestamp_override,
   threshold,
+  BulkAction,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
 import {
   CreateRulesSchema,
@@ -212,6 +213,24 @@ export interface DuplicateRulesProps {
   rules: Rule[];
 }
 
+export interface BulkActionProps<Action extends BulkAction> {
+  action: Action;
+  query: string;
+}
+
+export interface BulkActionResult {
+  success: boolean;
+  rules_count: number;
+}
+
+export type BulkActionResponse<Action extends BulkAction> = {
+  [BulkAction.delete]: BulkActionResult;
+  [BulkAction.disable]: BulkActionResult;
+  [BulkAction.enable]: BulkActionResult;
+  [BulkAction.duplicate]: BulkActionResult;
+  [BulkAction.export]: Blob;
+}[Action];
+
 export interface BasicFetchProps {
   signal: AbortSignal;
 }
@@ -248,7 +267,7 @@ export interface ExportDocumentsProps {
   ids: string[];
   filename?: string;
   excludeExportDetails?: boolean;
-  signal: AbortSignal;
+  signal?: AbortSignal;
 }
 
 export interface RuleStatus {

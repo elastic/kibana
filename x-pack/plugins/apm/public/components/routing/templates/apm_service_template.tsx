@@ -13,11 +13,18 @@ import {
   EuiPageHeaderProps,
   EuiTitle,
   EuiBetaBadge,
+  EuiToolTip,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { ApmMainTemplate } from './apm_main_template';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ApmServiceContextProvider } from '../../../context/apm_service/apm_service_context';
 import { enableServiceOverview } from '../../../../common/ui_settings_keys';
-import { isJavaAgentName, isRumAgentName } from '../../../../common/agent_name';
+import {
+  isJavaAgentName,
+  isRumAgentName,
+  isIosAgentName,
+} from '../../../../common/agent_name';
 import { ServiceIcons } from '../../shared/service_icons';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -29,39 +36,46 @@ import { useServiceOverviewHref } from '../../shared/Links/apm/service_overview_
 import { useServiceProfilingHref } from '../../shared/Links/apm/service_profiling_link';
 import { useTransactionsOverviewHref } from '../../shared/Links/apm/transaction_overview_link';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { ENVIRONMENT_NOT_DEFINED } from '../../../../common/environment_filter_values';
+import {
+  SERVICE_NAME,
+  SERVICE_ENVIRONMENT,
+} from '../../../../common/elasticsearch_fieldnames';
 import { Correlations } from '../../app/correlations';
 import { SearchBar } from '../../shared/search_bar';
+import {
+  createExploratoryViewUrl,
+  SeriesUrl,
+} from '../../../../../observability/public';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
-  key: string;
+  key:
+    | 'errors'
+    | 'metrics'
+    | 'nodes'
+    | 'overview'
+    | 'service-map'
+    | 'profiling'
+    | 'transactions';
   hidden?: boolean;
 };
-
-type TabKey =
-  | 'errors'
-  | 'metrics'
-  | 'nodes'
-  | 'overview'
-  | 'service-map'
-  | 'profiling'
-  | 'transactions';
 
 interface Props {
   children: React.ReactNode;
   serviceName: string;
-  selectedTab: TabKey;
+  selectedTab: Tab['key'];
   searchBarOptions?: React.ComponentProps<typeof SearchBar>;
 }
 
 export function ApmServiceTemplate(props: Props) {
   return (
     <ApmServiceContextProvider>
-      <Template {...props} />
+      <TemplateWithContext {...props} />
     </ApmServiceContextProvider>
   );
 }
 
-function Template({
+function TemplateWithContext({
   children,
   serviceName,
   selectedTab,
@@ -89,6 +103,10 @@ function Template({
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
+              <AnalyzeDataButton serviceName={serviceName} />
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
               <Correlations />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -102,12 +120,59 @@ function Template({
   );
 }
 
+function AnalyzeDataButton({ serviceName }: { serviceName: string }) {
+  const { agentName } = useApmServiceContext();
+  const { services } = useKibana();
+  const { urlParams } = useUrlParams();
+  const { rangeTo, rangeFrom, environment } = urlParams;
+  const basepath = services.http?.basePath.get();
+
+  if (isRumAgentName(agentName) || isIosAgentName(agentName)) {
+    const href = createExploratoryViewUrl(
+      {
+        'apm-series': {
+          dataType: isRumAgentName(agentName) ? 'ux' : 'mobile',
+          time: { from: rangeFrom, to: rangeTo },
+          reportType: 'kpi-over-time',
+          reportDefinitions: {
+            [SERVICE_NAME]: [serviceName],
+            ...(!!environment && ENVIRONMENT_NOT_DEFINED.value !== environment
+              ? { [SERVICE_ENVIRONMENT]: [environment] }
+              : {}),
+          },
+          operationType: 'average',
+          isNew: true,
+        } as SeriesUrl,
+      },
+      basepath
+    );
+
+    return (
+      <EuiToolTip
+        position="top"
+        content={i18n.translate('xpack.apm.analyzeDataButton.tooltip', {
+          defaultMessage:
+            'EXPERIMENTAL - Analyze Data allows you to select and filter result data in any dimension, and look for the cause or impact of performance problems',
+        })}
+      >
+        <EuiButtonEmpty href={href} iconType="visBarVerticalStacked">
+          {i18n.translate('xpack.apm.analyzeDataButton.label', {
+            defaultMessage: 'Analyze data',
+          })}
+        </EuiButtonEmpty>
+      </EuiToolTip>
+    );
+  }
+
+  return null;
+}
+
 function useTabs({
   serviceName,
   selectedTab,
 }: {
   serviceName: string;
-  selectedTab: TabKey;
+  selectedTab: Tab['key'];
 }) {
   const { agentName, transactionType } = useApmServiceContext();
   const { core, config } = useApmPluginContext();
@@ -155,7 +220,10 @@ function useTabs({
         defaultMessage: 'Metrics',
       }),
       hidden:
-        !agentName || isRumAgentName(agentName) || isJavaAgentName(agentName),
+        !agentName ||
+        isRumAgentName(agentName) ||
+        isJavaAgentName(agentName) ||
+        isIosAgentName(agentName),
     },
     {
       key: 'service-map',

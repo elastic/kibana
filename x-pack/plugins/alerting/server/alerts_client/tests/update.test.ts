@@ -127,6 +127,7 @@ describe('update()', () => {
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      isExportable: true,
       recoveryActionGroup: RecoveredActionGroup,
       async executor() {},
       producer: 'alerts',
@@ -773,6 +774,7 @@ describe('update()', () => {
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      isExportable: true,
       recoveryActionGroup: RecoveredActionGroup,
       validate: {
         params: schema.object({
@@ -1096,6 +1098,7 @@ describe('update()', () => {
         actionGroups: [{ id: 'default', name: 'Default' }],
         defaultActionGroupId: 'default',
         minimumLicenseRequired: 'basic',
+        isExportable: true,
         recoveryActionGroup: RecoveredActionGroup,
         async executor() {},
         producer: 'alerts',
@@ -1476,7 +1479,7 @@ describe('update()', () => {
       });
     });
 
-    test('logs audit event when updating an alert', async () => {
+    test('logs audit event when updating a rule', async () => {
       await alertsClient.update({
         id: '1',
         data: {
@@ -1495,7 +1498,7 @@ describe('update()', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'alert_update',
+            action: 'rule_update',
             outcome: 'unknown',
           }),
           kibana: { saved_object: { id: '1', type: 'alert' } },
@@ -1503,7 +1506,7 @@ describe('update()', () => {
       );
     });
 
-    test('logs audit event when not authorised to update an alert', async () => {
+    test('logs audit event when not authorised to update a rule', async () => {
       authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
 
       await expect(
@@ -1526,7 +1529,7 @@ describe('update()', () => {
         expect.objectContaining({
           event: expect.objectContaining({
             outcome: 'failure',
-            action: 'alert_update',
+            action: 'rule_update',
           }),
           kibana: {
             saved_object: {

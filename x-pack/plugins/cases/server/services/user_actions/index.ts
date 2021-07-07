@@ -7,13 +7,13 @@
 
 import { Logger, SavedObjectReference } from 'kibana/server';
 
-import { CaseUserActionAttributes } from '../../../common';
 import {
-  CASE_USER_ACTION_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
-  SUB_CASE_SAVED_OBJECT,
+  CASE_USER_ACTION_SAVED_OBJECT,
+  CaseUserActionAttributes,
   MAX_DOCS_PER_PAGE,
-} from '../../../common/constants';
+  SUB_CASE_SAVED_OBJECT,
+} from '../../../common';
 import { ClientArgs } from '..';
 
 interface GetCaseUserActionArgs extends ClientArgs {

@@ -22,13 +22,6 @@ export const EVENTS = i18n.translate('xpack.securitySolution.eventsViewer.events
   defaultMessage: 'Events',
 });
 
-export const LOADING_EVENTS = i18n.translate(
-  'xpack.securitySolution.eventsViewer.footer.loadingEventsDataLabel',
-  {
-    defaultMessage: 'Loading Events',
-  }
-);
-
 export const UNIT = (totalCount: number) =>
   i18n.translate('xpack.securitySolution.eventsViewer.unit', {
     values: { totalCount },

@@ -109,13 +109,11 @@ describe('when on integration detail', () => {
           pagePathGetters.integration_details_custom({ pkgkey: 'nginx-0.3.7' })[1]
         );
       });
-      expect(testRenderer.history.location.pathname).toEqual(
-        '/app/integrations/detail/nginx-0.3.7/overview'
-      );
+      expect(testRenderer.history.location.pathname).toEqual('/detail/nginx-0.3.7/overview');
     });
   });
 
-  describe('and a custom UI extension is registered', () => {
+  describe('and a custom tab UI extension is registered', () => {
     // Because React Lazy components are loaded async (Promise), we setup this "watcher" Promise
     // that is `resolved` once the lazy components actually renders.
     let lazyComponentWasRendered: Promise<void>;
@@ -138,7 +136,7 @@ describe('when on integration detail', () => {
       testRenderer.startInterface.registerExtension({
         package: 'nginx',
         view: 'package-detail-custom',
-        component: CustomComponent,
+        Component: CustomComponent,
       });
 
       render();
@@ -157,6 +155,53 @@ describe('when on integration detail', () => {
       act(() => {
         testRenderer.history.push(
           pagePathGetters.integration_details_custom({ pkgkey: 'nginx-0.3.7' })[1]
+        );
+      });
+      await lazyComponentWasRendered;
+      expect(renderResult.getByTestId('custom-hello'));
+    });
+  });
+
+  describe('and a custom assets UI extension is registered', () => {
+    let lazyComponentWasRendered: Promise<void>;
+
+    beforeEach(() => {
+      let setWasRendered: () => void;
+      lazyComponentWasRendered = new Promise((resolve) => {
+        setWasRendered = resolve;
+      });
+
+      const CustomComponent = lazy(async () => {
+        return {
+          default: memo(() => {
+            setWasRendered();
+            return <div data-test-subj="custom-hello">hello</div>;
+          }),
+        };
+      });
+
+      testRenderer.startInterface.registerExtension({
+        package: 'nginx',
+        view: 'package-detail-assets',
+        Component: CustomComponent,
+      });
+
+      render();
+    });
+
+    afterEach(() => {
+      // @ts-ignore
+      lazyComponentWasRendered = undefined;
+    });
+
+    it('should display "assets" tab in navigation', () => {
+      expect(renderResult.getByTestId('tab-assets'));
+    });
+
+    it('should display custom assets when tab is clicked', async () => {
+      act(() => {
+        testRenderer.history.push(
+          pagePathGetters.integration_details_assets({ pkgkey: 'nginx-0.3.7' })[1]
         );
       });
       await lazyComponentWasRendered;
@@ -204,11 +249,29 @@ describe('when on integration detail', () => {
       expect(firstRowAgentCount.tagName).not.toEqual('A');
     });
 
+    it('should show add agent button if agent count is zero', async () => {
+      await mockedApi.waitForApi();
+      const firstRowAgentCount = renderResult.getAllByTestId('rowAgentCount')[0];
+      expect(firstRowAgentCount.textContent).toEqual('0');
+
+      const addAgentButton = renderResult.getAllByTestId('addAgentButton')[0];
+      expect(addAgentButton).not.toBeNull();
+    });
+
     it('should show link for agent count if greater than zero', async () => {
       await mockedApi.waitForApi();
       const secondRowAgentCount = renderResult.getAllByTestId('rowAgentCount')[1];
       expect(secondRowAgentCount.textContent).toEqual('100');
       expect(secondRowAgentCount.tagName).toEqual('A');
+    });
+
+    it('should NOT show add agent button if agent count is greater than zero', async () => {
+      await mockedApi.waitForApi();
+      const secondRowAgentCount = renderResult.getAllByTestId('rowAgentCount')[1];
+      expect(secondRowAgentCount.textContent).toEqual('100');
+
+      const addAgentButton = renderResult.getAllByTestId('addAgentButton')[1];
+      expect(addAgentButton).toBeUndefined();
     });
   });
 });

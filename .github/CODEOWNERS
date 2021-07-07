@@ -76,6 +76,7 @@
 /src/plugins/apm_oss/  @elastic/apm-ui
 /src/apm.js @elastic/kibana-core @vigneshshanmugam
 /packages/kbn-apm-config-loader/ @elastic/kibana-core @vigneshshanmugam
+/src/core/types/elasticsearch @elastic/apm-ui
 #CC# /src/plugins/apm_oss/ @elastic/apm-ui
 #CC# /x-pack/plugins/observability/ @elastic/apm-ui
 
@@ -251,6 +252,7 @@
 /src/core/server/csp/  @elastic/kibana-security @elastic/kibana-core
 /src/plugins/security_oss/ @elastic/kibana-security
 /src/plugins/spaces_oss/ @elastic/kibana-security
+/src/plugins/user_setup/ @elastic/kibana-security
 /test/security_functional/ @elastic/kibana-security
 /x-pack/plugins/spaces/  @elastic/kibana-security
 /x-pack/plugins/encrypted_saved_objects/  @elastic/kibana-security

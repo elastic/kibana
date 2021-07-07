@@ -13,13 +13,12 @@ import { Observable } from 'rxjs';
 import { ExecutorState, ExecutorContainer } from './container';
 import { createExecutorContainer } from './container';
 import { AnyExpressionFunctionDefinition, ExpressionFunction } from '../expression_functions';
-import { Execution, ExecutionParams } from '../execution/execution';
+import { Execution, ExecutionParams, ExecutionResult } from '../execution/execution';
 import { IRegistry } from '../types';
 import { ExpressionType } from '../expression_types/expression_type';
 import { AnyExpressionTypeDefinition } from '../expression_types/types';
 import { ExpressionAstExpression, ExpressionAstFunction } from '../ast';
 import { ExpressionValueError, typeSpecs } from '../expression_types/specs';
-import { functionSpecs } from '../expression_functions/specs';
 import { getByAlias } from '../util';
 import { SavedObjectReference } from '../../../../core/types';
 import { PersistableStateService, SerializableState } from '../../../kibana_utils/common';
@@ -85,7 +84,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
   ): Executor<Ctx> {
     const executor = new Executor<Ctx>(state);
     for (const type of typeSpecs) executor.registerType(type);
-    for (const func of functionSpecs) executor.registerFunction(func);
+
     return executor;
   }
 
@@ -161,7 +160,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     ast: string | ExpressionAstExpression,
     input: Input,
     params: ExpressionExecutionParams = {}
-  ): Observable<Output | ExpressionValueError> {
+  ): Observable<ExecutionResult<Output | ExpressionValueError>> {
     return this.createExecution<Input, Output>(ast, params).start(input);
   }
 

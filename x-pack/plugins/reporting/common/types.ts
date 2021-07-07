@@ -65,9 +65,11 @@ export interface ReportSource {
     objectType: string;
     title: string;
     layout?: LayoutParams;
+    isDeprecated?: boolean;
   };
   meta: { objectType: string; layout?: string };
   browser_type: string;
+  migration_version: string;
   max_attempts: number;
   timeout: number;
 
@@ -77,7 +79,7 @@ export interface ReportSource {
   started_at?: string;
   completed_at?: string;
   created_at: string;
-  process_expiration?: string;
+  process_expiration?: string | null; // must be set to null to clear the expiration
 }
 
 /*
@@ -127,6 +129,7 @@ export interface ReportApiJSON {
     layout?: LayoutParams;
     title: string;
     browserTimezone?: string;
+    isDeprecated?: boolean;
   };
   meta: {
     layout?: string;
@@ -163,3 +166,9 @@ export type DownloadReportFn = (jobId: JobId) => DownloadLink;
 
 type ManagementLink = string;
 export type ManagementLinkFn = () => ManagementLink;
+
+export type IlmPolicyMigrationStatus = 'policy-not-found' | 'indices-not-managed-by-policy' | 'ok';
+
+export interface IlmPolicyStatusResponse {
+  status: IlmPolicyMigrationStatus;
+}

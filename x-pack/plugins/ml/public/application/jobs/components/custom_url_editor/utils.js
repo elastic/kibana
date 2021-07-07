@@ -17,10 +17,8 @@ import { parseInterval } from '../../../../../common/util/parse_interval';
 import { replaceTokensInUrlValue, isValidLabel } from '../../../util/custom_url_utils';
 import { getIndexPatternIdFromName } from '../../../util/index_utils';
 import { ml } from '../../../services/ml_api_service';
-import { mlJobService } from '../../../services/job_service';
 import { escapeForElasticsearchQuery } from '../../../util/string_utils';
 import { getSavedObjectsClient, getGetUrlGenerator } from '../../../util/dependency_cache';
-import { getProcessedFields } from '../../../components/data_grid';
 
 export function getNewCustomUrlDefaults(job, dashboards, indexPatterns) {
   // Returns the settings object in the format used by the custom URL editor
@@ -266,8 +264,7 @@ function buildAppStateQueryParam(queryFieldNames) {
 // Builds the full URL for testing out a custom URL configuration, which
 // may contain dollar delimited partition / influencer entity tokens and
 // drilldown time range settings.
-export function getTestUrl(job, customUrl) {
-  const urlValue = customUrl.url_value;
+export async function getTestUrl(job, customUrl) {
   const bucketSpanSecs = parseInterval(job.analysis_config.bucket_span).asSeconds();
 
   // By default, return configured url_value. Look to substitute any dollar-delimited
@@ -289,64 +286,55 @@ export function getTestUrl(job, customUrl) {
     sort: [{ record_score: { order: 'desc' } }],
   };
 
-  return new Promise((resolve, reject) => {
-    ml.results
-      .anomalySearch(
-        {
-          body,
-        },
-        [job.job_id]
-      )
-      .then((resp) => {
-        if (resp.hits.total.value > 0) {
-          const record = resp.hits.hits[0]._source;
-          testUrl = replaceTokensInUrlValue(customUrl, bucketSpanSecs, record, 'timestamp');
-          resolve(testUrl);
-        } else {
-          // No anomalies yet for this job, so do a preview of the search
-          // configured in the job datafeed to obtain sample docs.
-          mlJobService.searchPreview(job).then((response) => {
-            let testDoc;
-            const docTimeFieldName = job.data_description.time_field;
+  let resp;
+  try {
+    resp = await ml.results.anomalySearch(
+      {
+        body,
+      },
+      [job.job_id]
+    );
+  } catch (error) {
+    // search may fail if the job doesn't already exist
+    // ignore this error as the outer function call will raise a toast
+  }
 
-            // Handle datafeeds which use aggregations or documents.
-            if (response.aggregations) {
-              // Create a dummy object which contains the fields necessary to build the URL.
-              const firstBucket = response.aggregations.buckets.buckets[0];
-              testDoc = {
-                [docTimeFieldName]: firstBucket.key,
-              };
+  if (resp && resp.hits.total.value > 0) {
+    const record = resp.hits.hits[0]._source;
+    testUrl = replaceTokensInUrlValue(customUrl, bucketSpanSecs, record, 'timestamp');
+    return testUrl;
+  } else {
+    // No anomalies yet for this job, so do a preview of the search
+    // configured in the job datafeed to obtain sample docs.
 
-              // Look for bucket aggregations which match the tokens in the URL.
-              urlValue.replace(/\$([^?&$\'"]{1,40})\$/g, (match, name) => {
-                if (name !== 'earliest' && name !== 'latest' && firstBucket[name] !== undefined) {
-                  const tokenBuckets = firstBucket[name];
-                  if (tokenBuckets.buckets) {
-                    testDoc[name] = tokenBuckets.buckets[0].key;
-                  }
-                }
-              });
-            } else {
-              if (response.hits.total.value > 0) {
-                testDoc = getProcessedFields(response.hits.hits[0].fields);
-              }
-            }
+    let { datafeed_config: datafeedConfig, ...jobConfig } = job;
+    try {
+      // attempt load the non-combined job and datafeed so they can be used in the datafeed preview
+      const [{ jobs }, { datafeeds }] = await Promise.all([
+        ml.getJobs({ jobId: job.job_id }),
+        ml.getDatafeeds({ datafeedId: job.datafeed_config.datafeed_id }),
+      ]);
+      datafeedConfig = datafeeds[0];
+      jobConfig = jobs[0];
+    } catch (error) {
+      // jobs may not exist as this might be called from the AD job wizards
+      // ignore this error as the outer function call will raise a toast
+    }
 
-            if (testDoc !== undefined) {
-              testUrl = replaceTokensInUrlValue(
-                customUrl,
-                bucketSpanSecs,
-                testDoc,
-                docTimeFieldName
-              );
-            }
+    if (jobConfig === undefined || datafeedConfig === undefined) {
+      return testUrl;
+    }
 
-            resolve(testUrl);
-          });
-        }
-      })
-      .catch((resp) => {
-        reject(resp);
-      });
-  });
+    const preview = await ml.jobs.datafeedPreview(undefined, jobConfig, datafeedConfig);
+
+    const docTimeFieldName = job.data_description.time_field;
+
+    // Create a dummy object which contains the fields necessary to build the URL.
+    const firstBucket = preview[0];
+    if (firstBucket !== undefined) {
+      testUrl = replaceTokensInUrlValue(customUrl, bucketSpanSecs, firstBucket, docTimeFieldName);
+    }
+
+    return testUrl;
+  }
 }

@@ -7,8 +7,13 @@
 
 import { KibanaServices } from '../common/lib/kibana';
 
-import { ConnectorTypes, CommentType, CaseStatuses, SECURITY_SOLUTION_OWNER } from '../../common';
-import { CASES_URL } from '../../common';
+import {
+  CASES_URL,
+  ConnectorTypes,
+  CommentType,
+  CaseStatuses,
+  SECURITY_SOLUTION_OWNER,
+} from '../../common';
 
 import {
   deleteCases,
@@ -161,7 +166,7 @@ describe('Case Configuration API', () => {
         query: {
           ...DEFAULT_QUERY_PARAMS,
           reporters,
-          tags: ['"coke"', '"pepsi"'],
+          tags: ['coke', 'pepsi'],
           search: 'hello',
           status: CaseStatuses.open,
           owner: [SECURITY_SOLUTION_OWNER],
@@ -190,7 +195,7 @@ describe('Case Configuration API', () => {
         query: {
           ...DEFAULT_QUERY_PARAMS,
           reporters,
-          tags: ['"("', '"\\"double\\""'],
+          tags: ['(', '"double"'],
           search: 'hello',
           status: CaseStatuses.open,
           owner: [SECURITY_SOLUTION_OWNER],
@@ -358,13 +363,14 @@ describe('Case Configuration API', () => {
     });
 
     test('check url, method, signal', async () => {
-      await patchComment(
-        basicCase.id,
-        basicCase.comments[0].id,
-        'updated comment',
-        basicCase.comments[0].version,
-        abortCtrl.signal
-      );
+      await patchComment({
+        caseId: basicCase.id,
+        commentId: basicCase.comments[0].id,
+        commentUpdate: 'updated comment',
+        version: basicCase.comments[0].version,
+        signal: abortCtrl.signal,
+        owner: SECURITY_SOLUTION_OWNER,
+      });
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}/comments`, {
         method: 'PATCH',
         body: JSON.stringify({
@@ -372,19 +378,21 @@ describe('Case Configuration API', () => {
           type: CommentType.user,
           id: basicCase.comments[0].id,
           version: basicCase.comments[0].version,
+          owner: SECURITY_SOLUTION_OWNER,
         }),
         signal: abortCtrl.signal,
       });
     });
 
     test('happy path', async () => {
-      const resp = await patchComment(
-        basicCase.id,
-        basicCase.comments[0].id,
-        'updated comment',
-        basicCase.comments[0].version,
-        abortCtrl.signal
-      );
+      const resp = await patchComment({
+        caseId: basicCase.id,
+        commentId: basicCase.comments[0].id,
+        commentUpdate: 'updated comment',
+        version: basicCase.comments[0].version,
+        signal: abortCtrl.signal,
+        owner: SECURITY_SOLUTION_OWNER,
+      });
       expect(resp).toEqual(basicCase);
     });
   });

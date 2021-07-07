@@ -44,7 +44,7 @@ import { getTopNavConfig } from '../top_nav_config';
 import { MapQuery } from '../../../../common/descriptor_types';
 import { goToSpecifiedPath } from '../../../render_app';
 import { MapSavedObjectAttributes } from '../../../../common/map_saved_object_type';
-import { getExistingMapPath, APP_ID } from '../../../../common/constants';
+import { getFullPath, APP_ID } from '../../../../common/constants';
 import {
   getInitialQuery,
   getInitialRefreshConfig,
@@ -356,7 +356,7 @@ export class MapApp extends React.Component<Props, State> {
     const savedObjectId = this.props.savedMap.getSavedObjectId();
     if (savedObjectId) {
       getCoreChrome().recentlyAccessed.add(
-        getExistingMapPath(savedObjectId),
+        getFullPath(savedObjectId),
         this.props.savedMap.getTitle(),
         savedObjectId
       );
@@ -455,6 +455,7 @@ export class MapApp extends React.Component<Props, State> {
             addFilters={this._addFilter}
             title={this.props.savedMap.getAttributes().title}
             description={this.props.savedMap.getAttributes().description}
+            waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(this.props.savedMap.getStore())}
           />
         </div>
       </div>
