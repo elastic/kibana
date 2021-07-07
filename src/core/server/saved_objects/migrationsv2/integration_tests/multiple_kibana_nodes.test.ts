@@ -171,7 +171,7 @@ describe('migration v2', () => {
 
   const delay = (timeInMs: number) => new Promise((resolve) => setTimeout(resolve, timeInMs));
   const startWithDelay = async (instances: Root[], delayInSec: number) => {
-    const promises: Array<Promise<any>> = [];
+    const promises: Array<Promise<unknown>> = [];
     for (let i = 0; i < instances.length; i++) {
       promises.push(instances[i].start());
       if (i < instances.length - 1) {

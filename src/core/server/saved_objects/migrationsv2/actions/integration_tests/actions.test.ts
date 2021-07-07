@@ -181,21 +181,17 @@ describe('migration actions', () => {
         { _source: { title: 'doc 3' } },
         { _source: { title: 'doc 4' } },
       ] as unknown) as SavedObjectsRawDoc[];
-      await expect(
-        bulkOverwriteTransformedDocuments({
-          client,
-          index: 'new_index_without_write_block',
-          transformedDocs: sourceDocs,
-          refresh: 'wait_for',
-        })()
-      ).resolves.toMatchInlineSnapshot(`
-              Object {
-                "_tag": "Left",
-                "left": Object {
-                  "type": "target_index_had_write_block",
-                },
-              }
-            `);
+
+      const res = (await bulkOverwriteTransformedDocuments({
+        client,
+        index: 'new_index_without_write_block',
+        transformedDocs: sourceDocs,
+        refresh: 'wait_for',
+      })()) as Either.Left<unknown>;
+
+      expect(res.left).toEqual({
+        type: 'target_index_had_write_block',
+      });
     });
     it('resolves left index_not_found_exception when the index does not exist', async () => {
       expect.assertions(1);
@@ -1101,6 +1097,7 @@ describe('migration actions', () => {
           return Either.right({ processedDocs });
         };
       }
+
       const transformTask = transformDocs({
         transformRawDocs: innerTransformRawDocs,
         outdatedDocuments: originalDocs,
