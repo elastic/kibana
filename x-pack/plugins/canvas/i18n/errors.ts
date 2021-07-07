@@ -17,30 +17,6 @@ export const ErrorStrings = {
         },
       }),
   },
-  downloadWorkpad: {
-    getDownloadFailureErrorMessage: () =>
-      i18n.translate('xpack.canvas.error.downloadWorkpad.downloadFailureErrorMessage', {
-        defaultMessage: "Couldn't download workpad",
-      }),
-    getDownloadRenderedWorkpadFailureErrorMessage: () =>
-      i18n.translate(
-        'xpack.canvas.error.downloadWorkpad.downloadRenderedWorkpadFailureErrorMessage',
-        {
-          defaultMessage: "Couldn't download rendered workpad",
-        }
-      ),
-    getDownloadRuntimeFailureErrorMessage: () =>
-      i18n.translate('xpack.canvas.error.downloadWorkpad.downloadRuntimeFailureErrorMessage', {
-        defaultMessage: "Couldn't download Shareable Runtime",
-      }),
-    getDownloadZippedRuntimeFailureErrorMessage: () =>
-      i18n.translate(
-        'xpack.canvas.error.downloadWorkpad.downloadZippedRuntimeFailureErrorMessage',
-        {
-          defaultMessage: "Couldn't download ZIP file",
-        }
-      ),
-  },
   esPersist: {
     getSaveFailureTitle: () =>
       i18n.translate('xpack.canvas.error.esPersist.saveFailureTitle', {
