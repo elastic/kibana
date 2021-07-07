@@ -34,8 +34,7 @@ refer to <<xpack-security-authorization,Granting access to {kib}>>.
 . Open the main menu, and then click *Dashboard*.
 . Click **Create dashboard**.
 . Set the time range to *Last 7 days*.
-. Click **Create panel**.
-. Click **Maps**.
+. Click the **Create new Maps** icon.
 
 [float]
 [[maps-add-choropleth-layer]]
@@ -62,14 +61,15 @@ and lighter shades will symbolize countries with less traffic.
 
 . Add a Tooltip field:
 
-** Select **ISO 3166-1 alpha-2 code** and **name**.
-** Click **Add**.
+** **ISO 3166-1 alpha-2 code** is added by default.
+** Click **Add** and select **name**.
+** Click **Add** to create the field.
 
 . In **Layer style**, set:
 
 ** **Fill color: As number** to the grey color ramp
 ** **Border color** to white
-** **Label** to symbol label
+** **Label** to Fixed - symbol label
 
 . Click **Save & close**.
 +
@@ -136,7 +136,8 @@ grids with less bytes transferred.
 ** **Visibility** to the range [0, 9]
 ** **Opacity** to 100%
 . In **Metrics**, use:
-** **Agregation** set to **Count**, and
+** **Agregation** set to **Count**,
+** Click **Add metric**, and then
 ** **Aggregation** set to **Sum** with **Field** set to **bytes**
 . In **Layer style**, change **Symbol size**:
 ** Set the field select to *sum bytes*.
