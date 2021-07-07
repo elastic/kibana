@@ -16,6 +16,8 @@ export const totalNumberOfPrebuiltRulesInEsArchive = 127;
 
 export const totalNumberOfPrebuiltRulesInEsArchiveCustomRule = 145;
 
+const ccsRemoteName: string = Cypress.env('CCS_REMOTE_NAME');
+
 interface MitreAttackTechnique {
   name: string;
   subtechniques: string[];
@@ -183,6 +185,24 @@ export const newRule: CustomRule = {
 export const unmappedRule: CustomRule = {
   customQuery: '*:*',
   index: ['unmapped*'],
+  name: 'Rule with unmapped fields',
+  description: 'The new rule description.',
+  severity: 'High',
+  riskScore: '17',
+  tags: ['test', 'newRule'],
+  referenceUrls: ['http://example.com/', 'https://example.com/'],
+  falsePositivesExamples: ['False1', 'False2'],
+  mitre: [mitre1, mitre2],
+  note: '# test markdown',
+  runsEvery,
+  lookBack,
+  timeline,
+  maxSignals: 100,
+};
+
+export const unmappedCCSRule: CustomRule = {
+  customQuery: '*:*',
+  index: [`${ccsRemoteName}:unmapped*`],
   name: 'Rule with unmapped fields',
   description: 'The new rule description.',
   severity: 'High',
