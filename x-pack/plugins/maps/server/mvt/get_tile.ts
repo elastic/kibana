@@ -44,6 +44,9 @@ import { pluckRangeFieldMeta } from '../../common/pluck_range_field_meta';
 import { FieldMeta, TileMetaFeature } from '../../common/descriptor_types';
 import { pluckCategoryFieldMeta } from '../../common/pluck_category_field_meta';
 
+// heuristic. largest color-palette has 30 colors. 1 color is used for 'other'.
+const TERM_COUNT = 30 - 1;
+
 function isAbortError(error: Error) {
   return error.message === 'Request aborted' || error.message === 'Aborted';
 }
@@ -132,7 +135,7 @@ export async function getGridTile({
           }
         });
 
-        const categoryMeta = pluckCategoryFieldMeta(features, fieldName, 20);
+        const categoryMeta = pluckCategoryFieldMeta(features, fieldName, TERM_COUNT);
 
         if (!fieldMeta[fieldName]) {
           fieldMeta[fieldName] = {};
@@ -341,10 +344,18 @@ export async function getTile({
 
       const fieldMeta: FieldMeta = {};
       fieldNames.forEach((fieldName: string) => {
+        if (
+          fieldName === '_index' ||
+          fieldName === '_id' ||
+          fieldName === FEATURE_ID_PROPERTY_NAME
+        ) {
+          return;
+        }
+
         const rangeMeta = pluckRangeFieldMeta(features, fieldName, (rawValue: unknown) => {
           return typeof rawValue === 'number' ? rawValue : NaN;
         });
-        const categoryMeta = pluckCategoryFieldMeta(features, fieldName, 20);
+        const categoryMeta = pluckCategoryFieldMeta(features, fieldName, TERM_COUNT);
 
         if (!fieldMeta[fieldName]) {
           fieldMeta[fieldName] = {};

@@ -66,22 +66,22 @@ export class TiledVectorLayer extends VectorLayer {
     this._source = source as ITiledSingleLayerVectorSource;
   }
 
-  getMetaFromTiles(): TileMetaFeature[] {
+  _getMetaFromTiles(): TileMetaFeature[] {
     return this._descriptor.__metaFromTiles || [];
   }
 
   getCustomIconAndTooltipContent(): CustomIconAndTooltipContent {
-    const tileMetas = this.getMetaFromTiles();
+    const tileMetas = this._getMetaFromTiles();
     if (!tileMetas.length) {
       return NO_RESULTS_ICON_AND_TOOLTIPCONTENT;
     }
 
-    const totalFeatures: number = tileMetas.reduce((acc: number, tileMeta: Feature) => {
+    const totalFeaturesCount: number = tileMetas.reduce((acc: number, tileMeta: Feature) => {
       const count = tileMeta && tileMeta.properties ? tileMeta.properties[KBN_FEATURE_COUNT] : 0;
       return count + acc;
     }, 0);
 
-    if (totalFeatures === 0) {
+    if (totalFeaturesCount === 0) {
       return NO_RESULTS_ICON_AND_TOOLTIPCONTENT;
     }
 
@@ -93,9 +93,17 @@ export class TiledVectorLayer extends VectorLayer {
       icon: this.getCurrentStyle().getIcon(),
       tooltipContent: isIncomplete
         ? i18n.translate('xpack.maps.tiles.resultsTrimmedMsg', {
-            defaultMessage: `Layer shows incomplete results`,
+            defaultMessage: `Results limited to {count} documents.`,
+            values: {
+              count: totalFeaturesCount,
+            },
           })
-        : null,
+        : i18n.translate('xpack.maps.tiles.resultsCompleteMsg', {
+            defaultMessage: `Found {count} documents.`,
+            values: {
+              count: totalFeaturesCount,
+            },
+          }),
       areResultsTrimmed: isIncomplete,
     };
   }
@@ -340,7 +348,7 @@ export class TiledVectorLayer extends VectorLayer {
       return null;
     }
 
-    const metaFromTiles = this.getMetaFromTiles();
+    const metaFromTiles = this._getMetaFromTiles();
     return await style.pluckStyleMetaFromTileMeta(metaFromTiles);
   }
 }
