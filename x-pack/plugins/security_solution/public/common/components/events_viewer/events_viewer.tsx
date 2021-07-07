@@ -135,6 +135,7 @@ interface Props {
   rowRenderers: RowRenderer[];
   start: string;
   sort: Sort[];
+  showTotalCount?: boolean;
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
   // If truthy, the graph viewer (Resolver) is showing
   graphEventId: string | undefined;
@@ -163,6 +164,7 @@ const EventsViewerComponent: React.FC<Props> = ({
   rowRenderers,
   start,
   sort,
+  showTotalCount = true,
   utilityBar,
   graphEventId,
 }) => {
@@ -253,8 +255,12 @@ const EventsViewerComponent: React.FC<Props> = ({
 
   const subtitle = useMemo(
     () =>
-      `${i18n.SHOWING}: ${totalCountMinusDeleted.toLocaleString()} ${unit(totalCountMinusDeleted)}`,
-    [totalCountMinusDeleted, unit]
+      showTotalCount
+        ? `${i18n.SHOWING}: ${totalCountMinusDeleted.toLocaleString()} ${unit(
+            totalCountMinusDeleted
+          )}`
+        : null,
+    [showTotalCount, totalCountMinusDeleted, unit]
   );
 
   const nonDeletedEvents = useMemo(() => events.filter((e) => !deletedEventIds.includes(e._id)), [
