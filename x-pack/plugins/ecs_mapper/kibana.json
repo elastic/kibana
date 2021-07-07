@@ -14,5 +14,6 @@
   "server": true,
   "ui": true,
   "requiredBundles": [
+    "kibanaReact"
   ]
 }
