@@ -147,8 +147,9 @@ bin/logstash -f config/trimet-pipeline.conf
 ----------------------------------
 
 . Wait for Logstash to initialize and confirm data is flowing. You should see messages similar to this:
-    [role="screenshot"]
-    image::maps/images/asset-tracking-tutorial/logstash_output.png[]
++
+[role="screenshot"]
+image::maps/images/asset-tracking-tutorial/logstash_output.png[]
 . Leave the terminal window open and Logstash running throughout this tutorial.
 
 
