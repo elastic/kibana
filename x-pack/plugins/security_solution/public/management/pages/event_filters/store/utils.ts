@@ -6,15 +6,23 @@
  */
 
 import uuid from 'uuid';
-import { CreateExceptionListItemSchema } from '../../../../shared_imports';
+import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { Ecs } from '../../../../../common/ecs';
 import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '../constants';
 
-export const getInitialExceptionFromEvent = (data: Ecs): CreateExceptionListItemSchema => ({
+const osTypeBasedOnAgentType = (data?: Ecs) => {
+  if (data?.agent?.type?.includes('endpoint')) {
+    return (data?.host?.os?.name || ['windows']).map((name) => name.toLowerCase());
+  } else {
+    return data?.host?.os?.family ?? ['windows'];
+  }
+};
+
+export const getInitialExceptionFromEvent = (data?: Ecs): CreateExceptionListItemSchema => ({
   comments: [],
   description: '',
   entries:
-    data.event && data.process
+    data && data.event && data.process
       ? [
           {
             field: 'event.category',
@@ -29,7 +37,14 @@ export const getInitialExceptionFromEvent = (data: Ecs): CreateExceptionListItem
             value: (data.process.executable ?? [])[0],
           },
         ]
-      : [],
+      : [
+          {
+            field: '',
+            operator: 'included',
+            type: 'match',
+            value: '',
+          },
+        ],
   item_id: undefined,
   list_id: ENDPOINT_EVENT_FILTERS_LIST_ID,
   meta: {
@@ -37,8 +52,7 @@ export const getInitialExceptionFromEvent = (data: Ecs): CreateExceptionListItem
   },
   name: '',
   namespace_type: 'agnostic',
-  tags: [],
+  tags: ['policy:all'],
   type: 'simple',
-  // TODO: Try to fix this type casting
-  os_types: [(data.host ? data.host.os?.family ?? [] : [])[0] as 'windows' | 'linux' | 'macos'],
+  os_types: osTypeBasedOnAgentType(data) as Array<'windows' | 'linux' | 'macos'>,
 });

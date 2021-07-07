@@ -1,0 +1,29 @@
+{
+  "anomaly_threshold": 75,
+  "author": [
+    "Elastic"
+  ],
+  "description": "A machine learning job detected an unusually large spike in network traffic. Such a burst of traffic, if not caused by a surge in business activity, can be due to suspicious or malicious activity. Large-scale data exfiltration may produce a burst of network traffic; this could also be due to unusually large amounts of reconnaissance or enumeration traffic. Denial-of-service attacks or traffic floods may also produce such a surge in traffic.",
+  "false_positives": [
+    "Business workflows that occur very occasionally, and involve an unsual surge in network trafic, can trigger this alert. A new business workflow or a surge in business activity may trigger this alert. A misconfigured network application or firewall may trigger this alert."
+  ],
+  "from": "now-30m",
+  "interval": "15m",
+  "license": "Elastic License v2",
+  "machine_learning_job_id": "high_count_network_events",
+  "name": "Spike in Network Traffic",
+  "references": [
+    "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html"
+  ],
+  "risk_score": 21,
+  "rule_id": "b240bfb8-26b7-4e5e-924e-218144a3fa71",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Network",
+    "Threat Detection",
+    "ML"
+  ],
+  "type": "machine_learning",
+  "version": 2
+}

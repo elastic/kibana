@@ -12,6 +12,9 @@ import {
   PluginInitializerContext,
   AppMountParameters,
 } from 'kibana/public';
+import { from } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '../../../../../src/core/public';
 import {
   FeatureCatalogueCategory,
@@ -28,13 +31,18 @@ import {
 } from '../../../../../src/plugins/data/public';
 import { alertTypeInitializers } from '../lib/alert_types';
 import { FleetStart } from '../../../fleet/public';
-import { FetchDataParams, ObservabilityPublicSetup } from '../../../observability/public';
+import {
+  FetchDataParams,
+  ObservabilityPublicSetup,
+  ObservabilityPublicStart,
+} from '../../../observability/public';
 import { PLUGIN } from '../../common/constants/plugin';
 import { IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public';
 import {
   LazySyntheticsPolicyCreateExtension,
   LazySyntheticsPolicyEditExtension,
 } from '../components/fleet_package';
+import { LazySyntheticsCustomAssetsExtension } from '../components/fleet_package/lazy_synthetics_custom_assets_extension';
 
 export interface ClientPluginsSetup {
   data: DataPublicPluginSetup;
@@ -48,6 +56,7 @@ export interface ClientPluginsStart {
   data: DataPublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   fleet?: FleetStart;
+  observability: ObservabilityPublicStart;
 }
 
 export interface UptimePluginServices extends Partial<CoreStart> {
@@ -83,20 +92,54 @@ export class UptimePlugin
       return UptimeDataHelper(coreStart);
     };
 
-    if (plugins.observability) {
-      plugins.observability.dashboard.register({
-        appName: 'synthetics',
-        hasData: async () => {
-          const dataHelper = await getUptimeDataHelper();
-          const status = await dataHelper.indexStatus();
-          return { hasData: status.docCount > 0, indices: status.indices };
-        },
-        fetchData: async (params: FetchDataParams) => {
-          const dataHelper = await getUptimeDataHelper();
-          return await dataHelper.overviewData(params);
-        },
-      });
-    }
+    plugins.observability.dashboard.register({
+      appName: 'synthetics',
+      hasData: async () => {
+        const dataHelper = await getUptimeDataHelper();
+        const status = await dataHelper.indexStatus();
+        return { hasData: status.docCount > 0, indices: status.indices };
+      },
+      fetchData: async (params: FetchDataParams) => {
+        const dataHelper = await getUptimeDataHelper();
+        return await dataHelper.overviewData(params);
+      },
+    });
+
+    plugins.observability.navigation.registerSections(
+      from(core.getStartServices()).pipe(
+        map(([coreStart]) => {
+          if (coreStart.application.capabilities.uptime.show) {
+            return [
+              {
+                label: 'Uptime',
+                sortKey: 500,
+                entries: [
+                  {
+                    label: i18n.translate('xpack.uptime.overview.heading', {
+                      defaultMessage: 'Monitors',
+                    }),
+                    app: 'uptime',
+                    path: '/',
+                    matchFullPath: true,
+                    ignoreTrailingSlash: true,
+                  },
+                  {
+                    label: i18n.translate('xpack.uptime.certificatesPage.heading', {
+                      defaultMessage: 'TLS Certificates',
+                    }),
+                    app: 'uptime',
+                    path: '/certificates',
+                    matchFullPath: true,
+                  },
+                ],
+              },
+            ];
+          }
+
+          return [];
+        })
+      )
+    );
 
     core.application.register({
       id: PLUGIN.ID,
@@ -104,28 +147,26 @@ export class UptimePlugin
       order: 8400,
       title: PLUGIN.TITLE,
       category: DEFAULT_APP_CATEGORIES.observability,
-      meta: {
-        keywords: [
-          'Synthetics',
-          'pings',
-          'checks',
-          'availability',
-          'response duration',
-          'response time',
-          'outside in',
-          'reachability',
-          'reachable',
-          'digital',
-          'performance',
-          'web performance',
-          'web perf',
-        ],
-        searchDeepLinks: [
-          { id: 'Down monitors', title: 'Down monitors', path: '/?statusFilter=down' },
-          { id: 'Certificates', title: 'TLS Certificates', path: '/certificates' },
-          { id: 'Settings', title: 'Settings', path: '/settings' },
-        ],
-      },
+      keywords: [
+        'Synthetics',
+        'pings',
+        'checks',
+        'availability',
+        'response duration',
+        'response time',
+        'outside in',
+        'reachability',
+        'reachable',
+        'digital',
+        'performance',
+        'web performance',
+        'web perf',
+      ],
+      deepLinks: [
+        { id: 'Down monitors', title: 'Down monitors', path: '/?statusFilter=down' },
+        { id: 'Certificates', title: 'TLS Certificates', path: '/certificates' },
+        { id: 'Settings', title: 'Settings', path: '/settings' },
+      ],
       mount: async (params: AppMountParameters) => {
         const [coreStart, corePlugins] = await core.getStartServices();
 
@@ -156,13 +197,19 @@ export class UptimePlugin
       registerExtension({
         package: 'synthetics',
         view: 'package-policy-create',
-        component: LazySyntheticsPolicyCreateExtension,
+        Component: LazySyntheticsPolicyCreateExtension,
       });
 
       registerExtension({
         package: 'synthetics',
         view: 'package-policy-edit',
-        component: LazySyntheticsPolicyEditExtension,
+        Component: LazySyntheticsPolicyEditExtension,
+      });
+
+      registerExtension({
+        package: 'synthetics',
+        view: 'package-detail-assets',
+        Component: LazySyntheticsCustomAssetsExtension,
       });
     }
   }

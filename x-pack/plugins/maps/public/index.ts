@@ -23,4 +23,6 @@ export type { RenderTooltipContentParams } from './classes/tooltips/tooltip_prop
 
 export { MapsStartApi } from './api';
 
-export type { MapEmbeddable, MapEmbeddableInput } from './embeddable';
+export type { MapEmbeddable, MapEmbeddableInput, MapEmbeddableOutput } from './embeddable';
+
+export type { EMSTermJoinConfig, SampleValuesConfig } from './ems_autosuggest';

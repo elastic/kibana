@@ -1,0 +1,9 @@
+{
+  "name": "@kbn/securitysolution-list-hooks",
+  "version": "1.0.0",
+  "description": "Security solution list ReactJS hooks",
+  "license": "SSPL-1.0 OR Elastic License 2.0",
+  "main": "./target/index.js",
+  "types": "./target/index.d.ts",
+  "private": true
+}

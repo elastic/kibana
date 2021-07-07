@@ -7,6 +7,7 @@
 
 import { FIELD_ORIGIN, STYLE_TYPE } from '../../../../../maps/common/constants';
 import { ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../../../../common';
+import { AnomaliesTableData } from '../explorer_utils';
 
 const FEATURE = 'Feature';
 const POINT = 'Point';
@@ -29,7 +30,10 @@ const SEVERITY_COLOR_RAMP = [
   },
 ];
 
-function getAnomalyFeatures(anomalies: any[], type: 'actual_point' | 'typical_point') {
+function getAnomalyFeatures(
+  anomalies: AnomaliesTableData['anomalies'],
+  type: 'actual_point' | 'typical_point'
+) {
   const anomalyFeatures = [];
   for (let i = 0; i < anomalies.length; i++) {
     const anomaly = anomalies[i];
@@ -58,7 +62,7 @@ function getAnomalyFeatures(anomalies: any[], type: 'actual_point' | 'typical_po
   return anomalyFeatures;
 }
 
-export const getMLAnomaliesTypicalLayer = (anomalies: any) => {
+export const getMLAnomaliesTypicalLayer = (anomalies: AnomaliesTableData['anomalies']) => {
   return {
     id: 'anomalies_typical_layer',
     label: 'Typical',

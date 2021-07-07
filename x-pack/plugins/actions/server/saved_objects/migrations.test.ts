@@ -43,7 +43,7 @@ describe('7.10.0', () => {
 
   test('rename cases configuration object', () => {
     const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
-    const action = getMockData({});
+    const action = getCasesMockData({});
     const migratedAction = migration710(action, context);
     expect(migratedAction.attributes.config).toEqual({
       incidentConfiguration: { mapping: [] },
@@ -112,10 +112,32 @@ describe('7.11.0', () => {
   });
 });
 
+describe('7.14.0', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    encryptedSavedObjectsSetup.createMigration.mockImplementation(
+      (shouldMigrateWhenPredicate, migration) => migration
+    );
+  });
+
+  test('add isMissingSecrets property for actions', () => {
+    const migration714 = getMigrations(encryptedSavedObjectsSetup)['7.14.0'];
+    const action = getMockData({ isMissingSecrets: undefined });
+    const migratedAction = migration714(action, context);
+    expect(migratedAction).toEqual({
+      ...action,
+      attributes: {
+        ...action.attributes,
+        isMissingSecrets: false,
+      },
+    });
+  });
+});
+
 function getMockDataForWebhook(
   overwrites: Record<string, unknown> = {},
   hasUserAndPassword: boolean
-): SavedObjectUnsanitizedDoc<RawAction> {
+): SavedObjectUnsanitizedDoc<Omit<RawAction, 'isMissingSecrets'>> {
   const secrets = hasUserAndPassword
     ? { user: 'test', password: '123' }
     : { user: '', password: '' };
@@ -134,7 +156,7 @@ function getMockDataForWebhook(
 
 function getMockDataForEmail(
   overwrites: Record<string, unknown> = {}
-): SavedObjectUnsanitizedDoc<RawAction> {
+): SavedObjectUnsanitizedDoc<Omit<RawAction, 'isMissingSecrets'>> {
   return {
     attributes: {
       name: 'abc',
@@ -148,14 +170,30 @@ function getMockDataForEmail(
   };
 }
 
-function getMockData(
+function getCasesMockData(
   overwrites: Record<string, unknown> = {}
-): SavedObjectUnsanitizedDoc<RawAction> {
+): SavedObjectUnsanitizedDoc<Omit<RawAction, 'isMissingSecrets'>> {
   return {
     attributes: {
       name: 'abc',
       actionTypeId: '123',
       config: { casesConfiguration: { mapping: [] } },
+      secrets: {},
+      ...overwrites,
+    },
+    id: uuid.v4(),
+    type: 'action',
+  };
+}
+
+function getMockData(
+  overwrites: Record<string, unknown> = {}
+): SavedObjectUnsanitizedDoc<Omit<RawAction, 'isMissingSecrets'>> {
+  return {
+    attributes: {
+      name: 'abc',
+      actionTypeId: '123',
+      config: {},
       secrets: {},
       ...overwrites,
     },

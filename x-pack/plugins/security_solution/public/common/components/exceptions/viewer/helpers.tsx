@@ -7,9 +7,15 @@
 
 import moment from 'moment';
 
-import { entriesNested, ExceptionListItemSchema } from '../../../../lists_plugin_deps';
-import { getEntryValue, getExceptionOperatorSelect, formatOperatingSystems } from '../helpers';
-import { FormattedEntry, BuilderEntry, DescriptionListItem } from '../types';
+import { entriesNested, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  getEntryValue,
+  getExceptionOperatorSelect,
+  BuilderEntry,
+} from '@kbn/securitysolution-list-utils';
+
+import { formatOperatingSystems } from '../helpers';
+import type { FormattedEntry, DescriptionListItem } from '../types';
 import * as i18n from '../translations';
 
 /**
@@ -70,11 +76,23 @@ export const getFormattedEntries = (entries: BuilderEntry[]): FormattedEntry[] =
  * Formats ExceptionItem details for description list component
  *
  * @param exceptionItem an ExceptionItem
+ * @param includeModified if modified information should be included
+ * @param includeName if the Name should be included
  */
 export const getDescriptionListContent = (
-  exceptionItem: ExceptionListItemSchema
+  exceptionItem: ExceptionListItemSchema,
+  includeModified: boolean = false,
+  includeName: boolean = false
 ): DescriptionListItem[] => {
   const details = [
+    ...(includeName
+      ? [
+          {
+            title: i18n.NAME,
+            value: exceptionItem.name,
+          },
+        ]
+      : []),
     {
       title: i18n.OPERATING_SYSTEM,
       value: formatOperatingSystems(exceptionItem.os_types),
@@ -87,6 +105,18 @@ export const getDescriptionListContent = (
       title: i18n.CREATED_BY,
       value: exceptionItem.created_by,
     },
+    ...(includeModified
+      ? [
+          {
+            title: i18n.DATE_MODIFIED,
+            value: moment(exceptionItem.updated_at).format('MMMM Do YYYY @ HH:mm:ss'),
+          },
+          {
+            title: i18n.MODIFIED_BY,
+            value: exceptionItem.updated_by,
+          },
+        ]
+      : []),
     {
       title: i18n.DESCRIPTION,
       value: exceptionItem.description,

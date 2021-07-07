@@ -3,15 +3,18 @@
     "Elastic"
   ],
   "description": "Identifies the use of the grep command to discover known third-party macOS and Linux security tools, such as Antivirus or Host Firewall details.",
+  "false_positives": [
+    "Endpoint Security installers, updaters and post installation verification scripts."
+  ],
   "from": "now-9m",
   "index": [
     "logs-endpoint.events.*",
     "auditbeat-*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License v2",
   "name": "Security Software Discovery via Grep",
-  "query": "event.category : process and event.type : (start or process_started) and process.name : grep and process.args : (\"Little Snitch\" or Avast* or Avira* or ESET* or esets_* or BlockBlock or 360* or LuLu or KnockKnock* or kav or KIS or RTProtectionDaemon or Malware* or VShieldScanner or WebProtection or webinspectord or McAfee* or isecespd* or macmnsvc* or masvc or kesl or avscan or guard or rtvscand or symcfgd or scmdaemon or symantec or elastic-endpoint )",
+  "query": "process where event.type == \"start\" and\nprocess.name : \"grep\" and user.id != \"0\" and\n not process.parent.executable : \"/Library/Application Support/*\" and\n   process.args :\n         (\"Little Snitch*\",\n          \"Avast*\",\n          \"Avira*\",\n          \"ESET*\",\n          \"BlockBlock*\",\n          \"360Sec*\",\n          \"LuLu*\",\n          \"KnockKnock*\",\n          \"kav\",\n          \"KIS\",\n          \"RTProtectionDaemon*\",\n          \"Malware*\",\n          \"VShieldScanner*\",\n          \"WebProtection*\",\n          \"webinspectord*\",\n          \"McAfee*\",\n          \"isecespd*\",\n          \"macmnsvc*\",\n          \"masvc*\",\n          \"kesl*\",\n          \"avscan*\",\n          \"guard*\",\n          \"rtvscand*\",\n          \"symcfgd*\",\n          \"scmdaemon*\",\n          \"symantec*\",\n          \"sophos*\",\n          \"osquery*\",\n          \"elastic-endpoint*\"\n          ) and\n   not (process.args : \"Avast\" and process.args : \"Passwords\")\n",
   "risk_score": 47,
   "rule_id": "870aecc0-cea4-4110-af3f-e02e9b373655",
   "severity": "medium",
@@ -35,12 +38,19 @@
         {
           "id": "T1518",
           "name": "Software Discovery",
-          "reference": "https://attack.mitre.org/techniques/T1518/"
+          "reference": "https://attack.mitre.org/techniques/T1518/",
+          "subtechnique": [
+            {
+              "id": "T1518.001",
+              "name": "Security Software Discovery",
+              "reference": "https://attack.mitre.org/techniques/T1518/001/"
+            }
+          ]
         }
       ]
     }
   ],
   "timestamp_override": "event.ingested",
-  "type": "query",
-  "version": 1
+  "type": "eql",
+  "version": 2
 }

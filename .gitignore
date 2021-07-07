@@ -60,9 +60,10 @@ npm-debug.log*
 .ci/runbld
 .ci/bash_standard_lib.sh
 .gradle
+.vagrant
 
 ## @cypress/snapshot from apm plugin
-snapshots.js
+/snapshots.js
 
 # release notes script output
 report.csv

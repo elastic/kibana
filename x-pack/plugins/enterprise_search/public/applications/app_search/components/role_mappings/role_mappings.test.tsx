@@ -6,33 +6,46 @@
  */
 
 import '../../../__mocks__/shallow_useeffect.mock';
-import { setMockActions, setMockValues } from '../../../__mocks__';
+import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
 
-import React, { MouseEvent } from 'react';
+import React from 'react';
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import { shallow } from 'enzyme';
 
-import { EuiEmptyPrompt, EuiConfirmModal, EuiPageHeader } from '@elastic/eui';
+import {
+  RoleMappingsTable,
+  RoleMappingsHeading,
+  UsersHeading,
+  UsersEmptyPrompt,
+} from '../../../shared/role_mapping';
+import {
+  asRoleMapping,
+  asSingleUserRoleMapping,
+} from '../../../shared/role_mapping/__mocks__/roles';
 
-import { Loading } from '../../../shared/loading';
-import { RoleMappingsTable } from '../../../shared/role_mapping';
-import { wsRoleMapping } from '../../../shared/role_mapping/__mocks__/roles';
-
+import { RoleMapping } from './role_mapping';
 import { RoleMappings } from './role_mappings';
+import { User } from './user';
 
 describe('RoleMappings', () => {
   const initializeRoleMappings = jest.fn();
-  const handleResetMappings = jest.fn();
+  const initializeRoleMapping = jest.fn();
+  const initializeSingleUserRoleMapping = jest.fn();
+  const handleDeleteMapping = jest.fn();
   const mockValues = {
-    roleMappings: [wsRoleMapping],
+    roleMappings: [asRoleMapping],
     dataLoading: false,
     multipleAuthProvidersConfig: false,
+    singleUserRoleMappings: [asSingleUserRoleMapping],
+    singleUserRoleMappingFlyoutOpen: false,
   };
 
   beforeEach(() => {
     setMockActions({
       initializeRoleMappings,
-      handleResetMappings,
+      initializeRoleMapping,
+      initializeSingleUserRoleMapping,
+      handleDeleteMapping,
     });
     setMockValues(mockValues);
   });
@@ -43,46 +56,38 @@ describe('RoleMappings', () => {
     expect(wrapper.find(RoleMappingsTable)).toHaveLength(1);
   });
 
-  it('returns Loading when loading', () => {
-    setMockValues({ ...mockValues, dataLoading: true });
+  it('renders RoleMapping flyout', () => {
+    setMockValues({ ...mockValues, roleMappingFlyoutOpen: true });
     const wrapper = shallow(<RoleMappings />);
 
-    expect(wrapper.find(Loading)).toHaveLength(1);
+    expect(wrapper.find(RoleMapping)).toHaveLength(1);
   });
 
-  it('renders empty state', () => {
-    setMockValues({ ...mockValues, roleMappings: [] });
+  it('renders User flyout', () => {
+    setMockValues({ ...mockValues, singleUserRoleMappingFlyoutOpen: true });
     const wrapper = shallow(<RoleMappings />);
 
-    expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
+    expect(wrapper.find(User)).toHaveLength(1);
   });
 
-  describe('resetMappingsWarningModal', () => {
-    let wrapper: ShallowWrapper;
+  it('handles RoleMappingsHeading onClick', () => {
+    const wrapper = shallow(<RoleMappings />);
+    wrapper.find(RoleMappingsHeading).prop('onClick')();
 
-    beforeEach(() => {
-      wrapper = shallow(<RoleMappings />);
-      const button = wrapper.find(EuiPageHeader).prop('rightSideItems')![0] as any;
-      button.props.onClick();
-    });
+    expect(initializeRoleMapping).toHaveBeenCalled();
+  });
 
-    it('renders reset warnings modal', () => {
-      expect(wrapper.find(EuiConfirmModal)).toHaveLength(1);
-    });
+  it('handles UsersHeading onClick', () => {
+    const wrapper = shallow(<RoleMappings />);
+    wrapper.find(UsersHeading).prop('onClick')();
 
-    it('hides reset warnings modal', () => {
-      const modal = wrapper.find(EuiConfirmModal);
-      modal.prop('onCancel')();
+    expect(initializeSingleUserRoleMapping).toHaveBeenCalled();
+  });
 
-      expect(wrapper.find(EuiConfirmModal)).toHaveLength(0);
-    });
+  it('handles empty users state', () => {
+    setMockValues({ ...mockValues, singleUserRoleMappings: [] });
+    const wrapper = shallow(<RoleMappings />);
 
-    it('resets when confirmed', () => {
-      const event = {} as MouseEvent<HTMLButtonElement>;
-      const modal = wrapper.find(EuiConfirmModal);
-      modal.prop('onConfirm')!(event);
-
-      expect(handleResetMappings).toHaveBeenCalled();
-    });
+    expect(wrapper.find(UsersEmptyPrompt)).toHaveLength(1);
   });
 });

@@ -6,7 +6,6 @@
  */
 
 import { API_BASE_PATH } from './constants';
-import { getRandomString } from './lib';
 import { getFollowerIndexPayload } from './fixtures';
 
 export const registerHelpers = (supertest) => {
@@ -51,7 +50,7 @@ export const registerHelpers = (supertest) => {
     };
   };
 
-  const createFollowerIndex = (name = getRandomString(), payload = getFollowerIndexPayload()) => {
+  const createFollowerIndex = (name, payload = getFollowerIndexPayload()) => {
     followerIndicesCreated.push(name);
 
     return supertest

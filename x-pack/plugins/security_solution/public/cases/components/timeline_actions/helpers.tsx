@@ -7,10 +7,21 @@
 
 import React from 'react';
 import uuid from 'uuid';
+import styled from 'styled-components';
 import { AppToast } from '../../../common/components/toasters';
-import { Case } from '../../containers/types';
 import { ToasterContent } from './toaster_content';
 import * as i18n from './translations';
+import { Case } from '../../../../../cases/common';
+
+const LINE_CLAMP = 3;
+
+const Title = styled.span`
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: ${LINE_CLAMP};
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+`;
 
 export const createUpdateSuccessToaster = (
   theCase: Case,
@@ -20,7 +31,7 @@ export const createUpdateSuccessToaster = (
     id: uuid.v4(),
     color: 'success',
     iconType: 'check',
-    title: i18n.CASE_CREATED_SUCCESS_TOAST(theCase.title),
+    title: <Title>{i18n.CASE_CREATED_SUCCESS_TOAST(theCase.title)}</Title>,
     text: (
       <ToasterContent
         caseId={theCase.id}

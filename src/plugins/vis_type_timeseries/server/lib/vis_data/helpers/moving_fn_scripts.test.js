@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { MODEL_TYPES } from '../../../../common/model_options';
+import { MODEL_TYPES } from '../../../../common/enums';
 import { MODEL_SCRIPTS } from './moving_fn_scripts';
 
 describe('src/legacy/core_plugins/metrics/server/lib/vis_data/helpers/moving_fn_scripts.js', () => {

@@ -113,7 +113,7 @@ export const DurationChartComponent = ({
             tickFormat={timeFormatter(getChartDateLabel(min, max))}
           />
           <Axis
-            domain={{ min: 0 }}
+            domain={{ min: 0, fit: false }}
             id="left"
             position={Position.Left}
             tickFormat={(d) => getTickFormat(d)}

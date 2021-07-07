@@ -41,9 +41,15 @@ export function getMigrations(
     pipeMigrations(removeCasesFieldMappings, addHasAuthConfigurationObject)
   );
 
+  const migrationActionsFourteen = encryptedSavedObjects.createMigration<RawAction, RawAction>(
+    (doc): doc is SavedObjectUnsanitizedDoc<RawAction> => true,
+    pipeMigrations(addisMissingSecretsField)
+  );
+
   return {
     '7.10.0': executeMigrationWithErrorHandling(migrationActionsTen, '7.10.0'),
     '7.11.0': executeMigrationWithErrorHandling(migrationActionsEleven, '7.11.0'),
+    '7.14.0': executeMigrationWithErrorHandling(migrationActionsFourteen, '7.14.0'),
   };
 }
 
@@ -123,6 +129,18 @@ const addHasAuthConfigurationObject = (
         ...doc.attributes.config,
         hasAuth,
       },
+    },
+  };
+};
+
+const addisMissingSecretsField = (
+  doc: SavedObjectUnsanitizedDoc<RawAction>
+): SavedObjectUnsanitizedDoc<RawAction> => {
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      isMissingSecrets: false,
     },
   };
 };

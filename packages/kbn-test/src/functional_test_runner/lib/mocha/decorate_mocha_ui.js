@@ -12,7 +12,16 @@ import { createAssignmentProxy } from './assignment_proxy';
 import { wrapFunction } from './wrap_function';
 import { wrapRunnableArgs } from './wrap_runnable_args';
 
-export function decorateMochaUi(lifecycle, context) {
+function split(arr, fn) {
+  const a = [];
+  const b = [];
+  for (const i of arr) {
+    (fn(i) ? a : b).push(i);
+  }
+  return [a, b];
+}
+
+export function decorateMochaUi(log, lifecycle, context, { isDockerGroup }) {
   // incremented at the start of each suite, decremented after
   // so that in each non-suite call we can know if we are within
   // a suite, or that when a suite is defined it is within a suite
@@ -52,13 +61,23 @@ export function decorateMochaUi(lifecycle, context) {
             await lifecycle.beforeTestSuite.trigger(this);
           });
 
-          this.tags = (tags) => {
-            this._tags = [].concat(this._tags || [], tags);
-          };
-
           const relativeFilePath = relative(REPO_ROOT, this.file);
-          this.tags(relativeFilePath);
+          this._tags = isDockerGroup ? ['ciGroupDocker', relativeFilePath] : [relativeFilePath];
           this.suiteTag = relativeFilePath; // The tag that uniquely targets this suite/file
+          this.tags = (tags) => {
+            const newTags = Array.isArray(tags) ? tags : [tags];
+            const [tagsToAdd, tagsToIgnore] = split(newTags, (t) =>
+              !isDockerGroup ? true : !t.startsWith('ciGroup')
+            );
+
+            if (tagsToIgnore.length) {
+              log.warning(
+                `ignoring ciGroup tags because test is being run by a config using 'dockerServers', tags: ${tagsToIgnore}`
+              );
+            }
+
+            this._tags = [...this._tags, ...tagsToAdd];
+          };
 
           provider.call(this);
 

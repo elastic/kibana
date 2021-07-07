@@ -16,6 +16,7 @@ import {
   GeoContainmentInstanceState,
   GeoContainmentAlertType,
   GeoContainmentInstanceContext,
+  GeoContainmentState,
 } from './alert_type';
 
 export type LatestEntityLocation = GeoContainmentInstanceState;
@@ -141,7 +142,7 @@ export const getGeoContainmentExecutor = (log: Logger): GeoContainmentAlertType[
     params,
     alertId,
     state,
-  }) {
+  }): Promise<GeoContainmentState> {
     const { shapesFilters, shapesIdsNamesMap } = state.shapesFilters
       ? state
       : await getShapesFilters(
@@ -176,8 +177,7 @@ export const getGeoContainmentExecutor = (log: Logger): GeoContainmentAlertType[
     }
 
     const currLocationMap: Map<string, LatestEntityLocation[]> = transformResults(
-      // @ts-expect-error body doesn't exist on currentIntervalResults
-      currentIntervalResults?.body,
+      currentIntervalResults,
       params.dateField,
       params.geoField
     );

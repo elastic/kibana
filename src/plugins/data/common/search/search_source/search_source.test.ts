@@ -27,7 +27,7 @@ const mockSource2 = { excludes: ['bar-*'] };
 
 const indexPattern = ({
   title: 'foo',
-  fields: [{ name: 'foo-bar' }, { name: 'field1' }, { name: 'field2' }],
+  fields: [{ name: 'foo-bar' }, { name: 'field1' }, { name: 'field2' }, { name: '_id' }],
   getComputedFields,
   getSourceFiltering: () => mockSource,
 } as unknown) as IndexPattern;
@@ -68,7 +68,7 @@ describe('SearchSource', () => {
   beforeEach(() => {
     const getConfigMock = jest
       .fn()
-      .mockImplementation((param) => param === 'metaFields' && ['_type', '_source'])
+      .mockImplementation((param) => param === 'metaFields' && ['_type', '_source', '_id'])
       .mockName('getConfig');
 
     mockSearchMethod = jest
@@ -352,6 +352,13 @@ describe('SearchSource', () => {
         const request = searchSource.getSearchRequestBody();
         expect(request.stored_fields).toEqual(['*']);
       });
+
+      test('_source is not set when using the fields API', async () => {
+        searchSource.setField('fields', ['*']);
+        const request = searchSource.getSearchRequestBody();
+        expect(request.fields).toEqual(['*']);
+        expect(request._source).toEqual(false);
+      });
     });
 
     describe('source filters handling', () => {
@@ -448,6 +455,28 @@ describe('SearchSource', () => {
         searchSource.setField('fields', [{ field: '*', include_unmapped: 'true' }]);
 
         const request = searchSource.getSearchRequestBody();
+        expect(request.fields).toEqual([{ field: 'field1' }, { field: 'field2' }]);
+      });
+
+      test('excludes metafields from the request', async () => {
+        searchSource.setField('index', ({
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: [],
+            scriptFields: [],
+            docvalueFields: [],
+          }),
+        } as unknown) as IndexPattern);
+        searchSource.setField('fields', [{ field: '*', include_unmapped: 'true' }]);
+
+        const request = searchSource.getSearchRequestBody();
+        expect(request.fields).toEqual([{ field: 'field1' }, { field: 'field2' }]);
+
+        searchSource.setField('fields', ['foo-bar', 'foo--bar', 'field1', 'field2']);
+        expect(request.fields).toEqual([{ field: 'field1' }, { field: 'field2' }]);
+
+        searchSource.removeField('fields');
+        searchSource.setField('fieldsFromSource', ['foo-bar', 'foo--bar', 'field1', 'field2']);
         expect(request.fields).toEqual([{ field: 'field1' }, { field: 'field2' }]);
       });
 
@@ -605,6 +634,7 @@ describe('SearchSource', () => {
         searchSource.setField('fields', ['*']);
 
         const request = searchSource.getSearchRequestBody();
+        expect(request.hasOwnProperty('docvalue_fields')).toBe(false);
         expect(request.fields).toEqual([
           { field: 'foo-bar' },
           { field: 'field1' },
@@ -903,18 +933,26 @@ describe('SearchSource', () => {
         expect(next).toBeCalledTimes(2);
         expect(complete).toBeCalledTimes(1);
         expect(next.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            Object {
+        Array [
+          Object {
+            "isPartial": true,
+            "isRunning": true,
+            "rawResponse": Object {
               "test": 1,
             },
-          ]
+          },
+        ]
         `);
         expect(next.mock.calls[1]).toMatchInlineSnapshot(`
-          Array [
-            Object {
+        Array [
+          Object {
+            "isPartial": false,
+            "isRunning": false,
+            "rawResponse": Object {
               "test": 2,
             },
-          ]
+          },
+        ]
         `);
       });
 
@@ -958,13 +996,9 @@ describe('SearchSource', () => {
         expect(next).toBeCalledTimes(1);
         expect(error).toBeCalledTimes(1);
         expect(complete).toBeCalledTimes(0);
-        expect(next.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            Object {
-              "test": 1,
-            },
-          ]
-        `);
+        expect(next.mock.calls[0][0].rawResponse).toStrictEqual({
+          test: 1,
+        });
         expect(error.mock.calls[0][0]).toBe(undefined);
       });
     });
@@ -1174,7 +1208,7 @@ describe('SearchSource', () => {
         expect(fetchSub.next).toHaveBeenCalledTimes(3);
         expect(fetchSub.complete).toHaveBeenCalledTimes(1);
         expect(fetchSub.error).toHaveBeenCalledTimes(0);
-        expect(resp).toStrictEqual({ other: 5 });
+        expect(resp.rawResponse).toStrictEqual({ other: 5 });
         expect(typesRegistry.get('avg').postFlightRequest).toHaveBeenCalledTimes(3);
       });
 

@@ -68,7 +68,7 @@ export function enqueueJobFactory(
     // 2. Schedule the report with Task Manager
     const task = await reporting.scheduleTask(report.toReportTaskJSON());
     logger.info(
-      `Scheduled ${exportType.name} reporting task. Task ID: ${task.id}. Report ID: ${report._id}`
+      `Scheduled ${exportType.name} reporting task. Task ID: task:${task.id}. Report ID: ${report._id}`
     );
 
     return report;

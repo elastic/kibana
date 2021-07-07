@@ -16,7 +16,12 @@ export default {
   title: 'Labs/Flyout',
   description:
     'A set of components used for providing Labs controls and projects in another solution.',
-  argTypes: {},
+  argTypes: {
+    canSetAdvancedSettings: {
+      control: 'boolean',
+      defaultValue: true,
+    },
+  },
 };
 
 export function BeakerButton() {

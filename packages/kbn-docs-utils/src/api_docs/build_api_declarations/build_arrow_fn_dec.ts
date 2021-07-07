@@ -16,13 +16,11 @@ import {
   ShorthandPropertyAssignment,
   PropertyAssignment,
 } from 'ts-morph';
-import { getApiSectionId } from '../utils';
-import { getCommentsFromNode, getJSDocTagNames } from './js_doc_utils';
-import { AnchorLink, TypeKind } from '../types';
-import { getSourceForNode } from './utils';
+import { AnchorLink, ApiDeclaration, TypeKind } from '../types';
 import { buildApiDecsForParameters } from './build_parameter_decs';
 import { getSignature } from './get_signature';
-import { getJSDocReturnTagComment } from './js_doc_utils';
+import { getJSDocReturnTagComment, getJSDocs } from './js_doc_utils';
+import { buildBasicApiDeclaration } from './build_basic_api_declaration';
 
 /**
  * Arrow functions are handled differently than regular functions because you need the arrow function
@@ -34,6 +32,8 @@ import { getJSDocReturnTagComment } from './js_doc_utils';
  * @param plugins
  * @param anchorLink
  * @param log
+ * @param captureReferences if false, references will only be captured for deprecated APIs. Capturing references
+ * can be time consuming so this is only set to true if explicitly requested via the `--references` flag
  */
 export function getArrowFunctionDec(
   node:
@@ -45,17 +45,32 @@ export function getArrowFunctionDec(
   initializer: ArrowFunction,
   plugins: KibanaPlatformPlugin[],
   anchorLink: AnchorLink,
-  log: ToolingLog
-) {
+  currentPluginId: string,
+  log: ToolingLog,
+  captureReferences: boolean
+): ApiDeclaration {
   return {
-    id: getApiSectionId(anchorLink),
+    ...buildBasicApiDeclaration({
+      currentPluginId,
+      anchorLink,
+      node,
+      plugins,
+      captureReferences,
+      log,
+      apiName: node.getName(),
+    }),
     type: TypeKind.FunctionKind,
-    children: buildApiDecsForParameters(initializer.getParameters(), plugins, anchorLink, log),
+    children: buildApiDecsForParameters(
+      initializer.getParameters(),
+      plugins,
+      anchorLink,
+      currentPluginId,
+      log,
+      captureReferences,
+      getJSDocs(node)
+    ),
+    // need to override the signature - use the initializer, not the node.
     signature: getSignature(initializer, plugins, log),
-    description: getCommentsFromNode(node),
-    label: node.getName(),
-    source: getSourceForNode(node),
-    tags: getJSDocTagNames(node),
     returnComment: getJSDocReturnTagComment(node),
   };
 }

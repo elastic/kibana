@@ -8,11 +8,8 @@
 
 import { PluginInitializerContext, PluginConfigDescriptor } from 'kibana/server';
 import { TelemetryPlugin } from './plugin';
-import * as constants from '../common/constants';
 import { configSchema, TelemetryConfigType } from './config';
 
-export { FetcherTask } from './fetcher';
-export { handleOldSettings } from './handle_old_settings';
 export type { TelemetryPluginSetup, TelemetryPluginStart } from './plugin';
 
 export const config: PluginConfigDescriptor<TelemetryConfigType> = {
@@ -30,16 +27,12 @@ export const config: PluginConfigDescriptor<TelemetryConfigType> = {
 
 export const plugin = (initializerContext: PluginInitializerContext<TelemetryConfigType>) =>
   new TelemetryPlugin(initializerContext);
-export { constants };
-export {
-  getClusterUuids,
-  getLocalStats,
-  DATA_TELEMETRY_ID,
-  buildDataTelemetryPayload,
-} from './telemetry_collection';
+export { getClusterUuids, getLocalStats } from './telemetry_collection';
 
 export type {
   TelemetryLocalStats,
-  DataTelemetryIndex,
   DataTelemetryPayload,
+  DataTelemetryDocument,
+  DataTelemetryBasePayload,
+  NodeUsage,
 } from './telemetry_collection';

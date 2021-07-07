@@ -8,18 +8,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { AppMountParameters, CoreStart } from '../../../../src/core/public';
-import { StartDeps } from './types';
+import { SetupDeps, StartDeps } from './types';
 import { ReportingExampleApp } from './components/app';
 
 export const renderApp = (
   coreStart: CoreStart,
-  startDeps: StartDeps,
+  deps: Omit<StartDeps & SetupDeps, 'developerExamples'>,
   { appBasePath, element }: AppMountParameters
 ) => {
-  ReactDOM.render(
-    <ReportingExampleApp basename={appBasePath} {...coreStart} {...startDeps} />,
-    element
-  );
+  ReactDOM.render(<ReportingExampleApp basename={appBasePath} {...coreStart} {...deps} />, element);
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };

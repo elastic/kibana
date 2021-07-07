@@ -12,13 +12,14 @@ import {
   systemPalette,
   PaletteOutput,
   CustomPaletteState,
+  CustomPaletteArguments,
 } from './palette';
 import { functionWrapper } from 'src/plugins/expressions/common/expression_functions/specs/tests/utils';
 
 describe('palette', () => {
   const fn = functionWrapper(palette()) as (
     context: null,
-    args?: { color?: string[]; gradient?: boolean; reverse?: boolean }
+    args?: Partial<CustomPaletteArguments>
   ) => PaletteOutput<CustomPaletteState>;
 
   it('results a palette', () => {
@@ -31,6 +32,18 @@ describe('palette', () => {
       it('sets colors', () => {
         const result = fn(null, { color: ['red', 'green', 'blue'] });
         expect(result.params!.colors).toEqual(['red', 'green', 'blue']);
+      });
+
+      it('defaults to pault_tor_14 colors', () => {
+        const result = fn(null);
+        expect(result.params!.colors).toEqual(defaultCustomColors);
+      });
+    });
+
+    describe('stop', () => {
+      it('sets stops', () => {
+        const result = fn(null, { color: ['red', 'green', 'blue'], stop: [1, 2, 3] });
+        expect(result.params!.stops).toEqual([1, 2, 3]);
       });
 
       it('defaults to pault_tor_14 colors', () => {
@@ -68,6 +81,16 @@ describe('palette', () => {
       it(`defaults to 'false`, () => {
         const result = fn(null);
         expect(result.params!.colors).toEqual(defaultCustomColors);
+      });
+
+      it('keeps the stops order pristine when set', () => {
+        const stops = [1, 2, 3];
+        const result = fn(null, {
+          color: ['red', 'green', 'blue'],
+          stop: [1, 2, 3],
+          reverse: true,
+        });
+        expect(result.params!.stops).toEqual(stops);
       });
     });
   });

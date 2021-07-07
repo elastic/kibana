@@ -10,20 +10,22 @@ import { ThunkDispatch } from 'redux-thunk';
 import { Query } from 'src/plugins/data/public';
 import { MapStoreState } from '../reducers/store';
 import {
+  createLayerInstance,
+  getEditState,
   getLayerById,
   getLayerList,
   getLayerListRaw,
-  getSelectedLayerId,
-  getMapReady,
   getMapColors,
-  createLayerInstance,
+  getMapReady,
+  getSelectedLayerId,
 } from '../selectors/map_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
 import { cancelRequest } from '../reducers/non_serializable_instances';
-import { updateFlyout } from './ui_actions';
+import { setDrawMode, updateFlyout } from './ui_actions';
 import {
   ADD_LAYER,
   ADD_WAITING_FOR_MAP_READY_LAYER,
+  CLEAR_LAYER_PROP,
   CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
   REMOVE_LAYER,
   REMOVE_TRACKED_LAYER_STATE,
@@ -40,14 +42,20 @@ import {
 } from './map_action_constants';
 import { clearDataRequests, syncDataForLayerId, updateStyleMeta } from './data_request_actions';
 import { cleanTooltipStateForLayer } from './tooltip_actions';
-import { JoinDescriptor, LayerDescriptor, StyleDescriptor } from '../../common/descriptor_types';
+import {
+  Attribution,
+  JoinDescriptor,
+  LayerDescriptor,
+  StyleDescriptor,
+} from '../../common/descriptor_types';
 import { ILayer } from '../classes/layers/layer';
 import { IVectorLayer } from '../classes/layers/vector_layer';
-import { LAYER_STYLE_TYPE, LAYER_TYPE } from '../../common/constants';
+import { DRAW_MODE, LAYER_STYLE_TYPE, LAYER_TYPE } from '../../common/constants';
 import { IVectorStyle } from '../classes/styles/vector/vector_style';
 import { notifyLicensedFeatureUsage } from '../licensed_features';
 import { IESAggField } from '../classes/fields/agg';
 import { IField } from '../classes/fields/field';
+import { getDrawMode } from '../selectors/ui_selectors';
 
 export function trackCurrentLayerState(layerId: string) {
   return {
@@ -248,6 +256,10 @@ export function setSelectedLayer(layerId: string | null) {
     }
     if (layerId) {
       dispatch(trackCurrentLayerState(layerId));
+      // Reset draw mode only if setting a new selected layer
+      if (getDrawMode(getState()) !== DRAW_MODE.NONE) {
+        dispatch(setDrawMode(DRAW_MODE.NONE));
+      }
     }
     dispatch({
       type: SET_SELECTED_LAYER,
@@ -349,6 +361,23 @@ export function updateLayerLabel(id: string, newLabel: string) {
   };
 }
 
+export function setLayerAttribution(id: string, attribution: Attribution) {
+  return {
+    type: UPDATE_LAYER_PROP,
+    id,
+    propName: 'attribution',
+    newValue: attribution,
+  };
+}
+
+export function clearLayerAttribution(id: string) {
+  return {
+    type: CLEAR_LAYER_PROP,
+    id,
+    propName: 'attribution',
+  };
+}
+
 export function updateLayerMinZoom(id: string, minZoom: number) {
   return {
     type: UPDATE_LAYER_PROP,
@@ -382,6 +411,15 @@ export function updateLabelsOnTop(id: string, areLabelsOnTop: boolean) {
     id,
     propName: 'areLabelsOnTop',
     newValue: areLabelsOnTop,
+  };
+}
+
+export function updateFittableFlag(id: string, includeInFitToBounds: boolean) {
+  return {
+    type: UPDATE_LAYER_PROP,
+    id,
+    propName: 'includeInFitToBounds',
+    newValue: includeInFitToBounds,
   };
 }
 
@@ -445,6 +483,11 @@ function removeLayerFromLayerList(layerId: string) {
       type: REMOVE_LAYER,
       id: layerId,
     });
+    // Clean up draw state if needed
+    const editState = getEditState(getState());
+    if (layerId === editState?.layerId) {
+      dispatch(setDrawMode(DRAW_MODE.NONE));
+    }
   };
 }
 

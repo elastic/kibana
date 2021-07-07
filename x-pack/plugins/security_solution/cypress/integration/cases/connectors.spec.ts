@@ -40,6 +40,8 @@ describe('Cases connectors', () => {
       { source: 'comments', target: 'comments', action_type: 'append' },
     ],
     version: 'WzEwNCwxXQ==',
+    id: '123',
+    owner: 'securitySolution',
   };
   beforeEach(() => {
     cleanKibana();
@@ -53,16 +55,18 @@ describe('Cases connectors', () => {
     cy.intercept('GET', '/api/cases/configure', (req) => {
       req.reply((res) => {
         const resBody =
-          res.body.version != null
-            ? {
-                ...res.body,
-                error: null,
-                mappings: [
-                  { source: 'title', target: 'short_description', action_type: 'overwrite' },
-                  { source: 'description', target: 'description', action_type: 'overwrite' },
-                  { source: 'comments', target: 'comments', action_type: 'append' },
-                ],
-              }
+          res.body.length > 0 && res.body[0].version != null
+            ? [
+                {
+                  ...res.body[0],
+                  error: null,
+                  mappings: [
+                    { source: 'title', target: 'short_description', action_type: 'overwrite' },
+                    { source: 'description', target: 'description', action_type: 'overwrite' },
+                    { source: 'comments', target: 'comments', action_type: 'append' },
+                  ],
+                },
+              ]
             : res.body;
         res.send(200, resBody);
       });

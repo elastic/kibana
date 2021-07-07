@@ -12,13 +12,13 @@
     "logs-endpoint.events.*",
     "logs-windows.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License v2",
   "name": "Process Activity via Compiled HTML File",
-  "query": "event.category:process and event.type:(start or process_started) and process.name:hh.exe",
-  "risk_score": 21,
+  "query": "process where event.type in (\"start\", \"process_started\") and \n process.parent.name : \"hh.exe\" and \n process.name : (\"mshta.exe\", \"cmd.exe\", \"powershell.exe\", \"pwsh.exe\", \"cscript.exe\", \"wscript.exe\")\n",
+  "risk_score": 47,
   "rule_id": "e3343ab9-4245-4715-b344-e11c56b0a47f",
-  "severity": "low",
+  "severity": "medium",
   "tags": [
     "Elastic",
     "Host",
@@ -60,6 +60,6 @@
     }
   ],
   "timestamp_override": "event.ingested",
-  "type": "query",
-  "version": 7
+  "type": "eql",
+  "version": 8
 }

@@ -9,15 +9,21 @@ import { schema } from '@kbn/config-schema';
 
 const customRulesSchema = schema.maybe(
   schema.arrayOf(
-    schema.maybe(
-      schema.object({
-        actions: schema.arrayOf(schema.string()),
-        conditions: schema.maybe(schema.arrayOf(schema.any())),
-        scope: schema.maybe(schema.any()),
-      })
-    )
+    schema.object({
+      actions: schema.arrayOf(
+        schema.oneOf([schema.literal('skip_result'), schema.literal('skip_model_update')])
+      ),
+      conditions: schema.maybe(schema.arrayOf(schema.any())),
+      scope: schema.maybe(schema.any()),
+    })
   )
 );
+
+const AnalysisLimits = schema.object({
+  /** Limit of categorization examples */
+  categorization_examples_limit: schema.maybe(schema.number()),
+  model_memory_limit: schema.string(),
+});
 
 const detectorSchema = schema.object({
   identifier: schema.maybe(schema.string()),
@@ -27,7 +33,14 @@ const detectorSchema = schema.object({
   over_field_name: schema.maybe(schema.string()),
   partition_field_name: schema.maybe(schema.string()),
   detector_description: schema.maybe(schema.string()),
-  exclude_frequent: schema.maybe(schema.string()),
+  exclude_frequent: schema.maybe(
+    schema.oneOf([
+      schema.literal('all'),
+      schema.literal('none'),
+      schema.literal('by'),
+      schema.literal('over'),
+    ])
+  ),
   use_null: schema.maybe(schema.boolean()),
   /** Custom rules */
   custom_rules: customRulesSchema,
@@ -66,22 +79,17 @@ export const anomalyDetectionUpdateJobSchema = schema.object({
     )
   ),
   custom_settings: schema.maybe(customSettingsSchema),
-  analysis_limits: schema.maybe(
-    schema.object({
-      categorization_examples_limit: schema.maybe(schema.number()),
-      model_memory_limit: schema.maybe(schema.string()),
-    })
-  ),
-  groups: schema.maybe(schema.arrayOf(schema.maybe(schema.string()))),
+  analysis_limits: schema.maybe(AnalysisLimits),
+  groups: schema.maybe(schema.arrayOf(schema.string())),
   model_snapshot_retention_days: schema.maybe(schema.number()),
   daily_model_snapshot_retention_after_days: schema.maybe(schema.number()),
 });
 
 export const analysisConfigSchema = schema.object({
-  bucket_span: schema.maybe(schema.string()),
+  bucket_span: schema.string(),
   summary_count_field_name: schema.maybe(schema.string()),
   detectors: schema.arrayOf(detectorSchema),
-  influencers: schema.arrayOf(schema.maybe(schema.string())),
+  influencers: schema.arrayOf(schema.string()),
   categorization_field_name: schema.maybe(schema.string()),
   categorization_analyzer: schema.maybe(schema.any()),
   categorization_filters: schema.maybe(schema.arrayOf(schema.string())),
@@ -97,13 +105,7 @@ export const analysisConfigSchema = schema.object({
 
 export const anomalyDetectionJobSchema = {
   analysis_config: analysisConfigSchema,
-  analysis_limits: schema.maybe(
-    schema.object({
-      /** Limit of categorization examples */
-      categorization_examples_limit: schema.maybe(schema.number()),
-      model_memory_limit: schema.maybe(schema.string()),
-    })
-  ),
+  analysis_limits: schema.maybe(AnalysisLimits),
   background_persist_interval: schema.maybe(schema.string()),
   create_time: schema.maybe(schema.number()),
   custom_settings: schema.maybe(customSettingsSchema),
@@ -115,15 +117,15 @@ export const anomalyDetectionJobSchema = {
     time_field: schema.string(),
     time_format: schema.maybe(schema.string()),
   }),
-  datafeed_config: schema.maybe(schema.any()),
   description: schema.maybe(schema.string()),
   established_model_memory: schema.maybe(schema.number()),
   finished_time: schema.maybe(schema.number()),
   job_id: schema.string(),
   job_type: schema.maybe(schema.string()),
   job_version: schema.maybe(schema.string()),
-  groups: schema.arrayOf(schema.maybe(schema.string())),
+  groups: schema.maybe(schema.arrayOf(schema.maybe(schema.string()))),
   model_plot_config: schema.maybe(schema.any()),
+  model_plot: schema.maybe(schema.any()),
   model_size_stats: schema.maybe(schema.any()),
   model_snapshot_id: schema.maybe(schema.string()),
   model_snapshot_min_version: schema.maybe(schema.string()),
@@ -146,8 +148,8 @@ export const getRecordsSchema = schema.object({
   exclude_interim: schema.maybe(schema.boolean()),
   page: schema.maybe(
     schema.object({
-      from: schema.maybe(schema.number()),
-      size: schema.maybe(schema.number()),
+      from: schema.number(),
+      size: schema.number(),
     })
   ),
   record_score: schema.maybe(schema.number()),
@@ -165,9 +167,9 @@ export const getBucketsSchema = schema.object({
   page: schema.maybe(
     schema.object({
       /** Page offset */
-      from: schema.maybe(schema.number()),
+      from: schema.number(),
       /** Size of the page */
-      size: schema.maybe(schema.number()),
+      size: schema.number(),
     })
   ),
   sort: schema.maybe(schema.string()),
@@ -184,6 +186,7 @@ export const getOverallBucketsSchema = schema.object({
   bucketSpan: schema.string(),
   start: schema.number(),
   end: schema.number(),
+  overall_score: schema.maybe(schema.number()),
 });
 
 export const getCategoriesSchema = schema.object({
@@ -200,7 +203,14 @@ export const getModelSnapshotsSchema = schema.object({
   jobId: schema.string(),
 });
 
-export const updateModelSnapshotSchema = schema.object({
+export const updateModelSnapshotsSchema = schema.object({
+  /** Snapshot ID */
+  snapshotId: schema.string(),
+  /** Job ID */
+  jobId: schema.string(),
+});
+
+export const updateModelSnapshotBodySchema = schema.object({
   /** description */
   description: schema.maybe(schema.string()),
   /** retain */

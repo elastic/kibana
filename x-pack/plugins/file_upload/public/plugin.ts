@@ -8,9 +8,10 @@
 import { CoreStart, Plugin } from '../../../../src/core/public';
 import {
   FileUploadStartApi,
-  getFileUploadComponent,
+  FileUploadComponent,
   importerFactory,
   hasImportPermission,
+  IndexNameFormComponent,
   checkIndexExists,
   getTimeFieldRange,
   analyzeFile,
@@ -41,7 +42,8 @@ export class FileUploadPlugin
   public start(core: CoreStart, plugins: FileUploadStartDependencies): FileUploadStartApi {
     setStartServices(core, plugins);
     return {
-      getFileUploadComponent,
+      FileUploadComponent,
+      IndexNameFormComponent,
       importerFactory,
       getMaxBytes,
       getMaxBytesFormatted,

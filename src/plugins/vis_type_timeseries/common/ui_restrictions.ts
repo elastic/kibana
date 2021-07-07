@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PANEL_TYPES } from './panel_types';
+import { PANEL_TYPES } from './enums';
 
 /**
  * UI Restrictions keys
@@ -30,7 +30,7 @@ export enum RESTRICTIONS_KEYS {
   WHITE_LISTED_TIMERANGE_MODES = 'whiteListedTimerangeModes',
 }
 
-export interface UIRestrictions {
+interface UIRestrictions {
   '*': boolean;
   [restriction: string]: boolean;
 }

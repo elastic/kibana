@@ -11,8 +11,8 @@ import { PipelineDefinition } from '../../../common/types/trained_models';
 export function modelsProvider(client: IScopedClusterClient) {
   return {
     /**
-     * Retrieves the map of model ids and associated pipelines.
-     * @param modelIds
+     * Retrieves the map of model ids and aliases with associated pipelines.
+     * @param modelIds - Array of models ids and model aliases.
      */
     async getModelsPipelines(modelIds: string[]) {
       const modelIdsMap = new Map<string, Record<string, PipelineDefinition> | null>(

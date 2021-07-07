@@ -40,16 +40,17 @@ export class ShareToSpaceSavedObjectsManagementAction extends SavedObjectsManage
       const hasCapability =
         !this.actionContext ||
         !!this.actionContext.capabilities.savedObjectsManagement.shareIntoSpace;
-      return object.meta.namespaceType === 'multiple' && hasCapability;
+      const { namespaceType, hiddenType } = object.meta;
+      return namespaceType === 'multiple' && !hiddenType && hasCapability;
     },
     onClick: (object: SavedObjectsManagementRecord) => {
-      this.isDataChanged = false;
+      this.objectsToRefresh = [];
       this.start(object);
     },
   };
-  public refreshOnFinish = () => this.isDataChanged;
+  public refreshOnFinish = () => this.objectsToRefresh;
 
-  private isDataChanged: boolean = false;
+  private objectsToRefresh: Array<{ type: string; id: string }> = [];
 
   constructor(private readonly spacesApiUi: SpacesApiUi) {
     super();
@@ -69,7 +70,8 @@ export class ShareToSpaceSavedObjectsManagementAction extends SavedObjectsManage
         icon: this.record.meta.icon,
       },
       flyoutIcon: 'share',
-      onUpdate: () => (this.isDataChanged = true),
+      onUpdate: (updatedObjects: Array<{ type: string; id: string }>) =>
+        (this.objectsToRefresh = [...updatedObjects]),
       onClose: this.onClose,
       enableCreateCopyCallout: true,
       enableCreateNewSpaceLink: true,

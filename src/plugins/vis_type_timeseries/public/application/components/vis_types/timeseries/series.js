@@ -24,7 +24,7 @@ import {
 import { Split } from '../../split';
 import { createTextHandler } from '../../lib/create_text_handler';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import { PANEL_TYPES } from '../../../../../common/panel_types';
+import { PANEL_TYPES } from '../../../../../common/enums';
 
 const TimeseriesSeriesUI = injectI18n(function (props) {
   const {

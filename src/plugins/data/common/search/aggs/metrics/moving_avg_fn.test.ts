@@ -30,6 +30,7 @@ describe('agg_expression_functions', () => {
               "json": undefined,
               "metricAgg": undefined,
               "script": undefined,
+              "timeShift": undefined,
               "window": undefined,
             },
             "schema": undefined,
@@ -59,6 +60,7 @@ describe('agg_expression_functions', () => {
               "json": undefined,
               "metricAgg": "sum",
               "script": "test",
+              "timeShift": undefined,
               "window": 10,
             },
             "schema": undefined,
@@ -88,6 +90,7 @@ describe('agg_expression_functions', () => {
               "json": undefined,
               "metricAgg": undefined,
               "script": undefined,
+              "timeShift": undefined,
               "window": undefined,
             },
             "schema": undefined,
@@ -96,6 +99,7 @@ describe('agg_expression_functions', () => {
           "json": undefined,
           "metricAgg": undefined,
           "script": undefined,
+          "timeShift": undefined,
           "window": undefined,
         }
       `);

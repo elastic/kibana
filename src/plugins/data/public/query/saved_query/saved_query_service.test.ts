@@ -278,6 +278,74 @@ describe('saved query service', () => {
       await getSavedQuery('foo');
       expect(mockSavedObjectsClient.get).toHaveBeenCalledWith('query', 'foo');
     });
+
+    it('should parse a json query', async () => {
+      mockSavedObjectsClient.get.mockReturnValue({
+        id: 'food',
+        attributes: {
+          title: 'food',
+          description: 'bar',
+          query: {
+            language: 'kuery',
+            query: '{"x": "y"}',
+          },
+        },
+      });
+
+      const response = await getSavedQuery('food');
+      expect(response.attributes.query.query).toEqual({ x: 'y' });
+    });
+
+    it('should handle null string', async () => {
+      mockSavedObjectsClient.get.mockReturnValue({
+        id: 'food',
+        attributes: {
+          title: 'food',
+          description: 'bar',
+          query: {
+            language: 'kuery',
+            query: 'null',
+          },
+        },
+      });
+
+      const response = await getSavedQuery('food');
+      expect(response.attributes.query.query).toEqual('null');
+    });
+
+    it('should handle null quoted string', async () => {
+      mockSavedObjectsClient.get.mockReturnValue({
+        id: 'food',
+        attributes: {
+          title: 'food',
+          description: 'bar',
+          query: {
+            language: 'kuery',
+            query: '"null"',
+          },
+        },
+      });
+
+      const response = await getSavedQuery('food');
+      expect(response.attributes.query.query).toEqual('"null"');
+    });
+
+    it('should not lose quotes', async () => {
+      mockSavedObjectsClient.get.mockReturnValue({
+        id: 'food',
+        attributes: {
+          title: 'food',
+          description: 'bar',
+          query: {
+            language: 'kuery',
+            query: '"Bob"',
+          },
+        },
+      });
+
+      const response = await getSavedQuery('food');
+      expect(response.attributes.query.query).toEqual('"Bob"');
+    });
   });
 
   describe('deleteSavedQuery', function () {

@@ -27,7 +27,9 @@ export const useAlertInfo = ({ ruleId = null }: AlertInfo): Return => {
     <EuiLoadingSpinner size="m" />
   );
 
-  const { loading, data: alerts } = useQueryAlerts<unknown, Aggs>(buildLastAlertsQuery(ruleId));
+  const { loading, data: alerts } = useQueryAlerts<unknown, Aggs>({
+    query: buildLastAlertsQuery(ruleId),
+  });
 
   useEffect(() => {
     if (alerts != null) {

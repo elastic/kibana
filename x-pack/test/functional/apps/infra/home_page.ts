@@ -5,31 +5,27 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './constants';
 
 const DATE_WITH_DATA = DATES.metricsAndLogs.hosts.withData;
 const DATE_WITHOUT_DATA = DATES.metricsAndLogs.hosts.withoutData;
 
-const COMMON_REQUEST_HEADERS = {
-  'kbn-xsrf': 'some-xsrf-token',
-};
-
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const pageObjects = getPageObjects(['common', 'infraHome']);
-  const supertest = getService('supertest');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/75724
-  describe.skip('Home page', function () {
+  describe('Home page', function () {
     this.tags('includeFirefox');
     before(async () => {
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     describe('without metrics present', () => {
-      before(async () => await esArchiver.unload('infra/metrics_and_logs'));
+      before(
+        async () =>
+          await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs')
+      );
 
       it('renders an empty data prompt', async () => {
         await pageObjects.common.navigateToApp('infraOps');
@@ -39,59 +35,24 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('with metrics present', () => {
       before(async () => {
-        await esArchiver.load('infra/metrics_and_logs');
+        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await pageObjects.common.navigateToApp('infraOps');
         await pageObjects.infraHome.waitForLoading();
       });
-      after(async () => await esArchiver.unload('infra/metrics_and_logs'));
+      after(
+        async () =>
+          await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs')
+      );
 
-      it('renders the waffle map for dates with data', async () => {
+      it('renders the waffle map and tooltips for dates with data', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
         await pageObjects.infraHome.getWaffleMap();
+        await pageObjects.infraHome.getWaffleMapTooltips();
       });
 
       it('renders an empty data prompt for dates with no data', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITHOUT_DATA);
         await pageObjects.infraHome.getNoMetricsDataPrompt();
-      });
-
-      it('records telemetry for hosts', async () => {
-        await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
-        await pageObjects.infraHome.getWaffleMap();
-
-        const resp = await supertest
-          .post(`/api/telemetry/v2/clusters/_stats`)
-          .set(COMMON_REQUEST_HEADERS)
-          .set('Accept', 'application/json')
-          .send({
-            unencrypted: true,
-          })
-          .expect(200)
-          .then((res: any) => res.body);
-
-        expect(
-          resp[0].stack_stats.kibana.plugins.infraops.last_24_hours.hits.infraops_hosts
-        ).to.be.greaterThan(0);
-      });
-
-      it('records telemetry for docker', async () => {
-        await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
-        await pageObjects.infraHome.getWaffleMap();
-        await pageObjects.infraHome.goToDocker();
-
-        const resp = await supertest
-          .post(`/api/telemetry/v2/clusters/_stats`)
-          .set(COMMON_REQUEST_HEADERS)
-          .set('Accept', 'application/json')
-          .send({
-            unencrypted: true,
-          })
-          .expect(200)
-          .then((res: any) => res.body);
-
-        expect(
-          resp[0].stack_stats.kibana.plugins.infraops.last_24_hours.hits.infraops_docker
-        ).to.be.greaterThan(0);
       });
     });
   });

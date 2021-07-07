@@ -12,7 +12,7 @@ import { JiraActionConnector } from './types';
 jest.mock('../../../../common/lib/kibana');
 
 describe('JiraActionConnectorFields renders', () => {
-  test('alerting Jira connector fields is rendered', () => {
+  test('alerting Jira connector fields are rendered', () => {
     const actionConnector = {
       secrets: {
         email: 'email',
@@ -108,6 +108,26 @@ describe('JiraActionConnectorFields renders', () => {
     );
     expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toBeGreaterThan(0);
     expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toEqual(0);
+  });
+
+  test('should display a message when secrets is missing', () => {
+    const actionConnector = {
+      actionTypeId: '.jira',
+      isPreconfigured: false,
+      isMissingSecrets: true,
+      secrets: {},
+      config: {},
+    } as JiraActionConnector;
+    const wrapper = mountWithIntl(
+      <JiraConnectorFields
+        action={actionConnector}
+        errors={{ apiUrl: [], email: [], apiToken: [], projectKey: [] }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
+        readOnly={false}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="missingSecretsMessage"]').length).toBeGreaterThan(0);
   });
 
   test('should display a message on edit to re-enter credentials', () => {

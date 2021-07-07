@@ -10,7 +10,7 @@ import React, { useCallback } from 'react';
 import { getDisplayName } from './lib/get_display_name';
 import { labelDateFormatter } from './lib/label_date_formatter';
 import { findIndex, first } from 'lodash';
-import { emptyLabel } from '../../../common/empty_label';
+import { getValueOrEmpty } from '../../../common/empty_label';
 import { getSplitByTermsColor } from '../lib/get_split_by_terms_color';
 
 export function visWithSplits(WrappedComponent) {
@@ -109,7 +109,8 @@ export function visWithSplits(WrappedComponent) {
             model={model}
             visData={newVisData}
             onBrush={props.onBrush}
-            additionalLabel={additionalLabel || emptyLabel}
+            onFilterClick={props.onFilterClick}
+            additionalLabel={getValueOrEmpty(additionalLabel)}
             backgroundColor={props.backgroundColor}
             getConfig={props.getConfig}
           />

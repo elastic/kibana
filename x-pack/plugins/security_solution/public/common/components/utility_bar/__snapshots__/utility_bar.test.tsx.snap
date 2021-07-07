@@ -10,6 +10,7 @@ exports[`UtilityBar it renders 1`] = `
     </UtilityBarGroup>
     <UtilityBarGroup>
       <UtilityBarAction
+        dataTestSubj="popover"
         iconType=""
         popoverContent={[Function]}
       >
@@ -20,6 +21,7 @@ exports[`UtilityBar it renders 1`] = `
   <UtilityBarSection>
     <UtilityBarGroup>
       <UtilityBarAction
+        dataTestSubj="action"
         iconType="cross"
       >
         Test action

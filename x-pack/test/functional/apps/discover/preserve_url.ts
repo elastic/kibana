@@ -15,11 +15,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('preserve url', function () {
     before(async function () {
-      await esArchiver.load('spaces/multi_space');
+      await esArchiver.load('x-pack/test/functional/es_archives/spaces/multi_space');
     });
 
     after(function () {
-      return esArchiver.unload('spaces/multi_space');
+      return esArchiver.unload('x-pack/test/functional/es_archives/spaces/multi_space');
     });
 
     it('goes back to last opened url', async function () {

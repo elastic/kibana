@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-export const addNoteToTimeline = (note: string, timelineId: string) =>
+export const addNoteToTimeline = (
+  note: string,
+  timelineId: string
+): Cypress.Chainable<Cypress.Response> =>
   cy.request({
     method: 'PATCH',
     url: '/api/note',

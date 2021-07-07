@@ -25,6 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
 
   describe('line charts - split series', function () {
+    let isNewChartsLibraryEnabled = false;
     const initLineChart = async function () {
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
@@ -41,7 +42,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.clickGo();
     };
 
-    before(initLineChart);
+    before(async () => {
+      isNewChartsLibraryEnabled = await PageObjects.visChart.isNewChartsLibraryEnabled();
+      await PageObjects.visualize.initTests(isNewChartsLibraryEnabled);
+      await initLineChart();
+    });
 
     afterEach(async () => {
       await inspector.close();

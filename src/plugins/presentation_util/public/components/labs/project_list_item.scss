@@ -10,7 +10,7 @@
     left: 4px;
     bottom: $euiSizeL;
     width: 4px;
-    background: $euiColorPrimary;
+    background: $euiColorSecondary;
     content: '';
   }
 
@@ -37,10 +37,20 @@
   }
 
   &--isOverridden:before {
-    left: -12px;
+    left: -$euiSizeS;
   }
 
   &--isOverridden:first-child:before {
     top: 0;
   }
+}
+
+.projectListItem__titlePendingChangesIndicator {
+  margin-left: $euiSizeS;
+  position: relative;
+  top: -1px;
+}
+
+.projectListItem__solutions {
+  text-transform: capitalize;
 }

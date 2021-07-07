@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 
 import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 
-import { EmptyState } from './';
+import { EmptyState, SynonymModal } from './';
 
 describe('EmptyState', () => {
   it('renders', () => {
@@ -23,5 +23,11 @@ describe('EmptyState', () => {
     expect(wrapper.find(EuiButton).prop('href')).toEqual(
       expect.stringContaining('/synonyms-guide.html')
     );
+  });
+
+  it('renders the add synonym modal', () => {
+    const wrapper = shallow(<EmptyState />);
+
+    expect(wrapper.find(SynonymModal)).toHaveLength(1);
   });
 });

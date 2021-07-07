@@ -80,7 +80,7 @@ import {
   waitForAlertsPanelToBeLoaded,
 } from '../../tasks/alerts';
 import {
-  changeRowsPerPageTo300,
+  changeRowsPerPageTo100,
   deleteFirstRule,
   deleteSelectedRules,
   editFirstRule,
@@ -110,7 +110,7 @@ import { saveEditedRule, waitForKibana } from '../../tasks/edit_rule';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import { activatesRule } from '../../tasks/rule_details';
 
-import { DETECTIONS_URL } from '../../urls/navigation';
+import { ALERTS_URL } from '../../urls/navigation';
 
 describe('Custom detection rules creation', () => {
   const expectedUrls = newRule.referenceUrls.join('');
@@ -133,7 +133,7 @@ describe('Custom detection rules creation', () => {
   });
 
   it('Creates and activates a new rule', function () {
-    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
@@ -159,7 +159,7 @@ describe('Custom detection rules creation', () => {
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-    changeRowsPerPageTo300();
+    changeRowsPerPageTo100();
 
     cy.get(RULES_TABLE).then(($table) => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
@@ -177,7 +177,7 @@ describe('Custom detection rules creation', () => {
 
     goToRuleDetails();
 
-    cy.get(RULE_NAME_HEADER).should('have.text', `${this.rule.name}`);
+    cy.get(RULE_NAME_HEADER).should('contain', `${this.rule.name}`);
     cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', this.rule.description);
     cy.get(ABOUT_DETAILS).within(() => {
       getDetails(SEVERITY_DETAILS).should('have.text', this.rule.severity);
@@ -226,7 +226,7 @@ describe('Custom detection rules deletion and edition', () => {
   context('Deletion', () => {
     beforeEach(() => {
       cleanKibana();
-      loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+      loginAndWaitForPageWithoutDateRange(ALERTS_URL);
       goToManageAlertsDetectionRules();
       waitForAlertsIndexToBeCreated();
       createCustomRuleActivated(newRule, 'rule1');
@@ -302,7 +302,7 @@ describe('Custom detection rules deletion and edition', () => {
 
     beforeEach(() => {
       cleanKibana();
-      loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+      loginAndWaitForPageWithoutDateRange(ALERTS_URL);
       goToManageAlertsDetectionRules();
       waitForAlertsIndexToBeCreated();
       createCustomRuleActivated(existingRule, 'rule1');
@@ -374,7 +374,7 @@ describe('Custom detection rules deletion and edition', () => {
         cy.wrap(response!.body.max_signals).should('eql', existingRule.maxSignals);
       });
 
-      cy.get(RULE_NAME_HEADER).should('have.text', `${editedRule.name}`);
+      cy.get(RULE_NAME_HEADER).should('contain', `${editedRule.name}`);
       cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', editedRule.description);
       cy.get(ABOUT_DETAILS).within(() => {
         getDetails(SEVERITY_DETAILS).should('have.text', editedRule.severity);

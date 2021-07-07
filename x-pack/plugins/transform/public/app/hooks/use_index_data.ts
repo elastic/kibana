@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { EuiDataGridColumn } from '@elastic/eui';
@@ -14,6 +14,11 @@ import {
   isEsSearchResponse,
   isFieldHistogramsResponseSchema,
 } from '../../../common/api_schemas/type_guards';
+import {
+  hasKeywordDuplicate,
+  isKeywordDuplicate,
+  removeKeywordPostfix,
+} from '../../../common/utils/field_utils';
 import type { EsSorting, UseIndexDataReturnType } from '../../shared_imports';
 
 import { getErrorMessage } from '../../../common/utils/errors';
@@ -46,9 +51,66 @@ export const useIndexData = (
     },
   } = useAppDependencies();
 
-  const indexPatternFields = getFieldsFromKibanaIndexPattern(indexPattern);
+  const [indexPatternFields, setIndexPatternFields] = useState<string[]>();
+
+  // Fetch 500 random documents to determine populated fields.
+  // This is a workaround to avoid passing potentially thousands of unpopulated fields
+  // (for example, as part of filebeat/metricbeat/ECS based indices)
+  // to the data grid component which would significantly slow down the page.
+  const fetchDataGridSampleDocuments = async function () {
+    setErrorMessage('');
+    setStatus(INDEX_STATUS.LOADING);
+
+    const esSearchRequest = {
+      index: indexPattern.title,
+      body: {
+        fields: ['*'],
+        _source: false,
+        query: {
+          function_score: {
+            query: { match_all: {} },
+            random_score: {},
+          },
+        },
+        size: 500,
+      },
+    };
+
+    const resp = await api.esSearch(esSearchRequest);
+
+    if (!isEsSearchResponse(resp)) {
+      setErrorMessage(getErrorMessage(resp));
+      setStatus(INDEX_STATUS.ERROR);
+      return;
+    }
+
+    const isCrossClusterSearch = indexPattern.title.includes(':');
+    const isMissingFields = resp.hits.hits.every((d) => typeof d.fields === 'undefined');
+
+    const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
+
+    // Get all field names for each returned doc and flatten it
+    // to a list of unique field names used across all docs.
+    const allKibanaIndexPatternFields = getFieldsFromKibanaIndexPattern(indexPattern);
+    const populatedFields = [...new Set(docs.map(Object.keys).flat(1))]
+      .filter((d) => allKibanaIndexPatternFields.includes(d))
+      .sort();
+
+    setCcsWarning(isCrossClusterSearch && isMissingFields);
+    setStatus(INDEX_STATUS.LOADED);
+    setIndexPatternFields(populatedFields);
+  };
+
+  useEffect(() => {
+    fetchDataGridSampleDocuments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const columns: EuiDataGridColumn[] = useMemo(() => {
+    if (typeof indexPatternFields === 'undefined') {
+      return [];
+    }
+
     let result: Array<{ id: string; schema: string | undefined }> = [];
 
     // Get the the runtime fields that are defined from API field and index patterns
@@ -144,7 +206,7 @@ export const useIndexData = (
     setRowCount(typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total.value);
     setRowCountRelation(
       typeof resp.hits.total === 'number'
-        ? ('eq' as estypes.TotalHitsRelation)
+        ? ('eq' as estypes.SearchTotalHitsRelation)
         : resp.hits.total.relation
     );
     setTableItems(docs);
@@ -152,14 +214,25 @@ export const useIndexData = (
   };
 
   const fetchColumnChartsData = async function () {
+    const allIndexPatternFieldNames = new Set(indexPattern.fields.map((f) => f.name));
     const columnChartsData = await api.getHistogramsForFields(
       indexPattern.title,
       columns
         .filter((cT) => dataGrid.visibleColumns.includes(cT.id))
-        .map((cT) => ({
-          fieldName: cT.id,
-          type: getFieldType(cT.schema),
-        })),
+        .map((cT) => {
+          // If a column field name has a corresponding keyword field,
+          // fetch the keyword field instead to be able to do aggregations.
+          const fieldName = cT.id;
+          return hasKeywordDuplicate(fieldName, allIndexPatternFieldNames)
+            ? {
+                fieldName: `${fieldName}.keyword`,
+                type: getFieldType(undefined),
+              }
+            : {
+                fieldName,
+                type: getFieldType(cT.schema),
+              };
+        }),
       isDefaultQuery(query) ? matchAllQuery : query,
       combinedRuntimeMappings
     );
@@ -169,7 +242,15 @@ export const useIndexData = (
       return;
     }
 
-    setColumnCharts(columnChartsData);
+    setColumnCharts(
+      // revert field names with `.keyword` used to do aggregations to their original column name
+      columnChartsData.map((d) => ({
+        ...d,
+        ...(isKeywordDuplicate(d.id, allIndexPatternFieldNames)
+          ? { id: removeKeywordPostfix(d.id) }
+          : {}),
+      }))
+    );
   };
 
   useEffect(() => {

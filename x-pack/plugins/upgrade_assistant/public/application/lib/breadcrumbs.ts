@@ -18,6 +18,12 @@ const i18nTexts = {
     esDeprecations: i18n.translate('xpack.upgradeAssistant.breadcrumb.esDeprecationsLabel', {
       defaultMessage: 'Elasticsearch deprecations',
     }),
+    kibanaDeprecations: i18n.translate(
+      'xpack.upgradeAssistant.breadcrumb.kibanaDeprecationsLabel',
+      {
+        defaultMessage: 'Kibana deprecations',
+      }
+    ),
   },
 };
 
@@ -42,6 +48,15 @@ export class BreadcrumbService {
         text: i18nTexts.breadcrumbs.esDeprecations,
       },
     ],
+    kibanaDeprecations: [
+      {
+        text: i18nTexts.breadcrumbs.overview,
+        href: '/',
+      },
+      {
+        text: i18nTexts.breadcrumbs.kibanaDeprecations,
+      },
+    ],
   };
 
   private setBreadcrumbsHandler?: SetBreadcrumbs;
@@ -50,7 +65,7 @@ export class BreadcrumbService {
     this.setBreadcrumbsHandler = setBreadcrumbsHandler;
   }
 
-  public setBreadcrumbs(type: 'overview' | 'esDeprecations'): void {
+  public setBreadcrumbs(type: 'overview' | 'esDeprecations' | 'kibanaDeprecations'): void {
     if (!this.setBreadcrumbsHandler) {
       throw new Error('Breadcrumb service has not been initialized');
     }

@@ -7,15 +7,20 @@
 
 import React from 'react';
 
+import { useActions } from 'kea';
+
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiText, EuiButton } from '@elastic/eui';
 
 import { MANAGE_BUTTON_LABEL } from '../../../../shared/constants';
 
+import { SynonymsLogic } from '../index';
 import { SynonymSet } from '../types';
 
 import { SynonymIcon } from './';
 
 export const SynonymCard: React.FC<SynonymSet> = (synonymSet) => {
+  const { openModal } = useActions(SynonymsLogic);
+
   const [firstSynonym, ...remainingSynonyms] = synonymSet.synonyms;
 
   return (
@@ -28,7 +33,7 @@ export const SynonymCard: React.FC<SynonymSet> = (synonymSet) => {
       footer={
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={() => {} /* TODO */}>{MANAGE_BUTTON_LABEL}</EuiButton>
+            <EuiButton onClick={() => openModal(synonymSet)}>{MANAGE_BUTTON_LABEL}</EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       }

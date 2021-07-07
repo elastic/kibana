@@ -10,7 +10,6 @@ import { cloneDeep, isEqual } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 
-import { TEXT } from '../../../../../shared/constants/field_types';
 import { ADD, UPDATE } from '../../../../../shared/constants/operations';
 import {
   flashAPIErrors,
@@ -18,8 +17,15 @@ import {
   setErrorMessage,
   clearFlashMessages,
 } from '../../../../../shared/flash_messages';
+import { defaultErrorMessage } from '../../../../../shared/flash_messages/handle_api_errors';
 import { HttpLogic } from '../../../../../shared/http';
-import { IndexJob, TOperation, Schema, SchemaTypes } from '../../../../../shared/types';
+import {
+  IndexJob,
+  FieldCoercionErrors,
+  Schema,
+  SchemaType,
+} from '../../../../../shared/schema/types';
+import { TOperation } from '../../../../../shared/types';
 import { AppLogic } from '../../../../app_logic';
 import { OptionValue } from '../../../../types';
 import { SourceLogic } from '../../source_logic';
@@ -37,7 +43,7 @@ interface SchemaActions {
   ): SchemaChangeErrorsProps;
   onSchemaSetSuccess(schemaProps: SchemaResponseProps): SchemaResponseProps;
   onSchemaSetFormErrors(errors: string[]): string[];
-  updateNewFieldType(newFieldType: SchemaTypes): SchemaTypes;
+  updateNewFieldType(newFieldType: SchemaType): SchemaType;
   onFieldUpdate({
     schema,
     formUnchanged,
@@ -51,8 +57,8 @@ interface SchemaActions {
   setFilterValue(filterValue: string): string;
   addNewField(
     fieldName: string,
-    newFieldType: SchemaTypes
-  ): { fieldName: string; newFieldType: SchemaTypes };
+    newFieldType: SchemaType
+  ): { fieldName: string; newFieldType: SchemaType };
   updateFields(): void;
   openAddFieldModal(): void;
   closeAddFieldModal(): void;
@@ -64,8 +70,8 @@ interface SchemaActions {
   ): { activeReindexJobId: string; sourceId: string };
   updateExistingFieldType(
     fieldName: string,
-    newFieldType: SchemaTypes
-  ): { fieldName: string; newFieldType: SchemaTypes };
+    newFieldType: SchemaType
+  ): { fieldName: string; newFieldType: SchemaType };
   setServerField(
     updatedSchema: Schema,
     operation: TOperation
@@ -96,15 +102,6 @@ interface SchemaResponseProps {
 
 export interface SchemaInitialData extends SchemaResponseProps {
   sourceId: string;
-}
-
-interface FieldCoercionError {
-  external_id: string;
-  error: string;
-}
-
-export interface FieldCoercionErrors {
-  [key: string]: FieldCoercionError[];
 }
 
 interface SchemaChangeErrorsProps {
@@ -142,7 +139,7 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
       activeReindexJobId,
       sourceId,
     }),
-    addNewField: (fieldName: string, newFieldType: SchemaTypes) => ({ fieldName, newFieldType }),
+    addNewField: (fieldName: string, newFieldType: SchemaType) => ({ fieldName, newFieldType }),
     updateExistingFieldType: (fieldName: string, newFieldType: string) => ({
       fieldName,
       newFieldType,
@@ -196,10 +193,10 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
       },
     ],
     newFieldType: [
-      TEXT,
+      SchemaType.Text,
       {
         updateNewFieldType: (_, newFieldType) => newFieldType,
-        onSchemaSetSuccess: () => TEXT,
+        onSchemaSetSuccess: () => SchemaType.Text,
       },
     ],
     addFieldFormErrors: [
@@ -304,15 +301,15 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
     addNewField: ({ fieldName, newFieldType }) => {
       if (fieldName in values.activeSchema) {
         window.scrollTo(0, 0);
-        setErrorMessage(
+        actions.onSchemaSetFormErrors([
           i18n.translate(
             'xpack.enterpriseSearch.workplaceSearch.contentSource.schema.newFieldExists.message',
             {
               defaultMessage: 'New field already exists: {fieldName}.',
               values: { fieldName },
             }
-          )
-        );
+          ),
+        ]);
       } else {
         const schema = cloneDeep(values.activeSchema);
         schema[fieldName] = newFieldType;
@@ -353,7 +350,9 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
       } catch (e) {
         window.scrollTo(0, 0);
         if (isAdding) {
-          actions.onSchemaSetFormErrors(e?.message);
+          // We expect body.attributes.errors to be a string[] for actions.onSchemaSetFormErrors
+          const message: string[] = e?.body?.attributes?.errors || [defaultErrorMessage];
+          actions.onSchemaSetFormErrors(message);
         } else {
           flashAPIErrors(e);
         }

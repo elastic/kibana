@@ -113,21 +113,32 @@ export async function loadStatus({
   try {
     response = await http.get('/api/status');
   } catch (e) {
-    if ((e.response?.status ?? 0) >= 400) {
-      notifications.toasts.addDanger(
-        i18n.translate('core.statusPage.loadStatus.serverStatusCodeErrorMessage', {
-          defaultMessage: 'Failed to request server status with status code {responseStatus}',
-          values: { responseStatus: e.response?.status },
-        })
-      );
+    // API returns a 503 response if not all services are available.
+    // In this case, we want to treat this as a successful API call, so that we can
+    // display Kibana's status correctly.
+    // 503 responses can happen for other reasons (such as proxies), so we make an educated
+    // guess here to determine if the response payload looks like an appropriate `StatusResponse`.
+    const ignoreError = e.response?.status === 503 && typeof e.body?.name === 'string';
+
+    if (ignoreError) {
+      response = e.body;
     } else {
-      notifications.toasts.addDanger(
-        i18n.translate('core.statusPage.loadStatus.serverIsDownErrorMessage', {
-          defaultMessage: 'Failed to request server status. Perhaps your server is down?',
-        })
-      );
+      if ((e.response?.status ?? 0) >= 400) {
+        notifications.toasts.addDanger(
+          i18n.translate('core.statusPage.loadStatus.serverStatusCodeErrorMessage', {
+            defaultMessage: 'Failed to request server status with status code {responseStatus}',
+            values: { responseStatus: e.response?.status },
+          })
+        );
+      } else {
+        notifications.toasts.addDanger(
+          i18n.translate('core.statusPage.loadStatus.serverIsDownErrorMessage', {
+            defaultMessage: 'Failed to request server status. Perhaps your server is down?',
+          })
+        );
+      }
+      throw e;
     }
-    throw e;
   }
 
   return {

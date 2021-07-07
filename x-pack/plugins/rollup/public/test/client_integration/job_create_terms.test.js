@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { setHttp } from '../../crud_app/services';
+import { setHttp, init as initDocumentation } from '../../crud_app/services';
 import { pageHelpers, mockHttpRequest } from './helpers';
-import { coreMock } from '../../../../../../src/core/public/mocks';
+import { coreMock, docLinksServiceMock } from '../../../../../../src/core/public/mocks';
 
 jest.mock('lodash', () => ({
   ...jest.requireActual('lodash'),
@@ -28,6 +28,7 @@ describe('Create Rollup Job, step 3: Terms', () => {
   beforeAll(() => {
     startMock = coreMock.createStart();
     setHttp(startMock.http);
+    initDocumentation(docLinksServiceMock.createStartContract());
   });
 
   beforeEach(() => {

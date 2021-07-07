@@ -9,7 +9,10 @@
 export { registerUiMetricUsageCollector } from './ui_metric';
 export { registerManagementUsageCollector } from './management';
 export { registerApplicationUsageCollector } from './application_usage';
-export { registerKibanaUsageCollector } from './kibana';
+export {
+  registerKibanaUsageCollector,
+  registerSavedObjectsCountUsageCollector,
+} from './saved_objects_counts';
 export { registerOpsStatsCollector } from './ops_stats';
 export { registerCloudProviderUsageCollector } from './cloud';
 export { registerCspCollector } from './csp';
@@ -25,3 +28,4 @@ export {
   registerUsageCountersRollups,
   registerUsageCountersUsageCollector,
 } from './usage_counters';
+export { registerEventLoopDelaysCollector } from './event_loop_delays';

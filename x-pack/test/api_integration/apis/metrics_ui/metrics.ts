@@ -31,8 +31,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('metrics', () => {
-    before(() => esArchiver.load('infra/7.0.0/hosts'));
-    after(() => esArchiver.unload('infra/7.0.0/hosts'));
+    before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/7.0.0/hosts'));
+    after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/7.0.0/hosts'));
 
     const fetchNodeDetails = async (
       body: NodeDetailsRequest
@@ -69,8 +69,8 @@ export default function ({ getService }: FtrProviderContext) {
         expect(series).to.have.property('id', 'user');
         expect(series).to.have.property('data');
         const datapoint = last(series.data) as any;
-        expect(datapoint).to.have.property('timestamp', 1547571720000);
-        expect(datapoint).to.have.property('value', 0.0018333333333333333);
+        expect(datapoint).to.have.property('timestamp', 1547571780000);
+        expect(datapoint).to.have.property('value', 0.0015);
       });
     });
 

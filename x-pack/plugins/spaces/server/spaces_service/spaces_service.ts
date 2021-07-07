@@ -11,67 +11,77 @@ import type { Space } from 'src/plugins/spaces_oss/common';
 import { getSpaceIdFromPath } from '../../common';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { namespaceToSpaceId, spaceIdToNamespace } from '../lib/utils/namespace';
-import type { SpacesClientServiceStart } from '../spaces_client';
+import type { ISpacesClient, SpacesClientServiceStart } from '../spaces_client';
 
+/**
+ * The Spaces service setup contract.
+ */
 export interface SpacesServiceSetup {
   /**
    * Retrieves the space id associated with the provided request.
-   * @param request
+   * @param request the request.
    *
    * @deprecated Use `getSpaceId` from the `SpacesServiceStart` contract instead.
+   * @removeBy 7.16
    */
   getSpaceId(request: KibanaRequest): string;
 
   /**
    * Converts the provided space id into the corresponding Saved Objects `namespace` id.
-   * @param spaceId
+   * @param spaceId the space id to convert.
    *
    * @deprecated use `spaceIdToNamespace` from the `SpacesServiceStart` contract instead.
+   * @removeBy 7.16
    */
   spaceIdToNamespace(spaceId: string): string | undefined;
 
   /**
    * Converts the provided namespace into the corresponding space id.
-   * @param namespace
+   * @param namespace the namespace to convert.
    *
    * @deprecated use `namespaceToSpaceId` from the `SpacesServiceStart` contract instead.
+   * @removeBy 7.16
    */
   namespaceToSpaceId(namespace: string | undefined): string;
 }
 
+/**
+ * The Spaces service start contract.
+ */
 export interface SpacesServiceStart {
   /**
    * Creates a scoped instance of the SpacesClient.
+   * @param request the request.
    */
-  createSpacesClient: SpacesClientServiceStart['createSpacesClient'];
+  createSpacesClient: (request: KibanaRequest) => ISpacesClient;
 
   /**
    * Retrieves the space id associated with the provided request.
-   * @param request
+   * @param request the request.
    */
   getSpaceId(request: KibanaRequest): string;
 
   /**
    * Indicates if the provided request is executing within the context of the `default` space.
-   * @param request
+   * @param request the request.
    */
   isInDefaultSpace(request: KibanaRequest): boolean;
 
   /**
    * Retrieves the Space associated with the provided request.
-   * @param request
+   * @param request the request.
    */
   getActiveSpace(request: KibanaRequest): Promise<Space>;
 
   /**
    * Converts the provided space id into the corresponding Saved Objects `namespace` id.
-   * @param spaceId
+   * @param spaceId the space id to convert.
    */
   spaceIdToNamespace(spaceId: string): string | undefined;
 
   /**
    * Converts the provided namespace into the corresponding space id.
-   * @param namespace
+   * @param namespace the namespace to convert.
    */
   namespaceToSpaceId(namespace: string | undefined): string;
 }
@@ -85,6 +95,9 @@ interface SpacesServiceStartDeps {
   spacesClientService: SpacesClientServiceStart;
 }
 
+/**
+ * Service for interacting with spaces.
+ */
 export class SpacesService {
   public setup({ basePath }: SpacesServiceSetupDeps): SpacesServiceSetup {
     return {
@@ -96,7 +109,7 @@ export class SpacesService {
     };
   }
 
-  public start({ basePath, spacesClientService }: SpacesServiceStartDeps) {
+  public start({ basePath, spacesClientService }: SpacesServiceStartDeps): SpacesServiceStart {
     return {
       getSpaceId: (request: KibanaRequest) => {
         return this.getSpaceId(request, basePath);

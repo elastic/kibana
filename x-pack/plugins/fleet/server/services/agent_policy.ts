@@ -14,6 +14,8 @@ import type {
   SavedObjectsBulkUpdateResponse,
 } from 'src/core/server';
 
+import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
+
 import type { AuthenticatedUser } from '../../../security/server';
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -45,6 +47,10 @@ import type {
   Output,
 } from '../../common';
 import { AgentPolicyNameExistsError, HostedAgentPolicyRestrictionRelatedError } from '../errors';
+import {
+  storedPackagePoliciesToAgentPermissions,
+  DEFAULT_PERMISSIONS,
+} from '../services/package_policies_to_agent_permissions';
 
 import { getPackageInfo } from './epm/packages';
 import { getAgentsByKuery } from './agents';
@@ -113,25 +119,22 @@ class AgentPolicyService {
     policy?: AgentPolicy;
   }> {
     const { id, ...preconfiguredAgentPolicy } = omit(config, 'package_policies');
-    const newAgentPolicyDefaults: Partial<NewAgentPolicy> = {
+    const newAgentPolicyDefaults: Pick<NewAgentPolicy, 'namespace' | 'monitoring_enabled'> = {
       namespace: 'default',
       monitoring_enabled: ['logs', 'metrics'],
     };
 
-    let searchParams;
-    let newAgentPolicy;
-    if (id) {
-      const preconfigurationId = String(id);
-      searchParams = {
-        searchFields: ['preconfiguration_id'],
-        search: escapeSearchQueryPhrase(preconfigurationId),
-      };
+    const newAgentPolicy: NewAgentPolicy = {
+      ...newAgentPolicyDefaults,
+      ...preconfiguredAgentPolicy,
+      is_preconfigured: true,
+    };
 
-      newAgentPolicy = {
-        ...newAgentPolicyDefaults,
-        ...preconfiguredAgentPolicy,
-        preconfiguration_id: preconfigurationId,
-      } as NewAgentPolicy;
+    let searchParams;
+    if (id) {
+      searchParams = {
+        id: String(id),
+      };
     } else if (
       preconfiguredAgentPolicy.is_default ||
       preconfiguredAgentPolicy.is_default_fleet_server
@@ -144,13 +147,8 @@ class AgentPolicyService {
         ],
         search: 'true',
       };
-
-      newAgentPolicy = {
-        ...newAgentPolicyDefaults,
-        ...preconfiguredAgentPolicy,
-      } as NewAgentPolicy;
     }
-    if (!newAgentPolicy || !searchParams) throw new Error('Missing ID');
+    if (!searchParams) throw new Error('Missing ID');
 
     return await this.ensureAgentPolicy(soClient, esClient, newAgentPolicy, searchParams);
   }
@@ -159,14 +157,41 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     newAgentPolicy: NewAgentPolicy,
-    searchParams: {
-      searchFields: string[];
-      search: string;
-    }
+    searchParams:
+      | { id: string }
+      | {
+          searchFields: string[];
+          search: string;
+        }
   ): Promise<{
     created: boolean;
     policy: AgentPolicy;
   }> {
+    // For preconfigured policies with a specified ID
+    if ('id' in searchParams) {
+      try {
+        const agentPolicy = await soClient.get<AgentPolicySOAttributes>(
+          AGENT_POLICY_SAVED_OBJECT_TYPE,
+          searchParams.id
+        );
+        return {
+          created: false,
+          policy: {
+            id: agentPolicy.id,
+            ...agentPolicy.attributes,
+          },
+        };
+      } catch (e) {
+        if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+          return {
+            created: true,
+            policy: await this.create(soClient, esClient, newAgentPolicy, { id: searchParams.id }),
+          };
+        } else throw e;
+      }
+    }
+
+    // For default policies without a specified ID
     const agentPolicies = await soClient.find<AgentPolicySOAttributes>({
       type: AGENT_POLICY_SAVED_OBJECT_TYPE,
       ...searchParams,
@@ -571,9 +596,9 @@ class AgentPolicyService {
       );
     }
 
-    if (agentPolicy.preconfiguration_id) {
+    if (agentPolicy.is_preconfigured) {
       await soClient.create(PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE, {
-        preconfiguration_id: String(agentPolicy.preconfiguration_id),
+        id: String(id),
       });
     }
 
@@ -618,6 +643,10 @@ class AgentPolicyService {
       policy_id: fullPolicy.id,
       default_fleet_server: policy.is_default_fleet_server === true,
     };
+
+    if (policy.unenroll_timeout) {
+      fleetServerPolicy.unenroll_timeout = policy.unenroll_timeout;
+    }
 
     await esClient.create({
       index: AGENT_POLICY_INDEX,
@@ -709,6 +738,7 @@ class AgentPolicyService {
         ? {
             agent: {
               monitoring: {
+                namespace: agentPolicy.namespace,
                 use_output: defaultOutput.name,
                 enabled: true,
                 logs: agentPolicy.monitoring_enabled.includes(dataTypes.Logs),
@@ -723,30 +753,49 @@ class AgentPolicyService {
           }),
     };
 
+    const permissions = (await storedPackagePoliciesToAgentPermissions(
+      soClient,
+      agentPolicy.package_policies
+    )) || { _fallback: DEFAULT_PERMISSIONS };
+
+    permissions._elastic_agent_checks = {
+      cluster: DEFAULT_PERMISSIONS.cluster,
+    };
+
+    // TODO fetch this from the elastic agent package
+    const monitoringOutput = fullAgentPolicy.agent?.monitoring.use_output;
+    const monitoringNamespace = fullAgentPolicy.agent?.monitoring.namespace;
+    if (
+      fullAgentPolicy.agent?.monitoring.enabled &&
+      monitoringNamespace &&
+      monitoringOutput &&
+      fullAgentPolicy.outputs[monitoringOutput]?.type === 'elasticsearch'
+    ) {
+      const names: string[] = [];
+      if (fullAgentPolicy.agent.monitoring.logs) {
+        names.push(`logs-elastic_agent*-${monitoringNamespace}`);
+      }
+      if (fullAgentPolicy.agent.monitoring.metrics) {
+        names.push(`metrics-elastic_agent*-${monitoringNamespace}`);
+      }
+
+      permissions._elastic_agent_checks.indices = [
+        {
+          names,
+          privileges: ['auto_configure', 'create_doc'],
+        },
+      ];
+    }
+
     // Only add permissions if output.type is "elasticsearch"
     fullAgentPolicy.output_permissions = Object.keys(fullAgentPolicy.outputs).reduce<
       NonNullable<FullAgentPolicy['output_permissions']>
-    >((permissions, outputName) => {
+    >((outputPermissions, outputName) => {
       const output = fullAgentPolicy.outputs[outputName];
       if (output && output.type === 'elasticsearch') {
-        permissions[outputName] = {};
-        permissions[outputName]._fallback = {
-          cluster: ['monitor'],
-          indices: [
-            {
-              names: [
-                'logs-*',
-                'metrics-*',
-                'traces-*',
-                '.logs-endpoint.diagnostic.collection-*',
-                'synthetics-*',
-              ],
-              privileges: ['auto_configure', 'create_doc'],
-            },
-          ],
-        };
+        outputPermissions[outputName] = permissions;
       }
-      return permissions;
+      return outputPermissions;
     }, {});
 
     // only add settings if not in standalone

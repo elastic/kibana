@@ -8,10 +8,10 @@
 
 import React, { Component } from 'react';
 import * as Rx from 'rxjs';
+import uuid from 'uuid/v4';
 import { share } from 'rxjs/operators';
 import { isEqual, isEmpty, debounce } from 'lodash';
 import { EventEmitter } from 'events';
-
 import type { IUiSettingsClient } from 'kibana/public';
 import {
   Vis,
@@ -29,11 +29,12 @@ import type { IndexPatternValue, TimeseriesVisData } from '../../../common/types
 import { VisEditorVisualization } from './vis_editor_visualization';
 import { PanelConfig } from './panel_config';
 import { extractIndexPatternValues } from '../../../common/index_patterns_utils';
-import { TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../../common/timerange_data_modes';
+import { TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../../common/enums';
 import { VisPicker } from './vis_picker';
 import { fetchFields, VisFields } from '../lib/fetch_fields';
 import { getDataStart, getCoreStart } from '../../services';
 import { TimeseriesVisParams } from '../../types';
+import { UseIndexPatternModeCallout } from './use_index_patter_mode_callout';
 
 const VIS_STATE_DEBOUNCE_DELAY = 200;
 const APP_NAME = 'VisEditor';
@@ -79,6 +80,9 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
             ? TIME_RANGE_DATA_MODES.LAST_VALUE
             : TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE,
         ...this.props.vis.params,
+        ...(!this.props.vis.id && {
+          id: uuid(),
+        }),
       },
       extractedIndexPatterns: [''],
     };
@@ -155,8 +159,8 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
     this.setState({ autoApply: event.target.checked });
   };
 
-  onDataChange = ({ visData }: { visData: TimeseriesVisData }) => {
-    this.visDataSubject.next(visData);
+  onDataChange = (data: { visData?: TimeseriesVisData }) => {
+    this.visDataSubject.next(data?.visData);
   };
 
   render() {
@@ -178,6 +182,7 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
       >
         <DefaultIndexPatternContext.Provider value={this.state.defaultIndex}>
           <div className="tvbEditor" data-test-subj="tvbVisEditor">
+            {!this.props.vis.params.use_kibana_indexes && <UseIndexPatternModeCallout />}
             <div className="tvbEditor--hideForReporting">
               <VisPicker currentVisType={model.type} onChange={this.handleChange} />
             </div>

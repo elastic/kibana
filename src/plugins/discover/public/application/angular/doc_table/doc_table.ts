@@ -9,15 +9,17 @@
 import html from './doc_table.html';
 import { dispatchRenderComplete } from '../../../../../kibana_utils/public';
 import { SAMPLE_SIZE_SETTING } from '../../../../common';
-// @ts-ignore
+// @ts-expect-error
 import { getLimitedSearchResultsMessage } from './doc_table_strings';
 import { getServices } from '../../../kibana_services';
 import './index.scss';
 
 export interface LazyScope extends ng.IScope {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createDocTableDirective(pagerFactory: any, $filter: any) {
   return {
     restrict: 'E',
@@ -63,7 +65,7 @@ export function createDocTableDirective(pagerFactory: any, $filter: any) {
         $scope.limit = Math.max(minimumVisibleRows || 50, $scope.limit || 50);
       });
 
-      $scope.$watch('hits', (hits: any) => {
+      $scope.$watch('hits', (hits: unknown[]) => {
         if (!hits) return;
 
         // Reset infinite scroll limit

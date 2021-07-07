@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { get } from 'lodash';
 import {
   EuiButtonEmpty,
   EuiTextColor,
@@ -26,8 +27,7 @@ import { useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useActionResults } from '../../../action_results/use_action_results';
 import { useActionDetails } from '../../../actions/use_action_details';
-import { ResultTabs } from '../../../queries/edit/tabs';
-import { LiveQueryDetailsActionsMenu } from './actions_menu';
+import { ResultTabs } from '../../saved_queries/edit/tabs';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
 
@@ -43,6 +43,10 @@ const LiveQueryDetailsPageComponent = () => {
   const liveQueryListProps = useRouterNavigate('live_queries');
 
   const { data } = useActionDetails({ actionId });
+  const expirationDate = useMemo(() => new Date(data?.actionDetails._source.expiration), [
+    data?.actionDetails,
+  ]);
+  const expired = useMemo(() => expirationDate < new Date(), [expirationDate]);
   const { data: actionResultsData } = useActionResults({
     actionId,
     activePage: 0,
@@ -77,6 +81,18 @@ const LiveQueryDetailsPageComponent = () => {
     ),
     [liveQueryListProps]
   );
+
+  const failed = useMemo(() => {
+    let result = actionResultsData?.aggregations.failed;
+    if (expired) {
+      result = '-';
+      if (data?.actionDetails?.fields?.agents && actionResultsData?.aggregations) {
+        result =
+          data.actionDetails.fields.agents.length - actionResultsData.aggregations.successful;
+      }
+    }
+    return result;
+  }, [expired, actionResultsData?.aggregations, data?.actionDetails?.fields?.agents]);
 
   const RightColumn = useMemo(
     () => (
@@ -114,21 +130,13 @@ const LiveQueryDetailsPageComponent = () => {
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription className="eui-textNoWrap">
-              <EuiTextColor color={actionResultsData?.aggregations.failed ? 'danger' : 'default'}>
-                {actionResultsData?.aggregations.failed}
-              </EuiTextColor>
+              <EuiTextColor color={failed ? 'danger' : 'default'}>{failed}</EuiTextColor>
             </EuiDescriptionListDescription>
           </EuiDescriptionList>
         </EuiFlexItem>
-        <EuiFlexItem grow={false} key="agents_failed_count_divider">
-          <Divider />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} key="actions_menu">
-          <LiveQueryDetailsActionsMenu actionId={actionId} />
-        </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [actionId, actionResultsData?.aggregations.failed, data?.actionDetails?.fields?.agents?.length]
+    [data?.actionDetails?.fields?.agents?.length, failed]
   );
 
   return (
@@ -137,7 +145,13 @@ const LiveQueryDetailsPageComponent = () => {
         {data?.actionDetails._source?.data?.query}
       </EuiCodeBlock>
       <EuiSpacer />
-      <ResultTabs actionId={actionId} agentIds={data?.actionDetails?.fields?.agents} />
+      <ResultTabs
+        actionId={actionId}
+        expirationDate={expirationDate}
+        agentIds={data?.actionDetails?.fields?.agents}
+        startDate={get(data, ['actionDetails', 'fields', '@timestamp', '0'])}
+        endDate={get(data, 'actionDetails.fields.expiration[0]')}
+      />
     </WithHeaderLayout>
   );
 };

@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { EuiFilterButton, hexToRgb } from '@elastic/eui';
 import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
-import { useUrlStorage } from '../../hooks/use_url_storage';
+import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { useSeriesFilters } from '../../hooks/use_series_filters';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import FieldValueSuggestions from '../../../field_value_suggestions';
@@ -37,9 +37,11 @@ export function FilterValueButton({
   nestedField,
   allSelectedValues,
 }: Props) {
-  const { series } = useUrlStorage(seriesId);
+  const { getSeries } = useSeriesStorage();
 
-  const { indexPattern } = useAppIndexPatternContext();
+  const series = getSeries(seriesId);
+
+  const { indexPatterns } = useAppIndexPatternContext(series.dataType);
 
   const { setFilter, removeFilter } = useSeriesFilters({ seriesId });
 
@@ -71,8 +73,10 @@ export function FilterValueButton({
     </FilterButton>
   );
 
-  const onNestedChange = (val?: string) => {
-    setFilter({ field: nestedField!, value: val! });
+  const onNestedChange = (valuesN?: string[]) => {
+    (valuesN ?? []).forEach((valN) => {
+      setFilter({ field: nestedField!, value: valN! });
+    });
     setIsNestedOpen({ value: '', negate });
   };
 
@@ -92,13 +96,14 @@ export function FilterValueButton({
     <FieldValueSuggestions
       button={button}
       label={'Version'}
-      indexPattern={indexPattern}
       sourceField={nestedField}
       onChange={onNestedChange}
       filters={filters}
       forceOpen={forceOpenNested}
       anchorPosition="rightCenter"
       time={series.time}
+      asCombobox={false}
+      indexPatternTitle={indexPatterns[series.dataType]?.title}
     />
   ) : (
     button

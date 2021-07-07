@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExceptionListItemSchema } from '../../../../../lists/common/schemas/response';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { listMock } from '../../../../../lists/server/mocks';
 import { ExceptionListClient } from '../../../../../lists/server';
 import {
@@ -25,7 +25,7 @@ import {
 import { TrustedAppNotFoundError, TrustedAppVersionConflictError } from './errors';
 import { toUpdateTrustedApp } from '../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
 import { updateExceptionListItemImplementationMock } from './test_utils';
-import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common';
+import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
 
 const exceptionsListClient = listMock.getExceptionListClient() as jest.Mocked<ExceptionListClient>;
 
@@ -65,8 +65,8 @@ const TRUSTED_APP: TrustedApp = {
   os: OperatingSystem.LINUX,
   effectScope: { type: 'global' },
   entries: [
-    createConditionEntry(ConditionEntryField.HASH, '1234234659af249ddf3e40864e9fb241'),
-    createConditionEntry(ConditionEntryField.PATH, '/bin/malware'),
+    createConditionEntry(ConditionEntryField.HASH, 'match', '1234234659af249ddf3e40864e9fb241'),
+    createConditionEntry(ConditionEntryField.PATH, 'match', '/bin/malware'),
   ],
 };
 
@@ -109,8 +109,35 @@ describe('service', () => {
         effectScope: { type: 'global' },
         os: OperatingSystem.LINUX,
         entries: [
-          createConditionEntry(ConditionEntryField.PATH, '/bin/malware'),
-          createConditionEntry(ConditionEntryField.HASH, '1234234659af249ddf3e40864e9fb241'),
+          createConditionEntry(ConditionEntryField.PATH, 'match', '/bin/malware'),
+          createConditionEntry(
+            ConditionEntryField.HASH,
+            'match',
+            '1234234659af249ddf3e40864e9fb241'
+          ),
+        ],
+      });
+
+      expect(result).toEqual({ data: TRUSTED_APP });
+
+      expect(exceptionsListClient.createTrustedAppsList).toHaveBeenCalled();
+    });
+
+    it('should create trusted app with correct wildcard type', async () => {
+      exceptionsListClient.createExceptionListItem.mockResolvedValue(EXCEPTION_LIST_ITEM);
+
+      const result = await createTrustedApp(exceptionsListClient, {
+        name: 'linux trusted app 1',
+        description: 'Linux trusted app 1',
+        effectScope: { type: 'global' },
+        os: OperatingSystem.LINUX,
+        entries: [
+          createConditionEntry(ConditionEntryField.PATH, 'wildcard', '/bin/malware'),
+          createConditionEntry(
+            ConditionEntryField.HASH,
+            'wildcard',
+            '1234234659af249ddf3e40864e9fb241'
+          ),
         ],
       });
 

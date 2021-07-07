@@ -67,7 +67,7 @@ describe('helpers', () => {
           name: '@timestamp',
           searchable: true,
           type: 'date',
-          width: 190,
+          initialWidth: 190,
         },
         {
           aggregatable: true,
@@ -81,7 +81,7 @@ describe('helpers', () => {
           name: 'source.ip',
           searchable: true,
           type: 'ip',
-          width: 180,
+          initialWidth: 180,
         },
         {
           aggregatable: true,
@@ -96,7 +96,7 @@ describe('helpers', () => {
           name: 'destination.ip',
           searchable: true,
           type: 'ip',
-          width: 180,
+          initialWidth: 180,
         },
       ];
       const mockHeader = defaultHeaders.filter((h) =>

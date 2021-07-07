@@ -18,7 +18,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('logs security', () => {
     before(async () => {
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
     });
     describe('global logs all privileges', () => {
       before(async () => {

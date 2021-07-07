@@ -12,11 +12,24 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { NotificationsStart } from 'kibana/public';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public/context';
-import { CreateExceptionListItemSchema, ExceptionListItemSchema } from '../../../../shared_imports';
+import type {
+  CreateExceptionListItemSchema,
+  ExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 
-import { createGlobalNoMiddlewareStore, ecsEventMock } from '../test_utils';
+import {
+  createdEventFilterEntryMock,
+  createGlobalNoMiddlewareStore,
+  ecsEventMock,
+} from '../test_utils';
 import { useEventFiltersNotification } from './hooks';
-import { getCreationErrorMessage, getCreationSuccessMessage } from './translations';
+import {
+  getCreationErrorMessage,
+  getCreationSuccessMessage,
+  getGetErrorMessage,
+  getUpdateSuccessMessage,
+  getUpdateErrorMessage,
+} from './translations';
 import { getInitialExceptionFromEvent } from '../store/utils';
 import {
   getLastLoadedResourceState,
@@ -79,6 +92,37 @@ describe('EventFiltersNotification', () => {
     expect(notifications.toasts.addDanger).not.toBeCalled();
   });
 
+  it('shows success notification when update successful', () => {
+    const store = createGlobalNoMiddlewareStore();
+    const notifications = mockNotifications();
+
+    renderNotifications(store, notifications);
+
+    act(() => {
+      store.dispatch({
+        type: 'eventFiltersInitForm',
+        payload: { entry: createdEventFilterEntryMock() },
+      });
+    });
+
+    act(() => {
+      store.dispatch({
+        type: 'eventFiltersFormStateChanged',
+        payload: {
+          type: 'LoadedResourceState',
+          data: store.getState()!.management!.eventFilters!.form!.entry as ExceptionListItemSchema,
+        },
+      });
+    });
+
+    expect(notifications.toasts.addSuccess).toBeCalledWith(
+      getUpdateSuccessMessage(
+        store.getState()!.management!.eventFilters!.form!.entry as CreateExceptionListItemSchema
+      )
+    );
+    expect(notifications.toasts.addDanger).not.toBeCalled();
+  });
+
   it('shows error notification when creation fails', () => {
     const store = createGlobalNoMiddlewareStore();
     const notifications = mockNotifications();
@@ -109,6 +153,69 @@ describe('EventFiltersNotification', () => {
     expect(notifications.toasts.addSuccess).not.toBeCalled();
     expect(notifications.toasts.addDanger).toBeCalledWith(
       getCreationErrorMessage(
+        (store.getState()!.management!.eventFilters!.form!
+          .submissionResourceState as FailedResourceState).error
+      )
+    );
+  });
+
+  it('shows error notification when update fails', () => {
+    const store = createGlobalNoMiddlewareStore();
+    const notifications = mockNotifications();
+
+    renderNotifications(store, notifications);
+
+    act(() => {
+      store.dispatch({
+        type: 'eventFiltersInitForm',
+        payload: { entry: createdEventFilterEntryMock() },
+      });
+    });
+
+    act(() => {
+      store.dispatch({
+        type: 'eventFiltersFormStateChanged',
+        payload: {
+          type: 'FailedResourceState',
+          error: { message: 'error message', statusCode: 500, error: 'error' },
+          lastLoadedState: getLastLoadedResourceState(
+            store.getState()!.management!.eventFilters!.form!.submissionResourceState
+          ),
+        },
+      });
+    });
+
+    expect(notifications.toasts.addSuccess).not.toBeCalled();
+    expect(notifications.toasts.addDanger).toBeCalledWith(
+      getUpdateErrorMessage(
+        (store.getState()!.management!.eventFilters!.form!
+          .submissionResourceState as FailedResourceState).error
+      )
+    );
+  });
+
+  it('shows error notification when get fails', () => {
+    const store = createGlobalNoMiddlewareStore();
+    const notifications = mockNotifications();
+
+    renderNotifications(store, notifications);
+
+    act(() => {
+      store.dispatch({
+        type: 'eventFiltersFormStateChanged',
+        payload: {
+          type: 'FailedResourceState',
+          error: { message: 'error message', statusCode: 500, error: 'error' },
+          lastLoadedState: getLastLoadedResourceState(
+            store.getState()!.management!.eventFilters!.form!.submissionResourceState
+          ),
+        },
+      });
+    });
+
+    expect(notifications.toasts.addSuccess).not.toBeCalled();
+    expect(notifications.toasts.addWarning).toBeCalledWith(
+      getGetErrorMessage(
         (store.getState()!.management!.eventFilters!.form!
           .submissionResourceState as FailedResourceState).error
       )

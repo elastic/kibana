@@ -5,17 +5,21 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { cleanupMock } from './migrations_state_machine_cleanup.mocks';
 import { migrationStateActionMachine } from './migrations_state_action_machine';
 import { loggingSystemMock, elasticsearchServiceMock } from '../../mocks';
+import { typeRegistryMock } from '../saved_objects_type_registry.mock';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
-import { AllControlStates, State } from './types';
-import { createInitialState } from './model';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { elasticsearchClientMock } from '../../elasticsearch/client/mocks';
+import { LoggerAdapter } from '../../logging/logger_adapter';
+import { AllControlStates, State } from './types';
+import { createInitialState } from './initial_state';
 
 const esClient = elasticsearchServiceMock.createElasticsearchClient();
+
 describe('migrationsStateActionMachine', () => {
   beforeAll(() => {
     jest
@@ -27,6 +31,7 @@ describe('migrationsStateActionMachine', () => {
   });
 
   const mockLogger = loggingSystemMock.create();
+  const typeRegistry = typeRegistryMock.create();
 
   const initialState = createInitialState({
     kibanaVersion: '7.11.0',
@@ -41,6 +46,7 @@ describe('migrationsStateActionMachine', () => {
       enableV2: true,
       retryAttempts: 5,
     },
+    typeRegistry,
   });
 
   const next = jest.fn((s: State) => {
@@ -146,6 +152,37 @@ describe('migrationsStateActionMachine', () => {
       }
     `);
   });
+
+  // see https://github.com/elastic/kibana/issues/98406
+  it('correctly logs state transition when using a logger adapter', async () => {
+    const underlyingLogger = mockLogger.get();
+    const logger = new LoggerAdapter(underlyingLogger);
+
+    await expect(
+      migrationStateActionMachine({
+        initialState,
+        logger,
+        model: transitionModel(['LEGACY_REINDEX', 'LEGACY_DELETE', 'LEGACY_DELETE', 'DONE']),
+        next,
+        client: esClient,
+      })
+    ).resolves.toEqual(expect.anything());
+
+    const allLogs = loggingSystemMock.collect(mockLogger);
+    const stateTransitionLogs = allLogs.info
+      .map((call) => call[0])
+      .filter((log) => log.match('control state'));
+
+    expect(stateTransitionLogs).toMatchInlineSnapshot(`
+      Array [
+        "[.my-so-index] Log from LEGACY_REINDEX control state",
+        "[.my-so-index] Log from LEGACY_DELETE control state",
+        "[.my-so-index] Log from LEGACY_DELETE control state",
+        "[.my-so-index] Log from DONE control state",
+      ]
+    `);
+  });
+
   it('resolves when reaching the DONE state', async () => {
     await expect(
       migrationStateActionMachine({
@@ -225,6 +262,7 @@ describe('migrationsStateActionMachine', () => {
                 "currentAlias": ".my-so-index",
                 "indexPrefix": ".my-so-index",
                 "kibanaVersion": "7.11.0",
+                "knownTypes": Array [],
                 "legacyIndex": ".my-so-index",
                 "logs": Array [
                   Object {
@@ -264,38 +302,35 @@ describe('migrationsStateActionMachine', () => {
                   },
                 },
                 "unusedTypesQuery": Object {
-                  "_tag": "Some",
-                  "value": Object {
-                    "bool": Object {
-                      "must_not": Array [
-                        Object {
-                          "term": Object {
-                            "type": "fleet-agent-events",
-                          },
+                  "bool": Object {
+                    "must_not": Array [
+                      Object {
+                        "term": Object {
+                          "type": "fleet-agent-events",
                         },
-                        Object {
-                          "term": Object {
-                            "type": "tsvb-validation-telemetry",
-                          },
+                      },
+                      Object {
+                        "term": Object {
+                          "type": "tsvb-validation-telemetry",
                         },
-                        Object {
-                          "bool": Object {
-                            "must": Array [
-                              Object {
-                                "match": Object {
-                                  "type": "search-session",
-                                },
+                      },
+                      Object {
+                        "bool": Object {
+                          "must": Array [
+                            Object {
+                              "match": Object {
+                                "type": "search-session",
                               },
-                              Object {
-                                "match": Object {
-                                  "search-session.persisted": false,
-                                },
+                            },
+                            Object {
+                              "match": Object {
+                                "search-session.persisted": false,
                               },
-                            ],
-                          },
+                            },
+                          ],
                         },
-                      ],
-                    },
+                      },
+                    ],
                   },
                 },
                 "versionAlias": ".my-so-index_7.11.0",
@@ -321,6 +356,7 @@ describe('migrationsStateActionMachine', () => {
                 "currentAlias": ".my-so-index",
                 "indexPrefix": ".my-so-index",
                 "kibanaVersion": "7.11.0",
+                "knownTypes": Array [],
                 "legacyIndex": ".my-so-index",
                 "logs": Array [
                   Object {
@@ -364,38 +400,35 @@ describe('migrationsStateActionMachine', () => {
                   },
                 },
                 "unusedTypesQuery": Object {
-                  "_tag": "Some",
-                  "value": Object {
-                    "bool": Object {
-                      "must_not": Array [
-                        Object {
-                          "term": Object {
-                            "type": "fleet-agent-events",
-                          },
+                  "bool": Object {
+                    "must_not": Array [
+                      Object {
+                        "term": Object {
+                          "type": "fleet-agent-events",
                         },
-                        Object {
-                          "term": Object {
-                            "type": "tsvb-validation-telemetry",
-                          },
+                      },
+                      Object {
+                        "term": Object {
+                          "type": "tsvb-validation-telemetry",
                         },
-                        Object {
-                          "bool": Object {
-                            "must": Array [
-                              Object {
-                                "match": Object {
-                                  "type": "search-session",
-                                },
+                      },
+                      Object {
+                        "bool": Object {
+                          "must": Array [
+                            Object {
+                              "match": Object {
+                                "type": "search-session",
                               },
-                              Object {
-                                "match": Object {
-                                  "search-session.persisted": false,
-                                },
+                            },
+                            Object {
+                              "match": Object {
+                                "search-session.persisted": false,
                               },
-                            ],
-                          },
+                            },
+                          ],
                         },
-                      ],
-                    },
+                      },
+                    ],
                   },
                 },
                 "versionAlias": ".my-so-index_7.11.0",
@@ -515,6 +548,7 @@ describe('migrationsStateActionMachine', () => {
                 "currentAlias": ".my-so-index",
                 "indexPrefix": ".my-so-index",
                 "kibanaVersion": "7.11.0",
+                "knownTypes": Array [],
                 "legacyIndex": ".my-so-index",
                 "logs": Array [
                   Object {
@@ -552,38 +586,35 @@ describe('migrationsStateActionMachine', () => {
                   },
                 },
                 "unusedTypesQuery": Object {
-                  "_tag": "Some",
-                  "value": Object {
-                    "bool": Object {
-                      "must_not": Array [
-                        Object {
-                          "term": Object {
-                            "type": "fleet-agent-events",
-                          },
+                  "bool": Object {
+                    "must_not": Array [
+                      Object {
+                        "term": Object {
+                          "type": "fleet-agent-events",
                         },
-                        Object {
-                          "term": Object {
-                            "type": "tsvb-validation-telemetry",
-                          },
+                      },
+                      Object {
+                        "term": Object {
+                          "type": "tsvb-validation-telemetry",
                         },
-                        Object {
-                          "bool": Object {
-                            "must": Array [
-                              Object {
-                                "match": Object {
-                                  "type": "search-session",
-                                },
+                      },
+                      Object {
+                        "bool": Object {
+                          "must": Array [
+                            Object {
+                              "match": Object {
+                                "type": "search-session",
                               },
-                              Object {
-                                "match": Object {
-                                  "search-session.persisted": false,
-                                },
+                            },
+                            Object {
+                              "match": Object {
+                                "search-session.persisted": false,
                               },
-                            ],
-                          },
+                            },
+                          ],
                         },
-                      ],
-                    },
+                      },
+                    ],
                   },
                 },
                 "versionAlias": ".my-so-index_7.11.0",
@@ -606,6 +637,7 @@ describe('migrationsStateActionMachine', () => {
                 "currentAlias": ".my-so-index",
                 "indexPrefix": ".my-so-index",
                 "kibanaVersion": "7.11.0",
+                "knownTypes": Array [],
                 "legacyIndex": ".my-so-index",
                 "logs": Array [
                   Object {
@@ -647,38 +679,35 @@ describe('migrationsStateActionMachine', () => {
                   },
                 },
                 "unusedTypesQuery": Object {
-                  "_tag": "Some",
-                  "value": Object {
-                    "bool": Object {
-                      "must_not": Array [
-                        Object {
-                          "term": Object {
-                            "type": "fleet-agent-events",
-                          },
+                  "bool": Object {
+                    "must_not": Array [
+                      Object {
+                        "term": Object {
+                          "type": "fleet-agent-events",
                         },
-                        Object {
-                          "term": Object {
-                            "type": "tsvb-validation-telemetry",
-                          },
+                      },
+                      Object {
+                        "term": Object {
+                          "type": "tsvb-validation-telemetry",
                         },
-                        Object {
-                          "bool": Object {
-                            "must": Array [
-                              Object {
-                                "match": Object {
-                                  "type": "search-session",
-                                },
+                      },
+                      Object {
+                        "bool": Object {
+                          "must": Array [
+                            Object {
+                              "match": Object {
+                                "type": "search-session",
                               },
-                              Object {
-                                "match": Object {
-                                  "search-session.persisted": false,
-                                },
+                            },
+                            Object {
+                              "match": Object {
+                                "search-session.persisted": false,
                               },
-                            ],
-                          },
+                            },
+                          ],
                         },
-                      ],
-                    },
+                      },
+                    ],
                   },
                 },
                 "versionAlias": ".my-so-index_7.11.0",

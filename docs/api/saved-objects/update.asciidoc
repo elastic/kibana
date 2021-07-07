@@ -36,6 +36,9 @@ WARNING: When you update, attributes are not validated, which allows you to pass
 `references`::
   (Optional, array) Objects with `name`, `id`, and `type` properties that describe the other saved objects this object references. To refer to the other saved object, use `name` in the attributes, but never the `id`, which automatically updates during migrations or import/export.
 
+`upsert`::
+  (Optional, object) If specified, will create the document with the given upsert attributes if it doesn't exist. 
+
 [[saved-objects-api-update-errors-codes]]
 ==== Response code
 

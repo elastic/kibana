@@ -9,13 +9,14 @@ import { kea, MakeLogicType } from 'kea';
 
 import { Meta } from '../../../../../common/types';
 import { DEFAULT_META } from '../../../shared/constants';
-import { flashAPIErrors, setSuccessMessage } from '../../../shared/flash_messages';
+import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { updateMetaPageIndex } from '../../../shared/table_pagination';
 
 import { EngineDetails, EngineTypes } from '../engine/types';
 
 import { DELETE_ENGINE_MESSAGE } from './constants';
+import { EnginesAPIResponse } from './types';
 
 interface EnginesValues {
   dataLoading: boolean;
@@ -27,10 +28,6 @@ interface EnginesValues {
   metaEnginesLoading: boolean;
 }
 
-interface EnginesAPIResponse {
-  results: EngineDetails[];
-  meta: Meta;
-}
 interface EnginesActions {
   deleteEngine(engine: EngineDetails): { engine: EngineDetails };
   onDeleteEngineSuccess(engine: EngineDetails): { engine: EngineDetails };
@@ -121,30 +118,38 @@ export const EnginesLogic = kea<MakeLogicType<EnginesValues, EnginesActions>>({
       const { http } = HttpLogic.values;
       const { enginesMeta } = values;
 
-      const response = await http.get('/api/app_search/engines', {
-        query: {
-          type: 'indexed',
-          'page[current]': enginesMeta.page.current,
-          'page[size]': enginesMeta.page.size,
-        },
-      });
-      actions.onEnginesLoad(response);
+      try {
+        const response = await http.get('/api/app_search/engines', {
+          query: {
+            type: 'indexed',
+            'page[current]': enginesMeta.page.current,
+            'page[size]': enginesMeta.page.size,
+          },
+        });
+        actions.onEnginesLoad(response);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
     loadMetaEngines: async () => {
       const { http } = HttpLogic.values;
       const { metaEnginesMeta } = values;
 
-      const response = await http.get('/api/app_search/engines', {
-        query: {
-          type: 'meta',
-          'page[current]': metaEnginesMeta.page.current,
-          'page[size]': metaEnginesMeta.page.size,
-        },
-      });
-      actions.onMetaEnginesLoad(response);
+      try {
+        const response = await http.get('/api/app_search/engines', {
+          query: {
+            type: 'meta',
+            'page[current]': metaEnginesMeta.page.current,
+            'page[size]': metaEnginesMeta.page.size,
+          },
+        });
+        actions.onMetaEnginesLoad(response);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
     onDeleteEngineSuccess: async ({ engine }) => {
-      setSuccessMessage(DELETE_ENGINE_MESSAGE(engine.name));
+      flashSuccessToast(DELETE_ENGINE_MESSAGE(engine.name));
       if ([EngineTypes.default, EngineTypes.indexed].includes(engine.type)) {
         actions.loadEngines();
       } else if (engine.type === EngineTypes.meta) {

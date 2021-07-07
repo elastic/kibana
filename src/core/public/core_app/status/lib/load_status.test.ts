@@ -100,6 +100,51 @@ describe('response processing', () => {
     expect(data.name).toEqual('My computer');
   });
 
+  test('throws when an error occurs', async () => {
+    http.get.mockReset();
+
+    http.get.mockRejectedValue(new Error());
+
+    await expect(loadStatus({ http, notifications })).rejects.toThrowError();
+    expect(notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
+  });
+
+  test('throws when a 503 occurs which does not contain an appropriate payload', async () => {
+    const error = new Error() as any;
+    error.response = { status: 503 };
+    error.body = {};
+
+    http.get.mockReset();
+    http.get.mockRejectedValue(error);
+
+    await expect(loadStatus({ http, notifications })).rejects.toThrowError();
+    expect(notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
+  });
+
+  test('does not throw when a 503 occurs which contains an appropriate payload', async () => {
+    const error = new Error() as any;
+    error.response = { status: 503 };
+    error.body = mockedResponse;
+
+    http.get.mockReset();
+    http.get.mockRejectedValue(error);
+
+    const data = await loadStatus({ http, notifications });
+    expect(data.name).toEqual('My computer');
+  });
+
+  test('throws when a non-503 occurs which contains an appropriate payload', async () => {
+    const error = new Error() as any;
+    error.response = { status: 500 };
+    error.body = mockedResponse;
+
+    http.get.mockReset();
+    http.get.mockRejectedValue(error);
+
+    await expect(loadStatus({ http, notifications })).rejects.toThrowError();
+    expect(notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
+  });
+
   test('includes the plugin statuses', async () => {
     const data = await loadStatus({ http, notifications });
     expect(data.statuses).toEqual([

@@ -10,7 +10,7 @@ import React, { FunctionComponent } from 'react';
 import { DeprecationInfo, EnrichedDeprecationInfo } from '../../../../../common/types';
 import { GroupByOption } from '../../types';
 
-import { COLOR_MAP, LEVEL_MAP } from '../constants';
+import { COLOR_MAP, LEVEL_MAP } from '../../constants';
 import { DeprecationCell } from './cell';
 import { IndexDeprecationDetails, IndexDeprecationTable } from './index_table';
 
@@ -32,11 +32,10 @@ const MessageDeprecation: FunctionComponent<{
 
   return (
     <DeprecationCell
-      reindexBlocker={deprecation.blockerForReindexing}
       headline={deprecation.message}
       healthColor={COLOR_MAP[deprecation.level]}
-      reindexIndexName={deprecation.reindex ? deprecation.index! : undefined}
-      deprecatedIndexSettings={deprecation.deprecatedIndexSettings}
+      correctiveAction={deprecation.correctiveAction}
+      indexName={deprecation.index}
       docUrl={deprecation.url}
       items={items}
     />
@@ -57,10 +56,10 @@ const SimpleMessageDeprecation: FunctionComponent<{ deprecation: EnrichedDepreca
 
   return (
     <DeprecationCell
-      reindexBlocker={deprecation.blockerForReindexing}
+      correctiveAction={deprecation.correctiveAction}
+      indexName={deprecation.index}
       items={items}
       docUrl={deprecation.url}
-      deprecatedIndexSettings={deprecation.deprecatedIndexSettings}
     />
   );
 };
@@ -85,7 +84,7 @@ const IndexDeprecation: FunctionComponent<IndexDeprecationProps> = ({ deprecatio
  * A list of deprecations that is either shown as individual deprecation cells or as a
  * deprecation summary for a list of indices.
  */
-export const DeprecationList: FunctionComponent<{
+export const EsDeprecationList: FunctionComponent<{
   deprecations: EnrichedDeprecationInfo[];
   currentGroupBy: GroupByOption;
 }> = ({ deprecations, currentGroupBy }) => {
@@ -94,27 +93,26 @@ export const DeprecationList: FunctionComponent<{
   if (currentGroupBy === GroupByOption.message && deprecations[0].index !== undefined) {
     // We assume that every deprecation message is the same issue (since they have the same
     // message) and that each deprecation will have an index associated with it.
+
     const indices = deprecations.map((dep) => ({
       index: dep.index!,
       details: dep.details,
-      reindex: dep.reindex === true,
-      deprecatedIndexSettings: dep.deprecatedIndexSettings,
-      blockerForReindexing: dep.blockerForReindexing,
+      correctiveAction: dep.correctiveAction,
     }));
     return <IndexDeprecation indices={indices} deprecation={deprecations[0]} />;
   } else if (currentGroupBy === GroupByOption.index) {
     return (
       <div>
-        {deprecations.sort(sortByLevelDesc).map((dep) => (
-          <MessageDeprecation deprecation={dep} key={dep.message} />
+        {deprecations.sort(sortByLevelDesc).map((dep, index) => (
+          <MessageDeprecation deprecation={dep} key={`${dep.message}-${index}`} />
         ))}
       </div>
     );
   } else {
     return (
       <div>
-        {deprecations.sort(sortByLevelDesc).map((dep) => (
-          <SimpleMessageDeprecation deprecation={dep} key={dep.message} />
+        {deprecations.sort(sortByLevelDesc).map((dep, index) => (
+          <SimpleMessageDeprecation deprecation={dep} key={`${dep.message}-${index}`} />
         ))}
       </div>
     );

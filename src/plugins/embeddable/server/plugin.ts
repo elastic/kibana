@@ -16,6 +16,7 @@ import {
   EmbeddableRegistryDefinition,
 } from './types';
 import {
+  baseEmbeddableMigrations,
   getExtractFunction,
   getInjectFunction,
   getMigrateFunction,
@@ -27,6 +28,7 @@ import { EmbeddableStateWithType } from '../common/types';
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
   registerEnhancement: (enhancement: EnhancementRegistryDefinition) => void;
+  getMigrationVersions: () => string[];
 }
 
 export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType>;
@@ -41,6 +43,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
       getEnhancement: this.getEnhancement,
     };
     return {
+      getMigrationVersions: this.getMigrationVersions,
       registerEmbeddableFactory: this.registerEmbeddableFactory,
       registerEnhancement: this.registerEnhancement,
       telemetry: getTelemetryFunction(commonContract),
@@ -87,7 +90,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
     return (
       this.enhancements.get(id) || {
         id: 'unknown',
-        telemetry: () => ({}),
+        telemetry: (state, stats) => stats,
         inject: identity,
         extract: (state: SerializableState) => {
           return { state, references: [] };
@@ -116,7 +119,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
     return (
       this.embeddableFactories.get(embeddableFactoryId) || {
         id: 'unknown',
-        telemetry: () => ({}),
+        telemetry: (state, stats) => stats,
         inject: (state: EmbeddableStateWithType) => state,
         extract: (state: EmbeddableStateWithType) => {
           return { state, references: [] };
@@ -124,5 +127,21 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
         migrations: {},
       }
     );
+  };
+
+  private getMigrationVersions = () => {
+    const uniqueVersions = new Set<string>();
+    for (const baseMigrationVersion of Object.keys(baseEmbeddableMigrations)) {
+      uniqueVersions.add(baseMigrationVersion);
+    }
+    const factories = this.embeddableFactories.values();
+    for (const factory of factories) {
+      Object.keys(factory.migrations).forEach((version) => uniqueVersions.add(version));
+    }
+    const enhancements = this.enhancements.values();
+    for (const enhancement of enhancements) {
+      Object.keys(enhancement.migrations).forEach((version) => uniqueVersions.add(version));
+    }
+    return Array.from(uniqueVersions);
   };
 }

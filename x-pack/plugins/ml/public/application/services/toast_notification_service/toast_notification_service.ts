@@ -31,7 +31,7 @@ export function toastNotificationServiceProvider(toastNotifications: ToastsStart
     toastNotifications.addSuccess(toastOrTitle, options);
   }
 
-  function displayErrorToast(error: ErrorType, title?: string) {
+  function displayErrorToast(error: ErrorType, title?: string, toastLifeTimeMs?: number) {
     const errorObj = extractErrorProperties(error);
     toastNotifications.addError(new MLRequestFailure(errorObj, error), {
       title:
@@ -39,6 +39,7 @@ export function toastNotificationServiceProvider(toastNotifications: ToastsStart
         i18n.translate('xpack.ml.toastNotificationService.errorTitle', {
           defaultMessage: 'An error has occurred',
         }),
+      ...(toastLifeTimeMs ? { toastLifeTimeMs } : {}),
     });
   }
 

@@ -20,6 +20,8 @@ import {
   EuiCheckbox,
   EuiCheckboxGroup,
   EuiButton,
+  EuiLink,
+  EuiFieldNumber,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -28,6 +30,7 @@ import styled from 'styled-components';
 import { dataTypes } from '../../../../../../common';
 import type { NewAgentPolicy, AgentPolicy } from '../../../types';
 import { isValidNamespace } from '../../../services';
+import { useStartServices } from '../../../hooks';
 
 import { AgentPolicyDeleteProvider } from './agent_policy_delete_provider';
 
@@ -60,6 +63,15 @@ export const agentPolicyFormValidation = (
     errors.namespace = [namespaceValidation.error];
   }
 
+  if (agentPolicy.unenroll_timeout && agentPolicy.unenroll_timeout < 0) {
+    errors.unenroll_timeout = [
+      <FormattedMessage
+        id="xpack.fleet.agentPolicyForm.unenrollTimeoutMinValueErrorMessage"
+        defaultMessage="Timeout must be greater than zero."
+      />,
+    ];
+  }
+
   return errors;
 };
 
@@ -82,6 +94,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
   isEditing = false,
   onDelete = () => {},
 }) => {
+  const { docLinks } = useStartServices();
   const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
   const fields: Array<{
     name: 'name' | 'description' | 'namespace';
@@ -170,7 +183,17 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.fleet.agentPolicyForm.namespaceFieldDescription"
-            defaultMessage="Apply a default namespace to integrations that use this policy. Integrations can specify their own namespaces."
+            defaultMessage="Namespaces are a user-configurable arbitrary grouping that makes it easier to search for data and manage user permissions. A policy namespace is used to name its integration's data streams. {fleetUserGuide}."
+            values={{
+              fleetUserGuide: (
+                <EuiLink href={docLinks.links.fleet.datastreamsNamingScheme} target="_blank">
+                  {i18n.translate(
+                    'xpack.fleet.agentPolicyForm.nameSpaceFieldDescription.fleetUserGuideLabel',
+                    { defaultMessage: 'Learn more' }
+                  )}
+                </EuiLink>
+              ),
+            }}
           />
         }
       >
@@ -209,7 +232,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.fleet.agentPolicyForm.monitoringDescription"
-            defaultMessage="Collect data about your agents for debugging and tracking performance."
+            defaultMessage="Collect data about your agents for debugging and tracking performance. Monitoring data will be written to the default namespace specified above."
           />
         }
       >
@@ -284,7 +307,51 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
           }}
         />
       </EuiDescribedFormGroup>
-      {isEditing && 'id' in agentPolicy && agentPolicy.is_managed !== true ? (
+      <EuiDescribedFormGroup
+        title={
+          <h4>
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.unenrollmentTimeoutLabel"
+              defaultMessage="Unenrollment timeout"
+            />
+          </h4>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.fleet.agentPolicyForm.unenrollmentTimeoutDescription"
+            defaultMessage="An optional timeout in seconds. If provided, an agent will automatically unenroll after being gone for this period of time."
+          />
+        }
+      >
+        <EuiFormRow
+          fullWidth
+          error={
+            touchedFields.unenroll_timeout && validation.unenroll_timeout
+              ? validation.unenroll_timeout
+              : null
+          }
+          isInvalid={Boolean(touchedFields.unenroll_timeout && validation.unenroll_timeout)}
+        >
+          <EuiFieldNumber
+            fullWidth
+            disabled={agentPolicy.is_managed === true}
+            value={agentPolicy.unenroll_timeout || ''}
+            min={0}
+            onChange={(e) => {
+              updateAgentPolicy({
+                unenroll_timeout: e.target.value ? Number(e.target.value) : 0,
+              });
+            }}
+            isInvalid={Boolean(touchedFields.unenroll_timeout && validation.unenroll_timeout)}
+            onBlur={() => setTouchedFields({ ...touchedFields, unenroll_timeout: true })}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+      {isEditing &&
+      'id' in agentPolicy &&
+      !agentPolicy.is_managed &&
+      !agentPolicy.is_default &&
+      !agentPolicy.is_default_fleet_server ? (
         <EuiDescribedFormGroup
           title={
             <h4>

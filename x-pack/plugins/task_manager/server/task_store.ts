@@ -46,14 +46,14 @@ export interface StoreOpts {
 export interface SearchOpts {
   search_after?: Array<number | string>;
   size?: number;
-  sort?: estypes.Sort;
-  query?: estypes.QueryContainer;
+  sort?: estypes.SearchSort;
+  query?: estypes.QueryDslQueryContainer;
   seq_no_primary_term?: boolean;
 }
 
 export interface AggregationOpts {
-  aggs: Record<string, estypes.AggregationContainer>;
-  query?: estypes.QueryContainer;
+  aggs: Record<string, estypes.AggregationsAggregationContainer>;
+  query?: estypes.QueryDslQueryContainer;
   size?: number;
 }
 
@@ -319,9 +319,9 @@ export class TaskStore {
 
       return {
         docs: tasks
-          // @ts-expect-error @elastic/elasticsearch `Hid._id` expected to be `string`
+          // @ts-expect-error @elastic/elasticsearch _source is optional
           .filter((doc) => this.serializer.isRawSavedObject(doc))
-          // @ts-expect-error @elastic/elasticsearch `Hid._id` expected to be `string`
+          // @ts-expect-error @elastic/elasticsearch _source is optional
           .map((doc) => this.serializer.rawToSavedObject(doc))
           .map((doc) => omit(doc, 'namespace') as SavedObject<SerializedConcreteTaskInstance>)
           .map(savedObjectToConcreteTaskInstance),
@@ -340,6 +340,7 @@ export class TaskStore {
     const { body } = await this.esClient.search<ConcreteTaskInstance>({
       index: this.index,
       ignore_unavailable: true,
+      track_total_hits: true,
       body: ensureAggregationOnlyReturnsTaskObjects({
         query,
         aggs,
@@ -378,10 +379,8 @@ export class TaskStore {
       );
 
       return {
-        // @ts-expect-error @elastic/elasticsearch declares UpdateByQueryResponse.total as optional
-        total,
-        // @ts-expect-error @elastic/elasticsearch declares UpdateByQueryResponse.total as optional
-        updated,
+        total: total || 0,
+        updated: updated || 0,
         version_conflicts: conflictsCorrectedForContinuation,
       };
     } catch (e) {

@@ -8,7 +8,7 @@
 
 import path from 'path';
 import fs from 'fs';
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
@@ -26,9 +26,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     servers: functionalConfig.get('servers'),
     esTestCluster: functionalConfig.get('esTestCluster'),
     apps: functionalConfig.get('apps'),
-    esArchiver: {
-      directory: path.resolve(__dirname, '../es_archives'),
-    },
     snapshots: {
       directory: path.resolve(__dirname, 'snapshots'),
     },

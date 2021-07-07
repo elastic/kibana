@@ -27,6 +27,10 @@ import { TaskRunResult } from './task_running';
 import { mockLogger } from './test_utils';
 import { TaskTypeDictionary } from './task_type_dictionary';
 
+jest.mock('elastic-apm-node', () => ({
+  currentTraceparent: 'parent',
+}));
+
 describe('TaskScheduling', () => {
   const mockTaskStore = taskStoreMock.create({});
   const mockTaskManager = taskPollingLifecycleMock.create({});
@@ -60,6 +64,12 @@ describe('TaskScheduling', () => {
     };
     await taskScheduling.schedule(task);
     expect(mockTaskStore.schedule).toHaveBeenCalled();
+    expect(mockTaskStore.schedule).toHaveBeenCalledWith({
+      ...task,
+      id: undefined,
+      schedule: undefined,
+      traceparent: 'parent',
+    });
   });
 
   test('allows scheduling existing tasks that may have already been scheduled', async () => {
@@ -420,6 +430,7 @@ function mockTask(overrides: Partial<ConcreteTaskInstance> = {}): ConcreteTaskIn
     startedAt: null,
     retryAt: null,
     scheduledAt: new Date(),
+    traceparent: 'taskTraceparent',
     ...overrides,
   };
 }

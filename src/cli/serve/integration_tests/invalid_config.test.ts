@@ -14,7 +14,7 @@ const INVALID_CONFIG_PATH = require.resolve('./__fixtures__/invalid_config.yml')
 
 interface LogEntry {
   message: string;
-  tags: string[];
+  tags?: string[];
   type: string;
 }
 
@@ -32,18 +32,25 @@ describe('cli invalid config support', function () {
         }
       );
 
-      const [fatalLogLine] = stdout
-        .toString('utf8')
-        .split('\n')
-        .filter(Boolean)
-        .map((line) => JSON.parse(line) as LogEntry)
-        .filter((line) => line.tags.includes('fatal'))
-        .map((obj) => ({
-          ...obj,
-          pid: '## PID ##',
-          '@timestamp': '## @timestamp ##',
-          error: '## Error with stack trace ##',
-        }));
+      let fatalLogLine;
+      try {
+        [fatalLogLine] = stdout
+          .toString('utf8')
+          .split('\n')
+          .filter(Boolean)
+          .map((line) => JSON.parse(line) as LogEntry)
+          .filter((line) => line.tags?.includes('fatal'))
+          .map((obj) => ({
+            ...obj,
+            pid: '## PID ##',
+            '@timestamp': '## @timestamp ##',
+            error: '## Error with stack trace ##',
+          }));
+      } catch (e) {
+        throw new Error(
+          `error parsing log output:\n\n${e.stack}\n\nstdout: \n${stdout}\n\nstderr:\n${stderr}`
+        );
+      }
 
       expect(error).toBe(undefined);
 

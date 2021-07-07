@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ILegacyScopedClusterClient, IRouter, RequestHandlerContext } from 'src/core/server';
+import type { IRouter, RequestHandlerContext } from 'src/core/server';
 import type { LicensingApiRequestHandlerContext } from '../../licensing/server';
 
 export interface PipelineListItemOptions {
@@ -19,9 +19,6 @@ export interface PipelineListItemOptions {
  * @internal
  */
 export interface LogstashRequestHandlerContext extends RequestHandlerContext {
-  logstash: {
-    esClient: ILegacyScopedClusterClient;
-  };
   licensing: LicensingApiRequestHandlerContext;
 }
 

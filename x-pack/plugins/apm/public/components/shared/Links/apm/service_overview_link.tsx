@@ -7,39 +7,43 @@
 
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
+import { removeUndefinedProps } from '../../../../context/url_params_context/helpers';
 import { APMQueryParams } from '../url_helpers';
 import { APMLinkExtendProps, useAPMHref } from './APMLink';
 
 interface ServiceOverviewLinkProps extends APMLinkExtendProps {
   serviceName: string;
   environment?: string;
+  transactionType?: string;
 }
 
 const persistedFilters: Array<keyof APMQueryParams> = [
   'latencyAggregationType',
 ];
 
-export function useServiceOverviewHref(
-  serviceName: string,
-  environment?: string
-) {
-  const query = environment
-    ? {
-        environment,
-      }
-    : {};
+export function useServiceOverviewHref({
+  serviceName,
+  environment,
+  transactionType,
+}: ServiceOverviewLinkProps) {
+  const query = { environment, transactionType };
   return useAPMHref({
     path: `/services/${serviceName}/overview`,
     persistedFilters,
-    query,
+    query: removeUndefinedProps(query),
   });
 }
 
 export function ServiceOverviewLink({
   serviceName,
   environment,
+  transactionType,
   ...rest
 }: ServiceOverviewLinkProps) {
-  const href = useServiceOverviewHref(serviceName, environment);
+  const href = useServiceOverviewHref({
+    serviceName,
+    environment,
+    transactionType,
+  });
   return <EuiLink href={href} {...rest} />;
 }

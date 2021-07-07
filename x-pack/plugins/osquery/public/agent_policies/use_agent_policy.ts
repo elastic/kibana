@@ -7,8 +7,10 @@
 
 import { useQuery } from 'react-query';
 
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../common/lib/kibana';
 import { agentPolicyRouteService } from '../../../fleet/common';
+import { useErrorToast } from '../common/hooks/use_error_toast';
 
 interface UseAgentPolicy {
   policyId: string;
@@ -17,6 +19,7 @@ interface UseAgentPolicy {
 
 export const useAgentPolicy = ({ policyId, skip }: UseAgentPolicy) => {
   const { http } = useKibana().services;
+  const setErrorToast = useErrorToast();
 
   return useQuery(
     ['agentPolicy', { policyId }],
@@ -25,6 +28,13 @@ export const useAgentPolicy = ({ policyId, skip }: UseAgentPolicy) => {
       enabled: !skip,
       keepPreviousData: true,
       select: (response) => response.item,
+      onSuccess: () => setErrorToast(),
+      onError: (error: Error) =>
+        setErrorToast(error, {
+          title: i18n.translate('xpack.osquery.agent_policy_details.fetchError', {
+            defaultMessage: 'Error while fetching agent policy details',
+          }),
+        }),
     }
   );
 };

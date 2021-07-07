@@ -21,7 +21,6 @@
           "inventory-view": "84b320fd67209906333ffce261128462",
           "kql-telemetry": "d12a98a6f19a2d273696597547e064ee",
           "lens": "21c3ea0763beb1ecb0162529706b88c5",
-          "map": "23d7aa4a720d4938ccde3983f87bd58d",
           "maps-telemetry": "a4229f8b16a6820c6d724b7e0c1f729d",
           "metrics-explorer-view": "53c5365793677328df0ccb6138bf3cdd",
           "migrationVersion": "4a1746014a75ade3a714e1db5763276f",
@@ -310,8 +309,8 @@
         "gis-map": {
           "properties": {
             "bounds": {
-              "strategy": "recursive",
-              "type": "geo_shape"
+              "dynamic": false,
+              "properties": {}
             },
             "description": {
               "type": "text"
@@ -558,7 +557,8 @@
         "map": {
           "properties": {
             "bounds": {
-              "type": "geo_shape"
+              "dynamic": false,
+              "properties": {}
             },
             "description": {
               "type": "text"

@@ -12,7 +12,6 @@ import { waitFor } from '@testing-library/react';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { TestProviders } from '../../../common/mock';
 import '../../../common/mock/match_media';
-import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
 import { DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
 
@@ -20,6 +19,9 @@ import { Category } from './category';
 import { getFieldColumns, getFieldItems } from './field_items';
 import { FIELDS_PANE_WIDTH } from './helpers';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
+import { ColumnHeaderOptions } from '../../../../common';
+
+jest.mock('../../../common/lib/kibana');
 
 const selectedCategoryId = 'base';
 const selectedCategoryFields = mockBrowserFields[selectedCategoryId].fields;
@@ -34,7 +36,7 @@ const columnHeaders: ColumnHeaderOptions[] = [
     id: '@timestamp',
     type: 'date',
     aggregatable: true,
-    width: DEFAULT_DATE_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH,
   },
 ];
 
@@ -207,7 +209,7 @@ describe('field_items', () => {
       expect(toggleColumn).toBeCalledWith({
         columnHeaderType: 'not-filtered',
         id: '@timestamp',
-        width: 180,
+        initialWidth: 180,
       });
     });
 
@@ -266,7 +268,7 @@ describe('field_items', () => {
         expect(toggleColumn).toBeCalledWith({
           columnHeaderType: 'not-filtered',
           id: 'signal.rule.name',
-          width: 180,
+          initialWidth: 180,
         });
       });
     });

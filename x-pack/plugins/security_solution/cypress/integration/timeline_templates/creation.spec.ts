@@ -16,6 +16,7 @@ import {
   NOTES_TEXT_AREA,
   PIN_EVENT,
   TIMELINE_DESCRIPTION,
+  TIMELINE_FLYOUT_WRAPPER,
   TIMELINE_QUERY,
   TIMELINE_TITLE,
 } from '../../screens/timeline';
@@ -25,34 +26,38 @@ import {
   TIMELINES_NOTES_COUNT,
   TIMELINES_FAVORITE,
 } from '../../screens/timelines';
+import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana } from '../../tasks/common';
 
-import { loginAndWaitForPage } from '../../tasks/login';
+import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
 import {
   addDescriptionToTimeline,
   addFilter,
   addNameToTimeline,
   addNotesToTimeline,
+  clickingOnCreateTemplateFromTimelineBtn,
   closeTimeline,
   createNewTimelineTemplate,
+  expandEventAction,
   markAsFavorite,
   openTimelineTemplateFromSettings,
   populateTimeline,
   waitForTimelineChanges,
 } from '../../tasks/timeline';
-import { openTimeline } from '../../tasks/timelines';
+import { openTimeline, waitForTimelinesPanelToBeLoaded } from '../../tasks/timelines';
 
-import { OVERVIEW_URL } from '../../urls/navigation';
+import { TIMELINES_URL } from '../../urls/navigation';
 
 describe('Timeline Templates', () => {
   beforeEach(() => {
     cleanKibana();
+    loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
+
     cy.intercept('PATCH', '/api/timeline').as('timeline');
   });
 
   it('Creates a timeline template', async () => {
-    loginAndWaitForPage(OVERVIEW_URL);
     openTimelineUsingToggle();
     createNewTimelineTemplate();
     populateTimeline();
@@ -95,6 +100,24 @@ describe('Timeline Templates', () => {
       cy.get(NOTES_TAB_BUTTON).click();
       cy.get(NOTES_TEXT_AREA).should('exist');
       cy.get(NOTES).should('have.text', timeline.notes);
+    });
+  });
+
+  it('Create template from timeline', () => {
+    waitForTimelinesPanelToBeLoaded();
+
+    createTimeline(timeline).then(() => {
+      expandEventAction();
+      clickingOnCreateTemplateFromTimelineBtn();
+      cy.wait('@timeline', { timeout: 100000 }).then(({ request }) => {
+        expect(request.body.timeline).to.haveOwnProperty('templateTimelineId');
+        expect(request.body.timeline).to.haveOwnProperty('description', timeline.description);
+        expect(request.body.timeline.kqlQuery.filterQuery.kuery).to.haveOwnProperty(
+          'expression',
+          timeline.query
+        );
+        cy.get(TIMELINE_FLYOUT_WRAPPER).should('have.css', 'visibility', 'visible');
+      });
     });
   });
 });

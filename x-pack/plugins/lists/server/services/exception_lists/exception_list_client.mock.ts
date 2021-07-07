@@ -32,9 +32,11 @@ export class ExceptionListClientMock extends ExceptionListClient {
   public createEndpointList = jest.fn().mockResolvedValue(getExceptionListSchemaMock());
 }
 
-export const getExceptionListClientMock = (): ExceptionListClient => {
+export const getExceptionListClientMock = (
+  savedObject?: ReturnType<typeof savedObjectsClientMock.create>
+): ExceptionListClient => {
   const mock = new ExceptionListClientMock({
-    savedObjectsClient: savedObjectsClientMock.create(),
+    savedObjectsClient: savedObject ? savedObject : savedObjectsClientMock.create(),
     user: 'elastic',
   });
   return mock;

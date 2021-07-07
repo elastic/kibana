@@ -40,7 +40,7 @@ export const isJobConfigurationOutdated = <JobType extends string>(
   }
 
   const jobConfiguration = jobSummary.fullJob.custom_settings.logs_source_config;
-  const datafeedRuntimeMappings = jobSummary.fullJob.datafeed_config.runtime_mappings;
+  const datafeedRuntimeMappings = jobSummary.fullJob.datafeed_config.runtime_mappings ?? {};
 
   return !(
     jobConfiguration &&

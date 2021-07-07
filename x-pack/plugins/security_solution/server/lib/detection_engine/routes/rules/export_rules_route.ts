@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   exportRulesQuerySchema,
   ExportRulesQuerySchemaDecoded,
@@ -18,7 +19,7 @@ import { ConfigType } from '../../../../config';
 import { getNonPackagedRulesCount } from '../../rules/get_existing_prepackaged_rules';
 import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { getExportAll } from '../../rules/get_export_all';
-import { transformError, buildSiemResponse } from '../utils';
+import { buildSiemResponse } from '../utils';
 
 export const exportRulesRoute = (router: SecuritySolutionPluginRouter, config: ConfigType) => {
   router.post(

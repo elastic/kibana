@@ -1,10 +1,10 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "incremental": false,
-    "outDir": "./target/types",
+    "incremental": true,
+    "declarationDir": "./target_types",
+    "outDir": "./target_node",
     "stripInternal": true,
-    "emitDeclarationOnly": true,
     "declaration": true,
     "declarationMap": true,
     "isolatedModules": true,

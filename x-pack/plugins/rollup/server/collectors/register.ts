@@ -5,175 +5,18 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
 import { UsageCollectionSetup, CollectorFetchContext } from 'src/plugins/usage_collection/server';
-import { ElasticsearchClient } from 'kibana/server';
-
-interface IdToFlagMap {
-  [key: string]: boolean;
-}
-
-// elasticsearch index.max_result_window default value
-const ES_MAX_RESULT_WINDOW_DEFAULT_VALUE = 1000;
-
-function getIdFromSavedObjectId(savedObjectId: string) {
-  // The saved object ID is formatted `{TYPE}:{ID}`.
-  return savedObjectId.split(':')[1];
-}
+import {
+  fetchRollupIndexPatterns,
+  fetchRollupSavedSearches,
+  fetchRollupVisualizations,
+} from './helpers';
 
 function createIdToFlagMap(ids: string[]) {
   return ids.reduce((map, id) => {
     map[id] = true;
     return map;
   }, {} as any);
-}
-
-async function fetchRollupIndexPatterns(kibanaIndex: string, esClient: ElasticsearchClient) {
-  const searchParams = {
-    size: ES_MAX_RESULT_WINDOW_DEFAULT_VALUE,
-    index: kibanaIndex,
-    ignoreUnavailable: true,
-    filterPath: ['hits.hits._id'],
-    body: {
-      query: {
-        bool: {
-          filter: {
-            term: {
-              'index-pattern.type': 'rollup',
-            },
-          },
-        },
-      },
-    },
-  };
-
-  const { body: esResponse } = await esClient.search(searchParams);
-
-  return get(esResponse, 'hits.hits', []).map((indexPattern: any) => {
-    const { _id: savedObjectId } = indexPattern;
-    return getIdFromSavedObjectId(savedObjectId);
-  });
-}
-
-async function fetchRollupSavedSearches(
-  kibanaIndex: string,
-  esClient: ElasticsearchClient,
-  rollupIndexPatternToFlagMap: IdToFlagMap
-) {
-  const searchParams = {
-    size: ES_MAX_RESULT_WINDOW_DEFAULT_VALUE,
-    index: kibanaIndex,
-    ignoreUnavailable: true,
-    filterPath: ['hits.hits._id', 'hits.hits._source.search.kibanaSavedObjectMeta'],
-    body: {
-      query: {
-        bool: {
-          filter: {
-            term: {
-              type: 'search',
-            },
-          },
-        },
-      },
-    },
-  };
-
-  const { body: esResponse } = await esClient.search(searchParams);
-  const savedSearches = get(esResponse, 'hits.hits', []);
-
-  // Filter for ones with rollup index patterns.
-  return savedSearches.reduce((rollupSavedSearches: any, savedSearch: any) => {
-    const {
-      _id: savedObjectId,
-      _source: {
-        search: {
-          kibanaSavedObjectMeta: { searchSourceJSON },
-        },
-      },
-    } = savedSearch;
-
-    const searchSource = JSON.parse(searchSourceJSON);
-
-    if (rollupIndexPatternToFlagMap[searchSource.index]) {
-      const id = getIdFromSavedObjectId(savedObjectId) as string;
-      rollupSavedSearches.push(id);
-    }
-
-    return rollupSavedSearches;
-  }, [] as string[]);
-}
-
-async function fetchRollupVisualizations(
-  kibanaIndex: string,
-  esClient: ElasticsearchClient,
-  rollupIndexPatternToFlagMap: IdToFlagMap,
-  rollupSavedSearchesToFlagMap: IdToFlagMap
-) {
-  const searchParams = {
-    size: ES_MAX_RESULT_WINDOW_DEFAULT_VALUE,
-    index: kibanaIndex,
-    ignoreUnavailable: true,
-    filterPath: [
-      'hits.hits._source.visualization.savedSearchRefName',
-      'hits.hits._source.visualization.kibanaSavedObjectMeta',
-      'hits.hits._source.references',
-    ],
-    body: {
-      query: {
-        bool: {
-          filter: {
-            term: {
-              type: 'visualization',
-            },
-          },
-        },
-      },
-    },
-  };
-
-  const { body: esResponse } = await esClient.search(searchParams);
-  const visualizations = get(esResponse, 'hits.hits', []);
-
-  let rollupVisualizations = 0;
-  let rollupVisualizationsFromSavedSearches = 0;
-
-  visualizations.forEach((visualization: any) => {
-    const references: Array<{ name: string; id: string }> | undefined = get(
-      visualization,
-      '_source.references'
-    );
-    const savedSearchRefName: string | undefined = get(
-      visualization,
-      '_source.visualization.savedSearchRefName'
-    );
-    const searchSourceJSON: string | undefined = get(
-      visualization,
-      '_source.visualization.kibanaSavedObjectMeta.searchSourceJSON'
-    );
-
-    if (savedSearchRefName && references?.length) {
-      // This visualization depends upon a saved search.
-      const savedSearch = references.find(({ name }) => name === savedSearchRefName);
-      if (savedSearch && rollupSavedSearchesToFlagMap[savedSearch.id]) {
-        rollupVisualizations++;
-        rollupVisualizationsFromSavedSearches++;
-      }
-    } else if (searchSourceJSON) {
-      // This visualization depends upon an index pattern.
-      const searchSource = JSON.parse(searchSourceJSON);
-
-      if (rollupIndexPatternToFlagMap[searchSource.index]) {
-        rollupVisualizations++;
-      }
-    }
-
-    return rollupVisualizations;
-  });
-
-  return {
-    rollupVisualizations,
-    rollupVisualizationsFromSavedSearches,
-  };
 }
 
 interface Usage {
@@ -185,8 +28,10 @@ interface Usage {
   };
   visualizations: {
     total: number;
+    lens_total: number;
     saved_searches: {
       total: number;
+      lens_total: number;
     };
   };
 }
@@ -200,16 +45,50 @@ export function registerRollupUsageCollector(
     isReady: () => true,
     schema: {
       index_patterns: {
-        total: { type: 'long' },
+        total: {
+          type: 'long',
+          _meta: {
+            description: 'Counts all the rollup index patterns',
+          },
+        },
       },
       saved_searches: {
-        total: { type: 'long' },
+        total: {
+          type: 'long',
+          _meta: {
+            description: 'Counts all the rollup saved searches',
+          },
+        },
       },
       visualizations: {
         saved_searches: {
-          total: { type: 'long' },
+          total: {
+            type: 'long',
+            _meta: {
+              description: 'Counts all the visualizations that are based on rollup saved searches',
+            },
+          },
+          lens_total: {
+            type: 'long',
+            _meta: {
+              description:
+                'Counts all the lens visualizations that are based on rollup saved searches',
+            },
+          },
         },
-        total: { type: 'long' },
+        total: {
+          type: 'long',
+          _meta: {
+            description: 'Counts all the visualizations that are based on rollup index patterns',
+          },
+        },
+        lens_total: {
+          type: 'long',
+          _meta: {
+            description:
+              'Counts all the lens visualizations that are based on rollup index patterns',
+          },
+        },
       },
     },
     fetch: async ({ esClient }: CollectorFetchContext) => {
@@ -226,6 +105,8 @@ export function registerRollupUsageCollector(
       const {
         rollupVisualizations,
         rollupVisualizationsFromSavedSearches,
+        rollupLensVisualizations,
+        rollupLensVisualizationsFromSavedSearches,
       } = await fetchRollupVisualizations(
         kibanaIndex,
         esClient,
@@ -242,8 +123,10 @@ export function registerRollupUsageCollector(
         },
         visualizations: {
           total: rollupVisualizations,
+          lens_total: rollupLensVisualizations,
           saved_searches: {
             total: rollupVisualizationsFromSavedSearches,
+            lens_total: rollupLensVisualizationsFromSavedSearches,
           },
         },
       };

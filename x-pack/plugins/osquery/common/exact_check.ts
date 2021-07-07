@@ -25,6 +25,7 @@ import { isObject, get } from 'lodash/fp';
  * @param original The original to check if it has additional keys
  * @param decoded The decoded either which has either an existing error or the
  * decoded object which could have additional keys stripped from it.
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils/src/exact_check/index.ts
  */
 export const exactCheck = <T>(
   original: unknown,

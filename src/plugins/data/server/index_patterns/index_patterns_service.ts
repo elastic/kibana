@@ -28,6 +28,7 @@ import { UiSettingsServerToCommon } from './ui_settings_wrapper';
 import { IndexPatternsApiServer } from './index_patterns_api_client';
 import { SavedObjectsClientServerToCommon } from './saved_objects_client_wrapper';
 import { registerIndexPatternsUsageCollector } from './register_index_pattern_usage_collection';
+import { createScriptedFieldsDeprecationsConfig } from './deprecations';
 
 export interface IndexPatternsServiceStart {
   indexPatternsServiceFactory: (
@@ -88,6 +89,7 @@ export class IndexPatternsServiceProvider implements Plugin<void, IndexPatternsS
 
     expressions.registerFunction(getIndexPatternLoad({ getStartServices: core.getStartServices }));
     registerIndexPatternsUsageCollector(core.getStartServices, usageCollection);
+    core.deprecations.registerDeprecations(createScriptedFieldsDeprecationsConfig(core));
   }
 
   public start(core: CoreStart, { fieldFormats, logger }: IndexPatternsServiceStartDeps) {

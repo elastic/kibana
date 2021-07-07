@@ -121,7 +121,7 @@ export class GeoJsonFileSource extends AbstractVectorSource {
     return (this._descriptor as GeojsonFileSourceDescriptor).name;
   }
 
-  canFormatFeatureProperties() {
+  hasTooltipProperties() {
     return true;
   }
 

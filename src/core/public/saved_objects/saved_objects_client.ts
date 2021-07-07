@@ -16,10 +16,14 @@ import {
   SavedObjectsClientContract as SavedObjectsApi,
   SavedObjectsFindOptions as SavedObjectFindOptionsServer,
   SavedObjectsMigrationVersion,
+  SavedObjectsResolveResponse,
 } from '../../server';
 
 import { SimpleSavedObject } from './simple_saved_object';
+import type { ResolvedSimpleSavedObject } from './types';
 import { HttpFetchOptions, HttpSetup } from '../http';
+
+export type { SavedObjectsResolveResponse };
 
 type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;
 
@@ -77,10 +81,9 @@ export interface SavedObjectsBulkUpdateOptions {
 }
 
 /** @public */
-export interface SavedObjectsUpdateOptions {
+export interface SavedObjectsUpdateOptions<Attributes = unknown> {
   version?: string;
-  /** {@inheritDoc SavedObjectsMigrationVersion} */
-  migrationVersion?: SavedObjectsMigrationVersion;
+  upsert?: Attributes;
   references?: SavedObjectReference[];
 }
 
@@ -423,6 +426,29 @@ export class SavedObjectsClient {
   }
 
   /**
+   * Resolves a single object
+   *
+   * @param {string} type
+   * @param {string} id
+   * @returns The resolve result for the saved object for the given type and id.
+   */
+  public resolve = <T = unknown>(
+    type: string,
+    id: string
+  ): Promise<ResolvedSimpleSavedObject<T>> => {
+    if (!type || !id) {
+      return Promise.reject(new Error('requires type and id'));
+    }
+
+    const path = `${this.getPath(['resolve'])}/${type}/${id}`;
+    const request: Promise<SavedObjectsResolveResponse<T>> = this.savedObjectsFetch(path, {});
+    return request.then(({ saved_object: object, outcome, aliasTargetId }) => {
+      const savedObject = new SimpleSavedObject<T>(this, object);
+      return { savedObject, outcome, aliasTargetId };
+    });
+  };
+
+  /**
    * Updates an object
    *
    * @param {string} type
@@ -437,7 +463,7 @@ export class SavedObjectsClient {
     type: string,
     id: string,
     attributes: T,
-    { version, migrationVersion, references }: SavedObjectsUpdateOptions = {}
+    { version, references, upsert }: SavedObjectsUpdateOptions = {}
   ): Promise<SimpleSavedObject<T>> {
     if (!type || !id || !attributes) {
       return Promise.reject(new Error('requires type, id and attributes'));
@@ -446,9 +472,9 @@ export class SavedObjectsClient {
     const path = this.getPath([type, id]);
     const body = {
       attributes,
-      migrationVersion,
       references,
       version,
+      upsert,
     };
 
     return this.savedObjectsFetch(path, {

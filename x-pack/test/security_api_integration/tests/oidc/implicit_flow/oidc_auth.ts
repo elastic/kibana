@@ -83,32 +83,39 @@ export default function ({ getService }: FtrProviderContext) {
         const { idToken, accessToken } = createTokens('1', stateAndNonce.nonce);
         const authenticationResponse = `https://kibana.com/api/security/oidc/implicit#id_token=${idToken}&state=${stateAndNonce.state}&token_type=bearer&access_token=${accessToken}`;
 
-        await supertest
+        const unauthenticatedResponse = await supertest
           .get(
             `/api/security/oidc/callback?authenticationResponseURI=${encodeURIComponent(
               authenticationResponse
             )}`
           )
-          .set('kbn-xsrf', 'xxx')
           .expect(401);
+
+        expect(unauthenticatedResponse.headers['content-security-policy']).to.be(
+          `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+        );
+        expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
       });
 
       it('should fail if state is not matching', async () => {
         const { idToken, accessToken } = createTokens('1', stateAndNonce.nonce);
         const authenticationResponse = `https://kibana.com/api/security/oidc/implicit#id_token=${idToken}&state=$someothervalue&token_type=bearer&access_token=${accessToken}`;
 
-        await supertest
+        const unauthenticatedResponse = await supertest
           .get(
             `/api/security/oidc/callback?authenticationResponseURI=${encodeURIComponent(
               authenticationResponse
             )}`
           )
-          .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .expect(401);
+
+        expect(unauthenticatedResponse.headers['content-security-policy']).to.be(
+          `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+        );
+        expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/43938
       it('should succeed if both the OpenID Connect response and the cookie are provided', async () => {
         const { idToken, accessToken } = createTokens('1', stateAndNonce.nonce);
         const authenticationResponse = `https://kibana.com/api/security/oidc/implicit#id_token=${idToken}&state=${stateAndNonce.state}&token_type=bearer&access_token=${accessToken}`;
@@ -119,7 +126,6 @@ export default function ({ getService }: FtrProviderContext) {
               authenticationResponse
             )}`
           )
-          .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .expect(302);
 

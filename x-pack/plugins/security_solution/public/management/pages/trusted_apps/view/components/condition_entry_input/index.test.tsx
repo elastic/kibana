@@ -21,7 +21,7 @@ let onRemoveMock: jest.Mock;
 let onChangeMock: jest.Mock;
 let onVisitedMock: jest.Mock;
 
-const entry: Readonly<ConditionEntry> = {
+const baseEntry: Readonly<ConditionEntry> = {
   field: ConditionEntryField.HASH,
   type: 'match',
   operator: 'included',
@@ -38,7 +38,8 @@ describe('Condition entry input', () => {
   const getElement = (
     subject: string,
     os: OperatingSystem = OperatingSystem.WINDOWS,
-    isRemoveDisabled: boolean = false
+    isRemoveDisabled: boolean = false,
+    entry: ConditionEntry = baseEntry
   ) => (
     <ConditionEntryInput
       os={os}
@@ -64,10 +65,10 @@ describe('Condition entry input', () => {
       expect(onChangeMock).toHaveBeenCalledTimes(1);
       expect(onChangeMock).toHaveBeenCalledWith(
         {
-          ...entry,
+          ...baseEntry,
           field: { target: { value: field } },
         },
-        entry
+        baseEntry
       );
     }
   );
@@ -77,7 +78,7 @@ describe('Condition entry input', () => {
     expect(onRemoveMock).toHaveBeenCalledTimes(0);
     element.find('[data-test-subj="testOnRemove-remove"]').first().simulate('click');
     expect(onRemoveMock).toHaveBeenCalledTimes(1);
-    expect(onRemoveMock).toHaveBeenCalledWith(entry);
+    expect(onRemoveMock).toHaveBeenCalledWith(baseEntry);
   });
 
   it('should not be able to call on remove for field input because disabled', () => {
@@ -92,7 +93,7 @@ describe('Condition entry input', () => {
     expect(onVisitedMock).toHaveBeenCalledTimes(0);
     element.find('[data-test-subj="testOnVisited-value"]').first().simulate('blur');
     expect(onVisitedMock).toHaveBeenCalledTimes(1);
-    expect(onVisitedMock).toHaveBeenCalledWith(entry);
+    expect(onVisitedMock).toHaveBeenCalledWith(baseEntry);
   });
 
   it('should change value for field input', () => {
@@ -105,10 +106,10 @@ describe('Condition entry input', () => {
     expect(onChangeMock).toHaveBeenCalledTimes(1);
     expect(onChangeMock).toHaveBeenCalledWith(
       {
-        ...entry,
+        ...baseEntry,
         value: 'new value',
       },
-      entry
+      baseEntry
     );
   });
 
@@ -134,6 +135,26 @@ describe('Condition entry input', () => {
     const element = mount(getElement('testCheckSignatureOption', OperatingSystem.MAC));
     const superSelectProps = element
       .find('[data-test-subj="testCheckSignatureOption-field"]')
+      .first()
+      .props() as EuiSuperSelectProps<string>;
+    expect(superSelectProps.options.length).toBe(2);
+  });
+
+  it('should have operator value selected when field is HASH', () => {
+    const element = shallow(getElement('testOperatorOptions'));
+    const inputField = element.find('[data-test-subj="testOperatorOptions-operator"]');
+    expect(inputField.contains('is'));
+  });
+
+  it('should show operator dorpdown with two values when field is PATH', () => {
+    const element = shallow(
+      getElement('testOperatorOptions', undefined, undefined, {
+        ...baseEntry,
+        field: ConditionEntryField.PATH,
+      })
+    );
+    const superSelectProps = element
+      .find('[data-test-subj="testOperatorOptions-operator"]')
       .first()
       .props() as EuiSuperSelectProps<string>;
     expect(superSelectProps.options.length).toBe(2);

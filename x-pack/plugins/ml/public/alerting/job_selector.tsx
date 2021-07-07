@@ -99,10 +99,7 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
     <EuiFormRow
       fullWidth
       label={
-        <FormattedMessage
-          id="xpack.ml.jobSelector.formControlLabel"
-          defaultMessage="Select jobs or groups"
-        />
+        <FormattedMessage id="xpack.ml.jobSelector.formControlLabel" defaultMessage="Select job" />
       }
       isInvalid={!!errors?.length}
       error={errors}

@@ -6,53 +6,53 @@
  */
 
 import { pickBy, isEmpty } from 'lodash/fp';
-import {
-  DescriptionOrUndefined,
-  AnomalyThresholdOrUndefined,
-  QueryOrUndefined,
-  LanguageOrUndefined,
-  SavedIdOrUndefined,
-  TimelineIdOrUndefined,
-  TimelineTitleOrUndefined,
-  MachineLearningJobIdOrUndefined,
-  IndexOrUndefined,
-  NoteOrUndefined,
-  MetaOrUndefined,
-  VersionOrUndefined,
-  FalsePositivesOrUndefined,
+import type {
   FromOrUndefined,
-  OutputIndexOrUndefined,
-  IntervalOrUndefined,
-  MaxSignalsOrUndefined,
-  RiskScoreOrUndefined,
-  NameOrUndefined,
-  SeverityOrUndefined,
-  TagsOrUndefined,
-  ToOrUndefined,
-  ThreatsOrUndefined,
-  ThresholdOrUndefined,
-  TypeOrUndefined,
-  ReferencesOrUndefined,
-  AuthorOrUndefined,
-  BuildingBlockTypeOrUndefined,
-  LicenseOrUndefined,
+  MachineLearningJobIdOrUndefined,
   RiskScoreMappingOrUndefined,
-  RuleNameOverrideOrUndefined,
-  SeverityMappingOrUndefined,
-  TimestampOverrideOrUndefined,
-  EventCategoryOverrideOrUndefined,
-} from '../../../../common/detection_engine/schemas/common/schemas';
-import { PartialFilter } from '../types';
-import {
+  RiskScoreOrUndefined,
   ConcurrentSearchesOrUndefined,
   ItemsPerSearchOrUndefined,
-  ListArrayOrUndefined,
   ThreatFiltersOrUndefined,
   ThreatIndexOrUndefined,
   ThreatLanguageOrUndefined,
   ThreatMappingOrUndefined,
   ThreatQueryOrUndefined,
-} from '../../../../common/detection_engine/schemas/types';
+  ThreatsOrUndefined,
+  TypeOrUndefined,
+  LanguageOrUndefined,
+  SeverityOrUndefined,
+  SeverityMappingOrUndefined,
+  MaxSignalsOrUndefined,
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ListArrayOrUndefined } from '@kbn/securitysolution-io-ts-list-types';
+import type { VersionOrUndefined } from '@kbn/securitysolution-io-ts-types';
+import {
+  DescriptionOrUndefined,
+  AnomalyThresholdOrUndefined,
+  QueryOrUndefined,
+  SavedIdOrUndefined,
+  TimelineIdOrUndefined,
+  TimelineTitleOrUndefined,
+  IndexOrUndefined,
+  NoteOrUndefined,
+  MetaOrUndefined,
+  FalsePositivesOrUndefined,
+  OutputIndexOrUndefined,
+  IntervalOrUndefined,
+  NameOrUndefined,
+  TagsOrUndefined,
+  ToOrUndefined,
+  ThresholdOrUndefined,
+  ReferencesOrUndefined,
+  AuthorOrUndefined,
+  BuildingBlockTypeOrUndefined,
+  LicenseOrUndefined,
+  RuleNameOverrideOrUndefined,
+  TimestampOverrideOrUndefined,
+  EventCategoryOverrideOrUndefined,
+} from '../../../../common/detection_engine/schemas/common/schemas';
+import { PartialFilter } from '../types';
 
 export const calculateInterval = (
   interval: string | undefined,

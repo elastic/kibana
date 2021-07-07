@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiCard, EuiFlexGrid, EuiFlexItem, EuiFormRow, EuiIcon } from '@elastic/eui';
 
-import { Type } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import {
   isThresholdRule,

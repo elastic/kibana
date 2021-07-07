@@ -326,6 +326,7 @@ export class EditJobFlyoutUI extends Component {
       const tabs = [
         {
           id: 'job-details',
+          'data-test-subj': 'mlEditJobFlyout-jobDetails',
           name: i18n.translate('xpack.ml.jobsList.editJobFlyout.jobDetailsTitle', {
             defaultMessage: 'Job details',
           }),
@@ -346,6 +347,7 @@ export class EditJobFlyoutUI extends Component {
         },
         {
           id: 'detectors',
+          'data-test-subj': 'mlEditJobFlyout-detectors',
           name: i18n.translate('xpack.ml.jobsList.editJobFlyout.detectorsTitle', {
             defaultMessage: 'Detectors',
           }),
@@ -359,6 +361,7 @@ export class EditJobFlyoutUI extends Component {
         },
         {
           id: 'datafeed',
+          'data-test-subj': 'mlEditJobFlyout-datafeed',
           name: i18n.translate('xpack.ml.jobsList.editJobFlyout.datafeedTitle', {
             defaultMessage: 'Datafeed',
           }),
@@ -376,6 +379,7 @@ export class EditJobFlyoutUI extends Component {
         },
         {
           id: 'custom-urls',
+          'data-test-subj': 'mlEditJobFlyout-customUrls',
           name: i18n.translate('xpack.ml.jobsList.editJobFlyout.customUrlsTitle', {
             defaultMessage: 'Custom URLs',
           }),
@@ -395,6 +399,7 @@ export class EditJobFlyoutUI extends Component {
             this.closeFlyout();
           }}
           size="m"
+          data-test-subj="mlJobEditFlyout"
         >
           <EuiFlyoutHeader>
             <EuiTitle>
@@ -419,6 +424,7 @@ export class EditJobFlyoutUI extends Component {
                     this.closeFlyout();
                   }}
                   flush="left"
+                  data-test-subj="mlEditJobFlyoutCloseButton"
                 >
                   <FormattedMessage
                     id="xpack.ml.jobsList.editJobFlyout.closeButtonLabel"
@@ -431,6 +437,7 @@ export class EditJobFlyoutUI extends Component {
                   onClick={this.save}
                   fill
                   isDisabled={isValidJobDetails === false || isValidJobCustomUrls === false}
+                  data-test-subj="mlEditJobFlyoutSaveButton"
                 >
                   <FormattedMessage
                     id="xpack.ml.jobsList.editJobFlyout.saveButtonLabel"

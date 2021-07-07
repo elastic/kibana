@@ -1,0 +1,49 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "A job can be used to schedule programs or scripts to be executed at a specified date and time. Adversaries may abuse task scheduling functionality to facilitate initial or recurring execution of malicious code.",
+  "false_positives": [
+    "Legitimate scheduled jobs may be created during installation of new software."
+  ],
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Persistence via Scheduled Job Creation",
+  "query": "file where event.type != \"deletion\" and\n file.path : \"?:\\\\Windows\\\\Tasks\\\\*\" and file.extension : \"job\"\n",
+  "risk_score": 47,
+  "rule_id": "1327384f-00f3-44d5-9a8c-2373ba071e92",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Persistence"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1053",
+          "name": "Scheduled Task/Job",
+          "reference": "https://attack.mitre.org/techniques/T1053/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 1
+}

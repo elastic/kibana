@@ -24,6 +24,9 @@ describe('interpreter/functions#filtersToAst', () => {
     expect(actual[0].functions[0]).toHaveProperty('name', 'kibanaFilter');
     expect(actual[0].functions[0].arguments).toMatchInlineSnapshot(`
       Object {
+        "disabled": Array [
+          false,
+        ],
         "negate": Array [
           false,
         ],
@@ -35,6 +38,9 @@ describe('interpreter/functions#filtersToAst', () => {
     expect(actual[1].functions[0]).toHaveProperty('name', 'kibanaFilter');
     expect(actual[1].functions[0].arguments).toMatchInlineSnapshot(`
       Object {
+        "disabled": Array [
+          false,
+        ],
         "negate": Array [
           true,
         ],

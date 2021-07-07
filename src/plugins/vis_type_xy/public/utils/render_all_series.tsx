@@ -51,7 +51,15 @@ const getCurveType = (type?: 'linear' | 'cardinal' | 'step-after'): CurveType =>
  * @param getSeriesColor
  */
 export const renderAllSeries = (
-  { aspects, yAxes, xAxis, showValueLabel, enableHistogramMode, fittingFunction }: VisConfig,
+  {
+    aspects,
+    yAxes,
+    xAxis,
+    showValueLabel,
+    enableHistogramMode,
+    fittingFunction,
+    fillOpacity,
+  }: VisConfig,
   seriesParams: SeriesParam[],
   data: DatatableRow[],
   getSeriesName: (series: XYChartSeriesIdentifier) => SeriesName,
@@ -67,6 +75,7 @@ export const renderAllSeries = (
       data: { id: paramId },
       lineWidth: strokeWidth,
       showCircles,
+      circlesRadius,
       drawLinesBetweenPoints,
       mode,
       interpolate,
@@ -158,7 +167,7 @@ export const renderAllSeries = (
               stackMode={stackMode}
               areaSeriesStyle={{
                 area: {
-                  ...(type === ChartType.Line && { opacity: 0 }),
+                  ...(type === ChartType.Line ? { opacity: 0 } : { opacity: fillOpacity }),
                 },
                 line: {
                   strokeWidth,
@@ -167,6 +176,7 @@ export const renderAllSeries = (
                 point: {
                   visible: showCircles,
                   fill: markSizeAccessor ? ColorVariant.Series : undefined,
+                  radius: circlesRadius,
                 },
               }}
             />

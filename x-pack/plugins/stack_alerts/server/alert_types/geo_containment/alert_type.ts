@@ -120,6 +120,7 @@ export interface GeoContainmentParams extends AlertTypeParams {
 export interface GeoContainmentState extends AlertTypeState {
   shapesFilters: Record<string, unknown>;
   shapesIdsNamesMap: Record<string, unknown>;
+  prevLocationMap: Record<string, unknown>;
 }
 export interface GeoContainmentInstanceState extends AlertInstanceState {
   location: number[];
@@ -176,5 +177,6 @@ export function getAlertType(logger: Logger): GeoContainmentAlertType {
     },
     actionVariables,
     minimumLicenseRequired: 'gold',
+    isExportable: true,
   };
 }

@@ -9,31 +9,34 @@
 import { overwrite } from '../../helpers';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { isLastValueTimerangeMode } from '../../helpers/get_timerange_mode';
-import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 import { getTimerange } from '../../helpers/get_timerange';
 import { calculateAggRoot } from './calculate_agg_root';
 import { search, UI_SETTINGS } from '../../../../../../../plugins/data/server';
 
 const { dateHistogramInterval } = search.aggs;
 
-export function dateHistogram(req, panel, esQueryConfig, seriesIndex, capabilities, uiSettings) {
+export function dateHistogram(
+  req,
+  panel,
+  esQueryConfig,
+  seriesIndex,
+  capabilities,
+  uiSettings,
+  buildSeriesMetaParams
+) {
   return (next) => async (doc) => {
     const barTargetUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
-    const { timeField, interval } = getIntervalAndTimefield(panel, {}, seriesIndex);
+    const { timeField, interval } = await buildSeriesMetaParams();
+    const { from, to } = getTimerange(req);
 
     const meta = {
       timeField,
       index: panel.use_kibana_indexes ? seriesIndex.indexPattern?.id : undefined,
+      panelId: panel.id,
     };
 
-    const getDateHistogramForLastBucketMode = () => {
-      const { bucketSize, intervalString } = getBucketSize(
-        req,
-        interval,
-        capabilities,
-        barTargetUiSettings
-      );
-      const { from, to } = getTimerange(req);
+    const overwriteDateHistogramForLastBucketMode = () => {
+      const { intervalString } = getBucketSize(req, interval, capabilities, barTargetUiSettings);
       const { timezone } = capabilities;
 
       panel.series.forEach((column) => {
@@ -53,12 +56,13 @@ export function dateHistogram(req, panel, esQueryConfig, seriesIndex, capabiliti
         overwrite(doc, aggRoot.replace(/\.aggs$/, '.meta'), {
           ...meta,
           intervalString,
-          bucketSize,
         });
       });
     };
 
-    const getDateHistogramForEntireTimerangeMode = () => {
+    const overwriteDateHistogramForEntireTimerangeMode = () => {
+      const intervalString = `${to.valueOf() - from.valueOf()}ms`;
+
       panel.series.forEach((column) => {
         const aggRoot = calculateAggRoot(doc, column);
 
@@ -67,13 +71,16 @@ export function dateHistogram(req, panel, esQueryConfig, seriesIndex, capabiliti
           buckets: 1,
         });
 
-        overwrite(doc, aggRoot.replace(/\.aggs$/, '.meta'), meta);
+        overwrite(doc, aggRoot.replace(/\.aggs$/, '.meta'), {
+          ...meta,
+          intervalString,
+        });
       });
     };
 
     isLastValueTimerangeMode(panel)
-      ? getDateHistogramForLastBucketMode()
-      : getDateHistogramForEntireTimerangeMode();
+      ? overwriteDateHistogramForLastBucketMode()
+      : overwriteDateHistogramForEntireTimerangeMode();
 
     return next(doc);
   };

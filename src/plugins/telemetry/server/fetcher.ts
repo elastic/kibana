@@ -9,10 +9,7 @@
 import { Observable, Subscription, timer } from 'rxjs';
 import { take } from 'rxjs/operators';
 import fetch from 'node-fetch';
-import {
-  TelemetryCollectionManagerPluginStart,
-  UsageStatsPayload,
-} from 'src/plugins/telemetry_collection_manager/server';
+import type { TelemetryCollectionManagerPluginStart } from 'src/plugins/telemetry_collection_manager/server';
 import {
   PluginInitializerContext,
   Logger,
@@ -40,6 +37,7 @@ interface TelemetryConfig {
   telemetryUrl: string;
   failureCount: number;
   failureVersion: string | undefined;
+  currentVersion: string;
 }
 
 export class FetcherTask {
@@ -104,7 +102,7 @@ export class FetcherTask {
       return;
     }
 
-    let clusters: Array<UsageStatsPayload | string> = [];
+    let clusters: string[] = [];
     this.isSending = true;
 
     try {
@@ -160,6 +158,7 @@ export class FetcherTask {
       telemetryUrl,
       failureCount,
       failureVersion,
+      currentVersion: currentKibanaVersion,
     };
   }
 
@@ -187,11 +186,11 @@ export class FetcherTask {
   private shouldSendReport({
     telemetryOptIn,
     telemetrySendUsageFrom,
-    reportFailureCount,
+    failureCount,
+    failureVersion,
     currentVersion,
-    reportFailureVersion,
-  }: any) {
-    if (reportFailureCount > 2 && reportFailureVersion === currentVersion) {
+  }: TelemetryConfig) {
+    if (failureCount > 2 && failureVersion === currentVersion) {
       return false;
     }
 
@@ -209,7 +208,7 @@ export class FetcherTask {
     });
   }
 
-  private async sendTelemetry(url: string, cluster: any): Promise<void> {
+  private async sendTelemetry(url: string, cluster: string): Promise<void> {
     this.logger.debug(`Sending usage stats.`);
     /**
      * send OPTIONS before sending usage data.

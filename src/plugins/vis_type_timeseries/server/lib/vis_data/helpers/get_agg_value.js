@@ -8,7 +8,7 @@
 
 import { get, includes, max, min, sum, noop } from 'lodash';
 import { toPercentileNumber } from '../../../../common/to_percentile_number';
-import { EXTENDED_STATS_TYPES, METRIC_TYPES } from '../../../../common/metric_types';
+import { METRIC_TYPES, EXTENDED_STATS_TYPES } from '../../../../common/enums';
 
 const aggFns = {
   max,

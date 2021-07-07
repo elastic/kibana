@@ -12,10 +12,10 @@
     "logs-endpoint.events.*",
     "logs-windows.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License v2",
   "name": "Microsoft Build Engine Started by an Office Application",
-  "query": "event.category:process and event.type:(start or process_started) and process.name:MSBuild.exe and process.parent.name:(eqnedt32.exe or excel.exe or fltldr.exe or msaccess.exe or mspub.exe or outlook.exe or powerpnt.exe or winword.exe)",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.name : \"MSBuild.exe\" and\n  process.parent.name : (\"eqnedt32.exe\",\n                         \"excel.exe\",\n                         \"fltldr.exe\",\n                         \"msaccess.exe\",\n                         \"mspub.exe\",\n                         \"outlook.exe\",\n                         \"powerpnt.exe\",\n                         \"winword.exe\" )\n",
   "references": [
     "https://blog.talosintelligence.com/2020/02/building-bypass-with-msbuild.html"
   ],
@@ -56,6 +56,6 @@
     }
   ],
   "timestamp_override": "event.ingested",
-  "type": "query",
-  "version": 7
+  "type": "eql",
+  "version": 8
 }

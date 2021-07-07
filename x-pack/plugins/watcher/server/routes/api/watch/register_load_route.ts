@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { get } from 'lodash';
 // @ts-ignore
 import { Watch } from '../../../models/watch/index';
@@ -16,13 +16,15 @@ const paramsSchema = schema.object({
   id: schema.string(),
 });
 
-function fetchWatch(dataClient: ILegacyScopedClusterClient, watchId: string) {
-  return dataClient.callAsCurrentUser('watcher.getWatch', {
-    id: watchId,
-  });
+function fetchWatch(dataClient: IScopedClusterClient, watchId: string) {
+  return dataClient.asCurrentUser.watcher
+    .getWatch({
+      id: watchId,
+    })
+    .then(({ body }) => body);
 }
 
-export function registerLoadRoute({ router, license, lib: { isEsError } }: RouteDependencies) {
+export function registerLoadRoute({ router, license, lib: { handleEsError } }: RouteDependencies) {
   router.get(
     {
       path: '/api/watcher/watch/{id}',
@@ -34,7 +36,7 @@ export function registerLoadRoute({ router, license, lib: { isEsError } }: Route
       const id = request.params.id;
 
       try {
-        const hit = await fetchWatch(ctx.watcher!.client, id);
+        const hit = await fetchWatch(ctx.core.elasticsearch.client, id);
         const watchJson = get(hit, 'watch');
         const watchStatusJson = get(hit, 'status');
         const json = {
@@ -52,14 +54,10 @@ export function registerLoadRoute({ router, license, lib: { isEsError } }: Route
           body: { watch: watch.downstreamJson },
         });
       } catch (e) {
-        // Case: Error from Elasticsearch JS client
-        if (isEsError(e)) {
-          const body = e.statusCode === 404 ? `Watch with id = ${id} not found` : e;
-          return response.customError({ statusCode: e.statusCode, body });
+        if (e?.statusCode === 404 && e.meta?.body?.error) {
+          e.meta.body.error.reason = `Watch with id = ${id} not found`;
         }
-
-        // Case: default
-        throw e;
+        return handleEsError({ error: e, response });
       }
     })
   );

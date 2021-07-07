@@ -11,7 +11,7 @@ import { search, METRIC_TYPES } from '../../../../../data/server';
 
 const { dateHistogramInterval } = search.aggs;
 
-export default function createDateAgg(config, tlConfig, scriptedFields) {
+export default function createDateAgg(config, tlConfig, scriptFields) {
   const dateAgg = {
     time_buckets: {
       meta: { type: 'time_buckets' },
@@ -47,7 +47,7 @@ export default function createDateAgg(config, tlConfig, scriptedFields) {
       const percentArgs = splittedArgs[1];
       const metricKey = metricName + '(' + field + ')';
 
-      metricBody[metricKey] = { [metricName]: buildAggBody(field, scriptedFields) };
+      metricBody[metricKey] = { [metricName]: buildAggBody(field, scriptFields) };
 
       if (metricName === METRIC_TYPES.PERCENTILES && percentArgs) {
         let percentList = percentArgs.split(',');

@@ -6,8 +6,12 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
+import type {
+  Filter,
+  SortFieldOrUndefined,
+  SortOrderOrUndefined,
+} from '@kbn/securitysolution-io-ts-list-types';
 
-import { Filter, SortFieldOrUndefined, SortOrderOrUndefined } from '../../../common/schemas';
 import { Scroll } from '../lists/types';
 
 import { getQueryFilter } from './get_query_filter';
@@ -42,7 +46,7 @@ export const getSearchAfterScroll = async <T>({
     const { body: response } = await esClient.search<TieBreaker<T>>({
       body: {
         _source: getSourceWithTieBreaker({ sortField }),
-        // @ts-expect-error Filter is not assignale to QueryContainer
+        // @ts-expect-error Filter is not assignale to QueryDslQueryContainer
         query,
         search_after: newSearchAfter,
         sort: getSortWithTieBreaker({ sortField, sortOrder }),

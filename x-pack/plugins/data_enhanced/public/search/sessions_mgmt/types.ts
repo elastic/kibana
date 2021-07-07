@@ -25,13 +25,16 @@ export type PersistedSearchSessionSavedObjectAttributes = SearchSessionSavedObje
     >
   >;
 
+export type UISearchSessionState = SearchSessionStatus;
+
 export interface UISession {
   id: string;
   name: string;
   appId: string;
   created: string;
   expires: string | null;
-  status: SearchSessionStatus;
+  status: UISearchSessionState;
+  numSearches: number;
   actions?: ACTION[];
   reloadUrl: string;
   restoreUrl: string;

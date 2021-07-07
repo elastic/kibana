@@ -7,7 +7,7 @@
 
 import { CoreSetup } from 'kibana/server';
 import { getEditPath } from '../common';
-import { migrations } from './migrations';
+import { migrations } from './migrations/saved_object_migrations';
 
 export function setupSavedObjects(core: CoreSetup) {
   core.savedObjects.registerType({

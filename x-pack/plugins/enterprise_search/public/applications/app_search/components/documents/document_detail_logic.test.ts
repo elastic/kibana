@@ -10,12 +10,12 @@ import {
   mockHttpValues,
   mockKibanaValues,
   mockFlashMessageHelpers,
-} from '../../../__mocks__';
+} from '../../../__mocks__/kea_logic';
 import { mockEngineValues } from '../../__mocks__';
 
 import { nextTick } from '@kbn/test/jest';
 
-import { InternalSchemaTypes } from '../../../shared/types';
+import { InternalSchemaType } from '../../../shared/schema/types';
 
 import { DocumentDetailLogic } from './document_detail_logic';
 
@@ -23,7 +23,7 @@ describe('DocumentDetailLogic', () => {
   const { mount } = new LogicMounter(DocumentDetailLogic);
   const { http } = mockHttpValues;
   const { navigateToUrl } = mockKibanaValues;
-  const { setQueuedSuccessMessage, flashAPIErrors } = mockFlashMessageHelpers;
+  const { flashSuccessToast, flashAPIErrors } = mockFlashMessageHelpers;
 
   const DEFAULT_VALUES = {
     dataLoading: true,
@@ -38,7 +38,7 @@ describe('DocumentDetailLogic', () => {
   describe('actions', () => {
     describe('setFields', () => {
       it('should set fields to the provided value and dataLoading to false', () => {
-        const fields = [{ name: 'foo', value: ['foo'], type: 'string' as InternalSchemaTypes }];
+        const fields = [{ name: 'foo', value: ['foo'], type: InternalSchemaType.String }];
 
         mount({
           dataLoading: true,
@@ -101,9 +101,7 @@ describe('DocumentDetailLogic', () => {
 
         expect(http.delete).toHaveBeenCalledWith('/api/app_search/engines/engine1/documents/1');
         await nextTick();
-        expect(setQueuedSuccessMessage).toHaveBeenCalledWith(
-          'Successfully marked document for deletion. It will be deleted momentarily.'
-        );
+        expect(flashSuccessToast).toHaveBeenCalledWith('Your document was deleted');
         expect(navigateToUrl).toHaveBeenCalledWith('/engines/engine1/documents');
       });
 

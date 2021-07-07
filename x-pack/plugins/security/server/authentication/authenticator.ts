@@ -11,6 +11,7 @@ import type { IBasePath, IClusterClient, LoggerFactory } from 'src/core/server';
 import { KibanaRequest } from '../../../../../src/core/server';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
+  AUTH_URL_HASH_QUERY_STRING_PARAMETER,
   LOGOUT_PROVIDER_QUERY_STRING_PARAMETER,
   LOGOUT_REASON_QUERY_STRING_PARAMETER,
   NEXT_URL_QUERY_STRING_PARAMETER,
@@ -44,6 +45,15 @@ import {
   TokenAuthenticationProvider,
 } from './providers';
 import { Tokens } from './tokens';
+
+/**
+ * List of query string parameters used to pass various authentication related metadata that should
+ * be stripped away from URL as soon as they are no longer needed.
+ */
+const AUTH_METADATA_QUERY_STRING_PARAMETERS = [
+  AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
+  AUTH_URL_HASH_QUERY_STRING_PARAMETER,
+];
 
 /**
  * The shape of the login attempt.
@@ -201,6 +211,7 @@ export class Authenticator {
     const providerCommonOptions = {
       client: this.options.clusterClient,
       basePath: this.options.basePath,
+      getRequestOriginalURL: this.getRequestOriginalURL.bind(this),
       tokens: new Tokens({
         client: this.options.clusterClient.asInternalUser,
         logger: this.options.loggers.get('tokens'),
@@ -419,7 +430,9 @@ export class Authenticator {
       }
     }
 
-    return DeauthenticationResult.notHandled();
+    // If none of the configured providers could perform a logout, we should redirect user to the
+    // default logout location.
+    return DeauthenticationResult.redirectTo(this.getLoggedOutURL(request));
   }
 
   /**
@@ -450,6 +463,24 @@ export class Authenticator {
     );
 
     this.options.featureUsageService.recordPreAccessAgreementUsage();
+  }
+
+  getRequestOriginalURL(
+    request: KibanaRequest,
+    additionalQueryStringParameters?: Array<[string, string]>
+  ) {
+    const originalURLSearchParams = [
+      ...[...request.url.searchParams.entries()].filter(
+        ([key]) => !AUTH_METADATA_QUERY_STRING_PARAMETERS.includes(key)
+      ),
+      ...(additionalQueryStringParameters ?? []),
+    ];
+
+    return `${this.options.basePath.get(request)}${request.url.pathname}${
+      originalURLSearchParams.length > 0
+        ? `?${new URLSearchParams(originalURLSearchParams).toString()}`
+        : ''
+    }`;
   }
 
   /**
@@ -762,9 +793,13 @@ export class Authenticator {
   /**
    * Creates a logged out URL for the specified request and provider.
    * @param request Request that initiated logout.
-   * @param providerType Type of the provider that handles logout.
+   * @param providerType Type of the provider that handles logout. If not specified, then the first
+   * provider in the chain (default) is assumed.
    */
-  private getLoggedOutURL(request: KibanaRequest, providerType: string) {
+  private getLoggedOutURL(
+    request: KibanaRequest,
+    providerType: string = this.options.config.authc.sortedProviders[0].type
+  ) {
     // The app that handles logout needs to know the reason of the logout and the URL we may need to
     // redirect user to once they log in again (e.g. when session expires).
     const searchParams = new URLSearchParams();

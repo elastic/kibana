@@ -7,7 +7,7 @@
  */
 
 import { getSort, getSortArray } from './get_sort';
-// @ts-ignore
+// @ts-expect-error
 import FixturesStubbedLogstashIndexPatternProvider from '../../../../__fixtures__/stubbed_logstash_index_pattern';
 import { IndexPattern } from '../../../../kibana_services';
 

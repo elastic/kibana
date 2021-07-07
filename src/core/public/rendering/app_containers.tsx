@@ -10,17 +10,23 @@ import React from 'react';
 import { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import classNames from 'classnames';
+import { APP_WRAPPER_CLASS } from '../../utils';
 
 export const AppWrapper: React.FunctionComponent<{
   chromeVisible$: Observable<boolean>;
-}> = ({ chromeVisible$, children }) => {
-  const visible = useObservable(chromeVisible$);
-  return <div className={classNames('app-wrapper', { 'hidden-chrome': !visible })}>{children}</div>;
-};
-
-export const AppContainer: React.FunctionComponent<{
   classes$: Observable<string[]>;
-}> = ({ classes$, children }) => {
-  const classes = useObservable(classes$);
-  return <div className={classNames('application', classes)}>{children}</div>;
+}> = ({ chromeVisible$, classes$, children }) => {
+  const visible = useObservable(chromeVisible$);
+  const classes = useObservable(classes$, ['']);
+  return (
+    <div
+      className={classNames(
+        APP_WRAPPER_CLASS,
+        { 'kbnAppWrapper--hiddenChrome': !visible },
+        classes
+      )}
+    >
+      {children}
+    </div>
+  );
 };

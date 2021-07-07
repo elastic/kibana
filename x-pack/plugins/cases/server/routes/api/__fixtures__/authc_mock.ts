@@ -16,7 +16,7 @@ function createAuthenticationMock({
   authc.getCurrentUser.mockReturnValue(
     currentUser !== undefined
       ? // if we pass in null then use the null user (has null for each field) this is the default behavior
-        // for the CaseService getUser method
+        // for the CasesService getUser method
         currentUser !== null
         ? currentUser
         : nullUser

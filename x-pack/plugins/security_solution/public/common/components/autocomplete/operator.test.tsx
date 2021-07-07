@@ -11,7 +11,7 @@ import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { getField } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
 import { OperatorComponent } from './operator';
-import { isOperator, isNotOperator } from './operators';
+import { isOperator, isNotOperator } from '@kbn/securitysolution-list-utils';
 
 describe('OperatorComponent', () => {
   test('it renders disabled if "isDisabled" is true', () => {

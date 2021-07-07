@@ -8,9 +8,8 @@
 import { Observable } from 'rxjs';
 import type {
   IRouter,
-  ILegacyClusterClient,
   Logger,
-  ILegacyCustomClusterClient,
+  ICustomClusterClient,
   RequestHandlerContext,
   ElasticsearchClient,
 } from 'kibana/server';
@@ -25,7 +24,7 @@ import {
   PluginStartContract as AlertingPluginStartContract,
   PluginSetupContract as AlertingPluginSetupContract,
 } from '../../alerting/server';
-import { InfraPluginSetup } from '../../infra/server';
+import { InfraPluginSetup, InfraRequestHandlerContext } from '../../infra/server';
 import { LicensingPluginStart } from '../../licensing/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 import { EncryptedSavedObjectsPluginSetup } from '../../encrypted_saved_objects/server';
@@ -57,6 +56,7 @@ export interface PluginsSetup {
 export interface RequestHandlerContextMonitoringPlugin extends RequestHandlerContext {
   actions?: ActionsApiRequestHandlerContext;
   alerting?: AlertingApiRequestHandlerContext;
+  infra: InfraRequestHandlerContext;
 }
 
 export interface PluginsStart {
@@ -70,7 +70,7 @@ export interface MonitoringCoreConfig {
 }
 
 export interface RouteDependencies {
-  cluster: ILegacyCustomClusterClient;
+  cluster: ICustomClusterClient;
   router: IRouter<RequestHandlerContextMonitoringPlugin>;
   licenseService: MonitoringLicenseService;
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
@@ -86,7 +86,7 @@ export interface MonitoringCore {
 export interface LegacyShimDependencies {
   router: IRouter<RequestHandlerContextMonitoringPlugin>;
   instanceUuid: string;
-  esDataClient: ILegacyClusterClient;
+  esDataClient: ElasticsearchClient;
   kibanaStatsCollector: any;
 }
 

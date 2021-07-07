@@ -9,6 +9,8 @@ def label(size) {
       return 'docker && linux && immutable'
     case 's-highmem':
       return 'docker && tests-s'
+    case 'm':
+      return 'docker && linux && immutable && gobld/machineType:n2-standard-8'
     case 'm-highmem':
       return 'docker && linux && immutable && gobld/machineType:n1-highmem-8'
     case 'l':
@@ -71,16 +73,18 @@ def base(Map params, Closure closure) {
     if (config.scm) {
       // Try to clone from Github up to 8 times, waiting 15 secs between attempts
       retryWithDelay(8, 15) {
-        checkout scm
+        kibanaCheckout()
       }
 
       dir("kibana") {
         checkoutInfo = getCheckoutInfo()
 
-        // use `checkoutInfo` as a flag to indicate that we've already reported the pending commit status
-        if (buildState.get('shouldSetCommitStatus') && !buildState.has('checkoutInfo')) {
+        if (!buildState.has('checkoutInfo')) {
           buildState.set('checkoutInfo', checkoutInfo)
-          githubCommitStatus.onStart()
+
+          if (buildState.get('shouldSetCommitStatus')) {
+            githubCommitStatus.onStart()
+          }
         }
       }
 
@@ -99,6 +103,7 @@ def base(Map params, Closure closure) {
       "PR_TARGET_BRANCH=${env.ghprbTargetBranch ?: ''}",
       "PR_AUTHOR=${env.ghprbPullAuthorLogin ?: ''}",
       "TEST_BROWSER_HEADLESS=1",
+      "GIT_COMMIT=${checkoutInfo.commit}",
       "GIT_BRANCH=${checkoutInfo.branch}",
       "TMPDIR=${env.WORKSPACE}/tmp", // For Chrome and anything else that respects it
       "BUILD_TS_REFS_DISABLE=true", // no need to build ts refs in bootstrap

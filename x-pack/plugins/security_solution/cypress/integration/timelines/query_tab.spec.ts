@@ -7,7 +7,13 @@
 
 import { timeline } from '../../objects/timeline';
 
-import { UNLOCKED_ICON, PIN_EVENT, TIMELINE_FILTER, TIMELINE_QUERY } from '../../screens/timeline';
+import {
+  UNLOCKED_ICON,
+  PIN_EVENT,
+  TIMELINE_FILTER,
+  TIMELINE_QUERY,
+  NOTE_CARD_CONTENT,
+} from '../../screens/timeline';
 import { addNoteToTimeline } from '../../tasks/api_calls/notes';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 
@@ -18,37 +24,36 @@ import {
   addFilter,
   closeTimeline,
   openTimelineById,
+  persistNoteToFirstEvent,
   pinFirstEvent,
-  waitForEventsPanelToBeLoaded,
+  refreshTimelinesUntilTimeLinePresent,
 } from '../../tasks/timeline';
 import { waitForTimelinesPanelToBeLoaded } from '../../tasks/timelines';
 
 import { TIMELINES_URL } from '../../urls/navigation';
 
 describe('Timeline query tab', () => {
-  let timelineId: string | null = null;
   before(() => {
     cleanKibana();
     loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
     waitForTimelinesPanelToBeLoaded();
 
     createTimeline(timeline)
-      .then((response) => {
-        timelineId = response.body.data.persistTimeline.timeline.savedObjectId;
-      })
-      .then(() => {
-        const note = timeline.notes;
-        addNoteToTimeline(note, timelineId!).should((response) => {
-          expect(response.status).to.equal(200);
-          waitForTimelinesPanelToBeLoaded();
-          openTimelineById(timelineId!)
-            .click({ force: true })
-            .then(() => {
-              waitForEventsPanelToBeLoaded();
-              pinFirstEvent();
-              addFilter(timeline.filter);
-            });
-        });
+      .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
+      .then((timelineId: string) => {
+        refreshTimelinesUntilTimeLinePresent(timelineId)
+          // This cy.wait is here because we cannot do a pipe on a timeline as that will introduce multiple URL
+          // request responses and indeterminism since on clicks to activates URL's.
+          .then(() => cy.wait(1000))
+          .then(() =>
+            addNoteToTimeline(timeline.notes, timelineId).should((response) =>
+              expect(response.status).to.equal(200)
+            )
+          )
+          .then(() => openTimelineById(timelineId))
+          .then(() => pinFirstEvent())
+          .then(() => persistNoteToFirstEvent('event note'))
+          .then(() => addFilter(timeline.filter));
       });
   });
 
@@ -56,8 +61,13 @@ describe('Timeline query tab', () => {
     after(() => {
       closeTimeline();
     });
+
     it('should contain the right query', () => {
       cy.get(TIMELINE_QUERY).should('have.text', `${timeline.query}`);
+    });
+
+    it('should be able to add event note', () => {
+      cy.get(NOTE_CARD_CONTENT).should('contain', 'event note');
     });
 
     it('should display timeline filter', () => {

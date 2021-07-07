@@ -7,7 +7,7 @@
  */
 
 import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
-import { METRIC_TYPES } from '../../../../common/metric_types';
+import { METRIC_TYPES } from '../../../../common/enums';
 
 export function getSupportedFieldsByMetricType(type) {
   switch (type) {

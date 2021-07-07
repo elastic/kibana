@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { distinctUntilChanged, filter, map, skip, take, takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 import { Action } from '../../../../../../../../src/plugins/ui_actions/public';
 import {
   reactToUiComponent,
@@ -67,7 +69,11 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableContext> {
     }
 
     const templates = createDrilldownTemplatesFromSiblings(embeddable);
-
+    const closed$ = new Subject<true>();
+    const close = () => {
+      closed$.next(true);
+      handle.close();
+    };
     const handle = core.overlays.openFlyout(
       toMountPoint(
         <plugins.uiActionsEnhanced.DrilldownManager
@@ -76,7 +82,7 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableContext> {
           triggers={[...ensureNestedTriggers(embeddable.supportedTriggers()), CONTEXT_MENU_TRIGGER]}
           placeContext={{ embeddable }}
           templates={templates}
-          onClose={() => handle.close()}
+          onClose={close}
         />
       ),
       {
@@ -84,5 +90,24 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableContext> {
         'data-test-subj': 'editDrilldownFlyout',
       }
     );
+
+    // Close flyout on application change.
+    core.application.currentAppId$.pipe(takeUntil(closed$), skip(1), take(1)).subscribe(() => {
+      close();
+    });
+
+    // Close flyout on dashboard switch to "view" mode.
+    embeddable
+      .getInput$()
+      .pipe(
+        takeUntil(closed$),
+        map((input) => input.viewMode),
+        distinctUntilChanged(),
+        filter((mode) => mode !== ViewMode.EDIT),
+        take(1)
+      )
+      .subscribe(() => {
+        close();
+      });
   }
 }

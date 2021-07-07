@@ -10,9 +10,9 @@ import React from 'react';
 
 import { EnrichedDeprecationInfo } from '../../../../../common/types';
 import { GroupByOption } from '../../types';
-import { DeprecationList } from './list';
+import { EsDeprecationList } from './list';
 
-describe('DeprecationList', () => {
+describe('EsDeprecationList', () => {
   describe('group by message', () => {
     const defaultProps = {
       deprecations: [
@@ -23,7 +23,7 @@ describe('DeprecationList', () => {
     };
 
     test('shows simple messages when index field is not present', () => {
-      expect(shallow(<DeprecationList {...defaultProps} />)).toMatchInlineSnapshot(`
+      expect(shallow(<EsDeprecationList {...defaultProps} />)).toMatchInlineSnapshot(`
         <div>
           <SimpleMessageDeprecation
             deprecation={
@@ -33,7 +33,7 @@ describe('DeprecationList', () => {
                 "url": "",
               }
             }
-            key="Issue 1"
+            key="Issue 1-0"
           />
           <SimpleMessageDeprecation
             deprecation={
@@ -43,7 +43,7 @@ describe('DeprecationList', () => {
                 "url": "",
               }
             }
-            key="Issue 1"
+            key="Issue 1-1"
           />
         </div>
       `);
@@ -58,7 +58,7 @@ describe('DeprecationList', () => {
           index: index.toString(),
         })),
       };
-      const wrapper = shallow(<DeprecationList {...props} />);
+      const wrapper = shallow(<EsDeprecationList {...props} />);
       expect(wrapper).toMatchInlineSnapshot(`
         <IndexDeprecation
           deprecation={
@@ -72,18 +72,14 @@ describe('DeprecationList', () => {
           indices={
             Array [
               Object {
-                "blockerForReindexing": undefined,
-                "deprecatedIndexSettings": undefined,
+                "correctiveAction": undefined,
                 "details": undefined,
                 "index": "0",
-                "reindex": false,
               },
               Object {
-                "blockerForReindexing": undefined,
-                "deprecatedIndexSettings": undefined,
+                "correctiveAction": undefined,
                 "details": undefined,
                 "index": "1",
-                "reindex": false,
               },
             ]
           }
@@ -102,7 +98,7 @@ describe('DeprecationList', () => {
     };
 
     test('shows detailed messages', () => {
-      expect(shallow(<DeprecationList {...defaultProps} />)).toMatchInlineSnapshot(`
+      expect(shallow(<EsDeprecationList {...defaultProps} />)).toMatchInlineSnapshot(`
         <div>
           <MessageDeprecation
             deprecation={
@@ -113,7 +109,7 @@ describe('DeprecationList', () => {
                 "url": "",
               }
             }
-            key="Issue 1"
+            key="Issue 1-0"
           />
           <MessageDeprecation
             deprecation={
@@ -124,7 +120,7 @@ describe('DeprecationList', () => {
                 "url": "",
               }
             }
-            key="Issue 2"
+            key="Issue 2-1"
           />
         </div>
       `);

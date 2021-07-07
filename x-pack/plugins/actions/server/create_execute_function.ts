@@ -8,9 +8,10 @@
 import { SavedObjectsClientContract } from '../../../../src/core/server';
 import { TaskManagerStartContract } from '../../task_manager/server';
 import { RawAction, ActionTypeRegistryContract, PreConfiguredAction } from './types';
-import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './saved_objects';
+import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 import { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
 import { isSavedObjectExecutionSource } from './lib';
+import { RelatedSavedObjects } from './lib/related_saved_objects';
 
 interface CreateExecuteFunctionOptions {
   taskManager: TaskManagerStartContract;
@@ -23,6 +24,7 @@ export interface ExecuteOptions extends Pick<ActionExecutorOptions, 'params' | '
   id: string;
   spaceId: string;
   apiKey: string | null;
+  relatedSavedObjects?: RelatedSavedObjects;
 }
 
 export type ExecutionEnqueuer = (
@@ -38,7 +40,7 @@ export function createExecutionEnqueuerFunction({
 }: CreateExecuteFunctionOptions) {
   return async function execute(
     unsecuredSavedObjectsClient: SavedObjectsClientContract,
-    { id, params, spaceId, source, apiKey }: ExecuteOptions
+    { id, params, spaceId, source, apiKey, relatedSavedObjects }: ExecuteOptions
   ) {
     if (!isESOCanEncrypt) {
       throw new Error(
@@ -46,11 +48,17 @@ export function createExecutionEnqueuerFunction({
       );
     }
 
-    const actionTypeId = await getActionTypeId(
+    const { actionTypeId, name, isMissingSecrets } = await getAction(
       unsecuredSavedObjectsClient,
       preconfiguredActions,
       id
     );
+
+    if (isMissingSecrets) {
+      throw new Error(
+        `Unable to execute action because no secrets are defined for the "${name}" connector.`
+      );
+    }
 
     if (!actionTypeRegistry.isActionExecutable(id, actionTypeId, { notifyUsage: true })) {
       actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
@@ -62,6 +70,7 @@ export function createExecutionEnqueuerFunction({
         actionId: id,
         params,
         apiKey,
+        relatedSavedObjects,
       },
       executionSourceAsSavedObjectReferences(source)
     );
@@ -91,18 +100,16 @@ function executionSourceAsSavedObjectReferences(executionSource: ActionExecutorO
     : {};
 }
 
-async function getActionTypeId(
+async function getAction(
   unsecuredSavedObjectsClient: SavedObjectsClientContract,
   preconfiguredActions: PreConfiguredAction[],
   actionId: string
-): Promise<string> {
+): Promise<PreConfiguredAction | RawAction> {
   const pcAction = preconfiguredActions.find((action) => action.id === actionId);
   if (pcAction) {
-    return pcAction.actionTypeId;
+    return pcAction;
   }
 
-  const {
-    attributes: { actionTypeId },
-  } = await unsecuredSavedObjectsClient.get<RawAction>('action', actionId);
-  return actionTypeId;
+  const { attributes } = await unsecuredSavedObjectsClient.get<RawAction>('action', actionId);
+  return attributes;
 }

@@ -14,10 +14,20 @@ import { ActionResultsSummary } from '../../action_results/action_results_summar
 interface ResultTabsProps {
   actionId: string;
   agentIds?: string[];
+  expirationDate: Date;
   isLive?: boolean;
+  startDate?: string;
+  endDate?: string;
 }
 
-const ResultTabsComponent: React.FC<ResultTabsProps> = ({ actionId, agentIds, isLive }) => {
+const ResultTabsComponent: React.FC<ResultTabsProps> = ({
+  actionId,
+  agentIds,
+  expirationDate,
+  endDate,
+  isLive,
+  startDate,
+}) => {
   const tabs = useMemo(
     () => [
       {
@@ -26,7 +36,12 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({ actionId, agentIds, is
         content: (
           <>
             <EuiSpacer />
-            <ActionResultsSummary actionId={actionId} agentIds={agentIds} isLive={isLive} />
+            <ActionResultsSummary
+              expirationDate={expirationDate}
+              actionId={actionId}
+              agentIds={agentIds}
+              isLive={isLive}
+            />
           </>
         ),
       },
@@ -36,12 +51,18 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({ actionId, agentIds, is
         content: (
           <>
             <EuiSpacer />
-            <ResultsTable actionId={actionId} isLive={isLive} />
+            <ResultsTable
+              actionId={actionId}
+              agentIds={agentIds}
+              isLive={isLive}
+              startDate={startDate}
+              endDate={endDate}
+            />
           </>
         ),
       },
     ],
-    [actionId, agentIds, isLive]
+    [actionId, agentIds, endDate, isLive, startDate, expirationDate]
   );
 
   return (

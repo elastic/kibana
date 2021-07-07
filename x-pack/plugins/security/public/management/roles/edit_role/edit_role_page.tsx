@@ -125,7 +125,7 @@ function useIndexPatternsTitles(
         fatalErrors.add(err);
         throw err;
       })
-      .then(setIndexPatternsTitles);
+      .then((titles) => setIndexPatternsTitles(titles.filter(Boolean)));
   }, [fatalErrors, indexPatterns, notifications]);
 
   return indexPatternsTitles;
@@ -374,7 +374,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
 
   const getRoleName = () => {
     return (
-      <EuiPanel>
+      <EuiPanel hasShadow={false} hasBorder={true}>
         <EuiFormRow
           label={
             <FormattedMessage

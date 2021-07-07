@@ -8,7 +8,9 @@
 import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 
+import { docLinksServiceMock } from '../../../../../../../src/core/public/mocks';
 import { setHttpClient } from '../../../app/services/api';
+import { init as initDocumentation } from '../../../app/services/documentation_links';
 import { init as initHttpRequests } from './http_requests';
 
 export const setupEnvironment = () => {
@@ -17,6 +19,7 @@ export const setupEnvironment = () => {
   const client = axios.create({ adapter: axiosXhrAdapter });
   client.interceptors.response.use(({ data }) => data);
   setHttpClient(client);
+  initDocumentation(docLinksServiceMock.createStartContract());
 
   const { server, httpRequestsMockHelpers } = initHttpRequests();
 

@@ -5,19 +5,20 @@
  * 2.0.
  */
 
+import { Language } from '@kbn/securitysolution-io-ts-alerting-types';
+import type {
+  ExceptionListItemSchema,
+  CreateExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { buildExceptionFilter } from '@kbn/securitysolution-list-utils';
 import {
   Filter,
   IIndexPattern,
   buildEsQuery,
   EsQueryConfig,
 } from '../../../../../src/plugins/data/common';
-import {
-  ExceptionListItemSchema,
-  CreateExceptionListItemSchema,
-} from '../../../lists/common/schemas';
 import { ESBoolQuery } from '../typed_json';
-import { buildExceptionFilter } from '../shared_imports';
-import { Query, Language, Index, TimestampOverrideOrUndefined } from './schemas/common/schemas';
+import { Query, Index, TimestampOverrideOrUndefined } from './schemas/common/schemas';
 
 export const getQueryFilter = (
   query: Query,
@@ -120,6 +121,20 @@ export const buildEqlSearchRequest = (
         },
       },
       event_category_field: eventCategoryOverride,
+      fields: [
+        {
+          field: '*',
+          include_unmapped: true,
+        },
+        {
+          field: '@timestamp',
+          // BUG: We have to format @timestamp until this bug is fixed with epoch_millis
+          // https://github.com/elastic/elasticsearch/issues/74582
+          // TODO: Remove epoch and use the same techniques from x-pack/plugins/security_solution/server/lib/detection_engine/signals/build_events_query.ts
+          // where we format both the timestamp and any overrides as ISO8601
+          format: 'epoch_millis',
+        },
+      ],
     },
   };
 };

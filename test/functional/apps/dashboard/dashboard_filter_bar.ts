@@ -20,11 +20,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'dashboard',
+    'discover',
+    'header',
+    'visualize',
+    'timePicker',
+  ]);
 
   describe('dashboard filter bar', () => {
     before(async () => {
-      await esArchiver.load('dashboard/current/kibana');
+      await esArchiver.load('test/functional/fixtures/es_archiver/dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
@@ -174,13 +181,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('are added when a cell magnifying glass is clicked', async function () {
         await dashboardAddPanel.addSavedSearch('Rendering-Test:-saved-search');
         await PageObjects.dashboard.waitForRenderComplete();
-        const documentCell = await dataGrid.getCellElement(1, 3);
-        await documentCell.click();
-        const expandCellContentButton = await documentCell.findByClassName(
-          'euiDataGridRowCell__expandButtonIcon'
-        );
-        await expandCellContentButton.click();
-        await testSubjects.click('filterForButton');
+        const isLegacyDefault = PageObjects.discover.useLegacyTable();
+        if (isLegacyDefault) {
+          await testSubjects.click('docTableCellFilter');
+        } else {
+          const documentCell = await dataGrid.getCellElement(1, 3);
+          await documentCell.click();
+          const expandCellContentButton = await documentCell.findByClassName(
+            'euiDataGridRowCell__expandButtonIcon'
+          );
+          await expandCellContentButton.click();
+          await testSubjects.click('filterForButton');
+        }
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(1);
       });

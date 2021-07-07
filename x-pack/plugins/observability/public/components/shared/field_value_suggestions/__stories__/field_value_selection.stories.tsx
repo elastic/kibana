@@ -6,7 +6,7 @@
  */
 
 import React, { ComponentType, useEffect, useState } from 'react';
-import { IntlProvider } from 'react-intl';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
 import { Observable } from 'rxjs';
 import { CoreStart } from 'src/core/public';
 import { text } from '@storybook/addon-knobs';
@@ -14,6 +14,11 @@ import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_rea
 import { createKibanaReactContext } from '../../../../../../../../src/plugins/kibana_react/public';
 import { FieldValueSelectionProps } from '../types';
 import { FieldValueSelection } from '../field_value_selection';
+
+const values = [
+  { label: 'elastic co frontend', count: 1 },
+  { label: 'apm server', count: 2 },
+];
 
 const KibanaReactContext = createKibanaReactContext(({
   uiSettings: { get: () => {}, get$: () => new Observable() },
@@ -29,9 +34,9 @@ export default {
           <EuiThemeProvider>
             <FieldValueSelection
               label="Service name"
-              values={['elastic co frontend', 'apm server', 'opbean python']}
+              values={values}
               onChange={() => {}}
-              value={''}
+              selectedValue={[]}
               loading={false}
               setQuery={() => {}}
             />
@@ -46,9 +51,9 @@ export function ValuesLoaded() {
   return (
     <FieldValueSelection
       label="Service name"
-      values={['elastic co frontend', 'apm server', 'opbean python']}
+      values={values}
       onChange={() => {}}
-      value={''}
+      selectedValue={[]}
       loading={false}
       setQuery={() => {}}
     />
@@ -59,9 +64,9 @@ export function LoadingState() {
   return (
     <FieldValueSelection
       label="Service name"
-      values={['elastic co frontend', 'apm server', 'opbean python']}
+      values={values}
       onChange={() => {}}
-      value={''}
+      selectedValue={[]}
       loading={true}
       setQuery={() => {}}
     />
@@ -74,7 +79,7 @@ export function EmptyState() {
       label="Service name"
       values={[]}
       onChange={() => {}}
-      value={''}
+      selectedValue={[]}
       loading={false}
       setQuery={() => {}}
     />
@@ -92,9 +97,9 @@ export function SearchState(args: FieldValueSelectionProps) {
   return (
     <FieldValueSelection
       label="Service name"
-      values={['elastic co frontend', 'apm server', 'opbean python']}
+      values={values}
       onChange={() => {}}
-      value={''}
+      selectedValue={[]}
       loading={false}
       setQuery={setQuery}
     />

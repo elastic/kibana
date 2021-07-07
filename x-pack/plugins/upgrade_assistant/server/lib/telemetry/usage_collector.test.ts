@@ -51,6 +51,7 @@ describe('Upgrade Assistant Usage Collector', () => {
                   'ui_open.overview': 10,
                   'ui_open.cluster': 20,
                   'ui_open.indices': 30,
+                  'ui_open.kibana': 15,
                   'ui_reindex.close': 1,
                   'ui_reindex.open': 4,
                   'ui_reindex.start': 2,
@@ -90,6 +91,7 @@ describe('Upgrade Assistant Usage Collector', () => {
           overview: 10,
           cluster: 20,
           indices: 30,
+          kibana: 15,
         },
         ui_reindex: {
           close: 1,

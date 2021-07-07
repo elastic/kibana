@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Schema, SchemaConflicts, IIndexingStatus } from '../../../shared/types';
+import { Schema, SchemaConflicts, IIndexingStatus } from '../../../shared/schema/types';
 import { ApiToken } from '../credentials/types';
 
 export enum EngineTypes {

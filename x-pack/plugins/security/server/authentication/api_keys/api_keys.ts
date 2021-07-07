@@ -30,15 +30,21 @@ export interface CreateAPIKeyParams {
   name: string;
   role_descriptors: Record<string, any>;
   expiration?: string;
+  metadata?: Record<string, any>;
 }
 
-interface GrantAPIKeyParams {
-  api_key: CreateAPIKeyParams;
-  grant_type: 'password' | 'access_token';
-  username?: string;
-  password?: string;
-  access_token?: string;
-}
+type GrantAPIKeyParams =
+  | {
+      api_key: CreateAPIKeyParams;
+      grant_type: 'password';
+      username: string;
+      password: string;
+    }
+  | {
+      api_key: CreateAPIKeyParams;
+      grant_type: 'access_token';
+      access_token: string;
+    };
 
 /**
  * Represents the params for invalidating multiple API keys
@@ -218,7 +224,7 @@ export class APIKeys {
     try {
       result = (
         await this.clusterClient.asInternalUser.security.grantApiKey({
-          // @ts-expect-error @elastic/elasticsearch api_key.role_descriptors
+          // @ts-expect-error @elastic/elasticsearch api_key.role_descriptors  doesn't support `Record<string, any>`
           body: params,
         })
       ).body;

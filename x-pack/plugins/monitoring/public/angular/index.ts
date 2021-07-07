@@ -10,10 +10,10 @@ import { uiRoutes } from './helpers/routes';
 import { Legacy } from '../legacy_shims';
 import { configureAppAngularModule } from '../../../../../src/plugins/kibana_legacy/public';
 import { localAppModule, appModuleName } from './app_modules';
+import { APP_WRAPPER_CLASS } from '../../../../../src/core/public';
 
 import { MonitoringStartPluginDependencies } from '../types';
 
-const APP_WRAPPER_CLASS = 'monApplicationWrapper';
 export class AngularApp {
   private injector?: angular.auto.IInjectorService;
 
@@ -29,6 +29,7 @@ export class AngularApp {
       triggersActionsUi,
       usageCollection,
       kibanaLegacy,
+      appMountParameters,
     } = deps;
     const app: IModule = localAppModule(deps);
     app.run(($injector: angular.auto.IInjectorService) => {
@@ -45,6 +46,7 @@ export class AngularApp {
           kibanaLegacy,
           triggersActionsUi,
           usageCollection,
+          appMountParameters,
         },
         this.injector
       );

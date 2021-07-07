@@ -32,7 +32,6 @@
           "kql-telemetry": "d12a98a6f19a2d273696597547e064ee",
           "lens": "21c3ea0763beb1ecb0162529706b88c5",
           "lens-ui-telemetry": "509bfa5978586998e05f9e303c07a327",
-          "map": "23d7aa4a720d4938ccde3983f87bd58d",
           "maps-telemetry": "268da3a48066123fc5baf35abaa55014",
           "metrics-explorer-view": "53c5365793677328df0ccb6138bf3cdd",
           "migrationVersion": "4a1746014a75ade3a714e1db5763276f",
@@ -1801,7 +1800,8 @@
         "map": {
           "properties": {
             "bounds": {
-              "type": "geo_shape"
+              "dynamic": false,
+              "properties": {}
             },
             "description": {
               "type": "text"

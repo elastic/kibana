@@ -7,7 +7,7 @@
 
 export { AnalyticsCards } from './analytics_cards';
 export { AnalyticsChart } from './analytics_chart';
-export { AnalyticsHeader } from './analytics_header';
+export { AnalyticsFilters } from './analytics_filters';
 export { AnalyticsSection } from './analytics_section';
 export { AnalyticsSearch } from './analytics_search';
 export { AnalyticsTable, RecentQueriesTable, QueryClicksTable } from './analytics_tables';

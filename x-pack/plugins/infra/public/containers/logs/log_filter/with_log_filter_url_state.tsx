@@ -5,43 +5,57 @@
  * 2.0.
  */
 
+import * as rt from 'io-ts';
 import React, { useContext } from 'react';
-import { LogFilterState, LogFilterStateParams } from './log_filter_state';
+import { Query } from '../../../../../../../src/plugins/data/public';
 import { replaceStateKeyInQueryString, UrlStateContainer } from '../../../utils/url_state';
-
-type LogFilterUrlState = LogFilterStateParams['filterQueryAsKuery'];
+import { LogFilterState } from './log_filter_state';
 
 export const WithLogFilterUrlState: React.FC = () => {
-  const { filterQueryAsKuery, applyLogFilterQuery } = useContext(LogFilterState.Context);
+  const { filterQuery, applyLogFilterQuery } = useContext(LogFilterState.Context);
+
   return (
     <UrlStateContainer
-      urlState={filterQueryAsKuery}
+      urlState={filterQuery?.originalQuery}
       urlStateKey="logFilter"
       mapToUrlState={mapToFilterQuery}
       onChange={(urlState) => {
         if (urlState) {
-          applyLogFilterQuery(urlState.expression);
+          applyLogFilterQuery(urlState);
         }
       }}
       onInitialize={(urlState) => {
         if (urlState) {
-          applyLogFilterQuery(urlState.expression);
+          applyLogFilterQuery(urlState);
         }
       }}
     />
   );
 };
 
-const mapToFilterQuery = (value: any): LogFilterUrlState | undefined =>
-  value?.kind === 'kuery' && typeof value.expression === 'string'
-    ? {
-        kind: value.kind,
-        expression: value.expression,
-      }
-    : undefined;
+const mapToFilterQuery = (value: any): Query | undefined => {
+  if (legacyFilterQueryUrlStateRT.is(value)) {
+    // migrate old url state
+    return {
+      language: value.kind,
+      query: value.expression,
+    };
+  } else if (filterQueryUrlStateRT.is(value)) {
+    return value;
+  } else {
+    return undefined;
+  }
+};
 
-export const replaceLogFilterInQueryString = (expression: string) =>
-  replaceStateKeyInQueryString<LogFilterUrlState>('logFilter', {
-    kind: 'kuery',
-    expression,
-  });
+export const replaceLogFilterInQueryString = (query: Query) =>
+  replaceStateKeyInQueryString<Query>('logFilter', query);
+
+const filterQueryUrlStateRT = rt.type({
+  language: rt.string,
+  query: rt.string,
+});
+
+const legacyFilterQueryUrlStateRT = rt.type({
+  kind: rt.literal('kuery'),
+  expression: rt.string,
+});

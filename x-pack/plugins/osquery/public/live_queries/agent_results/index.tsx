@@ -22,7 +22,7 @@ const QueryAgentResultsComponent = () => {
         {data?.actionDetails._source?.data?.query}
       </EuiCodeBlock>
       <EuiSpacer />
-      <ResultsTable actionId={actionId} agentId={agentId} />
+      <ResultsTable actionId={actionId} selectedAgent={agentId} />
     </>
   );
 };

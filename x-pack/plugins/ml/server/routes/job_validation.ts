@@ -80,8 +80,7 @@ export function jobValidationRoutes({ router, mlLicense, routeGuard }: RouteInit
         const resp = await estimateBucketSpanFactory(client)(request.body)
           // this catch gets triggered when the estimation code runs without error
           // but isn't able to come up with a bucket span estimation.
-          // this doesn't return a HTTP error but an object with an error message
-          // which the client is then handling. triggering a HTTP error would be
+          // this doesn't return a HTTP error but an object with an error message a HTTP error would be
           // too severe for this case.
           .catch((error: any) => {
             errorResp = {
@@ -156,6 +155,7 @@ export function jobValidationRoutes({ router, mlLicense, routeGuard }: RouteInit
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
+        // @ts-expect-error datafeed config is incorrect
         const resp = await validateCardinality(client, request.body);
 
         return response.ok({

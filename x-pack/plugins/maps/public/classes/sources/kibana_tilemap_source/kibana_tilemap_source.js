@@ -53,11 +53,13 @@ export class KibanaTilemapSource extends AbstractTMSSource {
     return tilemap.url;
   }
 
-  async getAttributions() {
-    const tilemap = getKibanaTileMap();
-    const markdown = _.get(tilemap, 'options.attribution', '');
-    const objArr = this.convertMarkdownLinkToObjectArr(markdown);
-    return objArr;
+  getAttributionProvider() {
+    return async () => {
+      const tilemap = getKibanaTileMap();
+      const markdown = _.get(tilemap, 'options.attribution', '');
+      const objArr = this.convertMarkdownLinkToObjectArr(markdown);
+      return objArr;
+    };
   }
 
   async getDisplayName() {

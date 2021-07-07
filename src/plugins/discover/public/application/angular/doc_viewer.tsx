@@ -9,9 +9,10 @@
 import React from 'react';
 import { DocViewer } from '../components/doc_viewer/doc_viewer';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createDocViewerDirective(reactDirective: any) {
   return reactDirective(
-    (props: any) => {
+    (props: React.ComponentProps<typeof DocViewer>) => {
       return <DocViewer {...props} />;
     },
     [

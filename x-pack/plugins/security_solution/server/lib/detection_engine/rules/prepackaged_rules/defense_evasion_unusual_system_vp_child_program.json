@@ -9,10 +9,10 @@
     "logs-endpoint.events.*",
     "logs-windows.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License v2",
   "name": "Unusual Child Process from a System Virtual Process",
-  "query": "event.category:process and event.type:(start or process_started) and process.parent.pid:4 and not process.executable:(Registry or MemCompression or \"C:\\Windows\\System32\\smss.exe\")",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.parent.pid == 4 and\n  not process.executable : (\"Registry\", \"MemCompression\", \"?:\\\\Windows\\\\System32\\\\smss.exe\")\n",
   "risk_score": 73,
   "rule_id": "de9bd7e0-49e9-4e92-a64d-53ade2e66af1",
   "severity": "high",
@@ -41,6 +41,6 @@
     }
   ],
   "timestamp_override": "event.ingested",
-  "type": "query",
-  "version": 3
+  "type": "eql",
+  "version": 4
 }

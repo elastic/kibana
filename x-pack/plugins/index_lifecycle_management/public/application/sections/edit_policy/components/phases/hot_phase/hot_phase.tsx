@@ -167,7 +167,7 @@ export const HotPhase: FunctionComponent = () => {
         <>
           {<ForcemergeField phase={'hot'} />}
           <ShrinkField phase={'hot'} />
-          {license.canUseSearchableSnapshot() && <SearchableSnapshotField phase={'hot'} />}
+          {license.canUseSearchableSnapshot() && <SearchableSnapshotField phase="hot" />}
           <ReadonlyField phase={'hot'} />
         </>
       )}

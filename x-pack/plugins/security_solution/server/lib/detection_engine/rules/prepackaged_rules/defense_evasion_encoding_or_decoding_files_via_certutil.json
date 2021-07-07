@@ -9,10 +9,10 @@
     "logs-endpoint.events.*",
     "logs-windows.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License v2",
   "name": "Encoding or Decoding Files via CertUtil",
-  "query": "event.category:process and event.type:(start or process_started) and process.name:certutil.exe and process.args:(-decode or -encode or /decode or /encode)",
+  "query": "process where event.type == \"start\" and\n  (process.name : \"certutil.exe\" or process.pe.original_file_name == \"CertUtil.exe\") and \n  process.args : (\"?decode\", \"?encode\")\n",
   "risk_score": 47,
   "rule_id": "fd70c98a-c410-42dc-a2e3-761c71848acf",
   "severity": "medium",
@@ -41,6 +41,6 @@
     }
   ],
   "timestamp_override": "event.ingested",
-  "type": "query",
-  "version": 7
+  "type": "eql",
+  "version": 8
 }

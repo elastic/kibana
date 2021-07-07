@@ -9,6 +9,8 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+type TransformRowActionName = 'Clone' | 'Delete' | 'Edit' | 'Start' | 'Stop' | 'Discover';
+
 export function TransformTableProvider({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -238,6 +240,7 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
 
       await testSubjects.existOrFail('transformActionClone');
       await testSubjects.existOrFail('transformActionDelete');
+      await testSubjects.existOrFail('transformActionDiscover');
       await testSubjects.existOrFail('transformActionEdit');
 
       if (isTransformRunning) {
@@ -251,7 +254,7 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
 
     public async assertTransformRowActionEnabled(
       transformId: string,
-      action: 'Delete' | 'Start' | 'Stop' | 'Clone' | 'Edit',
+      action: TransformRowActionName,
       expectedValue: boolean
     ) {
       const selector = `transformAction${action}`;
@@ -274,7 +277,7 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
 
     public async clickTransformRowActionWithRetry(
       transformId: string,
-      action: 'Delete' | 'Start' | 'Stop' | 'Clone' | 'Edit'
+      action: TransformRowActionName
     ) {
       await retry.tryForTime(30 * 1000, async () => {
         await browser.pressKeys(browser.keys.ESCAPE);
@@ -285,7 +288,7 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       });
     }
 
-    public async clickTransformRowAction(action: string) {
+    public async clickTransformRowAction(action: TransformRowActionName) {
       await testSubjects.click(`transformAction${action}`);
     }
 

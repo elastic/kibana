@@ -6,13 +6,11 @@
  */
 
 import { existsSync } from 'fs';
-import { resolve as resolvePath } from 'path';
 import { BrowserDownload, chromium } from '../';
 import { GenericLevelLogger } from '../../lib/level_logger';
 import { md5 } from './checksum';
 import { clean } from './clean';
 import { download } from './download';
-import { asyncMap } from './util';
 
 /**
  * Check for the downloaded archive of each requested browser type and
@@ -31,39 +29,46 @@ export async function ensureBrowserDownloaded(logger: GenericLevelLogger) {
  * @return {Promise<undefined>}
  */
 async function ensureDownloaded(browsers: BrowserDownload[], logger: GenericLevelLogger) {
-  await asyncMap(browsers, async (browser) => {
-    const { archivesPath } = browser.paths;
+  await Promise.all(
+    browsers.map(async ({ paths: pSet }) => {
+      await clean(pSet.archivesPath, pSet.getAllArchiveFilenames(), logger);
 
-    await clean(
-      archivesPath,
-      browser.paths.packages.map((p) => resolvePath(archivesPath, p.archiveFilename)),
-      logger
-    );
+      const invalidChecksums: string[] = [];
+      await Promise.all(
+        pSet.packages.map(async (p) => {
+          const { archiveFilename, archiveChecksum } = p;
+          if (archiveFilename && archiveChecksum) {
+            const path = pSet.resolvePath(p);
 
-    const invalidChecksums: string[] = [];
-    await asyncMap(browser.paths.packages, async ({ archiveFilename, archiveChecksum }) => {
-      const url = `${browser.paths.baseUrl}${archiveFilename}`;
-      const path = resolvePath(archivesPath, archiveFilename);
+            if (existsSync(path) && (await md5(path)) === archiveChecksum) {
+              logger.debug(`Browser archive exists in ${path}`);
+              return;
+            }
 
-      if (existsSync(path) && (await md5(path)) === archiveChecksum) {
-        logger.debug(`Browser archive exists in ${path}`);
-        return;
-      }
-
-      const downloadedChecksum = await download(url, path, logger);
-      if (downloadedChecksum !== archiveChecksum) {
-        invalidChecksums.push(`${url} => ${path}`);
-      }
-    });
-
-    if (invalidChecksums.length) {
-      const err = new Error(
-        `Error downloading browsers, checksums incorrect for:\n    - ${invalidChecksums.join(
-          '\n    - '
-        )}`
+            const url = pSet.getDownloadUrl(p);
+            try {
+              const downloadedChecksum = await download(url, path, logger);
+              if (downloadedChecksum !== archiveChecksum) {
+                invalidChecksums.push(`${url} => ${path}`);
+              }
+            } catch (err) {
+              const message = new Error(`Failed to download ${url}`);
+              logger.error(err);
+              throw message;
+            }
+          }
+        })
       );
-      logger.error(err);
-      throw err;
-    }
-  });
+
+      if (invalidChecksums.length) {
+        const err = new Error(
+          `Error downloading browsers, checksums incorrect for:\n    - ${invalidChecksums.join(
+            '\n    - '
+          )}`
+        );
+        logger.error(err);
+        throw err;
+      }
+    })
+  );
 }

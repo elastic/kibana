@@ -6,14 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React, { ReactNode, Suspense } from 'react';
+import React, { ReactNode, Suspense, lazy } from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import classNames from 'classnames';
-import { VisualizationNoResults } from './visualization_noresults';
-import { VisualizationError } from './visualization_error';
+
 import { IInterpreterRenderHandlers } from '../../../expressions/common';
 
-interface VisualizationContainerProps {
+export interface VisualizationContainerProps {
   'data-test-subj'?: string;
   className?: string;
   children: ReactNode;
@@ -21,6 +20,9 @@ interface VisualizationContainerProps {
   showNoResult?: boolean;
   error?: string;
 }
+
+const VisualizationNoResults = lazy(() => import('./visualization_noresults'));
+const VisualizationError = lazy(() => import('./visualization_error'));
 
 export const VisualizationContainer = ({
   'data-test-subj': dataTestSubj = '',

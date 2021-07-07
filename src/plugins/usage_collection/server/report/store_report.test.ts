@@ -118,7 +118,7 @@ describe('store_report', () => {
     expect(storeApplicationUsageMock).toHaveBeenCalledTimes(1);
     expect(storeApplicationUsageMock).toHaveBeenCalledWith(
       repository,
-      Object.values(report.application_usage as Record<string, any>),
+      Object.values(report.application_usage!),
       expect.any(Date)
     );
   });

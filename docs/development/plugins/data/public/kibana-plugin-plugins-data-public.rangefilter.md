@@ -12,7 +12,7 @@ export declare type RangeFilter = Filter & EsRangeFilter & {
     script?: {
         script: {
             params: any;
-            lang: string;
+            lang: estypes.ScriptLanguage;
             source: any;
         };
     };

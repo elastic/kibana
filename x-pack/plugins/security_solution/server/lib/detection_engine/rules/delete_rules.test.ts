@@ -5,138 +5,74 @@
  * 2.0.
  */
 
+import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
 import { alertsClientMock } from '../../../../../alerting/server/mocks';
+import { ruleStatusSavedObjectsClientMock } from '../signals/__mocks__/rule_status_saved_objects_client.mock';
 import { deleteRules } from './delete_rules';
-import { readRules } from './read_rules';
-jest.mock('./read_rules');
+import { deleteNotifications } from '../notifications/delete_notifications';
+import { deleteRuleActionsSavedObject } from '../rule_actions/delete_rule_actions_saved_object';
+import { SavedObjectsFindResult } from '../../../../../../../src/core/server';
+import { IRuleStatusSOAttributes } from './types';
+
+jest.mock('../notifications/delete_notifications');
+jest.mock('../rule_actions/delete_rule_actions_saved_object');
 
 describe('deleteRules', () => {
   let alertsClient: ReturnType<typeof alertsClientMock.create>;
-  const notificationId = 'notification-52128c15-0d1b-4716-a4c5-46997ac7f3bd';
-  const ruleId = 'rule-04128c15-0d1b-4716-a4c5-46997ac7f3bd';
+  let ruleStatusClient: ReturnType<typeof ruleStatusSavedObjectsClientMock.create>;
+  let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
 
   beforeEach(() => {
     alertsClient = alertsClientMock.create();
+    savedObjectsClient = savedObjectsClientMock.create();
+    ruleStatusClient = ruleStatusSavedObjectsClientMock.create();
   });
 
-  it('should return null if notification was not found', async () => {
-    (readRules as jest.Mock).mockResolvedValue(null);
-
-    const result = await deleteRules({
-      alertsClient,
-      id: notificationId,
-      ruleId,
-    });
-
-    expect(result).toBe(null);
-  });
-
-  it('should call alertsClient.delete if notification was found', async () => {
-    (readRules as jest.Mock).mockResolvedValue({
-      id: notificationId,
-    });
-
-    const result = await deleteRules({
-      alertsClient,
-      id: notificationId,
-      ruleId,
-    });
-
-    expect(alertsClient.delete).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: notificationId,
-      })
-    );
-    expect(result).toEqual({ id: notificationId });
-  });
-
-  it('should call alertsClient.delete if ruleId was undefined', async () => {
-    (readRules as jest.Mock).mockResolvedValue({
-      id: null,
-    });
-
-    const result = await deleteRules({
-      alertsClient,
-      id: notificationId,
-      ruleId: undefined,
-    });
-
-    expect(alertsClient.delete).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: notificationId,
-      })
-    );
-    expect(result).toEqual({ id: null });
-  });
-
-  it('should return null if alertsClient.delete rejects with 404 if ruleId was undefined', async () => {
-    (readRules as jest.Mock).mockResolvedValue({
-      id: null,
-    });
-
-    alertsClient.delete.mockRejectedValue({
-      output: {
-        statusCode: 404,
+  it('should delete the rule along with its notifications, actions, and statuses', async () => {
+    const ruleStatus: SavedObjectsFindResult<IRuleStatusSOAttributes> = {
+      id: 'statusId',
+      type: '',
+      references: [],
+      attributes: {
+        alertId: 'alertId',
+        statusDate: '',
+        lastFailureAt: null,
+        lastFailureMessage: null,
+        lastSuccessAt: null,
+        lastSuccessMessage: null,
+        status: null,
+        lastLookBackDate: null,
+        gap: null,
+        bulkCreateTimeDurations: null,
+        searchAfterTimeDurations: null,
       },
-    });
+      score: 0,
+    };
 
-    const result = await deleteRules({
+    const rule = {
       alertsClient,
-      id: notificationId,
-      ruleId: undefined,
-    });
-
-    expect(alertsClient.delete).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: notificationId,
-      })
-    );
-    expect(result).toEqual(null);
-  });
-
-  it('should return error object if alertsClient.delete rejects with status different than 404 and if ruleId was undefined', async () => {
-    (readRules as jest.Mock).mockResolvedValue({
-      id: null,
-    });
-
-    const errorObject = {
-      output: {
-        statusCode: 500,
+      savedObjectsClient,
+      ruleStatusClient,
+      id: 'ruleId',
+      ruleStatuses: {
+        total: 0,
+        per_page: 0,
+        page: 0,
+        saved_objects: [ruleStatus],
       },
     };
 
-    alertsClient.delete.mockRejectedValue(errorObject);
+    await deleteRules(rule);
 
-    let errorResult;
-    try {
-      await deleteRules({
-        alertsClient,
-        id: notificationId,
-        ruleId: undefined,
-      });
-    } catch (error) {
-      errorResult = error;
-    }
-
-    expect(alertsClient.delete).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: notificationId,
-      })
-    );
-    expect(errorResult).toEqual(errorObject);
-  });
-
-  it('should return null if ruleId and id was undefined', async () => {
-    (readRules as jest.Mock).mockResolvedValue({
-      id: null,
+    expect(alertsClient.delete).toHaveBeenCalledWith({ id: rule.id });
+    expect(deleteNotifications).toHaveBeenCalledWith({
+      ruleAlertId: rule.id,
+      alertsClient: expect.any(Object),
     });
-
-    const result = await deleteRules({
-      alertsClient,
-      id: undefined,
-      ruleId: undefined,
+    expect(deleteRuleActionsSavedObject).toHaveBeenCalledWith({
+      ruleAlertId: rule.id,
+      savedObjectsClient: expect.any(Object),
     });
-
-    expect(result).toEqual(null);
+    expect(ruleStatusClient.delete).toHaveBeenCalledWith(ruleStatus.id);
   });
 });

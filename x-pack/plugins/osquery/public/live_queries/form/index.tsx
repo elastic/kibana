@@ -5,33 +5,46 @@
  * 2.0.
  */
 
-import { EuiButton, EuiSteps, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiSteps,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useMutation } from 'react-query';
 
-import { UseField, Form, FormData, useForm, useFormData } from '../../shared_imports';
+import { UseField, Form, FormData, useForm, useFormData, FIELD_TYPES } from '../../shared_imports';
 import { AgentsTableField } from './agents_table_field';
 import { LiveQueryQueryField } from './live_query_query_field';
 import { useKibana } from '../../common/lib/kibana';
-import { ResultTabs } from '../../queries/edit/tabs';
+import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
+import { queryFieldValidation } from '../../common/validations';
+import { fieldValidators } from '../../shared_imports';
+import { SavedQueryFlyout } from '../../saved_queries';
+import { useErrorToast } from '../../common/hooks/use_error_toast';
 
 const FORM_ID = 'liveQueryForm';
 
+export const MAX_QUERY_LENGTH = 2000;
+
 interface LiveQueryFormProps {
   defaultValue?: Partial<FormData> | undefined;
-  onSubmit?: (payload: Record<string, string>) => Promise<void>;
   onSuccess?: () => void;
 }
 
-const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
-  defaultValue,
-  // onSubmit,
-  onSuccess,
-}) => {
+const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({ defaultValue, onSuccess }) => {
   const { http } = useKibana().services;
+  const [showSavedQueryFlyout, setShowSavedQueryFlyout] = useState(false);
+  const setErrorToast = useErrorToast();
+
+  const handleShowSaveQueryFlout = useCallback(() => setShowSavedQueryFlyout(true), []);
+  const handleCloseSaveQueryFlout = useCallback(() => setShowSavedQueryFlyout(false), []);
 
   const {
     data,
@@ -46,13 +59,41 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         body: JSON.stringify(payload),
       }),
     {
-      onSuccess,
+      onSuccess: () => {
+        setErrorToast();
+        if (onSuccess) {
+          onSuccess();
+        }
+      },
+      onError: (error) => {
+        setErrorToast(error);
+      },
     }
   );
 
+  const expirationDate = useMemo(() => new Date(data?.actions[0].expiration), [data?.actions]);
+
+  const formSchema = {
+    query: {
+      type: FIELD_TYPES.TEXT,
+      validations: [
+        {
+          validator: fieldValidators.maxLengthField({
+            length: MAX_QUERY_LENGTH,
+            message: i18n.translate('xpack.osquery.liveQuery.queryForm.largeQueryError', {
+              defaultMessage: 'Query is too large (max {maxLength} characters)',
+              values: { maxLength: MAX_QUERY_LENGTH },
+            }),
+          }),
+        },
+        { validator: queryFieldValidation },
+      ],
+    },
+  };
+
   const { form } = useForm({
     id: FORM_ID,
-    // schema: formSchema,
+    schema: formSchema,
     onSubmit: (payload) => {
       return mutateAsync(payload);
     },
@@ -60,10 +101,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       stripEmptyFields: false,
     },
     defaultValue: defaultValue ?? {
-      query: {
-        id: null,
-        query: '',
-      },
+      query: '',
     },
   });
 
@@ -85,16 +123,16 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     [agentSelection]
   );
 
-  const queryValueProvided = useMemo(() => !!query?.query?.length, [query]);
+  const queryValueProvided = useMemo(() => !!query?.length, [query]);
 
   const queryStatus = useMemo(() => {
     if (!agentSelected) return 'disabled';
-    if (isError) return 'danger';
+    if (isError || !form.getFields().query.isValid) return 'danger';
     if (isLoading) return 'loading';
     if (isSuccess) return 'complete';
 
     return 'incomplete';
-  }, [agentSelected, isError, isLoading, isSuccess]);
+  }, [agentSelected, isError, isLoading, isSuccess, form]);
 
   const resultsStatus = useMemo(() => (queryStatus === 'complete' ? 'incomplete' : 'disabled'), [
     queryStatus,
@@ -106,6 +144,8 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     }),
     [queryStatus]
   );
+
+  const flyoutFormDefaultValue = useMemo(() => ({ query }), [query]);
 
   const formSteps: EuiContainedStepProps[] = useMemo(
     () => [
@@ -130,6 +170,17 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
             <EuiSpacer />
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  disabled={!agentSelected || !queryValueProvided || resultsStatus === 'disabled'}
+                  onClick={handleShowSaveQueryFlout}
+                >
+                  <FormattedMessage
+                    id="xpack.osquery.liveQueryForm.form.saveForLaterButtonLabel"
+                    defaultMessage="Save for later"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <EuiButton disabled={!agentSelected || !queryValueProvided} onClick={submit}>
                   <FormattedMessage
                     id="xpack.osquery.liveQueryForm.form.submitButtonLabel"
@@ -147,7 +198,12 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           defaultMessage: 'Check results',
         }),
         children: actionId ? (
-          <ResultTabs actionId={actionId} agentIds={agentIds} isLive={true} />
+          <ResultTabs
+            actionId={actionId}
+            expirationDate={expirationDate}
+            agentIds={agentIds}
+            isLive={true}
+          />
         ) : null,
         status: resultsStatus,
       },
@@ -156,18 +212,28 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       actionId,
       agentIds,
       agentSelected,
+      handleShowSaveQueryFlout,
       queryComponentProps,
       queryStatus,
       queryValueProvided,
+      expirationDate,
       resultsStatus,
       submit,
     ]
   );
 
   return (
-    <Form form={form}>
-      <EuiSteps steps={formSteps} />
-    </Form>
+    <>
+      <Form form={form}>
+        <EuiSteps steps={formSteps} />
+      </Form>
+      {showSavedQueryFlyout ? (
+        <SavedQueryFlyout
+          onClose={handleCloseSaveQueryFlout}
+          defaultValue={flyoutFormDefaultValue}
+        />
+      ) : null}
+    </>
   );
 };
 

@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import React, { ReactElement } from 'react';
-import { FeatureIdentifier, Map as MbMap } from 'mapbox-gl';
+import { FeatureIdentifier, Map as MbMap } from '@kbn/mapbox-gl';
 import { FeatureCollection } from 'geojson';
 import { StyleProperties, VectorStyleEditor } from './components/vector_style_editor';
 import { getDefaultStaticProperties, LINE_STYLES, POLYGON_STYLES } from './vector_style_defaults';

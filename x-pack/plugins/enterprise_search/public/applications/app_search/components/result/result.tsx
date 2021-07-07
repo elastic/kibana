@@ -15,7 +15,7 @@ import { EuiPanel, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { KibanaLogic } from '../../../shared/kibana';
-import { Schema } from '../../../shared/types';
+import { Schema } from '../../../shared/schema/types';
 
 import { ENGINE_DOCUMENT_DETAIL_PATH } from '../../routes';
 import { generateEncodedPath } from '../../utils/encode_path_params';

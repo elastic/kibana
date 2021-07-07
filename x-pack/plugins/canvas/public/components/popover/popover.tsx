@@ -86,7 +86,7 @@ export class Popover extends Component<Props, State> {
       return button(handleClick);
     };
 
-    const appWrapper = document.querySelector('.app-wrapper');
+    const appWrapper = document.querySelector('.kbnAppWrapper');
     const EuiPopoverAny = (EuiPopover as any) as React.FC<any>;
 
     return (

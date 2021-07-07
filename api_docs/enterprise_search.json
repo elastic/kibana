@@ -15,32 +15,31 @@
     "enums": [],
     "misc": [
       {
+        "parentPluginId": "enterpriseSearch",
         "id": "def-server.ConfigType",
         "type": "Type",
-        "label": "ConfigType",
         "tags": [],
+        "label": "ConfigType",
         "description": [],
+        "signature": [
+          "{ readonly host?: string | undefined; readonly enabled: boolean; readonly ssl: Readonly<{ certificateAuthorities?: string | string[] | undefined; } & { verificationMode: \"none\" | \"certificate\" | \"full\"; }>; readonly accessCheckTimeout: number; readonly accessCheckTimeoutWarning: number; }"
+        ],
         "source": {
           "path": "x-pack/plugins/enterprise_search/server/index.ts",
-          "lineNumber": 24
+          "lineNumber": 33
         },
-        "signature": [
-          "{ readonly host?: string | undefined; readonly enabled: boolean; readonly accessCheckTimeout: number; readonly accessCheckTimeoutWarning: number; }"
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "objects": [
       {
-        "tags": [],
+        "parentPluginId": "enterpriseSearch",
         "id": "def-server.configSchema",
         "type": "Object",
+        "tags": [],
         "label": "configSchema",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/enterprise_search/server/index.ts",
-          "lineNumber": 17
-        },
         "signature": [
           "ObjectType",
           "<{ host: ",
@@ -50,8 +49,20 @@
           "<boolean>; accessCheckTimeout: ",
           "Type",
           "<number>; accessCheckTimeoutWarning: ",
-          "Type"
+          "Type",
+          "<number>; ssl: ",
+          "ObjectType",
+          "<{ certificateAuthorities: ",
+          "Type",
+          "<string | string[] | undefined>; verificationMode: ",
+          "Type",
+          "<\"none\" | \"certificate\" | \"full\">; }>; }>"
         ],
+        "source": {
+          "path": "x-pack/plugins/enterprise_search/server/index.ts",
+          "lineNumber": 17
+        },
+        "deprecated": false,
         "initialIsOpen": false
       }
     ]

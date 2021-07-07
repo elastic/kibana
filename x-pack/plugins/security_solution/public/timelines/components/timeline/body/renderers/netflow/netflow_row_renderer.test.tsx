@@ -26,6 +26,8 @@ export const justIdAndTimestamp: Ecs = {
   timestamp: '2018-11-12T19:03:25.936Z',
 };
 
+jest.mock('../../../../../../common/lib/kibana');
+
 jest.mock('../../../../../../common/components/link_to');
 
 describe('netflowRowRenderer', () => {

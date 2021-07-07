@@ -48,6 +48,7 @@
 
     "ResultsService",
     "GetAnomaliesTableData",
+    "GetDatafeedResultsChartData",
     "GetCategoryDefinition",
     "GetMaxAnomalyScore",
     "GetCategoryExamples",
@@ -120,7 +121,7 @@
     "JobAuditMessages",
     "GetJobAuditMessages",
     "GetAllJobAuditMessages",
-
+    "ClearJobAuditMessages",
     "JobValidation",
     "EstimateBucketSpan",
     "CalculateModelMemoryLimit",
@@ -147,8 +148,7 @@
     "SavedObjectsStatus",
     "SyncJobSavedObjects",
     "InitializeJobSavedObjects",
-    "AssignJobsToSpaces",
-    "RemoveJobsFromSpaces",
+    "UpdateJobsSpaces",
     "RemoveJobsFromCurrentSpace",
     "JobsSpaces",
     "CanDeleteJob",

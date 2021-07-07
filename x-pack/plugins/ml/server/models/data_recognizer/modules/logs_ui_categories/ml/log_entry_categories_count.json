@@ -22,7 +22,7 @@
     ],
     "per_partition_categorization": {
       "enabled": true,
-      "stop_on_warn": false
+      "stop_on_warn": true
     }
   },
   "analysis_limits": {
@@ -38,6 +38,6 @@
   },
   "custom_settings": {
     "created_by": "ml-module-logs-ui-categories",
-    "job_revision": 1
+    "job_revision": 2
   }
 }

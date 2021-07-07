@@ -5,18 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import './index.scss';
-
-import {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  ApplicationStart,
-  SavedObjectsClientContract,
-} from '../../../core/public';
-import { TypesService, TypesSetup, TypesStart } from './vis_types';
 import {
   setUISettings,
   setTypes,
@@ -42,27 +30,42 @@ import {
   VisualizeEmbeddableFactory,
   createVisEmbeddableFromObject,
 } from './embeddable';
-import { ExpressionsSetup, ExpressionsStart } from '../../expressions/public';
-import { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
+import { TypesService } from './vis_types/types_service';
 import { range as rangeExpressionFunction } from './expression_functions/range';
 import { visDimension as visDimensionExpressionFunction } from './expression_functions/vis_dimension';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../plugins/data/public';
-import {
-  Setup as InspectorSetup,
-  Start as InspectorStart,
-} from '../../../plugins/inspector/public';
-import { UsageCollectionSetup } from '../../usage_collection/public';
+
 import { createStartServicesGetter, StartServicesGetter } from '../../kibana_utils/public';
 import { createSavedVisLoader, SavedVisualizationsLoader } from './saved_visualizations';
-import { SerializedVis, Vis } from './vis';
+import type { SerializedVis, Vis } from './vis';
 import { showNewVisModal } from './wizard';
-import { UiActionsStart } from '../../ui_actions/public';
+
 import {
   convertFromSerializedVis,
   convertToSerializedVis,
 } from './saved_visualizations/_saved_vis';
+
 import { createSavedSearchesLoader } from '../../discover/public';
-import { SavedObjectsStart } from '../../saved_objects/public';
+
+import type {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  ApplicationStart,
+  SavedObjectsClientContract,
+} from '../../../core/public';
+import type { UsageCollectionSetup } from '../../usage_collection/public';
+import type { UiActionsStart } from '../../ui_actions/public';
+import type { SavedObjectsStart } from '../../saved_objects/public';
+import type { TypesSetup, TypesStart } from './vis_types';
+import type {
+  Setup as InspectorSetup,
+  Start as InspectorStart,
+} from '../../../plugins/inspector/public';
+import type { DataPublicPluginSetup, DataPublicPluginStart } from '../../../plugins/data/public';
+import type { ExpressionsSetup, ExpressionsStart } from '../../expressions/public';
+import type { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
+import { createVisAsync } from './vis_async';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -180,11 +183,8 @@ export class VisualizationsPlugin
        * @param {IIndexPattern} indexPattern - index pattern to use
        * @param {VisState} visState - visualization configuration
        */
-      createVis: async (visType: string, visState: SerializedVis) => {
-        const vis = new Vis(visType);
-        await vis.setState(visState);
-        return vis;
-      },
+      createVis: async (visType: string, visState: SerializedVis) =>
+        await createVisAsync(visType, visState),
       convertToSerializedVis,
       convertFromSerializedVis,
       savedVisualizationsLoader,

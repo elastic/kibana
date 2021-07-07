@@ -13,7 +13,7 @@ import { UsageCollector } from './usage_collector';
 import {
   elasticsearchServiceMock,
   loggingSystemMock,
-  savedObjectsRepositoryMock,
+  savedObjectsClientMock,
 } from '../../../../core/server/mocks';
 
 const logger = loggingSystemMock.createLogger();
@@ -25,16 +25,14 @@ const loggerSpies = {
 
 describe('CollectorSet', () => {
   describe('registers a collector set and runs lifecycle events', () => {
-    let init: Function;
     let fetch: Function;
     beforeEach(() => {
-      init = noop;
       fetch = noop;
       loggerSpies.debug.mockRestore();
       loggerSpies.warn.mockRestore();
     });
     const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    const mockSoClient = savedObjectsRepositoryMock.create();
+    const mockSoClient = savedObjectsClientMock.create();
     const req = void 0; // No need to instantiate any KibanaRequest in these tests
 
     it('should throw an error if non-Collector type of object is registered', () => {
@@ -42,9 +40,9 @@ describe('CollectorSet', () => {
       const registerPojo = () => {
         collectors.registerCollector({
           type: 'type_collector_test',
-          init,
+          // @ts-expect-error we are intentionally sending it wrong.
           fetch,
-        } as any); // We are intentionally sending it wrong.
+        });
       };
 
       expect(registerPojo).toThrowError(
@@ -71,13 +69,14 @@ describe('CollectorSet', () => {
     });
 
     it('should log debug status of fetching from the collector', async () => {
-      mockEsClient.get.mockResolvedValue({ passTest: 1000 } as any);
+      // @ts-expect-error we are just mocking the output of any call
+      mockEsClient.ping.mockResolvedValue({ passTest: 1000 });
       const collectors = new CollectorSet({ logger });
       collectors.registerCollector(
         new Collector(logger, {
           type: 'MY_TEST_COLLECTOR',
-          fetch: (collectorFetchContext: any) => {
-            return collectorFetchContext.esClient.get();
+          fetch: (collectorFetchContext) => {
+            return collectorFetchContext.esClient.ping();
           },
           isReady: () => true,
         })
@@ -122,7 +121,8 @@ describe('CollectorSet', () => {
         new Collector(logger, {
           type: 'MY_TEST_COLLECTOR',
           fetch: () => ({ test: 1 }),
-          isReady: true as any,
+          // @ts-expect-error we are intentionally sending it wrong
+          isReady: true,
         })
       );
 
@@ -138,10 +138,11 @@ describe('CollectorSet', () => {
     it('should not break if isReady is not provided', async () => {
       const collectors = new CollectorSet({ logger });
       collectors.registerCollector(
+        // @ts-expect-error we are intentionally sending it wrong.
         new Collector(logger, {
           type: 'MY_TEST_COLLECTOR',
           fetch: () => ({ test: 1 }),
-        } as any)
+        })
       );
 
       const result = await collectors.bulkFetch(mockEsClient, mockSoClient, req);

@@ -15,6 +15,8 @@ import React from 'react';
 import { TestProviders } from '../../../mock';
 import { useMountAppended } from '../../../utils/use_mount_appended';
 
+jest.mock('../../../../common/lib/kibana');
+
 const startDate = new Date(2001).toISOString();
 const endDate = new Date(3000).toISOString();
 describe('get_anomalies_network_table_columns', () => {

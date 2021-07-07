@@ -339,7 +339,7 @@ export interface IHttpFetchError extends Error {
    * @deprecated Provided for legacy compatibility. Prefer the `response` property instead.
    */
   readonly res?: Response;
-  readonly body?: any;
+  readonly body?: any; // TODO: this should be unknown
 }
 
 /** @public */

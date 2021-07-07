@@ -7,9 +7,9 @@
 
 import { KibanaResponseFactory } from 'kibana/server';
 
-import { xpackMocks } from '../../../../../../mocks';
+import { xpackMocks } from '../../../fixtures';
 import { loggingSystemMock, httpServerMock } from '../../../../../../../src/core/server/mocks';
-import { ExceptionListItemSchema } from '../../../../../lists/common/schemas/response';
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { listMock } from '../../../../../lists/server/mocks';
 import { ExceptionListClient } from '../../../../../lists/server';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
@@ -66,8 +66,8 @@ const NEW_TRUSTED_APP: NewTrustedApp = {
   os: OperatingSystem.LINUX,
   effectScope: { type: 'global' },
   entries: [
-    createConditionEntry(ConditionEntryField.PATH, '/bin/malware'),
-    createConditionEntry(ConditionEntryField.HASH, '1234234659af249ddf3e40864e9fb241'),
+    createConditionEntry(ConditionEntryField.PATH, 'match', '/bin/malware'),
+    createConditionEntry(ConditionEntryField.HASH, 'match', '1234234659af249ddf3e40864e9fb241'),
   ],
 };
 
@@ -83,8 +83,8 @@ const TRUSTED_APP: TrustedApp = {
   os: OperatingSystem.LINUX,
   effectScope: { type: 'global' },
   entries: [
-    createConditionEntry(ConditionEntryField.HASH, '1234234659af249ddf3e40864e9fb241'),
-    createConditionEntry(ConditionEntryField.PATH, '/bin/malware'),
+    createConditionEntry(ConditionEntryField.HASH, 'match', '1234234659af249ddf3e40864e9fb241'),
+    createConditionEntry(ConditionEntryField.PATH, 'match', '/bin/malware'),
   ],
 };
 

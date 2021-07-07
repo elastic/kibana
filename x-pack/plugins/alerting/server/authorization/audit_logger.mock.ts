@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { AlertsAuthorizationAuditLogger } from './audit_logger';
+import { AlertingAuthorizationAuditLogger } from './audit_logger';
 
-const createAlertsAuthorizationAuditLoggerMock = () => {
+const createAlertingAuthorizationAuditLoggerMock = () => {
   const mocked = ({
     getAuthorizationMessage: jest.fn(),
-    alertsAuthorizationFailure: jest.fn(),
-    alertsUnscopedAuthorizationFailure: jest.fn(),
-    alertsAuthorizationSuccess: jest.fn(),
-    alertsBulkAuthorizationSuccess: jest.fn(),
-  } as unknown) as jest.Mocked<AlertsAuthorizationAuditLogger>;
+    logAuthorizationFailure: jest.fn(),
+    logUnscopedAuthorizationFailure: jest.fn(),
+    logAuthorizationSuccess: jest.fn(),
+    logBulkAuthorizationSuccess: jest.fn(),
+  } as unknown) as jest.Mocked<AlertingAuthorizationAuditLogger>;
   return mocked;
 };
 
-export const alertsAuthorizationAuditLoggerMock: {
-  create: () => jest.Mocked<AlertsAuthorizationAuditLogger>;
+export const alertingAuthorizationAuditLoggerMock: {
+  create: () => jest.Mocked<AlertingAuthorizationAuditLogger>;
 } = {
-  create: createAlertsAuthorizationAuditLoggerMock,
+  create: createAlertingAuthorizationAuditLoggerMock,
 };

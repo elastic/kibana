@@ -138,12 +138,13 @@ export function ServiceOverviewInstancesTable({
           </h2>
         </EuiTitle>
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem data-test-subj="serviceInstancesTableContainer">
         <TableFetchWrapper status={status}>
           <ServiceOverviewTableContainer
             isEmptyAndLoading={mainStatsItemCount === 0 && isLoading}
           >
             <EuiBasicTable
+              data-test-subj="instancesTable"
               loading={isLoading}
               items={mainStatsItems}
               columns={columns}

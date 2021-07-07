@@ -24,14 +24,14 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { loadingSpinner } from './loading_spinner';
 
 interface Props {
-  fetchExample: () => Promise<any[]>;
+  fetchExample: () => Promise<unknown[]>;
   onClose: () => void;
 }
 
 interface State {
   isLoading: boolean;
   hasPrivilegeToRead: boolean;
-  data: any[] | null;
+  data: unknown[] | null;
 }
 
 /**

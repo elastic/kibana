@@ -35,7 +35,7 @@ describe('Service or transactions overview link', () => {
   describe('useServiceOrTransactionsOverviewHref', () => {
     it('returns service link', () => {
       const { result } = renderHook(
-        () => useServiceOrTransactionsOverviewHref('foo'),
+        () => useServiceOrTransactionsOverviewHref({ serviceName: 'foo' }),
         { wrapper: wrapper({}) }
       );
       expect(result.current).toEqual('/basepath/app/apm/services/foo');
@@ -43,7 +43,7 @@ describe('Service or transactions overview link', () => {
 
     it('returns service link with persisted query items', () => {
       const { result } = renderHook(
-        () => useServiceOrTransactionsOverviewHref('foo'),
+        () => useServiceOrTransactionsOverviewHref({ serviceName: 'foo' }),
         { wrapper: wrapper({ queryParams: { latencyAggregationType: 'avg' } }) }
       );
       expect(result.current).toEqual(

@@ -10,15 +10,20 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { HttpStart } from 'kibana/public';
 import { AutocompleteStart } from 'src/plugins/data/public';
+import { ExceptionListType, OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  BuilderEntry,
+  ExceptionsBuilderExceptionItem,
+  FormattedBuilderEntry,
+  getFormattedBuilderEntries,
+  getUpdatedEntriesOnDelete,
+} from '@kbn/securitysolution-list-utils';
 
-import { ExceptionListType } from '../../../../common';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
 
-import { BuilderEntry, ExceptionsBuilderExceptionItem, FormattedBuilderEntry } from './types';
 import { BuilderAndBadgeComponent } from './and_badge';
 import { BuilderEntryDeleteButtonComponent } from './entry_delete_button';
 import { BuilderEntryItem } from './entry_renderer';
-import { getFormattedBuilderEntries, getUpdatedEntriesOnDelete } from './helpers';
 
 const MyBeautifulLine = styled(EuiFlexItem)`
   &:after {
@@ -41,18 +46,21 @@ interface BuilderExceptionListItemProps {
   autocompleteService: AutocompleteStart;
   exceptionItem: ExceptionsBuilderExceptionItem;
   exceptionItemIndex: number;
+  osTypes?: OsTypeArray;
   indexPattern: IIndexPattern;
   andLogicIncluded: boolean;
   isOnlyItem: boolean;
   listType: ExceptionListType;
   listTypeSpecificIndexPatternFilter?: (
     pattern: IIndexPattern,
-    type: ExceptionListType
+    type: ExceptionListType,
+    osTypes?: OsTypeArray
   ) => IIndexPattern;
   onDeleteExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
   onChangeExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
   setErrorsExist: (arg: boolean) => void;
   onlyShowListOperators?: boolean;
+  isDisabled?: boolean;
 }
 
 export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionListItemProps>(
@@ -61,6 +69,7 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
     httpService,
     autocompleteService,
     exceptionItem,
+    osTypes,
     exceptionItemIndex,
     indexPattern,
     isOnlyItem,
@@ -71,6 +80,7 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
     onChangeExceptionItem,
     setErrorsExist,
     onlyShowListOperators = false,
+    isDisabled = false,
   }) => {
     const handleEntryChange = useCallback(
       (entry: BuilderEntry, entryIndex: number): void => {
@@ -138,6 +148,8 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
                           onChange={handleEntryChange}
                           onlyShowListOperators={onlyShowListOperators}
                           setErrorsExist={setErrorsExist}
+                          osTypes={osTypes}
+                          isDisabled={isDisabled}
                           showLabel={
                             exceptionItemIndex === 0 && index === 0 && item.nested !== 'child'
                           }

@@ -123,7 +123,7 @@ export class ActionFactory<
   }
 
   public telemetry(state: SerializedEvent, telemetryData: Record<string, any>) {
-    return this.def.telemetry ? this.def.telemetry(state, telemetryData) : {};
+    return this.def.telemetry ? this.def.telemetry(state, telemetryData) : telemetryData;
   }
 
   public extract(state: SerializedEvent) {

@@ -184,4 +184,12 @@ describe('embeddable enhancements', () => {
       embeddableState.enhancements.test
     );
   });
+
+  test('doesnt fail if there is no migration function registered for specific version', () => {
+    expect(() => {
+      start.migrate(embeddableState, '7.10.0');
+    }).not.toThrow();
+
+    expect(start.migrate(embeddableState, '7.10.0')).toEqual(embeddableState);
+  });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SchemaTypes } from '../../../shared/types';
+import { SchemaType } from '../../../shared/schema/types';
 
 import {
   areFieldsAtDefaultSettings,
@@ -56,7 +56,7 @@ describe('convertServerResultFieldsToResultFields', () => {
           },
         },
         {
-          foo: 'text' as SchemaTypes,
+          foo: SchemaType.Text,
         }
       )
     ).toEqual({
@@ -132,8 +132,8 @@ describe('splitResultFields', () => {
           },
         },
         {
-          foo: 'text' as SchemaTypes,
-          bar: 'number' as SchemaTypes,
+          foo: SchemaType.Text,
+          bar: SchemaType.Number,
         }
       )
     ).toEqual({

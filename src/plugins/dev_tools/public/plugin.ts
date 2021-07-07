@@ -7,7 +7,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { Plugin, CoreSetup, AppMountParameters, AppSearchDeepLink } from 'src/core/public';
+import { Plugin, CoreSetup, AppMountParameters, AppDeepLink } from 'src/core/public';
 import { AppUpdater } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { sortBy } from 'lodash';
@@ -86,7 +86,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
       this.appStateUpdater.next(() => ({ navLinkStatus: AppNavLinkStatus.hidden }));
     } else {
       this.appStateUpdater.next(() => {
-        const deepLinks: AppSearchDeepLink[] = [...this.devTools.values()]
+        const deepLinks: AppDeepLink[] = [...this.devTools.values()]
           .filter(
             // Some tools do not use a string title, so we filter those out
             (tool) => !tool.enableRouting && !tool.isDisabled() && typeof tool.title === 'string'
@@ -96,7 +96,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
             title: tool.title as string,
             path: `#/${tool.id}`,
           }));
-        return { meta: { searchDeepLinks: deepLinks } };
+        return { deepLinks };
       });
     }
   }

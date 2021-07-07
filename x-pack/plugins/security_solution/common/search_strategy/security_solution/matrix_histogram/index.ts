@@ -23,9 +23,11 @@ export * from './dns';
 export * from './events';
 
 export const MatrixHistogramQuery = 'matrixHistogram';
+export const MatrixHistogramQueryEntities = 'matrixHistogramEntities';
 
 export enum MatrixHistogramType {
   authentications = 'authentications',
+  authenticationsEntities = 'authenticationsEntities',
   anomalies = 'anomalies',
   events = 'events',
   alerts = 'alerts',
@@ -48,6 +50,7 @@ export interface MatrixHistogramRequestOptions extends RequestBasicOptions {
     | undefined;
   inspect?: Maybe<Inspect>;
   isPtrIncluded?: boolean;
+  includeMissingData?: boolean;
 }
 
 export interface MatrixHistogramStrategyResponse extends IEsSearchResponse {

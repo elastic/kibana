@@ -81,6 +81,7 @@ function getAlwaysFiringAlertType() {
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     actionVariables: {
       state: [{ name: 'instanceStateValue', description: 'the instance state value' }],
       params: [{ name: 'instanceParamsValue', description: 'the instance params value' }],
@@ -103,10 +104,11 @@ async function alwaysFiringExecutor(alertExecutorOptions: any) {
     tags,
     createdBy,
     updatedBy,
+    rule,
   } = alertExecutorOptions;
   let group: string | null = 'default';
   let subgroup: string | null = null;
-  const alertInfo = { alertId, spaceId, namespace, name, tags, createdBy, updatedBy };
+  const alertInfo = { alertId, spaceId, namespace, name, tags, createdBy, updatedBy, ...rule };
 
   if (params.groupsToScheduleActionsInSeries) {
     const index = state.groupInSeriesIndex || 0;
@@ -166,6 +168,7 @@ function getCumulativeFiringAlertType() {
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     async executor(alertExecutorOptions) {
       const { services, state } = alertExecutorOptions;
       const group = 'default';
@@ -211,6 +214,7 @@ function getNeverFiringAlertType() {
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     async executor({ services, params, state }) {
       await services.scopedClusterClient.asCurrentUser.index({
         index: params.index,
@@ -251,6 +255,7 @@ function getFailingAlertType() {
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     async executor({ services, params, state }) {
       await services.scopedClusterClient.asCurrentUser.index({
         index: params.index,
@@ -289,6 +294,7 @@ function getAuthorizationAlertType(core: CoreSetup<FixtureStartDeps>) {
     defaultActionGroupId: 'default',
     producer: 'alertsFixture',
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     validate: {
       params: paramsSchema,
     },
@@ -375,6 +381,7 @@ function getValidationAlertType() {
     ],
     producer: 'alertsFixture',
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     defaultActionGroupId: 'default',
     validate: {
       params: paramsSchema,
@@ -403,6 +410,7 @@ function getPatternFiringAlertType() {
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     async executor(alertExecutorOptions) {
       const { services, state, params } = alertExecutorOptions;
       const pattern = params.pattern;
@@ -467,6 +475,7 @@ export function defineAlertTypes(
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     async executor() {},
   };
   const goldNoopAlertType: AlertType<{}, {}, {}, {}, 'default'> = {
@@ -476,6 +485,7 @@ export function defineAlertTypes(
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'gold',
+    isExportable: true,
     async executor() {},
   };
   const onlyContextVariablesAlertType: AlertType<{}, {}, {}, {}, 'default'> = {
@@ -485,6 +495,7 @@ export function defineAlertTypes(
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     actionVariables: {
       context: [{ name: 'aContextVariable', description: 'this is a context variable' }],
     },
@@ -500,6 +511,7 @@ export function defineAlertTypes(
       state: [{ name: 'aStateVariable', description: 'this is a state variable' }],
     },
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     async executor() {},
   };
   const throwAlertType: AlertType<{}, {}, {}, {}, 'default'> = {
@@ -514,6 +526,7 @@ export function defineAlertTypes(
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     async executor() {
       throw new Error('this alert is intended to fail');
     },
@@ -530,6 +543,7 @@ export function defineAlertTypes(
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     async executor() {
       await new Promise((resolve) => setTimeout(resolve, 5000));
     },

@@ -39,6 +39,7 @@ export function getConfig(table: Datatable, params: VisParams): VisConfig {
     fittingFunction,
     detailedTooltip,
     isVislibVis,
+    fillOpacity,
   } = params;
   const aspects = getAspects(table.columns, params.dimensions);
   const xAxis = getAxis<XScaleType>(
@@ -63,6 +64,7 @@ export function getConfig(table: Datatable, params: VisParams): VisConfig {
     // NOTE: downscale ratio to match current vislib implementation
     markSizeRatio: radiusRatio * 0.6,
     fittingFunction,
+    fillOpacity,
     detailedTooltip,
     orderBucketsBySum,
     isTimeChart,

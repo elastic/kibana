@@ -32,7 +32,8 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
 
-  describe('context link in discover', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/104413
+  describe.skip('context link in discover', () => {
     before(async () => {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update({
@@ -130,7 +131,7 @@ export default function ({ getService, getPageObjects }) {
       const alert = await browser.getAlert();
       await alert?.accept();
       expect(await browser.getCurrentUrl()).to.contain('#/doc');
-      retry.waitFor('doc view being rendered', async () => {
+      await retry.waitFor('doc view being rendered', async () => {
         return await PageObjects.discover.isShowingDocViewer();
       });
     });

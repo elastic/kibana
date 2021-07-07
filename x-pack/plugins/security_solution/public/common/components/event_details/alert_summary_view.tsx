@@ -12,7 +12,7 @@ import {
   EuiDescriptionListTitle,
   EuiSpacer,
 } from '@elastic/eui';
-import { get, getOr } from 'lodash/fp';
+import { get, getOr, find } from 'lodash/fp';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -35,11 +35,14 @@ import {
 import { DESTINATION_IP_FIELD_NAME, SOURCE_IP_FIELD_NAME } from '../../../network/components/ip';
 import { SummaryView } from './summary_view';
 import { AlertSummaryRow, getSummaryColumns, SummaryRow } from './helpers';
-import { useRuleAsync } from '../../../detections/containers/detection_engine/rules/use_rule_async';
+import { useRuleWithFallback } from '../../../detections/containers/detection_engine/rules/use_rule_with_fallback';
+import { MarkdownRenderer } from '../markdown_editor';
 import { LineClamp } from '../line_clamp';
+import { endpointAlertCheck } from '../../utils/endpoint_alert_check';
 
 const StyledEuiDescriptionList = styled(EuiDescriptionList)`
   padding: 24px 4px 4px;
+  word-break: break-word;
 `;
 
 const fields = [
@@ -53,6 +56,7 @@ const fields = [
   { id: 'signal.rule.severity', label: ALERTS_HEADERS_SEVERITY },
   { id: 'signal.rule.risk_score', label: ALERTS_HEADERS_RISK_SCORE },
   { id: 'host.name' },
+  { id: 'agent.status' },
   { id: 'user.name' },
   { id: SOURCE_IP_FIELD_NAME, fieldType: IP_FIELD_TYPE },
   { id: DESTINATION_IP_FIELD_NAME, fieldType: IP_FIELD_TYPE },
@@ -177,23 +181,51 @@ const AlertSummaryViewComponent: React.FC<{
     timelineId,
   ]);
 
+  const isEndpointAlert = useMemo(() => {
+    return endpointAlertCheck({ data });
+  }, [data]);
+
+  const endpointId = useMemo(() => {
+    const findAgentId = find({ category: 'agent', field: 'agent.id' }, data)?.values;
+    return findAgentId ? findAgentId[0] : '';
+  }, [data]);
+
+  const agentStatusRow = {
+    title: i18n.AGENT_STATUS,
+    description: {
+      contextId: timelineId,
+      eventId,
+      fieldName: 'agent.status',
+      value: endpointId,
+      linkValue: undefined,
+    },
+  };
+
+  const summaryRowsWithAgentStatus = [...summaryRows, agentStatusRow];
+
   const ruleId = useMemo(() => {
     const item = data.find((d) => d.field === 'signal.rule.id');
     return Array.isArray(item?.originalValue)
       ? item?.originalValue[0]
       : item?.originalValue ?? null;
   }, [data]);
-  const { rule: maybeRule } = useRuleAsync(ruleId);
+  const { rule: maybeRule } = useRuleWithFallback(ruleId);
 
   return (
     <>
       <EuiSpacer size="l" />
-      <SummaryView summaryColumns={summaryColumns} summaryRows={summaryRows} title={title} />
+      <SummaryView
+        summaryColumns={summaryColumns}
+        summaryRows={isEndpointAlert ? summaryRowsWithAgentStatus : summaryRows}
+        title={title}
+      />
       {maybeRule?.note && (
         <StyledEuiDescriptionList data-test-subj={`summary-view-guide`} compressed>
           <EuiDescriptionListTitle>{i18n.INVESTIGATION_GUIDE}</EuiDescriptionListTitle>
           <EuiDescriptionListDescription>
-            <LineClamp content={maybeRule?.note} />
+            <LineClamp>
+              <MarkdownRenderer>{maybeRule.note}</MarkdownRenderer>
+            </LineClamp>
           </EuiDescriptionListDescription>
         </StyledEuiDescriptionList>
       )}

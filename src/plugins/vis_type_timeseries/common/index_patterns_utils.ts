@@ -7,7 +7,7 @@
  */
 
 import { uniq } from 'lodash';
-import { PanelSchema, IndexPatternValue, FetchedIndexPattern } from '../common/types';
+import type { Panel, IndexPatternValue, FetchedIndexPattern } from '../common/types';
 import { IIndexPattern, IndexPatternsService } from '../../data/common';
 
 export const isStringTypeIndexPattern = (
@@ -17,10 +17,7 @@ export const isStringTypeIndexPattern = (
 export const getIndexPatternKey = (indexPatternValue: IndexPatternValue) =>
   isStringTypeIndexPattern(indexPatternValue) ? indexPatternValue : indexPatternValue?.id ?? '';
 
-export const extractIndexPatternValues = (
-  panel: PanelSchema,
-  defaultIndex: IIndexPattern | null
-) => {
+export const extractIndexPatternValues = (panel: Panel, defaultIndex: IIndexPattern | null) => {
   const patterns: IndexPatternValue[] = [];
 
   if (panel.index_pattern) {
@@ -54,9 +51,9 @@ export const fetchIndexPattern = async (
   indexPatternValue: IndexPatternValue | undefined,
   indexPatternsService: Pick<IndexPatternsService, 'getDefault' | 'get' | 'find'>,
   options: {
-    fetchKibabaIndexForStringIndexes: boolean;
+    fetchKibanaIndexForStringIndexes: boolean;
   } = {
-    fetchKibabaIndexForStringIndexes: false,
+    fetchKibanaIndexForStringIndexes: false,
   }
 ): Promise<FetchedIndexPattern> => {
   let indexPattern: FetchedIndexPattern['indexPattern'];
@@ -66,7 +63,7 @@ export const fetchIndexPattern = async (
     indexPattern = await indexPatternsService.getDefault();
   } else {
     if (isStringTypeIndexPattern(indexPatternValue)) {
-      if (options.fetchKibabaIndexForStringIndexes) {
+      if (options.fetchKibanaIndexForStringIndexes) {
         indexPattern = (await indexPatternsService.find(indexPatternValue)).find(
           (index) => index.title === indexPatternValue
         );

@@ -19,11 +19,10 @@ import {
   rangeQuery,
   kqlQuery,
 } from '../../../../server/utils/queries';
-import { withApmSpan } from '../../../utils/with_apm_span';
 import { getErrorName } from '../../helpers/get_error_name';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
-export function getServiceErrorGroupMainStatistics({
+export async function getServiceErrorGroupMainStatistics({
   kuery,
   serviceName,
   setup,
@@ -36,10 +35,11 @@ export function getServiceErrorGroupMainStatistics({
   transactionType: string;
   environment?: string;
 }) {
-  return withApmSpan('get_service_error_group_main_statistics', async () => {
-    const { apmEventClient, start, end } = setup;
+  const { apmEventClient, start, end } = setup;
 
-    const response = await apmEventClient.search({
+  const response = await apmEventClient.search(
+    'get_service_error_group_main_statistics',
+    {
       apm: {
         events: [ProcessorEvent.error],
       },
@@ -79,24 +79,23 @@ export function getServiceErrorGroupMainStatistics({
           },
         },
       },
-    });
+    }
+  );
 
-    const errorGroups =
-      response.aggregations?.error_groups.buckets.map((bucket) => ({
-        group_id: bucket.key as string,
-        name:
-          getErrorName(bucket.sample.hits.hits[0]._source) ??
-          NOT_AVAILABLE_LABEL,
-        last_seen: new Date(
-          bucket.sample.hits.hits[0]?._source['@timestamp']
-        ).getTime(),
-        occurrences: bucket.doc_count,
-      })) ?? [];
+  const errorGroups =
+    response.aggregations?.error_groups.buckets.map((bucket) => ({
+      group_id: bucket.key as string,
+      name:
+        getErrorName(bucket.sample.hits.hits[0]._source) ?? NOT_AVAILABLE_LABEL,
+      last_seen: new Date(
+        bucket.sample.hits.hits[0]?._source['@timestamp']
+      ).getTime(),
+      occurrences: bucket.doc_count,
+    })) ?? [];
 
-    return {
-      is_aggregation_accurate:
-        (response.aggregations?.error_groups.sum_other_doc_count ?? 0) === 0,
-      error_groups: errorGroups,
-    };
-  });
+  return {
+    is_aggregation_accurate:
+      (response.aggregations?.error_groups.sum_other_doc_count ?? 0) === 0,
+    error_groups: errorGroups,
+  };
 }

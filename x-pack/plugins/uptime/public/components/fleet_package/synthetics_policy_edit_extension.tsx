@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import React, { memo, useContext } from 'react';
+import React, { memo } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { PackagePolicyEditExtensionComponentProps } from '../../../../fleet/public';
 import { useTrackPageview } from '../../../../observability/public';
 import {
-  SimpleFieldsContext,
-  HTTPAdvancedFieldsContext,
-  TCPAdvancedFieldsContext,
-  TLSFieldsContext,
+  useMonitorTypeContext,
+  useTCPSimpleFieldsContext,
+  useTCPAdvancedFieldsContext,
+  useICMPSimpleFieldsContext,
+  useHTTPSimpleFieldsContext,
+  useHTTPAdvancedFieldsContext,
+  useTLSFieldsContext,
 } from './contexts';
-import { Config, ConfigKeys } from './types';
+import { PolicyConfig, DataStream } from './types';
 import { CustomFields } from './custom_fields';
 import { useUpdatePolicy } from './use_update_policy';
 import { validate } from './validation';
@@ -23,7 +26,7 @@ import { validate } from './validation';
 interface SyntheticsPolicyEditExtensionProps {
   newPolicy: PackagePolicyEditExtensionComponentProps['newPolicy'];
   onChange: PackagePolicyEditExtensionComponentProps['onChange'];
-  defaultConfig: Config;
+  defaultConfig: PolicyConfig;
   isTLSEnabled: boolean;
 }
 /**
@@ -34,32 +37,57 @@ export const SyntheticsPolicyEditExtension = memo<SyntheticsPolicyEditExtensionP
   ({ newPolicy, onChange, defaultConfig, isTLSEnabled }) => {
     useTrackPageview({ app: 'fleet', path: 'syntheticsEdit' });
     useTrackPageview({ app: 'fleet', path: 'syntheticsEdit', delay: 15000 });
-    const { fields: simpleFields } = useContext(SimpleFieldsContext);
-    const { fields: httpAdvancedFields } = useContext(HTTPAdvancedFieldsContext);
-    const { fields: tcpAdvancedFields } = useContext(TCPAdvancedFieldsContext);
-    const { fields: tlsFields } = useContext(TLSFieldsContext);
-    const { config, setConfig } = useUpdatePolicy({ defaultConfig, newPolicy, onChange, validate });
+    const { monitorType } = useMonitorTypeContext();
+    const { fields: httpSimpleFields } = useHTTPSimpleFieldsContext();
+    const { fields: tcpSimpleFields } = useTCPSimpleFieldsContext();
+    const { fields: icmpSimpleFields } = useICMPSimpleFieldsContext();
+    const { fields: httpAdvancedFields } = useHTTPAdvancedFieldsContext();
+    const { fields: tcpAdvancedFields } = useTCPAdvancedFieldsContext();
+    const { fields: tlsFields } = useTLSFieldsContext();
+    const { setConfig } = useUpdatePolicy({
+      defaultConfig,
+      newPolicy,
+      onChange,
+      validate,
+      monitorType,
+    });
 
     useDebounce(
       () => {
-        setConfig((prevConfig) => ({
-          ...prevConfig,
-          ...simpleFields,
-          ...httpAdvancedFields,
-          ...tcpAdvancedFields,
-          ...tlsFields,
-        }));
+        setConfig(() => {
+          switch (monitorType) {
+            case DataStream.HTTP:
+              return {
+                ...httpSimpleFields,
+                ...httpAdvancedFields,
+                ...tlsFields,
+              };
+            case DataStream.TCP:
+              return {
+                ...tcpSimpleFields,
+                ...tcpAdvancedFields,
+                ...tlsFields,
+              };
+            case DataStream.ICMP:
+              return {
+                ...icmpSimpleFields,
+              };
+          }
+        });
       },
       250,
-      [setConfig, simpleFields, httpAdvancedFields, tcpAdvancedFields, tlsFields]
+      [
+        setConfig,
+        httpSimpleFields,
+        httpAdvancedFields,
+        tcpSimpleFields,
+        tcpAdvancedFields,
+        icmpSimpleFields,
+        tlsFields,
+      ]
     );
 
-    return (
-      <CustomFields
-        isTLSEnabled={isTLSEnabled}
-        validate={validate[config[ConfigKeys.MONITOR_TYPE]]}
-      />
-    );
+    return <CustomFields isTLSEnabled={isTLSEnabled} validate={validate[monitorType]} />;
   }
 );
 SyntheticsPolicyEditExtension.displayName = 'SyntheticsPolicyEditExtension';

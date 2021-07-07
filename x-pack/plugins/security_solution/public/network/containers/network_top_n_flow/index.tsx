@@ -29,6 +29,7 @@ import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/pl
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import * as i18n from './translations';
+import { useTransforms } from '../../../transforms/containers/use_transforms';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
 const ID = 'networkTopNFlowQuery';
@@ -74,6 +75,7 @@ export const useNetworkTopNFlow = ({
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
+  const { getTransformChangesIfTheyExist } = useTransforms();
 
   const [
     networkTopNFlowRequest,
@@ -168,19 +170,25 @@ export const useNetworkTopNFlow = ({
 
   useEffect(() => {
     setTopNFlowRequest((prevRequest) => {
-      const myRequest = {
-        ...(prevRequest ?? {}),
-        defaultIndex: indexNames,
+      const { indices, factoryQueryType, timerange } = getTransformChangesIfTheyExist({
         factoryQueryType: NetworkQueries.topNFlow,
-        filterQuery: createFilter(filterQuery),
-        flowTarget,
-        ip,
-        pagination: generateTablePaginationOptions(activePage, limit),
+        indices: indexNames,
+        filterQuery,
         timerange: {
           interval: '12h',
           from: startDate,
           to: endDate,
         },
+      });
+      const myRequest = {
+        ...(prevRequest ?? {}),
+        defaultIndex: indices,
+        factoryQueryType,
+        filterQuery: createFilter(filterQuery),
+        flowTarget,
+        ip,
+        pagination: generateTablePaginationOptions(activePage, limit),
+        timerange,
         sort,
       };
       if (!deepEqual(prevRequest, myRequest)) {
@@ -188,7 +196,18 @@ export const useNetworkTopNFlow = ({
       }
       return prevRequest;
     });
-  }, [activePage, endDate, filterQuery, indexNames, ip, limit, startDate, sort, flowTarget]);
+  }, [
+    activePage,
+    endDate,
+    filterQuery,
+    indexNames,
+    ip,
+    limit,
+    startDate,
+    sort,
+    flowTarget,
+    getTransformChangesIfTheyExist,
+  ]);
 
   useEffect(() => {
     networkTopNFlowSearch(networkTopNFlowRequest);

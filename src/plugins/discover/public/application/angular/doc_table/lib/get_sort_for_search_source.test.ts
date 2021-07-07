@@ -7,7 +7,7 @@
  */
 
 import { getSortForSearchSource } from './get_sort_for_search_source';
-// @ts-ignore
+// @ts-expect-error
 import FixturesStubbedLogstashIndexPatternProvider from '../../../../__fixtures__/stubbed_logstash_index_pattern';
 import { IndexPattern } from '../../../../kibana_services';
 import { SortOrder } from '../components/table_header/helpers';

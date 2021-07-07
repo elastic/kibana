@@ -14,7 +14,7 @@ pipeline {
     HOME = "${env.WORKSPACE}"
     E2E_DIR = 'x-pack/plugins/apm/e2e'
     UPTIME_E2E_DIR = 'x-pack/plugins/uptime/e2e'
-    PIPELINE_LOG_LEVEL = 'DEBUG'
+    PIPELINE_LOG_LEVEL = 'INFO'
     KBN_OPTIMIZER_THEMES = 'v7light'
     GITHUB_CHECK_APM_UI = 'end2end-for-apm-ui'
     GITHUB_CHECK_UPTIME_UI = 'end2end-for-uptime-ui'
@@ -22,7 +22,7 @@ pipeline {
   }
   options {
     timeout(time: 1, unit: 'HOURS')
-    buildDiscarder(logRotator(numToKeepStr: '40', artifactNumToKeepStr: '20', daysToKeepStr: '30'))
+    buildDiscarder(logRotator(numToKeepStr: '30', artifactNumToKeepStr: '10', daysToKeepStr: '30'))
     timestamps()
     ansiColor('xterm')
     disableResume()

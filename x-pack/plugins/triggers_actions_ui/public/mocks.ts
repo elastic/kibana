@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import type { ConnectorAddFlyoutProps } from './application/sections/action_connector_form/connector_add_flyout';
-import type { ConnectorEditFlyoutProps } from './application/sections/action_connector_form/connector_edit_flyout';
-import type { AlertAddProps } from './application/sections/alert_form/alert_add';
-import type { AlertEditProps } from './application/sections/alert_form/alert_edit';
 import type { TriggersAndActionsUIPublicPluginStart } from './plugin';
 
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
@@ -17,7 +13,14 @@ import { getAddAlertFlyoutLazy } from './common/get_add_alert_flyout';
 import { getEditAlertFlyoutLazy } from './common/get_edit_alert_flyout';
 
 import { TypeRegistry } from './application/type_registry';
-import { ActionTypeModel, AlertTypeModel } from './types';
+import {
+  ActionTypeModel,
+  AlertAddProps,
+  AlertEditProps,
+  AlertTypeModel,
+  ConnectorAddFlyoutProps,
+  ConnectorEditFlyoutProps,
+} from './types';
 
 function createStartMock(): TriggersAndActionsUIPublicPluginStart {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();

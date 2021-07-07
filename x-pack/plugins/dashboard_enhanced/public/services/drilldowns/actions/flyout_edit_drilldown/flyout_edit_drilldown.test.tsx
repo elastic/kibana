@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Subject } from 'rxjs';
 import { FlyoutEditDrilldownAction, FlyoutEditDrilldownParams } from './flyout_edit_drilldown';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { ViewMode } from '../../../../../../../../src/plugins/embeddable/public';
@@ -32,6 +33,9 @@ const actionParams: FlyoutEditDrilldownParams = {
   start: () => ({
     core: {
       overlays,
+      application: {
+        currentAppId$: new Subject(),
+      },
     } as any,
     plugins: {
       uiActionsEnhanced: uiActions,

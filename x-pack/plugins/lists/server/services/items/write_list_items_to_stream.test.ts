@@ -8,8 +8,8 @@
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
-import { getSearchListItemMock } from '../../../common/schemas/elastic_response/search_es_list_item_schema.mock';
 import { LIST_ID, LIST_ITEM_INDEX } from '../../../common/constants.mock';
+import { getSearchListItemMock } from '../../schemas/elastic_response/search_es_list_item_schema.mock';
 
 import {
   getExportListItemsToStreamOptionsMock,

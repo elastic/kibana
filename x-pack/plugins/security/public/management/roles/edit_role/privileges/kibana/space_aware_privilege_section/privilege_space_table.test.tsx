@@ -742,6 +742,21 @@ describe('global base read', () => {
   });
 });
 
+describe('global and reserved', () => {
+  it('base all, reserved_foo', () => {
+    const props = buildProps([
+      { spaces: ['*'], base: ['all'], feature: {} },
+      { spaces: ['*'], base: [], feature: {}, _reserved: ['foo'] },
+    ]);
+    const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
+    const actualTable = getTableFromComponent(component);
+    expect(actualTable).toEqual([
+      { spaces: ['*'], privileges: { summary: 'Foo', overridden: false } },
+      { spaces: ['*'], privileges: { summary: 'All', overridden: false } },
+    ]);
+  });
+});
+
 describe('global normal feature privilege all', () => {
   describe('default and marketing space', () => {
     it('base all', () => {

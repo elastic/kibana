@@ -66,9 +66,7 @@ describe('SearchBar', () => {
   };
 
   const simulateTypeChar = async (text: string) => {
-    await waitFor(() =>
-      getSearchProps(component).onKeyUpCapture({ currentTarget: { value: text } })
-    );
+    await waitFor(() => getSearchProps(component).onInput({ currentTarget: { value: text } }));
   };
 
   const getDisplayedOptionsTitle = () => {

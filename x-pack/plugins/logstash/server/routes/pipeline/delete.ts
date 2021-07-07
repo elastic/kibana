@@ -23,14 +23,18 @@ export function registerPipelineDeleteRoute(router: LogstashPluginRouter) {
     wrapRouteWithLicenseCheck(
       checkLicense,
       router.handleLegacyErrors(async (context, request, response) => {
-        const client = context.logstash!.esClient;
+        const { id } = request.params;
+        const { client } = context.core.elasticsearch;
 
-        await client.callAsCurrentUser('transport.request', {
-          path: '/_logstash/pipeline/' + encodeURIComponent(request.params.id),
-          method: 'DELETE',
-        });
-
-        return response.noContent();
+        try {
+          await client.asCurrentUser.logstash.deletePipeline({ id });
+          return response.noContent();
+        } catch (e) {
+          if (e.statusCode === 404) {
+            return response.notFound();
+          }
+          throw e;
+        }
       })
     )
   );

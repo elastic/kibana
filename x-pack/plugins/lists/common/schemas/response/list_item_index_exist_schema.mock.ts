@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ListItemIndexExistSchema } from './list_item_index_exist_schema';
+import type { ListItemIndexExistSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 export const getListItemIndexExistSchemaResponseMock = (): ListItemIndexExistSchema => ({
   list_index: true,

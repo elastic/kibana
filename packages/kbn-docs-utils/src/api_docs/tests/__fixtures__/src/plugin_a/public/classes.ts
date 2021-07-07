@@ -31,6 +31,11 @@ export interface WithGen<T = number> {
   t: T;
 }
 
+/**
+ *
+ * @deprecated
+ * @removeBy 8.0
+ */
 export interface AnotherInterface<T> {
   t: T;
 }
@@ -77,6 +82,8 @@ export interface ExampleInterface extends AnotherInterface<string> {
   /**
    * This function takes a generic. It was sometimes being tripped on
    * and returned as an unknown type with no signature.
+   * @param t This a parameter.
+   * @returns nothing!
    */
   aFnWithGen: <T>(t: T) => void;
 

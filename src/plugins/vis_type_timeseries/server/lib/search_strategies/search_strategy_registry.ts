@@ -8,7 +8,7 @@
 
 import { VisTypeTimeseriesRequest, VisTypeTimeseriesRequestHandlerContext } from '../../types';
 import { AbstractSearchStrategy } from './strategies';
-import { FetchedIndexPattern } from '../../../common/types';
+import type { FetchedIndexPattern } from '../../../common/types';
 
 export class SearchStrategyRegistry {
   private strategies: AbstractSearchStrategy[] = [];

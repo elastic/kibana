@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 // @ts-ignore
 import { Fields } from '../../models/fields/index';
 import { RouteDependencies } from '../../types';
@@ -15,22 +15,22 @@ const bodySchema = schema.object({
   indexes: schema.arrayOf(schema.string()),
 });
 
-function fetchFields(dataClient: ILegacyScopedClusterClient, indexes: string[]) {
-  const params = {
-    index: indexes,
-    fields: ['*'],
-    ignoreUnavailable: true,
-    allowNoIndices: true,
-    ignore: 404,
-  };
-
-  return dataClient.callAsCurrentUser('fieldCaps', params);
+function fetchFields(dataClient: IScopedClusterClient, indexes: string[]) {
+  return dataClient.asCurrentUser.fieldCaps(
+    {
+      index: indexes,
+      fields: ['*'],
+      allow_no_indices: true,
+      ignore_unavailable: true,
+    },
+    { ignore: [404] }
+  );
 }
 
 export function registerListFieldsRoute({
   router,
   license,
-  lib: { isEsError },
+  lib: { handleEsError },
 }: RouteDependencies) {
   router.post(
     {
@@ -43,23 +43,12 @@ export function registerListFieldsRoute({
       const { indexes } = request.body;
 
       try {
-        const fieldsResponse = await fetchFields(ctx.watcher!.client, indexes);
-        const json = fieldsResponse.status === 404 ? { fields: [] } : fieldsResponse;
+        const fieldsResponse = await fetchFields(ctx.core.elasticsearch.client, indexes);
+        const json = fieldsResponse.statusCode === 404 ? { fields: [] } : fieldsResponse.body;
         const fields = Fields.fromUpstreamJson(json);
         return response.ok({ body: fields.downstreamJson });
       } catch (e) {
-        // Case: Error from Elasticsearch JS client
-        if (isEsError(e)) {
-          return response.customError({
-            statusCode: e.statusCode,
-            body: {
-              message: e.message,
-            },
-          });
-        }
-
-        // Case: default
-        throw e;
+        return handleEsError({ error: e, response });
       }
     })
   );

@@ -9,7 +9,6 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { Query, QueryStringInput } from '../../../../../../../src/plugins/data/public';
-import { Toolbar } from '../../../components/eui';
 import { LogCustomizationMenu } from '../../../components/logging/log_customization_menu';
 import { LogDatepicker } from '../../../components/logging/log_datepicker';
 import { LogHighlightsMenu } from '../../../components/logging/log_highlights_menu';
@@ -54,33 +53,26 @@ export const LogsToolbar = () => {
   } = useContext(LogPositionState.Context);
 
   return (
-    <Toolbar>
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
+    <div>
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="l">
         <EuiFlexItem>
           <QueryStringInput
             disableLanguageSwitcher={true}
             iconType="search"
             indexPatterns={[derivedIndexPattern]}
             isInvalid={!isFilterQueryDraftValid}
-            onChange={(expression: Query) => {
-              if (typeof expression.query === 'string') {
-                setSurroundingLogsId(null);
-                setLogFilterQueryDraft(expression.query);
-              }
+            onChange={(query: Query) => {
+              setSurroundingLogsId(null);
+              setLogFilterQueryDraft(query);
             }}
-            onSubmit={(expression: Query) => {
-              if (typeof expression.query === 'string') {
-                setSurroundingLogsId(null);
-                applyLogFilterQuery(expression.query);
-              }
+            onSubmit={(query: Query) => {
+              setSurroundingLogsId(null);
+              applyLogFilterQuery(query);
             }}
             placeholder={i18n.translate('xpack.infra.logsPage.toolbar.kqlSearchFieldPlaceholder', {
               defaultMessage: 'Search for log entries… (e.g. host.name:host-1)',
             })}
-            query={{
-              query: filterQueryDraft?.expression ?? '',
-              language: filterQueryDraft?.kind ?? 'kuery',
-            }}
+            query={filterQueryDraft}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -117,6 +109,6 @@ export const LogsToolbar = () => {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </Toolbar>
+    </div>
   );
 };

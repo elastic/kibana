@@ -10,24 +10,17 @@ import { useParams } from 'react-router-dom';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { AlertType } from '../../../../common/alert_types';
 import { getInitialAlertValues } from '../get_initial_alert_values';
-import { TriggersAndActionsUIPublicPluginStart } from '../../../../../triggers_actions_ui/public';
+import { ApmPluginStartDeps } from '../../../plugin';
 interface Props {
   addFlyoutVisible: boolean;
   setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
   alertType: AlertType | null;
 }
 
-interface KibanaDeps {
-  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-}
-
 export function AlertingFlyout(props: Props) {
   const { addFlyoutVisible, setAddFlyoutVisibility, alertType } = props;
   const { serviceName } = useParams<{ serviceName?: string }>();
-  const {
-    services: { triggersActionsUi },
-  } = useKibana<KibanaDeps>();
-
+  const { services } = useKibana<ApmPluginStartDeps>();
   const initialValues = getInitialAlertValues(alertType, serviceName);
 
   const onCloseAddFlyout = useCallback(() => setAddFlyoutVisibility(false), [
@@ -37,7 +30,7 @@ export function AlertingFlyout(props: Props) {
   const addAlertFlyout = useMemo(
     () =>
       alertType &&
-      triggersActionsUi.getAddAlertFlyout({
+      services.triggersActionsUi.getAddAlertFlyout({
         consumer: 'apm',
         onClose: onCloseAddFlyout,
         alertTypeId: alertType,
@@ -45,7 +38,7 @@ export function AlertingFlyout(props: Props) {
         initialValues,
       }),
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-    [alertType, onCloseAddFlyout, triggersActionsUi]
+    [alertType, onCloseAddFlyout, services.triggersActionsUi]
   );
   return <>{addFlyoutVisible && addAlertFlyout}</>;
 }

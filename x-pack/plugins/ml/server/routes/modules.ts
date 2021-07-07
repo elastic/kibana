@@ -45,7 +45,7 @@ function getModule(
   savedObjectsClient: SavedObjectsClientContract,
   jobSavedObjectService: JobSavedObjectService,
   request: KibanaRequest,
-  moduleId: string
+  moduleId?: string
 ) {
   const dr = new DataRecognizer(
     client,

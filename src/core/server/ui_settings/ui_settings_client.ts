@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { defaultsDeep, omit } from 'lodash';
+import { omit } from 'lodash';
 
 import { SavedObjectsErrorHelpers } from '../saved_objects';
 import { SavedObjectsClientContract } from '../saved_objects/types';
@@ -35,10 +35,7 @@ interface UserProvidedValue<T = unknown> {
   isOverridden?: boolean;
 }
 
-type UiSettingsRawValue = UiSettingsParams & UserProvidedValue;
-
 type UserProvided<T = unknown> = Record<string, UserProvidedValue<T>>;
-type UiSettingsRaw = Record<string, UiSettingsRawValue>;
 
 export class UiSettingsClient implements IUiSettingsClient {
   private readonly type: UiSettingsServiceOptions['type'];
@@ -47,6 +44,7 @@ export class UiSettingsClient implements IUiSettingsClient {
   private readonly savedObjectsClient: UiSettingsServiceOptions['savedObjectsClient'];
   private readonly overrides: NonNullable<UiSettingsServiceOptions['overrides']>;
   private readonly defaults: NonNullable<UiSettingsServiceOptions['defaults']>;
+  private readonly defaultValues: Record<string, unknown>;
   private readonly log: Logger;
   private readonly cache: Cache;
 
@@ -56,10 +54,15 @@ export class UiSettingsClient implements IUiSettingsClient {
     this.id = id;
     this.buildNum = buildNum;
     this.savedObjectsClient = savedObjectsClient;
-    this.defaults = defaults;
     this.overrides = overrides;
     this.log = log;
     this.cache = new Cache();
+    this.defaults = defaults;
+    const defaultValues: Record<string, unknown> = {};
+    Object.keys(this.defaults).forEach((key) => {
+      defaultValues[key] = this.defaults[key].value;
+    });
+    this.defaultValues = defaultValues;
   }
 
   getRegistered() {
@@ -72,17 +75,21 @@ export class UiSettingsClient implements IUiSettingsClient {
 
   async get<T = any>(key: string): Promise<T> {
     const all = await this.getAll();
-    return all[key];
+    return all[key] as T;
   }
 
   async getAll<T = any>() {
-    const raw = await this.getRaw();
+    const result = { ...this.defaultValues };
 
-    return Object.keys(raw).reduce((all, key) => {
-      const item = raw[key];
-      all[key] = ('userValue' in item ? item.userValue : item.value) as T;
-      return all;
-    }, {} as Record<string, T>);
+    const userProvided = await this.getUserProvided();
+    Object.keys(userProvided).forEach((key) => {
+      if (userProvided[key].userValue !== undefined) {
+        result[key] = userProvided[key].userValue;
+      }
+    });
+
+    Object.freeze(result);
+    return result as Record<string, T>;
   }
 
   async getUserProvided<T = unknown>(): Promise<UserProvided<T>> {
@@ -140,11 +147,6 @@ export class UiSettingsClient implements IUiSettingsClient {
     if (this.isOverridden(key)) {
       throw new CannotOverrideError(`Unable to update "${key}" because it is overridden`);
     }
-  }
-
-  private async getRaw(): Promise<UiSettingsRaw> {
-    const userProvided = await this.getUserProvided();
-    return defaultsDeep({}, userProvided, this.defaults);
   }
 
   private validateKey(key: string, value: unknown) {

@@ -25,7 +25,8 @@ export class DocViewsRegistry {
     const docView = typeof docViewRaw === 'function' ? docViewRaw() : docViewRaw;
     if (docView.directive) {
       // convert angular directive to render function for backwards compatibility
-      docView.render = convertDirectiveToRenderFn(docView.directive, () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (docView.render as any) = convertDirectiveToRenderFn(docView.directive as any, () => {
         if (!this.angularInjectorGetter) {
           throw new Error('Angular was not initialized');
         }

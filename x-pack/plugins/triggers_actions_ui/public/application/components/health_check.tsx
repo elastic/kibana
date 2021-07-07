@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { Option, none, some, fold } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -69,16 +69,16 @@ export const HealthCheck: React.FunctionComponent<Props> = ({
     fold(
       () =>
         waitForCheck ? (
-          <Fragment>
+          <>
             <EuiSpacer size="m" />
             <CenterJustifiedSpinner />
-          </Fragment>
+          </>
         ) : (
-          <Fragment>{children}</Fragment>
+          <>{children}</>
         ),
       (healthCheck) => {
         return healthCheck?.isSufficientlySecure && healthCheck?.hasPermanentEncryptionKey ? (
-          <Fragment>{children}</Fragment>
+          <>{children}</>
         ) : !healthCheck.isAlertsAvailable ? (
           <AlertsError docLinks={docLinks} className={className} />
         ) : !healthCheck.isSufficientlySecure && !healthCheck.hasPermanentEncryptionKey ? (

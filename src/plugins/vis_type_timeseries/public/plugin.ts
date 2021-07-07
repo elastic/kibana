@@ -6,18 +6,15 @@
  * Side Public License, v 1.
  */
 
-import './application/index.scss';
-
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { VisualizationsSetup } from '../../visualizations/public';
 import { VisualizePluginSetup } from '../../visualize/public';
-import { EditorController, TSVB_EDITOR_NAME } from './application';
+import { EditorController, TSVB_EDITOR_NAME } from './application/editor_controller';
 
 import { createMetricsFn } from './metrics_fn';
 import { metricsVisDefinition } from './metrics_type';
 import {
-  setSavedObjectsClient,
   setUISettings,
   setI18n,
   setFieldFormats,
@@ -67,7 +64,6 @@ export class MetricsPlugin implements Plugin<void, void> {
   }
 
   public start(core: CoreStart, { data }: MetricsPluginStartDependencies) {
-    setSavedObjectsClient(core.savedObjects);
     setI18n(core.i18n);
     setFieldFormats(data.fieldFormats);
     setDataStart(data);

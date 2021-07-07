@@ -20,6 +20,7 @@
     { "path": "../../../src/plugins/embeddable/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../../../src/plugins/management/tsconfig.json" },
+    { "path": "../../../src/plugins/screenshot_mode/tsconfig.json" },
     { "path": "../../../src/plugins/share/tsconfig.json" },
     { "path": "../../../src/plugins/ui_actions/tsconfig.json" },
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },

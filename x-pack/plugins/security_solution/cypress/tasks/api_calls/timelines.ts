@@ -112,3 +112,33 @@ export const getTimelineById = (timelineId: string) =>
     url: `api/timeline?id=${timelineId}`,
     headers: { 'kbn-xsrf': 'timeline-by-id' },
   });
+
+export const loadPrepackagedTimelineTemplates = () =>
+  cy.request({
+    method: 'POST',
+    url: 'api/timeline/_prepackaged',
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+  });
+
+export const favoriteTimeline = ({
+  timelineId,
+  timelineType,
+  templateTimelineId,
+  templateTimelineVersion,
+}: {
+  timelineId: string;
+  timelineType: string;
+  templateTimelineId?: string;
+  templateTimelineVersion?: number;
+}) =>
+  cy.request({
+    method: 'PATCH',
+    url: 'api/timeline/_favorite',
+    body: {
+      timelineId,
+      timelineType,
+      templateTimelineId: templateTimelineId || null,
+      templateTimelineVersion: templateTimelineVersion || null,
+    },
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+  });

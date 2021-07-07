@@ -32,6 +32,9 @@ describe('config schema', () => {
           "interval": "10s",
         },
         "cluster_alerts": Object {
+          "allowedSpaces": Array [
+            "default",
+          ],
           "email_notifications": Object {
             "email_address": "",
             "enabled": true,

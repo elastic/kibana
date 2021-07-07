@@ -167,16 +167,12 @@ export class LoggingSystem implements LoggerFactory {
   }
 
   private async applyBaseConfig(newBaseConfig: LoggingConfig) {
+    this.enforceBufferAppendersUsage();
+
     const computedConfig = [...this.contextConfigs.values()].reduce(
       (baseConfig, contextConfig) => baseConfig.extend(contextConfig),
       newBaseConfig
     );
-
-    // reconfigure all the loggers without configuration to have them use the buffer
-    // appender while we are awaiting for the appenders to be disposed.
-    for (const [loggerKey, loggerAdapter] of this.loggers) {
-      loggerAdapter.updateLogger(this.createLogger(loggerKey, undefined));
-    }
 
     // Appenders must be reset, so we first dispose of the current ones, then
     // build up a new set of appenders.
@@ -204,18 +200,32 @@ export class LoggingSystem implements LoggerFactory {
       }
     }
 
-    for (const [loggerKey, loggerAdapter] of this.loggers) {
-      loggerAdapter.updateLogger(this.createLogger(loggerKey, computedConfig));
-    }
-
+    this.enforceConfiguredAppendersUsage(computedConfig);
     // We keep a reference to the base config so we can properly extend it
     // on each config change.
     this.baseConfig = newBaseConfig;
-    this.computedConfig = computedConfig;
 
     // Re-log all buffered log records with newly configured appenders.
     for (const logRecord of this.bufferAppender.flush()) {
       this.get(logRecord.context).log(logRecord);
     }
+  }
+
+  // reconfigure all the loggers to have them use the buffer appender
+  // while we are awaiting for the appenders to be disposed.
+  private enforceBufferAppendersUsage() {
+    for (const [loggerKey, loggerAdapter] of this.loggers) {
+      loggerAdapter.updateLogger(this.createLogger(loggerKey, undefined));
+    }
+
+    // new loggers created during applyBaseConfig execution should use the buffer appender as well
+    this.computedConfig = undefined;
+  }
+
+  private enforceConfiguredAppendersUsage(config: LoggingConfig) {
+    for (const [loggerKey, loggerAdapter] of this.loggers) {
+      loggerAdapter.updateLogger(this.createLogger(loggerKey, config));
+    }
+    this.computedConfig = config;
   }
 }

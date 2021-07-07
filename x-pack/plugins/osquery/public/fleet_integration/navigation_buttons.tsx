@@ -9,16 +9,17 @@ import { EuiFlexGroup, EuiFlexItem, EuiCard, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
 
+import { PLUGIN_ID } from '../../common';
 import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';
 
 interface NavigationButtonsProps {
   isDisabled?: boolean;
-  integrationPolicyId?: string;
-  agentPolicyId?: string;
+  integrationPolicyId?: string | undefined;
+  agentPolicyId?: string | undefined;
 }
 
 const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
-  isDisabled,
+  isDisabled = false,
   integrationPolicyId,
   agentPolicyId,
 }) => {
@@ -28,7 +29,7 @@ const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
 
   const liveQueryHref = useMemo(
     () =>
-      getUrlForApp('osquery', {
+      getUrlForApp(PLUGIN_ID, {
         path: agentPolicyId
           ? `/live_queries/new?agentPolicyId=${agentPolicyId}`
           : ' `/live_queries/new',
@@ -40,7 +41,7 @@ const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
     (event) => {
       if (!isModifiedEvent(event) && isLeftClickEvent(event)) {
         event.preventDefault();
-        navigateToApp('osquery', {
+        navigateToApp(PLUGIN_ID, {
           path: agentPolicyId
             ? `/live_queries/new?agentPolicyId=${agentPolicyId}`
             : ' `/live_queries/new',
@@ -50,7 +51,7 @@ const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
     [agentPolicyId, navigateToApp]
   );
 
-  const scheduleQueryGroupsHref = getUrlForApp('osquery', {
+  const scheduleQueryGroupsHref = getUrlForApp(PLUGIN_ID, {
     path: integrationPolicyId
       ? `/scheduled_query_groups/${integrationPolicyId}/edit`
       : `/scheduled_query_groups`,
@@ -60,7 +61,7 @@ const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
     (event) => {
       if (!isModifiedEvent(event) && isLeftClickEvent(event)) {
         event.preventDefault();
-        navigateToApp('osquery', {
+        navigateToApp(PLUGIN_ID, {
           path: integrationPolicyId
             ? `/scheduled_query_groups/${integrationPolicyId}/edit`
             : `/scheduled_query_groups`,

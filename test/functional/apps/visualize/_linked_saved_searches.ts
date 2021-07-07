@@ -30,6 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       let discoverSavedSearchUrlPath: string;
 
       before(async () => {
+        await PageObjects.visualize.initTests();
         await PageObjects.common.navigateToApp('discover');
         await filterBar.addFilter('extension.raw', 'is', 'jpg');
         await PageObjects.header.waitUntilLoadingHasFinished();

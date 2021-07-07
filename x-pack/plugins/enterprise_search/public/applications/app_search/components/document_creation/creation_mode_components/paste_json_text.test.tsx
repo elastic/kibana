@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions, rerender } from '../../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
 import { EuiTextArea, EuiButtonEmpty, EuiButton } from '@elastic/eui';
+
+import { rerender } from '../../../../test_helpers';
 
 import { Errors } from '../creation_response_components';
 

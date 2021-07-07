@@ -15,11 +15,11 @@ import {
 } from '../../../plugins/data/public';
 import { ExpressionAstExpression } from '../../expressions/public';
 
-import { SerializedVis, Vis } from './vis';
-import { PersistedState } from './persisted_state';
-import { VisParams } from '../common';
+import type { SerializedVis, Vis } from './vis';
+import type { PersistedState } from './persisted_state';
+import type { VisParams } from '../common';
 
-export { Vis, SerializedVis, VisParams };
+export type { Vis, SerializedVis, VisParams };
 export interface SavedVisState {
   title: string;
   type: string;

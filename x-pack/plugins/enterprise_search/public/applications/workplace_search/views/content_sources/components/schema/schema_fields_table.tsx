@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { SchemaExistingField } from '../../../../../shared/schema/schema_existing_field';
+import { SchemaFieldTypeSelect } from '../../../../../shared/schema';
 
 import {
   SCHEMA_ERRORS_TABLE_FIELD_NAME_HEADER,
@@ -38,7 +38,7 @@ export const SchemaFieldsTable: React.FC = () => {
     <EuiTable tableLayout="auto">
       <EuiTableHeader>
         <EuiTableHeaderCell>{SCHEMA_ERRORS_TABLE_FIELD_NAME_HEADER}</EuiTableHeaderCell>
-        <EuiTableHeaderCell align="right">
+        <EuiTableHeaderCell align="right" id="schemaDataType">
           {SCHEMA_ERRORS_TABLE_DATA_TYPE_HEADER}
         </EuiTableHeaderCell>
       </EuiTableHeader>
@@ -53,13 +53,12 @@ export const SchemaFieldsTable: React.FC = () => {
               </EuiFlexGroup>
             </EuiTableRowCell>
             <EuiTableRowCell align="right">
-              <SchemaExistingField
+              <SchemaFieldTypeSelect
                 disabled={fieldName === 'id'}
-                key={fieldName}
                 fieldName={fieldName}
-                hideName
                 fieldType={filteredSchemaFields[fieldName]}
                 updateExistingFieldType={updateExistingFieldType}
+                aria-labelledby="schemaDataType"
               />
             </EuiTableRowCell>
           </EuiTableRow>

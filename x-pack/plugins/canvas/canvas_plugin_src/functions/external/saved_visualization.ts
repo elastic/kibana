@@ -15,6 +15,7 @@ import {
 import { getQueryFilters } from '../../../public/lib/build_embeddable_filters';
 import { ExpressionValueFilter, TimeRange as TimeRangeArg, SeriesStyle } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
+import { SavedObjectReference } from '../../../../../../src/core/types';
 
 interface Arguments {
   id: string;
@@ -102,6 +103,31 @@ export function savedVisualization(): ExpressionFunctionDefinition<
         embeddableType: EmbeddableTypes.visualization,
         generatedAt: Date.now(),
       };
+    },
+    extract(state) {
+      const refName = 'savedVisualization.id';
+      const references: SavedObjectReference[] = [
+        {
+          name: refName,
+          type: 'visualization',
+          id: state.id[0] as string,
+        },
+      ];
+      return {
+        state: {
+          ...state,
+          id: [refName],
+        },
+        references,
+      };
+    },
+
+    inject(state, references) {
+      const reference = references.find((ref) => ref.name === 'savedVisualization.id');
+      if (reference) {
+        state.id[0] = reference.id;
+      }
+      return state;
     },
   };
 }

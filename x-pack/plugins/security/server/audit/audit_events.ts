@@ -142,6 +142,8 @@ export enum SavedObjectAction {
   REMOVE_REFERENCES = 'saved_object_remove_references',
   OPEN_POINT_IN_TIME = 'saved_object_open_point_in_time',
   CLOSE_POINT_IN_TIME = 'saved_object_close_point_in_time',
+  COLLECT_MULTINAMESPACE_REFERENCES = 'saved_object_collect_multinamespace_references', // this is separate from 'saved_object_get' because the user is only accessing an object's metadata
+  UPDATE_OBJECTS_SPACES = 'saved_object_update_objects_spaces', // this is separate from 'saved_object_update' because the user is only updating an object's metadata
 }
 
 type VerbsTuple = [string, string, string];
@@ -170,6 +172,16 @@ const savedObjectAuditVerbs: Record<SavedObjectAction, VerbsTuple> = {
     'removing references to',
     'removed references to',
   ],
+  saved_object_collect_multinamespace_references: [
+    'collect references and spaces of',
+    'collecting references and spaces of',
+    'collected references and spaces of',
+  ],
+  saved_object_update_objects_spaces: [
+    'update spaces of',
+    'updating spaces of',
+    'updated spaces of',
+  ],
 };
 
 const savedObjectAuditTypes: Record<SavedObjectAction, EcsEventType> = {
@@ -184,6 +196,8 @@ const savedObjectAuditTypes: Record<SavedObjectAction, EcsEventType> = {
   saved_object_open_point_in_time: 'creation',
   saved_object_close_point_in_time: 'deletion',
   saved_object_remove_references: 'change',
+  saved_object_collect_multinamespace_references: 'access',
+  saved_object_update_objects_spaces: 'change',
 };
 
 export interface SavedObjectEventParams {

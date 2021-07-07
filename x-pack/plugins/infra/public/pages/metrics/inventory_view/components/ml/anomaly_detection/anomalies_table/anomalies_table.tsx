@@ -26,7 +26,7 @@ import {
   EuiText,
   OnTimeChangeProps,
 } from '@elastic/eui';
-import { FormattedDate, FormattedMessage } from 'react-intl';
+import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 import { datemathToEpochMillis } from '../../../../../../../utils/datemath';
 import { SnapshotMetricType } from '../../../../../../../../common/inventory_models/types';
 import { withTheme } from '../../../../../../../../../../../src/plugins/kibana_react/common';
@@ -166,7 +166,7 @@ export const NoAnomaliesFound = withTheme(({ theme }) => (
     <p>
       <EuiIcon type="eyeClosed" size="xl" color={theme.eui.euiColorMediumShade} />
     </p>
-    <h3>
+    <h3 data-test-subj="noAnomaliesFoundMsg">
       <FormattedMessage
         id="xpack.infra.ml.anomalyFlyout.anomalyTable.noAnomaliesFound"
         defaultMessage="No anomalies found"
@@ -205,12 +205,14 @@ export const AnomaliesTable = (props: Props) => {
       label: i18n.translate('xpack.infra.ml.anomalyFlyout.hostBtn', {
         defaultMessage: 'Hosts',
       }),
+      'data-test-subj': 'anomaliesHostComboBoxItem',
     },
     {
       id: `k8s` as JobType,
       label: i18n.translate('xpack.infra.ml.anomalyFlyout.podsBtn', {
         defaultMessage: 'Kubernetes Pods',
       }),
+      'data-test-subj': 'anomaliesK8sComboBoxItem',
     },
   ];
   const [jobType, setJobType] = useState<JobType>('hosts');
@@ -246,9 +248,8 @@ export const AnomaliesTable = (props: Props) => {
       },
       defaultPaginationOptions: { pageSize: 10 },
     }),
-    [timeRange, sorting?.field, sorting?.direction, anomalyThreshold]
+    [timeRange.start, timeRange.end, sorting?.field, sorting?.direction, anomalyThreshold]
   );
-
   const {
     metricsHostsAnomalies,
     getMetricsHostsAnomalies,
@@ -364,6 +365,7 @@ export const AnomaliesTable = (props: Props) => {
       }),
       width: '25%',
       render: (jobId: string) => jobId,
+      'data-test-subj': 'anomalyRow',
     },
     {
       field: 'anomalyScore',
@@ -471,6 +473,7 @@ export const AnomaliesTable = (props: Props) => {
               selectedOptions={selectedJobType}
               onChange={changeJobType}
               isClearable={false}
+              data-test-subj="anomaliesComboBoxType"
             />
           </EuiFlexItem>
         </EuiFlexGroup>

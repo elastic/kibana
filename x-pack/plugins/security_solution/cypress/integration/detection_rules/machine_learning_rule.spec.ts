@@ -46,7 +46,7 @@ import {
   waitForAlertsPanelToBeLoaded,
 } from '../../tasks/alerts';
 import {
-  changeRowsPerPageTo300,
+  changeRowsPerPageTo100,
   filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
@@ -62,7 +62,7 @@ import {
 } from '../../tasks/create_new_rule';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
-import { DETECTIONS_URL } from '../../urls/navigation';
+import { ALERTS_URL } from '../../urls/navigation';
 
 describe('Detection rules, machine learning', () => {
   const expectedUrls = machineLearningRule.referenceUrls.join('');
@@ -76,7 +76,7 @@ describe('Detection rules, machine learning', () => {
   });
 
   it('Creates and activates a new ml rule', () => {
-    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
@@ -90,7 +90,7 @@ describe('Detection rules, machine learning', () => {
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-    changeRowsPerPageTo300();
+    changeRowsPerPageTo100();
 
     cy.get(RULES_TABLE).then(($table) => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
@@ -108,7 +108,7 @@ describe('Detection rules, machine learning', () => {
 
     goToRuleDetails();
 
-    cy.get(RULE_NAME_HEADER).should('have.text', `${machineLearningRule.name}`);
+    cy.get(RULE_NAME_HEADER).should('contain', `${machineLearningRule.name}`);
     cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', machineLearningRule.description);
     cy.get(ABOUT_DETAILS).within(() => {
       getDetails(SEVERITY_DETAILS).should('have.text', machineLearningRule.severity);

@@ -54,6 +54,9 @@ import { BucketedAggregation, FieldStatsResponse } from '../../common';
 import { IndexPattern, IndexPatternField, DraggedField } from './types';
 import { LensFieldIcon } from './lens_field_icon';
 import { trackUiEvent } from '../lens_ui_telemetry';
+import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
+import { VisualizeGeoFieldButton } from './visualize_geo_field_button';
+import { getVisualizeGeoFieldMessage } from '../utils';
 
 import { debouncedComponent } from '../debounced_component';
 
@@ -75,6 +78,7 @@ export interface FieldItemProps {
   editField?: (name: string) => void;
   removeField?: (name: string) => void;
   hasSuggestionForField: DatasourceDataPanelProps['hasSuggestionForField'];
+  uiActions: UiActionsStart;
 }
 
 interface State {
@@ -149,7 +153,13 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
 
   function fetchData() {
     // Range types don't have any useful stats we can show
-    if (state.isLoading || field.type === 'document' || field.type.includes('range')) {
+    if (
+      state.isLoading ||
+      field.type === 'document' ||
+      field.type.includes('range') ||
+      field.type === 'geo_point' ||
+      field.type === 'geo_shape'
+    ) {
       return;
     }
 
@@ -392,6 +402,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     removeField,
     hasSuggestionForField,
     hideDetails,
+    uiActions,
   } = props;
 
   const chartTheme = chartsThemeService.useChartsTheme();
@@ -465,6 +476,21 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
             defaultMessage: `Summary information is not available for range type fields.`,
           })}
         </EuiText>
+      </>
+    );
+  } else if (field.type === 'geo_point' || field.type === 'geo_shape') {
+    return (
+      <>
+        <EuiPopoverTitle>{panelHeader}</EuiPopoverTitle>
+
+        <EuiText size="s">{getVisualizeGeoFieldMessage(field.type)}</EuiText>
+
+        <EuiSpacer size="m" />
+        <VisualizeGeoFieldButton
+          uiActions={uiActions}
+          indexPatternId={indexPattern.id}
+          fieldName={field.name}
+        />
       </>
     );
   } else if (

@@ -8,11 +8,12 @@
 
 // must be before mocks imports to avoid conflicting with `REPO_ROOT` accessor.
 import { REPO_ROOT } from '@kbn/dev-utils';
-import { mockPackage } from './plugins_discovery.test.mocks';
+import { mockPackage, scanPluginSearchPathsMock } from './plugins_discovery.test.mocks';
 import mockFs from 'mock-fs';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { getEnvOptions, rawConfigServiceMock } from '../../config/mocks';
 
+import { from } from 'rxjs';
 import { first, map, toArray } from 'rxjs/operators';
 import { resolve } from 'path';
 import { ConfigService, Env } from '../../config';
@@ -419,5 +420,59 @@ describe('plugins discovery system', () => {
     );
 
     expect(loggingSystemMock.collect(logger).warn).toEqual([]);
+  });
+
+  describe('discovery order', () => {
+    beforeEach(() => {
+      scanPluginSearchPathsMock.mockClear();
+    });
+
+    it('returns the plugins in a deterministic order', async () => {
+      mockFs(
+        {
+          [`${KIBANA_ROOT}/src/plugins/plugin_a`]: Plugins.valid('pluginA'),
+          [`${KIBANA_ROOT}/plugins/plugin_b`]: Plugins.valid('pluginB'),
+          [`${KIBANA_ROOT}/x-pack/plugins/plugin_c`]: Plugins.valid('pluginC'),
+        },
+        { createCwd: false }
+      );
+
+      scanPluginSearchPathsMock.mockReturnValue(
+        from([
+          `${KIBANA_ROOT}/src/plugins/plugin_a`,
+          `${KIBANA_ROOT}/plugins/plugin_b`,
+          `${KIBANA_ROOT}/x-pack/plugins/plugin_c`,
+        ])
+      );
+
+      let { plugin$ } = discover(new PluginsConfig(pluginConfig, env), coreContext, instanceInfo);
+
+      expect(scanPluginSearchPathsMock).toHaveBeenCalledTimes(1);
+      let plugins = await plugin$.pipe(toArray()).toPromise();
+      let pluginNames = plugins.map((plugin) => plugin.name);
+
+      expect(pluginNames).toHaveLength(3);
+      // order coming from `ROOT/plugin` -> `ROOT/src/plugins` -> // ROOT/x-pack
+      expect(pluginNames).toEqual(['pluginB', 'pluginA', 'pluginC']);
+
+      // second pass
+      scanPluginSearchPathsMock.mockReturnValue(
+        from([
+          `${KIBANA_ROOT}/plugins/plugin_b`,
+          `${KIBANA_ROOT}/x-pack/plugins/plugin_c`,
+          `${KIBANA_ROOT}/src/plugins/plugin_a`,
+        ])
+      );
+
+      plugin$ = discover(new PluginsConfig(pluginConfig, env), coreContext, instanceInfo).plugin$;
+
+      expect(scanPluginSearchPathsMock).toHaveBeenCalledTimes(2);
+      plugins = await plugin$.pipe(toArray()).toPromise();
+      pluginNames = plugins.map((plugin) => plugin.name);
+
+      expect(pluginNames).toHaveLength(3);
+      // order coming from `ROOT/plugin` -> `ROOT/src/plugins` -> // ROOT/x-pack
+      expect(pluginNames).toEqual(['pluginB', 'pluginA', 'pluginC']);
+    });
   });
 });

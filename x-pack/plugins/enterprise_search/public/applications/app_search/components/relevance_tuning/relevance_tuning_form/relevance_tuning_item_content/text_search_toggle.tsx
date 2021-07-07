@@ -13,20 +13,20 @@ import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { TEXT } from '../../../../../shared/constants/field_types';
-import { SchemaTypes } from '../../../../../shared/types';
+import { SchemaType } from '../../../../../shared/schema/types';
 
 import { RelevanceTuningLogic } from '../../relevance_tuning_logic';
 import { SearchField } from '../../types';
 
 interface Props {
   name: string;
-  type: SchemaTypes;
+  type: SchemaType;
   field?: SearchField;
 }
 
 export const TextSearchToggle: React.FC<Props> = ({ name, type, field }) => {
   const { toggleSearchField } = useActions(RelevanceTuningLogic);
+  const isText = type === SchemaType.Text;
 
   return (
     <EuiFormRow
@@ -39,7 +39,7 @@ export const TextSearchToggle: React.FC<Props> = ({ name, type, field }) => {
     >
       <EuiSwitch
         label={
-          type !== TEXT
+          !isText
             ? i18n.translate(
                 'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.manageFields.textSearch.warningLabel',
                 {
@@ -53,9 +53,9 @@ export const TextSearchToggle: React.FC<Props> = ({ name, type, field }) => {
                 }
               )
         }
-        onChange={() => type === TEXT && toggleSearchField(name, !!field)}
+        onChange={() => isText && toggleSearchField(name, !!field)}
         checked={!!field}
-        disabled={type !== TEXT}
+        disabled={!isText}
       />
     </EuiFormRow>
   );

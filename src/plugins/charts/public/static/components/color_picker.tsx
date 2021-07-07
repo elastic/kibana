@@ -18,7 +18,7 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-
+import { lightenColor } from '../../services/palettes/lighten_color';
 import './color_picker.scss';
 
 export const legacyColors: string[] = [
@@ -105,6 +105,14 @@ interface ColorPickerProps {
    * Callback for onKeyPress event
    */
   onKeyDown?: (e: React.KeyboardEvent<HTMLElement>) => void;
+  /**
+   * Optional define the series maxDepth
+   */
+  maxDepth?: number;
+  /**
+   * Optional define the layer index
+   */
+  layerIndex?: number;
 }
 const euiColors = euiPaletteColorBlind({ rotations: 4, order: 'group' });
 
@@ -115,6 +123,8 @@ export const ColorPicker = ({
   useLegacyColors = true,
   colorIsOverwritten = true,
   onKeyDown,
+  maxDepth,
+  layerIndex,
 }: ColorPickerProps) => {
   const legendColors = useLegacyColors ? legacyColors : euiColors;
 
@@ -159,13 +169,18 @@ export const ColorPicker = ({
           ))}
         </EuiFlexGroup>
       </fieldset>
-      {legendColors.some((c) => c === selectedColor) && colorIsOverwritten && (
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty size="s" onClick={(e: any) => onChange(null, e)}>
-            <FormattedMessage id="charts.colorPicker.clearColor" defaultMessage="Reset color" />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      )}
+      {legendColors.some(
+        (c) =>
+          c === selectedColor ||
+          (layerIndex && maxDepth && lightenColor(c, layerIndex, maxDepth) === selectedColor)
+      ) &&
+        colorIsOverwritten && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty size="s" onClick={(e: any) => onChange(null, e)}>
+              <FormattedMessage id="charts.colorPicker.clearColor" defaultMessage="Reset color" />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
     </div>
   );
 };

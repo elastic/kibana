@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }) {
 
     before(async () => {
       // load visualize to have an index pattern ready, otherwise visualize will redirect
-      await esArchiver.load('visualize/default');
+      await esArchiver.load('x-pack/test/functional/es_archives/visualize/default');
     });
 
     it('create rollup tsvb', async () => {
@@ -100,7 +100,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       await esDeleteAllIndices([rollupTargetIndexName, rollupSourceIndexName]);
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
     });
   });
 }

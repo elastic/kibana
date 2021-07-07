@@ -18,7 +18,7 @@ import { shallow } from 'enzyme';
 import { DynamicSizeProperty } from './dynamic_size_property';
 import { RawValue, VECTOR_STYLES } from '../../../../../common/constants';
 import { IField } from '../../../fields/field';
-import { Map as MbMap } from 'mapbox-gl';
+import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { SizeDynamicOptions } from '../../../../../common/descriptor_types';
 import { mockField, MockLayer, MockStyle } from './test_helpers/test_util';
 import { IVectorLayer } from '../../../layers/vector_layer';

@@ -75,6 +75,7 @@ The API returns the following:
     "refresh": false,
     "executionTimeField": null
   },
-  "isPreconfigured": false
+  "isPreconfigured": false,
+  "isMissingSecrets": false
 }
 --------------------------------------------------

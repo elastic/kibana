@@ -33,6 +33,7 @@ import {
   DEFAULT_RULE_REFRESH_INTERVAL_ON,
   DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
   DEFAULT_RULE_REFRESH_IDLE_VALUE,
+  DEFAULT_TRANSFORMS,
 } from '../../../../common/constants';
 import { StartServices } from '../../../types';
 import { createSecuritySolutionStorageMock } from '../../mock/mock_local_storage';
@@ -59,6 +60,9 @@ const mockUiSettings: Record<string, unknown> = {
     on: DEFAULT_RULE_REFRESH_INTERVAL_ON,
     value: DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
     idleTimeout: DEFAULT_RULE_REFRESH_IDLE_VALUE,
+  },
+  [DEFAULT_TRANSFORMS]: {
+    enabled: false,
   },
 };
 
@@ -92,6 +96,13 @@ export const createStartServicesMock = (): StartServices => {
 
   return ({
     ...core,
+    cases: {
+      getAllCases: jest.fn(),
+      getCaseView: jest.fn(),
+      getConfigureCases: jest.fn(),
+      getCreateCase: jest.fn(),
+      getRecentCases: jest.fn(),
+    },
     data: {
       ...data,
       query: {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import 'jest-canvas-mock';
+
 // @ts-ignore
 import { compile } from 'vega-lite/build/vega-lite';
 
@@ -100,8 +102,8 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
     });
     expect(vegaLiteSpec.spec.encoding.color).toEqual({
       condition: {
-        // Note the alternative UTF-8 dot character
-        test: "(datum['ml․outlier_score'] >= mlOutlierScoreThreshold.cutoff)",
+        // Note the escaped dot character
+        test: "(datum['ml\\.outlier_score'] >= mlOutlierScoreThreshold.cutoff)",
         value: COLOR_OUTLIER,
       },
       value: euiThemeLight.euiColorMediumShade,
@@ -110,8 +112,8 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
       { field: 'x', type: 'quantitative' },
       { field: 'y', type: 'quantitative' },
       {
-        // Note the alternative UTF-8 dot character
-        field: 'ml․outlier_score',
+        // Note the escaped dot character
+        field: 'ml\\.outlier_score',
         format: '.3f',
         type: 'quantitative',
       },
@@ -155,5 +157,26 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
       { field: 'x', type: 'quantitative' },
       { field: 'y', type: 'quantitative' },
     ]);
+  });
+
+  it('should escape special characters', () => {
+    const data = [{ ['x.a']: 1, ['y[a]']: 1 }];
+
+    const vegaLiteSpec = getScatterplotMatrixVegaLiteSpec(
+      data,
+      ['x.a', 'y[a]'],
+      euiThemeLight,
+      undefined,
+      'the-color-field',
+      LEGEND_TYPES.NOMINAL
+    );
+
+    // column values should be escaped
+    expect(vegaLiteSpec.repeat).toEqual({
+      column: ['x\\.a', 'y\\[a\\]'],
+      row: ['y\\[a\\]', 'x\\.a'],
+    });
+    // raw data should not be escaped
+    expect(vegaLiteSpec.spec.data.values).toEqual(data);
   });
 });

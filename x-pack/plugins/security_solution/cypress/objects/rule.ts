@@ -8,13 +8,15 @@
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import { rawRules } from '../../server/lib/detection_engine/rules/prepackaged_rules/index';
 import { mockThreatData } from '../../public/detections/mitre/mitre_tactics_techniques';
-import { CompleteTimeline, timeline } from './timeline';
+import { timeline, CompleteTimeline, indicatorMatchTimelineTemplate } from './timeline';
 
 export const totalNumberOfPrebuiltRules = rawRules.length;
 
 export const totalNumberOfPrebuiltRulesInEsArchive = 127;
 
 export const totalNumberOfPrebuiltRulesInEsArchiveCustomRule = 145;
+
+const ccsRemoteName: string = Cypress.env('CCS_REMOTE_NAME');
 
 interface MitreAttackTechnique {
   name: string;
@@ -41,7 +43,7 @@ export interface CustomRule {
   customQuery?: string;
   name: string;
   description: string;
-  index?: string[];
+  index: string[];
   interval?: string;
   severity: string;
   riskScore: string;
@@ -170,7 +172,43 @@ export const newRule: CustomRule = {
   severity: 'High',
   riskScore: '17',
   tags: ['test', 'newRule'],
-  referenceUrls: ['https://www.google.com/', 'https://elastic.co/'],
+  referenceUrls: ['http://example.com/', 'https://example.com/'],
+  falsePositivesExamples: ['False1', 'False2'],
+  mitre: [mitre1, mitre2],
+  note: '# test markdown',
+  runsEvery,
+  lookBack,
+  timeline,
+  maxSignals: 100,
+};
+
+export const unmappedRule: CustomRule = {
+  customQuery: '*:*',
+  index: ['unmapped*'],
+  name: 'Rule with unmapped fields',
+  description: 'The new rule description.',
+  severity: 'High',
+  riskScore: '17',
+  tags: ['test', 'newRule'],
+  referenceUrls: ['http://example.com/', 'https://example.com/'],
+  falsePositivesExamples: ['False1', 'False2'],
+  mitre: [mitre1, mitre2],
+  note: '# test markdown',
+  runsEvery,
+  lookBack,
+  timeline,
+  maxSignals: 100,
+};
+
+export const unmappedCCSRule: CustomRule = {
+  customQuery: '*:*',
+  index: [`${ccsRemoteName}:unmapped*`],
+  name: 'Rule with unmapped fields',
+  description: 'The new rule description.',
+  severity: 'High',
+  riskScore: '17',
+  tags: ['test', 'newRule'],
+  referenceUrls: ['http://example.com/', 'https://example.com/'],
   falsePositivesExamples: ['False1', 'False2'],
   mitre: [mitre1, mitre2],
   note: '# test markdown',
@@ -209,7 +247,7 @@ export const newOverrideRule: OverrideRule = {
   severity: 'High',
   riskScore: '17',
   tags: ['test', 'newRule'],
-  referenceUrls: ['https://www.google.com/', 'https://elastic.co/'],
+  referenceUrls: ['http://example.com/', 'https://example.com/'],
   falsePositivesExamples: ['False1', 'False2'],
   mitre: [mitre1, mitre2],
   note: '# test markdown',
@@ -231,7 +269,7 @@ export const newThresholdRule: ThresholdRule = {
   severity: 'High',
   riskScore: '17',
   tags: ['test', 'newRule'],
-  referenceUrls: ['https://www.google.com/', 'https://elastic.co/'],
+  referenceUrls: ['http://example.com/', 'https://example.com/'],
   falsePositivesExamples: ['False1', 'False2'],
   mitre: [mitre1, mitre2],
   note: '# test markdown',
@@ -267,7 +305,7 @@ export const eqlRule: CustomRule = {
   severity: 'High',
   riskScore: '17',
   tags: ['test', 'newRule'],
-  referenceUrls: ['https://www.google.com/', 'https://elastic.co/'],
+  referenceUrls: ['http://example.com/', 'https://example.com/'],
   falsePositivesExamples: ['False1', 'False2'],
   mitre: [mitre1, mitre2],
   note: '# test markdown',
@@ -288,7 +326,7 @@ export const eqlSequenceRule: CustomRule = {
   severity: 'High',
   riskScore: '17',
   tags: ['test', 'newRule'],
-  referenceUrls: ['https://www.google.com/', 'https://elastic.co/'],
+  referenceUrls: ['http://example.com/', 'https://example.com/'],
   falsePositivesExamples: ['False1', 'False2'],
   mitre: [mitre1, mitre2],
   note: '# test markdown',
@@ -305,7 +343,7 @@ export const newThreatIndicatorRule: ThreatIndicatorRule = {
   severity: 'Critical',
   riskScore: '20',
   tags: ['test', 'threat'],
-  referenceUrls: ['https://www.google.com/', 'https://elastic.co/'],
+  referenceUrls: ['http://example.com/', 'https://example.com/'],
   falsePositivesExamples: ['False1', 'False2'],
   mitre: [mitre1, mitre2],
   note: '# test markdown',
@@ -316,7 +354,7 @@ export const newThreatIndicatorRule: ThreatIndicatorRule = {
   indicatorIndexField: 'threatintel.indicator.file.hash.sha256',
   type: 'file',
   atomic: 'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
-  timeline,
+  timeline: indicatorMatchTimelineTemplate,
   maxSignals: 100,
 };
 

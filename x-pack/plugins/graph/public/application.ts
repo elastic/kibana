@@ -31,7 +31,7 @@ import {
 } from 'kibana/public';
 // @ts-ignore
 import { initGraphApp } from './app';
-import { Plugin as DataPlugin, IndexPatternsContract } from '../../../../src/plugins/data/public';
+import { DataPlugin, IndexPatternsContract } from '../../../../src/plugins/data/public';
 import { LicensingPluginStart } from '../../licensing/public';
 import { checkLicense } from '../common/check_license';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/plugins/navigation/public';
@@ -91,7 +91,10 @@ export const renderApp = ({ appBasePath, element, kibanaLegacy, ...deps }: Graph
     const licenseAllowsToShowThisPage = info.showAppLink && info.enableAppLink;
 
     if (!licenseAllowsToShowThisPage) {
-      deps.core.notifications.toasts.addDanger(info.message);
+      if (info.message) {
+        deps.core.notifications.toasts.addDanger(info.message);
+      }
+
       // This has to happen in the next tick because otherwise the original navigation
       // bringing us to the graph app in the first place
       // never completes and the browser enters are redirect loop

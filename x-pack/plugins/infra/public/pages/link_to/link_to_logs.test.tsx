@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Route, Router, Switch } from 'react-router-dom';
 import { httpServiceMock } from 'src/core/public/mocks';
-import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+import { KibanaContextProvider, KibanaPageTemplate } from 'src/plugins/kibana_react/public';
 import { useLogSource } from '../../containers/logs/log_source';
 import {
   createLoadedUseLogSourceMock,
@@ -27,6 +27,11 @@ const renderRoutes = (routes: React.ReactElement) => {
     http: httpServiceMock.createStartContract(),
     data: {
       indexPatterns: {},
+    },
+    observability: {
+      navigation: {
+        PageTemplate: KibanaPageTemplate,
+      },
     },
   };
   const renderResult = render(
@@ -66,7 +71,7 @@ describe('LinkToLogsPage component', () => {
       const searchParams = new URLSearchParams(history.location.search);
       expect(searchParams.get('sourceId')).toEqual('default');
       expect(searchParams.get('logFilter')).toMatchInlineSnapshot(
-        `"(expression:'FILTER_FIELD:FILTER_VALUE',kind:kuery)"`
+        `"(language:kuery,query:'FILTER_FIELD:FILTER_VALUE')"`
       );
       expect(searchParams.get('logPosition')).toMatchInlineSnapshot(
         `"(end:'2019-02-20T14:58:09.404Z',position:(tiebreaker:0,time:1550671089404),start:'2019-02-20T12:58:09.404Z',streamLive:!f)"`
@@ -86,7 +91,7 @@ describe('LinkToLogsPage component', () => {
 
       const searchParams = new URLSearchParams(history.location.search);
       expect(searchParams.get('sourceId')).toEqual('OTHER_SOURCE');
-      expect(searchParams.get('logFilter')).toMatchInlineSnapshot(`"(expression:'',kind:kuery)"`);
+      expect(searchParams.get('logFilter')).toMatchInlineSnapshot(`"(language:kuery,query:'')"`);
       expect(searchParams.get('logPosition')).toEqual(null);
     });
   });
@@ -106,7 +111,7 @@ describe('LinkToLogsPage component', () => {
       const searchParams = new URLSearchParams(history.location.search);
       expect(searchParams.get('sourceId')).toEqual('default');
       expect(searchParams.get('logFilter')).toMatchInlineSnapshot(
-        `"(expression:'FILTER_FIELD:FILTER_VALUE',kind:kuery)"`
+        `"(language:kuery,query:'FILTER_FIELD:FILTER_VALUE')"`
       );
       expect(searchParams.get('logPosition')).toMatchInlineSnapshot(
         `"(end:'2019-02-20T14:58:09.404Z',position:(tiebreaker:0,time:1550671089404),start:'2019-02-20T12:58:09.404Z',streamLive:!f)"`
@@ -126,7 +131,7 @@ describe('LinkToLogsPage component', () => {
 
       const searchParams = new URLSearchParams(history.location.search);
       expect(searchParams.get('sourceId')).toEqual('OTHER_SOURCE');
-      expect(searchParams.get('logFilter')).toMatchInlineSnapshot(`"(expression:'',kind:kuery)"`);
+      expect(searchParams.get('logFilter')).toMatchInlineSnapshot(`"(language:kuery,query:'')"`);
       expect(searchParams.get('logPosition')).toEqual(null);
     });
   });
@@ -146,7 +151,7 @@ describe('LinkToLogsPage component', () => {
       const searchParams = new URLSearchParams(history.location.search);
       expect(searchParams.get('sourceId')).toEqual('default');
       expect(searchParams.get('logFilter')).toMatchInlineSnapshot(
-        `"(expression:'HOST_FIELD: HOST_NAME',kind:kuery)"`
+        `"(language:kuery,query:'HOST_FIELD: HOST_NAME')"`
       );
       expect(searchParams.get('logPosition')).toEqual(null);
     });
@@ -167,7 +172,7 @@ describe('LinkToLogsPage component', () => {
       const searchParams = new URLSearchParams(history.location.search);
       expect(searchParams.get('sourceId')).toEqual('default');
       expect(searchParams.get('logFilter')).toMatchInlineSnapshot(
-        `"(expression:'(HOST_FIELD: HOST_NAME) and (FILTER_FIELD:FILTER_VALUE)',kind:kuery)"`
+        `"(language:kuery,query:'(HOST_FIELD: HOST_NAME) and (FILTER_FIELD:FILTER_VALUE)')"`
       );
       expect(searchParams.get('logPosition')).toMatchInlineSnapshot(
         `"(end:'2019-02-20T14:58:09.404Z',position:(tiebreaker:0,time:1550671089404),start:'2019-02-20T12:58:09.404Z',streamLive:!f)"`
@@ -188,12 +193,12 @@ describe('LinkToLogsPage component', () => {
       const searchParams = new URLSearchParams(history.location.search);
       expect(searchParams.get('sourceId')).toEqual('OTHER_SOURCE');
       expect(searchParams.get('logFilter')).toMatchInlineSnapshot(
-        `"(expression:'HOST_FIELD: HOST_NAME',kind:kuery)"`
+        `"(language:kuery,query:'HOST_FIELD: HOST_NAME')"`
       );
       expect(searchParams.get('logPosition')).toEqual(null);
     });
 
-    it('renders a loading page while loading the source configuration', () => {
+    it('renders a loading page while loading the source configuration', async () => {
       useLogSourceMock.mockImplementation(createLoadingUseLogSourceMock());
 
       const { history, queryByTestId } = renderRoutes(
@@ -203,8 +208,9 @@ describe('LinkToLogsPage component', () => {
       );
 
       history.push('/link-to/host-logs/HOST_NAME');
-
-      expect(queryByTestId('nodeLoadingPage-host')).not.toBeEmpty();
+      await waitFor(() => {
+        expect(queryByTestId('nodeLoadingPage-host')).not.toBeEmpty();
+      });
     });
   });
 
@@ -223,7 +229,7 @@ describe('LinkToLogsPage component', () => {
       const searchParams = new URLSearchParams(history.location.search);
       expect(searchParams.get('sourceId')).toEqual('default');
       expect(searchParams.get('logFilter')).toMatchInlineSnapshot(
-        `"(expression:'CONTAINER_FIELD: CONTAINER_ID',kind:kuery)"`
+        `"(language:kuery,query:'CONTAINER_FIELD: CONTAINER_ID')"`
       );
       expect(searchParams.get('logPosition')).toEqual(null);
     });
@@ -244,7 +250,7 @@ describe('LinkToLogsPage component', () => {
       const searchParams = new URLSearchParams(history.location.search);
       expect(searchParams.get('sourceId')).toEqual('default');
       expect(searchParams.get('logFilter')).toMatchInlineSnapshot(
-        `"(expression:'(CONTAINER_FIELD: CONTAINER_ID) and (FILTER_FIELD:FILTER_VALUE)',kind:kuery)"`
+        `"(language:kuery,query:'(CONTAINER_FIELD: CONTAINER_ID) and (FILTER_FIELD:FILTER_VALUE)')"`
       );
       expect(searchParams.get('logPosition')).toMatchInlineSnapshot(
         `"(end:'2019-02-20T14:58:09.404Z',position:(tiebreaker:0,time:1550671089404),start:'2019-02-20T12:58:09.404Z',streamLive:!f)"`
@@ -281,7 +287,7 @@ describe('LinkToLogsPage component', () => {
       const searchParams = new URLSearchParams(history.location.search);
       expect(searchParams.get('sourceId')).toEqual('default');
       expect(searchParams.get('logFilter')).toMatchInlineSnapshot(
-        `"(expression:'POD_FIELD: POD_UID',kind:kuery)"`
+        `"(language:kuery,query:'POD_FIELD: POD_UID')"`
       );
       expect(searchParams.get('logPosition')).toEqual(null);
     });
@@ -300,7 +306,7 @@ describe('LinkToLogsPage component', () => {
       const searchParams = new URLSearchParams(history.location.search);
       expect(searchParams.get('sourceId')).toEqual('default');
       expect(searchParams.get('logFilter')).toMatchInlineSnapshot(
-        `"(expression:'(POD_FIELD: POD_UID) and (FILTER_FIELD:FILTER_VALUE)',kind:kuery)"`
+        `"(language:kuery,query:'(POD_FIELD: POD_UID) and (FILTER_FIELD:FILTER_VALUE)')"`
       );
       expect(searchParams.get('logPosition')).toMatchInlineSnapshot(
         `"(end:'2019-02-20T14:58:09.404Z',position:(tiebreaker:0,time:1550671089404),start:'2019-02-20T12:58:09.404Z',streamLive:!f)"`

@@ -4,9 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { estypes } from '@elastic/elasticsearch';
-import { ExceptionListItemSchema, entriesList } from '../../../../../../lists/common/schemas';
-import { hasLargeValueList } from '../../../../../common/detection_engine/utils';
+import { entriesList, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+
+import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
+
 import { FilterEventsAgainstListOptions } from './types';
 import { filterEvents } from './filter_events';
 import { createFieldAndSetTuples } from './create_field_and_set_tuples';
@@ -55,9 +58,9 @@ export const filterEventsAgainstList = async <T>({
       return listItem.entries.every((entry) => entriesList.is(entry));
     });
 
-    const res = await valueListExceptionItems.reduce<Promise<Array<estypes.Hit<T>>>>(
+    const res = await valueListExceptionItems.reduce<Promise<Array<estypes.SearchHit<T>>>>(
       async (
-        filteredAccum: Promise<Array<estypes.Hit<T>>>,
+        filteredAccum: Promise<Array<estypes.SearchHit<T>>>,
         exceptionItem: ExceptionListItemSchema
       ) => {
         const events = await filteredAccum;
@@ -75,7 +78,7 @@ export const filterEventsAgainstList = async <T>({
         );
         return filteredEvents;
       },
-      Promise.resolve<Array<estypes.Hit<T>>>(eventSearchResult.hits.hits)
+      Promise.resolve<Array<estypes.SearchHit<T>>>(eventSearchResult.hits.hits)
     );
 
     return {

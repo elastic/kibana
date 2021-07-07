@@ -19,7 +19,7 @@ const FALLBACK_CODE_POINT = 97;
  * If a color is present on the Space itself, then that is used.
  * Otherwise, a color is provided from EUI's Visualization Colors based on the space name.
  *
- * @param {Space} space
+ * @param {Space} space the space.
  */
 export function getSpaceColor(space: Partial<Space> = {}) {
   const { color, name = '' } = space;
@@ -38,7 +38,7 @@ export function getSpaceColor(space: Partial<Space> = {}) {
  * If initials are present on the Space itself, then that is used.
  * Otherwise, the initials are calculated based off the words in the space name, with a max length of 2 characters.
  *
- * @param {Space} space
+ * @param {Space} space the space.
  */
 export function getSpaceInitials(space: Partial<Space> = {}) {
   const { initials, name = '' } = space;
@@ -59,7 +59,7 @@ export function getSpaceInitials(space: Partial<Space> = {}) {
 /**
  * Determines the avatar image for the provided space.
  *
- * @param {Space} space
+ * @param {Space} space the space.
  */
 export function getSpaceImageUrl(space: Partial<Space> = {}) {
   const { imageUrl } = space;

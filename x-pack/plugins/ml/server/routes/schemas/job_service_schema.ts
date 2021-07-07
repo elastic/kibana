@@ -23,62 +23,74 @@ export const categorizationFieldExamplesSchema = {
   indicesOptions: indicesOptionsSchema,
 };
 
-export const chartSchema = {
+export const basicChartSchema = {
   indexPatternTitle: schema.string(),
-  timeField: schema.maybe(schema.string()),
-  start: schema.maybe(schema.number()),
-  end: schema.maybe(schema.number()),
+  timeField: schema.string(),
+  start: schema.number(),
+  end: schema.number(),
   intervalMs: schema.number(),
   query: schema.any(),
   aggFieldNamePairs: schema.arrayOf(schema.any()),
-  splitFieldName: schema.maybe(schema.nullable(schema.string())),
+  splitFieldName: schema.nullable(schema.string()),
+  splitFieldValue: schema.nullable(schema.string()),
+  runtimeMappings: schema.maybe(runtimeMappingsSchema),
+  indicesOptions: schema.maybe(indicesOptionsSchema),
+};
+
+export const populationChartSchema = {
+  indexPatternTitle: schema.string(),
+  timeField: schema.string(),
+  start: schema.number(),
+  end: schema.number(),
+  intervalMs: schema.number(),
+  query: schema.any(),
+  aggFieldNamePairs: schema.arrayOf(schema.any()),
+  splitFieldName: schema.nullable(schema.string()),
   splitFieldValue: schema.maybe(schema.nullable(schema.string())),
-  runtimeMappings: runtimeMappingsSchema,
-  indicesOptions: indicesOptionsSchema,
+  runtimeMappings: schema.maybe(runtimeMappingsSchema),
+  indicesOptions: schema.maybe(indicesOptionsSchema),
 };
 
 export const datafeedIdsSchema = schema.object({
-  datafeedIds: schema.arrayOf(schema.maybe(schema.string())),
+  datafeedIds: schema.arrayOf(schema.string()),
 });
 
 export const forceStartDatafeedSchema = schema.object({
-  datafeedIds: schema.arrayOf(schema.maybe(schema.string())),
+  datafeedIds: schema.arrayOf(schema.string()),
   start: schema.maybe(schema.number()),
   end: schema.maybe(schema.number()),
-});
-
-export const jobIdSchema = schema.object({
-  /** Optional list of job IDs. */
-  jobIds: schema.maybe(schema.string()),
 });
 
 export const jobIdsSchema = schema.object({
-  /** Optional list of job IDs. */
-  jobIds: schema.maybe(schema.arrayOf(schema.maybe(schema.string()))),
+  /** List of job IDs. */
+  jobIds: schema.arrayOf(schema.string()),
 });
 
-export const jobsWithTimerangeSchema = {
+export const optionaljobIdsSchema = schema.object({
+  /** Optional list of job IDs. */
+  jobIds: schema.maybe(schema.arrayOf(schema.string())),
+});
+
+export const jobsWithTimerangeSchema = schema.object({
   dateFormatTz: schema.maybe(schema.string()),
-};
+});
 
 export const lookBackProgressSchema = {
   jobId: schema.string(),
-  start: schema.maybe(schema.number()),
-  end: schema.maybe(schema.number()),
+  start: schema.number(),
+  end: schema.number(),
 };
 
 export const topCategoriesSchema = { jobId: schema.string(), count: schema.number() };
 
-export const updateGroupsSchema = {
-  jobs: schema.maybe(
-    schema.arrayOf(
-      schema.object({
-        job_id: schema.maybe(schema.string()),
-        groups: schema.arrayOf(schema.maybe(schema.string())),
-      })
-    )
+export const updateGroupsSchema = schema.object({
+  jobs: schema.arrayOf(
+    schema.object({
+      jobId: schema.string(),
+      groups: schema.arrayOf(schema.string()),
+    })
   ),
-};
+});
 
 export const revertModelSnapshotSchema = schema.object({
   jobId: schema.string(),
@@ -97,15 +109,32 @@ export const revertModelSnapshotSchema = schema.object({
   ),
 });
 
-export const datafeedPreviewSchema = schema.oneOf([
-  schema.object({
+export const datafeedPreviewSchema = schema.object(
+  {
     job: schema.maybe(schema.object(anomalyDetectionJobSchema)),
     datafeed: schema.maybe(datafeedConfigSchema),
-  }),
-  schema.object({
     datafeedId: schema.maybe(schema.string()),
-  }),
-]);
+  },
+  {
+    validate: (v) => {
+      const msg = 'supply either a datafeed_id for an existing job or a job and datafeed config';
+      if (v.datafeedId !== undefined && (v.job !== undefined || v.datafeed !== undefined)) {
+        // datafeed_id is supplied but job and datafeed configs are also supplied
+        return msg;
+      }
+
+      if (v.datafeedId === undefined && (v.job === undefined || v.datafeed === undefined)) {
+        // datafeed_id is not supplied but job or datafeed configs are missing
+        return msg;
+      }
+
+      if (v.datafeedId === undefined && v.job === undefined && v.datafeed === undefined) {
+        // everything is missing
+        return msg;
+      }
+    },
+  }
+);
 
 export const jobsExistSchema = schema.object({
   jobIds: schema.arrayOf(schema.string()),

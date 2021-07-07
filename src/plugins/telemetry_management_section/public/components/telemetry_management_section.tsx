@@ -7,25 +7,16 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import {
-  EuiCallOut,
-  EuiPanel,
-  EuiForm,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiCallOut, EuiForm, EuiLink, EuiSpacer, EuiSplitPanel, EuiTitle } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { TelemetryPluginSetup } from 'src/plugins/telemetry/public';
+import type { TelemetryPluginSetup } from 'src/plugins/telemetry/public';
+import type { DocLinksStart, ToastsStart } from 'src/core/public';
 import { PRIVACY_STATEMENT_URL } from '../../../telemetry/common/constants';
 import { OptInExampleFlyout } from './opt_in_example_flyout';
 import { OptInSecurityExampleFlyout } from './opt_in_security_example_flyout';
 import { LazyField } from '../../../advanced_settings/public';
-import { ToastsStart } from '../../../../core/public';
 import { TrackApplicationView } from '../../../usage_collection/public';
 
 type TelemetryService = TelemetryPluginSetup['telemetryService'];
@@ -40,6 +31,7 @@ interface Props {
   enableSaving: boolean;
   query?: { text: string };
   toasts: ToastsStart;
+  docLinks: DocLinksStart['links'];
 }
 
 interface State {
@@ -115,23 +107,21 @@ export class TelemetryManagementSection extends Component<Props, State> {
             <OptInSecurityExampleFlyout onClose={this.toggleSecurityExample} />
           </TrackApplicationView>
         )}
-        <EuiPanel paddingSize="l">
+        <EuiSplitPanel.Outer hasBorder>
           <EuiForm>
-            <EuiText>
-              <EuiFlexGroup alignItems="baseline">
-                <EuiFlexItem grow={false}>
-                  <h2>
-                    <FormattedMessage id="telemetry.usageDataTitle" defaultMessage="Usage Data" />
-                  </h2>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiText>
+            <EuiSplitPanel.Inner color="subdued">
+              <EuiTitle>
+                <h2>
+                  <FormattedMessage id="telemetry.usageDataTitle" defaultMessage="Usage Data" />
+                </h2>
+              </EuiTitle>
+            </EuiSplitPanel.Inner>
 
-            {this.maybeGetAppliesSettingMessage()}
-            <EuiSpacer size="s" />
-            <LazyField
-              setting={
-                {
+            <EuiSplitPanel.Inner>
+              {this.maybeGetAppliesSettingMessage()}
+              <EuiSpacer size="s" />
+              <LazyField
+                setting={{
                   type: 'boolean',
                   name: 'telemetry:enabled',
                   displayName: i18n.translate('telemetry.provideUsageStatisticsTitle', {
@@ -143,16 +133,20 @@ export class TelemetryManagementSection extends Component<Props, State> {
                   ariaName: i18n.translate('telemetry.provideUsageStatisticsAriaName', {
                     defaultMessage: 'Provide usage statistics',
                   }),
-                } as any
-              }
-              loading={processing}
-              dockLinks={null as any}
-              toasts={null as any}
-              handleChange={this.toggleOptIn}
-              enableSaving={this.props.enableSaving}
-            />
+                  requiresPageReload: false,
+                  category: [],
+                  isOverridden: false,
+                  isCustom: true,
+                }}
+                loading={processing}
+                dockLinks={this.props.docLinks}
+                toasts={this.props.toasts}
+                handleChange={this.toggleOptIn}
+                enableSaving={this.props.enableSaving}
+              />
+            </EuiSplitPanel.Inner>
           </EuiForm>
-        </EuiPanel>
+        </EuiSplitPanel.Outer>
       </Fragment>
     );
   }

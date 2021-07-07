@@ -8,10 +8,10 @@
 import { estypes } from '@elastic/elasticsearch';
 
 export interface MustCondition {
-  bool: Pick<estypes.BoolQuery, 'must'>;
+  bool: Pick<estypes.QueryDslBoolQuery, 'must'>;
 }
 export interface MustNotCondition {
-  bool: Pick<estypes.BoolQuery, 'must_not'>;
+  bool: Pick<estypes.QueryDslBoolQuery, 'must_not'>;
 }
 
 export interface ScriptBasedSortClause {
@@ -24,7 +24,7 @@ export interface ScriptBasedSortClause {
 
 export interface ScriptClause {
   source: string;
-  lang: string;
+  lang: estypes.ScriptLanguage;
   params?: {
     [field: string]:
       | string
@@ -35,16 +35,16 @@ export interface ScriptClause {
   };
 }
 
-export type PinnedQuery = Pick<estypes.QueryContainer, 'pinned'>;
+export type PinnedQuery = Pick<estypes.QueryDslQueryContainer, 'pinned'>;
 
-type BoolClause = Pick<estypes.QueryContainer, 'bool'>;
+type BoolClause = Pick<estypes.QueryDslQueryContainer, 'bool'>;
 export function matchesClauses(...clauses: BoolClause[]): BoolClause {
   return {
     bool: Object.assign({}, ...clauses.map((clause) => clause.bool)),
   };
 }
 
-export function shouldBeOneOf(...should: estypes.QueryContainer[]) {
+export function shouldBeOneOf(...should: estypes.QueryDslQueryContainer[]) {
   return {
     bool: {
       should,
@@ -52,7 +52,7 @@ export function shouldBeOneOf(...should: estypes.QueryContainer[]) {
   };
 }
 
-export function mustBeAllOf(...must: estypes.QueryContainer[]) {
+export function mustBeAllOf(...must: estypes.QueryDslQueryContainer[]) {
   return {
     bool: {
       must,
@@ -60,7 +60,7 @@ export function mustBeAllOf(...must: estypes.QueryContainer[]) {
   };
 }
 
-export function filterDownBy(...filter: estypes.QueryContainer[]) {
+export function filterDownBy(...filter: estypes.QueryDslQueryContainer[]) {
   return {
     bool: {
       filter,
@@ -69,9 +69,9 @@ export function filterDownBy(...filter: estypes.QueryContainer[]) {
 }
 
 export function asPinnedQuery(
-  ids: estypes.PinnedQuery['ids'],
-  organic: estypes.PinnedQuery['organic']
-): Pick<estypes.QueryContainer, 'pinned'> {
+  ids: estypes.QueryDslPinnedQuery['ids'],
+  organic: estypes.QueryDslPinnedQuery['organic']
+): Pick<estypes.QueryDslQueryContainer, 'pinned'> {
   return {
     pinned: {
       ids,
