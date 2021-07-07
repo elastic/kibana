@@ -146,9 +146,9 @@ export async function SecuritySolutionCypressUpgradeCliTestRunner({
         CYPRESS_hostname: process.env.TEST_KIBANA_HOSTNAME,
         // eslint-disable-next-line @typescript-eslint/naming-convention
         CYPRESS_configport: process.env.TEST_KIBANA_PORT,
-        CYPRESS_ELASTICSEARCH_URL: process.env.TEST_ELASTICSEARCH_URL,
+        CYPRESS_ELASTICSEARCH_URL: process.env.TEST_ES_URL,
         CYPRESS_ELASTICSEARCH_USERNAME: process.env.TEST_ES_USER,
-        CYPRESS_ELASTICSEARCH_PASSWORD: process.env.TEST_ES_PASSWORD,
+        CYPRESS_ELASTICSEARCH_PASSWORD: process.env.TEST_ES_PASS,
         CYPRESS_KIBANA_URL: process.env.TEST_KIBANA_URL,
         ...process.env,
       },
