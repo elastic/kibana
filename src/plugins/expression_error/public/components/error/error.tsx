@@ -15,11 +15,11 @@ import { ShowDebugging } from './show_debugging';
 
 const strings = {
   getDescription: () =>
-    i18n.translate('presentationUtil.errorComponent.description', {
+    i18n.translate('expressionError.errorComponent.description', {
       defaultMessage: 'Expression failed with the message:',
     }),
   getTitle: () =>
-    i18n.translate('presentationUtil.errorComponent.title', {
+    i18n.translate('expressionError.errorComponent.title', {
       defaultMessage: 'Whoops! Expression failed',
     }),
 };
