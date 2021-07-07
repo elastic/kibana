@@ -6,67 +6,82 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ALERT_EVALUATION_THRESHOLD, ALERT_EVALUATION_VALUE, ALERT_ID } from '@kbn/rule-data-utils';
+import {
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
+  ALERT_ID,
+  ALERT_START,
+} from '@kbn/rule-data-utils';
+import { modifyUrl } from '@kbn/std';
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/function';
 import { ObservabilityRuleTypeFormatter } from '../../../../observability/public';
 import {
   ComparatorToi18nMap,
-  logThresholdRuleDataNamespace,
   logThresholdRuleDataRT,
+  logThresholdRuleDataSerializedParamsKey,
+  ratioAlertParamsRT,
 } from '../../../common/alerting/logs/log_threshold';
 
 export const formatReason: ObservabilityRuleTypeFormatter = ({ fields }) => {
   const reason = pipe(
     logThresholdRuleDataRT.decode(fields),
     fold(
-      () => unknownReasonDescription,
+      () =>
+        i18n.translate('xpack.infra.logs.alerting.threshold.unknownReasonDescription', {
+          defaultMessage: 'unknown reason',
+        }),
       (logThresholdRuleData) => {
-        const params = logThresholdRuleData[logThresholdRuleDataNamespace][0].params;
+        const params = logThresholdRuleData[logThresholdRuleDataSerializedParamsKey][0];
 
-        // TODO: differentiate count and ratio alerts
-        if ((params.groupBy?.length ?? 0) > 0) {
-          return i18n.translate(
-            'xpack.infra.logs.alerting.threshold.ungroupedAlertReasonDescription',
-            {
-              defaultMessage:
-                '{groupName}: {actualCount} {actualCount, plural, one {log entry} other {log entries} } ({comparator} {thresholdCount}) match the configured conditions.',
-              values: {
-                actualCount: fields[ALERT_EVALUATION_VALUE],
-                comparator: ComparatorToi18nMap[params.count.comparator],
-                groupName: fields[ALERT_ID],
-                thresholdCount: fields[ALERT_EVALUATION_THRESHOLD],
-              },
-            }
-          );
+        const actualCount = fields[ALERT_EVALUATION_VALUE];
+        const groupName = fields[ALERT_ID];
+        const isGrouped = (params.groupBy?.length ?? 0) > 0;
+        const isRatio = ratioAlertParamsRT.is(params);
+        const thresholdCount = fields[ALERT_EVALUATION_THRESHOLD];
+        const translatedComparator = ComparatorToi18nMap[params.count.comparator];
+
+        if (isRatio) {
+          return i18n.translate('xpack.infra.logs.alerting.threshold.ratioAlertReasonDescription', {
+            defaultMessage:
+              '{isGrouped, select, true{{groupName}: } false{}}The ratio of log entries matching the configured conditions is {actualCount} ({translatedComparator} {thresholdCount}).',
+            values: {
+              actualCount,
+              translatedComparator,
+              groupName,
+              isGrouped,
+              thresholdCount,
+            },
+          });
         } else {
-          return i18n.translate(
-            'xpack.infra.logs.alerting.threshold.ungroupedAlertReasonDescription',
-            {
-              defaultMessage:
-                '{actualCount} {actualCount, plural, one {log entry} other {log entries} } ({comparator} {thresholdCount}) match the configured conditions.',
-              values: {
-                actualCount: fields[ALERT_EVALUATION_VALUE],
-                comparator: ComparatorToi18nMap[params.count.comparator],
-                thresholdCount: fields[ALERT_EVALUATION_THRESHOLD],
-              },
-            }
-          );
+          return i18n.translate('xpack.infra.logs.alerting.threshold.countAlertReasonDescription', {
+            defaultMessage:
+              '{isGrouped, select, true{{groupName}: } false{}}{actualCount, plural, one {{actualCount} log entry} other {{actualCount} log entries} } ({translatedComparator} {thresholdCount}) match the configured conditions.',
+            values: {
+              actualCount,
+              translatedComparator,
+              groupName,
+              isGrouped,
+              thresholdCount,
+            },
+          });
         }
       }
     )
   );
 
+  const alertStartDate = fields[ALERT_START];
+  const timestamp = alertStartDate != null ? new Date(alertStartDate).valueOf() : null;
+  const link = modifyUrl('/app/logs/link-to/default/logs', ({ query, ...otherUrlParts }) => ({
+    ...otherUrlParts,
+    query: {
+      ...query,
+      ...(timestamp != null ? { time: `${timestamp}` } : {}),
+    },
+  }));
+
   return {
     reason,
-    // TODO: pass time as unix timestamps
-    link: `/app/logs/link-to/default/logs?time=${fields['kibana.rac.alert.start']}`,
+    link, // TODO: refactor to URL generators
   };
 };
-
-const unknownReasonDescription = i18n.translate(
-  'xpack.infra.logs.alerting.threshold.unknownReasonDescription',
-  {
-    defaultMessage: 'unknown reason',
-  }
-);

@@ -42,8 +42,12 @@ export const createRuleDataClient = ({
           mappings: {
             properties: {
               [logThresholdRuleDataNamespace]: {
-                type: 'flattened',
-                index: false,
+                properties: {
+                  serialized_params: {
+                    type: 'keyword',
+                    index: false,
+                  },
+                },
               },
             },
           },

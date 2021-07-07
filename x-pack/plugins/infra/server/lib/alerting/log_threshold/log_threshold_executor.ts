@@ -18,8 +18,8 @@ import {
   AlertTypeState,
 } from '../../../../../alerting/server';
 import {
-  logThresholdRuleDataNamespace,
   logThresholdRuleDataRT,
+  logThresholdRuleDataSerializedParamsKey,
 } from '../../../../common/alerting/logs/log_threshold';
 import {
   AlertParams,
@@ -96,11 +96,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
           [ALERT_EVALUATION_THRESHOLD]: threshold,
           [ALERT_EVALUATION_VALUE]: value,
           ...logThresholdRuleDataRT.encode({
-            [logThresholdRuleDataNamespace]: [
-              {
-                params,
-              },
-            ],
+            [logThresholdRuleDataSerializedParamsKey]: [params],
           }),
         },
       });

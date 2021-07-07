@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { jsonRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
 import { alertParamsRT as logThresholdAlertParamsRT } from './types';
 
+export const serializedParamsKey = 'serialized_params';
+
 export const logThresholdRuleDataNamespace = 'log_threshold_rule';
+export const logThresholdRuleDataSerializedParamsKey = `${logThresholdRuleDataNamespace}.${serializedParamsKey}` as const;
 
 export const logThresholdRuleDataRT = rt.type({
-  [logThresholdRuleDataNamespace]: rt.array(
-    rt.type({
-      params: logThresholdAlertParamsRT,
-    })
-  ),
+  [logThresholdRuleDataSerializedParamsKey]: rt.array(jsonRt.pipe(logThresholdAlertParamsRT)),
 });
