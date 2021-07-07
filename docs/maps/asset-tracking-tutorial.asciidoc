@@ -132,7 +132,7 @@ Before you can get to the fun of visualizing and alerting on Portland buses, you
     ----------------------------------
 . Replace `<tri_met_app_id>` with your TriMet application id.
 . Replace `<username:password>` with your Elastic Cloud deployment credentials.
-. Replace `<cloud_id>` with your https://www.elastic.co/guide/en/cloud-enterprise/current/ece-cloud-id.html[elastic cloud id].
+. Replace `<cloud_id>` with your {ref}/ece-cloud-id.html[elastic cloud id].
 . Open a terminal window, and then navigate to the Logstash folder.
 . Run Logstash with the TriMet pipeline:
     [source]
