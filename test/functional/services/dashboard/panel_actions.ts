@@ -25,6 +25,7 @@ export class DashboardPanelActionsService extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly inspector = this.ctx.getService('inspector');
+  private readonly retry = this.ctx.getService('retry');
   private readonly header = this.ctx.getPageObject('header');
   private readonly common = this.ctx.getPageObject('common');
   private readonly dashboard = this.ctx.getPageObject('dashboard');
@@ -190,11 +191,13 @@ export class DashboardPanelActionsService extends FtrService {
 
   async unlinkFromLibary(parent?: WebElementWrapper) {
     this.log.debug('unlinkFromLibrary');
-    const libraryNotification = parent
-      ? await this.testSubjects.findDescendant(LIBRARY_NOTIFICATION_TEST_SUBJ, parent)
-      : await this.testSubjects.find(LIBRARY_NOTIFICATION_TEST_SUBJ);
-    await libraryNotification.click(); // how does this click the wrong button sometimes?
-    await this.testSubjects.click('libraryNotificationUnlinkButton');
+    await this.retry.tryForTime(10000, async () => {
+      const libraryNotification = parent
+        ? await this.testSubjects.findDescendant(LIBRARY_NOTIFICATION_TEST_SUBJ, parent)
+        : await this.testSubjects.find(LIBRARY_NOTIFICATION_TEST_SUBJ);
+      await libraryNotification.clickWithRetries(0);
+      await this.testSubjects.click('libraryNotificationUnlinkButton', 10);
+    });
   }
 
   async saveToLibrary(newTitle: string, parent?: WebElementWrapper) {
