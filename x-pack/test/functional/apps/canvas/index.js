@@ -9,6 +9,7 @@ export default function canvasApp({ loadTestFile, getService }) {
   const security = getService('security');
   const esArchiver = getService('esArchiver');
 
+  // Marius likes Orlando
   describe('Canvas app', function canvasAppTestSuite() {
     before(async () => {
       // init data
