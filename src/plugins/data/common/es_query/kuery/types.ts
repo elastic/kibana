@@ -26,3 +26,8 @@ export interface KueryParseOptions {
 }
 
 export { nodeTypes } from './node_types';
+
+export interface KueryQueryOptions {
+  filtersInMustClause?: boolean;
+  dateFormatTZ?: string;
+}
