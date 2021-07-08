@@ -7,16 +7,16 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
-import type { Map as MapboxMap, MapboxOptions, MapMouseEvent } from '@kbn/mapbox-gl';
-
 // @ts-expect-error
 import { spritesheet } from '@elastic/maki';
 import sprites1 from '@elastic/maki/dist/sprite@1.png';
 import sprites2 from '@elastic/maki/dist/sprite@2.png';
 import { Adapters } from 'src/plugins/inspector/public';
 import { Filter } from 'src/plugins/data/public';
-import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
+import { Action, ActionExecutionContext } from 'src/plugins/ui_actions/public';
+
 import { mapboxgl } from '@kbn/mapbox-gl';
+import type { Map as MapboxMap, MapboxOptions, MapMouseEvent } from '@kbn/mapbox-gl';
 import { DrawFilterControl } from './draw_control/draw_filter_control';
 import { ScaleControl } from './scale_control';
 import { TooltipControl } from './tooltip_control';
@@ -25,15 +25,22 @@ import { getInitialView } from './get_initial_view';
 import { getPreserveDrawingBuffer } from '../../kibana_services';
 import { ILayer } from '../../classes/layers/layer';
 import { MapSettings } from '../../reducers/map';
-import { Goto, MapCenterAndZoom, Timeslice } from '../../../common/descriptor_types';
+import {
+  Goto,
+  MapCenterAndZoom,
+  TileMetaFeature,
+  Timeslice,
+} from '../../../common/descriptor_types';
 import {
   DECIMAL_DEGREES_PRECISION,
   KBN_TOO_MANY_FEATURES_IMAGE_ID,
+  LAYER_TYPE,
   RawValue,
   ZOOM_PRECISION,
 } from '../../../common/constants';
 import { getGlyphUrl, isRetina } from '../../util';
 import { syncLayerOrder } from './sort_layers';
+
 import {
   addSpriteSheetToMapFromImageData,
   loadSpriteSheetImageData,
@@ -45,6 +52,7 @@ import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { MapExtentState } from '../../actions';
 import { TileStatusTracker } from './tile_status_tracker';
 import { DrawFeatureControl } from './draw_control/draw_feature_control';
+import { TiledVectorLayer } from '../../classes/layers/tiled_vector_layer/tiled_vector_layer';
 
 export interface Props {
   isMapReady: boolean;
@@ -69,6 +77,7 @@ export interface Props {
   renderTooltipContent?: RenderToolTipContent;
   setAreTilesLoaded: (layerId: string, areTilesLoaded: boolean) => void;
   timeslice?: Timeslice;
+  updateMetaFromTiles: (layerId: string, features: TileMetaFeature[]) => void;
   featureModeActive: boolean;
   filterModeActive: boolean;
 }
@@ -77,7 +86,7 @@ interface State {
   mbMap: MapboxMap | undefined;
 }
 
-export class MBMap extends Component<Props, State> {
+export class MbMap extends Component<Props, State> {
   private _checker?: ResizeChecker;
   private _isMounted: boolean = false;
   private _containerRef: HTMLDivElement | null = null;
@@ -115,6 +124,16 @@ export class MBMap extends Component<Props, State> {
     }
     this.props.onMapDestroyed();
   }
+
+  // This keeps track of the latest update calls, per layerId
+  _queryForMeta = (layer: ILayer) => {
+    if (this.state.mbMap && layer.isVisible() && layer.getType() === LAYER_TYPE.TILED_VECTOR) {
+      const mbFeatures = (layer as TiledVectorLayer).queryTileMetaFeatures(this.state.mbMap);
+      if (mbFeatures !== null) {
+        this.props.updateMetaFromTiles(layer.getId(), mbFeatures);
+      }
+    }
+  };
 
   _debouncedSync = _.debounce(() => {
     if (this._isMounted && this.props.isMapReady && this.state.mbMap) {
@@ -184,7 +203,10 @@ export class MBMap extends Component<Props, State> {
       this._tileStatusTracker = new TileStatusTracker({
         mbMap,
         getCurrentLayerList: () => this.props.layerList,
-        setAreTilesLoaded: this.props.setAreTilesLoaded,
+        updateTileStatus: (layer: ILayer, areTilesLoaded: boolean) => {
+          this.props.setAreTilesLoaded(layer.getId(), areTilesLoaded);
+          this._queryForMeta(layer);
+        },
       });
 
       const tooManyFeaturesImageSrc =
@@ -250,6 +272,7 @@ export class MBMap extends Component<Props, State> {
         this.props.extentChanged(this._getMapState());
       }, 100)
     );
+
     // Attach event only if view control is visible, which shows lat/lon
     if (!this.props.settings.hideViewControl) {
       const throttledSetMouseCoordinates = _.throttle((e: MapMouseEvent) => {

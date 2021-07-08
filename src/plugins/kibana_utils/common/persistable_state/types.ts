@@ -99,11 +99,21 @@ export interface PersistableState<P extends SerializableState = SerializableStat
  * accumulated over time. Migration functions are keyed using semver version
  * of Kibana releases.
  */
-export type MigrateFunctionsObject = { [semver: string]: MigrateFunction };
+export type MigrateFunctionsObject = { [semver: string]: MigrateFunction<any, any> };
 export type MigrateFunction<
   FromVersion extends SerializableState = SerializableState,
   ToVersion extends SerializableState = SerializableState
 > = (state: FromVersion) => ToVersion;
+
+/**
+ * migrate function runs the specified migration
+ * @param state
+ * @param version
+ */
+export type PersistableStateMigrateFn = (
+  state: SerializableState,
+  version: string
+) => SerializableState;
 
 /**
  * @todo Shall we remove this?
@@ -151,23 +161,6 @@ export interface PersistableStateService<P extends SerializableState = Serializa
   extract(state: P): { state: P; references: SavedObjectReference[] };
 
   /**
-   * Migrate function runs a specified migration of a {@link PersistableState}
-   * item.
-   *
-   * When using this method it is up to consumer to make sure that the
-   * migration function are executed in the right semver order. To avoid such
-   * potentially error prone complexity, prefer using `migrateToLatest` method
-   * instead.
-   *
-   * @param state The old persistable state serializable state object, which
-   *              needs a migration.
-   * @param version Semver version of the migration to execute.
-   * @returns Persistable state object updated with the specified migration
-   *          applied to it.
-   */
-  migrate(state: SerializableState, version: string): SerializableState;
-
-  /**
    * A function which receives the state of an older object and version and
    * should migrate the state of the object to the latest possible version using
    * the `.migrations` dictionary provided on a {@link PersistableState} item.
@@ -177,4 +170,9 @@ export interface PersistableStateService<P extends SerializableState = Serializa
    * @returns A serializable state object migrated to the latest state.
    */
   migrateToLatest?: (state: VersionedState) => VersionedState<P>;
+
+  /**
+   * returns all registered migrations
+   */
+  getAllMigrations?: () => MigrateFunctionsObject;
 }
