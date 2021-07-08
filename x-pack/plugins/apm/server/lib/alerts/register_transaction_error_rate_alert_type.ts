@@ -17,7 +17,11 @@ import {
   getEnvironmentLabel,
 } from '../../../common/environment_filter_values';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
-import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
+import {
+  AlertType,
+  ALERT_TYPES_CONFIG,
+  APM_SERVER_FEATURE_ID,
+} from '../../../common/alert_types';
 import {
   EVENT_OUTCOME,
   PROCESSOR_EVENT,
@@ -75,7 +79,7 @@ export function registerTransactionErrorRateAlertType({
           apmActionVariables.interval,
         ],
       },
-      producer: 'apm',
+      producer: APM_SERVER_FEATURE_ID,
       minimumLicenseRequired: 'basic',
       isExportable: true,
       executor: async ({ services, params: alertParams }) => {
