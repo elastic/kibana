@@ -5,63 +5,129 @@
  * 2.0.
  */
 
-const bucketsA = [
+const bucketsA = (from: number) => [
+  {
+    doc_count: null,
+    aggregatedValue: { value: null, values: [{ key: 95.0, value: null }] },
+    from_as_string: new Date(from).toISOString(),
+  },
   {
     doc_count: 2,
     aggregatedValue: { value: 0.5, values: [{ key: 95.0, value: 0.5 }] },
+    from_as_string: new Date(from + 60000).toISOString(),
+  },
+  {
+    doc_count: 2,
+    aggregatedValue: { value: 0.5, values: [{ key: 95.0, value: 0.5 }] },
+    from_as_string: new Date(from + 120000).toISOString(),
+  },
+  {
+    doc_count: 2,
+    aggregatedValue: { value: 0.5, values: [{ key: 95.0, value: 0.5 }] },
+    from_as_string: new Date(from + 180000).toISOString(),
   },
   {
     doc_count: 3,
     aggregatedValue: { value: 1.0, values: [{ key: 95.0, value: 1.0 }] },
-    to_as_string: new Date(1577858400000).toISOString(),
+    from_as_string: new Date(from + 240000).toISOString(),
+  },
+  {
+    doc_count: 1,
+    aggregatedValue: { value: 1.0, values: [{ key: 95.0, value: 1.0 }] },
+    from_as_string: new Date(from + 300000).toISOString(),
   },
 ];
 
-const bucketsB = [
+const bucketsB = (from: number) => [
+  {
+    doc_count: 0,
+    aggregatedValue: { value: null, values: [{ key: 99.0, value: null }] },
+    from_as_string: new Date(from).toISOString(),
+  },
   {
     doc_count: 4,
     aggregatedValue: { value: 2.5, values: [{ key: 99.0, value: 2.5 }] },
+    from_as_string: new Date(from + 60000).toISOString(),
+  },
+  {
+    doc_count: 4,
+    aggregatedValue: { value: 2.5, values: [{ key: 99.0, value: 2.5 }] },
+    from_as_string: new Date(from + 120000).toISOString(),
+  },
+  {
+    doc_count: 4,
+    aggregatedValue: { value: 2.5, values: [{ key: 99.0, value: 2.5 }] },
+    from_as_string: new Date(from + 180000).toISOString(),
   },
   {
     doc_count: 5,
     aggregatedValue: { value: 3.5, values: [{ key: 99.0, value: 3.5 }] },
+    from_as_string: new Date(from + 240000).toISOString(),
+  },
+  {
+    doc_count: 1,
+    aggregatedValue: { value: 3, values: [{ key: 99.0, value: 3 }] },
+    from_as_string: new Date(from + 300000).toISOString(),
   },
 ];
 
-const bucketsC = [
+const bucketsC = (from: number) => [
+  {
+    doc_count: 0,
+    aggregatedValue: { value: null },
+    from_as_string: new Date(from).toISOString(),
+  },
   {
     doc_count: 2,
     aggregatedValue: { value: 0.5 },
+    from_as_string: new Date(from + 60000).toISOString(),
+  },
+  {
+    doc_count: 2,
+    aggregatedValue: { value: 0.5 },
+    from_as_string: new Date(from + 120000).toISOString(),
+  },
+  {
+    doc_count: 2,
+    aggregatedValue: { value: 0.5 },
+    from_as_string: new Date(from + 180000).toISOString(),
   },
   {
     doc_count: 3,
-    aggregatedValue: { value: 16.0 },
+    aggregatedValue: { value: 16 },
+    from_as_string: new Date(from + 240000).toISOString(),
+  },
+  {
+    doc_count: 1,
+    aggregatedValue: { value: 3 },
+    from_as_string: new Date(from + 300000).toISOString(),
   },
 ];
 
-const previewBucketsA = Array.from(Array(60), (_, i) => bucketsA[i % 2]); // Repeat bucketsA to a total length of 60
-const previewBucketsB = Array.from(Array(60), (_, i) => bucketsB[i % 2]);
-const previewBucketsWithNulls = [
+const previewBucketsA = (from: number) => Array.from(Array(60), (_, i) => bucketsA(from)[i % 2]); // Repeat bucketsA to a total length of 60
+const previewBucketsB = (from: number) => Array.from(Array(60), (_, i) => bucketsB(from)[i % 2]);
+const previewBucketsWithNulls = (from: number) => [
   ...Array.from(Array(10), (_, i) => ({ aggregatedValue: { value: null } })),
-  ...previewBucketsA.slice(10),
+  ...previewBucketsA(from).slice(10),
 ];
-const previewBucketsRepeat = Array.from(Array(60), (_, i) => bucketsA[Math.max(0, (i % 3) - 1)]);
+const previewBucketsRepeat = (from: number) =>
+  Array.from(Array(60), (_, i) => bucketsA(from)[Math.max(0, (i % 3) - 1)]);
 
-export const basicMetricResponse = {
+export const basicMetricResponse = (from: number) => ({
   aggregations: {
     aggregatedIntervals: {
-      buckets: bucketsA,
+      buckets: bucketsA(from),
     },
   },
-};
+});
 
-export const alternateMetricResponse = {
+export const alternateMetricResponse = (from: number) => ({
   aggregations: {
     aggregatedIntervals: {
-      buckets: bucketsB,
+      buckets: bucketsB(from),
     },
   },
-};
+});
 
 export const emptyMetricResponse = {
   aggregations: {
@@ -71,21 +137,21 @@ export const emptyMetricResponse = {
   },
 };
 
-export const emptyRateResponse = {
+export const emptyRateResponse = (from: number) => ({
   aggregations: {
     aggregatedIntervals: {
       buckets: [
         {
           doc_count: 2,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          aggregatedValue_max: { value: null },
+          aggregatedValueMax: { value: null },
+          from_as_string: new Date(from).toISOString(),
         },
       ],
     },
   },
-};
+});
 
-export const basicCompositeResponse = {
+export const basicCompositeResponse = (from: number) => ({
   aggregations: {
     groupings: {
       after_key: { groupBy0: 'foo' },
@@ -95,7 +161,7 @@ export const basicCompositeResponse = {
             groupBy0: 'a',
           },
           aggregatedIntervals: {
-            buckets: bucketsA,
+            buckets: bucketsA(from),
           },
         },
         {
@@ -103,7 +169,7 @@ export const basicCompositeResponse = {
             groupBy0: 'b',
           },
           aggregatedIntervals: {
-            buckets: bucketsB,
+            buckets: bucketsB(from),
           },
         },
       ],
@@ -114,9 +180,9 @@ export const basicCompositeResponse = {
       value: 2,
     },
   },
-};
+});
 
-export const alternateCompositeResponse = {
+export const alternateCompositeResponse = (from: number) => ({
   aggregations: {
     groupings: {
       after_key: { groupBy0: 'foo' },
@@ -126,7 +192,7 @@ export const alternateCompositeResponse = {
             groupBy0: 'a',
           },
           aggregatedIntervals: {
-            buckets: bucketsB,
+            buckets: bucketsB(from),
           },
         },
         {
@@ -134,7 +200,7 @@ export const alternateCompositeResponse = {
             groupBy0: 'b',
           },
           aggregatedIntervals: {
-            buckets: bucketsA,
+            buckets: bucketsA(from),
           },
         },
       ],
@@ -145,28 +211,28 @@ export const alternateCompositeResponse = {
       value: 2,
     },
   },
-};
+});
 
 export const compositeEndResponse = {
   aggregations: {},
   hits: { total: { value: 0 } },
 };
 
-export const changedSourceIdResponse = {
+export const changedSourceIdResponse = (from: number) => ({
   aggregations: {
     aggregatedIntervals: {
-      buckets: bucketsC,
+      buckets: bucketsC(from),
     },
   },
-};
+});
 
-export const basicMetricPreviewResponse = {
+export const basicMetricPreviewResponse = (from: number) => ({
   aggregations: {
     aggregatedIntervals: {
-      buckets: previewBucketsA,
+      buckets: previewBucketsA(from),
     },
   },
-};
+});
 
 export const alternateMetricPreviewResponse = {
   aggregations: {
@@ -176,15 +242,15 @@ export const alternateMetricPreviewResponse = {
   },
 };
 
-export const repeatingMetricPreviewResponse = {
+export const repeatingMetricPreviewResponse = (from: number) => ({
   aggregations: {
     aggregatedIntervals: {
-      buckets: previewBucketsRepeat,
+      buckets: previewBucketsRepeat(from),
     },
   },
-};
+});
 
-export const basicCompositePreviewResponse = {
+export const basicCompositePreviewResponse = (from: number) => ({
   aggregations: {
     groupings: {
       after_key: { groupBy0: 'foo' },
@@ -194,7 +260,7 @@ export const basicCompositePreviewResponse = {
             groupBy0: 'a',
           },
           aggregatedIntervals: {
-            buckets: previewBucketsA,
+            buckets: previewBucketsA(from),
           },
         },
         {
@@ -202,7 +268,7 @@ export const basicCompositePreviewResponse = {
             groupBy0: 'b',
           },
           aggregatedIntervals: {
-            buckets: previewBucketsB,
+            buckets: previewBucketsB(from),
           },
         },
       ],
@@ -213,4 +279,4 @@ export const basicCompositePreviewResponse = {
       value: 2,
     },
   },
-};
+});

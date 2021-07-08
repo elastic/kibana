@@ -18,6 +18,7 @@ import { InfraSources } from '../../sources';
 import { MetricThresholdAlertExecutorOptions } from './register_metric_threshold_alert_type';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import moment from 'moment';
 
 interface AlertTestInstance {
   instance: AlertInstanceMock;
@@ -119,14 +120,12 @@ describe('The metric threshold alert type', () => {
       expect(mostRecentAction(instanceID)).toBe(undefined);
     });
     test('reports expected values to the action context', async () => {
-      const now = 1577858400000;
       await execute(Comparator.GT, [0.75]);
       const { action } = mostRecentAction(instanceID);
       expect(action.group).toBe('*');
       expect(action.reason).toContain('current value is 1');
       expect(action.reason).toContain('threshold of 0.75');
       expect(action.reason).toContain('test.metric.1');
-      expect(action.timestamp).toBe(new Date(now).toISOString());
     });
   });
 
@@ -428,7 +427,6 @@ describe('The metric threshold alert type', () => {
         },
       });
     test('reports values converted from decimals to percentages to the action context', async () => {
-      const now = 1577858400000;
       await execute();
       const { action } = mostRecentAction(instanceID);
       expect(action.group).toBe('*');
@@ -436,7 +434,6 @@ describe('The metric threshold alert type', () => {
       expect(action.reason).toContain('threshold of 75%');
       expect(action.threshold.condition0[0]).toBe('75%');
       expect(action.value.condition0).toBe('100%');
-      expect(action.timestamp).toBe(new Date(now).toISOString());
     });
   });
 });
@@ -460,7 +457,8 @@ const executor = createMetricThresholdExecutor(mockLibs);
 
 const services: AlertServicesMock = alertsMock.createAlertServices();
 services.scopedClusterClient.asCurrentUser.search.mockImplementation((params?: any): any => {
-  if (params.index === 'alternatebeat-*') return mocks.changedSourceIdResponse;
+  const from = params?.body.query.bool.filter[0]?.range['@timestamp'].gte;
+  if (params.index === 'alternatebeat-*') return mocks.changedSourceIdResponse(from);
   const metric = params?.body.query.bool.filter[1]?.exists.field;
   if (params?.body.aggs.groupings) {
     if (params?.body.aggs.groupings.composite.after) {
@@ -470,25 +468,27 @@ services.scopedClusterClient.asCurrentUser.search.mockImplementation((params?: a
     }
     if (metric === 'test.metric.2') {
       return elasticsearchClientMock.createSuccessTransportRequestPromise(
-        mocks.alternateCompositeResponse
+        mocks.alternateCompositeResponse(from)
       );
     }
     return elasticsearchClientMock.createSuccessTransportRequestPromise(
-      mocks.basicCompositeResponse
+      mocks.basicCompositeResponse(from)
     );
   }
   if (metric === 'test.metric.2') {
     return elasticsearchClientMock.createSuccessTransportRequestPromise(
-      mocks.alternateMetricResponse
+      mocks.alternateMetricResponse(from)
     );
   } else if (metric === 'test.metric.3') {
     return elasticsearchClientMock.createSuccessTransportRequestPromise(
-      params?.body.aggs.aggregatedIntervals.aggregations.aggregatedValue_max
+      params?.body.aggs.aggregatedIntervals.aggregations.aggregatedValueMax
         ? mocks.emptyRateResponse
         : mocks.emptyMetricResponse
     );
   }
-  return elasticsearchClientMock.createSuccessTransportRequestPromise(mocks.basicMetricResponse);
+  return elasticsearchClientMock.createSuccessTransportRequestPromise(
+    mocks.basicMetricResponse(from)
+  );
 });
 services.savedObjectsClient.get.mockImplementation(async (type: string, sourceId: string) => {
   if (sourceId === 'alternate')
