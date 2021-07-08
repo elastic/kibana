@@ -83,7 +83,7 @@ Based on the criteria above, define the following rule details:
 * **Notify** - "Every time alert is active"
 * **Environment** - `all`
 * **Is above** - `25 errors`
-* **For the last** - `25 errors`
+* **For the last** - `1 minute`
 
 Select the **Email** connector and click **Create a connector**.
 Fill out the required details: sender, host, port, etc., and click **save**.
