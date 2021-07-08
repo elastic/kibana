@@ -37,3 +37,4 @@ export type RiskScoreQueryProps = QueryTabBodyProps & {
 export type HostRulesQueryProps = RiskScoreQueryProps & {
   hostName: string;
 };
+export type UserRulesQueryProps = HostRulesQueryProps;

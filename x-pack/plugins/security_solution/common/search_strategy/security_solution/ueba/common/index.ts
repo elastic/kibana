@@ -31,3 +31,9 @@ export interface HostRulesItem {
   [HostRulesFields.ruleName]: Maybe<string>;
   [HostRulesFields.ruleType]: Maybe<string>;
 }
+export enum UserRulesFields {
+  userName = 'user_name',
+  riskScore = 'risk_score',
+  rules = 'rules',
+  ruleCount = 'rule_count',
+}

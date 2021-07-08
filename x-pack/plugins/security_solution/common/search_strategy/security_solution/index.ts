@@ -72,11 +72,13 @@ import {
   CtiQueries,
 } from './cti';
 import {
-  UebaQueries,
-  RiskScoreStrategyResponse,
-  RiskScoreRequestOptions,
-  HostRulesStrategyResponse,
   HostRulesRequestOptions,
+  HostRulesStrategyResponse,
+  RiskScoreRequestOptions,
+  RiskScoreStrategyResponse,
+  UebaQueries,
+  UserRulesRequestOptions,
+  UserRulesStrategyResponse,
 } from './ueba';
 
 export * from './hosts';
@@ -122,6 +124,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? RiskScoreStrategyResponse
   : T extends UebaQueries.hostRules
   ? HostRulesStrategyResponse
+  : T extends UebaQueries.userRules
+  ? UserRulesStrategyResponse
   : T extends HostsQueries.overview
   ? HostsOverviewStrategyResponse
   : T extends HostsQueries.authentications
@@ -216,6 +220,8 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? RiskScoreRequestOptions
   : T extends UebaQueries.hostRules
   ? HostRulesRequestOptions
+  : T extends UebaQueries.userRules
+  ? UserRulesRequestOptions
   : T extends typeof MatrixHistogramQuery
   ? MatrixHistogramRequestOptions
   : T extends CtiQueries.eventEnrichment

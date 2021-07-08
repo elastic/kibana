@@ -6,15 +6,10 @@
  */
 
 import { getOr } from 'lodash/fp';
-import {
-  HostRulesHit,
-  HostRulesEdges,
-  HostRulesFields,
-  RuleNameHit,
-} from '../../../../../../common';
+import { HostRulesHit, HostRulesEdges, HostRulesFields } from '../../../../../../common';
 
 export const formatHostRulesData = (buckets: HostRulesHit[]): HostRulesEdges[] =>
-  getOr([], '[0].rule_name.buckets', buckets).map((bucket: RuleNameHit) => ({
+  buckets.map((bucket) => ({
     node: {
       _id: bucket.key,
       [HostRulesFields.hits]: bucket.doc_count,

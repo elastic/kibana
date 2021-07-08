@@ -12,8 +12,10 @@ import {
 import { SecuritySolutionFactory } from '../types';
 import { riskScore } from './risk_score';
 import { hostRules } from './host_rules';
+import { userRules } from './user_rules';
 
 export const uebaFactory: Record<UebaQueries, SecuritySolutionFactory<FactoryQueryTypes>> = {
   [UebaQueries.riskScore]: riskScore,
   [UebaQueries.hostRules]: hostRules,
+  [UebaQueries.userRules]: userRules,
 };

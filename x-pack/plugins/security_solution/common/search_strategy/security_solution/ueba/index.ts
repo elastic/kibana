@@ -6,6 +6,7 @@
  */
 
 export * from './host_rules';
+export * from './user_rules';
 export * from './risk_score';
 export * from './common';
 

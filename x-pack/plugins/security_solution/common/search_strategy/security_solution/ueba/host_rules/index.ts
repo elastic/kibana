@@ -10,7 +10,8 @@ import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/comm
 import { HostRulesItem, HostRulesFields } from '../common';
 import { CursorType, Hit, Inspect, Maybe, PageInfoPaginated, SortField } from '../../../common';
 import { RequestOptionsPaginated } from '../..';
-export interface RuleNameHit {
+
+export interface HostRulesHit extends Hit {
   key: string;
   doc_count: number;
   risk_score: {
@@ -22,18 +23,8 @@ export interface RuleNameHit {
       doc_count: number;
     }>;
   };
-}
-export interface HostRulesHit extends Hit {
-  _source: {
-    '@timestamp': string;
-  };
-  key: string;
-  doc_count: number;
-  risk_score: {
-    value?: number;
-  };
-  rule_name: {
-    buckets?: RuleNameHit[];
+  rule_count: {
+    value: number;
   };
 }
 

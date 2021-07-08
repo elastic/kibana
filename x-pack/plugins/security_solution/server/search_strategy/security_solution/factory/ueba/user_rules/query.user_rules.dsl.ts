@@ -6,16 +6,16 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { Direction, HostRulesRequestOptions } from '../../../../../../common/search_strategy';
+import { Direction, UserRulesRequestOptions } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
-export const buildHostRulesQuery = ({
+export const buildUserRulesQuery = ({
   defaultIndex,
   docValueFields,
   filterQuery,
   hostName,
   timerange: { from, to },
-}: HostRulesRequestOptions) => {
+}: UserRulesRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     {
@@ -37,17 +37,13 @@ export const buildHostRulesQuery = ({
     body: {
       ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggs: {
-        risk_score: {
-          sum: {
-            field: 'signal.rule.risk_score',
-          },
-        },
-        rule_name: {
+        user_data: {
           terms: {
-            field: 'signal.rule.name',
+            field: 'user.name',
             order: {
-              risk_score: Direction.desc,
+              risk_score: 'desc',
             },
+            size: 20,
           },
           aggs: {
             risk_score: {
@@ -55,16 +51,31 @@ export const buildHostRulesQuery = ({
                 field: 'signal.rule.risk_score',
               },
             },
-            rule_type: {
+            rule_name: {
               terms: {
-                field: 'signal.rule.type',
+                field: 'signal.rule.name',
+                order: {
+                  risk_score: Direction.desc,
+                },
+              },
+              aggs: {
+                risk_score: {
+                  sum: {
+                    field: 'signal.rule.risk_score',
+                  },
+                },
+                rule_type: {
+                  terms: {
+                    field: 'signal.rule.type',
+                  },
+                },
               },
             },
-          },
-        },
-        rule_count: {
-          cardinality: {
-            field: 'signal.rule.name',
+            rule_count: {
+              cardinality: {
+                field: 'signal.rule.name',
+              },
+            },
           },
         },
       },

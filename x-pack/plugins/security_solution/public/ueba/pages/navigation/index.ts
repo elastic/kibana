@@ -7,3 +7,4 @@
 
 export * from './risk_score_query_tab_body';
 export * from './host_rules_query_tab_body';
+export * from './user_rules_query_tab_body';
