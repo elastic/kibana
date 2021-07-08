@@ -10,6 +10,7 @@ import { isEqual, cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
 import { NotificationsStart, IUiSettingsClient } from 'kibana/public';
+import { SerializableState } from 'src/plugins/kibana_utils/common';
 import {
   createKbnUrlStateStorage,
   createStateContainer,
@@ -32,7 +33,7 @@ import {
 } from '../../../../../../data/public';
 import { migrateLegacyQuery } from '../../../helpers/migrate_legacy_query';
 import { DiscoverGridSettings } from '../../../components/discover_grid/types';
-import { DISCOVER_APP_URL_GENERATOR, DiscoverUrlGeneratorState } from '../../../../url_generator';
+import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../../locator';
 import { SavedSearch } from '../../../../saved_searches';
 import { handleSourceColumnState } from '../../../angular/helpers';
 
@@ -351,7 +352,7 @@ export function createSearchSessionRestorationDataProvider(deps: {
     },
     getUrlGeneratorData: async () => {
       return {
-        urlGeneratorId: DISCOVER_APP_URL_GENERATOR,
+        urlGeneratorId: DISCOVER_APP_LOCATOR,
         initialState: createUrlGeneratorState({
           ...deps,
           getSavedSearchId,
@@ -377,7 +378,7 @@ function createUrlGeneratorState({
   data: DataPublicPluginStart;
   getSavedSearchId: () => string | undefined;
   shouldRestoreSearchSession: boolean;
-}): DiscoverUrlGeneratorState {
+}): DiscoverAppLocatorParams {
   const appState = appStateContainer.get();
   return {
     filters: data.query.filterManager.getFilters(),
@@ -389,7 +390,7 @@ function createUrlGeneratorState({
       : data.query.timefilter.timefilter.getTime(),
     searchSessionId: shouldRestoreSearchSession ? data.search.session.getSessionId() : undefined,
     columns: appState.columns,
-    sort: appState.sort,
+    sort: appState.sort as string[][] & SerializableState,
     savedQuery: appState.savedQuery,
     interval: appState.interval,
     useHash: false,
