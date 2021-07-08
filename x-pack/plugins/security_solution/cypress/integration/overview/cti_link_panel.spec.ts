@@ -24,7 +24,6 @@ describe('CTI Link Panel', () => {
 
   describe('disabled threat intel module', () => {
     it('renders error inner panel', () => {
-      esArchiverUnload('threat_indicator');
       loginAndWaitForPage(OVERVIEW_URL);
       cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_ERROR_INNER_PANEL}`).should('exist');
     });
