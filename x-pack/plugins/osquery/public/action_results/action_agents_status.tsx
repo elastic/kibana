@@ -51,11 +51,15 @@ const ActionAgentsStatusComponent: React.FC<ActionAgentsStatusProps> = ({
     };
   }, [agentIds, aggregations.failed, aggregations.successful, aggregations.totalResponded]);
 
-  useEffect(() => setIsLive(aggregations.totalResponded !== agentIds?.length ?? !expired), [
-    agentIds?.length,
-    aggregations.totalResponded,
-    expired,
-  ]);
+  useEffect(
+    () =>
+      setIsLive(() => {
+        if (!agentIds?.length) return false;
+
+        return !!(aggregations.totalResponded !== agentIds?.length) ?? !expired;
+      }),
+    [agentIds?.length, aggregations.totalResponded, expired]
+  );
 
   return (
     <>

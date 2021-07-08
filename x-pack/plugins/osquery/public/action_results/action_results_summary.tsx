@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { i18n } from '@kbn/i18n';
-import { EuiLink, EuiSpacer, EuiInMemoryTable, EuiCodeBlock } from '@elastic/eui';
+import { EuiLink, EuiInMemoryTable, EuiCodeBlock } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { PLUGIN_ID } from '../../../fleet/common';
@@ -171,17 +171,24 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   );
 
   useEffect(() => {
-    setIsLive(
-      // @ts-expect-error update types
-      logsResults?.rawResponse.aggregations?.unique_agents.value !== agentIds?.length ?? !expired
-    );
-  }, [agentIds?.length, expired, logsResults?.rawResponse.aggregations?.unique_agents]);
+    setIsLive(() => {
+      if (!agentIds?.length) return false;
+
+      const uniqueAgentsRepliedCount =
+        // @ts-expect-error update types
+        logsResults?.rawResponse.aggregations?.unique_agents.value ?? 0;
+
+      return !!(uniqueAgentsRepliedCount !== agentIds?.length - aggregations.failed) ?? !expired;
+    });
+  }, [
+    agentIds?.length,
+    aggregations.failed,
+    expired,
+    logsResults?.rawResponse.aggregations?.unique_agents,
+  ]);
 
   return edges.length ? (
-    <>
-      <EuiSpacer />
-      <EuiInMemoryTable loading={isLive} items={edges} columns={columns} pagination={pagination} />
-    </>
+    <EuiInMemoryTable loading={isLive} items={edges} columns={columns} pagination={pagination} />
   ) : null;
 };
 

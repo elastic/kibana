@@ -65,14 +65,6 @@ export const formSchema = {
             defaultMessage="Minimum Osquery version"
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.osquery.scheduledQueryGroup.queryFlyoutForm.versionFieldOptionalLabel"
-              defaultMessage="(optional)"
-            />
-          </EuiText>
-        </EuiFlexItem>
       </EuiFlexGroup>
     ) as unknown) as string,
     validations: [],

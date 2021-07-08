@@ -18,7 +18,7 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
-  EuiDescribedFormGroup,
+  EuiText,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -128,10 +128,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
             <EuiSpacer />
             <CommonUseField path="query" component={CodeEditorField} />
             <EuiSpacer />
-            <EuiDescribedFormGroup
-              title={<h3>Set heading level based on context</h3>}
-              description={'Will be wrapped in a small, subdued EuiText block.'}
-            >
+            <EuiFlexGroup>
               <EuiFlexItem>
                 <CommonUseField
                   path="interval"
@@ -141,6 +138,16 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
                 <EuiSpacer />
                 <CommonUseField
                   path="version"
+                  labelAppend={
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs" color="subdued">
+                        <FormattedMessage
+                          id="xpack.osquery.scheduledQueryGroup.queryFlyoutForm.versionFieldOptionalLabel"
+                          defaultMessage="(optional)"
+                        />
+                      </EuiText>
+                    </EuiFlexItem>
+                  }
                   // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
                   euiFieldProps={{
                     isDisabled: !isFieldSupported,
@@ -160,7 +167,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
                   euiFieldProps={{ disabled: !isFieldSupported }}
                 />
               </EuiFlexItem>
-            </EuiDescribedFormGroup>
+            </EuiFlexGroup>
             <EuiSpacer />
           </Form>
           {!isFieldSupported ? (

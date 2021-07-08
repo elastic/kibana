@@ -219,14 +219,18 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
   useEffect(
     () =>
-      setIsLive(
-        aggregations.totalResponded !== agentIds?.length ||
+      setIsLive(() => {
+        if (!agentIds?.length) return false;
+
+        const uniqueAgentsRepliedCount =
           // @ts-expect-error-type
-          allResultsData?.rawResponse.aggregations?.unique_agents.value !== agentIds?.length
-      ),
+          allResultsData?.rawResponse.aggregations?.unique_agents.value ?? 0;
+
+        return !!(uniqueAgentsRepliedCount !== agentIds?.length - aggregations.failed);
+      }),
     [
       agentIds?.length,
-      aggregations.totalResponded,
+      aggregations.failed,
       // @ts-expect-error-type
       allResultsData?.rawResponse.aggregations?.unique_agents.value,
     ]

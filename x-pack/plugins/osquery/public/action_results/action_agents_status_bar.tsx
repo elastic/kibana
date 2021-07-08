@@ -26,10 +26,11 @@ export const AgentStatusBar: React.FC<{
   agentStatus: { [k in ActionAgentStatus]: number };
 }> = ({ agentStatus }) => {
   const palette = useMemo(() => {
+    let stop = 0;
     return AGENT_STATUSES.reduce((acc, status) => {
-      const previousStop = acc.length > 0 ? acc[acc.length - 1].stop : 0;
+      stop += agentStatus[status] || 0;
       acc.push({
-        stop: previousStop + (agentStatus[status] || 0),
+        stop,
         color: getColorForAgentStatus(status),
       });
       return acc;
