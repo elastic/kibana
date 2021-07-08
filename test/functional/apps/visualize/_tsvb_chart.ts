@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('metric', () => {
-      const { visualBuilder, visChart } = PageObjects;
+      const { visualBuilder } = PageObjects;
 
       beforeEach(async () => {
         await visualBuilder.resetPage();
