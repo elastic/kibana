@@ -62,6 +62,7 @@ export { BaseParams };
 export interface BasePayload extends BaseParams {
   headers: string;
   spaceId?: string;
+  isDeprecated?: boolean;
 }
 
 // default fn type for CreateJobFnFactory

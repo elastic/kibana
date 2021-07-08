@@ -34,7 +34,7 @@ export interface RuleDataWriter {
 export interface IRuleDataClient {
   getReader(options?: { namespace?: string }): RuleDataReader;
   getWriter(options?: { namespace?: string }): RuleDataWriter;
-  createOrUpdateWriteTarget(options: { namespace?: string }): Promise<void>;
+  createWriteTargetIfNeeded(options: { namespace?: string }): Promise<void>;
 }
 
 export interface RuleDataClientConstructorOptions {

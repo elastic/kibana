@@ -523,6 +523,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     // (undocumented)
     elasticsearch: ElasticsearchServiceSetup;
     // (undocumented)
+    executionContext: ExecutionContextSetup;
+    // (undocumented)
     getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
     // (undocumented)
     http: HttpServiceSetup & {
@@ -550,6 +552,8 @@ export interface CoreStart {
     coreUsageData: CoreUsageDataStart;
     // (undocumented)
     elasticsearch: ElasticsearchServiceStart;
+    // (undocumented)
+    executionContext: ExecutionContextStart;
     // (undocumented)
     http: HttpServiceStart;
     // (undocumented)
@@ -1015,6 +1019,15 @@ export interface ErrorHttpResponseOptions {
     headers?: ResponseHeaders;
 }
 
+// @public (undocumented)
+export interface ExecutionContextSetup {
+    get(): IExecutionContextContainer | undefined;
+    set(context: Partial<KibanaServerExecutionContext>): void;
+}
+
+// @public (undocumented)
+export type ExecutionContextStart = ExecutionContextSetup;
+
 // @public
 export interface FakeRequest {
     headers: Headers;
@@ -1187,6 +1200,14 @@ export interface ICustomClusterClient extends IClusterClient {
     close: () => Promise<void>;
 }
 
+// @public (undocumented)
+export interface IExecutionContextContainer {
+    // (undocumented)
+    toJSON(): Readonly<KibanaServerExecutionContext>;
+    // (undocumented)
+    toString(): string;
+}
+
 // @public
 export interface IExternalUrlConfig {
     readonly policy: IExternalUrlPolicy[];
@@ -1303,6 +1324,15 @@ export interface IUiSettingsClient {
     setMany: (changes: Record<string, any>) => Promise<void>;
 }
 
+// @public (undocumented)
+export interface KibanaExecutionContext {
+    readonly description: string;
+    readonly id: string;
+    readonly name: string;
+    readonly type: string;
+    readonly url?: string;
+}
+
 // @public
 export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Method extends RouteMethod = any> {
     // @internal (undocumented)
@@ -1373,6 +1403,12 @@ export const kibanaResponseFactory: {
     accepted: (options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
     noContent: (options?: HttpResponseOptions) => KibanaResponse<undefined>;
 };
+
+// @public (undocumented)
+export interface KibanaServerExecutionContext extends Partial<KibanaExecutionContext> {
+    // (undocumented)
+    requestId: string;
+}
 
 // Warning: (ae-forgotten-export) The symbol "KnownKeys" needs to be exported by the entry point index.d.ts
 //
