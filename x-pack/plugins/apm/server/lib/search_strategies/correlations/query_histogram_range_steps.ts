@@ -45,7 +45,7 @@ export const getHistogramIntervalRequest = (
   },
 });
 
-export const fetchTransactionDurationHistogramRangesteps = async (
+export const fetchTransactionDurationHistogramRangeSteps = async (
   esClient: ElasticsearchClient,
   params: SearchServiceParams
 ): Promise<number[]> => {
@@ -59,7 +59,7 @@ export const fetchTransactionDurationHistogramRangesteps = async (
 
   if (resp.body.aggregations === undefined) {
     throw new Error(
-      'fetchTransactionDurationHistogramRangesteps failed, did not return aggregations.'
+      'fetchTransactionDurationHistogramRangeSteps failed, did not return aggregations.'
     );
   }
 

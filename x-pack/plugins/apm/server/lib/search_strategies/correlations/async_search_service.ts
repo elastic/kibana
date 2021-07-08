@@ -11,7 +11,7 @@ import { fetchTransactionDurationFieldCandidates } from './query_field_candidate
 import { fetchTransactionDurationFieldValuePairs } from './query_field_value_pairs';
 import { fetchTransactionDurationPercentiles } from './query_percentiles';
 import { fetchTransactionDurationCorrelation } from './query_correlation';
-import { fetchTransactionDurationHistogramRangesteps } from './query_histogram_rangesteps';
+import { fetchTransactionDurationHistogramRangeSteps } from './query_histogram_range_steps';
 import { fetchTransactionDurationRanges, HistogramItem } from './query_ranges';
 import type {
   AsyncSearchProviderProgress,
@@ -78,7 +78,7 @@ export const asyncSearchServiceProvider = (
         return;
       }
 
-      const histogramRangeSteps = await fetchTransactionDurationHistogramRangesteps(
+      const histogramRangeSteps = await fetchTransactionDurationHistogramRangeSteps(
         esClient,
         params
       );
