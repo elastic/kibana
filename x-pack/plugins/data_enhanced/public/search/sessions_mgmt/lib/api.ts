@@ -11,6 +11,7 @@ import moment from 'moment';
 import { from, race, timer } from 'rxjs';
 import { mapTo, tap } from 'rxjs/operators';
 import type { SharePluginStart } from 'src/plugins/share/public';
+import { SerializableState } from 'src/plugins/kibana_utils/common';
 import {
   ISessionsClient,
   SearchUsageCollector,
@@ -24,7 +25,7 @@ import {
 } from '../types';
 import { SessionsConfigSchema } from '..';
 
-type UrlGeneratorsStart = SharePluginStart['urlGenerators'];
+type UrlService = SharePluginStart['url'];
 
 function getActions(status: UISearchSessionState) {
   const actions: ACTION[] = [];
@@ -61,14 +62,26 @@ function getUIStatus(session: PersistedSearchSessionSavedObjectAttributes): UISe
   return session.status;
 }
 
+const getLocatorId = (urlGeneratorIOrLocatorId: string): string => {
+  switch (urlGeneratorIOrLocatorId) {
+    case 'DASHBOARD_APP_URL_GENERATOR':
+      return 'DASHBOARD_APP_LOCATOR';
+    case 'DISCOVER_APP_URL_GENERATOR':
+      return 'DISCOVER_APP_LOCATOR';
+    default:
+      return urlGeneratorIOrLocatorId;
+  }
+};
+
 async function getUrlFromState(
-  urls: UrlGeneratorsStart,
-  urlGeneratorId: string,
-  state: Record<string, unknown>
+  urls: UrlService,
+  urlGeneratorOrLocatorId: string,
+  params: Record<string, unknown>
 ) {
+  const locatorId = getLocatorId(urlGeneratorOrLocatorId);
   let url = '/';
   try {
-    url = await urls.getUrlGenerator(urlGeneratorId).createUrl(state);
+    url = await urls.locators.get(locatorId)!.getUrl(params as SerializableState);
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error('Could not create URL from restoreState');
@@ -79,7 +92,7 @@ async function getUrlFromState(
 }
 
 // Helper: factory for a function to map server objects to UI objects
-const mapToUISession = (urls: UrlGeneratorsStart, config: SessionsConfigSchema) => async (
+const mapToUISession = (urls: UrlService, config: SessionsConfigSchema) => async (
   savedObject: SavedObject<PersistedSearchSessionSavedObjectAttributes>
 ): Promise<UISession> => {
   const {
@@ -119,7 +132,7 @@ const mapToUISession = (urls: UrlGeneratorsStart, config: SessionsConfigSchema) 
 };
 
 interface SearchSessionManagementDeps {
-  urls: UrlGeneratorsStart;
+  url: UrlService;
   notifications: NotificationsStart;
   application: ApplicationStart;
   usageCollector?: SearchUsageCollector;
@@ -170,7 +183,7 @@ export class SearchSessionsMgmtAPI {
         const savedObjects = result.saved_objects as Array<
           SavedObject<PersistedSearchSessionSavedObjectAttributes>
         >;
-        return await Promise.all(savedObjects.map(mapToUISession(this.deps.urls, this.config)));
+        return await Promise.all(savedObjects.map(mapToUISession(this.deps.url, this.config)));
       }
     } catch (err) {
       // eslint-disable-next-line no-console
