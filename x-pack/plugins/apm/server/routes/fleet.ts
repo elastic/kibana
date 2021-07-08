@@ -163,6 +163,9 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
     const coreStart = await resources.core.start();
     const esClient = coreStart.elasticsearch.client.asScoped(resources.request)
       .asCurrentUser;
+    const cloudPluginSetup = plugins.cloud?.setup;
+    console.log('cloudPluginSetup:');
+    console.log(cloudPluginSetup);
     const fleetPluginStart = await plugins.fleet.start();
     const securityPluginStart = await plugins.security.start();
     const hasRequiredRole = isSuperuser({ securityPluginStart, request });
@@ -171,6 +174,7 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
     }
     return {
       cloud_apm_package_policy: await createCloudApmPackgePolicy({
+        cloudPluginSetup,
         fleetPluginStart,
         savedObjectsClient,
         esClient,
