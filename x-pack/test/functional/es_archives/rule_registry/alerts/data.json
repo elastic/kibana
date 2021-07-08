@@ -16,7 +16,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".alerts-security-solution",
+    "index": ".alerts-security.alerts",
     "id": "020202",
     "source": {
       "@timestamp": "2020-12-16T15:16:18.570Z",

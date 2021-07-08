@@ -25,7 +25,7 @@
 {
   "type": "index",
   "value": {
-    "index": ".alerts-security-solution",
+    "index": ".alerts-security.alerts",
     "mappings": {
       "properties": {
         "message": {

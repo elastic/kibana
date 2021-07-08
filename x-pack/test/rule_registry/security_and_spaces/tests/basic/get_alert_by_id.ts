@@ -56,7 +56,7 @@ export default ({ getService }: FtrProviderContext) => {
   const APM_ALERT_ID = 'NoxgpHkBqbdrfX07MqXV';
   const APM_ALERT_INDEX = '.alerts-observability-apm';
   const SECURITY_SOLUTION_ALERT_ID = '020202';
-  const SECURITY_SOLUTION_ALERT_INDEX = '.alerts-security-solution';
+  const SECURITY_SOLUTION_ALERT_INDEX = '.alerts-security.alerts';
 
   const getAPMIndexName = async (user: User) => {
     const {

@@ -55,7 +55,7 @@ export default ({ getService }: FtrProviderContext) => {
   const APM_ALERT_ID = 'NoxgpHkBqbdrfX07MqXV';
   const APM_ALERT_INDEX = '.alerts-observability-apm';
   const SECURITY_SOLUTION_ALERT_ID = '020202';
-  const SECURITY_SOLUTION_ALERT_INDEX = '.alerts-security-solution';
+  const SECURITY_SOLUTION_ALERT_INDEX = '.alerts-security.alerts';
   const ALERT_VERSION = Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'); // required for optimistic concurrency control
 
   const getAPMIndexName = async (user: User) => {
@@ -155,7 +155,7 @@ export default ({ getService }: FtrProviderContext) => {
               ids: [APM_ALERT_ID],
               status: 'closed',
               index: 'this index does not exist',
-              _version: Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'),
+              _version: ALERT_VERSION,
             })
             .expect(404);
         });
