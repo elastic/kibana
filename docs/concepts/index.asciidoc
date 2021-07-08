@@ -83,7 +83,7 @@ resubmit your searches. You can also click *Refresh* to resubmit the search.
 This might be useful if you use {kib} to monitor the underlying data.
 
 [role="screenshot"]
-image:concepts/images/refresh-every.png["section of time filter where you can configure a refresh rate"]
+image:concepts/images/refresh-every.png["section of time filter where you can configure a refresh rate", width=75%]
 
 
 [float]
