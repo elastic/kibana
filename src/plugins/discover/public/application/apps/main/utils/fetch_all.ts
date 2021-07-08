@@ -74,11 +74,14 @@ export function fetchAll(
   };
 
   const all = forkJoin({
-    documents: fetchDocuments(dataSubjects.documents$, searchSource.createCopy(), subFetchDeps),
-    totalHits: fetchTotalHits(dataSubjects.totalHits$, searchSource.createCopy(), subFetchDeps),
+    documents: fetchDocuments(dataSubjects, searchSource.createCopy(), subFetchDeps),
+    totalHits:
+      hideChart || !indexPattern.timeFieldName
+        ? fetchTotalHits(dataSubjects, searchSource.createCopy(), subFetchDeps)
+        : of(null),
     chart:
       !hideChart && indexPattern.timeFieldName
-        ? fetchChart(dataSubjects.charts$, searchSource.createCopy(), subFetchDeps)
+        ? fetchChart(dataSubjects, searchSource.createCopy(), subFetchDeps)
         : of(null),
   });
 

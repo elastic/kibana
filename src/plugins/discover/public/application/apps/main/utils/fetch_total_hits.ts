@@ -15,11 +15,11 @@ import {
 } from '../../../../../../data/public';
 import { Adapters } from '../../../../../../inspector/common';
 import { FetchStatus } from '../../../types';
-import { DataTotalHits$ } from '../services/use_saved_search';
+import { SavedSearchData } from '../services/use_saved_search';
 import { sendErrorMsg, sendLoadingMsg } from '../services/use_saved_search_messages';
 
 export function fetchTotalHits(
-  dataTotalHits$: DataTotalHits$,
+  data$: SavedSearchData,
   searchSource: SearchSource,
   {
     abortController,
@@ -35,6 +35,7 @@ export function fetchTotalHits(
     searchSessionId: string;
   }
 ) {
+  const { totalHits$ } = data$;
   const indexPattern = searchSource.getField('index');
   searchSource.setField('trackTotalHits', true);
   searchSource.setField('filter', data.query.timefilter.timefilter.createFilter(indexPattern!));
@@ -42,7 +43,7 @@ export function fetchTotalHits(
   searchSource.removeField('sort');
   searchSource.removeField('fields');
 
-  sendLoadingMsg(dataTotalHits$);
+  sendLoadingMsg(totalHits$);
 
   const fetch$ = searchSource
     .fetch$({
@@ -63,14 +64,14 @@ export function fetchTotalHits(
   fetch$.subscribe(
     (res) => {
       const totalHitsNr = res.rawResponse.hits.total as number;
-      dataTotalHits$.next({ fetchStatus: FetchStatus.COMPLETE, result: totalHitsNr });
+      totalHits$.next({ fetchStatus: FetchStatus.COMPLETE, result: totalHitsNr });
       onResults(totalHitsNr > 0);
     },
     (error) => {
       if (error instanceof Error && error.name === 'AbortError') {
         return;
       }
-      sendErrorMsg(dataTotalHits$, error);
+      sendErrorMsg(totalHits$, error);
     }
   );
 

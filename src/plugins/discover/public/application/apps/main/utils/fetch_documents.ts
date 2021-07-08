@@ -10,11 +10,11 @@ import { filter } from 'rxjs/operators';
 import { Adapters } from '../../../../../../inspector/common';
 import { isCompleteResponse, SearchSource } from '../../../../../../data/common';
 import { FetchStatus } from '../../../types';
-import { DataDocuments$ } from '../services/use_saved_search';
+import { SavedSearchData } from '../services/use_saved_search';
 import { sendErrorMsg, sendLoadingMsg } from '../services/use_saved_search_messages';
 
 export const fetchDocuments = (
-  dataDocuments$: DataDocuments$,
+  data$: SavedSearchData,
   searchSource: SearchSource,
   {
     abortController,
@@ -28,11 +28,12 @@ export const fetchDocuments = (
     searchSessionId: string;
   }
 ) => {
+  const { documents$ } = data$;
   searchSource.setField('trackTotalHits', false);
   searchSource.setField('highlightAll', true);
   searchSource.setField('version', false);
 
-  sendLoadingMsg(dataDocuments$);
+  sendLoadingMsg(documents$);
 
   const fetch$ = searchSource
     .fetch$({
@@ -54,7 +55,7 @@ export const fetchDocuments = (
     (res) => {
       const documents = res.rawResponse.hits.hits;
 
-      dataDocuments$.next({
+      documents$.next({
         fetchStatus: FetchStatus.COMPLETE,
         result: documents,
       });
@@ -65,7 +66,7 @@ export const fetchDocuments = (
         return;
       }
 
-      sendErrorMsg(dataDocuments$, error);
+      sendErrorMsg(documents$, error);
     }
   );
   return fetch$;

@@ -18,13 +18,13 @@ import { getChartAggConfigs, getDimensions } from './index';
 import { tabifyAggResponse } from '../../../../../../data/common';
 import { buildPointSeriesData } from '../components/chart/point_series';
 import { FetchStatus } from '../../../types';
-import { DataCharts$ } from '../services/use_saved_search';
+import { SavedSearchData } from '../services/use_saved_search';
 import { AppState } from '../services/discover_state';
 import { ReduxLikeStateContainer } from '../../../../../../kibana_utils/common';
 import { sendErrorMsg, sendLoadingMsg } from '../services/use_saved_search_messages';
 
 export function fetchChart(
-  dataCharts$: DataCharts$,
+  data$: SavedSearchData,
   searchSource: SearchSource,
   {
     abortController,
@@ -42,10 +42,13 @@ export function fetchChart(
     searchSessionId: string;
   }
 ) {
+  const { charts$, totalHits$ } = data$;
+
   const interval = appStateContainer.getState().interval ?? 'auto';
   const chartAggConfigs = updateSearchSource(searchSource, interval, data);
 
-  sendLoadingMsg(dataCharts$);
+  sendLoadingMsg(charts$);
+  sendLoadingMsg(totalHits$);
 
   const fetch$ = searchSource
     .fetch$({
@@ -67,6 +70,10 @@ export function fetchChart(
   fetch$.subscribe(
     (res) => {
       try {
+        const totalHitsNr = res.rawResponse.hits.total as number;
+        totalHits$.next({ fetchStatus: FetchStatus.COMPLETE, result: totalHitsNr });
+        onResults(totalHitsNr > 0);
+
         const bucketAggConfig = chartAggConfigs.aggs[1];
         const tabifiedData = tabifyAggResponse(chartAggConfigs, res.rawResponse);
         const dimensions = getDimensions(chartAggConfigs, data);
@@ -74,14 +81,13 @@ export function fetchChart(
           ? bucketAggConfig?.buckets?.getInterval()
           : undefined;
         const chartData = buildPointSeriesData(tabifiedData, dimensions!);
-        onResults(true);
-        dataCharts$.next({
+        charts$.next({
           fetchStatus: FetchStatus.COMPLETE,
           chartData,
           bucketInterval,
         });
       } catch (e) {
-        dataCharts$.next({
+        charts$.next({
           fetchStatus: FetchStatus.ERROR,
           error: e,
         });
@@ -91,7 +97,8 @@ export function fetchChart(
       if (error instanceof Error && error.name === 'AbortError') {
         return;
       }
-      sendErrorMsg(dataCharts$, error);
+      sendErrorMsg(charts$, error);
+      sendErrorMsg(totalHits$, error);
     }
   );
   return fetch$;
@@ -105,7 +112,7 @@ export function updateSearchSource(
   const indexPattern = searchSource.getField('index')!;
   searchSource.setField('filter', data.query.timefilter.timefilter.createFilter(indexPattern!));
   searchSource.setField('size', 0);
-  searchSource.setField('trackTotalHits', false);
+  searchSource.setField('trackTotalHits', true);
   const chartAggConfigs = getChartAggConfigs(searchSource, interval, data);
   searchSource.setField('aggs', chartAggConfigs.toDsl());
   searchSource.removeField('sort');

@@ -12,9 +12,20 @@ import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { fetchTotalHits } from './fetch_total_hits';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 
+function getDataSubjects() {
+  return {
+    main$: new BehaviorSubject({ fetchStatus: FetchStatus.UNINITIALIZED }),
+    documents$: new BehaviorSubject({ fetchStatus: FetchStatus.UNINITIALIZED }),
+    totalHits$: new BehaviorSubject({ fetchStatus: FetchStatus.UNINITIALIZED }),
+    charts$: new BehaviorSubject({ fetchStatus: FetchStatus.UNINITIALIZED }),
+  };
+}
+
 describe('test fetchTotalHits', () => {
   test('changes of fetchStatus are correct when starting with FetchStatus.UNINITIALIZED', async (done) => {
-    const data$ = new BehaviorSubject({ fetchStatus: FetchStatus.UNINITIALIZED });
+    const subjects = getDataSubjects();
+    const { totalHits$ } = subjects;
+
     const deps = {
       abortController: new AbortController(),
       inspectorAdapters: { requests: new RequestAdapter() },
@@ -25,9 +36,9 @@ describe('test fetchTotalHits', () => {
 
     const stateArr: FetchStatus[] = [];
 
-    data$.subscribe((value) => stateArr.push(value.fetchStatus));
+    totalHits$.subscribe((value) => stateArr.push(value.fetchStatus));
 
-    fetchTotalHits(data$, savedSearchMock.searchSource, deps).subscribe({
+    fetchTotalHits(subjects, savedSearchMock.searchSource, deps).subscribe({
       complete: () => {
         expect(stateArr).toEqual([
           FetchStatus.UNINITIALIZED,
@@ -39,7 +50,8 @@ describe('test fetchTotalHits', () => {
     });
   });
   test('change of fetchStatus on fetch error', async (done) => {
-    const data$ = new BehaviorSubject({ fetchStatus: FetchStatus.UNINITIALIZED });
+    const subjects = getDataSubjects();
+    const { totalHits$ } = subjects;
     const deps = {
       abortController: new AbortController(),
       inspectorAdapters: { requests: new RequestAdapter() },
@@ -52,9 +64,9 @@ describe('test fetchTotalHits', () => {
 
     const stateArr: FetchStatus[] = [];
 
-    data$.subscribe((value) => stateArr.push(value.fetchStatus));
+    totalHits$.subscribe((value) => stateArr.push(value.fetchStatus));
 
-    fetchTotalHits(data$, savedSearchMock.searchSource, deps).subscribe({
+    fetchTotalHits(subjects, savedSearchMock.searchSource, deps).subscribe({
       error: () => {
         expect(stateArr).toEqual([
           FetchStatus.UNINITIALIZED,
