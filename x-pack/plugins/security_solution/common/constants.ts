@@ -119,6 +119,7 @@ export const DEFAULT_INDEX_PATTERN = [
   'logs-*',
   'packetbeat-*',
   'winlogbeat-*',
+  'risk_score_*', // TEMP for testing UEBA data
 ];
 
 /** This Kibana Advanced Setting enables the `Security news` feed widget */

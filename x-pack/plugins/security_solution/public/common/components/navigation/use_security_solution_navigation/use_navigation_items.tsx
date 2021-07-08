@@ -80,7 +80,9 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
       },
       {
         ...securityNavGroup.investigate,
-        items: hasCasesReadPermissions ? [navTabs.timelines, navTabs.case] : [navTabs.timelines],
+        items: hasCasesReadPermissions
+          ? [navTabs.timelines, navTabs.case, navTabs.ueba]
+          : [navTabs.timelines, navTabs.ueba],
       },
       {
         ...securityNavGroup.manage,
