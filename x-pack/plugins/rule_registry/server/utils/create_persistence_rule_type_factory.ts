@@ -32,6 +32,7 @@ export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory 
               alertInstanceFactory(alert['kibana.rac.alert.uuid']! as string)
             );
           },
+          /*
           findAlerts: async (query) => {
             const { body } = await scopedClusterClient.asCurrentUser.search({
               ...query,
@@ -63,6 +64,7 @@ export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory 
                 };
               });
           },
+          */
         },
       });
 

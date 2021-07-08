@@ -34,7 +34,7 @@ export type CreatePersistenceRuleTypeFactory = (options: {
   TAlertInstanceContext extends AlertInstanceContext,
   TServices extends {
     alertWithPersistence: PersistenceAlertService<TAlertInstanceContext>;
-    findAlerts: PersistenceAlertQueryService;
+    // findAlerts: PersistenceAlertQueryService;
   }
 >(
   type: AlertTypeWithExecutor<TParams, TAlertInstanceContext, TServices>

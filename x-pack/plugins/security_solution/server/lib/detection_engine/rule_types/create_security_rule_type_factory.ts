@@ -6,7 +6,9 @@
  */
 import { flow } from 'fp-ts/lib/function';
 import { Either, chain, fold, tryCatch } from 'fp-ts/lib/Either';
+import { schema } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
+import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { SavedObjectsClientContract } from 'kibana/server';
 import { toError } from '@kbn/securitysolution-list-api';
 import { ExceptionListItemSchema, ListArray } from '@kbn/securitysolution-io-ts-list-types';
@@ -25,7 +27,7 @@ import {
   AlertInstanceState,
   AlertTypeParams,
 } from '../../../../../alerting/common';
-import { AlertAttributes } from '../signals/types';
+import { AlertAttributes, SignalRuleAlertTypeDefinition } from '../signals/types';
 import { buildRuleMessageFactory } from '../signals/rule_messages';
 import {
   checkPrivilegesFromEsClient,
@@ -46,12 +48,11 @@ type CreateSecurityRuleTypeFactory = (options: {
   logger: Logger;
   ruleDataClient: RuleDataClient;
 }) => <
-  TParams extends RuleParams, 
+  TParams extends RuleParams,
   TAlertInstanceContext extends AlertInstanceContext,
   TServices extends {
     alertWithPersistence: PersistenceAlertService<TAlertInstanceContext>;
-    findAlerts: PersistenceAlertQueryService;
-    securityServices: { exceptionItems: ExceptionListItemSchema[]; listClient: ListClient };
+    // securityServices: { exceptionItems: ExceptionListItemSchema[]; listClient: ListClient };
   }
 >(
   type: AlertTypeWithExecutor<TParams, TAlertInstanceContext, TServices>
@@ -101,7 +102,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
       // move this collection of lines into a function in utils
       // so that we can use it in create rules route, bulk, etc.
       try {
-        if (!isMachineLearningParams(params as RuleParams)) {
+        if (!isMachineLearningParams(params)) {
           // FIXME?
           const index = params.index;
           const hasTimestampOverride = !!timestampOverride;
@@ -186,18 +187,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
         lists: (params.exceptionsList as ListArray) ?? [],
       });
 
-      const result = await type.executor({
-        ...options,
-        services: {
-          ...options.services,
-          securityServices: {
-            exceptionItems,
-            listClient,
-          },
-        },
-      });
-
-      return result;
+      return type.executor(options);
     },
   });
 };

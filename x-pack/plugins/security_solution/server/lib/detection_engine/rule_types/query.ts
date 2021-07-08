@@ -16,9 +16,20 @@ import { RuleDataClient } from '../../../../../rule_registry/server';
 import { CUSTOM_ALERT_TYPE_ID } from '../../../../common/constants';
 import { SetupPlugins } from '../../../../target/types/server/plugin';
 
+import { RuleParams } from '../schemas/rule_schemas';
+
 import { createSecurityRuleTypeFactory } from './create_security_rule_type_factory';
 
-export const createQueryAlertType = (lists: SetupPlugins['lists'], ruleDataClient: RuleDataClient, logger: Logger) => {
+interface AlertTypeParams {
+  indexPatterns: string[];
+  customQuery: string;
+}
+
+export const createQueryAlertType = (
+  lists: SetupPlugins['lists'],
+  ruleDataClient: RuleDataClient,
+  logger: Logger
+) => {
   const createSecurityRuleType = createSecurityRuleTypeFactory({
     lists,
     logger,
@@ -46,10 +57,8 @@ export const createQueryAlertType = (lists: SetupPlugins['lists'], ruleDataClien
     minimumLicenseRequired: 'basic',
     isExportable: false,
     producer: 'security-solution',
-    async executor({
-      services: { alertWithPersistence, findAlerts },
-      params: { indexPatterns, customQuery },
-    }) {
+    async executor(options) {
+      const indexPatterns: string[] = []; // FIXME
       try {
         const indexPattern: IIndexPattern = {
           fields: [],
@@ -73,7 +82,8 @@ export const createQueryAlertType = (lists: SetupPlugins['lists'], ruleDataClien
           },
         };
 
-        const alerts = await findAlerts(query);
+        // const alerts = await findAlerts(query);
+        const alerts = [];
         alertWithPersistence(alerts).forEach((alert) => {
           alert.scheduleActions('default', { server: 'server-test' });
         });
