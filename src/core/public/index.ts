@@ -186,11 +186,7 @@ export type {
 
 export type { DeprecationsServiceStart, ResolveDeprecationResponse } from './deprecations';
 
-export type {
-  IExecutionContextContainer,
-  ExecutionContextServiceStart,
-  KibanaExecutionContext,
-} from './execution_context';
+export type { IExecutionContextContainer, ExecutionContextServiceStart } from './execution_context';
 
 export type { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
 
