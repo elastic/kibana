@@ -20,15 +20,21 @@ export default ({ getService }: FtrProviderContext) => {
     before(async () => {
       await ml.testResources.setKibanaTimeZoneToUTC();
       testModelIds = await ml.api.createdTestTrainedModels('regression', 5, true);
+      await ml.api.createModelAlias('dfa_regression_model_n_0', 'dfa_regression_model_alias');
+      await ml.api.createIngestPipeline('dfa_regression_model_alias');
     });
 
     after(async () => {
-      await ml.api.cleanMlIndices();
       // delete created ingest pipelines
-      await Promise.all(testModelIds.map((modelId) => ml.api.deleteIngestPipeline(modelId)));
+      await Promise.all(
+        ['dfa_regression_model_alias', ...testModelIds].map((modelId) =>
+          ml.api.deleteIngestPipeline(modelId)
+        )
+      );
+      await ml.api.cleanMlIndices();
     });
 
-    it('returns all trained models with associated pipelines', async () => {
+    it('returns all trained models with associated pipelines including aliases', async () => {
       const { body } = await supertest
         .get(`/api/ml/trained_models?with_pipelines=true`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
@@ -38,7 +44,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body.length).to.eql(6);
 
       const sampleModel = body.find((v: any) => v.model_id === 'dfa_regression_model_n_0');
-      expect(Object.keys(sampleModel.pipelines).length).to.eql(1);
+      expect(Object.keys(sampleModel.pipelines).length).to.eql(2);
     });
 
     it('returns models without pipeline in case user does not have required permission', async () => {

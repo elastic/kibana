@@ -998,6 +998,14 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       );
     },
 
+    async createModelAlias(modelId: string, modelAlias: string) {
+      log.debug(`Creating alias for model "${modelId}"`);
+      await esSupertest
+        .put(`/_ml/trained_models/${modelId}/model_aliases/${modelAlias}`)
+        .expect(200);
+      log.debug('> Model alias created');
+    },
+
     /**
      * Creates ingest pipelines for trained model
      * @param modelId

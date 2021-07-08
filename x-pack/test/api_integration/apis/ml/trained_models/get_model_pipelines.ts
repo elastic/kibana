@@ -23,9 +23,9 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await ml.api.cleanMlIndices();
       // delete all created ingest pipelines
       await Promise.all(testModelIds.map((modelId) => ml.api.deleteIngestPipeline(modelId)));
+      await ml.api.cleanMlIndices();
     });
 
     it('returns trained model pipelines by id', async () => {
