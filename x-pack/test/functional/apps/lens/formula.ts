@@ -236,5 +236,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'count()'
       );
     });
+
+    it('should allow numeric only formulas', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+      await PageObjects.lens.switchToVisualization('lnsDatatable');
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsDatatable_metrics > lns-empty-dimension',
+        operation: 'formula',
+        formula: `0`,
+      });
+
+      await PageObjects.lens.dragDimensionToDimension(
+        'lnsDatatable_metrics > lns-dimensionTrigger',
+        'lnsDatatable_metrics > lns-empty-dimension'
+      );
+      expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('0');
+      expect(await PageObjects.lens.getDatatableCellText(0, 1)).to.eql('0');
+    });
   });
 }
