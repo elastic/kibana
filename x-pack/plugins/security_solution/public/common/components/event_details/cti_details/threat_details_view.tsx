@@ -139,6 +139,7 @@ const ThreatDetailsViewComponent: React.FC<{
         return (
           <Fragment key={id}>
             <ThreatDetailsHeader field={field} provider={provider} value={value} type={type} />
+            <EuiSpacer size="m" />
             <StyledEuiInMemoryTable
               columns={columns}
               compressed
