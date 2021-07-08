@@ -168,13 +168,6 @@ describe('EngineRouter', () => {
     expect(wrapper.find(ApiLogs)).toHaveLength(1);
   });
 
-  it('renders a source engines view', () => {
-    setMockValues({ ...values, myRole: { canViewMetaEngineSourceEngines: true } });
-    const wrapper = shallow(<EngineRouter />);
-
-    expect(wrapper.find(SourceEngines)).toHaveLength(1);
-  });
-
   it('renders a search ui view', () => {
     setMockValues({ ...values, myRole: { canManageEngineSearchUi: true } });
     const wrapper = shallow(<EngineRouter />);
