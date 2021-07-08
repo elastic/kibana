@@ -16,16 +16,17 @@ import type {
   TimeSeriesExplorerAppState,
   TimeSeriesExplorerGlobalState,
   TimeSeriesExplorerUrlState,
-} from '../../common/types/ml_url_generator';
-import { ML_PAGES } from '../../common/constants/ml_url_generator';
-import { createGenericMlUrl } from './common';
-import { setStateToKbnUrl } from '../../../../../src/plugins/kibana_utils/public';
-import { getGroupQueryText, getJobQueryText } from '../../common/util/string_utils';
-import { AppPageState, ListingPageUrlState } from '../../common/types/common';
+} from '../../../common/types/locator';
+import { ML_PAGES } from '../../../common/constants/locator';
+import { formatGenericMlUrl } from './common';
+import { setStateToKbnUrl } from '../../../../../../src/plugins/kibana_utils/public';
+import { getGroupQueryText, getJobQueryText } from '../../../common/util/string_utils';
+import { AppPageState, ListingPageUrlState } from '../../../common/types/common';
+
 /**
  * Creates URL to the Anomaly Detection Job management page
  */
-export function createAnomalyDetectionJobManagementUrl(
+export function formatAnomalyDetectionJobManagementUrl(
   appBasePath: string,
   params: AnomalyDetectionUrlState['pageState']
 ): string {
@@ -69,22 +70,22 @@ export function createAnomalyDetectionJobManagementUrl(
   return url;
 }
 
-export function createAnomalyDetectionCreateJobSelectType(
+export function formatAnomalyDetectionCreateJobSelectType(
   appBasePath: string,
   pageState: MlGenericUrlState['pageState']
 ): string {
-  return createGenericMlUrl(
+  return formatGenericMlUrl(
     appBasePath,
     ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE,
     pageState
   );
 }
 
-export function createAnomalyDetectionCreateJobSelectIndex(
+export function formatAnomalyDetectionCreateJobSelectIndex(
   appBasePath: string,
   pageState: MlGenericUrlState['pageState']
 ): string {
-  return createGenericMlUrl(
+  return formatGenericMlUrl(
     appBasePath,
     ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX,
     pageState
@@ -94,7 +95,7 @@ export function createAnomalyDetectionCreateJobSelectIndex(
 /**
  * Creates URL to the Anomaly Explorer page
  */
-export function createExplorerUrl(
+export function formatExplorerUrl(
   appBasePath: string,
   params: ExplorerUrlState['pageState']
 ): string {
@@ -146,7 +147,7 @@ export function createExplorerUrl(
 /**
  * Creates URL to the SingleMetricViewer page
  */
-export function createSingleMetricViewerUrl(
+export function formatSingleMetricViewerUrl(
   appBasePath: string,
   params: TimeSeriesExplorerUrlState['pageState']
 ): string {

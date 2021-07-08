@@ -43,7 +43,7 @@ import { useToastNotificationService } from '../../services/toast_notification_s
 import { AnnotationUpdatesService } from '../../services/annotations_service';
 import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
 import { useTimeSeriesExplorerUrlState } from '../../timeseriesexplorer/hooks/use_timeseriesexplorer_url_state';
-import type { TimeSeriesExplorerAppState } from '../../../../common/types/ml_url_generator';
+import type { TimeSeriesExplorerAppState } from '../../../../common/types/locator';
 import type { TimeRangeBounds } from '../../util/time_buckets';
 
 export const timeSeriesExplorerRouteFactory = (

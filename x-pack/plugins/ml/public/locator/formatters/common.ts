@@ -6,8 +6,8 @@
  */
 
 import { isEmpty } from 'lodash';
-import { MlGenericUrlState } from '../../common/types/ml_url_generator';
-import { setStateToKbnUrl } from '../../../../../src/plugins/kibana_utils/public';
+import { MlGenericUrlState } from '../../../common/types/locator';
+import { setStateToKbnUrl } from '../../../../../../src/plugins/kibana_utils/public';
 
 export function extractParams<UrlState>(urlState: UrlState) {
   // page should be guaranteed to exist here but <UrlState> is unknown
@@ -20,7 +20,7 @@ export function extractParams<UrlState>(urlState: UrlState) {
  * Creates generic index based search ML url
  * e.g. `jobs/new_job/datavisualizer?index=3da93760-e0af-11ea-9ad3-3bcfc330e42a`
  */
-export function createGenericMlUrl(
+export function formatGenericMlUrl(
   appBasePath: string,
   page: MlGenericUrlState['page'],
   pageState: MlGenericUrlState['pageState']
