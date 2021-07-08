@@ -150,6 +150,14 @@ export class TelemetryEventsSender {
       ignore_unavailable: false,
       size: 0, // no query results required - only aggregation quantity
       body: {
+        query: {
+          range: {
+            '@timestamp': {
+              gte: 'now-24h',
+              lt: 'now',
+            },
+          },
+        },
         aggs: {
           endpoint_agents: {
             terms: {
@@ -211,6 +219,14 @@ export class TelemetryEventsSender {
       ignore_unavailable: false,
       size: 0, // no query results required - only aggregation quantity
       body: {
+        query: {
+          range: {
+            '@timestamp': {
+              gte: 'now-24h',
+              lt: 'now',
+            },
+          },
+        },
         aggs: {
           policy_responses: {
             terms: {

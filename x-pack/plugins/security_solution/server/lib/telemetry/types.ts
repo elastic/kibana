@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-// Sec Sol Kbn telemetry instrumentation specific
-
-export interface FleetAgentCacheItem {
-  policy_id: string | undefined;
-  policy_version: number | undefined | null;
-}
-
 // EP Policy Response
 
 export interface EndpointPolicyResponseAggregation {

@@ -7,7 +7,14 @@
 
 import moment from 'moment';
 
-export const getLastTaskExecutionTimestamp = (
+/**
+ * Determines the when the last run was in order to execute to.
+ *
+ * @param executeTo
+ * @param lastExecutionTimestamp
+ * @returns the time to search from
+ */
+export const getPreviousDiagTaskTimestamp = (
   executeTo: string,
   lastExecutionTimestamp?: string
 ) => {
@@ -17,6 +24,28 @@ export const getLastTaskExecutionTimestamp = (
 
   if (moment(executeTo).diff(lastExecutionTimestamp, 'minutes') >= 10) {
     return moment(executeTo).subtract(10, 'minutes').toISOString();
+  }
+
+  return lastExecutionTimestamp;
+};
+
+/**
+ * Determines the when the last run was in order to execute to.
+ *
+ * @param executeTo
+ * @param lastExecutionTimestamp
+ * @returns
+ */
+export const getPreviousEpMetaTaskTimestamp = (
+  executeTo: string,
+  lastExecutionTimestamp?: string
+) => {
+  if (lastExecutionTimestamp === undefined) {
+    return moment(executeTo).subtract(24, 'hours').toISOString();
+  }
+
+  if (moment(executeTo).diff(lastExecutionTimestamp, 'hours') >= 24) {
+    return moment(executeTo).subtract(24, 'hours').toISOString();
   }
 
   return lastExecutionTimestamp;

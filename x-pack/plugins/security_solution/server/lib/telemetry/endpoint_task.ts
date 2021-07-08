@@ -12,7 +12,7 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '../../../../task_manager/server';
-import { batchTelemetryRecords, getLastTaskExecutionTimestamp } from './helpers';
+import { batchTelemetryRecords, getPreviousEpMetaTaskTimestamp } from './helpers';
 import { TelemetryEventsSender } from './sender';
 import { PolicyData } from '../../../common/endpoint/types';
 import { PackagePolicy } from '../../../../fleet/common/types/models/package_policy';
@@ -20,7 +20,6 @@ import {
   EndpointMetricsAggregation,
   EndpointPolicyResponseAggregation,
   EndpointPolicyResponseDocument,
-  FleetAgentCacheItem,
 } from './types';
 
 export const TelemetryEndpointTaskConstants = {
@@ -29,8 +28,6 @@ export const TelemetryEndpointTaskConstants = {
   INTERVAL: '1m', // TODO:@pjhampton - reset to 24h before merge
   VERSION: '1.0.0',
 };
-
-// const DEFAULT_POLICY_ID = '00000000-0000-0000-0000-000000000000';
 
 /** Telemetry Endpoint Task
  *
@@ -60,16 +57,20 @@ export class TelemetryEndpointTask {
           return {
             run: async () => {
               const taskExecutionTime = moment().utc().toISOString();
-              const lastExecutionTimestamp = getLastTaskExecutionTimestamp(
+              const lastExecutionTimestamp = getPreviousEpMetaTaskTimestamp(
                 taskExecutionTime,
                 taskInstance.state?.lastExecutionTimestamp
               );
 
-              const hits = await this.runTask(taskInstance.id, taskExecutionTime);
+              const hits = await this.runTask(
+                taskInstance.id,
+                lastExecutionTimestamp,
+                taskExecutionTime
+              );
 
               return {
                 state: {
-                  lastExecutionTimestamp,
+                  lastExecutionTimestamp: taskExecutionTime,
                   runs: (state.runs || 0) + 1,
                   hits,
                 },
@@ -119,7 +120,7 @@ export class TelemetryEndpointTask {
     };
   }
 
-  public runTask = async (taskId: string, taskExecutionTime: string) => {
+  public runTask = async (taskId: string, executeFrom: string, executeTo: string) => {
     if (taskId !== this.getTaskId()) {
       this.logger.debug(`Outdated task running: ${taskId}`);
       return 0;
@@ -170,24 +171,26 @@ export class TelemetryEndpointTask {
      */
     const agentsResponse = endpointData.fleetAgentsResponse;
     if (agentsResponse === undefined) {
-      this.logger.debug('no agents to report');
       return 0;
     }
 
     const fleetAgents = agentsResponse?.agents.reduce((cache, agent) => {
-      cache.set(agent.id, { policy_id: agent.policy_id, policy_version: agent.policy_revision });
+      if (agent.id === '00000000-0000-0000-0000-000000000000') {
+        return cache;
+      }
+
+      if (agent.policy_id !== null && agent.policy_id !== undefined) {
+        cache.set(agent.id, agent.policy_id);
+      }
+
       return cache;
-    }, new Map<string, FleetAgentCacheItem>());
+    }, new Map<string, string>());
 
     const endpointPolicyCache = new Map<string, PolicyData>();
     for (const policyInfo of fleetAgents.values()) {
-      if (
-        policyInfo.policy_id !== null &&
-        policyInfo.policy_id !== undefined &&
-        !endpointPolicyCache.has(policyInfo.policy_id)
-      ) {
-        const policies = await this.sender.fetchPolicyConfigs(policyInfo.policy_id);
-        const packagePolicies = policies?.package_policies as PackagePolicy[];
+      if (policyInfo !== null && policyInfo !== undefined && !endpointPolicyCache.has(policyInfo)) {
+        const agentPolicy = await this.sender.fetchPolicyConfigs(policyInfo);
+        const packagePolicies = agentPolicy?.package_policies as PackagePolicy[];
 
         packagePolicies
           .map((pPolicy) => pPolicy as PolicyData)
@@ -197,9 +200,9 @@ export class TelemetryEndpointTask {
                 if (
                   input.type === 'endpoint' &&
                   input.config !== undefined &&
-                  policyInfo.policy_id !== undefined
+                  policyInfo !== undefined
                 ) {
-                  endpointPolicyCache.set(policyInfo.policy_id, pPolicy);
+                  endpointPolicyCache.set(policyInfo, pPolicy);
                 }
               });
             }
@@ -244,8 +247,8 @@ export class TelemetryEndpointTask {
       const endpointAgentId = endpoint.endpoint_agent;
 
       const policyInformation = fleetAgents.get(fleetAgentId);
-      if (policyInformation?.policy_id) {
-        policyConfig = endpointPolicyCache.get(policyInformation?.policy_id);
+      if (policyInformation) {
+        policyConfig = endpointPolicyCache.get(policyInformation);
 
         if (policyConfig) {
           failedPolicy = policyResponses.get(policyConfig?.id);
@@ -253,7 +256,7 @@ export class TelemetryEndpointTask {
       }
 
       return {
-        '@timestamp': taskExecutionTime,
+        '@timestamp': executeTo,
         agent_id: fleetAgentId,
         endpoint_id: endpointAgentId,
         endpoint_version: endpoint.endpoint_version,
