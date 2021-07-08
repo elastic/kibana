@@ -18,7 +18,7 @@ import { ScopeExpression } from './scope_expression';
 import { checkPermission } from '../../capabilities/check_capabilities';
 import { getScopeFieldDefaults } from './utils';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ML_PAGES } from '../../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../../common/constants/locator';
 import { useMlUrlGenerator, useNavigateToPath } from '../../contexts/kibana';
 
 function NoFilterListsCallOut() {
