@@ -74,6 +74,7 @@ export const apmCorrelationsSearchStrategyProvider = (): ISearchStrategy<
 
       const {
         error,
+        log,
         isRunning,
         loaded,
         started,
@@ -101,6 +102,7 @@ export const apmCorrelationsSearchStrategyProvider = (): ISearchStrategy<
         isRunning,
         isPartial: isRunning,
         rawResponse: {
+          log,
           took,
           values,
           percentileThresholdValue,

@@ -62,7 +62,7 @@ export const fetchTransactionDurationPercentiles = async (
   percents?: number[],
   fieldName?: string,
   fieldValue?: string
-): Promise<Record<string, number>> => {
+): Promise<{ totalDocs: number; percentiles: Record<string, number> }> => {
   const resp = await esClient.search<ResponseHit>(
     getTransactionDurationPercentilesRequest(
       params,
@@ -74,7 +74,7 @@ export const fetchTransactionDurationPercentiles = async (
 
   // return early with no results if the search didn't return any documents
   if ((resp.body.hits.total as estypes.SearchTotalHits).value === 0) {
-    return {};
+    return { totalDocs: 0, percentiles: {} };
   }
 
   if (resp.body.aggregations === undefined) {
@@ -83,9 +83,11 @@ export const fetchTransactionDurationPercentiles = async (
     );
   }
 
-  return (
-    (resp.body.aggregations
-      .transaction_duration_percentiles as estypes.AggregationsTDigestPercentilesAggregate)
-      .values ?? {}
-  );
+  return {
+    totalDocs: (resp.body.hits.total as estypes.SearchTotalHits).value,
+    percentiles:
+      (resp.body.aggregations
+        .transaction_duration_percentiles as estypes.AggregationsTDigestPercentilesAggregate)
+        .values ?? {},
+  };
 };

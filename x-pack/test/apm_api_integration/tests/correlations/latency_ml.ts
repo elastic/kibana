@@ -131,6 +131,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(finalRawResponse?.percentileThresholdValue).to.be(undefined);
         expect(finalRawResponse?.overallHistogram).to.be(undefined);
         expect(finalRawResponse?.values.length).to.be(0);
+        expect(finalRawResponse?.log.map((d: string) => d.split(': ')[1])).to.eql([
+          'Fetched 95th percentile value of undefined based on 0 documents.',
+          'Abort service since percentileThresholdValue could not be determined.',
+        ]);
       });
     }
   );
@@ -236,6 +240,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         // TODO Identify a dataset that returns significant results
         expect(finalRawResponse?.values.length).to.be(0);
+        expect(finalRawResponse?.log.map((d: string) => d.split(': ')[1])).to.eql([
+          'Fetched 95th percentile value of 1855487.875 based on 4786 documents.',
+          'Loaded histogram range steps.',
+          'Loaded overall histogram chart data.',
+          'Loaded percentiles.',
+          'Identified 80 fieldCandidates.',
+          'Identified 430 fieldValuePairs.',
+          'Loaded fractions and totalDocCount of 4786.',
+          'Identified 0 significant correlations out of 430 field/value pairs.',
+        ]);
       });
     }
   );

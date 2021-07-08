@@ -24,6 +24,8 @@ import { fetchTransactionDurationFractions } from './query_fractions';
 const CORRELATION_THRESHOLD = 0.3;
 const KS_TEST_THRESHOLD = 0.1;
 
+const currentTimeAsString = () => new Date().toISOString();
+
 export const asyncSearchServiceProvider = (
   esClient: ElasticsearchClient,
   params: SearchServiceParams
@@ -31,6 +33,9 @@ export const asyncSearchServiceProvider = (
   let isCancelled = false;
   let isRunning = true;
   let error: Error;
+  const log: string[] = [];
+  const logMessage = (message: string) =>
+    log.push(`${currentTimeAsString()}: ${message}`);
 
   const progress: AsyncSearchProviderProgress = {
     started: Date.now(),
@@ -53,13 +58,17 @@ export const asyncSearchServiceProvider = (
   let percentileThresholdValue: number;
 
   const cancel = () => {
+    logMessage(`Service cancelled.`);
     isCancelled = true;
   };
 
   const fetchCorrelations = async () => {
     try {
       // 95th percentile to be displayed as a marker in the log log chart
-      const percentileThreshold = await fetchTransactionDurationPercentiles(
+      const {
+        totalDocs,
+        percentiles: percentileThreshold,
+      } = await fetchTransactionDurationPercentiles(
         esClient,
         params,
         params.percentileThreshold ? [params.percentileThreshold] : undefined
@@ -67,8 +76,15 @@ export const asyncSearchServiceProvider = (
       percentileThresholdValue =
         percentileThreshold[`${params.percentileThreshold}.0`];
 
+      logMessage(
+        `Fetched ${params.percentileThreshold}th percentile value of ${percentileThresholdValue} based on ${totalDocs} documents.`
+      );
+
       // finish early if we weren't able to identify the percentileThresholdValue.
       if (percentileThresholdValue === undefined) {
+        logMessage(
+          `Abort service since percentileThresholdValue could not be determined.`
+        );
         progress.loadedHistogramStepsize = 1;
         progress.loadedOverallHistogram = 1;
         progress.loadedFieldCanditates = 1;
@@ -84,6 +100,8 @@ export const asyncSearchServiceProvider = (
       );
       progress.loadedHistogramStepsize = 1;
 
+      logMessage(`Loaded histogram range steps.`);
+
       if (isCancelled) {
         isRunning = false;
         return;
@@ -97,6 +115,8 @@ export const asyncSearchServiceProvider = (
       progress.loadedOverallHistogram = 1;
       overallHistogram = overallLogHistogramChartData;
 
+      logMessage(`Loaded overall histogram chart data.`);
+
       if (isCancelled) {
         isRunning = false;
         return;
@@ -104,12 +124,12 @@ export const asyncSearchServiceProvider = (
 
       // Create an array of ranges [2, 4, 6, ..., 98]
       const percents = Array.from(range(2, 100, 2));
-      const percentilesRecords = await fetchTransactionDurationPercentiles(
-        esClient,
-        params,
-        percents
-      );
+      const {
+        percentiles: percentilesRecords,
+      } = await fetchTransactionDurationPercentiles(esClient, params, percents);
       const percentiles = Object.values(percentilesRecords);
+
+      logMessage(`Loaded percentiles.`);
 
       if (isCancelled) {
         isRunning = false;
@@ -121,6 +141,8 @@ export const asyncSearchServiceProvider = (
         params
       );
 
+      logMessage(`Identified ${fieldCandidates.length} fieldCandidates.`);
+
       progress.loadedFieldCanditates = 1;
 
       const fieldValuePairs = await fetchTransactionDurationFieldValuePairs(
@@ -129,6 +151,8 @@ export const asyncSearchServiceProvider = (
         fieldCandidates,
         progress
       );
+
+      logMessage(`Identified ${fieldValuePairs.length} fieldValuePairs.`);
 
       if (isCancelled) {
         isRunning = false;
@@ -143,6 +167,8 @@ export const asyncSearchServiceProvider = (
         fractions,
         totalDocCount,
       } = await fetchTransactionDurationFractions(esClient, params, ranges);
+
+      logMessage(`Loaded fractions and totalDocCount of ${totalDocCount}.`);
 
       async function* fetchTransactionDurationHistograms() {
         for (const item of shuffle(fieldValuePairs)) {
@@ -209,6 +235,10 @@ export const asyncSearchServiceProvider = (
         loadedHistograms++;
         progress.loadedHistograms = loadedHistograms / fieldValuePairs.length;
       }
+
+      logMessage(
+        `Identified ${values.length} significant correlations out of ${fieldValuePairs.length} field/value pairs.`
+      );
     } catch (e) {
       error = e;
     }
@@ -223,6 +253,7 @@ export const asyncSearchServiceProvider = (
 
     return {
       error,
+      log,
       isRunning,
       loaded: Math.round(progress.getOverallProgress() * 100),
       overallHistogram,
