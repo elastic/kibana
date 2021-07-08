@@ -7,16 +7,17 @@
  */
 
 import { getLastSeriesTimestamp } from './timestamp';
+import { PanelData } from '../../../../common/types';
 
 describe('src/legacy/core_plugins/metrics/server/lib/vis_data/helpers/timestamp.js', () => {
-  let series;
+  let series: PanelData[][];
   const lastTimestamp = 10000;
 
   beforeEach(() => {
     series = [
       [
         {
-          id: 1,
+          id: '1',
           data: [
             [100, 43],
             [1000, 56],
@@ -24,7 +25,7 @@ describe('src/legacy/core_plugins/metrics/server/lib/vis_data/helpers/timestamp.
           ],
         },
         {
-          id: 1,
+          id: '1',
           data: [
             [100, 33],
             [1000, 16],
@@ -34,7 +35,7 @@ describe('src/legacy/core_plugins/metrics/server/lib/vis_data/helpers/timestamp.
       ],
       [
         {
-          id: 2,
+          id: '2',
           data: [
             [100, 3],
             [1000, 6],
@@ -42,7 +43,7 @@ describe('src/legacy/core_plugins/metrics/server/lib/vis_data/helpers/timestamp.
           ],
         },
         {
-          id: 2,
+          id: '2',
           data: [
             [100, 5],
             [1000, 7],
@@ -50,7 +51,7 @@ describe('src/legacy/core_plugins/metrics/server/lib/vis_data/helpers/timestamp.
           ],
         },
       ],
-    ];
+    ] as PanelData[][];
   });
 
   describe('getLastSeriesTimestamp()', () => {
@@ -77,7 +78,7 @@ describe('src/legacy/core_plugins/metrics/server/lib/vis_data/helpers/timestamp.
     test('should return null if nothing is passed', () => {
       const timestamp = getLastSeriesTimestamp();
 
-      expect(timestamp).toBe(null);
+      expect(timestamp).toBeUndefined();
     });
   });
 });
