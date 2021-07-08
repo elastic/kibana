@@ -24,6 +24,7 @@ export enum ES_FIELD_TYPES {
   STRING = 'string',
   TEXT = 'text',
   KEYWORD = 'keyword',
+  VERSION = 'version',
 
   BOOLEAN = 'boolean',
   OBJECT = 'object',
