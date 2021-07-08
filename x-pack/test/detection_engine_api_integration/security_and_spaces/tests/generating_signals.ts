@@ -128,7 +128,6 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
           status: 'open',
-          owner: 'siem',
           depth: 1,
           parent: {
             id: 'BhbXBmkBR346wHgn4PeZ',
@@ -187,7 +186,6 @@ export default ({ getService }: FtrProviderContext) => {
             index: 'auditbeat-8.0.0-2019.02.19-000001',
             depth: 0,
           },
-          owner: 'siem',
           original_time: '2019-02-19T17:40:03.790Z',
           original_event: {
             action: 'socket_closed',
@@ -251,7 +249,6 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
           status: 'open',
-          owner: 'siem',
           depth: 2,
           parent: {
             rule: signalNoRule.parent?.rule, // parent.rule is always changing so skip testing it
@@ -374,7 +371,6 @@ export default ({ getService }: FtrProviderContext) => {
                 category: 'configuration',
                 module: 'auditd',
               },
-              owner: 'siem',
               parent: {
                 depth: 0,
                 id: '9xbRBmkBR346wHgngz2D',
@@ -515,7 +511,6 @@ export default ({ getService }: FtrProviderContext) => {
                 category: 'configuration',
                 module: 'auditd',
               },
-              owner: 'siem',
               parent: {
                 depth: 0,
                 id: '9xbRBmkBR346wHgngz2D',
@@ -681,7 +676,6 @@ export default ({ getService }: FtrProviderContext) => {
                 category: 'anomoly',
                 module: 'auditd',
               },
-              owner: 'siem',
               parent: {
                 depth: 0,
                 id: 'VhXOBmkBR346wHgnLP8T',
@@ -783,7 +777,6 @@ export default ({ getService }: FtrProviderContext) => {
                   type: 'signal',
                 },
               ],
-              owner: 'siem',
               parents: [
                 {
                   depth: 1,
@@ -880,7 +873,6 @@ export default ({ getService }: FtrProviderContext) => {
               status: 'open',
               rule: fullSignal.signal.rule,
               original_time: fullSignal.signal.original_time,
-              owner: 'siem',
               depth: 1,
               parent: {
                 id: eventIds[0],
@@ -1039,7 +1031,6 @@ export default ({ getService }: FtrProviderContext) => {
               status: 'open',
               rule: fullSignal.signal.rule,
               original_time: fullSignal.signal.original_time,
-              owner: 'siem',
               depth: 1,
               parent: {
                 id: eventIds[0],
@@ -1131,7 +1122,6 @@ export default ({ getService }: FtrProviderContext) => {
               rule: fullSignal.signal.rule,
               original_time: fullSignal.signal.original_time,
               depth: 1,
-              owner: 'siem',
               parent: {
                 id: eventIds[0],
                 type: 'event',
@@ -1232,7 +1222,6 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
           status: 'open',
-          owner: 'siem',
           depth: 1,
           parent: {
             id: '1',
@@ -1298,7 +1287,6 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
           status: 'open',
-          owner: 'siem',
           depth: 2,
           parent: {
             rule: signalNoRule.parent?.rule, // parent.rule is always changing so skip testing it
@@ -1386,7 +1374,6 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
           status: 'open',
-          owner: 'siem',
           depth: 1,
           parent: {
             id: '1',
@@ -1458,7 +1445,6 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
           status: 'open',
-          owner: 'siem',
           depth: 2,
           parent: {
             rule: signalNoRule.parent?.rule, // parent.rule is always changing so skip testing it
@@ -1723,7 +1709,6 @@ export default ({ getService }: FtrProviderContext) => {
             },
             original_time: fullSignal.signal.original_time,
             depth: 1,
-            owner: 'siem',
             parent: {
               id: 'UBXOBmkBR346wHgnLP8T',
               type: 'event',
