@@ -61,7 +61,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     sortField: '@timestamp',
     isLive,
   });
-
+  const expired = useMemo(() => (!endDate ? false : new Date(endDate) < new Date()), [endDate]);
   const { getUrlForApp } = useKibana().services.application;
 
   const getFleetAppUrl = useCallback(
@@ -220,7 +220,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   useEffect(
     () =>
       setIsLive(() => {
-        if (!agentIds?.length) return false;
+        if (!agentIds?.length || expired) return false;
 
         const uniqueAgentsRepliedCount =
           // @ts-expect-error-type
@@ -233,23 +233,24 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       aggregations.failed,
       // @ts-expect-error-type
       allResultsData?.rawResponse.aggregations?.unique_agents.value,
+      expired,
     ]
   );
 
-  if (!aggregations.totalResponded) {
+  if (!isFetched) {
     return <EuiLoadingContent lines={5} />;
   }
 
   return (
     <>
-      {aggregations.totalResponded && isFetched && !allResultsData?.edges.length ? (
+      {isLive && <EuiProgress color="primary" size="xs" />}
+
+      {isFetched && !allResultsData?.edges.length ? (
         <>
           <EuiCallOut title={generateEmptyDataMessage(aggregations.totalResponded)} />
           <EuiSpacer />
         </>
-      ) : null}
-      {isLive && <EuiProgress color="primary" size="xs" />}
-      {
+      ) : (
         // @ts-expect-error update types
         <DataContext.Provider value={allResultsData?.edges}>
           <EuiDataGrid
@@ -264,7 +265,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             toolbarVisibility={toolbarVisibility}
           />
         </DataContext.Provider>
-      }
+      )}
     </>
   );
 };

@@ -43,15 +43,14 @@ const ActionAgentsStatusComponent: React.FC<ActionAgentsStatusProps> = ({
   });
 
   const agentStatus = useMemo(() => {
-    const notRespondedCount =
-      !agentIds || !aggregations.totalResponded ? 0 : agentIds.length - aggregations.totalResponded;
+    const notRespondedCount = !agentIds?.length ? 0 : agentIds.length - aggregations.totalResponded;
 
     return {
       success: aggregations.successful,
       pending: notRespondedCount,
       failed: aggregations.failed,
     };
-  }, [agentIds, aggregations.failed, aggregations.successful, aggregations.totalResponded]);
+  }, [agentIds?.length, aggregations.failed, aggregations.successful, aggregations.totalResponded]);
 
   useEffect(
     () =>
