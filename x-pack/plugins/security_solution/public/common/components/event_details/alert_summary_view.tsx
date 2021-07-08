@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiBasicTableColumn,
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
-  EuiSpacer,
-  EuiHorizontalRule,
-} from '@elastic/eui';
+import { EuiBasicTableColumn, EuiSpacer, EuiHorizontalRule, EuiTitle } from '@elastic/eui';
 import { get, getOr, find } from 'lodash/fp';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
@@ -41,8 +34,8 @@ import { MarkdownRenderer } from '../markdown_editor';
 import { LineClamp } from '../line_clamp';
 import { endpointAlertCheck } from '../../utils/endpoint_alert_check';
 
-const StyledEuiDescriptionList = styled(EuiDescriptionList)`
-  padding: 24px 4px 4px;
+const StyledText = styled.div`
+  padding: 0 4px;
   word-break: break-word;
 `;
 
@@ -223,14 +216,15 @@ const AlertSummaryViewComponent: React.FC<{
       {maybeRule?.note && (
         <>
           <EuiHorizontalRule />
-          <StyledEuiDescriptionList data-test-subj={`summary-view-guide`} compressed>
-            <EuiDescriptionListTitle>{i18n.INVESTIGATION_GUIDE}</EuiDescriptionListTitle>
-            <EuiDescriptionListDescription>
-              <LineClamp>
-                <MarkdownRenderer>{maybeRule.note}</MarkdownRenderer>
-              </LineClamp>
-            </EuiDescriptionListDescription>
-          </StyledEuiDescriptionList>
+          <EuiTitle size="xxs" data-test-subj="summary-view-guide">
+            <h6>{i18n.INVESTIGATION_GUIDE}</h6>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <StyledText>
+            <LineClamp>
+              <MarkdownRenderer>{maybeRule.note}</MarkdownRenderer>
+            </LineClamp>
+          </StyledText>
         </>
       )}
     </>
