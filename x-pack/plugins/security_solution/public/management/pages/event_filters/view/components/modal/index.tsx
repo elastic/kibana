@@ -110,6 +110,12 @@ export const EventFiltersModal: React.FC<EventFiltersModalProps> = memo(({ data,
     enrichEvent();
 
     return () => {
+      dispatch({
+        type: 'eventFiltersFormStateChanged',
+        payload: {
+          type: 'UninitialisedResourceState',
+        },
+      });
       isMounted.current = false;
     };
 
