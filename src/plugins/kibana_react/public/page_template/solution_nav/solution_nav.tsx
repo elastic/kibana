@@ -138,7 +138,7 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<KibanaPageTemplate
               outsideClickCloses
               onClose={() => setIsSideNavOpenOnMobile(false)}
               side="left"
-              size={240}
+              size={248}
               closeButtonPosition="outside"
             >
               {sideNav}
