@@ -69,15 +69,13 @@ const ThreatDetailsHeader: React.FC<{
         <EuiFlexItem>
           <EuiHorizontalRule margin="none" />
         </EuiFlexItem>
+        {isInvestigationTimeEnrichment(type) && (
+          <EuiFlexItem grow={false}>
+            <InspectButton queryId={QUERY_ID} title={i18n.INVESTIGATION_QUERY_TITLE} />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiTextColor>
-    {isInvestigationTimeEnrichment(type) && (
-      <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
-        <EuiFlexItem grow={false}>
-          <InspectButton queryId={QUERY_ID} title={i18n.INVESTIGATION_QUERY_TITLE} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    )}
   </>
 );
 
