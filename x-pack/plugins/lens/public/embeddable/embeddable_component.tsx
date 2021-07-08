@@ -70,6 +70,10 @@ export function getEmbeddableComponent(core: CoreStart, plugins: PluginsStartDep
     const [embeddable, loading, error] = useEmbeddableFactory({ factory, input });
     const hasActions = props.withActions === true;
 
+    if (loading) {
+      return <EuiLoadingChart />;
+    }
+
     if (embeddable && hasActions) {
       return (
         <EmbeddablePanelWrapper
