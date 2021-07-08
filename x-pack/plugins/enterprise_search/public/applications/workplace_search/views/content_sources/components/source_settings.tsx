@@ -184,7 +184,7 @@ export const SourceSettings: React.FC = () => {
           href={diagnosticsPath}
           isLoading={buttonLoading}
           data-test-subj="DownloadDiagnosticsButton"
-          download
+          download={`${id}_${serviceType}_${Date.now()}_diagnostics.json`}
         >
           {SYNC_DIAGNOSTICS_BUTTON}
         </EuiButton>
