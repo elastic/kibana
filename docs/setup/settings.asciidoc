@@ -374,7 +374,8 @@ When `includeElasticMapsService` is turned off, only tile layer configured by <<
  | Specifies the URL of a self hosted <<elastic-maps-server,{hosted-ems}>>
 
 | `map.proxyElasticMapsServiceInMaps:`
- | Set to `true` to proxy all <<maps, Maps application>> Elastic Maps Service
+ | deprecated:[7.14.0,"In 8.0 and later, this setting will no longer be supported."]
+ Set to `true` to proxy all <<maps, Maps application>> Elastic Maps Service
 requests through the {kib} server. *Default: `false`*
 
 | [[regionmap-settings]] `map.regionmap:` {ess-icon}
@@ -626,7 +627,7 @@ identifies this {kib} instance. *Default: `"your-hostname"`*
 setting specifies the port to use. *Default: `5601`*
 
 |[[server-requestId-allowFromAnyIp]] `server.requestId.allowFromAnyIp:`
- | Sets whether or not the X-Opaque-Id header should be trusted from any IP address for identifying requests in logs and forwarded to Elasticsearch.
+ | Sets whether or not the `X-Opaque-Id` header should be trusted from any IP address for identifying requests in logs and forwarded to Elasticsearch.
 
 | `server.requestId.ipAllowlist:`
  | A list of IPv4 and IPv6 address which the `X-Opaque-Id` header should be trusted from. Normally this would be set to the IP addresses of the load balancers or reverse-proxy that end users use to access Kibana. If any are set, <<server-requestId-allowFromAnyIp, `server.requestId.allowFromAnyIp`>> must also be set to `false.`

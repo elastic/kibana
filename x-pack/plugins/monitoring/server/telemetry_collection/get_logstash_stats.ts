@@ -6,7 +6,8 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
+import { estypes } from '@elastic/elasticsearch';
 import { createQuery } from './create_query';
 import { mapToList } from './get_high_level_stats';
 import { incrementByKey } from './get_high_level_stats';
@@ -261,17 +262,14 @@ export function processLogstashStateResults(
 }
 
 export async function fetchLogstashStats(
-  callCluster: LegacyAPICaller,
+  callCluster: ElasticsearchClient,
   clusterUuids: string[],
   { page = 0, ...options }: { page?: number } & LogstashProcessOptions
 ): Promise<void> {
-  const params = {
-    headers: {
-      'X-QUERY-SOURCE': TELEMETRY_QUERY_SOURCE,
-    },
+  const params: estypes.SearchRequest = {
     index: INDEX_PATTERN_LOGSTASH,
-    ignoreUnavailable: true,
-    filterPath: [
+    ignore_unavailable: true,
+    filter_path: [
       'hits.hits._source.cluster_uuid',
       'hits.hits._source.type',
       'hits.hits._source.source_node',
@@ -295,7 +293,7 @@ export async function fetchLogstashStats(
             },
           },
         ],
-      }),
+      }) as estypes.QueryDslQueryContainer,
       from: page * HITS_SIZE,
       collapse: { field: 'logstash_stats.logstash.uuid' },
       sort: [{ ['logstash_stats.timestamp']: { order: 'desc', unmapped_type: 'long' } }],
@@ -303,12 +301,16 @@ export async function fetchLogstashStats(
     },
   };
 
-  const results = await callCluster<SearchResponse<LogstashStats>>('search', params);
+  const { body: results } = await callCluster.search(params, {
+    headers: {
+      'X-QUERY-SOURCE': TELEMETRY_QUERY_SOURCE,
+    },
+  });
   const hitsLength = results?.hits?.hits.length || 0;
 
   if (hitsLength > 0) {
     // further augment the clusters object with more stats
-    processStatsResults(results, options);
+    processStatsResults(results as SearchResponse<LogstashStats>, options);
 
     if (hitsLength === HITS_SIZE) {
       // call recursively
@@ -325,18 +327,15 @@ export async function fetchLogstashStats(
 }
 
 export async function fetchLogstashState(
-  callCluster: LegacyAPICaller,
+  callCluster: ElasticsearchClient,
   clusterUuid: string,
   ephemeralIds: string[],
   { page = 0, ...options }: { page?: number } & LogstashProcessOptions
 ): Promise<void> {
-  const params = {
-    headers: {
-      'X-QUERY-SOURCE': TELEMETRY_QUERY_SOURCE,
-    },
+  const params: estypes.SearchRequest = {
     index: INDEX_PATTERN_LOGSTASH,
-    ignoreUnavailable: true,
-    filterPath: [
+    ignore_unavailable: true,
+    filter_path: [
       'hits.hits._source.logstash_state.pipeline.batch_size',
       'hits.hits._source.logstash_state.pipeline.workers',
       'hits.hits._source.logstash_state.pipeline.representation.graph.vertices.config_name',
@@ -355,7 +354,7 @@ export async function fetchLogstashState(
             },
           },
         ],
-      }),
+      }) as estypes.QueryDslQueryContainer,
       from: page * HITS_SIZE,
       collapse: { field: 'logstash_state.pipeline.ephemeral_id' },
       sort: [{ ['timestamp']: { order: 'desc', unmapped_type: 'long' } }],
@@ -363,11 +362,16 @@ export async function fetchLogstashState(
     },
   };
 
-  const results = await callCluster<SearchResponse<LogstashState>>('search', params);
+  const { body: results } = await callCluster.search<SearchResponse<LogstashState>>(params, {
+    headers: {
+      'X-QUERY-SOURCE': TELEMETRY_QUERY_SOURCE,
+    },
+  });
+
   const hitsLength = results?.hits?.hits.length || 0;
   if (hitsLength > 0) {
     // further augment the clusters object with more stats
-    processLogstashStateResults(results, clusterUuid, options);
+    processLogstashStateResults(results as SearchResponse<LogstashState>, clusterUuid, options);
 
     if (hitsLength === HITS_SIZE) {
       // call recursively
@@ -392,7 +396,7 @@ export interface LogstashStatsByClusterUuid {
  * @return {Object} - Logstash stats in an object keyed by the cluster UUIDs
  */
 export async function getLogstashStats(
-  callCluster: LegacyAPICaller,
+  callCluster: ElasticsearchClient,
   clusterUuids: string[]
 ): Promise<LogstashStatsByClusterUuid> {
   const options: LogstashProcessOptions = {

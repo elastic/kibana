@@ -17,14 +17,30 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
 import { keymap } from '../../lib/keymap';
 import { ShortcutMap, ShortcutNameSpace } from '../../../types/shortcuts';
 import { getClientPlatform } from '../../lib/get_client_platform';
 import { getId } from '../../lib/get_id';
 import { getPrettyShortcut } from '../../lib/get_pretty_shortcut';
-import { ComponentStrings } from '../../../i18n/components';
 
-const { KeyboardShortcutsDoc: strings } = ComponentStrings;
+const strings = {
+  getFlyoutCloseButtonAriaLabel: () =>
+    i18n.translate('xpack.canvas.keyboardShortcutsDoc.flyout.closeButtonAriaLabel', {
+      defaultMessage: 'Closes keyboard shortcuts reference',
+    }),
+  getShortcutSeparator: () =>
+    i18n.translate('xpack.canvas.keyboardShortcutsDoc.shortcutListSeparator', {
+      defaultMessage: 'or',
+      description:
+        'Separates which keyboard shortcuts can be used for a single action. Example: "{shortcut1} or {shortcut2} or {shortcut3}"',
+    }),
+  getTitle: () =>
+    i18n.translate('xpack.canvas.keyboardShortcutsDoc.flyoutHeaderTitle', {
+      defaultMessage: 'Keyboard shortcuts',
+    }),
+};
 
 interface DescriptionListItem {
   title: string;

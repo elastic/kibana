@@ -196,12 +196,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     let ruleDataClient: RuleDataClient | null = null;
     if (isRuleRegistryEnabled) {
       const { ruleDataService } = plugins.ruleRegistry;
-      const start = () => core.getStartServices().then(([coreStart]) => coreStart);
 
-      const ready = once(async () => {
-        const componentTemplateName = ruleDataService.getFullAssetName(
-          'security-solution-mappings'
-        );
+      const alertsIndexPattern = ruleDataService.getFullAssetName('security.alerts*');
+
+      const initializeRuleDataTemplates = once(async () => {
+        const componentTemplateName = ruleDataService.getFullAssetName('security.alerts-mappings');
 
         if (!ruleDataService.isWriteEnabled()) {
           return;
@@ -220,9 +219,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         });
 
         await ruleDataService.createOrUpdateIndexTemplate({
-          name: ruleDataService.getFullAssetName('security-solution-index-template'),
+          name: ruleDataService.getFullAssetName('security.alerts-index-template'),
           body: {
-            index_patterns: [ruleDataService.getFullAssetName('security-solution*')],
+            index_patterns: [alertsIndexPattern],
             composed_of: [
               ruleDataService.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
               ruleDataService.getFullAssetName(ECS_COMPONENT_TEMPLATE_NAME),
@@ -230,20 +229,18 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             ],
           },
         });
+        await ruleDataService.updateIndexMappingsMatchingPattern(alertsIndexPattern);
       });
 
-      ready().catch((err) => {
+      // initialize eagerly
+      const initializeRuleDataTemplatesPromise = initializeRuleDataTemplates().catch((err) => {
         this.logger!.error(err);
       });
 
-      ruleDataClient = new RuleDataClient({
-        alias: plugins.ruleRegistry.ruleDataService.getFullAssetName('security-solution'),
-        getClusterClient: async () => {
-          const coreStart = await start();
-          return coreStart.elasticsearch.client.asInternalUser;
-        },
-        ready,
-      });
+      ruleDataClient = ruleDataService.getRuleDataClient(
+        ruleDataService.getFullAssetName('security.alerts'),
+        () => initializeRuleDataTemplatesPromise
+      );
 
       // sec
 
@@ -391,6 +388,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         version: this.context.env.packageInfo.version,
         ml: plugins.ml,
         lists: plugins.lists,
+        mergeStrategy: this.config.alertMergeStrategy,
       });
       const ruleNotificationType = rulesNotificationAlertType({
         logger: this.logger,
@@ -506,7 +504,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       exceptionListsClient: this.lists!.getExceptionListClient(savedObjectsClient, 'kibana'),
     });
 
-    this.telemetryEventsSender.start(core, plugins.telemetry, plugins.taskManager);
+    this.telemetryEventsSender.start(
+      core,
+      plugins.telemetry,
+      plugins.taskManager,
+      this.endpointAppContextService
+    );
     return {};
   }
 

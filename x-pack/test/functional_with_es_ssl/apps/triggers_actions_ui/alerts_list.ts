@@ -109,6 +109,43 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       ]);
     });
 
+    it('should update alert list on the search clear button click', async () => {
+      await createAlert({ name: 'b' });
+      await createAlert({ name: 'c' });
+      await refreshAlertsList();
+      await pageObjects.triggersActionsUI.searchAlerts('b');
+
+      const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
+      expect(searchResults).to.eql([
+        {
+          name: 'b',
+          tagsText: 'foo, bar',
+          alertType: 'Test: Noop',
+          interval: '1m',
+        },
+      ]);
+      const searchClearButton = await find.byCssSelector('.euiFormControlLayoutClearButton');
+      await searchClearButton.click();
+      await find.byCssSelector(
+        '.euiBasicTable[data-test-subj="alertsList"]:not(.euiBasicTable-loading)'
+      );
+      const searchResultsAfterClear = await pageObjects.triggersActionsUI.getAlertsList();
+      expect(searchResultsAfterClear).to.eql([
+        {
+          name: 'b',
+          tagsText: 'foo, bar',
+          alertType: 'Test: Noop',
+          interval: '1m',
+        },
+        {
+          name: 'c',
+          tagsText: 'foo, bar',
+          alertType: 'Test: Noop',
+          interval: '1m',
+        },
+      ]);
+    });
+
     it('should search for tags', async () => {
       const createdAlert = await createAlert();
       await refreshAlertsList();

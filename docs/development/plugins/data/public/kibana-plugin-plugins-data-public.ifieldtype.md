@@ -12,7 +12,7 @@
 <b>Signature:</b>
 
 ```typescript
-export interface IFieldType 
+export interface IFieldType extends IndexPatternFieldBase 
 ```
 
 ## Properties
@@ -26,15 +26,9 @@ export interface IFieldType
 |  [esTypes](./kibana-plugin-plugins-data-public.ifieldtype.estypes.md) | <code>string[]</code> |  |
 |  [filterable](./kibana-plugin-plugins-data-public.ifieldtype.filterable.md) | <code>boolean</code> |  |
 |  [format](./kibana-plugin-plugins-data-public.ifieldtype.format.md) | <code>any</code> |  |
-|  [lang](./kibana-plugin-plugins-data-public.ifieldtype.lang.md) | <code>estypes.ScriptLanguage</code> |  |
-|  [name](./kibana-plugin-plugins-data-public.ifieldtype.name.md) | <code>string</code> |  |
 |  [readFromDocValues](./kibana-plugin-plugins-data-public.ifieldtype.readfromdocvalues.md) | <code>boolean</code> |  |
-|  [script](./kibana-plugin-plugins-data-public.ifieldtype.script.md) | <code>string</code> |  |
-|  [scripted](./kibana-plugin-plugins-data-public.ifieldtype.scripted.md) | <code>boolean</code> |  |
 |  [searchable](./kibana-plugin-plugins-data-public.ifieldtype.searchable.md) | <code>boolean</code> |  |
 |  [sortable](./kibana-plugin-plugins-data-public.ifieldtype.sortable.md) | <code>boolean</code> |  |
-|  [subType](./kibana-plugin-plugins-data-public.ifieldtype.subtype.md) | <code>IFieldSubType</code> |  |
 |  [toSpec](./kibana-plugin-plugins-data-public.ifieldtype.tospec.md) | <code>(options?: {</code><br/><code>        getFormatterForField?: IndexPattern['getFormatterForField'];</code><br/><code>    }) =&gt; FieldSpec</code> |  |
-|  [type](./kibana-plugin-plugins-data-public.ifieldtype.type.md) | <code>string</code> |  |
 |  [visualizable](./kibana-plugin-plugins-data-public.ifieldtype.visualizable.md) | <code>boolean</code> |  |
 
