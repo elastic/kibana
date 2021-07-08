@@ -22,5 +22,8 @@ export const riskScoreSelector = () =>
 export const hostRulesSelector = () =>
   createSelector(selectUebaDetailsPage, (ueba) => ueba.queries[UebaTableType.hostRules]);
 
+export const hostTacticsSelector = () =>
+  createSelector(selectUebaDetailsPage, (ueba) => ueba.queries[UebaTableType.hostTactics]);
+
 export const userRulesSelector = () =>
   createSelector(selectUebaDetailsPage, (ueba) => ueba.queries[UebaTableType.userRules]);

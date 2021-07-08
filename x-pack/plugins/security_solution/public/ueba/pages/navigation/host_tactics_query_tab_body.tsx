@@ -7,15 +7,14 @@
 
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { useHostRules } from '../../containers/host_rules';
+import { useHostTactics } from '../../containers/host_tactics';
 import { HostQueryProps } from './types';
 import { manageQuery } from '../../../common/components/page/manage_query';
-import { HostRulesTable } from '../../components/host_rules_table';
-import { uebaModel } from '../../store';
+import { HostTacticsTable } from '../../components/host_tactics_table';
 
-const HostRulesTableManage = manageQuery(HostRulesTable);
+const HostTacticsTableManage = manageQuery(HostTacticsTable);
 
-export const HostRulesQueryTabBody = ({
+export const HostTacticsQueryTabBody = ({
   deleteQuery,
   docValueFields,
   endDate,
@@ -29,8 +28,8 @@ export const HostRulesQueryTabBody = ({
 }: HostQueryProps) => {
   const [
     loading,
-    { data, totalCount, pageInfo, loadPage, id, inspect, isInspected, refetch },
-  ] = useHostRules({
+    { data, techniqueCount, totalCount, pageInfo, loadPage, id, inspect, isInspected, refetch },
+  ] = useHostTactics({
     docValueFields,
     endDate,
     filterQuery,
@@ -42,7 +41,7 @@ export const HostRulesQueryTabBody = ({
   });
 
   return (
-    <HostRulesTableManage
+    <HostTacticsTableManage
       deleteQuery={deleteQuery}
       data={data}
       fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
@@ -54,11 +53,11 @@ export const HostRulesQueryTabBody = ({
       refetch={refetch}
       setQuery={setQuery}
       showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
-      tableType={uebaModel.UebaTableType.userRules}
+      techniqueCount={techniqueCount}
       totalCount={totalCount}
       type={type}
     />
   );
 };
 
-HostRulesQueryTabBody.displayName = 'HostRulesQueryTabBody';
+HostTacticsQueryTabBody.displayName = 'HostTacticsQueryTabBody';

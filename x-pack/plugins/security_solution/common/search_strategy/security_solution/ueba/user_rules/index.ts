@@ -8,22 +8,14 @@
 import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
 
 import { HostRulesFields, UserRulesFields } from '../common';
-import {
-  CursorType,
-  Hit,
-  Inspect,
-  Maybe,
-  PageInfoPaginated,
-  SearchHit,
-  SortField,
-} from '../../../common';
+import { Hit, Inspect, Maybe, PageInfoPaginated, SearchHit, SortField } from '../../../common';
 import { HostRulesEdges, RequestOptionsPaginated } from '../..';
 
 export interface RuleNameHit extends Hit {
   key: string;
   doc_count: number;
   risk_score: {
-    value?: number;
+    value: number;
   };
   rule_type: {
     buckets?: Array<{
@@ -51,8 +43,8 @@ export interface UserRulesHit extends Hit {
 
 export interface UserRulesByUser {
   _id?: Maybe<string>;
-  [UserRulesFields.userName]: Maybe<string>;
-  [UserRulesFields.riskScore]: Maybe<number>;
+  [UserRulesFields.userName]: string;
+  [UserRulesFields.riskScore]: number;
   [UserRulesFields.ruleCount]: number;
   [UserRulesFields.rules]: HostRulesEdges[];
 }

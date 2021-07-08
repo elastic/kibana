@@ -7,7 +7,12 @@
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 import { get } from 'lodash/fp';
-import { Direction, HostRulesFields, RiskScoreFields } from '../../../common/search_strategy';
+import {
+  Direction,
+  HostRulesFields,
+  HostTacticsFields,
+  RiskScoreFields,
+} from '../../../common/search_strategy';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../common/store/constants';
 
 import {
@@ -50,7 +55,7 @@ export const initialUebaState: UebaModel = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         sort: {
-          field: HostRulesFields.riskScore,
+          field: HostTacticsFields.riskScore,
           direction: Direction.desc,
         },
       },
@@ -58,7 +63,7 @@ export const initialUebaState: UebaModel = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         sort: {
-          field: HostRulesFields.riskScore,
+          field: HostRulesFields.riskScore, // this looks wrong but its right, the user "table" is an array of host tables
           direction: Direction.desc,
         },
       },

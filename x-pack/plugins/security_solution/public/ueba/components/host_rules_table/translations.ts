@@ -28,13 +28,3 @@ export const RULE_TYPE = i18n.translate('xpack.securitySolution.uebaTable.ruleTy
 export const HITS = i18n.translate('xpack.securitySolution.uebaTable.hits', {
   defaultMessage: 'Number of hits',
 });
-
-export const ROWS_5 = i18n.translate('xpack.securitySolution.uebaTable.rows', {
-  values: { numRows: 5 },
-  defaultMessage: '{numRows} {numRows, plural, =0 {rows} =1 {row} other {rows}}',
-});
-
-export const ROWS_10 = i18n.translate('xpack.securitySolution.uebaTable.rows', {
-  values: { numRows: 10 },
-  defaultMessage: '{numRows} {numRows, plural, =0 {rows} =1 {row} other {rows}}',
-});

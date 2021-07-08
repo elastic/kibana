@@ -16,43 +16,46 @@ import {
 } from '../../../common/components/paginated_table';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { uebaActions, uebaModel, uebaSelectors } from '../../store';
-import { getRiskScoreColumns } from './columns';
+import { getHostTacticsColumns } from './columns';
 import * as i18n from './translations';
 import {
-  RiskScoreEdges,
-  RiskScoreItem,
-  RiskScoreSortField,
-  RiskScoreFields,
+  HostTacticsEdges,
+  HostTacticsItem,
+  HostTacticsSortField,
+  HostTacticsFields,
 } from '../../../../common';
 import { Direction } from '../../../../common/search_strategy';
+import { HOST_TACTICS } from '../../pages/translations';
 import { rowItems } from '../utils';
 
-const tableType = uebaModel.UebaTableType.riskScore;
+const tableType = uebaModel.UebaTableType.hostTactics;
 
-interface RiskScoreTableProps {
-  data: RiskScoreEdges[];
+interface HostTacticsTableProps {
+  data: HostTacticsEdges[];
   fakeTotalCount: number;
   id: string;
   isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
   showMorePagesIndicator: boolean;
+  techniqueCount: number;
   totalCount: number;
   type: uebaModel.UebaType;
 }
 
-export type RiskScoreColumns = [
-  Columns<RiskScoreItem['host_name']>,
-  Columns<RiskScoreItem['risk_score']>,
-  Columns<RiskScoreItem['risk_keyword']>
+export type HostTacticsColumns = [
+  Columns<HostTacticsItem[HostTacticsFields.tactic]>,
+  Columns<HostTacticsItem[HostTacticsFields.technique]>,
+  Columns<HostTacticsItem[HostTacticsFields.riskScore]>,
+  Columns<HostTacticsItem[HostTacticsFields.hits]>
 ];
 
-const getSorting = (sortField: RiskScoreFields, direction: Direction): SortingBasicTable => ({
+const getSorting = (sortField: HostTacticsFields, direction: Direction): SortingBasicTable => ({
   field: getNodeField(sortField),
   direction,
 });
 
-const RiskScoreTableComponent: React.FC<RiskScoreTableProps> = ({
+const HostTacticsTableComponent: React.FC<HostTacticsTableProps> = ({
   data,
   fakeTotalCount,
   id,
@@ -60,12 +63,12 @@ const RiskScoreTableComponent: React.FC<RiskScoreTableProps> = ({
   loading,
   loadPage,
   showMorePagesIndicator,
+  techniqueCount,
   totalCount,
   type,
 }) => {
   const dispatch = useDispatch();
-  // const getRiskScoreSelector = useMemo(() => uebaSelectors.riskScoreSelector(), []);
-  const { activePage, limit, sort } = useDeepEqualSelector(uebaSelectors.riskScoreSelector());
+  const { activePage, limit, sort } = useDeepEqualSelector(uebaSelectors.hostTacticsSelector());
   const updateLimitPagination = useCallback(
     (newLimit) =>
       dispatch(
@@ -84,7 +87,7 @@ const RiskScoreTableComponent: React.FC<RiskScoreTableProps> = ({
         uebaActions.updateTableActivePage({
           activePage: newPage,
           uebaType: type,
-          tableType,
+          tableType, // this will need to become unique for each user table in the group
         })
       ),
     [type, dispatch]
@@ -93,13 +96,13 @@ const RiskScoreTableComponent: React.FC<RiskScoreTableProps> = ({
   const onChange = useCallback(
     (criteria: Criteria) => {
       if (criteria.sort != null) {
-        const newSort: RiskScoreSortField = {
+        const newSort: HostTacticsSortField = {
           field: getSortField(criteria.sort.field),
           direction: criteria.sort.direction as Direction,
         };
         if (newSort.direction !== sort.direction || newSort.field !== sort.field) {
           // dispatch(
-          //   uebaActions.updateRiskScoreSort({
+          //   uebaActions.updateHostTacticsSort({
           //     sort,
           //     uebaType: type,
           //   })
@@ -110,18 +113,17 @@ const RiskScoreTableComponent: React.FC<RiskScoreTableProps> = ({
     [sort]
   );
 
-  const columns = useMemo(() => getRiskScoreColumns(), []);
+  const columns = useMemo(() => getHostTacticsColumns(), []);
 
   const sorting = useMemo(() => getSorting(sort.field, sort.direction), [sort]);
-
   return (
     <PaginatedTable
       activePage={activePage}
       columns={columns}
       dataTestSubj={`table-${tableType}`}
       headerCount={totalCount}
-      headerTitle={i18n.RISK_SCORE}
-      headerUnit={i18n.UNIT(totalCount)}
+      headerTitle={HOST_TACTICS}
+      headerSubtitle={i18n.COUNT(totalCount, techniqueCount)}
       id={id}
       isInspect={isInspect}
       itemsPerRow={rowItems}
@@ -139,21 +141,21 @@ const RiskScoreTableComponent: React.FC<RiskScoreTableProps> = ({
   );
 };
 
-RiskScoreTableComponent.displayName = 'RiskScoreTableComponent';
+HostTacticsTableComponent.displayName = 'HostTacticsTableComponent';
 
-const getSortField = (field: string): RiskScoreFields => {
+const getSortField = (field: string): HostTacticsFields => {
   switch (field) {
-    case `node.${RiskScoreFields.hostName}`:
-      return RiskScoreFields.hostName;
-    case `node.${RiskScoreFields.riskScore}`:
-      return RiskScoreFields.riskScore;
+    case `node.${HostTacticsFields.tactic}`:
+      return HostTacticsFields.tactic;
+    case `node.${HostTacticsFields.riskScore}`:
+      return HostTacticsFields.riskScore;
     default:
-      return RiskScoreFields.riskScore;
+      return HostTacticsFields.riskScore;
   }
 };
 
-const getNodeField = (field: RiskScoreFields): string => `node.${field}`;
+const getNodeField = (field: HostTacticsFields): string => `node.${field}`;
 
-export const RiskScoreTable = React.memo(RiskScoreTableComponent);
+export const HostTacticsTable = React.memo(HostTacticsTableComponent);
 
-RiskScoreTable.displayName = 'RiskScoreTable';
+HostTacticsTable.displayName = 'HostTacticsTable';

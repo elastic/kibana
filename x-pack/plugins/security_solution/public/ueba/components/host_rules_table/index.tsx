@@ -11,7 +11,6 @@ import { useDispatch } from 'react-redux';
 import {
   Columns,
   Criteria,
-  ItemsPerRow,
   PaginatedTable,
   SortingBasicTable,
 } from '../../../common/components/paginated_table';
@@ -27,6 +26,7 @@ import {
 } from '../../../../common';
 import { Direction } from '../../../../common/search_strategy';
 import { HOST_RULES } from '../../pages/translations';
+import { rowItems } from '../utils';
 
 interface HostRulesTableProps {
   data: HostRulesEdges[];
@@ -50,16 +50,6 @@ export type HostRulesColumns = [
   Columns<HostRulesItem[HostRulesFields.hits]>
 ];
 
-const rowItems: ItemsPerRow[] = [
-  {
-    text: i18n.ROWS_5,
-    numberOfRow: 5,
-  },
-  {
-    text: i18n.ROWS_10,
-    numberOfRow: 10,
-  },
-];
 const getSorting = (sortField: HostRulesFields, direction: Direction): SortingBasicTable => ({
   field: getNodeField(sortField),
   direction,

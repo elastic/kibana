@@ -37,3 +37,16 @@ export enum UserRulesFields {
   rules = 'rules',
   ruleCount = 'rule_count',
 }
+export enum HostTacticsFields {
+  hits = 'hits',
+  riskScore = 'risk_score',
+  tactic = 'tactic',
+  technique = 'technique',
+}
+export interface HostTacticsItem {
+  _id?: Maybe<string>;
+  [HostTacticsFields.hits]: Maybe<number>;
+  [HostTacticsFields.riskScore]: Maybe<number>;
+  [HostTacticsFields.tactic]: Maybe<string>;
+  [HostTacticsFields.technique]: Maybe<string>;
+}

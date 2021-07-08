@@ -7,9 +7,11 @@
 
 import {
   HostRulesSortField,
+  HostTacticsSortField,
   RiskScoreFields,
   RiskScoreSortField,
   SortField,
+  UserRulesSortField,
 } from '../../../common/search_strategy';
 
 export enum UebaType {
@@ -38,6 +40,12 @@ export interface RiskScoreQuery extends BasicQueryPaginated {
 export interface HostRulesQuery extends BasicQueryPaginated {
   sort: HostRulesSortField;
 }
+export interface UserRulesQuery extends BasicQueryPaginated {
+  sort: UserRulesSortField;
+}
+export interface HostTacticsQuery extends BasicQueryPaginated {
+  sort: HostTacticsSortField;
+}
 
 export interface TableUpdates {
   activePage?: number;
@@ -56,8 +64,8 @@ export interface UebaPageModel {
 
 export interface UebaDetailsQueries {
   [UebaTableType.hostRules]: HostRulesQuery;
-  [UebaTableType.hostTactics]: HostRulesQuery;
-  [UebaTableType.userRules]: HostRulesQuery;
+  [UebaTableType.hostTactics]: HostTacticsQuery;
+  [UebaTableType.userRules]: UserRulesQuery;
 }
 
 export interface UebaDetailsModel {

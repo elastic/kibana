@@ -34,7 +34,6 @@ export type RiskScoreQueryProps = QueryTabBodyProps & {
   updateDateRange?: UpdateDateRange;
   narrowDateRange?: NarrowDateRange;
 };
-export type HostRulesQueryProps = RiskScoreQueryProps & {
+export type HostQueryProps = RiskScoreQueryProps & {
   hostName: string;
 };
-export type UserRulesQueryProps = HostRulesQueryProps;

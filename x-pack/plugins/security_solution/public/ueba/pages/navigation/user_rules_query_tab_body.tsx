@@ -9,7 +9,7 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useUserRules } from '../../containers/user_rules';
-import { UserRulesQueryProps } from './types';
+import { HostQueryProps } from './types';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { HostRulesTable } from '../../components/host_rules_table';
 import { uebaModel } from '../../store';
@@ -28,7 +28,7 @@ export const UserRulesQueryTabBody = ({
   setQuery,
   startDate,
   type,
-}: UserRulesQueryProps) => {
+}: HostQueryProps) => {
   const [loading, { data, loadPage, id, inspect, isInspected, refetch }] = useUserRules({
     docValueFields,
     endDate,

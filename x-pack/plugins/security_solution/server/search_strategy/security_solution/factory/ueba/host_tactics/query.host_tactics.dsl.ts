@@ -6,16 +6,16 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { Direction, UserRulesRequestOptions } from '../../../../../../common/search_strategy';
+import { HostTacticsRequestOptions } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
-export const buildUserRulesQuery = ({
+export const buildHostTacticsQuery = ({
   defaultIndex,
   docValueFields,
   filterQuery,
   hostName,
   timerange: { from, to },
-}: UserRulesRequestOptions) => {
+}: HostTacticsRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     {
@@ -37,26 +37,19 @@ export const buildUserRulesQuery = ({
     body: {
       ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggs: {
-        user_data: {
+        risk_score: {
+          sum: {
+            field: 'signal.rule.risk_score',
+          },
+        },
+        tactic: {
           terms: {
-            field: 'user.name',
-            order: {
-              risk_score: Direction.desc,
-            },
-            size: 20,
+            field: 'signal.rule.threat.tactic.name',
           },
           aggs: {
-            risk_score: {
-              sum: {
-                field: 'signal.rule.risk_score',
-              },
-            },
-            rule_name: {
+            technique: {
               terms: {
-                field: 'signal.rule.name',
-                order: {
-                  risk_score: Direction.desc,
-                },
+                field: 'signal.rule.threat.technique.name',
               },
               aggs: {
                 risk_score: {
@@ -64,18 +57,18 @@ export const buildUserRulesQuery = ({
                     field: 'signal.rule.risk_score',
                   },
                 },
-                rule_type: {
-                  terms: {
-                    field: 'signal.rule.type',
-                  },
-                },
               },
             },
-            rule_count: {
-              cardinality: {
-                field: 'signal.rule.name',
-              },
-            },
+          },
+        },
+        tactic_count: {
+          cardinality: {
+            field: 'signal.rule.threat.tactic.name',
+          },
+        },
+        technique_count: {
+          cardinality: {
+            field: 'signal.rule.threat.technique.name',
           },
         },
       },

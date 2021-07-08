@@ -80,6 +80,7 @@ import {
   UserRulesRequestOptions,
   UserRulesStrategyResponse,
 } from './ueba';
+import { HostTacticsRequestOptions, HostTacticsStrategyResponse } from './ueba/host_tactics';
 
 export * from './hosts';
 export * from './matrix_histogram';
@@ -126,6 +127,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostRulesStrategyResponse
   : T extends UebaQueries.userRules
   ? UserRulesStrategyResponse
+  : T extends UebaQueries.hostTactics
+  ? HostTacticsStrategyResponse
   : T extends HostsQueries.overview
   ? HostsOverviewStrategyResponse
   : T extends HostsQueries.authentications
@@ -222,6 +225,8 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? HostRulesRequestOptions
   : T extends UebaQueries.userRules
   ? UserRulesRequestOptions
+  : T extends UebaQueries.hostTactics
+  ? HostTacticsRequestOptions
   : T extends typeof MatrixHistogramQuery
   ? MatrixHistogramRequestOptions
   : T extends CtiQueries.eventEnrichment

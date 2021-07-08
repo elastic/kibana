@@ -14,6 +14,8 @@ import {
   NetworkTlsFields,
   NetworkUsersFields,
   RiskScoreFields,
+  HostRulesFields,
+  HostTacticsFields,
 } from '../../../common/search_strategy';
 import { State } from '../store';
 
@@ -178,10 +180,20 @@ export const mockGlobalState: State = {
     },
     details: {
       queries: {
-        [uebaModel.UebaTableType.riskScore]: {
+        [uebaModel.UebaTableType.hostRules]: {
           activePage: 0,
           limit: 10,
-          sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
+          sort: { field: HostRulesFields.riskScore, direction: Direction.desc },
+        },
+        [uebaModel.UebaTableType.hostTactics]: {
+          activePage: 0,
+          limit: 10,
+          sort: { field: HostTacticsFields.riskScore, direction: Direction.desc },
+        },
+        [uebaModel.UebaTableType.userRules]: {
+          activePage: 0,
+          limit: 10,
+          sort: { field: HostRulesFields.riskScore, direction: Direction.desc },
         },
       },
     },
