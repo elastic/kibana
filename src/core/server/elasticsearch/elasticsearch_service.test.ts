@@ -15,6 +15,7 @@ import { configServiceMock, getEnvOptions } from '../config/mocks';
 import { CoreContext } from '../core_context';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 import { httpServiceMock } from '../http/http_service.mock';
+import { executionContextServiceMock } from '../execution_context/execution_context_service.mock';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService } from './elasticsearch_service';
 import { elasticsearchServiceMock } from './elasticsearch_service.mock';
@@ -28,6 +29,7 @@ let elasticsearchService: ElasticsearchService;
 const configService = configServiceMock.create();
 const setupDeps = {
   http: httpServiceMock.createInternalSetupContract(),
+  executionContext: executionContextServiceMock.createInternalSetupContract(),
 };
 configService.atPath.mockReturnValue(
   new BehaviorSubject({
@@ -274,12 +276,7 @@ describe('#start', () => {
       expect(clusterClient).toBe(mockClusterClientInstance);
 
       expect(MockClusterClient).toHaveBeenCalledTimes(1);
-      expect(MockClusterClient).toHaveBeenCalledWith(
-        expect.objectContaining(customConfig),
-        expect.objectContaining({ context: ['elasticsearch'] }),
-        'custom-type',
-        expect.any(Function)
-      );
+      expect(MockClusterClient.mock.calls[0][0]).toEqual(expect.objectContaining(customConfig));
     });
     it('creates a new client on each call', async () => {
       await elasticsearchService.setup(setupDeps);

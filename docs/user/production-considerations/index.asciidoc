@@ -1,4 +1,5 @@
 include::production.asciidoc[]
+include::security-production-considerations.asciidoc[]
 include::alerting-production-considerations.asciidoc[]
 include::reporting-production-considerations.asciidoc[]
 include::task-manager-production-considerations.asciidoc[]
