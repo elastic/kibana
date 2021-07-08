@@ -2,7 +2,7 @@
 
 exports[`APM API tests basic apm_8.0.0 Instance details when data is loaded fetch instance details return the correct data 1`] = `
 Object {
-  "@timestamp": "2020-12-08T13:59:01.971Z",
+  "@timestamp": "2020-12-08T14:16:33.676Z",
   "agent": Object {
     "ephemeral_id": "d27b2271-06b4-48c8-a02a-cfd963c0b4d0",
     "name": "java",
@@ -26,9 +26,6 @@ Object {
   },
   "service": Object {
     "environment": "production",
-    "framework": Object {
-      "name": "Servlet API",
-    },
     "language": Object {
       "name": "Java",
       "version": "11.0.9.1",
