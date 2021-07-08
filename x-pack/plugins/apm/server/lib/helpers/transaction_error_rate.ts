@@ -24,11 +24,11 @@ type OutcomeAggregation = ReturnType<typeof getOutcomeAggregation>;
 export const getTimeseriesAggregation = (
   start: number,
   end: number,
-  intervalString: string
+  bucketSizeString: string
 ) => ({
   date_histogram: {
     field: '@timestamp',
-    fixed_interval: intervalString,
+    fixed_interval: bucketSizeString,
     min_doc_count: 0,
     extended_bounds: { min: start, max: end },
   },

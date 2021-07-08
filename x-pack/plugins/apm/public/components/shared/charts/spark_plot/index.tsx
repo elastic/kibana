@@ -49,7 +49,7 @@ export function SparkPlot({
 }: {
   color: Color;
   series?: Coordinate[] | null;
-  valueLabel: React.ReactNode;
+  valueLabel: string;
   compact?: boolean;
   comparisonSeries?: Coordinate[];
 }) {

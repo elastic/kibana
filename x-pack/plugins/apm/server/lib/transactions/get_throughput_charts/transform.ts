@@ -8,7 +8,10 @@
 import { sortBy } from 'lodash';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { ThroughputChartsResponse } from '.';
-import { calculateThroughput } from '../../helpers/calculate_throughput';
+import {
+  calculateThroughput,
+  getThroughputUnit,
+} from '../../../../common/calculate_throughput';
 import { SetupTimeRange } from '../../helpers/setup_request';
 
 type ThroughputResultBuckets = Required<ThroughputChartsResponse>['aggregations']['throughput']['buckets'];
@@ -23,13 +26,21 @@ export function getThroughputBuckets({
   setupTimeRange: SetupTimeRange;
 }) {
   const { start, end } = setupTimeRange;
+
+  const throughputUnit = getThroughputUnit(bucketSize);
+
   const buckets = throughputResultBuckets.map(
     ({ key: resultKey, timeseries }) => {
       const dataPoints = timeseries.buckets.map((bucket) => {
+        const { value } = calculateThroughput({
+          unit: throughputUnit,
+          bucketSize,
+          count: bucket.doc_count,
+        });
+
         return {
           x: bucket.key,
-          // divide by minutes
-          y: bucket.doc_count / (bucketSize / 60),
+          y: value,
         };
       });
 
@@ -42,14 +53,22 @@ export function getThroughputBuckets({
         .reduce((a, b) => a + b, 0);
 
       // calculate average throughput
-      const avg = calculateThroughput({ start, end, value: docCountTotal });
+      const avg = calculateThroughput({
+        unit: throughputUnit,
+        start,
+        end,
+        count: docCountTotal,
+      });
 
       return { key, dataPoints, avg };
     }
   );
 
-  return sortBy(
-    buckets,
-    (bucket) => bucket.key.toString().replace(/^HTTP (\d)xx$/, '00$1') // ensure that HTTP 3xx are sorted at the top
-  );
+  return {
+    unit: throughputUnit,
+    buckets: sortBy(
+      buckets,
+      (bucket) => bucket.key.toString().replace(/^HTTP (\d)xx$/, '00$1') // ensure that HTTP status codes like 3xx, 4xx are sorted at the top
+    ),
+  };
 }

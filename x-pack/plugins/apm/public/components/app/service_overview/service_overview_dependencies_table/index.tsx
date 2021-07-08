@@ -165,7 +165,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
             comparisonSeries={
               comparisonEnabled ? latency.previousPeriodTimeseries : undefined
             }
-            valueLabel={asMillisecondDuration(latency.value)}
+            valueLabel={asMillisecondDuration(latency.avg)}
           />
         );
       },
@@ -189,7 +189,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
                 ? throughput.previousPeriodTimeseries
                 : undefined
             }
-            valueLabel={asTransactionRate(throughput.value)}
+            valueLabel={asTransactionRate(throughput.avg)}
           />
         );
       },
@@ -213,7 +213,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
             comparisonSeries={
               comparisonEnabled ? errorRate.previousPeriodTimeseries : undefined
             }
-            valueLabel={asPercent(errorRate.value, 1)}
+            valueLabel={asPercent(errorRate.avg, 1)}
           />
         );
       },
@@ -260,7 +260,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
         endpoint: 'GET /api/apm/services/{serviceName}/dependencies',
         params: {
           path: { serviceName },
-          query: { start, end, environment, numBuckets: 20 },
+          query: { start, end, environment },
         },
       });
     },
@@ -282,7 +282,6 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
             start: comparisonStart,
             end: comparisonEnd,
             environment,
-            numBuckets: 20,
           },
         },
       });
@@ -298,9 +297,9 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
   // need top-level sortable fields for the managed table
   const items = serviceDependencies.map((item) => ({
     ...item,
-    errorRateValue: item.errorRate.value,
-    latencyValue: item.latency.value,
-    throughputValue: item.throughput.value,
+    errorRateValue: item.errorRate.avg,
+    latencyValue: item.latency.avg,
+    throughputValue: item.throughput.avg,
     impactValue: item.impact,
   }));
 

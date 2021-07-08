@@ -52,14 +52,12 @@ export async function getServiceInstancesSystemMetricStatistics<
   start,
   end,
   serviceNodeIds,
-  numBuckets,
   isComparisonSearch,
 }: {
   setup: Setup;
   serviceName: string;
   start: number;
   end: number;
-  numBuckets?: number;
   serviceNodeIds?: string[];
   environment?: string;
   kuery?: string;
@@ -68,7 +66,7 @@ export async function getServiceInstancesSystemMetricStatistics<
 }): Promise<Array<ServiceInstanceSystemMetricStatistics<T>>> {
   const { apmEventClient } = setup;
 
-  const { intervalString } = getBucketSize({ start, end, numBuckets });
+  const { bucketSizeString } = getBucketSize({ start, end, numBuckets: 20 });
 
   const systemMemoryFilter = {
     bool: {
@@ -95,7 +93,7 @@ export async function getServiceInstancesSystemMetricStatistics<
             timeseries: {
               date_histogram: {
                 field: '@timestamp',
-                fixed_interval: intervalString,
+                fixed_interval: bucketSizeString,
                 min_doc_count: 0,
                 extended_bounds: {
                   min: start,

@@ -28,7 +28,7 @@ export const fetchObservabilityOverviewPageData = async ({
     },
   });
 
-  const { serviceCount, transactionPerMinute } = data;
+  const { serviceCount, throughput } = data;
 
   return {
     appLink: `/app/apm/services?rangeFrom=${relativeTime.start}&rangeTo=${relativeTime.end}`,
@@ -39,12 +39,12 @@ export const fetchObservabilityOverviewPageData = async ({
       },
       transactions: {
         type: 'number',
-        value: transactionPerMinute.value || 0,
+        value: throughput.value || 0,
       },
     },
     series: {
       transactions: {
-        coordinates: transactionPerMinute.timeseries,
+        coordinates: throughput.timeseries,
       },
     },
   };

@@ -1575,7 +1575,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { avgMemoryUsage: number | null; avgCpuUsage: number | null; transactionStats: { avgTransactionDuration: number | null; avgRequestsPerMinute: number | null; }; avgErrorRate: number | null; }, ",
+          ", { avgMemoryUsage: number | null; avgCpuUsage: number | null; transactionStats: { avgTransactionDuration: number | null; avgThroughput: number | null; }; avgErrorRate: number | null; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /api/apm/services/{serviceName}/serviceNodes\": ",
           "ServerRoute",

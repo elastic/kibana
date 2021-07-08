@@ -47,13 +47,13 @@ export async function getTransactionDurationChartPreview({
     },
   };
 
-  const { intervalString } = getBucketSize({ start, end, numBuckets: 20 });
+  const { bucketSizeString } = getBucketSize({ start, end, numBuckets: 20 });
 
   const aggs = {
     timeseries: {
       date_histogram: {
         field: '@timestamp',
-        fixed_interval: intervalString,
+        fixed_interval: bucketSizeString,
       },
       aggs: {
         agg:

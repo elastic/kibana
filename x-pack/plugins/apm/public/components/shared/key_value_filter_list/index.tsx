@@ -48,6 +48,11 @@ const ValueContainer = styled.div`
   align-items: center;
 `;
 
+interface KeyValue {
+  key: string;
+  value: any | undefined;
+}
+
 function removeEmptyValues(items: KeyValue[]) {
   return items.filter(({ value }) => value !== undefined);
 }

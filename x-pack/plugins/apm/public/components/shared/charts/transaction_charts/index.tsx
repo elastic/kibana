@@ -29,8 +29,6 @@ export function TransactionCharts() {
     throughputChartsStatus,
   } = useTransactionThroughputChartsFetcher();
 
-  const { throughputTimeseries } = throughputChartsData;
-
   return (
     <>
       <AnnotationsContextProvider>
@@ -54,9 +52,14 @@ export function TransactionCharts() {
                 </EuiTitle>
                 <TimeseriesChart
                   fetchStatus={throughputChartsStatus}
-                  id="transactionsPerMinute"
-                  timeseries={throughputTimeseries}
-                  yLabelFormat={asTransactionRate}
+                  id="transactionRate"
+                  timeseries={throughputChartsData.buckets}
+                  yLabelFormat={(y) => {
+                    return asTransactionRate({
+                      value: y,
+                      unit: throughputChartsData.unit,
+                    });
+                  }}
                 />
               </EuiPanel>
             </EuiFlexItem>

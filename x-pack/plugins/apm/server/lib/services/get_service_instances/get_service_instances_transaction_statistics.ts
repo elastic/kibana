@@ -19,7 +19,10 @@ import {
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
-import { calculateThroughput } from '../../helpers/calculate_throughput';
+import {
+  calculateThroughput,
+  Throughput,
+} from '../../../../common/calculate_throughput';
 import { getBucketSizeForAggregatedTransactions } from '../../helpers/get_bucket_size_for_aggregated_transactions';
 import {
   getLatencyAggregation,
@@ -31,7 +34,7 @@ interface ServiceInstanceTransactionPrimaryStatistics {
   serviceNodeName: string;
   errorRate: number;
   latency: number;
-  throughput: number;
+  throughput: Throughput;
 }
 
 interface ServiceInstanceTransactionComparisonStatistics {
@@ -59,7 +62,6 @@ export async function getServiceInstancesTransactionStatistics<
   start,
   end,
   serviceNodeIds,
-  numBuckets,
   isComparisonSearch,
 }: {
   latencyAggregationType: LatencyAggregationType;
@@ -74,18 +76,14 @@ export async function getServiceInstancesTransactionStatistics<
   environment?: string;
   kuery?: string;
   size?: number;
-  numBuckets?: number;
 }): Promise<Array<ServiceInstanceTransactionStatistics<T>>> {
   const { apmEventClient } = setup;
 
-  const { intervalString, bucketSize } = getBucketSizeForAggregatedTransactions(
-    {
-      start,
-      end,
-      numBuckets,
-      searchAggregatedTransactions,
-    }
-  );
+  const { bucketSizeString } = getBucketSizeForAggregatedTransactions({
+    start,
+    end,
+    searchAggregatedTransactions,
+  });
 
   const field = getTransactionDurationFieldForAggregatedTransactions(
     searchAggregatedTransactions
@@ -130,7 +128,7 @@ export async function getServiceInstancesTransactionStatistics<
             timeseries: {
               date_histogram: {
                 field: '@timestamp',
-                fixed_interval: intervalString,
+                fixed_interval: bucketSizeString,
                 min_doc_count: 0,
                 extended_bounds: { min: start, max: end },
               },
@@ -155,8 +153,6 @@ export async function getServiceInstancesTransactionStatistics<
     }
   );
 
-  const bucketSizeInMinutes = bucketSize / 60;
-
   return (
     (response.aggregations?.[SERVICE_NODE_NAME].buckets.map(
       (serviceNodeBucket) => {
@@ -172,10 +168,12 @@ export async function getServiceInstancesTransactionStatistics<
               x: dateBucket.key,
               y: dateBucket.failures.doc_count / dateBucket.doc_count,
             })),
-            throughput: timeseries.buckets.map((dateBucket) => ({
-              x: dateBucket.key,
-              y: dateBucket.doc_count / bucketSizeInMinutes,
-            })),
+            throughput: timeseries.buckets.map((dateBucket) => {
+              return {
+                x: dateBucket.key,
+                y: dateBucket.doc_count, // TODO: ensure absolute count is ok
+              };
+            }),
             latency: timeseries.buckets.map((dateBucket) => ({
               x: dateBucket.key,
               y: getLatencyValue({
@@ -184,18 +182,23 @@ export async function getServiceInstancesTransactionStatistics<
               }),
             })),
           };
-        } else {
-          const { failures, latency } = serviceNodeBucket;
-          return {
-            serviceNodeName,
-            errorRate: failures.doc_count / count,
-            latency: getLatencyValue({
-              aggregation: latency,
-              latencyAggregationType,
-            }),
-            throughput: calculateThroughput({ start, end, value: count }),
-          };
         }
+
+        const { failures, latency } = serviceNodeBucket;
+        return {
+          serviceNodeName,
+          errorRate: failures.doc_count / count,
+          latency: getLatencyValue({
+            aggregation: latency,
+            latencyAggregationType,
+          }),
+          throughput: calculateThroughput({
+            unit: 'minute',
+            start,
+            end,
+            count,
+          }),
+        };
       }
     ) as Array<ServiceInstanceTransactionStatistics<T>>) || []
   );

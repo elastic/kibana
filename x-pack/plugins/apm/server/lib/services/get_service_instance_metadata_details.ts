@@ -14,11 +14,6 @@ import { environmentQuery, kqlQuery, rangeQuery } from '../../utils/queries';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
-export interface KeyValue {
-  key: string;
-  value: any | undefined;
-}
-
 export async function getServiceInstanceMetadataDetails({
   serviceName,
   serviceNodeName,

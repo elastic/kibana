@@ -157,7 +157,6 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
               kuery,
               start,
               end,
-              numBuckets: 20,
               transactionType,
               groupIds: JSON.stringify(
                 items.map(({ group_id: groupId }) => groupId).sort()

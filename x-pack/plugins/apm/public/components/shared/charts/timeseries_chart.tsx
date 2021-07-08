@@ -20,6 +20,7 @@ import {
   RectAnnotation,
   ScaleType,
   Settings,
+  TickFormatter,
   YDomainRange,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
@@ -57,11 +58,11 @@ interface Props {
   /**
    * Formatter for y-axis tick values
    */
-  yLabelFormat: (y: number) => string;
+  yLabelFormat: TickFormatter<number>;
   /**
    * Formatter for legend and tooltip values
    */
-  yTickFormat?: (y: number) => string;
+  yTickFormat?: TickFormatter<number>;
   showAnnotations?: boolean;
   yDomain?: YDomainRange;
   anomalyTimeseries?: ReturnType<

@@ -25,14 +25,6 @@ interface ServiceOverviewInstancesChartAndTableProps {
   serviceName: string;
 }
 
-export interface MainStatsServiceInstanceItem {
-  serviceNodeName: string;
-  errorRate: number;
-  throughput: number;
-  latency: number;
-  cpuUsage: number;
-  memoryUsage: number;
-}
 type ApiResponseMainStats = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
 type ApiResponseDetailedStats = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
 
@@ -163,7 +155,7 @@ export function ServiceOverviewInstancesChartAndTable({
     currentPeriodItems.map((item) => ({
       ...item,
       latency: item.latency ?? 0,
-      throughput: item.throughput ?? 0,
+      throughput: item.throughput,
       errorRate: item.errorRate ?? 0,
       cpuUsage: item.cpuUsage ?? 0,
       memoryUsage: item.memoryUsage ?? 0,
@@ -200,7 +192,6 @@ export function ServiceOverviewInstancesChartAndTable({
             latencyAggregationType,
             start,
             end,
-            numBuckets: 20,
             transactionType,
             serviceNodeIds: JSON.stringify(
               currentPeriodOrderedItems.map((item) => item.serviceNodeName)

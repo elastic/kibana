@@ -40,8 +40,8 @@ export function SingleRow() {
       serviceName: 'adminconsole',
       transactionType: 'request',
       p95: 11974156,
-      averageResponseTime: 8087434.558974359,
-      transactionsPerMinute: 0.40625,
+      latency: 8087434.558974359,
+      transactionRate: 0.40625,
       impact: 100,
     },
   ];

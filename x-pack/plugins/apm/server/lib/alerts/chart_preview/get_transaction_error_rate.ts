@@ -46,14 +46,14 @@ export async function getTransactionErrorRateChartPreview({
 
   const outcomes = getOutcomeAggregation();
 
-  const { intervalString } = getBucketSize({ start, end, numBuckets: 20 });
+  const { bucketSizeString } = getBucketSize({ start, end, numBuckets: 20 });
 
   const aggs = {
     outcomes,
     timeseries: {
       date_histogram: {
         field: '@timestamp',
-        fixed_interval: intervalString,
+        fixed_interval: bucketSizeString,
       },
       aggs: { outcomes },
     },

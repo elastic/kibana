@@ -158,7 +158,6 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
               kuery,
               start,
               end,
-              numBuckets: 20,
               transactionType,
               latencyAggregationType,
               transactionNames: JSON.stringify(

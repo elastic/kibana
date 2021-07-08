@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getThroughputUnit } from '../../../common/calculate_throughput';
 import { ESFilter } from '../../../../../../src/core/types/elasticsearch';
 import {
   SERVICE_NAME,
@@ -33,7 +34,7 @@ interface Options {
   end: number;
 }
 
-function fetcher({
+export async function getThroughput({
   environment,
   kuery,
   searchAggregatedTransactions,
@@ -44,7 +45,10 @@ function fetcher({
   end,
 }: Options) {
   const { apmEventClient } = setup;
-  const { intervalString } = getBucketSizeForAggregatedTransactions({
+  const {
+    bucketSizeString,
+    bucketSize,
+  } = getBucketSizeForAggregatedTransactions({
     start,
     end,
     searchAggregatedTransactions,
@@ -59,6 +63,8 @@ function fetcher({
     ...environmentQuery(environment),
     ...kqlQuery(kuery),
   ];
+
+  const throughputUnit = getThroughputUnit(bucketSize);
 
   const params = {
     apm: {
@@ -75,14 +81,14 @@ function fetcher({
         timeseries: {
           date_histogram: {
             field: '@timestamp',
-            fixed_interval: intervalString,
+            fixed_interval: bucketSizeString,
             min_doc_count: 0,
             extended_bounds: { min: start, max: end },
           },
           aggs: {
             throughput: {
               rate: {
-                unit: 'minute' as const,
+                unit: throughputUnit,
               },
             },
           },
@@ -91,18 +97,19 @@ function fetcher({
     },
   };
 
-  return apmEventClient.search('get_throughput_for_service', params);
-}
-
-export async function getThroughput(options: Options) {
-  const response = await fetcher(options);
-
-  return (
-    response.aggregations?.timeseries.buckets.map((bucket) => {
-      return {
-        x: bucket.key,
-        y: bucket.throughput.value,
-      };
-    }) ?? []
+  const response = await apmEventClient.search(
+    'get_throughput_for_service',
+    params
   );
+
+  return {
+    unit: throughputUnit,
+    timeseries:
+      response.aggregations?.timeseries.buckets.map((bucket) => {
+        return {
+          x: bucket.key,
+          y: bucket.throughput.value,
+        };
+      }) ?? [],
+  };
 }

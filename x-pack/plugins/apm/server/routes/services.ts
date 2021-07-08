@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { jsonRt, isoToEpochRt, toNumberRt } from '@kbn/io-ts-utils';
+import { jsonRt, isoToEpochRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { uniq } from 'lodash';
 import { latencyAggregationTypeRt } from '../../common/latency_aggregation_types';
@@ -342,7 +342,6 @@ const serviceErrorGroupsDetailedStatisticsRoute = createApmServerRoute({
       rangeRt,
       comparisonRangeRt,
       t.type({
-        numBuckets: toNumberRt,
         transactionType: t.string,
         groupIds: jsonRt.pipe(t.array(t.string)),
       }),
@@ -358,7 +357,6 @@ const serviceErrorGroupsDetailedStatisticsRoute = createApmServerRoute({
       query: {
         environment,
         kuery,
-        numBuckets,
         transactionType,
         groupIds,
         comparisonStart,
@@ -371,7 +369,6 @@ const serviceErrorGroupsDetailedStatisticsRoute = createApmServerRoute({
       kuery,
       serviceName,
       setup,
-      numBuckets,
       transactionType,
       groupIds,
       comparisonStart,
@@ -531,7 +528,6 @@ const serviceInstancesDetailedStatisticsRoute = createApmServerRoute({
         latencyAggregationType: latencyAggregationTypeRt,
         transactionType: t.string,
         serviceNodeIds: jsonRt.pipe(t.array(t.string)),
-        numBuckets: toNumberRt,
       }),
       environmentRt,
       kueryRt,
@@ -551,7 +547,6 @@ const serviceInstancesDetailedStatisticsRoute = createApmServerRoute({
       comparisonStart,
       comparisonEnd,
       serviceNodeIds,
-      numBuckets,
       latencyAggregationType,
     } = params.query;
 
@@ -568,7 +563,6 @@ const serviceInstancesDetailedStatisticsRoute = createApmServerRoute({
       setup,
       transactionType,
       searchAggregatedTransactions,
-      numBuckets,
       serviceNodeIds,
       comparisonStart,
       comparisonEnd,
@@ -620,13 +614,7 @@ export const serviceDependenciesRoute = createApmServerRoute({
     path: t.type({
       serviceName: t.string,
     }),
-    query: t.intersection([
-      t.type({
-        numBuckets: toNumberRt,
-      }),
-      environmentRt,
-      rangeRt,
-    ]),
+    query: t.intersection([t.type({}), environmentRt, rangeRt]),
   }),
   options: {
     tags: ['access:apm'],
@@ -635,13 +623,12 @@ export const serviceDependenciesRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const { params } = resources;
     const { serviceName } = params.path;
-    const { environment, numBuckets } = params.query;
+    const { environment } = params.query;
 
     const serviceDependencies = await getServiceDependencies({
       serviceName,
       environment,
       setup,
-      numBuckets,
     });
 
     return { serviceDependencies };

@@ -53,7 +53,7 @@ export function useTransactionThroughputChartsFetcher() {
   );
 
   const memoizedData = useMemo(
-    () => getThroughputChartSelector({ throughputChart: data, theme }),
+    () => getThroughputChartSelector({ data, theme }),
     [data, theme]
   );
 

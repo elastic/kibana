@@ -7,7 +7,6 @@
 
 import { jsonRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
-import { toNumberRt } from '@kbn/io-ts-utils';
 import {
   LatencyAggregationType,
   latencyAggregationTypeRt,
@@ -130,7 +129,6 @@ const transactionGroupsDetailedStatisticsRoute = createApmServerRoute({
       comparisonRangeRt,
       t.type({
         transactionNames: jsonRt.pipe(t.array(t.string)),
-        numBuckets: toNumberRt,
         transactionType: t.string,
         latencyAggregationType: latencyAggregationTypeRt,
       }),
@@ -150,7 +148,6 @@ const transactionGroupsDetailedStatisticsRoute = createApmServerRoute({
         kuery,
         transactionNames,
         latencyAggregationType,
-        numBuckets,
         transactionType,
         comparisonStart,
         comparisonEnd,
@@ -170,7 +167,6 @@ const transactionGroupsDetailedStatisticsRoute = createApmServerRoute({
       transactionNames,
       searchAggregatedTransactions,
       transactionType,
-      numBuckets,
       latencyAggregationType,
       comparisonStart,
       comparisonEnd,

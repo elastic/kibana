@@ -37,7 +37,6 @@ export async function getServiceErrorGroups({
   serviceName,
   setup,
   size,
-  numBuckets,
   pageIndex,
   sortDirection,
   sortField,
@@ -49,7 +48,6 @@ export async function getServiceErrorGroups({
   setup: Setup & SetupTimeRange;
   size: number;
   pageIndex: number;
-  numBuckets: number;
   sortDirection: 'asc' | 'desc';
   sortField: 'name' | 'last_seen' | 'occurrences';
   transactionType: string;
@@ -57,7 +55,7 @@ export async function getServiceErrorGroups({
   return withApmSpan('get_service_error_groups', async () => {
     const { apmEventClient, start, end } = setup;
 
-    const { intervalString } = getBucketSize({ start, end, numBuckets });
+    const { bucketSizeString } = getBucketSize({ start, end, numBuckets: 20 });
 
     const response = await apmEventClient.search(
       'get_top_service_error_groups',
@@ -170,7 +168,7 @@ export async function getServiceErrorGroups({
                 timeseries: {
                   date_histogram: {
                     field: '@timestamp',
-                    fixed_interval: intervalString,
+                    fixed_interval: bucketSizeString,
                     min_doc_count: 0,
                     extended_bounds: {
                       min: start,

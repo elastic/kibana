@@ -164,24 +164,24 @@ export function getServiceColumns({
         <ServiceListMetric
           series={avgResponseTime?.timeseries}
           color="euiColorVis1"
-          valueLabel={asMillisecondDuration(avgResponseTime?.value || 0)}
+          valueLabel={asMillisecondDuration(avgResponseTime?.avg || 0)}
         />
       ),
       align: 'left',
       width: unit * 10,
     },
     {
-      field: 'transactionsPerMinute',
+      field: 'transactionRate',
       name: i18n.translate('xpack.apm.servicesTable.throughputColumnLabel', {
         defaultMessage: 'Throughput',
       }),
       sortable: true,
       dataType: 'number',
-      render: (_, { transactionsPerMinute }) => (
+      render: (_, { transactionRate }) => (
         <ServiceListMetric
-          series={transactionsPerMinute?.timeseries}
+          series={transactionRate?.timeseries}
           color="euiColorVis0"
-          valueLabel={asTransactionRate(transactionsPerMinute?.value)}
+          valueLabel={asTransactionRate(transactionRate?.avg)}
         />
       ),
       align: 'left',
@@ -195,7 +195,7 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       render: (_, { transactionErrorRate }) => {
-        const value = transactionErrorRate?.value;
+        const value = transactionErrorRate?.avg;
 
         const valueLabel = asPercent(value, 1);
 
@@ -232,7 +232,7 @@ export function ServiceList({ items, noItemsMessage }: Props) {
     : serviceColumns.filter((column) => column.field !== 'healthStatus');
   const initialSortField = displayHealthStatus
     ? 'healthStatus'
-    : 'transactionsPerMinute';
+    : 'transactionRate';
 
   return (
     <EuiFlexGroup
@@ -286,7 +286,7 @@ export function ServiceList({ items, noItemsMessage }: Props) {
                         ? SERVICE_HEALTH_STATUS_ORDER.indexOf(item.healthStatus)
                         : -1;
                     },
-                    (item) => item.transactionsPerMinute?.value ?? 0,
+                    (item) => item.transactionRate?.avg ?? 0,
                   ],
                   [sortDirection, sortDirection]
                 )
@@ -298,11 +298,11 @@ export function ServiceList({ items, noItemsMessage }: Props) {
                       // In the table this will make the "N/A" items always at the
                       // bottom/top.
                       case 'avgResponseTime':
-                        return item.avgResponseTime?.value ?? -1;
-                      case 'transactionsPerMinute':
-                        return item.transactionsPerMinute?.value ?? -1;
+                        return item.avgResponseTime?.avg ?? -1;
+                      case 'transactionRate':
+                        return item.transactionRate?.avg ?? -1;
                       case 'transactionErrorRate':
-                        return item.transactionErrorRate?.value ?? -1;
+                        return item.transactionErrorRate?.avg ?? -1;
                       default:
                         return item[sortField as keyof typeof item];
                     }

@@ -23,12 +23,10 @@ export const getMetrics = async ({
   setup,
   serviceName,
   environment,
-  numBuckets,
 }: {
   setup: Setup & SetupTimeRange;
   serviceName: string;
   environment?: string;
-  numBuckets: number;
 }) => {
   const { start, end, apmEventClient } = setup;
 
@@ -65,8 +63,8 @@ export const getMetrics = async ({
               timeseries: {
                 date_histogram: {
                   field: '@timestamp',
-                  fixed_interval: getBucketSize({ start, end, numBuckets })
-                    .intervalString,
+                  fixed_interval: getBucketSize({ start, end, numBuckets: 20 })
+                    .bucketSizeString,
                   extended_bounds: {
                     min: start,
                     max: end,

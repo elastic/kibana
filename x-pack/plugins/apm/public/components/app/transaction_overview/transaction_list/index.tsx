@@ -8,6 +8,7 @@
 import { EuiToolTip, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
+import { Throughput } from '../../../../../../../../../../../../private/var/tmp/_bazel_sqren/0095b6903ba3e5f57f5da9fcb4ada8db/execroot/kibana/bazel-out/darwin-fastbuild/bin/x-pack/plugins/apm/common/calculate_throughput';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
@@ -76,7 +77,7 @@ export function TransactionList({ items, isLoading }: Props) {
         },
       },
       {
-        field: 'averageResponseTime',
+        field: 'latency',
         name: i18n.translate(
           'xpack.apm.transactionsTable.avgDurationColumnLabel',
           {
@@ -85,7 +86,7 @@ export function TransactionList({ items, isLoading }: Props) {
         ),
         sortable: true,
         dataType: 'number',
-        render: (time: number) => asMillisecondDuration(time),
+        render: (_, { latency }) => asMillisecondDuration(latency),
       },
       {
         field: 'p95',
@@ -97,17 +98,17 @@ export function TransactionList({ items, isLoading }: Props) {
         ),
         sortable: true,
         dataType: 'number',
-        render: (time: number) => asMillisecondDuration(time),
+        render: (_, { p95 }) => asMillisecondDuration(p95),
       },
       {
-        field: 'transactionsPerMinute',
+        field: 'transactionRate',
         name: i18n.translate(
           'xpack.apm.transactionsTable.throughputColumnLabel',
           { defaultMessage: 'Throughput' }
         ),
         sortable: true,
         dataType: 'number',
-        render: (value: number) => asTransactionRate(value),
+        render: (_, { transactionRate }) => asTransactionRate(transactionRate),
       },
       {
         field: 'impact',
@@ -135,7 +136,7 @@ export function TransactionList({ items, isLoading }: Props) {
         ),
         sortable: true,
         dataType: 'number',
-        render: (value: number) => <ImpactBar value={value} />,
+        render: (_, { impact }) => <ImpactBar value={impact} />,
       },
     ],
     [latencyAggregationType]

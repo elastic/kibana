@@ -17,7 +17,7 @@ export async function getOverallErrorTimeseries(options: CorrelationsOptions) {
   const { setup } = options;
   const filters = getCorrelationsFilters(options);
   const { start, end, apmEventClient } = setup;
-  const { intervalString } = getBucketSize({ start, end, numBuckets: 15 });
+  const { bucketSizeString } = getBucketSize({ start, end, numBuckets: 15 });
 
   const params = {
     // TODO: add support for metrics
@@ -26,7 +26,7 @@ export async function getOverallErrorTimeseries(options: CorrelationsOptions) {
       size: 0,
       query: { bool: { filter: filters } },
       aggs: {
-        timeseries: getTimeseriesAggregation(start, end, intervalString),
+        timeseries: getTimeseriesAggregation(start, end, bucketSizeString),
       },
     },
   };

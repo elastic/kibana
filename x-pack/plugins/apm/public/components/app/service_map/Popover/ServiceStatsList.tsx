@@ -29,14 +29,12 @@ export const ItemDescription = euiStyled('td')`
   text-align: right;
 `;
 
-type ServiceStatsListProps = ServiceNodeStats;
-
 export function ServiceStatsList({
   transactionStats,
   avgErrorRate,
   avgCpuUsage,
   avgMemoryUsage,
-}: ServiceStatsListProps) {
+}: ServiceNodeStats) {
   const listItems = [
     {
       title: i18n.translate(
@@ -56,7 +54,7 @@ export function ServiceStatsList({
           defaultMessage: 'Throughput (avg.)',
         }
       ),
-      description: asTransactionRate(transactionStats.avgRequestsPerMinute),
+      description: asTransactionRate(transactionStats.avgThroughput),
     },
     {
       title: i18n.translate('xpack.apm.serviceMap.errorRatePopoverStat', {

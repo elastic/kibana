@@ -15,7 +15,7 @@ export function ServiceListMetric({
 }: {
   color: 'euiColorVis1' | 'euiColorVis0' | 'euiColorVis7';
   series?: Array<{ x: number; y: number | null }>;
-  valueLabel: React.ReactNode;
+  valueLabel: string;
 }) {
   return <SparkPlot valueLabel={valueLabel} series={series} color={color} />;
 }

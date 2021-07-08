@@ -25,7 +25,6 @@ export async function getServiceErrorGroupDetailedStatistics({
   kuery,
   serviceName,
   setup,
-  numBuckets,
   transactionType,
   groupIds,
   environment,
@@ -35,7 +34,6 @@ export async function getServiceErrorGroupDetailedStatistics({
   kuery?: string;
   serviceName: string;
   setup: Setup;
-  numBuckets: number;
   transactionType: string;
   groupIds: string[];
   environment?: string;
@@ -43,9 +41,7 @@ export async function getServiceErrorGroupDetailedStatistics({
   end: number;
 }): Promise<Array<{ groupId: string; timeseries: Coordinate[] }>> {
   const { apmEventClient } = setup;
-
-  const { intervalString } = getBucketSize({ start, end, numBuckets });
-
+  const { bucketSizeString } = getBucketSize({ start, end, numBuckets: 20 });
   const timeseriesResponse = await apmEventClient.search(
     'get_service_error_group_detailed_statistics',
     {
@@ -76,7 +72,7 @@ export async function getServiceErrorGroupDetailedStatistics({
               timeseries: {
                 date_histogram: {
                   field: '@timestamp',
-                  fixed_interval: intervalString,
+                  fixed_interval: bucketSizeString,
                   min_doc_count: 0,
                   extended_bounds: {
                     min: start,
@@ -113,7 +109,6 @@ export async function getServiceErrorGroupPeriods({
   kuery,
   serviceName,
   setup,
-  numBuckets,
   transactionType,
   groupIds,
   environment,
@@ -123,7 +118,6 @@ export async function getServiceErrorGroupPeriods({
   kuery?: string;
   serviceName: string;
   setup: Setup & SetupTimeRange;
-  numBuckets: number;
   transactionType: string;
   groupIds: string[];
   environment?: string;
@@ -137,7 +131,6 @@ export async function getServiceErrorGroupPeriods({
     kuery,
     serviceName,
     setup,
-    numBuckets,
     transactionType,
     groupIds,
   };

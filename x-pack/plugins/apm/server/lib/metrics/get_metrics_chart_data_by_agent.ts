@@ -8,12 +8,7 @@
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getJavaMetricsCharts } from './by_agent/java';
 import { getDefaultMetricsCharts } from './by_agent/default';
-import { GenericMetricsChart } from './transform_metrics_chart';
 import { isJavaAgentName } from '../../../common/agent_name';
-
-export interface MetricsChartsByAgentAPIResponse {
-  charts: GenericMetricsChart[];
-}
 
 export async function getMetricsChartDataByAgent({
   environment,
@@ -29,7 +24,7 @@ export async function getMetricsChartDataByAgent({
   serviceName: string;
   serviceNodeName?: string;
   agentName: string;
-}): Promise<MetricsChartsByAgentAPIResponse> {
+}) {
   if (isJavaAgentName(agentName)) {
     return getJavaMetricsCharts({
       environment,

@@ -42,7 +42,7 @@ describe('ServiceList', () => {
     const service: any = {
       serviceName: 'opbeans-python',
       agentName: 'python',
-      transactionsPerMinute: {
+      transactionRate: {
         value: 86.93333333333334,
         timeseries: [],
       },

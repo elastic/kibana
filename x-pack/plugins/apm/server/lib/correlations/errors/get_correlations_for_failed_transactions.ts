@@ -95,13 +95,13 @@ export async function getErrorRateTimeSeries({
   topSigTerms: TopSigTerm[];
 }) {
   const { start, end, apmEventClient } = setup;
-  const { intervalString } = getBucketSize({ start, end, numBuckets: 15 });
+  const { bucketSizeString } = getBucketSize({ start, end, numBuckets: 15 });
 
   if (isEmpty(topSigTerms)) {
     return { significantTerms: [] };
   }
 
-  const timeseriesAgg = getTimeseriesAggregation(start, end, intervalString);
+  const timeseriesAgg = getTimeseriesAggregation(start, end, bucketSizeString);
 
   const perTermAggs = topSigTerms.reduce(
     (acc, term, index) => {

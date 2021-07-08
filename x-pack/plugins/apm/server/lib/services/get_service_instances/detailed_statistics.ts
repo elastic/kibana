@@ -23,7 +23,6 @@ interface ServiceInstanceDetailedStatisticsParams {
   serviceName: string;
   transactionType: string;
   searchAggregatedTransactions: boolean;
-  numBuckets: number;
   start: number;
   end: number;
   serviceNodeIds: string[];
@@ -70,7 +69,6 @@ export async function getServiceInstancesDetailedStatisticsPeriods({
   serviceName,
   transactionType,
   searchAggregatedTransactions,
-  numBuckets,
   serviceNodeIds,
   comparisonStart,
   comparisonEnd,
@@ -82,7 +80,6 @@ export async function getServiceInstancesDetailedStatisticsPeriods({
   serviceName: string;
   transactionType: string;
   searchAggregatedTransactions: boolean;
-  numBuckets: number;
   serviceNodeIds: string[];
   comparisonStart?: number;
   comparisonEnd?: number;
@@ -100,7 +97,6 @@ export async function getServiceInstancesDetailedStatisticsPeriods({
         serviceName,
         transactionType,
         searchAggregatedTransactions,
-        numBuckets,
         serviceNodeIds,
       };
 

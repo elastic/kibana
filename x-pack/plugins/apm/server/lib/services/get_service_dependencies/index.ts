@@ -15,21 +15,24 @@ import { joinByKey } from '../../../../common/utils/join_by_key';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getMetrics } from './get_metrics';
 import { getDestinationMap } from './get_destination_map';
-import { calculateThroughput } from '../../helpers/calculate_throughput';
+import {
+  calculateThroughput,
+  Throughput,
+} from '../../../../common/calculate_throughput';
 import { withApmSpan } from '../../../utils/with_apm_span';
 
 export type ServiceDependencyItem = {
   name: string;
   latency: {
-    value: number | null;
+    avg: number | null;
     timeseries: Array<{ x: number; y: number | null }>;
   };
   throughput: {
-    value: number | null;
+    avg: Throughput;
     timeseries: Array<{ x: number; y: number | null }>;
   };
   errorRate: {
-    value: number | null;
+    avg: number | null;
     timeseries: Array<{ x: number; y: number | null }>;
   };
   impact: number;
@@ -47,27 +50,16 @@ export function getServiceDependencies({
   setup,
   serviceName,
   environment,
-  numBuckets,
 }: {
   serviceName: string;
   setup: Setup & SetupTimeRange;
   environment?: string;
-  numBuckets: number;
 }): Promise<ServiceDependencyItem[]> {
   return withApmSpan('get_service_dependencies', async () => {
     const { start, end } = setup;
     const [allMetrics, destinationMap] = await Promise.all([
-      getMetrics({
-        setup,
-        serviceName,
-        environment,
-        numBuckets,
-      }),
-      getDestinationMap({
-        setup,
-        serviceName,
-        environment,
-      }),
+      getMetrics({ setup, serviceName, environment }),
+      getDestinationMap({ setup, serviceName, environment }),
     ]);
 
     const metricsWithDestinationIds = allMetrics.map((metricItem) => {
@@ -141,7 +133,7 @@ export function getServiceDependencies({
 
         const destMetrics = {
           latency: {
-            value:
+            avg:
               mergedMetrics.value.count > 0
                 ? mergedMetrics.value.latency_sum / mergedMetrics.value.count
                 : null,
@@ -151,24 +143,19 @@ export function getServiceDependencies({
             })),
           },
           throughput: {
-            value:
-              mergedMetrics.value.count > 0
-                ? calculateThroughput({
-                    start,
-                    end,
-                    value: mergedMetrics.value.count,
-                  })
-                : null,
+            avg: calculateThroughput({
+              unit: 'minute',
+              start,
+              end,
+              count: mergedMetrics.value.count,
+            }),
             timeseries: mergedMetrics.timeseries.map((point) => ({
               x: point.x,
-              y:
-                point.count > 0
-                  ? calculateThroughput({ start, end, value: point.count })
-                  : null,
+              y: point.count, // TODO: ensure absolute count is ok
             })),
           },
           errorRate: {
-            value:
+            avg:
               mergedMetrics.value.count > 0
                 ? (mergedMetrics.value.error_count ?? 0) /
                   mergedMetrics.value.count
@@ -205,7 +192,8 @@ export function getServiceDependencies({
 
     const latencySums = metricsByResolvedAddress
       .map(
-        (metric) => (metric.latency.value ?? 0) * (metric.throughput.value ?? 0)
+        (metric) =>
+          (metric.latency.avg ?? 0) * (metric.throughput.avg.value ?? 0)
       )
       .filter(isFiniteNumber);
 
@@ -214,9 +202,10 @@ export function getServiceDependencies({
 
     return metricsByResolvedAddress.map((metric) => {
       const impact =
-        isFiniteNumber(metric.latency.value) &&
-        isFiniteNumber(metric.throughput.value)
-          ? ((metric.latency.value * metric.throughput.value - minLatencySum) /
+        isFiniteNumber(metric.latency.avg) &&
+        isFiniteNumber(metric.throughput.avg.value)
+          ? ((metric.latency.avg * metric.throughput.avg.value -
+              minLatencySum) /
               (maxLatencySum - minLatencySum)) *
             100
           : 0;

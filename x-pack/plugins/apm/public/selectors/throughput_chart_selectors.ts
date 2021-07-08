@@ -8,52 +8,40 @@
 import { difference, zipObject } from 'lodash';
 import { EuiTheme } from '../../../../../src/plugins/kibana_react/common';
 import { asTransactionRate } from '../../common/utils/formatters';
-import { Coordinate, TimeSeries } from '../../typings/timeseries';
 import { APIReturnType } from '../services/rest/createCallApmApi';
 import { httpStatusCodeToColor } from '../utils/httpStatusCodeToColor';
 
 export type ThroughputChartsResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/throughput'>;
 
-export interface ThroughputChart {
-  throughputTimeseries: Array<TimeSeries<Coordinate>>;
-}
-
 export function getThroughputChartSelector({
+  data,
   theme,
-  throughputChart,
 }: {
+  data?: ThroughputChartsResponse;
   theme: EuiTheme;
-  throughputChart?: ThroughputChartsResponse;
-}): ThroughputChart {
-  if (!throughputChart) {
-    return { throughputTimeseries: [] };
+}) {
+  if (!data) {
+    return {
+      buckets: [],
+      unit: 'minute' as const,
+    };
   }
 
-  return {
-    throughputTimeseries: getThroughputTimeseries({ throughputChart, theme }),
-  };
-}
-
-function getThroughputTimeseries({
-  throughputChart,
-  theme,
-}: {
-  theme: EuiTheme;
-  throughputChart: ThroughputChartsResponse;
-}) {
-  const { throughputTimeseries } = throughputChart;
-  const bucketKeys = throughputTimeseries.map(({ key }) => key);
+  const bucketKeys = data.buckets.map(({ key }) => key);
   const getColor = getColorByKey(bucketKeys, theme);
 
-  return throughputTimeseries.map((bucket) => {
-    return {
-      title: bucket.key,
-      data: bucket.dataPoints,
-      legendValue: asTransactionRate(bucket.avg),
-      type: 'linemark',
-      color: getColor(bucket.key),
-    };
-  });
+  return {
+    unit: data.unit,
+    buckets: data.buckets.map((bucket) => {
+      return {
+        title: bucket.key,
+        data: bucket.dataPoints,
+        legendValue: asTransactionRate(bucket.avg),
+        type: 'linemark',
+        color: getColor(bucket.key),
+      };
+    }),
+  };
 }
 
 function colorMatch(key: string, theme: EuiTheme) {

@@ -67,22 +67,22 @@ const traceListColumns: Array<ITableColumn<TraceGroup>> = [
     sortable: true,
   },
   {
-    field: 'averageResponseTime',
+    field: 'latency',
     name: i18n.translate('xpack.apm.tracesTable.avgResponseTimeColumnLabel', {
       defaultMessage: 'Latency (avg.)',
     }),
     sortable: true,
     dataType: 'number',
-    render: (time: number) => asMillisecondDuration(time),
+    render: (_, { latency }) => asMillisecondDuration(latency),
   },
   {
-    field: 'transactionsPerMinute',
+    field: 'transactionRate',
     name: i18n.translate('xpack.apm.tracesTable.tracesPerMinuteColumnLabel', {
-      defaultMessage: 'Traces per minute',
+      defaultMessage: 'Throughput',
     }),
     sortable: true,
     dataType: 'number',
-    render: (value: number) => asTransactionRate(value),
+    render: (_, { transactionRate }) => asTransactionRate(transactionRate),
   },
   {
     field: 'impact',
@@ -112,7 +112,7 @@ const traceListColumns: Array<ITableColumn<TraceGroup>> = [
     width: '20%',
     align: 'left',
     sortable: true,
-    render: (value: number) => <ImpactBar value={value} />,
+    render: (_, impact) => <ImpactBar value={impact} />,
   },
 ];
 

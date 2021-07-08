@@ -61,7 +61,7 @@ export async function getServiceProfilingTimeline({
           timeseries: {
             date_histogram: {
               field: '@timestamp',
-              fixed_interval: getBucketSize({ start, end }).intervalString,
+              fixed_interval: getBucketSize({ start, end }).bucketSizeString,
               min_doc_count: 0,
               extended_bounds: {
                 min: start,

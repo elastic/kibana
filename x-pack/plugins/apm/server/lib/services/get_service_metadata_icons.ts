@@ -26,12 +26,6 @@ type ServiceMetadataIconsRaw = Pick<
   'kubernetes' | 'cloud' | 'container' | 'agent'
 >;
 
-export interface ServiceMetadataIcons {
-  agentName?: string;
-  containerType?: ContainerType;
-  cloudProvider?: string;
-}
-
 export const should = [
   { exists: { field: CONTAINER_ID } },
   { exists: { field: POD_NAME } },
@@ -48,7 +42,7 @@ export async function getServiceMetadataIcons({
   serviceName: string;
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
-}): Promise<ServiceMetadataIcons> {
+}) {
   const { start, end, apmEventClient } = setup;
 
   const filter = [

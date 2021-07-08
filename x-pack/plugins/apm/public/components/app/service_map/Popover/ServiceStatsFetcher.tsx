@@ -27,6 +27,20 @@ interface ServiceStatsFetcherProps {
   serviceAnomalyStats: ServiceAnomalyStats | undefined;
 }
 
+function getHasServiceData(data?: ServiceNodeStats) {
+  const { avgCpuUsage, avgErrorRate, avgMemoryUsage } = data ?? {};
+  const { avgTransactionDuration } = data?.transactionStats ?? {};
+  const avgThroughput = data?.transactionStats.avgThroughput.value;
+
+  return [
+    avgCpuUsage,
+    avgErrorRate,
+    avgMemoryUsage,
+    avgThroughput,
+    avgTransactionDuration,
+  ].some((stat) => isNumber(stat));
+}
+
 export function ServiceStatsFetcher({
   serviceName,
   serviceAnomalyStats,
@@ -35,10 +49,7 @@ export function ServiceStatsFetcher({
     urlParams: { environment, start, end },
   } = useUrlParams();
 
-  const {
-    data = { transactionStats: {} } as ServiceNodeStats,
-    status,
-  } = useFetcher(
+  const { data, status } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end) {
         return callApmApi({
@@ -62,22 +73,8 @@ export function ServiceStatsFetcher({
     return <LoadingSpinner />;
   }
 
-  const {
-    avgCpuUsage,
-    avgErrorRate,
-    avgMemoryUsage,
-    transactionStats: { avgRequestsPerMinute, avgTransactionDuration },
-  } = data;
-
-  const hasServiceData = [
-    avgCpuUsage,
-    avgErrorRate,
-    avgMemoryUsage,
-    avgRequestsPerMinute,
-    avgTransactionDuration,
-  ].some((stat) => isNumber(stat));
-
-  if (!hasServiceData) {
+  const hasServiceData = getHasServiceData(data);
+  if (!data || !hasServiceData) {
     return (
       <EuiText color="subdued">
         {i18n.translate('xpack.apm.serviceMap.popoverMetrics.noDataText', {
@@ -86,6 +83,7 @@ export function ServiceStatsFetcher({
       </EuiText>
     );
   }
+
   return (
     <>
       {serviceAnomalyStats && (

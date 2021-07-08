@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { memoize } from 'lodash';
+import { Throughput } from '../../../common/calculate_throughput';
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
 import { asDecimalOrInteger, asInteger, asDecimal } from './formatters';
 import { TimeUnit } from './datetime';
@@ -145,7 +146,9 @@ export const getDurationFormatter: TimeFormatterBuilder = memoize(
   }
 );
 
-export function asTransactionRate(value: Maybe<number>) {
+export function asTransactionRate(options?: Throughput) {
+  const { value, unit } = options ?? {};
+
   if (!isFiniteNumber(value)) {
     return NOT_AVAILABLE_LABEL;
   }
@@ -161,10 +164,8 @@ export function asTransactionRate(value: Maybe<number>) {
   }
 
   return i18n.translate('xpack.apm.transactionRateLabel', {
-    defaultMessage: `{value} tpm`,
-    values: {
-      value: displayedValue,
-    },
+    defaultMessage: `{displayedValue} { unit, select, minute {tpm} other {tps} }`,
+    values: { displayedValue, unit },
   });
 }
 

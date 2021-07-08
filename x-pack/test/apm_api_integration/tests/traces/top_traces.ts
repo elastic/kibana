@@ -60,7 +60,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expectSnapshot(firstItem).toMatchInline(`
           Object {
-            "averageResponseTime": 1733,
+            "latency": 1733,
             "impact": 0,
             "key": Object {
               "service.name": "opbeans-java",
@@ -69,13 +69,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "serviceName": "opbeans-java",
             "transactionName": "DispatcherServlet#doPost",
             "transactionType": "request",
-            "transactionsPerMinute": 0.0333333333333333,
+            "transactionRate": 0.0333333333333333,
           }
         `);
 
         expectSnapshot(lastItem).toMatchInline(`
           Object {
-            "averageResponseTime": 550905.994936709,
+            "latency": 550905.994936709,
             "impact": 100,
             "key": Object {
               "service.name": "kibana",
@@ -84,7 +84,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "serviceName": "kibana",
             "transactionName": "POST /api/apm/settings/agent-configuration/search",
             "transactionType": "request",
-            "transactionsPerMinute": 13.1666666666667,
+            "transactionRate": 13.1666666666667,
           }
         `);
 

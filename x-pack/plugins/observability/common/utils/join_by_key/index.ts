@@ -17,7 +17,7 @@ import { isEqual, pull, merge, castArray } from 'lodash';
  * example.
  *
  const agentNames = [{ serviceName: '', agentName: '' }];
- const transactionRates = [{ serviceName: '', transactionsPerMinute: 1 }];
+ const transactionRates = [{ serviceName: '', transactionRate: 1 }];
  const flattened = joinByKey(
   [...agentNames, ...transactionRates],
   'serviceName'

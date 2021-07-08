@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Throughput } from '../../../../common/calculate_throughput';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import { withApmSpan } from '../../../utils/with_apm_span';
@@ -32,7 +33,7 @@ export async function getServiceInstancesMainStatistics(
     serviceNodeName: string;
     errorRate?: number;
     latency?: number;
-    throughput?: number;
+    throughput?: Throughput;
     cpuUsage?: number | null;
     memoryUsage?: number | null;
   }>

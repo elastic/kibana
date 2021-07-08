@@ -68,7 +68,7 @@ export async function getServiceTransactionGroupDetailedStatistics({
   }>
 > {
   const { apmEventClient } = setup;
-  const { intervalString } = getBucketSizeForAggregatedTransactions({
+  const { bucketSizeString } = getBucketSizeForAggregatedTransactions({
     start,
     end,
     numBuckets,
@@ -120,7 +120,7 @@ export async function getServiceTransactionGroupDetailedStatistics({
               timeseries: {
                 date_histogram: {
                   field: '@timestamp',
-                  fixed_interval: intervalString,
+                  fixed_interval: bucketSizeString,
                   min_doc_count: 0,
                   extended_bounds: {
                     min: start,

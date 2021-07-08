@@ -26,5 +26,5 @@ export function getBucketSize({
     minBucketSize || 1
   );
 
-  return { bucketSize, intervalString: `${bucketSize}s` };
+  return { bucketSize, bucketSizeString: `${bucketSize}s` };
 }

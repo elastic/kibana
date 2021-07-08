@@ -31,33 +31,6 @@ type ServiceMetadataDetailsRaw = Pick<
   'service' | 'agent' | 'host' | 'container' | 'kubernetes' | 'cloud'
 >;
 
-export interface ServiceMetadataDetails {
-  service?: {
-    versions?: string[];
-    runtime?: {
-      name: string;
-      version: string;
-    };
-    framework?: string;
-    agent: {
-      name: string;
-      version: string;
-    };
-  };
-  container?: {
-    os?: string;
-    isContainerized?: boolean;
-    totalNumberInstances?: number;
-    type?: ContainerType;
-  };
-  cloud?: {
-    provider?: string;
-    availabilityZones?: string[];
-    machineTypes?: string[];
-    projectName?: string;
-  };
-}
-
 export async function getServiceMetadataDetails({
   serviceName,
   setup,
@@ -66,7 +39,7 @@ export async function getServiceMetadataDetails({
   serviceName: string;
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
-}): Promise<ServiceMetadataDetails> {
+}) {
   const { start, end, apmEventClient } = setup;
 
   const filter = [

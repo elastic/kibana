@@ -104,7 +104,7 @@ export async function getErrorRate({
               start,
               end,
               searchAggregatedTransactions,
-            }).intervalString,
+            }).bucketSizeString,
             min_doc_count: 0,
             extended_bounds: { min: start, max: end },
           },

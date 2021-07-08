@@ -61,7 +61,7 @@ export async function getAnomalySeries({
   }
 
   return withApmSpan('get_latency_anomaly_series', async () => {
-    const { intervalString } = getBucketSize({ start, end });
+    const { bucketSizeString } = getBucketSize({ start, end });
 
     // move the start back with one bucket size, to ensure to get anomaly data in the beginning
     // this is required because ML has a minimum bucket size (default is 900s) so if our buckets
@@ -72,7 +72,7 @@ export async function getAnomalySeries({
       anomalySeriesFetcher({
         serviceName,
         transactionType,
-        intervalString,
+        bucketSizeString,
         ml,
         start: mlStart,
         end,

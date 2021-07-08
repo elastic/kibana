@@ -26,7 +26,8 @@ export async function getErrorDistribution({
   groupId?: string;
   setup: Setup & SetupTimeRange;
 }) {
-  const bucketSize = getBucketSize({ start: setup.start, end: setup.end });
+  const { start, end } = setup;
+  const bucketSize = getBucketSize({ start, end });
   const { buckets, noHits } = await getBuckets({
     environment,
     kuery,

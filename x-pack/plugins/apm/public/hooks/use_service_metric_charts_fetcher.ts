@@ -6,14 +6,14 @@
  */
 
 import { useParams } from 'react-router-dom';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { MetricsChartsByAgentAPIResponse } from '../../server/lib/metrics/get_metrics_chart_data_by_agent';
 import { useUrlParams } from '../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
 import { useFetcher } from './use_fetcher';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { GenericMetricsChart } from '../../server/lib/metrics/transform_metrics_chart';
 
-const INITIAL_DATA: MetricsChartsByAgentAPIResponse = {
-  charts: [],
+const INITIAL_DATA = {
+  charts: [] as GenericMetricsChart[],
 };
 
 export function useServiceMetricChartsFetcher({

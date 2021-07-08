@@ -16,7 +16,7 @@ describe('getBucketSizeForAggregatedTransactions', () => {
           numBuckets: 10,
           searchAggregatedTransactions: true,
         })
-      ).toEqual({ bucketSize: 60, intervalString: '60s' });
+      ).toEqual({ bucketSize: 60, bucketSizeString: '60s' });
     });
     it('returns bucket size when date difference is greater than 60s', () => {
       expect(
@@ -26,7 +26,7 @@ describe('getBucketSizeForAggregatedTransactions', () => {
           numBuckets: 10,
           searchAggregatedTransactions: true,
         })
-      ).toEqual({ bucketSize: 300, intervalString: '300s' });
+      ).toEqual({ bucketSize: 300, bucketSizeString: '300s' });
     });
   });
   describe('when searchAggregatedTransactions is disabled', () => {
@@ -38,7 +38,7 @@ describe('getBucketSizeForAggregatedTransactions', () => {
           numBuckets: 10,
           searchAggregatedTransactions: false,
         })
-      ).toEqual({ bucketSize: 1, intervalString: '1s' });
+      ).toEqual({ bucketSize: 1, bucketSizeString: '1s' });
     });
   });
 });

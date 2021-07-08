@@ -21,14 +21,14 @@ export type ESResponse = Exclude<
 export function anomalySeriesFetcher({
   serviceName,
   transactionType,
-  intervalString,
+  bucketSizeString,
   ml,
   start,
   end,
 }: {
   serviceName: string;
   transactionType: string;
-  intervalString: string;
+  bucketSizeString: string;
   ml: Required<Setup>['ml'];
   start: number;
   end: number;
@@ -56,7 +56,7 @@ export function anomalySeriesFetcher({
               ml_avg_response_times: {
                 date_histogram: {
                   field: 'timestamp',
-                  fixed_interval: intervalString,
+                  fixed_interval: bucketSizeString,
                   extended_bounds: { min: start, max: end },
                 },
                 aggs: {

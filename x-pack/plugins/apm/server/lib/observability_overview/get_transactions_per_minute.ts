@@ -13,9 +13,12 @@ import { TRANSACTION_TYPE } from '../../../common/elasticsearch_fieldnames';
 import { rangeQuery } from '../../../server/utils/queries';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
-import { calculateThroughput } from '../helpers/calculate_throughput';
+import {
+  calculateThroughput,
+  getThroughputUnit,
+} from '../../../common/calculate_throughput';
 
-export async function getTransactionsPerMinute({
+export async function getTransactionRate({
   setup,
   bucketSize,
   searchAggregatedTransactions,
@@ -25,6 +28,7 @@ export async function getTransactionsPerMinute({
   searchAggregatedTransactions: boolean;
 }) {
   const { apmEventClient, start, end } = setup;
+  const throughputUnit = getThroughputUnit(bucketSize);
 
   const { aggregations } = await apmEventClient.search(
     'observability_overview_get_transactions_per_minute',
@@ -56,7 +60,11 @@ export async function getTransactionsPerMinute({
                   min_doc_count: 0,
                 },
                 aggs: {
-                  throughput: { rate: { unit: 'minute' as const } },
+                  throughput: {
+                    rate: {
+                      unit: throughputUnit,
+                    },
+                  },
                 },
               },
             },
@@ -77,12 +85,14 @@ export async function getTransactionsPerMinute({
         transactionType === TRANSACTION_PAGE_LOAD
     ) || aggregations.transactionType.buckets[0];
 
+  const throughput = calculateThroughput({
+    unit: 'auto',
+    bucketSize, // TODO: fix
+    count: topTransactionTypeBucket?.doc_count || 0,
+  });
+
   return {
-    value: calculateThroughput({
-      start,
-      end,
-      value: topTransactionTypeBucket?.doc_count || 0,
-    }),
+    ...throughput,
     timeseries:
       topTransactionTypeBucket?.timeseries.buckets.map((bucket) => ({
         x: bucket.key,

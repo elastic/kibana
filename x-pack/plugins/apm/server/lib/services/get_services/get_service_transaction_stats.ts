@@ -26,7 +26,7 @@ import {
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
-import { calculateThroughput } from '../../helpers/calculate_throughput';
+import { calculateThroughput } from '../../../../common/calculate_throughput';
 import { getBucketSizeForAggregatedTransactions } from '../../helpers/get_bucket_size_for_aggregated_transactions';
 import {
   calculateTransactionErrorPercentage,
@@ -122,7 +122,7 @@ export async function getServiceTransactionStats({
                         end,
                         numBuckets: 20,
                         searchAggregatedTransactions,
-                      }).intervalString,
+                      }).bucketSizeString,
                       min_doc_count: 0,
                       extended_bounds: { min: start, max: end },
                     },
@@ -155,7 +155,7 @@ export async function getServiceTransactionStats({
           AGENT_NAME
         ] as AgentName,
         avgResponseTime: {
-          value: topTransactionTypeBucket.avg_duration.value,
+          avg: topTransactionTypeBucket.avg_duration.value,
           timeseries: topTransactionTypeBucket.timeseries.buckets.map(
             (dateBucket) => ({
               x: dateBucket.key,
@@ -164,7 +164,7 @@ export async function getServiceTransactionStats({
           ),
         },
         transactionErrorRate: {
-          value: calculateTransactionErrorPercentage(
+          avg: calculateTransactionErrorPercentage(
             topTransactionTypeBucket.outcomes
           ),
           timeseries: topTransactionTypeBucket.timeseries.buckets.map(
@@ -174,20 +174,17 @@ export async function getServiceTransactionStats({
             })
           ),
         },
-        transactionsPerMinute: {
-          value: calculateThroughput({
+        transactionRate: {
+          avg: calculateThroughput({
+            unit: 'minute',
             start,
             end,
-            value: topTransactionTypeBucket.doc_count,
+            count: topTransactionTypeBucket.doc_count,
           }),
           timeseries: topTransactionTypeBucket.timeseries.buckets.map(
             (dateBucket) => ({
               x: dateBucket.key,
-              y: calculateThroughput({
-                start,
-                end,
-                value: dateBucket.doc_count,
-              }),
+              y: dateBucket.doc_count, // absolute doc count is fine (as opposed to relative throughput) since sparklines don't have have units
             })
           ),
         },

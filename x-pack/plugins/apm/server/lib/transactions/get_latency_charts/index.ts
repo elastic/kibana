@@ -58,7 +58,7 @@ function searchLatency({
   end: number;
 }) {
   const { apmEventClient } = setup;
-  const { intervalString } = getBucketSizeForAggregatedTransactions({
+  const { bucketSizeString } = getBucketSizeForAggregatedTransactions({
     start,
     end,
     searchAggregatedTransactions,
@@ -101,7 +101,7 @@ function searchLatency({
         latencyTimeseries: {
           date_histogram: {
             field: '@timestamp',
-            fixed_interval: intervalString,
+            fixed_interval: bucketSizeString,
             min_doc_count: 0,
             extended_bounds: { min: start, max: end },
           },

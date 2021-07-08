@@ -38,7 +38,7 @@ function searchThroughput({
   transactionName,
   setup,
   searchAggregatedTransactions,
-  intervalString,
+  bucketSizeString,
 }: {
   environment?: string;
   kuery?: string;
@@ -47,7 +47,7 @@ function searchThroughput({
   transactionName: string | undefined;
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
-  intervalString: string;
+  bucketSizeString: string;
 }) {
   const { start, end, apmEventClient } = setup;
 
@@ -84,7 +84,7 @@ function searchThroughput({
             timeseries: {
               date_histogram: {
                 field: '@timestamp',
-                fixed_interval: intervalString,
+                fixed_interval: bucketSizeString,
                 min_doc_count: 0,
                 extended_bounds: { min: start, max: end },
               },
@@ -115,12 +115,13 @@ export async function getThroughputCharts({
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
 }) {
-  const { bucketSize, intervalString } = getBucketSizeForAggregatedTransactions(
-    {
-      ...setup,
-      searchAggregatedTransactions,
-    }
-  );
+  const {
+    bucketSize,
+    bucketSizeString,
+  } = getBucketSizeForAggregatedTransactions({
+    ...setup,
+    searchAggregatedTransactions,
+  });
 
   const response = await searchThroughput({
     environment,
@@ -130,14 +131,12 @@ export async function getThroughputCharts({
     transactionName,
     setup,
     searchAggregatedTransactions,
-    intervalString,
+    bucketSizeString,
   });
 
-  return {
-    throughputTimeseries: getThroughputBuckets({
-      throughputResultBuckets: response.aggregations?.throughput.buckets,
-      bucketSize,
-      setupTimeRange: setup,
-    }),
-  };
+  return getThroughputBuckets({
+    throughputResultBuckets: response.aggregations?.throughput.buckets,
+    bucketSize,
+    setupTimeRange: setup,
+  });
 }

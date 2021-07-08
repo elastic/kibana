@@ -6,7 +6,6 @@
  */
 
 import { sortBy, take } from 'lodash';
-import moment from 'moment';
 import { Unionize } from 'utility-types';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { AggregationOptionsByType } from '../../../../../../src/core/types/elasticsearch';
@@ -20,6 +19,7 @@ import { getTransactionGroupsProjection } from '../../projections/transaction_gr
 import { mergeProjection } from '../../projections/util/merge_projection';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { calculateThroughput } from '../../../common/calculate_throughput';
 import {
   getAverages,
   getCounts,
@@ -81,14 +81,18 @@ function getItemsWithRelativeImpact(
   const max = Math.max(...values);
   const min = Math.min(...values);
 
-  const duration = moment.duration(setup.end - setup.start);
-  const minutes = duration.asMinutes();
+  const { start, end } = setup;
 
   const itemsWithRelativeImpact = items.map((item) => {
     return {
       key: item.key,
-      averageResponseTime: item.avg,
-      transactionsPerMinute: (item.count ?? 0) / minutes,
+      latency: item.avg,
+      transactionRate: calculateThroughput({
+        unit: 'minute',
+        start,
+        end,
+        count: item.count ?? 0,
+      }),
       transactionType: item.transactionType || '',
       impact:
         item.sum !== null && item.sum !== undefined
@@ -182,26 +186,24 @@ export function transactionGroupsFetcher(
     const defaultServiceName =
       options.type === 'top_transactions' ? options.serviceName : undefined;
 
-    const itemsWithKeys: TransactionGroup[] = itemsWithRelativeImpact.map(
-      (item) => {
-        let transactionName: string;
-        let serviceName: string;
+    const itemsWithKeys = itemsWithRelativeImpact.map((item) => {
+      let transactionName: string;
+      let serviceName: string;
 
-        if (typeof item.key === 'string') {
-          transactionName = item.key;
-          serviceName = defaultServiceName!;
-        } else {
-          transactionName = item.key[TRANSACTION_NAME];
-          serviceName = item.key[SERVICE_NAME];
-        }
-
-        return {
-          ...item,
-          transactionName,
-          serviceName,
-        };
+      if (typeof item.key === 'string') {
+        transactionName = item.key;
+        serviceName = defaultServiceName!;
+      } else {
+        transactionName = item.key[TRANSACTION_NAME];
+        serviceName = item.key[SERVICE_NAME];
       }
-    );
+
+      return {
+        ...item,
+        transactionName,
+        serviceName,
+      };
+    });
 
     return {
       items: take(
@@ -216,15 +218,4 @@ export function transactionGroupsFetcher(
       bucketSize,
     };
   });
-}
-
-export interface TransactionGroup {
-  key: string | Record<'service.name' | 'transaction.name', string>;
-  serviceName: string;
-  transactionName: string;
-  transactionType: string;
-  averageResponseTime: number | null | undefined;
-  transactionsPerMinute: number;
-  p95: number | null | undefined;
-  impact: number;
 }

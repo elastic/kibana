@@ -16,6 +16,10 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import {
+  calculateThroughput,
+  Throughput,
+} from '../../../common/calculate_throughput';
+import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../common/transaction_types';
@@ -40,14 +44,9 @@ interface Options {
   searchAggregatedTransactions: boolean;
 }
 
-interface TaskParameters {
-  environment?: string;
+type TaskParameters = Options & {
   filter: ESFilter[];
-  searchAggregatedTransactions: boolean;
-  minutes: number;
-  serviceName?: string;
-  setup: Setup;
-}
+};
 
 export function getServiceMapServiceNodeInfo({
   environment,
@@ -64,12 +63,10 @@ export function getServiceMapServiceNodeInfo({
       ...environmentQuery(environment),
     ];
 
-    const minutes = Math.abs((end - start) / (1000 * 60));
     const taskParams = {
       environment,
       filter,
       searchAggregatedTransactions,
-      minutes,
       serviceName,
       setup,
     };
@@ -123,13 +120,12 @@ async function getErrorStats({
 async function getTransactionStats({
   setup,
   filter,
-  minutes,
   searchAggregatedTransactions,
 }: TaskParameters): Promise<{
   avgTransactionDuration: number | null;
-  avgRequestsPerMinute: number | null;
+  avgThroughput: Throughput;
 }> {
-  const { apmEventClient } = setup;
+  const { apmEventClient, start, end } = setup;
 
   const params = {
     apm: {
@@ -176,11 +172,16 @@ async function getTransactionStats({
     params
   );
 
-  const totalRequests = response.hits.total.value;
+  const hitsCount = response.hits.total.value;
 
   return {
     avgTransactionDuration: response.aggregations?.duration.value ?? null,
-    avgRequestsPerMinute: totalRequests > 0 ? totalRequests / minutes : null,
+    avgThroughput: calculateThroughput({
+      unit: 'minute',
+      start,
+      end,
+      count: hitsCount ?? 0,
+    }),
   };
 }
 
