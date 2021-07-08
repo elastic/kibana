@@ -106,6 +106,9 @@ export default class JestJUnitReporter extends BaseReporter {
 
     const reportPath = getUniqueJunitReportPath(rootDirectory, reportName);
     const reportXML = root.end();
+
+    process.stdout.write(`\nWriting Jest JUnit report to [${reportXML}]\n\n`);
+
     mkdirSync(dirname(reportPath), { recursive: true });
     writeFileSync(reportPath, reportXML, 'utf8');
   }
