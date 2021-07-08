@@ -10,7 +10,6 @@ import request from 'superagent';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 
-import { SearchServiceValue } from '../../../../plugins/apm/common/search_strategies/correlations/types';
 import { PartialSearchRequest } from '../../../../plugins/apm/server/lib/search_strategies/correlations/search_strategy';
 
 function parseBfetchResponse(resp: request.Response): Array<Record<string, any>> {
@@ -28,11 +27,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     const partialSearchRequest: PartialSearchRequest = {
       params: {
         index: 'apm-*',
-        serviceName: 'opbeans-node',
-        start: '2020-07-05T22:00:00.000Z',
-        end: '2021-07-06T13:21:46.005Z',
         environment: 'ENVIRONMENT_ALL',
-        transactionType: 'request',
+        start: '2020',
+        end: '2021',
         percentileThreshold: 95,
       },
     };
@@ -174,7 +171,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(result?.total).to.be(100);
         expect(result?.isRunning).to.be(true);
         expect(result?.isPartial).to.be(true);
-        expect(result?.isRestored).to.be(false);
+        expect(result?.isRestored).to.eql(
+          false,
+          `Expected response result to be not restored. Got: '${result?.isRestored}'`
+        );
         expect(typeof result?.rawResponse).to.be('object');
 
         const { rawResponse } = result;
@@ -205,9 +205,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           }
         );
 
+        expect(followUpResponse?.error).to.eql(
+          undefined,
+          `Finished search strategy should not return an error, got: ${JSON.stringify(
+            followUpResponse?.error
+          )}`
+        );
+
         const followUpResult = followUpResponse.result;
-        expect(followUpResult?.isRunning).to.be(false);
-        expect(followUpResult?.isPartial).to.be(false);
+        expect(followUpResult?.isRunning).to.eql(
+          false,
+          `Expected finished result not to be running. Got: ${followUpResult?.isRunning}`
+        );
+        expect(followUpResult?.isPartial).to.eql(
+          false,
+          `Expected finished result not to be partial. Got: ${followUpResult?.isPartial}`
+        );
         expect(followUpResult?.id).to.be(searchStrategyId);
         expect(followUpResult?.isRestored).to.be(true);
         expect(followUpResult?.loaded).to.be(100);
@@ -218,28 +231,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const { rawResponse: finalRawResponse } = followUpResult;
 
         expect(typeof finalRawResponse?.took).to.be('number');
-        expect(finalRawResponse?.percentileThresholdValue).to.be(1507326);
+        expect(finalRawResponse?.percentileThresholdValue).to.be(1855487.875);
         expect(finalRawResponse?.overallHistogram.length).to.be(101);
-        expect(finalRawResponse?.values.length).to.be(2);
 
-        const eventOutcome = (finalRawResponse?.values as SearchServiceValue[]).find(
-          (d) => d.field === 'event.outcome'
-        );
-        expect(typeof eventOutcome).to.be('object');
-        expect(eventOutcome?.field).to.be('event.outcome');
-        expect(eventOutcome?.value).to.be('unknown');
-        expect(eventOutcome?.correlation).to.be(0.8314152072578924);
-        expect(eventOutcome?.ksTest).to.be(0.012732005168249932);
-        expect(eventOutcome?.histogram.length).to.be(101);
-
-        const transactionResult = (finalRawResponse?.values as SearchServiceValue[]).find(
-          (d) => d.field === 'transaction.result'
-        );
-        expect(transactionResult?.field).to.be('transaction.result');
-        expect(transactionResult?.value).to.be('success');
-        expect(transactionResult?.correlation).to.be(0.8314152072578924);
-        expect(transactionResult?.ksTest).to.be(0.012732005168249932);
-        expect(transactionResult?.histogram.length).to.be(101);
+        // TODO Identify a dataset that returns significant results
+        expect(finalRawResponse?.values.length).to.be(0);
       });
     }
   );
