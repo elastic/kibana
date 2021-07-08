@@ -8,8 +8,9 @@
 
 import * as path from 'path';
 import { StorybookConfig } from '@storybook/core/types';
+import { REPO_ROOT } from './constants';
 
-const toPath = (_path: string) => path.join(process.cwd(), _path);
+const toPath = (_path: string) => path.join(REPO_ROOT, _path);
 export const defaultConfig: StorybookConfig = {
   addons: ['@kbn/storybook/preset', '@storybook/addon-a11y', '@storybook/addon-essentials'],
   stories: ['../**/*.stories.tsx'],
