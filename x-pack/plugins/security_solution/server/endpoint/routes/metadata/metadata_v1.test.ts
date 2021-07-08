@@ -43,7 +43,7 @@ import {
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
-import { Agent, EsAssetReference } from '../../../../../fleet/common/types/models';
+import { Agent } from '../../../../../fleet/common/types/models';
 import { createV1SearchResponse } from './support/test_support';
 import { PackageService } from '../../../../../fleet/server/services';
 import type { SecuritySolutionPluginRouter } from '../../../types';
@@ -82,9 +82,7 @@ describe('test endpoint route v1', () => {
     mockResponse = httpServerMock.createResponseFactory();
     endpointAppContextService = new EndpointAppContextService();
     mockPackageService = createMockPackageService();
-    mockPackageService.getInstalledEsAssetReferences.mockReturnValue(
-      Promise.resolve(([] as unknown) as EsAssetReference[])
-    );
+    mockPackageService.getInstallation.mockReturnValue(Promise.resolve(undefined));
     startContract = createMockEndpointAppContextServiceStartContract();
     endpointAppContextService.start({ ...startContract, packageService: mockPackageService });
     mockAgentService = startContract.agentService!;

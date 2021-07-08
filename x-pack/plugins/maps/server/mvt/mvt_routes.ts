@@ -123,7 +123,7 @@ export function initMVTRoutes({
         z: parseInt((params as any).z, 10) as number,
         index: query.index as string,
         requestBody: requestBodyDSL as any,
-        requestType: query.requestType as RENDER_AS,
+        requestType: query.requestType as RENDER_AS.POINT | RENDER_AS.GRID,
         geoFieldType: query.geoFieldType as ES_GEO_FIELD_TYPE,
         searchSessionId: query.searchSessionId,
         abortSignal: abortController.signal,
