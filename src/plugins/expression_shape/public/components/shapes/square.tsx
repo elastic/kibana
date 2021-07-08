@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { getShapeComponent, SvgElementTypes } from '../../../../presentation_util/public';
+import { createShape, SvgElementTypes } from '../../../../presentation_util/public';
 
-export const Square = getShapeComponent({
+export const Square = createShape({
   viewBox: {
     minX: 0,
     minY: 0,

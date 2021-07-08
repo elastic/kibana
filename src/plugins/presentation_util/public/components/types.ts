@@ -25,18 +25,9 @@ export interface SaveModalDashboardProps {
   tagOptions?: React.ReactNode | ((state: SaveModalState) => React.ReactNode);
 }
 
-export interface ShapeHocProps {
+export interface ShapeProps {
   shapeAttributes?: ShapeAttributes;
   shapeContentAttributes?: ShapeContentAttributes;
-  setViewBoxParams: (viewBoxParams?: ViewBoxParams) => void;
-}
-
-export interface ShapeProps {
-  shapeAttributes: Omit<ShapeAttributes, 'viewBox'> & {
-    viewBox?: string;
-  };
-  shapeContentAttributes: ShapeContentAttributes & SpecificShapeContentAttributes;
-  shapeType?: SvgElementTypes;
 }
 
 export enum SvgElementTypes {
@@ -91,5 +82,5 @@ type SpecificShapeContentAttributes = CircleParams | RectParams | PathParams | P
 export interface SvgConfig {
   shapeType?: SvgElementTypes;
   viewBox: ViewBoxParams;
-  shapeProps: SpecificShapeContentAttributes;
+  shapeProps: ShapeContentAttributes & SpecificShapeContentAttributes;
 }

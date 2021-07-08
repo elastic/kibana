@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { getShapeComponent } from '../../../../presentation_util/public';
+import { createShape } from '../../../../presentation_util/public';
 
-export const Bookmark = getShapeComponent({
+export const Bookmark = createShape({
   viewBox: {
     minX: 0,
     minY: 0,

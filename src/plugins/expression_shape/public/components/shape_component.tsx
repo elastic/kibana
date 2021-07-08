@@ -8,11 +8,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useResizeObserver } from '@elastic/eui';
-import {
-  ShapeAttributes,
-  ShapeContentAttributes,
-  ViewBoxParams,
-} from '../../../presentation_util/public';
+import { ShapeAttributes, ShapeContentAttributes } from '../../../presentation_util/public';
 import { Dimensions, ShapeComponentProps } from './types';
 import { shapes } from './shapes';
 import { getViewBox } from '../../common/lib';
@@ -34,8 +30,6 @@ function ShapeComponent({
     height: parentNode.offsetHeight,
   });
 
-  const [shapeViewBox, setShapeViewBox] = useState<ViewBoxParams>();
-
   useEffect(() => {
     setDimensions({
       width: parentNode.offsetWidth,
@@ -56,30 +50,26 @@ function ShapeComponent({
 
   const { width, height } = dimensions;
 
+  const Shape = shapes[shapeType];
   const shapeAttributes: ShapeAttributes = {
     width,
     height,
     overflow: 'visible',
     preserveAspectRatio: maintainAspect ? 'xMidYMid meet' : 'none',
-  };
-
-  if (shapeViewBox) {
-    shapeAttributes.viewBox = getViewBox(shapeViewBox, {
+    viewBox: getViewBox(Shape.data.viewBox, {
       borderOffset: strokeWidth,
       width,
       height,
-    });
+    }),
+  };
 
-    parentNode.style.lineHeight = '0';
-  }
+  parentNode.style.lineHeight = '0';
 
-  const Shape = shapes[shapeType];
   return (
     <div className="shapeAligner">
-      <Shape
+      <Shape.Component
         shapeContentAttributes={shapeContentAttributes}
         shapeAttributes={shapeAttributes}
-        setViewBoxParams={setShapeViewBox}
       />
     </div>
   );
