@@ -677,7 +677,6 @@ export const createSearchAfterReturnType = ({
 }: {
   success?: boolean | undefined;
   warning?: boolean;
-  warningMessages?: string[] | undefined;
   searchAfterTimes?: string[] | undefined;
   bulkCreateTimes?: string[] | undefined;
   lastLookBackDate?: Date | undefined;

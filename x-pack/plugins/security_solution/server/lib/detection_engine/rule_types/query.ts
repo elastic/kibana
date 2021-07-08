@@ -8,6 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
+import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { ESSearchRequest } from 'src/core/types/elasticsearch';
 
 import { buildEsQuery, IIndexPattern } from '../../../../../../../src/plugins/data/common';
@@ -16,14 +17,9 @@ import { RuleDataClient } from '../../../../../rule_registry/server';
 import { CUSTOM_ALERT_TYPE_ID } from '../../../../common/constants';
 import { SetupPlugins } from '../../../../target/types/server/plugin';
 
-import { RuleParams } from '../schemas/rule_schemas';
+import { queryRuleParams, QueryRuleParams } from '../schemas/rule_schemas';
 
 import { createSecurityRuleTypeFactory } from './create_security_rule_type_factory';
-
-interface AlertTypeParams {
-  indexPatterns: string[];
-  customQuery: string;
-}
 
 export const createQueryAlertType = (
   lists: SetupPlugins['lists'],
@@ -39,10 +35,18 @@ export const createQueryAlertType = (
     id: CUSTOM_ALERT_TYPE_ID,
     name: 'Custom Query Rule',
     validate: {
-      params: schema.object({
-        indexPatterns: schema.arrayOf(schema.string()),
-        customQuery: schema.string(),
-      }),
+      params: {
+        validate: (object: unknown): QueryRuleParams => {
+          const [validated, errors] = validateNonExact(object, queryRuleParams);
+          if (errors != null) {
+            throw new Error(errors);
+          }
+          if (validated == null) {
+            throw new Error('Validation of rule params failed');
+          }
+          return validated;
+        },
+      },
     },
     actionGroups: [
       {
@@ -58,21 +62,24 @@ export const createQueryAlertType = (
     isExportable: false,
     producer: 'security-solution',
     async executor(options) {
-      const indexPatterns: string[] = []; // FIXME
+      const {
+        params: { index, query },
+        services: { alertWithPersistence },
+      } = options;
       try {
         const indexPattern: IIndexPattern = {
           fields: [],
-          title: indexPatterns.join(),
+          title: index?.join() ?? '',
         };
 
         // TODO: kql or lucene?
 
         const esQuery = buildEsQuery(
           indexPattern,
-          { query: customQuery, language: 'kuery' },
+          { query, language: 'kuery' },
           []
         ) as estypes.QueryDslQueryContainer;
-        const query: ESSearchRequest = {
+        const wrappedEsQuery: ESSearchRequest = {
           body: {
             query: esQuery,
             fields: ['*'],
@@ -83,7 +90,7 @@ export const createQueryAlertType = (
         };
 
         // const alerts = await findAlerts(query);
-        const alerts = [];
+        const alerts: Array<Record<string, unknown>> = [];
         alertWithPersistence(alerts).forEach((alert) => {
           alert.scheduleActions('default', { server: 'server-test' });
         });
