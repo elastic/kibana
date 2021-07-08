@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiLink, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiHorizontalRule, EuiLink, EuiPanel, EuiText } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 import { useKibana } from '../../../lib/kibana';
@@ -22,12 +22,15 @@ const NoEnrichmentsPanelView: React.FC<{
   description: React.ReactNode;
 }> = ({ title, description }) => {
   return (
-    <Container hasShadow={false} data-test-subj="no-enrichments-panel">
-      <EuiText textAlign="center">{title}</EuiText>
-      <EuiText size="s" color="subdued">
-        {description}
-      </EuiText>
-    </Container>
+    <>
+      <EuiHorizontalRule margin="s" />
+      <Container hasShadow={false} data-test-subj="no-enrichments-panel">
+        <EuiText textAlign="center">{title}</EuiText>
+        <EuiText size="s" color="subdued">
+          {description}
+        </EuiText>
+      </Container>
+    </>
   );
 };
 
