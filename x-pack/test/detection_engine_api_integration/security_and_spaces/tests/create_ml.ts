@@ -182,6 +182,7 @@ export default ({ getService }: FtrProviderContext) => {
             machine_learning_job_id: ['linux_anomalous_network_activity_ecs'],
           },
           depth: 1,
+          owner: 'siem',
           parent: {
             id:
               'linux_anomalous_network_activity_ecs_record_1586274300000_900_0_-96106189301704594950079884115725560577_5',
