@@ -12,10 +12,12 @@ import { i18n } from '@kbn/i18n';
 import { CANVAS, JSON as JSONString } from '../../../../i18n/constants';
 import { useNotifyService } from '../../../services';
 import { getId } from '../../../lib/get_id';
+import { useCreateWorkpad } from './use_create_workpad';
 import type { CanvasWorkpad } from '../../../../types';
 
 export const useImportWorkpad = () => {
   const notifyService = useNotifyService();
+  const createWorkpad = useCreateWorkpad();
 
   return useCallback(
     (file?: File, onComplete: (workpad?: CanvasWorkpad) => void = () => {}) => {
@@ -37,7 +39,7 @@ export const useImportWorkpad = () => {
       const reader = new FileReader();
 
       // handle reading the uploaded file
-      reader.onload = () => {
+      reader.onload = async () => {
         try {
           const workpad = JSON.parse(reader.result as string); // Type-casting because we catch below.
           workpad.id = getId('workpad');
@@ -48,6 +50,7 @@ export const useImportWorkpad = () => {
             throw new Error(errors.getMissingPropertiesErrorMessage());
           }
 
+          await createWorkpad(workpad);
           onComplete(workpad);
         } catch (e) {
           notifyService.error(e, {
@@ -62,7 +65,7 @@ export const useImportWorkpad = () => {
       // read the uploaded file
       reader.readAsText(file);
     },
-    [notifyService]
+    [notifyService, createWorkpad]
   );
 };
 
