@@ -79,8 +79,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     }
   );
 
-  const expirationDate = useMemo(() => new Date(data?.actions[0].expiration), [data?.actions]);
-
   const formSchema = {
     query: {
       type: FIELD_TYPES.TEXT,
@@ -212,9 +210,9 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   const resultsStepContent = useMemo(
     () =>
       actionId ? (
-        <ResultTabs actionId={actionId} expirationDate={expirationDate} agentIds={agentIds} />
+        <ResultTabs actionId={actionId} endDate={data?.actions[0].expiration} agentIds={agentIds} />
       ) : null,
-    [actionId, agentIds, expirationDate]
+    [actionId, agentIds, data?.actions]
   );
 
   const formSteps: EuiContainedStepProps[] = useMemo(
