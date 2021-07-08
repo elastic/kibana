@@ -55,8 +55,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await PageObjects.header.waitUntilLoadingHasFinished();
           await renderable.waitForRender();
           // https://github.com/elastic/kibana/issues/92887
-          //log.debug('Checking pie charts rendered');
-          //await pieChart.expectPieSliceCount(4);
+          // log.debug('Checking pie charts rendered');
+          // await pieChart.expectPieSliceCount(4);
           // log.debug('Checking area, bar and heatmap charts rendered');
           // await dashboardExpect.seriesElementCount(15);
           log.debug('Checking saved searches rendered');
