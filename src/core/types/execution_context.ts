@@ -7,7 +7,9 @@
  */
 
 /** @public */
-export interface KibanaExecutionContext {
+// to make it compatible with SerializableState
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type KibanaExecutionContext = {
   /**
    * Kibana application initated an operation.
    * Can be narrowed to an enum later.
@@ -21,4 +23,4 @@ export interface KibanaExecutionContext {
   readonly description: string;
   /** in browser - url to navigate to a current page, on server - endpoint path, for task: task SO url */
   readonly url?: string;
-}
+};
