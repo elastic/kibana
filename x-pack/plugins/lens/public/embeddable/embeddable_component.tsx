@@ -86,10 +86,6 @@ export function getEmbeddableComponent(core: CoreStart, plugins: PluginsStartDep
       );
     }
 
-    if (loading) {
-      return <EuiLoadingChart />;
-    }
-
     return <EmbeddableRoot embeddable={embeddable} loading={loading} error={error} input={input} />;
   };
 }
