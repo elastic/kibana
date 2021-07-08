@@ -18,6 +18,7 @@ import { IRouter, RouteRegistrar } from '../router';
 
 import { configServiceMock } from '../../config/mocks';
 import { contextServiceMock } from '../../context/context_service.mock';
+import { executionContextServiceMock } from '../../execution_context/execution_context_service.mock';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const pkg = require('../../../../../package.json');
@@ -31,6 +32,7 @@ const xsrfDisabledTestPath = '/xsrf/test/route/disabled';
 const kibanaName = 'my-kibana-name';
 const setupDeps = {
   context: contextServiceMock.createSetupContract(),
+  executionContext: executionContextServiceMock.createInternalSetupContract(),
 };
 
 describe('core lifecycle handlers', () => {
