@@ -29,7 +29,6 @@ export const useEndpointPrivileges = (): EndpointPrivileges => {
   const isMounted = useRef<boolean>(true);
   const [canAccessFleet, setCanAccessFleet] = useState<boolean>(false);
   const [fleetCheckDone, setFleetCheckDone] = useState<boolean>(false);
-  const [userRoleCheckDone, setUserRoleCheckDone] = useState<boolean>(false);
 
   // Check if user can access fleet
   useEffect(() => {
@@ -53,7 +52,6 @@ export const useEndpointPrivileges = (): EndpointPrivileges => {
   // Check if user has `superuser` role
   const isSuperUser = useMemo(() => {
     if (user?.roles) {
-      setUserRoleCheckDone(true);
       return user.roles.includes('superuser');
     }
     return false;
@@ -61,11 +59,11 @@ export const useEndpointPrivileges = (): EndpointPrivileges => {
 
   const privileges = useMemo(() => {
     return {
-      loading: !fleetCheckDone || !userRoleCheckDone,
+      loading: !fleetCheckDone || !user,
       canAccessFleet,
       canAccessEndpointManagement: canAccessFleet && isSuperUser,
     };
-  }, [canAccessFleet, fleetCheckDone, isSuperUser, userRoleCheckDone]);
+  }, [canAccessFleet, fleetCheckDone, isSuperUser, user]);
 
   // Capture if component is unmounted
   useEffect(

@@ -45,15 +45,34 @@ describe('When using useEndpointPrivileges hook', () => {
     unmount();
   });
 
-  it('should return `loading: true` while defining set of privileges', async () => {
-    render();
+  it('should return `loading: true` while retrieving privileges', async () => {
+    // Add a daly to the API response that we can control from the test
+    let releaseApiResponse: () => void;
+    fleetApiMock.responseProvider.checkPermissions.mockDelay.mockReturnValue(
+      new Promise<void>((resolve) => {
+        releaseApiResponse = () => resolve();
+      })
+    );
+    (useCurrentUser as jest.Mock).mockReturnValue(null);
+
+    const { rerender } = render();
     expect(result.current).toEqual({
       canAccessEndpointManagement: false,
       canAccessFleet: false,
       loading: true,
     });
 
-    await waitForNextUpdate();
+    // Make user service available
+    (useCurrentUser as jest.Mock).mockReturnValue(authenticatedUser);
+    rerender();
+    expect(result.current).toEqual({
+      canAccessEndpointManagement: false,
+      canAccessFleet: false,
+      loading: true,
+    });
+
+    // Release the API response
+    releaseApiResponse!();
     await fleetApiMock.waitForApi();
     expect(result.current).toEqual({
       canAccessEndpointManagement: true,
