@@ -131,7 +131,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
             setAlertsToDelete([item.id]);
           },
           name: i18n.translate(
-            'xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.deleteTitle',
+            'xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.deleteRuleTitle',
             { defaultMessage: 'Delete rule' }
           ),
         },

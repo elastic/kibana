@@ -444,17 +444,8 @@ export const AlertsList: React.FunctionComponent = () => {
       width: '6%',
       name: i18n.translate(
         'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.scheduleTitle',
-        { defaultMessage: 'Schedule' }
+        { defaultMessage: 'Runs every' }
       ),
-      render: (interval: number) => {
-        return (
-          <EuiText size="s">
-            <EuiIcon color="subdued" type="clock" />
-            &nbsp;
-            {interval}
-          </EuiText>
-        );
-      },
       sortable: false,
       truncateText: false,
       'data-test-subj': 'alertsTableCell-interval',
@@ -468,72 +459,17 @@ export const AlertsList: React.FunctionComponent = () => {
       render: (item: AlertTableItem) => {
         return (
           <EuiFlexGroup wrap responsive={false} gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <div>
-                <EuiText
-                  size="m"
-                  data-test-subj="actionsCount"
-                  title={i18n.translate(
-                    'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.actionsCountTooltip',
-                    { defaultMessage: 'Number of actions attached to the rule' }
-                  )}
-                >
-                  <EuiIcon color="subdued" type="bolt" />
-                  &nbsp;
-                  {item.actionsCount}
-                </EuiText>
-              </div>
-            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{item.actionsCount}</EuiFlexItem>
             <EuiFlexItem grow={false}>
               <div>
                 {item.muteAll ? (
-                  <EuiToolTip
-                    position="bottom"
-                    content={
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.unmuteButtonTooltip"
-                        defaultMessage="Unmute"
-                      />
-                    }
-                  >
-                    <EuiButtonIcon
-                      color={'danger'}
-                      data-test-subj="unmuteIconButton"
-                      onClick={async () => {
-                        asyncScheduler.schedule(async () => {
-                          await unmuteAlert({ http, id: item.id });
-                          loadAlertsData();
-                        }, 10);
-                      }}
-                      iconType={'eyeClosed'}
-                      aria-label={'unmute'}
+                  <EuiBadge color="hollow">
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.mutedBadge"
+                      defaultMessage="Muted"
                     />
-                  </EuiToolTip>
-                ) : (
-                  <EuiToolTip
-                    position="bottom"
-                    data-test-subj="muteButton"
-                    content={
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.muteButtonTooltip"
-                        defaultMessage="Mute"
-                      />
-                    }
-                  >
-                    <EuiButtonIcon
-                      color={'primary'}
-                      data-test-subj="muteIconButton"
-                      onClick={async () => {
-                        asyncScheduler.schedule(async () => {
-                          await muteAlert({ http, id: item.id });
-                          loadAlertsData();
-                        }, 10);
-                      }}
-                      iconType={'eye'}
-                      aria-label={'mute'}
-                    />
-                  </EuiToolTip>
-                )}
+                  </EuiBadge>
+                ) : null}
               </div>
             </EuiFlexItem>
           </EuiFlexGroup>
