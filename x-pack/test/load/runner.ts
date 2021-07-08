@@ -53,15 +53,6 @@ export async function GatlingTestRunner({ getService }: FtrProviderContext) {
   const log = getService('log');
 
   await withProcRunner(log, async (procs) => {
-    await procs.run('yarn build', {
-      cmd: 'yarn',
-      args: ['add', 'build'],
-      cwd: puppeteerProjectRootPath,
-      env: {
-        ...process.env,
-      },
-      wait: true,
-    });
     await procs.run('node build/index.js', {
       cmd: 'node',
       args: ['build/index.js'],
