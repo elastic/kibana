@@ -14,11 +14,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
   const security = getService('security');
 
-  describe('date in a nested field should produce an error message', function () {
+  describe('timefield is a date in a nested field', function () {
     before(async function () {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/date_nested');
       await security.testUser.setRoles(['kibana_admin', 'kibana_date_nested']);
-      await PageObjects.common.navigateToUrl('discover', '#/?_a=(index:date-nested)');
+      await PageObjects.common.navigateToApp('discover');
     });
 
     after(async function unloadMakelogs() {
@@ -27,6 +27,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show an error message', async function () {
+      await PageObjects.discover.selectIndexPattern('date-nested');
+      await PageObjects.discover.waitUntilSearchingHasFinished();
       await testSubjects.existOrFail('discoverNoResultsError');
     });
   });
