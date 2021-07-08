@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useCurrentUser, useHttp } from '../../lib/kibana';
 import { appRoutesService, CheckPermissionsResponse } from '../../../../../fleet/common';
 
@@ -27,13 +27,7 @@ export const useEndpointPrivileges = (): EndpointPrivileges => {
   const http = useHttp();
   const user = useCurrentUser();
   const isMounted = useRef<boolean>(true);
-  const [privileges, setPrivileges] = useState<EndpointPrivileges>({
-    loading: true,
-    canAccessFleet: false,
-    canAccessEndpointManagement: false,
-  });
   const [canAccessFleet, setCanAccessFleet] = useState<boolean>(false);
-  const [isSuperUser, setIsSuperUser] = useState<boolean>(false);
   const [fleetCheckDone, setFleetCheckDone] = useState<boolean>(false);
   const [userRoleCheckDone, setUserRoleCheckDone] = useState<boolean>(false);
 
@@ -56,22 +50,21 @@ export const useEndpointPrivileges = (): EndpointPrivileges => {
     })();
   }, [http]);
 
-  // Check if user has `superuser` permissions
-  useEffect(() => {
-    if (user && isMounted.current) {
-      setIsSuperUser(user.roles.includes('superuser'));
+  // Check if user has `superuser` role
+  const isSuperUser = useMemo(() => {
+    if (user?.roles) {
       setUserRoleCheckDone(true);
+      return user.roles.includes('superuser');
     }
-  }, [privileges.canAccessFleet, user]);
+    return false;
+  }, [user?.roles]);
 
-  useEffect(() => {
-    if (isMounted.current) {
-      setPrivileges({
-        loading: !fleetCheckDone || !userRoleCheckDone,
-        canAccessFleet,
-        canAccessEndpointManagement: canAccessFleet && isSuperUser,
-      });
-    }
+  const privileges = useMemo(() => {
+    return {
+      loading: !fleetCheckDone || !userRoleCheckDone,
+      canAccessFleet,
+      canAccessEndpointManagement: canAccessFleet && isSuperUser,
+    };
   }, [canAccessFleet, fleetCheckDone, isSuperUser, userRoleCheckDone]);
 
   // Capture if component is unmounted
