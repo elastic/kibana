@@ -18,7 +18,6 @@ import React, { Component, Fragment, useContext } from 'react';
 import memoizeOne from 'memoize-one';
 import {
   EuiBadge,
-  EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -687,7 +686,7 @@ class AnnotationsTableUI extends Component {
     columns.push(
       {
         align: RIGHT_ALIGNMENT,
-        // width: '60px',
+        width: '60px',
         name: i18n.translate('xpack.ml.annotationsTable.actionsColumnName', {
           defaultMessage: 'Actions',
         }),
