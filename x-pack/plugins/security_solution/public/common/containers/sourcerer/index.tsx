@@ -15,7 +15,7 @@ import { useIndexFields } from '../source';
 import { useUserInfo } from '../../../detections/components/user_info';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { ALERTS_PATH, RULES_PATH, UEBA_PATH } from '../../../../common/constants';
-import { TimelineId } from '../../../../common/types/timeline';
+import { TimelineId } from '../../../../common';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 
 export const useInitSourcerer = (
@@ -57,8 +57,7 @@ export const useInitSourcerer = (
       !loadingSignalIndex &&
       signalIndexName != null &&
       signalIndexNameSelector == null &&
-      (activeTimeline == null ||
-        (activeTimeline != null && activeTimeline.savedObjectId == null)) &&
+      (activeTimeline == null || activeTimeline.savedObjectId == null) &&
       initialTimelineSourcerer.current
     ) {
       initialTimelineSourcerer.current = false;
@@ -70,8 +69,7 @@ export const useInitSourcerer = (
       );
     } else if (
       signalIndexNameSelector != null &&
-      (activeTimeline == null ||
-        (activeTimeline != null && activeTimeline.savedObjectId == null)) &&
+      (activeTimeline == null || activeTimeline.savedObjectId == null) &&
       initialTimelineSourcerer.current
     ) {
       initialTimelineSourcerer.current = false;
@@ -124,8 +122,7 @@ export const useInitSourcerer = (
 
 export const useSourcererScope = (scope: SourcererScopeName = SourcererScopeName.default) => {
   const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
-  const SourcererScope = useDeepEqualSelector((state) => sourcererScopeSelector(state, scope));
-  return SourcererScope;
+  return useDeepEqualSelector((state) => sourcererScopeSelector(state, scope));
 };
 
 export const getScopeFromPath = (
