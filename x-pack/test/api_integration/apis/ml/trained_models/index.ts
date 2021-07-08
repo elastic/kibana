@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('trained models', function () {
     loadTestFile(require.resolve('./get_models'));
     loadTestFile(require.resolve('./get_model_stats'));
+    loadTestFile(require.resolve('./delete_model'));
   });
 }
