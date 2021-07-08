@@ -220,14 +220,21 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   });
 
   const isBlankTimeline: boolean =
-    isEmpty(dataProviders) && isEmpty(filters) && isEmpty(kqlQuery.query);
+    isEmpty(dataProviders) &&
+    isEmpty(filters) &&
+    isEmpty(kqlQuery.query) &&
+    combinedQueries?.filterQuery === undefined;
 
-  const canQueryTimeline = () =>
-    combinedQueries != null &&
-    loadingSourcerer != null &&
-    !loadingSourcerer &&
-    !isEmpty(start) &&
-    !isEmpty(end);
+  const canQueryTimeline = useMemo(
+    () =>
+      combinedQueries != null &&
+      loadingSourcerer != null &&
+      !loadingSourcerer &&
+      !isEmpty(start) &&
+      !isEmpty(end) &&
+      combinedQueries?.filterQuery !== undefined,
+    [combinedQueries, end, loadingSourcerer, start]
+  );
 
   const getTimelineQueryFields = () => {
     const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
@@ -264,7 +271,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     limit: itemsPerPage,
     filterQuery: combinedQueries?.filterQuery,
     startDate: start,
-    skip: !canQueryTimeline() || combinedQueries?.filterQuery === undefined,
+    skip: !canQueryTimeline,
     sort: timelineQuerySortField,
     timerangeKind,
   });
@@ -304,6 +311,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         inspect={inspect}
         loading={isQueryLoading}
         refetch={refetch}
+        skip={!canQueryTimeline}
       />
       <FullWidthFlexGroup gutterSize="none">
         <ScrollableFlexItem grow={2}>
@@ -323,7 +331,11 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 />
               )}
               <DatePicker grow={1}>
-                <SuperDatePicker id="timeline" timelineId={timelineId} />
+                <SuperDatePicker
+                  id="timeline"
+                  timelineId={timelineId}
+                  disabled={combinedQueries && combinedQueries.kqlError != null}
+                />
               </DatePicker>
               <EuiFlexItem grow={false}>
                 <TimelineDatePickerLock />

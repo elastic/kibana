@@ -91,6 +91,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
     timelineId,
     toStr,
     updateReduxTime,
+    disabled,
   }) => {
     const [recentlyUsedRanges, setRecentlyUsedRanges] = useState<EuiSuperDatePickerRecentRange[]>(
       []
@@ -201,6 +202,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
         refreshInterval={duration}
         showUpdateButton={true}
         start={startDate}
+        isDisabled={disabled}
       />
     );
   },
