@@ -6,7 +6,6 @@
  */
 
 import { useMemo } from 'react';
-import { useParams } from 'react-router-dom';
 import { useFetcher } from './use_fetcher';
 import { useUrlParams } from '../context/url_params_context/use_url_params';
 import { getThroughputChartSelector } from '../selectors/throughput_chart_selectors';

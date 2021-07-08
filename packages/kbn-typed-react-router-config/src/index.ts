@@ -5,13 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { useLocation } from 'react-router-dom';
-import { useRouter } from './use_router';
-
-export function useParams(path: string) {
-  const router = useRouter();
-  const location = useLocation();
-
-  return router.getParams(path as never, location);
-}
+export * from './create_router';
+export * from './types';
+export * from './outlet';
+export * from './route_renderer';
+export * from './router_provider';
+export * from './unconst';
+export * from './use_current_route';
+export * from './use_match_routes';
+export * from './use_params';
+export * from './use_router';

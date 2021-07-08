@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import * as t from 'io-ts';
-import { Outlet } from '@kbn/typed-react-router-config/target/outlet';
+import { Outlet } from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
 import { Redirect } from 'react-router-dom';
 import { agentConfigurationPageStepRt } from '../../../../common/agent_configuration/constants';

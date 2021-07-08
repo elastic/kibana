@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { OutputOf, PathsOf } from '@kbn/typed-react-router-config/target/types';
-import { useParams } from '@kbn/typed-react-router-config/target/use_params';
+import { OutputOf, PathsOf, useParams } from '@kbn/typed-react-router-config';
 import { ApmRoutes } from '../components/routing/apm_route_config';
 
-export function useApmParams<TPath extends PathsOf<ApmRoutes, true>>(
+export function useApmParams<TPath extends PathsOf<ApmRoutes>>(
   path: TPath
 ): OutputOf<ApmRoutes, TPath> {
-  return useParams(path as never) as any;
+  return useParams(path as never);
 }

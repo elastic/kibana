@@ -11,7 +11,7 @@ import { Router as ReactRouter } from 'react-router-dom';
 import { Route, Router } from './types';
 import { RouterContextProvider } from './use_router';
 
-export function Router({
+export function RouterProvider({
   children,
   router,
   history,

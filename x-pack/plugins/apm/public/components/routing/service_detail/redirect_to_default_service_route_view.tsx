@@ -18,7 +18,7 @@ export function RedirectToDefaultServiceRouteView() {
   const {
     path: { serviceName },
     query,
-  } = useApmParams('/services/:serviceName');
+  } = useApmParams('/services/:serviceName/*');
 
   const search = qs.stringify(query);
 

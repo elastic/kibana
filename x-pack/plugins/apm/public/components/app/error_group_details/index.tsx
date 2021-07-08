@@ -19,7 +19,11 @@ import React from 'react';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { useTrackPageview } from '../../../../../observability/public';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useApmParams } from '../../../hooks/use_apm_params';
+import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group_distribution_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { DetailView } from './detail_view';
@@ -89,17 +93,29 @@ function ErrorGroupHeader({
   );
 }
 
-interface ErrorGroupDetailsProps {
-  groupId: string;
-  serviceName: string;
-}
-
-export function ErrorGroupDetails({
-  serviceName,
-  groupId,
-}: ErrorGroupDetailsProps) {
+export function ErrorGroupDetails() {
   const { urlParams } = useUrlParams();
   const { environment, kuery, start, end } = urlParams;
+  const { serviceName } = useApmServiceContext();
+
+  const apmRouter = useApmRouter();
+
+  const {
+    path: { groupId },
+    query,
+  } = useApmParams('/services/:serviceName/errors/:groupId');
+
+  useBreadcrumb({
+    title: groupId,
+    href: apmRouter.link('/services/:serviceName/errors/:groupId', {
+      path: {
+        serviceName,
+        groupId,
+      },
+      query,
+    }),
+  });
+
   const { data: errorGroupData } = useFetcher(
     (callApmApi) => {
       if (start && end) {

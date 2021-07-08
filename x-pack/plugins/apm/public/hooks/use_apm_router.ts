@@ -5,18 +5,21 @@
  * 2.0.
  */
 
-import { useRouter } from '@kbn/typed-react-router-config/target/use_router';
-import { ApmRouter } from '../components/routing/apm_route_config';
+import { useRouter } from '@kbn/typed-react-router-config';
+import type { ApmRouter } from '../components/routing/apm_route_config';
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
 
-export function useApmRouter(): ApmRouter {
-  const router = useRouter() as ApmRouter;
+export function useApmRouter() {
+  const router = useRouter();
   const { core } = useApmPluginContext();
 
-  return {
-    ...router,
-    link: (...args) => {
-      return core.http.basePath.prepend('/app/apm' + router.link(...args));
-    },
+  const link = (...args: any[]) => {
+    // @ts-ignore
+    return core.http.basePath.prepend('/app/apm' + router.link(...args));
   };
+
+  return ({
+    ...router,
+    link,
+  } as unknown) as ApmRouter;
 }

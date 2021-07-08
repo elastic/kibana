@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { Outlet } from '@kbn/typed-react-router-config/target/outlet';
+import { Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
 import { Redirect } from 'react-router-dom';

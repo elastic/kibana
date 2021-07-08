@@ -16,6 +16,7 @@ import {
   EuiToolTip,
   EuiButtonEmpty,
 } from '@elastic/eui';
+import { omit } from 'lodash';
 import { ApmMainTemplate } from './apm_main_template';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ApmServiceContextProvider } from '../../../context/apm_service/apm_service_context';
@@ -28,13 +29,6 @@ import {
 import { ServiceIcons } from '../../shared/service_icons';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { useErrorOverviewHref } from '../../shared/Links/apm/ErrorOverviewLink';
-import { useMetricOverviewHref } from '../../shared/Links/apm/MetricOverviewLink';
-import { useServiceMapHref } from '../../shared/Links/apm/ServiceMapLink';
-import { useServiceNodeOverviewHref } from '../../shared/Links/apm/ServiceNodeOverviewLink';
-import { useServiceOverviewHref } from '../../shared/Links/apm/service_overview_link';
-import { useServiceProfilingHref } from '../../shared/Links/apm/service_profiling_link';
-import { useTransactionsOverviewHref } from '../../shared/Links/apm/transaction_overview_link';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../../common/environment_filter_values';
 import {
@@ -53,13 +47,13 @@ import { useApmRouter } from '../../../hooks/use_apm_router';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
-    | 'errors'
-    // | 'metrics'
-    // | 'nodes'
     | 'overview'
-    // | 'service-map'
-    // | 'profiling'
-    | 'transactions';
+    | 'transactions'
+    | 'errors'
+    | 'metrics'
+    | 'nodes'
+    | 'service-map'
+    | 'profiling';
   hidden?: boolean;
 };
 
@@ -186,15 +180,23 @@ function AnalyzeDataButton({ serviceName }: { serviceName: string }) {
 }
 
 function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
-  const { agentName, transactionType } = useApmServiceContext();
+  const { agentName } = useApmServiceContext();
   const { core, config } = useApmPluginContext();
 
   const router = useApmRouter();
 
   const {
     path: { serviceName },
-    query,
+    query: queryFromUrl,
   } = useApmParams(`/services/:serviceName/${selectedTab}` as const);
+
+  const query = omit(
+    queryFromUrl,
+    'page',
+    'pageSize',
+    'sortField',
+    'sortDirection'
+  );
 
   const tabs: Tab[] = [
     {
@@ -228,64 +230,78 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         defaultMessage: 'Errors',
       }),
     },
-    // {
-    //   key: 'nodes',
-    //   href: useServiceNodeOverviewHref(serviceName),
-    //   label: i18n.translate('xpack.apm.serviceDetails.nodesTabLabel', {
-    //     defaultMessage: 'JVMs',
-    //   }),
-    //   hidden: !isJavaAgentName(agentName),
-    // },
-    // {
-    //   key: 'metrics',
-    //   href: useMetricOverviewHref(serviceName),
-    //   label: i18n.translate('xpack.apm.serviceDetails.metricsTabLabel', {
-    //     defaultMessage: 'Metrics',
-    //   }),
-    //   hidden:
-    //     !agentName ||
-    //     isRumAgentName(agentName) ||
-    //     isJavaAgentName(agentName) ||
-    //     isIosAgentName(agentName),
-    // },
-    // {
-    //   key: 'service-map',
-    //   href: useServiceMapHref(serviceName),
-    //   label: i18n.translate('xpack.apm.home.serviceMapTabLabel', {
-    //     defaultMessage: 'Service Map',
-    //   }),
-    // },
-    // {
-    //   key: 'profiling',
-    //   href: useServiceProfilingHref({ serviceName }),
-    //   hidden: !config.profilingEnabled,
-    //   label: (
-    //     <EuiFlexGroup direction="row" gutterSize="s">
-    //       <EuiFlexItem>
-    //         {i18n.translate('xpack.apm.serviceDetails.profilingTabLabel', {
-    //           defaultMessage: 'Profiling',
-    //         })}
-    //       </EuiFlexItem>
-    //       <EuiFlexItem>
-    //         <EuiBetaBadge
-    //           label={i18n.translate(
-    //             'xpack.apm.serviceDetails.profilingTabExperimentalLabel',
-    //             {
-    //               defaultMessage: 'Experimental',
-    //             }
-    //           )}
-    //           tooltipContent={i18n.translate(
-    //             'xpack.apm.serviceDetails.profilingTabExperimentalDescription',
-    //             {
-    //               defaultMessage:
-    //                 'Profiling is highly experimental and for internal use only.',
-    //             }
-    //           )}
-    //         />
-    //       </EuiFlexItem>
-    //     </EuiFlexGroup>
-    //   ),
-    // },
+    {
+      key: 'metrics',
+      href: router.link('/services/:serviceName/metrics', {
+        path: { serviceName },
+        query,
+      }),
+      label: i18n.translate('xpack.apm.serviceDetails.metricsTabLabel', {
+        defaultMessage: 'Metrics',
+      }),
+      hidden:
+        !agentName ||
+        isRumAgentName(agentName) ||
+        isJavaAgentName(agentName) ||
+        isIosAgentName(agentName),
+    },
+    {
+      key: 'nodes',
+      href: router.link('/services/:serviceName/nodes', {
+        path: { serviceName },
+        query,
+      }),
+      label: i18n.translate('xpack.apm.serviceDetails.nodesTabLabel', {
+        defaultMessage: 'JVMs',
+      }),
+      hidden: !isJavaAgentName(agentName),
+    },
+    {
+      key: 'service-map',
+      href: router.link('/services/:serviceName/service-map', {
+        path: { serviceName },
+        query,
+      }),
+      label: i18n.translate('xpack.apm.home.serviceMapTabLabel', {
+        defaultMessage: 'Service Map',
+      }),
+    },
+    {
+      key: 'profiling',
+      href: router.link('/services/:serviceName/profiling', {
+        path: {
+          serviceName,
+        },
+        query,
+      }),
+      hidden: !config.profilingEnabled,
+      label: (
+        <EuiFlexGroup direction="row" gutterSize="s">
+          <EuiFlexItem>
+            {i18n.translate('xpack.apm.serviceDetails.profilingTabLabel', {
+              defaultMessage: 'Profiling',
+            })}
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiBetaBadge
+              label={i18n.translate(
+                'xpack.apm.serviceDetails.profilingTabExperimentalLabel',
+                {
+                  defaultMessage: 'Experimental',
+                }
+              )}
+              tooltipContent={i18n.translate(
+                'xpack.apm.serviceDetails.profilingTabExperimentalDescription',
+                {
+                  defaultMessage:
+                    'Profiling is highly experimental and for internal use only.',
+                }
+              )}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+    },
   ];
 
   return tabs

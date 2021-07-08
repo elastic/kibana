@@ -8,11 +8,67 @@
 import * as t from 'io-ts';
 
 type Unconst<T> = T extends React.ReactElement
-  ? T
+  ? React.ReactElement<any, any>
   : T extends t.Type<any>
   ? T
-  : T extends readonly [infer U]
-  ? [Unconst<U>]
+  : T extends readonly [any]
+  ? [Unconst<T[0]>]
+  : T extends readonly [any, any]
+  ? [Unconst<T[0]>, Unconst<T[1]>]
+  : T extends readonly [any, any, any]
+  ? [Unconst<T[0]>, Unconst<T[1]>, Unconst<T[2]>]
+  : T extends readonly [any, any, any, any]
+  ? [Unconst<T[0]>, Unconst<T[1]>, Unconst<T[2]>, Unconst<T[3]>]
+  : T extends readonly [any, any, any, any, any]
+  ? [Unconst<T[0]>, Unconst<T[1]>, Unconst<T[2]>, Unconst<T[3]>, Unconst<T[4]>]
+  : T extends readonly [any, any, any, any, any, any]
+  ? [Unconst<T[0]>, Unconst<T[1]>, Unconst<T[2]>, Unconst<T[3]>, Unconst<T[4]>, Unconst<T[5]>]
+  : T extends readonly [any, any, any, any, any, any, any]
+  ? [
+      Unconst<T[0]>,
+      Unconst<T[1]>,
+      Unconst<T[2]>,
+      Unconst<T[3]>,
+      Unconst<T[4]>,
+      Unconst<T[5]>,
+      Unconst<T[6]>
+    ]
+  : T extends readonly [any, any, any, any, any, any, any, any]
+  ? [
+      Unconst<T[0]>,
+      Unconst<T[1]>,
+      Unconst<T[2]>,
+      Unconst<T[3]>,
+      Unconst<T[4]>,
+      Unconst<T[5]>,
+      Unconst<T[6]>,
+      Unconst<T[7]>
+    ]
+  : T extends readonly [any, any, any, any, any, any, any, any, any]
+  ? [
+      Unconst<T[0]>,
+      Unconst<T[1]>,
+      Unconst<T[2]>,
+      Unconst<T[3]>,
+      Unconst<T[4]>,
+      Unconst<T[5]>,
+      Unconst<T[6]>,
+      Unconst<T[7]>,
+      Unconst<T[8]>
+    ]
+  : T extends readonly [any, any, any, any, any, any, any, any, any, any]
+  ? [
+      Unconst<T[0]>,
+      Unconst<T[1]>,
+      Unconst<T[2]>,
+      Unconst<T[3]>,
+      Unconst<T[4]>,
+      Unconst<T[5]>,
+      Unconst<T[6]>,
+      Unconst<T[7]>,
+      Unconst<T[8]>,
+      Unconst<T[9]>
+    ]
   : T extends readonly [infer U, ...infer V]
   ? [Unconst<U>, ...Unconst<V>]
   : T extends Record<any, any>

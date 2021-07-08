@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { useParams } from 'react-router-dom';
 import { useFetcher } from '../../hooks/use_fetcher';
 import { useUrlParams } from '../url_params_context/use_url_params';
 

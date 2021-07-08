@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useMemo } from 'react';
 import { Observable, of } from 'rxjs';
+import { RouterProvider } from '@kbn/typed-react-router-config';
+import { useHistory } from 'react-router-dom';
+import { createMemoryHistory, History } from 'history';
 import { createObservabilityRuleTypeRegistryMock } from '../../../../observability/public';
 import { ApmPluginContext, ApmPluginContextValue } from './apm_plugin_context';
 import { ConfigSchema } from '../..';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 import { createCallApmApi } from '../../services/rest/createCallApmApi';
 import { MlUrlGenerator } from '../../../../ml/public';
+import { apmRouter } from '../../components/routing/apm_route_config';
 
 const uiSettings: Record<string, unknown> = {
   [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: [
@@ -118,21 +122,32 @@ export const mockApmPluginContextValue = {
 export function MockApmPluginContextWrapper({
   children,
   value = {} as ApmPluginContextValue,
+  history,
 }: {
   children?: React.ReactNode;
   value?: ApmPluginContextValue;
+  history?: History;
 }) {
   if (value.core) {
     createCallApmApi(value.core);
   }
+
+  const contextHistory = useHistory();
+
+  const usedHistory = useMemo(() => {
+    return history || contextHistory || createMemoryHistory();
+  }, [history, contextHistory]);
+
   return (
-    <ApmPluginContext.Provider
-      value={{
-        ...mockApmPluginContextValue,
-        ...value,
-      }}
-    >
-      {children}
-    </ApmPluginContext.Provider>
+    <RouterProvider router={apmRouter as any} history={usedHistory}>
+      <ApmPluginContext.Provider
+        value={{
+          ...mockApmPluginContextValue,
+          ...value,
+        }}
+      >
+        {children}
+      </ApmPluginContext.Provider>
+    </RouterProvider>
   );
 }

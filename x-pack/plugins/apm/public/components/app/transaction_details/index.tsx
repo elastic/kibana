@@ -10,8 +10,11 @@ import { flatten, isEmpty } from 'lodash';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useTrackPageview } from '../../../../../observability/public';
+import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useApmParams } from '../../../hooks/use_apm_params';
+import { useApmRouter } from '../../../hooks/use_apm_router';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTransactionDistributionFetcher } from '../../../hooks/use_transaction_distribution_fetcher';
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
@@ -39,7 +42,22 @@ export function TransactionDetails() {
     exceedsMax,
     status: waterfallStatus,
   } = useWaterfallFetcher();
-  const { transactionName } = urlParams;
+
+  const { path, query } = useApmParams(
+    '/services/:serviceName/transactions/view'
+  );
+
+  const apmRouter = useApmRouter();
+
+  const { transactionName } = query;
+
+  useBreadcrumb({
+    title: transactionName,
+    href: apmRouter.link('/services/:serviceName/transactions/view', {
+      path,
+      query,
+    }),
+  });
 
   useTrackPageview({ app: 'apm', path: 'transaction_details' });
   useTrackPageview({ app: 'apm', path: 'transaction_details', delay: 15000 });

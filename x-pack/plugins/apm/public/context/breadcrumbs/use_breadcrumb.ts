@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCurrentRoute } from '@kbn/typed-react-router-config/target/use_current_route';
+import { useCurrentRoute } from '@kbn/typed-react-router-config';
 import { useContext, useEffect, useRef } from 'react';
 import { castArray } from 'lodash';
 import { Breadcrumb, BreadcrumbsContext } from './context';
