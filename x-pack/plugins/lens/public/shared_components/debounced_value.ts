@@ -30,12 +30,20 @@ export const useDebouncedValue = <T>(
   // Save the initial value
   const initialValue = useRef(value);
 
+  const flushChangesTimeout = useRef<NodeJS.Timeout | undefined>();
+
   const onChangeDebounced = useMemo(() => {
     const callback = debounce((val: T) => {
       onChange(val);
-      unflushedChanges.current = false;
+      // do not reset unflushed flag right away, wait a bit for upstream to pick it up
+      flushChangesTimeout.current = setTimeout(() => {
+        unflushedChanges.current = false;
+      }, 256);
     }, 256);
     return (val: T) => {
+      if (flushChangesTimeout.current) {
+        clearTimeout(flushChangesTimeout.current);
+      }
       unflushedChanges.current = true;
       callback(val);
     };

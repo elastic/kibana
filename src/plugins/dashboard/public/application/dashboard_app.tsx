@@ -40,6 +40,7 @@ export function DashboardApp({
     embeddable,
     onAppLeave,
     uiSettings,
+    data,
   } = useKibana<DashboardAppServices>().services;
 
   const kbnUrlStateStorage = useMemo(
@@ -97,6 +98,13 @@ export function DashboardApp({
       },
     ]);
   }, [chrome, dashboardState.title, dashboardState.viewMode, redirectTo, savedDashboardId]);
+
+  // clear search session when leaving dashboard route
+  useEffect(() => {
+    return () => {
+      data.search.session.clear();
+    };
+  }, [data.search.session]);
 
   return (
     <>
