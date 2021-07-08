@@ -6,23 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { getBucketSize } from '../../helpers/get_bucket_size';
-import { getTimerange } from '../../helpers/get_timerange';
-import { esQuery, UI_SETTINGS } from '../../../../../../data/server';
+import { getBucketSize, getTimerange, overwrite } from '../../helpers';
 import { validateField } from '../../../../../common/fields_utils';
+import { esQuery, UI_SETTINGS } from '../../../../../../data/server';
 
-export function query(
+import type { AnnotationsRequestProcessorsFunction } from './types';
+
+export const query: AnnotationsRequestProcessorsFunction = ({
   req,
   panel,
   annotation,
   esQueryConfig,
   annotationIndex,
   capabilities,
-  uiSettings
-) {
+  uiSettings,
+}) => {
   return (next) => async (doc) => {
     const barTargetUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
     const timeField = (annotation.time_field || annotationIndex.indexPattern?.timeFieldName) ?? '';
+    const indexPattern = annotationIndex.indexPattern || undefined;
 
     if (panel.use_kibana_indexes) {
       validateField(timeField, annotationIndex);
@@ -34,42 +36,40 @@ export function query(
     doc.size = 0;
     const queries = !annotation.ignore_global_filters ? req.body.query : [];
     const filters = !annotation.ignore_global_filters ? req.body.filters : [];
-    doc.query = esQuery.buildEsQuery(annotationIndex.indexPattern, queries, filters, esQueryConfig);
-    const timerange = {
-      range: {
-        [timeField]: {
-          gte: from.toISOString(),
-          lte: to.subtract(bucketSize, 'seconds').toISOString(),
-          format: 'strict_date_optional_time',
+
+    doc.query = esQuery.buildEsQuery(indexPattern, queries, filters, esQueryConfig);
+
+    const boolFilters: unknown[] = [
+      {
+        range: {
+          [timeField]: {
+            gte: from.toISOString(),
+            lte: to.subtract(bucketSize, 'seconds').toISOString(),
+            format: 'strict_date_optional_time',
+          },
         },
       },
-    };
-    doc.query.bool.must.push(timerange);
+    ];
 
     if (annotation.query_string) {
-      doc.query.bool.must.push(
-        esQuery.buildEsQuery(
-          annotationIndex.indexPattern,
-          [annotation.query_string],
-          [],
-          esQueryConfig
-        )
+      boolFilters.push(
+        esQuery.buildEsQuery(indexPattern, [annotation.query_string], [], esQueryConfig)
       );
     }
 
     if (!annotation.ignore_panel_filters && panel.filter) {
-      doc.query.bool.must.push(
-        esQuery.buildEsQuery(annotationIndex.indexPattern, [panel.filter], [], esQueryConfig)
-      );
+      boolFilters.push(esQuery.buildEsQuery(indexPattern, [panel.filter], [], esQueryConfig));
     }
 
     if (annotation.fields) {
       const fields = annotation.fields.split(/[,\s]+/) || [];
       fields.forEach((field) => {
-        doc.query.bool.must.push({ exists: { field } });
+        boolFilters.push({ exists: { field } });
       });
     }
 
+    overwrite(doc, 'query.bool.must', boolFilters);
+
     return next(doc);
   };
-}
+};

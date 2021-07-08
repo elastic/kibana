@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { query } from './query';
-import { dateHistogram } from './date_histogram';
-import { topHits } from './top_hits';
+import type { Annotation } from '../../../../../common/types/vis_data';
 
-export const processors = [query, dateHistogram, topHits];
+export const filterAnnotations = (filterValue?: number) => (annotations: Annotation[]) =>
+  annotations.filter(({ key }) => filterValue && key <= filterValue);
