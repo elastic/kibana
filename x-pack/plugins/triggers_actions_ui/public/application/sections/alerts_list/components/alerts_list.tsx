@@ -30,7 +30,6 @@ import {
   EuiToolTip,
   EuiTableSortingType,
   EuiSwitch,
-  EuiIcon,
   EuiButtonIcon,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
@@ -51,7 +50,6 @@ import {
   disableAlert,
   enableAlert,
   deleteAlerts,
-  unmuteAlert,
   muteAlert,
 } from '../../../lib/alert_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
