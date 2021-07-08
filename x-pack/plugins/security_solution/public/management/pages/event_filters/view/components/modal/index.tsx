@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useEffect, useCallback, useState } from 'react';
+import React, { memo, useMemo, useEffect, useCallback, useState, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import styled, { css } from 'styled-components';
@@ -70,10 +70,13 @@ export const EventFiltersModal: React.FC<EventFiltersModalProps> = memo(({ data,
   const formHasError = useEventFiltersSelector(getFormHasError);
   const creationInProgress = useEventFiltersSelector(isCreationInProgress);
   const creationSuccessful = useEventFiltersSelector(isCreationSuccessful);
+  const isMounted = useRef(false);
 
   // Enrich the event with missing ECS data from ES source
   useEffect(() => {
-    const enrich = async () => {
+    isMounted.current = true;
+
+    const enrichEvent = async () => {
       if (!data._index) return;
       const searchResponse = await search
         .search({
@@ -90,6 +93,8 @@ export const EventFiltersModal: React.FC<EventFiltersModalProps> = memo(({ data,
         })
         .toPromise();
 
+      if (!isMounted.current) return;
+
       setEnrichedData({
         ...data,
         host: {
@@ -102,11 +107,16 @@ export const EventFiltersModal: React.FC<EventFiltersModalProps> = memo(({ data,
       });
     };
 
-    enrich();
+    enrichEvent();
+
+    return () => {
+      isMounted.current = false;
+    };
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Initialize the store with the enriched event to allow render the form. It acts as componentDidMount
+  // Initialize the store with the enriched event to allow render the form
   useEffect(() => {
     if (enrichedData) {
       dispatch({
