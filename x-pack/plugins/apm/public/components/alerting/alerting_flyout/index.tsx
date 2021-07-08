@@ -8,7 +8,10 @@
 import React, { useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { AlertType } from '../../../../common/alert_types';
+import {
+  AlertType,
+  APM_SERVER_FEATURE_ID,
+} from '../../../../common/alert_types';
 import { getInitialAlertValues } from '../get_initial_alert_values';
 import { ApmPluginStartDeps } from '../../../plugin';
 interface Props {
@@ -31,7 +34,7 @@ export function AlertingFlyout(props: Props) {
     () =>
       alertType &&
       services.triggersActionsUi.getAddAlertFlyout({
-        consumer: 'apm',
+        consumer: APM_SERVER_FEATURE_ID,
         onClose: onCloseAddFlyout,
         alertTypeId: alertType,
         canChangeTrigger: false,
