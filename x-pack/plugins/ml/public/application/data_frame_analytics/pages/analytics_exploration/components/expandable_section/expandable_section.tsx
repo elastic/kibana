@@ -22,7 +22,7 @@ import {
   getDefaultExplorationPageUrlState,
   useExplorationUrlState,
 } from '../../hooks/use_exploration_url_state';
-import { ExpandablePanels } from '../../../../../../../common/types/ml_url_generator';
+import { ExpandablePanels } from '../../../../../../../common/types/locator';
 
 interface HeaderItem {
   // id is used as the React key and to construct a data-test-subj
