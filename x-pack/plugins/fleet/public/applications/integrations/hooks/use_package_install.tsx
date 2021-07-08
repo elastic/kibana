@@ -165,11 +165,12 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
             />
           ),
         });
-
-        const settingsPath = getPath('integration_details_settings', {
-          pkgkey: `${name}-${redirectToVersion}`,
-        });
-        history.push(settingsPath);
+        if (redirectToVersion !== version) {
+          const settingsPath = getPath('integration_details_settings', {
+            pkgkey: `${name}-${redirectToVersion}`,
+          });
+          history.push(settingsPath);
+        }
       }
     },
     [notifications.toasts, setPackageInstallStatus, getPath, history]
