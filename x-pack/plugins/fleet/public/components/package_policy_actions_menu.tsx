@@ -28,6 +28,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   const { getHref } = useLink();
   const hasWriteCapabilities = useCapabilities().write;
   const refreshAgentPolicy = useAgentPolicyRefresh();
+  const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
 
   const onEnrollmentFlyoutClose = useMemo(() => {
     return () => setIsEnrollmentFlyoutOpen(false);
@@ -48,7 +49,10 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     // </EuiContextMenuItem>,
     <EuiContextMenuItem
       icon="plusInCircle"
-      onClick={() => setIsEnrollmentFlyoutOpen(true)}
+      onClick={() => {
+        setIsActionsMenuOpen(false);
+        setIsEnrollmentFlyoutOpen(true);
+      }}
       key="addAgent"
     >
       <FormattedMessage
@@ -112,7 +116,11 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
           />
         </EuiPortal>
       )}
-      <ContextMenuActions items={menuItems} />
+      <ContextMenuActions
+        isOpen={isActionsMenuOpen}
+        items={menuItems}
+        onChange={(isOpen) => setIsActionsMenuOpen(isOpen)}
+      />
     </>
   );
 };
