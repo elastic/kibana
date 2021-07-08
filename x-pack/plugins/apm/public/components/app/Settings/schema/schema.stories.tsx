@@ -5,13 +5,21 @@
  * 2.0.
  */
 
-import type { Story } from '@storybook/react';
+import type { Meta, Story } from '@storybook/react';
 import React, { ComponentType } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { CoreStart } from '../../../../../../../../src/core/public';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import { createCallApmApi } from '../../../../services/rest/createCallApmApi';
 import { Schema } from './';
+
+interface Args {
+  hasCloudAgentPolicy: boolean;
+  hasCloudApmPackagePolicy: boolean;
+  cloudApmMigrationEnabled: boolean;
+  hasRequiredRole: boolean;
+  isMigrating: boolean;
+}
 
 export default {
   title: 'app/Settings/Schema',
@@ -54,8 +62,8 @@ export default {
     },
   },
   decorators: [
-    (StoryComponent: ComponentType, { args }: any) => {
-      if (args.isMigrating) {
+    (StoryComponent: ComponentType, { args }: Meta<Args>) => {
+      if (args?.isMigrating) {
         const expiryDate = new Date();
         expiryDate.setMinutes(expiryDate.getMinutes() + 5);
         window.localStorage.setItem(
@@ -73,10 +81,10 @@ export default {
           basePath: { prepend: () => {} },
           get: () => {
             return {
-              has_cloud_agent_policy: args.hasCloudAgentPolicy,
-              has_cloud_apm_package_policy: args.hasCloudApmPackagePolicy,
-              cloud_apm_migration_enabled: args.cloudApmMigrationEnabled,
-              has_required_role: args.hasRequiredRole,
+              has_cloud_agent_policy: args?.hasCloudAgentPolicy,
+              has_cloud_apm_package_policy: args?.hasCloudApmPackagePolicy,
+              cloud_apm_migration_enabled: args?.cloudApmMigrationEnabled,
+              has_required_role: args?.hasRequiredRole,
             };
           },
         },
