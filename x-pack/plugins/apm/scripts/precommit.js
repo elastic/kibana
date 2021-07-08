@@ -72,7 +72,7 @@ const tasks = new Listr(
             '--collect-coverage',
             'false',
             '--maxWorkers',
-            2,
+            4,
           ],
           execaOpts
         ),
