@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { get, isEmpty, mapValues } from 'lodash';
+import { get, isEmpty } from 'lodash';
 import type { SearchResponse } from 'kibana/server';
+import { overwrite } from '../../helpers';
 import type { Annotation } from '../../../../../common/types';
 
 interface AnnotationsBuckets {
@@ -28,6 +29,11 @@ export function getAnnotationBuckets(resp: SearchResponse, annotation: Annotatio
     .filter((bucket) => !isEmpty(bucket.hits.hits.hits))
     .map((bucket) => ({
       key: bucket.key,
-      docs: bucket.hits.hits.hits.map((doc) => mapValues(doc.fields, concatenateValues)),
+      docs: bucket.hits.hits.hits.map((doc) =>
+        Object.keys(doc.fields).reduce((acc, key) => {
+          overwrite(acc, key, concatenateValues(doc.fields[key]));
+          return acc;
+        }, {})
+      ),
     }));
 }
