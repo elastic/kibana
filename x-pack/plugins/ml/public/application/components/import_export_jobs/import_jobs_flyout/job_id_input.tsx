@@ -11,7 +11,7 @@
  * 2.0.
  */
 
-import React, { FC, useState, useCallback } from 'react';
+import React, { FC, useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import useDebounce from 'react-use/lib/useDebounce';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
@@ -66,8 +66,12 @@ export const JobIdInput: FC<Props> = ({ jobType, id, index, disabled, renameJob,
   const [validMessage, setValidMessage] = useState('');
   const jobsExist = jobType === 'anomaly-detector' ? adJobsExist : dfaJobsExist;
 
+  useEffect(() => {
+    setJobId(id);
+  }, [id]);
+
   useDebounce(
-    async () => {
+    useCallback(async () => {
       if (jobId === '') {
         setIsValid(index, false);
         setValidMessage(jobEmpty);
@@ -96,20 +100,29 @@ export const JobIdInput: FC<Props> = ({ jobType, id, index, disabled, renameJob,
       setValidMessage('');
       setIsValid(index, true);
       renameJob(index, jobId);
-    },
+    }, [jobId, setIsValid]),
     400,
     [jobId]
   );
 
-  const rename = useCallback((e: any) => {
-    setIsValid(index, false);
-    setJobId(e.target.value);
-    setValidMessage('');
-  }, []);
+  const rename = useCallback(
+    (e: any) => {
+      setIsValid(index, false);
+      setJobId(e.target.value);
+      setValidMessage('');
+    },
+    [setIsValid]
+  );
 
   return (
     <EuiFormRow error={validMessage} isInvalid={validMessage.length > 0}>
       <EuiFieldText
+        prepend={i18n.translate(
+          'xpack.fileDataVisualizer.aboutPanel.selectOrDragAndDropFileDescription',
+          {
+            defaultMessage: 'Job ID',
+          }
+        )}
         disabled={disabled}
         compressed={true}
         value={jobId}
