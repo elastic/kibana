@@ -39,7 +39,6 @@ import { StartServices } from '../../../types';
 import { createSecuritySolutionStorageMock } from '../../mock/mock_local_storage';
 import { MlLocatorDefinition } from '../../../../../ml/public';
 import { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
-import { UrlService } from 'src/plugins/share/common/url_service';
 import { MockUrlService } from 'src/plugins/share/common/mocks';
 
 const mockUiSettings: Record<string, unknown> = {
