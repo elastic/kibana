@@ -955,9 +955,11 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     ) {
       const compressedDefinition = this.getCompressedModelDefinition(modelType);
 
-      const models = new Array(count).fill(null).map((v, i) => {
+      const modelIds = new Array(count).fill(null).map((v, i) => `dfa_${modelType}_model_n_${i}`);
+
+      const models = modelIds.map((id) => {
         return {
-          model_id: `dfa_${modelType}_model_n_${i}`,
+          model_id: id,
           body: {
             compressed_definition: compressedDefinition,
             inference_config: {
@@ -976,8 +978,14 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
           await this.createIngestPipeline(model.model_id);
         }
       }
+
+      return modelIds;
     },
 
+    /**
+     * Retrieves compressed model definition from the test resources.
+     * @param modelType
+     */
     getCompressedModelDefinition(modelType: ModelType) {
       return fs.readFileSync(
         path.resolve(
@@ -1012,6 +1020,12 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
       log.debug('> Ingest pipeline crated');
       return ingestPipeline;
+    },
+
+    async deleteIngestPipeline(modelId: string) {
+      log.debug(`Deleting ingest pipeline for trained model with id "${modelId}"`);
+      await esSupertest.delete(`/_ingest/pipeline/pipeline_${modelId}`).expect(200);
+      log.debug('> Ingest pipeline deleted');
     },
   };
 }
