@@ -261,7 +261,7 @@ export default async function ({ readConfigFile }) {
             run_as: [],
           },
           kibana: [],
-        },  
+        },
         kibana_message_with_newline: {
           elasticsearch: {
             cluster: [],
