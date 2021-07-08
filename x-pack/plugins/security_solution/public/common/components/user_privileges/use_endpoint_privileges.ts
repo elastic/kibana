@@ -40,18 +40,19 @@ export const useEndpointPrivileges = (): EndpointPrivileges => {
   // Check if user can access fleet
   useEffect(() => {
     (async () => {
-      http
-        .get<CheckPermissionsResponse>(appRoutesService.getCheckPermissionsPath())
-        .then((fleetPermissionsResponse) => {
-          if (isMounted.current) {
-            setCanAccessFleet(fleetPermissionsResponse.success);
-          }
-        })
-        .finally(() => {
-          if (isMounted.current) {
-            setFleetCheckDone(true);
-          }
-        });
+      try {
+        const fleetPermissionsResponse = await http.get<CheckPermissionsResponse>(
+          appRoutesService.getCheckPermissionsPath()
+        );
+
+        if (isMounted.current) {
+          setCanAccessFleet(fleetPermissionsResponse.success);
+        }
+      } finally {
+        if (isMounted.current) {
+          setFleetCheckDone(true);
+        }
+      }
     })();
   }, [http]);
 
