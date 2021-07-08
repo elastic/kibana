@@ -29,7 +29,6 @@ import {
   EuiText,
   EuiToolTip,
   EuiTableSortingType,
-  EuiSwitch,
   EuiButtonIcon,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
@@ -71,6 +70,7 @@ import './alerts_list.scss';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import { ManageLicenseModal } from './manage_license_modal';
 import { checkAlertTypeEnabled } from '../../../lib/check_alert_type_enabled';
+import { RuleEnabledSwitch } from './rule_enabled_switch';
 
 const ENTER_KEY = 13;
 
@@ -328,28 +328,13 @@ export const AlertsList: React.FunctionComponent = () => {
         { defaultMessage: 'Enabled' }
       ),
       width: '90px',
-      render(enabled: boolean | undefined, item: AlertTableItem) {
-        let isEnabled = !!enabled;
+      render(_enabled: boolean | undefined, item: AlertTableItem) {
         return (
-          <EuiSwitch
-            name="enable"
-            disabled={!item.isEditable || !item.enabledInLicense}
-            compressed
-            checked={isEnabled}
-            data-test-subj="enableSwitch"
-            onChange={async () => {
-              asyncScheduler.schedule(async () => {
-                if (enabled) {
-                  await disableAlert({ http, id: item.id });
-                  isEnabled = false;
-                } else {
-                  await enableAlert({ http, id: item.id });
-                  isEnabled = true;
-                }
-                loadAlertsData();
-              }, 10);
-            }}
-            label=""
+          <RuleEnabledSwitch
+            disableAlert={async () => await disableAlert({ http, id: item.id })}
+            enableAlert={async () => await enableAlert({ http, id: item.id })}
+            item={item}
+            onAlertChanged={() => loadAlertsData()}
           />
         );
       },
