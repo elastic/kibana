@@ -1,0 +1,46 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { FtrProviderContext } from '../../../ftr_provider_context';
+import { USER } from '../../../../functional/services/ml/security_common';
+import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import expect from '../../../../../../../../../../private/var/tmp/_bazel_darnautov/1afe62330ff0d9ae1ca2013aad33fd76/execroot/kibana/bazel-out/darwin-fastbuild/bin/packages/kbn-expect';
+
+export default ({ getService }: FtrProviderContext) => {
+  const supertest = getService('supertestWithoutAuth');
+  const ml = getService('ml');
+
+  describe('GET trained_models/_stats', () => {
+    before(async () => {
+      await ml.testResources.setKibanaTimeZoneToUTC();
+      await ml.api.createdTestTrainedModels('regression', 2);
+    });
+
+    after(async () => {
+      await ml.api.cleanMlIndices();
+    });
+
+    it('returns trained model stats by id', async () => {
+      const { body } = await supertest
+        .get(`/api/ml/trained_models/dfa_regression_model_n_0/_stats`)
+        .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
+        .set(COMMON_REQUEST_HEADERS)
+        .expect(200);
+
+      expect(body.count).to.eql(1);
+      expect(body.trained_model_stats[0].model_id).to.eql('dfa_regression_model_n_0');
+    });
+
+    it('return an error for unauthorized user', async () => {
+      await supertest
+        .get(`/api/ml/trained_models/dfa_regression_model_n_0/_stats`)
+        .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
+        .set(COMMON_REQUEST_HEADERS)
+        .expect(403);
+    });
+  });
+};
