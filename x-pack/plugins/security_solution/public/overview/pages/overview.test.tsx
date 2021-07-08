@@ -87,6 +87,7 @@ describe('Overview', () => {
       },
     ]);
   });
+
   describe('rendering', () => {
     test('it DOES NOT render the Getting started text when an index is available', () => {
       mockUseSourcererScope.mockReturnValue({
@@ -275,6 +276,20 @@ describe('Overview', () => {
         );
         expect(wrapper.find('[data-test-subj="empty-page-endpoint-action"]').exists()).toBe(true);
       });
+    });
+  });
+
+  describe('Threat Intel Dashboard Links', () => {
+    it('invokes useIsThreatIntelModuleEnabled hook only once', () => {
+      useIsThreatIntelModuleEnabledMock.mockClear();
+      mount(
+        <TestProviders>
+          <MemoryRouter>
+            <Overview />
+          </MemoryRouter>
+        </TestProviders>
+      );
+      expect(useIsThreatIntelModuleEnabledMock).toHaveBeenCalledTimes(1);
     });
   });
 });
