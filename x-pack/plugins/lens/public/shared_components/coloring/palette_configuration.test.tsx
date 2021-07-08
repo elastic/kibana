@@ -84,7 +84,7 @@ describe('palette panel', () => {
 
     function changePaletteIn(instance: ReactWrapper, newPaletteName: string) {
       return ((instance
-        .find('[data-test-subj="lnsDatatable_dynamicColoring_palette_picker"]')
+        .find('[data-test-subj="lnsPalettePanel_dynamicColoring_palette_picker"]')
         .at(1)
         .prop('onChange') as unknown) as (value: string) => void)?.(newPaletteName);
     }
@@ -92,7 +92,7 @@ describe('palette panel', () => {
     it('should show only dynamic coloring enabled palette + custom option', () => {
       const instance = mountWithIntl(<CustomizablePalette {...props} />);
       const paletteOptions = instance
-        .find('[data-test-subj="lnsDatatable_dynamicColoring_palette_picker"]')
+        .find('[data-test-subj="lnsPalettePanel_dynamicColoring_palette_picker"]')
         .at(1)
         .prop('palettes') as EuiColorPalettePickerPaletteProps[];
       expect(paletteOptions.length).toEqual(2);
@@ -140,7 +140,7 @@ describe('palette panel', () => {
 
       function toggleReverse(instance: ReactWrapper, checked: boolean) {
         return instance
-          .find('[data-test-subj="lnsDatatable_dynamicColoring_reverse"]')
+          .find('[data-test-subj="lnsPalettePanel_dynamicColoring_reverse"]')
           .first()
           .prop('onClick')!({} as React.MouseEvent);
       }
@@ -172,7 +172,7 @@ describe('palette panel', () => {
       it('should be visible for predefined palettes', () => {
         const instance = mountWithIntl(<CustomizablePalette {...props} />);
         expect(
-          instance.find('[data-test-subj="lnsDatatable_dynamicColoring_custom_stops"]').exists()
+          instance.find('[data-test-subj="lnsPalettePanel_dynamicColoring_custom_stops"]').exists()
         ).toEqual(true);
       });
 
@@ -190,7 +190,7 @@ describe('palette panel', () => {
           />
         );
         expect(
-          instance.find('[data-test-subj="lnsDatatable_dynamicColoring_custom_stops"]').exists()
+          instance.find('[data-test-subj="lnsPalettePanel_dynamicColoring_custom_stops"]').exists()
         ).toEqual(true);
       });
     });
