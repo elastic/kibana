@@ -7,6 +7,12 @@
 
 import { TransformConfigSchema } from '../../../common/transforms/types';
 
+/**
+ * Given a transform setting and indices this will return either the particular setting
+ * that matches the index or it will return undefined if it is not found
+ * @param indices The indices to check against the transform
+ * @returns Either the setting if it matches or an undefined if it cannot find one
+ */
 export const getSettingsMatch = ({
   indices,
   transformSettings,
