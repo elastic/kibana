@@ -158,7 +158,6 @@ export const ImportDataModalComponent = ({
               <EuiCheckbox
                 id="import-data-modal-checkbox-label"
                 label={checkBoxLabel}
-                labelProps={checkBoxLabelProps}
                 checked={overwrite}
                 onChange={() => setOverwrite(!overwrite)}
               />
