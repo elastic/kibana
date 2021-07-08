@@ -499,7 +499,15 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         transformErrors: [],
       };
     } else {
-      throwBadResponse(stateP, res);
+      if (isLeftTypeof(res.left, 'target_index_had_write_block')) {
+        // the temp index has a write block, meaning that another instance already finished and moved forward.
+        // close the PIT search and carry on with the happy path.
+        return {
+          ...stateP,
+          controlState: 'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT',
+        };
+      }
+      throwBadResponse(stateP, res.left);
     }
   } else if (stateP.controlState === 'SET_TEMP_WRITE_BLOCK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -667,7 +675,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         hasTransformedDocs: true,
       };
     } else {
-      throwBadResponse(stateP, res);
+      throwBadResponse(stateP, res as never);
     }
   } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;

@@ -26,7 +26,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { AnomalyDetectionSettingsContext } from './anomaly_detection_settings_context';
 import { useNotifications } from '../contexts/kibana';
 import { ml } from '../services/ml_api_service';
-import { ML_PAGES } from '../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../common/constants/locator';
 import { useCreateAndNavigateToMlLink } from '../contexts/kibana/use_create_url';
 
 export const AnomalyDetectionSettings: FC = () => {
