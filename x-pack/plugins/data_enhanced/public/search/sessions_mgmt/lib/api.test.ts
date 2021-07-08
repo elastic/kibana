@@ -80,9 +80,9 @@ describe('Search Sessions Management API', () => {
             "initialState": Object {},
             "name": "Veggie",
             "numSearches": 0,
-            "reloadUrl": "hello-cool-undefined-url",
+            "reloadUrl": "/",
             "restoreState": Object {},
-            "restoreUrl": "hello-cool-undefined-url",
+            "restoreUrl": "/",
             "status": "complete",
           },
         ]
