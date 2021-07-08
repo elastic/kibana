@@ -96,7 +96,11 @@ export const ThreatIntelPanelView: React.FC<ThreatIntelPanelViewProps> = ({
 
   const button = useMemo(
     () => (
-      <LinkButton href={buttonHref} disabled={!buttonHref}>
+      <LinkButton
+        href={buttonHref}
+        disabled={!buttonHref}
+        data-test-subj="cti-view-dashboard-button"
+      >
         <FormattedMessage
           id="xpack.securitySolution.overview.ctiViewDasboard"
           defaultMessage="View dashboard"
