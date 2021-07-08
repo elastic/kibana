@@ -18,6 +18,7 @@ import { httpServerMock } from './http_server.mocks';
 import { ConfigService, Env } from '../config';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 import { contextServiceMock } from '../context/context_service.mock';
+import { executionContextServiceMock } from '../execution_context/execution_context_service.mock';
 import { config as cspConfig } from '../csp';
 import { config as externalUrlConfig } from '../external_url';
 
@@ -45,6 +46,7 @@ const contextSetup = contextServiceMock.createSetupContract();
 
 const setupDeps = {
   context: contextSetup,
+  executionContext: executionContextServiceMock.createInternalSetupContract(),
 };
 const fakeHapiServer = {
   start: noop,
