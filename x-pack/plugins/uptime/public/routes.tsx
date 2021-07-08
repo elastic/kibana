@@ -43,7 +43,9 @@ interface RouteProps {
   };
 }
 
-const baseTitle = 'Uptime - Kibana';
+const baseTitle = i18n.translate('xpack.uptime.routes.baseTitle', {
+  defaultMessage: 'Uptime - Kibana',
+});
 
 export const MONITORING_OVERVIEW_LABEL = i18n.translate('xpack.uptime.overview.heading', {
   defaultMessage: 'Monitors',
@@ -51,7 +53,10 @@ export const MONITORING_OVERVIEW_LABEL = i18n.translate('xpack.uptime.overview.h
 
 const Routes: RouteProps[] = [
   {
-    title: `Monitor | ${baseTitle}`,
+    title: i18n.translate('xpack.uptime.monitorRoute.title', {
+      defaultMessage: 'Monitor | {baseTitle}',
+      values: { baseTitle },
+    }),
     path: MONITOR_ROUTE,
     component: MonitorPage,
     dataTestSubj: 'uptimeMonitorPage',
@@ -63,7 +68,10 @@ const Routes: RouteProps[] = [
     },
   },
   {
-    title: `Settings | ${baseTitle}`,
+    title: i18n.translate('xpack.uptime.settingsRoute.title', {
+      defaultMessage: `Settings | {baseTitle}`,
+      values: { baseTitle },
+    }),
     path: SETTINGS_ROUTE,
     component: SettingsPage,
     dataTestSubj: 'uptimeSettingsPage',
@@ -75,7 +83,10 @@ const Routes: RouteProps[] = [
     },
   },
   {
-    title: `Certificates | ${baseTitle}`,
+    title: i18n.translate('xpack.uptime.certificatesRoute.title', {
+      defaultMessage: `Certificates | {baseTitle}`,
+      values: { baseTitle },
+    }),
     path: CERTIFICATES_ROUTE,
     component: CertificatesPage,
     dataTestSubj: 'uptimeCertificatesPage',
@@ -86,7 +97,10 @@ const Routes: RouteProps[] = [
     },
   },
   {
-    title: baseTitle,
+    title: i18n.translate('xpack.uptime.stepDetailRoute.title', {
+      defaultMessage: 'Synthetics detail | {baseTitle}',
+      values: { baseTitle },
+    }),
     path: STEP_DETAIL_ROUTE,
     component: StepDetailPage,
     dataTestSubj: 'uptimeStepDetailPage',
