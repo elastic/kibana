@@ -5944,7 +5944,6 @@
     "xpack.apm.transactionsTable.notFoundLabel": "トランザクションが見つかりませんでした。",
     "xpack.apm.transactionsTable.throughputColumnLabel": "スループット",
     "xpack.apm.tutorial.apmServer.title": "APM Server",
-    "xpack.apm.tutorial.elasticCloud.textPre": "APM Server を有効にするには、[the Elastic Cloud console] (https://cloud.elastic.co/deployments?q={cloudId}) に移動し、展開設定で APM を有効にします。有効になったら、このページを更新してください。",
     "xpack.apm.tutorial.elasticCloudInstructions.title": "APM エージェント",
     "xpack.apm.tutorial.specProvider.artifacts.application.label": "APM を起動",
     "xpack.apm.unitLabel": "単位を選択",
