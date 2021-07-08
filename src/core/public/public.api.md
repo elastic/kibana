@@ -433,6 +433,8 @@ export interface CoreStart {
     // (undocumented)
     docLinks: DocLinksStart;
     // (undocumented)
+    executionContext: ExecutionContextServiceStart;
+    // (undocumented)
     fatalErrors: FatalErrorsStart;
     // (undocumented)
     http: HttpStart;
@@ -507,9 +509,13 @@ export interface DocLinksStart {
             readonly elasticsearchModule: string;
             readonly startup: string;
             readonly exportedFields: string;
+            readonly suricataModule: string;
+            readonly zeekModule: string;
         };
         readonly auditbeat: {
             readonly base: string;
+            readonly auditdModule: string;
+            readonly systemModule: string;
         };
         readonly metricbeat: {
             readonly base: string;
@@ -525,6 +531,9 @@ export interface DocLinksStart {
         };
         readonly heartbeat: {
             readonly base: string;
+        };
+        readonly libbeat: {
+            readonly getStarted: string;
         };
         readonly logstash: {
             readonly base: string;
@@ -602,6 +611,10 @@ export interface DocLinksStart {
         readonly siem: {
             readonly guide: string;
             readonly gettingStarted: string;
+            readonly ml: string;
+            readonly ruleChangeLog: string;
+            readonly detectionsReq: string;
+            readonly networkMap: string;
         };
         readonly query: {
             readonly eql: string;
@@ -703,6 +716,11 @@ export interface ErrorToastOptions extends ToastOptions {
     toastMessage?: string;
 }
 
+// @public (undocumented)
+export interface ExecutionContextServiceStart {
+    create: (context: KibanaExecutionContext) => IExecutionContextContainer;
+}
+
 // @public
 export interface FatalErrorInfo {
     // (undocumented)
@@ -741,6 +759,8 @@ export class HttpFetchError extends Error implements IHttpFetchError {
 export interface HttpFetchOptions extends HttpRequestInit {
     asResponse?: boolean;
     asSystemRequest?: boolean;
+    // (undocumented)
+    context?: IExecutionContextContainer;
     headers?: HttpHeadersInit;
     prependBasePath?: boolean;
     query?: HttpFetchQuery;
@@ -876,6 +896,12 @@ export interface IBasePath {
     readonly serverBasePath: string;
 }
 
+// @public (undocumented)
+export interface IExecutionContextContainer {
+    // (undocumented)
+    toHeader: () => Record<string, string>;
+}
+
 // @public
 export interface IExternalUrl {
     validateUrl(relativeOrAbsoluteUrl: string): URL | null;
@@ -936,6 +962,15 @@ export interface IUiSettingsClient {
     isOverridden: (key: string) => boolean;
     remove: (key: string) => Promise<boolean>;
     set: (key: string, value: any) => Promise<boolean>;
+}
+
+// @public (undocumented)
+export interface KibanaExecutionContext {
+    readonly description: string;
+    readonly id: string;
+    readonly name: string;
+    readonly type: string;
+    readonly url?: string;
 }
 
 // @public
@@ -1652,6 +1687,6 @@ export interface UserProvidedValues<T = any> {
 
 // Warnings were encountered during analysis:
 //
-// src/core/public/core_system.ts:168:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
+// src/core/public/core_system.ts:172:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
 
 ```
