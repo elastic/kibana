@@ -127,6 +127,10 @@ export class APMPlugin
     const getCoreStart = () =>
       core.getStartServices().then(([coreStart]) => coreStart);
 
+    const alertsIndexPattern = ruleDataService.getFullAssetName(
+      'observability-apm*'
+    );
+
     const initializeRuleDataTemplates = once(async () => {
       const componentTemplateName = ruleDataService.getFullAssetName(
         'apm-mappings'
@@ -164,15 +168,16 @@ export class APMPlugin
       await ruleDataService.createOrUpdateIndexTemplate({
         name: ruleDataService.getFullAssetName('apm-index-template'),
         body: {
-          index_patterns: [
-            ruleDataService.getFullAssetName('observability-apm*'),
-          ],
+          index_patterns: [alertsIndexPattern],
           composed_of: [
             ruleDataService.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
             componentTemplateName,
           ],
         },
       });
+      await ruleDataService.updateIndexMappingsMatchingPattern(
+        alertsIndexPattern
+      );
     });
 
     // initialize eagerly
