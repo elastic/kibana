@@ -24,9 +24,6 @@ const LiveQueryDetailsPageComponent = () => {
   const liveQueryListProps = useRouterNavigate('live_queries');
 
   const { data } = useActionDetails({ actionId });
-  const expirationDate = useMemo(() => new Date(data?.actionDetails._source.expiration), [
-    data?.actionDetails,
-  ]);
 
   const LeftColumn = useMemo(
     () => (
@@ -63,7 +60,6 @@ const LiveQueryDetailsPageComponent = () => {
       <EuiSpacer />
       <ResultTabs
         actionId={actionId}
-        expirationDate={expirationDate}
         agentIds={data?.actionDetails?.fields?.agents}
         startDate={get(data, ['actionDetails', 'fields', '@timestamp', '0'])}
         endDate={get(data, 'actionDetails.fields.expiration[0]')}

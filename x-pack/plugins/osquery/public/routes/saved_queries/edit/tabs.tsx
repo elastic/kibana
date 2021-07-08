@@ -15,7 +15,6 @@ import { ActionAgentsStatus } from '../../../action_results/action_agents_status
 interface ResultTabsProps {
   actionId: string;
   agentIds?: string[];
-  expirationDate: Date;
   startDate?: string;
   endDate?: string;
 }
@@ -24,7 +23,6 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
   actionId,
   agentIds,
   endDate,
-  expirationDate,
   startDate,
 }) => {
   const tabs = useMemo(
@@ -53,18 +51,18 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
             <ActionResultsSummary
               actionId={actionId}
               agentIds={agentIds}
-              expirationDate={expirationDate}
+              expirationDate={endDate}
             />
           </>
         ),
       },
     ],
-    [actionId, agentIds, endDate, expirationDate, startDate]
+    [actionId, agentIds, endDate, startDate]
   );
 
   return (
     <>
-      <ActionAgentsStatus actionId={actionId} agentIds={agentIds} expirationDate={expirationDate} />
+      <ActionAgentsStatus actionId={actionId} agentIds={agentIds} expirationDate={endDate} />
       <EuiSpacer size="s" />
       <EuiTabbedContent
         tabs={tabs}

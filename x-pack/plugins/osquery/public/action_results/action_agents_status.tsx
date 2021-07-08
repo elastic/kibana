@@ -16,7 +16,7 @@ import { useActionResults } from './use_action_results';
 
 interface ActionAgentsStatusProps {
   actionId: string;
-  expirationDate: Date;
+  expirationDate?: string;
   agentIds?: string[];
 }
 
@@ -26,7 +26,9 @@ const ActionAgentsStatusComponent: React.FC<ActionAgentsStatusProps> = ({
   agentIds,
 }) => {
   const [isLive, setIsLive] = useState(true);
-  const expired = useMemo(() => expirationDate < new Date(), [expirationDate]);
+  const expired = useMemo(() => (!expirationDate ? false : new Date(expirationDate) < new Date()), [
+    expirationDate,
+  ]);
   const {
     // @ts-expect-error update types
     data: { aggregations },
@@ -54,9 +56,9 @@ const ActionAgentsStatusComponent: React.FC<ActionAgentsStatusProps> = ({
   useEffect(
     () =>
       setIsLive(() => {
-        if (!agentIds?.length) return false;
+        if (!agentIds?.length || expired) return false;
 
-        return !!(aggregations.totalResponded !== agentIds?.length) ?? !expired;
+        return !!(aggregations.totalResponded !== agentIds?.length);
       }),
     [agentIds?.length, aggregations.totalResponded, expired]
   );

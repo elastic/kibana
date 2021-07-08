@@ -20,7 +20,7 @@ import { useKibana } from '../common/lib/kibana';
 
 interface ActionResultsSummaryProps {
   actionId: string;
-  expirationDate: Date;
+  expirationDate?: string;
   agentIds?: string[];
 }
 
@@ -40,7 +40,9 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   const [pageIndex, setPageIndex] = useState(0);
   // @ts-expect-error update types
   const [pageSize, setPageSize] = useState(50);
-  const expired = useMemo(() => expirationDate < new Date(), [expirationDate]);
+  const expired = useMemo(() => (!expirationDate ? false : new Date(expirationDate) < new Date()), [
+    expirationDate,
+  ]);
   const [isLive, setIsLive] = useState(true);
   const {
     // @ts-expect-error update types
@@ -172,13 +174,13 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
 
   useEffect(() => {
     setIsLive(() => {
-      if (!agentIds?.length) return false;
+      if (!agentIds?.length || expired) return false;
 
       const uniqueAgentsRepliedCount =
         // @ts-expect-error update types
         logsResults?.rawResponse.aggregations?.unique_agents.value ?? 0;
 
-      return !!(uniqueAgentsRepliedCount !== agentIds?.length - aggregations.failed) ?? !expired;
+      return !!(uniqueAgentsRepliedCount !== agentIds?.length - aggregations.failed);
     });
   }, [
     agentIds?.length,
