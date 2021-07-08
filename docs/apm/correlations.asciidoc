@@ -2,7 +2,7 @@
 [[correlations]]
 === Find latency and error correlations
 
-**Correlations** surface attributes of your data that are potentially correlated
+Correlations surface attributes of your data that are potentially correlated
 with high-latency or erroneous transactions. For example, a site reliability
 engineer, who is responsible for keeping production systems up and running,
 notices an increase in latency in certain transactions. Analyzing attributes
@@ -12,17 +12,10 @@ piece of hardware, like a host or pod, has failed, increasing latency. Or,
 perhaps a set of users, based on IP address or region, is facing increased
 latency due to local data center issues.
 
-[discrete]
-[[view-correlations]]
-===  View correlations
+To view correlations in the {apm-app}, select a service on *Services* page and
+click **View correlations**.
 
-With a service selected, click **View correlations**:
-
-[role="screenshot"]
-image::apm/images/correlations.png[View correlations]
-//TBD: Is this section and screenshot still useful for orienting the user?
-
-NOTE: Queries within the APM app are also applied to the correlations.
+NOTE: Queries within the {apm-app} are also applied to the correlations.
 
 [discrete]
 [[correlations-latency]]
@@ -103,7 +96,7 @@ closer to a diagnosis.
 
 Correlations are only as good as the data they're searching for.
 By default, a handful of attributes commonly known to cause performance issues are included.
-During the course of an investigation however, you may to need to add and remove fields from
+During the course of an investigation however, you may need to add and remove fields from
 this list multiple times as you narrow in on a diagnosis.
 
 Add and remove fields under the **Customize fields** dropdown.
