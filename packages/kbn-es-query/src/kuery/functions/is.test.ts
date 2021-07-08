@@ -12,7 +12,7 @@ import { fields } from '../../filters/stubs';
 import * as is from './is';
 import { IndexPatternBase } from '../..';
 
-jest.mock('../../../grammar');
+jest.mock('../grammar');
 
 describe('kuery functions', () => {
   describe('is', () => {

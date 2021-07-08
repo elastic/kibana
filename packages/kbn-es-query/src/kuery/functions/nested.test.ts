@@ -14,7 +14,7 @@ import * as ast from '../ast';
 
 import * as nested from './nested';
 
-jest.mock('../../../grammar');
+jest.mock('../grammar');
 
 const childNode = nodeTypes.function.buildNode('is', 'child', 'foo');
 

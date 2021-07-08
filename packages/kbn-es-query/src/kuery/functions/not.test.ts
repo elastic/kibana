@@ -13,7 +13,7 @@ import { IndexPatternBase } from '../..';
 import * as ast from '../ast';
 import * as not from './not';
 
-jest.mock('../../../grammar');
+jest.mock('../grammar');
 
 const childNode = nodeTypes.function.buildNode('is', 'extension', 'jpg');
 

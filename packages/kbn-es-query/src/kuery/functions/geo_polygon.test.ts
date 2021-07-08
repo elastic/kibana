@@ -12,7 +12,7 @@ import { IndexPatternBase } from '../..';
 
 import * as geoPolygon from './geo_polygon';
 
-jest.mock('../../../grammar');
+jest.mock('../grammar');
 
 const points = [
   {

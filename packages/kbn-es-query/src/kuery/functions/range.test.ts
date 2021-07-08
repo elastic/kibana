@@ -13,7 +13,7 @@ import { IndexPatternBase } from '../..';
 import { RangeFilterParams } from '../../filters';
 
 import * as range from './range';
-jest.mock('../../../grammar');
+jest.mock('../grammar');
 
 describe('kuery functions', () => {
   describe('range', () => {

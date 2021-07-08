@@ -12,7 +12,7 @@ import { fields } from '../../../filters/stubs';
 import { nodeTypes } from '../../index';
 import { getFields } from './get_fields';
 
-jest.mock('../../../../grammar');
+jest.mock('../../grammar');
 
 describe('getFields', () => {
   let indexPattern: IndexPatternBase;
