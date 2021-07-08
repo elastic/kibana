@@ -21,6 +21,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { satisfies } from 'semver';
 
@@ -153,7 +154,12 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
                     isDisabled: !isFieldSupported,
                     noSuggestions: false,
                     singleSelection: { asPlainText: true },
-                    placeholder: ALL_OSQUERY_VERSIONS_OPTIONS[0].label,
+                    placeholder: i18n.translate(
+                      'xpack.osquery.scheduledQueryGroup.queriesTable.osqueryVersionAllLabel',
+                      {
+                        defaultMessage: 'ALL',
+                      }
+                    ),
                     options: ALL_OSQUERY_VERSIONS_OPTIONS,
                     onCreateOption: undefined,
                   }}
