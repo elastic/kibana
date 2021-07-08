@@ -28,7 +28,7 @@ export default ({ getService }: FtrProviderContext) => {
       await Promise.all(testModelIds.map((modelId) => ml.api.deleteIngestPipeline(modelId)));
     });
 
-    it('returns all trained models with associated pipelined', async () => {
+    it('returns all trained models with associated pipelines', async () => {
       const { body } = await supertest
         .get(`/api/ml/trained_models?with_pipelines=true`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
