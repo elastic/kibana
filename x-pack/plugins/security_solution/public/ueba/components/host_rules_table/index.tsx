@@ -28,11 +28,11 @@ import {
 import { Direction } from '../../../../common/search_strategy';
 import { HOST_RULES } from '../../pages/translations';
 
-const tableType = uebaModel.UebaTableType.hostRules;
-
 interface HostRulesTableProps {
   data: HostRulesEdges[];
   fakeTotalCount: number;
+  headerTitle?: string;
+  headerSupplement?: React.ReactElement;
   id: string;
   isInspect: boolean;
   loading: boolean;
@@ -40,6 +40,7 @@ interface HostRulesTableProps {
   showMorePagesIndicator: boolean;
   totalCount: number;
   type: uebaModel.UebaType;
+  tableType: uebaModel.UebaTableType.hostRules | uebaModel.UebaTableType.userRules;
 }
 
 export type HostRulesColumns = [
@@ -67,11 +68,14 @@ const getSorting = (sortField: HostRulesFields, direction: Direction): SortingBa
 const HostRulesTableComponent: React.FC<HostRulesTableProps> = ({
   data,
   fakeTotalCount,
+  headerTitle,
+  headerSupplement,
   id,
   isInspect,
   loading,
   loadPage,
   showMorePagesIndicator,
+  tableType,
   totalCount,
   type,
 }) => {
@@ -86,7 +90,7 @@ const HostRulesTableComponent: React.FC<HostRulesTableProps> = ({
           tableType,
         })
       ),
-    [type, dispatch]
+    [tableType, type, dispatch]
   );
 
   const updateActivePage = useCallback(
@@ -95,10 +99,10 @@ const HostRulesTableComponent: React.FC<HostRulesTableProps> = ({
         uebaActions.updateTableActivePage({
           activePage: newPage,
           uebaType: type,
-          tableType,
+          tableType, // this will need to become unique for each user table in the group
         })
       ),
-    [type, dispatch]
+    [tableType, type, dispatch]
   );
 
   const onChange = useCallback(
@@ -124,14 +128,23 @@ const HostRulesTableComponent: React.FC<HostRulesTableProps> = ({
   const columns = useMemo(() => getHostRulesColumns(), []);
 
   const sorting = useMemo(() => getSorting(sort.field, sort.direction), [sort]);
-
+  const headerProps = useMemo(
+    () =>
+      tableType === uebaModel.UebaTableType.userRules && headerTitle && headerSupplement
+        ? {
+            headerTitle,
+            headerSupplement,
+          }
+        : { headerTitle: HOST_RULES },
+    [headerSupplement, headerTitle, tableType]
+  );
   return (
     <PaginatedTable
+      {...headerProps}
       activePage={activePage}
       columns={columns}
       dataTestSubj={`table-${tableType}`}
       headerCount={totalCount}
-      headerTitle={HOST_RULES}
       headerUnit={i18n.UNIT(totalCount)}
       id={id}
       isInspect={isInspect}

@@ -11,6 +11,7 @@ import { useHostRules } from '../../containers/host_rules';
 import { HostRulesQueryProps } from './types';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { HostRulesTable } from '../../components/host_rules_table';
+import { uebaModel } from '../../store';
 
 const HostRulesTableManage = manageQuery(HostRulesTable);
 
@@ -53,6 +54,7 @@ export const HostRulesQueryTabBody = ({
       refetch={refetch}
       setQuery={setQuery}
       showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
+      tableType={uebaModel.UebaTableType.userRules}
       totalCount={totalCount}
       type={type}
     />

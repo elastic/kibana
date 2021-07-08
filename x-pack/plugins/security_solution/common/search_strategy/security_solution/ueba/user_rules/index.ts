@@ -17,7 +17,7 @@ import {
   SearchHit,
   SortField,
 } from '../../../common';
-import { RequestOptionsPaginated } from '../..';
+import { HostRulesEdges, RequestOptionsPaginated } from '../..';
 
 export interface RuleNameHit extends Hit {
   key: string;
@@ -54,16 +54,13 @@ export interface UserRulesByUser {
   [UserRulesFields.userName]: Maybe<string>;
   [UserRulesFields.riskScore]: Maybe<number>;
   [UserRulesFields.ruleCount]: number;
-  [UserRulesFields.rules]: UserRulesEdges[];
-}
-
-export interface UserRulesEdges {
-  node: UserRulesByUser;
-  cursor: CursorType;
+  [UserRulesFields.rules]: HostRulesEdges[];
 }
 
 export interface UserRulesStrategyUserResponse {
-  edges: UserRulesEdges[];
+  [UserRulesFields.userName]: string;
+  [UserRulesFields.riskScore]: number;
+  edges: HostRulesEdges[];
   totalCount: number;
   pageInfo: PageInfoPaginated;
 }

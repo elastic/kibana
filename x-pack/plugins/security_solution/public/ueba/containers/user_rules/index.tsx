@@ -126,7 +126,6 @@ export const useUserRules = ({
           })
           .subscribe({
             next: (response) => {
-              // debugger;
               if (isCompleteResponse(response)) {
                 setUserRulesResponse((prevResponse) => ({
                   ...prevResponse,

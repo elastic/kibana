@@ -51,6 +51,8 @@ export const userRules: SecuritySolutionFactory<UebaQueries.userRules> = {
 
         const showMorePagesIndicator = totalCount > fakeTotalCount;
         return {
+          [UserRulesFields.userName]: user[UserRulesFields.userName],
+          [UserRulesFields.riskScore]: user[UserRulesFields.riskScore],
           edges,
           totalCount,
           pageInfo: {

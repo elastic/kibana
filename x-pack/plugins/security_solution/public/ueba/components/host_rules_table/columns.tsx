@@ -25,7 +25,6 @@ export const getHostRulesColumns = (): HostRulesColumns => [
     name: i18n.NAME,
     truncateText: false,
     hideForMobile: false,
-    sortable: true,
     render: (ruleName) => {
       if (ruleName != null && ruleName.length > 0) {
         const id = escapeDataProviderId(`ueba-table-ruleName-${ruleName}`);
