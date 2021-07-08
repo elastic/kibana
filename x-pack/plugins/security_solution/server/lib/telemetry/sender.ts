@@ -146,14 +146,14 @@ export class TelemetryEventsSender {
 
     const query = {
       expand_wildcards: 'open,hidden',
-      index: `.fleet-metrics-endpoint.metrics-*`,
+      index: `.ds-metrics-endpoint.metrics-*`,
       ignore_unavailable: false,
       size: 0, // no query results required - only aggregation quantity
       body: {
         aggs: {
           endpoint_agents: {
             terms: {
-              field: 'agent.id.keyword',
+              field: 'agent.id',
               size: this.max_records,
             },
             aggs: {
@@ -207,7 +207,7 @@ export class TelemetryEventsSender {
 
     const query = {
       expand_wildcards: 'open,hidden',
-      index: `.fleet-metrics-endpoint.policy-default*`,
+      index: `.ds-metrics-endpoint.policy*`,
       ignore_unavailable: false,
       size: 0, // no query results required - only aggregation quantity
       body: {
@@ -215,7 +215,7 @@ export class TelemetryEventsSender {
           policy_responses: {
             terms: {
               size: this.max_records,
-              field: 'Endpoint.policy.applied.id.keyword',
+              field: 'Endpoint.policy.applied.id',
             },
             aggs: {
               latest_response: {
