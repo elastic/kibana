@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
   const dashboardPanelActions = getService('dashboardPanelActions');
   const inspector = getService('inspector');
-  const pieChart = getService('pieChart');
+  const elasticChart = getService('elasticChart');
   const find = getService('find');
   const dashboardExpect = getService('dashboardExpect');
   const searchSessions = getService('searchSessions');
@@ -94,10 +94,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   async function checkSampleDashboardLoaded() {
     log.debug('Checking no error labels');
     await testSubjects.missingOrFail('embeddableErrorLabel');
-    log.debug('Checking pie charts rendered');
-    await pieChart.expectPieSliceCount(4);
-    log.debug('Checking area, bar and heatmap charts rendered');
-    await dashboardExpect.seriesElementCount(15);
+    log.debug('Checkingpie charts rendered');
+    await elasticChart.waitForRenderComplete('lnsVisualizationContainer');
     log.debug('Checking saved searches rendered');
     await dashboardExpect.savedSearchRowCount(11);
     log.debug('Checking input controls rendered');
@@ -105,12 +103,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     log.debug('Checking tag cloud rendered');
     await dashboardExpect.tagCloudWithValuesFound(['Sunny', 'Rain', 'Clear', 'Cloudy', 'Hail']);
     log.debug('Checking vega chart rendered');
-    const tsvb = await find.existsByCssSelector('.vgaVis__view');
-    expect(tsvb).to.be(true);
+    expect(await find.existsByCssSelector('.vgaVis__view')).to.be(true);
     log.debug('Checking map rendered');
-    await dashboardPanelActions.openInspectorByTitle(
-      '[Flights] Origin and Destination Flight Time'
-    );
+    await dashboardPanelActions.openInspectorByTitle('[Flights] Origin Time Delayed');
     await testSubjects.click('inspectorRequestChooser');
     await testSubjects.click(`inspectorRequestChooserFlight Origin Location`);
     const requestStats = await inspector.getTableData();

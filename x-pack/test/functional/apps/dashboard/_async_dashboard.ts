@@ -15,7 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const log = getService('log');
-  const pieChart = getService('pieChart');
+  const elasticChart = getService('elasticChart');
   const find = getService('find');
   const renderable = getService('renderable');
   const dashboardExpect = getService('dashboardExpect');
@@ -136,8 +136,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // check at least one visualization
       await renderable.waitForRender();
-      log.debug('Checking pie charts rendered');
-      await pieChart.expectPieSliceCount(4);
+      log.debug('Checking charts rendered');
+      await elasticChart.waitForRenderComplete('lnsVisualizationContainer');
 
       await appMenu.clickLink('Discover');
       await retry.try(async function () {
@@ -147,8 +147,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await appMenu.clickLink('Dashboard');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await renderable.waitForRender();
-      log.debug('Checking pie charts rendered');
-      await pieChart.expectPieSliceCount(4);
+      log.debug('Checking charts rendered');
+      await elasticChart.waitForRenderComplete('lnsVisualizationContainer');
     });
 
     it('toggle from Discover to Dashboard attempt 1', async () => {
@@ -160,8 +160,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await appMenu.clickLink('Dashboard');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await renderable.waitForRender();
-      log.debug('Checking pie charts rendered');
-      await pieChart.expectPieSliceCount(4);
+      log.debug('Checking charts rendered');
+      await elasticChart.waitForRenderComplete('lnsVisualizationContainer');
     });
 
     it('toggle from Discover to Dashboard attempt 2', async () => {
@@ -173,11 +173,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await appMenu.clickLink('Dashboard');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await renderable.waitForRender();
-      log.debug('Checking pie charts rendered');
-      await pieChart.expectPieSliceCount(4);
+      log.debug('Checking charts rendered');
+      await elasticChart.waitForRenderComplete('lnsVisualizationContainer');
 
-      log.debug('Checking area, bar and heatmap charts rendered');
-      await dashboardExpect.seriesElementCount(15);
       log.debug('Checking saved searches rendered');
       await dashboardExpect.savedSearchRowCount(10);
       log.debug('Checking input controls rendered');
@@ -185,8 +183,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('Checking tag cloud rendered');
       await dashboardExpect.tagCloudWithValuesFound(['Sunny', 'Rain', 'Clear', 'Cloudy', 'Hail']);
       log.debug('Checking vega chart rendered');
-      const tsvb = await find.existsByCssSelector('.vgaVis__view');
-      expect(tsvb).to.be(true);
+      expect(await find.existsByCssSelector('.vgaVis__view')).to.be(true);
     });
   });
 }
