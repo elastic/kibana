@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
-import expect from '../../../../../../../../../../private/var/tmp/_bazel_darnautov/1afe62330ff0d9ae1ca2013aad33fd76/execroot/kibana/bazel-out/darwin-fastbuild/bin/packages/kbn-expect';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
