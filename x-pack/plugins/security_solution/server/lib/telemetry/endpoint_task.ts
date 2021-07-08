@@ -15,6 +15,7 @@ import {
 import { batchTelemetryRecords, getLastTaskExecutionTimestamp } from './helpers';
 import { TelemetryEventsSender } from './sender';
 import { PolicyData } from '../../../common/endpoint/types';
+import { PackagePolicy } from '../../../../fleet/common/types/models/package_policy';
 import {
   EndpointMetricsAggregation,
   EndpointPolicyResponseAggregation,
@@ -185,9 +186,10 @@ export class TelemetryEndpointTask {
         policyInfo.policy_id !== undefined &&
         !endpointPolicyCache.has(policyInfo.policy_id)
       ) {
-        const packagePolicies = await this.sender.fetchPolicyConfigs(policyInfo.policy_id);
+        const policies = await this.sender.fetchPolicyConfigs(policyInfo.policy_id);
+        const packagePolicies = policies?.package_policies as PackagePolicy[];
 
-        packagePolicies?.package_policies
+        packagePolicies
           .map((pPolicy) => pPolicy as PolicyData)
           .forEach((pPolicy) => {
             if (pPolicy.inputs[0].config !== undefined) {
