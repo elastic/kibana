@@ -20,3 +20,9 @@ export interface NodeDimensions {
   width: number;
   height: number;
 }
+
+export interface ParentNodeParams {
+  borderOffset: number;
+  width: number;
+  height: number;
+}

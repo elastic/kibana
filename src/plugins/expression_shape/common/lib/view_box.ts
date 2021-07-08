@@ -1,0 +1,48 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import { ViewBoxParams } from '../../../presentation_util/common';
+import { ParentNodeParams } from '../types';
+
+function getMinxAndWidth(viewBoxParams: ViewBoxParams, { borderOffset, width }: ParentNodeParams) {
+  let { minX, width: shapeWidth } = viewBoxParams;
+  if (width) {
+    const xOffset = (shapeWidth / width) * borderOffset;
+    minX -= xOffset;
+    shapeWidth += xOffset * 2;
+  } else {
+    shapeWidth = 0;
+  }
+
+  return [minX, shapeWidth];
+}
+
+function getMinyAndHeight(
+  viewBoxParams: ViewBoxParams,
+  { borderOffset, height }: ParentNodeParams
+) {
+  let { minY, height: shapeHeight } = viewBoxParams;
+  if (height) {
+    const yOffset = (shapeHeight / height) * borderOffset;
+    minY -= yOffset;
+    shapeHeight += yOffset * 2;
+  } else {
+    shapeHeight = 0;
+  }
+
+  return [minY, shapeHeight];
+}
+
+export function getViewBox(
+  viewBoxParams: ViewBoxParams,
+  parentNodeParams: ParentNodeParams
+): ViewBoxParams {
+  const [minX, width] = getMinxAndWidth(viewBoxParams, parentNodeParams);
+  const [minY, height] = getMinyAndHeight(viewBoxParams, parentNodeParams);
+  return { minX, minY, width, height };
+}

@@ -6,9 +6,4 @@
  * Side Public License, v 1.
  */
 
-export interface ViewBoxParams {
-  minX: number;
-  minY: number;
-  width: number;
-  height: number;
-}
+export * from './view_box';

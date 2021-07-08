@@ -8,15 +8,16 @@
 
 import React, { useState, useEffect } from 'react';
 import { useResizeObserver } from '@elastic/eui';
-import { Dimensions, ShapeComponentProps } from './types';
-import { shapes } from './shapes';
-import './shape.scss';
 import {
   ShapeAttributes,
   ShapeContentAttributes,
-  getViewBox,
   ViewBoxParams,
 } from '../../../presentation_util/public';
+import { Dimensions, ShapeComponentProps } from './types';
+import { shapes } from './shapes';
+import { getViewBox } from '../../common/lib';
+
+import './shape.scss';
 
 function ShapeComponent({
   onLoaded,
