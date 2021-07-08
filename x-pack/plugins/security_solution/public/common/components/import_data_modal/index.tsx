@@ -73,7 +73,6 @@ export const ImportDataModalComponent = ({
   subtitle,
   successMessage,
   title,
-  checkBoxLabelProps,
 }: ImportDataModalProps) => {
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [isImporting, setIsImporting] = useState(false);
