@@ -93,7 +93,7 @@ describe('TutorialConfigAgent', () => {
     `);
   });
   describe('running on prem', () => {
-    it('selects defaul standalone by defauls', async () => {
+    it('selects default standalone by default', async () => {
       const component = render(
         <TutorialConfigAgent
           variantId="java"
@@ -129,7 +129,7 @@ describe('TutorialConfigAgent', () => {
     });
   });
   describe('running on cloud', () => {
-    it('selects defaul standalone by defauls', async () => {
+    it('selects default standalone by default', async () => {
       const component = render(
         <TutorialConfigAgent
           variantId="java"

@@ -29,9 +29,10 @@ import {
   getCreateCallApmApiSpy,
 } from '../../../services/rest/callApmApiSpy';
 
-const KibanaReactContext = createKibanaReactContext({
+const KibanaReactContext = createKibanaReactContext(({
+  uiSettings: { get: () => true },
   usageCollection: { reportUiCounter: () => {} },
-} as Partial<CoreStart>);
+} as unknown) as Partial<CoreStart>);
 
 function Wrapper({ children }: { children?: ReactNode }) {
   const value = ({
