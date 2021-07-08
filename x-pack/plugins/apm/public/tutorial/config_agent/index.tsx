@@ -46,16 +46,19 @@ interface Props {
   isCloudEnabled: boolean;
 }
 
+const INITIAL_STATE = {
+  fleetAgents: [],
+  cloudStandaloneSetup: undefined,
+  isFleetEnabled: false,
+};
+
 function TutorialConfigAgent({
   variantId,
   http,
   basePath,
   isCloudEnabled,
 }: Props) {
-  const [data, setData] = useState<APIResponseType>({
-    fleetAgents: [],
-    cloudStandaloneSetup: undefined,
-  });
+  const [data, setData] = useState<APIResponseType>(INITIAL_STATE);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedOption, setSelectedOption] = useState<PolicyOption>();
 
@@ -68,6 +71,7 @@ function TutorialConfigAgent({
           setData(response as APIResponseType);
         }
       } catch (e) {
+        setIsLoading(false);
         console.error('Error while fetching fleet agents.', e);
       }
     }
@@ -125,7 +129,7 @@ function TutorialConfigAgent({
             onChange={(newSelectedOption) =>
               setSelectedOption(newSelectedOption)
             }
-            fleetLink={fleetLink}
+            fleetLink={data.isFleetEnabled ? fleetLink : undefined}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

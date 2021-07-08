@@ -32,7 +32,7 @@ const hasFleetDataRoute = createApmServerRoute({
   handler: async ({ core, plugins }) => {
     const fleetPluginStart = await plugins.fleet?.start();
     if (!fleetPluginStart) {
-      throw Boom.internal(FLEET_REQUIRED_MESSAGE);
+      return { hasData: false };
     }
     const packagePolicies = await getApmPackgePolicies({
       core,
@@ -56,7 +56,7 @@ const fleetAgentsRoute = createApmServerRoute({
 
     const fleetPluginStart = await plugins.fleet?.start();
     if (!fleetPluginStart) {
-      throw Boom.internal(FLEET_REQUIRED_MESSAGE);
+      return { cloudStandaloneSetup, fleetAgents: [], isFleetEnabled: false };
     }
     // fetches package policies that contains APM integrations
     const packagePolicies = await getApmPackgePolicies({
@@ -75,6 +75,7 @@ const fleetAgentsRoute = createApmServerRoute({
 
     return {
       cloudStandaloneSetup,
+      isFleetEnabled: true,
       fleetAgents: fleetAgents.map((agent) => {
         const packagePolicy = policiesGroupedById[agent.id];
         const packagePolicyVars = packagePolicy.inputs[0]?.vars;
@@ -187,11 +188,6 @@ export const apmFleetRouteRepository = createApmServerRouteRepository()
   .add(getUnsupportedApmServerSchemaRoute)
   .add(getMigrationCheckRoute)
   .add(createCloudApmPackagePolicyRoute);
-
-const FLEET_REQUIRED_MESSAGE = i18n.translate(
-  'xpack.apm.fleet_has_data.fleetRequired',
-  { defaultMessage: `Fleet plugin is required` }
-);
 
 const FLEET_SECURITY_REQUIRED_MESSAGE = i18n.translate(
   'xpack.apm.api.fleet.fleetSecurityRequired',
