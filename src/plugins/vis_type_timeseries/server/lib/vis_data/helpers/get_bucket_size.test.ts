@@ -8,6 +8,9 @@
 
 import { getBucketSize } from './get_bucket_size';
 
+import type { VisTypeTimeseriesVisDataRequest } from '../../../types';
+import type { SearchCapabilities } from '../../search_strategies';
+
 describe('getBucketSize', () => {
   const req = {
     body: {
@@ -16,13 +19,13 @@ describe('getBucketSize', () => {
         max: '2017-01-01T01:00:00.000Z',
       },
     },
-  };
+  } as VisTypeTimeseriesVisDataRequest;
 
-  const capabilities = {
+  const capabilities = ({
     timezone: 'UTC',
     maxBucketsLimit: 200000,
     getValidTimeInterval: jest.fn((v) => v),
-  };
+  } as unknown) as SearchCapabilities;
 
   test('returns auto calculated buckets', () => {
     const result = getBucketSize(req, 'auto', capabilities, 100);

@@ -6,15 +6,9 @@
  * Side Public License, v 1.
  */
 
-import set from 'set-value';
+import { flow } from 'lodash';
+import { filterAnnotations } from './filter';
+import { getAnnotationBuckets } from './buckets';
 
-/**
- * Set path in obj. Behaves like lodash `set`
- * @param obj The object to mutate
- * @param path The path of the sub-property to set
- * @param val The value to set the sub-property to
- */
-export function overwrite(obj, path, val) {
-  set(obj, path, undefined);
-  set(obj, path, val);
-}
+export const handleAnnotationResponse = (timestamp?: number) =>
+  flow(getAnnotationBuckets, filterAnnotations(timestamp));

@@ -6,13 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { get, isEmpty } from 'lodash';
+import set from 'set-value';
 
-export function getAnnotationBuckets(resp, annotation) {
-  return get(resp, `aggregations.${annotation.id}.buckets`, [])
-    .filter((bucket) => !isEmpty(bucket.hits.hits.hits))
-    .map((bucket) => ({
-      key: bucket.key,
-      docs: bucket.hits.hits.hits.map((doc) => doc._source),
-    }));
+/**
+ * Set path in obj. Behaves like lodash `set`
+ * @param obj The object to mutate
+ * @param path The path of the sub-property to set
+ * @param val The value to set the sub-property to
+ */
+export function overwrite(obj: Record<string, unknown>, path: string, val: unknown) {
+  set(obj, path, undefined);
+  set(obj, path, val);
 }
