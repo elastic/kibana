@@ -93,21 +93,23 @@ export function OverviewPage({ routeParams }: Props) {
           {hasAnyData && <DataSections bucketSize={bucketSize?.intervalString!} />}
           <EmptySections />
           <EuiSpacer size="l" />
-          <EuiPanel hasBorder={true}>
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                {/* Resources / What's New sections */}
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              {/* Resources / What's New sections */}
+              <EuiPanel hasBorder={true}>
                 <Resources />
                 <EuiSpacer size="l" />
                 {!!newsFeed?.items?.length && <NewsFeed items={newsFeed.items.slice(0, 5)} />}
-              </EuiFlexItem>
-              {!!alerts.length && (
-                <EuiFlexItem>
+              </EuiPanel>
+            </EuiFlexItem>
+            {!!alerts.length && (
+              <EuiFlexItem>
+                <EuiPanel hasBorder={true}>
                   <AlertsSection alerts={alerts} />
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </EuiPanel>
+                </EuiPanel>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </ObservabilityPageTemplate>
