@@ -6,9 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { flow } from 'lodash';
-import { filterAnnotations } from './filter';
-import { getAnnotationBuckets } from './buckets';
-
-export const handleAnnotationResponse = (timestamp) =>
-  flow(getAnnotationBuckets, filterAnnotations(timestamp));
+export { dateHistogram } from './date_histogram';
+export { query } from './query';
+export { topHits } from './top_hits';
