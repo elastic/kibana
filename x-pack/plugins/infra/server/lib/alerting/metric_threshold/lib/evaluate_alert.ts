@@ -226,7 +226,7 @@ const getValuesFromAggregations = (
     if (aggType === Aggregators.COUNT) {
       return buckets
         .map((bucket) => ({
-          key: bucket.to_as_string,
+          key: bucket.from_as_string,
           value: bucket.doc_count,
         }))
         .filter(dropPartialBuckets(dropPartialBucketsOptions));
@@ -237,7 +237,7 @@ const getValuesFromAggregations = (
           const values = bucket.aggregatedValue?.values || [];
           const firstValue = first(values);
           if (!firstValue) return null;
-          return { key: bucket.to_as_string, value: firstValue.value };
+          return { key: bucket.from_as_string, value: firstValue.value };
         })
         .filter(dropPartialBuckets(dropPartialBucketsOptions));
     }
