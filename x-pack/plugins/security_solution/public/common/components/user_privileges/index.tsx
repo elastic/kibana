@@ -6,6 +6,7 @@
  */
 
 import React, { createContext, useContext } from 'react';
+import { DeepReadonly } from 'utility-types';
 import { useFetchDetectionEnginePrivileges } from '../../../detections/components/user_privileges/use_fetch_detection_engine_privileges';
 import { useFetchListPrivileges } from '../../../detections/components/user_privileges/use_fetch_list_privileges';
 import { EndpointPrivileges, useEndpointPrivileges } from './use_endpoint_privileges';
@@ -46,4 +47,5 @@ export const UserPrivilegesProvider = ({ children }: UserPrivilegesProviderProps
   );
 };
 
-export const useUserPrivileges = () => useContext(UserPrivilegesContext);
+export const useUserPrivileges = (): DeepReadonly<UserPrivilegesState> =>
+  useContext(UserPrivilegesContext);
