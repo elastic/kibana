@@ -20,7 +20,6 @@ import { AppState } from '../../angular/context_state';
 import { EsHitRecordList, SurrDocType } from '../../angular/context/api/context';
 import { DiscoverServices } from '../../../build_services';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './utils/constants';
-import { DocTableRow } from '../../angular/doc_table/components/table_row';
 import { DocTable } from '../../angular/doc_table/doc_table';
 
 export interface ContextAppContentProps {
@@ -79,7 +78,6 @@ export function ContextAppContent({
   const { uiSettings: config } = services;
 
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>();
-  const isAnchorLoaded = anchorStatus === LoadingStatus.LOADED;
   const isAnchorLoading =
     anchorStatus === LoadingStatus.LOADING || anchorStatus === LoadingStatus.UNINITIALIZED;
   const arePredecessorsLoading =
@@ -125,17 +123,18 @@ export function ContextAppContent({
         docCountAvailable={predecessors.length}
         onChangeCount={onChangeCount}
         isLoading={arePredecessorsLoading}
-        isDisabled={!isAnchorLoaded}
+        isDisabled={isAnchorLoading}
       />
       {loadingFeedback()}
       <EuiHorizontalRule margin="xs" />
-      {isLegacy && isAnchorLoaded && (
+      {isLegacy ? (
         <div className="discover-table">
           <DocTableMemoized
+            type="context"
             columns={columns}
             indexPattern={indexPattern}
-            rows={rows as DocTableRow[]}
-            type="context"
+            rows={rows}
+            isLoading={isAnchorLoading}
             onFilter={addFilter}
             onAddColumn={onAddColumn}
             onRemoveColumn={onRemoveColumn}
@@ -144,18 +143,17 @@ export function ContextAppContent({
             dataTestSubj="contextDocTable"
           />
         </div>
-      )}
-      {!isLegacy && (
+      ) : (
         <div className="dscDocsGrid">
           <DiscoverGridMemoized
             ariaLabelledBy="surDocumentsAriaLabel"
             columns={columns}
-            rows={rows as ElasticSearchHit[]}
+            rows={rows}
             indexPattern={indexPattern}
             expandedDoc={expandedDoc}
             isLoading={isAnchorLoading}
             sampleSize={0}
-            sort={sort as [[string, SortDirection]]}
+            sort={sort}
             isSortEnabled={false}
             showTimeCol={showTimeCol}
             services={services}
@@ -178,7 +176,7 @@ export function ContextAppContent({
         docCountAvailable={successors.length}
         onChangeCount={onChangeCount}
         isLoading={areSuccessorsLoading}
-        isDisabled={!isAnchorLoaded}
+        isDisabled={isAnchorLoading}
       />
     </Fragment>
   );

@@ -50,7 +50,6 @@ import { DiscoverUninitialized } from '../uninitialized/uninitialized';
 import { SavedSearchDataMessage } from '../../services/use_saved_search';
 import { useDataGridColumns } from '../../../../helpers/use_data_grid_columns';
 import { FetchStatus } from '../../../../types';
-import { DocTableRow } from '../../../../angular/doc_table/components/table_row';
 import { DocTable } from '../../../../angular/doc_table/doc_table';
 
 const DocTableMemoized = React.memo(DocTable);
@@ -342,9 +341,10 @@ export function DiscoverLayout({
                           <DocTableMemoized
                             columns={columns}
                             indexPattern={indexPattern}
-                            rows={rows as DocTableRow[]}
+                            rows={rows}
                             type="infinite"
                             sort={state.sort || []}
+                            isLoading={fetchStatus === 'loading'}
                             searchDescription={savedSearch.description}
                             sharedItemTitle={savedSearch.lastSavedTitle}
                             onAddColumn={onAddColumn}

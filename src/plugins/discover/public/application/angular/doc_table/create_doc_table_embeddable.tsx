@@ -29,6 +29,7 @@ export function DiscoverDocTableEmbeddable(renderProps: DocTableProps) {
         useNewFieldsApi={renderProps.useNewFieldsApi}
         searchDescription={renderProps.searchDescription}
         sharedItemTitle={renderProps.sharedItemTitle}
+        isLoading={renderProps.isLoading}
         dataTestSubj="embeddedSavedSearchDocTable"
       />
     </I18nProvider>

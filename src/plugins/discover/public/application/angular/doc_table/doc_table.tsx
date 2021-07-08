@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment, useCallback, useState } from 'react';
+import React, { Fragment, memo, useCallback, useState } from 'react';
 import './index.scss';
 import { EuiButtonEmpty, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -71,6 +71,10 @@ export interface DocTableProps {
    */
   dataTestSubj: string;
   /**
+   * Loading state
+   */
+  isLoading: boolean;
+  /**
    * Filter callback
    */
   onFilter: DocViewFilterFn;
@@ -96,21 +100,24 @@ export interface DocTableProps {
   onBackToTop?: () => void;
 }
 
-export type CommonDocTableProps = Omit<
-  DocTableProps,
-  | 'type'
-  | 'filter'
-  | 'onBackToTop'
-  | 'sampleSize'
-  | 'searchDescription'
-  | 'sharedItemTitle'
-  | 'dataTestSubj'
-  | 'sort'
-  | 'onFilter'
-> & {
+export interface CommonDocTableProps {
+  columns: string[];
+  rows: DocTableRow[];
+  indexPattern: IndexPattern;
+  totalHitCount?: number;
+  minimumVisibleRows?: number;
+  useNewFieldsApi?: boolean;
+  sharedItemTitle?: string;
+  onSort?: (sort: string[][]) => void;
+  onAddColumn?: (column: string) => void;
+  onMoveColumn?: (columns: string, newIdx: number) => void;
+  onRemoveColumn?: (column: string) => void;
   renderRows: (row: DocTableRow[]) => JSX.Element[];
   renderHeader: () => JSX.Element;
-};
+}
+
+const DocTableEmbeddableMemoized = memo(DocTableEmbeddable);
+const DocTableInfiniteMemoized = memo(DocTableInfinite);
 
 export const DocTable = ({
   columns,
@@ -130,6 +137,7 @@ export const DocTable = ({
   searchDescription,
   sharedItemTitle,
   dataTestSubj,
+  isLoading,
 }: DocTableProps) => {
   const [minimumVisibleRows, setMinimumVisibleRows] = useState(50);
   const { uiSettings } = getServices();
@@ -213,17 +221,18 @@ export const DocTable = ({
 
   return (
     <div
+      className="kbnDocTableWrapper"
       data-shared-item
       data-title={sharedItemTitle}
       data-description={searchDescription}
       data-test-subj={dataTestSubj}
-      className="kbnDocTableWrapper"
+      data-render-complete={!isLoading}
     >
-      <SkipBottomButton onClick={onSkipBottomButtonClick} />
-      {rows.length && (
+      {!isLoading && (
         <Fragment>
+          <SkipBottomButton onClick={onSkipBottomButtonClick} />
           {type === 'infinite' && (
-            <DocTableInfinite
+            <DocTableInfiniteMemoized
               {...commonProps}
               renderHeader={renderHeader}
               renderRows={renderRows}
@@ -231,7 +240,7 @@ export const DocTable = ({
             />
           )}
           {type === 'embeddable' && (
-            <DocTableEmbeddable
+            <DocTableEmbeddableMemoized
               {...commonProps}
               renderHeader={renderHeader}
               renderRows={renderRows}
@@ -244,41 +253,41 @@ export const DocTable = ({
               <tbody>{renderRows(rows)}</tbody>
             </table>
           )}
-        </Fragment>
-      )}
-      {rows && !rows.length && (
-        <div className="kbnDocTable__error">
-          <EuiText size="xs" color="subdued">
-            <EuiIcon type="visualizeApp" size="m" color="subdued" />
-            <EuiSpacer size="m" />
-            <FormattedMessage
-              id="discover.docTable.noResultsTitle"
-              defaultMessage="No results found"
-            />
-          </EuiText>
-        </div>
-      )}
-      {rows.length === sampleSize ? (
-        <div
-          className="dscTable__footer"
-          data-test-subj="discoverDocTableFooter"
-          tabIndex={-1}
-          id="discoverBottomMarker"
-        >
-          <FormattedMessage
-            id="discover.howToSeeOtherMatchingDocumentsDescription"
-            defaultMessage="These are the first {sampleSize} documents matching
+          {rows && !rows.length && (
+            <div className="kbnDocTable__error">
+              <EuiText size="xs" color="subdued">
+                <EuiIcon type="visualizeApp" size="m" color="subdued" />
+                <EuiSpacer size="m" />
+                <FormattedMessage
+                  id="discover.docTable.noResultsTitle"
+                  defaultMessage="No results found"
+                />
+              </EuiText>
+            </div>
+          )}
+          {rows && rows.length === sampleSize ? (
+            <div
+              className="dscTable__footer"
+              data-test-subj="discoverDocTableFooter"
+              tabIndex={-1}
+              id="discoverBottomMarker"
+            >
+              <FormattedMessage
+                id="discover.howToSeeOtherMatchingDocumentsDescription"
+                defaultMessage="These are the first {sampleSize} documents matching
                   your search, refine your search to see others."
-            values={{ sampleSize }}
-          />
-          <EuiButtonEmpty onClick={onBackToTop} data-test-subj="discoverBackToTop">
-            <FormattedMessage id="discover.backToTopLinkText" defaultMessage="Back to top." />
-          </EuiButtonEmpty>
-        </div>
-      ) : (
-        <span tabIndex={-1} id="discoverBottomMarker">
-          &#8203;
-        </span>
+                values={{ sampleSize }}
+              />
+              <EuiButtonEmpty onClick={onBackToTop} data-test-subj="discoverBackToTop">
+                <FormattedMessage id="discover.backToTopLinkText" defaultMessage="Back to top." />
+              </EuiButtonEmpty>
+            </div>
+          ) : (
+            <span tabIndex={-1} id="discoverBottomMarker">
+              &#8203;
+            </span>
+          )}
+        </Fragment>
       )}
     </div>
   );

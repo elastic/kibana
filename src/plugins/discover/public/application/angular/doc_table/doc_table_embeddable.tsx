@@ -12,7 +12,7 @@ import { SAMPLE_SIZE_SETTING } from '../../../../common';
 import { getServices } from '../../../kibana_services';
 import { ToolBarPagerButtons } from './components/pager/tool_bar_pager_buttons';
 import { ToolBarPagerText } from './components/pager/tool_bar_pager_text';
-import { usePager } from './lib/usePager';
+import { usePager } from './lib/use_pager';
 import { CommonDocTableProps } from './doc_table';
 
 interface DocTableEmbeddableProps extends CommonDocTableProps {
@@ -26,14 +26,6 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
     () => props.rows.slice(pager.startIndex, pager.pageSize + pager.startIndex),
     [pager.pageSize, pager.startIndex, props.rows]
   );
-
-  const onPageNext = () => {
-    pager.updateMeta({ currentPage: pager.currentPage + 1, totalItems: props.rows.length });
-  };
-
-  const onPagePrevious = () => {
-    pager.updateMeta({ currentPage: pager.currentPage - 1, totalItems: props.rows.length });
-  };
 
   const shouldShowLimitedResultsWarning = () =>
     !pager.hasNextPage && pager.totalItems < props.totalHitCount;
@@ -59,8 +51,8 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
       <ToolBarPagerButtons
         hasPreviousPage={pager.hasPreviousPage}
         hasNextPage={pager.hasNextPage}
-        onPageNext={onPageNext}
-        onPagePrevious={onPagePrevious}
+        onPageNext={pager.onPageNext}
+        onPagePrevious={pager.onPagePrevious}
       />
     </div>
   );

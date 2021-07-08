@@ -57,7 +57,7 @@ export const TableRow = ({
     // eslint-disable-next-line @typescript-eslint/naming-convention
     'kbnDocTable__row--highlight': row.isAnchor,
   });
-  const docTableRowSubj = row.isAnchor ? 'docTableAnchorRow' : '';
+  const anchorDocTableRowSubj = row.isAnchor ? ' docTableAnchorRow' : '';
 
   const flattenedRow = useMemo(() => indexPattern.flattenHit(row), [indexPattern, row]);
   const mapping = useMemo(() => indexPattern.fields.getByName, [indexPattern]);
@@ -188,7 +188,7 @@ export const TableRow = ({
 
   return (
     <Fragment>
-      <tr data-test-subj={`docTableRow ${docTableRowSubj}`} className={docTableRowClassName}>
+      <tr data-test-subj={`docTableRow${anchorDocTableRowSubj}`} className={docTableRowClassName}>
         {newHtmls}
       </tr>
       <tr data-test-subj="docTableDetailsRow" className="kbnDocTableDetails__row">
