@@ -18,7 +18,6 @@ import { InfraSources } from '../../sources';
 import { MetricThresholdAlertExecutorOptions } from './register_metric_threshold_alert_type';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
-import moment from 'moment';
 
 interface AlertTestInstance {
   instance: AlertInstanceMock;
