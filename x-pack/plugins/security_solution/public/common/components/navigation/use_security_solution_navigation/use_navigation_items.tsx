@@ -76,13 +76,11 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
       },
       {
         ...securityNavGroup.explore,
-        items: [navTabs.hosts, navTabs.network],
+        items: [navTabs.hosts, navTabs.network, navTabs.ueba],
       },
       {
         ...securityNavGroup.investigate,
-        items: hasCasesReadPermissions
-          ? [navTabs.timelines, navTabs.case, navTabs.ueba]
-          : [navTabs.timelines, navTabs.ueba],
+        items: hasCasesReadPermissions ? [navTabs.timelines, navTabs.case] : [navTabs.timelines],
       },
       {
         ...securityNavGroup.manage,

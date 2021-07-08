@@ -99,7 +99,7 @@ export const topDeepLinks: AppDeepLink[] = [
     navLinkStatus: AppNavLinkStatus.visible,
     keywords: [
       i18n.translate('xpack.securitySolution.search.ueba', {
-        defaultMessage: 'UEBA',
+        defaultMessage: 'Users & Entities',
       }),
     ],
     order: 9004,
