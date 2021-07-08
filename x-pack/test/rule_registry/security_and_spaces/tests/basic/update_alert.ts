@@ -100,34 +100,6 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts');
     });
 
-    it('should return a 404 when superuser accesses not-existent alert', async () => {
-      await supertestWithoutAuth
-        .post(`${getSpaceUrlPrefix()}${TEST_URL}`)
-        .auth(superUser.username, superUser.password)
-        .set('kbn-xsrf', 'true')
-        .send({
-          ids: ['this id does not exist'],
-          status: 'closed',
-          index: APM_ALERT_INDEX,
-          _version: Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'),
-        })
-        .expect(404);
-    });
-
-    it('should return a 404 when superuser accesses not-existent alerts as data index', async () => {
-      await supertestWithoutAuth
-        .post(`${getSpaceUrlPrefix()}${TEST_URL}`)
-        .auth(superUser.username, superUser.password)
-        .set('kbn-xsrf', 'true')
-        .send({
-          ids: [APM_ALERT_ID],
-          status: 'closed',
-          index: 'this index does not exist',
-          _version: Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'),
-        })
-        .expect(404);
-    });
-
     function addTests({ space, authorizedUsers, unauthorizedUsers, alertId, index }: TestCase) {
       authorizedUsers.forEach(({ username, password }) => {
         it(`${username} should be able to update alert ${alertId} in ${space}/${index}`, async () => {
@@ -159,21 +131,34 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(409);
         });
 
-        // // NOTE: this test case actually results in a 500 error, not 404
-        // it(`${username} should fail to update a non-existent alert in ${space}/${index}`, async () => {
-        //   const fakeAlertId = 'some-alert-id-that-doesnt-exist';
-        //   await supertestWithoutAuth
-        //     .post(`${getSpaceUrlPrefix(space)}${TEST_URL}`)
-        //     .auth(username, password)
-        //     .set('kbn-xsrf', 'true')
-        //     .send({
-        //       ids: [fakeAlertId],
-        //       status: 'closed',
-        //       index,
-        //       _version: ALERT_VERSION,
-        //     })
-        //     .expect(404);
-        // });
+        it(`${username} should fail to update a non-existent alert in ${space}/${index}`, async () => {
+          const fakeAlertId = 'some-alert-id-that-doesnt-exist';
+          await supertestWithoutAuth
+            .post(`${getSpaceUrlPrefix(space)}${TEST_URL}`)
+            .auth(username, password)
+            .set('kbn-xsrf', 'true')
+            .send({
+              ids: [fakeAlertId],
+              status: 'closed',
+              index,
+              _version: ALERT_VERSION,
+            })
+            .expect(404);
+        });
+
+        it(`${username} should return a 404 when superuser accesses not-existent alerts as data index`, async () => {
+          await supertestWithoutAuth
+            .get(`${getSpaceUrlPrefix(space)}${TEST_URL}?id=${APM_ALERT_ID}&index=myfakeindex`)
+            .auth(username, password)
+            .set('kbn-xsrf', 'true')
+            .send({
+              ids: [APM_ALERT_ID],
+              status: 'closed',
+              index: 'this index does not exist',
+              _version: Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'),
+            })
+            .expect(404);
+        });
       });
 
       unauthorizedUsers.forEach(({ username, password }) => {
