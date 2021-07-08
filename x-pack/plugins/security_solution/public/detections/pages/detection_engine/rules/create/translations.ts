@@ -15,7 +15,7 @@ export const PAGE_TITLE = i18n.translate(
 );
 
 export const BACK_TO_RULES = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.backToRulesDescription',
+  'xpack.securitySolution.detectionEngine.createRule.backToRulesButton',
   {
     defaultMessage: 'Rules',
   }

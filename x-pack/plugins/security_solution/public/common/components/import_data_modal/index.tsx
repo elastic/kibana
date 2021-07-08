@@ -73,6 +73,7 @@ export const ImportDataModalComponent = ({
   subtitle,
   successMessage,
   title,
+  checkBoxLabelProps,
 }: ImportDataModalProps) => {
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [isImporting, setIsImporting] = useState(false);
@@ -157,6 +158,7 @@ export const ImportDataModalComponent = ({
               <EuiCheckbox
                 id="import-data-modal-checkbox-label"
                 label={checkBoxLabel}
+                labelProps={checkBoxLabelProps}
                 checked={overwrite}
                 onChange={() => setOverwrite(!overwrite)}
               />
