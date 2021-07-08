@@ -11,6 +11,7 @@ import {
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
   EuiSpacer,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { get, getOr, find } from 'lodash/fp';
 import React, { useMemo } from 'react';
@@ -220,14 +221,17 @@ const AlertSummaryViewComponent: React.FC<{
         title={title}
       />
       {maybeRule?.note && (
-        <StyledEuiDescriptionList data-test-subj={`summary-view-guide`} compressed>
-          <EuiDescriptionListTitle>{i18n.INVESTIGATION_GUIDE}</EuiDescriptionListTitle>
-          <EuiDescriptionListDescription>
-            <LineClamp>
-              <MarkdownRenderer>{maybeRule.note}</MarkdownRenderer>
-            </LineClamp>
-          </EuiDescriptionListDescription>
-        </StyledEuiDescriptionList>
+        <>
+          <EuiHorizontalRule />
+          <StyledEuiDescriptionList data-test-subj={`summary-view-guide`} compressed>
+            <EuiDescriptionListTitle>{i18n.INVESTIGATION_GUIDE}</EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              <LineClamp>
+                <MarkdownRenderer>{maybeRule.note}</MarkdownRenderer>
+              </LineClamp>
+            </EuiDescriptionListDescription>
+          </StyledEuiDescriptionList>
+        </>
       )}
     </>
   );

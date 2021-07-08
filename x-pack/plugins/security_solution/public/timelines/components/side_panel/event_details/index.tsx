@@ -106,6 +106,12 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     return endpointAlertCheck({ data: detailsData || [] });
   }, [detailsData]);
 
+  const ruleName = useMemo(() => {
+    const findRuleName = find({ category: 'signal', field: 'signal.rule.name' }, detailsData)
+      ?.values;
+    return findRuleName ? findRuleName[0] : '';
+  }, [detailsData]);
+
   const agentId = useMemo(() => {
     const findAgentId = find({ category: 'agent', field: 'agent.id' }, detailsData)?.values;
     return findAgentId ? findAgentId[0] : '';
@@ -177,7 +183,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         {isHostIsolationPanelOpen ? (
           backToAlertDetailsLink
         ) : (
-          <ExpandableEventTitle isAlert={isAlert} loading={loading} />
+          <ExpandableEventTitle isAlert={isAlert} loading={loading} ruleName={ruleName} />
         )}
       </EuiFlyoutHeader>
       {isIsolateActionSuccessBannerVisible && (
@@ -225,6 +231,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
       <ExpandableEventTitle
         isAlert={isAlert}
         loading={loading}
+        ruleName={ruleName}
         handleOnEventClosed={handleOnEventClosed}
       />
       <EuiSpacer size="m" />

@@ -22,6 +22,17 @@ export const INVESTIGATION_GUIDE = i18n.translate(
   }
 );
 
+export const OVERVIEW = i18n.translate('xpack.securitySolution.alertDetails.summary.overview', {
+  defaultMessage: 'Overview',
+});
+
+export const DUCOMENT_SUMMARY = i18n.translate(
+  'xpack.securitySolution.alertDetails.summary.documentSummary',
+  {
+    defaultMessage: 'Document Summary',
+  }
+);
+
 export const TABLE = i18n.translate('xpack.securitySolution.eventDetails.table', {
   defaultMessage: 'Table',
 });

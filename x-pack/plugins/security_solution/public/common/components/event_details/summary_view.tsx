@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiInMemoryTable, EuiBasicTableColumn, EuiTitle, EuiHorizontalRule } from '@elastic/eui';
+import { EuiInMemoryTable, EuiBasicTableColumn, EuiTitle, EuiText } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -16,28 +16,13 @@ export const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
   .euiTableHeaderCell,
   .euiTableRowCell {
     border: none;
+    .euiTitle--xxsmall {
+      font-size: 12px;
+    }
   }
   .euiTableHeaderCell .euiTableCellContent {
     padding: 0;
   }
-`;
-
-const StyledEuiTitle = styled(EuiTitle)`
-  color: ${({ theme }) => theme.eui.euiColorDarkShade};
-  text-transform: lowercase;
-  padding-top: ${({ theme }) => theme.eui.paddingSizes.s};
-  h2 {
-    min-width: 120px;
-  }
-  hr {
-    max-width: 75%;
-  }
-`;
-
-const FlexDiv = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
 `;
 
 export const SummaryViewComponent: React.FC<{
@@ -45,22 +30,19 @@ export const SummaryViewComponent: React.FC<{
   summaryColumns: Array<EuiBasicTableColumn<SummaryRow>>;
   summaryRows: SummaryRow[];
   dataTestSubj?: string;
-}> = ({ summaryColumns, summaryRows, dataTestSubj = 'summary-view', title }) => {
+}> = ({ summaryColumns, summaryRows, dataTestSubj = 'summary-view', title, subTitle }) => {
   return (
     <>
       {title && (
-        <StyledEuiTitle size="xxs">
-          <FlexDiv>
-            <h2>{title}</h2>
-            <EuiHorizontalRule margin="none" />
-          </FlexDiv>
-        </StyledEuiTitle>
+        <EuiTitle size="xxxs">
+          <h6>{title}</h6>
+        </EuiTitle>
       )}
       <StyledEuiInMemoryTable
         data-test-subj={dataTestSubj}
         items={summaryRows}
         columns={summaryColumns}
-        compressed
+        compressed={true}
       />
     </>
   );

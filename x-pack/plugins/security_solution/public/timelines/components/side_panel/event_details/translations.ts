@@ -14,6 +14,13 @@ export const MESSAGE = i18n.translate(
   }
 );
 
+export const REASON = i18n.translate(
+  'xpack.securitySolution.timeline.expandableEvent.reasonTitle',
+  {
+    defaultMessage: 'Reason',
+  }
+);
+
 export const CLOSE = i18n.translate(
   'xpack.securitySolution.timeline.expandableEvent.closeEventDetailsLabel',
   {
@@ -39,5 +46,12 @@ export const ALERT_DETAILS = i18n.translate(
   'xpack.securitySolution.timeline.expandableEvent.alertTitleLabel',
   {
     defaultMessage: 'Alert details',
+  }
+);
+
+export const VIEW_RULE_DETAILS_PAGE = i18n.translate(
+  'xpack.securitySolution.timeline.expandableEvent.viewRuleDetailsTitleLabel',
+  {
+    defaultMessage: 'View rule detail page',
   }
 );
