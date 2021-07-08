@@ -21,7 +21,7 @@ import { sendGetPackages } from './hooks';
 import type { GetPackagesResponse } from './types';
 import { pagePathGetters } from './constants';
 
-const packageType = 'package';
+const packageType = 'integration';
 
 const createPackages$ = () =>
   from(sendGetPackages()).pipe(
@@ -70,7 +70,7 @@ export const createPackageSearchProvider = (core: CoreSetup): GlobalSearchResult
   };
 
   return {
-    id: 'packages',
+    id: 'integrations',
     getSearchableTypes: () => [packageType],
     find: ({ term, types }, { maxResults, aborted$ }) => {
       if (types?.includes(packageType) === false) {
