@@ -73,7 +73,7 @@ import { AnomaliesMap } from './anomalies_map';
 import { getToastNotifications } from '../util/dependency_cache';
 import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/settings';
 import { withKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { ML_APP_URL_GENERATOR } from '../../../common/constants/ml_url_generator';
+import { ML_APP_LOCATOR } from '../../../common/constants/locator';
 import { AnomalyContextMenu } from './anomaly_context_menu';
 import { isDefined } from '../../../common/types/guards';
 
@@ -230,13 +230,9 @@ export class ExplorerUI extends React.Component {
   updateLanguage = (language) => this.setState({ language });
 
   render() {
-    const {
-      share: {
-        urlGenerators: { getUrlGenerator },
-      },
-    } = this.props.kibana.services;
+    const { share } = this.props.kibana.services;
 
-    const mlUrlGenerator = getUrlGenerator(ML_APP_URL_GENERATOR);
+    const mlLocator = share.url.locators.get(ML_APP_LOCATOR);
 
     const {
       showCharts,
@@ -502,7 +498,7 @@ export class ExplorerUI extends React.Component {
                         ...chartsData,
                         severity,
                         timefilter,
-                        mlUrlGenerator,
+                        mlLocator,
                         timeBuckets,
                         onSelectEntity: this.applyFilter,
                       }}
