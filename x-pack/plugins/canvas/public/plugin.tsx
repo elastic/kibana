@@ -32,6 +32,8 @@ import { PresentationUtilPluginStart } from '../../../../src/plugins/presentatio
 import { getPluginApi, CanvasApi } from './plugin_api';
 import { pluginServiceRegistry } from './services/kibana';
 
+import { functions } from '../canvas_plugin_src/functions/browser/functions';
+
 export { CoreStart, CoreSetup };
 
 /**
@@ -86,6 +88,8 @@ export class CanvasPlugin
         defaultPath: `#${lastPath}`,
       }));
     }
+
+    functions.map((fn) => setupPlugins.expressions.registerFunction(fn));
 
     coreSetup.application.register({
       category: DEFAULT_APP_CATEGORIES.kibana,

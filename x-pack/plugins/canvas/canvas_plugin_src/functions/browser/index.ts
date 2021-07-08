@@ -7,20 +7,6 @@
 
 import { functions as commonFunctions } from '../common';
 import { functions as externalFunctions } from '../external';
-import { location } from './location';
-import { markdown } from './markdown';
-import { urlparam } from './urlparam';
-import { escount } from './escount';
-import { esdocs } from './esdocs';
-import { essql } from './essql';
+import { functions as browserFunctions } from './functions';
 
-export const functions = [
-  location,
-  markdown,
-  urlparam,
-  escount,
-  esdocs,
-  essql,
-  ...commonFunctions,
-  ...externalFunctions,
-];
+export const functions = [...browserFunctions, ...commonFunctions, ...externalFunctions];

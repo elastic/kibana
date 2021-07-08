@@ -5,10 +5,8 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { Datatable, ExpressionFunctionDefinition } from '../../../types';
-import { getFunctionHelp } from '../../../i18n';
-
-const noop = () => {};
 
 interface Return extends Datatable {
   columns: [
@@ -18,32 +16,28 @@ interface Return extends Datatable {
   rows: [{ latitude: number; longitude: number }];
 }
 
-export function location(): ExpressionFunctionDefinition<'location', null, {}, Promise<Return>> {
-  const { help } = getFunctionHelp().location;
+const help = i18n.translate('xpack.canvas.functions.locationHelpText', {
+  defaultMessage:
+    'Find your current location using the {geolocationAPI} of the browser. ' +
+    'Performance can vary, but is fairly accurate. ' +
+    'See {url}. Don’t use {locationFn} if you plan to generate PDFs as this function requires user input.',
+  values: {
+    geolocationAPI: 'Geolocation API',
+    url: 'https://developer.mozilla.org/en-US/docs/Web/API/Navigator/geolocation',
+    locationFn: '`location`',
+  },
+});
 
+export function location(): ExpressionFunctionDefinition<'location', null, {}, Promise<Return>> {
   return {
     name: 'location',
     type: 'datatable',
     inputTypes: ['null'],
     args: {},
     help,
-    fn: () => {
-      return new Promise((resolve) => {
-        function createLocation(geoposition: GeolocationPosition) {
-          const { latitude, longitude } = geoposition.coords;
-          return resolve({
-            type: 'datatable',
-            columns: [
-              { id: 'latitude', name: 'latitude', meta: { type: 'number' } },
-              { id: 'longitude', name: 'longitude', meta: { type: 'number' } },
-            ],
-            rows: [{ latitude, longitude }],
-          });
-        }
-        return navigator.geolocation.getCurrentPosition(createLocation, noop, {
-          maximumAge: 5000,
-        });
-      });
+    fn: async (input, args, context) => {
+      const { locationFn } = await import('./fns');
+      return await locationFn(input, args, context);
     },
   };
 }

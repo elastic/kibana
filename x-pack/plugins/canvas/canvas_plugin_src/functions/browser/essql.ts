@@ -9,10 +9,9 @@ import {
   ExpressionFunctionDefinition,
   ExpressionValueFilter,
 } from 'src/plugins/expressions/common';
-import { searchService } from '../../../public/services';
-import { ESSQL_SEARCH_STRATEGY } from '../../../common/lib/constants';
-import { EssqlSearchStrategyRequest, EssqlSearchStrategyResponse } from '../../../types';
-import { getFunctionHelp } from '../../../i18n';
+
+import { i18n } from '@kbn/i18n';
+import { ELASTICSEARCH, SQL, ISO8601, UTC } from '../../../i18n/constants';
 
 interface Arguments {
   query: string;
@@ -21,14 +20,48 @@ interface Arguments {
   timezone: string;
 }
 
+const help = i18n.translate('xpack.canvas.functions.essqlHelpText', {
+  defaultMessage: 'Queries {ELASTICSEARCH} using {ELASTICSEARCH} {SQL}.',
+  values: {
+    ELASTICSEARCH,
+    SQL,
+  },
+});
+
+const argHelp = {
+  query: i18n.translate('xpack.canvas.functions.essql.args.queryHelpText', {
+    defaultMessage: 'An {ELASTICSEARCH} {SQL} query.',
+    values: {
+      ELASTICSEARCH,
+      SQL,
+    },
+  }),
+  parameter: i18n.translate('xpack.canvas.functions.essql.args.parameterHelpText', {
+    defaultMessage: 'A parameter to be passed to the {SQL} query.',
+    values: {
+      SQL,
+    },
+  }),
+  count: i18n.translate('xpack.canvas.functions.essql.args.countHelpText', {
+    defaultMessage:
+      'The number of documents to retrieve. For better performance, use a smaller data set.',
+  }),
+  timezone: i18n.translate('xpack.canvas.functions.essql.args.timezoneHelpText', {
+    defaultMessage:
+      'The timezone to use for date operations. Valid {ISO8601} formats and {UTC} offsets both work.',
+    values: {
+      ISO8601,
+      UTC,
+    },
+  }),
+};
+
 export function essql(): ExpressionFunctionDefinition<
   'essql',
   ExpressionValueFilter,
   Arguments,
   any
 > {
-  const { help, args: argHelp } = getFunctionHelp().essql;
-
   return {
     name: 'essql',
     type: 'datatable',
@@ -60,44 +93,9 @@ export function essql(): ExpressionFunctionDefinition<
         help: argHelp.timezone,
       },
     },
-    fn: (input, args, handlers) => {
-      const search = searchService.getService().search;
-      const { parameter, ...restOfArgs } = args;
-      const req = {
-        ...restOfArgs,
-        params: parameter,
-        filter: input.and,
-      };
-
-      return search
-        .search<EssqlSearchStrategyRequest, EssqlSearchStrategyResponse>(req, {
-          strategy: ESSQL_SEARCH_STRATEGY,
-        })
-        .toPromise()
-        .then((resp: EssqlSearchStrategyResponse) => {
-          return {
-            type: 'datatable',
-            meta: {
-              type: 'essql',
-            },
-            ...resp,
-          };
-        })
-        .catch((e) => {
-          let message = `Unexpected error from Elasticsearch: ${e.message}`;
-          if (e.err) {
-            const { type, reason } = e.err.attributes;
-            if (type === 'parsing_exception') {
-              message = `Couldn't parse Elasticsearch SQL query. You may need to add double quotes to names containing special characters. Check your query and try again. Error: ${reason}`;
-            } else {
-              message = `Unexpected error from Elasticsearch: ${type} - ${reason}`;
-            }
-          }
-
-          // Re-write the error message before surfacing it up
-          e.message = message;
-          throw e;
-        });
+    fn: async (input, args, context) => {
+      const { essqlFn } = await import('./fns');
+      return await essqlFn(input, args, context);
     },
   };
 }

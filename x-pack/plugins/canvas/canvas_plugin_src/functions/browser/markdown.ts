@@ -7,11 +7,13 @@
 
 import {
   Datatable,
-  Render,
   Style,
   ExpressionFunctionDefinition,
+  ExpressionValueRender,
 } from 'src/plugins/expressions/common';
-import { getFunctionHelp } from '../../../i18n';
+
+import { i18n } from '@kbn/i18n';
+import { MARKDOWN, CSS } from '../../../i18n/constants';
 
 type Context = Datatable | null;
 
@@ -27,14 +29,45 @@ export interface Return {
   openLinksInNewTab: boolean;
 }
 
+const help = i18n.translate('xpack.canvas.functions.markdownHelpText', {
+  defaultMessage:
+    'Adds an element that renders {MARKDOWN} text. TIP: Use the {markdownFn} function for single numbers, metrics, and paragraphs of text.',
+  values: {
+    MARKDOWN,
+    markdownFn: '`markdown`',
+  },
+});
+
+const argHelp = {
+  content: i18n.translate('xpack.canvas.functions.markdown.args.contentHelpText', {
+    defaultMessage:
+      'A string of text that contains {MARKDOWN}. To concatenate, pass the {stringFn} function multiple times.',
+    values: {
+      MARKDOWN,
+      stringFn: '`string`',
+    },
+  }),
+  font: i18n.translate('xpack.canvas.functions.markdown.args.fontHelpText', {
+    defaultMessage:
+      'The {CSS} font properties for the content. For example, {fontFamily} or {fontWeight}.',
+    values: {
+      CSS,
+      fontFamily: '"font-family"',
+      fontWeight: '"font-weight"',
+    },
+  }),
+  openLinksInNewTab: i18n.translate('xpack.canvas.functions.markdown.args.openLinkHelpText', {
+    defaultMessage:
+      'A true or false value for opening links in a new tab. The default value is `false`. Setting to `true` opens all links in a new tab.',
+  }),
+};
+
 export function markdown(): ExpressionFunctionDefinition<
   'markdown',
   Context,
   Arguments,
-  Promise<Render<Return>>
+  Promise<ExpressionValueRender<Return>>
 > {
-  const { help, args: argHelp } = getFunctionHelp().markdown;
-
   return {
     name: 'markdown',
     aliases: [],
@@ -60,28 +93,9 @@ export function markdown(): ExpressionFunctionDefinition<
         default: false,
       },
     },
-    fn: async (input, args) => {
-      // @ts-expect-error untyped local
-      const { Handlebars } = await import('../../../common/lib/handlebars');
-      const compileFunctions = args.content.map((str) =>
-        Handlebars.compile(String(str), { knownHelpersOnly: true })
-      );
-      const ctx = {
-        columns: [],
-        rows: [],
-        type: null,
-        ...input,
-      };
-
-      return {
-        type: 'render',
-        as: 'markdown',
-        value: {
-          content: compileFunctions.map((fn) => fn(ctx)).join(''),
-          font: args.font,
-          openLinksInNewTab: args.openLinksInNewTab,
-        },
-      };
+    fn: async (input, args, context) => {
+      const { markdownFn } = await import('./fns');
+      return await markdownFn(input, args, context);
     },
   };
 }

@@ -10,17 +10,35 @@ import {
   ExpressionValueFilter,
 } from 'src/plugins/expressions/common';
 
-// @ts-expect-error untyped local
-import { buildESRequest } from '../../../common/lib/request/build_es_request';
-
-import { searchService } from '../../../public/services';
-
-import { getFunctionHelp } from '../../../i18n';
+import { i18n } from '@kbn/i18n';
+import { ELASTICSEARCH, LUCENE } from '../../../i18n/constants';
 
 interface Arguments {
   index: string | null;
   query: string;
 }
+
+const help = i18n.translate('xpack.canvas.functions.escountHelpText', {
+  defaultMessage: 'Query {ELASTICSEARCH} for the number of hits matching the specified query.',
+  values: {
+    ELASTICSEARCH,
+  },
+});
+
+const argHelp = {
+  query: i18n.translate('xpack.canvas.functions.escount.args.queryHelpText', {
+    defaultMessage: 'A {LUCENE} query string.',
+    values: {
+      LUCENE,
+    },
+  }),
+  index: i18n.translate('xpack.canvas.functions.escount.args.indexHelpText', {
+    defaultMessage: 'An index or index pattern. For example, {example}.',
+    values: {
+      example: '`"logstash-*"`',
+    },
+  }),
+};
 
 export function escount(): ExpressionFunctionDefinition<
   'escount',
@@ -28,8 +46,6 @@ export function escount(): ExpressionFunctionDefinition<
   Arguments,
   any
 > {
-  const { help, args: argHelp } = getFunctionHelp().escount;
-
   return {
     name: 'escount',
     type: 'number',
@@ -50,45 +66,9 @@ export function escount(): ExpressionFunctionDefinition<
         help: argHelp.index,
       },
     },
-    fn: (input, args, handlers) => {
-      input.and = input.and.concat([
-        {
-          type: 'filter',
-          filterType: 'luceneQueryString',
-          query: args.query,
-          and: [],
-        },
-      ]);
-
-      const esRequest = buildESRequest(
-        {
-          index: args.index,
-          body: {
-            track_total_hits: true,
-            size: 0,
-            query: {
-              bool: {
-                must: [{ match_all: {} }],
-              },
-            },
-          },
-        },
-        input
-      );
-
-      const search = searchService.getService().search;
-      const req = {
-        params: {
-          ...esRequest,
-        },
-      };
-
-      return search
-        .search(req)
-        .toPromise()
-        .then((resp: any) => {
-          return resp.rawResponse.hits.total;
-        });
+    fn: async (input, args, context) => {
+      const { escountFn } = await import('./fns');
+      return await escountFn(input, args, context);
     },
   };
 }
