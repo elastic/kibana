@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { Dispatch } from 'redux';
 import { CoreStart, HttpStart } from 'kibana/public';
 import {
