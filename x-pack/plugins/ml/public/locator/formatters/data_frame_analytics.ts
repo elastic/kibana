@@ -9,6 +9,7 @@
  * Creates URL to the DataFrameAnalytics page
  */
 import { isEmpty } from 'lodash';
+import { formatGenericMlUrl } from './common';
 import {
   DataFrameAnalyticsExplorationQueryState,
   DataFrameAnalyticsExplorationUrlState,
@@ -16,14 +17,13 @@ import {
   ExplorationPageUrlState,
   MlGenericUrlState,
   MlCommonGlobalState,
-} from '../../common/types/ml_url_generator';
-import { createGenericMlUrl } from './common';
-import { ML_PAGES } from '../../common/constants/ml_url_generator';
-import { setStateToKbnUrl } from '../../../../../src/plugins/kibana_utils/public';
-import { getGroupQueryText, getJobQueryText } from '../../common/util/string_utils';
-import { AppPageState, ListingPageUrlState } from '../../common/types/common';
+} from '../../../common/types/locator';
+import { ML_PAGES } from '../../../common/constants/locator';
+import { setStateToKbnUrl } from '../../../../../../src/plugins/kibana_utils/public';
+import { getGroupQueryText, getJobQueryText } from '../../../common/util/string_utils';
+import { AppPageState, ListingPageUrlState } from '../../../common/types/common';
 
-export function createDataFrameAnalyticsJobManagementUrl(
+export function formatDataFrameAnalyticsJobManagementUrl(
   appBasePath: string,
   mlUrlGeneratorState: DataFrameAnalyticsUrlState['pageState']
 ): string {
@@ -70,7 +70,7 @@ export function createDataFrameAnalyticsJobManagementUrl(
 /**
  * Creates URL to the DataFrameAnalytics Exploration page
  */
-export function createDataFrameAnalyticsExplorationUrl(
+export function formatDataFrameAnalyticsExplorationUrl(
   appBasePath: string,
   mlUrlGeneratorState: DataFrameAnalyticsExplorationUrlState['pageState']
 ): string {
@@ -116,17 +116,17 @@ export function createDataFrameAnalyticsExplorationUrl(
 /**
  * Creates URL to the DataFrameAnalytics creation wizard
  */
-export function createDataFrameAnalyticsCreateJobUrl(
+export function formatDataFrameAnalyticsCreateJobUrl(
   appBasePath: string,
   pageState: MlGenericUrlState['pageState']
 ): string {
-  return createGenericMlUrl(appBasePath, ML_PAGES.DATA_FRAME_ANALYTICS_CREATE_JOB, pageState);
+  return formatGenericMlUrl(appBasePath, ML_PAGES.DATA_FRAME_ANALYTICS_CREATE_JOB, pageState);
 }
 
 /**
  * Creates URL to the DataFrameAnalytics Map page
  */
-export function createDataFrameAnalyticsMapUrl(
+export function formatDataFrameAnalyticsMapUrl(
   appBasePath: string,
   mlUrlGeneratorState: DataFrameAnalyticsExplorationUrlState['pageState']
 ): string {

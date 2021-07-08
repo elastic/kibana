@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { CalendarEditUrlState, FilterEditUrlState } from '../../common/types/ml_url_generator';
-import { ML_PAGES } from '../../common/constants/ml_url_generator';
-import { setStateToKbnUrl } from '../../../../../src/plugins/kibana_utils/public';
+import { CalendarEditUrlState, FilterEditUrlState } from '../../../common/types/locator';
+import { ML_PAGES } from '../../../common/constants/locator';
+import { setStateToKbnUrl } from '../../../../../../src/plugins/kibana_utils/public';
 
-export function createEditCalendarUrl(
+export function formatEditCalendarUrl(
   appBasePath: string,
   pageState: CalendarEditUrlState['pageState']
 ): string {
@@ -27,7 +27,7 @@ export function createEditCalendarUrl(
   return url;
 }
 
-export function createEditFilterUrl(
+export function formatEditFilterUrl(
   appBasePath: string,
   pageState: FilterEditUrlState['pageState']
 ): string {

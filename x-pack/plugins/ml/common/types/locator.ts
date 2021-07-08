@@ -5,21 +5,23 @@
  * 2.0.
  */
 
+import type { SerializableState } from 'src/plugins/kibana_utils/common';
+import type { LocatorPublic } from 'src/plugins/share/public';
 import type { RefreshInterval, TimeRange } from '../../../../../src/plugins/data/common/query';
 import type { JobId } from './anomaly_detection_jobs/job';
-import { ML_PAGES } from '../constants/ml_url_generator';
 import type { DataFrameAnalysisConfigType } from './data_frame_analytics';
 import type { SearchQueryLanguage } from '../constants/search';
 import type { ListingPageUrlState } from './common';
 import type { InfluencersFilterQuery } from './es_client';
+import { ML_PAGES } from '../constants/locator';
 
 type OptionalPageState = object | undefined;
 
 export type MLPageState<PageType, PageState> = PageState extends OptionalPageState
-  ? { page: PageType; pageState?: PageState; excludeBasePath?: boolean }
+  ? { page: PageType; pageState?: PageState }
   : PageState extends object
-  ? { page: PageType; pageState: PageState; excludeBasePath?: boolean }
-  : { page: PageType; excludeBasePath?: boolean };
+  ? { page: PageType; pageState: PageState }
+  : { page: PageType };
 
 export interface MlCommonGlobalState {
   time?: TimeRange;
@@ -241,7 +243,7 @@ export type ExplorationPageUrlState = {
 /**
  * Union type of ML URL state based on page
  */
-export type MlUrlGeneratorState =
+export type MlLocatorState =
   | AnomalyDetectionUrlState
   | ExplorerUrlState
   | TimeSeriesExplorerUrlState
@@ -250,3 +252,7 @@ export type MlUrlGeneratorState =
   | CalendarEditUrlState
   | FilterEditUrlState
   | MlGenericUrlState;
+
+export type MlLocatorParams = MlLocatorState & SerializableState;
+
+export type MlLocator = LocatorPublic<MlLocatorParams>;
