@@ -542,12 +542,7 @@ class AnnotationsTableUI extends Component {
         enabled: (annotation) => isTimeSeriesViewJob(this.getJob(annotation.job_id)),
         icon: 'visLine',
         type: 'icon',
-        onClick: (annotation) => {
-          this.setState({
-            datafeedFlyoutVisible: true,
-            datafeedEnd: annotation.end_timestamp,
-          });
-        },
+        onClick: (annotation) => this.openSingleMetricView(annotation),
       });
     }
 
