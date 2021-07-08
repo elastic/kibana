@@ -178,6 +178,20 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
         },
       },
     };
+  } else if (action.type === 'endpointDetailsActivityLogUpdateIsInvalidDateRange') {
+    return {
+      ...state,
+      endpointDetails: {
+        ...state.endpointDetails!,
+        activityLog: {
+          ...state.endpointDetails.activityLog,
+          paging: {
+            ...state.endpointDetails.activityLog.paging,
+            ...action.payload,
+          },
+        },
+      },
+    };
   } else if (action.type === 'endpointDetailsFlyoutTabChanged') {
     return {
       ...state,
@@ -290,6 +304,7 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
         disabled: false,
         page: 1,
         pageSize: 50,
+        isInvalidDateRange: false,
       },
     };
 

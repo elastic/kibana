@@ -6,7 +6,7 @@
  */
 
 import { useDispatch } from 'react-redux';
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback } from 'react';
 import styled from 'styled-components';
 import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem, EuiDatePicker, EuiDatePickerRange } from '@elastic/eui';
@@ -27,11 +27,8 @@ const StickyFlexItem = styled(EuiFlexItem)`
 
 export const DateRangePicker = memo(() => {
   const dispatch = useDispatch();
-  const { page, pageSize, startDate, endDate } = useEndpointSelector(getActivityLogDataPaging);
-
-  const isInvalidDateRange = useMemo(
-    () => (startDate && endDate ? moment(startDate) > moment(endDate) : false),
-    [startDate, endDate]
+  const { page, pageSize, startDate, endDate, isInvalidDateRange } = useEndpointSelector(
+    getActivityLogDataPaging
   );
 
   const onClear = useCallback(
@@ -52,9 +49,6 @@ export const DateRangePicker = memo(() => {
 
   const onChangeStartDate = useCallback(
     (date) => {
-      if (isInvalidDateRange) {
-        return;
-      }
       dispatch({
         type: 'endpointDetailsActivityLogUpdatePaging',
         payload: {
@@ -66,14 +60,11 @@ export const DateRangePicker = memo(() => {
         },
       });
     },
-    [dispatch, isInvalidDateRange, endDate, page, pageSize]
+    [dispatch, endDate, page, pageSize]
   );
 
   const onChangeEndDate = useCallback(
     (date) => {
-      if (isInvalidDateRange) {
-        return;
-      }
       dispatch({
         type: 'endpointDetailsActivityLogUpdatePaging',
         payload: {
@@ -85,7 +76,7 @@ export const DateRangePicker = memo(() => {
         },
       });
     },
-    [dispatch, isInvalidDateRange, startDate, page, pageSize]
+    [dispatch, startDate, page, pageSize]
   );
 
   return (
@@ -100,7 +91,7 @@ export const DateRangePicker = memo(() => {
                   aria-label="Start date"
                   endDate={endDate ? moment(endDate) : undefined}
                   isInvalid={isInvalidDateRange}
-                  maxDate={moment(startDate) || moment()}
+                  maxDate={moment(endDate) || moment()}
                   onChange={onChangeStartDate}
                   onClear={() => onClear({ clearStart: true })}
                   placeholderText={i18.ACTIVITY_LOG.datePicker.startDate}

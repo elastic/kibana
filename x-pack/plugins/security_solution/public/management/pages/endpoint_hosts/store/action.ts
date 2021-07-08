@@ -166,6 +166,13 @@ export interface EndpointDetailsActivityLogUpdatePaging {
   };
 }
 
+export interface EndpointDetailsActivityLogUpdateIsInvalidDateRange {
+  type: 'endpointDetailsActivityLogUpdateIsInvalidDateRange';
+  payload: {
+    isInvalidDateRange?: boolean;
+  };
+}
+
 export interface EndpointDetailsFlyoutTabChanged {
   type: 'endpointDetailsFlyoutTabChanged';
   payload: { flyoutView: EndpointIndexUIQueryParams['show'] };
@@ -177,6 +184,7 @@ export type EndpointAction =
   | ServerReturnedEndpointDetails
   | ServerFailedToReturnEndpointDetails
   | EndpointDetailsActivityLogUpdatePaging
+  | EndpointDetailsActivityLogUpdateIsInvalidDateRange
   | EndpointDetailsFlyoutTabChanged
   | EndpointDetailsActivityLogChanged
   | ServerReturnedEndpointPolicyResponse

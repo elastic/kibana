@@ -66,6 +66,7 @@ import { resolvePathVariables } from '../../../../common/utils/resolve_path_vari
 import { EndpointPackageInfoStateChanged } from './action';
 import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint_pending_actions';
 import { EndpointDetailsTabsTypes } from '../view/details/components/endpoint_details_tabs';
+import { getIsInvalidDateRange } from '../utils';
 
 type EndpointPageStore = ImmutableMiddlewareAPI<EndpointState, AppAction>;
 
@@ -409,13 +410,26 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
         const { disabled, page, pageSize, startDate, endDate } = getActivityLogDataPaging(
           getState()
         );
-        const isInvalidDateRange =
-          startDate && endDate ? moment(startDate) > moment(endDate) : false;
         // don't page when paging is disabled or when date ranges are invalid
-        if (disabled || isInvalidDateRange) {
+        if (disabled) {
+          return;
+        }
+        if (getIsInvalidDateRange({ startDate, endDate })) {
+          dispatch({
+            type: 'endpointDetailsActivityLogUpdateIsInvalidDateRange',
+            payload: {
+              isInvalidDateRange: true,
+            },
+          });
           return;
         }
 
+        dispatch({
+          type: 'endpointDetailsActivityLogUpdateIsInvalidDateRange',
+          payload: {
+            isInvalidDateRange: false,
+          },
+        });
         dispatch({
           type: 'endpointDetailsActivityLogChanged',
           // ts error to be fixed when AsyncResourceState is refactored (#830)

@@ -27,6 +27,7 @@ export const initialEndpointPageState = (): Immutable<EndpointState> => {
           pageSize: 50,
           startDate: undefined,
           endDate: undefined,
+          isInvalidDateRange: false,
         },
         logData: createUninitialisedResourceState(),
       },
