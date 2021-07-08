@@ -22,7 +22,6 @@ import { InspectButtonContainer } from '../../../common/components/inspect';
 import { HeaderSection } from '../../../common/components/header_section';
 import { ID as CTIEventCountQueryId } from '../../containers/overview_cti_links/use_cti_event_counts';
 import { CtiListItem } from '../../containers/overview_cti_links/helpers';
-import { LinkButton } from '../../../common/components/links';
 import { useKibana } from '../../../common/lib/kibana';
 import { CtiInnerPanel } from './cti_inner_panel';
 import * as i18n from './translations';
@@ -45,12 +44,12 @@ const List = styled.ul`
 
 const DashboardRightSideElement = styled(EuiFlexItem)`
   align-items: flex-end;
-  max-width: 160px;
+  max-width: 200px;
 `;
 
 const RightSideLink = styled(EuiLink)`
   text-align: right;
-  min-width: 140px;
+  min-width: 180px;
 `;
 
 interface ThreatIntelPanelViewProps {
@@ -96,12 +95,12 @@ export const ThreatIntelPanelView: React.FC<ThreatIntelPanelViewProps> = ({
 
   const button = useMemo(
     () => (
-      <LinkButton href={buttonHref} disabled={!buttonHref}>
+      <EuiButton href={buttonHref} isDisabled={!buttonHref} target="_blank">
         <FormattedMessage
           id="xpack.securitySolution.overview.ctiViewDasboard"
           defaultMessage="View dashboard"
         />
-      </LinkButton>
+      </EuiButton>
     ),
     [buttonHref]
   );
@@ -117,7 +116,11 @@ export const ThreatIntelPanelView: React.FC<ThreatIntelPanelViewProps> = ({
           color={'primary'}
           title={i18n.INFO_TITLE}
           body={i18n.INFO_BODY}
-          button={<EuiButton href={threatIntelDashboardDocLink}>{i18n.INFO_BUTTON}</EuiButton>}
+          button={
+            <EuiButton href={threatIntelDashboardDocLink} target="_blank">
+              {i18n.INFO_BUTTON}
+            </EuiButton>
+          }
         />
       ) : null,
     [isDashboardPluginDisabled, threatIntelDashboardDocLink]
@@ -164,7 +167,9 @@ export const ThreatIntelPanelView: React.FC<ThreatIntelPanelViewProps> = ({
                           </DashboardRightSideElement>
                           <DashboardRightSideElement key={`${title}-source`} grow={3}>
                             {path ? (
-                              <RightSideLink href={path}>{linkCopy}</RightSideLink>
+                              <RightSideLink href={path} target="_blank">
+                                {linkCopy}
+                              </RightSideLink>
                             ) : (
                               <EuiText color={'subdued'} size={'s'}>
                                 {linkCopy}
