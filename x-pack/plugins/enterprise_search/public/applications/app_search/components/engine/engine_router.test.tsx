@@ -39,6 +39,7 @@ describe('EngineRouter', () => {
     ...mockEngineValues,
     dataLoading: false,
     engineNotFound: false,
+    isMetaEngine: false,
     myRole: {},
   };
   const actions = {
@@ -167,13 +168,6 @@ describe('EngineRouter', () => {
     expect(wrapper.find(ApiLogs)).toHaveLength(1);
   });
 
-  it('renders a source engines view', () => {
-    setMockValues({ ...values, myRole: { canViewMetaEngineSourceEngines: true } });
-    const wrapper = shallow(<EngineRouter />);
-
-    expect(wrapper.find(SourceEngines)).toHaveLength(1);
-  });
-
   it('renders a search ui view', () => {
     setMockValues({ ...values, myRole: { canManageEngineSearchUi: true } });
     const wrapper = shallow(<EngineRouter />);
@@ -181,8 +175,19 @@ describe('EngineRouter', () => {
     expect(wrapper.find(SearchUI)).toHaveLength(1);
   });
 
+  it('renders a source engines view', () => {
+    setMockValues({
+      ...values,
+      myRole: { canViewMetaEngineSourceEngines: true },
+      isMetaEngine: true,
+    });
+    const wrapper = shallow(<EngineRouter />);
+
+    expect(wrapper.find(SourceEngines)).toHaveLength(1);
+  });
+
   it('renders a crawler view', () => {
-    setMockValues({ ...values, myRole: { canViewEngineCrawler: true } });
+    setMockValues({ ...values, myRole: { canViewEngineCrawler: true }, isMetaEngine: false });
     const wrapper = shallow(<EngineRouter />);
 
     expect(wrapper.find(CrawlerRouter)).toHaveLength(1);
