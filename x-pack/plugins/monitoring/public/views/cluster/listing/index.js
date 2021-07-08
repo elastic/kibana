@@ -23,9 +23,7 @@ const getPageData = ($injector) => {
 };
 
 const getAlerts = (clusters) => {
-  const alerts = clusters.reduce((alerts, cluster) => ({ ...alerts, ...cluster.alerts.list }), {});
-
-  return alerts;
+  return clusters.reduce((alerts, cluster) => ({ ...alerts, ...cluster.alerts.list }), {});
 };
 
 uiRoutes

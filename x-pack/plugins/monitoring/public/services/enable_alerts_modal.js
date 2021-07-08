@@ -12,7 +12,7 @@ export function enableAlertsModalProvider($http, $window, $injector) {
     const modalHasBeenShown = $window.sessionStorage.getItem('ALERTS_MODAL_HAS_BEEN_SHOWN');
     const decisionMade = $window.localStorage.getItem('ALERTS_MODAL_DECISION_MADE');
 
-    if (Object.keys(alerts) > 0) {
+    if (Object.keys(alerts).length > 0) {
       $window.localStorage.setItem('ALERTS_MODAL_DECISION_MADE', true);
       return false;
     } else if (!modalHasBeenShown && !decisionMade) {
