@@ -1,0 +1,31 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+      "exceptions": {
+        "is_write_index": false
+      }
+    },
+    "settings": {
+      "index": {
+        "refresh_interval": "5s"
+      }
+    },
+    "index": "ip-type-0001",
+    "mappings": {
+      "dynamic": "strict",
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "source": {
+          "properties": {
+            "ip": {
+              "type": "ip"
+            }
+          }
+        }
+      }
+    }
+  }
+}

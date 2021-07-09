@@ -1,0 +1,55 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "1",
+    "index": "ip-type-0001",
+    "source": {
+      "@timestamp": "2021-02-22T21:00:49.337Z",
+      "source": {
+        "ip": "127.0.0.1"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "2",
+    "index": "ip-type-0001",
+    "source": {
+      "@timestamp": "2021-02-22T21:01:49.337Z",
+      "source": {
+        "ip": "127.0.0.2"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "3",
+    "index": "ip-type-0001",
+    "source": {
+      "@timestamp": "2021-02-22T21:02:49.337Z",
+      "source": {
+        "ip": "127.0.0.3"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "4",
+    "index": "ip-type-0001",
+    "source": {
+      "@timestamp": "2021-02-22T21:03:49.337Z",
+      "source": {
+        "ip": "127.0.0.4"
+      }
+    }
+  }
+}
