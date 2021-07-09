@@ -222,7 +222,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(first(firstNode.path)).to.have.property('label', 'demo-stack-mysql-01');
             expect(firstNode).to.have.property('metrics');
             expect(firstNode.metrics[0]).to.have.property('timeseries');
-            expect(firstNode.metrics[0].timeseries?.rows.length).to.equal(58);
+            expect(firstNode.metrics[0].timeseries?.rows.length).to.equal(56);
             const rows = firstNode.metrics[0].timeseries?.rows;
             const rowInterval = (rows?.[1]?.timestamp || 0) - (rows?.[0]?.timestamp || 0);
             expect(rowInterval).to.equal(10000);
