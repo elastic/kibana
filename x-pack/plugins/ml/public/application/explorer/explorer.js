@@ -261,6 +261,30 @@ export class ExplorerUI extends React.Component {
     } = this.props.explorerState;
     const { annotationsData, aggregations, error: annotationsError } = annotations;
 
+    const annotationsCnt = Array.isArray(annotationsData) ? annotationsData.length : 0;
+    const allAnnotationsCnt = Array.isArray(aggregations?.event?.buckets)
+      ? aggregations.event.buckets.reduce((acc, v) => acc + v.doc_count, 0)
+      : annotationsCnt;
+
+    const badge =
+      allAnnotationsCnt > annotationsCnt ? (
+        <EuiBadge color={'hollow'}>
+          <FormattedMessage
+            id="xpack.ml.explorer.annotationsOutOfTotalCountTitle"
+            defaultMessage="First {visibleCount} out of a total of {totalCount}"
+            values={{ visibleCount: annotationsCnt, totalCount: allAnnotationsCnt }}
+          />
+        </EuiBadge>
+      ) : (
+        <EuiBadge color={'hollow'}>
+          <FormattedMessage
+            id="xpack.ml.explorer.annotationsTitleTotalCount"
+            defaultMessage="Total: {count}"
+            values={{ count: annotationsCnt }}
+          />
+        </EuiBadge>
+      );
+
     const jobSelectorProps = {
       dateFormatTz: getDateFormatTz(),
     };
@@ -404,7 +428,7 @@ export class ExplorerUI extends React.Component {
             {loading === false && tableData.anomalies?.length ? (
               <AnomaliesMap anomalies={tableData.anomalies} jobIds={selectedJobIds} />
             ) : null}
-            {annotationsData.length > 0 && (
+            {annotationsCnt > 0 && (
               <>
                 <EuiPanel data-test-subj="mlAnomalyExplorerAnnotationsPanel loaded">
                   <EuiAccordion
@@ -416,15 +440,7 @@ export class ExplorerUI extends React.Component {
                             id="xpack.ml.explorer.annotationsTitle"
                             defaultMessage="Annotations {badge}"
                             values={{
-                              badge: (
-                                <EuiBadge color={'hollow'}>
-                                  <FormattedMessage
-                                    id="xpack.ml.explorer.annotationsTitleTotalCount"
-                                    defaultMessage="Total: {count}"
-                                    values={{ count: annotationsData.length }}
-                                  />
-                                </EuiBadge>
-                              ),
+                              badge,
                             }}
                           />
                         </h2>

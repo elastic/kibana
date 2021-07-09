@@ -20,7 +20,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'header', 'discover', 'visualize', 'timePicker']);
   const find = getService('find');
 
-  describe('discover tab', function describeIndexTests() {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/104466
+  describe.skip('discover tab', function describeIndexTests() {
     this.tags('includeFirefox');
     before(async function () {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
@@ -33,8 +34,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
     });
-    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/104466
-    describe.skip('field data', function () {
+
+    describe('field data', function () {
       it('search php should show the correct hit count', async function () {
         const expectedHitCount = '445';
         await retry.try(async function () {
