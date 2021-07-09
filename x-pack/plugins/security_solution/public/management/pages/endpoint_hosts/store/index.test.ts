@@ -47,6 +47,7 @@ describe('EndpointList store concerns', () => {
               disabled: false,
               page: 1,
               pageSize: 50,
+              isInvalidDateRange: false,
             },
             logData: { type: 'UninitialisedResourceState' },
           },
