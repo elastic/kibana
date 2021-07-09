@@ -6,18 +6,24 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { useFetchDetectionEnginePrivileges } from './use_fetch_detection_engine_privileges';
-import { useFetchListPrivileges } from './use_fetch_list_privileges';
+import { DeepReadonly } from 'utility-types';
+import { useFetchDetectionEnginePrivileges } from '../../../detections/components/user_privileges/use_fetch_detection_engine_privileges';
+import { useFetchListPrivileges } from '../../../detections/components/user_privileges/use_fetch_list_privileges';
+import { EndpointPrivileges, useEndpointPrivileges } from './use_endpoint_privileges';
 
 export interface UserPrivilegesState {
   listPrivileges: ReturnType<typeof useFetchListPrivileges>;
   detectionEnginePrivileges: ReturnType<typeof useFetchDetectionEnginePrivileges>;
+  endpointPrivileges: EndpointPrivileges;
 }
 
-const UserPrivilegesContext = createContext<UserPrivilegesState>({
+export const initialUserPrivilegesState = (): UserPrivilegesState => ({
   listPrivileges: { loading: false, error: undefined, result: undefined },
   detectionEnginePrivileges: { loading: false, error: undefined, result: undefined },
+  endpointPrivileges: { loading: true, canAccessEndpointManagement: false, canAccessFleet: false },
 });
+
+const UserPrivilegesContext = createContext<UserPrivilegesState>(initialUserPrivilegesState());
 
 interface UserPrivilegesProviderProps {
   children: React.ReactNode;
@@ -26,12 +32,14 @@ interface UserPrivilegesProviderProps {
 export const UserPrivilegesProvider = ({ children }: UserPrivilegesProviderProps) => {
   const listPrivileges = useFetchListPrivileges();
   const detectionEnginePrivileges = useFetchDetectionEnginePrivileges();
+  const endpointPrivileges = useEndpointPrivileges();
 
   return (
     <UserPrivilegesContext.Provider
       value={{
         listPrivileges,
         detectionEnginePrivileges,
+        endpointPrivileges,
       }}
     >
       {children}
@@ -39,4 +47,5 @@ export const UserPrivilegesProvider = ({ children }: UserPrivilegesProviderProps
   );
 };
 
-export const useUserPrivileges = () => useContext(UserPrivilegesContext);
+export const useUserPrivileges = (): DeepReadonly<UserPrivilegesState> =>
+  useContext(UserPrivilegesContext);
