@@ -658,4 +658,48 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       }
     ),
   },
+  {
+    key: 'windows.advanced.memory_protection.shellcode_enhanced_pe_parsing',
+    first_supported_version: '7.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.shellcode_enhanced_pe_parsing',
+      {
+        defaultMessage:
+          "A value of 'false' disables enhanced parsing of PEs found within shellcode payloads. Default: true.",
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.memory_protection.shellcode',
+    first_supported_version: '7.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.shellcode',
+      {
+        defaultMessage:
+          "A value of 'false' disables Shellcode Injection Protection, a feature of Memory Protection. Default: true.",
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.memory_protection.memory_scan',
+    first_supported_version: '7.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.signature',
+      {
+        defaultMessage:
+          "A value of 'false' disables Memory Signature Scanning, a feature of Memory Protection. Default: true.",
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.malware.quarantine',
+    first_supported_version: '7.14',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.malware.quarantine',
+      {
+        defaultMessage:
+          'Whether quarantine should be enabled when malware prevention is enabled. Default: true.',
+      }
+    ),
+  },
 ];
