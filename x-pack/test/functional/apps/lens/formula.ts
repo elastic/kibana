@@ -16,7 +16,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const fieldEditor = getService('fieldEditor');
 
-  describe('lens formula', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/105016
+  describe.skip('lens formula', () => {
     it('should transition from count to formula', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');

@@ -146,13 +146,6 @@ export type EndpointIsolationRequestStateChange = Action<'endpointIsolationReque
   payload: EndpointState['isolationRequestState'];
 };
 
-export interface AppRequestedEndpointActivityLog {
-  type: 'appRequestedEndpointActivityLog';
-  payload: {
-    page: number;
-    pageSize: number;
-  };
-}
 export type EndpointDetailsActivityLogChanged = Action<'endpointDetailsActivityLogChanged'> & {
   payload: EndpointState['endpointDetails']['activityLog']['logData'];
 };
@@ -165,9 +158,18 @@ export interface EndpointDetailsActivityLogUpdatePaging {
   type: 'endpointDetailsActivityLogUpdatePaging';
   payload: {
     // disable paging when no more data after paging
-    disabled: boolean;
+    disabled?: boolean;
     page: number;
     pageSize: number;
+    startDate?: string;
+    endDate?: string;
+  };
+}
+
+export interface EndpointDetailsActivityLogUpdateIsInvalidDateRange {
+  type: 'endpointDetailsActivityLogUpdateIsInvalidDateRange';
+  payload: {
+    isInvalidDateRange?: boolean;
   };
 }
 
@@ -181,8 +183,8 @@ export type EndpointAction =
   | ServerFailedToReturnEndpointList
   | ServerReturnedEndpointDetails
   | ServerFailedToReturnEndpointDetails
-  | AppRequestedEndpointActivityLog
   | EndpointDetailsActivityLogUpdatePaging
+  | EndpointDetailsActivityLogUpdateIsInvalidDateRange
   | EndpointDetailsFlyoutTabChanged
   | EndpointDetailsActivityLogChanged
   | ServerReturnedEndpointPolicyResponse
