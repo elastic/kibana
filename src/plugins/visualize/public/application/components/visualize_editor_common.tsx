@@ -21,7 +21,7 @@ import {
   VisualizeEditorVisInstance,
 } from '../types';
 import { getUISettings } from '../../services';
-
+// Should be removed when this issue is closed https://github.com/elastic/kibana/issues/103209
 const LEGACY_CHARTS_LIBRARY = 'visualization:visualize:legacyChartsLibrary';
 
 interface VisualizeEditorCommonProps {
@@ -85,7 +85,7 @@ export const VisualizeEditorCommon = ({
         />
       )}
       {visInstance?.vis?.type?.stage === 'experimental' && <ExperimentalVisInfo />}
-      {/* Adds a removal warning for vislib xy axis charts */}
+      {/* Adds a deprecation warning for vislib xy axis charts */}
       {/* Should be removed when this issue is closed https://github.com/elastic/kibana/issues/103209 */}
       {isXYAxis(visInstance?.vis.type.name) && hasXYLegacyChartsEnabled && <DeprecationWarning />}
       {visInstance?.vis?.type?.getInfoMessage?.(visInstance.vis)}
