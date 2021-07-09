@@ -446,7 +446,7 @@ export const AlertsList: React.FunctionComponent = () => {
             <EuiFlexItem grow={false}>
               <div>
                 {item.muteAll ? (
-                  <EuiBadge color="hollow">
+                  <EuiBadge data-test-subj="mutedActionsBadge" color="hollow">
                     <FormattedMessage
                       id="xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.mutedBadge"
                       defaultMessage="Muted"
