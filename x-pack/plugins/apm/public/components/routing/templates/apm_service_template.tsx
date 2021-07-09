@@ -43,10 +43,7 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { Correlations } from '../../app/correlations';
 import { SearchBar } from '../../shared/search_bar';
-import {
-  createExploratoryViewUrl,
-  SeriesUrl,
-} from '../../../../../observability/public';
+import { createExploratoryViewUrl } from '../../../../../observability/public';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
@@ -137,6 +134,7 @@ function AnalyzeDataButton({ serviceName }: { serviceName: string }) {
         reportType: 'kpi-over-time',
         allSeries: [
           {
+            order: 0,
             name: `${serviceName}-series`,
             dataType: isRumAgentName(agentName) ? 'ux' : 'mobile',
             time: { from: rangeFrom, to: rangeTo },

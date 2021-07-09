@@ -9,12 +9,11 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import { SeriesConfig } from '../types';
+import { SeriesConfig, SeriesUrl } from '../types';
 import { ReportDefinitionCol } from './columns/report_definition_col';
-import { ReportFilters } from './columns/report_filters';
 import { OperationTypeSelect } from './columns/operation_type_select';
-import { useSeriesStorage } from '../hooks/use_series_storage';
 import { parseCustomFieldName } from '../configurations/lens_attributes';
+import { SeriesFilter } from '../series_viewer/columns/series_filter';
 
 function getColumnType(seriesConfig: SeriesConfig, selectedMetricField?: string) {
   const { columnType } = parseCustomFieldName(seriesConfig, selectedMetricField);
@@ -24,13 +23,10 @@ function getColumnType(seriesConfig: SeriesConfig, selectedMetricField?: string)
 
 interface Props {
   seriesId: string;
+  series: SeriesUrl;
   seriesConfig: SeriesConfig;
 }
-export function ExpandedSeriesRow({ seriesId, seriesConfig }: Props) {
-  const { getSeries } = useSeriesStorage();
-
-  const series = getSeries(seriesId);
-
+export function ExpandedSeriesRow({ seriesId, series, seriesConfig }: Props) {
   if (!seriesConfig) {
     return null;
   }
@@ -43,12 +39,12 @@ export function ExpandedSeriesRow({ seriesId, seriesConfig }: Props) {
 
   return (
     <div style={{ width: '100%' }}>
-      <ReportDefinitionCol seriesId={seriesId} seriesConfig={seriesConfig} />
+      <ReportDefinitionCol seriesId={seriesId} series={series} seriesConfig={seriesConfig} />
       <EuiSpacer />
       <EuiFlexGroup>
         <EuiFlexItem grow={false} style={{ minWidth: 600 }}>
           <EuiFormRow label={FILTERS_LABEL}>
-            <ReportFilters seriesId={seriesId} seriesConfig={seriesConfig} />
+            <SeriesFilter seriesConfig={seriesConfig} seriesId={seriesId} series={series} />
           </EuiFormRow>
         </EuiFlexItem>
         {(hasOperationType || columnType === 'operation') && (
@@ -56,6 +52,7 @@ export function ExpandedSeriesRow({ seriesId, seriesConfig }: Props) {
             <EuiFormRow label={OPERATION_LABEL}>
               <OperationTypeSelect
                 seriesId={seriesId}
+                series={series}
                 defaultOperationType={yAxisColumns[0].operationType}
               />
             </EuiFormRow>

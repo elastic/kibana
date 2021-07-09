@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { FilterValueButton } from './filter_value_btn';
-import { mockUseSeriesFilter, mockUseValuesList, render } from '../../rtl_helpers';
+import { mockUxSeries, mockUseSeriesFilter, mockUseValuesList, render } from '../../rtl_helpers';
 import {
   USER_AGENT_NAME,
   USER_AGENT_VERSION,
@@ -24,6 +24,7 @@ describe('FilterValueButton', function () {
         isNestedOpen={{ value: '', negate: false }}
         setIsNestedOpen={jest.fn()}
         negate={false}
+        series={mockUxSeries}
       />
     );
 
@@ -39,6 +40,7 @@ describe('FilterValueButton', function () {
         isNestedOpen={{ value: '', negate: false }}
         setIsNestedOpen={jest.fn()}
         negate={true}
+        series={mockUxSeries}
       />
     );
 
@@ -60,6 +62,7 @@ describe('FilterValueButton', function () {
         setIsNestedOpen={jest.fn()}
         negate={true}
         allSelectedValues={['Firefox']}
+        series={mockUxSeries}
       />
     );
 
@@ -86,6 +89,7 @@ describe('FilterValueButton', function () {
         setIsNestedOpen={jest.fn()}
         negate={false}
         allSelectedValues={['Chrome', 'Firefox']}
+        series={mockUxSeries}
       />
     );
 
@@ -110,6 +114,7 @@ describe('FilterValueButton', function () {
         setIsNestedOpen={jest.fn()}
         negate={true}
         allSelectedValues={['Chrome', 'Firefox']}
+        series={mockUxSeries}
       />
     );
 
@@ -136,6 +141,7 @@ describe('FilterValueButton', function () {
         negate={false}
         allSelectedValues={['Chrome', 'Firefox']}
         nestedField={USER_AGENT_VERSION}
+        series={mockUxSeries}
       />
     );
 
@@ -167,6 +173,7 @@ describe('FilterValueButton', function () {
         negate={false}
         allSelectedValues={['Chrome', 'Firefox']}
         nestedField={USER_AGENT_VERSION}
+        series={mockUxSeries}
       />
     );
 
@@ -201,6 +208,7 @@ describe('FilterValueButton', function () {
         negate={false}
         allSelectedValues={['Chrome', 'Firefox']}
         nestedField={USER_AGENT_VERSION}
+        series={mockUxSeries}
       />
     );
 
@@ -226,6 +234,7 @@ describe('FilterValueButton', function () {
         negate={true}
         allSelectedValues={['Firefox']}
         nestedField={USER_AGENT_VERSION}
+        series={mockUxSeries}
       />
     );
 

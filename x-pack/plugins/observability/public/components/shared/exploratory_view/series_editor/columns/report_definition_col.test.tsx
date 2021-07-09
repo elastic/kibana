@@ -12,6 +12,7 @@ import {
   mockAppIndexPattern,
   mockIndexPattern,
   mockUseValuesList,
+  mockUxSeries,
   render,
 } from '../../rtl_helpers';
 import { ReportDefinitionCol } from './report_definition_col';
@@ -28,22 +29,26 @@ describe('Series Builder ReportDefinitionCol', function () {
   });
 
   const initSeries = {
-    data: {
-      [seriesId]: {
+    data: [
+      {
+        order: 0,
+        name: seriesId,
         dataType: 'ux' as const,
-        reportType: 'data-distribution' as const,
         time: { from: 'now-30d', to: 'now' },
         reportDefinitions: { [SERVICE_NAME]: ['elastic-co'] },
       },
-    },
+    ],
   };
 
   mockUseValuesList([{ label: 'elastic-co', count: 10 }]);
 
   it('should render properly', async function () {
-    render(<ReportDefinitionCol seriesConfig={seriesConfig} seriesId={seriesId} />, {
-      initSeries,
-    });
+    render(
+      <ReportDefinitionCol seriesConfig={seriesConfig} seriesId={seriesId} series={mockUxSeries} />,
+      {
+        initSeries,
+      }
+    );
 
     screen.getByText('Web Application');
     screen.getByText('Environment');
@@ -52,9 +57,12 @@ describe('Series Builder ReportDefinitionCol', function () {
   });
 
   it('should render selected report definitions', async function () {
-    render(<ReportDefinitionCol seriesConfig={seriesConfig} seriesId={seriesId} />, {
-      initSeries,
-    });
+    render(
+      <ReportDefinitionCol seriesConfig={seriesConfig} seriesId={seriesId} series={mockUxSeries} />,
+      {
+        initSeries,
+      }
+    );
 
     expect(await screen.findByText('elastic-co')).toBeInTheDocument();
 
@@ -63,7 +71,7 @@ describe('Series Builder ReportDefinitionCol', function () {
 
   it('should be able to remove selected definition', async function () {
     const { setSeries } = render(
-      <ReportDefinitionCol seriesConfig={seriesConfig} seriesId={seriesId} />,
+      <ReportDefinitionCol seriesConfig={seriesConfig} seriesId={seriesId} series={mockUxSeries} />,
       { initSeries }
     );
 

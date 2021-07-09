@@ -66,6 +66,8 @@ export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null 
             getFiltersFromDefs(series.reportDefinitions)
           );
 
+          const color = `euiColorVis${series.order}`;
+
           layerConfigs.push({
             filters,
             indexPattern,
@@ -77,7 +79,7 @@ export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null 
             operationType: series.operationType,
             reportDefinitions: series.reportDefinitions ?? {},
             selectedMetricField: series.selectedMetricField,
-            color: series.color ?? theme.eui[`euiColorVis${series.order}`],
+            color: series.color ?? ((theme.eui as unknown) as Record<string, string>)[color],
           });
         }
       });

@@ -46,8 +46,8 @@ interface Props {
   label: string;
   value: string | string[];
   negate: boolean;
-  removeFilter: (field: string, value: string, notVal: boolean) => void;
-  invertFilter: (val: { field: string; value: string; negate: boolean }) => void;
+  removeFilter: (field: string, value: string | string[], notVal: boolean) => void;
+  invertFilter: (val: { field: string; value: string | string[]; negate: boolean }) => void;
   indexPattern: IndexPattern;
   allowExclusion?: boolean;
 }

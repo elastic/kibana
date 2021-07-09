@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { FilterExpanded } from './filter_expanded';
-import { mockAppIndexPattern, mockUseValuesList, render } from '../../rtl_helpers';
+import { mockUxSeries, mockAppIndexPattern, mockUseValuesList, render } from '../../rtl_helpers';
 import { USER_AGENT_NAME } from '../../configurations/constants/elasticsearch_fieldnames';
 
 describe('FilterExpanded', function () {
@@ -19,9 +19,9 @@ describe('FilterExpanded', function () {
     render(
       <FilterExpanded
         seriesId={'series-id'}
+        series={mockUxSeries}
         label={'Browser Family'}
         field={USER_AGENT_NAME}
-        goBack={jest.fn()}
         filters={[]}
       />,
       { initSeries }
@@ -36,9 +36,9 @@ describe('FilterExpanded', function () {
     render(
       <FilterExpanded
         seriesId={'series-id'}
+        series={mockUxSeries}
         label={'Browser Family'}
         field={USER_AGENT_NAME}
-        goBack={goBack}
         filters={[]}
       />,
       { initSeries }
@@ -58,14 +58,12 @@ describe('FilterExpanded', function () {
       { label: 'Firefox', count: 5 },
     ]);
 
-    const goBack = jest.fn();
-
     render(
       <FilterExpanded
         seriesId={'series-id'}
+        series={mockUxSeries}
         label={'Browser Family'}
         field={USER_AGENT_NAME}
-        goBack={goBack}
         filters={[]}
       />,
       { initSeries }
@@ -90,9 +88,9 @@ describe('FilterExpanded', function () {
     render(
       <FilterExpanded
         seriesId={'series-id'}
+        series={mockUxSeries}
         label={'Browser Family'}
         field={USER_AGENT_NAME}
-        goBack={jest.fn()}
         filters={[]}
       />,
       { initSeries }

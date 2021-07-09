@@ -11,19 +11,17 @@ import { i18n } from '@kbn/i18n';
 import { useRouteMatch } from 'react-router-dom';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { USE_BREAK_DOWN_COLUMN } from '../../configurations/constants';
-import { SeriesConfig } from '../../types';
+import { SeriesConfig, SeriesUrl } from '../../types';
 
 interface Props {
   seriesId: string;
-  breakdowns: string[];
+  series: SeriesUrl;
   seriesConfig: SeriesConfig;
 }
 
-export function Breakdowns({ seriesConfig, seriesId }: Props) {
-  const { setSeries, getSeries } = useSeriesStorage();
+export function Breakdowns({ seriesConfig, seriesId, series }: Props) {
+  const { setSeries } = useSeriesStorage();
   const isPreview = !!useRouteMatch('/exploratory-view/preview');
-
-  const series = getSeries(seriesId);
 
   const selectedBreakdown = series.breakdown;
   const NO_BREAKDOWN = 'no_breakdown';
@@ -41,6 +39,10 @@ export function Breakdowns({ seriesConfig, seriesId }: Props) {
       });
     }
   };
+
+  if (!seriesConfig) {
+    return null;
+  }
 
   const hasUseBreakdownColumn = seriesConfig.xAxisColumn.sourceField === USE_BREAK_DOWN_COLUMN;
 

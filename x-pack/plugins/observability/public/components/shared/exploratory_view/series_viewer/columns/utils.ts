@@ -63,7 +63,7 @@ export const relativeUnitsFromLargestToSmallest = timeUnitIds.reverse();
  *
  * This function accepts two strings start and end time. I the start value is now then it uses the end value to parse.
  */
-export const parseTimeParts = (start: string, end: string): QuickSelect => {
+export function parseTimeParts(start: string, end: string): QuickSelect | null {
   const value = isNow(start) ? end : start;
 
   const matches = isString(value) && value.match(/now(([-+])(\d+)([smhdwMy])(\/[smhdwMy])?)?/);
@@ -100,5 +100,5 @@ export const parseTimeParts = (start: string, end: string): QuickSelect => {
     }
   }
 
-  return results;
-};
+  return null;
+}

@@ -53,8 +53,10 @@ export function UXActionMenu({
           order: 0,
           dataType: 'ux',
           name: `${serviceName}-page-views`,
-          time: { from: rangeFrom, to: rangeTo },
-          reportDefinitions: { [SERVICE_NAME]: [serviceName] },
+          time: { from: rangeFrom!, to: rangeTo! },
+          reportDefinitions: {
+            [SERVICE_NAME]: serviceName ? [serviceName] : [],
+          },
           selectedMetricField: 'Records',
         },
       ],

@@ -13,6 +13,7 @@ import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { useQuickTimeRanges } from '../../../../../hooks/use_quick_time_ranges';
 import { parseTimeParts } from '../../series_viewer/columns/utils';
 import { useUiSetting } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { SeriesUrl } from '../../types';
 
 export interface TimePickerTime {
   from: string;
@@ -25,21 +26,21 @@ export interface TimePickerQuickRange extends TimePickerTime {
 
 interface Props {
   seriesId: string;
-  readonly: boolean;
+  series: SeriesUrl;
+  readonly?: boolean;
 }
 const readableUnit: Record<string, string> = {
   m: 'Minutes',
   h: 'Hour',
   d: 'Day',
 };
-export function SeriesDatePicker({ seriesId, readonly = true }: Props) {
+
+export function SeriesDatePicker({ series, seriesId, readonly = true }: Props) {
   const { onRefreshTimeRange } = useHasData();
 
   const commonlyUsedRanges = useQuickTimeRanges();
 
-  const { getSeries, setSeries, reportType, allSeries, firstSeries } = useSeriesStorage();
-
-  const series = getSeries(seriesId);
+  const { setSeries, reportType, allSeries, firstSeries } = useSeriesStorage();
 
   function onTimeChange({ start, end }: { start: string; end: string }) {
     onRefreshTimeRange();
@@ -52,7 +53,7 @@ export function SeriesDatePicker({ seriesId, readonly = true }: Props) {
     }
   }
 
-  const seriesTime = series.time ?? firstSeries.time;
+  const seriesTime = series.time ?? firstSeries!.time;
 
   const dateFormat = useUiSetting<string>('dateFormat').replace('ss.SSS', 'ss');
 

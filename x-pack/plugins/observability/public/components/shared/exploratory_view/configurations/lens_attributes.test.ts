@@ -38,6 +38,8 @@ describe('Lens Attribute', () => {
     indexPattern: mockIndexPattern,
     reportDefinitions: {},
     time: { from: 'now-15m', to: 'now' },
+    color: 'green',
+    name: 'test-series',
   };
 
   beforeEach(() => {
@@ -63,6 +65,8 @@ describe('Lens Attribute', () => {
         indexPattern: mockIndexPattern,
         reportDefinitions: { 'service.name': ['elastic-co'] },
         time: { from: 'now-15m', to: 'now' },
+        color: 'green',
+        name: 'test-series',
       },
     ]);
 
@@ -135,6 +139,8 @@ describe('Lens Attribute', () => {
       indexPattern: mockIndexPattern,
       reportDefinitions: { 'performance.metric': [LCP_FIELD] },
       time: { from: 'now-15m', to: 'now' },
+      color: 'green',
+      name: 'test-series',
     };
 
     lnsAttr = new LensAttributes([layerConfig1]);
@@ -403,6 +409,8 @@ describe('Lens Attribute', () => {
         reportDefinitions: { 'performance.metric': [LCP_FIELD] },
         breakdown: USER_AGENT_NAME,
         time: { from: 'now-15m', to: 'now' },
+        color: 'green',
+        name: 'test-series',
       };
 
       lnsAttr = new LensAttributes([layerConfig1]);
@@ -589,6 +597,8 @@ describe('Lens Attribute', () => {
         indexPattern: mockIndexPattern,
         reportDefinitions: { 'performance.metric': [LCP_FIELD] },
         time: { from: 'now-15m', to: 'now' },
+        color: 'green',
+        name: 'test-series',
       };
 
       const filters = lnsAttr.getLayerFilters(layerConfig1, 2);

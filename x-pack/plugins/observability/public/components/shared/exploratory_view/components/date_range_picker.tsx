@@ -12,24 +12,19 @@ import DateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
 import { useSeriesStorage } from '../hooks/use_series_storage';
 import { useUiSetting } from '../../../../../../../../src/plugins/kibana_react/public';
+import { SeriesUrl } from '../types';
 
 export const parseAbsoluteDate = (date: string, options = {}) => {
   return DateMath.parse(date, options)!;
 };
-export function DateRangePicker({ seriesId }: { seriesId: string }) {
-  const { firstSeries, getSeries, setSeries, reportType } = useSeriesStorage();
+export function DateRangePicker({ seriesId, series }: { seriesId: string; series: SeriesUrl }) {
+  const { firstSeries, setSeries, reportType } = useSeriesStorage();
   const dateFormat = useUiSetting<string>('dateFormat');
-
-  const series = getSeries(seriesId);
-
-  if (!series || !firstSeries?.time) {
-    return null;
-  }
 
   const seriesFrom = series.time?.from;
   const seriesTo = series.time?.to;
 
-  const { from, to } = firstSeries.time;
+  const { from, to } = firstSeries!.time;
 
   const startDate = parseAbsoluteDate(seriesFrom ?? from)!;
   const endDate = parseAbsoluteDate(seriesTo ?? to, { roundUp: true })!;

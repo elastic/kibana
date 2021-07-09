@@ -11,7 +11,7 @@ import { EuiTabs, EuiTab, EuiButtonIcon } from '@elastic/eui';
 import { useHistory, useParams } from 'react-router-dom';
 import { SeriesEditor } from '../series_editor/series_editor';
 import { SeriesViewer } from '../series_viewer/series_viewer';
-import { TypedLensByValueInput } from '../../../../../../lens/public';
+import { PanelId } from '../exploratory_view';
 
 const tabs = [
   {
@@ -29,10 +29,9 @@ type ViewTab = 'preview' | 'configure';
 export function SeriesViews({
   seriesBuilderRef,
   onSeriesPanelCollapse,
-  lensAttributes,
 }: {
   seriesBuilderRef: RefObject<HTMLDivElement>;
-  lensAttributes: TypedLensByValueInput['attributes'] | null;
+  onSeriesPanelCollapse: (panel: PanelId) => void;
 }) {
   const { mode } = useParams<{ mode: ViewTab }>();
 
@@ -52,7 +51,6 @@ export function SeriesViews({
   const renderTabs = () => {
     return tabs.map((tab, index) => (
       <EuiTab
-        {...(tab.href && { href: tab.href, target: '_blank' })}
         onClick={() => onSelectedTabChanged(tab.id)}
         isSelected={tab.id === selectedTabId}
         key={index}

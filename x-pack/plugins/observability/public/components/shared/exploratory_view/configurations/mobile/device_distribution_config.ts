@@ -38,13 +38,6 @@ export function getMobileDeviceDistributionConfig({ indexPattern }: ConfigProps)
       ...MobileFields,
       [SERVICE_NAME]: MOBILE_APP,
     },
-    metricOptions: [
-      {
-        id: 'labels.device_id',
-        field: 'labels.device_id',
-        label: NUMBER_OF_DEVICES,
-      },
-    ],
     definitionFields: [SERVICE_NAME],
     metricOptions: [
       {

@@ -8,21 +8,21 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
-import { SeriesConfig } from '../../types';
+import { SeriesConfig, SeriesUrl } from '../../types';
 import { ReportDefinitionField } from './report_definition_field';
 
 export function ReportDefinitionCol({
-  seriesConfig,
   seriesId,
+  series,
+  seriesConfig,
 }: {
-  seriesConfig: SeriesConfig;
   seriesId: string;
+  series: SeriesUrl;
+  seriesConfig: SeriesConfig;
 }) {
-  const { getSeries, setSeries } = useSeriesStorage();
+  const { setSeries } = useSeriesStorage();
 
-  const series = getSeries(seriesId);
-
-  const { reportDefinitions: selectedReportDefinitions = {} } = series ?? {};
+  const { reportDefinitions: selectedReportDefinitions = {} } = series;
 
   const { definitionFields } = seriesConfig;
 
@@ -47,6 +47,7 @@ export function ReportDefinitionCol({
         <EuiFlexItem key={field} grow={1}>
           <ReportDefinitionField
             seriesId={seriesId}
+            series={series}
             seriesConfig={seriesConfig}
             field={field}
             onChange={onChange}

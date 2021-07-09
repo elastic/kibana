@@ -29,7 +29,7 @@ export function RemoveSeries({ seriesId }: Props) {
       color="text"
       onClick={onClick}
       size="s"
-      isDisabled={firstSeries.name === seriesId && allSeries.length > 1}
+      isDisabled={firstSeries!.name === seriesId && allSeries.length > 1}
     />
   );
 }

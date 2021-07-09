@@ -8,22 +8,18 @@
 import React, { Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
-import { useSeriesStorage } from '../hooks/use_series_storage';
 import { FilterLabel } from '../components/filter_label';
-import { SeriesConfig, UrlFilter } from '../types';
+import { SeriesConfig, SeriesUrl, UrlFilter } from '../types';
 import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
 import { useSeriesFilters } from '../hooks/use_series_filters';
 import { getFiltersFromDefs } from '../hooks/use_lens_attributes';
 
 interface Props {
   seriesId: string;
+  series: SeriesUrl;
   seriesConfig: SeriesConfig;
 }
-export function SelectedFilters({ seriesId, seriesConfig }: Props) {
-  const { getSeries } = useSeriesStorage();
-
-  const series = getSeries(seriesId);
-
+export function SelectedFilters({ seriesId, series, seriesConfig }: Props) {
   const { reportDefinitions = {} } = series;
 
   const { labels } = seriesConfig;
@@ -39,7 +35,7 @@ export function SelectedFilters({ seriesId, seriesConfig }: Props) {
     definitionFilters = [];
   }
 
-  const { removeFilter } = useSeriesFilters({ seriesId });
+  const { removeFilter } = useSeriesFilters({ seriesId, series });
 
   const { indexPattern } = useAppIndexPatternContext(series.dataType);
 
@@ -52,6 +48,7 @@ export function SelectedFilters({ seriesId, seriesConfig }: Props) {
               <EuiFlexItem key={field + val} grow={false} style={{ maxWidth: 300 }}>
                 <FilterLabel
                   seriesId={seriesId}
+                  series={series}
                   field={field}
                   label={labels[field]}
                   value={val}
@@ -64,6 +61,7 @@ export function SelectedFilters({ seriesId, seriesConfig }: Props) {
             {(notValues ?? []).map((val) => (
               <EuiFlexItem key={field + val} grow={false} style={{ maxWidth: 300 }}>
                 <FilterLabel
+                  series={series}
                   seriesId={seriesId}
                   field={field}
                   label={labels[field]}
@@ -81,6 +79,7 @@ export function SelectedFilters({ seriesId, seriesConfig }: Props) {
           values ? (
             <EuiFlexItem key={field} grow={false} style={{ maxWidth: 350 }}>
               <FilterLabel
+                series={series}
                 seriesId={seriesId}
                 field={field}
                 label={labels[field]}

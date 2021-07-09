@@ -16,7 +16,7 @@ import { combineTimeRanges } from '../lens_embeddable';
 import { ExpViewActionMenu } from '../components/action_menu';
 
 interface Props {
-  seriesId: string;
+  seriesId?: string;
   lastUpdated?: number;
   lensAttributes: TypedLensByValueInput['attributes'] | null;
 }
@@ -24,7 +24,7 @@ interface Props {
 export function ExploratoryViewHeader({ seriesId, lensAttributes, lastUpdated }: Props) {
   const { getSeries, allSeries, setLastRefresh, reportType } = useSeriesStorage();
 
-  const series = getSeries(seriesId);
+  const series = seriesId ? getSeries(seriesId) : undefined;
 
   const timeRange = combineTimeRanges(reportType, allSeries, series);
 

@@ -8,20 +8,19 @@
 import React from 'react';
 import { EuiSuperSelect } from '@elastic/eui';
 import { useSeriesStorage } from '../hooks/use_series_storage';
-import { SeriesConfig } from '../types';
+import { SeriesConfig, SeriesUrl } from '../types';
 
 interface Props {
   seriesId: string;
+  series: SeriesUrl;
   defaultValue?: string;
   metricOptions: SeriesConfig['metricOptions'];
 }
 
 const SELECT_REPORT_METRIC = 'SELECT_REPORT_METRIC';
 
-export function ReportMetricOptions({ seriesId, metricOptions }: Props) {
-  const { getSeries, setSeries } = useSeriesStorage();
-
-  const series = getSeries(seriesId);
+export function ReportMetricOptions({ seriesId, series, metricOptions }: Props) {
+  const { setSeries } = useSeriesStorage();
 
   const onChange = (value: string) => {
     setSeries(seriesId, {

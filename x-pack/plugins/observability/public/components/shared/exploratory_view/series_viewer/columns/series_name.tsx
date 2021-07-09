@@ -8,17 +8,17 @@
 import React, { useState, ChangeEvent } from 'react';
 import { EuiFieldText } from '@elastic/eui';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
+import { SeriesUrl } from '../../types';
 
 interface Props {
   seriesId: string;
+  series: SeriesUrl;
 }
 
-export function SeriesName({ seriesId }: Props) {
-  const { setSeries, getSeries } = useSeriesStorage();
+export function SeriesName({ series, seriesId }: Props) {
+  const { setSeries } = useSeriesStorage();
 
   const [value, setValue] = useState(seriesId);
-
-  const series = getSeries(seriesId);
 
   const onChange = (e: ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value);
@@ -29,10 +29,6 @@ export function SeriesName({ seriesId }: Props) {
       setSeries(series.name, { ...series, name: value });
     }
   };
-
-  if (!series) {
-    return null;
-  }
 
   return <EuiFieldText value={value} onChange={onChange} fullWidth onBlur={() => onSave()} />;
 }

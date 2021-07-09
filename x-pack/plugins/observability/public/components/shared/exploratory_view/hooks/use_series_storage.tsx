@@ -23,16 +23,16 @@ import { OperationType, SeriesType } from '../../../../../../lens/public';
 import { URL_KEYS } from '../configurations/constants/url_constants';
 
 export interface SeriesContextValue {
-  firstSeries: SeriesUrl;
+  firstSeries?: SeriesUrl;
+  firstSeriesId?: string;
   autoApply: boolean;
   lastRefresh: number;
   setLastRefresh: (val: number) => void;
   setAutoApply: (val: boolean) => void;
-  applyChanges: (val: boolean) => void;
-  firstSeriesId: string;
+  applyChanges: () => void;
   allSeries: AllSeries;
   setSeries: (seriesIdN: string, newValue: SeriesUrl) => void;
-  getSeries: (seriesId: string) => SeriesUrl;
+  getSeries: (seriesId: string) => SeriesUrl | undefined;
   removeSeries: (seriesId: string) => void;
   setReportType: (reportType: string) => void;
   storage: IKbnUrlStateStorage | ISessionStorageStateStorage;
@@ -67,7 +67,7 @@ export function UrlStorageContextProvider({
     () => (storage as IKbnUrlStateStorage).get(reportTypeKey) ?? ''
   );
 
-  const [firstSeriesId, setFirstSeriesId] = useState('');
+  const [firstSeriesId, setFirstSeriesId] = useState<string>();
 
   const [firstSeries, setFirstSeries] = useState<SeriesUrl>();
   const isPreview = !!useRouteMatch('/exploratory-view/preview');
@@ -75,8 +75,10 @@ export function UrlStorageContextProvider({
   useEffect(() => {
     const allShortSeries = allSeries.map((series) => convertToShortUrl(series));
 
-    setFirstSeriesId(allSeries.find((seriesT) => seriesT.order === 0)?.name);
-    setFirstSeries(allSeries.find((seriesT) => seriesT.order === 0) ?? {});
+    const firstSeriesT = allSeries.find((seriesT) => seriesT.order === 0);
+
+    setFirstSeriesId(firstSeriesT?.name);
+    setFirstSeries(firstSeriesT);
 
     if (autoApply) {
       (storage as IKbnUrlStateStorage).set(allSeriesKey, allShortSeries);
@@ -112,7 +114,7 @@ export function UrlStorageContextProvider({
 
   const getSeries = useCallback(
     (seriesName: string) => {
-      return allSeries.find(({ name }) => name === seriesName) ?? {};
+      return allSeries.find(({ name }) => name === seriesName);
     },
     [allSeries]
   );

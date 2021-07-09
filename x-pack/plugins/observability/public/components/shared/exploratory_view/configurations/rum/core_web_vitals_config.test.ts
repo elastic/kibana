@@ -24,10 +24,12 @@ describe('Core web vital config test', function () {
 
   const layerConfig: LayerConfig = {
     seriesConfig,
-    indexPattern: mockIndexPattern,
-    reportDefinitions: { [SERVICE_NAME]: ['elastic-co'] },
-    time: { from: 'now-15m', to: 'now' },
+    color: 'green',
+    name: 'test-series',
     breakdown: USER_AGENT_OS,
+    indexPattern: mockIndexPattern,
+    time: { from: 'now-15m', to: 'now' },
+    reportDefinitions: { [SERVICE_NAME]: ['elastic-co'] },
   };
 
   beforeEach(() => {

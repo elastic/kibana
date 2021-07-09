@@ -10,14 +10,15 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RemoveSeries } from './remove_series';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
+import { SeriesUrl } from '../../types';
 
 interface Props {
   seriesId: string;
+  series: SeriesUrl;
   editorMode?: boolean;
 }
-export function SeriesActions({ seriesId, editorMode = false }: Props) {
-  const { getSeries, setSeries, allSeries } = useSeriesStorage();
-  const series = getSeries(seriesId);
+export function SeriesActions({ seriesId, series, editorMode = false }: Props) {
+  const { setSeries, allSeries } = useSeriesStorage();
 
   const copySeries = () => {
     let copySeriesId: string = `${seriesId}-copy`;

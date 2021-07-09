@@ -18,7 +18,7 @@ export function ExpViewActionMenu({
   timeRange,
   lensAttributes,
 }: {
-  timeRange: { from: string; to: string };
+  timeRange?: { from: string; to: string };
   lensAttributes: TypedLensByValueInput['attributes'] | null;
 }) {
   const kServices = useKibana<ObservabilityAppServices>().services;

@@ -7,12 +7,18 @@
 
 import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
-import { render } from '../../rtl_helpers';
+import { mockUxSeries, render } from '../../rtl_helpers';
 import { SeriesChartTypesSelect, XYChartTypesSelect } from './chart_types';
 
 describe.skip('SeriesChartTypesSelect', function () {
   it('should render properly', async function () {
-    render(<SeriesChartTypesSelect seriesId={'series-id'} defaultChartType={'line'} />);
+    render(
+      <SeriesChartTypesSelect
+        seriesId={'series-id'}
+        defaultChartType={'line'}
+        series={mockUxSeries}
+      />
+    );
 
     await waitFor(() => {
       screen.getByText(/chart type/i);
@@ -21,7 +27,11 @@ describe.skip('SeriesChartTypesSelect', function () {
 
   it('should call set series on change', async function () {
     const { setSeries } = render(
-      <SeriesChartTypesSelect seriesId={'series-id'} defaultChartType={'line'} />
+      <SeriesChartTypesSelect
+        seriesId={'series-id'}
+        defaultChartType={'line'}
+        series={mockUxSeries}
+      />
     );
 
     await waitFor(() => {

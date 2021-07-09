@@ -11,10 +11,9 @@ import { isEmpty } from 'lodash';
 import { EuiBasicTable, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SeriesFilter } from './columns/series_filter';
-import { SeriesConfig } from '../types';
+import { SeriesConfig, SeriesUrl } from '../types';
 import { useSeriesStorage } from '../hooks/use_series_storage';
 import { getDefaultConfigs } from '../configurations/default_configs';
-import { DatePickerCol } from './columns/date_picker_col';
 import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
 import { SeriesName } from './columns/series_name';
 import { SeriesInfo } from './columns/series_info';
@@ -22,8 +21,9 @@ import { Breakdowns } from './columns/breakdowns';
 import { SeriesDatePicker } from '../components/series_date_picker';
 
 interface EditItem {
-  seriesConfig: SeriesConfig;
   id: string;
+  series: SeriesUrl;
+  seriesConfig: SeriesConfig;
 }
 
 export function SeriesViewer() {
@@ -34,8 +34,8 @@ export function SeriesViewer() {
       name: '',
       field: 'id',
       width: '10%',
-      render: (seriesId: string, { seriesConfig, id }: EditItem) => (
-        <SeriesInfo seriesId={seriesId} seriesConfig={seriesConfig} />
+      render: (seriesId: string, { seriesConfig, series }: EditItem) => (
+        <SeriesInfo seriesId={seriesId} series={series} seriesConfig={seriesConfig} />
       ),
     },
     {
@@ -44,7 +44,9 @@ export function SeriesViewer() {
       }),
       field: 'id',
       width: '15%',
-      render: (seriesId: string) => <SeriesName seriesId={seriesId} />,
+      render: (seriesId: string, { series }: EditItem) => (
+        <SeriesName seriesId={seriesId} series={series} />
+      ),
     },
     {
       name: i18n.translate('xpack.observability.expView.seriesEditor.filters', {
@@ -52,8 +54,8 @@ export function SeriesViewer() {
       }),
       field: 'id',
       width: '25%',
-      render: (seriesId: string, { seriesConfig, id }: EditItem) => (
-        <SeriesFilter seriesId={id} seriesConfig={seriesConfig} />
+      render: (seriesId: string, { series, seriesConfig }: EditItem) => (
+        <SeriesFilter seriesId={seriesId} series={series} seriesConfig={seriesConfig} />
       ),
     },
     {
@@ -62,8 +64,8 @@ export function SeriesViewer() {
       }),
       field: 'seriesId',
       width: '10%',
-      render: (seriesId: string, { seriesConfig, id }: EditItem) => (
-        <Breakdowns seriesId={seriesId} seriesConfig={seriesConfig} />
+      render: (seriesId: string, { seriesConfig, series }: EditItem) => (
+        <Breakdowns seriesId={seriesId} seriesConfig={seriesConfig} series={series} />
       ),
     },
     {
@@ -77,8 +79,8 @@ export function SeriesViewer() {
       ),
       width: '35%',
       field: 'id',
-      render: (seriesId: string, item: EditItem) => (
-        <SeriesDatePicker seriesId={seriesId} readonly={true} />
+      render: (seriesId: string, { series }: EditItem) => (
+        <SeriesDatePicker seriesId={seriesId} series={series} readonly={true} />
       ),
     },
   ];
@@ -89,6 +91,7 @@ export function SeriesViewer() {
   allSeries.forEach((series) => {
     if (indexPatterns[series.dataType] && !isEmpty(series.reportDefinitions)) {
       items.push({
+        series,
         id: series.name,
         seriesConfig: getDefaultConfigs({
           reportType,
@@ -111,7 +114,7 @@ export function SeriesViewer() {
         rowHeader="firstName"
         columns={columns}
         noItemsMessage={i18n.translate('xpack.observability.expView.seriesEditor.notFound', {
-          defaultMessage: 'No series found, please add a series.',
+          defaultMessage: 'No series found, Please add a series.',
         })}
         cellProps={{
           style: {

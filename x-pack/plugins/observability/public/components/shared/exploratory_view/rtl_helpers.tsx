@@ -24,7 +24,7 @@ import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/
 import { lensPluginMock } from '../../../../../lens/public/mocks';
 import * as useAppIndexPatternHook from './hooks/use_app_index_pattern';
 import { IndexPatternContextProvider } from './hooks/use_app_index_pattern';
-import { AllSeries, UrlStorageContext } from './hooks/use_series_storage';
+import { AllSeries, SeriesContextValue, UrlStorageContext } from './hooks/use_series_storage';
 
 import * as fetcherHook from '../../../hooks/use_fetcher';
 import * as useSeriesFilterHook from './hooks/use_series_filters';
@@ -39,7 +39,7 @@ import {
   IndexPattern,
   IndexPatternsContract,
 } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
-import { AppDataType, UrlFilter } from './types';
+import { AppDataType, SeriesUrl, UrlFilter } from './types';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { ListItem } from '../../../hooks/use_values_list';
 
@@ -252,6 +252,14 @@ export const mockUseValuesList = (values?: ListItem[]) => {
   return { spy, onRefreshTimeRange };
 };
 
+export const mockUxSeries = {
+  order: 0,
+  name: 'performance-distribution',
+  dataType: 'ux',
+  breakdown: 'user_agent.name',
+  time: { from: 'now-15m', to: 'now' },
+} as SeriesUrl;
+
 function mockSeriesStorageContext({
   data,
   filters,
@@ -261,34 +269,38 @@ function mockSeriesStorageContext({
   filters?: UrlFilter[];
   breakdown?: string;
 }) {
-  const mockDataSeries = data || {
-    'performance-distribution': {
-      reportType: 'data-distribution',
-      dataType: 'ux',
-      breakdown: breakdown || 'user_agent.name',
-      time: { from: 'now-15m', to: 'now' },
-      ...(filters ? { filters } : {}),
-    },
+  const testSeries = {
+    ...mockUxSeries,
+    breakdown: breakdown || 'user_agent.name',
+    ...(filters ? { filters } : {}),
   };
+
+  const mockDataSeries = data || [testSeries];
+
   const allSeriesIds = Object.keys(mockDataSeries);
   const firstSeriesId = allSeriesIds?.[0];
-
-  const series = mockDataSeries[firstSeriesId];
 
   const removeSeries = jest.fn();
   const setSeries = jest.fn();
 
-  const getSeries = jest.fn().mockReturnValue(series);
+  const getSeries = jest.fn().mockReturnValue(testSeries);
 
   return {
     firstSeriesId,
-    allSeriesIds,
     removeSeries,
     setSeries,
     getSeries,
-    firstSeries: mockDataSeries[firstSeriesId],
+    autoApply: true,
+    reportType: 'data-distribution',
+    lastRefresh: Date.now(),
+    setLastRefresh: jest.fn(),
+    setAutoApply: jest.fn(),
+    applyChanges: jest.fn(),
+    firstSeries: mockDataSeries[0],
     allSeries: mockDataSeries,
-  };
+    setReportType: jest.fn(),
+    storage: {} as any,
+  } as SeriesContextValue;
 }
 
 export function mockUseSeriesFilter() {

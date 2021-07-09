@@ -4,11 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef, useState } from 'react';
 import { EuiButtonEmpty, EuiPanel, EuiResizableContainer, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
 import { useRouteMatch } from 'react-router-dom';
+import { PanelDirection } from '@elastic/eui/src/components/resizable_container/types';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { ExploratoryViewHeader } from './header/header';
@@ -19,6 +21,8 @@ import { useAppIndexPatternContext } from './hooks/use_app_index_pattern';
 import { SeriesViews } from './views/series_views';
 import { LensEmbeddable } from './lens_embeddable';
 import { EmptyView } from './components/empty_view';
+
+export type PanelId = 'seriesPanel' | 'chartPanel';
 
 export function ExploratoryView({
   saveAttributes,
@@ -42,7 +46,7 @@ export function ExploratoryView({
 
   const { loadIndexPattern, loading } = useAppIndexPatternContext();
 
-  const { firstSeriesId, firstSeries, allSeries, lastRefresh } = useSeriesStorage();
+  const { firstSeriesId, firstSeries, allSeries, lastRefresh, reportType } = useSeriesStorage();
 
   const lensAttributesT = useLensAttributes();
 
@@ -74,7 +78,7 @@ export function ExploratoryView({
     setHeightOffset();
   });
 
-  const collapseFn = useRef(() => {});
+  const collapseFn = useRef<(id: PanelId, direction: PanelDirection) => void>();
 
   const [hiddenPanel, setHiddenPanel] = useState('');
 
@@ -84,9 +88,11 @@ export function ExploratoryView({
     setHiddenPanel((prevState) => (panelId === prevState ? '' : panelId));
   };
 
-  const onChange = (panelId: string) => {
+  const onChange = (panelId: PanelId) => {
     onCollapse(panelId);
-    collapseFn.current(panelId, panelId === 'seriesPanel' ? 'right' : 'left');
+    if (collapseFn.current) {
+      collapseFn.current(panelId, panelId === 'seriesPanel' ? 'right' : 'left');
+    }
   };
 
   return (
@@ -105,7 +111,7 @@ export function ExploratoryView({
               onToggleCollapsed={onCollapse}
             >
               {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => {
-                collapseFn.current = (id, direction = 'left') => togglePanel(id, { direction });
+                collapseFn.current = (id, direction) => togglePanel?.(id, { direction });
 
                 return (
                   <>
@@ -121,7 +127,7 @@ export function ExploratoryView({
                           lensAttributes={lensAttributes}
                         />
                       ) : (
-                        <EmptyView series={firstSeries} loading={loading} />
+                        <EmptyView series={firstSeries} loading={loading} reportType={reportType} />
                       )}
                     </EuiResizablePanel>
                     <EuiResizableButton />
@@ -148,7 +154,6 @@ export function ExploratoryView({
                       <SeriesViews
                         seriesBuilderRef={seriesBuilderRef}
                         onSeriesPanelCollapse={onChange}
-                        lensAttributes={lensAttributes}
                       />
                     </EuiResizablePanel>
                   </>

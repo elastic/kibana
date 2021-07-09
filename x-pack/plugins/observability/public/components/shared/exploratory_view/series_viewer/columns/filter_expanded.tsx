@@ -20,8 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { map } from 'lodash';
 import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
-import { useSeriesStorage } from '../../hooks/use_series_storage';
-import { SeriesConfig, UrlFilter } from '../../types';
+import { SeriesConfig, SeriesUrl, UrlFilter } from '../../types';
 import { FilterValueButton } from './filter_value_btn';
 import { useValuesList } from '../../../../../hooks/use_values_list';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
@@ -31,6 +30,7 @@ import { ExistsFilter } from '../../../../../../../../../src/plugins/data/common
 
 interface Props {
   seriesId: string;
+  series: SeriesUrl;
   label: string;
   field: string;
   isNegated?: boolean;
@@ -40,6 +40,7 @@ interface Props {
 
 export function FilterExpanded({
   seriesId,
+  series,
   field,
   label,
   nestedField,
@@ -50,10 +51,6 @@ export function FilterExpanded({
 
   const [isOpen, setIsOpen] = useState(false);
   const [isNestedOpen, setIsNestedOpen] = useState({ value: '', negate: false });
-
-  const { getSeries } = useSeriesStorage();
-
-  const series = getSeries(seriesId);
 
   const queryFilters: ESFilter[] = [];
 
@@ -129,6 +126,7 @@ export function FilterExpanded({
                     negate={true}
                     nestedField={nestedField}
                     seriesId={seriesId}
+                    series={series}
                     isNestedOpen={isNestedOpen}
                     setIsNestedOpen={setIsNestedOpen}
                   />
@@ -139,6 +137,7 @@ export function FilterExpanded({
                   allSelectedValues={currFilter?.values}
                   nestedField={nestedField}
                   seriesId={seriesId}
+                  series={series}
                   negate={false}
                   isNestedOpen={isNestedOpen}
                   setIsNestedOpen={setIsNestedOpen}

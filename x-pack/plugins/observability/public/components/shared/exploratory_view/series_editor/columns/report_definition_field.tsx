@@ -8,27 +8,23 @@
 import React, { useMemo } from 'react';
 import { isEmpty } from 'lodash';
 import FieldValueSuggestions from '../../../field_value_suggestions';
-import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
 import { ESFilter } from '../../../../../../../../../src/core/types/elasticsearch';
 import { PersistableFilter } from '../../../../../../../lens/common';
 import { ExistsFilter } from '../../../../../../../../../src/plugins/data/common/es_query/filters';
 import { buildPhrasesFilter } from '../../configurations/utils';
-import { SeriesConfig } from '../../types';
+import { SeriesConfig, SeriesUrl } from '../../types';
 import { ALL_VALUES_SELECTED } from '../../../field_value_suggestions/field_value_combobox';
 
 interface Props {
   seriesId: string;
+  series: SeriesUrl;
   field: string;
   seriesConfig: SeriesConfig;
   onChange: (field: string, value?: string[]) => void;
 }
 
-export function ReportDefinitionField({ seriesId, field, seriesConfig, onChange }: Props) {
-  const { getSeries } = useSeriesStorage();
-
-  const series = getSeries(seriesId);
-
+export function ReportDefinitionField({ series, field, seriesConfig, onChange }: Props) {
   const { indexPattern } = useAppIndexPatternContext(series.dataType);
 
   const { reportDefinitions: selectedReportDefinitions = {} } = series;

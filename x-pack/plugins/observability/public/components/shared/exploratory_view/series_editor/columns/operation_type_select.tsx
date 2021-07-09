@@ -11,17 +11,18 @@ import { EuiSuperSelect } from '@elastic/eui';
 
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { OperationType } from '../../../../../../../lens/public';
+import { SeriesUrl } from '../../types';
 
 export function OperationTypeSelect({
   seriesId,
+  series,
   defaultOperationType,
 }: {
   seriesId: string;
+  series: SeriesUrl;
   defaultOperationType?: OperationType;
 }) {
-  const { getSeries, setSeries } = useSeriesStorage();
-
-  const series = getSeries(seriesId);
+  const { setSeries } = useSeriesStorage();
 
   const operationType = series?.operationType;
 

@@ -6,18 +6,16 @@
  */
 
 import React, { useState } from 'react';
-
 import { EuiColorPicker, EuiFormRow, EuiIcon, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { useTheme } from '../../../../hooks/use_theme';
 import { useSeriesStorage } from '../hooks/use_series_storage';
 import { ToolbarButton } from '../../../../../../../../src/plugins/kibana_react/public';
+import { SeriesUrl } from '../types';
 
-export function SeriesColorPicker({ seriesId }: { seriesId: string }) {
+export function SeriesColorPicker({ seriesId, series }: { seriesId: string; series: SeriesUrl }) {
   const theme = useTheme();
 
-  const { getSeries, setSeries } = useSeriesStorage();
-
-  const series = getSeries(seriesId);
+  const { setSeries } = useSeriesStorage();
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -25,7 +23,9 @@ export function SeriesColorPicker({ seriesId }: { seriesId: string }) {
     setSeries(seriesId, { ...series, color: colorN });
   };
 
-  const color = series.color ?? theme.eui[`euiColorVis${series.order}`];
+  const color =
+    series.color ??
+    ((theme.eui as unknown) as Record<string, string>)[`euiColorVis${series.order}`];
 
   const button = (
     <EuiToolTip content={'Edit color for series'}>

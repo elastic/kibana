@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiButtonEmpty, EuiFlexItem, EuiFlexGroup, EuiFilterGroup } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
 import { FilterExpanded } from './filter_expanded';
-import { SeriesConfig } from '../../types';
+import { SeriesConfig, SeriesUrl } from '../../types';
 import { FieldLabels } from '../../configurations/constants/constants';
 import { SelectedFilters } from '../selected_filters';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
@@ -18,8 +18,7 @@ import { useSeriesStorage } from '../../hooks/use_series_storage';
 interface Props {
   seriesId: string;
   seriesConfig: SeriesConfig;
-  isNew?: boolean;
-  labels?: Record<string, string>;
+  series: SeriesUrl;
 }
 
 export interface Field {
@@ -29,29 +28,29 @@ export interface Field {
   isNegated?: boolean;
 }
 
-export function SeriesFilter({ seriesConfig, seriesId, labels }: Props) {
+export function SeriesFilter({ series, seriesConfig, seriesId }: Props) {
   const isPreview = !!useRouteMatch('/exploratory-view/preview');
 
   const options: Field[] = seriesConfig.filterFields.map((field) => {
     if (typeof field === 'string') {
-      return { label: labels?.[field] ?? FieldLabels[field], field };
+      return { label: seriesConfig.labels?.[field] ?? FieldLabels[field], field };
     }
 
     return {
       field: field.field,
       nested: field.nested,
       isNegated: field.isNegated,
-      label: labels?.[field.field] ?? FieldLabels[field.field],
+      label: seriesConfig.labels?.[field.field] ?? FieldLabels[field.field],
     };
   });
 
-  const { setSeries, getSeries } = useSeriesStorage();
-  const urlSeries = getSeries(seriesId);
+  const { setSeries } = useSeriesStorage();
 
   const mainPanel = (
     <EuiFilterGroup>
       {options.map((opt) => (
         <FilterExpanded
+          series={series}
           key={opt.label}
           seriesId={seriesId}
           field={opt.field}
@@ -67,15 +66,15 @@ export function SeriesFilter({ seriesConfig, seriesId, labels }: Props) {
   return (
     <EuiFlexGroup wrap gutterSize="xs" alignItems="flexStart">
       {!isPreview && <EuiFlexItem>{mainPanel}</EuiFlexItem>}
-      <SelectedFilters seriesId={seriesId} seriesConfig={seriesConfig} />
-      {(urlSeries.filters ?? []).length > 0 && !isPreview && (
+      <SelectedFilters seriesId={seriesId} series={series} seriesConfig={seriesConfig} />
+      {(series.filters ?? []).length > 0 && !isPreview && (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             flush="left"
             color="text"
             iconType="cross"
             onClick={() => {
-              setSeries(seriesId, { ...urlSeries, filters: undefined });
+              setSeries(seriesId, { ...series, filters: undefined });
             }}
             size="s"
           >

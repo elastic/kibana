@@ -21,7 +21,6 @@ import classNames from 'classnames';
 import { isEmpty } from 'lodash';
 import { euiStyled } from './../../../../../../../../src/plugins/kibana_react/common';
 import { AppDataType, SeriesConfig, ReportViewType, SeriesUrl } from '../types';
-import { ReportBreakdowns } from './columns/report_breakdowns';
 import { SeriesContextValue, useSeriesStorage } from '../hooks/use_series_storage';
 import { IndexPatternState, useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
 import { getDefaultConfigs } from '../configurations/default_configs';
@@ -35,6 +34,7 @@ import { ReportTypesSelect } from './columns/report_type_select';
 import { ViewActions } from '../views/view_actions';
 import { ReportMetricOptions } from './report_metric_options';
 import { SeriesFooter } from './columns/series_footer';
+import { Breakdowns } from '../series_viewer/columns/breakdowns';
 
 export interface ReportTypeItem {
   id: string;
@@ -106,7 +106,9 @@ export const SeriesEditor = React.memo(function ({}: {}) {
           prevSeriesItem &&
           prevSeriesItem.series.selectedMetricField !== series.selectedMetricField
         ) {
-          newExpandRows[id] = <ExpandedSeriesRow seriesId={id} seriesConfig={seriesConfig} />;
+          newExpandRows[id] = (
+            <ExpandedSeriesRow seriesId={id} series={series} seriesConfig={seriesConfig} />
+          );
         }
       });
       return newEditorItems;
@@ -124,7 +126,11 @@ export const SeriesEditor = React.memo(function ({}: {}) {
       editorItems.forEach((item) => {
         if (itemIdToExpandedRowMapValues[item.id]) {
           itemIdToExpandedRowMapValues[item.id] = (
-            <ExpandedSeriesRow seriesId={item.id} seriesConfig={item.seriesConfig} />
+            <ExpandedSeriesRow
+              seriesId={item.id}
+              series={item.series}
+              seriesConfig={item.seriesConfig}
+            />
           );
         }
       });
@@ -138,7 +144,11 @@ export const SeriesEditor = React.memo(function ({}: {}) {
       delete itemIdToExpandedRowMapValues[item.id];
     } else {
       itemIdToExpandedRowMapValues[item.id] = (
-        <ExpandedSeriesRow seriesId={item.id} seriesConfig={item.seriesConfig} />
+        <ExpandedSeriesRow
+          seriesId={item.id}
+          series={item.series}
+          seriesConfig={item.seriesConfig}
+        />
       );
     }
     setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
@@ -165,8 +175,8 @@ export const SeriesEditor = React.memo(function ({}: {}) {
       name: '',
       field: 'id',
       width: '40px',
-      render: (seriesId: string, { seriesConfig, id }: BuilderItem) => (
-        <SeriesInfo seriesId={seriesId} seriesConfig={seriesConfig} />
+      render: (seriesId: string, { seriesConfig, series }: BuilderItem) => (
+        <SeriesInfo seriesId={seriesId} series={series} seriesConfig={seriesConfig} />
       ),
     },
     {
@@ -176,30 +186,37 @@ export const SeriesEditor = React.memo(function ({}: {}) {
       field: 'id',
       width: '20%',
       footer: <SeriesFooter allSeries={allSeries} />,
-      render: (seriesId: string) => <SeriesName seriesId={seriesId} />,
+      render: (seriesId: string, { series }: BuilderItem) => (
+        <SeriesName seriesId={seriesId} series={series} />
+      ),
     },
     {
       name: 'Data type',
       field: 'id',
       width: '15%',
-      render: (seriesId: string) => <DataTypesSelect seriesId={seriesId} />,
+      render: (seriesId: string, { series }: BuilderItem) => (
+        <DataTypesSelect seriesId={seriesId} series={series} />
+      ),
     },
     {
       name: 'Report metric',
       field: 'id',
       width: '15%',
-      render: (seriesId: string, { seriesConfig }: BuilderItem) => (
-        <ReportMetricOptions metricOptions={seriesConfig?.metricOptions} seriesId={seriesId} />
+      render: (seriesId: string, { seriesConfig, series }: BuilderItem) => (
+        <ReportMetricOptions
+          series={series}
+          seriesId={seriesId}
+          metricOptions={seriesConfig?.metricOptions}
+        />
       ),
     },
     {
       name: 'Date/Time',
       field: 'id',
       width: '27%',
-      render: (seriesId: string, { series }: BuilderItem) =>
-        series.dataType && series.selectedMetricField ? (
-          <DatePickerCol seriesId={seriesId} />
-        ) : null,
+      render: (seriesId: string, { series }: BuilderItem) => (
+        <DatePickerCol seriesId={seriesId} series={series} />
+      ),
     },
 
     {
@@ -208,10 +225,9 @@ export const SeriesEditor = React.memo(function ({}: {}) {
       }),
       width: '10%',
       field: 'id',
-      render: (seriesId: string, { series: { selectedMetricField }, seriesConfig }: BuilderItem) =>
-        selectedMetricField ? (
-          <ReportBreakdowns seriesId={seriesId} seriesConfig={seriesConfig} />
-        ) : null,
+      render: (seriesId: string, { series, seriesConfig }: BuilderItem) => (
+        <Breakdowns seriesConfig={seriesConfig} seriesId={seriesId} series={series} />
+      ),
     },
 
     {
@@ -221,7 +237,9 @@ export const SeriesEditor = React.memo(function ({}: {}) {
       align: 'center' as const,
       width: '8%',
       field: 'id',
-      render: (seriesId: string) => <SeriesActions seriesId={seriesId} editorMode={true} />,
+      render: (seriesId: string, { series }: BuilderItem) => (
+        <SeriesActions seriesId={seriesId} series={series} editorMode={true} />
+      ),
     },
   ];
 

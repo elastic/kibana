@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
-import { mockAppIndexPattern, render } from '../../rtl_helpers';
-import { dataTypes, DataTypesCol } from './data_types_col';
+import { mockAppIndexPattern, mockUxSeries, render } from '../../rtl_helpers';
+import { DataTypesSelect } from './data_type_select';
 
 describe('DataTypeSelect', function () {
   const seriesId = 'test-series-id';
@@ -16,15 +16,11 @@ describe('DataTypeSelect', function () {
   mockAppIndexPattern();
 
   it('should render properly', function () {
-    const { getByText } = render(<DataTypesCol seriesId={seriesId} />);
-
-    dataTypes.forEach(({ label }) => {
-      getByText(label);
-    });
+    render(<DataTypesSelect seriesId={seriesId} series={mockUxSeries} />);
   });
 
   it('should set series on change', function () {
-    const { setSeries } = render(<DataTypesCol seriesId={seriesId} />);
+    const { setSeries } = render(<DataTypesSelect seriesId={seriesId} series={mockUxSeries} />);
 
     fireEvent.click(screen.getByText(/user experience \(rum\)/i));
 
@@ -41,17 +37,19 @@ describe('DataTypeSelect', function () {
 
   it('should set series on change on already selected', function () {
     const initSeries = {
-      data: {
-        [seriesId]: {
+      data: [
+        {
+          order: 0,
+          name: seriesId,
           dataType: 'synthetics' as const,
           reportType: 'kpi-over-time' as const,
           breakdown: 'monitor.status',
           time: { from: 'now-15m', to: 'now' },
         },
-      },
+      ],
     };
 
-    render(<DataTypesCol seriesId={seriesId} />, { initSeries });
+    render(<DataTypesSelect seriesId={seriesId} series={mockUxSeries} />, { initSeries });
 
     const button = screen.getByRole('button', {
       name: /Synthetic Monitoring/i,

@@ -22,13 +22,15 @@ interface Props {
 export const combineTimeRanges = (
   reportType: ReportViewType,
   allSeries: SeriesUrl[],
-  firstSeries: SeriesUrl
+  firstSeries?: SeriesUrl
 ) => {
   let to: string = '';
   let from: string = '';
+
   if (reportType === 'kpi-over-time') {
     return firstSeries?.time;
   }
+
   allSeries.forEach((series) => {
     if (
       series.dataType &&
@@ -46,6 +48,7 @@ export const combineTimeRanges = (
       }
     }
   });
+
   return { to, from };
 };
 
@@ -58,15 +61,9 @@ export const LensEmbeddable = React.memo(function (props: Props) {
 
   const LensComponent = lens?.EmbeddableComponent;
 
-  const {
-    firstSeriesId,
-    firstSeries: series,
-    setSeries,
-    allSeries,
-    reportType,
-  } = useSeriesStorage();
+  const { firstSeriesId, firstSeries, setSeries, allSeries, reportType } = useSeriesStorage();
 
-  const timeRange = series ? combineTimeRanges(reportType, allSeries, series) : null;
+  const timeRange = firstSeries ? combineTimeRanges(reportType, allSeries, firstSeries) : null;
 
   const onLensLoad = useCallback(() => {
     setLastUpdated(Date.now());
@@ -74,9 +71,9 @@ export const LensEmbeddable = React.memo(function (props: Props) {
 
   const onBrushEnd = useCallback(
     ({ range }: { range: number[] }) => {
-      if (reportType !== 'data-distribution') {
+      if (reportType !== 'data-distribution' && firstSeriesId && firstSeries) {
         setSeries(firstSeriesId, {
-          ...series,
+          ...firstSeries,
           time: {
             from: new Date(range[0]).toISOString(),
             to: new Date(range[1]).toISOString(),
@@ -90,10 +87,10 @@ export const LensEmbeddable = React.memo(function (props: Props) {
         );
       }
     },
-    [reportType, setSeries, firstSeriesId, series, notifications?.toasts]
+    [reportType, setSeries, firstSeriesId, firstSeries, notifications?.toasts]
   );
 
-  if (timeRange === null) {
+  if (timeRange === null || !firstSeriesId || !firstSeries) {
     return null;
   }
 

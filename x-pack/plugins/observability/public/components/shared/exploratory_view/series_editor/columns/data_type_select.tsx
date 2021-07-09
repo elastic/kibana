@@ -8,10 +8,11 @@
 import React from 'react';
 import { EuiSuperSelect } from '@elastic/eui';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
-import { AppDataType } from '../../types';
+import { AppDataType, SeriesUrl } from '../../types';
 
 interface Props {
   seriesId: string;
+  series: SeriesUrl;
 }
 export const dataTypes: Array<{ id: AppDataType; label: string }> = [
   { id: 'synthetics', label: 'Synthetic Monitoring' },
@@ -21,10 +22,8 @@ export const dataTypes: Array<{ id: AppDataType; label: string }> = [
 
 const SELECT_DATA_TYPE = 'SELECT_DATA_TYPE';
 
-export function DataTypesSelect({ seriesId }: Props) {
-  const { getSeries, setSeries, reportType } = useSeriesStorage();
-
-  const series = getSeries(seriesId);
+export function DataTypesSelect({ seriesId, series }: Props) {
+  const { setSeries, reportType } = useSeriesStorage();
 
   const onDataTypeChange = (dataType: AppDataType) => {
     setSeries(seriesId, {

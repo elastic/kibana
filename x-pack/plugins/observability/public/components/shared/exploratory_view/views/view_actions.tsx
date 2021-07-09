@@ -27,13 +27,13 @@ export function ViewActions() {
   const { loading, indexPatterns } = useAppIndexPatternContext();
 
   useEffect(() => {
-    setEditorItems(getSeriesToEdit({ allSeries, indexPatterns }));
-  }, [allSeries, getSeries, indexPatterns, loading]);
+    setEditorItems(getSeriesToEdit({ allSeries, indexPatterns, reportType }));
+  }, [allSeries, getSeries, indexPatterns, loading, reportType]);
 
   const addSeries = () => {
     const prevSeries = allSeries?.[0];
     const name = `${NEW_SERIES_KEY}-${editorItems.length + 1}`;
-    const nextSeries = { name, order: editorItems.length };
+    const nextSeries = { name, order: editorItems.length } as SeriesUrl;
 
     if (reportType === 'data-distribution') {
       setSeries(name, { ...nextSeries, time: prevSeries?.time || DEFAULT_TIME } as SeriesUrl);

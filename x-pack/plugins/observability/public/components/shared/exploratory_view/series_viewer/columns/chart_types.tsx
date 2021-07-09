@@ -13,8 +13,7 @@ import {
   ToolbarButton,
 } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../../../plugin';
-import { useFetcher } from '../../../../..';
-import { useSeriesStorage } from '../../hooks/use_series_storage';
+import { SeriesUrl, useFetcher } from '../../../../..';
 import { SeriesConfig } from '../../types';
 import { SeriesChartTypesSelect } from '../../series_editor/columns/chart_types';
 
@@ -24,15 +23,13 @@ const CHART_TYPE_LABEL = i18n.translate('xpack.observability.expView.chartTypes.
 
 export function SeriesChartTypes({
   seriesId,
+  series,
   seriesConfig,
 }: {
   seriesId: string;
+  series: SeriesUrl;
   seriesConfig: SeriesConfig;
 }) {
-  const { getSeries } = useSeriesStorage();
-
-  const series = getSeries(seriesId);
-
   const seriesType = series?.seriesType ?? seriesConfig.defaultSeriesType;
 
   const {
@@ -60,7 +57,7 @@ export function SeriesChartTypes({
     >
       <SeriesChartTypesSelect
         seriesId={seriesId}
-        seriesTypes={[]}
+        series={series}
         defaultChartType={seriesConfig.defaultSeriesType}
       />
     </EuiPopover>

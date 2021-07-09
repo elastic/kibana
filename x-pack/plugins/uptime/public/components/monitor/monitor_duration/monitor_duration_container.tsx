@@ -58,7 +58,8 @@ export const MonitorDuration: React.FC<MonitorIdParam> = ({ monitorId }) => {
       reportType: 'kpi-over-time',
       allSeries: [
         {
-          name: `${monitorId}-reponse-duration`,
+          order: 0,
+          name: `${monitorId}-response-duration`,
           time: { from: dateRangeStart, to: dateRangeEnd },
           reportDefinitions: {
             'monitor.id': [monitorId] as string[],

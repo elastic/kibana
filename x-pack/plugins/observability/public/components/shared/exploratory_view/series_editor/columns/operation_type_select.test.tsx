@@ -7,46 +7,53 @@
 
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
-import { render } from '../../rtl_helpers';
+import { mockUxSeries, render } from '../../rtl_helpers';
 import { OperationTypeSelect } from './operation_type_select';
 
 describe('OperationTypeSelect', function () {
   it('should render properly', function () {
-    render(<OperationTypeSelect seriesId={'series-id'} />);
+    render(<OperationTypeSelect seriesId={'series-id'} series={mockUxSeries} />);
 
     screen.getByText('Select an option: , is selected');
   });
 
   it('should display selected value', function () {
     const initSeries = {
-      data: {
-        'performance-distribution': {
+      data: [
+        {
+          order: 0,
+          name: 'performance-distribution',
           dataType: 'ux' as const,
           reportType: 'kpi-over-time' as const,
           operationType: 'median' as const,
           time: { from: 'now-15m', to: 'now' },
         },
-      },
+      ],
     };
 
-    render(<OperationTypeSelect seriesId={'series-id'} />, { initSeries });
+    render(<OperationTypeSelect seriesId={'series-id'} series={mockUxSeries} />, { initSeries });
 
     screen.getByText('Median');
   });
 
   it('should call set series on change', function () {
     const initSeries = {
-      data: {
-        'series-id': {
+      data: [
+        {
+          order: 0,
+          name: 'series-id',
           dataType: 'ux' as const,
           reportType: 'kpi-over-time' as const,
           operationType: 'median' as const,
           time: { from: 'now-15m', to: 'now' },
         },
-      },
+      ],
     };
 
-    const { setSeries } = render(<OperationTypeSelect seriesId={'series-id'} />, { initSeries });
+    const { setSeries } = render(
+      <OperationTypeSelect seriesId={'series-id'} series={mockUxSeries} />,
+      { initSeries }
+    );
 
     fireEvent.click(screen.getByTestId('operationTypeSelect'));
 

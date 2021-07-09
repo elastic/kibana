@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiSuperSelect } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { ReportViewType } from '../../types';
 import {
@@ -18,7 +19,16 @@ import {
 
 const SELECT_REPORT_TYPE = 'SELECT_REPORT_TYPE';
 
-export const reportTypesList: Array<{ reportType: ReportViewType; label: string }> = [
+export const reportTypesList: Array<{
+  reportType: ReportViewType | typeof SELECT_REPORT_TYPE;
+  label: string;
+}> = [
+  {
+    reportType: SELECT_REPORT_TYPE,
+    label: i18n.translate('xpack.observability.expView.reportType.selectLabel', {
+      defaultMessage: 'Select report type',
+    }),
+  },
   { reportType: 'kpi-over-time', label: KPI_OVER_TIME_LABEL },
   { reportType: 'data-distribution', label: PERF_DIST_LABEL },
   { reportType: 'core-web-vitals', label: CORE_WEB_VITALS_LABEL },
@@ -32,20 +42,18 @@ export function ReportTypesSelect() {
     setReportType(reportType);
   };
 
-  const options = reportTypesList.map(({ reportType, label }) => ({
-    value: reportType,
-    inputDisplay: reportType === SELECT_REPORT_TYPE ? label : <strong>{label}</strong>,
-    dropdownDisplay: label,
-  }));
+  const options = reportTypesList
+    .filter(({ reportType }) => (selectedReportType ? reportType !== SELECT_REPORT_TYPE : true))
+    .map(({ reportType, label }) => ({
+      value: reportType,
+      inputDisplay: reportType === SELECT_REPORT_TYPE ? label : <strong>{label}</strong>,
+      dropdownDisplay: label,
+    }));
 
   return (
     <EuiSuperSelect
       fullWidth
-      options={
-        selectedReportType
-          ? options
-          : [{ value: SELECT_REPORT_TYPE, inputDisplay: 'Select report type' }, ...options]
-      }
+      options={options}
       valueOfSelected={selectedReportType ?? SELECT_REPORT_TYPE}
       onChange={(value) => onReportTypeChange(value as ReportViewType)}
       style={{ minWidth: 200 }}
