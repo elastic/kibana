@@ -15,7 +15,7 @@ import { Logger, SavedObjectsErrorHelpers } from '../../../../../src/core/server
 type RetryableForNotFound<T> = () => Promise<T>;
 
 // number of times to retry when not found error occur
-export const RetryForNotFoundAttempts = 3;
+export const RetryForNotFoundAttempts = 5;
 
 // milliseconds to wait before retrying when not found error occur
 // note: we considered making this random, to help avoid a stampede, but

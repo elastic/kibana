@@ -19,43 +19,45 @@ describe('retry_if_not_found', () => {
     expect(result).toBe(MockResult);
   });
 
-  test('should throw error if not a conflict error', async () => {
+  test('should throw error if not a not found error', async () => {
     await expect(
       retryIfNotFound(MockLogger, MockOperationName, OperationFailure)
     ).rejects.toThrowError('wops');
   });
 
   for (let i = 1; i <= RetryForNotFoundAttempts; i++) {
-    test(`should work when operation conflicts ${i} times`, async () => {
+    test(`should work when not found returned ${i} times`, async () => {
       const result = await retryIfNotFound(
         MockLogger,
         MockOperationName,
-        getOperationConflictsTimes(i)
+        getOperationNotFoundTimes(i)
       );
       expect(result).toBe(MockResult);
       expect(MockLogger.debug).toBeCalledTimes(i);
       for (let j = 0; j < i; j++) {
-        expect(MockLogger.debug).nthCalledWith(i, `${MockOperationName} conflict, retrying ...`);
+        expect(MockLogger.debug).nthCalledWith(i, `${MockOperationName} not found, retrying ...`);
       }
     });
   }
 
-  test(`should throw conflict error when conflicts > ${RetryForNotFoundAttempts} times`, async () => {
+  test(`should throw not found error when 404 error returned > ${RetryForNotFoundAttempts} times`, async () => {
     await expect(
       retryIfNotFound(
         MockLogger,
         MockOperationName,
-        getOperationConflictsTimes(RetryForNotFoundAttempts + 1)
+        getOperationNotFoundTimes(RetryForNotFoundAttempts + 1)
       )
-    ).rejects.toThrowError(SavedObjectsErrorHelpers.createConflictError('alert', MockAlertId));
+    ).rejects.toThrowError(
+      SavedObjectsErrorHelpers.createGenericNotFoundError('action', MockActionId)
+    );
     expect(MockLogger.debug).toBeCalledTimes(RetryForNotFoundAttempts);
     expect(MockLogger.warn).toBeCalledTimes(1);
-    expect(MockLogger.warn).toBeCalledWith(`${MockOperationName} conflict, exceeded retries`);
+    expect(MockLogger.warn).toBeCalledWith(`${MockOperationName} not found, exceeded retries`);
   });
 });
 
-const MockAlertId = 'alert-id';
-const MockOperationName = 'conflict-retryable-operation';
+const MockActionId = 'action-id';
+const MockOperationName = 'not-found-retryable-operation';
 const MockLogger = loggingSystemMock.create().get();
 const MockResult = 42;
 
@@ -67,11 +69,11 @@ async function OperationFailure() {
   throw new Error('wops');
 }
 
-function getOperationConflictsTimes(times: number) {
-  return async function OperationConflictsTimes() {
+function getOperationNotFoundTimes(times: number) {
+  return async function OperationNotFoundTimes() {
     times--;
     if (times >= 0) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundError('alert', MockAlertId);
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError('action', MockActionId);
     }
 
     return MockResult;

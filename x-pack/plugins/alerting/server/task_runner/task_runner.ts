@@ -493,7 +493,6 @@ export class TaskRunner<
       schedule: taskSchedule,
     } = this.taskInstance;
 
-    // console.log('start');
     await new Promise((resolve) => setTimeout(resolve, 8000));
     const runDate = new Date();
     const runDateString = runDate.toISOString();
@@ -609,7 +608,6 @@ export class TaskRunner<
       );
     }
 
-    // console.log('end');
     return {
       state: map<AlertTaskState, ElasticsearchError, AlertTaskState>(
         state,
