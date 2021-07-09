@@ -6,15 +6,14 @@
  * Side Public License, v 1.
  */
 
+import type { DecoratorFn } from '@storybook/react';
 import React from 'react';
 import * as styledComponents from 'styled-components';
 import { ThemedStyledComponentsModule, ThemeProvider, ThemeProviderProps } from 'styled-components';
-
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import { euiThemeVars, euiLightVars, euiDarkVars } from '@kbn/ui-shared-deps/theme';
 
 export interface EuiTheme {
-  eui: typeof euiLightVars | typeof euiDarkVars;
+  eui: typeof euiThemeVars;
   darkMode: boolean;
 }
 
@@ -35,6 +34,16 @@ const EuiThemeProvider = <
     })}
   />
 );
+
+/**
+ * Storybook decorator using the EUI theme provider. Uses the value from
+ * `globals` provided by the Storybook theme switcher.
+ */
+export const EuiThemeProviderDecorator: DecoratorFn = (storyFn, { globals }) => {
+  const darkMode = globals.euiTheme === 'v8.dark' || globals.euiTheme === 'v7.dark';
+
+  return <EuiThemeProvider darkMode={darkMode}>{storyFn()}</EuiThemeProvider>;
+};
 
 const {
   default: euiStyled,

@@ -8,7 +8,6 @@
 import cytoscape from 'cytoscape';
 import { CoreStart } from 'kibana/public';
 import React, { ComponentType } from 'react';
-import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
 import { createCallApmApi } from '../../../../services/rest/createCallApmApi';
@@ -17,7 +16,7 @@ import { Popover } from '.';
 import exampleGroupedConnectionsData from '../__stories__/example_grouped_connections.json';
 
 export default {
-  title: 'app/service_map/Popover',
+  title: 'app/ServiceMap/Popover',
   component: Popover,
   decorators: [
     (Story: ComponentType) => {
@@ -38,15 +37,13 @@ export default {
       createCallApmApi(coreMock);
 
       return (
-        <EuiThemeProvider>
-          <MockUrlParamsContextProvider>
-            <MockApmPluginContextWrapper>
-              <div style={{ height: 325 }}>
-                <Story />
-              </div>
-            </MockApmPluginContextWrapper>
-          </MockUrlParamsContextProvider>
-        </EuiThemeProvider>
+        <MockUrlParamsContextProvider>
+          <MockApmPluginContextWrapper>
+            <div style={{ height: 325 }}>
+              <Story />
+            </div>
+          </MockApmPluginContextWrapper>
+        </MockUrlParamsContextProvider>
       );
     },
   ],

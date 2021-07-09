@@ -11,7 +11,6 @@ import { expressionsService } from './expressions';
 import { reportingService } from './reporting';
 import { navLinkService } from './nav_link';
 import { labsService } from './labs';
-import { platformService } from './platform';
 import { searchService } from './search';
 
 export const stubs: CanvasServices = {
@@ -19,7 +18,6 @@ export const stubs: CanvasServices = {
   expressions: expressionsService,
   reporting: reportingService,
   navLink: navLinkService,
-  platform: platformService,
   search: searchService,
   labs: labsService,
 };
