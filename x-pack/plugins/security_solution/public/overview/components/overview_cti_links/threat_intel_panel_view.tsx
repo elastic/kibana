@@ -35,7 +35,7 @@ const DashboardLinkItems = styled(EuiFlexGroup)`
 `;
 
 const Title = styled(EuiFlexItem)`
-  min-width: 140px;
+  min-width: 110px;
 `;
 
 const List = styled.ul`
@@ -44,7 +44,6 @@ const List = styled.ul`
 
 const DashboardRightSideElement = styled(EuiFlexItem)`
   align-items: flex-end;
-  max-width: 200px;
 `;
 
 const RightSideLink = styled(EuiLink)`
@@ -152,9 +151,7 @@ export const ThreatIntelPanelView: React.FC<ThreatIntelPanelViewProps> = ({
                         gutterSize="l"
                         justifyContent="spaceBetween"
                       >
-                        <Title key={`${title}-link`} grow={3}>
-                          {title}
-                        </Title>
+                        <Title key={`${title}-link`}>{title}</Title>
                         <EuiFlexGroup
                           gutterSize="s"
                           key={`${title}-divider`}
@@ -162,10 +159,10 @@ export const ThreatIntelPanelView: React.FC<ThreatIntelPanelViewProps> = ({
                           alignItems="center"
                           justifyContent="flexEnd"
                         >
-                          <DashboardRightSideElement key={`${title}-count`} grow={1}>
+                          <DashboardRightSideElement key={`${title}-count`}>
                             {count}
                           </DashboardRightSideElement>
-                          <DashboardRightSideElement key={`${title}-source`} grow={3}>
+                          <DashboardRightSideElement key={`${title}-source`}>
                             {path ? (
                               <RightSideLink href={path} target="_blank">
                                 {linkCopy}
