@@ -11,7 +11,6 @@ import React, { RefObject } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { AppMountParameters } from 'kibana/public';
-import { LEGACY_CHARTS_LIBRARY } from '../../../../vis_type_xy/common/index';
 import { VisualizeTopNav } from './visualize_top_nav';
 import { ExperimentalVisInfo } from './experimental_vis_info';
 import { DeprecationWarning } from './deprecation_vis_warning';
@@ -22,6 +21,8 @@ import {
   VisualizeEditorVisInstance,
 } from '../types';
 import { getUISettings } from '../../services';
+
+const LEGACY_CHARTS_LIBRARY = 'visualization:visualize:legacyChartsLibrary';
 
 interface VisualizeEditorCommonProps {
   visInstance?: VisualizeEditorVisInstance;

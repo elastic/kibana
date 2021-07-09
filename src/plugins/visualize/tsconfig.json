@@ -30,6 +30,5 @@
     { "path": "../home/tsconfig.json" },
     { "path": "../presentation_util/tsconfig.json" },
     { "path": "../discover/tsconfig.json" },
-    { "path": "../vis_type_xy/tsconfig.json" },
   ]
 }
