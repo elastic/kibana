@@ -298,9 +298,10 @@ export class EnterpriseSearchRequestHandler {
    */
   handleAuthenticationError(response: KibanaResponseFactory) {
     const errorMessage = 'Cannot authenticate Enterprise Search user';
+    const headers = { ...this.headers, [ERROR_CONNECTING_HEADER]: 'true' };
 
     this.log.error(errorMessage);
-    return response.customError({ statusCode: 502, headers: this.headers, body: errorMessage });
+    return response.customError({ statusCode: 502, headers, body: errorMessage });
   }
 
   /**
