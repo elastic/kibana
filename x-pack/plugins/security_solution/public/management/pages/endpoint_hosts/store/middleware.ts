@@ -35,7 +35,6 @@ import {
   getActivityLogDataPaging,
   getLastLoadedActivityLogData,
   detailsData,
-  getEndpointDetailsFlyoutView,
   getIsEndpointPackageInfoUninitialized,
 } from './selectors';
 import { AgentIdsPendingActions, EndpointState, PolicyIds } from '../types';
@@ -369,7 +368,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
     if (
       action.type === 'userChangedUrl' &&
       hasSelectedEndpoint(getState()) === true &&
-      getEndpointDetailsFlyoutView(getState()) === EndpointDetailsTabsTypes.activityLog
+      uiQueryParams(getState()).show === EndpointDetailsTabsTypes.activityLog
     ) {
       // call the activity log api
       dispatch({

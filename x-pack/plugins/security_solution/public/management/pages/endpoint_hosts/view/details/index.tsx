@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { useDispatch } from 'react-redux';
 import React, { useCallback, useEffect, useMemo, memo } from 'react';
 import {
   EuiFlyout,
@@ -51,14 +50,11 @@ import { PreferenceFormattedDateFromPrimitive } from '../../../../../common/comp
 import { EndpointIsolationFlyoutPanel } from './components/endpoint_isolate_flyout_panel';
 import { BackToEndpointDetailsFlyoutSubHeader } from './components/back_to_endpoint_details_flyout_subheader';
 import { FlyoutBodyNoTopPadding } from './components/flyout_body_no_top_padding';
-import { getEndpointListPath } from '../../../../common/routing';
+import { getEndpointListPath, getEndpointDetailsPath } from '../../../../common/routing';
 import { ActionsMenu } from './components/actions_menu';
-import { EndpointIndexUIQueryParams } from '../../types';
-import { EndpointAction } from '../../store/action';
 import { EndpointDetailsFlyoutHeader } from './components/flyout_header';
 
 export const EndpointDetailsFlyout = memo(() => {
-  const dispatch = useDispatch<(action: EndpointAction) => void>();
   const history = useHistory();
   const toasts = useToasts();
   const queryParams = useEndpointSelector(uiQueryParams);
@@ -75,18 +71,6 @@ export const EndpointDetailsFlyout = memo(() => {
   const hostStatus = useEndpointSelector(hostStatusInfo);
   const show = useEndpointSelector(showView);
 
-  const setFlyoutView = useCallback(
-    (flyoutView: EndpointIndexUIQueryParams['show']) => {
-      dispatch({
-        type: 'endpointDetailsFlyoutTabChanged',
-        payload: {
-          flyoutView,
-        },
-      });
-    },
-    [dispatch]
-  );
-
   const ContentLoadingMarkup = useMemo(
     () => (
       <>
@@ -98,10 +82,15 @@ export const EndpointDetailsFlyout = memo(() => {
     []
   );
 
-  const tabs = [
+  const getTabs = (id: string) => [
     {
       id: EndpointDetailsTabsTypes.overview,
       name: i18.OVERVIEW,
+      route: getEndpointDetailsPath({
+        ...queryParams,
+        name: 'endpointDetails',
+        selected_endpoint: id,
+      }),
       content:
         hostDetails === undefined ? (
           ContentLoadingMarkup
@@ -112,6 +101,11 @@ export const EndpointDetailsFlyout = memo(() => {
     {
       id: EndpointDetailsTabsTypes.activityLog,
       name: i18.ACTIVITY_LOG.tabTitle,
+      route: getEndpointDetailsPath({
+        ...queryParams,
+        name: 'endpointActivityLog',
+        selected_endpoint: id,
+      }),
       content: <EndpointActivityLog activityLog={activityLog} />,
     },
   ];
@@ -127,11 +121,9 @@ export const EndpointDetailsFlyout = memo(() => {
         ...urlSearchParams,
       })
     );
-    setFlyoutView(undefined);
-  }, [setFlyoutView, history, queryParamsWithoutSelectedEndpoint]);
+  }, [history, queryParamsWithoutSelectedEndpoint]);
 
   useEffect(() => {
-    setFlyoutView(show);
     if (hostDetailsError !== undefined) {
       toasts.addDanger({
         title: i18n.translate('xpack.securitySolution.endpoint.details.errorTitle', {
@@ -142,10 +134,7 @@ export const EndpointDetailsFlyout = memo(() => {
         }),
       });
     }
-    return () => {
-      setFlyoutView(undefined);
-    };
-  }, [hostDetailsError, setFlyoutView, show, toasts]);
+  }, [hostDetailsError, show, toasts]);
 
   return (
     <EuiFlyout
@@ -167,9 +156,9 @@ export const EndpointDetailsFlyout = memo(() => {
         <>
           {(show === 'details' || show === 'activity_log') && (
             <EndpointDetailsFlyoutTabs
-              hostname={hostDetails?.host?.hostname}
+              hostname={hostDetails.host.hostname}
               show={show}
-              tabs={tabs}
+              tabs={getTabs(hostDetails.agent.id)}
             />
           )}
 
