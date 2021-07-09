@@ -20,7 +20,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'header', 'discover', 'visualize', 'timePicker']);
   const find = getService('find');
 
-  describe('discover tab with new fields API', function describeIndexTests() {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/104466
+  describe.skip('discover tab with new fields API', function describeIndexTests() {
     this.tags('includeFirefox');
     before(async function () {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
