@@ -98,6 +98,10 @@ export class DataVisualizer {
           stats.aggregatableExistsFields.push(...batchStats.aggregatableExistsFields);
           stats.aggregatableNotExistsFields.push(...batchStats.aggregatableNotExistsFields);
         } catch (e) {
+          // If index not found, no need to proceed with other batches
+          if (e.statusCode === 404) {
+            throw e;
+          }
           stats.errors.push(wrapError(e));
         }
       })
