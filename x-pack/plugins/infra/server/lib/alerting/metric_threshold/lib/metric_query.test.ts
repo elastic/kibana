@@ -71,12 +71,6 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
       end,
       start: end - 5 * 60 * 1000,
     };
-    const searchBody = getElasticsearchMetricQuery(
-      expressionParams,
-      timefield,
-      timerange,
-      undefined,
-      undefined
-    );
+    getElasticsearchMetricQuery(expressionParams, timefield, timerange, undefined, undefined);
   });
 });
