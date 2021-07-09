@@ -26,7 +26,7 @@ import {
 export const TelemetryEndpointTaskConstants = {
   TIMEOUT: '5m',
   TYPE: 'security:endpoint-meta-telemetry',
-  INTERVAL: '1m', // TODO:@pjhampton - reset to 24h before merge
+  INTERVAL: '24h',
   VERSION: '1.0.0',
 };
 
