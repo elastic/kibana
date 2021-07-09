@@ -15,7 +15,7 @@ import {
 import { formatReason } from './rule_data_formatters';
 import { validateExpression } from './validation';
 
-export function getLogThresholdAlertType(): ObservabilityRuleTypeModel<PartialAlertParams> {
+export function createLogThresholdAlertType(): ObservabilityRuleTypeModel<PartialAlertParams> {
   return {
     id: LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
     description: i18n.translate('xpack.infra.logs.alertFlyout.alertDescription', {

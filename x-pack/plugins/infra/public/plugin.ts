@@ -11,7 +11,7 @@ import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { createInventoryMetricAlertType } from './alerting/inventory';
-import { getLogThresholdAlertType } from './alerting/log_threshold';
+import { createLogThresholdAlertType } from './alerting/log_threshold';
 import { createMetricThresholdAlertType } from './alerting/metric_threshold';
 import { LOG_STREAM_EMBEDDABLE } from './components/log_stream/log_stream_embeddable';
 import { LogStreamEmbeddableFactoryDefinition } from './components/log_stream/log_stream_embeddable_factory';
@@ -35,7 +35,9 @@ export class Plugin implements InfraClientPluginClass {
     }
 
     pluginsSetup.triggersActionsUi.alertTypeRegistry.register(createInventoryMetricAlertType());
-    pluginsSetup.observability.observabilityRuleTypeRegistry.register(getLogThresholdAlertType());
+    pluginsSetup.observability.observabilityRuleTypeRegistry.register(
+      createLogThresholdAlertType()
+    );
     pluginsSetup.triggersActionsUi.alertTypeRegistry.register(createMetricThresholdAlertType());
 
     pluginsSetup.observability.dashboard.register({
