@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`renderDataMappingPopover Should disable toggle when field is not backed by geojson source 1`] = `
+exports[`renderDataMappingPopover Should render OrdinalDataMappingPopover 1`] = `
 <OrdinalDataMappingPopover
   dataMappingFunction="INTERPOLATE"
   fieldMetaOptions={
@@ -16,27 +16,6 @@ exports[`renderDataMappingPopover Should disable toggle when field is not backed
       "PERCENTILES",
     ]
   }
-  switchDisabled={true}
-/>
-`;
-
-exports[`renderDataMappingPopover Should enable toggle when field is backed by geojson-source 1`] = `
-<OrdinalDataMappingPopover
-  dataMappingFunction="INTERPOLATE"
-  fieldMetaOptions={
-    Object {
-      "isEnabled": true,
-    }
-  }
-  onChange={[Function]}
-  styleName="lineColor"
-  supportedDataMappingFunctions={
-    Array [
-      "INTERPOLATE",
-      "PERCENTILES",
-    ]
-  }
-  switchDisabled={false}
 />
 `;
 

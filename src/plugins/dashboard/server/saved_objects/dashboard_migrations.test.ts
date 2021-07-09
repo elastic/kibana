@@ -39,7 +39,7 @@ const injectImplementation = (
 };
 embeddableSetupMock.extract.mockImplementation(extractImplementation);
 embeddableSetupMock.inject.mockImplementation(injectImplementation);
-embeddableSetupMock.getMigrationVersions.mockImplementation(() => []);
+embeddableSetupMock.getAllMigrations.mockImplementation(() => ({}));
 
 const migrations = createDashboardSavedObjectTypeMigrations({
   embeddable: embeddableSetupMock,
@@ -586,28 +586,14 @@ describe('dashboard', () => {
       type: 'dashboard',
     };
 
-    it('should add all embeddable migrations for versions above 7.12.0 to dashboard saved object migrations', () => {
-      const newEmbeddableSetupMock = createEmbeddableSetupMock();
-      newEmbeddableSetupMock.getMigrationVersions.mockImplementation(() => [
-        '7.10.100',
-        '7.13.0',
-        '8.0.0',
-      ]);
-      const migrationsList = createDashboardSavedObjectTypeMigrations({
-        embeddable: newEmbeddableSetupMock,
-      });
-      expect(Object.keys(migrationsList).indexOf('8.0.0')).not.toBe(-1);
-      expect(Object.keys(migrationsList).indexOf('7.13.0')).not.toBe(-1);
-      expect(Object.keys(migrationsList).indexOf('7.10.100')).toBe(-1);
-    });
-
     it('runs migrations on by value panels only', () => {
       const newEmbeddableSetupMock = createEmbeddableSetupMock();
-      newEmbeddableSetupMock.getMigrationVersions.mockImplementation(() => ['7.13.0']);
-      newEmbeddableSetupMock.migrate.mockImplementation((state: SerializableState) => {
-        state.superCoolKey = 'ONLY 4 BY VALUE EMBEDDABLES THANK YOU VERY MUCH';
-        return state;
-      });
+      newEmbeddableSetupMock.getAllMigrations.mockImplementation(() => ({
+        '7.13.0': (state: SerializableState) => {
+          state.superCoolKey = 'ONLY 4 BY VALUE EMBEDDABLES THANK YOU VERY MUCH';
+          return state;
+        },
+      }));
       const migrationsList = createDashboardSavedObjectTypeMigrations({
         embeddable: newEmbeddableSetupMock,
       });
