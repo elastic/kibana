@@ -275,7 +275,7 @@ export const fillDefineThresholdRule = (rule: ThresholdRule) => {
   cy.get(TIMELINE(rule.timeline.id!)).click();
   cy.get(COMBO_BOX_CLEAR_BTN).click();
 
-  rule.index!.forEach((index) => {
+  rule.index.forEach((index) => {
     cy.get(COMBO_BOX_INPUT).first().type(`${index}{enter}`);
   });
 

@@ -6,7 +6,12 @@
  */
 
 import { formatMitreAttackDescription } from '../../helpers/rules';
-import { getIndexPatterns, getNewRule, getNewThresholdRule } from '../../objects/rule';
+import {
+  getIndexPatterns,
+  getNewRule,
+  getNewThresholdRule,
+  ThresholdRule,
+} from '../../objects/rule';
 
 import {
   ALERT_RULE_METHOD,
@@ -180,9 +185,9 @@ describe('Detection rules, threshold', () => {
     cy.get(ALERT_RULE_RISK_SCORE).first().should('have.text', rule.riskScore);
   });
 
-  it('Preview results', () => {
-    const previewRule = { ...getNewThresholdRule() };
-    previewRule.index.push('.siem-signals*');
+  it('Preview results of keyword using "host.name"', () => {
+    const previewRule: ThresholdRule = { ...getNewThresholdRule() };
+    previewRule.index = [...previewRule.index, '.siem-signals*'];
 
     createCustomRuleActivated(getNewRule());
     goToManageAlertsDetectionRules();
@@ -193,5 +198,24 @@ describe('Detection rules, threshold', () => {
     previewResults();
 
     cy.get(PREVIEW_HEADER_SUBTITLE).should('have.text', '3 unique hits');
+  });
+
+  it('Preview results of "ip" using "source.ip"', () => {
+    const previewRule: ThresholdRule = {
+      ...getNewThresholdRule(),
+      thresholdField: 'source.ip',
+      threshold: '1',
+    };
+    previewRule.index = [...previewRule.index, '.siem-signals*'];
+
+    createCustomRuleActivated(getNewRule());
+    goToManageAlertsDetectionRules();
+    waitForRulesTableToBeLoaded();
+    goToCreateNewRule();
+    selectThresholdRuleType();
+    fillDefineThresholdRule(previewRule);
+    previewResults();
+
+    cy.get(PREVIEW_HEADER_SUBTITLE).should('have.text', '10 unique hits');
   });
 });
