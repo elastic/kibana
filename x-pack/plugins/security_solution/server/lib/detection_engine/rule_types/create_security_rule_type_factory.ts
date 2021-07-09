@@ -56,7 +56,8 @@ type CreateSecurityRuleTypeFactory = (options: {
   }
 >(
   type: AlertTypeWithExecutor<TParams, TAlertInstanceContext, TServices>
-) => AlertTypeWithExecutor<TParams, TAlertInstanceContext, TServices>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+) => AlertTypeWithExecutor<TParams, TAlertInstanceContext, any>;
 
 export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
   lists,
@@ -174,6 +175,8 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
         hasError = true;
         await ruleStatusService.error(gapMessage, { gap: gapString });
       }
+
+      /*
       const { listClient, exceptionsClient } = newGetListsClient({
         esClient: services.scopedClusterClient.asCurrentUser,
         updatedByUser: updatedBy,
@@ -186,6 +189,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
         client: exceptionsClient,
         lists: (params.exceptionsList as ListArray) ?? [],
       });
+      */
 
       return type.executor(options);
     },

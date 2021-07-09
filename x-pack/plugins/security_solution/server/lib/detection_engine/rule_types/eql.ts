@@ -9,30 +9,44 @@ import moment from 'moment';
 import v4 from 'uuid/v4';
 
 import { ApiResponse } from '@elastic/elasticsearch';
-import { schema } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
+import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 
-import {
-  RuleDataClient,
-  createPersistenceRuleTypeFactory,
-} from '../../../../../rule_registry/server';
+import { RuleDataClient } from '../../../../../rule_registry/server';
 import { EQL_ALERT_TYPE_ID } from '../../../../common/constants';
 import { buildEqlSearchRequest } from '../../../../common/detection_engine/get_query_filter';
+import { SetupPlugins } from '../../../../target/types/server/plugin';
+import { eqlRuleParams, EqlRuleParams } from '../schemas/rule_schemas';
 import { BaseSignalHit, EqlSignalSearchResponse } from '../signals/types';
+import { createSecurityRuleTypeFactory } from './create_security_rule_type_factory';
 
-export const createEqlAlertType = (ruleDataClient: RuleDataClient, logger: Logger) => {
-  const createPersistenceRuleType = createPersistenceRuleTypeFactory({
-    ruleDataClient,
+export const createEqlAlertType = (createOptions: {
+  lists: SetupPlugins['lists'];
+  logger: Logger;
+  ruleDataClient: RuleDataClient;
+}) => {
+  const { lists, logger, ruleDataClient } = createOptions;
+  const createSecurityRuleType = createSecurityRuleTypeFactory({
+    lists,
     logger,
+    ruleDataClient,
   });
-  return createPersistenceRuleType({
+  return createSecurityRuleType({
     id: EQL_ALERT_TYPE_ID,
     name: 'EQL Rule',
     validate: {
-      params: schema.object({
-        eqlQuery: schema.string(),
-        indexPatterns: schema.arrayOf(schema.string()),
-      }),
+      params: {
+        validate: (object: unknown): EqlRuleParams => {
+          const [validated, errors] = validateNonExact(object, eqlRuleParams);
+          if (errors != null) {
+            throw new Error(errors);
+          }
+          if (validated == null) {
+            throw new Error('Validation of rule params failed');
+          }
+          return validated;
+        },
+      },
     },
     actionGroups: [
       {
@@ -49,15 +63,15 @@ export const createEqlAlertType = (ruleDataClient: RuleDataClient, logger: Logge
     producer: 'security-solution',
     async executor({
       startedAt,
-      services: { alertWithPersistence, findAlerts, scopedClusterClient },
-      params: { indexPatterns, eqlQuery },
+      services: { alertWithPersistence, scopedClusterClient },
+      params: { index, query },
     }) {
       const from = moment(startedAt).subtract(moment.duration(5, 'm')).toISOString(); // hardcoded 5-minute rule interval
       const to = startedAt.toISOString();
 
       const request = buildEqlSearchRequest(
-        eqlQuery,
-        indexPatterns,
+        query,
+        index ?? [],
         from,
         to,
         10,

@@ -244,14 +244,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       // sec
 
       // Register rule types via rule-registry
-      this.setupPlugins.alerting.registerType(createQueryAlertType(ruleDataClient, this.logger));
-      this.setupPlugins.alerting.registerType(createEqlAlertType(ruleDataClient, this.logger));
       this.setupPlugins.alerting.registerType(
-        createThresholdAlertType(ruleDataClient, this.logger)
+        createQueryAlertType({ lists: plugins.lists, logger: this.logger, ruleDataClient })
+      );
+      this.setupPlugins.alerting.registerType(createEqlAlertType({ lists: plugins.lists, logger: this.logger, ruleDataClient }));
+      this.setupPlugins.alerting.registerType(
+        createThresholdAlertType({ lists: plugins.lists, logger: this.logger, ruleDataClient })
       );
     }
 
-    // TO DO We need to get the endpoint routes inside of initRoutes
+    // TODO We need to get the endpoint routes inside of initRoutes
     initRoutes(
       router,
       config,

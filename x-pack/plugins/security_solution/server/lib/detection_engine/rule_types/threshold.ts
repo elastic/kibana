@@ -8,15 +8,16 @@
 import moment from 'moment';
 import v4 from 'uuid/v4';
 
-import { schema } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
+import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 
 import { AlertServices } from '../../../../../alerting/server';
 import {
   RuleDataClient,
-  createPersistenceRuleTypeFactory,
 } from '../../../../../rule_registry/server';
 import { THRESHOLD_ALERT_TYPE_ID } from '../../../../common/constants';
+import { SetupPlugins } from '../../../../target/types/server/plugin';
+import { thresholdRuleParams, ThresholdRuleParams } from '../schemas/rule_schemas';
 import { SignalSearchResponse, ThresholdSignalHistory } from '../signals/types';
 import {
   findThresholdSignals,
@@ -26,7 +27,9 @@ import {
 } from '../signals/threshold';
 import { getFilter } from '../signals/get_filter';
 import { BuildRuleMessage } from '../signals/rule_messages';
+import { createSecurityRuleTypeFactory } from './create_security_rule_type_factory';
 
+/*
 interface RuleParams {
   indexPatterns: string[];
   customQuery: string;
@@ -37,10 +40,11 @@ interface RuleParams {
     value: number;
   }>;
 }
+*/
 
 interface BulkCreateThresholdSignalParams {
   results: SignalSearchResponse;
-  ruleParams: RuleParams;
+  ruleParams: ThresholdRuleParams;
   services: AlertServices & { logger: Logger };
   inputIndexPattern: string[];
   ruleId: string;
@@ -52,14 +56,11 @@ interface BulkCreateThresholdSignalParams {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const formatThresholdSignals = (params: BulkCreateThresholdSignalParams): any[] => {
+  const { index, threshold } = params.ruleParams;
   const thresholdResults = params.results;
-  const threshold = {
-    field: params.ruleParams.thresholdFields,
-    value: params.ruleParams.thresholdValue,
-  };
   const results = transformThresholdResultsToEcs(
     thresholdResults,
-    params.ruleParams.indexPatterns.join(','),
+    (index ?? []).join(','),
     params.startedAt,
     params.from,
     undefined,
@@ -80,15 +81,35 @@ const formatThresholdSignals = (params: BulkCreateThresholdSignalParams): any[] 
   });
 };
 
-export const createThresholdAlertType = (ruleDataClient: RuleDataClient, logger: Logger) => {
-  const createPersistenceRuleType = createPersistenceRuleTypeFactory({
-    ruleDataClient,
+export const createThresholdAlertType = (createOptions: {
+  lists: SetupPlugins['lists'];
+  logger: Logger;
+  ruleDataClient: RuleDataClient;
+}) => {
+  const { lists, logger, ruleDataClient } = createOptions;
+  const createSecurityRuleType = createSecurityRuleTypeFactory({
+    lists,
     logger,
+    ruleDataClient,
   });
-  return createPersistenceRuleType({
+  return createSecurityRuleType({
     id: THRESHOLD_ALERT_TYPE_ID,
     name: 'Threshold Rule',
     validate: {
+      params: {
+        validate: (object: unknown): ThresholdRuleParams => {
+          const [validated, errors] = validateNonExact(object, thresholdRuleParams);
+          if (errors != null) {
+            throw new Error(errors);
+          }
+          if (validated == null) {
+            throw new Error('Validation of rule params failed');
+          }
+          return validated;
+        },
+      },
+    },
+    /*
       params: schema.object({
         indexPatterns: schema.arrayOf(schema.string()),
         customQuery: schema.string(),
@@ -102,6 +123,7 @@ export const createThresholdAlertType = (ruleDataClient: RuleDataClient, logger:
         ),
       }),
     },
+    */
     actionGroups: [
       {
         id: 'default',
@@ -116,6 +138,7 @@ export const createThresholdAlertType = (ruleDataClient: RuleDataClient, logger:
     isExportable: false,
     producer: 'security-solution',
     async executor({ startedAt, services, params, alertId }) {
+      const { index, query, threshold } = params;
       const fromDate = moment(startedAt).subtract(moment.duration(5, 'm')); // hardcoded 5-minute rule interval
       const from = fromDate.toISOString();
       const to = startedAt.toISOString();
@@ -135,7 +158,7 @@ export const createThresholdAlertType = (ruleDataClient: RuleDataClient, logger:
         services: (services as unknown) as AlertServices,
         logger,
         ruleId: alertId,
-        bucketByFields: params.thresholdFields,
+        bucketByFields: threshold.field,
         timestampOverride,
         buildRuleMessage,
       });
@@ -149,10 +172,10 @@ export const createThresholdAlertType = (ruleDataClient: RuleDataClient, logger:
         type: 'threshold',
         filters: bucketFilters,
         language: 'kuery',
-        query: params.customQuery,
+        query,
         savedId: undefined,
         services: (services as unknown) as AlertServices,
-        index: params.indexPatterns,
+        index,
         lists: [],
       });
 
@@ -161,16 +184,16 @@ export const createThresholdAlertType = (ruleDataClient: RuleDataClient, logger:
         searchErrors,
         searchDuration: thresholdSearchDuration,
       } = await findThresholdSignals({
-        inputIndexPattern: params.indexPatterns,
+        inputIndexPattern: index ?? [],
         from,
         to,
         services: (services as unknown) as AlertServices,
         logger,
         filter: esFilter,
         threshold: {
-          field: params.thresholdFields,
-          value: params.thresholdValue,
-          cardinality: params.thresholdCardinality,
+          field: threshold.field,
+          value: threshold.value,
+          cardinality: threshold.cardinality,
         },
         timestampOverride,
         buildRuleMessage,

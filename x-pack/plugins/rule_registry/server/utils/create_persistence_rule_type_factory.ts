@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import v4 from 'uuid/v4';
 import { CreatePersistenceRuleTypeFactory } from './persistence_types';
 
 export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory = ({
@@ -16,7 +15,7 @@ export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory 
     ...type,
     executor: async (options) => {
       const {
-        services: { alertInstanceFactory, scopedClusterClient },
+        services: { alertInstanceFactory },
       } = options;
 
       const currentAlerts: Array<Record<string, unknown>> = [];

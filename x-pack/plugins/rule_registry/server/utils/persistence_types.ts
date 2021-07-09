@@ -6,7 +6,6 @@
  */
 
 import { Logger } from '@kbn/logging';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ESSearchRequest } from 'src/core/types/elasticsearch';
 import {
   AlertInstance,
@@ -16,7 +15,6 @@ import {
 } from '../../../alerting/server';
 import { AlertTypeWithExecutor } from '../types';
 import { RuleDataClient } from '../../target/types/server';
-import { ListClient } from '../../../lists/target/types/server';
 
 export type PersistenceAlertService<TAlertInstanceContext extends Record<string, unknown>> = (
   alerts: Array<Record<string, unknown>>

@@ -6,14 +6,12 @@
  */
 /* eslint-disable complexity */
 
-import { ElasticsearchClient, Logger, SavedObject } from 'src/core/server';
+import { Logger, SavedObject } from 'src/core/server';
 import isEmpty from 'lodash/isEmpty';
 import { chain, tryCatch } from 'fp-ts/lib/TaskEither';
 import { flow } from 'fp-ts/lib/function';
 
 import * as t from 'io-ts';
-import { get, countBy } from 'lodash';
-import { performance } from 'perf_hooks';
 import { validateNonExact, parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import { toError, toPromise } from '@kbn/securitysolution-list-api';
 
@@ -31,13 +29,7 @@ import {
 } from '../../../../common/detection_engine/utils';
 import { SetupPlugins } from '../../../plugin';
 import { getInputIndex } from './get_input_output_index';
-import {
-  AlertAttributes,
-  SearchAfterAndBulkCreateParams,
-  SignalRuleAlertTypeDefinition,
-  WrapHits,
-  WrappedSignalHit,
-} from './types';
+import { AlertAttributes, SignalRuleAlertTypeDefinition } from './types';
 import {
   getListsClient,
   getExceptions,
@@ -47,9 +39,6 @@ import {
   hasReadIndexPrivileges,
   getRuleRangeTuples,
   isMachineLearningParams,
-  makeFloatString,
-  errorAggregator,
-  generateId,
 } from './utils';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
 import {
@@ -57,7 +46,7 @@ import {
   NotificationRuleTypeParams,
 } from '../notifications/schedule_notification_actions';
 import { ruleStatusServiceFactory } from './rule_status_service';
-import { BuildRuleMessage, buildRuleMessageFactory } from './rule_messages';
+import { buildRuleMessageFactory } from './rule_messages';
 import { ruleStatusSavedObjectsClientFactory } from './rule_status_saved_objects_client';
 import { getNotificationResultsLink } from '../notifications/utils';
 import { TelemetryEventsSender } from '../../telemetry/sender';

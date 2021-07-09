@@ -6,7 +6,6 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { schema } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { ESSearchRequest } from 'src/core/types/elasticsearch';
@@ -21,11 +20,12 @@ import { queryRuleParams, QueryRuleParams } from '../schemas/rule_schemas';
 
 import { createSecurityRuleTypeFactory } from './create_security_rule_type_factory';
 
-export const createQueryAlertType = (
-  lists: SetupPlugins['lists'],
-  ruleDataClient: RuleDataClient,
-  logger: Logger
-) => {
+export const createQueryAlertType = (createOptions: {
+  lists: SetupPlugins['lists'];
+  logger: Logger;
+  ruleDataClient: RuleDataClient;
+}) => {
+  const { lists, logger, ruleDataClient } = createOptions;
   const createSecurityRuleType = createSecurityRuleTypeFactory({
     lists,
     logger,
@@ -61,11 +61,11 @@ export const createQueryAlertType = (
     minimumLicenseRequired: 'basic',
     isExportable: false,
     producer: 'security-solution',
-    async executor(options) {
+    async executor(execOptions) {
       const {
         params: { index, query },
-        services: { alertWithPersistence },
-      } = options;
+        services: { alertWithPersistence, savedObjectsClient },
+      } = execOptions;
       try {
         const indexPattern: IIndexPattern = {
           fields: [],
@@ -79,6 +79,7 @@ export const createQueryAlertType = (
           { query, language: 'kuery' },
           []
         ) as estypes.QueryDslQueryContainer;
+
         const wrappedEsQuery: ESSearchRequest = {
           body: {
             query: esQuery,
@@ -89,6 +90,7 @@ export const createQueryAlertType = (
           },
         };
 
+        // TODO: find alerts
         // const alerts = await findAlerts(query);
         const alerts: Array<Record<string, unknown>> = [];
         alertWithPersistence(alerts).forEach((alert) => {
