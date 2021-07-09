@@ -38,11 +38,7 @@ import {
 } from '../../endpoint_app_context_services';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
-import {
-  Agent,
-  ElasticsearchAssetType,
-  EsAssetReference,
-} from '../../../../../fleet/common/types/models';
+import { Agent, ElasticsearchAssetType } from '../../../../../fleet/common/types/models';
 import { createV1SearchResponse, createV2SearchResponse } from './support/test_support';
 import { PackageService } from '../../../../../fleet/server/services';
 import {
@@ -106,9 +102,7 @@ describe('test endpoint route', () => {
     beforeEach(() => {
       endpointAppContextService = new EndpointAppContextService();
       mockPackageService = createMockPackageService();
-      mockPackageService.getInstalledEsAssetReferences.mockReturnValue(
-        Promise.resolve(([] as unknown) as EsAssetReference[])
-      );
+      mockPackageService.getInstallation.mockReturnValue(Promise.resolve(undefined));
       endpointAppContextService.start({ ...startContract, packageService: mockPackageService });
       mockAgentService = startContract.agentService!;
 
@@ -196,17 +190,28 @@ describe('test endpoint route', () => {
     beforeEach(() => {
       endpointAppContextService = new EndpointAppContextService();
       mockPackageService = createMockPackageService();
-      mockPackageService.getInstalledEsAssetReferences.mockReturnValue(
-        Promise.resolve([
-          {
-            id: 'logs-endpoint.events.security',
-            type: ElasticsearchAssetType.indexTemplate,
-          },
-          {
-            id: `${metadataTransformPrefix}-0.16.0-dev.0`,
-            type: ElasticsearchAssetType.transform,
-          },
-        ])
+      mockPackageService.getInstallation.mockReturnValue(
+        Promise.resolve({
+          installed_kibana: [],
+          package_assets: [],
+          es_index_patterns: {},
+          name: '',
+          version: '',
+          install_status: 'installed',
+          install_version: '',
+          install_started_at: '',
+          install_source: 'registry',
+          installed_es: [
+            {
+              id: 'logs-endpoint.events.security',
+              type: ElasticsearchAssetType.indexTemplate,
+            },
+            {
+              id: `${metadataTransformPrefix}-0.16.0-dev.0`,
+              type: ElasticsearchAssetType.transform,
+            },
+          ],
+        })
       );
       endpointAppContextService.start({ ...startContract, packageService: mockPackageService });
       mockAgentService = startContract.agentService!;

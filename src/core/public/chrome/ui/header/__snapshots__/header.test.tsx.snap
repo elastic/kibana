@@ -4553,7 +4553,7 @@ exports[`Header renders 1`] = `
                       isOpen={false}
                       onClose={[Function]}
                       ownFocus={false}
-                      size={240}
+                      size={248}
                     >
                       <EuiHeaderSectionItemButton
                         aria-controls="mockId"

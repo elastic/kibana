@@ -425,6 +425,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                     >
                       <div
                         className=""
+                        data-test-subj="reportingListItemObjectTitle"
                         key=".0"
                       >
                         <div>
@@ -1434,6 +1435,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                     >
                       <div
                         className=""
+                        data-test-subj="reportingListItemObjectTitle"
                         key=".0"
                       >
                         <div>
@@ -2457,6 +2459,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                     >
                       <div
                         className=""
+                        data-test-subj="reportingListItemObjectTitle"
                         key=".0"
                       >
                         <div>
@@ -3527,6 +3530,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                     >
                       <div
                         className=""
+                        data-test-subj="reportingListItemObjectTitle"
                         key=".0"
                       >
                         <div>
@@ -4630,6 +4634,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                     >
                       <div
                         className=""
+                        data-test-subj="reportingListItemObjectTitle"
                         key=".0"
                       >
                         <div>
@@ -5700,6 +5705,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                     >
                       <div
                         className=""
+                        data-test-subj="reportingListItemObjectTitle"
                         key=".0"
                       >
                         <div>
@@ -6770,6 +6776,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                     >
                       <div
                         className=""
+                        data-test-subj="reportingListItemObjectTitle"
                         key=".0"
                       >
                         <div>
@@ -7840,6 +7847,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                     >
                       <div
                         className=""
+                        data-test-subj="reportingListItemObjectTitle"
                         key=".0"
                       >
                         <div>
@@ -8910,6 +8918,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                     >
                       <div
                         className=""
+                        data-test-subj="reportingListItemObjectTitle"
                         key=".0"
                       >
                         <div>
