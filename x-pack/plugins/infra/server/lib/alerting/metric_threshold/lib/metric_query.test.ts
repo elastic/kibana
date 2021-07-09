@@ -78,12 +78,5 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
       undefined,
       undefined
     );
-    test('by rounding timestamps to the nearest timeUnit', () => {
-      const rangeFilter = searchBody.query.bool.filter.find((filter) =>
-        filter.hasOwnProperty('range')
-      )?.range[timefield];
-      expect(rangeFilter?.lte).toBe(1594246020000);
-      expect(rangeFilter?.gte).toBe(1594245720000);
-    });
   });
 });
