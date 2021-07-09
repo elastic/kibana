@@ -18,7 +18,7 @@ import {
 import { mapValues, once } from 'lodash';
 import { TECHNICAL_COMPONENT_TEMPLATE_NAME } from '../../rule_registry/common/assets';
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
-import { APMConfig, APMXPackConfig } from '.';
+import { APMConfig, APMXPackConfig, APM_SERVER_FEATURE_ID } from '.';
 import { mergeConfigs } from './index';
 import { UI_SETTINGS } from '../../../../src/plugins/data/common';
 import { APM_FEATURE, registerFeaturesUsage } from './feature';
@@ -127,6 +127,10 @@ export class APMPlugin
     const getCoreStart = () =>
       core.getStartServices().then(([coreStart]) => coreStart);
 
+    const alertsIndexPattern = ruleDataService.getFullAssetName(
+      'observability-apm*'
+    );
+
     const initializeRuleDataTemplates = once(async () => {
       const componentTemplateName = ruleDataService.getFullAssetName(
         'apm-mappings'
@@ -164,15 +168,16 @@ export class APMPlugin
       await ruleDataService.createOrUpdateIndexTemplate({
         name: ruleDataService.getFullAssetName('apm-index-template'),
         body: {
-          index_patterns: [
-            ruleDataService.getFullAssetName('observability-apm*'),
-          ],
+          index_patterns: [alertsIndexPattern],
           composed_of: [
             ruleDataService.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
             componentTemplateName,
           ],
         },
       });
+      await ruleDataService.updateIndexMappingsMatchingPattern(
+        alertsIndexPattern
+      );
     });
 
     // initialize eagerly
@@ -183,6 +188,7 @@ export class APMPlugin
     );
 
     const ruleDataClient = ruleDataService.getRuleDataClient(
+      APM_SERVER_FEATURE_ID,
       ruleDataService.getFullAssetName('observability-apm'),
       () => initializeRuleDataTemplatesPromise
     );
@@ -201,7 +207,7 @@ export class APMPlugin
     }) as APMRouteHandlerResources['plugins'];
 
     const telemetryUsageCounter = resourcePlugins.usageCollection?.setup.createUsageCounter(
-      'apm'
+      APM_SERVER_FEATURE_ID
     );
 
     registerRoutes({

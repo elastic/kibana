@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { UnwrapPromise } from '@kbn/utility-types';
-import { i18n } from '@kbn/i18n';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { i18n } from '@kbn/i18n';
+import { UnwrapPromise } from '@kbn/utility-types';
 import { ElasticsearchClient } from 'src/core/server';
 import { ReportingCore } from '../../';
 import { ReportDocument } from '../../lib/store';
@@ -87,6 +87,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore) {
         elasticsearchClient.search({ body, index: getIndex() })
       );
 
+      // FIXME: return the info in ReportApiJSON format;
       return response?.body.hits?.hits ?? [];
     },
 
@@ -139,6 +140,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore) {
         return;
       }
 
+      // FIXME: return the info in ReportApiJSON format;
       return response.body.hits.hits[0] as ReportDocument;
     },
 
