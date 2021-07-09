@@ -59,7 +59,7 @@ export const EndpointActivityLog = memo(
       [activityLogLoaded, activityLogSize, hasActiveDateRange, activityLogError]
     );
     const isShorter = useMemo(
-      () => hasActiveDateRange && isPagingDisabled && !activityLogLoading && !activityLogSize,
+      () => !!(hasActiveDateRange && isPagingDisabled && !activityLogLoading && !activityLogSize),
       [hasActiveDateRange, isPagingDisabled, activityLogLoading, activityLogSize]
     );
 

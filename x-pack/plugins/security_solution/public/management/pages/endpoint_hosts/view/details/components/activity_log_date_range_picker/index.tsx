@@ -85,6 +85,7 @@ export const DateRangePicker = memo(() => {
         <DatePickerWrapper>
           <EuiFlexItem>
             <EuiDatePickerRange
+              fullWidth={true}
               data-test-subj="activityLogDateRangePicker"
               startDateControl={
                 <EuiDatePicker
