@@ -20,6 +20,7 @@ import {
 import React, { useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
@@ -28,7 +29,6 @@ import { HostIsolationPanel } from '../../../../detections/components/host_isola
 import { EndpointIsolateSuccess } from '../../../../common/components/endpoint/host_isolation';
 import { useCasesFromAlerts } from '../../../../detections/containers/detection_engine/alerts/use_cases_from_alerts';
 import { CaseDetailsLink } from '../../../../common/components/links';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { TakeActionDropdown } from '../../../../detections/components/host_isolation/take_action_dropdown';
 import {
   ISOLATE_HOST,
@@ -84,7 +84,9 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
 
   const [isolateAction, setIsolateAction] = useState('isolateHost');
 
-  const [isIsolateActionSuccessBannerVisible, setIsIsolateActionSuccessBannerVisible] = useState(false);
+  const [isIsolateActionSuccessBannerVisible, setIsIsolateActionSuccessBannerVisible] = useState(
+    false
+  );
 
   const showAlertDetails = useCallback(() => {
     setIsHostIsolationPanel(false);
@@ -223,17 +225,19 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
           <ExpandableEventTitle isAlert={isAlert} loading={loading} />
         )}
       </EuiFlyoutHeader>
-      <StyledEuiFlyoutBody banner={
-        isIsolateActionSuccessBannerVisible && (
-          <EndpointIsolateSuccess
-          hostName={hostName}
-          isolateAction="isolateHost"
-          completeButtonLabel={'Return to alert Details'}
-          onComplete={showAlertDetails}
-          additionalInfo={associatedCases}
-        />
-        )
-      }>
+      <StyledEuiFlyoutBody
+        banner={
+          isIsolateActionSuccessBannerVisible && (
+            <EndpointIsolateSuccess
+              hostName={hostName}
+              isolateAction="isolateHost"
+              completeButtonLabel={'Return to alert Details'}
+              onComplete={showAlertDetails}
+              additionalInfo={associatedCases}
+            />
+          )
+        }
+      >
         {isHostIsolationPanelOpen ? (
           <HostIsolationPanel
             details={detailsData}
