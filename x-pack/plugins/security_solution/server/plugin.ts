@@ -249,7 +249,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       this.setupPlugins.alerting.registerType(
         createQueryAlertType({ lists: plugins.lists, logger: this.logger, ruleDataClient })
       );
-      this.setupPlugins.alerting.registerType(createEqlAlertType({ lists: plugins.lists, logger: this.logger, ruleDataClient }));
+      this.setupPlugins.alerting.registerType(
+        createEqlAlertType({ lists: plugins.lists, logger: this.logger, ruleDataClient })
+      );
       this.setupPlugins.alerting.registerType(
         createThresholdAlertType({ lists: plugins.lists, logger: this.logger, ruleDataClient })
       );

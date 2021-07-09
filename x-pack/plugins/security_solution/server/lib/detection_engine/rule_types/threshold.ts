@@ -12,9 +12,7 @@ import { Logger } from '@kbn/logging';
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 
 import { AlertServices } from '../../../../../alerting/server';
-import {
-  RuleDataClient,
-} from '../../../../../rule_registry/server';
+import { RuleDataClient } from '../../../../../rule_registry/server';
 import { THRESHOLD_ALERT_TYPE_ID } from '../../../../common/constants';
 import { SetupPlugins } from '../../../../target/types/server/plugin';
 import { thresholdRuleParams, ThresholdRuleParams } from '../schemas/rule_schemas';
