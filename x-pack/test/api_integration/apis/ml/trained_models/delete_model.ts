@@ -41,12 +41,27 @@ export default ({ getService }: FtrProviderContext) => {
         .expect(404);
     });
 
+    it('returns 404 if requested trained model does not exist', async () => {
+      await supertest
+        .delete(`/api/ml/trained_models/not_existing_model`)
+        .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
+        .set(COMMON_REQUEST_HEADERS)
+        .expect(404);
+    });
+
     it('does not allow to delete trained model if the user does not have required permissions', async () => {
       await supertest
-        .delete(`/api/ml/trained_models/dfa_regression_model_n_0`)
+        .delete(`/api/ml/trained_models/dfa_regression_model_n_1`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS)
         .expect(403);
+
+      // verify that model has not been deleted
+      await supertest
+        .get(`/api/ml/trained_models/dfa_regression_model_n_1`)
+        .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
+        .set(COMMON_REQUEST_HEADERS)
+        .expect(200);
     });
   });
 };

@@ -35,6 +35,14 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body.trained_model_stats[0].model_id).to.eql('dfa_regression_model_n_0');
     });
 
+    it('returns 404 if requested trained model does not exist', async () => {
+      await supertest
+        .get(`/api/ml/trained_models/not_existing_model/_stats`)
+        .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
+        .set(COMMON_REQUEST_HEADERS)
+        .expect(404);
+    });
+
     it('return an error for unauthorized user', async () => {
       await supertest
         .get(`/api/ml/trained_models/dfa_regression_model_n_0/_stats`)
