@@ -7,11 +7,8 @@
 
 import React, { useMemo } from 'react';
 import { find } from 'lodash/fp';
-import { EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { Maybe } from '../../../../../observability/common/typings';
 import { useCasesFromAlerts } from '../../containers/detection_engine/alerts/use_cases_from_alerts';
-import { CaseDetailsLink } from '../../../common/components/links';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { IsolateHost } from './isolate';
 import { UnisolateHost } from './unisolate';
