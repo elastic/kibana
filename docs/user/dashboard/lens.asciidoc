@@ -380,4 +380,4 @@ Here's a short list of few different aspects to check:
 [[is-it-possible-to-show-icons-in-datatable]]
 ===== Is it possible to show icons in datatable?
 
-It is possible to show icons <<../managing-index-patterns#string-field-formatters, via field formatter>>.
+It is possible to show icons <<managing-index-patterns#string-field-formatters, via field formatter>>.
