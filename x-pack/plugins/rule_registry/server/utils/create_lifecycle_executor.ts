@@ -28,6 +28,7 @@ import {
   ALERT_UUID,
   EVENT_ACTION,
   EVENT_KIND,
+  OWNER,
   RULE_UUID,
   TIMESTAMP,
 } from '../../common/technical_rule_data_field_names';
@@ -120,6 +121,7 @@ export const createLifecycleExecutor = (logger: Logger, ruleDataClient: RuleData
   >
 ): Promise<WrappedLifecycleRuleState<State>> => {
   const {
+    rule,
     services: { alertInstanceFactory },
     state: previousState,
   } = options;
@@ -239,6 +241,7 @@ export const createLifecycleExecutor = (logger: Logger, ruleDataClient: RuleData
       ...ruleExecutorData,
       [TIMESTAMP]: timestamp,
       [EVENT_KIND]: 'event',
+      [OWNER]: rule.consumer,
       [ALERT_ID]: alertId,
     };
 
@@ -293,6 +296,7 @@ export const createLifecycleExecutor = (logger: Logger, ruleDataClient: RuleData
         [EVENT_KIND]: 'signal',
       });
     }
+    logger.debug(`Preparing to index ${eventsToIndex.length} alerts.`);
 
     if (ruleDataClient.isWriteEnabled()) {
       await ruleDataClient.getWriter().bulk({

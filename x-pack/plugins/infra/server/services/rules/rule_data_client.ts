@@ -10,14 +10,17 @@ import { CoreSetup, Logger } from 'src/core/server';
 import { TECHNICAL_COMPONENT_TEMPLATE_NAME } from '../../../../rule_registry/common/assets';
 import { RuleRegistryPluginSetupContract } from '../../../../rule_registry/server';
 import { logThresholdRuleDataNamespace } from '../../../common/alerting/logs/log_threshold';
+import type { InfraFeatureId } from '../../../common/constants';
 import { RuleRegistrationContext, RulesServiceStartDeps } from './types';
 
 export const createRuleDataClient = ({
+  ownerFeatureId,
   registrationContext,
   getStartServices,
   logger,
   ruleDataService,
 }: {
+  ownerFeatureId: InfraFeatureId;
   registrationContext: RuleRegistrationContext;
   getStartServices: CoreSetup<RulesServiceStartDeps>['getStartServices'];
   logger: Logger;
@@ -73,6 +76,7 @@ export const createRuleDataClient = ({
   });
 
   return ruleDataService.getRuleDataClient(
+    ownerFeatureId,
     ruleDataService.getFullAssetName(registrationContext),
     () => initializeRuleDataTemplatesPromise
   );
