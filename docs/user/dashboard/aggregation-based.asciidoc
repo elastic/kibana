@@ -176,6 +176,48 @@ image:images/bar-chart-tutorial-2.png[Bar chart with sample logs data]
 . Click *Save and return*.
 
 
+[float]
+[[new-charts-library]]
+==== Check out our new charts library
+
+*Line, Area, Horizontal and Vertical Bar*
+
+From 7.12, XY axis charts use a new charts library. 
+
+NOTE: The legacy XY charts library will be removed in 7.16. If you are still using it, turn off the *XY axis legacy charts library* switch.
+
+The new library comes with new cool features:
+
+* Better performance
+
+* Color palettes 
+
+* Fill opacity
+
+* Fill missing values 
+
+To use the old library
+
+. Navigate to *Advanced settings*. Refer to <<advanced-options, Advanced Settings>> for more information.
+
+. Toggle the *XY axis legacy charts library* switch.
 
 
+*Pie*
 
+From 7.14, pie charts use a new charts library. The new library offers:
+
+* Better performance
+
+* Color palettes
+
+* Label position adjustment
+
+* Display values or percentages
+
+
+To use the old library
+
+. Navigate to *Advanced settings*. Refer to <<advanced-options, Advanced Settings>> for more information.
+
+. Toggle the *Pie legacy charts library* switch.

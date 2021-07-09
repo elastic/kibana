@@ -23,7 +23,8 @@
     "kibanaUtils",
     "kibanaReact",
     "home",
-    "discover"
+    "discover",
+    "visTypeXy"
   ],
   "owner": {
     "name": "Kibana App",
