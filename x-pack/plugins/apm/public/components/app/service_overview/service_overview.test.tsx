@@ -137,6 +137,9 @@ describe('ServiceOverview', () => {
           average: null,
         },
       },
+      'GET /api/apm/services/{serviceName}/annotation/search': {
+        annotations: [],
+      },
     };
     /* eslint-enable @typescript-eslint/naming-convention */
 

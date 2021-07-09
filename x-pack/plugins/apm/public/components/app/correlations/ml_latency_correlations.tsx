@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import {
   EuiIcon,
   EuiBasicTableColumn,
@@ -36,6 +36,7 @@ import { useCorrelations } from './use_correlations';
 import { push } from '../../shared/Links/url_helpers';
 import { useUiTracker } from '../../../../../observability/public';
 import { asPreciseDecimal } from '../../../../common/utils/formatters';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 
 const DEFAULT_PERCENTILE_THRESHOLD = 95;
 const isErrorMessage = (arg: unknown): arg is Error => {
@@ -59,7 +60,7 @@ export function MlLatencyCorrelations({ onClose }: Props) {
     core: { notifications },
   } = useApmPluginContext();
 
-  const { serviceName } = useParams<{ serviceName: string }>();
+  const { serviceName } = useApmServiceContext();
   const { urlParams } = useUrlParams();
 
   const fetchOptions = useMemo(
