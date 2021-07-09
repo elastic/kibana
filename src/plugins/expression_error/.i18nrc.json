@@ -1,7 +1,0 @@
-{
-  "prefix": "expressionError",
-  "paths": {
-    "expressionError": "."
-  },
-  "translations": ["translations/ja-JP.json"]
-}
