@@ -156,7 +156,7 @@ describe('Constants: Messages parseMessages()', () => {
         status: 'success',
         text: 'Influencer configuration passed the validation checks.',
         url:
-          'https://www.elastic.co/guide/en/machine-learning/mocked-test-branch/ml-influencers.html',
+          'https://www.elastic.co/guide/en/machine-learning/mocked-test-branch/ml-ad-finding-anomalies.html#ml-ad-influencers',
       },
       {
         id: 'half_estimated_mml_greater_than_mml',
