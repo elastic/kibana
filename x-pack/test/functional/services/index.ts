@@ -9,6 +9,7 @@ import { services as kibanaFunctionalServices } from '../../../../test/functiona
 import { services as kibanaApiIntegrationServices } from '../../../../test/api_integration/services';
 import { services as kibanaXPackApiIntegrationServices } from '../../api_integration/services';
 import { services as commonServices } from '../../common/services';
+import { ReportingFunctionalProvider } from '../../reporting_functional/services';
 
 import {
   MonitoringNoDataProvider,
@@ -107,5 +108,6 @@ export const services = {
   dashboardDrilldownPanelActions: DashboardDrilldownPanelActionsProvider,
   dashboardDrilldownsManage: DashboardDrilldownsManageProvider,
   dashboardPanelTimeRange: DashboardPanelTimeRangeProvider,
+  reporting: ReportingFunctionalProvider,
   searchSessions: SearchSessionsService,
 };
