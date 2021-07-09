@@ -13,8 +13,6 @@ import { act } from 'react-dom/test-utils';
 
 import { registerTestBed } from '@kbn/test/jest';
 
-import type { Capabilities } from 'src/core/public';
-
 import type { SharePluginSetup, LocatorPublic } from '../../../../../src/plugins/share/public';
 import type { NotificationsSetup } from '../../../../../src/core/public';
 import {
