@@ -76,52 +76,56 @@ export const alertComment: Comment = {
   version: 'WzQ3LDFc',
 };
 
-export const hostIsolationComment: Comment = {
-  type: CommentType.actions,
-  comment: 'I just isolated the host!',
-  id: 'isolate-comment-id',
-  actions: {
-    targets: [
-      {
-        hostname: 'host1',
-        endpointId: '001',
-      },
-    ],
-    type: 'isolate',
-  },
-  associationType: AssociationType.case,
-  createdAt: basicCreatedAt,
-  createdBy: elasticUser,
-  owner: SECURITY_SOLUTION_OWNER,
-  pushedAt: null,
-  pushedBy: null,
-  updatedAt: null,
-  updatedBy: null,
-  version: 'WzQ3LDFc',
+export const hostIsolationComment: () => Comment = () => {
+  return {
+    type: CommentType.actions,
+    comment: 'I just isolated the host!',
+    id: 'isolate-comment-id',
+    actions: {
+      targets: [
+        {
+          hostname: 'host1',
+          endpointId: '001',
+        },
+      ],
+      type: 'isolate',
+    },
+    associationType: AssociationType.case,
+    createdAt: basicCreatedAt,
+    createdBy: elasticUser,
+    owner: SECURITY_SOLUTION_OWNER,
+    pushedAt: null,
+    pushedBy: null,
+    updatedAt: null,
+    updatedBy: null,
+    version: 'WzQ3LDFc',
+  };
 };
 
-export const hostReleaseComment: Comment = {
-  type: CommentType.actions,
-  comment: 'I just released the host!',
-  id: 'isolate-comment-id',
-  actions: {
-    targets: [
-      {
-        hostname: 'host1',
-        endpointId: '001',
-      },
-    ],
-    type: 'unisolate',
-  },
-  associationType: AssociationType.case,
-  createdAt: basicCreatedAt,
-  createdBy: elasticUser,
-  owner: SECURITY_SOLUTION_OWNER,
-  pushedAt: null,
-  pushedBy: null,
-  updatedAt: null,
-  updatedBy: null,
-  version: 'WzQ3LDFc',
+export const hostReleaseComment: () => Comment = () => {
+  return {
+    type: CommentType.actions,
+    comment: 'I just released the host!',
+    id: 'isolate-comment-id',
+    actions: {
+      targets: [
+        {
+          hostname: 'host1',
+          endpointId: '001',
+        },
+      ],
+      type: 'unisolate',
+    },
+    associationType: AssociationType.case,
+    createdAt: basicCreatedAt,
+    createdBy: elasticUser,
+    owner: SECURITY_SOLUTION_OWNER,
+    pushedAt: null,
+    pushedBy: null,
+    updatedAt: null,
+    updatedBy: null,
+    version: 'WzQ3LDFc',
+  };
 };
 
 export const basicCase: Case = {

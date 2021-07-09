@@ -381,7 +381,7 @@ describe(`UserActionTree`, () => {
       const props = {
         ...defaultProps,
         caseUserActions: isolateAction,
-        data: { ...defaultProps.data, comments: [...basicCase.comments, hostIsolationComment] },
+        data: { ...defaultProps.data, comments: [...basicCase.comments, hostIsolationComment()] },
       };
 
       const wrapper = mount(
@@ -399,7 +399,7 @@ describe(`UserActionTree`, () => {
       const props = {
         ...defaultProps,
         caseUserActions: isolateAction,
-        data: { ...defaultProps.data, comments: [hostIsolationComment] },
+        data: { ...defaultProps.data, comments: [hostIsolationComment()] },
       };
 
       const wrapper = mount(
@@ -419,7 +419,7 @@ describe(`UserActionTree`, () => {
       const props = {
         ...defaultProps,
         caseUserActions: isolateAction,
-        data: { ...defaultProps.data, comments: [hostIsolationComment] },
+        data: { ...defaultProps.data, comments: [hostIsolationComment()] },
       };
 
       const wrapper = mount(
@@ -438,7 +438,7 @@ describe(`UserActionTree`, () => {
       const props = {
         ...defaultProps,
         caseUserActions: isolateAction,
-        data: { ...defaultProps.data, comments: [hostReleaseComment] },
+        data: { ...defaultProps.data, comments: [hostReleaseComment()] },
       };
 
       const wrapper = mount(
