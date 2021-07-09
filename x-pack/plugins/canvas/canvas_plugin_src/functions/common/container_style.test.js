@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { functionWrapper } from '../../../test_helpers/function_wrapper';
-import { elasticLogo } from '../../lib/elastic_logo';
+import {
+  elasticLogo,
+  functionWrapper,
+} from '../../../../../../src/plugins/presentation_util/common/lib';
 import { getFunctionErrors } from '../../../i18n';
 import { containerStyle } from './containerStyle';
 

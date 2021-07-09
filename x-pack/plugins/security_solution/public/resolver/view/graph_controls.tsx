@@ -21,6 +21,7 @@ import {
   EuiIconTip,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
+  EuiRangeProps,
 } from '@elastic/eui';
 import { useSelector, useDispatch } from 'react-redux';
 import { SideEffectContext } from './side_effect_context';
@@ -32,6 +33,13 @@ import { StyledDescriptionList } from './panels/styles';
 import { CubeForProcess } from './panels/cube_for_process';
 import { GeneratedText } from './generated_text';
 
+// EuiRange is currently only horizontally positioned. This reorients the track to a vertical position
+const StyledEuiRange = styled(EuiRange)<EuiRangeProps>`
+  & .euiRangeTrack:after {
+    left: -65px;
+    transform: rotate(90deg);
+  }
+`;
 interface StyledGraphControlProps {
   $backgroundColor: string;
   $iconColor: string;
@@ -275,7 +283,7 @@ export const GraphControls = React.memo(
             >
               <EuiIcon type="plusInCircle" />
             </button>
-            <EuiRange
+            <StyledEuiRange
               className="zoom-slider"
               data-test-subj="resolver:graph-controls:zoom-slider"
               min={0}

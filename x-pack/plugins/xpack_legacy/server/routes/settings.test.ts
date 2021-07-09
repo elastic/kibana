@@ -14,6 +14,7 @@ import {
   contextServiceMock,
   elasticsearchServiceMock,
   savedObjectsServiceMock,
+  executionContextServiceMock,
 } from '../../../../../src/core/server/mocks';
 import { createHttpServer } from '../../../../../src/core/server/test_utils';
 import { registerSettingsRoute } from './settings';
@@ -48,6 +49,7 @@ describe('/api/settings', () => {
           },
         },
       }),
+      executionContext: executionContextServiceMock.createInternalSetupContract(),
     });
 
     overallStatus$ = new BehaviorSubject<ServiceStatus>({

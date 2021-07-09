@@ -205,6 +205,7 @@ export const TableContent: React.FunctionComponent<Props> = ({
       onClick: () => {
         setConfirmModal(renderAddPolicyToTemplateConfirmModal(policy));
       },
+      'data-test-subj': 'addPolicyToTemplate',
     });
     items.push({
       name: deletePolicyLabel,
@@ -214,6 +215,7 @@ export const TableContent: React.FunctionComponent<Props> = ({
       onClick: () => {
         setConfirmModal(renderDeleteConfirmModal(policy));
       },
+      'data-test-subj': 'deletePolicy',
     });
     const panelTree = {
       id: 0,
