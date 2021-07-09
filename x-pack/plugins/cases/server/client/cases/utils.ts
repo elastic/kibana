@@ -81,13 +81,29 @@ const getCommentContent = (comment: CommentResponse): string => {
   return '';
 };
 
-const countAlerts = (comments: CaseResponse['comments']): number =>
-  comments?.reduce<number>((total, comment) => {
-    if (comment.type === CommentType.alert || comment.type === CommentType.generatedAlert) {
-      return total + (Array.isArray(comment.alertId) ? comment.alertId.length : 1);
-    }
-    return total;
-  }, 0) ?? 0;
+interface CountAlertsInfo {
+  total: number;
+  pushed: number;
+  totalAlerts: number;
+}
+
+const countAlerts = (comments: CaseResponse['comments']): CountAlertsInfo => {
+  const countingInfo = { total: 0, pushed: 0, totalAlerts: 0 };
+  return (
+    comments?.reduce<CountAlertsInfo>(({ total, pushed, totalAlerts }, comment) => {
+      if (comment.type === CommentType.alert || comment.type === CommentType.generatedAlert) {
+        return {
+          // We could use ++total but total + 1 is more readable.
+          total: total + 1,
+          // We could use ++pushed but pushed + 1 is more readable.
+          pushed: comment.pushed_at != null ? pushed + 1 : pushed,
+          totalAlerts: totalAlerts + (Array.isArray(comment.alertId) ? comment.alertId.length : 1),
+        };
+      }
+      return { total, pushed, totalAlerts };
+    }, countingInfo) ?? countingInfo
+  );
+};
 
 export const createIncident = async ({
   actionsClient,
@@ -164,7 +180,9 @@ export const createIncident = async ({
       comment.type === CommentType.user && commentsIdsToBeUpdated.has(comment.id)
   );
 
-  const totalAlerts = countAlerts(caseComments);
+  const { total: totalCommentsTypeAlert, pushed: pushedAlerts, totalAlerts } = countAlerts(
+    caseComments
+  );
 
   let comments: ExternalServiceComment[] = [];
 
@@ -175,7 +193,7 @@ export const createIncident = async ({
     }
   }
 
-  if (totalAlerts > 0) {
+  if (totalCommentsTypeAlert > pushedAlerts) {
     comments.push({
       comment: `Elastic Alerts attached to the case: ${totalAlerts}`,
       commentId: `${theCase.id}-total-alerts`,
