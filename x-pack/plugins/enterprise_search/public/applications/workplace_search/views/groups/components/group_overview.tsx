@@ -23,12 +23,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 import { TruncatedContent } from '../../../../shared/truncate';
 import noSharedSourcesIcon from '../../../assets/share_circle.svg';
 import { WorkplaceSearchPageTemplate } from '../../../components/layout';
 import { ContentSection } from '../../../components/shared/content_section';
 import { SourcesTable } from '../../../components/shared/sources_table';
 import { NAV, CANCEL_BUTTON } from '../../../constants';
+import { USERS_AND_ROLES_PATH } from '../../../routes';
 import { GroupLogic, MAX_NAME_LENGTH } from '../group_logic';
 
 import { GroupUsersTable } from './group_users_table';
@@ -60,7 +62,7 @@ const MANAGE_SOURCES_BUTTON_TEXT = i18n.translate(
 const MANAGE_USERS_BUTTON_TEXT = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.overview.manageUsersButtonText',
   {
-    defaultMessage: 'Manage users',
+    defaultMessage: 'Manage users and roles',
   }
 );
 const NAME_SECTION_TITLE = i18n.translate(
@@ -110,7 +112,6 @@ export const GroupOverview: React.FC = () => {
   const {
     deleteGroup,
     showSharedSourcesModal,
-    showManageUsersModal,
     showConfirmDeleteModal,
     hideConfirmDeleteModal,
     updateGroupName,
@@ -165,9 +166,9 @@ export const GroupOverview: React.FC = () => {
     </EuiButton>
   );
   const manageUsersButton = (
-    <EuiButton color="primary" onClick={showManageUsersModal}>
+    <EuiButtonTo color="primary" to={USERS_AND_ROLES_PATH}>
       {MANAGE_USERS_BUTTON_TEXT}
-    </EuiButton>
+    </EuiButtonTo>
   );
   const sourcesTable = <SourcesTable sources={contentSources} />;
 

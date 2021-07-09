@@ -45,6 +45,7 @@ It is the default one for new visualizations but it can also be switched for the
 image::images/tsvb_index_pattern_selection_mode.png[Change index pattern selection mode action]
 
 The index pattern mode unlocks many new features, such as:
+
 * Runtime fields
 
 * URL drilldowns
