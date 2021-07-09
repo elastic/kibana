@@ -10,6 +10,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { Logger } from '@kbn/logging';
 import { CoreSetup, PluginInitializerContext, Plugin } from 'src/core/server';
+import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
 import { InfraStaticSourceConfiguration } from '../common/source_configuration/source_configuration';
 import { inventoryViewSavedObjectType } from '../common/saved_objects/inventory_view';
 import { metricsExplorerViewSavedObjectType } from '../common/saved_objects/metrics_explorer_view';
@@ -93,8 +94,16 @@ export class InfraServerPlugin implements Plugin<InfraPluginSetup> {
     this.config = context.config.get<InfraConfig>();
     this.logger = context.logger.get();
 
-    this.logsRules = new RulesService('observability.logs', this.logger.get('logsRules'));
-    this.metricsRules = new RulesService('observability.metrics', this.logger.get('metricsRules'));
+    this.logsRules = new RulesService(
+      LOGS_FEATURE_ID,
+      'observability.logs',
+      this.logger.get('logsRules')
+    );
+    this.metricsRules = new RulesService(
+      METRICS_FEATURE_ID,
+      'observability.metrics',
+      this.logger.get('metricsRules')
+    );
   }
 
   setup(core: CoreSetup<InfraServerPluginStartDeps>, plugins: InfraServerPluginSetupDeps) {

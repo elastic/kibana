@@ -7,6 +7,7 @@
 
 import { CoreSetup, Logger } from 'src/core/server';
 import { createLifecycleExecutor } from '../../../../rule_registry/server';
+import { InfraFeatureId } from '../../../common/constants';
 import { createRuleDataClient } from './rule_data_client';
 import {
   RuleRegistrationContext,
@@ -18,6 +19,7 @@ import {
 
 export class RulesService {
   constructor(
+    public readonly ownerFeatureId: InfraFeatureId,
     public readonly registrationContext: RuleRegistrationContext,
     private readonly logger: Logger
   ) {}
@@ -29,6 +31,7 @@ export class RulesService {
     const ruleDataClient = createRuleDataClient({
       getStartServices: core.getStartServices,
       logger: this.logger,
+      ownerFeatureId: this.ownerFeatureId,
       registrationContext: this.registrationContext,
       ruleDataService: setupDeps.ruleRegistry.ruleDataService,
     });
