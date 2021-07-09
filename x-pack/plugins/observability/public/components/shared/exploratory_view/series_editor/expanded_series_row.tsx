@@ -43,26 +43,17 @@ export function ExpandedSeriesRow({ seriesId, seriesConfig }: Props) {
 
   return (
     <div style={{ width: '100%' }}>
+      <ReportDefinitionCol seriesId={seriesId} seriesConfig={seriesConfig} />
+      <EuiSpacer />
       <EuiFlexGroup>
         <EuiFlexItem grow={false} style={{ minWidth: 600 }}>
-          <ReportDefinitionCol seriesId={seriesId} seriesConfig={seriesConfig} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} style={{ minWidth: 600 }}>
-          <EuiFormRow
-            label={i18n.translate('xpack.observability.expView.seriesBuilder.selectFilters', {
-              defaultMessage: 'Filters',
-            })}
-          >
+          <EuiFormRow label={FILTERS_LABEL}>
             <ReportFilters seriesId={seriesId} seriesConfig={seriesConfig} />
           </EuiFormRow>
         </EuiFlexItem>
         {(hasOperationType || columnType === 'operation') && (
           <EuiFlexItem>
-            <EuiFormRow
-              label={i18n.translate('xpack.observability.expView.seriesBuilder.operation', {
-                defaultMessage: 'Operation',
-              })}
-            >
+            <EuiFormRow label={OPERATION_LABEL}>
               <OperationTypeSelect
                 seriesId={seriesId}
                 defaultOperationType={yAxisColumns[0].operationType}
@@ -75,3 +66,11 @@ export function ExpandedSeriesRow({ seriesId, seriesConfig }: Props) {
     </div>
   );
 }
+
+const FILTERS_LABEL = i18n.translate('xpack.observability.expView.seriesBuilder.selectFilters', {
+  defaultMessage: 'Filters',
+});
+
+const OPERATION_LABEL = i18n.translate('xpack.observability.expView.seriesBuilder.operation', {
+  defaultMessage: 'Operation',
+});

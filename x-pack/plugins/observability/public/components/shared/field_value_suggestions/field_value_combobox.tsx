@@ -87,7 +87,7 @@ export function FieldValueCombobox({
       </EuiFormControlLayout>
     </ComboWrapper>
   ) : (
-    <EuiFormRow label={label} display="center">
+    <EuiFormRow label={label} display="center" fullWidth>
       {comboBox}
     </EuiFormRow>
   );

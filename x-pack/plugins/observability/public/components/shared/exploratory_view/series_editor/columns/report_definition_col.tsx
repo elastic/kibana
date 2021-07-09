@@ -42,9 +42,9 @@ export function ReportDefinitionCol({
   };
 
   return (
-    <EuiFlexGroup gutterSize="s" direction="column">
+    <EuiFlexGroup gutterSize="l">
       {definitionFields.map((field) => (
-        <EuiFlexItem key={field}>
+        <EuiFlexItem key={field} grow={1}>
           <ReportDefinitionField
             seriesId={seriesId}
             seriesConfig={seriesConfig}
