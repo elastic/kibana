@@ -12,7 +12,6 @@ import { IInterpreterRenderHandlers } from '../../../expressions';
 import { withSuspense } from '../../../presentation_util/public';
 import { ErrorRendererConfig } from '../../common/types';
 import { LazyErrorComponent } from '.';
-import './error.scss';
 
 const Error = withSuspense(LazyErrorComponent);
 
