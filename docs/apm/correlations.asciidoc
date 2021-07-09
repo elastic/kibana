@@ -35,8 +35,8 @@ significant correlation with slow response times, they are listed in a table
 below the chart. The table is sorted by correlation coefficients that range from
 0 to 1. Attributes with higher correlation values are more likely to contribute
 to high latency transactions. By default, the attribute with the highest
-correlation value is added to the chart. You can hover over other rows in the
-table to compare the latency distribution of transactions with that attribute.
+correlation value is added to the chart. To see the latency distribution for
+other attributes, hover over their row in the table.
 
 If a correlated attribute seems noteworthy, use the **Filter** quick links:
 
