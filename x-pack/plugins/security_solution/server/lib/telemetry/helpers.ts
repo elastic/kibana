@@ -12,7 +12,7 @@ import moment from 'moment';
  *
  * @param executeTo
  * @param lastExecutionTimestamp
- * @returns the time to search from
+ * @returns the timestamp to search from
  */
 export const getPreviousDiagTaskTimestamp = (
   executeTo: string,
@@ -34,7 +34,7 @@ export const getPreviousDiagTaskTimestamp = (
  *
  * @param executeTo
  * @param lastExecutionTimestamp
- * @returns
+ * @returns the timestamp to search from
  */
 export const getPreviousEpMetaTaskTimestamp = (
   executeTo: string,

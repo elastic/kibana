@@ -139,7 +139,7 @@ export class TelemetryEventsSender {
     return callCluster('search', query);
   }
 
-  public async fetchEndpointMetrics() {
+  public async fetchEndpointMetrics(executeFrom: string, executeTo: string) {
     if (this.esClient === undefined) {
       throw Error('could not fetch policy responses. es client is not available');
     }
@@ -153,8 +153,8 @@ export class TelemetryEventsSender {
         query: {
           range: {
             '@timestamp': {
-              gte: 'now-24h',
-              lt: 'now',
+              gte: executeFrom,
+              lt: executeTo,
             },
           },
         },
@@ -208,7 +208,7 @@ export class TelemetryEventsSender {
     return this.agentPolicyService?.get(this.savedObjectClient, id);
   }
 
-  public async fetchEndpointPolicyResponses() {
+  public async fetchEndpointPolicyResponses(executeFrom: string, executeTo: string) {
     if (this.esClient === undefined) {
       throw Error('could not fetch policy responses. es client is not available');
     }
@@ -222,8 +222,8 @@ export class TelemetryEventsSender {
         query: {
           range: {
             '@timestamp': {
-              gte: 'now-24h',
-              lt: 'now',
+              gte: executeFrom,
+              lt: executeTo,
             },
           },
         },

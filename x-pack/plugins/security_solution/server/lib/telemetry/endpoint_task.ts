@@ -16,6 +16,7 @@ import { batchTelemetryRecords, getPreviousEpMetaTaskTimestamp } from './helpers
 import { TelemetryEventsSender } from './sender';
 import { PolicyData } from '../../../common/endpoint/types';
 import { PackagePolicy } from '../../../../fleet/common/types/models/package_policy';
+import { FLEET_ENDPOINT_PACKAGE } from '../../../../fleet/common';
 import {
   EndpointMetricsAggregation,
   EndpointPolicyResponseAggregation,
@@ -104,18 +105,18 @@ export class TelemetryEndpointTask {
     return `${TelemetryEndpointTaskConstants.TYPE}:${TelemetryEndpointTaskConstants.VERSION}`;
   };
 
-  private async fetchEndpointData() {
-    const [epMetricsResponse, fleetAgentsResponse, policyResponse] = await Promise.allSettled([
-      this.sender.fetchEndpointMetrics(),
+  private async fetchEndpointData(executeFrom: string, executeTo: string) {
+    const [fleetAgentsResponse, epMetricsResponse, policyResponse] = await Promise.allSettled([
       this.sender.fetchFleetAgents(),
-      this.sender.fetchEndpointPolicyResponses(),
+      this.sender.fetchEndpointMetrics(executeFrom, executeTo),
+      this.sender.fetchEndpointPolicyResponses(executeFrom, executeTo),
     ]);
 
     return {
-      endpointMetrics:
-        epMetricsResponse.status === 'fulfilled' ? epMetricsResponse.value : undefined,
       fleetAgentsResponse:
         fleetAgentsResponse.status === 'fulfilled' ? fleetAgentsResponse.value : undefined,
+      endpointMetrics:
+        epMetricsResponse.status === 'fulfilled' ? epMetricsResponse.value : undefined,
       epPolicyResponse: policyResponse.status === 'fulfilled' ? policyResponse.value : undefined,
     };
   }
@@ -132,7 +133,7 @@ export class TelemetryEndpointTask {
       return 0;
     }
 
-    const endpointData = await this.fetchEndpointData();
+    const endpointData = await this.fetchEndpointData(executeFrom, executeTo);
 
     /** STAGE 1 - Fetch Endpoint Agent Metrics
      *
@@ -198,7 +199,7 @@ export class TelemetryEndpointTask {
             if (pPolicy.inputs[0].config !== undefined) {
               pPolicy.inputs.forEach((input) => {
                 if (
-                  input.type === 'endpoint' &&
+                  input.type === FLEET_ENDPOINT_PACKAGE &&
                   input.config !== undefined &&
                   policyInfo !== undefined
                 ) {
