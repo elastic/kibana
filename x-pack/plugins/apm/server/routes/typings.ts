@@ -14,6 +14,7 @@ import {
 } from 'src/core/server';
 import { RuleDataClient } from '../../../rule_registry/server';
 import { AlertingApiRequestHandlerContext } from '../../../alerting/server';
+import type { RacApiRequestHandlerContext } from '../../../rule_registry/server';
 import { LicensingApiRequestHandlerContext } from '../../../licensing/server';
 import { APMConfig } from '..';
 import { APMPluginDependencies } from '../types';
@@ -21,6 +22,7 @@ import { APMPluginDependencies } from '../types';
 export interface ApmPluginRequestHandlerContext extends RequestHandlerContext {
   licensing: LicensingApiRequestHandlerContext;
   alerting: AlertingApiRequestHandlerContext;
+  rac: RacApiRequestHandlerContext;
 }
 
 export type InspectResponse = Array<{
@@ -29,6 +31,7 @@ export type InspectResponse = Array<{
   requestType: string;
   requestParams: Record<string, unknown>;
   esError: Error;
+  operationName: string;
 }>;
 
 export interface APMRouteCreateOptions {
@@ -40,6 +43,7 @@ export interface APMRouteCreateOptions {
       | 'access:ml:canCreateJob'
     >;
     body?: { accepts: Array<'application/json' | 'multipart/form-data'> };
+    disableTelemetry?: boolean;
   };
 }
 

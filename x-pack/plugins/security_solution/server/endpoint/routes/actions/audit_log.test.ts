@@ -60,6 +60,37 @@ describe('Action Log API', () => {
       }).not.toThrow();
     });
 
+    it('should work with all query params', () => {
+      expect(() => {
+        EndpointActionLogRequestSchema.query.validate({
+          page: 10,
+          page_size: 100,
+          start_date: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), // yesterday
+          end_date: new Date().toISOString(), // today
+        });
+      }).not.toThrow();
+    });
+
+    it('should work with just startDate', () => {
+      expect(() => {
+        EndpointActionLogRequestSchema.query.validate({
+          page: 1,
+          page_size: 100,
+          start_date: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), // yesterday
+        });
+      }).not.toThrow();
+    });
+
+    it('should work with just endDate', () => {
+      expect(() => {
+        EndpointActionLogRequestSchema.query.validate({
+          page: 1,
+          page_size: 100,
+          end_date: new Date().toISOString(), // today
+        });
+      }).not.toThrow();
+    });
+
     it('should not work without allowed page and page_size params', () => {
       expect(() => {
         EndpointActionLogRequestSchema.query.validate({ page_size: 101 });
@@ -157,20 +188,14 @@ describe('Action Log API', () => {
 
     it('should have actions and action responses', async () => {
       havingActionsAndResponses(
-        [
-          aMockAction().withAgent(mockID).withAction('isolate'),
-          aMockAction().withAgent(mockID).withAction('unisolate'),
-          aMockAction().withAgent(mockID).withAction('isolate'),
-        ],
-        [aMockResponse(actionID, mockID), aMockResponse(actionID, mockID)]
+        [aMockAction().withAgent(mockID).withAction('isolate').withID(actionID)],
+        [aMockResponse(actionID, mockID)]
       );
       const response = await getActivityLog();
       const responseBody = response.ok.mock.calls[0][0]?.body as ActivityLog;
 
       expect(response.ok).toBeCalled();
-      expect(responseBody.data).toHaveLength(5);
-      expect(responseBody.data.filter((x: any) => x.type === 'response')).toHaveLength(2);
-      expect(responseBody.data.filter((x: any) => x.type === 'action')).toHaveLength(3);
+      expect(responseBody.data).toHaveLength(2);
     });
 
     it('should throw errors when no results for some agentID', async () => {
@@ -181,6 +206,21 @@ describe('Action Log API', () => {
       } catch (error) {
         expect(error.message).toEqual(`Error fetching actions log for agent_id ${mockID}`);
       }
+    });
+
+    it('should return date ranges if present in the query', async () => {
+      havingActionsAndResponses([], []);
+      const startDate = new Date(new Date().setDate(new Date().getDate() - 1)).toISOString();
+      const endDate = new Date().toISOString();
+      const response = await getActivityLog({
+        page: 1,
+        page_size: 50,
+        start_date: startDate,
+        end_date: endDate,
+      });
+      expect(response.ok).toBeCalled();
+      expect((response.ok.mock.calls[0][0]?.body as ActivityLog).startDate).toEqual(startDate);
+      expect((response.ok.mock.calls[0][0]?.body as ActivityLog).endDate).toEqual(endDate);
     });
   });
 });

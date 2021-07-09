@@ -227,12 +227,14 @@ export async function loadInitialState({
   const state =
     persistedState && references ? injectReferences(persistedState, references) : undefined;
 
+  const fallbackId = lastUsedIndexPatternId || defaultIndexPatternId || indexPatternRefs[0]?.id;
+
   const requiredPatterns: string[] = uniq(
     state
       ? Object.values(state.layers)
           .map((l) => l.indexPatternId)
           .concat(state.currentIndexPatternId)
-      : [lastUsedIndexPatternId || defaultIndexPatternId || indexPatternRefs[0]?.id]
+      : [fallbackId]
   )
     // take out the undefined from the list
     .filter(Boolean);
@@ -248,15 +250,16 @@ export async function loadInitialState({
     indexPatternRefs[0]?.id,
   ].filter((id) => id != null && availableIndexPatterns.has(id));
 
-  const currentIndexPatternId = availableIndexPatternIds[0]!;
+  const currentIndexPatternId = availableIndexPatternIds[0];
 
   if (currentIndexPatternId) {
     setLastUsedIndexPatternId(storage, currentIndexPatternId);
+
+    if (!requiredPatterns.includes(currentIndexPatternId)) {
+      requiredPatterns.push(currentIndexPatternId);
+    }
   }
 
-  if (!requiredPatterns.includes(currentIndexPatternId)) {
-    requiredPatterns.push(currentIndexPatternId);
-  }
   const indexPatterns = await loadIndexPatterns({
     indexPatternsService,
     cache: {},
@@ -265,7 +268,7 @@ export async function loadInitialState({
   if (state) {
     return {
       ...state,
-      currentIndexPatternId,
+      currentIndexPatternId: currentIndexPatternId ?? fallbackId,
       indexPatternRefs,
       indexPatterns,
       existingFields: {},
@@ -274,7 +277,7 @@ export async function loadInitialState({
   }
 
   return {
-    currentIndexPatternId,
+    currentIndexPatternId: currentIndexPatternId ?? fallbackId,
     indexPatternRefs,
     indexPatterns,
     layers: {},
@@ -446,10 +449,13 @@ export async function syncExistingFields({
       isFirstExistenceFetch: false,
       existenceFetchFailed: false,
       existenceFetchTimeout: false,
-      existingFields: emptinessInfo.reduce((acc, info) => {
-        acc[info.indexPatternTitle] = booleanMap(info.existingFieldNames);
-        return acc;
-      }, state.existingFields),
+      existingFields: emptinessInfo.reduce(
+        (acc, info) => {
+          acc[info.indexPatternTitle] = booleanMap(info.existingFieldNames);
+          return acc;
+        },
+        { ...state.existingFields }
+      ),
     }));
   } catch (e) {
     // show all fields as available if fetch failed or timed out
@@ -457,10 +463,13 @@ export async function syncExistingFields({
       ...state,
       existenceFetchFailed: e.res?.status !== 408,
       existenceFetchTimeout: e.res?.status === 408,
-      existingFields: indexPatterns.reduce((acc, pattern) => {
-        acc[pattern.title] = booleanMap(pattern.fields.map((field) => field.name));
-        return acc;
-      }, state.existingFields),
+      existingFields: indexPatterns.reduce(
+        (acc, pattern) => {
+          acc[pattern.title] = booleanMap(pattern.fields.map((field) => field.name));
+          return acc;
+        },
+        { ...state.existingFields }
+      ),
     }));
   }
 }

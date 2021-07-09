@@ -16,7 +16,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const fieldEditor = getService('fieldEditor');
 
-  describe('lens formula', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/105016
+  describe.skip('lens formula', () => {
     it('should transition from count to formula', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
@@ -180,7 +181,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.getErrorCount()).to.eql(0);
     });
 
-    it('should duplicate a moving average formula and be a valid table', async () => {
+    it('should duplicate a moving average formula and be a valid table with conditional coloring', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.goToTimeRange();
@@ -198,14 +199,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         formula: `moving_average(sum(bytes), window=5`,
         keepOpen: true,
       });
+      await PageObjects.lens.setTableDynamicColoring('text');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const styleObj = await PageObjects.lens.getDatatableCellStyle(1, 1);
+      expect(styleObj['background-color']).to.be(undefined);
+      expect(styleObj.color).not.to.be(undefined);
+
       await PageObjects.lens.closeDimensionEditor();
 
       await PageObjects.lens.dragDimensionToDimension(
         'lnsDatatable_metrics > lns-dimensionTrigger',
         'lnsDatatable_metrics > lns-empty-dimension'
       );
-      expect(await PageObjects.lens.getDatatableCellText(1, 1)).to.eql('222420');
-      expect(await PageObjects.lens.getDatatableCellText(1, 2)).to.eql('222420');
+      expect(await PageObjects.lens.getDatatableCellText(1, 1)).to.eql('222,420');
+      expect(await PageObjects.lens.getDatatableCellText(1, 2)).to.eql('222,420');
     });
 
     it('should keep the formula if the user does not fully transition to a quick function', async () => {
@@ -229,6 +236,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.getDimensionTriggerText('lnsDatatable_metrics', 0)).to.eql(
         'count()'
       );
+    });
+
+    it('should allow numeric only formulas', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+      await PageObjects.lens.switchToVisualization('lnsDatatable');
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsDatatable_metrics > lns-empty-dimension',
+        operation: 'formula',
+        formula: `0`,
+      });
+
+      await PageObjects.lens.dragDimensionToDimension(
+        'lnsDatatable_metrics > lns-dimensionTrigger',
+        'lnsDatatable_metrics > lns-empty-dimension'
+      );
+      expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('0');
+      expect(await PageObjects.lens.getDatatableCellText(0, 1)).to.eql('0');
     });
   });
 }

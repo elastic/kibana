@@ -762,8 +762,9 @@ describe('When on the Trusted Apps Page', () => {
     });
 
     beforeEach(() => {
+      const priorMockImplementation = coreStart.http.get.getMockImplementation();
       // @ts-ignore
-      coreStart.http.get.mockImplementation(async (path, options) => {
+      coreStart.http.get.mockImplementation((path, options) => {
         if (path === TRUSTED_APPS_LIST_API) {
           const { page, per_page: perPage } = options.query as { page: number; per_page: number };
 
@@ -772,6 +773,9 @@ describe('When on the Trusted Apps Page', () => {
           } else {
             return releaseListResponse();
           }
+        }
+        if (priorMockImplementation) {
+          return priorMockImplementation(path);
         }
       });
     });

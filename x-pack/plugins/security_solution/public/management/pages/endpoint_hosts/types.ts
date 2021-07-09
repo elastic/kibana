@@ -40,9 +40,12 @@ export interface EndpointState {
     flyoutView: EndpointIndexUIQueryParams['show'];
     activityLog: {
       paging: {
-        disabled: boolean;
+        disabled?: boolean;
         page: number;
         pageSize: number;
+        startDate?: string;
+        endDate?: string;
+        isInvalidDateRange: boolean;
       };
       logData: AsyncResourceState<ActivityLog>;
     };
@@ -70,7 +73,7 @@ export interface EndpointState {
   /** the selected policy ID in the onboarding flow */
   selectedPolicyId?: string;
   /** Endpoint package info */
-  endpointPackageInfo?: GetPackagesResponse['response'][0];
+  endpointPackageInfo: AsyncResourceState<GetPackagesResponse['response'][0]>;
   /** Tracks the list of policies IDs used in Host metadata that may no longer exist */
   nonExistingPolicies: PolicyIds['packagePolicy'];
   /** List of Package Policy Ids mapped to an associated Fleet Parent Agent Policy Id*/

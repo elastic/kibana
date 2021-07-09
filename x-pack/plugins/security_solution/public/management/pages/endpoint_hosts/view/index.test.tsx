@@ -889,6 +889,27 @@ describe('when on the endpoint list page', () => {
         const emptyState = await renderResult.queryByTestId('activityLogEmpty');
         expect(emptyState).not.toBe(null);
       });
+
+      it('should not display empty state with no log data while date range filter is active', async () => {
+        const activityLogTab = await renderResult.findByTestId('activity_log');
+        reactTestingLibrary.act(() => {
+          reactTestingLibrary.fireEvent.click(activityLogTab);
+        });
+        await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
+        reactTestingLibrary.act(() => {
+          dispatchEndpointDetailsActivityLogChanged('success', {
+            page: 1,
+            pageSize: 50,
+            startDate: new Date().toISOString(),
+            data: [],
+          });
+        });
+
+        const emptyState = await renderResult.queryByTestId('activityLogEmpty');
+        const dateRangePicker = await renderResult.queryByTestId('activityLogDateRangePicker');
+        expect(emptyState).toBe(null);
+        expect(dateRangePicker).not.toBe(null);
+      });
     });
 
     describe('when showing host Policy Response panel', () => {
@@ -1188,6 +1209,17 @@ describe('when on the endpoint list page', () => {
               ...hosts[0].metadata.Endpoint.state,
               isolation: false,
             },
+          },
+          host: {
+            ...hosts[0].metadata.host,
+            os: {
+              ...hosts[0].metadata.host.os,
+              name: 'Windows',
+            },
+          },
+          agent: {
+            ...hosts[0].metadata.agent,
+            version: '7.14.0',
           },
         },
         query_strategy_version: queryStrategyVersion,

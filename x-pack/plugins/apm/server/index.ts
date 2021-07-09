@@ -102,23 +102,22 @@ export function mergeConfigs(
     'xpack.apm.agent.migrations.enabled': apmConfig.agent.migrations.enabled,
   };
 
-  if (apmOssConfig.fleetMode) {
-    mergedConfig[
-      'apm_oss.transactionIndices'
-    ] = `traces-apm*,${mergedConfig['apm_oss.transactionIndices']}`;
+  // Add data stream indices to list of configured values
+  mergedConfig[
+    'apm_oss.transactionIndices'
+  ] = `traces-apm*,${mergedConfig['apm_oss.transactionIndices']}`;
 
-    mergedConfig[
-      'apm_oss.spanIndices'
-    ] = `traces-apm*,${mergedConfig['apm_oss.spanIndices']}`;
+  mergedConfig[
+    'apm_oss.spanIndices'
+  ] = `traces-apm*,${mergedConfig['apm_oss.spanIndices']}`;
 
-    mergedConfig[
-      'apm_oss.errorIndices'
-    ] = `logs-apm*,${mergedConfig['apm_oss.errorIndices']}`;
+  mergedConfig[
+    'apm_oss.errorIndices'
+  ] = `logs-apm*,${mergedConfig['apm_oss.errorIndices']}`;
 
-    mergedConfig[
-      'apm_oss.metricsIndices'
-    ] = `metrics-apm*,${mergedConfig['apm_oss.metricsIndices']}`;
-  }
+  mergedConfig[
+    'apm_oss.metricsIndices'
+  ] = `metrics-apm*,${mergedConfig['apm_oss.metricsIndices']}`;
 
   return mergedConfig;
 }
@@ -126,6 +125,7 @@ export function mergeConfigs(
 export const plugin = (initContext: PluginInitializerContext) =>
   new APMPlugin(initContext);
 
+export { APM_SERVER_FEATURE_ID } from '../common/alert_types';
 export { APMPlugin } from './plugin';
 export { APMPluginSetup } from './types';
 export { APMServerRouteRepository } from './routes/get_global_apm_server_route_repository';

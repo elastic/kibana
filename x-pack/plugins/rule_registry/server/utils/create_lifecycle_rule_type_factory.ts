@@ -25,6 +25,7 @@ import {
   ALERT_UUID,
   EVENT_ACTION,
   EVENT_KIND,
+  OWNER,
   RULE_UUID,
   TIMESTAMP,
 } from '../../common/technical_rule_data_field_names';
@@ -69,6 +70,7 @@ export const createLifecycleRuleTypeFactory: CreateLifecycleRuleTypeFactory = ({
       const {
         services: { alertInstanceFactory },
         state: previousState,
+        rule,
       } = options;
 
       const ruleExecutorData = getRuleExecutorData(type, options);
@@ -180,6 +182,7 @@ export const createLifecycleRuleTypeFactory: CreateLifecycleRuleTypeFactory = ({
           ...ruleExecutorData,
           [TIMESTAMP]: timestamp,
           [EVENT_KIND]: 'event',
+          [OWNER]: rule.consumer,
           [ALERT_ID]: alertId,
         };
 
@@ -234,17 +237,20 @@ export const createLifecycleRuleTypeFactory: CreateLifecycleRuleTypeFactory = ({
             [EVENT_KIND]: 'signal',
           });
         }
+        logger.debug(`Preparing to index ${eventsToIndex.length} alerts.`);
 
-        await ruleDataClient.getWriter().bulk({
-          body: eventsToIndex
-            .flatMap((event) => [{ index: {} }, event])
-            .concat(
-              Array.from(alertEvents.values()).flatMap((event) => [
-                { index: { _id: event[ALERT_UUID]! } },
-                event,
-              ])
-            ),
-        });
+        if (ruleDataClient.isWriteEnabled()) {
+          await ruleDataClient.getWriter().bulk({
+            body: eventsToIndex
+              .flatMap((event) => [{ index: {} }, event])
+              .concat(
+                Array.from(alertEvents.values()).flatMap((event) => [
+                  { index: { _id: event[ALERT_UUID]! } },
+                  event,
+                ])
+              ),
+          });
+        }
       }
 
       const nextTrackedAlerts = Object.fromEntries(
@@ -260,7 +266,7 @@ export const createLifecycleRuleTypeFactory: CreateLifecycleRuleTypeFactory = ({
 
       return {
         wrapped: nextWrappedState ?? {},
-        trackedAlerts: nextTrackedAlerts,
+        trackedAlerts: ruleDataClient.isWriteEnabled() ? nextTrackedAlerts : {},
       };
     },
   };
