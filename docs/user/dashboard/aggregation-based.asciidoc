@@ -135,7 +135,7 @@ Add the sample web logs data that you'll use to create the bar chart, then creat
 [float]
 ===== Open and set up the aggregation-based bar chart
 
-Open the bar chart visualization builder and change the time range. 
+Open the *Aggregation based* editor and change the time range. 
 
 . On the dashboard, click *All types > Aggregation based*, select *Vertical bar*, then select *kibana_sample_data_logs*.
 

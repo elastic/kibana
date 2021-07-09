@@ -3,7 +3,7 @@
 
 The tutorial uses sample data from the perspective of a shop owner looking
 at sales trends, but this type of dashboard works on any type of data.
-To create dashboard panels of the data, open the *Lens* visualization builder, then  
+To create dashboard panels of the data, open *Lens*, then  
 create the visualization panels that best display the data.
 Before using this tutorial, you should be familiar with the <<kibana-concepts-analysts>>.
 
@@ -63,7 +63,7 @@ For the sample data, approximation is okay. To use the *Normalize unit* option:
 
 . Set the <<set-time-filter,time filter>> to *Last 30 days*.
 
-. From the *Available fields* list, drag and drop *Records* to the visualization builder.
+. From the *Available fields* list, drag and drop *Records* onto the workspace.
 +
 [role="screenshot"]
 image::images/lens_advanced_1_1.png[Added records to the workspace]
@@ -106,7 +106,7 @@ To quickly create many copies of a percentile metric that shows distribution of 
 [role="screenshot"]
 image::images/lens_advanced_2_1.png[Chart type menu with Line selected, width=50%]
 
-. From the *Available fields* list, drag and drop *products.price* to the visualization builder.
+. From the *Available fields* list, drag and drop *products.price* onto the workspace.
 
 . Create the 95th percentile.
 
@@ -152,7 +152,7 @@ scale. To add a line chart layer on top of an existing chart:
 
 To compare product prices with customers traffic:
 
-. From the *Available fields* list, drag and drop *products.price* to the visualization builder.
+. From the *Available fields* list, drag and drop *products.price* onto the workspace.
 
 .. In the *KQL* field, enter `response.keyword>=500 AND response.keyword<600`. 
 
@@ -202,7 +202,7 @@ sets of documents. To view this as a percentage, use a *stacked percentage* bar 
 
 To see sales change of product by type over time:
 
-. From the *Available fields* list, drag and drop *Records* to the visualization builder.
+. From the *Available fields* list, drag and drop *Records* onto the workspace.
 
 . Click *Bar vertical stacked*, then select *Area percentage*.
 
@@ -257,7 +257,7 @@ To determine the number of orders made only on Saturday and Sunday, create an ar
 
 . Configure the cumulative sum of the store orders.
 
-.. From the *Available fields* list, drag and drop *Records* to the visualization builder.
+.. From the *Available fields* list, drag and drop *Records* onto the workspace.
 
 .. From the editor, click *Count of Records*.
 
@@ -313,7 +313,7 @@ To compare current sales numbers with sales from a week ago, follow these steps:
 
 . From the *Chart Type* dropdown, select *Line*.
 
-. From the *Available fields* list, drag and drop *Records* to the visualization builder.
+. From the *Available fields* list, drag and drop *Records* onto the workspace.
 
 . Copy the *Count of Records* series by dragging it to the empty drop target of the *Vertical axis* dimension group (*Drop a field or click to add*)
 
@@ -340,7 +340,7 @@ To view the percent change in sales between the current time and the previous we
 
 . Open *Lens*.
 
-. From the *Available fields* list, drag and drop *Records* to the visualization builder.
+. From the *Available fields* list, drag and drop *Records* onto the workspace.
 
 . Click *Count of Records*, then click *Formula*.
 

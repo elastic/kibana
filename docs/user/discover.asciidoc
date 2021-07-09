@@ -257,8 +257,7 @@ image:images/discover-visualize.png[Discover sidebar field popover with visualiz
 +
 {kib} creates a visualization best suited for this field.
 
-. Drag `manufacturer.keyword` from the field list and drop it on
-the visualization builder pane.
+. From the *Available fields* list, drag and drop `manufacturer.keyword` onto the workspace.
 +
 [role="screenshot"]
 image:images/discover-from-visualize.png[Visualization that opens from Discover based on your data]

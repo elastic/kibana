@@ -112,7 +112,7 @@ Create a treemap panel that shows the top regions and manufacturers, then add th
 
 . On the *New Visualization* window, click *Lens*.
 
-. From the *Available fields* list, drag and drop the following fields to the visualization builder:
+. From the *Available fields* list, drag and drop the following fields onto the workspace:
 
 * *geoip.city_name*
 

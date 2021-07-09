@@ -54,7 +54,7 @@ visualization type after configuring your functions.
 
 * *Choose your field.* Do you know the dimension group you want to use the field in? If you do,
 drag and drop the field from the field list to your chosen dimension and Lens will pick a function for you.
-If you don't, drag and drop the field onto the visualization builder. Skip this step if you are
+If you don't, drag and drop the field onto the workspace. Skip this step if you are
 using the *Filters* function.
 
 * *Edit and delete.* To change the function or styling options, click the dimension to open
@@ -72,7 +72,7 @@ of the `clientip` field.
 [role="screenshot"]
 image::images/lens_end_to_end_1_2_1.png[Chart Type dropdown with Metric selected, width=50%]
 
-. From the *Available fields* list, drag and drop `clientip` to the visualization builder.
+. From the *Available fields* list, drag and drop `clientip` onto the workspace.
 Lens selects *Unique count* because it is the only numeric function
 that works for IP addresses. You can also drag and drop `clientip` onto
 the empty dimension for the same result.
@@ -111,13 +111,13 @@ width. The row for the metric will have 4 items on it later.
 === View a metric over time
 
 *Lens* has two shortcuts that simplify viewing metrics over time. 
-If you drag and drop a numeric field to the visualization builder, *Lens* adds the default
-time field from the index pattern. If the *Date histogram* function is being used,
-quickly replace the time field by dragging and dropping on the visualization builder.
+If you drag and drop a numeric field onto the workspace, *Lens* adds the default
+time field from the index pattern. When the *Date histogram* function is used, you can
+replace the time field by dragging and dropping the field onto the workspace.
 
 To visualize the `bytes` field over time without choosing a visualization type or function:
 
-. From the *Available fields* list, drag and drop `bytes` onto the visualization builder to have *Lens* automatically
+. From the *Available fields* list, drag and drop `bytes` onto the workspace to have *Lens* automatically
 create a chart. *Lens* creates a bar chart with two dimensions, *timestamp* and *Median of bytes*.
 
 . *Lens* automatically chooses a date interval. To zoom in on the data you want to view,
@@ -179,7 +179,7 @@ The *Top values* function ranks the unique values of a field by another dimensio
 The values are the most frequent when ranked by a *Count* dimension.
 The values are the largest when ranked by a *Sum* dimension.
 
-When you drag and drop a text or IP address field onto the visualization builder,
+When you drag and drop a text or IP address field onto the workspace,
 *Lens* adds a *Top values* function ranked by *Count of records* to show the most frequent values.
 
 For this tutorial, you have picked a field and function, but not a visualization type.
@@ -187,11 +187,11 @@ You want to see the most frequent values of `request.keyword` on your website, r
 This means that you want to use *Top values of request.keyword* ranked by *Unique count of clientip*, instead of
 being ranked by *Count of records*.
 
-. From the *Available fields* list, drag and drop `clientip` onto the *Vertical axis*.
-*Lens* chooses the function for you when you drop onto a dimension, which is *Unique count* here.
-Do not drop the field into the main workspace because `clientip` will be added to the wrong axis.
+. From the *Available fields* list, drag and drop `clientip` onto the *Vertical axis* field in the editor. 
++
+*Lens* automatically chooses the *Unique count* function. If you drag and drop `clientip` onto the workspace, *Lens* adds the field to the incorrect axis.
 
-. Drag and drop `request.keyword` to the main workspace. *Lens* adds *Top values of request.keyword*
+. Drag and drop `request.keyword` onto the workspace. *Lens* adds *Top values of request.keyword*
 to the *Horizontal axis*.
 +
 [role="screenshot"]
@@ -334,7 +334,7 @@ to create a chart that breaks down the traffic sources and user geography, use *
 
 Add the next break down by geography:
 
-. From the *Available fields* list, drag and drop *geo.src* to the main workspace.
+. From the *Available fields* list, drag and drop *geo.src* onto the workspace.
 
 . To change the *Group by* order, click and drag *Top values of geo.src* so that it appears first in the editor.
 +

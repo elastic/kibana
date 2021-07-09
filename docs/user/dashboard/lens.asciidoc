@@ -1,7 +1,7 @@
 [[lens]]
 === Lens
 
-To create visualizations with *Lens*, you drag and drop data fields onto the visualization builder, 
+To create visualizations with *Lens*, you drag and drop data fields onto the workspace, 
 then *Lens* uses heuristics to apply each field. 
 
 ++++
@@ -20,11 +20,13 @@ data-type="inline"
 
 [float]
 [[lens-required-choices]]
-==== Open and set up Lens
+==== Choose the data you want to visualize
 
-Open *Lens*, then explore the fields in your data. The list of fields are determined by the index pattern and time filter.
+Select the index pattern that contains the data you want to visualize, then specify the time range.
 
 . On the dashboard, click *Create visualization*.
+
+. Select the index pattern you want to visualize. 
 
 . In *Lens*, <<set-time-filter,set the time filter>>. 
 
@@ -33,6 +35,8 @@ Open *Lens*, then explore the fields in your data. The list of fields are determ
 . Scan through the list of fields to see what’s in your data.
 +
 TIP: For sparse datasets, *Empty fields* can contain data, which you can use to create visualizations.
+
+. To view a summary of the data in a field, click *i*.
 
 . To filter the data fields, use the following options:
 
@@ -47,7 +51,7 @@ TIP: For sparse datasets, *Empty fields* can contain data, which you can use to 
 For each field, *Lens* displays a summary depending on the type of data. To analyze the fields, *Lens* uses a sample of 5,000 documents. 
 Each summary displays the percentage of sampled documents over all available documents.
 
-To view a data summary, click *i* next to the field.
+
 
 [role="screenshot"]
 image::images/lens_data_info_documents.png[Data summary analyzed documents]
@@ -67,9 +71,9 @@ TIP: *Other* can equal more than 100% by a small amount.
 [[create-the-visualization-panel]]
 ==== Create visualizations
 
-Drag and drop the fields on to the visualization builder, then customize the visualization.
+Add the fields you want to visualize, then choose the best visualization to display the data.
 
-. Drag and drop the fields on to the visualization builder.
+. Drag and drop the fields onto the workspace.
 
 . To change the visualization type, use the following options:
 
@@ -138,9 +142,11 @@ For more information about adding fields to index patterns and Painless scriptin
 
 To configure the visualization, use the editor. For each visualization type, the editor options are different. 
 
-For area, bar, and line charts, you can add multiple layers. To display multiple index patterns and visualization types, you can specify an index pattern and visualization type for each layer. Each layer is made of dimensions that include the field you want to visualize, the bucket and metrics aggregation functions, and the display options. Dimensions are grouped by *Vertical axis*, *Hortizontal axis*, and *Break down by*. The *Vertical axis* and *Hortizontal axis* groups support multiple dimensions.
+Area, bar, and line charts::
+You can add multiple layers. To display multiple index patterns and visualization types, you can specify an index pattern and visualization type for each layer. Each layer is made of dimensions that include the field you want to visualize, the bucket and metrics aggregation functions, and the display options. Dimensions are grouped by *Vertical axis*, *Hortizontal axis*, and *Break down by*. The *Vertical axis* and *Hortizontal axis* groups support multiple dimensions.
 
-All other visualization types support a single set of dimensions. The dimension groups are different for each visualization type, but also include the field, aggregation functions, and display options.
+All other visualization types::
+Support a single set of dimensions. The dimension groups are different for each visualization type, but also include the field, aggregation functions, and display options.
 
 [float]
 [[lens-formulas]]
@@ -198,7 +204,7 @@ Compare your real-time data set to the results offset by a time increment. For e
 
 . From the *Chart type* dropdown, select *Table*. 
 
-. Drag and drop the fields you want to visualize on to the visualization builder. 
+. Drag and drop the fields you want to visualize onto the workspace. 
 
 . To sort or hide the columns, click the arrow next to the column heading, then select an option.
 
@@ -374,6 +380,8 @@ Here's a short list of few different aspects to check:
 
 ** If a `Percent` configuration is used, and the data range changes, the colors displayed are affected.
 ====
+
+When do I use runtime fields vs. formula?
 
 [discrete]
 [[can-i-sort-by-multiple-columns]]
