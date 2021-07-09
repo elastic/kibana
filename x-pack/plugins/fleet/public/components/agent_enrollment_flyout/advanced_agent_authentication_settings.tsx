@@ -22,12 +22,14 @@ import {
 interface Props {
   agentPolicyId?: string;
   selectedApiKeyId?: string;
+  initialAuthenticationSettingsOpen?: boolean;
   onKeyChange: (key?: string) => void;
 }
 
 export const AdvancedAgentAuthenticationSettings: FunctionComponent<Props> = ({
   agentPolicyId,
   selectedApiKeyId,
+  initialAuthenticationSettingsOpen = false,
   onKeyChange,
 }) => {
   const { notifications } = useStartServices();
@@ -35,7 +37,9 @@ export const AdvancedAgentAuthenticationSettings: FunctionComponent<Props> = ({
     []
   );
   const [isLoadingEnrollmentKey, setIsLoadingEnrollmentKey] = useState(false);
-  const [isAuthenticationSettingsOpen, setIsAuthenticationSettingsOpen] = useState<boolean>(false);
+  const [isAuthenticationSettingsOpen, setIsAuthenticationSettingsOpen] = useState<boolean>(
+    initialAuthenticationSettingsOpen
+  );
 
   const onCreateEnrollmentTokenClick = async () => {
     setIsLoadingEnrollmentKey(true);

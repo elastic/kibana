@@ -18,6 +18,7 @@ import { useServiceAgentNameFetcher } from './use_service_agent_name_fetcher';
 import { IUrlParams } from '../url_params_context/types';
 import { APIReturnType } from '../../services/rest/createCallApmApi';
 import { useServiceAlertsFetcher } from './use_service_alerts_fetcher';
+import { useServiceName } from '../../hooks/use_service_name';
 
 export type APMServiceAlert = ValuesType<
   APIReturnType<'GET /api/apm/services/{serviceName}/alerts'>['alerts']
@@ -28,6 +29,7 @@ export const APMServiceContext = createContext<{
   transactionType?: string;
   transactionTypes: string[];
   alerts: APMServiceAlert[];
+  serviceName?: string;
 }>({ transactionTypes: [], alerts: [] });
 
 export function ApmServiceContextProvider({
@@ -36,9 +38,12 @@ export function ApmServiceContextProvider({
   children: ReactNode;
 }) {
   const { urlParams } = useUrlParams();
-  const { agentName } = useServiceAgentNameFetcher();
 
-  const transactionTypes = useServiceTransactionTypesFetcher();
+  const serviceName = useServiceName();
+
+  const { agentName } = useServiceAgentNameFetcher(serviceName);
+
+  const transactionTypes = useServiceTransactionTypesFetcher(serviceName);
 
   const transactionType = getTransactionType({
     urlParams,
@@ -46,7 +51,7 @@ export function ApmServiceContextProvider({
     agentName,
   });
 
-  const { alerts } = useServiceAlertsFetcher(transactionType);
+  const { alerts } = useServiceAlertsFetcher({ serviceName, transactionType });
 
   return (
     <APMServiceContext.Provider
@@ -55,6 +60,7 @@ export function ApmServiceContextProvider({
         transactionType,
         transactionTypes,
         alerts,
+        serviceName,
       }}
       children={children}
     />

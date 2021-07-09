@@ -10,8 +10,7 @@ import { CoreSetup } from 'kibana/public';
 import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
-import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/common';
-import { OMIT_FIELDS } from '../../../../common/constants';
+import { NON_AGGREGATABLE_FIELD_TYPES, OMIT_FIELDS } from '../../../../common/constants';
 import { FieldRequestConfig } from '../../../../common/types';
 import { getVisualizerFieldStats, getVisualizerOverallStats } from '../services/visualizer_stats';
 
@@ -49,7 +48,7 @@ export class DataLoader {
     this._indexPattern.fields.forEach((field) => {
       const fieldName = field.displayName !== undefined ? field.displayName : field.name;
       if (this.isDisplayField(fieldName) === true) {
-        if (field.aggregatable === true && field.type !== KBN_FIELD_TYPES.GEO_SHAPE) {
+        if (field.aggregatable === true && !NON_AGGREGATABLE_FIELD_TYPES.has(field.type)) {
           aggregatableFields.push(field.name);
         } else {
           nonAggregatableFields.push(field.name);
