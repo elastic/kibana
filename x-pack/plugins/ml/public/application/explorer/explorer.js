@@ -270,7 +270,7 @@ export class ExplorerUI extends React.Component {
       allAnnotationsCnt > annotationsCnt ? (
         <EuiBadge color={'hollow'}>
           <FormattedMessage
-            id="xpack.ml.explorer.annotationsTitleTotalCount"
+            id="xpack.ml.explorer.annotationsOutOfTotalCountTitle"
             defaultMessage="First {visibleCount} out of a total of {totalCount}"
             values={{ visibleCount: annotationsCnt, totalCount: allAnnotationsCnt }}
           />
