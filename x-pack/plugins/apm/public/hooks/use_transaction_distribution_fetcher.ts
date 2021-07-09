@@ -6,14 +6,13 @@
  */
 
 import { flatten, omit, isEmpty } from 'lodash';
-import { useHistory, useParams } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { useFetcher } from './use_fetcher';
 import { toQuery, fromQuery } from '../components/shared/Links/url_helpers';
 import { maybe } from '../../common/utils/maybe';
 import { APIReturnType } from '../services/rest/createCallApmApi';
 import { useUrlParams } from '../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
-import { getTransactionType } from '../context/apm_service/apm_service_context';
 
 type APIResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/distribution'>;
 
