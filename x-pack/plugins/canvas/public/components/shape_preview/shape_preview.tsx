@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
+import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 import { ViewBoxParams, ShapeType } from '../../../../../../src/plugins/presentation_util/public';
 
@@ -14,16 +14,7 @@ interface Props {
 }
 
 export const ShapePreview: FC<Props> = ({ shape: Shape }) => {
-  const [shapeViewBox, setShapeViewBox] = useState<ViewBoxParams>({
-    minX: 0,
-    minY: 0,
-    width: 0,
-    height: 0,
-  });
-
-  if (!Shape) {
-    return <div className="canvasShapePreview" />;
-  }
+  if (!Shape) return <div className="canvasShapePreview" />;
 
   function getViewBox(defaultWidth: number, defaultViewBox: ViewBoxParams): ViewBoxParams {
     const { minX, minY, width, height } = defaultViewBox;
@@ -37,14 +28,11 @@ export const ShapePreview: FC<Props> = ({ shape: Shape }) => {
 
   return (
     <div className="canvasShapePreview">
-      <Shape
+      <Shape.Component
         shapeAttributes={{
           fill: 'none',
           stroke: 'black',
-          viewBox: getViewBox(5, shapeViewBox),
-        }}
-        setViewBoxParams={(viewBox?: ViewBoxParams | void) => {
-          if (viewBox) setShapeViewBox(viewBox);
+          viewBox: getViewBox(5, Shape.data.viewBox),
         }}
       />
     </div>
