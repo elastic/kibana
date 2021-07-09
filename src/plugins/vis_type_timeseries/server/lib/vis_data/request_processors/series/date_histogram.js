@@ -11,6 +11,7 @@ import { getBucketSize } from '../../helpers/get_bucket_size';
 import { offsetTime } from '../../offset_time';
 import { isLastValueTimerangeMode } from '../../helpers/get_timerange_mode';
 import { search, UI_SETTINGS } from '../../../../../../../plugins/data/server';
+import { METRIC_AGGREGATIONS } from '../../../../../common/enums';
 
 const { dateHistogramInterval } = search.aggs;
 
@@ -30,19 +31,17 @@ export function dateHistogram(
 
     const { timeField, interval, maxBars } = await buildSeriesMetaParams();
     const { from, to } = offsetTime(req, series.offset_time);
+    const { timezone } = capabilities;
 
+    const { intervalString } = getBucketSize(
+      req,
+      interval,
+      capabilities,
+      maxBars ? Math.min(maxBarsUiSettings, maxBars) : barTargetUiSettings
+    );
     let bucketInterval;
 
     const overwriteDateHistogramForLastBucketMode = () => {
-      const { timezone } = capabilities;
-
-      const { intervalString } = getBucketSize(
-        req,
-        interval,
-        capabilities,
-        maxBars ? Math.min(maxBarsUiSettings, maxBars) : barTargetUiSettings
-      );
-
       overwrite(doc, `aggs.${series.id}.aggs.timeseries.date_histogram`, {
         field: timeField,
         min_doc_count: 0,
@@ -58,12 +57,28 @@ export function dateHistogram(
     };
 
     const overwriteDateHistogramForEntireTimerangeMode = () => {
-      overwrite(doc, `aggs.${series.id}.aggs.timeseries.auto_date_histogram`, {
+      if (series.metrics.every((metric) => Object.values(METRIC_AGGREGATIONS).includes(metric.type))) {
+        overwrite(doc, `aggs.${series.id}.aggs.timeseries.auto_date_histogram`, {
+          field: timeField,
+          buckets: 1,
+        });
+
+        bucketInterval = `${to.valueOf() - from.valueOf()}ms`;
+        return;
+      }
+
+      overwrite(doc, `aggs.${series.id}.aggs.timeseries.date_histogram`, {
         field: timeField,
-        buckets: 1,
+        min_doc_count: 0,
+        time_zone: timezone,
+        extended_bounds: {
+          min: from.valueOf(),
+          max: to.valueOf(),
+        },
+        ...dateHistogramInterval(intervalString),
       });
 
-      bucketInterval = `${to.valueOf() - from.valueOf()}ms`;
+      bucketInterval = intervalString;
     };
 
     isLastValueTimerangeMode(panel, series)

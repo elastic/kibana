@@ -12,6 +12,7 @@ import { isLastValueTimerangeMode } from '../../helpers/get_timerange_mode';
 import { getTimerange } from '../../helpers/get_timerange';
 import { calculateAggRoot } from './calculate_agg_root';
 import { search, UI_SETTINGS } from '../../../../../../../plugins/data/server';
+import { METRIC_AGGREGATIONS } from '../../../../../common/enums';
 
 const { dateHistogramInterval } = search.aggs;
 
@@ -35,9 +36,10 @@ export function dateHistogram(
       panelId: panel.id,
     };
 
+    let { intervalString } = getBucketSize(req, interval, capabilities, barTargetUiSettings);
+    const { timezone } = capabilities;
+
     const overwriteDateHistogramForLastBucketMode = () => {
-      const { intervalString } = getBucketSize(req, interval, capabilities, barTargetUiSettings);
-      const { timezone } = capabilities;
 
       panel.series.forEach((column) => {
         const aggRoot = calculateAggRoot(doc, column);
@@ -61,20 +63,36 @@ export function dateHistogram(
     };
 
     const overwriteDateHistogramForEntireTimerangeMode = () => {
-      const intervalString = `${to.valueOf() - from.valueOf()}ms`;
-
+      let interval;
       panel.series.forEach((column) => {
         const aggRoot = calculateAggRoot(doc, column);
 
-        overwrite(doc, `${aggRoot}.timeseries.auto_date_histogram`, {
-          field: timeField,
-          buckets: 1,
-        });
+        if (column.metrics.every((metric) => Object.values(METRIC_AGGREGATIONS).includes(metric.type))) {
+          overwrite(doc, `${aggRoot}.timeseries.auto_date_histogram`, {
+            field: timeField,
+            buckets: 1,
+          });
+  
+          interval = `${to.valueOf() - from.valueOf()}ms`;
+        } else {
+          overwrite(doc, `${aggRoot}.timeseries.date_histogram`, {
+            field: timeField,
+            min_doc_count: 0,
+            time_zone: timezone,
+            extended_bounds: {
+              min: from.valueOf(),
+              max: to.valueOf(),
+            },
+            ...dateHistogramInterval(intervalString),
+          });
+          interval = intervalString;
+        }
 
         overwrite(doc, aggRoot.replace(/\.aggs$/, '.meta'), {
           ...meta,
-          intervalString,
+          interval,
         });
+      
       });
     };
 

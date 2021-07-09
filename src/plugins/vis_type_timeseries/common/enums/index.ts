@@ -8,7 +8,7 @@
 
 export { PANEL_TYPES } from './panel_types';
 export { MODEL_TYPES } from './model_types';
-export { METRIC_TYPES, BUCKET_TYPES, EXTENDED_STATS_TYPES } from './metric_types';
+export { METRIC_TYPES, METRIC_AGGREGATIONS, BUCKET_TYPES, EXTENDED_STATS_TYPES } from './metric_types';
 export { TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from './timerange_data_modes';
 
 export enum PALETTES {
