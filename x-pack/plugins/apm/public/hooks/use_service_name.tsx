@@ -5,19 +5,12 @@
  * 2.0.
  */
 
-import { useHistory, matchPath } from 'react-router-dom';
-import { apmRouteConfig } from '../components/routing/apm_route_config';
+import { useRouteMatch } from 'react-router-dom';
 
 export function useServiceName(): string | undefined {
-  const history = useHistory();
-  for (const config of apmRouteConfig) {
-    const match = matchPath<{ serviceName?: string }>(
-      history.location.pathname,
-      config
-    );
+  const match = useRouteMatch<{ serviceName?: string }>(
+    '/services/:serviceName'
+  );
 
-    if (match) {
-      return match.params.serviceName;
-    }
-  }
+  return match ? match.params.serviceName : undefined;
 }
