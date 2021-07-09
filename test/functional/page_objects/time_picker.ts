@@ -67,7 +67,7 @@ export class TimePickerPageObject extends FtrService {
   }
 
   private async getTimePickerPanel() {
-    return await this.retry.try(async () => {
+    return await this.retry.tryForTime(1000, async () => {
       return await this.find.byCssSelector('div.euiPopover__panel-isOpen');
     });
   }

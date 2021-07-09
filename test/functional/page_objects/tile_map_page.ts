@@ -22,7 +22,7 @@ export class TileMapPageObject extends FtrService {
   }
 
   public async clickMapButton(zoomSelector: string, waitForLoading?: boolean) {
-    await this.retry.try(async () => {
+    await this.retry.tryForTime(1000, async () => {
       const zooms = await this.getZoomSelectors(zoomSelector);
       for (let i = 0; i < zooms.length; i++) {
         await zooms[i].click();
@@ -69,7 +69,7 @@ export class TileMapPageObject extends FtrService {
 
   public async zoomAllTheWayOut(): Promise<void> {
     // we can tell we're at level 1 because zoom out is disabled
-    return await this.retry.try(async () => {
+    return await this.retry.tryForTime(1000, async () => {
       await this.clickMapZoomOut();
       const enabled = await this.getMapZoomOutEnabled();
       // should be able to zoom more as current config has 0 as min level.

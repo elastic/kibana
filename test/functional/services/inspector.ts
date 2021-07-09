@@ -26,7 +26,7 @@ export class InspectorService extends FtrService {
    * Asserts that inspector is enabled
    */
   public async expectIsEnabled(): Promise<void> {
-    await this.retry.try(async () => {
+    await this.retry.tryForTime(1000, async () => {
       const isEnabled = await this.getIsEnabled();
       expect(isEnabled).to.be(true);
     });
@@ -36,7 +36,7 @@ export class InspectorService extends FtrService {
    * Asserts that inspector is disabled
    */
   public async expectIsNotEnabled(): Promise<void> {
-    await this.retry.try(async () => {
+    await this.retry.tryForTime(1000, async () => {
       const isEnabled = await this.getIsEnabled();
       expect(isEnabled).to.be(false);
     });
@@ -49,7 +49,7 @@ export class InspectorService extends FtrService {
     this.log.debug('Inspector.open');
     const isOpen = await this.testSubjects.exists('inspectorPanel');
     if (!isOpen) {
-      await this.retry.try(async () => {
+      await this.retry.tryForTime(1000, async () => {
         await this.testSubjects.click('openInspectorButton');
         await this.testSubjects.exists('inspectorPanel');
       });
@@ -63,7 +63,7 @@ export class InspectorService extends FtrService {
     this.log.debug('Close Inspector');
     let isOpen = await this.testSubjects.exists('inspectorPanel');
     if (isOpen) {
-      await this.retry.try(async () => {
+      await this.retry.tryForTime(1000, async () => {
         await this.flyout.close('inspectorPanel');
         isOpen = await this.testSubjects.exists('inspectorPanel');
         if (isOpen) {
@@ -103,7 +103,9 @@ export class InspectorService extends FtrService {
   public async getTableData(): Promise<string[][]> {
     // TODO: we should use datat-test-subj=inspectorTable as soon as EUI supports it
     const inspectorPanel = await this.testSubjects.find('inspectorPanel');
-    const tableBody = await this.retry.try(async () => inspectorPanel.findByTagName('tbody'));
+    const tableBody = await this.retry.tryForTime(1000, async () =>
+      inspectorPanel.findByTagName('tbody')
+    );
     const $ = await tableBody.parseDomContent();
     return $('tr')
       .toArray()
@@ -131,7 +133,7 @@ export class InspectorService extends FtrService {
   public async getTableHeaders(): Promise<string[]> {
     this.log.debug('Inspector.getTableHeaders');
     // TODO: we should use datat-test-subj=inspectorTable as soon as EUI supports it
-    const dataTableHeader = await this.retry.try(async () => {
+    const dataTableHeader = await this.retry.tryForTime(1000, async () => {
       const inspectorPanel = await this.testSubjects.find('inspectorPanel');
       return await inspectorPanel.findByTagName('thead');
     });
@@ -146,7 +148,7 @@ export class InspectorService extends FtrService {
    * @param expected expected headers
    */
   public async expectTableHeaders(expected: string[]): Promise<void> {
-    await this.retry.try(async () => {
+    await this.retry.tryForTime(1000, async () => {
       const headers = await this.getTableHeaders();
       expect(headers).to.eql(expected);
     });
@@ -158,7 +160,7 @@ export class InspectorService extends FtrService {
    * @param row row index
    */
   public async filterForTableCell(column: string | number, row: string | number): Promise<void> {
-    await this.retry.try(async () => {
+    await this.retry.tryForTime(1000, async () => {
       const table = await this.testSubjects.find('inspectorTable');
       const cell = await table.findByCssSelector(
         `tbody tr:nth-child(${row}) td:nth-child(${column})`
@@ -176,7 +178,7 @@ export class InspectorService extends FtrService {
    * @param row row index
    */
   public async filterOutTableCell(column: string | number, row: string | number): Promise<void> {
-    await this.retry.try(async () => {
+    await this.retry.tryForTime(1000, async () => {
       const table = await this.testSubjects.find('inspectorTable');
       const cell = await table.findByCssSelector(
         `tbody tr:nth-child(${row}) td:nth-child(${column})`

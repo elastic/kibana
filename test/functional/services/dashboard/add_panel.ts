@@ -84,7 +84,7 @@ export class DashboardAddPanelService extends FtrService {
     this.log.debug('addEveryEmbeddableOnCurrentPage');
     const itemList = await this.testSubjects.find('savedObjectFinderItemList');
     const embeddableList: string[] = [];
-    await this.retry.try(async () => {
+    await this.retry.tryForTime(1000, async () => {
       const embeddableRows = await itemList.findAllByCssSelector('li');
       for (let i = 0; i < embeddableRows.length; i++) {
         const name = await embeddableRows[i].getVisibleText();
@@ -134,7 +134,7 @@ export class DashboardAddPanelService extends FtrService {
     this.log.debug('DashboardAddPanel.ensureAddPanelIsShowing');
     const isOpen = await this.isAddPanelOpen();
     if (!isOpen) {
-      await this.retry.try(async () => {
+      await this.retry.tryForTime(1000, async () => {
         await this.clickOpenAddPanel();
         const isNowOpen = await this.isAddPanelOpen();
         if (!isNowOpen) {

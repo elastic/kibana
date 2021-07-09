@@ -176,7 +176,7 @@ export class DashboardPageObject extends FtrService {
     const onPage = await this.onDashboardLandingPage();
     if (!onPage) {
       await this.clickDashboardBreadcrumbLink();
-      await this.retry.try(async () => {
+      await this.retry.tryForTime(1000, async () => {
         const warning = await this.testSubjects.exists('confirmModalTitleText');
         if (warning) {
           await this.testSubjects.click(
@@ -390,7 +390,7 @@ export class DashboardPageObject extends FtrService {
     dashboardName: string,
     saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true, exitFromEditMode: true }
   ) {
-    await this.retry.try(async () => {
+    await this.retry.tryForTime(1000, async () => {
       await this.enterDashboardTitleAndClickSave(dashboardName, saveOptions);
 
       if (saveOptions.needsConfirm) {
@@ -492,7 +492,7 @@ export class DashboardPageObject extends FtrService {
     await this.gotoDashboardLandingPage();
 
     await this.listingTable.searchForItemWithName(dashboardName);
-    await this.retry.try(async () => {
+    await this.retry.tryForTime(1000, async () => {
       await this.listingTable.clickItemLink('dashboard', dashboardName);
       await this.header.waitUntilLoadingHasFinished();
       // check Dashboard landing page is not present
@@ -560,7 +560,7 @@ export class DashboardPageObject extends FtrService {
     if (isAlreadyChecked !== checked) {
       this.log.debug('Flipping save as new checkbox');
       saveAsNewCheckbox = await this.testSubjects.find('saveAsNewCheckbox');
-      await this.retry.try(() => saveAsNewCheckbox.click());
+      await this.retry.tryForTime(1000, () => saveAsNewCheckbox.click());
     }
   }
 
@@ -571,7 +571,7 @@ export class DashboardPageObject extends FtrService {
     if (isAlreadyChecked !== checked) {
       this.log.debug('Flipping store time checkbox');
       storeTimeCheckbox = await this.testSubjects.find('storeTimeWithDashboard');
-      await this.retry.try(() => storeTimeCheckbox.click());
+      await this.retry.tryForTime(1000, () => storeTimeCheckbox.click());
     }
   }
 
