@@ -31,6 +31,8 @@ export const createRuleDataClient = ({
       `${registrationContext}-mappings`
     );
 
+    const indexNamePattern = ruleDataService.getFullAssetName(`${registrationContext}*`);
+
     if (!ruleDataService.isWriteEnabled()) {
       return;
     }
@@ -61,13 +63,15 @@ export const createRuleDataClient = ({
     await ruleDataService.createOrUpdateIndexTemplate({
       name: ruleDataService.getFullAssetName(registrationContext),
       body: {
-        index_patterns: [ruleDataService.getFullAssetName(`${registrationContext}*`)],
+        index_patterns: [indexNamePattern],
         composed_of: [
           ruleDataService.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
           componentTemplateName,
         ],
       },
     });
+
+    await ruleDataService.updateIndexMappingsMatchingPattern(indexNamePattern);
   });
 
   // initialize eagerly
