@@ -52,6 +52,30 @@ const INITIAL_STATE = {
   isFleetEnabled: false,
 };
 
+function getFleetLink({
+  isFleetEnabled,
+  hasFleetAgents,
+  basePath,
+}: {
+  isFleetEnabled: boolean;
+  hasFleetAgents: boolean;
+  basePath: string;
+}) {
+  if (!isFleetEnabled) {
+    return;
+  }
+
+  return hasFleetAgents
+    ? {
+        label: MANAGE_FLEET_POLICIES_LABEL,
+        href: `${basePath}/app/fleet#/policies`,
+      }
+    : {
+        label: GET_STARTED_WITH_FLEET_LABEL,
+        href: `${basePath}/app/integrations#/detail/apm-0.3.0/overview`,
+      };
+}
+
 function TutorialConfigAgent({
   variantId,
   http,
@@ -109,15 +133,6 @@ function TutorialConfigAgent({
   });
 
   const hasFleetAgents = !!data.fleetAgents.length;
-  const fleetLink = hasFleetAgents
-    ? {
-        label: MANAGE_FLEET_POLICIES_LABEL,
-        href: `${basePath}/app/fleet#/policies`,
-      }
-    : {
-        label: GET_STARTED_WITH_FLEET_LABEL,
-        href: `${basePath}/app/integrations#/detail/apm-0.3.0/overview`,
-      };
 
   return (
     <>
@@ -129,7 +144,11 @@ function TutorialConfigAgent({
             onChange={(newSelectedOption) =>
               setSelectedOption(newSelectedOption)
             }
-            fleetLink={data.isFleetEnabled ? fleetLink : undefined}
+            fleetLink={getFleetLink({
+              isFleetEnabled: data.isFleetEnabled,
+              hasFleetAgents,
+              basePath,
+            })}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
