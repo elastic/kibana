@@ -49,6 +49,12 @@ export function LatencyCorrelationsHelpPopover() {
       </p>
       <p>
         <FormattedMessage
+          id="xpack.apm.correlations.latencyPopoverPerformanceExplanation"
+          defaultMessage="This analysis performs statistical searches across a large number of attributes. For large time ranges and services with high transaction throughput, this might take some time. Reduce the time range to improve performance."
+        />
+      </p>
+      <p>
+        <FormattedMessage
           id="xpack.apm.correlations.latencyPopoverFilterExplanation"
           defaultMessage="You can also add or remove filters to affect the queries in the APM app."
         />
