@@ -77,7 +77,7 @@ export default ({ getService }: FtrProviderContext) => {
         .expect(404);
     });
 
-    it('return an error for unauthorized user', async () => {
+    it('returns an error for unauthorized user', async () => {
       await supertest
         .get(`/api/ml/trained_models/dfa_regression_model_n_1`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
