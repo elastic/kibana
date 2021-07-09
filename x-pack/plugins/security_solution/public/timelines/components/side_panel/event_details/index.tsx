@@ -25,6 +25,10 @@ import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { HostIsolationPanel } from '../../../../detections/components/host_isolation';
+import { EndpointIsolateSuccess } from '../../../../common/components/endpoint/host_isolation';
+import { useCasesFromAlerts } from '../../../../detections/containers/detection_engine/alerts/use_cases_from_alerts';
+import { CaseDetailsLink } from '../../../../common/components/links';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { TakeActionDropdown } from '../../../../detections/components/host_isolation/take_action_dropdown';
 import {
   ISOLATE_HOST,
@@ -80,8 +84,11 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
 
   const [isolateAction, setIsolateAction] = useState('isolateHost');
 
+  const [isIsolateActionSuccessBannerVisible, setIsIsolateActionSuccessBannerVisible] = useState(false);
+
   const showAlertDetails = useCallback(() => {
     setIsHostIsolationPanel(false);
+    setIsIsolateActionSuccessBannerVisible(false);
   }, []);
 
   const { isAllowed: isIsolationAllowed } = useIsolationPrivileges();
@@ -114,10 +121,63 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     return findAgentVersion ? findAgentVersion[0] : '';
   }, [detailsData]);
 
+  const alertId = useMemo(() => {
+    const findAlertId = find({ category: '_id', field: '_id' }, detailsData)?.values;
+    return findAlertId ? findAlertId[0] : '';
+  }, [detailsData]);
+
+  const hostName = useMemo(() => {
+    const findHostName = find({ category: 'host', field: 'host.name' }, detailsData)?.values;
+    return findHostName ? findHostName[0] : '';
+  }, [detailsData]);
+
   const isolationSupported = isIsolationSupported({
     osName: hostOsFamily,
     version: agentVersion,
   });
+
+  const { casesInfo } = useCasesFromAlerts({ alertId });
+
+  const caseCount: number = useMemo(() => casesInfo.length, [casesInfo]);
+
+  const casesList = useMemo(
+    () =>
+      casesInfo.map((caseInfo, index) => {
+        return (
+          <li key={caseInfo.id}>
+            <CaseDetailsLink detailName={caseInfo.id}>
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.hostIsolation.placeholderCase"
+                defaultMessage="{caseName}"
+                values={{ caseName: caseInfo.title }}
+              />
+            </CaseDetailsLink>
+          </li>
+        );
+      }),
+    [casesInfo]
+  );
+
+  const associatedCases = useMemo(() => {
+    if (caseCount > 0) {
+      return (
+        <>
+          <EuiText size="s">
+            <p>
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.hostIsolation.successfulIsolation.cases"
+                defaultMessage="This action has been attached to the following {caseCount, plural, one {case} other {cases}}:"
+                values={{ caseCount }}
+              />
+            </p>
+          </EuiText>
+          <EuiText size="s">
+            <ul>{casesList}</ul>
+          </EuiText>
+        </>
+      );
+    }
+  }, [caseCount, casesList]);
 
   const backToAlertDetailsLink = useMemo(() => {
     return (
@@ -142,6 +202,8 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   const caseDetailsRefresh = useWithCaseDetailsRefresh();
 
   const handleIsolationActionSuccess = useCallback(() => {
+    setIsIsolateActionSuccessBannerVisible(true);
+    setIsHostIsolationPanel(false);
     // If a case details refresh ref is defined, then refresh actions and comments
     if (caseDetailsRefresh) {
       caseDetailsRefresh.refreshUserActionsAndComments();
@@ -161,7 +223,17 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
           <ExpandableEventTitle isAlert={isAlert} loading={loading} />
         )}
       </EuiFlyoutHeader>
-      <StyledEuiFlyoutBody>
+      <StyledEuiFlyoutBody banner={
+        isIsolateActionSuccessBannerVisible && (
+          <EndpointIsolateSuccess
+          hostName={hostName}
+          isolateAction="isolateHost"
+          completeButtonLabel={'Return to alert Details'}
+          onComplete={showAlertDetails}
+          additionalInfo={associatedCases}
+        />
+        )
+      }>
         {isHostIsolationPanelOpen ? (
           <HostIsolationPanel
             details={detailsData}
