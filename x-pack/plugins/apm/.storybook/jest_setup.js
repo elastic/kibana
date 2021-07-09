@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/observability'],
-  setupFiles: ['<rootDir>/x-pack/plugins/observability/.storybook/jest_setup.js'],
-};
+import { setGlobalConfig } from '@storybook/testing-react';
+import * as globalStorybookConfig from './preview';
+
+setGlobalConfig(globalStorybookConfig);
