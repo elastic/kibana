@@ -101,18 +101,9 @@ export function getActiveEntriesAndGenerateAlerts(
   allActiveEntriesMap.forEach((locationsArr, entityName) => {
     // Generate alerts
     locationsArr.forEach(({ location, shapeLocationId, dateInShape, docId }) => {
-      let entityDateTime;
-      if (dateInShape) {
-        // Handle epoch millis
-        entityDateTime = new Date(
-          isNaN(dateInShape as never) ? dateInShape : +dateInShape
-        ).toISOString();
-      } else {
-        entityDateTime = null;
-      }
       const context = {
         entityId: entityName,
-        entityDateTime,
+        entityDateTime: dateInShape || null,
         entityDocumentId: docId,
         detectionDateTime: new Date(currIntervalEndTime).toISOString(),
         entityLocation: `POINT (${location[0]} ${location[1]})`,
