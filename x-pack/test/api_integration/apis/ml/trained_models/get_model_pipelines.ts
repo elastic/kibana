@@ -40,7 +40,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(Object.keys(body[0].pipelines).length).to.eql(1);
     });
 
-    it('return an error in case user does not have required permission', async () => {
+    it('returns an error in case user does not have required permission', async () => {
       await supertest
         .get(`/api/ml/trained_models/dfa_regression_model_n_0/pipelines`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
