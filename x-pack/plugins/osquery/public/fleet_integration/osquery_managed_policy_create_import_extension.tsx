@@ -57,7 +57,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
     return getUrlForApp(PLUGIN_ID, {
       path:
         `#` +
-        pagePathGetters.policy_details({ policyId: policy?.policy_id }) +
+        pagePathGetters.policy_details({ policyId: policy?.policy_id })[1] +
         '?openEnrollmentFlyout=true',
     });
   }, [getUrlForApp, policy?.policy_id]);
