@@ -22,7 +22,8 @@ Unify all your team's content into a personalized search experience. https://www
 
 1. When developing locally, Enterprise Search should be running locally alongside Kibana on `localhost:3002`.
 2. Update `config/kibana.dev.yml` with `enterpriseSearch.host: 'http://localhost:3002'`
-3. For faster QA/development, run Enterprise Search on [elasticsearch-native auth](https://www.elastic.co/guide/en/app-search/current/security-and-users.html#app-search-self-managed-security-and-user-management-elasticsearch-native-realm) and log in as the `elastic` superuser on Kibana.
+
+Problems? If you're an Elastic Enterprise Search engineer, please reach out to @elastic/enterprise-search-frontend for questions or our in-depth Getting Started developer guide.
 
 ### Kea
 
