@@ -27,6 +27,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_discover'));
     loadTestFile(require.resolve('./_discover_histogram'));
     loadTestFile(require.resolve('./_doc_table'));
+    loadTestFile(require.resolve('./_doc_table_newline'));
     loadTestFile(require.resolve('./_filter_editor'));
     loadTestFile(require.resolve('./_errors'));
     loadTestFile(require.resolve('./_field_data'));
