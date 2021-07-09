@@ -99,6 +99,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     const start = () => core.getStartServices().then(([coreStart]) => coreStart);
 
     const ruleDataClient = plugins.ruleRegistry.ruleDataService.getRuleDataClient(
+      'observability',
       plugins.ruleRegistry.ruleDataService.getFullAssetName(),
       () => Promise.resolve()
     );
