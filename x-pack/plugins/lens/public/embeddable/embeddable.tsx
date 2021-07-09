@@ -8,7 +8,7 @@
 import { isEqual, uniqBy } from 'lodash';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import type { KibanaExecutionContext } from 'src/core/public';
+import type { ExecutionContextServiceStart } from 'src/core/public';
 import {
   ExecutionContextSearch,
   Filter,
@@ -99,6 +99,7 @@ export interface LensEmbeddableDeps {
   getTriggerCompatibleActions?: UiActionsStart['getTriggerCompatibleActions'];
   capabilities: { canSaveVisualizations: boolean; canSaveDashboards: boolean };
   usageCollection?: UsageCollectionSetup;
+  executionContext: ExecutionContextServiceStart;
 }
 
 export class Embeddable
@@ -325,12 +326,12 @@ export class Embeddable
       this.input.onLoad(true);
     }
     const input = this.getInput();
-    const executionContext: KibanaExecutionContext = {
+    const executionContext = this.deps.executionContext.create({
       type: this.savedVis.type ?? 'lens',
       name: this.savedVis.visualizationType ?? '',
       description: this.savedVis.title ?? this.savedVis.description ?? '',
       id: this.id,
-    };
+    });
     render(
       <ExpressionWrapper
         ExpressionRenderer={this.expressionRenderer}

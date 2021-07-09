@@ -8,7 +8,7 @@
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { KibanaRequest } from 'src/core/server';
-import type { KibanaExecutionContext } from 'src/core/public';
+import type { IExecutionContextContainer } from 'src/core/public';
 
 import { ExpressionType, SerializableState } from '../expression_types';
 import { Adapters, RequestAdapter } from '../../../inspector/common';
@@ -64,7 +64,7 @@ export interface ExecutionContext<
    */
   isSyncColorsEnabled?: () => boolean;
 
-  executionContext?: KibanaExecutionContext;
+  executionContext?: IExecutionContextContainer;
 }
 
 /**

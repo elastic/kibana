@@ -62,7 +62,7 @@ export function getFunctionDefinition({
         timeFields: args.timeFields,
         timeRange: get(input, 'timeRange', undefined),
         getNow,
-        executionContext,
+        executionContext: executionContext?.toJSON(),
       });
     },
   });
