@@ -117,7 +117,7 @@ export const GroupOverview: React.FC = () => {
     onGroupNameInputChange,
   } = useActions(GroupLogic);
   const {
-    group: { name, contentSources, users, canDeleteGroup },
+    group: { name, contentSources, canDeleteGroup },
     groupNameInputValue,
     dataLoading,
     confirmDeleteModalVisible,
@@ -157,7 +157,6 @@ export const GroupOverview: React.FC = () => {
   );
 
   const hasContentSources = contentSources?.length > 0;
-  const hasUsers = users?.length > 0;
 
   const manageSourcesButton = (
     <EuiButton color="primary" onClick={showSharedSourcesModal}>
