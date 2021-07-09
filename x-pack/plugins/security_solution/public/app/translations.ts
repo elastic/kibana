@@ -48,13 +48,13 @@ export const ENDPOINTS = i18n.translate('xpack.securitySolution.search.administr
 export const TRUSTED_APPLICATIONS = i18n.translate(
   'xpack.securitySolution.search.administration.trustedApps',
   {
-    defaultMessage: 'Trusted Applications',
+    defaultMessage: 'Trusted applications',
   }
 );
 export const EVENT_FILTERS = i18n.translate(
   'xpack.securitySolution.search.administration.eventFilters',
   {
-    defaultMessage: 'Event Filters',
+    defaultMessage: 'Event filters',
   }
 );
 

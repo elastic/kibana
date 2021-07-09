@@ -9,7 +9,7 @@ import React, { FC } from 'react';
 import { ExpressionFunction } from 'src/plugins/expressions';
 import { EuiButtonEmpty } from '@elastic/eui';
 import copy from 'copy-to-clipboard';
-import { notifyService } from '../../services';
+import { useNotifyService } from '../../services';
 import { generateFunctionReference } from './generate_function_reference';
 
 interface Props {
@@ -17,16 +17,15 @@ interface Props {
 }
 
 export const FunctionReferenceGenerator: FC<Props> = ({ functionRegistry }) => {
+  const notifyService = useNotifyService();
   const functionDefinitions = Object.values(functionRegistry);
 
   const copyDocs = () => {
     copy(generateFunctionReference(functionDefinitions));
-    notifyService
-      .getService()
-      .success(
-        `Please paste updated docs into '/kibana/docs/canvas/canvas-function-reference.asciidoc' and commit your changes.`,
-        { title: 'Copied function docs to clipboard' }
-      );
+    notifyService.success(
+      `Please paste updated docs into '/kibana/docs/canvas/canvas-function-reference.asciidoc' and commit your changes.`,
+      { title: 'Copied function docs to clipboard' }
+    );
   };
 
   return (

@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
+import { filter, map, delay } from 'rxjs/operators';
 import { defaults } from 'lodash';
 import uuid from 'uuid';
+import { UnwrapObservable } from '@kbn/utility-types';
 import { Adapters } from '../../inspector/public';
 import { IExpressionLoaderParams } from './types';
 import { ExpressionAstExpression } from '../common';
@@ -21,7 +22,7 @@ import { getExpressionsService } from './services';
 type Data = any;
 
 export class ExpressionLoader {
-  data$: Observable<Data>;
+  data$: ReturnType<ExecutionContract['getData']>;
   update$: ExpressionRenderHandler['update$'];
   render$: ExpressionRenderHandler['render$'];
   events$: ExpressionRenderHandler['events$'];
@@ -29,10 +30,11 @@ export class ExpressionLoader {
 
   private execution: ExecutionContract | undefined;
   private renderHandler: ExpressionRenderHandler;
-  private dataSubject: Subject<Data>;
+  private dataSubject: Subject<UnwrapObservable<ExpressionLoader['data$']>>;
   private loadingSubject: Subject<boolean>;
   private data: Data;
   private params: IExpressionLoaderParams = {};
+  private subscription?: Subscription;
 
   constructor(
     element: HTMLElement,
@@ -68,8 +70,8 @@ export class ExpressionLoader {
       }
     });
 
-    this.data$.subscribe((data) => {
-      this.render(data);
+    this.data$.subscribe(({ result }) => {
+      this.render(result);
     });
 
     this.render$.subscribe(() => {
@@ -88,27 +90,20 @@ export class ExpressionLoader {
     this.dataSubject.complete();
     this.loadingSubject.complete();
     this.renderHandler.destroy();
-    if (this.execution) {
-      this.execution.cancel();
-    }
+    this.cancel();
+    this.subscription?.unsubscribe();
   }
 
   cancel() {
-    if (this.execution) {
-      this.execution.cancel();
-    }
+    this.execution?.cancel();
   }
 
   getExpression(): string | undefined {
-    if (this.execution) {
-      return this.execution.getExpression();
-    }
+    return this.execution?.getExpression();
   }
 
   getAst(): ExpressionAstExpression | undefined {
-    if (this.execution) {
-      return this.execution.getAst();
-    }
+    return this.execution?.getAst();
   }
 
   getElement(): HTMLElement {
@@ -116,27 +111,25 @@ export class ExpressionLoader {
   }
 
   inspect(): Adapters | undefined {
-    return this.execution ? (this.execution.inspect() as Adapters) : undefined;
+    return this.execution?.inspect() as Adapters;
   }
 
-  async update(
-    expression?: string | ExpressionAstExpression,
-    params?: IExpressionLoaderParams
-  ): Promise<void> {
+  update(expression?: string | ExpressionAstExpression, params?: IExpressionLoaderParams): void {
     this.setParams(params);
 
     this.loadingSubject.next(true);
     if (expression) {
-      await this.loadData(expression, this.params);
+      this.loadData(expression, this.params);
     } else if (this.data) {
       this.render(this.data);
     }
   }
 
-  private loadData = async (
+  private loadData = (
     expression: string | ExpressionAstExpression,
     params: IExpressionLoaderParams
-  ): Promise<void> => {
+  ) => {
+    this.subscription?.unsubscribe();
     if (this.execution && this.execution.isPending) {
       this.execution.cancel();
     }
@@ -150,13 +143,13 @@ export class ExpressionLoader {
       syncColors: params.syncColors,
       executionId: uuid(),
     });
-
-    const prevDataHandler = this.execution;
-    const data = await prevDataHandler.getData();
-    if (this.execution !== prevDataHandler) {
-      return;
-    }
-    this.dataSubject.next(data);
+    this.subscription = this.execution
+      .getData()
+      .pipe(
+        delay(0), // delaying until the next tick since we execute the expression in the constructor
+        filter(({ partial }) => params.partial || !partial)
+      )
+      .subscribe((value) => this.dataSubject.next(value));
   };
 
   private render(data: Data): void {
@@ -186,6 +179,7 @@ export class ExpressionLoader {
     }
     this.params.syncColors = params.syncColors;
     this.params.debug = Boolean(params.debug);
+    this.params.partial = Boolean(params.partial);
 
     this.params.inspectorAdapters = (params.inspectorAdapters ||
       this.execution?.inspect()) as Adapters;

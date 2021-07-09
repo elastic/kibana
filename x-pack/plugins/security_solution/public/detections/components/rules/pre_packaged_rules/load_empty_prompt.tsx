@@ -16,8 +16,7 @@ import { SecurityPageName } from '../../../../app/types';
 import { useFormatUrl } from '../../../../common/components/link_to';
 import { usePrePackagedRules } from '../../../containers/detection_engine/rules';
 import { useUserData } from '../../user_info';
-import { APP_ID } from '../../../../../common/constants';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useNavigateTo } from '../../../../common/lib/kibana/hooks';
 
 const EmptyPrompt = styled(EuiEmptyPrompt)`
   align-self: center; /* Corrects horizontal centering in IE11 */
@@ -40,14 +39,14 @@ const PrePackagedRulesPromptComponent: React.FC<PrePackagedRulesPromptProps> = (
     createPrePackagedRules();
   }, [createPrePackagedRules]);
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
-  const { navigateToApp } = useKibana().services.application;
+  const { navigateTo } = useNavigateTo();
 
   const goToCreateRule = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(APP_ID, { deepLinkId: SecurityPageName.rules, path: getCreateRuleUrl() });
+      navigateTo({ deepLinkId: SecurityPageName.rules, path: getCreateRuleUrl() });
     },
-    [navigateToApp]
+    [navigateTo]
   );
 
   const [

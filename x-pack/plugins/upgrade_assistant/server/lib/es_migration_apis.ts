@@ -16,26 +16,12 @@ import {
 import { esIndicesStateCheck } from './es_indices_state_check';
 
 export async function getUpgradeAssistantStatus(
-  dataClient: IScopedClusterClient,
-  isCloudEnabled: boolean
+  dataClient: IScopedClusterClient
 ): Promise<UpgradeAssistantStatus> {
   const { body: deprecations } = await dataClient.asCurrentUser.migration.deprecations();
 
-  const cluster = getClusterDeprecations(deprecations, isCloudEnabled);
-  const indices = getCombinedIndexInfos(deprecations);
-
-  const indexNames = indices.map(({ index }) => index!);
-
-  // If we have found deprecation information for index/indices check whether the index is
-  // open or closed.
-  if (indexNames.length) {
-    const indexStates = await esIndicesStateCheck(dataClient.asCurrentUser, indexNames);
-
-    indices.forEach((indexData) => {
-      indexData.blockerForReindexing =
-        indexStates[indexData.index!] === 'closed' ? 'index-closed' : undefined;
-    });
-  }
+  const cluster = getClusterDeprecations(deprecations);
+  const indices = await getCombinedIndexInfos(deprecations, dataClient);
 
   const criticalWarnings = cluster.concat(indices).filter((d) => d.level === 'critical');
 
@@ -47,38 +33,91 @@ export async function getUpgradeAssistantStatus(
 }
 
 // Reformats the index deprecations to an array of deprecation warnings extended with an index field.
-const getCombinedIndexInfos = (deprecations: DeprecationAPIResponse) =>
-  Object.keys(deprecations.index_settings).reduce((indexDeprecations, indexName) => {
-    return indexDeprecations.concat(
-      deprecations.index_settings[indexName].map(
-        (d) =>
-          ({
-            ...d,
-            index: indexName,
-            reindex: /Index created before/.test(d.message),
-            deprecatedIndexSettings: getIndexSettingDeprecations(d.message),
-          } as EnrichedDeprecationInfo)
-      )
-    );
-  }, [] as EnrichedDeprecationInfo[]);
+const getCombinedIndexInfos = async (
+  deprecations: DeprecationAPIResponse,
+  dataClient: IScopedClusterClient
+) => {
+  const indices = Object.keys(deprecations.index_settings).reduce(
+    (indexDeprecations, indexName) => {
+      return indexDeprecations.concat(
+        deprecations.index_settings[indexName].map(
+          (d) =>
+            ({
+              ...d,
+              index: indexName,
+              correctiveAction: getCorrectiveAction(d.message),
+            } as EnrichedDeprecationInfo)
+        )
+      );
+    },
+    [] as EnrichedDeprecationInfo[]
+  );
 
-const getClusterDeprecations = (deprecations: DeprecationAPIResponse, isCloudEnabled: boolean) => {
-  const combined = deprecations.cluster_settings
+  const indexNames = indices.map(({ index }) => index!);
+
+  // If we have found deprecation information for index/indices
+  // check whether the index is open or closed.
+  if (indexNames.length) {
+    const indexStates = await esIndicesStateCheck(dataClient.asCurrentUser, indexNames);
+
+    indices.forEach((indexData) => {
+      if (indexData.correctiveAction?.type === 'reindex') {
+        indexData.correctiveAction.blockerForReindexing =
+          indexStates[indexData.index!] === 'closed' ? 'index-closed' : undefined;
+      }
+    });
+  }
+  return indices as EnrichedDeprecationInfo[];
+};
+
+const getClusterDeprecations = (deprecations: DeprecationAPIResponse) => {
+  const combinedDeprecations = deprecations.cluster_settings
     .concat(deprecations.ml_settings)
     .concat(deprecations.node_settings);
 
-  if (isCloudEnabled) {
-    // In Cloud, this is changed at upgrade time. Filter it out to improve upgrade UX.
-    return combined.filter((d) => d.message !== 'Security realm settings structure changed');
-  } else {
-    return combined;
-  }
+  return combinedDeprecations.map((deprecation) => {
+    return {
+      ...deprecation,
+      correctiveAction: getCorrectiveAction(deprecation.message),
+    };
+  }) as EnrichedDeprecationInfo[];
 };
 
-const getIndexSettingDeprecations = (message: string) => {
-  const indexDeprecation = Object.values(indexSettingDeprecations).find(
+const getCorrectiveAction = (message: string) => {
+  const indexSettingDeprecation = Object.values(indexSettingDeprecations).find(
     ({ deprecationMessage }) => deprecationMessage === message
   );
+  const requiresReindexAction = /Index created before/.test(message);
+  const requiresIndexSettingsAction = Boolean(indexSettingDeprecation);
+  const requiresMlAction = /model snapshot/.test(message);
 
-  return indexDeprecation?.settings || [];
+  if (requiresReindexAction) {
+    return {
+      type: 'reindex',
+    };
+  }
+
+  if (requiresIndexSettingsAction) {
+    return {
+      type: 'indexSetting',
+      deprecatedSettings: indexSettingDeprecation!.settings,
+    };
+  }
+
+  if (requiresMlAction) {
+    // This logic is brittle, as we are expecting the message to be in a particular format to extract the snapshot ID and job ID
+    // Implementing https://github.com/elastic/elasticsearch/issues/73089 in ES should address this concern
+    const regex = /(?<=\[).*?(?=\])/g;
+    const matches = message.match(regex);
+
+    if (matches?.length === 2) {
+      return {
+        type: 'mlSnapshot',
+        snapshotId: matches[0],
+        jobId: matches[1],
+      };
+    }
+  }
+
+  return undefined;
 };

@@ -83,7 +83,7 @@
     "**/minimist": "^1.2.5",
     "**/node-jose/node-forge": "^0.10.0",
     "**/pdfkit/crypto-js": "4.0.0",
-    "**/prismjs": "1.23.0",
+    "**/prismjs": "1.24.0",
     "**/react-syntax-highlighter": "^15.3.1",
     "**/react-syntax-highlighter/**/highlight.js": "^10.4.1",
     "**/refractor": "^3.3.1",
@@ -93,13 +93,13 @@
     "**/underscore": "^1.13.1"
   },
   "engines": {
-    "node": "14.17.0",
+    "node": "14.17.3",
     "yarn": "^1.21.1"
   },
   "dependencies": {
     "@elastic/apm-rum": "^5.8.0",
     "@elastic/apm-rum-react": "^1.2.11",
-    "@elastic/charts": "31.0.0",
+    "@elastic/charts": "31.1.0",
     "@elastic/datemath": "link:bazel-bin/packages/elastic-datemath",
     "@elastic/elasticsearch": "npm:@elastic/elasticsearch-canary@^8.0.0-canary.13",
     "@elastic/ems-client": "7.14.0",
@@ -310,7 +310,7 @@
     "nock": "12.0.3",
     "node-fetch": "^2.6.1",
     "node-forge": "^0.10.0",
-    "nodemailer": "^6.4.16",
+    "nodemailer": "^6.6.2",
     "normalize-path": "^3.0.0",
     "object-hash": "^1.3.1",
     "object-path-immutable": "^3.1.1",
@@ -351,7 +351,7 @@
     "react-moment-proptypes": "^1.7.0",
     "react-monaco-editor": "^0.41.2",
     "react-popper-tooltip": "^2.10.1",
-    "react-query": "^3.13.10",
+    "react-query": "^3.18.1",
     "react-redux": "^7.2.0",
     "react-resizable": "^1.7.5",
     "react-resize-detector": "^4.2.0",
