@@ -9,7 +9,6 @@ import React, { memo, useCallback, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
-import { i18n } from '@kbn/i18n';
 import { EuiForm } from '@elastic/eui';
 import { HostMetadata } from '../../../../../../../common/endpoint/types';
 import { BackToEndpointDetailsFlyoutSubHeader } from './back_to_endpoint_details_flyout_subheader';

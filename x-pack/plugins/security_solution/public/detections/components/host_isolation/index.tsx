@@ -91,7 +91,6 @@ export const HostIsolationPanel = React.memo(
       <IsolateHost
         endpointId={endpointId}
         hostName={hostName}
-        cases={associatedCases}
         casesInfo={casesInfo}
         cancelCallback={cancelCallback}
         successCallback={successCallback}
@@ -100,7 +99,6 @@ export const HostIsolationPanel = React.memo(
       <UnisolateHost
         endpointId={endpointId}
         hostName={hostName}
-        cases={associatedCases}
         casesInfo={casesInfo}
         cancelCallback={cancelCallback}
         successCallback={successCallback}

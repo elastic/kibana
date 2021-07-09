@@ -20,14 +20,12 @@ export const UnisolateHost = React.memo(
   ({
     endpointId,
     hostName,
-    cases,
     casesInfo,
     cancelCallback,
     successCallback,
   }: {
     endpointId: string;
     hostName: string;
-    cases: ReactNode;
     casesInfo: CasesFromAlertsResponse;
     cancelCallback: () => void;
     successCallback?: () => void;
