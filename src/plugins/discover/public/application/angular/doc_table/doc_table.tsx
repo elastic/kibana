@@ -228,7 +228,7 @@ export const DocTable = ({
       data-test-subj={dataTestSubj}
       data-render-complete={!isLoading}
     >
-      {!isLoading && (
+      {!isLoading && rows && rows.length !== 0 && (
         <Fragment>
           <SkipBottomButton onClick={onSkipBottomButtonClick} />
           {type === 'infinite' && (
@@ -253,19 +253,7 @@ export const DocTable = ({
               <tbody>{renderRows(rows)}</tbody>
             </table>
           )}
-          {rows && !rows.length && (
-            <div className="kbnDocTable__error">
-              <EuiText size="xs" color="subdued">
-                <EuiIcon type="visualizeApp" size="m" color="subdued" />
-                <EuiSpacer size="m" />
-                <FormattedMessage
-                  id="discover.docTable.noResultsTitle"
-                  defaultMessage="No results found"
-                />
-              </EuiText>
-            </div>
-          )}
-          {rows && rows.length === sampleSize ? (
+          {rows.length === sampleSize ? (
             <div
               className="dscTable__footer"
               data-test-subj="discoverDocTableFooter"
@@ -288,6 +276,18 @@ export const DocTable = ({
             </span>
           )}
         </Fragment>
+      )}
+      {rows && rows.length === 0 && (
+        <div className="kbnDocTable__error">
+          <EuiText size="xs" color="subdued">
+            <EuiIcon type="visualizeApp" size="m" color="subdued" />
+            <EuiSpacer size="m" />
+            <FormattedMessage
+              id="discover.docTable.noResultsTitle"
+              defaultMessage="No results found"
+            />
+          </EuiText>
+        </div>
       )}
     </div>
   );

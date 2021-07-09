@@ -112,7 +112,7 @@ export const TableRow = ({
 
   // We just create a string here because its faster.
   const newHtmls = [
-    <td data-test-subj="docTableExpandToggleColumn" className="kbnDocTableCell__toggleDetails">
+    <td className="kbnDocTableCell__toggleDetails">
       <EuiButtonEmpty
         onClick={toggleRow}
         size="xs"
@@ -120,6 +120,7 @@ export const TableRow = ({
         aria-label={i18n.translate('discover.docTable.tableRow.toggleRowDetailsButtonAriaLabel', {
           defaultMessage: 'Toggle row details',
         })}
+        data-test-subj="docTableExpandToggleColumn"
       >
         {open && <EuiIcon type="arrowDown" size="s" />}
         {!open && <EuiIcon type="arrowRight" size="s" />}
