@@ -13,21 +13,23 @@ export const decryptJobHeaders = async (
   headers: string,
   logger: LevelLogger
 ): Promise<Record<string, string>> => {
+  if (typeof headers !== 'string') {
+    const noHeadersError = new Error(
+      i18n.translate('xpack.reporting.exportTypes.common.missingJobHeadersErrorMessage', {
+        defaultMessage: 'Job headers are missing',
+      })
+    );
+    logger.error(noHeadersError);
+    throw noHeadersError;
+  }
+
   try {
-    if (typeof headers !== 'string') {
-      throw new Error(
-        i18n.translate('xpack.reporting.exportTypes.common.missingJobHeadersErrorMessage', {
-          defaultMessage: 'Job headers are missing',
-        })
-      );
-    }
     const crypto = cryptoFactory(encryptionKey);
     const decryptedHeaders = (await crypto.decrypt(headers)) as Record<string, string>;
     return decryptedHeaders;
   } catch (err) {
     logger.error(err);
-
-    throw new Error(
+    const unableToDecryptError = new Error(
       i18n.translate(
         'xpack.reporting.exportTypes.common.failedToDecryptReportJobDataErrorMessage',
         {
@@ -37,5 +39,7 @@ export const decryptJobHeaders = async (
         }
       )
     );
+    logger.error(unableToDecryptError);
+    throw unableToDecryptError;
   }
 };
