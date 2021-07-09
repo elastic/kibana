@@ -102,7 +102,6 @@ export function ErrorGroupDetails() {
 
   const {
     path: { groupId },
-    query,
   } = useApmParams('/services/:serviceName/errors/:groupId');
 
   useBreadcrumb({
@@ -112,7 +111,6 @@ export function ErrorGroupDetails() {
         serviceName,
         groupId,
       },
-      query,
     }),
   });
 

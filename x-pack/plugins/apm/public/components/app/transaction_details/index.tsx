@@ -32,10 +32,6 @@ interface Sample {
 export function TransactionDetails() {
   const { urlParams } = useUrlParams();
   const history = useHistory();
-  const {
-    distributionData,
-    distributionStatus,
-  } = useTransactionDistributionFetcher();
 
   const {
     waterfall,
@@ -50,6 +46,11 @@ export function TransactionDetails() {
   const apmRouter = useApmRouter();
 
   const { transactionName } = query;
+
+  const {
+    distributionData,
+    distributionStatus,
+  } = useTransactionDistributionFetcher({ transactionName });
 
   useBreadcrumb({
     title: transactionName,
@@ -112,7 +113,6 @@ export function TransactionDetails() {
         <TransactionDistribution
           distribution={distributionData}
           fetchStatus={distributionStatus}
-          urlParams={urlParams}
           bucketIndex={bucketIndex}
           onBucketClick={(bucket) => {
             if (!isEmpty(bucket.samples)) {

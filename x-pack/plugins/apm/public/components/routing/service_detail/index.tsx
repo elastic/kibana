@@ -108,9 +108,15 @@ export const serviceDetail = {
           path: '/view',
           element: <TransactionDetails />,
           params: t.type({
-            query: t.type({
-              transactionName: t.string,
-            }),
+            query: t.intersection([
+              t.type({
+                transactionName: t.string,
+              }),
+              t.partial({
+                traceId: t.string,
+                transactionId: t.string,
+              }),
+            ]),
           }),
         },
         {
