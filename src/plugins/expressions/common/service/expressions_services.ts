@@ -77,6 +77,10 @@ export interface ExpressionExecutionParams {
   syncColors?: boolean;
 
   inspectorAdapters?: Adapters;
+  /**
+   * A unique id for the execution task
+   */
+  executionId?: string;
 }
 
 /**

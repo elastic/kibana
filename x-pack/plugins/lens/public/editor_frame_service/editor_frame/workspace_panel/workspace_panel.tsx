@@ -59,7 +59,6 @@ import {
   updateDatasourceState,
   setSaveable,
 } from '../../../state_management';
-import { generateId } from '../../../id_generator';
 
 export interface WorkspacePanelProps {
   activeVisualizationId: string | null;
@@ -637,7 +636,6 @@ export const VisualizationWrapper = ({
       <ExpressionRendererComponent
         className="lnsExpressionRenderer__component"
         padding="m"
-        variables={{ searchId: generateId() }}
         expression={expression!}
         searchContext={context}
         searchSessionId={framePublicAPI.searchSessionId}

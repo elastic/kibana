@@ -62,6 +62,10 @@ export interface ExecutionContext<
    * Returns the state (true|false) of the sync colors across panels switch.
    */
   isSyncColorsEnabled?: () => boolean;
+  /**
+   * A unique identifier for each execution
+   */
+  executionId: string;
 }
 
 /**

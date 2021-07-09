@@ -35,7 +35,7 @@ export function getFunctionDefinition({
 }) {
   return (): EsaggsExpressionFunctionDefinition => ({
     ...getEsaggsMeta(),
-    async fn(input, args, { inspectorAdapters, abortSignal, getSearchSessionId, variables }) {
+    async fn(input, args, { inspectorAdapters, abortSignal, getSearchSessionId, executionId }) {
       const { aggs, indexPatterns, searchSource, getNow } = await getStartDependencies();
 
       const indexPattern = await indexPatterns.create(args.index.value, true);
@@ -58,7 +58,7 @@ export function getFunctionDefinition({
         timeFields: args.timeFields,
         timeRange: get(input, 'timeRange', undefined),
         getNow,
-        searchId: variables?.searchId as string | undefined,
+        searchId: executionId,
       });
     },
   });

@@ -197,6 +197,7 @@ export class Execution<
         inspectorAdapters.tables[name] = datatable;
       },
       isSyncColorsEnabled: () => execution.params.syncColors,
+      executionId: execution.params.executionId,
       ...(execution.params as any).extraContext,
     };
 

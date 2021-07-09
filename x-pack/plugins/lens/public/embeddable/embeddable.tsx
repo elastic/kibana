@@ -57,7 +57,6 @@ import { getEditPath, DOC_TYPE, PLUGIN_ID } from '../../common';
 import { IBasePath } from '../../../../../src/core/public';
 import { LensAttributeService } from '../lens_attribute_service';
 import type { ErrorMessage } from '../editor_frame_service/types';
-import { generateId } from '../id_generator';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -326,7 +325,6 @@ export class Embeddable
     }
     const input = this.getInput();
     const variables = {
-      searchId: generateId(),
       ...(input.palette ? { theme: { palette: input.palette } } : {}),
     };
     render(
