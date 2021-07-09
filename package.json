@@ -90,7 +90,7 @@
     "**/underscore": "^1.13.1"
   },
   "engines": {
-    "node": "14.17.2",
+    "node": "14.17.3",
     "yarn": "^1.21.1"
   },
   "dependencies": {
@@ -348,7 +348,7 @@
     "react-moment-proptypes": "^1.7.0",
     "react-monaco-editor": "^0.41.2",
     "react-popper-tooltip": "^2.10.1",
-    "react-query": "^3.13.10",
+    "react-query": "^3.18.1",
     "react-redux": "^7.2.0",
     "react-resizable": "^1.7.5",
     "react-resize-detector": "^4.2.0",

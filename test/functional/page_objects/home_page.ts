@@ -110,19 +110,26 @@ export class HomePageObject extends FtrService {
     await this.testSubjects.click('onCloudTutorial');
   }
 
-  // click on side nav toggle button to see all of side nav
-  async clickOnToggleNavButton() {
+  // click on global nav toggle button
+  async clickToggleGlobalNav() {
     await this.testSubjects.click('toggleNavButton');
+  }
+
+  async clickGoHome() {
+    await this.openCollapsibleNav();
+    await this.testSubjects.click('homeLink');
+  }
+
+  // open global nav if it's closed
+  async openCollapsibleNav() {
+    if (!(await this.testSubjects.exists('collapsibleNav'))) {
+      await this.clickToggleGlobalNav();
+    }
   }
 
   // collapse the observability side nav details
   async collapseObservabibilitySideNav() {
     await this.testSubjects.click('collapsibleNavGroup-observability');
-  }
-
-  // dock the side nav
-  async dockTheSideNav() {
-    await this.testSubjects.click('collapsible-nav-lock');
   }
 
   async loadSavedObjects() {
