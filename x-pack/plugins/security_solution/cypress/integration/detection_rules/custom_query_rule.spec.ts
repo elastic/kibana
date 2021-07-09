@@ -48,6 +48,12 @@ import {
   SEVERITY_DROPDOWN,
   TAGS_CLEAR_BUTTON,
   TAGS_FIELD,
+  EMAIL_ACTION_BTN,
+  CREATE_ACTION_CONNECTOR_BTN,
+  SAVE_ACTION_CONNECTOR_BTN,
+  FROM_VALIDATION_ERROR,
+  EMAIL_ACTION_TO_INPUT,
+  EMAIL_ACTION_SUBJECT_INPUT,
 } from '../../screens/create_new_rule';
 import {
   ADDITIONAL_LOOK_BACK_DETAILS,
@@ -99,6 +105,7 @@ import {
   fillAboutRule,
   fillAboutRuleAndContinue,
   fillDefineCustomRuleWithImportedQueryAndContinue,
+  fillEmailConnectorForm,
   fillScheduleRuleAndContinue,
   goToAboutStepTab,
   goToActionsStepTab,
@@ -359,6 +366,17 @@ describe('Custom detection rules deletion and edition', () => {
       goToActionsStepTab();
 
       cy.get(ACTIONS_THROTTLE_INPUT).invoke('val').should('eql', 'no_actions');
+
+      cy.get(ACTIONS_THROTTLE_INPUT).select('Weekly');
+      cy.get(EMAIL_ACTION_BTN).click();
+      cy.get(CREATE_ACTION_CONNECTOR_BTN).click();
+      fillEmailConnectorForm();
+      cy.get(SAVE_ACTION_CONNECTOR_BTN).click();
+
+      cy.get(EMAIL_ACTION_TO_INPUT).type('test@example.com');
+      cy.get(EMAIL_ACTION_SUBJECT_INPUT).type('Subject');
+
+      cy.get(FROM_VALIDATION_ERROR).should('not.exist');
 
       goToAboutStepTab();
       cy.get(TAGS_CLEAR_BUTTON).click({ force: true });
