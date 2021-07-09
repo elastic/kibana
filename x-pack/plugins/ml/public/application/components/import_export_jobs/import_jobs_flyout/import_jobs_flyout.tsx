@@ -7,6 +7,7 @@
 
 import React, { FC, useState, useEffect, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -23,14 +24,17 @@ import {
   EuiFilePicker,
   EuiSpacer,
   EuiPanel,
+  EuiFormRow,
+  EuiFieldText,
 } from '@elastic/eui';
 
 import type { Job, Datafeed } from '../../../../../common/types/anomaly_detection_jobs';
 import { DataFrameAnalyticsConfig } from '../../../data_frame_analytics/common';
 import { useMlApiContext, useMlKibana } from '../../../contexts/kibana';
 import { JobType } from '../../../../../common/types/saved_objects';
-import { JobIdInput, VALIDATION_STATUS } from './job_id_input';
 import { CannotImportJobsCallout, SkippedJobs } from './cannot_import_jobs_callout';
+import { isJobIdValid } from '../../../../../common/util/job_utils';
+import { JOB_ID_MAX_LENGTH } from '../../../../../common/constants/validation';
 
 interface ImportedAdJob {
   job: Job;
@@ -45,14 +49,21 @@ function isDataFrameAnalyticsConfigs(obj: any): obj is DataFrameAnalyticsConfig[
   return Array.isArray(obj) && obj.some((o) => o.dest && o.analysis);
 }
 
+interface JobId {
+  id: string;
+  originalId: string;
+  valid: boolean;
+  invalidMessage: string;
+}
+
 interface Props {
   isDisabled: boolean;
   refreshJobs(): void;
 }
 export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
   const {
-    jobs: { bulkCreateJobs },
-    dataFrameAnalytics: { createDataFrameAnalytics },
+    jobs: { bulkCreateJobs, jobsExist: adJobsExist },
+    dataFrameAnalytics: { createDataFrameAnalytics, jobsExist: dfaJobsExist },
   } = useMlApiContext();
   const {
     services: {
@@ -64,14 +75,15 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
   const [showFlyout, setShowFlyout] = useState(false);
   const [adJobs, setAdJobs] = useState<ImportedAdJob[]>([]);
   const [dfaJobs, setDfaJobs] = useState<DataFrameAnalyticsConfig[]>([]);
-  const [jobIds, setJobIds] = useState<string[]>([]);
+  const [jobIds, setJobIds] = useState<JobId[]>([]);
   const [skippedJobs, setSkippedJobs] = useState<SkippedJobs[]>([]);
   const [importing, setImporting] = useState(false);
   const [jobType, setJobType] = useState<JobType | null>(null);
-  const [jobIdsValid, setJobIdsValid] = useState<VALIDATION_STATUS[]>([]);
   const [totalJobsRead, setTotalJobsRead] = useState(0);
   const [importDisabled, setImportDisabled] = useState(true);
   const [deleteDisabled, setDeleteDisabled] = useState(true);
+  const [idsMash, setIdsMash] = useState('');
+  const [validatingJobs, setValidatingJobs] = useState(false);
 
   useEffect(() => {
     setAdJobs([]);
@@ -101,7 +113,6 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
           loadedFile.jobType,
           getIndexPatternTitles
         );
-        setJobIdsValid(validatedJobs.jobIds.map((j) => VALIDATION_STATUS.VALIDATING));
 
         if (loadedFile.jobType === 'anomaly-detector') {
           const tempJobs = (loadedFile.jobs as ImportedAdJob[]).filter((j) =>
@@ -116,7 +127,15 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
         }
 
         setJobType(loadedFile.jobType);
-        setJobIds(validatedJobs.jobIds);
+        setJobIds(
+          validatedJobs.jobIds.map((id) => ({
+            id,
+            originalId: id,
+            valid: true,
+            invalidMessage: '',
+          }))
+        );
+        setIdsMash(validatedJobs.jobIds.map((id) => id).join(''));
         setSkippedJobs(validatedJobs.skippedJobs);
       } catch (error) {
         // show error
@@ -125,6 +144,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
       setAdJobs([]);
       setDfaJobs([]);
       setJobIds([]);
+      setIdsMash('');
       setImporting(false);
       setJobType(null);
       setTotalJobsRead(0);
@@ -158,15 +178,6 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
     );
   }, []);
 
-  const renameJob = useCallback(
-    (index: number, id: string) => {
-      const js = [...jobIds];
-      js[index] = id;
-      setJobIds(js);
-    },
-    [jobIds]
-  );
-
   const deleteJob = useCallback(
     (index: number) => {
       if (jobType === 'anomaly-detector') {
@@ -181,34 +192,73 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
       const js = [...jobIds];
       js.splice(index, 1);
       setJobIds(js);
-
-      const jsv = [...jobIdsValid];
-      jsv.splice(index, 1);
-      setJobIdsValid(jsv);
+      setIdsMash(js.map(({ id }) => id).join(''));
+      setValidatingJobs(true);
     },
-    [jobIds, adJobs, dfaJobs, jobIdsValid]
-  );
-
-  const setJobIdValid = useCallback(
-    (index: number, valid: VALIDATION_STATUS) => {
-      const validIds = [...jobIdsValid];
-      validIds[index] = valid;
-      setJobIdsValid(validIds);
-    },
-    [jobIdsValid]
+    [jobIds, adJobs, dfaJobs]
   );
 
   useEffect(() => {
     const disabled =
-      jobIds.length === 0 ||
-      jobIdsValid.some((j) => j === VALIDATION_STATUS.INVALID) ||
-      importing === true;
+      jobIds.length === 0 || importing === true || jobIds.some(({ valid }) => valid === false);
     setImportDisabled(disabled);
 
-    setDeleteDisabled(
-      jobIdsValid.some((j) => j === VALIDATION_STATUS.VALIDATING) || importing === true
-    );
-  }, [jobIds, jobIdsValid, importing]);
+    setDeleteDisabled(importing === true || validatingJobs === true);
+  }, [jobIds, idsMash, validatingJobs, importing]);
+
+  const validateIds = useCallback(async () => {
+    const existsChecks: string[] = [];
+    jobIds.forEach((j) => {
+      existsChecks.push(j.id);
+      j.valid = true;
+      j.invalidMessage = '';
+
+      if (j.id === '') {
+        j.valid = false;
+        j.invalidMessage = jobEmpty;
+        return;
+      }
+      if (j.id.length > JOB_ID_MAX_LENGTH) {
+        j.valid = false;
+        j.invalidMessage = jobInvalidLength;
+        return;
+      }
+      if (isJobIdValid(j.id) === false) {
+        j.valid = false;
+        j.invalidMessage = jobInvalid;
+        return;
+      }
+    });
+
+    if (jobType !== null) {
+      const jobsExist = jobType === 'anomaly-detector' ? adJobsExist : dfaJobsExist;
+      jobsExist(existsChecks, true).then((resp) => {
+        jobIds.forEach((j) => {
+          if (j.valid === true) {
+            // only apply the exists result if the previous checks are ok
+            const hh = resp[j.id];
+            j.valid = !hh.exists;
+            j.invalidMessage = hh.exists ? jobExists : '';
+          }
+        });
+        setJobIds([...jobIds]);
+        setValidatingJobs(false);
+      });
+    }
+  }, [idsMash, jobIds]);
+
+  const renameJob2 = useCallback(
+    (e: any, i: number) => {
+      jobIds[i].id = e.target.value;
+      jobIds[i].valid = false;
+      setJobIds([...jobIds]);
+      setIdsMash(jobIds.map(({ id }) => id).join(''));
+      setValidatingJobs(true);
+    },
+    [jobIds]
+  );
+
+  useDebounce(validateIds, 400, [idsMash]);
 
   const DeleteJobButton: FC<{ index: number }> = ({ index }) => (
     <EuiButtonIcon
@@ -293,14 +343,24 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
                         <EuiPanel hasBorder={true}>
                           <EuiFlexGroup>
                             <EuiFlexItem>
-                              <JobIdInput
-                                jobType={jobType}
-                                index={i}
-                                id={jobId}
-                                renameJob={renameJob}
-                                disabled={importing}
-                                setIsValid={setJobIdValid}
-                              />
+                              <EuiFormRow
+                                error={jobId.invalidMessage}
+                                isInvalid={jobId.invalidMessage.length > 0}
+                              >
+                                <EuiFieldText
+                                  prepend={i18n.translate(
+                                    'xpack.fileDataVisualizer.aboutPanel.selectOrDragAndDropFileDescription',
+                                    {
+                                      defaultMessage: 'Job ID',
+                                    }
+                                  )}
+                                  disabled={importing}
+                                  compressed={true}
+                                  value={jobId.id}
+                                  onChange={(e) => renameJob2(e, i)}
+                                  isInvalid={jobId.valid === false}
+                                />
+                              </EuiFormRow>
                             </EuiFlexItem>
                             <EuiFlexItem grow={false}>
                               <DeleteJobButton index={i} />
@@ -408,27 +468,28 @@ async function readJobConfigs(
   }
 }
 
-function renameAdJobs(jobIds: string[], jobs: ImportedAdJob[]) {
+function renameAdJobs(jobIds: JobId[], jobs: ImportedAdJob[]) {
   if (jobs.length !== jobs.length) {
     return jobs;
   }
 
   return jobs.map((j, i) => {
-    const jobId = jobIds[i];
-    j.job.job_id = jobId;
-    j.datafeed.job_id = jobId;
-    j.datafeed.datafeed_id = `datafeed-${jobId}`;
+    const { id } = jobIds[i];
+    j.job.job_id = id;
+    j.datafeed.job_id = id;
+    j.datafeed.datafeed_id = `datafeed-${id}`;
     return j;
   });
 }
-function renameDfaJobs(jobIds: string[], jobs: DataFrameAnalyticsConfig[]) {
+
+function renameDfaJobs(jobIds: JobId[], jobs: DataFrameAnalyticsConfig[]) {
   if (jobs.length !== jobs.length) {
     return jobs;
   }
 
   return jobs.map((j, i) => {
-    const jobId = jobIds[i];
-    j.id = jobId;
+    const { id } = jobIds[i];
+    j.id = id;
     return j;
   });
 }
@@ -470,3 +531,31 @@ async function validateJobs(
     skippedJobs: tempSkippedJobIds,
   };
 }
+
+const jobEmpty = i18n.translate(
+  'xpack.ml.newJob.wizard.validateJob.jobNameAllowedCharactersDescription',
+  {
+    defaultMessage: 'Enter a valid job ID',
+  }
+);
+const jobInvalid = i18n.translate(
+  'xpack.ml.newJob.wizard.validateJob.jobNameAllowedCharactersDescription',
+  {
+    defaultMessage:
+      'Job ID can contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores; ' +
+      'must start and end with an alphanumeric character',
+  }
+);
+const jobInvalidLength = i18n.translate(
+  'xpack.ml.newJob.wizard.validateJob.jobIdInvalidMaxLengthErrorMessage',
+  {
+    defaultMessage:
+      'Job ID must be no more than {maxLength, plural, one {# character} other {# characters}} long.',
+    values: {
+      maxLength: JOB_ID_MAX_LENGTH,
+    },
+  }
+);
+const jobExists = i18n.translate('xpack.ml.newJob.wizard.validateJob.jobNameAlreadyExists', {
+  defaultMessage: 'Job ID already exists. A job ID cannot be the same as an existing job or group.',
+});
