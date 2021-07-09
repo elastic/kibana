@@ -211,7 +211,7 @@ export const EventFiltersListPage = memo(() => {
           >
             <FormattedMessage
               id="xpack.securitySolution.eventFilters.list.pageAddButton"
-              defaultMessage="Add Endpoint Event Filter"
+              defaultMessage="Add Event Filter"
             />
           </EuiButton>
         )

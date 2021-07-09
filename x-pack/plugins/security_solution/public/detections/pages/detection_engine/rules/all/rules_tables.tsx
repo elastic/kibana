@@ -300,8 +300,8 @@ export const RulesTables = React.memo<RulesTableProps>(
       reFetchRules,
     ]);
 
-    const monitoringColumns = useMemo(() => getMonitoringColumns(history, formatUrl), [
-      history,
+    const monitoringColumns = useMemo(() => getMonitoringColumns(navigateToApp, formatUrl), [
+      navigateToApp,
       formatUrl,
     ]);
 

@@ -14,15 +14,20 @@ import {
   APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
   APM_SERVER_SCHEMA_SAVED_OBJECT_ID,
 } from '../../../common/apm_saved_object_constants';
-import { APMPluginStartDependencies } from '../../types';
+import {
+  APMPluginSetupDependencies,
+  APMPluginStartDependencies,
+} from '../../types';
 import { getApmPackagePolicyDefinition } from './get_apm_package_policy_definition';
 
 export async function createCloudApmPackgePolicy({
+  cloudPluginSetup,
   fleetPluginStart,
   savedObjectsClient,
   esClient,
   logger,
 }: {
+  cloudPluginSetup: APMPluginSetupDependencies['cloud'];
   fleetPluginStart: NonNullable<APMPluginStartDependencies['fleet']>;
   savedObjectsClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
@@ -35,9 +40,10 @@ export async function createCloudApmPackgePolicy({
   const apmServerSchema: Record<string, any> = JSON.parse(
     (attributes as { schemaJson: string }).schemaJson
   );
-  const apmPackagePolicyDefinition = getApmPackagePolicyDefinition(
-    apmServerSchema
-  );
+  const apmPackagePolicyDefinition = getApmPackagePolicyDefinition({
+    apmServerSchema,
+    cloudPluginSetup,
+  });
   logger.info(`Fleet migration on Cloud - apmPackagePolicy create start`);
   const apmPackagePolicy = await fleetPluginStart.packagePolicyService.create(
     savedObjectsClient,
