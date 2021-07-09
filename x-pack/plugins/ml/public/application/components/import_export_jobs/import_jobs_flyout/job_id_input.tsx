@@ -26,7 +26,13 @@ interface Props {
   index: number;
   disabled: boolean;
   renameJob(index: number, id: string): void;
-  setIsValid(index: number, valid: boolean): void;
+  setIsValid(index: number, valid: VALIDATION_STATUS): void;
+}
+
+export enum VALIDATION_STATUS {
+  VALID,
+  INVALID,
+  VALIDATING,
 }
 
 const jobEmpty = i18n.translate(
@@ -65,49 +71,52 @@ export const JobIdInput: FC<Props> = ({ jobType, id, index, disabled, renameJob,
   const [jobId, setJobId] = useState(id);
   const [validMessage, setValidMessage] = useState('');
   const jobsExist = jobType === 'anomaly-detector' ? adJobsExist : dfaJobsExist;
+  const [valid, setValid] = useState(VALIDATION_STATUS.VALIDATING);
 
   useEffect(() => {
     setJobId(id);
   }, [id]);
 
-  useDebounce(
-    useCallback(async () => {
-      if (jobId === '') {
-        setIsValid(index, false);
-        setValidMessage(jobEmpty);
-        return;
-      }
+  useEffect(() => {
+    setIsValid(index, valid);
+  }, [valid]);
 
-      if (isJobIdValid(jobId) === false) {
-        setIsValid(index, false);
-        setValidMessage(jobInvalid);
-        return;
-      }
+  const validate = useCallback(async () => {
+    if (jobId === '') {
+      setValid(VALIDATION_STATUS.INVALID);
+      setValidMessage(jobEmpty);
+      return;
+    }
 
-      if (jobId.length > JOB_ID_MAX_LENGTH) {
-        setIsValid(index, false);
-        setValidMessage(jobInvalidLength);
-        return;
-      }
+    if (isJobIdValid(jobId) === false) {
+      setValid(VALIDATION_STATUS.INVALID);
+      setValidMessage(jobInvalid);
+      return;
+    }
 
-      const resp = await jobsExist([jobId], true);
-      if (resp[jobId].exists) {
-        setIsValid(index, false);
-        setValidMessage(jobExists);
-        return;
-      }
+    if (jobId.length > JOB_ID_MAX_LENGTH) {
+      setValid(VALIDATION_STATUS.INVALID);
+      setValidMessage(jobInvalidLength);
+      return;
+    }
 
-      setValidMessage('');
-      setIsValid(index, true);
-      renameJob(index, jobId);
-    }, [jobId, setIsValid]),
-    400,
-    [jobId]
-  );
+    const resp = await jobsExist([jobId], true);
+    if (resp[jobId].exists) {
+      setValid(VALIDATION_STATUS.INVALID);
+      setValidMessage(jobExists);
+      return;
+    }
+
+    setValidMessage('');
+    setValid(VALIDATION_STATUS.VALID);
+    renameJob(index, jobId);
+  }, [jobId]);
+
+  useDebounce(validate, 400, [jobId]);
 
   const rename = useCallback(
     (e: any) => {
-      setIsValid(index, false);
+      setValid(VALIDATION_STATUS.VALIDATING);
       setJobId(e.target.value);
       setValidMessage('');
     },

@@ -29,7 +29,7 @@ import type { Job, Datafeed } from '../../../../../common/types/anomaly_detectio
 import { DataFrameAnalyticsConfig } from '../../../data_frame_analytics/common';
 import { useMlApiContext, useMlKibana } from '../../../contexts/kibana';
 import { JobType } from '../../../../../common/types/saved_objects';
-import { JobIdInput } from './job_id_input';
+import { JobIdInput, VALIDATION_STATUS } from './job_id_input';
 import { CannotImportJobsCallout, SkippedJobs } from './cannot_import_jobs_callout';
 
 interface ImportedAdJob {
@@ -68,8 +68,10 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
   const [skippedJobs, setSkippedJobs] = useState<SkippedJobs[]>([]);
   const [importing, setImporting] = useState(false);
   const [jobType, setJobType] = useState<JobType | null>(null);
-  const [jobIdsValid, setJobIdsValid] = useState<boolean[]>([]);
+  const [jobIdsValid, setJobIdsValid] = useState<VALIDATION_STATUS[]>([]);
   const [totalJobsRead, setTotalJobsRead] = useState(0);
+  const [importDisabled, setImportDisabled] = useState(true);
+  const [deleteDisabled, setDeleteDisabled] = useState(true);
 
   useEffect(() => {
     setAdJobs([]);
@@ -99,6 +101,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
           loadedFile.jobType,
           getIndexPatternTitles
         );
+        setJobIdsValid(validatedJobs.jobIds.map((j) => VALIDATION_STATUS.VALIDATING));
 
         if (loadedFile.jobType === 'anomaly-detector') {
           const tempJobs = (loadedFile.jobs as ImportedAdJob[]).filter((j) =>
@@ -115,7 +118,6 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
         setJobType(loadedFile.jobType);
         setJobIds(validatedJobs.jobIds);
         setSkippedJobs(validatedJobs.skippedJobs);
-        setJobIdsValid(validatedJobs.jobIds.map((j) => false));
       } catch (error) {
         // show error
       }
@@ -188,7 +190,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
   );
 
   const setJobIdValid = useCallback(
-    (index: number, valid: boolean) => {
+    (index: number, valid: VALIDATION_STATUS) => {
       const validIds = [...jobIdsValid];
       validIds[index] = valid;
       setJobIdsValid(validIds);
@@ -197,14 +199,23 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
   );
 
   useEffect(() => {
-    // console.log(jobIdsValid);
-  }, [jobIdsValid]);
+    const disabled =
+      jobIds.length === 0 ||
+      jobIdsValid.some((j) => j === VALIDATION_STATUS.INVALID) ||
+      importing === true;
+    setImportDisabled(disabled);
+
+    setDeleteDisabled(
+      jobIdsValid.some((j) => j === VALIDATION_STATUS.VALIDATING) || importing === true
+    );
+  }, [jobIds, jobIdsValid, importing]);
 
   const DeleteJobButton: FC<{ index: number }> = ({ index }) => (
     <EuiButtonIcon
       iconType="trash"
       aria-label="Delete"
-      color="danger"
+      color={deleteDisabled ? 'subdued' : 'danger'}
+      disabled={deleteDisabled}
       onClick={() => deleteJob(index)}
     />
   );
@@ -288,7 +299,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
                                 id={jobId}
                                 renameJob={renameJob}
                                 disabled={importing}
-                                setIsValid={(idx: number, val: boolean) => setJobIdValid(idx, val)}
+                                setIsValid={setJobIdValid}
                               />
                             </EuiFlexItem>
                             <EuiFlexItem grow={false}>
@@ -315,15 +326,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  disabled={
-                    jobIds.length === 0 ||
-                    jobIdsValid.some((j) => j === false) ||
-                    importing === true
-                  }
-                  onClick={onImport}
-                  fill
-                >
+                <EuiButton disabled={importDisabled} onClick={onImport} fill>
                   <FormattedMessage
                     id="xpack.ml.newJob.wizard.revertModelSnapshotFlyout.saveButton"
                     defaultMessage="Import"
