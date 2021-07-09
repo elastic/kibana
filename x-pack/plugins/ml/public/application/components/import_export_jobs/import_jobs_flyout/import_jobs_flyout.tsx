@@ -136,6 +136,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
           }))
         );
         setIdsMash(validatedJobs.jobIds.map((id) => id).join(''));
+        setValidatingJobs(true);
         setSkippedJobs(validatedJobs.skippedJobs);
       } catch (error) {
         // show error
@@ -200,7 +201,10 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
 
   useEffect(() => {
     const disabled =
-      jobIds.length === 0 || importing === true || jobIds.some(({ valid }) => valid === false);
+      jobIds.length === 0 ||
+      importing === true ||
+      validatingJobs === true ||
+      jobIds.some(({ valid }) => valid === false);
     setImportDisabled(disabled);
 
     setDeleteDisabled(importing === true || validatingJobs === true);
