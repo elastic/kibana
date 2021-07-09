@@ -13650,7 +13650,6 @@
     "xpack.ml.annotationsTable.byColumnSMVName": "グループ基準",
     "xpack.ml.annotationsTable.detectorColumnName": "検知器",
     "xpack.ml.annotationsTable.editAnnotationsTooltip": "注釈を編集します",
-    "xpack.ml.annotationsTable.editAnnotationsTooltipAriaLabel": "注釈を編集します",
     "xpack.ml.annotationsTable.eventColumnName": "イベント",
     "xpack.ml.annotationsTable.fromColumnName": "開始：",
     "xpack.ml.annotationsTable.howToCreateAnnotationDescription": "注釈を作成するには、{linkToSingleMetricView} を開きます",
