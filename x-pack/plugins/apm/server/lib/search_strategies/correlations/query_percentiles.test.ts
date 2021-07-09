@@ -63,6 +63,7 @@ describe('query_percentiles', () => {
 
   describe('fetchTransactionDurationPercentiles', () => {
     it('fetches the percentiles', async () => {
+      const totalDocs = 10;
       const percentilesValues = {
         '1.0': 5.0,
         '5.0': 25.0,
@@ -78,7 +79,7 @@ describe('query_percentiles', () => {
       } => {
         return {
           body: ({
-            hits: { total: { value: 10 } },
+            hits: { total: { value: totalDocs } },
             aggregations: {
               transaction_duration_percentiles: {
                 values: percentilesValues,
@@ -97,7 +98,7 @@ describe('query_percentiles', () => {
         params
       );
 
-      expect(resp).toEqual(percentilesValues);
+      expect(resp).toEqual({ percentiles: percentilesValues, totalDocs });
       expect(esClientSearchMock).toHaveBeenCalledTimes(1);
     });
   });
