@@ -57,15 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('Saves and restores a session with relative time ranges', async () => {
       await PageObjects.dashboard.loadSavedDashboard('[Flights] Global Flight Dashboard');
       await PageObjects.dashboard.waitForRenderComplete();
-      await PageObjects.timePicker.pauseAutoRefresh(); // sample data has auto-refresh on
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.waitForRenderComplete();
-
-      // saving dashboard to populate map buffer. See https://github.com/elastic/kibana/pull/91148 for more info
-      // This can be removed after a fix to https://github.com/elastic/kibana/issues/98180 is completed
-      await PageObjects.dashboard.switchToEditMode();
-      await PageObjects.dashboard.clickQuickSave();
-      await PageObjects.dashboard.clickCancelOutOfEditMode();
 
       await searchSessions.expectState('completed');
       await searchSessions.save();
@@ -106,8 +98,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(await find.existsByCssSelector('.vgaVis__view')).to.be(true);
     log.debug('Checking map rendered');
     await dashboardPanelActions.openInspectorByTitle('[Flights] Origin Time Delayed');
-    await testSubjects.click('inspectorRequestChooser');
-    await testSubjects.click(`inspectorRequestChooserFlight Origin Location`);
     const requestStats = await inspector.getTableData();
     const totalHits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
     expect(totalHits).to.equal('0');
