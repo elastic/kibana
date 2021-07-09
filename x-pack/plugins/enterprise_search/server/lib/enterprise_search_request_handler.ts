@@ -34,6 +34,7 @@ interface ConstructorDependencies {
 interface RequestParams {
   path: string;
   params?: object;
+  hasJsonResponse?: boolean;
   hasValidData?: Function;
 }
 interface ErrorResponse {
@@ -64,7 +65,12 @@ export class EnterpriseSearchRequestHandler {
     this.enterpriseSearchUrl = config.host as string;
   }
 
-  createRequest({ path, params = {}, hasValidData = () => true }: RequestParams) {
+  createRequest({
+    path,
+    params = {},
+    hasJsonResponse = true,
+    hasValidData = () => true,
+  }: RequestParams) {
     return async (
       _context: RequestHandlerContext,
       request: KibanaRequest<unknown, unknown, unknown>,
@@ -119,7 +125,7 @@ export class EnterpriseSearchRequestHandler {
         // Check returned data
         let responseBody;
 
-        try {
+        if (hasJsonResponse) {
           const json = await apiResponse.json();
 
           if (!hasValidData(json)) {
@@ -134,8 +140,8 @@ export class EnterpriseSearchRequestHandler {
           } else {
             responseBody = json;
           }
-        } catch (e) {
-          responseBody = undefined;
+        } else {
+          responseBody = apiResponse.body;
         }
 
         // Pass successful responses back to the front-end
