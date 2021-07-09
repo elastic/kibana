@@ -171,7 +171,7 @@ export class PrApi {
     await this.restRequest({
       method: 'POST',
       path: `/repos/elastic/kibana/statuses/${pr.head.sha}`,
-      data: {
+      body: {
         state: options.state,
         context: options.context,
         description: options.description,
@@ -294,7 +294,7 @@ export class PrApi {
         url: 'https://api.github.com/graphql',
         method: 'POST',
         headers: {
-          'user-agent': '@kbn/release-notes',
+          'user-agent': '@kbn/pr-utils',
           authorization: `bearer ${this.token}`,
         },
         data: {
@@ -307,18 +307,18 @@ export class PrApi {
     });
   }
 
-  private async restRequest<T>(options: { method: Method; path: string; data?: any }) {
+  private async restRequest<T>(options: { method: Method; path: string; body?: any }) {
     return await this.handleGithubHttpErrors(async () => {
       const resp = await Axios.request<T>({
         baseURL: 'https://api.github.com',
         headers: {
-          'user-agent': '@kbn/release-notes',
+          'user-agent': '@kbn/pr-utils',
           authorization: `token ${this.token}`,
           accept: 'application/vnd.github.v3+json',
         },
         method: options.method,
         url: options.path,
-        data: options.data,
+        data: options.body,
       });
 
       return resp.data;
