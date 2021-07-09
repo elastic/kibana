@@ -27,9 +27,7 @@ On plugin setup, rule type producers can create the index template as follows:
 ```ts
 // get the FQN of the component template. All assets are prefixed with the configured `index` value, which is `.alerts` by default.
 
-const componentTemplateName = plugins.ruleRegistry.getFullAssetName(
-  'apm-mappings'
-);
+const componentTemplateName = plugins.ruleRegistry.getFullAssetName('apm-mappings');
 
 // if write is disabled, don't install these templates
 if (!plugins.ruleRegistry.isWriteEnabled()) {
@@ -73,14 +71,10 @@ await plugins.ruleRegistry.createOrUpdateComponentTemplate({
 await plugins.ruleRegistry.createOrUpdateIndexTemplate({
   name: plugins.ruleRegistry.getFullAssetName('apm-index-template'),
   body: {
-    index_patterns: [
-      plugins.ruleRegistry.getFullAssetName('observability-apm*'),
-    ],
+    index_patterns: [plugins.ruleRegistry.getFullAssetName('observability-apm*')],
     composed_of: [
       // Technical component template, required
-      plugins.ruleRegistry.getFullAssetName(
-        TECHNICAL_COMPONENT_TEMPLATE_NAME
-      ),
+      plugins.ruleRegistry.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
       componentTemplateName,
     ],
   },
@@ -107,8 +101,7 @@ await ruleDataClient.getWriter().bulk({
 // to read data, simply call ruleDataClient.getReader().search:
 const response = await ruleDataClient.getReader().search({
   body: {
-    query: {
-    },
+    query: {},
     size: 100,
     fields: ['*'],
     sort: {
@@ -132,6 +125,7 @@ The following fields are defined in the technical field component template and s
 - `rule.name`: the name of the rule (as specified by the user).
 - `rule.category`: the name of the rule type (as defined by the rule type producer)
 - `kibana.rac.alert.producer`: the producer of the rule type. Usually a Kibana plugin. e.g., `APM`.
+- `kibana.rac.alert.owner`: the feature which produced the alert. Usually a Kibana feature id like `apm`, `siem`...
 - `kibana.rac.alert.id`: the id of the alert, that is unique within the context of the rule execution it was created in. E.g., for a rule that monitors latency for all services in all environments, this might be `opbeans-java:production`.
 - `kibana.rac.alert.uuid`: the unique identifier for the alert during its lifespan. If an alert recovers (or closes), this identifier is re-generated when it is opened again.
 - `kibana.rac.alert.status`: the status of the alert. Can be `open` or `closed`.
@@ -145,3 +139,16 @@ The following fields are defined in the technical field component template and s
 - `kibana.rac.alert.ancestors`: the array of ancestors (if any) for the alert.
 - `kibana.rac.alert.depth`: the depth of the alert in the ancestral tree (default 0).
 - `kibana.rac.alert.building_block_type`: the building block type of the alert (default undefined).
+
+# Alerts as data
+
+Alerts as data can be interacted with using the AlertsClient api found in `x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts`
+
+This api includes public methods such as
+
+[x] getFullAssetName
+[x] getAlertsIndex
+[x] get
+[x] update
+[ ] bulkUpdate (TODO)
+[ ] find (TODO)

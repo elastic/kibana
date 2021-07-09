@@ -125,6 +125,7 @@ export function mergeConfigs(
 export const plugin = (initContext: PluginInitializerContext) =>
   new APMPlugin(initContext);
 
+export { APM_SERVER_FEATURE_ID } from '../common/alert_types';
 export { APMPlugin } from './plugin';
 export { APMPluginSetup } from './types';
 export { APMServerRouteRepository } from './routes/get_global_apm_server_route_repository';
