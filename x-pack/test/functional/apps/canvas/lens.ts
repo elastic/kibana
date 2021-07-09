@@ -30,7 +30,7 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
 
     after(async () => {
       await esArchiver.unload(archives.es);
-      await kibanaServer.importExport.load(archives.kbn);
+      await kibanaServer.importExport.unload(archives.kbn);
     });
 
     it('renders lens visualization', async () => {
