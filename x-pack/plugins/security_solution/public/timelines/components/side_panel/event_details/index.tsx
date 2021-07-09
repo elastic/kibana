@@ -82,7 +82,9 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
 
   const [isHostIsolationPanelOpen, setIsHostIsolationPanel] = useState(false);
 
-  const [isolateAction, setIsolateAction] = useState('isolateHost');
+  const [isolateAction, setIsolateAction] = useState<'isolateHost' | 'unisolateHost'>(
+    'isolateHost'
+  );
 
   const [isIsolateActionSuccessBannerVisible, setIsIsolateActionSuccessBannerVisible] = useState(
     false
@@ -205,7 +207,6 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
 
   const handleIsolationActionSuccess = useCallback(() => {
     setIsIsolateActionSuccessBannerVisible(true);
-    setIsHostIsolationPanel(false);
     // If a case details refresh ref is defined, then refresh actions and comments
     if (caseDetailsRefresh) {
       caseDetailsRefresh.refreshUserActionsAndComments();
@@ -225,19 +226,14 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
           <ExpandableEventTitle isAlert={isAlert} loading={loading} />
         )}
       </EuiFlyoutHeader>
-      <StyledEuiFlyoutBody
-        banner={
-          isIsolateActionSuccessBannerVisible && (
-            <EndpointIsolateSuccess
-              hostName={hostName}
-              isolateAction="isolateHost"
-              completeButtonLabel={'Return to alert Details'}
-              onComplete={showAlertDetails}
-              additionalInfo={associatedCases}
-            />
-          )
-        }
-      >
+      {isIsolateActionSuccessBannerVisible && (
+        <EndpointIsolateSuccess
+          hostName={hostName}
+          isolateAction={isolateAction}
+          additionalInfo={associatedCases}
+        />
+      )}
+      <StyledEuiFlyoutBody>
         {isHostIsolationPanelOpen ? (
           <HostIsolationPanel
             details={detailsData}

@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useCallback, ReactNode } from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import React, { useMemo, useState, useCallback } from 'react';
+import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useHostIsolation } from '../../containers/detection_engine/alerts/use_host_isolation';
 import { CASES_ASSOCIATED_WITH_ALERT, RETURN_TO_ALERT_DETAILS } from './translations';
 import {
   EndpointIsolatedFormProps,
   EndpointIsolateForm,
-  EndpointIsolateSuccess,
 } from '../../../common/components/endpoint/host_isolation';
 import { CasesFromAlertsResponse } from '../../containers/detection_engine/alerts/types';
 
@@ -21,14 +20,12 @@ export const IsolateHost = React.memo(
   ({
     endpointId,
     hostName,
-    cases,
     casesInfo,
     cancelCallback,
     successCallback,
   }: {
     endpointId: string;
     hostName: string;
-    cases: ReactNode;
     casesInfo: CasesFromAlertsResponse;
     cancelCallback: () => void;
     successCallback?: () => void;
@@ -64,16 +61,22 @@ export const IsolateHost = React.memo(
       return (
         <>
           <EuiSpacer size="m" />
-          <EndpointIsolateSuccess
-            hostName={hostName}
-            isolateAction="isolateHost"
-            completeButtonLabel={RETURN_TO_ALERT_DETAILS}
-            onComplete={backToAlertDetails}
-            additionalInfo={cases}
-          />
+          <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                flush="right"
+                onClick={backToAlertDetails}
+                data-test-subj="hostIsolateSuccessCompleteButton"
+              >
+                <EuiText size="s">
+                  <p>{RETURN_TO_ALERT_DETAILS}</p>
+                </EuiText>
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </>
       );
-    }, [backToAlertDetails, hostName, cases]);
+    }, [backToAlertDetails]);
 
     const hostNotIsolated = useMemo(() => {
       return (

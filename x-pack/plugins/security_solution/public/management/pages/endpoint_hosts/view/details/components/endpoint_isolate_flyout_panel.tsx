@@ -88,18 +88,14 @@ export const EndpointIsolationFlyoutPanel = memo<{
     <>
       <BackToEndpointDetailsFlyoutSubHeader endpointId={hostMeta.agent.id} />
 
+      {wasSuccessful && (
+        <EndpointIsolateSuccess
+          hostName={hostMeta.host.name}
+          isolateAction={isCurrentlyIsolated ? 'unisolateHost' : 'isolateHost'}
+        />
+      )}
       <FlyoutBodyNoTopPadding>
-        {wasSuccessful ? (
-          <EndpointIsolateSuccess
-            hostName={hostMeta.host.name}
-            isolateAction={isCurrentlyIsolated ? 'unisolateHost' : 'isolateHost'}
-            completeButtonLabel={i18n.translate(
-              'xpack.securitySolution.endpoint.hostIsolation.successProceedButton',
-              { defaultMessage: 'Return to endpoint details' }
-            )}
-            onComplete={handleCancel}
-          />
-        ) : (
+        {wasSuccessful === false && (
           <EuiForm
             isInvalid={!!isolateError}
             error={isolateError?.message}

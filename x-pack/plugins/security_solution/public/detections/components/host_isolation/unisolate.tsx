@@ -6,12 +6,11 @@
  */
 
 import React, { useMemo, useState, useCallback, ReactNode } from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CASES_ASSOCIATED_WITH_ALERT, RETURN_TO_ALERT_DETAILS } from './translations';
 import {
   EndpointIsolatedFormProps,
-  EndpointIsolateSuccess,
   EndpointUnisolateForm,
 } from '../../../common/components/endpoint/host_isolation';
 import { useHostUnisolation } from '../../containers/detection_engine/alerts/use_host_unisolation';
@@ -64,16 +63,22 @@ export const UnisolateHost = React.memo(
       return (
         <>
           <EuiSpacer size="m" />
-          <EndpointIsolateSuccess
-            hostName={hostName}
-            isolateAction="unisolateHost"
-            completeButtonLabel={RETURN_TO_ALERT_DETAILS}
-            onComplete={backToAlertDetails}
-            additionalInfo={cases}
-          />
+          <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                flush="right"
+                onClick={backToAlertDetails}
+                data-test-subj="hostIsolateSuccessCompleteButton"
+              >
+                <EuiText size="s">
+                  <p>{RETURN_TO_ALERT_DETAILS}</p>
+                </EuiText>
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </>
       );
-    }, [backToAlertDetails, hostName, cases]);
+    }, [backToAlertDetails]);
 
     const hostNotUnisolated = useMemo(() => {
       return (
