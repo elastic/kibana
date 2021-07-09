@@ -6,7 +6,7 @@
  */
 
 import { formatMitreAttackDescription } from '../../helpers/rules';
-import { indexPatterns, newRule, newThresholdRule } from '../../objects/rule';
+import { getIndexPatterns, getNewRule, getNewThresholdRule } from '../../objects/rule';
 
 import {
   ALERT_RULE_METHOD,
@@ -84,16 +84,16 @@ import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import { ALERTS_URL } from '../../urls/navigation';
 
 describe('Detection rules, threshold', () => {
-  const expectedUrls = newThresholdRule.referenceUrls.join('');
-  const expectedFalsePositives = newThresholdRule.falsePositivesExamples.join('');
-  const expectedTags = newThresholdRule.tags.join('');
-  const expectedMitre = formatMitreAttackDescription(newThresholdRule.mitre);
+  const expectedUrls = getNewThresholdRule().referenceUrls.join('');
+  const expectedFalsePositives = getNewThresholdRule().falsePositivesExamples.join('');
+  const expectedTags = getNewThresholdRule().tags.join('');
+  const expectedMitre = formatMitreAttackDescription(getNewThresholdRule().mitre);
 
-  const rule = { ...newThresholdRule };
+  const rule = { ...getNewThresholdRule() };
 
   beforeEach(() => {
     cleanKibana();
-    createTimeline(newThresholdRule.timeline).then((response) => {
+    createTimeline(getNewThresholdRule().timeline).then((response) => {
       rule.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
     });
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
@@ -149,7 +149,7 @@ describe('Detection rules, threshold', () => {
     cy.get(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
     cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
     cy.get(DEFINITION_DETAILS).within(() => {
-      getDetails(INDEX_PATTERNS_DETAILS).should('have.text', indexPatterns.join(''));
+      getDetails(INDEX_PATTERNS_DETAILS).should('have.text', getIndexPatterns().join(''));
       getDetails(CUSTOM_QUERY_DETAILS).should('have.text', rule.customQuery);
       getDetails(RULE_TYPE_DETAILS).should('have.text', 'Threshold');
       getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
@@ -181,10 +181,10 @@ describe('Detection rules, threshold', () => {
   });
 
   it('Preview results', () => {
-    const previewRule = { ...newThresholdRule };
-    previewRule.index!.push('.siem-signals*');
+    const previewRule = { ...getNewThresholdRule() };
+    previewRule.index.push('.siem-signals*');
 
-    createCustomRuleActivated(newRule);
+    createCustomRuleActivated(getNewRule());
     goToManageAlertsDetectionRules();
     waitForRulesTableToBeLoaded();
     goToCreateNewRule();

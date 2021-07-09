@@ -9,7 +9,7 @@ import { emailConnector, EmailConnector } from '../objects/connector';
 import {
   CustomRule,
   MachineLearningRule,
-  machineLearningRule,
+  getMachineLearningRule,
   OverrideRule,
   ThreatIndicatorRule,
   ThresholdRule,
@@ -478,9 +478,12 @@ export const fillDefineMachineLearningRuleAndContinue = (rule: MachineLearningRu
     cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type(`${machineLearningJob}{enter}`);
     cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type('{esc}');
   });
-  cy.get(ANOMALY_THRESHOLD_INPUT).type(`{selectall}${machineLearningRule.anomalyScoreThreshold}`, {
-    force: true,
-  });
+  cy.get(ANOMALY_THRESHOLD_INPUT).type(
+    `{selectall}${getMachineLearningRule().anomalyScoreThreshold}`,
+    {
+      force: true,
+    }
+  );
   getDefineContinueButton().should('exist').click({ force: true });
 
   cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).should('not.exist');

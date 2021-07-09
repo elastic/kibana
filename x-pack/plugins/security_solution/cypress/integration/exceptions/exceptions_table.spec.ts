@@ -6,7 +6,7 @@
  */
 
 import { exception, exceptionList, expectedExportedExceptionList } from '../../objects/exception';
-import { newRule } from '../../objects/rule';
+import { getNewRule } from '../../objects/rule';
 
 import { RULE_STATUS } from '../../screens/create_new_rule';
 
@@ -46,7 +46,7 @@ describe('Exceptions Table', () => {
     cleanKibana();
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsIndexToBeCreated();
-    createCustomRule(newRule);
+    createCustomRule(getNewRule());
     goToManageAlertsDetectionRules();
     goToRuleDetails();
 

@@ -6,7 +6,7 @@
  */
 
 import { exception } from '../../objects/exception';
-import { newRule } from '../../objects/rule';
+import { getNewRule } from '../../objects/rule';
 
 import { ALERTS_COUNT, NUMBER_OF_ALERTS } from '../../screens/alerts';
 import { RULE_STATUS } from '../../screens/create_new_rule';
@@ -43,7 +43,7 @@ describe('From alert', () => {
     cleanKibana();
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsIndexToBeCreated();
-    createCustomRule(newRule, 'rule_testing', '10s');
+    createCustomRule(getNewRule(), 'rule_testing', '10s');
     goToManageAlertsDetectionRules();
     goToRuleDetails();
 
