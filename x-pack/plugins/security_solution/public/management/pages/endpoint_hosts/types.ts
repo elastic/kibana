@@ -40,9 +40,12 @@ export interface EndpointState {
     flyoutView: EndpointIndexUIQueryParams['show'];
     activityLog: {
       paging: {
-        disabled: boolean;
+        disabled?: boolean;
         page: number;
         pageSize: number;
+        startDate?: string;
+        endDate?: string;
+        isInvalidDateRange: boolean;
       };
       logData: AsyncResourceState<ActivityLog>;
     };
