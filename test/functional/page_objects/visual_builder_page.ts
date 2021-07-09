@@ -277,6 +277,13 @@ export class VisualBuilderPageObject extends FtrService {
     await this.comboBox.setElement(formatterEl, formatter, { clickWithMouse: true });
   }
 
+  public async setDrilldownUrl(value: string) {
+    const drilldownEl = await this.testSubjects.find('drilldownUrl');
+
+    await drilldownEl.clearValue();
+    await drilldownEl.type(value);
+  }
+
   /**
    * set duration formatter additional settings
    *
