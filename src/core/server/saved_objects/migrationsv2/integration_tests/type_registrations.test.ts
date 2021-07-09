@@ -93,7 +93,6 @@ const previouslyRegisteredTypes = [
   'tsvb-validation-telemetry',
   'ui-counter',
   'ui-metric',
-  'upgrade-assistant-ml-upgrade-operation',
   'upgrade-assistant-reindex-operation',
   'upgrade-assistant-telemetry',
   'uptime-dynamic-settings',
