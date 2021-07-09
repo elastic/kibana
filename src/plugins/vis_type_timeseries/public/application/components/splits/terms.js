@@ -146,6 +146,7 @@ export const SplitByTermsUI = ({
               <EuiFieldText
                 value={model.terms_include}
                 onChange={handleTextChange('terms_include')}
+                data-test-subj="groupByInclude"
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -162,6 +163,7 @@ export const SplitByTermsUI = ({
               <EuiFieldText
                 value={model.terms_exclude}
                 onChange={handleTextChange('terms_exclude')}
+                data-test-subj="groupByExclude"
               />
             </EuiFormRow>
           </EuiFlexItem>
