@@ -31,7 +31,9 @@ export function HelpPopoverButton({
       className="apmHelpPopover__buttonIcon"
       size="s"
       iconType="help"
-      aria-label="Help"
+      aria-label={i18n.translate('xpack.apm.helpPopover.ariaLabel', {
+        defaultMessage: 'Help',
+      })}
       onClick={onClick}
     />
   );
