@@ -104,7 +104,9 @@ export function getActiveEntriesAndGenerateAlerts(
       let entityDateTime;
       if (dateInShape) {
         // Handle epoch millis
-        entityDateTime = new Date(isNaN(dateInShape) ? dateInShape : +dateInShape).toISOString();
+        entityDateTime = new Date(
+          isNaN(dateInShape as never) ? dateInShape : +dateInShape
+        ).toISOString();
       } else {
         entityDateTime = null;
       }
