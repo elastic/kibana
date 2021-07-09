@@ -45,48 +45,6 @@ export const HostIsolationPanel = React.memo(
 
     const { casesInfo } = useCasesFromAlerts({ alertId });
 
-    // Cases related components to be used in both isolate and unisolate actions from the alert details flyout entry point
-    const caseCount: number = useMemo(() => casesInfo.length, [casesInfo]);
-
-    const casesList = useMemo(
-      () =>
-        casesInfo.map((caseInfo, index) => {
-          return (
-            <li key={caseInfo.id}>
-              <CaseDetailsLink detailName={caseInfo.id}>
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.hostIsolation.placeholderCase"
-                  defaultMessage="{caseName}"
-                  values={{ caseName: caseInfo.title }}
-                />
-              </CaseDetailsLink>
-            </li>
-          );
-        }),
-      [casesInfo]
-    );
-
-    const associatedCases = useMemo(() => {
-      if (caseCount > 0) {
-        return (
-          <>
-            <EuiText size="s">
-              <p>
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.hostIsolation.successfulIsolation.cases"
-                  defaultMessage="This action has been attached to the following {caseCount, plural, one {case} other {cases}}:"
-                  values={{ caseCount }}
-                />
-              </p>
-            </EuiText>
-            <EuiText size="s">
-              <ul>{casesList}</ul>
-            </EuiText>
-          </>
-        );
-      }
-    }, [caseCount, casesList]);
-
     return isolateAction === 'isolateHost' ? (
       <IsolateHost
         endpointId={endpointId}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useCallback, ReactNode } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CASES_ASSOCIATED_WITH_ALERT, RETURN_TO_ALERT_DETAILS } from './translations';
