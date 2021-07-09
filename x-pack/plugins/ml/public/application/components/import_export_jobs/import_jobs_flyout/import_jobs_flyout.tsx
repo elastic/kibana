@@ -33,6 +33,7 @@ import { DataFrameAnalyticsConfig } from '../../../data_frame_analytics/common';
 import { useMlApiContext, useMlKibana } from '../../../contexts/kibana';
 import { JobType } from '../../../../../common/types/saved_objects';
 import { CannotImportJobsCallout, SkippedJobs } from './cannot_import_jobs_callout';
+import { CannotReadFileCallout } from './cannot_read_file_callout';
 import { isJobIdValid } from '../../../../../common/util/job_utils';
 import { JOB_ID_MAX_LENGTH } from '../../../../../common/constants/validation';
 
@@ -84,6 +85,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
   const [deleteDisabled, setDeleteDisabled] = useState(true);
   const [idsMash, setIdsMash] = useState('');
   const [validatingJobs, setValidatingJobs] = useState(false);
+  const [showFileReadError, setShowFileReadError] = useState(false);
 
   useEffect(() => {
     setAdJobs([]);
@@ -99,11 +101,13 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
   }
 
   const onFilePickerChange = useCallback(async (files: any) => {
+    setShowFileReadError(false);
     if (files.length) {
       try {
         const loadedFile = await readJobConfigs(files[0]);
         if (loadedFile.jobType === null) {
-          throw new Error('AAGGHHH');
+          setShowFileReadError(true);
+          return;
         }
 
         setTotalJobsRead(loadedFile.jobs.length);
@@ -308,75 +312,75 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
                 />
               </div>
 
-              <>
-                {totalJobsRead > 0 && jobType !== null && (
-                  <>
-                    <EuiSpacer size="l" />
-                    {jobType === 'anomaly-detector' && (
-                      <FormattedMessage
-                        id="xpack.infra.ml.anomalyFlyout.jobSetup.flyoutHeader"
-                        defaultMessage="{num} anomaly detection {num, plural, one {job} other {jobs}} read from file"
-                        values={{ num: totalJobsRead }}
-                      />
-                    )}
+              {showFileReadError && <CannotReadFileCallout />}
 
-                    {jobType === 'data-frame-analytics' && (
-                      <FormattedMessage
-                        id="xpack.infra.ml.anomalyFlyout.jobSetup.flyoutHeader"
-                        defaultMessage="{num} data frame analytics {num, plural, one {job} other {jobs}} read from file"
-                        values={{ num: totalJobsRead }}
-                      />
-                    )}
-
-                    <EuiSpacer size="m" />
-
-                    <CannotImportJobsCallout
-                      jobs={skippedJobs}
-                      autoExpand={jobIds.length === 0 || skippedJobs.length === 1}
-                    />
-
+              {totalJobsRead > 0 && jobType !== null && (
+                <>
+                  <EuiSpacer size="l" />
+                  {jobType === 'anomaly-detector' && (
                     <FormattedMessage
                       id="xpack.infra.ml.anomalyFlyout.jobSetup.flyoutHeader"
-                      defaultMessage="{num} importable {num, plural, one {job} other {jobs}}"
-                      values={{ num: jobIds.length }}
+                      defaultMessage="{num} anomaly detection {num, plural, one {job} other {jobs}} read from file"
+                      values={{ num: totalJobsRead }}
                     />
-                    <EuiSpacer size="m" />
+                  )}
 
-                    {jobIds.map((jobId, i) => (
-                      <div key={i}>
-                        <EuiPanel hasBorder={true}>
-                          <EuiFlexGroup>
-                            <EuiFlexItem>
-                              <EuiFormRow
-                                error={jobId.invalidMessage}
-                                isInvalid={jobId.invalidMessage.length > 0}
-                              >
-                                <EuiFieldText
-                                  prepend={i18n.translate(
-                                    'xpack.fileDataVisualizer.aboutPanel.selectOrDragAndDropFileDescription',
-                                    {
-                                      defaultMessage: 'Job ID',
-                                    }
-                                  )}
-                                  disabled={importing}
-                                  compressed={true}
-                                  value={jobId.id}
-                                  onChange={(e) => renameJob2(e, i)}
-                                  isInvalid={jobId.valid === false}
-                                />
-                              </EuiFormRow>
-                            </EuiFlexItem>
-                            <EuiFlexItem grow={false}>
-                              <DeleteJobButton index={i} />
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                        </EuiPanel>
-                        <EuiSpacer size="m" />
-                      </div>
-                    ))}
-                  </>
-                )}
-              </>
+                  {jobType === 'data-frame-analytics' && (
+                    <FormattedMessage
+                      id="xpack.infra.ml.anomalyFlyout.jobSetup.flyoutHeader"
+                      defaultMessage="{num} data frame analytics {num, plural, one {job} other {jobs}} read from file"
+                      values={{ num: totalJobsRead }}
+                    />
+                  )}
+
+                  <EuiSpacer size="m" />
+
+                  <CannotImportJobsCallout
+                    jobs={skippedJobs}
+                    autoExpand={jobIds.length === 0 || skippedJobs.length === 1}
+                  />
+
+                  <FormattedMessage
+                    id="xpack.infra.ml.anomalyFlyout.jobSetup.flyoutHeader"
+                    defaultMessage="{num} importable {num, plural, one {job} other {jobs}}"
+                    values={{ num: jobIds.length }}
+                  />
+                  <EuiSpacer size="m" />
+
+                  {jobIds.map((jobId, i) => (
+                    <div key={i}>
+                      <EuiPanel hasBorder={true}>
+                        <EuiFlexGroup>
+                          <EuiFlexItem>
+                            <EuiFormRow
+                              error={jobId.invalidMessage}
+                              isInvalid={jobId.invalidMessage.length > 0}
+                            >
+                              <EuiFieldText
+                                prepend={i18n.translate(
+                                  'xpack.fileDataVisualizer.aboutPanel.selectOrDragAndDropFileDescription',
+                                  {
+                                    defaultMessage: 'Job ID',
+                                  }
+                                )}
+                                disabled={importing}
+                                compressed={true}
+                                value={jobId.id}
+                                onChange={(e) => renameJob2(e, i)}
+                                isInvalid={jobId.valid === false}
+                              />
+                            </EuiFormRow>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <DeleteJobButton index={i} />
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiPanel>
+                      <EuiSpacer size="m" />
+                    </div>
+                  ))}
+                </>
+              )}
             </>
           </EuiFlyoutBody>
           <EuiFlyoutFooter>
