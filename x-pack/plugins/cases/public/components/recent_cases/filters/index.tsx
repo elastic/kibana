@@ -39,6 +39,7 @@ export const RecentCasesFilters = React.memo<{
         : toggleButtonIcons.filter((x) => x.id !== MY_RECENTLY_REPORTED_ID),
     [showMyRecentlyReported]
   );
+
   const onChange = useCallback(
     (filterMode: string) => {
       setFilterBy(filterMode as FilterMode);
