@@ -34,3 +34,6 @@ yarn spec_to_console -g "<ELASTICSEARCH-REPO-FOLDER>/x-pack/plugin/src/test/reso
 * Request bodies
 * Data fetched at runtime: indices, fields, snapshots, etc
 * Ad hoc additions
+
+### Updating the script
+The script only allows a known parameter type to be used in the REST API specs and will throw an `Unexpected type error` if a new parameter type is encountered. The types can be updated in the file `<KIBANA_REPO>/packages/kbn-spec-to-console/lib/convert/params.js`. 
