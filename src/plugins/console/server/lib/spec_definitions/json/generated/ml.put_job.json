@@ -1,5 +1,17 @@
 {
   "ml.put_job": {
+    "url_params": {
+      "ignore_unavailable": "__flag__",
+      "allow_no_indices": "__flag__",
+      "ignore_throttled": "__flag__",
+      "expand_wildcards": [
+        "open",
+        "closed",
+        "hidden",
+        "none",
+        "all"
+      ]
+    },
     "methods": [
       "PUT"
     ],

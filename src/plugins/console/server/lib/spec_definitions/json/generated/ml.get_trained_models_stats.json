@@ -9,9 +9,9 @@
       "GET"
     ],
     "patterns": [
-      "_ml/inference/{model_id}/_stats",
-      "_ml/inference/_stats"
+      "_ml/trained_models/{model_id}/_stats",
+      "_ml/trained_models/_stats"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/get-inference-stats.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/get-trained-models-stats.html"
   }
 }
