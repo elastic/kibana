@@ -52,11 +52,11 @@ export function getTimestampRange({
     .parse(timerangeLookback)
     ?.subtract('24', 'hours')
     .valueOf();
-  const absoluteFrom = min([scheduleIntervalAbsoluteTime, defaultIntervalAbsoluteTime]);
+  const from = min([scheduleIntervalAbsoluteTime, defaultIntervalAbsoluteTime]) ?? 'now-24h';
 
   return {
     to: 'now',
-    from: absoluteFrom ? absoluteFrom : 'now-24h',
+    from,
   };
 }
 
