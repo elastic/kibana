@@ -12,13 +12,17 @@ import { ESSearchRequest } from 'src/core/types/elasticsearch';
 
 import { buildEsQuery, IIndexPattern } from '../../../../../../../src/plugins/data/common';
 
-import { RuleDataClient } from '../../../../../rule_registry/server';
+import { PersistenceServices, RuleDataClient } from '../../../../../rule_registry/server';
 import { CUSTOM_ALERT_TYPE_ID } from '../../../../common/constants';
 import { SetupPlugins } from '../../../../target/types/server/plugin';
 
 import { queryRuleParams, QueryRuleParams } from '../schemas/rule_schemas';
 
 import { createSecurityRuleTypeFactory } from './create_security_rule_type_factory';
+
+interface QueryAlertState {
+  previousStartedAt: Date;
+}
 
 export const createQueryAlertType = (createOptions: {
   lists: SetupPlugins['lists'];
@@ -31,7 +35,12 @@ export const createQueryAlertType = (createOptions: {
     logger,
     ruleDataClient,
   });
-  return createSecurityRuleType({
+  return createSecurityRuleType<
+    QueryRuleParams,
+    {},
+    PersistenceServices,
+    { previousStartedAt: Date }
+  >({
     id: CUSTOM_ALERT_TYPE_ID,
     name: 'Custom Query Rule',
     validate: {

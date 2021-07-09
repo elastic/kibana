@@ -7,7 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { DslQuery, Filter } from 'src/plugins/data/common';
-import moment, { Moment } from 'moment';
+import moment from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
@@ -302,7 +302,7 @@ export interface SearchAfterAndBulkCreateParams {
 
 export interface SearchAfterAndBulkCreateReturnType {
   success: boolean;
-  warning: boolean;
+  // warning: boolean;
   searchAfterTimes: string[];
   bulkCreateTimes: string[];
   lastLookBackDate: Date | null | undefined;
@@ -310,11 +310,6 @@ export interface SearchAfterAndBulkCreateReturnType {
   createdSignals: unknown[];
   errors: string[];
   warningMessages: string[];
-  totalToFromTuples?: Array<{
-    to: Moment | undefined;
-    from: Moment | undefined;
-    maxSignals: number;
-  }>;
 }
 
 export interface ThresholdAggregationBucket extends TermAggregationBucket {

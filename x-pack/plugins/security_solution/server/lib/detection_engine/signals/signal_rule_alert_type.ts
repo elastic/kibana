@@ -377,7 +377,7 @@ export const signalRulesAlertType = ({
               `[+] Finished indexing ${result.createdSignalsCount} signals into ${outputIndex}`
             )
           );
-          if (!hasError && !wroteWarningStatus && !result.warning) {
+          if (!hasError && !wroteWarningStatus && !result.warningMessages.length) {
             await ruleStatusService.success('succeeded', {
               bulkCreateTimeDurations: result.bulkCreateTimes,
               searchAfterTimeDurations: result.searchAfterTimes,
@@ -389,12 +389,8 @@ export const signalRulesAlertType = ({
           logger.info(
             buildRuleMessage(
               `[+] Finished indexing ${result.createdSignalsCount}  ${
-                !isEmpty(result.totalToFromTuples)
-                  ? `signals searched between date ranges ${JSON.stringify(
-                      result.totalToFromTuples,
-                      null,
-                      2
-                    )}`
+                !isEmpty(tuples)
+                  ? `signals searched between date ranges ${JSON.stringify(tuples, null, 2)}`
                   : ''
               }`
             )

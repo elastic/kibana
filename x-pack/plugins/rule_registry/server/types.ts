@@ -33,9 +33,10 @@ export type AlertTypeExecutor<
 export type AlertTypeWithExecutor<
   TParams extends AlertTypeParams = {},
   TAlertInstanceContext extends AlertInstanceContext = {},
-  TServices extends Record<string, any> = {}
+  TServices extends Record<string, any> = {},
+  TState extends AlertTypeState = {}
 > = Omit<
-  AlertType<TParams, AlertTypeState, AlertInstanceState, TAlertInstanceContext, string, string>,
+  AlertType<TParams, TState, AlertInstanceState, TAlertInstanceContext, string, string>,
   'executor'
 > & {
   executor: AlertTypeExecutor<TParams, TAlertInstanceContext, TServices>;

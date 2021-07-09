@@ -19,7 +19,7 @@ export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory 
       } = options;
 
       const currentAlerts: Array<Record<string, unknown>> = [];
-      const timestamp = options.startedAt.toISOString();
+      // const timestamp = options.startedAt.toISOString();
 
       const state = await type.executor({
         ...options,

@@ -6,18 +6,13 @@
  */
 import { flow } from 'fp-ts/lib/function';
 import { Either, chain, fold, tryCatch } from 'fp-ts/lib/Either';
-import { schema } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
-import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
-import { SavedObjectsClientContract } from 'kibana/server';
 import { toError } from '@kbn/securitysolution-list-api';
-import { ExceptionListItemSchema, ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import {
   createPersistenceRuleTypeFactory,
-  PersistenceAlertQueryService,
-  PersistenceAlertService,
   RuleDataClient,
   AlertTypeWithExecutor,
+  PersistenceServices,
 } from '../../../../../rule_registry/server';
 import { ruleStatusSavedObjectsClientFactory } from '../signals/rule_status_saved_objects_client';
 import { ruleStatusServiceFactory } from '../signals/rule_status_service';
@@ -26,22 +21,46 @@ import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertTypeParams,
+  AlertTypeState,
 } from '../../../../../alerting/common';
-import { AlertAttributes, SignalRuleAlertTypeDefinition } from '../signals/types';
+import { AlertType } from '../../../../../alerting/server';
 import { buildRuleMessageFactory } from '../signals/rule_messages';
 import {
   checkPrivilegesFromEsClient,
-  getExceptions,
   getRuleRangeTuples,
   hasReadIndexPrivileges,
   hasTimestampFields,
   isMachineLearningParams,
 } from '../signals/utils';
-import { newGetListsClient } from './utils/get_new_list_client';
 import { RuleParams } from '../schemas/rule_schemas';
 import { DEFAULT_MAX_SIGNALS } from '../../../../common/constants';
-import { AlertServices } from '../../../../../alerting/server';
-import { ListClient } from '../../../../../lists/server';
+import { AlertTypeExecutor } from '../../../../../rule_registry/server/types';
+
+// TODO: enforce executor return type
+export type SecurityAlertTypeExecutor<
+  TParams extends AlertTypeParams = {},
+  TAlertInstanceContext extends AlertInstanceContext = {},
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  TServices extends Record<string, any> = {}
+> = (
+  options: Parameters<SimpleAlertType<TParams, TAlertInstanceContext>['executor']>[0] & {
+    services: TServices;
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+) => Promise<any>;
+
+type SecurityAlertTypeWithExecutor<
+  TParams extends AlertTypeParams = {},
+  TAlertInstanceContext extends AlertInstanceContext = {},
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  TServices extends Record<string, any> = {},
+  TState extends AlertTypeState = {}
+> = Omit<
+  AlertType<TParams, TState, AlertInstanceState, TAlertInstanceContext, string, string>,
+  'executor'
+> & {
+  executor: AlertTypeExecutor<TParams, TAlertInstanceContext, TServices>;
+};
 
 type CreateSecurityRuleTypeFactory = (options: {
   lists: SetupPlugins['lists'];
@@ -50,14 +69,12 @@ type CreateSecurityRuleTypeFactory = (options: {
 }) => <
   TParams extends RuleParams,
   TAlertInstanceContext extends AlertInstanceContext,
-  TServices extends {
-    alertWithPersistence: PersistenceAlertService<TAlertInstanceContext>;
-    // securityServices: { exceptionItems: ExceptionListItemSchema[]; listClient: ListClient };
-  }
+  TServices extends PersistenceServices,
+  TState extends AlertTypeState = {}
 >(
-  type: AlertTypeWithExecutor<TParams, TAlertInstanceContext, TServices>
+  type: AlertTypeWithExecutor<TParams, TAlertInstanceContext, TServices, TState>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-) => AlertTypeWithExecutor<TParams, TAlertInstanceContext, any>;
+) => AlertTypeWithExecutor<TParams, TAlertInstanceContext, any, TState>;
 
 export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
   lists,
@@ -68,8 +85,8 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
   return persistenceRuleType({
     ...type,
     async executor(options) {
-      const { alertId, params, previousStartedAt, services, spaceId, updatedBy } = options;
-      const { from, maxSignals, meta, outputIndex, timestampOverride, to } = params;
+      const { alertId, params, previousStartedAt, services } = options;
+      const { from, timestampOverride, to } = params;
       const { savedObjectsClient, scopedClusterClient } = services;
       const ruleId = type.id;
       const esClient = scopedClusterClient.asCurrentUser;
@@ -80,7 +97,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
         ruleStatusClient,
       });
 
-      const savedObject = await savedObjectsClient.get<AlertAttributes>('alert', alertId);
+      const savedObject = await savedObjectsClient.get('alert', alertId);
       const {
         name,
         schedule: { interval },
@@ -104,17 +121,16 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
       // so that we can use it in create rules route, bulk, etc.
       try {
         if (!isMachineLearningParams(params)) {
-          // FIXME?
           const index = params.index;
           const hasTimestampOverride = !!timestampOverride;
 
-          // TODO: Input INdex
+          // TODO: Input Index
           const inputIndices = ['test'];
 
           const [privileges, timestampFieldCaps] = await Promise.all([
             checkPrivilegesFromEsClient(esClient, inputIndices),
             esClient.fieldCaps({
-              index: index as string[], // FIXME?
+              index: index ?? ['*'],
               fields: hasTimestampOverride
                 ? ['@timestamp', timestampOverride as string]
                 : ['@timestamp'],
@@ -191,7 +207,14 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
       });
       */
 
-      return type.executor(options);
+      const result = await type.executor(options);
+
+      return result;
+      /*
+        alertTypeState: state,
+        alertInstances: alertInstances,
+        previousStartedAt: startedAt,
+      */
     },
   });
 };
