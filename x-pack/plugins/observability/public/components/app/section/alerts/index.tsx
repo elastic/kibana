@@ -50,28 +50,15 @@ export function AlertsSection({ alerts }: Props) {
 
   return (
     <div>
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="xs">
-                <h4>
-                  {i18n.translate('xpack.observability.overview.alerts.title', {
-                    defaultMessage: 'Alerts',
-                  })}
-                </h4>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiSelect
-                compressed
-                id="filterAlerts"
-                options={[allTypes, ...filterOptions]}
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiTitle size="xs">
+            <h4>
+              {i18n.translate('xpack.observability.overview.alerts.title', {
+                defaultMessage: 'Alerts',
+              })}
+            </h4>
+          </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton size="s" href={manageLink}>
@@ -82,6 +69,18 @@ export function AlertsSection({ alerts }: Props) {
         </EuiFlexItem>
       </EuiFlexGroup>
       <>
+        <EuiFlexItem grow={false}>
+          <EuiSpacer />
+          <EuiSelect
+            compressed
+            fullWidth={true}
+            id="filterAlerts"
+            options={[allTypes, ...filterOptions]}
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+          />
+          <EuiSpacer />
+        </EuiFlexItem>
         {alerts
           .filter((alert) => filter === ALL_TYPES || alert.consumer === filter)
           .map((alert, index) => {
