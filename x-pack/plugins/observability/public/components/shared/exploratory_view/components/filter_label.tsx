@@ -13,7 +13,7 @@ import { FilterValueLabel } from '../../filter_value_label/filter_value_label';
 interface Props {
   field: string;
   label: string;
-  value: string;
+  value: string | string[];
   seriesId: string;
   negate: boolean;
   definitionFilter?: boolean;

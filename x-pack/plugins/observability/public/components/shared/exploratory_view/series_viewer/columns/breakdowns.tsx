@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useRouteMatch } from 'react-router-dom';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { USE_BREAK_DOWN_COLUMN } from '../../configurations/constants';
 import { SeriesConfig } from '../../types';
@@ -18,8 +19,9 @@ interface Props {
   seriesConfig: SeriesConfig;
 }
 
-export function Breakdowns({ seriesConfig, seriesId, breakdowns = [] }: Props) {
+export function Breakdowns({ seriesConfig, seriesId }: Props) {
   const { setSeries, getSeries } = useSeriesStorage();
+  const isPreview = !!useRouteMatch('/exploratory-view/preview');
 
   const series = getSeries(seriesId);
 
@@ -42,7 +44,7 @@ export function Breakdowns({ seriesConfig, seriesId, breakdowns = [] }: Props) {
 
   const hasUseBreakdownColumn = seriesConfig.xAxisColumn.sourceField === USE_BREAK_DOWN_COLUMN;
 
-  const items = breakdowns.map((breakdown) => ({
+  const items = seriesConfig.breakdownFields.map((breakdown) => ({
     id: breakdown,
     label: seriesConfig.labels[breakdown],
   }));
@@ -69,7 +71,7 @@ export function Breakdowns({ seriesConfig, seriesId, breakdowns = [] }: Props) {
     <div style={{ width: 200 }}>
       <EuiSuperSelect
         fullWidth
-        compressed
+        compressed={isPreview}
         options={options}
         valueOfSelected={valueOfSelected}
         onChange={(value) => onOptionChange(value)}

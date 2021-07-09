@@ -62,6 +62,7 @@ export function FieldValueSelection({
   values = [],
   selectedValue,
   excludedValue,
+  allowExclusions = true,
   compressed = true,
   onChange: onSelectionChange,
 }: FieldValueSelectionProps) {
@@ -165,7 +166,7 @@ export function FieldValueSelection({
           options={options}
           onChange={onChange}
           isLoading={loading}
-          allowExclusions={true}
+          allowExclusions={allowExclusions}
         >
           {(list, search) => (
             <div style={{ width: 240 }}>

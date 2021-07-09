@@ -20,7 +20,7 @@ export async function hasRumData({
   setup: Setup & Partial<SetupTimeRange>;
 }) {
   try {
-    const { start, end } = setup;
+    const { start = 'now-24h', end = 'now' } = setup;
 
     const params = {
       apm: {

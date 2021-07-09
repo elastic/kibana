@@ -153,5 +153,6 @@ export function getCoreWebVitalsConfig({ indexPattern }: ConfigProps): SeriesCon
       { color: statusPallete[1], forAccessor: 'y-axis-column-1' },
       { color: statusPallete[2], forAccessor: 'y-axis-column-2' },
     ],
+    query: { query: 'transaction.type: "page-load"', language: 'kuery' },
   };
 }

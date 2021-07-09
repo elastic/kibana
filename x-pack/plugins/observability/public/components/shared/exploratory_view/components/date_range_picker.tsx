@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiDatePicker, EuiDatePickerRange } from '@elastic/eui';
-import DateMath from '@elastic/datemath';
 import { Moment } from 'moment';
+import DateMath from '@elastic/datemath';
+import { i18n } from '@kbn/i18n';
 import { useSeriesStorage } from '../hooks/use_series_storage';
 import { useUiSetting } from '../../../../../../../../src/plugins/kibana_react/public';
 
@@ -17,37 +17,41 @@ export const parseAbsoluteDate = (date: string, options = {}) => {
   return DateMath.parse(date, options)!;
 };
 export function DateRangePicker({ seriesId }: { seriesId: string }) {
-  const { firstSeriesId, getSeries, setSeries } = useSeriesStorage();
+  const { firstSeries, getSeries, setSeries, reportType } = useSeriesStorage();
   const dateFormat = useUiSetting<string>('dateFormat');
-
-  const {
-    time: { from, to },
-    reportType,
-  } = getSeries(firstSeriesId);
 
   const series = getSeries(seriesId);
 
-  const {
-    time: { from: seriesFrom, to: seriesTo },
-  } = series;
+  if (!series || !firstSeries?.time) {
+    return null;
+  }
+
+  const seriesFrom = series.time?.from;
+  const seriesTo = series.time?.to;
+
+  const { from, to } = firstSeries.time;
 
   const startDate = parseAbsoluteDate(seriesFrom ?? from)!;
   const endDate = parseAbsoluteDate(seriesTo ?? to, { roundUp: true })!;
 
-  const onStartChange = (newDate: Moment) => {
+  const getTotalDuration = () => {
+    const mainStartDate = parseAbsoluteDate(from)!;
+    const mainEndDate = parseAbsoluteDate(to, { roundUp: true })!;
+    return mainEndDate.diff(mainStartDate, 'millisecond');
+  };
+
+  const onStartChange = (newStartDate: Moment) => {
     if (reportType === 'kpi-over-time') {
-      const mainStartDate = parseAbsoluteDate(from)!;
-      const mainEndDate = parseAbsoluteDate(to, { roundUp: true })!;
-      const totalDuration = mainEndDate.diff(mainStartDate, 'millisecond');
-      const newFrom = newDate.toISOString();
-      const newTo = newDate.add(totalDuration, 'millisecond').toISOString();
+      const totalDuration = getTotalDuration();
+      const newFrom = newStartDate.toISOString();
+      const newTo = newStartDate.add(totalDuration, 'millisecond').toISOString();
 
       setSeries(seriesId, {
         ...series,
         time: { from: newFrom, to: newTo },
       });
     } else {
-      const newFrom = newDate.toISOString();
+      const newFrom = newStartDate.toISOString();
 
       setSeries(seriesId, {
         ...series,
@@ -55,20 +59,19 @@ export function DateRangePicker({ seriesId }: { seriesId: string }) {
       });
     }
   };
-  const onEndChange = (newDate: Moment) => {
+
+  const onEndChange = (newEndDate: Moment) => {
     if (reportType === 'kpi-over-time') {
-      const mainStartDate = parseAbsoluteDate(from)!;
-      const mainEndDate = parseAbsoluteDate(to, { roundUp: true })!;
-      const totalDuration = mainEndDate.diff(mainStartDate, 'millisecond');
-      const newTo = newDate.toISOString();
-      const newFrom = newDate.subtract(totalDuration, 'millisecond').toISOString();
+      const totalDuration = getTotalDuration();
+      const newTo = newEndDate.toISOString();
+      const newFrom = newEndDate.subtract(totalDuration, 'millisecond').toISOString();
 
       setSeries(seriesId, {
         ...series,
         time: { from: newFrom, to: newTo },
       });
     } else {
-      const newTo = newDate.toISOString();
+      const newTo = newEndDate.toISOString();
 
       setSeries(seriesId, {
         ...series,
@@ -90,7 +93,7 @@ export function DateRangePicker({ seriesId }: { seriesId: string }) {
           aria-label={i18n.translate('xpack.observability.expView.dateRanger.startDate', {
             defaultMessage: 'Start date',
           })}
-          dateFormat={dateFormat}
+          dateFormat={dateFormat.replace('ss.SSS', 'ss')}
           showTimeSelect
         />
       }
@@ -104,7 +107,7 @@ export function DateRangePicker({ seriesId }: { seriesId: string }) {
           aria-label={i18n.translate('xpack.observability.expView.dateRanger.endDate', {
             defaultMessage: 'End date',
           })}
-          dateFormat={dateFormat}
+          dateFormat={dateFormat.replace('ss.SSS', 'ss')}
           showTimeSelect
         />
       }

@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash';
+
 import {
   CountIndexPatternColumn,
   DateHistogramIndexPatternColumn,
@@ -39,7 +40,7 @@ import {
 } from './constants';
 import { ColumnFilter, SeriesConfig, UrlFilter, URLReportDefinition } from '../types';
 import { PersistableFilter } from '../../../../../../lens/common';
-import { parseAbsoluteDate } from '../series_date_picker/date_range_picker';
+import { parseAbsoluteDate } from '../components/date_range_picker';
 import { getDistributionInPercentageColumn } from './lens_columns/overall_column';
 
 function getLayerReferenceName(layerId: string) {
@@ -73,14 +74,6 @@ export const parseCustomFieldName = (seriesConfig: SeriesConfig, selectedMetricF
       timeScale = currField?.timeScale;
       columnLabel = currField?.label;
     }
-  } else if (metricOptions?.[0].field || metricOptions?.[0].id) {
-    const firstMetricOption = metricOptions?.[0];
-
-    selectedMetricField = firstMetricOption.field || firstMetricOption.id;
-    columnType = firstMetricOption.columnType;
-    columnFilters = firstMetricOption.columnFilters;
-    timeScale = firstMetricOption.timeScale;
-    columnLabel = firstMetricOption.label;
   }
 
   return { fieldName: selectedMetricField!, columnType, columnFilters, timeScale, columnLabel };
@@ -96,6 +89,8 @@ export interface LayerConfig {
   time: { to: string; from: string };
   indexPattern: IndexPattern;
   selectedMetricField?: string;
+  color: string;
+  name: string;
 }
 
 export class LensAttributes {
@@ -471,14 +466,15 @@ export class LensAttributes {
   getLayerFilters(layerConfig: LayerConfig, totalLayers: number) {
     const {
       filters,
-      time: { from, to },
+      time,
       seriesConfig: { baseFilters: layerFilters, reportType },
     } = layerConfig;
     let baseFilters = '';
-    if (reportType !== 'kpi-over-time' && totalLayers > 1) {
+
+    if (reportType !== 'kpi-over-time' && totalLayers > 1 && time) {
       // for kpi over time, we don't need to add time range filters
       // since those are essentially plotted along the x-axis
-      baseFilters += `@timestamp >= ${from} and @timestamp <= ${to}`;
+      baseFilters += `@timestamp >= ${time.from} and @timestamp <= ${time.to}`;
     }
 
     layerFilters?.forEach((filter: PersistableFilter | ExistsFilter) => {
@@ -534,7 +530,11 @@ export class LensAttributes {
   }
 
   getTimeShift(mainLayerConfig: LayerConfig, layerConfig: LayerConfig, index: number) {
-    if (index === 0 || mainLayerConfig.seriesConfig.reportType !== 'kpi-over-time') {
+    if (
+      index === 0 ||
+      mainLayerConfig.seriesConfig.reportType !== 'kpi-over-time' ||
+      !layerConfig.time
+    ) {
       return null;
     }
 
@@ -546,11 +546,14 @@ export class LensAttributes {
       time: { from },
     } = layerConfig;
 
-    const inDays = parseAbsoluteDate(mainFrom).diff(parseAbsoluteDate(from), 'days');
+    const inDays = Math.abs(parseAbsoluteDate(mainFrom).diff(parseAbsoluteDate(from), 'days'));
     if (inDays > 1) {
       return inDays + 'd';
     }
-    const inHours = parseAbsoluteDate(mainFrom).diff(parseAbsoluteDate(from), 'hours');
+    const inHours = Math.abs(parseAbsoluteDate(mainFrom).diff(parseAbsoluteDate(from), 'hours'));
+    if (inHours === 0) {
+      return null;
+    }
     return inHours + 'h';
   }
 
@@ -581,7 +584,9 @@ export class LensAttributes {
           [`x-axis-column-${layerId}`]: this.getXAxis(layerConfig, layerId),
           [`y-axis-column-${layerId}`]: {
             ...mainYAxis,
-            label: timeShift ? `${mainYAxis.label}(${timeShift})` : mainYAxis.label,
+            label:
+              layerConfig.name ||
+              (timeShift ? `${mainYAxis.label}(${timeShift})` : mainYAxis.label),
             filter: { query: columnFilter, language: 'kuery' },
             ...(timeShift ? { timeShift } : {}),
           },
@@ -624,7 +629,7 @@ export class LensAttributes {
         seriesType: layerConfig.seriesType || layerConfig.seriesConfig.defaultSeriesType,
         palette: layerConfig.seriesConfig.palette,
         yConfig: layerConfig.seriesConfig.yConfig || [
-          { forAccessor: `y-axis-column-layer${index}` },
+          { forAccessor: `y-axis-column-layer${index}`, color: layerConfig.color },
         ],
         xAccessor: `x-axis-column-layer${index}`,
         ...(layerConfig.breakdown &&
@@ -638,7 +643,7 @@ export class LensAttributes {
     };
   }
 
-  getJSON(): TypedLensByValueInput['attributes'] {
+  getJSON(refresh?: number): TypedLensByValueInput['attributes'] {
     const uniqueIndexPatternsIds = Array.from(
       new Set([...this.layerConfigs.map(({ indexPattern }) => indexPattern.id)])
     );
@@ -647,7 +652,7 @@ export class LensAttributes {
 
     return {
       title: 'Prefilled from exploratory view app',
-      description: '',
+      description: String(refresh),
       visualizationType: 'lnsXY',
       references: [
         ...uniqueIndexPatternsIds.map((patternId) => ({

@@ -46,5 +46,12 @@ export function getMobileDeviceDistributionConfig({ indexPattern }: ConfigProps)
       },
     ],
     definitionFields: [SERVICE_NAME],
+    metricOptions: [
+      {
+        field: 'labels.device_id',
+        id: 'labels.device_id',
+        label: NUMBER_OF_DEVICES,
+      },
+    ],
   };
 }

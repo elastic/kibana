@@ -13,10 +13,12 @@ import { SeriesConfig } from '../types';
 interface Props {
   seriesId: string;
   defaultValue?: string;
-  options: SeriesConfig['metricOptions'];
+  metricOptions: SeriesConfig['metricOptions'];
 }
 
-export function ReportMetricOptions({ seriesId, options: opts }: Props) {
+const SELECT_REPORT_METRIC = 'SELECT_REPORT_METRIC';
+
+export function ReportMetricOptions({ seriesId, metricOptions }: Props) {
   const { getSeries, setSeries } = useSeriesStorage();
 
   const series = getSeries(seriesId);
@@ -28,19 +30,26 @@ export function ReportMetricOptions({ seriesId, options: opts }: Props) {
     });
   };
 
-  const options = opts ?? [];
+  if (!series.dataType) {
+    return null;
+  }
+
+  const options = (metricOptions ?? []).map(({ label, field: fd, id }) => ({
+    value: fd || id,
+    inputDisplay: label,
+  }));
 
   return (
     <EuiSuperSelect
       fullWidth
-      compressed
-      prepend={'Metric'}
-      options={options.map(({ label, field: fd, id }) => ({
-        value: fd || id,
-        inputDisplay: label,
-      }))}
-      valueOfSelected={series.selectedMetricField || options?.[0].field || options?.[0].id}
+      options={
+        series.selectedMetricField
+          ? options
+          : [{ value: SELECT_REPORT_METRIC, inputDisplay: 'Select report metric' }, ...options]
+      }
+      valueOfSelected={series.selectedMetricField || SELECT_REPORT_METRIC}
       onChange={(value) => onChange(value)}
+      style={{ minWidth: 220 }}
     />
   );
 }

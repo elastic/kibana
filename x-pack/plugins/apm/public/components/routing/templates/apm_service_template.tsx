@@ -127,22 +127,28 @@ function AnalyzeDataButton({ serviceName }: { serviceName: string }) {
   const { rangeTo, rangeFrom, environment } = urlParams;
   const basepath = services.http?.basePath.get();
 
-  if (isRumAgentName(agentName) || isIosAgentName(agentName)) {
+  if (
+    (isRumAgentName(agentName) || isIosAgentName(agentName)) &&
+    rangeFrom &&
+    rangeTo
+  ) {
     const href = createExploratoryViewUrl(
       {
-        'apm-series': {
-          dataType: isRumAgentName(agentName) ? 'ux' : 'mobile',
-          time: { from: rangeFrom, to: rangeTo },
-          reportType: 'kpi-over-time',
-          reportDefinitions: {
-            [SERVICE_NAME]: [serviceName],
-            ...(!!environment && ENVIRONMENT_NOT_DEFINED.value !== environment
-              ? { [SERVICE_ENVIRONMENT]: [environment] }
-              : {}),
+        reportType: 'kpi-over-time',
+        allSeries: [
+          {
+            name: `${serviceName}-series`,
+            dataType: isRumAgentName(agentName) ? 'ux' : 'mobile',
+            time: { from: rangeFrom, to: rangeTo },
+            reportDefinitions: {
+              [SERVICE_NAME]: [serviceName],
+              ...(!!environment && ENVIRONMENT_NOT_DEFINED.value !== environment
+                ? { [SERVICE_ENVIRONMENT]: [environment] }
+                : {}),
+            },
+            operationType: 'average',
           },
-          operationType: 'average',
-          isNew: true,
-        } as SeriesUrl,
+        ],
       },
       basepath
     );

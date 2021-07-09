@@ -8,8 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SeriesConfig } from '../../types';
-import { OperationTypeSelect } from '../../series_builder/columns/operation_type_select';
-import { SeriesChartTypesSelect } from '../../series_builder/columns/chart_types';
+import { OperationTypeSelect } from '../../series_editor/columns/operation_type_select';
 
 interface Props {
   seriesConfig: SeriesConfig;
@@ -19,12 +18,6 @@ interface Props {
 export function ChartOptions({ seriesConfig, seriesId }: Props) {
   return (
     <EuiFlexGroup direction="column" gutterSize="s" justifyContent="center">
-      <EuiFlexItem grow={false}>
-        <SeriesChartTypesSelect
-          seriesId={seriesId}
-          defaultChartType={seriesConfig.seriesTypes[0]}
-        />
-      </EuiFlexItem>
       {seriesConfig.hasOperationType && (
         <EuiFlexItem grow={false}>
           <OperationTypeSelect seriesId={seriesId} />

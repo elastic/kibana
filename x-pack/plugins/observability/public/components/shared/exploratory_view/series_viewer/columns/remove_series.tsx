@@ -15,7 +15,7 @@ interface Props {
 }
 
 export function RemoveSeries({ seriesId }: Props) {
-  const { removeSeries } = useSeriesStorage();
+  const { removeSeries, firstSeries, allSeries } = useSeriesStorage();
 
   const onClick = () => {
     removeSeries(seriesId);
@@ -25,10 +25,11 @@ export function RemoveSeries({ seriesId }: Props) {
       aria-label={i18n.translate('xpack.observability.expView.seriesEditor.removeSeries', {
         defaultMessage: 'Click to remove series',
       })}
-      iconType="cross"
-      color="danger"
+      iconType="trash"
+      color="text"
       onClick={onClick}
       size="s"
+      isDisabled={firstSeries.name === seriesId && allSeries.length > 1}
     />
   );
 }

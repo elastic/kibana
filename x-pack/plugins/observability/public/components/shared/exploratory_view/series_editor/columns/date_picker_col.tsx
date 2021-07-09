@@ -6,24 +6,34 @@
  */
 
 import React from 'react';
-import { SeriesDatePicker } from '../../series_date_picker';
+import styled from 'styled-components';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
-import { DateRangePicker } from '../../series_date_picker/date_range_picker';
+import { DateRangePicker } from '../../components/date_range_picker';
+import { SeriesDatePicker } from '../../components/series_date_picker';
 
 interface Props {
   seriesId: string;
 }
 export function DatePickerCol({ seriesId }: Props) {
-  const { firstSeriesId, getSeries } = useSeriesStorage();
-  const { reportType } = getSeries(firstSeriesId);
+  const { firstSeriesId, reportType } = useSeriesStorage();
 
   return (
-    <div style={{ maxWidth: 300 }}>
+    <Wrapper>
       {firstSeriesId === seriesId || reportType !== 'kpi-over-time' ? (
-        <SeriesDatePicker seriesId={seriesId} />
+        <SeriesDatePicker seriesId={seriesId} readonly={false} />
       ) : (
         <DateRangePicker seriesId={seriesId} />
       )}
-    </div>
+    </Wrapper>
   );
 }
+
+const Wrapper = styled.div`
+  width: 100%;
+  .euiSuperDatePicker__flexWrapper {
+    width: 100%;
+    > .euiFlexItem {
+      margin-right: 0;
+    }
+  }
+`;

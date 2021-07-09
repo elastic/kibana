@@ -10,7 +10,7 @@ import { fireEvent, screen } from '@testing-library/react';
 import { mockAppIndexPattern, render } from '../../rtl_helpers';
 import { dataTypes, DataTypesCol } from './data_types_col';
 
-describe('DataTypesCol', function () {
+describe('DataTypeSelect', function () {
   const seriesId = 'test-series-id';
 
   mockAppIndexPattern();

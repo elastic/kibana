@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { mockUseHasData, render } from '../rtl_helpers';
+import { mockUseHasData, render } from '../../rtl_helpers';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { SeriesDatePicker } from './index';
-import { DEFAULT_TIME } from '../configurations/constants';
+import { DEFAULT_TIME } from '../../configurations/constants';
 
 describe('SeriesDatePicker', function () {
   it('should render properly', function () {

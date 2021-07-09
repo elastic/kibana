@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSuperSelect } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIcon, EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../../../plugin';
@@ -105,14 +105,14 @@ export function XYChartTypesSelect({
   });
 
   return (
-    <EuiSuperSelect
-      fullWidth
-      compressed
-      prepend={CHART_TYPE_LABEL}
-      valueOfSelected={value}
-      isLoading={loading}
-      options={options}
-      onChange={onChange}
-    />
+    <EuiFormRow label={CHART_TYPE_LABEL} style={{ minWidth: 280 }}>
+      <EuiSuperSelect
+        fullWidth
+        valueOfSelected={value}
+        isLoading={loading}
+        options={options}
+        onChange={onChange}
+      />
+    </EuiFormRow>
   );
 }

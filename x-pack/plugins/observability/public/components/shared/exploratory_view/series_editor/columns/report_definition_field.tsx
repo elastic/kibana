@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import FieldValueSuggestions from '../../../field_value_suggestions';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
@@ -64,23 +63,26 @@ export function ReportDefinitionField({ seriesId, field, seriesConfig, onChange 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(selectedReportDefinitions), JSON.stringify(baseFilters)]);
 
+  if (!indexPattern) {
+    return null;
+  }
+
   return (
-    <EuiFlexGroup justifyContent="flexStart" gutterSize="s" alignItems="center" wrap>
-      <EuiFlexItem>
-        {indexPattern && (
-          <FieldValueSuggestions
-            label={labels[field]}
-            sourceField={field}
-            indexPatternTitle={indexPattern.title}
-            selectedValue={selectedReportDefinitions?.[field]}
-            onChange={(val?: string[]) => onChange(field, val)}
-            filters={queryFilters}
-            time={series.time}
-            fullWidth={true}
-            allowAllValuesSelection={true}
-          />
-        )}
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <FieldValueSuggestions
+      label={labels[field]}
+      sourceField={field}
+      indexPatternTitle={indexPattern.title}
+      selectedValue={selectedReportDefinitions?.[field]}
+      onChange={(val?: string[]) => onChange(field, val)}
+      filters={queryFilters}
+      time={series.time}
+      fullWidth={true}
+      asCombobox={true}
+      allowExclusions={false}
+      allowAllValuesSelection={true}
+      usePrependLabel={false}
+      compressed={false}
+      required={isEmpty(selectedReportDefinitions)}
+    />
   );
 }

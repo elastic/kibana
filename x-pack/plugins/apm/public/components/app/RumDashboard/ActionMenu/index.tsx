@@ -16,11 +16,11 @@ import { i18n } from '@kbn/i18n';
 import {
   createExploratoryViewUrl,
   HeaderMenuPortal,
-  SeriesUrl,
 } from '../../../../../../observability/public';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { AppMountParameters } from '../../../../../../../../src/core/public';
+import { SERVICE_NAME } from '../../../../../common/elasticsearch_fieldnames';
 
 const ANALYZE_DATA = i18n.translate('xpack.apm.analyzeDataButtonLabel', {
   defaultMessage: 'Analyze data',
@@ -43,15 +43,21 @@ export function UXActionMenu({
     services: { http },
   } = useKibana();
   const { urlParams } = useUrlParams();
-  const { rangeTo, rangeFrom } = urlParams;
+  const { rangeTo, rangeFrom, serviceName } = urlParams;
 
   const uxExploratoryViewLink = createExploratoryViewUrl(
     {
-      'ux-series': ({
-        dataType: 'ux',
-        isNew: true,
-        time: { from: rangeFrom, to: rangeTo },
-      } as unknown) as SeriesUrl,
+      reportType: 'kpi-over-time',
+      allSeries: [
+        {
+          order: 0,
+          dataType: 'ux',
+          name: `${serviceName}-page-views`,
+          time: { from: rangeFrom, to: rangeTo },
+          reportDefinitions: { [SERVICE_NAME]: [serviceName] },
+          selectedMetricField: 'Records',
+        },
+      ],
     },
     http?.basePath.get()
   );

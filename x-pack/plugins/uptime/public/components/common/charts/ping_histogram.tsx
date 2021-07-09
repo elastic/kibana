@@ -189,12 +189,14 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
 
   const pingHistogramExploratoryViewLink = createExploratoryViewUrl(
     {
-      'pings-over-time': {
-        dataType: 'synthetics',
-        reportType: 'kpi-over-time',
-        time: { from: dateRangeStart, to: dateRangeEnd },
-        ...(monitorId ? { filters: [{ field: 'monitor.id', values: [monitorId] }] } : {}),
-      },
+      reportType: 'kpi-over-time',
+      allSeries: [
+        {
+          dataType: 'synthetics',
+          time: { from: dateRangeStart, to: dateRangeEnd },
+          ...(monitorId ? { filters: [{ field: 'monitor.id', values: [monitorId] }] } : {}),
+        },
+      ],
     },
     basePath
   );

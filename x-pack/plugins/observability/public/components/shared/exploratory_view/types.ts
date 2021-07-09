@@ -42,7 +42,7 @@ export interface MetricOption {
   field?: string;
   label: string;
   description?: string;
-  columnType?: 'range' | 'operation' | 'FILTER_RECORDS' | 'TERMS_COLUMN';
+  columnType?: 'range' | 'operation' | 'FILTER_RECORDS' | 'TERMS_COLUMN' | 'unique_count';
   columnFilters?: ColumnFilter[];
   timeScale?: string;
 }
@@ -69,6 +69,7 @@ export interface SeriesConfig {
 export type URLReportDefinition = Record<string, string[]>;
 
 export interface SeriesUrl {
+  name: string;
   time: {
     to: string;
     from: string;
@@ -76,12 +77,13 @@ export interface SeriesUrl {
   breakdown?: string;
   filters?: UrlFilter[];
   seriesType?: SeriesType;
-  reportType: ReportViewType;
   operationType?: OperationType;
   dataType: AppDataType;
   reportDefinitions?: URLReportDefinition;
   selectedMetricField?: string;
-  isNew?: boolean;
+  hidden?: boolean;
+  order: number;
+  color?: string;
 }
 
 export interface UrlFilter {

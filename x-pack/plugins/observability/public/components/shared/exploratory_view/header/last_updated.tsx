@@ -18,7 +18,7 @@ export function LastUpdated({ lastUpdated }: Props) {
   useEffect(() => {
     const interVal = setInterval(() => {
       setRefresh(Date.now());
-    }, 1000);
+    }, 5000);
 
     return () => {
       clearInterval(interVal);
@@ -29,8 +29,11 @@ export function LastUpdated({ lastUpdated }: Props) {
     return null;
   }
 
+  const isWarning = moment().diff(moment(lastUpdated), 'minute') > 5;
+  const isDanger = moment().diff(moment(lastUpdated), 'minute') > 10;
+
   return (
-    <EuiText color="subdued" size="s">
+    <EuiText color={isDanger ? 'danger' : isWarning ? 'warning' : 'subdued'} size="s">
       <EuiIcon type="clock" /> Last Updated: {moment(lastUpdated).from(refresh)}
     </EuiText>
   );

@@ -6,16 +6,19 @@
  */
 
 import React from 'react';
-import { Breakdowns } from '../../series_editor/columns/breakdowns';
+import { Breakdowns } from '../../series_viewer/columns/breakdowns';
 import { SeriesConfig } from '../../types';
 
 export function ReportBreakdowns({
   seriesId,
   seriesConfig,
 }: {
-  seriesConfig: SeriesConfig;
+  seriesConfig?: SeriesConfig;
   seriesId: string;
 }) {
+  if (!seriesConfig) {
+    return null;
+  }
   return (
     <Breakdowns
       seriesConfig={seriesConfig}

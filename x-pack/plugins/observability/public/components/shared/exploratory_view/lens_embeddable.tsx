@@ -7,18 +7,49 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { Dispatch, SetStateAction, useCallback } from 'react';
-import { combineTimeRanges } from './exploratory_view';
+import styled from 'styled-components';
+import { isEmpty } from 'lodash';
 import { TypedLensByValueInput } from '../../../../../lens/public';
 import { useSeriesStorage } from './hooks/use_series_storage';
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { ReportViewType, SeriesUrl } from './types';
 
 interface Props {
   lensAttributes: TypedLensByValueInput['attributes'];
   setLastUpdated: Dispatch<SetStateAction<number | undefined>>;
 }
+export const combineTimeRanges = (
+  reportType: ReportViewType,
+  allSeries: SeriesUrl[],
+  firstSeries: SeriesUrl
+) => {
+  let to: string = '';
+  let from: string = '';
+  if (reportType === 'kpi-over-time') {
+    return firstSeries?.time;
+  }
+  allSeries.forEach((series) => {
+    if (
+      series.dataType &&
+      series.selectedMetricField &&
+      !isEmpty(series.reportDefinitions) &&
+      series.time
+    ) {
+      const seriesTo = new Date(series.time.to);
+      const seriesFrom = new Date(series.time.from);
+      if (!to || seriesTo > new Date(to)) {
+        to = series.time.to;
+      }
+      if (!from || seriesFrom < new Date(from)) {
+        from = series.time.from;
+      }
+    }
+  });
+  return { to, from };
+};
 
-export function LensEmbeddable(props: Props) {
+export const LensEmbeddable = React.memo(function (props: Props) {
   const { lensAttributes, setLastUpdated } = props;
 
   const {
@@ -27,9 +58,15 @@ export function LensEmbeddable(props: Props) {
 
   const LensComponent = lens?.EmbeddableComponent;
 
-  const { firstSeriesId, firstSeries: series, setSeries, allSeries } = useSeriesStorage();
+  const {
+    firstSeriesId,
+    firstSeries: series,
+    setSeries,
+    allSeries,
+    reportType,
+  } = useSeriesStorage();
 
-  const timeRange = combineTimeRanges(allSeries, series);
+  const timeRange = series ? combineTimeRanges(reportType, allSeries, series) : null;
 
   const onLensLoad = useCallback(() => {
     setLastUpdated(Date.now());
@@ -37,7 +74,7 @@ export function LensEmbeddable(props: Props) {
 
   const onBrushEnd = useCallback(
     ({ range }: { range: number[] }) => {
-      if (series?.reportType !== 'data-distribution') {
+      if (reportType !== 'data-distribution') {
         setSeries(firstSeriesId, {
           ...series,
           time: {
@@ -53,16 +90,30 @@ export function LensEmbeddable(props: Props) {
         );
       }
     },
-    [notifications?.toasts, series, firstSeriesId, setSeries]
+    [reportType, setSeries, firstSeriesId, series, notifications?.toasts]
   );
 
+  if (timeRange === null) {
+    return null;
+  }
+
   return (
-    <LensComponent
-      id="exploratoryView"
-      timeRange={timeRange}
-      attributes={lensAttributes}
-      onLoad={onLensLoad}
-      onBrushEnd={onBrushEnd}
-    />
+    <LensWrapper>
+      <LensComponent
+        id="exploratoryView"
+        timeRange={timeRange}
+        attributes={lensAttributes}
+        onLoad={onLensLoad}
+        onBrushEnd={onBrushEnd}
+      />
+    </LensWrapper>
   );
-}
+});
+
+const LensWrapper = styled.div`
+  height: 100%;
+
+  &&& > div {
+    height: 100%;
+  }
+`;

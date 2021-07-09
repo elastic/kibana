@@ -7,6 +7,7 @@
 
 import React, { Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { useRouteMatch } from 'react-router-dom';
 import { useSeriesStorage } from '../hooks/use_series_storage';
 import { FilterLabel } from '../components/filter_label';
 import { SeriesConfig, UrlFilter } from '../types';
@@ -17,9 +18,8 @@ import { getFiltersFromDefs } from '../hooks/use_lens_attributes';
 interface Props {
   seriesId: string;
   seriesConfig: SeriesConfig;
-  isNew?: boolean;
 }
-export function SelectedFilters({ seriesId, isNew, seriesConfig }: Props) {
+export function SelectedFilters({ seriesId, seriesConfig }: Props) {
   const { getSeries } = useSeriesStorage();
 
   const series = getSeries(seriesId);
@@ -32,6 +32,8 @@ export function SelectedFilters({ seriesId, isNew, seriesConfig }: Props) {
 
   let definitionFilters: UrlFilter[] = getFiltersFromDefs(reportDefinitions);
 
+  const isNew = !!useRouteMatch('/exploratory-view/configure');
+
   // we don't want to display report definition filters in new series view
   if (isNew) {
     definitionFilters = [];
@@ -42,7 +44,7 @@ export function SelectedFilters({ seriesId, isNew, seriesConfig }: Props) {
   const { indexPattern } = useAppIndexPatternContext(series.dataType);
 
   return (filters.length > 0 || definitionFilters.length > 0) && indexPattern ? (
-    <EuiFlexItem>
+    <EuiFlexItem grow={false}>
       <EuiFlexGroup wrap gutterSize="xs">
         {filters.map(({ field, values, notValues }) => (
           <Fragment key={field}>
@@ -75,26 +77,24 @@ export function SelectedFilters({ seriesId, isNew, seriesConfig }: Props) {
           </Fragment>
         ))}
 
-        {definitionFilters.map(({ field, values }) => (
-          <Fragment key={field}>
-            {(values ?? []).map((val) => (
-              <EuiFlexItem key={field + val} grow={false}>
-                <FilterLabel
-                  seriesId={seriesId}
-                  field={field}
-                  label={labels[field]}
-                  value={val}
-                  removeFilter={() => {
-                    // FIXME handle this use case
-                  }}
-                  negate={false}
-                  definitionFilter={true}
-                  indexPattern={indexPattern}
-                />
-              </EuiFlexItem>
-            ))}
-          </Fragment>
-        ))}
+        {definitionFilters.map(({ field, values }) =>
+          values ? (
+            <EuiFlexItem key={field} grow={false} style={{ maxWidth: 350 }}>
+              <FilterLabel
+                seriesId={seriesId}
+                field={field}
+                label={labels[field]}
+                value={values}
+                removeFilter={() => {
+                  // FIXME handle this use case
+                }}
+                negate={false}
+                definitionFilter={true}
+                indexPattern={indexPattern}
+              />
+            </EuiFlexItem>
+          ) : null
+        )}
       </EuiFlexGroup>
     </EuiFlexItem>
   ) : null;

@@ -6,21 +6,22 @@
  */
 
 import React from 'react';
-import { SeriesFilter } from '../../series_editor/columns/series_filter';
 import { SeriesConfig } from '../../types';
+import { SeriesFilter } from '../../series_viewer/columns/series_filter';
 
 export function ReportFilters({
   seriesConfig,
   seriesId,
 }: {
-  seriesConfig: SeriesConfig;
+  seriesConfig?: SeriesConfig;
   seriesId: string;
 }) {
+  if (!seriesConfig) {
+    return null;
+  }
   return (
     <SeriesFilter
       seriesConfig={seriesConfig}
-      filterFields={seriesConfig.filterFields}
-      baseFilters={seriesConfig.baseFilters}
       seriesId={seriesId}
       isNew={true}
       labels={seriesConfig.labels}
