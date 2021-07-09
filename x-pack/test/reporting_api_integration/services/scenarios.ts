@@ -181,8 +181,8 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .expect(200);
   };
 
-  const makeAllReportingPoliciesUnmanaged = async () => {
-    log.debug('ReportingAPI.makeAllReportingPoliciesUnmanaged');
+  const makeAllReportingIndicesUnmanaged = async () => {
+    log.debug('ReportingAPI.makeAllReportingIndicesUnmanaged');
     const settings: any = {
       'index.lifecycle.name': null,
     };
@@ -214,6 +214,6 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     deleteAllReports,
     checkIlmMigrationStatus,
     migrateReportingIndices,
-    makeAllReportingPoliciesUnmanaged,
+    makeAllReportingIndicesUnmanaged,
   };
 }

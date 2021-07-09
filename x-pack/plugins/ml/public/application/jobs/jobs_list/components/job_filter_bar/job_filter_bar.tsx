@@ -63,7 +63,7 @@ export const JobFilterBar: FC<JobFilterBarProps> = ({ queryText, setFilters }) =
   }, [queryText]);
 
   const onChange: EuiSearchBarProps['onChange'] = ({ query, error: queryError }) => {
-    if (error) {
+    if (queryError) {
       setError(queryError);
     } else {
       setFilters(query);
