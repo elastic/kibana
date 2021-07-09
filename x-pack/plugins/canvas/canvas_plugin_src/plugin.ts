@@ -7,16 +7,20 @@
 
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { ChartsPluginStart } from 'src/plugins/charts/public';
+import { ExpressionsSetup } from 'src/plugins/expressions/public';
+
 import { CanvasSetup } from '../public';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { Start as InspectorStart } from '../../../../src/plugins/inspector/public';
+import { AnyExpressionRenderDefinition } from '../types';
 
 import { functions } from './functions/browser';
 import { typeFunctions } from './expression_types';
 import { renderFunctions, renderFunctionFactories } from './renderers';
 interface SetupDeps {
   canvas: CanvasSetup;
+  expressions: ExpressionsSetup;
 }
 
 export interface StartDeps {
@@ -32,15 +36,24 @@ export type StartInitializer<T> = (core: CoreStart, plugins: StartDeps) => T;
 /** @internal */
 export class CanvasSrcPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   public setup(core: CoreSetup<StartDeps>, plugins: SetupDeps) {
-    plugins.canvas.addFunctions(functions);
-    plugins.canvas.addTypes(typeFunctions);
+    const { expressions } = plugins;
+    const releaseFunctions = expressions.leaseFunctions(functions);
+    const releaseTypes = expressions.leaseTypes(typeFunctions);
 
-    plugins.canvas.addRenderers(renderFunctions);
+    // There is an issue of the canvas render definition not matching the expression render definition
+    // due to our handlers needing additional methods.  For now, we are going to cast to get to the proper
+    // type, but we should work with AppArch to figure out how the Handlers can be genericized
+    const releaseRenderers = expressions.leaseRenderers(
+      (renderFunctions as unknown) as AnyExpressionRenderDefinition[]
+    );
+
+    let releaseFactories = () => {};
 
     core.getStartServices().then(([coreStart, depsStart]) => {
-      plugins.canvas.addRenderers(
-        renderFunctionFactories.map((factory: any) => factory(coreStart, depsStart))
+      const renderers = renderFunctionFactories.map((factory: any) =>
+        factory(coreStart, depsStart)
       );
+      releaseFactories = expressions.leaseRenderers(renderers);
     });
 
     plugins.canvas.addDatasourceUIs(async () => {
@@ -81,6 +94,13 @@ export class CanvasSrcPlugin implements Plugin<void, void, SetupDeps, StartDeps>
       const { transformSpecs } = await import('./canvas_addons');
       return transformSpecs;
     });
+
+    return () => {
+      releaseFunctions();
+      releaseTypes();
+      releaseRenderers();
+      releaseFactories();
+    };
   }
 
   public start(core: CoreStart, plugins: StartDeps) {}

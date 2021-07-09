@@ -75,7 +75,8 @@ export class CanvasPlugin
   private appUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
 
   public setup(coreSetup: CoreSetup<CanvasStartDeps>, setupPlugins: CanvasSetupDeps) {
-    const { api: canvasApi, registries } = getPluginApi(setupPlugins.expressions);
+    const { expressions } = setupPlugins;
+    const { api: canvasApi, registries } = getPluginApi();
 
     // Set the nav link to the last saved url if we have one in storage
     const lastPath = getSessionStorage().get(
@@ -97,7 +98,7 @@ export class CanvasPlugin
       mount: async (params: AppMountParameters) => {
         const { CanvasSrcPlugin } = await import('../canvas_plugin_src/plugin');
         const srcPlugin = new CanvasSrcPlugin();
-        srcPlugin.setup(coreSetup, { canvas: canvasApi });
+        const teardown = srcPlugin.setup(coreSetup, { canvas: canvasApi, expressions });
 
         // Get start services
         const [coreStart, startPlugins] = await coreSetup.getStartServices();
@@ -123,6 +124,7 @@ export class CanvasPlugin
 
         return () => {
           unmount();
+          teardown();
           teardownCanvas(coreStart);
         };
       },

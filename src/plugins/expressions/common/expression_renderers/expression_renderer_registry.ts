@@ -22,6 +22,10 @@ export class ExpressionRendererRegistry implements IRegistry<ExpressionRenderer>
     this.renderers.set(renderer.name, renderer);
   }
 
+  remove(name: string) {
+    this.renderers.delete(name);
+  }
+
   public get(id: string): ExpressionRenderer | null {
     return this.renderers.get(id) || null;
   }

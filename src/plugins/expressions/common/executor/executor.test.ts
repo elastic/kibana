@@ -44,6 +44,18 @@ describe('Executor', () => {
         expressionTypes.typeSpecs.map((spec) => spec.name).sort()
       );
     });
+
+    test('can lease all types', () => {
+      const executor = new Executor();
+      const release = executor.leaseTypes(expressionTypes.typeSpecs);
+      let types = executor.getTypes();
+      expect(Object.keys(types).sort()).toEqual(
+        expressionTypes.typeSpecs.map((spec) => spec.name).sort()
+      );
+      release();
+      types = executor.getTypes();
+      expect(Object.keys(types).length).toBe(0);
+    });
   });
 
   describe('function registry', () => {
@@ -79,6 +91,28 @@ describe('Executor', () => {
       const functions = executor.getFunctions();
 
       expect(Object.keys(functions).sort()).toEqual(functionSpecs.map((spec) => spec.name).sort());
+    });
+
+    test('can lease functions', () => {
+      const executor = new Executor();
+      const functionSpecs = [
+        expressionFunctions.clog,
+        expressionFunctions.font,
+        expressionFunctions.variableSet,
+        expressionFunctions.variable,
+        expressionFunctions.theme,
+        expressionFunctions.cumulativeSum,
+        expressionFunctions.derivative,
+        expressionFunctions.movingAverage,
+        expressionFunctions.mapColumn,
+        expressionFunctions.math,
+      ];
+      const release = executor.leaseFunctions(functionSpecs);
+      let functions = executor.getFunctions();
+      expect(Object.keys(functions).sort()).toEqual(functionSpecs.map((spec) => spec.name).sort());
+      release();
+      functions = executor.getFunctions();
+      expect(Object.keys(functions).length).toBe(0);
     });
   });
 

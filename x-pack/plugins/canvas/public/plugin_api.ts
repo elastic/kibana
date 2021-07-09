@@ -5,30 +5,19 @@
  * 2.0.
  */
 
-import {
-  AnyExpressionFunctionDefinition,
-  AnyExpressionTypeDefinition,
-  AnyExpressionRenderDefinition,
-  AnyRendererFactory,
-} from '../types';
 import { ElementFactory } from '../types';
-import { ExpressionsSetup } from '../../../../src/plugins/expressions/public';
 
 type SpecPromiseFn<T extends any> = () => Promise<T[]>;
 type AddToRegistry<T extends any> = (add: T[] | SpecPromiseFn<T>) => void;
-type AddSpecsToRegistry<T extends any> = (add: T[]) => void;
 
 export interface CanvasApi {
   addArgumentUIs: AddToRegistry<any>;
   addDatasourceUIs: AddToRegistry<any>;
   addElements: AddToRegistry<ElementFactory>;
-  addFunctions: AddSpecsToRegistry<() => AnyExpressionFunctionDefinition>;
   addModelUIs: AddToRegistry<any>;
-  addRenderers: AddSpecsToRegistry<AnyRendererFactory>;
   addTagUIs: AddToRegistry<any>;
   addTransformUIs: AddToRegistry<any>;
   addTransitions: AddToRegistry<any>;
-  addTypes: AddSpecsToRegistry<() => AnyExpressionTypeDefinition>;
   addViewUIs: AddToRegistry<any>;
 }
 
@@ -43,9 +32,7 @@ export interface SetupRegistries extends Record<string, any[]> {
   transitions: any[];
 }
 
-export function getPluginApi(
-  expressionsPluginSetup: ExpressionsSetup
-): { api: CanvasApi; registries: SetupRegistries } {
+export function getPluginApi(): { api: CanvasApi; registries: SetupRegistries } {
   const registries: SetupRegistries = {
     elements: [],
     transformUIs: [],
@@ -68,26 +55,6 @@ export function getPluginApi(
   };
 
   const api: CanvasApi = {
-    // Functions, types and renderers are registered directly to expression plugin
-    addFunctions: (fns) => {
-      fns.forEach((fn) => {
-        expressionsPluginSetup.registerFunction(fn);
-      });
-    },
-    addTypes: (types) => {
-      types.forEach((type) => {
-        expressionsPluginSetup.registerType(type as any);
-      });
-    },
-    addRenderers: (renderers) => {
-      renderers.forEach((r) => {
-        // There is an issue of the canvas render definition not matching the expression render definition
-        // due to our handlers needing additional methods.  For now, we are going to cast to get to the proper
-        // type, but we should work with AppArch to figure out how the Handlers can be genericized
-        expressionsPluginSetup.registerRenderer((r as unknown) as AnyExpressionRenderDefinition);
-      });
-    },
-
     // All these others are local to canvas, and they will only register on start
     addElements: addToRegistry(registries.elements),
     addTransformUIs: addToRegistry(registries.transformUIs),

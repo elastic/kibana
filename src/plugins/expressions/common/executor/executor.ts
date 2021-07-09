@@ -77,14 +77,16 @@ export class FunctionsRegistry implements IRegistry<ExpressionFunction> {
   }
 }
 
+type FunctionDefinition = AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition);
+type TypeDefinition = AnyExpressionTypeDefinition | (() => AnyExpressionTypeDefinition);
+
 export class Executor<Context extends Record<string, unknown> = Record<string, unknown>>
   implements PersistableStateService<ExpressionAstExpression> {
   static createWithDefaults<Ctx extends Record<string, unknown> = Record<string, unknown>>(
     state?: ExecutorState<Ctx>
   ): Executor<Ctx> {
     const executor = new Executor<Ctx>(state);
-    for (const type of typeSpecs) executor.registerType(type);
-
+    executor.registerTypes(typeSpecs);
     return executor;
   }
 
@@ -106,13 +108,27 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     this.types = new TypesRegistry(this);
   }
 
-  public registerFunction(
-    functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)
-  ) {
-    const fn = new ExpressionFunction(
-      typeof functionDefinition === 'object' ? functionDefinition : functionDefinition()
+  public registerFunction(functionDefinition: FunctionDefinition) {
+    this.registerFunctions([functionDefinition]);
+  }
+
+  public registerFunctions(functionDefinitions: FunctionDefinition[]) {
+    const fns = functionDefinitions.map(
+      (fn) => new ExpressionFunction(typeof fn === 'object' ? fn : fn())
     );
-    this.state.transitions.addFunction(fn);
+
+    this.state.transitions.addFunctions(fns);
+  }
+
+  public leaseFunctions(functionDefinitions: FunctionDefinition[]) {
+    const fns = functionDefinitions.map(
+      (fn) => new ExpressionFunction(typeof fn === 'object' ? fn : fn())
+    );
+
+    this.state.transitions.addFunctions(fns);
+    const names = fns.map((fn) => fn.name);
+
+    return () => this.state.transitions.removeFunctions(names);
   }
 
   public getFunction(name: string): ExpressionFunction | undefined {
@@ -123,13 +139,29 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     return { ...this.state.get().functions };
   }
 
-  public registerType(
-    typeDefinition: AnyExpressionTypeDefinition | (() => AnyExpressionTypeDefinition)
-  ) {
-    const type = new ExpressionType(
-      typeof typeDefinition === 'object' ? typeDefinition : typeDefinition()
+  public registerType(typeDefinition: TypeDefinition) {
+    this.registerTypes([typeDefinition]);
+  }
+
+  public registerTypes(typeDefinitions: TypeDefinition[]) {
+    const types = typeDefinitions.map(
+      (typeDefinition) =>
+        new ExpressionType(typeof typeDefinition === 'object' ? typeDefinition : typeDefinition())
     );
-    this.state.transitions.addType(type);
+
+    this.state.transitions.addTypes(types);
+  }
+
+  public leaseTypes(typeDefinitions: TypeDefinition[]) {
+    const types = typeDefinitions.map(
+      (typeDefinition) =>
+        new ExpressionType(typeof typeDefinition === 'object' ? typeDefinition : typeDefinition())
+    );
+
+    this.state.transitions.addTypes(types);
+    const names = types.map((type) => type.name);
+
+    return () => this.state.transitions.removeTypes(names);
   }
 
   public getType(name: string): ExpressionType | undefined {

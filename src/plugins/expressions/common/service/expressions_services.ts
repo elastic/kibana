@@ -14,8 +14,7 @@ import { Executor } from '../executor';
 import { AnyExpressionRenderDefinition, ExpressionRendererRegistry } from '../expression_renderers';
 import { ExpressionAstExpression } from '../ast';
 import { ExecutionContract, ExecutionResult } from '../execution';
-import { AnyExpressionTypeDefinition, ExpressionValueError } from '../expression_types';
-import { AnyExpressionFunctionDefinition } from '../expression_functions';
+import { ExpressionValueError } from '../expression_types';
 import { SavedObjectReference } from '../../../../core/types';
 import { PersistableStateService, SerializableState } from '../../../kibana_utils/common';
 import { Adapters } from '../../../inspector/common/adapters';
@@ -43,13 +42,19 @@ export type ExpressionsServiceSetup = Pick<
   ExpressionsService,
   | 'getFunction'
   | 'getFunctions'
+  | 'leaseFunctions'
   | 'getRenderer'
   | 'getRenderers'
   | 'getType'
   | 'getTypes'
+  | 'leaseTypes'
   | 'registerFunction'
+  | 'registerFunctions'
   | 'registerRenderer'
+  | 'registerRenderers'
+  | 'leaseRenderers'
   | 'registerType'
+  | 'registerTypes'
   | 'run'
   | 'fork'
 >;
@@ -231,17 +236,44 @@ export class ExpressionsService implements PersistableStateService<ExpressionAst
    * be edited by user (e.g in case of Canvas); (3) `context` is a shared object
    * passed to all functions that can be used for side-effects.
    */
-  public readonly registerFunction = (
-    functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)
-  ): void => this.executor.registerFunction(functionDefinition);
+  public readonly registerFunction: Executor['registerFunction'] = (functionDefinition) =>
+    this.executor.registerFunction(functionDefinition);
 
-  public readonly registerType = (
-    typeDefinition: AnyExpressionTypeDefinition | (() => AnyExpressionTypeDefinition)
-  ): void => this.executor.registerType(typeDefinition);
+  public readonly registerFunctions: Executor['registerFunctions'] = (functionDefinitions) =>
+    this.executor.registerFunctions(functionDefinitions);
 
-  public readonly registerRenderer = (
-    definition: AnyExpressionRenderDefinition | (() => AnyExpressionRenderDefinition)
-  ): void => this.renderers.register(definition);
+  public readonly leaseFunctions: Executor['leaseFunctions'] = (fns) =>
+    this.executor.leaseFunctions(fns);
+
+  public readonly registerType: Executor['registerType'] = (typeDefinition) =>
+    this.executor.registerType(typeDefinition);
+
+  public readonly registerTypes: Executor['registerTypes'] = (typeDefinitions) =>
+    this.executor.registerTypes(typeDefinitions);
+
+  public readonly leaseTypes: Executor['leaseTypes'] = (types) => this.executor.leaseTypes(types);
+
+  public readonly registerRenderer: ExpressionRendererRegistry['register'] = (definition): void =>
+    this.renderers.register(definition);
+
+  public readonly registerRenderers = (
+    definitions: Array<AnyExpressionRenderDefinition | (() => AnyExpressionRenderDefinition)>
+  ) => {
+    definitions.forEach(this.registerRenderer);
+  };
+
+  public readonly leaseRenderers = (
+    definitions: Array<AnyExpressionRenderDefinition | (() => AnyExpressionRenderDefinition)>
+  ) => {
+    const names = definitions.map((definition) => {
+      this.renderers.register(definition);
+      return definition.name;
+    });
+
+    return () => {
+      names.forEach((name) => this.renderers.remove(name));
+    };
+  };
 
   public readonly run: ExpressionsServiceStart['run'] = (ast, input, params) =>
     this.executor.run(ast, input, params);
