@@ -95,17 +95,15 @@ const getOrderOptions = () => [
 const AGG_WITH_KEY = 'agg_with';
 const ORDER_DATE_RESTRICT_FIELDS = [KBN_FIELD_TYPES.DATE];
 
+const getModelDefaults = () => ({
+  size: 1,
+  order: 'desc',
+  [AGG_WITH_KEY]: 'noop',
+});
+
 const TopHitAggUi = (props) => {
   const { fields, series, panel } = props;
-  const defaults = useMemo(
-    () => ({
-      size: 1,
-      order: 'desc',
-      [AGG_WITH_KEY]: 'noop',
-    }),
-    []
-  );
-  const model = useMemo(() => ({ ...defaults, ...props.model }), [defaults, props.model]);
+  const model = useMemo(() => ({ ...getModelDefaults(), ...props.model }), [props.model]);
   const indexPattern = series.override_index_pattern
     ? series.series_index_pattern
     : panel.index_pattern;
