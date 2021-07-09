@@ -18,13 +18,13 @@ import React, { Component, Fragment, useContext } from 'react';
 import memoizeOne from 'memoize-one';
 import {
   EuiBadge,
-  EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
   EuiLoadingSpinner,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -52,6 +52,19 @@ import { PLUGIN_ID } from '../../../../../common/constants/app';
 import { timeFormatter } from '../../../../../common/util/date_utils';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 import { DatafeedChartFlyout } from '../../../jobs/jobs_list/components/datafeed_chart_flyout';
+
+const editAnnotationsText = (
+  <FormattedMessage
+    id="xpack.ml.annotationsTable.editAnnotationsTooltip"
+    defaultMessage="Edit annotation"
+  />
+);
+const viewDataFeedText = (
+  <FormattedMessage
+    id="xpack.ml.annotationsTable.datafeedChartTooltip"
+    defaultMessage="Datafeed chart"
+  />
+);
 
 const CURRENT_SERIES = 'current_series';
 /**
@@ -467,82 +480,67 @@ class AnnotationsTableUI extends Component {
     const actions = [];
 
     actions.push({
-      render: (annotation) => {
-        // find the original annotation because the table might not show everything
+      name: editAnnotationsText,
+      description: editAnnotationsText,
+      icon: 'pencil',
+      type: 'icon',
+      onClick: (annotation) => {
         const annotationId = annotation._id;
         const originalAnnotation = annotations.find((d) => d._id === annotationId);
-        const editAnnotationsText = (
-          <FormattedMessage
-            id="xpack.ml.annotationsTable.editAnnotationsTooltip"
-            defaultMessage="Edit annotation"
-          />
-        );
-        const editAnnotationsAriaLabelText = i18n.translate(
-          'xpack.ml.annotationsTable.editAnnotationsTooltipAriaLabel',
-          { defaultMessage: 'Edit annotation' }
-        );
-        return (
-          <EuiButtonEmpty
-            size="xs"
-            aria-label={editAnnotationsAriaLabelText}
-            iconType="pencil"
-            onClick={() => annotationUpdatesService.setValue(originalAnnotation ?? annotation)}
-          >
-            {editAnnotationsText}
-          </EuiButtonEmpty>
-        );
+
+        annotationUpdatesService.setValue(originalAnnotation ?? annotation);
       },
     });
 
     if (this.state.jobId && this.props.jobs[0].analysis_config.bucket_span) {
       // add datafeed modal action
       actions.push({
-        render: (annotation) => {
-          const viewDataFeedText = (
-            <FormattedMessage
-              id="xpack.ml.annotationsTable.datafeedChartTooltip"
-              defaultMessage="Datafeed chart"
-            />
-          );
-          const viewDataFeedTooltipAriaLabelText = i18n.translate(
-            'xpack.ml.annotationsTable.datafeedChartTooltipAriaLabel',
-            { defaultMessage: 'Datafeed chart' }
-          );
-          return (
-            <EuiButtonEmpty
-              size="xs"
-              aria-label={viewDataFeedTooltipAriaLabelText}
-              iconType="visAreaStacked"
-              onClick={() =>
-                this.setState({
-                  datafeedFlyoutVisible: true,
-                  datafeedEnd: annotation.end_timestamp,
-                })
-              }
-            >
-              {viewDataFeedText}
-            </EuiButtonEmpty>
-          );
+        name: viewDataFeedText,
+        description: viewDataFeedText,
+        icon: 'visAreaStacked',
+        type: 'icon',
+        onClick: (annotation) => {
+          this.setState({
+            datafeedFlyoutVisible: true,
+            datafeedEnd: annotation.end_timestamp,
+          });
         },
       });
     }
 
     if (isSingleMetricViewerLinkVisible) {
       actions.push({
-        render: (annotation) => {
+        name: (annotation) => {
           const isDrillDownAvailable = isTimeSeriesViewJob(this.getJob(annotation.job_id));
-          const openInSingleMetricViewerTooltipText = isDrillDownAvailable ? (
-            <FormattedMessage
-              id="xpack.ml.annotationsTable.openInSingleMetricViewerTooltip"
-              defaultMessage="Open in Single Metric Viewer"
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.ml.annotationsTable.jobConfigurationNotSupportedInSingleMetricViewerTooltip"
-              defaultMessage="Job configuration not supported in Single Metric Viewer"
-            />
+
+          if (isDrillDownAvailable) {
+            return (
+              <FormattedMessage
+                id="xpack.ml.annotationsTable.openInSingleMetricViewerTooltip"
+                defaultMessage="Open in Single Metric Viewer"
+              />
+            );
+          }
+          return (
+            <EuiToolTip
+              content={
+                <FormattedMessage
+                  id="xpack.ml.annotationsTable.jobConfigurationNotSupportedInSingleMetricViewerTooltip"
+                  defaultMessage="Job configuration not supported in Single Metric Viewer"
+                />
+              }
+            >
+              <FormattedMessage
+                id="xpack.ml.annotationsTable.openInSingleMetricViewerTooltip"
+                defaultMessage="Open in Single Metric Viewer"
+              />
+            </EuiToolTip>
           );
-          const openInSingleMetricViewerAriaLabelText = isDrillDownAvailable
+        },
+        description: (annotation) => {
+          const isDrillDownAvailable = isTimeSeriesViewJob(this.getJob(annotation.job_id));
+
+          return isDrillDownAvailable
             ? i18n.translate('xpack.ml.annotationsTable.openInSingleMetricViewerAriaLabel', {
                 defaultMessage: 'Open in Single Metric Viewer',
               })
@@ -550,19 +548,11 @@ class AnnotationsTableUI extends Component {
                 'xpack.ml.annotationsTable.jobConfigurationNotSupportedInSingleMetricViewerAriaLabel',
                 { defaultMessage: 'Job configuration not supported in Single Metric Viewer' }
               );
-
-          return (
-            <EuiButtonEmpty
-              size="xs"
-              disabled={!isDrillDownAvailable}
-              aria-label={openInSingleMetricViewerAriaLabelText}
-              iconType="visLine"
-              onClick={() => this.openSingleMetricView(annotation)}
-            >
-              {openInSingleMetricViewerTooltipText}
-            </EuiButtonEmpty>
-          );
         },
+        enabled: (annotation) => isTimeSeriesViewJob(this.getJob(annotation.job_id)),
+        icon: 'visLine',
+        type: 'icon',
+        onClick: (annotation) => this.openSingleMetricView(annotation),
       });
     }
 
