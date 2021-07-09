@@ -13,8 +13,7 @@ export interface SecurityRuleState<TState extends AlertTypeState> {
   alertInstances: AlertInstance[];
   previousStartedAt: Date;
 }
-
-export interface AlertTypeReturnValue<TState extends AlertTypeState> {
+export interface SecurityAlertTypeReturnValue<TState extends AlertTypeState> {
   bulkCreateTimes: string[];
   createdSignals: unknown[];
   createdSignalsCount: number;

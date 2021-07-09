@@ -19,10 +19,11 @@ import { SetupPlugins } from '../../../../target/types/server/plugin';
 import { queryRuleParams, QueryRuleParams } from '../schemas/rule_schemas';
 
 import { createSecurityRuleTypeFactory } from './create_security_rule_type_factory';
+import { SecurityAlertTypeReturnValue } from './types';
+import { createResultObject } from './utils';
 
-interface QueryAlertState {
-  previousStartedAt: Date;
-}
+type QueryStateFields = 'previousStartedAt';
+type QueryAlertState = Record<QueryStateFields, unknown>;
 
 export const createQueryAlertType = (createOptions: {
   lists: SetupPlugins['lists'];
@@ -35,12 +36,7 @@ export const createQueryAlertType = (createOptions: {
     logger,
     ruleDataClient,
   });
-  return createSecurityRuleType<
-    QueryRuleParams,
-    {},
-    PersistenceServices,
-    { previousStartedAt: Date }
-  >({
+  return createSecurityRuleType<QueryRuleParams, {}, PersistenceServices, QueryAlertState>({
     id: CUSTOM_ALERT_TYPE_ID,
     name: 'Custom Query Rule',
     validate: {
@@ -71,6 +67,9 @@ export const createQueryAlertType = (createOptions: {
     isExportable: false,
     producer: 'security-solution',
     async executor(execOptions) {
+      const result = createResultObject<QueryAlertState>({
+        previousStartedAt: new Date().toISOString(),
+      });
       const {
         params: { index, query },
         services: { alertWithPersistence, savedObjectsClient },
@@ -105,13 +104,10 @@ export const createQueryAlertType = (createOptions: {
         alertWithPersistence(alerts).forEach((alert) => {
           alert.scheduleActions('default', { server: 'server-test' });
         });
-
-        return {
-          lastChecked: new Date(),
-        };
       } catch (error) {
         logger.error(error);
       }
+      return result;
     },
   });
 };

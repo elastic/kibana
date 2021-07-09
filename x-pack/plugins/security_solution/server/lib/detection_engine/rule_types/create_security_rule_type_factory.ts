@@ -34,20 +34,25 @@ import {
 } from '../signals/utils';
 import { RuleParams } from '../schemas/rule_schemas';
 import { DEFAULT_MAX_SIGNALS } from '../../../../common/constants';
-import { AlertTypeExecutor } from '../../../../../rule_registry/server/types';
+import { SecurityAlertTypeReturnValue } from './types';
+// import { AlertTypeExecutor } from '../../../../../rule_registry/server';
 
-// TODO: enforce executor return type
+type SimpleAlertType<
+  TParams extends AlertTypeParams = {},
+  TAlertInstanceContext extends AlertInstanceContext = {}
+> = AlertType<TParams, AlertTypeState, AlertInstanceState, TAlertInstanceContext, string, string>;
+
 export type SecurityAlertTypeExecutor<
   TParams extends AlertTypeParams = {},
   TAlertInstanceContext extends AlertInstanceContext = {},
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  TServices extends Record<string, any> = {}
+  TServices extends Record<string, any> = {},
+  TState extends AlertTypeState = {}
 > = (
   options: Parameters<SimpleAlertType<TParams, TAlertInstanceContext>['executor']>[0] & {
     services: TServices;
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-) => Promise<any>;
+) => Promise<SecurityAlertTypeReturnValue<TState>>;
 
 type SecurityAlertTypeWithExecutor<
   TParams extends AlertTypeParams = {},
@@ -59,7 +64,7 @@ type SecurityAlertTypeWithExecutor<
   AlertType<TParams, TState, AlertInstanceState, TAlertInstanceContext, string, string>,
   'executor'
 > & {
-  executor: AlertTypeExecutor<TParams, TAlertInstanceContext, TServices>;
+  executor: SecurityAlertTypeExecutor<TParams, TAlertInstanceContext, TServices, TState>;
 };
 
 type CreateSecurityRuleTypeFactory = (options: {
@@ -72,7 +77,7 @@ type CreateSecurityRuleTypeFactory = (options: {
   TServices extends PersistenceServices,
   TState extends AlertTypeState = {}
 >(
-  type: AlertTypeWithExecutor<TParams, TAlertInstanceContext, TServices, TState>
+  type: SecurityAlertTypeWithExecutor<TParams, TAlertInstanceContext, TServices, TState>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ) => AlertTypeWithExecutor<TParams, TAlertInstanceContext, any, TState>;
 
