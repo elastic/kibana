@@ -13,13 +13,21 @@ import { act } from 'react-dom/test-utils';
 
 import { registerTestBed } from '@kbn/test/jest';
 
+import type { Capabilities } from 'src/core/public';
+
 import type { SharePluginSetup, LocatorPublic } from '../../../../../src/plugins/share/public';
 import type { NotificationsSetup } from '../../../../../src/core/public';
-import { httpServiceMock, notificationServiceMock } from '../../../../../src/core/public/mocks';
+import {
+  httpServiceMock,
+  notificationServiceMock,
+  applicationServiceMock,
+} from '../../../../../src/core/public/mocks';
 
 import type { ILicense } from '../../../licensing/public';
 
 import { IlmPolicyMigrationStatus } from '../../common/types';
+
+import { KibanaContextProvider } from '../shared_imports';
 
 import { ReportingAPIClient, InternalApiClientClientProvider } from '../lib/reporting_api_client';
 import { IlmPolicyStatusContextProvider } from '../lib/ilm_policy_status_context';
@@ -75,6 +83,7 @@ const mockPollConfig = {
 
 describe('ReportListing', () => {
   let httpService: ReturnType<typeof httpServiceMock.createSetupContract>;
+  let applicationService: ReturnType<typeof applicationServiceMock.createStartContract>;
   let ilmLocator: undefined | LocatorPublic<any>;
   let urlService: SharePluginSetup['url'];
   let testBed: UnwrapPromise<ReturnType<typeof setup>>;
@@ -82,22 +91,21 @@ describe('ReportListing', () => {
 
   const createTestBed = registerTestBed(
     (props?: Partial<Props>) => (
-      <InternalApiClientClientProvider
-        apiClient={reportingAPIClient as ReportingAPIClient}
-        http={httpService}
-      >
-        <IlmPolicyStatusContextProvider>
-          <ReportListing
-            license$={license$}
-            pollConfig={mockPollConfig}
-            redirect={jest.fn()}
-            navigateToUrl={jest.fn()}
-            urlService={urlService}
-            toasts={toasts}
-            {...props}
-          />
-        </IlmPolicyStatusContextProvider>
-      </InternalApiClientClientProvider>
+      <KibanaContextProvider services={{ http: httpService, application: applicationService }}>
+        <InternalApiClientClientProvider apiClient={reportingAPIClient as ReportingAPIClient}>
+          <IlmPolicyStatusContextProvider>
+            <ReportListing
+              license$={license$}
+              pollConfig={mockPollConfig}
+              redirect={jest.fn()}
+              navigateToUrl={jest.fn()}
+              urlService={urlService}
+              toasts={toasts}
+              {...props}
+            />
+          </IlmPolicyStatusContextProvider>
+        </InternalApiClientClientProvider>
+      </KibanaContextProvider>
     ),
     { memoryRouter: { wrapComponent: false } }
   );
@@ -132,6 +140,12 @@ describe('ReportListing', () => {
   beforeEach(async () => {
     toasts = notificationServiceMock.createSetupContract().toasts;
     httpService = httpServiceMock.createSetupContract();
+    applicationService = applicationServiceMock.createStartContract();
+    applicationService.capabilities = {
+      catalogue: {},
+      navLinks: {},
+      management: { data: { index_lifecycle_management: true } },
+    };
     ilmLocator = ({
       getUrl: jest.fn(),
     } as unknown) as LocatorPublic<any>;
@@ -259,6 +273,27 @@ describe('ReportListing', () => {
       expect(toasts.addError).toHaveBeenCalledTimes(1);
       expect(actions.hasIlmMigrationBanner()).toBe(true);
       expect(actions.hasIlmPolicyLink()).toBe(true);
+    });
+
+    it('only shows the link to the ILM policy if UI capabilities allow it', async () => {
+      applicationService.capabilities = {
+        catalogue: {},
+        navLinks: {},
+        management: { data: { index_lifecycle_management: false } },
+      };
+      await runSetup();
+
+      expect(testBed.actions.hasIlmPolicyLink()).toBe(false);
+
+      applicationService.capabilities = {
+        catalogue: {},
+        navLinks: {},
+        management: { data: { index_lifecycle_management: true } },
+      };
+
+      await runSetup();
+
+      expect(testBed.actions.hasIlmPolicyLink()).toBe(true);
     });
   });
 });

@@ -34,6 +34,7 @@ import {
 } from '../lib/reporting_api_client';
 import { useIlmPolicyStatus, UseIlmPolicyStatusReturn } from '../lib/ilm_policy_status_context';
 import type { SharePluginSetup } from '../shared_imports';
+import { useKibana } from '../shared_imports';
 import { ClientConfigType } from '../plugin';
 import { ReportDeleteButton, ReportDownloadButton, ReportErrorButton, ReportInfoButton } from './';
 import { ReportDiagnostic } from './report_diagnostic';
@@ -61,6 +62,7 @@ export interface Job {
 export interface Props {
   intl: InjectedIntl;
   apiClient: ReportingAPIClient;
+  capabilities: ApplicationStart['capabilities'];
   license$: LicensingPluginSetup['license$'];
   pollConfig: ClientConfigType['poll'];
   redirect: ApplicationStart['navigateToApp'];
@@ -144,7 +146,7 @@ class ReportListingUi extends Component<Props, State> {
   }
 
   public render() {
-    const { ilmPolicyContextValue, urlService, navigateToUrl } = this.props;
+    const { ilmPolicyContextValue, urlService, navigateToUrl, capabilities } = this.props;
     const ilmLocator = urlService.locators.get('ILM_LOCATOR_ID');
     const hasIlmPolicy = ilmPolicyContextValue.status !== 'policy-not-found';
     const showIlmPolicyLink = Boolean(ilmLocator && hasIlmPolicy);
@@ -170,15 +172,17 @@ class ReportListingUi extends Component<Props, State> {
 
         <EuiSpacer size="s" />
         <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            {ilmPolicyContextValue.isLoading ? (
-              <EuiLoadingSpinner />
-            ) : (
-              showIlmPolicyLink && (
-                <IlmPolicyLink navigateToUrl={navigateToUrl} locator={ilmLocator!} />
-              )
-            )}
-          </EuiFlexItem>
+          {capabilities?.management?.data?.index_lifecycle_management && (
+            <EuiFlexItem grow={false}>
+              {ilmPolicyContextValue.isLoading ? (
+                <EuiLoadingSpinner />
+              ) : (
+                showIlmPolicyLink && (
+                  <IlmPolicyLink navigateToUrl={navigateToUrl} locator={ilmLocator!} />
+                )
+              )}
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <ReportDiagnostic apiClient={this.props.apiClient} />
           </EuiFlexItem>
@@ -561,14 +565,20 @@ class ReportListingUi extends Component<Props, State> {
 const PrivateReportListing = injectI18n(ReportListingUi);
 
 export const ReportListing = (
-  props: Omit<Props, 'ilmPolicyContextValue' | 'intl' | 'apiClient'>
+  props: Omit<Props, 'ilmPolicyContextValue' | 'intl' | 'apiClient' | 'capabilities'>
 ) => {
   const ilmPolicyStatusValue = useIlmPolicyStatus();
   const { apiClient } = useInternalApiClient();
+  const {
+    services: {
+      application: { capabilities },
+    },
+  } = useKibana();
   return (
     <PrivateReportListing
       {...props}
       apiClient={apiClient}
+      capabilities={capabilities}
       ilmPolicyContextValue={ilmPolicyStatusValue}
     />
   );

@@ -158,6 +158,7 @@ export class ReportingPublicPlugin
           getStartServices(),
           import('./management/mount_management_section'),
         ]);
+
         return await mountManagementSection(
           core,
           start,

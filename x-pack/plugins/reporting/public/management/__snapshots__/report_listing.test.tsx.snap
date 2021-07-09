@@ -631,6 +631,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "total": [Function],
                                   }
                                 }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
+                                  }
+                                }
                                 ilmPolicyContextValue={
                                   Object {
                                     "isLoading": false,
@@ -804,6 +815,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "list": [Function],
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
+                                  }
+                                }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
                                   }
                                 }
                                 ilmPolicyContextValue={
@@ -981,6 +1003,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                       "total": [Function],
                                     }
                                   }
+                                  capabilities={
+                                    Object {
+                                      "catalogue": Object {},
+                                      "management": Object {
+                                        "data": Object {
+                                          "index_lifecycle_management": true,
+                                        },
+                                      },
+                                      "navLinks": Object {},
+                                    }
+                                  }
                                   ilmPolicyContextValue={
                                     Object {
                                       "isLoading": false,
@@ -1155,6 +1188,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "list": [Function],
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
+                                  }
+                                }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
                                   }
                                 }
                                 ilmPolicyContextValue={
@@ -1654,6 +1698,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "total": [Function],
                                   }
                                 }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
+                                  }
+                                }
                                 ilmPolicyContextValue={
                                   Object {
                                     "isLoading": false,
@@ -1827,6 +1882,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "list": [Function],
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
+                                  }
+                                }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
                                   }
                                 }
                                 ilmPolicyContextValue={
@@ -2004,6 +2070,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                       "total": [Function],
                                     }
                                   }
+                                  capabilities={
+                                    Object {
+                                      "catalogue": Object {},
+                                      "management": Object {
+                                        "data": Object {
+                                          "index_lifecycle_management": true,
+                                        },
+                                      },
+                                      "navLinks": Object {},
+                                    }
+                                  }
                                   ilmPolicyContextValue={
                                     Object {
                                       "isLoading": false,
@@ -2178,6 +2255,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "list": [Function],
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
+                                  }
+                                }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
                                   }
                                 }
                                 ilmPolicyContextValue={
@@ -2677,6 +2765,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "total": [Function],
                                   }
                                 }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
+                                  }
+                                }
                                 ilmPolicyContextValue={
                                   Object {
                                     "isLoading": false,
@@ -2899,6 +2998,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "total": [Function],
                                   }
                                 }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
+                                  }
+                                }
                                 ilmPolicyContextValue={
                                   Object {
                                     "isLoading": false,
@@ -3072,6 +3182,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                       "list": [Function],
                                       "migrateReportingIndicesIlmPolicy": [MockFunction],
                                       "total": [Function],
+                                    }
+                                  }
+                                  capabilities={
+                                    Object {
+                                      "catalogue": Object {},
+                                      "management": Object {
+                                        "data": Object {
+                                          "index_lifecycle_management": true,
+                                        },
+                                      },
+                                      "navLinks": Object {},
                                     }
                                   }
                                   ilmPolicyContextValue={
@@ -3248,6 +3369,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "list": [Function],
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
+                                  }
+                                }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
                                   }
                                 }
                                 ilmPolicyContextValue={
@@ -3774,6 +3906,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "total": [Function],
                                   }
                                 }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
+                                  }
+                                }
                                 ilmPolicyContextValue={
                                   Object {
                                     "isLoading": false,
@@ -3998,6 +4141,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "total": [Function],
                                   }
                                 }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
+                                  }
+                                }
                                 ilmPolicyContextValue={
                                   Object {
                                     "isLoading": false,
@@ -4173,6 +4327,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                       "list": [Function],
                                       "migrateReportingIndicesIlmPolicy": [MockFunction],
                                       "total": [Function],
+                                    }
+                                  }
+                                  capabilities={
+                                    Object {
+                                      "catalogue": Object {},
+                                      "management": Object {
+                                        "data": Object {
+                                          "index_lifecycle_management": true,
+                                        },
+                                      },
+                                      "navLinks": Object {},
                                     }
                                   }
                                   ilmPolicyContextValue={
@@ -4351,6 +4516,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "list": [Function],
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
+                                  }
+                                }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
                                   }
                                 }
                                 ilmPolicyContextValue={
@@ -4850,6 +5026,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "total": [Function],
                                   }
                                 }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
+                                  }
+                                }
                                 ilmPolicyContextValue={
                                   Object {
                                     "isLoading": false,
@@ -5072,6 +5259,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "total": [Function],
                                   }
                                 }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
+                                  }
+                                }
                                 ilmPolicyContextValue={
                                   Object {
                                     "isLoading": false,
@@ -5245,6 +5443,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                       "list": [Function],
                                       "migrateReportingIndicesIlmPolicy": [MockFunction],
                                       "total": [Function],
+                                    }
+                                  }
+                                  capabilities={
+                                    Object {
+                                      "catalogue": Object {},
+                                      "management": Object {
+                                        "data": Object {
+                                          "index_lifecycle_management": true,
+                                        },
+                                      },
+                                      "navLinks": Object {},
                                     }
                                   }
                                   ilmPolicyContextValue={
@@ -5421,6 +5630,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "list": [Function],
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
+                                  }
+                                }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
                                   }
                                 }
                                 ilmPolicyContextValue={
@@ -5920,6 +6140,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "total": [Function],
                                   }
                                 }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
+                                  }
+                                }
                                 ilmPolicyContextValue={
                                   Object {
                                     "isLoading": false,
@@ -6142,6 +6373,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "total": [Function],
                                   }
                                 }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
+                                  }
+                                }
                                 ilmPolicyContextValue={
                                   Object {
                                     "isLoading": false,
@@ -6315,6 +6557,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                       "list": [Function],
                                       "migrateReportingIndicesIlmPolicy": [MockFunction],
                                       "total": [Function],
+                                    }
+                                  }
+                                  capabilities={
+                                    Object {
+                                      "catalogue": Object {},
+                                      "management": Object {
+                                        "data": Object {
+                                          "index_lifecycle_management": true,
+                                        },
+                                      },
+                                      "navLinks": Object {},
                                     }
                                   }
                                   ilmPolicyContextValue={
@@ -6491,6 +6744,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "list": [Function],
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
+                                  }
+                                }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
                                   }
                                 }
                                 ilmPolicyContextValue={
@@ -6990,6 +7254,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "total": [Function],
                                   }
                                 }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
+                                  }
+                                }
                                 ilmPolicyContextValue={
                                   Object {
                                     "isLoading": false,
@@ -7212,6 +7487,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "total": [Function],
                                   }
                                 }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
+                                  }
+                                }
                                 ilmPolicyContextValue={
                                   Object {
                                     "isLoading": false,
@@ -7385,6 +7671,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                       "list": [Function],
                                       "migrateReportingIndicesIlmPolicy": [MockFunction],
                                       "total": [Function],
+                                    }
+                                  }
+                                  capabilities={
+                                    Object {
+                                      "catalogue": Object {},
+                                      "management": Object {
+                                        "data": Object {
+                                          "index_lifecycle_management": true,
+                                        },
+                                      },
+                                      "navLinks": Object {},
                                     }
                                   }
                                   ilmPolicyContextValue={
@@ -7561,6 +7858,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "list": [Function],
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
+                                  }
+                                }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
                                   }
                                 }
                                 ilmPolicyContextValue={
@@ -8060,6 +8368,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "total": [Function],
                                   }
                                 }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
+                                  }
+                                }
                                 ilmPolicyContextValue={
                                   Object {
                                     "isLoading": false,
@@ -8282,6 +8601,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "total": [Function],
                                   }
                                 }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
+                                  }
+                                }
                                 ilmPolicyContextValue={
                                   Object {
                                     "isLoading": false,
@@ -8455,6 +8785,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                       "list": [Function],
                                       "migrateReportingIndicesIlmPolicy": [MockFunction],
                                       "total": [Function],
+                                    }
+                                  }
+                                  capabilities={
+                                    Object {
+                                      "catalogue": Object {},
+                                      "management": Object {
+                                        "data": Object {
+                                          "index_lifecycle_management": true,
+                                        },
+                                      },
+                                      "navLinks": Object {},
                                     }
                                   }
                                   ilmPolicyContextValue={
@@ -8631,6 +8972,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "list": [Function],
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
+                                  }
+                                }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
                                   }
                                 }
                                 ilmPolicyContextValue={
@@ -9130,6 +9482,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "total": [Function],
                                   }
                                 }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
+                                  }
+                                }
                                 ilmPolicyContextValue={
                                   Object {
                                     "isLoading": false,
@@ -9352,6 +9715,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "total": [Function],
                                   }
                                 }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
+                                  }
+                                }
                                 ilmPolicyContextValue={
                                   Object {
                                     "isLoading": false,
@@ -9525,6 +9899,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                       "list": [Function],
                                       "migrateReportingIndicesIlmPolicy": [MockFunction],
                                       "total": [Function],
+                                    }
+                                  }
+                                  capabilities={
+                                    Object {
+                                      "catalogue": Object {},
+                                      "management": Object {
+                                        "data": Object {
+                                          "index_lifecycle_management": true,
+                                        },
+                                      },
+                                      "navLinks": Object {},
                                     }
                                   }
                                   ilmPolicyContextValue={
@@ -9701,6 +10086,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "list": [Function],
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
+                                  }
+                                }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
                                   }
                                 }
                                 ilmPolicyContextValue={

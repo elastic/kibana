@@ -13,6 +13,12 @@ export type {
 
 export { useRequest, UseRequestResponse } from '../../../../src/plugins/es_ui_shared/public';
 
+export { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
+
+import { useKibana as _useKibana } from '../../../../src/plugins/kibana_react/public';
+import { KibanaContext } from './types';
+export const useKibana = () => _useKibana<KibanaContext>();
+
 export type { SerializableState } from 'src/plugins/kibana_utils/common';
 
 export type { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
