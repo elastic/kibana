@@ -1054,6 +1054,15 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
+      test('REINDEX_SOURCE_TO_TEMP_INDEX_BULK -> REINDEX_SOURCE_TO_TEMP_CLOSE_PIT if response is left target_index_had_write_block', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX_BULK'> = Either.left({
+          type: 'target_index_had_write_block',
+        });
+        const newState = model(reindexSourceToTempIndexBulkState, res);
+        expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_CLOSE_PIT');
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+      });
       test('REINDEX_SOURCE_TO_TEMP_INDEX_BULK should throw a throwBadResponse error if action failed', () => {
         const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX_BULK'> = Either.left({
           type: 'retryable_es_client_error',
@@ -1101,7 +1110,7 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toBe(0);
         expect(newState.retryDelay).toBe(0);
       });
-      it('CLONE_TEMP_TO_TARGET -> REFRESH_TARGET if response is left index_not_fonud_exception', () => {
+      it('CLONE_TEMP_TO_TARGET -> REFRESH_TARGET if response is left index_not_found_exception', () => {
         const res: ResponseType<'CLONE_TEMP_TO_TARGET'> = Either.left({
           type: 'index_not_found_exception',
           index: 'temp_index',
