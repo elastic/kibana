@@ -32,8 +32,8 @@ import {
   getActivityLogRequestLoading,
 } from '../../store/selectors';
 
-const StyledEuiFlexGroup = styled(EuiFlexGroup)`
-  height: 85vh;
+const StyledEuiFlexGroup = styled(EuiFlexGroup)<{ isShorter: boolean }>`
+  height: ${({ isShorter }) => (isShorter ? '25vh' : '85vh')};
 `;
 const LoadMoreTrigger = styled.div`
   height: ${(props) => props.theme.eui.euiSizeXS};
@@ -57,6 +57,10 @@ export const EndpointActivityLog = memo(
     const showEmptyState = useMemo(
       () => (activityLogLoaded && !activityLogSize && !hasActiveDateRange) || activityLogError,
       [activityLogLoaded, activityLogSize, hasActiveDateRange, activityLogError]
+    );
+    const isShorter = useMemo(
+      () => hasActiveDateRange && isPagingDisabled && !activityLogLoading && !activityLogSize,
+      [hasActiveDateRange, isPagingDisabled, activityLogLoading, activityLogSize]
     );
 
     const loadMoreTrigger = useRef<HTMLInputElement | null>(null);
@@ -91,7 +95,7 @@ export const EndpointActivityLog = memo(
 
     return (
       <>
-        <StyledEuiFlexGroup direction="column" responsive={false}>
+        <StyledEuiFlexGroup direction="column" responsive={false} isShorter={isShorter}>
           {showEmptyState ? (
             <EuiFlexItem>
               <EuiEmptyPrompt
