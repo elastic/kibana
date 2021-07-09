@@ -319,7 +319,12 @@ You can also change the index pattern for a single *Layer*.
 [[why-my-field-x-is-missing-from-the-fields-list]]
 ===== Why is my field X missing from the fields list?
 
-*Lens* does not support the visualization of full-text fields, therefore it is not showing them in the data summary.
+If your field is not in the `Available fields` list in *Lens* there may be multiple reasons, here described:
+* the field is a full-text field, therefore it is not showing in the data summary.
+* the field is a Geo field, therefore it is not showing in the data summary prior to v.7.14.0
+* the mapping is not supported by index-patterns, for instance for fields in `flattened` objects
+
+If your field does not fall into one of the cases above, check if that is available into the `Empty fields` group: *Lens* uses an heuristic to determine whether the fields have available values or not and for sparse datasets it can be less precise.
 
 [float]
 [[how-to-handle-gaps-in-time-series-visualizations]]
@@ -370,3 +375,9 @@ Here's a short list of few different aspects to check:
 ** If a custom `Number` configuration is used, check that the color stop values are covering the current data range.
 
 ** If a `Percent` configuration is used, and the data range changes, the colors displayed are affected.
+
+[float]
+[[is-it-possible-to-show-icons-in-datatable]]
+===== Is it possible to show icons in datatable?
+
+It is possible to show icons <<../managing-index-patterns#string-field-formatters, via field formatter>>.
