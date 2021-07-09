@@ -20,15 +20,12 @@ import {
 import React, { useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { HostIsolationPanel } from '../../../../detections/components/host_isolation';
 import { EndpointIsolateSuccess } from '../../../../common/components/endpoint/host_isolation';
-import { useCasesFromAlerts } from '../../../../detections/containers/detection_engine/alerts/use_cases_from_alerts';
-import { CaseDetailsLink } from '../../../../common/components/links';
 import { TakeActionDropdown } from '../../../../detections/components/host_isolation/take_action_dropdown';
 import {
   ISOLATE_HOST,
@@ -140,49 +137,6 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     version: agentVersion,
   });
 
-  const { casesInfo } = useCasesFromAlerts({ alertId });
-
-  const caseCount: number = useMemo(() => casesInfo.length, [casesInfo]);
-
-  const casesList = useMemo(
-    () =>
-      casesInfo.map((caseInfo, index) => {
-        return (
-          <li key={caseInfo.id}>
-            <CaseDetailsLink detailName={caseInfo.id}>
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.hostIsolation.placeholderCase"
-                defaultMessage="{caseName}"
-                values={{ caseName: caseInfo.title }}
-              />
-            </CaseDetailsLink>
-          </li>
-        );
-      }),
-    [casesInfo]
-  );
-
-  const associatedCases = useMemo(() => {
-    if (caseCount > 0) {
-      return (
-        <>
-          <EuiText size="s">
-            <p>
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.hostIsolation.successfulIsolation.cases"
-                defaultMessage="This action has been attached to the following {caseCount, plural, one {case} other {cases}}:"
-                values={{ caseCount }}
-              />
-            </p>
-          </EuiText>
-          <EuiText size="s">
-            <ul>{casesList}</ul>
-          </EuiText>
-        </>
-      );
-    }
-  }, [caseCount, casesList]);
-
   const backToAlertDetailsLink = useMemo(() => {
     return (
       <>
@@ -229,8 +183,8 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
       {isIsolateActionSuccessBannerVisible && (
         <EndpointIsolateSuccess
           hostName={hostName}
+          alertId={alertId}
           isolateAction={isolateAction}
-          additionalInfo={associatedCases}
         />
       )}
       <StyledEuiFlyoutBody>

@@ -6,13 +6,14 @@
  */
 
 import React, { useMemo, useState, useCallback } from 'react';
-import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiText } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useHostIsolation } from '../../containers/detection_engine/alerts/use_host_isolation';
 import { CASES_ASSOCIATED_WITH_ALERT, RETURN_TO_ALERT_DETAILS } from './translations';
 import {
   EndpointIsolatedFormProps,
   EndpointIsolateForm,
+  ActionCompletionReturnButton,
 } from '../../../common/components/endpoint/host_isolation';
 import { CasesFromAlertsResponse } from '../../containers/detection_engine/alerts/types';
 
@@ -57,24 +58,12 @@ export const IsolateHost = React.memo(
 
     const caseCount: number = useMemo(() => casesInfo.length, [casesInfo]);
 
-    const hostIsolatedSuccess = useMemo(() => {
+    const hostIsolatedSuccessButton = useMemo(() => {
       return (
-        <>
-          <EuiSpacer size="m" />
-          <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                flush="right"
-                onClick={backToAlertDetails}
-                data-test-subj="hostIsolateSuccessCompleteButton"
-              >
-                <EuiText size="s">
-                  <p>{RETURN_TO_ALERT_DETAILS}</p>
-                </EuiText>
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
+        <ActionCompletionReturnButton
+          onClick={backToAlertDetails}
+          buttonText={RETURN_TO_ALERT_DETAILS}
+        />
       );
     }, [backToAlertDetails]);
 
@@ -111,7 +100,7 @@ export const IsolateHost = React.memo(
       caseCount,
     ]);
 
-    return isIsolated ? hostIsolatedSuccess : hostNotIsolated;
+    return isIsolated ? hostIsolatedSuccessButton : hostNotIsolated;
   }
 );
 
