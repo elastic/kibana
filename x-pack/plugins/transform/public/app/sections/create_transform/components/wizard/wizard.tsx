@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useEffect, useRef, useState, createContext, useMemo } from 'react';
+import React, { Fragment, FC, useRef, useState, createContext, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -33,11 +33,6 @@ import {
 import { WizardNav } from '../wizard_nav';
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
 import type { RuntimeMappings } from '../step_define/common/types';
-
-enum KBN_MANAGEMENT_PAGE_CLASSNAME {
-  DEFAULT_BODY = 'mgtPage__body',
-  TRANSFORM_BODY_MODIFIER = 'mgtPage__body--transformWizard',
-}
 
 enum WIZARD_STEPS {
   DEFINE,
@@ -120,34 +115,6 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
 
   // The CREATE state
   const [stepCreateState, setStepCreateState] = useState(getDefaultStepCreateState);
-
-  useEffect(() => {
-    // The transform plugin doesn't control the wrapping management page via React
-    // so we use plain JS to add and remove a custom CSS class to set the full
-    // page width to 100% for the transform wizard. It's done to replicate the layout
-    // as it was when transforms were part of the ML plugin. This will be revisited
-    // to come up with an approach that's more in line with the overall layout
-    // of the Kibana management section.
-    let managementBody = document.getElementsByClassName(
-      KBN_MANAGEMENT_PAGE_CLASSNAME.DEFAULT_BODY
-    );
-
-    if (managementBody.length > 0) {
-      managementBody[0].classList.replace(
-        KBN_MANAGEMENT_PAGE_CLASSNAME.DEFAULT_BODY,
-        KBN_MANAGEMENT_PAGE_CLASSNAME.TRANSFORM_BODY_MODIFIER
-      );
-      return () => {
-        managementBody = document.getElementsByClassName(
-          KBN_MANAGEMENT_PAGE_CLASSNAME.TRANSFORM_BODY_MODIFIER
-        );
-        managementBody[0].classList.replace(
-          KBN_MANAGEMENT_PAGE_CLASSNAME.TRANSFORM_BODY_MODIFIER,
-          KBN_MANAGEMENT_PAGE_CLASSNAME.DEFAULT_BODY
-        );
-      };
-    }
-  }, []);
 
   const transformConfig = getCreateTransformRequestBody(
     indexPattern.title,
