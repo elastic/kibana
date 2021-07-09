@@ -81,6 +81,12 @@ interface JoinState {
   propertiesMap?: PropertiesMap;
 }
 
+interface JoinStatus {
+  joinedWithAtLeastOneFeature: boolean;
+  keys: string[];
+  joinState: JoinState;
+}
+
 export interface VectorLayerArguments {
   source: IVectorSource;
   joins?: InnerJoin[];
@@ -438,7 +444,8 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   _performInnerJoins(
     sourceResult: SourceResult,
     joinStates: JoinState[],
-    updateSourceData: DataRequestContext['updateSourceData']
+    updateSourceData: DataRequestContext['updateSourceData'],
+    onJoinError: DataRequestContext['onJoinError']
   ) {
     // should update the store if
     // -- source result was refreshed
@@ -452,6 +459,15 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       return;
     }
 
+    const joinStatuses: JoinStatus[] = [];
+    joinStates.forEach(joinState => {
+      joinStatuses.push({
+        joinedWithAtLeastOneFeature: false,
+        keys: [],
+        joinState,
+      });
+    });
+
     for (let i = 0; i < sourceResult.featureCollection!.features.length; i++) {
       const feature = sourceResult.featureCollection!.features[i];
       if (!feature.properties) {
@@ -462,9 +478,17 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       for (let j = 0; j < joinStates.length; j++) {
         const joinState = joinStates[j];
         const innerJoin = joinState.join;
+        const joinStatus = joinStatuses[j];
+        const joinKey = innerJoin.getJoinKey(feature);
+        if (joinKey) {
+          joinStatus.keys.push(joinKey);
+        }
         const canJoinOnCurrent = joinState.propertiesMap
           ? innerJoin.joinPropertiesToFeature(feature, joinState.propertiesMap)
           : false;
+        if (canJoinOnCurrent && !joinStatus.joinedWithAtLeastOneFeature) {
+          joinStatus.joinedWithAtLeastOneFeature = true;
+        }
         isFeatureVisible = isFeatureVisible && canJoinOnCurrent;
       }
 
@@ -477,6 +501,40 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
 
     if (shouldUpdateStore) {
       updateSourceData({ ...sourceResult.featureCollection });
+    }
+
+    const joinStatusesWithoutAnyMatches = joinStatuses.filter(joinStatus => {
+      return!joinStatus.joinedWithAtLeastOneFeature && joinStatus.joinState.propertiesMap !== undefined;
+    });
+
+    if (joinStatusesWithoutAnyMatches.length) {
+      function prettyPrintArray(array: unknown[]) {
+        return array.length <= 10
+          ? array.join(',')
+          : array.slice(0, 10).join(',');
+      }
+
+      const joinStatus = joinStatusesWithoutAnyMatches[0];
+      const leftFieldName = joinStatus.joinState.join.getLeftField().getName();
+      const reason = joinStatus.keys.length === 0
+        ? i18n.translate('xpack.maps.vectorLayer.joinError.noLeftFieldValuesMsg', {
+          defaultMessage: `Left field: '{leftFieldName}', did not provide any values.`,
+          values: { leftFieldName }
+        })
+        : i18n.translate('xpack.maps.vectorLayer.joinError.noMatchesMsg', {
+          defaultMessage: `Left field: '{leftFieldName}' with values: { leftFieldValues }, does not match right field: '{rightFieldName}' with values: { rightFieldValues }.`,
+          values: {
+            leftFieldName,
+            leftFieldValues: prettyPrintArray(joinStatus.keys),
+            rightFieldName: joinStatus.joinState.join.getRightJoinSource().getTermField().getName(),
+            rightFieldValues: prettyPrintArray(Array.from(joinStatus.joinState.propertiesMap.keys())),
+          }
+        });
+
+      onJoinError(i18n.translate('xpack.maps.vectorLayer.joinErrorMsg', {
+        defaultMessage: `Unable to perform term join. {reason} Please check your 'Term joins' configuration.`,
+        values: { reason }
+      }));
     }
   }
 
@@ -714,7 +772,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       }
 
       const joinStates = await this._syncJoins(syncContext, style);
-      this._performInnerJoins(sourceResult, joinStates, syncContext.updateSourceData);
+      this._performInnerJoins(sourceResult, joinStates, syncContext.updateSourceData, syncContext.onJoinError);
     } catch (error) {
       if (!(error instanceof DataRequestAbortError)) {
         throw error;
