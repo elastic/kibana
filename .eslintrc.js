@@ -101,6 +101,7 @@ const DEV_PACKAGES = [
   'kbn-plugin-generator',
   'kbn-plugin-helpers',
   'kbn-pm',
+  'kbn-pr-utils',
   'kbn-storybook',
   'kbn-telemetry-tools',
   'kbn-test',
