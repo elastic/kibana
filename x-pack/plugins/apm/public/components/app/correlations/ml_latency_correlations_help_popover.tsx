@@ -32,19 +32,19 @@ export function LatencyCorrelationsHelpPopover() {
       <p>
         <FormattedMessage
           id="xpack.apm.correlations.latencyPopoverBasicExplanation"
-          defaultMessage="Correlations help you discover which attributes are contributing to increased service response times or latency."
+          defaultMessage="Correlations help you discover which attributes are contributing to increased transaction response times or latency."
         />
       </p>
       <p>
         <FormattedMessage
           id="xpack.apm.correlations.latencyPopoverChartExplanation"
-          defaultMessage="The latency distribution chart visualizes the overall latency of the service. When you hover over attributes in the table, their latency distribution is added to the chart."
+          defaultMessage="The latency distribution chart visualizes the overall latency of the transactions in the service. When you hover over attributes in the table, their latency distribution is added to the chart."
         />
       </p>
       <p>
         <FormattedMessage
           id="xpack.apm.correlations.latencyPopoverTableExplanation"
-          defaultMessage="The table is sorted by correlation values ranging from 0 to 1. Attributes with higher correlation values are more likely to contribute to high latency transactions."
+          defaultMessage="The table is sorted by correlation coefficients that range from 0 to 1. Attributes with higher correlation values are more likely to contribute to high latency transactions."
         />
       </p>
       <p>
