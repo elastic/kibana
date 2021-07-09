@@ -34,7 +34,7 @@ export function getApmPackagePolicyDefinition(
     ],
     package: {
       name: APM_PACKAGE_NAME,
-      version: '0.3.0-dev.1',
+      version: '0.3.0',
       title: 'Elastic APM',
     },
   };
