@@ -22,8 +22,8 @@ describe('revealImageFunction', () => {
   let elasticOutline = '';
 
   beforeEach(async () => {
-    elasticLogo = await (await getElasticLogo()).elasticLogo;
-    elasticOutline = await (await getElasticOutline()).elasticOutline;
+    elasticLogo = (await getElasticLogo()).elasticLogo;
+    elasticOutline = (await getElasticOutline()).elasticOutline;
   });
 
   it('returns a render as revealImage', async () => {
