@@ -8,14 +8,22 @@
 import { HEADER } from '../screens/osquery';
 import { OSQUERY_NAVIGATION_LINK } from '../screens/navigation';
 
-import { INTEGRATIONS, OSQUERY, openNavigationFlyout, navigateTo } from '../tasks/navigation';
+import { INTEGRATIONS, OSQUERY, NEW_LIVE_QUERY, openNavigationFlyout, navigateTo } from '../tasks/navigation';
 import { addIntegration } from '../tasks/integrations';
+import { inputQuery, selectAllAgents, submitQuery } from '../tasks/live_query';
 
 describe('Osquery Manager', () => {
-  before(() => {
+  before(async () => {
     navigateTo(INTEGRATIONS);
     addIntegration('Osquery Manager');
   });
+
+  it('Runs live queries', () => {
+    navigateTo(NEW_LIVE_QUERY);
+    selectAllAgents();
+    inputQuery();
+    submitQuery();
+  })
 
   it('Displays Osquery on the navigation flyout once installed ', () => {
     openNavigationFlyout();
