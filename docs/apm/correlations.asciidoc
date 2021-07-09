@@ -27,7 +27,10 @@ contributing to increased transaction latency.
 image::apm/images/correlations-hover.png[Latency correlations]
 
 The progress bar indicates the status of the asynchronous analysis, which
-investigates the impact of each attribute.
+performs statistical searches across a large number of attributes. For large
+time ranges and services with high transaction throughput this might take some
+time. To improve performance, reduce the time range on the service overview
+page.
 
 The latency distribution chart visualizes the overall latency of the
 transactions in the service. If there are attributes that have a statistically
