@@ -12,10 +12,12 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const find = getService('find');
   const log = getService('log');
-  // const pieChart = getService('pieChart');
+  const pieChart = getService('pieChart');
   const renderable = getService('renderable');
   const dashboardExpect = getService('dashboardExpect');
   const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard', 'timePicker']);
+  const kibanaServer = getService('kibanaServer');
+  const browser = getService('browser');
 
   describe('dashboard smoke tests', function describeIndexTests() {
     const spaces = [
@@ -36,6 +38,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             basePath,
           });
           await PageObjects.header.waitUntilLoadingHasFinished();
+          await kibanaServer.uiSettings.update(
+            {
+              'visualization:visualize:legacyChartsLibrary': true,
+              'visualization:visualize:legacyPieChartsLibrary': true,
+            },
+            { space }
+          );
+          await browser.refresh();
         });
         dashboardTests.forEach(({ name, numPanels }) => {
           it('should launch sample ' + name + ' data set dashboard', async () => {
@@ -54,11 +64,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await PageObjects.home.launchSampleDashboard('flights');
           await PageObjects.header.waitUntilLoadingHasFinished();
           await renderable.waitForRender();
-          // https://github.com/elastic/kibana/issues/92887
-          // log.debug('Checking pie charts rendered');
-          // await pieChart.expectPieSliceCount(4);
-          // log.debug('Checking area, bar and heatmap charts rendered');
-          // await dashboardExpect.seriesElementCount(15);
+          log.debug('Checking pie charts rendered');
+          await pieChart.expectPieSliceCount(4);
+          log.debug('Checking area, bar and heatmap charts rendered');
+          await dashboardExpect.seriesElementCount(15);
           log.debug('Checking saved searches rendered');
           await dashboardExpect.savedSearchRowCount(49);
           log.debug('Checking input controls rendered');
