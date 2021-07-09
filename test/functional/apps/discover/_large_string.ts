@@ -19,7 +19,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'home', 'settings', 'discover']);
 
-  describe('test large strings', function () {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/104466
+  describe.skip('test large strings', function () {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'kibana_large_strings']);
 
