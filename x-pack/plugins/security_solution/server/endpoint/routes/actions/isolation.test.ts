@@ -6,7 +6,7 @@
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { KibanaResponseFactory, RequestHandler, RouteConfig } from 'kibana/server';
+import { KibanaRequest, KibanaResponseFactory, RequestHandler, RouteConfig } from 'kibana/server';
 import {
   elasticsearchServiceMock,
   httpServerMock,
@@ -37,15 +37,17 @@ import {
 } from '../../../../common/endpoint/constants';
 import {
   EndpointAction,
+  HostIsolationRequestBody,
   HostIsolationResponse,
   HostMetadata,
 } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { createV2SearchResponse } from '../metadata/support/test_support';
 import { ElasticsearchAssetType } from '../../../../../fleet/common';
+import { CasesClientMock } from '../../../../../cases/server/client/mocks';
 
 interface CallRouteInterface {
-  body?: any;
+  body?: HostIsolationRequestBody;
   idxResponse?: any;
   searchResponse?: HostMetadata;
   mockUser?: any;
@@ -370,8 +372,64 @@ describe('Host Isolation', () => {
     });
 
     describe('Cases', () => {
-      it.todo('logs a comment to the provided case');
-      it.todo('logs a comment to any cases associated with the given alert');
+      let casesClient: CasesClientMock;
+
+      const getCaseIdsFromAttachmentAddService = () => {
+        return casesClient.attachments.add.mock.calls.map(([addArgs]) => addArgs.caseId);
+      };
+
+      beforeEach(async () => {
+        casesClient = (await endpointAppContextService.getCasesClient(
+          {} as KibanaRequest
+        )) as CasesClientMock;
+
+        let counter = 1;
+        casesClient.cases.getCasesByAlertID.mockImplementation(async () => {
+          return [
+            {
+              id: `case-${counter++}`,
+              title: 'case',
+            },
+          ];
+        });
+      });
+
+      it('logs a comment to the provided cases', async () => {
+        await callRoute(ISOLATE_HOST_ROUTE, {
+          body: { endpoint_ids: ['XYZ'], case_ids: ['one', 'two'] },
+        });
+
+        expect(casesClient.attachments.add).toHaveBeenCalledTimes(2);
+        expect(getCaseIdsFromAttachmentAddService()).toEqual(
+          expect.arrayContaining(['one', 'two'])
+        );
+      });
+
+      it('logs a comment to any cases associated with the given alerts', async () => {
+        await callRoute(ISOLATE_HOST_ROUTE, {
+          body: { endpoint_ids: ['XYZ'], alert_ids: ['one', 'two'] },
+        });
+
+        expect(getCaseIdsFromAttachmentAddService()).toEqual(
+          expect.arrayContaining(['case-1', 'case-2'])
+        );
+      });
+
+      it('logs a comment to any cases  provided on input along with cases associated with the given alerts', async () => {
+        await callRoute(ISOLATE_HOST_ROUTE, {
+          // 'case-1` provided on `case_ids` should be dedupped
+          body: {
+            endpoint_ids: ['XYZ'],
+            case_ids: ['ONE', 'TWO', 'case-1'],
+            alert_ids: ['one', 'two'],
+          },
+        });
+
+        expect(casesClient.attachments.add).toHaveBeenCalledTimes(4);
+        expect(getCaseIdsFromAttachmentAddService()).toEqual(
+          expect.arrayContaining(['ONE', 'TWO', 'case-1', 'case-2'])
+        );
+      });
     });
   });
 });
