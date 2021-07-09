@@ -654,4 +654,15 @@ export class VisualBuilderPageObject extends FtrService {
     const dataTimeRangeMode = await this.testSubjects.find('dataTimeRangeMode');
     return await this.comboBox.isOptionSelected(dataTimeRangeMode, value);
   }
+
+  public async setFilterRatioNumeratorDenominator(
+    numerator: string = '',
+    denominator: string = ''
+  ) {
+    const [numeratorInput, denominatorInput] = await this.find.allByCssSelector(
+      '.tvbAggRow [data-test-subj="queryInput"]'
+    );
+    await numeratorInput.type(numerator);
+    await denominatorInput.type(denominator);
+  }
 }
