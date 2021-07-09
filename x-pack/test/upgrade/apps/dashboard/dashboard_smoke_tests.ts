@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const find = getService('find');
   const log = getService('log');
-  const pieChart = getService('pieChart');
+  // const pieChart = getService('pieChart');
   const renderable = getService('renderable');
   const dashboardExpect = getService('dashboardExpect');
   const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard', 'timePicker']);
