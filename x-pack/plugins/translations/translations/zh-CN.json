@@ -13833,7 +13833,6 @@
     "xpack.ml.annotationsTable.byColumnSMVName": "依据",
     "xpack.ml.annotationsTable.detectorColumnName": "检测工具",
     "xpack.ml.annotationsTable.editAnnotationsTooltip": "编辑注释",
-    "xpack.ml.annotationsTable.editAnnotationsTooltipAriaLabel": "编辑注释",
     "xpack.ml.annotationsTable.eventColumnName": "事件",
     "xpack.ml.annotationsTable.fromColumnName": "自",
     "xpack.ml.annotationsTable.howToCreateAnnotationDescription": "要创建注释，请打开 {linkToSingleMetricView}",
