@@ -185,7 +185,7 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
       setupRequest(resources),
       core
         .start()
-        .then((coreStart) => coreStart.savedObjects.createInternalRepository()),
+        .then(({ savedObjects }) => savedObjects.createInternalRepository()),
     ]);
 
     const spaceId = plugins.spaces?.setup.spacesService.getSpaceId(request);
