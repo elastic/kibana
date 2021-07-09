@@ -6,11 +6,12 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { AlertType } from '../../../../common/alert_types';
 import { getInitialAlertValues } from '../get_initial_alert_values';
 import { ApmPluginStartDeps } from '../../../plugin';
+import { useServiceName } from '../../../hooks/use_service_name';
+import { ApmServiceContextProvider } from '../../../context/apm_service/apm_service_context';
 interface Props {
   addFlyoutVisible: boolean;
   setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
@@ -19,7 +20,7 @@ interface Props {
 
 export function AlertingFlyout(props: Props) {
   const { addFlyoutVisible, setAddFlyoutVisibility, alertType } = props;
-  const { serviceName } = useParams<{ serviceName?: string }>();
+  const serviceName = useServiceName();
   const { services } = useKibana<ApmPluginStartDeps>();
   const initialValues = getInitialAlertValues(alertType, serviceName);
 
@@ -40,5 +41,11 @@ export function AlertingFlyout(props: Props) {
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [alertType, onCloseAddFlyout, services.triggersActionsUi]
   );
-  return <>{addFlyoutVisible && addAlertFlyout}</>;
+  return (
+    <>
+      {addFlyoutVisible && (
+        <ApmServiceContextProvider>{addAlertFlyout}</ApmServiceContextProvider>
+      )}
+    </>
+  );
 }
