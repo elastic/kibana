@@ -128,6 +128,12 @@ class AnnotationsTableUI extends Component {
             jobId: undefined,
           });
         });
+    } else {
+      this.setState({
+        annotations: [],
+        isLoading: false,
+        jobId: undefined,
+      });
     }
   }
 
