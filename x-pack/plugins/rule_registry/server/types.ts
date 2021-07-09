@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RequestHandlerContext } from 'kibana/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -12,6 +13,7 @@ import {
   AlertTypeState,
 } from '../../alerting/common';
 import { AlertExecutorOptions, AlertServices, AlertType } from '../../alerting/server';
+import { AlertsClient } from './alert_data_client/alerts_client';
 
 type SimpleAlertType<
   TParams extends AlertTypeParams = {},
@@ -52,3 +54,17 @@ export type AlertExecutorOptionsWithExtraServices<
 > & {
   services: AlertServices<InstanceState, InstanceContext, ActionGroupIds> & TExtraServices;
 };
+
+/**
+ * @public
+ */
+export interface RacApiRequestHandlerContext {
+  getAlertsClient: () => Promise<AlertsClient>;
+}
+
+/**
+ * @internal
+ */
+export interface RacRequestHandlerContext extends RequestHandlerContext {
+  rac: RacApiRequestHandlerContext;
+}
