@@ -7,6 +7,7 @@
  */
 
 const preset = require('@kbn/test/jest-preset');
+const { REPO_ROOT } = require('@kbn/dev-utils');
 
 module.exports = {
   preset: '@kbn/test',
@@ -21,7 +22,13 @@ module.exports = {
   ],
   reporters: [
     'default',
-    ['@kbn/test/target_node/jest/junit_reporter', { reportName: 'Jest Integration Tests' }],
+    [
+      '@kbn/test/target_node/jest/junit_reporter',
+      {
+        reportName: 'Jest Integration Tests',
+        rootDirectory: REPO_ROOT,
+      },
+    ],
   ],
   coverageReporters: !!process.env.CI
     ? [['json', { file: 'jest-integration.json' }]]
