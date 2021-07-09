@@ -24,7 +24,7 @@ import { State } from '../common/store';
 import { StartServices } from '../types';
 import { PageRouter } from './routes';
 import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
-import { UserPrivilegesProvider } from '../detections/components/user_privileges';
+import { UserPrivilegesProvider } from '../common/components/user_privileges';
 
 interface StartAppComponent {
   children: React.ReactNode;

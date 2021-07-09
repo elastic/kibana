@@ -47,8 +47,7 @@ import {
   ANNOTATION_EVENT_DELAYED_DATA,
 } from '../../../../../common/constants/annotations';
 import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { ML_APP_URL_GENERATOR, ML_PAGES } from '../../../../../common/constants/ml_url_generator';
-import { PLUGIN_ID } from '../../../../../common/constants/app';
+import { ML_APP_LOCATOR, ML_PAGES } from '../../../../../common/constants/locator';
 import { timeFormatter } from '../../../../../common/util/date_utils';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 import { DatafeedChartFlyout } from '../../../jobs/jobs_list/components/datafeed_chart_flyout';
@@ -129,6 +128,12 @@ class AnnotationsTableUI extends Component {
             jobId: undefined,
           });
         });
+    } else {
+      this.setState({
+        annotations: [],
+        isLoading: false,
+        jobId: undefined,
+      });
     }
   }
 
@@ -202,11 +207,8 @@ class AnnotationsTableUI extends Component {
   openSingleMetricView = async (annotation = {}) => {
     const {
       services: {
-        application: { navigateToApp },
-
-        share: {
-          urlGenerators: { getUrlGenerator },
-        },
+        application: { navigateToUrl },
+        share,
       },
     } = this.props.kibana;
 
@@ -266,32 +268,32 @@ class AnnotationsTableUI extends Component {
     mlTimeSeriesExplorer.entities = entityCondition;
     // appState.mlTimeSeriesExplorer = mlTimeSeriesExplorer;
 
-    const mlUrlGenerator = getUrlGenerator(ML_APP_URL_GENERATOR);
-    const singleMetricViewerLink = await mlUrlGenerator.createUrl({
-      page: ML_PAGES.SINGLE_METRIC_VIEWER,
-      pageState: {
-        timeRange,
-        refreshInterval: {
-          display: 'Off',
-          pause: true,
-          value: 0,
-        },
-        jobIds: [job.job_id],
-        query: {
-          query_string: {
-            analyze_wildcard: true,
-            query: '*',
+    const mlLocator = share.url.locators.get(ML_APP_LOCATOR);
+    const singleMetricViewerLink = await mlLocator.getUrl(
+      {
+        page: ML_PAGES.SINGLE_METRIC_VIEWER,
+        pageState: {
+          timeRange,
+          refreshInterval: {
+            display: 'Off',
+            pause: true,
+            value: 0,
           },
+          jobIds: [job.job_id],
+          query: {
+            query_string: {
+              analyze_wildcard: true,
+              query: '*',
+            },
+          },
+          ...mlTimeSeriesExplorer,
         },
-        ...mlTimeSeriesExplorer,
       },
-      excludeBasePath: true,
-    });
+      { absolute: true }
+    );
 
     addItemToRecentlyAccessed('timeseriesexplorer', job.job_id, singleMetricViewerLink);
-    await navigateToApp(PLUGIN_ID, {
-      path: singleMetricViewerLink,
-    });
+    await navigateToUrl(singleMetricViewerLink);
   };
 
   onMouseOverRow = (record) => {
