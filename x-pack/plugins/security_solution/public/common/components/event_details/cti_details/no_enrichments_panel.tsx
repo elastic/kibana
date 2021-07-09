@@ -22,16 +22,13 @@ const NoEnrichmentsPanelView: React.FC<{
   description: React.ReactNode;
 }> = ({ title, description }) => {
   return (
-    <>
-      <EuiHorizontalRule margin="s" />
-      <Container hasShadow={false} data-test-subj="no-enrichments-panel">
-        <EuiText textAlign="center">{title}</EuiText>
-        <EuiSpacer size="m" />
-        <EuiText size="s" color="subdued">
-          {description}
-        </EuiText>
-      </Container>
-    </>
+    <Container hasShadow={false} data-test-subj="no-enrichments-panel">
+      <EuiText textAlign="center">{title}</EuiText>
+      <EuiSpacer size="m" />
+      <EuiText size="s" color="subdued">
+        {description}
+      </EuiText>
+    </Container>
   );
 };
 
@@ -67,17 +64,23 @@ export const NoEnrichmentsPanel: React.FC<{
     );
   } else if (existingEnrichmentsCount === 0) {
     return (
-      <NoEnrichmentsPanelView
-        title={<h2>{i18n.NO_INDICATOR_ENRICHMENTS_TITLE}</h2>}
-        description={noIndicatorEnrichmentsDescription}
-      />
+      <>
+        <EuiHorizontalRule margin="s" />
+        <NoEnrichmentsPanelView
+          title={<h2>{i18n.NO_INDICATOR_ENRICHMENTS_TITLE}</h2>}
+          description={noIndicatorEnrichmentsDescription}
+        />
+      </>
     );
   } else if (investigationEnrichmentsCount === 0) {
     return (
-      <NoEnrichmentsPanelView
-        title={<h2>{i18n.NO_INVESTIGATION_ENRICHMENTS_TITLE}</h2>}
-        description={i18n.NO_INVESTIGATION_ENRICHMENTS_DESCRIPTION}
-      />
+      <>
+        <EuiHorizontalRule margin="s" />
+        <NoEnrichmentsPanelView
+          title={<h2>{i18n.NO_INVESTIGATION_ENRICHMENTS_TITLE}</h2>}
+          description={i18n.NO_INVESTIGATION_ENRICHMENTS_DESCRIPTION}
+        />
+      </>
     );
   } else {
     return null;
