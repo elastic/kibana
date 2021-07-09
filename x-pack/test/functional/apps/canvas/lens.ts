@@ -9,12 +9,17 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function canvasLensTest({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['canvas', 'common', 'header', 'lens']);
+  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/lens'
+  const archives = {
+    es: 'x-pack/test/functional/es_archives/canvas/logstash_lens',
+    kbn: 'x-pack/test/functional/fixtures/kbn_archiver/canvas/lens',
+  };
 
   describe('lens in canvas', function () {
     before(async () => {
-      await kibanaServer.importExport.load(archive);
+      await esArchiver.load(archives.es);
+      await kibanaServer.importExport.load(archives.kbn);
       // open canvas home
       await PageObjects.common.navigateToApp('canvas');
       // load test workpad
@@ -23,8 +28,10 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
       });
     });
 
-    after(async () => await kibanaServer.importExport.load(archive));
-
+    after(async () => {
+      await esArchiver.unload(archives.es);
+      await kibanaServer.importExport.load(archives.kbn);
+    });
 
     it('renders lens visualization', async () => {
       await PageObjects.header.waitUntilLoadingHasFinished();

@@ -55,7 +55,7 @@
   "coreMigrationVersion": "8.0.0",
   "id": "my-lens-vis",
   "migrationVersion": {
-    "lens": "7.13.1"
+    "lens": "7.14.0"
   },
   "references": [
     {
