@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
+import { getEnvironmentEsField } from '../../../../common/environment_filter_values';
 import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
 import {
   ERROR_GROUP_ID,
@@ -32,6 +34,19 @@ export function getBoolFilter({
   if (serviceName) {
     boolFilter.push({
       term: { [SERVICE_NAME]: serviceName },
+    });
+  }
+
+  const environmentFilter = getEnvironmentEsField(urlParams.environment);
+  if (!isEmpty(environmentFilter) && environmentFilter['service.environment']) {
+    boolFilter.push({
+      term: environmentFilter,
+    });
+  }
+
+  if (urlParams.transactionType) {
+    boolFilter.push({
+      term: { [TRANSACTION_TYPE]: urlParams.transactionType },
     });
   }
 
