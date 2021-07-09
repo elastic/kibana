@@ -645,7 +645,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       return {
         tooltipContent: i18n.translate('xpack.maps.esSearch.resultsTrimmedMsg', {
           defaultMessage: `Results limited to first {count} documents.`,
-          values: { count: meta.resultsCount },
+          values: { count: meta.resultsCount.toLocaleString() },
         }),
         areResultsTrimmed: true,
       };
