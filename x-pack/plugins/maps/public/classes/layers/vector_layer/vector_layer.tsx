@@ -511,7 +511,9 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       function prettyPrintArray(array: unknown[]) {
         return array.length <= 10
           ? array.join(',')
-          : array.slice(0, 10).join(',');
+          : array.slice(0, 10).join(',') + i18n.translate('xpack.maps.vectorLayer.joinError.firstTenMsg', {
+            defaultMessage: ` (showing first 10)`,
+          });
       }
 
       const joinStatus = joinStatusesWithoutAnyMatches[0];
