@@ -8105,7 +8105,6 @@
     "xpack.enterpriseSearch.workplaceSearch.groups.groupSourcesUpdated": "共有コンテンツソースが正常に更新されました。",
     "xpack.enterpriseSearch.workplaceSearch.groups.groupsTable.groupTableHeader": "グループ",
     "xpack.enterpriseSearch.workplaceSearch.groups.groupsTable.sourcesTableHeader": "コンテンツソース",
-    "xpack.enterpriseSearch.workplaceSearch.groups.groupsTable.usersTableHeader": "ユーザー",
     "xpack.enterpriseSearch.workplaceSearch.groups.groupUpdatedText": "前回更新日時{updatedAt}。",
     "xpack.enterpriseSearch.workplaceSearch.groups.heading": "グループを管理",
     "xpack.enterpriseSearch.workplaceSearch.groups.inviteUsers.action": "ユーザーを招待",

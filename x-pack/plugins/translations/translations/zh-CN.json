@@ -8173,7 +8173,6 @@
     "xpack.enterpriseSearch.workplaceSearch.groups.groupSourcesUpdated": "已成功更新共享内容源。",
     "xpack.enterpriseSearch.workplaceSearch.groups.groupsTable.groupTableHeader": "组",
     "xpack.enterpriseSearch.workplaceSearch.groups.groupsTable.sourcesTableHeader": "内容源",
-    "xpack.enterpriseSearch.workplaceSearch.groups.groupsTable.usersTableHeader": "用户",
     "xpack.enterpriseSearch.workplaceSearch.groups.groupUpdatedText": "上次更新于 {updatedAt}。",
     "xpack.enterpriseSearch.workplaceSearch.groups.heading": "管理组",
     "xpack.enterpriseSearch.workplaceSearch.groups.inviteUsers.action": "邀请用户",
