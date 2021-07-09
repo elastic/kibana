@@ -90,6 +90,7 @@ yarn kbn watch-bazel
 - @kbn/monaco
 - @kbn/optimizer
 - @kbn/plugin-helpers
+- @kbn/pr-utils
 - @kbn/rule-data-utils
 - @kbn/securitysolution-es-utils
 - @kbn/securitysolution-hook-utils
