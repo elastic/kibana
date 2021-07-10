@@ -89,14 +89,14 @@ import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import { ALERTS_URL } from '../../urls/navigation';
 
 describe('Detection rules, threshold', () => {
+  let rule = getNewThresholdRule();
   const expectedUrls = getNewThresholdRule().referenceUrls.join('');
   const expectedFalsePositives = getNewThresholdRule().falsePositivesExamples.join('');
   const expectedTags = getNewThresholdRule().tags.join('');
   const expectedMitre = formatMitreAttackDescription(getNewThresholdRule().mitre);
 
-  const rule = { ...getNewThresholdRule() };
-
   beforeEach(() => {
+    rule = getNewThresholdRule();
     cleanKibana();
     createTimeline(getNewThresholdRule().timeline).then((response) => {
       rule.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
@@ -186,15 +186,14 @@ describe('Detection rules, threshold', () => {
   });
 
   it('Preview results of keyword using "host.name"', () => {
-    const previewRule: ThresholdRule = { ...getNewThresholdRule() };
-    previewRule.index = [...previewRule.index, '.siem-signals*'];
+    rule.index = [...rule.index, '.siem-signals*'];
 
     createCustomRuleActivated(getNewRule());
     goToManageAlertsDetectionRules();
     waitForRulesTableToBeLoaded();
     goToCreateNewRule();
     selectThresholdRuleType();
-    fillDefineThresholdRule(previewRule);
+    fillDefineThresholdRule(rule);
     previewResults();
 
     cy.get(PREVIEW_HEADER_SUBTITLE).should('have.text', '3 unique hits');
@@ -202,7 +201,7 @@ describe('Detection rules, threshold', () => {
 
   it('Preview results of "ip" using "source.ip"', () => {
     const previewRule: ThresholdRule = {
-      ...getNewThresholdRule(),
+      ...rule,
       thresholdField: 'source.ip',
       threshold: '1',
     };
