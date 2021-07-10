@@ -23,8 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
   const dataGrid = getService('dataGrid');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/104466
-  describe.skip('discover data grid field data tests', function describeIndexTests() {
+  describe('discover data grid field data tests', function describeIndexTests() {
     this.tags('includeFirefox');
     before(async function () {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
