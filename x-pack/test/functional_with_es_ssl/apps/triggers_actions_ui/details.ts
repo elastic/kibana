@@ -149,7 +149,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const enableSwitch = await testSubjects.find('enableSwitch');
 
         const isChecked = await enableSwitch.getAttribute('aria-checked');
-        expect(isChecked).to.eql('false');
+        expect(isChecked).to.eql('true');
 
         await enableSwitch.click();
 
@@ -157,12 +157,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const isCheckedAfterDisabling = await disableSwitchAfterDisabling.getAttribute(
           'aria-checked'
         );
-        expect(isCheckedAfterDisabling).to.eql('true');
+        expect(isCheckedAfterDisabling).to.eql('false');
       });
 
       it('shouldnt allow you to mute a disabled alert', async () => {
         const disabledEnableSwitch = await testSubjects.find('enableSwitch');
-        expect(await disabledEnableSwitch.getAttribute('aria-checked')).to.eql('true');
+        expect(await disabledEnableSwitch.getAttribute('aria-checked')).to.eql('false');
 
         const muteSwitch = await testSubjects.find('muteSwitch');
         expect(await muteSwitch.getAttribute('aria-checked')).to.eql('false');
@@ -180,7 +180,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const enableSwitch = await testSubjects.find('enableSwitch');
 
         const isChecked = await enableSwitch.getAttribute('aria-checked');
-        expect(isChecked).to.eql('true');
+        expect(isChecked).to.eql('false');
 
         await enableSwitch.click();
 
@@ -188,7 +188,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const isCheckedAfterDisabling = await disableSwitchAfterReenabling.getAttribute(
           'aria-checked'
         );
-        expect(isCheckedAfterDisabling).to.eql('false');
+        expect(isCheckedAfterDisabling).to.eql('true');
       });
 
       it('should mute the alert', async () => {
