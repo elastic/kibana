@@ -8,7 +8,7 @@
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import { rawRules } from '../../server/lib/detection_engine/rules/prepackaged_rules/index';
 import { getMockThreatData } from '../../public/detections/mitre/mitre_tactics_techniques';
-import { timeline, CompleteTimeline, indicatorMatchTimelineTemplate } from './timeline';
+import { getTimeline, CompleteTimeline, getIndicatorMatchTimelineTemplate } from './timeline';
 
 export const totalNumberOfPrebuiltRules = rawRules.length;
 
@@ -180,7 +180,7 @@ export const getNewRule = (): CustomRule => ({
   note: '# test markdown',
   runsEvery: getRunsEvery(),
   lookBack: getLookBack(),
-  timeline,
+  timeline: getTimeline(),
   maxSignals: 100,
 });
 
@@ -198,7 +198,7 @@ export const getUnmappedRule = (): CustomRule => ({
   note: '# test markdown',
   runsEvery: getRunsEvery(),
   lookBack: getLookBack(),
-  timeline,
+  timeline: getTimeline(),
   maxSignals: 100,
 });
 
@@ -216,7 +216,7 @@ export const getUnmappedCCSRule = (): CustomRule => ({
   note: '# test markdown',
   runsEvery: getRunsEvery(),
   lookBack: getLookBack(),
-  timeline,
+  timeline: getTimeline(),
   maxSignals: 100,
 });
 
@@ -235,7 +235,7 @@ export const getExistingRule = (): CustomRule => ({
   note: 'This is my note',
   runsEvery: getRunsEvery(),
   lookBack: getLookBack(),
-  timeline,
+  timeline: getTimeline(),
   // Please do not change, or if you do, needs
   // to be any number other than default value
   maxSignals: 500,
@@ -264,7 +264,7 @@ export const getNewOverrideRule = (): OverrideRule => ({
   timestampOverride: '@timestamp',
   runsEvery: getRunsEvery(),
   lookBack: getLookBack(),
-  timeline,
+  timeline: getTimeline(),
   maxSignals: 100,
 });
 
@@ -284,7 +284,7 @@ export const getNewThresholdRule = (): ThresholdRule => ({
   threshold: '10',
   runsEvery: getRunsEvery(),
   lookBack: getLookBack(),
-  timeline,
+  timeline: getTimeline(),
   maxSignals: 100,
 });
 
@@ -318,7 +318,7 @@ export const getEqlRule = (): CustomRule => ({
   note: '# test markdown',
   runsEvery: getRunsEvery(),
   lookBack: getLookBack(),
-  timeline,
+  timeline: getTimeline(),
   maxSignals: 100,
 });
 
@@ -339,7 +339,7 @@ export const getEqlSequenceRule = (): CustomRule => ({
   note: '# test markdown',
   runsEvery: getRunsEvery(),
   lookBack: getLookBack(),
-  timeline,
+  timeline: getTimeline(),
   maxSignals: 100,
 });
 
@@ -361,7 +361,7 @@ export const getNewThreatIndicatorRule = (): ThreatIndicatorRule => ({
   indicatorIndexField: 'threatintel.indicator.file.hash.sha256',
   type: 'file',
   atomic: 'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
-  timeline: indicatorMatchTimelineTemplate,
+  timeline: getIndicatorMatchTimelineTemplate(),
   maxSignals: 100,
 });
 

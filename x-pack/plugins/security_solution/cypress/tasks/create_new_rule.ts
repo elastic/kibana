@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { emailConnector, EmailConnector } from '../objects/connector';
+import { getEmailConnector, EmailConnector } from '../objects/connector';
 import {
   CustomRule,
   MachineLearningRule,
@@ -397,7 +397,7 @@ export const fillIndexAndIndicatorIndexPattern = (
   getIndicatorIndicatorIndex().type(`${indicatorIndex}{enter}`);
 };
 
-export const fillEmailConnectorForm = (connector: EmailConnector = emailConnector) => {
+export const fillEmailConnectorForm = (connector: EmailConnector = getEmailConnector()) => {
   cy.get(CONNECTOR_NAME_INPUT).type(connector.name);
   cy.get(EMAIL_CONNECTOR_FROM_INPUT).type(connector.from);
   cy.get(EMAIL_CONNECTOR_HOST_INPUT).type(connector.host);

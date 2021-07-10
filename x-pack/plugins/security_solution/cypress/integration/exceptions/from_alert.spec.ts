@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { exception } from '../../objects/exception';
+import { getException } from '../../objects/exception';
 import { getNewRule } from '../../objects/rule';
 
 import { ALERTS_COUNT, NUMBER_OF_ALERTS } from '../../screens/alerts';
@@ -66,7 +66,7 @@ describe('From alert', () => {
 
   it('Creates an exception and deletes it', () => {
     addExceptionFromFirstAlert();
-    addsException(exception);
+    addsException(getException());
     esArchiverLoad('auditbeat_for_exceptions2');
 
     cy.get(ALERTS_COUNT).should('exist');
