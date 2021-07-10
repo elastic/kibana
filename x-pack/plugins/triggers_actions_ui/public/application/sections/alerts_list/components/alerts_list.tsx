@@ -38,7 +38,7 @@ import { ActionType, Alert, AlertTableItem, AlertTypeIndex, Pagination } from '.
 import { AlertAdd, AlertEdit } from '../../alert_form';
 import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
 import { AlertQuickEditButtonsWithApi as AlertQuickEditButtons } from '../../common/components/alert_quick_edit_buttons';
-import { CollapsedItemActionsWithApi as CollapsedItemActions } from './collapsed_item_actions_new';
+import { CollapsedItemActionsWithApi as CollapsedItemActions } from './collapsed_item_actions';
 import { TypeFilter } from './type_filter';
 import { ActionTypeFilter } from './action_type_filter';
 import { AlertStatusFilter, getHealthColor } from './alert_status_filter';
@@ -483,7 +483,10 @@ export const AlertsList: React.FunctionComponent = () => {
                       className="alertSidebarItem__action"
                       onClick={() => onRuleEdit(item)}
                       iconType={'pencil'}
-                      aria-label={'mute'}
+                      aria-label={i18n.translate(
+                        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.editAriaLabel',
+                        { defaultMessage: 'Edit' }
+                      )}
                     />
                   </EuiToolTip>
                 </EuiFlexItem>
@@ -507,7 +510,10 @@ export const AlertsList: React.FunctionComponent = () => {
                         }, 10);
                       }}
                       iconType={'trash'}
-                      aria-label={'mute'}
+                      aria-label={i18n.translate(
+                        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.deleteAriaLabel',
+                        { defaultMessage: 'Delete' }
+                      )}
                     />
                   </EuiToolTip>
                 </EuiFlexItem>
