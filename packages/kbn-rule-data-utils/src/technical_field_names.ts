@@ -28,6 +28,7 @@ const ALERT_DURATION = `${ALERT_NAMESPACE}.duration.us` as const;
 const ALERT_SEVERITY_LEVEL = `${ALERT_NAMESPACE}.severity.level` as const;
 const ALERT_SEVERITY_VALUE = `${ALERT_NAMESPACE}.severity.value` as const;
 const ALERT_STATUS = `${ALERT_NAMESPACE}.status` as const;
+const SPACE_IDS = `${ALERT_NAMESPACE}.space_ids` as const;
 const ALERT_EVALUATION_THRESHOLD = `${ALERT_NAMESPACE}.evaluation.threshold` as const;
 const ALERT_EVALUATION_VALUE = `${ALERT_NAMESPACE}.evaluation.value` as const;
 
@@ -52,6 +53,7 @@ const fields = {
   ALERT_STATUS,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  SPACE_IDS,
 };
 
 export {
@@ -75,6 +77,7 @@ export {
   ALERT_STATUS,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  SPACE_IDS,
 };
 
 export type TechnicalRuleDataFieldName = ValuesType<typeof fields>;

@@ -98,6 +98,30 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts');
     });
 
+    it.only('superuser should be able to access an alert in a given space', async () => {
+      const { body } = await supertestWithoutAuth
+        .get(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}?id=space1alert&index=${APM_ALERT_INDEX}`)
+        .auth(superUser.username, superUser.password)
+        .set('kbn-xsrf', 'true')
+        .expect(200);
+    });
+
+    it.only('superuser should NOT be able to access an alert in a space which the alert does not exist in', async () => {
+      const { body } = await supertestWithoutAuth
+        .get(`${getSpaceUrlPrefix(SPACE2)}${TEST_URL}?id=space1alert&index=${APM_ALERT_INDEX}`)
+        .auth(superUser.username, superUser.password)
+        .set('kbn-xsrf', 'true')
+        .expect(404);
+    });
+
+    it.only('obs only space 1 user should NOT be able to access an alert in a space which the user does not have access to', async () => {
+      const { body } = await supertestWithoutAuth
+        .get(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}?id=space2alert&index=${APM_ALERT_INDEX}`)
+        .auth(superUser.username, superUser.password)
+        .set('kbn-xsrf', 'true')
+        .expect(404);
+    });
+
     function addTests({ space, authorizedUsers, unauthorizedUsers, alertId, index }: TestCase) {
       authorizedUsers.forEach(({ username, password }) => {
         it(`${username} should be able to access alert ${alertId} in ${space}/${index}`, async () => {

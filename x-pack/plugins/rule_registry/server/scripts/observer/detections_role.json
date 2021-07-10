@@ -14,7 +14,7 @@
         "builtInAlerts": ["all"],
         "alerting": ["all"]
       },
-      "spaces": ["*"]
+      "spaces": ["space1"]
     }
   ]
 }

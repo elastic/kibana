@@ -16,7 +16,12 @@ import {
 import { Logger, ElasticsearchClient } from '../../../../../src/core/server';
 import { alertAuditEvent, AlertAuditAction } from './audit_events';
 import { AuditLogger } from '../../../security/server';
-import { ALERT_STATUS, OWNER, RULE_ID } from '../../common/technical_rule_data_field_names';
+import {
+  ALERT_STATUS,
+  OWNER,
+  RULE_ID,
+  SPACE_IDS,
+} from '../../common/technical_rule_data_field_names';
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import { mapConsumerToIndexName, validFeatureIds, isValidFeatureId } from '../utils/rbac';
 
@@ -57,12 +62,14 @@ export class AlertsClient {
   private readonly auditLogger?: AuditLogger;
   private readonly authorization: PublicMethodsOf<AlertingAuthorization>;
   private readonly esClient: ElasticsearchClient;
+  private readonly spaceId: Promise<string | undefined>;
 
   constructor({ auditLogger, authorization, logger, esClient }: ConstructorOptions) {
     this.logger = logger;
     this.authorization = authorization;
     this.esClient = esClient;
     this.auditLogger = auditLogger;
+    this.spaceId = this.authorization.getSpaceId();
   }
 
   public async getAlertsIndex(
@@ -81,6 +88,7 @@ export class AlertsClient {
     index,
   }: GetAlertParams): Promise<(AlertType & { _version: string | undefined }) | null | undefined> {
     try {
+      const alertSpaceId = await this.spaceId;
       const result = await this.esClient.search<ParsedTechnicalFields>({
         // Context: Originally thought of always just searching `.alerts-*` but that could
         // result in a big performance hit. If the client already knows which index the alert
@@ -91,7 +99,12 @@ export class AlertsClient {
         seq_no_primary_term: true,
       });
 
-      if (result == null || result.body == null || result.body.hits.hits.length === 0) {
+      if (
+        result == null ||
+        result.body == null ||
+        result.body.hits.hits.length === 0 ||
+        !result.body.hits.hits[0]._source['kibana.rac.alert.space_ids'].includes(alertSpaceId)
+      ) {
         return;
       }
 

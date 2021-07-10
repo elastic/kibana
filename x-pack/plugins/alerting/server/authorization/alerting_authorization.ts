@@ -51,6 +51,7 @@ export interface EnsureAuthorizedOpts {
   consumer: string;
   operation: ReadOperations | WriteOperations;
   entity: AlertingAuthorizationEntity;
+  spaceId?: string;
 }
 
 interface HasPrivileges {
@@ -81,6 +82,7 @@ export class AlertingAuthorization {
   private readonly featuresIds: Promise<Set<string>>;
   private readonly allPossibleConsumers: Promise<AuthorizedConsumers>;
   private readonly exemptConsumerIds: string[];
+  private readonly spaceId: Promise<string | undefined>;
 
   constructor({
     alertTypeRegistry,
@@ -100,6 +102,8 @@ export class AlertingAuthorization {
     // An example of this is the Rules Management `consumer` as we don't want to have to
     // manually authorize each rule type in the management UI.
     this.exemptConsumerIds = exemptConsumerIds;
+
+    this.spaceId = getSpace(request).then((maybeSpace) => maybeSpace?.id);
 
     this.featuresIds = getSpace(request)
       .then((maybeSpace) => new Set(maybeSpace?.disabledFeatures ?? []))
@@ -138,6 +142,10 @@ export class AlertingAuthorization {
     return this.authorization?.mode?.useRbacForRequest(this.request) ?? false;
   }
 
+  public async getSpaceId(): Promise<string | undefined> {
+    return this.spaceId;
+  }
+
   /*
    * This method exposes the private 'augmentRuleTypesWithAuthorization' to be
    * used by the RAC/Alerts client
@@ -159,19 +167,32 @@ export class AlertingAuthorization {
     );
   }
 
-  public async ensureAuthorized({ ruleTypeId, consumer, operation, entity }: EnsureAuthorizedOpts) {
+  public async ensureAuthorized({
+    spaceId,
+    ruleTypeId,
+    consumer,
+    operation,
+    entity,
+  }: EnsureAuthorizedOpts) {
     const { authorization } = this;
 
     const isAvailableConsumer = has(await this.allPossibleConsumers, consumer);
     if (authorization && this.shouldCheckAuthorization()) {
       const ruleType = this.alertTypeRegistry.get(ruleTypeId);
       const requiredPrivilegesByScope = {
-        consumer: authorization.actions.alerting.get(ruleTypeId, consumer, entity, operation),
+        consumer: authorization.actions.alerting.get(
+          ruleTypeId,
+          consumer,
+          entity,
+          operation,
+          spaceId
+        ),
         producer: authorization.actions.alerting.get(
           ruleTypeId,
           ruleType.producer,
           entity,
-          operation
+          operation,
+          spaceId
         ),
       };
 
