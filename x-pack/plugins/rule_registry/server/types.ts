@@ -24,7 +24,7 @@ export type AlertTypeExecutor<
   TParams extends AlertTypeParams = {},
   TAlertInstanceContext extends AlertInstanceContext = {},
   TServices extends Record<string, any> = {},
-  TState extends AlertTypeState = {},
+  TState extends AlertTypeState = {}
 > = (
   options: Parameters<SimpleAlertType<TParams, TAlertInstanceContext>['executor']>[0] & {
     services: TServices;

@@ -19,6 +19,11 @@ import { SetupPlugins } from '../../../../target/types/server/plugin';
 import { eqlRuleParams, EqlRuleParams } from '../schemas/rule_schemas';
 import { BaseSignalHit, EqlSignalSearchResponse } from '../signals/types';
 import { createSecurityRuleTypeFactory } from './create_security_rule_type_factory';
+import { createResultObject } from './utils';
+
+interface EqlAlertState {
+  [key: string]: never;
+}
 
 export const createEqlAlertType = (createOptions: {
   lists: SetupPlugins['lists'];
@@ -66,6 +71,8 @@ export const createEqlAlertType = (createOptions: {
       services: { alertWithPersistence, scopedClusterClient },
       params: { index, query },
     }) {
+      const result = createResultObject<EqlAlertState>({});
+
       const from = moment(startedAt).subtract(moment.duration(5, 'm')).toISOString(); // hardcoded 5-minute rule interval
       const to = startedAt.toISOString();
 
@@ -128,9 +135,7 @@ export const createEqlAlertType = (createOptions: {
         });
       }
 
-      return {
-        lastChecked: new Date(),
-      };
+      return result;
     },
   });
 };

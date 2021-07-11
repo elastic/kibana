@@ -12,7 +12,7 @@ import { Logger } from '@kbn/logging';
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 
 import { AlertServices } from '../../../../../alerting/server';
-import { RuleDataClient } from '../../../../../rule_registry/server';
+import { PersistenceServices, RuleDataClient } from '../../../../../rule_registry/server';
 import { THRESHOLD_ALERT_TYPE_ID } from '../../../../common/constants';
 import { SetupPlugins } from '../../../../target/types/server/plugin';
 import { thresholdRuleParams, ThresholdRuleParams } from '../schemas/rule_schemas';
@@ -26,20 +26,10 @@ import {
 import { getFilter } from '../signals/get_filter';
 import { BuildRuleMessage } from '../signals/rule_messages';
 import { createSecurityRuleTypeFactory } from './create_security_rule_type_factory';
+import { createResultObject } from './utils';
 
-/*
-interface RuleParams {
-  indexPatterns: string[];
-  customQuery: string;
-  thresholdFields: string[];
-  thresholdValue: number;
-  thresholdCardinality: Array<{
-    field: string;
-    value: number;
-  }>;
-}
-*/
-
+type ThresholdStateFields = 'TODO';
+type ThresholdAlertState = Record<ThresholdStateFields, unknown>;
 interface BulkCreateThresholdSignalParams {
   results: SignalSearchResponse;
   ruleParams: ThresholdRuleParams;
@@ -90,7 +80,7 @@ export const createThresholdAlertType = (createOptions: {
     logger,
     ruleDataClient,
   });
-  return createSecurityRuleType({
+  return createSecurityRuleType<ThresholdRuleParams, {}, PersistenceServices, ThresholdAlertState>({
     id: THRESHOLD_ALERT_TYPE_ID,
     name: 'Threshold Rule',
     validate: {
@@ -107,21 +97,6 @@ export const createThresholdAlertType = (createOptions: {
         },
       },
     },
-    /*
-      params: schema.object({
-        indexPatterns: schema.arrayOf(schema.string()),
-        customQuery: schema.string(),
-        thresholdFields: schema.arrayOf(schema.string()),
-        thresholdValue: schema.number(),
-        thresholdCardinality: schema.arrayOf(
-          schema.object({
-            field: schema.string(),
-            value: schema.number(),
-          })
-        ),
-      }),
-    },
-    */
     actionGroups: [
       {
         id: 'default',
@@ -136,6 +111,7 @@ export const createThresholdAlertType = (createOptions: {
     isExportable: false,
     producer: 'security-solution',
     async executor({ startedAt, services, params, alertId }) {
+      const result = createResultObject<ThresholdAlertState>({ TODO: 'test' });
       const { index, query, threshold } = params;
       const fromDate = moment(startedAt).subtract(moment.duration(5, 'm')); // hardcoded 5-minute rule interval
       const from = fromDate.toISOString();
@@ -220,9 +196,7 @@ export const createThresholdAlertType = (createOptions: {
         throw new Error(errors.join('\n'));
       }
 
-      return {
-        lastChecked: new Date(),
-      };
+      return result;
     },
   });
 };

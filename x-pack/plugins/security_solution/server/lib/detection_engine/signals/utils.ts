@@ -666,7 +666,6 @@ export const createSearchAfterReturnTypeFromResponse = ({
 
 export const createSearchAfterReturnType = ({
   success,
-  warning,
   searchAfterTimes,
   bulkCreateTimes,
   lastLookBackDate,
@@ -676,7 +675,6 @@ export const createSearchAfterReturnType = ({
   warningMessages,
 }: {
   success?: boolean | undefined;
-  warning?: boolean;
   searchAfterTimes?: string[] | undefined;
   bulkCreateTimes?: string[] | undefined;
   lastLookBackDate?: Date | undefined;
@@ -687,7 +685,6 @@ export const createSearchAfterReturnType = ({
 } = {}): SearchAfterAndBulkCreateReturnType => {
   return {
     success: success ?? true,
-    warning: warning ?? false,
     searchAfterTimes: searchAfterTimes ?? [],
     bulkCreateTimes: bulkCreateTimes ?? [],
     lastLookBackDate: lastLookBackDate ?? null,
