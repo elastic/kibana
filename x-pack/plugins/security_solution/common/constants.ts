@@ -78,13 +78,6 @@ export enum SecurityPageName {
   eventFilters = 'event_filters',
 }
 
-export enum SecurityPageGroupName {
-  detect = 'detect',
-  explore = 'explore',
-  investigate = 'investigate',
-  manage = 'manage',
-}
-
 export const TIMELINES_PATH = '/timelines';
 export const CASES_PATH = '/cases';
 export const OVERVIEW_PATH = '/overview';

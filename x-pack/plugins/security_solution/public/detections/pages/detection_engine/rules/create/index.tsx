@@ -305,7 +305,7 @@ const CreateRulePageComponent: React.FC = () => {
           <MaxWidthEuiFlexItem>
             <DetectionEngineHeaderPage
               backOptions={{
-                href: getRulesUrl(),
+                path: getRulesUrl(),
                 text: i18n.BACK_TO_RULES,
                 pageId: SecurityPageName.rules,
               }}

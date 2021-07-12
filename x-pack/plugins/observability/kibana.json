@@ -19,6 +19,7 @@
     "embeddable",
     "features",
     "ruleRegistry",
+    "timelines",
     "triggersActionsUi"
   ],
   "ui": true,

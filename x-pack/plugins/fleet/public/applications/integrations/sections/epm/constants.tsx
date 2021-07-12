@@ -19,23 +19,24 @@ export const DisplayedAssets: ServiceNameToAssetTypes = {
   elasticsearch: Object.values(ElasticsearchAssetType),
 };
 
-export type DisplayedAssetType = ElasticsearchAssetType | KibanaAssetType;
+export type DisplayedAssetType = ElasticsearchAssetType | KibanaAssetType | 'view';
 
 export const AssetTitleMap: Record<DisplayedAssetType, string> = {
-  dashboard: 'Dashboard',
-  ilm_policy: 'ILM Policy',
-  ingest_pipeline: 'Ingest Pipeline',
-  transform: 'Transform',
-  index_pattern: 'Index Pattern',
-  index_template: 'Index Template',
-  component_template: 'Component Template',
-  search: 'Saved Search',
-  visualization: 'Visualization',
-  map: 'Map',
-  data_stream_ilm_policy: 'Data Stream ILM Policy',
+  dashboard: 'Dashboards',
+  ilm_policy: 'ILM policies',
+  ingest_pipeline: 'Ingest pipelines',
+  transform: 'Transforms',
+  index_pattern: 'Index patterns',
+  index_template: 'Index templates',
+  component_template: 'Component templates',
+  search: 'Saved searches',
+  visualization: 'Visualizations',
+  map: 'Maps',
+  data_stream_ilm_policy: 'Data stream ILM policies',
   lens: 'Lens',
-  security_rule: 'Security Rule',
-  ml_module: 'ML Module',
+  security_rule: 'Security rules',
+  ml_module: 'ML modules',
+  view: 'Views',
 };
 
 export const ServiceTitleMap: Record<ServiceName, string> = {

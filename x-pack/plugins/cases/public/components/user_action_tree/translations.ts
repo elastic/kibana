@@ -63,3 +63,17 @@ export const INSERT_LENS = i18n.translate(
     defaultMessage: 'Insert visualization',
   }
 );
+
+export const ISOLATED_HOST = i18n.translate('xpack.cases.caseView.isolatedHost', {
+  defaultMessage: 'isolated host',
+});
+
+export const RELEASED_HOST = i18n.translate('xpack.cases.caseView.releasedHost', {
+  defaultMessage: 'released host',
+});
+
+export const OTHER_ENDPOINTS = (endpoints: number): string =>
+  i18n.translate('xpack.cases.caseView.otherEndpoints', {
+    values: { endpoints },
+    defaultMessage: ` and {endpoints} {endpoints, plural, =1 {other} other {others}}`,
+  });
