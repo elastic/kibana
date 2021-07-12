@@ -325,13 +325,15 @@ export class Embeddable
     if (this.input.onLoad) {
       this.input.onLoad(true);
     }
-    const input = this.getInput();
     const executionContext = this.deps.executionContext.create({
       type: this.savedVis.type ?? 'lens',
       name: this.savedVis.visualizationType ?? '',
       description: this.savedVis.title ?? this.savedVis.description ?? '',
       id: this.id,
+      url: this.output.editUrl,
     });
+    const input = this.getInput();
+
     render(
       <ExpressionWrapper
         ExpressionRenderer={this.expressionRenderer}

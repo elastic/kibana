@@ -396,6 +396,7 @@ export class VisualizeEmbeddable
         name: this.vis.type.name,
         id: this.vis.id ?? 'unknown_id',
         description: this.vis.title ?? this.vis.type.title,
+        url: this.output.editUrl,
       }),
     };
     if (this.abortController) {
