@@ -49,7 +49,8 @@ export const createTileMapFn = (): TileMapExpressionFunctionDefinition => ({
       as: 'tile_map_vis',
       value: {
         visType: 'tile_map',
-        visConfig: JSON.parse(args.visConfig)
+        visConfig: JSON.parse(args.visConfig),
+        context,
       },
     };
   },

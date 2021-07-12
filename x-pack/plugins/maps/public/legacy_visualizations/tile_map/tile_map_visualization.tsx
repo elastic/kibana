@@ -15,6 +15,7 @@ import { lazyLoadMapModules } from '../../lazy_load_bundle';
 import { TileMapVisConfig } from './types';
 
 interface Props {
+  context: unknown;
   visConfig: TileMapVisConfig;
 }
 
@@ -38,6 +39,12 @@ export class TileMapVisualization extends Component<Props, State> {
     this._isMounted = false;
     if (this._mapEmbeddable) {
       this._mapEmbeddable.destroy();
+    }
+  }
+
+  componentDidUpdate() {
+    if (this._mapEmbeddable) {
+      this._mapEmbeddable.updateInput(this.props.context);
     }
   }
 
@@ -65,8 +72,8 @@ export class TileMapVisualization extends Component<Props, State> {
           ]),
         },
         mapCenter: {
-          lat: this.props.visConfig.mapCenter[1],
-          lon: this.props.visConfig.mapCenter[0],
+          lat: this.props.visConfig.mapCenter[0],
+          lon: this.props.visConfig.mapCenter[1],
           zoom: this.props.visConfig.mapZoom,
         }
       }

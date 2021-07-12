@@ -34,6 +34,8 @@ export const tileMapVisType = {
     defaults: {
       colorSchema: 'Yellow to Red',
       mapType: MapTypes.ScaledCircleMarkers,
+      mapZoom: 2,
+      mapCenter: [0, 0],
     },
   },
   toExpressionAst,
