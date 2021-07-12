@@ -56,7 +56,6 @@ export const initialEndpointPageState = (): Immutable<EndpointState> => {
     agentsWithEndpointsTotalError: undefined,
     endpointsTotal: 0,
     endpointsTotalError: undefined,
-    queryStrategyVersion: undefined,
     policyVersionInfo: undefined,
     hostStatus: undefined,
     isolationRequestState: createUninitialisedResourceState(),
