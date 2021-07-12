@@ -6,9 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
-import { TileMapPlugin as Plugin } from './plugin';
+export enum MapTypes {
+  ScaledCircleMarkers = 'Scaled Circle Markers',
+  ShadedCircleMarkers = 'Shaded Circle Markers',
+  ShadedGeohashGrid = 'Shaded Geohash Grid',
+  Heatmap = 'Heatmap',
+}
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new Plugin(initializerContext);
+export interface TileMapVisParams {
+  colorSchema: string;
+  mapType: MapTypes;
 }

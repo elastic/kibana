@@ -7,18 +7,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { ExpressionFunctionDefinition, Datatable, Render } from '../../../../../../src/plugins/expressions/public';
+import { TileMapVisParams } from './types';
 
-import type { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/public';
-import { TileMapVisConfig, TileMapVisData } from './types';
+const title = i18n.translate('tileMap.vis.mapTitle', {
+  defaultMessage: 'Coordinate Map',
+});
 
 interface Arguments {
-  visConfig: string | null;
+  visConfig: string;
 }
 
 export interface TileMapVisRenderValue {
-  visData: TileMapVisData;
   visType: 'tile_map';
-  visConfig: TileMapVisConfig;
+  layerDescriptorParams: unknown;
 }
 
 export type TileMapExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -31,9 +33,6 @@ export type TileMapExpressionFunctionDefinition = ExpressionFunctionDefinition<
 export const createTileMapFn = (): TileMapExpressionFunctionDefinition => ({
   name: 'tilemap',
   type: 'render',
-  context: {
-    types: ['datatable'],
-  },
   help: i18n.translate('tileMap.function.help', {
     defaultMessage: 'Tilemap visualization',
   }),
@@ -44,27 +43,13 @@ export const createTileMapFn = (): TileMapExpressionFunctionDefinition => ({
       help: '',
     },
   },
-  async fn(context, args, handlers) {
-    const visConfig = args.visConfig && JSON.parse(args.visConfig);
-    const { geohash, metric, geocentroid } = visConfig.dimensions;
-
-    const { convertToGeoJson } = await import('./utils');
-    const convertedData = convertToGeoJson(context, {
-      geohash,
-      metric,
-      geocentroid,
-    });
-
-    if (handlers?.inspectorAdapters?.tables) {
-      handlers.inspectorAdapters.tables.logDatatable('default', context);
-    }
+  async fn(context, args) {
     return {
       type: 'render',
       as: 'tile_map_vis',
       value: {
-        visData: convertedData,
         visType: 'tile_map',
-        visConfig,
+        layerDescriptorParams: JSON.parse(args.visConfig)
       },
     };
   },
