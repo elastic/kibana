@@ -42,6 +42,7 @@ function TutorialFleetInstructions({ http, basePath, isDarkTheme }: Props) {
         const response = await http.get('/api/apm/fleet/has_data');
         setData(response as APIResponseType);
       } catch (e) {
+        setIsLoading(false);
         console.error('Error while fetching fleet details.', e);
       }
       setIsLoading(false);

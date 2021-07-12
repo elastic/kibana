@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { emailConnector, EmailConnector } from '../objects/connector';
+import { getEmailConnector, EmailConnector } from '../objects/connector';
 import {
   CustomRule,
   MachineLearningRule,
-  machineLearningRule,
+  getMachineLearningRule,
   OverrideRule,
   ThreatIndicatorRule,
   ThresholdRule,
@@ -275,7 +275,7 @@ export const fillDefineThresholdRule = (rule: ThresholdRule) => {
   cy.get(TIMELINE(rule.timeline.id!)).click();
   cy.get(COMBO_BOX_CLEAR_BTN).click();
 
-  rule.index!.forEach((index) => {
+  rule.index.forEach((index) => {
     cy.get(COMBO_BOX_INPUT).first().type(`${index}{enter}`);
   });
 
@@ -397,7 +397,7 @@ export const fillIndexAndIndicatorIndexPattern = (
   getIndicatorIndicatorIndex().type(`${indicatorIndex}{enter}`);
 };
 
-export const fillEmailConnectorForm = (connector: EmailConnector = emailConnector) => {
+export const fillEmailConnectorForm = (connector: EmailConnector = getEmailConnector()) => {
   cy.get(CONNECTOR_NAME_INPUT).type(connector.name);
   cy.get(EMAIL_CONNECTOR_FROM_INPUT).type(connector.from);
   cy.get(EMAIL_CONNECTOR_HOST_INPUT).type(connector.host);
@@ -478,9 +478,12 @@ export const fillDefineMachineLearningRuleAndContinue = (rule: MachineLearningRu
     cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type(`${machineLearningJob}{enter}`);
     cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type('{esc}');
   });
-  cy.get(ANOMALY_THRESHOLD_INPUT).type(`{selectall}${machineLearningRule.anomalyScoreThreshold}`, {
-    force: true,
-  });
+  cy.get(ANOMALY_THRESHOLD_INPUT).type(
+    `{selectall}${getMachineLearningRule().anomalyScoreThreshold}`,
+    {
+      force: true,
+    }
+  );
   getDefineContinueButton().should('exist').click({ force: true });
 
   cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).should('not.exist');

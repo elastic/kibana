@@ -7,10 +7,11 @@
 
 import { find } from 'lodash/fp';
 import { EuiCodeBlock, EuiFormRow, EuiComboBox, EuiText } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { SimpleSavedObject } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useHistory, useLocation } from 'react-router-dom';
 
 import { useSavedQueries } from './use_saved_queries';
 
@@ -29,19 +30,25 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
   disabled,
   onChange,
 }) => {
+  const { replace } = useHistory();
+  const location = useLocation();
   const [selectedOptions, setSelectedOptions] = useState([]);
 
   const { data } = useSavedQueries({});
 
-  const queryOptions =
-    data?.savedObjects?.map((savedQuery) => ({
-      label: savedQuery.attributes.id ?? '',
-      value: {
-        id: savedQuery.attributes.id,
-        description: savedQuery.attributes.description,
-        query: savedQuery.attributes.query,
-      },
-    })) ?? [];
+  const queryOptions = useMemo(
+    () =>
+      data?.savedObjects?.map((savedQuery) => ({
+        label: savedQuery.attributes.id ?? '',
+        value: {
+          savedObjectId: savedQuery.id,
+          id: savedQuery.attributes.id,
+          description: savedQuery.attributes.description,
+          query: savedQuery.attributes.query,
+        },
+      })) ?? [],
+    [data?.savedObjects]
+  );
 
   const handleSavedQueryChange = useCallback(
     (newSelectedOptions) => {
@@ -72,6 +79,20 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
     ),
     []
   );
+
+  useEffect(() => {
+    const savedQueryId = location.state?.form?.savedQueryId;
+
+    if (savedQueryId) {
+      const savedQueryOption = find(['value.savedObjectId', savedQueryId], queryOptions);
+
+      if (savedQueryOption) {
+        handleSavedQueryChange([savedQueryOption]);
+      }
+
+      replace({ state: null });
+    }
+  }, [handleSavedQueryChange, replace, location.state, queryOptions]);
 
   return (
     <EuiFormRow
