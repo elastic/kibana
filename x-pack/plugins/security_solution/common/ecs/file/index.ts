@@ -24,10 +24,22 @@ export interface MemoryPe {
 }
 
 export interface StartAddressDetails {
-  allocation_type?: string;
+  allocation_base?: number;
+  allocation_protection?: string;
   allocation_size?: number;
-  region_size?: number;
+  allocation_type?: string;
+  bytes_address?: number;
+  bytes_allocation_offset?: number;
+  bytes_compressed?: string;
+  bytes_compressed_present?: string;
+  mapped_path?: string;
+  mapped_pe_detected?: boolean;
+  memory_pe_detected?: boolean;
+  region_base?: number;
   region_protection?: string;
+  region_size?: number;
+  region_state?: string;
+  strings?: string;
   memory_pe?: MemoryPe;
 }
 
