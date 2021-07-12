@@ -535,7 +535,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
 
       onJoinError(i18n.translate('xpack.maps.vectorLayer.joinErrorMsg', {
         defaultMessage: `Unable to perform term join. {reason} Please check your 'Term joins' configuration.`,
-        values: { reason }
+        values:   { reason }
       }));
     }
   }
