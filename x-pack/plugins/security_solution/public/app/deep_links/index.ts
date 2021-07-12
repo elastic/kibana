@@ -26,7 +26,7 @@ import {
   NETWORK,
   TIMELINES,
   CASE,
-  ADMINISTRATION,
+  MANAGE,
 } from '../translations';
 import {
   OVERVIEW_PATH,
@@ -116,12 +116,12 @@ export const topDeepLinks: AppDeepLink[] = [
   },
   {
     id: SecurityPageName.administration,
-    title: ADMINISTRATION,
+    title: MANAGE,
     path: ENDPOINTS_PATH,
     navLinkStatus: AppNavLinkStatus.hidden,
     keywords: [
-      i18n.translate('xpack.securitySolution.search.administration', {
-        defaultMessage: 'Administration',
+      i18n.translate('xpack.securitySolution.search.manage', {
+        defaultMessage: 'Manage',
       }),
     ],
   },
@@ -179,28 +179,28 @@ const nestedDeepLinks: SecurityDeepLinks = {
         title: i18n.translate('xpack.securitySolution.search.hosts.authentications', {
           defaultMessage: 'Authentications',
         }),
-        path: '/authentications',
+        path: `${HOSTS_PATH}/authentications`,
       },
       {
         id: 'uncommonProcesses',
         title: i18n.translate('xpack.securitySolution.search.hosts.uncommonProcesses', {
           defaultMessage: 'Uncommon Processes',
         }),
-        path: '/uncommonProcesses',
+        path: `${HOSTS_PATH}/uncommonProcesses`,
       },
       {
         id: 'events',
         title: i18n.translate('xpack.securitySolution.search.hosts.events', {
           defaultMessage: 'Events',
         }),
-        path: '/events',
+        path: `${HOSTS_PATH}/events`,
       },
       {
         id: 'externalAlerts',
         title: i18n.translate('xpack.securitySolution.search.hosts.externalAlerts', {
           defaultMessage: 'External Alerts',
         }),
-        path: '/alerts',
+        path: `${HOSTS_PATH}/alerts`,
       },
     ],
     premium: [
@@ -209,7 +209,7 @@ const nestedDeepLinks: SecurityDeepLinks = {
         title: i18n.translate('xpack.securitySolution.search.hosts.anomalies', {
           defaultMessage: 'Anomalies',
         }),
-        path: '/anomalies',
+        path: `${HOSTS_PATH}/anomalies`,
       },
     ],
   },
@@ -220,28 +220,28 @@ const nestedDeepLinks: SecurityDeepLinks = {
         title: i18n.translate('xpack.securitySolution.search.network.dns', {
           defaultMessage: 'DNS',
         }),
-        path: '/dns',
+        path: `${NETWORK_PATH}/dns`,
       },
       {
         id: 'http',
         title: i18n.translate('xpack.securitySolution.search.network.http', {
           defaultMessage: 'HTTP',
         }),
-        path: '/http',
+        path: `${NETWORK_PATH}/http`,
       },
       {
         id: 'tls',
         title: i18n.translate('xpack.securitySolution.search.network.tls', {
           defaultMessage: 'TLS',
         }),
-        path: '/tls',
+        path: `${NETWORK_PATH}/tls`,
       },
       {
         id: 'externalAlertsNetwork',
         title: i18n.translate('xpack.securitySolution.search.network.externalAlerts', {
           defaultMessage: 'External Alerts',
         }),
-        path: '/external-alerts',
+        path: `${NETWORK_PATH}/external-alerts`,
       },
     ],
     premium: [
@@ -250,7 +250,7 @@ const nestedDeepLinks: SecurityDeepLinks = {
         title: i18n.translate('xpack.securitySolution.search.hosts.anomalies', {
           defaultMessage: 'Anomalies',
         }),
-        path: '/anomalies',
+        path: `${NETWORK_PATH}/anomalies`,
       },
     ],
   },
@@ -261,7 +261,7 @@ const nestedDeepLinks: SecurityDeepLinks = {
         title: i18n.translate('xpack.securitySolution.search.timeline.templates', {
           defaultMessage: 'Templates',
         }),
-        path: '/template',
+        path: `${TIMELINES_PATH}/template`,
       },
     ],
   },
@@ -272,7 +272,7 @@ const nestedDeepLinks: SecurityDeepLinks = {
         title: i18n.translate('xpack.securitySolution.search.cases.create', {
           defaultMessage: 'Create New Case',
         }),
-        path: '/create',
+        path: `${CASES_PATH}/create`,
       },
     ],
     premium: [
@@ -281,7 +281,7 @@ const nestedDeepLinks: SecurityDeepLinks = {
         title: i18n.translate('xpack.securitySolution.search.cases.configure', {
           defaultMessage: 'Configure Cases',
         }),
-        path: '/configure',
+        path: `${CASES_PATH}/configure`,
       },
     ],
   },
@@ -299,14 +299,14 @@ const nestedDeepLinks: SecurityDeepLinks = {
       {
         id: SecurityPageName.trustedApps,
         title: i18n.translate('xpack.securitySolution.search.administration.trustedApps', {
-          defaultMessage: 'Trusted Applications',
+          defaultMessage: 'Trusted applications',
         }),
         path: TRUSTED_APPS_PATH,
       },
       {
         id: SecurityPageName.eventFilters,
         title: i18n.translate('xpack.securitySolution.search.administration.eventFilters', {
-          defaultMessage: 'Event Filters',
+          defaultMessage: 'Event filters',
         }),
         path: EVENT_FILTERS_PATH,
       },
@@ -377,12 +377,13 @@ export function updateGlobalNavigation({
   const deepLinks = getDeepLinks(undefined, capabilities);
   const updatedDeepLinks = deepLinks.map((link) => {
     switch (link.id) {
-      case 'case':
+      case SecurityPageName.case:
         return {
           ...link,
           navLinkStatus: capabilities.siem.read_cases
             ? AppNavLinkStatus.visible
             : AppNavLinkStatus.hidden,
+          searchable: capabilities.siem.read_cases === true,
         };
       default:
         return link;
@@ -390,6 +391,7 @@ export function updateGlobalNavigation({
   });
 
   updater$.next(() => ({
+    navLinkStatus: AppNavLinkStatus.hidden, // needed to prevent showing main nav link
     deepLinks: updatedDeepLinks,
   }));
 }

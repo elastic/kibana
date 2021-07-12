@@ -1,22 +1,19 @@
-.kbnPageTemplateSolutionNav__title {
-  margin-bottom: $euiSizeL;
+$euiSideNavEmphasizedBackgroundColor: transparentize($euiColorLightShade, .7);
+
+.kbnPageTemplateSolutionNav {
+  @include euiYScroll;
+
+  @include euiBreakpoint('m' ,'l', 'xl') {
+    width: 248px;
+    padding: $euiSizeL;
+  }
 }
 
-@include euiBreakpoint('xs','s') {
-  .kbnPageTemplateSolutionNav {
-    // TODO: Fix in EUI
-    .euiSideNav__mobileToggle {
-      height: auto;
-      font-size: $euiFontSizeM;
+.kbnPageTemplateSolutionNav--hidden {
+  pointer-events: none;
+  opacity: 0;
 
-      .euiButtonEmpty__text {
-        overflow: visible;
-      }
-    }
-  }
-
-  // Rely on the `mobileToggle` of the EuiSideNav component to title the navigation list
-  .kbnPageTemplateSolutionNav__title {
-    display: none;
+  @include euiCanAnimate {
+    transition: opacity $euiAnimSpeedFast $euiAnimSlightResistance;
   }
 }

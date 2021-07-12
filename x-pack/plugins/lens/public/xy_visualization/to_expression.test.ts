@@ -10,7 +10,7 @@ import { Position } from '@elastic/charts';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { getXyVisualization } from './xy_visualization';
 import { Operation } from '../types';
-import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_service/mocks';
+import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 
 describe('#toExpression', () => {

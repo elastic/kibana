@@ -8,62 +8,6 @@
 import { SearchResponse } from 'elasticsearch';
 import { HostMetadata } from '../../../../../common/endpoint/types';
 
-export function createV1SearchResponse(hostMetadata?: HostMetadata): SearchResponse<HostMetadata> {
-  return ({
-    took: 15,
-    timed_out: false,
-    _shards: {
-      total: 1,
-      successful: 1,
-      skipped: 0,
-      failed: 0,
-    },
-    hits: {
-      total: {
-        value: 5,
-        relation: 'eq',
-      },
-      max_score: null,
-      hits: hostMetadata
-        ? [
-            {
-              _index: 'metrics-endpoint.metadata-default',
-              _id: '8FhM0HEBYyRTvb6lOQnw',
-              _score: null,
-              _source: hostMetadata,
-              sort: [1588337587997],
-              inner_hits: {
-                most_recent: {
-                  hits: {
-                    total: {
-                      value: 2,
-                      relation: 'eq',
-                    },
-                    max_score: null,
-                    hits: [
-                      {
-                        _index: 'metrics-endpoint.metadata-default',
-                        _id: 'W6Vo1G8BYQH1gtPUgYkC',
-                        _score: null,
-                        _source: hostMetadata,
-                        sort: [1579816615336],
-                      },
-                    ],
-                  },
-                },
-              },
-            },
-          ]
-        : [],
-    },
-    aggregations: {
-      total: {
-        value: 1,
-      },
-    },
-  } as unknown) as SearchResponse<HostMetadata>;
-}
-
 export function createV2SearchResponse(hostMetadata?: HostMetadata): SearchResponse<HostMetadata> {
   return ({
     took: 15,

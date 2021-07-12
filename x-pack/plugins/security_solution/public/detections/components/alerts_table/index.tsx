@@ -51,6 +51,7 @@ import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { buildTimeRangeFilter } from './helpers';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { columns, RenderCellValue } from '../../configurations/security_solution_detections';
+import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 
 interface OwnProps {
   defaultFilters?: Filter[];
@@ -131,6 +132,15 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     },
     [browserFields, defaultFilters, globalFilters, globalQuery, indexPatterns, kibana, to, from]
   );
+
+  useInvalidFilterQuery({
+    id: timelineId,
+    filterQuery: getGlobalQuery([])?.filterQuery,
+    kqlError: getGlobalQuery([])?.kqlError,
+    query: globalQuery,
+    startDate: from,
+    endDate: to,
+  });
 
   const setEventsLoadingCallback = useCallback(
     ({ eventIds, isLoading }: SetEventsLoadingProps) => {

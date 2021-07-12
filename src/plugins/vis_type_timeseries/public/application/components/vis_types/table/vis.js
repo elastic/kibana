@@ -18,7 +18,7 @@ import { replaceVars } from '../../lib/replace_vars';
 import { fieldFormats } from '../../../../../../../plugins/data/public';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getFieldFormats, getCoreStart } from '../../../../services';
-import { emptyLabel } from '../../../../../common/empty_label';
+import { getValueOrEmpty } from '../../../../../common/empty_label';
 
 function getColor(rules, colorKey, value) {
   let color;
@@ -58,7 +58,11 @@ class TableVis extends Component {
 
   renderRow = (row) => {
     const { model } = this.props;
-    let rowDisplay = model.pivot_type === 'date' ? this.dateFormatter.convert(row.key) : row.key;
+
+    let rowDisplay = getValueOrEmpty(
+      model.pivot_type === 'date' ? this.dateFormatter.convert(row.key) : row.key
+    );
+
     if (model.drilldown_url) {
       const url = replaceVars(model.drilldown_url, {}, { key: row.key });
       rowDisplay = <a href={sanitizeUrl(url)}>{rowDisplay}</a>;
@@ -98,7 +102,7 @@ class TableVis extends Component {
       });
     return (
       <tr key={row.key}>
-        <td>{rowDisplay || emptyLabel}</td>
+        <td>{rowDisplay}</td>
         {columns}
       </tr>
     );
