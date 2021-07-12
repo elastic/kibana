@@ -30,6 +30,7 @@ interface OperatorProps {
  * x-pack/plugins/lists/public/exceptions/components/autocomplete/field.tsx
  *
  * TODO: This should be in its own packaged and not copied
+ * NOTE: This has deviated from the copy and will have to be reconciled.
  */
 export const FieldComponent: React.FC<OperatorProps> = ({
   placeholder,
