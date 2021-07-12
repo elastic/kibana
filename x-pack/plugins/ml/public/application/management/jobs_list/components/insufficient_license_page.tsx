@@ -38,13 +38,13 @@ export const InsufficientLicensePage: FC<Props> = ({ basePath }) => (
           <p>
             <FormattedMessage
               id="xpack.ml.management.jobsList.insufficientLicenseDescription"
-              defaultMessage="To use the machine learning features, you must have the appropriate subscription. {upgradeLink}."
+              defaultMessage="To use these machine learning features, you must {link}."
               values={{
-                upgradeLink: (
+                link: (
                   <EuiLink href={`${basePath.get()}/app/management/stack/license_management/home`}>
                     <FormattedMessage
                       id="xpack.ml.management.jobsList.insufficientLicenseDescription.link"
-                      defaultMessage="Upgrade or start a trial"
+                      defaultMessage="start a trial or upgrade your subscription"
                     />
                   </EuiLink>
                 ),
