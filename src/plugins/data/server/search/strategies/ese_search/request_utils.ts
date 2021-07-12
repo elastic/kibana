@@ -46,21 +46,18 @@ export async function getDefaultAsyncSubmitParams(
     | 'keep_on_completion'
   >
 > {
+  // TODO: searchSessionsConfig could be "null" if we are running without x-pack which happens only in tests.
+  // This can be cleaned up when we completely stop separating basic and oss
+  const keepAlive = searchSessionsConfig?.enabled
+    ? `${searchSessionsConfig.defaultExpiration.asMilliseconds()}ms`
+    : '1m';
   return {
     batched_reduce_size: 64,
     keep_on_completion: !!options.sessionId, // Always return an ID, even if the request completes quickly
     ...getDefaultAsyncGetParams(options),
     ...(await getIgnoreThrottled(uiSettingsClient)),
     ...(await getDefaultSearchParams(uiSettingsClient)),
-    ...(options.sessionId
-      ? {
-          // TODO: searchSessionsConfig could be "null" if we are running without x-pack which happens only in tests.
-          // This can be cleaned up when we completely stop separating basic and oss
-          keep_alive: searchSessionsConfig
-            ? `${searchSessionsConfig.defaultExpiration.asMilliseconds()}ms`
-            : '1m',
-        }
-      : {}),
+    ...(options.sessionId ? { keep_alive: keepAlive } : {}),
   };
 }
 
