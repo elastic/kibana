@@ -196,6 +196,9 @@ describe('createLifecycleRuleTypeFactory', () => {
               "kibana.rac.alert.id": "opbeans-java",
               "kibana.rac.alert.owner": "consumer",
               "kibana.rac.alert.producer": "producer",
+              "kibana.rac.alert.space_ids": Array [
+                "spaceId",
+              ],
               "kibana.rac.alert.start": "2021-06-16T09:01:00.000Z",
               "kibana.rac.alert.status": "open",
               "rule.category": "ruleTypeName",
@@ -215,6 +218,9 @@ describe('createLifecycleRuleTypeFactory', () => {
               "kibana.rac.alert.id": "opbeans-node",
               "kibana.rac.alert.owner": "consumer",
               "kibana.rac.alert.producer": "producer",
+              "kibana.rac.alert.space_ids": Array [
+                "spaceId",
+              ],
               "kibana.rac.alert.start": "2021-06-16T09:01:00.000Z",
               "kibana.rac.alert.status": "open",
               "rule.category": "ruleTypeName",
@@ -234,6 +240,9 @@ describe('createLifecycleRuleTypeFactory', () => {
               "kibana.rac.alert.id": "opbeans-java",
               "kibana.rac.alert.owner": "consumer",
               "kibana.rac.alert.producer": "producer",
+              "kibana.rac.alert.space_ids": Array [
+                "spaceId",
+              ],
               "kibana.rac.alert.start": "2021-06-16T09:01:00.000Z",
               "kibana.rac.alert.status": "open",
               "rule.category": "ruleTypeName",
@@ -253,6 +262,9 @@ describe('createLifecycleRuleTypeFactory', () => {
               "kibana.rac.alert.id": "opbeans-node",
               "kibana.rac.alert.owner": "consumer",
               "kibana.rac.alert.producer": "producer",
+              "kibana.rac.alert.space_ids": Array [
+                "spaceId",
+              ],
               "kibana.rac.alert.start": "2021-06-16T09:01:00.000Z",
               "kibana.rac.alert.status": "open",
               "rule.category": "ruleTypeName",

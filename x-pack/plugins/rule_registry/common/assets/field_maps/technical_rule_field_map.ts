@@ -44,7 +44,7 @@ export const technicalRuleFieldMap = {
   ),
   [OWNER]: { type: 'keyword' },
   [PRODUCER]: { type: 'keyword' },
-  [SPACE_IDS]: { type: 'keyword' },
+  [SPACE_IDS]: { type: 'keyword', array: true },
   [ALERT_UUID]: { type: 'keyword' },
   [ALERT_ID]: { type: 'keyword' },
   [ALERT_START]: { type: 'date' },

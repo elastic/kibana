@@ -27,6 +27,7 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
 
 beforeEach(() => {
   jest.resetAllMocks();
+  alertingAuthMock.getSpaceId.mockImplementation(() => Promise.resolve('test_default_space_id'));
 });
 
 describe('get()', () => {
@@ -60,6 +61,7 @@ describe('get()', () => {
                   message: 'hello world 1',
                   'kibana.rac.alert.owner': 'apm',
                   'kibana.rac.alert.status': 'open',
+                  'kibana.rac.alert.space_ids': ['test_default_space_id'],
                 },
               },
             ],
@@ -72,6 +74,9 @@ describe('get()', () => {
       Object {
         "_version": "WzM2MiwyXQ==",
         "kibana.rac.alert.owner": "apm",
+        "kibana.rac.alert.space_ids": Array [
+          "test_default_space_id",
+        ],
         "kibana.rac.alert.status": "open",
         "message": "hello world 1",
         "rule.id": "apm.error_rate",
@@ -126,6 +131,7 @@ describe('get()', () => {
                   message: 'hello world 1',
                   'kibana.rac.alert.owner': 'apm',
                   'kibana.rac.alert.status': 'open',
+                  'kibana.rac.alert.space_ids': ['test_default_space_id'],
                 },
               },
             ],
@@ -187,6 +193,7 @@ describe('get()', () => {
                     message: 'hello world 1',
                     'kibana.rac.alert.owner': 'apm',
                     'kibana.rac.alert.status': 'open',
+                    'kibana.rac.alert.space_ids': ['test_default_space_id'],
                   },
                 },
               ],
@@ -210,6 +217,9 @@ describe('get()', () => {
         Object {
           "_version": "WzM2MiwyXQ==",
           "kibana.rac.alert.owner": "apm",
+          "kibana.rac.alert.space_ids": Array [
+            "test_default_space_id",
+          ],
           "kibana.rac.alert.status": "open",
           "message": "hello world 1",
           "rule.id": "apm.error_rate",

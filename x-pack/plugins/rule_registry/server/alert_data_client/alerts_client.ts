@@ -6,6 +6,8 @@
  */
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
+import { get } from 'lodash/fp';
+
 import { AlertTypeParams } from '../../../alerting/server';
 import {
   ReadOperations,
@@ -99,11 +101,13 @@ export class AlertsClient {
         seq_no_primary_term: true,
       });
 
+      const spaceIds = get(SPACE_IDS, result?.body?.hits?.hits[0]?._source);
+
       if (
         result == null ||
         result.body == null ||
         result.body.hits.hits.length === 0 ||
-        !result.body.hits.hits[0]._source['kibana.rac.alert.space_ids'].includes(alertSpaceId)
+        !spaceIds?.includes(alertSpaceId!) // assert spaceId is not null because if promise rejects we end up in catch block
       ) {
         return;
       }
