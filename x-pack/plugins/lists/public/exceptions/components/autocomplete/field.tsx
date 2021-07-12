@@ -28,6 +28,12 @@ interface OperatorProps {
   selectedField: IFieldType | undefined;
 }
 
+/**
+ * There is a copy within:
+ * x-pack/plugins/security_solution/public/common/components/autocomplete/field.tsx
+ *
+ * TODO: This should be in its own packaged and not copied
+ */
 export const FieldComponent: React.FC<OperatorProps> = ({
   fieldInputWidth,
   fieldTypeFilter = [],

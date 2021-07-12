@@ -38,6 +38,11 @@ interface AutocompleteFieldMatchProps {
   onError?: (arg: boolean) => void;
 }
 
+/**
+ * There is a copy of this within:
+ * x-pack/plugins/lists/public/exceptions/components/autocomplete/field_value_match.tsx
+ * TODO: This should be its own package and not copied
+ */
 export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchProps> = ({
   placeholder,
   rowLabel,

@@ -118,7 +118,6 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
           : [],
       [exceptionItem.entries, indexPattern]
     );
-
     return (
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="s" data-test-subj="exceptionEntriesContainer">

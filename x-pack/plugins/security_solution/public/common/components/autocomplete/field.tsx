@@ -25,6 +25,12 @@ interface OperatorProps {
   onChange: (a: IFieldType[]) => void;
 }
 
+/**
+ * There is a copy within:
+ * x-pack/plugins/lists/public/exceptions/components/autocomplete/field.tsx
+ *
+ * TODO: This should be in its own packaged and not copied
+ */
 export const FieldComponent: React.FC<OperatorProps> = ({
   placeholder,
   selectedField,
