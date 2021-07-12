@@ -508,10 +508,11 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
 
     if (joinStatusesWithoutAnyMatches.length) {
       function prettyPrintArray(array: unknown[]) {
-        return array.length <= 10
+        return array.length <= 5
           ? array.join(',')
-          : array.slice(0, 10).join(',') + i18n.translate('xpack.maps.vectorLayer.joinError.firstTenMsg', {
-            defaultMessage: ` (showing first 10)`,
+          : array.slice(0, 5).join(',') + i18n.translate('xpack.maps.vectorLayer.joinError.firstTenMsg', {
+            defaultMessage: ` (5 of {total})`,
+            values: { total, array.length }
           });
       }
 
@@ -519,21 +520,21 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       const leftFieldName = joinStatus.joinState.join.getLeftField().getName();
       const reason = joinStatus.keys.length === 0
         ? i18n.translate('xpack.maps.vectorLayer.joinError.noLeftFieldValuesMsg', {
-          defaultMessage: `Left field: '{leftFieldName}', did not provide any values.`,
-          values: { leftFieldName }
-        })
+            defaultMessage: `Left field: '{leftFieldName}', does not provide any values.`,
+            values: { leftFieldName }
+          })
         : i18n.translate('xpack.maps.vectorLayer.joinError.noMatchesMsg', {
-          defaultMessage: `Left field: '{leftFieldName}' with values: { leftFieldValues }, does not match right field: '{rightFieldName}' with values: { rightFieldValues }.`,
-          values: {
-            leftFieldName,
-            leftFieldValues: prettyPrintArray(joinStatus.keys),
-            rightFieldName: joinStatus.joinState.join.getRightJoinSource().getTermField().getName(),
-            rightFieldValues: prettyPrintArray(Array.from(joinStatus.joinState.propertiesMap.keys())),
-          }
-        });
+            defaultMessage: `Left field does not match right field. Left field: '{leftFieldName}' has values { leftFieldValues }. Right field: '{rightFieldName}' has values: { rightFieldValues }.`,
+            values: {
+              leftFieldName,
+              leftFieldValues: prettyPrintArray(joinStatus.keys),
+              rightFieldName: joinStatus.joinState.join.getRightJoinSource().getTermField().getName(),
+              rightFieldValues: prettyPrintArray(Array.from(joinStatus.joinState.propertiesMap.keys())),
+            }
+          });
 
       onJoinError(i18n.translate('xpack.maps.vectorLayer.joinErrorMsg', {
-        defaultMessage: `Unable to perform term join. {reason} Please check your 'Term joins' configuration.`,
+        defaultMessage: `Unable to perform term join. {reason}`,
         values: { reason }
       }));
     }
