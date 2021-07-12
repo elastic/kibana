@@ -110,9 +110,17 @@ export const createThresholdAlertType = (createOptions: {
     minimumLicenseRequired: 'basic',
     isExportable: false,
     producer: 'security-solution',
-    async executor({ startedAt, services, params, alertId }) {
+    async executor(execOptions) {
       const result = createResultObject<ThresholdAlertState>({ TODO: 'test' });
+      const {
+        alertId,
+        params,
+        runOpts: { exceptionItems, tuple },
+        services,
+        startedAt,
+      } = execOptions;
       const { index, query, threshold } = params;
+      const { alertWithPersistence, savedObjectsClient } = services;
       const fromDate = moment(startedAt).subtract(moment.duration(5, 'm')); // hardcoded 5-minute rule interval
       const from = fromDate.toISOString();
       const to = startedAt.toISOString();

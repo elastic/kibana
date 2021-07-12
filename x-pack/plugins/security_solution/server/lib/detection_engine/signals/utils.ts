@@ -721,7 +721,6 @@ export const mergeReturns = (
   return searchAfters.reduce((prev, next) => {
     const {
       success: existingSuccess,
-      warning: existingWarning,
       searchAfterTimes: existingSearchAfterTimes,
       bulkCreateTimes: existingBulkCreateTimes,
       lastLookBackDate: existingLastLookBackDate,
@@ -733,7 +732,6 @@ export const mergeReturns = (
 
     const {
       success: newSuccess,
-      warning: newWarning,
       searchAfterTimes: newSearchAfterTimes,
       bulkCreateTimes: newBulkCreateTimes,
       lastLookBackDate: newLastLookBackDate,
@@ -745,7 +743,6 @@ export const mergeReturns = (
 
     return {
       success: existingSuccess && newSuccess,
-      warning: existingWarning || newWarning,
       searchAfterTimes: [...existingSearchAfterTimes, ...newSearchAfterTimes],
       bulkCreateTimes: [...existingBulkCreateTimes, ...newBulkCreateTimes],
       lastLookBackDate: newLastLookBackDate ?? existingLastLookBackDate,

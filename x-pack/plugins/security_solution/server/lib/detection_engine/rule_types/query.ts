@@ -40,7 +40,7 @@ export const createQueryAlertType = (createOptions: {
     name: 'Custom Query Rule',
     validate: {
       params: {
-        validate: (object: unknown): QueryRuleParams => {
+        validate: (object: unknown) => {
           const [validated, errors] = validateNonExact(object, queryRuleParams);
           if (errors != null) {
             throw new Error(errors);
@@ -69,6 +69,7 @@ export const createQueryAlertType = (createOptions: {
       const result = createResultObject<QueryAlertState>({});
       const {
         params: { index, query },
+        runOpts: { exceptionItems, tuple },
         services: { alertWithPersistence, savedObjectsClient },
       } = execOptions;
       try {

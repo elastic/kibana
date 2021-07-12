@@ -4,9 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { Moment } from 'moment';
 import { flow } from 'fp-ts/lib/function';
 import { Either, chain, fold, tryCatch } from 'fp-ts/lib/Either';
 import { Logger } from '@kbn/logging';
+import { ExceptionListItemSchema, ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { toError } from '@kbn/securitysolution-list-api';
 import {
   createPersistenceRuleTypeFactory,
@@ -27,6 +29,7 @@ import { AlertType } from '../../../../../alerting/server';
 import { buildRuleMessageFactory } from '../signals/rule_messages';
 import {
   checkPrivilegesFromEsClient,
+  getExceptions,
   getRuleRangeTuples,
   hasReadIndexPrivileges,
   hasTimestampFields,
@@ -35,36 +38,43 @@ import {
 import { RuleParams } from '../schemas/rule_schemas';
 import { DEFAULT_MAX_SIGNALS } from '../../../../common/constants';
 import { SecurityAlertTypeReturnValue } from './types';
-// import { AlertTypeExecutor } from '../../../../../rule_registry/server';
+import { newGetListsClient } from './utils/get_new_list_client';
 
 type SimpleAlertType<
   TParams extends AlertTypeParams = {},
   TAlertInstanceContext extends AlertInstanceContext = {}
 > = AlertType<TParams, AlertTypeState, AlertInstanceState, TAlertInstanceContext, string, string>;
 
+export interface RunOpts {
+  exceptionItems: ExceptionListItemSchema[];
+  tuple: {
+    to: Moment;
+    from: Moment;
+    maxSignals: number;
+  };
+}
+
 export type SecurityAlertTypeExecutor<
+  TServices extends PersistenceServices<TAlertInstanceContext>,
   TParams extends AlertTypeParams = {},
   TAlertInstanceContext extends AlertInstanceContext = {},
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  TServices extends Record<string, any> = {},
   TState extends AlertTypeState = {}
 > = (
   options: Parameters<SimpleAlertType<TParams, TAlertInstanceContext>['executor']>[0] & {
-    services: TServices;
-  }
+    runOpts: RunOpts;
+  } & { services: TServices }
 ) => Promise<SecurityAlertTypeReturnValue<TState>>;
 
 type SecurityAlertTypeWithExecutor<
+  TServices extends PersistenceServices<TAlertInstanceContext>,
   TParams extends AlertTypeParams = {},
   TAlertInstanceContext extends AlertInstanceContext = {},
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  TServices extends Record<string, any> = {},
   TState extends AlertTypeState = {}
 > = Omit<
   AlertType<TParams, TState, AlertInstanceState, TAlertInstanceContext, string, string>,
   'executor'
 > & {
-  executor: SecurityAlertTypeExecutor<TParams, TAlertInstanceContext, TServices, TState>;
+  executor: SecurityAlertTypeExecutor<TServices, TParams, TAlertInstanceContext, TState>;
 };
 
 type CreateSecurityRuleTypeFactory = (options: {
@@ -74,10 +84,10 @@ type CreateSecurityRuleTypeFactory = (options: {
 }) => <
   TParams extends RuleParams,
   TAlertInstanceContext extends AlertInstanceContext,
-  TServices extends PersistenceServices,
+  TServices extends PersistenceServices<TAlertInstanceContext>,
   TState extends AlertTypeState = {}
 >(
-  type: SecurityAlertTypeWithExecutor<TParams, TAlertInstanceContext, TServices, TState>
+  type: SecurityAlertTypeWithExecutor<TServices, TParams, TAlertInstanceContext, TState>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ) => AlertTypeWithExecutor<TParams, TAlertInstanceContext, any, TState>;
 
@@ -90,7 +100,14 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
   return persistenceRuleType({
     ...type,
     async executor(options) {
-      const { alertId, params, previousStartedAt, services } = options;
+      const {
+        alertId,
+        params,
+        previousStartedAt,
+        services,
+        spaceId,
+        updatedBy: updatedByUser,
+      } = options;
       const { from, timestampOverride, to } = params;
       const { savedObjectsClient, scopedClusterClient } = services;
       const ruleId = type.id;
@@ -197,10 +214,9 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
         await ruleStatusService.error(gapMessage, { gap: gapString });
       }
 
-      /*
       const { listClient, exceptionsClient } = newGetListsClient({
         esClient: services.scopedClusterClient.asCurrentUser,
-        updatedByUser: updatedBy,
+        updatedByUser,
         spaceId,
         lists,
         savedObjectClient: options.services.savedObjectsClient,
@@ -210,16 +226,24 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
         client: exceptionsClient,
         lists: (params.exceptionsList as ListArray) ?? [],
       });
-      */
 
-      const result = await type.executor(options);
+      const results: Array<SecurityAlertTypeReturnValue<{}>> = []; // TODO: get alert type state?
+      for (const tuple of tuples) {
+        results.push(
+          await type.executor({
+            ...options,
+            services,
+            runOpts: {
+              exceptionItems,
+              tuple,
+            },
+          })
+        );
+      }
 
+      // TODO: combine results
+      const result = results[0];
       return result;
-      /*
-        alertTypeState: state,
-        alertInstances: alertInstances,
-        previousStartedAt: startedAt,
-      */
     },
   });
 };
