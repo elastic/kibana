@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
 import { ESSearchRequest } from 'src/core/types/elasticsearch';
 
-import { buildEsQuery, IIndexPattern } from '../../../../../../../src/plugins/data/common';
+import { buildEsQuery, IndexPatternBase } from '@kbn/es-query';
 
 import {
   RuleDataClient,
@@ -50,7 +50,7 @@ export const createQueryAlertType = (ruleDataClient: RuleDataClient, logger: Log
       params: { indexPatterns, customQuery },
     }) {
       try {
-        const indexPattern: IIndexPattern = {
+        const indexPattern: IndexPatternBase = {
           fields: [],
           title: indexPatterns.join(),
         };

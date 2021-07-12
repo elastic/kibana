@@ -6,6 +6,7 @@
  */
 
 import { PaletteOutput } from 'src/plugins/charts/public';
+import { ExistsFilter } from '@kbn/es-query';
 import {
   LastValueIndexPatternColumn,
   DateHistogramIndexPatternColumn,
@@ -16,8 +17,7 @@ import {
 } from '../../../../../lens/public';
 
 import { PersistableFilter } from '../../../../../lens/common';
-import { IIndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns';
-import { ExistsFilter } from '../../../../../../../src/plugins/data/common/es_query/filters';
+import { IIndexPattern } from '../../../../../../../src/plugins/data/public';
 
 export const ReportViewTypes = {
   dist: 'data-distribution',

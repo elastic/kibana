@@ -6,9 +6,18 @@
  * Side Public License, v 1.
  */
 
-export { buildEsQuery, EsQueryConfig } from './build_es_query';
-export { buildQueryFromFilters } from './from_filters';
-export { luceneStringToDsl } from './lucene_string_to_dsl';
-export { decorateQuery } from './decorate_query';
-export { IndexPatternBase, IndexPatternFieldBase, IFieldSubType } from './types';
-export { DslQuery } from './es_query_dsl';
+import { ExistsFilter, FilterStateStore } from '..';
+
+export const existsFilter: ExistsFilter = {
+  meta: {
+    index: 'logstash-*',
+    negate: false,
+    disabled: false,
+    type: 'exists',
+    key: 'machine.os',
+    alias: null,
+  },
+  $state: {
+    store: FilterStateStore.APP_STATE,
+  },
+};

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { IFieldSubType } from '@kbn/es-query';
 import { FrameworkRequest } from '../framework';
-import { IFieldSubType } from '../../../../../../src/plugins/data/common';
 
 export interface FieldsAdapter {
   getIndexFields(req: FrameworkRequest, indices: string[]): Promise<string[]>;

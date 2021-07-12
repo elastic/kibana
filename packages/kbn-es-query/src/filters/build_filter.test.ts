@@ -7,9 +7,15 @@
  */
 
 import { buildFilter, FilterStateStore, FILTERS } from '.';
-import { stubIndexPattern, stubFields } from '../../../common/stubs';
+import { IndexPatternBase } from '..';
+import { fields as stubFields } from './stubs';
 
 describe('buildFilter', () => {
+  const stubIndexPattern: IndexPatternBase = {
+    id: 'logstash-*',
+    fields: stubFields,
+  };
+
   it('should build phrase filters', () => {
     const params = 'foo';
     const alias = 'bar';
