@@ -44,10 +44,38 @@ export const INVESTIGATION_TOOLTIP_CONTENT = i18n.translate(
   }
 );
 
-export const NO_ENRICHMENT_FOUND = i18n.translate(
-  'xpack.securitySolution.alertDetails.noEnrichmentFound',
+export const NO_INDICATOR_ENRICHMENTS_TITLE = i18n.translate(
+  'xpack.securitySolution.alertDetails.noIndicatorEnrichmentsTitle',
   {
-    defaultMessage: 'No Threat Intel Enrichment Found',
+    defaultMessage: 'No indicator match rule enrichments found',
+  }
+);
+
+export const NO_INVESTIGATION_ENRICHMENTS_TITLE = i18n.translate(
+  'xpack.securitySolution.alertDetails.noInvestigationEnrichmentsTitle',
+  {
+    defaultMessage: 'No investigation time enrichments found',
+  }
+);
+
+export const NO_INVESTIGATION_ENRICHMENTS_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.alertDetails.noInvestigationEnrichmentsDescription',
+  {
+    defaultMessage: "We haven't found any indicator matches from the last 30 days.",
+  }
+);
+
+export const NO_ENRICHMENTS_FOUND_TITLE = i18n.translate(
+  'xpack.securitySolution.alertDetails.noEnrichmentsFoundTitle',
+  {
+    defaultMessage: 'No indicator match rule or investigation time enrichments found',
+  }
+);
+
+export const NO_ENRICHMENTS_FOUND_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.alertDetails.noEnrichmentFoundDescription',
+  {
+    defaultMessage: 'No indicator match rule or investigation time enrichments found',
   }
 );
 
