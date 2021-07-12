@@ -247,13 +247,28 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
       // Register rule types via rule-registry
       this.setupPlugins.alerting.registerType(
-        createQueryAlertType({ lists: plugins.lists, logger: this.logger, ruleDataClient })
+        createQueryAlertType({
+          lists: plugins.lists,
+          logger: this.logger,
+          mergeStrategy: this.config.alertMergeStrategy,
+          ruleDataClient,
+        })
       );
       this.setupPlugins.alerting.registerType(
-        createEqlAlertType({ lists: plugins.lists, logger: this.logger, ruleDataClient })
+        createEqlAlertType({
+          lists: plugins.lists,
+          logger: this.logger,
+          mergeStrategy: this.config.alertMergeStrategy,
+          ruleDataClient,
+        })
       );
       this.setupPlugins.alerting.registerType(
-        createThresholdAlertType({ lists: plugins.lists, logger: this.logger, ruleDataClient })
+        createThresholdAlertType({
+          lists: plugins.lists,
+          logger: this.logger,
+          mergeStrategy: this.config.alertMergeStrategy,
+          ruleDataClient,
+        })
       );
     }
 

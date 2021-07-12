@@ -20,6 +20,7 @@ import { eqlRuleParams, EqlRuleParams } from '../schemas/rule_schemas';
 import { BaseSignalHit, EqlSignalSearchResponse } from '../signals/types';
 import { createSecurityRuleTypeFactory } from './create_security_rule_type_factory';
 import { createResultObject } from './utils';
+import { ConfigType } from '../../../config';
 
 interface EqlAlertState {
   [key: string]: never;
@@ -28,12 +29,14 @@ interface EqlAlertState {
 export const createEqlAlertType = (createOptions: {
   lists: SetupPlugins['lists'];
   logger: Logger;
+  mergeStrategy: ConfigType['alertMergeStrategy'];
   ruleDataClient: RuleDataClient;
 }) => {
-  const { lists, logger, ruleDataClient } = createOptions;
+  const { lists, logger, mergeStrategy, ruleDataClient } = createOptions;
   const createSecurityRuleType = createSecurityRuleTypeFactory({
     lists,
     logger,
+    mergeStrategy,
     ruleDataClient,
   });
   return createSecurityRuleType({

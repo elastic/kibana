@@ -26,7 +26,7 @@ import {
   AlertTypeState,
 } from '../../../../../alerting/common';
 import { AlertType } from '../../../../../alerting/server';
-import { buildRuleMessageFactory } from '../signals/rule_messages';
+import { BuildRuleMessage, buildRuleMessageFactory } from '../signals/rule_messages';
 import {
   checkPrivilegesFromEsClient,
   getExceptions,
@@ -36,38 +36,50 @@ import {
   isMachineLearningParams,
 } from '../signals/utils';
 import { RuleParams } from '../schemas/rule_schemas';
-import { DEFAULT_MAX_SIGNALS } from '../../../../common/constants';
+import { DEFAULT_MAX_SIGNALS, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
 import { SecurityAlertTypeReturnValue } from './types';
 import { newGetListsClient } from './utils/get_new_list_client';
+import { ListClient } from '../../../../../lists/server';
+import { AlertAttributes, BulkCreate, WrapHits } from '../signals/types';
+import { SavedObject } from '../../../../../../../src/core/server';
+import { bulkCreateFactory } from './bulk_create_factory';
+import { wrapHitsFactory } from './wrap_hits_factory';
+import { ConfigType } from '../../../config';
 
 type SimpleAlertType<
   TParams extends AlertTypeParams = {},
   TAlertInstanceContext extends AlertInstanceContext = {}
 > = AlertType<TParams, AlertTypeState, AlertInstanceState, TAlertInstanceContext, string, string>;
 
-export interface RunOpts {
+export interface RunOpts<TParams extends RuleParams> {
+  buildRuleMessage: BuildRuleMessage;
+  bulkCreate: BulkCreate;
   exceptionItems: ExceptionListItemSchema[];
+  listClient: ListClient;
+  rule: SavedObject<AlertAttributes<TParams>>;
+  searchAfterSize: number;
   tuple: {
     to: Moment;
     from: Moment;
     maxSignals: number;
   };
+  wrapHits: WrapHits;
 }
 
 export type SecurityAlertTypeExecutor<
   TServices extends PersistenceServices<TAlertInstanceContext>,
-  TParams extends AlertTypeParams = {},
+  TParams extends RuleParams,
   TAlertInstanceContext extends AlertInstanceContext = {},
   TState extends AlertTypeState = {}
 > = (
   options: Parameters<SimpleAlertType<TParams, TAlertInstanceContext>['executor']>[0] & {
-    runOpts: RunOpts;
+    runOpts: RunOpts<TParams>;
   } & { services: TServices }
 ) => Promise<SecurityAlertTypeReturnValue<TState>>;
 
 type SecurityAlertTypeWithExecutor<
   TServices extends PersistenceServices<TAlertInstanceContext>,
-  TParams extends AlertTypeParams = {},
+  TParams extends RuleParams,
   TAlertInstanceContext extends AlertInstanceContext = {},
   TState extends AlertTypeState = {}
 > = Omit<
@@ -80,6 +92,7 @@ type SecurityAlertTypeWithExecutor<
 type CreateSecurityRuleTypeFactory = (options: {
   lists: SetupPlugins['lists'];
   logger: Logger;
+  mergeStrategy: ConfigType['alertMergeStrategy'];
   ruleDataClient: RuleDataClient;
 }) => <
   TParams extends RuleParams,
@@ -94,6 +107,7 @@ type CreateSecurityRuleTypeFactory = (options: {
 export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
   lists,
   logger,
+  mergeStrategy,
   ruleDataClient,
 }) => (type) => {
   const persistenceRuleType = createPersistenceRuleTypeFactory({ ruleDataClient, logger });
@@ -108,8 +122,10 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
         spaceId,
         updatedBy: updatedByUser,
       } = options;
-      const { from, timestampOverride, to } = params;
+      const { from, maxSignals, timestampOverride, to } = params;
       const { savedObjectsClient, scopedClusterClient } = services;
+      const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
+
       const ruleId = type.id;
       const esClient = scopedClusterClient.asCurrentUser;
 
@@ -119,11 +135,13 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
         ruleStatusClient,
       });
 
-      const savedObject = await savedObjectsClient.get('alert', alertId);
+      const ruleSO = await savedObjectsClient.get('alert', alertId);
       const {
+        actions,
         name,
         schedule: { interval },
-      } = savedObject.attributes;
+      } = ruleSO.attributes;
+      const refresh = actions.length ? 'wait_for' : false;
 
       const buildRuleMessage = buildRuleMessageFactory({
         id: alertId,
@@ -227,15 +245,35 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
         lists: (params.exceptionsList as ListArray) ?? [],
       });
 
+      const bulkCreate = bulkCreateFactory(
+        logger,
+        services.scopedClusterClient.asCurrentUser,
+        buildRuleMessage,
+        refresh
+      );
+
+      const wrapHits = wrapHitsFactory({
+        ruleSO,
+        signalsIndex: params.outputIndex,
+        mergeStrategy,
+      });
+
       const results: Array<SecurityAlertTypeReturnValue<{}>> = []; // TODO: get alert type state?
       for (const tuple of tuples) {
         results.push(
           await type.executor({
             ...options,
+            rule: ruleSO,
             services,
             runOpts: {
+              buildRuleMessage,
+              bulkCreate,
               exceptionItems,
+              listClient,
+              rule: ruleSO,
+              searchAfterSize,
               tuple,
+              wrapHits,
             },
           })
         );

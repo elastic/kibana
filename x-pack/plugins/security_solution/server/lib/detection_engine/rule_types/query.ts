@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import { Logger } from '@kbn/logging';
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
-import { ESSearchRequest } from 'src/core/types/elasticsearch';
-
-import { buildEsQuery, IIndexPattern } from '../../../../../../../src/plugins/data/common';
 
 import { PersistenceServices, RuleDataClient } from '../../../../../rule_registry/server';
 import { CUSTOM_ALERT_TYPE_ID } from '../../../../common/constants';
 import { SetupPlugins } from '../../../../target/types/server/plugin';
+import { ConfigType } from '../../../config';
 
 import { queryRuleParams, QueryRuleParams } from '../schemas/rule_schemas';
+import { getFilter } from '../signals/get_filter';
+import { searchAfterAndBulkCreate } from '../signals/search_after_bulk_create';
 
 import { createSecurityRuleTypeFactory } from './create_security_rule_type_factory';
 import { createResultObject } from './utils';
@@ -27,12 +26,14 @@ interface QueryAlertState {
 export const createQueryAlertType = (createOptions: {
   lists: SetupPlugins['lists'];
   logger: Logger;
+  mergeStrategy: ConfigType['alertMergeStrategy'];
   ruleDataClient: RuleDataClient;
 }) => {
-  const { lists, logger, ruleDataClient } = createOptions;
+  const { lists, logger, mergeStrategy, ruleDataClient } = createOptions;
   const createSecurityRuleType = createSecurityRuleTypeFactory({
     lists,
     logger,
+    mergeStrategy,
     ruleDataClient,
   });
   return createSecurityRuleType<QueryRuleParams, {}, PersistenceServices, {}>({
@@ -68,40 +69,58 @@ export const createQueryAlertType = (createOptions: {
     async executor(execOptions) {
       const result = createResultObject<QueryAlertState>({});
       const {
-        params: { index, query },
-        runOpts: { exceptionItems, tuple },
-        services: { alertWithPersistence, savedObjectsClient },
+        params: { filters, index, language, query },
+        runOpts: {
+          buildRuleMessage,
+          bulkCreate,
+          exceptionItems,
+          listClient,
+          rule,
+          searchAfterSize,
+          tuple,
+          wrapHits,
+        },
+        services,
       } = execOptions;
+      // const { alertWithPersistence, savedObjectsClient, scopedClusterClient } = services;
+
       try {
-        const indexPattern: IIndexPattern = {
-          fields: [],
-          title: index?.join() ?? '',
-        };
+        const esFilter = await getFilter({
+          type: 'query',
+          filters,
+          language,
+          query,
+          savedId: undefined,
+          services,
+          index,
+          lists: exceptionItems,
+        });
 
-        // TODO: kql or lucene?
+        // TODO; process return value
+        await searchAfterAndBulkCreate({
+          tuple,
+          listClient,
+          exceptionsList: exceptionItems,
+          ruleSO: rule,
+          services,
+          logger,
+          eventsTelemetry: undefined, // TODO
+          id: rule.id,
+          inputIndexPattern: index ?? [],
+          // signalsIndex: ruleParams.outputIndex, // TODO
+          signalsIndex: 'abcd1234',
+          filter: esFilter,
+          pageSize: searchAfterSize,
+          buildRuleMessage,
+          bulkCreate,
+          wrapHits,
+        });
 
-        const esQuery = buildEsQuery(
-          indexPattern,
-          { query, language: 'kuery' },
-          []
-        ) as estypes.QueryDslQueryContainer;
-
-        const wrappedEsQuery: ESSearchRequest = {
-          body: {
-            query: esQuery,
-            fields: ['*'],
-            sort: {
-              '@timestamp': 'asc' as const,
-            },
-          },
-        };
-
-        // TODO: find alerts
-        // const alerts = await findAlerts(query);
-        const alerts: Array<Record<string, unknown>> = [];
-        alertWithPersistence(alerts).forEach((alert) => {
+        /*
+        alertWithPersistence(results.createdSignals).forEach((alert) => {
           alert.scheduleActions('default', { server: 'server-test' });
         });
+        */
       } catch (error) {
         logger.error(error);
       }
