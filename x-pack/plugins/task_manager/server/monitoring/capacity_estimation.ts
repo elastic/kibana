@@ -57,6 +57,7 @@ export function estimateCapacity(
   const {
     recurring: percentageOfExecutionsUsedByRecurringTasks,
     non_recurring: percentageOfExecutionsUsedByNonRecurringTasks,
+    ephemeral: percentageOfExecutionsUsedByEphemeralTasks,
   } = capacityStats.runtime.value.execution.persistence;
   const { overdue, capacity_requirements: capacityRequirements } = workload;
   const {
@@ -97,9 +98,12 @@ export function estimateCapacity(
     capacityPerMinutePerKibana,
     percentageOf(
       averageLoadPercentage,
-      percentageOfExecutionsUsedByRecurringTasks + percentageOfExecutionsUsedByNonRecurringTasks
+      percentageOfExecutionsUsedByRecurringTasks +
+        percentageOfExecutionsUsedByNonRecurringTasks +
+        percentageOfExecutionsUsedByEphemeralTasks
     )
   );
+
   /**
    * On average, how much of this kibana's capacity has been historically used to execute
    * non-recurring and ephemeral tasks
@@ -182,7 +186,6 @@ export function estimateCapacity(
   const assumedRequiredThroughputPerMinutePerKibana =
     averageCapacityUsedByNonRecurringAndEphemeralTasksPerKibana +
     averageRecurringRequiredPerMinute / assumedKibanaInstances;
-
   return {
     status:
       assumedRequiredThroughputPerMinutePerKibana < capacityPerMinutePerKibana
