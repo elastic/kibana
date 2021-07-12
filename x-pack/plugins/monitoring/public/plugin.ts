@@ -97,7 +97,6 @@ export class MonitoringPlugin
           pluginsStart.kibanaLegacy.loadAngularBootstrap(),
           import('./angular'),
         ]);
-        const { AngularApp } = await import('./angular');
         const deps: MonitoringStartPluginDependencies = {
           navigation: pluginsStart.navigation,
           kibanaLegacy: pluginsStart.kibanaLegacy,
