@@ -1,15 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+import { allDoubleQuoteRE, nonAlphaNumRE } from './constants';
+import { cellHasFormulas } from './formula_checks';
 
-import { RawValue } from '../types';
-import { cellHasFormulas } from './cell_has_formula';
-
-const nonAlphaNumRE = /[^a-zA-Z0-9]/;
-const allDoubleQuoteRE = /"/g;
+type RawValue = string | object | null | undefined;
 
 export function createEscapeValue(
   quoteValues: boolean,
@@ -22,7 +21,6 @@ export function createEscapeValue(
         return `"${formulasEscaped.replace(allDoubleQuoteRE, '""')}"`;
       }
     }
-
     return val == null ? '' : val.toString();
   };
 }
