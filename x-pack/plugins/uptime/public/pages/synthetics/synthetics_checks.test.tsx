@@ -7,33 +7,12 @@
 
 import React from 'react';
 import { render } from '../../lib/helper/rtl_helpers';
-import * as observabilityPublic from '../../../../observability/public';
+import { spyOnUseFetcher } from '../../lib/helper/spy_use_fetcher';
 import {
   SyntheticsCheckSteps,
   SyntheticsCheckStepsPageHeader,
   SyntheticsCheckStepsPageRightSideItem,
 } from './synthetics_checks';
-
-jest.mock('../../../../observability/public', () => {
-  const originalModule = jest.requireActual('../../../../observability/public');
-
-  return {
-    ...originalModule,
-    useFetcher: jest.fn().mockReturnValue({
-      data: null,
-      status: 'success',
-    }),
-    useTrackPageview: jest.fn(),
-  };
-});
-
-const spyOnUseFetcher = (payload: unknown) => {
-  jest.spyOn(observabilityPublic, 'useFetcher').mockReturnValue({
-    status: observabilityPublic.FETCH_STATUS.SUCCESS,
-    data: payload,
-    refetch: () => null,
-  });
-};
 
 describe('SyntheticsCheckStepsPageHeader component', () => {
   it('returns the monitor name', () => {
@@ -47,9 +26,7 @@ describe('SyntheticsCheckStepsPageHeader component', () => {
         },
       },
     });
-    const { getByText } = render(<SyntheticsCheckStepsPageHeader />, {
-      url: 'http://localhost:5601?checkGroupId=test-id',
-    });
+    const { getByText } = render(<SyntheticsCheckStepsPageHeader />);
     expect(getByText('test-name'));
   });
 
@@ -63,9 +40,7 @@ describe('SyntheticsCheckStepsPageHeader component', () => {
         },
       },
     });
-    const { getByText } = render(<SyntheticsCheckStepsPageHeader />, {
-      url: 'http://localhost:5601?checkGroupId=test-id',
-    });
+    const { getByText } = render(<SyntheticsCheckStepsPageHeader />);
     expect(getByText('test-id'));
   });
 });

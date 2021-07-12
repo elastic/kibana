@@ -34,6 +34,7 @@ export const useStepDetailPage = (): {
     stepIndex: string;
   }>();
 
+  console.log('check group', checkGroup, 'step index', stepIndexString, useParams());
   useEffect(() => {
     if (checkGroup) {
       dispatch(getJourneySteps({ checkGroup, syntheticEventTypes: ['step/end'] }));
@@ -63,6 +64,7 @@ export const useStepDetailPage = (): {
 
 export const StepDetailPageHeader = () => {
   const { activeStep, journey } = useStepDetailPage();
+  console.log('active step', activeStep);
   return <>{journey && activeStep && activeStep.synthetics?.step?.name}</>;
 };
 
