@@ -65,7 +65,7 @@ export interface ExecutionContext<
   /**
    * A unique identifier for each execution
    */
-  executionId: string;
+  executionId?: string;
 }
 
 /**
