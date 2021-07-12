@@ -19,6 +19,7 @@ import {
   CommentAttributes,
   CommentRequestUserType,
   CommentRequestAlertType,
+  CommentRequestActionsType,
 } from '../../../common';
 import { ActionsClient } from '../../../../actions/server';
 import { CasesClientGetAlertsResponse } from '../../client/alerts/types';
@@ -76,6 +77,10 @@ const getCommentContent = (comment: CommentResponse): string => {
   } else if (comment.type === CommentType.alert || comment.type === CommentType.generatedAlert) {
     const ids = getAlertIds(comment);
     return `Alert with ids ${ids.join(', ')} added to case`;
+  } else if (comment.type === CommentType.actions) {
+    const actionText =
+      comment.actions.type === 'isolate' ? 'Isolated with comment:' : 'Released with comment:';
+    return `${actionText} ${comment.comment}`;
   }
 
   return '';
@@ -161,7 +166,8 @@ export const createIncident = async ({
   const commentsToBeUpdated = caseComments?.filter(
     (comment) =>
       // We push only user's comments
-      comment.type === CommentType.user && commentsIdsToBeUpdated.has(comment.id)
+      (comment.type === CommentType.user || comment.type === CommentType.actions) &&
+      commentsIdsToBeUpdated.has(comment.id)
   );
 
   const totalAlerts = countAlerts(caseComments);
@@ -322,7 +328,7 @@ export const isCommentAlertType = (
 
 export const getCommentContextFromAttributes = (
   attributes: CommentAttributes
-): CommentRequestUserType | CommentRequestAlertType => {
+): CommentRequestUserType | CommentRequestAlertType | CommentRequestActionsType => {
   const owner = attributes.owner;
   switch (attributes.type) {
     case CommentType.user:
@@ -338,6 +344,16 @@ export const getCommentContextFromAttributes = (
         alertId: attributes.alertId,
         index: attributes.index,
         rule: attributes.rule,
+        owner,
+      };
+    case CommentType.actions:
+      return {
+        type: attributes.type,
+        comment: attributes.comment,
+        actions: {
+          targets: attributes.actions.targets,
+          type: attributes.actions.type,
+        },
         owner,
       };
     default:
