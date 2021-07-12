@@ -73,7 +73,7 @@ import { AnomaliesMap } from './anomalies_map';
 import { getToastNotifications } from '../util/dependency_cache';
 import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/settings';
 import { withKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { ML_APP_URL_GENERATOR } from '../../../common/constants/ml_url_generator';
+import { ML_APP_LOCATOR } from '../../../common/constants/locator';
 import { AnomalyContextMenu } from './anomaly_context_menu';
 import { isDefined } from '../../../common/types/guards';
 
@@ -230,13 +230,9 @@ export class ExplorerUI extends React.Component {
   updateLanguage = (language) => this.setState({ language });
 
   render() {
-    const {
-      share: {
-        urlGenerators: { getUrlGenerator },
-      },
-    } = this.props.kibana.services;
+    const { share } = this.props.kibana.services;
 
-    const mlUrlGenerator = getUrlGenerator(ML_APP_URL_GENERATOR);
+    const mlLocator = share.url.locators.get(ML_APP_LOCATOR);
 
     const {
       showCharts,
@@ -264,6 +260,30 @@ export class ExplorerUI extends React.Component {
       swimLaneSeverity,
     } = this.props.explorerState;
     const { annotationsData, aggregations, error: annotationsError } = annotations;
+
+    const annotationsCnt = Array.isArray(annotationsData) ? annotationsData.length : 0;
+    const allAnnotationsCnt = Array.isArray(aggregations?.event?.buckets)
+      ? aggregations.event.buckets.reduce((acc, v) => acc + v.doc_count, 0)
+      : annotationsCnt;
+
+    const badge =
+      allAnnotationsCnt > annotationsCnt ? (
+        <EuiBadge color={'hollow'}>
+          <FormattedMessage
+            id="xpack.ml.explorer.annotationsOutOfTotalCountTitle"
+            defaultMessage="First {visibleCount} out of a total of {totalCount}"
+            values={{ visibleCount: annotationsCnt, totalCount: allAnnotationsCnt }}
+          />
+        </EuiBadge>
+      ) : (
+        <EuiBadge color={'hollow'}>
+          <FormattedMessage
+            id="xpack.ml.explorer.annotationsTitleTotalCount"
+            defaultMessage="Total: {count}"
+            values={{ count: annotationsCnt }}
+          />
+        </EuiBadge>
+      );
 
     const jobSelectorProps = {
       dateFormatTz: getDateFormatTz(),
@@ -408,7 +428,7 @@ export class ExplorerUI extends React.Component {
             {loading === false && tableData.anomalies?.length ? (
               <AnomaliesMap anomalies={tableData.anomalies} jobIds={selectedJobIds} />
             ) : null}
-            {annotationsData.length > 0 && (
+            {annotationsCnt > 0 && (
               <>
                 <EuiPanel data-test-subj="mlAnomalyExplorerAnnotationsPanel loaded">
                   <EuiAccordion
@@ -420,15 +440,7 @@ export class ExplorerUI extends React.Component {
                             id="xpack.ml.explorer.annotationsTitle"
                             defaultMessage="Annotations {badge}"
                             values={{
-                              badge: (
-                                <EuiBadge color={'hollow'}>
-                                  <FormattedMessage
-                                    id="xpack.ml.explorer.annotationsTitleTotalCount"
-                                    defaultMessage="Total: {count}"
-                                    values={{ count: annotationsData.length }}
-                                  />
-                                </EuiBadge>
-                              ),
+                              badge,
                             }}
                           />
                         </h2>
@@ -502,7 +514,7 @@ export class ExplorerUI extends React.Component {
                         ...chartsData,
                         severity,
                         timefilter,
-                        mlUrlGenerator,
+                        mlLocator,
                         timeBuckets,
                         onSelectEntity: this.applyFilter,
                       }}

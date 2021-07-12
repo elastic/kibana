@@ -151,7 +151,14 @@ export async function executeEsQueryFactory(
                           },
                         },
                       ],
-                      docvalue_fields: [entity, dateField, geoField],
+                      docvalue_fields: [
+                        entity,
+                        {
+                          field: dateField,
+                          format: 'strict_date_optional_time',
+                        },
+                        geoField,
+                      ],
                       _source: false,
                     },
                   },
