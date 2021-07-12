@@ -7,6 +7,7 @@
 import { ClusterPutComponentTemplate } from '@elastic/elasticsearch/api/requestParams';
 import { estypes } from '@elastic/elasticsearch';
 import { ElasticsearchClient, Logger } from 'kibana/server';
+import { get, isEmpty } from 'lodash';
 import { technicalComponentTemplate } from '../../common/assets/component_templates/technical_component_template';
 import {
   DEFAULT_ILM_POLICY_ID,
@@ -16,10 +17,14 @@ import {
 import { ecsComponentTemplate } from '../../common/assets/component_templates/ecs_component_template';
 import { defaultLifecyclePolicy } from '../../common/assets/lifecycle_policies/default_lifecycle_policy';
 import { ClusterPutComponentTemplateBody, PutIndexTemplateRequest } from '../../common/types';
+import { RuleDataClient } from '../rule_data_client';
+import { RuleDataWriteDisabledError } from './errors';
+import { incrementIndexName } from './utils';
+import { ValidFeatureId } from '../utils/rbac';
 
 const BOOTSTRAP_TIMEOUT = 60000;
 
-interface RuleDataPluginServiceConstructorOptions {
+export interface RuleDataPluginServiceConstructorOptions {
   getClusterClient: () => Promise<ElasticsearchClient>;
   logger: Logger;
   isWriteEnabled: boolean;
@@ -54,8 +59,8 @@ export class RuleDataPluginService {
   constructor(private readonly options: RuleDataPluginServiceConstructorOptions) {}
 
   private assertWriteEnabled() {
-    if (!this.isWriteEnabled) {
-      throw new Error('Write operations are disabled');
+    if (!this.isWriteEnabled()) {
+      throw new RuleDataWriteDisabledError();
     }
   }
 
@@ -64,7 +69,7 @@ export class RuleDataPluginService {
   }
 
   async init() {
-    if (!this.isWriteEnabled) {
+    if (!this.isWriteEnabled()) {
       this.options.logger.info('Write is disabled, not installing assets');
       this.signal.complete();
       return;
@@ -107,6 +112,14 @@ export class RuleDataPluginService {
 
     const clusterClient = await this.getClusterClient();
     this.options.logger.debug(`Installing index template ${template.name}`);
+    const { body: simulateResponse } = await clusterClient.indices.simulateTemplate(template);
+    const mappings: estypes.MappingTypeMapping = simulateResponse.template.mappings;
+
+    if (isEmpty(mappings)) {
+      throw new Error(
+        'No mappings would be generated for this index, possibly due to failed/misconfigured bootstrapping'
+      );
+    }
     return clusterClient.indices.putIndexTemplate(template);
   }
 
@@ -116,6 +129,42 @@ export class RuleDataPluginService {
 
     this.options.logger.debug(`Installing lifecycle policy ${policy.policy}`);
     return clusterClient.ilm.putLifecycle(policy);
+  }
+
+  private async updateAliasWriteIndexMapping({ index, alias }: { index: string; alias: string }) {
+    const clusterClient = await this.getClusterClient();
+
+    const simulatedIndexMapping = await clusterClient.indices.simulateIndexTemplate({
+      name: index,
+    });
+    const simulatedMapping = get(simulatedIndexMapping, ['body', 'template', 'mappings']);
+    try {
+      await clusterClient.indices.putMapping({
+        index,
+        body: simulatedMapping,
+      });
+      return;
+    } catch (err) {
+      if (err.meta?.body?.error?.type !== 'illegal_argument_exception') {
+        this.options.logger.error(`Failed to PUT mapping for alias ${alias}: ${err.message}`);
+        return;
+      }
+      const newIndexName = incrementIndexName(index);
+      if (newIndexName == null) {
+        this.options.logger.error(`Failed to increment write index name for alias: ${alias}`);
+        return;
+      }
+      try {
+        await clusterClient.indices.rollover({
+          alias,
+          new_index: newIndexName,
+        });
+      } catch (e) {
+        if (e?.meta?.body?.error?.type !== 'resource_already_exists_exception') {
+          this.options.logger.error(`Failed to rollover index for alias ${alias}: ${e.message}`);
+        }
+      }
+    }
   }
 
   async createOrUpdateComponentTemplate(
@@ -133,6 +182,25 @@ export class RuleDataPluginService {
   async createOrUpdateLifecyclePolicy(policy: estypes.IlmPutLifecycleRequest) {
     await this.wait();
     return this._createOrUpdateLifecyclePolicy(policy);
+  }
+
+  async updateIndexMappingsMatchingPattern(pattern: string) {
+    await this.wait();
+    const clusterClient = await this.getClusterClient();
+    const { body: aliasesResponse } = await clusterClient.indices.getAlias({ index: pattern });
+    const writeIndicesAndAliases: Array<{ index: string; alias: string }> = [];
+    Object.entries(aliasesResponse).forEach(([index, aliases]) => {
+      Object.entries(aliases.aliases).forEach(([aliasName, aliasProperties]) => {
+        if (aliasProperties.is_write_index) {
+          writeIndicesAndAliases.push({ index, alias: aliasName });
+        }
+      });
+    });
+    await Promise.all(
+      writeIndicesAndAliases.map((indexAndAlias) =>
+        this.updateAliasWriteIndexMapping(indexAndAlias)
+      )
+    );
   }
 
   isReady() {
@@ -154,5 +222,15 @@ export class RuleDataPluginService {
 
   getFullAssetName(assetName?: string) {
     return [this.options.index, assetName].filter(Boolean).join('-');
+  }
+
+  getRuleDataClient(feature: ValidFeatureId, alias: string, initialize: () => Promise<void>) {
+    return new RuleDataClient({
+      alias,
+      feature,
+      getClusterClient: () => this.getClusterClient(),
+      isWriteEnabled: this.isWriteEnabled(),
+      ready: initialize,
+    });
   }
 }

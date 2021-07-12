@@ -14,12 +14,12 @@ import { CasesByAlertId } from '../../../../../cases/common/api/cases/case';
 import { HostIsolationRequestSchema } from '../../../../common/endpoint/schema/actions';
 import { ISOLATE_HOST_ROUTE, UNISOLATE_HOST_ROUTE } from '../../../../common/endpoint/constants';
 import { AGENT_ACTIONS_INDEX } from '../../../../../fleet/common';
-import { EndpointAction } from '../../../../common/endpoint/types';
+import { EndpointAction, HostMetadata } from '../../../../common/endpoint/types';
 import {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../types';
-import { getAgentIDsForEndpoints } from '../../services';
+import { getMetadataForEndpoints } from '../../services';
 import { EndpointAppContext } from '../../types';
 import { APP_ID } from '../../../../common/constants';
 import { userCanIsolate } from '../../../../common/endpoint/actions';
@@ -62,17 +62,6 @@ export const isolationRequestHandler = function (
   SecuritySolutionRequestHandlerContext
 > {
   return async (context, req, res) => {
-    if (
-      (!req.body.agent_ids || req.body.agent_ids.length === 0) &&
-      (!req.body.endpoint_ids || req.body.endpoint_ids.length === 0)
-    ) {
-      return res.badRequest({
-        body: {
-          message: 'At least one agent ID or endpoint ID is required',
-        },
-      });
-    }
-
     // only allow admin users
     const user = endpointContext.service.security?.authc.getCurrentUser(req);
     if (!userCanIsolate(user?.roles)) {
@@ -92,22 +81,18 @@ export const isolationRequestHandler = function (
       });
     }
 
-    // translate any endpoint_ids into agent_ids
-    let agentIDs = req.body.agent_ids?.slice() || [];
-    if (req.body.endpoint_ids && req.body.endpoint_ids.length > 0) {
-      const newIDs = await getAgentIDsForEndpoints(req.body.endpoint_ids, context, endpointContext);
-      agentIDs = agentIDs.concat(newIDs);
-    }
-    agentIDs = [...new Set(agentIDs)]; // dedupe
+    // fetch the Agent IDs to send the commands to
+    const endpointIDs = [...new Set(req.body.endpoint_ids)]; // dedupe
+    const endpointData = await getMetadataForEndpoints(endpointIDs, context);
+
+    const casesClient = await endpointContext.service.getCasesClient(req);
 
     // convert any alert IDs into cases
     let caseIDs: string[] = req.body.case_ids?.slice() || [];
     if (req.body.alert_ids && req.body.alert_ids.length > 0) {
       const newIDs: string[][] = await Promise.all(
         req.body.alert_ids.map(async (a: string) => {
-          const cases: CasesByAlertId = await (
-            await endpointContext.service.getCasesClient(req)
-          ).cases.getCasesByAlertID({
+          const cases: CasesByAlertId = await casesClient.cases.getCasesByAlertID({
             alertID: a,
             options: { owner: APP_ID },
           });
@@ -133,7 +118,7 @@ export const isolationRequestHandler = function (
           expiration: moment().add(2, 'weeks').toISOString(),
           type: 'INPUT_ACTION',
           input_type: 'endpoint',
-          agents: agentIDs,
+          agents: endpointData.map((endpt: HostMetadata) => endpt.elastic.agent.id),
           user_id: user!.username,
           data: {
             command: isolate ? 'isolate' : 'unisolate',
@@ -157,26 +142,30 @@ export const isolationRequestHandler = function (
       });
     }
 
-    const commentLines: string[] = [];
+    // Update all cases with a comment
+    if (caseIDs.length > 0) {
+      const targets = endpointData.map((endpt: HostMetadata) => ({
+        hostname: endpt.host.hostname,
+        endpointId: endpt.agent.id,
+      }));
 
-    commentLines.push(`${isolate ? 'I' : 'Uni'}solate action was sent to the following Agents:`);
-    // lines of markdown links, inside a code block
-
-    commentLines.push(`${agentIDs.map((a) => `- [${a}](/app/fleet#/agents/${a})`).join('\n')}`);
-    if (req.body.comment) {
-      commentLines.push(`\n\nWith Comment:\n> ${req.body.comment}`);
+      await Promise.all(
+        caseIDs.map((caseId) =>
+          casesClient.attachments.add({
+            caseId,
+            comment: {
+              type: CommentType.actions,
+              comment: req.body.comment || '',
+              actions: {
+                targets,
+                type: isolate ? 'isolate' : 'unisolate',
+              },
+              owner: APP_ID,
+            },
+          })
+        )
+      );
     }
-
-    caseIDs.forEach(async (caseId) => {
-      (await endpointContext.service.getCasesClient(req)).attachments.add({
-        caseId,
-        comment: {
-          comment: commentLines.join('\n'),
-          type: CommentType.user,
-          owner: APP_ID,
-        },
-      });
-    });
 
     return res.ok({
       body: {

@@ -118,6 +118,7 @@ The following table describes the properties of the `options` object.
 |executor|This is where the code for the rule type lives. This is a function to be called when executing a rule on an interval basis. For full details, see the executor section below.|Function|
 |producer|The id of the application producing this rule type.|string|
 |minimumLicenseRequired|The value of a minimum license. Most of the rules are licensed as "basic".|string|
+|isExportable|Whether the rule type is exportable from the Saved Objects Management UI.|boolean|
 
 ### Executor
 
@@ -262,6 +263,7 @@ const myRuleType: AlertType<
 		],
 	},
 	minimumLicenseRequired: 'basic',
+	isExportable: true,
 	async executor({
 		alertId,
 		startedAt,

@@ -13,13 +13,14 @@ import { ExportApp } from '../../components/export_app';
 import { CanvasLoading } from '../../components/canvas_loading';
 // @ts-expect-error
 import { fetchAllRenderables } from '../../state/actions/elements';
-import { useServices } from '../../services';
+import { useNotifyService } from '../../services';
 import { CanvasWorkpad } from '../../../types';
 import { ErrorStrings } from '../../../i18n';
 import { useWorkpad } from './hooks/use_workpad';
 import { useRestoreHistory } from './hooks/use_restore_history';
 import { useWorkpadHistory } from './hooks/use_workpad_history';
 import { usePageSync } from './hooks/use_page_sync';
+import { useWorkpadPersist } from './hooks/use_workpad_persist';
 import { WorkpadPageRouteProps, WorkpadRouteProps, WorkpadPageRouteParams } from '.';
 import { WorkpadRoutingContextComponent } from './workpad_routing_context';
 import { WorkpadPresentationHelper } from './workpad_presentation_helper';
@@ -88,6 +89,7 @@ export const WorkpadHistoryManager: FC = ({ children }) => {
   useRestoreHistory();
   useWorkpadHistory();
   usePageSync();
+  useWorkpadPersist();
 
   return <>{children}</>;
 };
@@ -98,13 +100,13 @@ const WorkpadLoaderComponent: FC<{
   children: (workpad: CanvasWorkpad) => JSX.Element;
 }> = ({ params, children, loadPages }) => {
   const [workpad, error] = useWorkpad(params.id, loadPages);
-  const services = useServices();
+  const notifyService = useNotifyService();
 
   useEffect(() => {
     if (error) {
-      services.notify.error(error, { title: strings.getLoadFailureErrorMessage() });
+      notifyService.error(error, { title: strings.getLoadFailureErrorMessage() });
     }
-  }, [error, services.notify]);
+  }, [error, notifyService]);
 
   if (error) {
     return <Redirect to="/" />;

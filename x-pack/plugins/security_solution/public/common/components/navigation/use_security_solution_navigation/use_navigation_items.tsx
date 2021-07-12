@@ -5,62 +5,88 @@
  * 2.0.
  */
 
-import React from 'react';
-import { APP_ID } from '../../../../../common/constants';
-import { track, METRIC_TYPE, TELEMETRY_EVENT } from '../../../lib/telemetry';
+import React, { useCallback, useMemo } from 'react';
+import { EuiSideNavItemType } from '@elastic/eui/src/components/side_nav/side_nav_types';
+import { securityNavGroup } from '../../../../app/home/home_navigations';
 import { getSearch } from '../helpers';
 import { PrimaryNavigationItemsProps } from './types';
-import { useKibana } from '../../../lib/kibana';
+import { useGetUserCasesPermissions } from '../../../lib/kibana';
+import { useNavigation } from '../../../lib/kibana/hooks';
+import { NavTab } from '../types';
 
 export const usePrimaryNavigationItems = ({
-  filters,
   navTabs,
-  query,
-  savedQuery,
   selectedTabId,
-  sourcerer,
-  timeline,
-  timerange,
-}: PrimaryNavigationItemsProps) => {
-  const { navigateToApp, getUrlForApp } = useKibana().services.application;
+  ...urlStateProps
+}: PrimaryNavigationItemsProps): Array<EuiSideNavItemType<{}>> => {
+  const { navigateTo, getAppUrl } = useNavigation();
 
-  const navItems = Object.values(navTabs).map((tab) => {
-    const { id, name, disabled } = tab;
-    const isSelected = selectedTabId === id;
-    const urlSearch = getSearch(tab, {
-      filters,
-      query,
-      savedQuery,
-      sourcerer,
-      timeline,
-      timerange,
-    });
+  const getSideNav = useCallback(
+    (tab: NavTab) => {
+      const { id, name, disabled } = tab;
+      const isSelected = selectedTabId === id;
+      const urlSearch = getSearch(tab, urlStateProps);
 
-    const handleClick = (ev: React.MouseEvent) => {
-      ev.preventDefault();
-      navigateToApp(`${APP_ID}:${id}`, { path: urlSearch });
-      track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.TAB_CLICKED}${id}`);
-    };
+      const handleClick = (ev: React.MouseEvent) => {
+        ev.preventDefault();
+        navigateTo({ deepLinkId: id, path: urlSearch });
+      };
 
-    const appHref = getUrlForApp(`${APP_ID}:${id}`, { path: urlSearch });
+      const appHref = getAppUrl({ deepLinkId: id, path: urlSearch });
 
-    return {
-      'data-href': appHref,
-      'data-test-subj': `navigation-${id}`,
-      disabled,
-      href: appHref,
-      id,
-      isSelected,
-      name,
-      onClick: handleClick,
-    };
-  });
-
-  return [
-    {
-      id: APP_ID, // TODO: When separating into sub-sections (detect, explore, investigate). Those names can also serve as the section id
-      items: navItems,
-      name: '',
+      return {
+        'data-href': appHref,
+        'data-test-subj': `navigation-${id}`,
+        disabled,
+        href: appHref,
+        id,
+        isSelected,
+        name,
+        onClick: handleClick,
+      };
     },
-  ];
+    [getAppUrl, navigateTo, selectedTabId, urlStateProps]
+  );
+
+  const navItemsToDisplay = usePrimaryNavigationItemsToDisplay(navTabs);
+
+  return useMemo(
+    () =>
+      navItemsToDisplay.map((item) => ({
+        ...item,
+        items: item.items.map((t: NavTab) => getSideNav(t)),
+      })),
+    [getSideNav, navItemsToDisplay]
+  );
 };
+
+function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
+  const hasCasesReadPermissions = useGetUserCasesPermissions()?.read;
+
+  return useMemo(
+    () => [
+      {
+        id: 'main',
+        name: '',
+        items: [navTabs.overview],
+      },
+      {
+        ...securityNavGroup.detect,
+        items: [navTabs.alerts, navTabs.rules, navTabs.exceptions],
+      },
+      {
+        ...securityNavGroup.explore,
+        items: [navTabs.hosts, navTabs.network],
+      },
+      {
+        ...securityNavGroup.investigate,
+        items: hasCasesReadPermissions ? [navTabs.timelines, navTabs.case] : [navTabs.timelines],
+      },
+      {
+        ...securityNavGroup.manage,
+        items: [navTabs.endpoints, navTabs.trusted_apps, navTabs.event_filters],
+      },
+    ],
+    [navTabs, hasCasesReadPermissions]
+  );
+}

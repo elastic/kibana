@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, useRef, MutableRefObject } from 'react';
 import styled from 'styled-components';
-import { isEmpty } from 'lodash/fp';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingContent,
-  EuiLoadingSpinner,
-  EuiHorizontalRule,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent, EuiLoadingSpinner } from '@elastic/eui';
 
-import { CaseStatuses, CaseAttributes, CaseType, Case, CaseConnector, Ecs } from '../../../common';
+import {
+  CaseStatuses,
+  CaseAttributes,
+  CaseType,
+  Case,
+  CaseConnector,
+  Ecs,
+  CaseViewRefreshPropInterface,
+} from '../../../common';
 import { HeaderPage } from '../header_page';
 import { EditableTitle } from '../header_page/editable_title';
 import { TagList } from '../tag_list';
-import { useGetCase } from '../../containers/use_get_case';
+import { UseGetCase, useGetCase } from '../../containers/use_get_case';
 import { UserActionTree } from '../user_action_tree';
 import { UserList } from '../user_list';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { getTypedPayload } from '../../containers/utils';
-import { WhitePageWrapper, HeaderWrapper } from '../wrappers';
+import { ContentWrapper, WhitePageWrapper, HeaderWrapper } from '../wrappers';
 import { CaseActionBar } from '../case_action_bar';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
-import { usePushToService } from '../use_push_to_service';
 import { EditConnector } from '../edit_connector';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { normalizeActionConnector, getNoneConnector } from '../configure_cases/utils';
@@ -41,7 +41,6 @@ import { OwnerProvider } from '../owner_context';
 import { getConnectorById } from '../utils';
 import { DoesNotExist } from './does_not_exist';
 
-const gutterTimeline = '70px'; // seems to be a timeline reference from the original file
 export interface CaseViewComponentProps {
   allCasesNavigation: CasesNavigation;
   caseDetailsNavigation: CasesNavigation;
@@ -49,17 +48,24 @@ export interface CaseViewComponentProps {
   configureCasesNavigation: CasesNavigation;
   getCaseDetailHrefWithCommentId: (commentId: string) => string;
   onComponentInitialized?: () => void;
+  actionsNavigation?: CasesNavigation<string, 'configurable'>;
   ruleDetailsNavigation?: CasesNavigation<string | null | undefined, 'configurable'>;
   showAlertDetails?: (alertId: string, index: string) => void;
   subCaseId?: string;
   useFetchAlertData: (alertIds: string[]) => [boolean, Record<string, Ecs>];
   userCanCrud: boolean;
+  /**
+   * A React `Ref` that Exposes data refresh callbacks.
+   * **NOTE**: Do not hold on to the `.current` object, as it could become stale
+   */
+  refreshRef?: MutableRefObject<CaseViewRefreshPropInterface>;
 }
 
 export interface CaseViewProps extends CaseViewComponentProps {
   onCaseDataSuccess?: (data: Case) => void;
   timelineIntegration?: CasesTimelineIntegration;
 }
+
 export interface OnUpdateFields {
   key: keyof Case;
   value: Case[keyof Case];
@@ -67,24 +73,12 @@ export interface OnUpdateFields {
   onError?: () => void;
 }
 
-const MyWrapper = styled.div`
-  padding: ${({ theme }) =>
-    `${theme.eui.paddingSizes.l} ${theme.eui.paddingSizes.l} ${gutterTimeline} ${theme.eui.paddingSizes.l}`};
-`;
-
 const MyEuiFlexGroup = styled(EuiFlexGroup)`
   height: 100%;
 `;
 
-const MyEuiHorizontalRule = styled(EuiHorizontalRule)`
-  margin-left: 48px;
-  &.euiHorizontalRule--full {
-    width: calc(100% - 48px);
-  }
-`;
-
 export interface CaseComponentProps extends CaseViewComponentProps {
-  fetchCase: () => void;
+  fetchCase: UseGetCase['fetchCase'];
   caseData: Case;
   updateCase: (newCase: Case) => void;
 }
@@ -99,12 +93,14 @@ export const CaseComponent = React.memo<CaseComponentProps>(
     getCaseDetailHrefWithCommentId,
     fetchCase,
     onComponentInitialized,
+    actionsNavigation,
     ruleDetailsNavigation,
     showAlertDetails,
     subCaseId,
     updateCase,
     useFetchAlertData,
     userCanCrud,
+    refreshRef,
   }) => {
     const [initLoadingData, setInitLoadingData] = useState(true);
     const init = useRef(true);
@@ -123,6 +119,51 @@ export const CaseComponent = React.memo<CaseComponentProps>(
       caseId,
       subCaseId,
     });
+
+    // Set `refreshRef` if needed
+    useEffect(() => {
+      let isStale = false;
+
+      if (refreshRef) {
+        refreshRef.current = {
+          refreshCase: async () => {
+            // Do nothing if component (or instance of this render cycle) is stale
+            if (isStale) {
+              return;
+            }
+
+            await fetchCase();
+          },
+          refreshUserActionsAndComments: async () => {
+            // Do nothing if component (or instance of this render cycle) is stale
+            // -- OR --
+            // it is already loading
+            if (isStale || isLoadingUserActions) {
+              return;
+            }
+
+            await Promise.all([
+              fetchCase(true),
+              fetchCaseUserActions(caseId, caseData.connector.id, subCaseId),
+            ]);
+          },
+        };
+
+        return () => {
+          isStale = true;
+          refreshRef.current = null;
+        };
+      }
+    }, [
+      caseData.connector.id,
+      caseId,
+      fetchCase,
+      fetchCaseUserActions,
+      isLoadingUserActions,
+      refreshRef,
+      subCaseId,
+      updateCase,
+    ]);
 
     // Update Fields
     const onUpdateField = useCallback(
@@ -244,21 +285,6 @@ export const CaseComponent = React.memo<CaseComponentProps>(
       [caseServices, caseData.connector]
     );
 
-    const { pushButton, pushCallouts } = usePushToService({
-      configureCasesNavigation,
-      connector: {
-        ...caseData.connector,
-        name: isEmpty(connectorName) ? caseData.connector.name : connectorName,
-      },
-      caseServices,
-      caseId: caseData.id,
-      caseStatus: caseData.status,
-      connectors,
-      updateCase: handleUpdateCase,
-      userCanCrud,
-      isValidConnector: isLoadingConnectors ? true : isValidConnector,
-    });
-
     const onSubmitConnector = useCallback(
       (connectorId, connectorFields, onError, onSuccess) => {
         const connector = getConnectorById(connectorId, connectors);
@@ -350,7 +376,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
             data-test-subj="case-view-title"
             titleNode={
               <EditableTitle
-                disabled={!userCanCrud}
+                userCanCrud={userCanCrud}
                 isLoading={isLoading && updateKey === 'title'}
                 title={caseData.title}
                 onSubmit={onSubmitTitle}
@@ -371,8 +397,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
           </HeaderPage>
         </HeaderWrapper>
         <WhitePageWrapper>
-          <MyWrapper>
-            {!initLoadingData && pushCallouts != null && pushCallouts}
+          <ContentWrapper>
             <EuiFlexGroup>
               <EuiFlexItem grow={6}>
                 {initLoadingData && (
@@ -388,6 +413,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                       caseUserActions={caseUserActions}
                       connectors={connectors}
                       data={caseData}
+                      actionsNavigation={actionsNavigation}
                       fetchUserActions={fetchCaseUserActions.bind(
                         null,
                         caseId,
@@ -401,34 +427,19 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                       renderInvestigateInTimelineActionComponent={
                         timelineUi?.renderInvestigateInTimelineActionComponent
                       }
+                      statusActionButton={
+                        caseData.type !== CaseType.collection && userCanCrud ? (
+                          <StatusActionButton
+                            status={caseData.status}
+                            onStatusChanged={changeStatus}
+                            isLoading={isLoading && updateKey === 'status'}
+                          />
+                        ) : null
+                      }
                       updateCase={updateCase}
                       useFetchAlertData={useFetchAlertData}
                       userCanCrud={userCanCrud}
                     />
-                    {(caseData.type !== CaseType.collection || hasDataToPush) && userCanCrud && (
-                      <>
-                        <MyEuiHorizontalRule
-                          margin="s"
-                          data-test-subj="case-view-bottom-actions-horizontal-rule"
-                        />
-                        <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">
-                          {caseData.type !== CaseType.collection && (
-                            <EuiFlexItem grow={false}>
-                              <StatusActionButton
-                                status={caseData.status}
-                                onStatusChanged={changeStatus}
-                                isLoading={isLoading && updateKey === 'status'}
-                              />
-                            </EuiFlexItem>
-                          )}
-                          {hasDataToPush && (
-                            <EuiFlexItem data-test-subj="has-data-to-push-button" grow={false}>
-                              {pushButton}
-                            </EuiFlexItem>
-                          )}
-                        </EuiFlexGroup>
-                      </>
-                    )}
                   </>
                 )}
               </EuiFlexItem>
@@ -454,21 +465,26 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                   isLoading={isLoading && updateKey === 'tags'}
                 />
                 <EditConnector
-                  caseFields={caseData.connector.fields}
+                  caseData={caseData}
+                  caseServices={caseServices}
+                  configureCasesNavigation={configureCasesNavigation}
+                  connectorName={connectorName}
                   connectors={connectors}
-                  userCanCrud={userCanCrud}
+                  hasDataToPush={hasDataToPush && userCanCrud}
                   hideConnectorServiceNowSir={
                     subCaseId != null || caseData.type === CaseType.collection
                   }
                   isLoading={isLoadingConnectors || (isLoading && updateKey === 'connector')}
+                  isValidConnector={isLoadingConnectors ? true : isValidConnector}
                   onSubmit={onSubmitConnector}
-                  selectedConnector={caseData.connector.id}
-                  userActions={caseUserActions}
                   permissionsError={permissionsError}
+                  updateCase={handleUpdateCase}
+                  userActions={caseUserActions}
+                  userCanCrud={userCanCrud}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
-          </MyWrapper>
+          </ContentWrapper>
         </WhitePageWrapper>
         {timelineUi?.renderTimelineDetailsPanel ? timelineUi.renderTimelineDetailsPanel() : null}
       </>
@@ -485,12 +501,14 @@ export const CaseView = React.memo(
     getCaseDetailHrefWithCommentId,
     onCaseDataSuccess,
     onComponentInitialized,
+    actionsNavigation,
     ruleDetailsNavigation,
     showAlertDetails,
     subCaseId,
     timelineIntegration,
     useFetchAlertData,
     userCanCrud,
+    refreshRef,
   }: CaseViewProps) => {
     const { data, isLoading, isError, fetchCase, updateCase } = useGetCase(caseId, subCaseId);
     if (isError) {
@@ -522,12 +540,14 @@ export const CaseView = React.memo(
               getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
               fetchCase={fetchCase}
               onComponentInitialized={onComponentInitialized}
+              actionsNavigation={actionsNavigation}
               ruleDetailsNavigation={ruleDetailsNavigation}
               showAlertDetails={showAlertDetails}
               subCaseId={subCaseId}
               updateCase={updateCase}
               useFetchAlertData={useFetchAlertData}
               userCanCrud={userCanCrud}
+              refreshRef={refreshRef}
             />
           </OwnerProvider>
         </CasesTimelineIntegrationProvider>

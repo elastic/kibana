@@ -8,15 +8,16 @@
 import React, { memo } from 'react';
 import { EuiCallOut, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useKibana } from '../../../common/lib/kibana';
+import { APP_ID } from '../../../../common/constants';
 import { getEndpointListPath } from '../../../management/common/routing';
 import { useNavigateToAppEventHandler } from '../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
-import { useManagementFormatUrl } from '../../../management/components/hooks/use_management_format_url';
-import { MANAGEMENT_APP_ID } from '../../../management/common/constants';
 
 export const EndpointNotice = memo<{ onDismiss: () => void }>(({ onDismiss }) => {
+  const { getUrlForApp } = useKibana().services.application;
   const endpointsPath = getEndpointListPath({ name: 'endpointList' });
-  const endpointsLink = useManagementFormatUrl(endpointsPath);
-  const handleGetStartedClick = useNavigateToAppEventHandler(MANAGEMENT_APP_ID, {
+  const endpointsLink = getUrlForApp(APP_ID, { path: endpointsPath });
+  const handleGetStartedClick = useNavigateToAppEventHandler(APP_ID, {
     path: endpointsPath,
   });
 
@@ -34,7 +35,7 @@ export const EndpointNotice = memo<{ onDismiss: () => void }>(({ onDismiss }) =>
           </b>
           <FormattedMessage
             id="xpack.securitySolution.overview.endpointNotice.title"
-            defaultMessage="Endpoint Security (beta)"
+            defaultMessage="Endpoint Security"
           />
         </>
       }
@@ -50,7 +51,7 @@ export const EndpointNotice = memo<{ onDismiss: () => void }>(({ onDismiss }) =>
         <EuiButton onClick={handleGetStartedClick} href={endpointsLink}>
           <FormattedMessage
             id="xpack.securitySolution.overview.endpointNotice.tryButton"
-            defaultMessage="Try Endpoint Security (beta)"
+            defaultMessage="Try Endpoint Security"
           />
         </EuiButton>
         <EuiButtonEmpty onClick={onDismiss}>

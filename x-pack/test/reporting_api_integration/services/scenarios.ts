@@ -164,6 +164,36 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     });
   };
 
+  const checkIlmMigrationStatus = async () => {
+    log.debug('ReportingAPI.checkIlmMigrationStatus');
+    const { body } = await supertestWithoutAuth
+      .get('/api/reporting/ilm_policy_status')
+      .set('kbn-xsrf', 'xxx')
+      .expect(200);
+    return body.status;
+  };
+
+  const migrateReportingIndices = async () => {
+    log.debug('ReportingAPI.migrateReportingIndices');
+    await supertestWithoutAuth
+      .put('/api/reporting/deprecations/migrate_ilm_policy')
+      .set('kbn-xsrf', 'xxx')
+      .expect(200);
+  };
+
+  const makeAllReportingIndicesUnmanaged = async () => {
+    log.debug('ReportingAPI.makeAllReportingIndicesUnmanaged');
+    const settings: any = {
+      'index.lifecycle.name': null,
+    };
+    await esSupertest
+      .put('/.reporting*/_settings')
+      .send({
+        settings,
+      })
+      .expect(200);
+  };
+
   return {
     initEcommerce,
     teardownEcommerce,
@@ -182,5 +212,8 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     postJob,
     postJobJSON,
     deleteAllReports,
+    checkIlmMigrationStatus,
+    migrateReportingIndices,
+    makeAllReportingIndicesUnmanaged,
   };
 }

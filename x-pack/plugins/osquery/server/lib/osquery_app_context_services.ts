@@ -6,6 +6,7 @@
  */
 
 import { Logger, LoggerFactory } from 'src/core/server';
+import { SecurityPluginStart } from '../../../security/server';
 import {
   AgentService,
   FleetStartContract,
@@ -69,7 +70,7 @@ export class OsqueryAppContextService {
 export interface OsqueryAppContext {
   logFactory: LoggerFactory;
   config(): ConfigType;
-
+  security: SecurityPluginStart;
   /**
    * Object readiness is tied to plugin start method
    */

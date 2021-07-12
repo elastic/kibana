@@ -65,7 +65,6 @@ import { initUiSettings } from './ui_settings';
 import {
   APP_ID,
   SERVER_APP_ID,
-  SecurityPageName,
   SIGNALS_ID,
   NOTIFICATIONS_ID,
   REFERENCE_RULE_ALERT_TYPE_ID,
@@ -125,24 +124,6 @@ export interface PluginSetup {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginStart {}
-
-const casesSubPlugin = `${APP_ID}:${SecurityPageName.case}`;
-
-/**
- * Don't include cases here so that the sub feature can govern whether Cases is enabled in the navigation
- */
-const securitySubPluginsNoCases = [
-  APP_ID,
-  `${APP_ID}:${SecurityPageName.overview}`,
-  `${APP_ID}:${SecurityPageName.detections}`,
-  `${APP_ID}:${SecurityPageName.hosts}`,
-  `${APP_ID}:${SecurityPageName.network}`,
-  `${APP_ID}:${SecurityPageName.timelines}`,
-  `${APP_ID}:${SecurityPageName.administration}`,
-];
-
-const allSecuritySubPlugins = [...securitySubPluginsNoCases, casesSubPlugin];
-
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private readonly logger: Logger;
   private readonly config: ConfigType;
@@ -190,7 +171,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     initUsageCollectors({
       core,
-      endpointAppContext: endpointContext,
       kibanaIndex: globalConfig.kibana.index,
       signalsIndex: config.signalsIndex,
       ml: plugins.ml,
@@ -216,12 +196,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     let ruleDataClient: RuleDataClient | null = null;
     if (isRuleRegistryEnabled) {
       const { ruleDataService } = plugins.ruleRegistry;
-      const start = () => core.getStartServices().then(([coreStart]) => coreStart);
 
-      const ready = once(async () => {
-        const componentTemplateName = ruleDataService.getFullAssetName(
-          'security-solution-mappings'
-        );
+      const alertsIndexPattern = ruleDataService.getFullAssetName('security.alerts*');
+
+      const initializeRuleDataTemplates = once(async () => {
+        const componentTemplateName = ruleDataService.getFullAssetName('security.alerts-mappings');
 
         if (!ruleDataService.isWriteEnabled()) {
           return;
@@ -240,9 +219,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         });
 
         await ruleDataService.createOrUpdateIndexTemplate({
-          name: ruleDataService.getFullAssetName('security-solution-index-template'),
+          name: ruleDataService.getFullAssetName('security.alerts-index-template'),
           body: {
-            index_patterns: [ruleDataService.getFullAssetName('security-solution*')],
+            index_patterns: [alertsIndexPattern],
             composed_of: [
               ruleDataService.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
               ruleDataService.getFullAssetName(ECS_COMPONENT_TEMPLATE_NAME),
@@ -250,20 +229,19 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             ],
           },
         });
+        await ruleDataService.updateIndexMappingsMatchingPattern(alertsIndexPattern);
       });
 
-      ready().catch((err) => {
+      // initialize eagerly
+      const initializeRuleDataTemplatesPromise = initializeRuleDataTemplates().catch((err) => {
         this.logger!.error(err);
       });
 
-      ruleDataClient = new RuleDataClient({
-        alias: plugins.ruleRegistry.ruleDataService.getFullAssetName('security-solution'),
-        getClusterClient: async () => {
-          const coreStart = await start();
-          return coreStart.elasticsearch.client.asInternalUser;
-        },
-        ready,
-      });
+      ruleDataClient = ruleDataService.getRuleDataClient(
+        SERVER_APP_ID,
+        ruleDataService.getFullAssetName('security.alerts'),
+        () => initializeRuleDataTemplatesPromise
+      );
 
       // sec
 
@@ -308,7 +286,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       }),
       order: 1100,
       category: DEFAULT_APP_CATEGORIES.security,
-      app: [...allSecuritySubPlugins, 'kibana'],
+      app: [APP_ID, 'kibana'],
       catalogue: ['securitySolution'],
       management: {
         insightsAndAlerting: ['triggersActions'],
@@ -323,9 +301,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               groupType: 'mutually_exclusive',
               privileges: [
                 {
-                  // if the user is granted access to the cases feature than the global nav will show the cases
-                  // sub plugin within the security solution navigation
-                  app: [casesSubPlugin],
                   id: 'cases_all',
                   includeIn: 'all',
                   name: 'All',
@@ -341,7 +316,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
                   },
                 },
                 {
-                  app: [casesSubPlugin],
                   id: 'cases_read',
                   includeIn: 'read',
                   name: 'Read',
@@ -363,9 +337,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       ],
       privileges: {
         all: {
-          app: [...securitySubPluginsNoCases, 'kibana'],
+          app: [APP_ID, 'kibana'],
           catalogue: ['securitySolution'],
-          api: ['securitySolution', 'lists-all', 'lists-read'],
+          api: ['securitySolution', 'lists-all', 'lists-read', 'rac'],
           savedObject: {
             all: ['alert', 'exception-list', 'exception-list-agnostic', ...savedObjectTypes],
             read: [],
@@ -384,9 +358,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           ui: ['show', 'crud'],
         },
         read: {
-          app: [...securitySubPluginsNoCases, 'kibana'],
+          app: [APP_ID, 'kibana'],
           catalogue: ['securitySolution'],
-          api: ['securitySolution', 'lists-read'],
+          api: ['securitySolution', 'lists-read', 'rac'],
           savedObject: {
             all: [],
             read: ['exception-list', 'exception-list-agnostic', ...savedObjectTypes],
@@ -415,6 +389,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         version: this.context.env.packageInfo.version,
         ml: plugins.ml,
         lists: plugins.lists,
+        mergeStrategy: this.config.alertMergeStrategy,
       });
       const ruleNotificationType = rulesNotificationAlertType({
         logger: this.logger,
@@ -530,7 +505,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       exceptionListsClient: this.lists!.getExceptionListClient(savedObjectsClient, 'kibana'),
     });
 
-    this.telemetryEventsSender.start(core, plugins.telemetry, plugins.taskManager);
+    this.telemetryEventsSender.start(
+      core,
+      plugins.telemetry,
+      plugins.taskManager,
+      this.endpointAppContextService
+    );
     return {};
   }
 

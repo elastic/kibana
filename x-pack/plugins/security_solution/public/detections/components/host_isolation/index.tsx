@@ -20,10 +20,12 @@ export const HostIsolationPanel = React.memo(
   ({
     details,
     cancelCallback,
+    successCallback,
     isolateAction,
   }: {
     details: Maybe<TimelineEventsDetailsItem[]>;
     cancelCallback: () => void;
+    successCallback?: () => void;
     isolateAction: string;
   }) => {
     const endpointId = useMemo(() => {
@@ -92,6 +94,7 @@ export const HostIsolationPanel = React.memo(
         cases={associatedCases}
         casesInfo={casesInfo}
         cancelCallback={cancelCallback}
+        successCallback={successCallback}
       />
     ) : (
       <UnisolateHost
@@ -100,6 +103,7 @@ export const HostIsolationPanel = React.memo(
         cases={associatedCases}
         casesInfo={casesInfo}
         cancelCallback={cancelCallback}
+        successCallback={successCallback}
       />
     );
   }

@@ -1,0 +1,33 @@
+.kbnPageTemplateSolutionNavCollapseButton {
+  position: absolute;
+  opacity: 0;
+  left: 248px - $euiSize;
+  top: $euiSizeL;
+  z-index: 2;
+
+  @include euiCanAnimate {
+    transition: opacity $euiAnimSpeedFast, left $euiAnimSpeedFast;
+  }
+
+  &:hover,
+  &:focus {
+    transition-delay: 0s !important;
+  }
+
+  .kbnPageTemplate__pageSideBar:hover &,
+  &:hover,
+  &:focus {
+    opacity: 1;
+    left: 248px - $euiSizeL;
+  }
+
+  .kbnPageTemplate__pageSideBar:hover & {
+    transition-delay: $euiAnimSpeedSlow * 2;
+  }
+}
+
+.kbnPageTemplateSolutionNavCollapseButton-isCollapsed {
+  left: $euiSizeM !important;
+  opacity: 1 !important;
+  transition-delay: 0s !important;
+}

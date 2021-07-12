@@ -6,8 +6,13 @@
  */
 
 import { euiPaletteForStatus } from '@elastic/eui';
-import { ConfigProps, DataSeries } from '../../types';
-import { FieldLabels, FILTER_RECORDS, USE_BREAK_DOWN_COLUMN } from '../constants';
+import { ConfigProps, SeriesConfig } from '../../types';
+import {
+  FieldLabels,
+  FILTER_RECORDS,
+  REPORT_METRIC_FIELD,
+  USE_BREAK_DOWN_COLUMN,
+} from '../constants';
 import { buildPhraseFilter } from '../utils';
 import {
   CLIENT_GEO_COUNTRY_NAME,
@@ -26,8 +31,9 @@ import {
   URL_FULL,
   SERVICE_ENVIRONMENT,
 } from '../constants/elasticsearch_fieldnames';
+import { CLS_LABEL, FID_LABEL, LCP_LABEL } from '../constants/labels';
 
-export function getCoreWebVitalsConfig({ indexPattern }: ConfigProps): DataSeries {
+export function getCoreWebVitalsConfig({ indexPattern }: ConfigProps): SeriesConfig {
   const statusPallete = euiPaletteForStatus(3);
 
   return {
@@ -39,20 +45,20 @@ export function getCoreWebVitalsConfig({ indexPattern }: ConfigProps): DataSerie
     },
     yAxisColumns: [
       {
-        sourceField: 'core.web.vitals',
+        sourceField: REPORT_METRIC_FIELD,
         label: 'Good',
       },
       {
-        sourceField: 'core.web.vitals',
+        sourceField: REPORT_METRIC_FIELD,
         label: 'Average',
       },
       {
-        sourceField: 'core.web.vitals',
+        sourceField: REPORT_METRIC_FIELD,
         label: 'Poor',
       },
     ],
     hasOperationType: false,
-    defaultFilters: [
+    filterFields: [
       {
         field: TRANSACTION_URL,
         isNegated: false,
@@ -69,7 +75,7 @@ export function getCoreWebVitalsConfig({ indexPattern }: ConfigProps): DataSerie
         nested: USER_AGENT_VERSION,
       },
     ],
-    breakdowns: [
+    breakdownFields: [
       SERVICE_NAME,
       USER_AGENT_NAME,
       USER_AGENT_OS,
@@ -77,79 +83,67 @@ export function getCoreWebVitalsConfig({ indexPattern }: ConfigProps): DataSerie
       USER_AGENT_DEVICE,
       URL_FULL,
     ],
-    filters: [
+    baseFilters: [
       ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', indexPattern),
       ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', indexPattern),
     ],
     labels: { ...FieldLabels, [SERVICE_NAME]: 'Web Application' },
-    reportDefinitions: [
+    definitionFields: [SERVICE_NAME, SERVICE_ENVIRONMENT],
+    metricOptions: [
       {
-        field: SERVICE_NAME,
-        required: true,
-      },
-      {
-        field: SERVICE_ENVIRONMENT,
-      },
-      {
-        field: 'core.web.vitals',
-        custom: true,
-        options: [
+        id: LCP_FIELD,
+        label: LCP_LABEL,
+        columnType: FILTER_RECORDS,
+        columnFilters: [
           {
-            id: LCP_FIELD,
-            label: 'Largest contentful paint',
-            columnType: FILTER_RECORDS,
-            columnFilters: [
-              {
-                language: 'kuery',
-                query: `${LCP_FIELD} < 2500`,
-              },
-              {
-                language: 'kuery',
-                query: `${LCP_FIELD} > 2500 and ${LCP_FIELD} < 4000`,
-              },
-              {
-                language: 'kuery',
-                query: `${LCP_FIELD} > 4000`,
-              },
-            ],
+            language: 'kuery',
+            query: `${LCP_FIELD} < 2500`,
           },
           {
-            label: 'First input delay',
-            id: FID_FIELD,
-            columnType: FILTER_RECORDS,
-            columnFilters: [
-              {
-                language: 'kuery',
-                query: `${FID_FIELD} < 100`,
-              },
-              {
-                language: 'kuery',
-                query: `${FID_FIELD} > 100 and ${FID_FIELD} < 300`,
-              },
-              {
-                language: 'kuery',
-                query: `${FID_FIELD} > 300`,
-              },
-            ],
+            language: 'kuery',
+            query: `${LCP_FIELD} > 2500 and ${LCP_FIELD} < 4000`,
           },
           {
-            label: 'Cumulative layout shift',
-            id: CLS_FIELD,
-            columnType: FILTER_RECORDS,
-            columnFilters: [
-              {
-                language: 'kuery',
-                query: `${CLS_FIELD} < 0.1`,
-              },
-              {
-                language: 'kuery',
-                query: `${CLS_FIELD} > 0.1 and ${CLS_FIELD} < 0.25`,
-              },
-              {
-                language: 'kuery',
-                query: `${CLS_FIELD} > 0.25`,
-              },
-            ],
+            language: 'kuery',
+            query: `${LCP_FIELD} > 4000`,
+          },
+        ],
+      },
+      {
+        label: FID_LABEL,
+        id: FID_FIELD,
+        columnType: FILTER_RECORDS,
+        columnFilters: [
+          {
+            language: 'kuery',
+            query: `${FID_FIELD} < 100`,
+          },
+          {
+            language: 'kuery',
+            query: `${FID_FIELD} > 100 and ${FID_FIELD} < 300`,
+          },
+          {
+            language: 'kuery',
+            query: `${FID_FIELD} > 300`,
+          },
+        ],
+      },
+      {
+        label: CLS_LABEL,
+        id: CLS_FIELD,
+        columnType: FILTER_RECORDS,
+        columnFilters: [
+          {
+            language: 'kuery',
+            query: `${CLS_FIELD} < 0.1`,
+          },
+          {
+            language: 'kuery',
+            query: `${CLS_FIELD} > 0.1 and ${CLS_FIELD} < 0.25`,
+          },
+          {
+            language: 'kuery',
+            query: `${CLS_FIELD} > 0.25`,
           },
         ],
       },
