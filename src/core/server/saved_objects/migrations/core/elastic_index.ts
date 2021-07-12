@@ -28,6 +28,23 @@ export interface FullIndexInfo {
   mappings: IndexMapping;
 }
 
+/**
+ * Types that are no longer registered and need to be removed
+ */
+export const REMOVED_TYPES: string[] = [
+  'apm-services-telemetry',
+  'background-session',
+  'cases-sub-case',
+  'file-upload-telemetry',
+  // https://github.com/elastic/kibana/issues/91869
+  'fleet-agent-events',
+  // Was removed in 7.12
+  'ml-telemetry',
+  'server',
+  // https://github.com/elastic/kibana/issues/95617
+  'tsvb-validation-telemetry',
+].sort();
+
 // When migrating from the outdated index we use a read query which excludes
 // saved objects which are no longer used. These saved objects will still be
 // kept in the outdated index for backup purposes, but won't be available in
@@ -35,18 +52,11 @@ export interface FullIndexInfo {
 export const excludeUnusedTypesQuery: estypes.QueryDslQueryContainer = {
   bool: {
     must_not: [
-      // https://github.com/elastic/kibana/issues/91869
-      {
+      ...REMOVED_TYPES.map((typeName) => ({
         term: {
-          type: 'fleet-agent-events',
+          type: typeName,
         },
-      },
-      // https://github.com/elastic/kibana/issues/95617
-      {
-        term: {
-          type: 'tsvb-validation-telemetry',
-        },
-      },
+      })),
       // https://github.com/elastic/kibana/issues/96131
       {
         bool: {
