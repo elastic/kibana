@@ -12,7 +12,7 @@ import { getOr, isEmpty } from 'lodash/fp';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 
-import type { FilterStateStore, Filter } from '@kbn/es-query';
+import { FilterStateStore, Filter } from '@kbn/es-query';
 import {
   KueryFilterQueryKind,
   TimelineId,

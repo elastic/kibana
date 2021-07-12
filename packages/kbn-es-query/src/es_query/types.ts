@@ -34,4 +34,5 @@ export interface IndexPatternFieldBase {
 export interface IndexPatternBase {
   fields: IndexPatternFieldBase[];
   id?: string;
+  title?: string;
 }
