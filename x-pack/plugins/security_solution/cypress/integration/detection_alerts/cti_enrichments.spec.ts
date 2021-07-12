@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { newThreatIndicatorRule } from '../../objects/rule';
+import { getNewThreatIndicatorRule } from '../../objects/rule';
 import { cleanKibana, reload } from '../../tasks/common';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
@@ -39,7 +39,7 @@ describe('CTI Enrichment', () => {
     esArchiverLoad('suspicious_source_event');
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     goToManageAlertsDetectionRules();
-    createCustomIndicatorRule(newThreatIndicatorRule);
+    createCustomIndicatorRule(getNewThreatIndicatorRule());
     reload();
   });
 
@@ -56,9 +56,9 @@ describe('CTI Enrichment', () => {
 
   it('Displays enrichment matched.* fields on the timeline', () => {
     const expectedFields = {
-      'threat.indicator.matched.atomic': newThreatIndicatorRule.atomic,
+      'threat.indicator.matched.atomic': getNewThreatIndicatorRule().atomic,
       'threat.indicator.matched.type': 'indicator_match_rule',
-      'threat.indicator.matched.field': newThreatIndicatorRule.indicatorMappingField,
+      'threat.indicator.matched.field': getNewThreatIndicatorRule().indicatorMappingField,
     };
     const fields = Object.keys(expectedFields) as Array<keyof typeof expectedFields>;
 
