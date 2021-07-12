@@ -106,6 +106,7 @@ export const useCorrelations = (params: CorrelationsOptions) => {
   };
 
   return {
+    log: rawResponse?.log ?? [],
     error,
     histograms: rawResponse?.values ?? [],
     percentileThresholdValue:

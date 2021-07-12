@@ -6,8 +6,11 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 import {
+  EuiCode,
+  EuiAccordion,
+  EuiPanel,
   EuiIcon,
   EuiBasicTableColumn,
   EuiButton,
@@ -72,7 +75,11 @@ export function MlLatencyCorrelations({ onClose }: Props) {
     },
   } = useUrlParams();
 
+  const location = useLocation();
+  const displayLog = location.search.includes('debug=true');
+
   const {
+    log,
     error,
     histograms,
     percentileThresholdValue,
@@ -292,9 +299,10 @@ export function MlLatencyCorrelations({ onClose }: Props) {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="none">
-            <EuiFlexItem>
+            <EuiFlexItem data-test-subj="apmCorrelationsLatencyCorrelationsProgressTitle">
               <EuiText size="xs" color="subdued">
                 <FormattedMessage
+                  data-test-subj="apmCorrelationsLatencyCorrelationsProgressTitle"
                   id="xpack.apm.correlations.latencyCorrelations.progressTitle"
                   defaultMessage="Progress: {progress}%"
                   values={{ progress: Math.round(progress * 100) }}
@@ -323,7 +331,7 @@ export function MlLatencyCorrelations({ onClose }: Props) {
       {overallHistogram !== undefined ? (
         <>
           <EuiTitle size="xxs">
-            <h4>
+            <h4 data-test-subj="apmCorrelationsLatencyCorrelationsChartTitle">
               {i18n.translate(
                 'xpack.apm.correlations.latencyCorrelations.chartTitle',
                 {
@@ -347,32 +355,50 @@ export function MlLatencyCorrelations({ onClose }: Props) {
         </>
       ) : null}
 
-      {histograms.length > 0 && selectedHistogram !== undefined && (
-        <CorrelationsTable
-          // @ts-ignore correlations don't have the same column format other tables have
-          columns={mlCorrelationColumns}
-          // @ts-expect-error correlations don't have the same significant term other tables have
-          significantTerms={histogramTerms}
-          status={FETCH_STATUS.SUCCESS}
-          setSelectedSignificantTerm={setSelectedSignificantTerm}
-          selectedTerm={{
-            fieldName: selectedHistogram.field,
-            fieldValue: selectedHistogram.value,
-          }}
-          onFilter={onClose}
-        />
+      <div data-test-subj="apmCorrelationsTable">
+        {histograms.length > 0 && selectedHistogram !== undefined && (
+          <CorrelationsTable
+            // @ts-ignore correlations don't have the same column format other tables have
+            columns={mlCorrelationColumns}
+            // @ts-expect-error correlations don't have the same significant term other tables have
+            significantTerms={histogramTerms}
+            status={FETCH_STATUS.SUCCESS}
+            setSelectedSignificantTerm={setSelectedSignificantTerm}
+            selectedTerm={{
+              fieldName: selectedHistogram.field,
+              fieldValue: selectedHistogram.value,
+            }}
+            onFilter={onClose}
+          />
+        )}
+        {histograms.length < 1 && progress > 0.99 ? (
+          <>
+            <EuiSpacer size="m" />
+            <EuiText textAlign="center">
+              <FormattedMessage
+                id="xpack.apm.correlations.latencyCorrelations.noCorrelationsText"
+                defaultMessage="No significant correlations found"
+              />
+            </EuiText>
+          </>
+        ) : null}
+      </div>
+      {log.length > 0 && displayLog && (
+        <EuiAccordion id="accordion1" buttonContent="Log">
+          <EuiPanel color="subdued">
+            {log.map((d, i) => {
+              const splitItem = d.split(': ');
+              return (
+                <p key={i}>
+                  <small>
+                    <EuiCode>{splitItem[0]}</EuiCode> {splitItem[1]}
+                  </small>
+                </p>
+              );
+            })}
+          </EuiPanel>
+        </EuiAccordion>
       )}
-      {histograms.length < 1 && progress > 0.99 ? (
-        <>
-          <EuiSpacer size="m" />
-          <EuiText textAlign="center">
-            <FormattedMessage
-              id="xpack.apm.correlations.latencyCorrelations.noCorrelationsText"
-              defaultMessage="No significant correlations found"
-            />
-          </EuiText>
-        </>
-      ) : null}
     </>
   );
 }
