@@ -1,7 +1,7 @@
 #!/bin/groovy
 library 'kibana-pipeline-library'
 kibanaLibrary.load()
-kibanaPipeline(timeoutMinutes: 300) {
+kibanaPipeline(timeoutMinutes: 120) {
   slackNotifications.onFailure {
     ciStats.trackBuild {
       workers.ci(ramDisk: false, name: "package-build", size: 'l', runErrorReporter: false) {

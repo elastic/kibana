@@ -21,13 +21,11 @@ interface Props {
   onConfirm: () => void;
   onCancel: () => void;
   unsupportedConfigs: Array<{ key: string; value: string }>;
-  isLoading: boolean;
 }
 export function ConfirmSwitchModal({
   onConfirm,
   onCancel,
   unsupportedConfigs,
-  isLoading,
 }: Props) {
   const [isConfirmChecked, setIsConfirmChecked] = useState(false);
   const hasUnsupportedConfigs = !!unsupportedConfigs.length;
@@ -52,7 +50,6 @@ export function ConfirmSwitchModal({
       defaultFocusedButton="confirm"
       onConfirm={onConfirm}
       confirmButtonDisabled={!isConfirmChecked}
-      isLoading={isLoading}
     >
       <p>
         {i18n.translate('xpack.apm.settings.schema.confirm.descriptionText', {
@@ -135,7 +132,6 @@ export function ConfirmSwitchModal({
           onChange={(e) => {
             setIsConfirmChecked(e.target.checked);
           }}
-          disabled={isLoading}
         />
       </p>
     </EuiConfirmModal>
