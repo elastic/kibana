@@ -28,7 +28,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { DeleteFilterListModal } from '../components/delete_filter_list_modal';
 import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
-import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../../../common/constants/locator';
 
 function UsedByIcon({ usedBy }) {
   // Renders a tick or cross in the 'usedBy' column to indicate whether
