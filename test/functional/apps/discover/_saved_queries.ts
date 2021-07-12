@@ -40,7 +40,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    describe('saved query management component functionality', function () {
+    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/104366
+    describe.skip('saved query management component functionality', function () {
       before(async function () {
         // set up a query with filters and a time filter
         log.debug('set up a query with filters to save');

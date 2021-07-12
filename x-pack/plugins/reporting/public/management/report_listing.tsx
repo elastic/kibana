@@ -13,6 +13,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTextColor,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
@@ -26,10 +27,18 @@ import { JOB_STATUSES as JobStatuses } from '../../common/constants';
 import { Poller } from '../../common/poller';
 import { durationToNumber } from '../../common/schema_utils';
 import { checkLicense } from '../lib/license_check';
-import { JobQueueEntry, ReportingAPIClient } from '../lib/reporting_api_client';
+import {
+  JobQueueEntry,
+  ReportingAPIClient,
+  useInternalApiClient,
+} from '../lib/reporting_api_client';
+import { useIlmPolicyStatus, UseIlmPolicyStatusReturn } from '../lib/ilm_policy_status_context';
+import type { SharePluginSetup } from '../shared_imports';
 import { ClientConfigType } from '../plugin';
 import { ReportDeleteButton, ReportDownloadButton, ReportErrorButton, ReportInfoButton } from './';
 import { ReportDiagnostic } from './report_diagnostic';
+import { MigrateIlmPolicyCallOut } from './migrate_ilm_policy_callout';
+import { IlmPolicyLink } from './ilm_policy_link';
 
 export interface Job {
   id: string;
@@ -55,7 +64,10 @@ export interface Props {
   license$: LicensingPluginSetup['license$'];
   pollConfig: ClientConfigType['poll'];
   redirect: ApplicationStart['navigateToApp'];
+  navigateToUrl: ApplicationStart['navigateToUrl'];
   toasts: ToastsSetup;
+  urlService: SharePluginSetup['url'];
+  ilmPolicyContextValue: UseIlmPolicyStatusReturn;
 }
 
 interface State {
@@ -132,9 +144,14 @@ class ReportListingUi extends Component<Props, State> {
   }
 
   public render() {
+    const { ilmPolicyContextValue, urlService, navigateToUrl } = this.props;
+    const ilmLocator = urlService.locators.get('ILM_LOCATOR_ID');
+    const hasIlmPolicy = ilmPolicyContextValue.status !== 'policy-not-found';
+    const showIlmPolicyLink = Boolean(ilmLocator && hasIlmPolicy);
     return (
       <>
         <EuiPageHeader
+          data-test-subj="reportingPageHeader"
           bottomBorder
           pageTitle={
             <FormattedMessage id="xpack.reporting.listing.reportstitle" defaultMessage="Reports" />
@@ -147,11 +164,22 @@ class ReportListingUi extends Component<Props, State> {
           }
         />
 
+        <MigrateIlmPolicyCallOut toasts={this.props.toasts} />
+
         <EuiSpacer size={'l'} />
         {this.renderTable()}
 
         <EuiSpacer size="s" />
-        <EuiFlexGroup justifyContent="spaceBetween" direction="rowReverse">
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            {ilmPolicyContextValue.isLoading ? (
+              <EuiLoadingSpinner />
+            ) : (
+              showIlmPolicyLink && (
+                <IlmPolicyLink navigateToUrl={navigateToUrl} locator={ilmLocator!} />
+              )
+            )}
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <ReportDiagnostic apiClient={this.props.apiClient} />
           </EuiFlexItem>
@@ -348,7 +376,7 @@ class ReportListingUi extends Component<Props, State> {
         }),
         render: (objectTitle: string, record: Job) => {
           return (
-            <div>
+            <div data-test-subj="reportingListItemObjectTitle">
               <div>{objectTitle}</div>
               <EuiText size="s">
                 <EuiTextColor color="subdued">{record.object_type}</EuiTextColor>
@@ -531,4 +559,18 @@ class ReportListingUi extends Component<Props, State> {
   }
 }
 
-export const ReportListing = injectI18n(ReportListingUi);
+const PrivateReportListing = injectI18n(ReportListingUi);
+
+export const ReportListing = (
+  props: Omit<Props, 'ilmPolicyContextValue' | 'intl' | 'apiClient'>
+) => {
+  const ilmPolicyStatusValue = useIlmPolicyStatus();
+  const { apiClient } = useInternalApiClient();
+  return (
+    <PrivateReportListing
+      {...props}
+      apiClient={apiClient}
+      ilmPolicyContextValue={ilmPolicyStatusValue}
+    />
+  );
+};

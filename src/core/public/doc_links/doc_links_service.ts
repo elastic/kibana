@@ -231,7 +231,7 @@ export class DocLinksService {
         ml: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/index.html`,
           aggregations: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-configuring-aggregation.html`,
-          anomalyDetection: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/xpack-ml.html`,
+          anomalyDetection: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-ad-overview.html`,
           anomalyDetectionJobs: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-jobs.html`,
           anomalyDetectionConfiguringCategories: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-configuring-categories.html`,
           anomalyDetectionBucketSpan: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/create-jobs.html#bucket-span`,
@@ -244,14 +244,14 @@ export class DocLinksService {
           anomalyDetectionJobTips: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/create-jobs.html#job-tips`,
           anomalyDetectionModelMemoryLimits: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/create-jobs.html#model-memory-limits`,
           calendars: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-calendars.html`,
-          classificationEvaluation: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfanalytics-evaluate.html#ml-dfanalytics-classification`,
+          classificationEvaluation: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfa-classification.html#ml-dfanalytics-classification-evaluation`,
           customRules: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-rules.html`,
           customUrls: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-configuring-url.html`,
           dataFrameAnalytics: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfanalytics.html`,
           featureImportance: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-feature-importance.html`,
-          outlierDetectionRoc: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfanalytics-evaluate.html#ml-dfanalytics-roc`,
-          regressionEvaluation: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfanalytics-evaluate.html#ml-dfanalytics-regression-evaluation`,
-          classificationAucRoc: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfanalytics-evaluate.html#ml-dfanalytics-class-aucroc`,
+          outlierDetectionRoc: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfa-finding-outliers.html#ml-dfanalytics-roc`,
+          regressionEvaluation: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfa-regression.html#ml-dfanalytics-regression-evaluation`,
+          classificationAucRoc: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfa-classification.html#ml-dfanalytics-class-aucroc`,
         },
         transforms: {
           guide: `${ELASTICSEARCH_DOCS}transforms.html`,
@@ -263,6 +263,7 @@ export class DocLinksService {
           lensPanels: `${KIBANA_DOCS}lens.html`,
           maps: `${ELASTIC_WEBSITE_URL}maps`,
           vega: `${KIBANA_DOCS}vega.html`,
+          tsvbIndexPatternMode: `${KIBANA_DOCS}tsvb.html#tsvb-index-pattern-mode`,
         },
         observability: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/index.html`,
@@ -328,7 +329,7 @@ export class DocLinksService {
         },
         apis: {
           bulkIndexAlias: `${ELASTICSEARCH_DOCS}indices-aliases.html`,
-          byteSizeUnits: `${ELASTICSEARCH_DOCS}common-options.html#byte-units`,
+          byteSizeUnits: `${ELASTICSEARCH_DOCS}api-conventions.html#byte-units`,
           createAutoFollowPattern: `${ELASTICSEARCH_DOCS}ccr-put-auto-follow-pattern.html`,
           createFollower: `${ELASTICSEARCH_DOCS}ccr-put-follow.html`,
           createIndex: `${ELASTICSEARCH_DOCS}indices-create-index.html`,
@@ -352,7 +353,7 @@ export class DocLinksService {
           putSnapshotLifecyclePolicy: `${ELASTICSEARCH_DOCS}slm-api-put-policy.html`,
           putWatch: `${ELASTICSEARCH_DOCS}watcher-api-put-watch.html`,
           simulatePipeline: `${ELASTICSEARCH_DOCS}simulate-pipeline-api.html`,
-          timeUnits: `${ELASTICSEARCH_DOCS}common-options.html#time-units`,
+          timeUnits: `${ELASTICSEARCH_DOCS}api-conventions.html#time-units`,
           updateTransform: `${ELASTICSEARCH_DOCS}update-transform.html`,
         },
         plugins: {
