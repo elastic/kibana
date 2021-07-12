@@ -16,4 +16,5 @@ export interface IExecutionContextContainer
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [toHeader](./kibana-plugin-core-public.iexecutioncontextcontainer.toheader.md) | <code>() =&gt; Record&lt;string, string&gt;</code> |  |
+|  [toJSON](./kibana-plugin-core-public.iexecutioncontextcontainer.tojson.md) | <code>() =&gt; Readonly&lt;KibanaExecutionContext&gt;</code> |  |
 

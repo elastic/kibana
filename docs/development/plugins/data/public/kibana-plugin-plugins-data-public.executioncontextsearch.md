@@ -11,5 +11,6 @@ export declare type ExecutionContextSearch = {
     filters?: Filter[];
     query?: Query | Query[];
     timeRange?: TimeRange;
+    executionContext?: KibanaExecutionContext;
 };
 ```

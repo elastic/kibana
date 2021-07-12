@@ -55,6 +55,7 @@ import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { IUiSettingsClient } from 'src/core/public';
 import { JsonValue } from '@kbn/common-utils';
 import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import { KibanaExecutionContext } from 'src/core/public';
 import { Location } from 'history';
 import { LocationDescriptorObject } from 'history';
 import { Logger } from '@kbn/logging';
@@ -913,6 +914,7 @@ export type ExecutionContextSearch = {
     filters?: Filter[];
     query?: Query | Query[];
     timeRange?: TimeRange;
+    executionContext?: KibanaExecutionContext;
 };
 
 // Warning: (ae-missing-release-tag) "ExistsFilter" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -1730,6 +1732,8 @@ export type ISearchGeneric = <SearchStrategyRequest extends IKibanaSearchRequest
 // @public (undocumented)
 export interface ISearchOptions {
     abortSignal?: AbortSignal;
+    // (undocumented)
+    executionContext?: KibanaExecutionContext;
     indexPattern?: IndexPattern;
     // Warning: (ae-forgotten-export) The symbol "IInspectorInfo" needs to be exported by the entry point index.d.ts
     inspector?: IInspectorInfo;

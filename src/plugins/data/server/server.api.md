@@ -39,6 +39,7 @@ import { ISearchSource } from 'src/plugins/data/public';
 import { IUiSettingsClient } from 'src/core/server';
 import { IUiSettingsClient as IUiSettingsClient_3 } from 'kibana/server';
 import { JsonValue } from '@kbn/common-utils';
+import { KibanaExecutionContext } from 'src/core/public';
 import { KibanaRequest } from 'src/core/server';
 import { KibanaRequest as KibanaRequest_2 } from 'kibana/server';
 import { Logger } from 'src/core/server';
@@ -499,6 +500,7 @@ export type ExecutionContextSearch = {
     filters?: Filter[];
     query?: Query | Query[];
     timeRange?: TimeRange;
+    executionContext?: KibanaExecutionContext;
 };
 
 // Warning: (ae-missing-release-tag) "exporters" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -1016,6 +1018,8 @@ export interface IScopedSearchClient extends ISearchClient {
 // @public (undocumented)
 export interface ISearchOptions {
     abortSignal?: AbortSignal;
+    // (undocumented)
+    executionContext?: KibanaExecutionContext;
     indexPattern?: IndexPattern;
     // Warning: (ae-forgotten-export) The symbol "IInspectorInfo" needs to be exported by the entry point index.d.ts
     inspector?: IInspectorInfo;

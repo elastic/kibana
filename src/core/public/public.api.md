@@ -900,6 +900,8 @@ export interface IBasePath {
 export interface IExecutionContextContainer {
     // (undocumented)
     toHeader: () => Record<string, string>;
+    // (undocumented)
+    toJSON: () => Readonly<KibanaExecutionContext>;
 }
 
 // @public
@@ -965,13 +967,13 @@ export interface IUiSettingsClient {
 }
 
 // @public (undocumented)
-export interface KibanaExecutionContext {
-    readonly description: string;
-    readonly id: string;
-    readonly name: string;
+export type KibanaExecutionContext = {
     readonly type: string;
+    readonly name: string;
+    readonly id: string;
+    readonly description: string;
     readonly url?: string;
-}
+};
 
 // @public
 export type MountPoint<T extends HTMLElement = HTMLElement> = (element: T) => UnmountCallback;

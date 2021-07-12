@@ -19,6 +19,7 @@ export interface IExpressionLoaderParams
 |  [customRenderers](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.customrenderers.md) | <code>[]</code> |  |
 |  [debug](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.debug.md) | <code>boolean</code> |  |
 |  [disableCaching](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.disablecaching.md) | <code>boolean</code> |  |
+|  [executionContext](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.executioncontext.md) | <code>IExecutionContextContainer</code> |  |
 |  [hasCompatibleActions](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.hascompatibleactions.md) | <code>ExpressionRenderHandlerParams['hasCompatibleActions']</code> |  |
 |  [inspectorAdapters](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.inspectoradapters.md) | <code>Adapters</code> |  |
 |  [onRenderError](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.onrendererror.md) | <code>RenderErrorHandlerFnType</code> |  |
