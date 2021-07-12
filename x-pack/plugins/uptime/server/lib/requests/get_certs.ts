@@ -138,7 +138,6 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
     searchBody.query.bool.filter.push(validityFilters);
   }
 
-  // console.log(JSON.stringify(params, null, 2));
   const { body: result } = await uptimeEsClient.search({
     body: searchBody,
   });
