@@ -123,8 +123,8 @@ describe('duplicateRule', () => {
         },
         "tags": Array [
           "test",
-          "__internal_immutable:false",
           "__internal_rule_id:newId",
+          "__internal_immutable:false",
         ],
         "throttle": null,
       }
