@@ -131,7 +131,10 @@ export const CloneTransformSection: FC<Props> = ({ match, location }) => {
 
       <EuiSpacer size="l" />
 
-      <EuiPageContentBody data-test-subj="transformPageCloneTransform">
+      <EuiPageContentBody
+        data-test-subj="transformPageCloneTransform"
+        className="transform__wizardBody"
+      >
         {typeof errorMessage !== 'undefined' && (
           <>
             <EuiCallOut
