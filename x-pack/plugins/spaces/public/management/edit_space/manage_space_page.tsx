@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageContent,
+  EuiPageContentBody,
   EuiPageHeader,
   EuiSpacer,
   hexToHsv,
@@ -128,16 +129,12 @@ export class ManageSpacePage extends Component<Props, State> {
     }
 
     return (
-      <>
-        <EuiPageHeader
-          bottomBorder
-          pageTitle={this.getTitle()}
-          description={getSpacesFeatureDescription()}
-        />
+      <EuiPageContentBody restrictWidth>
+        <EuiPageHeader pageTitle={this.getTitle()} description={getSpacesFeatureDescription()} />
         <EuiSpacer size="l" />
 
         {this.getForm()}
-      </>
+      </EuiPageContentBody>
     );
   }
 

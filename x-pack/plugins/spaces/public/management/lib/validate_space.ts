@@ -134,22 +134,20 @@ export class SpaceValidator {
       return valid();
     }
 
-    if (space.avatarType !== 'image') {
-      if (!space.color) {
-        return invalid(
-          i18n.translate('xpack.spaces.management.validateSpace.requiredColorErrorMessage', {
-            defaultMessage: 'Select a color.',
-          })
-        );
-      }
+    if (!space.color) {
+      return invalid(
+        i18n.translate('xpack.spaces.management.validateSpace.requiredColorErrorMessage', {
+          defaultMessage: 'Select a background color.',
+        })
+      );
+    }
 
-      if (!isValidHex(space.color)) {
-        return invalid(
-          i18n.translate('xpack.spaces.management.validateSpace.invalidColorErrorMessage', {
-            defaultMessage: 'Enter a valid HEX color code.',
-          })
-        );
-      }
+    if (!isValidHex(space.color)) {
+      return invalid(
+        i18n.translate('xpack.spaces.management.validateSpace.invalidColorErrorMessage', {
+          defaultMessage: 'Enter a valid HEX color code.',
+        })
+      );
     }
 
     return valid();

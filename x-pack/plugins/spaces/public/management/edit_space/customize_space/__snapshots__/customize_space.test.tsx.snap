@@ -51,6 +51,7 @@ exports[`renders correctly 1`] = `
       helpText="The description appears on the space selection screen."
       isInvalid={false}
       label="Description"
+      labelAppend="Optional"
       labelType="label"
     >
       <EuiTextArea
@@ -102,18 +103,20 @@ exports[`renders correctly 1`] = `
         <p>
           Choose how your space avatar appears across Kibana.
         </p>
-        <EuiAvatar
-          color={null}
-          name="?"
-          size="xl"
-          style={
-            Object {
-              "background": "#d3dae6",
-              "color": "#6a717d",
+        <React.Suspense
+          fallback={<EuiLoadingSpinner />}
+        >
+          <UNDEFINED
+            size="xl"
+            space={
+              Object {
+                "id": "",
+                "imageUrl": undefined,
+                "name": "",
+              }
             }
-          }
-          type="space"
-        />
+          />
+        </React.Suspense>
       </React.Fragment>
     }
     fullWidth={true}

@@ -104,6 +104,9 @@ export class CustomizeSpace extends Component<Props, State> {
                 defaultMessage: 'Description',
               }
             )}
+            labelAppend={i18n.translate('xpack.spaces.management.manageSpacePage.optionalLabel', {
+              defaultMessage: 'Optional',
+            })}
             helpText={i18n.translate(
               'xpack.spaces.management.manageSpacePage.spaceDescriptionHelpText',
               {
@@ -170,7 +173,7 @@ export class CustomizeSpace extends Component<Props, State> {
                   defaultMessage: 'Choose how your space avatar appears across Kibana.',
                 })}
               </p>
-              {space.avatarType === 'image' && space.imageUrl ? (
+              {space.avatarType === 'image' ? (
                 <Suspense fallback={<EuiLoadingSpinner />}>
                   <LazySpaceAvatar
                     space={{
@@ -181,27 +184,17 @@ export class CustomizeSpace extends Component<Props, State> {
                     size="xl"
                   />
                 </Suspense>
-              ) : space.avatarType !== 'image' && (space.name || space.initials) ? (
+              ) : (
                 <Suspense fallback={<EuiLoadingSpinner />}>
                   <LazySpaceAvatar
                     space={{
+                      name: '?',
                       ...space,
                       imageUrl: undefined,
                     }}
                     size="xl"
                   />
                 </Suspense>
-              ) : (
-                <EuiAvatar
-                  type="space"
-                  name="?"
-                  size="xl"
-                  color={null}
-                  style={{
-                    background: euiThemeVars.euiColorLightShade,
-                    color: euiThemeVars.euiTextSubduedColor,
-                  }}
-                />
               )}
             </>
           }

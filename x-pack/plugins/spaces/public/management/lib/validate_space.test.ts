@@ -172,15 +172,6 @@ describe('validateAvatarColor', () => {
 
     expect(validator.validateAvatarColor(space)).toHaveProperty('isInvalid', true);
   });
-
-  it('it does not validate image avatars', () => {
-    const space = {
-      avatarType: 'image' as 'image',
-      color: '',
-    };
-
-    expect(validator.validateAvatarColor(space)).toHaveProperty('isInvalid', false);
-  });
 });
 
 describe('validateAvatarImage', () => {

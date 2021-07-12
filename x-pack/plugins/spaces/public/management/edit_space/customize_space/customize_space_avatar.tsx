@@ -127,6 +127,7 @@ export class CustomizeSpaceAvatar extends Component<Props> {
                 avatarType: avatarType as FormValues['avatarType'],
               })
             }
+            buttonSize="m"
           />
         </EuiFormRow>
         {space.avatarType !== 'image' ? (

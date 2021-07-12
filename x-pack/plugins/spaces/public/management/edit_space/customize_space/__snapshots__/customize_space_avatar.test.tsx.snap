@@ -14,6 +14,7 @@ exports[`renders without crashing 1`] = `
     labelType="label"
   >
     <EuiButtonGroup
+      buttonSize="m"
       idSelected="initials"
       legend=""
       onChange={[Function]}
@@ -55,7 +56,7 @@ exports[`renders without crashing 1`] = `
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    error="Select a color."
+    error="Select a background color."
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
