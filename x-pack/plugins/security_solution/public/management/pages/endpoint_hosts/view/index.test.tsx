@@ -23,7 +23,6 @@ import {
   HostPolicyResponseActionStatus,
   HostPolicyResponseAppliedAction,
   HostStatus,
-  MetadataQueryStrategyVersions,
 } from '../../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { POLICY_STATUS_TO_TEXT } from './host_constants';
@@ -167,31 +166,6 @@ describe('when on the endpoint list page', () => {
     });
   });
 
-  describe('when loading data with the query_strategy_version is `v1`', () => {
-    beforeEach(() => {
-      reactTestingLibrary.act(() => {
-        const mockedEndpointListData = mockEndpointResultList({
-          total: 4,
-          query_strategy_version: MetadataQueryStrategyVersions.VERSION_1,
-        });
-        setEndpointListApiMockImplementation(coreStart.http, {
-          endpointsResults: mockedEndpointListData.hosts,
-          queryStrategyVersion: mockedEndpointListData.query_strategy_version,
-        });
-      });
-    });
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
-    it('should not display the KQL bar', async () => {
-      const renderResult = render();
-      await reactTestingLibrary.act(async () => {
-        await middlewareSpy.waitForAction('serverReturnedEndpointList');
-      });
-      expect(renderResult.queryByTestId('adminSearchBar')).toBeNull();
-    });
-  });
-
   describe('when determining when to show the enrolling message', () => {
     afterEach(() => {
       jest.clearAllMocks();
@@ -268,7 +242,6 @@ describe('when on the endpoint list page', () => {
         reactTestingLibrary.act(() => {
           const mockedEndpointData = mockEndpointResultList({ total: 5 });
           const hostListData = mockedEndpointData.hosts;
-          const queryStrategyVersion = mockedEndpointData.query_strategy_version;
 
           firstPolicyID = hostListData[0].metadata.Endpoint.policy.applied.id;
           firstPolicyRev = hostListData[0].metadata.Endpoint.policy.applied.endpoint_policy_version;
@@ -329,7 +302,6 @@ describe('when on the endpoint list page', () => {
                 hostListData[index].metadata.Endpoint.policy.applied,
                 setup.policy
               ),
-              query_strategy_version: queryStrategyVersion,
             };
           });
           hostListData.forEach((item, index) => {
@@ -535,8 +507,6 @@ describe('when on the endpoint list page', () => {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         host_status,
         metadata: { agent, Endpoint, ...details },
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        query_strategy_version,
       } = mockEndpointDetailsApiResult();
 
       hostDetails = {
@@ -555,7 +525,6 @@ describe('when on the endpoint list page', () => {
             id: '1',
           },
         },
-        query_strategy_version,
       };
 
       const policy = docGenerator.generatePolicyPackagePolicy();
@@ -1198,7 +1167,7 @@ describe('when on the endpoint list page', () => {
     let renderResult: ReturnType<AppContextTestRender['render']>;
 
     const mockEndpointListApi = () => {
-      const { hosts, query_strategy_version: queryStrategyVersion } = mockEndpointResultList();
+      const { hosts } = mockEndpointResultList();
       hostInfo = {
         host_status: hosts[0].host_status,
         metadata: {
@@ -1222,7 +1191,6 @@ describe('when on the endpoint list page', () => {
             version: '7.14.0',
           },
         },
-        query_strategy_version: queryStrategyVersion,
       };
 
       const packagePolicy = docGenerator.generatePolicyPackagePolicy();

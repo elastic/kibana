@@ -283,11 +283,10 @@ export class EnterpriseSearchRequestHandler {
 
   handleConnectionError(response: KibanaResponseFactory, e: Error) {
     const errorMessage = `Error connecting to Enterprise Search: ${e?.message || e.toString()}`;
+    const headers = { ...this.headers, [ERROR_CONNECTING_HEADER]: 'true' };
 
     this.log.error(errorMessage);
     if (e instanceof Error) this.log.debug(e.stack as string);
-
-    const headers = { ...this.headers, [ERROR_CONNECTING_HEADER]: 'true' };
 
     return response.customError({ statusCode: 502, headers, body: errorMessage });
   }
@@ -298,9 +297,10 @@ export class EnterpriseSearchRequestHandler {
    */
   handleAuthenticationError(response: KibanaResponseFactory) {
     const errorMessage = 'Cannot authenticate Enterprise Search user';
+    const headers = { ...this.headers, [ERROR_CONNECTING_HEADER]: 'true' };
 
     this.log.error(errorMessage);
-    return response.customError({ statusCode: 502, headers: this.headers, body: errorMessage });
+    return response.customError({ statusCode: 502, headers, body: errorMessage });
   }
 
   /**
