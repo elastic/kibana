@@ -6,7 +6,8 @@
     "types": [
       "node",
       "jest",
-      "react"
+      "react",
+      "@emotion/react/types/css-prop"
     ]
   },
   "include": [
