@@ -358,6 +358,22 @@ export class VisualBuilderPageObject extends FtrService {
     return await gaugeCount.getVisibleText();
   }
 
+  public async getGaugeColor(): Promise<string> {
+    await this.visChart.waitForVisualizationRenderingStabilized();
+    const [, gaugeColoredCircle] = await this.find.allByCssSelector(
+      '[data-test-subj="tvbVisGaugeContainer"] circle'
+    );
+    return await gaugeColoredCircle.getAttribute('stroke');
+  }
+
+  public async getGaugeInnerColor(): Promise<string> {
+    await this.visChart.waitForVisualizationRenderingStabilized();
+    const gaugeInnerCircle = await this.find.byCssSelector(
+      '[data-test-subj="tvbVisGaugeContainer"] circle'
+    );
+    return await gaugeInnerCircle.getAttribute('stroke');
+  }
+
   public async clickTopN() {
     await this.testSubjects.click('top_nTsvbTypeBtn');
   }
@@ -370,6 +386,12 @@ export class VisualBuilderPageObject extends FtrService {
   public async getTopNCount() {
     const gaugeCount = await this.find.byCssSelector('.tvbVisTopN__value');
     return await gaugeCount.getVisibleText();
+  }
+
+  public async getTopNBarStyle(nth: number = 0): Promise<string> {
+    await this.visChart.waitForVisualizationRenderingStabilized();
+    const topNBars = await this.find.allByCssSelector('.tvbVisTopN__innerBar div');
+    return await topNBars[nth].getAttribute('style');
   }
 
   public async clickTable() {
@@ -611,6 +633,12 @@ export class VisualBuilderPageObject extends FtrService {
     return await metricValue.getAttribute('style');
   }
 
+  public async getGaugeValueStyle(): Promise<string> {
+    await this.visChart.waitForVisualizationRenderingStabilized();
+    const metricValue = await this.find.byCssSelector('.tvbVisGauge__value');
+    return await metricValue.getAttribute('style');
+  }
+
   public async changePanelPreview(nth: number = 0): Promise<void> {
     const prevRenderingCount = await this.visChart.getVisualizationRenderingCount();
     const changePreviewBtnArray = await this.testSubjects.findAll('AddActivatePanelBtn');
@@ -726,5 +754,12 @@ export class VisualBuilderPageObject extends FtrService {
       await this.comboBox.clearInputField('topHitOrderByFieldSelect');
       await this.comboBox.set('topHitOrderByFieldSelect', timeField);
     });
+  }
+
+  public async setFilterRatioNumerator(numerator: string) {
+    const numeratorInput = await this.find.byCssSelector(
+      '.tvbAggRow [data-test-subj="queryInput"]'
+    );
+    await numeratorInput.type(numerator);
   }
 }
