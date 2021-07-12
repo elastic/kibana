@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useState, useEffect } from 'react';
+import React, { FC, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlyout,
@@ -76,8 +76,8 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
     setShowFlyout(false);
   }
 
-  function toggleSelectedJob(e: any, id: string) {
-    if (e.target.checked) {
+  function toggleSelectedJob(checked: boolean, id: string) {
+    if (checked) {
       setSelectedJobIds([...selectedJobIds, id]);
     } else {
       setSelectedJobIds(selectedJobIds.filter((id2) => id2 !== id));
@@ -99,7 +99,7 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
   }
 
   return (
-    <Fragment>
+    <>
       <FlyoutButton onClick={toggleFlyout} isDisabled={isDisabled} />
 
       {showFlyout === true && isDisabled === false && (
@@ -156,7 +156,7 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
                         id={id}
                         label={id}
                         checked={selectedJobIds.includes(id)}
-                        onChange={(e) => toggleSelectedJob(e, id)}
+                        onChange={(e) => toggleSelectedJob(e.target.checked, id)}
                       />
                       <EuiSpacer size="s" />
                     </div>
@@ -180,7 +180,7 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
                         id={id}
                         label={id}
                         checked={selectedJobIds.includes(id)}
-                        onChange={(e) => toggleSelectedJob(e, id)}
+                        onChange={(e) => toggleSelectedJob(e.target.checked, id)}
                       />
                       <EuiSpacer size="s" />
                     </div>
@@ -215,7 +215,7 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
           </EuiFlyoutFooter>
         </EuiFlyout>
       )}
-    </Fragment>
+    </>
   );
 };
 

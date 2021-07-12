@@ -91,9 +91,11 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
     setAdJobs([]);
     setDfaJobs([]);
     setJobIds([]);
+    setIdsMash('');
     setImporting(false);
     setJobType(null);
     setTotalJobsRead(0);
+    setValidatingJobs(false);
   }, [showFlyout]);
 
   function toggleFlyout() {
@@ -153,6 +155,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
       setImporting(false);
       setJobType(null);
       setTotalJobsRead(0);
+      setValidatingJobs(false);
     }
   }, []);
 
@@ -255,12 +258,12 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
     }
   }, [idsMash, jobIds]);
 
-  const renameJob2 = useCallback(
-    (e: any, i: number) => {
-      jobIds[i].id = e.target.value;
+  const renameJob = useCallback(
+    (id: string, i: number) => {
+      jobIds[i].id = id;
       jobIds[i].valid = false;
       setJobIds([...jobIds]);
-      setIdsMash(jobIds.map(({ id }) => id).join(''));
+      setIdsMash(jobIds.map(({ id: jId }) => jId).join(''));
       setValidatingJobs(true);
     },
     [jobIds]
@@ -366,7 +369,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
                                 disabled={importing}
                                 compressed={true}
                                 value={jobId.id}
-                                onChange={(e) => renameJob2(e, i)}
+                                onChange={(e) => renameJob(e.target.value, i)}
                                 isInvalid={jobId.valid === false}
                               />
                             </EuiFormRow>
