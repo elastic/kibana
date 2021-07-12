@@ -59,6 +59,7 @@ describe('esaggs expression function - public', () => {
       inspectorAdapters: jest.fn(),
       variables: {},
       types: {},
+      executionId: 'execution-id',
     };
     startDependencies = {
       aggs: ({
@@ -96,7 +97,7 @@ describe('esaggs expression function - public', () => {
   });
 
   test('calls handleEsaggsRequest with all of the right dependencies', async () => {
-    await definition().fn(null, args, mockHandlers);
+    await definition().fn(null, args, { ...mockHandlers, executionId: undefined });
 
     expect(handleEsaggsRequest).toHaveBeenCalledWith({
       abortSignal: mockHandlers.abortSignal,
@@ -141,11 +142,11 @@ describe('esaggs expression function - public', () => {
   });
 
   test('passes searchId to handleEsaggsRequest if it is available', async () => {
-    await definition().fn(null, args, { ...mockHandlers, variables: { searchId: 'mySeachId' } });
+    await definition().fn(null, args, mockHandlers);
 
     expect(handleEsaggsRequest).toHaveBeenCalledWith(
       expect.objectContaining({
-        searchId: 'mySeachId',
+        searchId: 'execution-id',
       })
     );
   });
