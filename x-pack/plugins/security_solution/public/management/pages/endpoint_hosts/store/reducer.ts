@@ -89,7 +89,6 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
       total,
       request_page_size: pageSize,
       request_page_index: pageIndex,
-      query_strategy_version: queryStrategyVersion,
       policy_info: policyVersionInfo,
     } = action.payload;
     return {
@@ -98,7 +97,6 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
       total,
       pageSize,
       pageIndex,
-      queryStrategyVersion,
       policyVersionInfo,
       loading: false,
       error: undefined,

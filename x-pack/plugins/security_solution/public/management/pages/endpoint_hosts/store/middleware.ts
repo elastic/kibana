@@ -28,7 +28,6 @@ import {
   nonExistingPolicies,
   patterns,
   searchBarQuery,
-  isTransformEnabled,
   getIsIsolationRequestPending,
   getCurrentIsolationRequestState,
   getActivityLogData,
@@ -179,7 +178,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       }
 
       // get index pattern and fields for search bar
-      if (patterns(getState()).length === 0 && isTransformEnabled(getState())) {
+      if (patterns(getState()).length === 0) {
         try {
           const indexPatterns = await fetchIndexPatterns();
           if (indexPatterns !== undefined) {
