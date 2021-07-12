@@ -106,6 +106,7 @@ export const esFilters = {
  * @deprecated Import from `@kbn/es-query` directly.
  */
 export {
+  KueryNode,
   RangeFilter,
   RangeFilterMeta,
   RangeFilterParams,
