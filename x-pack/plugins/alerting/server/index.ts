@@ -35,6 +35,13 @@ export { FindResult } from './alerts_client';
 export { PublicAlertInstance as AlertInstance } from './alert_instance';
 export { parseDuration } from './lib';
 export { getEsErrorMessage } from './lib/errors';
+export {
+  ReadOperations,
+  AlertingAuthorizationFilterType,
+  AlertingAuthorization,
+  WriteOperations,
+  AlertingAuthorizationEntity,
+} from './authorization';
 
 export const plugin = (initContext: PluginInitializerContext) => new AlertingPlugin(initContext);
 

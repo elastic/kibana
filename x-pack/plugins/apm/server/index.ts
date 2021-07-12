@@ -49,6 +49,11 @@ export const config = {
     maxServiceEnvironments: schema.number({ defaultValue: 100 }),
     maxServiceSelection: schema.number({ defaultValue: 50 }),
     profilingEnabled: schema.boolean({ defaultValue: false }),
+    agent: schema.object({
+      migrations: schema.object({
+        enabled: schema.boolean({ defaultValue: false }),
+      }),
+    }),
   }),
 };
 
@@ -69,7 +74,7 @@ export function mergeConfigs(
     'apm_oss.metricsIndices': apmOssConfig.metricsIndices,
     'apm_oss.sourcemapIndices': apmOssConfig.sourcemapIndices,
     'apm_oss.onboardingIndices': apmOssConfig.onboardingIndices,
-    'apm_oss.indexPattern': apmOssConfig.indexPattern, // TODO: add data stream indices: traces-apm*,logs-apm*,metrics-apm*. Blocked by https://github.com/elastic/kibana/issues/87851
+    'apm_oss.indexPattern': apmOssConfig.indexPattern,
     /* eslint-enable @typescript-eslint/naming-convention */
     'xpack.apm.serviceMapEnabled': apmConfig.serviceMapEnabled,
     'xpack.apm.serviceMapFingerprintBucketSize':
@@ -94,25 +99,29 @@ export function mergeConfigs(
     'xpack.apm.searchAggregatedTransactions':
       apmConfig.searchAggregatedTransactions,
     'xpack.apm.metricsInterval': apmConfig.metricsInterval,
+    'xpack.apm.agent.migrations.enabled': apmConfig.agent.migrations.enabled,
   };
 
-  if (apmOssConfig.fleetMode) {
-    mergedConfig[
-      'apm_oss.transactionIndices'
-    ] = `traces-apm*,${mergedConfig['apm_oss.transactionIndices']}`;
+  // Add data stream indices to list of configured values
+  mergedConfig[
+    'apm_oss.transactionIndices'
+  ] = `traces-apm*,${mergedConfig['apm_oss.transactionIndices']}`;
 
-    mergedConfig[
-      'apm_oss.spanIndices'
-    ] = `traces-apm*,${mergedConfig['apm_oss.spanIndices']}`;
+  mergedConfig[
+    'apm_oss.spanIndices'
+  ] = `traces-apm*,${mergedConfig['apm_oss.spanIndices']}`;
 
-    mergedConfig[
-      'apm_oss.errorIndices'
-    ] = `logs-apm*,${mergedConfig['apm_oss.errorIndices']}`;
+  mergedConfig[
+    'apm_oss.errorIndices'
+  ] = `logs-apm*,${mergedConfig['apm_oss.errorIndices']}`;
 
-    mergedConfig[
-      'apm_oss.metricsIndices'
-    ] = `metrics-apm*,${mergedConfig['apm_oss.metricsIndices']}`;
-  }
+  mergedConfig[
+    'apm_oss.metricsIndices'
+  ] = `metrics-apm*,${mergedConfig['apm_oss.metricsIndices']}`;
+
+  mergedConfig[
+    'apm_oss.indexPattern'
+  ] = `traces-apm*,logs-apm*,metrics-apm*,${mergedConfig['apm_oss.indexPattern']}`;
 
   return mergedConfig;
 }
@@ -120,6 +129,7 @@ export function mergeConfigs(
 export const plugin = (initContext: PluginInitializerContext) =>
   new APMPlugin(initContext);
 
+export { APM_SERVER_FEATURE_ID } from '../common/alert_types';
 export { APMPlugin } from './plugin';
 export { APMPluginSetup } from './types';
 export { APMServerRouteRepository } from './routes/get_global_apm_server_route_repository';

@@ -27,7 +27,6 @@ export const BuildKibanaPlatformPlugins: Task = {
       repoRoot: REPO_ROOT,
       outputRoot: build.resolvePath(),
       cache: false,
-      oss: build.isOss(),
       examples: false,
       watch: false,
       dist: true,

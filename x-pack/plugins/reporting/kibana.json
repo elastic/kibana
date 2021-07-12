@@ -6,6 +6,7 @@
   "configPath": ["xpack", "reporting"],
   "requiredPlugins": [
     "data",
+    "esUiShared",
     "home",
     "management",
     "licensing",

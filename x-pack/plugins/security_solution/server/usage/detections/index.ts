@@ -20,12 +20,12 @@ export const fetchDetectionsMetrics = async (
   kibanaIndex: string,
   signalsIndex: string,
   esClient: ElasticsearchClient,
-  ml: MlPluginSetup | undefined,
-  savedObjectClient: SavedObjectsClientContract
+  soClient: SavedObjectsClientContract,
+  mlClient: MlPluginSetup | undefined
 ): Promise<DetectionMetrics> => {
   const [mlJobMetrics, detectionRuleMetrics] = await Promise.allSettled([
-    getMlJobMetrics(ml, savedObjectClient),
-    getDetectionRuleMetrics(kibanaIndex, signalsIndex, esClient, savedObjectClient),
+    getMlJobMetrics(mlClient, soClient),
+    getDetectionRuleMetrics(kibanaIndex, signalsIndex, esClient, soClient),
   ]);
 
   return {
