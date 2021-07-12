@@ -184,6 +184,7 @@ export interface GetAlertInstanceSummaryParams {
   dateStart?: string;
 }
 
+// NOTE: Changing this prefix will require a migration to update the prefix in all existing `rule` saved objects
 const extractedSavedObjectParamReferenceNamePrefix = 'param:';
 
 const alertingAuthorizationFilterOpts: AlertingAuthorizationFilterOpts = {
@@ -1604,7 +1605,10 @@ export class AlertsClient {
     };
   }
 
-  private injectReferencesIntoParams<Params extends AlertTypeParams>(
+  private injectReferencesIntoParams<
+    Params extends AlertTypeParams,
+    ExtractedParams extends AlertTypeParams
+  >(
     ruleId: string,
     ruleType: UntypedNormalizedAlertType,
     ruleParams: SavedObjectAttributes | undefined,
@@ -1621,7 +1625,7 @@ export class AlertsClient {
         }));
       return ruleParams && ruleType?.useSavedObjectReferences?.injectReferences
         ? (ruleType.useSavedObjectReferences.injectReferences(
-            ruleParams,
+            ruleParams as ExtractedParams,
             paramReferences
           ) as Params)
         : (ruleParams as Params);
