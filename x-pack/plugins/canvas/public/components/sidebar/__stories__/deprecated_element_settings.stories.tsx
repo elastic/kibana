@@ -10,6 +10,7 @@ import { storiesOf } from '@storybook/react';
 import {
   EuiBasicTable,
   EuiCallOut,
+  EuiCode,
   EuiHorizontalRule,
   EuiIcon,
   EuiPanel,
@@ -20,6 +21,7 @@ import {
   EuiTitle,
   EuiToken,
   EuiTreeView,
+  useEuiTextDiff,
 } from '@elastic/eui';
 
 storiesOf('Deprecated/Sidebar/ElementSettings', module)
@@ -100,30 +102,47 @@ storiesOf('Deprecated/Sidebar/ElementSettings', module)
   .add('Markdown deprecation. v2. Example', () => {
     const items = [
       {
-        label: 'markdown -> markdownVis',
+        label: (
+          <>
+            <del>markdown</del> {`->`} markdownVis
+          </>
+        ),
         id: 'item_one',
-        icon: <EuiToken iconType="tokenModule" />,
-        iconWhenExpanded: <EuiToken iconType="tokenModule" />,
+        icon: <EuiToken iconType="tokenFunction" />,
+        iconWhenExpanded: <EuiToken iconType="tokenFunction" />,
         isExpanded: true,
         children: [
           {
-            label: 'content -> markdown',
+            label: (
+              <>
+                <del>content</del> {`->`} markdown
+              </>
+            ),
             id: 'item_a',
-            icon: <EuiToken iconType="tokenParameter" />,
+            icon: <EuiIcon type="sortRight" color="primary" />,
           },
           {
-            label: 'font',
+            label: 'openLinksInNewTab',
             id: 'item_a',
-            icon: <EuiToken iconType="tokenParameter" />,
+            icon: <EuiIcon type="plus" color="success" />,
           },
           {
-            label: 'openLinksInNewTab (removed)',
+            label: <del>font</del>,
             id: 'item_a',
-            icon: <EuiToken iconType="tokenParameter" />,
+            icon: <EuiIcon color="danger" type="eraser" />,
           },
         ],
       },
     ];
+
+    const currentExpression = `markdown content="..." openLinksInNewTab="true" font="..."`;
+    const updatedExpression = `markdownVis markdown="..." openLinksInNewTab="true"`;
+
+    const [rendered, textDiffObject] = useEuiTextDiff({
+      beforeText: currentExpression,
+      afterText: updatedExpression,
+    });
+
     const tabs = [
       {
         id: 'deprecated',
@@ -146,6 +165,45 @@ storiesOf('Deprecated/Sidebar/ElementSettings', module)
                 in the future <strong>v8.0.0 release</strong>.
               </p>
             </EuiCallOut>
+            <EuiHorizontalRule size="full" />
+            <div>
+              <EuiText>
+                <EuiTitle>
+                  <h2>Possible update of the expression</h2>
+                </EuiTitle>
+                <p>
+                  Your current expression:
+                  <EuiCode>{currentExpression}</EuiCode>
+                </p>
+                <p>
+                  Updated expression:
+                  <EuiCode>{updatedExpression}</EuiCode>
+                </p>
+                <p>
+                  Diff view:
+                  <EuiCode>{rendered}</EuiCode>
+                </p>
+              </EuiText>
+            </div>
+            <EuiHorizontalRule size="full" />
+            <div>
+              <EuiText>
+                <EuiTitle>
+                  <h2>Conficts:</h2>
+                </EuiTitle>
+                <p>
+                  <ol>
+                    <li>
+                      <EuiCode>markdown.openLinksInNewTab</EuiCode> and{' '}
+                      <EuiCode>markdownVis.openLinksInNewTab</EuiCode> have incompatible types.
+                    </li>
+                    <li>
+                      <EuiCode>markdown.font</EuiCode> is deprecated.
+                    </li>
+                  </ol>
+                </p>
+              </EuiText>
+            </div>
             <EuiHorizontalRule size="full" />
             <EuiTitle size="m">
               <h4>Deprecation notes</h4>
