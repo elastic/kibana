@@ -21,8 +21,6 @@ const AgentIdToNameComponent: React.FC<AgentIdToNameProps> = ({ agentId }) => {
   const getUrlForApp = useKibana().services.application.getUrlForApp;
   const { data } = useAgentDetails({ agentId });
 
-  console.error('data', data);
-
   return (
     <EuiLink
       className="eui-textTruncate"
