@@ -908,7 +908,7 @@ export function XYChart({
                   valueFormatter: (d: unknown) => yAxis?.formatter?.convert(d) || '',
                   showValueLabel: shouldShowValueLabels && valueLabels !== 'hide',
                   isAlternatingValueLabel: false,
-                  isValueContainedInElement: true,
+                  isValueContainedInElement: false,
                   hideClippedValue: true,
                 },
               };
