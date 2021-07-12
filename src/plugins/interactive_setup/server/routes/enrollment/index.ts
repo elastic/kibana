@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import type { RouteDefinitionParams } from '../';
+import { defineEnrollRoutes } from './enroll';
+import { defineValidateTokenRoutes } from './validate_token';
 
-export type ConfigType = TypeOf<typeof ConfigSchema>;
-
-export const ConfigSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: false }),
-});
+export function defineEnrollmentRoutes(params: RouteDefinitionParams) {
+  defineEnrollRoutes(params);
+  defineValidateTokenRoutes(params);
+}

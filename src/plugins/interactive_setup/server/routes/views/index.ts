@@ -6,12 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { CoreSetup, CoreStart, Plugin } from 'src/core/server';
+import type { RouteDefinitionParams } from '../';
+import { defineViewStateRoutes } from './view_state';
 
-export class UserSetupPlugin implements Plugin {
-  public setup(core: CoreSetup) {}
-
-  public start(core: CoreStart) {}
-
-  public stop() {}
+export function defineViewRoutes(params: RouteDefinitionParams) {
+  defineViewStateRoutes(params);
 }

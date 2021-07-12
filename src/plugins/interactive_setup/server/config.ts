@@ -6,8 +6,12 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/src/plugins/user_setup'],
-};
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+
+export type ConfigType = TypeOf<typeof ConfigSchema>;
+
+export const ConfigSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: false }),
+  forceSetup: schema.boolean({ defaultValue: false }),
+});

@@ -10,13 +10,14 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import type { CoreSetup, CoreStart, Plugin } from 'src/core/public';
+
 import { App } from './app';
 
 export class UserSetupPlugin implements Plugin {
   public setup(core: CoreSetup) {
     core.application.register({
-      id: 'userSetup',
-      title: 'User Setup',
+      id: 'interactiveSetup',
+      title: 'Interactive Setup',
       chromeless: true,
       mount: (params) => {
         ReactDOM.render(<App />, params.element);
