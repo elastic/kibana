@@ -40,7 +40,6 @@ export function dateHistogram(
     const { timezone } = capabilities;
 
     const overwriteDateHistogramForLastBucketMode = () => {
-
       panel.series.forEach((column) => {
         const aggRoot = calculateAggRoot(doc, column);
 
@@ -67,12 +66,14 @@ export function dateHistogram(
       panel.series.forEach((column) => {
         const aggRoot = calculateAggRoot(doc, column);
 
-        if (column.metrics.every((metric) => Object.values(METRIC_AGGREGATIONS).includes(metric.type))) {
+        if (
+          column.metrics.every((metric) => Object.values(METRIC_AGGREGATIONS).includes(metric.type))
+        ) {
           overwrite(doc, `${aggRoot}.timeseries.auto_date_histogram`, {
             field: timeField,
             buckets: 1,
           });
-  
+
           interval = `${to.valueOf() - from.valueOf()}ms`;
         } else {
           overwrite(doc, `${aggRoot}.timeseries.date_histogram`, {
@@ -92,7 +93,6 @@ export function dateHistogram(
           ...meta,
           interval,
         });
-      
       });
     };
 

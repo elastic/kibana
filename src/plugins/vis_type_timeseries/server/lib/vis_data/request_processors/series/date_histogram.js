@@ -57,7 +57,9 @@ export function dateHistogram(
     };
 
     const overwriteDateHistogramForEntireTimerangeMode = () => {
-      if (series.metrics.every((metric) => Object.values(METRIC_AGGREGATIONS).includes(metric.type))) {
+      if (
+        series.metrics.every((metric) => Object.values(METRIC_AGGREGATIONS).includes(metric.type))
+      ) {
         overwrite(doc, `aggs.${series.id}.aggs.timeseries.auto_date_histogram`, {
           field: timeField,
           buckets: 1,
