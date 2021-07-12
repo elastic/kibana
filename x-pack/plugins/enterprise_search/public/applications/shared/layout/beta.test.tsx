@@ -107,7 +107,6 @@ describe('appendBetaNotificationItem', () => {
         {
           id: 'beta',
           name: '',
-          className: 'betaNotificationSideNavItem',
           renderItem: expect.any(Function),
         },
       ],
@@ -118,7 +117,6 @@ describe('appendBetaNotificationItem', () => {
     const SideNavItem = (mockSideNav.items[2] as any).renderItem;
     const wrapper = shallow(<SideNavItem />);
 
-    expect(wrapper.hasClass('betaNotificationWrapper')).toBe(true);
     expect(wrapper.find(BetaNotification)).toHaveLength(1);
   });
 
