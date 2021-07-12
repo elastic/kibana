@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const fieldEditor = getService('fieldEditor');
   const retry = getService('retry');
 
-  describe('lens formula', () => {
+  describe.only('lens formula', () => {
     it('should transition from count to formula', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
