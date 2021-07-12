@@ -8,7 +8,13 @@
 
 import { CoreSetup, Plugin } from 'kibana/server';
 import { querySavedObjectType } from '../saved_objects';
-import { extract, inject, telemetry, migrateToLatest, getAllMigrations } from '../../common/query/persistable_state';
+import {
+  extract,
+  inject,
+  telemetry,
+  migrateToLatest,
+  getAllMigrations,
+} from '../../common/query/persistable_state';
 
 export class QueryService implements Plugin<void> {
   public setup(core: CoreSetup) {
@@ -16,9 +22,13 @@ export class QueryService implements Plugin<void> {
 
     return {
       filterManager: {
-        extract, inject, telemetry, migrateToLatest, getAllMigrations
-      }
-    }
+        extract,
+        inject,
+        telemetry,
+        migrateToLatest,
+        getAllMigrations,
+      },
+    };
   }
 
   public start() {}

@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import uuid from 'uuid';
 import { SerializableState } from '../../../kibana_utils/common/persistable_state';
 import { SavedObjectReference } from '../../../../core/types';
 import { Filter } from '../es_query/filters';
-import uuid from 'uuid';
 
 export const extract = (filters: Filter[]) => {
   const references: SavedObjectReference[] = [];
-  const updatedFilters = (filters as unknown as Filter[]).map(filter => {
+  const updatedFilters = ((filters as unknown) as Filter[]).map((filter) => {
     if (filter.meta?.index) {
       const id = uuid();
       references.push({
@@ -28,7 +28,7 @@ export const extract = (filters: Filter[]) => {
           ...filter.meta,
           index: id,
         },
-      }
+      };
     }
     return filter;
   });
@@ -36,17 +36,17 @@ export const extract = (filters: Filter[]) => {
 };
 
 export const inject = (filters: Filter[], references: SavedObjectReference[]) => {
-  return (filters as unknown as Filter[]).map((filter) => {
+  return ((filters as unknown) as Filter[]).map((filter) => {
     if (!filter.meta.index) {
       return filter;
     }
-    const reference = references.find(ref => ref.name === filter.meta.index);
+    const reference = references.find((ref) => ref.name === filter.meta.index);
     return {
       ...filter,
       meta: {
         ...filter.meta,
         index: reference && reference.id,
-      }
+      },
     };
   });
 };

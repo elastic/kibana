@@ -10,7 +10,9 @@ import { extract, inject } from './persistable_state';
 import { Filter } from '../es_query/filters';
 
 describe('filter manager persistable state tests', () => {
-  const filters: Filter[] = [{ meta: { alias: 'test', disabled: false, negate: false, index: 'test' }}];
+  const filters: Filter[] = [
+    { meta: { alias: 'test', disabled: false, negate: false, index: 'test' } },
+  ];
   describe('reference injection', () => {
     test('correctly inserts reference to filter', () => {
       const updatedFilters = inject(filters, [{ type: 'index_pattern', name: 'test', id: '123' }]);
@@ -18,8 +20,10 @@ describe('filter manager persistable state tests', () => {
     });
 
     test('drops index setting if reference is missing', () => {
-      const updatedFilters = inject(filters, [{ type: 'index_pattern', name: 'test123', id: '123' }]);
-      expect(updatedFilters[0]).not.toHaveProperty('meta.index');
+      const updatedFilters = inject(filters, [
+        { type: 'index_pattern', name: 'test123', id: '123' },
+      ]);
+      expect(updatedFilters[0]).toHaveProperty('meta.index', undefined);
     });
   });
 

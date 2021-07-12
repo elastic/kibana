@@ -26,7 +26,13 @@ import {
   UI_SETTINGS,
 } from '../../../common';
 import { PersistableStateService } from '../../../../kibana_utils/common/persistable_state';
-import { getAllMigrations, migrateToLatest, inject, extract, telemetry } from '../../../common/query/persistable_state';
+import {
+  getAllMigrations,
+  migrateToLatest,
+  inject,
+  extract,
+  telemetry,
+} from '../../../common/query/persistable_state';
 
 export class FilterManager implements PersistableStateService {
   private filters: Filter[] = [];
@@ -225,18 +231,15 @@ export class FilterManager implements PersistableStateService {
   }
 
   // Filter needs to implement SerializableState
-  // @ts-ignore
-  public extract = extract;
+  public extract = extract as any;
 
   // Filter needs to implement SerializableState
-  // @ts-ignore
-  public inject = inject;
+  public inject = inject as any;
 
   public telemetry = telemetry;
 
   // Filter needs to implement SerializableState
-  // @ts-ignore
-  public migrateToLatest = migrateToLatest;
+  public migrateToLatest = migrateToLatest as any;
 
   public getAllMigrations = getAllMigrations;
 }
