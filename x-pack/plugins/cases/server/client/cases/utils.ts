@@ -81,7 +81,8 @@ const getCommentContent = (comment: CommentResponse): string => {
     comment.type === CommentType.actions &&
     (comment.actions.type === 'isolate' || comment.actions.type === 'unisolate')
   ) {
-    const firstHostname = comment.actions.targets[0]?.hostname;
+    const firstHostname =
+      comment.actions.targets?.length > 0 ? comment.actions.targets[0].hostname : 'unknown';
     const totalHosts = comment.actions.targets.length;
     const actionText = comment.actions.type === 'isolate' ? 'Isolated' : 'Released';
     const additionalHostsText = totalHosts - 1 > 0 ? `and ${totalHosts - 1} more ` : ``;
