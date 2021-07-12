@@ -1028,7 +1028,7 @@ describe('when on the endpoint list page', () => {
         const subHeaderBackLink = await renderResult.findByTestId('flyoutSubHeaderBackButton');
         expect(subHeaderBackLink.textContent).toBe('Endpoint Details');
         expect(subHeaderBackLink.getAttribute('href')).toEqual(
-          `${APP_PATH}${MANAGEMENT_PATH}/endpoints?page_index=0&page_size=10&selected_endpoint=1`
+          `${APP_PATH}${MANAGEMENT_PATH}/endpoints?page_index=0&page_size=10&selected_endpoint=1&show=details`
         );
       });
 
@@ -1040,7 +1040,7 @@ describe('when on the endpoint list page', () => {
         });
         const changedUrlAction = await userChangedUrlChecker;
         expect(changedUrlAction.payload.search).toEqual(
-          '?page_index=0&page_size=10&selected_endpoint=1'
+          '?page_index=0&page_size=10&selected_endpoint=1&show=details'
         );
       });
 
@@ -1113,7 +1113,7 @@ describe('when on the endpoint list page', () => {
 
         expect((await changeUrlAction).payload).toMatchObject({
           pathname: `${MANAGEMENT_PATH}/endpoints`,
-          search: '?page_index=0&page_size=10&selected_endpoint=1',
+          search: '?page_index=0&page_size=10&selected_endpoint=1&show=details',
         });
       });
 
@@ -1126,7 +1126,7 @@ describe('when on the endpoint list page', () => {
 
         expect((await changeUrlAction).payload).toMatchObject({
           pathname: `${MANAGEMENT_PATH}/endpoints`,
-          search: '?page_index=0&page_size=10&selected_endpoint=1',
+          search: '?page_index=0&page_size=10&selected_endpoint=1&show=details',
         });
       });
 
@@ -1146,7 +1146,7 @@ describe('when on the endpoint list page', () => {
 
         expect((await changeUrlAction).payload).toMatchObject({
           pathname: `${MANAGEMENT_PATH}/endpoints`,
-          search: '?page_index=0&page_size=10&selected_endpoint=1',
+          search: '?page_index=0&page_size=10&selected_endpoint=1&show=details',
         });
       });
 
