@@ -1,8 +1,27 @@
 [[lens]]
 === Lens
 
-To create visualizations with *Lens*, you drag and drop data fields onto the workspace, 
-then *Lens* uses heuristics to apply each field. 
+To create visualizations with *Lens*, you drag and drop data fields onto the workspace, then *Lens* uses heuristics to apply each field and create the visualization for you. If you already know how you want each field to display in the visualization, you can drag and drop onto the dimensions, such as *Vertical axis*, *Hortizontal axis*, and *Break down by*. 
+
+To configure how you want the data to display in the visualization, use the dimension options, which are dependent on the visualization type. 
+
+Area, bar, and line charts::
+Visualize the data using multiple layers. To display multiple index patterns and visualization types, you can specify an index pattern and visualization type for each layer. Each layer is made of dimensions that include the field you want to visualize, the bucket and metrics aggregation functions, and the display options. Dimensions are grouped by *Vertical axis*, *Hortizontal axis*, and *Break down by*. The *Vertical axis* and *Hortizontal axis* groups support multiple dimensions.
+
+All other visualization types::
+Support a single set of dimensions. The dimension groups are different for each visualization type, but also include the field, aggregation functions, and display options.
+
+Each time you create a visualization, you need to:
+
+* *Choose your visualization.* Do you know the type of visualization you'd like to use?
+If you do, select the type before you drag and drop any fields. If you're unsure, drag and drop the fields onto the workspace or dimension, then let *Lens* choose for you.
+
+* *Choose the data you want to visualize.* Do you know the dimension you want to use the field in? If you do,
+drag and drop the field to the dimension, then *Lens* automatically selects the function for you.
+If you're unsure, drag and drop the fields onto the workspace. When you use the *Filters* function, you can skip this step.
+
+* *Edit and delete.* To change the function and styling options, click the dimension name. To delete a specific dimension, close the configuration options, then click
+*Delete*. If you to reset the visualization, click *Reset visualization*, or to reset the layer, click *Reset layer*.
 
 ++++
 <script type="text/javascript" async 
@@ -43,29 +62,6 @@ TIP: For sparse datasets, *Empty fields* can contain data, which you can use to 
 * Enter the field name in the *Search field names* field. 
 
 * Click *Field by type*, then select the filter. To show all fields in the index pattern, deselect *Only show fields with data*.
-
-[float]
-[[view-the-data-summaries]]
-==== View the data summaries
-
-For each field, *Lens* displays a summary depending on the type of data. To analyze the fields, *Lens* uses a sample of 5,000 documents. 
-Each summary displays the percentage of sampled documents over all available documents.
-
-
-
-[role="screenshot"]
-image::images/lens_data_info_documents.png[Data summary analyzed documents]
-
-Each data type display the following summaries:
-
-* *Date* &mdash; Displays the time distribution.
-
-* *String* &mdash; Displays the top 10 values.
-
-* *Numeric* &mdash; Displays the top 10 values and a value distribution. When *Lens* displays the top 10 values distribution, the percentage of *Other* values is also displayed. 
-For array value fields, the percentage distribution considers each value in the array as separate.
-
-TIP: *Other* can equal more than 100% by a small amount.
 
 [float]
 [[create-the-visualization-panel]]
@@ -140,13 +136,6 @@ For more information about adding fields to index patterns and Painless scriptin
 [[configure-the-visualization]]
 ==== Configure the visualization
 
-To configure the visualization, use the editor. For each visualization type, the editor options are different. 
-
-Area, bar, and line charts::
-You can add multiple layers. To display multiple index patterns and visualization types, you can specify an index pattern and visualization type for each layer. Each layer is made of dimensions that include the field you want to visualize, the bucket and metrics aggregation functions, and the display options. Dimensions are grouped by *Vertical axis*, *Hortizontal axis*, and *Break down by*. The *Vertical axis* and *Hortizontal axis* groups support multiple dimensions.
-
-All other visualization types::
-Support a single set of dimensions. The dimension groups are different for each visualization type, but also include the field, aggregation functions, and display options.
 
 [float]
 [[lens-formulas]]
