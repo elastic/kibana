@@ -93,7 +93,7 @@
     "**/underscore": "^1.13.1"
   },
   "engines": {
-    "node": "14.17.2",
+    "node": "14.17.3",
     "yarn": "^1.21.1"
   },
   "dependencies": {
@@ -114,6 +114,7 @@
     "@elastic/safer-lodash-set": "link:bazel-bin/packages/elastic-safer-lodash-set",
     "@elastic/search-ui-app-search-connector": "^1.6.0",
     "@elastic/ui-ace": "0.2.3",
+    "@emotion/react": "^11.4.0",
     "@hapi/accept": "^5.0.2",
     "@hapi/boom": "^9.1.1",
     "@hapi/cookie": "^11.0.2",
@@ -351,7 +352,7 @@
     "react-moment-proptypes": "^1.7.0",
     "react-monaco-editor": "^0.41.2",
     "react-popper-tooltip": "^2.10.1",
-    "react-query": "^3.13.10",
+    "react-query": "^3.18.1",
     "react-redux": "^7.2.0",
     "react-resizable": "^1.7.5",
     "react-resize-detector": "^4.2.0",
@@ -454,6 +455,8 @@
     "@elastic/eslint-plugin-eui": "0.0.2",
     "@elastic/github-checks-reporter": "0.0.20b3",
     "@elastic/makelogs": "^6.0.0",
+    "@emotion/babel-preset-css-prop": "^11.2.0",
+    "@emotion/jest": "^11.3.0",
     "@istanbuljs/schema": "^0.1.2",
     "@jest/reporters": "^26.6.2",
     "@kbn/babel-code-parser": "link:bazel-bin/packages/kbn-babel-code-parser",
