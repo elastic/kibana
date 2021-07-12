@@ -9,8 +9,20 @@ import { SavedObjectAttribute, SavedObjectAttributes } from 'kibana/server';
 import { SerializableState } from 'src/plugins/kibana_utils/common';
 import { AlertNotifyWhenType } from './alert_notify_when_type';
 
+type SerializableRuleParamState = SerializableState & {
+  [key: string]: SerializableRuleParam;
+};
+export type SerializableRuleParamValue =
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | unknown
+  | SerializableRuleParamState;
+export type SerializableRuleParam = SerializableRuleParamValue | SerializableRuleParamValue[];
 export type AlertTypeState = Record<string, unknown>;
-export type AlertTypeParams = SerializableState;
+export type AlertTypeParams = SerializableRuleParamState;
 
 export interface IntervalSchedule extends SavedObjectAttributes {
   interval: string;
