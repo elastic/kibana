@@ -5,33 +5,27 @@
  * 2.0.
  */
 
-/*
-10000 to 10K
-10100 to 10.1K
-1000000 to 1M
-1000000000 to 1B
-*/
 export const shortenCountIntoString = (count: number): string => {
   if (count < 10000) {
     return count.toString();
   }
-  const si = [
-    { v: 1e3, s: 'K' },
-    { v: 1e6, s: 'M' },
-    { v: 1e9, s: 'B' },
-    { v: 1e12, s: 'T' },
-    { v: 1e15, s: 'P' },
-    { v: 1e18, s: 'E' },
+  const abbreviations = [
+    { magnitude: 1e18, unit: 'E' },
+    { magnitude: 1e15, unit: 'P' },
+    { magnitude: 1e12, unit: 'T' },
+    { magnitude: 1e9, unit: 'B' },
+    { magnitude: 1e6, unit: 'M' },
+    { magnitude: 1e3, unit: 'K' },
   ];
-  let i;
-  for (i = si.length - 1; i > 0; i--) {
-    if (count >= si[i].v) {
-      break;
-    }
-  }
+  const { magnitude, unit } = abbreviations.find(
+    (abbreviation) => count >= abbreviation.magnitude
+  ) ?? {
+    magnitude: 1,
+    unit: '',
+  };
 
   return (
-    toFixedWithoutRounding(count / si[i].v, 1).replace(/\.0+$|(\.[0-9]*[1-9])0+$/, '$1') + si[i].s
+    toFixedWithoutRounding(count / magnitude, 1).replace(/\.0+$|(\.[0-9]*[1-9])0+$/, '$1') + unit
   );
 };
 
