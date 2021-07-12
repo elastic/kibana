@@ -169,7 +169,7 @@ storiesOf('Deprecated/Sidebar/ElementSettings', module)
             <div>
               <EuiText>
                 <EuiTitle>
-                  <h2>Possible update of the expression</h2>
+                  <h2>Possible update of the expression:</h2>
                 </EuiTitle>
                 <p>
                   Your current expression:
@@ -205,10 +205,9 @@ storiesOf('Deprecated/Sidebar/ElementSettings', module)
               </EuiText>
             </div>
             <EuiHorizontalRule size="full" />
-            <EuiTitle size="m">
-              <h4>Deprecation notes</h4>
+            <EuiTitle>
+              <h2>Deprecation notes:</h2>
             </EuiTitle>
-            <EuiHorizontalRule size="full" />
             <EuiSpacer size="m" />
             <EuiSplitPanel.Outer direction="row">
               <EuiSplitPanel.Inner>
