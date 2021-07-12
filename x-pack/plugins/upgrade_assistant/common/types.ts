@@ -218,7 +218,7 @@ export interface EnrichedDeprecationInfo extends DeprecationInfo {
 }
 
 export interface UpgradeAssistantStatus {
-  readyForUpgrade: boolean;
+  totalCriticalDeprecations: number;
   cluster: EnrichedDeprecationInfo[];
   indices: EnrichedDeprecationInfo[];
 }

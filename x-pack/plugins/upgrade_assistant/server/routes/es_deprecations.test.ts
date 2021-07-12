@@ -15,17 +15,17 @@ jest.mock('../lib/es_version_precheck', () => ({
 
 // Need to require to get mock on named export to work.
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const MigrationApis = require('../lib/es_migration_apis');
+const MigrationApis = require('../lib/es_deprecations_status');
 MigrationApis.getUpgradeAssistantStatus = jest.fn();
 
-import { registerClusterCheckupRoutes } from './cluster_checkup';
+import { registerESDeprecationRoutes } from './es_deprecations';
 
 /**
  * Since these route callbacks are so thin, these serve simply as integration tests
  * to ensure they're wired up to the lib functions correctly. Business logic is tested
  * more thoroughly in the es_migration_apis test.
  */
-describe('cluster checkup API', () => {
+describe('ES deprecations API', () => {
   let mockRouter: MockRouter;
   let routeDependencies: any;
 
@@ -34,14 +34,14 @@ describe('cluster checkup API', () => {
     routeDependencies = {
       router: mockRouter,
     };
-    registerClusterCheckupRoutes(routeDependencies);
+    registerESDeprecationRoutes(routeDependencies);
   });
 
   afterEach(() => {
     jest.resetAllMocks();
   });
 
-  describe('GET /api/upgrade_assistant/reindex/{indexName}.json', () => {
+  describe('GET /api/upgrade_assistant/es_deprecations', () => {
     it('returns state', async () => {
       MigrationApis.getUpgradeAssistantStatus.mockResolvedValue({
         cluster: [],
@@ -50,7 +50,7 @@ describe('cluster checkup API', () => {
       });
       const resp = await routeDependencies.router.getHandler({
         method: 'get',
-        pathPattern: '/api/upgrade_assistant/status',
+        pathPattern: '/api/upgrade_assistant/es_deprecations',
       })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory);
 
       expect(resp.status).toEqual(200);
@@ -66,7 +66,7 @@ describe('cluster checkup API', () => {
       MigrationApis.getUpgradeAssistantStatus.mockRejectedValue(e);
       const resp = await routeDependencies.router.getHandler({
         method: 'get',
-        pathPattern: '/api/upgrade_assistant/status',
+        pathPattern: '/api/upgrade_assistant/es_deprecations',
       })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory);
 
       expect(resp.status).toEqual(403);
@@ -78,7 +78,7 @@ describe('cluster checkup API', () => {
       await expect(
         routeDependencies.router.getHandler({
           method: 'get',
-          pathPattern: '/api/upgrade_assistant/status',
+          pathPattern: '/api/upgrade_assistant/es_deprecations',
         })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory)
       ).rejects.toThrow('scary error!');
     });

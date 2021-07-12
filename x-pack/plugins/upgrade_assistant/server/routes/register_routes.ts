@@ -7,19 +7,22 @@
 
 import { RouteDependencies } from '../types';
 
-import { registerClusterCheckupRoutes } from './cluster_checkup';
+import { registerESDeprecationRoutes } from './es_deprecations';
 import { registerDeprecationLoggingRoutes } from './deprecation_logging';
 import { registerReindexIndicesRoutes } from './reindex_indices';
 import { registerTelemetryRoutes } from './telemetry';
 import { registerUpdateSettingsRoute } from './update_index_settings';
 import { registerMlSnapshotRoutes } from './ml_snapshots';
 import { ReindexWorker } from '../lib/reindexing';
+import { registerUpgradeStatusRoute } from './status';
 
 export function registerRoutes(dependencies: RouteDependencies, getWorker: () => ReindexWorker) {
-  registerClusterCheckupRoutes(dependencies);
+  registerESDeprecationRoutes(dependencies);
   registerDeprecationLoggingRoutes(dependencies);
   registerReindexIndicesRoutes(dependencies, getWorker);
   registerTelemetryRoutes(dependencies);
   registerUpdateSettingsRoute(dependencies);
   registerMlSnapshotRoutes(dependencies);
+  // Route for cloud to retrieve the upgrade status for ES and Kibana
+  registerUpgradeStatusRoute(dependencies);
 }

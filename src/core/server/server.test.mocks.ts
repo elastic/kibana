@@ -95,3 +95,9 @@ export const mockI18nService = i18nServiceMock.create();
 jest.doMock('./i18n/i18n_service', () => ({
   I18nService: jest.fn(() => mockI18nService),
 }));
+
+import { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
+export const mockDeprecationService = deprecationsServiceMock.create();
+jest.doMock('./deprecations/deprecations_service', () => ({
+  DeprecationsService: jest.fn(() => mockDeprecationService),
+}));

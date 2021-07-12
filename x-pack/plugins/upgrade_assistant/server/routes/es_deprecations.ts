@@ -6,16 +6,16 @@
  */
 
 import { API_BASE_PATH } from '../../common/constants';
-import { getUpgradeAssistantStatus } from '../lib/es_migration_apis';
+import { getESUpgradeStatus } from '../lib/es_deprecations_status';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import { RouteDependencies } from '../types';
 import { reindexActionsFactory } from '../lib/reindexing/reindex_actions';
 import { reindexServiceFactory } from '../lib/reindexing';
 
-export function registerClusterCheckupRoutes({ router, licensing, log }: RouteDependencies) {
+export function registerESDeprecationRoutes({ router, licensing, log }: RouteDependencies) {
   router.get(
     {
-      path: `${API_BASE_PATH}/status`,
+      path: `${API_BASE_PATH}/es_deprecations`,
       validate: false,
     },
     versionCheckHandlerWrapper(
@@ -30,7 +30,7 @@ export function registerClusterCheckupRoutes({ router, licensing, log }: RouteDe
         response
       ) => {
         try {
-          const status = await getUpgradeAssistantStatus(client);
+          const status = await getESUpgradeStatus(client);
 
           const asCurrentUser = client.asCurrentUser;
           const reindexActions = reindexActionsFactory(savedObjectsClient, asCurrentUser);

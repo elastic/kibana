@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { IRouter, Logger, SavedObjectsServiceStart } from 'src/core/server';
+import {
+  IRouter,
+  Logger,
+  SavedObjectsServiceStart,
+  DeprecationsServiceStart,
+} from 'src/core/server';
 import { CredentialStore } from './lib/reindexing/credential_store';
 import { LicensingPluginSetup } from '../../licensing/server';
 
@@ -14,5 +19,6 @@ export interface RouteDependencies {
   credentialStore: CredentialStore;
   log: Logger;
   getSavedObjectsService: () => SavedObjectsServiceStart;
+  getDeprecationsService: () => Promise<DeprecationsServiceStart>;
   licensing: LicensingPluginSetup;
 }

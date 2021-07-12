@@ -219,5 +219,6 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
       asScopedToClient: deps.uiSettings.asScopedToClient,
     },
     coreUsageData: deps.coreUsageData,
+    deprecations: deps.deprecations,
   };
 }

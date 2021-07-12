@@ -7,7 +7,11 @@
  */
 
 import { DeprecationsFactory } from './deprecations_factory';
-import { RegisterDeprecationsConfig } from './types';
+import {
+  DomainDeprecationDetails,
+  GetDeprecationsContext,
+  RegisterDeprecationsConfig,
+} from './types';
 import { registerRoutes } from './routes';
 
 import { CoreContext } from '../core_context';
@@ -102,6 +106,10 @@ export interface DeprecationsServiceSetup {
   registerDeprecations: (deprecationContext: RegisterDeprecationsConfig) => void;
 }
 
+export interface DeprecationsServiceStart {
+  getAllDeprecations: (dependencies: GetDeprecationsContext) => Promise<DomainDeprecationDetails[]>;
+}
+
 /** @internal */
 export interface InternalDeprecationsServiceSetup {
   getRegistry: (domainId: string) => DeprecationsServiceSetup;
@@ -113,21 +121,24 @@ export interface DeprecationsSetupDeps {
 }
 
 /** @internal */
-export class DeprecationsService implements CoreService<InternalDeprecationsServiceSetup> {
+export class DeprecationsService
+  implements CoreService<InternalDeprecationsServiceSetup, DeprecationsServiceStart> {
   private readonly logger: Logger;
+  private readonly deprecationsFactory: DeprecationsFactory;
 
   constructor(private readonly coreContext: Pick<CoreContext, 'logger' | 'configService'>) {
     this.logger = coreContext.logger.get('deprecations-service');
+    this.deprecationsFactory = new DeprecationsFactory({
+      logger: this.logger,
+    });
   }
 
   public setup({ http }: DeprecationsSetupDeps): InternalDeprecationsServiceSetup {
     this.logger.debug('Setting up Deprecations service');
-    const deprecationsFactory = new DeprecationsFactory({
-      logger: this.logger,
-    });
+    const deprecationsFactory = this.deprecationsFactory;
 
     registerRoutes({ http, deprecationsFactory });
-    this.registerConfigDeprecationsInfo(deprecationsFactory);
+    this.registerConfigDeprecationsInfo(this.deprecationsFactory);
 
     return {
       getRegistry: (domainId: string): DeprecationsServiceSetup => {
@@ -139,7 +150,13 @@ export class DeprecationsService implements CoreService<InternalDeprecationsServ
     };
   }
 
-  public start() {}
+  public start(): DeprecationsServiceStart {
+    return {
+      getAllDeprecations: (dependencies: GetDeprecationsContext) =>
+        this.deprecationsFactory.getAllDeprecations(dependencies),
+    };
+  }
+
   public stop() {}
 
   private registerConfigDeprecationsInfo(deprecationsFactory: DeprecationsFactory) {

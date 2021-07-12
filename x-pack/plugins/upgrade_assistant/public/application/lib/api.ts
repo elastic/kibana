@@ -47,7 +47,7 @@ export class ApiService {
 
   public useLoadUpgradeStatus() {
     return this.useRequest<UpgradeAssistantStatus>({
-      path: `${API_BASE_PATH}/status`,
+      path: `${API_BASE_PATH}/es_deprecations`,
       method: 'get',
     });
   }

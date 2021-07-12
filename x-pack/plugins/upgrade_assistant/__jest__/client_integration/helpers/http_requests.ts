@@ -19,7 +19,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     const status = error ? error.statusCode || 400 : 200;
     const body = error ? error : response;
 
-    server.respondWith('GET', `${API_BASE_PATH}/status`, [
+    server.respondWith('GET', `${API_BASE_PATH}/es_deprecations`, [
       status,
       { 'Content-Type': 'application/json' },
       JSON.stringify(body),

@@ -15,7 +15,7 @@ import {
 
 import { esIndicesStateCheck } from './es_indices_state_check';
 
-export async function getUpgradeAssistantStatus(
+export async function getESUpgradeStatus(
   dataClient: IScopedClusterClient
 ): Promise<UpgradeAssistantStatus> {
   const { body: deprecations } = await dataClient.asCurrentUser.migration.deprecations();
@@ -23,10 +23,11 @@ export async function getUpgradeAssistantStatus(
   const cluster = getClusterDeprecations(deprecations);
   const indices = await getCombinedIndexInfos(deprecations, dataClient);
 
-  const criticalWarnings = cluster.concat(indices).filter((d) => d.level === 'critical');
+  const totalCriticalDeprecations = cluster.concat(indices).filter((d) => d.level === 'critical')
+    .length;
 
   return {
-    readyForUpgrade: criticalWarnings.length === 0,
+    totalCriticalDeprecations,
     cluster,
     indices,
   };
