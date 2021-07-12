@@ -116,6 +116,7 @@ export {
   CustomFilter,
   MatchAllFilter,
   IFieldSubType,
+  EsQueryConfig,
   isFilter,
   isFilters,
 } from '@kbn/es-query';
