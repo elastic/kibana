@@ -452,6 +452,8 @@ export const AddFleetServerHostStepContent = ({
         await addFleetServerHost(fleetServerHost);
         setCalloutHost(fleetServerHost);
         setFleetServerHost('');
+      } else {
+        setCalloutHost('');
       }
     } finally {
       setIsLoading(false);
