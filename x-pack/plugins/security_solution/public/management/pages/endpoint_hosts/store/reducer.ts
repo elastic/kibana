@@ -41,6 +41,8 @@ const handleEndpointDetailsActivityLogChanged: CaseReducer<EndpointDetailsActivi
             ...state.endpointDetails.activityLog.paging,
             page: action.payload.data.page,
             pageSize: action.payload.data.pageSize,
+            startDate: action.payload.data.startDate,
+            endDate: action.payload.data.endDate,
           },
         }
       : { ...state.endpointDetails.activityLog };
@@ -87,7 +89,6 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
       total,
       request_page_size: pageSize,
       request_page_index: pageIndex,
-      query_strategy_version: queryStrategyVersion,
       policy_info: policyVersionInfo,
     } = action.payload;
     return {
@@ -96,7 +97,6 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
       total,
       pageSize,
       pageIndex,
-      queryStrategyVersion,
       policyVersionInfo,
       loading: false,
       error: undefined,
@@ -162,33 +162,31 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
         },
       },
     };
-  } else if (action.type === 'appRequestedEndpointActivityLog') {
-    const paging = {
-      disabled: state.endpointDetails.activityLog.paging.disabled,
-      page: action.payload.page,
-      pageSize: action.payload.pageSize,
-    };
+  } else if (action.type === 'endpointDetailsActivityLogUpdatePaging') {
     return {
       ...state,
       endpointDetails: {
         ...state.endpointDetails!,
         activityLog: {
           ...state.endpointDetails.activityLog,
-          paging,
+          paging: {
+            ...state.endpointDetails.activityLog.paging,
+            ...action.payload,
+          },
         },
       },
     };
-  } else if (action.type === 'endpointDetailsActivityLogUpdatePaging') {
-    const paging = {
-      ...action.payload,
-    };
+  } else if (action.type === 'endpointDetailsActivityLogUpdateIsInvalidDateRange') {
     return {
       ...state,
       endpointDetails: {
         ...state.endpointDetails!,
         activityLog: {
           ...state.endpointDetails.activityLog,
-          paging,
+          paging: {
+            ...state.endpointDetails.activityLog.paging,
+            ...action.payload,
+          },
         },
       },
     };
@@ -304,6 +302,7 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
         disabled: false,
         page: 1,
         pageSize: 50,
+        isInvalidDateRange: false,
       },
     };
 

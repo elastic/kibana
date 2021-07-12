@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { emailConnector, EmailConnector } from '../objects/connector';
 import {
   CustomRule,
   MachineLearningRule,
@@ -85,6 +86,12 @@ import {
   THRESHOLD_FIELD_SELECTION,
   THRESHOLD_INPUT_AREA,
   THRESHOLD_TYPE,
+  CONNECTOR_NAME_INPUT,
+  EMAIL_CONNECTOR_FROM_INPUT,
+  EMAIL_CONNECTOR_HOST_INPUT,
+  EMAIL_CONNECTOR_PORT_INPUT,
+  EMAIL_CONNECTOR_USER_INPUT,
+  EMAIL_CONNECTOR_PASSWORD_INPUT,
 } from '../screens/create_new_rule';
 import { TOAST_ERROR } from '../screens/shared';
 import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
@@ -268,7 +275,7 @@ export const fillDefineThresholdRule = (rule: ThresholdRule) => {
   cy.get(TIMELINE(rule.timeline.id!)).click();
   cy.get(COMBO_BOX_CLEAR_BTN).click();
 
-  rule.index!.forEach((index) => {
+  rule.index.forEach((index) => {
     cy.get(COMBO_BOX_INPUT).first().type(`${index}{enter}`);
   });
 
@@ -388,6 +395,15 @@ export const fillIndexAndIndicatorIndexPattern = (
   getIndexPatternClearButton().click();
   getIndicatorIndex().type(`${indexPattern}{enter}`);
   getIndicatorIndicatorIndex().type(`${indicatorIndex}{enter}`);
+};
+
+export const fillEmailConnectorForm = (connector: EmailConnector = emailConnector) => {
+  cy.get(CONNECTOR_NAME_INPUT).type(connector.name);
+  cy.get(EMAIL_CONNECTOR_FROM_INPUT).type(connector.from);
+  cy.get(EMAIL_CONNECTOR_HOST_INPUT).type(connector.host);
+  cy.get(EMAIL_CONNECTOR_PORT_INPUT).type(connector.port);
+  cy.get(EMAIL_CONNECTOR_USER_INPUT).type(connector.user);
+  cy.get(EMAIL_CONNECTOR_PASSWORD_INPUT).type(connector.password);
 };
 
 /** Returns the indicator index drop down field. Pass in row number, default is 1 */
