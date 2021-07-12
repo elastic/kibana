@@ -257,7 +257,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(first(firstNode.path)).to.have.property('label', 'demo-stack-mysql-01');
             expect(firstNode).to.have.property('metrics');
             expect(firstNode.metrics[0]).to.have.property('timeseries');
-            expect(firstNode.metrics[0].timeseries?.rows.length).to.equal(7);
+            expect(firstNode.metrics[0].timeseries?.rows.length).to.equal(5);
           }
         });
       });
