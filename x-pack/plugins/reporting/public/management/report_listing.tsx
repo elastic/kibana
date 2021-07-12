@@ -153,6 +153,7 @@ class ReportListingUi extends Component<Props, State> {
     return (
       <>
         <EuiPageHeader
+          data-test-subj="reportingPageHeader"
           bottomBorder
           pageTitle={
             <FormattedMessage id="xpack.reporting.listing.reportstitle" defaultMessage="Reports" />
@@ -379,7 +380,7 @@ class ReportListingUi extends Component<Props, State> {
         }),
         render: (objectTitle: string, record: Job) => {
           return (
-            <div>
+            <div data-test-subj="reportingListItemObjectTitle">
               <div>{objectTitle}</div>
               <EuiText size="s">
                 <EuiTextColor color="subdued">{record.object_type}</EuiTextColor>

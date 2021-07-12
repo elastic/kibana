@@ -424,7 +424,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        className=""
+                        data-test-subj="reportingListItemObjectTitle"
                         key=".0"
                       >
                         <div>
@@ -480,7 +480,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        className=""
                         key=".0"
                       >
                         <div>
@@ -522,7 +521,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        className=""
                         key=".0"
                       >
                         <FormattedMessage
@@ -1477,7 +1475,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        className=""
+                        data-test-subj="reportingListItemObjectTitle"
                         key=".0"
                       >
                         <div>
@@ -1533,7 +1531,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        className=""
                         key=".0"
                       >
                         <div>
@@ -1575,7 +1572,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        className=""
                         key=".0"
                       >
                         <FormattedMessage
@@ -2544,7 +2540,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        className=""
+                        data-test-subj="reportingListItemObjectTitle"
                         key=".0"
                       >
                         <div>
@@ -2600,7 +2596,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        className=""
                         key=".0"
                       >
                         <div>
@@ -2642,7 +2637,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        className=""
                         key=".0"
                       >
                         <FormattedMessage
@@ -3658,7 +3652,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        className=""
+                        data-test-subj="reportingListItemObjectTitle"
                         key=".0"
                       >
                         <div>
@@ -3714,7 +3708,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        className=""
                         key=".0"
                       >
                         <div>
@@ -3756,7 +3749,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        className=""
                         key=".0"
                       >
                         <FormattedMessage
@@ -4805,7 +4797,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        className=""
+                        data-test-subj="reportingListItemObjectTitle"
                         key=".0"
                       >
                         <div>
@@ -4861,7 +4853,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        className=""
                         key=".0"
                       >
                         <div>
@@ -4903,7 +4894,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        className=""
                         key=".0"
                       >
                         <FormattedMessage
@@ -5919,7 +5909,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        className=""
+                        data-test-subj="reportingListItemObjectTitle"
                         key=".0"
                       >
                         <div>
@@ -5975,7 +5965,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        className=""
                         key=".0"
                       >
                         <div>
@@ -6017,7 +6006,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        className=""
                         key=".0"
                       >
                         <FormattedMessage
@@ -7033,7 +7021,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        className=""
+                        data-test-subj="reportingListItemObjectTitle"
                         key=".0"
                       >
                         <div>
@@ -7089,7 +7077,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        className=""
                         key=".0"
                       >
                         <div>
@@ -7131,7 +7118,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        className=""
                         key=".0"
                       >
                         <FormattedMessage
@@ -8147,7 +8133,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        className=""
+                        data-test-subj="reportingListItemObjectTitle"
                         key=".0"
                       >
                         <div>
@@ -8203,7 +8189,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        className=""
                         key=".0"
                       >
                         <div>
@@ -8245,7 +8230,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        className=""
                         key=".0"
                       >
                         <FormattedMessage
@@ -9261,7 +9245,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        className=""
+                        data-test-subj="reportingListItemObjectTitle"
                         key=".0"
                       >
                         <div>
@@ -9317,7 +9301,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        className=""
                         key=".0"
                       >
                         <div>
@@ -9359,7 +9342,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        className=""
                         key=".0"
                       >
                         <FormattedMessage
