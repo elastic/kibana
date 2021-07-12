@@ -82,27 +82,51 @@ const getCommentContent = (comment: CommentResponse): string => {
 };
 
 interface CountAlertsInfo {
-  total: number;
+  totalComments: number;
   pushed: number;
   totalAlerts: number;
 }
 
-const countAlerts = (comments: CaseResponse['comments']): CountAlertsInfo => {
-  const countingInfo = { total: 0, pushed: 0, totalAlerts: 0 };
-  return (
-    comments?.reduce<CountAlertsInfo>(({ total, pushed, totalAlerts }, comment) => {
+const getAlertsInfo = (
+  comments: CaseResponse['comments']
+): { totalAlerts: number; hasUnpushedAlertComments: boolean } => {
+  const countingInfo = { totalComments: 0, pushed: 0, totalAlerts: 0 };
+
+  const res =
+    comments?.reduce<CountAlertsInfo>(({ totalComments, pushed, totalAlerts }, comment) => {
       if (comment.type === CommentType.alert || comment.type === CommentType.generatedAlert) {
         return {
-          // We could use ++total but total + 1 is more readable.
-          total: total + 1,
-          // We could use ++pushed but pushed + 1 is more readable.
+          totalComments: totalComments + 1,
           pushed: comment.pushed_at != null ? pushed + 1 : pushed,
           totalAlerts: totalAlerts + (Array.isArray(comment.alertId) ? comment.alertId.length : 1),
         };
       }
-      return { total, pushed, totalAlerts };
-    }, countingInfo) ?? countingInfo
-  );
+      return { totalComments, pushed, totalAlerts };
+    }, countingInfo) ?? countingInfo;
+
+  return {
+    totalAlerts: res.totalAlerts,
+    hasUnpushedAlertComments: res.totalComments > res.pushed,
+  };
+};
+
+const addAlertMessage = (
+  caseId: string,
+  caseComments: CaseResponse['comments'],
+  comments: ExternalServiceComment[]
+): ExternalServiceComment[] => {
+  const { totalAlerts, hasUnpushedAlertComments } = getAlertsInfo(caseComments);
+
+  const newComments = [...comments];
+
+  if (hasUnpushedAlertComments) {
+    newComments.push({
+      comment: `Elastic Alerts attached to the case: ${totalAlerts}`,
+      commentId: `${caseId}-total-alerts`,
+    });
+  }
+
+  return newComments;
 };
 
 export const createIncident = async ({
@@ -180,10 +204,6 @@ export const createIncident = async ({
       comment.type === CommentType.user && commentsIdsToBeUpdated.has(comment.id)
   );
 
-  const { total: totalCommentsTypeAlert, pushed: pushedAlerts, totalAlerts } = countAlerts(
-    caseComments
-  );
-
   let comments: ExternalServiceComment[] = [];
 
   if (commentsToBeUpdated && Array.isArray(commentsToBeUpdated) && commentsToBeUpdated.length > 0) {
@@ -193,12 +213,7 @@ export const createIncident = async ({
     }
   }
 
-  if (totalCommentsTypeAlert > pushedAlerts) {
-    comments.push({
-      comment: `Elastic Alerts attached to the case: ${totalAlerts}`,
-      commentId: `${theCase.id}-total-alerts`,
-    });
-  }
+  comments = addAlertMessage(theCase.id, caseComments, comments);
 
   return { incident, comments };
 };
