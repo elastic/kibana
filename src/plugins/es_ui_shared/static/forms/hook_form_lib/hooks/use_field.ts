@@ -189,11 +189,13 @@ export const useField = <T, FormType = FormData, I = T>(
       {
         formData,
         value: valueToValidate,
-        validationTypeToValidate = VALIDATION_TYPES.FIELD,
+        onlyBlocking: runOnlyBlockingValidations,
+        validationTypeToValidate,
       }: {
         formData: any;
         value: I;
-        validationTypeToValidate: string;
+        onlyBlocking: boolean;
+        validationTypeToValidate?: string;
       },
       clearFieldErrors: FieldHook['clearErrors']
     ): ValidationError[] | Promise<ValidationError[]> => {
@@ -203,7 +205,10 @@ export const useField = <T, FormType = FormData, I = T>(
 
       // By default, for fields that have an asynchronous validation
       // we will clear the errors as soon as the field value changes.
-      clearFieldErrors([validationTypeToValidate, VALIDATION_TYPES.ASYNC]);
+      clearFieldErrors([
+        validationTypeToValidate ?? VALIDATION_TYPES.FIELD,
+        VALIDATION_TYPES.ASYNC,
+      ]);
 
       cancelInflightValidation();
 
@@ -217,12 +222,17 @@ export const useField = <T, FormType = FormData, I = T>(
             validator,
             exitOnFail = true,
             type: validationType = VALIDATION_TYPES.FIELD,
+            isBlocking = true,
           } = validation;
 
           if (
             typeof validationTypeToValidate !== 'undefined' &&
             validationType !== validationTypeToValidate
           ) {
+            continue;
+          }
+
+          if (runOnlyBlockingValidations && isBlocking === false) {
             continue;
           }
 
@@ -263,12 +273,17 @@ export const useField = <T, FormType = FormData, I = T>(
             validator,
             exitOnFail = true,
             type: validationType = VALIDATION_TYPES.FIELD,
+            isBlocking = true,
           } = validation;
 
           if (
             typeof validationTypeToValidate !== 'undefined' &&
             validationType !== validationTypeToValidate
           ) {
+            continue;
+          }
+
+          if (runOnlyBlockingValidations && isBlocking === false) {
             continue;
           }
 
@@ -343,7 +358,8 @@ export const useField = <T, FormType = FormData, I = T>(
       const {
         formData = __getFormData$().value,
         value: valueToValidate = value,
-        validationType = VALIDATION_TYPES.FIELD,
+        validationType,
+        onlyBlocking = false,
       } = validationData;
 
       setIsValidated(true);
@@ -377,6 +393,7 @@ export const useField = <T, FormType = FormData, I = T>(
           formData,
           value: valueToValidate,
           validationTypeToValidate: validationType,
+          onlyBlocking,
         },
         clearErrors
       );
