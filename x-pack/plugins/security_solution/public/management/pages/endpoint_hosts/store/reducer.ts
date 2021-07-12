@@ -22,6 +22,7 @@ import { AppAction } from '../../../../common/store/actions';
 import { ImmutableReducer } from '../../../../common/store';
 import { Immutable } from '../../../../../common/endpoint/types';
 import { createUninitialisedResourceState, isUninitialisedResourceState } from '../../../state';
+import { EndpointDetailsTabsTypes } from '../view/details/components/endpoint_details_tabs';
 
 type StateReducer = ImmutableReducer<EndpointState, AppAction>;
 type CaseReducer<T extends AppAction> = (
@@ -192,14 +193,6 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
         },
       },
     };
-  } else if (action.type === 'endpointDetailsFlyoutTabChanged') {
-    return {
-      ...state,
-      endpointDetails: {
-        ...state.endpointDetails!,
-        flyoutView: action.payload.flyoutView,
-      },
-    };
   } else if (action.type === 'endpointDetailsActivityLogChanged') {
     return handleEndpointDetailsActivityLogChanged(state, action);
   } else if (action.type === 'endpointPendingActionsStateChanged') {
@@ -291,6 +284,19 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
     const wasPreviouslyOnListPage = isOnEndpointPage(state) && !hasSelectedEndpoint(state);
     const isCurrentlyOnDetailsPage = isOnEndpointPage(newState) && hasSelectedEndpoint(newState);
     const wasPreviouslyOnDetailsPage = isOnEndpointPage(state) && hasSelectedEndpoint(state);
+    const wasPreviouslyOnActivityLogPage =
+      isOnEndpointPage(state) &&
+      hasSelectedEndpoint(state) &&
+      uiQueryParams(state).show === EndpointDetailsTabsTypes.activityLog;
+    const isCurrentlyOnActivityLogPage =
+      isOnEndpointPage(newState) &&
+      hasSelectedEndpoint(newState) &&
+      uiQueryParams(newState).show === EndpointDetailsTabsTypes.activityLog;
+
+    const isNotLoadingDetails =
+      isCurrentlyOnActivityLogPage ||
+      (wasPreviouslyOnActivityLogPage &&
+        uiQueryParams(state).selected_endpoint === uiQueryParams(newState).selected_endpoint);
 
     const stateUpdates: Partial<EndpointState> = {
       location: action.payload,
@@ -344,7 +350,7 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
             activityLog,
             hostDetails: {
               ...state.endpointDetails.hostDetails,
-              detailsLoading: true,
+              detailsLoading: isNotLoadingDetails ? false : true,
               detailsError: undefined,
             },
           },
