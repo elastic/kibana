@@ -38,7 +38,7 @@ export const useAllAgents = (
       let kuery = `last_checkin_status: online and (${policyFragment})`;
 
       if (searchValue) {
-        kuery += `and (local_metadata.host.hostname:*${searchValue}* or local_metadata.elastic.agent.id:*${searchValue}*)`;
+        kuery += ` and (local_metadata.host.hostname:*${searchValue}* or local_metadata.elastic.agent.id:*${searchValue}*)`;
       }
 
       return http.get(agentRouteService.getListPath(), {
