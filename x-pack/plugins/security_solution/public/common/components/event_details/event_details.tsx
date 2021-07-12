@@ -9,9 +9,6 @@ import {
   EuiTabbedContent,
   EuiTabbedContentTab,
   EuiSpacer,
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiLoadingContent,
   EuiLoadingSpinner,
 } from '@elastic/eui';
@@ -34,6 +31,7 @@ import {
   parseExistingEnrichments,
   timelineDataToEnrichment,
 } from './cti_details/helpers';
+import { NoEnrichmentsPanel } from './cti_details/no_enrichments_panel';
 
 type EventViewTab = EuiTabbedContentTab;
 
@@ -100,9 +98,6 @@ const EventDetailsComponent: React.FC<Props> = ({
     (tab: EuiTabbedContentTab) => setSelectedTabId(tab.id as EventViewId),
     [setSelectedTabId]
   );
-  const viewThreatIntelTab = useCallback(() => setSelectedTabId(EventsViewType.threatIntelView), [
-    setSelectedTabId,
-  ]);
 
   const eventFields = useMemo(() => getEnrichmentFields(data), [data]);
   const existingEnrichments = useMemo(
@@ -118,6 +113,9 @@ const EventDetailsComponent: React.FC<Props> = ({
     loading: enrichmentsLoading,
     result: enrichmentsResponse,
   } = useInvestigationTimeEnrichment(eventFields);
+  const investigationEnrichments = useMemo(() => enrichmentsResponse?.enrichments ?? [], [
+    enrichmentsResponse?.enrichments,
+  ]);
   const allEnrichments = useMemo(() => {
     if (enrichmentsLoading || !enrichmentsResponse?.enrichments) {
       return existingEnrichments;
@@ -140,27 +138,18 @@ const EventDetailsComponent: React.FC<Props> = ({
                     eventId: id,
                     browserFields,
                     timelineId,
-                    title: i18n.ALERT_SUMMARY,
                   }}
                 />
+                {enrichmentCount > 0 && (
+                  <ThreatSummaryView
+                    eventId={id}
+                    timelineId={timelineId}
+                    enrichments={allEnrichments}
+                  />
+                )}
                 {enrichmentsLoading && (
                   <>
                     <EuiLoadingContent lines={2} />
-                  </>
-                )}
-                {enrichmentCount > 0 && (
-                  <>
-                    <ThreatSummaryView
-                      eventId={id}
-                      timelineId={timelineId}
-                      enrichments={allEnrichments}
-                    />
-                    <EuiSpacer size="s" />
-                    <EuiFlexGroup>
-                      <EuiFlexItem grow={false}>
-                        <EuiButton onClick={viewThreatIntelTab}>{i18n.VIEW_CTI_DATA}</EuiButton>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
                   </>
                 )}
               </>
@@ -176,7 +165,6 @@ const EventDetailsComponent: React.FC<Props> = ({
       enrichmentsLoading,
       enrichmentCount,
       allEnrichments,
-      viewThreatIntelTab,
     ]
   );
 
@@ -192,10 +180,25 @@ const EventDetailsComponent: React.FC<Props> = ({
                 {enrichmentsLoading ? <EuiLoadingSpinner /> : `(${enrichmentCount})`}
               </span>
             ),
-            content: <ThreatDetailsView enrichments={allEnrichments} />,
+            content: (
+              <>
+                <ThreatDetailsView enrichments={allEnrichments} />
+                <NoEnrichmentsPanel
+                  investigationEnrichmentsCount={investigationEnrichments.length}
+                  existingEnrichmentsCount={existingEnrichments.length}
+                />
+              </>
+            ),
           }
         : undefined,
-    [allEnrichments, enrichmentCount, enrichmentsLoading, isAlert]
+    [
+      allEnrichments,
+      enrichmentCount,
+      enrichmentsLoading,
+      existingEnrichments.length,
+      investigationEnrichments.length,
+      isAlert,
+    ]
   );
 
   const tableTab = useMemo(
