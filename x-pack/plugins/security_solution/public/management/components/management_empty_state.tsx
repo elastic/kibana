@@ -88,7 +88,7 @@ const PolicyEmptyState = React.memo<{
               <EuiLink external href={`${docLinks.links.siem.guide}`}>
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.policyList.onboardingDocsLink"
-                  defaultMessage="view the Security app documentation"
+                  defaultMessage="view the Elastic Security documentation"
                 />
               </EuiLink>
             </EuiText>

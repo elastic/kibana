@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+const { USES_STYLED_COMPONENTS } = require.resolve('@kbn/dev-utils');
+
 module.exports = () => {
   return {
     presets: [
@@ -21,14 +23,6 @@ module.exports = () => {
       ],
       require('./common_preset'),
     ],
-    plugins: [
-      [
-        require.resolve('babel-plugin-styled-components'),
-        {
-          fileName: false,
-        },
-      ],
-    ],
     env: {
       production: {
         plugins: [
@@ -42,5 +36,29 @@ module.exports = () => {
         ],
       },
     },
+    overrides: [
+      {
+        include: USES_STYLED_COMPONENTS,
+        plugins: [
+          [
+            require.resolve('babel-plugin-styled-components'),
+            {
+              fileName: false,
+            },
+          ],
+        ],
+      },
+      {
+        exclude: USES_STYLED_COMPONENTS,
+        presets: [
+          [
+            require.resolve('@emotion/babel-preset-css-prop'),
+            {
+              labelFormat: '[local]',
+            },
+          ],
+        ],
+      },
+    ],
   };
 };
