@@ -11,4 +11,3 @@ export { buildQueryFromFilters } from './from_filters';
 export { luceneStringToDsl } from './lucene_string_to_dsl';
 export { decorateQuery } from './decorate_query';
 export { IndexPatternBase, IndexPatternFieldBase, IFieldSubType } from './types';
-export { DslQuery } from './es_query_dsl';
