@@ -510,8 +510,8 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       const isOrganization = state.context !== 'account';
 
       /**
-        There is an extreme edge case where the user is trying to connect Github as source ent-search,
-        after configuring it in Kibana. When this happens Github redirects the user from ent-search to Kibana
+        There is an extreme edge case where the user is trying to connect Github as source from ent-search,
+        after configuring it in Kibana. When this happens, Github redirects the user from ent-search to Kibana
         with special error properties in the query params. In this case we need to redirect the user to the
         app home page and display the error message, and not persist the other query params to the server.
       */
