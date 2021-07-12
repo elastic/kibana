@@ -42,8 +42,6 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
         if (!body.has_all_requested) {
           return res.notFound();
         }
-
-        return handler(ctx, req, res);
       } catch (e) {
         return res.customError({ statusCode: e.statusCode, body: e.message });
       }

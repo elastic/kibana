@@ -15,7 +15,7 @@ import { ILM_POLICY_NAME } from '../../../plugins/reporting/common/constants';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
-  const supertestNoAuth = getService('supertestWithoutAuth');
+  const supertest = getService('supertest');
   const reportingAPI = getService('reportingAPI');
 
   describe('ILM policy migration APIs', () => {
@@ -38,7 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(await reportingAPI.checkIlmMigrationStatus()).to.eql('ok');
 
       // try creating a report
-      await supertestNoAuth
+      await supertest
         .post(`/api/reporting/generate/csv`)
         .set('kbn-xsrf', 'xxx')
         .send({ jobParams: JOB_PARAMS_RISON_CSV_DEPRECATED });
@@ -47,11 +47,11 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('detects when reporting indices should be migrated due to missing ILM policy', async () => {
-      await reportingAPI.makeAllReportingIndicesUnmanaged();
+      await reportingAPI.makeAllReportingPoliciesUnmanaged();
       // TODO: Remove "any" when no longer through type issue "policy_id" missing
       await es.ilm.deleteLifecycle({ policy: ILM_POLICY_NAME } as any);
 
-      await supertestNoAuth
+      await supertest
         .post(`/api/reporting/generate/csv`)
         .set('kbn-xsrf', 'xxx')
         .send({ jobParams: JOB_PARAMS_RISON_CSV_DEPRECATED });
@@ -63,8 +63,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('detects when reporting indices should be migrated due to unmanaged indices', async () => {
-      await reportingAPI.makeAllReportingIndicesUnmanaged();
-      await supertestNoAuth
+      await reportingAPI.makeAllReportingPoliciesUnmanaged();
+      await supertest
         .post(`/api/reporting/generate/csv`)
         .set('kbn-xsrf', 'xxx')
         .send({ jobParams: JOB_PARAMS_RISON_CSV_DEPRECATED });
