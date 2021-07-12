@@ -12,6 +12,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['dashboard', 'common', 'reporting']);
   const es = getService('es');
   const esArchiver = getService('esArchiver');
+  const retry = getService('retry');
 
   // FLAKY: https://github.com/elastic/kibana/issues/102722
   describe.skip('Reporting', function () {
@@ -33,6 +34,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       this.timeout(180000);
 
       await pageObjects.common.navigateToApp('dashboards');
+      await retry.waitFor('dashboard landing page', async () => {
+        return await pageObjects.dashboard.onDashboardLandingPage();
+      });
       await pageObjects.dashboard.loadSavedDashboard('dashboard');
       await pageObjects.reporting.openPdfReportingPanel();
       await pageObjects.reporting.clickGenerateReportButton();
