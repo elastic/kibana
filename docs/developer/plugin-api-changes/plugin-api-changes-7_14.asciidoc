@@ -21,9 +21,9 @@ Other versions: {kibana-ref-all}/7.13/plugin-api-changes.html[7.13] |
 
 `__legacy` and `sessionTimeout` were removed from the Security plugin's setup contract:
 
-* Uses explicit interfaces instead of `ReturnType<X>` as recommended in the Developer Guide.
-Improves the API docs and supports comments.
-* Removed `__legacy` return item from `Setup` function because it was unused.
+* Changed to explicit interfaces instead of `ReturnType<X>` as recommended in the Developer Guide.
+Improved the API docs and supports comments.
+* Removed `__legacy` return from the `Setup` function because it was unused.
 * Removed `sessionTimeout` return from the `Setup` function because it was also unused.
 * Added comments.
 
@@ -134,7 +134,7 @@ Refer to https://github.com/elastic/kibana/pull/100005[#100005].
 [%collapsible]
 ====
 
-The `chrome.navLinks.update` API was removed and replaced with the `appUpdater` API.
+The `chrome.navLinks.update` API was replaced with the `appUpdater` API.
 
 **Before**
 
@@ -195,7 +195,7 @@ Refer to https://github.com/elastic/kibana/pull/99633[#99633].
 ====
 
 When a plugin implements a custom deprecation function, it used to mutate the config object.
-From now on, it should return either the `set` command to extend `config` or the `unset` command
+Now it returns either the `set` command to extend `config` or the `unset` command
 to remove the `config` property. Refer to https://en.wikipedia.org/wiki/Command_pattern[Command pattern].
 
 *Before*
@@ -248,7 +248,7 @@ Refer to https://github.com/elastic/kibana/pull/98248[#98248].
 ====
 
 [[breaking_plugin_v7.14.0_77965]]
-.Set up enforcement added for custom plugins statuses
+.Custom plugin status checks improved
 [%collapsible]
 ====
 
