@@ -108,10 +108,16 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     this.types = new TypesRegistry(this);
   }
 
+  /**
+   * Register a single function with the executor.
+   */
   public registerFunction(functionDefinition: FunctionDefinition) {
     this.registerFunctions([functionDefinition]);
   }
 
+  /**
+   * Register a collection of functions with the executor.
+   */
   public registerFunctions(functionDefinitions: FunctionDefinition[]) {
     const fns = functionDefinitions.map(
       (fn) => new ExpressionFunction(typeof fn === 'object' ? fn : fn())
@@ -120,6 +126,10 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     this.state.transitions.addFunctions(fns);
   }
 
+  /**
+   * Register a collection of functions meant to be deregegistered by the registering context,
+   * when they are no longer to be used, which can be done with the callback returned.
+   */
   public leaseFunctions(functionDefinitions: FunctionDefinition[]) {
     const fns = functionDefinitions.map(
       (fn) => new ExpressionFunction(typeof fn === 'object' ? fn : fn())
@@ -139,10 +149,16 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     return { ...this.state.get().functions };
   }
 
+  /**
+   * Register a single type with the executor.
+   */
   public registerType(typeDefinition: TypeDefinition) {
     this.registerTypes([typeDefinition]);
   }
 
+  /**
+   * Register a collection of types with the executor.
+   */
   public registerTypes(typeDefinitions: TypeDefinition[]) {
     const types = typeDefinitions.map(
       (typeDefinition) =>
@@ -152,6 +168,10 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     this.state.transitions.addTypes(types);
   }
 
+  /**
+   * Register a collection of types meant to be deregegistered by the registering context
+   * when they are no longer to be used, which can be done with the callback returned.
+   */
   public leaseTypes(typeDefinitions: TypeDefinition[]) {
     const types = typeDefinitions.map(
       (typeDefinition) =>

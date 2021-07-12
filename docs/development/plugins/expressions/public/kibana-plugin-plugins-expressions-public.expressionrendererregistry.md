@@ -16,6 +16,7 @@ export declare class ExpressionRendererRegistry implements IRegistry<ExpressionR
 |  --- | --- | --- |
 |  [get(id)](./kibana-plugin-plugins-expressions-public.expressionrendererregistry.get.md) |  |  |
 |  [register(definition)](./kibana-plugin-plugins-expressions-public.expressionrendererregistry.register.md) |  |  |
+|  [remove(name)](./kibana-plugin-plugins-expressions-public.expressionrendererregistry.remove.md) |  |  |
 |  [toArray()](./kibana-plugin-plugins-expressions-public.expressionrendererregistry.toarray.md) |  |  |
 |  [toJS()](./kibana-plugin-plugins-expressions-public.expressionrendererregistry.tojs.md) |  |  |
 

@@ -205,14 +205,18 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     //
     // (undocumented)
     inject(ast: ExpressionAstExpression, references: SavedObjectReference[]): ExpressionAstExpression;
+    leaseFunctions(functionDefinitions: FunctionDefinition[]): () => ExecutorState<Record<string, unknown>>;
+    leaseTypes(typeDefinitions: TypeDefinition[]): () => ExecutorState<Record<string, unknown>>;
     // Warning: (ae-forgotten-export) The symbol "SerializableState" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
     migrate(ast: SerializableState, version: string): ExpressionAstExpression;
-    // (undocumented)
-    registerFunction(functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)): void;
-    // (undocumented)
-    registerType(typeDefinition: AnyExpressionTypeDefinition | (() => AnyExpressionTypeDefinition)): void;
+    // Warning: (ae-forgotten-export) The symbol "FunctionDefinition" needs to be exported by the entry point index.d.ts
+    registerFunction(functionDefinition: FunctionDefinition): void;
+    registerFunctions(functionDefinitions: FunctionDefinition[]): void;
+    // Warning: (ae-forgotten-export) The symbol "TypeDefinition" needs to be exported by the entry point index.d.ts
+    registerType(typeDefinition: TypeDefinition): void;
+    registerTypes(typeDefinitions: TypeDefinition[]): void;
     run<Input, Output>(ast: string | ExpressionAstExpression, input: Input, params?: ExpressionExecutionParams): Observable<ExecutionResult<Output | ExpressionValueError>>;
     // (undocumented)
     readonly state: ExecutorContainer<Context>;
@@ -471,6 +475,8 @@ export class ExpressionRendererRegistry implements IRegistry<ExpressionRenderer>
     //
     // (undocumented)
     register(definition: AnyExpressionRenderDefinition | (() => AnyExpressionRenderDefinition)): void;
+    // (undocumented)
+    remove(name: string): void;
     // (undocumented)
     toArray(): ExpressionRenderer[];
     // (undocumented)

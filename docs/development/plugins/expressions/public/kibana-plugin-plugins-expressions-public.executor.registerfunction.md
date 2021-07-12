@@ -4,17 +4,19 @@
 
 ## Executor.registerFunction() method
 
+Register a single function with the executor.
+
 <b>Signature:</b>
 
 ```typescript
-registerFunction(functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)): void;
+registerFunction(functionDefinition: FunctionDefinition): void;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  functionDefinition | <code>AnyExpressionFunctionDefinition &#124; (() =&gt; AnyExpressionFunctionDefinition)</code> |  |
+|  functionDefinition | <code>FunctionDefinition</code> |  |
 
 <b>Returns:</b>
 

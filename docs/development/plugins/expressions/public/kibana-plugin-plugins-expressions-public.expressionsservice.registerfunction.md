@@ -31,5 +31,5 @@ The actual function is defined in the `fn` key. The function can be \*async\*. I
 <b>Signature:</b>
 
 ```typescript
-readonly registerFunction: (functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)) => void;
+readonly registerFunction: Executor['registerFunction'];
 ```

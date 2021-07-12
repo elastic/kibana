@@ -39,8 +39,11 @@ export declare class ExpressionsService implements PersistableStateService<Expre
 |  [getType](./kibana-plugin-plugins-expressions-public.expressionsservice.gettype.md) |  | <code>ExpressionsServiceStart['getType']</code> |  |
 |  [getTypes](./kibana-plugin-plugins-expressions-public.expressionsservice.gettypes.md) |  | <code>() =&gt; ReturnType&lt;Executor['getTypes']&gt;</code> | Returns POJO map of all registered expression types, where keys are names of the types and values are <code>ExpressionType</code> instances. |
 |  [inject](./kibana-plugin-plugins-expressions-public.expressionsservice.inject.md) |  | <code>(state: ExpressionAstExpression, references: SavedObjectReference[]) =&gt; ExpressionAstExpression</code> | Injects saved object references into expression AST |
+|  [leaseFunctions](./kibana-plugin-plugins-expressions-public.expressionsservice.leasefunctions.md) |  | <code>Executor['leaseFunctions']</code> | Register a collection of expression functions that are meant to be deregistered by the registering context, (e.g. a plugin leases on mount and deregisters on unmount). This call returns a simple callback to make registering easier. |
+|  [leaseRenderers](./kibana-plugin-plugins-expressions-public.expressionsservice.leaserenderers.md) |  | <code>(definitions: Array&lt;AnyExpressionRenderDefinition &#124; (() =&gt; AnyExpressionRenderDefinition)&gt;) =&gt; () =&gt; void</code> |  |
+|  [leaseTypes](./kibana-plugin-plugins-expressions-public.expressionsservice.leasetypes.md) |  | <code>Executor['leaseTypes']</code> |  |
 |  [migrate](./kibana-plugin-plugins-expressions-public.expressionsservice.migrate.md) |  | <code>(state: SerializableState, version: string) =&gt; ExpressionAstExpression</code> | Runs the migration (if it exists) for specified version. This will run a single migration step (ie from 7.10.0 to 7.10.1) |
-|  [registerFunction](./kibana-plugin-plugins-expressions-public.expressionsservice.registerfunction.md) |  | <code>(functionDefinition: AnyExpressionFunctionDefinition &#124; (() =&gt; AnyExpressionFunctionDefinition)) =&gt; void</code> | Register an expression function, which will be possible to execute as part of the expression pipeline.<!-- -->Below we register a function which simply sleeps for given number of milliseconds to delay the execution and outputs its input as-is.
+|  [registerFunction](./kibana-plugin-plugins-expressions-public.expressionsservice.registerfunction.md) |  | <code>Executor['registerFunction']</code> | Register an expression function, which will be possible to execute as part of the expression pipeline.<!-- -->Below we register a function which simply sleeps for given number of milliseconds to delay the execution and outputs its input as-is.
 ```ts
 expressions.registerFunction({
   name: 'sleep',
@@ -60,8 +63,11 @@ expressions.registerFunction({
 
 ```
 The actual function is defined in the <code>fn</code> key. The function can be \*async\*. It receives three arguments: (1) <code>input</code> is the output of the previous function or the initial input of the expression if the function is first in chain; (2) <code>args</code> are function arguments as defined in expression string, that can be edited by user (e.g in case of Canvas); (3) <code>context</code> is a shared object passed to all functions that can be used for side-effects. |
-|  [registerRenderer](./kibana-plugin-plugins-expressions-public.expressionsservice.registerrenderer.md) |  | <code>(definition: AnyExpressionRenderDefinition &#124; (() =&gt; AnyExpressionRenderDefinition)) =&gt; void</code> |  |
-|  [registerType](./kibana-plugin-plugins-expressions-public.expressionsservice.registertype.md) |  | <code>(typeDefinition: AnyExpressionTypeDefinition &#124; (() =&gt; AnyExpressionTypeDefinition)) =&gt; void</code> |  |
+|  [registerFunctions](./kibana-plugin-plugins-expressions-public.expressionsservice.registerfunctions.md) |  | <code>Executor['registerFunctions']</code> | Register a collection of expression functions. See <code>registerFunction</code> for details. |
+|  [registerRenderer](./kibana-plugin-plugins-expressions-public.expressionsservice.registerrenderer.md) |  | <code>ExpressionRendererRegistry['register']</code> |  |
+|  [registerRenderers](./kibana-plugin-plugins-expressions-public.expressionsservice.registerrenderers.md) |  | <code>(definitions: Array&lt;AnyExpressionRenderDefinition &#124; (() =&gt; AnyExpressionRenderDefinition)&gt;) =&gt; void</code> |  |
+|  [registerType](./kibana-plugin-plugins-expressions-public.expressionsservice.registertype.md) |  | <code>Executor['registerType']</code> |  |
+|  [registerTypes](./kibana-plugin-plugins-expressions-public.expressionsservice.registertypes.md) |  | <code>Executor['registerTypes']</code> |  |
 |  [renderers](./kibana-plugin-plugins-expressions-public.expressionsservice.renderers.md) |  | <code>ExpressionRendererRegistry</code> |  |
 |  [run](./kibana-plugin-plugins-expressions-public.expressionsservice.run.md) |  | <code>ExpressionsServiceStart['run']</code> |  |
 |  [telemetry](./kibana-plugin-plugins-expressions-public.expressionsservice.telemetry.md) |  | <code>(state: ExpressionAstExpression, telemetryData?: Record&lt;string, any&gt;) =&gt; Record&lt;string, any&gt;</code> | Extracts telemetry from expression AST |

@@ -239,9 +239,17 @@ export class ExpressionsService implements PersistableStateService<ExpressionAst
   public readonly registerFunction: Executor['registerFunction'] = (functionDefinition) =>
     this.executor.registerFunction(functionDefinition);
 
+  /**
+   * Register a collection of expression functions.  See `registerFunction` for details.
+   */
   public readonly registerFunctions: Executor['registerFunctions'] = (functionDefinitions) =>
     this.executor.registerFunctions(functionDefinitions);
 
+  /**
+   * Register a collection of expression functions that are meant to be deregistered by the
+   * registering context, (e.g. a plugin leases on mount and deregisters on unmount).  This
+   * call returns a simple callback to make registering easier.
+   */
   public readonly leaseFunctions: Executor['leaseFunctions'] = (fns) =>
     this.executor.leaseFunctions(fns);
 

@@ -39,9 +39,13 @@ export declare class Executor<Context extends Record<string, unknown> = Record<s
 |  [getType(name)](./kibana-plugin-plugins-expressions-public.executor.gettype.md) |  |  |
 |  [getTypes()](./kibana-plugin-plugins-expressions-public.executor.gettypes.md) |  |  |
 |  [inject(ast, references)](./kibana-plugin-plugins-expressions-public.executor.inject.md) |  |  |
+|  [leaseFunctions(functionDefinitions)](./kibana-plugin-plugins-expressions-public.executor.leasefunctions.md) |  | Register a collection of functions meant to be deregegistered by the registering context, when they are no longer to be used, which can be done with the callback returned. |
+|  [leaseTypes(typeDefinitions)](./kibana-plugin-plugins-expressions-public.executor.leasetypes.md) |  | Register a collection of types meant to be deregegistered by the registering context when they are no longer to be used, which can be done with the callback returned. |
 |  [migrate(ast, version)](./kibana-plugin-plugins-expressions-public.executor.migrate.md) |  |  |
-|  [registerFunction(functionDefinition)](./kibana-plugin-plugins-expressions-public.executor.registerfunction.md) |  |  |
-|  [registerType(typeDefinition)](./kibana-plugin-plugins-expressions-public.executor.registertype.md) |  |  |
+|  [registerFunction(functionDefinition)](./kibana-plugin-plugins-expressions-public.executor.registerfunction.md) |  | Register a single function with the executor. |
+|  [registerFunctions(functionDefinitions)](./kibana-plugin-plugins-expressions-public.executor.registerfunctions.md) |  | Register a collection of functions with the executor. |
+|  [registerType(typeDefinition)](./kibana-plugin-plugins-expressions-public.executor.registertype.md) |  | Register a single type with the executor. |
+|  [registerTypes(typeDefinitions)](./kibana-plugin-plugins-expressions-public.executor.registertypes.md) |  | Register a collection of types with the executor. |
 |  [run(ast, input, params)](./kibana-plugin-plugins-expressions-public.executor.run.md) |  | Execute expression and return result. |
 |  [telemetry(ast, telemetryData)](./kibana-plugin-plugins-expressions-public.executor.telemetry.md) |  |  |
 

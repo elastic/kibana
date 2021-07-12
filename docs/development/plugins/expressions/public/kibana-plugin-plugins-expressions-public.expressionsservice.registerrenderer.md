@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-readonly registerRenderer: (definition: AnyExpressionRenderDefinition | (() => AnyExpressionRenderDefinition)) => void;
+readonly registerRenderer: ExpressionRendererRegistry['register'];
 ```

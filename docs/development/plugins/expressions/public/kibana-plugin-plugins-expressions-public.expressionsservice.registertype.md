@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-readonly registerType: (typeDefinition: AnyExpressionTypeDefinition | (() => AnyExpressionTypeDefinition)) => void;
+readonly registerType: Executor['registerType'];
 ```

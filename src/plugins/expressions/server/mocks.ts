@@ -26,6 +26,12 @@ const createSetupContract = (): Setup => {
     registerRenderer: jest.fn(),
     registerType: jest.fn(),
     run: jest.fn(),
+    leaseFunctions: jest.fn(),
+    leaseRenderers: jest.fn(),
+    leaseTypes: jest.fn(),
+    registerFunctions: jest.fn(),
+    registerRenderers: jest.fn(),
+    registerTypes: jest.fn(),
   };
   return setupContract;
 };

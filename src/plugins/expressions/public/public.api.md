@@ -223,14 +223,18 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     //
     // (undocumented)
     inject(ast: ExpressionAstExpression, references: SavedObjectReference[]): ExpressionAstExpression;
+    leaseFunctions(functionDefinitions: FunctionDefinition[]): () => ExecutorState<Record<string, unknown>>;
+    leaseTypes(typeDefinitions: TypeDefinition[]): () => ExecutorState<Record<string, unknown>>;
     // Warning: (ae-forgotten-export) The symbol "SerializableState" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
     migrate(ast: SerializableState, version: string): ExpressionAstExpression;
-    // (undocumented)
-    registerFunction(functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)): void;
-    // (undocumented)
-    registerType(typeDefinition: AnyExpressionTypeDefinition | (() => AnyExpressionTypeDefinition)): void;
+    // Warning: (ae-forgotten-export) The symbol "FunctionDefinition" needs to be exported by the entry point index.d.ts
+    registerFunction(functionDefinition: FunctionDefinition): void;
+    registerFunctions(functionDefinitions: FunctionDefinition[]): void;
+    // Warning: (ae-forgotten-export) The symbol "TypeDefinition" needs to be exported by the entry point index.d.ts
+    registerType(typeDefinition: TypeDefinition): void;
+    registerTypes(typeDefinitions: TypeDefinition[]): void;
     run<Input, Output>(ast: string | ExpressionAstExpression, input: Input, params?: ExpressionExecutionParams): Observable<ExecutionResult<Output | ExpressionValueError>>;
     // (undocumented)
     readonly state: ExecutorContainer<Context>;
@@ -515,6 +519,8 @@ export class ExpressionRendererRegistry implements IRegistry<ExpressionRenderer>
     // (undocumented)
     register(definition: AnyExpressionRenderDefinition | (() => AnyExpressionRenderDefinition)): void;
     // (undocumented)
+    remove(name: string): void;
+    // (undocumented)
     toArray(): ExpressionRenderer[];
     // (undocumented)
     toJS(): Record<string, ExpressionRenderer>;
@@ -607,12 +613,22 @@ export class ExpressionsService implements PersistableStateService<ExpressionAst
     readonly getType: ExpressionsServiceStart['getType'];
     readonly getTypes: () => ReturnType<Executor['getTypes']>;
     readonly inject: (state: ExpressionAstExpression, references: SavedObjectReference[]) => ExpressionAstExpression;
+    readonly leaseFunctions: Executor['leaseFunctions'];
+    // (undocumented)
+    readonly leaseRenderers: (definitions: Array<AnyExpressionRenderDefinition | (() => AnyExpressionRenderDefinition)>) => () => void;
+    // (undocumented)
+    readonly leaseTypes: Executor['leaseTypes'];
     readonly migrate: (state: SerializableState, version: string) => ExpressionAstExpression;
-    readonly registerFunction: (functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)) => void;
+    readonly registerFunction: Executor['registerFunction'];
+    readonly registerFunctions: Executor['registerFunctions'];
     // (undocumented)
-    readonly registerRenderer: (definition: AnyExpressionRenderDefinition | (() => AnyExpressionRenderDefinition)) => void;
+    readonly registerRenderer: ExpressionRendererRegistry['register'];
     // (undocumented)
-    readonly registerType: (typeDefinition: AnyExpressionTypeDefinition | (() => AnyExpressionTypeDefinition)) => void;
+    readonly registerRenderers: (definitions: Array<AnyExpressionRenderDefinition | (() => AnyExpressionRenderDefinition)>) => void;
+    // (undocumented)
+    readonly registerType: Executor['registerType'];
+    // (undocumented)
+    readonly registerTypes: Executor['registerTypes'];
     // (undocumented)
     readonly renderers: ExpressionRendererRegistry;
     // (undocumented)
@@ -627,7 +643,7 @@ export class ExpressionsService implements PersistableStateService<ExpressionAst
 // Warning: (ae-missing-release-tag) "ExpressionsServiceSetup" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
-export type ExpressionsServiceSetup = Pick<ExpressionsService, 'getFunction' | 'getFunctions' | 'getRenderer' | 'getRenderers' | 'getType' | 'getTypes' | 'registerFunction' | 'registerRenderer' | 'registerType' | 'run' | 'fork'>;
+export type ExpressionsServiceSetup = Pick<ExpressionsService, 'getFunction' | 'getFunctions' | 'leaseFunctions' | 'getRenderer' | 'getRenderers' | 'getType' | 'getTypes' | 'leaseTypes' | 'registerFunction' | 'registerFunctions' | 'registerRenderer' | 'registerRenderers' | 'leaseRenderers' | 'registerType' | 'registerTypes' | 'run' | 'fork'>;
 
 // Warning: (ae-missing-release-tag) "ExpressionsServiceStart" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //

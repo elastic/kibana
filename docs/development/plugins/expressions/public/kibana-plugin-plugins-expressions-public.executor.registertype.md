@@ -4,17 +4,19 @@
 
 ## Executor.registerType() method
 
+Register a single type with the executor.
+
 <b>Signature:</b>
 
 ```typescript
-registerType(typeDefinition: AnyExpressionTypeDefinition | (() => AnyExpressionTypeDefinition)): void;
+registerType(typeDefinition: TypeDefinition): void;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  typeDefinition | <code>AnyExpressionTypeDefinition &#124; (() =&gt; AnyExpressionTypeDefinition)</code> |  |
+|  typeDefinition | <code>TypeDefinition</code> |  |
 
 <b>Returns:</b>
 
