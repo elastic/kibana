@@ -190,7 +190,7 @@
       .outerBox {
         fill: $euiColorEmptyShade;
         stroke: $euiColorPrimary;
-        stroke-width: 1px;
+        stroke-width: $euiBorderWidthThin;
       }
       .url {
         fill: $euiColorPrimary;
