@@ -15,7 +15,6 @@ import {
   HostPolicyResponseAppliedAction,
   HostPolicyResponseConfiguration,
   HostPolicyResponseActionStatus,
-  MetadataQueryStrategyVersions,
   HostStatus,
   ActivityLog,
   HostMetadata,
@@ -90,15 +89,9 @@ export const agentsWithEndpointsTotalError = (state: Immutable<EndpointState>) =
   state.agentsWithEndpointsTotalError;
 
 export const endpointsTotalError = (state: Immutable<EndpointState>) => state.endpointsTotalError;
-const queryStrategyVersion = (state: Immutable<EndpointState>) => state.queryStrategyVersion;
 
 export const endpointPackageVersion = createSelector(endpointPackageInfo, (info) =>
   isLoadedResourceState(info) ? info.data.version : undefined
-);
-
-export const isTransformEnabled = createSelector(
-  queryStrategyVersion,
-  (version) => version !== MetadataQueryStrategyVersions.VERSION_1
 );
 
 /**

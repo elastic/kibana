@@ -103,7 +103,7 @@ export function getActiveEntriesAndGenerateAlerts(
     locationsArr.forEach(({ location, shapeLocationId, dateInShape, docId }) => {
       const context = {
         entityId: entityName,
-        entityDateTime: dateInShape ? new Date(dateInShape).toISOString() : null,
+        entityDateTime: dateInShape || null,
         entityDocumentId: docId,
         detectionDateTime: new Date(currIntervalEndTime).toISOString(),
         entityLocation: `POINT (${location[0]} ${location[1]})`,
