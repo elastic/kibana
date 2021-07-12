@@ -12,7 +12,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
-  describe('discover app', function () {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/104466
+  describe.skip('discover app', function () {
     this.tags('ciGroup6');
 
     before(function () {
