@@ -153,6 +153,7 @@ describe('configureClient', () => {
                       "200
                   GET /foo?hello=dolly
                   {\\"seq_no_primary_term\\":true,\\"query\\":{\\"term\\":{\\"user\\":\\"kimchy\\"}}}",
+                      undefined,
                     ],
                   ]
               `);
@@ -177,6 +178,7 @@ describe('configureClient', () => {
                       "200
                   GET /foo?hello=dolly
                   {\\"seq_no_primary_term\\":true,\\"query\\":{\\"term\\":{\\"user\\":\\"kimchy\\"}}}",
+                      undefined,
                     ],
                   ]
               `);
@@ -203,6 +205,7 @@ describe('configureClient', () => {
               "200
           GET /foo?hello=dolly
           [buffer]",
+              undefined,
             ],
           ]
         `);
@@ -229,6 +232,7 @@ describe('configureClient', () => {
               "200
           GET /foo?hello=dolly
           [stream]",
+              undefined,
             ],
           ]
         `);
@@ -245,6 +249,7 @@ describe('configureClient', () => {
             Array [
               "200
           GET /foo?hello=dolly",
+              undefined,
             ],
           ]
         `);
@@ -270,6 +275,7 @@ describe('configureClient', () => {
                     Array [
                       "200
                   GET /foo?city=M%C3%BCnich",
+                      undefined,
                     ],
                   ]
               `);
@@ -305,6 +311,7 @@ describe('configureClient', () => {
               "500
           GET /foo?hello=dolly
           {\\"seq_no_primary_term\\":true,\\"query\\":{\\"term\\":{\\"user\\":\\"kimchy\\"}}} [internal server error]: internal server error",
+              undefined,
             ],
           ]
         `);
@@ -320,6 +327,7 @@ describe('configureClient', () => {
                   Array [
                     Array [
                       "[TimeoutError]: message",
+                      undefined,
                     ],
                   ]
               `);
@@ -350,6 +358,7 @@ describe('configureClient', () => {
             Array [
               "400
           GET /_path?hello=dolly [illegal_argument_exception]: request [/_path] contains unrecognized parameter: [name]",
+              undefined,
             ],
           ]
         `);
@@ -376,6 +385,7 @@ describe('configureClient', () => {
             Array [
               "400
           GET /_path [undefined]: Response Error",
+              undefined,
             ],
           ]
         `);
@@ -398,6 +408,7 @@ describe('configureClient', () => {
             Array [
               "400
           GET /_path [undefined]: Response Error",
+              undefined,
             ],
           ]
         `);
