@@ -537,14 +537,11 @@ async function validateJobs(
   };
 }
 
-const jobEmpty = i18n.translate(
-  'xpack.ml.importExport.importFlyout.validateJobId.jobNameAllowedCharactersDescription',
-  {
-    defaultMessage: 'Enter a valid job ID',
-  }
-);
+const jobEmpty = i18n.translate('xpack.ml.importExport.importFlyout.validateJobId.jobNameEmpty', {
+  defaultMessage: 'Enter a valid job ID',
+});
 const jobInvalid = i18n.translate(
-  'xpack.ml.importExport.importFlyout.validateJobId.jobNameAllowedCharactersDescription',
+  'xpack.ml.importExport.importFlyout.validateJobId.jobNameAllowedCharacters',
   {
     defaultMessage:
       'Job ID can contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores; ' +
