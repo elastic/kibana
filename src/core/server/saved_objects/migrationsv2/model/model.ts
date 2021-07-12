@@ -318,31 +318,42 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     }
   } else if (stateP.controlState === 'CHECK_UNKNOWN_DOCUMENTS') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+
+    const source = stateP.sourceIndex;
+    const target = stateP.versionIndex;
+    const nextState: State = {
+      ...stateP,
+      controlState: 'SET_SOURCE_WRITE_BLOCK',
+      sourceIndex: source,
+      targetIndex: target,
+      targetIndexMappings: disableUnknownTypeMappingFields(
+        stateP.targetIndexMappings,
+        stateP.sourceIndexMappings
+      ),
+      versionIndexReadyActions: Option.some<AliasAction[]>([
+        { remove: { index: source.value, alias: stateP.currentAlias, must_exist: true } },
+        { add: { index: target, alias: stateP.currentAlias } },
+        { add: { index: target, alias: stateP.versionAlias } },
+        { remove_index: { index: stateP.tempIndex } },
+      ]),
+    };
+
     if (Either.isRight(res)) {
-      const source = stateP.sourceIndex;
-      const target = stateP.versionIndex;
-      return {
-        ...stateP,
-        controlState: 'SET_SOURCE_WRITE_BLOCK',
-        sourceIndex: source,
-        targetIndex: target,
-        targetIndexMappings: disableUnknownTypeMappingFields(
-          stateP.targetIndexMappings,
-          stateP.sourceIndexMappings
-        ),
-        versionIndexReadyActions: Option.some<AliasAction[]>([
-          { remove: { index: source.value, alias: stateP.currentAlias, must_exist: true } },
-          { add: { index: target, alias: stateP.currentAlias } },
-          { add: { index: target, alias: stateP.versionAlias } },
-          { remove_index: { index: stateP.tempIndex } },
-        ]),
-      };
+      return nextState;
     } else {
       if (isLeftTypeof(res.left, 'unknown_docs_found')) {
         return {
-          ...stateP,
-          controlState: 'FATAL',
-          reason: extractUnknownDocFailureReason(res.left.unknownDocs, stateP.sourceIndex.value),
+          ...nextState,
+          logs: [
+            ...nextState.logs,
+            {
+              level: 'warning',
+              message: `CHECK_UNKNOWN_DOCUMENTS ${extractUnknownDocFailureReason(
+                res.left.unknownDocs,
+                target
+              )}`,
+            },
+          ],
         };
       } else {
         return throwBadResponse(stateP, res.left);
