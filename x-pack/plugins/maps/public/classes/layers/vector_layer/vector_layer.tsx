@@ -459,13 +459,12 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       return;
     }
 
-    const joinStatuses: JoinStatus[] = [];
-    joinStates.forEach(joinState => {
-      joinStatuses.push({
+    const joinStatuses = joinStates.map(joinState => {
+      return {
         joinedWithAtLeastOneFeature: false,
         keys: [],
         joinState,
-      });
+      };
     });
 
     for (let i = 0; i < sourceResult.featureCollection!.features.length; i++) {
@@ -535,7 +534,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
 
       onJoinError(i18n.translate('xpack.maps.vectorLayer.joinErrorMsg', {
         defaultMessage: `Unable to perform term join. {reason} Please check your 'Term joins' configuration.`,
-        values:   { reason }
+        values: { reason }
       }));
     }
   }
