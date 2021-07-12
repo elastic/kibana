@@ -845,7 +845,7 @@ describe('Fields Provider', () => {
     });
 
     it('should search apm index fields', async () => {
-      const indices = ['apm-*-transaction*'];
+      const indices = ['apm-*-transaction*', 'traces-apm*'];
       const request = {
         indices,
         onlyCheckIfIndicesExist: false,
@@ -861,7 +861,7 @@ describe('Fields Provider', () => {
     });
 
     it('should check apm index exists with data', async () => {
-      const indices = ['apm-*-transaction*'];
+      const indices = ['apm-*-transaction*', 'traces-apm*'];
       const request = {
         indices,
         onlyCheckIfIndicesExist: true,
@@ -883,7 +883,7 @@ describe('Fields Provider', () => {
     });
 
     it('should check apm index exists with no data', async () => {
-      const indices = ['apm-*-transaction*'];
+      const indices = ['apm-*-transaction*', 'traces-apm*'];
       const request = {
         indices,
         onlyCheckIfIndicesExist: true,
