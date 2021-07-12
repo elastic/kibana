@@ -18,6 +18,7 @@ describe('Sourcerer selectors', () => {
         mapStateToProps(mockGlobalState, SourcererScopeName.default).selectedPatterns
       ).toEqual([
         'apm-*-transaction*',
+        'traces-apm*',
         'auditbeat-*',
         'endgame-*',
         'filebeat-*',
@@ -38,6 +39,7 @@ describe('Sourcerer selectors', () => {
         mapStateToProps(myMockGlobalState, SourcererScopeName.default).selectedPatterns
       ).toEqual([
         'apm-*-transaction*',
+        'traces-apm*',
         'auditbeat-*',
         'endgame-*',
         'filebeat-*',
@@ -59,6 +61,7 @@ describe('Sourcerer selectors', () => {
         mapStateToProps(myMockGlobalState, SourcererScopeName.default).selectedPatterns
       ).toEqual([
         'apm-*-transaction*',
+        'traces-apm*',
         'auditbeat-*',
         'endgame-*',
         'filebeat-*',

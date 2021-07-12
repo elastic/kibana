@@ -406,6 +406,7 @@ export const mockAlertDetailsData = [
     field: 'signal.rule.index',
     values: [
       'apm-*-transaction*',
+      'traces-apm*',
       'auditbeat-*',
       'endgame-*',
       'filebeat-*',
@@ -415,6 +416,7 @@ export const mockAlertDetailsData = [
     ],
     originalValue: [
       'apm-*-transaction*',
+      'traces-apm*',
       'auditbeat-*',
       'endgame-*',
       'filebeat-*',

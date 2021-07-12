@@ -14,6 +14,7 @@ export const mockIndexPatternIds: IndexPatternMapping[] = [
 
 export const mockAPMIndexPatternIds: IndexPatternMapping[] = [
   { title: 'apm-*', id: '8c7323ac-97ad-4b53-ac0a-40f8f691a918' },
+  { title: 'traces-apm*,logs-apm*,metrics-apm*,apm-*', id: '8c7323ac-97ad-4b53-ac0a-40f8f691a918' },
 ];
 
 export const mockSourceLayer = {
@@ -465,6 +466,15 @@ export const mockAPMTransactionIndexPattern: IndexPatternSavedObject = {
   _version: 'abc',
   attributes: {
     title: 'apm-*-transaction*',
+  },
+};
+
+export const mockAPMTracesDataStreamIndexPattern: IndexPatternSavedObject = {
+  id: 'traces-apm*',
+  type: 'index-pattern',
+  _version: 'abc',
+  attributes: {
+    title: 'traces-apm*',
   },
 };
 
