@@ -44,7 +44,7 @@ export const formatReason: ObservabilityRuleTypeFormatter = ({ fields }) => {
         if (isRatio) {
           return i18n.translate('xpack.infra.logs.alerting.threshold.ratioAlertReasonDescription', {
             defaultMessage:
-              '{isGrouped, select, true{{groupName}: } false{}}The ratio of log entries matching the configured conditions is {actualCount} ({translatedComparator} {thresholdCount}).',
+              '{isGrouped, select, true{{groupName}: } false{}}The log entries ratio is {actualCount} ({translatedComparator} {thresholdCount}).',
             values: {
               actualCount,
               translatedComparator,
