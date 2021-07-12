@@ -24,10 +24,23 @@ export const buildActionsQuery = ({
     body: {
       // query: { bool: { filter } },
       query: {
-        term: {
-          type: {
-            value: 'INPUT_ACTION',
-          },
+        bool: {
+          must: [
+            {
+              term: {
+                type: {
+                  value: 'INPUT_ACTION',
+                },
+              },
+            },
+            {
+              term: {
+                input_type: {
+                  value: 'osquery',
+                },
+              },
+            },
+          ],
         },
       },
       from: cursorStart,
