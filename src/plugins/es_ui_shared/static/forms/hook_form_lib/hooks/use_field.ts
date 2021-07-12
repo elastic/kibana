@@ -15,6 +15,7 @@ import {
   FieldValidateResponse,
   ValidationError,
   FormData,
+  ValidationConfig,
 } from '../types';
 import { FIELD_TYPES, VALIDATION_TYPES } from '../constants';
 
@@ -212,6 +213,24 @@ export const useField = <T, FormType = FormData, I = T>(
 
       cancelInflightValidation();
 
+      const doByPassValidation = ({
+        type: validationType,
+        isBlocking,
+      }: ValidationConfig<FormType, string, I>) => {
+        if (
+          typeof validationTypeToValidate !== 'undefined' &&
+          validationType !== validationTypeToValidate
+        ) {
+          return true;
+        }
+
+        if (runOnlyBlockingValidations && isBlocking === false) {
+          return true;
+        }
+
+        return false;
+      };
+
       const runAsync = async () => {
         const validationErrors: ValidationError[] = [];
 
@@ -222,17 +241,9 @@ export const useField = <T, FormType = FormData, I = T>(
             validator,
             exitOnFail = true,
             type: validationType = VALIDATION_TYPES.FIELD,
-            isBlocking = true,
           } = validation;
 
-          if (
-            typeof validationTypeToValidate !== 'undefined' &&
-            validationType !== validationTypeToValidate
-          ) {
-            continue;
-          }
-
-          if (runOnlyBlockingValidations && isBlocking === false) {
+          if (doByPassValidation(validation)) {
             continue;
           }
 
@@ -273,17 +284,9 @@ export const useField = <T, FormType = FormData, I = T>(
             validator,
             exitOnFail = true,
             type: validationType = VALIDATION_TYPES.FIELD,
-            isBlocking = true,
           } = validation;
 
-          if (
-            typeof validationTypeToValidate !== 'undefined' &&
-            validationType !== validationTypeToValidate
-          ) {
-            continue;
-          }
-
-          if (runOnlyBlockingValidations && isBlocking === false) {
+          if (doByPassValidation(validation)) {
             continue;
           }
 
