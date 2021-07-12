@@ -14,8 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/102722
-  describe.skip('Reporting', function () {
+  describe.only('Reporting', function () {
     this.tags(['smoke', 'ciGroup2']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/packaging');
