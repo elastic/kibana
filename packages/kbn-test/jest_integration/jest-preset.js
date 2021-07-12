@@ -16,6 +16,7 @@ module.exports = {
   ),
   setupFilesAfterEnv: [
     '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/after_env.integration.js',
+    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/mocks.js',
   ],
   reporters: [
     'default',
