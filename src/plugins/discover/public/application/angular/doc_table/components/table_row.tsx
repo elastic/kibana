@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { getServices, IndexPattern } from '../../../../kibana_services';
 import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../../common';
-import { Cell } from './table_row/table_cell';
+import { TableCell } from './table_row/table_cell';
 import { formatRow, formatTopLevelObject } from '../../helpers';
 import { getContextUrl } from '../../../helpers/get_context_url';
 import { DocViewer } from '../../../components/doc_viewer/doc_viewer';
@@ -33,7 +33,7 @@ export type DocTableRow = ElasticSearchHit & {
   isAnchor?: boolean;
 };
 
-interface TableRowProps {
+export interface TableRowProps {
   columns: string[];
   filter: DocViewFilterFn;
   indexPattern: IndexPattern;
@@ -52,6 +52,8 @@ export const TableRow = ({
   onAddColumn,
   onRemoveColumn,
 }: TableRowProps) => {
+  const services = getServices();
+
   const [open, setOpen] = useState(false);
   const docTableRowClassName = classNames('kbnDocTable__row', {
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -62,14 +64,12 @@ export const TableRow = ({
   const flattenedRow = useMemo(() => indexPattern.flattenHit(row), [indexPattern, row]);
   const mapping = useMemo(() => indexPattern.fields.getByName, [indexPattern]);
   const hideTimeColumn = useMemo(
-    () => getServices().uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
-    []
+    () => services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
+    [services]
   );
 
   // toggle display of the rows details, a full list of the fields from each row
-  const toggleRow = () => {
-    setOpen((prevOpen) => !prevOpen);
-  };
+  const toggleRow = () => setOpen((prevOpen) => !prevOpen);
 
   /**
    * Fill an element with the value of a field
@@ -99,20 +99,19 @@ export const TableRow = ({
       row._id,
       indexPattern.id!,
       columns,
-      getServices().filterManager,
-      getServices().addBasePath
+      services.filterManager,
+      services.addBasePath
     );
   };
 
   const getSingleDocHref = () => {
-    return getServices().addBasePath(
+    return services.addBasePath(
       `/app/discover#/doc/${indexPattern.id!}/${row._index}?id=${encodeURIComponent(row._id)}`
     );
   };
 
-  // We just create a string here because its faster.
   const newHtmls = [
-    <td className="kbnDocTableCell__toggleDetails">
+    <td className="kbnDocTableCell__toggleDetails" key="toggleDetailsCell">
       <EuiButtonEmpty
         onClick={toggleRow}
         size="xs"
@@ -130,10 +129,11 @@ export const TableRow = ({
 
   if (indexPattern.timeFieldName && !hideTimeColumn) {
     newHtmls.push(
-      <Cell
+      <TableCell
+        key={indexPattern.timeFieldName}
         timefield={true}
         formatted={_displayField(indexPattern.timeFieldName)}
-        filterable={!!mapping(indexPattern.timeFieldName)?.filterable && !!filter}
+        filterable={Boolean(mapping(indexPattern.timeFieldName)?.filterable && filter)}
         column={indexPattern.timeFieldName}
         inlineFilter={inlineFilter}
       />
@@ -144,7 +144,8 @@ export const TableRow = ({
     const formatted = formatRow(row, indexPattern);
 
     newHtmls.push(
-      <Cell
+      <TableCell
+        key="__document__"
         timefield={false}
         sourcefield={true}
         formatted={formatted}
@@ -155,15 +156,17 @@ export const TableRow = ({
     );
   } else {
     columns.forEach(function (column: string) {
-      const isFilterable = !!mapping(column) && !!mapping(column)?.filterable && !!filter;
+      const isFilterable = Boolean(mapping(column) && mapping(column)?.filterable && filter);
       if (useNewFieldsApi && !mapping(column) && !row.fields![column]) {
         const innerColumns = Object.fromEntries(
           Object.entries(row.fields!).filter(([key]) => {
             return key.indexOf(`${column}.`) === 0;
           })
         );
+
         newHtmls.push(
-          <Cell
+          <TableCell
+            key={column}
             timefield={false}
             sourcefield={true}
             formatted={formatTopLevelObject(row, innerColumns, indexPattern)}
@@ -174,7 +177,8 @@ export const TableRow = ({
         );
       } else {
         newHtmls.push(
-          <Cell
+          <TableCell
+            key={column}
             timefield={false}
             sourcefield={column === '_source'}
             formatted={_displayField(column, true)}

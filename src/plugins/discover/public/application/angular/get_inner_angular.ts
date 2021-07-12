@@ -20,9 +20,7 @@ import { DataPublicPluginStart } from '../../../../data/public';
 import { Storage } from '../../../../kibana_utils/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../navigation/public';
 import { createContextAppLegacy } from '../components/context_app/context_app_legacy_directive';
-import { createDocViewerDirective } from './doc_viewer';
 import { createDiscoverGridDirective } from './create_discover_grid_directive';
-import { createRenderCompleteDirective } from './directives/render_complete';
 import {
   initAngularBootstrap,
   configureAppAngularModule,
@@ -92,8 +90,7 @@ export function initializeInnerAngularModule(
         'discoverPromise',
       ])
       .config(watchMultiDecorator)
-      .directive('icon', (reactDirective) => reactDirective(EuiIcon))
-      .directive('renderComplete', createRenderCompleteDirective);
+      .directive('icon', (reactDirective) => reactDirective(EuiIcon));
   }
 
   return angular
@@ -110,7 +107,6 @@ export function initializeInnerAngularModule(
     ])
     .config(watchMultiDecorator)
     .run(registerListenEventListener)
-    .directive('renderComplete', createRenderCompleteDirective)
     .directive('discover', createDiscoverDirective);
 }
 
@@ -147,6 +143,5 @@ function createDocTableModule() {
   angular
     .module('discoverDocTable', ['react'])
     .directive('discoverGrid', createDiscoverGridDirective)
-    .directive('docViewer', createDocViewerDirective)
     .directive('contextAppLegacy', createContextAppLegacy);
 }

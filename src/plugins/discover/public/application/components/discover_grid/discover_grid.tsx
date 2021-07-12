@@ -369,7 +369,7 @@ export const DiscoverGrid = ({
     >
       <span
         data-test-subj="discoverDocTable"
-        data-render-complete={isLoading ? 'false' : 'true'}
+        data-render-complete={!isLoading}
         data-shared-item=""
         data-title={searchTitle}
         data-description={searchDescription}

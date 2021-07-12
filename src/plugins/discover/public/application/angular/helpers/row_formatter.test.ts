@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import ReactDOM from 'react-dom/server';
 import { formatRow, formatTopLevelObject } from './row_formatter';
 import { stubbedSavedObjectIndexPattern } from '../../../__mocks__/stubbed_saved_object_index_pattern';
 import { IndexPattern } from '../../../../../data/common/index_patterns/index_patterns';
@@ -68,9 +69,42 @@ describe('Row formatter', () => {
   });
 
   it('formats document properly', () => {
-    expect(formatRow(hit, indexPattern).trim()).toMatchInlineSnapshot(
-      `"<dl class=\\"source truncate-by-height\\"><dt>also:</dt><dd>with \\\\&quot;quotes\\\\&quot; or &#39;single qoutes&#39;</dd> <dt>foo:</dt><dd>bar</dd> <dt>number:</dt><dd>42</dd> <dt>hello:</dt><dd>&lt;h1&gt;World&lt;/h1&gt;</dd> <dt>_id:</dt><dd>a</dd> <dt>_type:</dt><dd>doc</dd> <dt>_score:</dt><dd>1</dd> </dl>"`
-    );
+    expect(formatRow(hit, indexPattern)).toMatchInlineSnapshot(`
+      <TemplateComponent
+        defPairs={
+          Array [
+            Array [
+              "also",
+              "with \\\\&quot;quotes\\\\&quot; or &#39;single qoutes&#39;",
+            ],
+            Array [
+              "foo",
+              "bar",
+            ],
+            Array [
+              "number",
+              "42",
+            ],
+            Array [
+              "hello",
+              "&lt;h1&gt;World&lt;/h1&gt;",
+            ],
+            Array [
+              "_id",
+              "a",
+            ],
+            Array [
+              "_type",
+              "doc",
+            ],
+            Array [
+              "_score",
+              1,
+            ],
+          ]
+        }
+      />
+    `);
   });
 
   it('limits number of rendered items', () => {
@@ -79,17 +113,57 @@ describe('Row formatter', () => {
         get: () => 1,
       },
     } as unknown) as DiscoverServices);
-    expect(formatRow(hit, indexPattern).trim()).toMatchInlineSnapshot(
-      `"<dl class=\\"source truncate-by-height\\"><dt>also:</dt><dd>with \\\\&quot;quotes\\\\&quot; or &#39;single qoutes&#39;</dd> </dl>"`
-    );
+    expect(formatRow(hit, indexPattern)).toMatchInlineSnapshot(`
+      <TemplateComponent
+        defPairs={
+          Array [
+            Array [
+              "also",
+              "with \\\\&quot;quotes\\\\&quot; or &#39;single qoutes&#39;",
+            ],
+          ]
+        }
+      />
+    `);
   });
 
   it('formats document with highlighted fields first', () => {
-    expect(
-      formatRow({ ...hit, highlight: { number: '42' } }, indexPattern).trim()
-    ).toMatchInlineSnapshot(
-      `"<dl class=\\"source truncate-by-height\\"><dt>number:</dt><dd>42</dd> <dt>also:</dt><dd>with \\\\&quot;quotes\\\\&quot; or &#39;single qoutes&#39;</dd> <dt>foo:</dt><dd>bar</dd> <dt>hello:</dt><dd>&lt;h1&gt;World&lt;/h1&gt;</dd> <dt>_id:</dt><dd>a</dd> <dt>_type:</dt><dd>doc</dd> <dt>_score:</dt><dd>1</dd> </dl>"`
-    );
+    expect(formatRow({ ...hit, highlight: { number: '42' } }, indexPattern)).toMatchInlineSnapshot(`
+      <TemplateComponent
+        defPairs={
+          Array [
+            Array [
+              "number",
+              "42",
+            ],
+            Array [
+              "also",
+              "with \\\\&quot;quotes\\\\&quot; or &#39;single qoutes&#39;",
+            ],
+            Array [
+              "foo",
+              "bar",
+            ],
+            Array [
+              "hello",
+              "&lt;h1&gt;World&lt;/h1&gt;",
+            ],
+            Array [
+              "_id",
+              "a",
+            ],
+            Array [
+              "_type",
+              "doc",
+            ],
+            Array [
+              "_score",
+              1,
+            ],
+          ]
+        }
+      />
+    `);
   });
 
   it('formats top level objects using formatter', () => {
@@ -111,10 +185,19 @@ describe('Row formatter', () => {
           getByName: jest.fn(),
         },
         indexPattern
-      ).trim()
-    ).toMatchInlineSnapshot(
-      `"<dl class=\\"source truncate-by-height\\"><dt>object.value:</dt><dd>formatted, formatted</dd> </dl>"`
-    );
+      )
+    ).toMatchInlineSnapshot(`
+      <TemplateComponent
+        defPairs={
+          Array [
+            Array [
+              "object.value",
+              "formatted, formatted",
+            ],
+          ]
+        }
+      />
+    `);
   });
 
   it('formats top level objects in alphabetical order', () => {
@@ -124,11 +207,13 @@ describe('Row formatter', () => {
     indexPattern.getFormatterForField = jest.fn().mockReturnValue({
       convert: () => 'formatted',
     });
-    const formatted = formatTopLevelObject(
-      { fields: { 'a.zzz': [100], 'a.ccc': [50] } },
-      { 'a.zzz': [100], 'a.ccc': [50], getByName: jest.fn() },
-      indexPattern
-    ).trim();
+    const formatted = ReactDOM.renderToStaticMarkup(
+      formatTopLevelObject(
+        { fields: { 'a.zzz': [100], 'a.ccc': [50] } },
+        { 'a.zzz': [100], 'a.ccc': [50], getByName: jest.fn() },
+        indexPattern
+      )
+    );
     expect(formatted.indexOf('<dt>a.ccc:</dt>')).toBeLessThan(formatted.indexOf('<dt>a.zzz:</dt>'));
   });
 
@@ -156,10 +241,23 @@ describe('Row formatter', () => {
           getByName: jest.fn(),
         },
         indexPattern
-      ).trim()
-    ).toMatchInlineSnapshot(
-      `"<dl class=\\"source truncate-by-height\\"><dt>object.keys:</dt><dd>formatted, formatted</dd> <dt>object.value:</dt><dd>formatted, formatted</dd> </dl>"`
-    );
+      )
+    ).toMatchInlineSnapshot(`
+      <TemplateComponent
+        defPairs={
+          Array [
+            Array [
+              "object.keys",
+              "formatted, formatted",
+            ],
+            Array [
+              "object.value",
+              "formatted, formatted",
+            ],
+          ]
+        }
+      />
+    `);
   });
 
   it('formats top level objects, converting unknown fields to string', () => {
@@ -177,9 +275,18 @@ describe('Row formatter', () => {
           getByName: jest.fn(),
         },
         indexPattern
-      ).trim()
-    ).toMatchInlineSnapshot(
-      `"<dl class=\\"source truncate-by-height\\"><dt>object.value:</dt><dd>5, 10</dd> </dl>"`
-    );
+      )
+    ).toMatchInlineSnapshot(`
+      <TemplateComponent
+        defPairs={
+          Array [
+            Array [
+              "object.value",
+              "5, 10",
+            ],
+          ]
+        }
+      />
+    `);
   });
 });

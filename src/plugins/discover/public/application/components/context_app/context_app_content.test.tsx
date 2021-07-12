@@ -9,7 +9,7 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { uiSettingsMock as mockUiSettings } from '../../../__mocks__/ui_settings';
-import { DocTableLegacy } from '../../angular/doc_table/create_doc_table_react';
+import { DocTable } from '../../angular/doc_table/doc_table';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { ActionBar } from '../../angular/context/components/action_bar/action_bar';
 import { AppState, GetStateReturn } from '../../angular/context_state';
@@ -74,7 +74,7 @@ describe('ContextAppContent test', () => {
 
   it('should render legacy table correctly', () => {
     const component = mountWithIntl(<ContextAppContent {...defaultProps} />);
-    expect(component.find(DocTableLegacy).length).toBe(1);
+    expect(component.find(DocTable).length).toBe(1);
     const loadingIndicator = findTestSubject(component, 'contextApp_loadingIndicator');
     expect(loadingIndicator.length).toBe(0);
     expect(component.find(ActionBar).length).toBe(2);
@@ -84,7 +84,7 @@ describe('ContextAppContent test', () => {
     const props = { ...defaultProps };
     props.anchorStatus = LoadingStatus.LOADING;
     const component = mountWithIntl(<ContextAppContent {...props} />);
-    expect(component.find(DocTableLegacy).length).toBe(0);
+    expect(component.find(DocTable).length).toBe(0);
     const loadingIndicator = findTestSubject(component, 'contextApp_loadingIndicator');
     expect(loadingIndicator.length).toBe(1);
   });
@@ -93,7 +93,7 @@ describe('ContextAppContent test', () => {
     const props = { ...defaultProps };
     props.anchorStatus = LoadingStatus.FAILED;
     const component = mountWithIntl(<ContextAppContent {...props} />);
-    expect(component.find(DocTableLegacy).length).toBe(0);
+    expect(component.find(DocTable).length).toBe(0);
   });
 
   it('should render discover grid correctly', () => {

@@ -3,7 +3,11 @@
 }
 
 .kbnDocTableCell__toggleDetails {
-  padding: $euiSizeXS 0 0 0!important;
+  padding: $euiSizeXS 0 0 0 !important;
+}
+
+.kbnDocTableCell--extraWidth {
+  width: 1%;
 }
 
 .kbnDocTableCell__filter {

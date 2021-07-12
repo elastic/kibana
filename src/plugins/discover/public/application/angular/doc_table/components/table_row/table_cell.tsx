@@ -7,10 +7,11 @@
  */
 
 import React from 'react';
+import classNames from 'classnames';
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-interface CellProps {
+export interface CellProps {
   timefield: boolean;
   sourcefield?: boolean;
   formatted: JSX.Element;
@@ -19,24 +20,20 @@ interface CellProps {
   inlineFilter: (column: string, type: '+' | '-') => void;
 }
 
-export const Cell = (props: CellProps) => {
-  let classes = '';
-  let extraWidth;
-  if (props.timefield) {
-    classes = 'eui-textNoWrap';
-    extraWidth = '1%';
-  } else if (props.sourcefield) {
-    classes = 'eui-textBreakAll eui-textBreakWord';
-  } else {
-    classes = 'kbnDocTableCell__dataField eui-textBreakAll eui-textBreakWord';
-  }
+export const TableCell = (props: CellProps) => {
+  const classes = classNames({
+    ['eui-textNoWrap kbnDocTableCell--extraWidth']: props.timefield,
+    ['eui-textBreakAll eui-textBreakWord']: props.sourcefield,
+    ['kbnDocTableCell__dataField eui-textBreakAll eui-textBreakWord']:
+      !props.timefield && !props.sourcefield,
+  });
 
   const handleFilterFor = () => props.inlineFilter(props.column, '+');
   const handleFilterOut = () => props.inlineFilter(props.column, '-');
 
   if (props.filterable) {
     return (
-      <td className={classes} style={{ width: extraWidth }} data-test-subj="docTableField">
+      <td className={classes} data-test-subj="docTableField">
         {props.formatted}
         <span className="kbnDocTableCell__filter">
           <EuiToolTip
@@ -88,7 +85,7 @@ export const Cell = (props: CellProps) => {
   }
 
   return (
-    <td className={classes} style={{ width: extraWidth }} data-test-subj="docTableField">
+    <td className={classes} data-test-subj="docTableField">
       {props.formatted}
       <span className="kbnDocTableCell__filter" />
     </td>
