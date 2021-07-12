@@ -20,10 +20,11 @@ import { ClusterPutComponentTemplateBody, PutIndexTemplateRequest } from '../../
 import { RuleDataClient } from '../rule_data_client';
 import { RuleDataWriteDisabledError } from './errors';
 import { incrementIndexName } from './utils';
+import { ValidFeatureId } from '../utils/rbac';
 
 const BOOTSTRAP_TIMEOUT = 60000;
 
-interface RuleDataPluginServiceConstructorOptions {
+export interface RuleDataPluginServiceConstructorOptions {
   getClusterClient: () => Promise<ElasticsearchClient>;
   logger: Logger;
   isWriteEnabled: boolean;
@@ -223,9 +224,10 @@ export class RuleDataPluginService {
     return [this.options.index, assetName].filter(Boolean).join('-');
   }
 
-  getRuleDataClient(alias: string, initialize: () => Promise<void>) {
+  getRuleDataClient(feature: ValidFeatureId, alias: string, initialize: () => Promise<void>) {
     return new RuleDataClient({
       alias,
+      feature,
       getClusterClient: () => this.getClusterClient(),
       isWriteEnabled: this.isWriteEnabled(),
       ready: initialize,
