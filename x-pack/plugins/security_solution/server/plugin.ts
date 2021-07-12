@@ -197,10 +197,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     if (isRuleRegistryEnabled) {
       const { ruleDataService } = plugins.ruleRegistry;
 
+      const alertsIndexPattern = ruleDataService.getFullAssetName('security.alerts*');
+
       const initializeRuleDataTemplates = once(async () => {
-        const componentTemplateName = ruleDataService.getFullAssetName(
-          'security-solution-mappings'
-        );
+        const componentTemplateName = ruleDataService.getFullAssetName('security.alerts-mappings');
 
         if (!ruleDataService.isWriteEnabled()) {
           return;
@@ -219,9 +219,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         });
 
         await ruleDataService.createOrUpdateIndexTemplate({
-          name: ruleDataService.getFullAssetName('security-solution-index-template'),
+          name: ruleDataService.getFullAssetName('security.alerts-index-template'),
           body: {
-            index_patterns: [ruleDataService.getFullAssetName('security-solution*')],
+            index_patterns: [alertsIndexPattern],
             composed_of: [
               ruleDataService.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
               ruleDataService.getFullAssetName(ECS_COMPONENT_TEMPLATE_NAME),
@@ -229,6 +229,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             ],
           },
         });
+        await ruleDataService.updateIndexMappingsMatchingPattern(alertsIndexPattern);
       });
 
       // initialize eagerly
@@ -237,7 +238,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       });
 
       ruleDataClient = ruleDataService.getRuleDataClient(
-        ruleDataService.getFullAssetName('security-solution'),
+        SERVER_APP_ID,
+        ruleDataService.getFullAssetName('security.alerts'),
         () => initializeRuleDataTemplatesPromise
       );
 
@@ -337,7 +339,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         all: {
           app: [APP_ID, 'kibana'],
           catalogue: ['securitySolution'],
-          api: ['securitySolution', 'lists-all', 'lists-read'],
+          api: ['securitySolution', 'lists-all', 'lists-read', 'rac'],
           savedObject: {
             all: ['alert', 'exception-list', 'exception-list-agnostic', ...savedObjectTypes],
             read: [],
@@ -358,7 +360,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         read: {
           app: [APP_ID, 'kibana'],
           catalogue: ['securitySolution'],
-          api: ['securitySolution', 'lists-read'],
+          api: ['securitySolution', 'lists-read', 'rac'],
           savedObject: {
             all: [],
             read: ['exception-list', 'exception-list-agnostic', ...savedObjectTypes],

@@ -7,7 +7,7 @@
  */
 
 import { utc } from 'moment';
-import { VisTypeTimeseriesVisDataRequest } from '../../../types';
+import type { VisTypeTimeseriesVisDataRequest } from '../../../types';
 
 export const getTimerange = (req: VisTypeTimeseriesVisDataRequest) => {
   const { min, max } = req.body.timerange;
