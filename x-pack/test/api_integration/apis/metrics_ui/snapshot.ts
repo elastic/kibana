@@ -298,7 +298,7 @@ export default function ({ getService }: FtrProviderContext) {
               name: 'custom_0',
               value: 0.0016,
               max: 0.0018333333333333333,
-              avg: 0.0013666666666666669,
+              avg: 0.00165,
             },
           ]);
         }
@@ -389,7 +389,7 @@ export default function ({ getService }: FtrProviderContext) {
                 name: 'cpu',
                 value: 0.0032,
                 max: 0.0038333333333333336,
-                avg: 0.002794444444444445,
+                avg: 0.003341666666666667,
               },
             ]);
             const secondNode = nodes[1] as any;
@@ -403,7 +403,7 @@ export default function ({ getService }: FtrProviderContext) {
                 name: 'cpu',
                 value: 0.0032,
                 max: 0.0038333333333333336,
-                avg: 0.002794444444444445,
+                avg: 0.003341666666666667,
               },
             ]);
           }
