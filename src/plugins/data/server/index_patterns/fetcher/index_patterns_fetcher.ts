@@ -93,6 +93,15 @@ export class IndexPatternsFetcher {
           fieldCapsResponseObj[field] && rollupFields.push(fieldCapsResponseObj[field])
       );
 
+      /*
+      console.log(
+        'mergeCapabilitiesWithFields',
+        rollupIndexCapabilities,
+        Object.keys(fieldCapsResponseObj)
+        // rollupFields
+      );
+      */
+
       return mergeCapabilitiesWithFields(
         rollupIndexCapabilities,
         fieldCapsResponseObj,

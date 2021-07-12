@@ -150,9 +150,12 @@ export type AggregationRestrictions = Record<
     time_zone?: string;
   }
 >;
+
 export interface TypeMeta {
   aggs?: Record<string, AggregationRestrictions>;
-  [key: string]: any;
+  params?: {
+    rollup_index: string;
+  };
 }
 
 export type FieldSpecConflictDescriptions = Record<string, string[]>;
