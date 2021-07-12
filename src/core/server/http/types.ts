@@ -136,6 +136,12 @@ export interface HttpServicePreboot {
    * @public
    */
   registerRoutes(path: string, callback: (router: IRouter) => void): void;
+
+  /**
+   * Access or manipulate the Kibana base path
+   * See {@link IBasePath}.
+   */
+  basePath: IBasePath;
 }
 
 /** @internal */

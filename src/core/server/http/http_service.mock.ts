@@ -97,6 +97,7 @@ const createPrebootContractMock = () => {
 
   const mock: HttpServicePrebootMock = {
     registerRoutes: internalMock.registerRoutes,
+    basePath: createBasePathMock(),
   };
 
   return mock;

@@ -114,6 +114,7 @@ export function createPluginPrebootSetupContext(
     },
     http: {
       registerRoutes: deps.http.registerRoutes,
+      basePath: deps.http.basePath,
     },
     preboot: {
       isSetupOnHold: deps.preboot.isSetupOnHold,

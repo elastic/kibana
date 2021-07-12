@@ -1157,6 +1157,7 @@ export interface HttpServerInfo {
 
 // @public
 export interface HttpServicePreboot {
+    basePath: IBasePath;
     registerRoutes(path: string, callback: (router: IRouter) => void): void;
 }
 
