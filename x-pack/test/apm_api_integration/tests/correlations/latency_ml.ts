@@ -141,7 +141,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when(
     'Correlations latency_ml with data and opbeans-node args',
-    { config: 'trial', archives: ['apm_8.0.0'] },
+    { config: 'trial', archives: ['ml_8.0.0'] },
     () => {
       // putting this into a single `it` because the responses depend on each other
       it('queries the search strategy and returns results', async () => {
@@ -235,21 +235,31 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const { rawResponse: finalRawResponse } = followUpResult;
 
         expect(typeof finalRawResponse?.took).to.be('number');
-        expect(finalRawResponse?.percentileThresholdValue).to.be(1855487.875);
+        expect(finalRawResponse?.percentileThresholdValue).to.be(1404927.875);
         expect(finalRawResponse?.overallHistogram.length).to.be(101);
 
-        // TODO Identify a dataset that returns significant results
-        expect(finalRawResponse?.values.length).to.be(0);
+        expect(finalRawResponse?.values.length).to.eql(
+          1,
+          `Expected 1 identified correlations, got ${finalRawResponse?.values.length}.`
+        );
         expect(finalRawResponse?.log.map((d: string) => d.split(': ')[1])).to.eql([
-          'Fetched 95th percentile value of 1855487.875 based on 4786 documents.',
+          'Fetched 95th percentile value of 1404927.875 based on 989 documents.',
           'Loaded histogram range steps.',
           'Loaded overall histogram chart data.',
           'Loaded percentiles.',
-          'Identified 80 fieldCandidates.',
-          'Identified 430 fieldValuePairs.',
-          'Loaded fractions and totalDocCount of 4786.',
-          'Identified 0 significant correlations out of 430 field/value pairs.',
+          'Identified 67 fieldCandidates.',
+          'Identified 339 fieldValuePairs.',
+          'Loaded fractions and totalDocCount of 989.',
+          'Identified 1 significant correlations out of 339 field/value pairs.',
         ]);
+
+        const correlation = finalRawResponse?.values[0];
+        expect(typeof correlation).to.be('object');
+        expect(correlation?.field).to.be('transaction.result');
+        expect(correlation?.value).to.be('success');
+        expect(correlation?.correlation).to.be(0.37418510688551887);
+        expect(correlation?.ksTest).to.be(1.1238496968312214e-10);
+        expect(correlation?.histogram.length).to.be(101);
       });
     }
   );

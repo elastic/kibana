@@ -222,7 +222,11 @@ export const asyncSearchServiceProvider = (
               yield undefined;
             }
           } catch (e) {
-            error = e;
+            // don't fail the whole process for individual correlation queries, just add the error to the internal log.
+            logMessage(
+              `Failed to fetch correlation/kstest for '${item.field}/${item.value}'`
+            );
+            yield undefined;
           }
         }
       }
