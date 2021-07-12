@@ -7,6 +7,7 @@
  */
 
 import moment from 'moment';
+import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
@@ -125,6 +126,9 @@ export class TimePickerPageObject extends FtrService {
     await this.inputValue('superDatePickerAbsoluteDateInput', toTime);
     await this.browser.pressKeys(this.browser.keys.ESCAPE); // close popover because sometimes browser can't find start input
 
+    const endDateButton = await this.testSubjects.find('superDatePickerendDatePopoverButton');
+    expect(await endDateButton.getVisibleText()).to.be(toTime);
+
     // set from time
     await this.testSubjects.click('superDatePickerstartDatePopoverButton');
     await this.waitPanelIsGone(panel);
@@ -132,6 +136,10 @@ export class TimePickerPageObject extends FtrService {
     await this.testSubjects.click('superDatePickerAbsoluteTab');
     await this.testSubjects.click('superDatePickerAbsoluteDateInput');
     await this.inputValue('superDatePickerAbsoluteDateInput', fromTime);
+    await this.browser.pressKeys(this.browser.keys.ESCAPE); // close popover because sometimes browser can't find start input
+
+    const startDateButton = await this.testSubjects.find('superDatePickerstartDatePopoverButton');
+    expect(await startDateButton.getVisibleText()).to.be(fromTime);
 
     const superDatePickerApplyButtonExists = await this.testSubjects.exists(
       'superDatePickerApplyTimeButton'
