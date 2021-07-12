@@ -56,7 +56,7 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
     <T extends keyof MlAnomalyDetectionAlertParams>(param: T) => (
       update: MlAnomalyDetectionAlertParams[T]
     ) => {
-      setAlertParams(param, update);
+      setAlertParams(param as string, update);
     },
     []
   );

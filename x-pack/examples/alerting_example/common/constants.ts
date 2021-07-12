@@ -5,14 +5,15 @@
  * 2.0.
  */
 
+import { SerializableState } from 'src/plugins/kibana_utils/common';
 import { AlertTypeParams } from '../../../plugins/alerting/common';
 
 export const ALERTING_EXAMPLE_APP_ID = 'AlertingExample';
 
 // always firing
 export const DEFAULT_INSTANCES_TO_GENERATE = 5;
-export interface AlwaysFiringThresholds {
-  small?: number;
+export interface AlwaysFiringThresholds extends SerializableState {
+  small: number;
   medium?: number;
   large?: number;
 }

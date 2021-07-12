@@ -8,7 +8,7 @@
 import React, { useState, Fragment, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-
+import { Serializable } from 'src/plugins/kibana_utils/common';
 import 'brace/theme/github';
 import { XJsonMode } from '@kbn/ace';
 
@@ -142,7 +142,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
     }
   };
 
-  const setParam = (paramField: string, paramValue: unknown) => {
+  const setParam = (paramField: string, paramValue: Serializable) => {
     setCurrentAlertParams({
       ...currentAlertParams,
       [paramField]: paramValue,
