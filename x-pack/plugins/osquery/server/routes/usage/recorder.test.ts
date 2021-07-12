@@ -11,7 +11,7 @@ import { usageMetricSavedObjectType } from '../../../common/types';
 
 import {
   CounterValue,
-  createMetricObjects,
+  getOrCreateMetricObject,
   getRouteMetric,
   incrementCount,
   RouteString,
@@ -48,7 +48,7 @@ describe('Usage metric recorder', () => {
     it('should seed route metrics objects', async () => {
       get.mockRejectedValueOnce('stub value');
       create.mockReturnValueOnce('stub value');
-      const result = await createMetricObjects(savedObjectsClient);
+      const result = await getOrCreateMetricObject(savedObjectsClient, 'asdf');
       checkGetCalls(get.mock.calls);
       checkCreateCalls(create.mock.calls);
       expect(result).toBe(true);
@@ -57,7 +57,7 @@ describe('Usage metric recorder', () => {
     it('should handle previously seeded objects properly', async () => {
       get.mockReturnValueOnce('stub value');
       create.mockRejectedValueOnce('stub value');
-      const result = await createMetricObjects(savedObjectsClient);
+      const result = await getOrCreateMetricObject(savedObjectsClient, 'asdf');
       checkGetCalls(get.mock.calls);
       checkCreateCalls(create.mock.calls, []);
       expect(result).toBe(true);
@@ -66,7 +66,7 @@ describe('Usage metric recorder', () => {
     it('should report failure to create the metrics object', async () => {
       get.mockRejectedValueOnce('stub value');
       create.mockRejectedValueOnce('stub value');
-      const result = await createMetricObjects(savedObjectsClient);
+      const result = await getOrCreateMetricObject(savedObjectsClient, 'asdf');
       checkGetCalls(get.mock.calls);
       checkCreateCalls(create.mock.calls);
       expect(result).toBe(false);
