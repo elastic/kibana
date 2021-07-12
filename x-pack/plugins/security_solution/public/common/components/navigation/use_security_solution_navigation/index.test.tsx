@@ -7,7 +7,8 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { KibanaPageTemplateProps } from '../../../../../../../../src/plugins/kibana_react/public';
-import { useGetUserCasesPermissions, useKibana } from '../../../lib/kibana';
+import { useKibana } from '../../../lib/kibana/kibana_react';
+import { useGetUserCasesPermissions } from '../../../lib/kibana';
 import { SecurityPageName } from '../../../../app/types';
 import { useSecuritySolutionNavigation } from '.';
 import { CONSTANTS } from '../../url_state/constants';
@@ -16,6 +17,7 @@ import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { UrlInputsModel } from '../../../store/inputs/model';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
 
+jest.mock('../../../lib/kibana/kibana_react');
 jest.mock('../../../lib/kibana');
 jest.mock('../../../hooks/use_selector');
 jest.mock('../../../utils/route/use_route_spy');
@@ -94,7 +96,7 @@ describe('useSecuritySolutionNavigation', () => {
         "icon": "logoSecurity",
         "items": Array [
           Object {
-            "id": "securitySolution",
+            "id": "main",
             "items": Array [
               Object {
                 "data-href": "securitySolution/overview?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
@@ -139,7 +141,7 @@ describe('useSecuritySolutionNavigation', () => {
                 "href": "securitySolution/exceptions?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
                 "id": "exceptions",
                 "isSelected": false,
-                "name": "Exception list",
+                "name": "Exceptions",
                 "onClick": [Function],
               },
             ],

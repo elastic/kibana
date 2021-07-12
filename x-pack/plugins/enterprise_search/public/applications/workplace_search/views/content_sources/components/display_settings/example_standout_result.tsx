@@ -13,7 +13,7 @@ import { useValues } from 'kea';
 import { isColorDark, hexToRgb } from '@elastic/eui';
 
 import { DESCRIPTION_LABEL } from '../../../../constants';
-import { getAsLocalDateTimeString } from '../../../../utils';
+import { getAsLocalDateTimeString, mimeType } from '../../../../utils';
 
 import { CustomSourceIcon } from './custom_source_icon';
 import { DisplaySettingsLogic } from './display_settings_logic';
@@ -108,7 +108,9 @@ export const ExampleStandoutResult: React.FC = () => {
                 })}
                 data-test-subj="MediaTypeField"
               >
-                <span className="example-search-result__tag-content">{result[mediaTypeField]}</span>
+                <span className="example-search-result__tag-content">
+                  {mimeType(result[mediaTypeField] as string)}
+                </span>
               </div>
             )}
             <div className="example-result-content__tag-content">

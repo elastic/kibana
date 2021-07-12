@@ -38,7 +38,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    describe('query', function () {
+    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/104409
+    describe.skip('query', function () {
       const queryName1 = 'Query # 1';
 
       it('should show correct time range string by timepicker', async function () {

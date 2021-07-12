@@ -139,5 +139,10 @@ export function MachineLearningDataVisualizerFileBasedProvider(
       await testSubjects.click('fileDataVisFilebeatConfigLink');
       await testSubjects.existOrFail('fileDataVisFilebeatConfigPanel');
     },
+
+    async closeCreateFilebeatConfig() {
+      await testSubjects.click('fileBeatConfigFlyoutCloseButton');
+      await testSubjects.missingOrFail('fileDataVisFilebeatConfigPanel');
+    },
   };
 }
