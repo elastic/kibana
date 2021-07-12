@@ -13,27 +13,30 @@ import type { PackagePolicy } from '../../../../common';
 export const migratePackagePolicyToV7150: SavedObjectMigrationFn<PackagePolicy, PackagePolicy> = (
   packagePolicyDoc
 ) => {
+  if (packagePolicyDoc.attributes.package?.name !== 'endpoint') {
+    return packagePolicyDoc;
+  }
+
   const updatedPackagePolicyDoc: SavedObjectUnsanitizedDoc<PackagePolicy> = cloneDeep(
     packagePolicyDoc
   );
-  if (packagePolicyDoc.attributes.package?.name === 'endpoint') {
-    const input = updatedPackagePolicyDoc.attributes.inputs[0];
-    const memory = {
-      mode: 'off',
-      // This value is based on license.
-      // For the migration, we add 'true', our license watcher will correct it, if needed, when the app starts.
-      supported: true,
-    };
-    const memoryPopup = {
-      message: '',
-      enabled: false,
-    };
-    if (input && input.config) {
-      const policy = input.config.policy.value;
 
-      policy.windows.memory_protection = memory;
-      policy.windows.popup.memory_protection = memoryPopup;
-    }
+  const input = updatedPackagePolicyDoc.attributes.inputs[0];
+  const memory = {
+    mode: 'off',
+    // This value is based on license.
+    // For the migration, we add 'true', our license watcher will correct it, if needed, when the app starts.
+    supported: true,
+  };
+  const memoryPopup = {
+    message: '',
+    enabled: false,
+  };
+  if (input && input.config) {
+    const policy = input.config.policy.value;
+
+    policy.windows.memory_protection = memory;
+    policy.windows.popup.memory_protection = memoryPopup;
   }
 
   return updatedPackagePolicyDoc;
