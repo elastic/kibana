@@ -19,7 +19,8 @@ export async function createStaticIndexPattern(
   setup: Setup,
   config: APMRouteHandlerResources['config'],
   savedObjectsClient: InternalSavedObjectsClient,
-  spaceId: string | undefined
+  spaceId: string | undefined,
+  overwrite = false
 ): Promise<boolean> {
   return withApmSpan('create_static_index_pattern', async () => {
     // don't autocreate APM index pattern if it's been disabled via the config
@@ -45,7 +46,7 @@ export async function createStaticIndexPattern(
           },
           {
             id: APM_STATIC_INDEX_PATTERN_ID,
-            overwrite: false,
+            overwrite,
             namespace: spaceId,
           }
         )
