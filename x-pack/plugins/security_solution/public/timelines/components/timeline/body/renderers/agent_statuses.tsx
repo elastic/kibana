@@ -32,7 +32,6 @@ export const AgentStatuses = React.memo(
       pendingUnisolation,
     } = useHostIsolationStatus({ agentId: value });
     const isolationFieldName = 'host.isolation';
-    console.log(agentStatus);
     return (
       <EuiFlexGroup gutterSize="none">
         {agentStatus !== undefined ? (
