@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useMutation } from 'react-query';
+import deepMerge from 'deepmerge';
 
 import { UseField, Form, FormData, useForm, useFormData, FIELD_TYPES } from '../../shared_imports';
 import { AgentsTableField } from './agents_table_field';
@@ -33,12 +34,19 @@ const FORM_ID = 'liveQueryForm';
 
 export const MAX_QUERY_LENGTH = 2000;
 
+const GhostFormField = () => <></>;
+
 interface LiveQueryFormProps {
+  agentId?: string | undefined;
   defaultValue?: Partial<FormData> | undefined;
   onSuccess?: () => void;
 }
 
-const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({ defaultValue, onSuccess }) => {
+const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
+  agentId,
+  defaultValue,
+  onSuccess,
+}) => {
   const { http } = useKibana().services;
   const [showSavedQueryFlyout, setShowSavedQueryFlyout] = useState(false);
   const setErrorToast = useErrorToast();
@@ -71,8 +79,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({ defaultValue, on
     }
   );
 
-  const expirationDate = useMemo(() => new Date(data?.actions[0].expiration), [data?.actions]);
-
   const formSchema = {
     query: {
       type: FIELD_TYPES.TEXT,
@@ -100,9 +106,18 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({ defaultValue, on
     options: {
       stripEmptyFields: false,
     },
-    defaultValue: defaultValue ?? {
-      query: '',
-    },
+    defaultValue: deepMerge(
+      {
+        agentSelection: {
+          agents: [],
+          allAgentsSelected: false,
+          platformsSelected: [],
+          policiesSelected: [],
+        },
+        query: '',
+      },
+      defaultValue ?? {}
+    ),
   });
 
   const { submit } = form;
@@ -147,6 +162,59 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({ defaultValue, on
 
   const flyoutFormDefaultValue = useMemo(() => ({ query }), [query]);
 
+  const queryFieldStepContent = useMemo(
+    () => (
+      <>
+        <UseField
+          path="query"
+          component={LiveQueryQueryField}
+          componentProps={queryComponentProps}
+        />
+        <EuiSpacer />
+        <EuiFlexGroup justifyContent="flexEnd">
+          {!agentId && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                disabled={!agentSelected || !queryValueProvided || resultsStatus === 'disabled'}
+                onClick={handleShowSaveQueryFlout}
+              >
+                <FormattedMessage
+                  id="xpack.osquery.liveQueryForm.form.saveForLaterButtonLabel"
+                  defaultMessage="Save for later"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false}>
+            <EuiButton disabled={!agentSelected || !queryValueProvided} onClick={submit}>
+              <FormattedMessage
+                id="xpack.osquery.liveQueryForm.form.submitButtonLabel"
+                defaultMessage="Submit"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </>
+    ),
+    [
+      agentId,
+      agentSelected,
+      handleShowSaveQueryFlout,
+      queryComponentProps,
+      queryValueProvided,
+      resultsStatus,
+      submit,
+    ]
+  );
+
+  const resultsStepContent = useMemo(
+    () =>
+      actionId ? (
+        <ResultTabs actionId={actionId} endDate={data?.actions[0].expiration} agentIds={agentIds} />
+      ) : null,
+    [actionId, agentIds, data?.actions]
+  );
+
   const formSteps: EuiContainedStepProps[] = useMemo(
     () => [
       {
@@ -160,73 +228,34 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({ defaultValue, on
         title: i18n.translate('xpack.osquery.liveQueryForm.steps.queryStepHeading', {
           defaultMessage: 'Enter query',
         }),
-        children: (
-          <>
-            <UseField
-              path="query"
-              component={LiveQueryQueryField}
-              componentProps={queryComponentProps}
-            />
-            <EuiSpacer />
-            <EuiFlexGroup justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  disabled={!agentSelected || !queryValueProvided || resultsStatus === 'disabled'}
-                  onClick={handleShowSaveQueryFlout}
-                >
-                  <FormattedMessage
-                    id="xpack.osquery.liveQueryForm.form.saveForLaterButtonLabel"
-                    defaultMessage="Save for later"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton disabled={!agentSelected || !queryValueProvided} onClick={submit}>
-                  <FormattedMessage
-                    id="xpack.osquery.liveQueryForm.form.submitButtonLabel"
-                    defaultMessage="Submit"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
-        ),
+        children: queryFieldStepContent,
         status: queryStatus,
       },
       {
         title: i18n.translate('xpack.osquery.liveQueryForm.steps.resultsStepHeading', {
           defaultMessage: 'Check results',
         }),
-        children: actionId ? (
-          <ResultTabs
-            actionId={actionId}
-            expirationDate={expirationDate}
-            agentIds={agentIds}
-            isLive={true}
-          />
-        ) : null,
+        children: resultsStepContent,
         status: resultsStatus,
       },
     ],
-    [
-      actionId,
-      agentIds,
-      agentSelected,
-      handleShowSaveQueryFlout,
-      queryComponentProps,
-      queryStatus,
-      queryValueProvided,
-      expirationDate,
-      resultsStatus,
-      submit,
-    ]
+    [agentSelected, queryFieldStepContent, queryStatus, resultsStepContent, resultsStatus]
+  );
+
+  const singleAgentForm = useMemo(
+    () => (
+      <EuiFlexGroup direction="column">
+        <UseField path="agentSelection" component={GhostFormField} />
+        <EuiFlexItem>{queryFieldStepContent}</EuiFlexItem>
+        <EuiFlexItem>{resultsStepContent}</EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+    [queryFieldStepContent, resultsStepContent]
   );
 
   return (
     <>
-      <Form form={form}>
-        <EuiSteps steps={formSteps} />
-      </Form>
+      <Form form={form}>{agentId ? singleAgentForm : <EuiSteps steps={formSteps} />}</Form>
       {showSavedQueryFlyout ? (
         <SavedQueryFlyout
           onClose={handleCloseSaveQueryFlout}
