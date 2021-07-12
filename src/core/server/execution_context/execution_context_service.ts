@@ -119,7 +119,7 @@ export class ExecutionContextService
     // we have to use enterWith since Hapi lifecycle model is built on event emitters.
     // therefore if we wrapped request handler in asyncLocalStorage.run(), we would lose context in other lifecycles.
     this.asyncLocalStorage.enterWith(contextContainer);
-    this.log.trace(`stored the execution context: ${contextContainer.toJSON()}`);
+    this.log.debug(`stored the execution context: ${JSON.stringify(contextContainer)}`);
   }
 
   private reset() {

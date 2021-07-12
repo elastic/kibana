@@ -11,14 +11,17 @@ import {
   InternalExecutionContextSetup,
 } from './execution_context_service';
 import { mockCoreContext } from '../core_context.mock';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 
 const delay = (ms: number = 100) => new Promise((resolve) => setTimeout(resolve, ms));
 describe('ExecutionContextService', () => {
   describe('setup', () => {
     let service: InternalExecutionContextSetup;
-    const core = mockCoreContext.create();
-    core.configService.atPath.mockReturnValue(new BehaviorSubject({ enabled: true }));
+    let core: ReturnType<typeof mockCoreContext.create>;
+
     beforeEach(() => {
+      core = mockCoreContext.create();
+      core.configService.atPath.mockReturnValue(new BehaviorSubject({ enabled: true }));
       service = new ExecutionContextService(core).setup();
     });
 
@@ -81,6 +84,19 @@ describe('ExecutionContextService', () => {
           requestId: '1111',
         },
       ]);
+    });
+
+    it('emits context to the logs when "set" is called', async () => {
+      service.set({
+        requestId: '0000',
+      });
+      expect(loggingSystemMock.collect(core.logger).debug).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "stored the execution context: {\\"requestId\\":\\"0000\\"}",
+          ],
+        ]
+      `);
     });
   });
 
