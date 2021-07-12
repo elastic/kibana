@@ -260,7 +260,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
               }
             : {
                 to: 'now',
-                from: 'now-15m',
+                from: 'now-1d',
                 mode: 'relative',
               },
       });
