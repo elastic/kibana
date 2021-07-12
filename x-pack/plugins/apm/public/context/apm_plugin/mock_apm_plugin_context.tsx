@@ -7,12 +7,13 @@
 
 import React, { ReactNode } from 'react';
 import { Observable, of } from 'rxjs';
+import { UrlService } from '../../../../../../src/plugins/share/common/url_service';
 import { createObservabilityRuleTypeRegistryMock } from '../../../../observability/public';
 import { ApmPluginContext, ApmPluginContextValue } from './apm_plugin_context';
 import { ConfigSchema } from '../..';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 import { createCallApmApi } from '../../services/rest/createCallApmApi';
-import { MlUrlGenerator } from '../../../../ml/public';
+import { MlLocatorDefinition } from '../../../../ml/public';
 
 const uiSettings: Record<string, unknown> = {
   [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: [
@@ -86,12 +87,17 @@ const mockConfig: ConfigSchema = {
   profilingEnabled: false,
 };
 
+const urlService = new UrlService({
+  navigate: async () => {},
+  getUrl: async ({ app, path }, { absolute }) => {
+    return `${absolute ? 'http://localhost:8888' : ''}/app/${app}${path}`;
+  },
+});
+const locator = urlService.locators.create(new MlLocatorDefinition());
+
 const mockPlugin = {
   ml: {
-    urlGenerator: new MlUrlGenerator({
-      appBasePath: '/app/ml',
-      useHash: false,
-    }),
+    locator,
   },
   data: {
     query: {

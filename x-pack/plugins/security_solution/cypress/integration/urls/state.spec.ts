@@ -37,7 +37,7 @@ import { addNameToTimeline, closeTimeline, populateTimeline } from '../../tasks/
 import { HOSTS_URL } from '../../urls/navigation';
 import { ABSOLUTE_DATE_RANGE } from '../../urls/state';
 
-import { timeline } from '../../objects/timeline';
+import { getTimeline } from '../../objects/timeline';
 import { TIMELINE } from '../../screens/create_new_case';
 import { cleanKibana } from '../../tasks/common';
 
@@ -74,7 +74,6 @@ describe('url state', () => {
     waitForIpsTableToBeLoaded();
     setEndDate(ABSOLUTE_DATE.newEndTimeTyped);
     updateDates();
-    cy.wait(300);
 
     let startDate: string;
     let endDate: string;
@@ -214,7 +213,7 @@ describe('url state', () => {
     cy.get(ANOMALIES_TAB).should(
       'have.attr',
       'href',
-      "/app/security/hosts/siem-kibana/anomalies?query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')&sourcerer=(default:!('auditbeat-*'))&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2020-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2020-01-01T21:33:29.186Z')))"
+      "/app/security/hosts/siem-kibana/anomalies?sourcerer=(default:!('auditbeat-*'))&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2020-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2020-01-01T21:33:29.186Z')))&query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')"
     );
     cy.get(BREADCRUMBS)
       .eq(1)
@@ -245,7 +244,7 @@ describe('url state', () => {
 
     cy.intercept('PATCH', '/api/timeline').as('timeline');
 
-    addNameToTimeline(timeline.title);
+    addNameToTimeline(getTimeline().title);
 
     cy.wait('@timeline').then(({ response }) => {
       closeTimeline();
@@ -257,7 +256,7 @@ describe('url state', () => {
       cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).should('not.have.text', 'Updating');
       cy.get(TIMELINE).should('be.visible');
       cy.get(TIMELINE_TITLE).should('be.visible');
-      cy.get(TIMELINE_TITLE).should('have.text', timeline.title);
+      cy.get(TIMELINE_TITLE).should('have.text', getTimeline().title);
     });
   });
 });

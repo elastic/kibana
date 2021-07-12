@@ -48,6 +48,7 @@ describe('EndpointList store concerns', () => {
               disabled: false,
               page: 1,
               pageSize: 50,
+              isInvalidDateRange: false,
             },
             logData: { type: 'UninitialisedResourceState' },
           },
@@ -64,7 +65,9 @@ describe('EndpointList store concerns', () => {
         policyItems: [],
         selectedPolicyId: undefined,
         policyItemsLoading: false,
-        endpointPackageInfo: undefined,
+        endpointPackageInfo: {
+          type: 'UninitialisedResourceState',
+        },
         nonExistingPolicies: {},
         agentPolicies: {},
         endpointsExist: true,

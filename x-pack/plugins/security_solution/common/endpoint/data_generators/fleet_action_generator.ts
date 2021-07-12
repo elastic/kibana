@@ -43,7 +43,7 @@ export class FleetActionGenerator extends BaseDataGenerator {
     return merge(this.generate({ data: { command: 'unisolate' } }), overrides);
   }
 
-  /** Generates an action response */
+  /** Generates an endpoint action response */
   generateResponse(overrides: DeepPartial<EndpointActionResponse> = {}): EndpointActionResponse {
     const timeStamp = new Date();
 

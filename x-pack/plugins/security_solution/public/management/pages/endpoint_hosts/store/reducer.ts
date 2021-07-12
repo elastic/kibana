@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { EndpointDetailsActivityLogChanged, EndpointPendingActionsStateChanged } from './action';
+import {
+  EndpointDetailsActivityLogChanged,
+  EndpointPackageInfoStateChanged,
+  EndpointPendingActionsStateChanged,
+} from './action';
 import {
   isOnEndpointPage,
   hasSelectedEndpoint,
@@ -37,6 +41,8 @@ const handleEndpointDetailsActivityLogChanged: CaseReducer<EndpointDetailsActivi
             ...state.endpointDetails.activityLog.paging,
             page: action.payload.data.page,
             pageSize: action.payload.data.pageSize,
+            startDate: action.payload.data.startDate,
+            endDate: action.payload.data.endDate,
           },
         }
       : { ...state.endpointDetails.activityLog };
@@ -65,6 +71,16 @@ const handleEndpointPendingActionsStateChanged: CaseReducer<EndpointPendingActio
   return state;
 };
 
+const handleEndpointPackageInfoStateChanged: CaseReducer<EndpointPackageInfoStateChanged> = (
+  state,
+  action
+) => {
+  return {
+    ...state,
+    endpointPackageInfo: action.payload,
+  };
+};
+
 /* eslint-disable-next-line complexity */
 export const endpointListReducer: StateReducer = (state = initialEndpointPageState(), action) => {
   if (action.type === 'serverReturnedEndpointList') {
@@ -73,7 +89,6 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
       total,
       request_page_size: pageSize,
       request_page_index: pageIndex,
-      query_strategy_version: queryStrategyVersion,
       policy_info: policyVersionInfo,
     } = action.payload;
     return {
@@ -82,7 +97,6 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
       total,
       pageSize,
       pageIndex,
-      queryStrategyVersion,
       policyVersionInfo,
       loading: false,
       error: undefined,
@@ -148,33 +162,31 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
         },
       },
     };
-  } else if (action.type === 'appRequestedEndpointActivityLog') {
-    const paging = {
-      disabled: state.endpointDetails.activityLog.paging.disabled,
-      page: action.payload.page,
-      pageSize: action.payload.pageSize,
-    };
+  } else if (action.type === 'endpointDetailsActivityLogUpdatePaging') {
     return {
       ...state,
       endpointDetails: {
         ...state.endpointDetails!,
         activityLog: {
           ...state.endpointDetails.activityLog,
-          paging,
+          paging: {
+            ...state.endpointDetails.activityLog.paging,
+            ...action.payload,
+          },
         },
       },
     };
-  } else if (action.type === 'endpointDetailsActivityLogUpdatePaging') {
-    const paging = {
-      ...action.payload,
-    };
+  } else if (action.type === 'endpointDetailsActivityLogUpdateIsInvalidDateRange') {
     return {
       ...state,
       endpointDetails: {
         ...state.endpointDetails!,
         activityLog: {
           ...state.endpointDetails.activityLog,
-          paging,
+          paging: {
+            ...state.endpointDetails.activityLog.paging,
+            ...action.payload,
+          },
         },
       },
     };
@@ -231,11 +243,8 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
       ...state,
       policyItemsLoading: false,
     };
-  } else if (action.type === 'serverReturnedEndpointPackageInfo') {
-    return {
-      ...state,
-      endpointPackageInfo: action.payload,
-    };
+  } else if (action.type === 'endpointPackageInfoStateChanged') {
+    return handleEndpointPackageInfoStateChanged(state, action);
   } else if (action.type === 'serverReturnedEndpointExistValue') {
     return {
       ...state,
@@ -293,6 +302,7 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
         disabled: false,
         page: 1,
         pageSize: 50,
+        isInvalidDateRange: false,
       },
     };
 

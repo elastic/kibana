@@ -18,6 +18,7 @@ import { hostDetailsPagePath } from '../types';
 import { type } from './utils';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { getHostDetailsPageFilters } from './helpers';
+import { HostsTableType } from '../../store/model';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -51,12 +52,12 @@ mockUseResizeObserver.mockImplementation(() => ({}));
 
 describe('body', () => {
   const scenariosMap = {
-    authentications: 'AuthenticationsQueryTabBody',
-    allHosts: 'HostsQueryTabBody',
-    uncommonProcesses: 'UncommonProcessQueryTabBody',
-    anomalies: 'AnomaliesQueryTabBody',
-    events: 'EventsQueryTabBody',
-    alerts: 'HostAlertsQueryTabBody',
+    [HostsTableType.authentications]: 'AuthenticationsQueryTabBody',
+    [HostsTableType.hosts]: 'HostsQueryTabBody',
+    [HostsTableType.uncommonProcesses]: 'UncommonProcessQueryTabBody',
+    [HostsTableType.anomalies]: 'AnomaliesQueryTabBody',
+    [HostsTableType.events]: 'EventsQueryTabBody',
+    [HostsTableType.alerts]: 'HostAlertsQueryTabBody',
   };
 
   const mockHostDetailsPageFilters = getHostDetailsPageFilters('host-1');
@@ -80,7 +81,7 @@ describe('body', () => {
     test(`it should pass expected object properties to ${componentName}`, () => {
       const wrapper = mount(
         <TestProviders>
-          <MemoryRouter initialEntries={[`/host-1/${path}`]}>
+          <MemoryRouter initialEntries={[`/hosts/host-1/${path}`]}>
             <HostDetailsTabs
               isInitializing={false}
               detailName={'host-1'}

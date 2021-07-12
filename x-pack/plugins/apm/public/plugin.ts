@@ -22,6 +22,7 @@ import type {
   DataPublicPluginStart,
 } from '../../../../src/plugins/data/public';
 import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+import type { FleetStart } from '../../fleet/public';
 import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import type {
   PluginSetupContract as AlertingPluginPublicSetup,
@@ -43,6 +44,10 @@ import type {
 } from '../../triggers_actions_ui/public';
 import { registerApmAlerts } from './components/alerting/register_apm_alerts';
 import { featureCatalogueEntry } from './featureCatalogueEntry';
+import {
+  getApmEnrollmentFlyoutData,
+  LazyApmCustomAssetsExtension,
+} from './components/fleet_integration';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 
@@ -69,6 +74,7 @@ export interface ApmPluginStartDeps {
   ml?: MlPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   observability: ObservabilityPublicStart;
+  fleet?: FleetStart;
 }
 
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
@@ -121,7 +127,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                 entries: [
                   {
                     label: i18n.translate('xpack.apm.ux.overview.heading', {
-                      defaultMessage: 'Overview',
+                      defaultMessage: 'Dashboard',
                     }),
                     app: 'ux',
                     path: '/',
@@ -173,6 +179,16 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     pluginSetupDeps.home?.tutorials.registerCustomComponent(
       'TutorialFleetInstructions',
       () => import('./tutorial/tutorial_fleet_instructions')
+    );
+
+    pluginSetupDeps.home?.tutorials.registerCustomComponent(
+      'TutorialConfigAgent',
+      () => import('./tutorial/config_agent')
+    );
+
+    pluginSetupDeps.home?.tutorials.registerCustomComponent(
+      'TutorialConfigAgentRumScript',
+      () => import('./tutorial/config_agent/rum_script')
     );
 
     plugins.observability.dashboard.register({
@@ -293,5 +309,23 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
     return {};
   }
-  public start(core: CoreStart, plugins: ApmPluginStartDeps) {}
+  public start(core: CoreStart, plugins: ApmPluginStartDeps) {
+    const { fleet } = plugins;
+    if (fleet) {
+      const agentEnrollmentExtensionData = getApmEnrollmentFlyoutData();
+
+      fleet.registerExtension({
+        package: 'apm',
+        view: 'agent-enrollment-flyout',
+        title: agentEnrollmentExtensionData.title,
+        Component: agentEnrollmentExtensionData.Component,
+      });
+
+      fleet.registerExtension({
+        package: 'apm',
+        view: 'package-detail-assets',
+        Component: LazyApmCustomAssetsExtension,
+      });
+    }
+  }
 }

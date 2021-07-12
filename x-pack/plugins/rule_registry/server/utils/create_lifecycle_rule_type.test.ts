@@ -40,6 +40,7 @@ function createRule() {
     },
     id: 'test_type',
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     name: 'Test type',
     producer: 'test',
     actionVariables: {
@@ -125,6 +126,25 @@ describe('createLifecycleRuleTypeFactory', () => {
       helpers = createRule();
     });
 
+    describe('when writing is disabled', () => {
+      beforeEach(() => {
+        helpers.ruleDataClientMock.isWriteEnabled.mockReturnValue(false);
+      });
+
+      it("doesn't persist anything", async () => {
+        await helpers.alertWithLifecycle([
+          {
+            id: 'opbeans-java',
+            fields: {
+              'service.name': 'opbeans-java',
+            },
+          },
+        ]);
+
+        expect(helpers.ruleDataClientMock.getWriter().bulk).toHaveBeenCalledTimes(0);
+      });
+    });
+
     describe('when alerts are new', () => {
       beforeEach(async () => {
         await helpers.alertWithLifecycle([
@@ -174,6 +194,7 @@ describe('createLifecycleRuleTypeFactory', () => {
               "event.kind": "event",
               "kibana.rac.alert.duration.us": 0,
               "kibana.rac.alert.id": "opbeans-java",
+              "kibana.rac.alert.owner": "consumer",
               "kibana.rac.alert.producer": "test",
               "kibana.rac.alert.start": "2021-06-16T09:01:00.000Z",
               "kibana.rac.alert.status": "open",
@@ -192,6 +213,7 @@ describe('createLifecycleRuleTypeFactory', () => {
               "event.kind": "event",
               "kibana.rac.alert.duration.us": 0,
               "kibana.rac.alert.id": "opbeans-node",
+              "kibana.rac.alert.owner": "consumer",
               "kibana.rac.alert.producer": "test",
               "kibana.rac.alert.start": "2021-06-16T09:01:00.000Z",
               "kibana.rac.alert.status": "open",
@@ -210,6 +232,7 @@ describe('createLifecycleRuleTypeFactory', () => {
               "event.kind": "signal",
               "kibana.rac.alert.duration.us": 0,
               "kibana.rac.alert.id": "opbeans-java",
+              "kibana.rac.alert.owner": "consumer",
               "kibana.rac.alert.producer": "test",
               "kibana.rac.alert.start": "2021-06-16T09:01:00.000Z",
               "kibana.rac.alert.status": "open",
@@ -228,6 +251,7 @@ describe('createLifecycleRuleTypeFactory', () => {
               "event.kind": "signal",
               "kibana.rac.alert.duration.us": 0,
               "kibana.rac.alert.id": "opbeans-node",
+              "kibana.rac.alert.owner": "consumer",
               "kibana.rac.alert.producer": "test",
               "kibana.rac.alert.start": "2021-06-16T09:01:00.000Z",
               "kibana.rac.alert.status": "open",

@@ -447,11 +447,11 @@ export const esFilters: {
     buildQueryFilter: (query: any, index: string, alias: string) => import("../common").QueryStringFilter;
     buildCustomFilter: typeof buildCustomFilter;
     buildEmptyFilter: (isPinned: boolean, index?: string | undefined) => import("../common").Filter;
-    buildExistsFilter: (field: import("../common").IFieldType, indexPattern: import("../common").IndexPatternBase) => import("../common").ExistsFilter;
+    buildExistsFilter: (field: import("../common").IndexPatternFieldBase, indexPattern: import("../common").IndexPatternBase) => import("../common").ExistsFilter;
     buildFilter: typeof buildFilter;
-    buildPhraseFilter: (field: import("../common").IFieldType, value: any, indexPattern: import("../common").IndexPatternBase) => import("../common").PhraseFilter;
-    buildPhrasesFilter: (field: import("../common").IFieldType, params: any[], indexPattern: import("../common").IndexPatternBase) => import("../common").PhrasesFilter;
-    buildRangeFilter: (field: import("../common").IFieldType, params: import("../common").RangeFilterParams, indexPattern: import("../common").IndexPatternBase, formattedValue?: string | undefined) => import("../common").RangeFilter;
+    buildPhraseFilter: (field: import("../common").IndexPatternFieldBase, value: any, indexPattern: import("../common").IndexPatternBase) => import("../common").PhraseFilter;
+    buildPhrasesFilter: (field: import("../common").IndexPatternFieldBase, params: any[], indexPattern: import("../common").IndexPatternBase) => import("../common").PhrasesFilter;
+    buildRangeFilter: (field: import("../common").IndexPatternFieldBase, params: import("../common").RangeFilterParams, indexPattern: import("../common").IndexPatternBase, formattedValue?: string | undefined) => import("../common").RangeFilter;
     isFilterDisabled: (filter: import("../common").Filter) => boolean;
 };
 
@@ -693,10 +693,11 @@ export interface IFieldSubType {
     };
 }
 
+// Warning: (ae-forgotten-export) The symbol "IndexPatternFieldBase" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "IFieldType" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public @deprecated (undocumented)
-export interface IFieldType {
+export interface IFieldType extends IndexPatternFieldBase {
     // (undocumented)
     aggregatable?: boolean;
     // (undocumented)
@@ -712,29 +713,17 @@ export interface IFieldType {
     // (undocumented)
     format?: any;
     // (undocumented)
-    lang?: estypes.ScriptLanguage;
-    // (undocumented)
-    name: string;
-    // (undocumented)
     readFromDocValues?: boolean;
-    // (undocumented)
-    script?: string;
-    // (undocumented)
-    scripted?: boolean;
     // (undocumented)
     searchable?: boolean;
     // (undocumented)
     sortable?: boolean;
-    // (undocumented)
-    subType?: IFieldSubType;
     // Warning: (ae-forgotten-export) The symbol "FieldSpec" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
     toSpec?: (options?: {
         getFormatterForField?: IndexPattern['getFormatterForField'];
     }) => FieldSpec;
-    // (undocumented)
-    type: string;
     // (undocumented)
     visualizable?: boolean;
 }
@@ -780,7 +769,9 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     getAggregationRestrictions(): Record<string, Record<string, {
         agg?: string | undefined;
-        interval?: number | undefined;
+        interval?: number | undefined; /**
+         * Get last saved saved object fields
+         */
         fixed_interval?: string | undefined;
         calendar_interval?: string | undefined;
         delay?: string | undefined;
