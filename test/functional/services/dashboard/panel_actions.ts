@@ -53,7 +53,7 @@ export class DashboardPanelActionsService extends FtrService {
 
   async openContextMenu(parent?: WebElementWrapper) {
     this.log.debug(`openContextMenu(${parent}`);
-    if (await this.testSubjects.exists('embeddablePanelContextMenuOpen')) return;
+    if (await this.testSubjects.exists('embeddablePanelContextMenuOpen', { timeout: 0 })) return;
     await this.toggleContextMenu(parent);
     await this.expectContextMenuToBeOpen();
   }

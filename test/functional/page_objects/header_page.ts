@@ -39,7 +39,9 @@ export class HeaderPageObject extends FtrService {
     await this.appsMenu.clickLink('Dashboard', { category: 'kibana' });
     await this.retry.waitFor('dashboard app to be loaded', async () => {
       const isNavVisible = await this.testSubjects.exists('top-nav');
-      const isLandingPageVisible = await this.testSubjects.exists('dashboardLandingPage');
+      const isLandingPageVisible = await this.testSubjects.exists('dashboardLandingPage', {
+        timeout: 0,
+      });
       return isNavVisible || isLandingPageVisible;
     });
     await this.awaitGlobalLoadingIndicatorHidden();
@@ -65,7 +67,7 @@ export class HeaderPageObject extends FtrService {
 
   public async isGlobalLoadingIndicatorVisible() {
     this.log.debug('isGlobalLoadingIndicatorVisible');
-    return await this.testSubjects.exists('globalLoadingIndicator', { timeout: 1500 });
+    return await this.testSubjects.exists('globalLoadingIndicator', { timeout: 0 });
   }
 
   public async awaitGlobalLoadingIndicatorHidden() {

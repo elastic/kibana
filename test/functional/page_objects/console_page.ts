@@ -94,9 +94,9 @@ export class ConsolePageObject extends FtrService {
     await textArea.pressKeys([Key.CONTROL, Key.SPACE]);
   }
 
-  public async hasAutocompleter(): Promise<boolean> {
+  public async hasAutocompleter(timeout: number = 10000): Promise<boolean> {
     try {
-      return Boolean(await this.find.byCssSelector('.ace_autocomplete'));
+      return Boolean(await this.find.byCssSelector('.ace_autocomplete', timeout));
     } catch (e) {
       return false;
     }

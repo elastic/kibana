@@ -122,7 +122,7 @@ export class HomePageObject extends FtrService {
 
   // open global nav if it's closed
   async openCollapsibleNav() {
-    if (!(await this.testSubjects.exists('collapsibleNav'))) {
+    if (!(await this.testSubjects.exists('collapsibleNav', { timeout: 0 }))) {
       await this.clickToggleGlobalNav();
     }
   }

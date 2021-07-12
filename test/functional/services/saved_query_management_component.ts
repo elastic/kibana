@@ -163,7 +163,9 @@ export class SavedQueryManagementComponentService extends FtrService {
   }
 
   async openSavedQueryManagementComponent() {
-    const isOpenAlready = await this.testSubjects.exists('saved-query-management-popover');
+    const isOpenAlready = await this.testSubjects.exists('saved-query-management-popover', {
+      timeout: 0,
+    });
     if (isOpenAlready) return;
 
     await this.retry.waitFor('saved query management popover to have any text', async () => {
@@ -174,7 +176,9 @@ export class SavedQueryManagementComponentService extends FtrService {
   }
 
   async closeSavedQueryManagementComponent() {
-    const isOpenAlready = await this.testSubjects.exists('saved-query-management-popover');
+    const isOpenAlready = await this.testSubjects.exists('saved-query-management-popover', {
+      timeout: 0,
+    });
     if (!isOpenAlready) return;
 
     await this.retry.try(async () => {

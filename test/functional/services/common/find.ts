@@ -469,7 +469,20 @@ export class FindService extends FtrService {
   }
 
   private async findAndWrap(locator: By, timeout: number): Promise<WebElementWrapper> {
+    const { implicit = 0 } = await this.driver.manage().getTimeouts();
+    const configuredTimeout = timeout ? timeout : implicit;
+
+    const timer = setTimeout(() => {
+      const { stack } = new Error();
+      this.log.info(`findAndWrap hit 90% of timeout for ${locator}`, configuredTimeout, stack);
+    }, configuredTimeout * 0.9);
+
+    await this._withTimeout(timeout);
     const webElement = await this.driver.wait(until.elementLocated(locator), timeout);
+    await this._withTimeout(this.defaultFindTimeout);
+
+    clearTimeout(timer);
+
     return this.wrap(webElement, locator);
   }
 }

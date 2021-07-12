@@ -232,7 +232,6 @@ export class TagManagementPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly find = this.ctx.getService('find');
   private readonly browser = this.ctx.getService('browser');
-  private readonly retry = this.ctx.getService('retry');
   private readonly header = this.ctx.getPageObject('header');
   private readonly settings = this.ctx.getPageObject('settings');
 
@@ -253,17 +252,9 @@ export class TagManagementPageObject extends FtrService {
    * Wait until the tags table is displayed and is not in a the loading state
    */
   async waitUntilTableIsLoaded() {
-    return this.retry.try(async () => {
-      const isLoaded = await this.find.existsByDisplayedByCssSelector(
-        '*[data-test-subj="tagsManagementTable"]:not(.euiBasicTable-loading)'
-      );
-
-      if (isLoaded) {
-        return true;
-      } else {
-        throw new Error('Waiting');
-      }
-    });
+    await this.find.existsByDisplayedByCssSelector(
+      '*[data-test-subj="tagsManagementTable"]:not(.euiBasicTable-loading)'
+    );
   }
 
   /**

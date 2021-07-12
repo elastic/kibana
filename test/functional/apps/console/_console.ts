@@ -83,7 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should provide basic auto-complete functionality', async () => {
       // Ensure that the text area can be interacted with
       await PageObjects.console.dismissTutorial();
-      expect(await PageObjects.console.hasAutocompleter()).to.be(false);
+      expect(await PageObjects.console.hasAutocompleter(10)).to.be(false);
       await PageObjects.console.promptAutocomplete();
       await retry.waitFor('autocomplete to be visible', () =>
         PageObjects.console.hasAutocompleter()

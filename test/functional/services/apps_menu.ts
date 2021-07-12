@@ -31,7 +31,7 @@ export class AppsMenuService extends FtrService {
 
   private async isGlobalLoadingIndicatorVisible() {
     this.log.debug('isGlobalLoadingIndicatorVisible');
-    return await this.testSubjects.exists('globalLoadingIndicator', { timeout: 1500 });
+    return await this.testSubjects.exists('globalLoadingIndicator', { timeout: 0 });
   }
 
   private async awaitGlobalLoadingIndicatorHidden() {

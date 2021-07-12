@@ -182,7 +182,7 @@ export function MachineLearningNavigationProvider({
     },
 
     async openKibanaNav() {
-      if (!(await testSubjects.exists('collapsibleNav'))) {
+      if (!(await testSubjects.exists('collapsibleNav', { timeout: 0 }))) {
         await testSubjects.click('toggleNavButton');
       }
       await testSubjects.existOrFail('collapsibleNav');

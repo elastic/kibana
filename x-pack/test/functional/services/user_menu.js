@@ -30,7 +30,7 @@ export function UserMenuProvider({ getService }) {
     }
 
     async closeMenu() {
-      if (!(await testSubjects.exists('userMenu'))) {
+      if (!(await testSubjects.exists('userMenu', { timeout: 0 }))) {
         return;
       }
 
@@ -39,7 +39,7 @@ export function UserMenuProvider({ getService }) {
     }
 
     async _ensureMenuOpen() {
-      if (await testSubjects.exists('userMenu')) {
+      if (await testSubjects.exists('userMenu', { timeout: 0 })) {
         return;
       }
 
