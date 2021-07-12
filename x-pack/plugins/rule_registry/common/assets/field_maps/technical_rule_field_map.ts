@@ -18,6 +18,7 @@ import {
   ALERT_UUID,
   EVENT_ACTION,
   EVENT_KIND,
+  OWNER,
   PRODUCER,
   RULE_CATEGORY,
   RULE_ID,
@@ -40,6 +41,7 @@ export const technicalRuleFieldMap = {
     RULE_CATEGORY,
     TAGS
   ),
+  [OWNER]: { type: 'keyword' },
   [PRODUCER]: { type: 'keyword' },
   [ALERT_UUID]: { type: 'keyword' },
   [ALERT_ID]: { type: 'keyword' },

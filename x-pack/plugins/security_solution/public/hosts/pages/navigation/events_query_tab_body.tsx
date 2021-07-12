@@ -65,6 +65,7 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
 }) => {
   const dispatch = useDispatch();
   const { globalFullScreen } = useGlobalFullScreen();
+
   useEffect(() => {
     dispatch(
       timelineActions.initializeTGridSettings({
