@@ -80,6 +80,7 @@ export const AnalyticsFilters: React.FC = () => {
                 'xpack.enterpriseSearch.appSearch.engine.analytics.filters.startDateAriaLabel',
                 { defaultMessage: 'Filter by start date' }
               )}
+              locale={i18n.getLocale()}
             />
           }
           endDateControl={
@@ -93,6 +94,7 @@ export const AnalyticsFilters: React.FC = () => {
                 'xpack.enterpriseSearch.appSearch.engine.analytics.filters.endDateAriaLabel',
                 { defaultMessage: 'Filter by end date' }
               )}
+              locale={i18n.getLocale()}
             />
           }
           fullWidth
