@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
+  EuiButton,
+  EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
-  EuiText,
-  EuiCard,
   EuiIcon,
-  EuiButton,
-  EuiCallOut,
   EuiLoadingSpinner,
+  EuiSpacer,
+  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ElasticDocsLink } from '../../../shared/Links/ElasticDocsLink';
-import rocketLaunchGraphic from './blog-rocket-720x420.png';
+import React from 'react';
 import { APMLink } from '../../../shared/Links/apm/APMLink';
+import { ElasticDocsLink } from '../../../shared/Links/ElasticDocsLink';
 import { useFleetCloudAgentPolicyHref } from '../../../shared/Links/kibana';
+import rocketLaunchGraphic from './blog-rocket-720x420.png';
+import { MigrationInProgressPanel } from './migration_in_progress_panel';
 
 interface Props {
   onSwitch: () => void;
+  isMigrating: boolean;
   isMigrated: boolean;
   isLoading: boolean;
   isLoadingConfirmation: boolean;
@@ -37,6 +37,7 @@ interface Props {
 }
 export function SchemaOverview({
   onSwitch,
+  isMigrating,
   isMigrated,
   isLoading,
   isLoadingConfirmation,
@@ -55,6 +56,15 @@ export function SchemaOverview({
         <EuiFlexGroup justifyContent="center">
           <EuiLoadingSpinner size="xl" />
         </EuiFlexGroup>
+      </>
+    );
+  }
+
+  if (isMigrating && !isMigrated) {
+    return (
+      <>
+        <SchemaOverviewHeading />
+        <MigrationInProgressPanel />
       </>
     );
   }
@@ -126,7 +136,7 @@ export function SchemaOverview({
       <SchemaOverviewHeading />
       <EuiFlexGroup justifyContent="center">
         <EuiFlexItem />
-        <EuiFlexItem>
+        <EuiFlexItem style={{ minWidth: '250px' }}>
           <EuiCard
             icon={<EuiIcon size="xxl" type="documents" />}
             title={i18n.translate(
@@ -155,7 +165,7 @@ export function SchemaOverview({
             }
           />
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem style={{ minWidth: '250px' }}>
           <EuiCard
             betaBadgeLabel={i18n.translate(
               'xpack.apm.settings.schema.migrate.dataStreams.betaBadge.label',
@@ -217,30 +227,6 @@ export function SchemaOverview({
         </EuiFlexItem>
         <EuiFlexItem />
       </EuiFlexGroup>
-      <EuiSpacer size="l" />
-      <EuiFlexGroup justifyContent="center" gutterSize="s">
-        <EuiFlexItem />
-        <EuiFlexItem grow={2}>
-          <EuiCallOut
-            title={i18n.translate(
-              'xpack.apm.settings.schema.migrate.calloutNote.title',
-              { defaultMessage: 'Please note before switching' }
-            )}
-            iconType="iInCircle"
-          >
-            <p>
-              {i18n.translate(
-                'xpack.apm.settings.schema.migrate.calloutNote.message',
-                {
-                  defaultMessage:
-                    'If you have custom dashboards, machine learning jobs, or source maps that use classic APM indices, you must reconfigure them for data streams.',
-                }
-              )}
-            </p>
-          </EuiCallOut>
-        </EuiFlexItem>
-        <EuiFlexItem />
-      </EuiFlexGroup>
     </>
   );
 }
@@ -284,18 +270,6 @@ export function SchemaOverviewHeading() {
           }}
         />
       </EuiText>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="s">
-            <h2>
-              {i18n.translate('xpack.apm.settings.schema.title', {
-                defaultMessage: 'Schema',
-              })}
-            </h2>
-          </EuiTitle>
-        </EuiFlexItem>
-      </EuiFlexGroup>
       <EuiSpacer size="m" />
     </>
   );

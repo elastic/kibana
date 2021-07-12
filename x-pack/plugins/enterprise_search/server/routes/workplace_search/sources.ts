@@ -400,6 +400,7 @@ export function registerAccountSourceDownloadDiagnosticsRoute({
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/ws/sources/:sourceId/download_diagnostics',
+      hasJsonResponse: false,
     })
   );
 }
@@ -748,6 +749,7 @@ export function registerOrgSourceDownloadDiagnosticsRoute({
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/ws/org/sources/:sourceId/download_diagnostics',
+      hasJsonResponse: false,
     })
   );
 }

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { defaults } from 'lodash';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { asPercent } from '../../../../common/utils/formatters';
@@ -42,63 +42,65 @@ interface Props {
 export function TransactionErrorRateAlertTrigger(props: Props) {
   const { setAlertParams, alertParams, setAlertProperty } = props;
   const { urlParams } = useUrlParams();
-  const { transactionTypes } = useApmServiceContext();
-  const { serviceName } = useParams<{ serviceName?: string }>();
-  const { start, end, transactionType } = urlParams;
+  const {
+    transactionType: transactionTypeFromContext,
+    transactionTypes,
+    serviceName: serviceNameFromContext,
+  } = useApmServiceContext();
+
+  const { start, end, environment: environmentFromUrl } = urlParams;
+
+  const params = defaults<Partial<AlertParams>, AlertParams>(
+    {
+      threshold: 30,
+      windowSize: 5,
+      windowUnit: 'm',
+      transactionType: transactionTypeFromContext,
+      environment: environmentFromUrl || ENVIRONMENT_ALL.value,
+      serviceName: serviceNameFromContext,
+    },
+    alertParams
+  );
+
   const { environmentOptions } = useEnvironmentsFetcher({
-    serviceName,
+    serviceName: serviceNameFromContext,
     start,
     end,
   });
 
-  const { threshold, windowSize, windowUnit, environment } = alertParams;
-
-  const thresholdAsPercent = (threshold ?? 0) / 100;
+  const thresholdAsPercent = (params.threshold ?? 0) / 100;
 
   const { data } = useFetcher(
     (callApmApi) => {
-      if (windowSize && windowUnit) {
+      if (params.windowSize && params.windowUnit) {
         return callApmApi({
           endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_rate',
           params: {
             query: {
-              ...getAbsoluteTimeRange(windowSize, windowUnit),
-              environment,
-              serviceName,
-              transactionType: alertParams.transactionType,
+              ...getAbsoluteTimeRange(params.windowSize, params.windowUnit),
+              environment: params.environment,
+              serviceName: params.serviceName,
+              transactionType: params.transactionType,
             },
           },
         });
       }
     },
     [
-      alertParams.transactionType,
-      environment,
-      serviceName,
-      windowSize,
-      windowUnit,
+      params.transactionType,
+      params.environment,
+      params.serviceName,
+      params.windowSize,
+      params.windowUnit,
     ]
   );
 
-  if (serviceName && !transactionTypes.length) {
+  if (params.serviceName && !transactionTypes.length) {
     return null;
   }
 
-  const defaultParams = {
-    threshold: 30,
-    windowSize: 5,
-    windowUnit: 'm',
-    transactionType: transactionType || transactionTypes[0],
-    environment: urlParams.environment || ENVIRONMENT_ALL.value,
-  };
-
-  const params = {
-    ...defaultParams,
-    ...alertParams,
-  };
-
   const fields = [
-    <ServiceField value={serviceName} />,
+    <ServiceField value={params.serviceName} />,
     <TransactionTypeField
       currentValue={params.transactionType}
       options={transactionTypes.map((key) => ({ text: key, value: key }))}
@@ -141,7 +143,7 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
   return (
     <ServiceAlertTrigger
       fields={fields}
-      defaults={defaultParams}
+      defaults={params}
       setAlertParams={setAlertParams}
       setAlertProperty={setAlertProperty}
       chartPreview={chartPreview}
