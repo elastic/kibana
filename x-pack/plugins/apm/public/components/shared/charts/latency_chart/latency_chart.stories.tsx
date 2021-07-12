@@ -70,8 +70,8 @@ export default {
 
       return (
         <ApmPluginContext.Provider value={apmPluginContextMock}>
-          <MemoryRouter initialEntries={[`/app/apm/services/test-service`]}>
-            <Route path="/app/apm/services/:serviceName">
+          <MemoryRouter initialEntries={[`/services/test-service`]}>
+            <Route path="/services/:serviceName">
               <KibanaContextProvider
                 services={{ ...apmPluginContextMock.core }}
               >
