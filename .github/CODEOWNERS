@@ -249,14 +249,14 @@
 #CC# /x-pack/plugins/translations/ @elastic/kibana-localization @elastic/kibana-core
 
 # Security
-/src/core/server/csp/  @elastic/kibana-security @elastic/kibana-core
+/src/core/server/csp/ @elastic/kibana-security @elastic/kibana-core
 /src/plugins/security_oss/ @elastic/kibana-security
 /src/plugins/spaces_oss/ @elastic/kibana-security
 /src/plugins/user_setup/ @elastic/kibana-security
 /test/security_functional/ @elastic/kibana-security
-/x-pack/plugins/spaces/  @elastic/kibana-security
-/x-pack/plugins/encrypted_saved_objects/  @elastic/kibana-security
-/x-pack/plugins/security/  @elastic/kibana-security
+/x-pack/plugins/spaces/ @elastic/kibana-security
+/x-pack/plugins/encrypted_saved_objects/ @elastic/kibana-security
+/x-pack/plugins/security/ @elastic/kibana-security
 /x-pack/test/api_integration/apis/security/ @elastic/kibana-security
 /x-pack/test/ui_capabilities/ @elastic/kibana-security
 /x-pack/test/encrypted_saved_objects_api_integration/ @elastic/kibana-security
@@ -265,6 +265,8 @@
 /x-pack/test/security_functional/ @elastic/kibana-security
 /x-pack/test/spaces_api_integration/ @elastic/kibana-security
 /x-pack/test/saved_object_api_integration/ @elastic/kibana-security
+/src/core/server/csp/ @elastic/kibana-security @elastic/kibana-core
+/examples/preboot_example/ @elastic/kibana-security @elastic/kibana-core
 #CC# /x-pack/plugins/security/ @elastic/kibana-security
 
 # Kibana Alerting Services

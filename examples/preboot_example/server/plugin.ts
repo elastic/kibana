@@ -32,7 +32,7 @@ export class PrebootExamplePlugin implements PrebootPlugin {
   }
 
   public setup(core: CorePreboot) {
-    const config = this.#initializerContext.config.get<ConfigType>();
+    const { skipSetup } = this.#initializerContext.config.get<ConfigType>();
     core.http.registerRoutes('', (prebootRouter) => {
       prebootRouter.get(
         {
@@ -41,17 +41,17 @@ export class PrebootExamplePlugin implements PrebootPlugin {
           options: { authRequired: false },
         },
         (_, request, response) => {
-          const isSetupModeActive = !config.skip && core.preboot.isSetupOnHold();
+          const isSetupModeActive = !skipSetup && core.preboot.isSetupOnHold();
           return response.ok({ body: { isSetupModeActive } });
         }
       );
-      if (config.skip) {
+      if (skipSetup) {
         return;
       }
 
       prebootRouter.post(
         {
-          path: '/api/preboot/complete',
+          path: '/api/preboot/complete_setup',
           validate: {
             body: schema.object({ shouldReloadConfig: schema.boolean() }),
           },
@@ -72,8 +72,8 @@ export class PrebootExamplePlugin implements PrebootPlugin {
           options: { authRequired: false },
         },
         async (_, request, response) => {
-          const configPath = this.#initializerContext.env.configs.find(
-            (path) => !path.includes('dev')
+          const configPath = this.#initializerContext.env.configs.find((path) =>
+            path.includes('dev')
           );
 
           if (!configPath) {
@@ -87,7 +87,7 @@ export class PrebootExamplePlugin implements PrebootPlugin {
 
       prebootRouter.post(
         {
-          path: '/api/preboot/connect',
+          path: '/api/preboot/connect_to_es',
           validate: {
             body: schema.object({
               host: schema.string(),

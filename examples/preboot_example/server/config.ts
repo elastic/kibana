@@ -14,6 +14,5 @@ export type ConfigType = TypeOf<typeof ConfigSchema>;
 export const ConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
   token: schema.maybe(schema.string()),
-  skip: schema.boolean({ defaultValue: false }),
-  configFileName: schema.maybe(schema.string()),
+  skipSetup: schema.boolean({ defaultValue: false }),
 });

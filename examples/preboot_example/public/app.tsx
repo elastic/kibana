@@ -22,7 +22,7 @@ import type { HttpSetup, IHttpFetchError } from 'src/core/public';
 export const App = ({ http, token }: { http: HttpSetup; token?: string }) => {
   const onCompleteSetup = async ({ shouldReloadConfig }: { shouldReloadConfig: boolean }) => {
     await http
-      .post('/api/preboot/complete', {
+      .post('/api/preboot/complete_setup', {
         body: JSON.stringify({ shouldReloadConfig }),
       })
       .then(() => {
@@ -37,10 +37,12 @@ export const App = ({ http, token }: { http: HttpSetup; token?: string }) => {
   };
 
   const onConnect = async () => {
-    await http.post('/api/preboot/connect', { body: JSON.stringify(elasticsearchConfig) }).then(
-      (response) => setConnectResponse(JSON.stringify(response)),
-      (err: IHttpFetchError) => setConnectResponse(err?.body?.message || 'ERROR')
-    );
+    await http
+      .post('/api/preboot/connect_to_es', { body: JSON.stringify(elasticsearchConfig) })
+      .then(
+        (response) => setConnectResponse(JSON.stringify(response)),
+        (err: IHttpFetchError) => setConnectResponse(err?.body?.message || 'ERROR')
+      );
   };
 
   const [configKeyValue, setConfigKeyValue] = useState<{ key: string; value: string }>({
