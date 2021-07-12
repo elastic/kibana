@@ -122,7 +122,13 @@ export const RuleActionsField: React.FC<Props> = ({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (key: string, value: any, index: number) => {
       const updatedActions = [...actions];
-      updatedActions[index].params[key] = value;
+      updatedActions[index] = {
+        ...updatedActions[index],
+        params: {
+          ...updatedActions[index].params,
+          [key]: value,
+        },
+      };
       field.setValue(updatedActions);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
