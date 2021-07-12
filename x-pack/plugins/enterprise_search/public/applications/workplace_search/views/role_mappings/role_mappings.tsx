@@ -9,11 +9,16 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
+import { EuiSpacer } from '@elastic/eui';
+
 import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
 import {
   RoleMappingsTable,
   RoleMappingsHeading,
   RolesEmptyPrompt,
+  UsersTable,
+  UsersHeading,
+  UsersEmptyPrompt,
 } from '../../../shared/role_mapping';
 import { ROLE_MAPPINGS_TITLE } from '../../../shared/role_mapping/constants';
 import { WorkplaceSearchPageTemplate } from '../../components/layout';
@@ -23,25 +28,31 @@ import { ROLE_MAPPINGS_TABLE_HEADER } from './constants';
 
 import { RoleMapping } from './role_mapping';
 import { RoleMappingsLogic } from './role_mappings_logic';
+import { User } from './user';
 
 export const RoleMappings: React.FC = () => {
   const {
     enableRoleBasedAccess,
     initializeRoleMappings,
     initializeRoleMapping,
+    initializeSingleUserRoleMapping,
     handleDeleteMapping,
   } = useActions(RoleMappingsLogic);
 
   const {
     roleMappings,
+    singleUserRoleMappings,
     dataLoading,
     multipleAuthProvidersConfig,
     roleMappingFlyoutOpen,
+    singleUserRoleMappingFlyoutOpen,
   } = useValues(RoleMappingsLogic);
 
   useEffect(() => {
     initializeRoleMappings();
   }, []);
+
+  const hasUsers = singleUserRoleMappings.length > 0;
 
   const rolesEmptyState = (
     <RolesEmptyPrompt
@@ -69,6 +80,23 @@ export const RoleMappings: React.FC = () => {
     </section>
   );
 
+  const usersTable = (
+    <UsersTable
+      accessItemKey="groups"
+      singleUserRoleMappings={singleUserRoleMappings}
+      initializeSingleUserRoleMapping={initializeSingleUserRoleMapping}
+      handleDeleteMapping={handleDeleteMapping}
+    />
+  );
+
+  const usersSection = (
+    <>
+      <UsersHeading onClick={() => initializeSingleUserRoleMapping()} />
+      <EuiSpacer />
+      {hasUsers ? usersTable : <UsersEmptyPrompt />}
+    </>
+  );
+
   return (
     <WorkplaceSearchPageTemplate
       pageChrome={[ROLE_MAPPINGS_TITLE]}
@@ -78,7 +106,10 @@ export const RoleMappings: React.FC = () => {
       emptyState={rolesEmptyState}
     >
       {roleMappingFlyoutOpen && <RoleMapping />}
+      {singleUserRoleMappingFlyoutOpen && <User />}
       {roleMappingsSection}
+      <EuiSpacer size="xxl" />
+      {usersSection}
     </WorkplaceSearchPageTemplate>
   );
 };

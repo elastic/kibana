@@ -13,7 +13,7 @@ import { useActions, useValues } from 'kea';
 
 import { AppLogic } from '../../app_logic';
 import { WorkplaceSearchPageTemplate, PersonalDashboardLayout } from '../../components/layout';
-import { CUSTOM_SERVICE_TYPE } from '../../constants';
+import { NAV, CUSTOM_SERVICE_TYPE } from '../../constants';
 import {
   REINDEX_JOB_PATH,
   SOURCE_DETAILS_PATH,
@@ -24,6 +24,7 @@ import {
   getContentSourcePath as sourcePath,
   getSourcesPath,
 } from '../../routes';
+import { NotFound } from '../../views/not_found';
 
 import { DisplaySettingsRouter } from './components/display_settings';
 import { Overview } from './components/overview';
@@ -78,12 +79,15 @@ export const SourceRouter: React.FC = () => {
         </Route>
       )}
       {isCustomSource && (
-        <Route exact path={sourcePath(SOURCE_DISPLAY_SETTINGS_PATH, sourceId, isOrganization)}>
+        <Route path={sourcePath(SOURCE_DISPLAY_SETTINGS_PATH, sourceId, isOrganization)}>
           <DisplaySettingsRouter />
         </Route>
       )}
       <Route exact path={sourcePath(SOURCE_SETTINGS_PATH, sourceId, isOrganization)}>
         <SourceSettings />
+      </Route>
+      <Route>
+        <NotFound isOrganization={isOrganization} pageChrome={[NAV.SOURCES]} />
       </Route>
     </Switch>
   );

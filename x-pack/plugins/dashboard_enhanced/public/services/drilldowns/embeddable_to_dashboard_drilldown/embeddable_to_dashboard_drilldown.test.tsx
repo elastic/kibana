@@ -7,7 +7,7 @@
 
 import { EmbeddableToDashboardDrilldown } from './embeddable_to_dashboard_drilldown';
 import { AbstractDashboardDrilldownConfig as Config } from '../abstract_dashboard_drilldown';
-import { coreMock, savedObjectsServiceMock } from '../../../../../../../src/core/public/mocks';
+import { savedObjectsServiceMock } from '../../../../../../../src/core/public/mocks';
 import {
   Filter,
   FilterStateStore,
@@ -19,10 +19,11 @@ import {
   ApplyGlobalFilterActionContext,
   esFilters,
 } from '../../../../../../../src/plugins/data/public';
-import { createDashboardUrlGenerator } from '../../../../../../../src/plugins/dashboard/public/url_generator';
-import { UrlGeneratorsService } from '../../../../../../../src/plugins/share/public/url_generators';
+import {
+  DashboardAppLocatorDefinition,
+  DashboardAppLocatorParams,
+} from '../../../../../../../src/plugins/dashboard/public/locator';
 import { StartDependencies } from '../../../plugin';
-import { SavedObjectLoader } from '../../../../../../../src/plugins/saved_objects/public';
 import { StartServicesGetter } from '../../../../../../../src/plugins/kibana_utils/public/core';
 import { EnhancedEmbeddableContext } from '../../../../../embeddable_enhanced/public';
 
@@ -74,13 +75,6 @@ test('inject/extract are defined', () => {
 });
 
 describe('.execute() & getHref', () => {
-  /**
-   * A convenience test setup helper
-   * Beware: `dataPluginMock.createStartContract().actions` and extracting filters from event is mocked!
-   * The url generation is not mocked and uses real implementation
-   * So this tests are mostly focused on making sure the filters returned from `dataPluginMock.createStartContract().actions` helpers
-   * end up in resulting navigation path
-   */
   async function setupTestBed(
     config: Partial<Config>,
     embeddableInput: { filters?: Filter[]; timeRange?: TimeRange; query?: Query },
@@ -90,7 +84,10 @@ describe('.execute() & getHref', () => {
     const navigateToApp = jest.fn();
     const getUrlForApp = jest.fn((app, opt) => `${app}/${opt.path}`);
     const savedObjectsClient = savedObjectsServiceMock.createStartContract().client;
-
+    const definition = new DashboardAppLocatorDefinition({
+      useHashedUrl: false,
+      getDashboardFilterFields: async () => [],
+    });
     const drilldown = new EmbeddableToDashboardDrilldown({
       start: ((() => ({
         core: {
@@ -105,17 +102,11 @@ describe('.execute() & getHref', () => {
         plugins: {
           uiActionsEnhanced: {},
           dashboard: {
-            dashboardUrlGenerator: new UrlGeneratorsService()
-              .setup(coreMock.createSetup())
-              .registerUrlGenerator(
-                createDashboardUrlGenerator(() =>
-                  Promise.resolve({
-                    appBasePath: 'xyz/app/dashboards',
-                    useHashedUrl: false,
-                    savedDashboardLoader: ({} as unknown) as SavedObjectLoader,
-                  })
-                )
-              ),
+            locator: {
+              getLocation: async (params: DashboardAppLocatorParams) => {
+                return await definition.getLocation(params);
+              },
+            },
           },
         },
         self: {},

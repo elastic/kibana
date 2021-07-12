@@ -500,6 +500,26 @@ export default ({ getService }: FtrProviderContext): void => {
           expectedHttpCode: 400,
         });
       });
+
+      it('400s if the title is too long', async () => {
+        const longTitle =
+          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed nulla enim, rutrum sit amet euismod venenatis, blandit et massa. Nulla id consectetur enim.';
+
+        const postedCase = await createCase(supertest, postCaseReq);
+        await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                title: longTitle,
+              },
+            ],
+          },
+          expectedHttpCode: 400,
+        });
+      });
     });
 
     describe('alerts', () => {

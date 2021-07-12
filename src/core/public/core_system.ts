@@ -29,6 +29,7 @@ import { SavedObjectsService } from './saved_objects';
 import { IntegrationsService } from './integrations';
 import { DeprecationsService } from './deprecations';
 import { CoreApp } from './core_app';
+import { ExecutionContextService } from './execution_context';
 import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
 
 interface Params {
@@ -83,6 +84,7 @@ export class CoreSystem {
   private readonly integrations: IntegrationsService;
   private readonly coreApp: CoreApp;
   private readonly deprecations: DeprecationsService;
+  private readonly executionContext: ExecutionContextService;
   private readonly rootDomElement: HTMLElement;
   private readonly coreContext: CoreContext;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
@@ -118,6 +120,7 @@ export class CoreSystem {
     this.application = new ApplicationService();
     this.integrations = new IntegrationsService();
     this.deprecations = new DeprecationsService();
+    this.executionContext = new ExecutionContextService();
 
     this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
     this.coreApp = new CoreApp(this.coreContext);
@@ -137,6 +140,7 @@ export class CoreSystem {
       const http = this.http.setup({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings });
+      this.executionContext.setup();
 
       const application = this.application.setup({ http });
       this.coreApp.setup({ application, http, injectedMetadata, notifications });
@@ -201,8 +205,9 @@ export class CoreSystem {
         notifications,
       });
       const deprecations = this.deprecations.start({ http });
+      const executionContext = this.executionContext.start();
 
-      this.coreApp.start({ application, http, notifications, uiSettings });
+      this.coreApp.start({ application, docLinks, http, notifications, uiSettings });
 
       const core: InternalCoreStart = {
         application,
@@ -217,6 +222,7 @@ export class CoreSystem {
         uiSettings,
         fatalErrors,
         deprecations,
+        executionContext,
       };
 
       await this.plugins.start(core);
@@ -260,6 +266,7 @@ export class CoreSystem {
     this.i18n.stop();
     this.application.stop();
     this.deprecations.stop();
+    this.executionContext.stop();
     this.rootDomElement.textContent = '';
   }
 }

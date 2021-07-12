@@ -65,6 +65,7 @@ import { ApplicationSetup, Capabilities, ApplicationStart } from './application'
 import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
 import { DeprecationsServiceStart } from './deprecations';
+import type { ExecutionContextServiceStart } from './execution_context';
 
 export type {
   PackageInfo,
@@ -99,6 +100,7 @@ export type {
 } from './application';
 
 export { SimpleSavedObject } from './saved_objects';
+export type { ResolvedSimpleSavedObject } from './saved_objects';
 export type {
   SavedObjectsBatchResponse,
   SavedObjectsBulkCreateObject,
@@ -107,6 +109,7 @@ export type {
   SavedObjectsBulkUpdateOptions,
   SavedObjectsCreateOptions,
   SavedObjectsFindResponsePublic,
+  SavedObjectsResolveResponse,
   SavedObjectsUpdateOptions,
   SavedObject,
   SavedObjectAttribute,
@@ -182,6 +185,12 @@ export type {
 } from './notifications';
 
 export type { DeprecationsServiceStart, ResolveDeprecationResponse } from './deprecations';
+
+export type {
+  IExecutionContextContainer,
+  ExecutionContextServiceStart,
+  KibanaExecutionContext,
+} from './execution_context';
 
 export type { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
 
@@ -269,6 +278,8 @@ export interface CoreStart {
   fatalErrors: FatalErrorsStart;
   /** {@link DeprecationsServiceStart} */
   deprecations: DeprecationsServiceStart;
+  /** {@link ExecutionContextServiceStart} */
+  executionContext: ExecutionContextServiceStart;
   /**
    * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
    * use *only* to retrieve config values. There is no way to set injected values

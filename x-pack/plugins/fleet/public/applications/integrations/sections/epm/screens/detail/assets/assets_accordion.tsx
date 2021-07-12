@@ -20,9 +20,11 @@ import {
   EuiNotificationBadge,
 } from '@elastic/eui';
 
-import { AssetTitleMap } from '../../../../../constants';
+import { AssetTitleMap } from '../../../constants';
 
 import { getHrefToObjectInKibanaApp, useStartServices } from '../../../../../hooks';
+
+import { KibanaAssetType } from '../../../../../types';
 
 import type { AllowedAssetType, AssetSavedObject } from './types';
 
@@ -33,8 +35,12 @@ interface Props {
 
 export const AssetsAccordion: FunctionComponent<Props> = ({ savedObjects, type }) => {
   const { http } = useStartServices();
+
+  const isDashboard = type === KibanaAssetType.dashboard;
+
   return (
     <EuiAccordion
+      initialIsOpen={isDashboard}
       buttonContent={
         <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
@@ -55,6 +61,11 @@ export const AssetsAccordion: FunctionComponent<Props> = ({ savedObjects, type }
         <EuiSpacer size="m" />
         <EuiSplitPanel.Outer hasBorder hasShadow={false}>
           {savedObjects.map(({ id, attributes: { title, description } }, idx) => {
+            // Ignore custom asset views
+            if (type === 'view') {
+              return;
+            }
+
             const pathToObjectInApp = getHrefToObjectInKibanaApp({
               http,
               id,

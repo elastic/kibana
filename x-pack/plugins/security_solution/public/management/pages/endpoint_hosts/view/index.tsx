@@ -47,6 +47,7 @@ import {
 import { SecurityPageName } from '../../../../app/types';
 import { getEndpointListPath, getEndpointDetailsPath } from '../../../common/routing';
 import { useFormatUrl } from '../../../../common/components/link_to';
+import { useAppUrl } from '../../../../common/lib/kibana/hooks';
 import { EndpointAction } from '../store/action';
 import { EndpointPolicyLink } from './components/endpoint_policy_link';
 import { OutOfDate } from './components/out_of_date';
@@ -119,9 +120,9 @@ export const EndpointList = () => {
     areEndpointsEnrolling,
     agentsWithEndpointsTotalError,
     endpointsTotalError,
-    isTransformEnabled,
   } = useEndpointSelector(selector);
-  const { formatUrl, search } = useFormatUrl(SecurityPageName.administration);
+  const { search } = useFormatUrl(SecurityPageName.administration);
+  const { getAppUrl } = useAppUrl();
   const dispatch = useDispatch<(a: EndpointAction) => void>();
   // cap ability to page at 10k records. (max_result_window)
   const maxPageCount = totalItemCount > MAX_PAGINATED_ITEM ? MAX_PAGINATED_ITEM : totalItemCount;
@@ -160,13 +161,17 @@ export const EndpointList = () => {
       }/add-integration`,
       state: {
         onCancelNavigateTo: [
-          'securitySolution:administration',
-          { path: getEndpointListPath({ name: 'endpointList' }) },
+          'securitySolution',
+          {
+            path: getEndpointListPath({ name: 'endpointList' }),
+          },
         ],
-        onCancelUrl: formatUrl(getEndpointListPath({ name: 'endpointList' })),
+        onCancelUrl: getAppUrl({ path: getEndpointListPath({ name: 'endpointList' }) }),
         onSaveNavigateTo: [
-          'securitySolution:administration',
-          { path: getEndpointListPath({ name: 'endpointList' }) },
+          'securitySolution',
+          {
+            path: getEndpointListPath({ name: 'endpointList' }),
+          },
         ],
       },
     }
@@ -201,7 +206,7 @@ export const EndpointList = () => {
       path: `#/policies/${selectedPolicyId}?openEnrollmentFlyout=true`,
       state: {
         onDoneNavigateTo: [
-          'securitySolution:administration',
+          'securitySolution',
           { path: getEndpointListPath({ name: 'endpointList' }) },
         ],
       },
@@ -245,6 +250,7 @@ export const EndpointList = () => {
     return [
       {
         field: 'metadata',
+        width: '15%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.hostname', {
           defaultMessage: 'Hostname',
         }),
@@ -257,7 +263,7 @@ export const EndpointList = () => {
             },
             search
           );
-          const toRouteUrl = formatUrl(toRoutePath);
+          const toRouteUrl = getAppUrl({ path: toRoutePath });
           return (
             <EuiToolTip content={hostname} anchorClassName="eui-textTruncate">
               <EndpointListNavLink
@@ -336,7 +342,7 @@ export const EndpointList = () => {
             ...queryParams,
             selected_endpoint: item.metadata.agent.id,
           });
-          const toRouteUrl = formatUrl(toRoutePath);
+          const toRouteUrl = getAppUrl({ path: toRoutePath });
           return (
             <EuiBadge
               color={POLICY_STATUS_TO_BADGE_COLOR[policy.status]}
@@ -364,6 +370,7 @@ export const EndpointList = () => {
       },
       {
         field: 'metadata.host.ip',
+        width: '12%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.ip', {
           defaultMessage: 'IP Address',
         }),
@@ -382,7 +389,7 @@ export const EndpointList = () => {
       },
       {
         field: 'metadata.agent.version',
-        width: '5%',
+        width: '9%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.endpointVersion', {
           defaultMessage: 'Version',
         }),
@@ -390,6 +397,7 @@ export const EndpointList = () => {
       {
         field: 'metadata.@timestamp',
         name: lastActiveColumnName,
+        width: '9%',
         render(dateValue: HostInfo['metadata']['@timestamp']) {
           return (
             <FormattedDate
@@ -402,7 +410,7 @@ export const EndpointList = () => {
       },
       {
         field: '',
-        width: '5%',
+        width: '8%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.actions', {
           defaultMessage: 'Actions',
         }),
@@ -416,7 +424,7 @@ export const EndpointList = () => {
         ],
       },
     ];
-  }, [queryParams, search, formatUrl, PAD_LEFT]);
+  }, [queryParams, search, getAppUrl, PAD_LEFT]);
 
   const renderTableOrEmptyState = useMemo(() => {
     if (endpointsExist || areEndpointsEnrolling) {
@@ -467,8 +475,8 @@ export const EndpointList = () => {
   const hasListData = listData && listData.length > 0;
 
   const refreshStyle = useMemo(() => {
-    return { display: endpointsExist && isTransformEnabled ? 'flex' : 'none', maxWidth: 200 };
-  }, [endpointsExist, isTransformEnabled]);
+    return { display: endpointsExist ? 'flex' : 'none', maxWidth: 200 };
+  }, [endpointsExist]);
 
   const refreshIsPaused = useMemo(() => {
     return !endpointsExist ? false : hasSelectedEndpoint ? true : !isAutoRefreshEnabled;
@@ -483,8 +491,8 @@ export const EndpointList = () => {
   }, [endpointsTotalError, agentsWithEndpointsTotalError]);
 
   const shouldShowKQLBar = useMemo(() => {
-    return endpointsExist && !patternsError && isTransformEnabled;
-  }, [endpointsExist, patternsError, isTransformEnabled]);
+    return endpointsExist && !patternsError;
+  }, [endpointsExist, patternsError]);
 
   return (
     <AdministrationListPage

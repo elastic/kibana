@@ -19,7 +19,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useNavigateToPath } from '../../../../contexts/kibana';
+import { useMlKibana, useNavigateToPath } from '../../../../contexts/kibana';
 
 import { useMlContext } from '../../../../contexts/ml';
 import { isSavedSearchSavedObject } from '../../../../../../common/types/kibana';
@@ -28,10 +28,15 @@ import { addItemToRecentlyAccessed } from '../../../../util/recently_accessed';
 import { timeBasedIndexCheck } from '../../../../util/index_utils';
 import { LinkCard } from '../../../../components/link_card';
 import { CategorizationIcon } from './categorization_job_icon';
-import { ML_PAGES } from '../../../../../../common/constants/ml_url_generator';
+import { ML_APP_LOCATOR, ML_PAGES } from '../../../../../../common/constants/locator';
+import { RareIcon } from './rare_job_icon';
 import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_create_url';
 
 export const Page: FC = () => {
+  const {
+    services: { share },
+  } = useMlKibana();
+
   const mlContext = useMlContext();
   const navigateToPath = useNavigateToPath();
   const onSelectDifferentIndex = useCreateAndNavigateToMlLink(
@@ -84,11 +89,25 @@ export const Page: FC = () => {
       : `?savedSearchId=${currentSavedSearch.id}`;
   };
 
-  const addSelectionToRecentlyAccessed = () => {
+  const addSelectionToRecentlyAccessed = async () => {
     const title = !isSavedSearchSavedObject(currentSavedSearch)
       ? currentIndexPattern.title
       : (currentSavedSearch.attributes.title as string);
-    addItemToRecentlyAccessed('jobs/new_job/datavisualizer', title, '');
+    const mlLocator = share.url.locators.get(ML_APP_LOCATOR)!;
+
+    const dataVisualizerLink = await mlLocator.getUrl(
+      {
+        page: ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER,
+        pageState: {
+          ...(currentSavedSearch?.id
+            ? { savedSearchId: currentSavedSearch.id }
+            : { index: currentIndexPattern.id }),
+        },
+      },
+      { absolute: true }
+    );
+
+    addItemToRecentlyAccessed(ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER, title, dataVisualizerLink);
     navigateToPath(`/jobs/new_job/datavisualizer${getUrlParams()}`);
   };
 
@@ -175,6 +194,22 @@ export const Page: FC = () => {
         defaultMessage: 'Group log messages into categories and detect anomalies within them.',
       }),
       id: 'mlJobTypeLinkCategorizationJob',
+    },
+    {
+      onClick: () => navigateToPath(`/jobs/new_job/rare${getUrlParams()}`),
+      icon: {
+        type: RareIcon,
+        ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.rareAriaLabel', {
+          defaultMessage: 'Rare job',
+        }),
+      },
+      title: i18n.translate('xpack.ml.newJob.wizard.jobType.rareTitle', {
+        defaultMessage: 'Rare',
+      }),
+      description: i18n.translate('xpack.ml.newJob.wizard.jobType.rareDescription', {
+        defaultMessage: 'Detect rare values in time series data.',
+      }),
+      id: 'mlJobTypeLinkrareJob',
     },
   ];
 

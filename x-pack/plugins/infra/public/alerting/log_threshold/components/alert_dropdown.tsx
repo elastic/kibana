@@ -89,7 +89,10 @@ export const AlertDropdown = () => {
             iconType={'arrowDown'}
             onClick={openPopover}
           >
-            <FormattedMessage id="xpack.infra.alerting.logs.alertsButton" defaultMessage="Alerts" />
+            <FormattedMessage
+              id="xpack.infra.alerting.logs.alertsButton"
+              defaultMessage="Alerts and rules"
+            />
           </EuiHeaderLink>
         }
         isOpen={popoverOpen}

@@ -40,7 +40,7 @@ export const DELETE_MESSAGE = i18n.translate(
 );
 export const SUCCESS_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.curations.deleteSuccessMessage',
-  { defaultMessage: 'Successfully removed curation.' }
+  { defaultMessage: 'Your curation was deleted' }
 );
 export const RESTORE_CONFIRMATION = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.curations.restoreConfirmation',

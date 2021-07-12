@@ -15,8 +15,6 @@ import { EuiInMemoryTable, EuiTableHeaderCell } from '@elastic/eui';
 
 import { engines } from '../../app_search/__mocks__/engines.mock';
 
-import { ANY_AUTH_PROVIDER_OPTION_LABEL } from './constants';
-
 import { RoleMappingsTable } from './role_mappings_table';
 import { UsersAndRolesRowActions } from './users_and_roles_row_actions';
 
@@ -59,11 +57,13 @@ describe('RoleMappingsTable', () => {
   });
 
   it('renders auth provider display names', () => {
-    const wrapper = mount(<RoleMappingsTable {...props} />);
+    const roleMappingWithAuths = {
+      ...wsRoleMapping,
+      authProvider: ['saml', 'native'],
+    };
+    const wrapper = mount(<RoleMappingsTable {...props} roleMappings={[roleMappingWithAuths]} />);
 
-    expect(wrapper.find('[data-test-subj="AuthProviderDisplayValue"]').prop('children')).toEqual(
-      `${ANY_AUTH_PROVIDER_OPTION_LABEL}, other_auth`
-    );
+    expect(wrapper.find('[data-test-subj="ProviderSpecificList"]')).toHaveLength(1);
   });
 
   it('handles manage click', () => {

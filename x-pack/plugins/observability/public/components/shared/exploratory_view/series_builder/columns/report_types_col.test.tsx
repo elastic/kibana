@@ -36,9 +36,8 @@ describe('ReportTypesCol', function () {
     fireEvent.click(screen.getByText(/KPI over time/i));
 
     expect(setSeries).toHaveBeenCalledWith(seriesId, {
-      breakdown: 'user_agent.name',
       dataType: 'ux',
-      reportDefinitions: {},
+      selectedMetricField: undefined,
       reportType: 'kpi-over-time',
       time: { from: 'now-15m', to: 'now' },
     });

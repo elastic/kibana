@@ -7,7 +7,7 @@
 
 import React, { memo, useEffect, useState } from 'react';
 import type { AppMountParameters } from 'kibana/public';
-import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel } from '@elastic/eui';
+import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel, EuiPortal } from '@elastic/eui';
 import type { History } from 'history';
 import { createHashHistory } from 'history';
 import { Router, Redirect, Route, Switch } from 'react-router-dom';
@@ -29,10 +29,10 @@ import type { FleetConfigType, FleetStartServices } from '../../plugin';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
 
-import { AgentPolicyContextProvider } from './hooks';
+import { AgentPolicyContextProvider, useUrlModal } from './hooks';
 import { INTEGRATIONS_ROUTING_PATHS } from './constants';
 
-import { Error, Loading } from './components';
+import { Error, Loading, SettingFlyout } from './components';
 
 import type { UIExtensionsStorage } from './types';
 
@@ -196,7 +196,7 @@ export const IntegrationsAppContext: React.FC<{
       const unlistenParentHistory = history.listen(() => {
         const newHash = createHashHistory();
         if (newHash.location.pathname !== routerHistoryInstance.location.pathname) {
-          routerHistoryInstance.replace(newHash.location.pathname);
+          routerHistoryInstance.replace(newHash.location.pathname + newHash.location.search || '');
         }
       });
 
@@ -234,12 +234,24 @@ export const IntegrationsAppContext: React.FC<{
 );
 
 export const AppRoutes = memo(() => {
+  const { modal, setModal } = useUrlModal();
   return (
-    <Switch>
-      <Route path={INTEGRATIONS_ROUTING_PATHS.integrations}>
-        <EPMApp />
-      </Route>
-      <Redirect to={INTEGRATIONS_ROUTING_PATHS.integrations_all} />
-    </Switch>
+    <>
+      {modal === 'settings' && (
+        <EuiPortal>
+          <SettingFlyout
+            onClose={() => {
+              setModal(null);
+            }}
+          />
+        </EuiPortal>
+      )}
+      <Switch>
+        <Route path={INTEGRATIONS_ROUTING_PATHS.integrations}>
+          <EPMApp />
+        </Route>
+        <Redirect to={INTEGRATIONS_ROUTING_PATHS.integrations_all} />
+      </Switch>
+    </>
   );
 });

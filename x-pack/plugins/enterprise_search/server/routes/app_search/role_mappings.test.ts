@@ -11,6 +11,7 @@ import {
   registerEnableRoleMappingsRoute,
   registerRoleMappingsRoute,
   registerRoleMappingRoute,
+  registerUserRoute,
 } from './role_mappings';
 
 const roleMappingBaseSchema = {
@@ -157,6 +158,54 @@ describe('role mappings routes', () => {
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/as/role_mappings/:id',
+      });
+    });
+  });
+
+  describe('POST /api/app_search/single_user_role_mapping', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/api/app_search/single_user_role_mapping',
+      });
+
+      registerUserRoute({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    describe('validates', () => {
+      it('correctly', () => {
+        const request = {
+          body: {
+            roleMapping: {
+              engines: ['foo', 'bar'],
+              roleType: 'admin',
+              accessAllEngines: true,
+              id: '123asf',
+            },
+            elasticsearchUser: {
+              username: 'user2@elastic.co',
+              email: 'user2',
+            },
+          },
+        };
+        mockRouter.shouldValidate(request);
+      });
+
+      it('missing required fields', () => {
+        const request = { body: {} };
+        mockRouter.shouldThrow(request);
+      });
+    });
+
+    it('creates a request handler', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/as/role_mappings/upsert_single_user_role_mapping',
       });
     });
   });

@@ -15,7 +15,7 @@ import { IIndexPattern } from 'src/plugins/data/common';
 import { MetricsSourceConfigurationProperties } from '../../../common/metrics_sources';
 import { DocumentTitle } from '../../components/document_title';
 import { HelpCenterContent } from '../../components/help_center_content';
-import { Header } from '../../components/header';
+import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
 import {
   MetricsExplorerOptionsContainer,
   DEFAULT_METRICS_EXPLORER_VIEW_STATE,
@@ -55,6 +55,8 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
   });
 
   const kibana = useKibana();
+
+  useReadOnlyBadge(!uiCapabilities?.infrastructure?.save);
 
   const settingsLinkProps = useLinkProps({
     app: 'metrics',
@@ -102,17 +104,6 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                       </EuiHeaderLinks>
                     </HeaderMenuPortal>
                   )}
-
-                  <Header
-                    breadcrumbs={[
-                      {
-                        text: i18n.translate('xpack.infra.header.infrastructureTitle', {
-                          defaultMessage: 'Metrics',
-                        }),
-                      },
-                    ]}
-                    readOnlyBadge={!uiCapabilities?.infrastructure?.save}
-                  />
                   <Switch>
                     <Route path={'/inventory'} component={SnapshotPage} />
                     <Route

@@ -17,7 +17,11 @@ import {
   getEnvironmentLabel,
   getEnvironmentEsField,
 } from '../../../common/environment_filter_values';
-import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
+import {
+  AlertType,
+  APM_SERVER_FEATURE_ID,
+  ALERT_TYPES_CONFIG,
+} from '../../../common/alert_types';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
@@ -77,8 +81,9 @@ export function registerTransactionDurationAlertType({
         apmActionVariables.interval,
       ],
     },
-    producer: 'apm',
+    producer: APM_SERVER_FEATURE_ID,
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     executor: async ({ services, params }) => {
       const config = await config$.pipe(take(1)).toPromise();
       const alertParams = params;

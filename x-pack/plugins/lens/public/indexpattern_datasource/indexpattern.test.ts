@@ -290,7 +290,7 @@ describe('IndexPattern Data Source', () => {
       expect(indexPatternDatasource.toExpression(state, 'first')).toEqual(null);
     });
 
-    it('should generate an empty expression when there is a formula without aggs', async () => {
+    it('should create a table when there is a formula without aggs', async () => {
       const queryBaseState: IndexPatternBaseState = {
         currentIndexPatternId: '1',
         layers: {
@@ -311,7 +311,21 @@ describe('IndexPattern Data Source', () => {
         },
       };
       const state = enrichBaseState(queryBaseState);
-      expect(indexPatternDatasource.toExpression(state, 'first')).toEqual(null);
+      expect(indexPatternDatasource.toExpression(state, 'first')).toEqual({
+        chain: [
+          {
+            function: 'createTable',
+            type: 'function',
+            arguments: { ids: [], names: [], rowCount: [1] },
+          },
+          {
+            arguments: { expression: [''], id: ['col1'], name: ['Formula'] },
+            function: 'mapColumn',
+            type: 'function',
+          },
+        ],
+        type: 'expression',
+      });
     });
 
     it('should generate an expression for an aggregated query', async () => {
@@ -1467,7 +1481,7 @@ describe('IndexPattern Data Source', () => {
       ).toBeUndefined();
     });
 
-    it('should clear the incomplete column', () => {
+    it('should clear all incomplete columns', () => {
       const state = {
         indexPatternRefs: [],
         existingFields: {},
@@ -1499,7 +1513,7 @@ describe('IndexPattern Data Source', () => {
             indexPatternId: '1',
             columnOrder: [],
             columns: {},
-            incompleteColumns: { col2: { operationType: 'sum' } },
+            incompleteColumns: undefined,
           },
         },
       });

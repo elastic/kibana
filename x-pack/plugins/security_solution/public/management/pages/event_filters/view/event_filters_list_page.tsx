@@ -177,9 +177,13 @@ export const EventFiltersListPage = memo(() => {
     [navigateCallback]
   );
 
-  const handleOnSearch = useCallback((query: string) => navigateCallback({ filter: query }), [
-    navigateCallback,
-  ]);
+  const handleOnSearch = useCallback(
+    (query: string) => {
+      dispatch({ type: 'eventFiltersForceRefresh', payload: { forceRefresh: true } });
+      navigateCallback({ filter: query });
+    },
+    [navigateCallback, dispatch]
+  );
 
   return (
     <AdministrationListPage
@@ -207,7 +211,7 @@ export const EventFiltersListPage = memo(() => {
           >
             <FormattedMessage
               id="xpack.securitySolution.eventFilters.list.pageAddButton"
-              defaultMessage="Add Endpoint Event Filter"
+              defaultMessage="Add Event Filter"
             />
           </EuiButton>
         )

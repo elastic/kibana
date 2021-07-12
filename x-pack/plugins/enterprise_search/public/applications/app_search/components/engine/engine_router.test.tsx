@@ -39,9 +39,16 @@ describe('EngineRouter', () => {
     ...mockEngineValues,
     dataLoading: false,
     engineNotFound: false,
+    isMetaEngine: false,
     myRole: {},
   };
-  const actions = { setEngineName: jest.fn(), initializeEngine: jest.fn(), clearEngine: jest.fn() };
+  const actions = {
+    setEngineName: jest.fn(),
+    initializeEngine: jest.fn(),
+    pollEmptyEngine: jest.fn(),
+    stopPolling: jest.fn(),
+    clearEngine: jest.fn(),
+  };
 
   beforeEach(() => {
     setMockValues(values);
@@ -58,12 +65,14 @@ describe('EngineRouter', () => {
       expect(actions.setEngineName).toHaveBeenCalledWith('some-engine');
     });
 
-    it('initializes/fetches engine API data', () => {
+    it('initializes/fetches engine API data and starts a poll for empty engines', () => {
       expect(actions.initializeEngine).toHaveBeenCalled();
+      expect(actions.pollEmptyEngine).toHaveBeenCalled();
     });
 
-    it('clears engine on unmount and on update', () => {
+    it('clears engine and stops polling on unmount / on engine change', () => {
       unmountHandler();
+      expect(actions.stopPolling).toHaveBeenCalled();
       expect(actions.clearEngine).toHaveBeenCalled();
     });
   });
@@ -167,14 +176,18 @@ describe('EngineRouter', () => {
   });
 
   it('renders a source engines view', () => {
-    setMockValues({ ...values, myRole: { canViewMetaEngineSourceEngines: true } });
+    setMockValues({
+      ...values,
+      myRole: { canViewMetaEngineSourceEngines: true },
+      isMetaEngine: true,
+    });
     const wrapper = shallow(<EngineRouter />);
 
     expect(wrapper.find(SourceEngines)).toHaveLength(1);
   });
 
   it('renders a crawler view', () => {
-    setMockValues({ ...values, myRole: { canViewEngineCrawler: true } });
+    setMockValues({ ...values, myRole: { canViewEngineCrawler: true }, isMetaEngine: false });
     const wrapper = shallow(<EngineRouter />);
 
     expect(wrapper.find(CrawlerRouter)).toHaveLength(1);

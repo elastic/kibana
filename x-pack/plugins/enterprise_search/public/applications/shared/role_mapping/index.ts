@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+export * from './types';
 export { AttributeSelector } from './attribute_selector';
+export { DeactivatedUserCallout } from './deactivated_user_callout';
 export { RolesEmptyPrompt } from './roles_empty_prompt';
 export { RoleMappingsTable } from './role_mappings_table';
 export { RoleOptionLabel } from './role_option_label';
