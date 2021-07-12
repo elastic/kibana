@@ -194,7 +194,7 @@ describe('execute()', () => {
     const configurationUtilities = actionsConfigMock.create();
     configurationUtilities.getProxySettings.mockReturnValue({
       proxyUrl: 'https://someproxyhost',
-      proxyTLSSettings: {
+      proxySSLSettings: {
         verificationMode: 'none',
       },
       proxyBypassHosts: undefined,
@@ -221,7 +221,7 @@ describe('execute()', () => {
     const configurationUtilities = actionsConfigMock.create();
     configurationUtilities.getProxySettings.mockReturnValue({
       proxyUrl: 'https://someproxyhost',
-      proxyTLSSettings: {
+      proxySSLSettings: {
         verificationMode: 'none',
       },
       proxyBypassHosts: new Set(['example.com']),
@@ -248,7 +248,7 @@ describe('execute()', () => {
     const configurationUtilities = actionsConfigMock.create();
     configurationUtilities.getProxySettings.mockReturnValue({
       proxyUrl: 'https://someproxyhost',
-      proxyTLSSettings: {
+      proxySSLSettings: {
         verificationMode: 'none',
       },
       proxyBypassHosts: new Set(['not-example.com']),
@@ -275,7 +275,7 @@ describe('execute()', () => {
     const configurationUtilities = actionsConfigMock.create();
     configurationUtilities.getProxySettings.mockReturnValue({
       proxyUrl: 'https://someproxyhost',
-      proxyTLSSettings: {
+      proxySSLSettings: {
         verificationMode: 'none',
       },
       proxyBypassHosts: undefined,
@@ -302,7 +302,7 @@ describe('execute()', () => {
     const configurationUtilities = actionsConfigMock.create();
     configurationUtilities.getProxySettings.mockReturnValue({
       proxyUrl: 'https://someproxyhost',
-      proxyTLSSettings: {
+      proxySSLSettings: {
         verificationMode: 'none',
       },
       proxyBypassHosts: undefined,

@@ -16,30 +16,35 @@ import { SavedObjectsFindResponse } from 'kibana/server';
 import { nodeBuilder, KueryNode } from '../../../../../src/plugins/data/common';
 import { esKuery } from '../../../../../src/plugins/data/server';
 import {
+  AlertCommentRequestRt,
+  ActionsCommentRequestRt,
+  CASE_SAVED_OBJECT,
   CaseConnector,
-  ESCasesConfigureAttributes,
-  ConnectorTypes,
   CaseStatuses,
   CaseType,
   CommentRequest,
-  throwErrors,
-  excess,
+  ConnectorTypes,
   ContextTypeUserRt,
-  AlertCommentRequestRt,
+  ESCasesConfigureAttributes,
+  excess,
   OWNER_FIELD,
-} from '../../common/api';
-import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../common/constants';
+  SUB_CASE_SAVED_OBJECT,
+  throwErrors,
+} from '../../common';
 import { combineFilterWithAuthorizationFilter } from '../authorization/utils';
 import {
   getIDsAndIndicesAsArrays,
   isCommentRequestTypeAlertOrGenAlert,
   isCommentRequestTypeUser,
+  isCommentRequestTypeActions,
   SavedObjectFindOptionsKueryNode,
 } from '../common';
 
 export const decodeCommentRequest = (comment: CommentRequest) => {
   if (isCommentRequestTypeUser(comment)) {
     pipe(excess(ContextTypeUserRt).decode(comment), fold(throwErrors(badRequest), identity));
+  } else if (isCommentRequestTypeActions(comment)) {
+    pipe(excess(ActionsCommentRequestRt).decode(comment), fold(throwErrors(badRequest), identity));
   } else if (isCommentRequestTypeAlertOrGenAlert(comment)) {
     pipe(excess(AlertCommentRequestRt).decode(comment), fold(throwErrors(badRequest), identity));
     const { ids, indices } = getIDsAndIndicesAsArrays(comment);

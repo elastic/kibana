@@ -133,7 +133,7 @@ export const TrustedAppCard = memo<TrustedAppCardProps>(
         <ItemDetailsPropertySummary
           name={PROPERTY_TITLES.updated_by}
           value={
-            <FormattedDate
+            <TextFieldValue
               fieldName={PROPERTY_TITLES.updated_by}
               value={trustedApp.updated_by}
               className="eui-textTruncate"

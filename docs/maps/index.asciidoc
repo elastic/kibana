@@ -11,6 +11,7 @@
 Create beautiful maps from your geographical data. With **Maps**, you can:
 
 * Build maps with multiple layers and indices.
+* Animate spatial temporal data.
 * Upload GeoJSON.
 * Embed your map in dashboards.
 * Symbolize features using data values.
@@ -38,6 +39,15 @@ Use multiple layers and indices to show all your data in a single map. Show how 
 
 [role="screenshot"]
 image::maps/images/sample_data_ecommerce.png[]
+
+[float]
+=== Animate spatial temporal data
+Data comes to life with animation. Hard to detect patterns in static data pop out with movement. Use time slider to animate your data and gain deeper insights.
+
+This animated map uses the time slider to show Portland buses over a period of 15 minutes. The routes come alive as the bus locations update with time.
+
+[role="screenshot"]
+image::maps/images/timeslider.gif[]
 
 [float]
 === Upload GeoJSON

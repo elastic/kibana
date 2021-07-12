@@ -12,7 +12,8 @@ import {
   User,
   AllTagsFindRequest,
   AllReportersFindRequest,
-} from '../../../common/api';
+  CasesByAlertId,
+} from '../../../common';
 import { CasesClient } from '../client';
 import { CasesClientInternal } from '../client_internal';
 import {
@@ -28,9 +29,9 @@ import { create } from './create';
 import { deleteCases } from './delete';
 import { find } from './find';
 import {
-  CaseIDsByAlertIDParams,
+  CasesByAlertIDParams,
   get,
-  getCaseIDsByAlertID,
+  getCasesByAlertID,
   GetParams,
   getReporters,
   getTags,
@@ -79,9 +80,9 @@ export interface CasesSubClient {
    */
   getReporters(params: AllReportersFindRequest): Promise<User[]>;
   /**
-   * Retrieves the case IDs given a single alert ID
+   * Retrieves the cases ID and title that have the requested alert attached to them
    */
-  getCaseIDsByAlertID(params: CaseIDsByAlertIDParams): Promise<string[]>;
+  getCasesByAlertID(params: CasesByAlertIDParams): Promise<CasesByAlertId>;
 }
 
 /**
@@ -103,8 +104,7 @@ export const createCasesSubClient = (
     delete: (ids: string[]) => deleteCases(ids, clientArgs),
     getTags: (params: AllTagsFindRequest) => getTags(params, clientArgs),
     getReporters: (params: AllReportersFindRequest) => getReporters(params, clientArgs),
-    getCaseIDsByAlertID: (params: CaseIDsByAlertIDParams) =>
-      getCaseIDsByAlertID(params, clientArgs),
+    getCasesByAlertID: (params: CasesByAlertIDParams) => getCasesByAlertID(params, clientArgs),
   };
 
   return Object.freeze(casesSubClient);

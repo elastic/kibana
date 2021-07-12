@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 
 import { EuiButtonEmpty } from '@elastic/eui';
 import * as i18n from '../../components/app/cases/translations';
-import { CASES_APP_ID, CASES_OWNER } from '../../components/app/cases/constants';
+import { CASES_OWNER } from '../../components/app/cases/constants';
 import { useKibana } from '../../utils/kibana_react';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { casesBreadcrumbs, useBreadcrumbs } from '../../hooks/use_breadcrumbs';
-import { getCaseUrl, useFormatUrl } from './links';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { casesBreadcrumbs, getCaseUrl, useFormatUrl } from './links';
+import { observabilityAppId } from '../../../common';
 
 const ButtonEmpty = styled(EuiButtonEmpty)`
   display: block;
@@ -23,24 +24,27 @@ const ButtonEmpty = styled(EuiButtonEmpty)`
 function ConfigureCasesPageComponent() {
   const {
     cases,
-    application: { navigateToApp },
+    application: { getUrlForApp, navigateToUrl },
   } = useKibana().services;
+  const casesUrl = `${getUrlForApp(observabilityAppId)}/cases`;
   const userPermissions = useGetUserCasesPermissions();
   const { ObservabilityPageTemplate } = usePluginContext();
   const onClickGoToCases = useCallback(
     async (ev) => {
       ev.preventDefault();
-      return navigateToApp(`${CASES_APP_ID}`);
+      return navigateToUrl(casesUrl);
     },
-    [navigateToApp]
+    [casesUrl, navigateToUrl]
   );
-  const { formatUrl } = useFormatUrl(CASES_APP_ID);
+  const { formatUrl } = useFormatUrl();
   const href = formatUrl(getCaseUrl());
   useBreadcrumbs([{ ...casesBreadcrumbs.cases, href }, casesBreadcrumbs.configure]);
-  if (userPermissions != null && !userPermissions.read) {
-    navigateToApp(`${CASES_APP_ID}`);
-    return null;
-  }
+
+  useEffect(() => {
+    if (userPermissions != null && !userPermissions.read) {
+      navigateToUrl(casesUrl);
+    }
+  }, [casesUrl, userPermissions, navigateToUrl]);
 
   return (
     <ObservabilityPageTemplate

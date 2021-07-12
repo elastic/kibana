@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
-import { isRumAgentName } from '../../../../common/agent_name';
+import { isRumAgentName, isIosAgentName } from '../../../../common/agent_name';
 import { AnnotationsContextProvider } from '../../../context/annotations/annotations_context';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
@@ -43,13 +43,14 @@ export function ServiceOverview({ serviceName }: ServiceOverviewProps) {
   const { isMedium } = useBreakPoints();
   const rowDirection = isMedium ? 'column' : 'row';
   const isRumAgent = isRumAgentName(agentName);
+  const isIosAgent = isIosAgentName(agentName);
 
   return (
     <AnnotationsContextProvider>
       <ChartPointerEventContextProvider>
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem>
-            <EuiPanel>
+            <EuiPanel hasBorder={true}>
               <LatencyChart height={200} />
             </EuiPanel>
           </EuiFlexItem>
@@ -63,7 +64,7 @@ export function ServiceOverview({ serviceName }: ServiceOverviewProps) {
                 <ServiceOverviewThroughputChart height={chartHeight} />
               </EuiFlexItem>
               <EuiFlexItem grow={7}>
-                <EuiPanel>
+                <EuiPanel hasBorder={true}>
                   <ServiceOverviewTransactionsTable serviceName={serviceName} />
                 </EuiPanel>
               </EuiFlexItem>
@@ -84,7 +85,7 @@ export function ServiceOverview({ serviceName }: ServiceOverviewProps) {
                 </EuiFlexItem>
               )}
               <EuiFlexItem grow={7}>
-                <EuiPanel>
+                <EuiPanel hasBorder={true}>
                   <ServiceOverviewErrorsTable serviceName={serviceName} />
                 </EuiPanel>
               </EuiFlexItem>
@@ -101,7 +102,7 @@ export function ServiceOverview({ serviceName }: ServiceOverviewProps) {
               </EuiFlexItem>
               {!isRumAgent && (
                 <EuiFlexItem grow={7}>
-                  <EuiPanel>
+                  <EuiPanel hasBorder={true}>
                     <ServiceOverviewDependenciesTable
                       serviceName={serviceName}
                     />
@@ -110,7 +111,7 @@ export function ServiceOverview({ serviceName }: ServiceOverviewProps) {
               )}
             </EuiFlexGroup>
           </EuiFlexItem>
-          {!isRumAgent && (
+          {!isRumAgent && !isIosAgent && (
             <EuiFlexItem>
               <EuiFlexGroup
                 direction="column"

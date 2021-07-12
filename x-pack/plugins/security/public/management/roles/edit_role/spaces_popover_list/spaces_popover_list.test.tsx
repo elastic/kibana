@@ -46,7 +46,8 @@ const spacesManager = spacesManagerMock.create();
 const { getStartServices } = coreMock.createSetup();
 const spacesApiUi = getUiApi({ spacesManager, getStartServices });
 
-describe('SpacesPopoverList', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/101454
+describe.skip('SpacesPopoverList', () => {
   async function setup(spaces: Space[]) {
     const wrapper = mountWithIntl(
       <SpacesPopoverList spaces={spaces} buttonText="hello world" spacesApiUi={spacesApiUi} />

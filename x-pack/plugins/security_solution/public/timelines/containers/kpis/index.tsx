@@ -64,7 +64,7 @@ export const useTimelineKpis = ({
 
         searchSubscription$.current = data.search
           .search<TimelineRequestBasicOptions, TimelineKpiStrategyResponse>(request, {
-            strategy: 'securitySolutionTimelineSearchStrategy',
+            strategy: 'timelineSearchStrategy',
             abortSignal: abortCtrl.current.signal,
           })
           .subscribe({

@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import { ConnectorTypes } from '../../common/api';
+import { ConnectorTypes } from '../../common';
+import { ICasesConnector, CasesConnectorsMap } from './types';
 import { getCaseConnector as getJiraCaseConnector } from './jira';
 import { getCaseConnector as getResilientCaseConnector } from './resilient';
 import { getServiceNowITSMCaseConnector, getServiceNowSIRCaseConnector } from './servicenow';
-import { ICasesConnector, CasesConnectorsMap } from './types';
+import { getCaseConnector as getSwimlaneCaseConnector } from './swimlane';
 
 const mapping: Record<ConnectorTypes, ICasesConnector | null> = {
   [ConnectorTypes.jira]: getJiraCaseConnector(),
   [ConnectorTypes.serviceNowITSM]: getServiceNowITSMCaseConnector(),
   [ConnectorTypes.serviceNowSIR]: getServiceNowSIRCaseConnector(),
   [ConnectorTypes.resilient]: getResilientCaseConnector(),
+  [ConnectorTypes.swimlane]: getSwimlaneCaseConnector(),
   [ConnectorTypes.none]: null,
 };
 

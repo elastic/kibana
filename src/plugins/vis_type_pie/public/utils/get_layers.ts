@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import {
   Datum,
   PartitionFillLabel,
@@ -16,9 +15,9 @@ import {
 } from '@elastic/charts';
 import { isEqual } from 'lodash';
 import { SeriesLayer, PaletteRegistry, lightenColor } from '../../../charts/public';
-import { DataPublicPluginStart } from '../../../data/public';
-import { DatatableRow } from '../../../expressions/public';
-import { BucketColumns, PieVisParams, SplitDimensionParams } from '../types';
+import type { DataPublicPluginStart } from '../../../data/public';
+import type { DatatableRow } from '../../../expressions/public';
+import type { BucketColumns, PieVisParams, SplitDimensionParams } from '../types';
 import { getDistinctSeries } from './get_distinct_series';
 
 const EMPTY_SLICE = Symbol('empty_slice');
@@ -31,14 +30,33 @@ export const computeColor = (
   rows: DatatableRow[],
   visParams: PieVisParams,
   palettes: PaletteRegistry | null,
-  syncColors: boolean
+  syncColors: boolean,
+  formatter: DataPublicPluginStart['fieldFormats'],
+  format?: BucketColumns['format']
 ) => {
   const { parentSeries, allSeries } = getDistinctSeries(rows, columns);
+  const dataName = d.dataName;
+
+  let formattedLabel = '';
+  if (format) {
+    formattedLabel = formatter.deserialize(format).convert(dataName) ?? '';
+  }
 
   if (visParams.distinctColors) {
-    const dataName = d.dataName;
+    let overwriteColor;
+    // this is for supporting old visualizations (created by vislib plugin)
+    // it seems that there for some aggs, the uiState saved from vislib is
+    // different than the es-charts handle it
+    if (overwriteColors.hasOwnProperty(formattedLabel)) {
+      overwriteColor = overwriteColors[formattedLabel];
+    }
+
     if (Object.keys(overwriteColors).includes(dataName.toString())) {
-      return overwriteColors[dataName];
+      overwriteColor = overwriteColors[dataName];
+    }
+
+    if (overwriteColor) {
+      return overwriteColor;
     }
 
     const index = allSeries.findIndex((name) => isEqual(name, dataName));
@@ -81,6 +99,13 @@ export const computeColor = (
   }
 
   let overwriteColor;
+  // this is for supporting old visualizations (created by vislib plugin)
+  // it seems that there for some aggs, the uiState saved from vislib is
+  // different than the es-charts handle it
+  if (overwriteColors.hasOwnProperty(formattedLabel)) {
+    overwriteColor = overwriteColors[formattedLabel];
+  }
+
   seriesLayers.forEach((layer) => {
     if (Object.keys(overwriteColors).includes(layer.name)) {
       overwriteColor = overwriteColors[layer.name];
@@ -125,11 +150,6 @@ export const getLayers = (
       },
       showAccessor: (d: Datum) => d !== EMPTY_SLICE,
       nodeLabel: (d: unknown) => {
-        if (d === '') {
-          return i18n.translate('visTypePie.emptyLabelValue', {
-            defaultMessage: '(empty)',
-          });
-        }
         if (col.format) {
           const formattedLabel = formatter.deserialize(col.format).convert(d) ?? '';
           if (visParams.labels.truncate && formattedLabel.length <= visParams.labels.truncate) {
@@ -147,7 +167,7 @@ export const getLayers = (
         if (name1 === '__other__' && name2 !== '__other__') return 1;
         if (name2 === '__other__' && name1 !== '__other__') return -1;
         // metric sorting
-        if (sort !== '_key') {
+        if (sort && sort !== '_key') {
           if (params?.order === 'desc') {
             return node2.value - node1.value;
           } else {
@@ -175,7 +195,9 @@ export const getLayers = (
             rows,
             visParams,
             palettes,
-            syncColors
+            syncColors,
+            formatter,
+            col.format
           );
 
           return outputColor || 'rgba(0,0,0,0)';

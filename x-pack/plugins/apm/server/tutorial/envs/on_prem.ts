@@ -6,28 +6,31 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { INSTRUCTION_VARIANT } from '../../../../../../src/plugins/home/server';
 import {
-  createWindowsServerInstructions,
-  createEditConfig,
-  createStartServerUnixSysv,
-  createStartServerUnix,
-  createDownloadServerRpm,
-  createDownloadServerDeb,
-  createDownloadServerOsx,
-} from '../instructions/apm_server_instructions';
+  INSTRUCTION_VARIANT,
+  InstructionsSchema,
+} from '../../../../../../src/plugins/home/server';
 import {
-  createNodeAgentInstructions,
   createDjangoAgentInstructions,
+  createDotNetAgentInstructions,
   createFlaskAgentInstructions,
-  createRailsAgentInstructions,
-  createRackAgentInstructions,
-  createJsAgentInstructions,
   createGoAgentInstructions,
   createJavaAgentInstructions,
-  createDotNetAgentInstructions,
+  createJsAgentInstructions,
+  createNodeAgentInstructions,
   createPhpAgentInstructions,
+  createRackAgentInstructions,
+  createRailsAgentInstructions,
 } from '../instructions/apm_agent_instructions';
+import {
+  createDownloadServerDeb,
+  createDownloadServerOsx,
+  createDownloadServerRpm,
+  createEditConfig,
+  createStartServerUnix,
+  createStartServerUnixSysv,
+  createWindowsServerInstructions,
+} from '../instructions/apm_server_instructions';
 
 export function onPremInstructions({
   errorIndices,
@@ -35,13 +38,15 @@ export function onPremInstructions({
   metricsIndices,
   sourcemapIndices,
   onboardingIndices,
+  isFleetPluginEnabled,
 }: {
   errorIndices: string;
   transactionIndices: string;
   metricsIndices: string;
   sourcemapIndices: string;
   onboardingIndices: string;
-}) {
+  isFleetPluginEnabled: boolean;
+}): InstructionsSchema {
   const EDIT_CONFIG = createEditConfig();
   const START_SERVER_UNIX = createStartServerUnix();
   const START_SERVER_UNIX_SYSV = createStartServerUnixSysv();
@@ -66,6 +71,17 @@ export function onPremInstructions({
           iconType: 'alert',
         },
         instructionVariants: [
+          // hides fleet section when plugin is disabled
+          ...(isFleetPluginEnabled
+            ? [
+                {
+                  id: INSTRUCTION_VARIANT.FLEET,
+                  instructions: [
+                    { customComponentName: 'TutorialFleetInstructions' },
+                  ],
+                },
+              ]
+            : []),
           {
             id: INSTRUCTION_VARIANT.OSX,
             instructions: [

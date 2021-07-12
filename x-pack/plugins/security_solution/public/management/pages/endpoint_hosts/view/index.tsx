@@ -31,11 +31,7 @@ import { EndpointDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
 import { useEndpointSelector } from './hooks';
 import { isPolicyOutOfDate } from '../utils';
-import {
-  HOST_STATUS_TO_BADGE_COLOR,
-  POLICY_STATUS_TO_BADGE_COLOR,
-  POLICY_STATUS_TO_TEXT,
-} from './host_constants';
+import { POLICY_STATUS_TO_BADGE_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
 import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { CreateStructuredSelector } from '../../../../common/store';
 import { Immutable, HostInfo } from '../../../../../common/endpoint/types';
@@ -51,6 +47,7 @@ import {
 import { SecurityPageName } from '../../../../app/types';
 import { getEndpointListPath, getEndpointDetailsPath } from '../../../common/routing';
 import { useFormatUrl } from '../../../../common/components/link_to';
+import { useAppUrl } from '../../../../common/lib/kibana/hooks';
 import { EndpointAction } from '../store/action';
 import { EndpointPolicyLink } from './components/endpoint_policy_link';
 import { OutOfDate } from './components/out_of_date';
@@ -59,6 +56,7 @@ import { AdministrationListPage } from '../../../components/administration_list_
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { LinkToApp } from '../../../../common/components/endpoint/link_to_app';
 import { TableRowActions } from './components/table_row_actions';
+import { EndpointAgentStatus } from './components/endpoint_agent_status';
 
 const MAX_PAGINATED_ITEM = 9999;
 
@@ -97,6 +95,7 @@ const EndpointListNavLink = memo<{
 });
 EndpointListNavLink.displayName = 'EndpointListNavLink';
 
+// FIXME: this needs refactoring - we are pulling in all selectors from endpoint, which includes many more than what the list uses
 const selector = (createStructuredSelector as CreateStructuredSelector)(selectors);
 export const EndpointList = () => {
   const history = useHistory();
@@ -121,9 +120,9 @@ export const EndpointList = () => {
     areEndpointsEnrolling,
     agentsWithEndpointsTotalError,
     endpointsTotalError,
-    isTransformEnabled,
   } = useEndpointSelector(selector);
-  const { formatUrl, search } = useFormatUrl(SecurityPageName.administration);
+  const { search } = useFormatUrl(SecurityPageName.administration);
+  const { getAppUrl } = useAppUrl();
   const dispatch = useDispatch<(a: EndpointAction) => void>();
   // cap ability to page at 10k records. (max_result_window)
   const maxPageCount = totalItemCount > MAX_PAGINATED_ITEM ? MAX_PAGINATED_ITEM : totalItemCount;
@@ -162,13 +161,17 @@ export const EndpointList = () => {
       }/add-integration`,
       state: {
         onCancelNavigateTo: [
-          'securitySolution:administration',
-          { path: getEndpointListPath({ name: 'endpointList' }) },
+          'securitySolution',
+          {
+            path: getEndpointListPath({ name: 'endpointList' }),
+          },
         ],
-        onCancelUrl: formatUrl(getEndpointListPath({ name: 'endpointList' })),
+        onCancelUrl: getAppUrl({ path: getEndpointListPath({ name: 'endpointList' }) }),
         onSaveNavigateTo: [
-          'securitySolution:administration',
-          { path: getEndpointListPath({ name: 'endpointList' }) },
+          'securitySolution',
+          {
+            path: getEndpointListPath({ name: 'endpointList' }),
+          },
         ],
       },
     }
@@ -203,7 +206,7 @@ export const EndpointList = () => {
       path: `#/policies/${selectedPolicyId}?openEnrollmentFlyout=true`,
       state: {
         onDoneNavigateTo: [
-          'securitySolution:administration',
+          'securitySolution',
           { path: getEndpointListPath({ name: 'endpointList' }) },
         ],
       },
@@ -247,6 +250,7 @@ export const EndpointList = () => {
     return [
       {
         field: 'metadata',
+        width: '15%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.hostname', {
           defaultMessage: 'Hostname',
         }),
@@ -259,7 +263,7 @@ export const EndpointList = () => {
             },
             search
           );
-          const toRouteUrl = formatUrl(toRoutePath);
+          const toRouteUrl = getAppUrl({ path: toRoutePath });
           return (
             <EuiToolTip content={hostname} anchorClassName="eui-textTruncate">
               <EndpointListNavLink
@@ -274,24 +278,14 @@ export const EndpointList = () => {
       },
       {
         field: 'host_status',
-        width: '9%',
+        width: '14%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.hostStatus', {
           defaultMessage: 'Agent Status',
         }),
         // eslint-disable-next-line react/display-name
-        render: (hostStatus: HostInfo['host_status']) => {
+        render: (hostStatus: HostInfo['host_status'], endpointInfo) => {
           return (
-            <EuiBadge
-              color={hostStatus != null ? HOST_STATUS_TO_BADGE_COLOR[hostStatus] : 'warning'}
-              data-test-subj="rowHostStatus"
-              className="eui-textTruncate"
-            >
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.list.hostStatusValue"
-                defaultMessage="{hostStatus, select, healthy {Healthy} unhealthy {Unhealthy} updating {Updating} offline {Offline} inactive {Inactive} other {Unhealthy}}"
-                values={{ hostStatus }}
-              />
-            </EuiBadge>
+            <EndpointAgentStatus hostStatus={hostStatus} endpointMetadata={endpointInfo.metadata} />
           );
         },
       },
@@ -348,7 +342,7 @@ export const EndpointList = () => {
             ...queryParams,
             selected_endpoint: item.metadata.agent.id,
           });
-          const toRouteUrl = formatUrl(toRoutePath);
+          const toRouteUrl = getAppUrl({ path: toRoutePath });
           return (
             <EuiBadge
               color={POLICY_STATUS_TO_BADGE_COLOR[policy.status]}
@@ -368,7 +362,7 @@ export const EndpointList = () => {
       },
       {
         field: 'metadata.host.os.name',
-        width: '10%',
+        width: '9%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.os', {
           defaultMessage: 'Operating System',
         }),
@@ -376,6 +370,7 @@ export const EndpointList = () => {
       },
       {
         field: 'metadata.host.ip',
+        width: '12%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.ip', {
           defaultMessage: 'IP Address',
         }),
@@ -394,7 +389,7 @@ export const EndpointList = () => {
       },
       {
         field: 'metadata.agent.version',
-        width: '5%',
+        width: '9%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.endpointVersion', {
           defaultMessage: 'Version',
         }),
@@ -402,6 +397,7 @@ export const EndpointList = () => {
       {
         field: 'metadata.@timestamp',
         name: lastActiveColumnName,
+        width: '9%',
         render(dateValue: HostInfo['metadata']['@timestamp']) {
           return (
             <FormattedDate
@@ -414,7 +410,7 @@ export const EndpointList = () => {
       },
       {
         field: '',
-        width: '5%',
+        width: '8%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.actions', {
           defaultMessage: 'Actions',
         }),
@@ -428,7 +424,7 @@ export const EndpointList = () => {
         ],
       },
     ];
-  }, [queryParams, search, formatUrl, PAD_LEFT]);
+  }, [queryParams, search, getAppUrl, PAD_LEFT]);
 
   const renderTableOrEmptyState = useMemo(() => {
     if (endpointsExist || areEndpointsEnrolling) {
@@ -479,8 +475,8 @@ export const EndpointList = () => {
   const hasListData = listData && listData.length > 0;
 
   const refreshStyle = useMemo(() => {
-    return { display: endpointsExist && isTransformEnabled ? 'flex' : 'none', maxWidth: 200 };
-  }, [endpointsExist, isTransformEnabled]);
+    return { display: endpointsExist ? 'flex' : 'none', maxWidth: 200 };
+  }, [endpointsExist]);
 
   const refreshIsPaused = useMemo(() => {
     return !endpointsExist ? false : hasSelectedEndpoint ? true : !isAutoRefreshEnabled;
@@ -495,8 +491,8 @@ export const EndpointList = () => {
   }, [endpointsTotalError, agentsWithEndpointsTotalError]);
 
   const shouldShowKQLBar = useMemo(() => {
-    return endpointsExist && !patternsError && isTransformEnabled;
-  }, [endpointsExist, patternsError, isTransformEnabled]);
+    return endpointsExist && !patternsError;
+  }, [endpointsExist, patternsError]);
 
   return (
     <AdministrationListPage
@@ -527,12 +523,12 @@ export const EndpointList = () => {
                   agentsLink: (
                     <LinkToApp
                       appId="fleet"
-                      appPath={`#${pagePathGetters.fleet_agent_list({
+                      appPath={`#${pagePathGetters.agent_list({
                         kuery: 'packages : "endpoint"',
                       })}`}
                       href={`${services?.application?.getUrlForApp(
                         'fleet'
-                      )}#${pagePathGetters.fleet_agent_list({
+                      )}#${pagePathGetters.agent_list({
                         kuery: 'packages : "endpoint"',
                       })}`}
                     >

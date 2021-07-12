@@ -18,7 +18,9 @@ import * as i18n from './translations';
 
 export interface CasesNavigation<T = React.MouseEvent | MouseEvent | null, K = null> {
   href: K extends 'configurable' ? (arg: T) => string : string;
-  onClick: (arg: T) => void;
+  onClick: K extends 'configurable'
+    ? (arg: T, arg2: React.MouseEvent | MouseEvent) => Promise<void> | void
+    : (arg: T) => Promise<void> | void;
 }
 
 export const LinkButton: React.FC<
@@ -47,7 +49,7 @@ const CaseDetailsLinkComponent: React.FC<{
     (ev) => {
       if (onClick) {
         ev.preventDefault();
-        onClick({ detailName, subCaseId });
+        onClick({ detailName, subCaseId }, ev);
       }
     },
     [detailName, onClick, subCaseId]

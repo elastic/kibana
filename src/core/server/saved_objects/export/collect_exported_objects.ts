@@ -8,7 +8,9 @@
 
 import type { SavedObject } from '../../../types';
 import type { KibanaRequest } from '../../http';
-import { SavedObjectsClientContract } from '../types';
+import type { Logger } from '../../logging';
+import { SavedObjectsClientContract, SavedObjectsExportablePredicate } from '../types';
+import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import type { SavedObjectsExportTransform } from './types';
 import { applyExportTransforms } from './apply_export_transforms';
 
@@ -22,41 +24,80 @@ interface CollectExportedObjectOptions {
   /** The http request initiating the export. */
   request: KibanaRequest;
   /** export transform per type */
-  exportTransforms: Record<string, SavedObjectsExportTransform>;
+  typeRegistry: ISavedObjectTypeRegistry;
+  /** logger to use to log potential errors */
+  logger: Logger;
 }
 
 interface CollectExportedObjectResult {
   objects: SavedObject[];
+  excludedObjects: ExcludedObject[];
   missingRefs: CollectedReference[];
 }
+
+interface ExcludedObject {
+  id: string;
+  type: string;
+  reason: ExclusionReason;
+}
+
+export type ExclusionReason = 'predicate_error' | 'excluded';
 
 export const collectExportedObjects = async ({
   objects,
   includeReferences = true,
   namespace,
   request,
-  exportTransforms,
+  typeRegistry,
   savedObjectsClient,
+  logger,
 }: CollectExportedObjectOptions): Promise<CollectExportedObjectResult> => {
+  const exportTransforms = buildTransforms(typeRegistry);
+  const isExportable = buildIsExportable(typeRegistry);
+
   const collectedObjects: SavedObject[] = [];
   const collectedMissingRefs: CollectedReference[] = [];
+  const collectedNonExportableObjects: ExcludedObject[] = [];
   const alreadyProcessed: Set<string> = new Set();
 
   let currentObjects = objects;
   do {
-    const transformed = (
+    currentObjects = currentObjects.filter((object) => !alreadyProcessed.has(objKey(object)));
+
+    // first, evict current objects that are not exportable
+    const {
+      exportable: untransformedExportableInitialObjects,
+      nonExportable: nonExportableInitialObjects,
+    } = await splitByExportability(currentObjects, isExportable, logger);
+    collectedNonExportableObjects.push(...nonExportableInitialObjects);
+    nonExportableInitialObjects.forEach((obj) => alreadyProcessed.add(objKey(obj)));
+
+    // second, apply export transforms to exportable objects
+    const transformedObjects = (
       await applyExportTransforms({
         request,
-        objects: currentObjects,
+        objects: untransformedExportableInitialObjects,
         transforms: exportTransforms,
       })
     ).filter((object) => !alreadyProcessed.has(objKey(object)));
+    transformedObjects.forEach((obj) => alreadyProcessed.add(objKey(obj)));
 
-    transformed.forEach((obj) => alreadyProcessed.add(objKey(obj)));
-    collectedObjects.push(...transformed);
+    // last, evict additional objects that are not exportable
+    const { included: exportableInitialObjects, excluded: additionalObjects } = splitByKeys(
+      transformedObjects,
+      untransformedExportableInitialObjects.map((obj) => objKey(obj))
+    );
+    const {
+      exportable: exportableAdditionalObjects,
+      nonExportable: nonExportableAdditionalObjects,
+    } = await splitByExportability(additionalObjects, isExportable, logger);
+    const allExportableObjects = [...exportableInitialObjects, ...exportableAdditionalObjects];
+    collectedNonExportableObjects.push(...nonExportableAdditionalObjects);
+    collectedObjects.push(...allExportableObjects);
 
+    // if `includeReferences` is true, recurse on exportable objects' references.
     if (includeReferences) {
-      const references = collectReferences(transformed, alreadyProcessed);
+      const references = collectReferences(allExportableObjects, alreadyProcessed);
       if (references.length) {
         const { objects: fetchedObjects, missingRefs } = await fetchReferences({
           references,
@@ -75,6 +116,7 @@ export const collectExportedObjects = async ({
 
   return {
     objects: collectedObjects,
+    excludedObjects: collectedNonExportableObjects,
     missingRefs: collectedMissingRefs,
   };
 };
@@ -124,5 +166,85 @@ const fetchReferences = async ({
     missingRefs: savedObjects
       .filter((obj) => obj.error)
       .map((obj) => ({ type: obj.type, id: obj.id })),
+  };
+};
+
+const buildTransforms = (typeRegistry: ISavedObjectTypeRegistry) =>
+  typeRegistry.getAllTypes().reduce((transformMap, type) => {
+    if (type.management?.onExport) {
+      transformMap.set(type.name, type.management.onExport);
+    }
+    return transformMap;
+  }, new Map<string, SavedObjectsExportTransform>());
+
+const buildIsExportable = (
+  typeRegistry: ISavedObjectTypeRegistry
+): SavedObjectsExportablePredicate<any> => {
+  const exportablePerType = typeRegistry.getAllTypes().reduce((exportableMap, type) => {
+    if (type.management?.isExportable) {
+      exportableMap.set(type.name, type.management.isExportable);
+    }
+    return exportableMap;
+  }, new Map<string, SavedObjectsExportablePredicate>());
+
+  return (obj: SavedObject) => {
+    const typePredicate = exportablePerType.get(obj.type);
+    return typePredicate ? typePredicate(obj) : true;
+  };
+};
+
+const splitByExportability = (
+  objects: SavedObject[],
+  isExportable: SavedObjectsExportablePredicate<any>,
+  logger: Logger
+) => {
+  const exportableObjects: SavedObject[] = [];
+  const nonExportableObjects: ExcludedObject[] = [];
+
+  objects.forEach((obj) => {
+    try {
+      const exportable = isExportable(obj);
+      if (exportable) {
+        exportableObjects.push(obj);
+      } else {
+        nonExportableObjects.push({
+          id: obj.id,
+          type: obj.type,
+          reason: 'excluded',
+        });
+      }
+    } catch (e) {
+      logger.error(
+        `Error invoking "isExportable" for object ${obj.type}:${obj.id}. Error was: ${
+          e.stack ?? e.message
+        }`
+      );
+      nonExportableObjects.push({
+        id: obj.id,
+        type: obj.type,
+        reason: 'predicate_error',
+      });
+    }
+  });
+
+  return {
+    exportable: exportableObjects,
+    nonExportable: nonExportableObjects,
+  };
+};
+
+const splitByKeys = (objects: SavedObject[], keys: ObjectKey[]) => {
+  const included: SavedObject[] = [];
+  const excluded: SavedObject[] = [];
+  objects.forEach((obj) => {
+    if (keys.includes(objKey(obj))) {
+      included.push(obj);
+    } else {
+      excluded.push(obj);
+    }
+  });
+  return {
+    included,
+    excluded,
   };
 };

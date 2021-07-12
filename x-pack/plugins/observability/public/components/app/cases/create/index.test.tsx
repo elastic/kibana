@@ -12,7 +12,7 @@ import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_rea
 import { Create } from '.';
 import { useKibana } from '../../../../utils/kibana_react';
 import { basicCase } from '../../../../../../cases/public/containers/mock';
-import { CASES_APP_ID, CASES_OWNER } from '../constants';
+import { CASES_OWNER } from '../constants';
 import { Case } from '../../../../../../cases/common';
 import { getCaseDetailsUrl } from '../../../../pages/cases/links';
 
@@ -20,7 +20,8 @@ jest.mock('../../../../utils/kibana_react');
 
 describe('Create case', () => {
   const mockCreateCase = jest.fn();
-  const mockNavigateToApp = jest.fn();
+  const mockNavigateToUrl = jest.fn();
+  const mockObservabilityUrl = 'https://elastic.co/app/observability';
   beforeEach(() => {
     jest.resetAllMocks();
     (useKibana as jest.Mock).mockReturnValue({
@@ -28,7 +29,7 @@ describe('Create case', () => {
         cases: {
           getCreateCase: mockCreateCase,
         },
-        application: { navigateToApp: mockNavigateToApp },
+        application: { navigateToUrl: mockNavigateToUrl, getUrlForApp: () => mockObservabilityUrl },
       },
     });
   });
@@ -52,7 +53,7 @@ describe('Create case', () => {
             onCancel();
           },
         },
-        application: { navigateToApp: mockNavigateToApp },
+        application: { navigateToUrl: mockNavigateToUrl, getUrlForApp: () => mockObservabilityUrl },
       },
     });
     mount(
@@ -61,7 +62,9 @@ describe('Create case', () => {
       </EuiThemeProvider>
     );
 
-    await waitFor(() => expect(mockNavigateToApp).toHaveBeenCalledWith(`${CASES_APP_ID}`));
+    await waitFor(() =>
+      expect(mockNavigateToUrl).toHaveBeenCalledWith(`${mockObservabilityUrl}/cases`)
+    );
   });
 
   it('should redirect to new case when posting the case', async () => {
@@ -72,7 +75,7 @@ describe('Create case', () => {
             onSuccess(basicCase);
           },
         },
-        application: { navigateToApp: mockNavigateToApp },
+        application: { navigateToUrl: mockNavigateToUrl, getUrlForApp: () => mockObservabilityUrl },
       },
     });
     mount(
@@ -82,9 +85,10 @@ describe('Create case', () => {
     );
 
     await waitFor(() =>
-      expect(mockNavigateToApp).toHaveBeenNthCalledWith(1, `${CASES_APP_ID}`, {
-        path: getCaseDetailsUrl({ id: basicCase.id }),
-      })
+      expect(mockNavigateToUrl).toHaveBeenNthCalledWith(
+        1,
+        `${mockObservabilityUrl}/cases${getCaseDetailsUrl({ id: basicCase.id })}`
+      )
     );
   });
 });

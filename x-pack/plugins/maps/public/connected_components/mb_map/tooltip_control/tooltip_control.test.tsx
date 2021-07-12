@@ -80,6 +80,8 @@ const defaultProps = {
   geoFieldNames: [],
   openTooltips: [],
   hasLockedTooltips: false,
+  filterModeActive: false,
+  drawModeActive: false,
 };
 
 const hoverTooltipState = {
@@ -208,7 +210,6 @@ describe('TooltipControl', () => {
           {...defaultProps}
           closeOnClickTooltip={closeOnClickTooltipStub}
           openOnClickTooltip={openOnClickTooltipStub}
-          isDrawingFilter={true}
         />
       );
 

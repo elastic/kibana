@@ -39,9 +39,7 @@ export const getCase = async (
   caseId: string,
   includeComments: boolean = true,
   signal: AbortSignal
-): Promise<Case> => {
-  return Promise.resolve(basicCase);
-};
+): Promise<Case> => Promise.resolve(basicCase);
 
 export const getCasesStatus = async (signal: AbortSignal): Promise<CasesStatus> =>
   Promise.resolve(casesStatus);

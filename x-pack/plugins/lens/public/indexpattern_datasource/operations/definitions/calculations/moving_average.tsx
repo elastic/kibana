@@ -98,9 +98,9 @@ export const movingAverageOperation: OperationDefinition<
       isBucketed: false,
       scale: 'ratio',
       references: referenceIds,
-      timeScale: previousColumn?.timeScale,
+      timeShift: columnParams?.shift || previousColumn?.timeShift,
       filter: getFilter(previousColumn, columnParams),
-      timeShift: previousColumn?.timeShift,
+      timeScale: previousColumn?.timeScale,
       params: {
         window,
         ...getFormatFromPreviousColumn(previousColumn),
@@ -137,7 +137,7 @@ export const movingAverageOperation: OperationDefinition<
     signature: i18n.translate('xpack.lens.indexPattern.moving_average.signature', {
       defaultMessage: 'metric: number, [window]: number',
     }),
-    description: i18n.translate('xpack.lens.indexPattern.movingAverage.documentation', {
+    description: i18n.translate('xpack.lens.indexPattern.movingAverage.documentation.markdown', {
       defaultMessage: `
 Calculates the moving average of a metric over time, averaging the last n-th values to calculate the current value. To use this function, you need to configure a date histogram dimension as well.
 The default window value is {defaultValue}.

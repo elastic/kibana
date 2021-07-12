@@ -20,7 +20,7 @@ interface AdditionalBreadcrumbOptions {
 type Breadcrumb = ChromeBreadcrumb & Partial<AdditionalBreadcrumbOptions>;
 
 const BASE_BREADCRUMB: Breadcrumb = {
-  href: pagePathGetters.overview()[1],
+  href: pagePathGetters.base()[1],
   text: i18n.translate('xpack.fleet.breadcrumbs.appTitle', {
     defaultMessage: 'Fleet',
   }),
@@ -38,20 +38,11 @@ const breadcrumbGetters: {
   [key in Page]?: (values: DynamicPagePathValues) => Breadcrumb[];
 } = {
   base: () => [BASE_BREADCRUMB],
-  overview: () => [
-    BASE_BREADCRUMB,
-    {
-      text: i18n.translate('xpack.fleet.breadcrumbs.overviewPageTitle', {
-        defaultMessage: 'Overview',
-      }),
-    },
-  ],
-
   policies: () => [
     BASE_BREADCRUMB,
     {
       text: i18n.translate('xpack.fleet.breadcrumbs.policiesPageTitle', {
-        defaultMessage: 'Policies',
+        defaultMessage: 'Agent policies',
       }),
     },
   ],
@@ -59,7 +50,7 @@ const breadcrumbGetters: {
     BASE_BREADCRUMB,
     {
       text: i18n.translate('xpack.fleet.breadcrumbs.policiesPageTitle', {
-        defaultMessage: 'Policies',
+        defaultMessage: 'Agent policies',
       }),
     },
   ],
@@ -68,7 +59,7 @@ const breadcrumbGetters: {
     {
       href: pagePathGetters.policies()[1],
       text: i18n.translate('xpack.fleet.breadcrumbs.policiesPageTitle', {
-        defaultMessage: 'Policies',
+        defaultMessage: 'Agent policies',
       }),
     },
     { text: policyName },
@@ -78,7 +69,7 @@ const breadcrumbGetters: {
     {
       href: pagePathGetters.policies()[1],
       text: i18n.translate('xpack.fleet.breadcrumbs.policiesPageTitle', {
-        defaultMessage: 'Policies',
+        defaultMessage: 'Agent policies',
       }),
     },
     {
@@ -109,7 +100,7 @@ const breadcrumbGetters: {
     {
       href: pagePathGetters.policies()[1],
       text: i18n.translate('xpack.fleet.breadcrumbs.policiesPageTitle', {
-        defaultMessage: 'Policies',
+        defaultMessage: 'Agent policies',
       }),
     },
     {
@@ -122,7 +113,7 @@ const breadcrumbGetters: {
       }),
     },
   ],
-  fleet: () => [
+  agent_list: () => [
     BASE_BREADCRUMB,
     {
       text: i18n.translate('xpack.fleet.breadcrumbs.agentsPageTitle', {
@@ -130,32 +121,18 @@ const breadcrumbGetters: {
       }),
     },
   ],
-  fleet_agent_list: () => [
+  agent_details: ({ agentHost }) => [
     BASE_BREADCRUMB,
     {
-      text: i18n.translate('xpack.fleet.breadcrumbs.agentsPageTitle', {
-        defaultMessage: 'Agents',
-      }),
-    },
-  ],
-  fleet_agent_details: ({ agentHost }) => [
-    BASE_BREADCRUMB,
-    {
-      href: pagePathGetters.fleet()[1],
+      href: pagePathGetters.agent_list({})[1],
       text: i18n.translate('xpack.fleet.breadcrumbs.agentsPageTitle', {
         defaultMessage: 'Agents',
       }),
     },
     { text: agentHost },
   ],
-  fleet_enrollment_tokens: () => [
+  enrollment_tokens: () => [
     BASE_BREADCRUMB,
-    {
-      href: pagePathGetters.fleet()[1],
-      text: i18n.translate('xpack.fleet.breadcrumbs.agentsPageTitle', {
-        defaultMessage: 'Agents',
-      }),
-    },
     {
       text: i18n.translate('xpack.fleet.breadcrumbs.enrollmentTokensPageTitle', {
         defaultMessage: 'Enrollment tokens',

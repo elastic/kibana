@@ -16,6 +16,7 @@ import {
   EuiTableFieldDataColumnType,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
 } from '@elastic/eui';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
@@ -25,13 +26,15 @@ import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { CaseDetailsHrefSchema, CaseDetailsLink, CasesNavigation } from '../links';
 import * as i18n from './translations';
-import { Status } from '../status';
 import { getSubCasesStatusCountsBadges, isSubCase } from './helpers';
 import { ALERTS } from '../../common/translations';
 import { getActions } from './actions';
 import { UpdateCase } from '../../containers/use_get_cases';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
+import { useKibana } from '../../common/lib/kibana';
+import { StatusContextMenu } from '../case_action_bar/status_context_menu';
+import { TruncatedText } from '../truncated_text';
 
 export type CasesColumns =
   | EuiTableActionsColumnType<Case>
@@ -62,6 +65,7 @@ export interface GetCasesColumn {
   isLoadingCases: string[];
   refreshCases?: (a?: boolean) => void;
   showActions: boolean;
+  userCanCrud: boolean;
 }
 export const useCasesColumns = ({
   caseDetailsNavigation,
@@ -72,6 +76,7 @@ export const useCasesColumns = ({
   isLoadingCases,
   refreshCases,
   showActions,
+  userCanCrud,
 }: GetCasesColumn): CasesColumns[] => {
   // Delete case
   const {
@@ -113,9 +118,8 @@ export const useCasesColumns = ({
     () =>
       getActions({
         deleteCaseOnClick: toggleDeleteModal,
-        dispatchUpdate: handleDispatchUpdate,
       }),
-    [toggleDeleteModal, handleDispatchUpdate]
+    [toggleDeleteModal]
   );
 
   useEffect(() => {
@@ -142,10 +146,10 @@ export const useCasesColumns = ({
                 subCaseId={isSubCase(theCase) ? theCase.id : undefined}
                 title={theCase.title}
               >
-                {theCase.title}
+                <TruncatedText text={theCase.title} />
               </CaseDetailsLink>
             ) : (
-              <span>{theCase.title}</span>
+              <TruncatedText text={theCase.title} />
             );
           return theCase.status !== CaseStatuses.closed ? (
             caseDetailsLinkComponent
@@ -268,25 +272,26 @@ export const useCasesColumns = ({
       },
     },
     {
-      name: i18n.INCIDENT_MANAGEMENT_SYSTEM,
-      render: (theCase: Case) => {
-        if (theCase.externalService != null) {
-          return renderStringField(
-            `${theCase.externalService.connectorName}`,
-            `case-table-column-connector`
-          );
-        }
-        return getEmptyTagValue();
-      },
-    },
-    {
       name: i18n.STATUS,
       render: (theCase: Case) => {
         if (theCase?.subCases == null || theCase.subCases.length === 0) {
           if (theCase.status == null || theCase.type === CaseType.collection) {
             return getEmptyTagValue();
           }
-          return <Status type={theCase.status} />;
+          return (
+            <StatusContextMenu
+              currentStatus={theCase.status}
+              disabled={!userCanCrud || isLoadingCases.length > 0}
+              onStatusChanged={(status) =>
+                handleDispatchUpdate({
+                  updateKey: 'status',
+                  updateValue: status,
+                  caseId: theCase.id,
+                  version: theCase.version,
+                })
+              }
+            />
+          );
         }
 
         const badges = getSubCasesStatusCountsBadges(theCase.subCases);
@@ -306,7 +311,6 @@ export const useCasesColumns = ({
                 <ConfirmDeleteCaseModal
                   caseTitle={deleteThisCase.title}
                   isModalVisible={isDisplayConfirmDeleteModal}
-                  isPlural={false}
                   onCancel={handleToggleModal}
                   onConfirm={handleOnDeleteConfirm.bind(null, [deleteThisCase])}
                 />
@@ -323,36 +327,48 @@ interface Props {
   theCase: Case;
 }
 
-export const ExternalServiceColumn: React.FC<Props> = ({ theCase }) => {
-  const handleRenderDataToPush = useCallback(() => {
-    const lastCaseUpdate = theCase.updatedAt != null ? new Date(theCase.updatedAt) : null;
-    const lastCasePush =
-      theCase.externalService?.pushedAt != null
-        ? new Date(theCase.externalService?.pushedAt)
-        : null;
-    const hasDataToPush =
-      lastCasePush === null ||
-      (lastCasePush != null &&
-        lastCaseUpdate != null &&
-        lastCasePush.getTime() < lastCaseUpdate?.getTime());
-    return (
-      <p>
-        <EuiLink
-          data-test-subj={`case-table-column-external`}
-          href={theCase.externalService?.externalUrl}
-          target="_blank"
-          aria-label={i18n.SERVICENOW_LINK_ARIA}
-        >
-          {theCase.externalService?.externalTitle}
-        </EuiLink>
-        {hasDataToPush
-          ? renderStringField(i18n.REQUIRES_UPDATE, `case-table-column-external-requiresUpdate`)
-          : renderStringField(i18n.UP_TO_DATE, `case-table-column-external-upToDate`)}
-      </p>
-    );
-  }, [theCase]);
-  if (theCase.externalService !== null) {
-    return handleRenderDataToPush();
+const IconWrapper = styled.span`
+  svg {
+    height: 20px !important;
+    position: relative;
+    top: 3px;
+    width: 20px !important;
   }
-  return renderStringField(i18n.NOT_PUSHED, `case-table-column-external-notPushed`);
+`;
+export const ExternalServiceColumn: React.FC<Props> = ({ theCase }) => {
+  const { triggersActionsUi } = useKibana().services;
+
+  if (theCase.externalService == null) {
+    return renderStringField(i18n.NOT_PUSHED, `case-table-column-external-notPushed`);
+  }
+
+  const lastCaseUpdate = theCase.updatedAt != null ? new Date(theCase.updatedAt) : null;
+  const lastCasePush =
+    theCase.externalService?.pushedAt != null ? new Date(theCase.externalService?.pushedAt) : null;
+  const hasDataToPush =
+    lastCasePush === null ||
+    (lastCaseUpdate != null && lastCasePush.getTime() < lastCaseUpdate?.getTime());
+  return (
+    <p>
+      <IconWrapper>
+        <EuiIcon
+          size="original"
+          title={theCase.externalService?.connectorName}
+          type={triggersActionsUi.actionTypeRegistry.get(theCase.connector.type)?.iconClass ?? ''}
+        />
+      </IconWrapper>
+      <EuiLink
+        data-test-subj={`case-table-column-external`}
+        title={theCase.externalService?.connectorName}
+        href={theCase.externalService?.externalUrl}
+        target="_blank"
+        aria-label={i18n.PUSH_LINK_ARIA(theCase.externalService?.connectorName)}
+      >
+        {theCase.externalService?.externalTitle}
+      </EuiLink>
+      {hasDataToPush
+        ? renderStringField(i18n.REQUIRES_UPDATE, `case-table-column-external-requiresUpdate`)
+        : renderStringField(i18n.UP_TO_DATE, `case-table-column-external-upToDate`)}
+    </p>
+  );
 };

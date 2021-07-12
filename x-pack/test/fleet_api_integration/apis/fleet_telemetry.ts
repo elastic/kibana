@@ -21,11 +21,21 @@ export default function (providerContext: FtrProviderContext) {
     let data: any = {};
 
     switch (status) {
-      case 'unhealthy':
+      case 'error':
         data = { last_checkin_status: 'error' };
+        break;
+      case 'degraded':
+        data = { last_checkin_status: 'degraded' };
         break;
       case 'offline':
         data = { last_checkin: '2017-06-07T18:59:04.498Z' };
+        break;
+      // Agent with last checkin status as error and currently unenrolling => should displayd updating status
+      case 'error-unenrolling':
+        data = {
+          last_checkin_status: 'error',
+          unenrollment_started_at: '2017-06-07T18:59:04.498Z',
+        };
         break;
       default:
         data = { last_checkin: new Date().toISOString() };
@@ -85,12 +95,14 @@ export default function (providerContext: FtrProviderContext) {
       // Default Fleet Server
       await generateAgent('healthy', defaultFleetServerPolicy.id);
       await generateAgent('healthy', defaultFleetServerPolicy.id);
-      await generateAgent('unhealthy', defaultFleetServerPolicy.id);
+      await generateAgent('error', defaultFleetServerPolicy.id);
 
       // Default policy
       await generateAgent('healthy', defaultServerPolicy.id);
       await generateAgent('offline', defaultServerPolicy.id);
-      await generateAgent('unhealthy', defaultServerPolicy.id);
+      await generateAgent('error', defaultServerPolicy.id);
+      await generateAgent('degraded', defaultServerPolicy.id);
+      await generateAgent('error-unenrolling', defaultServerPolicy.id);
     });
 
     it('should return the correct telemetry values for fleet', async () => {
@@ -105,12 +117,12 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
 
       expect(apiResponse.stack_stats.kibana.plugins.fleet.agents).eql({
-        total_enrolled: 6,
+        total_enrolled: 8,
         healthy: 3,
-        unhealthy: 2,
+        unhealthy: 3,
         offline: 1,
-        updating: 0,
-        total_all_statuses: 6,
+        updating: 1,
+        total_all_statuses: 8,
       });
 
       expect(apiResponse.stack_stats.kibana.plugins.fleet.fleet_server).eql({

@@ -6,22 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { HttpSetup, CoreSetup } from '../../../../core/public';
-import {
-  IndexPatternCreationManager,
-  IndexPatternCreationConfig,
-  RollupIndexPatternCreationConfig,
-} from './creation';
-import {
-  IndexPatternListManager,
-  IndexPatternListConfig,
-  RollupIndexPatternListConfig,
-} from './list';
+import { HttpStart, CoreStart } from '../../../../core/public';
+import { IndexPatternCreationManager } from './creation';
+import { IndexPatternListManager } from './list';
 
-import { CONFIG_ROLLUPS } from '../constants';
-interface SetupDependencies {
-  httpClient: HttpSetup;
-  uiSettings: CoreSetup['uiSettings'];
+interface StartDependencies {
+  httpClient: HttpStart;
+  uiSettings: CoreStart['uiSettings'];
 }
 
 /**
@@ -38,23 +29,12 @@ export class IndexPatternManagementService {
     this.indexPatternListConfig = new IndexPatternListManager();
   }
 
-  public setup({ httpClient, uiSettings }: SetupDependencies) {
-    const creationManagerSetup = this.indexPatternCreationManager.setup(httpClient);
-    creationManagerSetup.addCreationConfig(IndexPatternCreationConfig);
+  public setup() {}
 
-    const indexPatternListConfigSetup = this.indexPatternListConfig.setup();
-    indexPatternListConfigSetup.addListConfig(IndexPatternListConfig);
-
-    if (uiSettings.get(CONFIG_ROLLUPS)) {
-      creationManagerSetup.addCreationConfig(RollupIndexPatternCreationConfig);
-      indexPatternListConfigSetup.addListConfig(RollupIndexPatternListConfig);
-    }
-  }
-
-  public start() {
+  public start({ httpClient, uiSettings }: StartDependencies) {
     return {
-      creation: this.indexPatternCreationManager.start(),
-      list: this.indexPatternListConfig.start(),
+      creation: this.indexPatternCreationManager.start({ httpClient, uiSettings }),
+      list: this.indexPatternListConfig.start({ uiSettings }),
     };
   }
 

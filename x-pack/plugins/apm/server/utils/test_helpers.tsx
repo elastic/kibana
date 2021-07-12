@@ -10,8 +10,8 @@ import { PromiseReturnType } from '../../../observability/typings/common';
 import {
   ESSearchRequest,
   ESSearchResponse,
-} from '../../../../../typings/elasticsearch';
-import { UIFilters } from '../../typings/ui_filters';
+} from '../../../../../src/core/types/elasticsearch';
+import { UxUIFilters } from '../../typings/ui_filters';
 
 interface Options {
   mockResponse?: (
@@ -26,7 +26,7 @@ interface MockSetup {
   apmEventClient: any;
   internalClient: any;
   config: APMConfig;
-  uiFilters: UIFilters;
+  uiFilters: UxUIFilters;
   indices: {
     /* eslint-disable @typescript-eslint/naming-convention */
     'apm_oss.sourcemapIndices': string;

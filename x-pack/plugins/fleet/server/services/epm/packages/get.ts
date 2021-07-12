@@ -28,7 +28,7 @@ import { getEsPackage } from '../archive/storage';
 import { getArchivePackage } from '../archive';
 import { normalizeKuery } from '../../saved_object';
 
-import { createInstallableFrom, isRequiredPackage } from './index';
+import { createInstallableFrom, isUnremovablePackage } from './index';
 
 export { getFile, SearchParams } from '../registry';
 
@@ -101,6 +101,8 @@ export async function getPackageSavedObjects(
   });
 }
 
+export const getInstallations = getPackageSavedObjects;
+
 export async function getPackageInfo(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
@@ -112,9 +114,17 @@ export async function getPackageInfo(options: {
     Registry.fetchFindLatestPackage(pkgName),
   ]);
 
+  // If no package version is provided, use the installed version in the response
+  let responsePkgVersion = pkgVersion || savedObject?.attributes.install_version;
+
+  // If no installed version of the given package exists, default to the latest version of the package
+  if (!responsePkgVersion) {
+    responsePkgVersion = latestPackage.version;
+  }
+
   const getPackageRes = await getPackageFromSource({
     pkgName,
-    pkgVersion,
+    pkgVersion: responsePkgVersion,
     savedObjectsClient,
     installedPkg: savedObject?.attributes,
   });
@@ -125,7 +135,7 @@ export async function getPackageInfo(options: {
     latestVersion: latestPackage.version,
     title: packageInfo.title || nameAsTitle(packageInfo.name),
     assets: Registry.groupPathsByService(paths || []),
-    removable: !isRequiredPackage(pkgName),
+    removable: !isUnremovablePackage(pkgName),
     notice: Registry.getNoticePath(paths || []),
   };
   const updated = { ...packageInfo, ...additions };

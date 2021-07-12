@@ -15,7 +15,7 @@ import { IIndexPattern } from 'src/plugins/data/common';
 import { MetricsSourceConfigurationProperties } from '../../../common/metrics_sources';
 import { DocumentTitle } from '../../components/document_title';
 import { HelpCenterContent } from '../../components/help_center_content';
-import { Header } from '../../components/header';
+import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
 import {
   MetricsExplorerOptionsContainer,
   DEFAULT_METRICS_EXPLORER_VIEW_STATE,
@@ -56,6 +56,8 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
 
   const kibana = useKibana();
 
+  useReadOnlyBadge(!uiCapabilities?.infrastructure?.save);
+
   const settingsLinkProps = useLinkProps({
     app: 'metrics',
     pathname: 'settings',
@@ -84,9 +86,9 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
 
                   {setHeaderActionMenu && (
                     <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu}>
-                      <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
+                      <EuiFlexGroup alignItems="center" gutterSize={'xs'} responsive={false}>
                         <EuiFlexItem grow={false}>
-                          <EuiButtonEmpty iconType="gear" {...settingsLinkProps}>
+                          <EuiButtonEmpty size={'xs'} color={'text'} {...settingsLinkProps}>
                             {settingsTabTitle}
                           </EuiButtonEmpty>
                         </EuiFlexItem>
@@ -111,17 +113,6 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                       </EuiFlexGroup>
                     </HeaderMenuPortal>
                   )}
-
-                  <Header
-                    breadcrumbs={[
-                      {
-                        text: i18n.translate('xpack.infra.header.infrastructureTitle', {
-                          defaultMessage: 'Metrics',
-                        }),
-                      },
-                    ]}
-                    readOnlyBadge={!uiCapabilities?.infrastructure?.save}
-                  />
                   <Switch>
                     <Route path={'/inventory'} component={SnapshotPage} />
                     <Route

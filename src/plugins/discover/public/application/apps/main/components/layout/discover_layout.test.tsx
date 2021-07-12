@@ -18,7 +18,6 @@ import { createSearchSourceMock } from '../../../../../../../data/common/search/
 import { IndexPattern, IndexPatternAttributes } from '../../../../../../../data/common';
 import { SavedObject } from '../../../../../../../../core/types';
 import { indexPatternWithTimefieldMock } from '../../../../../__mocks__/index_pattern_with_timefield';
-import { DiscoverSearchSessionManager } from '../../services/discover_search_session';
 import { GetStateReturn } from '../../services/discover_state';
 import { DiscoverLayoutProps } from './types';
 import { SavedSearchDataSubject } from '../../services/use_saved_search';
@@ -50,11 +49,12 @@ function getProps(indexPattern: IndexPattern): DiscoverLayoutProps {
     indexPattern,
     indexPatternList,
     navigateTo: jest.fn(),
+    onChangeIndexPattern: jest.fn(),
+    onUpdateQuery: jest.fn(),
     resetQuery: jest.fn(),
     savedSearch: savedSearchMock,
     savedSearchData$: savedSearch$,
     savedSearchRefetch$: new Subject(),
-    searchSessionManager: {} as DiscoverSearchSessionManager,
     searchSource: searchSourceMock,
     services,
     state: { columns: [] },

@@ -91,7 +91,6 @@ export const EventSchema = schema.maybe(
         ruleset: ecsString(),
         uuid: ecsString(),
         version: ecsString(),
-        namespace: ecsString(),
       })
     ),
     user: schema.maybe(
@@ -102,6 +101,12 @@ export const EventSchema = schema.maybe(
     kibana: schema.maybe(
       schema.object({
         server_uuid: ecsString(),
+        task: schema.maybe(
+          schema.object({
+            scheduled: ecsDate(),
+            schedule_delay: ecsNumber(),
+          })
+        ),
         alerting: schema.maybe(
           schema.object({
             instance_id: ecsString(),

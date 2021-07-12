@@ -32,6 +32,7 @@ import {
   getActionError,
   getFormEntry,
   showDeleteModal,
+  getTotalCountListItems,
 } from '../store/selector';
 import { PaginatedContent, PaginatedContentProps } from '../../../components/paginated_content';
 import { Immutable, ListPageRouteState } from '../../../../../common/endpoint/types';
@@ -66,6 +67,7 @@ export const EventFiltersListPage = memo(() => {
   const isActionError = useEventFiltersSelector(getActionError);
   const formEntry = useEventFiltersSelector(getFormEntry);
   const listItems = useEventFiltersSelector(getListItems);
+  const totalCountListItems = useEventFiltersSelector(getTotalCountListItems);
   const pagination = useEventFiltersSelector(getListPagination);
   const isLoading = useEventFiltersSelector(getListIsLoading);
   const fetchError = useEventFiltersSelector(getListFetchError);
@@ -175,9 +177,13 @@ export const EventFiltersListPage = memo(() => {
     [navigateCallback]
   );
 
-  const handleOnSearch = useCallback((query: string) => navigateCallback({ filter: query }), [
-    navigateCallback,
-  ]);
+  const handleOnSearch = useCallback(
+    (query: string) => {
+      dispatch({ type: 'eventFiltersForceRefresh', payload: { forceRefresh: true } });
+      navigateCallback({ filter: query });
+    },
+    [navigateCallback, dispatch]
+  );
 
   return (
     <AdministrationListPage
@@ -205,7 +211,7 @@ export const EventFiltersListPage = memo(() => {
           >
             <FormattedMessage
               id="xpack.securitySolution.eventFilters.list.pageAddButton"
-              defaultMessage="Add Endpoint Event Filter"
+              defaultMessage="Add Event Filter"
             />
           </EuiButton>
         )
@@ -235,7 +241,7 @@ export const EventFiltersListPage = memo(() => {
             <FormattedMessage
               id="xpack.securitySolution.eventFilters.list.totalCount"
               defaultMessage="{total, plural, one {# event filter} other {# event filters}}"
-              values={{ total: listItems.length }}
+              values={{ total: totalCountListItems }}
             />
           </EuiText>
           <EuiHorizontalRule margin="m" />

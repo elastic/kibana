@@ -19,13 +19,11 @@ export interface AllCasesProps extends Owner {
   userCanCrud: boolean;
 }
 
-export const AllCases: React.FC<AllCasesProps> = (props) => {
-  return (
-    <OwnerProvider owner={props.owner}>
-      <AllCasesGeneric {...props} />
-    </OwnerProvider>
-  );
-};
+export const AllCases: React.FC<AllCasesProps> = (props) => (
+  <OwnerProvider owner={props.owner}>
+    <AllCasesGeneric {...props} />
+  </OwnerProvider>
+);
 
 // eslint-disable-next-line import/no-default-export
 export { AllCases as default };

@@ -5,14 +5,24 @@
  * 2.0.
  */
 
-import { CommentResponse } from '../../../common/api';
+import { AlertResponse, CommentResponse } from '../../../common';
+import { CasesClient } from '../client';
 
 import { CasesClientInternal } from '../client_internal';
 import { IAllCommentsResponse, ICaseResponse, ICommentsResponse } from '../typedoc_interfaces';
 import { CasesClientArgs } from '../types';
 import { AddArgs, addComment } from './add';
 import { DeleteAllArgs, deleteAll, DeleteArgs, deleteComment } from './delete';
-import { find, FindArgs, get, getAll, GetAllArgs, GetArgs } from './get';
+import {
+  find,
+  FindArgs,
+  get,
+  getAll,
+  getAllAlertsAttachToCase,
+  GetAllAlertsAttachToCase,
+  GetAllArgs,
+  GetArgs,
+} from './get';
 import { update, UpdateArgs } from './update';
 
 /**
@@ -36,6 +46,10 @@ export interface AttachmentsSubClient {
    */
   find(findArgs: FindArgs): Promise<ICommentsResponse>;
   /**
+   * Retrieves all alerts attach to a case given a single case ID
+   */
+  getAllAlertsAttachToCase(params: GetAllAlertsAttachToCase): Promise<AlertResponse>;
+  /**
    * Gets all attachments for a single case.
    */
   getAll(getAllArgs: GetAllArgs): Promise<IAllCommentsResponse>;
@@ -58,6 +72,7 @@ export interface AttachmentsSubClient {
  */
 export const createAttachmentsSubClient = (
   clientArgs: CasesClientArgs,
+  casesClient: CasesClient,
   casesClientInternal: CasesClientInternal
 ): AttachmentsSubClient => {
   const attachmentSubClient: AttachmentsSubClient = {
@@ -65,6 +80,8 @@ export const createAttachmentsSubClient = (
     deleteAll: (deleteAllArgs: DeleteAllArgs) => deleteAll(deleteAllArgs, clientArgs),
     delete: (deleteArgs: DeleteArgs) => deleteComment(deleteArgs, clientArgs),
     find: (findArgs: FindArgs) => find(findArgs, clientArgs),
+    getAllAlertsAttachToCase: (params: GetAllAlertsAttachToCase) =>
+      getAllAlertsAttachToCase(params, clientArgs, casesClient),
     getAll: (getAllArgs: GetAllArgs) => getAll(getAllArgs, clientArgs),
     get: (getArgs: GetArgs) => get(getArgs, clientArgs),
     update: (updateArgs: UpdateArgs) => update(updateArgs, clientArgs),

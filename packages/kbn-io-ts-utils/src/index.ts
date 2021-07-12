@@ -12,3 +12,4 @@ export { strictKeysRt } from './strict_keys_rt';
 export { isoToEpochRt } from './iso_to_epoch_rt';
 export { toNumberRt } from './to_number_rt';
 export { toBooleanRt } from './to_boolean_rt';
+export { toJsonSchema } from './to_json_schema';

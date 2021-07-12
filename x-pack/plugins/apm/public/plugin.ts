@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -23,6 +22,7 @@ import type {
   DataPublicPluginStart,
 } from '../../../../src/plugins/data/public';
 import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+import type { FleetStart } from '../../fleet/public';
 import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import type {
   PluginSetupContract as AlertingPluginPublicSetup,
@@ -44,6 +44,10 @@ import type {
 } from '../../triggers_actions_ui/public';
 import { registerApmAlerts } from './components/alerting/register_apm_alerts';
 import { featureCatalogueEntry } from './featureCatalogueEntry';
+import {
+  getApmEnrollmentFlyoutData,
+  LazyApmCustomAssetsExtension,
+} from './components/fleet_integration';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 
@@ -70,6 +74,7 @@ export interface ApmPluginStartDeps {
   ml?: MlPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   observability: ObservabilityPublicStart;
+  fleet?: FleetStart;
 }
 
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
@@ -122,7 +127,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                 entries: [
                   {
                     label: i18n.translate('xpack.apm.ux.overview.heading', {
-                      defaultMessage: 'Overview',
+                      defaultMessage: 'Dashboard',
                     }),
                     app: 'ux',
                     path: '/',
@@ -140,16 +145,52 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     );
 
     const getApmDataHelper = async () => {
-      const {
-        fetchObservabilityOverviewPageData,
-        getHasData,
-        createCallApmApi,
-      } = await import('./services/rest/apm_observability_overview_fetchers');
+      const { fetchObservabilityOverviewPageData, getHasData } = await import(
+        './services/rest/apm_observability_overview_fetchers'
+      );
+      const { hasFleetApmIntegrations } = await import(
+        './tutorial/tutorial_apm_fleet_check'
+      );
+
+      const { createCallApmApi } = await import(
+        './services/rest/createCallApmApi'
+      );
+
       // have to do this here as well in case app isn't mounted yet
       createCallApmApi(core);
 
-      return { fetchObservabilityOverviewPageData, getHasData };
+      return {
+        fetchObservabilityOverviewPageData,
+        getHasData,
+        hasFleetApmIntegrations,
+      };
     };
+
+    // Registers a status check callback for the tutorial to call and verify if the APM integration is installed on fleet.
+    pluginSetupDeps.home?.tutorials.registerCustomStatusCheck(
+      'apm_fleet_server_status_check',
+      async () => {
+        const { hasFleetApmIntegrations } = await getApmDataHelper();
+        return hasFleetApmIntegrations();
+      }
+    );
+
+    // Registers custom component that is going to be render on fleet section
+    pluginSetupDeps.home?.tutorials.registerCustomComponent(
+      'TutorialFleetInstructions',
+      () => import('./tutorial/tutorial_fleet_instructions')
+    );
+
+    pluginSetupDeps.home?.tutorials.registerCustomComponent(
+      'TutorialConfigAgent',
+      () => import('./tutorial/config_agent')
+    );
+
+    pluginSetupDeps.home?.tutorials.registerCustomComponent(
+      'TutorialConfigAgentRumScript',
+      () => import('./tutorial/config_agent/rum_script')
+    );
+
     plugins.observability.dashboard.register({
       appName: 'apm',
       hasData: async () => {
@@ -163,11 +204,12 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     });
 
     const getUxDataHelper = async () => {
-      const {
-        fetchUxOverviewDate,
-        hasRumData,
-        createCallApmApi,
-      } = await import('./components/app/RumDashboard/ux_overview_fetchers');
+      const { fetchUxOverviewDate, hasRumData } = await import(
+        './components/app/RumDashboard/ux_overview_fetchers'
+      );
+      const { createCallApmApi } = await import(
+        './services/rest/createCallApmApi'
+      );
       // have to do this here as well in case app isn't mounted yet
       createCallApmApi(core);
 
@@ -267,5 +309,23 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
     return {};
   }
-  public start(core: CoreStart, plugins: ApmPluginStartDeps) {}
+  public start(core: CoreStart, plugins: ApmPluginStartDeps) {
+    const { fleet } = plugins;
+    if (fleet) {
+      const agentEnrollmentExtensionData = getApmEnrollmentFlyoutData();
+
+      fleet.registerExtension({
+        package: 'apm',
+        view: 'agent-enrollment-flyout',
+        title: agentEnrollmentExtensionData.title,
+        Component: agentEnrollmentExtensionData.Component,
+      });
+
+      fleet.registerExtension({
+        package: 'apm',
+        view: 'package-detail-assets',
+        Component: LazyApmCustomAssetsExtension,
+      });
+    }
+  }
 }

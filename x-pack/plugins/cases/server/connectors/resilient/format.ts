@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConnectorResillientTypeFields } from '../../../common/api';
+import { ConnectorResillientTypeFields } from '../../../common';
 import { Format } from './types';
 
 export const format: Format = (theCase, alerts) => {

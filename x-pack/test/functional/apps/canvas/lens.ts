@@ -22,6 +22,10 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
       });
     });
 
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/canvas/lens');
+    });
+
     it('renders lens visualization', async () => {
       await PageObjects.header.waitUntilLoadingHasFinished();
 

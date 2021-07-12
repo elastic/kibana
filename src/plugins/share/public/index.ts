@@ -7,7 +7,9 @@
  */
 
 export { CSV_QUOTE_VALUES_SETTING, CSV_SEPARATOR_SETTING } from '../common/constants';
-export { LocatorDefinition } from '../common/url_service';
+
+export { LocatorDefinition, LocatorPublic, KibanaLocation } from '../common/url_service';
+export { parseSearchParams, formatSearchParams } from './url_service';
 
 export { UrlGeneratorStateMapping } from './url_generators/url_generator_definition';
 
@@ -28,6 +30,8 @@ export {
   UrlGeneratorContract,
   UrlGeneratorsService,
 } from './url_generators';
+
+export { useLocatorUrl } from '../common/url_service/locators/use_locator_url';
 
 import { SharePlugin } from './plugin';
 

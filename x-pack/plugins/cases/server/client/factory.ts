@@ -12,7 +12,7 @@ import {
   ElasticsearchClient,
 } from 'kibana/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../../security/server';
-import { SAVED_OBJECT_TYPES } from '../../common/constants';
+import { SAVED_OBJECT_TYPES } from '../../common';
 import { Authorization } from '../authorization/authorization';
 import { GetSpaceFn } from '../authorization/types';
 import {

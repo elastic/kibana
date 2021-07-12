@@ -11,7 +11,8 @@ import { delay } from 'bluebird';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  describe('uptime alerts', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/101984
+  describe.skip('uptime alerts', () => {
     const pageObjects = getPageObjects(['common', 'uptime']);
     const supertest = getService('supertest');
     const retry = getService('retry');
@@ -200,7 +201,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         } = alert;
         try {
           expect(actions).to.eql([]);
-          expect(alertTypeId).to.eql('xpack.uptime.alerts.tls');
+          expect(alertTypeId).to.eql('xpack.uptime.alerts.tlsCertificate');
           expect(consumer).to.eql('uptime');
           expect(tags).to.eql(['uptime', 'certs']);
           expect(params).to.eql({});

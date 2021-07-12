@@ -15,15 +15,23 @@
  */
 
 export * from './datatable_visualization/datatable_visualization';
+export * from './datatable_visualization';
 export * from './metric_visualization/metric_visualization';
+export * from './metric_visualization';
 export * from './pie_visualization/pie_visualization';
+export * from './pie_visualization';
 export * from './xy_visualization/xy_visualization';
+export * from './xy_visualization';
 export * from './heatmap_visualization/heatmap_visualization';
+export * from './heatmap_visualization';
 
 export * from './indexpattern_datasource/indexpattern';
+export * from './indexpattern_datasource';
 
 export * from './editor_frame_service/editor_frame';
-export * from './editor_frame_service/embeddable';
+export * from './editor_frame_service';
+export * from './embeddable';
 export * from './app_plugin/mounter';
 export * from './lens_attribute_service';
 export * from './lens_ui_telemetry';
+export * from './app_plugin/save_modal_container';

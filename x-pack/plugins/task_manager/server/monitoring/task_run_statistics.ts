@@ -7,7 +7,7 @@
 
 import { combineLatest, Observable } from 'rxjs';
 import { filter, startWith, map } from 'rxjs/operators';
-import { JsonObject, JsonValue } from 'src/plugins/kibana_utils/common';
+import { JsonObject, JsonValue } from '@kbn/common-utils';
 import { isNumber, mapValues } from 'lodash';
 import { AggregatedStatProvider, AggregatedStat } from './runtime_statistics_aggregator';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
@@ -103,6 +103,9 @@ type ResultFrequencySummary = ResultFrequency & {
 
 export interface SummarizedTaskRunStat extends JsonObject {
   drift: AveragedStat;
+  drift_by_type: {
+    [alertType: string]: AveragedStat;
+  };
   load: AveragedStat;
   execution: {
     duration: Record<string, AveragedStat>;

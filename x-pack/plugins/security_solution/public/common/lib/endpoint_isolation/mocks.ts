@@ -14,7 +14,6 @@ import { ISOLATE_HOST_ROUTE, UNISOLATE_HOST_ROUTE } from '../../../../common/end
 
 export const hostIsolationRequestBodyMock = (): HostIsolationRequestBody => {
   return {
-    agent_ids: ['fd8a122b-4c54-4c05-b295-111'],
     endpoint_ids: ['88c04a90-b19c-11eb-b838-222'],
     alert_ids: ['88c04a90-b19c-11eb-b838-333'],
     case_ids: ['88c04a90-b19c-11eb-b838-444'],

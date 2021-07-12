@@ -24,7 +24,7 @@ import { QueryRuleParams, SavedQueryRuleParams } from '../../schemas/rule_schema
 
 export const queryExecutor = async ({
   rule,
-  tuples,
+  tuple,
   listClient,
   exceptionItems,
   services,
@@ -37,7 +37,7 @@ export const queryExecutor = async ({
   wrapHits,
 }: {
   rule: SavedObject<AlertAttributes<QueryRuleParams | SavedQueryRuleParams>>;
-  tuples: RuleRangeTuple[];
+  tuple: RuleRangeTuple;
   listClient: ListClient;
   exceptionItems: ExceptionListItemSchema[];
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
@@ -63,7 +63,7 @@ export const queryExecutor = async ({
   });
 
   return searchAfterAndBulkCreate({
-    tuples,
+    tuple,
     listClient,
     exceptionsList: exceptionItems,
     ruleSO: rule,

@@ -20,7 +20,6 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiIcon,
-  EuiOverlayMask,
 } from '@elastic/eui';
 
 import { SolutionName, ProjectStatus, ProjectID, Project, EnvironmentName } from '../../../common';
@@ -124,30 +123,32 @@ export const LabsFlyout = (props: Props) => {
   );
 
   return (
-    <EuiOverlayMask onClick={() => onClose()} headerZindexLocation="below">
-      <EuiFlyout onClose={onClose} hideCloseButton={true}>
-        <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="m">
-            <h2>
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="beaker" size="l" />
-                </EuiFlexItem>
-                <EuiFlexItem>{strings.getTitleLabel()}</EuiFlexItem>
-              </EuiFlexGroup>
-            </h2>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText size="s" color="subdued">
-            <p>{strings.getDescriptionMessage()}</p>
-          </EuiText>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          <ProjectList {...{ projects, solutions, onStatusChange }} />
-        </EuiFlyoutBody>
-        {footer}
-      </EuiFlyout>
-    </EuiOverlayMask>
+    <EuiFlyout
+      onClose={onClose}
+      hideCloseButton={true}
+      maskProps={{ headerZindexLocation: 'below' }}
+    >
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="m">
+          <h2>
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="beaker" size="l" />
+              </EuiFlexItem>
+              <EuiFlexItem>{strings.getTitleLabel()}</EuiFlexItem>
+            </EuiFlexGroup>
+          </h2>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiText size="s" color="subdued">
+          <p>{strings.getDescriptionMessage()}</p>
+        </EuiText>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <ProjectList {...{ projects, solutions, onStatusChange }} />
+      </EuiFlyoutBody>
+      {footer}
+    </EuiFlyout>
   );
 };
 

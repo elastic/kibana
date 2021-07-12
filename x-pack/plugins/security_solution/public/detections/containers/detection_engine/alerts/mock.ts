@@ -1046,6 +1046,6 @@ export const mockHostIsolation: HostIsolationResponse = {
 };
 
 export const mockCaseIdsFromAlertId: CasesFromAlertsResponse = [
-  '818601a0-b26b-11eb-8759-6b318e8cf4bc',
-  '8a774850-b26b-11eb-8759-6b318e8cf4bc',
+  { id: '818601a0-b26b-11eb-8759-6b318e8cf4bc', title: 'Case 1' },
+  { id: '8a774850-b26b-11eb-8759-6b318e8cf4bc', title: 'Case 2' },
 ];

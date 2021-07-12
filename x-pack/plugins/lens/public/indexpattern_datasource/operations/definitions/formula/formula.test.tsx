@@ -413,13 +413,13 @@ describe('formula', () => {
         ).newLayer
       ).toEqual({
         ...layer,
-        columnOrder: ['col1X0', 'col1X1', 'col1'],
+        columnOrder: ['col1X0', 'col1'],
         columns: {
           ...layer.columns,
           col1: {
             ...currentColumn,
             label: 'average(bytes)',
-            references: ['col1X1'],
+            references: ['col1X0'],
             params: {
               ...currentColumn.params,
               formula: 'average(bytes)',
@@ -430,22 +430,51 @@ describe('formula', () => {
             customLabel: true,
             dataType: 'number',
             isBucketed: false,
-            label: 'col1X0',
+            label: 'Part of average(bytes)',
             operationType: 'average',
             scale: 'ratio',
             sourceField: 'bytes',
             timeScale: false,
           },
-          col1X1: {
+        },
+      });
+    });
+
+    it('should create a valid formula expression for numeric literals', () => {
+      expect(
+        regenerateLayerFromAst(
+          '0',
+          layer,
+          'col1',
+          currentColumn,
+          indexPattern,
+          operationDefinitionMap
+        ).newLayer
+      ).toEqual({
+        ...layer,
+        columnOrder: ['col1X0', 'col1'],
+        columns: {
+          ...layer.columns,
+          col1: {
+            ...currentColumn,
+            label: '0',
+            references: ['col1X0'],
+            params: {
+              ...currentColumn.params,
+              formula: '0',
+              isFormulaBroken: false,
+            },
+          },
+          col1X0: {
             customLabel: true,
             dataType: 'number',
             isBucketed: false,
-            label: 'col1X1',
+            label: 'Part of 0',
             operationType: 'math',
             params: {
-              tinymathAst: 'col1X0',
+              tinymathAst: 0,
             },
-            references: ['col1X0'],
+            references: [],
             scale: 'ratio',
           },
         },
@@ -568,8 +597,8 @@ describe('formula', () => {
         ).locations
       ).toEqual({
         col1X0: { min: 15, max: 29 },
-        col1X2: { min: 0, max: 41 },
-        col1X3: { min: 42, max: 50 },
+        col1X1: { min: 0, max: 41 },
+        col1X2: { min: 42, max: 50 },
       });
     });
   });

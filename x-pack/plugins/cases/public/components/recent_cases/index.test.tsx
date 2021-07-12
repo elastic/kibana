@@ -32,6 +32,7 @@ const defaultProps = {
     href: 'create-details-href',
     onClick: jest.fn(),
   },
+  hasWritePermissions: true,
   maxCasesToShow: 10,
   owner: [SECURITY_SOLUTION_OWNER],
 };
@@ -99,5 +100,22 @@ describe('RecentCases', () => {
     const element = getByTestId('myRecentlyReported');
     userEvent.click(element);
     expect(setFilters).toHaveBeenCalled();
+  });
+
+  it('it resets the reporters when changing from my recently reported cases to recent cases', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <RecentCases {...defaultProps} />
+      </TestProviders>
+    );
+
+    const myRecentCasesElement = getByTestId('myRecentlyReported');
+    const recentCasesElement = getByTestId('recentlyCreated');
+    userEvent.click(myRecentCasesElement);
+    userEvent.click(recentCasesElement);
+
+    const mockCalls = setFilters.mock.calls;
+    expect(mockCalls[0][0].reporters.length).toBeGreaterThan(0);
+    expect(mockCalls[1][0]).toEqual({ reporters: [] });
   });
 });

@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { CommentType } from '../../../common';
+import { CommentType, ConnectorTypes } from '../../../common';
 import { validateConnector } from './validators';
 
 // Reserved for future implementation
@@ -77,23 +77,29 @@ const ServiceNowSIRFieldsSchema = schema.object({
   subcategory: schema.nullable(schema.string()),
 });
 
+const SwimlaneFieldsSchema = schema.object({
+  caseId: schema.nullable(schema.string()),
+});
+
 const NoneFieldsSchema = schema.nullable(schema.object({}));
 
 const ReducedConnectorFieldsSchema: { [x: string]: any } = {
-  '.jira': JiraFieldsSchema,
-  '.resilient': ResilientFieldsSchema,
-  '.servicenow-sir': ServiceNowSIRFieldsSchema,
+  [ConnectorTypes.jira]: JiraFieldsSchema,
+  [ConnectorTypes.resilient]: ResilientFieldsSchema,
+  [ConnectorTypes.serviceNowSIR]: ServiceNowSIRFieldsSchema,
+  [ConnectorTypes.swimlane]: SwimlaneFieldsSchema,
 };
 
 export const ConnectorProps = {
   id: schema.string(),
   name: schema.string(),
   type: schema.oneOf([
-    schema.literal('.servicenow'),
-    schema.literal('.jira'),
-    schema.literal('.resilient'),
-    schema.literal('.servicenow-sir'),
-    schema.literal('.none'),
+    schema.literal(ConnectorTypes.jira),
+    schema.literal(ConnectorTypes.none),
+    schema.literal(ConnectorTypes.resilient),
+    schema.literal(ConnectorTypes.serviceNowITSM),
+    schema.literal(ConnectorTypes.serviceNowSIR),
+    schema.literal(ConnectorTypes.swimlane),
   ]),
   // Chain of conditional schemes
   fields: Object.keys(ReducedConnectorFieldsSchema).reduce(
@@ -106,7 +112,7 @@ export const ConnectorProps = {
       ),
     schema.conditional(
       schema.siblingRef('type'),
-      '.servicenow',
+      ConnectorTypes.serviceNowITSM,
       ServiceNowITSMFieldsSchema,
       NoneFieldsSchema
     )

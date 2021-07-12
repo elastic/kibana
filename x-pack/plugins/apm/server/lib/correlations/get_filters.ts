@@ -6,7 +6,7 @@
  */
 
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { ESFilter } from '../../../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../../src/core/types/elasticsearch';
 import { environmentQuery, rangeQuery, kqlQuery } from '../../utils/queries';
 import {
   SERVICE_NAME,

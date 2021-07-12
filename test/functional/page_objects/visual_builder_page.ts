@@ -132,19 +132,18 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async clearMarkdown() {
-    // Since we use ACE editor and that isn't really storing its value inside
-    // a textarea we must really select all text and remove it, and cannot use
-    // clearValue().
     await this.retry.waitForWithTimeout('text area is cleared', 20000, async () => {
-      const editor = await this.testSubjects.find('codeEditorContainer');
-      const $ = await editor.parseDomContent();
-      const value = $('.ace_line').text();
-      if (value.length > 0) {
-        this.log.debug('Clearing text area input');
-        this.waitForMarkdownTextAreaCleaned();
-      }
+      const input = await this.find.byCssSelector('.tvbMarkdownEditor__editor textarea');
+      await input.clickMouseButton();
+      await input.clearValueWithKeyboard();
 
-      return value.length === 0;
+      const linesContainer = await this.find.byCssSelector(
+        '.tvbMarkdownEditor__editor .view-lines'
+      );
+      // lines of code in monaco-editor
+      // text is not present in textarea
+      const lines = await linesContainer.findAllByClassName('mtk1');
+      return lines.length === 0;
     });
   }
 
@@ -276,6 +275,13 @@ export class VisualBuilderPageObject extends FtrService {
   ) {
     const formatterEl = await this.testSubjects.find('tsvbDataFormatPicker');
     await this.comboBox.setElement(formatterEl, formatter, { clickWithMouse: true });
+  }
+
+  public async setDrilldownUrl(value: string) {
+    const drilldownEl = await this.testSubjects.find('drilldownUrl');
+
+    await drilldownEl.clearValue();
+    await drilldownEl.type(value);
   }
 
   /**
@@ -448,7 +454,9 @@ export class VisualBuilderPageObject extends FtrService {
     const metricsIndexPatternInput = 'metricsIndexPatternInput';
 
     if (useKibanaIndices !== undefined) {
-      await this.switchIndexPatternSelectionMode(useKibanaIndices);
+      await this.retry.try(async () => {
+        await this.switchIndexPatternSelectionMode(useKibanaIndices);
+      });
     }
 
     if (useKibanaIndices === false) {
@@ -564,7 +572,7 @@ export class VisualBuilderPageObject extends FtrService {
 
   public async checkColorPickerPopUpIsPresent(): Promise<void> {
     this.log.debug(`Check color picker popup is present`);
-    await this.testSubjects.existOrFail('colorPickerPopover', { timeout: 5000 });
+    await this.testSubjects.existOrFail('euiColorPickerPopover', { timeout: 5000 });
   }
 
   public async changePanelPreview(nth: number = 0): Promise<void> {
@@ -627,7 +635,10 @@ export class VisualBuilderPageObject extends FtrService {
     return await this.find.allByCssSelector('.tvbSeriesEditor');
   }
 
-  public async setMetricsGroupByTerms(field: string) {
+  public async setMetricsGroupByTerms(
+    field: string,
+    filtering: { include?: string; exclude?: string } = {}
+  ) {
     const groupBy = await this.find.byCssSelector(
       '.tvbAggRow--split [data-test-subj="comboBoxInput"]'
     );
@@ -635,6 +646,22 @@ export class VisualBuilderPageObject extends FtrService {
     await this.common.sleep(1000);
     const byField = await this.testSubjects.find('groupByField');
     await this.comboBox.setElement(byField, field);
+
+    await this.setMetricsGroupByFiltering(filtering.include, filtering.exclude);
+  }
+
+  public async setMetricsGroupByFiltering(include?: string, exclude?: string) {
+    const setFilterValue = async (value: string | undefined, subjectKey: string) => {
+      if (typeof value === 'string') {
+        const valueSubject = await this.testSubjects.find(subjectKey);
+
+        await valueSubject.clearValue();
+        await valueSubject.type(value);
+      }
+    };
+
+    await setFilterValue(include, 'groupByInclude');
+    await setFilterValue(exclude, 'groupByExclude');
   }
 
   public async checkSelectedMetricsGroupByValue(value: string) {

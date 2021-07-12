@@ -312,7 +312,7 @@ export class GisPageObject extends FtrService {
   async openLayerPanel(layerName: string) {
     this.log.debug(`Open layer panel, layer: ${layerName}`);
     await this.openLayerTocActionsPanel(layerName);
-    await this.testSubjects.click('editLayerButton');
+    await this.testSubjects.click('layerSettingsButton');
   }
 
   async closeLayerPanel() {

@@ -253,7 +253,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         ]);
       });
 
-      it.skip('allows configuring http advanced options', async () => {
+      it('allows configuring http advanced options', async () => {
         // This test ensures that updates made to the Synthetics Policy are carried all the way through
         // to the generated Agent Policy that is dispatch down to the Elastic Agent.
         const config = generateHTTPConfig('http://elastic.co');
@@ -277,7 +277,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           },
           requestBody: {
             type: 'xml',
-            value: '<samplexml>samplexml',
+            value: '<samplexml>samplexml<samplexml>',
           },
           indexResponseBody: false,
           indexResponseHeaders: false,
@@ -308,7 +308,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               },
               'check.response.headers': advancedConfig.responseHeaders,
               'check.response.status': [advancedConfig.responseStatusCheck],
-              'check.request.body': `${advancedConfig.requestBody.value}</samplexml>`, // code editor adds closing tag
+              'check.request.body': advancedConfig.requestBody.value,
               'check.response.body.positive': [advancedConfig.responseBodyCheckPositive],
               'check.response.body.negative': [advancedConfig.responseBodyCheckNegative],
               'response.include_body': advancedConfig.indexResponseBody ? 'on_error' : 'never',

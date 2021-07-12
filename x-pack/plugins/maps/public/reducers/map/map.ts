@@ -44,6 +44,7 @@ import {
   ROLLBACK_MAP_SETTINGS,
   TRACK_MAP_SETTINGS,
   UPDATE_MAP_SETTING,
+  UPDATE_EDIT_STATE,
 } from '../../actions';
 
 import { getDefaultMapSettings } from './default_map_settings';
@@ -76,6 +77,7 @@ export const DEFAULT_MAP_STATE: MapState = {
     filters: [],
     refreshTimerLastTriggeredAt: undefined,
     drawState: undefined,
+    editState: undefined,
   },
   selectedLayerId: null,
   layerList: [],
@@ -92,6 +94,14 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, 
         mapState: {
           ...state.mapState,
           drawState: action.drawState,
+        },
+      };
+    case UPDATE_EDIT_STATE:
+      return {
+        ...state,
+        mapState: {
+          ...state.mapState,
+          editState: action.editState,
         },
       };
     case REMOVE_TRACKED_LAYER_STATE:

@@ -35,11 +35,14 @@ import { hasField } from '../utils';
 import type { IndexPattern, IndexPatternLayer, IndexPatternPrivateState } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { VisualizationDimensionGroupConfig } from '../../types';
+import { IndexPatternDimensionEditorProps } from './dimension_panel';
 
 const operationPanels = getOperationDisplay();
 
 export interface ReferenceEditorProps {
   layer: IndexPatternLayer;
+  layerId: string;
+  activeData?: IndexPatternDimensionEditorProps['activeData'];
   selectionStyle: 'full' | 'field' | 'hidden';
   validation: RequiredReference;
   columnId: string;
@@ -67,6 +70,8 @@ export interface ReferenceEditorProps {
 export function ReferenceEditor(props: ReferenceEditorProps) {
   const {
     layer,
+    layerId,
+    activeData,
     columnId,
     updateLayer,
     currentIndexPattern,
@@ -350,6 +355,8 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
               updateLayer={updateLayer}
               currentColumn={column}
               layer={layer}
+              layerId={layerId}
+              activeData={activeData}
               columnId={columnId}
               indexPattern={currentIndexPattern}
               dateRange={dateRange}

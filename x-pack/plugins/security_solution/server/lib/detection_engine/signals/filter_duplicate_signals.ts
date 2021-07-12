@@ -5,10 +5,26 @@
  * 2.0.
  */
 
-import { WrappedSignalHit } from './types';
+import { SimpleHit, WrappedSignalHit } from './types';
 
-export const filterDuplicateSignals = (ruleId: string, signals: WrappedSignalHit[]) => {
-  return signals.filter(
-    (doc) => !doc._source.signal?.ancestors.some((ancestor) => ancestor.rule === ruleId)
-  );
+const isWrappedSignalHit = (
+  signals: SimpleHit[],
+  isRuleRegistryEnabled: boolean
+): signals is WrappedSignalHit[] => {
+  return !isRuleRegistryEnabled;
+};
+
+export const filterDuplicateSignals = (
+  ruleId: string,
+  signals: SimpleHit[],
+  isRuleRegistryEnabled: boolean
+) => {
+  if (isWrappedSignalHit(signals, isRuleRegistryEnabled)) {
+    return signals.filter(
+      (doc) => !doc._source.signal?.ancestors.some((ancestor) => ancestor.rule === ruleId)
+    );
+  } else {
+    // TODO: filter duplicate signals for RAC
+    return [];
+  }
 };

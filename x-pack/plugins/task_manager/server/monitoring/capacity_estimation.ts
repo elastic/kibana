@@ -7,7 +7,7 @@
 
 import { mapValues } from 'lodash';
 import stats from 'stats-lite';
-import { JsonObject } from 'src/plugins/kibana_utils/common';
+import { JsonObject } from '@kbn/common-utils';
 import { RawMonitoringStats, RawMonitoredStat, HealthStatus } from './monitoring_stats_stream';
 import { AveragedStat } from './task_run_calcultors';
 import { TaskPersistenceTypes } from './task_run_statistics';
@@ -58,7 +58,7 @@ export function estimateCapacity(
     recurring: percentageOfExecutionsUsedByRecurringTasks,
     non_recurring: percentageOfExecutionsUsedByNonRecurringTasks,
   } = capacityStats.runtime.value.execution.persistence;
-  const { overdue, capacity_requirments: capacityRequirments } = workload;
+  const { overdue, capacity_requirements: capacityRequirements } = workload;
   const {
     poll_interval: pollInterval,
     max_workers: maxWorkers,
@@ -130,9 +130,9 @@ export function estimateCapacity(
    * On average, how many tasks per minute does this cluster need to execute?
    */
   const averageRecurringRequiredPerMinute =
-    capacityRequirments.per_minute +
-    capacityRequirments.per_hour / 60 +
-    capacityRequirments.per_day / 24 / 60;
+    capacityRequirements.per_minute +
+    capacityRequirements.per_hour / 60 +
+    capacityRequirements.per_day / 24 / 60;
 
   /**
    * how many Kibana are needed solely for the recurring tasks

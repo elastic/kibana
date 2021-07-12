@@ -60,7 +60,7 @@ describe('case connector', () => {
             connector: {
               id: 'jira',
               name: 'Jira',
-              type: '.jira',
+              type: ConnectorTypes.jira,
               fields: {
                 issueType: '10006',
                 priority: 'High',
@@ -99,7 +99,7 @@ describe('case connector', () => {
                 connector: {
                   id: 'jira',
                   name: 'Jira',
-                  type: '.jira',
+                  type: ConnectorTypes.jira,
                   fields: {
                     issueType: '10006',
                     priority: 'High',
@@ -293,7 +293,7 @@ describe('case connector', () => {
               connector: {
                 id: 'jira',
                 name: 'Jira',
-                type: '.jira',
+                type: ConnectorTypes.jira,
                 fields: {
                   priority: 'High',
                   parent: null,
@@ -438,7 +438,7 @@ describe('case connector', () => {
               connector: {
                 id: 'jira',
                 name: 'Jira',
-                type: '.jira',
+                type: ConnectorTypes.jira,
                 fields: {
                   issueType: '10006',
                   priority: 'High',
@@ -640,7 +640,7 @@ describe('case connector', () => {
               connector: {
                 id: 'jira',
                 name: 'Jira',
-                type: '.jira',
+                type: ConnectorTypes.jira,
                 fields: {
                   priority: 'High',
                   parent: null,
@@ -974,7 +974,7 @@ describe('case connector', () => {
             connector: {
               id: 'jira',
               name: 'Jira',
-              type: '.jira',
+              type: ConnectorTypes.jira,
               fields: {
                 issueType: '10006',
                 priority: 'High',
@@ -1003,7 +1003,7 @@ describe('case connector', () => {
           connector: {
             id: 'jira',
             name: 'Jira',
-            type: '.jira',
+            type: ConnectorTypes.jira,
             fields: {
               issueType: '10006',
               priority: 'High',

@@ -90,7 +90,7 @@ export const cumulativeSumOperation: OperationDefinition<
       operationType: 'cumulative_sum',
       isBucketed: false,
       scale: 'ratio',
-      timeShift: previousColumn?.timeShift,
+      timeShift: columnParams?.shift || previousColumn?.timeShift,
       filter: getFilter(previousColumn, columnParams),
       references: referenceIds,
       params: getFormatFromPreviousColumn(previousColumn),
@@ -122,7 +122,7 @@ export const cumulativeSumOperation: OperationDefinition<
     signature: i18n.translate('xpack.lens.indexPattern.cumulative_sum.signature', {
       defaultMessage: 'metric: number',
     }),
-    description: i18n.translate('xpack.lens.indexPattern.cumulativeSum.documentation', {
+    description: i18n.translate('xpack.lens.indexPattern.cumulativeSum.documentation.markdown', {
       defaultMessage: `
 Calculates the cumulative sum of a metric over time, adding all previous values of a series to each value. To use this function, you need to configure a date histogram dimension as well.
 

@@ -283,30 +283,33 @@ export const TlsTranslations = {
 
 export const ToggleFlyoutTranslations = {
   toggleButtonAriaLabel: i18n.translate('xpack.uptime.alertsPopover.toggleButton.ariaLabel', {
-    defaultMessage: 'Open alert context menu',
+    defaultMessage: 'Open alerts and rules context menu',
   }),
   openAlertContextPanelAriaLabel: i18n.translate('xpack.uptime.openAlertContextPanel.ariaLabel', {
-    defaultMessage: 'Open the alert context panel so you can choose an alert type',
+    defaultMessage: 'Open the rule context panel so you can choose a rule type',
   }),
   openAlertContextPanelLabel: i18n.translate('xpack.uptime.openAlertContextPanel.label', {
-    defaultMessage: 'Create alert',
+    defaultMessage: 'Create rule',
   }),
   toggleTlsAriaLabel: i18n.translate('xpack.uptime.toggleTlsAlertButton.ariaLabel', {
-    defaultMessage: 'Open TLS alert flyout',
+    defaultMessage: 'Open TLS rule flyout',
   }),
   toggleTlsContent: i18n.translate('xpack.uptime.toggleTlsAlertButton.content', {
-    defaultMessage: 'TLS alert',
+    defaultMessage: 'TLS rule',
   }),
   toggleMonitorStatusAriaLabel: i18n.translate('xpack.uptime.toggleAlertFlyout.ariaLabel', {
-    defaultMessage: 'Open add alert flyout',
+    defaultMessage: 'Open add rule flyout',
   }),
   toggleMonitorStatusContent: i18n.translate('xpack.uptime.toggleAlertButton.content', {
-    defaultMessage: 'Monitor status alert',
+    defaultMessage: 'Monitor status rule',
   }),
   navigateToAlertingUIAriaLabel: i18n.translate('xpack.uptime.navigateToAlertingUi', {
     defaultMessage: 'Leave Uptime and go to Alerting Management page',
   }),
   navigateToAlertingButtonContent: i18n.translate('xpack.uptime.navigateToAlertingButton.content', {
-    defaultMessage: 'Manage alerts',
+    defaultMessage: 'Manage rules',
+  }),
+  toggleAlertFlyoutButtonLabel: i18n.translate('xpack.uptime.alerts.createRulesPanel.title', {
+    defaultMessage: 'Create rules',
   }),
 };

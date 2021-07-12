@@ -48,6 +48,7 @@ describe('useExceptionLists', () => {
             perPage: 20,
             total: 0,
           },
+          showEventFilters: false,
           showTrustedApps: false,
         })
       );
@@ -83,6 +84,7 @@ describe('useExceptionLists', () => {
             perPage: 20,
             total: 0,
           },
+          showEventFilters: false,
           showTrustedApps: false,
         })
       );
@@ -122,6 +124,7 @@ describe('useExceptionLists', () => {
             perPage: 20,
             total: 0,
           },
+          showEventFilters: false,
           showTrustedApps: true,
         })
       );
@@ -132,7 +135,7 @@ describe('useExceptionLists', () => {
 
       expect(spyOnfetchExceptionLists).toHaveBeenCalledWith({
         filters:
-          '(exception-list.attributes.list_id: endpoint_trusted_apps* OR exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*)',
+          '(exception-list.attributes.list_id: endpoint_trusted_apps* OR exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*) AND (not exception-list.attributes.list_id: endpoint_event_filters* AND not exception-list-agnostic.attributes.list_id: endpoint_event_filters*)',
         http: mockKibanaHttpService,
         namespaceTypes: 'single,agnostic',
         pagination: { page: 1, perPage: 20 },
@@ -157,6 +160,7 @@ describe('useExceptionLists', () => {
             perPage: 20,
             total: 0,
           },
+          showEventFilters: false,
           showTrustedApps: false,
         })
       );
@@ -167,7 +171,79 @@ describe('useExceptionLists', () => {
 
       expect(spyOnfetchExceptionLists).toHaveBeenCalledWith({
         filters:
-          '(not exception-list.attributes.list_id: endpoint_trusted_apps* AND not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*)',
+          '(not exception-list.attributes.list_id: endpoint_trusted_apps* AND not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*) AND (not exception-list.attributes.list_id: endpoint_event_filters* AND not exception-list-agnostic.attributes.list_id: endpoint_event_filters*)',
+        http: mockKibanaHttpService,
+        namespaceTypes: 'single,agnostic',
+        pagination: { page: 1, perPage: 20 },
+        signal: new AbortController().signal,
+      });
+    });
+  });
+
+  test('fetches event filters lists if "showEventFilters" is true', async () => {
+    const spyOnfetchExceptionLists = jest.spyOn(api, 'fetchExceptionLists');
+
+    await act(async () => {
+      const { waitForNextUpdate } = renderHook<UseExceptionListsProps, ReturnExceptionLists>(() =>
+        useExceptionLists({
+          errorMessage: 'Uh oh',
+          filterOptions: {},
+          http: mockKibanaHttpService,
+          namespaceTypes: ['single', 'agnostic'],
+          notifications: mockKibanaNotificationsService,
+          pagination: {
+            page: 1,
+            perPage: 20,
+            total: 0,
+          },
+          showEventFilters: true,
+          showTrustedApps: false,
+        })
+      );
+      // NOTE: First `waitForNextUpdate` is initialization
+      // Second call applies the params
+      await waitForNextUpdate();
+      await waitForNextUpdate();
+
+      expect(spyOnfetchExceptionLists).toHaveBeenCalledWith({
+        filters:
+          '(not exception-list.attributes.list_id: endpoint_trusted_apps* AND not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*) AND (exception-list.attributes.list_id: endpoint_event_filters* OR exception-list-agnostic.attributes.list_id: endpoint_event_filters*)',
+        http: mockKibanaHttpService,
+        namespaceTypes: 'single,agnostic',
+        pagination: { page: 1, perPage: 20 },
+        signal: new AbortController().signal,
+      });
+    });
+  });
+
+  test('does not fetch event filters lists if "showEventFilters" is false', async () => {
+    const spyOnfetchExceptionLists = jest.spyOn(api, 'fetchExceptionLists');
+
+    await act(async () => {
+      const { waitForNextUpdate } = renderHook<UseExceptionListsProps, ReturnExceptionLists>(() =>
+        useExceptionLists({
+          errorMessage: 'Uh oh',
+          filterOptions: {},
+          http: mockKibanaHttpService,
+          namespaceTypes: ['single', 'agnostic'],
+          notifications: mockKibanaNotificationsService,
+          pagination: {
+            page: 1,
+            perPage: 20,
+            total: 0,
+          },
+          showEventFilters: false,
+          showTrustedApps: false,
+        })
+      );
+      // NOTE: First `waitForNextUpdate` is initialization
+      // Second call applies the params
+      await waitForNextUpdate();
+      await waitForNextUpdate();
+
+      expect(spyOnfetchExceptionLists).toHaveBeenCalledWith({
+        filters:
+          '(not exception-list.attributes.list_id: endpoint_trusted_apps* AND not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*) AND (not exception-list.attributes.list_id: endpoint_event_filters* AND not exception-list-agnostic.attributes.list_id: endpoint_event_filters*)',
         http: mockKibanaHttpService,
         namespaceTypes: 'single,agnostic',
         pagination: { page: 1, perPage: 20 },
@@ -195,6 +271,7 @@ describe('useExceptionLists', () => {
             perPage: 20,
             total: 0,
           },
+          showEventFilters: false,
           showTrustedApps: false,
         })
       );
@@ -205,7 +282,7 @@ describe('useExceptionLists', () => {
 
       expect(spyOnfetchExceptionLists).toHaveBeenCalledWith({
         filters:
-          '(exception-list.attributes.created_by:Moi OR exception-list-agnostic.attributes.created_by:Moi) AND (exception-list.attributes.name.text:Sample Endpoint OR exception-list-agnostic.attributes.name.text:Sample Endpoint) AND (not exception-list.attributes.list_id: endpoint_trusted_apps* AND not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*)',
+          '(exception-list.attributes.created_by:Moi OR exception-list-agnostic.attributes.created_by:Moi) AND (exception-list.attributes.name.text:Sample Endpoint OR exception-list-agnostic.attributes.name.text:Sample Endpoint) AND (not exception-list.attributes.list_id: endpoint_trusted_apps* AND not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*) AND (not exception-list.attributes.list_id: endpoint_event_filters* AND not exception-list-agnostic.attributes.list_id: endpoint_event_filters*)',
         http: mockKibanaHttpService,
         namespaceTypes: 'single,agnostic',
         pagination: { page: 1, perPage: 20 },
@@ -228,6 +305,7 @@ describe('useExceptionLists', () => {
           namespaceTypes,
           notifications,
           pagination,
+          showEventFilters,
           showTrustedApps,
         }) =>
           useExceptionLists({
@@ -237,6 +315,7 @@ describe('useExceptionLists', () => {
             namespaceTypes,
             notifications,
             pagination,
+            showEventFilters,
             showTrustedApps,
           }),
         {
@@ -251,6 +330,7 @@ describe('useExceptionLists', () => {
               perPage: 20,
               total: 0,
             },
+            showEventFilters: false,
             showTrustedApps: false,
           },
         }
@@ -271,6 +351,7 @@ describe('useExceptionLists', () => {
           perPage: 20,
           total: 0,
         },
+        showEventFilters: false,
         showTrustedApps: false,
       });
       // NOTE: Only need one call here because hook already initilaized
@@ -298,6 +379,7 @@ describe('useExceptionLists', () => {
             perPage: 20,
             total: 0,
           },
+          showEventFilters: false,
           showTrustedApps: false,
         })
       );
@@ -336,6 +418,7 @@ describe('useExceptionLists', () => {
             perPage: 20,
             total: 0,
           },
+          showEventFilters: false,
           showTrustedApps: false,
         })
       );

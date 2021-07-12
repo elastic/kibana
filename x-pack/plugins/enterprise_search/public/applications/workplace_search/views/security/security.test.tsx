@@ -14,11 +14,8 @@ import { shallow } from 'enzyme';
 
 import { EuiSwitch, EuiConfirmModal } from '@elastic/eui';
 
-import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-
-import { Loading } from '../../../shared/loading';
 import { UnsavedChangesPrompt } from '../../../shared/unsaved_changes_prompt';
-import { ViewContentHeader } from '../../components/shared/view_content_header';
+import { getPageHeaderActions } from '../../../test_helpers';
 
 import { Security } from './security';
 
@@ -59,9 +56,7 @@ describe('Security', () => {
     setMockValues({ ...mockValues, hasPlatinumLicense: false });
     const wrapper = shallow(<Security />);
 
-    expect(wrapper.find(SetPageChrome)).toHaveLength(1);
     expect(wrapper.find(UnsavedChangesPrompt)).toHaveLength(1);
-    expect(wrapper.find(ViewContentHeader)).toHaveLength(1);
     expect(wrapper.find(EuiSwitch).prop('disabled')).toEqual(true);
   });
 
@@ -69,13 +64,6 @@ describe('Security', () => {
     const wrapper = shallow(<Security />);
 
     expect(wrapper.find(EuiSwitch).prop('disabled')).toEqual(false);
-  });
-
-  it('returns Loading when loading', () => {
-    setMockValues({ ...mockValues, dataLoading: true });
-    const wrapper = shallow(<Security />);
-
-    expect(wrapper.find(Loading)).toHaveLength(1);
   });
 
   it('handles switch click', () => {
@@ -92,8 +80,8 @@ describe('Security', () => {
     setMockValues({ ...mockValues, unsavedChanges: true });
     const wrapper = shallow(<Security />);
 
-    const header = wrapper.find(ViewContentHeader).dive();
-    header.find('[data-test-subj="SaveSettingsButton"]').prop('onClick')!({} as any);
+    const headerActions = getPageHeaderActions(wrapper);
+    headerActions.find('[data-test-subj="SaveSettingsButton"]').prop('onClick')!({} as any);
     const modal = wrapper.find(EuiConfirmModal);
     modal.prop('onConfirm')!({} as any);
 

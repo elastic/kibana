@@ -54,6 +54,7 @@ describe('reference editor', () => {
       isFullscreen: false,
       toggleFullscreen: jest.fn(),
       setIsCloseable: jest.fn(),
+      layerId: '1',
     };
   }
 

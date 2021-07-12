@@ -211,20 +211,44 @@ export class DashboardPanelActionsService extends FtrService {
     await this.testSubjects.click('confirmSaveSavedObjectButton');
   }
 
+  async expectExistsPanelAction(testSubject: string, title?: string) {
+    this.log.debug('expectExistsPanelAction', testSubject);
+
+    const panelWrapper = title ? await this.getPanelHeading(title) : undefined;
+    await this.openContextMenu(panelWrapper);
+
+    if (!(await this.testSubjects.exists(testSubject))) {
+      if (await this.hasContextMenuMoreItem()) {
+        await this.clickContextMenuMoreItem();
+      }
+      await this.testSubjects.existOrFail(testSubject);
+    }
+    await this.toggleContextMenu(panelWrapper);
+  }
+
   async expectExistsRemovePanelAction() {
     this.log.debug('expectExistsRemovePanelAction');
     await this.expectExistsPanelAction(REMOVE_PANEL_DATA_TEST_SUBJ);
   }
 
-  async expectExistsPanelAction(testSubject: string) {
-    this.log.debug('expectExistsPanelAction', testSubject);
-    await this.openContextMenu();
-    if (await this.testSubjects.exists(CLONE_PANEL_DATA_TEST_SUBJ)) return;
-    if (await this.hasContextMenuMoreItem()) {
-      await this.clickContextMenuMoreItem();
-    }
-    await this.testSubjects.existOrFail(CLONE_PANEL_DATA_TEST_SUBJ);
-    await this.toggleContextMenu();
+  async expectExistsEditPanelAction(title?: string) {
+    this.log.debug('expectExistsEditPanelAction');
+    await this.expectExistsPanelAction(EDIT_PANEL_DATA_TEST_SUBJ, title);
+  }
+
+  async expectExistsReplacePanelAction() {
+    this.log.debug('expectExistsReplacePanelAction');
+    await this.expectExistsPanelAction(REPLACE_PANEL_DATA_TEST_SUBJ);
+  }
+
+  async expectExistsClonePanelAction() {
+    this.log.debug('expectExistsClonePanelAction');
+    await this.expectExistsPanelAction(CLONE_PANEL_DATA_TEST_SUBJ);
+  }
+
+  async expectExistsToggleExpandAction() {
+    this.log.debug('expectExistsToggleExpandAction');
+    await this.expectExistsPanelAction(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);
   }
 
   async expectMissingPanelAction(testSubject: string) {
@@ -236,21 +260,6 @@ export class DashboardPanelActionsService extends FtrService {
       await this.testSubjects.missingOrFail(testSubject);
     }
     await this.toggleContextMenu();
-  }
-
-  async expectExistsEditPanelAction() {
-    this.log.debug('expectExistsEditPanelAction');
-    await this.expectExistsPanelAction(EDIT_PANEL_DATA_TEST_SUBJ);
-  }
-
-  async expectExistsReplacePanelAction() {
-    this.log.debug('expectExistsReplacePanelAction');
-    await this.expectExistsPanelAction(REPLACE_PANEL_DATA_TEST_SUBJ);
-  }
-
-  async expectExistsClonePanelAction() {
-    this.log.debug('expectExistsClonePanelAction');
-    await this.expectExistsPanelAction(CLONE_PANEL_DATA_TEST_SUBJ);
   }
 
   async expectMissingEditPanelAction() {
@@ -271,11 +280,6 @@ export class DashboardPanelActionsService extends FtrService {
   async expectMissingRemovePanelAction() {
     this.log.debug('expectMissingRemovePanelAction');
     await this.expectMissingPanelAction(REMOVE_PANEL_DATA_TEST_SUBJ);
-  }
-
-  async expectExistsToggleExpandAction() {
-    this.log.debug('expectExistsToggleExpandAction');
-    await this.expectExistsPanelAction(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);
   }
 
   async getPanelHeading(title: string) {

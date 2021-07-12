@@ -380,7 +380,6 @@ export class ManifestManager {
     for (const result of results) {
       await iterateArtifactsBuildResult(result, async (artifact, policyId) => {
         const artifactToAdd = baselineManifest.getArtifact(getArtifactId(artifact)) || artifact;
-        artifactToAdd.compressionAlgorithm = 'none';
         if (!internalArtifactCompleteSchema.is(artifactToAdd)) {
           throw new Error(`Incomplete artifact detected: ${getArtifactId(artifactToAdd)}`);
         }

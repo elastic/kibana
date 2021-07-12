@@ -22,16 +22,18 @@ import { CategoryFacets } from './category_facets';
 
 export const EPMHomePage: React.FC = memo(() => {
   return (
-    <DefaultLayout>
-      <Switch>
-        <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_installed}>
+    <Switch>
+      <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_installed}>
+        <DefaultLayout section="manage">
           <InstalledPackages />
-        </Route>
-        <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_all}>
+        </DefaultLayout>
+      </Route>
+      <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_all}>
+        <DefaultLayout section="browse">
           <AvailablePackages />
-        </Route>
-      </Switch>
-    </DefaultLayout>
+        </DefaultLayout>
+      </Route>
+    </Switch>
   );
 });
 

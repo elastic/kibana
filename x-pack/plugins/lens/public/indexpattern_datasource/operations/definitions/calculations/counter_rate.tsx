@@ -94,7 +94,7 @@ export const counterRateOperation: OperationDefinition<
       scale: 'ratio',
       references: referenceIds,
       timeScale,
-      timeShift: previousColumn?.timeShift,
+      timeShift: columnParams?.shift || previousColumn?.timeShift,
       filter: getFilter(previousColumn, columnParams),
       params: getFormatFromPreviousColumn(previousColumn),
     };
@@ -126,7 +126,7 @@ export const counterRateOperation: OperationDefinition<
     signature: i18n.translate('xpack.lens.indexPattern.counterRate.signature', {
       defaultMessage: 'metric: number',
     }),
-    description: i18n.translate('xpack.lens.indexPattern.counterRate.documentation', {
+    description: i18n.translate('xpack.lens.indexPattern.counterRate.documentation.markdown', {
       defaultMessage: `
 Calculates the rate of an ever increasing counter. This function will only yield helpful results on counter metric fields which contain a measurement of some kind monotonically growing over time.
 If the value does get smaller, it will interpret this as a counter reset. To get most precise results, \`counter_rate\` should be calculated on the \`max\` of a field.

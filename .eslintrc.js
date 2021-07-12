@@ -445,6 +445,7 @@ module.exports = {
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
                   '!(src|x-pack)/plugins/**/(public|server)/mocks/index.{js,mjs,ts}',
                   '!(src|x-pack)/plugins/**/(public|server)/(index|mocks).{js,mjs,ts,tsx}',
+                  '!(src|x-pack)/plugins/**/__stories__/index.{js,mjs,ts,tsx}',
                 ],
                 allowSameFolder: true,
                 errorMessage: 'Plugins may only import from top-level public and server modules.',
@@ -857,6 +858,18 @@ module.exports = {
         'react-hooks/exhaustive-deps': ['error', { additionalHooks: '^useFetcher$' }],
       },
     },
+    {
+      files: ['x-pack/plugins/apm/**/*.stories.*', 'x-pack/plugins/observability/**/*.stories.*'],
+      rules: {
+        'react/function-component-definition': [
+          'off',
+          {
+            namedComponents: 'function-declaration',
+            unnamedComponents: 'arrow-function',
+          },
+        ],
+      },
+    },
 
     /**
      * Fleet overrides
@@ -876,6 +889,16 @@ module.exports = {
     },
 
     /**
+     * Cases overrides
+     */
+    {
+      files: ['x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'no-duplicate-imports': 'error',
+      },
+    },
+
+    /**
      * Security Solution overrides
      */
     {
@@ -883,6 +906,8 @@ module.exports = {
       files: [
         'x-pack/plugins/security_solution/public/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution/common/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/timelines/public/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/timelines/common/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'import/no-nodejs-modules': 'error',
@@ -897,7 +922,10 @@ module.exports = {
     },
     {
       // typescript only for front and back end
-      files: ['x-pack/plugins/security_solution/**/*.{ts,tsx}'],
+      files: [
+        'x-pack/plugins/security_solution/**/*.{ts,tsx}',
+        'x-pack/plugins/timelines/**/*.{ts,tsx}',
+      ],
       rules: {
         '@typescript-eslint/no-this-alias': 'error',
         '@typescript-eslint/no-explicit-any': 'error',
@@ -907,7 +935,10 @@ module.exports = {
     },
     {
       // typescript and javascript for front and back end
-      files: ['x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}'],
+      files: [
+        'x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/timelines/**/*.{js,mjs,ts,tsx}',
+      ],
       plugins: ['eslint-plugin-node', 'react'],
       env: {
         jest: true,
@@ -1461,7 +1492,7 @@ module.exports = {
       },
     },
     {
-      files: ['packages/kbn-ui-shared-deps/flot_charts/**/*.js'],
+      files: ['packages/kbn-ui-shared-deps/src/flot_charts/**/*.js'],
       env: {
         jquery: true,
       },

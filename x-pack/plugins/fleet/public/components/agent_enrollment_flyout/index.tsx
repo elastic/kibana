@@ -29,8 +29,11 @@ import { StandaloneInstructions } from './standalone_instructions';
 import { MissingFleetServerHostCallout } from './missing_fleet_server_host_callout';
 import type { BaseProps } from './types';
 
+type FlyoutMode = 'managed' | 'standalone';
+
 export interface Props extends BaseProps {
   onClose: () => void;
+  defaultMode?: FlyoutMode;
 }
 
 export * from './agent_policy_selection';
@@ -42,8 +45,10 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
   onClose,
   agentPolicy,
   agentPolicies,
+  viewDataStep,
+  defaultMode = 'managed',
 }) => {
-  const [mode, setMode] = useState<'managed' | 'standalone'>('managed');
+  const [mode, setMode] = useState<FlyoutMode>(defaultMode);
 
   const { modal } = useUrlModal();
   const [lastModal, setLastModal] = useState(modal);
@@ -57,6 +62,8 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
       setLastModal(modal);
     }
   }, [modal, lastModal, settings]);
+
+  const isLoadingInitialRequest = settings.isLoading && settings.isInitialRequest;
 
   return (
     <EuiFlyout data-test-subj="agentEnrollmentFlyout" onClose={onClose} size="m">
@@ -103,13 +110,17 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
 
       <EuiFlyoutBody
         banner={
-          fleetServerHosts.length === 0 && mode === 'managed' ? (
+          !isLoadingInitialRequest && fleetServerHosts.length === 0 && mode === 'managed' ? (
             <MissingFleetServerHostCallout />
           ) : undefined
         }
       >
         {fleetServerHosts.length === 0 && mode === 'managed' ? null : mode === 'managed' ? (
-          <ManagedInstructions agentPolicy={agentPolicy} agentPolicies={agentPolicies} />
+          <ManagedInstructions
+            agentPolicy={agentPolicy}
+            agentPolicies={agentPolicies}
+            viewDataStep={viewDataStep}
+          />
         ) : (
           <StandaloneInstructions agentPolicy={agentPolicy} agentPolicies={agentPolicies} />
         )}

@@ -9,123 +9,146 @@ exports[`Intro component renders correctly 1`] = `
   type="search"
   viewUrl="/some-url"
 >
-  <EuiPageContentHeader>
-    <div
-      className="euiPageContentHeader euiPageContentHeader--responsive"
-    >
-      <EuiPageContentHeaderSection>
-        <div
-          className="euiPageContentHeaderSection"
+  <EuiPageHeader
+    bottomBorder={true}
+    pageTitle={
+      <FormattedMessage
+        defaultMessage="Edit {title}"
+        id="savedObjectsManagement.view.editItemTitle"
+        values={
+          Object {
+            "title": "search",
+          }
+        }
+      />
+    }
+    rightSideItems={
+      Array [
+        <EuiButton
+          data-test-subj="savedObjectEditViewInApp"
+          href="/some-url"
+          iconType="eye"
+          size="s"
         >
-          <EuiTitle>
-            <h1
-              className="euiTitle euiTitle--medium"
+          <FormattedMessage
+            defaultMessage="View {title}"
+            id="savedObjectsManagement.view.viewItemButtonLabel"
+            values={
+              Object {
+                "title": "search",
+              }
+            }
+          />
+        </EuiButton>,
+        <EuiButton
+          color="danger"
+          data-test-subj="savedObjectEditDelete"
+          iconType="trash"
+          onClick={[Function]}
+          size="s"
+        >
+          <FormattedMessage
+            defaultMessage="Delete {title}"
+            id="savedObjectsManagement.view.deleteItemButtonLabel"
+            values={
+              Object {
+                "title": "search",
+              }
+            }
+          />
+        </EuiButton>,
+      ]
+    }
+  >
+    <header
+      className="euiPageHeader euiPageHeader--bottomBorder euiPageHeader--responsive euiPageHeader--center"
+    >
+      <EuiPageHeaderContent
+        pageTitle={
+          <FormattedMessage
+            defaultMessage="Edit {title}"
+            id="savedObjectsManagement.view.editItemTitle"
+            values={
+              Object {
+                "title": "search",
+              }
+            }
+          />
+        }
+        responsive={true}
+        rightSideItems={
+          Array [
+            <EuiButton
+              data-test-subj="savedObjectEditViewInApp"
+              href="/some-url"
+              iconType="eye"
+              size="s"
             >
               <FormattedMessage
-                defaultMessage="Edit {title}"
-                id="savedObjectsManagement.view.editItemTitle"
+                defaultMessage="View {title}"
+                id="savedObjectsManagement.view.viewItemButtonLabel"
                 values={
                   Object {
                     "title": "search",
                   }
                 }
-              >
-                Edit search
-              </FormattedMessage>
-            </h1>
-          </EuiTitle>
-        </div>
-      </EuiPageContentHeaderSection>
-      <EuiPageContentHeaderSection>
+              />
+            </EuiButton>,
+            <EuiButton
+              color="danger"
+              data-test-subj="savedObjectEditDelete"
+              iconType="trash"
+              onClick={[Function]}
+              size="s"
+            >
+              <FormattedMessage
+                defaultMessage="Delete {title}"
+                id="savedObjectsManagement.view.deleteItemButtonLabel"
+                values={
+                  Object {
+                    "title": "search",
+                  }
+                }
+              />
+            </EuiButton>,
+          ]
+        }
+      >
         <div
-          className="euiPageContentHeaderSection"
+          className="euiPageHeaderContent"
         >
           <EuiFlexGroup
-            responsive={false}
+            alignItems="flexStart"
+            className="euiPageHeaderContent__top"
+            gutterSize="l"
+            responsive={true}
           >
             <div
-              className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+              className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
             >
-              <EuiFlexItem
-                grow={false}
-              >
+              <EuiFlexItem>
                 <div
-                  className="euiFlexItem euiFlexItem--flexGrowZero"
+                  className="euiFlexItem"
                 >
-                  <EuiButton
-                    data-test-subj="savedObjectEditViewInApp"
-                    href="/some-url"
-                    iconType="eye"
-                    size="s"
+                  <EuiTitle
+                    size="l"
                   >
-                    <EuiButtonDisplay
-                      baseClassName="euiButton"
-                      data-test-subj="savedObjectEditViewInApp"
-                      element="a"
-                      href="/some-url"
-                      iconType="eye"
-                      isDisabled={false}
-                      rel="noreferrer"
-                      size="s"
+                    <h1
+                      className="euiTitle euiTitle--large"
                     >
-                      <a
-                        className="euiButton euiButton--primary euiButton--small"
-                        data-test-subj="savedObjectEditViewInApp"
-                        disabled={false}
-                        href="/some-url"
-                        rel="noreferrer"
-                        style={
+                      <FormattedMessage
+                        defaultMessage="Edit {title}"
+                        id="savedObjectsManagement.view.editItemTitle"
+                        values={
                           Object {
-                            "minWidth": undefined,
+                            "title": "search",
                           }
                         }
                       >
-                        <EuiButtonContent
-                          className="euiButton__content"
-                          iconSide="left"
-                          iconType="eye"
-                          textProps={
-                            Object {
-                              "className": "euiButton__text",
-                            }
-                          }
-                        >
-                          <span
-                            className="euiButtonContent euiButton__content"
-                          >
-                            <EuiIcon
-                              className="euiButtonContent__icon"
-                              color="inherit"
-                              size="m"
-                              type="eye"
-                            >
-                              <span
-                                className="euiButtonContent__icon"
-                                color="inherit"
-                                data-euiicon-type="eye"
-                                size="m"
-                              />
-                            </EuiIcon>
-                            <span
-                              className="euiButton__text"
-                            >
-                              <FormattedMessage
-                                defaultMessage="View {title}"
-                                id="savedObjectsManagement.view.viewItemButtonLabel"
-                                values={
-                                  Object {
-                                    "title": "search",
-                                  }
-                                }
-                              >
-                                View search
-                              </FormattedMessage>
-                            </span>
-                          </span>
-                        </EuiButtonContent>
-                      </a>
-                    </EuiButtonDisplay>
-                  </EuiButton>
+                        Edit search
+                      </FormattedMessage>
+                    </h1>
+                  </EuiTitle>
                 </div>
               </EuiFlexItem>
               <EuiFlexItem
@@ -134,90 +157,192 @@ exports[`Intro component renders correctly 1`] = `
                 <div
                   className="euiFlexItem euiFlexItem--flexGrowZero"
                 >
-                  <EuiButton
-                    color="danger"
-                    data-test-subj="savedObjectEditDelete"
-                    iconType="trash"
-                    onClick={[Function]}
-                    size="s"
+                  <EuiFlexGroup
+                    className="euiPageHeaderContent__rightSideItems"
+                    responsive={false}
+                    wrap={true}
                   >
-                    <EuiButtonDisplay
-                      baseClassName="euiButton"
-                      color="danger"
-                      data-test-subj="savedObjectEditDelete"
-                      disabled={false}
-                      element="button"
-                      iconType="trash"
-                      isDisabled={false}
-                      onClick={[Function]}
-                      size="s"
-                      type="button"
+                    <div
+                      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--wrap euiPageHeaderContent__rightSideItems"
                     >
-                      <button
-                        className="euiButton euiButton--danger euiButton--small"
-                        data-test-subj="savedObjectEditDelete"
-                        disabled={false}
-                        onClick={[Function]}
-                        style={
-                          Object {
-                            "minWidth": undefined,
-                          }
-                        }
-                        type="button"
+                      <EuiFlexItem
+                        grow={false}
+                        key="0"
                       >
-                        <EuiButtonContent
-                          className="euiButton__content"
-                          iconSide="left"
-                          iconType="trash"
-                          textProps={
-                            Object {
-                              "className": "euiButton__text",
-                            }
-                          }
+                        <div
+                          className="euiFlexItem euiFlexItem--flexGrowZero"
                         >
-                          <span
-                            className="euiButtonContent euiButton__content"
+                          <EuiButton
+                            data-test-subj="savedObjectEditViewInApp"
+                            href="/some-url"
+                            iconType="eye"
+                            size="s"
                           >
-                            <EuiIcon
-                              className="euiButtonContent__icon"
-                              color="inherit"
-                              size="m"
-                              type="trash"
+                            <EuiButtonDisplay
+                              baseClassName="euiButton"
+                              data-test-subj="savedObjectEditViewInApp"
+                              element="a"
+                              href="/some-url"
+                              iconType="eye"
+                              isDisabled={false}
+                              rel="noreferrer"
+                              size="s"
                             >
-                              <span
-                                className="euiButtonContent__icon"
-                                color="inherit"
-                                data-euiicon-type="trash"
-                                size="m"
-                              />
-                            </EuiIcon>
-                            <span
-                              className="euiButton__text"
-                            >
-                              <FormattedMessage
-                                defaultMessage="Delete {title}"
-                                id="savedObjectsManagement.view.deleteItemButtonLabel"
-                                values={
+                              <a
+                                className="euiButton euiButton--primary euiButton--small"
+                                data-test-subj="savedObjectEditViewInApp"
+                                disabled={false}
+                                href="/some-url"
+                                rel="noreferrer"
+                                style={
                                   Object {
-                                    "title": "search",
+                                    "minWidth": undefined,
                                   }
                                 }
                               >
-                                Delete search
-                              </FormattedMessage>
-                            </span>
-                          </span>
-                        </EuiButtonContent>
-                      </button>
-                    </EuiButtonDisplay>
-                  </EuiButton>
+                                <EuiButtonContent
+                                  className="euiButton__content"
+                                  iconSide="left"
+                                  iconType="eye"
+                                  textProps={
+                                    Object {
+                                      "className": "euiButton__text",
+                                    }
+                                  }
+                                >
+                                  <span
+                                    className="euiButtonContent euiButton__content"
+                                  >
+                                    <EuiIcon
+                                      className="euiButtonContent__icon"
+                                      color="inherit"
+                                      size="m"
+                                      type="eye"
+                                    >
+                                      <span
+                                        className="euiButtonContent__icon"
+                                        color="inherit"
+                                        data-euiicon-type="eye"
+                                        size="m"
+                                      />
+                                    </EuiIcon>
+                                    <span
+                                      className="euiButton__text"
+                                    >
+                                      <FormattedMessage
+                                        defaultMessage="View {title}"
+                                        id="savedObjectsManagement.view.viewItemButtonLabel"
+                                        values={
+                                          Object {
+                                            "title": "search",
+                                          }
+                                        }
+                                      >
+                                        View search
+                                      </FormattedMessage>
+                                    </span>
+                                  </span>
+                                </EuiButtonContent>
+                              </a>
+                            </EuiButtonDisplay>
+                          </EuiButton>
+                        </div>
+                      </EuiFlexItem>
+                      <EuiFlexItem
+                        grow={false}
+                        key="1"
+                      >
+                        <div
+                          className="euiFlexItem euiFlexItem--flexGrowZero"
+                        >
+                          <EuiButton
+                            color="danger"
+                            data-test-subj="savedObjectEditDelete"
+                            iconType="trash"
+                            onClick={[Function]}
+                            size="s"
+                          >
+                            <EuiButtonDisplay
+                              baseClassName="euiButton"
+                              color="danger"
+                              data-test-subj="savedObjectEditDelete"
+                              disabled={false}
+                              element="button"
+                              iconType="trash"
+                              isDisabled={false}
+                              onClick={[Function]}
+                              size="s"
+                              type="button"
+                            >
+                              <button
+                                className="euiButton euiButton--danger euiButton--small"
+                                data-test-subj="savedObjectEditDelete"
+                                disabled={false}
+                                onClick={[Function]}
+                                style={
+                                  Object {
+                                    "minWidth": undefined,
+                                  }
+                                }
+                                type="button"
+                              >
+                                <EuiButtonContent
+                                  className="euiButton__content"
+                                  iconSide="left"
+                                  iconType="trash"
+                                  textProps={
+                                    Object {
+                                      "className": "euiButton__text",
+                                    }
+                                  }
+                                >
+                                  <span
+                                    className="euiButtonContent euiButton__content"
+                                  >
+                                    <EuiIcon
+                                      className="euiButtonContent__icon"
+                                      color="inherit"
+                                      size="m"
+                                      type="trash"
+                                    >
+                                      <span
+                                        className="euiButtonContent__icon"
+                                        color="inherit"
+                                        data-euiicon-type="trash"
+                                        size="m"
+                                      />
+                                    </EuiIcon>
+                                    <span
+                                      className="euiButton__text"
+                                    >
+                                      <FormattedMessage
+                                        defaultMessage="Delete {title}"
+                                        id="savedObjectsManagement.view.deleteItemButtonLabel"
+                                        values={
+                                          Object {
+                                            "title": "search",
+                                          }
+                                        }
+                                      >
+                                        Delete search
+                                      </FormattedMessage>
+                                    </span>
+                                  </span>
+                                </EuiButtonContent>
+                              </button>
+                            </EuiButtonDisplay>
+                          </EuiButton>
+                        </div>
+                      </EuiFlexItem>
+                    </div>
+                  </EuiFlexGroup>
                 </div>
               </EuiFlexItem>
             </div>
           </EuiFlexGroup>
         </div>
-      </EuiPageContentHeaderSection>
-    </div>
-  </EuiPageContentHeader>
+      </EuiPageHeaderContent>
+    </header>
+  </EuiPageHeader>
 </Header>
 `;

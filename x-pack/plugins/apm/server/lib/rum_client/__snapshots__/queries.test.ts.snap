@@ -64,6 +64,13 @@ Object {
             },
           },
         ],
+        "must_not": Array [
+          Object {
+            "term": Object {
+              "service.environment": "staging",
+            },
+          },
+        ],
       },
     },
     "size": 0,
@@ -159,6 +166,7 @@ Object {
             },
           },
         ],
+        "must_not": Array [],
       },
     },
     "size": 0,
@@ -233,6 +241,7 @@ Object {
             },
           },
         ],
+        "must_not": Array [],
       },
     },
     "size": 0,
@@ -503,6 +512,13 @@ Object {
             },
           },
         ],
+        "must_not": Array [
+          Object {
+            "term": Object {
+              "service.environment": "staging",
+            },
+          },
+        ],
       },
     },
     "size": 0,
@@ -544,6 +560,13 @@ Object {
               "transaction.type": "page-load",
             },
           },
+          Object {
+            "term": Object {
+              "service.environment": "staging",
+            },
+          },
+        ],
+        "must_not": Array [
           Object {
             "term": Object {
               "service.environment": "staging",
@@ -667,6 +690,7 @@ Object {
             },
           },
         ],
+        "must_not": Array [],
       },
     },
     "size": 0,
@@ -713,6 +737,7 @@ Object {
             },
           },
         ],
+        "must_not": Array [],
       },
     },
     "size": 0,

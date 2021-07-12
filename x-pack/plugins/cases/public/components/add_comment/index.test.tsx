@@ -11,11 +11,10 @@ import { waitFor, act } from '@testing-library/react';
 import { noop } from 'lodash/fp';
 
 import { TestProviders } from '../../common/mock';
-import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
 
 import { CommentRequest, CommentType, SECURITY_SOLUTION_OWNER } from '../../../common';
 import { usePostComment } from '../../containers/use_post_comment';
-import { AddComment, AddCommentRefObject } from '.';
+import { AddComment, AddCommentProps, AddCommentRefObject } from '.';
 import { CasesTimelineIntegrationProvider } from '../timeline_context';
 import { timelineIntegrationMock } from '../__mock__/timeline';
 
@@ -26,13 +25,13 @@ const onCommentSaving = jest.fn();
 const onCommentPosted = jest.fn();
 const postComment = jest.fn();
 
-const addCommentProps = {
+const addCommentProps: AddCommentProps = {
   caseId: '1234',
-  disabled: false,
-  insertQuote: null,
+  userCanCrud: true,
   onCommentSaving,
   onCommentPosted,
   showLoading: false,
+  statusActionButton: null,
 };
 
 const defaultPostComment = {
@@ -51,15 +50,12 @@ describe('AddComment ', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     usePostCommentMock.mockImplementation(() => defaultPostComment);
-    jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
   });
 
   it('should post comment on submit click', async () => {
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <AddComment {...addCommentProps} />
-        </Router>
+        <AddComment {...addCommentProps} />
       </TestProviders>
     );
 
@@ -88,9 +84,7 @@ describe('AddComment ', () => {
     usePostCommentMock.mockImplementation(() => ({ ...defaultPostComment, isLoading: true }));
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <AddComment {...{ ...addCommentProps, showLoading: true }} />
-        </Router>
+        <AddComment {...{ ...addCommentProps, showLoading: true }} />
       </TestProviders>
     );
 
@@ -100,13 +94,11 @@ describe('AddComment ', () => {
     ).toBeTruthy();
   });
 
-  it('should disable submit button when disabled prop passed', () => {
+  it('should disable submit button when isLoading is true', () => {
     usePostCommentMock.mockImplementation(() => ({ ...defaultPostComment, isLoading: true }));
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <AddComment {...{ ...addCommentProps, disabled: true }} />
-        </Router>
+        <AddComment {...addCommentProps} />
       </TestProviders>
     );
 
@@ -115,14 +107,23 @@ describe('AddComment ', () => {
     ).toBeTruthy();
   });
 
+  it('should hide the component when the user does not have crud permissions', () => {
+    usePostCommentMock.mockImplementation(() => ({ ...defaultPostComment, isLoading: true }));
+    const wrapper = mount(
+      <TestProviders>
+        <AddComment {...{ ...addCommentProps, userCanCrud: false }} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find(`[data-test-subj="add-comment"]`).exists()).toBeFalsy();
+  });
+
   it('should insert a quote', async () => {
     const sampleQuote = 'what a cool quote';
     const ref = React.createRef<AddCommentRefObject>();
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <AddComment {...{ ...addCommentProps }} ref={ref} />
-        </Router>
+        <AddComment {...addCommentProps} ref={ref} />
       </TestProviders>
     );
 
@@ -153,9 +154,7 @@ describe('AddComment ', () => {
     const wrapper = mount(
       <TestProviders>
         <CasesTimelineIntegrationProvider timelineIntegration={mockTimelineIntegration}>
-          <Router history={mockHistory}>
-            <AddComment {...{ ...addCommentProps }} />
-          </Router>
+          <AddComment {...addCommentProps} />
         </CasesTimelineIntegrationProvider>
       </TestProviders>
     );

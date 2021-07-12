@@ -21,11 +21,12 @@ import { bulkCreateMlSignals } from '../bulk_create_ml_signals';
 import { filterEventsAgainstList } from '../filters/filter_events_against_list';
 import { findMlSignals } from '../find_ml_signals';
 import { BuildRuleMessage } from '../rule_messages';
-import { AlertAttributes, BulkCreate, WrapHits } from '../types';
+import { AlertAttributes, BulkCreate, RuleRangeTuple, WrapHits } from '../types';
 import { createErrorsFromShard, createSearchAfterReturnType, mergeReturns } from '../utils';
 
 export const mlExecutor = async ({
   rule,
+  tuple,
   ml,
   listClient,
   exceptionItems,
@@ -36,6 +37,7 @@ export const mlExecutor = async ({
   wrapHits,
 }: {
   rule: SavedObject<AlertAttributes<MachineLearningRuleParams>>;
+  tuple: RuleRangeTuple;
   ml: SetupPlugins['ml'];
   listClient: ListClient;
   exceptionItems: ExceptionListItemSchema[];
@@ -88,8 +90,8 @@ export const mlExecutor = async ({
     savedObjectsClient: services.savedObjectsClient,
     jobIds: ruleParams.machineLearningJobId,
     anomalyThreshold: ruleParams.anomalyThreshold,
-    from: ruleParams.from,
-    to: ruleParams.to,
+    from: tuple.from.toISOString(),
+    to: tuple.to.toISOString(),
     exceptionItems,
   });
 

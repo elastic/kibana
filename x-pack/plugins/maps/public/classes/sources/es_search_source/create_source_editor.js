@@ -14,7 +14,7 @@ import { GeoIndexPatternSelect } from '../../../components/geo_index_pattern_sel
 import { i18n } from '@kbn/i18n';
 import { SCALING_TYPES } from '../../../../common/constants';
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
-import { ScalingForm } from './scaling_form';
+import { ScalingForm } from './util/scaling_form';
 import {
   getGeoFields,
   getGeoTileAggNotSupportedReason,

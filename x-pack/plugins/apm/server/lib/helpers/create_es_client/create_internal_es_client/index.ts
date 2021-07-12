@@ -12,7 +12,7 @@ import { APMRouteHandlerResources } from '../../../../routes/typings';
 import {
   ESSearchResponse,
   ESSearchRequest,
-} from '../../../../../../../../typings/elasticsearch';
+} from '../../../../../../../../src/core/types/elasticsearch';
 import {
   callAsyncWithDebug,
   getDebugBody,
@@ -54,6 +54,7 @@ export function createInternalESClient({
       request,
       requestType,
       requestParams: params,
+      operationName,
     });
   }
 

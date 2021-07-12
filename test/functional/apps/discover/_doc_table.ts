@@ -236,7 +236,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const scrollWidth = await dscTable.getAttribute('scrollWidth');
           const clientWidth = await dscTable.getAttribute('clientWidth');
           log.debug(`scrollWidth: ${scrollWidth}, clientWidth: ${clientWidth}`);
-          return scrollWidth > clientWidth;
+          return Number(scrollWidth) > Number(clientWidth);
         };
         const addColumn = async () => {
           await PageObjects.discover.clickFieldListItemAdd(fieldNames[fieldCounter++]);

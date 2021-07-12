@@ -15,15 +15,15 @@ import {
   getTableSkipFocus,
   handleSkipFocus,
   stopPropagationAndPreventDefault,
-} from '../accessibility/helpers';
+} from '../../../../../timelines/public';
 import { BrowserField, BrowserFields } from '../../containers/source';
-import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import {
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
   DEFAULT_COLUMN_MIN_WIDTH,
 } from '../../../timelines/components/timeline/body/constants';
 
 import * as i18n from './translations';
+import { ColumnHeaderOptions } from '../../../../common';
 
 /**
  * Defines the behavior of the search input that appears above the table of data
@@ -64,16 +64,6 @@ export interface AlertSummaryRow {
   };
 }
 
-export interface ThreatSummaryRow {
-  title: string;
-  description: {
-    contextId: string;
-    eventId: string;
-    fieldName: string;
-    values: string[];
-  };
-}
-
 export interface ThreatDetailsRow {
   title: string;
   description: {
@@ -82,7 +72,7 @@ export interface ThreatDetailsRow {
   };
 }
 
-export type SummaryRow = AlertSummaryRow | ThreatSummaryRow | ThreatDetailsRow;
+export type SummaryRow = AlertSummaryRow | ThreatDetailsRow;
 
 export const getColumnHeaderFromBrowserField = ({
   browserField,
@@ -215,7 +205,6 @@ getTitle.displayName = 'getTitle';
 
 export const getSummaryColumns = (
   DescriptionComponent:
-    | React.FC<ThreatSummaryRow['description']>
     | React.FC<AlertSummaryRow['description']>
     | React.FC<ThreatDetailsRow['description']>
 ): Array<EuiBasicTableColumn<SummaryRow>> => {

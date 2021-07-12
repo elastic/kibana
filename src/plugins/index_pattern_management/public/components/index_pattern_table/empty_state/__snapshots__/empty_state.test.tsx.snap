@@ -4,9 +4,11 @@ exports[`EmptyState should render normally 1`] = `
 <Fragment>
   <EuiPageContent
     className="inpEmptyState"
+    color="subdued"
     data-test-subj="indexPatternEmptyState"
     grow={false}
     horizontalPosition="center"
+    verticalPosition="center"
   >
     <EuiPageContentHeader>
       <EuiPageContentHeaderSection>
@@ -118,11 +120,10 @@ exports[`EmptyState should render normally 1`] = `
       <div
         className="inpEmptyState__footer"
       >
-        <EuiFlexGrid
-          columns={3}
-        >
+        <EuiFlexGroup>
           <EuiFlexItem
             className="inpEmptyState__footerFlexItem"
+            grow={1}
           >
             <EuiDescriptionList
               listItems={
@@ -151,6 +152,7 @@ exports[`EmptyState should render normally 1`] = `
           </EuiFlexItem>
           <EuiFlexItem
             className="inpEmptyState__footerFlexItem"
+            grow={2}
           >
             <EuiDescriptionList
               listItems={
@@ -181,7 +183,7 @@ exports[`EmptyState should render normally 1`] = `
               }
             />
           </EuiFlexItem>
-        </EuiFlexGrid>
+        </EuiFlexGroup>
       </div>
     </EuiPageContentBody>
   </EuiPageContent>

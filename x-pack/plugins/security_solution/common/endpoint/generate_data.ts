@@ -51,7 +51,7 @@ export const ANCESTRY_LIMIT: number = 2;
 
 const Windows: OSFields[] = [
   {
-    name: 'windows 10.0',
+    name: 'Windows',
     full: 'Windows 10',
     version: '10.0',
     platform: 'Windows',
@@ -61,7 +61,7 @@ const Windows: OSFields[] = [
     },
   },
   {
-    name: 'windows 10.0',
+    name: 'Windows',
     full: 'Windows Server 2016',
     version: '10.0',
     platform: 'Windows',
@@ -71,7 +71,7 @@ const Windows: OSFields[] = [
     },
   },
   {
-    name: 'windows 6.2',
+    name: 'Windows',
     full: 'Windows Server 2012',
     version: '6.2',
     platform: 'Windows',
@@ -81,7 +81,7 @@ const Windows: OSFields[] = [
     },
   },
   {
-    name: 'windows 6.3',
+    name: 'Windows',
     full: 'Windows Server 2012R2',
     version: '6.3',
     platform: 'Windows',
@@ -423,6 +423,14 @@ export class EndpointDocGenerator extends BaseDataGenerator {
   }
 
   /**
+   * Update the common host metadata - essentially creating an entire new endpoint metadata record
+   * when the `.generateHostMetadata()` is subsequently called
+   */
+  public updateCommonInfo() {
+    this.commonInfo = this.createHostData();
+  }
+
+  /**
    * Parses an index and returns the data stream fields extracted from the index.
    *
    * @param index the index name to parse into the data stream parts
@@ -439,7 +447,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
 
   private createHostData(): HostInfo {
     const hostName = this.randomHostname();
-    const isIsolated = this.randomBoolean();
+    const isIsolated = this.randomBoolean(0.3);
 
     return {
       agent: {

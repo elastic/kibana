@@ -9,16 +9,6 @@ import { i18n } from '@kbn/i18n';
 
 export * from '../../common/translations';
 
-export const SHOWING_CASES = (actionDate: string, actionName: string, userName: string) =>
-  i18n.translate('xpack.cases.caseView.actionHeadline', {
-    values: {
-      actionDate,
-      actionName,
-      userName,
-    },
-    defaultMessage: '{userName} {actionName} on {actionDate}',
-  });
-
 export const ADDED_FIELD = i18n.translate('xpack.cases.caseView.actionLabel.addedField', {
   defaultMessage: 'added',
 });
@@ -87,10 +77,6 @@ export const EDIT_COMMENT = i18n.translate('xpack.cases.caseView.edit.comment', 
 
 export const ON = i18n.translate('xpack.cases.caseView.actionLabel.on', {
   defaultMessage: 'on',
-});
-
-export const ADDED_COMMENT = i18n.translate('xpack.cases.caseView.actionLabel.addComment', {
-  defaultMessage: 'added comment',
 });
 
 export const STATUS = i18n.translate('xpack.cases.caseView.statusLabel', {

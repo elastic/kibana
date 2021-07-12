@@ -14,23 +14,15 @@ export const DELETE_TITLE = (caseTitle: string) =>
     defaultMessage: 'Delete "{caseTitle}"',
   });
 
-export const DELETE_THIS_CASE = (caseTitle: string) =>
-  i18n.translate('xpack.cases.confirmDeleteCase.deleteThisCase', {
-    defaultMessage: 'Delete this case',
+export const DELETE_SELECTED_CASES = (quantity: number, title: string) =>
+  i18n.translate('xpack.cases.confirmDeleteCase.selectedCases', {
+    values: { quantity, title },
+    defaultMessage: 'Delete "{quantity, plural, =1 {{title}} other {Selected {quantity} cases}}"',
   });
 
-export const CONFIRM_QUESTION = i18n.translate('xpack.cases.confirmDeleteCase.confirmQuestion', {
-  defaultMessage:
-    'By deleting this case, all related case data will be permanently removed and you will no longer be able to push data to an external incident management system. Are you sure you wish to proceed?',
-});
-export const DELETE_SELECTED_CASES = i18n.translate('xpack.cases.confirmDeleteCase.selectedCases', {
-  defaultMessage: 'Delete selected cases',
-});
-
-export const CONFIRM_QUESTION_PLURAL = i18n.translate(
-  'xpack.cases.confirmDeleteCase.confirmQuestionPlural',
-  {
+export const CONFIRM_QUESTION = (quantity: number) =>
+  i18n.translate('xpack.cases.confirmDeleteCase.confirmQuestion', {
+    values: { quantity },
     defaultMessage:
-      'By deleting these cases, all related case data will be permanently removed and you will no longer be able to push data to  an external incident management system. Are you sure you wish to proceed?',
-  }
-);
+      'By deleting {quantity, plural, =1 {this case} other {these cases}}, all related case data will be permanently removed and you will no longer be able to push data to an external incident management system. Are you sure you wish to proceed?',
+  });
