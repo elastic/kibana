@@ -42,10 +42,13 @@ const EndpointDetailsTab = memo(
     handleTabClick: () => void;
   }) => {
     const setUrl = useNavigateByRouterEventHandler(tab.route);
-    const onClick = (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement, MouseEvent>) => {
-      setUrl(e);
-      handleTabClick();
-    };
+    const onClick = useCallback(
+      (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement, MouseEvent>) => {
+        setUrl(e);
+        handleTabClick();
+      },
+      [setUrl, handleTabClick]
+    );
     return (
       <EuiTab onClick={onClick} isSelected={isSelected} key={tab.id} data-test-subj={tab.id}>
         {tab.name}
