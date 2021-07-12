@@ -6,19 +6,20 @@
  */
 
 import React, { Component } from 'react';
+import uuid from 'uuid/v4';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingChart } from '@elastic/eui';
 import type { Embeddable } from '../../../../../../src/plugins/embeddable/public';
 import type { MapEmbeddableInput, MapEmbeddableOutput } from '../../embeddable';
-import { lazyLoadMapModules, LazyLoadedMapModules } from '../../lazy_load_bundle';
-import uuid from 'uuid/v4';
+import { lazyLoadMapModules } from '../../lazy_load_bundle';
+import { TileMapVisConfig } from './types';
 
 interface Props {
-  layerDescriptorParams: unknown;
+  visConfig: TileMapVisConfig;
 }
 
 interface State {
-  mapModules?: LazyLoadedMapModules;
+  isLoaded: boolean;
 }
 
 export class TileMapVisualization extends Component<Props, State> {
@@ -26,7 +27,7 @@ export class TileMapVisualization extends Component<Props, State> {
   private _mapEmbeddable?: Embeddable<MapEmbeddableInput, MapEmbeddableOutput> | undefined;
   private readonly _embeddableRef: HTMLDivElement = React.createRef();
   
-  state: State = {};
+  state: State = { isLoaded: false };
 
   componentDidMount() {
     this._isMounted = true;
@@ -46,9 +47,10 @@ export class TileMapVisualization extends Component<Props, State> {
       return;
     }
 
-    this.setState({ mapModules });
+    this.setState({ isLoaded: true });
 
-    const tileMapLayerDescriptor = mapModules.createTileMapLayerDescriptor(this.props.layerDescriptorParams);
+    console.log(this.props.visConfig);
+
     this._mapEmbeddable = new mapModules.MapEmbeddable(
       {
         editable: false,
@@ -59,16 +61,21 @@ export class TileMapVisualization extends Component<Props, State> {
           title: '',
           layerListJSON: JSON.stringify([
             mapModules.createBasemapLayerDescriptor(),
-            mapModules.createTileMapLayerDescriptor(this.props.layerDescriptorParams),
+            mapModules.createTileMapLayerDescriptor(this.props.visConfig.layerDescriptorParams),
           ]),
         },
+        mapCenter: {
+          lat: this.props.visConfig.mapCenter[1],
+          lon: this.props.visConfig.mapCenter[0],
+          zoom: this.props.visConfig.mapZoom,
+        }
       }
     );
     this._mapEmbeddable.render(this._embeddableRef.current);
   }
 
   render() {
-    if (!this.state.mapModules) {
+    if (!this.state.isLoaded) {
       return <EuiLoadingChart mono size="l" />;
     }
 

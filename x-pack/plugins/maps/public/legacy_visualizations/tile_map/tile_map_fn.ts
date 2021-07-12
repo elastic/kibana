@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionDefinition, Datatable, Render } from '../../../../../../src/plugins/expressions/public';
-import { TileMapVisParams } from './types';
+import { TileMapVisConfig } from './types';
 
 const title = i18n.translate('tileMap.vis.mapTitle', {
   defaultMessage: 'Coordinate Map',
@@ -20,7 +20,7 @@ interface Arguments {
 
 export interface TileMapVisRenderValue {
   visType: 'tile_map';
-  layerDescriptorParams: unknown;
+  visConfig: TileMapVisConfig;
 }
 
 export type TileMapExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -49,7 +49,7 @@ export const createTileMapFn = (): TileMapExpressionFunctionDefinition => ({
       as: 'tile_map_vis',
       value: {
         visType: 'tile_map',
-        layerDescriptorParams: JSON.parse(args.visConfig)
+        visConfig: JSON.parse(args.visConfig)
       },
     };
   },

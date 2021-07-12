@@ -16,13 +16,13 @@ import { TileMapVisualization } from './tile_map_visualization';
 export const tileMapRenderer = {
   name: 'tile_map_vis',
   reuseDomNode: true,
-  render: async (domNode, { layerDescriptorParams }, handlers) => {
+  render: async (domNode, { visConfig }, handlers) => {
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
 
     render(
-      <TileMapVisualization layerDescriptorParams={layerDescriptorParams} />,
+      <TileMapVisualization visConfig={visConfig} />,
       domNode
     );
   },

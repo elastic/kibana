@@ -16,4 +16,10 @@ export enum MapTypes {
 export interface TileMapVisParams {
   colorSchema: string;
   mapType: MapTypes;
+  mapZoom: number;
+  mapCenter: [number, number];
+}
+
+export interface TileMapVisConfig extends TileMapVisParams {
+  layerDescriptorParams: unknown;
 }

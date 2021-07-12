@@ -44,7 +44,10 @@ export const toExpressionAst: VisToExpressionAst<TileMapVisParams> = (vis) => {
   const tileMap = buildExpressionFunction<TileMapExpressionFunctionDefinition>(
     'tilemap',
     {
-      visConfig: JSON.stringify(params),
+      visConfig: JSON.stringify({
+        ...vis.params,
+        layerDescriptorParams: params,
+      }),
     }
   );
 
