@@ -9,11 +9,21 @@ import dateMath from '@elastic/datemath';
 import moment, { Duration } from 'moment';
 import type { TimerangeInput } from '../../../common/search_strategy';
 
-export type ParseTimeRange = (
-  timeRange: TimerangeInput
-) => { timeRangeAdjusted: TimerangeInput | undefined; duration: Duration | undefined };
+export interface TimeRangeAdjusted {
+  timeRangeAdjusted: TimerangeInput | undefined;
+  duration: Duration | undefined;
+}
 
-export const adjustTimeRange: ParseTimeRange = (timerange) => {
+/**
+ * Adjusts a given timerange by rounding the "from" down by an hour and returning
+ * the duration between "to" and "from". The duration is typically analyzed to determine
+ * if the adjustment should be made or not. Although we check "to" and use "to" for duration
+ * we are careful to still return "to: timerange.to", which is the original input to be careful
+ * about accidental bugs from trying to over parse or change relative date time ranges.
+ * @param timerange The timeRange to determine if we adjust or not
+ * @returns The time input adjustment and a duration
+ */
+export const adjustTimeRange = (timerange: TimerangeInput): TimeRangeAdjusted => {
   const from = dateMath.parse(timerange.from);
   const to = dateMath.parse(timerange.to);
   if (from == null || to == null) {

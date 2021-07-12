@@ -13,9 +13,9 @@ import { IndexDeprecationTableProps, IndexDeprecationTable } from './index_table
 describe('IndexDeprecationTable', () => {
   const defaultProps = {
     indices: [
-      { index: 'index1', details: 'Index 1 deets', reindex: true },
-      { index: 'index2', details: 'Index 2 deets', reindex: true },
-      { index: 'index3', details: 'Index 3 deets', reindex: true },
+      { index: 'index1', details: 'Index 1 deets', correctiveAction: { type: 'reindex' } },
+      { index: 'index2', details: 'Index 2 deets', correctiveAction: { type: 'reindex' } },
+      { index: 'index3', details: 'Index 3 deets', correctiveAction: { type: 'reindex' } },
     ],
   } as IndexDeprecationTableProps;
 
@@ -49,19 +49,25 @@ describe('IndexDeprecationTable', () => {
         items={
           Array [
             Object {
+              "correctiveAction": Object {
+                "type": "reindex",
+              },
               "details": "Index 1 deets",
               "index": "index1",
-              "reindex": true,
             },
             Object {
+              "correctiveAction": Object {
+                "type": "reindex",
+              },
               "details": "Index 2 deets",
               "index": "index2",
-              "reindex": true,
             },
             Object {
+              "correctiveAction": Object {
+                "type": "reindex",
+              },
               "details": "Index 3 deets",
               "index": "index3",
-              "reindex": true,
             },
           ]
         }

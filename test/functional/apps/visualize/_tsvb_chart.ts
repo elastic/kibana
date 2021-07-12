@@ -125,7 +125,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('switch index patterns', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/103252
+    describe.skip('switch index patterns', () => {
       before(async () => {
         await esArchiver.loadIfNeeded(
           'test/functional/fixtures/es_archiver/index_pattern_without_timefield'

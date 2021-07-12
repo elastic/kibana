@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
-import { getWaterfall } from './WaterfallWithSummmary/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
+import { getWaterfall } from './waterfall_with_summary/waterfall_container/Waterfall/waterfall_helpers/waterfall_helpers';
 
 const INITIAL_DATA = {
   root: undefined,

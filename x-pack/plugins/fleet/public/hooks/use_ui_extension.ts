@@ -20,7 +20,7 @@ type NarrowExtensionPoint<V extends UIExtensionPoint['view'], A = UIExtensionPoi
 export const useUIExtension = <V extends UIExtensionPoint['view'] = UIExtensionPoint['view']>(
   packageName: UIExtensionPoint['package'],
   view: V
-): NarrowExtensionPoint<V>['component'] | undefined => {
+): NarrowExtensionPoint<V> | undefined => {
   const registeredExtensions = useContext(UIExtensionsContext);
 
   if (!registeredExtensions) {
@@ -32,6 +32,6 @@ export const useUIExtension = <V extends UIExtensionPoint['view'] = UIExtensionP
   if (extension) {
     // FIXME:PT Revisit ignore below and see if TS error can be addressed
     // @ts-ignore
-    return extension.component;
+    return extension;
   }
 };
