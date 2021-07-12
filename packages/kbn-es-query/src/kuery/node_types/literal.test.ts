@@ -9,7 +9,7 @@
 // @ts-ignore
 import { buildNode, toElasticsearchQuery } from './literal';
 
-jest.mock('../../../grammar');
+jest.mock('../grammar');
 
 describe('kuery node types', () => {
   describe('literal', () => {

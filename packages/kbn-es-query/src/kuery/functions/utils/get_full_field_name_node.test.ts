@@ -11,7 +11,7 @@ import { fields } from '../../../filters/stubs';
 import { IndexPatternBase } from '../../..';
 import { getFullFieldNameNode } from './get_full_field_name_node';
 
-jest.mock('../../../../grammar');
+jest.mock('../../grammar');
 
 describe('getFullFieldNameNode', function () {
   let indexPattern: IndexPatternBase;

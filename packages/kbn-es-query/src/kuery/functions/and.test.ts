@@ -12,7 +12,7 @@ import * as ast from '../ast';
 import * as and from './and';
 import { IndexPatternBase } from '../../es_query';
 
-jest.mock('../../../grammar');
+jest.mock('../grammar');
 
 const childNode1 = nodeTypes.function.buildNode('is', 'machine.os', 'osx');
 const childNode2 = nodeTypes.function.buildNode('is', 'extension', 'jpg');

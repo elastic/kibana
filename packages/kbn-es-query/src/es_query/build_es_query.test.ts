@@ -14,6 +14,8 @@ import { MatchAllFilter } from '../filters';
 import { fields } from '../filters/stubs';
 import { IndexPatternBase } from './types';
 
+jest.mock('../kuery/grammar');
+
 describe('build query', () => {
   const indexPattern: IndexPatternBase = {
     fields,

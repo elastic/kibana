@@ -12,7 +12,7 @@ import { IndexPatternBase } from '../..';
 import { KueryNode } from '../types';
 import { fields } from '../../filters/stubs';
 
-jest.mock('../../../grammar');
+jest.mock('../grammar');
 
 describe('kuery AST API', () => {
   let indexPattern: IndexPatternBase;

@@ -10,7 +10,7 @@ import { nodeTypes } from '../node_types';
 import { fields } from '../../filters/stubs';
 import { IndexPatternBase } from '../..';
 
-jest.mock('../../../grammar');
+jest.mock('../grammar');
 
 // @ts-ignore
 import * as exists from './exists';

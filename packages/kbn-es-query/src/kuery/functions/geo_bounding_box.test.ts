@@ -13,7 +13,7 @@ import { IndexPatternBase } from '../..';
 
 import * as geoBoundingBox from './geo_bounding_box';
 
-jest.mock('../../../grammar');
+jest.mock('../grammar');
 
 const params = {
   bottomRight: {

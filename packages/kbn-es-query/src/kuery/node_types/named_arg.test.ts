@@ -9,7 +9,7 @@
 import { nodeTypes } from './index';
 import { buildNode, toElasticsearchQuery } from './named_arg';
 
-jest.mock('../../../grammar');
+jest.mock('../grammar');
 
 describe('kuery node types', () => {
   describe('named arg', () => {
