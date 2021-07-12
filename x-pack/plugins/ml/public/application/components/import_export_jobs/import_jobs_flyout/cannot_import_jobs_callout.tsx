@@ -28,7 +28,7 @@ export const CannotImportJobsCallout: FC<Props> = ({ jobs, autoExpand = false })
   return (
     <>
       <EuiCallOut
-        title={i18n.translate('xpack.ml.dataGrid.IndexNoDataCalloutTitle', {
+        title={i18n.translate('xpack.ml.importExport.importFlyout.cannotImportJobCallout.title', {
           defaultMessage: '{num, plural, one {# job} other {# jobs}} cannot be imported',
           values: { num: jobs.length },
         })}
@@ -40,12 +40,15 @@ export const CannotImportJobsCallout: FC<Props> = ({ jobs, autoExpand = false })
           <EuiAccordion
             id="advancedOptions"
             paddingSize="s"
-            aria-label={i18n.translate('xpack.ml.newJob.recognize.advancedSettingsAriaLabel', {
-              defaultMessage: 'Advanced settings',
-            })}
+            aria-label={i18n.translate(
+              'xpack.ml.importExport.importFlyout.cannotImportJobCallout.jobListAria',
+              {
+                defaultMessage: 'view jobs',
+              }
+            )}
             buttonContent={
               <FormattedMessage
-                id="xpack.ml.newJob.recognize.advancedLabel"
+                id="xpack.ml.importExport.importFlyout.cannotImportJobCallout.jobListButton"
                 defaultMessage="View jobs"
               />
             }
@@ -69,7 +72,7 @@ const SkippedJobList: FC<{ jobs: SkippedJobs[] }> = ({ jobs }) => (
             <EuiText size="s">
               <h5>{jobId}</h5>
               <FormattedMessage
-                id="xpack.ml.newJob.wizard.datafeedPreviewFlyout.closeButton"
+                id="xpack.ml.importExport.importFlyout.cannotImportJobCallout.missingIndex"
                 defaultMessage="Missing index {num, plural, one {pattern} other {patterns}}: {indices}"
                 values={{ num: missingIndices.length, indices: missingIndices.join(',') }}
               />

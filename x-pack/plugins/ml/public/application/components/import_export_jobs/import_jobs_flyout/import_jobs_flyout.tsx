@@ -288,7 +288,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
             <EuiTitle size="m">
               <h2>
                 <FormattedMessage
-                  id="xpack.infra.ml.anomalyFlyout.jobSetup.flyoutHeader"
+                  id="xpack.ml.importExport.importFlyout.flyoutHeader"
                   defaultMessage="Import jobs"
                 />
               </h2>
@@ -302,7 +302,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
                   fullWidth={true}
                   id="filePicker"
                   initialPromptText={i18n.translate(
-                    'xpack.fileDataVisualizer.aboutPanel.selectOrDragAndDropFileDescription',
+                    'xpack.ml.importExport.importFlyout.fileSelect',
                     {
                       defaultMessage: 'Select or drag and drop a file',
                     }
@@ -319,7 +319,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
                   <EuiSpacer size="l" />
                   {jobType === 'anomaly-detector' && (
                     <FormattedMessage
-                      id="xpack.infra.ml.anomalyFlyout.jobSetup.flyoutHeader"
+                      id="xpack.ml.importExport.importFlyout.selectedFiles.ad"
                       defaultMessage="{num} anomaly detection {num, plural, one {job} other {jobs}} read from file"
                       values={{ num: totalJobsRead }}
                     />
@@ -327,7 +327,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
 
                   {jobType === 'data-frame-analytics' && (
                     <FormattedMessage
-                      id="xpack.infra.ml.anomalyFlyout.jobSetup.flyoutHeader"
+                      id="xpack.ml.importExport.importFlyout.selectedFiles.dfa"
                       defaultMessage="{num} data frame analytics {num, plural, one {job} other {jobs}} read from file"
                       values={{ num: totalJobsRead }}
                     />
@@ -341,7 +341,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
                   />
 
                   <FormattedMessage
-                    id="xpack.infra.ml.anomalyFlyout.jobSetup.flyoutHeader"
+                    id="xpack.ml.importExport.importFlyout.importableFiles"
                     defaultMessage="{num} importable {num, plural, one {job} other {jobs}}"
                     values={{ num: jobIds.length }}
                   />
@@ -358,7 +358,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
                             >
                               <EuiFieldText
                                 prepend={i18n.translate(
-                                  'xpack.fileDataVisualizer.aboutPanel.selectOrDragAndDropFileDescription',
+                                  'xpack.ml.importExport.importFlyout.jobId',
                                   {
                                     defaultMessage: 'Job ID',
                                   }
@@ -388,7 +388,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty iconType="cross" onClick={() => setShowFlyout(false)} flush="left">
                   <FormattedMessage
-                    id="xpack.ml.newJob.wizard.datafeedPreviewFlyout.closeButton"
+                    id="xpack.ml.importExport.importFlyout.closeButton"
                     defaultMessage="Close"
                   />
                 </EuiButtonEmpty>
@@ -396,7 +396,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
               <EuiFlexItem grow={false}>
                 <EuiButton disabled={importDisabled} onClick={onImport} fill>
                   <FormattedMessage
-                    id="xpack.ml.newJob.wizard.revertModelSnapshotFlyout.saveButton"
+                    id="xpack.ml.importExport.importFlyout.closeButton.importButton"
                     defaultMessage="Import"
                   />
                 </EuiButton>
@@ -417,10 +417,7 @@ const FlyoutButton: FC<{ isDisabled: boolean; onClick(): void }> = ({ isDisabled
       isDisabled={isDisabled}
       data-test-subj="mlJobWizardButtonPreviewJobJson"
     >
-      <FormattedMessage
-        id="xpack.ml.newJob.wizard.datafeedPreviewFlyout.showButton"
-        defaultMessage="Import jobs"
-      />
+      <FormattedMessage id="xpack.ml.importExport.importButton" defaultMessage="Import jobs" />
     </EuiButtonEmpty>
   );
 };
@@ -541,13 +538,13 @@ async function validateJobs(
 }
 
 const jobEmpty = i18n.translate(
-  'xpack.ml.newJob.wizard.validateJob.jobNameAllowedCharactersDescription',
+  'xpack.ml.importExport.importFlyout.validateJobId.jobNameAllowedCharactersDescription',
   {
     defaultMessage: 'Enter a valid job ID',
   }
 );
 const jobInvalid = i18n.translate(
-  'xpack.ml.newJob.wizard.validateJob.jobNameAllowedCharactersDescription',
+  'xpack.ml.importExport.importFlyout.validateJobId.jobNameAllowedCharactersDescription',
   {
     defaultMessage:
       'Job ID can contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores; ' +
@@ -555,7 +552,7 @@ const jobInvalid = i18n.translate(
   }
 );
 const jobInvalidLength = i18n.translate(
-  'xpack.ml.newJob.wizard.validateJob.jobIdInvalidMaxLengthErrorMessage',
+  'xpack.ml.importExport.importFlyout.validateJobId.jobIdInvalidMaxLengthErrorMessage',
   {
     defaultMessage:
       'Job ID must be no more than {maxLength, plural, one {# character} other {# characters}} long.',
@@ -564,6 +561,10 @@ const jobInvalidLength = i18n.translate(
     },
   }
 );
-const jobExists = i18n.translate('xpack.ml.newJob.wizard.validateJob.jobNameAlreadyExists', {
-  defaultMessage: 'Job ID already exists. A job ID cannot be the same as an existing job or group.',
-});
+const jobExists = i18n.translate(
+  'xpack.ml.importExport.importFlyout.validateJobId.jobNameAlreadyExists',
+  {
+    defaultMessage:
+      'Job ID already exists. A job ID cannot be the same as an existing job or group.',
+  }
+);

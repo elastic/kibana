@@ -16,13 +16,13 @@ export const CannotReadFileCallout: FC = () => {
     <>
       <EuiSpacer size="l" />
       <EuiCallOut
-        title={i18n.translate('xpack.ml.dataGrid.IndexNoDataCalloutTitle', {
+        title={i18n.translate('xpack.ml.importExport.importFlyout.cannotReadFileCallout.title', {
           defaultMessage: 'File cannot be read',
         })}
         color="warning"
       >
         <FormattedMessage
-          id="xpack.ml.newJob.recognize.advancedLabel"
+          id="xpack.ml.importExport.importFlyout.cannotReadFileCallout.body"
           defaultMessage="Please select a file contained Machine Learning jobs with have been exported from Kibana using the Export Jobs option"
         />
       </EuiCallOut>

@@ -108,7 +108,7 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
             <EuiTitle size="m">
               <h2>
                 <FormattedMessage
-                  id="xpack.infra.ml.anomalyFlyout.jobSetup.flyoutHeader"
+                  id="xpack.ml.importExport.exportFlyout.flyoutHeader"
                   defaultMessage="Export jobs"
                 />
               </h2>
@@ -122,7 +122,7 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
                 disabled={exporting}
               >
                 <FormattedMessage
-                  id="xpack.ml.newJob.wizard.datafeedPreviewFlyout.closeButton"
+                  id="xpack.ml.importExport.exportFlyout.adTab"
                   defaultMessage="Anomaly detection"
                 />
               </EuiTab>
@@ -132,7 +132,7 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
                 disabled={exporting}
               >
                 <FormattedMessage
-                  id="xpack.ml.newJob.wizard.datafeedPreviewFlyout.closeButton"
+                  id="xpack.ml.importExport.exportFlyout.dfaTab"
                   defaultMessage="Analytics"
                 />
               </EuiTab>
@@ -141,14 +141,9 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
             <>
               {selectedJobType === 'anomaly-detector' && (
                 <>
-                  <EuiButtonEmpty
-                    size="xs"
-                    onClick={onSelectAll}
-                    isDisabled={isDisabled}
-                    data-test-subj="mlJobWizardButtonPreviewJobJson"
-                  >
+                  <EuiButtonEmpty size="xs" onClick={onSelectAll} isDisabled={isDisabled}>
                     <FormattedMessage
-                      id="xpack.ml.newJob.wizard.datafeedPreviewFlyout.showButton"
+                      id="xpack.ml.importExport.exportFlyout.adSelectAllButton"
                       defaultMessage="Select all"
                     />
                   </EuiButtonEmpty>
@@ -170,14 +165,9 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
               )}
               {selectedJobType === 'data-frame-analytics' && (
                 <>
-                  <EuiButtonEmpty
-                    size="xs"
-                    onClick={onSelectAll}
-                    isDisabled={isDisabled}
-                    data-test-subj="mlJobWizardButtonPreviewJobJson"
-                  >
+                  <EuiButtonEmpty size="xs" onClick={onSelectAll} isDisabled={isDisabled}>
                     <FormattedMessage
-                      id="xpack.ml.newJob.wizard.datafeedPreviewFlyout.showButton"
+                      id="xpack.ml.importExport.exportFlyout.dfaSelectAllButton"
                       defaultMessage="Select all"
                     />
                   </EuiButtonEmpty>
@@ -204,7 +194,7 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty iconType="cross" onClick={() => setShowFlyout(false)} flush="left">
                   <FormattedMessage
-                    id="xpack.ml.newJob.wizard.datafeedPreviewFlyout.closeButton"
+                    id="xpack.ml.importExport.exportFlyout.closeButton"
                     defaultMessage="Close"
                   />
                 </EuiButtonEmpty>
@@ -216,7 +206,7 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
                   fill
                 >
                   <FormattedMessage
-                    id="xpack.ml.newJob.wizard.revertModelSnapshotFlyout.saveButton"
+                    id="xpack.ml.importExport.exportFlyout.exportButton"
                     defaultMessage="Export"
                   />
                 </EuiButton>
@@ -237,10 +227,7 @@ const FlyoutButton: FC<{ isDisabled: boolean; onClick(): void }> = ({ isDisabled
       isDisabled={isDisabled}
       data-test-subj="mlJobWizardButtonPreviewJobJson"
     >
-      <FormattedMessage
-        id="xpack.ml.newJob.wizard.datafeedPreviewFlyout.showButton"
-        defaultMessage="Export jobs"
-      />
+      <FormattedMessage id="xpack.ml.importExport.exportButton" defaultMessage="Export jobs" />
     </EuiButtonEmpty>
   );
 };
