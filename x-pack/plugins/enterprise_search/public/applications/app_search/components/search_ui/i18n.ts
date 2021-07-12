@@ -52,7 +52,7 @@ export const URL_FIELD_HELP_TEXT = i18n.translate(
 );
 export const THUMBNAIL_FIELD_HELP_TEXT = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.searchUI.thumbnailFieldHelpText',
-  { defaultMessage: 'Used to show a thumbnail image' }
+  { defaultMessage: 'Provide an image URL to show a thumbnail image' }
 );
 export const GENERATE_PREVIEW_BUTTON_LABEL = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.searchUI.generatePreviewButtonLabel',
