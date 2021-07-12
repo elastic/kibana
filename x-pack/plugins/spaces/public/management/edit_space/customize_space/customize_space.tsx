@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiAvatar,
   EuiDescribedFormGroup,
   EuiFieldText,
   EuiFormRow,
@@ -19,7 +18,6 @@ import React, { Component, lazy, Suspense } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 
 import { getSpaceAvatarComponent, getSpaceColor, getSpaceInitials } from '../../../space_avatar';
 import type { SpaceValidator } from '../../lib';
