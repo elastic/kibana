@@ -72,6 +72,7 @@ export class Plugin implements PluginType {
     });
 
     const ruleDataClient = ruleDataService.getRuleDataClient(
+      'synthetics',
       ruleDataService.getFullAssetName('observability.synthetics'),
       () => initializeRuleDataTemplatesPromise
     );

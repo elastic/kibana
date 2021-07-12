@@ -14,6 +14,7 @@ export const mapConsumerToIndexName = {
   apm: '.alerts-observability-apm',
   observability: '.alerts-observability',
   siem: ['.alerts-security.alerts', '.siem-signals'],
+  synthetics: '.alerts-observability-synthetics',
 };
 export type ValidFeatureId = keyof typeof mapConsumerToIndexName;
 
