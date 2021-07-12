@@ -74,7 +74,7 @@ export interface ApmPluginStartDeps {
   ml?: MlPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   observability: ObservabilityPublicStart;
-  fleet: FleetStart;
+  fleet?: FleetStart;
 }
 
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
@@ -311,20 +311,21 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   }
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
     const { fleet } = plugins;
+    if (fleet) {
+      const agentEnrollmentExtensionData = getApmEnrollmentFlyoutData();
 
-    const agentEnrollmentExtensionData = getApmEnrollmentFlyoutData();
+      fleet.registerExtension({
+        package: 'apm',
+        view: 'agent-enrollment-flyout',
+        title: agentEnrollmentExtensionData.title,
+        Component: agentEnrollmentExtensionData.Component,
+      });
 
-    fleet.registerExtension({
-      package: 'apm',
-      view: 'agent-enrollment-flyout',
-      title: agentEnrollmentExtensionData.title,
-      Component: agentEnrollmentExtensionData.Component,
-    });
-
-    fleet.registerExtension({
-      package: 'apm',
-      view: 'package-detail-assets',
-      Component: LazyApmCustomAssetsExtension,
-    });
+      fleet.registerExtension({
+        package: 'apm',
+        view: 'package-detail-assets',
+        Component: LazyApmCustomAssetsExtension,
+      });
+    }
   }
 }
