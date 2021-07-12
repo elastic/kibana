@@ -277,6 +277,13 @@ export class VisualBuilderPageObject extends FtrService {
     await this.comboBox.setElement(formatterEl, formatter, { clickWithMouse: true });
   }
 
+  public async setDrilldownUrl(value: string) {
+    const drilldownEl = await this.testSubjects.find('drilldownUrl');
+
+    await drilldownEl.clearValue();
+    await drilldownEl.type(value);
+  }
+
   /**
    * set duration formatter additional settings
    *
@@ -628,7 +635,10 @@ export class VisualBuilderPageObject extends FtrService {
     return await this.find.allByCssSelector('.tvbSeriesEditor');
   }
 
-  public async setMetricsGroupByTerms(field: string) {
+  public async setMetricsGroupByTerms(
+    field: string,
+    filtering: { include?: string; exclude?: string } = {}
+  ) {
     const groupBy = await this.find.byCssSelector(
       '.tvbAggRow--split [data-test-subj="comboBoxInput"]'
     );
@@ -636,6 +646,22 @@ export class VisualBuilderPageObject extends FtrService {
     await this.common.sleep(1000);
     const byField = await this.testSubjects.find('groupByField');
     await this.comboBox.setElement(byField, field);
+
+    await this.setMetricsGroupByFiltering(filtering.include, filtering.exclude);
+  }
+
+  public async setMetricsGroupByFiltering(include?: string, exclude?: string) {
+    const setFilterValue = async (value: string | undefined, subjectKey: string) => {
+      if (typeof value === 'string') {
+        const valueSubject = await this.testSubjects.find(subjectKey);
+
+        await valueSubject.clearValue();
+        await valueSubject.type(value);
+      }
+    };
+
+    await setFilterValue(include, 'groupByInclude');
+    await setFilterValue(exclude, 'groupByExclude');
   }
 
   public async checkSelectedMetricsGroupByValue(value: string) {
