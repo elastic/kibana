@@ -77,7 +77,10 @@ const getCommentContent = (comment: CommentResponse): string => {
   } else if (comment.type === CommentType.alert || comment.type === CommentType.generatedAlert) {
     const ids = getAlertIds(comment);
     return `Alert with ids ${ids.join(', ')} added to case`;
-  } else if (comment.type === CommentType.actions) {
+  } else if (
+    comment.type === CommentType.actions &&
+    (comment.actions.type === 'isolate' || comment.actions.type === 'unisolate')
+  ) {
     const firstHostname = comment.actions.targets[0]?.hostname;
     const totalHosts = comment.actions.targets.length;
     const actionText = comment.actions.type === 'isolate' ? 'Isolated' : 'Released';
