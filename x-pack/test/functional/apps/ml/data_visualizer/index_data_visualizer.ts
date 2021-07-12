@@ -496,7 +496,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
   }
 
-  describe('index based', function () {
+  describe.only('index based', function () {
     this.tags(['mlqa']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
