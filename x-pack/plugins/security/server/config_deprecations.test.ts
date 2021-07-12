@@ -203,7 +203,7 @@ describe('Config Deprecations', () => {
     expect(messages).toHaveLength(0);
   });
 
-  it('does not warn when using the ECS audit logger, even when using the legacy appender config', () => {
+  it('does not warn about using the legacy logger when using the ECS audit logger, even when using the deprecated ECS appender config', () => {
     const config = {
       xpack: {
         security: {

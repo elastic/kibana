@@ -337,7 +337,7 @@ For more details and a reference of audit events, refer to <<xpack-security-audi
 [cols="2*<"]
 |======
 | `xpack.security.audit.enabled` {ess-icon}
-| Set to `true`, and configure where the audit log should be written to using `xpack.security.audit.appender`, to enable audit logging. *Default:* `false`
+| Set to `true` and configure where the audit log should be written to using `xpack.security.audit.appender` to enable audit logging. *Default:* `false`
 
 2+a| For example:
 [source,yaml]
@@ -358,7 +358,7 @@ xpack.security.audit.appender:
 <1> Rotates log files every 24 hours.
 <2> Keeps maximum of 10 log files before deleting older ones.
 
-[IMPORTANT]
+[NOTE]
 ============
 {ess} does not support custom log file policies. To enable audit logging on {ess} only specify:
 
@@ -369,9 +369,9 @@ xpack.security.audit.appender.type: rolling-file
 ----------------------------------------
 ============
 
-[WARNING]
+[NOTE]
 ============
-To enable the legacy audit logger (**deprecated**) only specify:
+deprecated:[7.15.0,"In 8.0 and later, the legacy audit logger will be removed, and this setting alone will instead enable the ECS audit logger with a default appender."] To enable the legacy audit logger only specify:
 
 [source,yaml]
 ----------------------------------------
@@ -379,7 +379,7 @@ xpack.security.audit.enabled: true
 ----------------------------------------
 ============
 
-| `xpack.security.audit.appender`
+| `xpack.security.audit.appender` {ess-icon}
 | Optional. Specifies where audit logs should be written to and how they should be formatted.
 
 | `xpack.security.audit.appender.type` {ess-icon}
