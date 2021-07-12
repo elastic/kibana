@@ -69,23 +69,7 @@ import { IESSource } from '../../sources/es_source';
 import { PropertiesMap } from '../../../../common/elasticsearch_util';
 import { ITermJoinSource } from '../../sources/term_join_source';
 import { addGeoJsonMbSource, getVectorSourceBounds, syncVectorSource } from './utils';
-
-interface SourceResult {
-  refreshed: boolean;
-  featureCollection?: FeatureCollection;
-}
-
-interface JoinState {
-  dataHasChanged: boolean;
-  join: InnerJoin;
-  propertiesMap?: PropertiesMap;
-}
-
-interface JoinStatus {
-  joinedWithAtLeastOneFeature: boolean;
-  keys: string[];
-  joinState: JoinState;
-}
+import { JoinState, performInnerJoins } from './perform_inner_joins';
 
 export interface VectorLayerArguments {
   source: IVectorSource;
@@ -441,105 +425,6 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     };
   }
 
-  _performInnerJoins(
-    sourceResult: SourceResult,
-    joinStates: JoinState[],
-    updateSourceData: DataRequestContext['updateSourceData'],
-    onJoinError: DataRequestContext['onJoinError']
-  ) {
-    // should update the store if
-    // -- source result was refreshed
-    // -- any of the join configurations changed (joinState changed)
-    // -- visibility of any of the features has changed
-
-    let shouldUpdateStore =
-      sourceResult.refreshed || joinStates.some((joinState) => joinState.dataHasChanged);
-
-    if (!shouldUpdateStore) {
-      return;
-    }
-
-    const joinStatuses = joinStates.map(joinState => {
-      return {
-        joinedWithAtLeastOneFeature: false,
-        keys: [],
-        joinState,
-      };
-    });
-
-    for (let i = 0; i < sourceResult.featureCollection!.features.length; i++) {
-      const feature = sourceResult.featureCollection!.features[i];
-      if (!feature.properties) {
-        feature.properties = {};
-      }
-      const oldVisbility = feature.properties[FEATURE_VISIBLE_PROPERTY_NAME];
-      let isFeatureVisible = true;
-      for (let j = 0; j < joinStates.length; j++) {
-        const joinState = joinStates[j];
-        const innerJoin = joinState.join;
-        const joinStatus = joinStatuses[j];
-        const joinKey = innerJoin.getJoinKey(feature);
-        if (joinKey) {
-          joinStatus.keys.push(joinKey);
-        }
-        const canJoinOnCurrent = joinState.propertiesMap
-          ? innerJoin.joinPropertiesToFeature(feature, joinState.propertiesMap)
-          : false;
-        if (canJoinOnCurrent && !joinStatus.joinedWithAtLeastOneFeature) {
-          joinStatus.joinedWithAtLeastOneFeature = true;
-        }
-        isFeatureVisible = isFeatureVisible && canJoinOnCurrent;
-      }
-
-      if (oldVisbility !== isFeatureVisible) {
-        shouldUpdateStore = true;
-      }
-
-      feature.properties[FEATURE_VISIBLE_PROPERTY_NAME] = isFeatureVisible;
-    }
-
-    if (shouldUpdateStore) {
-      updateSourceData({ ...sourceResult.featureCollection });
-    }
-
-    const joinStatusesWithoutAnyMatches = joinStatuses.filter(joinStatus => {
-      return!joinStatus.joinedWithAtLeastOneFeature && joinStatus.joinState.propertiesMap !== undefined;
-    });
-
-    if (joinStatusesWithoutAnyMatches.length) {
-      function prettyPrintArray(array: unknown[]) {
-        return array.length <= 5
-          ? array.join(',')
-          : array.slice(0, 5).join(',') + i18n.translate('xpack.maps.vectorLayer.joinError.firstTenMsg', {
-            defaultMessage: ` (5 of {total})`,
-            values: { total, array.length }
-          });
-      }
-
-      const joinStatus = joinStatusesWithoutAnyMatches[0];
-      const leftFieldName = joinStatus.joinState.join.getLeftField().getName();
-      const reason = joinStatus.keys.length === 0
-        ? i18n.translate('xpack.maps.vectorLayer.joinError.noLeftFieldValuesMsg', {
-            defaultMessage: `Left field: '{leftFieldName}', does not provide any values.`,
-            values: { leftFieldName }
-          })
-        : i18n.translate('xpack.maps.vectorLayer.joinError.noMatchesMsg', {
-            defaultMessage: `Left field does not match right field. Left field: '{leftFieldName}' has values { leftFieldValues }. Right field: '{rightFieldName}' has values: { rightFieldValues }.`,
-            values: {
-              leftFieldName,
-              leftFieldValues: prettyPrintArray(joinStatus.keys),
-              rightFieldName: joinStatus.joinState.join.getRightJoinSource().getTermField().getName(),
-              rightFieldValues: prettyPrintArray(Array.from(joinStatus.joinState.propertiesMap.keys())),
-            }
-          });
-
-      onJoinError(i18n.translate('xpack.maps.vectorLayer.joinErrorMsg', {
-        defaultMessage: `Unable to perform term join. {reason}`,
-        values: { reason }
-      }));
-    }
-  }
-
   async _syncSourceStyleMeta(
     syncContext: DataRequestContext,
     source: IVectorSource,
@@ -774,7 +659,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       }
 
       const joinStates = await this._syncJoins(syncContext, style);
-      this._performInnerJoins(sourceResult, joinStates, syncContext.updateSourceData, syncContext.onJoinError);
+      performInnerJoins(sourceResult, joinStates, syncContext.updateSourceData, syncContext.onJoinError);
     } catch (error) {
       if (!(error instanceof DataRequestAbortError)) {
         throw error;

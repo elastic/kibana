@@ -128,8 +128,8 @@ export class InnerJoin {
   }
 
   getJoinKey(feature: Feature): string | null {
-    const joinKey = feature.properties[this._leftField.getName()];
-    return typeof joinKey === 'undefined' || joinKey === null ? null : joinKey.toString();
+    const joinKey = feature.properties && this._leftField ? feature.properties[this._leftField.getName()] : undefined;
+    return joinKey === undefined || joinKey === null ? null : joinKey.toString();
   }
 
   getRightJoinSource(): ITermJoinSource {
