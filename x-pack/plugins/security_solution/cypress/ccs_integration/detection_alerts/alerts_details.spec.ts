@@ -18,7 +18,7 @@ import { cleanKibana } from '../../tasks/common';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import { esArchiverCCSLoad, esArchiverCCSUnload } from '../../tasks/es_archiver';
 
-import { unmappedCCSRule } from '../../objects/rule';
+import { getUnmappedCCSRule } from '../../objects/rule';
 
 import { ALERTS_URL } from '../../urls/navigation';
 
@@ -29,7 +29,7 @@ describe('Alert details with unmapped fields', () => {
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
-    createCustomRuleActivated(unmappedCCSRule);
+    createCustomRuleActivated(getUnmappedCCSRule());
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     expandFirstAlert();
@@ -55,7 +55,7 @@ describe('Alert details with unmapped fields', () => {
 
   it('Displays the unmapped field on the table', () => {
     const expectedUnmmappedField = {
-      row: 55,
+      row: 56,
       field: 'unmapped',
       text: 'This is the unmapped field',
     };

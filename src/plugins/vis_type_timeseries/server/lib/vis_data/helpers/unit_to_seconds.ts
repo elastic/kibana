@@ -12,7 +12,7 @@ import { Unit } from '@elastic/datemath';
 /** @ts-ignore */
 import { INTERVAL_STRING_RE } from '../../../../common/interval_regexp';
 
-export const ASCENDING_UNIT_ORDER = ['ms', 's', 'm', 'h', 'd', 'w', 'M', 'y'];
+export const ASCENDING_UNIT_ORDER: Unit[] = ['ms', 's', 'm', 'h', 'd', 'w', 'M', 'y'];
 
 const units: Record<Unit, number> = {
   ms: 0.001,
