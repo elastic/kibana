@@ -9,8 +9,10 @@ import React from 'react';
 import { storiesOf } from '@storybook/react';
 import {
   EuiBasicTable,
+  EuiButton,
   EuiCallOut,
   EuiCode,
+  EuiFieldText,
   EuiHorizontalRule,
   EuiIcon,
   EuiPanel,
@@ -23,6 +25,61 @@ import {
   EuiTreeView,
   useEuiTextDiff,
 } from '@elastic/eui';
+
+const TreeView = () => {
+  const items = [
+    {
+      label: (
+        <>
+          <del>markdown</del> {`->`} markdownVis
+        </>
+      ),
+      id: 'item_one',
+      icon: <EuiToken iconType="tokenFunction" />,
+      iconWhenExpanded: <EuiToken iconType="tokenFunction" />,
+      isExpanded: true,
+      children: [
+        {
+          label: (
+            <>
+              <del>content</del> {`->`} markdown
+            </>
+          ),
+          id: 'item_a',
+          icon: <EuiIcon type="sortRight" color="primary" />,
+        },
+        {
+          label: 'openLinksInNewTab',
+          id: 'item_a',
+          icon: <EuiIcon type="plus" color="success" />,
+        },
+        {
+          label: <del>font</del>,
+          id: 'item_a',
+          icon: <EuiIcon color="danger" type="eraser" />,
+        },
+      ],
+    },
+  ];
+  return (
+    <EuiSplitPanel.Outer direction="row">
+      <EuiSplitPanel.Inner>
+        <EuiTreeView items={items} aria-label="Sample Folder Tree" />
+      </EuiSplitPanel.Inner>
+      <EuiSplitPanel.Inner color="subdued">
+        <EuiText>
+          <p>Attribute `markdown`:</p>
+        </EuiText>
+        <EuiText>
+          <span>Type: string</span>
+        </EuiText>
+        <EuiText>
+          <span>Required: true</span>
+        </EuiText>
+      </EuiSplitPanel.Inner>
+    </EuiSplitPanel.Outer>
+  );
+};
 
 storiesOf('Deprecated/Sidebar/ElementSettings', module)
   .add('Markdown deprecation. v1. Example', () => {
@@ -100,41 +157,6 @@ storiesOf('Deprecated/Sidebar/ElementSettings', module)
     return <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} size="s" />;
   })
   .add('Markdown deprecation. v2. Example', () => {
-    const items = [
-      {
-        label: (
-          <>
-            <del>markdown</del> {`->`} markdownVis
-          </>
-        ),
-        id: 'item_one',
-        icon: <EuiToken iconType="tokenFunction" />,
-        iconWhenExpanded: <EuiToken iconType="tokenFunction" />,
-        isExpanded: true,
-        children: [
-          {
-            label: (
-              <>
-                <del>content</del> {`->`} markdown
-              </>
-            ),
-            id: 'item_a',
-            icon: <EuiIcon type="sortRight" color="primary" />,
-          },
-          {
-            label: 'openLinksInNewTab',
-            id: 'item_a',
-            icon: <EuiIcon type="plus" color="success" />,
-          },
-          {
-            label: <del>font</del>,
-            id: 'item_a',
-            icon: <EuiIcon color="danger" type="eraser" />,
-          },
-        ],
-      },
-    ];
-
     const currentExpression = `markdown content="..." openLinksInNewTab="true" font="..."`;
     const updatedExpression = `markdownVis markdown="..." openLinksInNewTab="true"`;
 
@@ -209,22 +231,63 @@ storiesOf('Deprecated/Sidebar/ElementSettings', module)
               <h2>Deprecation notes:</h2>
             </EuiTitle>
             <EuiSpacer size="m" />
-            <EuiSplitPanel.Outer direction="row">
-              <EuiSplitPanel.Inner>
-                <EuiTreeView items={items} aria-label="Sample Folder Tree" />
-              </EuiSplitPanel.Inner>
-              <EuiSplitPanel.Inner color="subdued">
-                <EuiText>
-                  <p>Attribute `markdown`:</p>
-                </EuiText>
-                <EuiText>
-                  <span>Type: string</span>
-                </EuiText>
-                <EuiText>
-                  <span>Required: true</span>
-                </EuiText>
-              </EuiSplitPanel.Inner>
-            </EuiSplitPanel.Outer>
+            <TreeView />
+          </EuiPanel>
+        ),
+      },
+    ];
+    return <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} size="s" />;
+  })
+  .add('Markdown deprecation. v3. Example', () => {
+    const currentExpression = `markdown content="..." openLinksInNewTab="true" font="..."`;
+    const updatedExpression = `markdownVis markdown="..." openLinksInNewTab="true"`;
+
+    const tabs = [
+      {
+        id: 'deprecated',
+        name: (
+          <span>
+            <EuiIcon type="alert" color="warning" />
+            &nbsp;Deprecated
+          </span>
+        ),
+        content: (
+          <EuiPanel paddingSize="l">
+            <EuiSpacer size="m" />
+            <EuiCallOut
+              title="Markdown is deprecated. Please, use markdownVis."
+              color="warning"
+              iconType="flag"
+            />
+            <EuiSpacer size="m" />
+            <div>
+              <EuiText>
+                <p>
+                  Current expression:
+                  <EuiFieldText
+                    placeholder="Current expression"
+                    value={currentExpression}
+                    aria-label="Use aria labels when no actual label is in use"
+                  />
+                </p>
+                <p>
+                  Proposed expression:
+                  <EuiFieldText
+                    placeholder="Updated expression"
+                    value={updatedExpression}
+                    aria-label="Use aria labels when no actual label is in use"
+                  />
+                </p>
+              </EuiText>
+              <EuiSpacer size="m" />
+              <EuiButton iconType={'check'}>Update</EuiButton>
+            </div>
+            <EuiHorizontalRule size="full" />
+            <EuiTitle>
+              <h2>Deprecation notes:</h2>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+            <TreeView />
           </EuiPanel>
         ),
       },
