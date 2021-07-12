@@ -13,7 +13,7 @@ export const ALERTING_EXAMPLE_APP_ID = 'AlertingExample';
 // always firing
 export const DEFAULT_INSTANCES_TO_GENERATE = 5;
 export interface AlwaysFiringThresholds extends SerializableState {
-  small: number;
+  small?: number;
   medium?: number;
   large?: number;
 }
