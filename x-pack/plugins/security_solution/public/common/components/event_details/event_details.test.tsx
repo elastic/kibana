@@ -104,4 +104,11 @@ describe('EventDetails', () => {
       ).toEqual('Summary');
     });
   });
+
+  describe('threat intel tab', () => {
+    it('renders a "no enrichments" panel view if there are no enrichments', () => {
+      alertsWrapper.find('[data-test-subj="threatIntelTab"]').first().simulate('click');
+      expect(alertsWrapper.find('[data-test-subj="no-enrichments-panel"]').exists()).toEqual(true);
+    });
+  });
 });
