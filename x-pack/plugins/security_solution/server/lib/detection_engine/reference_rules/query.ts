@@ -10,8 +10,9 @@ import { schema } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
 import { ESSearchRequest } from 'src/core/types/elasticsearch';
 
-import { buildEsQuery, IndexPatternBase } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 
+import type { IIndexPattern } from 'src/plugins/data/public';
 import {
   RuleDataClient,
   createPersistenceRuleTypeFactory,
@@ -50,7 +51,7 @@ export const createQueryAlertType = (ruleDataClient: RuleDataClient, logger: Log
       params: { indexPatterns, customQuery },
     }) {
       try {
-        const indexPattern: IndexPatternBase = {
+        const indexPattern: IIndexPattern = {
           fields: [],
           title: indexPatterns.join(),
         };

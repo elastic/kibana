@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DslQuery, Filter } from 'src/plugins/data/common';
+import { DslQuery, Filter } from '@kbn/es-query';
 
 import { JsonObject } from '@kbn/common-utils';
 
