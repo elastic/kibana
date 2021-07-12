@@ -10,7 +10,11 @@ import { Buffer } from 'buffer';
 import { Readable } from 'stream';
 
 import { RequestEvent, errors } from '@elastic/elasticsearch';
-import { TransportRequestParams, RequestBody } from '@elastic/elasticsearch/lib/Transport';
+import type {
+  TransportRequestOptions,
+  TransportRequestParams,
+  RequestBody,
+} from '@elastic/elasticsearch/lib/Transport';
 
 import { parseClientOptionsMock, ClientMock } from './configure_client.test.mocks';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
@@ -39,12 +43,14 @@ const createApiResponse = <T>({
   headers = {},
   warnings = [],
   params,
+  requestOptions = {},
 }: {
   body: T;
   statusCode?: number;
   headers?: Record<string, string>;
   warnings?: string[];
   params?: TransportRequestParams;
+  requestOptions?: TransportRequestOptions;
 }): RequestEvent<T> => {
   return {
     body,
@@ -54,6 +60,7 @@ const createApiResponse = <T>({
     meta: {
       request: {
         params: params!,
+        options: requestOptions,
       } as any,
     } as any,
   };
@@ -393,6 +400,62 @@ describe('configureClient', () => {
           GET /_path [undefined]: Response Error",
             ],
           ]
+        `);
+      });
+
+      it('adds meta information to logs', () => {
+        const client = configureClient(createFakeConfig(), { logger, type: 'test', scoped: false });
+
+        let response = createApiResponse({
+          statusCode: 400,
+          headers: {},
+          params: {
+            method: 'GET',
+            path: '/_path',
+          },
+          requestOptions: {
+            opaqueId: 'opaque-id',
+          },
+          body: {
+            error: {},
+          },
+        });
+        client.emit('response', null, response);
+
+        expect(loggingSystemMock.collect(logger).debug[0][1]).toMatchInlineSnapshot(`
+          Object {
+            "http": Object {
+              "request": Object {
+                "id": "opaque-id",
+              },
+            },
+          }
+        `);
+
+        logger.debug.mockClear();
+
+        response = createApiResponse({
+          statusCode: 400,
+          headers: {},
+          params: {
+            method: 'GET',
+            path: '/_path',
+          },
+          requestOptions: {
+            opaqueId: 'opaque-id',
+          },
+          body: {} as any,
+        });
+        client.emit('response', new errors.ResponseError(response), response);
+
+        expect(loggingSystemMock.collect(logger).debug[0][1]).toMatchInlineSnapshot(`
+          Object {
+            "http": Object {
+              "request": Object {
+                "id": "opaque-id",
+              },
+            },
+          }
         `);
       });
     });
