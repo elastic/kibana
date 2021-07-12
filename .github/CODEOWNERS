@@ -350,6 +350,8 @@
 /x-pack/plugins/timelines @elastic/security-threat-hunting
 /x-pack/test/case_api_integration @elastic/security-threat-hunting
 /x-pack/plugins/lists @elastic/security-detections-response
+/x-pack/plugins/security_solution/server/endpoint/routes/trusted_apps @elastic/security-onboarding-and-lifecycle-mgt
+/x-pack/plugins/security_solution/public/management @elastic/security-onboarding-and-lifecycle-mgt
 
 # Security Intelligence And Analytics
 /x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules @elastic/security-intelligence-analytics
