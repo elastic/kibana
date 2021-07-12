@@ -46,8 +46,8 @@ export const toExpressionAst: VisToExpressionAst<TileMapVisParams> = (vis) => {
     {
       visConfig: JSON.stringify({
         ...vis.params,
-        mapCenter: vis.uiState.get('mapCenter'),
-        mapZoom: parseInt(vis.uiState.get('mapZoom'), 10),
+        mapCenter: vis.uiState.get('mapCenter', [0, 0]),
+        mapZoom: parseInt(vis.uiState.get('mapZoom', 2), 10),
         layerDescriptorParams: params,
       }),
     }

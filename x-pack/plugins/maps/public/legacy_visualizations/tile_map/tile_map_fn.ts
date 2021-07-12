@@ -10,10 +10,6 @@ import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionDefinition, Datatable, Render } from '../../../../../../src/plugins/expressions/public';
 import { TileMapVisConfig } from './types';
 
-const title = i18n.translate('tileMap.vis.mapTitle', {
-  defaultMessage: 'Coordinate Map',
-});
-
 interface Arguments {
   visConfig: string;
 }

@@ -7,6 +7,12 @@
 
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
+import { ViewInMaps } from '../view_in_maps';
+import { COORDINATE_MAP_TITLE } from './utils';
+
+interface Props {
+  vis: Vis;
+}
 
 interface State {
 }
@@ -16,6 +22,7 @@ export class TileMapEditor extends Component<{}, State> {
   state: State = {};
 
   componentDidMount() {
+    console.log(this.props);
     this._isMounted = true;
   }
 
@@ -24,6 +31,6 @@ export class TileMapEditor extends Component<{}, State> {
   }
 
   render() {
-    return <div>hello world</div>;
+    return <ViewInMaps onClick={() => {}} visualizationLabel={COORDINATE_MAP_TITLE} />;
   }
 }

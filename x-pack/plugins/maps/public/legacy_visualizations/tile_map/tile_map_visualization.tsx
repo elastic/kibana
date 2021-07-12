@@ -56,8 +56,6 @@ export class TileMapVisualization extends Component<Props, State> {
 
     this.setState({ isLoaded: true });
 
-    console.log(this.props.visConfig);
-
     this._mapEmbeddable = new mapModules.MapEmbeddable(
       {
         editable: false,
