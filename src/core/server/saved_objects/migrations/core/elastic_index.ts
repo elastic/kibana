@@ -40,6 +40,7 @@ export const REMOVED_TYPES: string[] = [
   'fleet-agent-events',
   // Was removed in 7.12
   'ml-telemetry',
+  'server',
   // https://github.com/elastic/kibana/issues/95617
   'tsvb-validation-telemetry',
 ].sort();

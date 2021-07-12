@@ -47,7 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('detects when reporting indices should be migrated due to missing ILM policy', async () => {
-      await reportingAPI.makeAllReportingPoliciesUnmanaged();
+      await reportingAPI.makeAllReportingIndicesUnmanaged();
       // TODO: Remove "any" when no longer through type issue "policy_id" missing
       await es.ilm.deleteLifecycle({ policy: ILM_POLICY_NAME } as any);
 
@@ -63,7 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('detects when reporting indices should be migrated due to unmanaged indices', async () => {
-      await reportingAPI.makeAllReportingPoliciesUnmanaged();
+      await reportingAPI.makeAllReportingIndicesUnmanaged();
       await supertestNoAuth
         .post(`/api/reporting/generate/csv`)
         .set('kbn-xsrf', 'xxx')
