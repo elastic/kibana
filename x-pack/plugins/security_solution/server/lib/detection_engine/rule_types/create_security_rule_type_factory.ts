@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { isEmpty } from 'lodash';
 import { Moment } from 'moment';
 import { flow } from 'fp-ts/lib/function';
 import { Either, chain, fold, tryCatch } from 'fp-ts/lib/Either';
 import { Logger } from '@kbn/logging';
+import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import { ExceptionListItemSchema, ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { toError } from '@kbn/securitysolution-list-api';
 import {
@@ -45,6 +47,12 @@ import { SavedObject } from '../../../../../../../src/core/server';
 import { bulkCreateFactory } from './bulk_create_factory';
 import { wrapHitsFactory } from './wrap_hits_factory';
 import { ConfigType } from '../../../config';
+import {
+  NotificationRuleTypeParams,
+  scheduleNotificationActions,
+} from '../notifications/schedule_notification_actions';
+import { getNotificationResultsLink } from '../notifications/utils';
+import { createResultObject } from './utils';
 
 type SimpleAlertType<
   TParams extends AlertTypeParams = {},
@@ -120,13 +128,14 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
         previousStartedAt,
         services,
         spaceId,
+        state,
         updatedBy: updatedByUser,
       } = options;
-      const { from, maxSignals, timestampOverride, to } = params;
+      let runState = state;
+      const { from, maxSignals, meta, outputIndex, ruleId, timestampOverride, to } = params;
       const { savedObjectsClient, scopedClusterClient } = services;
       const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
 
-      const ruleId = type.id;
       const esClient = scopedClusterClient.asCurrentUser;
 
       const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
@@ -147,7 +156,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
         id: alertId,
         ruleId,
         name,
-        index: params.outputIndex as string, // FIXME?
+        index: outputIndex as string, // FIXME?
       });
 
       logger.debug(buildRuleMessage('[+] Starting Signal Rule execution'));
@@ -155,6 +164,9 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
 
       let wroteWarningStatus = false;
       await ruleStatusService.goingToRun();
+
+      // TODO: alert state?
+      let result = createResultObject({});
 
       // check if rule has permissions to access given index pattern
       // move this collection of lines into a function in utils
@@ -232,39 +244,38 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
         await ruleStatusService.error(gapMessage, { gap: gapString });
       }
 
-      const { listClient, exceptionsClient } = newGetListsClient({
-        esClient: services.scopedClusterClient.asCurrentUser,
-        updatedByUser,
-        spaceId,
-        lists,
-        savedObjectClient: options.services.savedObjectsClient,
-      });
+      try {
+        const { listClient, exceptionsClient } = newGetListsClient({
+          esClient: services.scopedClusterClient.asCurrentUser,
+          updatedByUser,
+          spaceId,
+          lists,
+          savedObjectClient: options.services.savedObjectsClient,
+        });
 
-      const exceptionItems = await getExceptions({
-        client: exceptionsClient,
-        lists: (params.exceptionsList as ListArray) ?? [],
-      });
+        const exceptionItems = await getExceptions({
+          client: exceptionsClient,
+          lists: (params.exceptionsList as ListArray) ?? [],
+        });
 
-      const bulkCreate = bulkCreateFactory(
-        logger,
-        services.scopedClusterClient.asCurrentUser,
-        buildRuleMessage,
-        refresh
-      );
+        const bulkCreate = bulkCreateFactory(
+          logger,
+          services.scopedClusterClient.asCurrentUser,
+          buildRuleMessage,
+          refresh
+        );
 
-      const wrapHits = wrapHitsFactory({
-        ruleSO,
-        signalsIndex: params.outputIndex,
-        mergeStrategy,
-      });
+        const wrapHits = wrapHitsFactory({
+          ruleSO,
+          signalsIndex: outputIndex, // FIXME
+          mergeStrategy,
+        });
 
-      const results: Array<SecurityAlertTypeReturnValue<{}>> = []; // TODO: get alert type state?
-      for (const tuple of tuples) {
-        results.push(
-          await type.executor({
+        for (const tuple of tuples) {
+          const runResult = await type.executor({
             ...options,
-            rule: ruleSO,
             services,
+            state: runState,
             runOpts: {
               buildRuleMessage,
               bulkCreate,
@@ -275,12 +286,113 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
               tuple,
               wrapHits,
             },
-          })
+          });
+          // TODO: AlertTypeState?
+          result = {
+            bulkCreateTimes: result.bulkCreateTimes.concat(runResult.bulkCreateTimes),
+            createdSignals: result.createdSignals.concat(runResult.createdSignals),
+            errors: result.errors.concat(runResult.errors),
+            lastLookbackDate: runResult.lastLookbackDate,
+            searchAfterTimes: result.searchAfterTimes.concat(runResult.searchAfterTimes),
+            state: runState,
+            success: result.success && runResult.success,
+            warnings: result.warnings.concat(runResult.warnings),
+          };
+          runState = runResult.state;
+        }
+
+        if (result.warnings.length) {
+          const warningMessage = buildRuleMessage(result.warnings.join());
+          await ruleStatusService.partialFailure(warningMessage);
+        }
+
+        if (result.success) {
+          const createdSignalsCount = result.createdSignals.length;
+
+          if (actions.length) {
+            const notificationRuleParams: NotificationRuleTypeParams = {
+              ...params,
+              name,
+              id: ruleSO.id,
+            };
+
+            const fromInMs = parseScheduleDates(`now-${interval}`)?.format('x');
+            const toInMs = parseScheduleDates('now')?.format('x');
+            const resultsLink = getNotificationResultsLink({
+              from: fromInMs,
+              to: toInMs,
+              id: ruleSO.id,
+              kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
+                ?.kibana_siem_app_url,
+            });
+
+            logger.info(buildRuleMessage(`Found ${createdSignalsCount} signals for notification.`));
+
+            if (createdSignalsCount) {
+              // TODO: notification for ALL alerts?
+              const alertInstance = services.alertInstanceFactory(alertId);
+              scheduleNotificationActions({
+                alertInstance,
+                signalsCount: createdSignalsCount,
+                signals: result.createdSignals,
+                resultsLink,
+                ruleParams: notificationRuleParams,
+              });
+            }
+          }
+
+          logger.debug(buildRuleMessage('[+] Signal Rule execution completed.'));
+          logger.debug(
+            buildRuleMessage(
+              `[+] Finished indexing ${createdSignalsCount} signals into ${outputIndex}`
+            )
+          );
+
+          if (!hasError && !wroteWarningStatus && !result.warnings.length) {
+            await ruleStatusService.success('succeeded', {
+              bulkCreateTimeDurations: result.bulkCreateTimes,
+              searchAfterTimeDurations: result.searchAfterTimes,
+              lastLookBackDate: result.lastLookbackDate?.toISOString(),
+            });
+          }
+
+          // adding this log line so we can get some information from cloud
+          logger.info(
+            buildRuleMessage(
+              `[+] Finished indexing ${createdSignalsCount}  ${
+                !isEmpty(tuples)
+                  ? `signals searched between date ranges ${JSON.stringify(tuples, null, 2)}`
+                  : ''
+              }`
+            )
+          );
+        } else {
+          const errorMessage = buildRuleMessage(
+            'Bulk Indexing of signals failed:',
+            result.errors.join()
+          );
+          logger.error(errorMessage);
+          await ruleStatusService.error(errorMessage, {
+            bulkCreateTimeDurations: result.bulkCreateTimes,
+            searchAfterTimeDurations: result.searchAfterTimes,
+            lastLookBackDate: result.lastLookbackDate?.toISOString(),
+          });
+        }
+      } catch (error) {
+        const errorMessage = error.message ?? '(no error message given)';
+        const message = buildRuleMessage(
+          'An error occurred during rule execution:',
+          `message: "${errorMessage}"`
         );
+
+        logger.error(message);
+        await ruleStatusService.error(message, {
+          bulkCreateTimeDurations: result.bulkCreateTimes,
+          searchAfterTimeDurations: result.searchAfterTimes,
+          lastLookBackDate: result.lastLookbackDate?.toISOString(),
+        });
       }
 
-      // TODO: combine results
-      const result = results[0];
       return result;
     },
   });

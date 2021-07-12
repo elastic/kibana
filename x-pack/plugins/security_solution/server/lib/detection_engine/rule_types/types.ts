@@ -17,11 +17,10 @@ export interface SecurityRuleState<TState extends AlertTypeState = {}> {
 export interface SecurityAlertTypeReturnValue<TState extends AlertTypeState = {}> {
   bulkCreateTimes: string[];
   createdSignals: unknown[];
-  createdSignalsCount: number;
   errors: string[];
   lastLookbackDate?: Date | null;
   searchAfterTimes: string[];
   state: TState;
   success: boolean;
-  warningMessages: string[];
+  warnings: string[];
 }

@@ -12,12 +12,12 @@ export const createResultObject = <TState extends AlertTypeState = {}>(state: TS
   const result: SecurityAlertTypeReturnValue<TState> = {
     bulkCreateTimes: [],
     createdSignals: [],
-    createdSignalsCount: 0,
     errors: [],
+    lastLookbackDate: undefined,
     searchAfterTimes: [],
     state,
     success: false,
-    warningMessages: [],
+    warnings: [],
   };
   return result;
 };
