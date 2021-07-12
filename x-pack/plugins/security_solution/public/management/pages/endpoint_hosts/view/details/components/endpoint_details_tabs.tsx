@@ -31,26 +31,30 @@ interface EndpointDetailsTabs {
   route: string;
 }
 
-const Tab = ({
-  tab,
-  isSelected,
-  handleTabClick,
-}: {
-  tab: EndpointDetailsTabs;
-  isSelected: boolean;
-  handleTabClick: () => void;
-}) => {
-  const setUrl = useNavigateByRouterEventHandler(tab.route);
-  const onClick = (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement, MouseEvent>) => {
-    setUrl(e);
-    handleTabClick();
-  };
-  return (
-    <EuiTab onClick={onClick} isSelected={isSelected} key={tab.id} data-test-subj={tab.id}>
-      {tab.name}
-    </EuiTab>
-  );
-};
+const EndpointDetailsTab = memo(
+  ({
+    tab,
+    isSelected,
+    handleTabClick,
+  }: {
+    tab: EndpointDetailsTabs;
+    isSelected: boolean;
+    handleTabClick: () => void;
+  }) => {
+    const setUrl = useNavigateByRouterEventHandler(tab.route);
+    const onClick = (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement, MouseEvent>) => {
+      setUrl(e);
+      handleTabClick();
+    };
+    return (
+      <EuiTab onClick={onClick} isSelected={isSelected} key={tab.id} data-test-subj={tab.id}>
+        {tab.name}
+      </EuiTab>
+    );
+  }
+);
+
+EndpointDetailsTab.displayName = 'EndpointDetailsTab';
 
 export const EndpointDetailsFlyoutTabs = memo(
   ({
@@ -86,7 +90,11 @@ export const EndpointDetailsFlyoutTabs = memo(
     const selectedTab = useMemo(() => tabs.find((tab) => tab.id === show), [tabs, show]);
 
     const renderTabs = tabs.map((tab) => (
-      <Tab tab={tab} handleTabClick={() => handleTabClick(tab)} isSelected={tab.id === show} />
+      <EndpointDetailsTab
+        tab={tab}
+        handleTabClick={() => handleTabClick(tab)}
+        isSelected={tab.id === show}
+      />
     ));
 
     return (

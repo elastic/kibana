@@ -82,33 +82,40 @@ export const EndpointDetailsFlyout = memo(() => {
     []
   );
 
-  const getTabs = (id: string) => [
-    {
-      id: EndpointDetailsTabsTypes.overview,
-      name: i18.OVERVIEW,
-      route: getEndpointDetailsPath({
-        ...queryParams,
-        name: 'endpointDetails',
-        selected_endpoint: id,
-      }),
-      content:
-        hostDetails === undefined ? (
-          ContentLoadingMarkup
-        ) : (
-          <EndpointDetails details={hostDetails} policyInfo={policyInfo} hostStatus={hostStatus} />
-        ),
-    },
-    {
-      id: EndpointDetailsTabsTypes.activityLog,
-      name: i18.ACTIVITY_LOG.tabTitle,
-      route: getEndpointDetailsPath({
-        ...queryParams,
-        name: 'endpointActivityLog',
-        selected_endpoint: id,
-      }),
-      content: <EndpointActivityLog activityLog={activityLog} />,
-    },
-  ];
+  const getTabs = useCallback(
+    (id: string) => [
+      {
+        id: EndpointDetailsTabsTypes.overview,
+        name: i18.OVERVIEW,
+        route: getEndpointDetailsPath({
+          ...queryParams,
+          name: 'endpointDetails',
+          selected_endpoint: id,
+        }),
+        content:
+          hostDetails === undefined ? (
+            ContentLoadingMarkup
+          ) : (
+            <EndpointDetails
+              details={hostDetails}
+              policyInfo={policyInfo}
+              hostStatus={hostStatus}
+            />
+          ),
+      },
+      {
+        id: EndpointDetailsTabsTypes.activityLog,
+        name: i18.ACTIVITY_LOG.tabTitle,
+        route: getEndpointDetailsPath({
+          ...queryParams,
+          name: 'endpointActivityLog',
+          selected_endpoint: id,
+        }),
+        content: <EndpointActivityLog activityLog={activityLog} />,
+      },
+    ],
+    [ContentLoadingMarkup, hostDetails, policyInfo, hostStatus, activityLog, queryParams]
+  );
 
   const showFlyoutFooter =
     show === 'details' || show === 'policy_response' || show === 'activity_log';
