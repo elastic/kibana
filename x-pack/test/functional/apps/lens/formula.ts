@@ -16,7 +16,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const fieldEditor = getService('fieldEditor');
 
-  describe('lens formula', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/105016
+  describe.skip('lens formula', () => {
     it('should transition from count to formula', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
@@ -235,6 +236,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.getDimensionTriggerText('lnsDatatable_metrics', 0)).to.eql(
         'count()'
       );
+    });
+
+    it('should allow numeric only formulas', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+      await PageObjects.lens.switchToVisualization('lnsDatatable');
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsDatatable_metrics > lns-empty-dimension',
+        operation: 'formula',
+        formula: `0`,
+      });
+
+      await PageObjects.lens.dragDimensionToDimension(
+        'lnsDatatable_metrics > lns-dimensionTrigger',
+        'lnsDatatable_metrics > lns-empty-dimension'
+      );
+      expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('0');
+      expect(await PageObjects.lens.getDatatableCellText(0, 1)).to.eql('0');
     });
   });
 }
