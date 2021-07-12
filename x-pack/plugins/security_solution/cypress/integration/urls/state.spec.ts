@@ -37,7 +37,7 @@ import { addNameToTimeline, closeTimeline, populateTimeline } from '../../tasks/
 import { HOSTS_URL } from '../../urls/navigation';
 import { ABSOLUTE_DATE_RANGE } from '../../urls/state';
 
-import { timeline } from '../../objects/timeline';
+import { getTimeline } from '../../objects/timeline';
 import { TIMELINE } from '../../screens/create_new_case';
 import { cleanKibana } from '../../tasks/common';
 
@@ -245,7 +245,7 @@ describe('url state', () => {
 
     cy.intercept('PATCH', '/api/timeline').as('timeline');
 
-    addNameToTimeline(timeline.title);
+    addNameToTimeline(getTimeline().title);
 
     cy.wait('@timeline').then(({ response }) => {
       closeTimeline();
@@ -257,7 +257,7 @@ describe('url state', () => {
       cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).should('not.have.text', 'Updating');
       cy.get(TIMELINE).should('be.visible');
       cy.get(TIMELINE_TITLE).should('be.visible');
-      cy.get(TIMELINE_TITLE).should('have.text', timeline.title);
+      cy.get(TIMELINE_TITLE).should('have.text', getTimeline().title);
     });
   });
 });
