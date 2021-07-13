@@ -11,7 +11,10 @@ import {
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { environmentQuery, kqlQuery, rangeQuery } from '../../utils/queries';
-import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
+import {
+  getDocumentTypeFilterForAggregatedTransactions,
+  getProcessorEventForAggregatedTransactions,
+} from '../helpers/aggregated_transactions';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 export interface KeyValue {
@@ -44,6 +47,9 @@ export async function getServiceInstanceMetadataDetails({
     ...rangeQuery(start, end),
     ...environmentQuery(environment),
     ...kqlQuery(kuery),
+    ...getDocumentTypeFilterForAggregatedTransactions(
+      searchAggregatedTransactions
+    ),
   ];
 
   const response = await apmEventClient.search(
