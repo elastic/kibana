@@ -6,17 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { IndexPattern, IndexPatternField, IndexPatternType } from '../../../../data/public';
 import { IndexPatternListConfig } from '.';
 
-function isRollup(indexPattern: IndexPattern) {
-  return indexPattern.type === IndexPatternType.ROLLUP;
+function isRollup(indexPattern) {
+  return (
+    indexPattern.type === 'rollup' || (indexPattern.get && indexPattern.get('type') === 'rollup')
+  );
 }
 
 export class RollupIndexPatternListConfig extends IndexPatternListConfig {
-  key = IndexPatternType.ROLLUP;
+  key = 'rollup';
 
-  getIndexPatternTags = (indexPattern: IndexPattern) => {
+  getIndexPatternTags = (indexPattern) => {
     return isRollup(indexPattern)
       ? [
           {
@@ -27,13 +28,13 @@ export class RollupIndexPatternListConfig extends IndexPatternListConfig {
       : [];
   };
 
-  getFieldInfo = (indexPattern: IndexPattern, field: IndexPatternField) => {
+  getFieldInfo = (indexPattern, field) => {
     if (!isRollup(indexPattern)) {
       return [];
     }
 
     const allAggs = indexPattern.typeMeta && indexPattern.typeMeta.aggs;
-    const fieldAggs = allAggs && Object.keys(allAggs).filter((agg) => allAggs[agg][field.name]);
+    const fieldAggs = allAggs && Object.keys(allAggs).filter((agg) => allAggs[agg][field]);
 
     if (!fieldAggs || !fieldAggs.length) {
       return [];
@@ -41,12 +42,13 @@ export class RollupIndexPatternListConfig extends IndexPatternListConfig {
 
     return ['Rollup aggregations:'].concat(
       fieldAggs.map((aggName) => {
-        const agg = allAggs![aggName][field.name];
+        const agg = allAggs[aggName][field];
         switch (aggName) {
           case 'date_histogram':
-            return `${aggName} (interval: ${agg.fixed_interval}, ${
+            return `${aggName} (interval: ${agg.interval}, ${
               agg.delay ? `delay: ${agg.delay},` : ''
             } ${agg.time_zone})`;
+            break;
           case 'histogram':
             return `${aggName} (interval: ${agg.interval})`;
           default:
@@ -56,7 +58,7 @@ export class RollupIndexPatternListConfig extends IndexPatternListConfig {
     );
   };
 
-  areScriptedFieldsEnabled = (indexPattern: IndexPattern) => {
+  areScriptedFieldsEnabled = (indexPattern) => {
     return !isRollup(indexPattern);
   };
 }
