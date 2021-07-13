@@ -6,4 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { ToastNotifications } from './toast_notifications';
+// Stub @emotion/core
+// Remove when @storybook has moved to @emotion v11
+// https://github.com/storybookjs/storybook/issues/13145
+export {};
