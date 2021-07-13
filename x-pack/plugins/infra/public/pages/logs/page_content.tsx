@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import { EuiHeaderLinks, EuiHeaderLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { Route, Switch } from 'react-router-dom';
@@ -76,28 +76,19 @@ export const LogsPageContent: React.FunctionComponent = () => {
 
       {setHeaderActionMenu && (
         <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu}>
-          <EuiFlexGroup gutterSize={'xs'} alignItems={'center'} responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty size={'xs'} color={'text'} {...settingsLinkProps}>
-                {settingsTabTitle}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <AlertDropdown />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                href={kibana.services?.application?.getUrlForApp(
-                  '/home#/tutorial_directory/logging'
-                )}
-                size="s"
-                color="primary"
-                iconType="indexOpen"
-              >
-                {ADD_DATA_LABEL}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiHeaderLinks gutterSize="xs">
+            <EuiHeaderLink color={'text'} {...settingsLinkProps}>
+              {settingsTabTitle}
+            </EuiHeaderLink>
+            <AlertDropdown />
+            <EuiHeaderLink
+              href={kibana.services?.application?.getUrlForApp('/home#/tutorial_directory/logging')}
+              color="primary"
+              iconType="indexOpen"
+            >
+              {ADD_DATA_LABEL}
+            </EuiHeaderLink>
+          </EuiHeaderLinks>
         </HeaderMenuPortal>
       )}
 
