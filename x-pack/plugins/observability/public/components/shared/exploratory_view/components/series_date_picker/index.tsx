@@ -8,6 +8,8 @@
 import moment from 'moment';
 import { EuiSuperDatePicker, EuiText } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+
 import { useHasData } from '../../../../../hooks/use_has_data';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { useQuickTimeRanges } from '../../../../../hooks/use_quick_time_ranges';
@@ -31,9 +33,15 @@ interface Props {
   readonly?: boolean;
 }
 const readableUnit: Record<string, string> = {
-  m: 'Minutes',
-  h: 'Hour',
-  d: 'Day',
+  m: i18n.translate('xpack.observability.overview.exploratoryView.minutes', {
+    defaultMessage: 'Minutes',
+  }),
+  h: i18n.translate('xpack.observability.overview.exploratoryView.hour', {
+    defaultMessage: 'Hour',
+  }),
+  d: i18n.translate('xpack.observability.overview.exploratoryView.day', {
+    defaultMessage: 'day',
+  }),
 };
 
 export function SeriesDatePicker({ series, seriesId, readonly = true }: Props) {
@@ -76,7 +84,13 @@ export function SeriesDatePicker({ series, seriesId, readonly = true }: Props) {
     } else {
       return (
         <EuiText color="subdued" size="s">
-          {moment(seriesTime.from).format(dateFormat)} to {moment(seriesTime.to).format(dateFormat)}
+          {i18n.translate('xpack.observability.overview.exploratoryView.dateRangeReadonly', {
+            defaultMessage: '{start} to {end}',
+            values: {
+              start: moment(seriesTime.from).format(dateFormat),
+              end: moment(seriesTime.to).format(dateFormat),
+            },
+          })}
         </EuiText>
       );
     }
