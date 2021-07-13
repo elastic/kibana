@@ -47,7 +47,6 @@ import {
   getSignalsByIds,
   findImmutableRuleById,
   getPrePackagedRulesStatus,
-  getRuleForSignalTesting,
   getOpenSignals,
   createRuleWithExceptionEntries,
   getEqlRuleForSignalTesting,
