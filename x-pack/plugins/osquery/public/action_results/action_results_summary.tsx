@@ -54,6 +54,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     isLive,
   });
   if (expired) {
+    // @ts-expect-error update types
     edges.forEach(edge => {
       if (!edge.fields.completed_at) {
         edge.fields['error.keyword'] = edge.fields.error = ['The action request timed out.']

@@ -11,7 +11,9 @@ import { produce } from 'immer';
 
 import { FormConfig, useForm } from '../../shared_imports';
 import { OsqueryManagerPackagePolicyConfigRecord } from '../../../common/types';
-import { formSchema } from './schema';
+import { useScheduledQueryGroups } from '../use_scheduled_query_groups';
+import { createFormSchema } from './schema';
+import { useMemo } from 'react';
 
 const FORM_ID = 'editQueryFlyoutForm';
 
@@ -34,8 +36,18 @@ export interface ScheduledQueryGroupFormData {
 export const useScheduledQueryGroupQueryForm = ({
   defaultValue,
   handleSubmit,
-}: UseScheduledQueryGroupQueryFormProps) =>
-  useForm<OsqueryManagerPackagePolicyConfigRecord, ScheduledQueryGroupFormData>({
+}: UseScheduledQueryGroupQueryFormProps) => {
+  const {data} = useScheduledQueryGroups();
+  const ids = useMemo<string[]>(() => data?.items.map(it => it.inputs.map(input => input.streams.map(stream => stream.compiled_stream.id)).flat()).flat() ?? [], [data])
+  const idSet = useMemo<Set<string>>(() => {
+    const res = new Set<string>(ids)
+    if (defaultValue && defaultValue.id.value) {
+      res.delete(defaultValue.id.value)
+    }
+    return res
+  }, [ids, defaultValue])
+  const formSchema = useMemo<ReturnType<typeof createFormSchema>>(() => createFormSchema(idSet), [idSet])
+  return useForm<OsqueryManagerPackagePolicyConfigRecord, ScheduledQueryGroupFormData>({
     id: FORM_ID + uuid.v4(),
     onSubmit: handleSubmit,
     options: {
@@ -74,4 +86,5 @@ export const useScheduledQueryGroupQueryForm = ({
       };
     },
     schema: formSchema,
-  });
+  })
+};
