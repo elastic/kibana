@@ -178,8 +178,6 @@ export interface HostResultList {
   request_page_size: number;
   /* the page index requested */
   request_page_index: number;
-  /* the version of the query strategy */
-  query_strategy_version: MetadataQueryStrategyVersions;
   /* policy IDs and versions */
   policy_info?: HostInfo['policy_info'];
 }
@@ -402,22 +400,17 @@ export enum HostStatus {
    * Host is inactive as indicated by its checkin status during the last checkin window
    */
   INACTIVE = 'inactive',
-}
 
-export enum MetadataQueryStrategyVersions {
-  VERSION_1 = 'v1',
-  VERSION_2 = 'v2',
+  /**
+   * Host is unenrolled
+   */
+  UNENROLLED = 'unenrolled',
 }
 
 export type PolicyInfo = Immutable<{
   revision: number;
   id: string;
 }>;
-
-export interface HostMetadataInfo {
-  metadata: HostMetadata;
-  query_strategy_version: MetadataQueryStrategyVersions;
-}
 
 export type HostInfo = Immutable<{
   metadata: HostMetadata;
@@ -438,8 +431,6 @@ export type HostInfo = Immutable<{
      */
     endpoint: PolicyInfo;
   };
-  /* the version of the query strategy */
-  query_strategy_version: MetadataQueryStrategyVersions;
 }>;
 
 // HostMetadataDetails is now just HostMetadata
