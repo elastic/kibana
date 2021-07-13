@@ -151,14 +151,14 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
   }, [fieldsToArray]);
 
   const validateFields: FormHook<T, I>['__validateFields'] = useCallback(
-    async (fieldNames) => {
+    async (fieldNames, onlyBlocking = false) => {
       const fieldsToValidate = fieldNames
         .map((name) => fieldsRefs.current[name])
         .filter((field) => field !== undefined);
 
       const formData = getFormData$().value;
       const validationResult = await Promise.all(
-        fieldsToValidate.map((field) => field.validate({ formData }))
+        fieldsToValidate.map((field) => field.validate({ formData, onlyBlocking }))
       );
 
       if (isMounted.current === false) {
@@ -315,7 +315,8 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
     if (fieldsToValidate.length === 0) {
       isFormValid = fieldsArray.every(isFieldValid);
     } else {
-      ({ isFormValid } = await validateFields(fieldsToValidate.map((field) => field.path)));
+      const fieldPathsToValidate = fieldsToValidate.map((field) => field.path);
+      ({ isFormValid } = await validateFields(fieldPathsToValidate, true));
     }
 
     setIsValid(isFormValid);
