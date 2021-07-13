@@ -10,6 +10,8 @@
 //
 // https://github.com/peggyjs/peggy
 
+/* eslint-disable */
+
 "use strict";
 
 function peg$subclass(child, parent) {
