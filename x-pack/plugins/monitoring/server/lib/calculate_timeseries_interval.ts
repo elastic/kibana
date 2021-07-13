@@ -9,9 +9,9 @@ import moment from 'moment';
 import { calculateAuto } from './calculate_auto';
 
 export function calculateTimeseriesInterval(
-  lowerBoundInMsSinceEpoch,
-  upperBoundInMsSinceEpoch,
-  minIntervalSeconds
+  lowerBoundInMsSinceEpoch: number,
+  upperBoundInMsSinceEpoch: number,
+  minIntervalSeconds: number
 ) {
   const duration = moment.duration(upperBoundInMsSinceEpoch - lowerBoundInMsSinceEpoch, 'ms');
 

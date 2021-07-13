@@ -10,7 +10,7 @@
  * @param param - anything
  * @param context {String} calling context used in the error message
  */
-export function checkParam(param, context) {
+export function checkParam(param: any, context: string) {
   if (!param) {
     throw new MissingRequiredError(context);
   }
@@ -21,10 +21,12 @@ export function checkParam(param, context) {
  * - verification in unit tests
  * see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error
  */
-export function MissingRequiredError(param) {
-  this.name = 'MissingRequiredError';
-  this.message = `Missing required parameter or field: ${param}`;
-  this.stack = new Error().stack;
+
+export class MissingRequiredError extends Error {
+  constructor(param: string) {
+    super();
+    this.name = 'MissingRequiredError';
+    this.message = `Missing required parameter or field: ${param}`;
+    this.stack = new Error().stack;
+  }
 }
-MissingRequiredError.prototype = Object.create(Error.prototype);
-MissingRequiredError.prototype.constructor = MissingRequiredError;

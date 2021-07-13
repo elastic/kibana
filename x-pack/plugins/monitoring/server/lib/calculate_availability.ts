@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 /*
  * Return `true` if timestamp of last update is younger than 10 minutes ago
  * If older than, it indicates cluster/instance is offline
  */
-export function calculateAvailability(timestamp) {
+export function calculateAvailability(timestamp: Moment) {
   const lastUpdate = moment(timestamp); // converts to local time
   return lastUpdate.isAfter(moment().subtract(10, 'minutes')); // compares with local time
 }

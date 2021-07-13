@@ -16,7 +16,7 @@ import moment from 'moment';
  * @param {*} utcTimestamp UTC timestamp
  * @param {*} timezone The timezone to convert into
  */
-export const formatUTCTimestampForTimezone = (utcTimestamp, timezone) => {
+export const formatUTCTimestampForTimezone = (utcTimestamp: string, timezone: string) => {
   if (timezone === 'Browser') {
     return utcTimestamp;
   }

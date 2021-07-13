@@ -10,8 +10,9 @@ import { checkParam } from '../error_missing_required';
 import { BeatsClusterMetric } from '../metrics';
 import { createBeatsQuery } from './create_beats_query';
 import { beatsAggFilterPath, beatsUuidsAgg, beatsAggResponseHandler } from './_beats_stats';
+import type { ElasticsearchResponse } from '../../../common/types/es';
 
-export function handleResponse(clusterUuid, response) {
+export function handleResponse(clusterUuid: string, response: ElasticsearchResponse) {
   const { beatTotal, beatTypes, totalEvents, bytesSent } = beatsAggResponseHandler(response);
 
   // combine stats

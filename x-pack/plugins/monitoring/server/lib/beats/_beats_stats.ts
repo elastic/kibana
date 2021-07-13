@@ -6,8 +6,9 @@
  */
 
 import { upperFirst, get } from 'lodash';
+import type { ElasticsearchResponse } from '../../../common/types/es';
 
-export const getDiffCalculation = (max, min) => {
+export const getDiffCalculation = (max: number, min: number) => {
   // no need to test max >= 0, but min <= 0 which is normal for a derivative after restart
   // because we are aggregating/collapsing on ephemeral_ids
   if (max !== null && min !== null && max >= 0 && min >= 0 && max >= min) {
@@ -27,7 +28,7 @@ export const beatsAggFilterPath = [
   'aggregations.max_bytes_sent_total.value',
 ];
 
-export const beatsUuidsAgg = (maxBucketSize) => ({
+export const beatsUuidsAgg = (maxBucketSize: string) => ({
   types: {
     terms: {
       field: 'beats_stats.beat.type',
@@ -98,11 +99,12 @@ export const beatsUuidsAgg = (maxBucketSize) => ({
   },
 });
 
-export const beatsAggResponseHandler = (response) => {
+export const beatsAggResponseHandler = (response: ElasticsearchResponse) => {
   // beat types stat
   const buckets = get(response, 'aggregations.types.buckets', []);
   const beatTotal = get(response, 'aggregations.total.value', 0);
   const beatTypes = buckets.reduce((types, typeBucket) => {
+    console.log(typeBucket);
     return [
       ...types,
       {

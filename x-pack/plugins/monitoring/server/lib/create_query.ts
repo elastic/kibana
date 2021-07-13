@@ -6,12 +6,22 @@
  */
 
 import { defaults, get } from 'lodash';
-import { MissingRequiredError } from './error_missing_required';
 import moment from 'moment';
+import { MissingRequiredError } from './error_missing_required';
 import { standaloneClusterFilter } from './standalone_clusters';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../common/constants';
 
-export function createTimeFilter(options) {
+interface TimerangeFilter {
+  range: {
+    [x: string]: {
+      format: 'epoch_millis';
+      gte?: number;
+      lte?: number;
+    };
+  };
+}
+
+export function createTimeFilter(options: { start?: Date; end?: Date }) {
   const { start, end } = options;
   if (!start && !end) {
     return null;
@@ -21,7 +31,7 @@ export function createTimeFilter(options) {
   if (!timestampField) {
     throw new MissingRequiredError('metric.timestampField');
   }
-  const timeRangeFilter = {
+  const timeRangeFilter: TimerangeFilter = {
     range: {
       [timestampField]: {
         format: 'epoch_millis',
@@ -50,7 +60,15 @@ export function createTimeFilter(options) {
  * @param {Date} options.end - numeric timestamp (optional)
  * @param {Metric} options.metric - Metric instance or metric fields object @see ElasticsearchMetric.getMetricFields
  */
-export function createQuery(options) {
+export function createQuery(options: {
+  type?: string;
+  types?: string[];
+  filters: any[];
+  clusterUuid: string;
+  uuid: string;
+  start?: Date;
+  end?: Date;
+}) {
   options = defaults(options, { filters: [] });
   const { type, types, clusterUuid, uuid, filters } = options;
 
@@ -63,8 +81,8 @@ export function createQuery(options) {
     typeFilter = {
       bool: {
         should: [
-          ...types.map((type) => ({ term: { type } })),
-          ...types.map((type) => ({ term: { 'metricset.name': type } })),
+          ...types.map((t) => ({ term: { type: t } })),
+          ...types.map((t) => ({ term: { 'metricset.name': t } })),
         ],
       },
     };

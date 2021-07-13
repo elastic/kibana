@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import moment from 'moment';
+import moment, { Duration } from 'moment';
+
+type RoundingRule = [number | Duration, Duration];
 
 const d = moment.duration;
 const roundingRules = [
@@ -25,18 +27,21 @@ const roundingRules = [
   [d(3, 'week'), d(1, 'week')],
   [d(1, 'year'), d(1, 'month')],
   [Infinity, d(1, 'year')],
-];
+] as RoundingRule[];
 
-function find(rules, check) {
-  function pick(buckets, duration) {
-    const target = duration / buckets;
+function find(
+  rules: RoundingRule[],
+  check: (b: number | Duration, i: Duration, t: number) => Duration | void
+) {
+  function pick(buckets: number, duration: Duration): Duration {
+    const target = duration.asMilliseconds() / buckets;
     let lastResp;
 
     for (let i = 0; i < rules.length; i++) {
       const rule = rules[i];
       const resp = check(rule[0], rule[1], target);
 
-      if (resp == null) {
+      if (resp === null) {
         if (lastResp) {
           return lastResp;
         }
@@ -51,11 +56,9 @@ function find(rules, check) {
     return moment.duration(ms, 'ms');
   }
 
-  return function (buckets, duration) {
+  return function (buckets: number, duration: Duration) {
     const interval = pick(buckets, duration);
-    if (interval) {
-      return moment.duration(interval._data);
-    }
+    return interval;
   };
 }
 

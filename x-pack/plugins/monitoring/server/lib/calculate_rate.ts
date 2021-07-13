@@ -20,6 +20,16 @@ import moment from 'moment';
  * 4. From that subtract the earliest timestamp from the time picker
  * This gives you the denominator in millis. Divide it by 1000 to convert to seconds
  */
+
+interface CalculateRateProps {
+  hitTimestamp: string | null;
+  earliestHitTimestamp: string | null;
+  latestTotal: number | null;
+  earliestTotal: number | null;
+  timeWindowMin: string;
+  timeWindowMax: string;
+}
+
 export function calculateRate({
   hitTimestamp = null,
   earliestHitTimestamp = null,
@@ -27,7 +37,7 @@ export function calculateRate({
   earliestTotal = null,
   timeWindowMin,
   timeWindowMax,
-} = {}) {
+}: CalculateRateProps) {
   const nullResult = {
     rate: null,
     isEstimate: false,

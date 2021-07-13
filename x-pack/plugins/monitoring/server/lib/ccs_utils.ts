@@ -6,8 +6,14 @@
  */
 
 import { isFunction, get } from 'lodash';
+import type { MonitoringConfig } from '../config';
 
-export function appendMetricbeatIndex(config, indexPattern, ccs, bypass = false) {
+export function appendMetricbeatIndex(
+  config: MonitoringConfig,
+  indexPattern: string,
+  ccs?: string,
+  bypass: boolean = false
+) {
   if (bypass) {
     return indexPattern;
   }
@@ -39,7 +45,12 @@ export function appendMetricbeatIndex(config, indexPattern, ccs, bypass = false)
  * @param  {String} ccs The optional cluster-prefix to prepend.
  * @return {String} The index pattern with the {@code cluster} prefix appropriately prepended.
  */
-export function prefixIndexPattern(config, indexPattern, ccs, monitoringIndicesOnly = false) {
+export function prefixIndexPattern(
+  config: MonitoringConfig,
+  indexPattern: string,
+  ccs: string,
+  monitoringIndicesOnly: boolean = false
+) {
   let ccsEnabled = false;
   // TODO: NP
   // This function is called with both NP config and LP config
@@ -102,7 +113,7 @@ export function prefixIndexPattern(config, indexPattern, ccs, monitoringIndicesO
  * @param  {String} indexName The index's name, possibly including the cross-cluster prefix
  * @return {String} {@code null} if none. Otherwise the cluster prefix.
  */
-export function parseCrossClusterPrefix(indexName) {
+export function parseCrossClusterPrefix(indexName: string) {
   const colonIndex = indexName.indexOf(':');
 
   if (colonIndex === -1) {
