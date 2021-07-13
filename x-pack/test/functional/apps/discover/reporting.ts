@@ -73,7 +73,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Generate CSV: new search', () => {
+    // TODO: Remove .only
+    describe.only('Generate CSV: new search', () => {
       beforeEach(async () => {
         await kibanaServer.importExport.load(ecommerceSOPath);
         await PageObjects.common.navigateToApp('discover');
