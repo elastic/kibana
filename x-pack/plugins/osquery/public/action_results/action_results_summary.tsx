@@ -55,12 +55,11 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   });
   if (expired) {
     // @ts-expect-error update types
-    edges.forEach(edge => {
+    edges.forEach((edge) => {
       if (!edge.fields.completed_at) {
-        edge.fields['error.keyword'] = edge.fields.error = ['The action request timed out.']
+        edge.fields['error.keyword'] = edge.fields.error = ['The action request timed out.'];
       }
-      console.log(edge)
-    })
+    });
   }
 
   const { data: logsResults } = useAllResults({

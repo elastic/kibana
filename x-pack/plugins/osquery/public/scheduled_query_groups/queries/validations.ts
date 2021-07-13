@@ -24,17 +24,18 @@ const idSchemaValidation: ValidationFunc<any, string, string> = ({ value }) => {
 };
 
 const createUniqueIdValidation = (ids: Set<string>) => {
-  const uniqueIdCheck: ValidationFunc<any, string, string>  = ({value}) => {
-    if(ids.has(value)) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const uniqueIdCheck: ValidationFunc<any, string, string> = ({ value }) => {
+    if (ids.has(value)) {
       return {
         message: i18n.translate('xpack.osquery.scheduledQueryGroup.queryFlyoutForm.uniqueIdError', {
           defaultMessage: 'ID must be unique',
         }),
       };
     }
-  }
-  return uniqueIdCheck
-}
+  };
+  return uniqueIdCheck;
+};
 
 export const createIdFieldValidations = (ids: Set<string>) => [
   fieldValidators.emptyField(

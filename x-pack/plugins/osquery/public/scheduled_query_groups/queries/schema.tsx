@@ -12,7 +12,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { FIELD_TYPES } from '../../shared_imports';
 
-import { createIdFieldValidations, intervalFieldValidation, queryFieldValidation } from './validations';
+import {
+  createIdFieldValidations,
+  intervalFieldValidation,
+  queryFieldValidation,
+} from './validations';
 
 export const createFormSchema = (ids: Set<string>) => ({
   id: {
