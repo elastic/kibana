@@ -53,7 +53,9 @@ export interface FormHook<T extends FormData = FormData, I extends FormData = T>
   __addField: (field: FieldHook) => void;
   __removeField: (fieldNames: string | string[]) => void;
   __validateFields: (
-    fieldNames: string[]
+    fieldNames: string[],
+    /** Run only blocking validations */
+    onlyBlocking?: boolean
   ) => Promise<{ areFieldsValid: boolean; isFormValid: boolean | undefined }>;
   __updateFormDataAt: (field: string, value: unknown) => void;
   __updateDefaultValueAt: (field: string, value: unknown) => void;
@@ -137,6 +139,7 @@ export interface FieldHook<T = unknown, I = T> {
     formData?: any;
     value?: I;
     validationType?: string;
+    onlyBlocking?: boolean;
   }) => FieldValidateResponse | Promise<FieldValidateResponse>;
   reset: (options?: { resetValue?: boolean; defaultValue?: T }) => unknown | undefined;
   // Flag to indicate if the field value will be included in the form data outputted

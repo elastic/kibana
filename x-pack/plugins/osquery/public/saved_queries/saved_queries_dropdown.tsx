@@ -7,7 +7,14 @@
 
 import { find } from 'lodash/fp';
 import { EuiCodeBlock, EuiFormRow, EuiComboBox, EuiText } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useState,
+} from 'react';
 import { SimpleSavedObject } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -15,21 +22,27 @@ import { useHistory, useLocation } from 'react-router-dom';
 
 import { useSavedQueries } from './use_saved_queries';
 
+export interface SavedQueriesDropdownRef {
+  clearSelection: () => void;
+}
+
 interface SavedQueriesDropdownProps {
   disabled?: boolean;
   onChange: (
-    value: SimpleSavedObject<{
-      id: string;
-      description?: string | undefined;
-      query: string;
-    }>['attributes']
+    value:
+      | SimpleSavedObject<{
+          id: string;
+          description?: string | undefined;
+          query: string;
+        }>['attributes']
+      | null
   ) => void;
 }
 
-const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
-  disabled,
-  onChange,
-}) => {
+const SavedQueriesDropdownComponent = forwardRef<
+  SavedQueriesDropdownRef,
+  SavedQueriesDropdownProps
+>(({ disabled, onChange }, ref) => {
   const { replace } = useHistory();
   const location = useLocation();
   const [selectedOptions, setSelectedOptions] = useState([]);
@@ -52,6 +65,12 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
 
   const handleSavedQueryChange = useCallback(
     (newSelectedOptions) => {
+      if (!newSelectedOptions.length) {
+        onChange(null);
+        setSelectedOptions(newSelectedOptions);
+        return;
+      }
+
       const selectedSavedQuery = find(
         ['attributes.id', newSelectedOptions[0].value.id],
         data?.savedObjects
@@ -80,6 +99,8 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
     []
   );
 
+  const clearSelection = useCallback(() => setSelectedOptions([]), []);
+
   useEffect(() => {
     const savedQueryId = location.state?.form?.savedQueryId;
 
@@ -93,6 +114,14 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
       replace({ state: null });
     }
   }, [handleSavedQueryChange, replace, location.state, queryOptions]);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      clearSelection,
+    }),
+    [clearSelection]
+  );
 
   return (
     <EuiFormRow
@@ -120,6 +149,6 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
       />
     </EuiFormRow>
   );
-};
+});
 
 export const SavedQueriesDropdown = React.memo(SavedQueriesDropdownComponent);
