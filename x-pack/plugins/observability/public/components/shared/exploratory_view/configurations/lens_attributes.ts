@@ -88,7 +88,7 @@ export interface LayerConfig {
   reportDefinitions: URLReportDefinition;
   time: { to: string; from: string };
   indexPattern: IndexPattern;
-  selectedMetricField?: string;
+  selectedMetricField: string;
   color: string;
   name: string;
 }

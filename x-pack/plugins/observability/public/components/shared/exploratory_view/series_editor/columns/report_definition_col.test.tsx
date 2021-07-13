@@ -16,7 +16,6 @@ import {
   render,
 } from '../../rtl_helpers';
 import { ReportDefinitionCol } from './report_definition_col';
-import { SERVICE_NAME } from '../../configurations/constants/elasticsearch_fieldnames';
 
 describe('Series Builder ReportDefinitionCol', function () {
   mockAppIndexPattern();
@@ -28,40 +27,21 @@ describe('Series Builder ReportDefinitionCol', function () {
     dataType: 'ux',
   });
 
-  const initSeries = {
-    data: [
-      {
-        order: 0,
-        name: seriesId,
-        dataType: 'ux' as const,
-        time: { from: 'now-30d', to: 'now' },
-        reportDefinitions: { [SERVICE_NAME]: ['elastic-co'] },
-      },
-    ],
-  };
-
   mockUseValuesList([{ label: 'elastic-co', count: 10 }]);
 
   it('should render properly', async function () {
     render(
-      <ReportDefinitionCol seriesConfig={seriesConfig} seriesId={seriesId} series={mockUxSeries} />,
-      {
-        initSeries,
-      }
+      <ReportDefinitionCol seriesConfig={seriesConfig} seriesId={seriesId} series={mockUxSeries} />
     );
 
     screen.getByText('Web Application');
     screen.getByText('Environment');
-    screen.getByText('Select an option: Page load time, is selected');
-    screen.getByText('Page load time');
+    screen.getByText('Search Environment');
   });
 
   it('should render selected report definitions', async function () {
     render(
-      <ReportDefinitionCol seriesConfig={seriesConfig} seriesId={seriesId} series={mockUxSeries} />,
-      {
-        initSeries,
-      }
+      <ReportDefinitionCol seriesConfig={seriesConfig} seriesId={seriesId} series={mockUxSeries} />
     );
 
     expect(await screen.findByText('elastic-co')).toBeInTheDocument();
@@ -71,8 +51,7 @@ describe('Series Builder ReportDefinitionCol', function () {
 
   it('should be able to remove selected definition', async function () {
     const { setSeries } = render(
-      <ReportDefinitionCol seriesConfig={seriesConfig} seriesId={seriesId} series={mockUxSeries} />,
-      { initSeries }
+      <ReportDefinitionCol seriesConfig={seriesConfig} seriesId={seriesId} series={mockUxSeries} />
     );
 
     expect(
@@ -86,11 +65,15 @@ describe('Series Builder ReportDefinitionCol', function () {
     fireEvent.click(removeBtn);
 
     expect(setSeries).toHaveBeenCalledTimes(1);
+
     expect(setSeries).toHaveBeenCalledWith(seriesId, {
+      order: 0,
       dataType: 'ux',
+      name: 'performance-distribution',
+      breakdown: 'user_agent.name',
       reportDefinitions: {},
-      reportType: 'data-distribution',
-      time: { from: 'now-30d', to: 'now' },
+      selectedMetricField: 'transaction.duration.us',
+      time: { from: 'now-15m', to: 'now' },
     });
   });
 });

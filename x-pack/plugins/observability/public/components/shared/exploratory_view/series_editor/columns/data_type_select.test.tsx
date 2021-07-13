@@ -19,42 +19,24 @@ describe('DataTypeSelect', function () {
     render(<DataTypesSelect seriesId={seriesId} series={mockUxSeries} />);
   });
 
-  it('should set series on change', function () {
+  it('should set series on change', async function () {
     const { setSeries } = render(<DataTypesSelect seriesId={seriesId} series={mockUxSeries} />);
 
-    fireEvent.click(screen.getByText(/user experience \(rum\)/i));
+    fireEvent.click(await screen.findByText('User Experience (RUM)'));
+    fireEvent.click(await screen.findByText('Synthetic Monitoring'));
 
     expect(setSeries).toHaveBeenCalledTimes(1);
     expect(setSeries).toHaveBeenCalledWith(seriesId, {
-      dataType: 'ux',
-      isNew: true,
+      breakdown: 'user_agent.name',
+      dataType: 'synthetics',
+      name: 'performance-distribution',
+      order: 0,
+      reportDefinitions: {},
+      selectedMetricField: 'transaction.duration.us',
       time: {
         from: 'now-15m',
         to: 'now',
       },
     });
-  });
-
-  it('should set series on change on already selected', function () {
-    const initSeries = {
-      data: [
-        {
-          order: 0,
-          name: seriesId,
-          dataType: 'synthetics' as const,
-          reportType: 'kpi-over-time' as const,
-          breakdown: 'monitor.status',
-          time: { from: 'now-15m', to: 'now' },
-        },
-      ],
-    };
-
-    render(<DataTypesSelect seriesId={seriesId} series={mockUxSeries} />, { initSeries });
-
-    const button = screen.getByRole('button', {
-      name: /Synthetic Monitoring/i,
-    });
-
-    expect(button.classList).toContain('euiButton--fill');
   });
 });

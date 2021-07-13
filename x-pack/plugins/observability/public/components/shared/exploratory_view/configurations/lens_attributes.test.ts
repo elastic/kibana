@@ -16,7 +16,7 @@ import {
 } from './constants/elasticsearch_fieldnames';
 import { buildExistsFilter, buildPhrasesFilter } from './utils';
 import { sampleAttributeKpi } from './test_data/sample_attribute_kpi';
-import { REPORT_METRIC_FIELD } from './constants';
+import { RECORDS_FIELD, REPORT_METRIC_FIELD } from './constants';
 
 describe('Lens Attribute', () => {
   mockAppIndexPattern();
@@ -40,6 +40,7 @@ describe('Lens Attribute', () => {
     time: { from: 'now-15m', to: 'now' },
     color: 'green',
     name: 'test-series',
+    selectedMetricField: TRANSACTION_DURATION,
   };
 
   beforeEach(() => {
@@ -67,6 +68,7 @@ describe('Lens Attribute', () => {
         time: { from: 'now-15m', to: 'now' },
         color: 'green',
         name: 'test-series',
+        selectedMetricField: RECORDS_FIELD,
       },
     ]);
 
@@ -141,6 +143,7 @@ describe('Lens Attribute', () => {
       time: { from: 'now-15m', to: 'now' },
       color: 'green',
       name: 'test-series',
+      selectedMetricField: TRANSACTION_DURATION,
     };
 
     lnsAttr = new LensAttributes([layerConfig1]);
@@ -283,7 +286,7 @@ describe('Lens Attribute', () => {
                 'transaction.type: page-load and processor.event: transaction and transaction.type : *',
             },
             isBucketed: false,
-            label: 'Pages loaded',
+            label: 'test-series',
             operationType: 'formula',
             params: {
               format: {
@@ -389,7 +392,7 @@ describe('Lens Attribute', () => {
           palette: undefined,
           seriesType: 'line',
           xAccessor: 'x-axis-column-layer0',
-          yConfig: [{ forAccessor: 'y-axis-column-layer0' }],
+          yConfig: [{ color: 'green', forAccessor: 'y-axis-column-layer0' }],
         },
       ],
       legend: { isVisible: true, position: 'right' },
@@ -411,6 +414,7 @@ describe('Lens Attribute', () => {
         time: { from: 'now-15m', to: 'now' },
         color: 'green',
         name: 'test-series',
+        selectedMetricField: TRANSACTION_DURATION,
       };
 
       lnsAttr = new LensAttributes([layerConfig1]);
@@ -430,7 +434,7 @@ describe('Lens Attribute', () => {
           seriesType: 'line',
           splitAccessor: 'breakdown-column-layer0',
           xAccessor: 'x-axis-column-layer0',
-          yConfig: [{ forAccessor: 'y-axis-column-layer0' }],
+          yConfig: [{ color: 'green', forAccessor: 'y-axis-column-layer0' }],
         },
       ]);
 
@@ -491,7 +495,7 @@ describe('Lens Attribute', () => {
                 'transaction.type: page-load and processor.event: transaction and transaction.type : *',
             },
             isBucketed: false,
-            label: 'Pages loaded',
+            label: 'test-series',
             operationType: 'formula',
             params: {
               format: {
@@ -599,6 +603,7 @@ describe('Lens Attribute', () => {
         time: { from: 'now-15m', to: 'now' },
         color: 'green',
         name: 'test-series',
+        selectedMetricField: TRANSACTION_DURATION,
       };
 
       const filters = lnsAttr.getLayerFilters(layerConfig1, 2);

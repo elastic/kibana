@@ -8,13 +8,11 @@
 import React, { useState } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { HeaderMenuPortal } from '../../../../../../observability/public';
-import { LensEmbeddableInput, TypedLensByValueInput } from '../../../../../../lens/public';
-import { ObservabilityAppServices } from '../../../../application/types';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { usePluginContext } from '../../../../hooks/use_plugin_context';
+import { LensEmbeddableInput, TypedLensByValueInput } from '../../../../../../../lens/public';
+import { ObservabilityAppServices } from '../../../../../application/types';
+import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 
-export function ExpViewActionMenu({
+export function ExpViewActionMenuContent({
   timeRange,
   lensAttributes,
 }: {
@@ -29,10 +27,8 @@ export function ExpViewActionMenu({
 
   const LensSaveModalComponent = lens.SaveModalComponent;
 
-  const { appMountParameters } = usePluginContext();
-
   return (
-    <HeaderMenuPortal setHeaderActionMenu={appMountParameters.setHeaderActionMenu}>
+    <>
       <EuiFlexGroup
         alignItems="center"
         gutterSize="s"
@@ -89,6 +85,6 @@ export function ExpViewActionMenu({
           onSave={() => {}}
         />
       )}
-    </HeaderMenuPortal>
+    </>
   );
 }

@@ -31,7 +31,11 @@ describe('Breakdowns', function () {
     const initSeries = { breakdown: USER_AGENT_OS };
 
     const { setSeries } = render(
-      <Breakdowns seriesId={'series-id'} seriesConfig={dataViewSeries} series={mockUxSeries} />,
+      <Breakdowns
+        seriesId={'series-id'}
+        seriesConfig={dataViewSeries}
+        series={{ ...mockUxSeries, breakdown: USER_AGENT_OS }}
+      />,
       { initSeries }
     );
 
@@ -44,6 +48,12 @@ describe('Breakdowns', function () {
     expect(setSeries).toHaveBeenCalledWith('series-id', {
       breakdown: 'user_agent.name',
       dataType: 'ux',
+      name: 'performance-distribution',
+      order: 0,
+      reportDefinitions: {
+        'service.name': ['elastic-co'],
+      },
+      selectedMetricField: 'transaction.duration.us',
       time: { from: 'now-15m', to: 'now' },
     });
     expect(setSeries).toHaveBeenCalledTimes(1);

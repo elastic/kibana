@@ -55,7 +55,13 @@ export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null 
       .sort((a, b) => a.order - b.order)
       .forEach((series) => {
         const indexPattern = indexPatterns?.[series?.dataType];
-        if (indexPattern && !isEmpty(series.reportDefinitions) && !series.hidden) {
+
+        if (
+          indexPattern &&
+          !isEmpty(series.reportDefinitions) &&
+          !series.hidden &&
+          series.selectedMetricField
+        ) {
           const seriesConfig = getDefaultConfigs({
             reportType,
             indexPattern,

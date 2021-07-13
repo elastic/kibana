@@ -22,13 +22,14 @@ describe('SelectedFilters', function () {
   });
 
   it('should render properly', async function () {
-    const initSeries = { filters: [{ field: USER_AGENT_NAME, values: ['Chrome'] }] };
+    const filters = [{ field: USER_AGENT_NAME, values: ['Chrome'] }];
+    const initSeries = { filters };
 
     render(
       <SelectedFilters
         seriesId={'series-id'}
         seriesConfig={dataViewSeries}
-        series={mockUxSeries}
+        series={{ ...mockUxSeries, filters }}
       />,
       {
         initSeries,

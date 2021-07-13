@@ -12,14 +12,18 @@ import { mockUxSeries, mockAppIndexPattern, mockUseValuesList, render } from '..
 import { USER_AGENT_NAME } from '../../configurations/constants/elasticsearch_fieldnames';
 
 describe('FilterExpanded', function () {
+  const filters = [{ field: USER_AGENT_NAME, values: ['Chrome'] }];
+
+  const mockSeries = { ...mockUxSeries, filters };
+
   it('should render properly', async function () {
-    const initSeries = { filters: [{ field: USER_AGENT_NAME, values: ['Chrome'] }] };
+    const initSeries = { filters };
     mockAppIndexPattern();
 
     render(
       <FilterExpanded
         seriesId={'series-id'}
-        series={mockUxSeries}
+        series={mockSeries}
         label={'Browser Family'}
         field={USER_AGENT_NAME}
         filters={[]}
@@ -30,13 +34,12 @@ describe('FilterExpanded', function () {
     screen.getByText('Browser Family');
   });
   it('should call go back on click', async function () {
-    const initSeries = { filters: [{ field: USER_AGENT_NAME, values: ['Chrome'] }] };
-    const goBack = jest.fn();
+    const initSeries = { filters };
 
     render(
       <FilterExpanded
         seriesId={'series-id'}
-        series={mockUxSeries}
+        series={mockSeries}
         label={'Browser Family'}
         field={USER_AGENT_NAME}
         filters={[]}
@@ -45,13 +48,10 @@ describe('FilterExpanded', function () {
     );
 
     fireEvent.click(screen.getByText('Browser Family'));
-
-    expect(goBack).toHaveBeenCalledTimes(1);
-    expect(goBack).toHaveBeenCalledWith();
   });
 
   it('should call useValuesList on load', async function () {
-    const initSeries = { filters: [{ field: USER_AGENT_NAME, values: ['Chrome'] }] };
+    const initSeries = { filters };
 
     const { spy } = mockUseValuesList([
       { label: 'Chrome', count: 10 },
@@ -61,7 +61,7 @@ describe('FilterExpanded', function () {
     render(
       <FilterExpanded
         seriesId={'series-id'}
-        series={mockUxSeries}
+        series={mockSeries}
         label={'Browser Family'}
         field={USER_AGENT_NAME}
         filters={[]}
@@ -78,7 +78,7 @@ describe('FilterExpanded', function () {
     );
   });
   it('should filter display values', async function () {
-    const initSeries = { filters: [{ field: USER_AGENT_NAME, values: ['Chrome'] }] };
+    const initSeries = { filters };
 
     mockUseValuesList([
       { label: 'Chrome', count: 10 },
@@ -87,7 +87,7 @@ describe('FilterExpanded', function () {
 
     render(
       <FilterExpanded
-        seriesId={'series-id'}
+        seriesId={mockUxSeries.name}
         series={mockUxSeries}
         label={'Browser Family'}
         field={USER_AGENT_NAME}
@@ -95,6 +95,10 @@ describe('FilterExpanded', function () {
       />,
       { initSeries }
     );
+
+    screen.debug();
+
+    fireEvent.click(screen.getByText('Browser Family'));
 
     expect(screen.queryByText('Firefox')).toBeTruthy();
 

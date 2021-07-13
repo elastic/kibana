@@ -24,14 +24,15 @@ describe('OperationTypeSelect', function () {
           order: 0,
           name: 'performance-distribution',
           dataType: 'ux' as const,
-          reportType: 'kpi-over-time' as const,
           operationType: 'median' as const,
           time: { from: 'now-15m', to: 'now' },
         },
       ],
     };
 
-    render(<OperationTypeSelect seriesId={'series-id'} series={mockUxSeries} />, { initSeries });
+    render(<OperationTypeSelect seriesId={'series-id'} series={initSeries.data[0]} />, {
+      initSeries,
+    });
 
     screen.getByText('Median');
   });
@@ -43,7 +44,6 @@ describe('OperationTypeSelect', function () {
           order: 0,
           name: 'series-id',
           dataType: 'ux' as const,
-          reportType: 'kpi-over-time' as const,
           operationType: 'median' as const,
           time: { from: 'now-15m', to: 'now' },
         },
@@ -51,7 +51,7 @@ describe('OperationTypeSelect', function () {
     };
 
     const { setSeries } = render(
-      <OperationTypeSelect seriesId={'series-id'} series={mockUxSeries} />,
+      <OperationTypeSelect seriesId={'series-id'} series={initSeries.data[0]} />,
       { initSeries }
     );
 
@@ -60,16 +60,18 @@ describe('OperationTypeSelect', function () {
     expect(setSeries).toHaveBeenCalledWith('series-id', {
       operationType: 'median',
       dataType: 'ux',
-      reportType: 'kpi-over-time',
       time: { from: 'now-15m', to: 'now' },
+      name: 'series-id',
+      order: 0,
     });
 
     fireEvent.click(screen.getByText('95th Percentile'));
     expect(setSeries).toHaveBeenCalledWith('series-id', {
       operationType: '95th',
       dataType: 'ux',
-      reportType: 'kpi-over-time',
       time: { from: 'now-15m', to: 'now' },
+      name: 'series-id',
+      order: 0,
     });
   });
 });

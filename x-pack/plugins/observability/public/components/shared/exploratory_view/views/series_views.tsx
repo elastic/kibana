@@ -33,11 +33,11 @@ export function SeriesViews({
   seriesBuilderRef: RefObject<HTMLDivElement>;
   onSeriesPanelCollapse: (panel: PanelId) => void;
 }) {
-  const { mode } = useParams<{ mode: ViewTab }>();
+  const params = useParams<{ mode: ViewTab }>();
 
   const history = useHistory();
 
-  const [selectedTabId, setSelectedTabId] = useState('cobalt');
+  const [selectedTabId, setSelectedTabId] = useState('configure');
 
   const onSelectedTabChanged = (id: string) => {
     setSelectedTabId(id);
@@ -45,8 +45,8 @@ export function SeriesViews({
   };
 
   useEffect(() => {
-    setSelectedTabId(mode);
-  }, [mode]);
+    setSelectedTabId(params.mode);
+  }, [params.mode]);
 
   const renderTabs = () => {
     return tabs.map((tab, index) => (

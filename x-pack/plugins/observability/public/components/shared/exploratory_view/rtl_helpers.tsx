@@ -10,7 +10,7 @@ import React, { ReactElement } from 'react';
 import { stringify } from 'query-string';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { render as reactTestLibRender, RenderOptions } from '@testing-library/react';
-import { Router } from 'react-router-dom';
+import { Route, Router } from 'react-router-dom';
 import { createMemoryHistory, History } from 'history';
 import { CoreStart } from 'kibana/public';
 import { I18nProvider } from '@kbn/i18n/react';
@@ -42,6 +42,7 @@ import {
 import { AppDataType, SeriesUrl, UrlFilter } from './types';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { ListItem } from '../../../hooks/use_values_list';
+import { TRANSACTION_DURATION } from './configurations/constants/elasticsearch_fieldnames';
 
 interface KibanaProps {
   services?: KibanaServices;
@@ -158,9 +159,11 @@ export function MockRouter<ExtraCore>({
 }: MockRouterProps<ExtraCore>) {
   return (
     <Router history={history}>
-      <MockKibanaProvider core={core} kibanaProps={kibanaProps} history={history}>
-        {children}
-      </MockKibanaProvider>
+      <Route path={'/app/observability/exploratory-view/:mode'}>
+        <MockKibanaProvider core={core} kibanaProps={kibanaProps} history={history}>
+          {children}
+        </MockKibanaProvider>
+      </Route>
     </Router>
   );
 }
@@ -173,7 +176,7 @@ export function render<ExtraCore>(
     core: customCore,
     kibanaProps,
     renderOptions,
-    url,
+    url = '/app/observability/exploratory-view/configure#?autoApply=!t',
     initSeries = {},
   }: RenderRouterOptions<ExtraCore> = {}
 ) {
@@ -258,6 +261,8 @@ export const mockUxSeries = {
   dataType: 'ux',
   breakdown: 'user_agent.name',
   time: { from: 'now-15m', to: 'now' },
+  reportDefinitions: { 'service.name': ['elastic-co'] },
+  selectedMetricField: TRANSACTION_DURATION,
 } as SeriesUrl;
 
 function mockSeriesStorageContext({
@@ -299,7 +304,7 @@ function mockSeriesStorageContext({
     firstSeries: mockDataSeries[0],
     allSeries: mockDataSeries,
     setReportType: jest.fn(),
-    storage: {} as any,
+    storage: { get: jest.fn() } as any,
   } as SeriesContextValue;
 }
 
