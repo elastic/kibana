@@ -51,9 +51,12 @@ export async function getDefaultAsyncSubmitParams(
   const keepAlive = searchSessionsConfig?.enabled
     ? `${searchSessionsConfig.defaultExpiration.asMilliseconds()}ms`
     : '1m';
+
+  // Always return an ID, even if the request completes quickly
+  const keepOnCompletion = searchSessionsConfig?.enabled && !!options.sessionId;
   return {
     batched_reduce_size: 64,
-    keep_on_completion: !!options.sessionId, // Always return an ID, even if the request completes quickly
+    keep_on_completion: keepOnCompletion,
     ...getDefaultAsyncGetParams(options),
     ...(await getIgnoreThrottled(uiSettingsClient)),
     ...(await getDefaultSearchParams(uiSettingsClient)),
