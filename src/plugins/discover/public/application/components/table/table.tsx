@@ -9,7 +9,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
 import { IndexPattern, IndexPatternField } from '../../../../../data/public';
-import { SHOW_MULTIFIELDS } from '../../../../common';
+import { SEARCH_FIELDS_FROM_SOURCE, SHOW_MULTIFIELDS } from '../../../../common';
 import { getServices } from '../../../kibana_services';
 import { isNestedFieldParent } from '../../apps/main/utils/nested_fields';
 import {
@@ -54,7 +54,9 @@ export const DocViewerTable = ({
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) => {
-  const showMultiFields = getServices().uiSettings.get(SHOW_MULTIFIELDS);
+  const uiSettings = getServices().uiSettings;
+  const showMultiFields =
+    uiSettings.get(SHOW_MULTIFIELDS) || uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
 
   const mapping = useCallback((name) => indexPattern?.fields.getByName(name), [
     indexPattern?.fields,
