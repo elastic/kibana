@@ -22,14 +22,12 @@ describe('createStaticIndexPattern', () => {
     const setup = {} as Setup;
 
     const savedObjectsClient = getMockSavedObjectsClient();
-    await createStaticIndexPattern(
+    await createStaticIndexPattern({
       setup,
-      {
-        'xpack.apm.autocreateApmIndexPattern': false,
-      } as APMConfig,
+      config: { 'xpack.apm.autocreateApmIndexPattern': false } as APMConfig,
       savedObjectsClient,
-      'default'
-    );
+      spaceId: 'default',
+    });
     expect(savedObjectsClient.create).not.toHaveBeenCalled();
   });
 
@@ -43,14 +41,12 @@ describe('createStaticIndexPattern', () => {
 
     const savedObjectsClient = getMockSavedObjectsClient();
 
-    await createStaticIndexPattern(
+    await createStaticIndexPattern({
       setup,
-      {
-        'xpack.apm.autocreateApmIndexPattern': true,
-      } as APMConfig,
+      config: { 'xpack.apm.autocreateApmIndexPattern': true } as APMConfig,
       savedObjectsClient,
-      'default'
-    );
+      spaceId: 'default',
+    });
     expect(savedObjectsClient.create).not.toHaveBeenCalled();
   });
 
@@ -64,14 +60,12 @@ describe('createStaticIndexPattern', () => {
 
     const savedObjectsClient = getMockSavedObjectsClient();
 
-    await createStaticIndexPattern(
+    await createStaticIndexPattern({
       setup,
-      {
-        'xpack.apm.autocreateApmIndexPattern': true,
-      } as APMConfig,
+      config: { 'xpack.apm.autocreateApmIndexPattern': true } as APMConfig,
       savedObjectsClient,
-      'default'
-    );
+      spaceId: 'default',
+    });
 
     expect(savedObjectsClient.create).toHaveBeenCalled();
   });
