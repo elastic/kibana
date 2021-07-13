@@ -385,7 +385,7 @@ security and spaces filtering as well as performing audit logging.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/enterprise_search/README.md[enterpriseSearch]
-|This plugin's goal is to provide a Kibana user interface to the Enterprise Search solution's products (App Search and Workplace Search). In it's current MVP state, the plugin provides the following with the goal of gathering user feedback and raising product awareness:
+|This plugin provides beta Kibana user interfaces for managing the Enterprise Search solution and its products, App Search and Workplace Search.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/event_log/README.md[eventLog]
@@ -477,7 +477,7 @@ using the CURL scripts in the scripts folder.
 |{kib-repo}blob/{branch}/x-pack/plugins/metrics_entities/README.md[metricsEntities]
 |This is the metrics and entities plugin where you add can add transforms for your project
 and group those transforms into modules. You can also re-use existing transforms in your
-modules as well.
+newly created modules as well.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/ml/readme.md[ml]

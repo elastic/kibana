@@ -20,6 +20,7 @@ import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../pl
 import { SpacesPluginSetup } from '../../../../../../plugins/spaces/server';
 import { PluginSetupContract as AlertingPluginContract } from '../../../../../alerting/server';
 import { MlPluginSetup } from '../../../../../ml/server';
+import { RuleRegistryPluginSetupContract } from '../../../../../rule_registry/server';
 
 export interface InfraServerPluginSetupDeps {
   data: DataPluginSetup;
@@ -29,6 +30,7 @@ export interface InfraServerPluginSetupDeps {
   visTypeTimeseries: VisTypeTimeseriesSetup;
   features: FeaturesPluginSetup;
   alerting: AlertingPluginContract;
+  ruleRegistry: RuleRegistryPluginSetupContract;
   ml?: MlPluginSetup;
 }
 

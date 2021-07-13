@@ -535,6 +535,17 @@ exports[`TOCEntryActionsPopover should not show edit actions in read only mode 1
               "onClick": [Function],
               "toolTipContent": null,
             },
+            Object {
+              "data-test-subj": "layerSettingsButton",
+              "disabled": false,
+              "icon": <EuiIcon
+                size="m"
+                type="pencil"
+              />,
+              "name": "Edit layer settings",
+              "onClick": [Function],
+              "toolTipContent": null,
+            },
           ],
           "title": "Layer actions",
         },

@@ -17,10 +17,11 @@ import {
 
 import { ApmConfiguration } from './config';
 
-const initialEnv = { ...process.env };
-
 describe('ApmConfiguration', () => {
   beforeEach(() => {
+    // start with an empty env to avoid CI from spoiling snapshots, env is unique for each jest file
+    process.env = {};
+
     packageMock.raw = {
       version: '8.0.0',
       build: {
@@ -30,7 +31,6 @@ describe('ApmConfiguration', () => {
   });
 
   afterEach(() => {
-    process.env = { ...initialEnv };
     resetAllMocks();
   });
 
@@ -46,7 +46,7 @@ describe('ApmConfiguration', () => {
   it('sets the git revision from `git rev-parse` command in non distribution mode', () => {
     gitRevExecMock.mockReturnValue('some-git-rev');
     const config = new ApmConfiguration(mockedRootDir, {}, false);
-    expect(config.getConfig('serviceName').globalLabels.git_rev).toBe('some-git-rev');
+    expect(config.getConfig('serviceName').globalLabels?.git_rev).toBe('some-git-rev');
   });
 
   it('sets the git revision from `pkg.build.sha` in distribution mode', () => {
@@ -58,13 +58,13 @@ describe('ApmConfiguration', () => {
       },
     };
     const config = new ApmConfiguration(mockedRootDir, {}, true);
-    expect(config.getConfig('serviceName').globalLabels.git_rev).toBe('distribution-sha');
+    expect(config.getConfig('serviceName').globalLabels?.git_rev).toBe('distribution-sha');
   });
 
   it('reads the kibana uuid from the uuid file', () => {
     readUuidFileMock.mockReturnValue('instance-uuid');
     const config = new ApmConfiguration(mockedRootDir, {}, false);
-    expect(config.getConfig('serviceName').globalLabels.kibana_uuid).toBe('instance-uuid');
+    expect(config.getConfig('serviceName').globalLabels?.kibana_uuid).toBe('instance-uuid');
   });
 
   it('uses the uuid from the kibana config if present', () => {
@@ -75,23 +75,51 @@ describe('ApmConfiguration', () => {
       },
     };
     const config = new ApmConfiguration(mockedRootDir, kibanaConfig, false);
-    expect(config.getConfig('serviceName').globalLabels.kibana_uuid).toBe('uuid-from-config');
+    expect(config.getConfig('serviceName').globalLabels?.kibana_uuid).toBe('uuid-from-config');
   });
 
-  it('uses the correct default config depending on the `isDistributable` parameter', () => {
+  it('overrides metricsInterval, breakdownMetrics, captureHeaders, and captureBody when `isDistributable` is true', () => {
     let config = new ApmConfiguration(mockedRootDir, {}, false);
-    expect(config.getConfig('serviceName')).toEqual(
-      expect.objectContaining({
-        breakdownMetrics: true,
-      })
-    );
+    expect(config.getConfig('serviceName')).toMatchInlineSnapshot(`
+      Object {
+        "active": false,
+        "breakdownMetrics": true,
+        "captureSpanStackTraces": false,
+        "centralConfig": false,
+        "environment": "development",
+        "globalLabels": Object {},
+        "logUncaughtExceptions": true,
+        "metricsInterval": "30s",
+        "secretToken": "ZQHYvrmXEx04ozge8F",
+        "serverUrl": "https://38b80fbd79fb4c91bae06b4642d4d093.apm.us-east-1.aws.cloud.es.io",
+        "serviceName": "serviceName",
+        "serviceVersion": "8.0.0",
+        "transactionSampleRate": 1,
+      }
+    `);
 
     config = new ApmConfiguration(mockedRootDir, {}, true);
-    expect(config.getConfig('serviceName')).toEqual(
-      expect.objectContaining({
-        breakdownMetrics: false,
-      })
-    );
+    expect(config.getConfig('serviceName')).toMatchInlineSnapshot(`
+      Object {
+        "active": false,
+        "breakdownMetrics": false,
+        "captureBody": "off",
+        "captureHeaders": false,
+        "captureSpanStackTraces": false,
+        "centralConfig": false,
+        "environment": "development",
+        "globalLabels": Object {
+          "git_rev": "sha",
+        },
+        "logUncaughtExceptions": true,
+        "metricsInterval": "120s",
+        "secretToken": "ZQHYvrmXEx04ozge8F",
+        "serverUrl": "https://38b80fbd79fb4c91bae06b4642d4d093.apm.us-east-1.aws.cloud.es.io",
+        "serviceName": "serviceName",
+        "serviceVersion": "8.0.0",
+        "transactionSampleRate": 1,
+      }
+    `);
   });
 
   it('loads the configuration from the kibana config file', () => {
@@ -119,7 +147,7 @@ describe('ApmConfiguration', () => {
       active: true,
       serverUrl: 'https://dev-url.co',
     };
-    const config = new ApmConfiguration(mockedRootDir, {}, true);
+    const config = new ApmConfiguration(mockedRootDir, {}, false);
     expect(config.getConfig('serviceName')).toEqual(
       expect.objectContaining({
         active: true,
@@ -128,7 +156,20 @@ describe('ApmConfiguration', () => {
     );
   });
 
-  it('respect the precedence of the dev config', () => {
+  it('does not load the configuration from the dev config in distributable', () => {
+    devConfigMock.raw = {
+      active: true,
+      serverUrl: 'https://dev-url.co',
+    };
+    const config = new ApmConfiguration(mockedRootDir, {}, true);
+    expect(config.getConfig('serviceName')).toEqual(
+      expect.objectContaining({
+        active: false,
+      })
+    );
+  });
+
+  it('overwrites the standard config file with the dev config', () => {
     const kibanaConfig = {
       elastic: {
         apm: {
@@ -142,7 +183,7 @@ describe('ApmConfiguration', () => {
       active: true,
       serverUrl: 'https://dev-url.co',
     };
-    const config = new ApmConfiguration(mockedRootDir, kibanaConfig, true);
+    const config = new ApmConfiguration(mockedRootDir, kibanaConfig, false);
     expect(config.getConfig('serviceName')).toEqual(
       expect.objectContaining({
         active: true,
@@ -152,7 +193,7 @@ describe('ApmConfiguration', () => {
     );
   });
 
-  it('correctly sets environment', () => {
+  it('correctly sets environment by reading env vars', () => {
     delete process.env.ELASTIC_APM_ENVIRONMENT;
     delete process.env.NODE_ENV;
 

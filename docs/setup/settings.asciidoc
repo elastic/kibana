@@ -284,6 +284,11 @@ the username and password that the {kib} server uses to perform maintenance
 on the {kib} index at startup. {kib} users still need to authenticate with
 {es}, which is proxied through the {kib} server.
 
+|[[elasticsearch-service-account-token]] `elasticsearch.serviceAccountToken:`
+ | beta[]. If your {es} is protected with basic authentication, this token provides the credentials
+that the {kib} server uses to perform maintenance on the {kib} index at startup. This setting
+is an alternative to `elasticsearch.username` and `elasticsearch.password`.
+
 | `enterpriseSearch.host`
   | The URL of your Enterprise Search instance
 
@@ -557,11 +562,10 @@ deprecation warning at startup. This setting cannot end in a slash (`/`).
 proxy sitting in front of it. This determines whether HTTP compression may be used for responses, based on the request `Referer` header.
 This setting may not be used when <<server-compression, `server.compression.enabled`>> is set to `false`. *Default: `none`*
 
-[[server-securityResponseHeaders-strictTransportSecurity]]
 a|
 `server.securityResponseHeaders:`
 `strictTransportSecurity:`
-| Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security[`Strict-Transport-Security`]
+| [[server-securityResponseHeaders-strictTransportSecurity]] Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security[`Strict-Transport-Security`]
 header is used in all responses to the client from the {kib} server, and specifies what value is used. Allowed values are any text value or
 `null`. To disable, set to `null`. *Default:* `null`
 
@@ -627,7 +631,7 @@ identifies this {kib} instance. *Default: `"your-hostname"`*
 setting specifies the port to use. *Default: `5601`*
 
 |[[server-requestId-allowFromAnyIp]] `server.requestId.allowFromAnyIp:`
- | Sets whether or not the X-Opaque-Id header should be trusted from any IP address for identifying requests in logs and forwarded to Elasticsearch.
+ | Sets whether or not the `X-Opaque-Id` header should be trusted from any IP address for identifying requests in logs and forwarded to Elasticsearch.
 
 | `server.requestId.ipAllowlist:`
  | A list of IPv4 and IPv6 address which the `X-Opaque-Id` header should be trusted from. Normally this would be set to the IP addresses of the load balancers or reverse-proxy that end users use to access Kibana. If any are set, <<server-requestId-allowFromAnyIp, `server.requestId.allowFromAnyIp`>> must also be set to `false.`

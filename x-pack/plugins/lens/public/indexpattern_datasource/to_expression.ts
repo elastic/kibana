@@ -135,10 +135,6 @@ function getExpressionForLayer(
       }
     });
 
-    if (esAggEntries.length === 0) {
-      // Return early if there are no aggs, for example if the user has an empty formula
-      return null;
-    }
     const idMap = esAggEntries.reduce((currentIdMap, [colId, column], index) => {
       const esAggsId = `col-${index}-${index}`;
       return {
@@ -233,6 +229,26 @@ function getExpressionForLayer(
         return [scalingCall, formatCall];
       }
     );
+
+    if (esAggEntries.length === 0) {
+      return {
+        type: 'expression',
+        chain: [
+          {
+            type: 'function',
+            function: 'createTable',
+            arguments: {
+              ids: [],
+              names: [],
+              rowCount: [1],
+            },
+          },
+          ...expressions,
+          ...formatterOverrides,
+          ...timeScaleFunctions,
+        ],
+      };
+    }
 
     const allDateHistogramFields = Object.values(columns)
       .map((column) =>
