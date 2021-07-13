@@ -21,7 +21,7 @@ import { SpanIcon } from './index';
 const spanTypes = Object.keys(spanTypeIcons);
 
 export default {
-  title: 'shared/icons',
+  title: 'shared/SpanIcon',
   component: SpanIcon,
 };
 

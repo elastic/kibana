@@ -21,7 +21,7 @@ import { getAgentIcon } from './get_agent_icon';
 import { AgentIcon } from './index';
 
 export default {
-  title: 'shared/icons',
+  title: 'shared/AgentIcon',
   component: AgentIcon,
 };
 
