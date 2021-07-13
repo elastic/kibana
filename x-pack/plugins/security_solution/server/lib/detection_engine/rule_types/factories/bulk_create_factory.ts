@@ -9,10 +9,10 @@ import { performance } from 'perf_hooks';
 import { countBy, isEmpty, get } from 'lodash';
 import { ElasticsearchClient, Logger } from 'kibana/server';
 
-import { BaseHit } from '../../../../common/detection_engine/types';
-import { BuildRuleMessage } from '../signals/rule_messages';
-import { errorAggregator, makeFloatString } from '../signals/utils';
-import { RefreshTypes } from '../types';
+import { BaseHit } from '../../../../../common/detection_engine/types';
+import { BuildRuleMessage } from '../../signals/rule_messages';
+import { errorAggregator, makeFloatString } from '../../signals/utils';
+import { RefreshTypes } from '../../types';
 
 export interface GenericBulkCreateResponse<T> {
   success: boolean;

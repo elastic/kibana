@@ -6,30 +6,15 @@
  */
 
 import { isEmpty } from 'lodash';
-import { Moment } from 'moment';
 import { flow } from 'fp-ts/lib/function';
 import { Either, chain, fold, tryCatch } from 'fp-ts/lib/Either';
-import { Logger } from '@kbn/logging';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
-import { ExceptionListItemSchema, ListArray } from '@kbn/securitysolution-io-ts-list-types';
+import { ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { toError } from '@kbn/securitysolution-list-api';
-import {
-  createPersistenceRuleTypeFactory,
-  RuleDataClient,
-  AlertTypeWithExecutor,
-  PersistenceServices,
-} from '../../../../../rule_registry/server';
+import { createPersistenceRuleTypeFactory } from '../../../../../rule_registry/server';
 import { ruleStatusSavedObjectsClientFactory } from '../signals/rule_status_saved_objects_client';
 import { ruleStatusServiceFactory } from '../signals/rule_status_service';
-import { SetupPlugins } from '../../../../target/types/server/plugin';
-import {
-  AlertInstanceContext,
-  AlertInstanceState,
-  AlertTypeParams,
-  AlertTypeState,
-} from '../../../../../alerting/common';
-import { AlertType } from '../../../../../alerting/server';
-import { BuildRuleMessage, buildRuleMessageFactory } from '../signals/rule_messages';
+import { buildRuleMessageFactory } from '../signals/rule_messages';
 import {
   checkPrivilegesFromEsClient,
   getExceptions,
@@ -38,15 +23,10 @@ import {
   hasTimestampFields,
   isMachineLearningParams,
 } from '../signals/utils';
-import { RuleParams } from '../schemas/rule_schemas';
 import { DEFAULT_MAX_SIGNALS, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
-import { ListClient } from '../../../../../lists/server';
-import { AlertAttributes, BulkCreate, WrapHits } from '../signals/types';
-import { SavedObject } from '../../../../../../../src/core/server';
-import { ConfigType } from '../../../config';
 import { bulkCreateFactory } from './factories/bulk_create_factory';
 import { wrapHitsFactory } from './factories/wrap_hits_factory';
-import { SecurityAlertTypeReturnValue } from './types';
+import { CreateSecurityRuleTypeFactory } from './types';
 import { getListClient } from './utils/get_list_client';
 import {
   NotificationRuleTypeParams,
@@ -54,65 +34,6 @@ import {
 } from '../notifications/schedule_notification_actions';
 import { getNotificationResultsLink } from '../notifications/utils';
 import { createResultObject } from './utils';
-
-type SimpleAlertType<
-  TState extends AlertTypeState,
-  TParams extends AlertTypeParams = {},
-  TAlertInstanceContext extends AlertInstanceContext = {}
-> = AlertType<TParams, TState, AlertInstanceState, TAlertInstanceContext, string, string>;
-
-export interface RunOpts<TParams extends RuleParams> {
-  buildRuleMessage: BuildRuleMessage;
-  bulkCreate: BulkCreate;
-  exceptionItems: ExceptionListItemSchema[];
-  listClient: ListClient;
-  rule: SavedObject<AlertAttributes<TParams>>;
-  searchAfterSize: number;
-  tuple: {
-    to: Moment;
-    from: Moment;
-    maxSignals: number;
-  };
-  wrapHits: WrapHits;
-}
-
-export type SecurityAlertTypeExecutor<
-  TState extends AlertTypeState,
-  TServices extends PersistenceServices<TAlertInstanceContext>,
-  TParams extends RuleParams,
-  TAlertInstanceContext extends AlertInstanceContext = {}
-> = (
-  options: Parameters<SimpleAlertType<TState, TParams, TAlertInstanceContext>['executor']>[0] & {
-    runOpts: RunOpts<TParams>;
-  } & { services: TServices }
-) => Promise<SecurityAlertTypeReturnValue<TState>>;
-
-type SecurityAlertTypeWithExecutor<
-  TState extends AlertTypeState,
-  TServices extends PersistenceServices<TAlertInstanceContext>,
-  TParams extends RuleParams,
-  TAlertInstanceContext extends AlertInstanceContext = {}
-> = Omit<
-  AlertType<TParams, TState, AlertInstanceState, TAlertInstanceContext, string, string>,
-  'executor'
-> & {
-  executor: SecurityAlertTypeExecutor<TState, TServices, TParams, TAlertInstanceContext>;
-};
-
-type CreateSecurityRuleTypeFactory = (options: {
-  lists: SetupPlugins['lists'];
-  logger: Logger;
-  mergeStrategy: ConfigType['alertMergeStrategy'];
-  ruleDataClient: RuleDataClient;
-}) => <
-  TParams extends RuleParams,
-  TAlertInstanceContext extends AlertInstanceContext,
-  TServices extends PersistenceServices<TAlertInstanceContext>,
-  TState extends AlertTypeState
->(
-  type: SecurityAlertTypeWithExecutor<TState, TServices, TParams, TAlertInstanceContext>
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-) => AlertTypeWithExecutor<TState, TParams, TAlertInstanceContext, any>;
 
 export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
   lists,
