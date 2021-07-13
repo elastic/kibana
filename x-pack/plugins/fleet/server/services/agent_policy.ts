@@ -63,6 +63,9 @@ import { appContextService } from './app_context';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
+const MONITORING_LOG_DATASETS = ['logs-elastic_agent*'];
+const MONITORING_METRICS_DATASETS = ['metrics-elastic_agent*'];
+
 class AgentPolicyService {
   private triggerAgentPolicyUpdatedEvent = async (
     soClient: SavedObjectsClientContract,
@@ -771,12 +774,16 @@ class AgentPolicyService {
       monitoringOutput &&
       fullAgentPolicy.outputs[monitoringOutput]?.type === 'elasticsearch'
     ) {
-      const names: string[] = [];
+      let names: string[] = [];
       if (fullAgentPolicy.agent.monitoring.logs) {
-        names.push(`logs-elastic_agent*-${monitoringNamespace}`);
+        names = names.concat(
+          MONITORING_LOG_DATASETS.map((dataset) => `${dataset}-${monitoringNamespace}`)
+        );
       }
       if (fullAgentPolicy.agent.monitoring.metrics) {
-        names.push(`metrics-elastic_agent*-${monitoringNamespace}`);
+        names = names.concat(
+          MONITORING_METRICS_DATASETS.map((dataset) => `${dataset}-${monitoringNamespace}`)
+        );
       }
 
       permissions._elastic_agent_checks.indices = [
