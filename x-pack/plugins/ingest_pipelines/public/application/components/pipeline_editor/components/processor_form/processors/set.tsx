@@ -158,18 +158,6 @@ export const SetProcessor: FunctionComponent = () => {
         path="fields.value"
       />
 
-      <UseField
-        config={fieldsConfig.copy_from}
-        component={Field}
-        path="fields.copy_from"
-        componentProps={{
-          euiFieldProps: {
-            disabled: fields?.value,
-          },
-        }}
-        data-test-subj="copyFromField"
-      />
-
       {hasTemplateSnippet(fields?.value) && (
         <UseField
           componentProps={{
@@ -196,6 +184,18 @@ export const SetProcessor: FunctionComponent = () => {
           path="fields.media_type"
         />
       )}
+
+      <UseField
+        config={fieldsConfig.copy_from}
+        component={Field}
+        path="fields.copy_from"
+        componentProps={{
+          euiFieldProps: {
+            disabled: fields?.value,
+          },
+        }}
+        data-test-subj="copyFromField"
+      />
 
       <FieldNameField
         helpText={i18n.translate('xpack.ingestPipelines.pipelineEditor.setForm.fieldNameField', {
