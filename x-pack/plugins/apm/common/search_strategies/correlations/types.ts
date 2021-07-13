@@ -19,7 +19,6 @@ export interface ResponseHit {
 }
 
 export interface SearchServiceParams {
-  index: string;
   environment?: string;
   kuery?: string;
   serviceName?: string;
@@ -29,6 +28,10 @@ export interface SearchServiceParams {
   end?: string;
   percentileThreshold?: number;
   percentileThresholdValue?: number;
+}
+
+export interface SearchServiceFetchParams extends SearchServiceParams {
+  index: string;
 }
 
 export interface SearchServiceValue {

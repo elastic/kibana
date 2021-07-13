@@ -21,7 +21,6 @@ import { useKibana } from '../../../../../../../src/plugins/kibana_react/public'
 import { ApmPluginStartDeps } from '../../../plugin';
 
 interface CorrelationsOptions {
-  index: string;
   environment?: string;
   kuery?: string;
   serviceName?: string;

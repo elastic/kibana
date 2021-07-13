@@ -89,7 +89,6 @@ export function MlLatencyCorrelations({ onClose }: Props) {
     cancelFetch,
     overallHistogram: originalOverallHistogram,
   } = useCorrelations({
-    index: 'apm-*',
     ...{
       ...{
         environment,
