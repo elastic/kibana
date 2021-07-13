@@ -35,7 +35,7 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
     }),
   } as unknown) as GenericOperationDefinition,
   terms: { input: 'field' } as GenericOperationDefinition,
-  sum: { input: 'field' } as GenericOperationDefinition,
+  sum: { input: 'field', filterable: true } as GenericOperationDefinition,
   last_value: { input: 'field' } as GenericOperationDefinition,
   max: { input: 'field' } as GenericOperationDefinition,
   count: ({
@@ -928,6 +928,63 @@ invalid: "
       ).toEqual(['The operation average does not accept any parameter']);
     });
 
+    it('returns an error if first argument type is passed multiple times', () => {
+      const formulas = [
+        'average(bytes, bytes)',
+        "sum(bytes, kql='category.keyword: *', bytes)",
+        'moving_average(average(bytes), average(bytes))',
+        "moving_average(average(bytes), kql='category.keyword: *', average(bytes))",
+        'moving_average(average(bytes, bytes), count())',
+        'moving_average(moving_average(average(bytes, bytes), count(), count()))',
+      ];
+      for (const formula of formulas) {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(formula),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual(
+          expect.arrayContaining([
+            expect.stringMatching(
+              /The operation (moving_average|average|sum) in the Formula requires a single (field|metric), found:/
+            ),
+          ])
+        );
+      }
+    });
+
+    it('returns an error if a function received an argument of the wrong argument type in any position', () => {
+      const formulas = [
+        'average(bytes, count())',
+        "sum(bytes, kql='category.keyword: *', count(), count())",
+        'average(bytes, bytes + 1)',
+        'average(count(), bytes)',
+        'moving_average(average(bytes), bytes)',
+        'moving_average(bytes, bytes)',
+        'moving_average(average(bytes), window=7, bytes)',
+        'moving_average(window=7, bytes)',
+        "moving_average(kql='category.keyword: *', bytes)",
+      ];
+      for (const formula of formulas) {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(formula),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual(
+          expect.arrayContaining([
+            expect.stringMatching(
+              /The operation (moving_average|average|sum) in the Formula does not support (metric|field) parameters, found:/
+            ),
+          ])
+        );
+      }
+    });
+
     it('returns an error if the parameter passed to an operation is of the wrong type', () => {
       expect(
         formulaOperation.getErrorMessage!(
@@ -1087,6 +1144,14 @@ invalid: "
           )
         ).toEqual([`The first argument for ${fn} should be a field name. Found no field`]);
       }
+      expect(
+        formulaOperation.getErrorMessage!(
+          getNewLayerWithFormula(`sum(kql='category.keyword: *')`),
+          'col1',
+          indexPattern,
+          operationDefinitionMap
+        )
+      ).toEqual([`The first argument for sum should be a field name. Found category.keyword: *`]);
     });
 
     it("returns a clear error when there's a missing function for a fullReference operation", () => {
