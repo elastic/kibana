@@ -90,6 +90,7 @@ describe('createStaticIndexPattern', () => {
       setup,
       config: {
         'xpack.apm.autocreateApmIndexPattern': true,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'apm_oss.indexPattern': apmIndexPatternTitle,
       } as APMConfig,
       savedObjectsClient,
@@ -121,6 +122,7 @@ describe('createStaticIndexPattern', () => {
       setup,
       config: {
         'xpack.apm.autocreateApmIndexPattern': true,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'apm_oss.indexPattern': apmIndexPatternTitle,
       } as APMConfig,
       savedObjectsClient,
