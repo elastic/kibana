@@ -41,7 +41,7 @@ export function performInnerJoins(
     return;
   }
 
-  const joinStatuses = joinStates.map(joinState => {
+  const joinStatuses = joinStates.map((joinState) => {
     return {
       joinedWithAtLeastOneFeature: false,
       keys: [] as string[],
@@ -84,40 +84,51 @@ export function performInnerJoins(
     updateSourceData({ ...sourceResult.featureCollection });
   }
 
-  const joinStatusesWithoutAnyMatches = joinStatuses.filter(joinStatus => {
-    return!joinStatus.joinedWithAtLeastOneFeature && joinStatus.joinState.propertiesMap !== undefined;
+  const joinStatusesWithoutAnyMatches = joinStatuses.filter((joinStatus) => {
+    return (
+      !joinStatus.joinedWithAtLeastOneFeature && joinStatus.joinState.propertiesMap !== undefined
+    );
   });
 
   if (joinStatusesWithoutAnyMatches.length) {
     function prettyPrintArray(array: unknown[]) {
       return array.length <= 5
         ? array.join(',')
-        : array.slice(0, 5).join(',') + i18n.translate('xpack.maps.vectorLayer.joinError.firstTenMsg', {
-          defaultMessage: ` (5 of {total})`,
-          values: { total: array.length }
-        });
+        : array.slice(0, 5).join(',') +
+            i18n.translate('xpack.maps.vectorLayer.joinError.firstTenMsg', {
+              defaultMessage: ` (5 of {total})`,
+              values: { total: array.length },
+            });
     }
 
     const joinStatus = joinStatusesWithoutAnyMatches[0];
     const leftFieldName = joinStatus.joinState.join.getLeftField().getName();
-    const reason = joinStatus.keys.length === 0
-      ? i18n.translate('xpack.maps.vectorLayer.joinError.noLeftFieldValuesMsg', {
-          defaultMessage: `Left field: '{leftFieldName}', does not provide any values.`,
-          values: { leftFieldName }
-        })
-      : i18n.translate('xpack.maps.vectorLayer.joinError.noMatchesMsg', {
-          defaultMessage: `Left field does not match right field. Left field: '{leftFieldName}' has values { leftFieldValues }. Right field: '{rightFieldName}' has values: { rightFieldValues }.`,
-          values: {
-            leftFieldName,
-            leftFieldValues: prettyPrintArray(joinStatus.keys),
-            rightFieldName: joinStatus.joinState.join.getRightJoinSource().getTermField().getName(),
-            rightFieldValues: prettyPrintArray(Array.from(joinStatus.joinState.propertiesMap!.keys())),
-          }
-        });
+    const reason =
+      joinStatus.keys.length === 0
+        ? i18n.translate('xpack.maps.vectorLayer.joinError.noLeftFieldValuesMsg', {
+            defaultMessage: `Left field: '{leftFieldName}', does not provide any values.`,
+            values: { leftFieldName },
+          })
+        : i18n.translate('xpack.maps.vectorLayer.joinError.noMatchesMsg', {
+            defaultMessage: `Left field does not match right field. Left field: '{leftFieldName}' has values { leftFieldValues }. Right field: '{rightFieldName}' has values: { rightFieldValues }.`,
+            values: {
+              leftFieldName,
+              leftFieldValues: prettyPrintArray(joinStatus.keys),
+              rightFieldName: joinStatus.joinState.join
+                .getRightJoinSource()
+                .getTermField()
+                .getName(),
+              rightFieldValues: prettyPrintArray(
+                Array.from(joinStatus.joinState.propertiesMap!.keys())
+              ),
+            },
+          });
 
-    onJoinError(i18n.translate('xpack.maps.vectorLayer.joinErrorMsg', {
-      defaultMessage: `Unable to perform term join. {reason}`,
-      values: { reason }
-    }));
+    onJoinError(
+      i18n.translate('xpack.maps.vectorLayer.joinErrorMsg', {
+        defaultMessage: `Unable to perform term join. {reason}`,
+        values: { reason },
+      })
+    );
   }
 }

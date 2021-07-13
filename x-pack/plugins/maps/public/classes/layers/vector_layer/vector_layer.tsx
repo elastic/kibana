@@ -659,7 +659,12 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       }
 
       const joinStates = await this._syncJoins(syncContext, style);
-      performInnerJoins(sourceResult, joinStates, syncContext.updateSourceData, syncContext.onJoinError);
+      performInnerJoins(
+        sourceResult,
+        joinStates,
+        syncContext.updateSourceData,
+        syncContext.onJoinError
+      );
     } catch (error) {
       if (!(error instanceof DataRequestAbortError)) {
         throw error;
