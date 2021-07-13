@@ -622,7 +622,6 @@ export function FormulaEditor({
                 </EuiFlexItem>
 
                 <EuiFlexItem className="lnsFormula__editorHeaderGroup" grow={false}>
-                  {/* TODO: Replace `bolt` with `fullScreenExit` icon (after latest EUI is deployed). */}
                   <EuiButtonEmpty
                     onClick={() => {
                       toggleFullscreen();
@@ -630,7 +629,7 @@ export function FormulaEditor({
                       setIsHelpOpen(!isFullscreen);
                       trackUiEvent('toggle_formula_fullscreen');
                     }}
-                    iconType={isFullscreen ? 'bolt' : 'fullScreen'}
+                    iconType={isFullscreen ? 'fullScreenExit' : 'fullScreen'}
                     size="xs"
                     color="text"
                     flush="right"
@@ -758,7 +757,6 @@ export function FormulaEditor({
                             }}
                             iconType="documentation"
                             color="text"
-                            size="s"
                             aria-label={i18n.translate(
                               'xpack.lens.formula.editorHelpInlineShowToolTip',
                               {

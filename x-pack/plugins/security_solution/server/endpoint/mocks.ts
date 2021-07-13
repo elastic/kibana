@@ -31,6 +31,12 @@ import { MetadataRequestContext } from './routes/metadata/handlers';
 import { LicenseService } from '../../common/license';
 import { SecuritySolutionRequestHandlerContext } from '../types';
 import { parseExperimentalConfigValue } from '../../common/experimental_features';
+// A TS error (TS2403) is thrown when attempting to export the mock function below from Cases
+// plugin server `index.ts`. Its unclear what is actually causing the error. Since this is a Mock
+// file and not bundled with the application, adding a eslint disable below and using import from
+// a restricted path.
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { createCasesClientMock } from '../../../cases/server/client/mocks';
 
 /**
  * Creates a mocked EndpointAppContext.
@@ -69,7 +75,10 @@ export const createMockEndpointAppContextService = (
 export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<EndpointAppContextServiceStartContract> => {
   const factory = new AppClientFactory();
   const config = createMockConfig();
+  const casesClientMock = createCasesClientMock();
+
   factory.setup({ getSpaceId: () => 'mockSpace', config });
+
   return {
     agentService: createMockAgentService(),
     packageService: createMockPackageService(),
@@ -88,7 +97,7 @@ export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
     exceptionListsClient: listMock.getExceptionListClient(),
     packagePolicyService: createPackagePolicyServiceMock(),
     cases: {
-      getCasesClientWithRequest: jest.fn(),
+      getCasesClientWithRequest: jest.fn(async () => casesClientMock),
     },
   };
 };
@@ -99,7 +108,7 @@ export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
 
 export const createMockPackageService = (): jest.Mocked<PackageService> => {
   return {
-    getInstalledEsAssetReferences: jest.fn(),
+    getInstallation: jest.fn(),
   };
 };
 

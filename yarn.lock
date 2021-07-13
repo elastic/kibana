@@ -1359,10 +1359,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@31.0.0":
-  version "31.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-31.0.0.tgz#c0b177313192bf5999835b8e01dc20471a8e7ef8"
-  integrity sha512-k8IJEwUBzzAjjkw1GDbt3laUfBoyc2t46+i1hs0Ni3ehb9jVntJSbYMBDReUDjWQSrUvrgHM6Xht1urBsdLS8Q==
+"@elastic/charts@32.0.0":
+  version "32.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-32.0.0.tgz#f747b8fa931027ba7476a6284be03383cd6a6dab"
+  integrity sha512-3cvX0Clezocd6/T2R5h3+nilPdIgWrO+it043giyW5U0pAtFC5P+5VyNEjn22LlD3zzbndxAbXHSj0QDvHXOBw==
   dependencies:
     "@popperjs/core" "^2.4.0"
     chroma-js "^2.1.0"
@@ -13489,9 +13489,9 @@ fast-redact@^3.0.0:
   integrity sha512-a/S/Hp6aoIjx7EmugtzLqXmcNsyFszqbt6qQ99BdG61QjBZF6shNis0BYR6TsZOQ1twYc0FN2Xdhwwbv6+KD0w==
 
 fast-safe-stringify@2.x.x, fast-safe-stringify@^2.0.4, fast-safe-stringify@^2.0.7:
-  version "2.0.7"
-  resolved "https://registry.yarnpkg.com/fast-safe-stringify/-/fast-safe-stringify-2.0.7.tgz#124aa885899261f68aedb42a7c080de9da608743"
-  integrity sha512-Utm6CdzT+6xsDk2m8S6uL8VHxNwI6Jub+e9NYTcAms28T84pTa25GJQV9j0CY0N1rM8hK4x6grpF2BQf+2qwVA==
+  version "2.0.8"
+  resolved "https://registry.yarnpkg.com/fast-safe-stringify/-/fast-safe-stringify-2.0.8.tgz#dc2af48c46cf712b683e849b2bbd446b32de936f"
+  integrity sha512-lXatBjf3WPjmWD6DpIZxkeSsCOwqI0maYMpgDlx8g4U2qi4lbjA9oH/HD2a87G+KfsUmo5WbJFmqBZlPxtptag==
 
 fast-shallow-equal@^1.0.0:
   version "1.0.0"
@@ -23088,10 +23088,10 @@ react-popper@^2.2.4:
     react-fast-compare "^3.0.1"
     warning "^4.0.2"
 
-react-query@^3.13.10:
-  version "3.13.10"
-  resolved "https://registry.yarnpkg.com/react-query/-/react-query-3.13.10.tgz#b6a05e22a5debb6e2df79ada588179771cbd7df8"
-  integrity sha512-wFvKhEDnOVL5bFL+9KPgNsiOOei1Ad+l6l1awCBuoX7xMG+SXXKDOF2uuZFsJe0w6gdthdWN+00021yepTR31g==
+react-query@^3.18.1:
+  version "3.18.1"
+  resolved "https://registry.yarnpkg.com/react-query/-/react-query-3.18.1.tgz#893b5475a7b4add099e007105317446f7a2cd310"
+  integrity sha512-17lv3pQxU9n+cB5acUv0/cxNTjo9q8G+RsedC6Ax4V9D8xEM7Q5xf9xAbCPdEhDrrnzPjTls9fQEABKRSi7OJA==
   dependencies:
     "@babel/runtime" "^7.5.5"
     broadcast-channel "^3.4.1"

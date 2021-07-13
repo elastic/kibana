@@ -164,7 +164,6 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
           onCreateOption={handleCreateOption}
           isInvalid={selectedField != null && error != null}
           onBlur={setIsTouchedValue}
-          delimiter=", "
           data-test-subj="valuesAutocompleteMatchAny"
           fullWidth
           async
@@ -209,7 +208,6 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
               onCreateOption={handleCreateOption}
               isInvalid={selectedField != null && error != null}
               onFocus={setIsTouchedValue}
-              delimiter=", "
               data-test-subj="valuesAutocompleteMatchAnyNumber"
               fullWidth
             />

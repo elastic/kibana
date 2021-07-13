@@ -45,11 +45,11 @@ const FixedWidthLastUpdatedContainer = React.memo<FixedWidthLastUpdatedContainer
     const width = useEventDetailsWidthContext();
     const compact = useMemo(() => isCompactFooter(width), [width]);
 
-    return (
+    return updatedAt > 0 ? (
       <FixedWidthLastUpdated data-test-subj="fixed-width-last-updated" compact={compact}>
         {timelines.getLastUpdated({ updatedAt, compact })}
       </FixedWidthLastUpdated>
-    );
+    ) : null;
   }
 );
 
