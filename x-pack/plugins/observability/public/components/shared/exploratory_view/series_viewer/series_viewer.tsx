@@ -114,7 +114,7 @@ export function SeriesViewer() {
         rowHeader="firstName"
         columns={columns}
         noItemsMessage={i18n.translate('xpack.observability.expView.seriesEditor.notFound', {
-          defaultMessage: 'No series found, Please add a series.',
+          defaultMessage: 'No series found. Please add a series.',
         })}
         cellProps={{
           style: {
