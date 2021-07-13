@@ -92,7 +92,7 @@ export function getScheduledQueryUsage(packagePolicies: ListResult<PackagePolicy
   return packagePolicies.items.reduce(
     (acc, item) => {
       ++acc.queryGroups.total;
-      const policyAgents = item.inputs.reduce((sum, input) => sum + input.streams.length, 0)
+      const policyAgents = item.inputs.reduce((sum, input) => sum + input.streams.length, 0);
       if (policyAgents === 0) {
         ++acc.queryGroups.empty;
       }

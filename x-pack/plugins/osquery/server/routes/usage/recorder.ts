@@ -18,7 +18,10 @@ export type RouteString = 'live_query';
 
 export const routeStrings: RouteString[] = ['live_query'];
 
-export async function getOrCreateMetricObject<T>(soClient: SavedObjectsClientContract, route: string) {
+export async function getOrCreateMetricObject<T>(
+  soClient: SavedObjectsClientContract,
+  route: string
+) {
   try {
     return await soClient.get<T>(usageMetricSavedObjectType, route);
   } catch (e) {
