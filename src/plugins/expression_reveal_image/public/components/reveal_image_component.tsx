@@ -7,10 +7,10 @@
  */
 
 /** @jsx jsx */
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import { useResizeObserver } from '@elastic/eui';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
-import { css, jsx, classnames } from '@emotion/react'
+import { css, CSSObject, jsx } from '@emotion/react';
 import { NodeDimensions, RevealImageRendererConfig, OriginString } from '../../common/types';
 import { isValidUrl } from '../../../presentation_util/public';
 
@@ -23,13 +23,13 @@ const revealImageParentStyle = css`
   pointer-events: none;
 `;
 
-const revealImageAlignerStyle = {
+const revealImageAlignerStyle: CSSObject = {
   backgroundSize: 'contain',
   backgroundRepeat: 'no-repeat',
 };
 
-const revealImageStyle = {
-  userSelect: 'none'
+const revealImageStyle: CSSObject = {
+  userSelect: 'none',
 };
 
 interface RevealImageComponentProps extends RevealImageRendererConfig {
@@ -38,8 +38,8 @@ interface RevealImageComponentProps extends RevealImageRendererConfig {
 }
 
 interface ImageStyles {
-  width?: string;
-  height?: string;
+  width?: number | string;
+  height?: number | string;
   clipPath?: string;
 }
 
@@ -67,7 +67,7 @@ function RevealImageComponent({
 
   // modify the top-level container class
   parentNode.className = 'revealImage';
-  parentNode.style = revealImageParentStyle.styles;
+  parentNode.setAttribute('style', revealImageParentStyle.styles);
 
   // set up the overlay image
   const updateImageView = useCallback(() => {
@@ -129,17 +129,23 @@ function RevealImageComponent({
   let additionalImgStyles: ImageStyles = {};
   if (imgRef.current && loaded) additionalImgStyles = getImageSizeStyle();
 
-  imgStyles.clipPath = getClipPath(percent, origin);
+  additionalImgStyles.clipPath = getClipPath(percent, origin);
   if (imgRef.current && loaded) {
     imgRef.current.style.setProperty('-webkit-clip-path', getClipPath(percent, origin));
   }
 
   return (
-    <div className="revealImageAligner" css={[revealImageAlignerStyle, additionaAlignerStyles]}>
+    <div
+      className="revealImageAligner"
+      css={css({
+        ...revealImageAlignerStyle,
+        ...additionaAlignerStyles,
+      })}
+    >
       <img
         ref={imgRef}
         onLoad={updateImageView}
-        css={[revealImageStyle, additionalImgStyles]}
+        css={css({ ...revealImageStyle, ...additionalImgStyles })}
         src={image}
         alt=""
         role="presentation"
