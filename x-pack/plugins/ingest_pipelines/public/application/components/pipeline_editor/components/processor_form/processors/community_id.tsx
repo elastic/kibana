@@ -32,14 +32,16 @@ const seedValidator = {
     than: SEED_MAX_VALUE,
     allowEquality: true,
     message: i18n.translate('xpack.ingestPipelines.pipelineEditor.communityId.seedMaxNumberError', {
-      defaultMessage: 'This number must be equals or less than 65535.',
+      defaultMessage: `This number must be equals or less than {maxValue}.`,
+      values: { maxValue: SEED_MAX_VALUE },
     }),
   }),
   min: fieldValidators.numberGreaterThanField({
     than: SEED_MIN_VALUE,
     allowEquality: true,
     message: i18n.translate('xpack.ingestPipelines.pipelineEditor.communityId.seedMinNumberError', {
-      defaultMessage: 'This number must be equals or greater than 0.',
+      defaultMessage: `This number must be equals or greater than ${SEED_MIN_VALUE}.`,
+      values: { minValue: SEED_MIN_VALUE },
     }),
   }),
 };
