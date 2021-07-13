@@ -14,7 +14,7 @@ import { PropertiesMap } from '../../../../common/elasticsearch_util';
 
 interface SourceResult {
   refreshed: boolean;
-  featureCollection?: FeatureCollection;
+  featureCollection: FeatureCollection;
 }
 
 export interface JoinState {
@@ -49,8 +49,8 @@ export function performInnerJoins(
     };
   });
 
-  for (let i = 0; i < sourceResult.featureCollection!.features.length; i++) {
-    const feature = sourceResult.featureCollection!.features[i];
+  for (let i = 0; i < sourceResult.featureCollection.features.length; i++) {
+    const feature = sourceResult.featureCollection.features[i];
     if (!feature.properties) {
       feature.properties = {};
     }
