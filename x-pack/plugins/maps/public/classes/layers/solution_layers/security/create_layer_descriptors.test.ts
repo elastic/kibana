@@ -30,14 +30,16 @@ import { createSecurityLayerDescriptors } from './create_layer_descriptors';
 
 describe('createLayerDescriptor', () => {
   test('apm index', () => {
-    expect(createSecurityLayerDescriptors('id', 'apm-*-transaction*')).toEqual([
+    expect(
+      createSecurityLayerDescriptors('id', 'traces-apm*,logs-apm*,metrics-apm*,apm-*')
+    ).toEqual([
       {
         __dataRequests: [],
         alpha: 0.75,
         id: '12345',
         includeInFitToBounds: true,
         joins: [],
-        label: 'apm-*-transaction* | Source Point',
+        label: 'traces-apm*,logs-apm*,metrics-apm*,apm-* | Source Point',
         maxZoom: 24,
         minZoom: 0,
         sourceDescriptor: {
@@ -146,7 +148,7 @@ describe('createLayerDescriptor', () => {
         id: '12345',
         includeInFitToBounds: true,
         joins: [],
-        label: 'apm-*-transaction* | Destination point',
+        label: 'traces-apm*,logs-apm*,metrics-apm*,apm-* | Destination point',
         maxZoom: 24,
         minZoom: 0,
         sourceDescriptor: {
@@ -255,7 +257,7 @@ describe('createLayerDescriptor', () => {
         id: '12345',
         includeInFitToBounds: true,
         joins: [],
-        label: 'apm-*-transaction* | Line',
+        label: 'traces-apm*,logs-apm*,metrics-apm*,apm-* | Line',
         maxZoom: 24,
         minZoom: 0,
         sourceDescriptor: {
