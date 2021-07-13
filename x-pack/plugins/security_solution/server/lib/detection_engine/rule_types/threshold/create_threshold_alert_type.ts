@@ -144,7 +144,6 @@ export const createThresholdAlertType = (createOptions: {
         buildRuleMessage,
       });
 
-      // TODO: build signal history
       result.state = {
         ...result.state,
         ...buildThresholdSignalHistory({

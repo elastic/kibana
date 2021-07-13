@@ -33,7 +33,7 @@ export type AlertTypeExecutor<
 ) => Promise<TState>;
 
 export type AlertTypeWithExecutor<
-  TState extends AlertTypeState,
+  TState extends AlertTypeState = {},
   TParams extends AlertTypeParams = {},
   TAlertInstanceContext extends AlertInstanceContext = {},
   TServices extends Record<string, any> = {}

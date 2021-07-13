@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { ConfigType } from '../../../config';
-import { buildBulkBody } from '../signals/build_bulk_body';
-import { filterDuplicateSignals } from '../signals/filter_duplicate_signals';
-import { SearchAfterAndBulkCreateParams, WrapHits, WrappedSignalHit } from '../signals/types';
-import { generateId } from '../signals/utils';
+import type { ConfigType } from '../../../../config';
+import { buildBulkBody } from '../../signals/build_bulk_body';
+import { filterDuplicateSignals } from '../../signals/filter_duplicate_signals';
+import { SearchAfterAndBulkCreateParams, WrapHits, WrappedSignalHit } from '../../signals/types';
+import { generateId } from '../../signals/utils';
 
 export const wrapHitsFactory = ({
   ruleSO,

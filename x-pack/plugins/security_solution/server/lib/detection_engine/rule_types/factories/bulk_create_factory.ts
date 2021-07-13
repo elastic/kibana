@@ -7,12 +7,14 @@
 
 import { performance } from 'perf_hooks';
 import { countBy, isEmpty, get } from 'lodash';
-import { ElasticsearchClient, Logger } from 'kibana/server';
+import { Logger } from 'kibana/server';
 
 import { BaseHit } from '../../../../../common/detection_engine/types';
 import { BuildRuleMessage } from '../../signals/rule_messages';
 import { errorAggregator, makeFloatString } from '../../signals/utils';
 import { RefreshTypes } from '../../types';
+import { PersistenceAlertService } from '../../../../../../rule_registry/server';
+import { AlertInstanceContext } from '../../../../../../alerting/server';
 
 export interface GenericBulkCreateResponse<T> {
   success: boolean;
@@ -22,9 +24,9 @@ export interface GenericBulkCreateResponse<T> {
   errors: string[];
 }
 
-export const bulkCreateFactory = (
+export const bulkCreateFactory = <TAlertInstanceContext extends AlertInstanceContext = {}>(
   logger: Logger,
-  esClient: ElasticsearchClient,
+  alertWithPersistence: PersistenceAlertService<TAlertInstanceContext>,
   buildRuleMessage: BuildRuleMessage,
   refreshForBulkCreate: RefreshTypes
 ) => async <T>(wrappedDocs: Array<BaseHit<T>>): Promise<GenericBulkCreateResponse<T>> => {
@@ -38,21 +40,26 @@ export const bulkCreateFactory = (
     };
   }
 
-  const bulkBody = wrappedDocs.flatMap((wrappedDoc) => [
-    {
-      create: {
-        _index: wrappedDoc._index,
-        _id: wrappedDoc._id,
-      },
-    },
-    wrappedDoc._source,
-  ]);
+  /*
+  export interface BulkRequest<TSource = unknown> extends RequestBase {
+    index?: IndexName
+    type?: Type
+    pipeline?: string
+    refresh?: Refresh
+    routing?: Routing
+    _source?: boolean | Fields
+    _source_excludes?: Fields
+    _source_includes?: Fields
+    timeout?: Time
+    wait_for_active_shards?: WaitForActiveShards
+    require_alias?: boolean
+    body?: (BulkOperationContainer | TSource)[]
+  }
+  */
+
   const start = performance.now();
 
-  const { body: response } = await esClient.bulk({
-    refresh: refreshForBulkCreate,
-    body: bulkBody,
-  });
+  const { body: response } = await alertWithPersistence(wrappedDocs);
 
   const end = performance.now();
   logger.debug(

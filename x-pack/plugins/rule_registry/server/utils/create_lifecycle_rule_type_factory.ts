@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { Logger } from '@kbn/logging';
-import { isLeft } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
 import { Mutable } from 'utility-types';
 import v4 from 'uuid/v4';
@@ -15,6 +14,7 @@ import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertTypeParams,
+  AlertTypeState,
 } from '../../../alerting/common';
 import {
   ALERT_DURATION,
@@ -43,27 +43,25 @@ const trackedAlertStateRt = t.type({
   alertUuid: t.string,
   started: t.string,
 });
+type TrackedAlertStateRt = t.TypeOf<typeof trackedAlertStateRt>;
 
-const wrappedStateRt = t.type({
-  wrapped: t.record(t.string, t.unknown),
-  trackedAlerts: t.record(t.string, trackedAlertStateRt),
-});
+export interface WrappedStateRt<TState extends AlertTypeState> extends AlertTypeState {
+  wrapped: TState;
+  trackedAlerts: Record<string, TrackedAlertStateRt>;
+}
 
-type CreateLifecycleRuleTypeFactory = (options: {
-  ruleDataClient: RuleDataClient;
+export const createLifecycleRuleTypeFactory = (createOpts: {
   logger: Logger;
+  ruleDataClient: RuleDataClient;
 }) => <
+  TState extends AlertTypeState,
   TParams extends AlertTypeParams,
   TAlertInstanceContext extends AlertInstanceContext,
   TServices extends { alertWithLifecycle: LifecycleAlertService<TAlertInstanceContext> }
 >(
-  type: AlertTypeWithExecutor<TParams, TAlertInstanceContext, TServices>
-) => AlertTypeWithExecutor<TParams, TAlertInstanceContext, any>;
-
-export const createLifecycleRuleTypeFactory: CreateLifecycleRuleTypeFactory = ({
-  logger,
-  ruleDataClient,
-}) => (type) => {
+  type: AlertTypeWithExecutor<TState, TParams, TAlertInstanceContext, TServices>
+): AlertTypeWithExecutor<WrappedStateRt<TState>, TParams, TAlertInstanceContext, any> => {
+  const { logger, ruleDataClient } = createOpts;
   return {
     ...type,
     executor: async (options) => {
@@ -75,14 +73,12 @@ export const createLifecycleRuleTypeFactory: CreateLifecycleRuleTypeFactory = ({
 
       const ruleExecutorData = getRuleExecutorData(type, options);
 
-      const decodedState = wrappedStateRt.decode(previousState);
+      // TODO: runtime validation of state?
 
-      const state = isLeft(decodedState)
-        ? {
-            wrapped: previousState,
-            trackedAlerts: {},
-          }
-        : decodedState.right;
+      const state: WrappedStateRt<TState> = {
+        wrapped: previousState.wrapped as TState,
+        trackedAlerts: {} as Record<string, TrackedAlertStateRt>,
+      };
 
       const currentAlerts: Record<string, { [ALERT_ID]: string }> = {};
 
@@ -267,7 +263,7 @@ export const createLifecycleRuleTypeFactory: CreateLifecycleRuleTypeFactory = ({
       return {
         wrapped: nextWrappedState ?? {},
         trackedAlerts: ruleDataClient.isWriteEnabled() ? nextTrackedAlerts : {},
-      };
+      } as WrappedStateRt<TState>;
     },
   };
 };
