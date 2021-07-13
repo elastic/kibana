@@ -79,7 +79,7 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
   }),
   handler: async (resources) => {
     const setup = await setupRequest(resources);
-    const { params, logger, core } = resources;
+    const { params, logger, core, telemetryUsageCounter } = resources;
 
     const { service } = params.body;
 
@@ -106,6 +106,7 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
         core,
         fleetPluginStart: await resources.plugins.fleet.start(),
         setup,
+        telemetryUsageCounter,
       });
       logger.info(
         `Updated Fleet integration policy for APM to remove the deleted agent configuration.`
@@ -128,7 +129,7 @@ const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
   ]),
   handler: async (resources) => {
     const setup = await setupRequest(resources);
-    const { params, logger, core } = resources;
+    const { params, logger, core, telemetryUsageCounter } = resources;
     const { body, query } = params;
 
     // if the config already exists, it is fetched and updated
@@ -162,6 +163,7 @@ const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
         core,
         fleetPluginStart: await resources.plugins.fleet.start(),
         setup,
+        telemetryUsageCounter,
       });
       logger.info(
         `Saved latest agent settings to Fleet integration policy for APM.`
