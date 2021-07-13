@@ -86,11 +86,11 @@ describe('Processor: Set', () => {
     expect(find('copyFromField.input').exists()).toBe(true);
 
     form.setInputValue('valueFieldInput', 'value');
-    expect(find('copyFromField.input').props().disabled).toBeTruthy();
+    expect(find('copyFromField.input').props().disabled).toBe(true);
 
     form.setInputValue('valueFieldInput', '');
     form.setInputValue('copyFromField.input', 'copy_from');
-    expect(find('valueFieldInput').props().disabled).toBeTruthy();
+    expect(find('valueFieldInput').props().disabled).toBe(true);
   });
   test('should allow to set mediaType when value is a template snippet', async () => {
     const {
