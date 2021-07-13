@@ -10,7 +10,7 @@ import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 
 import { AliasAction, isLeftTypeof } from '../actions';
-import { AllActionStates, State } from '../types';
+import { AllActionStates, MigrationLog, State } from '../types';
 import type { ResponseType } from '../next';
 import { disableUnknownTypeMappingFields } from '../../migrations/core/migration_context';
 import {
@@ -319,45 +319,42 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'CHECK_UNKNOWN_DOCUMENTS') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
 
-    const source = stateP.sourceIndex;
-    const target = stateP.versionIndex;
-    const nextState: State = {
-      ...stateP,
-      controlState: 'SET_SOURCE_WRITE_BLOCK',
-      sourceIndex: source,
-      targetIndex: target,
-      targetIndexMappings: disableUnknownTypeMappingFields(
-        stateP.targetIndexMappings,
-        stateP.sourceIndexMappings
-      ),
-      versionIndexReadyActions: Option.some<AliasAction[]>([
-        { remove: { index: source.value, alias: stateP.currentAlias, must_exist: true } },
-        { add: { index: target, alias: stateP.currentAlias } },
-        { add: { index: target, alias: stateP.versionAlias } },
-        { remove_index: { index: stateP.tempIndex } },
-      ]),
-    };
-
     if (Either.isRight(res)) {
-      return nextState;
+      const source = stateP.sourceIndex;
+      const target = stateP.versionIndex;
+      return {
+        ...stateP,
+        controlState: 'SET_SOURCE_WRITE_BLOCK',
+        sourceIndex: source,
+        targetIndex: target,
+        targetIndexMappings: disableUnknownTypeMappingFields(
+          stateP.targetIndexMappings,
+          stateP.sourceIndexMappings
+        ),
+        versionIndexReadyActions: Option.some<AliasAction[]>([
+          { remove: { index: source.value, alias: stateP.currentAlias, must_exist: true } },
+          { add: { index: target, alias: stateP.currentAlias } },
+          { add: { index: target, alias: stateP.versionAlias } },
+          { remove_index: { index: stateP.tempIndex } },
+        ]),
+
+        logs: [
+          ...stateP.logs,
+          ...(res.right.unknownDocs.length > 0
+            ? ([
+                {
+                  level: 'warning',
+                  message: `CHECK_UNKNOWN_DOCUMENTS ${extractUnknownDocFailureReason(
+                    res.right.unknownDocs,
+                    target
+                  )}`,
+                },
+              ] as MigrationLog[])
+            : []),
+        ],
+      };
     } else {
-      if (isLeftTypeof(res.left, 'unknown_docs_found')) {
-        return {
-          ...nextState,
-          logs: [
-            ...nextState.logs,
-            {
-              level: 'warning',
-              message: `CHECK_UNKNOWN_DOCUMENTS ${extractUnknownDocFailureReason(
-                res.left.unknownDocs,
-                target
-              )}`,
-            },
-          ],
-        };
-      } else {
-        return throwBadResponse(stateP, res.left);
-      }
+      return throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'SET_SOURCE_WRITE_BLOCK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;

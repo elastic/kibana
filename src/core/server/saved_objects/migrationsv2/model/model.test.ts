@@ -715,7 +715,7 @@ describe('migrations v2 model', () => {
         },
       } as const;
 
-      test('CHECK_UNKNOWN_DOCUMENTS -> SET_SOURCE_WRITE_BLOCK if action succeeds', () => {
+      test('CHECK_UNKNOWN_DOCUMENTS -> SET_SOURCE_WRITE_BLOCK if action succeeds and no unknown docs are found', () => {
         const checkUnknownDocumentsSourceState: CheckUnknownDocumentsState = {
           ...baseState,
           controlState: 'CHECK_UNKNOWN_DOCUMENTS',
@@ -723,7 +723,7 @@ describe('migrations v2 model', () => {
           sourceIndexMappings: mappingsWithUnknownType,
         };
 
-        const res: ResponseType<'CHECK_UNKNOWN_DOCUMENTS'> = Either.right({});
+        const res: ResponseType<'CHECK_UNKNOWN_DOCUMENTS'> = Either.right({ unknownDocs: [] });
         const newState = model(checkUnknownDocumentsSourceState, res);
         expect(newState.controlState).toEqual('SET_SOURCE_WRITE_BLOCK');
 
@@ -758,9 +758,12 @@ describe('migrations v2 model', () => {
             },
           }
         `);
+
+        // No log message gets appended
+        expect(newState.logs).toEqual([]);
       });
 
-      test('CHECK_UNKNOWN_DOCUMENTS -> SET_SOURCE_WRITE_BLOCK and adds logs if action fails and unknown docs were found', () => {
+      test('CHECK_UNKNOWN_DOCUMENTS -> SET_SOURCE_WRITE_BLOCK and adds log if action succeeds and unknown docs were found', () => {
         const checkUnknownDocumentsSourceState: CheckUnknownDocumentsState = {
           ...baseState,
           controlState: 'CHECK_UNKNOWN_DOCUMENTS',
@@ -768,8 +771,7 @@ describe('migrations v2 model', () => {
           sourceIndexMappings: mappingsWithUnknownType,
         };
 
-        const res: ResponseType<'CHECK_UNKNOWN_DOCUMENTS'> = Either.left({
-          type: 'unknown_docs_found',
+        const res: ResponseType<'CHECK_UNKNOWN_DOCUMENTS'> = Either.right({
           unknownDocs: [
             { id: 'dashboard:12', type: 'dashboard' },
             { id: 'foo:17', type: 'foo' },
