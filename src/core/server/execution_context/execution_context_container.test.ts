@@ -37,6 +37,19 @@ describe('KibanaExecutionContext', () => {
       expect(value).toMatchInlineSnapshot(`"1234-5678"`);
     });
 
+    it('returns an escaped string representation of provided execution contextStringified', () => {
+      const context: KibanaServerExecutionContext = {
+        id: 'Visualization☺漢字',
+        type: 'test-type',
+        requestId: '1234-5678',
+      };
+
+      const value = new ExecutionContextContainer(context).toString();
+      expect(value).toMatchInlineSnapshot(
+        `"1234-5678;kibana:test-type:Visualization%E2%98%BA%E6%BC%A2%E5%AD%97"`
+      );
+    });
+
     it('trims a string representation of provided execution context if it is bigger max allowed size', () => {
       expect(
         new Blob([

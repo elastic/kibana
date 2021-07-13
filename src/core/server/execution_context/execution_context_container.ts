@@ -57,7 +57,11 @@ export class ExecutionContextContainer implements IExecutionContextContainer {
   }
   toString(): string {
     const ctx = this.#context;
-    const contextStringified = ctx.type && ctx.id ? `kibana:${ctx.type}:${ctx.id}` : '';
+    const contextStringified =
+      ctx.type && ctx.id
+        ? // id may contain non-ASCII symbols
+          `kibana:${encodeURIComponent(ctx.type)}:${encodeURIComponent(ctx.id)}`
+        : '';
     const result = contextStringified ? `${ctx.requestId};${contextStringified}` : ctx.requestId;
     return enforceMaxLength(result);
   }
