@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -64,14 +64,6 @@ export const formSchema = {
             id="xpack.osquery.scheduledQueryGroup.queryFlyoutForm.versionFieldLabel"
             defaultMessage="Minimum Osquery version"
           />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.osquery.scheduledQueryGroup.queryFlyoutForm.versionFieldOptionalLabel"
-              defaultMessage="(optional)"
-            />
-          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     ) as unknown) as string,
