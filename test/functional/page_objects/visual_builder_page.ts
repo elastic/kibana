@@ -579,8 +579,8 @@ export class VisualBuilderPageObject extends FtrService {
     return (await label.findAllByTestSubject('comboBoxInput'))[1];
   }
 
-  public async clickColorPicker(): Promise<void> {
-    const picker = await this.find.byCssSelector('.tvbColorPicker button');
+  public async clickColorPicker(nth: number = 0): Promise<void> {
+    const picker = (await this.find.allByCssSelector('.tvbColorPicker button'))[nth];
     await picker.clickMouseButton();
   }
 
@@ -598,10 +598,10 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async setColorPickerValue(colorHex: string, nth: number = 0): Promise<void> {
-    const picker = await this.find.allByCssSelector('.tvbColorPicker button');
-    await picker[nth].clickMouseButton();
+    await this.clickColorPicker(nth);
     await this.checkColorPickerPopUpIsPresent();
     await this.find.setValue('.euiColorPicker input', colorHex);
+    await this.clickColorPicker(nth);
     await this.visChart.waitForVisualizationRenderingStabilized();
   }
 
