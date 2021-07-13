@@ -909,7 +909,7 @@ describe('SearchSource', () => {
         expect(callOptions.strategy).toBe(ES_SEARCH_STRATEGY);
       });
 
-      test('should remove searchSessionId if not set', async () => {
+      test('should remove searchSessionId when forcing ES_SEARCH_STRATEGY', async () => {
         searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
         const options = { sessionId: 'test' };
         await searchSource.fetch$(options).toPromise();
