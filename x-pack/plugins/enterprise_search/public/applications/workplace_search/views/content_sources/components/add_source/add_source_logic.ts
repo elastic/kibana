@@ -30,6 +30,7 @@ import {
   getSourcesPath,
 } from '../../../../routes';
 import { CustomSource } from '../../../../types';
+import { PERSONAL_DASHBOARD_SOURCE_ERROR } from '../../constants';
 import { staticSourceData } from '../../source_data';
 import { SourcesLogic } from '../../sources_logic';
 
@@ -517,7 +518,11 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       */
       if (params.error_description) {
         navigateToUrl(isOrganization ? '/' : PERSONAL_SOURCES_PATH);
-        setErrorMessage(params.error_description);
+        setErrorMessage(
+          isOrganization
+            ? params.error_description
+            : PERSONAL_DASHBOARD_SOURCE_ERROR(params.error_description)
+        );
         return;
       }
 

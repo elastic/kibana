@@ -27,6 +27,7 @@ import {
   getSourcesPath,
 } from '../../../../routes';
 import { CustomSource } from '../../../../types';
+import { PERSONAL_DASHBOARD_SOURCE_ERROR } from '../../constants';
 import { SourcesLogic } from '../../sources_logic';
 
 import {
@@ -378,7 +379,9 @@ describe('AddSourceLogic', () => {
 
           expect(navigateToUrl).toHaveBeenCalledWith(PERSONAL_SOURCES_PATH);
           expect(setErrorMessage).toHaveBeenCalledWith(
-            'The redirect_uri MUST match the registered callback URL for this application.'
+            PERSONAL_DASHBOARD_SOURCE_ERROR(
+              'The redirect_uri MUST match the registered callback URL for this application.'
+            )
           );
         });
       });
