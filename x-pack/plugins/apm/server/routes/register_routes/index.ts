@@ -90,20 +90,18 @@ export function registerRoutes({
             runtimeType
           );
 
-          const { aborted, data } = await Promise.race([
-            handler({
-              request,
-              context,
-              config,
-              logger,
-              core,
-              plugins,
-              telemetryUsageCounter,
-              params: merge(
-                {
-                  query: {
-                    _inspect: false,
-                  },
+          const data: Record<string, any> | undefined | null = (await handler({
+            request,
+            context,
+            config,
+            logger,
+            core,
+            plugins,
+            telemetryUsageCounter,
+            params: merge(
+              {
+                query: {
+                  _inspect: false,
                 },
               },
               validatedParams
