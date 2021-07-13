@@ -13,7 +13,11 @@ import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { Root } from '../../../root';
 import JSON5 from 'json5';
 import { ElasticsearchClient } from '../../../elasticsearch';
+import { Env } from '@kbn/config';
+import { REPO_ROOT } from '@kbn/utils';
+import { getEnvOptions } from '@kbn/config/target/mocks';
 
+const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 const logFilePath = Path.join(__dirname, '7_13_unknown_types_test.log');
 
 async function removeLogFile() {
@@ -76,7 +80,7 @@ describe('migration v2', () => {
       unknownDocsWarningLog.message.startsWith(
         '[.kibana] CHECK_UNKNOWN_DOCUMENTS Upgrades will fail for 8.0+ because documents were found for unknown saved ' +
           'object types. To ensure that upgrades will succeed in the future, either re-enable plugins or delete ' +
-          'these documents from the ".kibana_8.0.0_001" index after the current upgrade completes.'
+          `these documents from the ".kibana_${kibanaVersion}_001" index after the current upgrade completes.`
       )
     ).toBeTruthy();
 
@@ -100,14 +104,16 @@ describe('migration v2', () => {
     });
 
     const client: ElasticsearchClient = esServer.es.getClient();
-    const { body: response } = await client.indices.getSettings({ index: '.kibana_8.0.0_001' });
-    const settings = response['.kibana_8.0.0_001']
+    const { body: response } = await client.indices.getSettings({
+      index: `.kibana_${kibanaVersion}_001`,
+    });
+    const settings = response[`.kibana_${kibanaVersion}_001`]
       .settings as estypes.IndicesIndexStatePrefixedSettings;
     expect(settings.index).not.toBeUndefined();
     expect(settings.index!.blocks?.write).not.toEqual('true');
 
     // Ensure that documents for unknown types were preserved in target index in an unmigrated state
-    const spaceDocs = await fetchDocs(client, '.kibana_8.0.0_001', 'space');
+    const spaceDocs = await fetchDocs(client, `.kibana_${kibanaVersion}_001`, 'space');
     expect(spaceDocs.map((s) => s.id)).toEqual(
       expect.arrayContaining([
         'space:default',
@@ -123,7 +129,7 @@ describe('migration v2', () => {
       expect(d.migrationVersion.space).toEqual('6.6.0');
       expect(d.coreMigrationVersion).toEqual('7.13.0');
     });
-    const fooDocs = await fetchDocs(client, '.kibana_8.0.0_001', 'foo');
+    const fooDocs = await fetchDocs(client, `.kibana_${kibanaVersion}_001`, 'foo');
     expect(fooDocs.map((f) => f.id)).toEqual(
       expect.arrayContaining([
         'P2SQfHkBs3dBRGh--No5',
@@ -155,13 +161,13 @@ describe('migration v2', () => {
       namespaceType: 'agnostic',
       migrations: {
         '6.6.0': (d) => d,
-        '8.0.0': (d) => d,
+        [kibanaVersion]: (d) => d,
       },
     });
     await root.start();
 
     const client: ElasticsearchClient = esServer.es.getClient();
-    const spacesDocsMigrated = await fetchDocs(client, '.kibana_8.0.0_001', 'space');
+    const spacesDocsMigrated = await fetchDocs(client, `.kibana_${kibanaVersion}_001`, 'space');
     expect(spacesDocsMigrated.map((s) => s.id)).toEqual(
       expect.arrayContaining([
         'space:default',
@@ -174,12 +180,12 @@ describe('migration v2', () => {
       ])
     );
     spacesDocsMigrated.forEach((d) => {
-      expect(d.migrationVersion.space).toEqual('8.0.0'); // should be migrated
-      expect(d.coreMigrationVersion).toEqual('8.0.0');
+      expect(d.migrationVersion.space).toEqual(kibanaVersion); // should be migrated
+      expect(d.coreMigrationVersion).toEqual(kibanaVersion);
     });
 
     // Make sure unmigrated foo docs are also still there in an unmigrated state
-    const fooDocsUnmigrated = await fetchDocs(client, '.kibana_8.0.0_001', 'foo');
+    const fooDocsUnmigrated = await fetchDocs(client, `.kibana_${kibanaVersion}_001`, 'foo');
     expect(fooDocsUnmigrated.map((f) => f.id)).toEqual(
       expect.arrayContaining([
         'P2SQfHkBs3dBRGh--No5',
