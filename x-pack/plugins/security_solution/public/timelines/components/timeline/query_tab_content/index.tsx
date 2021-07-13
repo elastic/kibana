@@ -297,6 +297,10 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     );
   }, [loadingSourcerer, timelineId, isQueryLoading, dispatch]);
 
+  const isDatePickerDisabled = useMemo(() => {
+    return (combinedQueries && combinedQueries.kqlError != null) || false;
+  }, [combinedQueries]);
+
   const leadingControlColumns: ControlColumnProps[] = [defaultControlColumn];
   const trailingControlColumns: ControlColumnProps[] = [];
 
@@ -334,7 +338,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 <SuperDatePicker
                   id="timeline"
                   timelineId={timelineId}
-                  disabled={combinedQueries && combinedQueries.kqlError != null}
+                  disabled={isDatePickerDisabled}
                 />
               </DatePicker>
               <EuiFlexItem grow={false}>

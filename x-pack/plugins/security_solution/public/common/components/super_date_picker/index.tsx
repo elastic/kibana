@@ -218,6 +218,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
     prevProps.startAutoReload === nextProps.startAutoReload &&
     prevProps.stopAutoReload === nextProps.stopAutoReload &&
     prevProps.timelineId === nextProps.timelineId &&
+    prevProps.disabled === nextProps.disabled &&
     prevProps.toStr === nextProps.toStr &&
     prevProps.updateReduxTime === nextProps.updateReduxTime &&
     deepEqual(prevProps.kqlQuery, nextProps.kqlQuery) &&
