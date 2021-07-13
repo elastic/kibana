@@ -18,6 +18,7 @@ import { createFormSchema } from './schema';
 const FORM_ID = 'editQueryFlyoutForm';
 
 export interface UseScheduledQueryGroupQueryFormProps {
+  scheduledQueryGroupId: string;
   defaultValue?: OsqueryManagerPackagePolicyConfigRecord | undefined;
   handleSubmit: FormConfig<
     OsqueryManagerPackagePolicyConfigRecord,
@@ -34,6 +35,7 @@ export interface ScheduledQueryGroupFormData {
 }
 
 export const useScheduledQueryGroupQueryForm = ({
+  scheduledQueryGroupId,
   defaultValue,
   handleSubmit,
 }: UseScheduledQueryGroupQueryFormProps) => {
@@ -41,11 +43,10 @@ export const useScheduledQueryGroupQueryForm = ({
   const ids = useMemo<string[]>(
     () =>
       data?.items
-        .map((it) =>
-          it.inputs.map((input) => input.streams.map((stream) => stream.compiled_stream.id)).flat()
-        )
+        .find((value) => value.id === scheduledQueryGroupId)
+        ?.inputs.map((input) => input.streams.map((stream) => stream.compiled_stream.id))
         .flat() ?? [],
-    [data]
+    [data, scheduledQueryGroupId]
   );
   const idSet = useMemo<Set<string>>(() => {
     const res = new Set<string>(ids);

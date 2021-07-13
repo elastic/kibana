@@ -256,6 +256,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
       {<OsqueryPackUploader onChange={handlePackUpload} />}
       {showAddQueryFlyout && (
         <QueryFlyout
+          scheduledQueryGroupId={scheduledQueryGroupId}
           integrationPackageVersion={integrationPackageVersion}
           onSave={handleAddQuery}
           onClose={handleHideAddFlyout}
@@ -263,6 +264,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
       )}
       {showEditQueryFlyout != null && showEditQueryFlyout >= 0 && (
         <QueryFlyout
+          scheduledQueryGroupId={scheduledQueryGroupId}
           defaultValue={field.value[0].streams[showEditQueryFlyout]?.vars}
           integrationPackageVersion={integrationPackageVersion}
           onSave={handleEditQuery}
