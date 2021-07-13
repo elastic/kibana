@@ -373,6 +373,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "kibana.rac.alert.producer": Array [
               "apm",
             ],
+            "kibana.rac.alert.space_ids": Array [
+              "default",
+            ],
             "kibana.rac.alert.status": Array [
               "open",
             ],
