@@ -29,7 +29,7 @@ export type TileMapExpressionFunctionDefinition = ExpressionFunctionDefinition<
 export const createTileMapFn = (): TileMapExpressionFunctionDefinition => ({
   name: 'tilemap',
   type: 'render',
-  help: i18n.translate('tileMap.function.help', {
+  help: i18n.translate('xpack.maps.tileMap.function.help', {
     defaultMessage: 'Tilemap visualization',
   }),
   args: {

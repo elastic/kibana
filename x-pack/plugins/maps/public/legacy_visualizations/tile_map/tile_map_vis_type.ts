@@ -14,11 +14,11 @@ import { TileMapEditor } from './tile_map_editor';
 
 export const tileMapVisType = {
   name: 'tile_map',
-  title: i18n.translate('tileMap.vis.mapTitle', {
+  title: i18n.translate('xpack.maps.tileMap.vis.mapTitle', {
     defaultMessage: 'Coordinate Map',
   }),
   icon: 'visMapCoordinate',
-  description: i18n.translate('tileMap.vis.mapDescription', {
+  description: i18n.translate('xpack.maps.tileMap.vis.mapDescription', {
     defaultMessage: 'Plot latitude and longitude coordinates on a map',
   }),
   editorConfig: {
