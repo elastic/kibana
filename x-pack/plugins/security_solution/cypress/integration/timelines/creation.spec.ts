@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { timeline } from '../../objects/timeline';
+import { getTimeline } from '../../objects/timeline';
 
 import {
   LOCKED_ICON,
@@ -64,7 +64,7 @@ describe('Timelines', (): void => {
 
     before(() => {
       openTimelineUsingToggle();
-      addNameAndDescriptionToTimeline(timeline);
+      addNameAndDescriptionToTimeline(getTimeline());
       populateTimeline();
     });
 
@@ -73,8 +73,8 @@ describe('Timelines', (): void => {
     });
 
     it('can be added filter', () => {
-      addFilter(timeline.filter);
-      cy.get(TIMELINE_FILTER(timeline.filter)).should('exist');
+      addFilter(getTimeline().filter);
+      cy.get(TIMELINE_FILTER(getTimeline().filter)).should('exist');
     });
 
     it('pins an event', () => {
@@ -89,8 +89,8 @@ describe('Timelines', (): void => {
     });
 
     it('can be added notes', () => {
-      addNotesToTimeline(timeline.notes);
-      cy.get(NOTES_TEXT).should('have.text', timeline.notes);
+      addNotesToTimeline(getTimeline().notes);
+      cy.get(NOTES_TEXT).should('have.text', getTimeline().notes);
     });
 
     it('should update timeline after adding eql', () => {
@@ -116,17 +116,20 @@ describe('Create a timeline from a template', () => {
   });
 
   it('Should have the same query and open the timeline modal', () => {
-    createTimelineTemplate(timeline).then(() => {
+    createTimelineTemplate(getTimeline()).then(() => {
       expandEventAction();
       cy.intercept('/api/timeline').as('timeline');
 
       clickingOnCreateTimelineFormTemplateBtn();
       cy.wait('@timeline', { timeout: 100000 }).then(({ request }) => {
         if (request.body && request.body.timeline) {
-          expect(request.body.timeline).to.haveOwnProperty('description', timeline.description);
+          expect(request.body.timeline).to.haveOwnProperty(
+            'description',
+            getTimeline().description
+          );
           expect(request.body.timeline.kqlQuery.filterQuery.kuery).to.haveOwnProperty(
             'expression',
-            timeline.query
+            getTimeline().query
           );
           cy.get(TIMELINE_FLYOUT_WRAPPER).should('have.css', 'visibility', 'visible');
         }
