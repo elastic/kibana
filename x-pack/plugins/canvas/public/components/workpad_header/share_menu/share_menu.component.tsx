@@ -125,7 +125,7 @@ export const ShareMenu: FunctionComponent<Props> = ({
 
   const shareControl = (togglePopover: React.MouseEventHandler<any>) => (
     <EuiButtonEmpty
-      size="xs"
+      size="s"
       aria-label={strings.getShareWorkpadMessage()}
       onClick={togglePopover}
       data-test-subj="shareTopNavButton"
