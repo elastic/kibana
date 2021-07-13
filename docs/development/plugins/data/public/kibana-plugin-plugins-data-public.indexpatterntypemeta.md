@@ -15,5 +15,4 @@ export interface TypeMeta
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [aggs](./kibana-plugin-plugins-data-public.indexpatterntypemeta.aggs.md) | <code>Record&lt;string, AggregationRestrictions&gt;</code> |  |
-|  [params](./kibana-plugin-plugins-data-public.indexpatterntypemeta.params.md) | <code>{</code><br/><code>        rollup_index: string;</code><br/><code>    }</code> |  |
 

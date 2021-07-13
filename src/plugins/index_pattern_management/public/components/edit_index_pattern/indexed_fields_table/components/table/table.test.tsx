@@ -8,13 +8,13 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { IndexPattern } from 'src/plugins/data/public';
+import { IIndexPattern } from 'src/plugins/data/public';
 import { IndexedFieldItem } from '../../types';
 import { Table, renderFieldName } from './table';
 
 const indexPattern = {
   timeFieldName: 'timestamp',
-} as IndexPattern;
+} as IIndexPattern;
 
 const items: IndexedFieldItem[] = [
   {
