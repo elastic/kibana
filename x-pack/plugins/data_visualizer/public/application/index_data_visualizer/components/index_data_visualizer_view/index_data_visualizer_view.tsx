@@ -56,7 +56,7 @@ import { useDataVisualizerKibana } from '../../../kibana_context';
 import { FieldCountPanel } from '../../../common/components/field_count_panel';
 import { DocumentCountContent } from '../../../common/components/document_count_content';
 import { DataLoader } from '../../data_loader/data_loader';
-import { JOB_FIELD_TYPES } from '../../../../../common';
+import { JOB_FIELD_TYPES, OMIT_FIELDS } from '../../../../../common';
 import { useTimefilter } from '../../hooks/use_time_filter';
 import { kbnTypeToJobType } from '../../../common/util/field_types_utils';
 import { SearchPanel } from '../search_panel';
@@ -204,18 +204,21 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     }
   }, [currentIndexPattern, toasts]);
 
-  // Obtain the list of non metric field types which appear in the index pattern.
-  let indexedFieldTypes: JobFieldType[] = [];
   const indexPatternFields: IndexPatternField[] = currentIndexPattern.fields;
-  indexPatternFields.forEach((field) => {
-    if (field.scripted !== true) {
-      const dataVisualizerType: JobFieldType | undefined = kbnTypeToJobType(field);
-      if (dataVisualizerType !== undefined && !indexedFieldTypes.includes(dataVisualizerType)) {
-        indexedFieldTypes.push(dataVisualizerType);
+
+  const fieldTypes = useMemo(() => {
+    // Obtain the list of non metric field types which appear in the index pattern.
+    const indexedFieldTypes: JobFieldType[] = [];
+    indexPatternFields.forEach((field) => {
+      if (!OMIT_FIELDS.includes(field.name) && field.scripted !== true) {
+        const dataVisualizerType: JobFieldType | undefined = kbnTypeToJobType(field);
+        if (dataVisualizerType !== undefined && !indexedFieldTypes.includes(dataVisualizerType)) {
+          indexedFieldTypes.push(dataVisualizerType);
+        }
       }
-    }
-  });
-  indexedFieldTypes = indexedFieldTypes.sort();
+    });
+    return indexedFieldTypes.sort();
+  }, [indexPatternFields]);
 
   const defaults = getDefaultPageState();
 
@@ -859,7 +862,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                     samplerShardSize={samplerShardSize}
                     setSamplerShardSize={setSamplerShardSize}
                     overallStats={overallStats}
-                    indexedFieldTypes={indexedFieldTypes}
+                    indexedFieldTypes={fieldTypes}
                     setVisibleFieldTypes={setVisibleFieldTypes}
                     visibleFieldTypes={visibleFieldTypes}
                     visibleFieldNames={visibleFieldNames}

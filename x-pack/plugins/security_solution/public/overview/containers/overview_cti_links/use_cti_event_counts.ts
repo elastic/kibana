@@ -6,19 +6,14 @@
  */
 
 import { useEffect, useState, useMemo } from 'react';
-import { ThreatIntelLinkPanelProps } from '../../components/overview_cti_links';
 import { useRequestEventCounts } from './use_request_event_counts';
 import { emptyEventCountsByDataset } from './helpers';
+import { CtiEnabledModuleProps } from '../../components/overview_cti_links/cti_enabled_module';
 
 export const ID = 'ctiEventCountQuery';
 const PREFIX = 'threatintel.';
 
-export const useCtiEventCounts = ({
-  deleteQuery,
-  from,
-  setQuery,
-  to,
-}: ThreatIntelLinkPanelProps) => {
+export const useCtiEventCounts = ({ deleteQuery, from, setQuery, to }: CtiEnabledModuleProps) => {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   const [loading, { data, inspect, totalCount, refetch }] = useRequestEventCounts(to, from);
