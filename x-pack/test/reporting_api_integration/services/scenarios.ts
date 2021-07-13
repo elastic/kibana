@@ -166,7 +166,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
 
   const checkIlmMigrationStatus = async () => {
     log.debug('ReportingAPI.checkIlmMigrationStatus');
-    const { body } = await supertestWithoutAuth
+    const { body } = await supertest
       .get('/api/reporting/ilm_policy_status')
       .set('kbn-xsrf', 'xxx')
       .expect(200);
@@ -175,7 +175,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
 
   const migrateReportingIndices = async () => {
     log.debug('ReportingAPI.migrateReportingIndices');
-    await supertestWithoutAuth
+    await supertest
       .put('/api/reporting/deprecations/migrate_ilm_policy')
       .set('kbn-xsrf', 'xxx')
       .expect(200);
