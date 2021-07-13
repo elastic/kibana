@@ -1611,7 +1611,7 @@ describe('Exception builder helpers', () => {
         field: '',
         id: '123',
         operator: OperatorEnum.INCLUDED,
-        type: OperatorTypeEnum.MATCH,
+        type: OperatorTypeEnum.MATCH_ANY,
         value: ['some value'],
       };
       const output: Array<
