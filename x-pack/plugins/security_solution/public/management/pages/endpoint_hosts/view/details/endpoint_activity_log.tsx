@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useRef } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import styled from 'styled-components';
 
 import {
@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { LogEntry } from './components/log_entry';
+import { DateRangePicker } from './components/activity_log_date_range_picker';
 import * as i18 from '../translations';
 import { Immutable, ActivityLog } from '../../../../../../common/endpoint/types';
 import { AsyncResourceState } from '../../../../state';
@@ -31,12 +32,12 @@ import {
   getActivityLogRequestLoading,
 } from '../../store/selectors';
 
-const StyledEuiFlexGroup = styled(EuiFlexGroup)`
-  height: 85vh;
+const StyledEuiFlexGroup = styled(EuiFlexGroup)<{ isShorter: boolean }>`
+  height: ${({ isShorter }) => (isShorter ? '25vh' : '85vh')};
 `;
 const LoadMoreTrigger = styled.div`
-  height: 6px;
-  width: 100%;
+  height: ${(props) => props.theme.eui.euiSizeXS};
+  width: ${(props) => props.theme.eui.fractions.single.percentage};
 `;
 
 export const EndpointActivityLog = memo(
@@ -48,8 +49,18 @@ export const EndpointActivityLog = memo(
     const activityLogSize = activityLogData.length;
     const activityLogError = useEndpointSelector(getActivityLogError);
     const dispatch = useDispatch<(action: EndpointAction) => void>();
-    const { page, pageSize, disabled: isPagingDisabled } = useEndpointSelector(
+    const { page, pageSize, startDate, endDate, disabled: isPagingDisabled } = useEndpointSelector(
       getActivityLogDataPaging
+    );
+
+    const hasActiveDateRange = useMemo(() => !!startDate || !!endDate, [startDate, endDate]);
+    const showEmptyState = useMemo(
+      () => (activityLogLoaded && !activityLogSize && !hasActiveDateRange) || activityLogError,
+      [activityLogLoaded, activityLogSize, hasActiveDateRange, activityLogError]
+    );
+    const isShorter = useMemo(
+      () => !!(hasActiveDateRange && isPagingDisabled && !activityLogLoading && !activityLogSize),
+      [hasActiveDateRange, isPagingDisabled, activityLogLoading, activityLogSize]
     );
 
     const loadMoreTrigger = useRef<HTMLInputElement | null>(null);
@@ -58,15 +69,17 @@ export const EndpointActivityLog = memo(
         const isTargetIntersecting = entries.some((entry) => entry.isIntersecting);
         if (isTargetIntersecting && activityLogLoaded && !isPagingDisabled) {
           dispatch({
-            type: 'appRequestedEndpointActivityLog',
+            type: 'endpointDetailsActivityLogUpdatePaging',
             payload: {
               page: page + 1,
               pageSize,
+              startDate,
+              endDate,
             },
           });
         }
       },
-      [activityLogLoaded, dispatch, isPagingDisabled, page, pageSize]
+      [activityLogLoaded, dispatch, isPagingDisabled, page, pageSize, startDate, endDate]
     );
 
     useEffect(() => {
@@ -82,8 +95,8 @@ export const EndpointActivityLog = memo(
 
     return (
       <>
-        <StyledEuiFlexGroup direction="column" responsive={false}>
-          {(activityLogLoaded && !activityLogSize) || activityLogError ? (
+        <StyledEuiFlexGroup direction="column" responsive={false} isShorter={isShorter}>
+          {showEmptyState ? (
             <EuiFlexItem>
               <EuiEmptyPrompt
                 iconType="editorUnorderedList"
@@ -95,6 +108,7 @@ export const EndpointActivityLog = memo(
             </EuiFlexItem>
           ) : (
             <>
+              <DateRangePicker />
               <EuiFlexItem grow={true}>
                 {activityLogLoaded &&
                   activityLogData.map((logEntry) => (

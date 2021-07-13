@@ -124,6 +124,7 @@ export class Fetch {
         'Content-Type': 'application/json',
         ...options.headers,
         'kbn-version': this.params.kibanaVersion,
+        ...options.context?.toHeader(),
       }),
     };
 

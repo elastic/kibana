@@ -120,7 +120,12 @@ export function LayerPanel(
   const { groups } = useMemo(
     () => activeVisualization.getConfiguration(layerVisualizationConfigProps),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [layerDatasourceConfigProps.frame, layerDatasourceDropProps, activeVisualization]
+    [
+      layerVisualizationConfigProps.frame,
+      layerVisualizationConfigProps.state,
+      layerId,
+      activeVisualization,
+    ]
   );
   const isEmptyLayer = !groups.some((d) => d.accessors.length > 0);
   const { activeId, activeGroup } = activeDimension;
