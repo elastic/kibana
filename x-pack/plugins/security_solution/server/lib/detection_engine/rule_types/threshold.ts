@@ -28,9 +28,15 @@ import { BuildRuleMessage } from '../signals/rule_messages';
 import { createSecurityRuleTypeFactory } from './create_security_rule_type_factory';
 import { createResultObject } from './utils';
 import { ConfigType } from '../../../config';
+import { SearchTypes } from '../../../../common/detection_engine/types';
 
-type ThresholdStateFields = 'TODO';
-type ThresholdAlertState = Record<ThresholdStateFields, unknown>;
+interface ThresholdAlertState extends AlertTypeState {
+  terms: Array<{
+    field?: string;
+    value: SearchTypes;
+  }>;
+  lastSignalTimestamp: number | null;
+}
 interface BulkCreateThresholdSignalParams {
   results: SignalSearchResponse;
   ruleParams: ThresholdRuleParams;
@@ -114,24 +120,31 @@ export const createThresholdAlertType = (createOptions: {
     isExportable: false,
     producer: 'security-solution',
     async executor(execOptions) {
-      const result = createResultObject<ThresholdAlertState>({ TODO: 'test' });
       const {
         alertId,
         params,
-        runOpts: { exceptionItems, tuple },
+        runOpts: {
+          buildRuleMessage,
+          bulkCreate,
+          exceptionItems,
+          listClient,
+          rule,
+          searchAfterSize,
+          tuple,
+          wrapHits,
+        },
         services,
         startedAt,
+        state,
       } = execOptions;
-      const { index, query, threshold } = params;
-      const { alertWithPersistence, savedObjectsClient } = services;
+      const result = createResultObject<ThresholdAlertState>(state);
+      const { index, query, threshold, timestampOverride } = params;
       const fromDate = moment(startedAt).subtract(moment.duration(5, 'm')); // hardcoded 5-minute rule interval
       const from = fromDate.toISOString();
       const to = startedAt.toISOString();
 
       // TODO: how to get the output index?
       const outputIndex = ['.kibana-madi-8-alerts-security-solution-8.0.0-000001'];
-      const buildRuleMessage = (...messages: string[]) => messages.join();
-      const timestampOverride = undefined;
 
       const {
         thresholdSignalHistory,

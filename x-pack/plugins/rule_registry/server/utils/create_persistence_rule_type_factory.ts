@@ -19,7 +19,6 @@ export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory 
       } = options;
 
       const currentAlerts: Array<Record<string, unknown>> = [];
-      // const timestamp = options.startedAt.toISOString();
 
       const state = await type.executor({
         ...options,
@@ -31,39 +30,6 @@ export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory 
               alertInstanceFactory(alert['kibana.rac.alert.uuid']! as string)
             );
           },
-          /*
-          findAlerts: async (query) => {
-            const { body } = await scopedClusterClient.asCurrentUser.search({
-              ...query,
-              body: {
-                ...query.body,
-              },
-              ignore_unavailable: true,
-            });
-            return body.hits.hits
-              .map((event: unknown) => (event as { _source: any })._source!)
-              .map((event: { [x: string]: any }) => {
-                const alertUuid = event['kibana.rac.alert.uuid'];
-                const isAlert = alertUuid != null;
-                return {
-                  ...event,
-                  'event.kind': 'signal',
-                  'kibana.rac.alert.id': '???',
-                  'kibana.rac.alert.status': 'open',
-                  'kibana.rac.alert.uuid': v4(),
-                  'kibana.rac.alert.ancestors': isAlert
-                    ? ((event['kibana.rac.alert.ancestors'] as string[]) ?? []).concat([
-                        alertUuid!,
-                      ] as string[])
-                    : [],
-                  'kibana.rac.alert.depth': isAlert
-                    ? ((event['kibana.rac.alert.depth'] as number) ?? 0) + 1
-                    : 0,
-                  '@timestamp': timestamp,
-                };
-              });
-          },
-          */
         },
       });
 
