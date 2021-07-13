@@ -34,12 +34,12 @@ jest.mock('react-redux', () => {
 
 const mockOptions = [
   { label: 'apm-*-transaction*', value: 'apm-*-transaction*' },
-  { label: 'traces-apm*', value: 'traces-apm*' },
   { label: 'auditbeat-*', value: 'auditbeat-*' },
   { label: 'endgame-*', value: 'endgame-*' },
   { label: 'filebeat-*', value: 'filebeat-*' },
   { label: 'logs-*', value: 'logs-*' },
   { label: 'packetbeat-*', value: 'packetbeat-*' },
+  { label: 'traces-apm*', value: 'traces-apm*' },
   { label: 'winlogbeat-*', value: 'winlogbeat-*' },
 ];
 

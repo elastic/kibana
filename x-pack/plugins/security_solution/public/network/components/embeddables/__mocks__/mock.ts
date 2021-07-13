@@ -184,6 +184,11 @@ export const mockClientLayer = {
   joins: [],
 };
 
+const mockApmDataStreamClientLayer = {
+  ...mockClientLayer,
+  label: 'traces-apm*,logs-apm*,metrics-apm*,apm-* | Client Point',
+};
+
 export const mockServerLayer = {
   sourceDescriptor: {
     id: 'uuid.v4()',
@@ -237,6 +242,11 @@ export const mockServerLayer = {
   visible: true,
   type: 'VECTOR',
   query: { query: '', language: 'kuery' },
+};
+
+const mockApmDataStreamServerLayer = {
+  ...mockServerLayer,
+  label: 'traces-apm*,logs-apm*,metrics-apm*,apm-* | Server Point',
 };
 
 export const mockLineLayer = {
@@ -366,6 +376,10 @@ export const mockClientServerLineLayer = {
   type: 'VECTOR',
   query: { query: '', language: 'kuery' },
 };
+const mockApmDataStreamClientServerLineLayer = {
+  ...mockClientServerLineLayer,
+  label: 'traces-apm*,logs-apm*,metrics-apm*,apm-* | Line',
+};
 
 export const mockLayerList = [
   {
@@ -422,6 +436,9 @@ export const mockLayerListMixed = [
   mockClientServerLineLayer,
   mockServerLayer,
   mockClientLayer,
+  mockApmDataStreamClientServerLineLayer,
+  mockApmDataStreamServerLayer,
+  mockApmDataStreamClientLayer,
 ];
 
 export const mockAPMIndexPattern: IndexPatternSavedObject = {

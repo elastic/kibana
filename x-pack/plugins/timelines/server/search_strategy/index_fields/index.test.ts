@@ -867,13 +867,17 @@ describe('Fields Provider', () => {
         onlyCheckIfIndicesExist: true,
       };
 
-      esClientSearchMock.mockResolvedValueOnce({
+      esClientSearchMock.mockResolvedValue({
         body: { hits: { total: { value: 1 } } },
       });
       const response = await requestIndexFieldSearch(request, deps, beatFields);
 
       expect(esClientSearchMock).toHaveBeenCalledWith({
         index: indices[0],
+        body: { query: { match_all: {} }, size: 0 },
+      });
+      expect(esClientSearchMock).toHaveBeenCalledWith({
+        index: indices[1],
         body: { query: { match_all: {} }, size: 0 },
       });
       expect(getFieldsForWildcardMock).not.toHaveBeenCalled();
@@ -889,7 +893,7 @@ describe('Fields Provider', () => {
         onlyCheckIfIndicesExist: true,
       };
 
-      esClientSearchMock.mockResolvedValueOnce({
+      esClientSearchMock.mockResolvedValue({
         body: { hits: { total: { value: 0 } } },
       });
 
@@ -897,6 +901,10 @@ describe('Fields Provider', () => {
 
       expect(esClientSearchMock).toHaveBeenCalledWith({
         index: indices[0],
+        body: { query: { match_all: {} }, size: 0 },
+      });
+      expect(esClientSearchMock).toHaveBeenCalledWith({
+        index: indices[1],
         body: { query: { match_all: {} }, size: 0 },
       });
       expect(getFieldsForWildcardMock).not.toHaveBeenCalled();
