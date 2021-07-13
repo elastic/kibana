@@ -152,7 +152,7 @@ export const SetProcessor: FunctionComponent = () => {
         componentProps={{
           euiFieldProps: {
             'data-test-subj': 'valueFieldInput',
-            disabled: fields?.copy_from,
+            disabled: !!fields?.copy_from,
           },
         }}
         path="fields.value"
@@ -191,7 +191,7 @@ export const SetProcessor: FunctionComponent = () => {
         path="fields.copy_from"
         componentProps={{
           euiFieldProps: {
-            disabled: fields?.value,
+            disabled: !!fields?.value,
           },
         }}
         data-test-subj="copyFromField"
