@@ -36,7 +36,7 @@ export function dateHistogram(
       panelId: panel.id,
     };
 
-    let { intervalString } = getBucketSize(req, interval, capabilities, barTargetUiSettings);
+    const { intervalString } = getBucketSize(req, interval, capabilities, barTargetUiSettings);
     const { timezone } = capabilities;
 
     const overwriteDateHistogramForLastBucketMode = () => {
