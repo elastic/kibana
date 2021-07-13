@@ -20,6 +20,7 @@ import { HttpService, InternalHttpServiceSetup } from '../../../http';
 import { registerStatusRoute } from '../status';
 import { ServiceStatus, ServiceStatusLevels } from '../../types';
 import { statusServiceMock } from '../../status_service.mock';
+import { executionContextServiceMock } from '../../../execution_context/execution_context_service.mock';
 
 const coreId = Symbol('core');
 
@@ -35,6 +36,7 @@ describe('GET /api/status', () => {
     server = createHttpServer(coreContext);
     httpSetup = await server.setup({
       context: contextService.setup({ pluginDependencies: new Map() }),
+      executionContext: executionContextServiceMock.createInternalSetupContract(),
     });
 
     metrics = metricsServiceMock.createSetupContract();

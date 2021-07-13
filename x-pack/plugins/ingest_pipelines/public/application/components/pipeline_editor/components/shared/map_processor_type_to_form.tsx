@@ -34,6 +34,7 @@ import {
   Json,
   Kv,
   Lowercase,
+  NetworkDirection,
   Pipeline,
   RegisteredDomain,
   Remove,
@@ -515,6 +516,23 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
         values: {
           field,
         },
+      }),
+  },
+  network_direction: {
+    FieldsComponent: NetworkDirection,
+    docLinkPath: '/network-direction-processor.html',
+    label: i18n.translate('xpack.ingestPipelines.processors.label.networkDirection', {
+      defaultMessage: 'Network Direction',
+    }),
+    typeDescription: i18n.translate(
+      'xpack.ingestPipelines.processors.description.networkDirection',
+      {
+        defaultMessage: 'Calculates the network direction given a source IP address.',
+      }
+    ),
+    getDefaultDescription: () =>
+      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.networkDirection', {
+        defaultMessage: 'Calculates the network direction given a source IP address.',
       }),
   },
   pipeline: {

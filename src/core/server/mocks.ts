@@ -30,6 +30,7 @@ import { statusServiceMock } from './status/status_service.mock';
 import { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_service.mock';
 import { i18nServiceMock } from './i18n/i18n_service.mock';
 import { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
+import { executionContextServiceMock } from './execution_context/execution_context_service.mock';
 
 export { configServiceMock } from './config/mocks';
 export { httpServerMock } from './http/http_server.mocks';
@@ -51,6 +52,7 @@ export { capabilitiesServiceMock } from './capabilities/capabilities_service.moc
 export { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_service.mock';
 export { i18nServiceMock } from './i18n/i18n_service.mock';
 export { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
+export { executionContextServiceMock } from './execution_context/execution_context_service.mock';
 
 type MockedPluginInitializerConfig<T> = jest.Mocked<PluginInitializerContext<T>['config']>;
 
@@ -144,6 +146,7 @@ function createCoreSetupMock({
     logging: loggingServiceMock.createSetupContract(),
     metrics: metricsServiceMock.createSetupContract(),
     deprecations: deprecationsServiceMock.createSetupContract(),
+    executionContext: executionContextServiceMock.createInternalSetupContract(),
     getStartServices: jest
       .fn<Promise<[ReturnType<typeof createCoreStartMock>, object, any]>, []>()
       .mockResolvedValue([createCoreStartMock(), pluginStartDeps, pluginStartContract]),
@@ -161,6 +164,7 @@ function createCoreStartMock() {
     savedObjects: savedObjectsServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
     coreUsageData: coreUsageDataServiceMock.createStartContract(),
+    executionContext: executionContextServiceMock.createInternalStartContract(),
   };
 
   return mock;
@@ -182,6 +186,7 @@ function createInternalCoreSetupMock() {
     logging: loggingServiceMock.createInternalSetupContract(),
     metrics: metricsServiceMock.createInternalSetupContract(),
     deprecations: deprecationsServiceMock.createInternalSetupContract(),
+    executionContext: executionContextServiceMock.createInternalSetupContract(),
   };
   return setupDeps;
 }
@@ -195,6 +200,7 @@ function createInternalCoreStartMock() {
     savedObjects: savedObjectsServiceMock.createInternalStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
     coreUsageData: coreUsageDataServiceMock.createStartContract(),
+    executionContext: executionContextServiceMock.createInternalStartContract(),
   };
   return startDeps;
 }

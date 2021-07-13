@@ -36,6 +36,7 @@ import { useCorrelations } from './use_correlations';
 import { push } from '../../shared/Links/url_helpers';
 import { useUiTracker } from '../../../../../observability/public';
 import { asPreciseDecimal } from '../../../../common/utils/formatters';
+import { LatencyCorrelationsHelpPopover } from './ml_latency_correlations_help_popover';
 
 const DEFAULT_PERCENTILE_THRESHOLD = 95;
 const isErrorMessage = (arg: unknown): arg is Error => {
@@ -151,7 +152,7 @@ export function MlLatencyCorrelations({ onClose }: Props) {
               'xpack.apm.correlations.latencyCorrelations.correlationsTable.correlationColumnDescription',
               {
                 defaultMessage:
-                  'The impact of a field on the latency of the service, ranging from 0 to 1.',
+                  'The correlation score [0-1] of an attribute; the greater the score, the more an attribute increases latency.',
               }
             )}
           >
@@ -263,20 +264,6 @@ export function MlLatencyCorrelations({ onClose }: Props) {
 
   return (
     <>
-      <EuiText size="s" color="subdued">
-        <p>
-          {i18n.translate(
-            'xpack.apm.correlations.latencyCorrelations.description',
-            {
-              defaultMessage:
-                'What is slowing down my service? Correlations will help discover a slower performance in a particular cohort of your data.',
-            }
-          )}
-        </p>
-      </EuiText>
-
-      <EuiSpacer size="m" />
-
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           {!isRunning && (
@@ -319,6 +306,9 @@ export function MlLatencyCorrelations({ onClose }: Props) {
               />
             </EuiFlexItem>
           </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <LatencyCorrelationsHelpPopover />
         </EuiFlexItem>
       </EuiFlexGroup>
 

@@ -6,7 +6,7 @@
  */
 
 import { formatMitreAttackDescription } from '../../helpers/rules';
-import { indexPatterns, newThreatIndicatorRule } from '../../objects/rule';
+import { getIndexPatterns, getNewThreatIndicatorRule } from '../../objects/rule';
 
 import {
   ALERT_RULE_METHOD,
@@ -109,10 +109,10 @@ import { ALERTS_URL, RULE_CREATION } from '../../urls/navigation';
 
 describe('indicator match', () => {
   describe('Detection rules, Indicator Match', () => {
-    const expectedUrls = newThreatIndicatorRule.referenceUrls.join('');
-    const expectedFalsePositives = newThreatIndicatorRule.falsePositivesExamples.join('');
-    const expectedTags = newThreatIndicatorRule.tags.join('');
-    const expectedMitre = formatMitreAttackDescription(newThreatIndicatorRule.mitre);
+    const expectedUrls = getNewThreatIndicatorRule().referenceUrls.join('');
+    const expectedFalsePositives = getNewThreatIndicatorRule().falsePositivesExamples.join('');
+    const expectedTags = getNewThreatIndicatorRule().tags.join('');
+    const expectedMitre = formatMitreAttackDescription(getNewThreatIndicatorRule().mitre);
     const expectedNumberOfRules = 1;
     const expectedNumberOfAlerts = 1;
 
@@ -134,12 +134,12 @@ describe('indicator match', () => {
 
       describe('Index patterns', () => {
         it('Contains a predefined index pattern', () => {
-          getIndicatorIndex().should('have.text', indexPatterns.join(''));
+          getIndicatorIndex().should('have.text', getIndexPatterns().join(''));
         });
 
         it('Does NOT show invalidation text on initial page load if indicator index pattern is filled out', () => {
           getIndicatorIndicatorIndex().type(
-            `${newThreatIndicatorRule.indicatorIndexPattern}{enter}`
+            `${getNewThreatIndicatorRule().indicatorIndexPattern}{enter}`
           );
           getDefineContinueButton().click();
           getIndexPatternInvalidationText().should('not.exist');
@@ -148,7 +148,7 @@ describe('indicator match', () => {
         it('Shows invalidation text when you try to continue without filling it out', () => {
           getIndexPatternClearButton().click();
           getIndicatorIndicatorIndex().type(
-            `${newThreatIndicatorRule.indicatorIndexPattern}{enter}`
+            `${getNewThreatIndicatorRule().indicatorIndexPattern}{enter}`
           );
           getDefineContinueButton().click();
           getIndexPatternInvalidationText().should('exist');
@@ -195,8 +195,8 @@ describe('indicator match', () => {
       describe('Indicator mapping', () => {
         beforeEach(() => {
           fillIndexAndIndicatorIndexPattern(
-            newThreatIndicatorRule.index,
-            newThreatIndicatorRule.indicatorIndexPattern
+            getNewThreatIndicatorRule().index,
+            getNewThreatIndicatorRule().indicatorIndexPattern
           );
         });
 
@@ -221,8 +221,8 @@ describe('indicator match', () => {
 
         it('Does NOT show invalidation text when there is a valid "index field" and a valid "indicator index field"', () => {
           fillIndicatorMatchRow({
-            indexField: newThreatIndicatorRule.indicatorMappingField,
-            indicatorIndexField: newThreatIndicatorRule.indicatorIndexField,
+            indexField: getNewThreatIndicatorRule().indicatorMappingField,
+            indicatorIndexField: getNewThreatIndicatorRule().indicatorIndexField,
           });
           getDefineContinueButton().click();
           getIndicatorInvalidationText().should('not.exist');
@@ -231,7 +231,7 @@ describe('indicator match', () => {
         it('Shows invalidation text when there is an invalid "index field" and a valid "indicator index field"', () => {
           fillIndicatorMatchRow({
             indexField: 'non-existent-value',
-            indicatorIndexField: newThreatIndicatorRule.indicatorIndexField,
+            indicatorIndexField: getNewThreatIndicatorRule().indicatorIndexField,
             validColumns: 'indicatorField',
           });
           getDefineContinueButton().click();
@@ -240,7 +240,7 @@ describe('indicator match', () => {
 
         it('Shows invalidation text when there is a valid "index field" and an invalid "indicator index field"', () => {
           fillIndicatorMatchRow({
-            indexField: newThreatIndicatorRule.indicatorMappingField,
+            indexField: getNewThreatIndicatorRule().indicatorMappingField,
             indicatorIndexField: 'non-existent-value',
             validColumns: 'indexField',
           });
@@ -250,21 +250,21 @@ describe('indicator match', () => {
 
         it('Deletes the first row when you have two rows. Both rows valid rows of "index fields" and valid "indicator index fields". The second row should become the first row', () => {
           fillIndicatorMatchRow({
-            indexField: newThreatIndicatorRule.indicatorMappingField,
-            indicatorIndexField: newThreatIndicatorRule.indicatorIndexField,
+            indexField: getNewThreatIndicatorRule().indicatorMappingField,
+            indicatorIndexField: getNewThreatIndicatorRule().indicatorIndexField,
           });
           getIndicatorAndButton().click();
           fillIndicatorMatchRow({
             rowNumber: 2,
             indexField: 'agent.name',
-            indicatorIndexField: newThreatIndicatorRule.indicatorIndexField,
+            indicatorIndexField: getNewThreatIndicatorRule().indicatorIndexField,
             validColumns: 'indicatorField',
           });
           getIndicatorDeleteButton().click();
           getIndicatorIndexComboField().should('have.text', 'agent.name');
           getIndicatorMappingComboField().should(
             'have.text',
-            newThreatIndicatorRule.indicatorIndexField
+            getNewThreatIndicatorRule().indicatorIndexField
           );
           getIndicatorIndexComboField(2).should('not.exist');
           getIndicatorMappingComboField(2).should('not.exist');
@@ -272,14 +272,14 @@ describe('indicator match', () => {
 
         it('Deletes the first row when you have two rows. Both rows have valid "index fields" and invalid "indicator index fields". The second row should become the first row', () => {
           fillIndicatorMatchRow({
-            indexField: newThreatIndicatorRule.indicatorMappingField,
+            indexField: getNewThreatIndicatorRule().indicatorMappingField,
             indicatorIndexField: 'non-existent-value',
             validColumns: 'indexField',
           });
           getIndicatorAndButton().click();
           fillIndicatorMatchRow({
             rowNumber: 2,
-            indexField: newThreatIndicatorRule.indicatorMappingField,
+            indexField: getNewThreatIndicatorRule().indicatorMappingField,
             indicatorIndexField: 'second-non-existent-value',
             validColumns: 'indexField',
           });
@@ -292,14 +292,14 @@ describe('indicator match', () => {
         it('Deletes the first row when you have two rows. Both rows have valid "indicator index fields" and invalid "index fields". The second row should become the first row', () => {
           fillIndicatorMatchRow({
             indexField: 'non-existent-value',
-            indicatorIndexField: newThreatIndicatorRule.indicatorIndexField,
+            indicatorIndexField: getNewThreatIndicatorRule().indicatorIndexField,
             validColumns: 'indicatorField',
           });
           getIndicatorAndButton().click();
           fillIndicatorMatchRow({
             rowNumber: 2,
             indexField: 'second-non-existent-value',
-            indicatorIndexField: newThreatIndicatorRule.indicatorIndexField,
+            indicatorIndexField: getNewThreatIndicatorRule().indicatorIndexField,
             validColumns: 'indicatorField',
           });
           getIndicatorDeleteButton().click();
@@ -310,8 +310,8 @@ describe('indicator match', () => {
 
         it('Deletes the first row of data but not the UI elements and the text defaults back to the placeholder of Search', () => {
           fillIndicatorMatchRow({
-            indexField: newThreatIndicatorRule.indicatorMappingField,
-            indicatorIndexField: newThreatIndicatorRule.indicatorIndexField,
+            indexField: getNewThreatIndicatorRule().indicatorMappingField,
+            indicatorIndexField: getNewThreatIndicatorRule().indicatorIndexField,
           });
           getIndicatorDeleteButton().click();
           getIndicatorIndexComboField().should('text', 'Search');
@@ -322,8 +322,8 @@ describe('indicator match', () => {
 
         it('Deletes the second row when you have three rows. The first row is valid data, the second row is invalid data, and the third row is valid data. Third row should shift up correctly', () => {
           fillIndicatorMatchRow({
-            indexField: newThreatIndicatorRule.indicatorMappingField,
-            indicatorIndexField: newThreatIndicatorRule.indicatorIndexField,
+            indexField: getNewThreatIndicatorRule().indicatorMappingField,
+            indicatorIndexField: getNewThreatIndicatorRule().indicatorIndexField,
           });
           getIndicatorAndButton().click();
           fillIndicatorMatchRow({
@@ -335,25 +335,25 @@ describe('indicator match', () => {
           getIndicatorAndButton().click();
           fillIndicatorMatchRow({
             rowNumber: 3,
-            indexField: newThreatIndicatorRule.indicatorMappingField,
-            indicatorIndexField: newThreatIndicatorRule.indicatorIndexField,
+            indexField: getNewThreatIndicatorRule().indicatorMappingField,
+            indicatorIndexField: getNewThreatIndicatorRule().indicatorIndexField,
           });
           getIndicatorDeleteButton(2).click();
           getIndicatorIndexComboField(1).should(
             'text',
-            newThreatIndicatorRule.indicatorMappingField
+            getNewThreatIndicatorRule().indicatorMappingField
           );
           getIndicatorMappingComboField(1).should(
             'text',
-            newThreatIndicatorRule.indicatorIndexField
+            getNewThreatIndicatorRule().indicatorIndexField
           );
           getIndicatorIndexComboField(2).should(
             'text',
-            newThreatIndicatorRule.indicatorMappingField
+            getNewThreatIndicatorRule().indicatorMappingField
           );
           getIndicatorMappingComboField(2).should(
             'text',
-            newThreatIndicatorRule.indicatorIndexField
+            getNewThreatIndicatorRule().indicatorIndexField
           );
           getIndicatorIndexComboField(3).should('not.exist');
           getIndicatorMappingComboField(3).should('not.exist');
@@ -368,17 +368,17 @@ describe('indicator match', () => {
           getIndicatorOrButton().click();
           fillIndicatorMatchRow({
             rowNumber: 2,
-            indexField: newThreatIndicatorRule.indicatorMappingField,
-            indicatorIndexField: newThreatIndicatorRule.indicatorIndexField,
+            indexField: getNewThreatIndicatorRule().indicatorMappingField,
+            indicatorIndexField: getNewThreatIndicatorRule().indicatorIndexField,
           });
           getIndicatorDeleteButton().click();
           getIndicatorIndexComboField().should(
             'text',
-            newThreatIndicatorRule.indicatorMappingField
+            getNewThreatIndicatorRule().indicatorMappingField
           );
           getIndicatorMappingComboField().should(
             'text',
-            newThreatIndicatorRule.indicatorIndexField
+            getNewThreatIndicatorRule().indicatorIndexField
           );
           getIndicatorIndexComboField(2).should('not.exist');
           getIndicatorMappingComboField(2).should('not.exist');
@@ -399,9 +399,9 @@ describe('indicator match', () => {
         waitForRulesTableToBeLoaded();
         goToCreateNewRule();
         selectIndicatorMatchType();
-        fillDefineIndicatorMatchRuleAndContinue(newThreatIndicatorRule);
-        fillAboutRuleAndContinue(newThreatIndicatorRule);
-        fillScheduleRuleAndContinue(newThreatIndicatorRule);
+        fillDefineIndicatorMatchRuleAndContinue(getNewThreatIndicatorRule());
+        fillAboutRuleAndContinue(getNewThreatIndicatorRule());
+        fillScheduleRuleAndContinue(getNewThreatIndicatorRule());
         createAndActivateRule();
 
         cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
@@ -417,18 +417,18 @@ describe('indicator match', () => {
         cy.get(RULES_TABLE).then(($table) => {
           cy.wrap($table.find(RULES_ROW).length).should('eql', 1);
         });
-        cy.get(RULE_NAME).should('have.text', newThreatIndicatorRule.name);
-        cy.get(RISK_SCORE).should('have.text', newThreatIndicatorRule.riskScore);
-        cy.get(SEVERITY).should('have.text', newThreatIndicatorRule.severity);
+        cy.get(RULE_NAME).should('have.text', getNewThreatIndicatorRule().name);
+        cy.get(RISK_SCORE).should('have.text', getNewThreatIndicatorRule().riskScore);
+        cy.get(SEVERITY).should('have.text', getNewThreatIndicatorRule().severity);
         cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
         goToRuleDetails();
 
-        cy.get(RULE_NAME_HEADER).should('contain', `${newThreatIndicatorRule.name}`);
-        cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', newThreatIndicatorRule.description);
+        cy.get(RULE_NAME_HEADER).should('contain', `${getNewThreatIndicatorRule().name}`);
+        cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', getNewThreatIndicatorRule().description);
         cy.get(ABOUT_DETAILS).within(() => {
-          getDetails(SEVERITY_DETAILS).should('have.text', newThreatIndicatorRule.severity);
-          getDetails(RISK_SCORE_DETAILS).should('have.text', newThreatIndicatorRule.riskScore);
+          getDetails(SEVERITY_DETAILS).should('have.text', getNewThreatIndicatorRule().severity);
+          getDetails(RISK_SCORE_DETAILS).should('have.text', getNewThreatIndicatorRule().riskScore);
           getDetails(REFERENCE_URLS_DETAILS).should((details) => {
             expect(removeExternalLinkText(details.text())).equal(expectedUrls);
           });
@@ -444,18 +444,20 @@ describe('indicator match', () => {
         cy.get(DEFINITION_DETAILS).within(() => {
           getDetails(INDEX_PATTERNS_DETAILS).should(
             'have.text',
-            newThreatIndicatorRule.index.join('')
+            getNewThreatIndicatorRule().index.join('')
           );
           getDetails(CUSTOM_QUERY_DETAILS).should('have.text', '*:*');
           getDetails(RULE_TYPE_DETAILS).should('have.text', 'Indicator Match');
           getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
           getDetails(INDICATOR_INDEX_PATTERNS).should(
             'have.text',
-            newThreatIndicatorRule.indicatorIndexPattern.join('')
+            getNewThreatIndicatorRule().indicatorIndexPattern.join('')
           );
           getDetails(INDICATOR_MAPPING).should(
             'have.text',
-            `${newThreatIndicatorRule.indicatorMappingField} MATCHES ${newThreatIndicatorRule.indicatorIndexField}`
+            `${getNewThreatIndicatorRule().indicatorMappingField} MATCHES ${
+              getNewThreatIndicatorRule().indicatorIndexField
+            }`
           );
           getDetails(INDICATOR_INDEX_QUERY).should('have.text', '*:*');
         });
@@ -463,11 +465,15 @@ describe('indicator match', () => {
         cy.get(SCHEDULE_DETAILS).within(() => {
           getDetails(RUNS_EVERY_DETAILS).should(
             'have.text',
-            `${newThreatIndicatorRule.runsEvery.interval}${newThreatIndicatorRule.runsEvery.type}`
+            `${getNewThreatIndicatorRule().runsEvery.interval}${
+              getNewThreatIndicatorRule().runsEvery.type
+            }`
           );
           getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should(
             'have.text',
-            `${newThreatIndicatorRule.lookBack.interval}${newThreatIndicatorRule.lookBack.type}`
+            `${getNewThreatIndicatorRule().lookBack.interval}${
+              getNewThreatIndicatorRule().lookBack.type
+            }`
           );
         });
 
@@ -475,13 +481,15 @@ describe('indicator match', () => {
         waitForAlertsToPopulate();
 
         cy.get(NUMBER_OF_ALERTS).should('have.text', expectedNumberOfAlerts);
-        cy.get(ALERT_RULE_NAME).first().should('have.text', newThreatIndicatorRule.name);
+        cy.get(ALERT_RULE_NAME).first().should('have.text', getNewThreatIndicatorRule().name);
         cy.get(ALERT_RULE_VERSION).first().should('have.text', '1');
         cy.get(ALERT_RULE_METHOD).first().should('have.text', 'threat_match');
         cy.get(ALERT_RULE_SEVERITY)
           .first()
-          .should('have.text', newThreatIndicatorRule.severity.toLowerCase());
-        cy.get(ALERT_RULE_RISK_SCORE).first().should('have.text', newThreatIndicatorRule.riskScore);
+          .should('have.text', getNewThreatIndicatorRule().severity.toLowerCase());
+        cy.get(ALERT_RULE_RISK_SCORE)
+          .first()
+          .should('have.text', getNewThreatIndicatorRule().riskScore);
       });
 
       it('Investigate alert in timeline', () => {
@@ -492,7 +500,7 @@ describe('indicator match', () => {
         loadPrepackagedTimelineTemplates();
 
         goToManageAlertsDetectionRules();
-        createCustomIndicatorRule(newThreatIndicatorRule);
+        createCustomIndicatorRule(getNewThreatIndicatorRule());
 
         reload();
         goToRuleDetails();
@@ -502,13 +510,25 @@ describe('indicator match', () => {
         cy.get(PROVIDER_BADGE).should('have.length', 3);
         cy.get(PROVIDER_BADGE).should(
           'have.text',
-          `threat.indicator.matched.atomic: "${newThreatIndicatorRule.atomic}"threat.indicator.matched.type: "indicator_match_rule"threat.indicator.matched.field: "${newThreatIndicatorRule.indicatorMappingField}"`
+          `threat.indicator.matched.atomic: "${
+            getNewThreatIndicatorRule().atomic
+          }"threat.indicator.matched.type: "indicator_match_rule"threat.indicator.matched.field: "${
+            getNewThreatIndicatorRule().indicatorMappingField
+          }"`
         );
 
         cy.readFile(threatIndicatorPath).then((threatIndicator) => {
           cy.get(INDICATOR_MATCH_ROW_RENDER).should(
             'have.text',
-            `threat.indicator.matched.field${newThreatIndicatorRule.indicatorMappingField}${accessibilityText}matched${newThreatIndicatorRule.indicatorMappingField}${newThreatIndicatorRule.atomic}${accessibilityText}threat.indicator.matched.typeindicator_match_rule${accessibilityText}fromthreat.indicator.event.dataset${threatIndicator.value.source.event.dataset}${accessibilityText}:threat.indicator.event.reference${threatIndicator.value.source.event.reference}(opens in a new tab or window)${accessibilityText}`
+            `threat.indicator.matched.field${
+              getNewThreatIndicatorRule().indicatorMappingField
+            }${accessibilityText}matched${getNewThreatIndicatorRule().indicatorMappingField}${
+              getNewThreatIndicatorRule().atomic
+            }${accessibilityText}threat.indicator.matched.typeindicator_match_rule${accessibilityText}fromthreat.indicator.event.dataset${
+              threatIndicator.value.source.event.dataset
+            }${accessibilityText}:threat.indicator.event.reference${
+              threatIndicator.value.source.event.reference
+            }(opens in a new tab or window)${accessibilityText}`
           );
         });
       });
@@ -519,7 +539,7 @@ describe('indicator match', () => {
         cleanKibana();
         loginAndWaitForPageWithoutDateRange(ALERTS_URL);
         goToManageAlertsDetectionRules();
-        createCustomIndicatorRule(newThreatIndicatorRule);
+        createCustomIndicatorRule(getNewThreatIndicatorRule());
         reload();
       });
 

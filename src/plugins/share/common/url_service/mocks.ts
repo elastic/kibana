@@ -16,7 +16,7 @@ export class MockUrlService extends UrlService {
     super({
       navigate: async () => {},
       getUrl: async ({ app, path }, { absolute }) => {
-        return `${absolute ? 'https://example.com' : ''}/app/${app}${path}`;
+        return `${absolute ? 'http://localhost:8888' : ''}/app/${app}${path}`;
       },
     });
   }
