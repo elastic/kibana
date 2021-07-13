@@ -33,7 +33,6 @@ import { SeriesName } from '../series_viewer/columns/series_name';
 import { ReportTypesSelect } from './columns/report_type_select';
 import { ViewActions } from '../views/view_actions';
 import { ReportMetricOptions } from './report_metric_options';
-import { SeriesFooter } from './columns/series_footer';
 import { Breakdowns } from '../series_viewer/columns/breakdowns';
 
 export interface ReportTypeItem {
@@ -185,7 +184,6 @@ export const SeriesEditor = React.memo(function ({}: {}) {
       }),
       field: 'id',
       width: '20%',
-      footer: <SeriesFooter allSeries={allSeries} />,
       render: (seriesId: string, { series }: BuilderItem) => (
         <SeriesName seriesId={seriesId} series={series} />
       ),

@@ -55,10 +55,14 @@ export function ExploratoryViewHeader({ seriesId, lensAttributes, lastUpdated }:
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton iconType="refresh" onClick={() => setLastRefresh(Date.now())}>
-            Refresh
+            {REFRESH_LABEL}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
   );
 }
+
+const REFRESH_LABEL = i18n.translate('xpack.observability.overview.exploratoryView.refresh', {
+  defaultMessage: 'Refresh',
+});

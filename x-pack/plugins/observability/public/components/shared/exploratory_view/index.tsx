@@ -59,11 +59,9 @@ export function ExploratoryViewPage({
   return (
     <Wrapper>
       <IndexPatternContextProvider>
-        <UIContextProvider>
-          <UrlStorageContextProvider storage={kbnUrlStateStorage}>
-            <ExploratoryView saveAttributes={saveAttributes} />
-          </UrlStorageContextProvider>
-        </UIContextProvider>
+        <UrlStorageContextProvider storage={kbnUrlStateStorage}>
+          <ExploratoryView saveAttributes={saveAttributes} />
+        </UrlStorageContextProvider>
       </IndexPatternContextProvider>
     </Wrapper>
   );

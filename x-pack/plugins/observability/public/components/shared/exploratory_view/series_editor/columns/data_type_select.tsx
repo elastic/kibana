@@ -7,9 +7,10 @@
 
 import React from 'react';
 import { EuiSuperSelect } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { AppDataType, SeriesUrl } from '../../types';
-import { DataTypes } from '../../configurations/constants';
+import { DataTypes, ReportTypes } from '../../configurations/constants';
 
 interface Props {
   seriesId: string;
@@ -36,11 +37,11 @@ export function DataTypesSelect({ seriesId, series }: Props) {
 
   const options = dataTypes
     .filter(({ id }) => {
-      if (reportType === 'device-data-distribution') {
-        return id === 'mobile';
+      if (reportType === ReportTypes.DEVICE_DISTRIBUTION) {
+        return id === DataTypes.MOBILE;
       }
-      if (reportType === 'core-web-vitals') {
-        return id === 'ux';
+      if (reportType === ReportTypes.CORE_WEB_VITAL) {
+        return id === DataTypes.UX;
       }
       return true;
     })
@@ -55,7 +56,7 @@ export function DataTypesSelect({ seriesId, series }: Props) {
       options={
         series.dataType
           ? options
-          : [{ value: SELECT_DATA_TYPE, inputDisplay: 'Select data type' }, ...options]
+          : [{ value: SELECT_DATA_TYPE, inputDisplay: SELECT_DATA_TYPE_LABEL }, ...options]
       }
       valueOfSelected={series.dataType ?? SELECT_DATA_TYPE}
       onChange={(value) => onDataTypeChange(value as AppDataType)}
@@ -63,3 +64,10 @@ export function DataTypesSelect({ seriesId, series }: Props) {
     />
   );
 }
+
+const SELECT_DATA_TYPE_LABEL = i18n.translate(
+  'xpack.observability.overview.exploratoryView.selectDataType',
+  {
+    defaultMessage: 'Select data type',
+  }
+);

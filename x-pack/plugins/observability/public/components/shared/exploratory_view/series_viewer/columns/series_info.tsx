@@ -9,19 +9,12 @@ import React from 'react';
 import { isEmpty } from 'lodash';
 import { EuiBadge, EuiBadgeGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import { SeriesChartTypes } from './chart_types';
-import { AppDataType, SeriesConfig, SeriesUrl } from '../../types';
+import { SeriesConfig, SeriesUrl } from '../../types';
 import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
 import { SeriesColorPicker } from '../../components/series_color_picker';
-
-const dataTypes: Record<AppDataType, string> = {
-  synthetics: 'Synthetics Monitoring',
-  ux: 'User Experience',
-  mobile: 'Mobile Experience',
-  apm: 'APM',
-  infra_logs: 'Logs',
-  infra_metrics: 'Metrics',
-};
+import { dataTypes } from '../../series_editor/columns/data_type_select';
 
 interface Props {
   seriesId: string;
@@ -46,13 +39,16 @@ export function SeriesInfo({ seriesId, series, seriesConfig }: Props) {
   const { definitionFields, labels } = seriesConfig;
 
   const incompleteDefinition = isEmpty(reportDefinitions)
-    ? `Missing ${labels?.[definitionFields[0]]}`
+    ? i18n.translate('xpack.observability.overview.exploratoryView.missingReportDefinition', {
+        defaultMessage: 'Missing {reportDefinition}',
+        values: { reportDefinition: labels?.[definitionFields[0]] },
+      })
     : '';
 
-  let incompleteMessage = !selectedMetricField ? 'Missing report metric' : incompleteDefinition;
+  let incompleteMessage = !selectedMetricField ? MISSING_REPORT_METRIC_LABEL : incompleteDefinition;
 
   if (!dataType) {
-    incompleteMessage = 'Missing Data type';
+    incompleteMessage = MISSING_DATA_TYPE_LABEL;
   }
 
   if (!isIncomplete && seriesConfig && isConfigure) {
@@ -76,10 +72,24 @@ export function SeriesInfo({ seriesId, series, seriesConfig }: Props) {
       {!isConfigure && (
         <EuiFlexItem>
           <EuiBadgeGroup>
-            <EuiBadge>{dataTypes[dataType]}</EuiBadge>
+            <EuiBadge>{dataTypes.find(({ id }) => id === dataType)!.label}</EuiBadge>
           </EuiBadgeGroup>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
   );
 }
+
+const MISSING_REPORT_METRIC_LABEL = i18n.translate(
+  'xpack.observability.overview.exploratoryView.missingReportMetric',
+  {
+    defaultMessage: 'Missing report metric',
+  }
+);
+
+const MISSING_DATA_TYPE_LABEL = i18n.translate(
+  'xpack.observability.overview.exploratoryView.missingDataType',
+  {
+    defaultMessage: 'Missing data type',
+  }
+);

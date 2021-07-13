@@ -7,6 +7,7 @@
 
 import React, { useState } from 'react';
 import { EuiColorPicker, EuiFormRow, EuiIcon, EuiPopover, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useTheme } from '../../../../hooks/use_theme';
 import { useSeriesStorage } from '../hooks/use_series_storage';
 import { ToolbarButton } from '../../../../../../../../src/plugins/kibana_react/public';
@@ -28,7 +29,7 @@ export function SeriesColorPicker({ seriesId, series }: { seriesId: string; seri
     ((theme.eui as unknown) as Record<string, string>)[`euiColorVis${series.order}`];
 
   const button = (
-    <EuiToolTip content={'Edit color for series'}>
+    <EuiToolTip content={EDIT_SERIES_COLOR_LABEL}>
       <ToolbarButton size="s" onClick={() => setIsOpen((prevState) => !prevState)} hasArrow={false}>
         <EuiIcon type="dot" size="l" color={color} />
       </ToolbarButton>
@@ -37,9 +38,23 @@ export function SeriesColorPicker({ seriesId, series }: { seriesId: string; seri
 
   return (
     <EuiPopover button={button} isOpen={isOpen} closePopover={() => setIsOpen(false)}>
-      <EuiFormRow label="Pick a color">
+      <EuiFormRow label={PICK_A_COLOR_LABEL}>
         <EuiColorPicker onChange={onChange} color={color} />
       </EuiFormRow>
     </EuiPopover>
   );
 }
+
+const PICK_A_COLOR_LABEL = i18n.translate(
+  'xpack.observability.overview.exploratoryView.pickColor',
+  {
+    defaultMessage: 'Pick a color',
+  }
+);
+
+const EDIT_SERIES_COLOR_LABEL = i18n.translate(
+  'xpack.observability.overview.exploratoryView.editSeriesColor',
+  {
+    defaultMessage: 'Edit color for series',
+  }
+);
