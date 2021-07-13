@@ -7,9 +7,9 @@
 
 import { SearchHit } from '@elastic/elasticsearch/api/types';
 
-import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
-import { SignalSource, ThresholdSignalHistory } from '../signals/types';
-import { getThresholdTermsHash } from '../signals/utils';
+import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
+import { SignalSource, ThresholdSignalHistory } from '../../signals/types';
+import { getThresholdTermsHash } from '../../signals/utils';
 
 interface GetThresholdSignalHistoryParams {
   alerts: Array<SearchHit<SignalSource>>;

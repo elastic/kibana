@@ -8,17 +8,19 @@
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
-import { createRuleTypeMocks } from './__mocks__/rule_type';
-import { mockThresholdResults } from './__mocks__/threshold';
-import { createThresholdAlertType } from './threshold';
+import { createRuleTypeMocks } from '../__mocks__/rule_type';
+import { mockThresholdResults } from '../__mocks__/threshold';
+import { createThresholdAlertType } from './create_threshold_alert_type';
 
 describe('Threshold alerts', () => {
   it('does not send an alert when threshold is not met', async () => {
     const { services, dependencies, executor } = createRuleTypeMocks();
-    const thresholdAlertType = createThresholdAlertType(
-      dependencies.ruleDataClient,
-      dependencies.logger
-    );
+    const thresholdAlertType = createThresholdAlertType({
+      lists: '',
+      logger: dependencies.logger,
+      mergeStrategy: 'allFields', // TODO: is this what we want?
+      ruleDataClient: dependencies.ruleDataClient,
+    });
 
     dependencies.alerting.registerType(thresholdAlertType);
 
@@ -62,10 +64,12 @@ describe('Threshold alerts', () => {
 
   it('sends a properly formatted alert when threshold is met', async () => {
     const { services, dependencies, executor } = createRuleTypeMocks();
-    const thresholdAlertType = createThresholdAlertType(
-      dependencies.ruleDataClient,
-      dependencies.logger
-    );
+    const thresholdAlertType = createThresholdAlertType({
+      lists: '',
+      logger: dependencies.logger,
+      mergeStrategy: 'allFields',
+      ruleDataClient: dependencies.ruleDataClient,
+    });
 
     dependencies.alerting.registerType(thresholdAlertType);
 

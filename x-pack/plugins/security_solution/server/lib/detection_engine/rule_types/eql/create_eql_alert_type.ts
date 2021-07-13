@@ -12,15 +12,15 @@ import { ApiResponse } from '@elastic/elasticsearch';
 import { Logger } from '@kbn/logging';
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 
-import { RuleDataClient } from '../../../../../rule_registry/server';
-import { EQL_ALERT_TYPE_ID } from '../../../../common/constants';
-import { buildEqlSearchRequest } from '../../../../common/detection_engine/get_query_filter';
-import { SetupPlugins } from '../../../../target/types/server/plugin';
-import { eqlRuleParams, EqlRuleParams } from '../schemas/rule_schemas';
-import { BaseSignalHit, EqlSignalSearchResponse } from '../signals/types';
-import { createSecurityRuleTypeFactory } from './create_security_rule_type_factory';
-import { createResultObject } from './utils';
-import { ConfigType } from '../../../config';
+import { RuleDataClient } from '../../../../../../rule_registry/server';
+import { EQL_ALERT_TYPE_ID } from '../../../../../common/constants';
+import { buildEqlSearchRequest } from '../../../../../common/detection_engine/get_query_filter';
+import { SetupPlugins } from '../../../../../target/types/server/plugin';
+import { eqlRuleParams, EqlRuleParams } from '../../schemas/rule_schemas';
+import { BaseSignalHit, EqlSignalSearchResponse } from '../../signals/types';
+import { createSecurityRuleTypeFactory } from '../create_security_rule_type_factory';
+import { createResultObject } from '../utils';
+import { ConfigType } from '../../../../config';
 
 interface EqlAlertState {
   [key: string]: never;

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { isEmpty } from 'lodash';
 import { Moment } from 'moment';
 import { flow } from 'fp-ts/lib/function';
@@ -39,14 +40,14 @@ import {
 } from '../signals/utils';
 import { RuleParams } from '../schemas/rule_schemas';
 import { DEFAULT_MAX_SIGNALS, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
-import { SecurityAlertTypeReturnValue } from './types';
-import { newGetListsClient } from './utils/get_new_list_client';
 import { ListClient } from '../../../../../lists/server';
 import { AlertAttributes, BulkCreate, WrapHits } from '../signals/types';
 import { SavedObject } from '../../../../../../../src/core/server';
-import { bulkCreateFactory } from './bulk_create_factory';
-import { wrapHitsFactory } from './wrap_hits_factory';
 import { ConfigType } from '../../../config';
+import { bulkCreateFactory } from './factories/bulk_create_factory';
+import { wrapHitsFactory } from './factories/wrap_hits_factory';
+import { SecurityAlertTypeReturnValue } from './types';
+import { getListClient } from './utils/get_list_client';
 import {
   NotificationRuleTypeParams,
   scheduleNotificationActions,
@@ -245,7 +246,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
       }
 
       try {
-        const { listClient, exceptionsClient } = newGetListsClient({
+        const { listClient, exceptionsClient } = getListClient({
           esClient: services.scopedClusterClient.asCurrentUser,
           updatedByUser,
           spaceId,

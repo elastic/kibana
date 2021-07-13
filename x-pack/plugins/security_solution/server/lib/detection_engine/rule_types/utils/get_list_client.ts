@@ -8,7 +8,7 @@
 import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../../../lists/server';
 
-export const newGetListsClient = ({
+export const getListClient = ({
   lists,
   spaceId,
   updatedByUser,

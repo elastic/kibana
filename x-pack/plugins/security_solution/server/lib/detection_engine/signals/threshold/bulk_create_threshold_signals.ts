@@ -6,11 +6,12 @@
  */
 import { get } from 'lodash/fp';
 import set from 'set-value';
+import { Logger } from '@kbn/logging';
+import { SavedObject } from 'kibana/server';
 import {
   ThresholdNormalized,
   TimestampOverrideOrUndefined,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { Logger, SavedObject } from '../../../../../../../../src/core/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,

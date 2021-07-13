@@ -6,84 +6,23 @@
  */
 
 import moment from 'moment';
-import v4 from 'uuid/v4';
 
-import { SearchHit } from '@elastic/elasticsearch/api/types';
 import { Logger } from '@kbn/logging';
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 
-import { AlertServices, AlertTypeState } from '../../../../../alerting/server';
-import { PersistenceServices, RuleDataClient } from '../../../../../rule_registry/server';
-import { THRESHOLD_ALERT_TYPE_ID } from '../../../../common/constants';
-import { SetupPlugins } from '../../../../target/types/server/plugin';
-import { thresholdRuleParams, ThresholdRuleParams } from '../schemas/rule_schemas';
-import { SignalSearchResponse, SignalSource } from '../signals/types';
-import {
-  findThresholdSignals,
-  getThresholdBucketFilters,
-  transformThresholdResultsToEcs,
-} from '../signals/threshold';
+import { AlertServices } from '../../../../../../alerting/server';
+import { PersistenceServices, RuleDataClient } from '../../../../../../rule_registry/server';
+import { THRESHOLD_ALERT_TYPE_ID } from '../../../../../common/constants';
+import { SetupPlugins } from '../../../../../target/types/server/plugin';
+import { thresholdRuleParams, ThresholdRuleParams } from '../../schemas/rule_schemas';
+import { findThresholdSignals, getThresholdBucketFilters } from '../../signals/threshold';
 import { buildThresholdSignalHistory } from './build_threshold_signal_history';
-import { getFilter } from '../signals/get_filter';
-import { BuildRuleMessage } from '../signals/rule_messages';
-import { createSecurityRuleTypeFactory } from './create_security_rule_type_factory';
-import { createResultObject } from './utils';
-import { ConfigType } from '../../../config';
-import { SearchTypes } from '../../../../common/detection_engine/types';
-
-interface ThresholdSignalHistoryRecord {
-  terms: Array<{
-    field?: string;
-    value: SearchTypes;
-  }>;
-  lastSignalTimestamp: number;
-}
-
-interface ThresholdSignalHistory {
-  [hash: string]: ThresholdSignalHistoryRecord;
-}
-interface ThresholdAlertState extends AlertTypeState {
-  signalHistory: ThresholdSignalHistory;
-}
-interface BulkCreateThresholdSignalParams {
-  results: SignalSearchResponse;
-  ruleParams: ThresholdRuleParams;
-  services: AlertServices & { logger: Logger };
-  inputIndexPattern: string[];
-  ruleId: string;
-  startedAt: Date;
-  from: Date;
-  thresholdSignalHistory: ThresholdSignalHistory;
-  buildRuleMessage: BuildRuleMessage;
-}
-
-const formatThresholdSignals = (
-  params: BulkCreateThresholdSignalParams
-): Array<SearchHit<SignalSource>> => {
-  const { index, threshold } = params.ruleParams;
-  const thresholdResults = params.results;
-  const results = transformThresholdResultsToEcs(
-    thresholdResults,
-    (index ?? []).join(','),
-    params.startedAt,
-    params.from,
-    undefined,
-    params.services.logger,
-    threshold,
-    params.ruleId,
-    undefined,
-    params.thresholdSignalHistory
-  );
-  return results.hits.hits.map((hit) => {
-    return {
-      ...hit,
-      'event.kind': 'signal',
-      'kibana.rac.alert.id': '???',
-      'kibana.rac.alert.uuid': v4(),
-      '@timestamp': new Date().toISOString(),
-    };
-  });
-};
+import { getFilter } from '../../signals/get_filter';
+import { createSecurityRuleTypeFactory } from '../create_security_rule_type_factory';
+import { createResultObject } from '../utils';
+import { ConfigType } from '../../../../config';
+import { ThresholdAlertState } from './types';
+import { formatThresholdSignals } from './format_threshold_signals';
 
 export const createThresholdAlertType = (createOptions: {
   lists: SetupPlugins['lists'];

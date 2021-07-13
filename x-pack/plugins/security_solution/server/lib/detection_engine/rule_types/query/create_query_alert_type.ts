@@ -8,20 +8,18 @@
 import { Logger } from '@kbn/logging';
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 
-import { PersistenceServices, RuleDataClient } from '../../../../../rule_registry/server';
-import { CUSTOM_ALERT_TYPE_ID } from '../../../../common/constants';
-import { SetupPlugins } from '../../../../target/types/server/plugin';
-import { ConfigType } from '../../../config';
+import { PersistenceServices, RuleDataClient } from '../../../../../../rule_registry/server';
+import { CUSTOM_ALERT_TYPE_ID } from '../../../../../common/constants';
+import { SetupPlugins } from '../../../../../target/types/server/plugin';
+import { ConfigType } from '../../../../config';
 
-import { queryRuleParams, QueryRuleParams } from '../schemas/rule_schemas';
-import { getFilter } from '../signals/get_filter';
-import { searchAfterAndBulkCreate } from '../signals/search_after_bulk_create';
+import { queryRuleParams, QueryRuleParams } from '../../schemas/rule_schemas';
+import { getFilter } from '../../signals/get_filter';
+import { searchAfterAndBulkCreate } from '../../signals/search_after_bulk_create';
 
-import { createSecurityRuleTypeFactory } from './create_security_rule_type_factory';
-import { createResultObject } from './utils';
-interface QueryAlertState {
-  [key: string]: never;
-}
+import { createSecurityRuleTypeFactory } from '../create_security_rule_type_factory';
+import { createResultObject } from '../utils';
+import { QueryAlertState } from './types';
 
 export const createQueryAlertType = (createOptions: {
   lists: SetupPlugins['lists'];
