@@ -42,7 +42,8 @@ export const timelineEventsAll: TimelineFactory<TimelineEventsQueries.all> = {
     const hits = response.rawResponse.hits.hits;
 
     if (fieldRequested.includes('*') && hits.length > 0) {
-      fieldRequested = Object.keys(hits[0]?.fields ?? {}).reduce((acc, f) => {
+      const fieldsReturned = hits.flatMap((hit) => Object.keys(hit.fields ?? {}));
+      fieldRequested = fieldsReturned.reduce((acc, f) => {
         if (!acc.includes(f)) {
           return [...acc, f];
         }
@@ -59,6 +60,7 @@ export const timelineEventsAll: TimelineFactory<TimelineEventsQueries.all> = {
         )
       )
     );
+
     const inspect = {
       dsl: [inspectStringifyObject(buildTimelineEventsAllQuery(queryOptions))],
     };
