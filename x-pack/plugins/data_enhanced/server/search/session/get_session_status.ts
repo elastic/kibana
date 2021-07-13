@@ -10,14 +10,21 @@ import {
   SearchSessionSavedObjectAttributes,
   SearchSessionStatus,
 } from '../../../../../../src/plugins/data/common/';
-import { SearchStatus } from './types';
+import { SearchSessionsConfig, SearchStatus } from './types';
 
-export function getSessionStatus(session: SearchSessionSavedObjectAttributes): SearchSessionStatus {
+export function getSessionStatus(
+  session: SearchSessionSavedObjectAttributes,
+  config: SearchSessionsConfig
+): SearchSessionStatus {
   const searchStatuses = Object.values(session.idMapping);
   const curTime = moment();
   if (searchStatuses.some((item) => item.status === SearchStatus.ERROR)) {
     return SearchSessionStatus.ERROR;
-  } else if (curTime.diff(moment(session.touched), 'ms') > 60000) {
+  } else if (
+    searchStatuses.length === 0 &&
+    curTime.diff(moment(session.touched), 'ms') >
+      moment.duration(config.notTouchedInProgressTimeout).asMilliseconds()
+  ) {
     // Expire empty sessions that weren't touched for a minute
     return SearchSessionStatus.EXPIRED;
   } else if (
