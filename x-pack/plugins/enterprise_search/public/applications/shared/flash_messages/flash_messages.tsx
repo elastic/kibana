@@ -18,7 +18,7 @@ export const FlashMessages: React.FC = ({ children }) => {
   const { messages } = useValues(FlashMessagesLogic);
 
   return (
-    <div role="alert" aria-live="polite" data-test-subj="FlashMessages">
+    <div aria-live="polite" data-test-subj="FlashMessages">
       {messages.map(({ type, message, description }, index) => (
         <Fragment key={index}>
           <EuiCallOut

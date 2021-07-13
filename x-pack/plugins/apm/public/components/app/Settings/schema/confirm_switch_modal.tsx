@@ -21,13 +21,11 @@ interface Props {
   onConfirm: () => void;
   onCancel: () => void;
   unsupportedConfigs: Array<{ key: string; value: string }>;
-  isLoading: boolean;
 }
 export function ConfirmSwitchModal({
   onConfirm,
   onCancel,
   unsupportedConfigs,
-  isLoading,
 }: Props) {
   const [isConfirmChecked, setIsConfirmChecked] = useState(false);
   const hasUnsupportedConfigs = !!unsupportedConfigs.length;
@@ -52,12 +50,11 @@ export function ConfirmSwitchModal({
       defaultFocusedButton="confirm"
       onConfirm={onConfirm}
       confirmButtonDisabled={!isConfirmChecked}
-      isLoading={isLoading}
     >
       <p>
         {i18n.translate('xpack.apm.settings.schema.confirm.descriptionText', {
           defaultMessage:
-            'If you have custom dashboards, machine learning jobs, or source maps that use classic APM indices, you must reconfigure them for data streams. Stack monitoring is not currently supported with Fleet-managed APM.',
+            'Please note Stack monitoring is not currently supported with Fleet-managed APM.',
         })}
       </p>
       {!hasUnsupportedConfigs && (
@@ -135,7 +132,6 @@ export function ConfirmSwitchModal({
           onChange={(e) => {
             setIsConfirmChecked(e.target.checked);
           }}
-          disabled={isLoading}
         />
       </p>
     </EuiConfirmModal>

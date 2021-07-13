@@ -51,7 +51,7 @@ import { TimelineId } from '../../../common/types/timeline';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
 import { useSourcererScope } from '../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hooks/use_selector';
-
+import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */
@@ -60,6 +60,8 @@ const StyledFullHeightContainer = styled.div`
   flex-direction: column;
   flex: 1 1 auto;
 `;
+
+const ID = 'NetworkQueryId';
 
 const NetworkComponent = React.memo<NetworkComponentProps>(
   ({ hasMlUserPermissions, capabilitiesFetched }) => {
@@ -133,18 +135,20 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
       [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
     );
 
-    const filterQuery = convertToBuildEsQuery({
+    const [filterQuery, kqlError] = convertToBuildEsQuery({
       config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
       indexPattern,
       queries: [query],
       filters,
     });
-    const tabsFilterQuery = convertToBuildEsQuery({
+    const [tabsFilterQuery] = convertToBuildEsQuery({
       config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
       indexPattern,
       queries: [query],
       filters: tabsFilters,
     });
+
+    useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
 
     return (
       <>
@@ -184,7 +188,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                   indexNames={selectedPatterns}
                   narrowDateRange={narrowDateRange}
                   setQuery={setQuery}
-                  skip={isInitializing}
+                  skip={isInitializing || filterQuery === undefined}
                   to={to}
                 />
               </Display>

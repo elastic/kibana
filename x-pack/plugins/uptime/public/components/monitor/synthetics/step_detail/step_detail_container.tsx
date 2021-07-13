@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useCallback, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
@@ -16,7 +16,7 @@ import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/
 import { useMonitorBreadcrumb } from './use_monitor_breadcrumb';
 import { ClientPluginsStart } from '../../../../apps/plugin';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { StepPageTitle } from './step_page_title';
+import { StepPageTitleContent } from './step_page_title';
 import { StepPageNavigation } from './step_page_nav';
 import { WaterfallChartContainer } from './waterfall/waterfall_chart_container';
 
@@ -78,10 +78,11 @@ export const StepDetailContainer: React.FC<Props> = ({ checkGroup, stepIndex }) 
   return (
     <PageTemplateComponent
       pageHeader={{
-        pageTitle:
+        pageTitle: journey && activeStep && activeStep.synthetics?.step?.name,
+        children:
           journey && activeStep ? (
-            <StepPageTitle
-              stepName={activeStep.synthetics?.step?.name}
+            <StepPageTitleContent
+              stepName={activeStep.synthetics?.step?.name ?? ''}
               stepIndex={stepIndex}
               totalSteps={journey.steps.length}
               hasPreviousStep={hasPreviousStep}
@@ -104,7 +105,7 @@ export const StepDetailContainer: React.FC<Props> = ({ checkGroup, stepIndex }) 
           : [],
       }}
     >
-      <EuiPanel>
+      <>
         {(!journey || journey.loading) && (
           <EuiFlexGroup justifyContent="center">
             <EuiFlexItem grow={false}>
@@ -124,7 +125,7 @@ export const StepDetailContainer: React.FC<Props> = ({ checkGroup, stepIndex }) 
         {journey && activeStep && !journey.loading && (
           <WaterfallChartContainer checkGroup={checkGroup} stepIndex={stepIndex} />
         )}
-      </EuiPanel>
+      </>
     </PageTemplateComponent>
   );
 };

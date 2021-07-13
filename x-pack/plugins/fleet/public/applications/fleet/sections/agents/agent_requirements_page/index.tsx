@@ -6,9 +6,4 @@
  */
 
 export { MissingESRequirementsPage } from './es_requirements_page';
-export {
-  FleetServerRequirementPage,
-  ServiceTokenStep,
-  FleetServerCommandStep,
-  useFleetServerInstructions,
-} from './fleet_server_requirement_page';
+export { FleetServerRequirementPage } from './fleet_server_requirement_page';

@@ -209,17 +209,23 @@ describe('EnterpriseSearchRequestHandler', () => {
           headers: mockExpectedResponseHeaders,
         });
       });
-    });
 
-    it('works if response contains no json data', async () => {
-      EnterpriseSearchAPI.mockReturn();
+      it('passes back the response body as-is if hasJsonResponse is false', async () => {
+        const mockFile = new File(['mockFile'], 'mockFile.json');
+        EnterpriseSearchAPI.mockReturn(mockFile);
 
-      const requestHandler = enterpriseSearchRequestHandler.createRequest({ path: '/api/prep' });
-      await makeAPICall(requestHandler);
+        const requestHandler = enterpriseSearchRequestHandler.createRequest({
+          path: '/api/file',
+          hasJsonResponse: false,
+        });
+        await makeAPICall(requestHandler);
 
-      expect(responseMock.custom).toHaveBeenCalledWith({
-        statusCode: 200,
-        headers: mockExpectedResponseHeaders,
+        EnterpriseSearchAPI.shouldHaveBeenCalledWith('http://localhost:3002/api/file');
+        expect(responseMock.custom).toHaveBeenCalledWith({
+          body: expect.any(Buffer), // Unfortunately Response() buffers the body so we can't actually inspect/equality assert on it
+          statusCode: 200,
+          headers: mockExpectedResponseHeaders,
+        });
       });
     });
   });
@@ -397,7 +403,7 @@ describe('EnterpriseSearchRequestHandler', () => {
         expect(responseMock.customError).toHaveBeenCalledWith({
           statusCode: 502,
           body: 'Cannot authenticate Enterprise Search user',
-          headers: mockExpectedResponseHeaders,
+          headers: { ...mockExpectedResponseHeaders, [ERROR_CONNECTING_HEADER]: 'true' },
         });
         expect(mockLogger.error).toHaveBeenCalled();
       });

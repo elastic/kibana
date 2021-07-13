@@ -10,6 +10,7 @@ import { RuleRegistryPlugin } from './plugin';
 
 export * from './config';
 export type { RuleRegistryPluginSetupContract, RuleRegistryPluginStartContract } from './plugin';
+export type { RacRequestHandlerContext, RacApiRequestHandlerContext } from './types';
 export { RuleDataClient } from './rule_data_client';
 export { IRuleDataClient } from './rule_data_client/types';
 export { getRuleExecutorData, RuleExecutorData } from './utils/get_rule_executor_data';

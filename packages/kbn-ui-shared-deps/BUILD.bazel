@@ -40,6 +40,7 @@ SRC_DEPS = [
   "@npm//@elastic/charts",
   "@npm//@elastic/eui",
   "@npm//@elastic/numeral",
+  "@npm//@emotion/react",
   "@npm//abortcontroller-polyfill",
   "@npm//angular",
   "@npm//babel-loader",
@@ -50,8 +51,6 @@ SRC_DEPS = [
   "@npm//fflate",
   "@npm//jquery",
   "@npm//loader-utils",
-  # TODO: we can remove this once EUI patches the dependencies
-  "@npm//mdast-util-to-hast",
   "@npm//mini-css-extract-plugin",
   "@npm//moment",
   "@npm//moment-timezone",

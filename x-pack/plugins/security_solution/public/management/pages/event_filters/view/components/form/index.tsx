@@ -206,7 +206,7 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
     return !isIndexPatternLoading && exception ? (
       <EuiForm component="div">
         <EuiText size="s">{FORM_DESCRIPTION}</EuiText>
-        <EuiSpacer size="s" />
+        <EuiSpacer size="m" />
         {nameInputMemo}
         <EuiSpacer size="m" />
         {allowSelectOs ? (

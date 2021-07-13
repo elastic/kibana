@@ -60,6 +60,7 @@ export const createRuleTypeMocks = () => {
             bulk: jest.fn(),
           };
         },
+        isWriteEnabled: jest.fn(() => true),
       } as unknown) as RuleDataClient,
     },
     services,
