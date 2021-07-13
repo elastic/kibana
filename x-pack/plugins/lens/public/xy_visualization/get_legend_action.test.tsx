@@ -11,7 +11,7 @@ import { EuiPopover } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test/jest';
 import { ComponentType, ReactWrapper } from 'enzyme';
 import type { LayerArgs } from './types';
-import type { LensMultiTable } from '../types';
+import type { LensMultiTable } from '../../common';
 import { getLegendAction } from './get_legend_action';
 import { LegendActionPopover } from '../shared_components';
 

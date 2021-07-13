@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { counterRate, CounterRateArgs } from '../counter_rate';
+import { counterRate, CounterRateArgs } from './counter_rate';
 
 import { Datatable } from 'src/plugins/expressions/public';
 import { functionWrapper } from 'src/plugins/expressions/common/expression_functions/specs/tests/utils';

@@ -7,7 +7,8 @@
 
 import type { EuiDataGridSorting } from '@elastic/eui';
 import type { Datatable, DatatableColumn } from 'src/plugins/expressions';
-import type { LensFilterEvent, LensMultiTable } from '../../types';
+import type { LensFilterEvent } from '../../types';
+import type { LensMultiTable } from '../../../common';
 import type {
   LensGridDirection,
   LensResizeAction,

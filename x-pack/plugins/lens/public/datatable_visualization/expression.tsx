@@ -25,7 +25,8 @@ import { getSortingCriteria } from './sorting';
 import { DatatableComponent } from './components/table_basic';
 import { ColumnState } from './visualization';
 
-import type { FormatFactory, ILensInterpreterRenderHandlers, LensMultiTable } from '../types';
+import type { FormatFactory, ILensInterpreterRenderHandlers } from '../types';
+import type { LensMultiTable } from '../../common';
 import type { DatatableRender } from './components/types';
 import { transposeTable } from './transpose_helpers';
 import { computeSummaryRowForColumn } from './summary';

@@ -10,11 +10,12 @@ import { I18nProvider } from '@kbn/i18n/react';
 import ReactDOM from 'react-dom';
 import React from 'react';
 import { Position } from '@elastic/charts';
-import {
+import type {
   ExpressionFunctionDefinition,
   IInterpreterRenderHandlers,
 } from '../../../../../src/plugins/expressions';
-import { FormatFactory, LensBrushEvent, LensFilterEvent, LensMultiTable } from '../types';
+import type { FormatFactory, LensBrushEvent, LensFilterEvent } from '../types';
+import type { LensMultiTable } from '../../common';
 import {
   FUNCTION_NAME,
   HEATMAP_GRID_FUNCTION,
@@ -29,8 +30,8 @@ import type {
   HeatmapRender,
   LegendConfigResult,
 } from './types';
-import { HeatmapLegendConfig } from './types';
-import { ChartsPluginSetup, PaletteRegistry } from '../../../../../src/plugins/charts/public';
+import type { HeatmapLegendConfig } from './types';
+import type { ChartsPluginSetup, PaletteRegistry } from '../../../../../src/plugins/charts/public';
 import { HeatmapChartReportable } from './chart_component';
 
 export const heatmapGridConfig: ExpressionFunctionDefinition<

@@ -14,7 +14,7 @@ import {
 import { ExpressionValueSearchContext, search } from '../../../../../src/plugins/data/public';
 const { toAbsoluteDates } = search.aggs;
 
-import { LensMultiTable } from '../types';
+import { LensMultiTable } from '../../common';
 import { Adapters } from '../../../../../src/plugins/inspector/common';
 
 interface MergeTables {

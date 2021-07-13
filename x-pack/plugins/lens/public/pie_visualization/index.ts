@@ -9,7 +9,7 @@ import { CoreSetup } from 'src/core/public';
 import { ExpressionsSetup } from 'src/plugins/expressions/public';
 import { EditorFrameSetup, FormatFactory } from '../types';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
-import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
+import type { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 
 export interface PieVisualizationPluginSetupPlugins {
   editorFrame: EditorFrameSetup;

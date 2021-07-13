@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PaletteOutput } from 'src/plugins/charts/public';
-import { LensMultiTable } from '../types';
+import type { PaletteOutput } from 'src/plugins/charts/public';
+import type { LensMultiTable } from '../../types';
 
 export interface SharedPieLayerState {
   groups: string[];

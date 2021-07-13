@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { FormatFactory, LensMultiTable } from '../types';
+import type { FormatFactory } from '../types';
+import type { LensMultiTable } from '../../common';
 import { getColorAssignments } from './color_assignment';
-import { LayerArgs } from './types';
+import type { LayerArgs } from './types';
 
 describe('color_assignment', () => {
   const layers: LayerArgs[] = [

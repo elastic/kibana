@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { metricChart, MetricChart } from './expression';
-import { LensMultiTable } from '../types';
+import { MetricChart } from './expression';
+import { metricChart } from '../../common';
 import React from 'react';
 import { shallow } from 'enzyme';
-import { MetricConfig } from './types';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 import { IFieldFormat } from '../../../../../src/plugins/data/public';
+import type { MetricConfig, LensMultiTable } from '../../common';
 
 function sampleArgs() {
   const data: LensMultiTable = {

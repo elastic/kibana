@@ -387,15 +387,6 @@ export interface OperationMetadata {
   // introduce a raw document datasource, this should be considered here.
 }
 
-export interface LensMultiTable {
-  type: 'lens_multitable';
-  tables: Record<string, Datatable>;
-  dateRange?: {
-    fromDate: Date;
-    toDate: Date;
-  };
-}
-
 export interface VisualizationConfigProps<T = unknown> {
   layerId: string;
   frame: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;

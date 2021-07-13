@@ -69,10 +69,16 @@ export function columnToOperation(column: IndexPatternColumn, uniqueLabel?: stri
   };
 }
 
+export {
+  CounterRateArgs,
+  ExpressionFunctionCounterRate,
+  counterRate,
+  FormatColumnArgs,
+  supportedFormats,
+  formatColumn,
+} from '../../common';
 export * from './rename_columns';
-export * from './format_column';
 export * from './time_scale';
-export * from './counter_rate';
 export * from './suffix_formatter';
 
 export function getIndexPatternDatasource({

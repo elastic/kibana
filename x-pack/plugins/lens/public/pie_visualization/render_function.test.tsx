@@ -16,9 +16,8 @@ import {
   Chart,
 } from '@elastic/charts';
 import { shallow } from 'enzyme';
-import { LensMultiTable } from '../types';
+import type { LensMultiTable, PieExpressionArgs } from '../../common';
 import { PieComponent } from './render_function';
-import { PieExpressionArgs } from './types';
 import { EmptyPlaceholder } from '../shared_components';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { LensIconChartDonut } from '../assets/chart_donut';

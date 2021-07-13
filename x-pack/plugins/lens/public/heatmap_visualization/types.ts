@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { Position } from '@elastic/charts';
-import { PaletteOutput } from '../../../../../src/plugins/charts/common';
-import { FormatFactory, LensBrushEvent, LensFilterEvent, LensMultiTable } from '../types';
+import type { Position } from '@elastic/charts';
+import type { PaletteOutput } from '../../../../../src/plugins/charts/common';
+import type { FormatFactory, LensBrushEvent, LensFilterEvent } from '../types';
+import type { LensMultiTable } from '../../common';
 import {
   CHART_SHAPES,
   HEATMAP_GRID_FUNCTION,
   LEGEND_FUNCTION,
   LENS_HEATMAP_RENDERER,
 } from './constants';
-import { ChartsPluginSetup, PaletteRegistry } from '../../../../../src/plugins/charts/public';
-import { CustomPaletteParams } from '../shared_components';
+import type { ChartsPluginSetup, PaletteRegistry } from '../../../../../src/plugins/charts/public';
+import type { CustomPaletteParams } from '../shared_components';
 
 export type ChartShapes = typeof CHART_SHAPES[keyof typeof CHART_SHAPES];
 

@@ -26,7 +26,7 @@ import {
   XYChartProps,
   XYChartRenderProps,
 } from './expression';
-import { LensMultiTable } from '../types';
+import type { LensMultiTable } from '../../common';
 import { Datatable, DatatableRow } from '../../../../../src/plugins/expressions/public';
 import React from 'react';
 import { shallow } from 'enzyme';

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { FilterMeta, Filter } from 'src/plugins/data/common';
+import type { FilterMeta, Filter } from '../../../../src/plugins/data/common';
+import type { Datatable } from '../../../../src/plugins/expressions/common';
 
 export interface ExistingFields {
   indexPatternTitle: string;
@@ -23,4 +24,13 @@ export interface PersistableFilterMeta extends FilterMeta {
 
 export interface PersistableFilter extends Filter {
   meta: PersistableFilterMeta;
+}
+
+export interface LensMultiTable {
+  type: 'lens_multitable';
+  tables: Record<string, Datatable>;
+  dateRange?: {
+    fromDate: Date;
+    toDate: Date;
+  };
 }

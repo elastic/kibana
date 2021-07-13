@@ -5,5 +5,6 @@
  * 2.0.
  */
 
+export { pie } from '../../common';
 export * from './expression';
 export * from './visualization';
