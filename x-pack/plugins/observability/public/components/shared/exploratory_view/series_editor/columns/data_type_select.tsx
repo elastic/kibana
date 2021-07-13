@@ -17,9 +17,24 @@ interface Props {
   series: SeriesUrl;
 }
 export const dataTypes: Array<{ id: AppDataType; label: string }> = [
-  { id: DataTypes.SYNTHETICS, label: 'Synthetic Monitoring' },
-  { id: DataTypes.UX, label: 'User Experience (RUM)' },
-  { id: DataTypes.MOBILE, label: 'Mobile Experience' },
+  {
+    id: DataTypes.SYNTHETICS,
+    label: i18n.translate('xpack.observability.overview.exploratoryView.syntheticsLabel', {
+      defaultMessage: 'Synthetics monitoring',
+    }),
+  },
+  {
+    id: DataTypes.UX,
+    label: i18n.translate('xpack.observability.overview.exploratoryView.uxLabel', {
+      defaultMessage: 'User experience (RUM)',
+    }),
+  },
+  {
+    id: DataTypes.MOBILE,
+    label: i18n.translate('xpack.observability.overview.exploratoryView.mobileExperienceLabel', {
+      defaultMessage: 'Mobile experience',
+    }),
+  },
 ];
 
 const SELECT_DATA_TYPE = 'SELECT_DATA_TYPE';
