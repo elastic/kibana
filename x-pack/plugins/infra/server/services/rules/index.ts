@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export * from './log_threshold_alert_type';
-export { AlertDropdown } from './components/alert_dropdown';
+export * from './rules_service';
+export * from './types';
