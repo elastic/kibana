@@ -142,6 +142,13 @@ export const buildExpression = (
                       ? [state.legend.showSingleSeries]
                       : [],
                     position: [state.legend.position],
+                    isInside: state.legend.isInside ? [state.legend.isInside] : [],
+                    horizontalAlignment: state.legend.horizontalAlignment
+                      ? [state.legend.horizontalAlignment]
+                      : [],
+                    verticalAlignment: state.legend.verticalAlignment
+                      ? [state.legend.verticalAlignment]
+                      : [],
                   },
                 },
               ],
