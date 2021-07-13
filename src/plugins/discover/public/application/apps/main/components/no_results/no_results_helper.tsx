@@ -26,7 +26,7 @@ export function getTimeFieldMessage() {
         <p>
           <FormattedMessage
             id="discover.noResults.queryMayNotMatchTitle"
-            defaultMessage="You are searching time series data, try searching over a larger period of time."
+            defaultMessage="You are searching time series data and no matches were found in the specified time range. Try searching over a larger period of time."
           />
         </p>
       </EuiText>
