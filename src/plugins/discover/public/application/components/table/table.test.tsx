@@ -450,4 +450,23 @@ describe('DocViewTable at Discover Doc with Fields API', () => {
         .length
     ).toBe(0);
   });
+
+  it('renders multifield rows if showMultiFields flag is not set and searchFieldsFromSource  is set', () => {
+    (getServices as jest.Mock).mockImplementationOnce(() => ({
+      uiSettings: {
+        get: (key: string) => {
+          return key === 'discover:searchFieldsFromSource';
+        },
+      },
+    }));
+    const component = mountComponent(props);
+
+    const categoryKeywordRow = findTestSubject(component, 'tableDocViewRow-category.keyword');
+    expect(categoryKeywordRow.length).toBe(1);
+
+    expect(
+      findTestSubject(component, 'tableDocViewRow-customer_first_name.keyword-multifieldBadge')
+        .length
+    ).toBe(1);
+  });
 });

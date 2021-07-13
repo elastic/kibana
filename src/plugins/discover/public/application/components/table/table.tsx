@@ -54,7 +54,7 @@ export const DocViewerTable = ({
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) => {
-  const uiSettings = getServices().uiSettings;
+  const { uiSettings } = getServices();
   const showMultiFields =
     uiSettings.get(SHOW_MULTIFIELDS) || uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
 
