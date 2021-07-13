@@ -6,6 +6,7 @@
       "master_timeout": "",
       "h": [],
       "help": "__flag__",
+      "include_bootstrap": "__flag__",
       "s": [],
       "v": "__flag__"
     },
