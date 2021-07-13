@@ -40,7 +40,6 @@ export const useAllAgents = (
         kuery += ` and (local_metadata.host.hostname:*${searchValue}* or local_metadata.elastic.agent.id:*${searchValue}*)`;
       }
 
-      console.log(agentRouteService.getListPath(), kuery)
       return http.get(agentRouteService.getListPath(), {
         query: {
           kuery,
@@ -59,7 +58,6 @@ export const useAllAgents = (
         }),
     }
   );
-  console.log(agentData)
 
   return { agentsLoading, agents: agentData?.list };
 };

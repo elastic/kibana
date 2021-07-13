@@ -50,7 +50,6 @@ export async function incrementCount(
   key: keyof CounterValue = 'count',
   increment = 1
 ) {
-  console.log(usageMetricSavedObjectType)
   const metric = await getOrCreateMetricObject<CounterValue>(soClient, route);
   metric.attributes[key] += increment;
   await soClient.update(usageMetricSavedObjectType, route, metric.attributes);
