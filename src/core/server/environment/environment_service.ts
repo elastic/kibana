@@ -27,6 +27,11 @@ export interface InternalEnvironmentServicePreboot {
   instanceUuid: string;
 }
 
+/**
+ * @internal
+ */
+export type InternalEnvironmentServiceSetup = InternalEnvironmentServicePreboot;
+
 /** @internal */
 export class EnvironmentService {
   private readonly log: Logger;
@@ -71,6 +76,12 @@ export class EnvironmentService {
       logger: this.log,
     });
 
+    return {
+      instanceUuid: this.uuid,
+    };
+  }
+
+  public setup() {
     return {
       instanceUuid: this.uuid,
     };

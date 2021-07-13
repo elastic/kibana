@@ -194,7 +194,7 @@ function createCoreStartMock() {
 
 function createInternalCorePrebootMock() {
   const prebootDeps = {
-    context: contextServiceMock.createSetupContract(),
+    context: contextServiceMock.createPrebootContract(),
     elasticsearch: elasticsearchServiceMock.createInternalPreboot(),
     http: httpServiceMock.createInternalPrebootContract(),
     httpResources: httpResourcesMock.createPrebootContract(),
@@ -213,7 +213,7 @@ function createInternalCoreSetupMock() {
     http: httpServiceMock.createInternalSetupContract(),
     savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
     status: statusServiceMock.createInternalSetupContract(),
-    environment: environmentServiceMock.createPrebootContract(),
+    environment: environmentServiceMock.createSetupContract(),
     i18n: i18nServiceMock.createSetupContract(),
     httpResources: httpResourcesMock.createSetupContract(),
     rendering: renderingMock.createSetupContract(),

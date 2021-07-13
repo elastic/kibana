@@ -61,7 +61,7 @@ test('preboot services on "preboot"', async () => {
   const server = new Server(rawConfigService, env, logger);
 
   expect(mockEnvironmentService.preboot).not.toHaveBeenCalled();
-  expect(mockContextService.setup).not.toHaveBeenCalled();
+  expect(mockContextService.preboot).not.toHaveBeenCalled();
   expect(mockHttpService.preboot).not.toHaveBeenCalled();
   expect(mockI18nService.preboot).not.toHaveBeenCalled();
   expect(mockElasticsearchService.preboot).not.toHaveBeenCalled();
@@ -75,7 +75,7 @@ test('preboot services on "preboot"', async () => {
   await server.preboot();
 
   expect(mockEnvironmentService.preboot).toHaveBeenCalledTimes(1);
-  expect(mockContextService.setup).toHaveBeenCalledTimes(1);
+  expect(mockContextService.preboot).toHaveBeenCalledTimes(1);
   expect(mockHttpService.preboot).toHaveBeenCalledTimes(1);
   expect(mockI18nService.preboot).toHaveBeenCalledTimes(1);
   expect(mockElasticsearchService.preboot).toHaveBeenCalledTimes(1);
@@ -92,6 +92,7 @@ test('sets up services on "setup"', async () => {
 
   await server.preboot();
 
+  expect(mockEnvironmentService.setup).not.toHaveBeenCalled();
   expect(mockHttpService.setup).not.toHaveBeenCalled();
   expect(mockElasticsearchService.setup).not.toHaveBeenCalled();
   expect(mockPluginsService.setup).not.toHaveBeenCalled();
@@ -105,6 +106,7 @@ test('sets up services on "setup"', async () => {
 
   await server.setup();
 
+  expect(mockEnvironmentService.setup).toHaveBeenCalled();
   expect(mockHttpService.setup).toHaveBeenCalledTimes(1);
   expect(mockElasticsearchService.setup).toHaveBeenCalledTimes(1);
   expect(mockPluginsService.setup).toHaveBeenCalledTimes(1);
@@ -223,7 +225,7 @@ test(`doesn't preboot core services if config validation fails`, async () => {
     `"Unknown configuration keys"`
   );
 
-  expect(mockContextService.setup).not.toHaveBeenCalled();
+  expect(mockContextService.preboot).not.toHaveBeenCalled();
   expect(mockHttpService.preboot).not.toHaveBeenCalled();
   expect(mockI18nService.preboot).not.toHaveBeenCalled();
   expect(mockElasticsearchService.preboot).not.toHaveBeenCalled();

@@ -14,7 +14,7 @@ import type { RequestHandlerContext } from 'src/core/server';
 import type { InternalExecutionContextSetup } from '../execution_context';
 import { CoreService } from '../../types';
 import { Logger } from '../logging';
-import { ContextSetup } from '../context';
+import { ContextSetup, InternalContextPreboot } from '../context';
 import { Env } from '../config';
 import { CoreContext } from '../core_context';
 import { PluginOpaqueId } from '../plugins';
@@ -41,7 +41,7 @@ import {
 } from '../external_url';
 
 interface PrebootDeps {
-  context: ContextSetup;
+  context: InternalContextPreboot;
 }
 
 interface SetupDeps {

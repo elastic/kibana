@@ -136,4 +136,11 @@ describe('UuidService', () => {
       });
     });
   });
+
+  describe('#setup()', () => {
+    it('returns the uuid resolved from resolveInstanceUuid', async () => {
+      await expect(service.preboot()).resolves.toEqual({ instanceUuid: 'SOME_UUID' });
+      expect(service.setup()).toEqual({ instanceUuid: 'SOME_UUID' });
+    });
+  });
 });

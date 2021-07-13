@@ -34,11 +34,7 @@ import { PluginsService, config as pluginsConfig } from './plugins';
 import { SavedObjectsService, SavedObjectsServiceStart } from './saved_objects';
 import { MetricsService, opsConfig } from './metrics';
 import { CapabilitiesService } from './capabilities';
-import {
-  EnvironmentService,
-  config as pidConfig,
-  InternalEnvironmentServicePreboot,
-} from './environment';
+import { EnvironmentService, config as pidConfig } from './environment';
 // do not try to shorten the import to `./status`, it will break server test mocking
 import { StatusService } from './status/status_service';
 import { ExecutionContextService } from './execution_context';
@@ -102,7 +98,6 @@ export class Server {
   #pluginsInitialized?: boolean;
   private coreStart?: InternalCoreStart;
   private discoveredPlugins?: DiscoveredPlugins;
-  private environmentPreboot?: InternalEnvironmentServicePreboot;
   private loggingSetup?: InternalLoggingServiceSetup;
   private readonly logger: LoggerFactory;
 
@@ -146,20 +141,20 @@ export class Server {
     this.log.debug('prebooting server');
     const prebootTransaction = apm.startTransaction('server_preboot', 'kibana_platform');
 
-    this.environmentPreboot = await this.environment.preboot();
+    const environmentPreboot = await this.environment.preboot();
 
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
-    this.discoveredPlugins = await this.plugins.discover({ environment: this.environmentPreboot });
+    this.discoveredPlugins = await this.plugins.discover({ environment: environmentPreboot });
 
     // Immediately terminate in case of invalid configuration. This needs to be done after plugin discovery. We also
     // silent deprecation warnings until `setup` stage where we'll validate config once again.
     await ensureValidConfiguration(this.configService, { logDeprecations: false });
 
     const { uiPlugins, pluginTree, pluginPaths } = this.discoveredPlugins.preboot;
-    const contextServiceSetup = this.context.setup({
+    const contextServicePreboot = this.context.preboot({
       pluginDependencies: new Map([...pluginTree.asOpaqueIds]),
     });
-    const httpPreboot = await this.http.preboot({ context: contextServiceSetup });
+    const httpPreboot = await this.http.preboot({ context: contextServicePreboot });
 
     // setup i18n prior to any other service, to have translations ready
     await this.i18n.preboot({ http: httpPreboot, pluginPaths });
@@ -178,7 +173,7 @@ export class Server {
     this.loggingSetup = this.logging.setup({ loggingSystem: this.loggingSystem });
 
     const corePreboot: InternalCorePreboot = {
-      context: contextServiceSetup,
+      context: contextServicePreboot,
       elasticsearch: elasticsearchServicePreboot,
       http: httpPreboot,
       uiSettings: uiSettingsPreboot,
@@ -202,6 +197,8 @@ export class Server {
   public async setup() {
     this.log.debug('setting up server');
     const setupTransaction = apm.startTransaction('server_setup', 'kibana_platform');
+
+    const environmentSetup = this.environment.setup();
 
     // Configuration could have changed after preboot.
     await ensureValidConfiguration(this.configService);
@@ -251,7 +248,7 @@ export class Server {
       elasticsearch: elasticsearchServiceSetup,
       pluginDependencies: pluginTree.asNames,
       savedObjects: savedObjectsSetup,
-      environment: this.environmentPreboot!,
+      environment: environmentSetup,
       http: httpSetup,
       metrics: metricsSetup,
     });
@@ -275,7 +272,7 @@ export class Server {
       capabilities: capabilitiesSetup,
       context: contextServiceSetup,
       elasticsearch: elasticsearchServiceSetup,
-      environment: this.environmentPreboot!,
+      environment: environmentSetup,
       executionContext: executionContextSetup,
       http: httpSetup,
       i18n: i18nServiceSetup,

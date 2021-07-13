@@ -10,7 +10,7 @@ import { Type } from '@kbn/config-schema';
 
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { ConfigDeprecationProvider } from './config';
-import { ContextSetup } from './context';
+import { InternalContextPreboot, ContextSetup } from './context';
 import {
   InternalElasticsearchServicePreboot,
   InternalElasticsearchServiceSetup,
@@ -30,7 +30,7 @@ import {
   InternalUiSettingsServiceSetup,
   InternalUiSettingsServiceStart,
 } from './ui_settings';
-import { InternalEnvironmentServicePreboot } from './environment';
+import { InternalEnvironmentServiceSetup } from './environment';
 import { InternalMetricsServiceSetup, InternalMetricsServiceStart } from './metrics';
 import { InternalRenderingServiceSetup } from './rendering';
 import { InternalHttpResourcesSetup } from './http_resources';
@@ -47,7 +47,7 @@ import { InternalPrebootServicePreboot } from './preboot';
 
 /** @internal */
 export interface InternalCorePreboot {
-  context: ContextSetup;
+  context: InternalContextPreboot;
   http: InternalHttpServicePreboot;
   elasticsearch: InternalElasticsearchServicePreboot;
   uiSettings: InternalUiSettingsServicePreboot;
@@ -67,7 +67,7 @@ export interface InternalCoreSetup {
   savedObjects: InternalSavedObjectsServiceSetup;
   status: InternalStatusServiceSetup;
   uiSettings: InternalUiSettingsServiceSetup;
-  environment: InternalEnvironmentServicePreboot;
+  environment: InternalEnvironmentServiceSetup;
   rendering: InternalRenderingServiceSetup;
   httpResources: InternalHttpResourcesSetup;
   logging: InternalLoggingServiceSetup;

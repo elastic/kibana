@@ -42,10 +42,11 @@ const createConfigService = (value: Partial<HttpConfigType> = {}) => {
   configService.setSchema(externalUrlConfig.path, externalUrlConfig.schema);
   return configService;
 };
+const contextPreboot = contextServiceMock.createPrebootContract();
 const contextSetup = contextServiceMock.createSetupContract();
 
 const prebootDeps = {
-  context: contextSetup,
+  context: contextPreboot,
 };
 const setupDeps = {
   context: contextSetup,

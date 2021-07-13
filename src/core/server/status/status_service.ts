@@ -19,7 +19,7 @@ import { InternalSavedObjectsServiceSetup } from '../saved_objects';
 import { PluginName } from '../plugins';
 import { InternalMetricsServiceSetup } from '../metrics';
 import { registerStatusRoute } from './routes';
-import { InternalEnvironmentServicePreboot } from '../environment';
+import { InternalEnvironmentServiceSetup } from '../environment';
 
 import { config, StatusConfigType } from './status_config';
 import { ServiceStatus, CoreStatus, InternalStatusServiceSetup } from './types';
@@ -37,7 +37,7 @@ interface PrebootSetupDeps {
 
 interface SetupDeps {
   elasticsearch: Pick<InternalElasticsearchServiceSetup, 'status$'>;
-  environment: InternalEnvironmentServicePreboot;
+  environment: InternalEnvironmentServiceSetup;
   pluginDependencies: ReadonlyMap<PluginName, PluginName[]>;
   http: InternalHttpServiceSetup;
   metrics: InternalMetricsServiceSetup;
