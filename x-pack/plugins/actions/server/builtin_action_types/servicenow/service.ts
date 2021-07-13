@@ -7,7 +7,14 @@
 
 import axios, { AxiosResponse } from 'axios';
 
-import { ExternalServiceCredentials, ExternalService, ExternalServiceParams } from './types';
+import {
+  ExternalServiceCredentials,
+  ExternalService,
+  ExternalServiceParams,
+  ImportSetApiResponse,
+  ImportSetApiResponseError,
+  ServiceNowIncident,
+} from './types';
 
 import * as i18n from './translations';
 import { Logger } from '../../../../../../src/core/server';
@@ -21,6 +28,14 @@ import { ActionsConfigurationUtilities } from '../../actions_config';
 
 const API_VERSION = 'v2';
 const SYS_DICTIONARY = `api/now/${API_VERSION}/table/sys_dictionary`;
+const IMPORTATION_SET_TABLE = 'x_463134_elastic_import_set_web_service';
+const FIELD_PREFIX = 'u_';
+
+const prefixFields = (incident: ExternalServiceParams['incident']) =>
+  Object.entries(incident).reduce(
+    (acc, [key, value]) => ({ ...acc, [`${FIELD_PREFIX}${key}`]: value }),
+    {}
+  );
 
 export const createExternalService = (
   table: string,
@@ -36,6 +51,7 @@ export const createExternalService = (
   }
 
   const urlWithoutTrailingSlash = url.endsWith('/') ? url.slice(0, -1) : url;
+  const importSetTableUrl = `${urlWithoutTrailingSlash}/api/now/import/${IMPORTATION_SET_TABLE}`;
   const incidentUrl = `${urlWithoutTrailingSlash}/api/now/${API_VERSION}/table/${table}`;
   const fieldsUrl = `${urlWithoutTrailingSlash}/${SYS_DICTIONARY}?sysparm_query=name=task^ORname=${table}^internal_type=string&active=true&array=false&read_only=false&sysparm_fields=max_length,element,column_label,mandatory`;
   const choicesUrl = `${urlWithoutTrailingSlash}/api/now/${API_VERSION}/table/sys_choice`;
@@ -57,7 +73,7 @@ export const createExternalService = (
   };
 
   const checkInstance = (res: AxiosResponse) => {
-    if (res.status === 200 && res.data.result == null) {
+    if ((res.status >= 200 || res.status < 400) && res.data.result == null) {
       throw new Error(
         `There is an issue with your Service Now Instance. Please check ${
           res.request?.connection?.servername ?? ''
@@ -75,7 +91,24 @@ export const createExternalService = (
     return error != null ? `${error?.message}: ${error?.detail}` : '';
   };
 
-  const getIncident = async (id: string) => {
+  const isImportSetApiResponseAnError = (
+    data: ImportSetApiResponse['result'][0]
+  ): data is ImportSetApiResponseError['result'][0] => data.status === 'error';
+
+  const throwIfImportSetApiResponseIsAnError = (res: ImportSetApiResponse) => {
+    if (res.result.length === 0) {
+      throw new Error('Unexpected result');
+    }
+
+    const data = res.result[0];
+
+    // Create ResponseError message?
+    if (isImportSetApiResponseAnError(data)) {
+      throw new Error(data.error_message);
+    }
+  };
+
+  const getIncident = async (id: string): Promise<ServiceNowIncident> => {
     try {
       const res = await request({
         axios: axiosInstance,
@@ -83,7 +116,9 @@ export const createExternalService = (
         logger,
         configurationUtilities,
       });
+
       checkInstance(res);
+
       return { ...res.data.result };
     } catch (error) {
       throw new Error(
@@ -124,18 +159,22 @@ export const createExternalService = (
     try {
       const res = await request({
         axios: axiosInstance,
-        url: `${incidentUrl}`,
+        url: importSetTableUrl,
         logger,
         method: 'post',
-        data: { ...(incident as Record<string, unknown>) },
+        data: prefixFields(incident),
         configurationUtilities,
       });
+
       checkInstance(res);
+      throwIfImportSetApiResponseIsAnError(res.data);
+      const insertedIncident = await getIncident(res.data.result[0].sys_id);
+
       return {
-        title: res.data.result.number,
-        id: res.data.result.sys_id,
-        pushedDate: new Date(addTimeZoneToDate(res.data.result.sys_created_on)).toISOString(),
-        url: getIncidentViewURL(res.data.result.sys_id),
+        title: insertedIncident.number,
+        id: insertedIncident.sys_id,
+        pushedDate: new Date(addTimeZoneToDate(insertedIncident.sys_created_on)).toISOString(),
+        url: getIncidentViewURL(insertedIncident.sys_id),
       };
     } catch (error) {
       throw new Error(
@@ -151,19 +190,24 @@ export const createExternalService = (
 
   const updateIncident = async ({ incidentId, incident }: ExternalServiceParams) => {
     try {
-      const res = await patch({
+      const res = await request({
         axios: axiosInstance,
-        url: `${incidentUrl}/${incidentId}`,
+        url: importSetTableUrl,
+        method: 'post',
         logger,
-        data: { ...(incident as Record<string, unknown>) },
+        data: { ...prefixFields(incident), u_incident_id: incidentId },
         configurationUtilities,
       });
+
       checkInstance(res);
+      throwIfImportSetApiResponseIsAnError(res.data);
+      const insertedIncident = await getIncident(res.data.result[0].sys_id);
+
       return {
-        title: res.data.result.number,
-        id: res.data.result.sys_id,
-        pushedDate: new Date(addTimeZoneToDate(res.data.result.sys_updated_on)).toISOString(),
-        url: getIncidentViewURL(res.data.result.sys_id),
+        title: insertedIncident.number,
+        id: insertedIncident.sys_id,
+        pushedDate: new Date(addTimeZoneToDate(insertedIncident.sys_updated_on)).toISOString(),
+        url: getIncidentViewURL(insertedIncident.sys_id),
       };
     } catch (error) {
       throw new Error(
@@ -185,7 +229,9 @@ export const createExternalService = (
         logger,
         configurationUtilities,
       });
+
       checkInstance(res);
+
       return res.data.result.length > 0 ? res.data.result : [];
     } catch (error) {
       throw new Error(

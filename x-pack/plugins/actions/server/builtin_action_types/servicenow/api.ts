@@ -41,7 +41,7 @@ const pushToServiceHandler = async ({
     res = await externalService.createIncident({
       incident: {
         ...incident,
-        caller_id: secrets.username,
+        opened_by: secrets.username,
       },
     });
   }

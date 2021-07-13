@@ -158,12 +158,20 @@ export interface GetChoicesHandlerArgs {
   params: ExecutorSubActionGetChoicesParams;
 }
 
+export interface ServiceNowIncident {
+  sys_id: string;
+  number: string;
+  sys_created_on: string;
+  sys_updated_on: string;
+  [x: string]: unknown;
+}
+
 export interface ExternalServiceApi {
   getChoices: (args: GetChoicesHandlerArgs) => Promise<GetChoicesResponse>;
   getFields: (args: GetCommonFieldsHandlerArgs) => Promise<GetCommonFieldsResponse>;
   handshake: (args: HandshakeApiHandlerArgs) => Promise<void>;
   pushToService: (args: PushToServiceApiHandlerArgs) => Promise<PushToServiceResponse>;
-  getIncident: (args: GetIncidentApiHandlerArgs) => Promise<void>;
+  getIncident: (args: GetIncidentApiHandlerArgs) => Promise<ServiceNowIncident>;
 }
 
 export interface ExternalServiceCommentResponse {
@@ -180,3 +188,30 @@ export interface ResponseError {
   }>;
   status: TypeNullOrUndefined<string>;
 }
+
+export interface ImportSetApiResponseSuccess {
+  import_set: string;
+  staging_table: string;
+  result: Array<{
+    display_name: string;
+    display_value: string;
+    record_link: string;
+    status: string;
+    sys_id: string;
+    table: string;
+    transform_map: string;
+  }>;
+}
+
+export interface ImportSetApiResponseError {
+  import_set: string;
+  staging_table: string;
+  result: Array<{
+    error_message: string;
+    status_message: string;
+    status: string;
+    transform_map: string;
+  }>;
+}
+
+export type ImportSetApiResponse = ImportSetApiResponseSuccess | ImportSetApiResponseError;
