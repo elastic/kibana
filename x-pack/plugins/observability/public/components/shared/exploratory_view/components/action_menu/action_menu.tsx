@@ -82,6 +82,8 @@ export function ExpViewActionMenuContent({
         <LensSaveModalComponent
           initialInput={(lensAttributes as unknown) as LensEmbeddableInput}
           onClose={() => setIsSaveOpen(false)}
+          // if we want to do anything after the viz is saved
+          // right now there is no action, so an empty function
           onSave={() => {}}
         />
       )}

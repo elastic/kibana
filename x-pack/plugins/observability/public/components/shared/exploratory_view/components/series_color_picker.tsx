@@ -19,7 +19,7 @@ export function SeriesColorPicker({ seriesId, series }: { seriesId: string; seri
 
   const [isOpen, setIsOpen] = useState(false);
 
-  const onChane = (colorN: string) => {
+  const onChange = (colorN: string) => {
     setSeries(seriesId, { ...series, color: colorN });
   };
 
@@ -38,7 +38,7 @@ export function SeriesColorPicker({ seriesId, series }: { seriesId: string; seri
   return (
     <EuiPopover button={button} isOpen={isOpen} closePopover={() => setIsOpen(false)}>
       <EuiFormRow label="Pick a color">
-        <EuiColorPicker onChange={onChane} color={color} />
+        <EuiColorPicker onChange={onChange} color={color} />
       </EuiFormRow>
     </EuiPopover>
   );
