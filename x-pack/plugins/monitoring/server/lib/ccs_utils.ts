@@ -8,8 +8,10 @@
 import { isFunction, get } from 'lodash';
 import type { MonitoringConfig } from '../config';
 
+type Config = MonitoringConfig & { get?: (key: string) => any };
+
 export function appendMetricbeatIndex(
-  config: MonitoringConfig,
+  config: Config,
   indexPattern: string,
   ccs?: string,
   bypass: boolean = false
@@ -46,7 +48,7 @@ export function appendMetricbeatIndex(
  * @return {String} The index pattern with the {@code cluster} prefix appropriately prepended.
  */
 export function prefixIndexPattern(
-  config: MonitoringConfig,
+  config: Config,
   indexPattern: string,
   ccs: string,
   monitoringIndicesOnly: boolean = false
