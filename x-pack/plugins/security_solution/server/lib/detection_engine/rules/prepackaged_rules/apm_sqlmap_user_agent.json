@@ -7,8 +7,7 @@
     "This rule does not indicate that a SQL injection attack occurred, only that the `sqlmap` tool was used. Security scans and tests may result in these errors. If the source is not an authorized security tester, this is generally suspicious or malicious activity."
   ],
   "index": [
-    "apm-*-transaction*",
-    "traces-apm*"
+    "apm-*-transaction*"
   ],
   "language": "kuery",
   "license": "Elastic License v2",

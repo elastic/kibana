@@ -25,8 +25,7 @@
     }
   ],
   "index": [
-    "apm-*-transaction*",
-    "traces-apm*"
+    "apm-*-transaction*"
   ],
   "language": "kuery",
   "license": "Elastic License v2",
