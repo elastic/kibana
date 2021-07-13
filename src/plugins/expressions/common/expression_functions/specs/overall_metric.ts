@@ -128,15 +128,17 @@ export const overallMetric: ExpressionFunctionOverallMetric = {
       const accumulatorValue = accumulators[bucketIdentifier];
 
       const currentValue = row[inputColumnId];
-      if (currentValue != null && typeof currentValue !== 'undefined') {
+      if (currentValue != null) {
         const currentNumberValues = getValueAsNumberArray(currentValue);
         switch (metric) {
           case 'average':
             valueCounter[bucketIdentifier] =
               (valueCounter[bucketIdentifier] ?? 0) + currentNumberValues.length;
           case 'sum':
-            accumulators[bucketIdentifier] =
-              (accumulatorValue ?? 0) + currentNumberValues.reduce((a, b) => a + b, 0);
+            accumulators[bucketIdentifier] = currentNumberValues.reduce(
+              (a, b) => a + b,
+              accumulatorValue || 0
+            );
             break;
           case 'min':
             if (typeof accumulatorValue !== 'undefined') {
