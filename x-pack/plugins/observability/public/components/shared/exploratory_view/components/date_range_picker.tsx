@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { useSeriesStorage } from '../hooks/use_series_storage';
 import { useUiSetting } from '../../../../../../../../src/plugins/kibana_react/public';
 import { SeriesUrl } from '../types';
+import { ReportTypes } from '../configurations/constants';
 
 export const parseAbsoluteDate = (date: string, options = {}) => {
   return DateMath.parse(date, options)!;
@@ -36,7 +37,7 @@ export function DateRangePicker({ seriesId, series }: { seriesId: string; series
   };
 
   const onStartChange = (newStartDate: Moment) => {
-    if (reportType === 'kpi-over-time') {
+    if (reportType === ReportTypes.KPI) {
       const totalDuration = getTotalDuration();
       const newFrom = newStartDate.toISOString();
       const newTo = newStartDate.add(totalDuration, 'millisecond').toISOString();
@@ -56,7 +57,7 @@ export function DateRangePicker({ seriesId, series }: { seriesId: string; series
   };
 
   const onEndChange = (newEndDate: Moment) => {
-    if (reportType === 'kpi-over-time') {
+    if (reportType === ReportTypes.KPI) {
       const totalDuration = getTotalDuration();
       const newTo = newEndDate.toISOString();
       const newFrom = newEndDate.subtract(totalDuration, 'millisecond').toISOString();

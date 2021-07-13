@@ -37,6 +37,7 @@ import {
   REPORT_METRIC_FIELD,
   RECORDS_FIELD,
   RECORDS_PERCENTAGE_FIELD,
+  ReportTypes,
 } from './constants';
 import { ColumnFilter, SeriesConfig, UrlFilter, URLReportDefinition } from '../types';
 import { PersistableFilter } from '../../../../../../lens/common';
@@ -471,7 +472,7 @@ export class LensAttributes {
     } = layerConfig;
     let baseFilters = '';
 
-    if (reportType !== 'kpi-over-time' && totalLayers > 1 && time) {
+    if (reportType !== ReportTypes.KPI && totalLayers > 1 && time) {
       // for kpi over time, we don't need to add time range filters
       // since those are essentially plotted along the x-axis
       baseFilters += `@timestamp >= ${time.from} and @timestamp <= ${time.to}`;
@@ -532,7 +533,7 @@ export class LensAttributes {
   getTimeShift(mainLayerConfig: LayerConfig, layerConfig: LayerConfig, index: number) {
     if (
       index === 0 ||
-      mainLayerConfig.seriesConfig.reportType !== 'kpi-over-time' ||
+      mainLayerConfig.seriesConfig.reportType !== ReportTypes.KPI ||
       !layerConfig.time
     ) {
       return null;

@@ -14,6 +14,7 @@ import { useQuickTimeRanges } from '../../../../../hooks/use_quick_time_ranges';
 import { parseTimeParts } from '../../series_viewer/columns/utils';
 import { useUiSetting } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { SeriesUrl } from '../../types';
+import { ReportTypes } from '../../configurations/constants';
 
 export interface TimePickerTime {
   from: string;
@@ -44,7 +45,7 @@ export function SeriesDatePicker({ series, seriesId, readonly = true }: Props) {
 
   function onTimeChange({ start, end }: { start: string; end: string }) {
     onRefreshTimeRange();
-    if (reportType === 'kpi-over-time') {
+    if (reportType === ReportTypes.KPI) {
       allSeries.forEach((currSeries) => {
         setSeries(currSeries.name, { ...currSeries, time: { from: start, to: end } });
       });

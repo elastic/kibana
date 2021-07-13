@@ -9,6 +9,7 @@ import React, { RefObject, useEffect, useState } from 'react';
 
 import { EuiTabs, EuiTab, EuiButtonIcon } from '@elastic/eui';
 import { useHistory, useParams } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import { SeriesEditor } from '../series_editor/series_editor';
 import { SeriesViewer } from '../series_viewer/series_viewer';
 import { PanelId } from '../exploratory_view';
@@ -16,11 +17,15 @@ import { PanelId } from '../exploratory_view';
 const tabs = [
   {
     id: 'preview',
-    name: 'Preview',
+    name: i18n.translate('xpack.observability.overview.exploratoryView.preview', {
+      defaultMessage: 'Preview',
+    }),
   },
   {
     id: 'configure',
-    name: 'Configure series',
+    name: i18n.translate('xpack.observability.overview.exploratoryView.configureSeries', {
+      defaultMessage: 'Configure series',
+    }),
   },
 ];
 

@@ -16,7 +16,7 @@ import {
 } from './constants/elasticsearch_fieldnames';
 import { buildExistsFilter, buildPhrasesFilter } from './utils';
 import { sampleAttributeKpi } from './test_data/sample_attribute_kpi';
-import { RECORDS_FIELD, REPORT_METRIC_FIELD } from './constants';
+import { RECORDS_FIELD, REPORT_METRIC_FIELD, ReportTypes } from './constants';
 
 describe('Lens Attribute', () => {
   mockAppIndexPattern();
@@ -53,7 +53,7 @@ describe('Lens Attribute', () => {
 
   it('should return expected json for kpi report type', function () {
     const seriesConfigKpi = getDefaultConfigs({
-      reportType: 'kpi-over-time',
+      reportType: ReportTypes.KPI,
       dataType: 'ux',
       indexPattern: mockIndexPattern,
     });

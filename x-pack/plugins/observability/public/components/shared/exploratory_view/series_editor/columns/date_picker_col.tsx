@@ -11,6 +11,7 @@ import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { DateRangePicker } from '../../components/date_range_picker';
 import { SeriesDatePicker } from '../../components/series_date_picker';
 import { SeriesUrl } from '../../types';
+import { ReportTypes } from '../../configurations/constants';
 
 interface Props {
   seriesId: string;
@@ -25,7 +26,7 @@ export function DatePickerCol({ seriesId, series }: Props) {
 
   return (
     <Wrapper>
-      {firstSeriesId === seriesId || reportType !== 'kpi-over-time' ? (
+      {firstSeriesId === seriesId || reportType !== ReportTypes.KPI ? (
         <SeriesDatePicker seriesId={seriesId} series={series} readonly={false} />
       ) : (
         <DateRangePicker seriesId={seriesId} series={series} />

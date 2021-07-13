@@ -9,15 +9,16 @@ import React from 'react';
 import { EuiSuperSelect } from '@elastic/eui';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { AppDataType, SeriesUrl } from '../../types';
+import { DataTypes } from '../../configurations/constants';
 
 interface Props {
   seriesId: string;
   series: SeriesUrl;
 }
 export const dataTypes: Array<{ id: AppDataType; label: string }> = [
-  { id: 'synthetics', label: 'Synthetic Monitoring' },
-  { id: 'ux', label: 'User Experience (RUM)' },
-  { id: 'mobile', label: 'Mobile Experience' },
+  { id: DataTypes.SYNTHETICS, label: 'Synthetic Monitoring' },
+  { id: DataTypes.UX, label: 'User Experience (RUM)' },
+  { id: DataTypes.MOBILE, label: 'Mobile Experience' },
 ];
 
 const SELECT_DATA_TYPE = 'SELECT_DATA_TYPE';

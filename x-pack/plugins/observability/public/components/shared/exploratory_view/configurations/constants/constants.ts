@@ -101,6 +101,12 @@ export enum ReportTypes {
   DEVICE_DISTRIBUTION = 'device-data-distribution',
 }
 
+export enum DataTypes {
+  SYNTHETICS = 'synthetics',
+  UX = 'ux',
+  MOBILE = 'mobile',
+}
+
 export const USE_BREAK_DOWN_COLUMN = 'USE_BREAK_DOWN_COLUMN';
 export const FILTER_RECORDS = 'FILTER_RECORDS';
 export const TERMS_COLUMN = 'TERMS_COLUMN';

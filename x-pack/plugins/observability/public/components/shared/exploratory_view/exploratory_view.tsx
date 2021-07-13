@@ -140,7 +140,7 @@ export function ExploratoryView({
                       {!isPreview &&
                         (hiddenPanel === 'chartPanel' ? (
                           <ShowChart onClick={() => onChange('chartPanel')} iconType="arrowDown">
-                            Show chart
+                            {SHOW_CHART_LABEL}
                           </ShowChart>
                         ) : (
                           <HideChart
@@ -148,7 +148,7 @@ export function ExploratoryView({
                             iconType="arrowUp"
                             color="text"
                           >
-                            Hide chart
+                            {HIDE_CHART_LABEL}
                           </HideChart>
                         ))}
                       <SeriesViews
@@ -162,19 +162,14 @@ export function ExploratoryView({
             </EuiResizableContainer>
             {hiddenPanel === 'seriesPanel' && (
               <ShowPreview onClick={() => onChange('seriesPanel')} iconType="arrowUp">
-                Preview
+                {PREVIEW_LABEL}
               </ShowPreview>
             )}
           </LensWrapper>
         </>
       ) : (
         <EuiTitle>
-          <h2>
-            {i18n.translate('xpack.observability.overview.exploratoryView.lensDisabled', {
-              defaultMessage:
-                'Lens app is not available, please enable Lens to use exploratory view.',
-            })}
-          </h2>
+          <h2>{LENS_NOT_AVAILABLE}</h2>
         </EuiTitle>
       )}
     </Wrapper>
@@ -211,3 +206,22 @@ const ShowChart = styled(EuiButtonEmpty)`
   top: -10px;
   right: 50px;
 `;
+
+const HIDE_CHART_LABEL = i18n.translate('xpack.observability.overview.exploratoryView.hideChart', {
+  defaultMessage: 'Hide chart',
+});
+
+const SHOW_CHART_LABEL = i18n.translate('xpack.observability.overview.exploratoryView.showChart', {
+  defaultMessage: 'Show chart',
+});
+
+const PREVIEW_LABEL = i18n.translate('xpack.observability.overview.exploratoryView.preview', {
+  defaultMessage: 'Preview',
+});
+
+const LENS_NOT_AVAILABLE = i18n.translate(
+  'xpack.observability.overview.exploratoryView.lensDisabled',
+  {
+    defaultMessage: 'Lens app is not available, please enable Lens to use exploratory view.',
+  }
+);

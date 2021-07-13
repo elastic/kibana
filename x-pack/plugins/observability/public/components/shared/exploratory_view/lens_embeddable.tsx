@@ -14,6 +14,7 @@ import { useSeriesStorage } from './hooks/use_series_storage';
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ReportViewType, SeriesUrl } from './types';
+import { ReportTypes } from './configurations/constants';
 
 interface Props {
   lensAttributes: TypedLensByValueInput['attributes'];
@@ -27,7 +28,7 @@ export const combineTimeRanges = (
   let to: string = '';
   let from: string = '';
 
-  if (reportType === 'kpi-over-time') {
+  if (reportType === ReportTypes.KPI) {
     return firstSeries?.time;
   }
 
