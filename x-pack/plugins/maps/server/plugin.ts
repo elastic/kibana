@@ -172,6 +172,45 @@ export class MapsPlugin implements Plugin {
 
     initRoutes(core, () => lastLicenseId, emsSettings, this.kibanaVersion, this._logger);
 
+    // core.elasticsearch.client.asCurrentUser.extend('mvt', ({makeRequest}) => {
+    //   console.log('do mvt call');
+    //   return function mvt(params: any, options: any) {
+    //     console.log(params, options);
+    //
+    //     const {
+    //       body,
+    //       index,
+    //       method,
+    //       ...querystring
+    //     } = params;
+    //
+    //
+    //     // console.log('t', tile);
+    //
+    //     const path = `/${encodeURIComponent(index)}/_mvt/${params.field}/${params.z}/${params.x}/${params.y}`;
+    //     console.log('p',path);
+    //     // build request object
+    //     const request = {
+    //       method: 'GET',
+    //       path: path,
+    //       // body,
+    //       // querystring
+    //     };
+    //
+    //     // build request options object
+    //     const requestOptions = {
+    //       ignore: options.ignore || null,
+    //       requestTimeout: options.requestTimeout || null,
+    //       maxRetries: options.maxRetries || null,
+    //       asStream: options.asStream || false,
+    //       headers: options.headers || null
+    //     };
+    //
+    //     return makeRequest(request, requestOptions)
+    //
+    //   }
+    // });
+
     this._initHomeData(home, core.http.basePath.prepend, emsSettings);
 
     features.registerKibanaFeature({
@@ -221,6 +260,13 @@ export class MapsPlugin implements Plugin {
 
   // @ts-ignore
   start(core: CoreStart, plugins: StartDeps) {
+
+    console.log('****************************');
+    // console.log('core.elasticsearch.client', core.elasticsearch.client.asInternalUser.extend.toString());
+    console.log('****************************');
+
+
+
     setInternalRepository(core.savedObjects.createInternalRepository);
     setIndexPatternsService(
       plugins.data.indexPatterns.indexPatternsServiceFactory,

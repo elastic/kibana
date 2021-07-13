@@ -173,6 +173,8 @@ export class MapsPlugin
   }
 
   public start(core: CoreStart, plugins: MapsPluginStartDependencies): MapsStartApi {
+
+
     setLicensingPluginStart(plugins.licensing);
     setStartServices(core, plugins);
 

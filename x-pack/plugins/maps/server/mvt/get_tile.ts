@@ -51,6 +51,102 @@ function isAbortError(error: Error) {
   return error.message === 'Request aborted' || error.message === 'Aborted';
 }
 
+
+export async function getEsTile({
+                                logger,
+                                context,
+                                index,
+                                geometryFieldName,
+                                x,
+                                y,
+                                z,
+                                requestBody = {},
+                                geoFieldType,
+                                searchSessionId,
+                                abortSignal,
+                              }: {
+  x: number;
+  y: number;
+  z: number;
+  geometryFieldName: string;
+  index: string;
+  context: DataRequestHandlerContext;
+  logger: Logger;
+  requestBody: any;
+  geoFieldType: ES_GEO_FIELD_TYPE;
+  searchSessionId?: string;
+  abortSignal: AbortSignal;
+}): Promise<Buffer | null> {
+  try {
+    const path = `/${encodeURIComponent(index)}/_mvt/${geometryFieldName}/${z}/${x}/${y}`;
+    console.log('op', path);
+    const tile = await context.core.elasticsearch.client.asCurrentUser.transport.request({
+      method: 'GET',
+      path: path,
+    });
+    console.log('t', tile);
+    return tile;
+  } catch (e) {
+    if (!isAbortError(e)) {
+      // These are often circuit breaking exceptions
+      // Should return a tile with some error message
+      logger.warn(`Cannot generate ES-tile for ${z}/${x}/${y}: ${e.message}`);
+    }
+    return null;
+  }
+}
+
+
+
+export async function getEsGridTile({
+                                    logger,
+                                    context,
+                                    index,
+                                    geometryFieldName,
+                                    x,
+                                    y,
+                                    z,
+                                    requestBody = {},
+                                    requestType = RENDER_AS.POINT,
+                                    searchSessionId,
+                                    abortSignal,
+                                  }: {
+  x: number;
+  y: number;
+  z: number;
+  geometryFieldName: string;
+  index: string;
+  context: DataRequestHandlerContext;
+  logger: Logger;
+  requestBody: any;
+  requestType: RENDER_AS.GRID | RENDER_AS.POINT;
+  geoFieldType: ES_GEO_FIELD_TYPE;
+  searchSessionId?: string;
+  abortSignal: AbortSignal;
+}): Promise<Buffer | null> {
+  try {
+    const path = `/${encodeURIComponent(index)}/_mvt/${geometryFieldName}/${z}/${x}/${y}`;
+    console.log('getTileP', path);
+    const tile = await context.core.elasticsearch.client.asCurrentUser.transport.request({
+      method: 'GET',
+      path: path,
+    });
+    console.log('b', typeof tile.body, tile.body.length);
+    let buffer = Buffer.from(tile.body, 'base64');
+    // let buffer = tile.body;
+    console.log('bfl',buffer, buffer.length);
+    // const buffer= tile.body;
+    return buffer;
+  } catch (e) {
+    if (!isAbortError(e)) {
+      // These are often circuit breaking exceptions
+      // Should return a tile with some error message
+      logger.warn(`Cannot generate ES-grid-tile for ${z}/${x}/${y}: ${e.message}`);
+    }
+    return null;
+  }
+}
+
 export async function getGridTile({
   logger,
   context,

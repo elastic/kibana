@@ -38,6 +38,7 @@ export class MVTSingleLayerVectorSourceEditor extends Component<Props, State> {
   };
 
   _sourceConfigChange = _.debounce(() => {
+    console.log('can change?');
     const canPreview =
       this.state.urlTemplate.indexOf('{x}') >= 0 &&
       this.state.urlTemplate.indexOf('{y}') >= 0 &&

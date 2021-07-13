@@ -47,6 +47,10 @@ export const GET_MATCHING_INDEXES_PATH = `/${GIS_API_PATH}/getMatchingIndexes`;
 
 export const MVT_GETTILE_API_PATH = 'mvt/getTile';
 export const MVT_GETGRIDTILE_API_PATH = 'mvt/getGridTile';
+
+export const MVT_GETESTILE_API_PATH = 'mvt/getEsTile';
+export const MVT_GETESGRIDTILE_API_PATH = 'mvt/getEsGridTile';
+
 export const MVT_SOURCE_LAYER_NAME = 'source_layer';
 // Identifies vector tile "too many features" feature.
 // "too many features" feature is a box showing area that contains too many features for single ES search response
