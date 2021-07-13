@@ -6,14 +6,7 @@
  */
 
 import { AlertTypeState } from '../../../../../alerting/common';
-import { AlertInstance } from '../../../../../alerting/server';
 
-export type SecurityAlertTypeState = AlertTypeState & { previousStartedAt: string };
-export interface SecurityRuleState<TState extends AlertTypeState = {}> {
-  alertTypeState: TState;
-  alertInstances: AlertInstance[];
-  previousStartedAt: Date;
-}
 export interface SecurityAlertTypeReturnValue<TState extends AlertTypeState = {}> {
   bulkCreateTimes: string[];
   createdSignals: unknown[];

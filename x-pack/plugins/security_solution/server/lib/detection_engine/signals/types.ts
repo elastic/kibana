@@ -302,14 +302,12 @@ export interface SearchAfterAndBulkCreateParams {
 
 export interface SearchAfterAndBulkCreateReturnType {
   success: boolean;
-  // warning: boolean;
   searchAfterTimes: string[];
   bulkCreateTimes: string[];
   lastLookBackDate: Date | null | undefined;
-  createdSignalsCount: number;
   createdSignals: unknown[];
   errors: string[];
-  warningMessages: string[];
+  warnings: string[];
 }
 
 export interface ThresholdAggregationBucket extends TermAggregationBucket {

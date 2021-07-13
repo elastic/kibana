@@ -332,8 +332,8 @@ export const signalRulesAlertType = ({
         } else {
           throw new Error(`unknown rule type ${type}`);
         }
-        if (result.warningMessages.length) {
-          const warningMessage = buildRuleMessage(result.warningMessages.join());
+        if (result.warnings.length) {
+          const warningMessage = buildRuleMessage(result.warnings.join());
           await ruleStatusService.partialFailure(warningMessage);
         }
 
@@ -356,14 +356,14 @@ export const signalRulesAlertType = ({
             });
 
             logger.info(
-              buildRuleMessage(`Found ${result.createdSignalsCount} signals for notification.`)
+              buildRuleMessage(`Found ${result.createdSignals.length} signals for notification.`)
             );
 
-            if (result.createdSignalsCount) {
+            if (result.createdSignals.length) {
               const alertInstance = services.alertInstanceFactory(alertId);
               scheduleNotificationActions({
                 alertInstance,
-                signalsCount: result.createdSignalsCount,
+                signalsCount: result.createdSignals.length,
                 signals: result.createdSignals,
                 resultsLink,
                 ruleParams: notificationRuleParams,
@@ -374,10 +374,10 @@ export const signalRulesAlertType = ({
           logger.debug(buildRuleMessage('[+] Signal Rule execution completed.'));
           logger.debug(
             buildRuleMessage(
-              `[+] Finished indexing ${result.createdSignalsCount} signals into ${outputIndex}`
+              `[+] Finished indexing ${result.createdSignals.length} signals into ${outputIndex}`
             )
           );
-          if (!hasError && !wroteWarningStatus && !result.warningMessages.length) {
+          if (!hasError && !wroteWarningStatus && !result.warnings.length) {
             await ruleStatusService.success('succeeded', {
               bulkCreateTimeDurations: result.bulkCreateTimes,
               searchAfterTimeDurations: result.searchAfterTimes,
@@ -388,7 +388,7 @@ export const signalRulesAlertType = ({
           // adding this log line so we can get some information from cloud
           logger.info(
             buildRuleMessage(
-              `[+] Finished indexing ${result.createdSignalsCount}  ${
+              `[+] Finished indexing ${result.createdSignals.length}  ${
                 !isEmpty(tuples)
                   ? `signals searched between date ranges ${JSON.stringify(tuples, null, 2)}`
                   : ''

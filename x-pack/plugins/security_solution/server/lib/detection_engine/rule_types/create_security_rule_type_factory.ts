@@ -393,7 +393,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
         });
       }
 
-      return result;
+      return result.state;
     },
   });
 };

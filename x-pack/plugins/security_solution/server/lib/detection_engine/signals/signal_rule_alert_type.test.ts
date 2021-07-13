@@ -151,7 +151,7 @@ describe('signal_rule_alert_type', () => {
       };
     });
     const executorReturnValue = createSearchAfterReturnType({
-      createdSignalsCount: 10,
+      createdSignals: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
     });
     (queryExecutor as jest.Mock).mockClear();
     (queryExecutor as jest.Mock).mockResolvedValue(executorReturnValue);
@@ -432,9 +432,8 @@ describe('signal_rule_alert_type', () => {
         searchAfterTimes: [],
         bulkCreateTimes: [],
         lastLookBackDate: null,
-        createdSignalsCount: 0,
         createdSignals: [],
-        warningMessages: [],
+        warnings: [],
         errors: ['Error that bubbled up.'],
       };
       (queryExecutor as jest.Mock).mockResolvedValue(result);

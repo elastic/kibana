@@ -67,7 +67,7 @@ export const createQueryAlertType = (createOptions: {
     isExportable: false,
     producer: 'security-solution',
     async executor(execOptions) {
-      const result = createResultObject<QueryAlertState>({});
+      let result = createResultObject<QueryAlertState>({});
       const {
         params: { filters, index, language, query },
         runOpts: {
@@ -96,8 +96,7 @@ export const createQueryAlertType = (createOptions: {
           lists: exceptionItems,
         });
 
-        // TODO; process return value
-        await searchAfterAndBulkCreate({
+        const runResult = await searchAfterAndBulkCreate({
           tuple,
           listClient,
           exceptionsList: exceptionItems,
@@ -116,14 +115,14 @@ export const createQueryAlertType = (createOptions: {
           wrapHits,
         });
 
-        /*
-        alertWithPersistence(results.createdSignals).forEach((alert) => {
-          alert.scheduleActions('default', { server: 'server-test' });
-        });
-        */
+        result = {
+          ...result,
+          ...runResult,
+        };
       } catch (error) {
         logger.error(error);
       }
+
       return result;
     },
   });

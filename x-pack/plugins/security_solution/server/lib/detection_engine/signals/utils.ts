@@ -669,29 +669,26 @@ export const createSearchAfterReturnType = ({
   searchAfterTimes,
   bulkCreateTimes,
   lastLookBackDate,
-  createdSignalsCount,
   createdSignals,
   errors,
-  warningMessages,
+  warnings,
 }: {
   success?: boolean | undefined;
   searchAfterTimes?: string[] | undefined;
   bulkCreateTimes?: string[] | undefined;
   lastLookBackDate?: Date | undefined;
-  createdSignalsCount?: number | undefined;
   createdSignals?: unknown[] | undefined;
   errors?: string[] | undefined;
-  warningMessages?: string[] | undefined;
+  warnings?: string[] | undefined;
 } = {}): SearchAfterAndBulkCreateReturnType => {
   return {
     success: success ?? true,
     searchAfterTimes: searchAfterTimes ?? [],
     bulkCreateTimes: bulkCreateTimes ?? [],
     lastLookBackDate: lastLookBackDate ?? null,
-    createdSignalsCount: createdSignalsCount ?? 0,
     createdSignals: createdSignals ?? [],
     errors: errors ?? [],
-    warningMessages: warningMessages ?? [],
+    warnings: warnings ?? [],
   };
 };
 
@@ -724,10 +721,9 @@ export const mergeReturns = (
       searchAfterTimes: existingSearchAfterTimes,
       bulkCreateTimes: existingBulkCreateTimes,
       lastLookBackDate: existingLastLookBackDate,
-      createdSignalsCount: existingCreatedSignalsCount,
       createdSignals: existingCreatedSignals,
       errors: existingErrors,
-      warningMessages: existingWarningMessages,
+      warnings: existingWarningMessages,
     }: SearchAfterAndBulkCreateReturnType = prev;
 
     const {
@@ -735,10 +731,9 @@ export const mergeReturns = (
       searchAfterTimes: newSearchAfterTimes,
       bulkCreateTimes: newBulkCreateTimes,
       lastLookBackDate: newLastLookBackDate,
-      createdSignalsCount: newCreatedSignalsCount,
       createdSignals: newCreatedSignals,
       errors: newErrors,
-      warningMessages: newWarningMessages,
+      warnings: newWarningMessages,
     }: SearchAfterAndBulkCreateReturnType = next;
 
     return {
@@ -746,10 +741,9 @@ export const mergeReturns = (
       searchAfterTimes: [...existingSearchAfterTimes, ...newSearchAfterTimes],
       bulkCreateTimes: [...existingBulkCreateTimes, ...newBulkCreateTimes],
       lastLookBackDate: newLastLookBackDate ?? existingLastLookBackDate,
-      createdSignalsCount: existingCreatedSignalsCount + newCreatedSignalsCount,
       createdSignals: [...existingCreatedSignals, ...newCreatedSignals],
       errors: [...new Set([...existingErrors, ...newErrors])],
-      warningMessages: [...existingWarningMessages, ...newWarningMessages],
+      warnings: [...existingWarningMessages, ...newWarningMessages],
     };
   });
 };

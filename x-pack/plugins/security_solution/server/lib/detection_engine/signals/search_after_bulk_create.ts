@@ -155,7 +155,6 @@ export const searchAfterAndBulkCreate = async ({
           toReturn,
           createSearchAfterReturnType({
             success: bulkSuccess,
-            createdSignalsCount: createdCount,
             createdSignals: createdItems,
             bulkCreateTimes: bulkDuration ? [bulkDuration] : undefined,
             errors: bulkErrors,
@@ -186,6 +185,6 @@ export const searchAfterAndBulkCreate = async ({
       ]);
     }
   }
-  logger.debug(buildRuleMessage(`[+] completed bulk index of ${toReturn.createdSignalsCount}`));
+  logger.debug(buildRuleMessage(`[+] completed bulk index of ${toReturn.createdSignals.length}`));
   return toReturn;
 };
