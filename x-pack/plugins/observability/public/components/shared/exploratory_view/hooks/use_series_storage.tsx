@@ -91,6 +91,7 @@ export function UrlStorageContextProvider({
 
     (storage as IKbnUrlStateStorage).set(allSeriesKey, allShortSeries);
     (storage as IKbnUrlStateStorage).set(reportTypeKey, reportType);
+    // this is only needed for tab change, so we will not add allSeries into dependencies
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPreview, storage]);
 

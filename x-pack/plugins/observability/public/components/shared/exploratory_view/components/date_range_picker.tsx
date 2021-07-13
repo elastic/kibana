@@ -25,14 +25,14 @@ export function DateRangePicker({ seriesId, series }: { seriesId: string; series
   const seriesFrom = series.time?.from;
   const seriesTo = series.time?.to;
 
-  const { from, to } = firstSeries!.time;
+  const { from: mainFrom, to: mainTo } = firstSeries!.time;
 
-  const startDate = parseAbsoluteDate(seriesFrom ?? from)!;
-  const endDate = parseAbsoluteDate(seriesTo ?? to, { roundUp: true })!;
+  const startDate = parseAbsoluteDate(seriesFrom ?? mainFrom)!;
+  const endDate = parseAbsoluteDate(seriesTo ?? mainTo, { roundUp: true })!;
 
   const getTotalDuration = () => {
-    const mainStartDate = parseAbsoluteDate(from)!;
-    const mainEndDate = parseAbsoluteDate(to, { roundUp: true })!;
+    const mainStartDate = parseAbsoluteDate(mainTo)!;
+    const mainEndDate = parseAbsoluteDate(mainTo, { roundUp: true })!;
     return mainEndDate.diff(mainStartDate, 'millisecond');
   };
 
