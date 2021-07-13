@@ -36,6 +36,7 @@ It's vital to be consistent when naming environments in your agents.
 To learn how to configure service environments, see the specific agent documentation:
 
 * *Go:* {apm-go-ref}/configuration.html#config-environment[`ELASTIC_APM_ENVIRONMENT`]
+* *iOS agent:* _Not yet supported_
 * *Java:* {apm-java-ref}/config-core.html#config-environment[`environment`]
 * *.NET:* {apm-dotnet-ref}/config-core.html#config-environment[`Environment`]
 * *Node.js:* {apm-node-ref}/configuration.html#environment[`environment`]
