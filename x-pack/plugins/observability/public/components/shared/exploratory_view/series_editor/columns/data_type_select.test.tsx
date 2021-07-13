@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { mockAppIndexPattern, mockUxSeries, render } from '../../rtl_helpers';
-import { dataTypes, DataTypesLabels, DataTypesSelect } from './data_type_select';
+import { DataTypesLabels, DataTypesSelect } from './data_type_select';
 import { DataTypes } from '../../configurations/constants';
 
 describe('DataTypeSelect', function () {
