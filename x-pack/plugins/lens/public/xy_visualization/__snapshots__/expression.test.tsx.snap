@@ -337,7 +337,7 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
       Object {
         "hideClippedValue": true,
         "isAlternatingValueLabel": false,
-        "isValueContainedInElement": true,
+        "isValueContainedInElement": false,
         "showValueLabel": false,
         "valueFormatter": [Function],
       }
@@ -401,7 +401,7 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
       Object {
         "hideClippedValue": true,
         "isAlternatingValueLabel": false,
-        "isValueContainedInElement": true,
+        "isValueContainedInElement": false,
         "showValueLabel": false,
         "valueFormatter": [Function],
       }
@@ -560,7 +560,7 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
       Object {
         "hideClippedValue": true,
         "isAlternatingValueLabel": false,
-        "isValueContainedInElement": true,
+        "isValueContainedInElement": false,
         "showValueLabel": false,
         "valueFormatter": [Function],
       }
@@ -624,7 +624,7 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
       Object {
         "hideClippedValue": true,
         "isAlternatingValueLabel": false,
-        "isValueContainedInElement": true,
+        "isValueContainedInElement": false,
         "showValueLabel": false,
         "valueFormatter": [Function],
       }
@@ -1221,7 +1221,7 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
       Object {
         "hideClippedValue": true,
         "isAlternatingValueLabel": false,
-        "isValueContainedInElement": true,
+        "isValueContainedInElement": false,
         "showValueLabel": false,
         "valueFormatter": [Function],
       }
@@ -1289,7 +1289,7 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
       Object {
         "hideClippedValue": true,
         "isAlternatingValueLabel": false,
-        "isValueContainedInElement": true,
+        "isValueContainedInElement": false,
         "showValueLabel": false,
         "valueFormatter": [Function],
       }
@@ -1452,7 +1452,7 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
       Object {
         "hideClippedValue": true,
         "isAlternatingValueLabel": false,
-        "isValueContainedInElement": true,
+        "isValueContainedInElement": false,
         "showValueLabel": false,
         "valueFormatter": [Function],
       }
@@ -1520,7 +1520,7 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
       Object {
         "hideClippedValue": true,
         "isAlternatingValueLabel": false,
-        "isValueContainedInElement": true,
+        "isValueContainedInElement": false,
         "showValueLabel": false,
         "valueFormatter": [Function],
       }
