@@ -431,7 +431,7 @@ ${'`square(last_value(length))`'}
   },
 };
 
-export function isMathNode(node: TinymathAST) {
+export function isMathNode(node: TinymathAST | string) {
   return isObject(node) && node.type === 'function' && tinymathFunctions[node.name];
 }
 
