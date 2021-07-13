@@ -21,6 +21,11 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
 
   const authzWrapper = <P, Q, B>(handler: RequestHandler<P, Q, B>): RequestHandler<P, Q, B> => {
     return async (ctx, req, res) => {
+      const { security } = reporting.getPluginSetupDeps();
+      if (!security) {
+        return handler(ctx, req, res);
+      }
+
       const {
         core: { elasticsearch },
       } = ctx;
