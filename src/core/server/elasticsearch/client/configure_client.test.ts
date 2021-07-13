@@ -98,7 +98,7 @@ describe('configureClient', () => {
     const client = configureClient(config, { logger, type: 'test', scoped: false });
 
     expect(ClientMock).toHaveBeenCalledTimes(1);
-    expect(ClientMock).toHaveBeenCalledWith(parsedOptions);
+    expect(ClientMock).toHaveBeenCalledWith(expect.objectContaining(parsedOptions));
     expect(client).toBe(ClientMock.mock.results[0].value);
   });
 

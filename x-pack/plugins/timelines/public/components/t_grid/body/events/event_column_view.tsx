@@ -58,7 +58,7 @@ export const EventColumnView = React.memo<Props>(
     hasRowRenderers,
     onRuleChange,
     renderCellValue,
-    selectedEventIds,
+    selectedEventIds = {},
     showCheckboxes,
     tabType,
     timelineId,
@@ -82,7 +82,6 @@ export const EventColumnView = React.memo<Props>(
           .join(' '),
       [columnHeaders, data]
     );
-
     const leadingActionCells = useMemo(
       () =>
         leadingControlColumns ? leadingControlColumns.map((column) => column.rowCellRender) : [],

@@ -78,6 +78,9 @@ export function kbnTypeToJobType(field: IndexPatternField) {
     case KBN_FIELD_TYPES.GEO_SHAPE:
       type = JOB_FIELD_TYPES.GEO_SHAPE;
       break;
+    case KBN_FIELD_TYPES.HISTOGRAM:
+      type = JOB_FIELD_TYPES.HISTOGRAM;
+      break;
 
     default:
       break;
