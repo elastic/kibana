@@ -608,8 +608,7 @@ describe('utils', () => {
             },
           ],
         },
-        // Remove second push
-        userActions: userActions.filter((item, index) => index !== 4),
+        userActions,
         connector,
         mappings: [
           ...mappings,
@@ -636,7 +635,7 @@ describe('utils', () => {
       ]);
     });
 
-    it('it removes alerts correctly', async () => {
+    it('it filters out the alerts from the comments correctly', async () => {
       const res = await createIncident({
         actionsClient: actionsMock,
         theCase: {
@@ -663,6 +662,32 @@ describe('utils', () => {
         {
           comment: 'Elastic Alerts attached to the case: 4',
           commentId: 'mock-id-1-total-alerts',
+        },
+      ]);
+    });
+
+    it('does not add the alerts count comment if all alerts have been pushed', async () => {
+      const res = await createIncident({
+        actionsClient: actionsMock,
+        theCase: {
+          ...theCase,
+          comments: [
+            { ...commentObj, id: 'comment-user-1', pushed_at: '2019-11-25T21:55:00.177Z' },
+            { ...commentGeneratedAlert, pushed_at: '2019-11-25T21:55:00.177Z' },
+          ],
+        },
+        userActions,
+        connector,
+        mappings,
+        alerts: [],
+        casesConnectors,
+      });
+
+      expect(res.comments).toEqual([
+        {
+          comment:
+            'Wow, good luck catching that bad meanie! (added at 2019-11-25T21:55:00.177Z by elastic)',
+          commentId: 'comment-user-1',
         },
       ]);
     });
@@ -726,22 +751,6 @@ describe('utils', () => {
             `Retrieving Incident by id external-id from .jira failed with exception: Error: exception`
           )
         );
-      });
-    });
-
-    it('throws error if connector is not supported', async () => {
-      expect.assertions(2);
-      createIncident({
-        actionsClient: actionsMock,
-        theCase,
-        userActions,
-        connector: { ...connector, actionTypeId: 'not-supported' },
-        mappings,
-        alerts: [],
-        casesConnectors,
-      }).catch((e) => {
-        expect(e).not.toBeNull();
-        expect(e).toEqual(new Error('Invalid external service'));
       });
     });
 
