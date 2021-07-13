@@ -22,6 +22,7 @@ import { PersistableStateService, SerializableState } from '../../../kibana_util
 import { Adapters } from '../../../inspector/common/adapters';
 import {
   clog,
+  createTable,
   font,
   variableSet,
   variable,
@@ -338,6 +339,7 @@ export class ExpressionsService implements PersistableStateService<ExpressionAst
   public setup(...args: unknown[]): ExpressionsServiceSetup {
     for (const fn of [
       clog,
+      createTable,
       font,
       variableSet,
       variable,

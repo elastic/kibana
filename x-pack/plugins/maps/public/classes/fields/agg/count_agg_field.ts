@@ -94,7 +94,7 @@ export class CountAggField implements IESAggField {
   }
 
   supportsAutoDomain(): boolean {
-    return this._canReadFromGeoJson ? true : this.supportsFieldMeta();
+    return true;
   }
 
   canReadFromGeoJson(): boolean {

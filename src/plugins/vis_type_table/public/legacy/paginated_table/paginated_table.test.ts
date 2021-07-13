@@ -12,6 +12,7 @@ import $ from 'jquery';
 import 'angular-sanitize';
 import 'angular-mocks';
 
+import { initAngularBootstrap } from '../../../../kibana_legacy/public/angular_bootstrap';
 import { getAngularModule } from '../get_inner_angular';
 import { initTableVisLegacyModule } from '../table_vis_legacy_module';
 import { coreMock } from '../../../../../core/public/mocks';
@@ -55,6 +56,10 @@ describe('Table Vis - Paginated table', () => {
   let $scope: PaginatedTableScope;
   const defaultPerPage = 10;
   let paginatedTable: any;
+
+  beforeAll(async () => {
+    await initAngularBootstrap();
+  });
 
   const initLocalAngular = () => {
     const tableVisModule = getAngularModule(
