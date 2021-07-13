@@ -77,7 +77,7 @@ These stats are logged based the number of milliseconds set in your <<task-manag
 
 ==== Automatic logging
 
-By default, the health API runs at a regular cadence and each time it runs, it will attempts to self evaluate its performance. If this self evaluation yields a potential problem,
+By default, the health API runs at a regular cadence and each time it runs, it will attempt to self evaluate its performance. If this self evaluation yields a potential problem,
 a message will log to the {kib} server log. In addition to this test, the health API will look at how long tasks have waited to start (from when they were scheduled to start) and if this number exceeds a configurable threshold (<<task-manager-settings,`xpack.task_manager.monitored_stats_health_verbose_log.warn_delayed_task_start_in_seconds`>>), the same message as above will log to the {kib} server log.
 
 This message looks like:
