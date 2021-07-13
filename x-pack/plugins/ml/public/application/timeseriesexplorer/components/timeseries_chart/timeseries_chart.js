@@ -488,6 +488,7 @@ class TimeseriesChartIntl extends Component {
     fcsGroup
       .append('g')
       .attr('class', 'mlAnnotationBrush')
+      .attr('data-test-subh', 'mlAnnotationActionableArea')
       .call(annotateBrush)
       .selectAll('rect')
       .attr('x', brushX)

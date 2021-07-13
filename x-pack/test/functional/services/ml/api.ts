@@ -845,17 +845,18 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return undefined;
     },
 
-    async indexAnnotation(annotationRequestBody: Partial<Annotation>) {
+    async indexAnnotation(annotationRequestBody: Partial<Annotation>, id?: string) {
       log.debug(`Indexing annotation '${JSON.stringify(annotationRequestBody)}'...`);
       // @ts-ignore due to outdated type for IndexDocumentParams.type
       const params = {
         index: ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
+        id,
         body: annotationRequestBody,
         refresh: 'wait_for',
       } as const;
       const { body } = await es.index(params);
       await this.waitForAnnotationToExist(body._id);
-      log.debug('> Annotation indexed.');
+      log.debug(`> Annotation ${body._id} indexed.`);
       return body;
     },
 

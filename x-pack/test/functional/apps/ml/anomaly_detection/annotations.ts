@@ -7,34 +7,7 @@
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { Job, Datafeed } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
-
-// @ts-expect-error doesn't implement the full interface
-const JOB_CONFIG: Job = {
-  job_id: `fq_single_1_smv`,
-  description: 'mean(responsetime) on farequote dataset with 15m bucket span',
-  groups: ['farequote', 'automated', 'single-metric'],
-  analysis_config: {
-    bucket_span: '15m',
-    influencers: [],
-    detectors: [
-      {
-        function: 'mean',
-        field_name: 'responsetime',
-      },
-    ],
-  },
-  data_description: { time_field: '@timestamp' },
-  analysis_limits: { model_memory_limit: '10mb' },
-  model_plot_config: { enabled: true },
-};
-
-// @ts-expect-error doesn't implement the full interface
-const DATAFEED_CONFIG: Datafeed = {
-  datafeed_id: 'datafeed-fq_single_1_smv',
-  indices: ['ft_farequote'],
-  job_id: 'fq_single_1_smv',
-  query: { bool: { must: [{ match_all: {} }] } },
-};
+import { Annotation } from '../../../../../plugins/ml/common/types/annotations';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -42,15 +15,57 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('annotations', function () {
     this.tags(['mlqa']);
+    const jobId = `fq_single_1_smv_${Date.now()}`;
+
+    // @ts-expect-error doesn't implement the full interface
+    const JOB_CONFIG: Job = {
+      job_id: jobId,
+      description: 'mean(responsetime) on farequote dataset with 15m bucket span',
+      groups: ['farequote', 'automated', 'single-metric'],
+      analysis_config: {
+        bucket_span: '15m',
+        influencers: [],
+        detectors: [
+          {
+            function: 'mean',
+            field_name: 'responsetime',
+          },
+        ],
+      },
+      data_description: { time_field: '@timestamp' },
+      analysis_limits: { model_memory_limit: '10mb' },
+      model_plot_config: { enabled: true },
+    };
+    // @ts-expect-error doesn't implement the full interface
+    const DATAFEED_CONFIG: Datafeed = {
+      datafeed_id: `datafeed-${jobId}`,
+      indices: ['ft_farequote'],
+      job_id: jobId,
+      query: { bool: { must: [{ match_all: {} }] } },
+    };
+    const annotation = {
+      timestamp: 1455142431586,
+      end_timestamp: 1455200689604,
+      annotation: 'Test annotation',
+      job_id: jobId,
+      type: 'annotation' as Annotation['type'],
+      detector_index: 0,
+      event: 'user',
+      create_time: 1626129498464,
+      create_username: 'user1',
+      modified_time: 1626129498464,
+      modified_username: 'user2',
+    };
+
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.api.createAndRunAnomalyDetectionLookbackJob(JOB_CONFIG, DATAFEED_CONFIG);
+
       // Points the read/write aliases of annotations to an index with wrong mappings
       // so we can simulate errors when requesting annotations.
-      await ml.testResources.setupBrokenAnnotationsIndexState(JOB_CONFIG.job_id);
       await ml.securityUI.loginAsMlPowerUser();
     });
 
@@ -58,45 +73,248 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.api.cleanMlIndices();
     });
 
-    it('displays error on broken annotation index and recovers after fix', async () => {
-      await ml.testExecution.logTestStep('loads from job list row link');
-      await ml.navigation.navigateToMl();
-      await ml.navigation.navigateToJobManagement();
+    describe('creation', function () {
+      const newText = 'Created annotation text';
 
-      await ml.jobTable.waitForJobsToLoad();
-      await ml.jobTable.filterWithSearchString(JOB_CONFIG.job_id, 1);
+      it('creates annotation', async () => {
+        await ml.testExecution.logTestStep('loads from job list row link');
+        await ml.navigation.navigateToMl();
+        await ml.navigation.navigateToJobManagement();
 
-      await ml.jobTable.clickOpenJobInSingleMetricViewerButton(JOB_CONFIG.job_id);
-      await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
+        await ml.jobTable.waitForJobsToLoad();
+        await ml.jobTable.filterWithSearchString(JOB_CONFIG.job_id, 1);
 
-      await ml.testExecution.logTestStep('pre-fills the job selection');
-      await ml.jobSelection.assertJobSelection([JOB_CONFIG.job_id]);
+        await ml.jobTable.clickOpenJobInSingleMetricViewerButton(JOB_CONFIG.job_id);
+        await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
 
-      await ml.testExecution.logTestStep('pre-fills the detector input');
-      await ml.singleMetricViewer.assertDetectorInputExist();
-      await ml.singleMetricViewer.assertDetectorInputValue('0');
+        await ml.testExecution.logTestStep('pre-fills the job selection');
+        await ml.jobSelection.assertJobSelection([JOB_CONFIG.job_id]);
 
-      await ml.testExecution.logTestStep('should display the annotations section showing an error');
-      await ml.singleMetricViewer.assertAnnotationsExists('error');
+        await ml.testExecution.logTestStep('pre-fills the detector input');
+        await ml.singleMetricViewer.assertDetectorInputExist();
+        await ml.singleMetricViewer.assertDetectorInputValue('0');
+        await ml.singleMetricViewer.assertAnnotationsExists('loaded');
 
-      await ml.testExecution.logTestStep('should navigate to anomaly explorer');
-      await ml.navigation.navigateToAnomalyExplorerViaSingleMetricViewer();
+        await ml.jobAnnotation.createAnnotation(newText);
+        await ml.jobAnnotation.ensureSingleMetricViewerAnnotationsPanelOpen();
+        await ml.jobAnnotation.assertAnnotationExists({
+          annotation: newText,
+          event: 'user',
+        });
+      });
+    });
 
-      await ml.testExecution.logTestStep('should display the annotations section showing an error');
-      await ml.anomalyExplorer.assertAnnotationsPanelExists('error');
+    describe('editing', function () {
+      const annotationId = `edit-annotation-id-${Date.now()}`;
+      const newText = 'Edited annotation text';
+      const expectedOriginalAnnotation = {
+        annotation: annotation.annotation,
+        from: '2016-02-10 22:13:51',
+        to: '2016-02-11 14:24:49',
+        modifiedTime: '2021-07-12 22:38:18',
+        modifiedBy: annotation.modified_username,
+        event: annotation.event,
+      };
+      const expectedEditedAnnotation = {
+        annotation: newText,
+        event: annotation.event,
+      };
 
-      await ml.testExecution.logTestStep('should display the annotations section without an error');
-      // restores the aliases to point to the original working annotations index
-      // so we can run tests against successfully loaded annotations sections.
-      await ml.testResources.restoreAnnotationsIndexState();
-      await ml.anomalyExplorer.refreshPage();
-      await ml.anomalyExplorer.assertAnnotationsPanelExists('loaded');
+      before(async () => {
+        await ml.api.indexAnnotation(annotation, annotationId);
+      });
 
-      await ml.testExecution.logTestStep('should navigate to single metric viewer');
-      await ml.navigation.navigateToSingleMetricViewerViaAnomalyExplorer();
+      it('displays the original annotation correctly', async () => {
+        await ml.testExecution.logTestStep('loads from job list row link');
+        await ml.navigation.navigateToMl();
+        await ml.navigation.navigateToJobManagement();
 
-      await ml.testExecution.logTestStep('should display the annotations section without an error');
-      await ml.singleMetricViewer.assertAnnotationsExists('loaded');
+        await ml.jobTable.waitForJobsToLoad();
+        await ml.jobTable.filterWithSearchString(JOB_CONFIG.job_id, 1);
+        await ml.jobTable.expandAnnotationsTab(JOB_CONFIG.job_id);
+        await ml.jobAnnotation.assertAnnotationContentById(
+          annotationId,
+          expectedOriginalAnnotation
+        );
+
+        await ml.jobTable.clickOpenJobInSingleMetricViewerButton(JOB_CONFIG.job_id);
+        await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
+
+        await ml.testExecution.logTestStep('pre-fills the job selection');
+        await ml.jobSelection.assertJobSelection([JOB_CONFIG.job_id]);
+
+        await ml.testExecution.logTestStep('pre-fills the detector input');
+        await ml.singleMetricViewer.assertDetectorInputExist();
+        await ml.singleMetricViewer.assertDetectorInputValue('0');
+        await ml.singleMetricViewer.assertAnnotationsExists('loaded');
+
+        await ml.testExecution.logTestStep('displays annotation content');
+        await ml.jobAnnotation.ensureSingleMetricViewerAnnotationsPanelOpen();
+        await ml.jobAnnotation.assertAnnotationsRowExists(annotationId);
+        await ml.jobAnnotation.assertAnnotationContentById(
+          annotationId,
+          expectedOriginalAnnotation
+        );
+      });
+
+      it('edits the annotation', async () => {
+        await ml.testExecution.logTestStep('opens edit annotation flyout');
+        await ml.jobAnnotation.clickAnnotationsEditAction(annotationId);
+
+        await ml.testExecution.logTestStep('displays annotation content');
+        await ml.jobAnnotation.assertAnnotationsEditFlyoutContent({
+          'Job ID': jobId,
+          Start: 'February 10th 2016, 22:13:51',
+          End: 'February 11th 2016, 14:24:49',
+          Created: 'July 12th 2021, 22:38:18',
+          'Created by': annotation.create_username,
+          'Last modified': 'July 12th 2021, 22:38:18',
+          'Modified by': annotation.modified_username,
+          Detector: 'mean(responsetime)',
+        });
+
+        await ml.testExecution.logTestStep('edits and saves new annotation text');
+        await ml.jobAnnotation.setAnnotationText(newText);
+
+        await ml.testExecution.logTestStep('displays annotation with newly edited text');
+        await ml.jobAnnotation.assertAnnotationContentById(annotationId, expectedEditedAnnotation);
+      });
+
+      it('displays newly edited annotation in anomaly explorer and job list', async () => {
+        await ml.testExecution.logTestStep('should display edited annotation in anomaly explorer');
+        await ml.navigation.navigateToAnomalyExplorerViaSingleMetricViewer();
+        await ml.anomalyExplorer.assertAnnotationsPanelExists('loaded');
+
+        await ml.jobAnnotation.ensureAnomalyExplorerAnnotationsPanelOpen();
+        await ml.jobAnnotation.assertAnnotationContentById(annotationId, expectedEditedAnnotation);
+
+        await ml.testExecution.logTestStep('should display edited annotation in job list');
+        await ml.navigation.navigateToJobManagement();
+        await ml.jobTable.waitForJobsToLoad();
+        await ml.jobTable.filterWithSearchString(JOB_CONFIG.job_id, 1);
+        await ml.jobTable.expandAnnotationsTab(JOB_CONFIG.job_id);
+        await ml.jobAnnotation.assertAnnotationContentById(annotationId, expectedEditedAnnotation);
+      });
+    });
+
+    describe('deleting', function () {
+      const annotationId = `delete-annotation-id-${Date.now()}`;
+
+      before(async () => {
+        await ml.api.indexAnnotation(annotation, annotationId);
+      });
+
+      it('displays the original annotation', async () => {
+        await ml.testExecution.logTestStep('loads from job list row link');
+        await ml.navigation.navigateToMl();
+        await ml.navigation.navigateToJobManagement();
+
+        await ml.jobTable.waitForJobsToLoad();
+        await ml.jobTable.filterWithSearchString(JOB_CONFIG.job_id, 1);
+
+        await ml.jobTable.clickOpenJobInSingleMetricViewerButton(JOB_CONFIG.job_id);
+        await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
+
+        await ml.testExecution.logTestStep('pre-fills the job selection');
+        await ml.jobSelection.assertJobSelection([JOB_CONFIG.job_id]);
+
+        await ml.testExecution.logTestStep('pre-fills the detector input');
+        await ml.singleMetricViewer.assertDetectorInputExist();
+        await ml.singleMetricViewer.assertDetectorInputValue('0');
+        await ml.singleMetricViewer.assertAnnotationsExists('loaded');
+
+        await ml.testExecution.logTestStep('displays annotation content');
+        await ml.jobAnnotation.ensureSingleMetricViewerAnnotationsPanelOpen();
+        await ml.jobAnnotation.assertAnnotationsRowExists(annotationId);
+        await ml.jobAnnotation.assertAnnotationContentById(annotationId, {
+          annotation: annotation.annotation,
+          from: '2016-02-10 22:13:51',
+          to: '2016-02-11 14:24:49',
+          modifiedTime: '2021-07-12 22:38:18',
+          modifiedBy: annotation.modified_username,
+          event: annotation.event,
+        });
+      });
+
+      it('deletes the annotation', async () => {
+        await ml.testExecution.logTestStep('opens edit annotation flyout');
+        await ml.jobAnnotation.deleteAnnotation(annotationId);
+        await ml.jobAnnotation.assertAnnotationsRowMissing(annotationId);
+      });
+
+      it('does not display the deleted annotation in anomaly explorer and job list', async () => {
+        await ml.testExecution.logTestStep(
+          'does not show the deleted annotation in anomaly explorer'
+        );
+        await ml.navigation.navigateToAnomalyExplorerViaSingleMetricViewer();
+        await ml.anomalyExplorer.assertAnnotationsPanelExists('loaded');
+        await ml.jobAnnotation.ensureAnomalyExplorerAnnotationsPanelOpen();
+        await ml.jobAnnotation.assertAnnotationsRowMissing(annotationId);
+
+        await ml.testExecution.logTestStep('does not show the deleted annotation in job list');
+        await ml.navigation.navigateToJobManagement();
+        await ml.jobTable.waitForJobsToLoad();
+        await ml.jobTable.filterWithSearchString(JOB_CONFIG.job_id, 1);
+        await ml.jobTable.expandAnnotationsTab(JOB_CONFIG.job_id);
+        await ml.jobAnnotation.assertAnnotationsRowMissing(annotationId);
+      });
+    });
+
+    describe('with errors', function () {
+      before(async () => {
+        // Points the read/write aliases of annotations to an index with wrong mappings
+        // so we can simulate errors when requesting annotations.
+        await ml.testResources.setupBrokenAnnotationsIndexState(JOB_CONFIG.job_id);
+      });
+
+      it('displays error on broken annotation index and recovers after fix', async () => {
+        await ml.testExecution.logTestStep('loads from job list row link');
+        await ml.navigation.navigateToMl();
+        await ml.navigation.navigateToJobManagement();
+
+        await ml.jobTable.waitForJobsToLoad();
+        await ml.jobTable.filterWithSearchString(JOB_CONFIG.job_id, 1);
+
+        await ml.jobTable.clickOpenJobInSingleMetricViewerButton(JOB_CONFIG.job_id);
+        await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
+
+        await ml.testExecution.logTestStep('pre-fills the job selection');
+        await ml.jobSelection.assertJobSelection([JOB_CONFIG.job_id]);
+
+        await ml.testExecution.logTestStep('pre-fills the detector input');
+        await ml.singleMetricViewer.assertDetectorInputExist();
+        await ml.singleMetricViewer.assertDetectorInputValue('0');
+
+        await ml.testExecution.logTestStep(
+          'should display the annotations section showing an error'
+        );
+        await ml.singleMetricViewer.assertAnnotationsExists('error');
+
+        await ml.testExecution.logTestStep('should navigate to anomaly explorer');
+        await ml.navigation.navigateToAnomalyExplorerViaSingleMetricViewer();
+
+        await ml.testExecution.logTestStep(
+          'should display the annotations section showing an error'
+        );
+        await ml.anomalyExplorer.assertAnnotationsPanelExists('error');
+
+        await ml.testExecution.logTestStep(
+          'should display the annotations section without an error'
+        );
+        // restores the aliases to point to the original working annotations index
+        // so we can run tests against successfully loaded annotations sections.
+        await ml.testResources.restoreAnnotationsIndexState();
+        await ml.anomalyExplorer.refreshPage();
+        await ml.anomalyExplorer.assertAnnotationsPanelExists('loaded');
+
+        await ml.testExecution.logTestStep('should navigate to single metric viewer');
+        await ml.navigation.navigateToSingleMetricViewerViaAnomalyExplorer();
+
+        await ml.testExecution.logTestStep(
+          'should display the annotations section without an error'
+        );
+        await ml.singleMetricViewer.assertAnnotationsExists('loaded');
+      });
     });
   });
 }
