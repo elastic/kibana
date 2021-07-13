@@ -68,6 +68,11 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
             },
           },
           {
+            exists: {
+              field: 'tls.server.hash.sha256',
+            },
+          },
+          {
             range: {
               'monitor.timespan': {
                 gte: from,
