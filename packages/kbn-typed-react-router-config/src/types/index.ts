@@ -51,12 +51,21 @@ export type Match<TRoutes extends Route[], TPath extends string> = MapRoutes<TRo
   ? UnwrapRouteMap<MapRoutes<TRoutes>[TPath]>
   : [];
 
-export interface Route {
+interface PlainRoute {
   path: string;
   element: ReactElement;
-  children?: Route[];
+  children?: PlainRoute[];
   params?: t.Type<any>;
 }
+
+interface ReadonlyPlainRoute {
+  readonly path: string;
+  readonly element: ReactElement;
+  readonly children?: readonly ReadonlyPlainRoute[];
+  readonly params?: t.Type<any>;
+}
+
+export type Route = PlainRoute | ReadonlyPlainRoute;
 
 interface DefaultOutput {
   path: {};
@@ -132,7 +141,11 @@ type MaybeUnion<T extends Record<string, any>, U extends Record<string, any>> = 
     [key in keyof U]: key extends keyof T ? T[key] | U[key] : U[key];
   };
 
-type MapRoute<TRoute, TPrefix extends string, TParents extends Route[] = []> = TRoute extends Route
+type MapRoute<
+  TRoute extends Route,
+  TPrefix extends string,
+  TParents extends Route[] = []
+> = TRoute extends Route
   ? MaybeUnion<
       {
         [key in AppendPath<TPrefix, TRoute['path']>]: TRoute & { parents: TParents };

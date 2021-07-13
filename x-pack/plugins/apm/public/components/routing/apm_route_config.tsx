@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createRouter, Outlet, unconst } from '@kbn/typed-react-router-config';
+import { createRouter, Outlet, route } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
 import { Breadcrumb } from '../app/breadcrumb';
@@ -19,7 +19,7 @@ import { settings } from './settings';
  * The array of route definitions to be used when the application
  * creates the routes.
  */
-const apmRoutesAsConst = [
+const apmRoutes = route([
   {
     path: '/',
     element: (
@@ -63,9 +63,7 @@ const apmRoutesAsConst = [
       }),
     ]),
   },
-] as const;
-
-export const apmRoutes = unconst(apmRoutesAsConst);
+] as const);
 
 export type ApmRoutes = typeof apmRoutes;
 

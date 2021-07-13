@@ -5,14 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export * from './create_router';
-export * from './types';
-export * from './outlet';
-export * from './route';
-export * from './route_renderer';
-export * from './router_provider';
-export * from './unconst';
-export * from './use_current_route';
-export * from './use_match_routes';
-export * from './use_params';
-export * from './use_router';
+import { Route } from './types';
+import { Unconst, unconst } from './unconst';
+
+export function route<TRoute extends Route | Route[] | readonly Route[]>(
+  r: TRoute
+): Unconst<TRoute> {
+  return unconst(r);
+}

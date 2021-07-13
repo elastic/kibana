@@ -9,11 +9,11 @@ import React from 'react';
 import * as t from 'io-ts';
 import { toNumberRt } from '@kbn/io-ts-utils/target/to_number_rt';
 import { createRouter } from './create_router';
-import { unconst } from './unconst';
 import { createMemoryHistory } from 'history';
+import { route } from './route';
 
 describe('createRouter', () => {
-  const routes = unconst([
+  const routes = route([
     {
       path: '/',
       element: <></>,

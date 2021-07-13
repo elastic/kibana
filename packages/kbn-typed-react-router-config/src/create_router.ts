@@ -28,7 +28,10 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
     const path = `${prefix}${route.path}`.replace(/\/{2,}/g, '/').replace(/\/$/, '') || '/';
     const reactRouterConfig: ReactRouterConfig = {
       component: () => route.element,
-      routes: route.children?.map((child) => toReactRouterConfigRoute(child, path)) ?? [],
+      routes:
+        (route.children as Route[] | undefined)?.map((child) =>
+          toReactRouterConfigRoute(child, path)
+        ) ?? [],
       exact: !route.children?.length,
       path,
     };

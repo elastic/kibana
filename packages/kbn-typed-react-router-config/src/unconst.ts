@@ -6,8 +6,19 @@
  * Side Public License, v 1.
  */
 import * as t from 'io-ts';
+import { DeepReadonly } from 'utility-types';
 
-type Unconst<T> = T extends React.ReactElement
+export type MaybeConst<TObject extends object | [object]> = TObject extends [object]
+  ? [DeepReadonly<TObject> | TObject]
+  : TObject extends [object, ...infer TTail]
+  ? [DeepReadonly<TObject> | TObject, ...(TTail extends object[] ? MaybeConst<TTail> : [])]
+  : TObject extends object[]
+  ? DeepReadonly<TObject>
+  : TObject extends object
+  ? [DeepReadonly<TObject> | TObject]
+  : [];
+
+export type Unconst<T> = T extends React.ReactElement
   ? React.ReactElement<any, any>
   : T extends t.Type<any>
   ? T
