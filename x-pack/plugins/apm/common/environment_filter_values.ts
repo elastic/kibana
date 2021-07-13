@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { SERVICE_ENVIRONMENT } from './elasticsearch_fieldnames';
 
 const ENVIRONMENT_ALL_VALUE = 'ENVIRONMENT_ALL';
-const ENVIRONMENT_NOT_DEFINED_VALUE = 'ENVIRONMENT_NOT_DEFINED';
+export const ENVIRONMENT_NOT_DEFINED_VALUE = 'ENVIRONMENT_NOT_DEFINED';
 
 export function getEnvironmentLabel(environment: string) {
   if (!environment || environment === ENVIRONMENT_NOT_DEFINED_VALUE) {
@@ -37,7 +37,7 @@ export const ENVIRONMENT_NOT_DEFINED = {
   text: getEnvironmentLabel(ENVIRONMENT_NOT_DEFINED_VALUE),
 };
 
-export function getEnvironmentEsField(environment?: string) {
+export function getEnvironmentEsField(environment: string) {
   if (
     !environment ||
     environment === ENVIRONMENT_NOT_DEFINED_VALUE ||
