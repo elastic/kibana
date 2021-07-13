@@ -247,7 +247,7 @@ The `file:` protocol is always denied, even if no network policy is configured.
 ==== CSV settings
 
 [[xpack-reporting-csv]] `xpack.reporting.csv.maxSizeBytes` {ess-icon}::
-The maximum {byte-units}[byte size] of a CSV file before being truncated. This setting exists to prevent large exports from causing performance and storage issues. Can be specified as number of bytes. Defaults to `10mb`.
+The maximum {ref}/common-options.html#byte-units[byte size] of a CSV file before being truncated. This setting exists to prevent large exports from causing performance and storage issues. Can be specified as number of bytes. Defaults to `10mb`.
 
 [NOTE]
 ============
@@ -266,7 +266,7 @@ For information about {kib} memory limits, see <<production, using {kib} in a pr
 Number of documents retrieved from {es} for each scroll iteration during a CSV export. Defaults to `500`.
 
 `xpack.reporting.csv.scroll.duration`::
- Amount of {time-units}[time] allowed before {kib} cleans the scroll context during a CSV export. Defaults to `30s`.
+ Amount of {ref}/common-options.html#time-units[time] allowed before {kib} cleans the scroll context during a CSV export. Defaults to `30s`.
 
 `xpack.reporting.csv.checkForFormulas`::
 Enables a check that warns you when there's a potential formula involved in the output (=, -, +, and @ chars). See OWASP: https://www.owasp.org/index.php/CSV_Injection. Defaults to `true`.
