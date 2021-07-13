@@ -26,7 +26,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const getRequestBody = () => {
     const partialSearchRequest: PartialSearchRequest = {
       params: {
-        index: 'apm-*',
         environment: 'ENVIRONMENT_ALL',
         start: '2020',
         end: '2021',

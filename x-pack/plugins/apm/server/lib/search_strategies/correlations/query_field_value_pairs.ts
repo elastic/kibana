@@ -11,7 +11,7 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import type {
   AsyncSearchProviderProgress,
-  SearchServiceParams,
+  SearchServiceFetchParams,
 } from '../../../../common/search_strategies/correlations/types';
 
 import { getQueryWithParams } from './get_query_with_params';
@@ -26,7 +26,7 @@ type FieldValuePairs = FieldValuePair[];
 export type Field = string;
 
 export const getTermsAggRequest = (
-  params: SearchServiceParams,
+  params: SearchServiceFetchParams,
   fieldName: string
 ): estypes.SearchRequest => ({
   index: params.index,
@@ -46,7 +46,7 @@ export const getTermsAggRequest = (
 
 export const fetchTransactionDurationFieldValuePairs = async (
   esClient: ElasticsearchClient,
-  params: SearchServiceParams,
+  params: SearchServiceFetchParams,
   fieldCandidates: Field[],
   progress: AsyncSearchProviderProgress
 ): Promise<FieldValuePairs> => {

@@ -31,7 +31,6 @@ interface CorrelationsOptions {
 }
 
 interface RawResponse {
-  log: string[];
   percentileThresholdValue?: number;
   took: number;
   values: SearchServiceValue[];
