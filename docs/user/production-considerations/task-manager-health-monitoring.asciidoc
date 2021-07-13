@@ -59,7 +59,7 @@ The health API is best consumed by via the `/api/task_manager/_health` endpoint.
 
 Additionally, there are two ways to consume these metrics:
 
-==== Debug logging
+*Debug logging*
 
 The metrics are logged in the {kib} `DEBUG` logger at a regular cadence.
 To enable Task Manager DEBUG logging in your {kib} instance, add the following to your `kibana.yml`:
@@ -75,7 +75,7 @@ logging:
 
 These stats are logged based on the number of milliseconds set in your <<task-manager-settings,`xpack.task_manager.poll_interval`>> setting, which means it could add substantial noise to your logs. Only enable this level of logging temporarily.
 
-==== Automatic logging
+*Automatic logging*
 
 By default, the health API runs at a regular cadence, and each time it runs, it will attempt to self evaluate its performance. If this self evaluation yields a potential problem,
 a message will log to the {kib} server log. In addition, the health API will look at how long tasks have waited to start (from when they were scheduled to start) and if this number exceeds a configurable threshold (<<task-manager-settings,`xpack.task_manager.monitored_stats_health_verbose_log.warn_delayed_task_start_in_seconds`>>), the same message as above will log to the {kib} server log.
