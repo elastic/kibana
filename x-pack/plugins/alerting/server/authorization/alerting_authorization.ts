@@ -51,7 +51,6 @@ export interface EnsureAuthorizedOpts {
   consumer: string;
   operation: ReadOperations | WriteOperations;
   entity: AlertingAuthorizationEntity;
-  spaceId?: string;
 }
 
 interface HasPrivileges {
@@ -167,32 +166,19 @@ export class AlertingAuthorization {
     );
   }
 
-  public async ensureAuthorized({
-    spaceId,
-    ruleTypeId,
-    consumer,
-    operation,
-    entity,
-  }: EnsureAuthorizedOpts) {
+  public async ensureAuthorized({ ruleTypeId, consumer, operation, entity }: EnsureAuthorizedOpts) {
     const { authorization } = this;
 
     const isAvailableConsumer = has(await this.allPossibleConsumers, consumer);
     if (authorization && this.shouldCheckAuthorization()) {
       const ruleType = this.alertTypeRegistry.get(ruleTypeId);
       const requiredPrivilegesByScope = {
-        consumer: authorization.actions.alerting.get(
-          ruleTypeId,
-          consumer,
-          entity,
-          operation,
-          spaceId
-        ),
+        consumer: authorization.actions.alerting.get(ruleTypeId, consumer, entity, operation),
         producer: authorization.actions.alerting.get(
           ruleTypeId,
           ruleType.producer,
           entity,
-          operation,
-          spaceId
+          operation
         ),
       };
 

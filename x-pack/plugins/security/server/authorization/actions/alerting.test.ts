@@ -52,11 +52,4 @@ describe('#get', () => {
       'alerting:1.0.0-zeta1:foo-ruleType/consumer/alertingType/bar-operation'
     );
   });
-
-  test('returns `alerting:${ruleType}/${spaceId}/${consumer}/${alertingType}/${operation}`', () => {
-    const alertingActions = new AlertingActions(version);
-    expect(
-      alertingActions.get('foo-ruleType', 'consumer', 'alertingType', 'bar-operation', 'mySpaceId')
-    ).toBe('alerting:1.0.0-zeta1:foo-ruleType/mySpaceId/consumer/alertingType/bar-operation');
-  });
 });

@@ -18,8 +18,7 @@ export class AlertingActions {
     ruleTypeId: string,
     consumer: string,
     alertingEntity: string,
-    operation: string,
-    spaceId?: string
+    operation: string
   ): string {
     if (!ruleTypeId || !isString(ruleTypeId)) {
       throw new Error('ruleTypeId is required and must be a string');
@@ -37,8 +36,6 @@ export class AlertingActions {
       throw new Error('alertingEntity is required and must be a string');
     }
 
-    return spaceId == null
-      ? `${this.prefix}${ruleTypeId}/${consumer}/${alertingEntity}/${operation}`
-      : `${this.prefix}${ruleTypeId}/${spaceId}/${consumer}/${alertingEntity}/${operation}`;
+    return `${this.prefix}${ruleTypeId}/${consumer}/${alertingEntity}/${operation}`;
   }
 }
