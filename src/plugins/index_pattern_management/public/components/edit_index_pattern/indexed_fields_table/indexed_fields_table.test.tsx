@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { IndexPatternField, IndexPattern } from 'src/plugins/data/public';
+import { IndexPatternField, IndexPattern, IndexPatternType } from 'src/plugins/data/public';
 import { IndexedFieldsTable } from './indexed_fields_table';
 import { RollupIndexPatternListConfig } from '../../../service/list';
 
@@ -39,7 +39,7 @@ const indexPattern = ({
 } as unknown) as IndexPattern;
 
 const rollupIndexPattern = ({
-  type: 'rollup', // todo use type
+  type: IndexPatternType.ROLLUP,
   typeMeta: {
     'rollup-index': 'rollup',
     aggs: {

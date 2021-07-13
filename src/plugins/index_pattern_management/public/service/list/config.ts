@@ -7,16 +7,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IndexPattern, IndexPatternField } from 'src/plugins/data/public';
+import { IndexPattern, IndexPatternField, IndexPatternType } from 'src/plugins/data/public';
 
 export interface IndexPatternTag {
   key: string;
   name: string;
-}
-
-export enum IndexPatternType {
-  DEFAULT = 'default',
-  ROLLUP = 'rollup',
 }
 
 const defaultIndexPatternListName = i18n.translate(

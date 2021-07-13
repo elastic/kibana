@@ -158,6 +158,11 @@ export interface TypeMeta {
   };
 }
 
+export enum IndexPatternType {
+  DEFAULT = 'default',
+  ROLLUP = 'rollup',
+}
+
 export type FieldSpecConflictDescriptions = Record<string, string[]>;
 
 // This should become FieldSpec once types are cleaned up

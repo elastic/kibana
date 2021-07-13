@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { IndexPattern, IndexPatternField } from '../../../../data/public';
+import { IndexPattern, IndexPatternField, IndexPatternType } from '../../../../data/public';
 import { IndexPatternListConfig } from '.';
-import { IndexPatternType } from './config';
 
 function isRollup(indexPattern: IndexPattern) {
   return indexPattern.type === IndexPatternType.ROLLUP;
