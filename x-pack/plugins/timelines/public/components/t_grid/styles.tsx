@@ -203,7 +203,7 @@ export const EventsTbody = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__tbody ${className}`,
   role: 'rowgroup',
 }))`
-  overflow-x: hidden;
+  overflow-x: scroll;
 `;
 
 export const EventsTrGroup = styled.div.attrs(
