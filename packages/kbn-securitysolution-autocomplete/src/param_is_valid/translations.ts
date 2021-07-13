@@ -8,10 +8,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const NUMBER_ERR = i18n.translate('xpack.autocomplete.invalidNumberError', {
+export const NUMBER_ERR = i18n.translate('autocomplete.invalidNumberError', {
   defaultMessage: 'Not a valid number',
 });
 
-export const DATE_ERR = i18n.translate('xpack.autocomplete.invalidDateError', {
+export const DATE_ERR = i18n.translate('autocomplete.invalidDateError', {
   defaultMessage: 'Not a valid date',
 });

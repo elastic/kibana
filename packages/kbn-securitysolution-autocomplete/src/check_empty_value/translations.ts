@@ -8,6 +8,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const FIELD_REQUIRED_ERR = i18n.translate('xpack.autocomplete.fieldRequiredError', {
+export const FIELD_REQUIRED_ERR = i18n.translate('autocomplete.fieldRequiredError', {
   defaultMessage: 'Value cannot be empty',
 });

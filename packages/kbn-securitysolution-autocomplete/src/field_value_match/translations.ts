@@ -8,13 +8,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const LOADING = i18n.translate('xpack.autocomplete.loadingDescription', {
+export const LOADING = i18n.translate('autocomplete.loadingDescription', {
   defaultMessage: 'Loading...',
 });
 
-export const SELECT_FIELD_FIRST = i18n.translate(
-  'xpack.securitySolution.autocomplete.selectField',
-  {
-    defaultMessage: 'Please select a field first...',
-  }
-);
+export const SELECT_FIELD_FIRST = i18n.translate('autocomplete.selectField', {
+  defaultMessage: 'Please select a field first...',
+});
