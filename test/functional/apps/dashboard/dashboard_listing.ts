@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   // FLAKY: https://github.com/elastic/kibana/issues/86948
   // FLAKY: https://github.com/elastic/kibana/issues/98247
-  describe.skip('dashboard listing page', function describeIndexTests() {
+  describe.only('dashboard listing page', function describeIndexTests() {
     const dashboardName = 'Dashboard Listing Test';
 
     before(async function () {
