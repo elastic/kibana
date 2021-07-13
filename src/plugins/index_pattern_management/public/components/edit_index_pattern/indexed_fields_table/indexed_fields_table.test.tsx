@@ -8,9 +8,8 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { IndexPatternField, IndexPattern, IndexPatternType } from 'src/plugins/data/public';
+import { IndexPatternField, IndexPattern } from 'src/plugins/data/public';
 import { IndexedFieldsTable } from './indexed_fields_table';
-import { RollupIndexPatternListConfig } from '../../../service/list';
 
 jest.mock('@elastic/eui', () => ({
   EuiFlexGroup: 'eui-flex-group',
@@ -29,37 +28,10 @@ jest.mock('./components/table', () => ({
 const helpers = {
   editField: (fieldName: string) => {},
   deleteField: (fieldName: string) => {},
-  // getFieldInfo handles non rollups as well
-  getFieldInfo: new RollupIndexPatternListConfig().getFieldInfo,
+  getFieldInfo: () => [],
 };
 
 const indexPattern = ({
-  getNonScriptedFields: () => fields,
-  getFormatterForFieldNoDefault: () => ({ params: () => ({}) }),
-} as unknown) as IndexPattern;
-
-const rollupIndexPattern = ({
-  type: IndexPatternType.ROLLUP,
-  typeMeta: {
-    'rollup-index': 'rollup',
-    aggs: {
-      date_histogram: {
-        timestamp: {
-          agg: 'date_histogram',
-          fixed_interval: '30s',
-          delay: '30s',
-          time_zone: 'UTC',
-        },
-      },
-      terms: { Elastic: { agg: 'terms' } },
-      histogram: { amount: { agg: 'histogram', interval: 5 } },
-      avg: { amount: { agg: 'avg' } },
-      max: { amount: { agg: 'max' } },
-      min: { amount: { agg: 'min' } },
-      sum: { amount: { agg: 'sum' } },
-      value_count: { amount: { agg: 'value_count' } },
-    },
-  },
   getNonScriptedFields: () => fields,
   getFormatterForFieldNoDefault: () => ({ params: () => ({}) }),
 } as unknown) as IndexPattern;
@@ -79,7 +51,6 @@ const fields = [
   },
   { name: 'timestamp', displayName: 'timestamp', esTypes: ['date'] },
   { name: 'conflictingField', displayName: 'conflictingField', esTypes: ['keyword', 'long'] },
-  { name: 'amount', displayName: 'amount', esTypes: ['long'] },
 ].map(mockFieldToIndexPatternField);
 
 describe('IndexedFieldsTable', () => {
@@ -143,27 +114,5 @@ describe('IndexedFieldsTable', () => {
     component.update();
 
     expect(component).toMatchSnapshot();
-  });
-
-  describe('IndexedFieldsTable with rollup index pattern', () => {
-    test('should render normally', async () => {
-      const component = shallow(
-        <IndexedFieldsTable
-          fields={fields}
-          indexPattern={rollupIndexPattern}
-          helpers={helpers}
-          fieldWildcardMatcher={() => {
-            return () => false;
-          }}
-          indexedFieldTypeFilter=""
-          fieldFilter=""
-        />
-      );
-
-      await new Promise((resolve) => process.nextTick(resolve));
-      component.update();
-
-      expect(component).toMatchSnapshot();
-    });
   });
 });
