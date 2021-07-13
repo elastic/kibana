@@ -7,7 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IndexPattern, IndexPatternField, IndexPatternType } from '../../../../data/public';
+import { IIndexPattern, IFieldType } from 'src/plugins/data/public';
+import { SimpleSavedObject } from 'src/core/public';
 
 export interface IndexPatternTag {
   key: string;
@@ -22,9 +23,12 @@ const defaultIndexPatternListName = i18n.translate(
 );
 
 export class IndexPatternListConfig {
-  public readonly key: IndexPatternType = IndexPatternType.DEFAULT;
+  public readonly key = 'default';
 
-  public getIndexPatternTags(indexPattern: IndexPattern, isDefault: boolean): IndexPatternTag[] {
+  public getIndexPatternTags(
+    indexPattern: IIndexPattern | SimpleSavedObject<IIndexPattern>,
+    isDefault: boolean
+  ): IndexPatternTag[] {
     return isDefault
       ? [
           {
@@ -35,11 +39,11 @@ export class IndexPatternListConfig {
       : [];
   }
 
-  public getFieldInfo(indexPattern: IndexPattern, field: IndexPatternField): string[] {
+  public getFieldInfo(indexPattern: IIndexPattern, field: IFieldType): string[] {
     return [];
   }
 
-  public areScriptedFieldsEnabled(indexPattern: IndexPattern): boolean {
+  public areScriptedFieldsEnabled(indexPattern: IIndexPattern): boolean {
     return true;
   }
 }
