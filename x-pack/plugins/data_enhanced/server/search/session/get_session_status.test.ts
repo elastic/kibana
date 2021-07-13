@@ -8,11 +8,13 @@
 import { SearchStatus } from './types';
 import { getSessionStatus } from './get_session_status';
 import { SearchSessionStatus } from '../../../../../../src/plugins/data/common';
+import moment from 'moment';
 
 describe('getSessionStatus', () => {
   test("returns an in_progress status if there's nothing inside the session", () => {
     const session: any = {
       idMapping: {},
+      touched: moment(),
     };
     expect(getSessionStatus(session)).toBe(SearchSessionStatus.IN_PROGRESS);
   });
@@ -26,6 +28,14 @@ describe('getSessionStatus', () => {
       },
     };
     expect(getSessionStatus(session)).toBe(SearchSessionStatus.ERROR);
+  });
+
+  test('expires a empty session after a minute', () => {
+    const session: any = {
+      idMapping: {},
+      touched: moment().subtract(2, 'm'),
+    };
+    expect(getSessionStatus(session)).toBe(SearchSessionStatus.EXPIRED);
   });
 
   test('returns a complete status if all are complete', () => {
