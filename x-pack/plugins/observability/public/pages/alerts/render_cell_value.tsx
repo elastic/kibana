@@ -63,8 +63,8 @@ export const getRenderCellValue = ({
       if (columnId === ALERT_DURATION) {
         setCellProps({
           style: {
-            backgroundColor: 'green', // TEMP
             textAlign: 'right',
+            paddingRight: '15px',
           },
         });
       }
