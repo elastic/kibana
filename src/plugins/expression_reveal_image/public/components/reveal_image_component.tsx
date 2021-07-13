@@ -6,12 +6,31 @@
  * Side Public License, v 1.
  */
 
+/** @jsx jsx */
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useResizeObserver } from '@elastic/eui';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import { css, jsx, classnames } from '@emotion/react'
 import { NodeDimensions, RevealImageRendererConfig, OriginString } from '../../common/types';
 import { isValidUrl } from '../../../presentation_util/public';
-import './reveal_image.scss';
+
+const revealImageParentStyle = css`
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+`;
+
+const revealImageAlignerStyle = {
+  backgroundSize: 'contain',
+  backgroundRepeat: 'no-repeat',
+};
+
+const revealImageStyle = {
+  userSelect: 'none'
+};
 
 interface RevealImageComponentProps extends RevealImageRendererConfig {
   onLoaded: IInterpreterRenderHandlers['done'];
@@ -48,6 +67,7 @@ function RevealImageComponent({
 
   // modify the top-level container class
   parentNode.className = 'revealImage';
+  parentNode.style = revealImageParentStyle.styles;
 
   // set up the overlay image
   const updateImageView = useCallback(() => {
@@ -89,25 +109,25 @@ function RevealImageComponent({
     };
 
     if (imgDimensions.ratio > domNodeDimensions.ratio) {
-      imgStyles.height = `${domNodeDimensions.height}px`;
+      imgStyles.height = domNodeDimensions.height;
       imgStyles.width = 'initial';
     } else {
-      imgStyles.width = `${domNodeDimensions.width}px`;
+      imgStyles.width = domNodeDimensions.width;
       imgStyles.height = 'initial';
     }
 
     return imgStyles;
   }
 
-  const alignerStyles: AlignerStyles = {};
+  const additionaAlignerStyles: AlignerStyles = {};
 
   if (isValidUrl(emptyImage ?? '')) {
     // only use empty image if one is provided
-    alignerStyles.backgroundImage = `url(${emptyImage})`;
+    additionaAlignerStyles.backgroundImage = `url(${emptyImage})`;
   }
 
-  let imgStyles: ImageStyles = {};
-  if (imgRef.current && loaded) imgStyles = getImageSizeStyle();
+  let additionalImgStyles: ImageStyles = {};
+  if (imgRef.current && loaded) additionalImgStyles = getImageSizeStyle();
 
   imgStyles.clipPath = getClipPath(percent, origin);
   if (imgRef.current && loaded) {
@@ -115,15 +135,14 @@ function RevealImageComponent({
   }
 
   return (
-    <div className="revealImageAligner" style={alignerStyles}>
+    <div className="revealImageAligner" css={[revealImageAlignerStyle, additionaAlignerStyles]}>
       <img
         ref={imgRef}
         onLoad={updateImageView}
-        className="revealImage__image"
+        css={[revealImageStyle, additionalImgStyles]}
         src={image}
         alt=""
         role="presentation"
-        style={imgStyles}
       />
     </div>
   );
