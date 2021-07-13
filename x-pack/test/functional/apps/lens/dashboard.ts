@@ -185,8 +185,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.configureDimension(
         {
           dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-          operation: 'terms',
-          field: 'geo.src',
+          operation: 'date_histogram',
+          field: '@timestamp',
         },
         1
       );
@@ -200,11 +200,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1
       );
       await PageObjects.lens.saveAndReturn();
-      await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await inspector.open();
+      await panelActions.openContextMenu();
+      await panelActions.clickContextMenuMoreItem();
+      await testSubjects.click('embeddablePanelAction-openInspector');
+      await inspector.openInspectorRequestsView();
       const requests = await inspector.getRequestNames();
-      expect(requests.length).to.be(2);
+      expect(requests.split(',').length).to.be(2);
     });
 
     it('unlink lens panel from embeddable library', async () => {
