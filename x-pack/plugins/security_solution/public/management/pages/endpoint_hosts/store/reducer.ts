@@ -14,6 +14,7 @@ import {
   isOnEndpointPage,
   hasSelectedEndpoint,
   uiQueryParams,
+  getIsOnEndpointDetailsActivityLog,
   getCurrentIsolationRequestState,
 } from './selectors';
 import { EndpointState } from '../types';
@@ -22,7 +23,6 @@ import { AppAction } from '../../../../common/store/actions';
 import { ImmutableReducer } from '../../../../common/store';
 import { Immutable } from '../../../../../common/endpoint/types';
 import { createUninitialisedResourceState, isUninitialisedResourceState } from '../../../state';
-import { EndpointDetailsTabsTypes } from '../view/details/components/endpoint_details_tabs';
 
 type StateReducer = ImmutableReducer<EndpointState, AppAction>;
 type CaseReducer<T extends AppAction> = (
@@ -285,11 +285,11 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
     const wasPreviouslyOnActivityLogPage =
       isOnEndpointPage(state) &&
       hasSelectedEndpoint(state) &&
-      uiQueryParams(state).show === EndpointDetailsTabsTypes.activityLog;
+      getIsOnEndpointDetailsActivityLog(state);
     const isCurrentlyOnActivityLogPage =
       isOnEndpointPage(newState) &&
       hasSelectedEndpoint(newState) &&
-      uiQueryParams(newState).show === EndpointDetailsTabsTypes.activityLog;
+      getIsOnEndpointDetailsActivityLog(newState);
 
     const isNotLoadingDetails =
       isCurrentlyOnActivityLogPage ||
@@ -349,7 +349,7 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
             activityLog,
             hostDetails: {
               ...state.endpointDetails.hostDetails,
-              detailsLoading: isNotLoadingDetails ? false : true,
+              detailsLoading: !isNotLoadingDetails,
               detailsError: undefined,
             },
           },

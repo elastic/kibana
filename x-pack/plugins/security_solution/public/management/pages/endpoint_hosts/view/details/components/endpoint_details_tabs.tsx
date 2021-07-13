@@ -14,6 +14,7 @@ import { useEndpointSelector } from '../../hooks';
 import { getActivityLogDataPaging } from '../../../store/selectors';
 import { EndpointDetailsFlyoutHeader } from './flyout_header';
 import { useNavigateByRouterEventHandler } from '../../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
+import { useAppUrl } from '../../../../../../common/lib/kibana';
 
 export enum EndpointDetailsTabsTypes {
   overview = 'details',
@@ -41,16 +42,16 @@ const EndpointDetailsTab = memo(
     isSelected: boolean;
     handleTabClick: () => void;
   }) => {
-    const setUrl = useNavigateByRouterEventHandler(tab.route);
-    const onClick = useCallback(
-      (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement, MouseEvent>) => {
-        setUrl(e);
-        handleTabClick();
-      },
-      [setUrl, handleTabClick]
-    );
+    const { getAppUrl } = useAppUrl();
+    const onClick = useNavigateByRouterEventHandler(tab.route, handleTabClick);
     return (
-      <EuiTab onClick={onClick} isSelected={isSelected} key={tab.id} data-test-subj={tab.id}>
+      <EuiTab
+        href={getAppUrl({ path: tab.route })}
+        onClick={onClick}
+        isSelected={isSelected}
+        key={tab.id}
+        data-test-subj={tab.id}
+      >
         {tab.name}
       </EuiTab>
     );
@@ -96,7 +97,7 @@ export const EndpointDetailsFlyoutTabs = memo(
       <EndpointDetailsTab
         tab={tab}
         handleTabClick={() => handleTabClick(tab)}
-        isSelected={tab.id === show}
+        isSelected={tab.id === selectedTab?.id}
       />
     ));
 
