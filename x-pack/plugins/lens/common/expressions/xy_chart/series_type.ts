@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-export * from './counter_rate';
-export * from './format_column';
-export * from './metric_chart';
-export * from './pie_chart';
-export * from './xy_chart';
+export type SeriesType =
+  | 'bar'
+  | 'bar_horizontal'
+  | 'line'
+  | 'area'
+  | 'bar_stacked'
+  | 'bar_percentage_stacked'
+  | 'bar_horizontal_stacked'
+  | 'bar_horizontal_percentage_stacked'
+  | 'area_stacked'
+  | 'area_percentage_stacked';

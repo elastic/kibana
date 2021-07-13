@@ -5,6 +5,16 @@
  * 2.0.
  */
 
+export {
+  legendConfig,
+  yAxisConfig,
+  tickLabelsConfig,
+  gridlinesConfig,
+  axisTitlesVisibilityConfig,
+  axisExtentConfig,
+  layerConfig,
+  xyChart,
+} from '../../common';
 export * from './expression';
 export * from './types';
 export * from './visualization';

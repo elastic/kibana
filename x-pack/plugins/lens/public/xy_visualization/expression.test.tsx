@@ -19,27 +19,25 @@ import {
   Fit,
 } from '@elastic/charts';
 import { PaletteOutput } from 'src/plugins/charts/public';
-import {
-  calculateMinInterval,
-  xyChart,
-  XYChart,
+import { calculateMinInterval, XYChart, XYChartRenderProps } from './expression';
+import type {
+  XYArgs,
   XYChartProps,
-  XYChartRenderProps,
-} from './expression';
-import type { LensMultiTable } from '../../common';
+  LegendConfig,
+  LayerArgs,
+  AxesSettingsConfig,
+  LensMultiTable,
+} from '../../common';
+import {
+  xyChart,
+  layerConfig,
+  legendConfig,
+  tickLabelsConfig,
+  gridlinesConfig,
+} from '../../common';
 import { Datatable, DatatableRow } from '../../../../../src/plugins/expressions/public';
 import React from 'react';
 import { shallow } from 'enzyme';
-import {
-  XYArgs,
-  LegendConfig,
-  legendConfig,
-  layerConfig,
-  LayerArgs,
-  AxesSettingsConfig,
-  tickLabelsConfig,
-  gridlinesConfig,
-} from './types';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 import { mountWithIntl } from '@kbn/test/jest';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';

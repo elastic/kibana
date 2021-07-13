@@ -8,8 +8,7 @@
 import { uniq } from 'lodash';
 import React from 'react';
 import { Endzones } from '../../../../../src/plugins/charts/public';
-import type { LensMultiTable } from '../../common';
-import type { LayerArgs } from './types';
+import type { LensMultiTable, LayerArgs } from '../../common';
 
 export interface XDomain {
   min?: number;

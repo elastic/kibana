@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-export * from './counter_rate';
-export * from './format_column';
-export * from './metric_chart';
-export * from './pie_chart';
+export * from './axis_config';
+export * from './fitting_function';
+export * from './grid_lines_config';
+export * from './layer_config';
+export * from './legend_config';
+export * from './series_type';
+export * from './tick_labels_config';
+export * from './xy_args';
 export * from './xy_chart';

@@ -8,7 +8,7 @@
 import type { FormatFactory } from '../types';
 import type { LensMultiTable } from '../../common';
 import { getColorAssignments } from './color_assignment';
-import type { LayerArgs } from './types';
+import type { LayerArgs } from '../../common';
 
 describe('color_assignment', () => {
   const layers: LayerArgs[] = [

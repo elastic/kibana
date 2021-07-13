@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AxisExtentConfig, XYLayerConfig } from './types';
+import { AxisExtentConfig, XYLayerConfig } from '../../common';
 import { Datatable, SerializedFieldFormat } from '../../../../../src/plugins/expressions/public';
 import { IFieldFormat } from '../../../../../src/plugins/data/public';
 

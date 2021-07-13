@@ -8,7 +8,7 @@
 import React from 'react';
 import { shallowWithIntl as shallow } from '@kbn/test/jest';
 import { Position } from '@elastic/charts';
-import { FramePublicAPI } from '../../types';
+import type { FramePublicAPI } from '../../types';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { State } from '../types';
 import { VisualOptionsPopover } from './visual_options_popover';

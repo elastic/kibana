@@ -10,8 +10,7 @@ import { LegendActionProps, SeriesIdentifier } from '@elastic/charts';
 import { EuiPopover } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test/jest';
 import { ComponentType, ReactWrapper } from 'enzyme';
-import type { LayerArgs } from './types';
-import type { LensMultiTable } from '../../common';
+import type { LensMultiTable, LayerArgs } from '../../common';
 import { getLegendAction } from './get_legend_action';
 import { LegendActionPopover } from '../shared_components';
 
