@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { IndexPatternBase } from '..';
 import { buildExistsFilter, getExistsFilterField } from './exists_filter';
 import { fields } from './stubs/fields.mocks';
-import { IndexPatternBase } from '../..';
 
 describe('exists filter', function () {
   const indexPattern: IndexPatternBase = {

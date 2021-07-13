@@ -9,7 +9,7 @@
 import { buildPhraseFilter } from './phrase_filter';
 import { buildQueryFilter } from './query_string_filter';
 import { getFilterField } from './get_filter_field';
-import { IndexPatternBase } from '../..';
+import { IndexPatternBase } from '..';
 import { fields } from './stubs/fields.mocks';
 
 describe('getFilterField', function () {
