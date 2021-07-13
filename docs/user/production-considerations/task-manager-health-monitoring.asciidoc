@@ -73,12 +73,12 @@ logging:
         level: debug
 ----
 
-These stats are logged based the number of milliseconds set in your <<task-manager-settings,`xpack.task_manager.poll_interval`>> setting, which means it could add substantial noise to your logs. Only enable this level of logging temporarily.
+These stats are logged based on the number of milliseconds set in your <<task-manager-settings,`xpack.task_manager.poll_interval`>> setting, which means it could add substantial noise to your logs. Only enable this level of logging temporarily.
 
 ==== Automatic logging
 
-By default, the health API runs at a regular cadence and each time it runs, it will attempt to self evaluate its performance. If this self evaluation yields a potential problem,
-a message will log to the {kib} server log. In addition to this test, the health API will look at how long tasks have waited to start (from when they were scheduled to start) and if this number exceeds a configurable threshold (<<task-manager-settings,`xpack.task_manager.monitored_stats_health_verbose_log.warn_delayed_task_start_in_seconds`>>), the same message as above will log to the {kib} server log.
+By default, the health API runs at a regular cadence, and each time it runs, it will attempt to self evaluate its performance. If this self evaluation yields a potential problem,
+a message will log to the {kib} server log. In addition, the health API will look at how long tasks have waited to start (from when they were scheduled to start) and if this number exceeds a configurable threshold (<<task-manager-settings,`xpack.task_manager.monitored_stats_health_verbose_log.warn_delayed_task_start_in_seconds`>>), the same message as above will log to the {kib} server log.
 
 This message looks like:
 
@@ -88,7 +88,7 @@ Detected potential performance issue with Task Manager. Set 'xpack.task_manager.
 ----
 
 
-If this appears, it is recommended you set <<task-manager-settings,`xpack.task_manager.monitored_stats_health_verbose_log.enabled`>> to `true` in your `kibana.yml`. This will start logging the health metrics are at either a `warn` or `error` log level, based on the detected severity of the potential problem.
+If this message appears, it is recommended you set <<task-manager-settings,`xpack.task_manager.monitored_stats_health_verbose_log.enabled`>> to `true` in your `kibana.yml`. This will start logging the health metrics at either a `warn` or `error` log level, based on the detected severity of the potential problem.
 
 [float]
 [[making-sense-of-task-manager-health-stats]]
