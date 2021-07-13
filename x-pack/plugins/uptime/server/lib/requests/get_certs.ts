@@ -64,11 +64,6 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
         filter: [
           {
             exists: {
-              field: 'tls.server',
-            },
-          },
-          {
-            exists: {
               field: 'tls.server.hash.sha256',
             },
           },
