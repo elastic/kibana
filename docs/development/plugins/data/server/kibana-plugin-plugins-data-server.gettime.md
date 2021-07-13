@@ -10,7 +10,7 @@
 export declare function getTime(indexPattern: IIndexPattern | undefined, timeRange: TimeRange, options?: {
     forceNow?: Date;
     fieldName?: string;
-}): import("@kbn/es-query").RangeFilter | undefined;
+}): import("../..").RangeFilter | undefined;
 ```
 
 ## Parameters
@@ -23,5 +23,5 @@ export declare function getTime(indexPattern: IIndexPattern | undefined, timeRan
 
 <b>Returns:</b>
 
-`import("@kbn/es-query").RangeFilter | undefined`
+`import("../..").RangeFilter | undefined`
 

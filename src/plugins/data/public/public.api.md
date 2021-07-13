@@ -821,21 +821,21 @@ export const esFilters: {
     FilterItem: (props: import("./ui/filter_bar/filter_item").FilterItemProps) => JSX.Element;
     FILTERS: typeof FILTERS;
     FilterStateStore: typeof FilterStateStore;
-    buildEmptyFilter: (isPinned: boolean, index?: string | undefined) => import("@kbn/es-query").Filter;
-    buildPhrasesFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, params: any[], indexPattern: import("@kbn/es-query").IndexPatternBase) => import("@kbn/es-query").PhrasesFilter;
-    buildExistsFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, indexPattern: import("@kbn/es-query").IndexPatternBase) => import("@kbn/es-query").ExistsFilter;
-    buildPhraseFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, value: any, indexPattern: import("@kbn/es-query").IndexPatternBase) => import("@kbn/es-query").PhraseFilter;
-    buildQueryFilter: (query: any, index: string, alias: string) => import("@kbn/es-query").QueryStringFilter;
-    buildRangeFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, params: import("@kbn/es-query").RangeFilterParams, indexPattern: import("@kbn/es-query").IndexPatternBase, formattedValue?: string | undefined) => import("@kbn/es-query").RangeFilter;
-    isPhraseFilter: (filter: any) => filter is import("@kbn/es-query").PhraseFilter;
-    isExistsFilter: (filter: any) => filter is import("@kbn/es-query").ExistsFilter;
-    isPhrasesFilter: (filter: any) => filter is import("@kbn/es-query").PhrasesFilter;
-    isRangeFilter: (filter: any) => filter is import("@kbn/es-query").RangeFilter;
-    isMatchAllFilter: (filter: any) => filter is import("@kbn/es-query").MatchAllFilter;
-    isMissingFilter: (filter: any) => filter is import("@kbn/es-query").MissingFilter;
-    isQueryStringFilter: (filter: any) => filter is import("@kbn/es-query").QueryStringFilter;
-    isFilterPinned: (filter: import("@kbn/es-query").Filter) => boolean | undefined;
-    toggleFilterNegated: (filter: import("@kbn/es-query").Filter) => {
+    buildEmptyFilter: (isPinned: boolean, index?: string | undefined) => import("../common").Filter;
+    buildPhrasesFilter: (field: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IndexPatternFieldBase, params: any[], indexPattern: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IndexPatternBase) => import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").PhrasesFilter;
+    buildExistsFilter: (field: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IndexPatternFieldBase, indexPattern: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IndexPatternBase) => import("../common").ExistsFilter;
+    buildPhraseFilter: (field: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IndexPatternFieldBase, value: any, indexPattern: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IndexPatternBase) => import("../common").PhraseFilter;
+    buildQueryFilter: (query: any, index: string, alias: string) => import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").QueryStringFilter;
+    buildRangeFilter: (field: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IndexPatternFieldBase, params: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").RangeFilterParams, indexPattern: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IndexPatternBase, formattedValue?: string | undefined) => import("../common").RangeFilter;
+    isPhraseFilter: (filter: any) => filter is import("../common").PhraseFilter;
+    isExistsFilter: (filter: any) => filter is import("../common").ExistsFilter;
+    isPhrasesFilter: (filter: any) => filter is import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").PhrasesFilter;
+    isRangeFilter: (filter: any) => filter is import("../common").RangeFilter;
+    isMatchAllFilter: (filter: any) => filter is import("../common").MatchAllFilter;
+    isMissingFilter: (filter: any) => filter is import("../common").MissingFilter;
+    isQueryStringFilter: (filter: any) => filter is import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").QueryStringFilter;
+    isFilterPinned: (filter: import("../common").Filter) => boolean | undefined;
+    toggleFilterNegated: (filter: import("../common").Filter) => {
         meta: {
             negate: boolean;
             alias: string | null;
@@ -848,20 +848,20 @@ export const esFilters: {
             params?: any;
             value?: string | undefined;
         };
-        $state?: import("@kbn/es-query/target_types/filters/types").FilterState | undefined;
+        $state?: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types/filters/types").FilterState | undefined;
         query?: any;
     };
-    disableFilter: (filter: import("@kbn/es-query").Filter) => import("@kbn/es-query").Filter;
-    getPhraseFilterField: (filter: import("@kbn/es-query").PhraseFilter) => string;
-    getPhraseFilterValue: (filter: import("@kbn/es-query").PhraseFilter) => string | number | boolean;
+    disableFilter: (filter: import("../common").Filter) => import("../common").Filter;
+    getPhraseFilterField: (filter: import("../common").PhraseFilter) => string;
+    getPhraseFilterValue: (filter: import("../common").PhraseFilter) => string | number | boolean;
     getDisplayValueFromFilter: typeof getDisplayValueFromFilter;
-    compareFilters: (first: import("@kbn/es-query").Filter | import("@kbn/es-query").Filter[], second: import("@kbn/es-query").Filter | import("@kbn/es-query").Filter[], comparatorOptions?: import("../common").FilterCompareOptions) => boolean;
+    compareFilters: (first: import("../common").Filter | import("../common").Filter[], second: import("../common").Filter | import("../common").Filter[], comparatorOptions?: import("../common").FilterCompareOptions) => boolean;
     COMPARE_ALL_OPTIONS: import("../common").FilterCompareOptions;
     generateFilters: typeof generateFilters;
-    onlyDisabledFiltersChanged: (newFilters?: import("@kbn/es-query").Filter[] | undefined, oldFilters?: import("@kbn/es-query").Filter[] | undefined) => boolean;
+    onlyDisabledFiltersChanged: (newFilters?: import("../common").Filter[] | undefined, oldFilters?: import("../common").Filter[] | undefined) => boolean;
     changeTimeFilter: typeof changeTimeFilter;
     convertRangeFilterToTimeRangeString: typeof convertRangeFilterToTimeRangeString;
-    mapAndFlattenFilters: (filters: import("@kbn/es-query").Filter[]) => import("@kbn/es-query").Filter[];
+    mapAndFlattenFilters: (filters: import("../common").Filter[]) => import("../common").Filter[];
     extractTimeFilter: typeof extractTimeFilter;
     extractTimeRange: typeof extractTimeRange;
 };
@@ -870,9 +870,9 @@ export const esFilters: {
 //
 // @public (undocumented)
 export const esKuery: {
-    nodeTypes: import("@kbn/es-query/target_types/kuery/node_types").NodeTypes;
-    fromKueryExpression: (expression: any, parseOptions?: Partial<import("@kbn/es-query/target_types/kuery/types").KueryParseOptions> | undefined) => import("@kbn/es-query").KueryNode;
-    toElasticsearchQuery: (node: import("@kbn/es-query").KueryNode, indexPattern?: import("@kbn/es-query").IndexPatternBase | undefined, config?: Record<string, any> | undefined, context?: Record<string, any> | undefined) => import("@kbn/common-utils").JsonObject;
+    nodeTypes: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types/kuery/node_types").NodeTypes;
+    fromKueryExpression: (expression: any, parseOptions?: Partial<import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types/kuery/types").KueryParseOptions> | undefined) => import("../common").KueryNode;
+    toElasticsearchQuery: (node: import("../common").KueryNode, indexPattern?: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IndexPatternBase | undefined, config?: Record<string, any> | undefined, context?: Record<string, any> | undefined) => import("@kbn/common-utils").JsonObject;
 };
 
 // Warning: (ae-missing-release-tag) "esQuery" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -881,11 +881,11 @@ export const esKuery: {
 export const esQuery: {
     buildEsQuery: typeof buildEsQuery;
     getEsQueryConfig: typeof getEsQueryConfig;
-    buildQueryFromFilters: (filters: import("@kbn/es-query").Filter[] | undefined, indexPattern: import("@kbn/es-query").IndexPatternBase | undefined, ignoreFilterIfFieldNotInIndex?: boolean | undefined) => {
+    buildQueryFromFilters: (filters: import("../common").Filter[] | undefined, indexPattern: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IndexPatternBase | undefined, ignoreFilterIfFieldNotInIndex?: boolean | undefined) => {
         must: never[];
-        filter: import("@kbn/es-query").Filter[];
+        filter: import("../common").Filter[];
         should: never[];
-        must_not: import("@kbn/es-query").Filter[];
+        must_not: import("../common").Filter[];
     };
     luceneStringToDsl: typeof luceneStringToDsl;
     decorateQuery: typeof decorateQuery;
@@ -1141,7 +1141,7 @@ export function getSearchParamsFromRequest(searchRequest: SearchRequest, depende
 export function getTime(indexPattern: IIndexPattern | undefined, timeRange: TimeRange, options?: {
     forceNow?: Date;
     fieldName?: string;
-}): import("@kbn/es-query").RangeFilter | undefined;
+}): import("../..").RangeFilter | undefined;
 
 // Warning: (ae-missing-release-tag) "IAggConfig" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1528,7 +1528,7 @@ export class IndexPatternField implements IFieldType {
     // (undocumented)
     readonly spec: FieldSpec;
     // (undocumented)
-    get subType(): import("@kbn/es-query").IFieldSubType | undefined;
+    get subType(): import("../../../public").IFieldSubType | undefined;
     // (undocumented)
     toJSON(): {
         count: number;
@@ -1542,7 +1542,7 @@ export class IndexPatternField implements IFieldType {
         searchable: boolean;
         aggregatable: boolean;
         readFromDocValues: boolean;
-        subType: import("@kbn/es-query").IFieldSubType | undefined;
+        subType: import("../../../public").IFieldSubType | undefined;
         customLabel: string | undefined;
     };
     // (undocumented)
@@ -1665,14 +1665,26 @@ export class IndexPatternsService {
     updateSavedObject(indexPattern: IndexPattern, saveAttempts?: number, ignoreErrors?: boolean): Promise<void | Error>;
 }
 
+// Warning: (ae-missing-release-tag) "IndexPatternType" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export enum IndexPatternType {
+    // (undocumented)
+    DEFAULT = "default",
+    // (undocumented)
+    ROLLUP = "rollup"
+}
+
 // Warning: (ae-missing-release-tag) "TypeMeta" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
 export interface IndexPatternTypeMeta {
     // (undocumented)
-    [key: string]: any;
-    // (undocumented)
     aggs?: Record<string, IndexPatternAggRestrictions>;
+    // (undocumented)
+    params?: {
+        rollup_index: string;
+    };
 }
 
 // Warning: (ae-missing-release-tag) "injectReferences" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -2650,20 +2662,20 @@ export interface WaitUntilNextSessionCompletesOptions {
 // src/plugins/data/public/index.ts:239:27 - (ae-forgotten-export) The symbol "validateIndexPattern" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:239:27 - (ae-forgotten-export) The symbol "flattenHitWrapper" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:239:27 - (ae-forgotten-export) The symbol "formatHitProvider" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:409:20 - (ae-forgotten-export) The symbol "getResponseInspectorStats" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:409:20 - (ae-forgotten-export) The symbol "tabifyAggResponse" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:409:20 - (ae-forgotten-export) The symbol "tabifyGetColumns" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:411:1 - (ae-forgotten-export) The symbol "CidrMask" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:412:1 - (ae-forgotten-export) The symbol "dateHistogramInterval" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:421:1 - (ae-forgotten-export) The symbol "InvalidEsCalendarIntervalError" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:422:1 - (ae-forgotten-export) The symbol "InvalidEsIntervalFormatError" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:423:1 - (ae-forgotten-export) The symbol "IpAddress" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:424:1 - (ae-forgotten-export) The symbol "isDateHistogramBucketAggConfig" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:428:1 - (ae-forgotten-export) The symbol "isValidEsInterval" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:429:1 - (ae-forgotten-export) The symbol "isValidInterval" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:432:1 - (ae-forgotten-export) The symbol "parseInterval" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:433:1 - (ae-forgotten-export) The symbol "propFilter" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:436:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:410:20 - (ae-forgotten-export) The symbol "getResponseInspectorStats" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:410:20 - (ae-forgotten-export) The symbol "tabifyAggResponse" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:410:20 - (ae-forgotten-export) The symbol "tabifyGetColumns" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:412:1 - (ae-forgotten-export) The symbol "CidrMask" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:413:1 - (ae-forgotten-export) The symbol "dateHistogramInterval" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:422:1 - (ae-forgotten-export) The symbol "InvalidEsCalendarIntervalError" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:423:1 - (ae-forgotten-export) The symbol "InvalidEsIntervalFormatError" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:424:1 - (ae-forgotten-export) The symbol "IpAddress" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:425:1 - (ae-forgotten-export) The symbol "isDateHistogramBucketAggConfig" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:429:1 - (ae-forgotten-export) The symbol "isValidEsInterval" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:430:1 - (ae-forgotten-export) The symbol "isValidInterval" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:433:1 - (ae-forgotten-export) The symbol "parseInterval" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:434:1 - (ae-forgotten-export) The symbol "propFilter" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:437:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/search/session/session_service.ts:62:5 - (ae-forgotten-export) The symbol "UrlGeneratorStateMapping" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)

@@ -453,35 +453,35 @@ export type EsaggsExpressionFunctionDefinition = ExpressionFunctionDefinition<'e
 //
 // @public (undocumented)
 export const esFilters: {
-    buildQueryFilter: (query: any, index: string, alias: string) => import("@kbn/es-query").QueryStringFilter;
+    buildQueryFilter: (query: any, index: string, alias: string) => import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").QueryStringFilter;
     buildCustomFilter: typeof buildCustomFilter;
-    buildEmptyFilter: (isPinned: boolean, index?: string | undefined) => import("@kbn/es-query").Filter;
-    buildExistsFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, indexPattern: import("@kbn/es-query").IndexPatternBase) => import("@kbn/es-query").ExistsFilter;
+    buildEmptyFilter: (isPinned: boolean, index?: string | undefined) => import("../common").Filter;
+    buildExistsFilter: (field: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IndexPatternFieldBase, indexPattern: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IndexPatternBase) => import("../common").ExistsFilter;
     buildFilter: typeof buildFilter;
-    buildPhraseFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, value: any, indexPattern: import("@kbn/es-query").IndexPatternBase) => import("@kbn/es-query").PhraseFilter;
-    buildPhrasesFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, params: any[], indexPattern: import("@kbn/es-query").IndexPatternBase) => import("@kbn/es-query").PhrasesFilter;
-    buildRangeFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, params: import("@kbn/es-query").RangeFilterParams, indexPattern: import("@kbn/es-query").IndexPatternBase, formattedValue?: string | undefined) => import("@kbn/es-query").RangeFilter;
-    isFilterDisabled: (filter: import("@kbn/es-query").Filter) => boolean;
+    buildPhraseFilter: (field: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IndexPatternFieldBase, value: any, indexPattern: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IndexPatternBase) => import("../common").PhraseFilter;
+    buildPhrasesFilter: (field: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IndexPatternFieldBase, params: any[], indexPattern: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IndexPatternBase) => import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").PhrasesFilter;
+    buildRangeFilter: (field: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IndexPatternFieldBase, params: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").RangeFilterParams, indexPattern: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IndexPatternBase, formattedValue?: string | undefined) => import("../common").RangeFilter;
+    isFilterDisabled: (filter: import("../common").Filter) => boolean;
 };
 
 // Warning: (ae-missing-release-tag) "esKuery" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
 export const esKuery: {
-    nodeTypes: import("@kbn/es-query/target_types/kuery/node_types").NodeTypes;
-    fromKueryExpression: (expression: any, parseOptions?: Partial<import("@kbn/es-query/target_types/kuery/types").KueryParseOptions> | undefined) => import("@kbn/es-query").KueryNode;
-    toElasticsearchQuery: (node: import("@kbn/es-query").KueryNode, indexPattern?: import("@kbn/es-query").IndexPatternBase | undefined, config?: Record<string, any> | undefined, context?: Record<string, any> | undefined) => import("@kbn/common-utils").JsonObject;
+    nodeTypes: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types/kuery/node_types").NodeTypes;
+    fromKueryExpression: (expression: any, parseOptions?: Partial<import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types/kuery/types").KueryParseOptions> | undefined) => import("../common").KueryNode;
+    toElasticsearchQuery: (node: import("../common").KueryNode, indexPattern?: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IndexPatternBase | undefined, config?: Record<string, any> | undefined, context?: Record<string, any> | undefined) => import("@kbn/common-utils").JsonObject;
 };
 
 // Warning: (ae-missing-release-tag) "esQuery" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
 export const esQuery: {
-    buildQueryFromFilters: (filters: import("@kbn/es-query").Filter[] | undefined, indexPattern: import("@kbn/es-query").IndexPatternBase | undefined, ignoreFilterIfFieldNotInIndex?: boolean | undefined) => {
+    buildQueryFromFilters: (filters: import("../common").Filter[] | undefined, indexPattern: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IndexPatternBase | undefined, ignoreFilterIfFieldNotInIndex?: boolean | undefined) => {
         must: never[];
-        filter: import("@kbn/es-query").Filter[];
+        filter: import("../common").Filter[];
         should: never[];
-        must_not: import("@kbn/es-query").Filter[];
+        must_not: import("../common").Filter[];
     };
     getEsQueryConfig: typeof getEsQueryConfig;
     buildEsQuery: typeof buildEsQuery;
@@ -618,7 +618,7 @@ export function getShardTimeout(config: SharedGlobalConfig_2): Pick<Search, 'tim
 export function getTime(indexPattern: IIndexPattern | undefined, timeRange: TimeRange, options?: {
     forceNow?: Date;
     fieldName?: string;
-}): import("@kbn/es-query").RangeFilter | undefined;
+}): import("../..").RangeFilter | undefined;
 
 // @internal
 export function getTotalLoaded(response: estypes.SearchResponse<unknown>): {

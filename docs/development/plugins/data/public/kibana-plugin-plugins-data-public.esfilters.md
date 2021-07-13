@@ -12,21 +12,21 @@ esFilters: {
     FilterItem: (props: import("./ui/filter_bar/filter_item").FilterItemProps) => JSX.Element;
     FILTERS: typeof FILTERS;
     FilterStateStore: typeof FilterStateStore;
-    buildEmptyFilter: (isPinned: boolean, index?: string | undefined) => import("@kbn/es-query").Filter;
-    buildPhrasesFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, params: any[], indexPattern: import("@kbn/es-query").IndexPatternBase) => import("@kbn/es-query").PhrasesFilter;
-    buildExistsFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, indexPattern: import("@kbn/es-query").IndexPatternBase) => import("@kbn/es-query").ExistsFilter;
-    buildPhraseFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, value: any, indexPattern: import("@kbn/es-query").IndexPatternBase) => import("@kbn/es-query").PhraseFilter;
-    buildQueryFilter: (query: any, index: string, alias: string) => import("@kbn/es-query").QueryStringFilter;
-    buildRangeFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, params: import("@kbn/es-query").RangeFilterParams, indexPattern: import("@kbn/es-query").IndexPatternBase, formattedValue?: string | undefined) => import("@kbn/es-query").RangeFilter;
-    isPhraseFilter: (filter: any) => filter is import("@kbn/es-query").PhraseFilter;
-    isExistsFilter: (filter: any) => filter is import("@kbn/es-query").ExistsFilter;
-    isPhrasesFilter: (filter: any) => filter is import("@kbn/es-query").PhrasesFilter;
-    isRangeFilter: (filter: any) => filter is import("@kbn/es-query").RangeFilter;
-    isMatchAllFilter: (filter: any) => filter is import("@kbn/es-query").MatchAllFilter;
-    isMissingFilter: (filter: any) => filter is import("@kbn/es-query").MissingFilter;
-    isQueryStringFilter: (filter: any) => filter is import("@kbn/es-query").QueryStringFilter;
-    isFilterPinned: (filter: import("@kbn/es-query").Filter) => boolean | undefined;
-    toggleFilterNegated: (filter: import("@kbn/es-query").Filter) => {
+    buildEmptyFilter: (isPinned: boolean, index?: string | undefined) => import("../common").Filter;
+    buildPhrasesFilter: (field: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IndexPatternFieldBase, params: any[], indexPattern: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IndexPatternBase) => import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").PhrasesFilter;
+    buildExistsFilter: (field: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IndexPatternFieldBase, indexPattern: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IndexPatternBase) => import("../common").ExistsFilter;
+    buildPhraseFilter: (field: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IndexPatternFieldBase, value: any, indexPattern: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IndexPatternBase) => import("../common").PhraseFilter;
+    buildQueryFilter: (query: any, index: string, alias: string) => import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").QueryStringFilter;
+    buildRangeFilter: (field: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IndexPatternFieldBase, params: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").RangeFilterParams, indexPattern: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IndexPatternBase, formattedValue?: string | undefined) => import("../common").RangeFilter;
+    isPhraseFilter: (filter: any) => filter is import("../common").PhraseFilter;
+    isExistsFilter: (filter: any) => filter is import("../common").ExistsFilter;
+    isPhrasesFilter: (filter: any) => filter is import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").PhrasesFilter;
+    isRangeFilter: (filter: any) => filter is import("../common").RangeFilter;
+    isMatchAllFilter: (filter: any) => filter is import("../common").MatchAllFilter;
+    isMissingFilter: (filter: any) => filter is import("../common").MissingFilter;
+    isQueryStringFilter: (filter: any) => filter is import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").QueryStringFilter;
+    isFilterPinned: (filter: import("../common").Filter) => boolean | undefined;
+    toggleFilterNegated: (filter: import("../common").Filter) => {
         meta: {
             negate: boolean;
             alias: string | null;
@@ -39,20 +39,20 @@ esFilters: {
             params?: any;
             value?: string | undefined;
         };
-        $state?: import("@kbn/es-query/target_types/filters/types").FilterState | undefined;
+        $state?: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types/filters/types").FilterState | undefined;
         query?: any;
     };
-    disableFilter: (filter: import("@kbn/es-query").Filter) => import("@kbn/es-query").Filter;
-    getPhraseFilterField: (filter: import("@kbn/es-query").PhraseFilter) => string;
-    getPhraseFilterValue: (filter: import("@kbn/es-query").PhraseFilter) => string | number | boolean;
+    disableFilter: (filter: import("../common").Filter) => import("../common").Filter;
+    getPhraseFilterField: (filter: import("../common").PhraseFilter) => string;
+    getPhraseFilterValue: (filter: import("../common").PhraseFilter) => string | number | boolean;
     getDisplayValueFromFilter: typeof getDisplayValueFromFilter;
-    compareFilters: (first: import("@kbn/es-query").Filter | import("@kbn/es-query").Filter[], second: import("@kbn/es-query").Filter | import("@kbn/es-query").Filter[], comparatorOptions?: import("../common").FilterCompareOptions) => boolean;
+    compareFilters: (first: import("../common").Filter | import("../common").Filter[], second: import("../common").Filter | import("../common").Filter[], comparatorOptions?: import("../common").FilterCompareOptions) => boolean;
     COMPARE_ALL_OPTIONS: import("../common").FilterCompareOptions;
     generateFilters: typeof generateFilters;
-    onlyDisabledFiltersChanged: (newFilters?: import("@kbn/es-query").Filter[] | undefined, oldFilters?: import("@kbn/es-query").Filter[] | undefined) => boolean;
+    onlyDisabledFiltersChanged: (newFilters?: import("../common").Filter[] | undefined, oldFilters?: import("../common").Filter[] | undefined) => boolean;
     changeTimeFilter: typeof changeTimeFilter;
     convertRangeFilterToTimeRangeString: typeof convertRangeFilterToTimeRangeString;
-    mapAndFlattenFilters: (filters: import("@kbn/es-query").Filter[]) => import("@kbn/es-query").Filter[];
+    mapAndFlattenFilters: (filters: import("../common").Filter[]) => import("../common").Filter[];
     extractTimeFilter: typeof extractTimeFilter;
     extractTimeRange: typeof extractTimeRange;
 }
