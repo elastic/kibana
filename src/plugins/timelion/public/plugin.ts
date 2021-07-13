@@ -19,7 +19,7 @@ import {
   AppNavLinkStatus,
 } from '../../../core/public';
 import { Panel } from './panels/panel';
-import { initAngularBootstrap } from '../../kibana_legacy/public';
+import { KibanaLegacyStart } from '../../kibana_legacy/public';
 import { createKbnUrlTracker } from '../../kibana_utils/public';
 import { DataPublicPluginStart, esFilters, DataPublicPluginSetup } from '../../data/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
@@ -41,6 +41,7 @@ export interface TimelionPluginStartDependencies {
   visualizations: VisualizationsStart;
   visTypeTimelion: VisTypeTimelionPluginStart;
   savedObjects: SavedObjectsStart;
+  kibanaLegacy: KibanaLegacyStart;
 }
 
 /** @internal */
@@ -91,7 +92,6 @@ export class TimelionPlugin
       stopUrlTracker();
     };
 
-    initAngularBootstrap();
     core.application.register({
       id: 'timelion',
       title: 'Timelion',
@@ -103,6 +103,7 @@ export class TimelionPlugin
         visTypeTimelion.isUiEnabled === false ? AppNavLinkStatus.hidden : AppNavLinkStatus.default,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
+        await pluginsStart.kibanaLegacy.loadAngularBootstrap();
         this.currentHistory = params.history;
 
         appMounted();

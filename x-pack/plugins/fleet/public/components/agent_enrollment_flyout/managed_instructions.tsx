@@ -11,7 +11,7 @@ import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/st
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { useGetOneEnrollmentAPIKey, useGetSettings, useLink, useFleetStatus } from '../../hooks';
+import { useGetOneEnrollmentAPIKey, useLink, useFleetStatus } from '../../hooks';
 
 import { ManualInstructions } from '../../components/enrollment_instructions';
 import {
@@ -23,12 +23,7 @@ import {
 } from '../../applications/fleet/sections/agents/agent_requirements_page/components';
 import { FleetServerRequirementPage } from '../../applications/fleet/sections/agents/agent_requirements_page';
 
-import {
-  DownloadStep,
-  AgentPolicySelectionStep,
-  AgentEnrollmentKeySelectionStep,
-  ViewDataStep,
-} from './steps';
+import { DownloadStep, AgentPolicySelectionStep, AgentEnrollmentKeySelectionStep } from './steps';
 import type { BaseProps } from './types';
 
 type Props = BaseProps;
@@ -61,14 +56,19 @@ const FleetServerMissingRequirements = () => {
 };
 
 export const ManagedInstructions = React.memo<Props>(
-  ({ agentPolicy, agentPolicies, viewDataStepContent }) => {
+  ({
+    agentPolicy,
+    agentPolicies,
+    viewDataStep,
+    setSelectedPolicyId,
+    isFleetServerPolicySelected,
+    settings,
+  }) => {
     const fleetStatus = useFleetStatus();
 
     const [selectedApiKeyId, setSelectedAPIKeyId] = useState<string | undefined>();
-    const [isFleetServerPolicySelected, setIsFleetServerPolicySelected] = useState<boolean>(false);
 
     const apiKey = useGetOneEnrollmentAPIKey(selectedApiKeyId);
-    const settings = useGetSettings();
     const fleetServerInstructions = useFleetServerInstructions(apiKey?.data?.item?.policy_id);
 
     const fleetServerSteps = useMemo(() => {
@@ -93,7 +93,7 @@ export const ManagedInstructions = React.memo<Props>(
     }, [fleetServerInstructions]);
 
     const steps = useMemo(() => {
-      const fleetServerHosts = settings.data?.item?.fleet_server_hosts || [];
+      const fleetServerHosts = settings?.fleet_server_hosts || [];
       const baseSteps: EuiContainedStepProps[] = [
         DownloadStep(),
         !agentPolicy
@@ -101,7 +101,7 @@ export const ManagedInstructions = React.memo<Props>(
               agentPolicies,
               selectedApiKeyId,
               setSelectedAPIKeyId,
-              setIsFleetServerPolicySelected,
+              setSelectedPolicyId,
             })
           : AgentEnrollmentKeySelectionStep({ agentPolicy, selectedApiKeyId, setSelectedAPIKeyId }),
       ];
@@ -118,38 +118,47 @@ export const ManagedInstructions = React.memo<Props>(
         });
       }
 
-      if (viewDataStepContent) {
-        baseSteps.push(ViewDataStep(viewDataStepContent));
+      if (viewDataStep) {
+        baseSteps.push({ 'data-test-subj': 'view-data-step', ...viewDataStep });
       }
 
       return baseSteps;
     }, [
       agentPolicy,
       selectedApiKeyId,
+      setSelectedPolicyId,
       setSelectedAPIKeyId,
-      viewDataStepContent,
       agentPolicies,
       apiKey.data,
       fleetServerSteps,
       isFleetServerPolicySelected,
-      settings.data?.item?.fleet_server_hosts,
+      settings?.fleet_server_hosts,
+      viewDataStep,
     ]);
+
+    if (fleetStatus.isReady && settings?.fleet_server_hosts.length === 0) {
+      return null;
+    }
+
+    if (fleetStatus.isReady) {
+      return (
+        <>
+          <EuiText>
+            <FormattedMessage
+              id="xpack.fleet.agentEnrollment.managedDescription"
+              defaultMessage="Enroll an Elastic Agent in Fleet to automatically deploy updates and centrally manage the agent."
+            />
+          </EuiText>
+          <EuiSpacer size="l" />
+          <EuiSteps steps={steps} />
+        </>
+      );
+    }
 
     return (
       <>
-        {fleetStatus.isReady ? (
-          <>
-            <EuiText>
-              <FormattedMessage
-                id="xpack.fleet.agentEnrollment.managedDescription"
-                defaultMessage="Enroll an Elastic Agent in Fleet to automatically deploy updates and centrally manage the agent."
-              />
-            </EuiText>
-            <EuiSpacer size="l" />
-            <EuiSteps steps={steps} />
-          </>
-        ) : fleetStatus.missingRequirements?.length === 1 &&
-          fleetStatus.missingRequirements[0] === 'fleet_server' ? (
+        {fleetStatus.missingRequirements?.length === 1 &&
+        fleetStatus.missingRequirements[0] === 'fleet_server' ? (
           <FleetServerMissingRequirements />
         ) : (
           <DefaultMissingRequirements />

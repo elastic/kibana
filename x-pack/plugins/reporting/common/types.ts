@@ -65,6 +65,7 @@ export interface ReportSource {
     objectType: string;
     title: string;
     layout?: LayoutParams;
+    isDeprecated?: boolean;
   };
   meta: { objectType: string; layout?: string };
   browser_type: string;
@@ -128,6 +129,7 @@ export interface ReportApiJSON {
     layout?: LayoutParams;
     title: string;
     browserTimezone?: string;
+    isDeprecated?: boolean;
   };
   meta: {
     layout?: string;
@@ -170,4 +172,10 @@ export interface Locator<P extends object = object> {
   id: string;
   version?: string;
   params: P;
+}
+
+export type IlmPolicyMigrationStatus = 'policy-not-found' | 'indices-not-managed-by-policy' | 'ok';
+
+export interface IlmPolicyStatusResponse {
+  status: IlmPolicyMigrationStatus;
 }
