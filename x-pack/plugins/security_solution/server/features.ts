@@ -133,9 +133,6 @@ export const getKibanaPrivilegesFeaturePrivileges = (
         rule: {
           all: ruleTypes,
         },
-        alert: {
-          all: ruleTypes,
-        },
       },
       management: {
         insightsAndAlerting: ['triggersActions'],
@@ -152,9 +149,6 @@ export const getKibanaPrivilegesFeaturePrivileges = (
       },
       alerting: {
         rule: {
-          read: ruleTypes,
-        },
-        alert: {
           read: ruleTypes,
         },
       },
