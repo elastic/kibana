@@ -48,6 +48,7 @@ import {
   AlertResponse,
   ConnectorMappings,
   CasesByAlertId,
+  ESCasesConfigureAttributes,
 } from '../../../../plugins/cases/common/api';
 import { getPostCaseRequest, postCollectionReq, postCommentGenAlertReq } from './mock';
 import { getCaseUserActionUrl, getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
@@ -603,6 +604,30 @@ export const getConnectorMappingsFromES = async ({ es }: { es: KibanaClient }) =
   });
 
   return mappings;
+};
+
+interface ConfigureSavedObject {
+  'cases-configure': ESCasesConfigureAttributes;
+}
+
+/**
+ * Returns configure saved objects from Elasticsearch directly.
+ */
+export const getConfigureSavedObjectsFromES = async ({ es }: { es: KibanaClient }) => {
+  const configure: ApiResponse<estypes.SearchResponse<ConfigureSavedObject>> = await es.search({
+    index: '.kibana',
+    body: {
+      query: {
+        term: {
+          type: {
+            value: 'cases-configure',
+          },
+        },
+      },
+    },
+  });
+
+  return configure;
 };
 
 export const createCaseWithConnector = async ({

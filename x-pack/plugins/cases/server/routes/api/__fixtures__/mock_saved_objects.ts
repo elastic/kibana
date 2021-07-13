@@ -14,7 +14,6 @@ import {
   CommentType,
   ConnectorTypes,
   ESCaseAttributes,
-  ESCasesConfigureAttributes,
   SECURITY_SOLUTION_OWNER,
 } from '../../../../common';
 
@@ -443,38 +442,6 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
       },
     ],
     updated_at: '2019-11-25T22:32:30.608Z',
-    version: 'WzYsMV0=',
-  },
-];
-
-export const mockCaseConfigure: Array<SavedObject<ESCasesConfigureAttributes>> = [
-  {
-    type: 'cases-configure',
-    id: 'mock-configuration-1',
-    attributes: {
-      connector: {
-        id: '789',
-        name: 'My connector 3',
-        type: ConnectorTypes.jira,
-        fields: null,
-      },
-      closure_type: 'close-by-user',
-      created_at: '2020-04-09T09:43:51.778Z',
-      created_by: {
-        full_name: 'elastic',
-        email: 'testemail@elastic.co',
-        username: 'elastic',
-      },
-      updated_at: '2020-04-09T09:43:51.778Z',
-      updated_by: {
-        full_name: 'elastic',
-        email: 'testemail@elastic.co',
-        username: 'elastic',
-      },
-      owner: SECURITY_SOLUTION_OWNER,
-    },
-    references: [],
-    updated_at: '2020-04-09T09:43:51.778Z',
     version: 'WzYsMV0=',
   },
 ];

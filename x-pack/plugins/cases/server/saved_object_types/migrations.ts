@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '../../../../../src/core/server';
 import {
   ConnectorTypes,
@@ -138,6 +136,38 @@ export const caseMigrations = {
   },
 };
 
+export const configureConnectorIdMigration = (
+  doc: SavedObjectUnsanitizedDoc<{ connector: { id: string } }>
+): SavedObjectSanitizedDoc<unknown> => {
+  // removing the id field since it will be stored in the references instead
+  const { id: connectorId, ...restConnector } = doc.attributes.connector;
+  const { references = [] } = doc;
+  // don't create a reference if the connector ID is none
+  const connectorReference =
+    connectorId !== 'none'
+      ? [
+          {
+            id: connectorId,
+            type: ACTION_SAVED_OBJECT_TYPE,
+
+            // TODO: can we remove 'associated'?
+            name: configurationConnectorReferenceName,
+          },
+        ]
+      : [];
+
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      connector: {
+        ...restConnector,
+      },
+    },
+    references: [...references, ...connectorReference],
+  };
+};
+
 export const configureMigrations = {
   '7.10.0': (
     doc: SavedObjectUnsanitizedDoc<UnsanitizedConfigureConnector>
@@ -163,37 +193,7 @@ export const configureMigrations = {
   ): SavedObjectSanitizedDoc<SanitizedCaseOwner> => {
     return addOwnerToSO(doc);
   },
-  '7.15.0': (
-    doc: SavedObjectUnsanitizedDoc<{ connector: { id: string } }>
-  ): SavedObjectSanitizedDoc<unknown> => {
-    // removing the id field since it will be stored in the references instead
-    const { id: connectorId, ...restConnector } = doc.attributes.connector;
-    const { references = [] } = doc;
-    // ignore the connector ID if it is none
-    const connectorReference =
-      connectorId !== 'none'
-        ? [
-            {
-              id: connectorId,
-              type: ACTION_SAVED_OBJECT_TYPE,
-
-              // TODO: can we remove 'associated'?
-              name: configurationConnectorReferenceName,
-            },
-          ]
-        : [];
-
-    return {
-      ...doc,
-      attributes: {
-        ...doc.attributes,
-        connector: {
-          ...restConnector,
-        },
-      },
-      references: [...references, ...connectorReference],
-    };
-  },
+  '7.15.0': configureConnectorIdMigration,
 };
 
 export const userActionsMigrations = {

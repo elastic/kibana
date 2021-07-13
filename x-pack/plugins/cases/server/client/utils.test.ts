@@ -5,22 +5,14 @@
  * 2.0.
  */
 
-import { SavedObjectsFindResponse } from 'kibana/server';
-import {
-  CaseConnector,
-  CaseType,
-  ConnectorTypes,
-  ESCaseConnector,
-  ESCasesConfigureAttributes,
-} from '../../common/api';
-import { mockCaseConfigure } from '../routes/api/__fixtures__';
+import { CaseConnector, CaseType, ConnectorTypes, ESCaseConnector } from '../../common/api';
 import { newCase } from '../routes/api/__mocks__/request_responses';
 import {
   transformCaseConnectorToEsConnector,
   transformESConnectorToCaseConnector,
   transformNewCase,
 } from '../common';
-import { getConnectorFromConfiguration, sortToSnake } from './utils';
+import { sortToSnake } from './utils';
 
 describe('utils', () => {
   const caseConnector: CaseConnector = {
@@ -39,13 +31,6 @@ describe('utils', () => {
       { key: 'priority', value: 'High' },
       { key: 'parent', value: null },
     ],
-  };
-
-  const caseConfigure: SavedObjectsFindResponse<ESCasesConfigureAttributes> = {
-    saved_objects: [{ ...mockCaseConfigure[0], score: 0 }],
-    total: 1,
-    per_page: 20,
-    page: 1,
   };
 
   describe('transformCaseConnectorToEsConnector', () => {
@@ -72,38 +57,6 @@ describe('utils', () => {
     it('transform correctly with null attributes', () => {
       // @ts-ignore this is case the connector does not exist for old cases object or configurations
       expect(transformESConnectorToCaseConnector(null)).toEqual({
-        id: 'none',
-        name: 'none',
-        type: ConnectorTypes.none,
-        fields: null,
-      });
-    });
-  });
-
-  describe('getConnectorFromConfiguration', () => {
-    it('transform correctly', () => {
-      expect(getConnectorFromConfiguration(caseConfigure)).toEqual({
-        id: '789',
-        name: 'My connector 3',
-        type: ConnectorTypes.jira,
-        fields: null,
-      });
-    });
-
-    it('transform correctly with no connector', () => {
-      const caseConfigureNoConnector: SavedObjectsFindResponse<ESCasesConfigureAttributes> = {
-        ...caseConfigure,
-        saved_objects: [
-          {
-            ...mockCaseConfigure[0],
-            // @ts-ignore this is case the connector does not exist for old cases object or configurations
-            attributes: { ...mockCaseConfigure[0].attributes, connector: null },
-            score: 0,
-          },
-        ],
-      };
-
-      expect(getConnectorFromConfiguration(caseConfigureNoConnector)).toEqual({
         id: 'none',
         name: 'none',
         type: ConnectorTypes.none,

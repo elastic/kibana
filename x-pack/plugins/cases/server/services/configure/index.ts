@@ -14,15 +14,14 @@ import {
   SavedObjectsUpdateResponse,
 } from 'kibana/server';
 
-import { SavedObjectFindOptionsKueryNode } from '../../common';
+import { getNoneCaseConnector, SavedObjectFindOptionsKueryNode } from '../../common';
 import {
   CASE_CONFIGURE_SAVED_OBJECT,
-  ESCasesConfigureAttributesNoConnectorID,
+  ESCasesConfigureAttributes,
   CasesConfigureAttributes,
   CaseConnector,
   ConnectorTypeFields,
   ESCaseConnectorNoID,
-  ConnectorTypes,
   CasesConfigurePatch,
   ESConnectorFields,
 } from '../../../common';
@@ -50,22 +49,11 @@ interface PatchCaseConfigureArgs extends ClientArgs {
   updatedAttributes: Partial<CasesConfigureAttributes>;
 }
 
-function transformESConnectorToCaseConnectorOrDefault(
-  connector?: ESCaseConnectorNoID,
-  connectorID?: string
-) {
-  return (
-    transformESConnectorToCaseConnector(connector, connectorID) ?? {
-      id: 'none',
-      name: 'none',
-      type: ConnectorTypes.none,
-      fields: null,
-    }
-  );
+function transformOrUseNoneConnector(connector?: ESCaseConnectorNoID, connectorID?: string) {
+  return transformToExternalConnector(connector, connectorID) ?? getNoneCaseConnector();
 }
 
-// TODO: rename
-function transformESConnectorToCaseConnector(
+function transformToExternalConnector(
   connector?: ESCaseConnectorNoID,
   connectorID?: string
 ): CaseConnector | undefined {
@@ -94,8 +82,8 @@ function transformESConnectorToCaseConnector(
   };
 }
 
-function transformUpdateRespToExternalModel(
-  updatedConfiguration: SavedObjectsUpdateResponse<ESCasesConfigureAttributesNoConnectorID>
+function transformUpdateToExternalModel(
+  updatedConfiguration: SavedObjectsUpdateResponse<ESCasesConfigureAttributes>
 ): SavedObjectsUpdateResponse<CasesConfigurePatch> {
   const connectorIDRef = updatedConfiguration.references?.find(
     (ref) => ref.type === ACTION_SAVED_OBJECT_TYPE
@@ -107,13 +95,13 @@ function transformUpdateRespToExternalModel(
     ...updatedConfiguration,
     attributes: {
       ...restUpdatedAttributes,
-      connector: transformESConnectorToCaseConnector(connector, connectorIDRef?.id),
+      connector: transformToExternalConnector(connector, connectorIDRef?.id),
     },
   };
 }
 
 function transformToExternalModel(
-  configuration: SavedObject<ESCasesConfigureAttributesNoConnectorID>
+  configuration: SavedObject<ESCasesConfigureAttributes>
 ): SavedObject<CasesConfigureAttributes> {
   const connectorIDRef = configuration.references.find(
     (ref) => ref.type === ACTION_SAVED_OBJECT_TYPE
@@ -123,7 +111,7 @@ function transformToExternalModel(
     ...configuration,
     attributes: {
       ...configuration.attributes,
-      connector: transformESConnectorToCaseConnectorOrDefault(
+      connector: transformOrUseNoneConnector(
         // if the saved object had an error the attributes field will not exist
         configuration.attributes?.connector,
         connectorIDRef?.id
@@ -133,7 +121,7 @@ function transformToExternalModel(
 }
 
 function transformFindToExternalModel(
-  configurations: SavedObjectsFindResponse<ESCasesConfigureAttributesNoConnectorID>
+  configurations: SavedObjectsFindResponse<ESCasesConfigureAttributes>
 ): SavedObjectsFindResponse<CasesConfigureAttributes> {
   return {
     ...configurations,
@@ -177,7 +165,7 @@ function buildReferences(id: string): SavedObjectReference[] | undefined {
 function transformCreateAttributesToESModel(
   configuration: CasesConfigureAttributes
 ): {
-  attributes: ESCasesConfigureAttributesNoConnectorID;
+  attributes: ESCasesConfigureAttributes;
   references?: SavedObjectReference[];
 } {
   const { connector, ...restWithoutConnector } = configuration;
@@ -198,7 +186,7 @@ function transformCreateAttributesToESModel(
 function transformUpdateAttributesToESModel(
   configuration: Partial<CasesConfigureAttributes>
 ): {
-  attributes: Partial<ESCasesConfigureAttributesNoConnectorID>;
+  attributes: Partial<ESCasesConfigureAttributes>;
   references?: SavedObjectReference[];
 } {
   const { connector, ...restWithoutConnector } = configuration;
@@ -242,7 +230,7 @@ export class CaseConfigureService {
   }: GetCaseConfigureArgs): Promise<SavedObject<CasesConfigureAttributes>> {
     try {
       this.log.debug(`Attempting to GET case configuration ${configurationId}`);
-      const configuration = await unsecuredSavedObjectsClient.get<ESCasesConfigureAttributesNoConnectorID>(
+      const configuration = await unsecuredSavedObjectsClient.get<ESCasesConfigureAttributes>(
         CASE_CONFIGURE_SAVED_OBJECT,
         configurationId
       );
@@ -261,15 +249,13 @@ export class CaseConfigureService {
     try {
       this.log.debug(`Attempting to find all case configuration`);
 
-      const findResp = await unsecuredSavedObjectsClient.find<ESCasesConfigureAttributesNoConnectorID>(
-        {
-          ...options,
-          // Get the latest configuration
-          sortField: 'created_at',
-          sortOrder: 'desc',
-          type: CASE_CONFIGURE_SAVED_OBJECT,
-        }
-      );
+      const findResp = await unsecuredSavedObjectsClient.find<ESCasesConfigureAttributes>({
+        ...options,
+        // Get the latest configuration
+        sortField: 'created_at',
+        sortOrder: 'desc',
+        type: CASE_CONFIGURE_SAVED_OBJECT,
+      });
 
       return transformFindToExternalModel(findResp);
     } catch (error) {
@@ -286,7 +272,7 @@ export class CaseConfigureService {
     try {
       this.log.debug(`Attempting to POST a new case configuration`);
       const esConfigInfo = transformCreateAttributesToESModel(attributes);
-      const createdConfig = await unsecuredSavedObjectsClient.create<ESCasesConfigureAttributesNoConnectorID>(
+      const createdConfig = await unsecuredSavedObjectsClient.create<ESCasesConfigureAttributes>(
         CASE_CONFIGURE_SAVED_OBJECT,
         {
           ...esConfigInfo.attributes,
@@ -310,7 +296,7 @@ export class CaseConfigureService {
       this.log.debug(`Attempting to UPDATE case configuration ${configurationId}`);
       const esUpdateInfo = transformUpdateAttributesToESModel(updatedAttributes);
 
-      const updatedConfiguration = await unsecuredSavedObjectsClient.update<ESCasesConfigureAttributesNoConnectorID>(
+      const updatedConfiguration = await unsecuredSavedObjectsClient.update<ESCasesConfigureAttributes>(
         CASE_CONFIGURE_SAVED_OBJECT,
         configurationId,
         {
@@ -321,7 +307,7 @@ export class CaseConfigureService {
         }
       );
 
-      return transformUpdateRespToExternalModel(updatedConfiguration);
+      return transformUpdateToExternalModel(updatedConfiguration);
     } catch (error) {
       this.log.debug(`Error on UPDATE case configuration ${configurationId}: ${error}`);
       throw error;

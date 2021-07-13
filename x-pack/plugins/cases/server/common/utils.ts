@@ -25,6 +25,7 @@ import {
   CommentsResponse,
   CommentType,
   ConnectorTypeFields,
+  ConnectorTypes,
   ENABLE_CASE_CONNECTOR,
   ESCaseAttributes,
   ESCaseConnector,
@@ -430,3 +431,15 @@ export function checkEnabledCaseConnectorOrThrow(subCaseID: string | undefined) 
     );
   }
 }
+
+/**
+ * Returns a connector that indicates that no connector was set.
+ *
+ * @returns the 'none' connector
+ */
+export const getNoneCaseConnector = () => ({
+  id: 'none',
+  name: 'none',
+  type: ConnectorTypes.none,
+  fields: null,
+});
