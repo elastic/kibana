@@ -13,6 +13,11 @@ import { APMConfig } from '../..';
 
 function getMockSavedObjectsClient() {
   return ({
+    get: jest.fn(() => ({
+      attributes: {
+        title: 'apm-*',
+      },
+    })),
     create: jest.fn(),
   } as unknown) as InternalSavedObjectsClient;
 }
@@ -68,5 +73,63 @@ describe('createStaticIndexPattern', () => {
     });
 
     expect(savedObjectsClient.create).toHaveBeenCalled();
+  });
+
+  it(`should upgrade an index pattern if 'apm_oss.indexPattern' does not match title`, async () => {
+    const setup = {} as Setup;
+
+    // does have APM data
+    jest
+      .spyOn(HistoricalAgentData, 'hasHistoricalAgentData')
+      .mockResolvedValue(true);
+
+    const savedObjectsClient = getMockSavedObjectsClient();
+    const apmIndexPatternTitle = 'traces-apm*,logs-apm*,metrics-apm*,apm-*';
+
+    await createStaticIndexPattern({
+      setup,
+      config: {
+        'xpack.apm.autocreateApmIndexPattern': true,
+        'apm_oss.indexPattern': apmIndexPatternTitle,
+      } as APMConfig,
+      savedObjectsClient,
+      spaceId: 'default',
+    });
+
+    expect(savedObjectsClient.get).toHaveBeenCalled();
+    expect(savedObjectsClient.create).toHaveBeenCalled();
+    // @ts-ignore
+    expect(savedObjectsClient.create.mock.calls[0][1].title).toBe(
+      apmIndexPatternTitle
+    );
+    // @ts-ignore
+    expect(savedObjectsClient.create.mock.calls[0][2].overwrite).toBe(true);
+  });
+
+  it(`should not upgrade an index pattern if 'apm_oss.indexPattern' already match existing title`, async () => {
+    const setup = {} as Setup;
+
+    // does have APM data
+    jest
+      .spyOn(HistoricalAgentData, 'hasHistoricalAgentData')
+      .mockResolvedValue(true);
+
+    const savedObjectsClient = getMockSavedObjectsClient();
+    const apmIndexPatternTitle = 'apm-*';
+
+    await createStaticIndexPattern({
+      setup,
+      config: {
+        'xpack.apm.autocreateApmIndexPattern': true,
+        'apm_oss.indexPattern': apmIndexPatternTitle,
+      } as APMConfig,
+      savedObjectsClient,
+      spaceId: 'default',
+    });
+
+    expect(savedObjectsClient.get).toHaveBeenCalled();
+    expect(savedObjectsClient.create).toHaveBeenCalled();
+    // @ts-ignore
+    expect(savedObjectsClient.create.mock.calls[0][2].overwrite).toBe(false);
   });
 });
