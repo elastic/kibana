@@ -46,20 +46,13 @@ describe('estimateCapacity', () => {
                   p99: 1500,
                 },
               },
+              // no non-recurring executions in the system in recent history
               persistence: {
-                // no non-recurring executions in the system in recent history
                 ephemeral: 0,
                 non_recurring: 0,
                 recurring: 100,
               },
               result_frequency_percent_as_number: {},
-            },
-            polling: {
-              // no non-recurring tasks polled in the system in recent history
-              persistence: {
-                non_recurring: 0,
-                recurring: 100,
-              },
             },
           }
         )
@@ -108,19 +101,13 @@ describe('estimateCapacity', () => {
                   p99: 253150,
                 },
               },
+              // no non-recurring executions in the system in recent history
               persistence: {
-                ephemeral: 33,
-                non_recurring: 33,
-                recurring: 33,
-              },
-              result_frequency_percent_as_number: {},
-            },
-            polling: {
-              persistence: {
-                // no non-recurring tasks polled in the system in recent history
+                ephemeral: 0,
                 non_recurring: 0,
                 recurring: 100,
               },
+              result_frequency_percent_as_number: {},
             },
           }
         )
@@ -152,19 +139,13 @@ describe('estimateCapacity', () => {
             execution: {
               duration: {},
               duration_by_persistence: {},
+              // no non-recurring executions in the system in recent history
               persistence: {
-                ephemeral: 33,
-                non_recurring: 33,
-                recurring: 33,
-              },
-              result_frequency_percent_as_number: {},
-            },
-            polling: {
-              // no non-recurring tasks polled in the system in recent history
-              persistence: {
+                ephemeral: 0,
                 non_recurring: 0,
                 recurring: 100,
               },
+              result_frequency_percent_as_number: {},
             },
           }
         )
@@ -213,19 +194,13 @@ describe('estimateCapacity', () => {
                   p99: 1500,
                 },
               },
+              // no non-recurring executions in the system in recent history
               persistence: {
-                ephemeral: 33,
-                non_recurring: 33,
-                recurring: 33,
-              },
-              result_frequency_percent_as_number: {},
-            },
-            polling: {
-              // no non-recurring task polling in the system in recent history
-              persistence: {
+                ephemeral: 0,
                 non_recurring: 0,
                 recurring: 100,
               },
+              result_frequency_percent_as_number: {},
             },
           }
         )
@@ -277,18 +252,11 @@ describe('estimateCapacity', () => {
               },
               // no non-recurring executions in the system in recent history
               persistence: {
-                ephemeral: 33,
-                non_recurring: 33,
-                recurring: 33,
-              },
-              result_frequency_percent_as_number: {},
-            },
-            polling: {
-              // no non-recurring tasks polled in the system in recent history
-              persistence: {
+                ephemeral: 0,
                 non_recurring: 0,
                 recurring: 100,
               },
+              result_frequency_percent_as_number: {},
             },
           }
         )
@@ -300,8 +268,7 @@ describe('estimateCapacity', () => {
     });
   });
 
-  // TODO: I need Gidi's help investigating this failure
-  test.skip('estimates the max throughput available to handle the workload when there are multiple active kibana instances', async () => {
+  test('estimates the max throughput available to handle the workload when there are multiple active kibana instances', async () => {
     expect(
       estimateCapacity(
         mockStats(
@@ -338,19 +305,13 @@ describe('estimateCapacity', () => {
                   p99: 1500,
                 },
               },
+              // no non-recurring executions in the system in recent history
               persistence: {
-                ephemeral: 33,
-                non_recurring: 33,
-                recurring: 33,
-              },
-              result_frequency_percent_as_number: {},
-            },
-            polling: {
-              // no non-recurring tasks polled in the system in recent history
-              persistence: {
+                ephemeral: 0,
                 non_recurring: 0,
                 recurring: 100,
               },
+              result_frequency_percent_as_number: {},
             },
           }
         )
@@ -364,8 +325,7 @@ describe('estimateCapacity', () => {
     });
   });
 
-  // TODO: I need Gidi's help investigating this failure
-  test.skip('estimates the max throughput available to handle the workload and historical non-recurring tasks when there are multiple active kibana instances', async () => {
+  test('estimates the max throughput available to handle the workload and historical non-recurring tasks when there are multiple active kibana instances', async () => {
     const provisionedKibanaInstances = 2;
     // 50% for non-recurring/epehemral + a 3rd of recurring task workload
     const expectedAverageRequiredCapacityPerKibana = 200 * 0.5 + (150 + 1) / 2;
@@ -414,18 +374,12 @@ describe('estimateCapacity', () => {
                 },
               },
               persistence: {
-                ephemeral: 33,
-                non_recurring: 33,
-                recurring: 33,
-              },
-              result_frequency_percent_as_number: {},
-            },
-            polling: {
-              persistence: {
-                // 50% of polled tasks are non-recurring in the system in recent history
-                non_recurring: 50,
+                // 50% of tasks are non-recurring/ephemeral executions in the system in recent history
+                ephemeral: 25,
+                non_recurring: 25,
                 recurring: 50,
               },
+              result_frequency_percent_as_number: {},
             },
           }
         )
@@ -443,7 +397,7 @@ describe('estimateCapacity', () => {
     });
   });
 
-  test('estimates the min required kibana instances when there is sufficient capacity for recurring but not for non-recurring', async () => {
+  test('estimates the min required kibana instances when there is sufficient capacity for recurring but not for non-recurring/ephemeral', async () => {
     const provisionedKibanaInstances = 2;
     const recurringTasksPerMinute = 251;
     // 50% for non-recurring/epehemral + half of recurring task workload
@@ -500,18 +454,12 @@ describe('estimateCapacity', () => {
                 },
               },
               persistence: {
+                // 50% of tasks are non-recurring/ephemeral executions in the system in recent history
                 ephemeral: 25,
                 non_recurring: 25,
                 recurring: 50,
               },
               result_frequency_percent_as_number: {},
-            },
-            polling: {
-              persistence: {
-                // 50% of polled tasks are non-recurring in the system in recent history
-                non_recurring: 50,
-                recurring: 50,
-              },
             },
           }
         )
@@ -542,8 +490,7 @@ describe('estimateCapacity', () => {
     });
   });
 
-  // TODO: I need Gidi's help investigating this failure
-  test.skip('marks estimated capacity as OK state when workload and load suggest capacity is sufficient', async () => {
+  test('marks estimated capacity as OK state when workload and load suggest capacity is sufficient', async () => {
     expect(
       estimateCapacity(
         mockStats(
@@ -589,19 +536,13 @@ describe('estimateCapacity', () => {
                   p99: 1500,
                 },
               },
+              // 20% average of non-recurring executions in the system in recent history
               persistence: {
-                ephemeral: 50,
-                non_recurring: 10,
-                recurring: 40,
-              },
-              result_frequency_percent_as_number: {},
-            },
-            polling: {
-              // 20% average of polled non-recurring in the system in recent history
-              persistence: {
+                ephemeral: 0,
                 non_recurring: 20,
                 recurring: 80,
               },
+              result_frequency_percent_as_number: {},
             },
           }
         )
@@ -656,20 +597,13 @@ describe('estimateCapacity', () => {
                   p99: 1500,
                 },
               },
+              // no non-recurring executions in the system in recent history
               persistence: {
                 ephemeral: 0,
                 non_recurring: 20,
                 recurring: 80,
               },
               result_frequency_percent_as_number: {},
-            },
-            polling: {
-              // no non-recurring tasks polled in the system in recent history
-              persistence: {
-                ephemeral: 0,
-                non_recurring: 20,
-                recurring: 80,
-              },
             },
           }
         )
@@ -724,19 +658,13 @@ describe('estimateCapacity', () => {
                   p99: 1500,
                 },
               },
+              // 20% average of non-recurring executions in the system in recent history
               persistence: {
                 ephemeral: 0,
                 non_recurring: 20,
                 recurring: 80,
               },
               result_frequency_percent_as_number: {},
-            },
-            polling: {
-              // 20% average of polled tasks are non-recurring in the system in recent history
-              persistence: {
-                non_recurring: 20,
-                recurring: 80,
-              },
             },
           }
         )
@@ -798,12 +726,6 @@ describe('estimateCapacity', () => {
               },
               result_frequency_percent_as_number: {},
             },
-            polling: {
-              persistence: {
-                recurring: 0,
-                non_recurring: 100,
-              },
-            },
           }
         )
       )
@@ -814,7 +736,7 @@ describe('estimateCapacity', () => {
         observed: {
           observed_kibana_instances: 1,
           avg_recurring_required_throughput_per_minute: 29,
-          // we obesrve 100% capacity on non-recurring tasks, which is 200tpm
+          // we obesrve 100% capacity on non-recurring/ephemeral tasks, which is 200tpm
           // and add to that the 29tpm for recurring tasks
           avg_required_throughput_per_minute_per_kibana: 229,
         },
@@ -879,12 +801,6 @@ describe('estimateCapacity', () => {
               },
               result_frequency_percent_as_number: {},
             },
-            polling: {
-              persistence: {
-                recurring: 0,
-                non_recurring: 100,
-              },
-            },
           }
         )
       )
@@ -895,12 +811,12 @@ describe('estimateCapacity', () => {
         observed: {
           observed_kibana_instances: 1,
           avg_recurring_required_throughput_per_minute: 210,
-          // we obesrve 100% capacity on non-recurring tasks, which is 200tpm
+          // we obesrve 100% capacity on non-recurring/ephemeral tasks, which is 200tpm
           // and add to that the 210tpm for recurring tasks
           avg_required_throughput_per_minute_per_kibana: 410,
         },
         proposed: {
-          // we propose provisioning 3 instances for recurring + non-recurring
+          // we propose provisioning 3 instances for recurring + non-recurring/ephemeral
           provisioned_kibana: 3,
           // but need at least 2 for recurring
           min_required_kibana: 2,
@@ -919,6 +835,30 @@ function mockStats(
   runtime: Partial<Required<RawMonitoringStats['stats']>['runtime']['value']> = {}
 ): CapacityEstimationParams {
   return {
+    ephemeral: {
+      status: HealthStatus.OK,
+      timestamp: new Date().toISOString(),
+      value: {
+        load: {
+          p50: 4,
+          p90: 6,
+          p95: 6,
+          p99: 6,
+        },
+        executionsPerCycle: {
+          p50: 4,
+          p90: 6,
+          p95: 6,
+          p99: 6,
+        },
+        queuedTasks: {
+          p50: 4,
+          p90: 6,
+          p95: 6,
+          p99: 6,
+        },
+      },
+    },
     configuration: {
       status: HealthStatus.OK,
       timestamp: new Date().toISOString(),
@@ -961,30 +901,6 @@ function mockStats(
           per_day: 820,
         },
         ...workload,
-      },
-    },
-    ephemeral: {
-      status: HealthStatus.OK,
-      timestamp: new Date().toISOString(),
-      value: {
-        load: {
-          p50: 4,
-          p90: 6,
-          p95: 6,
-          p99: 6,
-        },
-        executionsPerCycle: {
-          p50: 4,
-          p90: 6,
-          p95: 6,
-          p99: 6,
-        },
-        queuedTasks: {
-          p50: 4,
-          p90: 6,
-          p95: 6,
-          p99: 6,
-        },
       },
     },
     runtime: {

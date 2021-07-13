@@ -57,7 +57,6 @@ export function estimateCapacity(
   const {
     recurring: percentageOfExecutionsUsedByRecurringTasks,
     non_recurring: percentageOfExecutionsUsedByNonRecurringTasks,
-    ephemeral: percentageOfExecutionsUsedByEphemeralTasks,
   } = capacityStats.runtime.value.execution.persistence;
   const { overdue, capacity_requirements: capacityRequirements } = workload;
   const {
@@ -98,9 +97,7 @@ export function estimateCapacity(
     capacityPerMinutePerKibana,
     percentageOf(
       averageLoadPercentage,
-      percentageOfExecutionsUsedByRecurringTasks +
-        percentageOfExecutionsUsedByNonRecurringTasks +
-        percentageOfExecutionsUsedByEphemeralTasks
+      percentageOfExecutionsUsedByRecurringTasks + percentageOfExecutionsUsedByNonRecurringTasks
     )
   );
 
