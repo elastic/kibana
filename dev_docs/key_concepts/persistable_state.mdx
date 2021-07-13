@@ -7,11 +7,9 @@ date: 2021-02-02
 tags: ['kibana','dev', 'contributor', 'api docs']
 ---
 
-"Persistable State" is developer defined part of state or configuration that can be(is ment to be) persisted by other
- plugin that the one providing it. Persistable State needs to be serializable and owner can/should provide utilities
- to migrate it, extract and inject references from/to it as well as collect telemetry.
+ “Persistable state” is developer-defined state that supports being persisted by a plugin other than the one defining it. Persistable State needs to be serializable and the owner can/should provide utilities to migrate it, extract and inject references from/to it, as well as telemetry collection utilities.
  
-## exposing state that can be persisted
+## Exposing state that can be persisted
 
 Any plugin that exposes state or configuration that another plugin might persist should implement `PersistableStateService`
 interface on their `setup` contract. This will allow plugins persisting the state to easily access migrations and other utilities.
