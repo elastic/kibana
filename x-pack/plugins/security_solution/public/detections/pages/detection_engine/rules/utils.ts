@@ -77,10 +77,7 @@ export const getBreadcrumbs = (
       ...breadcrumb,
       {
         text: i18nRules.ADD_PAGE_TITLE,
-        href: getUrlForApp(APP_ID, {
-          deepLinkId: SecurityPageName.rules,
-          path: '',
-        }),
+        href: ''
       },
     ];
   }
@@ -90,10 +87,7 @@ export const getBreadcrumbs = (
       ...breadcrumb,
       {
         text: i18nRules.EDIT_PAGE_TITLE,
-        href: getUrlForApp(APP_ID, {
-          deepLinkId: SecurityPageName.rules,
-          path: '',
-        }),
+        href: ''
       },
     ];
   }
