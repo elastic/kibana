@@ -26,6 +26,7 @@ import { LinkButton } from '../../../common/components/links';
 import { useKibana } from '../../../common/lib/kibana';
 import { CtiInnerPanel } from './cti_inner_panel';
 import * as i18n from './translations';
+import { shortenCountIntoString } from '../../../common/utils/shorten_count_into_string';
 
 const DashboardLink = styled.li`
   margin: 0 ${({ theme }) => theme.eui.paddingSizes.s} 0 ${({ theme }) => theme.eui.paddingSizes.m};
@@ -86,7 +87,7 @@ export const ThreatIntelPanelView: React.FC<ThreatIntelPanelViewProps> = ({
     () => (
       <FormattedMessage
         data-test-subj="cti-total-event-count"
-        defaultMessage="Showing: {totalEventCount} {totalEventCount, plural, one {event} other {events}}"
+        defaultMessage="Showing: {totalEventCount} {totalEventCount, plural, one {indicator} other {indicators}}"
         id="xpack.securitySolution.overview.ctiDashboardSubtitle"
         values={{ totalEventCount }}
       />
@@ -149,7 +150,7 @@ export const ThreatIntelPanelView: React.FC<ThreatIntelPanelViewProps> = ({
                         gutterSize="l"
                         justifyContent="spaceBetween"
                       >
-                        <Title key={`${title}-link`} grow={3}>
+                        <Title key={`${title}-link`}>
                           {title}
                         </Title>
                         <EuiFlexGroup
@@ -159,10 +160,10 @@ export const ThreatIntelPanelView: React.FC<ThreatIntelPanelViewProps> = ({
                           alignItems="center"
                           justifyContent="flexEnd"
                         >
-                          <DashboardRightSideElement key={`${title}-count`} grow={1}>
-                            {count}
+                          <DashboardRightSideElement key={`${title}-count`} grow={false}>
+                            {shortenCountIntoString(count)}
                           </DashboardRightSideElement>
-                          <DashboardRightSideElement key={`${title}-source`} grow={3}>
+                          <DashboardRightSideElement key={`${title}-source`} grow={false}>
                             {path ? (
                               <RightSideLink href={path}>{linkCopy}</RightSideLink>
                             ) : (
