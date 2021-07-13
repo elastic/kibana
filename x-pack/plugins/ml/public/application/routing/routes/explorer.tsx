@@ -127,7 +127,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
         to: globalState.time.to,
       });
     }
-  }, [globalState?.time?.from, globalState?.time?.to]);
+  }, [lastRefresh, globalState?.time?.from, globalState?.time?.to]);
 
   const getJobsWithStoppedPartitions = useCallback(async (selectedJobIds: string[]) => {
     try {

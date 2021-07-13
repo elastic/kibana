@@ -354,10 +354,6 @@ The plugin exposes the static DefaultEditorController class to consume.
 The client-side plugin configures following values:
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/console_extensions/README.md[consoleExtensions]
-|This plugin provides autocomplete definitions of licensed APIs to the OSS Console plugin.
-
-
 |{kib-repo}blob/{branch}/x-pack/plugins/cross_cluster_replication/README.md[crossClusterReplication]
 |You can run a local cluster and simulate a remote cluster within a single Kibana directory.
 
