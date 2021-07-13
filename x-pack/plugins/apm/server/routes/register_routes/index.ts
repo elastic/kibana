@@ -18,9 +18,12 @@ import {
   routeValidationObject,
 } from '@kbn/server-route-repository';
 import { mergeRt, jsonRt } from '@kbn/io-ts-utils';
-import { UsageCollectionSetup } from '../../../../../../src/plugins/usage_collection/server';
 import { pickKeys } from '../../../common/utils/pick_keys';
-import { APMRouteHandlerResources, InspectResponse } from '../typings';
+import {
+  APMRouteHandlerResources,
+  InspectResponse,
+  TelemetryUsageCounter,
+} from '../typings';
 import type { ApmPluginRequestHandlerContext } from '../typings';
 
 const inspectRt = t.exact(
@@ -49,9 +52,7 @@ export function registerRoutes({
   repository: ServerRouteRepository<APMRouteHandlerResources>;
   config: APMRouteHandlerResources['config'];
   ruleDataClient: APMRouteHandlerResources['ruleDataClient'];
-  telemetryUsageCounter?: ReturnType<
-    UsageCollectionSetup['createUsageCounter']
-  >;
+  telemetryUsageCounter?: TelemetryUsageCounter;
 }) {
   const routes = repository.getRoutes();
 
@@ -89,17 +90,20 @@ export function registerRoutes({
             runtimeType
           );
 
-          const data: Record<string, any> | undefined | null = (await handler({
-            request,
-            context,
-            config,
-            logger,
-            core,
-            plugins,
-            params: merge(
-              {
-                query: {
-                  _inspect: false,
+          const { aborted, data } = await Promise.race([
+            handler({
+              request,
+              context,
+              config,
+              logger,
+              core,
+              plugins,
+              telemetryUsageCounter,
+              params: merge(
+                {
+                  query: {
+                    _inspect: false,
+                  },
                 },
               },
               validatedParams
