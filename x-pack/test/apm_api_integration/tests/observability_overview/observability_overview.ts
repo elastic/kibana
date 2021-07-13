@@ -54,7 +54,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expectSnapshot(response.body.serviceCount).toMatchInline(`9`);
 
-        expectSnapshot(response.body.transactionPerMinute.value).toMatchInline(`302.2`);
+        expectSnapshot(response.body.transactionPerMinute.value).toMatchInline(`41.4333333333333`);
         expectSnapshot(response.body.transactionPerMinute.timeseries.length).toMatchInline(`31`);
 
         expectSnapshot(
@@ -72,19 +72,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
             Object {
               "x": "2020-12-08T13:58:00.000Z",
-              "y": 174,
+              "y": 43,
             },
             Object {
               "x": "2020-12-08T13:59:00.000Z",
-              "y": 399,
+              "y": 18,
             },
             Object {
               "x": "2020-12-08T14:00:00.000Z",
-              "y": 208,
+              "y": 57,
             },
             Object {
               "x": "2020-12-08T14:01:00.000Z",
-              "y": 394,
+              "y": 15,
             },
           ]
         `);
