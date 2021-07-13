@@ -53,6 +53,14 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     sortField: '@timestamp',
     isLive,
   });
+  if (expired) {
+    edges.forEach(edge => {
+      if (!edge.fields.completed_at) {
+        edge.fields['error.keyword'] = edge.fields.error = ['The action request timed out.']
+      }
+      console.log(edge)
+    })
+  }
 
   const { data: logsResults } = useAllResults({
     actionId,
