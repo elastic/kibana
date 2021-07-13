@@ -18,7 +18,7 @@ import * as i18n from './translations';
  * There is a copy within:
  * x-pack/plugins/lists/public/exceptions/components/autocomplete/helpers.ts
  *
- * TODO: This should be in its own packaged and not copied
+ * TODO: This should be in its own packaged and not copied, https://github.com/elastic/kibana/issues/105378
  */
 export const checkEmptyValue = (
   param: string | undefined,
@@ -46,7 +46,7 @@ export const checkEmptyValue = (
  * There is a copy within:
  * x-pack/plugins/lists/public/exceptions/components/autocomplete/helpers.ts
  *
- * TODO: This should be in its own packaged and not copied
+ * TODO: This should be in its own packaged and not copied, https://github.com/elastic/kibana/issues/105378
  * @param param the value being checked
  * @param field the selected field
  * @param isRequired whether or not an empty value is allowed
@@ -86,8 +86,7 @@ export const paramIsValid = (
  * There is a copy within:
  * x-pack/plugins/lists/public/exceptions/components/autocomplete/helpers.ts
  *
- * TODO: This should be in its own packaged and not copied
- *
+ * TODO: This should be in its own packaged and not copied, https://github.com/elastic/kibana/issues/105378
  * @param options options user can select from
  * @param selectedOptions user selection if any
  * @param getLabel helper function to know which property to use for labels

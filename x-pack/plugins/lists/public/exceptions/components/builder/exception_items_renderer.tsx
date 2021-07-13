@@ -257,6 +257,7 @@ export const ExceptionBuilderComponent = ({
         ...lastException,
         entries: [...entries, isNested ? getDefaultNestedEmptyEntry() : getDefaultEmptyEntry()],
       };
+
       setUpdateExceptions([...exceptions.slice(0, exceptions.length - 1), { ...updatedException }]);
     },
     [setUpdateExceptions, exceptions]

@@ -36,7 +36,7 @@ export interface UseFieldValueAutocompleteProps {
  * There is a copy within:
  * x-pack/plugins/lists/public/exceptions/components/autocomplete/hooks.ts
  *
- * TODO: This should be in its own packaged and not copied
+ * TODO: This should be in its own packaged and not copied, https://github.com/elastic/kibana/issues/105378
  */
 export const useFieldValueAutocomplete = ({
   selectedField,
