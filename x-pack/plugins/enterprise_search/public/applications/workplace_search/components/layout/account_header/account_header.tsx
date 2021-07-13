@@ -66,7 +66,7 @@ export const AccountHeader: React.FC = () => {
   );
 
   return (
-    <EuiHeader>
+    <EuiHeader className="personalDashboardHeader">
       <EuiHeaderSection grow={false}>
         <EuiHeaderSectionItem>
           <EuiHeaderLogo iconType="logoWorkplaceSearch" />

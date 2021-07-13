@@ -23,3 +23,10 @@
     height: 100%;
   }
 }
+
+.personalDashboardHeader {
+  // Fixes a bug in Kibana v7 theme where logo has extra line visible
+  .euiHeaderSectionItem:after {
+    background: none;
+  }
+}
