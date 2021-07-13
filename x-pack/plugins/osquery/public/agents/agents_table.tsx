@@ -21,7 +21,12 @@ import {
   generateAgentSelection,
 } from './helpers';
 
-import { SELECT_AGENT_LABEL, generateSelectedAgentsMessage } from './translations';
+import {
+  SELECT_AGENT_LABEL,
+  generateSelectedAgentsMessage,
+  ALL_AGENTS_LABEL,
+  AGENT_POLICY_LABEL,
+} from './translations';
 
 import {
   AGENT_GROUP_KEY,
@@ -72,8 +77,17 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
 
   useEffect(() => {
     if (agentSelection && !defaultValueInitialized.current && options.length) {
-      if (agentSelection.policiesSelected) {
-        const policyOptions = find(['label', 'Policy'], options);
+      if (agentSelection.allAgentsSelected) {
+        const allAgentsOptions = find(['label', ALL_AGENTS_LABEL], options);
+
+        if (allAgentsOptions?.options) {
+          setSelectedOptions(allAgentsOptions.options);
+          defaultValueInitialized.current = true;
+        }
+      }
+
+      if (agentSelection.policiesSelected.length) {
+        const policyOptions = find(['label', AGENT_POLICY_LABEL], options);
 
         if (policyOptions) {
           const defaultOptions = policyOptions.options?.filter((option) =>
@@ -82,12 +96,12 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
 
           if (defaultOptions?.length) {
             setSelectedOptions(defaultOptions);
+            defaultValueInitialized.current = true;
           }
-          defaultValueInitialized.current = true;
         }
       }
     }
-  }, [agentSelection, options]);
+  }, [agentSelection, options, selectedOptions]);
 
   useEffect(() => {
     // update the groups when groups or agents have changed
