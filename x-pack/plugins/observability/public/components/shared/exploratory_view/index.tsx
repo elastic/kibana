@@ -22,7 +22,6 @@ import {
 import { UrlStorageContextProvider } from './hooks/use_series_storage';
 import { useTrackPageview } from '../../..';
 import { TypedLensByValueInput } from '../../../../../lens/public';
-import { UIContextProvider } from './hooks/use_ui_context';
 
 export function ExploratoryViewPage({
   saveAttributes,
