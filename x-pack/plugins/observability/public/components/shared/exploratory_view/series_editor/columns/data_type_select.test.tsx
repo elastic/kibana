@@ -8,7 +8,8 @@
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { mockAppIndexPattern, mockUxSeries, render } from '../../rtl_helpers';
-import { DataTypesSelect } from './data_type_select';
+import { dataTypes, DataTypesLabels, DataTypesSelect } from './data_type_select';
+import { DataTypes } from '../../configurations/constants';
 
 describe('DataTypeSelect', function () {
   const seriesId = 'test-series-id';
@@ -22,8 +23,8 @@ describe('DataTypeSelect', function () {
   it('should set series on change', async function () {
     const { setSeries } = render(<DataTypesSelect seriesId={seriesId} series={mockUxSeries} />);
 
-    fireEvent.click(await screen.findByText('User Experience (RUM)'));
-    fireEvent.click(await screen.findByText('Synthetic Monitoring'));
+    fireEvent.click(await screen.findByText(DataTypesLabels[DataTypes.UX]));
+    fireEvent.click(await screen.findByText(DataTypesLabels[DataTypes.SYNTHETICS]));
 
     expect(setSeries).toHaveBeenCalledTimes(1);
     expect(setSeries).toHaveBeenCalledWith(seriesId, {

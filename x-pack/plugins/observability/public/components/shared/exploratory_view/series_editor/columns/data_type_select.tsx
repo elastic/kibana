@@ -16,24 +16,39 @@ interface Props {
   seriesId: string;
   series: SeriesUrl;
 }
+
+export const DataTypesLabels = {
+  [DataTypes.UX]: i18n.translate('xpack.observability.overview.exploratoryView.uxLabel', {
+    defaultMessage: 'User experience (RUM)',
+  }),
+
+  [DataTypes.SYNTHETICS]: i18n.translate(
+    'xpack.observability.overview.exploratoryView.syntheticsLabel',
+    {
+      defaultMessage: 'Synthetics monitoring',
+    }
+  ),
+
+  [DataTypes.MOBILE]: i18n.translate(
+    'xpack.observability.overview.exploratoryView.mobileExperienceLabel',
+    {
+      defaultMessage: 'Mobile experience',
+    }
+  ),
+};
+
 export const dataTypes: Array<{ id: AppDataType; label: string }> = [
   {
     id: DataTypes.SYNTHETICS,
-    label: i18n.translate('xpack.observability.overview.exploratoryView.syntheticsLabel', {
-      defaultMessage: 'Synthetics monitoring',
-    }),
+    label: DataTypesLabels[DataTypes.SYNTHETICS],
   },
   {
     id: DataTypes.UX,
-    label: i18n.translate('xpack.observability.overview.exploratoryView.uxLabel', {
-      defaultMessage: 'User experience (RUM)',
-    }),
+    label: DataTypesLabels[DataTypes.UX],
   },
   {
     id: DataTypes.MOBILE,
-    label: i18n.translate('xpack.observability.overview.exploratoryView.mobileExperienceLabel', {
-      defaultMessage: 'Mobile experience',
-    }),
+    label: DataTypesLabels[DataTypes.MOBILE],
   },
 ];
 
