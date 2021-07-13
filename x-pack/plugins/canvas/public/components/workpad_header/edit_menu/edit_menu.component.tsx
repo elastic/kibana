@@ -247,7 +247,7 @@ export const EditMenu: FunctionComponent<Props> = ({
 
   const editControl = (togglePopover: React.MouseEventHandler<any>) => (
     <EuiButtonEmpty
-      size="xs"
+      size="s"
       aria-label={strings.getEditMenuLabel()}
       onClick={togglePopover}
       data-test-subj="canvasWorkpadEditMenuButton"
