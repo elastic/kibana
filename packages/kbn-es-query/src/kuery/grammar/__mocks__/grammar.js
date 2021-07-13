@@ -10,8 +10,6 @@
 //
 // https://github.com/peggyjs/peggy
 
-/* eslint-disable */
-
 "use strict";
 
 function peg$subclass(child, parent) {
@@ -139,49 +137,49 @@ function peg$parse(input, options) {
 
   var peg$FAILED = {};
 
-  var peg$startRuleFunctions = { Expression: peg$parseExpression };
-  var peg$startRuleFunction = peg$parseExpression;
+  var peg$startRuleFunctions = { start: peg$parsestart, Literal: peg$parseLiteral };
+  var peg$startRuleFunction = peg$parsestart;
 
   var peg$c0 = function(query, trailing) {
-      if (trailing.type === 'cursor') {
-        return {
-          ...trailing,
-          suggestionTypes: ['conjunction']
-        };
-      }
-      if (query !== null) return query;
-      return nodeTypes.function.buildNode('is', '*', '*');
-    };
+    if (trailing.type === 'cursor') {
+      return {
+        ...trailing,
+        suggestionTypes: ['conjunction']
+      };
+    }
+    if (query !== null) return query;
+    return nodeTypes.function.buildNode('is', '*', '*');
+  };
   var peg$c1 = function(head, query) { return query; };
   var peg$c2 = function(head, tail) {
-      const nodes = [head, ...tail];
-      const cursor = parseCursor && nodes.find(node => node.type === 'cursor');
-      if (cursor) return cursor;
-      return buildFunctionNode('or', nodes);
-    };
+    const nodes = [head, ...tail];
+    const cursor = parseCursor && nodes.find(node => node.type === 'cursor');
+    if (cursor) return cursor;
+    return buildFunctionNode('or', nodes);
+  };
   var peg$c3 = function(head, tail) {
-      const nodes = [head, ...tail];
-      const cursor = parseCursor && nodes.find(node => node.type === 'cursor');
-      if (cursor) return cursor;
-      return buildFunctionNode('and', nodes);
-    };
+    const nodes = [head, ...tail];
+    const cursor = parseCursor && nodes.find(node => node.type === 'cursor');
+    if (cursor) return cursor;
+    return buildFunctionNode('and', nodes);
+  };
   var peg$c4 = function(query) {
-      if (query.type === 'cursor') return query;
-      return buildFunctionNode('not', [query]);
-    };
+    if (query.type === 'cursor') return query;
+    return buildFunctionNode('not', [query]);
+  };
   var peg$c5 = "(";
   var peg$c6 = peg$literalExpectation("(", false);
   var peg$c7 = ")";
   var peg$c8 = peg$literalExpectation(")", false);
   var peg$c9 = function(query, trailing) {
-      if (trailing.type === 'cursor') {
-        return {
-          ...trailing,
-          suggestionTypes: ['conjunction']
-        };
-      }
-      return query;
-    };
+    if (trailing.type === 'cursor') {
+      return {
+        ...trailing,
+        suggestionTypes: ['conjunction']
+      };
+    }
+    return query;
+  };
   var peg$c10 = ":";
   var peg$c11 = peg$literalExpectation(":", false);
   var peg$c12 = "{";
@@ -189,111 +187,111 @@ function peg$parse(input, options) {
   var peg$c14 = "}";
   var peg$c15 = peg$literalExpectation("}", false);
   var peg$c16 = function(field, query, trailing) {
-        if (query.type === 'cursor') {
-          return {
-            ...query,
-            nestedPath: query.nestedPath ? `${field.value}.${query.nestedPath}` : field.value,
-          }
-        };
+    if (query.type === 'cursor') {
+      return {
+        ...query,
+        nestedPath: query.nestedPath ? `${field.value}.${query.nestedPath}` : field.value,
+      }
+    };
 
-        if (trailing.type === 'cursor') {
-          return {
-            ...trailing,
-            suggestionTypes: ['conjunction']
-          };
-        }
-        return buildFunctionNode('nested', [field, query]);
+    if (trailing.type === 'cursor') {
+      return {
+        ...trailing,
+        suggestionTypes: ['conjunction']
       };
+    }
+    return buildFunctionNode('nested', [field, query]);
+  };
   var peg$c17 = peg$otherExpectation("fieldName");
   var peg$c18 = function(field, operator, value) {
-      if (value.type === 'cursor') {
-        return {
-          ...value,
-          suggestionTypes: ['conjunction']
-        };
-      }
-      const range = buildNamedArgNode(operator, value);
-      return buildFunctionNode('range', [field, range]);
-    };
+    if (value.type === 'cursor') {
+      return {
+        ...value,
+        suggestionTypes: ['conjunction']
+      };
+    }
+    const range = buildNamedArgNode(operator, value);
+    return buildFunctionNode('range', [field, range]);
+  };
   var peg$c19 = function(field, partial) {
-      if (partial.type === 'cursor') {
-        return {
-          ...partial,
-          fieldName: field.value,
-          suggestionTypes: ['value', 'conjunction']
-        };
-      }
-      return partial(field);
-    };
+    if (partial.type === 'cursor') {
+      return {
+        ...partial,
+        fieldName: field.value,
+        suggestionTypes: ['value', 'conjunction']
+      };
+    }
+    return partial(field);
+  };
   var peg$c20 = function(partial) {
-      if (partial.type === 'cursor') {
-        const fieldName = `${partial.prefix}${partial.suffix}`.trim();
-        return {
-          ...partial,
-          fieldName,
-          suggestionTypes: ['field', 'operator', 'conjunction']
-        };
-      }
-      const field = buildLiteralNode(null);
-      return partial(field);
-    };
+    if (partial.type === 'cursor') {
+      const fieldName = `${partial.prefix}${partial.suffix}`.trim();
+      return {
+        ...partial,
+        fieldName,
+        suggestionTypes: ['field', 'operator', 'conjunction']
+      };
+    }
+    const field = buildLiteralNode(null);
+    return partial(field);
+  };
   var peg$c21 = function(partial, trailing) {
-      if (trailing.type === 'cursor') {
-        return {
-          ...trailing,
-          suggestionTypes: ['conjunction']
-        };
-      }
-      return partial;
-    };
+    if (trailing.type === 'cursor') {
+      return {
+        ...trailing,
+        suggestionTypes: ['conjunction']
+      };
+    }
+    return partial;
+  };
   var peg$c22 = function(head, partial) { return partial; };
   var peg$c23 = function(head, tail) {
-      const nodes = [head, ...tail];
-      const cursor = parseCursor && nodes.find(node => node.type === 'cursor');
-      if (cursor) {
-        return {
-          ...cursor,
-          suggestionTypes: ['value']
-        };
-      }
-      return (field) => buildFunctionNode('or', nodes.map(partial => partial(field)));
-    };
+    const nodes = [head, ...tail];
+    const cursor = parseCursor && nodes.find(node => node.type === 'cursor');
+    if (cursor) {
+      return {
+        ...cursor,
+        suggestionTypes: ['value']
+      };
+    }
+    return (field) => buildFunctionNode('or', nodes.map(partial => partial(field)));
+  };
   var peg$c24 = function(head, tail) {
-      const nodes = [head, ...tail];
-      const cursor = parseCursor && nodes.find(node => node.type === 'cursor');
-      if (cursor) {
-        return {
-          ...cursor,
-          suggestionTypes: ['value']
-        };
-      }
-      return (field) => buildFunctionNode('and', nodes.map(partial => partial(field)));
-    };
+    const nodes = [head, ...tail];
+    const cursor = parseCursor && nodes.find(node => node.type === 'cursor');
+    if (cursor) {
+      return {
+        ...cursor,
+        suggestionTypes: ['value']
+      };
+    }
+    return (field) => buildFunctionNode('and', nodes.map(partial => partial(field)));
+  };
   var peg$c25 = function(partial) {
-      if (partial.type === 'cursor') {
-        return {
-          ...list,
-          suggestionTypes: ['value']
-        };
-      }
-      return (field) => buildFunctionNode('not', [partial(field)]);
-    };
+    if (partial.type === 'cursor') {
+      return {
+        ...list,
+        suggestionTypes: ['value']
+      };
+    }
+    return (field) => buildFunctionNode('not', [partial(field)]);
+  };
   var peg$c26 = peg$otherExpectation("value");
   var peg$c27 = function(value) {
-      if (value.type === 'cursor') return value;
-      const isPhrase = buildLiteralNode(true);
-      return (field) => buildFunctionNode('is', [field, value, isPhrase]);
-    };
+    if (value.type === 'cursor') return value;
+    const isPhrase = buildLiteralNode(true);
+    return (field) => buildFunctionNode('is', [field, value, isPhrase]);
+  };
   var peg$c28 = function(value) {
-      if (value.type === 'cursor') return value;
+    if (value.type === 'cursor') return value;
 
-      if (!allowLeadingWildcards && value.type === 'wildcard' && nodeTypes.wildcard.hasLeadingWildcard(value)) {
-        error('Leading wildcards are disabled. See query:allowLeadingWildcards in Advanced Settings.');
-      }
+    if (!allowLeadingWildcards && value.type === 'wildcard' && nodeTypes.wildcard.hasLeadingWildcard(value)) {
+      error('Leading wildcards are disabled. See query:allowLeadingWildcards in Advanced Settings.');
+    }
 
-      const isPhrase = buildLiteralNode(false);
-      return (field) => buildFunctionNode('is', [field, value, isPhrase]);
-    };
+    const isPhrase = buildLiteralNode(false);
+    return (field) => buildFunctionNode('is', [field, value, isPhrase]);
+  };
   var peg$c29 = peg$otherExpectation("OR");
   var peg$c30 = "or";
   var peg$c31 = peg$literalExpectation("or", true);
@@ -308,19 +306,19 @@ function peg$parse(input, options) {
   var peg$c40 = "\"";
   var peg$c41 = peg$literalExpectation("\"", false);
   var peg$c42 = function(prefix, cursor, suffix) {
-      const { start, end } = location();
-      return {
-        type: 'cursor',
-        start: start.offset,
-        end: end.offset - cursor.length,
-        prefix: prefix.join(''),
-        suffix: suffix.join(''),
-        text: text().replace(cursor, '')
-      };
+    const { start, end } = location();
+    return {
+      type: 'cursor',
+      start: start.offset,
+      end: end.offset - cursor.length,
+      prefix: prefix.join(''),
+      suffix: suffix.join(''),
+      text: text().replace(cursor, '')
     };
+  };
   var peg$c43 = function(chars) {
-      return buildLiteralNode(chars.join(''));
-    };
+    return buildLiteralNode(chars.join(''));
+  };
   var peg$c44 = "\\";
   var peg$c45 = peg$literalExpectation("\\", false);
   var peg$c46 = /^[\\"]/;
@@ -329,13 +327,13 @@ function peg$parse(input, options) {
   var peg$c49 = /^[^"]/;
   var peg$c50 = peg$classExpectation(["\""], true, false);
   var peg$c51 = function(chars) {
-      const sequence = chars.join('').trim();
-      if (sequence === 'null') return buildLiteralNode(null);
-      if (sequence === 'true') return buildLiteralNode(true);
-      if (sequence === 'false') return buildLiteralNode(false);
-      if (chars.includes(wildcardSymbol)) return buildWildcardNode(sequence);
-      return buildLiteralNode(sequence);
-    };
+    const sequence = chars.join('').trim();
+    if (sequence === 'null') return buildLiteralNode(null);
+    if (sequence === 'true') return buildLiteralNode(true);
+    if (sequence === 'false') return buildLiteralNode(false);
+    if (chars.includes(wildcardSymbol)) return buildWildcardNode(sequence);
+    return buildLiteralNode(sequence);
+  };
   var peg$c52 = peg$anyExpectation();
   var peg$c53 = "*";
   var peg$c54 = peg$literalExpectation("*", false);
@@ -356,8 +354,8 @@ function peg$parse(input, options) {
   var peg$c69 = "u";
   var peg$c70 = peg$literalExpectation("u", false);
   var peg$c71 = function(digits) {
-        return String.fromCharCode(parseInt(digits, 16));
-      };
+    return String.fromCharCode(parseInt(digits, 16));
+  };
   var peg$c72 = /^[0-9a-f]/i;
   var peg$c73 = peg$classExpectation([["0", "9"], ["a", "f"]], false, true);
   var peg$c74 = "<=";
@@ -2254,12 +2252,12 @@ function peg$parse(input, options) {
   }
 
 
-    const { parseCursor, cursorSymbol, allowLeadingWildcards = true, helpers: { nodeTypes } } = options;
-    const buildFunctionNode = nodeTypes.function.buildNodeWithArgumentNodes;
-    const buildLiteralNode = nodeTypes.literal.buildNode;
-    const buildWildcardNode = nodeTypes.wildcard.buildNode;
-    const buildNamedArgNode = nodeTypes.namedArg.buildNode;
-    const { wildcardSymbol } = nodeTypes.wildcard;
+  const { parseCursor, cursorSymbol, allowLeadingWildcards = true, helpers: { nodeTypes } } = options;
+  const buildFunctionNode = nodeTypes.function.buildNodeWithArgumentNodes;
+  const buildLiteralNode = nodeTypes.literal.buildNode;
+  const buildWildcardNode = nodeTypes.wildcard.buildNode;
+  const buildNamedArgNode = nodeTypes.namedArg.buildNode;
+  const { wildcardSymbol } = nodeTypes.wildcard;
 
 
   peg$result = peg$startRuleFunction();
