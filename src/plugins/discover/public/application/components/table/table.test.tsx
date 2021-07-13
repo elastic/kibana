@@ -350,9 +350,11 @@ describe('DocViewTable at Discover Doc with Fields API', () => {
           displayName: 'city.raw',
           type: 'string',
           isMapped: true,
-          subType: {
-            multi: {
-              parent: 'city',
+          spec: {
+            subType: {
+              multi: {
+                parent: 'city',
+              },
             },
           },
           shortDotsEnable: false,
