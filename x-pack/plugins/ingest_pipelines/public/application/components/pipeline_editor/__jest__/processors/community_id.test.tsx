@@ -63,11 +63,11 @@ describe('Processor: Community id', () => {
     expect(find('transportField.input').exists()).toBe(true);
 
     form.setInputValue('ianaField.input', 'iana_number');
-    expect(find('transportField.input').props().disabled).toBeTruthy();
+    expect(find('transportField.input').props().disabled).toBe(true);
 
     form.setInputValue('ianaField.input', '');
     form.setInputValue('transportField.input', 'transport');
-    expect(find('ianaField.input').props().disabled).toBeTruthy();
+    expect(find('ianaField.input').props().disabled).toBe(true);
   });
 
   test('allows optional parameters to be set', async () => {

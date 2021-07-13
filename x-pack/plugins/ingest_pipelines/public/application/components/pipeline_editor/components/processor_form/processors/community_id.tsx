@@ -24,19 +24,19 @@ import {
   fieldValidators,
 } from '../../../../../../shared_imports';
 
-const seedMinValue = 0;
-const seedMaxValue = 65535;
+const SEED_MIN_VALUE = 0;
+const SEED_MAX_VALUE = 65535;
 
 const seedValidator = {
   max: fieldValidators.numberSmallerThanField({
-    than: seedMaxValue,
+    than: SEED_MAX_VALUE,
     allowEquality: true,
     message: i18n.translate('xpack.ingestPipelines.pipelineEditor.communityId.seedMaxNumberError', {
       defaultMessage: 'This number must be equals or less than 65535.',
     }),
   }),
   min: fieldValidators.numberGreaterThanField({
-    than: seedMinValue,
+    than: SEED_MIN_VALUE,
     allowEquality: true,
     message: i18n.translate('xpack.ingestPipelines.pipelineEditor.communityId.seedMinNumberError', {
       defaultMessage: 'This number must be equals or greater than 0.',
@@ -232,7 +232,7 @@ export const CommunityId: FunctionComponent = () => {
         data-test-subj="ianaField"
         componentProps={{
           euiFieldProps: {
-            disabled: fields?.transport,
+            disabled: !!fields?.transport,
           },
         }}
       />
@@ -243,7 +243,7 @@ export const CommunityId: FunctionComponent = () => {
         data-test-subj="transportField"
         componentProps={{
           euiFieldProps: {
-            disabled: fields?.iana_number,
+            disabled: !!fields?.iana_number,
           },
         }}
       />
@@ -269,8 +269,8 @@ export const CommunityId: FunctionComponent = () => {
         data-test-subj="seedField"
         componentProps={{
           euiFieldProps: {
-            min: seedMinValue,
-            max: seedMaxValue,
+            min: SEED_MIN_VALUE,
+            max: SEED_MAX_VALUE,
           },
         }}
       />

@@ -153,14 +153,14 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
           // These are the option names we get back from our UI
           const knownOptionNames = [
             ...Object.keys(processorTypeAndOptions.options),
-            
+
             // We manually add fields that we **don't** want to be treated as "unknownOptions"
             'internal_networks',
             'internal_networks_field',
             'transport',
             'iana_number',
           ];
-        
+
           // The processor that we are updating may have options configured the UI does not know about
           const unknownOptions = omit(mode.arg.processor.options, knownOptionNames);
           // In order to keep the options we don't get back from our UI, we merge the known and unknown options
