@@ -120,6 +120,7 @@ export default {
 export const Tabs = () => (
   <EndpointDetailsFlyoutTabs
     show="details"
+    hostname="endpoint-name-01"
     tabs={[
       {
         id: 'overview',

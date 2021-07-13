@@ -65,7 +65,7 @@ export const EndpointDetailsFlyoutTabs = memo(
     show,
     tabs,
   }: {
-    hostname?: string;
+    hostname: string;
     show: EndpointIndexUIQueryParams['show'];
     tabs: EndpointDetailsTabs[];
   }) => {
