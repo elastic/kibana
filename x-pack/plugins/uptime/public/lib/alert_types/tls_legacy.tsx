@@ -20,7 +20,7 @@ export const initTlsLegacyAlertType: AlertTypeInitializer = ({
   id: CLIENT_ALERT_TYPES.TLS_LEGACY,
   iconClass: 'uptimeApp',
   documentationUrl(docLinks) {
-    return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/uptime/${docLinks.DOC_LINK_VERSION}/uptime-alerting.html#_tls_alerts`;
+    return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/observability/${docLinks.DOC_LINK_VERSION}/tls-certificate-alert.html`;
   },
   alertParamsExpression: (params: any) => (
     <TLSAlert core={core} plugins={plugins} params={params} />
