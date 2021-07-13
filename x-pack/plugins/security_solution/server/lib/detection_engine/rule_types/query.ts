@@ -69,7 +69,7 @@ export const createQueryAlertType = (createOptions: {
     async executor(execOptions) {
       let result = createResultObject<QueryAlertState>({});
       const {
-        params: { filters, index, language, query },
+        params: { filters, index, language, outputIndex, query },
         runOpts: {
           buildRuleMessage,
           bulkCreate,
@@ -82,7 +82,6 @@ export const createQueryAlertType = (createOptions: {
         },
         services,
       } = execOptions;
-      // const { alertWithPersistence, savedObjectsClient, scopedClusterClient } = services;
 
       try {
         const esFilter = await getFilter({
@@ -106,8 +105,7 @@ export const createQueryAlertType = (createOptions: {
           eventsTelemetry: undefined, // TODO
           id: rule.id,
           inputIndexPattern: index ?? [],
-          // signalsIndex: ruleParams.outputIndex, // TODO
-          signalsIndex: 'abcd1234',
+          signalsIndex: outputIndex, // FIXME
           filter: esFilter,
           pageSize: searchAfterSize,
           buildRuleMessage,

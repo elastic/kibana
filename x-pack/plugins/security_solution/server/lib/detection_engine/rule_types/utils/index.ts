@@ -8,7 +8,7 @@
 import { AlertTypeState } from '../../../../../../alerting/server';
 import { SecurityAlertTypeReturnValue } from '../types';
 
-export const createResultObject = <TState extends AlertTypeState = {}>(state: TState) => {
+export const createResultObject = <TState extends AlertTypeState>(state: TState) => {
   const result: SecurityAlertTypeReturnValue<TState> = {
     bulkCreateTimes: [],
     createdSignals: [],

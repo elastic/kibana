@@ -55,9 +55,10 @@ import { getNotificationResultsLink } from '../notifications/utils';
 import { createResultObject } from './utils';
 
 type SimpleAlertType<
+  TState extends AlertTypeState,
   TParams extends AlertTypeParams = {},
   TAlertInstanceContext extends AlertInstanceContext = {}
-> = AlertType<TParams, AlertTypeState, AlertInstanceState, TAlertInstanceContext, string, string>;
+> = AlertType<TParams, TState, AlertInstanceState, TAlertInstanceContext, string, string>;
 
 export interface RunOpts<TParams extends RuleParams> {
   buildRuleMessage: BuildRuleMessage;
@@ -75,26 +76,26 @@ export interface RunOpts<TParams extends RuleParams> {
 }
 
 export type SecurityAlertTypeExecutor<
+  TState extends AlertTypeState,
   TServices extends PersistenceServices<TAlertInstanceContext>,
   TParams extends RuleParams,
-  TAlertInstanceContext extends AlertInstanceContext = {},
-  TState extends AlertTypeState = {}
+  TAlertInstanceContext extends AlertInstanceContext = {}
 > = (
-  options: Parameters<SimpleAlertType<TParams, TAlertInstanceContext>['executor']>[0] & {
+  options: Parameters<SimpleAlertType<TState, TParams, TAlertInstanceContext>['executor']>[0] & {
     runOpts: RunOpts<TParams>;
   } & { services: TServices }
 ) => Promise<SecurityAlertTypeReturnValue<TState>>;
 
 type SecurityAlertTypeWithExecutor<
+  TState extends AlertTypeState,
   TServices extends PersistenceServices<TAlertInstanceContext>,
   TParams extends RuleParams,
-  TAlertInstanceContext extends AlertInstanceContext = {},
-  TState extends AlertTypeState = {}
+  TAlertInstanceContext extends AlertInstanceContext = {}
 > = Omit<
   AlertType<TParams, TState, AlertInstanceState, TAlertInstanceContext, string, string>,
   'executor'
 > & {
-  executor: SecurityAlertTypeExecutor<TServices, TParams, TAlertInstanceContext, TState>;
+  executor: SecurityAlertTypeExecutor<TState, TServices, TParams, TAlertInstanceContext>;
 };
 
 type CreateSecurityRuleTypeFactory = (options: {
@@ -106,11 +107,11 @@ type CreateSecurityRuleTypeFactory = (options: {
   TParams extends RuleParams,
   TAlertInstanceContext extends AlertInstanceContext,
   TServices extends PersistenceServices<TAlertInstanceContext>,
-  TState extends AlertTypeState = {}
+  TState extends AlertTypeState
 >(
-  type: SecurityAlertTypeWithExecutor<TServices, TParams, TAlertInstanceContext, TState>
+  type: SecurityAlertTypeWithExecutor<TState, TServices, TParams, TAlertInstanceContext>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-) => AlertTypeWithExecutor<TParams, TAlertInstanceContext, any, TState>;
+) => AlertTypeWithExecutor<TState, TParams, TAlertInstanceContext, any>;
 
 export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
   lists,
@@ -165,8 +166,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
       let wroteWarningStatus = false;
       await ruleStatusService.goingToRun();
 
-      // TODO: alert state?
-      let result = createResultObject({});
+      let result = createResultObject(state);
 
       // check if rule has permissions to access given index pattern
       // move this collection of lines into a function in utils

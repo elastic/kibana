@@ -16,31 +16,32 @@ import { AlertType } from '../../alerting/server';
 import { AlertsClient } from './alert_data_client/alerts_client';
 
 type SimpleAlertType<
+  TState extends AlertTypeState,
   TParams extends AlertTypeParams = {},
   TAlertInstanceContext extends AlertInstanceContext = {}
-> = AlertType<TParams, AlertTypeState, AlertInstanceState, TAlertInstanceContext, string, string>;
+> = AlertType<TParams, TState, AlertInstanceState, TAlertInstanceContext, string, string>;
 
 export type AlertTypeExecutor<
+  TState extends AlertTypeState,
   TParams extends AlertTypeParams = {},
   TAlertInstanceContext extends AlertInstanceContext = {},
-  TServices extends Record<string, any> = {},
-  TState extends AlertTypeState = {}
+  TServices extends Record<string, any> = {}
 > = (
-  options: Parameters<SimpleAlertType<TParams, TAlertInstanceContext>['executor']>[0] & {
+  options: Parameters<SimpleAlertType<TState, TParams, TAlertInstanceContext>['executor']>[0] & {
     services: TServices;
   }
 ) => Promise<TState>;
 
 export type AlertTypeWithExecutor<
+  TState extends AlertTypeState,
   TParams extends AlertTypeParams = {},
   TAlertInstanceContext extends AlertInstanceContext = {},
-  TServices extends Record<string, any> = {},
-  TState extends AlertTypeState = {}
+  TServices extends Record<string, any> = {}
 > = Omit<
   AlertType<TParams, TState, AlertInstanceState, TAlertInstanceContext, string, string>,
   'executor'
 > & {
-  executor: AlertTypeExecutor<TParams, TAlertInstanceContext, TServices>;
+  executor: AlertTypeExecutor<TState, TParams, TAlertInstanceContext, TServices>;
 };
 
 /**

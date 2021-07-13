@@ -31,9 +31,10 @@ export type CreatePersistenceRuleTypeFactory = (options: {
   ruleDataClient: RuleDataClient;
   logger: Logger;
 }) => <
+  TState extends AlertTypeState,
   TParams extends AlertTypeParams,
   TServices extends PersistenceServices<TAlertInstanceContext>,
   TAlertInstanceContext extends AlertInstanceContext = {}
 >(
-  type: AlertTypeWithExecutor<TParams, TAlertInstanceContext, TServices>
-) => AlertTypeWithExecutor<TParams, TAlertInstanceContext, TServices>;
+  type: AlertTypeWithExecutor<TState, TParams, TAlertInstanceContext, TServices>
+) => AlertTypeWithExecutor<TState, TParams, TAlertInstanceContext, TServices>;

@@ -8,21 +8,22 @@
 import moment from 'moment';
 import v4 from 'uuid/v4';
 
+import { SearchHit } from '@elastic/elasticsearch/api/types';
 import { Logger } from '@kbn/logging';
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 
-import { AlertServices } from '../../../../../alerting/server';
+import { AlertServices, AlertTypeState } from '../../../../../alerting/server';
 import { PersistenceServices, RuleDataClient } from '../../../../../rule_registry/server';
 import { THRESHOLD_ALERT_TYPE_ID } from '../../../../common/constants';
 import { SetupPlugins } from '../../../../target/types/server/plugin';
 import { thresholdRuleParams, ThresholdRuleParams } from '../schemas/rule_schemas';
-import { SignalSearchResponse, ThresholdSignalHistory } from '../signals/types';
+import { SignalSearchResponse, SignalSource } from '../signals/types';
 import {
   findThresholdSignals,
   getThresholdBucketFilters,
-  getThresholdSignalHistory,
   transformThresholdResultsToEcs,
 } from '../signals/threshold';
+import { buildThresholdSignalHistory } from './build_threshold_signal_history';
 import { getFilter } from '../signals/get_filter';
 import { BuildRuleMessage } from '../signals/rule_messages';
 import { createSecurityRuleTypeFactory } from './create_security_rule_type_factory';
@@ -30,12 +31,19 @@ import { createResultObject } from './utils';
 import { ConfigType } from '../../../config';
 import { SearchTypes } from '../../../../common/detection_engine/types';
 
-interface ThresholdAlertState extends AlertTypeState {
+interface ThresholdSignalHistoryRecord {
   terms: Array<{
     field?: string;
     value: SearchTypes;
   }>;
-  lastSignalTimestamp: number | null;
+  lastSignalTimestamp: number;
+}
+
+interface ThresholdSignalHistory {
+  [hash: string]: ThresholdSignalHistoryRecord;
+}
+interface ThresholdAlertState extends AlertTypeState {
+  signalHistory: ThresholdSignalHistory;
 }
 interface BulkCreateThresholdSignalParams {
   results: SignalSearchResponse;
@@ -49,8 +57,9 @@ interface BulkCreateThresholdSignalParams {
   buildRuleMessage: BuildRuleMessage;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const formatThresholdSignals = (params: BulkCreateThresholdSignalParams): any[] => {
+const formatThresholdSignals = (
+  params: BulkCreateThresholdSignalParams
+): Array<SearchHit<SignalSource>> => {
   const { index, threshold } = params.ruleParams;
   const thresholdResults = params.results;
   const results = transformThresholdResultsToEcs(
@@ -138,28 +147,13 @@ export const createThresholdAlertType = (createOptions: {
         state,
       } = execOptions;
       const result = createResultObject<ThresholdAlertState>(state);
-      const { index, query, threshold, timestampOverride } = params;
+      const { index, outputIndex, query, threshold, timestampOverride } = params;
       const fromDate = moment(startedAt).subtract(moment.duration(5, 'm')); // hardcoded 5-minute rule interval
       const from = fromDate.toISOString();
       const to = startedAt.toISOString();
 
-      // TODO: how to get the output index?
-      const outputIndex = ['.kibana-madi-8-alerts-security-solution-8.0.0-000001'];
-
-      const {
-        thresholdSignalHistory,
-        searchErrors: previousSearchErrors,
-      } = await getThresholdSignalHistory({
-        indexPattern: outputIndex,
-        from,
-        to,
-        services: (services as unknown) as AlertServices,
-        logger,
-        ruleId: alertId,
-        bucketByFields: threshold.field,
-        timestampOverride,
-        buildRuleMessage,
-      });
+      const { signalHistory: thresholdSignalHistory } = state;
+      // TODO: clean up any signal history that has fallen outside the window
 
       const bucketFilters = await getThresholdBucketFilters({
         thresholdSignalHistory,
@@ -211,13 +205,23 @@ export const createThresholdAlertType = (createOptions: {
         buildRuleMessage,
       });
 
-      const errors = searchErrors.concat(previousSearchErrors);
-      if (errors.length === 0) {
-        services.alertWithPersistence(alerts).forEach((alert) => {
-          alert.scheduleActions('default', { server: 'server-test' });
-        });
+      // TODO: build signal history
+      result.state = {
+        ...result.state,
+        ...buildThresholdSignalHistory({
+          alerts,
+          bucketByFields: threshold.field,
+        }),
+      };
+
+      if (searchErrors.length === 0) {
+        services
+          .alertWithPersistence((alerts as unknown) as Array<Record<string, unknown>>)
+          .forEach((alert) => {
+            alert.scheduleActions('default', { server: 'server-test' });
+          });
       } else {
-        throw new Error(errors.join('\n'));
+        throw new Error(searchErrors.join('\n'));
       }
 
       return result;

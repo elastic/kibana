@@ -7,7 +7,7 @@
 
 import { AlertTypeState } from '../../../../../alerting/common';
 
-export interface SecurityAlertTypeReturnValue<TState extends AlertTypeState = {}> {
+export interface SecurityAlertTypeReturnValue<TState extends AlertTypeState> {
   bulkCreateTimes: string[];
   createdSignals: unknown[];
   errors: string[];
