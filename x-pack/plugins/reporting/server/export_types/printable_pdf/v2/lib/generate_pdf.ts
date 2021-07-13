@@ -8,6 +8,7 @@
 import { groupBy } from 'lodash';
 import * as Rx from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
+import { getRedirectAppPathHome } from '../../../../../common/constants';
 import { Locator } from '../../../../../common/types';
 import { ReportingCore } from '../../../../';
 import { LevelLogger } from '../../../../lib';
@@ -16,8 +17,6 @@ import { ScreenshotResults } from '../../../../lib/screenshots';
 import { ConditionalHeaders } from '../../../common';
 import { PdfMaker } from './pdf';
 import { getTracker } from './tracker';
-
-// const REDIRECT_APP_URL = 'temp';
 
 const getTimeRange = (urlScreenshots: ScreenshotResults[]) => {
   const grouped = groupBy(urlScreenshots.map((u) => u.timeRange));
@@ -36,6 +35,7 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
 
   return function generatePdfObservable(
     logger: LevelLogger,
+    jobId: string,
     title: string,
     locators: Locator[],
     browserTimezone: string | undefined,
@@ -53,9 +53,9 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
     tracker.startScreenshots();
     const screenshots$ = getScreenshots({
       logger,
-      // urls: locators.map<[url: string, locator: Locator]>((locator) => [REDIRECT_APP_URL, locator]),
-      // TODO: Use the above line once we have a redirect app and URL service to work with locators
-      urls: locators.map<[url: string, locator: Locator]>((locator) => [locator.id, locator]),
+      urls: locators.map((_, idx) =>
+        getRedirectAppPathHome({ reportSavedObjectId: jobId, locatorIdx: String(idx) })
+      ),
       conditionalHeaders,
       layout,
       browserTimezone,

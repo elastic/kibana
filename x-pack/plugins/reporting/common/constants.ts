@@ -74,8 +74,6 @@ export const PNG_JOB_TYPE_V2 = 'PNGV2';
 
 export const CSV_SEARCHSOURCE_IMMEDIATE_TYPE = 'csv_searchsource_immediate';
 
-export const REPORT_LOCATOR_STORE_KEY = '__reportLocatorStore__';
-
 // This is deprecated because it lacks support for runtime fields
 // but the extension points are still needed for pre-existing scripted automation, until 8.0
 export const CSV_REPORT_TYPE_DEPRECATED = 'CSV';
@@ -109,6 +107,19 @@ export const API_GENERATE_IMMEDIATE = `${API_BASE_URL_V1}/generate/immediate/csv
 
 // Management UI route
 export const REPORTING_MANAGEMENT_HOME = '/app/management/insightsAndAlerting/reporting';
+
+export const REDIRECT_APP_PATH_HOME =
+  '/app/management/insightsAndAlerting/reporting/r/{reportSavedObjectId}/{locatorIdx}';
+
+export const getRedirectAppPathHome = ({
+  reportSavedObjectId,
+  locatorIdx = '0',
+}: {
+  locatorIdx?: string;
+  reportSavedObjectId: string;
+}) => {
+  return `/app/management/insightsAndAlerting/reporting/r/${reportSavedObjectId}/${locatorIdx}`;
+};
 
 // Statuses
 export enum JOB_STATUSES {

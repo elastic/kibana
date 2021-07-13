@@ -8,7 +8,6 @@
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, concatMap, first, mergeMap, take, takeUntil, toArray } from 'rxjs/operators';
-import { Locator } from '../../../common/types';
 import { HeadlessChromiumDriverFactory } from '../../browsers';
 import { CaptureConfig } from '../../types';
 import {
@@ -43,7 +42,7 @@ export function screenshotsObservableFactory(
 ): ScreenshotsObservableFn {
   return function screenshotsObservable({
     logger,
-    urls: urlsOrTuples,
+    urls,
     conditionalHeaders,
     layout,
     browserTimezone,
@@ -61,18 +60,10 @@ export function screenshotsObservableFactory(
         apmCreatePage?.end();
         exit$.subscribe({ error: () => apmTrans?.end() });
 
-        return Rx.from(urlsOrTuples).pipe(
-          concatMap((urlOrTuple, index) => {
+        return Rx.from(urls).pipe(
+          concatMap((url, index) => {
             const setup$: Rx.Observable<ScreenSetupData> = Rx.of(1).pipe(
               mergeMap(() => {
-                let url: string;
-                let locator: undefined | Locator;
-                if (Array.isArray(urlOrTuple)) {
-                  [url, locator] = urlOrTuple;
-                } else {
-                  url = urlOrTuple;
-                }
-
                 // If we're moving to another page in the app, we'll want to wait for the app to tell us
                 // it's loaded the next page.
                 const p = index + 1;
@@ -85,8 +76,7 @@ export function screenshotsObservableFactory(
                   url,
                   pageLoadSelector,
                   conditionalHeaders,
-                  logger,
-                  locator
+                  logger
                 );
               }),
               mergeMap(() => getNumberOfItems(captureConfig, driver, layout, logger)),
@@ -150,7 +140,7 @@ export function screenshotsObservableFactory(
               )
             );
           }),
-          take(urlsOrTuples.length),
+          take(urls.length),
           toArray()
         );
       }),

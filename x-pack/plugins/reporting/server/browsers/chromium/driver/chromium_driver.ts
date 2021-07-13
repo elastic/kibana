@@ -13,9 +13,7 @@ import { parse as parseUrl } from 'url';
 import { getDisallowedOutgoingUrlError } from '../';
 import { ReportingCore } from '../../..';
 import { KBN_SCREENSHOT_MODE_HEADER } from '../../../../../../../src/plugins/screenshot_mode/server';
-import { REPORT_LOCATOR_STORE_KEY } from '../../../../common/constants';
 import { ConditionalHeaders, ConditionalHeadersConditions } from '../../../export_types/common';
-import { Locator } from '../../../../common/types';
 import { LevelLogger } from '../../../lib';
 import { ViewZoomWidthHeight } from '../../../lib/layouts/layout';
 import { ElementPosition } from '../../../lib/screenshots';
@@ -96,12 +94,10 @@ export class HeadlessChromiumDriver {
       conditionalHeaders,
       waitForSelector: pageLoadSelector,
       timeout,
-      locator,
     }: {
       conditionalHeaders: ConditionalHeaders;
       waitForSelector: string;
       timeout: number;
-      locator?: Locator;
     },
     logger: LevelLogger
   ): Promise<void> {
@@ -115,25 +111,6 @@ export class HeadlessChromiumDriver {
      * scripts have run on the browser page.
      */
     await this.page.evaluateOnNewDocument(this.core.getEnableScreenshotMode());
-
-    if (locator) {
-      /**
-       * Create the "locator" store in the page's context. This value is provided by the client and
-       * should be considered fully opaque to us.
-       */
-      await this.page.evaluateOnNewDocument(
-        (storeName: string, value: object) => {
-          Object.defineProperty(window, storeName, {
-            enumerable: true,
-            writable: false,
-            configurable: false,
-            value,
-          });
-        },
-        REPORT_LOCATOR_STORE_KEY,
-        locator
-      );
-    }
 
     await this.page.setRequestInterception(true);
 

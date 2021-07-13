@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { SerializableState } from '../../../../src/plugins/kibana_utils/common';
+
 export interface PageSizeParams {
   pageMarginTop: number;
   pageMarginBottom: number;
@@ -167,10 +169,9 @@ export type DownloadReportFn = (jobId: JobId) => DownloadLink;
 type ManagementLink = string;
 export type ManagementLinkFn = () => ManagementLink;
 
-// TODO: review once real locator types are available
-export interface Locator<P extends object = object> {
+export interface Locator<P extends SerializableState = SerializableState> {
   id: string;
-  version?: string;
+  version: string;
   params: P;
 }
 

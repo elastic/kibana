@@ -17,6 +17,7 @@ import {
   omitBlockedHeaders,
   getFullUrls,
 } from '../../common';
+import { getRedirectAppPathHome } from '../../../../common/constants';
 import { generatePdfObservableFactory } from './lib/generate_pdf';
 import { getCustomLogo } from '../lib/get_custom_logo';
 import { TaskPayloadPDFV2 } from './types';
@@ -46,18 +47,12 @@ export const runTaskFnFactory: RunTaskFnFactory<
         const { browserTimezone, layout, title, locators } = job;
         if (apmGetAssets) apmGetAssets.end();
 
-        // TODO: HACK, temporary hack before we have URL locators and an app client side to handle redirects
-        const urls = getFullUrls(config, {
-          ...job,
-          relativeUrls: locators.map((l) => l.id),
-        });
-
         apmGeneratePdf = apmTrans?.startSpan('generate_pdf_pipeline', 'execute');
         return generatePdfObservable(
           jobLogger,
+          jobId,
           title,
-          // TODO: HACK, temporary hack before we have URL locators and an app client side to handle redirects
-          urls.map((url, idx) => ({ ...locators[idx], id: url })),
+          locators,
           browserTimezone,
           conditionalHeaders,
           layout,

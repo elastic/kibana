@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { SerializableState } from '../../../../../../../src/plugins/kibana_utils/common';
 import { Locator } from '../../../../common/types';
 import { LayoutParams } from '../../../lib/layouts';
 import { BaseParams, BasePayload } from '../../../types';
 
-interface BaseParamsPDFV2<P extends object = object> {
+interface BaseParamsPDFV2<P extends SerializableState = SerializableState> {
   layout: LayoutParams;
   forceNow?: string;
   /**
