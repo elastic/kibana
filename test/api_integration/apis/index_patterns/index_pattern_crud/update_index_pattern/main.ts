@@ -284,5 +284,53 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response3.body.index_pattern.intervalName).to.be('intervalName2');
       expect(response3.body.index_pattern.typeMeta.baz).to.be('qux');
     });
+
+    it('can update runtime fields', async () => {
+      const title = `basic_index*`;
+      const response1 = await supertest.post('/api/index_patterns/index_pattern').send({
+        override: true,
+        index_pattern: {
+          title,
+          runtimeFieldMap: {
+            runtimeFoo: {
+              type: 'keyword',
+              script: {
+                source: 'emit(doc["foo"].value)',
+              },
+            },
+          },
+        },
+      });
+
+      expect(response1.status).to.be(200);
+      expect(response1.body.index_pattern.title).to.be(title);
+
+      expect(response1.body.index_pattern.runtimeFieldMap.runtimeFoo.type).to.be('keyword');
+      expect(response1.body.index_pattern.runtimeFieldMap.runtimeFoo.script.source).to.be(
+        'emit(doc["foo"].value)'
+      );
+
+      const id = response1.body.index_pattern.id;
+      const response2 = await supertest.post('/api/index_patterns/index_pattern/' + id).send({
+        index_pattern: {
+          runtimeFieldMap: {
+            runtimeBar: {
+              type: 'keyword',
+              script: {
+                source: 'emit(doc["foo"].value)',
+              },
+            },
+          },
+        },
+      });
+
+      expect(response2.body.index_pattern.runtimeFieldMap.runtimeBar.type).to.be('keyword');
+      expect(response2.body.index_pattern.runtimeFieldMap.runtimeFoo).to.be(undefined);
+
+      const response3 = await supertest.get('/api/index_patterns/index_pattern/' + id);
+
+      expect(response3.body.index_pattern.runtimeFieldMap.runtimeBar.type).to.be('keyword');
+      expect(response3.body.index_pattern.runtimeFieldMap.runtimeFoo).to.be(undefined);
+    });
   });
 }

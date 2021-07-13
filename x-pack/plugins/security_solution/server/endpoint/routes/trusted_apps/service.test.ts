@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExceptionListItemSchema } from '../../../../../lists/common/schemas/response';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { listMock } from '../../../../../lists/server/mocks';
 import { ExceptionListClient } from '../../../../../lists/server';
 import {
@@ -25,7 +25,7 @@ import {
 import { TrustedAppNotFoundError, TrustedAppVersionConflictError } from './errors';
 import { toUpdateTrustedApp } from '../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
 import { updateExceptionListItemImplementationMock } from './test_utils';
-import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common';
+import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
 
 const exceptionsListClient = listMock.getExceptionListClient() as jest.Mocked<ExceptionListClient>;
 

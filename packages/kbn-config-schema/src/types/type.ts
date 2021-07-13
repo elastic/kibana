@@ -6,14 +6,33 @@
  * Side Public License, v 1.
  */
 
+import type { AnySchema, CustomValidator, ErrorReport } from 'joi';
 import { SchemaTypeError, ValidationError } from '../errors';
-import { AnySchema, internals, ValidationErrorItem } from '../internals';
 import { Reference } from '../references';
 
 export interface TypeOptions<T> {
   defaultValue?: T | Reference<T> | (() => T);
   validate?: (value: T) => string | void;
 }
+
+export const convertValidationFunction = <T = unknown>(
+  validate: (value: T) => string | void
+): CustomValidator<T> => {
+  return (value, { error }) => {
+    let validationResultMessage;
+    try {
+      validationResultMessage = validate(value);
+    } catch (e) {
+      validationResultMessage = e.message || e;
+    }
+
+    if (typeof validationResultMessage === 'string') {
+      return error('any.custom', { message: validationResultMessage });
+    }
+
+    return value;
+  };
+};
 
 export abstract class Type<V> {
   // This is just to enable the `TypeOf` helper, and because TypeScript would
@@ -36,24 +55,23 @@ export abstract class Type<V> {
 
       // If default value is a function, then we must provide description for it.
       if (typeof options.defaultValue === 'function') {
-        schema = schema.default(options.defaultValue, 'Type default value');
+        schema = schema.default(options.defaultValue);
       } else {
         schema = schema.default(
           Reference.isReference(options.defaultValue)
             ? options.defaultValue.getSchema()
-            : options.defaultValue
+            : (options.defaultValue as any)
         );
       }
     }
 
     if (options.validate) {
-      schema = schema.custom(options.validate);
+      schema = schema.custom(convertValidationFunction(options.validate));
     }
 
     // Attach generic error handler only if it hasn't been attached yet since
     // only the last error handler is counted.
-    const schemaFlags = (schema.describe().flags as Record<string, any>) || {};
-    if (schemaFlags.error === undefined) {
+    if (schema.$_getFlag('error') === undefined) {
       schema = schema.error(([error]) => this.onError(error));
     }
 
@@ -61,7 +79,7 @@ export abstract class Type<V> {
   }
 
   public validate(value: any, context: Record<string, any> = {}, namespace?: string): V {
-    const { value: validatedValue, error } = internals.validate(value, this.internalSchema, {
+    const { value: validatedValue, error } = this.internalSchema.validate(value, {
       context,
       presence: 'required',
     });
@@ -88,14 +106,19 @@ export abstract class Type<V> {
     return undefined;
   }
 
-  private onError(error: SchemaTypeError | ValidationErrorItem): SchemaTypeError {
+  private onError(error: SchemaTypeError | ErrorReport): SchemaTypeError {
     if (error instanceof SchemaTypeError) {
       return error;
     }
 
-    const { context = {}, type, path, message } = error;
+    const { local, code, path, value } = error;
+    const convertedPath = path.map((entry) => entry.toString());
+    const context: Record<string, any> = {
+      ...local,
+      value,
+    };
 
-    const errorHandleResult = this.handleError(type, context, path);
+    const errorHandleResult = this.handleError(code, context, convertedPath);
     if (errorHandleResult instanceof SchemaTypeError) {
       return errorHandleResult;
     }
@@ -103,15 +126,18 @@ export abstract class Type<V> {
     // If error handler just defines error message, then wrap it into proper
     // `SchemaTypeError` instance.
     if (typeof errorHandleResult === 'string') {
-      return new SchemaTypeError(errorHandleResult, path);
+      return new SchemaTypeError(errorHandleResult, convertedPath);
     }
 
     // If error is produced by the custom validator, just extract source message
     // from context and wrap it into `SchemaTypeError` instance.
-    if (type === 'any.custom') {
-      return new SchemaTypeError(context.message, path);
+    if (code === 'any.custom' && context.message) {
+      return new SchemaTypeError(context.message, convertedPath);
     }
 
-    return new SchemaTypeError(message || type, path);
+    // `message` is only initialized once `toString` has been called (...)
+    // see https://github.com/sideway/joi/blob/master/lib/errors.js
+    const message = error.toString();
+    return new SchemaTypeError(message || code, convertedPath);
   }
 }

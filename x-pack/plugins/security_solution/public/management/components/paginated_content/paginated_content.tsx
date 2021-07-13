@@ -16,6 +16,7 @@ import React, {
   useCallback,
   useMemo,
   useState,
+  useEffect,
 } from 'react';
 import {
   CommonProps,
@@ -152,6 +153,12 @@ export const PaginatedContent = memo(
       [pagination?.pageSize, pagination?.totalItemCount]
     );
 
+    useEffect(() => {
+      if (pageCount > 0 && pageCount < (pagination?.pageIndex || 0) + 1) {
+        onChange({ pageIndex: pageCount - 1, pageSize: pagination?.pageSize || 0 });
+      }
+    }, [pageCount, onChange, pagination]);
+
     const handleItemsPerPageChange: EuiTablePaginationProps['onChangeItemsPerPage'] = useCallback(
       (pageSize) => {
         onChange({ pageSize, pageIndex: pagination?.pageIndex || 0 });
@@ -203,8 +210,7 @@ export const PaginatedContent = memo(
           return <Item {...itemComponentProps(item)} key={key} />;
         });
       }
-
-      return noItemsMessage || <DefaultNoItemsFound />;
+      if (!loading) return noItemsMessage || <DefaultNoItemsFound />;
     }, [
       ItemComponent,
       error,
@@ -214,6 +220,7 @@ export const PaginatedContent = memo(
       itemKeys,
       items,
       noItemsMessage,
+      loading,
     ]);
 
     return (

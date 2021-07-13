@@ -9,7 +9,6 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { Query, QueryStringInput } from '../../../../../../../src/plugins/data/public';
-import { Toolbar } from '../../../components/eui';
 import { LogCustomizationMenu } from '../../../components/logging/log_customization_menu';
 import { LogDatepicker } from '../../../components/logging/log_datepicker';
 import { LogHighlightsMenu } from '../../../components/logging/log_highlights_menu';
@@ -54,8 +53,8 @@ export const LogsToolbar = () => {
   } = useContext(LogPositionState.Context);
 
   return (
-    <Toolbar>
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
+    <div>
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="l">
         <EuiFlexItem>
           <QueryStringInput
             disableLanguageSwitcher={true}
@@ -110,6 +109,6 @@ export const LogsToolbar = () => {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </Toolbar>
+    </div>
   );
 };

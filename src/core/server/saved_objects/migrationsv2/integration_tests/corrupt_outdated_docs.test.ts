@@ -15,6 +15,7 @@ import { Root } from '../../../root';
 const logFilePath = Path.join(__dirname, 'migration_test_corrupt_docs_kibana.log');
 
 const asyncUnlink = Util.promisify(Fs.unlink);
+
 async function removeLogFile() {
   // ignore errors if it doesn't exist
   await asyncUnlink(logFilePath).catch(() => void 0);
@@ -55,7 +56,7 @@ describe('migration v2 with corrupt saved object documents', () => {
           // },
           // original corrupt SO example:
           // {
-          //  id: 'bar:123'
+          //  id: 'bar:123' // '123' etc
           //  type: 'foo',
           //  foo: {},
           //  migrationVersion: {
@@ -107,16 +108,41 @@ describe('migration v2 with corrupt saved object documents', () => {
     try {
       await root.start();
     } catch (err) {
-      const corruptFooSOs = /foo:/g;
-      const corruptBarSOs = /bar:/g;
-      const corruptBazSOs = /baz:/g;
+      const errorMessage = err.message;
       expect(
-        [
-          ...err.message.matchAll(corruptFooSOs),
-          ...err.message.matchAll(corruptBarSOs),
-          ...err.message.matchAll(corruptBazSOs),
-        ].length
-      ).toEqual(16);
+        errorMessage.startsWith(
+          'Unable to complete saved object migrations for the [.kibana] index: Migrations failed. Reason: 19 corrupt saved object documents were found: '
+        )
+      ).toBeTruthy();
+      expect(
+        errorMessage.endsWith(
+          'To allow migrations to proceed, please delete or fix these documents.'
+        )
+      ).toBeTruthy();
+      const expectedCorruptDocIds = [
+        '"foo:my_name"',
+        '"123"',
+        '"456"',
+        '"789"',
+        '"foo:other_name"',
+        '"bar:123"',
+        '"baz:123"',
+        '"bar:345"',
+        '"bar:890"',
+        '"baz:456"',
+        '"baz:789"',
+        '"bar:other_name"',
+        '"baz:other_name"',
+        '"bar:my_name"',
+        '"baz:my_name"',
+        '"foo:123"',
+        '"foo:456"',
+        '"foo:789"',
+        '"foo:other"',
+      ];
+      for (const corruptDocId of expectedCorruptDocIds) {
+        expect(errorMessage.includes(corruptDocId)).toBeTruthy();
+      }
     }
   });
 });

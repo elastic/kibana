@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { EuiFieldText, EuiFormRow, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -20,8 +20,11 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<
   const { docLinks } = useKibana().services;
   const { apiUrl } = action.config;
   const { routingKey } = action.secrets;
+  const isRoutingKeyInvalid: boolean =
+    routingKey !== undefined && errors.routingKey !== undefined && errors.routingKey.length > 0;
+
   return (
-    <Fragment>
+    <>
       <EuiFormRow
         id="apiUrl"
         fullWidth
@@ -60,7 +63,7 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<
           </EuiLink>
         }
         error={errors.routingKey}
-        isInvalid={errors.routingKey.length > 0 && routingKey !== undefined}
+        isInvalid={isRoutingKeyInvalid}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.routingKeyTextFieldLabel',
           {
@@ -68,7 +71,7 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<
           }
         )}
       >
-        <Fragment>
+        <>
           {getEncryptedFieldNotifyLabel(
             !action.id,
             1,
@@ -80,7 +83,7 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<
           )}
           <EuiFieldText
             fullWidth
-            isInvalid={errors.routingKey.length > 0 && routingKey !== undefined}
+            isInvalid={isRoutingKeyInvalid}
             name="routingKey"
             readOnly={readOnly}
             value={routingKey || ''}
@@ -94,9 +97,9 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<
               }
             }}
           />
-        </Fragment>
+        </>
       </EuiFormRow>
-    </Fragment>
+    </>
   );
 };
 

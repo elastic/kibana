@@ -8,7 +8,7 @@
 import { configSchema } from './config';
 
 describe('config validation', () => {
-  test('alerts defaults', () => {
+  test('alerting defaults', () => {
     const config: Record<string, unknown> = {};
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {

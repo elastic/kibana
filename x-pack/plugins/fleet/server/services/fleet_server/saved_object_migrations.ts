@@ -28,6 +28,7 @@ import { invalidateAPIKeys } from '../api_keys';
 import { settingsService } from '..';
 
 export async function runFleetServerMigration() {
+  await settingsService.settingsSetup(getInternalUserSOClient());
   await Promise.all([migrateEnrollmentApiKeys(), migrateAgentPolicies(), migrateAgents()]);
 }
 

@@ -59,6 +59,61 @@ OptimizerConfig {
   ],
   "cache": true,
   "dist": false,
+  "filteredBundles": Array [
+    Bundle {
+      "banner": undefined,
+      "cache": BundleCache {
+        "path": <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/target/public/.kbn-optimizer-cache,
+        "state": undefined,
+      },
+      "contextDir": <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar,
+      "id": "bar",
+      "manifestPath": <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/kibana.json,
+      "outputDir": <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/target/public,
+      "pageLoadAssetSizeLimit": undefined,
+      "publicDirNames": Array [
+        "public",
+      ],
+      "sourceRoot": <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo,
+      "type": "plugin",
+    },
+    Bundle {
+      "banner": undefined,
+      "cache": BundleCache {
+        "path": <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/target/public/.kbn-optimizer-cache,
+        "state": undefined,
+      },
+      "contextDir": <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo,
+      "id": "foo",
+      "manifestPath": <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/kibana.json,
+      "outputDir": <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/target/public,
+      "pageLoadAssetSizeLimit": undefined,
+      "publicDirNames": Array [
+        "public",
+      ],
+      "sourceRoot": <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo,
+      "type": "plugin",
+    },
+    Bundle {
+      "banner": "/*! Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one or more contributor license agreements. 
+ * Licensed under the Elastic License 2.0; you may not use this file except in compliance with the Elastic License 2.0. */
+",
+      "cache": BundleCache {
+        "path": <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/x-pack/baz/target/public/.kbn-optimizer-cache,
+        "state": undefined,
+      },
+      "contextDir": <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/x-pack/baz,
+      "id": "baz",
+      "manifestPath": <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/x-pack/baz/kibana.json,
+      "outputDir": <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/x-pack/baz/target/public,
+      "pageLoadAssetSizeLimit": undefined,
+      "publicDirNames": Array [
+        "public",
+      ],
+      "sourceRoot": <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo,
+      "type": "plugin",
+    },
+  ],
   "inspectWorkers": false,
   "maxWorkerCount": 1,
   "plugins": Array [
@@ -123,7 +178,7 @@ exports[`prepares assets for distribution: metrics.json 1`] = `
     \\"group\\": \\"page load bundle size\\",
     \\"id\\": \\"foo\\",
     \\"value\\": 4627,
-    \\"limitConfigPath\\": \\"packages/kbn-optimizer/limits.yml\\"
+    \\"limitConfigPath\\": \\"node_modules/@kbn/optimizer/limits.yml\\"
   },
   {
     \\"group\\": \\"async chunks size\\",

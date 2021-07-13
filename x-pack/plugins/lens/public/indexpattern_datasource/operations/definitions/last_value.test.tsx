@@ -29,6 +29,11 @@ const defaultProps = {
     ...createMockedIndexPattern(),
     hasRestrictions: false,
   } as IndexPattern,
+  operationDefinitionMap: {},
+  isFullscreen: false,
+  toggleFullscreen: jest.fn(),
+  setIsCloseable: jest.fn(),
+  layerId: '1',
 };
 
 describe('last_value', () => {
@@ -74,7 +79,8 @@ describe('last_value', () => {
         'col1',
         {} as IndexPattern,
         layer,
-        uiSettingsMock
+        uiSettingsMock,
+        []
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({

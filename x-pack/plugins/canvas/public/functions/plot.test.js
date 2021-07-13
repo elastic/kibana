@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { functionWrapper } from '../../test_helpers/function_wrapper';
+import { functionWrapper } from '../../../../../src/plugins/presentation_util/public';
 import { testPlot } from '../../canvas_plugin_src/functions/common/__fixtures__/test_pointseries';
 import {
   fontStyle,
@@ -21,7 +21,7 @@ describe('plot', () => {
   const fn = functionWrapper(
     plotFunctionFactory({
       get: () => ({
-        getColors: () => ['red', 'black'],
+        getCategoricalColors: () => ['red', 'black'],
       }),
     })
   );
@@ -121,7 +121,7 @@ describe('plot', () => {
         const mockedFn = functionWrapper(
           plotFunctionFactory({
             get: () => ({
-              getColors: mockedColors,
+              getCategoricalColors: mockedColors,
             }),
           })
         );

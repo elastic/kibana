@@ -48,7 +48,7 @@ export function getLogstashForClusters(req, lsIndexPattern, clusters) {
     const params = {
       index: lsIndexPattern,
       size: 0,
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       body: {
         query: createQuery({
           types: ['stats', 'logstash_stats'],

@@ -16,7 +16,7 @@ export interface FleetConfigType {
   agents: {
     enabled: boolean;
     elasticsearch: {
-      host?: string;
+      hosts?: string[];
       ca_sha256?: string;
     };
     fleet_server?: {
@@ -25,6 +25,7 @@ export interface FleetConfigType {
   };
   agentPolicies?: PreconfiguredAgentPolicy[];
   packages?: PreconfiguredPackage[];
+  agentIdVerificationEnabled?: boolean;
 }
 
 // Calling Object.entries(PackagesGroupedByStatus) gave `status: string`

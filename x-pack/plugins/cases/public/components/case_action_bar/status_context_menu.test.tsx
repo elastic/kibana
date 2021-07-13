@@ -26,6 +26,18 @@ describe('SyncAlertsSwitch', () => {
     expect(wrapper.find(`[data-test-subj="case-view-status-dropdown"]`).exists()).toBeTruthy();
   });
 
+  it('it renders when disabled', async () => {
+    const wrapper = mount(
+      <StatusContextMenu
+        disabled={true}
+        currentStatus={CaseStatuses.open}
+        onStatusChanged={onStatusChanged}
+      />
+    );
+
+    expect(wrapper.find(`[data-test-subj="case-view-status-dropdown"]`).exists()).toBeTruthy();
+  });
+
   it('it renders the current status correctly', async () => {
     const wrapper = mount(
       <StatusContextMenu currentStatus={CaseStatuses.closed} onStatusChanged={onStatusChanged} />

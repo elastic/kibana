@@ -19,10 +19,6 @@
     float: right;
   }
 
-  .ml-anomalies-controls {
-    padding-top: $euiSizeXS;
-  }
-
   .ml-timeseries-chart {
     svg {
       font-size: $euiFontSizeXS;
@@ -133,7 +129,7 @@
 
     rect.scheduled-event-marker {
       stroke-width: 1px;
-      stroke: $euiColorMediumShade;
+      stroke: $euiColorDarkShade;
       fill: $euiColorLightShade;
       pointer-events: none;
     }

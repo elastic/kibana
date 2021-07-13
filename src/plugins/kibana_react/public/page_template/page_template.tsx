@@ -6,9 +6,27 @@
  * Side Public License, v 1.
  */
 
-import { EuiEmptyPrompt, EuiPageTemplate, EuiPageTemplateProps } from '@elastic/eui';
-import React, { FunctionComponent } from 'react';
+/* eslint-disable @typescript-eslint/naming-convention */
+import './page_template.scss';
 
+import React, { FunctionComponent, useState } from 'react';
+import classNames from 'classnames';
+
+import {
+  EuiEmptyPrompt,
+  EuiPageTemplate,
+  EuiPageTemplateProps,
+  useIsWithinBreakpoints,
+} from '@elastic/eui';
+
+import {
+  KibanaPageTemplateSolutionNav,
+  KibanaPageTemplateSolutionNavProps,
+} from './solution_nav/solution_nav';
+
+/**
+ * A thin wrapper around EuiPageTemplate with a few Kibana specific additions
+ */
 export type KibanaPageTemplateProps = EuiPageTemplateProps & {
   /**
    * Changes the template type depending on other props provided.
@@ -17,6 +35,10 @@ export type KibanaPageTemplateProps = EuiPageTemplateProps & {
    * With `pageHeader` and `children`: Uses `centeredContent`
    */
   isEmptyState?: boolean;
+  /**
+   * Quick creation of EuiSideNav. Hooks up mobile instance too
+   */
+  solutionNav?: KibanaPageTemplateSolutionNavProps;
 };
 
 export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
@@ -25,29 +47,57 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
   children,
   isEmptyState,
   restrictWidth = true,
-  bottomBar,
-  bottomBarProps,
+  pageSideBar,
+  solutionNav,
   ...rest
 }) => {
-  // Needed for differentiating between union types
-  let localBottomBarProps = {};
-  if (template === 'default') {
-    localBottomBarProps = {
-      bottomBar,
-      bottomBarProps,
-    };
+  /**
+   * Only default to open in large+ breakpoints
+   */
+  const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
+  const isLargerBreakpoint = useIsWithinBreakpoints(['l', 'xl']);
+
+  /**
+   * Create the solution nav component
+   */
+  const [isSideNavOpenOnDesktop, setisSideNavOpenOnDesktop] = useState(
+    JSON.parse(String(localStorage.getItem('solutionNavIsCollapsed'))) ? false : true
+  );
+  const toggleOpenOnDesktop = () => {
+    setisSideNavOpenOnDesktop(!isSideNavOpenOnDesktop);
+    // Have to store it as the opposite of the default we want
+    localStorage.setItem('solutionNavIsCollapsed', JSON.stringify(isSideNavOpenOnDesktop));
+  };
+  let sideBarClasses = 'kbnPageTemplate__pageSideBar';
+  if (solutionNav) {
+    // Only apply shrinking classes if collapsibility is available through `solutionNav`
+    sideBarClasses = classNames(sideBarClasses, {
+      'kbnPageTemplate__pageSideBar--shrink':
+        isMediumBreakpoint || (isLargerBreakpoint && !isSideNavOpenOnDesktop),
+    });
+
+    pageSideBar = (
+      <KibanaPageTemplateSolutionNav
+        isOpenOnDesktop={isSideNavOpenOnDesktop}
+        onCollapse={toggleOpenOnDesktop}
+        {...solutionNav}
+      />
+    );
   }
+
+  const emptyStateDefaultTemplate = pageSideBar ? 'centeredContent' : 'centeredBody';
 
   /**
    * An easy way to create the right content for empty pages
    */
   if (isEmptyState && pageHeader && !children) {
-    template = template ?? 'centeredBody';
+    template = template ?? emptyStateDefaultTemplate;
     const { iconType, pageTitle, description, rightSideItems } = pageHeader;
     pageHeader = undefined;
     children = (
       <EuiEmptyPrompt
         iconType={iconType}
+        iconColor={''} // This is likely a solution or app logo, so keep it multi-color
         title={pageTitle ? <h1>{pageTitle}</h1> : undefined}
         body={description ? <p>{description}</p> : undefined}
         actions={rightSideItems}
@@ -56,15 +106,20 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
   } else if (isEmptyState && pageHeader && children) {
     template = template ?? 'centeredContent';
   } else if (isEmptyState && !pageHeader) {
-    template = template ?? 'centeredBody';
+    template = template ?? emptyStateDefaultTemplate;
   }
 
   return (
     <EuiPageTemplate
       template={template}
-      pageHeader={pageHeader}
       restrictWidth={restrictWidth}
-      {...localBottomBarProps}
+      pageHeader={pageHeader}
+      pageSideBar={pageSideBar}
+      pageSideBarProps={{
+        paddingSize: solutionNav ? 'none' : 'l',
+        ...rest.pageSideBarProps,
+        className: classNames(sideBarClasses, rest.pageSideBarProps?.className),
+      }}
       {...rest}
     >
       {children}

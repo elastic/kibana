@@ -3,6 +3,7 @@
   "value": {
     "index": "myfakeindex-2",
     "mappings": {
+      "dynamic": "strict",
       "properties": {
         "message": {
           "type": "text",

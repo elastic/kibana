@@ -135,7 +135,7 @@ export function TransactionErrorRateChart({
   ];
 
   return (
-    <EuiPanel>
+    <EuiPanel hasBorder={true}>
       <EuiTitle size="xs">
         <h2>
           {i18n.translate('xpack.apm.errorRate', {

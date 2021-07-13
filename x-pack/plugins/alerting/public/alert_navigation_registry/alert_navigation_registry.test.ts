@@ -20,10 +20,11 @@ const mockAlertType = (id: string): AlertType => ({
   defaultActionGroupId: 'default',
   producer: 'alerts',
   minimumLicenseRequired: 'basic',
+  isExportable: true,
 });
 
 describe('AlertNavigationRegistry', () => {
-  function handler(alert: SanitizedAlert, alertType: AlertType) {
+  function handler(alert: SanitizedAlert) {
     return {};
   }
 
@@ -143,7 +144,7 @@ describe('AlertNavigationRegistry', () => {
     test('returns registered handlers by consumer & Alert Type', () => {
       const registry = new AlertNavigationRegistry();
 
-      function indexThresholdHandler(alert: SanitizedAlert, alertType: AlertType) {
+      function indexThresholdHandler(alert: SanitizedAlert) {
         return {};
       }
 
@@ -155,7 +156,7 @@ describe('AlertNavigationRegistry', () => {
     test('returns default handlers by consumer when there is no handler for requested alert type', () => {
       const registry = new AlertNavigationRegistry();
 
-      function defaultHandler(alert: SanitizedAlert, alertType: AlertType) {
+      function defaultHandler(alert: SanitizedAlert) {
         return {};
       }
 
@@ -168,7 +169,7 @@ describe('AlertNavigationRegistry', () => {
 
       registry.register('siem', mockAlertType('indexThreshold'), () => ({}));
 
-      function defaultHandler(alert: SanitizedAlert, alertType: AlertType) {
+      function defaultHandler(alert: SanitizedAlert) {
         return {};
       }
 

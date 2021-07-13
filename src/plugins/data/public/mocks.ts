@@ -6,18 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, IndexPatternsContract } from '.';
+import { DataPlugin, IndexPatternsContract } from '.';
 import { fieldFormatsServiceMock } from './field_formats/mocks';
 import { searchServiceMock } from './search/mocks';
 import { queryServiceMock } from './query/mocks';
 import { AutocompleteStart, AutocompleteSetup } from './autocomplete';
 import { createNowProviderMock } from './now_provider/mocks';
 
-export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
-export type Start = jest.Mocked<ReturnType<Plugin['start']>>;
+export type Setup = jest.Mocked<ReturnType<DataPlugin['setup']>>;
+export type Start = jest.Mocked<ReturnType<DataPlugin['start']>>;
 
-const automcompleteSetupMock: jest.Mocked<AutocompleteSetup> = {
+const autocompleteSetupMock: jest.Mocked<AutocompleteSetup> = {
   getQuerySuggestions: jest.fn(),
+  getAutocompleteSettings: jest.fn(),
 };
 
 const autocompleteStartMock: jest.Mocked<AutocompleteStart> = {
@@ -29,7 +30,7 @@ const autocompleteStartMock: jest.Mocked<AutocompleteStart> = {
 const createSetupContract = (): Setup => {
   const querySetupMock = queryServiceMock.createSetupContract();
   return {
-    autocomplete: automcompleteSetupMock,
+    autocomplete: autocompleteSetupMock,
     search: searchServiceMock.createSetupContract(),
     fieldFormats: fieldFormatsServiceMock.createSetupContract(),
     query: querySetupMock,

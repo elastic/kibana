@@ -12,7 +12,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
-  describe('discover app', function () {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/104466
+  describe.skip('discover app', function () {
     this.tags('ciGroup6');
 
     before(function () {
@@ -20,13 +21,14 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     after(function unloadMakelogs() {
-      return esArchiver.unload('logstash_functional');
+      return esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
     loadTestFile(require.resolve('./_saved_queries'));
     loadTestFile(require.resolve('./_discover'));
     loadTestFile(require.resolve('./_discover_histogram'));
     loadTestFile(require.resolve('./_doc_table'));
+    loadTestFile(require.resolve('./_doc_table_newline'));
     loadTestFile(require.resolve('./_filter_editor'));
     loadTestFile(require.resolve('./_errors'));
     loadTestFile(require.resolve('./_field_data'));

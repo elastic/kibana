@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../../__mocks__';
+import {
+  LogicMounter,
+  mockFlashMessageHelpers,
+  mockHttpValues,
+} from '../../../__mocks__/kea_logic';
 import { mockEngineValues, mockEngineActions } from '../../__mocks__';
 
 import { nextTick } from '@kbn/test/jest';
@@ -28,6 +32,7 @@ describe('RelevanceTuningLogic', () => {
       ],
     },
     search_fields: {},
+    precision: 10,
   };
   const schema = {};
   const schemaConflicts = {};
@@ -56,6 +61,7 @@ describe('RelevanceTuningLogic', () => {
     searchSettings: {
       boosts: {},
       search_fields: {},
+      precision: 2,
     },
     unsavedChanges: false,
     filterInputValue: '',
@@ -221,11 +227,27 @@ describe('RelevanceTuningLogic', () => {
         });
       });
     });
+
+    describe('updatePrecision', () => {
+      it('should set precision inside search settings and set unsavedChanges to true', () => {
+        mount();
+        RelevanceTuningLogic.actions.updatePrecision(9);
+
+        expect(RelevanceTuningLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          searchSettings: {
+            ...DEFAULT_VALUES.searchSettings,
+            precision: 9,
+          },
+          unsavedChanges: true,
+        });
+      });
+    });
   });
 
   describe('listeners', () => {
     const { http } = mockHttpValues;
-    const { flashAPIErrors, setSuccessMessage, clearFlashMessages } = mockFlashMessageHelpers;
+    const { flashAPIErrors, flashSuccessToast, clearFlashMessages } = mockFlashMessageHelpers;
     let scrollToSpy: jest.SpyInstance;
     let confirmSpy: jest.SpyInstance;
 
@@ -366,15 +388,12 @@ describe('RelevanceTuningLogic', () => {
         await nextTick();
 
         expect(RelevanceTuningLogic.actions.setResultsLoading).toHaveBeenCalledWith(true);
-        expect(http.post).toHaveBeenCalledWith(
-          '/api/app_search/engines/test-engine/search_settings_search',
-          {
-            body: JSON.stringify(searchSettingsWithoutNewBoostProp),
-            query: {
-              query: 'foo',
-            },
-          }
-        );
+        expect(http.post).toHaveBeenCalledWith('/api/app_search/engines/test-engine/search', {
+          body: JSON.stringify(searchSettingsWithoutNewBoostProp),
+          query: {
+            query: 'foo',
+          },
+        });
         expect(RelevanceTuningLogic.actions.setSearchResults).toHaveBeenCalledWith(searchResults);
         expect(clearFlashMessages).toHaveBeenCalled();
       });
@@ -399,15 +418,12 @@ describe('RelevanceTuningLogic', () => {
         jest.runAllTimers();
         await nextTick();
 
-        expect(http.post).toHaveBeenCalledWith(
-          '/api/app_search/engines/test-engine/search_settings_search',
-          {
-            body: '{}',
-            query: {
-              query: 'foo',
-            },
-          }
-        );
+        expect(http.post).toHaveBeenCalledWith('/api/app_search/engines/test-engine/search', {
+          body: '{}',
+          query: {
+            query: 'foo',
+          },
+        });
       });
 
       it('will call clearSearchResults if there is no query', async () => {
@@ -517,9 +533,9 @@ describe('RelevanceTuningLogic', () => {
             body: JSON.stringify(searchSettingsWithoutNewBoostProp),
           }
         );
-        expect(setSuccessMessage).toHaveBeenCalledWith(
-          'Relevance successfully tuned. The changes will impact your results shortly.'
-        );
+        expect(flashSuccessToast).toHaveBeenCalledWith('Relevance was tuned', {
+          text: 'The changes will impact your results shortly.',
+        });
         expect(RelevanceTuningLogic.actions.onSearchSettingsSuccess).toHaveBeenCalledWith(
           searchSettingsWithoutNewBoostProp
         );
@@ -573,9 +589,9 @@ describe('RelevanceTuningLogic', () => {
         expect(http.post).toHaveBeenCalledWith(
           '/api/app_search/engines/test-engine/search_settings/reset'
         );
-        expect(setSuccessMessage).toHaveBeenCalledWith(
-          'Relevance has been reset to default values. The change will impact your results shortly.'
-        );
+        expect(flashSuccessToast).toHaveBeenCalledWith('Relevance was reset to default values', {
+          text: 'The changes will impact your results shortly.',
+        });
         expect(RelevanceTuningLogic.actions.onSearchSettingsSuccess).toHaveBeenCalledWith(
           searchSettings
         );

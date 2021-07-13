@@ -20,7 +20,6 @@ const createStartContractMock = () => {
       get: jest.fn(),
       getAll: jest.fn(),
       showOnly: jest.fn(),
-      update: jest.fn(),
       enableForcedAppSwitcherNavigation: jest.fn(),
       getForceAppSwitcherNavigation$: jest.fn(),
     },

@@ -15,7 +15,7 @@ Once you have retrieved all of the results you need, it is recommended to call `
 <b>Signature:</b>
 
 ```typescript
-createPointInTimeFinder(findOptions: SavedObjectsCreatePointInTimeFinderOptions, dependencies?: SavedObjectsCreatePointInTimeFinderDependencies): ISavedObjectsPointInTimeFinder;
+createPointInTimeFinder<T = unknown, A = unknown>(findOptions: SavedObjectsCreatePointInTimeFinderOptions, dependencies?: SavedObjectsCreatePointInTimeFinderDependencies): ISavedObjectsPointInTimeFinder<T, A>;
 ```
 
 ## Parameters
@@ -27,7 +27,7 @@ createPointInTimeFinder(findOptions: SavedObjectsCreatePointInTimeFinderOptions,
 
 <b>Returns:</b>
 
-`ISavedObjectsPointInTimeFinder`
+`ISavedObjectsPointInTimeFinder<T, A>`
 
 ## Example
 

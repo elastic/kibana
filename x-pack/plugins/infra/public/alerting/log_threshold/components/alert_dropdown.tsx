@@ -7,7 +7,7 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiPopover, EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel } from '@elastic/eui';
+import { EuiPopover, EuiContextMenuItem, EuiContextMenuPanel, EuiHeaderLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AlertFlyout } from './alert_flyout';
 import { useLinkProps } from '../../../hooks/use_link_props';
@@ -66,13 +66,13 @@ export const AlertDropdown = () => {
       >
         <FormattedMessage
           id="xpack.infra.alerting.logs.createAlertButton"
-          defaultMessage="Create alert"
+          defaultMessage="Create rule"
         />
       </EuiContextMenuItem>,
       <EuiContextMenuItem icon="tableOfContents" key="manageLink" {...manageAlertsLinkProps}>
         <FormattedMessage
           id="xpack.infra.alerting.logs.manageAlerts"
-          defaultMessage="Manage alerts"
+          defaultMessage="Manage rules"
         />
       </EuiContextMenuItem>,
     ];
@@ -83,9 +83,17 @@ export const AlertDropdown = () => {
       <EuiPopover
         panelPaddingSize="none"
         button={
-          <EuiButtonEmpty iconSide={'right'} iconType={'arrowDown'} onClick={openPopover}>
-            <FormattedMessage id="xpack.infra.alerting.logs.alertsButton" defaultMessage="Alerts" />
-          </EuiButtonEmpty>
+          <EuiHeaderLink
+            color="text"
+            iconSide={'right'}
+            iconType={'arrowDown'}
+            onClick={openPopover}
+          >
+            <FormattedMessage
+              id="xpack.infra.alerting.logs.alertsButton"
+              defaultMessage="Alerts and rules"
+            />
+          </EuiHeaderLink>
         }
         isOpen={popoverOpen}
         closePopover={closePopover}

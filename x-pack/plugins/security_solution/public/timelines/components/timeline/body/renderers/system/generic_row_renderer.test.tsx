@@ -9,7 +9,7 @@ import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
-import { removeExternalLinkText } from '../../../../../../../common/test_utils';
+import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
 import { BrowserFields } from '../../../../../../common/containers/source';
 import { mockBrowserFields } from '../../../../../../common/containers/source/mock';
 import { Ecs } from '../../../../../../../common/ecs';
@@ -67,7 +67,6 @@ import {
   mockEndpointSecurityLogOffEvent,
 } from '../../../../../../common/mock/mock_endgame_ecs_data';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
-import { RowRenderer } from '../row_renderer';
 import {
   createDnsRowRenderer,
   createEndgameProcessRowRenderer,
@@ -82,6 +81,9 @@ import {
   EndpointAlertCriteria,
 } from './generic_row_renderer';
 import * as i18n from './translations';
+import { RowRenderer } from '../../../../../../../common';
+
+jest.mock('../../../../../../common/lib/kibana');
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');

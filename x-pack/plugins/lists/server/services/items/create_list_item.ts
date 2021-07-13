@@ -7,15 +7,17 @@
 
 import uuid from 'uuid';
 import { ElasticsearchClient } from 'kibana/server';
-import { IdOrUndefined, MetaOrUndefined, Type } from '@kbn/securitysolution-io-ts-utils';
-
 import {
   DeserializerOrUndefined,
+  IdOrUndefined,
   ListItemSchema,
+  MetaOrUndefined,
   SerializerOrUndefined,
-} from '../../../common/schemas';
+  Type,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
+
 import { transformListItemToElasticQuery } from '../utils';
-import { encodeHitVersion } from '../utils/encode_hit_version';
 import { IndexEsListItemSchema } from '../../schemas/elastic_query';
 
 export interface CreateListItemOptions {

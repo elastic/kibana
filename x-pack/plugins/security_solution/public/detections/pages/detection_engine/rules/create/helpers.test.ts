@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { List } from '../../../../../../common/detection_engine/schemas/types';
+import { List } from '@kbn/securitysolution-io-ts-list-types';
 import { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
 import { Rule } from '../../../../containers/detection_engine/rules';
 import {
@@ -40,7 +40,7 @@ import {
   mockActionsStepRule,
 } from '../all/__mocks__/mock';
 import { getThreatMock } from '../../../../../../common/detection_engine/schemas/types/threat.mock';
-import { Threat, Threats } from '../../../../../../common/detection_engine/schemas/common/schemas';
+import { Threat, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 
 describe('helpers', () => {
   describe('getTimeTypeValue', () => {

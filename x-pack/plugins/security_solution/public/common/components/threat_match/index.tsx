@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useReducer } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { ThreatMapping } from '../../../../common/detection_engine/schemas/types';
+import { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ListItemComponent } from './list_item';
 import { IndexPattern } from '../../../../../../../src/plugins/data/common';
 import { AndOrBadge } from '../and_or_badge';

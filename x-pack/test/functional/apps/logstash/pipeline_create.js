@@ -23,11 +23,11 @@ export default function ({ getService, getPageObjects }) {
     before(async () => {
       originalWindowSize = await browser.getWindowSize();
       await browser.setWindowSize(1600, 1000);
-      await esArchiver.load('logstash/empty');
+      await esArchiver.load('x-pack/test/functional/es_archives/logstash/empty');
     });
 
     after(async () => {
-      await esArchiver.unload('logstash/empty');
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash/empty');
       await browser.setWindowSize(originalWindowSize.width, originalWindowSize.height);
     });
 

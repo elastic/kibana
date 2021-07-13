@@ -7,11 +7,11 @@
 
 export * from './shared_exports';
 
-import { PluginInitializerContext } from '../../../../src/core/public';
+import type { PluginInitializerContext } from '../../../../src/core/public';
 
 import { Plugin } from './plugin';
-import { PluginSetup, PluginStart } from './types';
+import type { PluginSetup, PluginStart } from './types';
 
 export const plugin = (context: PluginInitializerContext): Plugin => new Plugin(context);
 
-export { Plugin, PluginSetup, PluginStart };
+export type { Plugin, PluginSetup, PluginStart };

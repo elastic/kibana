@@ -196,6 +196,9 @@ export interface StatusServiceSetup {
    * Completely overrides the default inherited status.
    *
    * @remarks
+   * The first emission from this Observable should occur within 30s, else this plugin's status will fallback to
+   * `unavailable` until the first emission.
+   *
    * See the {@link StatusServiceSetup.derivedStatus$} API for leveraging the default status
    * calculation that is provided by Core.
    */

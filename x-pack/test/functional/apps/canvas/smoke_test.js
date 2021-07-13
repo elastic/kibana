@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { parse } from 'url';
 
 export default function canvasSmokeTest({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
@@ -17,11 +16,11 @@ export default function canvasSmokeTest({ getService, getPageObjects }) {
 
   describe('smoke test', function () {
     this.tags('includeFirefox');
-    const workpadListSelector = 'canvasWorkpadLoaderTable > canvasWorkpadLoaderWorkpad';
+    const workpadListSelector = 'canvasWorkpadTable > canvasWorkpadTableWorkpad';
     const testWorkpadId = 'workpad-1705f884-6224-47de-ba49-ca224fe6ec31';
 
     before(async () => {
-      await esArchiver.load('canvas/default');
+      await esArchiver.load('x-pack/test/functional/es_archives/canvas/default');
       await PageObjects.common.navigateToApp('canvas');
     });
 
@@ -45,7 +44,7 @@ export default function canvasSmokeTest({ getService, getPageObjects }) {
         const url = await browser.getCurrentUrl();
 
         // remove all the search params, just compare the route
-        const hashRoute = parse(url).hash.split('?')[0];
+        const hashRoute = new URL(url).hash.split('?')[0];
         expect(hashRoute).to.equal(`#/workpad/${testWorkpadId}/page/1`);
       });
     });

@@ -11,7 +11,7 @@ import { get } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
-import { RowRendererId } from '../../../../../../../common/types/timeline';
+import { RowRendererId, RowRenderer } from '../../../../../../../common/types/timeline';
 import { asArrayIfExists } from '../../../../../../common/lib/helpers';
 import {
   TLS_CLIENT_CERTIFICATE_FINGERPRINT_SHA1_FIELD_NAME,
@@ -63,7 +63,7 @@ import {
   SOURCE_BYTES_FIELD_NAME,
   SOURCE_PACKETS_FIELD_NAME,
 } from '../../../../../../network/components/source_destination/source_destination_arrows';
-import { RowRenderer, RowRendererContainer } from '../row_renderer';
+import { RowRendererContainer } from '../row_renderer';
 
 const Details = styled.div`
   margin: 5px 0;

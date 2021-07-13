@@ -8,7 +8,7 @@
 
 import type { ReactElement } from 'react';
 import { UiCounterMetricType } from '@kbn/analytics';
-import { UiSettingsType, StringValidation, ImageValidation } from '../../../../core/public';
+import { UiSettingsType } from '../../../../core/public';
 
 export interface FieldSetting {
   displayName: string;
@@ -24,7 +24,6 @@ export interface FieldSetting {
   isOverridden: boolean;
   defVal: unknown;
   isCustom: boolean;
-  validation?: StringValidation | ImageValidation;
   readOnly?: boolean;
   order?: number;
   deprecation?: {

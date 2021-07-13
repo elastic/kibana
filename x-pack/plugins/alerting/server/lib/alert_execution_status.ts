@@ -9,6 +9,7 @@ import { Logger } from 'src/core/server';
 import { AlertTaskState, AlertExecutionStatus, RawAlertExecutionStatus } from '../types';
 import { getReasonFromError } from './error_with_reason';
 import { getEsErrorMessage } from './errors';
+import { AlertExecutionStatuses } from '../../common';
 
 export function executionStatusFromState(state: AlertTaskState): AlertExecutionStatus {
   const instanceIds = Object.keys(state.alertInstances ?? {});
@@ -66,3 +67,9 @@ export function alertExecutionStatusFromRaw(
     return { lastExecutionDate: parsedDate, status };
   }
 }
+
+export const getAlertExecutionStatusPending = (lastExecutionDate: string) => ({
+  status: 'pending' as AlertExecutionStatuses,
+  lastExecutionDate,
+  error: null,
+});

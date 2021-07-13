@@ -14,10 +14,10 @@ const bodySchema = schema.object({
   indices: schema.arrayOf(schema.string()),
 });
 
-export function registerFlushRoute({ router, license, lib }: RouteDependencies) {
+export function registerFlushRoute({ router, lib }: RouteDependencies) {
   router.post(
     { path: addBasePath('/indices/flush'), validate: { body: bodySchema } },
-    license.guardApiRoute(async (ctx, req, res) => {
+    async (ctx, req, res) => {
       const body = req.body as typeof bodySchema.type;
       const { indices = [] } = body;
 
@@ -40,6 +40,6 @@ export function registerFlushRoute({ router, license, lib }: RouteDependencies) 
         // Case: default
         throw e;
       }
-    })
+    }
   );
 }

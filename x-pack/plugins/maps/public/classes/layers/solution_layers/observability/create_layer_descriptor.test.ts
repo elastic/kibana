@@ -45,6 +45,7 @@ describe('createLayerDescriptor', () => {
       __dataRequests: [],
       alpha: 0.75,
       id: '12345',
+      includeInFitToBounds: true,
       joins: [
         {
           leftField: 'iso2',
@@ -178,6 +179,7 @@ describe('createLayerDescriptor', () => {
       __dataRequests: [],
       alpha: 0.75,
       id: '12345',
+      includeInFitToBounds: true,
       label: '[Performance] Duration',
       maxZoom: 24,
       minZoom: 0,
@@ -220,6 +222,7 @@ describe('createLayerDescriptor', () => {
       __dataRequests: [],
       alpha: 0.75,
       id: '12345',
+      includeInFitToBounds: true,
       joins: [],
       label: '[Performance] Duration',
       maxZoom: 24,

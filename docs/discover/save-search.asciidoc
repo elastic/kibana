@@ -35,8 +35,9 @@ image::discover/images/read-only-badge.png[Example of Discover's read only acces
 If the saved search is associated with a different index pattern than is currently
 selected, opening the saved search changes the selected index pattern. The query language
 used for the saved search is also automatically selected.
-. To add your search results to an existing dashboard:
-.. Open the dashboard, then click *Edit*.
+. To add your search results to a dashboard:
+.. Open the main menu, then click *Dashboard*.
+.. Open or create the dashboard, then click *Edit*.
 .. Click *Add from library*.
-.. Open the *Types* menu, then select *Saved search*.
-.. Select the the saved search that you want.
+.. From the *Types* dropdown, select *Saved search*.
+.. Select the saved search that you want to visualize, then click *X* to close the list.

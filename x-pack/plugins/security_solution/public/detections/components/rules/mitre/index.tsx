@@ -11,7 +11,7 @@ import React, { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { isEqual } from 'lodash';
-import { Threat, Threats } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { Threat, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 import { tacticsOptions } from '../../../mitre/mitre_tactics_techniques';
 import * as Rulei18n from '../../../pages/detection_engine/rules/translations';
 import { FieldHook } from '../../../../shared_imports';

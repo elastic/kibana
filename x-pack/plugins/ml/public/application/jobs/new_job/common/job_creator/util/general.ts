@@ -79,8 +79,9 @@ export function getRichDetectors(
       byField,
       overField,
       partitionField,
-      excludeFrequent: d.exclude_frequent || null,
-      description: d.detector_description || null,
+      excludeFrequent: d.exclude_frequent ?? null,
+      description: d.detector_description ?? null,
+      useNull: d.use_null ?? null,
     };
   });
 }
@@ -309,6 +310,10 @@ export function getJobCreatorTitle(jobCreator: JobCreatorType) {
     case JOB_TYPE.CATEGORIZATION:
       return i18n.translate('xpack.ml.newJob.wizard.jobCreatorTitle.categorization', {
         defaultMessage: 'Categorization',
+      });
+    case JOB_TYPE.RARE:
+      return i18n.translate('xpack.ml.newJob.wizard.jobCreatorTitle.rare', {
+        defaultMessage: 'Rare',
       });
     default:
       return '';

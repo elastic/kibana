@@ -39,7 +39,7 @@ This entails generating a "server certificate" for {es} to use on the HTTP layer
 . Obtain a client certificate and private key for {kib}.
 +
 --
-{kib} must this "client certificate" and corresponding private key when connecting to {es}.
+{kib} uses the client certificate and corresponding private key when connecting to {es}.
 
 NOTE: This is not the same as the <<configuring-tls-browser-kib,server certificate>> that {kib} will present to web browsers.
 

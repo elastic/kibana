@@ -6,10 +6,8 @@
  */
 
 import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
-import {
-  apmIndexPattern,
-  APM_STATIC_INDEX_PATTERN_ID,
-} from '../../../../../../src/plugins/apm_oss/server';
+import { APM_STATIC_INDEX_PATTERN_ID } from '../../../common/index_pattern_constants';
+import apmIndexPattern from '../../tutorial/index_pattern.json';
 import { hasHistoricalAgentData } from '../services/get_services/has_historical_agent_data';
 import { Setup } from '../helpers/setup_request';
 import { APMRouteHandlerResources } from '../../routes/typings';
@@ -21,7 +19,8 @@ export async function createStaticIndexPattern(
   setup: Setup,
   config: APMRouteHandlerResources['config'],
   savedObjectsClient: InternalSavedObjectsClient,
-  spaceId: string | undefined
+  spaceId: string | undefined,
+  overwrite = false
 ): Promise<boolean> {
   return withApmSpan('create_static_index_pattern', async () => {
     // don't autocreate APM index pattern if it's been disabled via the config
@@ -47,7 +46,7 @@ export async function createStaticIndexPattern(
           },
           {
             id: APM_STATIC_INDEX_PATTERN_ID,
-            overwrite: false,
+            overwrite,
             namespace: spaceId,
           }
         )

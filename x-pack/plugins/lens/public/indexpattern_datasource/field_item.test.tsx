@@ -164,7 +164,7 @@ describe('IndexPattern Field Item', () => {
       body: JSON.stringify({
         dslQuery: {
           bool: {
-            must: [{ match_all: {} }],
+            must: [],
             filter: [],
             should: [],
             must_not: [],

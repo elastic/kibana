@@ -35,15 +35,8 @@
             "label": "getDerivedStateFromProps",
             "description": [],
             "signature": [
-              "typeof ",
-              {
-                "pluginId": "esUiShared",
-                "scope": "public",
-                "docId": "kibEsUiSharedPluginApi",
-                "section": "def-public.CronEditor",
-                "text": "CronEditor"
-              },
-              ".getDerivedStateFromProps"
+              "(props: Props) => ",
+              "FieldToValueMap"
             ],
             "source": {
               "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
@@ -285,7 +278,7 @@
         ],
         "source": {
           "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
-          "lineNumber": 49
+          "lineNumber": 47
         },
         "deprecated": false,
         "children": [
@@ -301,7 +294,7 @@
             ],
             "source": {
               "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
-              "lineNumber": 49
+              "lineNumber": 47
             },
             "deprecated": false,
             "isRequired": true
@@ -357,13 +350,32 @@
         "label": "JsonEditor",
         "description": [],
         "signature": [
-          "typeof JsonEditorComp"
+          "<T extends object = { [key: string]: any; }>({ label, helpText, onUpdate, value, defaultValue, euiCodeEditorProps, error: propsError, }: Props<T>) => JSX.Element"
         ],
         "source": {
           "path": "src/plugins/es_ui_shared/public/components/json_editor/json_editor.tsx",
           "lineNumber": 102
         },
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.__0",
+            "type": "Object",
+            "tags": [],
+            "label": "__0",
+            "description": [],
+            "signature": [
+              "Props<T>"
+            ],
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/components/json_editor/json_editor.tsx",
+              "lineNumber": 25
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -405,6 +417,80 @@
       },
       {
         "parentPluginId": "esUiShared",
+        "id": "def-public.PageError",
+        "type": "Function",
+        "tags": [],
+        "label": "PageError",
+        "description": [],
+        "signature": [
+          "({ title, error, actions, isCentered, ...rest }: React.PropsWithChildren<Props>) => JSX.Element"
+        ],
+        "source": {
+          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/page_error.tsx",
+          "lineNumber": 28
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.PageError.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  title,\n  error,\n  actions,\n  isCentered,\n  ...rest\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<Props>"
+            ],
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/page_error.tsx",
+              "lineNumber": 28
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "esUiShared",
+        "id": "def-public.PageLoading",
+        "type": "Function",
+        "tags": [],
+        "label": "PageLoading",
+        "description": [],
+        "signature": [
+          "({ children }: { children?: React.ReactNode; }) => JSX.Element"
+        ],
+        "source": {
+          "path": "src/plugins/es_ui_shared/public/components/page_loading/page_loading.tsx",
+          "lineNumber": 12
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.PageLoading.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ children }",
+            "description": [],
+            "signature": [
+              "{ children?: React.ReactNode; }"
+            ],
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/components/page_loading/page_loading.tsx",
+              "lineNumber": 12
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "esUiShared",
         "id": "def-public.SectionError",
         "type": "Function",
         "tags": [],
@@ -415,7 +501,7 @@
         ],
         "source": {
           "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
-          "lineNumber": 24
+          "lineNumber": 19
         },
         "deprecated": false,
         "children": [
@@ -431,7 +517,7 @@
             ],
             "source": {
               "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
-              "lineNumber": 24
+              "lineNumber": 19
             },
             "deprecated": false,
             "isRequired": true
@@ -579,7 +665,7 @@
         ],
         "source": {
           "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
-          "lineNumber": 35
+          "lineNumber": 33
         },
         "deprecated": false,
         "children": [],
@@ -723,8 +809,8 @@
         "label": "Error",
         "description": [],
         "source": {
-          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
-          "lineNumber": 12
+          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+          "lineNumber": 18
         },
         "deprecated": false,
         "children": [
@@ -736,8 +822,8 @@
             "label": "error",
             "description": [],
             "source": {
-              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
-              "lineNumber": 13
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+              "lineNumber": 19
             },
             "deprecated": false
           },
@@ -752,8 +838,8 @@
               "string[] | undefined"
             ],
             "source": {
-              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
-              "lineNumber": 14
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+              "lineNumber": 20
             },
             "deprecated": false
           },
@@ -768,8 +854,8 @@
               "string | undefined"
             ],
             "source": {
-              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
-              "lineNumber": 15
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+              "lineNumber": 21
             },
             "deprecated": false
           }
@@ -1271,7 +1357,9 @@
               "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
               "lineNumber": 25
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           }
         ],
         "initialIsOpen": false
@@ -1335,7 +1423,7 @@
         ],
         "source": {
           "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
-          "lineNumber": 33
+          "lineNumber": 31
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1377,14 +1465,32 @@
             "label": "indexNameBeginsWithPeriod",
             "description": [],
             "signature": [
-              "typeof ",
-              "indexNameBeginsWithPeriod"
+              "(indexName?: string | undefined) => boolean"
             ],
             "source": {
               "path": "src/plugins/es_ui_shared/public/indices/index.ts",
               "lineNumber": 19
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "esUiShared",
+                "id": "def-public.indexName",
+                "type": "string",
+                "tags": [],
+                "label": "indexName",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "source": {
+                  "path": "src/plugins/es_ui_shared/public/indices/validate/validate_index.ts",
+                  "lineNumber": 12
+                },
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "esUiShared",
@@ -1394,14 +1500,29 @@
             "label": "findIllegalCharactersInIndexName",
             "description": [],
             "signature": [
-              "typeof ",
-              "findIllegalCharactersInIndexName"
+              "(indexName: string) => string[]"
             ],
             "source": {
               "path": "src/plugins/es_ui_shared/public/indices/index.ts",
               "lineNumber": 20
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "esUiShared",
+                "id": "def-public.indexName",
+                "type": "string",
+                "tags": [],
+                "label": "indexName",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/es_ui_shared/public/indices/validate/validate_index.ts",
+                  "lineNumber": 19
+                },
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "esUiShared",
@@ -1411,14 +1532,29 @@
             "label": "indexNameContainsSpaces",
             "description": [],
             "signature": [
-              "typeof ",
-              "indexNameContainsSpaces"
+              "(indexName: string) => boolean"
             ],
             "source": {
               "path": "src/plugins/es_ui_shared/public/indices/index.ts",
               "lineNumber": 21
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "esUiShared",
+                "id": "def-public.indexName",
+                "type": "string",
+                "tags": [],
+                "label": "indexName",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/es_ui_shared/public/indices/validate/validate_index.ts",
+                  "lineNumber": 34
+                },
+                "deprecated": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false

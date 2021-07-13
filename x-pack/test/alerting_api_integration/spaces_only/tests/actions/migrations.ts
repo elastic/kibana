@@ -16,11 +16,11 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
   describe('migrations', () => {
     before(async () => {
-      await esArchiver.load('actions');
+      await esArchiver.load('x-pack/test/functional/es_archives/actions');
     });
 
     after(async () => {
-      await esArchiver.unload('actions');
+      await esArchiver.unload('x-pack/test/functional/es_archives/actions');
     });
 
     it('7.10.0 migrates the `casesConfiguration` to be the `incidentConfiguration` in `config`, then 7.11.0 removes `incidentConfiguration`', async () => {

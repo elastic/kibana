@@ -26,17 +26,19 @@ export const getBreadcrumbs = (
   let breadcrumb = [
     {
       text: i18n.PAGE_TITLE,
-      href: getUrlForApp(`${APP_ID}:${SecurityPageName.case}`, {
+      href: getUrlForApp(APP_ID, {
+        deepLinkId: SecurityPageName.case,
         path: queryParameters,
       }),
     },
   ];
-  if (params.detailName === 'create') {
+  if (params.pathName === '/create') {
     breadcrumb = [
       ...breadcrumb,
       {
         text: i18n.CREATE_BC_TITLE,
-        href: getUrlForApp(`${APP_ID}:${SecurityPageName.case}`, {
+        href: getUrlForApp(APP_ID, {
+          deepLinkId: SecurityPageName.case,
           path: getCreateCaseUrl(queryParameters),
         }),
       },
@@ -46,7 +48,8 @@ export const getBreadcrumbs = (
       ...breadcrumb,
       {
         text: params.state?.caseTitle ?? '',
-        href: getUrlForApp(`${APP_ID}:${SecurityPageName.case}`, {
+        href: getUrlForApp(APP_ID, {
+          deepLinkId: SecurityPageName.case,
           path: getCaseDetailsUrl({ id: params.detailName, search: queryParameters }),
         }),
       },

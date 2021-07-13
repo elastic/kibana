@@ -25,7 +25,7 @@ const validateParams = (actionParams: CaseActionParams) => {
     validationResult.errors.caseId.push(i18n.CASE_CONNECTOR_CASE_REQUIRED);
   }
 
-  return validationResult;
+  return Promise.resolve(validationResult);
 };
 
 export function getActionType(): ActionTypeModel {
@@ -34,7 +34,7 @@ export function getActionType(): ActionTypeModel {
     iconClass: 'securityAnalyticsApp',
     selectMessage: i18n.CASE_CONNECTOR_DESC,
     actionTypeTitle: i18n.CASE_CONNECTOR_TITLE,
-    validateConnector: () => ({ config: { errors: {} }, secrets: { errors: {} } }),
+    validateConnector: () => Promise.resolve({ config: { errors: {} }, secrets: { errors: {} } }),
     validateParams,
     actionConnectorFields: null,
     actionParamsFields: lazy(() => import('./alert_fields')),

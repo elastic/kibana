@@ -44,8 +44,6 @@ export interface InputControlVisPluginStartDependencies {
 
 /** @internal */
 export class InputControlVisPlugin implements Plugin<void, void> {
-  private cachedSettings: InputControlSettings | undefined = undefined;
-
   constructor(public initializerContext: PluginInitializerContext) {}
 
   public setup(
@@ -56,13 +54,8 @@ export class InputControlVisPlugin implements Plugin<void, void> {
       core,
       data,
       getSettings: async () => {
-        if (!this.cachedSettings) {
-          this.cachedSettings = await core.http.get<InputControlSettings>(
-            '/api/input_control_vis/settings'
-          );
-        }
-
-        return this.cachedSettings;
+        const { timeout, terminateAfter } = data.autocomplete.getAutocompleteSettings();
+        return { autocompleteTimeout: timeout, autocompleteTerminateAfter: terminateAfter };
       },
     };
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { transformError } from '@kbn/securitysolution-es-utils';
 import { setSignalStatusValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/set_signal_status_type_dependents';
 import {
   SetSignalsStatusSchemaDecoded,
@@ -12,7 +13,8 @@ import {
 } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../../common/constants';
-import { transformError, buildSiemResponse } from '../utils';
+import { buildSiemResponse } from '../utils';
+
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 
 export const setSignalsStatusRoute = (router: SecuritySolutionPluginRouter) => {

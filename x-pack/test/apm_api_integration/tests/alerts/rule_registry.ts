@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { merge, omit } from 'lodash';
 import { format } from 'url';
+import { EVENT_KIND } from '@kbn/rule-data-utils/target/technical_field_names';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 
@@ -259,7 +260,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           index: ALERTS_INDEX_TARGET,
           body: {
             query: {
-              match_all: {},
+              term: {
+                [EVENT_KIND]: 'signal',
+              },
             },
             size: 1,
             sort: {
@@ -286,7 +289,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           index: ALERTS_INDEX_TARGET,
           body: {
             query: {
-              match_all: {},
+              term: {
+                [EVENT_KIND]: 'signal',
+              },
             },
             size: 1,
             sort: {
@@ -313,7 +318,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           index: ALERTS_INDEX_TARGET,
           body: {
             query: {
-              match_all: {},
+              term: {
+                [EVENT_KIND]: 'signal',
+              },
             },
             size: 1,
             sort: {
@@ -346,7 +353,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               "open",
             ],
             "event.kind": Array [
-              "state",
+              "signal",
             ],
             "kibana.rac.alert.duration.us": Array [
               0,
@@ -358,7 +365,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               50,
             ],
             "kibana.rac.alert.id": Array [
-              "apm.transaction_error_rate_opbeans-go_request",
+              "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
+            ],
+            "kibana.rac.alert.owner": Array [
+              "apm",
             ],
             "kibana.rac.alert.producer": Array [
               "apm",
@@ -400,6 +410,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               query: {
                 start: new Date(now - 30 * 60 * 1000).toISOString(),
                 end: new Date(now).toISOString(),
+                status: 'all',
               },
             })
           )
@@ -415,7 +426,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               "open",
             ],
             "event.kind": Array [
-              "state",
+              "signal",
             ],
             "kibana.rac.alert.duration.us": Array [
               0,
@@ -427,7 +438,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               50,
             ],
             "kibana.rac.alert.id": Array [
-              "apm.transaction_error_rate_opbeans-go_request",
+              "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
+            ],
+            "kibana.rac.alert.owner": Array [
+              "apm",
             ],
             "kibana.rac.alert.producer": Array [
               "apm",
@@ -485,7 +499,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           index: ALERTS_INDEX_TARGET,
           body: {
             query: {
-              match_all: {},
+              term: {
+                [EVENT_KIND]: 'signal',
+              },
             },
             size: 1,
             sort: {
@@ -520,7 +536,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               "close",
             ],
             "event.kind": Array [
-              "state",
+              "signal",
             ],
             "kibana.rac.alert.evaluation.threshold": Array [
               30,
@@ -529,7 +545,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               50,
             ],
             "kibana.rac.alert.id": Array [
-              "apm.transaction_error_rate_opbeans-go_request",
+              "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
+            ],
+            "kibana.rac.alert.owner": Array [
+              "apm",
             ],
             "kibana.rac.alert.producer": Array [
               "apm",
@@ -572,6 +591,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               query: {
                 start: new Date(now - 30 * 60 * 1000).toISOString(),
                 end: new Date().toISOString(),
+                status: 'all',
               },
             })
           )
@@ -601,7 +621,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       expect(errorOrUndefined).not.to.be(undefined);
 
-      expect(errorOrUndefined).to.be(`ResponseError: index_not_found_exception`);
+      expect(errorOrUndefined).to.contain('index_not_found_exception');
     });
   });
 }

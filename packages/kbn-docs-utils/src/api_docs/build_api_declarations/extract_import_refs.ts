@@ -31,13 +31,8 @@ export function extractImportReferences(
   log: ToolingLog
 ): TextWithLinks {
   const texts: TextWithLinks = [];
-  let pos = 0;
   let textSegment: string | undefined = text;
-  const max = 5;
   while (textSegment) {
-    pos++;
-    if (pos > max) break;
-
     const ref = extractImportRef(textSegment);
     if (ref) {
       const { name, path, index, length } = ref;

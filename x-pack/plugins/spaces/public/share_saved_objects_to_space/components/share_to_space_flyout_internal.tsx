@@ -5,18 +5,19 @@
  * 2.0.
  */
 
+import './share_to_space_flyout_internal.scss';
+
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
-  EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiHorizontalRule,
   EuiIcon,
   EuiLoadingSpinner,
+  EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -24,7 +25,7 @@ import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { ToastsStart } from 'src/core/public';
+import type { SavedObjectReferenceWithContext, ToastsStart } from 'src/core/public';
 import type {
   ShareToSpaceFlyoutProps,
   ShareToSpaceSavedObjectTarget,
@@ -36,8 +37,11 @@ import { useSpaces } from '../../spaces_context';
 import type { SpacesManager } from '../../spaces_manager';
 import type { ShareToSpaceTarget } from '../../types';
 import type { ShareOptions } from '../types';
+import { AliasTable } from './alias_table';
 import { DEFAULT_OBJECT_NOUN } from './constants';
+import { RelativesFooter } from './relatives_footer';
 import { ShareToSpaceForm } from './share_to_space_form';
+import type { InternalLegacyUrlAliasTarget } from './types';
 
 // No need to wrap LazyCopyToSpaceFlyout in an error boundary, because the ShareToSpaceFlyoutInternal component itself is only ever used in
 // a lazy-loaded fashion with an error boundary.
@@ -46,8 +50,17 @@ const LazyCopyToSpaceFlyout = lazy(() =>
 );
 
 const ALL_SPACES_TARGET = i18n.translate('xpack.spaces.shareToSpace.allSpacesTarget', {
-  defaultMessage: 'all',
+  defaultMessage: 'all spaces',
 });
+function getSpacesTargetString(spaces: string[]) {
+  if (spaces.includes(ALL_SPACES_ID)) {
+    return ALL_SPACES_TARGET;
+  }
+  return i18n.translate('xpack.spaces.shareToSpace.spacesTarget', {
+    defaultMessage: '{spacesCount, plural, one {# space} other {# spaces}}',
+    values: { spacesCount: spaces.length },
+  });
+}
 
 const arraysAreEqual = (a: unknown[], b: unknown[]) =>
   a.every((x) => b.includes(x)) && b.every((x) => a.includes(x));
@@ -57,46 +70,56 @@ function createDefaultChangeSpacesHandler(
   spacesManager: SpacesManager,
   toastNotifications: ToastsStart
 ) {
-  return async (spacesToAdd: string[], spacesToRemove: string[]) => {
-    const { type, id, title } = object;
+  return async (
+    objects: Array<{ type: string; id: string }>,
+    spacesToAdd: string[],
+    spacesToRemove: string[]
+  ) => {
+    const { title } = object;
+    const objectsToUpdate = objects.map(({ type, id }) => ({ type, id })); // only use 'type' and 'id' fields
+    const relativesCount = objects.length - 1;
     const toastTitle = i18n.translate('xpack.spaces.shareToSpace.shareSuccessTitle', {
       values: { objectNoun: object.noun },
       defaultMessage: 'Updated {objectNoun}',
+      description: `Object noun can be plural or singular, examples: "Updated objects", "Updated job"`,
     });
+    await spacesManager.updateSavedObjectsSpaces(objectsToUpdate, spacesToAdd, spacesToRemove);
+
     const isSharedToAllSpaces = spacesToAdd.includes(ALL_SPACES_ID);
-    if (spacesToAdd.length > 0) {
-      await spacesManager.shareSavedObjectAdd({ type, id }, spacesToAdd);
-      const spaceTargets = isSharedToAllSpaces ? ALL_SPACES_TARGET : `${spacesToAdd.length}`;
-      const toastText =
-        !isSharedToAllSpaces && spacesToAdd.length === 1
-          ? i18n.translate('xpack.spaces.shareToSpace.shareAddSuccessTextSingular', {
-              defaultMessage: `'{object}' was added to 1 space.`,
-              values: { object: title },
-            })
-          : i18n.translate('xpack.spaces.shareToSpace.shareAddSuccessTextPlural', {
-              defaultMessage: `'{object}' was added to {spaceTargets} spaces.`,
-              values: { object: title, spaceTargets },
-            });
-      toastNotifications.addSuccess({ title: toastTitle, text: toastText });
+    let toastText: string;
+    if (spacesToAdd.length > 0 && spacesToRemove.length > 0 && !isSharedToAllSpaces) {
+      toastText = i18n.translate('xpack.spaces.shareToSpace.shareSuccessAddRemoveText', {
+        defaultMessage: `'{object}' {relativesCount, plural, =0 {was} =1 {and {relativesCount} related object were} other {and {relativesCount} related objects were}} added to {spacesTargetAdd} and removed from {spacesTargetRemove}.`,
+        values: {
+          object: title,
+          relativesCount,
+          spacesTargetAdd: getSpacesTargetString(spacesToAdd),
+          spacesTargetRemove: getSpacesTargetString(spacesToRemove),
+        },
+        description: `Uses output of xpack.spaces.shareToSpace.spacesTarget or xpack.spaces.shareToSpace.allSpacesTarget as 'spacesTarget...' inputs. Example strings: "'Finance dashboard' was added to 1 space and removed from 2 spaces.", "'Finance dashboard' and 2 related objects were added to 3 spaces and removed from all spaces."`,
+      });
+    } else if (spacesToAdd.length > 0) {
+      toastText = i18n.translate('xpack.spaces.shareToSpace.shareSuccessAddText', {
+        defaultMessage: `'{object}' {relativesCount, plural, =0 {was} =1 {and {relativesCount} related object were} other {and {relativesCount} related objects were}} added to {spacesTarget}.`,
+        values: {
+          object: title,
+          relativesCount,
+          spacesTarget: getSpacesTargetString(spacesToAdd),
+        },
+        description: `Uses output of xpack.spaces.shareToSpace.spacesTarget or xpack.spaces.shareToSpace.allSpacesTarget as 'spacesTarget' input. Example strings: "'Finance dashboard' was added to 1 space.", "'Finance dashboard' and 2 related objects were added to all spaces."`,
+      });
+    } else {
+      toastText = i18n.translate('xpack.spaces.shareToSpace.shareSuccessRemoveText', {
+        defaultMessage: `'{object}' {relativesCount, plural, =0 {was} =1 {and {relativesCount} related object were} other {and {relativesCount} related objects were}} removed from {spacesTarget}.`,
+        values: {
+          object: title,
+          relativesCount,
+          spacesTarget: getSpacesTargetString(spacesToRemove),
+        },
+        description: `Uses output of xpack.spaces.shareToSpace.spacesTarget or xpack.spaces.shareToSpace.allSpacesTarget as 'spacesTarget' input. Example strings: "'Finance dashboard' was removed from 1 space.", "'Finance dashboard' and 2 related objects were removed from all spaces."`,
+      });
     }
-    if (spacesToRemove.length > 0) {
-      await spacesManager.shareSavedObjectRemove({ type, id }, spacesToRemove);
-      const isUnsharedFromAllSpaces = spacesToRemove.includes(ALL_SPACES_ID);
-      const spaceTargets = isUnsharedFromAllSpaces ? ALL_SPACES_TARGET : `${spacesToRemove.length}`;
-      const toastText =
-        !isUnsharedFromAllSpaces && spacesToRemove.length === 1
-          ? i18n.translate('xpack.spaces.shareToSpace.shareRemoveSuccessTextSingular', {
-              defaultMessage: `'{object}' was removed from 1 space.`,
-              values: { object: title },
-            })
-          : i18n.translate('xpack.spaces.shareToSpace.shareRemoveSuccessTextPlural', {
-              defaultMessage: `'{object}' was removed from {spaceTargets} spaces.`,
-              values: { object: title, spaceTargets },
-            });
-      if (!isSharedToAllSpaces) {
-        toastNotifications.addSuccess({ title: toastTitle, text: toastText });
-      }
-    }
+    toastNotifications.addSuccess({ title: toastTitle, text: toastText });
   };
 }
 
@@ -120,7 +143,7 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
   const {
     flyoutIcon,
     flyoutTitle = i18n.translate('xpack.spaces.shareToSpace.flyoutTitle', {
-      defaultMessage: 'Edit spaces for {objectNoun}',
+      defaultMessage: 'Assign {objectNoun} to spaces',
       values: { objectNoun: savedObjectTarget.noun },
     }),
     enableCreateCopyCallout = false,
@@ -143,14 +166,18 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
   const [canShareToAllSpaces, setCanShareToAllSpaces] = useState<boolean>(false);
   const [showMakeCopy, setShowMakeCopy] = useState<boolean>(false);
 
-  const [{ isLoading, spaces }, setSpacesState] = useState<{
+  const [{ isLoading, spaces, referenceGraph, aliasTargets }, setSpacesState] = useState<{
     isLoading: boolean;
     spaces: ShareToSpaceTarget[];
-  }>({ isLoading: true, spaces: [] });
+    referenceGraph: SavedObjectReferenceWithContext[];
+    aliasTargets: InternalLegacyUrlAliasTarget[];
+  }>({ isLoading: true, spaces: [], referenceGraph: [], aliasTargets: [] });
   useEffect(() => {
-    const getPermissions = spacesManager.getShareSavedObjectPermissions(savedObjectTarget.type);
-    Promise.all([shareToSpacesDataPromise, getPermissions])
-      .then(([shareToSpacesData, permissions]) => {
+    const { type, id } = savedObjectTarget;
+    const getShareableReferences = spacesManager.getShareableReferences([{ type, id }]);
+    const getPermissions = spacesManager.getShareSavedObjectPermissions(type);
+    Promise.all([shareToSpacesDataPromise, getShareableReferences, getPermissions])
+      .then(([shareToSpacesData, shareableReferences, permissions]) => {
         const activeSpaceId = !enableSpaceAgnosticBehavior && shareToSpacesData.activeSpaceId;
         const selectedSpaceIds = savedObjectTarget.namespaces.filter(
           (spaceId) => spaceId !== activeSpaceId
@@ -163,6 +190,20 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
         setSpacesState({
           isLoading: false,
           spaces: [...shareToSpacesData.spacesMap].map(([, spaceTarget]) => spaceTarget),
+          referenceGraph: shareableReferences.objects,
+          aliasTargets: shareableReferences.objects.reduce<InternalLegacyUrlAliasTarget[]>(
+            (acc, x) => {
+              for (const space of x.spacesWithMatchingAliases ?? []) {
+                if (space !== '?') {
+                  const spaceExists = shareToSpacesData.spacesMap.has(space);
+                  // If the user does not have privileges to view all spaces, they will be redacted; we cannot attempt to disable aliases for redacted spaces.
+                  acc.push({ targetSpace: space, targetType: x.type, sourceId: x.id, spaceExists });
+                }
+              }
+              return acc;
+            },
+            []
+          ),
         });
       })
       .catch((e) => {
@@ -182,7 +223,12 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
 
   const getSelectionChanges = () => {
     if (!spaces.length) {
-      return { isSelectionChanged: false, spacesToAdd: [], spacesToRemove: [] };
+      return {
+        isSelectionChanged: false,
+        spacesToAdd: [],
+        spacesToRemove: [],
+        aliasesToDisable: [],
+      };
     }
     const activeSpaceId =
       !enableSpaceAgnosticBehavior && spaces.find((space) => space.isActiveSpace)!.id;
@@ -218,21 +264,36 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
       : isUnsharedFromAllSpaces
       ? [...activeSpaceArray, ...selectedSpacesToAdd]
       : selectedSpacesToAdd;
+    const spacesToAddSet = new Set(spacesToAdd);
     const spacesToRemove =
       isUnsharedFromAllSpaces || !isSharedToAllSpaces
         ? selectedSpacesToRemove
         : [...activeSpaceArray, ...initialSelection];
-    return { isSelectionChanged, spacesToAdd, spacesToRemove };
+    const aliasesToDisable = isSharedToAllSpaces
+      ? aliasTargets
+      : aliasTargets.filter(({ targetSpace }) => spacesToAddSet.has(targetSpace));
+    return { isSelectionChanged, spacesToAdd, spacesToRemove, aliasesToDisable };
   };
-  const { isSelectionChanged, spacesToAdd, spacesToRemove } = getSelectionChanges();
+  const {
+    isSelectionChanged,
+    spacesToAdd,
+    spacesToRemove,
+    aliasesToDisable,
+  } = getSelectionChanges();
 
+  const [showAliasesToDisable, setShowAliasesToDisable] = useState(false);
   const [shareInProgress, setShareInProgress] = useState(false);
 
   async function startShare() {
     setShareInProgress(true);
     try {
-      await changeSpacesHandler(spacesToAdd, spacesToRemove);
-      onUpdate();
+      if (aliasesToDisable.length) {
+        const aliases = aliasesToDisable.map(({ spaceExists, ...alias }) => alias); // only use 'targetSpace', 'targetType', and 'sourceId' fields
+        await spacesManager.disableLegacyUrlAliases(aliases);
+      }
+      await changeSpacesHandler(referenceGraph, spacesToAdd, spacesToRemove);
+      const updatedObjects = referenceGraph.map(({ type, id }) => ({ type, id })); // only use 'type' and 'id' fields
+      onUpdate(updatedObjects);
       onClose();
     } catch (e) {
       setShareInProgress(false);
@@ -251,27 +312,86 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
       return <EuiLoadingSpinner />;
     }
 
-    // If the object has not been shared yet (e.g., it currently exists in exactly one space), and there is at least one space that we could
-    // share this object to, we want to display a callout to the user that explains the ramifications of shared objects. They might actually
-    // want to make a copy instead, so this callout contains a link that opens the Copy flyout.
-    const showCreateCopyCallout =
-      enableCreateCopyCallout &&
-      spaces.length > 1 &&
-      savedObjectTarget.namespaces.length === 1 &&
-      !arraysAreEqual(savedObjectTarget.namespaces, [ALL_SPACES_ID]);
-    // Step 2: Share has not been initiated yet; User must fill out form to continue.
+    if (!showAliasesToDisable) {
+      // If the object has not been shared yet (e.g., it currently exists in exactly one space), and there is at least one space that we could
+      // share this object to, we want to display a callout to the user that explains the ramifications of shared objects. They might actually
+      // want to make a copy instead, so this callout contains a link that opens the Copy flyout.
+      const showCreateCopyCallout =
+        enableCreateCopyCallout &&
+        spaces.length > 1 &&
+        savedObjectTarget.namespaces.length === 1 &&
+        !arraysAreEqual(savedObjectTarget.namespaces, [ALL_SPACES_ID]);
+      // Step 2: Share has not been initiated yet; User must fill out form to continue.
+      return (
+        <ShareToSpaceForm
+          spaces={spaces}
+          objectNoun={savedObjectTarget.noun}
+          shareOptions={shareOptions}
+          onUpdate={setShareOptions}
+          showCreateCopyCallout={showCreateCopyCallout}
+          canShareToAllSpaces={canShareToAllSpaces}
+          makeCopy={() => setShowMakeCopy(true)}
+          enableCreateNewSpaceLink={enableCreateNewSpaceLink}
+          enableSpaceAgnosticBehavior={enableSpaceAgnosticBehavior}
+        />
+      );
+    }
+
+    return <AliasTable spaces={spaces} aliasesToDisable={aliasesToDisable} />;
+  };
+
+  const getFlyoutFooter = () => {
+    const filteredAliasesToDisable = aliasesToDisable.filter(({ spaceExists }) => spaceExists);
+    const showContinueButton = filteredAliasesToDisable.length && !showAliasesToDisable;
     return (
-      <ShareToSpaceForm
-        spaces={spaces}
-        objectNoun={savedObjectTarget.noun}
-        shareOptions={shareOptions}
-        onUpdate={setShareOptions}
-        showCreateCopyCallout={showCreateCopyCallout}
-        canShareToAllSpaces={canShareToAllSpaces}
-        makeCopy={() => setShowMakeCopy(true)}
-        enableCreateNewSpaceLink={enableCreateNewSpaceLink}
-        enableSpaceAgnosticBehavior={enableSpaceAgnosticBehavior}
-      />
+      <>
+        <RelativesFooter
+          savedObjectTarget={savedObjectTarget}
+          referenceGraph={referenceGraph}
+          isDisabled={isStartShareButtonDisabled}
+        />
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              onClick={() => onClose()}
+              data-test-subj="sts-cancel-button"
+              disabled={shareInProgress}
+            >
+              <FormattedMessage
+                id="xpack.spaces.shareToSpace.cancelButton"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {showContinueButton ? (
+              <EuiButton
+                fill
+                onClick={() => setShowAliasesToDisable(true)}
+                data-test-subj="sts-continue-button"
+                disabled={isStartShareButtonDisabled}
+              >
+                <FormattedMessage
+                  id="xpack.spaces.shareToSpace.continueButton"
+                  defaultMessage="Continue"
+                />
+              </EuiButton>
+            ) : (
+              <EuiButton
+                fill
+                onClick={() => startShare()}
+                data-test-subj="sts-save-button"
+                disabled={isStartShareButtonDisabled}
+              >
+                <FormattedMessage
+                  id="xpack.spaces.shareToSpace.saveButton"
+                  defaultMessage="Save &amp; close"
+                />
+              </EuiButton>
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </>
     );
   };
 
@@ -304,54 +424,33 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <EuiFlexGroup alignItems="center" gutterSize="m">
-          {savedObjectTarget.icon && (
-            <EuiFlexItem grow={false}>
-              <EuiIcon type={savedObjectTarget.icon} />
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem>
-            <EuiText>
-              <p>{savedObjectTarget.title}</p>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
 
-        <EuiHorizontalRule margin="m" />
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="none"
+        className="spcShareToSpace__flyoutBodyWrapper"
+      >
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems="center" gutterSize="m">
+            {savedObjectTarget.icon && (
+              <EuiFlexItem grow={false}>
+                <EuiIcon type={savedObjectTarget.icon} />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem>
+              <EuiText>
+                <p>{savedObjectTarget.title}</p>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+
+        <EuiSpacer size="m" />
 
         {getFlyoutBody()}
-      </EuiFlyoutBody>
+      </EuiFlexGroup>
 
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              onClick={() => onClose()}
-              data-test-subj="sts-cancel-button"
-              disabled={shareInProgress}
-            >
-              <FormattedMessage
-                id="xpack.spaces.shareToSpace.cancelButton"
-                defaultMessage="Cancel"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              onClick={() => startShare()}
-              data-test-subj="sts-initiate-button"
-              disabled={isStartShareButtonDisabled}
-            >
-              <FormattedMessage
-                id="xpack.spaces.shareToSpace.shareToSpacesButton"
-                defaultMessage="Save &amp; close"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
+      <EuiFlyoutFooter>{getFlyoutFooter()}</EuiFlyoutFooter>
     </EuiFlyout>
   );
 };

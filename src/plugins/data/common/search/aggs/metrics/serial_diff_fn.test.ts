@@ -29,6 +29,7 @@ describe('agg_expression_functions', () => {
               "customMetric": undefined,
               "json": undefined,
               "metricAgg": undefined,
+              "timeShift": undefined,
             },
             "schema": undefined,
             "type": "serial_diff",
@@ -54,6 +55,7 @@ describe('agg_expression_functions', () => {
               "customMetric": undefined,
               "json": undefined,
               "metricAgg": "sum",
+              "timeShift": undefined,
             },
             "schema": undefined,
             "type": "serial_diff",
@@ -81,12 +83,14 @@ describe('agg_expression_functions', () => {
               "customMetric": undefined,
               "json": undefined,
               "metricAgg": undefined,
+              "timeShift": undefined,
             },
             "schema": undefined,
             "type": "serial_diff",
           },
           "json": undefined,
           "metricAgg": undefined,
+          "timeShift": undefined,
         }
       `);
     });

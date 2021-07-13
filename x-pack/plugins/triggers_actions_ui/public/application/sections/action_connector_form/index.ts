@@ -15,3 +15,11 @@ export const ConnectorEditFlyout = suspendedComponentWithProps(
   lazy(() => import('./connector_edit_flyout'))
 );
 export const ActionForm = suspendedComponentWithProps(lazy(() => import('./action_form')));
+
+export const ConnectorAddModal = suspendedComponentWithProps(
+  lazy(() => import('./connector_add_modal'))
+);
+
+export const AddConnectorInline = suspendedComponentWithProps(
+  lazy(() => import('./connector_add_inline'))
+);

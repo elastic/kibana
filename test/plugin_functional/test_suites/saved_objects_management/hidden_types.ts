@@ -24,13 +24,13 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   describe('saved objects management with hidden types', () => {
     before(async () => {
       await esArchiver.load(
-        '../functional/fixtures/es_archiver/saved_objects_management/hidden_types'
+        'test/functional/fixtures/es_archiver/saved_objects_management/hidden_types'
       );
     });
 
     after(async () => {
       await esArchiver.unload(
-        '../functional/fixtures/es_archiver/saved_objects_management/hidden_types'
+        'test/functional/fixtures/es_archiver/saved_objects_management/hidden_types'
       );
     });
 

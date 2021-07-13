@@ -7,7 +7,7 @@
 
 import equal from 'fast-deep-equal';
 import { useCallback, useMemo, useState } from 'react';
-import { useAsync } from 'react-use';
+import useAsync from 'react-use/lib/useAsync';
 import { ObjectEntries } from '../../../../common/utility_types';
 import { ChildFormValidationError, GenericValidationError } from './validation_errors';
 

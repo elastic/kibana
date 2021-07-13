@@ -69,7 +69,6 @@ export async function validateJob(
           timeField,
           job.datafeed_config.query,
           job.datafeed_config.runtime_mappings,
-          // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
           job.datafeed_config.indices_options
         );
 

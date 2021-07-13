@@ -6,14 +6,14 @@
  */
 
 import moment from 'moment';
-import {
+import type {
   EndpointEntriesArray,
   EntriesArray,
   Entry,
   EntryMatch,
   EntryNested,
   OsTypeArray,
-} from '@kbn/securitysolution-io-ts-utils';
+} from '@kbn/securitysolution-io-ts-list-types';
 
 export const DATE_NOW = '2020-04-20T15:25:31.830Z';
 export const OLD_DATE_RELATIVE_TO_DATE_NOW = '2020-04-19T15:25:31.830Z';

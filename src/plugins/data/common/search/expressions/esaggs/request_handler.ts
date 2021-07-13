@@ -9,15 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { Adapters } from 'src/plugins/inspector/common';
 
-import {
-  calculateBounds,
-  Filter,
-  getTime,
-  IndexPattern,
-  isRangeFilter,
-  Query,
-  TimeRange,
-} from '../../../../common';
+import { calculateBounds, Filter, IndexPattern, Query, TimeRange } from '../../../../common';
 
 import { IAggConfigs } from '../../aggs';
 import { ISearchStartSearchSource } from '../../search_source';
@@ -70,8 +62,15 @@ export const handleRequest = async ({
   const timeFilterSearchSource = searchSource.createChild({ callParentStartHandlers: true });
   const requestSearchSource = timeFilterSearchSource.createChild({ callParentStartHandlers: true });
 
+  // If timeFields have been specified, use the specified ones, otherwise use primary time field of index
+  // pattern if it's available.
+  const defaultTimeField = indexPattern?.getTimeField?.();
+  const defaultTimeFields = defaultTimeField ? [defaultTimeField.name] : [];
+  const allTimeFields = timeFields && timeFields.length > 0 ? timeFields : defaultTimeFields;
+
   aggs.setTimeRange(timeRange as TimeRange);
-  aggs.setTimeFields(timeFields);
+  aggs.setForceNow(forceNow);
+  aggs.setTimeFields(allTimeFields);
 
   // For now we need to mirror the history of the passed search source, since
   // the request inspector wouldn't work otherwise.
@@ -90,19 +89,11 @@ export const handleRequest = async ({
     return aggs.onSearchRequestStart(paramSearchSource, options);
   });
 
-  // If timeFields have been specified, use the specified ones, otherwise use primary time field of index
-  // pattern if it's available.
-  const defaultTimeField = indexPattern?.getTimeField?.();
-  const defaultTimeFields = defaultTimeField ? [defaultTimeField.name] : [];
-  const allTimeFields = timeFields && timeFields.length > 0 ? timeFields : defaultTimeFields;
-
   // If a timeRange has been specified and we had at least one timeField available, create range
   // filters for that those time fields
   if (timeRange && allTimeFields.length > 0) {
     timeFilterSearchSource.setField('filter', () => {
-      return allTimeFields
-        .map((fieldName) => getTime(indexPattern, timeRange, { fieldName, forceNow }))
-        .filter(isRangeFilter);
+      return aggs.getSearchSourceTimeFilter(forceNow);
     });
   }
 

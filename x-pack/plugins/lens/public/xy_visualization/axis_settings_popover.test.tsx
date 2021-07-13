@@ -32,6 +32,8 @@ describe('Axes Settings', () => {
       toggleAxisTitleVisibility: jest.fn(),
       toggleTickLabelsVisibility: jest.fn(),
       toggleGridlinesVisibility: jest.fn(),
+      hasBarOrAreaOnAxis: false,
+      hasPercentageAxis: false,
     };
   });
 
@@ -90,5 +92,27 @@ describe('Axes Settings', () => {
       <AxisSettingsPopover {...props} endzonesVisible={true} setEndzoneVisibility={() => {}} />
     );
     expect(component.find('[data-test-subj="lnsshowEndzones"]').prop('checked')).toBe(true);
+  });
+
+  describe('axis extent', () => {
+    it('hides the extent section if no extent is passed in', () => {
+      const component = shallow(<AxisSettingsPopover {...props} />);
+      expect(component.find('[data-test-subj="lnsXY_axisBounds_groups"]').length).toBe(0);
+    });
+
+    it('renders bound inputs if mode is custom', () => {
+      const setSpy = jest.fn();
+      const component = shallow(
+        <AxisSettingsPopover
+          {...props}
+          extent={{ mode: 'custom', lowerBound: 123, upperBound: 456 }}
+          setExtent={setSpy}
+        />
+      );
+      const lower = component.find('[data-test-subj="lnsXY_axisExtent_lowerBound"]');
+      const upper = component.find('[data-test-subj="lnsXY_axisExtent_upperBound"]');
+      expect(lower.prop('value')).toEqual(123);
+      expect(upper.prop('value')).toEqual(456);
+    });
   });
 });

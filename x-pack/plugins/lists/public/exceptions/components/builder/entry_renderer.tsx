@@ -8,23 +8,16 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import styled from 'styled-components';
-import { OsTypeArray } from '@kbn/securitysolution-io-ts-utils';
-
-import { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
-import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/common';
-import { HttpStart } from '../../../../../../../src/core/public';
-import { FieldComponent } from '../autocomplete/field';
-import { OperatorComponent } from '../autocomplete/operator';
-import { OperatorOption } from '../autocomplete/types';
-import { EXCEPTION_OPERATORS_ONLY_LISTS } from '../autocomplete/operators';
-import { AutocompleteFieldExistsComponent } from '../autocomplete/field_value_exists';
-import { AutocompleteFieldMatchComponent } from '../autocomplete/field_value_match';
-import { AutocompleteFieldMatchAnyComponent } from '../autocomplete/field_value_match_any';
-import { AutocompleteFieldListsComponent } from '../autocomplete/field_value_lists';
-import { ExceptionListType, ListSchema, OperatorTypeEnum } from '../../../../common';
-import { getEmptyValue } from '../../../common/empty_value';
-
 import {
+  ExceptionListType,
+  ListSchema,
+  ListOperatorTypeEnum as OperatorTypeEnum,
+  OsTypeArray,
+} from '@kbn/securitysolution-io-ts-list-types';
+import {
+  BuilderEntry,
+  EXCEPTION_OPERATORS_ONLY_LISTS,
+  FormattedBuilderEntry,
   getEntryOnFieldChange,
   getEntryOnListChange,
   getEntryOnMatchAnyChange,
@@ -32,8 +25,20 @@ import {
   getEntryOnOperatorChange,
   getFilteredIndexPatterns,
   getOperatorOptions,
-} from './helpers';
-import { BuilderEntry, FormattedBuilderEntry } from './types';
+} from '@kbn/securitysolution-list-utils';
+
+import { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
+import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/common';
+import { HttpStart } from '../../../../../../../src/core/public';
+import { FieldComponent } from '../autocomplete/field';
+import { OperatorComponent } from '../autocomplete/operator';
+import { OperatorOption } from '../autocomplete/types';
+import { AutocompleteFieldExistsComponent } from '../autocomplete/field_value_exists';
+import { AutocompleteFieldMatchComponent } from '../autocomplete/field_value_match';
+import { AutocompleteFieldMatchAnyComponent } from '../autocomplete/field_value_match_any';
+import { AutocompleteFieldListsComponent } from '../autocomplete/field_value_lists';
+import { getEmptyValue } from '../../../common/empty_value';
+
 import * as i18n from './translations';
 
 const MyValuesInput = styled(EuiFlexItem)`

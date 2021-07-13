@@ -16,21 +16,11 @@ import {
 import { APMConfig } from '../../..';
 import { APMRouteHandlerResources } from '../../../routes/typings';
 import { withApmSpan } from '../../../utils/with_apm_span';
+import { ApmIndicesConfig } from '../../../../../observability/common/typings';
+
+export { ApmIndicesConfig };
 
 type ISavedObjectsClient = Pick<SavedObjectsClient, 'get'>;
-
-export interface ApmIndicesConfig {
-  /* eslint-disable @typescript-eslint/naming-convention */
-  'apm_oss.sourcemapIndices': string;
-  'apm_oss.errorIndices': string;
-  'apm_oss.onboardingIndices': string;
-  'apm_oss.spanIndices': string;
-  'apm_oss.transactionIndices': string;
-  'apm_oss.metricsIndices': string;
-  /* eslint-enable @typescript-eslint/naming-convention */
-  apmAgentConfigurationIndex: string;
-  apmCustomLinkIndex: string;
-}
 
 export type ApmIndicesName = keyof ApmIndicesConfig;
 

@@ -1,0 +1,19 @@
+$euiSideNavEmphasizedBackgroundColor: transparentize($euiColorLightShade, .7);
+
+.kbnPageTemplateSolutionNav {
+  @include euiYScroll;
+
+  @include euiBreakpoint('m' ,'l', 'xl') {
+    width: 248px;
+    padding: $euiSizeL;
+  }
+}
+
+.kbnPageTemplateSolutionNav--hidden {
+  pointer-events: none;
+  opacity: 0;
+
+  @include euiCanAnimate {
+    transition: opacity $euiAnimSpeedFast $euiAnimSlightResistance;
+  }
+}

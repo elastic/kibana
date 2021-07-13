@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions } from '../../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 import '../../../../__mocks__/shallow_useeffect.mock';
+import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { Loading } from '../../../../shared/loading';
+import { EuiCallOut } from '@elastic/eui';
+
+import { MetaEnginesSchemaTable, MetaEnginesConflictsTable } from '../components';
 
 import { MetaEngineSchema } from './';
 
@@ -33,8 +36,7 @@ describe('MetaEngineSchema', () => {
   it('renders', () => {
     const wrapper = shallow(<MetaEngineSchema />);
 
-    expect(wrapper.isEmptyRender()).toBe(false);
-    // TODO: Check for schema components
+    expect(wrapper.find(MetaEnginesSchemaTable)).toHaveLength(1);
   });
 
   it('calls loadSchema on mount', () => {
@@ -43,10 +45,11 @@ describe('MetaEngineSchema', () => {
     expect(actions.loadSchema).toHaveBeenCalled();
   });
 
-  it('renders a loading state', () => {
-    setMockValues({ ...values, dataLoading: true });
+  it('renders an inactive fields callout & table when source engines have schema conflicts', () => {
+    setMockValues({ ...values, hasConflicts: true, conflictingFieldsCount: 5 });
     const wrapper = shallow(<MetaEngineSchema />);
 
-    expect(wrapper.find(Loading)).toHaveLength(1);
+    expect(wrapper.find(EuiCallOut)).toHaveLength(1);
+    expect(wrapper.find(MetaEnginesConflictsTable)).toHaveLength(1);
   });
 });

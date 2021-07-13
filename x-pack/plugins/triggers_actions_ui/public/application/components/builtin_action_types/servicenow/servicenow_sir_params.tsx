@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiFormRow,
   EuiSelect,
@@ -142,7 +142,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
   }, [actionParams]);
 
   return (
-    <Fragment>
+    <>
       <EuiTitle size="s">
         <h3>{i18n.INCIDENT}</h3>
       </EuiTitle>
@@ -151,6 +151,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
         fullWidth
         error={errors['subActionParams.incident.short_description']}
         isInvalid={
+          errors['subActionParams.incident.short_description'] !== undefined &&
           errors['subActionParams.incident.short_description'].length > 0 &&
           incident.short_description !== undefined
         }
@@ -276,7 +277,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
         inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
         label={i18n.COMMENTS_LABEL}
       />
-    </Fragment>
+    </>
   );
 };
 

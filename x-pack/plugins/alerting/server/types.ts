@@ -32,6 +32,7 @@ import {
   AlertNotifyWhenType,
   WithoutReservedActionGroups,
   ActionVariable,
+  SanitizedRuleConfig,
 } from '../common';
 import { LicenseType } from '../../licensing/server';
 
@@ -89,6 +90,7 @@ export interface AlertExecutorOptions<
   services: AlertServices<InstanceState, InstanceContext, ActionGroupIds>;
   params: Params;
   state: State;
+  rule: SanitizedRuleConfig;
   spaceId: string;
   namespace?: string;
   name: string;
@@ -144,6 +146,7 @@ export interface AlertType<
     params?: ActionVariable[];
   };
   minimumLicenseRequired: LicenseType;
+  isExportable: boolean;
 }
 
 export type UntypedAlertType = AlertType<

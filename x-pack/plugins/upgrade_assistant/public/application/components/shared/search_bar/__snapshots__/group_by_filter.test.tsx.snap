@@ -10,14 +10,14 @@ exports[`GroupByFilter renders 1`] = `
       key="message"
       onClick={[Function]}
     >
-      by issue
+      By issue
     </EuiFilterButton>
     <EuiFilterButton
       hasActiveFilters={false}
       key="index"
       onClick={[Function]}
     >
-      by index
+      By index
     </EuiFilterButton>
   </EuiFilterGroup>
 </EuiFlexItem>

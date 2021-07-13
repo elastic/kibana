@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export * from './alerts_authorization';
-export * from './alerts_authorization_kuery';
+export * from './alerting_authorization';
+export * from './alerting_authorization_kuery';

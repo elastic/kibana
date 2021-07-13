@@ -14,26 +14,32 @@ export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
     description: {
       type: 'text',
     },
-    name: {
-      type: 'text',
+    id: {
+      type: 'keyword',
     },
     query: {
       type: 'text',
     },
-    created: {
+    created_at: {
       type: 'date',
     },
-    createdBy: {
-      type: 'text',
+    created_by: {
+      type: 'keyword',
     },
     platform: {
       type: 'keyword',
     },
-    updated: {
+    version: {
+      type: 'keyword',
+    },
+    updated_at: {
       type: 'date',
     },
-    updatedBy: {
-      type: 'text',
+    updated_by: {
+      type: 'keyword',
+    },
+    interval: {
+      type: 'keyword',
     },
   },
 };
@@ -41,7 +47,7 @@ export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
 export const savedQueryType: SavedObjectsType = {
   name: savedQuerySavedObjectType,
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
   mappings: savedQuerySavedObjectMappings,
 };
 
@@ -51,19 +57,19 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
       type: 'text',
     },
     name: {
-      type: 'text',
+      type: 'keyword',
     },
-    created: {
+    created_at: {
       type: 'date',
     },
-    createdBy: {
-      type: 'text',
+    created_by: {
+      type: 'keyword',
     },
-    updated: {
+    updated_at: {
       type: 'date',
     },
-    updatedBy: {
-      type: 'text',
+    updated_by: {
+      type: 'keyword',
     },
     queries: {
       properties: {
@@ -71,7 +77,7 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
           type: 'keyword',
         },
         interval: {
-          type: 'text',
+          type: 'keyword',
         },
       },
     },
@@ -81,6 +87,6 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
 export const packType: SavedObjectsType = {
   name: packSavedObjectType,
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
   mappings: packSavedObjectMappings,
 };

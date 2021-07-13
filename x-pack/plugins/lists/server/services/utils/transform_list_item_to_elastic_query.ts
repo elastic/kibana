@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { Type } from '@kbn/securitysolution-io-ts-utils';
+import type { SerializerOrUndefined, Type } from '@kbn/securitysolution-io-ts-list-types';
 
-import { SerializerOrUndefined } from '../../../common/schemas';
 import {
   EsDataTypeGeoPoint,
   EsDataTypeGeoShape,

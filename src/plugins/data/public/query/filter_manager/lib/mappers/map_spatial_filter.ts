@@ -22,5 +22,18 @@ export const mapSpatialFilter = (filter: Filter) => {
       value: '',
     };
   }
+
+  if (
+    filter.meta &&
+    filter.meta.type === FILTERS.SPATIAL_FILTER &&
+    filter.meta.isMultiIndex &&
+    filter.query?.bool?.should
+  ) {
+    return {
+      key: 'query',
+      type: filter.meta.type,
+      value: '',
+    };
+  }
   throw filter;
 };

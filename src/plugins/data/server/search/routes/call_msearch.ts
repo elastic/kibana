@@ -8,7 +8,8 @@
 
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { IUiSettingsClient, IScopedClusterClient, SharedGlobalConfig } from 'src/core/server';
+import type { IUiSettingsClient, IScopedClusterClient, SharedGlobalConfig } from 'src/core/server';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { MsearchRequestBody, MsearchResponse } from '../../../common/search/search_source';
 import { getKbnServerError } from '../../../../kibana_utils/server';
@@ -78,7 +79,9 @@ export function getCallMsearch(dependencies: CallMsearchDependencies) {
         body: {
           ...response,
           body: {
-            responses: response.body.responses?.map((r) => shimHitsTotal(r)),
+            responses: response.body.responses?.map((r) =>
+              shimHitsTotal(r as estypes.SearchResponse<unknown>)
+            ),
           },
         },
       };

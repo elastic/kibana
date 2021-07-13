@@ -9,7 +9,7 @@ import { ExceptionListClient } from '../../../../../lists/server';
 import { listMock } from '../../../../../lists/server/mocks';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { EntriesArray, EntryList } from '@kbn/securitysolution-io-ts-utils';
+import type { EntriesArray, EntryList } from '@kbn/securitysolution-io-ts-list-types';
 import {
   buildArtifact,
   getEndpointExceptionList,
@@ -18,7 +18,10 @@ import {
 } from './lists';
 import { TranslatedEntry, TranslatedExceptionListItem } from '../../schemas/artifacts';
 import { ArtifactConstants } from './common';
-import { ENDPOINT_LIST_ID, ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common';
+import {
+  ENDPOINT_LIST_ID,
+  ENDPOINT_TRUSTED_APPS_LIST_ID,
+} from '@kbn/securitysolution-list-constants';
 
 describe('artifacts lists', () => {
   let mockExceptionClient: ExceptionListClient;

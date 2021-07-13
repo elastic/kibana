@@ -36,7 +36,7 @@ export default ({ getService }: FtrProviderContext) => {
     beforeEach(async () => {
       await createSignalsIndex(supertest);
       await createListsIndex(supertest);
-      await esArchiver.load('rule_exceptions/keyword_as_array');
+      await esArchiver.load('x-pack/test/functional/es_archives/rule_exceptions/keyword_as_array');
     });
 
     afterEach(async () => {
@@ -44,7 +44,9 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllAlerts(supertest);
       await deleteAllExceptions(es);
       await deleteListsIndex(supertest);
-      await esArchiver.unload('rule_exceptions/keyword_as_array');
+      await esArchiver.unload(
+        'x-pack/test/functional/es_archives/rule_exceptions/keyword_as_array'
+      );
     });
 
     describe('"is" operator', () => {

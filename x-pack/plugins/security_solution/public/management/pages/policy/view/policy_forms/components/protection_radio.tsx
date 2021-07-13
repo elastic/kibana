@@ -14,7 +14,7 @@ import {
   ProtectionModes,
   UIPolicyConfig,
 } from '../../../../../../../common/endpoint/types';
-import { MacPolicyProtection, PolicyProtection } from '../../../types';
+import { MacPolicyProtection, LinuxPolicyProtection, PolicyProtection } from '../../../types';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import { policyConfig } from '../../../store/policy_details/selectors';
 import { AppAction } from '../../../../../../common/store/actions';
@@ -46,6 +46,8 @@ export const ProtectionRadio = React.memo(
             newPayload[os][protection].mode = protectionMode;
           } else if (os === 'mac') {
             newPayload[os][protection as MacPolicyProtection].mode = protectionMode;
+          } else if (os === 'linux') {
+            newPayload[os][protection as LinuxPolicyProtection].mode = protectionMode;
           }
           if (isPlatinumPlus) {
             if (os === 'windows') {
@@ -59,6 +61,12 @@ export const ProtectionRadio = React.memo(
                 newPayload[os].popup[protection as MacPolicyProtection].enabled = true;
               } else {
                 newPayload[os].popup[protection as MacPolicyProtection].enabled = false;
+              }
+            } else if (os === 'linux') {
+              if (protectionMode === ProtectionModes.prevent) {
+                newPayload[os].popup[protection as LinuxPolicyProtection].enabled = true;
+              } else {
+                newPayload[os].popup[protection as LinuxPolicyProtection].enabled = false;
               }
             }
           }

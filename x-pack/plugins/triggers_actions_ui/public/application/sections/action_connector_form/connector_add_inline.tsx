@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -68,7 +68,7 @@ export const AddConnectorInline = ({
 
   const noConnectorsLabel = (
     <FormattedMessage
-      id="xpack.triggersActionsUI.sections.alertForm.emptyConnectorsLabel"
+      id="xpack.triggersActionsUI.sections.connectorAddInline.emptyConnectorsLabel"
       defaultMessage="No {actionTypeName} connectors"
       values={{
         actionTypeName,
@@ -79,8 +79,8 @@ export const AddConnectorInline = ({
   const unableToLoadConnectorLabel = (
     <EuiText color="danger">
       <FormattedMessage
-        id="xpack.triggersActionsUI.sections.alertForm.unableToLoadConnectorTitle"
-        defaultMessage="Unable to load connector."
+        id="xpack.triggersActionsUI.sections.connectorAddInline.unableToLoadConnectorTitle"
+        defaultMessage="Unable to load connector"
       />
     </EuiText>
   );
@@ -117,7 +117,7 @@ export const AddConnectorInline = ({
           fullWidth
           label={
             <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertForm.connectorAddInline.actionIdLabel"
+              id="xpack.triggersActionsUI.sections.connectorAddInline.connectorAddInline.actionIdLabel"
               defaultMessage="Use another {connectorInstance} connector"
               values={{
                 connectorInstance: actionTypeName,
@@ -132,7 +132,7 @@ export const AddConnectorInline = ({
             >
               <FormattedMessage
                 defaultMessage="Add connector"
-                id="xpack.triggersActionsUI.sections.alertForm.connectorAddInline.addNewConnectorEmptyButton"
+                id="xpack.triggersActionsUI.sections.connectorAddInline.connectorAddInline.addNewConnectorEmptyButton"
               />
             </EuiButtonEmpty>
           }
@@ -162,8 +162,9 @@ export const AddConnectorInline = ({
   );
 
   return (
-    <Fragment key={index}>
+    <>
       <EuiAccordion
+        key={index}
         initialIsOpen={true}
         id={index.toString()}
         className="actAccordionActionForm"
@@ -179,7 +180,7 @@ export const AddConnectorInline = ({
                 <div>
                   <FormattedMessage
                     defaultMessage="{actionConnectorName}"
-                    id="xpack.triggersActionsUI.sections.alertForm.newAlertActionTypeEditTitle"
+                    id="xpack.triggersActionsUI.sections.connectorAddInline.newAlertActionTypeEditTitle"
                     values={{
                       actionConnectorName: actionTypeRegistered.actionTypeTitle,
                     }}
@@ -196,8 +197,8 @@ export const AddConnectorInline = ({
                   data-test-subj={`alertActionAccordionErrorTooltip`}
                   content={
                     <FormattedMessage
-                      defaultMessage="Unable to load connector."
-                      id="xpack.triggersActionsUI.sections.alertForm.unableToLoadConnectorTitle'"
+                      defaultMessage="Unable to load connector"
+                      id="xpack.triggersActionsUI.sections.connectorAddInline.unableToLoadConnectorTitle'"
                     />
                   }
                 />
@@ -211,7 +212,7 @@ export const AddConnectorInline = ({
             color="danger"
             className="actAccordionActionForm__extraAction"
             aria-label={i18n.translate(
-              'xpack.triggersActionsUI.sections.alertForm.accordion.deleteIconAriaLabel',
+              'xpack.triggersActionsUI.sections.connectorAddInline.accordion.deleteIconAriaLabel',
               {
                 defaultMessage: 'Delete',
               }
@@ -236,7 +237,7 @@ export const AddConnectorInline = ({
                   onClick={onAddConnector}
                 >
                   <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.alertForm.addConnectorButtonLabel"
+                    id="xpack.triggersActionsUI.sections.connectorAddInline.addConnectorButtonLabel"
                     defaultMessage="Create a connector"
                   />
                 </EuiButton>
@@ -247,7 +248,7 @@ export const AddConnectorInline = ({
           <EuiCallOut title={noConnectorsLabel}>
             <p>
               <FormattedMessage
-                id="xpack.triggersActionsUI.sections.alertForm.unauthorizedToCreateForEmptyConnectors"
+                id="xpack.triggersActionsUI.sections.connectorAddInline.unauthorizedToCreateForEmptyConnectors"
                 defaultMessage="Only authorized users can configure a connector. Contact your administrator."
               />
             </p>
@@ -255,6 +256,9 @@ export const AddConnectorInline = ({
         )}
       </EuiAccordion>
       <EuiSpacer size="xs" />
-    </Fragment>
+    </>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { AddConnectorInline as default };

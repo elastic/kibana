@@ -42,6 +42,7 @@ describe('esaggs expression function - public', () => {
         toDsl: jest.fn().mockReturnValue({ aggs: {} }),
         onSearchRequestStart: jest.fn(),
         setTimeFields: jest.fn(),
+        setForceNow: jest.fn(),
       } as unknown) as jest.Mocked<IAggConfigs>,
       filters: undefined,
       indexPattern: ({ id: 'logstash-*' } as unknown) as jest.Mocked<IndexPattern>,

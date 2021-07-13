@@ -3,9 +3,11 @@
 exports[`EmptyIndexPatternPrompt should render normally 1`] = `
 <EuiPageContent
   className="inpEmptyIndexPatternPrompt"
+  color="subdued"
   data-test-subj="emptyIndexPatternPrompt"
   grow={false}
   horizontalPosition="center"
+  verticalPosition="center"
 >
   <EuiFlexGroup
     alignItems="center"

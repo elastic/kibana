@@ -12,10 +12,17 @@
         opacity: 1;
       }
 
+      rect.selected-interval {
+        fill: rgba(200, 200, 200, .1);
+        stroke: $euiColorDarkShade;
+        stroke-width: $euiSizeXS / 2;
+        stroke-opacity: .8;
+      }
+
       rect.scheduled-event-marker {
         stroke-width: 1px;
-        stroke: $euiColorLightShade;
-        fill: $euiColorLightestShade;
+        stroke: $euiColorDarkShade;
+        fill: $euiColorLightShade;
         pointer-events: none;
       }
     }

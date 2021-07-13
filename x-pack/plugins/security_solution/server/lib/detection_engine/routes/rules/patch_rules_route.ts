@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { transformError } from '@kbn/securitysolution-es-utils';
+import { RuleDataClient } from '../../../../../../rule_registry/server';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { patchRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/patch_rules_type_dependents';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
@@ -18,7 +20,8 @@ import { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwHttpError } from '../../../machine_learning/validation';
 import { patchRules } from '../../rules/patch_rules';
-import { transformError, buildSiemResponse } from '../utils';
+import { buildSiemResponse } from '../utils';
+
 import { getIdError } from './utils';
 import { transformValidate } from './validate';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
@@ -26,7 +29,11 @@ import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_s
 import { readRules } from '../../rules/read_rules';
 import { PartialFilter } from '../../types';
 
-export const patchRulesRoute = (router: SecuritySolutionPluginRouter, ml: SetupPlugins['ml']) => {
+export const patchRulesRoute = (
+  router: SecuritySolutionPluginRouter,
+  ml: SetupPlugins['ml'],
+  ruleDataClient?: RuleDataClient | null
+) => {
   router.patch(
     {
       path: DETECTION_ENGINE_RULES_URL,

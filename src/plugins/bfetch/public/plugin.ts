@@ -7,12 +7,11 @@
  */
 
 import { CoreStart, PluginInitializerContext, CoreSetup, Plugin } from 'src/core/public';
+import { from, Observable, of } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import { fetchStreaming as fetchStreamingStatic, FetchStreamingParams } from './streaming';
-import { removeLeadingSlash } from '../common';
-import {
-  createStreamingBatchedFunction,
-  StreamingBatchedFunctionParams,
-} from './batching/create_streaming_batched_function';
+import { DISABLE_BFETCH_COMPRESSION, removeLeadingSlash } from '../common';
+import { createStreamingBatchedFunction, StreamingBatchedFunctionParams } from './batching';
 import { BatchedFunc } from './batching/types';
 
 // eslint-disable-next-line
@@ -43,12 +42,23 @@ export class BfetchPublicPlugin
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, plugins: BfetchPublicSetupDependencies): BfetchPublicSetup {
+  public setup(
+    core: CoreSetup<any, any>,
+    plugins: BfetchPublicSetupDependencies
+  ): BfetchPublicSetup {
     const { version } = this.initializerContext.env.packageInfo;
     const basePath = core.http.basePath.get();
 
-    const fetchStreaming = this.fetchStreaming(version, basePath);
-    const batchedFunction = this.batchedFunction(fetchStreaming);
+    const compressionDisabled$ = from(core.getStartServices()).pipe(
+      switchMap((deps) => {
+        return of(deps[0]);
+      }),
+      switchMap((coreStart) => {
+        return coreStart.uiSettings.get$<boolean>(DISABLE_BFETCH_COMPRESSION);
+      })
+    );
+    const fetchStreaming = this.fetchStreaming(version, basePath, compressionDisabled$);
+    const batchedFunction = this.batchedFunction(fetchStreaming, compressionDisabled$);
 
     this.contract = {
       fetchStreaming,
@@ -66,7 +76,8 @@ export class BfetchPublicPlugin
 
   private fetchStreaming = (
     version: string,
-    basePath: string
+    basePath: string,
+    compressionDisabled$: Observable<boolean>
   ): BfetchPublicSetup['fetchStreaming'] => (params) =>
     fetchStreamingStatic({
       ...params,
@@ -76,13 +87,16 @@ export class BfetchPublicPlugin
         'kbn-version': version,
         ...(params.headers || {}),
       },
+      compressionDisabled$,
     });
 
   private batchedFunction = (
-    fetchStreaming: BfetchPublicContract['fetchStreaming']
+    fetchStreaming: BfetchPublicContract['fetchStreaming'],
+    compressionDisabled$: Observable<boolean>
   ): BfetchPublicContract['batchedFunction'] => (params) =>
     createStreamingBatchedFunction({
       ...params,
+      compressionDisabled$,
       fetchStreaming: params.fetchStreaming || fetchStreaming,
     });
 }

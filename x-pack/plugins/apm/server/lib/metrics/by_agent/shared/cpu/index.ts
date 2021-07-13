@@ -7,7 +7,6 @@
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
-import { withApmSpan } from '../../../../../utils/with_apm_span';
 import {
   METRIC_SYSTEM_CPU_PERCENT,
   METRIC_PROCESS_CPU_PERCENT,
@@ -66,20 +65,19 @@ export function getCPUChartData({
   serviceName: string;
   serviceNodeName?: string;
 }) {
-  return withApmSpan('get_cpu_metric_charts', () =>
-    fetchAndTransformMetrics({
-      environment,
-      kuery,
-      setup,
-      serviceName,
-      serviceNodeName,
-      chartBase,
-      aggs: {
-        systemCPUAverage: { avg: { field: METRIC_SYSTEM_CPU_PERCENT } },
-        systemCPUMax: { max: { field: METRIC_SYSTEM_CPU_PERCENT } },
-        processCPUAverage: { avg: { field: METRIC_PROCESS_CPU_PERCENT } },
-        processCPUMax: { max: { field: METRIC_PROCESS_CPU_PERCENT } },
-      },
-    })
-  );
+  return fetchAndTransformMetrics({
+    environment,
+    kuery,
+    setup,
+    serviceName,
+    serviceNodeName,
+    chartBase,
+    aggs: {
+      systemCPUAverage: { avg: { field: METRIC_SYSTEM_CPU_PERCENT } },
+      systemCPUMax: { max: { field: METRIC_SYSTEM_CPU_PERCENT } },
+      processCPUAverage: { avg: { field: METRIC_PROCESS_CPU_PERCENT } },
+      processCPUMax: { max: { field: METRIC_PROCESS_CPU_PERCENT } },
+    },
+    operationName: 'get_cpu_metric_charts',
+  });
 }

@@ -13,77 +13,88 @@ import { promisify } from 'util';
 import del from 'del';
 
 import { comparePngs } from '../lib/compare_pngs';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext, FtrService } from '../../ftr_provider_context';
 import { WebElementWrapper } from '../lib/web_element_wrapper';
 
 const mkdirAsync = promisify(mkdir);
 const writeFileAsync = promisify(writeFile);
 
-export async function ScreenshotsProvider({ getService }: FtrProviderContext) {
-  const log = getService('log');
-  const config = getService('config');
-  const failureMetadata = getService('failureMetadata');
-  const browser = getService('browser');
+export class ScreenshotsService extends FtrService {
+  private readonly log = this.ctx.getService('log');
+  private readonly config = this.ctx.getService('config');
+  private readonly failureMetadata = this.ctx.getService('failureMetadata');
+  private readonly browser = this.ctx.getService('browser');
 
-  const SESSION_DIRECTORY = resolve(config.get('screenshots.directory'), 'session');
-  const FAILURE_DIRECTORY = resolve(config.get('screenshots.directory'), 'failure');
-  const BASELINE_DIRECTORY = resolve(config.get('screenshots.directory'), 'baseline');
+  private readonly SESSION_DIRECTORY = resolve(this.config.get('screenshots.directory'), 'session');
+  private readonly FAILURE_DIRECTORY = resolve(this.config.get('screenshots.directory'), 'failure');
+  private readonly BASELINE_DIRECTORY = resolve(
+    this.config.get('screenshots.directory'),
+    'baseline'
+  );
 
-  if (process.env.CI !== 'true' && !process.env.stack_functional_integration) {
-    await del([SESSION_DIRECTORY, FAILURE_DIRECTORY]);
-  }
+  constructor(ctx: FtrProviderContext) {
+    super(ctx);
 
-  class Screenshots {
-    /**
-     *
-     * @param name {string} name of the file to use for comparison
-     * @param updateBaselines {boolean} optional, pass true to update the baseline snapshot.
-     * @return {Promise.<number>} Percentage difference between the baseline and the current snapshot.
-     */
-    async compareAgainstBaseline(name: string, updateBaselines: boolean, el?: WebElementWrapper) {
-      log.debug('compareAgainstBaseline');
-      const sessionPath = resolve(SESSION_DIRECTORY, `${name}.png`);
-      await this._take(sessionPath, el);
-
-      const baselinePath = resolve(BASELINE_DIRECTORY, `${name}.png`);
-      const failurePath = resolve(FAILURE_DIRECTORY, `${name}.png`);
-
-      if (updateBaselines) {
-        log.debug('Updating baseline snapshot');
-        // Make the directory if it doesn't exist
-        await mkdirAsync(dirname(baselinePath), { recursive: true });
-        await writeFileAsync(baselinePath, readFileSync(sessionPath));
-        return 0;
-      } else {
-        await mkdirAsync(FAILURE_DIRECTORY, { recursive: true });
-        return await comparePngs(sessionPath, baselinePath, failurePath, SESSION_DIRECTORY, log);
-      }
-    }
-
-    async take(name: string, el?: WebElementWrapper) {
-      const path = resolve(SESSION_DIRECTORY, `${name}.png`);
-      await this._take(path, el);
-      failureMetadata.addScreenshot(name, path);
-    }
-
-    async takeForFailure(name: string, el?: WebElementWrapper) {
-      const path = resolve(FAILURE_DIRECTORY, `${name}.png`);
-      await this._take(path, el);
-      failureMetadata.addScreenshot(`failure[${name}]`, path);
-    }
-
-    async _take(path: string, el?: WebElementWrapper) {
-      try {
-        log.info(`Taking screenshot "${path}"`);
-        const screenshot = await (el ? el.takeScreenshot() : browser.takeScreenshot());
-        await mkdirAsync(dirname(path), { recursive: true });
-        await writeFileAsync(path, screenshot, 'base64');
-      } catch (err) {
-        log.error('SCREENSHOT FAILED');
-        log.error(err);
-      }
+    if (process.env.CI !== 'true' && !process.env.stack_functional_integration) {
+      ctx.getService('lifecycle').beforeTests.add(async () => {
+        await del([this.SESSION_DIRECTORY, this.FAILURE_DIRECTORY]);
+      });
     }
   }
 
-  return new Screenshots();
+  /**
+   *
+   * @param name {string} name of the file to use for comparison
+   * @param updateBaselines {boolean} optional, pass true to update the baseline snapshot.
+   * @return {Promise.<number>} Percentage difference between the baseline and the current snapshot.
+   */
+  async compareAgainstBaseline(name: string, updateBaselines: boolean, el?: WebElementWrapper) {
+    this.log.debug('compareAgainstBaseline');
+    const sessionPath = resolve(this.SESSION_DIRECTORY, `${name}.png`);
+    await this.capture(sessionPath, el);
+
+    const baselinePath = resolve(this.BASELINE_DIRECTORY, `${name}.png`);
+    const failurePath = resolve(this.FAILURE_DIRECTORY, `${name}.png`);
+
+    if (updateBaselines) {
+      this.log.debug('Updating baseline snapshot');
+      // Make the directory if it doesn't exist
+      await mkdirAsync(dirname(baselinePath), { recursive: true });
+      await writeFileAsync(baselinePath, readFileSync(sessionPath));
+      return 0;
+    } else {
+      await mkdirAsync(this.FAILURE_DIRECTORY, { recursive: true });
+      return await comparePngs(
+        sessionPath,
+        baselinePath,
+        failurePath,
+        this.SESSION_DIRECTORY,
+        this.log
+      );
+    }
+  }
+
+  async take(name: string, el?: WebElementWrapper) {
+    const path = resolve(this.SESSION_DIRECTORY, `${name}.png`);
+    await this.capture(path, el);
+    this.failureMetadata.addScreenshot(name, path);
+  }
+
+  async takeForFailure(name: string, el?: WebElementWrapper) {
+    const path = resolve(this.FAILURE_DIRECTORY, `${name}.png`);
+    await this.capture(path, el);
+    this.failureMetadata.addScreenshot(`failure[${name}]`, path);
+  }
+
+  private async capture(path: string, el?: WebElementWrapper) {
+    try {
+      this.log.info(`Taking screenshot "${path}"`);
+      const screenshot = await (el ? el.takeScreenshot() : this.browser.takeScreenshot());
+      await mkdirAsync(dirname(path), { recursive: true });
+      await writeFileAsync(path, screenshot, 'base64');
+    } catch (err) {
+      this.log.error('SCREENSHOT FAILED');
+      this.log.error(err);
+    }
+  }
 }

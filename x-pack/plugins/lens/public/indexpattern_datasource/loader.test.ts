@@ -6,7 +6,7 @@
  */
 
 import { HttpHandler } from 'kibana/public';
-import _ from 'lodash';
+import { last } from 'lodash';
 import {
   loadInitialState,
   loadIndexPatterns,
@@ -497,6 +497,57 @@ describe('loader', () => {
       });
     });
 
+    it('should initialize all the embeddable references without local storage', async () => {
+      const savedState: IndexPatternPersistedState = {
+        layers: {
+          layerb: {
+            columnOrder: ['col1', 'col2'],
+            columns: {
+              col1: {
+                dataType: 'date',
+                isBucketed: true,
+                label: 'My date',
+                operationType: 'date_histogram',
+                params: {
+                  interval: 'm',
+                },
+                sourceField: 'timestamp',
+              },
+              col2: {
+                dataType: 'number',
+                isBucketed: false,
+                label: 'Sum of bytes',
+                operationType: 'sum',
+                sourceField: 'bytes',
+              },
+            },
+          },
+        },
+      };
+      const storage = createMockStorage({});
+      const state = await loadInitialState({
+        persistedState: savedState,
+        references: [
+          { name: 'indexpattern-datasource-current-indexpattern', id: '2', type: 'index-pattern' },
+          { name: 'indexpattern-datasource-layer-layerb', id: '2', type: 'index-pattern' },
+          { name: 'another-reference', id: 'c', type: 'index-pattern' },
+        ],
+        indexPatternsService: mockIndexPatternsService(),
+        storage,
+        options: { isFullEditor: false },
+      });
+
+      expect(state).toMatchObject({
+        currentIndexPatternId: undefined,
+        indexPatternRefs: [],
+        indexPatterns: {
+          '2': sampleIndexPatterns['2'],
+        },
+        layers: { layerb: { ...savedState.layers.layerb, indexPatternId: '2' } },
+      });
+      expect(storage.set).not.toHaveBeenCalled();
+    });
+
     it('should initialize from saved state', async () => {
       const savedState: IndexPatternPersistedState = {
         layers: {
@@ -770,7 +821,7 @@ describe('loader', () => {
                 label: 'My hist',
                 operationType: 'date_histogram',
                 params: {
-                  interval: '1d',
+                  interval: 'm',
                 },
                 sourceField: 'timestamp',
               },
@@ -841,7 +892,7 @@ describe('loader', () => {
     it('should call once for each index pattern', async () => {
       const setState = jest.fn();
       const fetchJson = (jest.fn((path: string) => {
-        const indexPatternTitle = _.last(path.split('/'));
+        const indexPatternTitle = last(path.split('/'));
         return {
           indexPatternTitle,
           existingFieldNames: ['field_1', 'field_2'].map(
@@ -891,7 +942,7 @@ describe('loader', () => {
       const setState = jest.fn();
       const showNoDataPopover = jest.fn();
       const fetchJson = (jest.fn((path: string) => {
-        const indexPatternTitle = _.last(path.split('/'));
+        const indexPatternTitle = last(path.split('/'));
         return {
           indexPatternTitle,
           existingFieldNames:

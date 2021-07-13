@@ -5,16 +5,17 @@
  * 2.0.
  */
 
+import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { RuleStatusResponse } from '../../rules/types';
-import { transformError, buildSiemResponse, mergeStatuses, getFailingRules } from '../utils';
+import { buildSiemResponse, mergeStatuses, getFailingRules } from '../utils';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 import {
   findRulesStatusesSchema,
   FindRulesStatusesSchemaDecoded,
 } from '../../../../../common/detection_engine/schemas/request/find_rule_statuses_schema';
+import { mergeAlertWithSidecarStatus } from '../../schemas/rule_converters';
 
 /**
  * Given a list of rule ids, return the current status and
@@ -49,45 +50,27 @@ export const findRulesStatusesRoute = (router: SecuritySolutionPluginRouter) => 
       const ids = body.ids;
       try {
         const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
-        const failingRules = await getFailingRules(ids, alertsClient);
+        const [statusesById, failingRules] = await Promise.all([
+          ruleStatusClient.findBulk(ids, 6),
+          getFailingRules(ids, alertsClient),
+        ]);
 
-        const statuses = await ids.reduce(async (acc, id) => {
-          const accumulated = await acc;
-          const lastFiveErrorsForId = await ruleStatusClient.find({
-            perPage: 6,
-            sortField: 'statusDate',
-            sortOrder: 'desc',
-            search: id,
-            searchFields: ['alertId'],
-          });
+        const statuses = ids.reduce((acc, id) => {
+          const lastFiveErrorsForId = statusesById[id];
 
-          if (lastFiveErrorsForId.saved_objects.length === 0) {
-            return accumulated;
+          if (lastFiveErrorsForId == null || lastFiveErrorsForId.length === 0) {
+            return acc;
           }
 
           const failingRule = failingRules[id];
-          const lastFailureAt = lastFiveErrorsForId.saved_objects[0].attributes.lastFailureAt;
 
-          if (
-            failingRule != null &&
-            (lastFailureAt == null ||
-              new Date(failingRule.executionStatus.lastExecutionDate) > new Date(lastFailureAt))
-          ) {
-            const currentStatus = lastFiveErrorsForId.saved_objects[0];
-            currentStatus.attributes.lastFailureMessage = `Reason: ${failingRule.executionStatus.error?.reason} Message: ${failingRule.executionStatus.error?.message}`;
-            currentStatus.attributes.lastFailureAt = failingRule.executionStatus.lastExecutionDate.toISOString();
-            currentStatus.attributes.statusDate = failingRule.executionStatus.lastExecutionDate.toISOString();
-            currentStatus.attributes.status = 'failed';
-            const updatedLastFiveErrorsSO = [
-              currentStatus,
-              ...lastFiveErrorsForId.saved_objects.slice(1),
-            ];
-
-            return mergeStatuses(id, updatedLastFiveErrorsSO, accumulated);
+          if (failingRule != null) {
+            const currentStatus = mergeAlertWithSidecarStatus(failingRule, lastFiveErrorsForId[0]);
+            const updatedLastFiveErrorsSO = [currentStatus, ...lastFiveErrorsForId.slice(1)];
+            return mergeStatuses(id, updatedLastFiveErrorsSO, acc);
           }
-          return mergeStatuses(id, [...lastFiveErrorsForId.saved_objects], accumulated);
-        }, Promise.resolve<RuleStatusResponse>({}));
-
+          return mergeStatuses(id, [...lastFiveErrorsForId], acc);
+        }, {});
         return response.ok({ body: statuses });
       } catch (err) {
         const error = transformError(err);

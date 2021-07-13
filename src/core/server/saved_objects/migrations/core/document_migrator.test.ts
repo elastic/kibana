@@ -748,14 +748,9 @@ describe('DocumentMigrator', () => {
         migrator.migrate(_.cloneDeep(failedDoc));
         expect('Did not throw').toEqual('But it should have!');
       } catch (error) {
-        expect(error.message).toMatchInlineSnapshot(`
-          "Failed to transform document smelly. Transform: dog:1.2.3
-          Doc: {\\"id\\":\\"smelly\\",\\"type\\":\\"dog\\",\\"attributes\\":{},\\"migrationVersion\\":{}}"
-        `);
+        expect(error.message).toEqual('Migration function for version 1.2.3 threw an error');
+        expect(error.stack.includes(`Caused by:\nError: Dang diggity!`)).toBe(true);
         expect(error).toBeInstanceOf(TransformSavedObjectDocumentError);
-        expect(loggingSystemMock.collect(mockLoggerFactory).error[0][0]).toMatchInlineSnapshot(
-          `[Error: Dang diggity!]`
-        );
       }
     });
 
@@ -982,6 +977,7 @@ describe('DocumentMigrator', () => {
               id: 'foo-namespace:dog:loud',
               type: LEGACY_URL_ALIAS_TYPE,
               attributes: {
+                sourceId: 'loud',
                 targetNamespace: 'foo-namespace',
                 targetType: 'dog',
                 targetId: 'uuidv5',
@@ -1046,6 +1042,7 @@ describe('DocumentMigrator', () => {
               id: 'foo-namespace:dog:cute',
               type: LEGACY_URL_ALIAS_TYPE,
               attributes: {
+                sourceId: 'cute',
                 targetNamespace: 'foo-namespace',
                 targetType: 'dog',
                 targetId: 'uuidv5',
@@ -1168,6 +1165,7 @@ describe('DocumentMigrator', () => {
               id: 'foo-namespace:dog:hungry',
               type: LEGACY_URL_ALIAS_TYPE,
               attributes: {
+                sourceId: 'hungry',
                 targetNamespace: 'foo-namespace',
                 targetType: 'dog',
                 targetId: 'uuidv5',
@@ -1240,6 +1238,7 @@ describe('DocumentMigrator', () => {
               id: 'foo-namespace:dog:pretty',
               type: LEGACY_URL_ALIAS_TYPE,
               attributes: {
+                sourceId: 'pretty',
                 targetNamespace: 'foo-namespace',
                 targetType: 'dog',
                 targetId: 'uuidv5',

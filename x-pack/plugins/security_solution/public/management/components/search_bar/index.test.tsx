@@ -22,7 +22,7 @@ describe('Search bar', () => {
   });
 
   const getElement = (defaultValue: string = '') => (
-    <SearchBar defaultValue={defaultValue} onSearch={onSearchMock} />
+    <SearchBar defaultValue={defaultValue} onSearch={onSearchMock} placeholder={'placeholder'} />
   );
 
   it('should have a default value', () => {
