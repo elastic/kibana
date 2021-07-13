@@ -80,7 +80,6 @@ export const columns: Array<
     }),
     linkField: '*',
     id: RULE_NAME,
-    initialWidth: 400,
   },
 ];
 

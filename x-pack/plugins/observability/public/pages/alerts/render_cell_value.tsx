@@ -52,7 +52,7 @@ export const getRenderCellValue = ({
   rangeFrom: string;
   setFlyoutAlert: (data: TopAlert) => void;
 }) => {
-  return ({ columnId, data, linkValues, setCellProps }: CellValueElementProps) => {
+  return ({ columnId, data, setCellProps }: CellValueElementProps) => {
     const { observabilityRuleTypeRegistry } = usePluginContext();
     const value = getMappedNonEcsValue({
       data,
