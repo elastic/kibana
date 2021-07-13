@@ -218,7 +218,7 @@ export function DiscoverLayout({
     filterManager.setFilters(disabledFilters);
   }, [filterManager]);
 
-  const contentCentered = resultState === 'uninitialized';
+  const contentCentered = resultState === 'uninitialized' || resultState === 'none';
   const showTimeCol = useMemo(
     () => !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && !!indexPattern.timeFieldName,
     [uiSettings, indexPattern.timeFieldName]
