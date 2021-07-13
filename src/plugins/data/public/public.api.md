@@ -1693,9 +1693,11 @@ export class IndexPatternsService {
 // @public (undocumented)
 export interface IndexPatternTypeMeta {
     // (undocumented)
-    [key: string]: any;
-    // (undocumented)
     aggs?: Record<string, IndexPatternAggRestrictions>;
+    // (undocumented)
+    params?: {
+        rollup_index: string;
+    };
 }
 
 // Warning: (ae-missing-release-tag) "injectReferences" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
