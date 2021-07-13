@@ -77,7 +77,7 @@ export const getBreadcrumbs = (
       ...breadcrumb,
       {
         text: i18nRules.ADD_PAGE_TITLE,
-        href: ''
+        href: '',
       },
     ];
   }
@@ -87,7 +87,7 @@ export const getBreadcrumbs = (
       ...breadcrumb,
       {
         text: i18nRules.EDIT_PAGE_TITLE,
-        href: ''
+        href: '',
       },
     ];
   }

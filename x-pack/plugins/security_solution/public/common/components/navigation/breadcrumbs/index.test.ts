@@ -323,8 +323,7 @@ describe('Navigation Breadcrumbs', () => {
         },
         {
           text: 'Create',
-          href:
-            "",
+          href: '',
         },
       ]);
     });
