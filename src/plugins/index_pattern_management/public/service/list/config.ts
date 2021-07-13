@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IndexPattern, IndexPatternField, IndexPatternType } from 'src/plugins/data/public';
+import { IndexPattern, IndexPatternField, IndexPatternType } from '../../../../data/public';
 
 export interface IndexPatternTag {
   key: string;
