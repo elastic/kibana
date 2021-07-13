@@ -6,10 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import {
-  ENVIRONMENT_NOT_DEFINED_VALUE,
-  getEnvironmentEsField,
-} from '../../../../common/environment_filter_values';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
 import {
   ERROR_GROUP_ID,
@@ -40,13 +37,9 @@ export function getBoolFilter({
     });
   }
 
-  const environmentFilter = getEnvironmentEsField(
-    urlParams.environment || ENVIRONMENT_NOT_DEFINED_VALUE
-  );
-  if (!isEmpty(environmentFilter) && environmentFilter['service.environment']) {
-    boolFilter.push({
-      term: environmentFilter,
-    });
+  const environmentFilter = environmentQuery(urlParams.environment);
+  if (!isEmpty(environmentFilter)) {
+    boolFilter.push(...environmentFilter);
   }
 
   if (urlParams.transactionType) {

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { SERVICE_ENVIRONMENT } from './elasticsearch_fieldnames';
 
 const ENVIRONMENT_ALL_VALUE = 'ENVIRONMENT_ALL';
-export const ENVIRONMENT_NOT_DEFINED_VALUE = 'ENVIRONMENT_NOT_DEFINED';
+const ENVIRONMENT_NOT_DEFINED_VALUE = 'ENVIRONMENT_NOT_DEFINED';
 
 export function getEnvironmentLabel(environment: string) {
   if (!environment || environment === ENVIRONMENT_NOT_DEFINED_VALUE) {
