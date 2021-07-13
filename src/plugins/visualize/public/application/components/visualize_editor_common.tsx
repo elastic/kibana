@@ -13,7 +13,7 @@ import { EuiScreenReaderOnly } from '@elastic/eui';
 import { AppMountParameters } from 'kibana/public';
 import { VisualizeTopNav } from './visualize_top_nav';
 import { ExperimentalVisInfo } from './experimental_vis_info';
-import { DeprecationWarning } from './deprecation_vis_warning';
+import { DeprecationWarning, LEGACY_CHARTS_LIBRARY } from './deprecation_vis_warning';
 import {
   SavedVisInstance,
   VisualizeAppState,
@@ -21,8 +21,6 @@ import {
   VisualizeEditorVisInstance,
 } from '../types';
 import { getUISettings } from '../../services';
-// Should be removed when this issue is closed https://github.com/elastic/kibana/issues/103209
-const LEGACY_CHARTS_LIBRARY = 'visualization:visualize:legacyChartsLibrary';
 
 interface VisualizeEditorCommonProps {
   visInstance?: VisualizeEditorVisInstance;

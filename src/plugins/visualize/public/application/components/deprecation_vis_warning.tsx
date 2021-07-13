@@ -11,10 +11,16 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { getCoreStart } from '../../services';
 
+export const LEGACY_CHARTS_LIBRARY = 'visualization:visualize:legacyChartsLibrary';
+
 export const DeprecationWarning = () => {
   const documentationLink = useMemo(
     () => getCoreStart().docLinks.links.visualize.aggregationBased,
     []
+  );
+  const canEditAdvancedSettings = getCoreStart().application.capabilities.advancedSettings.save;
+  const advancedSettingsLink = getCoreStart().http.basePath.prepend(
+    `/app/management/kibana/settings?query=${LEGACY_CHARTS_LIBRARY}`
   );
 
   return (
@@ -23,13 +29,39 @@ export const DeprecationWarning = () => {
       title={
         <FormattedMessage
           id="visualize.legacyCharts.notificationMessage"
-          defaultMessage="Deprecated since 7.12, the legacy XY charts will be removed in 7.16. {documentationLink} our new charts library!"
+          defaultMessage="You are using the legacy XY charts library which will be removed in the next minor release, 7.16, after being deprecated in 7.12. {advancedSettingsMessage} Check our documentation {documentationLink}"
           values={{
+            advancedSettingsMessage: (
+              <>
+                {canEditAdvancedSettings && (
+                  <FormattedMessage
+                    id="visualize.legacyCharts.advancedSettingsMessage.newLibrary"
+                    defaultMessage="Switch to the new library {link}"
+                    values={{
+                      link: (
+                        <EuiLink href={advancedSettingsLink}>
+                          <FormattedMessage
+                            id="visualize.legacyCharts.advancedSettingsMessage.linkText"
+                            defaultMessage="in your advanced settings."
+                          />
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                )}
+                {!canEditAdvancedSettings && (
+                  <FormattedMessage
+                    id="visualize.legacyCharts.advancedSettingsMessage.noPermissions"
+                    defaultMessage="To switch to the new library in your advanced settings, contact your administrator."
+                  />
+                )}
+              </>
+            ),
             documentationLink: (
               <EuiLink href={documentationLink} target="_blank" external>
                 <FormattedMessage
                   id="visualize.legacyCharts.documentationLink"
-                  defaultMessage="Check out"
+                  defaultMessage="here."
                 />
               </EuiLink>
             ),

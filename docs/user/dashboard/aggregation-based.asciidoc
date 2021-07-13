@@ -4,6 +4,8 @@
 Aggregation-based visualizations are the core {kib} panels, and are not optimized
 for a specific use case.
 
+NOTE: he legacy XY charts library which powers bar, area, and line charts will be removed in 7.16. If you are still using it, turn off the *XY axis legacy charts library* switch in *Advanced settings*.
+
 [float]
 [[types-of-visualizations]]
 ==== Types of aggregation-based visualizations
@@ -182,11 +184,7 @@ image:images/bar-chart-tutorial-2.png[Bar chart with sample logs data]
 
 *Line, Area, Horizontal and Vertical Bar*
 
-From 7.12, XY axis charts use a new charts library. 
-
-NOTE: The legacy XY charts library will be removed in 7.16. If you are still using it, turn off the *XY axis legacy charts library* switch.
-
-The new library comes with new cool features:
+From 7.12, XY axis charts use a new charts library. The new library comes with new cool features:
 
 * Better performance
 
@@ -201,6 +199,8 @@ To use the old library
 . Navigate to *Advanced settings*. Refer to <<advanced-options, Advanced Settings>> for more information.
 
 . Toggle the *XY axis legacy charts library* switch.
+
+. Click the *Save changes* button.
 
 
 *Pie*
@@ -221,3 +221,5 @@ To use the old library
 . Navigate to *Advanced settings*. Refer to <<advanced-options, Advanced Settings>> for more information.
 
 . Toggle the *Pie legacy charts library* switch.
+
+. Click the *Save changes* button
