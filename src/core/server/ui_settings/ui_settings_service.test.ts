@@ -61,10 +61,10 @@ describe('uiSettings', () => {
       expect(getCoreSettingsMock).toHaveBeenCalledTimes(1);
     });
 
-    it('#defaultsClient', async () => {
-      const { defaultsClient } = await service.preboot();
+    it('#createDefaultsClient', async () => {
+      const { createDefaultsClient } = await service.preboot();
 
-      const client = defaultsClient();
+      const client = createDefaultsClient();
       expect(client).toBeInstanceOf(UiSettingsClient);
 
       expect(MockUiSettingsClientConstructor).toBeCalledTimes(1);

@@ -33,6 +33,8 @@ export class PrebootExamplePlugin implements PrebootPlugin {
 
   public setup(core: CorePreboot) {
     const { skipSetup } = this.#initializerContext.config.get<ConfigType>();
+    let completeSetup: (result: { shouldReloadConfig: boolean }) => void;
+
     core.http.registerRoutes('', (prebootRouter) => {
       prebootRouter.get(
         {
@@ -120,7 +122,6 @@ export class PrebootExamplePlugin implements PrebootPlugin {
         }
       );
 
-      let completeSetup: (result: { shouldReloadConfig: boolean }) => void;
       core.preboot.holdSetupUntilResolved(
         'Elasticsearch connection is not set up',
         new Promise<{ shouldReloadConfig: boolean }>((resolve) => {

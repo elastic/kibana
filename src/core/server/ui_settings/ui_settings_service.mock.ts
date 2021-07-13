@@ -37,10 +37,10 @@ const createClientMock = () => {
 
 const createPrebootMock = () => {
   const mocked: jest.Mocked<InternalUiSettingsServicePreboot> = {
-    defaultsClient: jest.fn(),
+    createDefaultsClient: jest.fn(),
   };
 
-  mocked.defaultsClient.mockReturnValue(createClientMock());
+  mocked.createDefaultsClient.mockReturnValue(createClientMock());
 
   return mocked;
 };

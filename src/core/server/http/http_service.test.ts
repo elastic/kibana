@@ -20,7 +20,7 @@ import { loggingSystemMock } from '../logging/logging_system.mock';
 import { contextServiceMock } from '../context/context_service.mock';
 import { executionContextServiceMock } from '../execution_context/execution_context_service.mock';
 import { config as cspConfig } from '../csp';
-import { config as externalUrlConfig } from '../external_url';
+import { config as externalUrlConfig, ExternalUrlConfig } from '../external_url';
 
 const logger = loggingSystemMock.create();
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());
@@ -276,23 +276,15 @@ test('returns `preboot` http server contract on preboot', async () => {
   }));
 
   const service = new HttpService({ coreId, configService, env, logger });
-  await expect(service.preboot(prebootDeps)).resolves.toMatchInlineSnapshot(`
-          Object {
-            "auth": Symbol(auth),
-            "basePath": Symbol(basePath),
-            "csp": Symbol(csp),
-            "externalUrl": ExternalUrlConfig {
-              "policy": Array [
-                Object {
-                  "allow": true,
-                },
-              ],
-            },
-            "registerRouteHandlerContext": [Function],
-            "registerRoutes": [Function],
-            "registerStaticDir": [Function],
-          }
-        `);
+  await expect(service.preboot(prebootDeps)).resolves.toMatchObject({
+    auth: httpServer.auth,
+    basePath: httpServer.basePath,
+    csp: httpServer.csp,
+    externalUrl: expect.any(ExternalUrlConfig),
+    registerRouteHandlerContext: expect.any(Function),
+    registerRoutes: expect.any(Function),
+    registerStaticDir: expect.any(Function),
+  });
 });
 
 test('returns http server contract on setup', async () => {

@@ -38,6 +38,10 @@ export class PrebootService {
             .then((results) => ({
               shouldReloadConfig: results.some((result) => result?.shouldReloadConfig),
             }))
+            .catch((err) => {
+              this.log.error(err);
+              throw err;
+            })
             .finally(() => (this.isSetupOnHold = false));
         }
 

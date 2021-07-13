@@ -11,12 +11,12 @@ import { coreMock } from './mocks';
 
 describe('#uiSettings', () => {
   describe('#client', () => {
-    test('returns the results of corePreboot.uiSettings.defaultsClient', () => {
+    test('returns the results of corePreboot.uiSettings.createDefaultsClient', () => {
       const corePreboot = coreMock.createInternalPreboot();
       const context = new PrebootCoreRouteHandlerContext(corePreboot);
 
       const client = context.uiSettings.client;
-      const [{ value: mockResult }] = corePreboot.uiSettings.defaultsClient.mock.results;
+      const [{ value: mockResult }] = corePreboot.uiSettings.createDefaultsClient.mock.results;
       expect(client).toBe(mockResult);
     });
 
@@ -24,9 +24,9 @@ describe('#uiSettings', () => {
       const corePreboot = coreMock.createInternalPreboot();
       const context = new PrebootCoreRouteHandlerContext(corePreboot);
 
-      expect(corePreboot.uiSettings.defaultsClient).not.toHaveBeenCalled();
+      expect(corePreboot.uiSettings.createDefaultsClient).not.toHaveBeenCalled();
       const client = context.uiSettings.client;
-      expect(corePreboot.uiSettings.defaultsClient).toHaveBeenCalled();
+      expect(corePreboot.uiSettings.createDefaultsClient).toHaveBeenCalled();
       expect(client).toBeDefined();
     });
 
@@ -37,8 +37,8 @@ describe('#uiSettings', () => {
       const client1 = context.uiSettings.client;
       const client2 = context.uiSettings.client;
 
-      expect(corePreboot.uiSettings.defaultsClient).toHaveBeenCalledTimes(1);
-      const [{ value: mockResult }] = corePreboot.uiSettings.defaultsClient.mock.results;
+      expect(corePreboot.uiSettings.createDefaultsClient).toHaveBeenCalledTimes(1);
+      const [{ value: mockResult }] = corePreboot.uiSettings.createDefaultsClient.mock.results;
       expect(client1).toBe(mockResult);
       expect(client2).toBe(mockResult);
     });

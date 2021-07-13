@@ -184,7 +184,7 @@ export async function parseManifest(
     throw PluginDiscoveryError.invalidManifest(
       manifestPath,
       new Error(
-        `The optional "type" in manifest for plugin "${manifest.id}" is set to "${type}", but it should either be "standard" or "preboot".`
+        `The "type" in manifest for plugin "${manifest.id}" is set to "${type}", but it should either be "standard" or "preboot".`
       )
     );
   }

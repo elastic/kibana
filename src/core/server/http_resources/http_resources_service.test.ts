@@ -48,229 +48,228 @@ describe('HttpResources service', () => {
       router = httpServiceMock.createRouter();
     });
 
-    describe('register', () => {
-      const routeConfig: RouteConfig<any, any, any, 'get'> = { path: '/', validate: false };
-      const testCases: Array<
-        [string, () => Promise<HttpResources['register']>, () => PrebootDeps | SetupDeps]
-      > = [
-        [
-          '#preboot',
-          async () => {
-            const { createRegistrar } = await service.preboot(prebootDeps);
-            return createRegistrar(router).register;
-          },
-          () => prebootDeps,
-        ],
-        [
-          '#setup',
-          async () => {
-            await service.preboot(prebootDeps);
-            const { createRegistrar } = await service.setup(setupDeps);
-            return createRegistrar(router).register;
-          },
-          () => setupDeps,
-        ],
-      ];
+    function runRegisterTestSuite(
+      name: string,
+      initializer: () => Promise<HttpResources['register']>,
+      getDeps: () => PrebootDeps | SetupDeps
+    ) {
+      describe(`${name} register`, () => {
+        const routeConfig: RouteConfig<any, any, any, 'get'> = { path: '/', validate: false };
+        let register: HttpResources['register'];
+        beforeEach(async () => {
+          register = await initializer();
+        });
 
-      for (const [testSuiteName, initializer, getDeps] of testCases) {
-        describe(testSuiteName, () => {
-          let register: HttpResources['register'];
-          beforeEach(async () => {
-            register = await initializer();
+        describe('renderCoreApp', () => {
+          it('formats successful response', async () => {
+            register(routeConfig, async (ctx, req, res) => {
+              return res.renderCoreApp();
+            });
+            const [[, routeHandler]] = router.get.mock.calls;
+
+            const responseFactory = httpResourcesMock.createResponseFactory();
+            await routeHandler(context, kibanaRequest, responseFactory);
+            expect(getDeps().rendering.render).toHaveBeenCalledWith(
+              kibanaRequest,
+              context.core.uiSettings.client,
+              {
+                includeUserSettings: true,
+                vars: {
+                  apmConfig,
+                },
+              }
+            );
           });
 
-          describe('renderCoreApp', () => {
-            it('formats successful response', async () => {
-              register(routeConfig, async (ctx, req, res) => {
-                return res.renderCoreApp();
-              });
-              const [[, routeHandler]] = router.get.mock.calls;
-
-              const responseFactory = httpResourcesMock.createResponseFactory();
-              await routeHandler(context, kibanaRequest, responseFactory);
-              expect(getDeps().rendering.render).toHaveBeenCalledWith(
-                kibanaRequest,
-                context.core.uiSettings.client,
-                {
-                  includeUserSettings: true,
-                  vars: {
-                    apmConfig,
-                  },
-                }
-              );
-            });
-
-            it('can attach headers, except the CSP header', async () => {
-              register(routeConfig, async (ctx, req, res) => {
-                return res.renderCoreApp({
-                  headers: {
-                    'content-security-policy': "script-src 'unsafe-eval'",
-                    'x-kibana': '42',
-                  },
-                });
-              });
-
-              const [[, routeHandler]] = router.get.mock.calls;
-
-              const responseFactory = httpResourcesMock.createResponseFactory();
-              await routeHandler(context, kibanaRequest, responseFactory);
-
-              expect(responseFactory.ok).toHaveBeenCalledWith({
-                body: '<body />',
+          it('can attach headers, except the CSP header', async () => {
+            register(routeConfig, async (ctx, req, res) => {
+              return res.renderCoreApp({
                 headers: {
+                  'content-security-policy': "script-src 'unsafe-eval'",
                   'x-kibana': '42',
-                  'content-security-policy':
-                    "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
-                },
-              });
-            });
-          });
-          describe('renderAnonymousCoreApp', () => {
-            it('formats successful response', async () => {
-              register(routeConfig, async (ctx, req, res) => {
-                return res.renderAnonymousCoreApp();
-              });
-              const [[, routeHandler]] = router.get.mock.calls;
-
-              const responseFactory = httpResourcesMock.createResponseFactory();
-              await routeHandler(context, kibanaRequest, responseFactory);
-              expect(getDeps().rendering.render).toHaveBeenCalledWith(
-                kibanaRequest,
-                context.core.uiSettings.client,
-                {
-                  includeUserSettings: false,
-                  vars: {
-                    apmConfig,
-                  },
-                }
-              );
-            });
-
-            it('can attach headers, except the CSP header', async () => {
-              register(routeConfig, async (ctx, req, res) => {
-                return res.renderAnonymousCoreApp({
-                  headers: {
-                    'content-security-policy': "script-src 'unsafe-eval'",
-                    'x-kibana': '42',
-                  },
-                });
-              });
-
-              const [[, routeHandler]] = router.get.mock.calls;
-
-              const responseFactory = httpResourcesMock.createResponseFactory();
-              await routeHandler(context, kibanaRequest, responseFactory);
-
-              expect(responseFactory.ok).toHaveBeenCalledWith({
-                body: '<body />',
-                headers: {
-                  'x-kibana': '42',
-                  'content-security-policy':
-                    "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
-                },
-              });
-            });
-          });
-          describe('renderHtml', () => {
-            it('formats successful response', async () => {
-              const htmlBody = '<html><body /></html>';
-              register(routeConfig, async (ctx, req, res) => {
-                return res.renderHtml({ body: htmlBody });
-              });
-              const [[, routeHandler]] = router.get.mock.calls;
-
-              const responseFactory = httpResourcesMock.createResponseFactory();
-              await routeHandler(context, kibanaRequest, responseFactory);
-              expect(responseFactory.ok).toHaveBeenCalledWith({
-                body: htmlBody,
-                headers: {
-                  'content-type': 'text/html',
-                  'content-security-policy':
-                    "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
                 },
               });
             });
 
-            it('can attach headers, except the CSP & "content-type" headers', async () => {
-              const htmlBody = '<html><body /></html>';
-              register(routeConfig, async (ctx, req, res) => {
-                return res.renderHtml({
-                  body: htmlBody,
-                  headers: {
-                    'content-type': 'text/html5',
-                    'content-security-policy': "script-src 'unsafe-eval'",
-                    'x-kibana': '42',
-                  },
-                });
-              });
+            const [[, routeHandler]] = router.get.mock.calls;
 
-              const [[, routeHandler]] = router.get.mock.calls;
+            const responseFactory = httpResourcesMock.createResponseFactory();
+            await routeHandler(context, kibanaRequest, responseFactory);
 
-              const responseFactory = httpResourcesMock.createResponseFactory();
-              await routeHandler(context, kibanaRequest, responseFactory);
-
-              expect(responseFactory.ok).toHaveBeenCalledWith({
-                body: htmlBody,
-                headers: {
-                  'content-type': 'text/html',
-                  'x-kibana': '42',
-                  'content-security-policy':
-                    "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
-                },
-              });
-            });
-          });
-          describe('renderJs', () => {
-            it('formats successful response', async () => {
-              const jsBody = 'alert(1);';
-              register(routeConfig, async (ctx, req, res) => {
-                return res.renderJs({ body: jsBody });
-              });
-              const [[, routeHandler]] = router.get.mock.calls;
-
-              const responseFactory = httpResourcesMock.createResponseFactory();
-              await routeHandler(context, kibanaRequest, responseFactory);
-              expect(responseFactory.ok).toHaveBeenCalledWith({
-                body: jsBody,
-                headers: {
-                  'content-type': 'text/javascript',
-                  'content-security-policy':
-                    "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
-                },
-              });
-            });
-
-            it('can attach headers, except the CSP & "content-type" headers', async () => {
-              const jsBody = 'alert(1);';
-              register(routeConfig, async (ctx, req, res) => {
-                return res.renderJs({
-                  body: jsBody,
-                  headers: {
-                    'content-type': 'text/html',
-                    'content-security-policy': "script-src 'unsafe-eval'",
-                    'x-kibana': '42',
-                  },
-                });
-              });
-
-              const [[, routeHandler]] = router.get.mock.calls;
-
-              const responseFactory = httpResourcesMock.createResponseFactory();
-              await routeHandler(context, kibanaRequest, responseFactory);
-
-              expect(responseFactory.ok).toHaveBeenCalledWith({
-                body: jsBody,
-                headers: {
-                  'content-type': 'text/javascript',
-                  'x-kibana': '42',
-                  'content-security-policy':
-                    "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
-                },
-              });
+            expect(responseFactory.ok).toHaveBeenCalledWith({
+              body: '<body />',
+              headers: {
+                'x-kibana': '42',
+                'content-security-policy':
+                  "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+              },
             });
           });
         });
-      }
-    });
+        describe('renderAnonymousCoreApp', () => {
+          it('formats successful response', async () => {
+            register(routeConfig, async (ctx, req, res) => {
+              return res.renderAnonymousCoreApp();
+            });
+            const [[, routeHandler]] = router.get.mock.calls;
+
+            const responseFactory = httpResourcesMock.createResponseFactory();
+            await routeHandler(context, kibanaRequest, responseFactory);
+            expect(getDeps().rendering.render).toHaveBeenCalledWith(
+              kibanaRequest,
+              context.core.uiSettings.client,
+              {
+                includeUserSettings: false,
+                vars: {
+                  apmConfig,
+                },
+              }
+            );
+          });
+
+          it('can attach headers, except the CSP header', async () => {
+            register(routeConfig, async (ctx, req, res) => {
+              return res.renderAnonymousCoreApp({
+                headers: {
+                  'content-security-policy': "script-src 'unsafe-eval'",
+                  'x-kibana': '42',
+                },
+              });
+            });
+
+            const [[, routeHandler]] = router.get.mock.calls;
+
+            const responseFactory = httpResourcesMock.createResponseFactory();
+            await routeHandler(context, kibanaRequest, responseFactory);
+
+            expect(responseFactory.ok).toHaveBeenCalledWith({
+              body: '<body />',
+              headers: {
+                'x-kibana': '42',
+                'content-security-policy':
+                  "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+              },
+            });
+          });
+        });
+        describe('renderHtml', () => {
+          it('formats successful response', async () => {
+            const htmlBody = '<html><body /></html>';
+            register(routeConfig, async (ctx, req, res) => {
+              return res.renderHtml({ body: htmlBody });
+            });
+            const [[, routeHandler]] = router.get.mock.calls;
+
+            const responseFactory = httpResourcesMock.createResponseFactory();
+            await routeHandler(context, kibanaRequest, responseFactory);
+            expect(responseFactory.ok).toHaveBeenCalledWith({
+              body: htmlBody,
+              headers: {
+                'content-type': 'text/html',
+                'content-security-policy':
+                  "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+              },
+            });
+          });
+
+          it('can attach headers, except the CSP & "content-type" headers', async () => {
+            const htmlBody = '<html><body /></html>';
+            register(routeConfig, async (ctx, req, res) => {
+              return res.renderHtml({
+                body: htmlBody,
+                headers: {
+                  'content-type': 'text/html5',
+                  'content-security-policy': "script-src 'unsafe-eval'",
+                  'x-kibana': '42',
+                },
+              });
+            });
+
+            const [[, routeHandler]] = router.get.mock.calls;
+
+            const responseFactory = httpResourcesMock.createResponseFactory();
+            await routeHandler(context, kibanaRequest, responseFactory);
+
+            expect(responseFactory.ok).toHaveBeenCalledWith({
+              body: htmlBody,
+              headers: {
+                'content-type': 'text/html',
+                'x-kibana': '42',
+                'content-security-policy':
+                  "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+              },
+            });
+          });
+        });
+        describe('renderJs', () => {
+          it('formats successful response', async () => {
+            const jsBody = 'alert(1);';
+            register(routeConfig, async (ctx, req, res) => {
+              return res.renderJs({ body: jsBody });
+            });
+            const [[, routeHandler]] = router.get.mock.calls;
+
+            const responseFactory = httpResourcesMock.createResponseFactory();
+            await routeHandler(context, kibanaRequest, responseFactory);
+            expect(responseFactory.ok).toHaveBeenCalledWith({
+              body: jsBody,
+              headers: {
+                'content-type': 'text/javascript',
+                'content-security-policy':
+                  "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+              },
+            });
+          });
+
+          it('can attach headers, except the CSP & "content-type" headers', async () => {
+            const jsBody = 'alert(1);';
+            register(routeConfig, async (ctx, req, res) => {
+              return res.renderJs({
+                body: jsBody,
+                headers: {
+                  'content-type': 'text/html',
+                  'content-security-policy': "script-src 'unsafe-eval'",
+                  'x-kibana': '42',
+                },
+              });
+            });
+
+            const [[, routeHandler]] = router.get.mock.calls;
+
+            const responseFactory = httpResourcesMock.createResponseFactory();
+            await routeHandler(context, kibanaRequest, responseFactory);
+
+            expect(responseFactory.ok).toHaveBeenCalledWith({
+              body: jsBody,
+              headers: {
+                'content-type': 'text/javascript',
+                'x-kibana': '42',
+                'content-security-policy':
+                  "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+              },
+            });
+          });
+        });
+      });
+    }
+
+    runRegisterTestSuite(
+      '#preboot',
+      async () => {
+        const { createRegistrar } = await service.preboot(prebootDeps);
+        return createRegistrar(router).register;
+      },
+      () => prebootDeps
+    );
+
+    runRegisterTestSuite(
+      '#setup',
+      async () => {
+        await service.preboot(prebootDeps);
+        const { createRegistrar } = await service.setup(setupDeps);
+        return createRegistrar(router).register;
+      },
+      () => setupDeps
+    );
   });
 });

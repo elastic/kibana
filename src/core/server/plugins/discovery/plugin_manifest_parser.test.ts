@@ -243,7 +243,7 @@ test('returns error when manifest contains unrecognized `type`', async () => {
   });
 
   await expect(parseManifest(pluginPath, packageInfo)).rejects.toMatchObject({
-    message: `The optional "type" in manifest for plugin "someId" is set to "unknown", but it should either be "standard" or "preboot". (invalid-manifest, ${pluginManifestPath})`,
+    message: `The "type" in manifest for plugin "someId" is set to "unknown", but it should either be "standard" or "preboot". (invalid-manifest, ${pluginManifestPath})`,
     type: PluginDiscoveryErrorType.InvalidManifest,
     path: pluginManifestPath,
   });

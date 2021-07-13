@@ -146,18 +146,16 @@ export interface HttpServicePreboot {
 
 /** @internal */
 export interface InternalHttpServicePreboot
-  extends Pick<HttpServiceSetup, 'auth' | 'csp' | 'basePath'> {
-  externalUrl: ExternalUrlConfig;
+  extends Pick<
+    InternalHttpServiceSetup,
+    | 'auth'
+    | 'csp'
+    | 'basePath'
+    | 'externalUrl'
+    | 'registerStaticDir'
+    | 'registerRouteHandlerContext'
+  > {
   registerRoutes(path: string, callback: (router: IRouter) => void): void;
-  registerStaticDir: (path: string, dirPath: string) => void;
-  registerRouteHandlerContext: <
-    Context extends RequestHandlerContext,
-    ContextName extends keyof Context
-  >(
-    pluginOpaqueId: PluginOpaqueId,
-    contextName: ContextName,
-    provider: RequestHandlerContextProvider<Context, ContextName>
-  ) => RequestHandlerContextContainer;
 }
 
 /**

@@ -12,12 +12,24 @@ import { Env } from '@kbn/config';
 import { schema } from '@kbn/config-schema';
 import { fromRoot } from '@kbn/utils';
 
-import { IRouter, IBasePath } from '../http';
+import { IRouter, IBasePath, IKibanaResponse, KibanaResponseFactory } from '../http';
+import { HttpResources, HttpResourcesServiceToolkit } from '../http_resources';
 import { InternalCorePreboot, InternalCoreSetup } from '../internal_types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { registerBundleRoutes } from './bundle_routes';
 import { UiPlugins } from '../plugins';
+
+/** @internal */
+interface CommonRoutesParams {
+  router: IRouter;
+  httpResources: HttpResources;
+  basePath: IBasePath;
+  uiPlugins: UiPlugins;
+  onResourceNotFound: (
+    res: HttpResourcesServiceToolkit & KibanaResponseFactory
+  ) => Promise<IKibanaResponse>;
+}
 
 /** @internal */
 export class CoreApp {
@@ -47,43 +59,13 @@ export class CoreApp {
 
   private registerPrebootDefaultRoutes(corePreboot: InternalCorePreboot, uiPlugins: UiPlugins) {
     corePreboot.http.registerRoutes('', (router) => {
-      const resources = corePreboot.httpResources.createRegistrar(router);
-      resources.register(
-        {
-          path: '/{path*}',
-          validate: {
-            params: schema.object({
-              path: schema.maybe(schema.string()),
-            }),
-            query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-          },
-        },
-        async (context, req, res) => {
-          const { query, params } = req;
-          const { path } = params;
-          if (!path || !path.endsWith('/') || path.startsWith('/')) {
-            return res.renderAnonymousCoreApp();
-          }
-
-          // remove trailing slash
-          const basePath = corePreboot.http.basePath.get(req);
-          let rewrittenPath = path.slice(0, -1);
-          if (`/${path}`.startsWith(basePath)) {
-            rewrittenPath = rewrittenPath.substring(basePath.length);
-          }
-
-          const querystring = query ? stringify(query) : undefined;
-          const url = `${basePath}/${rewrittenPath}${querystring ? `?${querystring}` : ''}`;
-
-          return res.redirected({
-            headers: {
-              location: url,
-            },
-          });
-        }
-      );
-
-      this.registerCommonDefaultRoutes(router, corePreboot.http.basePath, uiPlugins);
+      this.registerCommonDefaultRoutes({
+        basePath: corePreboot.http.basePath,
+        httpResources: corePreboot.httpResources.createRegistrar(router),
+        router,
+        uiPlugins,
+        onResourceNotFound: (res) => res.renderAnonymousCoreApp(),
+      });
     });
   }
 
@@ -104,42 +86,13 @@ export class CoreApp {
       });
     });
 
-    // remove trailing slash catch-all
-    router.get(
-      {
-        path: '/{path*}',
-        validate: {
-          params: schema.object({
-            path: schema.maybe(schema.string()),
-          }),
-          query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-        },
-      },
-      async (context, req, res) => {
-        const { query, params } = req;
-        const { path } = params;
-        if (!path || !path.endsWith('/') || path.startsWith('/')) {
-          return res.notFound();
-        }
-
-        const basePath = httpSetup.basePath.get(req);
-        let rewrittenPath = path.slice(0, -1);
-        if (`/${path}`.startsWith(basePath)) {
-          rewrittenPath = rewrittenPath.substring(basePath.length);
-        }
-
-        const querystring = query ? stringify(query) : undefined;
-        const url = `${basePath}/${rewrittenPath}${querystring ? `?${querystring}` : ''}`;
-
-        return res.redirected({
-          headers: {
-            location: url,
-          },
-        });
-      }
-    );
-
-    this.registerCommonDefaultRoutes(router, coreSetup.http.basePath, uiPlugins);
+    this.registerCommonDefaultRoutes({
+      basePath: coreSetup.http.basePath,
+      httpResources: resources,
+      router,
+      uiPlugins,
+      onResourceNotFound: async (res) => res.notFound(),
+    });
 
     resources.register(
       {
@@ -173,7 +126,49 @@ export class CoreApp {
     );
   }
 
-  private registerCommonDefaultRoutes(router: IRouter, basePath: IBasePath, uiPlugins: UiPlugins) {
+  private registerCommonDefaultRoutes({
+    router,
+    basePath,
+    uiPlugins,
+    onResourceNotFound,
+    httpResources,
+  }: CommonRoutesParams) {
+    // catch-all route
+    httpResources.register(
+      {
+        path: '/{path*}',
+        validate: {
+          params: schema.object({
+            path: schema.maybe(schema.string()),
+          }),
+          query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+        },
+      },
+      async (context, req, res) => {
+        const { query, params } = req;
+        const { path } = params;
+        if (!path || !path.endsWith('/') || path.startsWith('/')) {
+          return onResourceNotFound(res);
+        }
+
+        // remove trailing slash
+        const requestBasePath = basePath.get(req);
+        let rewrittenPath = path.slice(0, -1);
+        if (`/${path}`.startsWith(requestBasePath)) {
+          rewrittenPath = rewrittenPath.substring(requestBasePath.length);
+        }
+
+        const querystring = query ? stringify(query) : undefined;
+        const url = `${requestBasePath}/${rewrittenPath}${querystring ? `?${querystring}` : ''}`;
+
+        return res.redirected({
+          headers: {
+            location: url,
+          },
+        });
+      }
+    );
+
     router.get({ path: '/core', validate: false }, async (context, req, res) =>
       res.ok({ body: { version: '0.0.1' } })
     );

@@ -58,7 +58,7 @@ export class UiSettingsService
 
     const { version, buildNum } = this.coreContext.env.packageInfo;
     return {
-      defaultsClient: () =>
+      createDefaultsClient: () =>
         new UiSettingsClient({
           type: 'config',
           id: version,

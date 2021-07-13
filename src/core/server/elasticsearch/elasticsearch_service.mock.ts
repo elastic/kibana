@@ -22,23 +22,12 @@ import { ElasticsearchService } from './elasticsearch_service';
 import {
   InternalElasticsearchServiceSetup,
   ElasticsearchStatusMeta,
-  InternalElasticsearchServicePreboot,
   ElasticsearchServicePreboot,
 } from './types';
 import { NodesVersionCompatibility } from './version_check/ensure_es_version';
 import { ServiceStatus, ServiceStatusLevels } from '../status';
 
 type MockedElasticSearchServicePreboot = jest.Mocked<ElasticsearchServicePreboot>;
-const createPrebootContractMock = () => {
-  const prebootContract: MockedElasticSearchServicePreboot = {
-    config: {} as ElasticsearchConfig,
-    createClient: jest.fn(),
-  };
-  prebootContract.createClient.mockImplementation(() =>
-    elasticsearchClientMock.createCustomClusterClient()
-  );
-  return prebootContract;
-};
 
 export interface MockedElasticSearchServiceSetup {
   legacy: {
@@ -53,6 +42,17 @@ type MockedElasticSearchServiceStart = MockedElasticSearchServiceSetup & {
   createClient: jest.MockedFunction<
     (name: string, config?: Partial<ElasticsearchClientConfig>) => CustomClusterClientMock
   >;
+};
+
+const createPrebootContractMock = () => {
+  const prebootContract: MockedElasticSearchServicePreboot = {
+    config: {} as ElasticsearchConfig,
+    createClient: jest.fn(),
+  };
+  prebootContract.createClient.mockImplementation(() =>
+    elasticsearchClientMock.createCustomClusterClient()
+  );
+  return prebootContract;
 };
 
 const createSetupContractMock = () => {
@@ -90,19 +90,7 @@ const createStartContractMock = () => {
   return startContract;
 };
 
-const createInternalStartContractMock = createStartContractMock;
-
-type MockedInternalElasticSearchServicePreboot = jest.Mocked<InternalElasticsearchServicePreboot>;
-const createInternalPrebootContractMock = () => {
-  const prebootContract: MockedInternalElasticSearchServicePreboot = {
-    config: {} as ElasticsearchConfig,
-    createClient: jest.fn(),
-  };
-  prebootContract.createClient.mockImplementation(() =>
-    elasticsearchClientMock.createCustomClusterClient()
-  );
-  return prebootContract;
-};
+const createInternalPrebootContractMock = createPrebootContractMock;
 
 type MockedInternalElasticSearchServiceSetup = jest.Mocked<
   InternalElasticsearchServiceSetup & {
@@ -130,6 +118,8 @@ const createInternalSetupContractMock = () => {
   );
   return setupContract;
 };
+
+const createInternalStartContractMock = createStartContractMock;
 
 type ElasticsearchServiceContract = PublicMethodsOf<ElasticsearchService>;
 const createMock = () => {

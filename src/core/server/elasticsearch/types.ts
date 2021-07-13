@@ -115,13 +115,7 @@ export interface ElasticsearchServiceSetup {
 }
 
 /** @internal */
-export interface InternalElasticsearchServicePreboot {
-  readonly config: ElasticsearchConfig;
-  readonly createClient: (
-    type: string,
-    clientConfig?: Partial<ElasticsearchClientConfig>
-  ) => ICustomClusterClient;
-}
+export type InternalElasticsearchServicePreboot = ElasticsearchServicePreboot;
 
 /** @internal */
 export interface InternalElasticsearchServiceSetup extends ElasticsearchServiceSetup {

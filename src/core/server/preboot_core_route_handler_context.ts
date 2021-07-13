@@ -16,7 +16,7 @@ class PrebootCoreUiSettingsRouteHandlerContext {
 
   public get client() {
     if (this.#client == null) {
-      this.#client = this.uiSettingsPreboot.defaultsClient();
+      this.#client = this.uiSettingsPreboot.createDefaultsClient();
     }
     return this.#client;
   }
