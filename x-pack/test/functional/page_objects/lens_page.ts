@@ -1075,7 +1075,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await input.clearValueWithKeyboard({ charByChar: true });
       await input.type(formula);
       // Debounce time for formula
-      await PageObjects.common.sleep(250);
+      await PageObjects.common.sleep(300);
     },
 
     async expectFormulaText(formula: string) {
