@@ -41,34 +41,32 @@ const kbnArchiverScript = prokSync(kbnArchiver);
 const xpackConfig = resolveRoot('x-pack/test/functional/config.js');
 const kbnArchiveFixturesDir = resolveRoot('x-pack/test/functional/fixtures/kbn_archiver');
 
+const computeName = (fixtureDir: string) => (esArchiveName: string) => {
+  return `${fixtureDir}/${esArchiveName}_NOT_COMPUTED_YET`;
+};
+
+const join2Str = (xs: string[]) => xs.join(',');
+const soTypes = ['index-pattern', 'lens', 'canvas-workpad'];
+
+const loadAndSave = (log: ToolingLog) => (name: string) => {
+  log.info(`${acMark} processing: \n\t[${name}]`);
+
+  const computed = computeName(kbnArchiveFixturesDir)(name);
+
+  try {
+    esArchiverScript(['--config', xpackConfig, 'load', name]);
+    log.info(`${acMark} creating: \n\t${computed}`);
+    shell.mkdir('-p', computed);
+    kbnArchiverScript(['--config', xpackConfig, 'save', computed, '--type', join2Str(soTypes)]);
+  } catch (err) {
+    log.error(`${acMark} ${err}`);
+  }
+};
+
 const creepThru = (log: ToolingLog) => (base: BaseArchivePath) => {
+  const loadWithLog = loadAndSave(log);
   for (const dir of tail(getDirectoriesRecursive(resolveRoot(base)))) {
-    if (!dir.includes('empty_kibana')) loadEsArchive(dir);
-
-    function loadEsArchive(name: string) {
-      log.info(`\n### loading from: \n\t[${name}]`);
-
-      const computeName = (fixtureDir) => (esArchiveName) => {
-        return `${fixtureDir}/${esArchiveName}_NOT_COMPUTED_YET`;
-      };
-      const computed = computeName(kbnArchiveFixturesDir)(name);
-
-      try {
-        esArchiverScript(['--config', xpackConfig, 'load', name]);
-        log.info(`\n### creating: \n\t${computed}`);
-        shell.mkdir('-p', computed);
-        kbnArchiverScript([
-          '--config',
-          xpackConfig,
-          'save',
-          computed,
-          '--type',
-          'index-pattern,lens,canvas-workpad',
-        ]);
-      } catch (err) {
-        log.error(`${acMark} ${err}`);
-      }
-    }
+    if (!dir.includes('empty_kibana')) loadWithLog(dir);
   }
 };
 
