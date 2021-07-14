@@ -12,7 +12,8 @@
     "visTypeTimeseries",
     "alerting",
     "triggersActionsUi",
-    "observability"
+    "observability",
+    "ruleRegistry"
   ],
   "optionalPlugins": ["ml", "home", "embeddable"],
   "server": true,
