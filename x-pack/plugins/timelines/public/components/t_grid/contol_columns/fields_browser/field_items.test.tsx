@@ -9,7 +9,6 @@ import { omit } from 'lodash/fp';
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 import { mockBrowserFields, TestProviders } from '../../../../mock';
-import '../../../../mock/match_media';
 import { defaultColumnHeaderType } from '../../body/column_headers/default_headers';
 import { DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../../body/constants';
 

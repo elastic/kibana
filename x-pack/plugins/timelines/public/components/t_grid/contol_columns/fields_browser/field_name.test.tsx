@@ -9,7 +9,6 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 import { mockBrowserFields, TestProviders } from '../../../../mock';
-import '../../../../mock/match_media';
 import { getColumnsWithTimestamp } from '../../body/column_headers/helpers';
 
 import { FieldName } from './field_name';

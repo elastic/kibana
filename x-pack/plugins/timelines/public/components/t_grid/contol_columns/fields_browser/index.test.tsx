@@ -9,8 +9,6 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 
-import '../../../../mock/match_media';
-import '../../../../mock/react_beautiful_dnd';
 import { mockBrowserFields, TestProviders } from '../../../../mock';
 
 import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from './helpers';

@@ -7,7 +7,6 @@
 
 import React from 'react';
 
-import '../../../../mock/match_media';
 import { useMountAppended } from '../../../utils/use_mount_appended';
 
 import { Category } from './category';
