@@ -6,13 +6,12 @@
  */
 
 import { APMPlugin, APMRouteHandlerResources } from '../..';
-import { listConfigurations } from '../settings/agent_configuration/list_configurations';
-import { setupRequest } from '../helpers/setup_request';
-import { APMPluginStartDependencies } from '../../types';
 import { ExternalCallback } from '../../../../fleet/server';
-import { AGENT_NAME } from '../../../common/elasticsearch_fieldnames';
 import { AgentConfiguration } from '../../../common/agent_configuration/configuration_types';
-import { getPackagePolicyWithSourceMap, listArtifacts } from './source_maps';
+import { AGENT_NAME } from '../../../common/elasticsearch_fieldnames';
+import { APMPluginStartDependencies } from '../../types';
+import { setupRequest } from '../helpers/setup_request';
+import { mergePackagePolicyWithApm } from './merge_package_policy_with_apm';
 
 export async function registerFleetPolicyCallbacks({
   plugins,
@@ -91,12 +90,11 @@ function registerPackagePolicyExternalCallback({
       logger,
       ruleDataClient,
     });
-    const agentConfigurations = await listConfigurations({ setup });
-    const artifacts = await listArtifacts({ fleetPluginStart });
-    return getPackagePolicyWithAgentConfigurations(
-      getPackagePolicyWithSourceMap({ packagePolicy, artifacts }),
-      agentConfigurations
-    );
+    return await mergePackagePolicyWithApm({
+      setup,
+      fleetPluginStart,
+      packagePolicy,
+    });
   };
 
   fleetPluginStart.registerExternalCallback(callbackName, callbackFn);
