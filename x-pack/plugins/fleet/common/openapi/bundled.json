@@ -32,7 +32,7 @@
                     "items": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/paths/~1agent_policies/post/responses/200/content/application~1json/schema/properties/item"
+                        "$ref": "#/components/schemas/agent_policy"
                       }
                     },
                     "total": {
@@ -59,31 +59,13 @@
         "operationId": "agent-policy-list",
         "parameters": [
           {
-            "name": "perPage",
-            "in": "query",
-            "description": "The number of items to return",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "default": 50
-            }
+            "$ref": "#/components/parameters/page_size"
           },
           {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "default": 1
-            }
+            "$ref": "#/components/parameters/page_index"
           },
           {
-            "name": "kuery",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
+            "$ref": "#/components/parameters/kuery"
           }
         ],
         "description": ""
@@ -100,58 +82,7 @@
                   "type": "object",
                   "properties": {
                     "item": {
-                      "allOf": [
-                        {
-                          "$ref": "#/paths/~1agent_policies/post/requestBody/content/application~1json/schema"
-                        },
-                        {
-                          "type": "object",
-                          "properties": {
-                            "id": {
-                              "type": "string"
-                            },
-                            "status": {
-                              "type": "string",
-                              "enum": [
-                                "active",
-                                "inactive"
-                              ]
-                            },
-                            "packagePolicies": {
-                              "oneOf": [
-                                {
-                                  "items": {
-                                    "type": "string"
-                                  }
-                                },
-                                {
-                                  "items": {
-                                    "$ref": "#/paths/~1package_policies~1%7BpackagePolicyId%7D/get/responses/200/content/application~1json/schema/properties/item"
-                                  }
-                                }
-                              ],
-                              "type": "array"
-                            },
-                            "updated_on": {
-                              "type": "string",
-                              "format": "date-time"
-                            },
-                            "updated_by": {
-                              "type": "string"
-                            },
-                            "revision": {
-                              "type": "number"
-                            },
-                            "agents": {
-                              "type": "number"
-                            }
-                          },
-                          "required": [
-                            "id",
-                            "status"
-                          ]
-                        }
-                      ]
+                      "$ref": "#/components/schemas/agent_policy"
                     }
                   }
                 }
@@ -164,19 +95,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "title": "NewAgentPolicy",
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "type": "string"
-                  },
-                  "namespace": {
-                    "type": "string"
-                  },
-                  "description": {
-                    "type": "string"
-                  }
-                }
+                "$ref": "#/components/schemas/new_agent_policy"
               }
             }
           }
@@ -184,7 +103,7 @@
         "security": [],
         "parameters": [
           {
-            "$ref": "#/paths/~1setup/post/parameters/0"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
       }
@@ -212,7 +131,7 @@
                   "type": "object",
                   "properties": {
                     "item": {
-                      "$ref": "#/paths/~1agent_policies/post/responses/200/content/application~1json/schema/properties/item"
+                      "$ref": "#/components/schemas/agent_policy"
                     }
                   },
                   "required": [
@@ -239,7 +158,7 @@
                   "type": "object",
                   "properties": {
                     "item": {
-                      "$ref": "#/paths/~1agent_policies/post/responses/200/content/application~1json/schema/properties/item"
+                      "$ref": "#/components/schemas/agent_policy"
                     }
                   },
                   "required": [
@@ -255,14 +174,14 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/paths/~1agent_policies/post/requestBody/content/application~1json/schema"
+                "$ref": "#/components/schemas/new_agent_policy"
               }
             }
           }
         },
         "parameters": [
           {
-            "$ref": "#/paths/~1setup/post/parameters/0"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
       }
@@ -290,7 +209,7 @@
                   "type": "object",
                   "properties": {
                     "item": {
-                      "$ref": "#/paths/~1agent_policies/post/responses/200/content/application~1json/schema/properties/item"
+                      "$ref": "#/components/schemas/agent_policy"
                     }
                   },
                   "required": [
@@ -375,7 +294,7 @@
         },
         "parameters": [
           {
-            "$ref": "#/paths/~1setup/post/parameters/0"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
       },
@@ -461,7 +380,7 @@
                     "list": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/paths/~1agent_policies/post/responses/200/content/application~1json/schema/properties/item"
+                        "$ref": "#/components/schemas/agent_policy"
                       }
                     },
                     "total": {
@@ -546,7 +465,7 @@
         "operationId": "post-fleet-agents-unenroll",
         "parameters": [
           {
-            "$ref": "#/paths/~1setup/post/parameters/0"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ],
         "requestBody": {
@@ -588,7 +507,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/paths/~1agents~1%7BagentId%7D~1upgrade/post/requestBody/content/application~1json/schema"
+                  "$ref": "#/components/schemas/upgrade_agent"
                 }
               }
             }
@@ -598,7 +517,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/paths/~1agents~1%7BagentId%7D~1upgrade/post/requestBody/content/application~1json/schema"
+                  "$ref": "#/components/schemas/upgrade_agent"
                 }
               }
             }
@@ -607,7 +526,7 @@
         "operationId": "post-fleet-agents-upgrade",
         "parameters": [
           {
-            "$ref": "#/paths/~1setup/post/parameters/0"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ],
         "requestBody": {
@@ -615,34 +534,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "title": "UpgradeAgent",
-                "oneOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "version": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "version"
-                    ]
-                  },
-                  {
-                    "type": "object",
-                    "properties": {
-                      "version": {
-                        "type": "string"
-                      },
-                      "source_uri": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "version"
-                    ]
-                  }
-                ]
+                "$ref": "#/components/schemas/upgrade_agent"
               }
             }
           }
@@ -659,7 +551,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/paths/~1agents~1bulk_upgrade/post/requestBody/content/application~1json/schema"
+                  "$ref": "#/components/schemas/bulk_upgrade_agents"
                 }
               }
             }
@@ -669,7 +561,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/paths/~1agents~1%7BagentId%7D~1upgrade/post/requestBody/content/application~1json/schema"
+                  "$ref": "#/components/schemas/upgrade_agent"
                 }
               }
             }
@@ -678,7 +570,7 @@
         "operationId": "post-fleet-agents-bulk-upgrade",
         "parameters": [
           {
-            "$ref": "#/paths/~1setup/post/parameters/0"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ],
         "requestBody": {
@@ -686,66 +578,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "title": "BulkUpgradeAgents",
-                "oneOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "version": {
-                        "type": "string"
-                      },
-                      "agents": {
-                        "type": "array",
-                        "items": {
-                          "type": "string"
-                        }
-                      }
-                    },
-                    "required": [
-                      "version",
-                      "agents"
-                    ]
-                  },
-                  {
-                    "type": "object",
-                    "properties": {
-                      "version": {
-                        "type": "string"
-                      },
-                      "source_uri": {
-                        "type": "string"
-                      },
-                      "agents": {
-                        "type": "array",
-                        "items": {
-                          "type": "string"
-                        }
-                      }
-                    },
-                    "required": [
-                      "version",
-                      "agents"
-                    ]
-                  },
-                  {
-                    "type": "object",
-                    "properties": {
-                      "version": {
-                        "type": "string"
-                      },
-                      "source_uri": {
-                        "type": "string"
-                      },
-                      "agents": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "version",
-                      "agents"
-                    ]
-                  }
-                ]
+                "$ref": "#/components/schemas/bulk_upgrade_agents"
               }
             }
           }
@@ -829,7 +662,7 @@
         },
         "parameters": [
           {
-            "$ref": "#/paths/~1setup/post/parameters/0"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
       }
@@ -849,7 +682,7 @@
                     "list": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/paths/~1enrollment-api-keys/post/responses/200/content/application~1json/schema/properties/item"
+                        "$ref": "#/components/schemas/enrollment_api_key"
                       }
                     },
                     "page": {
@@ -888,38 +721,7 @@
                   "type": "object",
                   "properties": {
                     "item": {
-                      "title": "EnrollmentApiKey",
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "api_key_id": {
-                          "type": "string"
-                        },
-                        "api_key": {
-                          "type": "string"
-                        },
-                        "name": {
-                          "type": "string"
-                        },
-                        "active": {
-                          "type": "boolean"
-                        },
-                        "policy_id": {
-                          "type": "string"
-                        },
-                        "created_at": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "api_key_id",
-                        "api_key",
-                        "active",
-                        "created_at"
-                      ]
+                      "$ref": "#/components/schemas/enrollment_api_key"
                     },
                     "action": {
                       "type": "string",
@@ -936,7 +738,7 @@
         "operationId": "post-fleet-enrollment-api-keys",
         "parameters": [
           {
-            "$ref": "#/paths/~1setup/post/parameters/0"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
       }
@@ -964,7 +766,7 @@
                   "type": "object",
                   "properties": {
                     "item": {
-                      "$ref": "#/paths/~1enrollment-api-keys/post/responses/200/content/application~1json/schema/properties/item"
+                      "$ref": "#/components/schemas/enrollment_api_key"
                     }
                   },
                   "required": [
@@ -1006,7 +808,7 @@
         "operationId": "delete-fleet-enrollment-api-keys-keyId",
         "parameters": [
           {
-            "$ref": "#/paths/~1setup/post/parameters/0"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
       }
@@ -1061,51 +863,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "title": "SearchResult",
-                    "type": "object",
-                    "properties": {
-                      "description": {
-                        "type": "string"
-                      },
-                      "download": {
-                        "type": "string"
-                      },
-                      "icons": {
-                        "type": "string"
-                      },
-                      "name": {
-                        "type": "string"
-                      },
-                      "path": {
-                        "type": "string"
-                      },
-                      "title": {
-                        "type": "string"
-                      },
-                      "type": {
-                        "type": "string"
-                      },
-                      "version": {
-                        "type": "string"
-                      },
-                      "status": {
-                        "type": "string"
-                      },
-                      "savedObject": {
-                        "type": "object"
-                      }
-                    },
-                    "required": [
-                      "description",
-                      "download",
-                      "icons",
-                      "name",
-                      "path",
-                      "title",
-                      "type",
-                      "version",
-                      "status"
-                    ]
+                    "$ref": "#/components/schemas/search_result"
                   }
                 }
               }
@@ -1131,182 +889,7 @@
                     {
                       "properties": {
                         "response": {
-                          "title": "PackageInfo",
-                          "type": "object",
-                          "properties": {
-                            "name": {
-                              "type": "string"
-                            },
-                            "title": {
-                              "type": "string"
-                            },
-                            "version": {
-                              "type": "string"
-                            },
-                            "readme": {
-                              "type": "string"
-                            },
-                            "description": {
-                              "type": "string"
-                            },
-                            "type": {
-                              "type": "string"
-                            },
-                            "categories": {
-                              "type": "array",
-                              "items": {
-                                "type": "string"
-                              }
-                            },
-                            "requirement": {
-                              "oneOf": [
-                                {
-                                  "properties": {
-                                    "kibana": {
-                                      "type": "object",
-                                      "properties": {
-                                        "versions": {
-                                          "type": "string"
-                                        }
-                                      }
-                                    }
-                                  }
-                                },
-                                {
-                                  "properties": {
-                                    "elasticsearch": {
-                                      "type": "object",
-                                      "properties": {
-                                        "versions": {
-                                          "type": "string"
-                                        }
-                                      }
-                                    }
-                                  }
-                                }
-                              ],
-                              "type": "object"
-                            },
-                            "screenshots": {
-                              "type": "array",
-                              "items": {
-                                "type": "object",
-                                "properties": {
-                                  "src": {
-                                    "type": "string"
-                                  },
-                                  "path": {
-                                    "type": "string"
-                                  },
-                                  "title": {
-                                    "type": "string"
-                                  },
-                                  "size": {
-                                    "type": "string"
-                                  },
-                                  "type": {
-                                    "type": "string"
-                                  }
-                                },
-                                "required": [
-                                  "src",
-                                  "path"
-                                ]
-                              }
-                            },
-                            "icons": {
-                              "type": "array",
-                              "items": {
-                                "type": "string"
-                              }
-                            },
-                            "assets": {
-                              "type": "array",
-                              "items": {
-                                "type": "string"
-                              }
-                            },
-                            "internal": {
-                              "type": "boolean"
-                            },
-                            "format_version": {
-                              "type": "string"
-                            },
-                            "data_streams": {
-                              "type": "array",
-                              "items": {
-                                "type": "object",
-                                "properties": {
-                                  "title": {
-                                    "type": "string"
-                                  },
-                                  "name": {
-                                    "type": "string"
-                                  },
-                                  "release": {
-                                    "type": "string"
-                                  },
-                                  "ingeset_pipeline": {
-                                    "type": "string"
-                                  },
-                                  "vars": {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "object",
-                                      "properties": {
-                                        "name": {
-                                          "type": "string"
-                                        },
-                                        "default": {
-                                          "type": "string"
-                                        }
-                                      },
-                                      "required": [
-                                        "name",
-                                        "default"
-                                      ]
-                                    }
-                                  },
-                                  "type": {
-                                    "type": "string"
-                                  },
-                                  "package": {
-                                    "type": "string"
-                                  }
-                                },
-                                "required": [
-                                  "title",
-                                  "name",
-                                  "release",
-                                  "ingeset_pipeline",
-                                  "type",
-                                  "package"
-                                ]
-                              }
-                            },
-                            "download": {
-                              "type": "string"
-                            },
-                            "path": {
-                              "type": "string"
-                            },
-                            "removable": {
-                              "type": "boolean"
-                            }
-                          },
-                          "required": [
-                            "name",
-                            "title",
-                            "version",
-                            "description",
-                            "type",
-                            "categories",
-                            "requirement",
-                            "assets",
-                            "format_version",
-                            "download",
-                            "path"
-                          ]
+                          "$ref": "#/components/schemas/package_info"
                         }
                       }
                     },
@@ -1393,7 +976,7 @@
         "description": "",
         "parameters": [
           {
-            "$ref": "#/paths/~1setup/post/parameters/0"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
       },
@@ -1438,7 +1021,7 @@
         "operationId": "post-epm-delete-pkgkey",
         "parameters": [
           {
-            "$ref": "#/paths/~1setup/post/parameters/0"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ],
         "requestBody": {
@@ -1480,84 +1063,7 @@
                   "type": "object",
                   "properties": {
                     "item": {
-                      "title": "Agent",
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "title": "AgentType",
-                          "enum": [
-                            "PERMANENT",
-                            "EPHEMERAL",
-                            "TEMPORARY"
-                          ]
-                        },
-                        "active": {
-                          "type": "boolean"
-                        },
-                        "enrolled_at": {
-                          "type": "string"
-                        },
-                        "unenrolled_at": {
-                          "type": "string"
-                        },
-                        "unenrollment_started_at": {
-                          "type": "string"
-                        },
-                        "shared_id": {
-                          "type": "string",
-                          "deprecated": true
-                        },
-                        "access_api_key_id": {
-                          "type": "string"
-                        },
-                        "default_api_key_id": {
-                          "type": "string"
-                        },
-                        "policy_id": {
-                          "type": "string"
-                        },
-                        "policy_revision": {
-                          "type": "number"
-                        },
-                        "last_checkin": {
-                          "type": "string"
-                        },
-                        "user_provided_metadata": {
-                          "$ref": "#/paths/~1agents~1%7BagentId%7D/get/responses/200/content/application~1json/schema/properties/item/properties/local_metadata"
-                        },
-                        "local_metadata": {
-                          "title": "AgentMetadata",
-                          "type": "object"
-                        },
-                        "id": {
-                          "type": "string"
-                        },
-                        "access_api_key": {
-                          "type": "string"
-                        },
-                        "status": {
-                          "type": "string",
-                          "title": "AgentStatus",
-                          "enum": [
-                            "offline",
-                            "error",
-                            "online",
-                            "inactive",
-                            "warning"
-                          ]
-                        },
-                        "default_api_key": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "type",
-                        "active",
-                        "enrolled_at",
-                        "id",
-                        "status"
-                      ]
+                      "$ref": "#/components/schemas/agent"
                     }
                   },
                   "required": [
@@ -1582,7 +1088,7 @@
                   "type": "object",
                   "properties": {
                     "item": {
-                      "$ref": "#/paths/~1agents~1%7BagentId%7D/get/responses/200/content/application~1json/schema/properties/item"
+                      "$ref": "#/components/schemas/agent"
                     }
                   },
                   "required": [
@@ -1596,7 +1102,7 @@
         "operationId": "put-fleet-agents-agentId",
         "parameters": [
           {
-            "$ref": "#/paths/~1setup/post/parameters/0"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
       },
@@ -1629,7 +1135,7 @@
         "operationId": "delete-fleet-agents-agentId",
         "parameters": [
           {
-            "$ref": "#/paths/~1setup/post/parameters/0"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
       }
@@ -1649,7 +1155,7 @@
                     "items": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/paths/~1package_policies~1%7BpackagePolicyId%7D/get/responses/200/content/application~1json/schema/properties/item"
+                        "$ref": "#/components/schemas/package_policy"
                       }
                     },
                     "total": {
@@ -1687,96 +1193,14 @@
           "content": {
             "application/json": {
               "schema": {
-                "title": "NewPackagePolicy",
-                "type": "object",
-                "description": "",
-                "properties": {
-                  "enabled": {
-                    "type": "boolean"
-                  },
-                  "package": {
-                    "type": "object",
-                    "properties": {
-                      "name": {
-                        "type": "string"
-                      },
-                      "version": {
-                        "type": "string"
-                      },
-                      "title": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "name",
-                      "version",
-                      "title"
-                    ]
-                  },
-                  "namespace": {
-                    "type": "string"
-                  },
-                  "output_id": {
-                    "type": "string"
-                  },
-                  "inputs": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string"
-                        },
-                        "enabled": {
-                          "type": "boolean"
-                        },
-                        "processors": {
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
-                        },
-                        "streams": {
-                          "type": "array",
-                          "items": {}
-                        },
-                        "config": {
-                          "type": "object"
-                        },
-                        "vars": {
-                          "type": "object"
-                        }
-                      },
-                      "required": [
-                        "type",
-                        "enabled",
-                        "streams"
-                      ]
-                    }
-                  },
-                  "policy_id": {
-                    "type": "string"
-                  },
-                  "name": {
-                    "type": "string"
-                  },
-                  "description": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "output_id",
-                  "inputs",
-                  "policy_id",
-                  "name"
-                ]
+                "$ref": "#/components/schemas/new_package_policy"
               }
             }
           }
         },
         "parameters": [
           {
-            "$ref": "#/paths/~1setup/post/parameters/0"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
       }
@@ -1794,31 +1218,7 @@
                   "type": "object",
                   "properties": {
                     "item": {
-                      "title": "PackagePolicy",
-                      "allOf": [
-                        {
-                          "type": "object",
-                          "properties": {
-                            "id": {
-                              "type": "string"
-                            },
-                            "revision": {
-                              "type": "number"
-                            },
-                            "inputs": {
-                              "type": "array",
-                              "items": {}
-                            }
-                          },
-                          "required": [
-                            "id",
-                            "revision"
-                          ]
-                        },
-                        {
-                          "$ref": "#/paths/~1package_policies/post/requestBody/content/application~1json/schema"
-                        }
-                      ]
+                      "$ref": "#/components/schemas/package_policy"
                     }
                   },
                   "required": [
@@ -1848,20 +1248,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "title": "UpdatePackagePolicy",
-                "allOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "version": {
-                        "type": "string"
-                      }
-                    }
-                  },
-                  {
-                    "$ref": "#/paths/~1package_policies/post/requestBody/content/application~1json/schema"
-                  }
-                ]
+                "$ref": "#/components/schemas/update_package_policy"
               }
             }
           }
@@ -1875,7 +1262,7 @@
                   "type": "object",
                   "properties": {
                     "item": {
-                      "$ref": "#/paths/~1package_policies~1%7BpackagePolicyId%7D/get/responses/200/content/application~1json/schema/properties/item"
+                      "$ref": "#/components/schemas/package_policy"
                     },
                     "sucess": {
                       "type": "boolean"
@@ -1892,7 +1279,7 @@
         },
         "parameters": [
           {
-            "$ref": "#/paths/~1setup/post/parameters/0"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
       }
@@ -1936,12 +1323,7 @@
         "operationId": "post-setup",
         "parameters": [
           {
-            "schema": {
-              "type": "string"
-            },
-            "in": "header",
-            "name": "kbn-xsrf",
-            "required": true
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
       }
@@ -1964,6 +1346,682 @@
         "type": "apiKey",
         "in": "header",
         "description": "e.g. Authorization: ApiKey base64AccessApiKey"
+      }
+    },
+    "parameters": {
+      "page_size": {
+        "name": "perPage",
+        "in": "query",
+        "description": "The number of items to return",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "default": 50
+        }
+      },
+      "page_index": {
+        "name": "page",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "default": 1
+        }
+      },
+      "kuery": {
+        "name": "kuery",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "kbn_xsrf": {
+        "schema": {
+          "type": "string"
+        },
+        "in": "header",
+        "name": "kbn-xsrf",
+        "required": true
+      }
+    },
+    "schemas": {
+      "new_agent_policy": {
+        "title": "NewAgentPolicy",
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "new_package_policy": {
+        "title": "NewPackagePolicy",
+        "type": "object",
+        "description": "",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "package": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "version": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "version",
+              "title"
+            ]
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "output_id": {
+            "type": "string"
+          },
+          "inputs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "enabled": {
+                  "type": "boolean"
+                },
+                "processors": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "streams": {
+                  "type": "array",
+                  "items": {}
+                },
+                "config": {
+                  "type": "object"
+                },
+                "vars": {
+                  "type": "object"
+                }
+              },
+              "required": [
+                "type",
+                "enabled",
+                "streams"
+              ]
+            }
+          },
+          "policy_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "output_id",
+          "inputs",
+          "policy_id",
+          "name"
+        ]
+      },
+      "package_policy": {
+        "title": "PackagePolicy",
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "revision": {
+                "type": "number"
+              },
+              "inputs": {
+                "type": "array",
+                "items": {}
+              }
+            },
+            "required": [
+              "id",
+              "revision"
+            ]
+          },
+          {
+            "$ref": "#/components/schemas/new_package_policy"
+          }
+        ]
+      },
+      "agent_policy": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/new_agent_policy"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "active",
+                  "inactive"
+                ]
+              },
+              "packagePolicies": {
+                "oneOf": [
+                  {
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "items": {
+                      "$ref": "#/components/schemas/package_policy"
+                    }
+                  }
+                ],
+                "type": "array"
+              },
+              "updated_on": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updated_by": {
+                "type": "string"
+              },
+              "revision": {
+                "type": "number"
+              },
+              "agents": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "id",
+              "status"
+            ]
+          }
+        ]
+      },
+      "upgrade_agent": {
+        "title": "UpgradeAgent",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "version": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "version"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "version": {
+                "type": "string"
+              },
+              "source_uri": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "version"
+            ]
+          }
+        ]
+      },
+      "bulk_upgrade_agents": {
+        "title": "BulkUpgradeAgents",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "version": {
+                "type": "string"
+              },
+              "agents": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "version",
+              "agents"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "version": {
+                "type": "string"
+              },
+              "source_uri": {
+                "type": "string"
+              },
+              "agents": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "version",
+              "agents"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "version": {
+                "type": "string"
+              },
+              "source_uri": {
+                "type": "string"
+              },
+              "agents": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "version",
+              "agents"
+            ]
+          }
+        ]
+      },
+      "enrollment_api_key": {
+        "title": "EnrollmentApiKey",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "api_key_id": {
+            "type": "string"
+          },
+          "api_key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "policy_id": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "api_key_id",
+          "api_key",
+          "active",
+          "created_at"
+        ]
+      },
+      "search_result": {
+        "title": "SearchResult",
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "download": {
+            "type": "string"
+          },
+          "icons": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "savedObject": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "description",
+          "download",
+          "icons",
+          "name",
+          "path",
+          "title",
+          "type",
+          "version",
+          "status"
+        ]
+      },
+      "package_info": {
+        "title": "PackageInfo",
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "readme": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "requirement": {
+            "oneOf": [
+              {
+                "properties": {
+                  "kibana": {
+                    "type": "object",
+                    "properties": {
+                      "versions": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "elasticsearch": {
+                    "type": "object",
+                    "properties": {
+                      "versions": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "type": "object"
+          },
+          "screenshots": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "src": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "size": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "src",
+                "path"
+              ]
+            }
+          },
+          "icons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "assets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "internal": {
+            "type": "boolean"
+          },
+          "format_version": {
+            "type": "string"
+          },
+          "data_streams": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "release": {
+                  "type": "string"
+                },
+                "ingeset_pipeline": {
+                  "type": "string"
+                },
+                "vars": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "default": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "default"
+                    ]
+                  }
+                },
+                "type": {
+                  "type": "string"
+                },
+                "package": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "title",
+                "name",
+                "release",
+                "ingeset_pipeline",
+                "type",
+                "package"
+              ]
+            }
+          },
+          "download": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "removable": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "title",
+          "version",
+          "description",
+          "type",
+          "categories",
+          "requirement",
+          "assets",
+          "format_version",
+          "download",
+          "path"
+        ]
+      },
+      "agent_type": {
+        "type": "string",
+        "title": "AgentType",
+        "enum": [
+          "PERMANENT",
+          "EPHEMERAL",
+          "TEMPORARY"
+        ]
+      },
+      "agent_metadata": {
+        "title": "AgentMetadata",
+        "type": "object"
+      },
+      "agent_status": {
+        "type": "string",
+        "title": "AgentStatus",
+        "enum": [
+          "offline",
+          "error",
+          "online",
+          "inactive",
+          "warning"
+        ]
+      },
+      "agent": {
+        "title": "Agent",
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/agent_type"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "enrolled_at": {
+            "type": "string"
+          },
+          "unenrolled_at": {
+            "type": "string"
+          },
+          "unenrollment_started_at": {
+            "type": "string"
+          },
+          "shared_id": {
+            "type": "string",
+            "deprecated": true
+          },
+          "access_api_key_id": {
+            "type": "string"
+          },
+          "default_api_key_id": {
+            "type": "string"
+          },
+          "policy_id": {
+            "type": "string"
+          },
+          "policy_revision": {
+            "type": "number"
+          },
+          "last_checkin": {
+            "type": "string"
+          },
+          "user_provided_metadata": {
+            "$ref": "#/components/schemas/agent_metadata"
+          },
+          "local_metadata": {
+            "$ref": "#/components/schemas/agent_metadata"
+          },
+          "id": {
+            "type": "string"
+          },
+          "access_api_key": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/agent_status"
+          },
+          "default_api_key": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "active",
+          "enrolled_at",
+          "id",
+          "status"
+        ]
+      },
+      "update_package_policy": {
+        "title": "UpdatePackagePolicy",
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "version": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/new_package_policy"
+          }
+        ]
       }
     }
   },
