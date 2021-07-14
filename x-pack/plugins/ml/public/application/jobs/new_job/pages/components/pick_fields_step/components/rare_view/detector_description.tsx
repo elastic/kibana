@@ -37,14 +37,10 @@ export const DetectorDescription: FC<Props> = ({ detectorType }) => {
       title={i18n.translate(
         'xpack.ml.newJob.wizard.pickFieldsStep.rareField.plainText.calloutTitle',
         {
-          defaultMessage: 'Detector summary',
+          defaultMessage: 'Job summary',
         }
       )}
     >
-      <FormattedMessage
-        id="xpack.ml.newJob.wizard.pickFieldsStep.rareField.plainText.title"
-        defaultMessage="This job:"
-      />
       <ul>
         {description.map((d) => (
           <li>{d}</li>
@@ -63,49 +59,82 @@ function createDetectorDescription(jobCreator: RareJobCreator, detectorType: RAR
   const populationFieldName = jobCreator.populationField?.id;
   const splitFieldName = jobCreator.splitField?.id;
 
-  const beginningSummary = i18n.translate(
-    'xpack.ml.newJob.wizard.pickFieldsStep.rareField.plainText.beginningSummary',
+  const rareSummary = i18n.translate(
+    'xpack.ml.newJob.wizard.pickFieldsStep.rareField.plainText.rareSummary',
     {
-      defaultMessage: 'detects rare values of {rareFieldName}',
+      defaultMessage: 'Detects rare {rareFieldName} values.',
       values: { rareFieldName },
     }
   );
 
-  const beginningSummaryFreq = i18n.translate(
-    'xpack.ml.newJob.wizard.pickFieldsStep.rareField.plainText.beginningSummaryFreq',
+  const rareSplitSummary = i18n.translate(
+    'xpack.ml.newJob.wizard.pickFieldsStep.rareField.plainText.rareSplitSummary',
     {
-      defaultMessage: 'detects frequently rare values of {rareFieldName}',
-      values: { rareFieldName },
+      defaultMessage: 'For each {splitFieldName} value, detects rare {rareFieldName} values.',
+      values: { splitFieldName, rareFieldName },
     }
   );
 
-  const population = i18n.translate(
-    'xpack.ml.newJob.wizard.pickFieldsStep.rareField.plainText.population',
+  const freqRarePopulationSummary = i18n.translate(
+    'xpack.ml.newJob.wizard.pickFieldsStep.rareField.plainText.freqRarePopulationSummary',
     {
-      defaultMessage: 'compared to the population of {populationFieldName}',
-      values: { populationFieldName },
+      defaultMessage:
+        'Detects {populationFieldName} values that frequently have rare {rareFieldName} values relative to the population.',
+      values: { populationFieldName, rareFieldName },
     }
   );
 
-  const split = i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.rareField.plainText.split', {
-    defaultMessage: 'for each value of {splitFieldName}',
-    values: { splitFieldName },
-  });
+  const freqRareSplitPopulationSummary = i18n.translate(
+    'xpack.ml.newJob.wizard.pickFieldsStep.rareField.plainText.freqRareSplitPopulationSummary',
+    {
+      defaultMessage:
+        'For each {splitFieldName}, detects {populationFieldName} values that frequently have rare {rareFieldName} values relative to the population.',
+      values: { splitFieldName, populationFieldName, rareFieldName },
+    }
+  );
+
+  const rarePopulationSummary = i18n.translate(
+    'xpack.ml.newJob.wizard.pickFieldsStep.rareField.plainText.rarePopulationSummary',
+    {
+      defaultMessage:
+        'Detects {populationFieldName} values that have rare {rareFieldName} values relative to the population.',
+      values: { populationFieldName, rareFieldName },
+    }
+  );
+
+  const rareSplitPopulationSummary = i18n.translate(
+    'xpack.ml.newJob.wizard.pickFieldsStep.rareField.plainText.rareSplitPopulationSummary',
+    {
+      defaultMessage:
+        'For each {splitFieldName} value, detects {populationFieldName} values that have rare {rareFieldName} values relative to the population.',
+      values: { splitFieldName, populationFieldName, rareFieldName },
+    }
+  );
 
   const desc = [];
 
+  if (detectorType === RARE_DETECTOR_TYPE.RARE) {
+    if (splitFieldName !== undefined) {
+      desc.push(rareSplitSummary);
+    } else {
+      desc.push(rareSummary);
+    }
+  }
+
   if (detectorType === RARE_DETECTOR_TYPE.FREQ_RARE_POPULATION) {
-    desc.push(beginningSummaryFreq);
-  } else {
-    desc.push(beginningSummary);
+    if (splitFieldName !== undefined) {
+      desc.push(freqRareSplitPopulationSummary);
+    } else {
+      desc.push(freqRarePopulationSummary);
+    }
   }
 
-  if (populationFieldName !== undefined) {
-    desc.push(population);
-  }
-
-  if (splitFieldName !== undefined) {
-    desc.push(split);
+  if (detectorType === RARE_DETECTOR_TYPE.RARE_POPULATION) {
+    if (splitFieldName !== undefined) {
+      desc.push(rareSplitPopulationSummary);
+    } else {
+      desc.push(rarePopulationSummary);
+    }
   }
 
   return desc;
