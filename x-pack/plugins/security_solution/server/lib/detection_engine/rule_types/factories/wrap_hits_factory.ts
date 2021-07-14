@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { TechnicalRuleFieldMaps } from '../../../../../../rule_registry/common/assets/field_maps/technical_rule_field_map';
 import type { ConfigType } from '../../../../config';
 import { buildBulkBody } from '../../signals/build_bulk_body';
 import { filterDuplicateSignals } from '../../signals/filter_duplicate_signals';
-import { SearchAfterAndBulkCreateParams, WrapHits, WrappedSignalHit } from '../../signals/types';
+import { SearchAfterAndBulkCreateParams } from '../../signals/types';
 import { generateId } from '../../signals/utils';
 
 export const wrapHitsFactory = ({
@@ -19,8 +20,8 @@ export const wrapHitsFactory = ({
   ruleSO: SearchAfterAndBulkCreateParams['ruleSO'];
   signalsIndex: string;
   mergeStrategy: ConfigType['alertMergeStrategy'];
-}): WrapHits => (events) => {
-  const wrappedDocs: WrappedSignalHit[] = events.flatMap((doc) => [
+}) => (events) => {
+  const wrappedDocs: TechnicalRuleFieldMaps[] = events.flatMap((doc) => [
     {
       _index: signalsIndex,
       _id: generateId(
@@ -33,5 +34,6 @@ export const wrapHitsFactory = ({
     },
   ]);
 
-  return filterDuplicateSignals(ruleSO.id, wrappedDocs, false);
+  // return filterDuplicateSignals(ruleSO.id, wrappedDocs, false);
+  return wrappedDocs;
 };

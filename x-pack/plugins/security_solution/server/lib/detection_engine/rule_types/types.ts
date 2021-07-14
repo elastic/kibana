@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { Logger } from '@kbn/logging';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { Moment } from 'moment';
@@ -17,6 +18,7 @@ import {
 } from '../../../../../alerting/common';
 import { AlertType } from '../../../../../alerting/server';
 import { ListClient } from '../../../../../lists/server';
+import { TechnicalRuleFieldMaps } from '../../../../../rule_registry/common/assets/field_maps/technical_rule_field_map';
 import {
   AlertTypeWithExecutor,
   PersistenceServices,
@@ -57,7 +59,8 @@ export interface RunOpts<TParams extends RuleParams> {
     from: Moment;
     maxSignals: number;
   };
-  wrapHits: WrapHits;
+  // wrapHits: WrapHits;
+  wrapHits: (hits: Array<estypes.SearchHit<RACAlert>>) => WrappedRACAlert[];
 }
 
 export type SecurityAlertTypeExecutor<
@@ -97,3 +100,9 @@ export type CreateSecurityRuleTypeFactory = (options: {
   type: SecurityAlertTypeWithExecutor<TState, TServices, TParams, TAlertInstanceContext>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ) => AlertTypeWithExecutor<TState, TParams, TAlertInstanceContext, any>;
+
+export interface RACAlert extends TechnicalRuleFieldMaps {
+  todo?: undefined;
+}
+
+export type WrappedRACAlert = RACAlert;

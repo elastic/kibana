@@ -40,23 +40,6 @@ export const bulkCreateFactory = <TAlertInstanceContext extends AlertInstanceCon
     };
   }
 
-  /*
-  export interface BulkRequest<TSource = unknown> extends RequestBase {
-    index?: IndexName
-    type?: Type
-    pipeline?: string
-    refresh?: Refresh
-    routing?: Routing
-    _source?: boolean | Fields
-    _source_excludes?: Fields
-    _source_includes?: Fields
-    timeout?: Time
-    wait_for_active_shards?: WaitForActiveShards
-    require_alias?: boolean
-    body?: (BulkOperationContainer | TSource)[]
-  }
-  */
-
   const start = performance.now();
 
   const { body: response } = await alertWithPersistence(wrappedDocs);

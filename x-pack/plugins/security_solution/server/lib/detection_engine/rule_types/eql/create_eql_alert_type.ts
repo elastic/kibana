@@ -133,9 +133,12 @@ export const createEqlAlertType = (createOptions: {
       }
 
       if (alerts.length > 0) {
+        /*
         alertWithPersistence(alerts).forEach((alert) => {
           alert.scheduleActions('default', { server: 'server-test' });
         });
+        */
+        const bulkResponse = await alertWithPersistence(alerts);
       }
 
       return result;

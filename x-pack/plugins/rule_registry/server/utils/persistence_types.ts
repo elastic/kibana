@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { ApiResponse } from '@elastic/elasticsearch';
+import { BulkResponse } from '@elastic/elasticsearch/api/types';
 import { Logger } from '@kbn/logging';
 import { ESSearchRequest } from 'src/core/types/elasticsearch';
 import {
@@ -12,13 +14,15 @@ import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertTypeParams,
+  AlertTypeState,
 } from '../../../alerting/server';
 import { AlertTypeWithExecutor } from '../types';
 import { RuleDataClient } from '../../target/types/server';
 
 export type PersistenceAlertService<TAlertInstanceContext extends Record<string, unknown>> = (
   alerts: Array<Record<string, unknown>>
-) => Array<AlertInstance<AlertInstanceState, TAlertInstanceContext, string>>;
+  // ) => Array<AlertInstance<AlertInstanceState, TAlertInstanceContext, string>>;
+) => Promise<ApiResponse<BulkResponse, unknown>>;
 
 export type PersistenceAlertQueryService = (
   query: ESSearchRequest

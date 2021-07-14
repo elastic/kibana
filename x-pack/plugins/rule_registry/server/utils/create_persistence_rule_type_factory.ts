@@ -24,23 +24,39 @@ export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory 
         ...options,
         services: {
           ...options.services,
-          alertWithPersistence: (alerts) => {
+          alertWithPersistence: async (alerts) => {
             alerts.forEach((alert) => currentAlerts.push(alert));
-            return alerts.map((alert) =>
-              alertInstanceFactory(alert['kibana.rac.alert.uuid']! as string)
-            );
+
+            const numAlerts = currentAlerts.length;
+            logger.debug(`Found ${numAlerts} alerts.`);
+
+            if (ruleDataClient.isWriteEnabled() && numAlerts) {
+              const response = await ruleDataClient.getWriter().bulk({
+                body: currentAlerts.flatMap((event) => [{ index: {} }, event]),
+              });
+              alerts.map((alert) =>
+                alertInstanceFactory(alert['kibana.rac.alert.uuid']! as string)
+              );
+              return response;
+              /*
+              return {
+                createdSignals: alerts.map((alert) =>
+                  alertInstanceFactory(alert['kibana.rac.alert.uuid']! as string)
+                ),
+                errors: [],
+              };
+              */
+            }
+
+            /*
+            return {
+              createdSignals: 0,
+              errors: [],
+            };
+            */
           },
         },
       });
-
-      const numAlerts = currentAlerts.length;
-      logger.debug(`Found ${numAlerts} alerts.`);
-
-      if (ruleDataClient.isWriteEnabled() && numAlerts) {
-        await ruleDataClient.getWriter().bulk({
-          body: currentAlerts.flatMap((event) => [{ index: {} }, event]),
-        });
-      }
 
       return state;
     },
