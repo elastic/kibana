@@ -17405,7 +17405,6 @@
     "xpack.observability.feedbackMenu.appName": "可观测性",
     "xpack.observability.fieldValueSelection.apply": "应用",
     "xpack.observability.fieldValueSelection.placeholder": "筛选 {label}",
-    "xpack.observability.fleet.beta": "公测版",
     "xpack.observability.fleet.button": "试用 Fleet 公测版",
     "xpack.observability.fleet.text": "通过 Elastic 代理，可以简单统一的方式将日志、指标和其他类型数据的监测添加到主机。您无需安装多个 Beats 和其他代理，以令其更为方便快捷地在基础结构中部署配置。",
     "xpack.observability.fleet.title": "您是否了解我们的全新 Fleet？",
