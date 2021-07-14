@@ -20,15 +20,15 @@ export interface GetGenericComboBoxPropsReturn {
  * @param selectedOptions user selection if any
  * @param getLabel helper function to know which property to use for labels
  */
-export function getGenericComboBoxProps<T>({
+export const getGenericComboBoxProps = <T>({
+  getLabel,
   options,
   selectedOptions,
-  getLabel,
 }: {
+  getLabel: (value: T) => string;
   options: T[];
   selectedOptions: T[];
-  getLabel: (value: T) => string;
-}): GetGenericComboBoxPropsReturn {
+}): GetGenericComboBoxPropsReturn => {
   const newLabels = options.map(getLabel);
   const newComboOptions: EuiComboBoxOptionOption[] = newLabels.map((label) => ({ label }));
   const newSelectedComboOptions = selectedOptions
@@ -45,4 +45,4 @@ export function getGenericComboBoxProps<T>({
     labels: newLabels,
     selectedComboOptions: newSelectedComboOptions,
   };
-}
+};

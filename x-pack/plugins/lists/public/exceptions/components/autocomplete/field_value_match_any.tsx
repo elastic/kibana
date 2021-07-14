@@ -9,12 +9,12 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { uniq } from 'lodash';
 import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { getGenericComboBoxProps, paramIsValid } from '@kbn/securitysolution-autocomplete';
 
 import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
 
 import { useFieldValueAutocomplete } from './hooks/use_field_value_autocomplete';
-import { getGenericComboBoxProps, paramIsValid } from './helpers';
 import { GetGenericComboBoxPropsReturn } from './types';
 import * as i18n from './translations';
 

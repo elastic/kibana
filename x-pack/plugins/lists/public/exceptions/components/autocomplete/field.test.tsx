@@ -8,13 +8,12 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import { FieldComponent } from '@kbn/securitysolution-autocomplete';
 
 import {
   fields,
   getField,
 } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
-
-import { FieldComponent } from './field';
 
 describe('FieldComponent', () => {
   test('it renders disabled if "isDisabled" is true', () => {

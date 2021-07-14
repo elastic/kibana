@@ -8,10 +8,11 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { OperatorOption } from '@kbn/securitysolution-list-utils';
+import { getGenericComboBoxProps } from '@kbn/securitysolution-autocomplete';
 
 import { IFieldType } from '../../../../../../../src/plugins/data/common';
 
-import { getGenericComboBoxProps, getOperators } from './helpers';
+import { getOperators } from './helpers';
 import { GetGenericComboBoxPropsReturn } from './types';
 
 const AS_PLAIN_TEXT = { asPlainText: true };

@@ -10,10 +10,11 @@ import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { HttpStart } from 'kibana/public';
 import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { useFindLists } from '@kbn/securitysolution-list-hooks';
+import { getGenericComboBoxProps } from '@kbn/securitysolution-autocomplete';
 
 import { IFieldType } from '../../../../../../../src/plugins/data/common';
 
-import { filterFieldToList, getGenericComboBoxProps } from './helpers';
+import { filterFieldToList } from './helpers';
 import * as i18n from './translations';
 
 const SINGLE_SELECTION = { asPlainText: true };

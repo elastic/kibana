@@ -14,20 +14,18 @@ import {
   isNotOperator,
   isOperator,
 } from '@kbn/securitysolution-list-utils';
+import {
+  checkEmptyValue,
+  getGenericComboBoxProps,
+  paramIsValid,
+} from '@kbn/securitysolution-autocomplete';
 
 import { getField } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
 import { IFieldType } from '../../../../../../../src/plugins/data/common';
 import { getListResponseMock } from '../../../../../lists/common/schemas/response/list_schema.mock';
 
 import * as i18n from './translations';
-import {
-  checkEmptyValue,
-  filterFieldToList,
-  getGenericComboBoxProps,
-  getOperators,
-  paramIsValid,
-  typeMatch,
-} from './helpers';
+import { filterFieldToList, getOperators, typeMatch } from './helpers';
 
 describe('helpers', () => {
   // @ts-ignore
