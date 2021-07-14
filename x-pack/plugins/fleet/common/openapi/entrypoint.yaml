@@ -42,8 +42,6 @@ paths:
     $ref: 'paths/epm@packages@{pkgkey}.yaml'
   '/agents/{agentId}':
     $ref: 'paths/agents@{agent_id}.yaml'
-  '/install/{osType}':
-    $ref: 'paths/install@{os_type}.yaml'
   /package_policies:
     $ref: paths/package_policies.yaml
   '/package_policies/{packagePolicyId}':

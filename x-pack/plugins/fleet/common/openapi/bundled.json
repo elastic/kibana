@@ -1388,24 +1388,6 @@
         ]
       }
     },
-    "/install/{osType}": {
-      "parameters": [
-        {
-          "schema": {
-            "type": "string"
-          },
-          "name": "osType",
-          "in": "path",
-          "required": true
-        }
-      ],
-      "get": {
-        "summary": "Fleet - Get OS install script",
-        "tags": [],
-        "responses": {},
-        "operationId": "get-fleet-install-osType"
-      }
-    },
     "/package_policies": {
       "get": {
         "summary": "PackagePolicies - List",
