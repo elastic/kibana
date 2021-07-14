@@ -6,6 +6,8 @@
  */
 
 export type OnActionComplete = () => void;
+export type OnActionClick = (actionElement: React.ReactElement) => void;
+export type OnActionDismiss = () => void;
 
 export enum ACTION {
   INSPECT = 'inspect',

@@ -13,7 +13,7 @@ import { Duration } from 'moment';
 import moment from 'moment';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { TableText } from '../';
-import { OnActionComplete } from './types';
+import { OnActionClick, OnActionComplete, OnActionDismiss } from './types';
 
 interface ExtendButtonProps {
   id: string;
@@ -21,13 +21,12 @@ interface ExtendButtonProps {
   expires: string | null;
   extendBy: Duration;
   api: SearchSessionsMgmtAPI;
+  onActionClick: OnActionClick;
   onActionComplete: OnActionComplete;
+  onConfirmDismiss: OnActionDismiss;
 }
 
-const ExtendConfirm = ({
-  onConfirmDismiss,
-  ...props
-}: ExtendButtonProps & { onConfirmDismiss: () => void }) => {
+const ExtendConfirm = ({ onConfirmDismiss, ...props }: ExtendButtonProps) => {
   const { id, name, expires, api, extendBy, onActionComplete } = props;
   const [isLoading, setIsLoading] = useState(false);
   const extendByDuration = moment.duration(extendBy);
@@ -74,25 +73,20 @@ const ExtendConfirm = ({
 };
 
 export const ExtendButton = (props: ExtendButtonProps) => {
-  const [showConfirm, setShowConfirm] = useState(false);
-
-  const onClick = () => {
-    setShowConfirm(true);
-  };
-
-  const onConfirmDismiss = () => {
-    setShowConfirm(false);
-  };
+  const { onActionClick } = props;
 
   return (
     <>
-      <TableText onClick={onClick}>
+      <TableText
+        onClick={() => {
+          onActionClick(<ExtendConfirm {...props} />);
+        }}
+      >
         <FormattedMessage
           id="xpack.data.mgmt.searchSessions.actionExtend"
           defaultMessage="Extend"
         />
       </TableText>
-      {showConfirm ? <ExtendConfirm {...props} onConfirmDismiss={onConfirmDismiss} /> : null}
     </>
   );
 };

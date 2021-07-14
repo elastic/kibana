@@ -22,16 +22,18 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useState } from 'react';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { TableText } from '../';
-import { OnActionComplete } from './types';
+import { OnActionClick, OnActionComplete, OnActionDismiss } from './types';
 
 interface RenameButtonProps {
   id: string;
   name: string;
   api: SearchSessionsMgmtAPI;
   onActionComplete: OnActionComplete;
+  onActionClick: OnActionClick;
+  onActionDismiss: OnActionDismiss;
 }
 
-const RenameDialog = ({ onDismiss, ...props }: RenameButtonProps & { onDismiss: () => void }) => {
+const RenameDialog = ({ onActionDismiss, ...props }: RenameButtonProps) => {
   const { id, name: originalName, api, onActionComplete } = props;
   const [isLoading, setIsLoading] = useState(false);
   const [newName, setNewName] = useState(originalName);
@@ -56,7 +58,7 @@ const RenameDialog = ({ onDismiss, ...props }: RenameButtonProps & { onDismiss: 
   const isNewNameValid = newName && originalName !== newName;
 
   return (
-    <EuiModal onClose={onDismiss} initialFocus="[name=newName]">
+    <EuiModal onClose={onActionDismiss} initialFocus="[name=newName]">
       <EuiModalHeader>
         <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
       </EuiModalHeader>
@@ -75,7 +77,7 @@ const RenameDialog = ({ onDismiss, ...props }: RenameButtonProps & { onDismiss: 
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onDismiss}>{cancel}</EuiButtonEmpty>
+        <EuiButtonEmpty onClick={onActionDismiss}>{cancel}</EuiButtonEmpty>
 
         <EuiButton
           disabled={!isNewNameValid}
@@ -84,7 +86,7 @@ const RenameDialog = ({ onDismiss, ...props }: RenameButtonProps & { onDismiss: 
             setIsLoading(true);
             await api.sendRename(id, newName);
             setIsLoading(false);
-            onDismiss();
+            onActionDismiss();
             onActionComplete();
           }}
           fill
@@ -98,14 +100,10 @@ const RenameDialog = ({ onDismiss, ...props }: RenameButtonProps & { onDismiss: 
 };
 
 export const RenameButton = (props: RenameButtonProps) => {
-  const [showRenameDialog, setShowRenameDialog] = useState(false);
+  const { onActionClick } = props;
 
   const onClick = () => {
-    setShowRenameDialog(true);
-  };
-
-  const onDismiss = () => {
-    setShowRenameDialog(false);
+    onActionClick(<RenameDialog {...props} />);
   };
 
   return (
@@ -116,7 +114,6 @@ export const RenameButton = (props: RenameButtonProps) => {
           defaultMessage="Edit name"
         />
       </TableText>
-      {showRenameDialog ? <RenameDialog {...props} onDismiss={onDismiss} /> : null}
     </>
   );
 };

@@ -13,14 +13,16 @@ import { UISession } from '../../types';
 import { DeleteButton } from './delete_button';
 import { ExtendButton } from './extend_button';
 import { InspectButton } from './inspect_button';
-import { ACTION, OnActionComplete } from './types';
+import { ACTION, OnActionClick, OnActionComplete, OnActionDismiss } from './types';
 import { RenameButton } from './rename_button';
 
 export const getAction = (
   api: SearchSessionsMgmtAPI,
   actionType: string,
   uiSession: UISession,
-  onActionComplete: OnActionComplete
+  onActionClick: OnActionClick,
+  onActionComplete: OnActionComplete,
+  onActionDismiss: OnActionDismiss
 ): IClickActionDescriptor | null => {
   const { id, name, expires } = uiSession;
   switch (actionType) {
@@ -28,14 +30,29 @@ export const getAction = (
       return {
         iconType: 'document',
         textColor: 'default',
-        label: <InspectButton searchSession={uiSession} />,
+        label: (
+          <InspectButton
+            searchSession={uiSession}
+            onActionClick={onActionClick}
+            onActionDismiss={onActionDismiss}
+          />
+        ),
       };
 
     case ACTION.DELETE:
       return {
         iconType: 'crossInACircleFilled',
         textColor: 'default',
-        label: <DeleteButton api={api} id={id} name={name} onActionComplete={onActionComplete} />,
+        label: (
+          <DeleteButton
+            api={api}
+            id={id}
+            name={name}
+            onActionComplete={onActionComplete}
+            onActionDismiss={onActionDismiss}
+            onActionClick={onActionClick}
+          />
+        ),
       };
 
     case ACTION.EXTEND:
@@ -50,6 +67,8 @@ export const getAction = (
             expires={expires}
             extendBy={api.getExtendByDuration()}
             onActionComplete={onActionComplete}
+            onConfirmDismiss={onActionDismiss}
+            onActionClick={onActionClick}
           />
         ),
       };
@@ -58,7 +77,16 @@ export const getAction = (
       return {
         iconType: 'pencil',
         textColor: 'default',
-        label: <RenameButton api={api} id={id} name={name} onActionComplete={onActionComplete} />,
+        label: (
+          <RenameButton
+            api={api}
+            id={id}
+            name={name}
+            onActionComplete={onActionComplete}
+            onActionClick={onActionClick}
+            onActionDismiss={onActionDismiss}
+          />
+        ),
       };
 
     default:

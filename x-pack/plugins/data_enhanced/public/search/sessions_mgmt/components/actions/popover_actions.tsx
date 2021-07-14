@@ -55,6 +55,7 @@ const PopoverAction = ({ textColor, iconType, children, ...props }: PopoverActio
 
 export const PopoverActionsMenu = ({ api, onActionComplete, session }: PopoverActionItemsProps) => {
   const [isPopoverOpen, setPopover] = useState(false);
+  const [actionElement, setActionElement] = useState<React.ReactElement | undefined>(undefined);
 
   const onPopoverClick = () => {
     setPopover(!isPopoverOpen);
@@ -62,6 +63,16 @@ export const PopoverActionsMenu = ({ api, onActionComplete, session }: PopoverAc
 
   const closePopover = () => {
     setPopover(false);
+  };
+
+  const onPopoverDismiss = () => {
+    closePopover();
+    setActionElement(undefined);
+  };
+
+  const onActionClick = (elem: React.ReactElement) => {
+    closePopover();
+    setActionElement(elem);
   };
 
   const renderPopoverButton = () => (
@@ -84,7 +95,14 @@ export const PopoverActionsMenu = ({ api, onActionComplete, session }: PopoverAc
   const actions = session.actions || [];
   // Generic set of actions - up to the API to return what is available
   const items = actions.reduce((itemSet, actionType) => {
-    const actionDef = getAction(api, actionType, session, onActionComplete);
+    const actionDef = getAction(
+      api,
+      actionType,
+      session,
+      onActionClick,
+      onActionComplete,
+      onPopoverDismiss
+    );
     if (actionDef) {
       const { label, textColor, iconType } = actionDef;
 
@@ -115,16 +133,21 @@ export const PopoverActionsMenu = ({ api, onActionComplete, session }: PopoverAc
 
   const panels: EuiContextMenuPanelDescriptor[] = [{ id: 0, items }];
 
-  return actions.length ? (
-    <EuiPopover
-      id={`popover-${session.id}`}
-      button={renderPopoverButton()}
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-      anchorPosition="downLeft"
-      panelPaddingSize={'s'}
-    >
-      <EuiContextMenu initialPanelId={0} panels={panels} />
-    </EuiPopover>
-  ) : null;
+  return (
+    <>
+      {actions.length ? (
+        <EuiPopover
+          id={`popover-${session.id}`}
+          button={renderPopoverButton()}
+          isOpen={isPopoverOpen}
+          closePopover={closePopover}
+          anchorPosition="downLeft"
+          panelPaddingSize={'s'}
+        >
+          <EuiContextMenu initialPanelId={0} panels={panels} />
+        </EuiPopover>
+      ) : null}
+      {actionElement}
+    </>
+  );
 };

@@ -11,19 +11,18 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useState } from 'react';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { TableText } from '../';
-import { OnActionComplete } from './types';
+import { OnActionClick, OnActionComplete, OnActionDismiss } from './types';
 
 interface DeleteButtonProps {
   id: string;
   name: string;
   api: SearchSessionsMgmtAPI;
   onActionComplete: OnActionComplete;
+  onActionDismiss: OnActionDismiss;
+  onActionClick: OnActionClick;
 }
 
-const DeleteConfirm = ({
-  onConfirmCancel,
-  ...props
-}: DeleteButtonProps & { onConfirmCancel: () => void }) => {
+const DeleteConfirm = ({ onActionDismiss, ...props }: DeleteButtonProps) => {
   const { id, name, api, onActionComplete } = props;
   const [isLoading, setIsLoading] = useState(false);
 
@@ -46,7 +45,7 @@ const DeleteConfirm = ({
   return (
     <EuiConfirmModal
       title={title}
-      onCancel={onConfirmCancel}
+      onCancel={onActionDismiss}
       onConfirm={async () => {
         setIsLoading(true);
         await api.sendCancel(id);
@@ -64,25 +63,20 @@ const DeleteConfirm = ({
 };
 
 export const DeleteButton = (props: DeleteButtonProps) => {
-  const [showConfirm, setShowConfirm] = useState(false);
-
-  const onClick = () => {
-    setShowConfirm(true);
-  };
-
-  const onConfirmCancel = () => {
-    setShowConfirm(false);
-  };
+  const { onActionClick } = props;
 
   return (
     <>
-      <TableText onClick={onClick}>
+      <TableText
+        onClick={() => {
+          onActionClick(<DeleteConfirm {...props} />);
+        }}
+      >
         <FormattedMessage
           id="xpack.data.mgmt.searchSessions.actionDelete"
           defaultMessage="Delete"
         />
       </TableText>
-      {showConfirm ? <DeleteConfirm {...props} onConfirmCancel={onConfirmCancel} /> : null}
     </>
   );
 };
