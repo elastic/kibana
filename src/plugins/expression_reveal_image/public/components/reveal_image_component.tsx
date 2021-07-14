@@ -68,7 +68,7 @@ function RevealImageComponent({
 
   const imgStyles = useMemo(() => {
     if (!imgRef.current || !loaded) {
-      return;
+      return undefined;
     }
 
     const imageAspectRatio = dimensions.height / dimensions.width;
@@ -84,7 +84,6 @@ function RevealImageComponent({
       -ms-user-select: none;
       user-select: none;
 
-      -webkit-clip-path: ${clipPath};
       clip-path: ${clipPath};
 
       width: ${imageAspectRatio > containerHeight / containerWidth
@@ -99,12 +98,12 @@ function RevealImageComponent({
   const alignerStyles = useMemo(
     () =>
       isValidUrl(emptyImage ?? '')
-        && css`
+        ? css`
             background-size: contain;
             background-repeat: no-repeat;
             background-image: url(${emptyImage});
           `
-        ,
+        : undefined,
     [emptyImage]
   );
 
