@@ -186,7 +186,7 @@ export const customValidators = {
   forbiddenField: (
     value: unknown,
     forbiddenString: string
-  ): ReturnType<ValidationFunc<unknown, ERROR_CODE>> => {
+  ): ReturnType<ValidationFunc<{}, ERROR_CODE>> => {
     let match: boolean;
 
     if (typeof value === 'string') {
