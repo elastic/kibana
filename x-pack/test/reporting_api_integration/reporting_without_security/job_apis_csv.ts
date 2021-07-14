@@ -14,7 +14,6 @@ const apiResponseFields = [
   'attempts',
   'created_by',
   'jobtype',
-  'max_attempts',
   'meta',
   'payload.isDeprecated',
   'payload.title',
@@ -70,7 +69,6 @@ export default function ({ getService }: FtrProviderContext) {
           "attempts": 0,
           "created_by": false,
           "jobtype": "csv_searchsource",
-          "max_attempts": 1,
           "meta": Object {
             "objectType": "search",
           },
@@ -99,7 +97,6 @@ export default function ({ getService }: FtrProviderContext) {
           "attempts": 0,
           "created_by": false,
           "jobtype": "csv_searchsource",
-          "max_attempts": 1,
           "meta": Object {
             "objectType": "search",
           },
@@ -124,7 +121,6 @@ export default function ({ getService }: FtrProviderContext) {
             "attempts": 0,
             "created_by": false,
             "jobtype": "csv_searchsource",
-            "max_attempts": 1,
             "meta": Object {
               "objectType": "search",
             },
@@ -148,7 +144,6 @@ export default function ({ getService }: FtrProviderContext) {
           "attempts": 0,
           "created_by": false,
           "jobtype": "csv_searchsource",
-          "max_attempts": 1,
           "meta": Object {
             "objectType": "search",
           },
@@ -174,7 +169,6 @@ export default function ({ getService }: FtrProviderContext) {
             "attempts": 0,
             "created_by": false,
             "jobtype": "csv_searchsource",
-            "max_attempts": 1,
             "meta": Object {
               "objectType": "search",
             },
@@ -198,7 +192,6 @@ export default function ({ getService }: FtrProviderContext) {
           "attempts": 0,
           "created_by": false,
           "jobtype": "csv_searchsource",
-          "max_attempts": 1,
           "meta": Object {
             "objectType": "search",
           },
@@ -220,7 +213,6 @@ export default function ({ getService }: FtrProviderContext) {
           "attempts": 0,
           "created_by": false,
           "jobtype": "csv_searchsource",
-          "max_attempts": 1,
           "meta": Object {
             "objectType": "search",
           },

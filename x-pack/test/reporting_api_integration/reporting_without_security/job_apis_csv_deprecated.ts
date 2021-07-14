@@ -15,7 +15,6 @@ const apiResponseFields = [
   'attempts',
   'created_by',
   'jobtype',
-  'max_attempts',
   'meta',
   'payload.isDeprecated',
   'payload.title',
@@ -60,7 +59,6 @@ export default function ({ getService }: FtrProviderContext) {
           "attempts": 0,
           "created_by": false,
           "jobtype": "csv",
-          "max_attempts": 1,
           "meta": Object {},
           "payload": Object {
             "isDeprecated": true,
@@ -103,7 +101,6 @@ export default function ({ getService }: FtrProviderContext) {
             "attempts": 0,
             "created_by": false,
             "jobtype": "csv",
-            "max_attempts": 1,
             "meta": Object {},
             "payload": Object {
               "isDeprecated": true,
@@ -139,7 +136,6 @@ export default function ({ getService }: FtrProviderContext) {
             "attempts": 0,
             "created_by": false,
             "jobtype": "csv",
-            "max_attempts": 1,
             "meta": Object {},
             "payload": Object {
               "isDeprecated": true,
@@ -172,7 +168,6 @@ export default function ({ getService }: FtrProviderContext) {
           "attempts": 0,
           "created_by": false,
           "jobtype": "csv",
-          "max_attempts": 1,
           "meta": Object {},
           "payload": Object {
             "isDeprecated": true,
