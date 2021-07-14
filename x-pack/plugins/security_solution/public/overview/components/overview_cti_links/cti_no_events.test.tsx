@@ -69,7 +69,7 @@ describe('CtiNoEvents', () => {
     );
 
     expect(wrapper.find('[data-test-subj="cti-total-event-count"]').text()).toEqual(
-      'Showing: 0 events'
+      'Showing: 0 indicators'
     );
   });
 });
