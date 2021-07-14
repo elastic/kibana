@@ -238,8 +238,10 @@ describe('Custom detection rules deletion and edition', () => {
       goToManageAlertsDetectionRules();
       waitForAlertsIndexToBeCreated();
       createCustomRuleActivated(getNewRule(), 'rule1');
-      createCustomRuleActivated(getNewOverrideRule(), 'rule2');
-      createCustomRuleActivated(getExistingRule(), 'rule3');
+      createCustomRuleActivated(getNewRule(), 'rule2');
+
+      createCustomRuleActivated(getNewOverrideRule(), 'rule3');
+      createCustomRuleActivated(getExistingRule(), 'rule4');
       reload();
     });
 
@@ -293,7 +295,7 @@ describe('Custom detection rules deletion and edition', () => {
           });
           cy.get(SHOWING_RULES_TEXT).should(
             'have.text',
-            `Showing ${expectedNumberOfRulesAfterDeletion} rule`
+            `Showing ${expectedNumberOfRulesAfterDeletion} rules`
           );
           cy.get(CUSTOM_RULES_BTN).should(
             'have.text',
@@ -324,7 +326,7 @@ describe('Custom detection rules deletion and edition', () => {
             });
             cy.get(SHOWING_RULES_TEXT).should(
               'have.text',
-              `Showing ${expectedNumberOfRulesAfterDeletion} rule`
+              `Showing ${expectedNumberOfRulesAfterDeletion} rules`
             );
             cy.get(CUSTOM_RULES_BTN).should(
               'have.text',

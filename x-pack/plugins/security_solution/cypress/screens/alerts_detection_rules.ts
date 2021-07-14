@@ -104,6 +104,4 @@ export const RULES_DELETE_CONFIRMATION_MODAL = '[data-test-subj="allRulesDeleteC
 
 export const MODAL_CONFIRMATION_BTN = '[data-test-subj="confirmModalConfirmButton"]';
 
-export const RULE_DETAILS_POPOVER_BTN = '[data-test-subj="rules-details-popover"]';
-
 export const RULE_DETAILS_DELETE_BTN = '[data-test-subj="rules-details-delete-rule"]';
