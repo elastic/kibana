@@ -81,6 +81,7 @@ const MyEuiFlexGroup = styled(EuiFlexGroup)`
   margin-bottom: 8px;
 `;
 
+const alertActionCommentPadding = '10px';
 const MyEuiCommentList = styled(EuiCommentList)`
   ${({ theme }) => `
     & .userAction__comment.outlined .euiCommentEvent {
@@ -107,12 +108,20 @@ const MyEuiCommentList = styled(EuiCommentList)`
     & .comment-alert .euiCommentEvent {
       background-color: ${theme.eui.euiColorLightestShade};
       border: ${theme.eui.euiFlyoutBorder};
-      padding: 10px;
+      padding: alertActionCommentPadding;
       border-radius: ${theme.eui.paddingSizes.xs};
     }
 
     & .comment-alert .euiCommentEvent__headerData {
       flex-grow: 1;
+    }
+
+    & .comment-action.empty-comment .euiCommentEvent--regular {
+      box-shadow: none;
+      .euiCommentEvent__header {
+        padding: 14px alertActionCommentPadding;
+        border-bottom: 0;
+      }
     }
   `}
 `;
@@ -467,10 +476,6 @@ export const UserActionTree = React.memo(
                           isLoadingIds,
                           getCaseDetailHrefWithCommentId,
                           actionsNavigation,
-                          manageMarkdownEditIds,
-                          handleManageMarkdownEditId,
-                          handleManageQuote,
-                          handleSaveComment,
                           action,
                         }),
                       ]
