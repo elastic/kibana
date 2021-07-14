@@ -14,7 +14,7 @@ import {
   getHistogramIntervalRequest,
 } from './query_histogram_interval';
 
-const params = { index: 'apm-*' };
+const params = { index: 'apm-*', start: '2020', end: '2021' };
 
 describe('query_histogram_interval', () => {
   describe('getHistogramIntervalRequest', () => {
@@ -41,6 +41,15 @@ describe('query_histogram_interval', () => {
                 {
                   term: {
                     'processor.event': 'transaction',
+                  },
+                },
+                {
+                  range: {
+                    '@timestamp': {
+                      format: 'epoch_millis',
+                      gte: 1577836800000,
+                      lte: 1609459200000,
+                    },
                   },
                 },
               ],
