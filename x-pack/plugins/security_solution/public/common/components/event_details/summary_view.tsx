@@ -39,7 +39,7 @@ export const SummaryViewComponent: React.FC<{
         data-test-subj={dataTestSubj}
         items={summaryRows}
         columns={summaryColumns}
-        compressed={true}
+        compressed
       />
     </>
   );

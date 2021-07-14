@@ -5,33 +5,23 @@
  * 2.0.
  */
 
-import { find, isEmpty } from 'lodash/fp';
+import { isEmpty } from 'lodash/fp';
 import {
   EuiButtonIcon,
   EuiTextColor,
   EuiLoadingContent,
   EuiTitle,
-  EuiSpacer,
-  EuiDescriptionList,
-  EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
 } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../common/containers/source';
 import { EventDetails } from '../../../../common/components/event_details/event_details';
 import { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
-import { LineClamp } from '../../../../common/components/line_clamp';
 import * as i18n from './translations';
-import { LinkAnchor } from '../../../../common/components/links';
-import { APP_ID, SecurityPageName } from '../../../../../common/constants';
-import { getRuleDetailsUrl, useFormatUrl } from '../../../../common/components/link_to';
-import { useKibana } from '../../../../common/lib/kibana';
 
 export type HandleOnEventClosed = () => void;
 interface Props {
@@ -93,29 +83,6 @@ ExpandableEventTitle.displayName = 'ExpandableEventTitle';
 
 export const ExpandableEvent = React.memo<Props>(
   ({ browserFields, event, timelineId, timelineTabType, isAlert, loading, detailsData }) => {
-    const { navigateToApp } = useKibana().services.application;
-    const { formatUrl } = useFormatUrl(SecurityPageName.rules);
-
-    const reason = useMemo(() => {
-      if (detailsData) {
-        const reasonField = find({ category: 'event', field: 'reason' }, detailsData) as
-          | TimelineEventsDetailsItem
-          | undefined;
-
-        if (reasonField?.originalValue) {
-          return Array.isArray(reasonField?.originalValue)
-            ? reasonField?.originalValue.join()
-            : reasonField?.originalValue;
-        }
-      }
-      return null;
-    }, [detailsData]);
-
-    const ruleId = useMemo(() => {
-      const findRuleId = find({ category: 'signal', field: 'signal.rule.id' }, detailsData)?.values;
-      return findRuleId ? findRuleId[0] : '';
-    }, [detailsData]);
-
     if (!event.eventId) {
       return <EuiTextColor color="subdued">{i18n.EVENT_DETAILS_PLACEHOLDER}</EuiTextColor>;
     }
@@ -126,32 +93,6 @@ export const ExpandableEvent = React.memo<Props>(
 
     return (
       <StyledFlexGroup direction="column" gutterSize="none">
-        {reason && (
-          <EuiFlexItem grow={false}>
-            <EuiDescriptionList data-test-subj="event-reason" compressed>
-              <EuiDescriptionListTitle>{i18n.REASON}</EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>
-                <LineClamp>{reason}</LineClamp>
-              </EuiDescriptionListDescription>
-            </EuiDescriptionList>
-            <EuiSpacer size="m" />
-            <LinkAnchor
-              data-test-subj="ruleName"
-              onClick={(ev: { preventDefault: () => void }) => {
-                ev.preventDefault();
-                navigateToApp(APP_ID, {
-                  deepLinkId: SecurityPageName.rules,
-                  path: getRuleDetailsUrl(ruleId),
-                });
-              }}
-              href={formatUrl(getRuleDetailsUrl(ruleId))}
-            >
-              {i18n.VIEW_RULE_DETAILS_PAGE}
-            </LinkAnchor>
-            <EuiHorizontalRule />
-          </EuiFlexItem>
-        )}
-
         <StyledEuiFlexItem grow={true}>
           <EventDetails
             browserFields={browserFields}
