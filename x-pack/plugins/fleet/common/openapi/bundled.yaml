@@ -262,7 +262,7 @@ paths:
                   list:
                     type: array
                     items:
-                      type: object
+                      $ref: '#/paths/~1agent_policies/post/responses/200/content/application~1json/schema/properties/item'
                   total:
                     type: number
                   page:
