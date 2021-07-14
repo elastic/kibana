@@ -17,6 +17,7 @@ import {
 } from '../../../../src/core/server';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import { InfraPluginSetup } from '../../infra/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { SpacesPluginStart } from '../../spaces/server';
 
@@ -52,6 +53,7 @@ interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
   security?: SecurityPluginSetup;
   features: FeaturesPluginSetup;
+  infra: InfraPluginSetup;
 }
 
 interface PluginsStart {

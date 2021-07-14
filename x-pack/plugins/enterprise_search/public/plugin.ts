@@ -15,6 +15,7 @@ import {
   DEFAULT_APP_CATEGORIES,
 } from '../../../../src/core/public';
 import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
+import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
@@ -49,6 +50,7 @@ export interface PluginsStart {
   cloud?: CloudSetup;
   licensing: LicensingPluginStart;
   charts: ChartsPluginStart;
+  data: DataPublicPluginStart;
   security?: SecurityPluginStart;
 }
 
