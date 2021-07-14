@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC, useContext, useEffect, useState } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 
