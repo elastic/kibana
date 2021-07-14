@@ -1,5 +1,5 @@
 {
-  "id": "userSetup",
+  "id": "interactiveSetup",
   "owner": {
     "name": "Platform Security",
     "githubTeam": "kibana-security"
@@ -7,10 +7,11 @@
   "description": "This plugin provides UI and APIs for the interactive setup mode.",
   "version": "8.0.0",
   "kibanaVersion": "kibana",
-  "configPath": ["userSetup"],
+  "configPath": ["interactiveSetup"],
+  "type": "preboot",
   "server": true,
   "ui": true,
-  "requiredBundles": [
-    "kibanaReact"
-  ]
+  "requiredPlugins": [],
+  "requiredBundles": [],
+  "extraPublicDirs": []
 }

@@ -6,11 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import ReactDOM from 'react-dom';
 
 import type { CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { I18nProvider } from '@kbn/i18n/react';
+import { Router } from 'react-router-dom';
+import type { History } from 'history';
 import { App } from './app';
+import { KibanaContextProvider } from '../../kibana_react/public';
 
 export class UserSetupPlugin implements Plugin {
   public setup(core: CoreSetup) {
@@ -18,12 +22,33 @@ export class UserSetupPlugin implements Plugin {
       id: 'userSetup',
       title: 'User Setup',
       chromeless: true,
-      mount: (params) => {
-        ReactDOM.render(<App />, params.element);
-        return () => ReactDOM.unmountComponentAtNode(params.element);
+      mount: async ({ element, history }) => {
+        const [[coreStart]] = await Promise.all([core.getStartServices()]);
+
+        ReactDOM.render(
+          <Providers services={coreStart} history={history}>
+            <App />
+          </Providers>,
+          element
+        );
+
+        return () => ReactDOM.unmountComponentAtNode(element);
       },
     });
   }
 
   public start(core: CoreStart) {}
 }
+
+export interface ProvidersProps {
+  services: CoreStart;
+  history: History;
+}
+
+export const Providers: FunctionComponent<ProvidersProps> = ({ services, history, children }) => (
+  <KibanaContextProvider services={services}>
+    <I18nProvider>
+      <Router history={history}>{children}</Router>
+    </I18nProvider>
+  </KibanaContextProvider>
+);
