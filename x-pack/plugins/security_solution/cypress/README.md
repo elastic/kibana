@@ -2,6 +2,11 @@
 
 The `security_solution/cypress` directory contains functional UI tests that execute using [Cypress](https://www.cypress.io/).
 
+## Table of Contents
+
+[**Running the tests**](#running-the-tests)
+
+
 ## Running the tests
 
 There are currently four ways to run the tests, comprised of two execution modes and two target environments, which will be detailed below.
