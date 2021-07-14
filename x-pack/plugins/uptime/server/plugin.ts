@@ -37,6 +37,7 @@ export class Plugin implements PluginType {
 
     const ready = once(async () => {
       const componentTemplateName = ruleDataService.getFullAssetName('synthetics-mappings');
+      const alertsIndexPattern = ruleDataService.getFullAssetName('observability.synthetics*');
 
       if (!ruleDataService.isWriteEnabled()) {
         return;
@@ -57,13 +58,15 @@ export class Plugin implements PluginType {
       await ruleDataService.createOrUpdateIndexTemplate({
         name: ruleDataService.getFullAssetName('synthetics-index-template'),
         body: {
-          index_patterns: [ruleDataService.getFullAssetName('observability.synthetics*')],
+          index_patterns: [alertsIndexPattern],
           composed_of: [
             ruleDataService.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
             componentTemplateName,
           ],
         },
       });
+
+      await ruleDataService.updateIndexMappingsMatchingPattern(alertsIndexPattern);
     });
 
     // initialize eagerly
