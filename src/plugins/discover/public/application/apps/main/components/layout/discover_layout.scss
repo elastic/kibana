@@ -89,17 +89,3 @@ discover-app {
   height: $euiSize * 8;
   padding: $euiSizeS $euiSizeS 0 $euiSizeS;
 }
-
-.dscTable {
-  // SASSTODO: add a monospace modifier to the doc-table component
-  .kbnDocTable__row {
-    font-family: $euiCodeFontFamily;
-    font-size: $euiFontSizeXS;
-  }
-}
-
-.dscTable__footer {
-  background-color: $euiColorLightShade;
-  padding: $euiSizeXS $euiSizeS;
-  text-align: center;
-}

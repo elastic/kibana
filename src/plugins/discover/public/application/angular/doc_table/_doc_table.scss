@@ -4,6 +4,7 @@
 // stylelint-disable selector-no-qualifying-type
 .kbnDocTableWrapper {
   @include euiScrollBar;
+  overflow: auto;
   flex: 1 1 100%;
   flex-direction: column; /* 1 */
 
@@ -20,6 +21,18 @@
     z-index: $euiZLevel1;
     opacity: .5;
   }
+
+  // SASSTODO: add a monospace modifier to the doc-table component
+  .kbnDocTable__row {
+    font-family: $euiCodeFontFamily;
+    font-size: $euiFontSizeXS;
+  }
+}
+
+.kbnDocTable__footer {
+  background-color: $euiColorLightShade;
+  padding: $euiSizeXS $euiSizeS;
+  text-align: center;
 }
 
 .kbnDocTable__container.loading {

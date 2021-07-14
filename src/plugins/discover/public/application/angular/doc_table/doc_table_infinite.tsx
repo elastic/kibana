@@ -27,7 +27,7 @@ export const DocTableInfinite = (props: DocTableInfiniteProps) => {
    * and have therefore to be considered for calculation of infinite scrolling
    */
   useEffect(() => {
-    const scrollDiv = document.querySelector('.dscTable') as HTMLElement;
+    const scrollDiv = document.querySelector('.kbnDocTableWrapper') as HTMLElement;
     const scrollMobileElem = document.documentElement;
 
     const scheduleCheck = debounce(() => {

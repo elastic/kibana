@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment, memo, useCallback, useState } from 'react';
+import React, { Fragment, memo, useCallback, useRef, useState } from 'react';
 import './index.scss';
 import { EuiButtonEmpty, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -94,10 +94,6 @@ export interface DocTableProps {
    * Remove column callback
    */
   onRemoveColumn?: (column: string) => void;
-  /**
-   * On back to top callback. Used only for 'infinite' table
-   */
-  onBackToTop?: () => void;
 }
 
 export interface CommonDocTableProps {
@@ -133,12 +129,12 @@ export const DocTable = ({
   onFilter,
   useNewFieldsApi,
   sampleSize,
-  onBackToTop,
   searchDescription,
   sharedItemTitle,
   dataTestSubj,
   isLoading,
 }: DocTableProps) => {
+  const scrollableDesktop = useRef<HTMLDivElement>(null);
   const [minimumVisibleRows, setMinimumVisibleRows] = useState(50);
   const { uiSettings } = getServices();
   const defaultSortOrder = uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc');
@@ -159,6 +155,19 @@ export const DocTable = ({
     await wait(50);
     bottomMarker!.blur();
   }, [setMinimumVisibleRows, rows]);
+
+  const onBackToTop = useCallback(() => {
+    if (scrollableDesktop && scrollableDesktop.current) {
+      scrollableDesktop.current.focus();
+    }
+    const isMobileView = document.getElementsByClassName('dscSidebar__mobile').length > 0;
+    // Only the desktop one needs to target a specific container
+    if (!isMobileView && scrollableDesktop.current) {
+      scrollableDesktop.current.scrollTo(0, 0);
+    } else if (window) {
+      window.scrollTo(0, 0);
+    }
+  }, []);
 
   const renderHeader = useCallback(
     () => (
@@ -221,7 +230,8 @@ export const DocTable = ({
 
   return (
     <div
-      className="kbnDocTableWrapper"
+      ref={scrollableDesktop}
+      className="kbnDocTableWrapper eui-yScroll eui-xScroll"
       data-shared-item
       data-title={sharedItemTitle}
       data-description={searchDescription}
@@ -255,7 +265,7 @@ export const DocTable = ({
           )}
           {rows.length === sampleSize ? (
             <div
-              className="dscTable__footer"
+              className="kbnDocTable__footer"
               data-test-subj="discoverDocTableFooter"
               tabIndex={-1}
               id="discoverBottomMarker"

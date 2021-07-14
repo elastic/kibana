@@ -49,7 +49,6 @@ describe('Doc table component', () => {
       isLoading: false,
       searchDescription: '',
       onAddColumn: () => {},
-      onBackToTop: () => {},
       onFilter: () => {},
       onMoveColumn: () => {},
       onRemoveColumn: () => {},
