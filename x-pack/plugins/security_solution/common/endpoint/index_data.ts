@@ -13,6 +13,8 @@ import { AxiosResponse } from 'axios';
 import { EndpointDocGenerator, Event, TreeOptions } from './generate_data';
 import { firstNonNullValue } from './models/ecs_safety_helpers';
 import {
+  AGENT_ACTIONS_INDEX,
+  AGENT_ACTIONS_RESULTS_INDEX,
   AGENT_POLICY_API_ROUTES,
   CreateAgentPolicyRequest,
   CreateAgentPolicyResponse,
@@ -25,11 +27,13 @@ import {
   PACKAGE_POLICY_API_ROUTES,
 } from '../../../fleet/common';
 import { policyFactory as policyConfigFactory } from './models/policy_config';
-import { HostMetadata } from './types';
+import { EndpointAction, HostMetadata } from './types';
 import { KbnClientWithApiKeySupport } from '../../scripts/endpoint/kbn_client_with_api_key_support';
 import { FleetAgentGenerator } from './data_generators/fleet_agent_generator';
+import { FleetActionGenerator } from './data_generators/fleet_action_generator';
 
 const fleetAgentGenerator = new FleetAgentGenerator();
+const fleetActionGenerator = new FleetActionGenerator();
 
 export async function indexHostsAndAlerts(
   client: Client,
@@ -119,7 +123,7 @@ async function indexHostDocs({
   const kibanaVersion = await fetchKibanaVersion(kbnClient);
   let hostMetadata: HostMetadata;
   let wasAgentEnrolled = false;
-  let enrolledAgent: undefined | estypes.Hit<FleetServerAgent>;
+  let enrolledAgent: undefined | estypes.SearchHit<FleetServerAgent>;
 
   for (let j = 0; j < numDocs; j++) {
     generator.updateHostData();
@@ -175,6 +179,9 @@ async function indexHostDocs({
           },
         },
       };
+
+      // Create some actions for this Host
+      await indexFleetActionsForHost(client, hostMetadata);
     }
 
     await client.index({
@@ -368,7 +375,7 @@ const indexFleetAgentForHost = async (
   endpointHost: HostMetadata,
   agentPolicyId: string,
   kibanaVersion: string = '8.0.0'
-): Promise<estypes.Hit<FleetServerAgent>> => {
+): Promise<estypes.SearchHit<FleetServerAgent>> => {
   const agentDoc = fleetAgentGenerator.generateEsHit({
     _source: {
       local_metadata: {
@@ -396,4 +403,105 @@ const indexFleetAgentForHost = async (
   });
 
   return agentDoc;
+};
+
+const indexFleetActionsForHost = async (
+  esClient: Client,
+  endpointHost: HostMetadata
+): Promise<void> => {
+  const ES_INDEX_OPTIONS = { headers: { 'X-elastic-product-origin': 'fleet' } };
+  const agentId = endpointHost.elastic.agent.id;
+  const total = fleetActionGenerator.randomN(5);
+
+  for (let i = 0; i < total; i++) {
+    // create an action
+    const action = fleetActionGenerator.generate({
+      data: { comment: 'data generator: this host is bad' },
+    });
+
+    action.agents = [agentId];
+
+    esClient.index(
+      {
+        index: AGENT_ACTIONS_INDEX,
+        body: action,
+      },
+      ES_INDEX_OPTIONS
+    );
+
+    // Create an action response for the above
+    const actionResponse = fleetActionGenerator.generateResponse({
+      action_id: action.action_id,
+      agent_id: agentId,
+      action_data: action.data,
+    });
+
+    esClient.index(
+      {
+        index: AGENT_ACTIONS_RESULTS_INDEX,
+        body: actionResponse,
+      },
+      ES_INDEX_OPTIONS
+    );
+  }
+
+  // Add edge cases (maybe)
+  if (fleetActionGenerator.randomFloat() < 0.3) {
+    const randomFloat = fleetActionGenerator.randomFloat();
+
+    // 60% of the time just add either an Isolate -OR- an UnIsolate action
+    if (randomFloat < 0.6) {
+      let action: EndpointAction;
+
+      if (randomFloat < 0.3) {
+        // add a pending isolation
+        action = fleetActionGenerator.generateIsolateAction({
+          '@timestamp': new Date().toISOString(),
+        });
+      } else {
+        // add a pending UN-isolation
+        action = fleetActionGenerator.generateUnIsolateAction({
+          '@timestamp': new Date().toISOString(),
+        });
+      }
+
+      action.agents = [agentId];
+
+      await esClient.index(
+        {
+          index: AGENT_ACTIONS_INDEX,
+          body: action,
+        },
+        ES_INDEX_OPTIONS
+      );
+    } else {
+      // Else (40% of the time) add a pending isolate AND pending un-isolate
+      const action1 = fleetActionGenerator.generateIsolateAction({
+        '@timestamp': new Date().toISOString(),
+      });
+      const action2 = fleetActionGenerator.generateUnIsolateAction({
+        '@timestamp': new Date().toISOString(),
+      });
+
+      action1.agents = [agentId];
+      action2.agents = [agentId];
+
+      await Promise.all([
+        esClient.index(
+          {
+            index: AGENT_ACTIONS_INDEX,
+            body: action1,
+          },
+          ES_INDEX_OPTIONS
+        ),
+        esClient.index(
+          {
+            index: AGENT_ACTIONS_INDEX,
+            body: action2,
+          },
+          ES_INDEX_OPTIONS
+        ),
+      ]);
+    }
+  }
 };

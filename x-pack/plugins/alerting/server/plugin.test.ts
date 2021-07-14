@@ -25,6 +25,8 @@ describe('Alerting Plugin', () => {
     let coreSetup: ReturnType<typeof coreMock.createSetup>;
     let pluginsSetup: jest.Mocked<AlertingPluginsSetup>;
 
+    beforeEach(() => jest.clearAllMocks());
+
     it('should log warning when Encrypted Saved Objects plugin is missing encryption key', async () => {
       const context = coreMock.createPluginInitializerContext<AlertsConfig>({
         healthCheck: {
@@ -63,6 +65,7 @@ describe('Alerting Plugin', () => {
         id: 'test',
         name: 'test',
         minimumLicenseRequired: 'basic',
+        isExportable: true,
         actionGroups: [],
         defaultActionGroupId: 'default',
         producer: 'test',

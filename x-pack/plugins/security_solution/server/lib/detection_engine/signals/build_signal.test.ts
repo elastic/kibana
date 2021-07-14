@@ -28,7 +28,6 @@ describe('buildSignal', () => {
 
   test('it builds a signal as expected without original_event if event does not exist', () => {
     const doc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
-    // @ts-expect-error @elastic/elasticsearch _source is optional
     delete doc._source.event;
     const rule = getRulesSchemaMock();
     const signal = {
@@ -61,7 +60,7 @@ describe('buildSignal', () => {
           depth: 0,
         },
       ],
-      original_time: '2020-04-20T21:27:45+0000',
+      original_time: '2020-04-20T21:27:45.000Z',
       status: 'open',
       rule: {
         author: [],
@@ -105,7 +104,6 @@ describe('buildSignal', () => {
 
   test('it builds a signal as expected with original_event if is present', () => {
     const doc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
-    // @ts-expect-error @elastic/elasticsearch _source is optional
     doc._source.event = {
       action: 'socket_opened',
       dataset: 'socket',
@@ -143,7 +141,7 @@ describe('buildSignal', () => {
           depth: 0,
         },
       ],
-      original_time: '2020-04-20T21:27:45+0000',
+      original_time: '2020-04-20T21:27:45.000Z',
       original_event: {
         action: 'socket_opened',
         dataset: 'socket',
@@ -193,7 +191,6 @@ describe('buildSignal', () => {
 
   test('it builds a ancestor correctly if the parent does not exist', () => {
     const doc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
-    // @ts-expect-error @elastic/elasticsearch _source is optional
     doc._source.event = {
       action: 'socket_opened',
       dataset: 'socket',
@@ -212,14 +209,12 @@ describe('buildSignal', () => {
 
   test('it builds a ancestor correctly if the parent does exist', () => {
     const doc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
-    // @ts-expect-error @elastic/elasticsearch _source is optional
     doc._source.event = {
       action: 'socket_opened',
       dataset: 'socket',
       kind: 'event',
       module: 'system',
     };
-    // @ts-expect-error @elastic/elasticsearch _source is optional
     doc._source.signal = {
       parents: [
         {
@@ -255,7 +250,6 @@ describe('buildSignal', () => {
 
   test('it builds a signal ancestor correctly if the parent does not exist', () => {
     const doc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
-    // @ts-expect-error @elastic/elasticsearch _source is optional
     doc._source.event = {
       action: 'socket_opened',
       dataset: 'socket',
@@ -276,14 +270,12 @@ describe('buildSignal', () => {
 
   test('it builds a signal ancestor correctly if the parent does exist', () => {
     const doc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
-    // @ts-expect-error @elastic/elasticsearch _source is optional
     doc._source.event = {
       action: 'socket_opened',
       dataset: 'socket',
       kind: 'event',
       module: 'system',
     };
-    // @ts-expect-error @elastic/elasticsearch _source is optional
     doc._source.signal = {
       parents: [
         {

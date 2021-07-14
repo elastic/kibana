@@ -23,6 +23,23 @@ export type StatusAllType = typeof StatusAll;
 
 export type CaseStatusWithAllStatus = CaseStatuses | StatusAllType;
 
+/**
+ * The type for the `refreshRef` prop (a `React.Ref`) defined by the `CaseViewComponentProps`.
+ *
+ * @example
+ * const refreshRef = useRef<CaseViewRefreshPropInterface>(null);
+ * return <CaseComponent refreshRef={refreshRef} ...otherProps>
+ */
+export type CaseViewRefreshPropInterface = null | {
+  /**
+   * Refreshes the all of the user actions/comments in the view's timeline
+   * (note: this also triggers a silent `refreshCase()`)
+   */
+  refreshUserActionsAndComments: () => Promise<void>;
+  /** Refreshes the Case information only */
+  refreshCase: () => Promise<void>;
+};
+
 export type Comment = CommentRequest & {
   associationType: AssociationType;
   id: string;
@@ -58,6 +75,7 @@ export interface CaseExternalService {
 
 interface BasicCase {
   id: string;
+  owner: string;
   closedAt: string | null;
   closedBy: ElasticUser | null;
   comments: Comment[];
@@ -129,7 +147,7 @@ export interface ElasticUser {
 
 export interface FetchCasesProps extends ApiProps {
   queryParams?: QueryParams;
-  filterOptions?: FilterOptions;
+  filterOptions?: FilterOptions & { owner: string[] };
 }
 
 export interface ApiProps {
@@ -152,7 +170,7 @@ export interface ActionLicense {
 export interface DeleteCase {
   id: string;
   type: CaseType | null;
-  title?: string;
+  title: string;
 }
 
 export interface FieldMappings {

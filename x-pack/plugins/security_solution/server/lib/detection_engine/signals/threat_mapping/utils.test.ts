@@ -58,6 +58,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
@@ -69,6 +70,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
       const combinedResults = combineResults(existingResult, newResult);
       expect(combinedResults.success).toEqual(true);
@@ -84,6 +86,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
@@ -95,6 +98,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
       const combinedResults = combineResults(existingResult, newResult);
       expect(combinedResults.success).toEqual(false);
@@ -110,6 +114,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
@@ -121,6 +126,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
       const combinedResults = combineResults(existingResult, newResult);
       expect(combinedResults.lastLookBackDate?.toISOString()).toEqual('2020-09-16T03:34:32.390Z');
@@ -136,6 +142,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
@@ -147,6 +154,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
       const combinedResults = combineResults(existingResult, newResult);
       expect(combinedResults).toEqual(
@@ -167,6 +175,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: ['error 1', 'error 2', 'error 3'],
+        warningMessages: [],
       };
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
@@ -178,6 +187,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: ['error 4', 'error 1', 'error 3', 'error 5'],
+        warningMessages: [],
       };
       const combinedResults = combineResults(existingResult, newResult);
       expect(combinedResults).toEqual(
@@ -289,6 +299,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
       const expectedResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
@@ -299,6 +310,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
       const combinedResults = combineConcurrentResults(existingResult, []);
       expect(combinedResults).toEqual(expectedResult);
@@ -314,6 +326,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
       const newResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
@@ -324,6 +337,7 @@ describe('utils', () => {
         createdSignalsCount: 0,
         createdSignals: [],
         errors: [],
+        warningMessages: [],
       };
       const expectedResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
@@ -334,6 +348,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
 
       const combinedResults = combineConcurrentResults(existingResult, [newResult]);
@@ -350,6 +365,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
       const newResult1: SearchAfterAndBulkCreateReturnType = {
         success: true,
@@ -360,6 +376,7 @@ describe('utils', () => {
         createdSignalsCount: 5,
         createdSignals: Array(5).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
       const newResult2: SearchAfterAndBulkCreateReturnType = {
         success: true,
@@ -370,6 +387,7 @@ describe('utils', () => {
         createdSignalsCount: 8,
         createdSignals: Array(8).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
 
       const expectedResult: SearchAfterAndBulkCreateReturnType = {
@@ -381,6 +399,7 @@ describe('utils', () => {
         createdSignalsCount: 16, // all the signals counted together (8 + 5 + 3)
         createdSignals: Array(16).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
 
       const combinedResults = combineConcurrentResults(existingResult, [newResult1, newResult2]);
@@ -397,6 +416,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
       const newResult1: SearchAfterAndBulkCreateReturnType = {
         success: true,
@@ -407,6 +427,7 @@ describe('utils', () => {
         createdSignalsCount: 5,
         createdSignals: Array(5).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
       const newResult2: SearchAfterAndBulkCreateReturnType = {
         success: true,
@@ -417,6 +438,7 @@ describe('utils', () => {
         createdSignalsCount: 8,
         createdSignals: Array(8).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
 
       const expectedResult: SearchAfterAndBulkCreateReturnType = {
@@ -428,6 +450,7 @@ describe('utils', () => {
         createdSignalsCount: 16, // all the signals counted together (8 + 5 + 3)
         createdSignals: Array(16).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
 
       const combinedResults = combineConcurrentResults(existingResult, [newResult2, newResult1]); // two array elements are flipped
@@ -444,6 +467,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
       const newResult1: SearchAfterAndBulkCreateReturnType = {
         success: true,
@@ -454,6 +478,7 @@ describe('utils', () => {
         createdSignalsCount: 5,
         createdSignals: Array(5).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
       const newResult2: SearchAfterAndBulkCreateReturnType = {
         success: true,
@@ -464,6 +489,7 @@ describe('utils', () => {
         createdSignalsCount: 8,
         createdSignals: Array(8).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
 
       const expectedResult: SearchAfterAndBulkCreateReturnType = {
@@ -475,6 +501,7 @@ describe('utils', () => {
         createdSignalsCount: 16, // all the signals counted together (8 + 5 + 3)
         createdSignals: Array(16).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
 
       const combinedResults = combineConcurrentResults(existingResult, [newResult1, newResult2]);
@@ -491,6 +518,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
@@ -502,6 +530,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
       const combinedResults = combineConcurrentResults(existingResult, [newResult]);
       expect(combinedResults.success).toEqual(true);
@@ -517,6 +546,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
@@ -528,6 +558,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
       const combinedResults = combineConcurrentResults(existingResult, [newResult]);
       expect(combinedResults.success).toEqual(false);
@@ -543,6 +574,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
@@ -554,6 +586,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
       const combinedResults = combineConcurrentResults(existingResult, [newResult]);
       expect(combinedResults.lastLookBackDate?.toISOString()).toEqual('2020-09-16T03:34:32.390Z');
@@ -569,6 +602,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
@@ -580,6 +614,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
       const combinedResults = combineConcurrentResults(existingResult, [newResult]);
       expect(combinedResults).toEqual(
@@ -600,6 +635,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: ['error 1', 'error 2', 'error 3'],
+        warningMessages: [],
       };
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
@@ -611,6 +647,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: ['error 4', 'error 1', 'error 3', 'error 5'],
+        warningMessages: [],
       };
       const combinedResults = combineConcurrentResults(existingResult, [newResult]);
       expect(combinedResults).toEqual(

@@ -23,7 +23,7 @@
         ],
         "source": {
           "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-          "lineNumber": 103
+          "lineNumber": 104
         },
         "deprecated": false,
         "children": [
@@ -36,7 +36,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-              "lineNumber": 107
+              "lineNumber": 108
             },
             "deprecated": false,
             "children": [
@@ -53,7 +53,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-                  "lineNumber": 108
+                  "lineNumber": 109
                 },
                 "deprecated": false,
                 "returnComment": [],
@@ -143,7 +143,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-                  "lineNumber": 109
+                  "lineNumber": 110
                 },
                 "deprecated": false,
                 "returnComment": [],
@@ -231,7 +231,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-                  "lineNumber": 110
+                  "lineNumber": 111
                 },
                 "deprecated": false,
                 "returnComment": [],
@@ -319,7 +319,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-                  "lineNumber": 111
+                  "lineNumber": 112
                 },
                 "deprecated": false,
                 "returnComment": [],
@@ -407,7 +407,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-                  "lineNumber": 112
+                  "lineNumber": 113
                 },
                 "deprecated": false,
                 "returnComment": [],
@@ -495,7 +495,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-                  "lineNumber": 113
+                  "lineNumber": 114
                 },
                 "deprecated": false,
                 "returnComment": [],
@@ -584,7 +584,7 @@
             ],
             "source": {
               "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-              "lineNumber": 173
+              "lineNumber": 174
             },
             "deprecated": false,
             "children": [
@@ -600,7 +600,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-                  "lineNumber": 173
+                  "lineNumber": 174
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -620,7 +620,7 @@
             ],
             "source": {
               "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-              "lineNumber": 188
+              "lineNumber": 189
             },
             "deprecated": false,
             "children": [],
@@ -638,7 +638,7 @@
             ],
             "source": {
               "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-              "lineNumber": 193
+              "lineNumber": 194
             },
             "deprecated": false,
             "children": [],
@@ -656,7 +656,7 @@
             ],
             "source": {
               "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-              "lineNumber": 198
+              "lineNumber": 199
             },
             "deprecated": false,
             "children": [],
@@ -719,7 +719,7 @@
             "plugin": "discover",
             "link": {
               "path": "src/plugins/discover/public/plugin.tsx",
-              "lineNumber": 88
+              "lineNumber": 122
             }
           },
           {
@@ -781,15 +781,15 @@
           {
             "plugin": "dashboard",
             "link": {
-              "path": "src/plugins/dashboard/public/application/types.ts",
-              "lineNumber": 25
+              "path": "src/plugins/dashboard/public/types.ts",
+              "lineNumber": 33
             }
           },
           {
             "plugin": "dashboard",
             "link": {
-              "path": "src/plugins/dashboard/public/application/types.ts",
-              "lineNumber": 74
+              "path": "src/plugins/dashboard/public/types.ts",
+              "lineNumber": 186
             }
           },
           {
@@ -803,7 +803,7 @@
             "plugin": "dashboard",
             "link": {
               "path": "src/plugins/dashboard/public/plugin.tsx",
-              "lineNumber": 126
+              "lineNumber": 130
             }
           },
           {
@@ -817,7 +817,7 @@
             "plugin": "dashboard",
             "link": {
               "path": "src/plugins/dashboard/public/url_generator.ts",
-              "lineNumber": 95
+              "lineNumber": 101
             }
           },
           {
@@ -983,7 +983,7 @@
                     "section": "def-public.SavedObjectsClient",
                     "text": "SavedObjectsClient"
                   },
-                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"update\" | \"bulkUpdate\">"
+                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"bulkUpdate\">"
                 ],
                 "source": {
                   "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
@@ -1383,20 +1383,20 @@
             "plugin": "embeddable",
             "link": {
               "path": "src/plugins/embeddable/public/lib/attribute_service/attribute_service.tsx",
-              "lineNumber": 167
+              "lineNumber": 165
             }
           },
           {
             "plugin": "discover",
             "link": {
-              "path": "src/plugins/discover/public/application/components/top_nav/on_save_search.tsx",
+              "path": "src/plugins/discover/public/application/apps/main/components/top_nav/on_save_search.tsx",
               "lineNumber": 11
             }
           },
           {
             "plugin": "discover",
             "link": {
-              "path": "src/plugins/discover/public/application/components/top_nav/on_save_search.tsx",
+              "path": "src/plugins/discover/public/application/apps/main/components/top_nav/on_save_search.tsx",
               "lineNumber": 133
             }
           },
@@ -1707,7 +1707,7 @@
         ],
         "source": {
           "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-          "lineNumber": 526
+          "lineNumber": 527
         },
         "deprecated": false,
         "children": [
@@ -1729,7 +1729,7 @@
             ],
             "source": {
               "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-              "lineNumber": 526
+              "lineNumber": 527
             },
             "deprecated": false,
             "isRequired": true
@@ -1752,7 +1752,7 @@
             ],
             "source": {
               "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-              "lineNumber": 526
+              "lineNumber": 527
             },
             "deprecated": false,
             "isRequired": true
@@ -1892,7 +1892,7 @@
             "section": "def-public.SavedObjectsClient",
             "text": "SavedObjectsClient"
           },
-          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"update\" | \"bulkUpdate\">; overlays: ",
+          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"bulkUpdate\">; overlays: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -2116,7 +2116,15 @@
                     "section": "def-public.SavedObjectsBatchResponse",
                     "text": "SavedObjectsBatchResponse"
                   },
-                  "<unknown>>; update: <T = unknown>(type: string, id: string, attributes: T, { version, references, upsert }?: ",
+                  "<unknown>>; resolve: <T = unknown>(type: string, id: string) => Promise<",
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCoreSavedObjectsPluginApi",
+                    "section": "def-public.ResolvedSimpleSavedObject",
+                    "text": "ResolvedSimpleSavedObject"
+                  },
+                  "<T>>; update: <T = unknown>(type: string, id: string, attributes: T, { version, references, upsert }?: ",
                   {
                     "pluginId": "core",
                     "scope": "public",
@@ -2670,7 +2678,21 @@
             "plugin": "dashboard",
             "link": {
               "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
-              "lineNumber": 18
+              "lineNumber": 19
+            }
+          },
+          {
+            "plugin": "dashboard",
+            "link": {
+              "path": "src/plugins/dashboard/public/application/lib/dashboard_tagging.ts",
+              "lineNumber": 10
+            }
+          },
+          {
+            "plugin": "dashboard",
+            "link": {
+              "path": "src/plugins/dashboard/public/application/lib/dashboard_tagging.ts",
+              "lineNumber": 15
             }
           },
           {
@@ -2692,20 +2714,6 @@
             "link": {
               "path": "src/plugins/dashboard/public/application/actions/clone_panel_action.tsx",
               "lineNumber": 126
-            }
-          },
-          {
-            "plugin": "dashboard",
-            "link": {
-              "path": "src/plugins/dashboard/public/application/hooks/use_dashboard_state_manager.ts",
-              "lineNumber": 23
-            }
-          },
-          {
-            "plugin": "dashboard",
-            "link": {
-              "path": "src/plugins/dashboard/public/application/hooks/use_dashboard_state_manager.ts",
-              "lineNumber": 35
             }
           },
           {
@@ -4005,6 +4013,57 @@
           },
           {
             "parentPluginId": "savedObjects",
+            "id": "def-public.SavedObjectMetaData.getSavedObjectSubType",
+            "type": "Function",
+            "tags": [],
+            "label": "getSavedObjectSubType",
+            "description": [],
+            "signature": [
+              "((savedObject: ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-public.SimpleSavedObject",
+                "text": "SimpleSavedObject"
+              },
+              "<T>) => string) | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
+              "lineNumber": 49
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "savedObjects",
+                "id": "def-public.SavedObjectMetaData.getSavedObjectSubType.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "savedObject",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCoreSavedObjectsPluginApi",
+                    "section": "def-public.SimpleSavedObject",
+                    "text": "SimpleSavedObject"
+                  },
+                  "<T>"
+                ],
+                "source": {
+                  "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
+                  "lineNumber": 49
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "savedObjects",
             "id": "def-public.SavedObjectMetaData.includeFields",
             "type": "Array",
             "tags": [],
@@ -4015,7 +4074,7 @@
             ],
             "source": {
               "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-              "lineNumber": 49
+              "lineNumber": 50
             },
             "deprecated": false
           }
@@ -4337,7 +4396,7 @@
               "plugin": "dashboard",
               "link": {
                 "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
-                "lineNumber": 41
+                "lineNumber": 42
               }
             }
           ]
@@ -4364,14 +4423,14 @@
               "plugin": "dashboard",
               "link": {
                 "path": "src/plugins/dashboard/public/application/listing/dashboard_listing.tsx",
-                "lineNumber": 87
+                "lineNumber": 92
               }
             },
             {
               "plugin": "dashboard",
               "link": {
                 "path": "src/plugins/dashboard/public/application/listing/dashboard_listing.tsx",
-                "lineNumber": 172
+                "lineNumber": 177
               }
             },
             {

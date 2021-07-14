@@ -7,44 +7,67 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut } from '@elastic/eui';
+import { EuiPageContent, EuiEmptyPrompt } from '@elastic/eui';
 
 interface Props {
   errorType: 'pluginError' | 'requestError';
 }
 
 const i18nTexts = {
-  pluginError: i18n.translate('xpack.upgradeAssistant.kibanaDeprecationErrors.pluginErrorMessage', {
-    defaultMessage:
-      'Not all Kibana deprecations were retrieved successfully. This list may be incomplete. Check the Kibana server logs for errors.',
-  }),
-  loadingError: i18n.translate(
-    'xpack.upgradeAssistant.kibanaDeprecationErrors.loadingErrorMessage',
-    {
-      defaultMessage:
-        'Could not retrieve Kibana deprecations. Check the Kibana server logs for errors.',
-    }
-  ),
+  pluginError: {
+    title: i18n.translate('xpack.upgradeAssistant.kibanaDeprecationErrors.pluginErrorTitle', {
+      defaultMessage: 'Not all Kibana deprecations were retrieved successfully',
+    }),
+    description: i18n.translate(
+      'xpack.upgradeAssistant.kibanaDeprecationErrors.pluginErrorDescription',
+      {
+        defaultMessage: 'Check the Kibana server logs for errors.',
+      }
+    ),
+  },
+  loadingError: {
+    title: i18n.translate('xpack.upgradeAssistant.kibanaDeprecationErrors.loadingErrorTitle', {
+      defaultMessage: 'Could not retrieve Kibana deprecations',
+    }),
+    description: i18n.translate(
+      'xpack.upgradeAssistant.kibanaDeprecationErrors.loadingErrorDescription',
+      {
+        defaultMessage: 'Check the Kibana server logs for errors.',
+      }
+    ),
+  },
 };
 
 export const KibanaDeprecationErrors: React.FunctionComponent<Props> = ({ errorType }) => {
   if (errorType === 'pluginError') {
     return (
-      <EuiCallOut
-        title={i18nTexts.pluginError}
-        color="warning"
-        iconType="alert"
+      <EuiPageContent
+        verticalPosition="center"
+        horizontalPosition="center"
+        color="danger"
         data-test-subj="kibanaPluginError"
-      />
+      >
+        <EuiEmptyPrompt
+          iconType="alert"
+          title={<h2>{i18nTexts.pluginError.title}</h2>}
+          body={<p>{i18nTexts.pluginError.description}</p>}
+        />
+      </EuiPageContent>
     );
   }
 
   return (
-    <EuiCallOut
-      title={i18nTexts.loadingError}
+    <EuiPageContent
+      verticalPosition="center"
+      horizontalPosition="center"
       color="danger"
-      iconType="alert"
       data-test-subj="kibanaRequestError"
-    />
+    >
+      <EuiEmptyPrompt
+        iconType="alert"
+        title={<h2>{i18nTexts.loadingError.title}</h2>}
+        body={<p>{i18nTexts.loadingError.description}</p>}
+      />
+    </EuiPageContent>
   );
 };

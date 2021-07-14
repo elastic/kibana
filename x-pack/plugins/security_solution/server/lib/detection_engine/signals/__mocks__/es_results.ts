@@ -146,7 +146,7 @@ export const sampleDocWithSortId = (
 export const sampleDocNoSortId = (
   someUuid: string = sampleIdGuid,
   ip?: string
-): SignalSourceHit => ({
+): SignalSourceHit & { _source: Required<SignalSourceHit>['_source'] } => ({
   _index: 'myFakeSignalIndex',
   _type: 'doc',
   _score: 100,
@@ -225,12 +225,12 @@ export const sampleWrappedSignalHit = (): WrappedSignalHit => {
   };
 };
 
-export const sampleDocWithAncestors = (): SignalSearchResponse => {
+export const sampleDocWithAncestors = (): SignalSearchResponse & {
+  hits: { hits: Array<ReturnType<typeof sampleDocNoSortId>> };
+} => {
   const sampleDoc = sampleDocNoSortId();
   delete sampleDoc.sort;
-  // @ts-expect-error @elastic/elasticsearch _source is optional
   delete sampleDoc._source.source;
-  // @ts-expect-error @elastic/elasticsearch _source is optional
   sampleDoc._source.signal = {
     parent: {
       id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
@@ -562,7 +562,9 @@ export const sampleBulkCreateErrorResult = {
 
 export const sampleDocSearchResultsNoSortId = (
   someUuid: string = sampleIdGuid
-): SignalSearchResponse => ({
+): SignalSearchResponse & {
+  hits: { hits: Array<ReturnType<typeof sampleDocNoSortId>> };
+} => ({
   took: 10,
   timed_out: false,
   _shards: {

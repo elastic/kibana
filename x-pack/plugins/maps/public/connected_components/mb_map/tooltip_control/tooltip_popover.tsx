@@ -7,7 +7,7 @@
 
 import React, { Component, RefObject } from 'react';
 import { EuiPopover, EuiText } from '@elastic/eui';
-import { Map as MbMap } from 'mapbox-gl';
+import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { GeoJsonProperties, Geometry } from 'geojson';
 import { Filter } from 'src/plugins/data/public';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';

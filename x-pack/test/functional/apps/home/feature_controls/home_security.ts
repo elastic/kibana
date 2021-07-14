@@ -16,15 +16,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('security', () => {
     before(async () => {
-      await esArchiver.load('dashboard/feature_controls/security');
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.load(
+        'x-pack/test/functional/es_archives/dashboard/feature_controls/security'
+      );
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
 
       // ensure we're logged out so we can login as the appropriate users
       await PageObjects.security.forceLogout();
     });
 
     after(async () => {
-      await esArchiver.unload('dashboard/feature_controls/security');
+      await esArchiver.unload(
+        'x-pack/test/functional/es_archives/dashboard/feature_controls/security'
+      );
 
       // logout, so the other tests don't accidentally run as the custom users we're testing below
       await PageObjects.security.forceLogout();

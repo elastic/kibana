@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export function UptimeCertProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const find = getService('find');
 
   const PageObjects = getPageObjects(['common', 'timePicker', 'header']);
 
@@ -27,7 +28,7 @@ export function UptimeCertProvider({ getService, getPageObjects }: FtrProviderCo
   return {
     async hasViewCertButton() {
       return retry.tryForTime(15000, async () => {
-        await testSubjects.existOrFail('uptimeCertificatesLink');
+        await find.existsByCssSelector('[href="/app/uptime/certificates"]');
       });
     },
     async certificateExists(cert: { certId: string; monitorId: string }) {

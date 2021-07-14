@@ -529,6 +529,7 @@ function buildSuggestion({
     yTitle: currentState?.yTitle,
     yRightTitle: currentState?.yRightTitle,
     hideEndzones: currentState?.hideEndzones,
+    valuesInLegend: currentState?.valuesInLegend,
     yLeftExtent: currentState?.yLeftExtent,
     yRightExtent: currentState?.yRightExtent,
     axisTitlesVisibilitySettings: currentState?.axisTitlesVisibilitySettings || {

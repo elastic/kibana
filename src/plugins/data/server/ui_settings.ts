@@ -605,35 +605,35 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
             }),
           },
           {
-            from: 'now-24h',
+            from: 'now-24h/h',
             to: 'now',
             display: i18n.translate('data.advancedSettings.timepicker.last24Hours', {
               defaultMessage: 'Last 24 hours',
             }),
           },
           {
-            from: 'now-7d',
+            from: 'now-7d/d',
             to: 'now',
             display: i18n.translate('data.advancedSettings.timepicker.last7Days', {
               defaultMessage: 'Last 7 days',
             }),
           },
           {
-            from: 'now-30d',
+            from: 'now-30d/d',
             to: 'now',
             display: i18n.translate('data.advancedSettings.timepicker.last30Days', {
               defaultMessage: 'Last 30 days',
             }),
           },
           {
-            from: 'now-90d',
+            from: 'now-90d/d',
             to: 'now',
             display: i18n.translate('data.advancedSettings.timepicker.last90Days', {
               defaultMessage: 'Last 90 days',
             }),
           },
           {
-            from: 'now-1y',
+            from: 'now-1y/d',
             to: 'now',
             display: i18n.translate('data.advancedSettings.timepicker.last1Year', {
               defaultMessage: 'Last 1 year',

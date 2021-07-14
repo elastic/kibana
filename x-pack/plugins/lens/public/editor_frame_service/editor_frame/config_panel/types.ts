@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Action } from '../state_management';
 import {
   Visualization,
   FramePublicAPI,
@@ -18,7 +17,6 @@ export interface ConfigPanelWrapperProps {
   visualizationState: unknown;
   visualizationMap: Record<string, Visualization>;
   activeVisualizationId: string | null;
-  dispatch: (action: Action) => void;
   framePublicAPI: FramePublicAPI;
   datasourceMap: Record<string, Datasource>;
   datasourceStates: Record<
@@ -29,6 +27,7 @@ export interface ConfigPanelWrapperProps {
     }
   >;
   core: DatasourceDimensionEditorProps['core'];
+  isFullscreen: boolean;
 }
 
 export interface LayerPanelProps {
@@ -36,7 +35,6 @@ export interface LayerPanelProps {
   visualizationState: unknown;
   datasourceMap: Record<string, Datasource>;
   activeVisualization: Visualization;
-  dispatch: (action: Action) => void;
   framePublicAPI: FramePublicAPI;
   datasourceStates: Record<
     string,
@@ -46,6 +44,7 @@ export interface LayerPanelProps {
     }
   >;
   core: DatasourceDimensionEditorProps['core'];
+  isFullscreen: boolean;
 }
 
 export interface LayerDatasourceDropProps {

@@ -7,10 +7,10 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { Map as MbMap } from 'mapbox-gl';
+import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { Query } from 'src/plugins/data/public';
 import _ from 'lodash';
-import React, { ReactElement, ReactNode } from 'react';
+import React, { ReactElement } from 'react';
 import { EuiIcon } from '@elastic/eui';
 import uuid from 'uuid/v4';
 import { FeatureCollection } from 'geojson';
@@ -36,12 +36,15 @@ import {
   LayerDescriptor,
   MapExtent,
   StyleDescriptor,
+  Timeslice,
+  StyleMetaDescriptor,
 } from '../../../common/descriptor_types';
 import { ImmutableSourceProperty, ISource, SourceEditorArgs } from '../sources/source';
 import { DataRequestContext } from '../../actions';
 import { IStyle } from '../styles/style';
 import { getJoinAggKey } from '../../../common/get_agg_key';
 import { LICENSED_FEATURES } from '../../licensed_features';
+import { IESSource } from '../sources/es_source';
 
 export interface ILayer {
   getBounds(dataRequestContext: DataRequestContext): Promise<MapExtent | null>;
@@ -77,7 +80,7 @@ export interface ILayer {
   getMbLayerIds(): string[];
   ownsMbLayerId(mbLayerId: string): boolean;
   ownsMbSourceId(mbSourceId: string): boolean;
-  syncLayerWithMB(mbMap: MbMap): void;
+  syncLayerWithMB(mbMap: MbMap, timeslice?: Timeslice): void;
   getLayerTypeIconName(): string;
   isInitialDataLoadComplete(): boolean;
   getIndexPatternIds(): string[];
@@ -101,10 +104,12 @@ export interface ILayer {
   getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
   getCustomIconAndTooltipContent(): CustomIconAndTooltipContent;
   getDescriptor(): LayerDescriptor;
+  getGeoFieldNames(): string[];
+  getStyleMetaDescriptorFromLocalFeatures(): Promise<StyleMetaDescriptor | null>;
 }
 
 export type CustomIconAndTooltipContent = {
-  icon: ReactNode;
+  icon: ReactElement;
   tooltipContent?: string | null;
   areResultsTrimmed?: boolean;
 };
@@ -512,5 +517,14 @@ export class AbstractLayer implements ILayer {
 
   async getLicensedFeatures(): Promise<LICENSED_FEATURES[]> {
     return [];
+  }
+
+  getGeoFieldNames(): string[] {
+    const source = this.getSource();
+    return source.isESSource() ? [(source as IESSource).getGeoFieldName()] : [];
+  }
+
+  async getStyleMetaDescriptorFromLocalFeatures(): Promise<StyleMetaDescriptor | null> {
+    return null;
   }
 }

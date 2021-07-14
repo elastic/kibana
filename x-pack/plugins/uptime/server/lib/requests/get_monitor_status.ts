@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { JsonObject } from 'src/plugins/kibana_utils/public';
-import { QueryContainer } from '@elastic/elasticsearch/api/types';
+import { JsonObject } from '@kbn/common-utils';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { Ping } from '../../../common/runtime_types/ping';
@@ -15,7 +15,8 @@ export interface GetMonitorStatusParams {
   filters?: JsonObject;
   locations: string[];
   numTimes: number;
-  timerange: { from: string; to: string };
+  timespanRange: { from: string; to: string };
+  timestampRange: { from: string | number; to: string };
 }
 
 export interface GetMonitorStatusResult {
@@ -43,7 +44,7 @@ export type AfterKey = Record<string, string | number | null> | undefined;
 export const getMonitorStatus: UMElasticsearchQueryFn<
   GetMonitorStatusParams,
   GetMonitorStatusResult[]
-> = async ({ uptimeEsClient, filters, locations, numTimes, timerange: { from, to } }) => {
+> = async ({ uptimeEsClient, filters, locations, numTimes, timespanRange, timestampRange }) => {
   let afterKey: AfterKey;
 
   const STATUS = 'down';
@@ -63,14 +64,22 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
             {
               range: {
                 '@timestamp': {
-                  gte: from,
-                  lte: to,
+                  gte: timestampRange.from,
+                  lte: timestampRange.to,
+                },
+              },
+            },
+            {
+              range: {
+                'monitor.timespan': {
+                  gte: timespanRange.from,
+                  lte: timespanRange.to,
                 },
               },
             },
             // append user filters, if defined
             ...(filters?.bool ? [filters] : []),
-          ] as QueryContainer[],
+          ] as QueryDslQueryContainer[],
         },
       },
       size: 0,

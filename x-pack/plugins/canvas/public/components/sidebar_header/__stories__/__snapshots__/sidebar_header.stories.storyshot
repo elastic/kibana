@@ -71,6 +71,7 @@ exports[`Storyshots components/Sidebar/SidebarHeader with layer controls 1`] = `
               <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
+                color="inherit"
                 data-euiicon-type="sortUp"
                 size="m"
               />
@@ -98,6 +99,7 @@ exports[`Storyshots components/Sidebar/SidebarHeader with layer controls 1`] = `
               <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
+                color="inherit"
                 data-euiicon-type="arrowUp"
                 size="m"
               />
@@ -125,6 +127,7 @@ exports[`Storyshots components/Sidebar/SidebarHeader with layer controls 1`] = `
               <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
+                color="inherit"
                 data-euiicon-type="arrowDown"
                 size="m"
               />
@@ -152,6 +155,7 @@ exports[`Storyshots components/Sidebar/SidebarHeader with layer controls 1`] = `
               <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
+                color="inherit"
                 data-euiicon-type="sortDown"
                 size="m"
               />

@@ -31,44 +31,32 @@ export function getActionType(): ActionTypeModel<EsIndexConfig, unknown, IndexAc
         defaultMessage: 'Index data',
       }
     ),
-    validateConnector: (
+    validateConnector: async (
       action: EsIndexActionConnector
-    ): ConnectorValidationResult<Pick<EsIndexConfig, 'index'>, unknown> => {
+    ): Promise<ConnectorValidationResult<Pick<EsIndexConfig, 'index'>, unknown>> => {
+      const translations = await import('./translations');
       const configErrors = {
         index: new Array<string>(),
       };
       const validationResult = { config: { errors: configErrors }, secrets: { errors: {} } };
       if (!action.config.index) {
-        configErrors.index.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.error.requiredIndexText',
-            {
-              defaultMessage: 'Index is required.',
-            }
-          )
-        );
+        configErrors.index.push(translations.INDEX_REQUIRED);
       }
       return validationResult;
     },
     actionConnectorFields: lazy(() => import('./es_index_connector')),
     actionParamsFields: lazy(() => import('./es_index_params')),
-    validateParams: (
+    validateParams: async (
       actionParams: IndexActionParams
-    ): GenericValidationResult<IndexActionParams> => {
+    ): Promise<GenericValidationResult<IndexActionParams>> => {
+      const translations = await import('./translations');
       const errors = {
         documents: new Array<string>(),
         indexOverride: new Array<string>(),
       };
       const validationResult = { errors };
       if (!actionParams.documents?.length || Object.keys(actionParams.documents[0]).length === 0) {
-        errors.documents.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredDocumentJson',
-            {
-              defaultMessage: 'Document is required and should be a valid JSON object.',
-            }
-          )
-        );
+        errors.documents.push(translations.DOCUMENT_NOT_VALID);
       }
       if (actionParams.indexOverride) {
         if (!actionParams.indexOverride.startsWith(ALERT_HISTORY_PREFIX)) {
@@ -85,14 +73,7 @@ export function getActionType(): ActionTypeModel<EsIndexConfig, unknown, IndexAc
 
         const indexSuffix = actionParams.indexOverride.replace(ALERT_HISTORY_PREFIX, '');
         if (indexSuffix.length === 0) {
-          errors.indexOverride.push(
-            i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.error.badIndexOverrideSuffix',
-              {
-                defaultMessage: 'Alert history index must contain valid suffix.',
-              }
-            )
-          );
+          errors.indexOverride.push(translations.HISTORY_NOT_VALID);
         }
       }
 

@@ -69,6 +69,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             if (type === 'pdf_optimize') {
               await testSubjects.click('usePrintLayout');
             }
+            const advOpt = await find.byXPath(`//button[descendant::*[text()='Advanced options']]`);
+            await advOpt.click();
             const postUrl = await find.byXPath(`//button[descendant::*[text()='Copy POST URL']]`);
             await postUrl.click();
             const url = await browser.getClipboardValue();

@@ -12,6 +12,10 @@ import { EuiSuperSelect } from '@elastic/eui';
 import { ConnectorsDropdown, Props } from './connectors_dropdown';
 import { TestProviders } from '../../common/mock';
 import { connectors } from './__mock__';
+import { useKibana } from '../../common/lib/kibana';
+
+jest.mock('../../common/lib/kibana');
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('ConnectorsDropdown', () => {
   let wrapper: ReactWrapper;
@@ -24,6 +28,10 @@ describe('ConnectorsDropdown', () => {
   };
 
   beforeAll(() => {
+    useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
+      actionTypeTitle: '.servicenow',
+      iconClass: 'logoSecurity',
+    });
     wrapper = mount(<ConnectorsDropdown {...props} />, { wrappingComponent: TestProviders });
   });
 
@@ -73,14 +81,7 @@ describe('ConnectorsDropdown', () => {
             >
               <Styled(EuiIcon)
                 size="m"
-                type={
-                  Object {
-                    "$$typeof": Symbol(react.lazy),
-                    "_ctor": [Function],
-                    "_result": null,
-                    "_status": -1,
-                  }
-                }
+                type="logoSecurity"
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -103,14 +104,7 @@ describe('ConnectorsDropdown', () => {
             >
               <Styled(EuiIcon)
                 size="m"
-                type={
-                  Object {
-                    "$$typeof": Symbol(react.lazy),
-                    "_ctor": [Function],
-                    "_result": null,
-                    "_status": -1,
-                  }
-                }
+                type="logoSecurity"
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -133,14 +127,7 @@ describe('ConnectorsDropdown', () => {
             >
               <Styled(EuiIcon)
                 size="m"
-                type={
-                  Object {
-                    "$$typeof": Symbol(react.lazy),
-                    "_ctor": [Function],
-                    "_result": null,
-                    "_status": -1,
-                  }
-                }
+                type="logoSecurity"
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -163,14 +150,7 @@ describe('ConnectorsDropdown', () => {
             >
               <Styled(EuiIcon)
                 size="m"
-                type={
-                  Object {
-                    "$$typeof": Symbol(react.lazy),
-                    "_ctor": [Function],
-                    "_result": null,
-                    "_status": -1,
-                  }
-                }
+                type="logoSecurity"
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -210,9 +190,13 @@ describe('ConnectorsDropdown', () => {
       wrappingComponent: TestProviders,
     });
 
-    expect(newWrapper.find('button span:not([data-euiicon-type])').at(1).text()).toBe(
-      'My Connector'
-    );
+    expect(
+      newWrapper
+        .find('[data-test-subj="dropdown-connectors"]')
+        .first()
+        .text()
+        .includes('My Connector, is selected')
+    ).toBeTruthy();
   });
 
   test('if the props hideConnectorServiceNowSir is true, the connector should not be part of the list of options  ', () => {

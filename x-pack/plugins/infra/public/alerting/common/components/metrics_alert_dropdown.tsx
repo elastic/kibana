@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback, useMemo } from 'react';
 import {
   EuiPopover,
-  EuiButtonEmpty,
+  EuiHeaderLink,
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
@@ -36,12 +36,12 @@ export const MetricsAlertDropdown = () => {
     () => ({
       id: 1,
       title: i18n.translate('xpack.infra.alerting.infrastructureDropdownTitle', {
-        defaultMessage: 'Infrastructure alerts',
+        defaultMessage: 'Infrastructure rules',
       }),
       items: [
         {
-          name: i18n.translate('xpack.infra.alerting.createInventoryAlertButton', {
-            defaultMessage: 'Create inventory alert',
+          name: i18n.translate('xpack.infra.alerting.createInventoryRuleButton', {
+            defaultMessage: 'Create inventory rule',
           }),
           onClick: () => setVisibleFlyoutType('inventory'),
         },
@@ -54,12 +54,12 @@ export const MetricsAlertDropdown = () => {
     () => ({
       id: 2,
       title: i18n.translate('xpack.infra.alerting.metricsDropdownTitle', {
-        defaultMessage: 'Metrics alerts',
+        defaultMessage: 'Metrics rules',
       }),
       items: [
         {
-          name: i18n.translate('xpack.infra.alerting.createThresholdAlertButton', {
-            defaultMessage: 'Create threshold alert',
+          name: i18n.translate('xpack.infra.alerting.createThresholdRuleButton', {
+            defaultMessage: 'Create threshold rule',
           }),
           onClick: () => setVisibleFlyoutType('threshold'),
         },
@@ -75,8 +75,8 @@ export const MetricsAlertDropdown = () => {
 
   const manageAlertsMenuItem = useMemo(
     () => ({
-      name: i18n.translate('xpack.infra.alerting.manageAlerts', {
-        defaultMessage: 'Manage alerts',
+      name: i18n.translate('xpack.infra.alerting.manageRules', {
+        defaultMessage: 'Manage rules',
       }),
       icon: 'tableOfContents',
       onClick: manageAlertsLinkProps.onClick,
@@ -112,7 +112,7 @@ export const MetricsAlertDropdown = () => {
         {
           id: 0,
           title: i18n.translate('xpack.infra.alerting.alertDropdownTitle', {
-            defaultMessage: 'Alerts',
+            defaultMessage: 'Alerts and rules',
           }),
           items: firstPanelMenuItems,
         },
@@ -134,9 +134,17 @@ export const MetricsAlertDropdown = () => {
         panelPaddingSize="none"
         anchorPosition="downLeft"
         button={
-          <EuiButtonEmpty iconSide={'right'} iconType={'arrowDown'} onClick={openPopover}>
-            <FormattedMessage id="xpack.infra.alerting.alertsButton" defaultMessage="Alerts" />
-          </EuiButtonEmpty>
+          <EuiHeaderLink
+            color="text"
+            iconSide={'right'}
+            iconType={'arrowDown'}
+            onClick={openPopover}
+          >
+            <FormattedMessage
+              id="xpack.infra.alerting.alertsButton"
+              defaultMessage="Alerts and rules"
+            />
+          </EuiHeaderLink>
         }
         isOpen={popoverOpen}
         closePopover={closePopover}

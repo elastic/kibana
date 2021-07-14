@@ -8,18 +8,15 @@
 import React, { useEffect, useState, Fragment, FC, useMemo, useCallback } from 'react';
 import { Router } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { CoreStart } from 'kibana/public';
 
 import {
   EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPageContent,
   EuiPageContentBody,
+  EuiPageHeader,
   EuiSpacer,
   EuiTabbedContent,
-  EuiText,
-  EuiTitle,
   EuiTabbedContentTab,
 } from '@elastic/eui';
 
@@ -38,6 +35,7 @@ import { getDocLinks } from '../../../../util/dependency_cache';
 import { JobsListView } from '../../../../jobs/jobs_list/components/jobs_list_view/index';
 import { DataFrameAnalyticsList } from '../../../../data_frame_analytics/pages/analytics_management/components/analytics_list';
 import { AccessDeniedPage } from '../access_denied_page';
+import { InsufficientLicensePage } from '../insufficient_license_page';
 import { SharePluginStart } from '../../../../../../../../../src/plugins/share/public';
 import type { SpacesPluginStart } from '../../../../../../../spaces/public';
 import { JobSpacesSyncFlyout } from '../../../../components/job_spaces_sync';
@@ -128,6 +126,7 @@ export const JobsListPage: FC<{
   const spacesEnabled = spacesApi !== undefined;
   const [initialized, setInitialized] = useState(false);
   const [accessDenied, setAccessDenied] = useState(false);
+  const [isPlatinumOrTrialLicense, setIsPlatinumOrTrialLicense] = useState(true);
   const [showSyncFlyout, setShowSyncFlyout] = useState(false);
   const [isMlEnabledInSpace, setIsMlEnabledInSpace] = useState(false);
   const tabs = useTabs(isMlEnabledInSpace, spacesApi);
@@ -139,7 +138,11 @@ export const JobsListPage: FC<{
       const { mlFeatureEnabledInSpace } = await checkGetManagementMlJobsResolver();
       setIsMlEnabledInSpace(mlFeatureEnabledInSpace);
     } catch (e) {
-      setAccessDenied(true);
+      if (e.mlFeatureEnabledInSpace && e.isPlatinumOrTrialLicense === false) {
+        setIsPlatinumOrTrialLicense(false);
+      } else {
+        setAccessDenied(true);
+      }
     }
     setInitialized(true);
   };
@@ -170,6 +173,19 @@ export const JobsListPage: FC<{
     defaultMessage: 'Analytics jobs docs',
   });
 
+  const docsLink = (
+    <EuiButtonEmpty
+      href={
+        currentTabId === 'anomaly_detection_jobs' ? anomalyDetectionJobsUrl : dataFrameAnalyticsUrl
+      }
+      target="_blank"
+      iconType="help"
+      data-test-subj="documentationLink"
+    >
+      {currentTabId === 'anomaly_detection_jobs' ? anomalyDetectionDocsLabel : analyticsDocsLabel}
+    </EuiButtonEmpty>
+  );
+
   function renderTabs() {
     return (
       <EuiTabbedContent
@@ -191,6 +207,10 @@ export const JobsListPage: FC<{
     return <AccessDeniedPage />;
   }
 
+  if (isPlatinumOrTrialLicense === false) {
+    return <InsufficientLicensePage basePath={coreStart.http.basePath} />;
+  }
+
   return (
     <RedirectAppLinks application={coreStart.application}>
       <I18nContext>
@@ -199,62 +219,42 @@ export const JobsListPage: FC<{
         >
           <ContextWrapper feature={PLUGIN_ID}>
             <Router history={history}>
-              <EuiPageContent
+              <EuiPageHeader
+                pageTitle={
+                  <FormattedMessage
+                    id="xpack.ml.management.jobsList.jobsListTitle"
+                    defaultMessage="Machine Learning Jobs"
+                  />
+                }
+                description={
+                  <FormattedMessage
+                    id="xpack.ml.management.jobsList.jobsListTagline"
+                    defaultMessage="View machine learning analytics and anomaly detection jobs."
+                  />
+                }
+                rightSideItems={[docsLink]}
+                bottomBorder
+              />
+
+              <EuiSpacer size="l" />
+
+              <EuiPageContentBody
                 id="kibanaManagementMLSection"
                 data-test-subj="mlPageStackManagementJobsList"
               >
-                <EuiTitle size="l">
-                  <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-                    <EuiFlexItem grow={false}>
-                      <h1>
-                        {i18n.translate('xpack.ml.management.jobsList.jobsListTitle', {
-                          defaultMessage: 'Machine Learning Jobs',
-                        })}
-                      </h1>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonEmpty
-                        target="_blank"
-                        iconType="help"
-                        iconSide="left"
-                        color="primary"
-                        href={
-                          currentTabId === 'anomaly_detection_jobs'
-                            ? anomalyDetectionJobsUrl
-                            : dataFrameAnalyticsUrl
-                        }
-                      >
-                        {currentTabId === 'anomaly_detection_jobs'
-                          ? anomalyDetectionDocsLabel
-                          : analyticsDocsLabel}
-                      </EuiButtonEmpty>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiTitle>
-                <EuiSpacer size="s" />
-                <EuiTitle size="s">
-                  <EuiText color="subdued">
-                    {i18n.translate('xpack.ml.management.jobsList.jobsListTagline', {
-                      defaultMessage: 'View machine learning analytics and anomaly detection jobs.',
-                    })}
-                  </EuiText>
-                </EuiTitle>
-                <EuiSpacer size="l" />
-                <EuiPageContentBody>
-                  {spacesEnabled && (
-                    <>
-                      <EuiButtonEmpty onClick={() => setShowSyncFlyout(true)}>
-                        {i18n.translate('xpack.ml.management.jobsList.syncFlyoutButton', {
-                          defaultMessage: 'Synchronize saved objects',
-                        })}
-                      </EuiButtonEmpty>
-                      {showSyncFlyout && <JobSpacesSyncFlyout onClose={onCloseSyncFlyout} />}
-                      <EuiSpacer size="s" />
-                    </>
-                  )}
-                  {renderTabs()}
-                </EuiPageContentBody>
-              </EuiPageContent>
+                {spacesEnabled && (
+                  <>
+                    <EuiButtonEmpty onClick={() => setShowSyncFlyout(true)}>
+                      {i18n.translate('xpack.ml.management.jobsList.syncFlyoutButton', {
+                        defaultMessage: 'Synchronize saved objects',
+                      })}
+                    </EuiButtonEmpty>
+                    {showSyncFlyout && <JobSpacesSyncFlyout onClose={onCloseSyncFlyout} />}
+                    <EuiSpacer size="s" />
+                  </>
+                )}
+                {renderTabs()}
+              </EuiPageContentBody>
             </Router>
           </ContextWrapper>
         </KibanaContextProvider>

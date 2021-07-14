@@ -7,19 +7,21 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionAST } from '@kbn/interpreter/common';
+import memoizeOne from 'memoize-one';
 import type { TimeScaleUnit } from '../../../time_scale';
 import type { IndexPattern, IndexPatternLayer } from '../../../types';
 import { adjustTimeScaleLabelSuffix } from '../../time_scale_utils';
 import type { ReferenceBasedIndexPatternColumn } from '../column_types';
-import { isColumnValidAsReference } from '../../layer_helpers';
+import { getManagedColumnsFrom, isColumnValidAsReference } from '../../layer_helpers';
 import { operationDefinitionMap } from '..';
 
 export const buildLabelFunction = (ofName: (name?: string) => string) => (
   name?: string,
-  timeScale?: TimeScaleUnit
+  timeScale?: TimeScaleUnit,
+  timeShift?: string
 ) => {
   const rawLabel = ofName(name);
-  return adjustTimeScaleLabelSuffix(rawLabel, undefined, timeScale);
+  return adjustTimeScaleLabelSuffix(rawLabel, undefined, timeScale, undefined, timeShift);
 };
 
 /**
@@ -43,6 +45,23 @@ export function checkForDateHistogram(layer: IndexPatternLayer, name: string) {
     }),
   ];
 }
+
+const getFullyManagedColumnIds = memoizeOne((layer: IndexPatternLayer) => {
+  const managedColumnIds = new Set<string>();
+  Object.entries(layer.columns).forEach(([id, column]) => {
+    if (
+      'references' in column &&
+      operationDefinitionMap[column.operationType].input === 'managedReference'
+    ) {
+      managedColumnIds.add(id);
+      const managedColumns = getManagedColumnsFrom(id, layer.columns);
+      managedColumns.map(([managedId]) => {
+        managedColumnIds.add(managedId);
+      });
+    }
+  });
+  return managedColumnIds;
+});
 
 export function checkReferences(layer: IndexPatternLayer, columnId: string) {
   const column = layer.columns[columnId] as ReferenceBasedIndexPatternColumn;
@@ -71,7 +90,8 @@ export function checkReferences(layer: IndexPatternLayer, columnId: string) {
         column: referenceColumn,
       });
 
-      if (!isValid) {
+      // do not enforce column validity if current column is part of managed subtree
+      if (!isValid && !getFullyManagedColumnIds(layer).has(columnId)) {
         errors.push(
           i18n.translate('xpack.lens.indexPattern.invalidReferenceConfiguration', {
             defaultMessage: 'Dimension "{dimensionLabel}" is configured incorrectly',
@@ -125,6 +145,38 @@ export function dateBasedOperationToExpression(
       function: functionName,
       arguments: {
         by: buckets,
+        inputColumnId: [currentColumn.references[0]],
+        outputColumnId: [columnId],
+        outputColumnName: [currentColumn.label],
+        ...additionalArgs,
+      },
+    },
+  ];
+}
+
+/**
+ * Creates an expression ast for a date based operation (cumulative sum, derivative, moving average, counter rate)
+ */
+export function optionallHistogramBasedOperationToExpression(
+  layer: IndexPatternLayer,
+  columnId: string,
+  functionName: string,
+  additionalArgs: Record<string, unknown[]> = {}
+): ExpressionFunctionAST[] {
+  const currentColumn = (layer.columns[columnId] as unknown) as ReferenceBasedIndexPatternColumn;
+  const buckets = layer.columnOrder.filter((colId) => layer.columns[colId].isBucketed);
+  const nonHistogramColumns = buckets.filter(
+    (colId) =>
+      layer.columns[colId].operationType !== 'date_histogram' &&
+      layer.columns[colId].operationType !== 'range'
+  )!;
+
+  return [
+    {
+      type: 'function',
+      function: functionName,
+      arguments: {
+        by: nonHistogramColumns.length === buckets.length ? [] : nonHistogramColumns,
         inputColumnId: [currentColumn.references[0]],
         outputColumnId: [columnId],
         outputColumnName: [currentColumn.label],

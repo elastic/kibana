@@ -27,6 +27,7 @@ export declare class IndexPatternsService
 |  [get](./kibana-plugin-plugins-data-public.indexpatternsservice.get.md) |  | <code>(id: string) =&gt; Promise&lt;IndexPattern&gt;</code> | Get an index pattern by id. Cache optimized |
 |  [getCache](./kibana-plugin-plugins-data-public.indexpatternsservice.getcache.md) |  | <code>() =&gt; Promise&lt;SavedObject&lt;IndexPatternSavedObjectAttrs&gt;[] &#124; null &#124; undefined&gt;</code> |  |
 |  [getDefault](./kibana-plugin-plugins-data-public.indexpatternsservice.getdefault.md) |  | <code>() =&gt; Promise&lt;IndexPattern &#124; null&gt;</code> | Get default index pattern |
+|  [getDefaultId](./kibana-plugin-plugins-data-public.indexpatternsservice.getdefaultid.md) |  | <code>() =&gt; Promise&lt;string &#124; null&gt;</code> | Get default index pattern id |
 |  [getFieldsForIndexPattern](./kibana-plugin-plugins-data-public.indexpatternsservice.getfieldsforindexpattern.md) |  | <code>(indexPattern: IndexPattern &#124; IndexPatternSpec, options?: GetFieldsOptions &#124; undefined) =&gt; Promise&lt;any&gt;</code> | Get field list by providing an index patttern (or spec) |
 |  [getFieldsForWildcard](./kibana-plugin-plugins-data-public.indexpatternsservice.getfieldsforwildcard.md) |  | <code>(options: GetFieldsOptions) =&gt; Promise&lt;any&gt;</code> | Get field list by providing { pattern } |
 |  [getIds](./kibana-plugin-plugins-data-public.indexpatternsservice.getids.md) |  | <code>(refresh?: boolean) =&gt; Promise&lt;string[]&gt;</code> | Get list of index pattern ids |
@@ -34,7 +35,7 @@ export declare class IndexPatternsService
 |  [getTitles](./kibana-plugin-plugins-data-public.indexpatternsservice.gettitles.md) |  | <code>(refresh?: boolean) =&gt; Promise&lt;string[]&gt;</code> | Get list of index pattern titles |
 |  [refreshFields](./kibana-plugin-plugins-data-public.indexpatternsservice.refreshfields.md) |  | <code>(indexPattern: IndexPattern) =&gt; Promise&lt;void&gt;</code> | Refresh field list for a given index pattern |
 |  [savedObjectToSpec](./kibana-plugin-plugins-data-public.indexpatternsservice.savedobjecttospec.md) |  | <code>(savedObject: SavedObject&lt;IndexPatternAttributes&gt;) =&gt; IndexPatternSpec</code> | Converts index pattern saved object to index pattern spec |
-|  [setDefault](./kibana-plugin-plugins-data-public.indexpatternsservice.setdefault.md) |  | <code>(id: string, force?: boolean) =&gt; Promise&lt;void&gt;</code> | Optionally set default index pattern, unless force = true |
+|  [setDefault](./kibana-plugin-plugins-data-public.indexpatternsservice.setdefault.md) |  | <code>(id: string &#124; null, force?: boolean) =&gt; Promise&lt;void&gt;</code> | Optionally set default index pattern, unless force = true |
 
 ## Methods
 

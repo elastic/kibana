@@ -9,5 +9,5 @@ Function returning the url to use to redirect to the editing page of this object
 <b>Signature:</b>
 
 ```typescript
-getEditUrl?: (savedObject: SavedObject<any>) => string;
+getEditUrl?: (savedObject: SavedObject<Attributes>) => string;
 ```

@@ -16,11 +16,11 @@
           "\nConvert instruction variant id into display text.\n"
         ],
         "signature": [
-          "(id: \"ESC\" | \"OSX\" | \"DEB\" | \"RPM\" | \"DOCKER\" | \"WINDOWS\" | \"NODE\" | \"DJANGO\" | \"FLASK\" | \"RAILS\" | \"RACK\" | \"JS\" | \"GO\" | \"JAVA\" | \"DOTNET\" | \"LINUX\" | \"PHP\") => string"
+          "(id: \"ESC\" | \"OSX\" | \"DEB\" | \"RPM\" | \"DOCKER\" | \"WINDOWS\" | \"NODE\" | \"DJANGO\" | \"FLASK\" | \"RAILS\" | \"RACK\" | \"JS\" | \"GO\" | \"JAVA\" | \"DOTNET\" | \"LINUX\" | \"PHP\" | \"FLEET\") => string"
         ],
         "source": {
           "path": "src/plugins/home/common/instruction_variant.ts",
-          "lineNumber": 55
+          "lineNumber": 61
         },
         "deprecated": false,
         "children": [
@@ -32,11 +32,11 @@
             "label": "id",
             "description": [],
             "signature": [
-              "\"ESC\" | \"OSX\" | \"DEB\" | \"RPM\" | \"DOCKER\" | \"WINDOWS\" | \"NODE\" | \"DJANGO\" | \"FLASK\" | \"RAILS\" | \"RACK\" | \"JS\" | \"GO\" | \"JAVA\" | \"DOTNET\" | \"LINUX\" | \"PHP\""
+              "\"ESC\" | \"OSX\" | \"DEB\" | \"RPM\" | \"DOCKER\" | \"WINDOWS\" | \"NODE\" | \"DJANGO\" | \"FLASK\" | \"RAILS\" | \"RACK\" | \"JS\" | \"GO\" | \"JAVA\" | \"DOTNET\" | \"LINUX\" | \"PHP\" | \"FLEET\""
             ],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 55
+              "lineNumber": 61
             },
             "deprecated": false,
             "isRequired": true
@@ -501,7 +501,7 @@
         ],
         "source": {
           "path": "src/plugins/home/public/plugin.ts",
-          "lineNumber": 161
+          "lineNumber": 166
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -534,7 +534,7 @@
         ],
         "source": {
           "path": "src/plugins/home/public/plugin.ts",
-          "lineNumber": 158
+          "lineNumber": 163
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -598,11 +598,11 @@
         "label": "TutorialSetup",
         "description": [],
         "signature": [
-          "{ setVariable: (key: string, value: unknown) => void; registerDirectoryNotice: (id: string, component: React.FC<{}>) => void; registerDirectoryHeaderLink: (id: string, component: React.FC<{}>) => void; registerModuleNotice: (id: string, component: React.FC<{ moduleName: string; }>) => void; }"
+          "{ setVariable: (key: string, value: unknown) => void; registerDirectoryNotice: (id: string, component: React.FC<{}>) => void; registerDirectoryHeaderLink: (id: string, component: React.FC<{}>) => void; registerModuleNotice: (id: string, component: React.FC<{ moduleName: string; }>) => void; registerCustomStatusCheck: (name: string, fnCallback: CustomStatusCheckCallback) => void; registerCustomComponent: (name: string, component: CustomComponent) => void; }"
         ],
         "source": {
           "path": "src/plugins/home/public/plugin.ts",
-          "lineNumber": 164
+          "lineNumber": 169
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -635,7 +635,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/home/common/instruction_variant.ts",
-          "lineNumber": 9
+          "lineNumber": 11
         },
         "deprecated": false,
         "children": [
@@ -648,7 +648,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 10
+              "lineNumber": 12
             },
             "deprecated": false
           },
@@ -661,7 +661,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 11
+              "lineNumber": 13
             },
             "deprecated": false
           },
@@ -674,7 +674,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 12
+              "lineNumber": 14
             },
             "deprecated": false
           },
@@ -687,7 +687,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 13
+              "lineNumber": 15
             },
             "deprecated": false
           },
@@ -700,7 +700,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 14
+              "lineNumber": 16
             },
             "deprecated": false
           },
@@ -713,7 +713,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 15
+              "lineNumber": 17
             },
             "deprecated": false
           },
@@ -726,7 +726,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 16
+              "lineNumber": 18
             },
             "deprecated": false
           },
@@ -739,7 +739,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 17
+              "lineNumber": 19
             },
             "deprecated": false
           },
@@ -752,7 +752,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 18
+              "lineNumber": 20
             },
             "deprecated": false
           },
@@ -765,7 +765,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 19
+              "lineNumber": 21
             },
             "deprecated": false
           },
@@ -778,7 +778,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 20
+              "lineNumber": 22
             },
             "deprecated": false
           },
@@ -791,7 +791,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 21
+              "lineNumber": 23
             },
             "deprecated": false
           },
@@ -804,7 +804,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 22
+              "lineNumber": 24
             },
             "deprecated": false
           },
@@ -817,7 +817,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 23
+              "lineNumber": 25
             },
             "deprecated": false
           },
@@ -830,7 +830,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 24
+              "lineNumber": 26
             },
             "deprecated": false
           },
@@ -843,7 +843,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 25
+              "lineNumber": 27
             },
             "deprecated": false
           },
@@ -856,7 +856,20 @@
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 26
+              "lineNumber": 28
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "home",
+            "id": "def-public.INSTRUCTION_VARIANT.FLEET",
+            "type": "string",
+            "tags": [],
+            "label": "FLEET",
+            "description": [],
+            "source": {
+              "path": "src/plugins/home/common/instruction_variant.ts",
+              "lineNumber": 29
             },
             "deprecated": false
           }
@@ -873,7 +886,7 @@
       "description": [],
       "source": {
         "path": "src/plugins/home/public/plugin.ts",
-        "lineNumber": 167
+        "lineNumber": 175
       },
       "deprecated": false,
       "children": [
@@ -885,11 +898,29 @@
           "label": "tutorials",
           "description": [],
           "signature": [
-            "{ setVariable: (key: string, value: unknown) => void; registerDirectoryNotice: (id: string, component: React.FC<{}>) => void; registerDirectoryHeaderLink: (id: string, component: React.FC<{}>) => void; registerModuleNotice: (id: string, component: React.FC<{ moduleName: string; }>) => void; }"
+            "{ setVariable: (key: string, value: unknown) => void; registerDirectoryNotice: (id: string, component: React.FC<{}>) => void; registerDirectoryHeaderLink: (id: string, component: React.FC<{}>) => void; registerModuleNotice: (id: string, component: React.FC<{ moduleName: string; }>) => void; registerCustomStatusCheck: (name: string, fnCallback: CustomStatusCheckCallback) => void; registerCustomComponent: (name: string, component: CustomComponent) => void; }"
           ],
           "source": {
             "path": "src/plugins/home/public/plugin.ts",
-            "lineNumber": 168
+            "lineNumber": 176
+          },
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "home",
+          "id": "def-public.HomePublicPluginSetup.addData",
+          "type": "Object",
+          "tags": [],
+          "label": "addData",
+          "description": [],
+          "signature": [
+            "{ registerAddDataTab: (tab: ",
+            "AddDataTab",
+            ") => void; }"
+          ],
+          "source": {
+            "path": "src/plugins/home/public/plugin.ts",
+            "lineNumber": 177
           },
           "deprecated": false
         },
@@ -921,7 +952,7 @@
           ],
           "source": {
             "path": "src/plugins/home/public/plugin.ts",
-            "lineNumber": 169
+            "lineNumber": 178
           },
           "deprecated": false
         },
@@ -949,29 +980,22 @@
           ],
           "source": {
             "path": "src/plugins/home/public/plugin.ts",
-            "lineNumber": 176
+            "lineNumber": 185
           },
           "deprecated": true,
           "references": [
             {
-              "plugin": "cloud",
-              "link": {
-                "path": "x-pack/plugins/cloud/public/plugin.ts",
-                "lineNumber": 66
-              }
-            },
-            {
-              "plugin": "ml",
-              "link": {
-                "path": "x-pack/plugins/ml/public/register_feature.ts",
-                "lineNumber": 18
-              }
-            },
-            {
               "plugin": "apm",
               "link": {
                 "path": "x-pack/plugins/apm/public/plugin.ts",
-                "lineNumber": 82
+                "lineNumber": 85
+              }
+            },
+            {
+              "plugin": "cloud",
+              "link": {
+                "path": "x-pack/plugins/cloud/public/plugin.ts",
+                "lineNumber": 86
               }
             }
           ]
@@ -989,7 +1013,7 @@
       "description": [],
       "source": {
         "path": "src/plugins/home/public/plugin.ts",
-        "lineNumber": 178
+        "lineNumber": 187
       },
       "deprecated": false,
       "children": [
@@ -1005,7 +1029,7 @@
           ],
           "source": {
             "path": "src/plugins/home/public/plugin.ts",
-            "lineNumber": 179
+            "lineNumber": 188
           },
           "deprecated": false
         }
@@ -1054,6 +1078,40 @@
       },
       {
         "parentPluginId": "home",
+        "id": "def-server.InstructionSetSchema",
+        "type": "Type",
+        "tags": [],
+        "label": "InstructionSetSchema",
+        "description": [],
+        "signature": [
+          "{ readonly title?: string | undefined; readonly callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; readonly statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; success?: string | undefined; error?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; readonly instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }"
+        ],
+        "source": {
+          "path": "src/plugins/home/server/services/tutorials/lib/tutorial_schema.ts",
+          "lineNumber": 83
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "home",
+        "id": "def-server.InstructionsSchema",
+        "type": "Type",
+        "tags": [],
+        "label": "InstructionsSchema",
+        "description": [],
+        "signature": [
+          "{ readonly params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; label: string; id: string; }>[] | undefined; readonly instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; success?: string | undefined; error?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }"
+        ],
+        "source": {
+          "path": "src/plugins/home/server/services/tutorials/lib/tutorial_schema.ts",
+          "lineNumber": 104
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "home",
         "id": "def-server.SampleDataRegistrySetup",
         "type": "Type",
         "tags": [],
@@ -1070,7 +1128,7 @@
           },
           ") => void; getSampleDatasets: () => ",
           "Writable",
-          "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; statusMsg?: string | undefined; } & { description: string; id: string; name: string; defaultIndex: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { type: string; id: string; references: any[]; }>[]; previewImagePath: string; overviewDashboard: string; appLinks: Readonly<{} & { label: string; path: string; icon: string; }>[]; dataIndices: Readonly<{} & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>[]; addSavedObjectsToSampleDataset: (id: string, savedObjects: ",
+          "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; statusMsg?: string | undefined; } & { description: string; id: string; name: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { type: string; id: string; references: any[]; }>[]; previewImagePath: string; overviewDashboard: string; appLinks: Readonly<{} & { label: string; path: string; icon: string; }>[]; defaultIndex: string; dataIndices: Readonly<{} & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>[]; addSavedObjectsToSampleDataset: (id: string, savedObjects: ",
           "SavedObject",
           "<unknown>[]) => void; addAppLinksToSampleDataset: (id: string, appLinks: Readonly<{} & { label: string; path: string; icon: string; }>[]) => void; replacePanelInSampleDatasetDashboard: ({ sampleDataId, dashboardId, oldEmbeddableId, embeddableId, embeddableType, embeddableConfig, }: ",
           "SampleDatasetDashboardPanel",
@@ -1093,7 +1151,7 @@
         "signature": [
           "() => ",
           "Writable",
-          "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; statusMsg?: string | undefined; } & { description: string; id: string; name: string; defaultIndex: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { type: string; id: string; references: any[]; }>[]; previewImagePath: string; overviewDashboard: string; appLinks: Readonly<{} & { label: string; path: string; icon: string; }>[]; dataIndices: Readonly<{} & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>"
+          "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; statusMsg?: string | undefined; } & { description: string; id: string; name: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { type: string; id: string; references: any[]; }>[]; previewImagePath: string; overviewDashboard: string; appLinks: Readonly<{} & { label: string; path: string; icon: string; }>[]; defaultIndex: string; dataIndices: Readonly<{} & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>"
         ],
         "source": {
           "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
@@ -1112,11 +1170,28 @@
         "signature": [
           "(context: ",
           "TutorialContext",
-          ") => Readonly<{ savedObjects?: any[] | undefined; euiIconType?: string | undefined; previewImagePath?: string | undefined; moduleName?: string | undefined; isBeta?: boolean | undefined; completionTimeMinutes?: number | undefined; elasticCloud?: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; label: string; id: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; success?: string | undefined; error?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; onPremElasticCloud?: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; label: string; id: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; success?: string | undefined; error?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; artifacts?: Readonly<{ application?: Readonly<{} & { label: string; path: string; }> | undefined; exportedFields?: Readonly<{} & { documentationUrl: string; }> | undefined; } & { dashboards: Readonly<{ linkLabel?: string | undefined; } & { id: string; isOverview: boolean; }>[]; }> | undefined; savedObjectsInstallMsg?: string | undefined; } & { id: string; name: string; category: \"metrics\" | \"security\" | \"other\" | \"logging\"; shortDescription: string; longDescription: string; onPrem: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; label: string; id: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; success?: string | undefined; error?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; } & {}>[]; }>[]; }>[]; }>; }>"
+          ") => Readonly<{ savedObjects?: any[] | undefined; euiIconType?: string | undefined; previewImagePath?: string | undefined; moduleName?: string | undefined; isBeta?: boolean | undefined; completionTimeMinutes?: number | undefined; elasticCloud?: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; label: string; id: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; success?: string | undefined; error?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; onPremElasticCloud?: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; label: string; id: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; success?: string | undefined; error?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; artifacts?: Readonly<{ application?: Readonly<{} & { label: string; path: string; }> | undefined; exportedFields?: Readonly<{} & { documentationUrl: string; }> | undefined; } & { dashboards: Readonly<{ linkLabel?: string | undefined; } & { id: string; isOverview: boolean; }>[]; }> | undefined; savedObjectsInstallMsg?: string | undefined; customStatusCheckName?: string | undefined; } & { id: string; name: string; category: \"metrics\" | \"security\" | \"other\" | \"logging\"; shortDescription: string; longDescription: string; onPrem: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; label: string; id: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; success?: string | undefined; error?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }>; }>"
         ],
         "source": {
           "path": "src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts",
           "lineNumber": 34
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "home",
+        "id": "def-server.TutorialSchema",
+        "type": "Type",
+        "tags": [],
+        "label": "TutorialSchema",
+        "description": [],
+        "signature": [
+          "{ readonly savedObjects?: any[] | undefined; readonly euiIconType?: string | undefined; readonly previewImagePath?: string | undefined; readonly moduleName?: string | undefined; readonly isBeta?: boolean | undefined; readonly completionTimeMinutes?: number | undefined; readonly elasticCloud?: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; label: string; id: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; success?: string | undefined; error?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; readonly onPremElasticCloud?: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; label: string; id: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; success?: string | undefined; error?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; readonly artifacts?: Readonly<{ application?: Readonly<{} & { label: string; path: string; }> | undefined; exportedFields?: Readonly<{} & { documentationUrl: string; }> | undefined; } & { dashboards: Readonly<{ linkLabel?: string | undefined; } & { id: string; isOverview: boolean; }>[]; }> | undefined; readonly savedObjectsInstallMsg?: string | undefined; readonly customStatusCheckName?: string | undefined; readonly id: string; readonly name: string; readonly category: \"metrics\" | \"security\" | \"other\" | \"logging\"; readonly shortDescription: string; readonly longDescription: string; readonly onPrem: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; label: string; id: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; success?: string | undefined; error?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }>; }"
+        ],
+        "source": {
+          "path": "src/plugins/home/server/services/tutorials/lib/tutorial_schema.ts",
+          "lineNumber": 159
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1132,7 +1207,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/home/common/instruction_variant.ts",
-          "lineNumber": 9
+          "lineNumber": 11
         },
         "deprecated": false,
         "children": [
@@ -1145,7 +1220,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 10
+              "lineNumber": 12
             },
             "deprecated": false
           },
@@ -1158,7 +1233,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 11
+              "lineNumber": 13
             },
             "deprecated": false
           },
@@ -1171,7 +1246,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 12
+              "lineNumber": 14
             },
             "deprecated": false
           },
@@ -1184,7 +1259,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 13
+              "lineNumber": 15
             },
             "deprecated": false
           },
@@ -1197,7 +1272,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 14
+              "lineNumber": 16
             },
             "deprecated": false
           },
@@ -1210,7 +1285,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 15
+              "lineNumber": 17
             },
             "deprecated": false
           },
@@ -1223,7 +1298,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 16
+              "lineNumber": 18
             },
             "deprecated": false
           },
@@ -1236,7 +1311,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 17
+              "lineNumber": 19
             },
             "deprecated": false
           },
@@ -1249,7 +1324,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 18
+              "lineNumber": 20
             },
             "deprecated": false
           },
@@ -1262,7 +1337,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 19
+              "lineNumber": 21
             },
             "deprecated": false
           },
@@ -1275,7 +1350,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 20
+              "lineNumber": 22
             },
             "deprecated": false
           },
@@ -1288,7 +1363,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 21
+              "lineNumber": 23
             },
             "deprecated": false
           },
@@ -1301,7 +1376,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 22
+              "lineNumber": 24
             },
             "deprecated": false
           },
@@ -1314,7 +1389,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 23
+              "lineNumber": 25
             },
             "deprecated": false
           },
@@ -1327,7 +1402,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 24
+              "lineNumber": 26
             },
             "deprecated": false
           },
@@ -1340,7 +1415,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 25
+              "lineNumber": 27
             },
             "deprecated": false
           },
@@ -1353,7 +1428,20 @@
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 26
+              "lineNumber": 28
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "home",
+            "id": "def-server.INSTRUCTION_VARIANT.FLEET",
+            "type": "string",
+            "tags": [],
+            "label": "FLEET",
+            "description": [],
+            "source": {
+              "path": "src/plugins/home/common/instruction_variant.ts",
+              "lineNumber": 29
             },
             "deprecated": false
           }
@@ -1426,7 +1514,7 @@
             },
             ") => void; getSampleDatasets: () => ",
             "Writable",
-            "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; statusMsg?: string | undefined; } & { description: string; id: string; name: string; defaultIndex: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { type: string; id: string; references: any[]; }>[]; previewImagePath: string; overviewDashboard: string; appLinks: Readonly<{} & { label: string; path: string; icon: string; }>[]; dataIndices: Readonly<{} & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>[]; addSavedObjectsToSampleDataset: (id: string, savedObjects: ",
+            "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; statusMsg?: string | undefined; } & { description: string; id: string; name: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { type: string; id: string; references: any[]; }>[]; previewImagePath: string; overviewDashboard: string; appLinks: Readonly<{} & { label: string; path: string; icon: string; }>[]; defaultIndex: string; dataIndices: Readonly<{} & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>[]; addSavedObjectsToSampleDataset: (id: string, savedObjects: ",
             "SavedObject",
             "<unknown>[]) => void; addAppLinksToSampleDataset: (id: string, appLinks: Readonly<{} & { label: string; path: string; icon: string; }>[]) => void; replacePanelInSampleDatasetDashboard: ({ sampleDataId, dashboardId, oldEmbeddableId, embeddableId, embeddableType, embeddableConfig, }: ",
             "SampleDatasetDashboardPanel",

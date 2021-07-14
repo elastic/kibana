@@ -6,8 +6,8 @@
  */
 
 import { ROLES } from '../../../common/test';
-import { DETECTIONS_RULE_MANAGEMENT_URL, DETECTIONS_URL } from '../../urls/navigation';
-import { newRule } from '../../objects/rule';
+import { DETECTIONS_RULE_MANAGEMENT_URL, ALERTS_URL } from '../../urls/navigation';
+import { getNewRule } from '../../objects/rule';
 import { PAGE_TITLE } from '../../screens/common/page';
 
 import {
@@ -47,7 +47,7 @@ describe('Detections > Callouts', () => {
     // First, we have to open the app on behalf of a privileged user in order to initialize it.
     // Otherwise the app will be disabled and show a "welcome"-like page.
     cleanKibana();
-    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL, ROLES.platform_engineer);
+    loginAndWaitForPageWithoutDateRange(ALERTS_URL, ROLES.platform_engineer);
     waitForAlertsIndexToBeCreated();
 
     // After that we can login as a read-only user.
@@ -57,7 +57,7 @@ describe('Detections > Callouts', () => {
   context('indicating read-only access to resources', () => {
     context('On Detections home page', () => {
       beforeEach(() => {
-        loadPageAsReadOnlyUser(DETECTIONS_URL);
+        loadPageAsReadOnlyUser(ALERTS_URL);
       });
 
       it('We show one primary callout', () => {
@@ -95,7 +95,7 @@ describe('Detections > Callouts', () => {
 
     context('On Rule Details page', () => {
       beforeEach(() => {
-        createCustomRule(newRule);
+        createCustomRule(getNewRule());
         loadPageAsReadOnlyUser(DETECTIONS_RULE_MANAGEMENT_URL);
         waitForPageTitleToBeShown();
         goToRuleDetails();
@@ -125,7 +125,7 @@ describe('Detections > Callouts', () => {
   context('indicating read-write access to resources', () => {
     context('On Detections home page', () => {
       beforeEach(() => {
-        loadPageAsPlatformEngineer(DETECTIONS_URL);
+        loadPageAsPlatformEngineer(ALERTS_URL);
       });
 
       it('We show no callout', () => {
@@ -145,7 +145,7 @@ describe('Detections > Callouts', () => {
 
     context('On Rule Details page', () => {
       beforeEach(() => {
-        createCustomRule(newRule);
+        createCustomRule(getNewRule());
         loadPageAsPlatformEngineer(DETECTIONS_RULE_MANAGEMENT_URL);
         waitForPageTitleToBeShown();
         goToRuleDetails();

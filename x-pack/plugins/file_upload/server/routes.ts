@@ -21,7 +21,12 @@ import { getTimeFieldRange } from './get_time_field_range';
 import { analyzeFile } from './analyze_file';
 
 import { updateTelemetry } from './telemetry';
-import { importFileBodySchema, importFileQuerySchema, analyzeFileQuerySchema } from './schemas';
+import {
+  importFileBodySchema,
+  importFileQuerySchema,
+  analyzeFileQuerySchema,
+  runtimeMappingsSchema,
+} from './schemas';
 import { StartDeps } from './types';
 import { checkFileUploadPrivileges } from './check_privileges';
 
@@ -136,7 +141,6 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
           accepts: ['application/json'],
           maxBytes: MAX_FILE_SIZE_BYTES,
         },
-        tags: ['access:fileUpload:import'],
       },
     },
     async (context, request, response) => {
@@ -180,9 +184,6 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
       validate: {
         body: schema.object({ index: schema.string() }),
       },
-      options: {
-        tags: ['access:fileUpload:import'],
-      },
     },
     async (context, request, response) => {
       try {
@@ -219,6 +220,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
           timeFieldName: schema.string(),
           /** Query to match documents in the index(es). */
           query: schema.maybe(schema.any()),
+          runtimeMappings: schema.maybe(runtimeMappingsSchema),
         }),
       },
       options: {
@@ -227,12 +229,13 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
     },
     async (context, request, response) => {
       try {
-        const { index, timeFieldName, query } = request.body;
+        const { index, timeFieldName, query, runtimeMappings } = request.body;
         const resp = await getTimeFieldRange(
           context.core.elasticsearch.client,
           index,
           timeFieldName,
-          query
+          query,
+          runtimeMappings
         );
 
         return response.ok({

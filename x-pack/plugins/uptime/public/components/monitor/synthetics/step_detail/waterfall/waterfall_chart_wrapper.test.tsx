@@ -131,17 +131,18 @@ describe('WaterfallChartWrapper', () => {
   });
 
   it('opens flyout on sidebar click and closes on flyout close button', async () => {
-    const { getByText, getAllByText, getByTestId, queryByText, getByRole } = render(
+    const { getByText, getByTestId, queryByText, getByRole } = render(
       <WaterfallChartWrapper total={mockNetworkItems.length} data={mockNetworkItems} />
     );
 
-    expect(getByText(`1. ${mockNetworkItems[0].url}`)).toBeInTheDocument();
+    expect(getByText(`${mockNetworkItems[0].url}`)).toBeInTheDocument();
+    expect(getByText(`1.`)).toBeInTheDocument();
     expect(queryByText('Content type')).not.toBeInTheDocument();
     expect(queryByText(`${mockNetworkItems[0]?.mimeType}`)).not.toBeInTheDocument();
 
     // open flyout
-    // selecter matches both button and accessible text. Button is the second element in the array;
-    const sidebarButton = getAllByText(/1./)[1];
+    // selector matches both button and accessible text. Button is the second element in the array;
+    const sidebarButton = getByTestId(`middleTruncatedTextButton1`);
     fireEvent.click(sidebarButton);
 
     // check for sample flyout items
@@ -163,17 +164,18 @@ describe('WaterfallChartWrapper', () => {
   });
 
   it('opens flyout on sidebar click and closes on second sidebar click', async () => {
-    const { getByText, getAllByText, getByTestId, queryByText } = render(
+    const { getByText, getByTestId, queryByText } = render(
       <WaterfallChartWrapper total={mockNetworkItems.length} data={mockNetworkItems} />
     );
 
-    expect(getByText(`1. ${mockNetworkItems[0].url}`)).toBeInTheDocument();
+    expect(getByText(`${mockNetworkItems[0].url}`)).toBeInTheDocument();
+    expect(getByText(`1.`)).toBeInTheDocument();
     expect(queryByText('Content type')).not.toBeInTheDocument();
     expect(queryByText(`${mockNetworkItems[0]?.mimeType}`)).not.toBeInTheDocument();
 
     // open flyout
-    // selecter matches both button and accessible text. Button is the second element in the array;
-    const sidebarButton = getAllByText(/1./)[1];
+    // selector matches both button and accessible text. Button is the second element in the array;
+    const sidebarButton = getByTestId(`middleTruncatedTextButton1`);
     fireEvent.click(sidebarButton);
 
     // check for sample flyout items and that the flyout is focused

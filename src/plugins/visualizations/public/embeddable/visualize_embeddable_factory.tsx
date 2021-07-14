@@ -104,6 +104,9 @@ export class VisualizeEmbeddableFactory
       }
       return visType.stage !== 'experimental';
     },
+    getSavedObjectSubType: (savedObject) => {
+      return JSON.parse(savedObject.attributes.visState).type;
+    },
   };
 
   constructor(private readonly deps: VisualizeEmbeddableFactoryDeps) {}

@@ -6,9 +6,8 @@
  */
 
 import React from 'react';
-
-import { RouterContext } from '../../public/components/router';
+import { MemoryRouter } from 'react-router-dom';
 
 export const routerContextDecorator = (story: Function) => (
-  <RouterContext.Provider value={{ navigateTo: () => {} }}>{story()}</RouterContext.Provider>
+  <MemoryRouter initialEntries={['/']}>{story()}</MemoryRouter>
 );

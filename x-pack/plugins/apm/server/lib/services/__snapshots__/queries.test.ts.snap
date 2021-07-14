@@ -22,6 +22,7 @@ Object {
     "events": Array [
       "transaction",
     ],
+    "includeLegacyData": true,
   },
   "body": Object {
     "query": Object {

@@ -8,7 +8,7 @@
 import React from 'react';
 import { Plugin, CoreSetup, AppMountParameters } from 'kibana/public';
 import { PluginSetupContract as AlertingSetup } from '../../../../../../plugins/alerting/public';
-import { AlertType, SanitizedAlert } from '../../../../../../plugins/alerting/common';
+import { SanitizedAlert } from '../../../../../../plugins/alerting/common';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../../../../../plugins/triggers_actions_ui/public';
 
 export type Setup = void;
@@ -24,7 +24,7 @@ export class AlertingFixturePlugin implements Plugin<Setup, Start, AlertingExamp
     alerting.registerNavigation(
       'alerting_fixture',
       'test.noop',
-      (alert: SanitizedAlert, alertType: AlertType) => `/rule/${alert.id}`
+      (alert: SanitizedAlert) => `/rule/${alert.id}`
     );
 
     triggersActionsUi.alertTypeRegistry.register({

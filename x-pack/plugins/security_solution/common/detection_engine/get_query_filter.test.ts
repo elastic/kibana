@@ -1143,6 +1143,16 @@ describe('get_filter', () => {
               ],
             },
           },
+          fields: [
+            {
+              field: '*',
+              include_unmapped: true,
+            },
+            {
+              field: '@timestamp',
+              format: 'strict_date_optional_time',
+            },
+          ],
         },
       });
     });
@@ -1180,6 +1190,20 @@ describe('get_filter', () => {
               ],
             },
           },
+          fields: [
+            {
+              field: '*',
+              include_unmapped: true,
+            },
+            {
+              field: 'event.ingested',
+              format: 'strict_date_optional_time',
+            },
+            {
+              field: '@timestamp',
+              format: 'strict_date_optional_time',
+            },
+          ],
         },
       });
     });
@@ -1262,6 +1286,16 @@ describe('get_filter', () => {
               ],
             },
           },
+          fields: [
+            {
+              field: '*',
+              include_unmapped: true,
+            },
+            {
+              field: '@timestamp',
+              format: 'strict_date_optional_time',
+            },
+          ],
         },
       });
     });

@@ -101,7 +101,7 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
             })}
           >
             <EuiButtonIcon
-              href={getHref('fleet_agent_details', {
+              href={getHref('agent_details', {
                 agentId: agent.id,
                 tabId: 'logs',
                 logQuery: getLogsQueryByInputType(inputType),

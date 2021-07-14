@@ -6,13 +6,12 @@
  */
 
 import { SavedObjectsType } from 'src/core/server';
+import { CASE_CONFIGURE_SAVED_OBJECT } from '../../common';
 import { configureMigrations } from './migrations';
-
-export const CASE_CONFIGURE_SAVED_OBJECT = 'cases-configure';
 
 export const caseConfigureSavedObjectType: SavedObjectsType = {
   name: CASE_CONFIGURE_SAVED_OBJECT,
-  hidden: false,
+  hidden: true,
   namespaceType: 'single',
   mappings: {
     properties: {
@@ -56,6 +55,9 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
         },
       },
       closure_type: {
+        type: 'keyword',
+      },
+      owner: {
         type: 'keyword',
       },
       updated_at: {

@@ -118,7 +118,7 @@ export function getAccessorColorConfig(
     );
     const customColor =
       currentYConfig?.color ||
-      paletteService.get(currentPalette.name).getColor(
+      paletteService.get(currentPalette.name).getCategoricalColor(
         [
           {
             name: columnToLabel[accessor] || accessor,

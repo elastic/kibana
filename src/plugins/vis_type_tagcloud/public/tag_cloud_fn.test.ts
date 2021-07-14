@@ -24,6 +24,7 @@ describe('interpreter/functions#tagcloud', () => {
     maxFontSize: 72,
     showLabel: true,
     metric: { accessor: 0, format: { id: 'number' } },
+    bucket: { accessor: 1, format: { id: 'number' } },
   };
 
   it('returns an object with the correct structure', () => {

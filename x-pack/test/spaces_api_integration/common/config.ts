@@ -44,10 +44,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         reportName: 'X-Pack Spaces API Integration Tests -- ' + name,
       },
 
-      esArchiver: {
-        directory: path.join(__dirname, 'fixtures', 'es_archiver'),
-      },
-
       esTestCluster: {
         ...config.xpack.api.get('esTestCluster'),
         license,

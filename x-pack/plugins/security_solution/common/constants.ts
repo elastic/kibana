@@ -25,6 +25,7 @@ export const DEFAULT_TIME_RANGE = 'timepicker:timeDefaults';
 export const DEFAULT_REFRESH_RATE_INTERVAL = 'timepicker:refreshIntervalDefaults';
 export const DEFAULT_APP_TIME_RANGE = 'securitySolution:timeDefaults';
 export const DEFAULT_APP_REFRESH_INTERVAL = 'securitySolution:refreshIntervalDefaults';
+export const DEFAULT_ALERTS_INDEX = '.alerts-security-solution';
 export const DEFAULT_SIGNALS_INDEX = '.siem-signals';
 export const DEFAULT_LISTS_INDEX = '.lists';
 export const DEFAULT_ITEMS_INDEX = '.items';
@@ -43,7 +44,8 @@ export const DEFAULT_INTERVAL_VALUE = 300000; // ms
 export const DEFAULT_TIMEPICKER_QUICK_RANGES = 'timepicker:quickRanges';
 export const DEFAULT_TRANSFORMS = 'securitySolution:transforms';
 export const SCROLLING_DISABLED_CLASS_NAME = 'scrolling-disabled';
-export const GLOBAL_HEADER_HEIGHT = 98; // px
+export const GLOBAL_HEADER_HEIGHT = 96; // px
+export const GLOBAL_HEADER_HEIGHT_WITH_GLOBAL_BANNER = 128; // px
 export const FILTERS_GLOBAL_HEIGHT = 109; // px
 export const FULL_SCREEN_TOGGLED_CLASS_NAME = 'fullScreenToggled';
 export const NO_ALERT_INDEX = 'no-alert-index-049FC71A-4C2C-446F-9901-37XMC5024C51';
@@ -60,28 +62,55 @@ export const DEFAULT_INDICATOR_SOURCE_PATH = 'threatintel.indicator';
 export const INDICATOR_DESTINATION_PATH = 'threat.indicator';
 
 export enum SecurityPageName {
-  detections = 'detections',
   overview = 'overview',
+  detections = 'detections',
+  alerts = 'alerts',
+  rules = 'rules',
+  exceptions = 'exceptions',
   hosts = 'hosts',
   network = 'network',
   timelines = 'timelines',
   case = 'case',
   administration = 'administration',
+  endpoints = 'endpoints',
+  policies = 'policies',
+  trustedApps = 'trusted_apps',
+  eventFilters = 'event_filters',
 }
 
-export const APP_OVERVIEW_PATH = `${APP_PATH}/overview`;
-export const APP_DETECTIONS_PATH = `${APP_PATH}/detections`;
-export const APP_HOSTS_PATH = `${APP_PATH}/hosts`;
-export const APP_NETWORK_PATH = `${APP_PATH}/network`;
-export const APP_TIMELINES_PATH = `${APP_PATH}/timelines`;
-export const APP_CASES_PATH = `${APP_PATH}/cases`;
-export const APP_MANAGEMENT_PATH = `${APP_PATH}/administration`;
+export const TIMELINES_PATH = '/timelines';
+export const CASES_PATH = '/cases';
+export const OVERVIEW_PATH = '/overview';
+export const DETECTIONS_PATH = '/detections';
+export const ALERTS_PATH = '/alerts';
+export const RULES_PATH = '/rules';
+export const EXCEPTIONS_PATH = '/exceptions';
+export const HOSTS_PATH = '/hosts';
+export const NETWORK_PATH = '/network';
+export const MANAGEMENT_PATH = '/administration';
+export const ENDPOINTS_PATH = `${MANAGEMENT_PATH}/endpoints`;
+export const TRUSTED_APPS_PATH = `${MANAGEMENT_PATH}/trusted_apps`;
+export const EVENT_FILTERS_PATH = `${MANAGEMENT_PATH}/event_filters`;
 
-export const DETECTIONS_SUB_PLUGIN_ID = `${APP_ID}:${SecurityPageName.detections}`;
+export const APP_OVERVIEW_PATH = `${APP_PATH}${OVERVIEW_PATH}`;
+export const APP_MANAGEMENT_PATH = `${APP_PATH}${MANAGEMENT_PATH}`;
+
+export const APP_ALERTS_PATH = `${APP_PATH}${ALERTS_PATH}`;
+export const APP_RULES_PATH = `${APP_PATH}${RULES_PATH}`;
+export const APP_EXCEPTIONS_PATH = `${APP_PATH}${EXCEPTIONS_PATH}`;
+
+export const APP_HOSTS_PATH = `${APP_PATH}${HOSTS_PATH}`;
+export const APP_NETWORK_PATH = `${APP_PATH}${NETWORK_PATH}`;
+export const APP_TIMELINES_PATH = `${APP_PATH}${TIMELINES_PATH}`;
+export const APP_CASES_PATH = `${APP_PATH}${CASES_PATH}`;
+export const APP_ENDPOINTS_PATH = `${APP_PATH}${ENDPOINTS_PATH}`;
+export const APP_TRUSTED_APPS_PATH = `${APP_PATH}${TRUSTED_APPS_PATH}`;
+export const APP_EVENT_FILTERS_PATH = `${APP_PATH}${EVENT_FILTERS_PATH}`;
 
 /** The comma-delimited list of Elasticsearch indices from which the SIEM app collects events */
 export const DEFAULT_INDEX_PATTERN = [
   'apm-*-transaction*',
+  'traces-apm*',
   'auditbeat-*',
   'endgame-*',
   'filebeat-*',
@@ -149,6 +178,18 @@ export const DEFAULT_TRANSFORMS_SETTING = JSON.stringify(defaultTransformsSettin
 export const SIGNALS_ID = `siem.signals`;
 
 /**
+ * Id's for reference rule types
+ */
+export const REFERENCE_RULE_ALERT_TYPE_ID = `siem.referenceRule`;
+export const REFERENCE_RULE_PERSISTENCE_ALERT_TYPE_ID = `siem.referenceRulePersistence`;
+
+export const CUSTOM_ALERT_TYPE_ID = `siem.customRule`;
+export const EQL_ALERT_TYPE_ID = `siem.eqlRule`;
+export const INDICATOR_ALERT_TYPE_ID = `siem.indicatorRule`;
+export const ML_ALERT_TYPE_ID = `siem.mlRule`;
+export const THRESHOLD_ALERT_TYPE_ID = `siem.thresholdRule`;
+
+/**
  * Id for the notifications alerting type
  */
 export const NOTIFICATIONS_ID = `siem.notifications`;
@@ -173,6 +214,7 @@ export const DETECTION_ENGINE_INDEX_URL = `${DETECTION_ENGINE_URL}/index`;
 export const DETECTION_ENGINE_TAGS_URL = `${DETECTION_ENGINE_URL}/tags`;
 export const DETECTION_ENGINE_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/_find_statuses`;
 export const DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/prepackaged/_status`;
+export const DETECTION_ENGINE_RULES_BULK_ACTION = `${DETECTION_ENGINE_RULES_URL}/_bulk_action`;
 
 export const TIMELINE_URL = '/api/timeline';
 export const TIMELINES_URL = '/api/timelines';
@@ -221,6 +263,7 @@ export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
   '.email',
   '.slack',
   '.pagerduty',
+  '.swimlane',
   '.webhook',
   '.servicenow',
   '.jira',

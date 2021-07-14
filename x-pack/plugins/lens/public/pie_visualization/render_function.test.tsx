@@ -161,7 +161,7 @@ describe('PieVisualization component', () => {
         [] as HierarchyOfArrays
       );
 
-      expect(defaultArgs.paletteService.get('mock').getColor).toHaveBeenCalledWith(
+      expect(defaultArgs.paletteService.get('mock').getCategoricalColor).toHaveBeenCalledWith(
         [
           {
             name: 'css',

@@ -24,13 +24,11 @@ import { ActionConnectorTableItem } from '../../../../triggers_actions_ui/public
 import { SectionWrapper } from '../wrappers';
 import { Connectors } from './connectors';
 import { ClosureOptions } from './closure_options';
-import {
-  getConnectorById,
-  getNoneConnector,
-  normalizeActionConnector,
-  normalizeCaseConnector,
-} from './utils';
+import { getNoneConnector, normalizeActionConnector, normalizeCaseConnector } from './utils';
 import * as i18n from './translations';
+import { Owner } from '../../types';
+import { OwnerProvider } from '../owner_context';
+import { getConnectorById } from '../utils';
 
 const FormWrapper = styled.div`
   ${({ theme }) => css`
@@ -50,11 +48,11 @@ const FormWrapper = styled.div`
   `}
 `;
 
-export interface ConfigureCasesProps {
+export interface ConfigureCasesProps extends Owner {
   userCanCrud: boolean;
 }
 
-const ConfigureCasesComponent: React.FC<ConfigureCasesProps> = ({ userCanCrud }) => {
+const ConfigureCasesComponent: React.FC<Omit<ConfigureCasesProps, 'owner'>> = ({ userCanCrud }) => {
   const { triggersActionsUi } = useKibana().services;
 
   const [connectorIsValid, setConnectorIsValid] = useState(true);
@@ -223,6 +221,13 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesProps> = ({ userCanCrud })
   );
 };
 
-export const ConfigureCases = React.memo(ConfigureCasesComponent);
+export const ConfigureCases: React.FC<ConfigureCasesProps> = React.memo((props) => {
+  return (
+    <OwnerProvider owner={props.owner}>
+      <ConfigureCasesComponent {...props} />
+    </OwnerProvider>
+  );
+});
+
 // eslint-disable-next-line import/no-default-export
 export default ConfigureCases;

@@ -101,11 +101,20 @@ Below is a document in the expected structure, with descriptions of the fields:
     logger: "name of the logger",
   },
 
-  // Rule fields. All of them are supported.
+  // Rule fields.
   // https://www.elastic.co/guide/en/ecs/current/ecs-rule.html
   rule: {
+    // Fields currently are populated:
+    id: "a823fd56-5467-4727-acb1-66809737d943", // rule id
+    category: "test", // rule type id
+    license: "basic", // rule type minimumLicenseRequired
+    name: "rule-name", //
+    ruleset: "alerts", // rule type producer
+    // Fields currently are not populated:
     author: ["Elastic"],
-    id: "a823fd56-5467-4727-acb1-66809737d943",
+    description: "Some rule description",
+    version: '1',
+    uuid: "uuid"
     // etc
   },
 
@@ -118,11 +127,15 @@ Below is a document in the expected structure, with descriptions of the fields:
   // Custom fields that are not part of ECS.
   kibana: {
     server_uuid: "UUID of kibana server, for diagnosing multi-Kibana scenarios",
+    task: {
+      scheduled: "ISO date of when the task for this event was supposed to start",
+      schedule_delay: "delay in nanoseconds between when this task was supposed to start and when it actually started",
+    },
     alerting: {
       instance_id: "alert instance id, for relevant documents",
       action_group_id: "alert action group, for relevant documents",
       action_subgroup: "alert action subgroup, for relevant documents",
-      status: "overall alert status, after alert execution",
+      status: "overall alert status, after rule  execution",
     },
     saved_objects: [
       {
@@ -151,21 +164,26 @@ plugins:
   - `action: execute-via-http` - generated when an action is executed via HTTP request
 
 - `provider: alerting`
-  - `action: execute` - generated when an alert executor runs
-  - `action: execute-action` - generated when an alert schedules an action to run
-  - `action: new-instance` - generated when an alert has a new instance id that is active
-  - `action: recovered-instance` - generated when an alert has a previously active instance id that is no longer active
-  - `action: active-instance` - generated when an alert determines an instance id is active
+  - `action: execute` - generated when a rule executor runs
+  - `action: execute-action` - generated when a rule schedules an action to run
+  - `action: new-instance` - generated when a rule has a new instance id that is active
+  - `action: recovered-instance` - generated when a rule has a previously active instance id that is no longer active
+  - `action: active-instance` - generated when a rule determines an instance id is active
 
 For the `saved_objects` array elements, these are references to saved objects
-associated with the event.  For the `alerting` provider, those are alert saved
-ojects and for the `actions` provider those are action saved objects.  The 
-`alerts:execute-action` event includes both the alert and action saved object
-references.  For that event, only the alert reference has the optional `rel`
+associated with the event.  For the `alerting` provider, those are rule saved
+ojects and for the `actions` provider those are connector saved objects.  The 
+`alerts:execute-action` event includes both the rule and connector saved object
+references.  For that event, only the rule reference has the optional `rel`
 property with a `primary` value.  This property is used when searching the
 event log to indicate which saved objects should be directly searchable via 
-saved object references.  For the `alerts:execute-action` event, searching 
-only via the alert saved object reference will return the event.
+saved object references.  For the `alerts:execute-action` event, only searching 
+via the rule saved object reference will return the event; searching via the
+connector save object reference will **NOT** return the event.  The 
+`actions:execute` event also includes both the rule and connector saved object
+references, and both of them have the `rel` property with a `primary` value,
+allowing those events to be returned in searches of either the rule or 
+connector.
 
 
 ## Event Log index - associated resources

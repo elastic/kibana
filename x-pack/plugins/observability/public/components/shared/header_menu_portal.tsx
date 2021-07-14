@@ -15,17 +15,14 @@ export default function HeaderMenuPortal({ children, setHeaderActionMenu }: Head
   const portalNode = useMemo(() => createPortalNode(), []);
 
   useEffect(() => {
-    let unmount = () => {};
-
     setHeaderActionMenu((element) => {
       const mount = toMountPoint(<OutPortal node={portalNode} />);
-      unmount = mount(element);
-      return unmount;
+      return mount(element);
     });
 
     return () => {
       portalNode.unmount();
-      unmount();
+      setHeaderActionMenu(undefined);
     };
   }, [portalNode, setHeaderActionMenu]);
 

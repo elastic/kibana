@@ -15,6 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const pieChart = getService('pieChart');
   const inspector = getService('inspector');
+
   const PageObjects = getPageObjects([
     'common',
     'visualize',
@@ -25,9 +26,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
 
   describe('pie chart', function () {
+    // Used to track flag before and after reset
+    let isNewChartsLibraryEnabled = false;
     const vizName1 = 'Visualization PieChart';
     before(async function () {
-      await PageObjects.visualize.initTests();
+      isNewChartsLibraryEnabled = await PageObjects.visChart.isNewChartsLibraryEnabled();
+      await PageObjects.visualize.initTests(isNewChartsLibraryEnabled);
+
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
       log.debug('clickPieChart');
@@ -84,7 +89,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('other bucket', () => {
       it('should show other and missing bucket', async function () {
-        const expectedTableData = ['win 8', 'win xp', 'win 7', 'ios', 'Missing', 'Other'];
+        const expectedTableData = ['Missing', 'Other', 'ios', 'win 7', 'win 8', 'win xp'];
 
         await PageObjects.visualize.navigateToNewAggBasedVisualization();
         log.debug('clickPieChart');
@@ -168,7 +173,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'ID',
           'BR',
           'Other',
-        ];
+        ].sort();
 
         await PageObjects.visEditor.toggleOpenEditor(2, 'false');
         await PageObjects.visEditor.clickBucket('Split slices');
@@ -190,7 +195,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show correct result with one agg disabled', async () => {
-        const expectedTableData = ['win 8', 'win xp', 'win 7', 'ios', 'osx'];
+        const expectedTableData = ['ios', 'osx', 'win 7', 'win 8', 'win xp'];
 
         await PageObjects.visEditor.clickBucket('Split slices');
         await PageObjects.visEditor.selectAggregation('Terms');
@@ -207,7 +212,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.loadSavedVisualization(vizName1);
         await PageObjects.visChart.waitForRenderingCount();
 
-        const expectedTableData = ['win 8', 'win xp', 'win 7', 'ios', 'osx'];
+        const expectedTableData = ['ios', 'osx', 'win 7', 'win 8', 'win xp'];
         await pieChart.expectPieChartLabels(expectedTableData);
       });
 
@@ -276,7 +281,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'ios',
           'win 8',
           'osx',
-        ];
+        ].sort();
 
         await pieChart.expectPieChartLabels(expectedTableData);
       });
@@ -426,7 +431,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'CN',
           '360,000',
           'CN',
-        ];
+        ].sort();
+        if (await PageObjects.visChart.isNewLibraryChart('visTypePieChart')) {
+          await PageObjects.visEditor.clickOptionsTab();
+          await PageObjects.visEditor.togglePieLegend();
+          await PageObjects.visEditor.togglePieNestedLegend();
+          await PageObjects.visEditor.clickDataTab();
+          await PageObjects.visEditor.clickGo();
+        }
         await PageObjects.visChart.filterLegend('CN');
         await PageObjects.visChart.waitForVisualization();
         await pieChart.expectPieChartLabels(expectedTableData);

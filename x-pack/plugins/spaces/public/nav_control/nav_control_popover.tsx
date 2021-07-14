@@ -71,9 +71,6 @@ export class NavControlPopover extends Component<Props, State> {
 
   public render() {
     const button = this.getActiveSpaceButton();
-    if (!button) {
-      return null;
-    }
 
     let element: React.ReactNode;
     if (!this.state.loading && this.state.spaces.length < 2) {
@@ -102,7 +99,7 @@ export class NavControlPopover extends Component<Props, State> {
     return (
       <EuiPopover
         id={'spcMenuPopover'}
-        data-test-subj={`spacesNavSelector`}
+        data-test-subj={`${this.state.loading ? 'spacesNavSelectorLoading' : 'spacesNavSelector'}`}
         button={button}
         isOpen={this.state.showSpaceSelector}
         closePopover={this.closeSpaceSelector}
@@ -143,7 +140,7 @@ export class NavControlPopover extends Component<Props, State> {
     }
 
     return this.getButton(
-      <Suspense fallback={<EuiLoadingSpinner />}>
+      <Suspense fallback={<EuiLoadingSpinner size="m" />}>
         <LazySpaceAvatar space={activeSpace} size={'s'} />
       </Suspense>,
       (activeSpace as Space).name

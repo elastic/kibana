@@ -231,3 +231,10 @@ export interface ApiReference {
 export interface ReferencedDeprecations {
   [key: string]: Array<{ deprecatedApi: ApiDeclaration; ref: ApiReference }>;
 }
+export interface ApiStats {
+  missingComments: ApiDeclaration[];
+  isAnyType: ApiDeclaration[];
+  noReferences: ApiDeclaration[];
+  apiCount: number;
+  missingExports: number;
+}

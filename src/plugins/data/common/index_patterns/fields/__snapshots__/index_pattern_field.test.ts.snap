@@ -16,7 +16,7 @@ Object {
   "esTypes": Array [
     "keyword",
   ],
-  "lang": "lang",
+  "lang": "java",
   "name": "name",
   "readFromDocValues": false,
   "script": "script",
@@ -58,7 +58,7 @@ Object {
     },
   },
   "isMapped": undefined,
-  "lang": "lang",
+  "lang": "java",
   "name": "name",
   "readFromDocValues": false,
   "runtimeField": Object {

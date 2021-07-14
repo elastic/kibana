@@ -17,18 +17,18 @@ interface GetBulkItems {
   caseStatus: CaseStatusWithAllStatus;
   closePopover: () => void;
   deleteCasesAction: (cases: Case[]) => void;
+  includeCollections: boolean;
   selectedCases: Case[];
   updateCaseStatus: (status: string) => void;
-  includeCollections: boolean;
 }
 
 export const getBulkItems = ({
   caseStatus,
   closePopover,
   deleteCasesAction,
+  includeCollections,
   selectedCases,
   updateCaseStatus,
-  includeCollections,
 }: GetBulkItems) => {
   let statusMenuItems: JSX.Element[] = [];
 
@@ -36,8 +36,8 @@ export const getBulkItems = ({
     <EuiContextMenuItem
       data-test-subj="cases-bulk-open-button"
       disabled={selectedCases.length === 0 || includeCollections}
-      key="cases-bulk-open-button"
       icon={statuses[CaseStatuses.open].icon}
+      key="cases-bulk-open-button"
       onClick={() => {
         closePopover();
         updateCaseStatus(CaseStatuses.open);
@@ -51,8 +51,8 @@ export const getBulkItems = ({
     <EuiContextMenuItem
       data-test-subj="cases-bulk-in-progress-button"
       disabled={selectedCases.length === 0 || includeCollections}
-      key="cases-bulk-in-progress-button"
       icon={statuses[CaseStatuses['in-progress']].icon}
+      key="cases-bulk-in-progress-button"
       onClick={() => {
         closePopover();
         updateCaseStatus(CaseStatuses['in-progress']);
@@ -66,8 +66,8 @@ export const getBulkItems = ({
     <EuiContextMenuItem
       data-test-subj="cases-bulk-close-button"
       disabled={selectedCases.length === 0 || includeCollections}
-      key="cases-bulk-close-button"
       icon={statuses[CaseStatuses.closed].icon}
+      key="cases-bulk-close-button"
       onClick={() => {
         closePopover();
         updateCaseStatus(CaseStatuses.closed);

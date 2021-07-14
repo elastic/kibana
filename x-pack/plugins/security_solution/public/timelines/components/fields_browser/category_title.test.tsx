@@ -9,6 +9,7 @@ import { mount } from 'enzyme';
 import React from 'react';
 
 import { mockBrowserFields } from '../../../common/containers/source/mock';
+import { TestProviders } from '../../../common/mock';
 
 import { CategoryTitle } from './category_title';
 import { getFieldCount } from './helpers';
@@ -19,12 +20,14 @@ describe('CategoryTitle', () => {
   test('it renders the category id as the value of the title', () => {
     const categoryId = 'client';
     const wrapper = mount(
-      <CategoryTitle
-        categoryId={categoryId}
-        filteredBrowserFields={mockBrowserFields}
-        onUpdateColumns={jest.fn()}
-        timelineId={timelineId}
-      />
+      <TestProviders>
+        <CategoryTitle
+          categoryId={categoryId}
+          filteredBrowserFields={mockBrowserFields}
+          onUpdateColumns={jest.fn()}
+          timelineId={timelineId}
+        />
+      </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="selected-category-title"]').first().text()).toEqual(
@@ -35,12 +38,14 @@ describe('CategoryTitle', () => {
   test('when `categoryId` specifies a valid category in `filteredBrowserFields`, a count of the field is displayed in the badge', () => {
     const validCategoryId = 'client';
     const wrapper = mount(
-      <CategoryTitle
-        categoryId={validCategoryId}
-        filteredBrowserFields={mockBrowserFields}
-        onUpdateColumns={jest.fn()}
-        timelineId={timelineId}
-      />
+      <TestProviders>
+        <CategoryTitle
+          categoryId={validCategoryId}
+          filteredBrowserFields={mockBrowserFields}
+          onUpdateColumns={jest.fn()}
+          timelineId={timelineId}
+        />
+      </TestProviders>
     );
 
     expect(wrapper.find(`[data-test-subj="selected-category-count-badge"]`).first().text()).toEqual(
@@ -51,12 +56,14 @@ describe('CategoryTitle', () => {
   test('when `categoryId` specifies an INVALID category in `filteredBrowserFields`, a count of zero is displayed in the badge', () => {
     const invalidCategoryId = 'this.is.not.happening';
     const wrapper = mount(
-      <CategoryTitle
-        categoryId={invalidCategoryId}
-        filteredBrowserFields={mockBrowserFields}
-        onUpdateColumns={jest.fn()}
-        timelineId={timelineId}
-      />
+      <TestProviders>
+        <CategoryTitle
+          categoryId={invalidCategoryId}
+          filteredBrowserFields={mockBrowserFields}
+          onUpdateColumns={jest.fn()}
+          timelineId={timelineId}
+        />
+      </TestProviders>
     );
 
     expect(wrapper.find(`[data-test-subj="selected-category-count-badge"]`).first().text()).toEqual(

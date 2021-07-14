@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiButtonEmpty, EuiText, EuiFlexGroup, EuiFlexItem, EuiHeaderLinks } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiHeaderLinks } from '@elastic/eui';
 
 import { externalUrl, getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
 import { EuiButtonEmptyTo } from '../../../shared/react_router_helpers';
@@ -25,8 +25,9 @@ export const WorkplaceSearchHeaderActions: React.FC = () => {
             data-test-subj="PersonalDashboardButton"
             iconType="user"
             to={PERSONAL_SOURCES_PATH}
+            size="s"
           >
-            <EuiText size="s">{NAV.PERSONAL_DASHBOARD}</EuiText>
+            {NAV.PERSONAL_DASHBOARD}
           </EuiButtonEmptyTo>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -35,8 +36,9 @@ export const WorkplaceSearchHeaderActions: React.FC = () => {
             href={getWorkplaceSearchUrl('/search')}
             target="_blank"
             iconType="search"
+            size="s"
           >
-            <EuiText size="s">{NAV.SEARCH}</EuiText>
+            {NAV.SEARCH}
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>

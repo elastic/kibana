@@ -33,6 +33,7 @@ describe('Axes Settings', () => {
       toggleTickLabelsVisibility: jest.fn(),
       toggleGridlinesVisibility: jest.fn(),
       hasBarOrAreaOnAxis: false,
+      hasPercentageAxis: false,
     };
   });
 

@@ -116,7 +116,7 @@ describe('msearch route', () => {
 
     const error: any = mockResponse.customError.mock.calls[0][0];
     expect(error.statusCode).toBe(400);
-    expect(error.body.message).toBe('json_e_o_f_exception');
+    expect(error.body.message).toMatch(/json_e_o_f_exception/);
     expect(error.body.attributes).toBe(jsonEofException.error);
   });
 

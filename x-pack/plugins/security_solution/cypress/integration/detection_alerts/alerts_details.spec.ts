@@ -18,19 +18,19 @@ import { cleanKibana } from '../../tasks/common';
 import { esArchiverLoad } from '../../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
-import { unmappedRule } from '../../objects/rule';
+import { getUnmappedRule } from '../../objects/rule';
 
-import { DETECTIONS_URL } from '../../urls/navigation';
+import { ALERTS_URL } from '../../urls/navigation';
 
 describe('Alert details with unmapped fields', () => {
   beforeEach(() => {
     cleanKibana();
     esArchiverLoad('unmapped_fields');
-    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
-    createCustomRuleActivated(unmappedRule);
-    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+    createCustomRuleActivated(getUnmappedRule());
+    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     expandFirstAlert();
   });

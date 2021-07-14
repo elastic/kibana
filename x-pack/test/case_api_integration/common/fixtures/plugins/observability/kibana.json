@@ -1,0 +1,10 @@
+{
+  "id": "observabilityFixtures",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack"],
+  "requiredPlugins": ["features", "cases"],
+  "optionalPlugins": ["security",  "spaces"],
+  "server": true,
+  "ui": false
+}

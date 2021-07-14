@@ -39,12 +39,16 @@ describe('build query', () => {
         { query: 'extension:jpg', language: 'kuery' },
         { query: 'bar:baz', language: 'lucene' },
       ] as Query[];
-      const filters = [
-        {
-          match_all: {},
-          meta: { type: 'match_all' },
-        } as MatchAllFilter,
-      ];
+      const filters = {
+        match: {
+          a: 'b',
+        },
+        meta: {
+          alias: '',
+          disabled: false,
+          negate: false,
+        },
+      };
       const config = {
         allowLeadingWildcards: true,
         queryStringOptions: {},
@@ -56,7 +60,11 @@ describe('build query', () => {
           must: [decorateQuery(luceneStringToDsl('bar:baz'), config.queryStringOptions)],
           filter: [
             toElasticsearchQuery(fromKueryExpression('extension:jpg'), indexPattern),
-            { match_all: {} },
+            {
+              match: {
+                a: 'b',
+              },
+            },
           ],
           should: [],
           must_not: [],
@@ -71,9 +79,15 @@ describe('build query', () => {
     it('should accept queries and filters as either single objects or arrays', () => {
       const queries = { query: 'extension:jpg', language: 'lucene' } as Query;
       const filters = {
-        match_all: {},
-        meta: { type: 'match_all' },
-      } as MatchAllFilter;
+        match: {
+          a: 'b',
+        },
+        meta: {
+          alias: '',
+          disabled: false,
+          negate: false,
+        },
+      };
       const config = {
         allowLeadingWildcards: true,
         queryStringOptions: {},
@@ -83,13 +97,62 @@ describe('build query', () => {
       const expectedResult = {
         bool: {
           must: [decorateQuery(luceneStringToDsl('extension:jpg'), config.queryStringOptions)],
-          filter: [{ match_all: {} }],
+          filter: [
+            {
+              match: {
+                a: 'b',
+              },
+            },
+          ],
           should: [],
           must_not: [],
         },
       };
 
       const result = buildEsQuery(indexPattern, queries, filters, config);
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    it('should remove match_all clauses', () => {
+      const filters = [
+        {
+          match_all: {},
+          meta: { type: 'match_all' },
+        } as MatchAllFilter,
+        {
+          match: {
+            a: 'b',
+          },
+          meta: {
+            alias: '',
+            disabled: false,
+            negate: false,
+          },
+        },
+      ];
+      const config = {
+        allowLeadingWildcards: true,
+        queryStringOptions: {},
+        ignoreFilterIfFieldNotInIndex: false,
+      };
+
+      const expectedResult = {
+        bool: {
+          must: [],
+          filter: [
+            {
+              match: {
+                a: 'b',
+              },
+            },
+          ],
+          should: [],
+          must_not: [],
+        },
+      };
+
+      const result = buildEsQuery(indexPattern, [], filters, config);
 
       expect(result).toEqual(expectedResult);
     });
@@ -122,7 +185,6 @@ describe('build query', () => {
               indexPattern,
               config
             ),
-            { match_all: {} },
           ],
           should: [],
           must_not: [],

@@ -33,10 +33,9 @@ export interface ChromeNavLink {
   readonly baseUrl: string;
 
   /**
-   * The route used to open the {@link AppBase.defaultPath | default path } of an application.
-   * If unset, `baseUrl` will be used instead.
+   * The route used to open the default path and the deep links of an application.
    */
-  readonly url?: string;
+  readonly url: string;
 
   /**
    * An ordinal used to sort nav links relative to one another for display.

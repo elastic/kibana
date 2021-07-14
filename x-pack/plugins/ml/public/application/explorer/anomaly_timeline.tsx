@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React, { FC, useMemo, useState } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 import { isEqual } from 'lodash';
 import {
-  EuiPanel,
-  EuiPopover,
-  EuiContextMenuPanel,
+  EuiButtonEmpty,
   EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiPanel,
+  EuiPopover,
   EuiSelect,
-  EuiTitle,
   EuiSpacer,
-  EuiContextMenuItem,
-  EuiButtonEmpty,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import useDebounce from 'react-use/lib/useDebounce';
 import { OVERALL_LABEL, SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from './explorer_constants';
 import { AddSwimlaneToDashboardControl } from './dashboard_controls/add_swimlane_to_dashboard_controls';
 import { useMlKibana } from '../contexts/kibana';
@@ -35,7 +35,9 @@ import { ExplorerNoInfluencersFound } from './components/explorer_no_influencers
 import { SwimlaneContainer } from './swimlane_container';
 import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
 import { NoOverallData } from './components/no_overall_data';
+import { SeverityControl } from '../components/severity_control';
 import { AnomalyTimelineHelpPopover } from './anomaly_timeline_help_popover';
+import { isDefined } from '../../../common/types/guards';
 
 function mapSwimlaneOptionsToEuiOptions(options: string[]) {
   return options.map((option) => ({
@@ -76,10 +78,8 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       filterActive,
       filteredFields,
       maskAll,
-      overallSwimlaneData,
       selectedCells,
       viewByLoadedForTimeFormatted,
-      viewBySwimlaneData,
       viewBySwimlaneDataLoading,
       viewBySwimlaneFieldName,
       viewBySwimlaneOptions,
@@ -89,7 +89,22 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       swimlaneLimit,
       loading,
       overallAnnotations,
+      swimLaneSeverity,
+      overallSwimlaneData,
+      viewBySwimlaneData,
     } = explorerState;
+
+    const [severityUpdate, setSeverityUpdate] = useState(swimLaneSeverity);
+
+    useDebounce(
+      () => {
+        if (severityUpdate === swimLaneSeverity) return;
+
+        explorerService.setSwimLaneSeverity(severityUpdate!);
+      },
+      500,
+      [severityUpdate, swimLaneSeverity]
+    );
 
     const annotations = useMemo(() => overallAnnotations.annotationsData, [overallAnnotations]);
 
@@ -128,7 +143,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
     return (
       <>
         <EuiPanel paddingSize="m">
-          <EuiFlexGroup direction="row" gutterSize="m" responsive={false} alignItems="center">
+          <EuiFlexGroup direction="row" gutterSize="xs" responsive={false} alignItems="baseline">
             <EuiFlexItem grow={false}>
               <EuiTitle className="panel-title">
                 <h2>
@@ -139,68 +154,10 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                 </h2>
               </EuiTitle>
             </EuiFlexItem>
-            {viewBySwimlaneOptions.length > 0 && (
-              <>
-                <EuiFlexItem grow={false}>
-                  <EuiFormRow
-                    label={
-                      <span className="eui-textNoWrap">
-                        <FormattedMessage
-                          id="xpack.ml.explorer.viewByLabel"
-                          defaultMessage="View by"
-                        />
-                      </span>
-                    }
-                    display={'columnCompressed'}
-                  >
-                    <EuiSelect
-                      compressed
-                      id="selectViewBy"
-                      options={mapSwimlaneOptionsToEuiOptions(viewBySwimlaneOptions)}
-                      value={viewBySwimlaneFieldName}
-                      onChange={(e) => explorerService.setViewBySwimlaneFieldName(e.target.value)}
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-                {selectedCells ? (
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      size="xs"
-                      onClick={setSelectedCells.bind(null, undefined)}
-                      data-test-subj="mlAnomalyTimelineClearSelection"
-                    >
-                      <FormattedMessage
-                        id="xpack.ml.explorer.clearSelectionLabel"
-                        defaultMessage="Clear selection"
-                      />
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                ) : null}
-                <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
-                  <div className="panel-sub-title">
-                    {viewByLoadedForTimeFormatted && (
-                      <FormattedMessage
-                        id="xpack.ml.explorer.sortedByMaxAnomalyScoreForTimeFormattedLabel"
-                        defaultMessage="(Sorted by max anomaly score for {viewByLoadedForTimeFormatted})"
-                        values={{ viewByLoadedForTimeFormatted }}
-                      />
-                    )}
-                    {viewByLoadedForTimeFormatted === undefined && (
-                      <FormattedMessage
-                        id="xpack.ml.explorer.sortedByMaxAnomalyScoreLabel"
-                        defaultMessage="(Sorted by max anomaly score)"
-                      />
-                    )}
-                    {filterActive === true && viewBySwimlaneFieldName === VIEW_BY_JOB_LABEL && (
-                      <FormattedMessage
-                        id="xpack.ml.explorer.jobScoreAcrossAllInfluencersLabel"
-                        defaultMessage="(Job score across all influencers)"
-                      />
-                    )}
-                  </div>
-                </EuiFlexItem>
-              </>
-            )}
+
+            <EuiFlexItem grow={false}>
+              <AnomalyTimelineHelpPopover />
+            </EuiFlexItem>
 
             {menuItems.length > 0 && (
               <EuiFlexItem grow={false} style={{ marginLeft: 'auto', alignSelf: 'baseline' }}>
@@ -226,10 +183,79 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                 </EuiPopover>
               </EuiFlexItem>
             )}
+          </EuiFlexGroup>
 
-            <EuiFlexItem grow={false}>
-              <AnomalyTimelineHelpPopover />
+          <EuiSpacer size="m" />
+
+          <EuiFlexGroup direction="row" gutterSize="m" responsive={false} alignItems="baseline">
+            {viewBySwimlaneOptions.length > 0 && (
+              <>
+                <EuiFlexItem grow={false}>
+                  <EuiSelect
+                    prepend={i18n.translate('xpack.ml.explorer.viewByLabel', {
+                      defaultMessage: 'View by',
+                    })}
+                    compressed
+                    id="selectViewBy"
+                    options={mapSwimlaneOptionsToEuiOptions(viewBySwimlaneOptions)}
+                    value={viewBySwimlaneFieldName}
+                    onChange={(e) => explorerService.setViewBySwimlaneFieldName(e.target.value)}
+                  />
+                </EuiFlexItem>
+              </>
+            )}
+
+            <EuiFlexItem grow={true}>
+              <SeverityControl
+                value={severityUpdate ?? 0}
+                onChange={useCallback((update) => {
+                  setSeverityUpdate(update);
+                }, [])}
+              />
             </EuiFlexItem>
+          </EuiFlexGroup>
+
+          <EuiSpacer size="m" />
+
+          <EuiFlexGroup direction="row" gutterSize="m" responsive={false} alignItems="center">
+            <EuiFlexItem grow={false}>
+              <div className="panel-sub-title">
+                {viewByLoadedForTimeFormatted && (
+                  <FormattedMessage
+                    id="xpack.ml.explorer.sortedByMaxAnomalyScoreForTimeFormattedLabel"
+                    defaultMessage="(Sorted by max anomaly score for {viewByLoadedForTimeFormatted})"
+                    values={{ viewByLoadedForTimeFormatted }}
+                  />
+                )}
+                {isDefined(viewByLoadedForTimeFormatted) ? null : (
+                  <FormattedMessage
+                    id="xpack.ml.explorer.sortedByMaxAnomalyScoreLabel"
+                    defaultMessage="(Sorted by max anomaly score)"
+                  />
+                )}
+                {filterActive === true && viewBySwimlaneFieldName === VIEW_BY_JOB_LABEL && (
+                  <FormattedMessage
+                    id="xpack.ml.explorer.jobScoreAcrossAllInfluencersLabel"
+                    defaultMessage="(Job score across all influencers)"
+                  />
+                )}
+              </div>
+            </EuiFlexItem>
+
+            {selectedCells ? (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={setSelectedCells.bind(null, undefined)}
+                  data-test-subj="mlAnomalyTimelineClearSelection"
+                >
+                  <FormattedMessage
+                    id="xpack.ml.explorer.clearSelectionLabel"
+                    defaultMessage="Clear selection"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            ) : null}
           </EuiFlexGroup>
 
           <EuiSpacer size="m" />
@@ -249,6 +275,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             noDataWarning={<NoOverallData />}
             showTimeline={false}
             annotationsData={annotations}
+            showLegend={false}
           />
 
           <EuiSpacer size="m" />
@@ -266,7 +293,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                 })
               }
               timeBuckets={timeBuckets}
-              showLegend={true}
+              showLegend={false}
               swimlaneData={viewBySwimlaneData as ViewBySwimLaneData}
               swimlaneType={SWIMLANE_TYPE.VIEW_BY}
               selection={selectedCells}

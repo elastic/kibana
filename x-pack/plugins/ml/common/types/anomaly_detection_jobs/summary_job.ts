@@ -36,6 +36,7 @@ export interface MlSummaryJob {
   earliestStartTimestampMs?: number;
   awaitingNodeAssignment: boolean;
   alertingRules?: MlAnomalyDetectionAlertRule[];
+  jobTags: Record<string, string>;
 }
 
 export interface AuditMessage {
@@ -45,6 +46,7 @@ export interface AuditMessage {
   highestLevel: string;
   highestLevelText: string;
   text: string;
+  cleared?: boolean;
 }
 
 export type MlSummaryJobs = MlSummaryJob[];

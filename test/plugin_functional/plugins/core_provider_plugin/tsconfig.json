@@ -1,8 +1,11 @@
 {
   "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
+    "composite": true,
     "outDir": "./target",
-    "skipLibCheck": true
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true
   },
   "include": [
     "index.ts",
@@ -12,6 +15,6 @@
   ],
   "exclude": [],
   "references": [
-    { "path": "../../../../src/core/tsconfig.json" }
-  ]
+    { "path": "../../../../src/core/tsconfig.json" },
+  ],
 }

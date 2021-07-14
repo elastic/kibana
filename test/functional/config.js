@@ -42,9 +42,14 @@ export default async function ({ readConfigFile }) {
       serverArgs: [
         ...commonConfig.get('kbnTestServer.serverArgs'),
         '--telemetry.optIn=false',
-        '--xpack.security.enabled=false',
         '--savedObjects.maxImportPayloadBytes=10485760',
         '--xpack.maps.showMapVisualizationTypes=true',
+
+        // to be re-enabled once kibana/issues/102552 is completed
+        '--xpack.security.enabled=false',
+        '--monitoring.enabled=false',
+        '--xpack.reporting.enabled=false',
+        '--enterpriseSearch.enabled=false',
       ],
     },
 
@@ -53,6 +58,7 @@ export default async function ({ readConfigFile }) {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
         'visualization:visualize:legacyChartsLibrary': true,
+        'visualization:visualize:legacyPieChartsLibrary': true,
       },
     },
 
@@ -96,6 +102,9 @@ export default async function ({ readConfigFile }) {
       home: {
         pathname: '/app/home',
         hash: '/',
+      },
+      observabilityCases: {
+        pathname: '/app/observability/cases',
       },
     },
     junit: {
@@ -238,6 +247,20 @@ export default async function ({ readConfigFile }) {
           },
           kibana: [],
         },
+        kibana_message_with_newline: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['message_with_newline'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
 
         kibana_timefield: {
           elasticsearch: {
@@ -275,6 +298,21 @@ export default async function ({ readConfigFile }) {
             indices: [
               {
                 names: ['long-window-logstash-*'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+
+        'test-index-unmapped-fields': {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['test-index-unmapped-fields'],
                 privileges: ['read', 'view_index_metadata'],
                 field_security: { grant: ['*'], except: [] },
               },

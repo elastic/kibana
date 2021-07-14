@@ -18,6 +18,8 @@ import {
   UrlGeneratorsSetup,
   UrlGeneratorsStart,
 } from './url_generators/url_generator_service';
+import { UrlService } from '../common/url_service';
+import { RedirectManager } from './url_service';
 
 export interface ShareSetupDependencies {
   securityOss?: SecurityOssPluginSetup;
@@ -27,16 +29,73 @@ export interface ShareStartDependencies {
   securityOss?: SecurityOssPluginStart;
 }
 
+/** @public */
+export type SharePluginSetup = ShareMenuRegistrySetup & {
+  /**
+   * @deprecated
+   *
+   * URL Generators are deprecated use UrlService instead.
+   */
+  urlGenerators: UrlGeneratorsSetup;
+
+  /**
+   * Utilities to work with URL locators and short URLs.
+   */
+  url: UrlService;
+};
+
+/** @public */
+export type SharePluginStart = ShareMenuManagerStart & {
+  /**
+   * @deprecated
+   *
+   * URL Generators are deprecated use UrlService instead.
+   */
+  urlGenerators: UrlGeneratorsStart;
+
+  /**
+   * Utilities to work with URL locators and short URLs.
+   */
+  url: UrlService;
+};
+
 export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
   private readonly shareMenuRegistry = new ShareMenuRegistry();
   private readonly shareContextMenu = new ShareMenuManager();
   private readonly urlGeneratorsService = new UrlGeneratorsService();
+  private url?: UrlService;
 
   public setup(core: CoreSetup, plugins: ShareSetupDependencies): SharePluginSetup {
     core.application.register(createShortUrlRedirectApp(core, window.location));
+
+    this.url = new UrlService({
+      navigate: async ({ app, path, state }, { replace = false } = {}) => {
+        const [start] = await core.getStartServices();
+        await start.application.navigateToApp(app, {
+          path,
+          state,
+          replace,
+        });
+      },
+      getUrl: async ({ app, path }, { absolute }) => {
+        const start = await core.getStartServices();
+        const url = start[0].application.getUrlForApp(app, {
+          path,
+          absolute,
+        });
+        return url;
+      },
+    });
+
+    const redirectManager = new RedirectManager({
+      url: this.url,
+    });
+    redirectManager.registerRedirectApp(core);
+
     return {
       ...this.shareMenuRegistry.setup(),
       urlGenerators: this.urlGeneratorsService.setup(core),
+      url: this.url,
     };
   }
 
@@ -48,16 +107,7 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
         plugins.securityOss?.anonymousAccess
       ),
       urlGenerators: this.urlGeneratorsService.start(core),
+      url: this.url!,
     };
   }
 }
-
-/** @public */
-export type SharePluginSetup = ShareMenuRegistrySetup & {
-  urlGenerators: UrlGeneratorsSetup;
-};
-
-/** @public */
-export type SharePluginStart = ShareMenuManagerStart & {
-  urlGenerators: UrlGeneratorsStart;
-};

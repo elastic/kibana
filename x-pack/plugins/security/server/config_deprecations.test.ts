@@ -243,7 +243,7 @@ describe('Config Deprecations', () => {
     expect(migrated).toEqual(config);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Defining \`xpack.security.authc.providers\` as an array of provider types is deprecated. Use extended \`object\` format instead.",
+        "Defining \\"xpack.security.authc.providers\\" as an array of provider types is deprecated. Use extended \\"object\\" format instead.",
       ]
     `);
   });
@@ -262,7 +262,7 @@ describe('Config Deprecations', () => {
     expect(migrated).toEqual(config);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Defining \`xpack.security.authc.providers\` as an array of provider types is deprecated. Use extended \`object\` format instead.",
+        "Defining \\"xpack.security.authc.providers\\" as an array of provider types is deprecated. Use extended \\"object\\" format instead.",
         "Enabling both \`basic\` and \`token\` authentication providers in \`xpack.security.authc.providers\` is deprecated. Login page will only use \`token\` provider.",
       ]
     `);
