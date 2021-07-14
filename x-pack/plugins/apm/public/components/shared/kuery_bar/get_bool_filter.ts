@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
-import { environmentQuery } from '../../../../common/utils/environment_query';
 import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
 import {
   ERROR_GROUP_ID,
@@ -16,6 +14,7 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { UIProcessorEvent } from '../../../../common/processor_event';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 import { IUrlParams } from '../../../context/url_params_context/types';
 
 export function getBoolFilter({
@@ -37,10 +36,7 @@ export function getBoolFilter({
     });
   }
 
-  const environmentFilter = environmentQuery(urlParams.environment);
-  if (!isEmpty(environmentFilter)) {
-    boolFilter.push(...environmentFilter);
-  }
+  boolFilter.push(...environmentQuery(urlParams.environment));
 
   if (urlParams.transactionType) {
     boolFilter.push({
