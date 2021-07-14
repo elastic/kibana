@@ -80,6 +80,7 @@ class DataDownloadOptions extends Component<DataDownloadOptionsProps, DataDownlo
               quoteValues: this.props.uiSettings.get('csv:quoteValues', true),
               raw: !isFormatted,
               formatFactory: this.props.fieldFormats.deserialize,
+              escapeFormulaValues: false,
             }),
             type: CSV_MIME_TYPE,
           };

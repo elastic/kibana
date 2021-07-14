@@ -256,6 +256,7 @@ export const LensTopNavMenu = ({
                       csvSeparator: uiSettings.get('csv:separator', ','),
                       quoteValues: uiSettings.get('csv:quoteValues', true),
                       formatFactory: data.fieldFormats.deserialize,
+                      escapeFormulaValues: false,
                     }),
                     type: exporters.CSV_MIME_TYPE,
                   };

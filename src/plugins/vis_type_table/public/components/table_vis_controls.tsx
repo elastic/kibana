@@ -63,6 +63,7 @@ export const TableVisControls = memo(
             quoteValues,
             formatFactory: getFormatService().deserialize,
             raw: !formatted,
+            escapeFormulaValues: false,
           }
         );
         downloadFileAs(`${filename || 'unsaved'}.csv`, { content, type: exporters.CSV_MIME_TYPE });

@@ -18,14 +18,14 @@ export const CSV_MIME_TYPE = 'text/plain;charset=utf-8';
 interface CSVOptions {
   csvSeparator: string;
   quoteValues: boolean;
-  escapeFormulaValues?: boolean;
+  escapeFormulaValues: boolean;
   formatFactory: FormatFactory;
   raw?: boolean;
 }
 
 export function datatableToCSV(
   { columns, rows }: Datatable,
-  { csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues = false }: CSVOptions
+  { csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues }: CSVOptions
 ) {
   const escapeValues = createEscapeValue(quoteValues, escapeFormulaValues);
   // Build the header row by its names

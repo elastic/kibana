@@ -17,6 +17,7 @@ function getDefaultOptions() {
     csvSeparator: ',',
     quoteValues: true,
     formatFactory,
+    escapeFormulaValues: false,
   };
 }
 
