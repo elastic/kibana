@@ -289,6 +289,7 @@ describe('AddSourceLogic', () => {
     describe('saveSourceParams', () => {
       const params = {
         code: 'code123',
+        session_state: 'session_state123',
         state:
           '{"action":"create","context":"organization","service_type":"gmail","csrf_token":"token==","index_permissions":false}',
       };
@@ -306,7 +307,7 @@ describe('AddSourceLogic', () => {
         const setAddedSourceSpy = jest.spyOn(SourcesLogic.actions, 'setAddedSource');
         const { serviceName, indexPermissions, serviceType } = response;
         http.get.mockReturnValue(Promise.resolve(response));
-        AddSourceLogic.actions.saveSourceParams(queryString);
+        AddSourceLogic.actions.saveSourceParams(queryString, params, true);
         expect(http.get).toHaveBeenCalledWith('/api/workplace_search/sources/create', {
           query: {
             ...params,
@@ -324,7 +325,7 @@ describe('AddSourceLogic', () => {
         const accountQueryString =
           '?state=%7B%22action%22:%22create%22,%22context%22:%22account%22,%22service_type%22:%22gmail%22,%22csrf_token%22:%22token%3D%3D%22,%22index_permissions%22:false%7D&code=code';
 
-        AddSourceLogic.actions.saveSourceParams(accountQueryString);
+        AddSourceLogic.actions.saveSourceParams(accountQueryString, params, false);
 
         await nextTick();
 
@@ -345,7 +346,7 @@ describe('AddSourceLogic', () => {
             preContentSourceId,
           })
         );
-        AddSourceLogic.actions.saveSourceParams(queryString);
+        AddSourceLogic.actions.saveSourceParams(queryString, params, true);
         expect(http.get).toHaveBeenCalledWith('/api/workplace_search/sources/create', {
           query: {
             ...params,
@@ -389,7 +390,7 @@ describe('AddSourceLogic', () => {
       it('handles error', async () => {
         http.get.mockReturnValue(Promise.reject('this is an error'));
 
-        AddSourceLogic.actions.saveSourceParams(queryString);
+        AddSourceLogic.actions.saveSourceParams(queryString, params, true);
         await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
