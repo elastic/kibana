@@ -1953,13 +1953,13 @@
         "type": "http",
         "scheme": "basic"
       },
-      "Enrollment API Key": {
+      "Enrollment_API_Key": {
         "name": "Authorization",
         "type": "apiKey",
         "in": "header",
         "description": "e.g. Authorization: ApiKey base64EnrollmentApiKey"
       },
-      "Access API Key": {
+      "Access_API_Key": {
         "name": "Authorization",
         "type": "apiKey",
         "in": "header",

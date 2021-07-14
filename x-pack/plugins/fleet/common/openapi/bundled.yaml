@@ -136,7 +136,7 @@ paths:
                 type: object
                 properties:
                   item:
-                    $ref: '#/paths/~1agent_policies/post/responses/200/content/application~1json/schema/properties/item'
+                    $ref: ./components/schemas/agent_policy.yaml
                 required:
                   - item
       operationId: agent-policy-info
@@ -1233,12 +1233,12 @@ components:
     basicAuth:
       type: http
       scheme: basic
-    Enrollment API Key:
+    Enrollment_API_Key:
       name: Authorization
       type: apiKey
       in: header
       description: 'e.g. Authorization: ApiKey base64EnrollmentApiKey'
-    Access API Key:
+    Access_API_Key:
       name: Authorization
       type: apiKey
       in: header
