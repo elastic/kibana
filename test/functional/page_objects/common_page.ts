@@ -202,7 +202,13 @@ export class CommonPageObject extends FtrService {
 
   async navigateToApp(
     appName: string,
-    { basePath = '', shouldLoginIfPrompted = true, hash = '', insertTimestamp = true } = {}
+    {
+      basePath = '',
+      shouldLoginIfPrompted = true,
+      hash = '',
+      search = '',
+      insertTimestamp = true,
+    } = {}
   ) {
     let appUrl: string;
     if (this.config.has(['apps', appName])) {
@@ -211,11 +217,13 @@ export class CommonPageObject extends FtrService {
       appUrl = getUrl.noAuth(this.config.get('servers.kibana'), {
         pathname: `${basePath}${appConfig.pathname}`,
         hash: hash || appConfig.hash,
+        search,
       });
     } else {
       appUrl = getUrl.noAuth(this.config.get('servers.kibana'), {
         pathname: `${basePath}/app/${appName}`,
         hash,
+        search,
       });
     }
 

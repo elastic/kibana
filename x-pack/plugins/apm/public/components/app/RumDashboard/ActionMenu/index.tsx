@@ -68,6 +68,7 @@ export function UXActionMenu({
       <EuiHeaderLinks gutterSize="xs">
         <EuiToolTip position="top" content={<p>{ANALYZE_MESSAGE}</p>}>
           <EuiHeaderLink
+            data-test-subj="uxAnalyzeBtn"
             color="text"
             href={uxExploratoryViewLink}
             iconType="visBarVerticalStacked"

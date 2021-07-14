@@ -25,6 +25,7 @@ interface UrlParam {
 interface App {
   pathname?: string;
   hash?: string;
+  search?: string;
 }
 
 /**
