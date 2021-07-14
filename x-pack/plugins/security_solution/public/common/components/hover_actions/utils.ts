@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { BrowserField } from '../../containers/source';
+
 export const getAdditionalScreenReaderOnlyContext = ({
   field,
   value,
