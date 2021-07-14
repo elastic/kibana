@@ -25,7 +25,7 @@ export function ToolBarPagerButtons(props: Props) {
           display="base"
           iconType="arrowLeft"
           iconSize="m"
-          size="s"
+          size="xs"
           onClick={() => props.onPagePrevious()}
           isDisabled={!props.hasPreviousPage}
           data-test-subj="btnPrevPage"
