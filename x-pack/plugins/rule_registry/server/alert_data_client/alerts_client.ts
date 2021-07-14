@@ -6,7 +6,6 @@
  */
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
-import { get } from 'lodash/fp';
 
 import { AlertTypeParams } from '../../../alerting/server';
 import {
