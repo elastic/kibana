@@ -13,7 +13,6 @@ import {
 } from '@elastic/eui';
 import React, { PropsWithChildren, ReactNode } from 'react';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
-import { useTrackPageview } from '../../../../../observability/public';
 import {
   invalidLicenseMessage,
   SERVICE_MAP_TIMEOUT_ERROR,
@@ -105,9 +104,6 @@ export function ServiceMap({
   // Temporary hack to work around bottom padding introduced by EuiPage
   const PADDING_BOTTOM = 24;
   const heightWithPadding = height - PADDING_BOTTOM;
-
-  useTrackPageview({ app: 'apm', path: 'service_map' });
-  useTrackPageview({ app: 'apm', path: 'service_map', delay: 15000 });
 
   if (!license) {
     return null;

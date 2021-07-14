@@ -12,6 +12,8 @@ export const KIBANA_USER_QUERY_LANGUAGE_KEY = 'kibana.userQueryLanguage';
 /** @public **/
 export const INDEX_PATTERN_SAVED_OBJECT_TYPE = 'index-pattern';
 
+export type ValueSuggestionsMethod = 'terms_enum' | 'terms_agg';
+
 export const UI_SETTINGS = {
   META_FIELDS: 'metaFields',
   DOC_HIGHLIGHT: 'doc_table:highlight',
