@@ -29,7 +29,9 @@ import { endpointListReducer } from './reducer';
 import { endpointMiddlewareFactory } from './middleware';
 import { getEndpointListPath, getEndpointDetailsPath } from '../../../common/routing';
 import {
+  createUninitialisedResourceState,
   createLoadedResourceState,
+  createLoadingResourceState,
   FailedResourceState,
   isFailedResourceState,
   isLoadedResourceState,
@@ -245,7 +247,6 @@ describe('endpoint list middleware', () => {
     });
     const getMockEndpointActivityLog = () =>
       ({
-        total: 2,
         page: 1,
         pageSize: 50,
         data: [
@@ -265,7 +266,15 @@ describe('endpoint list middleware', () => {
           },
         ],
       } as ActivityLog);
-    const dispatchGetActivityLog = () => {
+
+    const dispatchGetActivityLogLoading = () => {
+      dispatch({
+        type: 'endpointDetailsActivityLogChanged',
+        // @ts-ignore
+        payload: createLoadingResourceState({ previousState: createUninitialisedResourceState() }),
+      });
+    };
+    const dispatchGetActivityLogLoaded = () => {
       dispatch({
         type: 'endpointDetailsActivityLogChanged',
         payload: createLoadedResourceState(getMockEndpointActivityLog()),
@@ -281,6 +290,7 @@ describe('endpoint list middleware', () => {
           return isLoadingResourceState(action.payload);
         },
       });
+      dispatchGetActivityLogLoading();
 
       const loadingDispatchedResponse = await loadingDispatched;
       expect(loadingDispatchedResponse.payload.type).toEqual('LoadingResourceState');
@@ -295,7 +305,7 @@ describe('endpoint list middleware', () => {
         },
       });
 
-      dispatchGetActivityLog();
+      dispatchGetActivityLogLoaded();
       const loadedDispatchedResponse = await loadedDispatched;
       const activityLogData = (loadedDispatchedResponse.payload as LoadedResourceState<ActivityLog>)
         .data;
