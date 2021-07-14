@@ -47,6 +47,11 @@ interface AutocompleteFieldMatchProps {
   onError?: (arg: boolean) => void;
 }
 
+/**
+ * There is a copy of this within:
+ * x-pack/plugins/security_solution/public/common/components/autocomplete/field_value_match.tsx
+ * TODO: This should be in its own packaged and not copied, https://github.com/elastic/kibana/issues/105378
+ */
 export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchProps> = ({
   placeholder,
   rowLabel,
