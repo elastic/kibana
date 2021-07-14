@@ -18,7 +18,7 @@ interface ContextValue {
 
 const InternalApiClientContext = createContext<undefined | ContextValue>(undefined);
 
-export const InternalApiClientClientProvider: FunctionComponent<{
+export const InternalApiClientProvider: FunctionComponent<{
   http: HttpSetup;
   apiClient: ReportingAPIClient;
 }> = ({ http, apiClient, children }) => {

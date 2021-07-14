@@ -11,7 +11,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Observable } from 'rxjs';
 import { CoreSetup, CoreStart } from 'src/core/public';
 import { ILicense } from '../../../licensing/public';
-import { ReportingAPIClient, InternalApiClientClientProvider } from '../lib/reporting_api_client';
+import { ReportingAPIClient, InternalApiClientProvider } from '../lib/reporting_api_client';
 import { IlmPolicyStatusContextProvider } from '../lib/ilm_policy_status_context';
 import { ClientConfigType } from '../plugin';
 import type { ManagementAppMountParams, SharePluginSetup } from '../shared_imports';
@@ -28,7 +28,7 @@ export async function mountManagementSection(
 ) {
   render(
     <I18nProvider>
-      <InternalApiClientClientProvider http={coreSetup.http} apiClient={apiClient}>
+      <InternalApiClientProvider http={coreSetup.http} apiClient={apiClient}>
         <IlmPolicyStatusContextProvider>
           <ReportListing
             toasts={coreSetup.notifications.toasts}
@@ -39,7 +39,7 @@ export async function mountManagementSection(
             urlService={urlService}
           />
         </IlmPolicyStatusContextProvider>
-      </InternalApiClientClientProvider>
+      </InternalApiClientProvider>
     </I18nProvider>,
     params.element
   );

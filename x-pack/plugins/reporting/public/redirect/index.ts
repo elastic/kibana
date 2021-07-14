@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-export * from './reporting_api_client';
-
-export * from './hooks';
-
-export { InternalApiClientProvider, useInternalApiClient } from './context';
+export { mountRedirectApp } from './mount_redirect_app';

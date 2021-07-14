@@ -21,7 +21,7 @@ import type { ILicense } from '../../../licensing/public';
 
 import { IlmPolicyMigrationStatus } from '../../common/types';
 
-import { ReportingAPIClient, InternalApiClientClientProvider } from '../lib/reporting_api_client';
+import { ReportingAPIClient, InternalApiClientProvider } from '../lib/reporting_api_client';
 import { IlmPolicyStatusContextProvider } from '../lib/ilm_policy_status_context';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
@@ -82,7 +82,7 @@ describe('ReportListing', () => {
 
   const createTestBed = registerTestBed(
     (props?: Partial<Props>) => (
-      <InternalApiClientClientProvider
+      <InternalApiClientProvider
         apiClient={reportingAPIClient as ReportingAPIClient}
         http={httpService}
       >
@@ -97,7 +97,7 @@ describe('ReportListing', () => {
             {...props}
           />
         </IlmPolicyStatusContextProvider>
-      </InternalApiClientClientProvider>
+      </InternalApiClientProvider>
     ),
     { memoryRouter: { wrapComponent: false } }
   );

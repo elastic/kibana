@@ -34,6 +34,7 @@ import { ReportingCsvPanelAction } from './panel_actions/get_csv_panel_action';
 import { getSharedComponents } from './shared';
 import { ReportingCsvShareProvider } from './share_context_menu/register_csv_reporting';
 import { reportingScreenshotShareProvider } from './share_context_menu/register_pdf_png_reporting';
+import { isRedirectAppPath } from './utils';
 
 import type {
   SharePluginSetup,
@@ -153,6 +154,10 @@ export class ReportingPublicPlugin
       title: this.title,
       order: 1,
       mount: async (params) => {
+        if (isRedirectAppPath(params.history.location.pathname)) {
+          const { mountRedirectApp } = await import('./redirect');
+          return mountRedirectApp({ ...params, share, apiClient });
+        }
         params.setBreadcrumbs([{ text: this.breadcrumbText }]);
         const [[start], { mountManagementSection }] = await Promise.all([
           getStartServices(),
