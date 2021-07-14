@@ -10,6 +10,7 @@ import { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { ListSchema, Type } from '@kbn/securitysolution-io-ts-list-types';
 import {
   EXCEPTION_OPERATORS,
+  OperatorOption,
   doesNotExistOperator,
   existsOperator,
   isNotOperator,
@@ -18,7 +19,7 @@ import {
 
 import { IFieldType } from '../../../../../../../src/plugins/data/common';
 
-import { GetGenericComboBoxPropsReturn, OperatorOption } from './types';
+import { GetGenericComboBoxPropsReturn } from './types';
 import * as i18n from './translations';
 
 /**
@@ -72,6 +73,10 @@ export const checkEmptyValue = (
 
 /**
  * Very basic validation for values
+ * There is a copy within:
+ * x-pack/plugins/security_solution/public/common/components/autocomplete/helpers.ts
+ *
+ * TODO: This should be in its own packaged and not copied, https://github.com/elastic/kibana/issues/105378
  *
  * @param param the value being checked
  * @param field the selected field
@@ -109,7 +114,10 @@ export const paramIsValid = (
 
 /**
  * Determines the options, selected values and option labels for EUI combo box
+ * There is a copy within:
+ * x-pack/plugins/security_solution/public/common/components/autocomplete/helpers.ts
  *
+ * TODO: This should be in its own packaged and not copied, https://github.com/elastic/kibana/issues/105378
  * @param options options user can select from
  * @param selectedOptions user selection if any
  * @param getLabel helper function to know which property to use for labels
