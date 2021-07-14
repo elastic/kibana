@@ -18,7 +18,7 @@ import {
 import { ComparatorFns, getHumanReadableComparator } from '../lib';
 
 export const ID = '.index-threshold';
-const ActionGroupId = 'threshold met';
+export const ActionGroupId = 'threshold met';
 
 export function getAlertType(
   logger: Logger,
