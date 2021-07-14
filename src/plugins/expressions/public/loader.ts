@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
-import { filter, map, delay } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subject, Subscription, asyncScheduler, identity } from 'rxjs';
+import { filter, map, delay, throttleTime } from 'rxjs/operators';
 import { defaults } from 'lodash';
 import { UnwrapObservable } from '@kbn/utility-types';
 import { Adapters } from '../../inspector/public';
@@ -145,7 +145,10 @@ export class ExpressionLoader {
       .getData()
       .pipe(
         delay(0), // delaying until the next tick since we execute the expression in the constructor
-        filter(({ partial }) => params.partial || !partial)
+        filter(({ partial }) => params.partial || !partial),
+        params.partial && params.throttle
+          ? throttleTime(params.throttle, asyncScheduler, { leading: true, trailing: true })
+          : identity
       )
       .subscribe((value) => this.dataSubject.next(value));
   };
@@ -178,6 +181,7 @@ export class ExpressionLoader {
     this.params.syncColors = params.syncColors;
     this.params.debug = Boolean(params.debug);
     this.params.partial = Boolean(params.partial);
+    this.params.throttle = Number(params.throttle);
 
     this.params.inspectorAdapters = (params.inspectorAdapters ||
       this.execution?.inspect()) as Adapters;
