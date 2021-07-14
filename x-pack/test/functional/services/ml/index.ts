@@ -93,7 +93,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     dataVisualizerTable
   );
 
-  const jobAnnotation = MachineLearningJobAnnotationsProvider(context);
+  const jobAnnotations = MachineLearningJobAnnotationsProvider(context);
   const jobManagement = MachineLearningJobManagementProvider(context, api);
   const jobSelection = MachineLearningJobSelectionProvider(context);
   const jobSourceSelection = MachineLearningJobSourceSelectionProvider(context);
@@ -140,7 +140,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     dataVisualizerIndexBased,
     dataVisualizerIndexPatternManagement,
     dataVisualizerTable,
-    jobAnnotation,
+    jobAnnotations,
     jobManagement,
     jobSelection,
     jobSourceSelection,

@@ -155,7 +155,7 @@ export function MachineLearningJobTableProvider(
       });
     }
 
-    public async expandAnnotationsTab<T>(jobId: string) {
+    public async openAnnotationsTab<T>(jobId: string) {
       await retry.tryForTime(10000, async () => {
         await this.ensureDetailsOpen(jobId);
         await testSubjects.click(this.detailsSelector(jobId, 'mlJobListTab-annotations'));

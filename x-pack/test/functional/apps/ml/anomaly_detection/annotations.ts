@@ -73,7 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.api.cleanMlIndices();
     });
 
-    describe('creation', function () {
+    describe('creating', function () {
       const newText = 'Created annotation text';
 
       it('creates annotation', async () => {
@@ -95,9 +95,31 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.singleMetricViewer.assertDetectorInputValue('0');
         await ml.singleMetricViewer.assertAnnotationsExists('loaded');
 
-        await ml.jobAnnotation.createAnnotation(newText);
-        await ml.jobAnnotation.ensureSingleMetricViewerAnnotationsPanelOpen();
-        await ml.jobAnnotation.assertAnnotationExists({
+        await ml.jobAnnotations.createAnnotation(newText);
+        await ml.jobAnnotations.ensureSingleMetricViewerAnnotationsPanelOpen();
+        await ml.jobAnnotations.assertAnnotationExists({
+          annotation: newText,
+          event: 'user',
+        });
+      });
+
+      it('displays newly created annotation in anomaly explorer and job list', async () => {
+        await ml.testExecution.logTestStep('should display created annotation in anomaly explorer');
+        await ml.navigation.navigateToAnomalyExplorerViaSingleMetricViewer();
+        await ml.anomalyExplorer.assertAnnotationsPanelExists('loaded');
+
+        await ml.jobAnnotations.ensureAnomalyExplorerAnnotationsPanelOpen();
+        await ml.jobAnnotations.assertAnnotationExists({
+          annotation: newText,
+          event: 'user',
+        });
+
+        await ml.testExecution.logTestStep('should display created annotation in job list');
+        await ml.navigation.navigateToJobManagement();
+        await ml.jobTable.waitForJobsToLoad();
+        await ml.jobTable.filterWithSearchString(JOB_CONFIG.job_id, 1);
+        await ml.jobTable.openAnnotationsTab(JOB_CONFIG.job_id);
+        await ml.jobAnnotations.assertAnnotationExists({
           annotation: newText,
           event: 'user',
         });
@@ -131,8 +153,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         await ml.jobTable.waitForJobsToLoad();
         await ml.jobTable.filterWithSearchString(JOB_CONFIG.job_id, 1);
-        await ml.jobTable.expandAnnotationsTab(JOB_CONFIG.job_id);
-        await ml.jobAnnotation.assertAnnotationContentById(
+        await ml.jobTable.openAnnotationsTab(JOB_CONFIG.job_id);
+        await ml.jobAnnotations.assertAnnotationContentById(
           annotationId,
           expectedOriginalAnnotation
         );
@@ -149,9 +171,9 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.singleMetricViewer.assertAnnotationsExists('loaded');
 
         await ml.testExecution.logTestStep('displays annotation content');
-        await ml.jobAnnotation.ensureSingleMetricViewerAnnotationsPanelOpen();
-        await ml.jobAnnotation.assertAnnotationsRowExists(annotationId);
-        await ml.jobAnnotation.assertAnnotationContentById(
+        await ml.jobAnnotations.ensureSingleMetricViewerAnnotationsPanelOpen();
+        await ml.jobAnnotations.assertAnnotationsRowExists(annotationId);
+        await ml.jobAnnotations.assertAnnotationContentById(
           annotationId,
           expectedOriginalAnnotation
         );
@@ -159,10 +181,10 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('edits the annotation', async () => {
         await ml.testExecution.logTestStep('opens edit annotation flyout');
-        await ml.jobAnnotation.clickAnnotationsEditAction(annotationId);
+        await ml.jobAnnotations.clickAnnotationsEditAction(annotationId);
 
         await ml.testExecution.logTestStep('displays annotation content');
-        await ml.jobAnnotation.assertAnnotationsEditFlyoutContent({
+        await ml.jobAnnotations.assertAnnotationsEditFlyoutContent({
           'Job ID': jobId,
           Start: 'February 10th 2016, 22:13:51',
           End: 'February 11th 2016, 14:24:49',
@@ -174,10 +196,10 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         await ml.testExecution.logTestStep('edits and saves new annotation text');
-        await ml.jobAnnotation.setAnnotationText(newText);
+        await ml.jobAnnotations.setAnnotationText(newText);
 
         await ml.testExecution.logTestStep('displays annotation with newly edited text');
-        await ml.jobAnnotation.assertAnnotationContentById(annotationId, expectedEditedAnnotation);
+        await ml.jobAnnotations.assertAnnotationContentById(annotationId, expectedEditedAnnotation);
       });
 
       it('displays newly edited annotation in anomaly explorer and job list', async () => {
@@ -185,15 +207,15 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.navigation.navigateToAnomalyExplorerViaSingleMetricViewer();
         await ml.anomalyExplorer.assertAnnotationsPanelExists('loaded');
 
-        await ml.jobAnnotation.ensureAnomalyExplorerAnnotationsPanelOpen();
-        await ml.jobAnnotation.assertAnnotationContentById(annotationId, expectedEditedAnnotation);
+        await ml.jobAnnotations.ensureAnomalyExplorerAnnotationsPanelOpen();
+        await ml.jobAnnotations.assertAnnotationContentById(annotationId, expectedEditedAnnotation);
 
         await ml.testExecution.logTestStep('should display edited annotation in job list');
         await ml.navigation.navigateToJobManagement();
         await ml.jobTable.waitForJobsToLoad();
         await ml.jobTable.filterWithSearchString(JOB_CONFIG.job_id, 1);
-        await ml.jobTable.expandAnnotationsTab(JOB_CONFIG.job_id);
-        await ml.jobAnnotation.assertAnnotationContentById(annotationId, expectedEditedAnnotation);
+        await ml.jobTable.openAnnotationsTab(JOB_CONFIG.job_id);
+        await ml.jobAnnotations.assertAnnotationContentById(annotationId, expectedEditedAnnotation);
       });
     });
 
@@ -224,9 +246,9 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.singleMetricViewer.assertAnnotationsExists('loaded');
 
         await ml.testExecution.logTestStep('displays annotation content');
-        await ml.jobAnnotation.ensureSingleMetricViewerAnnotationsPanelOpen();
-        await ml.jobAnnotation.assertAnnotationsRowExists(annotationId);
-        await ml.jobAnnotation.assertAnnotationContentById(annotationId, {
+        await ml.jobAnnotations.ensureSingleMetricViewerAnnotationsPanelOpen();
+        await ml.jobAnnotations.assertAnnotationsRowExists(annotationId);
+        await ml.jobAnnotations.assertAnnotationContentById(annotationId, {
           annotation: annotation.annotation,
           from: '2016-02-10 22:13:51',
           to: '2016-02-11 14:24:49',
@@ -238,8 +260,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('deletes the annotation', async () => {
         await ml.testExecution.logTestStep('opens edit annotation flyout');
-        await ml.jobAnnotation.deleteAnnotation(annotationId);
-        await ml.jobAnnotation.assertAnnotationsRowMissing(annotationId);
+        await ml.jobAnnotations.deleteAnnotation(annotationId);
+        await ml.jobAnnotations.assertAnnotationsRowMissing(annotationId);
       });
 
       it('does not display the deleted annotation in anomaly explorer and job list', async () => {
@@ -248,15 +270,15 @@ export default function ({ getService }: FtrProviderContext) {
         );
         await ml.navigation.navigateToAnomalyExplorerViaSingleMetricViewer();
         await ml.anomalyExplorer.assertAnnotationsPanelExists('loaded');
-        await ml.jobAnnotation.ensureAnomalyExplorerAnnotationsPanelOpen();
-        await ml.jobAnnotation.assertAnnotationsRowMissing(annotationId);
+        await ml.jobAnnotations.ensureAnomalyExplorerAnnotationsPanelOpen();
+        await ml.jobAnnotations.assertAnnotationsRowMissing(annotationId);
 
         await ml.testExecution.logTestStep('does not show the deleted annotation in job list');
         await ml.navigation.navigateToJobManagement();
         await ml.jobTable.waitForJobsToLoad();
         await ml.jobTable.filterWithSearchString(JOB_CONFIG.job_id, 1);
-        await ml.jobTable.expandAnnotationsTab(JOB_CONFIG.job_id);
-        await ml.jobAnnotation.assertAnnotationsRowMissing(annotationId);
+        await ml.jobTable.openAnnotationsTab(JOB_CONFIG.job_id);
+        await ml.jobAnnotations.assertAnnotationsRowMissing(annotationId);
       });
     });
 
