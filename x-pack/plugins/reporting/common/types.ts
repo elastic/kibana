@@ -110,7 +110,8 @@ export interface JobContent {
 }
 
 /* Info API response: report query results do not need to include the
- * payload.headers or output.content */
+ * payload.headers or output.content
+ */
 type ReportSimple = Omit<ReportSource, 'payload' | 'output'> & {
   payload: Omit<ReportSource['payload'], 'headers'>;
 } & {
