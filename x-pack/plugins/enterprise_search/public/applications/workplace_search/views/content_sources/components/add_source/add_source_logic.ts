@@ -16,14 +16,21 @@ import {
   flashAPIErrors,
   setSuccessMessage,
   clearFlashMessages,
+  setErrorMessage,
 } from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { parseQueryParams } from '../../../../../shared/query_params';
 import { AppLogic } from '../../../../app_logic';
 import { CUSTOM_SERVICE_TYPE, WORKPLACE_SEARCH_URL_PREFIX } from '../../../../constants';
-import { SOURCES_PATH, ADD_GITHUB_PATH, getSourcesPath } from '../../../../routes';
+import {
+  SOURCES_PATH,
+  ADD_GITHUB_PATH,
+  PERSONAL_SOURCES_PATH,
+  getSourcesPath,
+} from '../../../../routes';
 import { CustomSource } from '../../../../types';
+import { PERSONAL_DASHBOARD_SOURCE_ERROR } from '../../constants';
 import { staticSourceData } from '../../source_data';
 import { SourcesLogic } from '../../sources_logic';
 
@@ -50,6 +57,8 @@ export interface OauthParams {
   state: string;
   session_state: string;
   oauth_verifier?: string;
+  error?: string;
+  error_description?: string;
 }
 
 export interface AddSourceActions {
@@ -500,6 +509,22 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       const route = '/api/workplace_search/sources/create';
       const state = JSON.parse(params.state);
       const isOrganization = state.context !== 'account';
+
+      /**
+        There is an extreme edge case where the user is trying to connect Github as source from ent-search,
+        after configuring it in Kibana. When this happens, Github redirects the user from ent-search to Kibana
+        with special error properties in the query params. In this case we need to redirect the user to the
+        app home page and display the error message, and not persist the other query params to the server.
+      */
+      if (params.error_description) {
+        navigateToUrl(isOrganization ? '/' : PERSONAL_SOURCES_PATH);
+        setErrorMessage(
+          isOrganization
+            ? params.error_description
+            : PERSONAL_DASHBOARD_SOURCE_ERROR(params.error_description)
+        );
+        return;
+      }
 
       try {
         const response = await http.get(route, { query });

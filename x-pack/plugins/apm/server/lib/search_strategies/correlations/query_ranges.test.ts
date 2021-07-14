@@ -14,7 +14,7 @@ import {
   getTransactionDurationRangesRequest,
 } from './query_ranges';
 
-const params = { index: 'apm-*' };
+const params = { index: 'apm-*', start: '2020', end: '2021' };
 const rangeSteps = [1, 3, 5];
 
 describe('query_ranges', () => {
@@ -57,6 +57,15 @@ describe('query_ranges', () => {
                 {
                   term: {
                     'processor.event': 'transaction',
+                  },
+                },
+                {
+                  range: {
+                    '@timestamp': {
+                      format: 'epoch_millis',
+                      gte: 1577836800000,
+                      lte: 1609459200000,
+                    },
                   },
                 },
               ],

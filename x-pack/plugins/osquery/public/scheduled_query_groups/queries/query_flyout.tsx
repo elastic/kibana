@@ -71,10 +71,14 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
     [integrationPackageVersion]
   );
 
-  const { submit, setFieldValue } = form;
+  const { submit, setFieldValue, reset } = form;
 
   const handleSetQueryValue = useCallback(
     (savedQuery) => {
+      if (!savedQuery) {
+        return reset();
+      }
+
       setFieldValue('id', savedQuery.id);
       setFieldValue('query', savedQuery.query);
 
@@ -94,7 +98,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
         setFieldValue('version', [savedQuery.version]);
       }
     },
-    [isFieldSupported, setFieldValue]
+    [isFieldSupported, setFieldValue, reset]
   );
 
   return (
