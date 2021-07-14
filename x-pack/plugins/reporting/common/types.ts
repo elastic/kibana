@@ -55,32 +55,39 @@ export interface TaskRunResult {
 }
 
 export interface ReportSource {
-  jobtype: string;
-  created_by: string | false;
+  /*
+   * Required fields: populated in enqueue_job when the request comes in to
+   * generate the report
+   */
+  jobtype: string; // refers to `ExportTypeDefinition.jobType`
+  created_by: string | false; // username or `false` if security is disabled. Used for ensuring users can only access the reports they've created.
   payload: {
     headers: string; // encrypted headers
-    browserTimezone?: string; // may use timezone from advanced settings
-    objectType: string;
-    title: string;
-    layout?: LayoutParams;
-    isDeprecated?: boolean;
-  };
-  meta: { objectType: string; layout?: string };
-  migration_version: string;
+    isDeprecated?: boolean; // set to true when the export type is being phased out
+  } & BaseParams;
+  meta: { objectType: string; layout?: string }; // for telemetry
+  migration_version: string; // for reminding the user to update their POST URL
+  attempts: number; // initially populated as 0
+  created_at: string; // timestamp in UTC
   status: JobStatus;
-  attempts: number;
-  output: TaskRunResult | null;
-  created_at: string;
 
-  // fields with undefined values exist in report jobs that have not been claimed
-  kibana_name?: string;
-  kibana_id?: string;
-  browser_type?: string;
-  timeout?: number;
-  max_attempts?: number;
-  started_at?: string;
-  completed_at?: string;
-  process_expiration?: string | null; // must be set to null to clear the expiration
+  /*
+   * `output` is only populated if the report job is completed or failed.
+   */
+  output: TaskRunResult | null;
+
+  /*
+   * Optional fields: populated when the job is claimed to execute, and after
+   * execution has finished
+   */
+  kibana_name?: string; // for troubleshooting
+  kibana_id?: string; // for troubleshooting
+  browser_type?: string; // no longer used since chromium is the only option (used to allow phantomjs)
+  timeout?: number; // for troubleshooting: the actual comparison uses the config setting xpack.reporting.queue.timeout
+  max_attempts?: number; // for troubleshooting: the actual comparison uses the config setting xpack.reporting.capture.maxAttempts
+  started_at?: string; // timestamp in UTC
+  completed_at?: string; // timestamp in UTC
+  process_expiration?: string | null; // timestamp in UTC - is overwritten with `null` when the job needs a retry
 }
 
 /*
@@ -98,18 +105,27 @@ export interface BaseParams {
 }
 
 export type JobId = string;
+
+/*
+ * JobStatus:
+ *  - Begins as 'pending'
+ *  - Changes to 'processing` when the job is claimed
+ *  - Then 'completed' | 'failed' when execution is done
+ * If the job needs a retry, it reverts back to 'pending'.
+ */
 export type JobStatus =
-  | 'completed'
-  | 'completed_with_warnings'
-  | 'pending'
-  | 'processing'
-  | 'failed';
+  | 'completed' // Report was successful
+  | 'completed_with_warnings' // The download available for troubleshooting - it **should** show a meaningful error
+  | 'pending' // Report job is waiting to be claimed
+  | 'processing' // Report job has been claimed and is executing
+  | 'failed'; // Report was not successful, and all retries are done. Nothing to download.
 
 export interface JobContent {
   content: string;
 }
 
-/* Info API response: report query results do not need to include the
+/*
+ * Info API response: report query results do not need to include the
  * payload.headers or output.content
  */
 type ReportSimple = Omit<ReportSource, 'payload' | 'output'> & {
