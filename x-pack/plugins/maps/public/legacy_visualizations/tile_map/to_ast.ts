@@ -10,37 +10,9 @@ import { buildExpression, buildExpressionFunction } from '../../../../../../src/
 import { VisToExpressionAst } from '../../../../../../src/plugins/visualizations/public';
 import { TileMapExpressionFunctionDefinition } from './tile_map_fn';
 import { TileMapVisParams } from './types';
+import { extractLayerDescriptorParams } from './utils';
 
 export const toExpressionAst: VisToExpressionAst<TileMapVisParams> = (vis) => {
-  const params: { [key: string]: any } = {
-    label: vis.title ? vis.title : title,
-    mapType: vis.params.mapType,
-    colorSchema: vis.params.colorSchema,
-    indexPatternId: vis.data.indexPattern?.id,
-    metricAgg: 'count',
-  };
-
-  const bucketAggs = vis.data?.aggs?.byType('buckets');
-  if (bucketAggs?.length && bucketAggs[0].type.dslName === 'geohash_grid') {
-    params.geoFieldName = bucketAggs[0].getField()?.name;
-  } else if (vis.data.indexPattern) {
-    // attempt to default to first geo point field when geohash is not configured yet
-    const geoField = vis.data.indexPattern.fields.find((field) => {
-      return (
-        !indexPatterns.isNestedField(field) && field.aggregatable && field.type === 'geo_point'
-      );
-    });
-    if (geoField) {
-      params.geoFieldName = geoField.name;
-    }
-  }
-
-  const metricAggs = vis.data?.aggs?.byType('metrics');
-  if (metricAggs?.length) {
-    params.metricAgg = metricAggs[0].type.dslName;
-    params.metricFieldName = metricAggs[0].getField()?.name;
-  }
-
   const tileMap = buildExpressionFunction<TileMapExpressionFunctionDefinition>(
     'tilemap',
     {
@@ -48,7 +20,7 @@ export const toExpressionAst: VisToExpressionAst<TileMapVisParams> = (vis) => {
         ...vis.params,
         mapCenter: vis.uiState.get('mapCenter', [0, 0]),
         mapZoom: parseInt(vis.uiState.get('mapZoom', 2), 10),
-        layerDescriptorParams: params,
+        layerDescriptorParams: extractLayerDescriptorParams(vis),
       }),
     }
   );

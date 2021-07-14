@@ -7,8 +7,10 @@
 
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
+import { Vis } from '../../../../../../src/plugins/visualizations/public';
+import { getData, getShareService } from '../../kibana_services';
 import { ViewInMaps } from '../view_in_maps';
-import { COORDINATE_MAP_TITLE } from './utils';
+import { COORDINATE_MAP_TITLE, extractLayerDescriptorParams } from './utils';
 
 interface Props {
   vis: Vis;
@@ -30,7 +32,23 @@ export class TileMapEditor extends Component<{}, State> {
     this._isMounted = false;
   }
 
+  _onClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+
+    const locator = getShareService().url.locators.get('MAPS_APP_TILE_MAP_LOCATOR');
+    if (!locator) return;
+
+    const query = getData().query;
+    locator.navigate({
+      ...(extractLayerDescriptorParams(this.props.vis)),
+      filters: query.filterManager.getFilters(),
+      query: query.queryString.getQuery(),
+      timeRange: query.timefilter.timefilter.getTime(),
+    });
+
+  }
+
   render() {
-    return <ViewInMaps onClick={() => {}} visualizationLabel={COORDINATE_MAP_TITLE} />;
+    return <ViewInMaps onClick={this._onClick} visualizationLabel={COORDINATE_MAP_TITLE} />;
   }
 }

@@ -6,7 +6,41 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { Vis } from '../../../../../../src/plugins/visualizations/public';
 
 export const COORDINATE_MAP_TITLE = i18n.translate('xpack.maps.legacyVisualizations.tileMapTitle', {
   defaultMessage: 'Coordinate Map',
 });
+
+export function extractLayerDescriptorParams(vis: Vis) {
+  const params: { [key: string]: any } = {
+    label: vis.title ? vis.title : COORDINATE_MAP_TITLE,
+    mapType: vis.params.mapType,
+    colorSchema: vis.params.colorSchema,
+    indexPatternId: vis.data.indexPattern?.id,
+    metricAgg: 'count',
+  };
+
+  const bucketAggs = vis.data?.aggs?.byType('buckets');
+  if (bucketAggs?.length && bucketAggs[0].type.dslName === 'geohash_grid') {
+    params.geoFieldName = bucketAggs[0].getField()?.name;
+  } else if (vis.data.indexPattern) {
+    // attempt to default to first geo point field when geohash is not configured yet
+    const geoField = vis.data.indexPattern.fields.find((field) => {
+      return (
+        !indexPatterns.isNestedField(field) && field.aggregatable && field.type === 'geo_point'
+      );
+    });
+    if (geoField) {
+      params.geoFieldName = geoField.name;
+    }
+  }
+
+  const metricAggs = vis.data?.aggs?.byType('metrics');
+  if (metricAggs?.length) {
+    params.metricAgg = metricAggs[0].type.dslName;
+    params.metricFieldName = metricAggs[0].getField()?.name;
+  }
+
+  return params;
+}
