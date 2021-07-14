@@ -114,6 +114,9 @@ Object {
             "chain": Array [
               Object {
                 "arguments": Object {
+                  "floatingColumns": Array [],
+                  "horizontalAlignment": Array [],
+                  "isInside": Array [],
                   "isVisible": Array [
                     true,
                   ],
@@ -121,6 +124,7 @@ Object {
                     "bottom",
                   ],
                   "showSingleSeries": Array [],
+                  "verticalAlignment": Array [],
                 },
                 "function": "lens_xy_legendConfig",
                 "type": "function",
