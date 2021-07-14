@@ -14,7 +14,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useTrackPageview } from '../../../../../observability/public';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group_distribution_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
@@ -59,12 +58,6 @@ export function ErrorGroupOverview({ serviceName }: ErrorGroupOverviewProps) {
     },
     [environment, kuery, serviceName, start, end, sortField, sortDirection]
   );
-
-  useTrackPageview({
-    app: 'apm',
-    path: 'error_group_overview',
-  });
-  useTrackPageview({ app: 'apm', path: 'error_group_overview', delay: 15000 });
 
   if (!errorDistributionData || !errorGroupListData) {
     return null;

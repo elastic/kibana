@@ -104,16 +104,7 @@ export function Correlations() {
         width: '20%',
       });
     }
-    if (urlParams.transactionName) {
-      properties.push({
-        label: i18n.translate('xpack.apm.correlations.transactionLabel', {
-          defaultMessage: 'Transaction',
-        }),
-        fieldName: TRANSACTION_NAME,
-        val: urlParams.transactionName,
-        width: '20%',
-      });
-    }
+
     if (urlParams.environment) {
       properties.push({
         label: i18n.translate('xpack.apm.correlations.environmentLabel', {
@@ -121,6 +112,17 @@ export function Correlations() {
         }),
         fieldName: SERVICE_ENVIRONMENT,
         val: getEnvironmentLabel(urlParams.environment),
+        width: '20%',
+      });
+    }
+
+    if (urlParams.transactionName) {
+      properties.push({
+        label: i18n.translate('xpack.apm.correlations.transactionLabel', {
+          defaultMessage: 'Transaction',
+        }),
+        fieldName: TRANSACTION_NAME,
+        val: urlParams.transactionName,
         width: '20%',
       });
     }
