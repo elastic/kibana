@@ -11,19 +11,19 @@ import { Vis } from '../../../../../../src/plugins/visualizations/public';
 import { getData, getShareService } from '../../kibana_services';
 import { ViewInMaps } from '../view_in_maps';
 import { extractLayerDescriptorParams } from './utils';
-import { TileMapVisParams } from './types';
-import { title } from './tile_map_vis_type';
+import { RegionMapVisParams } from './types';
+import { title } from './region_map_vis_type';
 
-export function TileMapEditor(props: VisEditorOptionsProps) {
+export function RegionMapEditor(props: VisEditorOptionsProps) {
   const onClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
-    const locator = getShareService().url.locators.get('MAPS_APP_TILE_MAP_LOCATOR');
+    const locator = getShareService().url.locators.get('MAPS_APP_REGION_MAP_LOCATOR');
     if (!locator) return;
 
     const query = getData().query;
     locator.navigate({
-      ...extractLayerDescriptorParams((props.vis as unknown) as Vis<TileMapVisParams>),
+      ...extractLayerDescriptorParams((props.vis as unknown) as Vis<RegionMapVisParams>),
       filters: query.filterManager.getFilters(),
       query: query.queryString.getQuery(),
       timeRange: query.timefilter.timefilter.getTime(),

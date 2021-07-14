@@ -16,6 +16,7 @@ import { LayerWizard } from '../classes/layers/layer_wizard_registry';
 import type { CreateLayerDescriptorParams } from '../classes/sources/es_search_source';
 import type { EMSTermJoinConfig, SampleValuesConfig } from '../ems_autosuggest';
 import type { CreateTileMapLayerDescriptorParams } from '../classes/layers/create_tile_map_layer_descriptor';
+import type { CreateRegionMapLayerDescriptorParams } from '../classes/layers/create_region_map_layer_descriptor';
 
 let loadModulesPromise: Promise<LazyLoadedMapModules>;
 
@@ -54,18 +55,7 @@ interface LazyLoadedMapModules {
     indexPatternTitle,
     metricAgg,
     metricFieldName,
-  }: {
-    label: string;
-    emsLayerId?: string;
-    leftFieldName?: string;
-    termsFieldName?: string;
-    termsSize?: number;
-    colorSchema: string;
-    indexPatternId?: string;
-    indexPatternTitle?: string;
-    metricAgg: string;
-    metricFieldName?: string;
-  }) => LayerDescriptor | null;
+  }: CreateRegionMapLayerDescriptorParams) => LayerDescriptor | null;
   createBasemapLayerDescriptor: () => LayerDescriptor | null;
   createESSearchSourceLayerDescriptor: (params: CreateLayerDescriptorParams) => LayerDescriptor;
   suggestEMSTermJoinConfig: (config: SampleValuesConfig) => Promise<EMSTermJoinConfig | null>;

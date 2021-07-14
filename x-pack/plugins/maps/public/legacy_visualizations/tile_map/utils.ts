@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { Vis } from '../../../../../../src/plugins/visualizations/public';
 import { indexPatterns } from '../../../../../../src/plugins/data/public';
 import { TileMapVisParams } from './types';
-
-export const COORDINATE_MAP_TITLE = i18n.translate('xpack.maps.legacyVisualizations.tileMapTitle', {
-  defaultMessage: 'Coordinate Map',
-});
+import { title } from './tile_map_vis_type';
 
 export function extractLayerDescriptorParams(vis: Vis<TileMapVisParams>) {
   const params: { [key: string]: any } = {
-    label: vis.title ? vis.title : COORDINATE_MAP_TITLE,
+    label: vis.title ? vis.title : title,
     mapType: vis.params.mapType,
     colorSchema: vis.params.colorSchema,
     indexPatternId: vis.data.indexPattern?.id,

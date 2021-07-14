@@ -72,7 +72,7 @@ import {
   MapsAppRegionMapLocatorDefinition,
   MapsAppTileMapLocatorDefinition,
 } from './locators';
-import { createTileMapFn, tileMapRenderer, tileMapVisType } from './legacy_visualizations';
+import { createRegionMapFn, regionMapRenderer, regionMapVisType, createTileMapFn, tileMapRenderer, tileMapVisType } from './legacy_visualizations';
 
 export interface MapsPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
@@ -175,6 +175,9 @@ export class MapsPlugin
     });
 
     // register wrapper around legacy tile_map and region_map visualizations
+    plugins.expressions.registerFunction(createRegionMapFn);
+    plugins.expressions.registerRenderer(regionMapRenderer);
+    plugins.visualizations.createBaseVisualization(regionMapVisType);
     plugins.expressions.registerFunction(createTileMapFn);
     plugins.expressions.registerRenderer(tileMapRenderer);
     plugins.visualizations.createBaseVisualization(tileMapVisType);

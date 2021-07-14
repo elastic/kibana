@@ -8,37 +8,37 @@
 import { i18n } from '@kbn/i18n';
 import { VisTypeDefinition } from '../../../../../../src/plugins/visualizations/public';
 import { toExpressionAst } from './to_ast';
-import { MapTypes, TileMapVisParams } from './types';
-import { TileMapEditor } from './tile_map_editor';
+import { RegionMapVisParams } from './types';
+import { RegionMapEditor } from './region_map_editor';
 
-export const title = i18n.translate('xpack.maps.tileMap.vis.title', {
-  defaultMessage: 'Coordinate Map',
+export const title = i18n.translate('xpack.maps.regionMapMap.vis.title', {
+  defaultMessage: 'Region Map',
 });
 
-export const tileMapVisType = {
-  name: 'tile_map',
+export const regionMapVisType = {
+  name: 'region_map',
   title,
-  icon: 'visMapCoordinate',
-  description: i18n.translate('xpack.maps.tileMap.vis.description', {
-    defaultMessage: 'Plot latitude and longitude coordinates on a map',
+  icon: 'visMapRegion',
+  description: i18n.translate('xpack.maps.regionMap.vis.description', {
+    defaultMessage: 'Show metrics on a thematic map. Use one of the \
+provided base maps, or add your own. Darker colors represent higher values.',
   }),
   editorConfig: {
     optionTabs: [
       {
         name: '',
         title: '',
-        editor: TileMapEditor,
+        editor: RegionMapEditor,
       },
     ],
   },
   visConfig: {
     defaults: {
       colorSchema: 'Yellow to Red',
-      mapType: MapTypes.ScaledCircleMarkers,
       mapZoom: 2,
       mapCenter: [0, 0],
     },
   },
   toExpressionAst,
   requiresSearch: true,
-} as VisTypeDefinition<TileMapVisParams>;
+} as VisTypeDefinition<RegionMapVisParams>;
