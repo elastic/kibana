@@ -30,7 +30,7 @@ const LensChartTooltipFix = createGlobalStyle`
 interface LensMarkDownRendererProps {
   attributes: TypedLensByValueInput['attributes'] | null;
   id?: string | null;
-  title?: string | null;
+  timeRange?: TypedLensByValueInput['timeRange'];
   startDate?: string | null;
   endDate?: string | null;
   viewMode?: boolean | undefined;
@@ -38,9 +38,7 @@ interface LensMarkDownRendererProps {
 
 const LensMarkDownRendererComponent: React.FC<LensMarkDownRendererProps> = ({
   attributes,
-  title,
-  startDate,
-  endDate,
+  timeRange,
   viewMode = true,
 }) => {
   const location = useLocation();
@@ -64,11 +62,7 @@ const LensMarkDownRendererComponent: React.FC<LensMarkDownRendererProps> = ({
       navigateToPrefilledEditor(
         {
           id: '',
-          timeRange: {
-            from: startDate ?? 'now-7d',
-            to: endDate ?? 'now',
-            mode: startDate ? 'absolute' : 'relative',
-          },
+          timeRange,
           attributes,
         },
         options
@@ -77,11 +71,10 @@ const LensMarkDownRendererComponent: React.FC<LensMarkDownRendererProps> = ({
   }, [
     attributes,
     currentAppId,
-    endDate,
     location.pathname,
     location.search,
     navigateToPrefilledEditor,
-    startDate,
+    timeRange,
     viewMode,
   ]);
 
@@ -100,15 +93,15 @@ const LensMarkDownRendererComponent: React.FC<LensMarkDownRendererProps> = ({
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiText>
-                <h5>{title}</h5>
+                <h5>{attributes.title}</h5>
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {viewMode ? (
+              {viewMode && canUseEditor() ? (
                 <EuiButton
                   iconType="lensApp"
                   fullWidth={false}
-                  isDisabled={!canUseEditor() || !attributes}
+                  isDisabled={!canUseEditor()}
                   onClick={handleClick}
                 >
                   {`Open visualization`}
@@ -119,18 +112,13 @@ const LensMarkDownRendererComponent: React.FC<LensMarkDownRendererProps> = ({
 
           <EuiSpacer size="xs" />
 
-          {attributes ? (
-            <EmbeddableComponent
-              id=""
-              style={{ height: LENS_VISUALIZATION_HEIGHT }}
-              timeRange={{
-                from: startDate ?? 'now-7d',
-                to: endDate ?? 'now',
-                mode: startDate ? 'absolute' : 'relative',
-              }}
-              attributes={attributes}
-            />
-          ) : null}
+          <EmbeddableComponent
+            id=""
+            style={{ height: LENS_VISUALIZATION_HEIGHT }}
+            timeRange={timeRange}
+            attributes={attributes}
+            renderMode="noInteractivity"
+          />
           <LensChartTooltipFix />
         </>
       ) : null}

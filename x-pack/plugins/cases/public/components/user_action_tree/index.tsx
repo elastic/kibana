@@ -650,39 +650,40 @@ export const UserActionTree = React.memo(
           .getIncomingEmbeddablePackage(currentAppId);
 
         if (incomingEmbeddablePackage) {
-          let draftComment: DraftComment | undefined;
+          let draftComment: DraftComment;
           if (storage.get(DRAFT_COMMENT_STORAGE_ID)) {
             try {
               draftComment = JSON.parse(storage.get(DRAFT_COMMENT_STORAGE_ID));
+
+              if (draftComment?.commentId) {
+                setManageMarkdownEditIds((prevManageMarkdownEditIds) => {
+                  if (
+                    ![NEW_ID, DESCRIPTION_ID].includes(draftComment?.commentId) &&
+                    !prevManageMarkdownEditIds.includes(draftComment?.commentId)
+                  ) {
+                    return [draftComment?.commentId];
+                  }
+                  return prevManageMarkdownEditIds;
+                });
+
+                if (
+                  commentRefs.current &&
+                  commentRefs.current[draftComment.commentId] &&
+                  commentRefs.current[draftComment.commentId].editor?.textarea &&
+                  commentRefs.current[draftComment.commentId].editor?.toolbar
+                ) {
+                  commentRefs.current[draftComment.commentId].setComment(draftComment.comment);
+                  const lensPluginButton = commentRefs.current[
+                    draftComment.commentId
+                  ].editor?.toolbar?.querySelector(`[aria-label="${i18n.INSERT_LENS}"]`);
+                  if (lensPluginButton) {
+                    lensPluginButton.click();
+                    storage.remove(DRAFT_COMMENT_STORAGE_ID);
+                  }
+                }
+              }
               // eslint-disable-next-line no-empty
             } catch (e) {}
-          }
-
-          if (draftComment && draftComment?.commentId) {
-            setManageMarkdownEditIds((prevManageMarkdownEditIds) => {
-              if (
-                ![NEW_ID, DESCRIPTION_ID].includes(draftComment.commentId) &&
-                !prevManageMarkdownEditIds.includes(draftComment.commentId)
-              ) {
-                return [draftComment.commentId];
-              }
-              return prevManageMarkdownEditIds;
-            });
-
-            if (
-              commentRefs.current &&
-              commentRefs.current[draftComment.commentId] &&
-              commentRefs.current[draftComment.commentId].editor?.textarea &&
-              commentRefs.current[draftComment.commentId].editor?.toolbar
-            ) {
-              commentRefs.current[draftComment.commentId].setComment(draftComment.comment);
-              const lensPluginButton = commentRefs.current[
-                draftComment.commentId
-              ].editor?.toolbar?.querySelector(`[aria-label="${i18n.INSERT_LENS}"]`);
-              if (lensPluginButton) {
-                lensPluginButton.click();
-              }
-            }
           }
         }
       };

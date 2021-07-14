@@ -19,7 +19,7 @@ export class KibanaServices {
     http,
     kibanaVersion,
     config,
-  }: GlobalServices & { kibanaVersion: string } & { config: any }) {
+  }: GlobalServices & { kibanaVersion: string; config: CasesUiConfigType }) {
     this.services = { http };
     this.kibanaVersion = kibanaVersion;
     this.config = config;

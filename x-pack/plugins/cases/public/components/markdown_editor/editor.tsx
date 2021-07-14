@@ -9,6 +9,7 @@ import React, {
   memo,
   forwardRef,
   useCallback,
+  useMemo,
   useRef,
   useState,
   useImperativeHandle,
@@ -49,7 +50,15 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
     const { parsingPlugins, processingPlugins, uiPlugins } = usePlugins();
     const editorRef = useRef<EuiMarkdownEditorRef>(null);
 
-    // @ts-expect-error update types
+    const commentEditorContextValue = useMemo(
+      () => ({
+        editorId,
+        value,
+      }),
+      [editorId, value]
+    );
+
+    // @ts-expect-error
     useImperativeHandle(ref, () => {
       if (!editorRef.current) {
         return null;
@@ -81,12 +90,7 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
     );
 
     return (
-      <CommentEditorContext.Provider
-        value={{
-          editorId,
-          value,
-        }}
-      >
+      <CommentEditorContext.Provider value={commentEditorContextValue}>
         {editor}
       </CommentEditorContext.Provider>
     );
