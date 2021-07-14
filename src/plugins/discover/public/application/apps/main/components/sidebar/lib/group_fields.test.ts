@@ -244,8 +244,7 @@ describe('group_fields', function () {
       5,
       fieldCounts,
       fieldFilterState,
-      true,
-      false
+      true
     );
     expect(actual.unpopular).toEqual([]);
   });
@@ -270,8 +269,7 @@ describe('group_fields', function () {
       5,
       fieldCounts,
       fieldFilterState,
-      false,
-      undefined
+      false
     );
     expect(actual.unpopular.map((field) => field.name)).toEqual(['unknown_field']);
   });

@@ -56,6 +56,7 @@ import { WithHeaderLayout } from '../../../../layouts';
 import { RELEASE_BADGE_DESCRIPTION, RELEASE_BADGE_LABEL } from '../../components/release_badge';
 
 import { IntegrationAgentPolicyCount, UpdateIcon, IconPanel, LoadingIconPanel } from './components';
+import { AssetsPage } from './assets';
 import { OverviewPage } from './overview';
 import { PackagePoliciesPage } from './policies';
 import { SettingsPage } from './settings';
@@ -99,6 +100,8 @@ export function Detail() {
   const [packageInfo, setPackageInfo] = useState<PackageInfo | null>(null);
   const setPackageInstallStatus = useSetPackageInstallStatus();
   const getPackageInstallStatus = useGetPackageInstallStatus();
+
+  const CustomAssets = useUIExtension(packageInfo?.name ?? '', 'package-detail-assets');
 
   const packageInstallStatus = useMemo(() => {
     if (packageInfo === null || !packageInfo.name) {
@@ -243,14 +246,23 @@ export function Detail() {
         redirectToPath = [
           INTEGRATIONS_PLUGIN_ID,
           {
-            path: currentPath,
+            path: `#${
+              pagePathGetters.integration_details_policies({
+                pkgkey,
+              })[1]
+            }`,
           },
         ];
       }
 
       const redirectBackRouteState: CreatePackagePolicyRouteState = {
         onSaveNavigateTo: redirectToPath,
-        onCancelNavigateTo: redirectToPath,
+        onCancelNavigateTo: [
+          INTEGRATIONS_PLUGIN_ID,
+          {
+            path: currentPath,
+          },
+        ],
         onCancelUrl: currentPath,
       };
 
@@ -408,6 +420,24 @@ export function Detail() {
       });
     }
 
+    if (packageInstallStatus === InstallStatus.installed && (packageInfo.assets || CustomAssets)) {
+      tabs.push({
+        id: 'assets',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetailsNav.packageAssetsLinkText"
+            defaultMessage="Assets"
+          />
+        ),
+        isSelected: panel === 'assets',
+        'data-test-subj': `tab-assets`,
+        href: getHref('integration_details_assets', {
+          pkgkey: packageInfoKey,
+          ...(integration ? { integration } : {}),
+        }),
+      });
+    }
+
     tabs.push({
       id: 'settings',
       name: (
@@ -443,7 +473,7 @@ export function Detail() {
     }
 
     return tabs;
-  }, [packageInfo, panel, getHref, integration, packageInstallStatus, showCustomTab]);
+  }, [packageInfo, panel, getHref, integration, packageInstallStatus, showCustomTab, CustomAssets]);
 
   return (
     <WithHeaderLayout
@@ -475,6 +505,9 @@ export function Detail() {
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_settings}>
             <SettingsPage packageInfo={packageInfo} />
+          </Route>
+          <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_assets}>
+            <AssetsPage packageInfo={packageInfo} />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_policies}>
             <PackagePoliciesPage name={packageInfo.name} version={packageInfo.version} />

@@ -10,11 +10,11 @@ import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import semverLt from 'semver/functions/lt';
 
-import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer, EuiLink } from '@elastic/eui';
 
 import type { PackageInfo } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
-import { useGetPackagePolicies, useGetPackageInstallStatus } from '../../../../../hooks';
+import { useGetPackagePolicies, useGetPackageInstallStatus, useLink } from '../../../../../hooks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
 import { UpdateIcon } from '../components';
 
@@ -47,6 +47,21 @@ const UpdatesAvailableMsg = () => (
   </UpdatesAvailableMsgContainer>
 );
 
+const LatestVersionLink = ({ name, version }: { name: string; version: string }) => {
+  const { getPath } = useLink();
+  const settingsPath = getPath('integration_details_settings', {
+    pkgkey: `${name}-${version}`,
+  });
+  return (
+    <EuiLink href={`#${settingsPath}`}>
+      <FormattedMessage
+        id="xpack.fleet.integrations.settings.packageLatestVersionLink"
+        defaultMessage="latest version"
+      />
+    </EuiLink>
+  );
+};
+
 interface Props {
   packageInfo: PackageInfo;
 }
@@ -72,6 +87,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
     (installationStatus === InstallStatus.installed && installedVersion !== version);
 
   const isUpdating = installationStatus === InstallStatus.installing && installedVersion;
+
   return (
     <EuiFlexGroup alignItems="flexStart">
       <EuiFlexItem grow={1} />
@@ -206,6 +222,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
                         <p>
                           <InstallationButton
                             {...packageInfo}
+                            latestVersion={latestVersion}
                             disabled={!packagePoliciesData || packageHasUsages}
                           />
                         </p>
@@ -233,7 +250,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
                   <EuiText color="subdued">
                     <FormattedMessage
                       id="xpack.fleet.integrations.settings.packageUninstallNoteDescription.packageUninstallUninstallableNoteDetail"
-                      defaultMessage="{strongNote} The {title} integration is installed by default and cannot be removed."
+                      defaultMessage="{strongNote} The {title} integration is a system integration and cannot be removed."
                       values={{
                         title,
                         strongNote: <NoteLabel />,
@@ -242,6 +259,37 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
                   </EuiText>
                 </p>
               )}
+            </div>
+          )}
+          {hideInstallOptions && isViewingOldPackage && !isUpdating && (
+            <div>
+              <EuiSpacer size="s" />
+              <div>
+                <EuiTitle>
+                  <h4>
+                    <FormattedMessage
+                      id="xpack.fleet.integrations.settings.packageInstallTitle"
+                      defaultMessage="Install {title}"
+                      values={{
+                        title,
+                      }}
+                    />
+                  </h4>
+                </EuiTitle>
+                <EuiSpacer size="s" />
+                <p>
+                  <EuiText color="subdued">
+                    <FormattedMessage
+                      id="xpack.fleet.integrations.settings.packageSettingsOldVersionMessage"
+                      defaultMessage="Version {version} is out of date. The {latestVersion} of this integration is available to be installed."
+                      values={{
+                        version,
+                        latestVersion: <LatestVersionLink name={name} version={latestVersion} />,
+                      }}
+                    />
+                  </EuiText>
+                </p>
+              </div>
             </div>
           )}
         </EuiText>

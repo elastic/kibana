@@ -26,9 +26,9 @@ export function RemoveSeries({ seriesId }: Props) {
         defaultMessage: 'Click to remove series',
       })}
       iconType="cross"
-      color="primary"
+      color="danger"
       onClick={onClick}
-      size="m"
+      size="s"
     />
   );
 }

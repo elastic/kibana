@@ -185,15 +185,18 @@ describe('getAppInfo', () => {
 
   it('adds default deepLinks when needed', () => {
     const app = createApp({
+      order: 3,
       deepLinks: [
         {
           id: 'sub-id',
           title: 'sub-title',
+          order: 2,
           deepLinks: [
             {
               id: 'sub-sub-id',
               title: 'sub-sub-title',
               path: '/sub-sub',
+              order: 1,
               keywords: ['sub sub'],
             },
           ],
@@ -210,12 +213,14 @@ describe('getAppInfo', () => {
       searchable: true,
       appRoute: `/app/some-id`,
       keywords: [],
+      order: 3,
       deepLinks: [
         {
           id: 'sub-id',
           title: 'sub-title',
           navLinkStatus: AppNavLinkStatus.hidden,
           searchable: true,
+          order: 2,
           keywords: [],
           deepLinks: [
             {
@@ -223,6 +228,7 @@ describe('getAppInfo', () => {
               title: 'sub-sub-title',
               navLinkStatus: AppNavLinkStatus.hidden,
               searchable: true,
+              order: 1,
               path: '/sub-sub',
               keywords: ['sub sub'],
               deepLinks: [],

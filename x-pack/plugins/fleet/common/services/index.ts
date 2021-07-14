@@ -30,3 +30,5 @@ export {
   validationHasErrors,
   countValidationErrors,
 } from './validate_package_policy';
+
+export { normalizeHostsForAgents } from './hosts_utils';

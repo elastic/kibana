@@ -43,8 +43,12 @@ describe('EndpointList store concerns', () => {
         error: undefined,
         endpointDetails: {
           activityLog: {
-            page: 1,
-            pageSize: 50,
+            paging: {
+              disabled: false,
+              page: 1,
+              pageSize: 50,
+              isInvalidDateRange: false,
+            },
             logData: { type: 'UninitialisedResourceState' },
           },
           hostDetails: {
@@ -60,7 +64,9 @@ describe('EndpointList store concerns', () => {
         policyItems: [],
         selectedPolicyId: undefined,
         policyItemsLoading: false,
-        endpointPackageInfo: undefined,
+        endpointPackageInfo: {
+          type: 'UninitialisedResourceState',
+        },
         nonExistingPolicies: {},
         agentPolicies: {},
         endpointsExist: true,

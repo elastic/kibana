@@ -27,6 +27,7 @@ import {
   getSearchSessionMapBuffer,
   getLayerById,
   getEditState,
+  getSelectedLayerId,
 } from '../selectors/map_selectors';
 import {
   CLEAR_GOTO,
@@ -59,7 +60,6 @@ import {
   Timeslice,
 } from '../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../common/constants';
-import { scaleBounds } from '../../common/elasticsearch_util';
 import { cleanTooltipStateForLayer } from './tooltip_actions';
 import { VectorLayer } from '../classes/layers/vector_layer';
 import { SET_DRAW_MODE } from './ui_actions';
@@ -166,9 +166,8 @@ export function mapExtentChanged(mapExtentState: MapExtentState) {
       }
 
       if (!doesBufferContainExtent || currentZoom !== newZoom) {
-        const expandedExtent = scaleBounds(extent, 0.5);
         // snap to the smallest tile-bounds, to avoid jitter in the bounds
-        dataFilters.buffer = expandToTileBoundaries(expandedExtent, Math.ceil(newZoom));
+        dataFilters.buffer = expandToTileBoundaries(extent, Math.ceil(newZoom));
       }
     }
 
@@ -342,6 +341,19 @@ export function updateEditShape(shapeToDraw: DRAW_SHAPE | null) {
   };
 }
 
+export function setEditLayerToSelectedLayer() {
+  return async (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    const layerId = getSelectedLayerId(getState());
+    if (!layerId) {
+      return;
+    }
+    dispatch(updateEditLayer(layerId));
+  };
+}
+
 export function updateEditLayer(layerId: string | null) {
   return (dispatch: Dispatch) => {
     if (layerId !== null) {
@@ -373,6 +385,25 @@ export function addNewFeatureToIndex(geometry: Geometry | Position[]) {
       return;
     }
     await layer.addFeature(geometry);
+    await dispatch(syncDataForLayer(layer, true));
+  };
+}
+
+export function deleteFeatureFromIndex(featureId: string) {
+  return async (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    const editState = getEditState(getState());
+    const layerId = editState ? editState.layerId : undefined;
+    if (!layerId) {
+      return;
+    }
+    const layer = getLayerById(layerId, getState());
+    if (!layer || !(layer instanceof VectorLayer)) {
+      return;
+    }
+    await layer.deleteFeature(featureId);
     await dispatch(syncDataForLayer(layer, true));
   };
 }

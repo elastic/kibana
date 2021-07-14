@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
-import styled from 'styled-components';
+import React, { memo, ReactNode } from 'react';
+import styled, { StyledComponent } from 'styled-components';
 import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
 
 import * as i18n from '../translations';
@@ -20,7 +20,11 @@ export interface CreateCaseModalProps {
   onSuccess: (theCase: Case) => Promise<void>;
 }
 
-const StyledFlyout = styled(EuiFlyout)`
+// TODO: EUI team follow up on complex types and styled-components `styled`
+// https://github.com/elastic/eui/issues/4855
+const StyledFlyout: StyledComponent<typeof EuiFlyout, {}, { children?: ReactNode }> = styled(
+  EuiFlyout
+)`
   ${({ theme }) => `
     z-index: ${theme.eui.euiZModal};
   `}

@@ -110,16 +110,17 @@ export class Execution<Input = unknown, Output = unknown, InspectorAdapters exte
     // (undocumented)
     get inspectorAdapters(): InspectorAdapters;
     // (undocumented)
-    interpret<T>(ast: ExpressionAstNode, input: T): Observable<unknown>;
+    interpret<T>(ast: ExpressionAstNode, input: T): Observable<ExecutionResult<unknown>>;
     // (undocumented)
     invokeChain(chainArr: ExpressionAstFunction[], input: unknown): Observable<any>;
     // (undocumented)
     invokeFunction(fn: ExpressionFunction, input: unknown, args: Record<string, unknown>): Observable<any>;
     // (undocumented)
     resolveArgs(fnDef: ExpressionFunction, input: unknown, argAsts: any): Observable<any>;
-    readonly result: Observable<Output | ExpressionValueError>;
-    start(input?: Input): Observable<Output | ExpressionValueError>;
-    readonly state: ExecutionContainer<Output | ExpressionValueError>;
+    readonly result: Observable<ExecutionResult<Output | ExpressionValueError>>;
+    start(input?: Input, isSubExpression?: boolean): Observable<ExecutionResult<Output | ExpressionValueError>>;
+    // Warning: (ae-forgotten-export) The symbol "ExecutionResult" needs to be exported by the entry point index.d.ts
+    readonly state: ExecutionContainer<ExecutionResult<Output | ExpressionValueError>>;
 }
 
 // Warning: (ae-forgotten-export) The symbol "StateContainer" needs to be exported by the entry point index.d.ts
@@ -212,7 +213,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     registerFunction(functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)): void;
     // (undocumented)
     registerType(typeDefinition: AnyExpressionTypeDefinition | (() => AnyExpressionTypeDefinition)): void;
-    run<Input, Output>(ast: string | ExpressionAstExpression, input: Input, params?: ExpressionExecutionParams): Observable<Output | ExpressionValueError>;
+    run<Input, Output>(ast: string | ExpressionAstExpression, input: Input, params?: ExpressionExecutionParams): Observable<ExecutionResult<Output | ExpressionValueError>>;
     // (undocumented)
     readonly state: ExecutorContainer<Context>;
     // (undocumented)

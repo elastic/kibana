@@ -220,14 +220,14 @@ describe('endpoint list middleware', () => {
   describe('handle ActivityLog State Change actions', () => {
     const endpointList = getEndpointListApiResponse();
     const search = getEndpointDetailsPath({
-      name: 'endpointDetails',
+      name: 'endpointActivityLog',
       selected_endpoint: endpointList.hosts[0].metadata.agent.id,
     });
     const dispatchUserChangedUrl = () => {
       dispatchUserChangedUrlToEndpointList({ search: `?${search.split('?').pop()}` });
     };
 
-    const fleetActionGenerator = new FleetActionGenerator(Math.random().toString());
+    const fleetActionGenerator = new FleetActionGenerator('seed');
     const actionData = fleetActionGenerator.generate({
       agents: [endpointList.hosts[0].metadata.agent.id],
     });
@@ -294,7 +294,7 @@ describe('endpoint list middleware', () => {
     });
   });
 
-  describe('handle Endpoint Pending Actions state actions', () => {
+  describe.skip('handle Endpoint Pending Actions state actions', () => {
     let mockedApis: ReturnType<typeof endpointPageHttpMock>;
 
     beforeEach(() => {

@@ -15,7 +15,7 @@
         ],
         "source": {
           "path": "src/plugins/spaces_oss/public/api.ts",
-          "lineNumber": 250
+          "lineNumber": 254
         },
         "deprecated": false,
         "children": [
@@ -33,7 +33,7 @@
             ],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 257
+              "lineNumber": 261
             },
             "deprecated": false
           },
@@ -48,7 +48,7 @@
             ],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 261
+              "lineNumber": 265
             },
             "deprecated": false
           },
@@ -63,7 +63,7 @@
             ],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 265
+              "lineNumber": 269
             },
             "deprecated": false
           },
@@ -78,7 +78,7 @@
             ],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 269
+              "lineNumber": 273
             },
             "deprecated": false
           }
@@ -221,10 +221,10 @@
             "tags": [],
             "label": "changeSpacesHandler",
             "description": [
-              "\nOptional handler that is called when the user has saved changes and there are spaces to be added to and/or removed from the object. If\nthis is not defined, a default handler will be used that calls `/api/spaces/_update_objects_spaces` and displays a toast indicating\nwhat occurred."
+              "\nOptional handler that is called when the user has saved changes and there are spaces to be added to and/or removed from the object and\nits relatives. If this is not defined, a default handler will be used that calls `/api/spaces/_update_objects_spaces` and displays a\ntoast indicating what occurred."
             ],
             "signature": [
-              "((spacesToAdd: string[], spacesToRemove: string[]) => Promise<void>) | undefined"
+              "((objects: { type: string; id: string; }[], spacesToAdd: string[], spacesToRemove: string[]) => Promise<void>) | undefined"
             ],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
@@ -239,14 +239,14 @@
             "tags": [],
             "label": "onUpdate",
             "description": [
-              "\nOptional callback when the target object is updated."
+              "\nOptional callback when the target object and its relatives are updated."
             ],
             "signature": [
-              "(() => void) | undefined"
+              "((updatedObjects: { type: string; id: string; }[]) => void) | undefined"
             ],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 179
+              "lineNumber": 183
             },
             "deprecated": false
           },
@@ -264,7 +264,7 @@
             ],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 183
+              "lineNumber": 187
             },
             "deprecated": false
           }
@@ -282,7 +282,7 @@
         ],
         "source": {
           "path": "src/plugins/spaces_oss/public/api.ts",
-          "lineNumber": 189
+          "lineNumber": 193
         },
         "deprecated": false,
         "children": [
@@ -297,7 +297,7 @@
             ],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 193
+              "lineNumber": 197
             },
             "deprecated": false
           },
@@ -312,7 +312,7 @@
             ],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 197
+              "lineNumber": 201
             },
             "deprecated": false
           },
@@ -330,7 +330,7 @@
             ],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 201
+              "lineNumber": 205
             },
             "deprecated": false
           },
@@ -348,7 +348,7 @@
             ],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 207
+              "lineNumber": 211
             },
             "deprecated": false
           },
@@ -366,7 +366,7 @@
             ],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 213
+              "lineNumber": 217
             },
             "deprecated": false
           },
@@ -384,7 +384,7 @@
             ],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 219
+              "lineNumber": 223
             },
             "deprecated": false
           }
@@ -402,7 +402,7 @@
         ],
         "source": {
           "path": "src/plugins/spaces_oss/public/api.ts",
-          "lineNumber": 275
+          "lineNumber": 279
         },
         "deprecated": false,
         "children": [
@@ -420,7 +420,7 @@
             ],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 277
+              "lineNumber": 281
             },
             "deprecated": false
           },
@@ -438,7 +438,7 @@
             ],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 280
+              "lineNumber": 284
             },
             "deprecated": false
           },
@@ -456,7 +456,7 @@
             ],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 283
+              "lineNumber": 287
             },
             "deprecated": false
           },
@@ -474,7 +474,25 @@
             ],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 290
+              "lineNumber": 294
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "spacesOss",
+            "id": "def-public.SpaceAvatarProps.isDisabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isDisabled",
+            "description": [
+              "\nWhether or not to render the avatar in a disabled state.\n\nDefault value is false."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 301
             },
             "deprecated": false
           }
@@ -492,7 +510,7 @@
         ],
         "source": {
           "path": "src/plugins/spaces_oss/public/api.ts",
-          "lineNumber": 225
+          "lineNumber": 229
         },
         "deprecated": false,
         "children": [
@@ -510,7 +528,7 @@
             ],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 229
+              "lineNumber": 233
             },
             "deprecated": false
           },
@@ -528,7 +546,7 @@
             ],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 236
+              "lineNumber": 240
             },
             "deprecated": false
           },
@@ -546,7 +564,7 @@
             ],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 244
+              "lineNumber": 248
             },
             "deprecated": false
           }

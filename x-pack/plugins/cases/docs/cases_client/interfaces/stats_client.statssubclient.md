@@ -29,4 +29,4 @@ Retrieves the total number of open, closed, and in-progress cases.
 
 **Returns:** *Promise*<{ `count_closed_cases`: *number* ; `count_in_progress_cases`: *number* ; `count_open_cases`: *number*  }\>
 
-Defined in: [stats/client.ts:34](https://github.com/jonathan-buttner/kibana/blob/0e98e105663/x-pack/plugins/cases/server/client/stats/client.ts#L34)
+Defined in: [stats/client.ts:34](https://github.com/elastic/kibana/blob/a80791aa4cc/x-pack/plugins/cases/server/client/stats/client.ts#L34)

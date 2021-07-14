@@ -17,6 +17,7 @@ import {
   createSignalsIndex,
   deleteAllAlerts,
   deleteSignalsIndex,
+  getEqlRuleForSignalTesting,
   getRuleForSignalTesting,
   getSignalsById,
   waitForRuleSuccessOrStatus,
@@ -62,8 +63,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(signalsOpen.hits.hits.length).to.eql(8);
       });
 
-      // TODO: Fix this bug and make this work. We currently do not write out the dataset name when it is not in _source
-      it.skip('should copy the dataset_name_1 from the index into the signal', async () => {
+      it('should copy the dataset_name_1 from the index into the signal', async () => {
         const rule = {
           ...getRuleForSignalTesting(['keyword', 'const_keyword']),
           query: 'event.dataset: "dataset_name_1"',
@@ -91,10 +91,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('"eql" rule type', () => {
       it('should detect the "dataset_name_1" from "event.dataset" and have 8 signals, 4 from each index', async () => {
         const rule: EqlCreateSchema = {
-          ...getRuleForSignalTesting(['keyword', 'const_keyword']),
-          rule_id: 'eql-rule',
-          type: 'eql',
-          language: 'eql',
+          ...getEqlRuleForSignalTesting(['keyword', 'const_keyword']),
           query: 'any where event.dataset=="dataset_name_1"',
         };
 
@@ -105,13 +102,9 @@ export default ({ getService }: FtrProviderContext) => {
         expect(signalsOpen.hits.hits.length).to.eql(8);
       });
 
-      // TODO: Fix this bug and make this work. We currently do not write out the dataset name when it is not in _source
-      it.skip('should copy the "dataset_name_1" from "event.dataset"', async () => {
+      it('should copy the "dataset_name_1" from "event.dataset"', async () => {
         const rule: EqlCreateSchema = {
-          ...getRuleForSignalTesting(['keyword', 'const_keyword']),
-          rule_id: 'eql-rule',
-          type: 'eql',
-          language: 'eql',
+          ...getEqlRuleForSignalTesting(['keyword', 'const_keyword']),
           query: 'any where event.dataset=="dataset_name_1"',
         };
 

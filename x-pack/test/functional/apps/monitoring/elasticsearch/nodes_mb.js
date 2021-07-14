@@ -29,6 +29,8 @@ export default function ({ getService, getPageObjects }) {
           }
         );
 
+        await overview.closeAlertsModal();
+
         // go to nodes listing
         await overview.clickEsNodes();
         expect(await nodesList.isOnListing()).to.be(true);
@@ -260,6 +262,8 @@ export default function ({ getService, getPageObjects }) {
             to: 'Oct 5, 2017 @ 20:35:12.176',
           }
         );
+
+        await overview.closeAlertsModal();
 
         // go to nodes listing
         await overview.clickEsNodes();

@@ -5,12 +5,19 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useState } from 'react';
-import styled from 'styled-components';
-import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
+import { useDispatch } from 'react-redux';
+import React, { memo, useCallback, useMemo } from 'react';
+import { EuiTab, EuiTabs, EuiFlyoutBody, EuiTabbedContentTab, EuiSpacer } from '@elastic/eui';
 import { EndpointIndexUIQueryParams } from '../../../types';
+import { EndpointAction } from '../../../store/action';
+import { useEndpointSelector } from '../../hooks';
+import { getActivityLogDataPaging } from '../../../store/selectors';
+import { EndpointDetailsFlyoutHeader } from './flyout_header';
+import { useNavigateByRouterEventHandler } from '../../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
+import { useAppUrl } from '../../../../../../common/lib/kibana';
+
 export enum EndpointDetailsTabsTypes {
-  overview = 'overview',
+  overview = 'details',
   activityLog = 'activity_log',
 }
 
@@ -22,55 +29,88 @@ interface EndpointDetailsTabs {
   id: string;
   name: string;
   content: JSX.Element;
+  route: string;
 }
 
-const StyledEuiTabbedContent = styled(EuiTabbedContent)`
-  overflow: hidden;
-  padding-bottom: ${(props) => props.theme.eui.paddingSizes.xl};
-
-  > [role='tabpanel'] {
-    height: 100%;
-    padding-right: 12px;
-    overflow: hidden;
-    overflow-y: auto;
-    ::-webkit-scrollbar {
-      -webkit-appearance: none;
-      width: 4px;
-    }
-    ::-webkit-scrollbar-thumb {
-      border-radius: 2px;
-      background-color: rgba(0, 0, 0, 0.5);
-      -webkit-box-shadow: 0 0 1px rgba(255, 255, 255, 0.5);
-    }
+const EndpointDetailsTab = memo(
+  ({
+    tab,
+    isSelected,
+    handleTabClick,
+  }: {
+    tab: EndpointDetailsTabs;
+    isSelected: boolean;
+    handleTabClick: () => void;
+  }) => {
+    const { getAppUrl } = useAppUrl();
+    const onClick = useNavigateByRouterEventHandler(tab.route, handleTabClick);
+    return (
+      <EuiTab
+        href={getAppUrl({ path: tab.route })}
+        onClick={onClick}
+        isSelected={isSelected}
+        key={tab.id}
+        data-test-subj={tab.id}
+      >
+        {tab.name}
+      </EuiTab>
+    );
   }
-`;
+);
+
+EndpointDetailsTab.displayName = 'EndpointDetailsTab';
 
 export const EndpointDetailsFlyoutTabs = memo(
-  ({ show, tabs }: { show: EndpointIndexUIQueryParams['show']; tabs: EndpointDetailsTabs[] }) => {
-    const [selectedTabId, setSelectedTabId] = useState<EndpointDetailsTabsId>(() => {
-      return show === 'details'
-        ? EndpointDetailsTabsTypes.overview
-        : EndpointDetailsTabsTypes.activityLog;
-    });
+  ({
+    hostname,
+    show,
+    tabs,
+  }: {
+    hostname: string;
+    show: EndpointIndexUIQueryParams['show'];
+    tabs: EndpointDetailsTabs[];
+  }) => {
+    const dispatch = useDispatch<(action: EndpointAction) => void>();
+    const { pageSize } = useEndpointSelector(getActivityLogDataPaging);
 
     const handleTabClick = useCallback(
-      (tab: EuiTabbedContentTab) => setSelectedTabId(tab.id as EndpointDetailsTabsId),
-      [setSelectedTabId]
+      (tab: EuiTabbedContentTab) => {
+        if (tab.id === EndpointDetailsTabsTypes.activityLog) {
+          dispatch({
+            type: 'endpointDetailsActivityLogUpdatePaging',
+            payload: {
+              disabled: false,
+              page: 1,
+              pageSize,
+              startDate: undefined,
+              endDate: undefined,
+            },
+          });
+        }
+      },
+      [dispatch, pageSize]
     );
 
-    const selectedTab = useMemo(() => tabs.find((tab) => tab.id === selectedTabId), [
-      tabs,
-      selectedTabId,
-    ]);
+    const selectedTab = useMemo(() => tabs.find((tab) => tab.id === show), [tabs, show]);
+
+    const renderTabs = tabs.map((tab) => (
+      <EndpointDetailsTab
+        tab={tab}
+        handleTabClick={() => handleTabClick(tab)}
+        isSelected={tab.id === selectedTab?.id}
+      />
+    ));
 
     return (
-      <StyledEuiTabbedContent
-        data-test-subj="endpointDetailsTabs"
-        tabs={tabs}
-        selectedTab={selectedTab}
-        onTabClick={handleTabClick}
-        key="endpoint-details-tabs"
-      />
+      <>
+        <EndpointDetailsFlyoutHeader hostname={hostname} hasBorder>
+          <EuiSpacer size="s" />
+          <EuiTabs style={{ marginBottom: '-25px' }}>{renderTabs}</EuiTabs>
+        </EndpointDetailsFlyoutHeader>
+        <EuiFlyoutBody data-test-subj="endpointDetailsFlyoutBody">
+          {selectedTab?.content}
+        </EuiFlyoutBody>
+      </>
     );
   }
 );

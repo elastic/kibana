@@ -7,8 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React from 'react';
-import { useTrackPageview } from '../../../../../observability/public';
-import { isRumAgentName } from '../../../../common/agent_name';
+import { isRumAgentName, isIosAgentName } from '../../../../common/agent_name';
 import { AnnotationsContextProvider } from '../../../context/annotations/annotations_context';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
@@ -35,14 +34,12 @@ interface ServiceOverviewProps {
 export function ServiceOverview({ serviceName }: ServiceOverviewProps) {
   const { agentName } = useApmServiceContext();
 
-  useTrackPageview({ app: 'apm', path: 'service_overview' });
-  useTrackPageview({ app: 'apm', path: 'service_overview', delay: 15000 });
-
   // The default EuiFlexGroup breaks at 768, but we want to break at 992, so we
   // observe the window width and set the flex directions of rows accordingly
   const { isMedium } = useBreakPoints();
   const rowDirection = isMedium ? 'column' : 'row';
   const isRumAgent = isRumAgentName(agentName);
+  const isIosAgent = isIosAgentName(agentName);
 
   return (
     <AnnotationsContextProvider>
@@ -110,7 +107,7 @@ export function ServiceOverview({ serviceName }: ServiceOverviewProps) {
               )}
             </EuiFlexGroup>
           </EuiFlexItem>
-          {!isRumAgent && (
+          {!isRumAgent && !isIosAgent && (
             <EuiFlexItem>
               <EuiFlexGroup
                 direction="column"

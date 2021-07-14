@@ -5,28 +5,41 @@
  * 2.0.
  */
 
-import React from 'react';
 import type {
   Map as MbMap,
   GeoJSONSource as MbGeoJSONSource,
   VectorSource as MbVectorSource,
 } from '@kbn/mapbox-gl';
-import { EuiIcon } from '@elastic/eui';
 import { Feature } from 'geojson';
 import uuid from 'uuid/v4';
 import { parse as parseUrl } from 'url';
+import { i18n } from '@kbn/i18n';
 import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
-import { SOURCE_DATA_REQUEST_ID, LAYER_TYPE } from '../../../../common/constants';
-import { VectorLayer, VectorLayerArguments } from '../vector_layer';
+import {
+  KBN_FEATURE_COUNT,
+  KBN_IS_TILE_COMPLETE,
+  KBN_METADATA_FEATURE,
+  LAYER_TYPE,
+  SOURCE_DATA_REQUEST_ID,
+} from '../../../../common/constants';
+import {
+  VectorLayer,
+  VectorLayerArguments,
+  NO_RESULTS_ICON_AND_TOOLTIPCONTENT,
+} from '../vector_layer';
 import { ITiledSingleLayerVectorSource } from '../../sources/tiled_single_layer_vector_source';
 import { DataRequestContext } from '../../../actions';
 import {
+  Timeslice,
+  StyleMetaDescriptor,
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
+  TileMetaFeature,
 } from '../../../../common/descriptor_types';
 import { MVTSingleLayerVectorSourceConfig } from '../../sources/mvt_single_layer_vector_source/types';
 import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
 import { isRefreshOnlyQuery } from '../../util/is_refresh_only_query';
+import { CustomIconAndTooltipContent } from '../layer';
 
 export class TiledVectorLayer extends VectorLayer {
   static type = LAYER_TYPE.TILED_VECTOR;
@@ -53,9 +66,45 @@ export class TiledVectorLayer extends VectorLayer {
     this._source = source as ITiledSingleLayerVectorSource;
   }
 
-  getCustomIconAndTooltipContent() {
+  _getMetaFromTiles(): TileMetaFeature[] {
+    return this._descriptor.__metaFromTiles || [];
+  }
+
+  getCustomIconAndTooltipContent(): CustomIconAndTooltipContent {
+    const tileMetas = this._getMetaFromTiles();
+    if (!tileMetas.length) {
+      return NO_RESULTS_ICON_AND_TOOLTIPCONTENT;
+    }
+
+    const totalFeaturesCount: number = tileMetas.reduce((acc: number, tileMeta: Feature) => {
+      const count = tileMeta && tileMeta.properties ? tileMeta.properties[KBN_FEATURE_COUNT] : 0;
+      return count + acc;
+    }, 0);
+
+    if (totalFeaturesCount === 0) {
+      return NO_RESULTS_ICON_AND_TOOLTIPCONTENT;
+    }
+
+    const isIncomplete: boolean = tileMetas.some((tileMeta: Feature) => {
+      return !tileMeta?.properties?.[KBN_IS_TILE_COMPLETE];
+    });
+
     return {
-      icon: <EuiIcon size="m" type={this.getLayerTypeIconName()} />,
+      icon: this.getCurrentStyle().getIcon(),
+      tooltipContent: isIncomplete
+        ? i18n.translate('xpack.maps.tiles.resultsTrimmedMsg', {
+            defaultMessage: `Results limited to {count} documents.`,
+            values: {
+              count: totalFeaturesCount.toLocaleString(),
+            },
+          })
+        : i18n.translate('xpack.maps.tiles.resultsCompleteMsg', {
+            defaultMessage: `Found {count} documents.`,
+            values: {
+              count: totalFeaturesCount.toLocaleString(),
+            },
+          }),
+      areResultsTrimmed: isIncomplete,
     };
   }
 
@@ -66,7 +115,7 @@ export class TiledVectorLayer extends VectorLayer {
     dataFilters,
   }: DataRequestContext) {
     const requestToken: symbol = Symbol(`layer-${this.getId()}-${SOURCE_DATA_REQUEST_ID}`);
-    const searchFilters: VectorSourceRequestMeta = this._getSearchFilters(
+    const searchFilters: VectorSourceRequestMeta = await this._getSearchFilters(
       dataFilters,
       this.getSource(),
       this._style as IVectorStyle
@@ -84,6 +133,10 @@ export class TiledVectorLayer extends VectorLayer {
           source: this.getSource(),
           prevDataRequest,
           nextMeta: searchFilters,
+          getUpdateDueToTimeslice: (timeslice?: Timeslice) => {
+            // TODO use meta features to determine if tiles already contain features for timeslice.
+            return true;
+          },
         });
         const canSkip = noChangesInSourceState && noChangesInSearchState;
         if (canSkip) {
@@ -183,6 +236,47 @@ export class TiledVectorLayer extends VectorLayer {
     this._setMbCentroidProperties(mbMap, sourceMeta.layerName);
   }
 
+  queryTileMetaFeatures(mbMap: MbMap): TileMetaFeature[] | null {
+    // @ts-ignore
+    const mbSource = mbMap.getSource(this._getMbSourceId());
+    if (!mbSource) {
+      return null;
+    }
+
+    const sourceDataRequest = this.getSourceDataRequest();
+    if (!sourceDataRequest) {
+      return null;
+    }
+    const sourceMeta: MVTSingleLayerVectorSourceConfig = sourceDataRequest.getData() as MVTSingleLayerVectorSourceConfig;
+    if (sourceMeta.layerName === '') {
+      return null;
+    }
+
+    // querySourceFeatures can return duplicated features when features cross tile boundaries.
+    // Tile meta will never have duplicated features since by there nature, tile meta is a feature contained within a single tile
+    const mbFeatures = mbMap.querySourceFeatures(this._getMbSourceId(), {
+      sourceLayer: sourceMeta.layerName,
+      filter: ['==', ['get', KBN_METADATA_FEATURE], true],
+    });
+
+    const metaFeatures: TileMetaFeature[] = mbFeatures.map((mbFeature: Feature) => {
+      const parsedProperties: Record<string, unknown> = {};
+      for (const key in mbFeature.properties) {
+        if (mbFeature.properties.hasOwnProperty(key)) {
+          parsedProperties[key] = JSON.parse(mbFeature.properties[key]); // mvt properties cannot be nested geojson
+        }
+      }
+      return {
+        type: 'Feature',
+        id: mbFeature.id,
+        geometry: mbFeature.geometry,
+        properties: parsedProperties,
+      } as TileMetaFeature;
+    });
+
+    return metaFeatures as TileMetaFeature[];
+  }
+
   _requiresPrevSourceCleanup(mbMap: MbMap): boolean {
     const mbSource = mbMap.getSource(this._getMbSourceId()) as MbVectorSource | MbGeoJSONSource;
     if (!mbSource) {
@@ -246,5 +340,15 @@ export class TiledVectorLayer extends VectorLayer {
 
   getFeatureById(id: string | number): Feature | null {
     return null;
+  }
+
+  async getStyleMetaDescriptorFromLocalFeatures(): Promise<StyleMetaDescriptor | null> {
+    const style = this.getCurrentStyle();
+    if (!style) {
+      return null;
+    }
+
+    const metaFromTiles = this._getMetaFromTiles();
+    return await style.pluckStyleMetaFromTileMeta(metaFromTiles);
   }
 }

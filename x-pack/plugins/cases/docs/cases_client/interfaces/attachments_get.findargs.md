@@ -21,7 +21,7 @@ Parameters for finding attachments of a case
 
 The case ID for finding associated attachments
 
-Defined in: [attachments/get.ts:47](https://github.com/jonathan-buttner/kibana/blob/0e98e105663/x-pack/plugins/cases/server/client/attachments/get.ts#L47)
+Defined in: [attachments/get.ts:47](https://github.com/elastic/kibana/blob/a80791aa4cc/x-pack/plugins/cases/server/client/attachments/get.ts#L47)
 
 ___
 
@@ -48,4 +48,4 @@ Optional parameters for filtering the returned attachments
 | `sortOrder` | *undefined* \| ``"desc"`` \| ``"asc"`` |
 | `subCaseId` | *undefined* \| *string* |
 
-Defined in: [attachments/get.ts:51](https://github.com/jonathan-buttner/kibana/blob/0e98e105663/x-pack/plugins/cases/server/client/attachments/get.ts#L51)
+Defined in: [attachments/get.ts:51](https://github.com/elastic/kibana/blob/a80791aa4cc/x-pack/plugins/cases/server/client/attachments/get.ts#L51)

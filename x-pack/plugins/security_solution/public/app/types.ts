@@ -16,9 +16,10 @@ import {
   StateFromReducersMapObject,
   CombinedState,
 } from 'redux';
-
+import { RouteProps } from 'react-router-dom';
 import { AppMountParameters, AppDeepLink } from '../../../../../src/core/public';
-import { StartServices } from '../types';
+import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
+import { StartedSubPlugins, StartServices } from '../types';
 
 /**
  * The React properties used to render `SecurityApp` as well as the `element` to render it into.
@@ -26,7 +27,8 @@ import { StartServices } from '../types';
 export interface RenderAppProps extends AppMountParameters {
   services: StartServices;
   store: Store<State, Action>;
-  SubPluginRoutes: React.FC;
+  subPlugins: StartedSubPlugins;
+  usageCollection?: UsageCollectionSetup;
 }
 
 import { State, SubPluginsInitReducer } from '../common/store';
@@ -42,8 +44,10 @@ export interface SecuritySubPluginStore<K extends SecuritySubPluginKeyStore, T> 
   middleware?: Array<Middleware<{}, State, Dispatch<AppAction | Immutable<AppAction>>>>;
 }
 
+export type SecuritySubPluginRoutes = RouteProps[];
+
 export interface SecuritySubPlugin {
-  SubPluginRoutes: React.FC;
+  routes: SecuritySubPluginRoutes;
   storageTimelines?: Pick<TimelineState, 'timelineById'>;
 }
 
@@ -55,14 +59,21 @@ export type SecuritySubPluginKeyStore =
   | 'alertList'
   | 'management';
 
-export type SecuritySubPluginNames = keyof typeof SecurityPageName;
+export type SecurityDeepLinkName =
+  | SecurityPageName.overview
+  | SecurityPageName.detections
+  | SecurityPageName.hosts
+  | SecurityPageName.network
+  | SecurityPageName.timelines
+  | SecurityPageName.case
+  | SecurityPageName.administration;
 
 interface SecurityDeepLink {
   base: AppDeepLink[];
   premium?: AppDeepLink[];
 }
 
-export type SecurityDeepLinks = { [key in SecuritySubPluginNames]: SecurityDeepLink };
+export type SecurityDeepLinks = { [key in SecurityDeepLinkName]: SecurityDeepLink };
 
 /**
  * Returned by the various 'SecuritySubPlugin' classes from the `start` method.

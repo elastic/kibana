@@ -60,12 +60,14 @@ export type { ReindexResponse, ReindexParams } from './reindex';
 export { reindex } from './reindex';
 
 import type { IncompatibleMappingException } from './wait_for_reindex_task';
+
 export { waitForReindexTask } from './wait_for_reindex_task';
 
 export type { VerifyReindexParams } from './verify_reindex';
 export { verifyReindex } from './verify_reindex';
 
 import type { AliasNotFound, RemoveIndexNotAConcreteIndex } from './update_aliases';
+
 export type { AliasAction, UpdateAliasesParams } from './update_aliases';
 export { updateAliases } from './update_aliases';
 
@@ -77,6 +79,13 @@ export type {
   UpdateAndPickupMappingsParams,
 } from './update_and_pickup_mappings';
 export { updateAndPickupMappings } from './update_and_pickup_mappings';
+
+export type {
+  CheckForUnknownDocsParams,
+  UnknownDocsFound,
+  CheckForUnknownDocsFoundDoc,
+} from './check_for_unknown_docs';
+export { checkForUnknownDocs } from './check_for_unknown_docs';
 
 export { waitForPickupUpdatedMappingsTask } from './wait_for_pickup_updated_mappings_task';
 
@@ -96,9 +105,11 @@ export interface IndexNotFound {
   type: 'index_not_found_exception';
   index: string;
 }
+
 export interface WaitForReindexTaskFailure {
   readonly cause: { type: string; reason: string };
 }
+
 export interface TargetIndexHadWriteBlock {
   type: 'target_index_had_write_block';
 }
@@ -108,6 +119,7 @@ export interface AcknowledgeResponse {
   acknowledged: boolean;
   shardsAcknowledged: boolean;
 }
+
 // Map of left response 'type' string -> response interface
 export interface ActionErrorTypeMap {
   wait_for_task_completion_timeout: WaitForTaskCompletionTimeout;

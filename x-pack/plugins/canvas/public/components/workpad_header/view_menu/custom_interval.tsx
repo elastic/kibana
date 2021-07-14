@@ -8,12 +8,31 @@
 import React, { useState, ChangeEvent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiButton, EuiFieldText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { ButtonSize } from '@elastic/eui/src/components/button/button';
 import { FlexGroupGutterSize } from '@elastic/eui/src/components/flex/flex_group';
 import { getTimeInterval } from '../../../lib/time_interval';
 
-import { ComponentStrings } from '../../../../i18n';
-const { WorkpadHeaderCustomInterval: strings } = ComponentStrings;
+const strings = {
+  getButtonLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderCustomInterval.confirmButtonLabel', {
+      defaultMessage: 'Set',
+    }),
+  getFormDescription: () =>
+    i18n.translate('xpack.canvas.workpadHeaderCustomInterval.formDescription', {
+      defaultMessage:
+        'Use shorthand notation, like {secondsExample}, {minutesExample}, or {hoursExample}',
+      values: {
+        secondsExample: '30s',
+        minutesExample: '10m',
+        hoursExample: '1h',
+      },
+    }),
+  getFormLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderCustomInterval.formLabel', {
+      defaultMessage: 'Set a custom interval',
+    }),
+};
 
 interface Props {
   gutterSize: FlexGroupGutterSize;

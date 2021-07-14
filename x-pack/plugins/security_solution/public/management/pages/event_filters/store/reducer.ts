@@ -30,6 +30,7 @@ import {
   EventFilterForDeletion,
   EventFilterDeletionReset,
   EventFilterDeleteStatusChanged,
+  EventFiltersForceRefresh,
 } from './action';
 
 import { initialEventFiltersPageState } from './builders';
@@ -220,6 +221,16 @@ const handleEventFilterDeleteStatusChanges: CaseReducer<EventFilterDeleteStatusC
   };
 };
 
+const handleEventFilterForceRefresh: CaseReducer<EventFiltersForceRefresh> = (state, action) => {
+  return {
+    ...state,
+    listPage: {
+      ...state.listPage,
+      forceRefresh: action.payload.forceRefresh,
+    },
+  };
+};
+
 export const eventFiltersPageReducer: StateReducer = (
   state = initialEventFiltersPageState(),
   action
@@ -237,6 +248,8 @@ export const eventFiltersPageReducer: StateReducer = (
       return eventFiltersUpdateSuccess(state, action);
     case 'userChangedUrl':
       return userChangedUrl(state, action);
+    case 'eventFiltersForceRefresh':
+      return handleEventFilterForceRefresh(state, action);
   }
 
   // actions only handled if we're on the List Page

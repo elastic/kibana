@@ -6,7 +6,6 @@
  */
 
 import { keyBy } from 'lodash';
-import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
 import {
   EVENT_OUTCOME,
   SERVICE_NAME,
@@ -15,18 +14,16 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../common/event_outcome';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
-import {
-  environmentQuery,
-  rangeQuery,
-  kqlQuery,
-} from '../../../server/utils/queries';
+import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
+import { kqlQuery, rangeQuery } from '../../../../observability/server';
+import { environmentQuery } from '../../../common/utils/environment_query';
 import { Coordinate } from '../../../typings/timeseries';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
-import { getBucketSize } from '../helpers/get_bucket_size';
+import { getBucketSizeForAggregatedTransactions } from '../helpers/get_bucket_size_for_aggregated_transactions';
 import {
   getLatencyAggregation,
   getLatencyValue,
@@ -68,7 +65,12 @@ export async function getServiceTransactionGroupDetailedStatistics({
   }>
 > {
   const { apmEventClient } = setup;
-  const { intervalString } = getBucketSize({ start, end, numBuckets });
+  const { intervalString } = getBucketSizeForAggregatedTransactions({
+    start,
+    end,
+    numBuckets,
+    searchAggregatedTransactions,
+  });
 
   const field = getTransactionDurationFieldForAggregatedTransactions(
     searchAggregatedTransactions

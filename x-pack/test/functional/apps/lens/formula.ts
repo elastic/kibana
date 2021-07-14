@@ -14,6 +14,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
+  const fieldEditor = getService('fieldEditor');
+  const retry = getService('retry');
 
   describe('lens formula', () => {
     it('should transition from count to formula', async () => {
@@ -53,8 +55,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const input = await find.activeElement();
       await input.type('*');
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('14,005');
+      await retry.try(async () => {
+        expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('14,005');
+      });
     });
 
     it('should insert single quotes and escape when needed to create valid KQL', async () => {
@@ -77,15 +80,45 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.common.sleep(100);
 
-      let element = await find.byCssSelector('.monaco-editor');
-      expect(await element.getVisibleText()).to.equal(`count(kql='Men\\'s Clothing ')`);
+      PageObjects.lens.expectFormulaText(`count(kql='Men\\'s Clothing ')`);
 
       await PageObjects.lens.typeFormula('count(kql=');
+
       input = await find.activeElement();
       await input.type(`Men\'s Clothing`);
 
-      element = await find.byCssSelector('.monaco-editor');
-      expect(await element.getVisibleText()).to.equal(`count(kql='Men\\'s Clothing')`);
+      PageObjects.lens.expectFormulaText(`count(kql='Men\\'s Clothing')`);
+    });
+
+    it('should insert single quotes and escape when needed to create valid field name', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+      await PageObjects.lens.switchToVisualization('lnsDatatable');
+      await PageObjects.lens.clickAddField();
+      await fieldEditor.setName(`*' "'`);
+      await fieldEditor.enableValue();
+      await fieldEditor.typeScript("emit('abc')");
+      await fieldEditor.save();
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsDatatable_metrics > lns-empty-dimension',
+        operation: 'unique_count',
+        field: `*`,
+        keepOpen: true,
+      });
+
+      await PageObjects.lens.switchToFormula();
+      PageObjects.lens.expectFormulaText(`unique_count('*\\' "\\'')`);
+
+      await PageObjects.lens.typeFormula('unique_count(');
+      const input = await find.activeElement();
+      await input.type('*');
+      await input.pressKeys(browser.keys.ENTER);
+
+      await PageObjects.common.sleep(100);
+
+      PageObjects.lens.expectFormulaText(`unique_count('*\\' "\\'')`);
     });
 
     it('should persist a broken formula on close', async () => {
@@ -144,7 +177,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.getErrorCount()).to.eql(0);
     });
 
-    it('should duplicate a moving average formula and be a valid table', async () => {
+    it('should duplicate a moving average formula and be a valid table with conditional coloring', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.goToTimeRange();
@@ -162,14 +195,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         formula: `moving_average(sum(bytes), window=5`,
         keepOpen: true,
       });
+      await PageObjects.lens.setTableDynamicColoring('text');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const styleObj = await PageObjects.lens.getDatatableCellStyle(1, 1);
+      expect(styleObj['background-color']).to.be(undefined);
+      expect(styleObj.color).not.to.be(undefined);
+
       await PageObjects.lens.closeDimensionEditor();
 
       await PageObjects.lens.dragDimensionToDimension(
         'lnsDatatable_metrics > lns-dimensionTrigger',
         'lnsDatatable_metrics > lns-empty-dimension'
       );
-      expect(await PageObjects.lens.getDatatableCellText(1, 1)).to.eql('222420');
-      expect(await PageObjects.lens.getDatatableCellText(1, 2)).to.eql('222420');
+      expect(await PageObjects.lens.getDatatableCellText(1, 1)).to.eql('222,420');
+      expect(await PageObjects.lens.getDatatableCellText(1, 2)).to.eql('222,420');
     });
 
     it('should keep the formula if the user does not fully transition to a quick function', async () => {
@@ -193,6 +232,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.getDimensionTriggerText('lnsDatatable_metrics', 0)).to.eql(
         'count()'
       );
+    });
+
+    it('should allow numeric only formulas', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+      await PageObjects.lens.switchToVisualization('lnsDatatable');
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsDatatable_metrics > lns-empty-dimension',
+        operation: 'formula',
+        formula: `0`,
+      });
+
+      await PageObjects.lens.dragDimensionToDimension(
+        'lnsDatatable_metrics > lns-dimensionTrigger',
+        'lnsDatatable_metrics > lns-empty-dimension'
+      );
+      expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('0');
+      expect(await PageObjects.lens.getDatatableCellText(0, 1)).to.eql('0');
     });
   });
 }

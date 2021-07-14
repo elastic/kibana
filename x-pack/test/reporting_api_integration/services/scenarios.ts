@@ -22,8 +22,10 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const log = getService('log');
   const supertest = getService('supertest');
   const esSupertest = getService('esSupertest');
+  const kibanaServer = getService('kibanaServer');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const retry = getService('retry');
+  const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
 
   const DATA_ANALYST_USERNAME = 'data_analyst';
   const DATA_ANALYST_PASSWORD = 'data_analyst-password';
@@ -32,11 +34,11 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
 
   const initEcommerce = async () => {
     await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
-    await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce_kibana');
+    await kibanaServer.importExport.load(ecommerceSOPath);
   };
   const teardownEcommerce = async () => {
     await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
-    await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce_kibana');
+    await kibanaServer.importExport.unload(ecommerceSOPath);
     await deleteAllReports();
   };
 
@@ -162,6 +164,36 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     });
   };
 
+  const checkIlmMigrationStatus = async () => {
+    log.debug('ReportingAPI.checkIlmMigrationStatus');
+    const { body } = await supertestWithoutAuth
+      .get('/api/reporting/ilm_policy_status')
+      .set('kbn-xsrf', 'xxx')
+      .expect(200);
+    return body.status;
+  };
+
+  const migrateReportingIndices = async () => {
+    log.debug('ReportingAPI.migrateReportingIndices');
+    await supertestWithoutAuth
+      .put('/api/reporting/deprecations/migrate_ilm_policy')
+      .set('kbn-xsrf', 'xxx')
+      .expect(200);
+  };
+
+  const makeAllReportingIndicesUnmanaged = async () => {
+    log.debug('ReportingAPI.makeAllReportingIndicesUnmanaged');
+    const settings: any = {
+      'index.lifecycle.name': null,
+    };
+    await esSupertest
+      .put('/.reporting*/_settings')
+      .send({
+        settings,
+      })
+      .expect(200);
+  };
+
   return {
     initEcommerce,
     teardownEcommerce,
@@ -180,5 +212,8 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     postJob,
     postJobJSON,
     deleteAllReports,
+    checkIlmMigrationStatus,
+    migrateReportingIndices,
+    makeAllReportingIndicesUnmanaged,
   };
 }

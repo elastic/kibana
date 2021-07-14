@@ -53,12 +53,14 @@ const createSetMaxSizeAction = (testBed: TestBed) => async (value: string, units
 export const createRolloverActions = (testBed: TestBed) => {
   const { exists } = testBed;
   return {
-    toggle: createFormToggleAction(testBed, 'rolloverSwitch'),
-    toggleDefault: createFormToggleAction(testBed, 'useDefaultRolloverSwitch'),
-    setMaxPrimaryShardSize: createSetPrimaryShardSizeAction(testBed),
-    setMaxDocs: createFormSetValueAction(testBed, 'hot-selectedMaxDocuments'),
-    setMaxAge: createSetMaxAgeAction(testBed),
-    setMaxSize: createSetMaxSizeAction(testBed),
-    hasSettingRequiredCallout: (): boolean => exists('rolloverSettingsRequired'),
+    rollover: {
+      toggle: createFormToggleAction(testBed, 'rolloverSwitch'),
+      toggleDefault: createFormToggleAction(testBed, 'useDefaultRolloverSwitch'),
+      setMaxPrimaryShardSize: createSetPrimaryShardSizeAction(testBed),
+      setMaxDocs: createFormSetValueAction(testBed, 'hot-selectedMaxDocuments'),
+      setMaxAge: createSetMaxAgeAction(testBed),
+      setMaxSize: createSetMaxSizeAction(testBed),
+      hasSettingRequiredCallout: (): boolean => exists('rolloverSettingsRequired'),
+    },
   };
 };

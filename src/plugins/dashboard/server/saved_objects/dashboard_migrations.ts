@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import semver from 'semver';
-import { get, flow } from 'lodash';
+import { get, flow, mapValues } from 'lodash';
 import {
   SavedObjectAttributes,
   SavedObjectMigrationFn,
@@ -25,7 +24,14 @@ import {
   convertSavedDashboardPanelToPanelState,
 } from '../../common/embeddable/embeddable_saved_object_converters';
 import { SavedObjectEmbeddableInput } from '../../../embeddable/common';
-import { SerializableValue } from '../../../kibana_utils/common';
+import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../../data/common';
+import {
+  mergeMigrationFunctionMaps,
+  MigrateFunction,
+  MigrateFunctionsObject,
+  SerializableValue,
+} from '../../../kibana_utils/common';
+import { replaceIndexPatternReference } from './replace_index_pattern_reference';
 
 function migrateIndexPattern(doc: DashboardDoc700To720) {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
@@ -43,7 +49,7 @@ function migrateIndexPattern(doc: DashboardDoc700To720) {
     searchSource.indexRefName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
     doc.references.push({
       name: searchSource.indexRefName,
-      type: 'index-pattern',
+      type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
       id: searchSource.index,
     });
     delete searchSource.index;
@@ -56,7 +62,7 @@ function migrateIndexPattern(doc: DashboardDoc700To720) {
       filterRow.meta.indexRefName = `kibanaSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
       doc.references.push({
         name: filterRow.meta.indexRefName,
-        type: 'index-pattern',
+        type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
         id: filterRow.meta.index,
       });
       delete filterRow.meta.index;
@@ -154,7 +160,7 @@ type ValueOrReferenceInput = SavedObjectEmbeddableInput & {
 
 // Runs the embeddable migrations on each panel
 const migrateByValuePanels = (
-  deps: DashboardSavedObjectTypeMigrationsDeps,
+  migrate: MigrateFunction,
   version: string
 ): SavedObjectMigrationFn => (doc: any) => {
   const { attributes } = doc;
@@ -177,13 +183,10 @@ const migrateByValuePanels = (
     // saved vis is used to store by value input for Visualize. This should eventually be renamed to `attributes` to align with Lens and Maps
     if (originalPanelState.explicitInput.attributes || originalPanelState.explicitInput.savedVis) {
       // If this panel is by value, migrate the state using embeddable migrations
-      const migratedInput = deps.embeddable.migrate(
-        {
-          ...originalPanelState.explicitInput,
-          type: originalPanelState.type,
-        },
-        version
-      );
+      const migratedInput = migrate({
+        ...originalPanelState.explicitInput,
+        type: originalPanelState.type,
+      });
       // Convert the embeddable state back into the panel shape
       newPanels.push(
         convertPanelStateToSavedDashboardPanel(
@@ -214,14 +217,12 @@ export interface DashboardSavedObjectTypeMigrationsDeps {
 export const createDashboardSavedObjectTypeMigrations = (
   deps: DashboardSavedObjectTypeMigrationsDeps
 ): SavedObjectMigrationMap => {
-  const embeddableMigrations = deps.embeddable
-    .getMigrationVersions()
-    .filter((version) => semver.gt(version, '7.12.0'))
-    .map((version): [string, SavedObjectMigrationFn] => {
-      return [version, migrateByValuePanels(deps, version)];
-    });
+  const embeddableMigrations = mapValues<MigrateFunctionsObject, SavedObjectMigrationFn>(
+    deps.embeddable.getAllMigrations(),
+    migrateByValuePanels
+  ) as MigrateFunctionsObject;
 
-  return {
+  const dashboardMigrations = {
     /**
      * We need to have this migration twice, once with a version prior to 7.0.0 once with a version
      * after it. The reason for that is, that this migration has been introduced once 7.0.0 was already
@@ -237,12 +238,15 @@ export const createDashboardSavedObjectTypeMigrations = (
     '7.3.0': flow(migrations730),
     '7.9.3': flow(migrateMatchAllQuery),
     '7.11.0': flow(createExtractPanelReferencesMigration(deps)),
-    ...Object.fromEntries(embeddableMigrations),
 
     /**
      * Any dashboard saved object migrations that come after this point will have to be wary of
      * potentially overwriting embeddable migrations. An example of how to mitigate this follows:
      */
-    // '7.x': flow(yourNewMigrationFunction, embeddableMigrations['7.x'])
+    // '7.x': flow(yourNewMigrationFunction, embeddableMigrations['7.x'] ?? identity),
+
+    '7.14.0': flow(replaceIndexPatternReference),
   };
+
+  return mergeMigrationFunctionMaps(dashboardMigrations, embeddableMigrations);
 };

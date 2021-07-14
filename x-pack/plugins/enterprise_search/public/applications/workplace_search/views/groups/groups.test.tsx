@@ -50,7 +50,6 @@ const mockValues = {
   filteredSources: [],
   filteredUsers: [],
   filterValue: '',
-  isFederatedAuth: false,
 };
 
 describe('GroupOverview', () => {
@@ -112,29 +111,12 @@ describe('GroupOverview', () => {
     expect(wrapper.find(ClearFiltersLink)).toHaveLength(1);
   });
 
-  it('renders inviteUsersButton when not federated auth', () => {
-    setMockValues({
-      ...mockValues,
-      isFederatedAuth: false,
-    });
-
+  it('renders inviteUsersButton', () => {
     const wrapper = shallow(<Groups />);
     const actions = getPageHeaderActions(wrapper);
 
     expect(actions.find('[data-test-subj="InviteUsersButton"]')).toHaveLength(1);
     expect(actions.find(EuiButtonTo)).toHaveLength(1);
-  });
-
-  it('does not render inviteUsersButton when federated auth', () => {
-    setMockValues({
-      ...mockValues,
-      isFederatedAuth: true,
-    });
-
-    const wrapper = shallow(<Groups />);
-    const actions = getPageHeaderActions(wrapper);
-
-    expect(actions.find('[data-test-subj="InviteUsersButton"]')).toHaveLength(0);
   });
 
   it('renders EuiLoadingSpinner when loading', () => {

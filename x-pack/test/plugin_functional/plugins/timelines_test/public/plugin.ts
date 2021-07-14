@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, AppMountParameters } from 'kibana/public';
+import { Plugin, CoreStart, CoreSetup, AppMountParameters } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { TimelinesPluginSetup } from '../../../../../plugins/timelines/public';
+import { TimelinesUIStart } from '../../../../../plugins/timelines/public';
 import { renderApp } from './applications/timelines_test';
 
 export type TimelinesTestPluginSetup = void;
 export type TimelinesTestPluginStart = void;
-export interface TimelinesTestPluginSetupDependencies {
-  timelines: TimelinesPluginSetup;
-}
-
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface TimelinesTestPluginStartDependencies {}
+export interface TimelinesTestPluginSetupDependencies {}
+
+export interface TimelinesTestPluginStartDependencies {
+  timelines: TimelinesUIStart;
+}
 
 export class TimelinesTestPlugin
   implements
@@ -27,6 +27,7 @@ export class TimelinesTestPlugin
       TimelinesTestPluginSetupDependencies,
       TimelinesTestPluginStartDependencies
     > {
+  private timelinesPlugin: TimelinesUIStart | null = null;
   public setup(
     core: CoreSetup<TimelinesTestPluginStartDependencies, TimelinesTestPluginStart>,
     setupDependencies: TimelinesTestPluginSetupDependencies
@@ -39,12 +40,12 @@ export class TimelinesTestPlugin
       mount: async (params: AppMountParameters<unknown>) => {
         const startServices = await core.getStartServices();
         const [coreStart] = startServices;
-        const { timelines } = setupDependencies;
-
-        return renderApp(coreStart, params, timelines);
+        return renderApp(coreStart, params, this.timelinesPlugin);
       },
     });
   }
 
-  public start() {}
+  public start(core: CoreStart, { timelines }: TimelinesTestPluginStartDependencies) {
+    this.timelinesPlugin = timelines;
+  }
 }

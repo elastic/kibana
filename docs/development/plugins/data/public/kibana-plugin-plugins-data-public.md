@@ -31,6 +31,7 @@
 |  --- | --- |
 |  [BUCKET\_TYPES](./kibana-plugin-plugins-data-public.bucket_types.md) |  |
 |  [ES\_FIELD\_TYPES](./kibana-plugin-plugins-data-public.es_field_types.md) | \* |
+|  [IndexPatternType](./kibana-plugin-plugins-data-public.indexpatterntype.md) |  |
 |  [KBN\_FIELD\_TYPES](./kibana-plugin-plugins-data-public.kbn_field_types.md) | \* |
 |  [METRIC\_TYPES](./kibana-plugin-plugins-data-public.metric_types.md) |  |
 |  [QuerySuggestionTypes](./kibana-plugin-plugins-data-public.querysuggestiontypes.md) |  |
@@ -118,6 +119,7 @@
 |  [fieldFormats](./kibana-plugin-plugins-data-public.fieldformats.md) |  |
 |  [fieldList](./kibana-plugin-plugins-data-public.fieldlist.md) |  |
 |  [getKbnTypeNames](./kibana-plugin-plugins-data-public.getkbntypenames.md) | Get the esTypes known by all kbnFieldTypes {<!-- -->Array<string>} |
+|  [INDEX\_PATTERN\_SAVED\_OBJECT\_TYPE](./kibana-plugin-plugins-data-public.index_pattern_saved_object_type.md) | \* |
 |  [indexPatterns](./kibana-plugin-plugins-data-public.indexpatterns.md) |  |
 |  [injectSearchSourceReferences](./kibana-plugin-plugins-data-public.injectsearchsourcereferences.md) |  |
 |  [isCompleteResponse](./kibana-plugin-plugins-data-public.iscompleteresponse.md) |  |

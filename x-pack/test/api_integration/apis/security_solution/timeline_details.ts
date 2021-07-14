@@ -681,7 +681,7 @@ export default function ({ getService }: FtrProviderContext) {
         const {
           body: { data: detailsData },
         } = await supertest
-          .post('/internal/search/securitySolutionTimelineSearchStrategy/')
+          .post('/internal/search/timelineSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
             factoryQueryType: TimelineEventsQueries.details,
@@ -701,7 +701,7 @@ export default function ({ getService }: FtrProviderContext) {
         const {
           body: { destinationIpCount, hostCount, processCount, sourceIpCount, userCount },
         } = await supertest
-          .post('/internal/search/securitySolutionTimelineSearchStrategy/')
+          .post('/internal/search/timelineSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
             factoryQueryType: TimelineEventsQueries.kpi,

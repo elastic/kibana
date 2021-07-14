@@ -6,21 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { take } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { KibanaRequest } from 'src/core/server';
 
 import { Executor } from '../executor';
 import { AnyExpressionRenderDefinition, ExpressionRendererRegistry } from '../expression_renderers';
 import { ExpressionAstExpression } from '../ast';
-import { ExecutionContract } from '../execution/execution_contract';
-import { AnyExpressionTypeDefinition } from '../expression_types';
+import { ExecutionContract, ExecutionResult } from '../execution';
+import { AnyExpressionTypeDefinition, ExpressionValueError } from '../expression_types';
 import { AnyExpressionFunctionDefinition } from '../expression_functions';
 import { SavedObjectReference } from '../../../../core/types';
 import { PersistableStateService, SerializableState } from '../../../kibana_utils/common';
 import { Adapters } from '../../../inspector/common/adapters';
 import {
   clog,
+  createTable,
   font,
   variableSet,
   variable,
@@ -136,7 +137,7 @@ export interface ExpressionsServiceStart {
     ast: string | ExpressionAstExpression,
     input: Input,
     params?: ExpressionExecutionParams
-  ) => Promise<Output>;
+  ) => Observable<ExecutionResult<Output | ExpressionValueError>>;
 
   /**
    * Starts expression execution and immediately returns `ExecutionContract`
@@ -243,7 +244,7 @@ export class ExpressionsService implements PersistableStateService<ExpressionAst
   ): void => this.renderers.register(definition);
 
   public readonly run: ExpressionsServiceStart['run'] = (ast, input, params) =>
-    this.executor.run(ast, input, params).pipe(take(1)).toPromise<any>();
+    this.executor.run(ast, input, params);
 
   public readonly getFunction: ExpressionsServiceStart['getFunction'] = (name) =>
     this.executor.getFunction(name);
@@ -335,6 +336,7 @@ export class ExpressionsService implements PersistableStateService<ExpressionAst
   public setup(...args: unknown[]): ExpressionsServiceSetup {
     for (const fn of [
       clog,
+      createTable,
       font,
       variableSet,
       variable,

@@ -23,69 +23,63 @@ import { FramePublicAPI } from '../types';
 export const timeShiftOptions = [
   {
     label: i18n.translate('xpack.lens.indexPattern.timeShift.hour', {
-      defaultMessage: '1 hour (1h)',
+      defaultMessage: '1 hour ago (1h)',
     }),
     value: '1h',
   },
   {
     label: i18n.translate('xpack.lens.indexPattern.timeShift.3hours', {
-      defaultMessage: '3 hours (3h)',
+      defaultMessage: '3 hours ago (3h)',
     }),
     value: '3h',
   },
   {
     label: i18n.translate('xpack.lens.indexPattern.timeShift.6hours', {
-      defaultMessage: '6 hours (6h)',
+      defaultMessage: '6 hours ago (6h)',
     }),
     value: '6h',
   },
   {
     label: i18n.translate('xpack.lens.indexPattern.timeShift.12hours', {
-      defaultMessage: '12 hours (12h)',
+      defaultMessage: '12 hours ago (12h)',
     }),
     value: '12h',
   },
   {
     label: i18n.translate('xpack.lens.indexPattern.timeShift.day', {
-      defaultMessage: '1 day (1d)',
+      defaultMessage: '1 day ago (1d)',
     }),
     value: '1d',
   },
   {
     label: i18n.translate('xpack.lens.indexPattern.timeShift.week', {
-      defaultMessage: '1 week (1w)',
+      defaultMessage: '1 week ago (1w)',
     }),
     value: '1w',
   },
   {
     label: i18n.translate('xpack.lens.indexPattern.timeShift.month', {
-      defaultMessage: '1 month (1M)',
+      defaultMessage: '1 month ago (1M)',
     }),
     value: '1M',
   },
   {
     label: i18n.translate('xpack.lens.indexPattern.timeShift.3months', {
-      defaultMessage: '3 months (3M)',
+      defaultMessage: '3 months ago (3M)',
     }),
     value: '3M',
   },
   {
     label: i18n.translate('xpack.lens.indexPattern.timeShift.6months', {
-      defaultMessage: '6 months (6M)',
+      defaultMessage: '6 months ago (6M)',
     }),
     value: '6M',
   },
   {
     label: i18n.translate('xpack.lens.indexPattern.timeShift.year', {
-      defaultMessage: '1 year (1y)',
+      defaultMessage: '1 year ago (1y)',
     }),
     value: '1y',
-  },
-  {
-    label: i18n.translate('xpack.lens.indexPattern.timeShift.previous', {
-      defaultMessage: 'Previous',
-    }),
-    value: 'previous',
   },
 ];
 

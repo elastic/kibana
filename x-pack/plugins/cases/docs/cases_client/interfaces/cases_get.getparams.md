@@ -22,7 +22,7 @@ The parameters for retrieving a case
 
 Case ID
 
-Defined in: [cases/get.ts:110](https://github.com/jonathan-buttner/kibana/blob/0e98e105663/x-pack/plugins/cases/server/client/cases/get.ts#L110)
+Defined in: [cases/get.ts:145](https://github.com/elastic/kibana/blob/a80791aa4cc/x-pack/plugins/cases/server/client/cases/get.ts#L145)
 
 ___
 
@@ -32,7 +32,7 @@ ___
 
 Whether to include the attachments for a case in the response
 
-Defined in: [cases/get.ts:114](https://github.com/jonathan-buttner/kibana/blob/0e98e105663/x-pack/plugins/cases/server/client/cases/get.ts#L114)
+Defined in: [cases/get.ts:149](https://github.com/elastic/kibana/blob/a80791aa4cc/x-pack/plugins/cases/server/client/cases/get.ts#L149)
 
 ___
 
@@ -42,4 +42,4 @@ ___
 
 Whether to include the attachments for all children of a case in the response
 
-Defined in: [cases/get.ts:118](https://github.com/jonathan-buttner/kibana/blob/0e98e105663/x-pack/plugins/cases/server/client/cases/get.ts#L118)
+Defined in: [cases/get.ts:153](https://github.com/elastic/kibana/blob/a80791aa4cc/x-pack/plugins/cases/server/client/cases/get.ts#L153)

@@ -21,7 +21,7 @@ Parameters for deleting all comments of a case or sub case.
 
 The case ID to delete all attachments for
 
-Defined in: [attachments/delete.ts:31](https://github.com/jonathan-buttner/kibana/blob/0e98e105663/x-pack/plugins/cases/server/client/attachments/delete.ts#L31)
+Defined in: [attachments/delete.ts:31](https://github.com/elastic/kibana/blob/a80791aa4cc/x-pack/plugins/cases/server/client/attachments/delete.ts#L31)
 
 ___
 
@@ -31,4 +31,4 @@ ___
 
 If specified the caseID will be ignored and this value will be used to find a sub case for deleting all the attachments
 
-Defined in: [attachments/delete.ts:35](https://github.com/jonathan-buttner/kibana/blob/0e98e105663/x-pack/plugins/cases/server/client/attachments/delete.ts#L35)
+Defined in: [attachments/delete.ts:35](https://github.com/elastic/kibana/blob/a80791aa4cc/x-pack/plugins/cases/server/client/attachments/delete.ts#L35)

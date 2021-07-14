@@ -23,7 +23,6 @@ import {
   disableFilter,
   FILTERS,
   FilterStateStore,
-  getDisplayValueFromFilter,
   getPhraseFilterField,
   getPhraseFilterValue,
   isExistsFilter,
@@ -43,6 +42,7 @@ import { FilterLabel } from './ui';
 import { FilterItem } from './ui/filter_bar';
 
 import {
+  getDisplayValueFromFilter,
   generateFilters,
   onlyDisabledFiltersChanged,
   changeTimeFilter,
@@ -268,6 +268,8 @@ export {
   IndexPatternSpec,
   IndexPatternLoadExpressionFunctionDefinition,
   fieldList,
+  INDEX_PATTERN_SAVED_OBJECT_TYPE,
+  IndexPatternType,
 } from '../common';
 
 export { DuplicateIndexPatternError } from '../common/index_patterns/errors';

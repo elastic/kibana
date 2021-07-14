@@ -113,7 +113,7 @@ export function DimensionContainer({
                     >
                       <strong>
                         {i18n.translate('xpack.lens.configure.configurePanelTitle', {
-                          defaultMessage: '{groupLabel} configuration',
+                          defaultMessage: '{groupLabel}',
                           values: {
                             groupLabel,
                           },

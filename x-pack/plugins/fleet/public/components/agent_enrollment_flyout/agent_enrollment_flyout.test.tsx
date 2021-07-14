@@ -16,10 +16,10 @@ import { coreMock } from 'src/core/public/mocks';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 
 import type { AgentPolicy } from '../../../common';
-import { useGetSettings, sendGetFleetStatus } from '../../hooks/use_request';
+import { useGetSettings, sendGetFleetStatus, sendGetOneAgentPolicy } from '../../hooks/use_request';
 import { FleetStatusProvider, ConfigContext } from '../../hooks';
 
-import { useFleetServerInstructions } from '../../applications/fleet/sections/agents/agent_requirements_page';
+import { useFleetServerInstructions } from '../../applications/fleet/sections/agents/agent_requirements_page/components';
 
 import { AgentEnrollmentKeySelectionStep, AgentPolicySelectionStep } from './steps';
 
@@ -79,6 +79,10 @@ describe('<AgentEnrollmentFlyout />', () => {
       data: { isReady: true },
     });
 
+    (sendGetOneAgentPolicy as jest.Mock).mockResolvedValue({
+      data: { item: { package_policies: [] } },
+    });
+
     (useFleetServerInstructions as jest.Mock).mockReturnValue({
       serviceToken: 'test',
       getServiceToken: jest.fn(),
@@ -126,6 +130,48 @@ describe('<AgentEnrollmentFlyout />', () => {
         expect(exists('agentEnrollmentFlyout')).toBe(true);
         expect(AgentPolicySelectionStep).not.toHaveBeenCalled();
         expect(AgentEnrollmentKeySelectionStep).toHaveBeenCalled();
+      });
+    });
+
+    // Skipped due to implementation details in the step components. See https://github.com/elastic/kibana/issues/103894
+    describe.skip('"View data" extension point', () => {
+      it('shows the "View data" step when UI extension is provided', async () => {
+        jest.clearAllMocks();
+        await act(async () => {
+          testBed = await setup({
+            agentPolicies: [],
+            onClose: jest.fn(),
+            viewDataStep: { title: 'View Data', children: <div /> },
+          });
+          testBed.component.update();
+        });
+        const { exists, actions } = testBed;
+        expect(exists('agentEnrollmentFlyout')).toBe(true);
+        expect(exists('view-data-step')).toBe(true);
+
+        jest.clearAllMocks();
+        actions.goToStandaloneTab();
+        expect(exists('agentEnrollmentFlyout')).toBe(true);
+        expect(exists('view-data-step')).toBe(false);
+      });
+
+      it('does not call the "View data" step when UI extension is not provided', async () => {
+        jest.clearAllMocks();
+        await act(async () => {
+          testBed = await setup({
+            agentPolicies: [],
+            onClose: jest.fn(),
+            viewDataStep: undefined,
+          });
+          testBed.component.update();
+        });
+        const { exists, actions } = testBed;
+        expect(exists('agentEnrollmentFlyout')).toBe(true);
+        expect(exists('view-data-step')).toBe(false);
+
+        jest.clearAllMocks();
+        actions.goToStandaloneTab();
+        expect(exists('view-data-step')).toBe(false);
       });
     });
   });

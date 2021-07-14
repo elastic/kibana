@@ -9,15 +9,23 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import semver from 'semver';
 
-import type { AgentPolicy, PackagePolicy } from '../../types';
-import { sendGetOneAgentPolicy } from '../../hooks';
-import { FLEET_SERVER_PACKAGE } from '../../constants';
+import type { AgentPolicy } from '../../types';
+import { useKibanaVersion } from '../../hooks';
 
 import { EnrollmentStepAgentPolicy } from './agent_policy_selection';
 import { AdvancedAgentAuthenticationSettings } from './advanced_agent_authentication_settings';
 
 export const DownloadStep = () => {
+  const kibanaVersion = useKibanaVersion();
+  const kibanaVersionURLString = useMemo(
+    () =>
+      `${semver.major(kibanaVersion)}-${semver.minor(kibanaVersion)}-${semver.patch(
+        kibanaVersion
+      )}`,
+    [kibanaVersion]
+  );
   return {
     title: i18n.translate('xpack.fleet.agentEnrollment.stepDownloadAgentTitle', {
       defaultMessage: 'Download the Elastic Agent to your host',
@@ -27,12 +35,19 @@ export const DownloadStep = () => {
         <EuiText>
           <FormattedMessage
             id="xpack.fleet.agentEnrollment.downloadDescription"
-            defaultMessage="You can download the agent binaries and their verification signatures from the Elastic Agent download page."
+            defaultMessage="Fleet Server runs on an Elastic Agent. You can download the Elastic Agent binaries and verification signatures from Elastic’s download page."
+          />
+        </EuiText>
+        <EuiSpacer size="s" />
+        <EuiText size="s">
+          <FormattedMessage
+            id="xpack.fleet.agentEnrollment.downloadUseLinuxInstaller"
+            defaultMessage="Linux users: We recommend using the installers over (RPM/DEB) because they provide the ability to upgrade your agent within Fleet."
           />
         </EuiText>
         <EuiSpacer size="l" />
         <EuiButton
-          href="https://ela.st/download-elastic-agent"
+          href={`https://www.elastic.co/downloads/past-releases/elastic-agent-${kibanaVersionURLString}`}
           target="_blank"
           iconSide="right"
           iconType="popout"
@@ -49,15 +64,15 @@ export const DownloadStep = () => {
 
 export const AgentPolicySelectionStep = ({
   agentPolicies,
-  setSelectedAPIKeyId,
   setSelectedPolicyId,
-  setIsFleetServerPolicySelected,
+  selectedApiKeyId,
+  setSelectedAPIKeyId,
   excludeFleetServer,
 }: {
   agentPolicies?: AgentPolicy[];
-  setSelectedAPIKeyId?: (key?: string) => void;
   setSelectedPolicyId?: (policyId?: string) => void;
-  setIsFleetServerPolicySelected?: (selected: boolean) => void;
+  selectedApiKeyId?: string;
+  setSelectedAPIKeyId?: (key?: string) => void;
   excludeFleetServer?: boolean;
 }) => {
   const regularAgentPolicies = useMemo(() => {
@@ -74,21 +89,8 @@ export const AgentPolicySelectionStep = ({
       if (setSelectedPolicyId) {
         setSelectedPolicyId(policyId);
       }
-      if (policyId && setIsFleetServerPolicySelected) {
-        const agentPolicyRequest = await sendGetOneAgentPolicy(policyId);
-        if (
-          agentPolicyRequest.data?.item &&
-          (agentPolicyRequest.data.item.package_policies as PackagePolicy[]).some(
-            (packagePolicy) => packagePolicy.package?.name === FLEET_SERVER_PACKAGE
-          )
-        ) {
-          setIsFleetServerPolicySelected(true);
-        } else {
-          setIsFleetServerPolicySelected(false);
-        }
-      }
     },
-    [setIsFleetServerPolicySelected, setSelectedPolicyId]
+    [setSelectedPolicyId]
   );
 
   return {
@@ -99,6 +101,7 @@ export const AgentPolicySelectionStep = ({
       <EnrollmentStepAgentPolicy
         agentPolicies={regularAgentPolicies}
         withKeySelection={setSelectedAPIKeyId ? true : false}
+        selectedApiKeyId={selectedApiKeyId}
         onKeyChange={setSelectedAPIKeyId}
         onAgentPolicyChange={onAgentPolicyChange}
         excludeFleetServer={excludeFleetServer}
@@ -109,21 +112,23 @@ export const AgentPolicySelectionStep = ({
 
 export const AgentEnrollmentKeySelectionStep = ({
   agentPolicy,
+  selectedApiKeyId,
   setSelectedAPIKeyId,
 }: {
   agentPolicy: AgentPolicy;
+  selectedApiKeyId?: string;
   setSelectedAPIKeyId: (key?: string) => void;
 }) => {
   return {
     title: i18n.translate('xpack.fleet.agentEnrollment.stepConfigurePolicyAuthenticationTitle', {
-      defaultMessage: 'Configure agent authentication',
+      defaultMessage: 'Select enrollment token',
     }),
     children: (
       <>
         <EuiText>
           <FormattedMessage
             id="xpack.fleet.agentEnrollment.agentAuthenticationSettings"
-            defaultMessage="{agentPolicyName} has been selected. Configure agent authentication based on the available policy options."
+            defaultMessage="{agentPolicyName} has been selected. Select which enrollment token to use when enrolling agents."
             values={{
               agentPolicyName: <strong>{agentPolicy.name}</strong>,
             }}
@@ -132,6 +137,8 @@ export const AgentEnrollmentKeySelectionStep = ({
         <EuiSpacer size="l" />
         <AdvancedAgentAuthenticationSettings
           agentPolicyId={agentPolicy.id}
+          selectedApiKeyId={selectedApiKeyId}
+          initialAuthenticationSettingsOpen
           onKeyChange={setSelectedAPIKeyId}
         />
       </>

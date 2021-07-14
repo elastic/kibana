@@ -19,7 +19,7 @@ import {
   DocumentsTransformSuccess,
 } from '../migrations/core/migrate_raw_docs';
 
-export type MigrationLogLevel = 'error' | 'info';
+export type MigrationLogLevel = 'error' | 'info' | 'warning';
 
 export interface MigrationLog {
   level: MigrationLogLevel;
@@ -108,11 +108,16 @@ export interface BaseState extends ControlState {
    * prevents lost deletes e.g. `.kibana_7.11.0_reindex`.
    */
   readonly tempIndex: string;
-  /* When reindexing we use a source query to exclude saved objects types which
+  /**
+   * When reindexing we use a source query to exclude saved objects types which
    * are no longer used. These saved objects will still be kept in the outdated
    * index for backup purposes, but won't be available in the upgraded index.
    */
   readonly unusedTypesQuery: estypes.QueryDslQueryContainer;
+  /**
+   * The list of known SO types that are registered.
+   */
+  readonly knownTypes: string[];
 }
 
 export interface InitState extends BaseState {
@@ -150,6 +155,13 @@ export interface FatalState extends BaseState {
 export interface WaitForYellowSourceState extends BaseState {
   /** Wait for the source index to be yellow before requesting it. */
   readonly controlState: 'WAIT_FOR_YELLOW_SOURCE';
+  readonly sourceIndex: Option.Some<string>;
+  readonly sourceIndexMappings: IndexMapping;
+}
+
+export interface CheckUnknownDocumentsState extends BaseState {
+  /** Check if any unknown document is present in the source index */
+  readonly controlState: 'CHECK_UNKNOWN_DOCUMENTS';
   readonly sourceIndex: Option.Some<string>;
   readonly sourceIndexMappings: IndexMapping;
 }
@@ -287,6 +299,7 @@ export interface OutdatedDocumentsTransform extends PostInitState {
   readonly transformErrors: TransformErrorObjects[];
   readonly progress: Progress;
 }
+
 export interface TransformedDocumentsBulkIndex extends PostInitState {
   /**
    * Write the up-to-date transformed documents to the target index
@@ -386,6 +399,7 @@ export type State = Readonly<
   | InitState
   | DoneState
   | WaitForYellowSourceState
+  | CheckUnknownDocumentsState
   | SetSourceWriteBlockState
   | CreateNewTargetState
   | CreateReindexTempState

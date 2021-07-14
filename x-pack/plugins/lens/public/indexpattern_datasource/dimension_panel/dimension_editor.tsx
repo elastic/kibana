@@ -117,21 +117,14 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const setStateWrapper = (
     setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
   ) => {
-    const prevOperationType =
-      operationDefinitionMap[state.layers[layerId].columns[columnId]?.operationType]?.input;
-
     const hypotheticalLayer = typeof setter === 'function' ? setter(state.layers[layerId]) : setter;
-    const hasIncompleteColumns = Boolean(hypotheticalLayer.incompleteColumns?.[columnId]);
     setState(
       (prevState) => {
         const layer = typeof setter === 'function' ? setter(prevState.layers[layerId]) : setter;
         return mergeLayer({ state: prevState, layerId, newLayer: layer });
       },
       {
-        isDimensionComplete:
-          prevOperationType === 'fullReference'
-            ? !hasIncompleteColumns
-            : Boolean(hypotheticalLayer.columns[columnId]),
+        isDimensionComplete: Boolean(hypotheticalLayer.columns[columnId]),
       }
     );
   };
@@ -750,7 +743,7 @@ function getErrorMessage(
   if (selectedColumn && incompleteOperation) {
     if (input === 'field') {
       return i18n.translate('xpack.lens.indexPattern.invalidOperationLabel', {
-        defaultMessage: 'To use this function, select a different field.',
+        defaultMessage: 'This field does not work with the selected function.',
       });
     }
     return i18n.translate('xpack.lens.indexPattern.chooseFieldLabel', {

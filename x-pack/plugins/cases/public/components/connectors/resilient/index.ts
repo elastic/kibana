@@ -8,13 +8,13 @@
 import { lazy } from 'react';
 
 import { CaseConnector } from '../types';
-import { ResilientFieldsType } from '../../../../common';
+import { ConnectorTypes, ResilientFieldsType } from '../../../../common';
 import * as i18n from './translations';
 
 export * from './types';
 
 export const getCaseConnector = (): CaseConnector<ResilientFieldsType> => ({
-  id: '.resilient',
+  id: ConnectorTypes.resilient,
   fieldsComponent: lazy(() => import('./case_fields')),
 });
 

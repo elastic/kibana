@@ -6,12 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiHeaderLinks, EuiHeaderLink, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   createExploratoryViewUrl,
@@ -47,10 +42,11 @@ export function UXActionMenu({
 
   const uxExploratoryViewLink = createExploratoryViewUrl(
     {
-      'ux-series': {
+      'ux-series': ({
         dataType: 'ux',
+        isNew: true,
         time: { from: rangeFrom, to: rangeTo },
-      } as SeriesUrl,
+      } as unknown) as SeriesUrl,
     },
     http?.basePath.get()
   );
@@ -61,38 +57,29 @@ export function UXActionMenu({
     <HeaderMenuPortal
       setHeaderActionMenu={appMountParameters.setHeaderActionMenu}
     >
-      <EuiFlexGroup
-        alignItems="center"
-        gutterSize="s"
-        responsive={false}
-        style={{ paddingRight: 20 }}
-      >
-        <EuiFlexItem>
-          <EuiToolTip position="top" content={<p>{ANALYZE_MESSAGE}</p>}>
-            <EuiButtonEmpty
-              size="xs"
-              color="text"
-              href={uxExploratoryViewLink}
-              iconType="visBarVerticalStacked"
-            >
-              {ANALYZE_DATA}
-            </EuiButtonEmpty>
-          </EuiToolTip>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiButtonEmpty
-            iconType="indexOpen"
-            iconSide="left"
-            href={kibana.services?.application?.getUrlForApp(
-              '/home#/tutorial/apm'
-            )}
+      <EuiHeaderLinks gutterSize="xs">
+        <EuiToolTip position="top" content={<p>{ANALYZE_MESSAGE}</p>}>
+          <EuiHeaderLink
+            color="text"
+            href={uxExploratoryViewLink}
+            iconType="visBarVerticalStacked"
           >
-            {i18n.translate('xpack.apm.addDataButtonLabel', {
-              defaultMessage: 'Add data',
-            })}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+            {ANALYZE_DATA}
+          </EuiHeaderLink>
+        </EuiToolTip>
+        <EuiHeaderLink
+          color="primary"
+          iconType="indexOpen"
+          iconSide="left"
+          href={kibana.services?.application?.getUrlForApp(
+            '/home#/tutorial/apm'
+          )}
+        >
+          {i18n.translate('xpack.apm.addDataButtonLabel', {
+            defaultMessage: 'Add data',
+          })}
+        </EuiHeaderLink>
+      </EuiHeaderLinks>
     </HeaderMenuPortal>
   );
 }

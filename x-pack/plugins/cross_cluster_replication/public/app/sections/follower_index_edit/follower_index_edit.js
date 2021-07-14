@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import React, { PureComponent, Fragment } from 'react';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
-  EuiButtonEmpty,
+  EuiButton,
   EuiConfirmModal,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiPageContentBody,
   EuiPageContent,
-  EuiSpacer,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 
 import { setBreadcrumbs, listBreadcrumb, editBreadcrumb } from '../../services/breadcrumbs';
@@ -24,11 +23,10 @@ import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_rea
 import {
   FollowerIndexForm,
   FollowerIndexPageTitle,
-  SectionLoading,
-  SectionError,
   RemoteClustersProvider,
 } from '../../components';
 import { API_STATUS } from '../../constants';
+import { SectionLoading } from '../../../shared_imports';
 
 export class FollowerIndexEdit extends PureComponent {
   static propTypes = {
@@ -104,14 +102,11 @@ export class FollowerIndexEdit extends PureComponent {
 
   closeConfirmModal = () => this.setState({ showConfirmModal: false });
 
-  renderLoadingFollowerIndex() {
+  renderLoading(loadingTitle) {
     return (
-      <SectionLoading>
-        <FormattedMessage
-          id="xpack.crossClusterReplication.followerIndexEditForm.loadingFollowerIndexTitle"
-          defaultMessage="Loading follower index…"
-        />
-      </SectionLoading>
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+        <SectionLoading>{loadingTitle}</SectionLoading>
+      </EuiPageContent>
     );
   }
 
@@ -121,13 +116,6 @@ export class FollowerIndexEdit extends PureComponent {
         params: { id: name },
       },
     } = this.props;
-
-    const title = i18n.translate(
-      'xpack.crossClusterReplication.followerIndexEditForm.loadingErrorTitle',
-      {
-        defaultMessage: 'Error loading follower index',
-      }
-    );
 
     const errorMessage =
       error.body.statusCode === 404
@@ -143,27 +131,33 @@ export class FollowerIndexEdit extends PureComponent {
         : error;
 
     return (
-      <Fragment>
-        <SectionError title={title} error={errorMessage} />
-
-        <EuiSpacer size="m" />
-
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+        <EuiEmptyPrompt
+          iconType="alert"
+          title={
+            <h2>
+              <FormattedMessage
+                id="xpack.crossClusterReplication.followerIndexEditForm.loadingErrorTitle"
+                defaultMessage="Error loading follower index"
+              />
+            </h2>
+          }
+          body={<p>{errorMessage}</p>}
+          actions={
+            <EuiButton
               {...reactRouterNavigate(this.props.history, `/follower_indices`)}
-              iconType="arrowLeft"
+              color="danger"
               flush="left"
-              data-test-subj="viewListFollowerIndexButton"
+              iconType="arrowLeft"
             >
               <FormattedMessage
                 id="xpack.crossClusterReplication.followerIndexEditForm.viewFollowerIndicesButtonLabel"
                 defaultMessage="View follower indices"
               />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </Fragment>
+            </EuiButton>
+          }
+        />
+      </EuiPageContent>
     );
   }
 
@@ -237,57 +231,63 @@ export class FollowerIndexEdit extends PureComponent {
     /* remove non-editable properties */
     const { shards, ...rest } = followerIndex || {}; // eslint-disable-line no-unused-vars
 
+    if (apiStatus.get === API_STATUS.LOADING || !followerIndex) {
+      return this.renderLoading(
+        i18n.translate(
+          'xpack.crossClusterReplication.followerIndexEditForm.loadingFollowerIndexTitle',
+          { defaultMessage: 'Loading follower index…' }
+        )
+      );
+    }
+
+    if (apiError.get) {
+      return this.renderGetFollowerIndexError(apiError.get);
+    }
+
     return (
-      <EuiPageContent horizontalPosition="center" className="ccrPageContent">
-        <FollowerIndexPageTitle
-          title={
-            <FormattedMessage
-              id="xpack.crossClusterReplication.followerIndex.editTitle"
-              defaultMessage="Edit follower index"
-            />
+      <RemoteClustersProvider>
+        {({ isLoading, error, remoteClusters }) => {
+          if (isLoading) {
+            return this.renderLoading(
+              i18n.translate(
+                'xpack.crossClusterReplication.followerIndexEditForm.loadingRemoteClustersMessage',
+                { defaultMessage: 'Loading remote clusters…' }
+              )
+            );
           }
-        />
 
-        {apiStatus.get === API_STATUS.LOADING && this.renderLoadingFollowerIndex()}
+          return (
+            <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
+              <FollowerIndexPageTitle
+                title={
+                  <FormattedMessage
+                    id="xpack.crossClusterReplication.followerIndex.editTitle"
+                    defaultMessage="Edit follower index"
+                  />
+                }
+              />
 
-        {apiError.get && this.renderGetFollowerIndexError(apiError.get)}
-        {followerIndex && (
-          <RemoteClustersProvider>
-            {({ isLoading, error, remoteClusters }) => {
-              if (isLoading) {
-                return (
-                  <SectionLoading>
-                    <FormattedMessage
-                      id="xpack.crossClusterReplication.followerIndexEditForm.loadingRemoteClustersMessage"
-                      defaultMessage="Loading remote clusters…"
-                    />
-                  </SectionLoading>
-                );
-              }
+              <FollowerIndexForm
+                followerIndex={rest}
+                apiStatus={apiStatus.save}
+                apiError={apiError.save}
+                currentUrl={currentUrl}
+                remoteClusters={error ? [] : remoteClusters}
+                saveFollowerIndex={this.saveFollowerIndex}
+                clearApiError={clearApiError}
+                saveButtonLabel={
+                  <FormattedMessage
+                    id="xpack.crossClusterReplication.followerIndexEditForm.saveButtonLabel"
+                    defaultMessage="Update"
+                  />
+                }
+              />
 
-              return (
-                <FollowerIndexForm
-                  followerIndex={rest}
-                  apiStatus={apiStatus.save}
-                  apiError={apiError.save}
-                  currentUrl={currentUrl}
-                  remoteClusters={error ? [] : remoteClusters}
-                  saveFollowerIndex={this.saveFollowerIndex}
-                  clearApiError={clearApiError}
-                  saveButtonLabel={
-                    <FormattedMessage
-                      id="xpack.crossClusterReplication.followerIndexEditForm.saveButtonLabel"
-                      defaultMessage="Update"
-                    />
-                  }
-                />
-              );
-            }}
-          </RemoteClustersProvider>
-        )}
-
-        {showConfirmModal && this.renderConfirmModal()}
-      </EuiPageContent>
+              {showConfirmModal && this.renderConfirmModal()}
+            </EuiPageContentBody>
+          );
+        }}
+      </RemoteClustersProvider>
     );
   }
 }

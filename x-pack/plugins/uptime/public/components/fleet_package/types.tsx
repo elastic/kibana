@@ -25,10 +25,17 @@ export enum ResponseBodyIndexPolicy {
   ON_ERROR = 'on_error',
 }
 
+export enum MonacoEditorLangId {
+  JSON = 'xjson',
+  PLAINTEXT = 'plaintext',
+  XML = 'xml',
+  JAVASCRIPT = 'javascript',
+}
+
 export enum Mode {
   FORM = 'form',
   JSON = 'json',
-  TEXT = 'text',
+  PLAINTEXT = 'text',
   XML = 'xml',
 }
 
@@ -192,11 +199,11 @@ export interface PolicyConfig {
   [DataStream.ICMP]: ICMPFields;
 }
 
-export type Validation = Partial<Record<ConfigKeys, (value: unknown, ...args: any[]) => void>>;
+export type Validation = Partial<Record<ConfigKeys, (value: unknown, ...args: any[]) => boolean>>;
 
 export const contentTypesToMode = {
   [ContentType.FORM]: Mode.FORM,
   [ContentType.JSON]: Mode.JSON,
-  [ContentType.TEXT]: Mode.TEXT,
+  [ContentType.TEXT]: Mode.PLAINTEXT,
   [ContentType.XML]: Mode.XML,
 };

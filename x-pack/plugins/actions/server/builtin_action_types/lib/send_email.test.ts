@@ -76,7 +76,7 @@ describe('send_email module', () => {
       },
       {
         proxyUrl: 'https://example.com',
-        proxyTLSSettings: {
+        proxySSLSettings: {
           verificationMode: 'none',
         },
         proxyBypassHosts: undefined,
@@ -238,7 +238,7 @@ describe('send_email module', () => {
       },
       {
         proxyUrl: 'https://proxy.com',
-        proxyTLSSettings: {
+        proxySSLSettings: {
           verificationMode: 'none',
         },
         proxyBypassHosts: new Set(['example.com']),
@@ -272,7 +272,7 @@ describe('send_email module', () => {
       },
       {
         proxyUrl: 'https://proxy.com',
-        proxyTLSSettings: {
+        proxySSLSettings: {
           verificationMode: 'none',
         },
         proxyBypassHosts: new Set(['not-example.com']),
@@ -308,7 +308,7 @@ describe('send_email module', () => {
       },
       {
         proxyUrl: 'https://proxy.com',
-        proxyTLSSettings: {
+        proxySSLSettings: {
           verificationMode: 'none',
         },
         proxyBypassHosts: undefined,
@@ -344,7 +344,7 @@ describe('send_email module', () => {
       },
       {
         proxyUrl: 'https://proxy.com',
-        proxyTLSSettings: {},
+        proxySSLSettings: {},
         proxyBypassHosts: undefined,
         proxyOnlyHosts: new Set(['not-example.com']),
       }
@@ -377,7 +377,7 @@ describe('send_email module', () => {
       undefined,
       {
         url: 'smtp://example.com:1025',
-        tls: {
+        ssl: {
           certificateAuthoritiesData: 'ca cert data goes here',
         },
         smtp: {
@@ -419,7 +419,7 @@ describe('send_email module', () => {
       undefined,
       {
         url: 'smtp://example.com:1025',
-        tls: {
+        ssl: {
           certificateAuthoritiesData: 'ca cert data goes here',
           rejectUnauthorized: true,
         },
@@ -461,13 +461,13 @@ describe('send_email module', () => {
       },
       {
         proxyUrl: 'https://proxy.com',
-        proxyTLSSettings: {},
+        proxySSLSettings: {},
         proxyBypassHosts: undefined,
         proxyOnlyHosts: undefined,
       },
       {
         url: 'smtp://example.com:1025',
-        tls: {
+        ssl: {
           certificateAuthoritiesData: 'ca cert data goes here',
           rejectUnauthorized: true,
         },

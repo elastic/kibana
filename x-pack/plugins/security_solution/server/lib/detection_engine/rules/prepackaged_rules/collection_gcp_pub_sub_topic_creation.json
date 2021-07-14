@@ -14,7 +14,7 @@
   "license": "Elastic License v2",
   "name": "GCP Pub/Sub Topic Creation",
   "note": "## Config\n\nThe GCP Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:(googlecloud.audit or gcp.audit) and event.action:google.pubsub.v*.Publisher.CreateTopic and event.outcome:success",
+  "query": "event.dataset:(googlecloud.audit or gcp.audit) and event.action:google.pubsub.v*.Publisher.CreateTopic and event.outcome:success\n",
   "references": [
     "https://cloud.google.com/pubsub/docs/admin"
   ],

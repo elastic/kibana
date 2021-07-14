@@ -13,9 +13,7 @@ import { useValues, useActions } from 'kea';
 import { i18n } from '@kbn/i18n';
 
 import { setQueuedErrorMessage } from '../../../shared/flash_messages';
-import { Layout } from '../../../shared/layout';
 import { AppLogic } from '../../app_logic';
-import { AppSearchNav } from '../../index';
 
 import {
   ENGINE_PATH,
@@ -40,6 +38,7 @@ import { CurationsRouter } from '../curations';
 import { DocumentDetail, Documents } from '../documents';
 import { EngineOverview } from '../engine_overview';
 import { AppSearchPageTemplate } from '../layout';
+import { NotFound } from '../not_found';
 import { RelevanceTuning } from '../relevance_tuning';
 import { ResultSettings } from '../result_settings';
 import { SchemaRouter } from '../schema';
@@ -47,7 +46,7 @@ import { SearchUI } from '../search_ui';
 import { SourceEngines } from '../source_engines';
 import { Synonyms } from '../synonyms';
 
-import { EngineLogic } from './';
+import { EngineLogic, getEngineBreadcrumbs } from './';
 
 export const EngineRouter: React.FC = () => {
   const {
@@ -67,13 +66,20 @@ export const EngineRouter: React.FC = () => {
   } = useValues(AppLogic);
 
   const { engineName: engineNameFromUrl } = useParams() as { engineName: string };
-  const { engineName, dataLoading, engineNotFound } = useValues(EngineLogic);
-  const { setEngineName, initializeEngine, clearEngine } = useActions(EngineLogic);
+  const { engineName, dataLoading, engineNotFound, isMetaEngine } = useValues(EngineLogic);
+  const { setEngineName, initializeEngine, pollEmptyEngine, stopPolling, clearEngine } = useActions(
+    EngineLogic
+  );
 
   useEffect(() => {
     setEngineName(engineNameFromUrl);
     initializeEngine();
-    return clearEngine;
+    pollEmptyEngine();
+
+    return () => {
+      stopPolling();
+      clearEngine();
+    };
   }, [engineNameFromUrl]);
 
   if (engineNotFound) {
@@ -94,6 +100,11 @@ export const EngineRouter: React.FC = () => {
       <Route exact path={ENGINE_PATH}>
         <EngineOverview />
       </Route>
+      {canViewEngineAnalytics && (
+        <Route path={ENGINE_ANALYTICS_PATH}>
+          <AnalyticsRouter />
+        </Route>
+      )}
       {canViewEngineDocuments && (
         <Route path={ENGINE_DOCUMENT_DETAIL_PATH}>
           <DocumentDetail />
@@ -104,59 +115,54 @@ export const EngineRouter: React.FC = () => {
           <Documents />
         </Route>
       )}
-      {/* TODO: Remove layout once page template migration is over */}
-      <Layout navigation={<AppSearchNav />}>
-        {canViewEngineAnalytics && (
-          <Route path={ENGINE_ANALYTICS_PATH}>
-            <AnalyticsRouter />
-          </Route>
-        )}
-        {canViewEngineSchema && (
-          <Route path={ENGINE_SCHEMA_PATH}>
-            <SchemaRouter />
-          </Route>
-        )}
-        {canManageEngineCurations && (
-          <Route path={ENGINE_CURATIONS_PATH}>
-            <CurationsRouter />
-          </Route>
-        )}
-        {canManageEngineRelevanceTuning && (
-          <Route path={ENGINE_RELEVANCE_TUNING_PATH}>
-            <RelevanceTuning />
-          </Route>
-        )}
-        {canManageEngineSynonyms && (
-          <Route path={ENGINE_SYNONYMS_PATH}>
-            <Synonyms />
-          </Route>
-        )}
-        {canManageEngineResultSettings && (
-          <Route path={ENGINE_RESULT_SETTINGS_PATH}>
-            <ResultSettings />
-          </Route>
-        )}
-        {canViewEngineApiLogs && (
-          <Route path={ENGINE_API_LOGS_PATH}>
-            <ApiLogs />
-          </Route>
-        )}
-        {canManageEngineSearchUi && (
-          <Route path={ENGINE_SEARCH_UI_PATH}>
-            <SearchUI />
-          </Route>
-        )}
-        {canViewMetaEngineSourceEngines && (
-          <Route path={META_ENGINE_SOURCE_ENGINES_PATH}>
-            <SourceEngines />
-          </Route>
-        )}
-        {canViewEngineCrawler && (
-          <Route path={ENGINE_CRAWLER_PATH}>
-            <CrawlerRouter />
-          </Route>
-        )}
-      </Layout>
+      {canViewEngineSchema && (
+        <Route path={ENGINE_SCHEMA_PATH}>
+          <SchemaRouter />
+        </Route>
+      )}
+      {canViewMetaEngineSourceEngines && isMetaEngine && (
+        <Route path={META_ENGINE_SOURCE_ENGINES_PATH}>
+          <SourceEngines />
+        </Route>
+      )}
+      {canViewEngineCrawler && !isMetaEngine && (
+        <Route path={ENGINE_CRAWLER_PATH}>
+          <CrawlerRouter />
+        </Route>
+      )}
+      {canManageEngineRelevanceTuning && (
+        <Route path={ENGINE_RELEVANCE_TUNING_PATH}>
+          <RelevanceTuning />
+        </Route>
+      )}
+      {canManageEngineSynonyms && (
+        <Route path={ENGINE_SYNONYMS_PATH}>
+          <Synonyms />
+        </Route>
+      )}
+      {canManageEngineCurations && (
+        <Route path={ENGINE_CURATIONS_PATH}>
+          <CurationsRouter />
+        </Route>
+      )}
+      {canManageEngineResultSettings && (
+        <Route path={ENGINE_RESULT_SETTINGS_PATH}>
+          <ResultSettings />
+        </Route>
+      )}
+      {canManageEngineSearchUi && (
+        <Route path={ENGINE_SEARCH_UI_PATH}>
+          <SearchUI />
+        </Route>
+      )}
+      {canViewEngineApiLogs && (
+        <Route path={ENGINE_API_LOGS_PATH}>
+          <ApiLogs />
+        </Route>
+      )}
+      <Route>
+        <NotFound pageChrome={getEngineBreadcrumbs()} />
+      </Route>
     </Switch>
   );
 };

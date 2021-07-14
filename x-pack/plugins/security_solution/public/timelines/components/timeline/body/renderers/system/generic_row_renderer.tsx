@@ -10,13 +10,13 @@
 import { get } from 'lodash/fp';
 import React from 'react';
 
-import { RowRendererId } from '../../../../../../../common/types/timeline';
+import { RowRendererId, RowRenderer } from '../../../../../../../common/types/timeline';
 
 import { DnsRequestEventDetails } from '../dns/dns_request_event_details';
 import { EndgameSecurityEventDetails } from '../endgame/endgame_security_event_details';
 import { isFileEvent, isNillEmptyOrNotFinite } from '../helpers';
 import { RegistryEventDetails } from '../registry/registry_event_details';
-import { RowRenderer, RowRendererContainer } from '../row_renderer';
+import { RowRendererContainer } from '../row_renderer';
 
 import { SystemGenericDetails } from './generic_details';
 import { SystemGenericFileDetails } from './generic_file_details';
