@@ -111,14 +111,7 @@ export class AlertsClient {
         seq_no_primary_term: true,
       });
 
-      const spaceIds = get(SPACE_IDS, result?.body?.hits?.hits[0]?._source);
-
-      if (
-        result == null ||
-        result.body == null ||
-        result.body.hits.hits.length === 0 ||
-        !spaceIds?.includes(alertSpaceId!) // assert spaceId is not null because if promise rejects we end up in catch block
-      ) {
+      if (result == null || result.body == null || result.body.hits.hits.length === 0) {
         return;
       }
 
