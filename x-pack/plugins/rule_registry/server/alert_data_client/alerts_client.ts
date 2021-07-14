@@ -91,13 +91,23 @@ export class AlertsClient {
   }: GetAlertParams): Promise<(AlertType & { _version: string | undefined }) | null | undefined> {
     try {
       const alertSpaceId = await this.spaceId;
+      if (alertSpaceId == null) {
+        this.logger.error('Failed to acquire spaceId from authorization client');
+        return;
+      }
       const result = await this.esClient.search<ParsedTechnicalFields>({
         // Context: Originally thought of always just searching `.alerts-*` but that could
         // result in a big performance hit. If the client already knows which index the alert
         // belongs to, passing in the index will speed things up
         index: index ?? '.alerts-*',
         ignore_unavailable: true,
-        body: { query: { term: { _id: id } } },
+        body: {
+          query: {
+            bool: {
+              filter: [{ term: { _id: id } }, { term: { [SPACE_IDS]: alertSpaceId } }],
+            },
+          },
+        },
         seq_no_primary_term: true,
       });
 
