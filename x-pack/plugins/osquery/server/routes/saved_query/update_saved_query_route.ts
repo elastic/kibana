@@ -24,12 +24,6 @@ export const updateSavedQueryRoute = (router: IRouter) => {
 
       // @ts-expect-error update types
       const { id, description, platform, query, version, interval } = request.body;
-      try {
-        await savedObjectsClient.get(savedQuerySavedObjectType, id);
-        return response.conflict({ body: `A query with an id of ${id} already exists` });
-      } catch (_) {
-        // no conflict, continuing
-      }
 
       const savedQuerySO = await savedObjectsClient.update(
         savedQuerySavedObjectType,

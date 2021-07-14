@@ -30,13 +30,6 @@ export const createSavedQueryRoute = (router: IRouter) => {
 
       const { id, description, platform, query, version, interval } = request.body;
 
-      try {
-        await savedObjectsClient.get(savedQuerySavedObjectType, id);
-        return response.conflict({ body: `A query with an id of ${id} already exists` });
-      } catch (_) {
-        // no conflict, continuing
-      }
-
       const savedQuerySO = await savedObjectsClient.create(savedQuerySavedObjectType, {
         id,
         description,
