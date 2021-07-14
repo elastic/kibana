@@ -31,6 +31,7 @@ export function FieldValueSuggestions({
   compressed,
   asFilterButton,
   allowAllValuesSelection,
+  isSyntheticsData,
   asCombobox = true,
   onChange: onSelectionChange,
 }: FieldValueSuggestionsProps) {
@@ -43,6 +44,7 @@ export function FieldValueSuggestions({
     sourceField,
     filters,
     time,
+    isSyntheticsData,
     keepHistory: true,
   });
 
@@ -50,7 +52,7 @@ export function FieldValueSuggestions({
     () => {
       setQuery(debouncedValue);
     },
-    400,
+    250,
     [debouncedValue]
   );
 
@@ -63,6 +65,7 @@ export function FieldValueSuggestions({
       values={values}
       label={label}
       onChange={onSelectionChange}
+      query={query}
       setQuery={setDebouncedValue}
       loading={loading}
       selectedValue={selectedValue}

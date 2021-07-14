@@ -6,8 +6,10 @@
  */
 
 import React, { createContext, useContext } from 'react';
+import { useSelector } from 'react-redux';
 import { useFetcher } from '../../../observability/public';
 import { DataPublicPluginStart, IndexPattern } from '../../../../../src/plugins/data/public';
+import { selectDynamicSettings } from '../state/selectors';
 
 export const UptimeIndexPatternContext = createContext({} as IndexPattern);
 
@@ -15,9 +17,15 @@ export const UptimeIndexPatternContextProvider: React.FC<{ data: DataPublicPlugi
   children,
   data: { indexPatterns },
 }) => {
-  const { data } = useFetcher<Promise<IndexPattern>>(async () => {
-    return indexPatterns.create({ pattern: 'heartbeat-*' });
-  }, []);
+  const { settings } = useSelector(selectDynamicSettings);
+
+  const heartbeatIndices = settings?.heartbeatIndices || '';
+
+  const { data } = useFetcher<Promise<IndexPattern | undefined>>(async () => {
+    if (heartbeatIndices) {
+      return indexPatterns.create({ title: heartbeatIndices });
+    }
+  }, [heartbeatIndices]);
 
   return <UptimeIndexPatternContext.Provider value={data!} children={children} />;
 };

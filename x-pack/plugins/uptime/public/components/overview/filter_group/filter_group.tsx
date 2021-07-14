@@ -16,6 +16,7 @@ import { useSelectedFilters } from '../../../hooks/use_selected_filters';
 import { FieldValueSuggestions } from '../../../../../observability/public';
 import { SelectedFilters } from './selected_filters';
 import { useIndexPattern } from '../../../contexts/uptime_index_pattern_context';
+import { useGetUrlParams } from '../../../hooks';
 
 const Container = styled(EuiFilterGroup)`
   margin-bottom: 10px;
@@ -24,10 +25,12 @@ const Container = styled(EuiFilterGroup)`
 export const FilterGroup = () => {
   const [updatedFieldValues, setUpdatedFieldValues] = useState<{
     fieldName: string;
-    values: string[];
+    values?: string[];
   }>({ fieldName: '', values: [] });
 
   useFilterUpdate(updatedFieldValues.fieldName, updatedFieldValues.values);
+
+  const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
 
   const { selectedLocations, selectedPorts, selectedSchemes, selectedTags } = useSelectedFilters();
 
@@ -81,7 +84,7 @@ export const FilterGroup = () => {
             <FieldValueSuggestions
               key={fieldName}
               compressed={false}
-              indexPattern={indexPattern}
+              indexPatternTitle={indexPattern.title}
               sourceField={fieldName}
               label={title}
               selectedValue={selectedItems}
@@ -96,6 +99,8 @@ export const FilterGroup = () => {
                 setIsOpen('');
               }}
               filters={[]}
+              isSyntheticsData={true}
+              time={{ from: dateRangeStart, to: dateRangeEnd }}
             />
           ))}
       </Container>

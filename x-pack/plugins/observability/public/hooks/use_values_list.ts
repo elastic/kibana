@@ -18,6 +18,7 @@ export interface Props {
   filters?: ESFilter[];
   time?: { from: string; to: string };
   keepHistory?: boolean;
+  isSyntheticsData?: boolean;
 }
 
 export interface ListItem {
@@ -32,10 +33,10 @@ export const useValuesList = ({
   filters,
   time,
   keepHistory,
+  isSyntheticsData = false,
 }: Props): { values: ListItem[]; loading?: boolean } => {
   const [debouncedQuery, setDebounceQuery] = useState<string>(query);
   const [values, setValues] = useState<ListItem[]>([]);
-  const [allLoaded, setAllLoaded] = useState(false);
 
   const { from, to } = time ?? {};
 
@@ -87,9 +88,20 @@ export const useValuesList = ({
           values: {
             terms: {
               field: sourceField,
-              size: 100,
+              size: 50,
               ...(query ? { include: includeClause } : {}),
             },
+            ...(isSyntheticsData
+              ? {
+                  aggs: {
+                    count: {
+                      cardinality: {
+                        field: 'monitor.id',
+                      },
+                    },
+                  },
+                }
+              : {}),
           },
         },
       },
@@ -98,22 +110,31 @@ export const useValuesList = ({
   );
 
   useEffect(() => {
-    const newValues =
-      data?.aggregations?.values.buckets.map(({ key: value, doc_count: count }) => ({
-        count,
-        label: String(value),
-      })) ?? [];
+    if (!loading) {
+      const newValues =
+        data?.aggregations?.values.buckets.map(
+          ({ key: value, doc_count: count, count: aggsCount }) => {
+            if (aggsCount) {
+              return {
+                count: aggsCount.value,
+                label: String(value),
+              };
+            } else {
+              return {
+                count,
+                label: String(value),
+              };
+            }
+          }
+        ) ?? [];
 
-    if (newValues.length < 100 && !query) {
-      setAllLoaded(true);
-    }
-
-    if (keepHistory && query) {
-      setValues((prevState) => {
-        return union(newValues, prevState);
-      });
-    } else {
-      setValues(newValues);
+      if (keepHistory && query) {
+        setValues((prevState) => {
+          return union(newValues, prevState);
+        });
+      } else {
+        setValues(newValues);
+      }
     }
   }, [data, keepHistory, loading, query]);
 

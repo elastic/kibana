@@ -15,6 +15,7 @@ import {
   EuiPopoverTitle,
   EuiSelectable,
   EuiSelectableOption,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
@@ -34,7 +35,13 @@ const formatOptions = (
   excludedValues?: string[],
   showCount?: boolean
 ): EuiSelectableOption[] => {
-  return (values ?? []).map(({ label, count }) => ({
+  const uniqueValues: Record<string, number> = {};
+
+  values?.forEach(({ label, count }) => {
+    uniqueValues[label] = count;
+  });
+
+  return Object.entries(uniqueValues).map(([label, count]) => ({
     label,
     append: showCount ? (
       <Counter>
@@ -50,6 +57,7 @@ export function FieldValueSelection({
   fullWidth,
   label,
   loading,
+  query,
   setQuery,
   button,
   width,
@@ -158,19 +166,28 @@ export function FieldValueSelection({
             }),
             compressed,
             onInput: onValueChange,
+            autoComplete: 'off',
           }}
           listProps={{
             onFocusBadge: false,
           }}
           options={options}
           onChange={onChange}
-          isLoading={loading}
+          isLoading={loading && !query && options.length === 0}
           allowExclusions={true}
         >
           {(list, search) => (
             <div style={{ width: 240 }}>
               <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
               {list}
+              {loading && query && (
+                <EuiText className="eui-textCenter">
+                  {i18n.translate('xpack.observability.fieldValueSelection.loading', {
+                    defaultMessage: 'Loading',
+                  })}{' '}
+                  <EuiLoadingSpinner size="m" />
+                </EuiText>
+              )}
               <EuiPopoverFooter paddingSize="s">
                 <EuiButton
                   fill
