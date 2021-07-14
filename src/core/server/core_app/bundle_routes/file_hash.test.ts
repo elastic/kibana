@@ -19,8 +19,7 @@ const mockedCache = (): jest.Mocked<IFileHashCache> => ({
   set: jest.fn(),
 });
 
-// FLAKY: https://github.com/elastic/kibana/issues/105174
-describe.skip('getFileHash', () => {
+describe('getFileHash', () => {
   const sampleFilePath = resolve(__dirname, 'foo.js');
   const fd = 42;
   const stats: Stats = { ino: 42, size: 9000 } as any;
