@@ -195,11 +195,6 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
     isLoadingSuggestions,
   ]);
 
-  const fieldInputWidths = useMemo(
-    () => (fieldInputWidth ? { width: `${fieldInputWidth}px` } : {}),
-    [fieldInputWidth]
-  );
-
   useEffect((): void => {
     setError(undefined);
     if (onError != null) {
@@ -231,7 +226,7 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
           onBlur={setIsTouchedValue}
           sortMatchesBy="startsWith"
           data-test-subj="valuesAutocompleteMatch"
-          style={fieldInputWidths}
+          style={fieldInputWidth ? { width: `${fieldInputWidth}px` } : {}}
           fullWidth
           async
         />
@@ -240,7 +235,7 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
   }, [
     comboOptions,
     error,
-    fieldInputWidths,
+    fieldInputWidth,
     handleCreateOption,
     handleSearchChange,
     handleValuesChange,
@@ -275,7 +270,7 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
               }
               onChange={handleNonComboBoxInputChange}
               data-test-subj="valueAutocompleteFieldMatchNumber"
-              style={fieldInputWidths}
+              style={fieldInputWidth ? { width: `${fieldInputWidth}px` } : {}}
               fullWidth
             />
           </EuiFormRow>
@@ -295,7 +290,7 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
               valueOfSelected={selectedValue ?? 'true'}
               onChange={handleBooleanInputChange}
               data-test-subj="valuesAutocompleteMatchBoolean"
-              style={fieldInputWidths}
+              style={fieldInputWidth ? { width: `${fieldInputWidth}px` } : {}}
               fullWidth
             />
           </EuiFormRow>

@@ -9,6 +9,7 @@ import React from 'react';
 import { ReactWrapper, mount } from 'enzyme';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiSuperSelect } from '@elastic/eui';
 import { act } from '@testing-library/react';
+import { AutocompleteFieldMatchComponent } from '@kbn/securitysolution-autocomplete';
 
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import {
@@ -16,7 +17,6 @@ import {
   getField,
 } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
 
-import { AutocompleteFieldMatchComponent } from './field_value_match';
 import { useFieldValueAutocomplete } from './hooks/use_field_value_autocomplete';
 
 jest.mock('./hooks/use_field_value_autocomplete');

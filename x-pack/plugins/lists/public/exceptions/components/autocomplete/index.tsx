@@ -8,6 +8,5 @@
 export { AutocompleteFieldExistsComponent } from './field_value_exists';
 export { AutocompleteFieldListsComponent } from './field_value_lists';
 export { AutocompleteFieldMatchAnyComponent } from './field_value_match_any';
-export { AutocompleteFieldMatchComponent } from './field_value_match';
 export { FieldComponent } from './field';
 export { OperatorComponent } from './operator';

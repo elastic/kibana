@@ -5,9 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export * from './check_empty_value';
-export * from './field';
-export * from './field_value_match';
-export * from './get_generic_combo_box_props';
-export * from './hooks';
-export * from './param_is_valid';
+
+module.exports = {
+  env: {
+    web: {
+      presets: ['@kbn/babel-preset/webpack_preset'],
+    },
+    node: {
+      presets: ['@kbn/babel-preset/node_preset'],
+    },
+  },
+  ignore: ['**/*.test.ts', '**/*.test.tsx'],
+};
