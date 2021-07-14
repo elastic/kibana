@@ -6,14 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { log } from '../utils/log';
+import { runBazel } from '../utils/bazel';
 import { ICommand } from '.';
 
-export const BuildBazelCommand: ICommand = {
-  description: 'Removed',
-  name: 'build-bazel',
+export const BuildCommand: ICommand = {
+  description: 'Runs a build in the Bazel built packages',
+  name: 'build',
 
   async run(projects, projectGraph, { options }) {
-    log.error('Command "build-bazel" has been replaced with "build"');
+    const runOffline = options?.offline === true;
+
+    // Call bazel with the target to build all available packages
+    await runBazel(['build', '//packages:build', '--show_result=1'], runOffline);
   },
 };

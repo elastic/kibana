@@ -34,7 +34,7 @@ Non Bazel packages can be watched independently with
 
 [source,bash]
 ----
-yarn kbn watch -i PACKAGE_NAME
+yarn kbn run watch -i PACKAGE_NAME
 ----
 
 [discrete]
@@ -44,7 +44,7 @@ Bazel packages are built as a whole for now. You can use:
 
 [source,bash]
 ----
-yarn kbn build-bazel
+yarn kbn build
 ----
 
 [discrete]
@@ -54,7 +54,7 @@ Bazel packages are watched as a whole for now. You can use:
 
 [source,bash]
 ----
-yarn kbn watch-bazel
+yarn kbn watch
 ----
 
 

@@ -27,6 +27,7 @@ export interface ICommand {
 }
 
 import { BootstrapCommand } from './bootstrap';
+import { BuildCommand } from './build';
 import { BuildBazelCommand } from './build_bazel';
 import { CleanCommand } from './clean';
 import { ResetCommand } from './reset';
@@ -37,6 +38,7 @@ import { Kibana } from '../utils/kibana';
 
 export const commands: { [key: string]: ICommand } = {
   bootstrap: BootstrapCommand,
+  build: BuildCommand,
   'build-bazel': BuildBazelCommand,
   clean: CleanCommand,
   reset: ResetCommand,
