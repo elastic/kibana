@@ -24,7 +24,6 @@ import { getUnsupportedApmServerSchema } from '../lib/fleet/get_unsupported_apm_
 import { isSuperuser } from '../lib/fleet/is_superuser';
 import { getInternalSavedObjectsClient } from '../lib/helpers/get_internal_saved_objects_client';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { createStaticIndexPattern } from '../lib/index_pattern/create_static_index_pattern';
 import { createApmServerRoute } from './create_apm_server_route';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 
@@ -156,7 +155,7 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
   endpoint: 'POST /api/apm/fleet/cloud_apm_package_policy',
   options: { tags: ['access:apm', 'access:apm_write'] },
   handler: async (resources) => {
-    const { plugins, context, config, request, logger, core } = resources;
+    const { plugins, context, config, request, logger } = resources;
     const cloudApmMigrationEnabled =
       config['xpack.apm.agent.migrations.enabled'];
     if (!plugins.fleet || !plugins.security) {
@@ -174,12 +173,7 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
       throw Boom.forbidden(CLOUD_SUPERUSER_REQUIRED_MESSAGE);
     }
 
-    const [setup, internalSavedObjectsClient] = await Promise.all([
-      setupRequest(resources),
-      core
-        .start()
-        .then(({ savedObjects }) => savedObjects.createInternalRepository()),
-    ]);
+    const setup = await setupRequest(resources);
 
     const cloudApmPackagePolicy = await createCloudApmPackgePolicy({
       cloudPluginSetup,
@@ -190,18 +184,7 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
       setup,
     });
 
-    const spaceId = plugins.spaces?.setup.spacesService.getSpaceId(request);
-
-    // force update the index pattern title with data streams
-    await createStaticIndexPattern(
-      setup,
-      config,
-      internalSavedObjectsClient,
-      spaceId,
-      true
-    );
-
-    return { cloud_apm_package_policy: cloudApmPackagePolicy };
+    return { cloudApmPackagePolicy };
   },
 });
 
