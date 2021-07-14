@@ -12,6 +12,7 @@ import { CoreStart } from '../../../../../../../../src/core/public';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import { createCallApmApi } from '../../../../services/rest/createCallApmApi';
 import { Schema } from './';
+import { ConfirmSwitchModal } from './confirm_switch_modal';
 
 interface Args {
   hasCloudAgentPolicy: boolean;
@@ -107,3 +108,18 @@ export default {
 export const Example: Story = () => {
   return <Schema />;
 };
+
+interface ModalArgs {
+  unsupportedConfigs: Array<{ key: string; value: string }>;
+}
+
+export const Modal: Story<ModalArgs> = ({ unsupportedConfigs }) => {
+  return (
+    <ConfirmSwitchModal
+      onCancel={() => {}}
+      onConfirm={() => {}}
+      unsupportedConfigs={unsupportedConfigs}
+    />
+  );
+};
+Modal.args = { unsupportedConfigs: [{ key: 'test', value: '123' }] };
