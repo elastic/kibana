@@ -25,7 +25,7 @@ import { Job } from '../lib/job';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { Props as ListingProps } from './report_listing';
 
-type Props = {
+interface Props extends Pick<ListingProps, 'apiClient' | 'intl'> {
   jobId: string;
   apiClient: ReportingAPIClient;
 } & Pick<ListingProps, 'apiClient' | 'intl'>;
