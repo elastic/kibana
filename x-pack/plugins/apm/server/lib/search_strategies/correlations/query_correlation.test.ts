@@ -15,7 +15,7 @@ import {
   BucketCorrelation,
 } from './query_correlation';
 
-const params = { index: 'apm-*' };
+const params = { index: 'apm-*', start: '2020', end: '2021' };
 const expectations = [1, 3, 5];
 const ranges = [{ to: 1 }, { from: 1, to: 3 }, { from: 3, to: 5 }, { from: 5 }];
 const fractions = [1, 2, 4, 5];
