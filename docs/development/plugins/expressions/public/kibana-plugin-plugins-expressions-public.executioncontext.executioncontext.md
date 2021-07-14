@@ -4,8 +4,10 @@
 
 ## ExecutionContext.executionContext property
 
+Contains the meta-data about the source of the expression.
+
 <b>Signature:</b>
 
 ```typescript
-executionContext?: IExecutionContextContainer;
+readonly executionContext?: IExecutionContextContainer;
 ```

@@ -500,7 +500,6 @@ export type ExecutionContextSearch = {
     filters?: Filter[];
     query?: Query | Query[];
     timeRange?: TimeRange;
-    executionContext?: KibanaExecutionContext;
 };
 
 // Warning: (ae-missing-release-tag) "exporters" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
