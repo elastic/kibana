@@ -304,7 +304,7 @@ describe('endpoint list middleware', () => {
     });
   });
 
-  describe.skip('handle Endpoint Pending Actions state actions', () => {
+  describe('handle Endpoint Pending Actions state actions', () => {
     let mockedApis: ReturnType<typeof endpointPageHttpMock>;
 
     beforeEach(() => {
