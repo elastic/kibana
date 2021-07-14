@@ -279,13 +279,21 @@ export const useSavedSearch = ({
     ).pipe(debounceTime(100));
 
     const subscription = fetch$.subscribe((val) => {
-      fetchAll(val === 'reset');
+      try {
+        fetchAll(val === 'reset');
+      } catch (error) {
+        data$.next({
+          state: FetchStatus.ERROR,
+          fetchError: error,
+        });
+      }
     });
 
     return () => {
       subscription.unsubscribe();
     };
   }, [
+    data$,
     data.query.queryString,
     filterManager,
     refetch$,

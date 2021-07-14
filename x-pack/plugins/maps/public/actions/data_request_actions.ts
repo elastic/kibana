@@ -16,7 +16,6 @@ import { FeatureCollection } from 'geojson';
 import { MapStoreState } from '../reducers/store';
 import {
   KBN_IS_CENTROID_FEATURE,
-  LAYER_STYLE_TYPE,
   LAYER_TYPE,
   SOURCE_DATA_REQUEST_ID,
 } from '../../common/constants';
@@ -49,7 +48,6 @@ import { IVectorLayer } from '../classes/layers/vector_layer';
 import { DataMeta, MapExtent, MapFilters } from '../../common/descriptor_types';
 import { DataRequestAbortError } from '../classes/util/data_request';
 import { scaleBounds, turfBboxToBounds } from '../../common/elasticsearch_util';
-import { IVectorStyle } from '../classes/styles/vector/vector_style';
 
 const FIT_TO_BOUNDS_SCALE_FACTOR = 0.1;
 
@@ -57,6 +55,7 @@ export type DataRequestContext = {
   startLoading(dataId: string, requestToken: symbol, requestMeta?: DataMeta): void;
   stopLoading(dataId: string, requestToken: symbol, data: object, resultsMeta?: DataMeta): void;
   onLoadError(dataId: string, requestToken: symbol, errorMessage: string): void;
+  onJoinError(errorMessage: string): void;
   updateSourceData(newData: unknown): void;
   isRequestStillActive(dataId: string, requestToken: symbol): boolean;
   registerCancelCallback(requestToken: symbol, callback: () => void): void;
@@ -95,14 +94,12 @@ export function updateStyleMeta(layerId: string | null) {
     if (!layer) {
       return;
     }
-    const sourceDataRequest = layer.getSourceDataRequest();
-    const style = layer.getCurrentStyle();
-    if (!style || !sourceDataRequest || style.getType() !== LAYER_STYLE_TYPE.VECTOR) {
+
+    const styleMeta = await layer.getStyleMetaDescriptorFromLocalFeatures();
+    if (!styleMeta) {
       return;
     }
-    const styleMeta = await (style as IVectorStyle).pluckStyleMetaFromSourceDataRequest(
-      sourceDataRequest
-    );
+
     dispatch({
       type: SET_LAYER_STYLE_META,
       layerId,
@@ -125,6 +122,8 @@ function getDataRequestContext(
       dispatch(endDataLoad(layerId, dataId, requestToken, data, meta)),
     onLoadError: (dataId: string, requestToken: symbol, errorMessage: string) =>
       dispatch(onDataLoadError(layerId, dataId, requestToken, errorMessage)),
+    onJoinError: (errorMessage: string) =>
+      dispatch(setLayerDataLoadErrorStatus(layerId, errorMessage)),
     updateSourceData: (newData: object) => {
       dispatch(updateSourceDataRequest(layerId, newData));
     },
@@ -197,13 +196,11 @@ export function syncDataForLayerId(layerId: string | null) {
 }
 
 function setLayerDataLoadErrorStatus(layerId: string, errorMessage: string | null) {
-  return (dispatch: Dispatch) => {
-    dispatch({
-      type: SET_LAYER_ERROR_STATUS,
-      isInErrorState: errorMessage !== null,
-      layerId,
-      errorMessage,
-    });
+  return {
+    type: SET_LAYER_ERROR_STATUS,
+    isInErrorState: errorMessage !== null,
+    layerId,
+    errorMessage,
   };
 }
 
@@ -249,6 +246,7 @@ function endDataLoad(
     dispatch(unregisterCancelCallback(requestToken));
     const dataRequest = getDataRequestDescriptor(getState(), layerId, dataId);
     if (dataRequest && dataRequest.dataRequestToken !== requestToken) {
+      // todo - investigate - this may arise with failing style meta request and should not throw in that case
       throw new DataRequestAbortError();
     }
 

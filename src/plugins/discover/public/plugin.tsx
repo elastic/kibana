@@ -403,6 +403,7 @@ export class DiscoverPlugin
       }
       // this is used by application mount and tests
       const { getInnerAngularModule } = await import('./application/angular/get_inner_angular');
+      await plugins.kibanaLegacy.loadAngularBootstrap();
       const module = getInnerAngularModule(
         innerAngularName,
         core,
@@ -473,6 +474,7 @@ export class DiscoverPlugin
         throw Error('Discover plugin getEmbeddableInjector:  initializeServices is undefined');
       }
       const { core, plugins } = await this.initializeServices();
+      await getServices().kibanaLegacy.loadAngularBootstrap();
       getServices().kibanaLegacy.loadFontAwesome();
       const { getInnerAngularModuleEmbeddable } = await import(
         './application/angular/get_inner_angular'
