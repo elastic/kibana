@@ -18,6 +18,7 @@ import {
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
 } from '../../../common';
+import * as i18n from './translations';
 
 import {
   IIndexPattern,
@@ -26,6 +27,7 @@ import {
   isErrorResponse,
 } from '../../../../../../src/plugins/data/public';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { useAppToasts } from '../../hooks/use_app_toasts';
 
 const DEFAULT_BROWSER_FIELDS = {};
 const DEFAULT_INDEX_PATTERNS = { fields: [], title: '' };
@@ -117,9 +119,7 @@ export const useFetchIndex = (
     indexExists: true,
     indexPatterns: DEFAULT_INDEX_PATTERNS,
   });
-  // const { addError, addWarning } = useAppToasts();
-  // const useToasts = (): StartServices['notifications']['toasts'] =>
-  // useKibana().services.notifications.toasts;
+  const { addError, addWarning } = useAppToasts();
 
   const indexFieldsSearch = useCallback(
     (iNames) => {
@@ -153,15 +153,15 @@ export const useFetchIndex = (
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading(false);
-                // addWarning(i18n.ERROR_BEAT_FIELDS);
+                addWarning(i18n.ERROR_BEAT_FIELDS);
                 searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
               setLoading(false);
-              // addError(msg, {
-              //   title: i18n.FAIL_BEAT_FIELDS,
-              // });
+              addError(msg, {
+                title: i18n.FAIL_BEAT_FIELDS,
+              });
               searchSubscription$.current.unsubscribe();
             },
           });
@@ -170,7 +170,7 @@ export const useFetchIndex = (
       abortCtrl.current.abort();
       asyncSearch();
     },
-    [data.search, onlyCheckIfIndicesExist, setLoading, setState]
+    [data.search, addError, addWarning, onlyCheckIfIndicesExist, setLoading, setState]
   );
 
   useEffect(() => {
