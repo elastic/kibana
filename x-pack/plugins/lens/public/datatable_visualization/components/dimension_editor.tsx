@@ -84,7 +84,7 @@ export function TableDimensionEditor(
       onChange: onSummaryLabelChangeToDebounce,
       value: column?.summaryLabel,
     },
-    { allowEmptyString: true } // empty string is a valid label for this feature
+    { allowFalsyValue: true } // falsy values are valid for this feature
   );
 
   if (!column) return null;

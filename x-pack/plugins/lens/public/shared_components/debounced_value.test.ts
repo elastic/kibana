@@ -43,7 +43,7 @@ describe('useDebouncedValue', () => {
   it('should allow empty input to be updated', () => {
     const onChangeMock = jest.fn();
     const { result } = renderHook(() =>
-      useDebouncedValue({ value: 'a', onChange: onChangeMock }, { allowEmptyString: true })
+      useDebouncedValue({ value: 'a', onChange: onChangeMock }, { allowFalsyValue: true })
     );
 
     act(() => {

@@ -182,12 +182,12 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
         >
           <DecimalPlaceSlider
             value={layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS}
-            setValue={(value) =>
+            setValue={(value) => {
               setState({
                 ...state,
                 layers: [{ ...layer, percentDecimals: value }],
-              })
-            }
+              });
+            }}
           />
         </EuiFormRow>
       </ToolbarPopover>
@@ -232,7 +232,13 @@ const DecimalPlaceSlider = ({
   value: number;
   setValue: (value: number) => void;
 }) => {
-  const { inputValue, handleInputChange } = useDebouncedValue({ value, onChange: setValue });
+  const { inputValue, handleInputChange } = useDebouncedValue(
+    {
+      value,
+      onChange: setValue,
+    },
+    { allowFalsyValue: true }
+  );
   return (
     <EuiRange
       data-test-subj="indexPattern-dimension-formatDecimals"
