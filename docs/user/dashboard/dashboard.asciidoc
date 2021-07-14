@@ -266,15 +266,18 @@ Copy panels from one dashboard to another dashboard.
 == Explore the underlying documents
 
 A {kib} administrator can add additional interactions for {kib} users to take from their dashboard panels.
-These additional interactions allow users to open *Discover* from the dashboard. Administrators can choose
-to enable:
+These additional interactions allow users to open *Discover* from the dashboard.
 
-<<settings-explore-data-in-context,`xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled`>>::
-  Adds an action to each panel's context menu. This action does not carry the filters from your dashboard to
-  *Discover*.
+Panel context:: Adds an *Explore underlying data* action to each panel's context menu. This action does not carry the filters from your dashboard to *Discover*.
++
+Enable by setting <<settings-explore-data-in-context,`xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled`>>.
 
-<<settings-explore-data-in-chart,`xpack.discoverEnhanced.actions.exploreDataInChart.enabled`>>::
-  Adds an action to each series in a panel.
+Series context::
+Adds an action to each series in a panel. Instead of filtering automatically, users choose to filter or open *Discover*.
++
+Enable by setting <<settings-explore-data-in-chart,`xpack.discoverEnhanced.actions.exploreDataInChart.enabled`>>.
+
+Both actions require that the panel uses only one index pattern.
 
 NOTE: Prior to {kib} 7.13, the panel context menu was enabled by default.
 
