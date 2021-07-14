@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   generateFilterDSL,
   hasFilters,
@@ -113,7 +112,12 @@ const mockOptions = (
     timerange: { from: 'now-15m', to: 'now' },
     shouldCheckStatus: true,
   },
-  state = {}
+  state = {},
+  rule = {
+    schedule: {
+      interval: '5m',
+    },
+  }
 ): any => {
   const { services } = createRuleTypeMocks();
 
@@ -121,13 +125,16 @@ const mockOptions = (
     params,
     state,
     services,
+    rule,
   };
 };
 
 describe('status check alert', () => {
   let toISOStringSpy: jest.SpyInstance<string, []>;
+  const mockDate = new Date('2021-05-13T12:33:37.000Z');
   beforeEach(() => {
     toISOStringSpy = jest.spyOn(Date.prototype, 'toISOString');
+    Date.now = jest.fn().mockReturnValue(mockDate);
   });
 
   afterEach(() => {
@@ -156,8 +163,12 @@ describe('status check alert', () => {
           filters: undefined,
           locations: [],
           numTimes: 5,
-          timerange: {
+          timespanRange: {
             from: 'now-15m',
+            to: 'now',
+          },
+          timestampRange: {
+            from: 1620821917000,
             to: 'now',
           },
         })
@@ -187,7 +198,7 @@ describe('status check alert', () => {
           filters: undefined,
           locations: [],
           numTimes: 5,
-          timerange: {
+          timespanRange: {
             from: 'now-15m',
             to: 'now',
           },
@@ -252,7 +263,7 @@ describe('status check alert', () => {
           filters: undefined,
           locations: [],
           numTimes: 5,
-          timerange: {
+          timespanRange: {
             from: 'now-15m',
             to: 'now',
           },
@@ -302,7 +313,7 @@ describe('status check alert', () => {
       const alert = statusCheckAlertFactory(server, libs, plugins);
       const options = mockOptions({
         numTimes: 4,
-        timerange: { from: 'now-14h', to: 'now' },
+        timespanRange: { from: 'now-14h', to: 'now' },
         locations: ['fairbanks'],
         filters: '',
       });
@@ -387,7 +398,7 @@ describe('status check alert', () => {
         expect.objectContaining({
           locations: [],
           numTimes: 3,
-          timerange: {
+          timespanRange: {
             from: 'now-15m',
             to: 'now',
           },
@@ -625,7 +636,7 @@ describe('status check alert', () => {
         expect.objectContaining({
           locations: [],
           numTimes: 20,
-          timerange: {
+          timespanRange: {
             from: 'now-30h',
             to: 'now',
           },
@@ -903,6 +914,84 @@ describe('status check alert', () => {
         ]
       `);
     });
+  });
+
+  it('generates timespan and @timestamp ranges appropriately', async () => {
+    const mockGetter = jest.fn();
+    mockGetter.mockReturnValue([]);
+    const { server, libs, plugins } = bootstrapDependencies({
+      getIndexPattern: jest.fn(),
+      getMonitorStatus: mockGetter,
+    });
+    const alert = statusCheckAlertFactory(server, libs, plugins);
+    const options = mockOptions({
+      numTimes: 20,
+      timerangeCount: 30,
+      timerangeUnit: 'h',
+      filters: {
+        'monitor.type': ['http'],
+        'observer.geo.name': [],
+        tags: [],
+        'url.port': [],
+      },
+      search: 'url.full: *',
+    });
+    await alert.executor(options);
+
+    expect(mockGetter).toHaveBeenCalledTimes(1);
+    expect(mockGetter.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        timespanRange: {
+          from: 'now-30h',
+          to: 'now',
+        },
+        timestampRange: {
+          from: mockDate.setHours(mockDate.getHours() - 54).valueOf(), // now minus the timerange (30h), plus an additional 24 hour buffer
+          to: 'now',
+        },
+      })
+    );
+  });
+
+  it('uses the larger of alert interval and timerange when defining timestampRange', async () => {
+    const mockGetter = jest.fn();
+    mockGetter.mockReturnValue([]);
+    const { server, libs, plugins } = bootstrapDependencies({
+      getIndexPattern: jest.fn(),
+      getMonitorStatus: mockGetter,
+    });
+    const alert = statusCheckAlertFactory(server, libs, plugins);
+    const options = mockOptions(
+      {
+        numTimes: 20,
+        timerangeCount: 30,
+        timerangeUnit: 'h',
+        filters: {
+          'monitor.type': ['http'],
+          'observer.geo.name': [],
+          tags: [],
+          'url.port': [],
+        },
+        search: 'url.full: *',
+      },
+      undefined,
+      { schedule: { interval: '60h' } }
+    );
+    await alert.executor(options);
+
+    expect(mockGetter).toHaveBeenCalledTimes(1);
+    expect(mockGetter.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        timespanRange: {
+          from: 'now-30h',
+          to: 'now',
+        },
+        timestampRange: {
+          from: mockDate.setHours(mockDate.getHours() - 60).valueOf(), // 60h rule schedule interval is larger than 30h timerange, so use now - 60h to define timestamp range
+          to: 'now',
+        },
+      })
+    );
   });
 
   describe('hasFilters', () => {

@@ -18,6 +18,11 @@ export {
   createLifecycleRuleTypeFactory,
   LifecycleAlertService,
 } from './utils/create_lifecycle_rule_type_factory';
+export {
+  LifecycleRuleExecutor,
+  LifecycleAlertServices,
+  createLifecycleExecutor,
+} from './utils/create_lifecycle_executor';
 export { createPersistenceRuleTypeFactory } from './utils/create_persistence_rule_type_factory';
 export type { AlertTypeWithExecutor } from './types';
 

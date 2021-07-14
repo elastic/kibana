@@ -8,7 +8,7 @@
 import React from 'react';
 import moment from 'moment';
 
-import { FormattableAlertTypeModel } from '../../../../observability/public';
+import { ObservabilityRuleTypeModel } from '../../../../observability/public';
 import { ValidationResult } from '../../../../triggers_actions_ui/public';
 
 import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
@@ -27,7 +27,7 @@ let validateFunc: (alertParams: any) => ValidationResult;
 export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   core,
   plugins,
-}): FormattableAlertTypeModel => ({
+}): ObservabilityRuleTypeModel => ({
   id: CLIENT_ALERT_TYPES.MONITOR_STATUS,
   description,
   iconClass: 'uptimeApp',

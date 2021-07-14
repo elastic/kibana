@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { FormattableAlertTypeModel } from '../../../../observability/public';
+import { ObservabilityRuleTypeModel } from '../../../../observability/public';
 import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
 import { TlsTranslations } from '../../../common/translations';
 import { AlertTypeInitializer } from '.';
@@ -18,7 +18,7 @@ const TLSAlert = React.lazy(() => import('./lazy_wrapper/tls_alert'));
 export const initTlsAlertType: AlertTypeInitializer = ({
   core,
   plugins,
-}): FormattableAlertTypeModel => ({
+}): ObservabilityRuleTypeModel => ({
   id: CLIENT_ALERT_TYPES.TLS,
   iconClass: 'uptimeApp',
   documentationUrl(docLinks) {

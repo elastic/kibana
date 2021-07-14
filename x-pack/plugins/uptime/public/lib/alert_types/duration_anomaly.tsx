@@ -14,7 +14,7 @@ import { AlertTypeInitializer } from '.';
 
 import { getMonitorRouteFromMonitorId } from './common';
 
-import { FormattableAlertTypeModel } from '../../../../observability/public';
+import { ObservabilityRuleTypeModel } from '../../../../observability/public';
 
 const { defaultActionMessage, description } = DurationAnomalyTranslations;
 const DurationAnomalyAlert = React.lazy(() => import('./lazy_wrapper/duration_anomaly'));
@@ -22,7 +22,7 @@ const DurationAnomalyAlert = React.lazy(() => import('./lazy_wrapper/duration_an
 export const initDurationAnomalyAlertType: AlertTypeInitializer = ({
   core,
   plugins,
-}): FormattableAlertTypeModel => ({
+}): ObservabilityRuleTypeModel => ({
   id: CLIENT_ALERT_TYPES.DURATION_ANOMALY,
   iconClass: 'uptimeApp',
   documentationUrl(docLinks) {

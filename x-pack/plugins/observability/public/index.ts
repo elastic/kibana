@@ -69,7 +69,8 @@ export { FilterValueLabel } from './components/shared/filter_value_label/filter_
 export type { SeriesUrl } from './components/shared/exploratory_view/types';
 
 export type {
+  ObservabilityRuleTypeFormatter,
+  ObservabilityRuleTypeModel,
   ObservabilityRuleTypeRegistry,
-  FormattableAlertTypeModel,
 } from './rules/create_observability_rule_type_registry';
 export { createObservabilityRuleTypeRegistryMock } from './rules/observability_rule_type_registry_mock';
