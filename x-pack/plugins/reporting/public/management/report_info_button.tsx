@@ -91,7 +91,7 @@ class ReportInfoButtonUi extends Component<Props, State> {
     const attempts = info.attempts ? info.attempts.toString() : NA;
     const maxAttempts = info.max_attempts ? info.max_attempts.toString() : NA;
     const timeout = info.timeout ? info.timeout.toString() : NA;
-    const warnings = info.warnings ? info.warnings.join(',') : null;
+    const warnings = info.warnings?.join(',') ?? null;
 
     const jobInfoDateTimes: JobInfo[] = [
       {
