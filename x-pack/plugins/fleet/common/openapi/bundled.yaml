@@ -934,21 +934,101 @@ paths:
                 type: object
                 properties:
                   item:
+                    title: Agent
                     type: object
+                    properties:
+                      type:
+                        type: string
+                        title: AgentType
+                        enum:
+                          - PERMANENT
+                          - EPHEMERAL
+                          - TEMPORARY
+                      active:
+                        type: boolean
+                      enrolled_at:
+                        type: string
+                      unenrolled_at:
+                        type: string
+                      unenrollment_started_at:
+                        type: string
+                      shared_id:
+                        type: string
+                        deprecated: true
+                      access_api_key_id:
+                        type: string
+                      default_api_key_id:
+                        type: string
+                      policy_id:
+                        type: string
+                      policy_revision:
+                        type: number
+                      last_checkin:
+                        type: string
+                      user_provided_metadata:
+                        $ref: '#/paths/~1agents~1%7BagentId%7D/get/responses/200/content/application~1json/schema/properties/item/properties/local_metadata'
+                      local_metadata:
+                        title: AgentMetadata
+                        type: object
+                      id:
+                        type: string
+                      access_api_key:
+                        type: string
+                      status:
+                        type: string
+                        title: AgentStatus
+                        enum:
+                          - offline
+                          - error
+                          - online
+                          - inactive
+                          - warning
+                      default_api_key:
+                        type: string
+                    required:
+                      - type
+                      - active
+                      - enrolled_at
+                      - id
+                      - status
                 required:
                   - item
       operationId: get-fleet-agents-agentId
     put:
       summary: Fleet - Agent - Update
       tags: []
-      responses: {}
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  item:
+                    $ref: '#/paths/~1agents~1%7BagentId%7D/get/responses/200/content/application~1json/schema/properties/item'
+                required:
+                  - item
       operationId: put-fleet-agents-agentId
       parameters:
         - $ref: '#/paths/~1setup/post/parameters/0'
     delete:
       summary: Fleet - Agent - Delete
       tags: []
-      responses: {}
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  action:
+                    type: string
+                    enum:
+                      - deleted
+                required:
+                  - action
       operationId: delete-fleet-agents-agentId
       parameters:
         - $ref: '#/paths/~1setup/post/parameters/0'
