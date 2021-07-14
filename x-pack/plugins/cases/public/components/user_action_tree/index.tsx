@@ -81,7 +81,6 @@ const MyEuiFlexGroup = styled(EuiFlexGroup)`
   margin-bottom: 8px;
 `;
 
-const alertActionCommentPadding = '10px';
 const MyEuiCommentList = styled(EuiCommentList)`
   ${({ theme }) => `
     & .userAction__comment.outlined .euiCommentEvent {
@@ -108,7 +107,7 @@ const MyEuiCommentList = styled(EuiCommentList)`
     & .comment-alert .euiCommentEvent {
       background-color: ${theme.eui.euiColorLightestShade};
       border: ${theme.eui.euiFlyoutBorder};
-      padding: ${alertActionCommentPadding};
+      padding: ${theme.eui.paddingSizes.s};
       border-radius: ${theme.eui.paddingSizes.xs};
     }
 
@@ -119,7 +118,7 @@ const MyEuiCommentList = styled(EuiCommentList)`
     & .comment-action.empty-comment .euiCommentEvent--regular {
       box-shadow: none;
       .euiCommentEvent__header {
-        padding: 14px ${alertActionCommentPadding};
+        padding: ${theme.eui.euiSizeM} ${theme.eui.paddingSizes.s};
         border-bottom: 0;
       }
     }
