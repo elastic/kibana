@@ -19,9 +19,16 @@ export const pathExists = (x: string) =>
   );
 export const noop = () => {};
 export const notADot = (name: string) => !name.startsWith('.');
+export const flatten = (lists): unknown => lists.reduce((a, b) => a.concat(b), []);
 export const predicates = [notADot, isDir];
 export const allTrue = (predicateFns) => (xs) => {
   return predicateFns.forEach((pred) => {
     pred(name);
   });
 };
+export const tail = (xs) => {
+  const [, ...rest] = xs;
+  return rest;
+};
+// Conversion Archive Log Marker
+export const acMark = '[Archive Conversion]';

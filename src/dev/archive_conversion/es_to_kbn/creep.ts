@@ -9,13 +9,14 @@
 import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
 import fs from 'fs';
 import { resolve, join } from 'path';
-import { pathExists } from './utils';
+import { EsArchiver } from '@kbn/es-archiver';
+import { spawnSync } from 'child_process';
+import { acMark, flatten, pathExists, tail } from './utils';
 
 const resolveRoot = resolve.bind(null, REPO_ROOT);
 
 type BaseArchivePath = string;
 
-const flatten = (lists): unknown => lists.reduce((a, b) => a.concat(b), []);
 const getDirectories = (srcpath): unknown =>
   fs
     .readdirSync(srcpath)
@@ -26,10 +27,23 @@ const getDirectoriesRecursive = (srcpath): unknown => [
   ...flatten(getDirectories(srcpath).map(getDirectoriesRecursive)),
 ];
 
+const esArchiverScript = resolveRoot('scripts/es_archiver.js');
+const xpackConfig = resolveRoot('x-pack/test/functional/config.js');
+
 const creepThru = (log: ToolingLog) => (base: BaseArchivePath) => {
-  // const xs = getDirectoriesRecursive(resolveRoot('x-pack/test/functional/es_archives/auditbeat'))
-  const xs = getDirectoriesRecursive(resolveRoot(base));
-  log.info(`\n### xs: \n\t${xs}`);
+  for (const dir of tail(getDirectoriesRecursive(resolveRoot(base)))) {
+    if (!dir.includes('empty_kibana')) loadEsArchive(dir);
+
+    function loadEsArchive(name: string) {
+      log.info(`\n### loading from: \n\t[${name}]`);
+
+      try {
+        spawnSync(process.execPath, [esArchiverScript, '--config', xpackConfig, 'load', name]);
+      } catch (err) {
+        log.error(`${acMark} ${err}`);
+      }
+    }
+  }
 };
 
 const creepFs = (archiveRoot: BaseArchivePath) => (log: ToolingLog) => {
