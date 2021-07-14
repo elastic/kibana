@@ -12,7 +12,7 @@ import { FieldDescriptor } from '../index_patterns_fetcher';
 
 export const mergeCapabilitiesWithFields = (
   rollupIndexCapabilities: { [key: string]: any },
-  fieldsFromFieldCapsApi: { [key: string]: any },
+  fieldsFromFieldCapsApi: Record<string, FieldDescriptor>,
   previousFields: FieldDescriptor[] = []
 ) => {
   const rollupFields = [...previousFields];
@@ -56,16 +56,21 @@ export const mergeCapabilitiesWithFields = (
       rollupFields.push(
         ...fields
           .filter((field) => !rollupFieldNames.includes(field))
-          .map((field) => {
+          .reduce<FieldDescriptor[]>((collector, field) => {
             // Expand each field into object format that end consumption expects.
             const fieldCapsKey = `${field}.${agg}.value`;
             rollupFieldNames.push(field);
-            return {
-              ...fieldsFromFieldCapsApi[fieldCapsKey],
-              ...defaultField,
-              name: field,
-            };
-          })
+
+            // only add fields if they are returned from field caps. they won't exist if there's no data
+            if (fieldsFromFieldCapsApi[fieldCapsKey]) {
+              collector.push({
+                ...fieldsFromFieldCapsApi[fieldCapsKey],
+                ...defaultField,
+                name: field,
+              });
+            }
+            return collector;
+          }, [])
       );
     }
   });
