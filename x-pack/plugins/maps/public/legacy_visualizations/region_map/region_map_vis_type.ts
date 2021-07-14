@@ -21,8 +21,7 @@ export const regionMapVisType = {
   icon: 'visMapRegion',
   description: i18n.translate('xpack.maps.regionMap.vis.description', {
     defaultMessage:
-      'Show metrics on a thematic map. Use one of the \
-provided base maps, or add your own. Darker colors represent higher values.',
+      'Show metrics on a thematic map.',
   }),
   editorConfig: {
     optionTabs: [
