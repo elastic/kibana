@@ -18,7 +18,7 @@ It is enabled by default.
 // Any changes made in this file will be seen there as well.
 // tag::apm-indices-settings[]
 
-Index defaults can be changed in Kibana. Open the main menu, then click *APM > Settings > Indices*.
+Index defaults can be changed in the APM app. Select **Settings** > **Indices**.
 Index settings in the APM app take precedence over those set in `kibana.yml`.
 
 [role="screenshot"]
