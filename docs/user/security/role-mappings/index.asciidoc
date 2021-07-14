@@ -2,11 +2,10 @@
 [[role-mappings]]
 === Role mappings
 
-Role mappings allow you to describe which roles to assign to your users
-using a set of rules. Role mappings are required when authenticating via
-an external identity provider, such as Active Directory, Kerberos, PKI, OIDC,
-or SAML.
+Role mappings are part of single sign-on (SSO), a https://www.elastic.co/subscriptions[subscription feature]. This feature allows you to
+describe which roles to assign to your users using a set of rules.
 
+Role mappings are required when authenticating via an external identity provider, such as Active Directory, Kerberos, PKI, OIDC, or SAML.
 Role mappings have no effect for users inside the `native` or `file` realms.
 
 To manage your role mappings, open the main menu, then click *Stack Management > Role Mappings*.

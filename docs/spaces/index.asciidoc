@@ -125,7 +125,7 @@ The landing page can route users to a specific dashboard, application, or saved 
 
 To configure the landing page, use the default route setting in
 <<kibana-general-settings, Stack Management > {kib} > Advanced settings>>.
-For example, you might set the default route to `/app/kibana#/dashboards`.
+For example, you might set the default route to `/app/dashboards`.
 
 [role="screenshot"]
 image::spaces/images/spaces-configure-landing-page.png["Configure space-level landing page"]

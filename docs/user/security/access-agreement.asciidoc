@@ -9,7 +9,7 @@ Some work environments require you to acknowledge and accept an agreement before
 You need to acknowledge the access agreement only once per session, and {kib} reports the acknowledgement in the audit logs.
 ============================================================================
 
-Here is how your `kibana.yml` can look like if you define an access agreement:
+Here is an example of defining an access agreement in `kibana.yml`:
 
 [source,yaml]
 --------------------------------------------------------------------------------
@@ -17,8 +17,11 @@ xpack.security.authc.providers:
   basic.basic1:
     order: 0
     accessAgreement:
-      message: "**You are accessing a system with a sensitive information** \n\n
-                  By logging in, you acknowledge that (shortened ...)"
+      message: |
+        **You are accessing a system with a sensitive information**
+
+        By logging in, you acknowledge that information system usage
+        ...(shortened)
 --------------------------------------------------------------------------------
 
 When you authenticate using `basic.basic1`, you'll see the following agreement that you must acknowledge before you can access {kib}:

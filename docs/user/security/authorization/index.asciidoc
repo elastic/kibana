@@ -68,6 +68,8 @@ image::user/security/images/create-role-index-example.png[Create role with index
 [[index_privilege_dls_example]]
 ===== Example: Grant read access to specific documents in indices that match the `filebeat-*` pattern
 
+{ref}/document-level-security.html[Document-level security] is a https://www.elastic.co/subscriptions[subscription feature].
+
 . Go to **Stack Management > Roles**, and then click **Create role**.
 . In **Index privileges**, enter:
 .. `filebeat-*` in the **Indices** field.
@@ -95,9 +97,9 @@ image::user/security/images/create-role-dls-example.png[Create role with DLS ind
 To assign {kib} privileges to the role, click **Add {kib} privilege** in the {kib} section.
 
 [role="screenshot"]
-image::user/security/images/add-space-privileges.png[Add {kib} privileges]
+image::spaces/images/spaces-roles.png[Add {kib} privileges]
 
-Open the **Spaces** selection control to specify whether to grant the role access to all spaces *** Global (all spaces)** or one or more individual spaces. If you select *** Global (all spaces)**, you can’t select individual spaces until you clear your selection.
+Open the **Spaces** selection control to specify whether to grant the role access to all spaces *** All Spaces** or one or more individual spaces. If you select *** All Spaces**, you can’t select individual spaces until you clear your selection.
 
 Use the **Privilege** menu to grant access to features. The default is **Custom**, which you can use to grant access to individual features. Otherwise, you can grant read and write access to all current and future features by selecting **All**, or grant read access to all current and future features by selecting **Read**.
 
@@ -139,9 +141,9 @@ Features are available to users when their roles grant access to the features, *
 
 ==== Assigning different privileges to different spaces
 
-Using the same role, it’s possible to assign different privileges to different spaces. After you’ve added privileges, click **Add {kib} privilege**. If you’ve already added privileges for either *** Global (all spaces)** or an individual space, you will not be able to select these in the **Spaces** selection control.
+Using the same role, it’s possible to assign different privileges to different spaces. After you’ve added privileges, click **Add {kib} privilege**. If you’ve already added privileges for either *** All Spaces** or an individual space, you will not be able to select these in the **Spaces** selection control.
 
-Additionally, if you’ve already assigned privileges at *** Global (all spaces)**, you are only able to assign additional privileges to individual spaces. Similar to the behavior of multiple roles granting the union of all privileges, {kib} privileges are also a union. If you’ve already granted the user the **All** privilege at *** Global (all spaces)**, you’re not able to restrict the role to only the **Read** privilege at an individual space.
+Additionally, if you’ve already assigned privileges at *** All Spaces**, you are only able to assign additional privileges to individual spaces. Similar to the behavior of multiple roles granting the union of all privileges, {kib} privileges are also a union. If you’ve already granted the user the **All** privilege at *** All Spaces**, you’re not able to restrict the role to only the **Read** privilege at an individual space.
 
 
 ==== Privilege summary
@@ -178,7 +180,7 @@ image::user/security/images/privilege-example-2.png[Privilege example 2]
 ==== Example 3: Grant read access to all spaces and write access to an individual space
 
 . Click **Add {kib} privilege**.
-. For **Spaces**, select *** Global (all spaces)**.
+. For **Spaces**, select *** All Spaces**.
 . For **Privilege**, select **Read**.
 . Click **Add {kib} privilege**.
 . For **Spaces**, select the individual space.

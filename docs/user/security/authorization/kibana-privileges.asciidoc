@@ -14,7 +14,7 @@ Assigning a base privilege grants access to all {kib} features, such as *Discove
 From the role management screen:
 
 [role="screenshot"]
-image::user/security/images/assign_base_privilege.png[Assign base privilege]
+image::user/security/images/assign-base-privilege.png[Assign base privilege]
 
 From the <<role-management-api-put, role management API>>:
 [source,js]
@@ -45,13 +45,13 @@ Assigning a feature privilege grants access to a specific feature.
 
 ===== Sub-feature privileges
 Some features allow for finer access control than the `all` and `read` privileges.
-This additional level of control is available in the Gold subscription level and higher.
+This additional level of control is a https://www.elastic.co/subscriptions[subscription feature].
 
 ===== Assigning feature privileges
 From the role management screen:
 
 [role="screenshot"]
-image::user/security/images/assign_feature_privilege.png[Assign feature privilege]
+image::user/security/images/assign-subfeature-privilege.png[Assign feature privilege]
 
 From the <<role-management-api-put, role management API>>:
 [source,js]
