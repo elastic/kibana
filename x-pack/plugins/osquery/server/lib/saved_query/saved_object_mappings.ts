@@ -24,7 +24,7 @@ export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
       type: 'date',
     },
     created_by: {
-      type: 'keyword',
+      type: 'text',
     },
     platform: {
       type: 'keyword',
@@ -36,7 +36,7 @@ export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
       type: 'date',
     },
     updated_by: {
-      type: 'keyword',
+      type: 'text',
     },
     interval: {
       type: 'keyword',
@@ -57,19 +57,19 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
       type: 'text',
     },
     name: {
-      type: 'keyword',
+      type: 'text',
     },
     created_at: {
       type: 'date',
     },
     created_by: {
-      type: 'keyword',
+      type: 'text',
     },
     updated_at: {
       type: 'date',
     },
     updated_by: {
-      type: 'keyword',
+      type: 'text',
     },
     queries: {
       properties: {
@@ -77,7 +77,7 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
           type: 'keyword',
         },
         interval: {
-          type: 'keyword',
+          type: 'text',
         },
       },
     },
