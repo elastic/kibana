@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { EuiButton, EuiDatePicker, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiDatePicker, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment, { Moment } from 'moment';
 import React, { useCallback } from 'react';
 import { withTheme, EuiTheme } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { useWaffleTimeContext } from '../../hooks/use_waffle_time';
+import { intervalAsString } from './interval_label';
 
 interface Props {
   theme: EuiTheme | undefined;
@@ -55,18 +56,28 @@ export const WaffleTimeControls = withTheme(({ theme }: Props) => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="m">
       <EuiFlexItem grow={false} data-test-subj="waffleDatePicker">
-        <EuiDatePicker
-          dateFormat="L LTS"
-          disabled={isAutoReloading}
-          injectTimes={currentMoment ? [currentMoment] : []}
-          isLoading={isAutoReloading}
-          onChange={handleChangeDate}
-          popperPlacement="top-end"
-          selected={currentMoment}
-          shouldCloseOnSelect
-          showTimeSelect
-          timeFormat="LT"
-        />
+        <EuiFormRow
+          helpText={
+            <FormattedMessage
+              id="xpack.infra.homePage.toolbar.showingLastOneMinuteDataText"
+              defaultMessage="Last {duration} of data for the selected time"
+              values={{ duration: { intervalAsString } }}
+            />
+          }
+        >
+          <EuiDatePicker
+            dateFormat="L LTS"
+            disabled={isAutoReloading}
+            injectTimes={currentMoment ? [currentMoment] : []}
+            isLoading={isAutoReloading}
+            onChange={handleChangeDate}
+            popperPlacement="top-end"
+            selected={currentMoment}
+            shouldCloseOnSelect
+            showTimeSelect
+            timeFormat="LT"
+          />
+        </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{liveStreamingButton}</EuiFlexItem>
     </EuiFlexGroup>

@@ -19,14 +19,12 @@ export const IntervalLabel = ({ intervalAsString }: Props) => {
   }
 
   return (
-    <EuiText color="subdued" size="s">
-      <p>
-        <FormattedMessage
-          id="xpack.infra.homePage.toolbar.showingLastOneMinuteDataText"
-          defaultMessage="Last {duration} of data for the selected time"
-          values={{ duration: intervalAsString }}
-        />
-      </p>
+    <EuiText color="subdued" size="xs">
+      <FormattedMessage
+        id="xpack.infra.homePage.toolbar.showingLastOneMinuteDataText"
+        defaultMessage="Last {duration} of data for the selected time"
+        values={{ duration: intervalAsString }}
+      />
     </EuiText>
   );
 };
