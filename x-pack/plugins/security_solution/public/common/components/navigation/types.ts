@@ -55,11 +55,13 @@ export type SecurityNavKey =
   | SecurityPageName.trustedApps
   | SecurityPageName.ueba;
 
-export type SecurityNav = Record<Exclude<SecurityNavKey,SecurityPageName.ueba>, NavTab> & {[SecurityPageName.ueba]?: NavTab};
+export type SecurityNav = Record<SecurityNavKey, NavTab>;
+
+export type GenericNavRecord = Record<string, NavTab>;
 
 export interface SecuritySolutionTabNavigationProps {
   display?: 'default' | 'condensed';
-  navTabs: SecurityNav;
+  navTabs: GenericNavRecord;
 }
 export type GetUrlForApp = (
   appId: string,

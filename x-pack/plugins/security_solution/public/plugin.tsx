@@ -58,7 +58,10 @@ import { SecuritySolutionUiConfigType } from './common/types';
 import { getLazyEndpointPolicyEditExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_edit_extension';
 import { LazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
 import { getLazyEndpointPackageCustomExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_package_custom_extension';
-import { ExperimentalFeatures, parseExperimentalConfigValue } from '../common/experimental_features';
+import {
+  ExperimentalFeatures,
+  parseExperimentalConfigValue,
+} from '../common/experimental_features';
 import type { TimelineState } from '../../timelines/public';
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
 
@@ -69,9 +72,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<SecuritySolutionUiConfigType>();
-    this.experimentalFeatures = parseExperimentalConfigValue(
-      this.config.enableExperimental || []
-    );
+    this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental || []);
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
   private appUpdater$ = new Subject<AppUpdater>();
@@ -235,7 +236,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         if (currentLicense.type !== undefined) {
           this.appUpdater$.next(() => ({
             navLinkStatus: AppNavLinkStatus.hidden, // workaround to prevent main navLink to switch to visible after update. should not be needed
-            deepLinks: getDeepLinks(this.experimentalFeatures, currentLicense.type, core.application.capabilities),
+            deepLinks: getDeepLinks(
+              this.experimentalFeatures,
+              currentLicense.type,
+              core.application.capabilities
+            ),
           }));
         }
       });
@@ -326,7 +331,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       cases: subPlugins.cases.start(),
       hosts: subPlugins.hosts.start(storage),
       network: subPlugins.network.start(storage),
-      ...(this.experimentalFeatures.uebaEnabled && subPlugins.ueba != null ? { ueba: subPlugins.ueba.start(storage) } : {}),
+      ...(this.experimentalFeatures.uebaEnabled && subPlugins.ueba != null
+        ? { ueba: subPlugins.ueba.start(storage) }
+        : {}),
       timelines: subPlugins.timelines.start(),
       management: subPlugins.management.start(core, plugins),
     };
@@ -387,7 +394,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             ...subPlugins.exceptions.storageTimelines!.timelineById,
             ...subPlugins.hosts.storageTimelines!.timelineById,
             ...subPlugins.network.storageTimelines!.timelineById,
-            ...(this.experimentalFeatures.uebaEnabled && subPlugins.ueba != null ? subPlugins.ueba.storageTimelines!.timelineById : {}),
+            ...(this.experimentalFeatures.uebaEnabled && subPlugins.ueba != null
+              ? subPlugins.ueba.storageTimelines!.timelineById
+              : {}),
           },
         },
       };
@@ -404,7 +413,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           {
             ...subPlugins.hosts.store.initialState,
             ...subPlugins.network.store.initialState,
-            ...(this.experimentalFeatures.uebaEnabled && subPlugins.ueba != null ? subPlugins.ueba.store.initialState : {}),
+            ...(this.experimentalFeatures.uebaEnabled && subPlugins.ueba != null
+              ? subPlugins.ueba.store.initialState
+              : {}),
             ...timelineInitialState,
             ...subPlugins.management.store.initialState,
           },
@@ -418,7 +429,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         {
           ...subPlugins.hosts.store.reducer,
           ...subPlugins.network.store.reducer,
-          ...(this.experimentalFeatures.uebaEnabled && subPlugins.ueba != null ? subPlugins.ueba.store.reducer : {}),
+          ...(this.experimentalFeatures.uebaEnabled && subPlugins.ueba != null
+            ? subPlugins.ueba.store.reducer
+            : {}),
           timeline: timelineReducer,
           ...subPlugins.management.store.reducer,
           ...tGridReducer,

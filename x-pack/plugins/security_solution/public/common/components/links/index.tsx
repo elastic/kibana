@@ -61,7 +61,6 @@ export const PortContainer = styled.div`
   }
 `;
 
-// TO DO Steph refactor these LinkComponents down to one
 // Internal Links
 const UebaDetailsLinkComponent: React.FC<{
   children?: React.ReactNode;

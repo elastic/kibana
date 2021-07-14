@@ -108,7 +108,7 @@ const HostRulesTableComponent: React.FC<HostRulesTableProps> = ({
           //     sort,
           //     uebaType: type,
           //   })
-          // ); TO DO Steph
+          // ); TO DO Steph/ueba implement sorting
         }
       }
     },

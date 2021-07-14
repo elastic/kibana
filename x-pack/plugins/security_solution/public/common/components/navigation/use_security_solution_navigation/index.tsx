@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { usePrimaryNavigation } from './use_primary_navigation';
 import { useKibana } from '../../../lib/kibana';
 import { setBreadcrumbs } from '../breadcrumbs';
@@ -13,7 +13,8 @@ import { makeMapStateToProps } from '../../url_state/helpers';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { navTabs } from '../../../../app/home/home_navigations';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
-import { appSelectors } from '../../../store';
+import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
+import { GenericNavRecord } from '../types';
 
 /**
  * @description - This hook provides the structure necessary by the KibanaPageTemplate for rendering the primary security_solution side navigation.
@@ -30,11 +31,10 @@ export const useSecuritySolutionNavigation = () => {
 
   const { detailName, flowTarget, pageName, pathName, search, state, tabName } = routeProps;
 
-  const getEnableExperimental = useMemo(() => appSelectors.enableExperimentalSelector(), []);
-  const enableExperimental = useDeepEqualSelector(getEnableExperimental);
-  let enabledNavTabs = navTabs;
-  if (!enableExperimental.uebaEnabled) {
-    const { ueba, ...rest }= navTabs;
+  const uebaEnabled = useIsExperimentalFeatureEnabled('uebaEnabled');
+  let enabledNavTabs: GenericNavRecord = (navTabs as unknown) as GenericNavRecord;
+  if (!uebaEnabled) {
+    const { ueba, ...rest } = enabledNavTabs;
     enabledNavTabs = rest;
   }
   useEffect(() => {
@@ -73,10 +73,10 @@ export const useSecuritySolutionNavigation = () => {
     tabName,
     getUrlForApp,
     navigateToUrl,
+    enabledNavTabs,
   ]);
 
   return usePrimaryNavigation({
-
     query: urlState.query,
     filters: urlState.filters,
     navTabs: enabledNavTabs,

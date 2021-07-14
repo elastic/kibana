@@ -334,7 +334,9 @@ const nestedDeepLinks: SecurityDeepLinks = {
 
 /**
  * A function that generates the plugin deepLinks
+ * @param enableExperimental ExperimentalFeatures arg
  * @param licenseType optional string for license level, if not provided basic is assumed.
+ * @param capabilities optional arg for app start capabilities
  */
 export function getDeepLinks(
   enableExperimental: ExperimentalFeatures,

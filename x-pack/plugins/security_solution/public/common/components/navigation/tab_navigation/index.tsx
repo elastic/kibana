@@ -14,6 +14,7 @@ import deepEqual from 'fast-deep-equal';
 import { useNavigation } from '../../../lib/kibana/hooks';
 import { track, METRIC_TYPE, TELEMETRY_EVENT } from '../../../lib/telemetry';
 import { TabNavigationProps, TabNavigationItemProps } from './types';
+import { NavTab } from '../types';
 
 const TabNavigationItemComponent = ({
   disabled,
@@ -63,7 +64,7 @@ export const TabNavigationComponent: React.FC<TabNavigationProps> = ({
       getOr(
         '',
         'id',
-        Object.values(navTabs).find((item) => tabName === item.id)
+        Object.values(navTabs).find((item) => tabName === item?.id)
       ),
     [tabName, navTabs]
   );
@@ -82,10 +83,10 @@ export const TabNavigationComponent: React.FC<TabNavigationProps> = ({
 
   const renderTabs = useMemo(
     () =>
-      Object.values(navTabs).map((tab) => {
+      Object.values(navTabs).reduce((acc: React.ReactNode[], tab: NavTab) => {
         const isSelected = selectedTabId === tab.id;
-
-        return (
+        return [
+          ...acc,
           <TabNavigationItem
             key={`navigation-${tab.id}`}
             id={tab.id}
@@ -93,9 +94,9 @@ export const TabNavigationComponent: React.FC<TabNavigationProps> = ({
             name={tab.name}
             disabled={tab.disabled}
             isSelected={isSelected}
-          />
-        );
-      }),
+          />,
+        ];
+      }, []),
     [navTabs, selectedTabId, search]
   );
 

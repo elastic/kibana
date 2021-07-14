@@ -106,7 +106,7 @@ const HostTacticsTableComponent: React.FC<HostTacticsTableProps> = ({
           //     sort,
           //     uebaType: type,
           //   })
-          // ); TO DO Steph
+          // ); TO DO Steph/ueba implement sorting
         }
       }
     },
