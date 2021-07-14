@@ -14,6 +14,7 @@ import type { PluginSetupContract as AlertingSetup } from '../../../alerting/pub
 import { PLUGIN_ID } from '../../common/constants/app';
 import { formatExplorerUrl } from '../locator/formatters/anomaly_detection';
 import { validateLookbackInterval, validateTopNBucket } from './validators';
+import { registerJobsHealthAlertingRule } from './jobs_health_rule';
 
 export function registerMlAlerts(
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup,
@@ -136,6 +137,8 @@ export function registerMlAlerts(
       }
     ),
   });
+
+  registerJobsHealthAlertingRule(triggersActionsUi, alerting);
 
   if (alerting) {
     registerNavigation(alerting);

@@ -108,3 +108,10 @@ export type MlAnomalyDetectionAlertRule = Omit<Alert<MlAnomalyDetectionAlertPara
 export interface JobAlertingRuleStats {
   alerting_rules?: MlAnomalyDetectionAlertRule[];
 }
+
+export type MlAnomalyDetectionJobsHealthRuleParams = {
+  jobSelection: {
+    jobIds?: string[];
+    groupIds?: string[];
+  };
+} & AlertTypeParams;

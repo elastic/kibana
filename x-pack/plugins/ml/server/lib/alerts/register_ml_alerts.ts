@@ -9,6 +9,7 @@ import { Logger } from 'kibana/server';
 import { AlertingPlugin } from '../../../../alerting/server';
 import { registerAnomalyDetectionAlertType } from './register_anomaly_detection_alert_type';
 import { SharedServices } from '../../shared_services';
+import { registerJobsMonitoringRuleType } from './register_jobs_monitoring_rule_type';
 
 export interface RegisterAlertParams {
   alerting: AlertingPlugin['setup'];
@@ -18,4 +19,5 @@ export interface RegisterAlertParams {
 
 export function registerMlAlerts(params: RegisterAlertParams) {
   registerAnomalyDetectionAlertType(params);
+  registerJobsMonitoringRuleType(params);
 }
