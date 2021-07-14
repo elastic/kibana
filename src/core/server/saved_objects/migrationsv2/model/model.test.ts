@@ -715,7 +715,7 @@ describe('migrations v2 model', () => {
         },
       } as const;
 
-      test('CHECK_UNKNOWN_DOCUMENTS -> SET_SOURCE_WRITE_BLOCK if action succeeds', () => {
+      test('CHECK_UNKNOWN_DOCUMENTS -> SET_SOURCE_WRITE_BLOCK if action succeeds and no unknown docs are found', () => {
         const checkUnknownDocumentsSourceState: CheckUnknownDocumentsState = {
           ...baseState,
           controlState: 'CHECK_UNKNOWN_DOCUMENTS',
@@ -723,7 +723,7 @@ describe('migrations v2 model', () => {
           sourceIndexMappings: mappingsWithUnknownType,
         };
 
-        const res: ResponseType<'CHECK_UNKNOWN_DOCUMENTS'> = Either.right({});
+        const res: ResponseType<'CHECK_UNKNOWN_DOCUMENTS'> = Either.right({ unknownDocs: [] });
         const newState = model(checkUnknownDocumentsSourceState, res);
         expect(newState.controlState).toEqual('SET_SOURCE_WRITE_BLOCK');
 
@@ -758,9 +758,12 @@ describe('migrations v2 model', () => {
             },
           }
         `);
+
+        // No log message gets appended
+        expect(newState.logs).toEqual([]);
       });
 
-      test('CHECK_UNKNOWN_DOCUMENTS -> FATAL if action fails and unknown docs were found', () => {
+      test('CHECK_UNKNOWN_DOCUMENTS -> SET_SOURCE_WRITE_BLOCK and adds log if action succeeds and unknown docs were found', () => {
         const checkUnknownDocumentsSourceState: CheckUnknownDocumentsState = {
           ...baseState,
           controlState: 'CHECK_UNKNOWN_DOCUMENTS',
@@ -768,20 +771,51 @@ describe('migrations v2 model', () => {
           sourceIndexMappings: mappingsWithUnknownType,
         };
 
-        const res: ResponseType<'CHECK_UNKNOWN_DOCUMENTS'> = Either.left({
-          type: 'unknown_docs_found',
+        const res: ResponseType<'CHECK_UNKNOWN_DOCUMENTS'> = Either.right({
           unknownDocs: [
             { id: 'dashboard:12', type: 'dashboard' },
             { id: 'foo:17', type: 'foo' },
           ],
         });
         const newState = model(checkUnknownDocumentsSourceState, res);
-        expect(newState.controlState).toEqual('FATAL');
+        expect(newState.controlState).toEqual('SET_SOURCE_WRITE_BLOCK');
 
         expect(newState).toMatchObject({
-          controlState: 'FATAL',
-          reason: expect.stringContaining(
-            'Migration failed because documents were found for unknown saved object types'
+          controlState: 'SET_SOURCE_WRITE_BLOCK',
+          sourceIndex: Option.some('.kibana_3'),
+          targetIndex: '.kibana_7.11.0_001',
+        });
+
+        // This snapshot asserts that we disable the unknown saved object
+        // type. Because it's mappings are disabled, we also don't copy the
+        // `_meta.migrationMappingPropertyHashes` for the disabled type.
+        expect(newState.targetIndexMappings).toMatchInlineSnapshot(`
+          Object {
+            "_meta": Object {
+              "migrationMappingPropertyHashes": Object {
+                "new_saved_object_type": "4a11183eee21e6fbad864f7a30b39ad0",
+              },
+            },
+            "properties": Object {
+              "disabled_saved_object_type": Object {
+                "dynamic": false,
+                "properties": Object {},
+              },
+              "new_saved_object_type": Object {
+                "properties": Object {
+                  "value": Object {
+                    "type": "text",
+                  },
+                },
+              },
+            },
+          }
+        `);
+
+        expect(newState.logs[0]).toMatchObject({
+          level: 'warning',
+          message: expect.stringContaining(
+            'Upgrades will fail for 8.0+ because documents were found for unknown saved object types'
           ),
         });
       });

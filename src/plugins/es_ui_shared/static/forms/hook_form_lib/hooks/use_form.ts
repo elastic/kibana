@@ -257,11 +257,6 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
     [getFormData$, updateFormData$, fieldsToArray]
   );
 
-  const getFieldDefaultValue: FormHook<T, I>['__getFieldDefaultValue'] = useCallback(
-    (fieldName) => get(defaultValueDeserialized.current, fieldName),
-    []
-  );
-
   const readFieldConfigFromSchema: FormHook<T, I>['__readFieldConfigFromSchema'] = useCallback(
     (fieldName) => {
       const config = (get(schema ?? {}, fieldName) as FieldConfig) || {};
@@ -338,6 +333,11 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
   }, []);
 
   const getFields: FormHook<T, I>['getFields'] = useCallback(() => fieldsRefs.current, []);
+
+  const getFieldDefaultValue: FormHook<T, I>['getFieldDefaultValue'] = useCallback(
+    (fieldName) => get(defaultValueDeserialized.current, fieldName),
+    []
+  );
 
   const submit: FormHook<T, I>['submit'] = useCallback(
     async (e) => {
@@ -431,6 +431,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
       setFieldValue,
       setFieldErrors,
       getFields,
+      getFieldDefaultValue,
       getFormData,
       getErrors,
       reset,
@@ -439,7 +440,6 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
       __updateFormDataAt: updateFormDataAt,
       __updateDefaultValueAt: updateDefaultValueAt,
       __readFieldConfigFromSchema: readFieldConfigFromSchema,
-      __getFieldDefaultValue: getFieldDefaultValue,
       __addField: addField,
       __removeField: removeField,
       __validateFields: validateFields,
