@@ -88,8 +88,19 @@ describe('get()', () => {
         Object {
           "body": Object {
             "query": Object {
-              "term": Object {
-                "_id": "1",
+              "bool": Object {
+                "filter": Array [
+                  Object {
+                    "term": Object {
+                      "_id": "1",
+                    },
+                  },
+                  Object {
+                    "term": Object {
+                      "kibana.rac.alert.space_ids": "test_default_space_id",
+                    },
+                  },
+                ],
               },
             },
           },
