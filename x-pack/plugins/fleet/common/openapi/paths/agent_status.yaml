@@ -1,7 +1,39 @@
 get:
-  summary: Fleet - Agent - Status for policy
+  summary: Fleet - Agent - Summary stats
   tags: []
-  responses: {}
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: integer
+              events:
+                type: integer
+              inactive:
+                type: integer
+              offline:
+                type: integer
+              online:
+                type: integer
+              other:
+                type: integer
+              total:
+                type: integer
+              updating:
+                type: integer
+            required:
+              - error
+              - events
+              - inactive
+              - offline
+              - online
+              - other
+              - total
+              - updating
   operationId: get-fleet-agent-status
   parameters:
     - schema:
