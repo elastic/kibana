@@ -9,8 +9,8 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
+import { FieldComponent } from '@kbn/securitysolution-autocomplete';
 import { IFieldType, IndexPattern } from '../../../../../../../src/plugins/data/common';
-import { FieldComponent } from '../autocomplete/field';
 import { FormattedEntry, Entry } from './types';
 import * as i18n from './translations';
 import { getEntryOnFieldChange, getEntryOnThreatFieldChange } from './helpers';
