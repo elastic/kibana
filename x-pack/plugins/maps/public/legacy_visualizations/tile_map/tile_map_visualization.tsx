@@ -25,7 +25,9 @@ export function TileMapVisualization(props: Props) {
     zoom: props.visConfig.mapZoom,
   };
   function getLayerDescriptors(mapModules: LazyLoadedMapModules) {
-    const layerDescriptor = mapModules.createTileMapLayerDescriptor(props.visConfig.layerDescriptorParams);
+    const layerDescriptor = mapModules.createTileMapLayerDescriptor(
+      props.visConfig.layerDescriptorParams
+    );
     return layerDescriptor ? [layerDescriptor] : [];
   }
   return (

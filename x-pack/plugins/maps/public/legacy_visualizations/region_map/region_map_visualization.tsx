@@ -25,7 +25,9 @@ export function RegionMapVisualization(props: Props) {
     zoom: props.visConfig.mapZoom,
   };
   function getLayerDescriptors(mapModules: LazyLoadedMapModules) {
-    const layerDescriptor = mapModules.createRegionMapLayerDescriptor(props.visConfig.layerDescriptorParams);
+    const layerDescriptor = mapModules.createRegionMapLayerDescriptor(
+      props.visConfig.layerDescriptorParams
+    );
     return layerDescriptor ? [layerDescriptor] : [];
   }
   return (

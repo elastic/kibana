@@ -45,5 +45,5 @@ export function extractLayerDescriptorParams(vis: Vis<RegionMapVisParams>) {
     params.metricFieldName = metricAggs[0].getField()?.name;
   }
 
- return params;
+  return params;
 }

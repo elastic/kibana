@@ -72,7 +72,14 @@ import {
   MapsAppRegionMapLocatorDefinition,
   MapsAppTileMapLocatorDefinition,
 } from './locators';
-import { createRegionMapFn, regionMapRenderer, regionMapVisType, createTileMapFn, tileMapRenderer, tileMapVisType } from './legacy_visualizations';
+import {
+  createRegionMapFn,
+  regionMapRenderer,
+  regionMapVisType,
+  createTileMapFn,
+  tileMapRenderer,
+  tileMapVisType,
+} from './legacy_visualizations';
 
 export interface MapsPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
