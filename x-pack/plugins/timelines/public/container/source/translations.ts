@@ -8,15 +8,12 @@
 import { i18n } from '@kbn/i18n';
 
 export const ERROR_BEAT_FIELDS = i18n.translate(
-  'xpack.securitySolution.beatFields.errorSearchDescription',
+  'xpack.timelines.beatFields.errorSearchDescription',
   {
     defaultMessage: `An error has occurred on getting beat fields`,
   }
 );
 
-export const FAIL_BEAT_FIELDS = i18n.translate(
-  'xpack.securitySolution.beatFields.failSearchDescription',
-  {
-    defaultMessage: `Failed to run search on beat fields`,
-  }
-);
+export const FAIL_BEAT_FIELDS = i18n.translate('xpack.timelines.beatFields.failSearchDescription', {
+  defaultMessage: `Failed to run search on beat fields`,
+});
