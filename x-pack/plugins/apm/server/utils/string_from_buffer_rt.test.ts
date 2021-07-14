@@ -6,7 +6,7 @@
  */
 
 import { isRight } from 'fp-ts/lib/Either';
-import { toSourceMapRt } from './source_map_rt';
+import { stringFromBufferRt } from './string_from_buffer_rt';
 
 const sourceMap = {
   version: 3,
@@ -30,30 +30,30 @@ const sourceMap = {
   sourceRoot: '',
 };
 
-describe('toSourceMapRt', () => {
+describe('stringFromBufferRt', () => {
   describe('decode', () => {
     it('converts from buffer to SourceMap', () => {
       const sourceMapBuffer = Buffer.from(JSON.stringify(sourceMap));
-      const decoded = toSourceMapRt.decode(sourceMapBuffer);
+      const decoded = stringFromBufferRt.decode(sourceMapBuffer);
       if (isRight(decoded)) {
-        expect(decoded.right).toEqual(sourceMap);
+        expect(decoded.right).toEqual(JSON.stringify(sourceMap));
       } else {
         expect(true).toBeFalsy();
       }
     });
     it('converts from string to SourceMap', () => {
       const sourceMapString = JSON.stringify(sourceMap);
-      const decoded = toSourceMapRt.decode(sourceMapString);
+      const decoded = stringFromBufferRt.decode(sourceMapString);
       if (isRight(decoded)) {
-        expect(decoded.right).toEqual(sourceMap);
+        expect(decoded.right).toEqual(JSON.stringify(sourceMap));
       } else {
         expect(true).toBeFalsy();
       }
     });
   });
   describe('encode', () => {
-    it('converts from SourceMap to buffer', () => {
-      const encoded = toSourceMapRt.encode(sourceMap);
+    it('converts from string to buffer', () => {
+      const encoded = stringFromBufferRt.encode(JSON.stringify(sourceMap));
       expect(encoded).toEqual(Buffer.from(JSON.stringify(sourceMap)));
     });
   });

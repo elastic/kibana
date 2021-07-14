@@ -13,7 +13,7 @@ import {
 import { promisify } from 'util';
 import { unzip } from 'zlib';
 import { Artifact } from '../../../../fleet/server';
-import { SourceMap } from '../../utils/source_map_rt';
+import { SourceMap } from '../../routes/source_maps';
 import { APMPluginStartDependencies } from '../../types';
 import { getApmPackgePolicies } from './get_apm_package_policies';
 import { APM_SERVER, PackagePolicy } from './register_fleet_policy_callbacks';
