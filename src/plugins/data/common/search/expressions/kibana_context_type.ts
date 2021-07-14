@@ -5,8 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import type { KibanaExecutionContext } from 'src/core/public';
 import { ExpressionValueBoxed } from 'src/plugins/expressions/common';
 import { Filter } from '../../es_query';
 import { Query, TimeRange } from '../../query';
@@ -17,7 +15,6 @@ export type ExecutionContextSearch = {
   filters?: Filter[];
   query?: Query | Query[];
   timeRange?: TimeRange;
-  executionContext?: KibanaExecutionContext;
 };
 
 export type ExpressionValueSearchContext = ExpressionValueBoxed<
