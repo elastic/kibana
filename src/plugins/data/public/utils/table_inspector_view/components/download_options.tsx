@@ -119,7 +119,7 @@ class DataDownloadOptions extends Component<DataDownloadOptionsProps, DataDownlo
         position="top"
         content={i18n.translate('data.inspector.table.exportButtonFormulasWarning', {
           defaultMessage:
-            'Your CSV contains characters which spreadsheet application can interpret as formulas',
+            'Your CSV contains characters which spreadsheet applications can interpret as formulas',
         })}
       >
         {button}
