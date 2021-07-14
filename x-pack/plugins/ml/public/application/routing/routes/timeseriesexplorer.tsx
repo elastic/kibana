@@ -142,10 +142,10 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
       // Only if both min/max bounds are valid moment times set the bounds.
       // An invalid string restored from globalState might return `undefined`.
       if (timefilterBounds?.min !== undefined && timefilterBounds?.max !== undefined) {
-        setBounds(timefilter.getBounds());
+        setBounds(timefilterBounds);
       }
     }
-  }, [globalState?.time?.from, globalState?.time?.to]);
+  }, [lastRefresh, globalState?.time?.from, globalState?.time?.to]);
 
   const selectedJobIds = globalState?.ml?.jobIds;
   // Sort selectedJobIds so we can be sure comparison works when stringifying.
@@ -309,7 +309,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
           );
         });
     }
-  }, [selectedForecastId]);
+  }, [boundsMinMs, boundsMaxMs, selectedJob, selectedForecastId, autoZoomDuration]);
 
   const [tableInterval] = useTableInterval();
   const [tableSeverity] = useTableSeverity();

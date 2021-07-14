@@ -76,7 +76,11 @@ export const IGNORE_FILE_GLOBS = [
  *
  * @type {Array}
  */
-export const KEBAB_CASE_DIRECTORY_GLOBS = ['packages/*', 'x-pack'];
+export const KEBAB_CASE_DIRECTORY_GLOBS = [
+  'packages/*',
+  'x-pack',
+  'packages/kbn-optimizer/src/__fixtures__/mock_repo/packages/kbn-ui-shared-deps',
+];
 
 /**
  * These patterns are matched against directories and indicate

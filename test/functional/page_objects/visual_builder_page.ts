@@ -643,7 +643,7 @@ export class VisualBuilderPageObject extends FtrService {
     await this.comboBox.setElement(groupBy, 'Terms', { clickWithMouse: true });
     await this.common.sleep(1000);
     const byField = await this.testSubjects.find('groupByField');
-    await this.comboBox.setElement(byField, field, { clickWithMouse: true });
+    await this.comboBox.setElement(byField, field);
 
     await this.setMetricsGroupByFiltering(filtering.include, filtering.exclude);
   }
