@@ -38,6 +38,7 @@ export const getTransactionDurationPercentilesRequest = (
   return {
     index: params.index,
     body: {
+      track_total_hits: true,
       query,
       size: 0,
       aggs: {
@@ -55,13 +56,13 @@ export const getTransactionDurationPercentilesRequest = (
   };
 };
 
-export const fetchTransactionDurationPecentiles = async (
+export const fetchTransactionDurationPercentiles = async (
   esClient: ElasticsearchClient,
   params: SearchServiceParams,
   percents?: number[],
   fieldName?: string,
   fieldValue?: string
-): Promise<Record<string, number>> => {
+): Promise<{ totalDocs: number; percentiles: Record<string, number> }> => {
   const resp = await esClient.search<ResponseHit>(
     getTransactionDurationPercentilesRequest(
       params,
@@ -71,14 +72,22 @@ export const fetchTransactionDurationPecentiles = async (
     )
   );
 
+  // return early with no results if the search didn't return any documents
+  if ((resp.body.hits.total as estypes.SearchTotalHits).value === 0) {
+    return { totalDocs: 0, percentiles: {} };
+  }
+
   if (resp.body.aggregations === undefined) {
     throw new Error(
-      'fetchTransactionDurationPecentiles failed, did not return aggregations.'
+      'fetchTransactionDurationPercentiles failed, did not return aggregations.'
     );
   }
-  return (
-    (resp.body.aggregations
-      .transaction_duration_percentiles as estypes.AggregationsTDigestPercentilesAggregate)
-      .values ?? {}
-  );
+
+  return {
+    totalDocs: (resp.body.hits.total as estypes.SearchTotalHits).value,
+    percentiles:
+      (resp.body.aggregations
+        .transaction_duration_percentiles as estypes.AggregationsTDigestPercentilesAggregate)
+        .values ?? {},
+  };
 };

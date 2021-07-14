@@ -248,6 +248,35 @@ export default async function ({ readConfigFile }) {
           kibana: [],
         },
 
+        kibana_date_nested: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['date-nested'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+        kibana_message_with_newline: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['message_with_newline'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+
         kibana_timefield: {
           elasticsearch: {
             cluster: [],

@@ -46,16 +46,43 @@ interface Props {
   isCloudEnabled: boolean;
 }
 
+const INITIAL_STATE = {
+  fleetAgents: [],
+  cloudStandaloneSetup: undefined,
+  isFleetEnabled: false,
+};
+
+function getFleetLink({
+  isFleetEnabled,
+  hasFleetAgents,
+  basePath,
+}: {
+  isFleetEnabled: boolean;
+  hasFleetAgents: boolean;
+  basePath: string;
+}) {
+  if (!isFleetEnabled) {
+    return;
+  }
+
+  return hasFleetAgents
+    ? {
+        label: MANAGE_FLEET_POLICIES_LABEL,
+        href: `${basePath}/app/fleet#/policies`,
+      }
+    : {
+        label: GET_STARTED_WITH_FLEET_LABEL,
+        href: `${basePath}/app/integrations#/detail/apm-0.3.0/overview`,
+      };
+}
+
 function TutorialConfigAgent({
   variantId,
   http,
   basePath,
   isCloudEnabled,
 }: Props) {
-  const [data, setData] = useState<APIResponseType>({
-    fleetAgents: [],
-    cloudStandaloneSetup: undefined,
-  });
+  const [data, setData] = useState<APIResponseType>(INITIAL_STATE);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedOption, setSelectedOption] = useState<PolicyOption>();
 
@@ -68,6 +95,7 @@ function TutorialConfigAgent({
           setData(response as APIResponseType);
         }
       } catch (e) {
+        setIsLoading(false);
         console.error('Error while fetching fleet agents.', e);
       }
     }
@@ -105,15 +133,6 @@ function TutorialConfigAgent({
   });
 
   const hasFleetAgents = !!data.fleetAgents.length;
-  const fleetLink = hasFleetAgents
-    ? {
-        label: MANAGE_FLEET_POLICIES_LABEL,
-        href: `${basePath}/app/fleet#/policies`,
-      }
-    : {
-        label: GET_STARTED_WITH_FLEET_LABEL,
-        href: `${basePath}/app/integrations#/detail/apm-0.3.0/overview`,
-      };
 
   return (
     <>
@@ -125,7 +144,11 @@ function TutorialConfigAgent({
             onChange={(newSelectedOption) =>
               setSelectedOption(newSelectedOption)
             }
-            fleetLink={fleetLink}
+            fleetLink={getFleetLink({
+              isFleetEnabled: data.isFleetEnabled,
+              hasFleetAgents,
+              basePath,
+            })}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
