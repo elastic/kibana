@@ -193,9 +193,11 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const getRollupIndices = (rollupCaps: RollupIndicesCapsResponse) => Object.keys(rollupCaps);
 
   const loadTimestampFieldOptions = useCallback(
-    async (query: string, exactMatched: MatchedItem[]) => {
+    async (query: string) => {
       let timestampOptions: TimestampOption[] = [];
-      const isValidResult = !existingIndexPatterns.includes(title) && exactMatched.length > 0;
+      // async (query: string, exactMatched: MatchedItem[]) => {
+      // const isValidResult = !existingIndexPatterns.includes(title) && exactMatched.length > 0;
+      const isValidResult = !existingIndexPatterns.includes(title); // && exactMatched.length > 0;
       if (isValidResult) {
         setIsLoadingTimestampFields(true);
         const getFieldsOptions: GetFieldsOptions = {
@@ -213,17 +215,9 @@ const IndexPatternEditorFlyoutContentComponent = ({
       }
       setIsLoadingTimestampFields(false);
       setTimestampFieldOptions(timestampOptions);
-      form.getFields().timestampField.reset();
+      return timestampOptions;
     },
-    [
-      existingIndexPatterns,
-      indexPatternService,
-      requireTimestampField,
-      rollupIndex,
-      title,
-      type,
-      form,
-    ]
+    [existingIndexPatterns, indexPatternService, requireTimestampField, rollupIndex, title, type]
   );
 
   const reloadMatchedIndices = useCallback(
@@ -264,7 +258,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
           indexRequests
         )) as MatchedItem[][];
 
-        await loadTimestampFieldOptions(query, exactMatched);
+        // console.log('loadTimestampFieldOptions', query, exactMatched);
+        // await loadTimestampFieldOptions(query, exactMatched);
 
         const matchedIndicesResult = getMatchedIndices(
           allSources,
@@ -282,6 +277,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
         setMatchedIndices(matchedIndicesResult);
         setIsLoadingMatchedIndices(false);
+        form.getFields().timestampField.reset();
 
         return matchedIndicesResult;
       };
@@ -296,7 +292,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
       type,
       i18nTexts.rollupLabel,
       rollupIndicesCapabilities,
-      loadTimestampFieldOptions,
+      // loadTimestampFieldOptions,
+      form,
     ]
   );
 
@@ -446,6 +443,8 @@ TODO MOVE SOME OF THIS COMPLEXITY INTO A COMPONENT
                   options={timestampFieldOptions}
                   isLoadingOptions={isLoadingTimestampFields}
                   helpText={timestampNoFieldsHelp || selectTimestampHelp}
+                  loadTimestampFieldOptions={loadTimestampFieldOptions}
+                  // loadTimestampFieldOptions={() => Promise.resolve([])}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

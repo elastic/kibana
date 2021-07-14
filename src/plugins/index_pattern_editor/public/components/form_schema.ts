@@ -34,7 +34,9 @@ export const schema = {
     label: i18n.translate('indexPatternEditor.editor.form.timeFieldLabel', {
       defaultMessage: 'Timestamp field',
     }),
-    helpText: 'Select a primary time field for use with the global time filter.',
+    helpText: i18n.translate('indexPatternEditor.editor.form.timestampFieldHelp', {
+      defaultMessage: 'Select a primary time field for use with the global time filter.',
+    }),
     validations: [],
   },
   allowHidden: {
@@ -47,8 +49,10 @@ export const schema = {
     label: i18n.translate('indexPatternEditor.editor.form.customIdLabel', {
       defaultMessage: 'Custom index pattern ID',
     }),
-    helpText:
-      'Kibana will provide a unique identifier for each index pattern. If you do not want to use this unique ID, enter a custom one.',
+    helpText: i18n.translate('indexPatternEditor.editor.form.customIdHelp', {
+      defaultMessage:
+        'Kibana will provide a unique identifier for each index pattern. If you do not want to use this unique ID, enter a custom one.',
+    }),
   },
   type: {
     label: i18n.translate('indexPatternEditor.editor.form.TypeLabel', {
