@@ -13,8 +13,6 @@ import { Dimensions, ShapeComponentProps } from './types';
 import { shapes } from './shapes';
 import { getViewBox } from '../../common/lib';
 
-import './shape.scss';
-
 function ShapeComponent({
   onLoaded,
   parentNode,
