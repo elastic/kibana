@@ -97,7 +97,7 @@ export const ThreatIntelPanelView: React.FC<ThreatIntelPanelViewProps> = ({
     () => (
       <EuiButton
         href={buttonHref}
-        disabled={!buttonHref}
+        isDisabled={!buttonHref}
         data-test-subj="cti-view-dashboard-button"
         target="_blank"
       >

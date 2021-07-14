@@ -25,27 +25,17 @@ describe('CTI Link Panel', () => {
     cleanKibana();
   });
 
-  describe('disabled threat intel module', () => {
-    it('renders error inner panel', () => {
-      loginAndWaitForPage(OVERVIEW_URL);
-      cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_ERROR_INNER_PANEL}`).should('exist');
-    });
-
-    it('renders disabled "view dashboard" button', () => {
-      cy.get(`${OVERVIEW_CTI_VIEW_DASHBOARD_BUTTON}`).should('be.disabled');
-    });
-
-    it('renders 0 total event count', () => {
-      cy.get(`${OVERVIEW_CTI_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 0 events');
-    });
-
-    it('renders enable module button', () => {
-      it('renders disabled "view dashboard" button', () => {
-        cy.get(`${OVERVIEW_CTI_ENABLE_MODULE_BUTTON}`).should('exist');
-        // TODO: how to test injected doclink?
-        // cy.get(`${OVERVIEW_CTI_ENABLE_MODULE_BUTTON} a`).should('have.attr', 'href', "doclink");
-      });
-    });
+  it('renders disabled threat intel module as expected', () => {
+    loginAndWaitForPage(OVERVIEW_URL);
+    cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_ERROR_INNER_PANEL}`).should('exist');
+    cy.get(`${OVERVIEW_CTI_VIEW_DASHBOARD_BUTTON}`).should('be.disabled');
+    cy.get(`${OVERVIEW_CTI_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 0 indicators');
+    cy.get(`${OVERVIEW_CTI_ENABLE_MODULE_BUTTON}`).should('exist');
+    cy.get(`${OVERVIEW_CTI_ENABLE_MODULE_BUTTON}`).should(
+      'have.attr',
+      'href',
+      'https://www.elastic.co/guide/en/beats/filebeat/master/filebeat-module-threatintel.html'
+    );
   });
 
   describe('enabled threat intel module', () => {
@@ -57,54 +47,22 @@ describe('CTI Link Panel', () => {
       esArchiverUnload('threat_indicator');
     });
 
-    describe('disabled dashboard module', () => {
-      describe('when there are no events in the selected time period', () => {
-        before(() => {
-          loginAndWaitForPage(
-            `${OVERVIEW_URL}?sourcerer=(timerange:(from:%272021-07-08T04:00:00.000Z%27,kind:absolute,to:%272021-07-09T03:59:59.999Z%27))`
-          );
-        });
+    it('renders disabled dashboard module as expected when there are no events in the selected time period', () => {
+      loginAndWaitForPage(
+        `${OVERVIEW_URL}?sourcerer=(timerange:(from:%272021-07-08T04:00:00.000Z%27,kind:absolute,to:%272021-07-09T03:59:59.999Z%27))`
+      );
+      cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_WARNING_INNER_PANEL}`).should('exist');
+      cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_INFO_INNER_PANEL}`).should('exist');
+      cy.get(`${OVERVIEW_CTI_VIEW_DASHBOARD_BUTTON}`).should('be.disabled');
+      cy.get(`${OVERVIEW_CTI_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 0 indicators');
+    });
 
-        it('renders warning inner panel', () => {
-          cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_WARNING_INNER_PANEL}`).should('exist');
-        });
-
-        it('renders info inner panel', () => {
-          cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_INFO_INNER_PANEL}`).should('exist');
-        });
-
-        it('renders disabled "view dashboard" button', () => {
-          cy.get(`${OVERVIEW_CTI_VIEW_DASHBOARD_BUTTON}`).should('be.disabled');
-        });
-
-        it('renders 0 total event count', () => {
-          cy.get(`${OVERVIEW_CTI_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 0 events');
-        });
-      });
-
-      describe('when there are events in the selected time period', () => {
-        before(() => {
-          loginAndWaitForPage(OVERVIEW_URL);
-        });
-
-        it('does not render warning inner panel', () => {
-          cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_WARNING_INNER_PANEL}`).should(
-            'not.exist'
-          );
-        });
-
-        it('renders info inner panel', () => {
-          cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_INFO_INNER_PANEL}`).should('exist');
-        });
-
-        it('renders disabled "view dashboard" button', () => {
-          cy.get(`${OVERVIEW_CTI_VIEW_DASHBOARD_BUTTON}`).should('be.disabled');
-        });
-
-        it('renders correct total event count', () => {
-          cy.get(`${OVERVIEW_CTI_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 1 event');
-        });
-      });
+    it('renders dashboard module as expected when there are events in the selected time period', () => {
+      loginAndWaitForPage(OVERVIEW_URL);
+      cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_WARNING_INNER_PANEL}`).should('not.exist');
+      cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_INFO_INNER_PANEL}`).should('exist');
+      cy.get(`${OVERVIEW_CTI_VIEW_DASHBOARD_BUTTON}`).should('be.disabled');
+      cy.get(`${OVERVIEW_CTI_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 1 indicator');
     });
 
     // TODO: find a way to properly load a 'threat intel' tag, and a dashboard that has that tag, for the following tests to work
@@ -118,52 +76,27 @@ describe('CTI Link Panel', () => {
     //     esArchiverUnload('cti_tag');
     //   });
     //
-    //   describe('when there are no events in the selected time period', () => {
-    //     before(() => {
-    //       loginAndWaitForPage(
-    //         `${OVERVIEW_URL}?sourcerer=(timerange:(from:%272021-07-08T04:00:00.000Z%27,kind:absolute,to:%272021-07-09T03:59:59.999Z%27))`
-    //       );
-    //     });
-    //
-    //     it('renders warning inner panel', () => {
-    //       cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_WARNING_INNER_PANEL}`).should('exist');
-    //     });
-    //
-    //     it('does not render info inner panel', () => {
-    //       cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_INFO_INNER_PANEL}`).should(
-    //         'not.exist'
-    //       );
-    //     });
-    //
-    //     it('renders enabled "view dashboard" button', () => {
-    //       cy.get(`${OVERVIEW_CTI_VIEW_DASHBOARD_BUTTON}`).should('be.enabled');
-    //     });
-    //
-    //     it('renders 0 total event count', () => {
-    //       cy.get(`${OVERVIEW_CTI_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 0 events');
-    //     });
+    //   it('renders as expected when there are no events in the selected time period', () => {
+    //     loginAndWaitForPage(
+    //       `${OVERVIEW_URL}?sourcerer=(timerange:(from:%272021-07-08T04:00:00.000Z%27,kind:absolute,to:%272021-07-09T03:59:59.999Z%27))`
+    //     );
+    //     cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_WARNING_INNER_PANEL}`).should('exist');
+    //     cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_INFO_INNER_PANEL}`).should(
+    //       'not.exist'
+    //     );
+    //     cy.get(`${OVERVIEW_CTI_VIEW_DASHBOARD_BUTTON}`).should('be.enabled');
+    //     cy.get(`${OVERVIEW_CTI_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 0 events');
     //   });
     //
-    //   describe('when there are events in the selected time period', () => {
-    //     it('does not render warning inner panel', () => {
-    //       cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_WARNING_INNER_PANEL}`).should(
-    //         'not.exist'
-    //       );
-    //     });
-    //
-    //     it('does not render info inner panel', () => {
-    //       cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_INFO_INNER_PANEL}`).should(
-    //         'not.exist'
-    //       );
-    //     });
-    //
-    //     it('renders enabled "view dashboard" button', () => {
-    //       cy.get(`${OVERVIEW_CTI_VIEW_DASHBOARD_BUTTON}`).should('be.enabled');
-    //     });
-    //
-    //     it('renders correct total event count', () => {
-    //       cy.get(`${OVERVIEW_CTI_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 1 event');
-    //     });
+    //   it('renders as expected when there are events in the selected time period', () => {
+    //     cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_WARNING_INNER_PANEL}`).should(
+    //       'not.exist'
+    //     );
+    //     cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_INFO_INNER_PANEL}`).should(
+    //       'not.exist'
+    //     );
+    //     cy.get(`${OVERVIEW_CTI_VIEW_DASHBOARD_BUTTON}`).should('be.enabled');
+    //     cy.get(`${OVERVIEW_CTI_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 1 event');;
     //   });
     // });
   });
