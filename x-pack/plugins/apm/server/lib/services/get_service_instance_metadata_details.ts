@@ -10,7 +10,8 @@ import {
   SERVICE_NODE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
-import { environmentQuery, kqlQuery, rangeQuery } from '../../utils/queries';
+import { kqlQuery, rangeQuery } from '../../../../observability/server';
+import { environmentQuery } from '../../../common/utils/environment_query';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
