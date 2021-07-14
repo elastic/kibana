@@ -47,11 +47,11 @@ export function urlparam(): ExpressionFunctionDefinition<
       const url = new URL(window.location.href);
       if (url.hash != "") {
         viewParam = qs.parse(
-          uri.hash.includes('?') ? uri.hash.substring(uri.hash.indexOf('?'), uri.hash.length) : ''
+          url.hash.includes('?') ? url.hash.substring(url.hash.indexOf('?'), url.hash.length) : ''
         );
       }
       const query = { ...url.searchParams, ...viewParam };
-      return query.get(args.param) || args.default;
+      return query[args.param] || args.default;
     },
   };
 }
