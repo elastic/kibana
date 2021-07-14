@@ -341,21 +341,13 @@ export function getDeepLinks(
   licenseType?: LicenseType,
   capabilities?: ApplicationStart['capabilities']
 ): AppDeepLink[] {
-  console.log({ topDeepLinks, filtered: topDeepLinks
-      .filter(
-        (deepLink) =>
-          (deepLink.id === SecurityPageName.ueba && enableExperimental.uebaEnabled) ||
-          deepLink.id !== SecurityPageName.case ||
-          capabilities == null ||
-          (deepLink.id === SecurityPageName.case && capabilities.siem.read_cases === true)
-      ) })
   return topDeepLinks
     .filter(
       (deepLink) =>
-        (deepLink.id === SecurityPageName.ueba && enableExperimental.uebaEnabled) ||
-        deepLink.id !== SecurityPageName.case ||
-        capabilities == null ||
-        (deepLink.id === SecurityPageName.case && capabilities.siem.read_cases === true)
+        (deepLink.id !== SecurityPageName.case && deepLink.id !== SecurityPageName.ueba) ||
+        (deepLink.id === SecurityPageName.case &&
+          (capabilities == null || capabilities.siem.read_cases === true)) ||
+        (deepLink.id === SecurityPageName.ueba && enableExperimental.uebaEnabled)
     )
     .map((deepLink) => {
       const deepLinkId = deepLink.id as SecurityDeepLinkName;

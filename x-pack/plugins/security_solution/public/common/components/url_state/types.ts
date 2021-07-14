@@ -19,7 +19,7 @@ import { UrlInputsModel } from '../../store/inputs/model';
 import { TimelineUrl } from '../../../timelines/store/timeline/model';
 import { RouteSpyState } from '../../utils/route/types';
 import { DispatchUpdateTimeline } from '../../../timelines/components/open_timeline/types';
-import { NavTab } from '../navigation/types';
+import { SecurityNav } from '../navigation/types';
 
 import { CONSTANTS, UrlStateType } from './constants';
 import { SourcererScopePatterns } from '../../store/sourcerer/model';
@@ -132,7 +132,7 @@ export interface UrlState {
 export type KeyUrlState = keyof UrlState;
 
 export interface UrlStateProps {
-  navTabs: Record<string, NavTab>;
+  navTabs: SecurityNav;
   indexPattern?: IIndexPattern;
   mapToUrlState?: (value: string) => UrlState;
   onChange?: (urlState: UrlState, previousUrlState: UrlState) => void;
