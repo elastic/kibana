@@ -289,7 +289,7 @@ export const useFleetServerInstructions = (policyId?: string) => {
   }, [notifications.toasts]);
 
   const refresh = useCallback(() => {
-    return Promise.all([refreshOutputs, refreshSettings()]);
+    return Promise.all([refreshOutputs(), refreshSettings()]);
   }, [refreshOutputs, refreshSettings]);
 
   const addFleetServerHost = useCallback(
@@ -452,6 +452,8 @@ export const AddFleetServerHostStepContent = ({
         await addFleetServerHost(fleetServerHost);
         setCalloutHost(fleetServerHost);
         setFleetServerHost('');
+      } else {
+        setCalloutHost('');
       }
     } finally {
       setIsLoading(false);

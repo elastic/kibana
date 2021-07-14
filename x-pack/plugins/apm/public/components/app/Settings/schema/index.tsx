@@ -8,6 +8,8 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'kibana/public';
+import moment from 'moment';
+import { useLocalStorage } from '../../../../hooks/useLocalStorage';
 import { SchemaOverview } from './schema_overview';
 import { ConfirmSwitchModal } from './confirm_switch_modal';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
@@ -19,10 +21,22 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 
 type FleetMigrationCheckResponse = APIReturnType<'GET /api/apm/fleet/migration_check'>;
 
+const APM_DATA_STREAMS_MIGRATION_STATUS_LS = {
+  value: '',
+  expiry: '',
+};
+
 export function Schema() {
+  const [
+    apmDataStreamsMigrationStatus,
+    setApmDataStreamsMigrationStatus,
+  ] = useLocalStorage(
+    'apm.dataStreamsMigrationStatus',
+    APM_DATA_STREAMS_MIGRATION_STATUS_LS
+  );
+
   const { toasts } = useApmPluginContext().core.notifications;
   const [isSwitchActive, setIsSwitchActive] = useState(false);
-  const [isLoadingMigration, setIsLoadingMigration] = useState(false);
   const [isLoadingConfirmation, setIsLoadingConfirmation] = useState(false);
   const [unsupportedConfigs, setUnsupportedConfigs] = useState<
     Array<{ key: string; value: any }>
@@ -42,6 +56,19 @@ export function Schema() {
   const hasCloudAgentPolicy = !!data.has_cloud_agent_policy;
   const hasCloudApmPackagePolicy = !!data.has_cloud_apm_package_policy;
   const hasRequiredRole = !!data.has_required_role;
+
+  function updateLocalStorage(newStatus: FETCH_STATUS) {
+    setApmDataStreamsMigrationStatus({
+      value: newStatus,
+      expiry: moment().add(5, 'minutes').toISOString(),
+    });
+  }
+
+  const { value: localStorageValue, expiry } = apmDataStreamsMigrationStatus;
+  const isMigrating =
+    localStorageValue === FETCH_STATUS.LOADING &&
+    moment(expiry).valueOf() > moment.now();
+
   return (
     <>
       <SchemaOverview
@@ -56,6 +83,7 @@ export function Schema() {
           setIsLoadingConfirmation(false);
           setIsSwitchActive(true);
         }}
+        isMigrating={isMigrating}
         isMigrated={hasCloudApmPackagePolicy}
         isLoading={isLoading}
         isLoadingConfirmation={isLoadingConfirmation}
@@ -65,21 +93,18 @@ export function Schema() {
       />
       {isSwitchActive && (
         <ConfirmSwitchModal
-          isLoading={isLoadingMigration}
           onConfirm={async () => {
-            setIsLoadingMigration(true);
-            const apmPackagePolicy = await createCloudApmPackagePolicy(toasts);
+            setIsSwitchActive(false);
+            const apmPackagePolicy = await createCloudApmPackagePolicy(
+              toasts,
+              updateLocalStorage
+            );
             if (!apmPackagePolicy) {
-              setIsLoadingMigration(false);
               return;
             }
-            setIsSwitchActive(false);
             refetch();
           }}
           onCancel={() => {
-            if (isLoadingMigration) {
-              return;
-            }
             setIsSwitchActive(false);
           }}
           unsupportedConfigs={unsupportedConfigs}
@@ -112,17 +137,19 @@ async function getUnsupportedApmServerConfigs(
 }
 
 async function createCloudApmPackagePolicy(
-  toasts: NotificationsStart['toasts']
+  toasts: NotificationsStart['toasts'],
+  updateLocalStorage: (status: FETCH_STATUS) => void
 ) {
+  updateLocalStorage(FETCH_STATUS.LOADING);
   try {
-    const {
-      cloud_apm_package_policy: cloudApmPackagePolicy,
-    } = await callApmApi({
+    const { cloudApmPackagePolicy } = await callApmApi({
       endpoint: 'POST /api/apm/fleet/cloud_apm_package_policy',
       signal: null,
     });
+    updateLocalStorage(FETCH_STATUS.SUCCESS);
     return cloudApmPackagePolicy;
   } catch (error) {
+    updateLocalStorage(FETCH_STATUS.FAILURE);
     toasts.addDanger({
       title: i18n.translate(
         'xpack.apm.settings.createApmPackagePolicy.errorToast.title',

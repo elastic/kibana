@@ -19,12 +19,14 @@ export const initialEndpointPageState = (): Immutable<EndpointState> => {
     loading: false,
     error: undefined,
     endpointDetails: {
-      flyoutView: undefined,
       activityLog: {
         paging: {
           disabled: false,
           page: 1,
           pageSize: 50,
+          startDate: undefined,
+          endDate: undefined,
+          isInvalidDateRange: false,
         },
         logData: createUninitialisedResourceState(),
       },
@@ -53,7 +55,6 @@ export const initialEndpointPageState = (): Immutable<EndpointState> => {
     agentsWithEndpointsTotalError: undefined,
     endpointsTotal: 0,
     endpointsTotalError: undefined,
-    queryStrategyVersion: undefined,
     policyVersionInfo: undefined,
     hostStatus: undefined,
     isolationRequestState: createUninitialisedResourceState(),
