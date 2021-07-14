@@ -17171,7 +17171,6 @@
     "xpack.observability.feedbackMenu.appName": "オブザーバビリティ",
     "xpack.observability.fieldValueSelection.apply": "適用",
     "xpack.observability.fieldValueSelection.placeholder": "{label}をフィルタリング",
-    "xpack.observability.fleet.beta": "ベータ",
     "xpack.observability.fleet.button": "Fleet ベータを試す",
     "xpack.observability.fleet.text": "Elastic エージェントでは、シンプルかつ統合された方法で、ログ、メトリック、他の種類のデータの監視をホストに追加することができます。複数の Beats と他のエージェントをインストールする必要はありません。このため、インフラストラクチャ全体での構成のデプロイが簡単で高速になりました。",
     "xpack.observability.fleet.title": "新しい Fleet をご覧になりましたか。",
