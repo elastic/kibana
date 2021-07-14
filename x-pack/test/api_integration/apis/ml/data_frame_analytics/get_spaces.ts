@@ -45,6 +45,19 @@ export default ({ getService }: FtrProviderContext) => {
     return body;
   }
 
+  async function runMapRequest(space: string, expectedStatusCode: number, jobId: string) {
+    const { body } = await supertest
+      .get(`/s/${space}/api/ml/data_frame/analytics/map/${jobId}`)
+      .auth(
+        USER.ML_VIEWER_ALL_SPACES,
+        ml.securityCommon.getPasswordForUser(USER.ML_VIEWER_ALL_SPACES)
+      )
+      .set(COMMON_REQUEST_HEADERS)
+      .expect(expectedStatusCode);
+
+    return body;
+  }
+
   describe('GET data_frame/analytics with spaces', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
@@ -143,14 +156,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('GetDataFrameAnalyticsIdMap with spaces', () => {
       it(`should return a map of objects from ${idSpace1} leading up to analytics job id created in ${idSpace1}`, async () => {
-        const { body } = await supertest
-          .get(`/s/${idSpace1}/api/ml/data_frame/analytics/map/${jobIdSpace1}`)
-          .auth(
-            USER.ML_VIEWER_ALL_SPACES,
-            ml.securityCommon.getPasswordForUser(USER.ML_VIEWER_ALL_SPACES)
-          )
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(200);
+        const body = await runMapRequest(idSpace1, 200, jobIdSpace1);
 
         expect(body).to.have.keys('elements', 'details', 'error');
         // Index node, 2 job nodes (with same source index), and 2 edge nodes to connect them
@@ -164,14 +170,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it(`should return a map of objects from ${idSpace2} leading up to analytics job id created in ${idSpace2}`, async () => {
-        const { body } = await supertest
-          .get(`/s/${idSpace2}/api/ml/data_frame/analytics/map/${jobIdSpace2}`)
-          .auth(
-            USER.ML_VIEWER_ALL_SPACES,
-            ml.securityCommon.getPasswordForUser(USER.ML_VIEWER_ALL_SPACES)
-          )
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(200);
+        const body = await runMapRequest(idSpace2, 200, jobIdSpace2);
 
         expect(body).to.have.keys('elements', 'details', 'error');
         // Index node, 1 job node and 2 edge nodes to connect them
@@ -185,14 +184,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it(`should fail to return a map of objects from one space when requesting with analytics job id created in a different space`, async () => {
-        const { body } = await supertest
-          .get(`/s/${idSpace2}/api/ml/data_frame/analytics/map/${jobIdSpace1}`)
-          .auth(
-            USER.ML_VIEWER_ALL_SPACES,
-            ml.securityCommon.getPasswordForUser(USER.ML_VIEWER_ALL_SPACES)
-          )
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(200);
+        const body = await runMapRequest(idSpace2, 200, jobIdSpace1);
 
         expect(body.elements.length).to.eql(0);
         expect(body.details).to.eql({});
