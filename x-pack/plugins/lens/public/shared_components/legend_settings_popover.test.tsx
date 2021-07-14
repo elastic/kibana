@@ -9,6 +9,7 @@ import React from 'react';
 import { Position } from '@elastic/charts';
 import { shallowWithIntl as shallow } from '@kbn/test/jest';
 import { LegendSettingsPopover, LegendSettingsPopoverProps } from './legend_settings_popover';
+import { LegendLocationSettings } from './legend_location_settings';
 
 describe('Legend Settings', () => {
   const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label: string }> = [
@@ -69,6 +70,25 @@ describe('Legend Settings', () => {
     expect(
       component.find('[data-test-subj="lens-legend-position-btn"]').prop('isDisabled')
     ).toEqual(true);
+  });
+
+  it('should hide the position button group if location inside is given', () => {
+    const newProps = {
+      ...props,
+      location: 'inside',
+    } as LegendSettingsPopoverProps;
+    const component = shallow(<LegendSettingsPopover {...newProps} />);
+    expect(component.find('[data-test-subj="lens-legend-position-btn"]').length).toEqual(0);
+  });
+
+  it('should render the location settings if location inside is given', () => {
+    const newProps = {
+      ...props,
+      location: 'inside',
+      onLocationChange: jest.fn(),
+    } as LegendSettingsPopoverProps;
+    const component = shallow(<LegendSettingsPopover {...newProps} />);
+    expect(component.find(LegendLocationSettings).length).toEqual(1);
   });
 
   it('should enable the Nested Legend Switch when renderNestedLegendSwitch prop is true', () => {

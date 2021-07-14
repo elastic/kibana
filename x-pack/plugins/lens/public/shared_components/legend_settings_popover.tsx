@@ -187,29 +187,28 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
           onFloatingColumnsChange={onFloatingColumnsChange}
         />
       )}
-      {!location ||
-        (location === 'outside' && (
-          <EuiFormRow
-            display="columnCompressed"
-            label={i18n.translate('xpack.lens.shared.legendPositionLabel', {
+      {(!location || location === 'outside') && (
+        <EuiFormRow
+          display="columnCompressed"
+          label={i18n.translate('xpack.lens.shared.legendPositionLabel', {
+            defaultMessage: 'Position',
+          })}
+        >
+          <EuiButtonGroup
+            legend={i18n.translate('xpack.lens.shared.legendPositionLabel', {
               defaultMessage: 'Position',
             })}
-          >
-            <EuiButtonGroup
-              legend={i18n.translate('xpack.lens.shared.legendPositionLabel', {
-                defaultMessage: 'Position',
-              })}
-              isDisabled={mode === 'hide'}
-              data-test-subj="lens-legend-position-btn"
-              name="legendPosition"
-              buttonSize="compressed"
-              options={toggleButtonsIcons}
-              idSelected={position || Position.Right}
-              onChange={onPositionChange}
-              isIconOnly
-            />
-          </EuiFormRow>
-        ))}
+            isDisabled={mode === 'hide'}
+            data-test-subj="lens-legend-position-btn"
+            name="legendPosition"
+            buttonSize="compressed"
+            options={toggleButtonsIcons}
+            idSelected={position || Position.Right}
+            onChange={onPositionChange}
+            isIconOnly
+          />
+        </EuiFormRow>
+      )}
       {renderNestedLegendSwitch && (
         <EuiFormRow
           display="columnCompressedSwitch"
