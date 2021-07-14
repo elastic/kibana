@@ -49,14 +49,12 @@ export const createThreatSignals = async ({
 
   let results: SearchAfterAndBulkCreateReturnType = {
     success: true,
-    warning: false,
     bulkCreateTimes: [],
     searchAfterTimes: [],
     lastLookBackDate: null,
-    createdSignalsCount: 0,
     createdSignals: [],
     errors: [],
-    warningMessages: [],
+    warnings: [],
   };
 
   let threatListCount = await getThreatListCount({
