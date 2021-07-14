@@ -65,6 +65,7 @@ export class Job {
     this.browser_type = report.browser_type;
     this.browserTimezone = report.payload.browserTimezone;
     this.size = report.output?.size;
+    this.content_type = report.output?.content_type;
 
     this.isDeprecated = report.payload.isDeprecated || false;
     this.csv_contains_formulas = report.output?.csv_contains_formulas;
