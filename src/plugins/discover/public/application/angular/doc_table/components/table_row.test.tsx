@@ -7,15 +7,14 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
-import { findTestSubject } from '@elastic/eui/lib/test';
+import { mountWithIntl, findTestSubject } from '@kbn/test/jest';
 import { TableRow, TableRowProps } from './table_row';
-import { indexPatternMock } from '../../../../__mocks__/index_pattern';
 import { setDocViewsRegistry, setServices } from '../../../../kibana_services';
 import { createFilterManagerMock } from '../../../../../../data/public/query/filter_manager/filter_manager.mock';
 import { DiscoverServices } from 'src/plugins/discover/public/build_services';
 import { DocViewsRegistry } from '../../../doc_views/doc_views_registry';
 import { DOC_HIDE_TIME_COLUMN_SETTING } from 'src/plugins/discover/common';
+import { indexPatternWithTimefieldMock } from 'src/plugins/discover/public/__mocks__/index_pattern_with_timefield';
 
 jest.mock('../../helpers', () => {
   const originalModule = jest.requireActual('../../helpers');
@@ -37,11 +36,15 @@ const mountComponent = (props: TableRowProps) => {
 
 const mockHit = {
   _index: 'mock_index',
-  mock_time_field_name: 'mock_time_value',
   _id: '1',
   _score: 1,
   _type: '_doc',
-  _source: { date: '2020-20-01T12:12:12.123', message: 'mock_message', bytes: 20 },
+  fields: [
+    {
+      timestamp: '2020-20-01T12:12:12.123',
+    },
+  ],
+  _source: { message: 'mock_message', bytes: 20 },
 };
 
 const mockFilterManager = createFilterManagerMock();
@@ -56,7 +59,7 @@ describe('Doc table row component', () => {
     defaultProps = {
       columns: ['_source'],
       filter: mockInlineFilter,
-      indexPattern: indexPatternMock,
+      indexPattern: indexPatternWithTimefieldMock,
       row: mockHit,
       useNewFieldsApi: true,
     };
@@ -65,7 +68,7 @@ describe('Doc table row component', () => {
       uiSettings: {
         get: (key: string) => {
           if (key === DOC_HIDE_TIME_COLUMN_SETTING) {
-            return false;
+            return true;
           }
         },
       },

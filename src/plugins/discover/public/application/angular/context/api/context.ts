@@ -22,10 +22,7 @@ export enum SurrDocType {
 }
 
 export type EsHitRecord = Required<
-  Pick<
-    estypes.SearchResponse['hits']['hits'][number],
-    '_id' | 'fields' | 'sort' | '_index' | '_version'
-  >
+  Pick<estypes.SearchHit, '_id' | 'fields' | 'sort' | '_index' | '_version'>
 > & {
   _source?: Record<string, unknown>;
   _score?: number;

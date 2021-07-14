@@ -93,10 +93,7 @@ export function ContextAppContent({
   const defaultStepSize = useMemo(() => parseInt(config.get(CONTEXT_STEP_SETTING), 10), [config]);
 
   const loadingFeedback = () => {
-    if (
-      isLegacy &&
-      (anchorStatus === LoadingStatus.UNINITIALIZED || anchorStatus === LoadingStatus.LOADING)
-    ) {
+    if (isLegacy && isAnchorLoading) {
       return (
         <EuiText textAlign="center" data-test-subj="contextApp_loadingIndicator">
           <FormattedMessage id="discover.context.loadingDescription" defaultMessage="Loading..." />

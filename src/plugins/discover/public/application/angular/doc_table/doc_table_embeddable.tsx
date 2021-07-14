@@ -15,7 +15,7 @@ import { ToolBarPagerText } from './components/pager/tool_bar_pager_text';
 import { usePager } from './lib/use_pager';
 import { CommonDocTableProps } from './doc_table';
 
-interface DocTableEmbeddableProps extends CommonDocTableProps {
+export interface DocTableEmbeddableProps extends CommonDocTableProps {
   totalHitCount: number;
 }
 
