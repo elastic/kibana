@@ -8,46 +8,17 @@
 import dateMath from '@elastic/datemath';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 
-import type { Type, ListSchema } from '@kbn/securitysolution-io-ts-list-types';
-import {
-  EXCEPTION_OPERATORS,
-  isOperator,
-  isNotOperator,
-  existsOperator,
-  doesNotExistOperator,
-} from '@kbn/securitysolution-list-utils';
 import { IFieldType } from '../../../../../../../src/plugins/data/common';
 
-import { GetGenericComboBoxPropsReturn, OperatorOption } from './types';
+import { GetGenericComboBoxPropsReturn } from './types';
 import * as i18n from './translations';
 
 /**
- * Returns the appropriate operators given a field type
- *
- * @param field IFieldType selected field
- *
- */
-export const getOperators = (field: IFieldType | undefined): OperatorOption[] => {
-  if (field == null) {
-    return [isOperator];
-  } else if (field.type === 'boolean') {
-    return [isOperator, isNotOperator, existsOperator, doesNotExistOperator];
-  } else if (field.type === 'nested') {
-    return [isOperator];
-  } else {
-    return EXCEPTION_OPERATORS;
-  }
-};
-
-/**
  * Determines if empty value is ok
+ * There is a copy within:
+ * x-pack/plugins/lists/public/exceptions/components/autocomplete/helpers.ts
  *
- * @param param the value being checked
- * @param field the selected field
- * @param isRequired whether or not an empty value is allowed
- * @param touched has field been touched by user
- * @returns undefined if valid, string with error message if invalid,
- * null if no checks matched
+ * TODO: This should be in its own packaged and not copied, https://github.com/elastic/kibana/issues/105378
  */
 export const checkEmptyValue = (
   param: string | undefined,
@@ -72,7 +43,10 @@ export const checkEmptyValue = (
 
 /**
  * Very basic validation for values
+ * There is a copy within:
+ * x-pack/plugins/lists/public/exceptions/components/autocomplete/helpers.ts
  *
+ * TODO: This should be in its own packaged and not copied, https://github.com/elastic/kibana/issues/105378
  * @param param the value being checked
  * @param field the selected field
  * @param isRequired whether or not an empty value is allowed
@@ -109,7 +83,10 @@ export const paramIsValid = (
 
 /**
  * Determines the options, selected values and option labels for EUI combo box
+ * There is a copy within:
+ * x-pack/plugins/lists/public/exceptions/components/autocomplete/helpers.ts
  *
+ * TODO: This should be in its own packaged and not copied, https://github.com/elastic/kibana/issues/105378
  * @param options options user can select from
  * @param selectedOptions user selection if any
  * @param getLabel helper function to know which property to use for labels
@@ -140,36 +117,3 @@ export function getGenericComboBoxProps<T>({
     selectedComboOptions: newSelectedComboOptions,
   };
 }
-
-/**
- * Given an array of lists and optionally a field this will return all
- * the lists that match against the field based on the types from the field
- * @param lists The lists to match against the field
- * @param field The field to check against the list to see if they are compatible
- */
-export const filterFieldToList = (lists: ListSchema[], field?: IFieldType): ListSchema[] => {
-  if (field != null) {
-    const { esTypes = [] } = field;
-    return lists.filter(({ type }) => esTypes.some((esType) => typeMatch(type, esType)));
-  } else {
-    return [];
-  }
-};
-
-/**
- * Given an input list type and a string based ES type this will match
- * if they're exact or if they are compatible with a range
- * @param type The type to match against the esType
- * @param esType The ES type to match with
- */
-export const typeMatch = (type: Type, esType: string): boolean => {
-  return (
-    type === esType ||
-    (type === 'ip_range' && esType === 'ip') ||
-    (type === 'date_range' && esType === 'date') ||
-    (type === 'double_range' && esType === 'double') ||
-    (type === 'float_range' && esType === 'float') ||
-    (type === 'integer_range' && esType === 'integer') ||
-    (type === 'long_range' && esType === 'long')
-  );
-};
