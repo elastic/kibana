@@ -12,6 +12,7 @@ import {
   mockAPMIndexPattern,
   mockAPMRegexIndexPattern,
   mockAPMTransactionIndexPattern,
+  mockAPMTracesDataStreamIndexPattern,
   mockAuditbeatIndexPattern,
   mockCCSGlobIndexPattern,
   mockCommaFilebeatAuditbeatCCSGlobIndexPattern,
@@ -69,6 +70,7 @@ describe('embedded_map_helpers', () => {
   describe('findMatchingIndexPatterns', () => {
     const siemDefaultIndices = [
       'apm-*-transaction*',
+      'traces-apm*',
       'auditbeat-*',
       'endgame-*',
       'filebeat-*',
@@ -102,11 +104,16 @@ describe('embedded_map_helpers', () => {
 
     test('finds exact glob-matched index patterns ', () => {
       const matchingIndexPatterns = findMatchingIndexPatterns({
-        kibanaIndexPatterns: [mockAPMTransactionIndexPattern, mockFilebeatIndexPattern],
+        kibanaIndexPatterns: [
+          mockAPMTransactionIndexPattern,
+          mockAPMTracesDataStreamIndexPattern,
+          mockFilebeatIndexPattern,
+        ],
         siemDefaultIndices,
       });
       expect(matchingIndexPatterns).toEqual([
         mockAPMTransactionIndexPattern,
+        mockAPMTracesDataStreamIndexPattern,
         mockFilebeatIndexPattern,
       ]);
     });
