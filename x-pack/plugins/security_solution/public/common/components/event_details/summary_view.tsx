@@ -11,6 +11,10 @@ import styled from 'styled-components';
 
 import { SummaryRow } from './helpers';
 
+export const Indent = styled.div`
+  padding: 0 4px;
+`;
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
   .euiTableHeaderCell,
@@ -35,12 +39,14 @@ export const SummaryViewComponent: React.FC<{
           <h6>{title}</h6>
         </EuiTitle>
       )}
-      <StyledEuiInMemoryTable
-        data-test-subj={dataTestSubj}
-        items={summaryRows}
-        columns={summaryColumns}
-        compressed
-      />
+      <Indent>
+        <StyledEuiInMemoryTable
+          data-test-subj={dataTestSubj}
+          items={summaryRows}
+          columns={summaryColumns}
+          compressed
+        />
+      </Indent>
     </>
   );
 };

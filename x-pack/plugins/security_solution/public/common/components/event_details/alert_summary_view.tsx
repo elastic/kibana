@@ -36,8 +36,8 @@ import { MarkdownRenderer } from '../markdown_editor';
 import { LineClamp } from '../line_clamp';
 import { endpointAlertCheck } from '../../utils/endpoint_alert_check';
 
-const StyledText = styled.div`
-  padding: 0 4px;
+export const Indent = styled.div`
+  padding: 0 8px;
   word-break: break-word;
 `;
 
@@ -237,7 +237,7 @@ const AlertSummaryViewComponent: React.FC<{
 
   return (
     <>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
       <SummaryView
         summaryColumns={summaryColumns}
         summaryRows={isEndpointAlert ? summaryRowsWithAgentStatus : summaryRows}
@@ -250,11 +250,11 @@ const AlertSummaryViewComponent: React.FC<{
             <h6>{i18n.INVESTIGATION_GUIDE}</h6>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <StyledText>
+          <Indent>
             <LineClamp>
               <MarkdownRenderer>{maybeRule.note}</MarkdownRenderer>
             </LineClamp>
-          </StyledText>
+          </Indent>
         </>
       )}
     </>
