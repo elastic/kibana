@@ -18,7 +18,7 @@ import {
 import { ComparatorFns, getHumanReadableComparator } from '../lib';
 
 export const ID = '.index-threshold';
-export const ActionGroupId = 'threshold met';
+const ActionGroupId = 'threshold met';
 
 export function getAlertType(
   logger: Logger,
@@ -180,14 +180,16 @@ export function getAlertType(
         groupResult.metrics && groupResult.metrics.length > 0 ? groupResult.metrics[0] : null;
       const value = metric && metric.length === 2 ? metric[1] : null;
 
-      const met = compareFn(value ?? 0, params.threshold);
-      if (!value && !met) {
+      if (value === null) {
         logger.debug(
           `alert ${ID}:${alertId} "${name}": no metrics found for group ${instanceId}} from groupResult ${JSON.stringify(
             groupResult
           )}`
         );
+        continue;
       }
+
+      const met = compareFn(value, params.threshold);
 
       if (!met) continue;
 
@@ -199,7 +201,7 @@ export function getAlertType(
       const baseContext: BaseActionContext = {
         date,
         group: instanceId,
-        value: value ?? 0,
+        value,
         conditions: humanFn,
       };
       const actionContext = addMessages(options, baseContext, params);
