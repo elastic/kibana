@@ -10,13 +10,13 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from 'src/core/server';
 
 import {
-  fetchTransactionDurationHistogramRangesteps,
+  fetchTransactionDurationHistogramRangeSteps,
   getHistogramIntervalRequest,
-} from './query_histogram_rangesteps';
+} from './query_histogram_range_steps';
 
-const params = { index: 'apm-*' };
+const params = { index: 'apm-*', start: '2020', end: '2021' };
 
-describe('query_histogram_rangesteps', () => {
+describe('query_histogram_range_steps', () => {
   describe('getHistogramIntervalRequest', () => {
     it('returns the request body for the histogram interval request', () => {
       const req = getHistogramIntervalRequest(params);
@@ -43,6 +43,15 @@ describe('query_histogram_rangesteps', () => {
                     'processor.event': 'transaction',
                   },
                 },
+                {
+                  range: {
+                    '@timestamp': {
+                      format: 'epoch_millis',
+                      gte: 1577836800000,
+                      lte: 1609459200000,
+                    },
+                  },
+                },
               ],
             },
           },
@@ -53,13 +62,14 @@ describe('query_histogram_rangesteps', () => {
     });
   });
 
-  describe('fetchTransactionDurationHistogramRangesteps', () => {
+  describe('fetchTransactionDurationHistogramRangeSteps', () => {
     it('fetches the range steps for the log histogram', async () => {
       const esClientSearchMock = jest.fn((req: estypes.SearchRequest): {
         body: estypes.SearchResponse;
       } => {
         return {
           body: ({
+            hits: { total: { value: 10 } },
             aggregations: {
               transaction_duration_max: {
                 value: 10000,
@@ -76,7 +86,7 @@ describe('query_histogram_rangesteps', () => {
         search: esClientSearchMock,
       } as unknown) as ElasticsearchClient;
 
-      const resp = await fetchTransactionDurationHistogramRangesteps(
+      const resp = await fetchTransactionDurationHistogramRangeSteps(
         esClientMock,
         params
       );
