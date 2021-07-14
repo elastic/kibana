@@ -40,7 +40,11 @@ export const useSavedQueryForm = ({ defaultValue, handleSubmit }: UseSavedQueryF
   return useForm({
     id: SAVED_QUERY_FORM_ID + uuid.v4(),
     schema: formSchema,
-    onSubmit: handleSubmit,
+    onSubmit: async (formData, isValid) => {
+      if (isValid) {
+        return handleSubmit(formData);
+      }
+    },
     options: {
       stripEmptyFields: false,
     },

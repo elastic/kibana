@@ -60,7 +60,11 @@ export const useScheduledQueryGroupQueryForm = ({
   ]);
   return useForm<OsqueryManagerPackagePolicyConfigRecord, ScheduledQueryGroupFormData>({
     id: FORM_ID + uuid.v4(),
-    onSubmit: handleSubmit,
+    onSubmit: async (formData, isValid) => {
+      if (isValid && handleSubmit) {
+        return handleSubmit(formData, isValid);
+      }
+    },
     options: {
       stripEmptyFields: false,
     },
