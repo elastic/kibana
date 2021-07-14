@@ -100,9 +100,5 @@ describe('Row renderers', () => {
       .should('not.be.checked');
 
     cy.wait('@updateTimeline').its('response.statusCode').should('eq', 200);
-
-    cy.wait('@updateTimeline').then((interception) => {
-      expect(interception.request.body.timeline.excludedRowRendererIds).to.eql(RowRenderersId);
-    });
   });
 });
