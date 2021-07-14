@@ -91,7 +91,7 @@ export const getRenderCellValue = ({
       case ALERT_START:
         return <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />;
       case ALERT_DURATION:
-        return asDuration(Number(value), { extended: true });
+        return asDuration(Number(value));
       case ALERT_SEVERITY_LEVEL:
         return <SeverityBadge severityLevel={value ?? undefined} />;
       case RULE_NAME:
