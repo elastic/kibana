@@ -16,7 +16,7 @@ import { useKibana } from '../../lib/kibana';
 import { createFilter } from '../add_filter_to_global_search_bar';
 import { allowTopN } from './utils';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
-import { TimelineId } from '../../../../common/types/timeline';
+import { ColumnHeaderOptions, TimelineId } from '../../../../common/types/timeline';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererScope } from '../../containers/sourcerer';
 import { timelineSelectors } from '../../../timelines/store/timeline';
@@ -25,6 +25,7 @@ import { FilterForValueButton } from './actions/filter_for_value';
 import { FilterOutValueButton } from './actions/filter_out_value';
 import { AddToTimelineButton } from './actions/add_to_timeline';
 import { ShowTopNButton } from './actions/show_top_n';
+import { ToggleColumnButton } from './actions/toggle_column';
 import { CopyButton } from './actions/copy';
 import {
   FILTER_FOR_VALUE_KEYBOARD_SHORTCUT,
@@ -33,6 +34,9 @@ import {
   SHOW_TOP_N_KEYBOARD_SHORTCUT,
   COPY_TO_CLIPBOARD_KEYBOARD_SHORTCUT,
 } from './keyboard_shortcut_constants';
+import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
+import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
+import { EventFieldsData } from '../event_details/types';
 
 export const YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS = (fieldName: string) =>
   i18n.translate(
@@ -79,13 +83,16 @@ const StyledHoverActionsContainer = styled.div<{ $showTopN: boolean }>`
 
 interface Props {
   additionalContent?: React.ReactNode;
+  dataType?: EventFieldsData['type'];
   draggableId?: DraggableId;
   field: string;
+  isObjectArray: boolean;
   goGetTimelineId?: (args: boolean) => void;
   onFilterAdded?: () => void;
   ownFocus: boolean;
   showTopN: boolean;
   timelineId?: string | null;
+  toggleColumn?: (column: ColumnHeaderOptions) => void;
   toggleTopN: () => void;
   value?: string[] | string | null;
 }
@@ -108,13 +115,16 @@ const isFocusTrapDisabled = ({
 export const HoverActions: React.FC<Props> = React.memo(
   ({
     additionalContent = null,
+    dataType,
     draggableId,
     field,
     goGetTimelineId,
+    isObjectArray,
     onFilterAdded,
     ownFocus,
     showTopN,
     timelineId,
+    toggleColumn,
     toggleTopN,
     value,
   }) => {
@@ -184,6 +194,18 @@ export const HoverActions: React.FC<Props> = React.memo(
         }
       }
     }, [field, value, filterManager, onFilterAdded]);
+
+    const toggleFieldColumn = useCallback(
+      () =>
+        toggleColumn
+          ? toggleColumn({
+              columnHeaderType: defaultColumnHeaderType,
+              id: field,
+              initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+            })
+          : null,
+      [field, toggleColumn]
+    );
 
     const isInit = useRef(true);
 
@@ -278,6 +300,16 @@ export const HoverActions: React.FC<Props> = React.memo(
                 value={value}
               />
             </>
+          )}
+          {toggleColumn && (
+            <ToggleColumnButton
+              field={field}
+              isDisabled={isObjectArray && dataType !== 'geo_point'}
+              isObjectArray={isObjectArray}
+              onClick={toggleFieldColumn}
+              ownFocus={ownFocus}
+              value={value}
+            />
           )}
 
           {showFilters && draggableId != null && (

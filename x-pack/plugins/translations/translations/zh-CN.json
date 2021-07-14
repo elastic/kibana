@@ -20447,7 +20447,6 @@
     "xpack.securitySolution.eventDetails.nestedColumnCheckboxAriaLabel": "{field} 字段是对象，并分解为可以添加为列的嵌套字段",
     "xpack.securitySolution.eventDetails.table": "表",
     "xpack.securitySolution.eventDetails.value": "值",
-    "xpack.securitySolution.eventDetails.viewColumnCheckboxAriaLabel": "查看 {field} 列",
     "xpack.securitySolution.eventRenderers.alertsDescription": "阻止或检测到恶意软件或勒索软件时，显示告警",
     "xpack.securitySolution.eventRenderers.alertsName": "告警",
     "xpack.securitySolution.eventRenderers.auditdDescriptionPart1": "审计事件传送 Linux 审计框架的安全相关日志。",

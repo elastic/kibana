@@ -20146,7 +20146,6 @@
     "xpack.securitySolution.eventDetails.nestedColumnCheckboxAriaLabel": "{field}フィールドはオブジェクトであり、列として追加できるネストされたフィールドに分解されます",
     "xpack.securitySolution.eventDetails.table": "表",
     "xpack.securitySolution.eventDetails.value": "値",
-    "xpack.securitySolution.eventDetails.viewColumnCheckboxAriaLabel": "{field} 列を表示",
     "xpack.securitySolution.eventRenderers.alertsDescription": "マルウェアまたはランサムウェアが防御、検出されたときにアラートが表示されます。",
     "xpack.securitySolution.eventRenderers.alertsName": "アラート",
     "xpack.securitySolution.eventRenderers.auditdDescriptionPart1": "監査イベントは、Linux Audit Framework からセキュリティ関連ログを通知します。",
