@@ -13,7 +13,7 @@ import {
   TRANSACTION_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import type { SearchServiceParams } from '../../../../common/search_strategies/correlations/types';
-import { environmentQuery as getEnvironmentQuery } from '../../../utils/queries';
+import { environmentQuery as getEnvironmentQuery } from '../../../../common/utils/environment_query';
 import { ProcessorEvent } from '../../../../common/processor_event';
 
 const getPercentileThresholdValueQuery = (
