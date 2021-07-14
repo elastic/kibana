@@ -8,7 +8,7 @@
 import type { FieldFormat } from 'src/plugins/data/public';
 import type { Datatable } from 'src/plugins/expressions';
 
-import { Args } from './expression';
+import type { DatatableArgs } from './datatable';
 import { transposeTable } from './transpose_helpers';
 
 describe('transpose_helpes', () => {
@@ -59,7 +59,7 @@ describe('transpose_helpes', () => {
     };
   }
 
-  function buildArgs(): Args {
+  function buildArgs(): DatatableArgs {
     return {
       title: 'Table',
       sortingColumnId: undefined,

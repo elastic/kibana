@@ -6,11 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FieldFormat } from 'src/plugins/data/public';
-import { Datatable } from 'src/plugins/expressions/public';
-import { ColumnConfigArg } from './datatable_visualization';
+import type { FieldFormat } from '../../../../../../src/plugins/data/common';
+import type { Datatable } from '../../../../../../src/plugins/expressions/common';
+import type { ColumnConfigArg } from './datatable_column';
 import { getOriginalId } from './transpose_helpers';
-import { isNumericField } from './utils';
+import { isNumericFieldForDatatable } from './utils';
 
 type SummaryRowType = Extract<ColumnConfigArg['summaryRow'], string>;
 
@@ -19,7 +19,7 @@ export function getFinalSummaryConfiguration(
   columnArgs: Pick<ColumnConfigArg, 'summaryRow' | 'summaryLabel'> | undefined,
   table: Datatable | undefined
 ) {
-  const isNumeric = isNumericField(table, columnId);
+  const isNumeric = isNumericFieldForDatatable(table, columnId);
 
   const summaryRow = isNumeric ? columnArgs?.summaryRow || 'none' : 'none';
   const summaryLabel = columnArgs?.summaryLabel ?? getDefaultSummaryLabel(summaryRow);

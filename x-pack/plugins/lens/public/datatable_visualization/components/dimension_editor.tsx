@@ -22,7 +22,6 @@ import {
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import { VisualizationDimensionEditorProps } from '../../types';
 import { DatatableVisualizationState } from '../visualization';
-import { getOriginalId } from '../transpose_helpers';
 import {
   CustomizablePalette,
   applyPaletteParams,
@@ -34,13 +33,14 @@ import {
   findMinMaxByColumnId,
 } from '../../shared_components/';
 import './dimension_editor.scss';
+import type { ColumnState } from '../../../common';
 import {
   getDefaultSummaryLabel,
   getFinalSummaryConfiguration,
   getSummaryRowOptions,
-} from '../summary';
-import { isNumericField } from '../utils';
-import type { ColumnState } from '../../../common';
+  getOriginalId,
+  isNumericFieldForDatatable,
+} from '../../../common';
 
 const idPrefix = htmlIdGenerator()();
 
@@ -94,7 +94,7 @@ export function TableDimensionEditor(
   const currentData = frame.activeData?.[state.layerId];
 
   // either read config state or use same logic as chart itself
-  const isNumeric = isNumericField(currentData, accessor);
+  const isNumeric = isNumericFieldForDatatable(currentData, accessor);
   const currentAlignment = column?.alignment || (isNumeric ? 'right' : 'left');
   const currentColorMode = column?.colorMode || 'none';
   const hasDynamicColoring = currentColorMode !== 'none';

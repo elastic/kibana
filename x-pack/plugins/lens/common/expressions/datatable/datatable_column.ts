@@ -5,12 +5,35 @@
  * 2.0.
  */
 
-import type { PaletteOutput } from '../../../../../../src/plugins/charts/common';
+import type { Direction } from '@elastic/eui';
+import type {
+  CustomPaletteState,
+  PaletteOutput,
+} from '../../../../../../src/plugins/charts/common';
 import type {
   ExpressionFunctionDefinition,
   DatatableColumn,
 } from '../../../../../../src/plugins/expressions/common';
 import type { CustomPaletteParams } from '../../types';
+
+export type LensGridDirection = 'none' | Direction;
+
+export interface ColumnConfig {
+  columns: Array<
+    Omit<ColumnState, 'palette'> & {
+      type: 'lens_datatable_column';
+      palette?: PaletteOutput<CustomPaletteState>;
+    }
+  >;
+  sortingColumnId: string | undefined;
+  sortingDirection: LensGridDirection;
+}
+
+export type ColumnConfigArg = Omit<ColumnState, 'palette'> & {
+  type: 'lens_datatable_column';
+  palette?: PaletteOutput<CustomPaletteState>;
+  summaryRowValue?: unknown;
+};
 
 export interface ColumnState {
   columnId: string;

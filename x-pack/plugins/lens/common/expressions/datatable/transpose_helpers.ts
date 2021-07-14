@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import type { FieldFormat } from 'src/plugins/data/public';
-import type { Datatable, DatatableColumn, DatatableRow } from 'src/plugins/expressions';
-import { ColumnConfig } from './components/table_basic';
+import type {
+  Datatable,
+  DatatableColumn,
+  DatatableRow,
+} from '../../../../../../src/plugins/expressions';
+import type { FieldFormat } from '../../../../../../src/plugins/data/common';
+import type { ColumnConfig, ColumnConfigArg } from './datatable_column';
 
-import type { Args, ColumnConfigArg } from './expression';
+import type { DatatableArgs } from './datatable';
 
 const TRANSPOSE_SEPARATOR = '---';
 
@@ -42,7 +46,7 @@ export function getOriginalId(id: string) {
  * @param formatters Formatters for all columns to transpose columns by actual display values
  */
 export function transposeTable(
-  args: Args,
+  args: DatatableArgs,
   firstTable: Datatable,
   formatters: Record<string, FieldFormat>
 ) {
@@ -112,7 +116,7 @@ function transposeRows(
  * grouped by unique value
  */
 function updateColumnArgs(
-  args: Args,
+  args: DatatableArgs,
   bucketsColumnArgs: ColumnConfig['columns'],
   transposedColumnGroups: Array<ColumnConfig['columns']>
 ) {
@@ -150,7 +154,7 @@ function getUniqueValues(table: Datatable, formatter: FieldFormat, columnId: str
  * @param uniqueValues
  */
 function transposeColumns(
-  args: Args,
+  args: DatatableArgs,
   bucketsColumnArgs: ColumnConfig['columns'],
   metricColumns: ColumnConfig['columns'],
   firstTable: Datatable,

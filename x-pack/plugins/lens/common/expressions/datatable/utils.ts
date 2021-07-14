@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Datatable } from 'src/plugins/expressions/public';
+import type { Datatable } from '../../../../../../src/plugins/expressions/common';
 import { getOriginalId } from './transpose_helpers';
 
 function isValidNumber(value: unknown): boolean {
   return typeof value === 'number' || value == null;
 }
 
-export function isNumericField(currentData: Datatable | undefined, accessor: string) {
+export function isNumericFieldForDatatable(currentData: Datatable | undefined, accessor: string) {
   const isNumeric =
     currentData?.columns.find((col) => col.id === accessor || getOriginalId(col.id) === accessor)
       ?.meta.type === 'number';

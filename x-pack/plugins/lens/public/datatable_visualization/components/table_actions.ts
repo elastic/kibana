@@ -8,15 +8,9 @@
 import type { EuiDataGridSorting } from '@elastic/eui';
 import type { Datatable, DatatableColumn } from 'src/plugins/expressions';
 import type { LensFilterEvent } from '../../types';
-import type { LensMultiTable } from '../../../common';
-import type {
-  LensGridDirection,
-  LensResizeAction,
-  LensSortAction,
-  LensToggleAction,
-} from './types';
-import type { ColumnConfig } from './table_basic';
-import { getOriginalId } from '../transpose_helpers';
+import type { LensMultiTable, ColumnConfig, LensGridDirection } from '../../../common';
+import type { LensResizeAction, LensSortAction, LensToggleAction } from './types';
+import { getOriginalId } from '../../../common';
 
 export const createGridResizeHandler = (
   columnConfig: ColumnConfig,
