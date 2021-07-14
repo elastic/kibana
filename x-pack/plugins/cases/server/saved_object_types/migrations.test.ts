@@ -8,17 +8,17 @@
 import { SavedObjectSanitizedDoc } from 'kibana/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../actions/server';
 import {
-  CasesConfigureAttributes,
   CASE_CONFIGURE_SAVED_OBJECT,
   ConnectorTypes,
   ESCaseConnector,
+  ESCasesConfigureAttributes,
   SECURITY_SOLUTION_OWNER,
 } from '../../common';
 import { getNoneCaseConnector } from '../common';
 import { configurationConnectorReferenceName } from '../services';
 import { configureConnectorIdMigration } from './migrations';
 
-const createConfigSO = (connector: ESCaseConnector) => ({
+const createLegacyConfigSchema = (connector: ESCaseConnector) => ({
   type: CASE_CONFIGURE_SAVED_OBJECT,
   id: '1',
   attributes: {
@@ -40,26 +40,22 @@ const createConfigSO = (connector: ESCaseConnector) => ({
   },
 });
 
-type ESConfigureAttributesWithID = Omit<CasesConfigureAttributes, 'connector'> & {
-  connector: ESCaseConnector;
-};
-
 describe('migrations', () => {
   describe('configure', () => {
     describe('7.15.0 connector ID migration', () => {
       it('does not create a reference when the connector ID is none', () => {
-        const configureSavedObject = createConfigSO(getNoneCaseConnector());
+        const configureSavedObject = createLegacyConfigSchema(getNoneCaseConnector());
 
         const migratedConnector = configureConnectorIdMigration(
           configureSavedObject
-        ) as SavedObjectSanitizedDoc<ESConfigureAttributesWithID>;
+        ) as SavedObjectSanitizedDoc<ESCasesConfigureAttributes>;
 
         expect(migratedConnector.references.length).toBe(0);
         expect(migratedConnector.attributes.connector).not.toHaveProperty('id');
       });
 
       it('creates a reference using the connector id', () => {
-        const configureSavedObject = createConfigSO({
+        const configureSavedObject = createLegacyConfigSchema({
           id: '123',
           fields: null,
           name: 'connector',
@@ -68,7 +64,7 @@ describe('migrations', () => {
 
         const migratedConnector = configureConnectorIdMigration(
           configureSavedObject
-        ) as SavedObjectSanitizedDoc<ESConfigureAttributesWithID>;
+        ) as SavedObjectSanitizedDoc<ESCasesConfigureAttributes>;
 
         expect(migratedConnector.references).toEqual([
           { id: '123', type: ACTION_SAVED_OBJECT_TYPE, name: configurationConnectorReferenceName },

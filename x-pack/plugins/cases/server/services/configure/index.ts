@@ -82,12 +82,17 @@ function transformToExternalConnector(
   };
 }
 
+function findConnectorIDReference(references?: SavedObjectReference[]) {
+  return references?.find(
+    (ref) =>
+      ref.type === ACTION_SAVED_OBJECT_TYPE && ref.name === configurationConnectorReferenceName
+  );
+}
+
 function transformUpdateToExternalModel(
   updatedConfiguration: SavedObjectsUpdateResponse<ESCasesConfigureAttributes>
 ): SavedObjectsUpdateResponse<CasesConfigurePatch> {
-  const connectorIDRef = updatedConfiguration.references?.find(
-    (ref) => ref.type === ACTION_SAVED_OBJECT_TYPE
-  );
+  const connectorIDRef = findConnectorIDReference(updatedConfiguration.references);
 
   const { connector, ...restUpdatedAttributes } = updatedConfiguration.attributes;
 
@@ -103,9 +108,7 @@ function transformUpdateToExternalModel(
 function transformToExternalModel(
   configuration: SavedObject<ESCasesConfigureAttributes>
 ): SavedObject<CasesConfigureAttributes> {
-  const connectorIDRef = configuration.references.find(
-    (ref) => ref.type === ACTION_SAVED_OBJECT_TYPE
-  );
+  const connectorIDRef = findConnectorIDReference(configuration.references);
 
   return {
     ...configuration,
