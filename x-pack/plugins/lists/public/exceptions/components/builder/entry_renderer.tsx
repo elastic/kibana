@@ -18,6 +18,7 @@ import {
   BuilderEntry,
   EXCEPTION_OPERATORS_ONLY_LISTS,
   FormattedBuilderEntry,
+  OperatorOption,
   getEntryOnFieldChange,
   getEntryOnListChange,
   getEntryOnMatchAnyChange,
@@ -32,7 +33,6 @@ import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data
 import { HttpStart } from '../../../../../../../src/core/public';
 import { FieldComponent } from '../autocomplete/field';
 import { OperatorComponent } from '../autocomplete/operator';
-import { OperatorOption } from '../autocomplete/types';
 import { AutocompleteFieldExistsComponent } from '../autocomplete/field_value_exists';
 import { AutocompleteFieldMatchComponent } from '../autocomplete/field_value_match';
 import { AutocompleteFieldMatchAnyComponent } from '../autocomplete/field_value_match_any';
