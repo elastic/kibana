@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
 import { checkParam } from '../error_missing_required';
 import { BeatsClusterMetric } from '../metrics';
 import { createBeatsQuery } from './create_beats_query';
 import { beatsAggFilterPath, beatsUuidsAgg, beatsAggResponseHandler } from './_beats_stats';
-import type { ElasticsearchResponse } from '../../../common/types/es';
+import type { ElasticsearchResponse, ElasticsearchModifiedSource } from '../../../common/types/es';
+import { LegacyRequest } from '../../types';
 
 export function handleResponse(clusterUuid: string, response: ElasticsearchResponse) {
   const { beatTotal, beatTypes, totalEvents, bytesSent } = beatsAggResponseHandler(response);
@@ -31,7 +31,11 @@ export function handleResponse(clusterUuid: string, response: ElasticsearchRespo
   };
 }
 
-export function getBeatsForClusters(req, beatsIndexPattern, clusters) {
+export function getBeatsForClusters(
+  req: LegacyRequest,
+  beatsIndexPattern: string,
+  clusters: ElasticsearchModifiedSource[]
+) {
   checkParam(beatsIndexPattern, 'beatsIndexPattern in beats/getBeatsForClusters');
 
   const start = req.payload.timeRange.min;
@@ -41,7 +45,7 @@ export function getBeatsForClusters(req, beatsIndexPattern, clusters) {
 
   return Promise.all(
     clusters.map(async (cluster) => {
-      const clusterUuid = get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid);
+      const clusterUuid = cluster.elasticsearch?.cluster?.id ?? cluster.cluster_uuid;
       const params = {
         index: beatsIndexPattern,
         size: 0,
@@ -54,7 +58,7 @@ export function getBeatsForClusters(req, beatsIndexPattern, clusters) {
             clusterUuid,
             metric: BeatsClusterMetric.getMetricFields(), // override default of BeatMetric.getMetricFields
           }),
-          aggs: beatsUuidsAgg(maxBucketSize),
+          aggs: beatsUuidsAgg(maxBucketSize!),
         },
       };
 

@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import { upperFirst, get } from 'lodash';
+import { upperFirst } from 'lodash';
+import { LegacyRequest } from '../../types';
 import { checkParam } from '../error_missing_required';
 import { createBeatsQuery } from './create_beats_query';
+import type { BeatsElasticsearchResponse, BucketCount } from './types';
 
-export function handleResponse(response) {
-  const aggs = get(response, 'aggregations');
+export function handleResponse(response: BeatsElasticsearchResponse) {
+  const aggs = response.aggregations;
 
-  const getTimeRangeCount = (name) => {
-    const lastActiveBuckets = get(aggs, 'active_counts.buckets', []);
+  const getTimeRangeCount = (name: string) => {
+    const lastActiveBuckets = aggs?.active_counts?.buckets ?? [];
     const rangeBucket = lastActiveBuckets.find((bucket) => bucket.key === name);
-    return get(rangeBucket, 'uuids.buckets.length');
+    return rangeBucket?.uuids.buckets.length;
   };
 
   // aggregations are not ordered, so we find the bucket for each timestamp range
@@ -34,25 +36,31 @@ export function handleResponse(response) {
     { range: 'last1d', count: last1dCount },
   ];
 
-  const latestVersions = get(aggs, 'versions.buckets', []).reduce((accum, current) => {
-    return [
-      ...accum,
-      {
-        version: current.key,
-        count: get(current, 'uuids.buckets.length'),
-      },
-    ];
-  }, []);
+  const latestVersions = (aggs?.versions?.buckets ?? []).reduce(
+    (accum: BucketCount<{ version: string }>, current) => {
+      return [
+        ...accum,
+        {
+          version: current.key,
+          count: current.uuids.buckets.length,
+        },
+      ];
+    },
+    []
+  );
 
-  const latestTypes = get(aggs, 'types.buckets', []).reduce((accum, current) => {
-    return [
-      ...accum,
-      {
-        type: upperFirst(current.key),
-        count: get(current, 'uuids.buckets.length'),
-      },
-    ];
-  }, []);
+  const latestTypes = (aggs?.types?.buckets ?? []).reduce(
+    (accum: BucketCount<{ type: string }>, current) => {
+      return [
+        ...accum,
+        {
+          type: upperFirst(current.key),
+          count: current.uuids.buckets.length,
+        },
+      ];
+    },
+    []
+  );
 
   return {
     latestActive,
@@ -61,7 +69,7 @@ export function handleResponse(response) {
   };
 }
 
-export function getLatestStats(req, beatsIndexPattern, clusterUuid) {
+export function getLatestStats(req: LegacyRequest, beatsIndexPattern: string, clusterUuid: string) {
   checkParam(beatsIndexPattern, 'beatsIndexPattern in getBeats');
 
   const config = req.server.config();

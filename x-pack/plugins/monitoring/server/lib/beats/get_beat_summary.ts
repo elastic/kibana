@@ -67,7 +67,7 @@ export function handleResponse(response: ElasticsearchResponse, beatUuid: string
     eventsTotal: getDiffCalculation(eventsTotalLast, eventsTotalFirst) ?? null,
     eventsEmitted: getDiffCalculation(eventsEmittedLast, eventsEmittedFirst) ?? null,
     eventsDropped: getDiffCalculation(eventsDroppedLast, eventsDroppedFirst) ?? null,
-    bytesWritten: getDiffCalculation(bytesWrittenLast, bytesWrittenFirst) ?? null,
+    bytesWritten: getDiffCalculation(Number(bytesWrittenLast), Number(bytesWrittenFirst)) ?? null,
     handlesHardLimit,
     handlesSoftLimit,
   };
@@ -81,7 +81,7 @@ export async function getBeatSummary(
     beatUuid,
     start,
     end,
-  }: { clusterUuid: string; beatUuid: string; start: number; end: number }
+  }: { clusterUuid: string; beatUuid: string; start: Date; end: Date }
 ) {
   checkParam(beatsIndexPattern, 'beatsIndexPattern in beats/getBeatSummary');
 

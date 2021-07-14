@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { defaults } from 'lodash';
-import { BeatsMetric } from '../metrics';
+import { BeatsMetric, BeatsMetricFields } from '../metrics';
 import { createQuery } from '../create_query';
 
 /**
@@ -17,15 +16,24 @@ import { createQuery } from '../create_query';
  *
  * @param {Object} options The options to pass to {@code createQuery}
  */
-export function createBeatsQuery(options = {}) {
-  options = defaults(options, {
-    filters: [],
+export function createBeatsQuery(options: {
+  filters?: any[];
+  types?: string[];
+  metric?: BeatsMetricFields;
+  uuid?: string;
+  clusterUuid: string;
+  start?: Date | number;
+  end?: Date | number;
+}) {
+  const opts = {
+    filters: [] as any[],
     metric: BeatsMetric.getMetricFields(),
     types: ['stats', 'beats_stats'],
-  });
+    ...options,
+  };
 
   // avoid showing APM Server stats alongside other Beats because APM Server will have its own UI
-  options.filters.push({
+  opts.filters.push({
     bool: {
       must_not: {
         term: {
@@ -35,5 +43,5 @@ export function createBeatsQuery(options = {}) {
     },
   });
 
-  return createQuery(options);
+  return createQuery(opts);
 }

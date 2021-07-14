@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { upperFirst, get } from 'lodash';
-import type { ElasticsearchResponse } from '../../../common/types/es';
+import { upperFirst } from 'lodash';
+import type { BeatsElasticsearchResponse, BucketCount } from './types';
 
-export const getDiffCalculation = (max: number, min: number) => {
+export const getDiffCalculation = (max: number | null, min: number | null) => {
   // no need to test max >= 0, but min <= 0 which is normal for a derivative after restart
   // because we are aggregating/collapsing on ephemeral_ids
   if (max !== null && min !== null && max >= 0 && min >= 0 && max >= min) {
@@ -99,25 +99,24 @@ export const beatsUuidsAgg = (maxBucketSize: string) => ({
   },
 });
 
-export const beatsAggResponseHandler = (response: ElasticsearchResponse) => {
+export const beatsAggResponseHandler = (response: BeatsElasticsearchResponse) => {
   // beat types stat
-  const buckets = get(response, 'aggregations.types.buckets', []);
-  const beatTotal = get(response, 'aggregations.total.value', 0);
-  const beatTypes = buckets.reduce((types, typeBucket) => {
-    console.log(typeBucket);
+  const buckets = response.aggregations?.types?.buckets ?? [];
+  const beatTotal = response.aggregations?.total.value ?? 0;
+  const beatTypes = buckets.reduce((types: BucketCount<{ type: string }>, typeBucket) => {
     return [
       ...types,
       {
         type: upperFirst(typeBucket.key),
-        count: get(typeBucket, 'uuids.buckets.length'),
+        count: typeBucket.uuids.buckets.length,
       },
     ];
   }, []);
 
-  const eventsTotalMax = get(response, 'aggregations.max_events_total.value', 0);
-  const eventsTotalMin = get(response, 'aggregations.min_events_total.value', 0);
-  const bytesSentMax = get(response, 'aggregations.max_bytes_sent_total.value', 0);
-  const bytesSentMin = get(response, 'aggregations.min_bytes_sent_total.value', 0);
+  const eventsTotalMax = response.aggregations?.max_events_total.value ?? 0;
+  const eventsTotalMin = response.aggregations?.min_events_total.value ?? 0;
+  const bytesSentMax = response.aggregations?.max_bytes_sent_total.value ?? 0;
+  const bytesSentMin = response.aggregations?.min_bytes_sent_total.value ?? 0;
 
   return {
     beatTotal,

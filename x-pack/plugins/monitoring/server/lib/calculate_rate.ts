@@ -24,10 +24,10 @@ import moment from 'moment';
 interface CalculateRateProps {
   hitTimestamp: string | null;
   earliestHitTimestamp: string | null;
-  latestTotal: number | null;
-  earliestTotal: number | null;
-  timeWindowMin: string;
-  timeWindowMax: string;
+  latestTotal?: string | number | null;
+  earliestTotal?: string | number | null;
+  timeWindowMin: number;
+  timeWindowMax: number;
 }
 
 export function calculateRate({
@@ -68,9 +68,9 @@ export function calculateRate({
   let rate = null;
   let isEstimate = false;
   if (millisDelta !== 0) {
-    const totalDelta = latestTotal - earliestTotal;
+    const totalDelta = Number(latestTotal) - Number(earliestTotal);
     if (totalDelta < 0) {
-      rate = latestTotal / (millisDelta / 1000); // a restart caused an unwanted negative rate
+      rate = Number(latestTotal) / (millisDelta / 1000); // a restart caused an unwanted negative rate
       isEstimate = true;
     } else {
       rate = totalDelta / (millisDelta / 1000);
