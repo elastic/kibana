@@ -65,7 +65,7 @@ const prebootDeps = coreMock.createInternalPreboot();
 const setupDeps = coreMock.createInternalSetup();
 const startDeps = coreMock.createInternalStart();
 
-let pluginsSystem: PluginsSystem;
+let pluginsSystem: PluginsSystem<PluginType.standard>;
 let configService: ReturnType<typeof configServiceMock.create>;
 let logger: ReturnType<typeof loggingSystemMock.create>;
 let env: Env;
@@ -80,229 +80,113 @@ beforeEach(() => {
 
   coreContext = { coreId: Symbol(), env, logger, configService: configService as any };
 
-  pluginsSystem = new PluginsSystem(coreContext);
+  pluginsSystem = new PluginsSystem(coreContext, PluginType.standard);
 });
 
 test('can be setup even without plugins', async () => {
-  for (const pluginsSetup of [
-    await pluginsSystem.setupPlugins(PluginType.preboot, prebootDeps),
-    await pluginsSystem.setupPlugins(PluginType.standard, setupDeps),
-  ]) {
-    expect(pluginsSetup).toBeInstanceOf(Map);
-    expect(pluginsSetup.size).toBe(0);
-  }
+  const pluginsSetup = await pluginsSystem.setupPlugins(setupDeps);
+
+  expect(pluginsSetup).toBeInstanceOf(Map);
+  expect(pluginsSetup.size).toBe(0);
+});
+
+test('throws if adding plugin with incompatible type', () => {
+  const prebootPlugin = createPlugin('plugin-preboot', { type: PluginType.preboot });
+  const standardPlugin = createPlugin('plugin-standard');
+
+  const prebootPluginSystem = new PluginsSystem(coreContext, PluginType.preboot);
+  const standardPluginSystem = new PluginsSystem(coreContext, PluginType.standard);
+
+  prebootPluginSystem.addPlugin(prebootPlugin);
+  expect(() => prebootPluginSystem.addPlugin(standardPlugin)).toThrowErrorMatchingInlineSnapshot(
+    `"Cannot add plugin with type \\"standard\\" to plugin system with type \\"preboot\\"."`
+  );
+  expect(prebootPluginSystem.getPlugins()).toEqual([prebootPlugin]);
+
+  standardPluginSystem.addPlugin(standardPlugin);
+  expect(() => standardPluginSystem.addPlugin(prebootPlugin)).toThrowErrorMatchingInlineSnapshot(
+    `"Cannot add plugin with type \\"preboot\\" to plugin system with type \\"standard\\"."`
+  );
+  expect(standardPluginSystem.getPlugins()).toEqual([standardPlugin]);
 });
 
 test('getPlugins returns the list of plugins', () => {
-  const pluginA = createPlugin('plugin-a', { type: PluginType.preboot });
-  const pluginB = createPlugin('plugin-b', { type: PluginType.preboot });
-  const pluginC = createPlugin('plugin-c');
-  const pluginD = createPlugin('plugin-d');
+  const pluginA = createPlugin('plugin-a');
+  const pluginB = createPlugin('plugin-b');
+  pluginsSystem.addPlugin(pluginA);
+  pluginsSystem.addPlugin(pluginB);
 
-  for (const plugin of [pluginA, pluginB, pluginC, pluginD]) {
-    pluginsSystem.addPlugin(plugin);
-  }
-
-  expect(pluginsSystem.getPlugins(PluginType.preboot)).toEqual([pluginA, pluginB]);
-  expect(pluginsSystem.getPlugins(PluginType.standard)).toEqual([pluginC, pluginD]);
+  expect(pluginsSystem.getPlugins()).toEqual([pluginA, pluginB]);
 });
 
 test('getPluginDependencies returns dependency tree of symbols', () => {
-  for (const type of [PluginType.preboot, PluginType.standard]) {
-    pluginsSystem.addPlugin(
-      createPlugin(`plugin-a-${type}`, { type, required: [`no-dep-${type}`] })
-    );
-    pluginsSystem.addPlugin(
-      createPlugin(`plugin-b-${type}`, {
-        type,
-        required: [`plugin-a-${type}`],
-        optional: [`no-dep-${type}`, `other-${type}`],
-      })
-    );
-    pluginsSystem.addPlugin(createPlugin(`no-dep-${type}`, { type }));
-  }
+  pluginsSystem.addPlugin(createPlugin('plugin-a', { required: ['no-dep'] }));
+  pluginsSystem.addPlugin(
+    createPlugin('plugin-b', { required: ['plugin-a'], optional: ['no-dep', 'other'] })
+  );
+  pluginsSystem.addPlugin(createPlugin('no-dep'));
 
-  expect(pluginsSystem.getPluginDependencies(PluginType.preboot)).toMatchInlineSnapshot(`
+  expect(pluginsSystem.getPluginDependencies()).toMatchInlineSnapshot(`
     Object {
       "asNames": Map {
-        "plugin-a-preboot" => Array [
-          "no-dep-preboot",
+        "plugin-a" => Array [
+          "no-dep",
         ],
-        "plugin-b-preboot" => Array [
-          "plugin-a-preboot",
-          "no-dep-preboot",
+        "plugin-b" => Array [
+          "plugin-a",
+          "no-dep",
         ],
-        "no-dep-preboot" => Array [],
+        "no-dep" => Array [],
       },
       "asOpaqueIds": Map {
-        Symbol(plugin-a-preboot) => Array [
-          Symbol(no-dep-preboot),
+        Symbol(plugin-a) => Array [
+          Symbol(no-dep),
         ],
-        Symbol(plugin-b-preboot) => Array [
-          Symbol(plugin-a-preboot),
-          Symbol(no-dep-preboot),
+        Symbol(plugin-b) => Array [
+          Symbol(plugin-a),
+          Symbol(no-dep),
         ],
-        Symbol(no-dep-preboot) => Array [],
-      },
-    }
-  `);
-  expect(pluginsSystem.getPluginDependencies(PluginType.standard)).toMatchInlineSnapshot(`
-    Object {
-      "asNames": Map {
-        "plugin-a-standard" => Array [
-          "no-dep-standard",
-        ],
-        "plugin-b-standard" => Array [
-          "plugin-a-standard",
-          "no-dep-standard",
-        ],
-        "no-dep-standard" => Array [],
-      },
-      "asOpaqueIds": Map {
-        Symbol(plugin-a-standard) => Array [
-          Symbol(no-dep-standard),
-        ],
-        Symbol(plugin-b-standard) => Array [
-          Symbol(plugin-a-standard),
-          Symbol(no-dep-standard),
-        ],
-        Symbol(no-dep-standard) => Array [],
+        Symbol(no-dep) => Array [],
       },
     }
   `);
 });
 
 test('`setupPlugins` throws plugin has missing required dependency', async () => {
-  pluginsSystem.addPlugin(
-    createPlugin('some-id-preboot', { type: PluginType.preboot, required: ['missing-dep'] })
-  );
-  await expect(
-    pluginsSystem.setupPlugins(PluginType.preboot, prebootDeps)
-  ).rejects.toMatchInlineSnapshot(
-    `[Error: Topological ordering of plugins did not complete, these plugins have cyclic or missing dependencies: ["some-id-preboot"]]`
-  );
-
   pluginsSystem.addPlugin(createPlugin('some-id', { required: ['missing-dep'] }));
-  await expect(
-    pluginsSystem.setupPlugins(PluginType.standard, setupDeps)
-  ).rejects.toMatchInlineSnapshot(
-    `[Error: Topological ordering of plugins did not complete, these plugins have cyclic or missing dependencies: ["some-id"]]`
-  );
-});
 
-test('`setupPlugins` throws plugin has incompatible required dependency', async () => {
-  pluginsSystem.addPlugin(
-    createPlugin('some-id-preboot', {
-      type: PluginType.preboot,
-      required: ['incompatible-standard'],
-    })
-  );
-  pluginsSystem.addPlugin(createPlugin('incompatible-standard'));
-  await expect(
-    pluginsSystem.setupPlugins(PluginType.preboot, prebootDeps)
-  ).rejects.toMatchInlineSnapshot(
-    `[Error: Topological ordering of plugins did not complete, these plugins have cyclic or missing dependencies: ["some-id-preboot"]]`
-  );
-
-  pluginsSystem.addPlugin(createPlugin('some-id', { required: ['incompatible-preboot'] }));
-  pluginsSystem.addPlugin(createPlugin('incompatible-preboot', { type: PluginType.preboot }));
-  await expect(
-    pluginsSystem.setupPlugins(PluginType.standard, setupDeps)
-  ).rejects.toMatchInlineSnapshot(
+  await expect(pluginsSystem.setupPlugins(setupDeps)).rejects.toMatchInlineSnapshot(
     `[Error: Topological ordering of plugins did not complete, these plugins have cyclic or missing dependencies: ["some-id"]]`
   );
 });
 
 test('`setupPlugins` throws if plugins have circular required dependency', async () => {
-  pluginsSystem.addPlugin(createPlugin('no-dep-preboot', { type: PluginType.preboot }));
-  pluginsSystem.addPlugin(
-    createPlugin('depends-on-1-preboot', {
-      type: PluginType.preboot,
-      required: ['depends-on-2-preboot'],
-    })
-  );
-  pluginsSystem.addPlugin(
-    createPlugin('depends-on-2-preboot', {
-      type: PluginType.preboot,
-      required: ['depends-on-1-preboot'],
-    })
-  );
-
-  await expect(
-    pluginsSystem.setupPlugins(PluginType.preboot, prebootDeps)
-  ).rejects.toMatchInlineSnapshot(
-    `[Error: Topological ordering of plugins did not complete, these plugins have cyclic or missing dependencies: ["depends-on-1-preboot","depends-on-2-preboot"]]`
-  );
-
   pluginsSystem.addPlugin(createPlugin('no-dep'));
   pluginsSystem.addPlugin(createPlugin('depends-on-1', { required: ['depends-on-2'] }));
   pluginsSystem.addPlugin(createPlugin('depends-on-2', { required: ['depends-on-1'] }));
 
-  await expect(
-    pluginsSystem.setupPlugins(PluginType.standard, setupDeps)
-  ).rejects.toMatchInlineSnapshot(
+  await expect(pluginsSystem.setupPlugins(setupDeps)).rejects.toMatchInlineSnapshot(
     `[Error: Topological ordering of plugins did not complete, these plugins have cyclic or missing dependencies: ["depends-on-1","depends-on-2"]]`
   );
 });
 
 test('`setupPlugins` throws if plugins have circular optional dependency', async () => {
-  pluginsSystem.addPlugin(createPlugin('no-dep-preboot', { type: PluginType.preboot }));
-  pluginsSystem.addPlugin(
-    createPlugin('depends-on-1-preboot', {
-      type: PluginType.preboot,
-      optional: ['depends-on-2-preboot'],
-    })
-  );
-  pluginsSystem.addPlugin(
-    createPlugin('depends-on-2-preboot', {
-      type: PluginType.preboot,
-      optional: ['depends-on-1-preboot'],
-    })
-  );
-
-  await expect(
-    pluginsSystem.setupPlugins(PluginType.preboot, prebootDeps)
-  ).rejects.toMatchInlineSnapshot(
-    `[Error: Topological ordering of plugins did not complete, these plugins have cyclic or missing dependencies: ["depends-on-1-preboot","depends-on-2-preboot"]]`
-  );
-
   pluginsSystem.addPlugin(createPlugin('no-dep'));
   pluginsSystem.addPlugin(createPlugin('depends-on-1', { optional: ['depends-on-2'] }));
   pluginsSystem.addPlugin(createPlugin('depends-on-2', { optional: ['depends-on-1'] }));
 
-  await expect(
-    pluginsSystem.setupPlugins(PluginType.standard, setupDeps)
-  ).rejects.toMatchInlineSnapshot(
+  await expect(pluginsSystem.setupPlugins(setupDeps)).rejects.toMatchInlineSnapshot(
     `[Error: Topological ordering of plugins did not complete, these plugins have cyclic or missing dependencies: ["depends-on-1","depends-on-2"]]`
   );
 });
 
 test('`setupPlugins` ignores missing optional dependency', async () => {
-  const prebootPlugin = createPlugin('some-id-preboot', {
-    type: PluginType.preboot,
-    optional: ['missing-dep'],
-  });
-  jest.spyOn(prebootPlugin, 'setup').mockResolvedValue('test');
-
-  pluginsSystem.addPlugin(prebootPlugin);
-
-  expect([...(await pluginsSystem.setupPlugins(PluginType.preboot, prebootDeps))])
-    .toMatchInlineSnapshot(`
-    Array [
-      Array [
-        "some-id-preboot",
-        "test",
-      ],
-    ]
-  `);
-
   const plugin = createPlugin('some-id', { optional: ['missing-dep'] });
   jest.spyOn(plugin, 'setup').mockResolvedValue('test');
 
   pluginsSystem.addPlugin(plugin);
 
-  expect([...(await pluginsSystem.setupPlugins(PluginType.standard, setupDeps))])
-    .toMatchInlineSnapshot(`
+  expect([...(await pluginsSystem.setupPlugins(setupDeps))]).toMatchInlineSnapshot(`
     Array [
       Array [
         "some-id",
@@ -310,84 +194,6 @@ test('`setupPlugins` ignores missing optional dependency', async () => {
       ],
     ]
   `);
-});
-
-test('correctly orders preboot plugins and returns exposed values for "setup"', async () => {
-  const plugins = new Map([
-    [
-      createPlugin('order-4', { type: PluginType.preboot, required: ['order-2'] }),
-      { 'order-2': 'added-as-2' },
-    ],
-    [createPlugin('order-0', { type: PluginType.preboot }), {}],
-    [
-      createPlugin('order-2', {
-        type: PluginType.preboot,
-        required: ['order-1'],
-        optional: ['order-0'],
-      }),
-      { 'order-1': 'added-as-3', 'order-0': 'added-as-1' },
-    ],
-    [
-      createPlugin('order-1', { type: PluginType.preboot, required: ['order-0'] }),
-      { 'order-0': 'added-as-1' },
-    ],
-    [
-      createPlugin('order-3', {
-        type: PluginType.preboot,
-        required: ['order-2'],
-        optional: ['missing-dep'],
-      }),
-      { 'order-2': 'added-as-2' },
-    ],
-  ] as Array<[PluginWrapper<any, any>, Record<PluginName, unknown>]>);
-
-  const setupContextMap = new Map();
-
-  [...plugins.keys()].forEach((plugin, index) => {
-    jest.spyOn(plugin, 'setup').mockResolvedValue(`added-as-${index}`);
-    setupContextMap.set(plugin.name, `setup-for-${plugin.name}`);
-    pluginsSystem.addPlugin(plugin);
-  });
-
-  mockCreatePluginPrebootSetupContext.mockImplementation((context, deps, plugin) =>
-    setupContextMap.get(plugin.name)
-  );
-
-  expect([...(await pluginsSystem.setupPlugins(PluginType.preboot, prebootDeps))])
-    .toMatchInlineSnapshot(`
-    Array [
-      Array [
-        "order-0",
-        "added-as-1",
-      ],
-      Array [
-        "order-1",
-        "added-as-3",
-      ],
-      Array [
-        "order-2",
-        "added-as-2",
-      ],
-      Array [
-        "order-3",
-        "added-as-4",
-      ],
-      Array [
-        "order-4",
-        "added-as-0",
-      ],
-    ]
-  `);
-
-  for (const [plugin, deps] of plugins) {
-    expect(mockCreatePluginPrebootSetupContext).toHaveBeenCalledWith(
-      coreContext,
-      prebootDeps,
-      plugin
-    );
-    expect(plugin.setup).toHaveBeenCalledTimes(1);
-    expect(plugin.setup).toHaveBeenCalledWith(setupContextMap.get(plugin.name), deps);
-  }
 });
 
 test('correctly orders plugins and returns exposed values for "setup" and "start"', async () => {
@@ -454,8 +260,7 @@ test('correctly orders plugins and returns exposed values for "setup" and "start
     startContextMap.get(plugin.name)
   );
 
-  expect([...(await pluginsSystem.setupPlugins(PluginType.standard, setupDeps))])
-    .toMatchInlineSnapshot(`
+  expect([...(await pluginsSystem.setupPlugins(setupDeps))]).toMatchInlineSnapshot(`
     Array [
       Array [
         "order-0",
@@ -486,8 +291,7 @@ test('correctly orders plugins and returns exposed values for "setup" and "start
     expect(plugin.setup).toHaveBeenCalledWith(setupContextMap.get(plugin.name), deps.setup);
   }
 
-  expect([...(await pluginsSystem.startPlugins(PluginType.standard, startDeps))])
-    .toMatchInlineSnapshot(`
+  expect([...(await pluginsSystem.startPlugins(startDeps))]).toMatchInlineSnapshot(`
     Array [
       Array [
         "order-0",
@@ -519,52 +323,81 @@ test('correctly orders plugins and returns exposed values for "setup" and "start
   }
 });
 
-test('`setupPlugins` only setups preboot plugins that have server side', async () => {
-  const firstPluginToRun = createPlugin('order-0', { type: PluginType.preboot });
-  const secondPluginNotToRun = createPlugin('order-not-run', {
-    type: PluginType.preboot,
-    server: false,
-  });
-  const thirdPluginToRun = createPlugin('order-1', { type: PluginType.preboot });
+test('correctly orders preboot plugins and returns exposed values for "setup"', async () => {
+  const prebootPluginSystem = new PluginsSystem(coreContext, PluginType.preboot);
+  const plugins = new Map([
+    [
+      createPlugin('order-4', { type: PluginType.preboot, required: ['order-2'] }),
+      { 'order-2': 'added-as-2' },
+    ],
+    [createPlugin('order-0', { type: PluginType.preboot }), {}],
+    [
+      createPlugin('order-2', {
+        type: PluginType.preboot,
+        required: ['order-1'],
+        optional: ['order-0'],
+      }),
+      { 'order-1': 'added-as-3', 'order-0': 'added-as-1' },
+    ],
+    [
+      createPlugin('order-1', { type: PluginType.preboot, required: ['order-0'] }),
+      { 'order-0': 'added-as-1' },
+    ],
+    [
+      createPlugin('order-3', {
+        type: PluginType.preboot,
+        required: ['order-2'],
+        optional: ['missing-dep'],
+      }),
+      { 'order-2': 'added-as-2' },
+    ],
+  ] as Array<[PluginWrapper<any, any>, Record<PluginName, unknown>]>);
 
-  [firstPluginToRun, secondPluginNotToRun, thirdPluginToRun].forEach((plugin, index) => {
+  const setupContextMap = new Map();
+  [...plugins.keys()].forEach((plugin, index) => {
     jest.spyOn(plugin, 'setup').mockResolvedValue(`added-as-${index}`);
-
-    pluginsSystem.addPlugin(plugin);
+    setupContextMap.set(plugin.name, `setup-for-${plugin.name}`);
+    prebootPluginSystem.addPlugin(plugin);
   });
 
-  expect([...(await pluginsSystem.setupPlugins(PluginType.preboot, prebootDeps))])
-    .toMatchInlineSnapshot(`
+  mockCreatePluginPrebootSetupContext.mockImplementation((context, deps, plugin) =>
+    setupContextMap.get(plugin.name)
+  );
+
+  expect([...(await prebootPluginSystem.setupPlugins(prebootDeps))]).toMatchInlineSnapshot(`
     Array [
       Array [
+        "order-0",
+        "added-as-1",
+      ],
+      Array [
         "order-1",
+        "added-as-3",
+      ],
+      Array [
+        "order-2",
         "added-as-2",
       ],
       Array [
-        "order-0",
+        "order-3",
+        "added-as-4",
+      ],
+      Array [
+        "order-4",
         "added-as-0",
       ],
     ]
   `);
 
-  expect(mockCreatePluginPrebootSetupContext).toHaveBeenCalledWith(
-    coreContext,
-    prebootDeps,
-    firstPluginToRun
-  );
-  expect(mockCreatePluginPrebootSetupContext).not.toHaveBeenCalledWith(
-    coreContext,
-    secondPluginNotToRun
-  );
-  expect(mockCreatePluginPrebootSetupContext).toHaveBeenCalledWith(
-    coreContext,
-    prebootDeps,
-    thirdPluginToRun
-  );
-
-  expect(firstPluginToRun.setup).toHaveBeenCalledTimes(1);
-  expect(secondPluginNotToRun.setup).not.toHaveBeenCalled();
-  expect(thirdPluginToRun.setup).toHaveBeenCalledTimes(1);
+  for (const [plugin, deps] of plugins) {
+    expect(mockCreatePluginPrebootSetupContext).toHaveBeenCalledWith(
+      coreContext,
+      prebootDeps,
+      plugin
+    );
+    expect(plugin.setup).toHaveBeenCalledTimes(1);
+    expect(plugin.setup).toHaveBeenCalledWith(setupContextMap.get(plugin.name), deps);
+  }
 });
 
 test('`setupPlugins` only setups plugins that have server side', async () => {
@@ -578,8 +411,7 @@ test('`setupPlugins` only setups plugins that have server side', async () => {
     pluginsSystem.addPlugin(plugin);
   });
 
-  expect([...(await pluginsSystem.setupPlugins(PluginType.standard, setupDeps))])
-    .toMatchInlineSnapshot(`
+  expect([...(await pluginsSystem.setupPlugins(setupDeps))]).toMatchInlineSnapshot(`
     Array [
       Array [
         "order-1",
@@ -610,103 +442,86 @@ test('`setupPlugins` only setups plugins that have server side', async () => {
 });
 
 test('`uiPlugins` returns empty Map before plugins are added', async () => {
-  expect(pluginsSystem.uiPlugins(PluginType.preboot)).toMatchInlineSnapshot(`Map {}`);
-  expect(pluginsSystem.uiPlugins(PluginType.standard)).toMatchInlineSnapshot(`Map {}`);
+  expect(pluginsSystem.uiPlugins()).toMatchInlineSnapshot(`Map {}`);
 });
 
 test('`uiPlugins` returns ordered Maps of all plugin manifests', async () => {
-  const plugins = new Map(
-    [PluginType.preboot, PluginType.standard].flatMap(
-      (type) =>
-        [
-          [
-            createPlugin(`order-4-${type}`, { type, required: [`order-2-${type}`] }),
-            { 'order-2': 'added-as-2' },
-          ],
-          [createPlugin(`order-0-${type}`, { type }), {}],
-          [
-            createPlugin(`order-2-${type}`, {
-              type,
-              required: [`order-1-${type}`],
-              optional: [`order-0-${type}`],
-            }),
-            { 'order-1': 'added-as-3', 'order-0': 'added-as-1' },
-          ],
-          [
-            createPlugin(`order-1-${type}`, { type, required: [`order-0-${type}`] }),
-            { 'order-0': 'added-as-1' },
-          ],
-          [
-            createPlugin(`order-3-${type}`, {
-              type,
-              required: [`order-2-${type}`],
-              optional: ['missing-dep'],
-            }),
-            { 'order-2': 'added-as-2' },
-          ],
-        ] as Array<[PluginWrapper, Record<PluginName, unknown>]>
-    )
-  );
+  const plugins = new Map([
+    [createPlugin('order-4', { required: ['order-2'] }), { 'order-2': 'added-as-2' }],
+    [createPlugin('order-0'), {}],
+    [
+      createPlugin('order-2', { required: ['order-1'], optional: ['order-0'] }),
+      { 'order-1': 'added-as-3', 'order-0': 'added-as-1' },
+    ],
+    [createPlugin('order-1', { required: ['order-0'] }), { 'order-0': 'added-as-1' }],
+    [
+      createPlugin('order-3', { required: ['order-2'], optional: ['missing-dep'] }),
+      { 'order-2': 'added-as-2' },
+    ],
+  ] as Array<[PluginWrapper, Record<PluginName, unknown>]>);
 
   [...plugins.keys()].forEach((plugin) => {
     pluginsSystem.addPlugin(plugin);
   });
 
-  expect([...pluginsSystem.uiPlugins(PluginType.preboot).keys()]).toMatchInlineSnapshot(`
+  expect([...pluginsSystem.uiPlugins().keys()]).toMatchInlineSnapshot(`
     Array [
-      "order-0-preboot",
-      "order-1-preboot",
-      "order-2-preboot",
-      "order-3-preboot",
-      "order-4-preboot",
-    ]
-  `);
-  expect([...pluginsSystem.uiPlugins(PluginType.standard).keys()]).toMatchInlineSnapshot(`
-    Array [
-      "order-0-standard",
-      "order-1-standard",
-      "order-2-standard",
-      "order-3-standard",
-      "order-4-standard",
+      "order-0",
+      "order-1",
+      "order-2",
+      "order-3",
+      "order-4",
     ]
   `);
 });
 
 test('`uiPlugins` returns only ui plugin dependencies', async () => {
-  const plugins = [PluginType.preboot, PluginType.standard].flatMap((type) => [
-    createPlugin(`ui-plugin-${type}`, {
-      type,
-      required: [`req-ui-${type}`, `req-no-ui-${type}`],
-      optional: [`opt-ui-${type}`, `opt-no-ui-${type}`],
+  const plugins = [
+    createPlugin('ui-plugin', {
+      required: ['req-ui', 'req-no-ui'],
+      optional: ['opt-ui', 'opt-no-ui'],
       ui: true,
       server: false,
     }),
-    createPlugin(`req-ui-${type}`, { type, ui: true, server: false }),
-    createPlugin(`req-no-ui-${type}`, { type, ui: false, server: true }),
-    createPlugin(`opt-ui-${type}`, { type, ui: true, server: false }),
-    createPlugin(`opt-no-ui-${type}`, { type, ui: false, server: true }),
-  ]);
+    createPlugin('req-ui', { ui: true, server: false }),
+    createPlugin('req-no-ui', { ui: false, server: true }),
+    createPlugin('opt-ui', { ui: true, server: false }),
+    createPlugin('opt-no-ui', { ui: false, server: true }),
+  ];
 
   plugins.forEach((plugin) => {
     pluginsSystem.addPlugin(plugin);
   });
 
-  for (const type of [PluginType.preboot, PluginType.standard]) {
-    const plugin = pluginsSystem.uiPlugins(type).get(`ui-plugin-${type}`)!;
-    expect(plugin.requiredPlugins).toEqual([`req-ui-${type}`]);
-    expect(plugin.optionalPlugins).toEqual([`opt-ui-${type}`]);
-  }
+  const plugin = pluginsSystem.uiPlugins().get('ui-plugin')!;
+  expect(plugin.requiredPlugins).toEqual(['req-ui']);
+  expect(plugin.optionalPlugins).toEqual(['opt-ui']);
 });
 
-test('can start without standard plugins', async () => {
-  await pluginsSystem.setupPlugins(PluginType.standard, setupDeps);
-  const pluginsStart = await pluginsSystem.startPlugins(PluginType.standard, startDeps);
+test('can start without plugins', async () => {
+  await pluginsSystem.setupPlugins(setupDeps);
+  const pluginsStart = await pluginsSystem.startPlugins(startDeps);
 
   expect(pluginsStart).toBeInstanceOf(Map);
   expect(pluginsStart.size).toBe(0);
 });
 
-test('`startPlugins` only starts standard plugins that were setup', async () => {
+test('cannot start preboot plugins', async () => {
+  const prebootPlugin = createPlugin('order-0', { type: PluginType.preboot });
+  jest.spyOn(prebootPlugin, 'setup').mockResolvedValue({});
+  jest.spyOn(prebootPlugin, 'start').mockResolvedValue({});
+
+  const prebootPluginSystem = new PluginsSystem(coreContext, PluginType.preboot);
+  prebootPluginSystem.addPlugin(prebootPlugin);
+  await prebootPluginSystem.setupPlugins(prebootDeps);
+
+  await expect(
+    prebootPluginSystem.startPlugins(startDeps)
+  ).rejects.toThrowErrorMatchingInlineSnapshot(`"Preboot plugins cannot be started."`);
+  expect(prebootPlugin.start).not.toHaveBeenCalled();
+});
+
+test('`startPlugins` only starts plugins that were setup', async () => {
   const firstPluginToRun = createPlugin('order-0');
   const secondPluginNotToRun = createPlugin('order-not-run', { server: false });
   const thirdPluginToRun = createPlugin('order-1');
@@ -717,8 +532,8 @@ test('`startPlugins` only starts standard plugins that were setup', async () => 
 
     pluginsSystem.addPlugin(plugin);
   });
-  await pluginsSystem.setupPlugins(PluginType.standard, setupDeps);
-  const result = await pluginsSystem.startPlugins(PluginType.standard, startDeps);
+  await pluginsSystem.setupPlugins(setupDeps);
+  const result = await pluginsSystem.startPlugins(startDeps);
   expect([...result]).toMatchInlineSnapshot(`
     Array [
       Array [
@@ -741,51 +556,32 @@ describe('setup', () => {
     jest.useRealTimers();
   });
   it('throws timeout error if "setup" was not completed in 10 sec.', async () => {
-    const prebootPlugin: PluginWrapper = createPlugin('timeout-setup-preboot', {
-      type: PluginType.preboot,
-    });
-    jest.spyOn(prebootPlugin, 'setup').mockImplementation(() => new Promise((i) => i));
-    pluginsSystem.addPlugin(prebootPlugin);
-    mockCreatePluginPrebootSetupContext.mockImplementation(() => ({}));
-
-    const standardPlugin: PluginWrapper = createPlugin('timeout-setup');
-    jest.spyOn(standardPlugin, 'setup').mockImplementation(() => new Promise((i) => i));
-    pluginsSystem.addPlugin(standardPlugin);
+    const plugin: PluginWrapper = createPlugin('timeout-setup');
+    jest.spyOn(plugin, 'setup').mockImplementation(() => new Promise((i) => i));
+    pluginsSystem.addPlugin(plugin);
     mockCreatePluginSetupContext.mockImplementation(() => ({}));
 
-    const prebootPromise = pluginsSystem.setupPlugins(PluginType.preboot, prebootDeps);
-    const standardPromise = pluginsSystem.setupPlugins(PluginType.standard, setupDeps);
+    const promise = pluginsSystem.setupPlugins(setupDeps);
     jest.runAllTimers();
 
-    await expect(prebootPromise).rejects.toMatchInlineSnapshot(
-      `[Error: Setup lifecycle of "timeout-setup-preboot" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.]`
-    );
-    await expect(standardPromise).rejects.toMatchInlineSnapshot(
+    await expect(promise).rejects.toMatchInlineSnapshot(
       `[Error: Setup lifecycle of "timeout-setup" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.]`
     );
   });
 
   it('logs only server-side plugins', async () => {
-    [PluginType.preboot, PluginType.standard]
-      .flatMap((type) => [
-        createPlugin(`order-0-${type}`, { type }),
-        createPlugin(`order-not-run-${type}`, { type, server: false }),
-        createPlugin(`order-1-${type}`, { type }),
-      ])
-      .forEach((plugin, index) => {
-        jest.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
-        jest.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
-        pluginsSystem.addPlugin(plugin);
-      });
-    await pluginsSystem.setupPlugins(PluginType.preboot, prebootDeps);
-    await pluginsSystem.setupPlugins(PluginType.standard, setupDeps);
+    [
+      createPlugin('order-0'),
+      createPlugin('order-not-run', { server: false }),
+      createPlugin('order-1'),
+    ].forEach((plugin, index) => {
+      jest.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
+      jest.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
+      pluginsSystem.addPlugin(plugin);
+    });
+    await pluginsSystem.setupPlugins(setupDeps);
     const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
-    expect(log.info).toHaveBeenCalledWith(
-      `Setting up [2] plugins: [order-1-preboot,order-0-preboot]`
-    );
-    expect(log.info).toHaveBeenCalledWith(
-      `Setting up [2] plugins: [order-1-standard,order-0-standard]`
-    );
+    expect(log.info).toHaveBeenCalledWith(`Setting up [2] plugins: [order-1,order-0]`);
   });
 });
 
@@ -796,7 +592,6 @@ describe('start', () => {
   afterAll(() => {
     jest.useRealTimers();
   });
-
   it('throws timeout error if "start" was not completed in 10 sec.', async () => {
     const plugin = createPlugin('timeout-start');
     jest.spyOn(plugin, 'setup').mockResolvedValue({});
@@ -806,8 +601,8 @@ describe('start', () => {
     mockCreatePluginSetupContext.mockImplementation(() => ({}));
     mockCreatePluginStartContext.mockImplementation(() => ({}));
 
-    await pluginsSystem.setupPlugins(PluginType.standard, setupDeps);
-    const promise = pluginsSystem.startPlugins(PluginType.standard, startDeps);
+    await pluginsSystem.setupPlugins(setupDeps);
+    const promise = pluginsSystem.startPlugins(startDeps);
     jest.runAllTimers();
 
     await expect(promise).rejects.toMatchInlineSnapshot(
@@ -825,8 +620,8 @@ describe('start', () => {
       jest.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
       pluginsSystem.addPlugin(plugin);
     });
-    await pluginsSystem.setupPlugins(PluginType.standard, setupDeps);
-    await pluginsSystem.startPlugins(PluginType.standard, startDeps);
+    await pluginsSystem.setupPlugins(setupDeps);
+    await pluginsSystem.startPlugins(startDeps);
     const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
     expect(log.info).toHaveBeenCalledWith(`Starting [2] plugins: [order-1,order-0]`);
   });
@@ -852,7 +647,7 @@ describe('asynchronous plugins', () => {
       })
     );
     coreContext = { coreId: Symbol(), env, logger, configService: configService as any };
-    pluginsSystem = new PluginsSystem(coreContext);
+    pluginsSystem = new PluginsSystem(coreContext, PluginType.standard);
 
     const syncPlugin = createPlugin('sync-plugin');
     jest.spyOn(syncPlugin, 'setup').mockReturnValue('setup-sync');
@@ -868,8 +663,8 @@ describe('asynchronous plugins', () => {
       .mockReturnValue(asyncStart ? Promise.resolve('start-async') : 'start-sync');
     pluginsSystem.addPlugin(asyncPlugin);
 
-    await pluginsSystem.setupPlugins(PluginType.standard, setupDeps);
-    await pluginsSystem.startPlugins(PluginType.standard, startDeps);
+    await pluginsSystem.setupPlugins(setupDeps);
+    await pluginsSystem.startPlugins(startDeps);
   };
 
   it('logs a warning if a plugin returns a promise from its setup contract in dev mode', async () => {
@@ -959,47 +754,33 @@ describe('stop', () => {
   });
 
   it('waits for 30 sec to finish "stop" and move on to the next plugin.', async () => {
-    const [prebootStopSpy1, prebootStopSpy2, standardStopSpy1, standardStopSpy2] = [
-      PluginType.preboot,
-      PluginType.standard,
-    ].flatMap((type, index) => {
-      const plugin1 = createPlugin(`timeout-stop-1-${type}`, { type });
-      jest.spyOn(plugin1, 'setup').mockResolvedValue(`setup-as-${type}-${index}`);
-      const stopSpy1 = jest
-        .spyOn(plugin1, 'stop')
-        .mockImplementationOnce(() => new Promise((resolve) => resolve));
-      pluginsSystem.addPlugin(plugin1);
+    const [plugin1, plugin2] = [createPlugin('timeout-stop-1'), createPlugin('timeout-stop-2')].map(
+      (plugin, index) => {
+        jest.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
+        jest.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
+        pluginsSystem.addPlugin(plugin);
+        return plugin;
+      }
+    );
 
-      const plugin2 = createPlugin(`timeout-stop-2-${type}`, { type });
-      jest.spyOn(plugin2, 'setup').mockResolvedValue(`setup-as-${type}-${index}`);
-      const stopSpy2 = jest.spyOn(plugin2, 'stop').mockImplementationOnce(() => Promise.resolve());
-      pluginsSystem.addPlugin(plugin2);
+    const stopSpy1 = jest
+      .spyOn(plugin1, 'stop')
+      .mockImplementationOnce(() => new Promise((resolve) => resolve));
+    const stopSpy2 = jest.spyOn(plugin2, 'stop').mockImplementationOnce(() => Promise.resolve());
 
-      return [stopSpy1, stopSpy2];
-    });
-
-    mockCreatePluginPrebootSetupContext.mockImplementation(() => ({}));
     mockCreatePluginSetupContext.mockImplementation(() => ({}));
 
-    await pluginsSystem.setupPlugins(PluginType.preboot, prebootDeps);
-    await pluginsSystem.setupPlugins(PluginType.standard, setupDeps);
+    await pluginsSystem.setupPlugins(setupDeps);
+    const stopPromise = pluginsSystem.stopPlugins();
 
-    const prebootStopPromise = pluginsSystem.stopPlugins(PluginType.preboot);
     jest.runAllTimers();
-    await prebootStopPromise;
-    expect(prebootStopSpy1).toHaveBeenCalledTimes(1);
-    expect(prebootStopSpy2).toHaveBeenCalledTimes(1);
-
-    const standardStopPromise = pluginsSystem.stopPlugins(PluginType.standard);
-    jest.runAllTimers();
-    await standardStopPromise;
-    expect(standardStopSpy1).toHaveBeenCalledTimes(1);
-    expect(standardStopSpy2).toHaveBeenCalledTimes(1);
+    await stopPromise;
+    expect(stopSpy1).toHaveBeenCalledTimes(1);
+    expect(stopSpy2).toHaveBeenCalledTimes(1);
 
     expect(loggingSystemMock.collect(logger).warn.flat()).toEqual(
       expect.arrayContaining([
-        `"timeout-stop-1-preboot" plugin didn't stop in 30sec., move on to the next.`,
-        `"timeout-stop-1-standard" plugin didn't stop in 30sec., move on to the next.`,
+        `"timeout-stop-1" plugin didn't stop in 30sec., move on to the next.`,
       ])
     );
   });

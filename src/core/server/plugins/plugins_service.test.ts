@@ -8,13 +8,13 @@
 
 import { mockDiscover, mockPackage } from './plugins_service.test.mocks';
 
-import { resolve, join } from 'path';
+import { join, resolve } from 'path';
 import { BehaviorSubject, combineLatest, from } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 import { createAbsolutePathSerializer, REPO_ROOT } from '@kbn/dev-utils';
 
 import { ConfigPath, ConfigService, Env } from '../config';
-import { rawConfigServiceMock, getEnvOptions } from '../config/mocks';
+import { getEnvOptions, rawConfigServiceMock } from '../config/mocks';
 import { coreMock } from '../mocks';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 import { environmentServiceMock } from '../environment/environment_service.mock';
@@ -26,14 +26,15 @@ import { config } from './plugins_config';
 import { take } from 'rxjs/operators';
 import { DiscoveredPlugin, PluginType } from './types';
 
-const MockPluginsSystem: jest.Mock<PluginsSystem> = PluginsSystem as any;
+const MockPluginsSystem: jest.Mock<PluginsSystem<PluginType>> = PluginsSystem as any;
 
 let pluginsService: PluginsService;
 let config$: BehaviorSubject<Record<string, any>>;
 let configService: ConfigService;
 let coreId: symbol;
 let env: Env;
-let mockPluginSystem: jest.Mocked<PluginsSystem>;
+let prebootMockPluginSystem: jest.Mocked<PluginsSystem<PluginType.preboot>>;
+let standardMockPluginSystem: jest.Mocked<PluginsSystem<PluginType.standard>>;
 let environmentPreboot: ReturnType<typeof environmentServiceMock.createPrebootContract>;
 
 const prebootDeps = coreMock.createInternalPreboot();
@@ -119,9 +120,11 @@ async function testSetup() {
   await configService.setSchema(config.path, config.schema);
   pluginsService = new PluginsService({ coreId, env, logger, configService });
 
-  [mockPluginSystem] = MockPluginsSystem.mock.instances as any;
-  mockPluginSystem.uiPlugins.mockReturnValue(new Map());
-  mockPluginSystem.getPlugins.mockReturnValue([]);
+  [prebootMockPluginSystem, standardMockPluginSystem] = MockPluginsSystem.mock.instances as any;
+  prebootMockPluginSystem.uiPlugins.mockReturnValue(new Map());
+  prebootMockPluginSystem.getPlugins.mockReturnValue([]);
+  standardMockPluginSystem.uiPlugins.mockReturnValue(new Map());
+  standardMockPluginSystem.getPlugins.mockReturnValue([]);
 
   environmentPreboot = environmentServiceMock.createPrebootContract();
 }
@@ -205,8 +208,10 @@ describe('PluginsService', () => {
         `[Error: Plugin with id "conflicting-id" is already registered!]`
       );
 
-      expect(mockPluginSystem.addPlugin).not.toHaveBeenCalled();
-      expect(mockPluginSystem.setupPlugins).not.toHaveBeenCalled();
+      expect(prebootMockPluginSystem.addPlugin).not.toHaveBeenCalled();
+      expect(prebootMockPluginSystem.setupPlugins).not.toHaveBeenCalled();
+      expect(standardMockPluginSystem.addPlugin).not.toHaveBeenCalled();
+      expect(standardMockPluginSystem.setupPlugins).not.toHaveBeenCalled();
     });
 
     it('throws if discovered standard and preboot plugins with conflicting names', async () => {
@@ -237,8 +242,10 @@ describe('PluginsService', () => {
         `[Error: Plugin with id "conflicting-id" is already registered!]`
       );
 
-      expect(mockPluginSystem.addPlugin).not.toHaveBeenCalled();
-      expect(mockPluginSystem.setupPlugins).not.toHaveBeenCalled();
+      expect(prebootMockPluginSystem.addPlugin).not.toHaveBeenCalled();
+      expect(prebootMockPluginSystem.setupPlugins).not.toHaveBeenCalled();
+      expect(standardMockPluginSystem.addPlugin).not.toHaveBeenCalled();
+      expect(standardMockPluginSystem.setupPlugins).not.toHaveBeenCalled();
     });
 
     it('properly detects plugins that should be disabled.', async () => {
@@ -246,48 +253,57 @@ describe('PluginsService', () => {
         .spyOn(configService, 'isEnabledAtPath')
         .mockImplementation((path) => Promise.resolve(!path.includes('disabled')));
 
-      mockPluginSystem.setupPlugins.mockResolvedValue(new Map());
+      prebootMockPluginSystem.setupPlugins.mockResolvedValue(new Map());
+      standardMockPluginSystem.setupPlugins.mockResolvedValue(new Map());
 
       mockDiscover.mockReturnValue({
         error$: from([]),
         plugin$: from(
           pluginTypes.flatMap((type) => [
             createPlugin(`explicitly-disabled-plugin-${type}`, {
+              type,
               disabled: true,
               path: `path-1-${type}`,
               configPath: `path-1-${type}`,
             }),
             createPlugin(`plugin-with-missing-required-deps-${type}`, {
+              type,
               path: `path-2-${type}`,
               configPath: `path-2-${type}`,
               requiredPlugins: ['missing-plugin'],
             }),
             createPlugin(`plugin-with-disabled-transitive-dep-${type}`, {
+              type,
               path: `path-3-${type}`,
               configPath: `path-3-${type}`,
               requiredPlugins: [`another-explicitly-disabled-plugin-${type}`],
             }),
             createPlugin(`another-explicitly-disabled-plugin-${type}`, {
+              type,
               disabled: true,
               path: `path-4-${type}`,
               configPath: `path-4-disabled-${type}`,
             }),
             createPlugin(`plugin-with-disabled-optional-dep-${type}`, {
+              type,
               path: `path-5-${type}`,
               configPath: `path-5-${type}`,
               optionalPlugins: [`explicitly-disabled-plugin-${type}`],
             }),
             createPlugin(`plugin-with-missing-optional-dep-${type}`, {
+              type,
               path: `path-6-${type}`,
               configPath: `path-6-${type}`,
               optionalPlugins: ['missing-plugin'],
             }),
             createPlugin(`plugin-with-disabled-nested-transitive-dep-${type}`, {
+              type,
               path: `path-7-${type}`,
               configPath: `path-7-${type}`,
               requiredPlugins: [`plugin-with-disabled-transitive-dep-${type}`],
             }),
             createPlugin(`plugin-with-missing-nested-dep-${type}`, {
+              type,
               path: `path-8-${type}`,
               configPath: `path-8-${type}`,
               requiredPlugins: [`plugin-with-missing-required-deps-${type}`],
@@ -301,10 +317,13 @@ describe('PluginsService', () => {
       const setup = await pluginsService.setup(setupDeps);
 
       expect(setup.contracts).toBeInstanceOf(Map);
-      expect(mockPluginSystem.addPlugin).toHaveBeenCalledTimes(4);
-      expect(mockPluginSystem.setupPlugins).toHaveBeenCalledTimes(2);
-      expect(mockPluginSystem.setupPlugins).toHaveBeenCalledWith(PluginType.preboot, prebootDeps);
-      expect(mockPluginSystem.setupPlugins).toHaveBeenCalledWith(PluginType.standard, setupDeps);
+
+      expect(prebootMockPluginSystem.addPlugin).toHaveBeenCalledTimes(2);
+      expect(standardMockPluginSystem.addPlugin).toHaveBeenCalledTimes(2);
+      expect(prebootMockPluginSystem.setupPlugins).toHaveBeenCalledTimes(1);
+      expect(standardMockPluginSystem.setupPlugins).toHaveBeenCalledTimes(1);
+      expect(prebootMockPluginSystem.setupPlugins).toHaveBeenCalledWith(prebootDeps);
+      expect(standardMockPluginSystem.setupPlugins).toHaveBeenCalledWith(setupDeps);
 
       expect(loggingSystemMock.collect(logger).info).toMatchInlineSnapshot(`
         Array [
@@ -375,7 +394,11 @@ describe('PluginsService', () => {
 
       expect(mockDiscover).toHaveBeenCalledTimes(1);
       for (const plugin of plugins) {
-        expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(plugin);
+        if (plugin.manifest.type === PluginType.preboot) {
+          expect(prebootMockPluginSystem.addPlugin).toHaveBeenCalledWith(plugin);
+        } else {
+          expect(standardMockPluginSystem.addPlugin).toHaveBeenCalledWith(plugin);
+        }
       }
     });
 
@@ -409,7 +432,8 @@ describe('PluginsService', () => {
       expect(standard.pluginTree).toBeUndefined();
 
       expect(mockDiscover).toHaveBeenCalledTimes(1);
-      expect(mockPluginSystem.addPlugin).not.toHaveBeenCalled();
+      expect(prebootMockPluginSystem.addPlugin).not.toHaveBeenCalled();
+      expect(standardMockPluginSystem.addPlugin).not.toHaveBeenCalled();
     });
 
     it('does not throw in case of cyclic plugin dependencies', async () => {
@@ -453,8 +477,13 @@ describe('PluginsService', () => {
       expect(standard.pluginTree).toBeUndefined();
 
       expect(mockDiscover).toHaveBeenCalledTimes(1);
-      expect(mockPluginSystem.addPlugin).toHaveBeenCalledTimes(8);
+      expect(prebootMockPluginSystem.addPlugin).toHaveBeenCalledTimes(4);
+      expect(standardMockPluginSystem.addPlugin).toHaveBeenCalledTimes(4);
       for (const plugin of plugins) {
+        const mockPluginSystem =
+          plugin.manifest.type === PluginType.preboot
+            ? prebootMockPluginSystem
+            : standardMockPluginSystem;
         if (plugin.name.startsWith('missing-deps')) {
           expect(mockPluginSystem.addPlugin).not.toHaveBeenCalledWith(plugin);
         } else {
@@ -490,9 +519,14 @@ describe('PluginsService', () => {
       });
 
       await pluginsService.discover({ environment: environmentPreboot });
-      expect(mockPluginSystem.addPlugin).toHaveBeenCalledTimes(plugins.length);
+      expect(prebootMockPluginSystem.addPlugin).toHaveBeenCalledTimes(2);
+      expect(standardMockPluginSystem.addPlugin).toHaveBeenCalledTimes(2);
       for (const plugin of plugins) {
-        expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(plugin);
+        if (plugin.manifest.type === PluginType.preboot) {
+          expect(prebootMockPluginSystem.addPlugin).toHaveBeenCalledWith(plugin);
+        } else {
+          expect(standardMockPluginSystem.addPlugin).toHaveBeenCalledWith(plugin);
+        }
       }
       expect(mockDiscover).toHaveBeenCalledTimes(1);
       expect(mockDiscover).toHaveBeenCalledWith(
@@ -584,16 +618,27 @@ describe('PluginsService', () => {
         plugin$: from([]),
       });
 
-      mockPluginSystem.getPlugins.mockImplementation((type) => [
-        createPlugin(`A-${type}`, {
-          type,
-          path: `/plugin-A-path-${type}`,
-          configPath: `pathA-${type}`,
+      prebootMockPluginSystem.getPlugins.mockImplementation(() => [
+        createPlugin('A-preboot', {
+          type: PluginType.preboot,
+          path: '/plugin-A-path-preboot',
+          configPath: 'pathA-preboot',
         }),
-        createPlugin(`B-${type}`, {
-          type,
-          path: `/plugin-B-path-${type}`,
-          configPath: `pathB-${type}`,
+        createPlugin('B-preboot', {
+          type: PluginType.preboot,
+          path: '/plugin-B-path-preboot',
+          configPath: 'pathB-preboot',
+        }),
+      ]);
+
+      standardMockPluginSystem.getPlugins.mockImplementation(() => [
+        createPlugin('A-standard', {
+          path: '/plugin-A-path-standard',
+          configPath: 'pathA-standard',
+        }),
+        createPlugin('B-standard', {
+          path: '/plugin-B-path-standard',
+          configPath: 'pathB-standard',
         }),
       ]);
 
@@ -729,13 +774,19 @@ describe('PluginsService', () => {
         error$: from([]),
         plugin$: from(plugins),
       });
-      mockPluginSystem.uiPlugins.mockImplementation(
-        (type) =>
-          new Map(
-            plugins
-              .filter((plugin) => plugin.manifest.type === type)
-              .map((plugin) => pluginToDiscoveredEntry(plugin))
-          )
+      prebootMockPluginSystem.uiPlugins.mockReturnValue(
+        new Map(
+          plugins
+            .filter((plugin) => plugin.manifest.type === PluginType.preboot)
+            .map((plugin) => pluginToDiscoveredEntry(plugin))
+        )
+      );
+      standardMockPluginSystem.uiPlugins.mockReturnValue(
+        new Map(
+          plugins
+            .filter((plugin) => plugin.manifest.type === PluginType.standard)
+            .map((plugin) => pluginToDiscoveredEntry(plugin))
+        )
       );
 
       const { preboot, standard } = await pluginsService.discover({
@@ -789,13 +840,19 @@ describe('PluginsService', () => {
         error$: from([]),
         plugin$: from(plugins),
       });
-      mockPluginSystem.uiPlugins.mockImplementation(
-        (type) =>
-          new Map(
-            plugins
-              .filter((plugin) => plugin.manifest.type === type)
-              .map((plugin) => pluginToDiscoveredEntry(plugin))
-          )
+      prebootMockPluginSystem.uiPlugins.mockReturnValue(
+        new Map(
+          plugins
+            .filter((plugin) => plugin.manifest.type === PluginType.preboot)
+            .map((plugin) => pluginToDiscoveredEntry(plugin))
+        )
+      );
+      standardMockPluginSystem.uiPlugins.mockReturnValue(
+        new Map(
+          plugins
+            .filter((plugin) => plugin.manifest.type === PluginType.standard)
+            .map((plugin) => pluginToDiscoveredEntry(plugin))
+        )
       );
 
       const { preboot, standard } = await pluginsService.discover({
@@ -830,7 +887,8 @@ describe('PluginsService', () => {
         ),
       });
 
-      mockPluginSystem.uiPlugins.mockReturnValue(new Map());
+      prebootMockPluginSystem.uiPlugins.mockReturnValue(new Map());
+      standardMockPluginSystem.uiPlugins.mockReturnValue(new Map());
     });
 
     it('`uiPlugins.internal` contains internal properties for plugins', async () => {
@@ -907,8 +965,9 @@ describe('PluginsService', () => {
       await pluginsService.discover({ environment: environmentPreboot });
       await pluginsService.preboot(prebootDeps);
 
-      expect(mockPluginSystem.setupPlugins).toHaveBeenCalledTimes(1);
-      expect(mockPluginSystem.setupPlugins).toHaveBeenCalledWith(PluginType.preboot, prebootDeps);
+      expect(prebootMockPluginSystem.setupPlugins).toHaveBeenCalledTimes(1);
+      expect(prebootMockPluginSystem.setupPlugins).toHaveBeenCalledWith(prebootDeps);
+      expect(standardMockPluginSystem.setupPlugins).not.toHaveBeenCalled();
     });
 
     it('#preboot does not initialize `preboot` plugins if plugins.initialize is false', async () => {
@@ -916,19 +975,18 @@ describe('PluginsService', () => {
       await pluginsService.discover({ environment: environmentPreboot });
       await pluginsService.preboot(prebootDeps);
 
-      expect(mockPluginSystem.setupPlugins).not.toHaveBeenCalled();
+      expect(prebootMockPluginSystem.setupPlugins).not.toHaveBeenCalled();
+      expect(standardMockPluginSystem.setupPlugins).not.toHaveBeenCalled();
     });
 
     it('#setup does initialize `standard` plugins if plugins.initialize is true', async () => {
       config$.next({ plugins: { initialize: true } });
       await pluginsService.discover({ environment: environmentPreboot });
       await pluginsService.preboot(prebootDeps);
-      // Reset call information related to `preboot` plugins initialization.
-      mockPluginSystem.setupPlugins.mockClear();
 
       const { initialized } = await pluginsService.setup(setupDeps);
-      expect(mockPluginSystem.setupPlugins).toHaveBeenCalledTimes(1);
-      expect(mockPluginSystem.setupPlugins).toHaveBeenCalledWith(PluginType.standard, setupDeps);
+      expect(standardMockPluginSystem.setupPlugins).toHaveBeenCalledTimes(1);
+      expect(standardMockPluginSystem.setupPlugins).toHaveBeenCalledWith(setupDeps);
       expect(initialized).toBe(true);
     });
 
@@ -937,7 +995,8 @@ describe('PluginsService', () => {
       await pluginsService.discover({ environment: environmentPreboot });
       await pluginsService.preboot(prebootDeps);
       const { initialized } = await pluginsService.setup(setupDeps);
-      expect(mockPluginSystem.setupPlugins).not.toHaveBeenCalled();
+      expect(standardMockPluginSystem.setupPlugins).not.toHaveBeenCalled();
+      expect(prebootMockPluginSystem.setupPlugins).not.toHaveBeenCalled();
       expect(initialized).toBe(false);
     });
   });
@@ -973,24 +1032,25 @@ describe('PluginsService', () => {
       await pluginsService.preboot(prebootDeps);
       await pluginsService.setup(setupDeps);
 
-      expect(mockPluginSystem.stopPlugins).not.toHaveBeenCalled();
-      expect(mockPluginSystem.startPlugins).not.toHaveBeenCalled();
+      expect(prebootMockPluginSystem.stopPlugins).not.toHaveBeenCalled();
+      expect(standardMockPluginSystem.startPlugins).not.toHaveBeenCalled();
 
       await pluginsService.start(startDeps);
 
-      expect(mockPluginSystem.stopPlugins).toHaveBeenCalledTimes(1);
-      expect(mockPluginSystem.stopPlugins).toHaveBeenCalledWith(PluginType.preboot);
-      expect(mockPluginSystem.startPlugins).toHaveBeenCalledTimes(1);
-      expect(mockPluginSystem.startPlugins).toHaveBeenCalledWith(PluginType.standard, startDeps);
+      expect(prebootMockPluginSystem.stopPlugins).toHaveBeenCalledTimes(1);
+      expect(standardMockPluginSystem.stopPlugins).not.toHaveBeenCalled();
+
+      expect(standardMockPluginSystem.startPlugins).toHaveBeenCalledTimes(1);
+      expect(standardMockPluginSystem.startPlugins).toHaveBeenCalledWith(startDeps);
+      expect(prebootMockPluginSystem.startPlugins).not.toHaveBeenCalled();
     });
   });
 
   describe('#stop()', () => {
     it('`stop` stops plugins system', async () => {
       await pluginsService.stop();
-      expect(mockPluginSystem.stopPlugins).toHaveBeenCalledTimes(2);
-      expect(mockPluginSystem.stopPlugins).toHaveBeenCalledWith(PluginType.preboot);
-      expect(mockPluginSystem.stopPlugins).toHaveBeenCalledWith(PluginType.standard);
+      expect(standardMockPluginSystem.stopPlugins).toHaveBeenCalledTimes(1);
+      expect(prebootMockPluginSystem.stopPlugins).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -25,85 +25,73 @@ import {
 const Sec = 1000;
 
 /** @internal */
-export class PluginsSystem {
-  private readonly prebootPlugins = new Map<PluginName, PluginWrapper>();
-  private readonly standardPlugins = new Map<PluginName, PluginWrapper>();
+export class PluginsSystem<T extends PluginType> {
+  private readonly plugins = new Map<PluginName, PluginWrapper>();
   private readonly log: Logger;
   // `satup`, the past-tense version of the noun `setup`.
-  private readonly satupPrebootPlugins: PluginName[] = [];
-  private readonly satupStandardPlugins: PluginName[] = [];
+  private readonly satupPlugins: PluginName[] = [];
 
-  constructor(private readonly coreContext: CoreContext) {
-    this.log = coreContext.logger.get('plugins-system');
+  constructor(private readonly coreContext: CoreContext, public readonly type: T) {
+    this.log = coreContext.logger.get('plugins-system', this.type);
   }
 
   public addPlugin(plugin: PluginWrapper) {
-    if (plugin.manifest.type === PluginType.preboot) {
-      this.prebootPlugins.set(plugin.name, plugin);
-    } else {
-      this.standardPlugins.set(plugin.name, plugin);
+    if (plugin.manifest.type !== this.type) {
+      throw new Error(
+        `Cannot add plugin with type "${plugin.manifest.type}" to plugin system with type "${this.type}".`
+      );
     }
+
+    this.plugins.set(plugin.name, plugin);
   }
 
-  public getPlugins(type: PluginType) {
-    return [...(type === PluginType.preboot ? this.prebootPlugins : this.standardPlugins).values()];
+  public getPlugins() {
+    return [...this.plugins.values()];
   }
 
   /**
    * @returns a ReadonlyMap of each plugin and an Array of its available dependencies
    * @internal
    */
-  public getPluginDependencies(type: PluginType): PluginDependencies {
-    const plugins = type === PluginType.preboot ? this.prebootPlugins : this.standardPlugins;
-    const asNames = new Map();
-    const asOpaqueIds = new Map();
-    for (const plugin of plugins.values()) {
-      const dependencies = [
-        ...new Set([
-          ...plugin.requiredPlugins,
-          ...plugin.optionalPlugins.filter((optPlugin) => plugins.has(optPlugin)),
-        ]),
-      ];
-
-      asNames.set(
+  public getPluginDependencies(): PluginDependencies {
+    const asNames = new Map(
+      [...this.plugins].map(([name, plugin]) => [
         plugin.name,
-        dependencies.map((pluginName) => plugins.get(pluginName)!.name)
-      );
-      asOpaqueIds.set(
+        [
+          ...new Set([
+            ...plugin.requiredPlugins,
+            ...plugin.optionalPlugins.filter((optPlugin) => this.plugins.has(optPlugin)),
+          ]),
+        ].map((depId) => this.plugins.get(depId)!.name),
+      ])
+    );
+    const asOpaqueIds = new Map(
+      [...this.plugins].map(([name, plugin]) => [
         plugin.opaqueId,
-        dependencies.map((pluginName) => plugins.get(pluginName)!.opaqueId)
-      );
-    }
+        [
+          ...new Set([
+            ...plugin.requiredPlugins,
+            ...plugin.optionalPlugins.filter((optPlugin) => this.plugins.has(optPlugin)),
+          ]),
+        ].map((depId) => this.plugins.get(depId)!.opaqueId),
+      ])
+    );
 
     return { asNames, asOpaqueIds };
   }
 
   public async setupPlugins(
-    type: PluginType.preboot,
-    deps: PluginsServicePrebootSetupDeps
-  ): Promise<Map<string, unknown>>;
-  public async setupPlugins(
-    type: PluginType.standard,
-    deps: PluginsServiceSetupDeps
-  ): Promise<Map<string, unknown>>;
-  async setupPlugins(
-    type: PluginType,
-    deps: PluginsServicePrebootSetupDeps | PluginsServiceSetupDeps
+    deps: T extends PluginType.preboot ? PluginsServicePrebootSetupDeps : PluginsServiceSetupDeps
   ): Promise<Map<string, unknown>> {
-    const [plugins, satupPlugins] =
-      type === PluginType.preboot
-        ? [this.prebootPlugins, this.satupPrebootPlugins]
-        : [this.standardPlugins, this.satupStandardPlugins];
-
     const contracts = new Map<PluginName, unknown>();
-    if (plugins.size === 0) {
+    if (this.plugins.size === 0) {
       return contracts;
     }
 
     const sortedPlugins = new Map(
-      [...this.getTopologicallySortedPluginNames(plugins)]
-        .map((pluginName) => [pluginName, plugins.get(pluginName)!] as [string, PluginWrapper])
-        .filter(([, plugin]) => plugin.includesServerPlugin)
+      [...this.getTopologicallySortedPluginNames()]
+        .map((pluginName) => [pluginName, this.plugins.get(pluginName)!] as [string, PluginWrapper])
+        .filter(([pluginName, plugin]) => plugin.includesServerPlugin)
     );
     this.log.info(
       `Setting up [${sortedPlugins.size}] plugins: [${[...sortedPlugins.keys()].join(',')}]`
@@ -123,7 +111,7 @@ export class PluginsSystem {
       }, {} as Record<PluginName, unknown>);
 
       let pluginSetupContext;
-      if (type === PluginType.preboot) {
+      if (this.type === PluginType.preboot) {
         pluginSetupContext = createPluginPrebootSetupContext(
           this.coreContext,
           deps as PluginsServicePrebootSetupDeps,
@@ -162,25 +150,27 @@ export class PluginsSystem {
       }
 
       contracts.set(pluginName, contract);
-      satupPlugins.push(pluginName);
+      this.satupPlugins.push(pluginName);
     }
 
     return contracts;
   }
 
-  public async startPlugins(type: PluginType.standard, deps: PluginsServiceStartDeps) {
+  public async startPlugins(deps: PluginsServiceStartDeps) {
+    if (this.type === PluginType.preboot) {
+      throw new Error('Preboot plugins cannot be started.');
+    }
+
     const contracts = new Map<PluginName, unknown>();
-    if (this.satupStandardPlugins.length === 0) {
+    if (this.satupPlugins.length === 0) {
       return contracts;
     }
 
-    this.log.info(
-      `Starting [${this.satupStandardPlugins.length}] plugins: [${[...this.satupStandardPlugins]}]`
-    );
+    this.log.info(`Starting [${this.satupPlugins.length}] plugins: [${[...this.satupPlugins]}]`);
 
-    for (const pluginName of this.satupStandardPlugins) {
+    for (const pluginName of this.satupPlugins) {
       this.log.debug(`Starting plugin "${pluginName}"...`);
-      const plugin = this.standardPlugins.get(pluginName)!;
+      const plugin = this.plugins.get(pluginName)!;
       const pluginDeps = new Set([...plugin.requiredPlugins, ...plugin.optionalPlugins]);
       const pluginDepContracts = Array.from(pluginDeps).reduce((depContracts, dependencyName) => {
         // Only set if present. Could be absent if plugin does not have server-side code or is a
@@ -225,26 +215,21 @@ export class PluginsSystem {
     return contracts;
   }
 
-  public async stopPlugins(type: PluginType) {
-    const [plugins, satupPlugins] =
-      type === PluginType.preboot
-        ? [this.prebootPlugins, this.satupPrebootPlugins]
-        : [this.standardPlugins, this.satupStandardPlugins];
-
-    if (plugins.size === 0 || satupPlugins.length === 0) {
+  public async stopPlugins() {
+    if (this.plugins.size === 0 || this.satupPlugins.length === 0) {
       return;
     }
 
-    this.log.info(`Stopping all "${type}" plugins.`);
+    this.log.info(`Stopping all plugins.`);
 
     // Stop plugins in the reverse order of when they were set up.
-    while (satupPlugins.length > 0) {
-      const pluginName = satupPlugins.pop()!;
+    while (this.satupPlugins.length > 0) {
+      const pluginName = this.satupPlugins.pop()!;
 
       this.log.debug(`Stopping plugin "${pluginName}"...`);
 
       const resultMaybe = await withTimeout({
-        promise: plugins.get(pluginName)!.stop(),
+        promise: this.plugins.get(pluginName)!.stop(),
         timeoutMs: 30 * Sec,
       });
 
@@ -257,14 +242,13 @@ export class PluginsSystem {
   /**
    * Get a Map of all discovered UI plugins in topological order.
    */
-  public uiPlugins(type: PluginType) {
-    const plugins = type === PluginType.preboot ? this.prebootPlugins : this.standardPlugins;
-    const uiPluginNames = [...this.getTopologicallySortedPluginNames(plugins).keys()].filter(
-      (pluginName) => plugins.get(pluginName)!.includesUiPlugin
+  public uiPlugins() {
+    const uiPluginNames = [...this.getTopologicallySortedPluginNames().keys()].filter(
+      (pluginName) => this.plugins.get(pluginName)!.includesUiPlugin
     );
     const publicPlugins = new Map<PluginName, DiscoveredPlugin>(
       uiPluginNames.map((pluginName) => {
-        const plugin = plugins.get(pluginName)!;
+        const plugin = this.plugins.get(pluginName)!;
         return [
           pluginName,
           {
@@ -294,18 +278,18 @@ export class PluginsSystem {
    *
    * Uses Kahn's Algorithm to sort the graph.
    */
-  private getTopologicallySortedPluginNames(plugins: Map<PluginName, PluginWrapper>) {
+  private getTopologicallySortedPluginNames() {
     // We clone plugins so we can remove handled nodes while we perform the
     // topological ordering. If the cloned graph is _not_ empty at the end, we
     // know we were not able to topologically order the graph. We exclude optional
     // dependencies that are not present in the plugins graph.
     const pluginsDependenciesGraph = new Map(
-      [...plugins.entries()].map(([pluginName, plugin]) => {
+      [...this.plugins.entries()].map(([pluginName, plugin]) => {
         return [
           pluginName,
           new Set([
             ...plugin.requiredPlugins,
-            ...plugin.optionalPlugins.filter((dependency) => plugins.has(dependency)),
+            ...plugin.optionalPlugins.filter((dependency) => this.plugins.has(dependency)),
           ]),
         ] as [PluginName, Set<PluginName>];
       })

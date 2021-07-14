@@ -89,19 +89,17 @@ export interface PluginsServiceDiscoverDeps {
 /** @internal */
 export class PluginsService implements CoreService<PluginsServiceSetup, PluginsServiceStart> {
   private readonly log: Logger;
-  private readonly pluginsSystem: PluginsSystem;
+  private readonly prebootPluginsSystem = new PluginsSystem(this.coreContext, PluginType.preboot);
+  private readonly prebootUiPluginInternalInfo = new Map<PluginName, InternalPluginInfo>();
+  private readonly standardPluginsSystem = new PluginsSystem(this.coreContext, PluginType.standard);
+  private readonly standardUiPluginInternalInfo = new Map<PluginName, InternalPluginInfo>();
   private readonly configService: IConfigService;
   private readonly config$: Observable<PluginsConfig>;
   private readonly pluginConfigDescriptors = new Map<PluginName, PluginConfigDescriptor>();
-  private readonly uiPluginInternalInfo = {
-    preboot: new Map<PluginName, InternalPluginInfo>(),
-    standard: new Map<PluginName, InternalPluginInfo>(),
-  };
   private readonly pluginConfigUsageDescriptors = new Map<string, Record<string, any | any[]>>();
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('plugins-service');
-    this.pluginsSystem = new PluginsSystem(coreContext);
     this.configService = coreContext.configService;
     this.config$ = coreContext.configService
       .atPath<PluginsConfigType>('plugins')
@@ -118,24 +116,28 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     await this.handleDiscoveryErrors(error$);
     await this.handleDiscoveredPlugins(plugin$);
 
-    // Forced typecasting to `DiscoveredPlugins` is required due to https://github.com/microsoft/TypeScript/issues/35745.
-    return Object.fromEntries(
-      [PluginType.preboot, PluginType.standard].map((type) => {
-        const uiPlugins = this.pluginsSystem.uiPlugins(type);
-        return [
-          type,
-          {
-            pluginTree: this.pluginsSystem.getPluginDependencies(type),
-            pluginPaths: this.pluginsSystem.getPlugins(type).map((plugin) => plugin.path),
-            uiPlugins: {
-              internal: this.uiPluginInternalInfo[type],
-              public: uiPlugins,
-              browserConfigs: this.generateUiPluginsConfigs(uiPlugins),
-            },
-          },
-        ];
-      })
-    ) as DiscoveredPlugins;
+    const prebootUiPlugins = this.prebootPluginsSystem.uiPlugins();
+    const standardUiPlugins = this.standardPluginsSystem.uiPlugins();
+    return {
+      preboot: {
+        pluginPaths: this.prebootPluginsSystem.getPlugins().map((plugin) => plugin.path),
+        pluginTree: this.prebootPluginsSystem.getPluginDependencies(),
+        uiPlugins: {
+          internal: this.prebootUiPluginInternalInfo,
+          public: prebootUiPlugins,
+          browserConfigs: this.generateUiPluginsConfigs(prebootUiPlugins),
+        },
+      },
+      standard: {
+        pluginPaths: this.standardPluginsSystem.getPlugins().map((plugin) => plugin.path),
+        pluginTree: this.standardPluginsSystem.getPluginDependencies(),
+        uiPlugins: {
+          internal: this.standardUiPluginInternalInfo,
+          public: standardUiPlugins,
+          browserConfigs: this.generateUiPluginsConfigs(standardUiPlugins),
+        },
+      },
+    };
   }
 
   public getExposedPluginConfigsToUsage() {
@@ -147,8 +149,8 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
 
     const config = await this.config$.pipe(first()).toPromise();
     if (config.initialize) {
-      await this.pluginsSystem.setupPlugins(PluginType.preboot, deps);
-      this.registerPluginStaticDirs(deps, this.uiPluginInternalInfo.preboot);
+      await this.prebootPluginsSystem.setupPlugins(deps);
+      this.registerPluginStaticDirs(deps, this.prebootUiPluginInternalInfo);
     } else {
       this.log.info(
         'Skipping `setup` for `preboot` plugins since plugin initialization is disabled.'
@@ -163,8 +165,8 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
 
     let contracts = new Map<PluginName, unknown>();
     if (config.initialize) {
-      contracts = await this.pluginsSystem.setupPlugins(PluginType.standard, deps);
-      this.registerPluginStaticDirs(deps, this.uiPluginInternalInfo.standard);
+      contracts = await this.standardPluginsSystem.setupPlugins(deps);
+      this.registerPluginStaticDirs(deps, this.standardUiPluginInternalInfo);
     } else {
       this.log.info(
         'Skipping `setup` for `standard` plugins since plugin initialization is disabled.'
@@ -179,15 +181,15 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
 
   public async start(deps: PluginsServiceStartDeps) {
     this.log.debug('Plugins service starts plugins');
-    await this.pluginsSystem.stopPlugins(PluginType.preboot);
-    const contracts = await this.pluginsSystem.startPlugins(PluginType.standard, deps);
+    await this.prebootPluginsSystem.stopPlugins();
+    const contracts = await this.standardPluginsSystem.startPlugins(deps);
     return { contracts };
   }
 
   public async stop() {
     this.log.debug('Stopping plugins service');
-    await this.pluginsSystem.stopPlugins(PluginType.preboot);
-    await this.pluginsSystem.stopPlugins(PluginType.standard);
+    await this.prebootPluginsSystem.stopPlugins();
+    await this.standardPluginsSystem.stopPlugins();
   }
 
   private generateUiPluginsConfigs(
@@ -279,8 +281,8 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
           if (plugin.includesUiPlugin) {
             const uiPluginInternalInfo =
               plugin.manifest.type === PluginType.preboot
-                ? this.uiPluginInternalInfo.preboot
-                : this.uiPluginInternalInfo.standard;
+                ? this.prebootUiPluginInternalInfo
+                : this.standardUiPluginInternalInfo;
             uiPluginInternalInfo.set(plugin.name, {
               requiredBundles: plugin.requiredBundles,
               version: plugin.manifest.version,
@@ -320,7 +322,11 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       const pluginEnablement = this.shouldEnablePlugin(pluginName, pluginEnableStatuses);
 
       if (pluginEnablement.enabled) {
-        this.pluginsSystem.addPlugin(plugin);
+        if (plugin.manifest.type === PluginType.preboot) {
+          this.prebootPluginsSystem.addPlugin(plugin);
+        } else {
+          this.standardPluginsSystem.addPlugin(plugin);
+        }
       } else if (isEnabled) {
         this.log.info(
           `Plugin "${pluginName}" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible type: [${pluginEnablement.missingOrIncompatibleDependencies.join(
