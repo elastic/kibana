@@ -8,7 +8,7 @@
 import type { PaletteOutput } from 'src/plugins/charts/public';
 import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common';
 import { axisConfig, YConfig } from './axis_config';
-import { SeriesType } from './series_type';
+import type { SeriesType } from './series_type';
 
 export interface XYLayerConfig {
   hide?: boolean;

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { AxisExtentConfigResult, AxisTitlesVisibilityConfigResult } from './axis_config';
-import { FittingFunction } from './fitting_function';
-import { GridlinesConfigResult } from './grid_lines_config';
-import { LayerArgs } from './layer_config';
-import { LegendConfigResult } from './legend_config';
-import { TickLabelsConfigResult } from './tick_labels_config';
+import type { AxisExtentConfigResult, AxisTitlesVisibilityConfigResult } from './axis_config';
+import type { FittingFunction } from './fitting_function';
+import type { GridlinesConfigResult } from './grid_lines_config';
+import type { LayerArgs } from './layer_config';
+import type { LegendConfigResult } from './legend_config';
+import type { TickLabelsConfigResult } from './tick_labels_config';
 
 export type ValueLabelConfig = 'hide' | 'inside' | 'outside';
 

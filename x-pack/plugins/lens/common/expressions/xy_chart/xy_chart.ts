@@ -6,9 +6,9 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common';
-import { ExpressionValueSearchContext } from '../../../../../../src/plugins/data/common';
-import { LensMultiTable } from '../../types';
-import { XYArgs } from './xy_args';
+import type { ExpressionValueSearchContext } from '../../../../../../src/plugins/data/common';
+import type { LensMultiTable } from '../../types';
+import type { XYArgs } from './xy_args';
 import { fittingFunctionDefinitions } from './fitting_function';
 
 export interface XYChartProps {

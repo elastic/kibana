@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common';
-import { AxesSettingsConfig } from './axis_config';
+import type { AxesSettingsConfig } from './axis_config';
 
 export type TickLabelsConfigResult = AxesSettingsConfig & { type: 'lens_xy_tickLabelsConfig' };
 
