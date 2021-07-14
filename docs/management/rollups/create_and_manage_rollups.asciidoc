@@ -173,8 +173,8 @@ image::images/management-create-rollup-bar-chart.png[][Create visualization of r
 . Add the `bytes` field to the *Vertical axis*. This defaults to an `Average of
 bytes` axis.
 +
-{kib} creates a visualization of your data. Select a section of the chart to
-zoom in.
+{kib} creates a vertical bar chart of your data. Select a section of the chart
+to zoom in.
 +
 [role="screenshot"]
 image::images/management_rollup_job_dashboard.png[][Dashboard with rolled up data]
