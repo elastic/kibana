@@ -32,17 +32,17 @@ export interface ThreatSummaryItem {
 }
 
 const RightMargin = styled.span`
-  margin-right: ${({ theme }) => theme.eui.paddingSizes.s};
+  margin-right: ${({ theme }) => theme.eui.paddingSizes.xs};
 `;
 
 const EnrichmentTitle: React.FC<ThreatSummaryItem['title']> = ({ title, type }) => (
   <>
     <RightMargin>
-      <EnrichmentIcon type={type} />
+      <EuiTitle size="xxs">
+        <h5>{title}</h5>
+      </EuiTitle>
     </RightMargin>
-    <EuiTitle size="xxs">
-      <h5>{title}</h5>
-    </EuiTitle>
+    <EnrichmentIcon type={type} />
   </>
 );
 

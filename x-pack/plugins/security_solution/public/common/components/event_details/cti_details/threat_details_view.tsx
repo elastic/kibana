@@ -48,10 +48,7 @@ const ThreatDetailsHeader: React.FC<{
 }> = ({ field, value, provider, type }) => (
   <>
     <EuiTextColor color="subdued">
-      <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EnrichmentIcon type={type} />
-        </EuiFlexItem>
+      <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="xs">
         <EuiFlexItem grow={false}>
           <EuiText size="s">
             {field} {value}
@@ -66,6 +63,9 @@ const ThreatDetailsHeader: React.FC<{
             </EuiFlexItem>
           </>
         )}
+        <EuiFlexItem grow={false}>
+          <EnrichmentIcon type={type} />
+        </EuiFlexItem>
         <EuiFlexItem>
           <EuiHorizontalRule margin="none" />
         </EuiFlexItem>
