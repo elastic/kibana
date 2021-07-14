@@ -37,17 +37,17 @@ export type ReportContent = Pick<ReportSource, 'status' | 'jobtype' | 'output'> 
 };
 
 interface JobsQueryFactory {
-  list: (
+  list(
     jobTypes: string[],
     user: ReportingUser,
     page: number,
     size: number,
     jobIds: string[] | null
-  ) => Promise<ReportApiJSON[]>;
-  count: (jobTypes: string[], user: ReportingUser) => Promise<number>;
-  get: (user: ReportingUser, id: string) => Promise<ReportApiJSON | void>;
-  getContent: (user: ReportingUser, id: string) => Promise<ReportContent | void>;
-  delete: (deleteIndex: string, id: string) => Promise<ApiResponse<DeleteResponse>>;
+  ): Promise<ReportApiJSON[]>;
+  count(jobTypes: string[], user: ReportingUser): Promise<number>;
+  get(user: ReportingUser, id: string): Promise<ReportApiJSON | void>;
+  getContent(user: ReportingUser, id: string): Promise<ReportContent | void>;
+  delete(deleteIndex: string, id: string): Promise<ApiResponse<DeleteResponse>>;
 }
 
 export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory {
@@ -131,7 +131,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
       return response?.body.count ?? 0;
     },
 
-    async get(user, id, opts = {}) {
+    async get(user, id) {
       const { logger } = reportingCore.getPluginSetupDeps();
       if (!id) {
         logger.warning(`No ID provided for GET`);
