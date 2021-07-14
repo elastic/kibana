@@ -539,7 +539,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         // GitHub requires an intermediate configuration step, where we collect the repos to index.
         if (hasConfigureStep && !values.oauthConfigCompleted) {
           actions.setPreContentSourceId(preContentSourceId);
-          navigateToUrl(`${ADD_GITHUB_PATH}/configure${search}`);
+          navigateToUrl(getSourcesPath(`${ADD_GITHUB_PATH}/configure${search}`, isOrganization));
         } else {
           setAddedSource(serviceName, indexPermissions, serviceType);
           navigateToUrl(getSourcesPath(SOURCES_PATH, isOrganization));
