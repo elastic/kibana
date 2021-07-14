@@ -170,8 +170,8 @@ image::images/management-create-rollup-bar-chart.png[][Create visualization of r
 
 . Add the `@timestamp` field to the *Horizontal axis*.
 
-. Add the `bytes` field to the *Vertical axis*. This defaults to an `Average of
-bytes` axis.
+. Add the `bytes` field to the *Vertical axis*, defaulting to an `Average of
+bytes`.
 +
 {kib} creates a vertical bar chart of your data. Select a section of the chart
 to zoom in.
