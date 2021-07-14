@@ -20,7 +20,7 @@ import type { CreateRegionMapLayerDescriptorParams } from '../classes/layers/cre
 
 let loadModulesPromise: Promise<LazyLoadedMapModules>;
 
-interface LazyLoadedMapModules {
+export interface LazyLoadedMapModules {
   MapEmbeddable: new (
     config: MapEmbeddableConfig,
     initialInput: MapEmbeddableInput,

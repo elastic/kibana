@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import React, { Component, RefObject } from 'react';
-import uuid from 'uuid/v4';
-import { EuiLoadingChart } from '@elastic/eui';
+import React from 'react';
 import type { Filter, Query, TimeRange } from '../../../../../../src/plugins/data/common';
-import type { Embeddable } from '../../../../../../src/plugins/embeddable/public';
-import type { MapEmbeddableInput, MapEmbeddableOutput } from '../../embeddable';
-import { lazyLoadMapModules } from '../../lazy_load_bundle';
 import { TileMapVisConfig } from './types';
+import type { LazyLoadedMapModules } from '../../lazy_load_bundle';
+import { MapComponent } from '../../embeddable/map_component';
 
 interface Props {
   filters?: Filter[];
@@ -21,77 +18,23 @@ interface Props {
   visConfig: TileMapVisConfig;
 }
 
-interface State {
-  isLoaded: boolean;
-}
-
-export class TileMapVisualization extends Component<Props, State> {
-  private _isMounted = false;
-  private _mapEmbeddable?: Embeddable<MapEmbeddableInput, MapEmbeddableOutput> | undefined;
-  private readonly _embeddableRef: RefObject<HTMLDivElement> = React.createRef<HTMLDivElement>();
-
-  state: State = { isLoaded: false };
-
-  componentDidMount() {
-    this._isMounted = true;
-    this._load();
+export function TileMapVisualization(props: Props) {
+  const mapCenter = {
+    lat: props.visConfig.mapCenter[0],
+    lon: props.visConfig.mapCenter[1],
+    zoom: props.visConfig.mapZoom,
+  };
+  function getLayerDescriptors(mapModules: LazyLoadedMapModules) {
+    const layerDescriptor = mapModules.createTileMapLayerDescriptor(props.visConfig.layerDescriptorParams);
+    return layerDescriptor ? [layerDescriptor] : [];
   }
-
-  componentWillUnmount() {
-    this._isMounted = false;
-    if (this._mapEmbeddable) {
-      this._mapEmbeddable.destroy();
-    }
-  }
-
-  componentDidUpdate() {
-    if (this._mapEmbeddable) {
-      this._mapEmbeddable.updateInput({
-        filters: this.props.filters,
-        query: this.props.query,
-        timeRange: this.props.timeRange,
-      });
-    }
-  }
-
-  async _load() {
-    const mapModules = await lazyLoadMapModules();
-    if (!this._isMounted) {
-      return;
-    }
-
-    this.setState({ isLoaded: true });
-
-    this._mapEmbeddable = new mapModules.MapEmbeddable(
-      {
-        editable: false,
-      },
-      {
-        id: uuid(),
-        attributes: {
-          title: '',
-          layerListJSON: JSON.stringify([
-            mapModules.createBasemapLayerDescriptor(),
-            mapModules.createTileMapLayerDescriptor(this.props.visConfig.layerDescriptorParams),
-          ]),
-        },
-        mapCenter: {
-          lat: this.props.visConfig.mapCenter[0],
-          lon: this.props.visConfig.mapCenter[1],
-          zoom: this.props.visConfig.mapZoom,
-        },
-      }
-    );
-    if (this._embeddableRef.current) {
-      this._mapEmbeddable.render(this._embeddableRef.current);
-    }
-  }
-
-  render() {
-    if (!this.state.isLoaded) {
-      return <EuiLoadingChart mono size="l" />;
-    }
-
-    return <div className="mapLegacyVisualizationContainer" ref={this._embeddableRef} />;
-  }
+  return (
+    <MapComponent
+      filters={props.filters}
+      query={props.query}
+      timeRange={props.timeRange}
+      mapCenter={mapCenter}
+      getLayerDescriptors={getLayerDescriptors}
+    />
+  );
 }
