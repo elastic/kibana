@@ -838,14 +838,101 @@
       "get": {
         "summary": "Enrollment - List",
         "tags": [],
-        "responses": {},
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "list": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/paths/~1enrollment-api-keys/post/responses/200/content/application~1json/schema/properties/item"
+                      }
+                    },
+                    "page": {
+                      "type": "number"
+                    },
+                    "perPage": {
+                      "type": "number"
+                    },
+                    "total": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "list",
+                    "page",
+                    "perPage",
+                    "total"
+                  ]
+                }
+              }
+            }
+          }
+        },
         "operationId": "get-fleet-enrollment-api-keys",
         "parameters": []
       },
       "post": {
         "summary": "Enrollment - Create",
         "tags": [],
-        "responses": {},
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "title": "EnrollmentApiKey",
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "api_key_id": {
+                          "type": "string"
+                        },
+                        "api_key": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "active": {
+                          "type": "boolean"
+                        },
+                        "policy_id": {
+                          "type": "string"
+                        },
+                        "created_at": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "api_key_id",
+                        "api_key",
+                        "active",
+                        "created_at"
+                      ]
+                    },
+                    "action": {
+                      "type": "string",
+                      "enum": [
+                        "created"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
         "operationId": "post-fleet-enrollment-api-keys",
         "parameters": [
           {
@@ -868,13 +955,54 @@
       "get": {
         "summary": "Enrollment - Info",
         "tags": [],
-        "responses": {},
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/paths/~1enrollment-api-keys/post/responses/200/content/application~1json/schema/properties/item"
+                    }
+                  },
+                  "required": [
+                    "item"
+                  ]
+                }
+              }
+            }
+          }
+        },
         "operationId": "get-fleet-enrollment-api-keys-keyId"
       },
       "delete": {
         "summary": "Enrollment - Delete",
         "tags": [],
-        "responses": {},
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "action": {
+                      "type": "string",
+                      "enum": [
+                        "deleted"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "action"
+                  ]
+                }
+              }
+            }
+          }
+        },
         "operationId": "delete-fleet-enrollment-api-keys-keyId",
         "parameters": [
           {
