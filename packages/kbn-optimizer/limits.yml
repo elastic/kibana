@@ -49,14 +49,12 @@ pageLoadAssetSize:
   logstash: 53548
   management: 46112
   maps: 80000
-  mapsLegacy: 87859
   ml: 82187
   monitoring: 80000
   navigation: 37269
   newsfeed: 42228
   observability: 89709
   painlessLab: 179748
-  regionMap: 66098
   remoteClusters: 51327
   reporting: 183418
   rollup: 97204

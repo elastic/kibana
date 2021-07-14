@@ -1,9 +1,0 @@
-{
-  "id": "mapsLegacy",
-  "version": "8.0.0",
-  "kibanaVersion": "kibana",
-  "ui": true,
-  "server": true,
-  "requiredPlugins": ["mapsEms"],
-  "requiredBundles": ["visDefaultEditor", "mapsEms"]
-}
