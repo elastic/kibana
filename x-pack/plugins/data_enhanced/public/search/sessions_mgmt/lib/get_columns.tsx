@@ -104,7 +104,7 @@ export const getColumns = (
           </>
         );
         const versionIncompatibleWarning =
-          version === kibanaVersion ? null : (
+          isRestorable && version === kibanaVersion ? null : (
             <>
               {' '}
               <EuiIconTip
