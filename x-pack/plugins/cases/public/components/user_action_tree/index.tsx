@@ -108,7 +108,7 @@ const MyEuiCommentList = styled(EuiCommentList)`
     & .comment-alert .euiCommentEvent {
       background-color: ${theme.eui.euiColorLightestShade};
       border: ${theme.eui.euiFlyoutBorder};
-      padding: alertActionCommentPadding;
+      padding: ${alertActionCommentPadding};
       border-radius: ${theme.eui.paddingSizes.xs};
     }
 
@@ -119,7 +119,7 @@ const MyEuiCommentList = styled(EuiCommentList)`
     & .comment-action.empty-comment .euiCommentEvent--regular {
       box-shadow: none;
       .euiCommentEvent__header {
-        padding: 14px alertActionCommentPadding;
+        padding: 14px ${alertActionCommentPadding};
         border-bottom: 0;
       }
     }
