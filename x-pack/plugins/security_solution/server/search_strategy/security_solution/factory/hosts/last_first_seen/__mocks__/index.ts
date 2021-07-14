@@ -14,6 +14,7 @@ import {
 export const mockOptions: HostFirstLastSeenRequestOptions = {
   defaultIndex: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -126,6 +127,7 @@ export const formattedSearchStrategyFirstResponse = {
           allowNoIndices: true,
           index: [
             'apm-*-transaction*',
+            'traces-apm*',
             'auditbeat-*',
             'endgame-*',
             'filebeat-*',
@@ -191,6 +193,7 @@ export const formattedSearchStrategyLastResponse = {
           allowNoIndices: true,
           index: [
             'apm-*-transaction*',
+            'traces-apm*',
             'auditbeat-*',
             'endgame-*',
             'filebeat-*',
@@ -225,6 +228,7 @@ export const expectedDsl = {
   allowNoIndices: true,
   index: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
