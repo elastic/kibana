@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import qs from 'query-string';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { getFunctionHelp } from '../../../i18n';
 
