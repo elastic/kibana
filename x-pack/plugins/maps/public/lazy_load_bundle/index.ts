@@ -19,8 +19,6 @@ import type { CreateTileMapLayerDescriptorParams } from '../classes/layers/creat
 
 let loadModulesPromise: Promise<LazyLoadedMapModules>;
 
-
-
 interface LazyLoadedMapModules {
   MapEmbeddable: new (
     config: MapEmbeddableConfig,
