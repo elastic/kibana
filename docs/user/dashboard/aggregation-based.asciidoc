@@ -4,7 +4,7 @@
 Aggregation-based visualizations are the core {kib} panels, and are not optimized
 for a specific use case.
 
-NOTE: he legacy XY charts library which powers bar, area, and line charts will be removed in 7.16. If you are still using it, turn off the *XY axis legacy charts library* switch in *Advanced settings*.
+NOTE: Make sure you are using the new charts library. The legacy charts library for area, bar, line, and pie charts will be removed in 7.16. For more information, refer to <<kibana-visualization-settings>>.
 
 [float]
 [[types-of-visualizations]]
