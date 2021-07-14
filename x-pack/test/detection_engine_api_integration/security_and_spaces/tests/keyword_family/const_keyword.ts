@@ -17,8 +17,10 @@ import {
   createSignalsIndex,
   deleteAllAlerts,
   deleteSignalsIndex,
+  getEqlRuleForSignalTesting,
   getRuleForSignalTesting,
   getSignalsById,
+  getThresholdRuleForSignalTesting,
   waitForRuleSuccessOrStatus,
   waitForSignalsToBePresent,
 } from '../../../utils';
@@ -84,10 +86,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('"eql" rule type', () => {
       it('should detect the "dataset_name_1" from "event.dataset" and have 4 signals', async () => {
         const rule: EqlCreateSchema = {
-          ...getRuleForSignalTesting(['const_keyword']),
-          rule_id: 'eql-rule',
-          type: 'eql',
-          language: 'eql',
+          ...getEqlRuleForSignalTesting(['const_keyword']),
           query: 'any where event.dataset=="dataset_name_1"',
         };
 
@@ -100,10 +99,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should copy the "dataset_name_1" from "event.dataset"', async () => {
         const rule: EqlCreateSchema = {
-          ...getRuleForSignalTesting(['const_keyword']),
-          rule_id: 'eql-rule',
-          type: 'eql',
-          language: 'eql',
+          ...getEqlRuleForSignalTesting(['const_keyword']),
           query: 'any where event.dataset=="dataset_name_1"',
         };
 
@@ -126,11 +122,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('"threshold" rule type', async () => {
       it('should detect the "dataset_name_1" from "event.dataset"', async () => {
         const rule: ThresholdCreateSchema = {
-          ...getRuleForSignalTesting(['const_keyword']),
-          rule_id: 'threshold-rule',
-          type: 'threshold',
-          language: 'kuery',
-          query: '*:*',
+          ...getThresholdRuleForSignalTesting(['const_keyword']),
           threshold: {
             field: 'event.dataset',
             value: 1,
