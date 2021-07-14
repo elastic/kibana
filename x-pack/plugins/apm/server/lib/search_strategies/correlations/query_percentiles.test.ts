@@ -14,7 +14,7 @@ import {
   getTransactionDurationPercentilesRequest,
 } from './query_percentiles';
 
-const params = { index: 'apm-*' };
+const params = { index: 'apm-*', start: '2020', end: '2021' };
 
 describe('query_percentiles', () => {
   describe('getTransactionDurationPercentilesRequest', () => {
@@ -41,10 +41,20 @@ describe('query_percentiles', () => {
                     'processor.event': 'transaction',
                   },
                 },
+                {
+                  range: {
+                    '@timestamp': {
+                      format: 'epoch_millis',
+                      gte: 1577836800000,
+                      lte: 1609459200000,
+                    },
+                  },
+                },
               ],
             },
           },
           size: 0,
+          track_total_hits: true,
         },
         index: params.index,
       });
@@ -53,6 +63,7 @@ describe('query_percentiles', () => {
 
   describe('fetchTransactionDurationPercentiles', () => {
     it('fetches the percentiles', async () => {
+      const totalDocs = 10;
       const percentilesValues = {
         '1.0': 5.0,
         '5.0': 25.0,
@@ -68,6 +79,7 @@ describe('query_percentiles', () => {
       } => {
         return {
           body: ({
+            hits: { total: { value: totalDocs } },
             aggregations: {
               transaction_duration_percentiles: {
                 values: percentilesValues,
@@ -86,7 +98,7 @@ describe('query_percentiles', () => {
         params
       );
 
-      expect(resp).toEqual(percentilesValues);
+      expect(resp).toEqual({ percentiles: percentilesValues, totalDocs });
       expect(esClientSearchMock).toHaveBeenCalledTimes(1);
     });
   });
