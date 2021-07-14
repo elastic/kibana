@@ -9,7 +9,5 @@
 ```typescript
 mergeCapabilitiesWithFields: (rollupIndexCapabilities: {
     [key: string]: any;
-}, fieldsFromFieldCapsApi: {
-    [key: string]: any;
-}, previousFields?: FieldDescriptor[]) => FieldDescriptor[]
+}, fieldsFromFieldCapsApi: Record<string, FieldDescriptor>, previousFields?: FieldDescriptor[]) => FieldDescriptor[]
 ```
