@@ -36,6 +36,7 @@ interface RawResponse {
   took: number;
   values: SearchServiceValue[];
   overallHistogram: HistogramItem[];
+  log: string[];
 }
 
 export const useCorrelations = (params: CorrelationsOptions) => {
