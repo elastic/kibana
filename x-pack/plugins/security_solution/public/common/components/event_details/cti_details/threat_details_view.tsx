@@ -48,10 +48,10 @@ const ThreatDetailsHeader: React.FC<{
 }> = ({ field, value, provider, type }) => (
   <>
     <EuiTextColor color="subdued">
-      <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="xs">
+      <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="xs" wrap>
         <EuiFlexItem grow={false}>
           <EuiText size="s">
-            {field} {value}
+            <span>{field}</span> <span>{value}</span>
           </EuiText>
         </EuiFlexItem>
         {provider && (
