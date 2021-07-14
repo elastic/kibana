@@ -21,6 +21,8 @@ import {
   EuiPopover,
   EuiText,
   EuiTitle,
+  EuiCodeBlock,
+  EuiSpacer,
 } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n/react';
 import React, { useEffect, useState } from 'react';
@@ -38,6 +40,8 @@ import {
 
 import { REPORTING_EXAMPLE_LOCATOR_ID } from '../../common';
 
+import { MyForwardableState } from '../types';
+
 interface ReportingExampleAppDeps {
   basename: string;
   notifications: CoreStart['notifications'];
@@ -45,6 +49,7 @@ interface ReportingExampleAppDeps {
   navigation: NavigationPublicPluginStart;
   reporting: ReportingStart;
   screenshotMode: ScreenshotModePluginSetup;
+  forwardedParams?: MyForwardableState;
 }
 
 const sourceLogos = ['Beats', 'Cloud', 'Logging', 'Kibana'];
@@ -55,6 +60,7 @@ export const ReportingExampleApp = ({
   http,
   reporting,
   screenshotMode,
+  forwardedParams,
 }: ReportingExampleAppDeps) => {
   const { getDefaultLayoutSelectors } = reporting;
 
@@ -160,9 +166,11 @@ export const ReportingExampleApp = ({
             </EuiPageHeader>
             <EuiPageContent>
               <EuiPageContentBody>
+                <EuiTitle>
+                  <h2>Example of a Sharing menu using components from Reporting</h2>
+                </EuiTitle>
+                <EuiSpacer />
                 <EuiText>
-                  <p>Example of a Sharing menu using components from Reporting</p>
-
                   <EuiPopover
                     id="contextMenuExample"
                     button={<EuiButton onClick={onButtonClick}>Share</EuiButton>}
@@ -175,6 +183,16 @@ export const ReportingExampleApp = ({
                   </EuiPopover>
 
                   <EuiHorizontalRule />
+
+                  {forwardedParams && (
+                    <>
+                      <EuiTitle>
+                        <h2>Forwarded app state</h2>
+                      </EuiTitle>
+                      <EuiCodeBlock>{JSON.stringify(forwardedParams)}</EuiCodeBlock>
+                      <EuiHorizontalRule />
+                    </>
+                  )}
 
                   <div data-shared-items-container data-shared-items-count="4">
                     <EuiFlexGroup gutterSize="l">

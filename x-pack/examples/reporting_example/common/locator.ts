@@ -16,11 +16,11 @@ export type ReportingExampleLocatorParams = SerializableState;
 export class ReportingExampleLocatorDefinition implements LocatorDefinition<{}> {
   public readonly id = REPORTING_EXAMPLE_LOCATOR_ID;
 
-  public readonly getLocation = async () => {
+  public readonly getLocation = async (params: {}) => {
     return {
       app: PLUGIN_ID,
       path: '/',
-      state: {},
+      state: params,
     };
   };
 }

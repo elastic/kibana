@@ -13,7 +13,7 @@ import {
   Plugin,
 } from '../../../../src/core/public';
 import { PLUGIN_ID, PLUGIN_NAME, ReportingExampleLocatorDefinition } from '../common';
-import { SetupDeps, StartDeps } from './types';
+import { SetupDeps, StartDeps, MyForwardableState } from './types';
 
 export class ReportingExamplePlugin implements Plugin<void, void, {}, {}> {
   public setup(core: CoreSetup, { developerExamples, screenshotMode, share }: SetupDeps): void {
@@ -30,7 +30,12 @@ export class ReportingExamplePlugin implements Plugin<void, void, {}, {}> {
           unknown
         ];
         // Render the application
-        return renderApp(coreStart, { ...depsStart, screenshotMode, share }, params);
+        return renderApp(
+          coreStart,
+          { ...depsStart, screenshotMode, share },
+          params,
+          params.history.location.state as MyForwardableState
+        );
       },
     });
 

@@ -130,6 +130,11 @@ export interface ReportApiJSON {
   payload: {
     layout?: LayoutParams;
     title: string;
+    /**
+     * PDF V2 reports will contain locators that will be converted to {@link KibanaLocation}s when
+     * generating a report
+     */
+    locators?: Locator[];
     browserTimezone?: string;
     isDeprecated?: boolean;
   };

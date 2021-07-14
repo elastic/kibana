@@ -25,3 +25,5 @@ export interface StartDeps {
   navigation: NavigationPublicPluginStart;
   reporting: ReportingStart;
 }
+
+export type MyForwardableState = Record<string, unknown>;

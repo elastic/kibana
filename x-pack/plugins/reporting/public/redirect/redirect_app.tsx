@@ -30,18 +30,19 @@ const i18nTexts = {
   }),
 };
 
-export const RedirectApp: FunctionComponent<Props> = ({ apiClient, history }) => {
+export const RedirectApp: FunctionComponent<Props> = ({ apiClient, history, share }) => {
+  const pathname = history.location.pathname;
   const match = useMemo(
     () =>
-      matchPath<{ jobId: string; locatorIdx: string }>(history.location.pathname, {
+      matchPath<{ jobId: string; locatorIdx: string }>(pathname, {
         path: REACT_ROUTER_REDIRECT_APP_PATH,
         exact: true,
       }),
-    [history]
+    [pathname]
   );
 
   if (!match) {
-    throw new Error('boo');
+    throw new Error(`Unexpected redirect parameters, received: ${pathname}`);
   }
 
   const {
@@ -50,8 +51,19 @@ export const RedirectApp: FunctionComponent<Props> = ({ apiClient, history }) =>
 
   useEffect(() => {
     async function fetchReportJob() {
-      const job = await apiClient.getInfo(jobId);
-      console.log(job);
+      const {
+        payload: { locators },
+      } = await apiClient.getInfo(jobId);
+
+      if (locators) {
+        const { [parseInt(locatorIdx, 10)]: locatorParams } = locators;
+        if (locatorParams) {
+          share.navigate(locatorParams);
+          return;
+        }
+        throw new Error(`No locator params found at ${locatorIdx} for job ID ${jobId}`);
+      }
+      throw new Error(`No locators for this report job for job ID ${jobId}`);
     }
     fetchReportJob();
   });
