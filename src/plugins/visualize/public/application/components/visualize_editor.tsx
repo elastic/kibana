@@ -55,8 +55,16 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
   useLinkedSearchUpdates(services, eventEmitter, appState, savedVisInstance);
 
   useEffect(() => {
-    const { originatingApp: value } =
-      services.stateTransferService.getIncomingEditorState(VisualizeConstants.APP_ID) || {};
+    const { stateTransferService, data } = services;
+    const { originatingApp: value, searchSessionId } =
+      stateTransferService.getIncomingEditorState(VisualizeConstants.APP_ID) || {};
+
+    if (searchSessionId) {
+      data.search.session.continue(searchSessionId);
+    } else {
+      data.search.session.start();
+    }
+
     setOriginatingApp(value);
   }, [services]);
 
@@ -65,7 +73,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
     return () => {
       eventEmitter.removeAllListeners();
     };
-  }, [eventEmitter]);
+  }, [eventEmitter, services]);
 
   return (
     <VisualizeEditorCommon
