@@ -141,7 +141,7 @@ describe('#formatTimelineData', () => {
           parent: {
             depth: 0,
             index:
-              'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*',
+              'apm-*-transaction*,traces-apm*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*',
             id: '0268af90-d8da-576a-9747-2a191519416a',
             type: 'event',
           },
@@ -180,6 +180,7 @@ describe('#formatTimelineData', () => {
             query: '_id :*',
             index: [
               'apm-*-transaction*',
+              'traces-apm*',
               'auditbeat-*',
               'endgame-*',
               'filebeat-*',
@@ -246,7 +247,7 @@ describe('#formatTimelineData', () => {
             {
               depth: 0,
               index:
-                'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*',
+                'apm-*-transaction*,traces-apm*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*',
               id: '0268af90-d8da-576a-9747-2a191519416a',
               type: 'event',
             },
@@ -255,7 +256,7 @@ describe('#formatTimelineData', () => {
             {
               depth: 0,
               index:
-                'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*',
+                'apm-*-transaction*,traces-apm*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*',
               id: '0268af90-d8da-576a-9747-2a191519416a',
               type: 'event',
             },
@@ -279,6 +280,7 @@ describe('#formatTimelineData', () => {
         'signal.rule.version': ['1'],
         'signal.rule.index': [
           'apm-*-transaction*',
+          'traces-apm*',
           'auditbeat-*',
           'endgame-*',
           'filebeat-*',
@@ -332,6 +334,7 @@ describe('#formatTimelineData', () => {
               id: ['696c24e0-526d-11eb-836c-e1620268b945'],
               index: [
                 'apm-*-transaction*',
+                'traces-apm*',
                 'auditbeat-*',
                 'endgame-*',
                 'filebeat-*',

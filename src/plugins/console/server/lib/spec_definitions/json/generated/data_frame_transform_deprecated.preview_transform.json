@@ -1,0 +1,7 @@
+{
+  "data_frame_transform_deprecated.preview_transform": {
+    "methods": [],
+    "patterns": [],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/preview-transform.html"
+  }
+}
