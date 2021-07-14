@@ -265,33 +265,18 @@ Copy panels from one dashboard to another dashboard.
 [[explore-the-underlying-documents]]
 == Explore the underlying documents
 
-To gain insight to the data, open the underlying panel or data series documents in *Discover*. The panel documents that you open in *Discover* have the same time range and filters as the source panel.
+A {kib} administrator can add additional interactions for {kib} users to take from their dashboard panels.
+These additional interactions allow users to open *Discover* from the dashboard. Administrators can choose
+to enable:
 
-[float]
-[[explore-underlying-panel-documents]]
-=== Explore the underlying panel documents
+<<settings-explore-data-in-context,`xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled`>>::
+  Adds an action to each panel's context menu. This action does not carry the filters from your dashboard to
+  *Discover*.
 
-When your visualization panel contains a single index pattern, you can open the panel documents in *Discover*.
+<<settings-explore-data-in-chart,`xpack.discoverEnhanced.actions.exploreDataInChart.enabled`>>::
+  Adds an action to each series in a panel.
 
-. Open the panel menu.
-
-. Click *Explore underlying data*.
-+
-[role="screenshot"]
-image::images/explore_data_context_menu.png[Explore underlying data from panel context menu]
-
-[float]
-[[explore-underlying-data-series-documents]]
-=== Explore the underlying data series documents
-
-To gain insight to a data series, open the documents in *Discover*. 
-
-. Click the data series in the panel that you want to view. 
-
-. Select *Explore underlying data*.
-+
-[role="screenshot"]
-image::images/explore_data_in_chart.png[Explore underlying data from chart]
+NOTE: Prior to {kib} 7.13, the panel context menu was enabled by default.
 
 [float]
 [[download-csv]]
