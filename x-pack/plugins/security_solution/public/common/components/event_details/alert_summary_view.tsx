@@ -21,6 +21,8 @@ import {
   ALERTS_HEADERS_THRESHOLD_CARDINALITY,
   ALERTS_HEADERS_THRESHOLD_COUNT,
   ALERTS_HEADERS_THRESHOLD_TERMS,
+  SIGNAL_STATUS,
+  TIMESTAMP,
 } from '../../../detections/components/alerts_table/translations';
 import {
   IP_FIELD_TYPE,
@@ -40,8 +42,8 @@ const StyledText = styled.div`
 `;
 
 const fields = [
-  { id: 'signal.status' },
-  { id: '@timestamp' },
+  { id: 'signal.status', label: SIGNAL_STATUS },
+  { id: '@timestamp', label: TIMESTAMP },
   {
     id: SIGNAL_RULE_NAME_FIELD_NAME,
     linkField: 'signal.rule.id',
@@ -57,6 +59,20 @@ const fields = [
   { id: 'signal.threshold_result.count', label: ALERTS_HEADERS_THRESHOLD_COUNT },
   { id: 'signal.threshold_result.terms', label: ALERTS_HEADERS_THRESHOLD_TERMS },
   { id: 'signal.threshold_result.cardinality', label: ALERTS_HEADERS_THRESHOLD_CARDINALITY },
+];
+
+const processFields = [
+  ...fields,
+  { id: 'process.name' },
+  { id: 'process.parent.name' },
+  { id: 'process.args' },
+];
+
+const networkFields = [
+  ...fields,
+  { id: 'destination.address' },
+  { id: 'destination.port' },
+  { id: 'process.name' },
 ];
 
 const getDescription = ({
@@ -88,8 +104,22 @@ const getSummaryRows = ({
   timelineId: string;
   eventId: string;
 }) => {
+  const categoryField = find({ category: 'event', field: 'event.category' }, data) as
+    | TimelineEventsDetailsItem
+    | undefined;
+  const eventCategory = Array.isArray(categoryField?.originalValue)
+    ? categoryField?.originalValue[0]
+    : categoryField?.originalValue;
+
+  const tableFields =
+    eventCategory === 'network'
+      ? networkFields
+      : eventCategory === 'process'
+      ? processFields
+      : fields;
+
   return data != null
-    ? fields.reduce<SummaryRow[]>((acc, item) => {
+    ? tableFields.reduce<SummaryRow[]>((acc, item) => {
         const field = data.find((d) => d.field === item.id);
         if (!field) {
           return acc;
