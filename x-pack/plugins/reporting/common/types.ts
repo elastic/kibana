@@ -128,11 +128,10 @@ export interface JobContent {
  * Info API response: report query results do not need to include the
  * payload.headers or output.content
  */
-type ReportSimple = Omit<ReportSource, 'payload' | 'output'> & {
+interface ReportSimple extends Omit<ReportSource, 'payload' | 'output'> {
   payload: Omit<ReportSource['payload'], 'headers'>;
-} & {
   output?: Omit<Partial<TaskRunResult>, 'content'>; // is undefined for report jobs that are not completed
-};
+}
 
 /*
  * The response format for all of the report job APIs
