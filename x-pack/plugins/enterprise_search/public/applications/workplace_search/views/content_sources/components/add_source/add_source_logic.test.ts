@@ -361,28 +361,27 @@ describe('AddSourceLogic', () => {
       });
 
       describe('Github error edge case', () => {
+        const GITHUB_ERROR =
+          'The redirect_uri MUST match the registered callback URL for this application.';
+        const errorParams = { ...params, error_description: GITHUB_ERROR };
         const getGithubQueryString = (context: 'organization' | 'account') =>
           `?error=redirect_uri_mismatch&error_description=The+redirect_uri+MUST+match+the+registered+callback+URL+for+this+application.&error_uri=https%3A%2F%2Fdocs.github.com%2Fapps%2Fmanaging-oauth-apps%2Ftroubleshooting-authorization-request-errors%2F%23redirect-uri-mismatch&state=%7B%22action%22%3A%22create%22%2C%22context%22%3A%22${context}%22%2C%22service_type%22%3A%22github%22%2C%22csrf_token%22%3A%22TOKEN%3D%3D%22%2C%22index_permissions%22%3Afalse%7D`;
 
         it('handles "organization" redirect and displays error', () => {
           const githubQueryString = getGithubQueryString('organization');
-          AddSourceLogic.actions.saveSourceParams(githubQueryString);
+          AddSourceLogic.actions.saveSourceParams(githubQueryString, errorParams, true);
 
           expect(navigateToUrl).toHaveBeenCalledWith('/');
-          expect(setErrorMessage).toHaveBeenCalledWith(
-            'The redirect_uri MUST match the registered callback URL for this application.'
-          );
+          expect(setErrorMessage).toHaveBeenCalledWith(GITHUB_ERROR);
         });
 
         it('handles "account" redirect and displays error', () => {
           const githubQueryString = getGithubQueryString('account');
-          AddSourceLogic.actions.saveSourceParams(githubQueryString);
+          AddSourceLogic.actions.saveSourceParams(githubQueryString, errorParams, false);
 
           expect(navigateToUrl).toHaveBeenCalledWith(PERSONAL_SOURCES_PATH);
           expect(setErrorMessage).toHaveBeenCalledWith(
-            PERSONAL_DASHBOARD_SOURCE_ERROR(
-              'The redirect_uri MUST match the registered callback URL for this application.'
-            )
+            PERSONAL_DASHBOARD_SOURCE_ERROR(GITHUB_ERROR)
           );
         });
       });
