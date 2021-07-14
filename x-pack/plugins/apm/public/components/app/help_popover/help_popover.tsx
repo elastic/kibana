@@ -15,23 +15,32 @@ import {
   EuiPopoverTitle,
   EuiText,
 } from '@elastic/eui';
-import './help_popover.scss';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 
-export const HelpPopoverButton = ({ onClick }: { onClick: EuiLinkButtonProps['onClick'] }) => {
+const PopoverContent = euiStyled(EuiText)`
+  max-width: 480px;
+  max-height: 40vh;
+`;
+
+export function HelpPopoverButton({
+  onClick,
+}: {
+  onClick: EuiLinkButtonProps['onClick'];
+}) {
   return (
     <EuiButtonIcon
-      className="mlHelpPopover__buttonIcon"
+      className="apmHelpPopover__buttonIcon"
       size="s"
       iconType="help"
-      aria-label={i18n.translate('xpack.ml.helpPopover.ariaLabel', {
+      aria-label={i18n.translate('xpack.apm.helpPopover.ariaLabel', {
         defaultMessage: 'Help',
       })}
       onClick={onClick}
     />
   );
-};
+}
 
-export const HelpPopover = ({
+export function HelpPopover({
   anchorPosition,
   button,
   children,
@@ -45,23 +54,19 @@ export const HelpPopover = ({
   closePopover: EuiPopoverProps['closePopover'];
   isOpen: EuiPopoverProps['isOpen'];
   title?: string;
-}) => {
+}) {
   return (
     <EuiPopover
       anchorPosition={anchorPosition}
       button={button}
-      className="mlHelpPopover"
       closePopover={closePopover}
       isOpen={isOpen}
+      panelPaddingSize="s"
       ownFocus
-      panelClassName="mlHelpPopover__panel"
-      panelPaddingSize="none"
     >
       {title && <EuiPopoverTitle paddingSize="s">{title}</EuiPopoverTitle>}
 
-      <EuiText className="mlHelpPopover__content" size="s">
-        {children}
-      </EuiText>
+      <PopoverContent size="s">{children}</PopoverContent>
     </EuiPopover>
   );
-};
+}

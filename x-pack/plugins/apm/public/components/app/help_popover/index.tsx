@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-import { EuiComboBoxOptionOption } from '@elastic/eui';
-
-export interface GetGenericComboBoxPropsReturn {
-  comboOptions: EuiComboBoxOptionOption[];
-  labels: string[];
-  selectedComboOptions: EuiComboBoxOptionOption[];
-}
+export { HelpPopoverButton, HelpPopover } from './help_popover';
