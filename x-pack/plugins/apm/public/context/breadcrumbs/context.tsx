@@ -13,7 +13,6 @@ import { ChromeBreadcrumb } from 'kibana/public';
 import { compact, isEqual } from 'lodash';
 import React, { createContext, useMemo, useState } from 'react';
 import { useBreadcrumbs } from '../../../../observability/public';
-import { useApmPluginContext } from '../apm_plugin/use_apm_plugin_context';
 
 export interface Breadcrumb {
   title: string;
@@ -36,8 +35,6 @@ export function BreadcrumbsContextProvider({
   children: React.ReactElement;
 }) {
   const [, forceUpdate] = useState({});
-
-  const { core } = useApmPluginContext();
 
   const breadcrumbs = useMemo(() => {
     return new Map<Route, Breadcrumb[]>();
