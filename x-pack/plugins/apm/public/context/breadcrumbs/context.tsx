@@ -81,10 +81,6 @@ export function BreadcrumbsContextProvider({
           ? {}
           : {
               href: breadcrumb.href,
-              onClick: (event) => {
-                event.preventDefault();
-                core.application.navigateToUrl(breadcrumb.href);
-              },
             }),
       };
     });
