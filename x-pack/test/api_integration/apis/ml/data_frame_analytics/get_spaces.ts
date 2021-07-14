@@ -140,5 +140,66 @@ export default ({ getService }: FtrProviderContext) => {
     it('should fail to list jobs stats by job ids if one of them is in a different space', async () => {
       await runRequest(idSpace1, 404, true, `${jobIdSpace1},${jobIdSpace2}`);
     });
+
+    describe('GetDataFrameAnalyticsIdMap with spaces', () => {
+      it(`should return a map of objects from ${idSpace1} leading up to analytics job id created in ${idSpace1}`, async () => {
+        const { body } = await supertest
+          .get(`/s/${idSpace1}/api/ml/data_frame/analytics/map/${jobIdSpace1}`)
+          .auth(
+            USER.ML_VIEWER_ALL_SPACES,
+            ml.securityCommon.getPasswordForUser(USER.ML_VIEWER_ALL_SPACES)
+          )
+          .set(COMMON_REQUEST_HEADERS)
+          .expect(200);
+
+        expect(body).to.have.keys('elements', 'details', 'error');
+        // Index node, 2 job nodes (with same source index), and 2 edge nodes to connect them
+        expect(body.elements.length).to.eql(5);
+        // No space2 related job ids should be returned
+        for (const detailsId in body.details) {
+          if (detailsId.includes('analytics')) {
+            expect(body.details[detailsId].id.includes(idSpace2)).to.eql(false);
+          }
+        }
+      });
+
+      it(`should return a map of objects from ${idSpace2} leading up to analytics job id created in ${idSpace2}`, async () => {
+        const { body } = await supertest
+          .get(`/s/${idSpace2}/api/ml/data_frame/analytics/map/${jobIdSpace2}`)
+          .auth(
+            USER.ML_VIEWER_ALL_SPACES,
+            ml.securityCommon.getPasswordForUser(USER.ML_VIEWER_ALL_SPACES)
+          )
+          .set(COMMON_REQUEST_HEADERS)
+          .expect(200);
+
+        expect(body).to.have.keys('elements', 'details', 'error');
+        // Index node, 1 job node and 2 edge nodes to connect them
+        expect(body.elements.length).to.eql(3);
+        // No space1 related job ids should be returned
+        for (const detailsId in body.details) {
+          if (detailsId.includes('analytics')) {
+            expect(body.details[detailsId].id.includes(idSpace1)).to.eql(false);
+          }
+        }
+      });
+
+      it(`should fail to return a map of objects from one space when requesting with analytics job id created in a different space`, async () => {
+        const { body } = await supertest
+          .get(`/s/${idSpace2}/api/ml/data_frame/analytics/map/${jobIdSpace1}`)
+          .auth(
+            USER.ML_VIEWER_ALL_SPACES,
+            ml.securityCommon.getPasswordForUser(USER.ML_VIEWER_ALL_SPACES)
+          )
+          .set(COMMON_REQUEST_HEADERS)
+          .expect(200);
+
+        expect(body.elements.length).to.eql(0);
+        expect(body.details).to.eql({});
+        expect(body.error).to.eql(`No known job with id '${jobIdSpace1}'`);
+
+        expect(body).to.have.keys('elements', 'details', 'error');
+      });
+    });
   });
 };
