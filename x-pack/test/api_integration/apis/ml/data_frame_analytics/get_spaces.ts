@@ -160,11 +160,18 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(body).to.have.keys('elements', 'details', 'error');
         // Index node, 2 job nodes (with same source index), and 2 edge nodes to connect them
-        expect(body.elements.length).to.eql(5);
+        expect(body.elements.length).to.eql(
+          5,
+          `Expected 5 map elements, got ${body.elements.length}`
+        );
+        expect(body.error).to.be(null);
         // No space2 related job ids should be returned
         for (const detailsId in body.details) {
           if (detailsId.includes('analytics')) {
-            expect(body.details[detailsId].id.includes(idSpace2)).to.eql(false);
+            expect(body.details[detailsId].id.includes(idSpace2)).to.eql(
+              false,
+              `No space2 related job ids should be returned, got ${body.details[detailsId].id}`
+            );
           }
         }
       });
@@ -174,11 +181,18 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(body).to.have.keys('elements', 'details', 'error');
         // Index node, 1 job node and 2 edge nodes to connect them
-        expect(body.elements.length).to.eql(3);
+        expect(body.elements.length).to.eql(
+          3,
+          `Expected 3 map elements, got ${body.elements.length}`
+        );
+        expect(body.error).to.be(null);
         // No space1 related job ids should be returned
         for (const detailsId in body.details) {
           if (detailsId.includes('analytics')) {
-            expect(body.details[detailsId].id.includes(idSpace1)).to.eql(false);
+            expect(body.details[detailsId].id.includes(idSpace1)).to.eql(
+              false,
+              `No space1 related job ids should be returned, got ${body.details[detailsId].id}`
+            );
           }
         }
       });
@@ -186,11 +200,14 @@ export default ({ getService }: FtrProviderContext) => {
       it(`should fail to return a map of objects from one space when requesting with analytics job id created in a different space`, async () => {
         const body = await runMapRequest(idSpace2, 200, jobIdSpace1);
 
-        expect(body.elements.length).to.eql(0);
+        expect(body).to.have.keys('elements', 'details', 'error');
+
+        expect(body.elements.length).to.eql(
+          0,
+          `Expected 0 map elements, got ${body.elements.length}`
+        );
         expect(body.details).to.eql({});
         expect(body.error).to.eql(`No known job with id '${jobIdSpace1}'`);
-
-        expect(body).to.have.keys('elements', 'details', 'error');
       });
     });
   });
