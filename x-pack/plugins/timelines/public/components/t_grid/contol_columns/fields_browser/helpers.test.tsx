@@ -373,5 +373,45 @@ describe('helpers', () => {
         })
       ).toEqual(expectedMatchingFields);
     });
+
+    test('it combines the specified fields into a virtual category omitting the fields missing in the browser fields', () => {
+      const expectedMatchingFields = {
+        fields: {
+          '@timestamp': {
+            aggregatable: true,
+            category: 'base',
+            description:
+              'Date/time when the event originated. For log events this is the date/time when the event was generated, and not when it was read. Required field for all events.',
+            example: '2016-05-23T08:05:34.853Z',
+            format: '',
+            indexes: ['auditbeat', 'filebeat', 'packetbeat'],
+            name: '@timestamp',
+            searchable: true,
+            type: 'date',
+          },
+          'client.domain': {
+            aggregatable: true,
+            category: 'client',
+            description: 'Client domain.',
+            example: null,
+            format: '',
+            indexes: ['auditbeat', 'filebeat', 'packetbeat'],
+            name: 'client.domain',
+            searchable: true,
+            type: 'string',
+          },
+        },
+      };
+
+      const fieldIds = ['agent.hostname', '@timestamp', 'client.domain'];
+      const { agent, ...mockBrowserFieldsWithoutAgent } = mockBrowserFields;
+
+      expect(
+        createVirtualCategory({
+          browserFields: mockBrowserFieldsWithoutAgent,
+          fieldIds,
+        })
+      ).toEqual(expectedMatchingFields);
+    });
   });
 });

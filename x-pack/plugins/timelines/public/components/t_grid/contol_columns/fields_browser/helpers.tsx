@@ -123,15 +123,23 @@ export const createVirtualCategory = ({
   browserFields: BrowserFields;
   fieldIds: string[];
 }): Partial<BrowserField> => ({
-  fields: fieldIds.reduce<Readonly<Record<string, Partial<BrowserField>>>>((fields, fieldId) => {
+  fields: fieldIds.reduce<Readonly<BrowserFields>>((fields, fieldId) => {
     const splitId = fieldId.split('.'); // source.geo.city_name -> [source, geo, city_name]
+    const browserField = get(
+      [splitId.length > 1 ? splitId[0] : 'base', 'fields', fieldId],
+      browserFields
+    );
 
     return {
       ...fields,
-      [fieldId]: {
-        ...get([splitId.length > 1 ? splitId[0] : 'base', 'fields', fieldId], browserFields),
-        name: fieldId,
-      },
+      ...(browserField
+        ? {
+            [fieldId]: {
+              ...browserField,
+              name: fieldId,
+            },
+          }
+        : {}),
     };
   }, {}),
 });

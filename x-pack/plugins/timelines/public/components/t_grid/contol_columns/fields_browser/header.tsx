@@ -117,7 +117,7 @@ const TitleRow = React.memo<{
     >
       <EuiFlexItem grow={false}>
         <EuiTitle data-test-subj="field-browser-title" size="s">
-          <h2>{i18n.CUSTOMIZE_COLUMNS}</h2>
+          <h2>{i18n.FIELDS_BROWSER}</h2>
         </EuiTitle>
       </EuiFlexItem>
 

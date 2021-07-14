@@ -126,9 +126,9 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
 
   return (
     <FieldsBrowserButtonContainer data-test-subj="fields-browser-button-container">
-      <EuiToolTip content={i18n.CUSTOMIZE_COLUMNS}>
+      <EuiToolTip content={i18n.FIELDS_BROWSER}>
         <EuiButtonIcon
-          aria-label={i18n.CUSTOMIZE_COLUMNS}
+          aria-label={i18n.FIELDS_BROWSER}
           buttonRef={customizeColumnsButtonRef}
           className={fieldsButtonClassName}
           data-test-subj="show-field-browser"

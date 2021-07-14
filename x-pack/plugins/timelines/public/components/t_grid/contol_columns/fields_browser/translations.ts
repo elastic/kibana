@@ -44,12 +44,9 @@ export const CLOSE = i18n.translate('xpack.timelines.fieldBrowser.closeButton', 
   defaultMessage: 'Close',
 });
 
-export const CUSTOMIZE_COLUMNS = i18n.translate(
-  'xpack.timelines.fieldBrowser.customizeColumnsTitle',
-  {
-    defaultMessage: 'Customize Columns',
-  }
-);
+export const FIELDS_BROWSER = i18n.translate('xpack.timelines.fieldBrowser.fieldBrowserTitle', {
+  defaultMessage: 'Fields',
+});
 
 export const DESCRIPTION = i18n.translate('xpack.timelines.fieldBrowser.descriptionLabel', {
   defaultMessage: 'Description',
