@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { timelineNonValidQuery } from '../../objects/timeline';
+import { getTimelineNonValidQuery } from '../../objects/timeline';
 
 import {
   NOTES_AUTHOR,
@@ -39,7 +39,7 @@ describe('Timeline notes tab', () => {
     loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
     waitForTimelinesPanelToBeLoaded();
 
-    createTimeline(timelineNonValidQuery)
+    createTimeline(getTimelineNonValidQuery())
       .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
       .then((timelineId: string) =>
         refreshTimelinesUntilTimeLinePresent(timelineId)
@@ -56,16 +56,16 @@ describe('Timeline notes tab', () => {
   });
   it('should render mockdown', () => {
     cy.intercept('/api/note').as(`updateNote`);
-    addNotesToTimeline(timelineNonValidQuery.notes);
+    addNotesToTimeline(getTimelineNonValidQuery().notes);
     cy.wait('@updateNote').its('response.statusCode').should('eq', 200);
     cy.get(NOTES_TEXT_AREA).should('exist');
   });
 
   it('should contain notes', () => {
     cy.intercept('/api/note').as(`updateNote`);
-    addNotesToTimeline(timelineNonValidQuery.notes);
+    addNotesToTimeline(getTimelineNonValidQuery().notes);
     cy.wait('@updateNote').its('response.statusCode').should('eq', 200);
-    cy.get(NOTES_TEXT).first().should('have.text', timelineNonValidQuery.notes);
+    cy.get(NOTES_TEXT).first().should('have.text', getTimelineNonValidQuery().notes);
   });
 
   it('should be able to render font in bold', () => {
@@ -91,7 +91,7 @@ describe('Timeline notes tab', () => {
 
   it('should render the right author', () => {
     cy.intercept('/api/note').as(`updateNote`);
-    addNotesToTimeline(timelineNonValidQuery.notes);
+    addNotesToTimeline(getTimelineNonValidQuery().notes);
     cy.wait('@updateNote').its('response.statusCode').should('eq', 200);
     cy.get(NOTES_AUTHOR).first().should('have.text', text);
   });

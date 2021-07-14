@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { case1 } from '../../objects/case';
+import { getCase1, TestCase } from '../../objects/case';
 
 import {
   ALL_CASES_CLOSED_CASES_STATS,
@@ -55,12 +55,12 @@ import { CASES_URL } from '../../urls/navigation';
 describe('Cases', () => {
   beforeEach(() => {
     cleanKibana();
-    createTimeline(case1.timeline).then((response) =>
+    createTimeline(getCase1().timeline).then((response) =>
       cy
         .wrap({
-          ...case1,
+          ...getCase1(),
           timeline: {
-            ...case1.timeline,
+            ...getCase1().timeline,
             id: response.body.data.persistTimeline.timeline.savedObjectId,
           },
         })
@@ -86,7 +86,7 @@ describe('Cases', () => {
     cy.get(ALL_CASES_TAGS_COUNT).should('have.text', 'Tags2');
     cy.get(ALL_CASES_NAME).should('have.text', this.mycase.name);
     cy.get(ALL_CASES_REPORTER).should('have.text', this.mycase.reporter);
-    (this.mycase as typeof case1).tags.forEach((tag, index) => {
+    (this.mycase as TestCase).tags.forEach((tag, index) => {
       cy.get(ALL_CASES_TAGS(index)).should('have.text', tag);
     });
     cy.get(ALL_CASES_COMMENTS_COUNT).should('have.text', '0');
