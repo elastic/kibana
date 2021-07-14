@@ -17,7 +17,8 @@ import {
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import { Coordinate } from '../../../../typings/timeseries';
-import { environmentQuery, kqlQuery, rangeQuery } from '../../../utils/queries';
+import { kqlQuery, rangeQuery } from '../../../../../observability/server';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { Setup } from '../../helpers/setup_request';
 import {

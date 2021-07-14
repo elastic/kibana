@@ -41,7 +41,9 @@ const indexPattern = ({
 const rollupIndexPattern = ({
   type: IndexPatternType.ROLLUP,
   typeMeta: {
-    'rollup-index': 'rollup',
+    params: {
+      'rollup-index': 'rollup',
+    },
     aggs: {
       date_histogram: {
         timestamp: {
