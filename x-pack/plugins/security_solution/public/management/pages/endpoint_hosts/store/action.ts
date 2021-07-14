@@ -15,7 +15,7 @@ import {
 } from '../../../../../common/endpoint/types';
 import { ServerApiError } from '../../../../common/types';
 import { GetPolicyListResponse } from '../../policy/types';
-import { EndpointIndexUIQueryParams, EndpointState } from '../types';
+import { EndpointState } from '../types';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 
 export interface ServerReturnedEndpointList {
@@ -171,11 +171,6 @@ export interface EndpointDetailsActivityLogUpdatePaging {
   };
 }
 
-export interface EndpointDetailsFlyoutTabChanged {
-  type: 'endpointDetailsFlyoutTabChanged';
-  payload: { flyoutView: EndpointIndexUIQueryParams['show'] };
-}
-
 export type EndpointAction =
   | ServerReturnedEndpointList
   | ServerFailedToReturnEndpointList
@@ -183,7 +178,6 @@ export type EndpointAction =
   | ServerFailedToReturnEndpointDetails
   | AppRequestedEndpointActivityLog
   | EndpointDetailsActivityLogUpdatePaging
-  | EndpointDetailsFlyoutTabChanged
   | EndpointDetailsActivityLogChanged
   | ServerReturnedEndpointPolicyResponse
   | ServerFailedToReturnEndpointPolicyResponse
