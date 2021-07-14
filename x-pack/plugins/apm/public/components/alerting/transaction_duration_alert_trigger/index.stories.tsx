@@ -15,6 +15,7 @@ import {
   mockApmPluginContextValue,
   MockApmPluginContextWrapper,
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
+import { ApmServiceContextProvider } from '../../../context/apm_service/apm_service_context';
 import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
 
 export default {
@@ -44,7 +45,9 @@ export default {
             <Route path="/services/:serviceName">
               <MockApmPluginContextWrapper value={contextMock}>
                 <MockUrlParamsContextProvider>
-                  <StoryComponent />
+                  <ApmServiceContextProvider>
+                    <StoryComponent />
+                  </ApmServiceContextProvider>
                 </MockUrlParamsContextProvider>
               </MockApmPluginContextWrapper>
             </Route>
