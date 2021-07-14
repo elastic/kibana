@@ -15,8 +15,11 @@ import { SourceRegistryEntry } from '../classes/sources/source_registry';
 import { LayerWizard } from '../classes/layers/layer_wizard_registry';
 import type { CreateLayerDescriptorParams } from '../classes/sources/es_search_source';
 import type { EMSTermJoinConfig, SampleValuesConfig } from '../ems_autosuggest';
+import type { CreateTileMapLayerDescriptorParams } from '../classes/layers/create_tile_map_layer_descriptor';
 
 let loadModulesPromise: Promise<LazyLoadedMapModules>;
+
+
 
 interface LazyLoadedMapModules {
   MapEmbeddable: new (
@@ -41,15 +44,7 @@ interface LazyLoadedMapModules {
     geoFieldName,
     metricAgg,
     metricFieldName,
-  }: {
-    label: string;
-    mapType: string;
-    colorSchema: string;
-    indexPatternId?: string;
-    geoFieldName?: string;
-    metricAgg: string;
-    metricFieldName?: string;
-  }) => LayerDescriptor | null;
+  }: CreateTileMapLayerDescriptorParams) => LayerDescriptor | null;
   createRegionMapLayerDescriptor: ({
     label,
     emsLayerId,

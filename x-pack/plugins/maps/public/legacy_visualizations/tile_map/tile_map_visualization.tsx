@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
+import React, { Component, RefObject } from 'react';
 import uuid from 'uuid/v4';
-import { i18n } from '@kbn/i18n';
 import { EuiLoadingChart } from '@elastic/eui';
+import type { Filter, Query, TimeRange } from '../../../../../../src/plugins/data/common';
 import type { Embeddable } from '../../../../../../src/plugins/embeddable/public';
 import type { MapEmbeddableInput, MapEmbeddableOutput } from '../../embeddable';
 import { lazyLoadMapModules } from '../../lazy_load_bundle';
 import { TileMapVisConfig } from './types';
 
 interface Props {
-  context: unknown;
+  filters?: Filter[];
+  query?: Query;
+  timeRange?: TimeRange;
   visConfig: TileMapVisConfig;
 }
 
@@ -26,8 +28,8 @@ interface State {
 export class TileMapVisualization extends Component<Props, State> {
   private _isMounted = false;
   private _mapEmbeddable?: Embeddable<MapEmbeddableInput, MapEmbeddableOutput> | undefined;
-  private readonly _embeddableRef: HTMLDivElement = React.createRef();
-  
+  private readonly _embeddableRef: RefObject<HTMLDivElement> = React.createRef<HTMLDivElement>();
+
   state: State = { isLoaded: false };
 
   componentDidMount() {
@@ -44,7 +46,11 @@ export class TileMapVisualization extends Component<Props, State> {
 
   componentDidUpdate() {
     if (this._mapEmbeddable) {
-      this._mapEmbeddable.updateInput(this.props.context);
+      this._mapEmbeddable.updateInput({
+        filters: this.props.filters,
+        query: this.props.query,
+        timeRange: this.props.timeRange,
+      });
     }
   }
 
@@ -73,10 +79,12 @@ export class TileMapVisualization extends Component<Props, State> {
           lat: this.props.visConfig.mapCenter[0],
           lon: this.props.visConfig.mapCenter[1],
           zoom: this.props.visConfig.mapZoom,
-        }
+        },
       }
     );
-    this._mapEmbeddable.render(this._embeddableRef.current);
+    if (this._embeddableRef.current) {
+      this._mapEmbeddable.render(this._embeddableRef.current);
+    }
   }
 
   render() {

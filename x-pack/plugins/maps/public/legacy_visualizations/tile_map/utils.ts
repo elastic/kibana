@@ -7,12 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import { Vis } from '../../../../../../src/plugins/visualizations/public';
+import { indexPatterns } from '../../../../../../src/plugins/data/public';
+import { TileMapVisParams } from './types';
 
 export const COORDINATE_MAP_TITLE = i18n.translate('xpack.maps.legacyVisualizations.tileMapTitle', {
   defaultMessage: 'Coordinate Map',
 });
 
-export function extractLayerDescriptorParams(vis: Vis) {
+export function extractLayerDescriptorParams(vis: Vis<TileMapVisParams>) {
   const params: { [key: string]: any } = {
     label: vis.title ? vis.title : COORDINATE_MAP_TITLE,
     mapType: vis.params.mapType,

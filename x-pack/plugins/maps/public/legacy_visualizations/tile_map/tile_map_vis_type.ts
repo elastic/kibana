@@ -1,9 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -14,11 +13,11 @@ import { TileMapEditor } from './tile_map_editor';
 
 export const tileMapVisType = {
   name: 'tile_map',
-  title: i18n.translate('xpack.maps.tileMap.vis.mapTitle', {
+  title: i18n.translate('xpack.maps.tileMap.vis.title', {
     defaultMessage: 'Coordinate Map',
   }),
   icon: 'visMapCoordinate',
-  description: i18n.translate('xpack.maps.tileMap.vis.mapDescription', {
+  description: i18n.translate('xpack.maps.tileMap.vis.description', {
     defaultMessage: 'Plot latitude and longitude coordinates on a map',
   }),
   editorConfig: {
