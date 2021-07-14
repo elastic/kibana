@@ -48,36 +48,6 @@ This plugin follows the `common`, `server`, `public` structure from the [Archite
 
 Note: The plugin was previously named Ingest Manager it's possible that some variables are still named with that old plugin name.
 
-### Tests
-
-#### API integration tests
-
-You need to have `docker` to run ingest manager api integration tests
-
-1. In one terminal, run the tests from the Kibana root directory with
-
-   ```
-   FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/test/fleet_api_integration/config.ts
-   ```
-
-1. in a second terminal, run the tests from the Kibana root directory with
-
-   ```
-   FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/test/fleet_api_integration/config.ts
-   ```
-
-   Optionally you can filter which tests you want to run using `--grep`
-
-   ```
-   FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/test/fleet_api_integration/config.ts --grep='fleet'
-   ```
-
-**Note** you can also supply which docker image to use for the package registry via the `FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE` env variable. For example,
-
-```
-FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE='docker.elastic.co/package-registry/distribution:production' FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner
-```
-
 ### Running Fleet Server Locally in a Container
 
 It can be useful to run Fleet Server in a container on your local machine in order to free up your actual "bare metal" machine to run Elastic Agent for testing purposes. Otherwise, you'll only be able to a single instance of Elastic Agent dedicated to Fleet Server on your local machine, and this can make testing integrations and policies difficult.
@@ -111,7 +81,7 @@ docker run -it --rm alpine nslookup host.docker.internal
 To run the Fleet Server Docker container:
 
 ```
-docker run -e KIBANA_HOST=http://{YOUR-IP}/{BASE-PATH}:5601 -e KIBANA_USERNAME=elastic -e KIBANA_PASSWORD=changeme -e ELASTICSEARCH_HOST=http://{YOUR-IP}:9200 -e ELASTICSEARCH_USERNAME=elastic -e ELASTICSEARCH_PASSWORD=changeme -e KIBANA_FLEET_SETUP=1 -e FLEET_SERVER_ENABLE=1 -e FLEET_SERVER_INSECURE_HTTP=1 -p 8220:8220 docker.elastic.co/beats/elastic-agent:{VERSION}
+docker run -e KIBANA_HOST=http://{YOUR-IP}:5601/{BASE-PATH} -e KIBANA_USERNAME=elastic -e KIBANA_PASSWORD=changeme -e ELASTICSEARCH_HOST=http://{YOUR-IP}:9200 -e ELASTICSEARCH_USERNAME=elastic -e ELASTICSEARCH_PASSWORD=changeme -e KIBANA_FLEET_SETUP=1 -e FLEET_SERVER_ENABLE=1 -e FLEET_SERVER_INSECURE_HTTP=1 -p 8220:8220 docker.elastic.co/beats/elastic-agent:{VERSION}
 ```
 
 Ensure you provide the `-p 8220:8220` port mapping to map the Fleet Server container's port `8220` to your local machine's port `8220` in order for Fleet to communicate with Fleet Server.
@@ -119,3 +89,34 @@ Ensure you provide the `-p 8220:8220` port mapping to map the Fleet Server conta
 For the latest version, use `8.0.0-SNAPSHOT`. Otherwise, you can explore the available versions at https://www.docker.elastic.co/r/beats/elastic-agent.
 
 Once the Fleet Server container is running, you should be able to treat it as if it were a local process running on `http://localhost:8220` when configuring Fleet via the UI. You can then run `elastic-agent` on your local machine directly for testing purposes.
+
+### Tests
+
+#### API integration tests
+
+You need to have `docker` to run ingest manager api integration tests
+
+1. In one terminal, run the tests from the Kibana root directory with
+
+   ```
+   FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/test/fleet_api_integration/config.ts
+   ```
+
+1. in a second terminal, run the tests from the Kibana root directory with
+
+   ```
+   FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/test/fleet_api_integration/config.ts
+   ```
+
+   Optionally you can filter which tests you want to run using `--grep`
+
+   ```
+   FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/test/fleet_api_integration/config.ts --grep='fleet'
+   ```
+
+**Note** you can also supply which docker image to use for the package registry via the `FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE` env variable. For example,
+
+```
+FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE='docker.elastic.co/package-registry/distribution:production' FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner
+```
+
