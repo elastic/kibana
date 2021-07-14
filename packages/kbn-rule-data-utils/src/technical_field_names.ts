@@ -19,6 +19,7 @@ const RULE_NAME = 'rule.name' as const;
 const RULE_CATEGORY = 'rule.category' as const;
 const TAGS = 'tags' as const;
 const PRODUCER = `${ALERT_NAMESPACE}.producer` as const;
+const OWNER = `${ALERT_NAMESPACE}.owner` as const;
 const ALERT_ID = `${ALERT_NAMESPACE}.id` as const;
 const ALERT_UUID = `${ALERT_NAMESPACE}.uuid` as const;
 const ALERT_START = `${ALERT_NAMESPACE}.start` as const;
@@ -40,6 +41,7 @@ const fields = {
   RULE_CATEGORY,
   TAGS,
   PRODUCER,
+  OWNER,
   ALERT_ID,
   ALERT_UUID,
   ALERT_START,
@@ -62,6 +64,7 @@ export {
   RULE_CATEGORY,
   TAGS,
   PRODUCER,
+  OWNER,
   ALERT_ID,
   ALERT_UUID,
   ALERT_START,

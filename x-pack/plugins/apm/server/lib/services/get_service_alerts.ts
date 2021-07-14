@@ -11,7 +11,8 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
-import { environmentQuery, rangeQuery } from '../../utils/queries';
+import { rangeQuery } from '../../../../observability/server';
+import { environmentQuery } from '../../../common/utils/environment_query';
 
 export async function getServiceAlerts({
   ruleDataClient,

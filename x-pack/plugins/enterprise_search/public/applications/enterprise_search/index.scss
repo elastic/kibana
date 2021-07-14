@@ -21,21 +21,7 @@
   &__header {
     text-align: center;
     margin: auto;
-  }
-
-  &__heading {
-    @include euiBreakpoint('xs', 's') {
-      font-size: $euiFontSizeXL;
-      line-height: map-get(map-get($euiTitles, 'm'), 'line-height');
-    }
-  }
-
-  &__subheading {
-    color: $euiColorMediumShade;
-    font-size: $euiFontSize;
-
     @include euiBreakpoint('m', 'l', 'xl') {
-      font-size: $euiFontSizeL;
       margin-bottom: $euiSizeL;
     }
   }
