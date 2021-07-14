@@ -627,13 +627,13 @@ For more information, see <<kibana-privileges>>.
 (required, string) The absolute path of the final bundle as used in the web application.
 
 `sourcemap`::
-(required, string) The source map. It must follow the
-https://docs.google.com/document/d/1U1RGAehQwRypUTovF1KRlpiOFze0b-_2gc6fAH0KY0k[Source map revision 3 proposal].
+(required, string or file upload) The source map. It must follow the
+https://docs.google.com/document/d/1U1RGAehQwRypUTovF1KRlpiOFze0b-_2gc6fAH0KY0k[source map revision 3 proposal].
 
 [[apm-sourcemap-post-example]]
-===== Example
+===== Examples
 
-The following example uploads a sourcemap for a service named `foo` and a service version of `1.0.0`:
+The following example uploads a source map for a service named `foo` and a service version of `1.0.0`:
 
 [source,curl]
 --------------------------------------------------
@@ -641,11 +641,12 @@ curl -X POST "http://localhost:5601/api/apm/sourcemaps" \
 -H 'Content-Type: multipart/form-data' \
 -H 'kbn-xsrf: true' \
 -H 'Authorization: ApiKey ${YOUR_API_KEY}' \
---form 'service_name="foo"' \
---form 'service_version="1.0.0"' \
---form 'bundle_filepath="/test/e2e/general-usecase/bundle.js.map"' \
---form 'sourcemap="{\"version\":3,\"file\":\"static/js/main.chunk.js\",\"sources\":[\"fleet-source-map-client/src/index.css\",\"fleet-source-map-client/src/App.js\",\"webpack:///./src/index.css?bb0a\",\"fleet-source-map-client/src/index.js\",\"fleet-source-map-client/src/reportWebVitals.js\"],\"sourcesContent\":[\"content\"],\"mappings\":\"mapping\",\"sourceRoot\":\"\"}"'
+-F 'service_name="foo"' \
+-F 'service_version="1.0.0"' \
+-F 'bundle_filepath="/test/e2e/general-usecase/bundle.js.map"' \
+-F 'sourcemap="{\"version\":3,\"file\":\"static/js/main.chunk.js\",\"sources\":[\"fleet-source-map-client/src/index.css\",\"fleet-source-map-client/src/App.js\",\"webpack:///./src/index.css?bb0a\",\"fleet-source-map-client/src/index.js\",\"fleet-source-map-client/src/reportWebVitals.js\"],\"sourcesContent\":[\"content\"],\"mappings\":\"mapping\",\"sourceRoot\":\"\"}"' <1>
 --------------------------------------------------
+<1> Alternatively, upload the source map as a file with `-F 'sourcemap=@path/to/source_map/bundle.js.map'`
 
 [[apm-sourcemap-post-body]]
 ===== Response body
