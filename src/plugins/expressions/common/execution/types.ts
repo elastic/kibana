@@ -64,7 +64,10 @@ export interface ExecutionContext<
    */
   isSyncColorsEnabled?: () => boolean;
 
-  executionContext?: IExecutionContextContainer;
+  /**
+   * Contains the meta-data about the source of the expression.
+   */
+  readonly executionContext?: IExecutionContextContainer;
 }
 
 /**
