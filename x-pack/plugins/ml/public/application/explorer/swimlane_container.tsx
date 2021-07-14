@@ -323,9 +323,6 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
         },
         fontSize: 12,
       },
-      overflow: {
-        rightOverflow: 50,
-      },
       xAxisLabel: {
         visible: true,
         // eui color subdued

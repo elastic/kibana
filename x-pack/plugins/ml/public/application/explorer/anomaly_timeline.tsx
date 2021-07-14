@@ -286,7 +286,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                     tooltipService={tooltipService}
                   />
                 )}
-              </MlTooltipComponent>{' '}
+              </MlTooltipComponent>
               <EuiSpacer size="m" />
             </>
           ) : null}
