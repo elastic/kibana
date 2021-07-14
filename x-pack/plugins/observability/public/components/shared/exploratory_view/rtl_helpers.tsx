@@ -206,7 +206,7 @@ export function render<ExtraCore>(
   };
 }
 
-const getHistoryFromUrl = (url: Url) => {
+export const getHistoryFromUrl = (url: Url) => {
   if (typeof url === 'string') {
     return createMemoryHistory({
       initialEntries: [url],
