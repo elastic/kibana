@@ -199,7 +199,7 @@ function createInternalCorePrebootMock() {
     http: httpServiceMock.createInternalPrebootContract(),
     httpResources: httpResourcesMock.createPrebootContract(),
     uiSettings: uiSettingsServiceMock.createPrebootContract(),
-    logging: loggingServiceMock.createInternalSetupContract(),
+    logging: loggingServiceMock.createInternalPrebootContract(),
     preboot: prebootServiceMock.createInternalPrebootContract(),
   };
   return prebootDeps;

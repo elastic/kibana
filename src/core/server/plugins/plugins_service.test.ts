@@ -968,20 +968,20 @@ describe('PluginsService', () => {
       });
     });
 
-    it('starts `standard` plugins and stops `preboot` ones', async () => {
+    it('stops `preboot` plugins and starts `standard` ones', async () => {
       await pluginsService.discover({ environment: environmentPreboot });
       await pluginsService.preboot(prebootDeps);
       await pluginsService.setup(setupDeps);
 
-      expect(mockPluginSystem.startPlugins).not.toHaveBeenCalled();
       expect(mockPluginSystem.stopPlugins).not.toHaveBeenCalled();
+      expect(mockPluginSystem.startPlugins).not.toHaveBeenCalled();
 
       await pluginsService.start(startDeps);
 
-      expect(mockPluginSystem.startPlugins).toHaveBeenCalledTimes(1);
-      expect(mockPluginSystem.startPlugins).toHaveBeenCalledWith(PluginType.standard, startDeps);
       expect(mockPluginSystem.stopPlugins).toHaveBeenCalledTimes(1);
       expect(mockPluginSystem.stopPlugins).toHaveBeenCalledWith(PluginType.preboot);
+      expect(mockPluginSystem.startPlugins).toHaveBeenCalledTimes(1);
+      expect(mockPluginSystem.startPlugins).toHaveBeenCalledWith(PluginType.standard, startDeps);
     });
   });
 

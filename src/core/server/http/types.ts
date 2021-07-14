@@ -400,6 +400,7 @@ export interface InternalHttpServiceSetup
     contextName: ContextName,
     provider: RequestHandlerContextProvider<Context, ContextName>
   ) => RequestHandlerContextContainer;
+  registerPrebootRoutes(path: string, callback: (router: IRouter) => void): void;
 }
 
 /** @public */

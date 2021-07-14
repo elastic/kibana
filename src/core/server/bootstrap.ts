@@ -59,9 +59,9 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
     reloadConfiguration();
   });
 
-  function reloadConfiguration(reason = 'SIGHUP') {
+  function reloadConfiguration(reason = 'SIGHUP signal received') {
     const cliLogger = root.logger.get('cli');
-    cliLogger.info(`Reloading Kibana configuration due to ${reason}.`, { tags: ['config'] });
+    cliLogger.info(`Reloading Kibana configuration (reason: ${reason}).`, { tags: ['config'] });
 
     try {
       rawConfigService.reloadConfig();
@@ -69,7 +69,7 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
       return shutdown(err);
     }
 
-    cliLogger.info(`Reloaded Kibana configuration due to ${reason}.`, { tags: ['config'] });
+    cliLogger.info(`Reloaded Kibana configuration (reason: ${reason}).`, { tags: ['config'] });
   }
 
   process.on('SIGINT', () => shutdown());
@@ -94,7 +94,7 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
       root.logger.get().info('Holding setup until preboot stage is completed.');
       const { shouldReloadConfig } = await preboot.waitUntilCanSetup();
       if (shouldReloadConfig) {
-        await reloadConfiguration('preboot request');
+        await reloadConfiguration('configuration might have changed during preboot stage');
       }
     }
 

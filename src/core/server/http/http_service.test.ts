@@ -21,6 +21,7 @@ import { contextServiceMock } from '../context/context_service.mock';
 import { executionContextServiceMock } from '../execution_context/execution_context_service.mock';
 import { config as cspConfig } from '../csp';
 import { config as externalUrlConfig, ExternalUrlConfig } from '../external_url';
+import { Router } from './router';
 
 const logger = loggingSystemMock.create();
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());
@@ -165,6 +166,15 @@ test('spins up `preboot` server until started if configured with `autoListen:tru
 test('logs error if already set up', async () => {
   const configService = createConfigService();
 
+  mockHttpServer.mockImplementationOnce(() => ({
+    setup: () => ({
+      server: { start: jest.fn(), stop: jest.fn(), route: jest.fn() },
+      registerStaticDir: jest.fn(),
+    }),
+    start: noop,
+    stop: noop,
+  }));
+
   const httpServer = {
     isListening: () => true,
     setup: jest.fn().mockReturnValue({ server: fakeHapiServer }),
@@ -175,6 +185,7 @@ test('logs error if already set up', async () => {
 
   const service = new HttpService({ coreId, configService, env, logger });
 
+  await service.preboot(prebootDeps);
   await service.setup(setupDeps);
 
   expect(loggingSystemMock.collect(logger).warn).toMatchSnapshot();
@@ -239,6 +250,15 @@ test('stops `preboot` server if it is running', async () => {
 test('register route handler', async () => {
   const configService = createConfigService();
 
+  mockHttpServer.mockImplementationOnce(() => ({
+    setup: () => ({
+      server: { start: jest.fn(), stop: jest.fn(), route: jest.fn() },
+      registerStaticDir: jest.fn(),
+    }),
+    start: noop,
+    stop: noop,
+  }));
+
   const registerRouterMock = jest.fn();
   const httpServer = {
     isListening: () => false,
@@ -252,11 +272,67 @@ test('register route handler', async () => {
 
   const service = new HttpService({ coreId, configService, env, logger });
 
+  await service.preboot(prebootDeps);
   const { createRouter } = await service.setup(setupDeps);
   const router = createRouter('/foo');
 
   expect(registerRouterMock).toHaveBeenCalledTimes(1);
   expect(registerRouterMock).toHaveBeenLastCalledWith(router);
+});
+
+test('register preboot route handler on preboot', async () => {
+  const registerRouterMock = jest.fn();
+  mockHttpServer.mockImplementationOnce(() => ({
+    setup: () => ({
+      server: { start: jest.fn(), stop: jest.fn(), route: jest.fn() },
+      registerStaticDir: jest.fn(),
+      registerRouterAfterListening: registerRouterMock,
+    }),
+    start: noop,
+    stop: noop,
+  }));
+
+  const service = new HttpService({ coreId, configService: createConfigService(), env, logger });
+
+  const registerRoutesMock = jest.fn();
+  const { registerRoutes } = await service.preboot(prebootDeps);
+  registerRoutes('some-path', registerRoutesMock);
+
+  expect(registerRoutesMock).toHaveBeenCalledTimes(1);
+  expect(registerRoutesMock).toHaveBeenCalledWith(expect.any(Router));
+
+  const [[router]] = registerRoutesMock.mock.calls;
+  expect(registerRouterMock).toHaveBeenCalledTimes(1);
+  expect(registerRouterMock).toHaveBeenCalledWith(router);
+});
+
+test('register preboot route handler on setup', async () => {
+  const registerRouterMock = jest.fn();
+  mockHttpServer
+    .mockImplementationOnce(() => ({
+      setup: () => ({
+        server: { start: jest.fn(), stop: jest.fn(), route: jest.fn() },
+        registerStaticDir: jest.fn(),
+        registerRouterAfterListening: registerRouterMock,
+      }),
+      start: noop,
+      stop: noop,
+    }))
+    .mockImplementationOnce(() => ({ setup: () => ({ server: {} }), start: noop, stop: noop }));
+
+  const service = new HttpService({ coreId, configService: createConfigService(), env, logger });
+  await service.preboot(prebootDeps);
+
+  const registerRoutesMock = jest.fn();
+  const { registerPrebootRoutes } = await service.setup(setupDeps);
+  registerPrebootRoutes('some-path', registerRoutesMock);
+
+  expect(registerRoutesMock).toHaveBeenCalledTimes(1);
+  expect(registerRoutesMock).toHaveBeenCalledWith(expect.any(Router));
+
+  const [[router]] = registerRoutesMock.mock.calls;
+  expect(registerRouterMock).toHaveBeenCalledTimes(1);
+  expect(registerRouterMock).toHaveBeenCalledWith(router);
 });
 
 test('returns `preboot` http server contract on preboot', async () => {
@@ -292,6 +368,15 @@ test('returns http server contract on setup', async () => {
   const configService = createConfigService();
   const httpServer = { server: fakeHapiServer, options: { someOption: true } };
 
+  mockHttpServer.mockImplementationOnce(() => ({
+    setup: () => ({
+      server: { start: jest.fn(), stop: jest.fn(), route: jest.fn() },
+      registerStaticDir: jest.fn(),
+    }),
+    start: noop,
+    stop: noop,
+  }));
+
   mockHttpServer.mockImplementation(() => ({
     isListening: () => false,
     setup: jest.fn().mockReturnValue(httpServer),
@@ -300,10 +385,12 @@ test('returns http server contract on setup', async () => {
   }));
 
   const service = new HttpService({ coreId, configService, env, logger });
+  await service.preboot(prebootDeps);
   const setupContract = await service.setup(setupDeps);
   expect(setupContract).toMatchObject(httpServer);
   expect(setupContract).toMatchObject({
     createRouter: expect.any(Function),
+    registerPrebootRoutes: expect.any(Function),
   });
 });
 
@@ -311,6 +398,14 @@ test('does not start http server if configured with `autoListen:false`', async (
   const configService = createConfigService({
     autoListen: false,
   });
+  mockHttpServer.mockImplementationOnce(() => ({
+    setup: () => ({
+      server: { start: jest.fn(), stop: jest.fn(), route: jest.fn() },
+      registerStaticDir: jest.fn(),
+    }),
+    start: noop,
+    stop: noop,
+  }));
   const httpServer = {
     isListening: () => false,
     setup: jest.fn().mockReturnValue({}),
@@ -326,6 +421,7 @@ test('does not start http server if configured with `autoListen:false`', async (
     logger,
   });
 
+  await service.preboot(prebootDeps);
   await service.setup(setupDeps);
   await service.start();
 

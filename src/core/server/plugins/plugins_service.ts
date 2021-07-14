@@ -150,7 +150,9 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       await this.pluginsSystem.setupPlugins(PluginType.preboot, deps);
       this.registerPluginStaticDirs(deps, this.uiPluginInternalInfo.preboot);
     } else {
-      this.log.info('Plugin initialization disabled.');
+      this.log.info(
+        'Skipping `setup` for `preboot` plugins since plugin initialization is disabled.'
+      );
     }
   }
 
@@ -164,7 +166,9 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       contracts = await this.pluginsSystem.setupPlugins(PluginType.standard, deps);
       this.registerPluginStaticDirs(deps, this.uiPluginInternalInfo.standard);
     } else {
-      this.log.info('Plugin initialization disabled.');
+      this.log.info(
+        'Skipping `setup` for `standard` plugins since plugin initialization is disabled.'
+      );
     }
 
     return {
@@ -175,8 +179,8 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
 
   public async start(deps: PluginsServiceStartDeps) {
     this.log.debug('Plugins service starts plugins');
-    const contracts = await this.pluginsSystem.startPlugins(PluginType.standard, deps);
     await this.pluginsSystem.stopPlugins(PluginType.preboot);
+    const contracts = await this.pluginsSystem.startPlugins(PluginType.standard, deps);
     return { contracts };
   }
 

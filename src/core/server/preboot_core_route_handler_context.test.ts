@@ -20,16 +20,6 @@ describe('#uiSettings', () => {
       expect(client).toBe(mockResult);
     });
 
-    test('lazily created', () => {
-      const corePreboot = coreMock.createInternalPreboot();
-      const context = new PrebootCoreRouteHandlerContext(corePreboot);
-
-      expect(corePreboot.uiSettings.createDefaultsClient).not.toHaveBeenCalled();
-      const client = context.uiSettings.client;
-      expect(corePreboot.uiSettings.createDefaultsClient).toHaveBeenCalled();
-      expect(client).toBeDefined();
-    });
-
     test('only creates one instance', () => {
       const corePreboot = coreMock.createInternalPreboot();
       const context = new PrebootCoreRouteHandlerContext(corePreboot);

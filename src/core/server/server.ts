@@ -22,13 +22,7 @@ import { HttpService } from './http';
 import { HttpResourcesService } from './http_resources';
 import { RenderingService } from './rendering';
 import { LegacyService } from './legacy';
-import {
-  Logger,
-  LoggerFactory,
-  LoggingService,
-  ILoggingSystem,
-  InternalLoggingServiceSetup,
-} from './logging';
+import { Logger, LoggerFactory, LoggingService, ILoggingSystem } from './logging';
 import { UiSettingsService } from './ui_settings';
 import { PluginsService, config as pluginsConfig } from './plugins';
 import { SavedObjectsService, SavedObjectsServiceStart } from './saved_objects';
@@ -98,7 +92,6 @@ export class Server {
   #pluginsInitialized?: boolean;
   private coreStart?: InternalCoreStart;
   private discoveredPlugins?: DiscoveredPlugins;
-  private loggingSetup?: InternalLoggingServiceSetup;
   private readonly logger: LoggerFactory;
 
   constructor(
@@ -162,7 +155,6 @@ export class Server {
     this.capabilities.preboot({ http: httpPreboot });
     const elasticsearchServicePreboot = await this.elasticsearch.preboot();
     const uiSettingsPreboot = await this.uiSettings.preboot();
-    await this.status.preboot({ http: httpPreboot });
 
     const renderingPreboot = await this.rendering.preboot({ http: httpPreboot, uiPlugins });
     const httpResourcesPreboot = this.httpResources.preboot({
@@ -170,7 +162,7 @@ export class Server {
       rendering: renderingPreboot,
     });
 
-    this.loggingSetup = this.logging.setup({ loggingSystem: this.loggingSystem });
+    const loggingPreboot = this.logging.preboot({ loggingSystem: this.loggingSystem });
 
     const corePreboot: InternalCorePreboot = {
       context: contextServicePreboot,
@@ -178,7 +170,7 @@ export class Server {
       http: httpPreboot,
       uiSettings: uiSettingsPreboot,
       httpResources: httpResourcesPreboot,
-      logging: this.loggingSetup,
+      logging: loggingPreboot,
       preboot: this.prebootService.preboot(),
     };
 
@@ -264,6 +256,8 @@ export class Server {
       rendering: renderingSetup,
     });
 
+    const loggingSetup = this.logging.setup();
+
     const deprecationsSetup = this.deprecations.setup({
       http: httpSetup,
     });
@@ -281,7 +275,7 @@ export class Server {
       uiSettings: uiSettingsSetup,
       rendering: renderingSetup,
       httpResources: httpResourcesSetup,
-      logging: this.loggingSetup!,
+      logging: loggingSetup,
       metrics: metricsSetup,
       deprecations: deprecationsSetup,
     };

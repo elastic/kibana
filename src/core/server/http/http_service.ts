@@ -60,6 +60,7 @@ export class HttpService
 
   private readonly log: Logger;
   private readonly env: Env;
+  private internalPreboot?: InternalHttpServicePreboot;
   private internalSetup?: InternalHttpServiceSetup;
   private requestHandlerContext?: RequestHandlerContextContainer;
 
@@ -106,7 +107,7 @@ export class HttpService
     }
 
     const prebootServerRequestHandlerContext = deps.context.createContextContainer();
-    return {
+    this.internalPreboot = {
       externalUrl: new ExternalUrlConfig(config.externalUrl),
       csp: prebootSetup.csp,
       basePath: prebootSetup.basePath,
@@ -126,6 +127,8 @@ export class HttpService
         prebootSetup.registerRouterAfterListening(router);
       },
     };
+
+    return this.internalPreboot;
   }
 
   public async setup(deps: SetupDeps) {
@@ -172,6 +175,8 @@ export class HttpService
         contextName: ContextName,
         provider: RequestHandlerContextProvider<Context, ContextName>
       ) => this.requestHandlerContext!.registerContext(pluginOpaqueId, contextName, provider),
+
+      registerPrebootRoutes: this.internalPreboot!.registerRoutes,
     };
 
     return this.internalSetup;

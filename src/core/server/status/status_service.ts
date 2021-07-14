@@ -14,7 +14,7 @@ import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { Logger, LogMeta } from '../logging';
 import { InternalElasticsearchServiceSetup } from '../elasticsearch';
-import { InternalHttpServicePreboot, InternalHttpServiceSetup } from '../http';
+import { InternalHttpServiceSetup } from '../http';
 import { InternalSavedObjectsServiceSetup } from '../saved_objects';
 import { PluginName } from '../plugins';
 import { InternalMetricsServiceSetup } from '../metrics';
@@ -29,10 +29,6 @@ import { getOverallStatusChanges } from './log_overall_status';
 
 interface StatusLogMeta extends LogMeta {
   kibana: { status: ServiceStatus };
-}
-
-interface PrebootSetupDeps {
-  http: InternalHttpServicePreboot;
 }
 
 interface SetupDeps {
@@ -52,15 +48,10 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
   private overall$?: Observable<ServiceStatus>;
   private pluginsStatus?: PluginsStatusService;
   private overallSubscription?: Subscription;
-  private httpPrebootSetup?: InternalHttpServicePreboot;
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('status');
     this.config$ = coreContext.configService.atPath<StatusConfigType>(config.path);
-  }
-
-  public async preboot({ http }: PrebootSetupDeps) {
-    this.httpPrebootSetup = http;
   }
 
   public async setup({
@@ -119,7 +110,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     });
 
     if (commonRouteDeps.config.allowAnonymous) {
-      this.httpPrebootSetup?.registerRoutes('', (prebootRouter) => {
+      http.registerPrebootRoutes('', (prebootRouter) => {
         registerStatusRoute({
           router: prebootRouter,
           ...commonRouteDeps,

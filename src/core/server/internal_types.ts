@@ -33,9 +33,9 @@ import {
 import { InternalEnvironmentServiceSetup } from './environment';
 import { InternalMetricsServiceSetup, InternalMetricsServiceStart } from './metrics';
 import { InternalRenderingServiceSetup } from './rendering';
-import { InternalHttpResourcesSetup } from './http_resources';
+import { InternalHttpResourcesPreboot, InternalHttpResourcesSetup } from './http_resources';
 import { InternalStatusServiceSetup } from './status';
-import { InternalLoggingServiceSetup } from './logging';
+import { InternalLoggingServicePreboot, InternalLoggingServiceSetup } from './logging';
 import { CoreUsageDataStart } from './core_usage_data';
 import { I18nServiceSetup } from './i18n';
 import { InternalDeprecationsServiceSetup } from './deprecations';
@@ -51,8 +51,8 @@ export interface InternalCorePreboot {
   http: InternalHttpServicePreboot;
   elasticsearch: InternalElasticsearchServicePreboot;
   uiSettings: InternalUiSettingsServicePreboot;
-  httpResources: InternalHttpResourcesSetup;
-  logging: InternalLoggingServiceSetup;
+  httpResources: InternalHttpResourcesPreboot;
+  logging: InternalLoggingServicePreboot;
   preboot: InternalPrebootServicePreboot;
 }
 

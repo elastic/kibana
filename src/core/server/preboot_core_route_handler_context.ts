@@ -8,24 +8,18 @@
 
 // eslint-disable-next-line max-classes-per-file
 import { InternalCorePreboot } from './internal_types';
-import { InternalUiSettingsServicePreboot, IUiSettingsClient } from './ui_settings';
+import { IUiSettingsClient } from './ui_settings';
 
 class PrebootCoreUiSettingsRouteHandlerContext {
-  #client?: IUiSettingsClient;
-  constructor(private readonly uiSettingsPreboot: InternalUiSettingsServicePreboot) {}
-
-  public get client() {
-    if (this.#client == null) {
-      this.#client = this.uiSettingsPreboot.createDefaultsClient();
-    }
-    return this.#client;
-  }
+  constructor(public readonly client: IUiSettingsClient) {}
 }
 
 export class PrebootCoreRouteHandlerContext {
   readonly uiSettings: PrebootCoreUiSettingsRouteHandlerContext;
 
   constructor(private readonly corePreboot: InternalCorePreboot) {
-    this.uiSettings = new PrebootCoreUiSettingsRouteHandlerContext(this.corePreboot.uiSettings);
+    this.uiSettings = new PrebootCoreUiSettingsRouteHandlerContext(
+      this.corePreboot.uiSettings.createDefaultsClient()
+    );
   }
 }

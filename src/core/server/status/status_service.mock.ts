@@ -58,7 +58,6 @@ type StatusServiceContract = PublicMethodsOf<StatusService>;
 
 const createMock = () => {
   const mocked: jest.Mocked<StatusServiceContract> = {
-    preboot: jest.fn(),
     setup: jest.fn().mockReturnValue(createInternalSetupContractMock()),
     start: jest.fn(),
     stop: jest.fn(),

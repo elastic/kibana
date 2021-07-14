@@ -32,6 +32,10 @@ export type {
 export { LoggingSystem } from './logging_system';
 export type { ILoggingSystem } from './logging_system';
 export { LoggingService } from './logging_service';
-export type { InternalLoggingServiceSetup, LoggingServiceSetup } from './logging_service';
+export type {
+  InternalLoggingServicePreboot,
+  InternalLoggingServiceSetup,
+  LoggingServiceSetup,
+} from './logging_service';
 export { appendersSchema } from './appenders/appenders';
 export type { AppenderConfigType } from './appenders/appenders';

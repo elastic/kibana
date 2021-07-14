@@ -89,8 +89,8 @@ export function createPluginInitializerContext(
 }
 
 /**
- * This returns a facade for `CoreContext` that will be exposed to the `preboot` plugin `setup` method.
- * This facade should be safe to use only within `setup` itself.
+ * Provides `CorePreboot` contract that will be exposed to the `preboot` plugin `setup` method.
+ * This contract should be safe to use only within `setup` itself.
  *
  * This is called for each `preboot` plugin when it's set up, so each plugin gets its own
  * version of these values.

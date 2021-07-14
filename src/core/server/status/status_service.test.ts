@@ -38,14 +38,8 @@ describe('StatusService', () => {
     summary: 'This is degraded!',
   };
 
-  const prebootDeps = () => {
-    return {
-      http: httpServiceMock.createInternalPrebootContract(),
-    };
-  };
-
   type SetupDeps = Parameters<StatusService['setup']>[0];
-  const setupDeps = (overrides: Partial<SetupDeps> = {}): SetupDeps => {
+  const setupDeps = (overrides: Partial<SetupDeps>): SetupDeps => {
     return {
       elasticsearch: {
         status$: of(available),
@@ -63,10 +57,6 @@ describe('StatusService', () => {
 
   describe('setup', () => {
     describe('core$', () => {
-      beforeEach(async () => {
-        await service.preboot(prebootDeps());
-      });
-
       it('rolls up core status observables into single observable', async () => {
         const setup = await service.setup(
           setupDeps({
@@ -178,10 +168,6 @@ describe('StatusService', () => {
     });
 
     describe('overall$', () => {
-      beforeEach(async () => {
-        await service.preboot(prebootDeps());
-      });
-
       it('exposes an overall summary', async () => {
         const setup = await service.setup(
           setupDeps({
@@ -339,19 +325,18 @@ describe('StatusService', () => {
       });
     });
 
-    describe('preboot server', () => {
+    describe('preboot status routes', () => {
       let prebootRouterMock: RouterMock;
       beforeEach(async () => {
         prebootRouterMock = mockRouter.create();
       });
 
       it('does not register `status` route if anonymous access is not allowed', async () => {
-        const deps = prebootDeps();
-        deps.http.registerRoutes.mockImplementation((path, callback) =>
+        const httpSetup = httpServiceMock.createInternalSetupContract();
+        httpSetup.registerPrebootRoutes.mockImplementation((path, callback) =>
           callback(prebootRouterMock)
         );
-        await service.preboot(deps);
-        await service.setup(setupDeps());
+        await service.setup(setupDeps({ http: httpSetup }));
 
         expect(prebootRouterMock.get).not.toHaveBeenCalled();
       });
@@ -361,12 +346,11 @@ describe('StatusService', () => {
         configService.atPath.mockReturnValue(new BehaviorSubject({ allowAnonymous: true }));
         service = new StatusService(mockCoreContext.create({ configService }));
 
-        const deps = prebootDeps();
-        deps.http.registerRoutes.mockImplementation((path, callback) =>
+        const httpSetup = httpServiceMock.createInternalSetupContract();
+        httpSetup.registerPrebootRoutes.mockImplementation((path, callback) =>
           callback(prebootRouterMock)
         );
-        await service.preboot(deps);
-        await service.setup(setupDeps());
+        await service.setup(setupDeps({ http: httpSetup }));
 
         expect(prebootRouterMock.get).toHaveBeenCalledTimes(1);
         expect(prebootRouterMock.get).toHaveBeenCalledWith(

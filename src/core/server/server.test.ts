@@ -66,9 +66,8 @@ test('preboot services on "preboot"', async () => {
   expect(mockI18nService.preboot).not.toHaveBeenCalled();
   expect(mockElasticsearchService.preboot).not.toHaveBeenCalled();
   expect(mockUiSettingsService.preboot).not.toHaveBeenCalled();
-  expect(mockStatusService.preboot).not.toHaveBeenCalled();
   expect(mockRenderingService.preboot).not.toHaveBeenCalled();
-  expect(mockLoggingService.setup).not.toHaveBeenCalled();
+  expect(mockLoggingService.preboot).not.toHaveBeenCalled();
   expect(mockPluginsService.preboot).not.toHaveBeenCalled();
   expect(mockPrebootService.preboot).not.toHaveBeenCalled();
 
@@ -80,9 +79,8 @@ test('preboot services on "preboot"', async () => {
   expect(mockI18nService.preboot).toHaveBeenCalledTimes(1);
   expect(mockElasticsearchService.preboot).toHaveBeenCalledTimes(1);
   expect(mockUiSettingsService.preboot).toHaveBeenCalledTimes(1);
-  expect(mockStatusService.preboot).toHaveBeenCalledTimes(1);
   expect(mockRenderingService.preboot).toHaveBeenCalledTimes(1);
-  expect(mockLoggingService.setup).toHaveBeenCalledTimes(1);
+  expect(mockLoggingService.preboot).toHaveBeenCalledTimes(1);
   expect(mockPluginsService.preboot).toHaveBeenCalledTimes(1);
   expect(mockPrebootService.preboot).toHaveBeenCalledTimes(1);
 });
@@ -102,6 +100,7 @@ test('sets up services on "setup"', async () => {
   expect(mockRenderingService.setup).not.toHaveBeenCalled();
   expect(mockMetricsService.setup).not.toHaveBeenCalled();
   expect(mockStatusService.setup).not.toHaveBeenCalled();
+  expect(mockLoggingService.setup).not.toHaveBeenCalled();
   expect(mockI18nService.setup).not.toHaveBeenCalled();
 
   await server.setup();
@@ -116,6 +115,7 @@ test('sets up services on "setup"', async () => {
   expect(mockRenderingService.setup).toHaveBeenCalledTimes(1);
   expect(mockMetricsService.setup).toHaveBeenCalledTimes(1);
   expect(mockStatusService.setup).toHaveBeenCalledTimes(1);
+  expect(mockLoggingService.setup).toHaveBeenCalledTimes(1);
   expect(mockI18nService.setup).toHaveBeenCalledTimes(1);
 });
 
@@ -230,9 +230,8 @@ test(`doesn't preboot core services if config validation fails`, async () => {
   expect(mockI18nService.preboot).not.toHaveBeenCalled();
   expect(mockElasticsearchService.preboot).not.toHaveBeenCalled();
   expect(mockUiSettingsService.preboot).not.toHaveBeenCalled();
-  expect(mockStatusService.preboot).not.toHaveBeenCalled();
   expect(mockRenderingService.preboot).not.toHaveBeenCalled();
-  expect(mockLoggingService.setup).not.toHaveBeenCalled();
+  expect(mockLoggingService.preboot).not.toHaveBeenCalled();
   expect(mockPluginsService.preboot).not.toHaveBeenCalled();
   expect(mockPrebootService.preboot).not.toHaveBeenCalled();
 });
