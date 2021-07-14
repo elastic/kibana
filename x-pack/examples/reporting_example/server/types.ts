@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-export const PLUGIN_ID = 'reportingExample';
-export const PLUGIN_NAME = 'reportingExample';
+import { SharePluginSetup } from 'src/plugins/share/server';
 
-export {
-  REPORTING_EXAMPLE_LOCATOR_ID,
-  ReportingExampleLocatorDefinition,
-  ReportingExampleLocatorParams,
-} from './locator';
+export interface SetupDeps {
+  share: SharePluginSetup;
+}

@@ -2,8 +2,8 @@
   "id": "reportingExample",
   "version": "1.0.0",
   "kibanaVersion": "kibana",
-  "server": false,
+  "server": true,
   "ui": true,
   "optionalPlugins": [],
-  "requiredPlugins": ["reporting", "developerExamples", "navigation", "screenshotMode"]
+  "requiredPlugins": ["reporting", "developerExamples", "navigation", "screenshotMode", "share"]
 }

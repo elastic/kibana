@@ -8,7 +8,7 @@
 import { CoreSetup } from 'kibana/public';
 import React from 'react';
 import { ReportingAPIClient } from '../';
-import { PDF_REPORT_TYPE } from '../../common/constants';
+import { PDF_REPORT_TYPE, PDF_REPORT_TYPE_V2 } from '../../common/constants';
 import type { Props as PanelPropsScreenCapture } from '../share_context_menu/screen_capture_panel_content';
 import { ScreenCapturePanelContent } from '../share_context_menu/screen_capture_panel_content_lazy';
 
@@ -31,6 +31,18 @@ export function getSharedComponents(core: CoreSetup) {
           layoutOption={props.layoutOption}
           requiresSavedState={false}
           reportType={PDF_REPORT_TYPE}
+          apiClient={new ReportingAPIClient(core.http)}
+          toasts={core.notifications.toasts}
+          {...props}
+        />
+      );
+    },
+    ReportingPanelPDFV2(props: PropsPDF) {
+      return (
+        <ScreenCapturePanelContent
+          layoutOption={props.layoutOption}
+          requiresSavedState={false}
+          reportType={PDF_REPORT_TYPE_V2}
           apiClient={new ReportingAPIClient(core.http)}
           toasts={core.notifications.toasts}
           {...props}

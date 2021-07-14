@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-export const PLUGIN_ID = 'reportingExample';
-export const PLUGIN_NAME = 'reportingExample';
+import { ReportingExampleServerPlugin } from './plugin';
 
-export {
-  REPORTING_EXAMPLE_LOCATOR_ID,
-  ReportingExampleLocatorDefinition,
-  ReportingExampleLocatorParams,
-} from './locator';
+export const plugin = () => {
+  return new ReportingExampleServerPlugin();
+};

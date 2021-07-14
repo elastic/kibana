@@ -31,7 +31,12 @@ import { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
 import { CoreStart } from '../../../../../src/core/public';
 import { NavigationPublicPluginStart } from '../../../../../src/plugins/navigation/public';
 import { constants, ReportingStart } from '../../../../../x-pack/plugins/reporting/public';
-import { JobParamsPDF } from '../../../../plugins/reporting/server/export_types/printable_pdf/types';
+import {
+  JobParamsPDF,
+  JobParamsPDFV2,
+} from '../../../../plugins/reporting/server/export_types/printable_pdf/types';
+
+import { REPORTING_EXAMPLE_LOCATOR_ID } from '../../common';
 
 interface ReportingExampleAppDeps {
   basename: string;
@@ -86,6 +91,18 @@ export const ReportingExampleApp = ({
     };
   };
 
+  const getPDFJobParamsDefaultV2 = (): JobParamsPDFV2 => {
+    return {
+      layout: {
+        id: constants.LAYOUT_TYPES.PRESERVE_LAYOUT,
+        selectors: getDefaultLayoutSelectors(),
+      },
+      locators: [{ id: REPORTING_EXAMPLE_LOCATOR_ID, version: '1', params: { myTestState: {} } }],
+      objectType: 'develeloperExample',
+      title: 'Reporting Developer Example',
+    };
+  };
+
   const panels = [
     { id: 0, items: [{ name: 'PDF Reports', icon: 'document', panel: 1 }] },
     {
@@ -94,6 +111,7 @@ export const ReportingExampleApp = ({
       title: 'PDF Reports',
       items: [
         { name: 'No Layout Option', icon: 'document', panel: 2 },
+        { name: 'V2 No Layout Option', icon: 'document', panel: 4 },
         { name: 'Canvas Layout Option', icon: 'canvasApp', panel: 3 },
       ],
     },
@@ -114,6 +132,16 @@ export const ReportingExampleApp = ({
         <reporting.components.ReportingPanelPDF
           layoutOption="canvas"
           getJobParams={getPDFJobParamsDefault}
+          onClose={closePopover}
+        />
+      ),
+    },
+    {
+      id: 4,
+      title: 'V2 No Layout Option',
+      content: (
+        <reporting.components.ReportingPanelPDFV2
+          getJobParams={getPDFJobParamsDefaultV2}
           onClose={closePopover}
         />
       ),
