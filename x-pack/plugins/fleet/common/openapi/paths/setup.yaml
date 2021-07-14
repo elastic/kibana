@@ -1,5 +1,5 @@
 post:
-  summary: Ingest Manager - Setup
+  summary: Fleet - Setup
   tags: []
   responses:
     '200':
