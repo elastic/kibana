@@ -390,6 +390,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         ml: plugins.ml,
         lists: plugins.lists,
         mergeStrategy: this.config.alertMergeStrategy,
+        experimentalFeatures,
       });
       const ruleNotificationType = rulesNotificationAlertType({
         logger: this.logger,
