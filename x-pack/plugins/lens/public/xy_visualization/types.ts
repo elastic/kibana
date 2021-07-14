@@ -48,6 +48,10 @@ export interface LegendConfig {
    * Vertical Alignment of the legend when it is set inside chart
    */
   verticalAlignment?: VerticalAlignment;
+  /**
+   * Number of columns when legend is set inside chart
+   */
+  floatingColumns?: number;
 }
 
 type LegendConfigResult = LegendConfig & { type: 'lens_xy_legendConfig' };
@@ -103,6 +107,12 @@ export const legendConfig: ExpressionFunctionDefinition<
       help: i18n.translate('xpack.lens.xyChart.verticalAlignment.help', {
         defaultMessage:
           'Specifies the vertical alignment of the legend when it is displayed inside chart.',
+      }),
+    },
+    floatingColumns: {
+      types: ['number'],
+      help: i18n.translate('xpack.lens.xyChart.floatingColumns.help', {
+        defaultMessage: 'Specifies the number of columns when legend is displayed inside chart.',
       }),
     },
   },

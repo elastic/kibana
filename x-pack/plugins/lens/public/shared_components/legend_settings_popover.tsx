@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiButtonGroup, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { Position, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
 import { ToolbarPopover } from '../shared_components';
+import { LegendLocationSettings } from './legend_location_settings';
 import { ToolbarButtonProps } from '../../../../../src/plugins/kibana_react/public';
 
 export interface LegendSettingsPopoverProps {
@@ -18,13 +19,13 @@ export interface LegendSettingsPopoverProps {
    */
   legendOptions: Array<{
     id: string;
-    value: 'auto' | 'show' | 'hide' | 'default' | 'inside';
+    value: 'auto' | 'show' | 'hide' | 'default';
     label: string;
   }>;
   /**
    * Determines the legend mode
    */
-  mode: 'default' | 'show' | 'hide' | 'auto' | 'inside';
+  mode: 'default' | 'show' | 'hide' | 'auto';
   /**
    * Callback on display option change
    */
@@ -38,6 +39,14 @@ export interface LegendSettingsPopoverProps {
    */
   onPositionChange: (id: string) => void;
   /**
+   * Determines the legend location
+   */
+  location?: 'inside' | 'outside';
+  /**
+   * Callback on location option change
+   */
+  onLocationChange?: (id: string) => void;
+  /**
    * Sets the vertical alignment for legend inside chart
    */
   verticalAlignment?: VerticalAlignment;
@@ -49,6 +58,14 @@ export interface LegendSettingsPopoverProps {
    * Callback on horizontal alignment option change
    */
   onAlignmentChange?: (id: string, type: string) => void;
+  /**
+   * Sets the number of columns for legend inside chart
+   */
+  floatingColumns?: number;
+  /**
+   * Callback on horizontal alignment option change
+   */
+  onFloatingColumnsChange?: (value: number) => void;
   /**
    * If true, nested legend switch is rendered
    */
@@ -110,48 +127,18 @@ const toggleButtonsIcons = [
   },
 ];
 
-const verticalAlignButtonsIcons = [
-  {
-    id: VerticalAlignment.Bottom,
-    label: i18n.translate('xpack.lens.shared.legendVerticalAlignBottom', {
-      defaultMessage: 'Bottom',
-    }),
-    iconType: 'arrowDown',
-  },
-  {
-    id: VerticalAlignment.Top,
-    label: i18n.translate('xpack.lens.shared.legendVerticalAlignTop', {
-      defaultMessage: 'Top',
-    }),
-    iconType: 'arrowUp',
-  },
-];
-
-const horizontalAlignButtonsIcons = [
-  {
-    id: HorizontalAlignment.Left,
-    label: i18n.translate('xpack.lens.shared.legendHorizontalAlignLeft', {
-      defaultMessage: 'Left',
-    }),
-    iconType: 'arrowLeft',
-  },
-  {
-    id: HorizontalAlignment.Right,
-    label: i18n.translate('xpack.lens.shared.legendHorizontalAlignRight', {
-      defaultMessage: 'Right',
-    }),
-    iconType: 'arrowRight',
-  },
-];
-
 export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopoverProps> = ({
   legendOptions,
   mode,
   onDisplayChange,
   position,
+  location,
+  onLocationChange = () => {},
   verticalAlignment,
   horizontalAlignment,
+  floatingColumns,
   onAlignmentChange = () => {},
+  onFloatingColumnsChange = () => {},
   onPositionChange,
   renderNestedLegendSwitch,
   nestedLegend,
@@ -189,65 +176,40 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
           onChange={onDisplayChange}
         />
       </EuiFormRow>
-      {mode !== 'inside' && (
-        <EuiFormRow
-          display="columnCompressed"
-          label={i18n.translate('xpack.lens.shared.legendPositionLabel', {
-            defaultMessage: 'Position',
-          })}
-        >
-          <EuiButtonGroup
-            legend={i18n.translate('xpack.lens.shared.legendPositionLabel', {
+      {location && (
+        <LegendLocationSettings
+          location={location}
+          onLocationChange={onLocationChange}
+          verticalAlignment={verticalAlignment}
+          horizontalAlignment={horizontalAlignment}
+          onAlignmentChange={onAlignmentChange}
+          floatingColumns={floatingColumns}
+          onFloatingColumnsChange={onFloatingColumnsChange}
+        />
+      )}
+      {!location ||
+        (location === 'outside' && (
+          <EuiFormRow
+            display="columnCompressed"
+            label={i18n.translate('xpack.lens.shared.legendPositionLabel', {
               defaultMessage: 'Position',
             })}
-            isDisabled={mode === 'hide'}
-            data-test-subj="lens-legend-position-btn"
-            name="legendPosition"
-            buttonSize="compressed"
-            options={toggleButtonsIcons}
-            idSelected={position || Position.Right}
-            onChange={onPositionChange}
-            isIconOnly
-          />
-        </EuiFormRow>
-      )}
-      {mode === 'inside' && (
-        <EuiFormRow
-          display="columnCompressed"
-          label={i18n.translate('xpack.lens.shared.legendInsideAlignmentLabel', {
-            defaultMessage: 'Alignment',
-          })}
-        >
-          <>
+          >
             <EuiButtonGroup
-              legend={i18n.translate('xpack.lens.shared.legendInsideVerticalAlignmentLabel', {
-                defaultMessage: 'Vertical alignment',
+              legend={i18n.translate('xpack.lens.shared.legendPositionLabel', {
+                defaultMessage: 'Position',
               })}
-              type="single"
-              data-test-subj="lens-legend-inside-valign-btn"
-              name="legendInsideVAlign"
+              isDisabled={mode === 'hide'}
+              data-test-subj="lens-legend-position-btn"
+              name="legendPosition"
               buttonSize="compressed"
-              options={verticalAlignButtonsIcons}
-              idSelected={verticalAlignment || VerticalAlignment.Top}
-              onChange={(id) => onAlignmentChange(id, 'vertical')}
+              options={toggleButtonsIcons}
+              idSelected={position || Position.Right}
+              onChange={onPositionChange}
               isIconOnly
             />
-            <EuiButtonGroup
-              legend={i18n.translate('xpack.lens.shared.legendInsideHorizontalAlignLabel', {
-                defaultMessage: 'Horizontal alignment',
-              })}
-              type="single"
-              data-test-subj="lens-legend-inside-halign-btn"
-              name="legendInsideHAlign"
-              buttonSize="compressed"
-              options={horizontalAlignButtonsIcons}
-              idSelected={horizontalAlignment || HorizontalAlignment.Right}
-              onChange={(id) => onAlignmentChange(id, 'horizontal')}
-              isIconOnly
-            />
-          </>
-        </EuiFormRow>
-      )}
+          </EuiFormRow>
+        ))}
       {renderNestedLegendSwitch && (
         <EuiFormRow
           display="columnCompressedSwitch"

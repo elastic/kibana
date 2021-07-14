@@ -608,6 +608,7 @@ export function XYChart({
     hAlign: legend?.horizontalAlignment ?? HorizontalAlignment.Right,
     direction: LayoutDirection.Vertical,
     floating: true,
+    floatingColumns: legend?.floatingColumns ?? 1,
   } as LegendPositionConfig;
 
   return (

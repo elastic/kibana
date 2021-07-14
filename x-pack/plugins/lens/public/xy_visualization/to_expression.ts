@@ -149,6 +149,9 @@ export const buildExpression = (
                     verticalAlignment: state.legend.verticalAlignment
                       ? [state.legend.verticalAlignment]
                       : [],
+                    floatingColumns: state.legend.floatingColumns
+                      ? [state.legend.floatingColumns]
+                      : [],
                   },
                 },
               ],

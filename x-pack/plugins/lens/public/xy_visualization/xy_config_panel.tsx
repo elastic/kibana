@@ -63,7 +63,7 @@ function updateLayer(state: State, layer: UnwrapArray<State['layers']>, index: n
 
 const legendOptions: Array<{
   id: string;
-  value: 'auto' | 'show' | 'hide' | 'inside';
+  value: 'auto' | 'show' | 'hide';
   label: string;
 }> = [
   {
@@ -85,13 +85,6 @@ const legendOptions: Array<{
     value: 'hide',
     label: i18n.translate('xpack.lens.xyChart.legendVisibility.hide', {
       defaultMessage: 'Hide',
-    }),
-  },
-  {
-    id: `xy_legend_inside`,
-    value: 'inside',
-    label: i18n.translate('xpack.lens.xyChart.legendVisibility.inside', {
-      defaultMessage: 'Inside',
     }),
   },
 ];
@@ -282,8 +275,6 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
       ? 'auto'
       : !state?.legend.isVisible
       ? 'hide'
-      : state?.legend.isInside
-      ? 'inside'
       : 'show';
   const hasBarOrAreaOnLeftAxis = Boolean(
     axisGroups
@@ -332,6 +323,16 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
           <LegendSettingsPopover
             legendOptions={legendOptions}
             mode={legendMode}
+            location={state?.legend.isInside ? 'inside' : 'outside'}
+            onLocationChange={(location) => {
+              setState({
+                ...state,
+                legend: {
+                  ...state.legend,
+                  isInside: location === 'inside',
+                },
+              });
+            }}
             onDisplayChange={(optionId) => {
               const newMode = legendOptions.find(({ id }) => id === optionId)!.value;
               if (newMode === 'auto') {
@@ -341,7 +342,6 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
                     ...state.legend,
                     isVisible: true,
                     showSingleSeries: false,
-                    isInside: false,
                   },
                 });
               } else if (newMode === 'show') {
@@ -351,7 +351,6 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
                     ...state.legend,
                     isVisible: true,
                     showSingleSeries: true,
-                    isInside: false,
                   },
                 });
               } else if (newMode === 'hide') {
@@ -361,17 +360,6 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
                     ...state.legend,
                     isVisible: false,
                     showSingleSeries: false,
-                    isInside: false,
-                  },
-                });
-              } else if (newMode === 'inside') {
-                setState({
-                  ...state,
-                  legend: {
-                    ...state.legend,
-                    isVisible: true,
-                    showSingleSeries: true,
-                    isInside: true,
                   },
                 });
               }
@@ -379,6 +367,13 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
             position={state?.legend.position}
             horizontalAlignment={state?.legend.horizontalAlignment}
             verticalAlignment={state?.legend.verticalAlignment}
+            floatingColumns={state?.legend.floatingColumns}
+            onFloatingColumnsChange={(val) => {
+              setState({
+                ...state,
+                legend: { ...state.legend, floatingColumns: val },
+              });
+            }}
             onPositionChange={(id) => {
               setState({
                 ...state,
