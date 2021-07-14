@@ -10,10 +10,6 @@ import { SecurityPageName } from '../../../app/types';
 import { UrlState } from '../url_state/types';
 import { SiemRouteType } from '../../utils/route/types';
 
-export interface SecuritySolutionTabNavigationProps {
-  display?: 'default' | 'condensed';
-  navTabs: Record<string, NavTab>;
-}
 export interface TabNavigationComponentProps {
   pageName: string;
   tabName: SiemRouteType | undefined;
@@ -59,8 +55,12 @@ export type SecurityNavKey =
   | SecurityPageName.trustedApps
   | SecurityPageName.ueba;
 
-export type SecurityNav = Record<SecurityNavKey, NavTab>;
+export type SecurityNav = Record<Exclude<SecurityNavKey,SecurityPageName.ueba>, NavTab> & {[SecurityPageName.ueba]?: NavTab};
 
+export interface SecuritySolutionTabNavigationProps {
+  display?: 'default' | 'condensed';
+  navTabs: SecurityNav;
+}
 export type GetUrlForApp = (
   appId: string,
   options?: { deepLinkId?: string; path?: string; absolute?: boolean }

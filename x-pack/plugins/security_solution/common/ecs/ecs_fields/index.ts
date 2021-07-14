@@ -69,15 +69,6 @@ export const hostFieldsMap: Readonly<Record<string, string>> = {
   ...extendMap('host', osFieldsMap),
 };
 
-export const riskScoreFieldsMap: Readonly<Record<string, string>> = {
-  // NOTE: This field is not tested and available from ECS. Please remove this tag once it is
-  'risk.score': 'risk_score',
-  // NOTE: This field is not tested and available from ECS. Please remove this tag once it is
-  'risk.keyword': 'risk.keyword',
-  // NOTE: I don't know what I'm doing here TO DO
-  'host.name': 'host.name',
-};
-
 export const processFieldsMap: Readonly<Record<string, string>> = {
   'process.hash.md5': 'process.hash.md5',
   'process.hash.sha1': 'process.hash.sha1',
@@ -365,5 +356,4 @@ export const eventFieldsMap: Readonly<Record<string, string>> = {
   ...{ ...userFieldsMap },
   ...{ ...winlogFieldsMap },
   ...{ ...processFieldsMap },
-  ...{ ...riskScoreFieldsMap },
 };

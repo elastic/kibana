@@ -48,6 +48,7 @@ export const mockGlobalState: State = {
       metricsEntitiesEnabled: false,
       ruleRegistryEnabled: false,
       tGridEnabled: false,
+      uebaEnabled: false,
     },
   },
   hosts: {

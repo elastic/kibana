@@ -12,10 +12,11 @@ export type ExperimentalFeatures = typeof allowedExperimentalValues;
  * This object is then used to validate and parse the value entered.
  */
 const allowedExperimentalValues = Object.freeze({
-  trustedAppsByPolicyEnabled: false,
   metricsEntitiesEnabled: false,
   ruleRegistryEnabled: false,
   tGridEnabled: false,
+  trustedAppsByPolicyEnabled: false,
+  uebaEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

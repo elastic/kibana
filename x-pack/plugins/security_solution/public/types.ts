@@ -92,7 +92,8 @@ export interface SubPlugins {
   cases: Cases;
   hosts: Hosts;
   network: Network;
-  ueba: Ueba;
+  // TO DO: make required once no longer experimental
+  ueba?: Ueba;
   overview: Overview;
   timelines: Timelines;
   management: Management;
@@ -106,7 +107,7 @@ export interface StartedSubPlugins {
   cases: ReturnType<Cases['start']>;
   hosts: ReturnType<Hosts['start']>;
   network: ReturnType<Network['start']>;
-  ueba: ReturnType<Ueba['start']>;
+  ueba?: ReturnType<Ueba['start']>;
   overview: ReturnType<Overview['start']>;
   timelines: ReturnType<Timelines['start']>;
   management: ReturnType<Management['start']>;

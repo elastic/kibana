@@ -43,6 +43,7 @@ import {
   EVENT_FILTERS_PATH,
   UEBA_PATH,
 } from '../../../common/constants';
+import { ExperimentalFeatures } from '../../../common/experimental_features';
 
 export const topDeepLinks: AppDeepLink[] = [
   {
@@ -336,12 +337,22 @@ const nestedDeepLinks: SecurityDeepLinks = {
  * @param licenseType optional string for license level, if not provided basic is assumed.
  */
 export function getDeepLinks(
+  enableExperimental: ExperimentalFeatures,
   licenseType?: LicenseType,
   capabilities?: ApplicationStart['capabilities']
 ): AppDeepLink[] {
+  console.log({ topDeepLinks, filtered: topDeepLinks
+      .filter(
+        (deepLink) =>
+          (deepLink.id === SecurityPageName.ueba && enableExperimental.uebaEnabled) ||
+          deepLink.id !== SecurityPageName.case ||
+          capabilities == null ||
+          (deepLink.id === SecurityPageName.case && capabilities.siem.read_cases === true)
+      ) })
   return topDeepLinks
     .filter(
       (deepLink) =>
+        (deepLink.id === SecurityPageName.ueba && enableExperimental.uebaEnabled) ||
         deepLink.id !== SecurityPageName.case ||
         capabilities == null ||
         (deepLink.id === SecurityPageName.case && capabilities.siem.read_cases === true)
@@ -387,11 +398,13 @@ export function isPremiumLicense(licenseType?: LicenseType): boolean {
 export function updateGlobalNavigation({
   capabilities,
   updater$,
+  enableExperimental,
 }: {
   capabilities: ApplicationStart['capabilities'];
   updater$: Subject<AppUpdater>;
+  enableExperimental: ExperimentalFeatures;
 }) {
-  const deepLinks = getDeepLinks(undefined, capabilities);
+  const deepLinks = getDeepLinks(enableExperimental, undefined, capabilities);
   const updatedDeepLinks = deepLinks.map((link) => {
     switch (link.id) {
       case SecurityPageName.case:

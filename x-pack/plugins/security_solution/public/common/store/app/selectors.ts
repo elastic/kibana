@@ -12,11 +12,21 @@ import { Note } from '../../lib/note';
 import { ErrorModel, NotesById } from './model';
 import { State } from '../types';
 import { TimelineResultNote } from '../../../timelines/components/open_timeline/types';
+import { ExperimentalFeatures } from '../../../../common/experimental_features';
 
 export const selectNotesById = (state: State): NotesById => state.app.notesById;
 
 const getErrors = (state: State): ErrorModel => state.app.errors;
+const selectEnableExperimental = (state: State): ExperimentalFeatures => state.app.enableExperimental ?? {
+  trustedAppsByPolicyEnabled: false,
+  metricsEntitiesEnabled: false,
+  ruleRegistryEnabled: false,
+  tGridEnabled: false,
+  uebaEnabled: false,
+};
 
+export const enableExperimentalSelector = () =>
+  createSelector(selectEnableExperimental, (experimentalFeatures: ExperimentalFeatures) => experimentalFeatures);
 export const getNotes = memoizeOne((notesById: NotesById, noteIds: string[]): Note[] =>
   keys(notesById).reduce((acc: Note[], noteId: string) => {
     if (noteIds.includes(noteId)) {
