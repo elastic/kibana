@@ -15,7 +15,7 @@ import type {
   LensSortAction,
   LensToggleAction,
 } from './types';
-import { ColumnConfig } from './table_basic';
+import type { ColumnConfig } from './table_basic';
 import { getOriginalId } from '../transpose_helpers';
 
 export const createGridResizeHandler = (

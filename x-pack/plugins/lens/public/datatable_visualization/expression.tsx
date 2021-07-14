@@ -12,24 +12,24 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 
 import type { IAggType } from 'src/plugins/data/public';
-import {
+import type {
   DatatableColumnMeta,
   ExpressionFunctionDefinition,
   ExpressionRenderDefinition,
 } from 'src/plugins/expressions';
-import { CustomPaletteState, PaletteOutput } from 'src/plugins/charts/common';
+import type { CustomPaletteState, PaletteOutput } from 'src/plugins/charts/common';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import { IUiSettingsClient } from 'kibana/public';
 import { getSortingCriteria } from './sorting';
 
 import { DatatableComponent } from './components/table_basic';
-import { ColumnState } from './visualization';
 
-import type { FormatFactory, ILensInterpreterRenderHandlers } from '../types';
-import type { LensMultiTable } from '../../common';
+import type { ILensInterpreterRenderHandlers } from '../types';
+import type { LensMultiTable, FormatFactory } from '../../common';
 import type { DatatableRender } from './components/types';
 import { transposeTable } from './transpose_helpers';
 import { computeSummaryRowForColumn } from './summary';
+import type { ColumnState } from '../../common';
 
 export type ColumnConfigArg = Omit<ColumnState, 'palette'> & {
   type: 'lens_datatable_column';

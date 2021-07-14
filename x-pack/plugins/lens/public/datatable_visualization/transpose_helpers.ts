@@ -9,7 +9,7 @@ import type { FieldFormat } from 'src/plugins/data/public';
 import type { Datatable, DatatableColumn, DatatableRow } from 'src/plugins/expressions';
 import { ColumnConfig } from './components/table_basic';
 
-import { Args, ColumnConfigArg } from './expression';
+import type { Args, ColumnConfigArg } from './expression';
 
 const TRANSPOSE_SEPARATOR = '---';
 

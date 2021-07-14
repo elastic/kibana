@@ -16,11 +16,10 @@ import {
   ExpressionRendererEvent,
   IInterpreterRenderHandlers,
   Datatable,
-  SerializedFieldFormat,
 } from '../../../../src/plugins/expressions/public';
 import { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import { DateRange } from '../common';
-import { Query, Filter, IFieldFormat } from '../../../../src/plugins/data/public';
+import { Query, Filter } from '../../../../src/plugins/data/public';
 import { VisualizeFieldContext } from '../../../../src/plugins/ui_actions/public';
 import { RangeSelectContext, ValueClickContext } from '../../../../src/plugins/embeddable/public';
 import {
@@ -36,8 +35,6 @@ import type {
 import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 
 export type ErrorCallback = (e: { message: string }) => void;
-
-export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
 
 export interface PublicAPIProps<T> {
   state: T;

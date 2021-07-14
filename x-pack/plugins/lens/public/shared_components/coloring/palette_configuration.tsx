@@ -6,7 +6,7 @@
  */
 
 import React, { FC } from 'react';
-import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
+import type { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import {
   EuiFormRow,
   htmlIdGenerator,
@@ -26,7 +26,7 @@ import './palette_configuration.scss';
 
 import { CustomStops } from './color_stops';
 import { defaultPaletteParams, CUSTOM_PALETTE, DEFAULT_COLOR_STEPS } from './constants';
-import { CustomPaletteParams, RequiredPaletteParamTypes } from './types';
+import type { CustomPaletteParams, RequiredPaletteParamTypes } from '../../../common';
 import {
   getColorStops,
   getPaletteStops,

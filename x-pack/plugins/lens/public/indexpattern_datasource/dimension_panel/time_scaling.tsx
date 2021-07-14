@@ -15,8 +15,7 @@ import {
   IndexPatternColumn,
   operationDefinitionMap,
 } from '../operations';
-import { unitSuffixesLong } from '../suffix_formatter';
-import { TimeScaleUnit } from '../time_scale';
+import { TimeScaleUnit, unitSuffixesLong } from '../../../common';
 import { IndexPatternLayer } from '../types';
 
 export function setTimeScaling(

@@ -18,13 +18,13 @@ import {
   EuiDataGridSorting,
   EuiDataGridStyle,
 } from '@elastic/eui';
-import { CustomPaletteState, PaletteOutput } from 'src/plugins/charts/common';
-import { FormatFactory, LensFilterEvent, LensTableRowContextMenuEvent } from '../../types';
+import type { CustomPaletteState, PaletteOutput } from 'src/plugins/charts/common';
+import type { LensFilterEvent, LensTableRowContextMenuEvent } from '../../types';
+import type { FormatFactory, ColumnState } from '../../../common';
 import { VisualizationContainer } from '../../visualization_container';
 import { EmptyPlaceholder, findMinMaxByColumnId } from '../../shared_components';
 import { LensIconChartDatatable } from '../../assets/chart_datatable';
-import { ColumnState } from '../visualization';
-import {
+import type {
   DataContextType,
   DatatableRenderProps,
   LensSortAction,

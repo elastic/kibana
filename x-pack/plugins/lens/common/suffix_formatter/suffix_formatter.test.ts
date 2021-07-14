@@ -6,7 +6,7 @@
  */
 
 import { FormatFactory } from '../types';
-import { getSuffixFormatter } from './suffix_formatter';
+import { getSuffixFormatter } from './index';
 
 describe('suffix formatter', () => {
   it('should call nested formatter and apply suffix', () => {

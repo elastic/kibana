@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { CoreSetup } from 'kibana/public';
-import { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
-import { EditorFrameSetup, FormatFactory } from '../types';
-import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
+import type { CoreSetup } from 'kibana/public';
+import type { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
+import type { EditorFrameSetup } from '../types';
+import type { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { getTimeZone } from '../utils';
+import type { FormatFactory } from '../../common';
 
 export interface HeatmapVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;

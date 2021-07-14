@@ -35,13 +35,14 @@ import type {
 import { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RenderMode } from 'src/plugins/expressions';
+import type { ILensInterpreterRenderHandlers, LensFilterEvent, LensBrushEvent } from '../types';
 import type {
+  LayerArgs,
+  SeriesType,
+  XYChartProps,
+  LensMultiTable,
   FormatFactory,
-  ILensInterpreterRenderHandlers,
-  LensFilterEvent,
-  LensBrushEvent,
-} from '../types';
-import type { LayerArgs, LensMultiTable, SeriesType, XYChartProps } from '../../common';
+} from '../../common';
 import { visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart, getSeriesColor } from './state_helpers';

@@ -7,12 +7,11 @@
 
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition, Datatable } from 'src/plugins/expressions/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { ExpressionFunctionDefinition, Datatable } from 'src/plugins/expressions/public';
+import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import { search } from '../../../../../src/plugins/data/public';
 import { buildResultColumns } from '../../../../../src/plugins/expressions/common';
-
-export type TimeScaleUnit = 's' | 'm' | 'h' | 'd';
+import type { TimeScaleUnit } from '../../common';
 
 export interface TimeScaleArgs {
   dateColumnId: string;

@@ -10,9 +10,10 @@ import { IUiSettingsClient } from 'kibana/public';
 import { CustomPaletteState, PaletteRegistry } from 'src/plugins/charts/public';
 import type { IAggType } from 'src/plugins/data/public';
 import type { Datatable, RenderMode } from 'src/plugins/expressions';
-import type { FormatFactory, ILensInterpreterRenderHandlers, LensEditEvent } from '../../types';
+import type { ILensInterpreterRenderHandlers, LensEditEvent } from '../../types';
 import type { DatatableProps } from '../expression';
 import { LENS_EDIT_SORT_ACTION, LENS_EDIT_RESIZE_ACTION, LENS_TOGGLE_ACTION } from './constants';
+import type { FormatFactory } from '../../../common';
 
 export type LensGridDirection = 'none' | Direction;
 

@@ -24,10 +24,10 @@ import {
   ElementClickListener,
 } from '@elastic/charts';
 import { RenderMode } from 'src/plugins/expressions';
-import { FormatFactory, LensFilterEvent } from '../types';
+import type { LensFilterEvent } from '../types';
 import { VisualizationContainer } from '../visualization_container';
 import { CHART_NAMES, DEFAULT_PERCENT_DECIMALS } from './constants';
-import type { PieExpressionProps } from '../../common';
+import type { PieExpressionProps, FormatFactory } from '../../common';
 import { getSliceValue, getFilterContext } from './render_helpers';
 import { EmptyPlaceholder } from '../shared_components';
 import './visualization.scss';

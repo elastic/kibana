@@ -26,11 +26,16 @@ import type {
   VisualizationLayerWidgetProps,
   VisualizationToolbarProps,
   VisualizationDimensionEditorProps,
-  FormatFactory,
   FramePublicAPI,
 } from '../types';
 import { State, visualizationTypes, XYState } from './types';
-import type { SeriesType, YAxisMode, AxesSettingsConfig, AxisExtentConfig } from '../../common';
+import type {
+  SeriesType,
+  YAxisMode,
+  AxesSettingsConfig,
+  AxisExtentConfig,
+  FormatFactory,
+} from '../../common';
 import { isHorizontalChart, isHorizontalSeries, getSeriesColor } from './state_helpers';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { LegendSettingsPopover } from '../shared_components';

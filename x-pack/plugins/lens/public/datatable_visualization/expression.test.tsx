@@ -6,7 +6,7 @@
  */
 
 import { DatatableProps, getDatatable } from './expression';
-import { LensMultiTable } from '../../common';
+import type { LensMultiTable } from '../../common';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 import { IFieldFormat } from '../../../../../src/plugins/data/public';
 

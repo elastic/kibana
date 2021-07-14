@@ -8,8 +8,8 @@
 import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { Visualization } from '../types';
-import { HeatmapVisualizationState } from './types';
+import type { Visualization } from '../types';
+import type { HeatmapVisualizationState } from './types';
 import { CHART_SHAPES, HEATMAP_GRID_FUNCTION, LEGEND_FUNCTION } from './constants';
 
 export const getSuggestions: Visualization<HeatmapVisualizationState>['getSuggestions'] = ({

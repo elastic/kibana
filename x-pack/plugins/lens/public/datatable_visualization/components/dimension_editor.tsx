@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import { VisualizationDimensionEditorProps } from '../../types';
-import { ColumnState, DatatableVisualizationState } from '../visualization';
+import { DatatableVisualizationState } from '../visualization';
 import { getOriginalId } from '../transpose_helpers';
 import {
   CustomizablePalette,
@@ -40,6 +40,7 @@ import {
   getSummaryRowOptions,
 } from '../summary';
 import { isNumericField } from '../utils';
+import type { ColumnState } from '../../../common';
 
 const idPrefix = htmlIdGenerator()();
 

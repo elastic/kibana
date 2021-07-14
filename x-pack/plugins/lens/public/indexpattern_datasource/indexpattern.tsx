@@ -76,10 +76,11 @@ export {
   FormatColumnArgs,
   supportedFormats,
   formatColumn,
+  getSuffixFormatter,
+  unitSuffixesLong,
 } from '../../common';
 export * from './rename_columns';
 export * from './time_scale';
-export * from './suffix_formatter';
 
 export function getIndexPatternDatasource({
   core,

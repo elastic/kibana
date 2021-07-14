@@ -9,9 +9,9 @@ import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { VisualizationToolbarProps } from '../types';
+import type { VisualizationToolbarProps } from '../types';
 import { LegendSettingsPopover } from '../shared_components';
-import { HeatmapVisualizationState } from './types';
+import type { HeatmapVisualizationState } from './types';
 
 const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label: string }> = [
   {

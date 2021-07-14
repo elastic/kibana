@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-export * from './counter_rate';
-export * from './format_column';
-export * from './time_scale';
-export * from './datatable';
-export * from './metric_chart';
-export * from './pie_chart';
-export * from './xy_chart';
+export * from './datatable_column';

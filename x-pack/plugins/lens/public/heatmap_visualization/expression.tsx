@@ -14,8 +14,8 @@ import type {
   ExpressionFunctionDefinition,
   IInterpreterRenderHandlers,
 } from '../../../../../src/plugins/expressions';
-import type { FormatFactory, LensBrushEvent, LensFilterEvent } from '../types';
-import type { LensMultiTable } from '../../common';
+import type { LensBrushEvent, LensFilterEvent } from '../types';
+import type { LensMultiTable, FormatFactory } from '../../common';
 import {
   FUNCTION_NAME,
   HEATMAP_GRID_FUNCTION,
