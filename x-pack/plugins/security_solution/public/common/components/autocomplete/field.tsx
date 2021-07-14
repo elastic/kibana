@@ -25,6 +25,13 @@ interface OperatorProps {
   onChange: (a: IFieldType[]) => void;
 }
 
+/**
+ * There is a copy within:
+ * x-pack/plugins/lists/public/exceptions/components/autocomplete/field.tsx
+ *
+ * TODO: This should be in its own packaged and not copied, https://github.com/elastic/kibana/issues/105378
+ * NOTE: This has deviated from the copy and will have to be reconciled.
+ */
 export const FieldComponent: React.FC<OperatorProps> = ({
   placeholder,
   selectedField,

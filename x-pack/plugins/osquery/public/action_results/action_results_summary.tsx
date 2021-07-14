@@ -8,15 +8,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { i18n } from '@kbn/i18n';
-import { EuiLink, EuiInMemoryTable, EuiCodeBlock } from '@elastic/eui';
+import { EuiInMemoryTable, EuiCodeBlock } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { PLUGIN_ID } from '../../../fleet/common';
-import { pagePathGetters } from '../../../fleet/public';
+import { AgentIdToName } from '../agents/agent_id_to_name';
 import { useActionResults } from './use_action_results';
 import { useAllResults } from '../results/use_all_results';
 import { Direction } from '../../common/search_strategy';
-import { useKibana } from '../common/lib/kibana';
 
 interface ActionResultsSummaryProps {
   actionId: string;
@@ -35,7 +33,6 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   expirationDate,
   agentIds,
 }) => {
-  const getUrlForApp = useKibana().services.application.getUrlForApp;
   // @ts-expect-error update types
   const [pageIndex, setPageIndex] = useState(0);
   // @ts-expect-error update types
@@ -70,20 +67,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     isLive,
   });
 
-  const renderAgentIdColumn = useCallback(
-    (agentId) => (
-      <EuiLink
-        className="eui-textTruncate"
-        href={getUrlForApp(PLUGIN_ID, {
-          path: `#` + pagePathGetters.agent_details({ agentId })[1],
-        })}
-        target="_blank"
-      >
-        {agentId}
-      </EuiLink>
-    ),
-    [getUrlForApp]
-  );
+  const renderAgentIdColumn = useCallback((agentId) => <AgentIdToName agentId={agentId} />, []);
 
   const renderRowsColumn = useCallback(
     (_, item) => {
