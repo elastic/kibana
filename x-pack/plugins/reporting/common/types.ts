@@ -125,12 +125,13 @@ export interface JobContent {
 }
 
 /*
- * Info API response: report query results do not need to include the
- * payload.headers or output.content
+ * Info API response: to avoid unnecessary large payloads on a network, the
+ * report query results do not include `payload.headers` or `output.content`,
+ * which can be long strings of meaningless text
  */
 interface ReportSimple extends Omit<ReportSource, 'payload' | 'output'> {
   payload: Omit<ReportSource['payload'], 'headers'>;
-  output?: Omit<Partial<TaskRunResult>, 'content'>; // is undefined for report jobs that are not completed
+  output?: Omit<TaskRunResult, 'content'>; // is undefined for report jobs that are not completed
 }
 
 /*
