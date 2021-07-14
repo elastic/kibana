@@ -57,7 +57,7 @@ export interface MetricAnomalyParams {
 }
 
 // Alert Preview API
-const baseAlertRequestParamsRT = rt.intersection([
+export const baseAlertRequestParamsRT = rt.intersection([
   rt.partial({
     filterQuery: rt.union([rt.string, rt.undefined]),
     sourceId: rt.string,

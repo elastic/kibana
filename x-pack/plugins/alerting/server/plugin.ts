@@ -84,6 +84,11 @@ export const LEGACY_EVENT_LOG_ACTIONS = {
   resolvedInstance: 'resolved-instance',
 };
 
+// export interface InventoryMetricPluginSetupContract
+//   extends Omit<PluginSetupContract, 'ActionGroupIds'> {
+//   ActionGroupIds: InventoryMetricThresholdAllowedActionGroups;
+// }
+
 export interface PluginSetupContract {
   registerType<
     Params extends AlertTypeParams = AlertTypeParams,
