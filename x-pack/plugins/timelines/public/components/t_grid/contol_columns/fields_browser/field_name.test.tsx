@@ -8,14 +8,11 @@
 import { mount } from 'enzyme';
 import React from 'react';
 import { waitFor } from '@testing-library/react';
-import { mockBrowserFields } from '../../../common/containers/source/mock';
-import { TestProviders } from '../../../common/mock';
-import '../../../common/mock/match_media';
-import { getColumnsWithTimestamp } from '../../../common/components/event_details/helpers';
+import { mockBrowserFields, TestProviders } from '../../../../mock';
+import '../../../../mock/match_media';
+import { getColumnsWithTimestamp } from '../../body/column_headers/helpers';
 
 import { FieldName } from './field_name';
-
-jest.mock('../../../common/lib/kibana');
 
 const categoryId = 'base';
 const timestampFieldId = '@timestamp';
@@ -52,7 +49,8 @@ describe('FieldName', () => {
     ).toEqual(timestampFieldId);
   });
 
-  test('it renders a copy to clipboard action menu item a user hovers over the name', async () => {
+  // TODO: does this drag&drop-integrated functionality need to be migrated?
+  test.skip('it renders a copy to clipboard action menu item a user hovers over the name', async () => {
     const wrapper = mount(
       <TestProviders>
         <FieldName {...defaultProps} />

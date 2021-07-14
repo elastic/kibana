@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mockBrowserFields } from '../../../common/containers/source/mock';
+import { mockBrowserFields } from '../../../../mock';
 
 import {
   categoryHasFields,
@@ -16,7 +16,7 @@ import {
   getFieldCount,
   filterBrowserFieldsByFieldName,
 } from './helpers';
-import { BrowserFields } from '../../../common/containers/source';
+import { BrowserFields } from '../../../../../common';
 
 const timelineId = 'test';
 

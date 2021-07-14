@@ -17,7 +17,7 @@ import {
 import { TimelineId } from '../../../../../public/types';
 import { BrowserField, BrowserFields } from '../../../../../common';
 import { defaultHeaders } from '../../../../store/t_grid/defaults';
-import { DEFAULT_CATEGORY_NAME } from '../../body/column_headers_dummy/default_headers';
+import { DEFAULT_CATEGORY_NAME } from '../../body/column_headers/default_headers';
 
 export const LoadingSpinner = styled(EuiLoadingSpinner)`
   cursor: pointer;

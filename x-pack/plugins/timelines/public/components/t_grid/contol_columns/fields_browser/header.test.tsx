@@ -7,8 +7,7 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { mockBrowserFields } from '../../../common/containers/source/mock';
-import { TestProviders } from '../../../common/mock';
+import { mockBrowserFields, TestProviders } from '../../../../mock';
 import { Header } from './header';
 
 const timelineId = 'test';

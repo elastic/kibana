@@ -83,8 +83,7 @@ describe('ColumnHeaders', () => {
       expect(wrapper.find('ColumnHeadersComponent')).toMatchSnapshot();
     });
 
-    // TODO BrowserField When we bring back browser fields unskip
-    test.skip('it renders the field browser', () => {
+    test('it renders the field browser', () => {
       const wrapper = mount(
         <TestProviders>
           <ColumnHeadersComponent
@@ -128,12 +127,13 @@ describe('ColumnHeaders', () => {
       );
 
       defaultHeaders.forEach((h) => {
-        expect(wrapper.find('[data-test-subj="headers-group"]').first().text()).toContain(h.id);
+        expect(wrapper.find('[data-test-subj="dataGridHeader"]').first().text()).toContain(h.id);
       });
     });
   });
 
-  describe('#onColumnsSorted', () => {
+  // TODO unskip when sorting is migrated back to EuiDataGrid
+  describe.skip('#onColumnsSorted', () => {
     let mockSort: Sort[] = [
       {
         columnId: '@timestamp',

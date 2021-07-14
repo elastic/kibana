@@ -8,7 +8,7 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { mockBrowserFields } from '../../../common/containers/source/mock';
+import { mockBrowserFields } from '../../../../mock';
 
 import { CATEGORY_PANE_WIDTH, getFieldCount } from './helpers';
 import { CategoriesPane } from './categories_pane';

@@ -28,12 +28,12 @@ import type {
 } from '../../../../common/types/timeline';
 import type { TimelineItem } from '../../../../common/search_strategy/timeline';
 
-import { getActionsColumnWidth, getColumnHeaders } from './column_headers_dummy/helpers';
+import { getActionsColumnWidth, getColumnHeaders } from './column_headers/helpers';
 import { getEventIdToDataMapping } from './helpers';
 import { Sort } from './sort';
 
 import { EventsTable, TimelineBody, TimelineBodyGlobalStyle } from '../styles';
-import { ColumnHeadersDummy } from './column_headers_dummy';
+import { ColumnHeadersDummy } from './column_headers';
 import { Events } from './events';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
 import { BrowserFields } from '../../../../common/search_strategy/index_fields';

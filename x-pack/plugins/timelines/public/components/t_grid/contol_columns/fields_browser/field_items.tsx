@@ -18,9 +18,9 @@ import { uniqBy } from 'lodash/fp';
 import styled from 'styled-components';
 
 import { getEmptyValue } from '../../../empty_value';
-import { getExampleText, getIconFromType } from '../../body/column_headers_dummy/helpers';
+import { getExampleText, getIconFromType } from '../../body/column_headers/helpers';
 import { ColumnHeaderOptions, BrowserField } from '../../../../../common';
-import { defaultColumnHeaderType } from '../../body/column_headers_dummy/default_headers';
+import { defaultColumnHeaderType } from '../../body/column_headers/default_headers';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../body/constants';
 import { TruncatableText } from '../../../truncatable_text';
 import { FieldName } from './field_name';
@@ -54,7 +54,7 @@ export interface FieldItem {
 }
 
 /**
- * Returns the draggable fields, values, and descriptions shown when a user expands an event
+ * Returns the fields items, values, and descriptions shown when a user expands an event
  */
 export const getFieldItems = ({
   category,

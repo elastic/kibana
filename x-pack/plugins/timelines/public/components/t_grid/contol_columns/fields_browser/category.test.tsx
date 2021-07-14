@@ -7,18 +7,15 @@
 
 import React from 'react';
 
-import '../../../common/mock/match_media';
-import { mockBrowserFields } from '../../../common/containers/source/mock';
+import '../../../../mock/match_media';
+import { useMountAppended } from '../../../utils/use_mount_appended';
 
 import { Category } from './category';
 import { getFieldItems } from './field_items';
 import { FIELDS_PANE_WIDTH } from './helpers';
-import { TestProviders } from '../../../common/mock';
-import { useMountAppended } from '../../../common/utils/use_mount_appended';
+import { mockBrowserFields, TestProviders } from '../../../../mock';
 
 import * as i18n from './translations';
-
-jest.mock('../../../common/lib/kibana');
 
 describe('Category', () => {
   const timelineId = 'test';
@@ -33,12 +30,9 @@ describe('Category', () => {
           data-test-subj="category"
           filteredBrowserFields={mockBrowserFields}
           fieldItems={getFieldItems({
-            browserFields: mockBrowserFields,
             category: mockBrowserFields[selectedCategoryId],
-            categoryId: selectedCategoryId,
             columnHeaders: [],
             highlight: '',
-            onUpdateColumns: jest.fn(),
             timelineId,
             toggleColumn: jest.fn(),
           })}
@@ -63,12 +57,9 @@ describe('Category', () => {
           data-test-subj="category"
           filteredBrowserFields={mockBrowserFields}
           fieldItems={getFieldItems({
-            browserFields: mockBrowserFields,
             category: mockBrowserFields[selectedCategoryId],
-            categoryId: selectedCategoryId,
             columnHeaders: [],
             highlight: '',
-            onUpdateColumns: jest.fn(),
             timelineId,
             toggleColumn: jest.fn(),
           })}
@@ -91,12 +82,9 @@ describe('Category', () => {
           data-test-subj="category"
           filteredBrowserFields={mockBrowserFields}
           fieldItems={getFieldItems({
-            browserFields: mockBrowserFields,
             category: mockBrowserFields[selectedCategoryId],
-            categoryId: selectedCategoryId,
             columnHeaders: [],
             highlight: '',
-            onUpdateColumns: jest.fn(),
             timelineId,
             toggleColumn: jest.fn(),
           })}

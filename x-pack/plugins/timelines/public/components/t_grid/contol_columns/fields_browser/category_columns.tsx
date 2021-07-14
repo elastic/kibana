@@ -28,7 +28,7 @@ import {
 } from './helpers';
 import * as i18n from './translations';
 import { tGridSelectors } from '../../../../store/t_grid';
-import { getColumnsWithTimestamp } from '../../body/column_headers_dummy/helpers';
+import { getColumnsWithTimestamp } from '../../body/column_headers/helpers';
 import { OnUpdateColumns, BrowserFields } from '../../../../../common';
 
 const CategoryName = styled.span<{ bold: boolean }>`
