@@ -1,0 +1,16 @@
+{
+  "async_search.get": {
+    "url_params": {
+      "wait_for_completion_timeout": "",
+      "keep_alive": "",
+      "typed_keys": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_async_search/{id}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/async-search.html"
+  }
+}
