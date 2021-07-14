@@ -93,6 +93,8 @@ import { licenseService } from './lib/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
+import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
+import { alertsFieldMap } from './lib/detection_engine/rule_types/field_maps/alerts';
 
 export interface SetupPlugins {
   alerting: AlertingSetup;
@@ -215,7 +217,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               settings: {
                 number_of_shards: 1,
               },
-              mappings: {}, // TODO: Add mappings here via `mappingFromFieldMap()`
+              mappings: mappingFromFieldMap(alertsFieldMap),
             },
           },
         });
