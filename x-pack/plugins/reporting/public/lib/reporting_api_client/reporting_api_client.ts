@@ -35,22 +35,29 @@ interface JobParams {
 }
 
 interface IReportingAPI {
+  // Helpers
   getReportURL(jobId: string): string;
+  getReportingJobPath(exportType: string, jobParams: JobParams): string; // Return a URL to queue a job, with the job params encoded in the query string of the URL. Used for copying POST URL
+  createReportingJob(exportType: string, jobParams: any): Promise<Job>; // Sends a request to queue a job, with the job params in the POST body
+  getServerBasePath(): string; // Provides the raw server basePath to allow it to be stripped out from relativeUrls in job params
+
+  // CRUD
   downloadReport(jobId: string): void;
   deleteReport(jobId: string): Promise<void>;
-  list(page: number, jobIds: string[]): Promise<Job[]>;
+  list(page: number, jobIds: string[]): Promise<Job[]>; // gets the first 10 report of the page
   total(): Promise<number>;
   getError(jobId: string): Promise<JobContent>;
   getInfo(jobId: string): Promise<Job>;
   findForJobIds(jobIds: string[]): Promise<Job[]>;
-  getReportingJobPath(exportType: string, jobParams: JobParams): string;
-  createReportingJob(exportType: string, jobParams: any): Promise<Job>;
-  getServerBasePath(): string;
+
+  // Function props
+  getManagementLink: ManagementLinkFn;
+  getDownloadLink: DownloadReportFn;
+
+  // Diagnostic-related API calls
   verifyConfig(): Promise<DiagnoseResponse>;
   verifyBrowser(): Promise<DiagnoseResponse>;
   verifyScreenCapture(): Promise<DiagnoseResponse>;
-  getManagementLink: ManagementLinkFn;
-  getDownloadLink: DownloadReportFn;
 }
 
 export class ReportingAPIClient implements IReportingAPI {
@@ -121,17 +128,11 @@ export class ReportingAPIClient implements IReportingAPI {
     return reports.map((report) => new Job(report));
   }
 
-  /*
-   * Return a URL to queue a job, with the job params encoded in the query string of the URL. Used for copying POST URL
-   */
   public getReportingJobPath(exportType: string, jobParams: JobParams) {
     const params = stringify({ jobParams: rison.encode(jobParams) });
     return `${this.http.basePath.prepend(API_BASE_GENERATE)}/${exportType}?${params}`;
   }
 
-  /*
-   * Sends a request to queue a job, with the job params in the POST body
-   */
   public async createReportingJob(exportType: string, jobParams: any) {
     const jobParamsRison = rison.encode(jobParams);
     const resp: { job: ReportApiJSON } = await this.http.post(
@@ -155,32 +156,20 @@ export class ReportingAPIClient implements IReportingAPI {
   public getDownloadLink: DownloadReportFn = (jobId: JobId) =>
     this.http.basePath.prepend(`${API_LIST_URL}/download/${jobId}`);
 
-  /*
-   * provides the raw server basePath to allow it to be stripped out from relativeUrls in job params
-   */
   public getServerBasePath = () => this.http.basePath.serverBasePath;
 
-  /*
-   * Diagnostic-related API calls
-   */
   public async verifyConfig() {
     return await this.http.post(`${API_BASE_URL}/diagnose/config`, {
       asSystemRequest: true,
     });
   }
 
-  /*
-   * Diagnostic-related API calls
-   */
   public async verifyBrowser() {
     return await this.http.post(`${API_BASE_URL}/diagnose/browser`, {
       asSystemRequest: true,
     });
   }
 
-  /*
-   * Diagnostic-related API calls
-   */
   public async verifyScreenCapture() {
     return await this.http.post(`${API_BASE_URL}/diagnose/screenshot`, {
       asSystemRequest: true,
