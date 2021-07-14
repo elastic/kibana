@@ -11,6 +11,7 @@ import fs from 'fs';
 import { resolve, join } from 'path';
 import { EsArchiver } from '@kbn/es-archiver';
 import { spawnSync } from 'child_process';
+import shell from 'shelljs';
 import { acMark, flatten, pathExists, tail } from './utils';
 
 const resolveRoot = resolve.bind(null, REPO_ROOT);
@@ -27,8 +28,18 @@ const getDirectoriesRecursive = (srcpath): unknown => [
   ...flatten(getDirectories(srcpath).map(getDirectoriesRecursive)),
 ];
 
-const esArchiverScript = resolveRoot('scripts/es_archiver.js');
+const prokSync = (script) => (opts) => {
+  const merged = [script, ...opts];
+  spawnSync(process.execPath, merged);
+};
+const esArchiver = resolveRoot('scripts/es_archiver.js');
+const kbnArchiver = resolveRoot('scripts/kbn_archiver.js');
+
+const esArchiverScript = prokSync(esArchiver);
+const kbnArchiverScript = prokSync(kbnArchiver);
+
 const xpackConfig = resolveRoot('x-pack/test/functional/config.js');
+const kbnArchiveFixturesDir = resolveRoot('x-pack/test/functional/fixtures/kbn_archiver');
 
 const creepThru = (log: ToolingLog) => (base: BaseArchivePath) => {
   for (const dir of tail(getDirectoriesRecursive(resolveRoot(base)))) {
@@ -37,8 +48,23 @@ const creepThru = (log: ToolingLog) => (base: BaseArchivePath) => {
     function loadEsArchive(name: string) {
       log.info(`\n### loading from: \n\t[${name}]`);
 
+      const computeName = (fixtureDir) => (esArchiveName) => {
+        return `${fixtureDir}/${esArchiveName}_NOT_COMPUTED_YET`;
+      };
+      const computed = computeName(kbnArchiveFixturesDir)(name);
+
       try {
-        spawnSync(process.execPath, [esArchiverScript, '--config', xpackConfig, 'load', name]);
+        esArchiverScript(['--config', xpackConfig, 'load', name]);
+        log.info(`\n### creating: \n\t${computed}`);
+        shell.mkdir('-p', computed);
+        kbnArchiverScript([
+          '--config',
+          xpackConfig,
+          'save',
+          computed,
+          '--type',
+          'index-pattern,lens,canvas-workpad',
+        ]);
       } catch (err) {
         log.error(`${acMark} ${err}`);
       }
