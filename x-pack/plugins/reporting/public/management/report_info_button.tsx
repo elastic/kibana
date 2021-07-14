@@ -28,7 +28,7 @@ import { Props as ListingProps } from './report_listing';
 interface Props extends Pick<ListingProps, 'apiClient' | 'intl'> {
   jobId: string;
   apiClient: ReportingAPIClient;
-} & Pick<ListingProps, 'apiClient' | 'intl'>;
+}
 
 interface State {
   isLoading: boolean;
