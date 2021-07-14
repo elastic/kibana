@@ -73,8 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // TODO: Remove .only
-    describe.only('Generate CSV: new search', () => {
+    describe('Generate CSV: new search', () => {
       beforeEach(async () => {
         await kibanaServer.importExport.load(ecommerceSOPath);
         await PageObjects.common.navigateToApp('discover');
@@ -132,8 +131,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // TODO: Remove .only
-    describe.only('Generate CSV: archived search', () => {
+    describe('Generate CSV: archived search', () => {
       const setupPage = async () => {
         const fromTime = 'Apr 27, 2019 @ 23:56:51.374';
         const toTime = 'Aug 23, 2019 @ 16:18:51.821';
