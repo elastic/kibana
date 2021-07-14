@@ -59,7 +59,11 @@ function checkNonPersistedSessionsPage(
         `${SEARCH_SESSIONS_CLEANUP_TASK_TYPE} Found ${nonPersistedSearchSessions.total} sessions, processing ${nonPersistedSearchSessions.saved_objects.length}`
       );
 
-      const updatedSessions = await getAllSessionsStatusUpdates(deps, nonPersistedSearchSessions);
+      const updatedSessions = await getAllSessionsStatusUpdates(
+        deps,
+        config,
+        nonPersistedSearchSessions
+      );
       const deletedSessionIds: string[] = [];
 
       await Promise.all(
