@@ -513,9 +513,13 @@ const getAgentAndPoliciesForEndpointsList = async (
   // Create an array of unique policy IDs that are not yet known to be non-existing.
   const policyIdsToCheck = Array.from(
     new Set(
-      hosts
-        .filter((host) => !currentNonExistingPolicies[host.metadata.Endpoint.policy.applied.id])
-        .map((host) => host.metadata.Endpoint.policy.applied.id)
+      hosts.reduce((acc: string[], host) => {
+        const appliedPolicyId = host.metadata.Endpoint.policy.applied.id;
+        if (!currentNonExistingPolicies[appliedPolicyId]) {
+          acc.push(appliedPolicyId);
+        }
+        return acc;
+      }, [])
     )
   );
 
