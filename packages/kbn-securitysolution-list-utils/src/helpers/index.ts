@@ -43,7 +43,6 @@ import {
   isOneOfOperator,
   isOperator,
 } from '../autocomplete_operators';
-import { OperatorOption } from '../autocomplete_operators/types';
 
 import {
   BuilderEntry,
@@ -52,6 +51,7 @@ import {
   EmptyNestedEntry,
   ExceptionsBuilderExceptionItem,
   FormattedBuilderEntry,
+  OperatorOption,
 } from '../types';
 
 export const isEntryNested = (item: BuilderEntry): item is EntryNested => {
