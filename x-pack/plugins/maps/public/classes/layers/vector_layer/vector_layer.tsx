@@ -23,12 +23,13 @@ import {
   SOURCE_FORMATTERS_DATA_REQUEST_ID,
   FEATURE_VISIBLE_PROPERTY_NAME,
   EMPTY_FEATURE_COLLECTION,
-  KBN_TOO_MANY_FEATURES_PROPERTY,
+  KBN_METADATA_FEATURE,
   LAYER_TYPE,
   FIELD_ORIGIN,
   KBN_TOO_MANY_FEATURES_IMAGE_ID,
   FieldFormatter,
   SUPPORTS_FEATURE_EDITING_REQUEST_ID,
+  KBN_IS_TILE_COMPLETE,
 } from '../../../../common/constants';
 import { JoinTooltipProperty } from '../../tooltips/join_tooltip_property';
 import { DataRequestAbortError } from '../../util/data_request';
@@ -49,6 +50,7 @@ import {
   DynamicStylePropertyOptions,
   MapFilters,
   MapQuery,
+  StyleMetaDescriptor,
   Timeslice,
   VectorJoinSourceRequestMeta,
   VectorLayerDescriptor,
@@ -102,9 +104,18 @@ export interface IVectorLayer extends ILayer {
   deleteFeature(featureId: string): Promise<void>;
 }
 
+const noResultsIcon = <EuiIcon size="m" color="subdued" type="minusInCircle" />;
+export const NO_RESULTS_ICON_AND_TOOLTIPCONTENT = {
+  icon: noResultsIcon,
+  tooltipContent: i18n.translate('xpack.maps.vectorLayer.noResultsFoundTooltip', {
+    defaultMessage: `No results found.`,
+  }),
+};
+
 export class VectorLayer extends AbstractLayer implements IVectorLayer {
   static type = LAYER_TYPE.VECTOR;
-  protected readonly _style: IVectorStyle;
+
+  protected readonly _style: VectorStyle;
   private readonly _joins: InnerJoin[];
 
   static createDescriptor(
@@ -157,7 +168,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     return this._style;
   }
 
-  getCurrentStyle(): IVectorStyle {
+  getCurrentStyle(): VectorStyle {
     return this._style;
   }
 
@@ -211,14 +222,8 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   getCustomIconAndTooltipContent(): CustomIconAndTooltipContent {
     const featureCollection = this._getSourceFeatureCollection();
 
-    const noResultsIcon = <EuiIcon size="m" color="subdued" type="minusInCircle" />;
     if (!featureCollection || featureCollection.features.length === 0) {
-      return {
-        icon: noResultsIcon,
-        tooltipContent: i18n.translate('xpack.maps.vectorLayer.noResultsFoundTooltip', {
-          defaultMessage: `No results found.`,
-        }),
-      };
+      return NO_RESULTS_ICON_AND_TOOLTIPCONTENT;
     }
 
     if (
@@ -956,9 +961,9 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       }
       mbMap.addLayer(mbLayer);
       mbMap.setFilter(tooManyFeaturesLayerId, [
-        '==',
-        ['get', KBN_TOO_MANY_FEATURES_PROPERTY],
-        true,
+        'all',
+        ['==', ['get', KBN_METADATA_FEATURE], true],
+        ['==', ['get', KBN_IS_TILE_COMPLETE], false],
       ]);
       mbMap.setPaintProperty(
         tooManyFeaturesLayerId,
@@ -1167,5 +1172,14 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   async deleteFeature(featureId: string) {
     const layerSource = this.getSource();
     await layerSource.deleteFeature(featureId);
+  }
+
+  async getStyleMetaDescriptorFromLocalFeatures(): Promise<StyleMetaDescriptor | null> {
+    const sourceDataRequest = this.getSourceDataRequest();
+    const style = this.getCurrentStyle();
+    if (!style || !sourceDataRequest) {
+      return null;
+    }
+    return await style.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
   }
 }

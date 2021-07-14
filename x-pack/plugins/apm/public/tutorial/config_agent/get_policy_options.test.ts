@@ -41,6 +41,7 @@ describe('getPolicyOptions', () => {
             apmServerUrl: 'cloud_url',
             secretToken: 'cloud_token',
           },
+          isFleetEnabled: true,
         };
         const options = getPolicyOptions({
           isCloudEnabled: true,
@@ -65,6 +66,7 @@ describe('getPolicyOptions', () => {
             apmServerUrl: 'cloud_url',
             secretToken: 'cloud_token',
           },
+          isFleetEnabled: true,
         };
         const options = getPolicyOptions({
           isCloudEnabled: true,
@@ -109,6 +111,7 @@ describe('getPolicyOptions', () => {
             apmServerUrl: 'cloud_url',
             secretToken: 'cloud_token',
           },
+          isFleetEnabled: true,
         };
         const options = getPolicyOptions({
           isCloudEnabled: true,
@@ -151,6 +154,7 @@ describe('getPolicyOptions', () => {
         const data: APIResponseType = {
           fleetAgents: [],
           cloudStandaloneSetup: undefined,
+          isFleetEnabled: true,
         };
         const options = getPolicyOptions({
           isCloudEnabled: true,
@@ -173,6 +177,7 @@ describe('getPolicyOptions', () => {
         const data: APIResponseType = {
           fleetAgents,
           cloudStandaloneSetup: undefined,
+          isFleetEnabled: true,
         };
         const options = getPolicyOptions({
           isCloudEnabled: true,
@@ -213,6 +218,7 @@ describe('getPolicyOptions', () => {
         const data: APIResponseType = {
           fleetAgents: [policyElasticAgentOnCloudAgent, ...fleetAgents],
           cloudStandaloneSetup: undefined,
+          isFleetEnabled: true,
         };
         const options = getPolicyOptions({
           isCloudEnabled: true,
@@ -256,6 +262,7 @@ describe('getPolicyOptions', () => {
       const data: APIResponseType = {
         fleetAgents: [],
         cloudStandaloneSetup: undefined,
+        isFleetEnabled: true,
       };
       const options = getPolicyOptions({
         isCloudEnabled: false,
@@ -278,6 +285,7 @@ describe('getPolicyOptions', () => {
       const data: APIResponseType = {
         fleetAgents,
         cloudStandaloneSetup: undefined,
+        isFleetEnabled: true,
       };
       const options = getPolicyOptions({
         isCloudEnabled: false,
