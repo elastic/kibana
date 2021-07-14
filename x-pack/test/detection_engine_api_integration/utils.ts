@@ -27,6 +27,8 @@ import {
   UpdateRulesSchema,
   FullResponseSchema,
   QueryCreateSchema,
+  EqlCreateSchema,
+  ThresholdCreateSchema,
 } from '../../plugins/security_solution/common/detection_engine/schemas/request';
 import { Signal } from '../../plugins/security_solution/server/lib/detection_engine/signals/types';
 import { signalsMigrationType } from '../../plugins/security_solution/server/lib/detection_engine/migrations/saved_objects';
@@ -121,6 +123,46 @@ export const getRuleForSignalTesting = (
   type: 'query',
   query: '*:*',
   from: '1900-01-01T00:00:00.000Z',
+});
+
+/**
+ * This is a typical signal testing rule that is easy for most basic testing of output of EQL signals.
+ * It starts out in an enabled true state. The from is set very far back to test the basics of signal
+ * creation for EQL and testing by getting all the signals at once.
+ * @param ruleId The optional ruleId which is eql-rule by default.
+ * @param enabled Enables the rule on creation or not. Defaulted to true.
+ */
+export const getEqlRuleForSignalTesting = (
+  index: string[],
+  ruleId = 'eql-rule',
+  enabled = true
+): EqlCreateSchema => ({
+  ...getRuleForSignalTesting(index, ruleId, enabled),
+  type: 'eql',
+  language: 'eql',
+  query: 'any where true',
+});
+
+/**
+ * This is a typical signal testing rule that is easy for most basic testing of output of Threshold signals.
+ * It starts out in an enabled true state. The from is set very far back to test the basics of signal
+ * creation for Threshold and testing by getting all the signals at once.
+ * @param ruleId The optional ruleId which is threshold-rule by default.
+ * @param enabled Enables the rule on creation or not. Defaulted to true.
+ */
+export const getThresholdRuleForSignalTesting = (
+  index: string[],
+  ruleId = 'threshold-rule',
+  enabled = true
+): ThresholdCreateSchema => ({
+  ...getRuleForSignalTesting(index, ruleId, enabled),
+  type: 'threshold',
+  language: 'kuery',
+  query: '*:*',
+  threshold: {
+    field: 'process.name',
+    value: 21,
+  },
 });
 
 export const getRuleForSignalTestingWithTimestampOverride = (
@@ -412,7 +454,6 @@ export const downgradeImmutableRule = async (es: KibanaClient, ruleId: string): 
 export const deleteAllTimelines = async (es: KibanaClient): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
-    // @ts-expect-error @elastic/elasticsearch DeleteByQueryRequest doesn't accept q parameter
     q: 'type:siem-ui-timeline',
     wait_for_completion: true,
     refresh: true,
@@ -429,7 +470,6 @@ export const deleteAllRulesStatuses = async (es: KibanaClient): Promise<void> =>
   return countDownES(async () => {
     return es.deleteByQuery({
       index: '.kibana',
-      // @ts-expect-error @elastic/elasticsearch DeleteByQueryRequest doesn't accept q parameter
       q: 'type:siem-detection-engine-rule-status',
       wait_for_completion: true,
       refresh: true,
@@ -1009,7 +1049,7 @@ export const waitForRuleSuccessOrStatus = async (
       .send({ ids: [id] })
       .expect(200);
     return body[id]?.current_status?.status === status;
-  }, 'waitForRuleSuccess');
+  }, 'waitForRuleSuccessOrStatus');
 };
 
 /**

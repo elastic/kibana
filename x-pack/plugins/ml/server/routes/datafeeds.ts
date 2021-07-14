@@ -247,7 +247,7 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const options: estypes.DeleteDatafeedRequest = {
+        const options: estypes.MlDeleteDatafeedRequest = {
           datafeed_id: request.params.datafeedId,
         };
         const force = request.query.force;

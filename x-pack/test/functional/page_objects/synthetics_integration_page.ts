@@ -16,6 +16,8 @@ export function SyntheticsIntegrationPageProvider({
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
 
+  const fixedFooterHeight = 72; // Size of EuiBottomBar more or less
+
   return {
     /**
      * Navigates to the Synthetics Integration page
@@ -84,7 +86,8 @@ export function SyntheticsIntegrationPageProvider({
      * @params {value} the value of the input
      */
     async fillTextInputByTestSubj(testSubj: string, value: string) {
-      const field = await testSubjects.find(testSubj, 5000);
+      const field = await testSubjects.find(testSubj);
+      await field.scrollIntoViewIfNecessary({ bottomOffset: fixedFooterHeight });
       await field.click();
       await field.clearValue();
       await field.type(value);
@@ -96,6 +99,7 @@ export function SyntheticsIntegrationPageProvider({
      * @params {value} the value of the input
      */
     async fillTextInput(field: WebElementWrapper, value: string) {
+      await field.scrollIntoViewIfNecessary({ bottomOffset: fixedFooterHeight });
       await field.click();
       await field.clearValue();
       await field.type(value);
@@ -114,7 +118,7 @@ export function SyntheticsIntegrationPageProvider({
      */
     async findHTTPAdvancedOptionsAccordion() {
       await this.ensureIsOnPackagePage();
-      const accordion = await testSubjects.find('syntheticsHTTPAdvancedFieldsAccordion', 5000);
+      const accordion = await testSubjects.find('syntheticsHTTPAdvancedFieldsAccordion');
       return accordion;
     },
 

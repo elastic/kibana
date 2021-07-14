@@ -67,6 +67,40 @@ const breadcrumbGetters: {
       text: liveQueryId,
     },
   ],
+  saved_queries: () => [
+    BASE_BREADCRUMB,
+    {
+      text: i18n.translate('xpack.osquery.breadcrumbs.savedQueriesPageTitle', {
+        defaultMessage: 'Saved queries',
+      }),
+    },
+  ],
+  saved_query_new: () => [
+    BASE_BREADCRUMB,
+    {
+      href: pagePathGetters.saved_queries(),
+      text: i18n.translate('xpack.osquery.breadcrumbs.savedQueriesPageTitle', {
+        defaultMessage: 'Saved queries',
+      }),
+    },
+    {
+      text: i18n.translate('xpack.osquery.breadcrumbs.newSavedQueryPageTitle', {
+        defaultMessage: 'New',
+      }),
+    },
+  ],
+  saved_query_edit: ({ savedQueryName }) => [
+    BASE_BREADCRUMB,
+    {
+      href: pagePathGetters.saved_queries(),
+      text: i18n.translate('xpack.osquery.breadcrumbs.savedQueriesPageTitle', {
+        defaultMessage: 'Saved queries',
+      }),
+    },
+    {
+      text: savedQueryName,
+    },
+  ],
   scheduled_query_groups: () => [
     BASE_BREADCRUMB,
     {

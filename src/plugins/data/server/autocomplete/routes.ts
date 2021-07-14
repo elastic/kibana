@@ -7,10 +7,11 @@
  */
 
 import { Observable } from 'rxjs';
-import { CoreSetup, SharedGlobalConfig } from 'kibana/server';
+import { CoreSetup } from 'kibana/server';
 import { registerValueSuggestionsRoute } from './value_suggestions_route';
+import { ConfigSchema } from '../../config';
 
-export function registerRoutes({ http }: CoreSetup, config$: Observable<SharedGlobalConfig>): void {
+export function registerRoutes({ http }: CoreSetup, config$: Observable<ConfigSchema>): void {
   const router = http.createRouter();
 
   registerValueSuggestionsRoute(router, config$);

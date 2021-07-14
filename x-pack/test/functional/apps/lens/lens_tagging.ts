@@ -30,8 +30,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('lens tagging', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.loadIfNeeded('lens/basic');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/basic');
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.clickNewDashboard();
@@ -107,7 +107,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         `tag-searchbar-option-${PageObjects.tagManagement.testSubjFriendly(lensTag)}`
       );
       // click elsewhere to close the filter dropdown
-      const searchFilter = await find.byCssSelector('main .euiFieldSearch');
+      const searchFilter = await find.byCssSelector('.euiPageBody .euiFieldSearch');
       await searchFilter.click();
       // wait until the table refreshes
       await listingTable.waitUntilTableIsLoaded();

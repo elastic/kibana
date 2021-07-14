@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Kibana spaces page meets a11y validations', () => {
     before(async () => {
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       await PageObjects.common.navigateToApp('home');
     });
 
@@ -114,7 +114,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     // test starts with deleting space b so we can get the space selection page instead of logging out in the test
-    it('a11y test for space selection page', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/100968
+    it.skip('a11y test for space selection page', async () => {
       await PageObjects.spaceSelector.confirmDeletingSpace();
       await a11y.testAppSnapshot();
       await PageObjects.spaceSelector.clickSpaceCard('default');

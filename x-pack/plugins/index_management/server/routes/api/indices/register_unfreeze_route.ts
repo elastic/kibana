@@ -14,10 +14,10 @@ const bodySchema = schema.object({
   indices: schema.arrayOf(schema.string()),
 });
 
-export function registerUnfreezeRoute({ router, license, lib }: RouteDependencies) {
+export function registerUnfreezeRoute({ router, lib }: RouteDependencies) {
   router.post(
     { path: addBasePath('/indices/unfreeze'), validate: { body: bodySchema } },
-    license.guardApiRoute(async (ctx, req, res) => {
+    async (ctx, req, res) => {
       const { indices = [] } = req.body as typeof bodySchema.type;
       const params = {
         path: `/${encodeURIComponent(indices.join(','))}/_unfreeze`,
@@ -37,6 +37,6 @@ export function registerUnfreezeRoute({ router, license, lib }: RouteDependencie
         // Case: default
         throw e;
       }
-    })
+    }
   );
 }

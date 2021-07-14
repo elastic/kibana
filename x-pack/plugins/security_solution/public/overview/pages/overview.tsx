@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import { AlertsByCategory } from '../components/alerts_by_category';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { SiemSearchBar } from '../../common/components/search_bar';
-import { WrapperPage } from '../../common/components/wrapper_page';
+import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { useFetchIndex } from '../../common/containers/source';
 
@@ -27,14 +27,20 @@ import { SecurityPageName } from '../../app/types';
 import { EndpointNotice } from '../components/endpoint_notice';
 import { useMessagesStorage } from '../../common/containers/local_storage/use_messages_storage';
 import { ENDPOINT_METADATA_INDEX } from '../../../common/constants';
-import { useIngestEnabledCheck } from '../../common/hooks/endpoint/ingest_enabled';
 import { useSourcererScope } from '../../common/containers/sourcerer';
 import { Sourcerer } from '../../common/components/sourcerer';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
+import { ThreatIntelLinkPanel } from '../components/overview_cti_links';
+import { useIsThreatIntelModuleEnabled } from '../containers/overview_cti_links/use_is_threat_intel_module_enabled';
+import { useUserPrivileges } from '../../common/components/user_privileges';
 
 const SidebarFlexItem = styled(EuiFlexItem)`
   margin-right: 24px;
+`;
+
+const StyledSecuritySolutionPageWrapper = styled(SecuritySolutionPageWrapper)`
+  overflow-x: auto;
 `;
 
 const OverviewComponent = () => {
@@ -64,7 +70,8 @@ const OverviewComponent = () => {
     setDismissMessage(true);
     addMessage('management', 'dismissEndpointNotice');
   }, [addMessage]);
-  const { allEnabled: isIngestEnabled } = useIngestEnabledCheck();
+  const canAccessFleet = useUserPrivileges().endpointPrivileges.canAccessFleet;
+  const isThreatIntelModuleEnabled = useIsThreatIntelModuleEnabled();
   return (
     <>
       {indicesExist ? (
@@ -73,8 +80,8 @@ const OverviewComponent = () => {
             <SiemSearchBar id="global" indexPattern={indexPattern} />
           </FiltersGlobal>
 
-          <WrapperPage>
-            {!dismissMessage && !metadataIndexExists && isIngestEnabled && (
+          <StyledSecuritySolutionPageWrapper>
+            {!dismissMessage && !metadataIndexExists && canAccessFleet && (
               <>
                 <EndpointNotice onDismiss={dismissEndpointNotice} />
                 <EuiSpacer size="l" />
@@ -136,10 +143,19 @@ const OverviewComponent = () => {
                       to={to}
                     />
                   </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <ThreatIntelLinkPanel
+                      isThreatIntelModuleEnabled={isThreatIntelModuleEnabled}
+                      deleteQuery={deleteQuery}
+                      from={from}
+                      setQuery={setQuery}
+                      to={to}
+                    />
+                  </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
-          </WrapperPage>
+          </StyledSecuritySolutionPageWrapper>
         </>
       ) : (
         <OverviewEmpty />

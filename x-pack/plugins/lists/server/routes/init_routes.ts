@@ -39,6 +39,7 @@ import {
   readListItemRoute,
   readListRoute,
   readPrivilegesRoute,
+  summaryExceptionListRoute,
   updateEndpointListItemRoute,
   updateExceptionListItemRoute,
   updateExceptionListRoute,
@@ -95,4 +96,7 @@ export const initRoutes = (router: ListsPluginRouter, config: ConfigType): void 
   updateEndpointListItemRoute(router);
   deleteEndpointListItemRoute(router);
   findEndpointListItemRoute(router);
+
+  // exception list items summary
+  summaryExceptionListRoute(router);
 };

@@ -12,7 +12,7 @@ import { VisualizationsSetup } from '../../visualizations/public';
 import { ChartsPluginSetup } from '../../charts/public';
 
 import { createTagCloudFn } from './tag_cloud_fn';
-import { tagCloudVisTypeDefinition } from './tag_cloud_type';
+import { getTagCloudVisTypeDefinition } from './tag_cloud_type';
 import { DataPublicPluginStart } from '../../data/public';
 import { setFormatService } from './services';
 import { ConfigSchema } from '../config';
@@ -27,7 +27,7 @@ export interface TagCloudPluginSetupDependencies {
 
 /** @internal */
 export interface TagCloudVisDependencies {
-  colors: ChartsPluginSetup['legacyColors'];
+  palettes: ChartsPluginSetup['palettes'];
 }
 
 /** @internal */
@@ -48,11 +48,15 @@ export class TagCloudPlugin implements Plugin<void, void> {
     { expressions, visualizations, charts }: TagCloudPluginSetupDependencies
   ) {
     const visualizationDependencies: TagCloudVisDependencies = {
-      colors: charts.legacyColors,
+      palettes: charts.palettes,
     };
     expressions.registerFunction(createTagCloudFn);
     expressions.registerRenderer(getTagCloudVisRenderer(visualizationDependencies));
-    visualizations.createBaseVisualization(tagCloudVisTypeDefinition);
+    visualizations.createBaseVisualization(
+      getTagCloudVisTypeDefinition({
+        palettes: charts.palettes,
+      })
+    );
   }
 
   public start(core: CoreStart, { data }: TagCloudVisPluginStartDependencies) {

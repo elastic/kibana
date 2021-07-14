@@ -36,14 +36,14 @@ import {
   YAxisMode,
   AxesSettingsConfig,
   AxisExtentConfig,
+  XYState,
 } from './types';
 import { isHorizontalChart, isHorizontalSeries, getSeriesColor } from './state_helpers';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { LegendSettingsPopover } from '../shared_components';
 import { AxisSettingsPopover } from './axis_settings_popover';
-import { TooltipWrapper } from './tooltip_wrapper';
 import { getAxesConfiguration, GroupsConfiguration } from './axes_configuration';
-import { PalettePicker } from '../shared_components';
+import { PalettePicker, TooltipWrapper } from '../shared_components';
 import { getAccessorColorConfig, getColorAssignments } from './color_assignment';
 import { getScaleType, getSortedAccessors } from './to_expression';
 import { VisualOptionsPopover } from './visual_options_popover/visual_options_popover';
@@ -140,7 +140,7 @@ const getDataBounds = function (
     let min = Number.MAX_VALUE;
     let max = Number.MIN_VALUE;
     axis.series.forEach((series) => {
-      activeData?.[series.layer].rows.forEach((row) => {
+      activeData?.[series.layer]?.rows.forEach((row) => {
         const value = row[series.accessor];
         if (!Number.isNaN(value)) {
           if (value < min) {
@@ -162,6 +162,18 @@ const getDataBounds = function (
 
   return groups;
 };
+
+function hasPercentageAxis(axisGroups: GroupsConfiguration, groupId: string, state: XYState) {
+  return Boolean(
+    axisGroups
+      .find((group) => group.groupId === groupId)
+      ?.series.some(({ layer: layerId }) =>
+        state?.layers.find(
+          (layer) => layer.layerId === layerId && layer.seriesType.includes('percentage')
+        )
+      )
+  );
+}
 
 export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProps<State>) {
   const { state, setState, frame } = props;
@@ -227,6 +239,15 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
       axisTitlesVisibilitySettings: newAxisTitlesVisibilitySettings,
     });
   };
+
+  const nonOrdinalXAxis = state?.layers.every(
+    (layer) =>
+      !layer.xAccessor ||
+      getScaleType(
+        props.frame.datasourceLayers[layer.layerId].getOperationForColumnId(layer.xAccessor),
+        ScaleType.Linear
+      ) !== 'ordinal'
+  );
 
   // only allow changing endzone visibility if it could show up theoretically (if it's a time viz)
   const onChangeEndzoneVisiblity = state?.layers.every(
@@ -324,6 +345,14 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
                 legend: { ...state.legend, position: id as Position },
               });
             }}
+            renderValueInLegendSwitch={nonOrdinalXAxis}
+            valueInLegend={state?.valuesInLegend}
+            onValueInLegendChange={() => {
+              setState({
+                ...state,
+                valuesInLegend: !state.valuesInLegend,
+              });
+            }}
           />
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -361,6 +390,7 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
               setExtent={setLeftExtent}
               hasBarOrAreaOnAxis={hasBarOrAreaOnLeftAxis}
               dataBounds={dataBounds.left}
+              hasPercentageAxis={hasPercentageAxis(axisGroups, 'left', state)}
             />
           </TooltipWrapper>
           <AxisSettingsPopover
@@ -377,6 +407,7 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
             endzonesVisible={!state?.hideEndzones}
             setEndzoneVisibility={onChangeEndzoneVisiblity}
             hasBarOrAreaOnAxis={false}
+            hasPercentageAxis={false}
           />
           <TooltipWrapper
             tooltipContent={
@@ -405,6 +436,7 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
                 Object.keys(axisGroups.find((group) => group.groupId === 'right') || {}).length ===
                 0
               }
+              hasPercentageAxis={hasPercentageAxis(axisGroups, 'right', state)}
               isAxisTitleVisible={axisTitlesVisibilitySettings.yRight}
               toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
               extent={state?.yRightExtent || { mode: 'full' }}
@@ -508,7 +540,10 @@ export function DimensionEditor(
               (yAxisConfig) => yAxisConfig.forAccessor === accessor
             );
             if (existingIndex !== -1) {
-              newYAxisConfigs[existingIndex].axisMode = newMode;
+              newYAxisConfigs[existingIndex] = {
+                ...newYAxisConfigs[existingIndex],
+                axisMode: newMode,
+              };
             } else {
               newYAxisConfigs.push({
                 forAccessor: accessor,
@@ -593,9 +628,9 @@ const ColorPicker = ({
         const existingIndex = newYConfigs.findIndex((yConfig) => yConfig.forAccessor === accessor);
         if (existingIndex !== -1) {
           if (text === '') {
-            delete newYConfigs[existingIndex].color;
+            newYConfigs[existingIndex] = { ...newYConfigs[existingIndex], color: undefined };
           } else {
-            newYConfigs[existingIndex].color = output.hex;
+            newYConfigs[existingIndex] = { ...newYConfigs[existingIndex], color: output.hex };
           }
         } else {
           newYConfigs.push({

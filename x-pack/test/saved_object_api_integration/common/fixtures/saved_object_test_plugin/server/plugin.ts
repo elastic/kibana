@@ -22,7 +22,7 @@ export class Plugin {
       properties: {
         title: { type: 'text' },
       },
-    };
+    } as const;
 
     core.savedObjects.registerType({
       name: 'isolatedtype',

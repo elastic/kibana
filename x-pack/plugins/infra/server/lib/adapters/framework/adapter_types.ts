@@ -8,6 +8,7 @@
 import { GenericParams, SearchResponse } from 'elasticsearch';
 import { Lifecycle } from '@hapi/hapi';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { JsonArray, JsonValue } from '@kbn/common-utils';
 import { RouteConfig, RouteMethod } from '../../../../../../../src/core/server';
 import {
   PluginSetup as DataPluginSetup,
@@ -19,7 +20,7 @@ import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../pl
 import { SpacesPluginSetup } from '../../../../../../plugins/spaces/server';
 import { PluginSetupContract as AlertingPluginContract } from '../../../../../alerting/server';
 import { MlPluginSetup } from '../../../../../ml/server';
-import { JsonArray, JsonValue } from '../../../../../../../src/plugins/kibana_utils/common';
+import { RuleRegistryPluginSetupContract } from '../../../../../rule_registry/server';
 
 export interface InfraServerPluginSetupDeps {
   data: DataPluginSetup;
@@ -29,6 +30,7 @@ export interface InfraServerPluginSetupDeps {
   visTypeTimeseries: VisTypeTimeseriesSetup;
   features: FeaturesPluginSetup;
   alerting: AlertingPluginContract;
+  ruleRegistry: RuleRegistryPluginSetupContract;
   ml?: MlPluginSetup;
 }
 

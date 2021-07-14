@@ -428,8 +428,16 @@ export function resolveCopyToSpaceConflictsSuite(
       });
 
       describe('single-namespace types', () => {
-        beforeEach(() => esArchiver.load('saved_objects/spaces'));
-        afterEach(() => esArchiver.unload('saved_objects/spaces'));
+        beforeEach(() =>
+          esArchiver.load(
+            'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
+        afterEach(() =>
+          esArchiver.unload(
+            'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
 
         const dashboardObject = { type: 'dashboard', id: 'cts_dashboard' };
         const visualizationObject = { type: 'visualization', id: 'cts_vis_3' };
@@ -518,8 +526,16 @@ export function resolveCopyToSpaceConflictsSuite(
       const includeReferences = false;
       const createNewCopies = false;
       describe(`multi-namespace types with "overwrite" retry`, () => {
-        before(() => esArchiver.load('saved_objects/spaces'));
-        after(() => esArchiver.unload('saved_objects/spaces'));
+        before(() =>
+          esArchiver.load(
+            'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
+        after(() =>
+          esArchiver.unload(
+            'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
 
         const testCases = tests.multiNamespaceTestCases();
         testCases.forEach(({ testTitle, objects, retries, statusCode, response }) => {

@@ -53,11 +53,11 @@ import {
   SeriesLayer,
 } from '../../../../../src/plugins/charts/public';
 import { EmptyPlaceholder } from '../shared_components';
-import { desanitizeFilterContext } from '../utils';
 import { fittingFunctionDefinitions, getFitOptions } from './fitting_functions';
 import { getAxesConfiguration, GroupsConfiguration, validateExtent } from './axes_configuration';
 import { getColorAssignments } from './color_assignment';
 import { getXDomain, XyEndzones } from './x_domain';
+import { getLegendAction } from './get_legend_action';
 
 declare global {
   interface Window {
@@ -209,6 +209,13 @@ export const xyChart: ExpressionFunctionDefinition<
         defaultMessage: 'Hide endzone markers for partial data',
       }),
     },
+    valuesInLegend: {
+      types: ['boolean'],
+      default: false,
+      help: i18n.translate('xpack.lens.xyChart.valuesInLegend.help', {
+        defaultMessage: 'Show values in legend',
+      }),
+    },
   },
   fn(data: LensMultiTable, args: XYArgs) {
     return {
@@ -222,7 +229,7 @@ export const xyChart: ExpressionFunctionDefinition<
   },
 };
 
-export async function calculateMinInterval({ args: { layers }, data }: XYChartProps) {
+export function calculateMinInterval({ args: { layers }, data }: XYChartProps) {
   const filteredLayers = getFilteredLayers(layers, data);
   if (filteredLayers.length === 0) return;
   const isTimeViz = data.dateRange && filteredLayers.every((l) => l.xScaleType === 'time');
@@ -280,7 +287,7 @@ export const getXyChartRenderer = (dependencies: {
           chartsThemeService={dependencies.chartsThemeService}
           paletteService={dependencies.paletteService}
           timeZone={dependencies.timeZone}
-          minInterval={await calculateMinInterval(config)}
+          minInterval={calculateMinInterval(config)}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
           renderMode={handlers.getRenderMode()}
@@ -365,6 +372,7 @@ export function XYChart({
     hideEndzones,
     yLeftExtent,
     yRightExtent,
+    valuesInLegend,
   } = args;
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
@@ -382,6 +390,7 @@ export function XYChart({
   );
   const xAxisFormatter = formatFactory(xAxisColumn && xAxisColumn.meta?.params);
   const layersAlreadyFormatted: Record<string, boolean> = {};
+
   // This is a safe formatter for the xAccessor that abstracts the knowledge of already formatted layers
   const safeXAccessorLabelRenderer = (value: unknown): string =>
     xAxisColumn && layersAlreadyFormatted[xAxisColumn.id]
@@ -552,9 +561,9 @@ export function XYChart({
         value: pointValue,
       });
     }
-
-    const xAxisFieldName = table.columns.find((el) => el.id === layer.xAccessor)?.meta?.field;
-    const timeFieldName = xDomain && xAxisFieldName;
+    const currentColumnMeta = table.columns.find((el) => el.id === layer.xAccessor)?.meta;
+    const xAxisFieldName = currentColumnMeta?.field;
+    const isDateField = currentColumnMeta?.type === 'date';
 
     const context: LensFilterEvent['data'] = {
       data: points.map((point) => ({
@@ -563,9 +572,9 @@ export function XYChart({
         value: point.value,
         table,
       })),
-      timeFieldName,
+      timeFieldName: xDomain && isDateField ? xAxisFieldName : undefined,
     };
-    onClickValue(desanitizeFilterContext(context));
+    onClickValue(context);
   };
 
   const brushHandler: BrushEndListener = ({ x }) => {
@@ -602,7 +611,6 @@ export function XYChart({
             : legend.isVisible
         }
         legendPosition={legend.position}
-        showLegendExtra={false}
         theme={{
           ...chartTheme,
           barSeriesStyle: {
@@ -622,6 +630,14 @@ export function XYChart({
         xDomain={xDomain}
         onBrushEnd={renderMode !== 'noInteractivity' ? brushHandler : undefined}
         onElementClick={renderMode !== 'noInteractivity' ? clickHandler : undefined}
+        legendAction={getLegendAction(
+          filteredLayers,
+          data.tables,
+          onClickValue,
+          formatFactory,
+          layersAlreadyFormatted
+        )}
+        showLegendExtra={isHistogramViz && valuesInLegend}
       />
 
       <Axis
@@ -798,7 +814,7 @@ export function XYChart({
                   ),
                 },
               ];
-              return paletteService.get(palette.name).getColor(
+              return paletteService.get(palette.name).getCategoricalColor(
                 seriesLayers,
                 {
                   maxDepth: 1,

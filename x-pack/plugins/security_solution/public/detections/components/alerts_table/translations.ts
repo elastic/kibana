@@ -165,10 +165,10 @@ export const ACTION_ADD_EXCEPTION = i18n.translate(
   }
 );
 
-export const ACTION_ADD_EVENT_EXCEPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.actions.addEventException',
+export const ACTION_ADD_EVENT_FILTER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.addEventFilter',
   {
-    defaultMessage: 'Add Endpoint event exception',
+    defaultMessage: 'Add Endpoint event filter',
   }
 );
 

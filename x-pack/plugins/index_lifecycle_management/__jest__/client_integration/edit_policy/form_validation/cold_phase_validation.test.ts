@@ -7,12 +7,11 @@
 
 import { act } from 'react-dom/test-utils';
 import { i18nTexts } from '../../../../public/application/sections/edit_policy/i18n_texts';
-import { setupEnvironment } from '../../helpers/setup_environment';
-import { EditPolicyTestBed, setup } from '../edit_policy.helpers';
+import { setupEnvironment } from '../../helpers';
+import { setupValidationTestBed, ValidationTestBed } from './validation.helpers';
 
 describe('<EditPolicy /> cold phase validation', () => {
-  let testBed: EditPolicyTestBed;
-  let runTimers: () => void;
+  let testBed: ValidationTestBed;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
@@ -36,15 +35,13 @@ describe('<EditPolicy /> cold phase validation', () => {
     ]);
 
     await act(async () => {
-      testBed = await setup();
+      testBed = await setupValidationTestBed();
     });
 
     const { component, actions } = testBed;
     component.update();
     await actions.setPolicyName('mypolicy');
-    await actions.cold.enable(true);
-
-    ({ runTimers } = testBed);
+    await actions.togglePhase('cold');
   });
 
   describe('replicas', () => {
@@ -53,9 +50,9 @@ describe('<EditPolicy /> cold phase validation', () => {
 
       await actions.cold.setReplicas('-1');
 
-      runTimers();
+      actions.errors.waitForValidation();
 
-      actions.expectErrorMessages([i18nTexts.editPolicy.errors.nonNegativeNumberRequired]);
+      actions.errors.expectMessages([i18nTexts.editPolicy.errors.nonNegativeNumberRequired]);
     });
 
     test(`allows 0 for replicas`, async () => {
@@ -63,9 +60,9 @@ describe('<EditPolicy /> cold phase validation', () => {
 
       await actions.cold.setReplicas('0');
 
-      runTimers();
+      actions.errors.waitForValidation();
 
-      actions.expectErrorMessages([]);
+      actions.errors.expectMessages([]);
     });
   });
 
@@ -75,9 +72,9 @@ describe('<EditPolicy /> cold phase validation', () => {
 
       await actions.cold.setIndexPriority('-1');
 
-      runTimers();
+      actions.errors.waitForValidation();
 
-      actions.expectErrorMessages([i18nTexts.editPolicy.errors.nonNegativeNumberRequired]);
+      actions.errors.expectMessages([i18nTexts.editPolicy.errors.nonNegativeNumberRequired]);
     });
 
     test(`allows 0 for index priority`, async () => {
@@ -85,9 +82,9 @@ describe('<EditPolicy /> cold phase validation', () => {
 
       await actions.cold.setIndexPriority('0');
 
-      runTimers();
+      actions.errors.waitForValidation();
 
-      actions.expectErrorMessages([]);
+      actions.errors.expectMessages([]);
     });
   });
 });

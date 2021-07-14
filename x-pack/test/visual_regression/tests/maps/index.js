@@ -12,9 +12,9 @@ export default function ({ loadTestFile, getService }) {
 
   describe('maps app visual regression', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.load('maps/data');
-      await esArchiver.load('maps/kibana');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.load('x-pack/test/functional/es_archives/maps/data');
+      await esArchiver.load('x-pack/test/functional/es_archives/maps/kibana');
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
       });
@@ -22,8 +22,8 @@ export default function ({ loadTestFile, getService }) {
     });
 
     after(async () => {
-      await esArchiver.unload('maps/data');
-      await esArchiver.unload('maps/kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/maps/data');
+      await esArchiver.unload('x-pack/test/functional/es_archives/maps/kibana');
     });
 
     this.tags('ciGroup10');

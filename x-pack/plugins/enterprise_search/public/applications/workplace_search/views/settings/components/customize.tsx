@@ -11,9 +11,10 @@ import { useActions, useValues } from 'kea';
 
 import { EuiButton, EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 
+import { WorkplaceSearchPageTemplate } from '../../../components/layout';
 import { ContentSection } from '../../../components/shared/content_section';
-import { ViewContentHeader } from '../../../components/shared/view_content_header';
 import {
+  NAV,
   CUSTOMIZE_HEADER_TITLE,
   CUSTOMIZE_HEADER_DESCRIPTION,
   CUSTOMIZE_NAME_LABEL,
@@ -31,32 +32,36 @@ export const Customize: React.FC = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <ViewContentHeader
-        title={CUSTOMIZE_HEADER_TITLE}
-        description={CUSTOMIZE_HEADER_DESCRIPTION}
-      />
-      <ContentSection>
-        <EuiFormRow label={CUSTOMIZE_NAME_LABEL} fullWidth isInvalid={false}>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiFieldText
-                isInvalid={false}
-                required
-                value={orgNameInputValue}
-                data-test-subj="OrgNameInput"
-                onChange={(e) => onOrgNameInputChange(e.target.value)}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem />
-          </EuiFlexGroup>
-        </EuiFormRow>
-        <EuiFormRow>
-          <EuiButton color="primary" data-test-subj="SaveOrgNameButton" type="submit">
-            {CUSTOMIZE_NAME_BUTTON}
-          </EuiButton>
-        </EuiFormRow>
-      </ContentSection>
-    </form>
+    <WorkplaceSearchPageTemplate
+      pageChrome={[NAV.SETTINGS]}
+      pageHeader={{
+        pageTitle: CUSTOMIZE_HEADER_TITLE,
+        description: CUSTOMIZE_HEADER_DESCRIPTION,
+      }}
+    >
+      <form onSubmit={handleSubmit}>
+        <ContentSection>
+          <EuiFormRow label={CUSTOMIZE_NAME_LABEL} fullWidth isInvalid={false}>
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiFieldText
+                  isInvalid={false}
+                  required
+                  value={orgNameInputValue}
+                  data-test-subj="OrgNameInput"
+                  onChange={(e) => onOrgNameInputChange(e.target.value)}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem />
+            </EuiFlexGroup>
+          </EuiFormRow>
+          <EuiFormRow>
+            <EuiButton color="primary" data-test-subj="SaveOrgNameButton" type="submit">
+              {CUSTOMIZE_NAME_BUTTON}
+            </EuiButton>
+          </EuiFormRow>
+        </ContentSection>
+      </form>
+    </WorkplaceSearchPageTemplate>
   );
 };

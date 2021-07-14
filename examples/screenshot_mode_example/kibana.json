@@ -4,6 +4,6 @@
   "kibanaVersion": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["navigation", "screenshotMode", "usageCollection"],
+  "requiredPlugins": ["navigation", "screenshotMode", "usageCollection", "developerExamples"],
   "optionalPlugins": []
 }

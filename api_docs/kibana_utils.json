@@ -2551,7 +2551,9 @@
             "type": "Object",
             "tags": [],
             "label": "storage",
-            "description": [],
+            "description": [
+              "- Option {@link Storage} to use for storing state. By default window.sessionStorage."
+            ],
             "signature": [
               "Storage"
             ],
@@ -2616,7 +2618,9 @@
             "type": "Function",
             "tags": [],
             "label": "accessor",
-            "description": [],
+            "description": [
+              "Asynchronous start service accessor provided by platform."
+            ],
             "signature": [
               {
                 "pluginId": "core",
@@ -3623,7 +3627,9 @@
             "type": "Object",
             "tags": [],
             "label": "promise",
-            "description": [],
+            "description": [
+              "Promise to convert to 3-tuple."
+            ],
             "signature": [
               "Promise<T>"
             ],
@@ -3799,7 +3805,7 @@
                     "description": [],
                     "source": {
                       "path": "src/core/public/application/types.ts",
-                      "lineNumber": 717
+                      "lineNumber": 731
                     },
                     "deprecated": false
                   },
@@ -3822,7 +3828,7 @@
                     ],
                     "source": {
                       "path": "src/core/public/application/types.ts",
-                      "lineNumber": 717
+                      "lineNumber": 731
                     },
                     "deprecated": false
                   }
@@ -4687,7 +4693,9 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "container",
-            "description": [],
+            "description": [
+              "- {@link StateContainer} which state to track."
+            ],
             "signature": [
               "Container"
             ],
@@ -4704,7 +4712,9 @@
             "type": "Function",
             "tags": [],
             "label": "selector",
-            "description": [],
+            "description": [
+              "- Function used to pick parts of state."
+            ],
             "signature": [
               "(state: ",
               {
@@ -4729,7 +4739,9 @@
             "type": "Function",
             "tags": [],
             "label": "comparator",
-            "description": [],
+            "description": [
+              "- {@link Comparator} function used to memoize previous result, to not\nre-render React component if state did not change. By default uses\n`fast-deep-equal` package."
+            ],
             "signature": [
               {
                 "pluginId": "kibanaUtils",
@@ -4793,7 +4805,9 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "container",
-            "description": [],
+            "description": [
+              "- {@link StateContainer} which state to track."
+            ],
             "signature": [
               "Container"
             ],
@@ -6109,71 +6123,6 @@
       },
       {
         "parentPluginId": "kibanaUtils",
-        "id": "def-public.JsonArray",
-        "type": "Interface",
-        "tags": [],
-        "label": "JsonArray",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.JsonArray",
-            "text": "JsonArray"
-          },
-          " extends ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.JsonValue",
-            "text": "JsonValue"
-          },
-          "[]"
-        ],
-        "source": {
-          "path": "src/plugins/kibana_utils/common/typed_json.ts",
-          "lineNumber": 16
-        },
-        "deprecated": false,
-        "children": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaUtils",
-        "id": "def-public.JsonObject",
-        "type": "Interface",
-        "tags": [],
-        "label": "JsonObject",
-        "description": [],
-        "source": {
-          "path": "src/plugins/kibana_utils/common/typed_json.ts",
-          "lineNumber": 11
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaUtils",
-            "id": "def-public.JsonObject.Unnamed",
-            "type": "Any",
-            "tags": [],
-            "label": "Unnamed",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "source": {
-              "path": "src/plugins/kibana_utils/common/typed_json.ts",
-              "lineNumber": 12
-            },
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaUtils",
         "id": "def-public.KibanaServerError",
         "type": "Interface",
         "tags": [],
@@ -6941,39 +6890,6 @@
         ],
         "source": {
           "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
-          "lineNumber": 9
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaUtils",
-        "id": "def-public.JsonValue",
-        "type": "Type",
-        "tags": [],
-        "label": "JsonValue",
-        "description": [],
-        "signature": [
-          "string | number | boolean | ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.JsonObject",
-            "text": "JsonObject"
-          },
-          " | ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.JsonArray",
-            "text": "JsonArray"
-          },
-          " | null"
-        ],
-        "source": {
-          "path": "src/plugins/kibana_utils/common/typed_json.ts",
           "lineNumber": 9
         },
         "deprecated": false,
@@ -10006,7 +9922,9 @@
             "type": "Object",
             "tags": [],
             "label": "promise",
-            "description": [],
+            "description": [
+              "Promise to convert to 3-tuple."
+            ],
             "signature": [
               "Promise<T>"
             ],
@@ -10069,7 +9987,9 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "container",
-            "description": [],
+            "description": [
+              "- {@link StateContainer} which state to track."
+            ],
             "signature": [
               "Container"
             ],
@@ -10086,7 +10006,9 @@
             "type": "Function",
             "tags": [],
             "label": "selector",
-            "description": [],
+            "description": [
+              "- Function used to pick parts of state."
+            ],
             "signature": [
               "(state: ",
               {
@@ -10111,7 +10033,9 @@
             "type": "Function",
             "tags": [],
             "label": "comparator",
-            "description": [],
+            "description": [
+              "- {@link Comparator} function used to memoize previous result, to not\nre-render React component if state did not change. By default uses\n`fast-deep-equal` package."
+            ],
             "signature": [
               {
                 "pluginId": "kibanaUtils",
@@ -10175,7 +10099,9 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "container",
-            "description": [],
+            "description": [
+              "- {@link StateContainer} which state to track."
+            ],
             "signature": [
               "Container"
             ],
@@ -10332,71 +10258,6 @@
             "source": {
               "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
               "lineNumber": 54
-            },
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaUtils",
-        "id": "def-common.JsonArray",
-        "type": "Interface",
-        "tags": [],
-        "label": "JsonArray",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.JsonArray",
-            "text": "JsonArray"
-          },
-          " extends ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.JsonValue",
-            "text": "JsonValue"
-          },
-          "[]"
-        ],
-        "source": {
-          "path": "src/plugins/kibana_utils/common/typed_json.ts",
-          "lineNumber": 16
-        },
-        "deprecated": false,
-        "children": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaUtils",
-        "id": "def-common.JsonObject",
-        "type": "Interface",
-        "tags": [],
-        "label": "JsonObject",
-        "description": [],
-        "source": {
-          "path": "src/plugins/kibana_utils/common/typed_json.ts",
-          "lineNumber": 11
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaUtils",
-            "id": "def-common.JsonObject.Unnamed",
-            "type": "Any",
-            "tags": [],
-            "label": "Unnamed",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "source": {
-              "path": "src/plugins/kibana_utils/common/typed_json.ts",
-              "lineNumber": 12
             },
             "deprecated": false
           }
@@ -11587,39 +11448,6 @@
         ],
         "source": {
           "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
-          "lineNumber": 9
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaUtils",
-        "id": "def-common.JsonValue",
-        "type": "Type",
-        "tags": [],
-        "label": "JsonValue",
-        "description": [],
-        "signature": [
-          "string | number | boolean | ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.JsonObject",
-            "text": "JsonObject"
-          },
-          " | ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.JsonArray",
-            "text": "JsonArray"
-          },
-          " | null"
-        ],
-        "source": {
-          "path": "src/plugins/kibana_utils/common/typed_json.ts",
           "lineNumber": 9
         },
         "deprecated": false,

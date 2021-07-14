@@ -89,7 +89,7 @@ export default function ({ getService }: FtrProviderContext) {
     const transformConfigWithLatest = getLatestTransformConfig('cloning');
 
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/ecommerce');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
       await transform.api.createAndRunTransform(
         transformConfigWithPivot.id,

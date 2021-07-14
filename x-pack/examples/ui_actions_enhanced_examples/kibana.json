@@ -19,7 +19,6 @@
     "dashboardEnhanced",
     "embeddable",
     "kibanaUtils",
-    "kibanaReact",
-    "share"
+    "kibanaReact"
   ]
 }

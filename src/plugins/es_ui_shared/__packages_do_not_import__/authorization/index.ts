@@ -12,8 +12,8 @@ export {
   AuthorizationProvider,
   AuthorizationContext,
   SectionError,
-  Error,
+  PageError,
   useAuthorizationContext,
 } from './components';
 
-export { Privileges, MissingPrivileges } from './types';
+export { Privileges, MissingPrivileges, Error } from './types';

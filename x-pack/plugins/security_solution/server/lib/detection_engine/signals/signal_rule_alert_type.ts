@@ -65,6 +65,10 @@ import {
   RuleParams,
   savedQueryRuleParams,
 } from '../schemas/rule_schemas';
+import { bulkCreateFactory } from './bulk_create_factory';
+import { wrapHitsFactory } from './wrap_hits_factory';
+import { wrapSequencesFactory } from './wrap_sequences_factory';
+import { ConfigType } from '../../../config';
 
 export const signalRulesAlertType = ({
   logger,
@@ -72,12 +76,14 @@ export const signalRulesAlertType = ({
   version,
   ml,
   lists,
+  mergeStrategy,
 }: {
   logger: Logger;
   eventsTelemetry: TelemetryEventsSender | undefined;
   version: string;
   ml: SetupPlugins['ml'];
   lists: SetupPlugins['lists'] | undefined;
+  mergeStrategy: ConfigType['alertMergeStrategy'];
 }): SignalRuleAlertTypeDefinition => {
   return {
     id: SIGNALS_ID,
@@ -100,6 +106,7 @@ export const signalRulesAlertType = ({
     },
     producer: SERVER_APP_ID,
     minimumLicenseRequired: 'basic',
+    isExportable: false,
     async executor({
       previousStartedAt,
       startedAt,
@@ -218,78 +225,118 @@ export const signalRulesAlertType = ({
           client: exceptionsClient,
           lists: params.exceptionsList ?? [],
         });
+
+        const bulkCreate = bulkCreateFactory(
+          logger,
+          services.scopedClusterClient.asCurrentUser,
+          buildRuleMessage,
+          refresh
+        );
+
+        const wrapHits = wrapHitsFactory({
+          ruleSO: savedObject,
+          signalsIndex: params.outputIndex,
+          mergeStrategy,
+        });
+
+        const wrapSequences = wrapSequencesFactory({
+          ruleSO: savedObject,
+          signalsIndex: params.outputIndex,
+          mergeStrategy,
+        });
+
         if (isMlRule(type)) {
           const mlRuleSO = asTypeSpecificSO(savedObject, machineLearningRuleParams);
-          result = await mlExecutor({
-            rule: mlRuleSO,
-            ml,
-            listClient,
-            exceptionItems,
-            ruleStatusService,
-            services,
-            logger,
-            refresh,
-            buildRuleMessage,
-          });
+          for (const tuple of tuples) {
+            result = await mlExecutor({
+              rule: mlRuleSO,
+              tuple,
+              ml,
+              listClient,
+              exceptionItems,
+              services,
+              logger,
+              buildRuleMessage,
+              bulkCreate,
+              wrapHits,
+            });
+          }
         } else if (isThresholdRule(type)) {
           const thresholdRuleSO = asTypeSpecificSO(savedObject, thresholdRuleParams);
-          result = await thresholdExecutor({
-            rule: thresholdRuleSO,
-            tuples,
-            exceptionItems,
-            ruleStatusService,
-            services,
-            version,
-            logger,
-            refresh,
-            buildRuleMessage,
-            startedAt,
-          });
+          for (const tuple of tuples) {
+            result = await thresholdExecutor({
+              rule: thresholdRuleSO,
+              tuple,
+              exceptionItems,
+              services,
+              version,
+              logger,
+              buildRuleMessage,
+              startedAt,
+              bulkCreate,
+              wrapHits,
+            });
+          }
         } else if (isThreatMatchRule(type)) {
           const threatRuleSO = asTypeSpecificSO(savedObject, threatRuleParams);
-          result = await threatMatchExecutor({
-            rule: threatRuleSO,
-            tuples,
-            listClient,
-            exceptionItems,
-            services,
-            version,
-            searchAfterSize,
-            logger,
-            refresh,
-            eventsTelemetry,
-            buildRuleMessage,
-          });
+          for (const tuple of tuples) {
+            result = await threatMatchExecutor({
+              rule: threatRuleSO,
+              tuple,
+              listClient,
+              exceptionItems,
+              services,
+              version,
+              searchAfterSize,
+              logger,
+              eventsTelemetry,
+              buildRuleMessage,
+              bulkCreate,
+              wrapHits,
+            });
+          }
         } else if (isQueryRule(type)) {
           const queryRuleSO = validateQueryRuleTypes(savedObject);
-          result = await queryExecutor({
-            rule: queryRuleSO,
-            tuples,
-            listClient,
-            exceptionItems,
-            services,
-            version,
-            searchAfterSize,
-            logger,
-            refresh,
-            eventsTelemetry,
-            buildRuleMessage,
-          });
+          for (const tuple of tuples) {
+            result = await queryExecutor({
+              rule: queryRuleSO,
+              tuple,
+              listClient,
+              exceptionItems,
+              services,
+              version,
+              searchAfterSize,
+              logger,
+              eventsTelemetry,
+              buildRuleMessage,
+              bulkCreate,
+              wrapHits,
+            });
+          }
         } else if (isEqlRule(type)) {
           const eqlRuleSO = asTypeSpecificSO(savedObject, eqlRuleParams);
-          result = await eqlExecutor({
-            rule: eqlRuleSO,
-            exceptionItems,
-            ruleStatusService,
-            services,
-            version,
-            searchAfterSize,
-            logger,
-            refresh,
-          });
+          for (const tuple of tuples) {
+            result = await eqlExecutor({
+              rule: eqlRuleSO,
+              tuple,
+              exceptionItems,
+              services,
+              version,
+              searchAfterSize,
+              bulkCreate,
+              logger,
+              wrapHits,
+              wrapSequences,
+            });
+          }
         } else {
           throw new Error(`unknown rule type ${type}`);
         }
+        if (result.warningMessages.length) {
+          const warningMessage = buildRuleMessage(result.warningMessages.join());
+          await ruleStatusService.partialFailure(warningMessage);
+        }
+
         if (result.success) {
           if (actions.length) {
             const notificationRuleParams: NotificationRuleTypeParams = {

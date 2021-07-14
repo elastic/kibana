@@ -44,6 +44,7 @@ exports[`FingerprintCol renders expected elements for valid props 1`] = `
         <span
           aria-hidden="true"
           class="euiButtonIcon__icon"
+          color="inherit"
           data-euiicon-type="copy"
         />
       </button>
@@ -83,6 +84,7 @@ exports[`FingerprintCol renders expected elements for valid props 1`] = `
         <span
           aria-hidden="true"
           class="euiButtonIcon__icon"
+          color="inherit"
           data-euiicon-type="copy"
         />
       </button>

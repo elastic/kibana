@@ -135,6 +135,17 @@ export const getDateHistogramBucketAgg = ({
         },
       };
     },
+    getShiftedKey(agg, key, timeShift) {
+      return moment(key).add(timeShift).valueOf();
+    },
+    splitForTimeShift(agg, aggs) {
+      return aggs.hasTimeShifts() && Boolean(aggs.timeFields?.includes(agg.fieldName()));
+    },
+    getTimeShiftInterval(agg) {
+      const { useNormalizedEsInterval } = agg.params;
+      const interval = agg.buckets.getInterval(useNormalizedEsInterval);
+      return interval;
+    },
     params: [
       {
         name: 'field',

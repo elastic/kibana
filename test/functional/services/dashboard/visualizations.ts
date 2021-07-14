@@ -13,25 +13,23 @@ export class DashboardVisualizationsService extends FtrService {
   private readonly queryBar = this.ctx.getService('queryBar');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly dashboardAddPanel = this.ctx.getService('dashboardAddPanel');
-  private readonly PageObjects = this.ctx.getPageObjects([
-    'dashboard',
-    'visualize',
-    'visEditor',
-    'header',
-    'discover',
-    'timePicker',
-  ]);
+  private readonly dashboard = this.ctx.getPageObject('dashboard');
+  private readonly visualize = this.ctx.getPageObject('visualize');
+  private readonly visEditor = this.ctx.getPageObject('visEditor');
+  private readonly header = this.ctx.getPageObject('header');
+  private readonly discover = this.ctx.getPageObject('discover');
+  private readonly timePicker = this.ctx.getPageObject('timePicker');
 
   async createAndAddTSVBVisualization(name: string) {
     this.log.debug(`createAndAddTSVBVisualization(${name})`);
-    const inViewMode = await this.PageObjects.dashboard.getIsInViewMode();
+    const inViewMode = await this.dashboard.getIsInViewMode();
     if (inViewMode) {
-      await this.PageObjects.dashboard.switchToEditMode();
+      await this.dashboard.switchToEditMode();
     }
     await this.dashboardAddPanel.clickEditorMenuButton();
     await this.dashboardAddPanel.clickAddNewEmbeddableLink('metrics');
-    await this.PageObjects.visualize.clickVisualBuilder();
-    await this.PageObjects.visualize.saveVisualizationExpectSuccess(name);
+    await this.visualize.clickVisualBuilder();
+    await this.visualize.saveVisualizationExpectSuccess(name);
   }
 
   async createSavedSearch({
@@ -44,8 +42,8 @@ export class DashboardVisualizationsService extends FtrService {
     fields?: string[];
   }) {
     this.log.debug(`createSavedSearch(${name})`);
-    await this.PageObjects.header.clickDiscover(true);
-    await this.PageObjects.timePicker.setHistoricalDataRange();
+    await this.header.clickDiscover(true);
+    await this.timePicker.setHistoricalDataRange();
 
     if (query) {
       await this.queryBar.setQuery(query);
@@ -54,12 +52,12 @@ export class DashboardVisualizationsService extends FtrService {
 
     if (fields) {
       for (let i = 0; i < fields.length; i++) {
-        await this.PageObjects.discover.clickFieldListItemAdd(fields[i]);
+        await this.discover.clickFieldListItemAdd(fields[i]);
       }
     }
 
-    await this.PageObjects.discover.saveSearch(name);
-    await this.PageObjects.header.waitUntilLoadingHasFinished();
+    await this.discover.saveSearch(name);
+    await this.header.waitUntilLoadingHasFinished();
     await this.testSubjects.exists('saveSearchSuccess');
   }
 
@@ -75,25 +73,25 @@ export class DashboardVisualizationsService extends FtrService {
     this.log.debug(`createAndAddSavedSearch(${name})`);
     await this.createSavedSearch({ name, query, fields });
 
-    await this.PageObjects.header.clickDashboard();
+    await this.header.clickDashboard();
 
-    const inViewMode = await this.PageObjects.dashboard.getIsInViewMode();
+    const inViewMode = await this.dashboard.getIsInViewMode();
     if (inViewMode) {
-      await this.PageObjects.dashboard.switchToEditMode();
+      await this.dashboard.switchToEditMode();
     }
     await this.dashboardAddPanel.addSavedSearch(name);
   }
 
   async createAndAddMarkdown({ name, markdown }: { name: string; markdown: string }) {
     this.log.debug(`createAndAddMarkdown(${markdown})`);
-    const inViewMode = await this.PageObjects.dashboard.getIsInViewMode();
+    const inViewMode = await this.dashboard.getIsInViewMode();
     if (inViewMode) {
-      await this.PageObjects.dashboard.switchToEditMode();
+      await this.dashboard.switchToEditMode();
     }
     await this.dashboardAddPanel.clickMarkdownQuickButton();
-    await this.PageObjects.visEditor.setMarkdownTxt(markdown);
-    await this.PageObjects.visEditor.clickGo();
-    await this.PageObjects.visualize.saveVisualizationExpectSuccess(name, {
+    await this.visEditor.setMarkdownTxt(markdown);
+    await this.visEditor.clickGo();
+    await this.visualize.saveVisualizationExpectSuccess(name, {
       saveAsNew: false,
       redirectToOrigin: true,
     });
@@ -101,9 +99,9 @@ export class DashboardVisualizationsService extends FtrService {
 
   async createAndEmbedMetric(name: string) {
     this.log.debug(`createAndEmbedMetric(${name})`);
-    const inViewMode = await this.PageObjects.dashboard.getIsInViewMode();
+    const inViewMode = await this.dashboard.getIsInViewMode();
     if (inViewMode) {
-      await this.PageObjects.dashboard.switchToEditMode();
+      await this.dashboard.switchToEditMode();
     }
     await this.dashboardAddPanel.clickEditorMenuButton();
     await this.dashboardAddPanel.clickAggBasedVisualizations();
@@ -115,13 +113,13 @@ export class DashboardVisualizationsService extends FtrService {
 
   async createAndEmbedMarkdown({ name, markdown }: { name: string; markdown: string }) {
     this.log.debug(`createAndEmbedMarkdown(${markdown})`);
-    const inViewMode = await this.PageObjects.dashboard.getIsInViewMode();
+    const inViewMode = await this.dashboard.getIsInViewMode();
     if (inViewMode) {
-      await this.PageObjects.dashboard.switchToEditMode();
+      await this.dashboard.switchToEditMode();
     }
     await this.dashboardAddPanel.clickMarkdownQuickButton();
-    await this.PageObjects.visEditor.setMarkdownTxt(markdown);
-    await this.PageObjects.visEditor.clickGo();
+    await this.visEditor.setMarkdownTxt(markdown);
+    await this.visEditor.clickGo();
     await this.testSubjects.click('visualizesaveAndReturnButton');
   }
 }

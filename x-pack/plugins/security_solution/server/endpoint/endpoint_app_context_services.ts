@@ -20,7 +20,6 @@ import { SecurityPluginStart } from '../../../security/server';
 import {
   AgentService,
   FleetStartContract,
-  PackageService,
   AgentPolicyServiceInterface,
   PackagePolicyServiceInterface,
 } from '../../../fleet/server';
@@ -30,14 +29,6 @@ import {
   getPackagePolicyUpdateCallback,
 } from '../fleet_integration/fleet_integration';
 import { ManifestManager } from './services/artifacts';
-import { MetadataQueryStrategy } from './types';
-import { MetadataQueryStrategyVersions } from '../../common/endpoint/types';
-import {
-  metadataQueryStrategyV1,
-  metadataQueryStrategyV2,
-} from './routes/metadata/support/query_strategies';
-import { ElasticsearchAssetType } from '../../../fleet/common/types/models';
-import { metadataTransformPrefix } from '../../common/endpoint/constants';
 import { AppClientFactory } from '../client';
 import { ConfigType } from '../config';
 import { LicenseService } from '../../common/license';
@@ -45,47 +36,6 @@ import {
   ExperimentalFeatures,
   parseExperimentalConfigValue,
 } from '../../common/experimental_features';
-import { SecuritySolutionRequestHandlerContext } from '../types';
-
-export interface MetadataService {
-  queryStrategy(
-    savedObjectsClient: SavedObjectsClientContract,
-    version?: MetadataQueryStrategyVersions
-  ): Promise<MetadataQueryStrategy>;
-}
-
-export const createMetadataService = (packageService: PackageService): MetadataService => {
-  return {
-    async queryStrategy(
-      savedObjectsClient: SavedObjectsClientContract,
-      version?: MetadataQueryStrategyVersions
-    ): Promise<MetadataQueryStrategy> {
-      if (version === MetadataQueryStrategyVersions.VERSION_1) {
-        return metadataQueryStrategyV1();
-      }
-      if (!packageService) {
-        throw new Error('package service is uninitialized');
-      }
-
-      if (version === MetadataQueryStrategyVersions.VERSION_2 || !version) {
-        const assets = await packageService.getInstalledEsAssetReferences(
-          savedObjectsClient,
-          'endpoint'
-        );
-        const expectedTransformAssets = assets.filter(
-          (ref) =>
-            ref.type === ElasticsearchAssetType.transform &&
-            ref.id.startsWith(metadataTransformPrefix)
-        );
-        if (expectedTransformAssets && expectedTransformAssets.length === 1) {
-          return metadataQueryStrategyV2();
-        }
-        return metadataQueryStrategyV1();
-      }
-      return metadataQueryStrategyV1();
-    },
-  };
-};
 
 export type EndpointAppContextServiceStartContract = Partial<
   Pick<
@@ -116,7 +66,6 @@ export class EndpointAppContextService {
   private packagePolicyService: PackagePolicyServiceInterface | undefined;
   private agentPolicyService: AgentPolicyServiceInterface | undefined;
   private savedObjectsStart: SavedObjectsServiceStart | undefined;
-  private metadataService: MetadataService | undefined;
   private config: ConfigType | undefined;
   private license: LicenseService | undefined;
   public security: SecurityPluginStart | undefined;
@@ -130,7 +79,6 @@ export class EndpointAppContextService {
     this.agentPolicyService = dependencies.agentPolicyService;
     this.manifestManager = dependencies.manifestManager;
     this.savedObjectsStart = dependencies.savedObjectsStart;
-    this.metadataService = createMetadataService(dependencies.packageService!);
     this.config = dependencies.config;
     this.license = dependencies.licenseService;
     this.security = dependencies.security;
@@ -178,10 +126,6 @@ export class EndpointAppContextService {
     return this.agentPolicyService;
   }
 
-  public getMetadataService(): MetadataService | undefined {
-    return this.metadataService;
-  }
-
   public getManifestManager(): ManifestManager | undefined {
     return this.manifestManager;
   }
@@ -200,13 +144,10 @@ export class EndpointAppContextService {
     return this.license;
   }
 
-  public async getCasesClient(
-    req: KibanaRequest,
-    context: SecuritySolutionRequestHandlerContext
-  ): Promise<CasesClient> {
+  public async getCasesClient(req: KibanaRequest): Promise<CasesClient> {
     if (!this.cases) {
       throw new Error(`must call start on ${EndpointAppContextService.name} to call getter`);
     }
-    return this.cases.getCasesClientWithRequestAndContext(context, req);
+    return this.cases.getCasesClientWithRequest(req);
   }
 }

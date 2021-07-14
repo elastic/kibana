@@ -14,7 +14,7 @@ import { useGetTags } from '../../containers/use_get_tags';
 import { useGetReporters } from '../../containers/use_get_reporters';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { StatusAll } from '../../containers/types';
-import { CaseStatuses } from '../../../common';
+import { CaseStatuses, SECURITY_SOLUTION_OWNER } from '../../../common';
 import { act } from 'react-dom/test-utils';
 
 jest.mock('../../containers/use_get_reporters');
@@ -32,7 +32,26 @@ const alertDataMock = {
   },
   index: 'index-id',
   alertId: 'alert-id',
+  owner: SECURITY_SOLUTION_OWNER,
 };
+jest.mock('../../common/lib/kibana', () => {
+  const originalModule = jest.requireActual('../../common/lib/kibana');
+  return {
+    ...originalModule,
+    useKibana: () => ({
+      services: {
+        triggersActionsUi: {
+          actionTypeRegistry: {
+            get: jest.fn().mockReturnValue({
+              actionTypeTitle: '.jira',
+              iconClass: 'logoSecurity',
+            }),
+          },
+        },
+      },
+    }),
+  };
+});
 
 describe('AllCasesGeneric ', () => {
   beforeEach(() => {

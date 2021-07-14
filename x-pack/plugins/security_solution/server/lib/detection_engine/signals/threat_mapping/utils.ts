@@ -75,6 +75,7 @@ export const combineResults = (
   lastLookBackDate: newResult.lastLookBackDate,
   createdSignalsCount: currentResult.createdSignalsCount + newResult.createdSignalsCount,
   createdSignals: [...currentResult.createdSignals, ...newResult.createdSignals],
+  warningMessages: [...currentResult.warningMessages, ...newResult.warningMessages],
   errors: [...new Set([...currentResult.errors, ...newResult.errors])],
 });
 
@@ -100,6 +101,7 @@ export const combineConcurrentResults = (
         lastLookBackDate,
         createdSignalsCount: accum.createdSignalsCount + item.createdSignalsCount,
         createdSignals: [...accum.createdSignals, ...item.createdSignals],
+        warningMessages: [...accum.warningMessages, ...item.warningMessages],
         errors: [...new Set([...accum.errors, ...item.errors])],
       };
     },
@@ -112,6 +114,7 @@ export const combineConcurrentResults = (
       createdSignalsCount: 0,
       createdSignals: [],
       errors: [],
+      warningMessages: [],
     }
   );
 

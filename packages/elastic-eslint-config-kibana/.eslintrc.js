@@ -1,3 +1,5 @@
+const { USES_STYLED_COMPONENTS } = require('@kbn/dev-utils'); 
+
 module.exports = {
   extends: [
     './javascript.js',
@@ -74,6 +76,17 @@ module.exports = {
           from: '@kbn/test/types/ftr',
           to: '@kbn/test',
           disallowedMessage: `import from the root of @kbn/test instead`
+        },
+        {
+          from: 'react-intl',
+          to: '@kbn/i18n/react',
+          disallowedMessage: `import from @kbn/i18n/react instead`
+        },
+        {
+          from: 'styled-components',
+          to: false,
+          exclude: USES_STYLED_COMPONENTS,
+          disallowedMessage: `Prefer using @emotion/react instead. To use styled-components, ensure you plugin is enabled in @kbn/dev-utils/src/babel.ts.`
         },
       ],
     ],

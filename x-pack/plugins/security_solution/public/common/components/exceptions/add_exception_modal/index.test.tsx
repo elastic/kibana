@@ -13,7 +13,7 @@ import { waitFor } from '@testing-library/react';
 import { AddExceptionModal } from './';
 import { useCurrentUser } from '../../../../common/lib/kibana';
 import { ExceptionBuilder } from '../../../../shared_imports';
-import { useAsync } from '@kbn/securitysolution-list-hooks';
+import { useAsync } from '@kbn/securitysolution-hook-utils';
 import { getExceptionListSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_schema.mock';
 import { useFetchIndex } from '../../../containers/source';
 import { stubIndexPattern } from 'src/plugins/data/common/index_patterns/index_pattern.stub';
@@ -49,8 +49,8 @@ jest.mock('../../../containers/source');
 jest.mock('../../../../detections/containers/detection_engine/rules');
 jest.mock('../use_add_exception');
 jest.mock('../use_fetch_or_create_rule_exception_list');
-jest.mock('@kbn/securitysolution-list-hooks', () => ({
-  ...jest.requireActual('@kbn/securitysolution-list-hooks'),
+jest.mock('@kbn/securitysolution-hook-utils', () => ({
+  ...jest.requireActual('@kbn/securitysolution-hook-utils'),
   useAsync: jest.fn(),
 }));
 jest.mock('../../../../detections/containers/detection_engine/rules/use_rule_async');

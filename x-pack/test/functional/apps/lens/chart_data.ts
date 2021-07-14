@@ -76,10 +76,43 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it.skip('should render treemap chart', async () => {
-      await PageObjects.lens.switchToVisualization('treemap');
+      await PageObjects.lens.switchToVisualization('treemap', 'treemap');
       await PageObjects.lens.waitForVisualization();
       const data = await PageObjects.lens.getCurrentChartDebugState();
       assertMatchesExpectedData(data!);
+    });
+
+    it('should render heatmap chart', async () => {
+      await PageObjects.lens.switchToVisualization('heatmap', 'heatmap');
+      await PageObjects.lens.waitForVisualization();
+      const debugState = await PageObjects.lens.getCurrentChartDebugState();
+
+      if (!debugState) {
+        throw new Error('Debug state is not available');
+      }
+
+      // assert axes
+      expect(debugState.axes!.x[0].labels).to.eql([
+        '97.220.3.248',
+        '169.228.188.120',
+        '78.83.247.30',
+        '226.82.228.233',
+        '93.28.27.24',
+        'Other',
+      ]);
+      expect(debugState.axes!.y[0].labels).to.eql(['']);
+
+      // assert cells
+      expect(debugState.heatmap!.cells.length).to.eql(6);
+
+      // assert legend
+      expect(debugState.legend!.items).to.eql([
+        { key: '5722.77', name: '> 5,722.77', color: '#6092c0' },
+        { key: '8529.22', name: '> 8,529.22', color: '#a8bfda' },
+        { key: '11335.66', name: '> 11,335.66', color: '#ebeff5' },
+        { key: '14142.11', name: '> 14,142.11', color: '#ecb385' },
+        { key: '16948.55', name: '> 16,948.55', color: '#e7664c' },
+      ]);
     });
 
     it('should render datatable', async () => {

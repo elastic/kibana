@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LogicMounter } from '../../../__mocks__';
+import { LogicMounter } from '../../../__mocks__/kea_logic';
 
 import { SchemaType } from '../../../shared/schema/types';
 

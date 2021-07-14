@@ -4,5 +4,11 @@
   "ui": true,
   "server": true,
   "requiredPlugins": ["data", "expressions", "visualizations", "charts"],
-  "requiredBundles": ["kibanaUtils", "kibanaReact", "visDefaultEditor"]
+  "requiredBundles": ["kibanaUtils", "kibanaReact", "visDefaultEditor"],
+  "owner": {
+    "name": "Kibana App",
+    "githubTeam": "kibana-app"
+  },
+  "description": "Registers the tagcloud visualization. It is based on elastic-charts wordcloud."
+
 }

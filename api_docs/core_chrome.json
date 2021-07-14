@@ -890,7 +890,7 @@
         "description": [],
         "source": {
           "path": "src/core/public/chrome/nav_links/nav_link.ts",
-          "lineNumber": 15
+          "lineNumber": 14
         },
         "deprecated": false,
         "children": [
@@ -905,7 +905,7 @@
             ],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 19
+              "lineNumber": 18
             },
             "deprecated": false
           },
@@ -920,7 +920,7 @@
             ],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 24
+              "lineNumber": 23
             },
             "deprecated": false
           },
@@ -939,7 +939,7 @@
             ],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 29
+              "lineNumber": 28
             },
             "deprecated": false
           },
@@ -954,7 +954,7 @@
             ],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 34
+              "lineNumber": 33
             },
             "deprecated": false
           },
@@ -965,14 +965,11 @@
             "tags": [],
             "label": "url",
             "description": [
-              "\nThe route used to open the {@link AppBase.defaultPath | default path } of an application.\nIf unset, `baseUrl` will be used instead."
-            ],
-            "signature": [
-              "string | undefined"
+              "\nThe route used to open the default path and the deep links of an application."
             ],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 40
+              "lineNumber": 38
             },
             "deprecated": false
           },
@@ -990,7 +987,7 @@
             ],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 45
+              "lineNumber": 43
             },
             "deprecated": false
           },
@@ -1008,7 +1005,7 @@
             ],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 50
+              "lineNumber": 48
             },
             "deprecated": false
           },
@@ -1026,7 +1023,7 @@
             ],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 56
+              "lineNumber": 54
             },
             "deprecated": false
           },
@@ -1044,7 +1041,7 @@
             ],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 62
+              "lineNumber": 60
             },
             "deprecated": false
           },
@@ -1059,7 +1056,7 @@
             ],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 67
+              "lineNumber": 65
             },
             "deprecated": false
           },
@@ -1077,7 +1074,7 @@
             ],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 76
+              "lineNumber": 74
             },
             "deprecated": false
           },
@@ -1095,7 +1092,7 @@
             ],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 81
+              "lineNumber": 79
             },
             "deprecated": false
           }
@@ -1299,103 +1296,6 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-public.ChromeNavLinks.update",
-            "type": "Function",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "update",
-            "description": [
-              "\nUpdate the navlink for the given id with the updated attributes.\nReturns the updated navlink or `undefined` if it does not exist.\n"
-            ],
-            "signature": [
-              "(id: string, values: Partial<Pick<",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreChromePluginApi",
-                "section": "def-public.ChromeNavLink",
-                "text": "ChromeNavLink"
-              },
-              ", \"hidden\" | \"url\" | \"disabled\" | \"href\">>) => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreChromePluginApi",
-                "section": "def-public.ChromeNavLink",
-                "text": "ChromeNavLink"
-              },
-              " | undefined"
-            ],
-            "source": {
-              "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
-              "lineNumber": 71
-            },
-            "deprecated": true,
-            "references": [
-              {
-                "plugin": "apm",
-                "link": {
-                  "path": "x-pack/plugins/apm/public/toggleAppLinkInNav.ts",
-                  "lineNumber": 13
-                }
-              },
-              {
-                "plugin": "graph",
-                "link": {
-                  "path": "x-pack/plugins/graph/public/services/toggle_nav_link.ts",
-                  "lineNumber": 26
-                }
-              }
-            ],
-            "children": [
-              {
-                "parentPluginId": "core",
-                "id": "def-public.ChromeNavLinks.update.$1",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "source": {
-                  "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
-                  "lineNumber": 71
-                },
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "core",
-                "id": "def-public.ChromeNavLinks.update.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "values",
-                "description": [],
-                "signature": [
-                  "Partial<Pick<",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreChromePluginApi",
-                    "section": "def-public.ChromeNavLink",
-                    "text": "ChromeNavLink"
-                  },
-                  ", \"hidden\" | \"url\" | \"disabled\" | \"href\">>"
-                ],
-                "source": {
-                  "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
-                  "lineNumber": 71
-                },
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "core",
             "id": "def-public.ChromeNavLinks.enableForcedAppSwitcherNavigation",
             "type": "Function",
             "tags": [],
@@ -1408,7 +1308,7 @@
             ],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
-              "lineNumber": 85
+              "lineNumber": 73
             },
             "deprecated": false,
             "children": [],
@@ -1430,7 +1330,7 @@
             ],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
-              "lineNumber": 90
+              "lineNumber": 78
             },
             "deprecated": false,
             "children": [],
@@ -2674,23 +2574,6 @@
         "source": {
           "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
           "lineNumber": 98
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-public.ChromeNavLinkUpdateableFields",
-        "type": "Type",
-        "tags": [],
-        "label": "ChromeNavLinkUpdateableFields",
-        "description": [],
-        "signature": [
-          "{ readonly hidden?: boolean | undefined; readonly url?: string | undefined; readonly disabled?: boolean | undefined; readonly href?: string | undefined; }"
-        ],
-        "source": {
-          "path": "src/core/public/chrome/nav_links/nav_link.ts",
-          "lineNumber": 85
         },
         "deprecated": false,
         "initialIsOpen": false

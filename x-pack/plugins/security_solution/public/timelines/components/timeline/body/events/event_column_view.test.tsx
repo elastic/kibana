@@ -60,9 +60,7 @@ describe('EventColumnView', () => {
     loadingEventIds: [],
     notesCount: 0,
     onEventDetailsPanelOpened: jest.fn(),
-    onPinEvent: jest.fn(),
     onRowSelected: jest.fn(),
-    onUnPinEvent: jest.fn(),
     refetch: jest.fn(),
     renderCellValue: DefaultCellRenderer,
     selectedEventIds: {},
@@ -118,16 +116,6 @@ describe('EventColumnView', () => {
     });
 
     expect(wrapper.find('[data-test-subj="pin"]').exists()).toBe(false);
-  });
-
-  test('it invokes onPinClicked when the button for pinning events is clicked', () => {
-    const wrapper = mount(<EventColumnView {...props} />, { wrappingComponent: TestProviders });
-
-    expect(props.onPinEvent).not.toHaveBeenCalled();
-
-    wrapper.find('[data-test-subj="pin"]').first().simulate('click');
-
-    expect(props.onPinEvent).toHaveBeenCalled();
   });
 
   test('it render AddToCaseAction if timelineId === TimelineId.detectionsPage', () => {

@@ -7,6 +7,24 @@
  */
 
 import './typings';
+import type {
+  Map,
+  GeoJSONSource,
+  VectorSource,
+  Layer,
+  AnyLayer,
+  FeatureIdentifier,
+  Style,
+  MapboxOptions,
+  MapMouseEvent,
+  MapSourceDataEvent,
+  LngLat,
+  LngLatBounds,
+  PointLike,
+  MapboxGeoJSONFeature,
+  Point,
+  CustomLayerInterface,
+} from 'mapbox-gl';
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
 // @ts-expect-error
 import mbRtlPlugin from '!!file-loader!@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js';
@@ -17,4 +35,22 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 mapboxgl.workerUrl = mbWorkerUrl;
 mapboxgl.setRTLTextPlugin(mbRtlPlugin);
 
-export { mapboxgl };
+export {
+  mapboxgl,
+  Map,
+  GeoJSONSource,
+  VectorSource,
+  Layer,
+  AnyLayer,
+  FeatureIdentifier,
+  Style,
+  MapboxOptions,
+  MapMouseEvent,
+  MapSourceDataEvent,
+  LngLat,
+  LngLatBounds,
+  PointLike,
+  MapboxGeoJSONFeature,
+  Point,
+  CustomLayerInterface,
+};

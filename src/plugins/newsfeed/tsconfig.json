@@ -7,13 +7,9 @@
     "declaration": true,
     "declarationMap": true
   },
-  "include": [
-    "public/**/*",
-    "server/**/*",
-    "common/*",
-    "../../../typings/**/*"
-  ],
+  "include": ["public/**/*", "server/**/*", "common/*", "../../../typings/**/*"],
   "references": [
-    { "path": "../../core/tsconfig.json" }
+    { "path": "../../core/tsconfig.json" },
+    { "path": "../screenshot_mode/tsconfig.json" }
   ]
 }

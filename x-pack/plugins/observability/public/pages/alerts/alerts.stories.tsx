@@ -7,11 +7,14 @@
 
 import { StoryContext } from '@storybook/react';
 import React, { ComponentType } from 'react';
-import { IntlProvider } from 'react-intl';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
 import { MemoryRouter } from 'react-router-dom';
 import { AlertsPage } from '.';
 import { HttpSetup } from '../../../../../../src/core/public';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import {
+  KibanaContextProvider,
+  KibanaPageTemplate,
+} from '../../../../../../src/plugins/kibana_react/public';
 import { PluginContext, PluginContextValue } from '../../context/plugin_context';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
 import { createCallObservabilityApi } from '../../services/call_observability_api';
@@ -63,6 +66,7 @@ export default {
                       http: { basePath: { prepend: (_: string) => '' } },
                     },
                     observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
+                    ObservabilityPageTemplate: KibanaPageTemplate,
                   } as unknown) as PluginContextValue
                 }
               >

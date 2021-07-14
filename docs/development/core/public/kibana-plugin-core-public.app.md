@@ -8,7 +8,7 @@
 <b>Signature:</b>
 
 ```typescript
-export interface App<HistoryLocationState = unknown> 
+export interface App<HistoryLocationState = unknown> extends AppNavOptions 
 ```
 
 ## Properties
@@ -21,16 +21,13 @@ export interface App<HistoryLocationState = unknown>
 |  [chromeless](./kibana-plugin-core-public.app.chromeless.md) | <code>boolean</code> | Hide the UI chrome when the application is mounted. Defaults to <code>false</code>. Takes precedence over chrome service visibility settings. |
 |  [deepLinks](./kibana-plugin-core-public.app.deeplinks.md) | <code>AppDeepLink[]</code> | Input type for registering secondary in-app locations for an application.<!-- -->Deep links must include at least one of <code>path</code> or <code>deepLinks</code>. A deep link that does not have a <code>path</code> represents a topological level in the application's hierarchy, but does not have a destination URL that is user-accessible. |
 |  [defaultPath](./kibana-plugin-core-public.app.defaultpath.md) | <code>string</code> | Allow to define the default path a user should be directed to when navigating to the app. When defined, this value will be used as a default for the <code>path</code> option when calling [navigateToApp](./kibana-plugin-core-public.applicationstart.navigatetoapp.md)<!-- -->\`<!-- -->, and will also be appended to the [application navLink](./kibana-plugin-core-public.chromenavlink.md) in the navigation bar. |
-|  [euiIconType](./kibana-plugin-core-public.app.euiicontype.md) | <code>string</code> | A EUI iconType that will be used for the app's icon. This icon takes precendence over the <code>icon</code> property. |
 |  [exactRoute](./kibana-plugin-core-public.app.exactroute.md) | <code>boolean</code> | If set to true, the application's route will only be checked against an exact match. Defaults to <code>false</code>. |
-|  [icon](./kibana-plugin-core-public.app.icon.md) | <code>string</code> | A URL to an image file used as an icon. Used as a fallback if <code>euiIconType</code> is not provided. |
 |  [id](./kibana-plugin-core-public.app.id.md) | <code>string</code> | The unique identifier of the application |
 |  [keywords](./kibana-plugin-core-public.app.keywords.md) | <code>string[]</code> | Optional keywords to match with in deep links search. Omit if this part of the hierarchy does not have a page URL. |
 |  [mount](./kibana-plugin-core-public.app.mount.md) | <code>AppMount&lt;HistoryLocationState&gt;</code> | A mount function called when the user navigates to this app's route. |
 |  [navLinkStatus](./kibana-plugin-core-public.app.navlinkstatus.md) | <code>AppNavLinkStatus</code> | The initial status of the application's navLink. Defaulting to <code>visible</code> if <code>status</code> is <code>accessible</code> and <code>hidden</code> if status is <code>inaccessible</code> See [AppNavLinkStatus](./kibana-plugin-core-public.appnavlinkstatus.md) |
-|  [order](./kibana-plugin-core-public.app.order.md) | <code>number</code> | An ordinal used to sort nav links relative to one another for display. |
+|  [searchable](./kibana-plugin-core-public.app.searchable.md) | <code>boolean</code> | The initial flag to determine if the application is searchable in the global search. Defaulting to <code>true</code> if <code>navLinkStatus</code> is <code>visible</code> or omitted. |
 |  [status](./kibana-plugin-core-public.app.status.md) | <code>AppStatus</code> | The initial status of the application. Defaulting to <code>accessible</code> |
 |  [title](./kibana-plugin-core-public.app.title.md) | <code>string</code> | The title of the application. |
-|  [tooltip](./kibana-plugin-core-public.app.tooltip.md) | <code>string</code> | A tooltip shown when hovering over app link. |
 |  [updater$](./kibana-plugin-core-public.app.updater_.md) | <code>Observable&lt;AppUpdater&gt;</code> | An [AppUpdater](./kibana-plugin-core-public.appupdater.md) observable that can be used to update the application [AppUpdatableFields](./kibana-plugin-core-public.appupdatablefields.md) at runtime. |
 

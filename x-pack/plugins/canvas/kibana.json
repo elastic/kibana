@@ -10,6 +10,7 @@
       "charts",
       "data",
       "embeddable",
+      "expressionRevealImage",
       "expressions",
       "features",
       "inspector",
@@ -29,7 +30,6 @@
       "kibanaUtils",
       "lens",
       "maps",
-      "reporting",
       "savedObjects",
       "visualizations"
     ]

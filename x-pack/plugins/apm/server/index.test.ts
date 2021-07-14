@@ -25,54 +25,18 @@ describe('mergeConfigs', () => {
       ui: { enabled: false },
       enabled: true,
       metricsInterval: 2000,
+      agent: { migrations: { enabled: true } },
     } as APMXPackConfig;
 
     expect(mergeConfigs(apmOssConfig, apmConfig)).toEqual({
-      'apm_oss.errorIndices': 'apm-*-error-*',
-      'apm_oss.indexPattern': 'apm-*',
-      'apm_oss.metricsIndices': 'apm-*-metric-*',
-      'apm_oss.spanIndices': 'apm-*-span-*',
-      'apm_oss.transactionIndices': 'apm-*-transaction-*',
-      'xpack.apm.metricsInterval': 2000,
-      'xpack.apm.ui.enabled': false,
-    });
-  });
-
-  it('adds fleet indices', () => {
-    const apmOssConfig = {
-      transactionIndices: 'apm-*-transaction-*',
-      spanIndices: 'apm-*-span-*',
-      errorIndices: 'apm-*-error-*',
-      metricsIndices: 'apm-*-metric-*',
-      fleetMode: true,
-    } as APMOSSConfig;
-
-    const apmConfig = { ui: {} } as APMXPackConfig;
-
-    expect(mergeConfigs(apmOssConfig, apmConfig)).toEqual({
       'apm_oss.errorIndices': 'logs-apm*,apm-*-error-*',
+      'apm_oss.indexPattern': 'traces-apm*,logs-apm*,metrics-apm*,apm-*',
       'apm_oss.metricsIndices': 'metrics-apm*,apm-*-metric-*',
       'apm_oss.spanIndices': 'traces-apm*,apm-*-span-*',
       'apm_oss.transactionIndices': 'traces-apm*,apm-*-transaction-*',
-    });
-  });
-
-  it('does not add fleet indices', () => {
-    const apmOssConfig = {
-      transactionIndices: 'apm-*-transaction-*',
-      spanIndices: 'apm-*-span-*',
-      errorIndices: 'apm-*-error-*',
-      metricsIndices: 'apm-*-metric-*',
-      fleetMode: false,
-    } as APMOSSConfig;
-
-    const apmConfig = { ui: {} } as APMXPackConfig;
-
-    expect(mergeConfigs(apmOssConfig, apmConfig)).toEqual({
-      'apm_oss.errorIndices': 'apm-*-error-*',
-      'apm_oss.metricsIndices': 'apm-*-metric-*',
-      'apm_oss.spanIndices': 'apm-*-span-*',
-      'apm_oss.transactionIndices': 'apm-*-transaction-*',
+      'xpack.apm.metricsInterval': 2000,
+      'xpack.apm.ui.enabled': false,
+      'xpack.apm.agent.migrations.enabled': true,
     });
   });
 });

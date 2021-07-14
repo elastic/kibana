@@ -14,7 +14,7 @@
   "license": "Elastic License v2",
   "name": "Attempt to Reset MFA Factors for an Okta User Account",
   "note": "## Config\n\nThe Okta Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:okta.system and event.action:user.mfa.factor.reset_all",
+  "query": "event.dataset:okta.system and event.action:user.mfa.factor.reset_all\n",
   "references": [
     "https://developer.okta.com/docs/reference/api/system-log/",
     "https://developer.okta.com/docs/reference/api/event-types/"

@@ -21,6 +21,7 @@ import {
 } from '../../../../src/plugins/home/public';
 import { CloudSetup } from '../../cloud/public';
 import { LicensingPluginStart } from '../../licensing/public';
+import { SecurityPluginSetup, SecurityPluginStart } from '../../security/public';
 
 import {
   APP_SEARCH_PLUGIN,
@@ -42,11 +43,13 @@ export interface ClientData extends InitialAppData {
 interface PluginsSetup {
   cloud?: CloudSetup;
   home?: HomePublicPluginSetup;
+  security?: SecurityPluginSetup;
 }
 export interface PluginsStart {
   cloud?: CloudSetup;
   licensing: LicensingPluginStart;
   charts: ChartsPluginStart;
+  security?: SecurityPluginStart;
 }
 
 export class EnterpriseSearchPlugin implements Plugin {

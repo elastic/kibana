@@ -49,11 +49,11 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('removed task types', () => {
     before(async () => {
-      await esArchiver.load('task_manager_removed_types');
+      await esArchiver.load('x-pack/test/functional/es_archives/task_manager_removed_types');
     });
 
     after(async () => {
-      await esArchiver.unload('task_manager_removed_types');
+      await esArchiver.unload('x-pack/test/functional/es_archives/task_manager_removed_types');
     });
 
     function scheduleTask(

@@ -78,6 +78,16 @@ export type {
   ConfigUsageData,
 };
 
+import type { ExecutionContextSetup, ExecutionContextStart } from './execution_context';
+
+export type {
+  ExecutionContextSetup,
+  ExecutionContextStart,
+  IExecutionContextContainer,
+  KibanaServerExecutionContext,
+  KibanaExecutionContext,
+} from './execution_context';
+
 export { bootstrap } from './bootstrap';
 export type {
   Capabilities,
@@ -295,6 +305,7 @@ export type {
   SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsCreateOptions,
   SavedObjectsExportResultDetails,
+  SavedObjectsExportExcludedObject,
   SavedObjectsFindResult,
   SavedObjectsFindResponse,
   SavedObjectsImportConflictError,
@@ -339,8 +350,6 @@ export type {
   SavedObjectsDeleteByNamespaceOptions,
   SavedObjectsIncrementCounterOptions,
   SavedObjectsIncrementCounterField,
-  SavedObjectsComplexFieldMapping,
-  SavedObjectsCoreFieldMapping,
   SavedObjectsFieldMapping,
   SavedObjectsTypeMappingDefinition,
   SavedObjectsMappingProperties,
@@ -476,6 +485,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   context: ContextSetup;
   /** {@link ElasticsearchServiceSetup} */
   elasticsearch: ElasticsearchServiceSetup;
+  /** {@link ExecutionContextSetup} */
+  executionContext: ExecutionContextSetup;
   /** {@link HttpServiceSetup} */
   http: HttpServiceSetup & {
     /** {@link HttpResources} */
@@ -522,6 +533,8 @@ export interface CoreStart {
   capabilities: CapabilitiesStart;
   /** {@link ElasticsearchServiceStart} */
   elasticsearch: ElasticsearchServiceStart;
+  /** {@link ExecutionContextStart} */
+  executionContext: ExecutionContextStart;
   /** {@link HttpServiceStart} */
   http: HttpServiceStart;
   /** {@link MetricsServiceStart} */

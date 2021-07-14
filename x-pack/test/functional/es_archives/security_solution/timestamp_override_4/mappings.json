@@ -3,6 +3,7 @@
   "value": {
     "index": "myfakeindex-4",
     "mappings": {
+      "dynamic": "strict",
       "properties": {
         "@timestamp": {
           "type": "date"

@@ -12,18 +12,13 @@ import styled from 'styled-components';
 import { SummaryRow } from './helpers';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
-  .euiTableHeaderCell {
-    border: none;
-  }
+export const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
+  .euiTableHeaderCell,
   .euiTableRowCell {
     border: none;
   }
-
-  .euiTableCellContent {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+  .euiTableHeaderCell .euiTableCellContent {
+    padding: 0;
   }
 `;
 

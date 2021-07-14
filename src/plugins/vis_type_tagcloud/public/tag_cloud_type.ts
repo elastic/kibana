@@ -10,10 +10,11 @@ import { i18n } from '@kbn/i18n';
 import { AggGroupNames } from '../../data/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
 
-import { TagCloudOptions } from './components/tag_cloud_options';
+import { getTagCloudOptions } from './components/get_tag_cloud_options';
 import { toExpressionAst } from './to_ast';
+import { TagCloudVisDependencies } from './plugin';
 
-export const tagCloudVisTypeDefinition = {
+export const getTagCloudVisTypeDefinition = ({ palettes }: TagCloudVisDependencies) => ({
   name: 'tagcloud',
   title: i18n.translate('visTypeTagCloud.vis.tagCloudTitle', { defaultMessage: 'Tag cloud' }),
   icon: 'visTagCloud',
@@ -30,11 +31,17 @@ export const tagCloudVisTypeDefinition = {
       minFontSize: 18,
       maxFontSize: 72,
       showLabel: true,
+      palette: {
+        name: 'default',
+        type: 'palette',
+      },
     },
   },
   toExpressionAst,
   editorConfig: {
-    optionsTemplate: TagCloudOptions,
+    optionsTemplate: getTagCloudOptions({
+      palettes,
+    }),
     schemas: [
       {
         group: AggGroupNames.Metrics,
@@ -69,4 +76,4 @@ export const tagCloudVisTypeDefinition = {
     ],
   },
   requiresSearch: true,
-};
+});

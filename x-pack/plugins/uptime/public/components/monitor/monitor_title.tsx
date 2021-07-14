@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiLink } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { useSelector } from 'react-redux';
@@ -32,18 +32,11 @@ const getPageTitle = (monitorId: string, selectedMonitor: Ping | null) => {
   return monitorId;
 };
 
-export const MonitorPageTitle: React.FC = () => {
+export const MonitorPageTitleContent: React.FC = () => {
   const monitorId = useMonitorId();
-
   const selectedMonitor = useSelector(monitorStatusSelector);
-
-  const nameOrId = selectedMonitor?.monitor?.name || getPageTitle(monitorId, selectedMonitor);
-
   const type = selectedMonitor?.monitor?.type;
   const isBrowser = type === 'browser';
-
-  useBreadcrumbs([{ text: nameOrId }]);
-
   const renderMonitorType = (monitorType: string) => {
     switch (monitorType) {
       case 'http':
@@ -78,16 +71,9 @@ export const MonitorPageTitle: React.FC = () => {
         return '';
     }
   };
-
   return (
     <>
       <EuiFlexGroup wrap={false} data-test-subj="monitorTitle">
-        <EuiFlexItem grow={false}>
-          <EuiTitle>
-            <h1 className="eui-textNoWrap">{nameOrId}</h1>
-          </EuiTitle>
-          <EuiSpacer size="xs" />
-        </EuiFlexItem>
         <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
           <EnableMonitorAlert monitorId={monitorId} selectedMonitor={selectedMonitor!} />
         </EuiFlexItem>
@@ -95,29 +81,41 @@ export const MonitorPageTitle: React.FC = () => {
       <EuiSpacer size="s" />
       <EuiFlexGroup wrap={false} gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
-          {type && (
+          {isBrowser && type && (
             <EuiBadge color="hollow">
               {renderMonitorType(type)}{' '}
-              {isBrowser && (
-                <FormattedMessage
-                  id="xpack.uptime.monitorDetails.title.disclaimer.description"
-                  defaultMessage="(BETA)"
-                />
-              )}
+              <FormattedMessage
+                id="xpack.uptime.monitorDetails.title.disclaimer.description"
+                defaultMessage="(BETA)"
+              />
             </EuiBadge>
           )}
         </EuiFlexItem>
         {isBrowser && (
           <EuiFlexItem grow={false}>
-            <EuiLink href="https://www.elastic.co/what-is/synthetic-monitoring" target="_blank">
-              <FormattedMessage
-                id="xpack.uptime.monitorDetails.title.disclaimer.link"
-                defaultMessage="See more"
-              />
-            </EuiLink>
+            <EuiText>
+              <EuiLink href="https://www.elastic.co/what-is/synthetic-monitoring" target="_blank">
+                <FormattedMessage
+                  id="xpack.uptime.monitorDetails.title.disclaimer.link"
+                  defaultMessage="See more"
+                />
+              </EuiLink>
+            </EuiText>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
     </>
   );
+};
+
+export const MonitorPageTitle: React.FC = () => {
+  const monitorId = useMonitorId();
+
+  const selectedMonitor = useSelector(monitorStatusSelector);
+
+  const nameOrId = selectedMonitor?.monitor?.name || getPageTitle(monitorId, selectedMonitor);
+
+  useBreadcrumbs([{ text: nameOrId }]);
+
+  return <span className="eui-textNoWrap">{nameOrId}</span>;
 };

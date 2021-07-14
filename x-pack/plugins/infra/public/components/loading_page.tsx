@@ -5,34 +5,38 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPageBody,
-  EuiPageContent,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { ReactNode } from 'react';
-
-import { FlexPage } from './page';
+import { PageTemplate } from './page_template';
 
 interface LoadingPageProps {
   message?: ReactNode;
   'data-test-subj'?: string;
 }
 
+// Represents a fully constructed page, including page template.
 export const LoadingPage = ({
   message,
   'data-test-subj': dataTestSubj = 'loadingPage',
-}: LoadingPageProps) => (
-  <FlexPage data-test-subj={dataTestSubj}>
-    <EuiPageBody>
-      <EuiPageContent verticalPosition="center" horizontalPosition="center">
-        <EuiFlexGroup alignItems="center" style={{ flexWrap: 'nowrap' }}>
-          <EuiLoadingSpinner size="xl" style={{ marginRight: '8px' }} />
-          <EuiFlexItem data-test-subj="loadingMessage">{message}</EuiFlexItem>
+}: LoadingPageProps) => {
+  return (
+    <PageTemplate isEmptyState={true} data-test-subj={dataTestSubj}>
+      <LoadingPrompt message={message} />
+    </PageTemplate>
+  );
+};
+
+export const LoadingPrompt = ({ message }: LoadingPageProps) => {
+  return (
+    <EuiEmptyPrompt
+      body={
+        <EuiFlexGroup alignItems="center" gutterSize="none">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="xl" style={{ marginRight: '8px' }} />
+          </EuiFlexItem>
+          <EuiFlexItem>{message}</EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPageContent>
-    </EuiPageBody>
-  </FlexPage>
-);
+      }
+    />
+  );
+};

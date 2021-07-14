@@ -27,9 +27,9 @@ import type {
   NewPackagePolicy,
   RegistryVarsEntry,
 } from '../../../types';
-import { packageToPackagePolicy } from '../../../services';
+import { packageToPackagePolicy, pkgKeyFromPackageInfo } from '../../../services';
 import { Loading } from '../../../components';
-import { pkgKeyFromPackageInfo } from '../../../services/pkg_key_from_package_info';
+import { useStartServices } from '../../../hooks';
 
 import { isAdvancedVar } from './services';
 import type { PackagePolicyValidationResults } from './services';
@@ -39,7 +39,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
   agentPolicy: AgentPolicy;
   packageInfo: PackageInfo;
   packagePolicy: NewPackagePolicy;
-  integration?: string;
+  integrationToEnable?: string;
   updatePackagePolicy: (fields: Partial<NewPackagePolicy>) => void;
   validationResults: PackagePolicyValidationResults;
   submitAttempted: boolean;
@@ -48,11 +48,12 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     agentPolicy,
     packageInfo,
     packagePolicy,
-    integration,
+    integrationToEnable,
     updatePackagePolicy,
     validationResults,
     submitAttempted,
   }) => {
+    const { docLinks } = useStartServices();
     // Form show/hide states
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
 
@@ -96,7 +97,8 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                 ? pkgPoliciesWithMatchingNames[pkgPoliciesWithMatchingNames.length - 1] + 1
                 : 1
             }`,
-            packagePolicy.description
+            packagePolicy.description,
+            integrationToEnable
           )
         );
       }
@@ -108,7 +110,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
           namespace: agentPolicy.namespace,
         });
       }
-    }, [packagePolicy, agentPolicy, packageInfo, updatePackagePolicy, integration]);
+    }, [packagePolicy, agentPolicy, packageInfo, updatePackagePolicy, integrationToEnable]);
 
     return validationResults ? (
       <EuiDescribedFormGroup
@@ -167,10 +169,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                   defaultMessage="Change the default namespace inherited from the selected Agent policy. This setting changes the name of the integration's data stream. {learnMore}."
                   values={{
                     learnMore: (
-                      <EuiLink
-                        href="https://www.elastic.co/guide/en/fleet/current/data-streams.html#data-streams-naming-scheme"
-                        target="_blank"
-                      >
+                      <EuiLink href={docLinks.links.fleet.datastreamsNamingScheme} target="_blank">
                         {i18n.translate(
                           'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceHelpLearnMoreLabel',
                           { defaultMessage: 'Learn more' }

@@ -60,6 +60,7 @@ export const DocumentCreationButtons: React.FC<Props> = ({ disabled = false }) =
       <EuiFlexGrid columns={2}>
         <EuiFlexItem>
           <EuiCard
+            display="subdued"
             title={i18n.translate(
               'xpack.enterpriseSearch.appSearch.documentCreation.buttons.text',
               { defaultMessage: 'Paste JSON' }
@@ -73,6 +74,7 @@ export const DocumentCreationButtons: React.FC<Props> = ({ disabled = false }) =
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiCard
+            display="subdued"
             title={i18n.translate(
               'xpack.enterpriseSearch.appSearch.documentCreation.buttons.file',
               { defaultMessage: 'Upload a JSON file' }
@@ -85,6 +87,7 @@ export const DocumentCreationButtons: React.FC<Props> = ({ disabled = false }) =
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiCard
+            display="subdued"
             title={i18n.translate('xpack.enterpriseSearch.appSearch.documentCreation.buttons.api', {
               defaultMessage: 'Index from API',
             })}
@@ -96,6 +99,7 @@ export const DocumentCreationButtons: React.FC<Props> = ({ disabled = false }) =
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiCardTo
+            display="subdued"
             title={i18n.translate(
               'xpack.enterpriseSearch.appSearch.documentCreation.buttons.crawl',
               { defaultMessage: 'Use the Crawler' }

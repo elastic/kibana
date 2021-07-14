@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { JsonObject } from '@kbn/common-utils';
 import { nodeTypes } from '../node_types/index';
 import { KQLSyntaxError } from '../kuery_syntax_error';
 import { KueryNode, DslQuery, KueryParseOptions } from '../types';
-import { IIndexPattern } from '../../../index_patterns/types';
 
 // @ts-ignore
 import { parse as parseKuery } from './_generated_/kuery';
-import { JsonObject } from '../../../../../kibana_utils/common';
+import { IndexPatternBase } from '../..';
 
 const fromExpression = (
   expression: string | DslQuery,
@@ -65,7 +65,7 @@ export const fromKueryExpression = (
  */
 export const toElasticsearchQuery = (
   node: KueryNode,
-  indexPattern?: IIndexPattern,
+  indexPattern?: IndexPatternBase,
   config?: Record<string, any>,
   context?: Record<string, any>
 ): JsonObject => {

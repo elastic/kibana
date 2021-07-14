@@ -17,6 +17,7 @@ export const filtersToAst = (filters: Filter[] | Filter) => {
       buildExpressionFunction<ExpressionFunctionKibanaFilter>('kibanaFilter', {
         query: JSON.stringify(restOfFilter),
         negate: filter.meta.negate,
+        disabled: filter.meta.disabled,
       }),
     ]);
   });

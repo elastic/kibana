@@ -121,11 +121,7 @@ export function validateBaseProperties(alertObject: InitialAlert): ValidationRes
   return validationResult;
 }
 
-export function getAlertErrors(
-  alert: Alert,
-  actionTypeRegistry: ActionTypeRegistryContract,
-  alertTypeModel: AlertTypeModel | null
-) {
+export function getAlertErrors(alert: Alert, alertTypeModel: AlertTypeModel | null) {
   const alertParamsErrors: IErrorObject = alertTypeModel
     ? alertTypeModel.validate(alert.params).errors
     : [];
@@ -135,16 +131,24 @@ export function getAlertErrors(
     ...alertBaseErrors,
   } as IErrorObject;
 
-  const alertActionsErrors = alert.actions.map((alertAction: AlertAction) => {
-    return actionTypeRegistry.get(alertAction.actionTypeId)?.validateParams(alertAction.params)
-      .errors;
-  });
   return {
     alertParamsErrors,
     alertBaseErrors,
-    alertActionsErrors,
     alertErrors,
   };
+}
+
+export async function getAlertActionErrors(
+  alert: Alert,
+  actionTypeRegistry: ActionTypeRegistryContract
+): Promise<IErrorObject[]> {
+  return await Promise.all(
+    alert.actions.map(
+      async (alertAction: AlertAction) =>
+        (await actionTypeRegistry.get(alertAction.actionTypeId)?.validateParams(alertAction.params))
+          .errors
+    )
+  );
 }
 
 export const hasObjectErrors: (errors: IErrorObject) => boolean = (errors) =>

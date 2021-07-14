@@ -12,6 +12,7 @@
  */
 
 import apm from 'elastic-apm-node';
+import { withSpan } from '@kbn/apm-utils';
 import { performance } from 'perf_hooks';
 import { identity, defaults, flow } from 'lodash';
 import { Logger, SavedObjectsErrorHelpers } from '../../../../../src/core/server';
@@ -242,30 +243,38 @@ export class TaskManagerRunner implements TaskRunner {
       );
     }
     this.logger.debug(`Running task ${this}`);
+
+    const apmTrans = apm.startTransaction(this.taskType, 'taskManager run', {
+      childOf: this.instance.task.traceparent,
+    });
+
     const modifiedContext = await this.beforeRun({
       taskInstance: this.instance.task,
     });
 
     const stopTaskTimer = startTaskTimer();
-    const apmTrans = apm.startTransaction(`taskManager run`, 'taskManager');
-    apmTrans?.addLabels({
-      taskType: this.taskType,
-    });
+
     try {
       this.task = this.definition.createTaskRunner(modifiedContext);
-      const result = await this.task.run();
+      const result = await withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run());
       const validatedResult = this.validateResult(result);
+      const processedResult = await withSpan({ name: 'process result', type: 'task manager' }, () =>
+        this.processResult(validatedResult, stopTaskTimer())
+      );
       if (apmTrans) apmTrans.end('success');
-      return this.processResult(validatedResult, stopTaskTimer());
+      return processedResult;
     } catch (err) {
       this.logger.error(`Task ${this} failed: ${err}`);
       // in error scenario, we can not get the RunResult
       // re-use modifiedContext's state, which is correct as of beforeRun
-      if (apmTrans) apmTrans.end('error');
-      return this.processResult(
-        asErr({ error: err, state: modifiedContext.taskInstance.state }),
-        stopTaskTimer()
+      const processedResult = await withSpan({ name: 'process result', type: 'task manager' }, () =>
+        this.processResult(
+          asErr({ error: err, state: modifiedContext.taskInstance.state }),
+          stopTaskTimer()
+        )
       );
+      if (apmTrans) apmTrans.end('failure');
+      return processedResult;
     }
   }
 
@@ -285,10 +294,7 @@ export class TaskManagerRunner implements TaskRunner {
     }
     performance.mark('markTaskAsRunning_start');
 
-    const apmTrans = apm.startTransaction(`taskManager markTaskAsRunning`, 'taskManager');
-    apmTrans?.addLabels({
-      taskType: this.taskType,
-    });
+    const apmTrans = apm.startTransaction('taskManager', 'taskManager markTaskAsRunning');
 
     const now = new Date();
     try {

@@ -7,7 +7,7 @@
 
 import '../../../../__mocks__/shallow_useeffect.mock';
 
-import { setMockValues, setMockActions } from '../../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 import { fullContentSources, sourceConfigData } from '../../../__mocks__/content_sources.mock';
 
 import React from 'react';
@@ -123,6 +123,16 @@ describe('SourceSettings', () => {
 
       expect(wrapper.find('[data-test-subj="DownloadDiagnosticsButton"]').prop('href')).toEqual(
         '/api/workplace_search/account/sources/123/download_diagnostics'
+      );
+    });
+
+    it('renders with the correct download file name', () => {
+      jest.spyOn(global.Date, 'now').mockImplementationOnce(() => new Date('1970-01-01').valueOf());
+
+      const wrapper = shallow(<SourceSettings />);
+
+      expect(wrapper.find('[data-test-subj="DownloadDiagnosticsButton"]').prop('download')).toEqual(
+        '123_custom_0_diagnostics.json'
       );
     });
   });

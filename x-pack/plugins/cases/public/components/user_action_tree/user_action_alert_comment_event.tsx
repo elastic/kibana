@@ -12,12 +12,13 @@ import { EuiText, EuiLoadingSpinner } from '@elastic/eui';
 import * as i18n from './translations';
 import { CommentType } from '../../../common';
 import { LinkAnchor } from '../links';
+import { RuleDetailsNavigation } from './helpers';
 
 interface Props {
   alertId: string;
   commentType: CommentType;
-  getRuleDetailsHref: (ruleId: string | null | undefined) => string;
-  onRuleDetailsClick?: (ruleId: string | null | undefined) => void;
+  getRuleDetailsHref: RuleDetailsNavigation['href'];
+  onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
   ruleId?: string | null;
   ruleName?: string | null;
   alertsCount?: number;
@@ -35,9 +36,9 @@ const AlertCommentEventComponent: React.FC<Props> = ({
   commentType,
 }) => {
   const onLinkClick = useCallback(
-    (ev: { preventDefault: () => void }) => {
+    (ev) => {
       ev.preventDefault();
-      if (onRuleDetailsClick) onRuleDetailsClick(ruleId);
+      if (onRuleDetailsClick) onRuleDetailsClick(ruleId, ev);
     },
     [ruleId, onRuleDetailsClick]
   );

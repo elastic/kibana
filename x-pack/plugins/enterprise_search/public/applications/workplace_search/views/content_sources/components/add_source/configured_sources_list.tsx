@@ -70,7 +70,12 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
         <React.Fragment key={i}>
           <EuiFlexItem>
             <EuiPanel paddingSize="s">
-              <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
+              <EuiFlexGroup
+                alignItems="center"
+                gutterSize="none"
+                responsive={false}
+                className="eui-fullHeight"
+              >
                 <EuiFlexItem>
                   <EuiFlexGroup
                     justifyContent="flexStart"

@@ -969,9 +969,9 @@
             "section": "def-server.ActionResult",
             "text": "ActionResult"
           },
-          "<Record<string, unknown>>>; execute: ({ actionId, params, source, }: Pick<",
+          "<Record<string, unknown>>>; execute: ({ actionId, params, source, relatedSavedObjects, }: Pick<",
           "ExecuteOptions",
-          "<unknown>, \"source\" | \"params\" | \"actionId\">) => Promise<",
+          "<unknown>, \"source\" | \"params\" | \"actionId\" | \"taskInfo\" | \"relatedSavedObjects\">) => Promise<",
           {
             "pluginId": "actions",
             "scope": "common",
@@ -1054,7 +1054,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/actions/server/builtin_action_types/pagerduty.ts",
-          "lineNumber": 121
+          "lineNumber": 129
         },
         "deprecated": false,
         "initialIsOpen": false

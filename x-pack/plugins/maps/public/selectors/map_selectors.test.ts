@@ -57,6 +57,7 @@ describe('getDataFilters', () => {
   };
   const mapZoom = 4;
   const timeFilters = { to: '2001-01-01', from: '2001-12-31' };
+  const timeslice = undefined;
   const refreshTimerLastTriggeredAt = '2001-01-01T00:00:00';
   const query = undefined;
   const filters: Filter[] = [];
@@ -67,6 +68,7 @@ describe('getDataFilters', () => {
     minLat: -0.25,
     minLon: -0.25,
   };
+  const isReadOnly = false;
 
   test('should set buffer as searchSessionMapBuffer when using searchSessionId', () => {
     const dataFilters = getDataFilters.resultFunc(
@@ -74,11 +76,13 @@ describe('getDataFilters', () => {
       mapBuffer,
       mapZoom,
       timeFilters,
+      timeslice,
       refreshTimerLastTriggeredAt,
       query,
       filters,
       searchSessionId,
-      searchSessionMapBuffer
+      searchSessionMapBuffer,
+      isReadOnly
     );
     expect(dataFilters.buffer).toEqual(searchSessionMapBuffer);
   });
@@ -89,11 +93,13 @@ describe('getDataFilters', () => {
       mapBuffer,
       mapZoom,
       timeFilters,
+      timeslice,
       refreshTimerLastTriggeredAt,
       query,
       filters,
       searchSessionId,
-      undefined
+      undefined,
+      isReadOnly
     );
     expect(dataFilters.buffer).toEqual(mapBuffer);
   });

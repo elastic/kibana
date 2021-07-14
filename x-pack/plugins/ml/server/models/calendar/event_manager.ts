@@ -9,7 +9,7 @@ import { estypes } from '@elastic/elasticsearch';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
 import type { MlClient } from '../../lib/ml_client';
 
-type ScheduledEvent = estypes.ScheduledEvent;
+type ScheduledEvent = estypes.MlCalendarEvent;
 
 export class EventManager {
   private _mlClient: MlClient;
