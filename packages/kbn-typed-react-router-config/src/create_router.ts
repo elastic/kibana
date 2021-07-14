@@ -151,5 +151,8 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
     matchRoutes: (...args: any[]) => {
       return matchRoutes(...args) as any;
     },
+    getRoutePath: (route) => {
+      return reactRouterConfigsByRoute.get(route)!.path as string;
+    },
   };
 }

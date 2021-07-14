@@ -32,6 +32,10 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
       loadTestFile(require.resolve('./correlations/latency_slow_transactions'));
     });
 
+    describe('correlations/latency_ml', function () {
+      loadTestFile(require.resolve('./correlations/latency_ml'));
+    });
+
     describe('correlations/latency_overall', function () {
       loadTestFile(require.resolve('./correlations/latency_overall'));
     });

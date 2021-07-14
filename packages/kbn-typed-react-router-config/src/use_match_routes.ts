@@ -7,9 +7,10 @@
  */
 
 import { useLocation } from 'react-router-dom';
+import { RouteMatch } from './types';
 import { useRouter } from './use_router';
 
-export function useMatchRoutes(path?: string) {
+export function useMatchRoutes(path?: string): RouteMatch[] {
   const router = useRouter();
   const location = useLocation();
 

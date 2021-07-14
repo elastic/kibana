@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// import { ApmRoute } from '@elastic/apm-rum-react';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
@@ -32,6 +31,7 @@ import { UrlParamsProvider } from '../../context/url_params_context/url_params_c
 import { ApmPluginStartDeps } from '../../plugin';
 import { ApmHeaderActionMenu } from '../shared/apm_header_action_menu';
 import { apmRouter } from './apm_route_config';
+import { TrackPageview } from './track_pageview';
 
 export function ApmAppRoot({
   apmPluginContextValue,
@@ -55,20 +55,22 @@ export function ApmAppRoot({
         <KibanaContextProvider services={{ ...core, ...pluginsStart }}>
           <i18nCore.Context>
             <RouterProvider history={history} router={apmRouter as any}>
-              <BreadcrumbsContextProvider>
-                <UrlParamsProvider>
-                  <LicenseProvider>
-                    <AnomalyDetectionJobsContextProvider>
-                      <ApmThemeProvider>
-                        <MountApmHeaderActionMenu />
+              <TrackPageview>
+                <BreadcrumbsContextProvider>
+                  <UrlParamsProvider>
+                    <LicenseProvider>
+                      <AnomalyDetectionJobsContextProvider>
+                        <ApmThemeProvider>
+                          <MountApmHeaderActionMenu />
 
-                        <Route component={ScrollToTopOnPathChange} />
-                        <RouteRenderer />
-                      </ApmThemeProvider>
-                    </AnomalyDetectionJobsContextProvider>
-                  </LicenseProvider>
-                </UrlParamsProvider>
-              </BreadcrumbsContextProvider>
+                          <Route component={ScrollToTopOnPathChange} />
+                          <RouteRenderer />
+                        </ApmThemeProvider>
+                      </AnomalyDetectionJobsContextProvider>
+                    </LicenseProvider>
+                  </UrlParamsProvider>
+                </BreadcrumbsContextProvider>
+              </TrackPageview>
             </RouterProvider>
           </i18nCore.Context>
         </KibanaContextProvider>

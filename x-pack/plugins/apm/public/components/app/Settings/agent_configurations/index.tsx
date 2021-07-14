@@ -18,7 +18,6 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React from 'react';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
-import { useTrackPageview } from '../../../../../../observability/public';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { AgentConfigurationList } from './List';
@@ -32,9 +31,6 @@ export function AgentConfigurations() {
     [],
     { preservePreviousData: false, showToastOnError: false }
   );
-
-  useTrackPageview({ app: 'apm', path: 'agent_configuration' });
-  useTrackPageview({ app: 'apm', path: 'agent_configuration', delay: 15000 });
 
   const hasConfigurations = !isEmpty(data.configurations);
 

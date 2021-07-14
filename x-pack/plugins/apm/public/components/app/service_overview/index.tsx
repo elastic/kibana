@@ -7,7 +7,6 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React from 'react';
-import { useTrackPageview } from '../../../../../observability/public';
 import { isRumAgentName, isIosAgentName } from '../../../../common/agent_name';
 import { AnnotationsContextProvider } from '../../../context/annotations/annotations_context';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -30,9 +29,6 @@ export const chartHeight = 288;
 
 export function ServiceOverview() {
   const { agentName, serviceName } = useApmServiceContext();
-
-  useTrackPageview({ app: 'apm', path: 'service_overview' });
-  useTrackPageview({ app: 'apm', path: 'service_overview', delay: 15000 });
 
   // The default EuiFlexGroup breaks at 768, but we want to break at 992, so we
   // observe the window width and set the flex directions of rows accordingly

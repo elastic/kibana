@@ -17,7 +17,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { useTrackPageview } from '../../../../../observability/public';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
@@ -141,9 +140,6 @@ export function ErrorGroupDetails() {
     serviceName,
     groupId,
   });
-
-  useTrackPageview({ app: 'apm', path: 'error_group_details' });
-  useTrackPageview({ app: 'apm', path: 'error_group_details', delay: 15000 });
 
   if (!errorGroupData || !errorDistributionData) {
     return <ErrorGroupHeader groupId={groupId} />;

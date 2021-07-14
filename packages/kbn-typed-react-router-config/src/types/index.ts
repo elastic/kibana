@@ -129,6 +129,7 @@ export interface Router<TRoutes extends Route[]> {
     path: TPath,
     ...args: TypeAsArgs<TypeOf<TRoutes, TPath>>
   ): string;
+  getRoutePath(route: Route): string;
 }
 
 type AppendPath<

@@ -16,3 +16,4 @@ export * from './use_current_route';
 export * from './use_match_routes';
 export * from './use_params';
 export * from './use_router';
+export * from './use_route_path';
