@@ -78,6 +78,12 @@ module.exports = {
             disallowedMessage: {
               type: 'string',
             },
+            include: {
+              type: 'array',
+            },
+            exclude: {
+              type: 'array',
+            },
           },
           anyOf: [
             {
@@ -95,7 +101,22 @@ module.exports = {
     ],
   },
   create: (context) => {
-    const mappings = context.options[0];
+    const filename = path.relative(KIBANA_ROOT, context.getFilename());
+
+    const mappings = context.options[0].filter((mapping) => {
+      // exclude mapping rule if it is explicitly excluded from this file
+      if (mapping.exclude && mapping.exclude.some((p) => p.test(filename))) {
+        return false;
+      }
+
+      // if this mapping rule is only included in specific files, optionally include it
+      if (mapping.include) {
+        return mapping.include.some((p) => p.test(filename));
+      }
+
+      // include all mapping rules by default
+      return true;
+    });
 
     return {
       ImportDeclaration(node) {

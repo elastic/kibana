@@ -6,13 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { IIndexPattern, IFieldType } from 'src/plugins/data/public';
-import { SimpleSavedObject } from 'src/core/public';
+import { IndexPattern, IndexPatternField } from 'src/plugins/data/public';
 import { once } from 'lodash';
 import { CoreStart } from '../../../../../core/public';
 import { IndexPatternListConfig, IndexPatternTag } from './config';
 import { CONFIG_ROLLUPS } from '../../constants';
-// @ts-ignore
 import { RollupIndexPatternListConfig } from './rollup_list_config';
 
 interface IndexPatternListManagerStart {
@@ -32,10 +30,7 @@ export class IndexPatternListManager {
       return configs;
     });
     return {
-      getIndexPatternTags: (
-        indexPattern: IIndexPattern | SimpleSavedObject<IIndexPattern>,
-        isDefault: boolean
-      ) =>
+      getIndexPatternTags: (indexPattern: IndexPattern, isDefault: boolean) =>
         getConfigs().reduce(
           (tags: IndexPatternTag[], config) =>
             config.getIndexPatternTags
@@ -44,14 +39,14 @@ export class IndexPatternListManager {
           []
         ),
 
-      getFieldInfo: (indexPattern: IIndexPattern, field: IFieldType): string[] =>
+      getFieldInfo: (indexPattern: IndexPattern, field: IndexPatternField): string[] =>
         getConfigs().reduce(
           (info: string[], config) =>
             config.getFieldInfo ? info.concat(config.getFieldInfo(indexPattern, field)) : info,
           []
         ),
 
-      areScriptedFieldsEnabled: (indexPattern: IIndexPattern): boolean =>
+      areScriptedFieldsEnabled: (indexPattern: IndexPattern): boolean =>
         getConfigs().every((config) =>
           config.areScriptedFieldsEnabled ? config.areScriptedFieldsEnabled(indexPattern) : true
         ),
