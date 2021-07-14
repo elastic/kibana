@@ -57,7 +57,9 @@ exports[`IndexedFieldsTable IndexedFieldsTable with rollup index pattern should 
               },
             },
           },
-          "rollup-index": "rollup",
+          "params": Object {
+            "rollup-index": "rollup",
+          },
         },
       }
     }
