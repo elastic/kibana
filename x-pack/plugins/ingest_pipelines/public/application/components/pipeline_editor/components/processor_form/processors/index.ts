@@ -28,6 +28,7 @@ export { Join } from './join';
 export { Json } from './json';
 export { Kv } from './kv';
 export { Lowercase } from './lowercase';
+export { NetworkDirection } from './network_direction';
 export { Pipeline } from './pipeline';
 export { RegisteredDomain } from './registered_domain';
 export { Remove } from './remove';

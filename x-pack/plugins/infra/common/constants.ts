@@ -11,3 +11,8 @@ export const LOGS_INDEX_PATTERN = 'logs-*,filebeat-*,kibana_sample_data_logs*';
 export const TIMESTAMP_FIELD = '@timestamp';
 export const METRICS_APP = 'metrics';
 export const LOGS_APP = 'logs';
+
+export const METRICS_FEATURE_ID = 'infrastructure';
+export const LOGS_FEATURE_ID = 'logs';
+
+export type InfraFeatureId = typeof METRICS_FEATURE_ID | typeof LOGS_FEATURE_ID;

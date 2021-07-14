@@ -86,7 +86,6 @@ const ExplorerPage = ({
   filterPlaceHolder,
   indexPattern,
   queryString,
-  filterIconTriggeredQuery,
   updateLanguage,
 }) => (
   <div data-test-subj="mlPageAnomalyExplorer">
@@ -121,7 +120,6 @@ const ExplorerPage = ({
                       filterPlaceHolder={filterPlaceHolder}
                       indexPattern={indexPattern}
                       queryString={queryString}
-                      filterIconTriggeredQuery={filterIconTriggeredQuery}
                       updateLanguage={updateLanguage}
                     />
                   </div>
@@ -151,7 +149,7 @@ export class ExplorerUI extends React.Component {
     selectedJobsRunning: PropTypes.bool.isRequired,
   };
 
-  state = { filterIconTriggeredQuery: undefined, language: DEFAULT_QUERY_LANG };
+  state = { language: DEFAULT_QUERY_LANG };
   htmlIdGen = htmlIdGenerator();
 
   componentDidMount() {
@@ -199,8 +197,6 @@ export class ExplorerUI extends React.Component {
         );
       }
     }
-
-    this.setState({ filterIconTriggeredQuery: `${newQueryString}` });
 
     try {
       const { clearSettings, settings } = getKqlQueryValues({
@@ -327,7 +323,6 @@ export class ExplorerUI extends React.Component {
         influencers={influencers}
         filterActive={filterActive}
         filterPlaceHolder={filterPlaceHolder}
-        filterIconTriggeredQuery={this.state.filterIconTriggeredQuery}
         indexPattern={indexPattern}
         queryString={queryString}
         updateLanguage={this.updateLanguage}
