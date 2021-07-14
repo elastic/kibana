@@ -9293,7 +9293,6 @@
     "xpack.fleet.setupPage.gettingStartedText": "有关更多信息，请阅读我们的{link}指南。",
     "xpack.fleet.setupPage.missingRequirementsCalloutDescription": "要对 Elastic 代理使用集中管理，请启用下面的 Elasticsearch 安全功能。",
     "xpack.fleet.setupPage.missingRequirementsCalloutTitle": "缺失安全性要求",
-    "xpack.fleet.setupPage.missingRequirementsElasticsearchTitle": "在 Elasticsearch 策略中，启用：",
     "xpack.fleet.unenrollAgents.cancelButtonLabel": "取消",
     "xpack.fleet.unenrollAgents.confirmMultipleButtonLabel": "取消注册 {count} 个代理",
     "xpack.fleet.unenrollAgents.confirmSingleButtonLabel": "取消注册代理",

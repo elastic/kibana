@@ -14,11 +14,11 @@ export interface EmailConnector {
   password: string;
 }
 
-export const emailConnector: EmailConnector = {
+export const getEmailConnector = (): EmailConnector => ({
   name: 'Test connector',
   from: 'test@example.com',
   host: 'example.com',
   port: '80',
   user: 'username',
   password: 'password',
-};
+});
