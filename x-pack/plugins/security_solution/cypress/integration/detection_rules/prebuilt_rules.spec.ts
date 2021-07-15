@@ -39,7 +39,8 @@ import { ALERTS_URL } from '../../urls/navigation';
 import { totalNumberOfPrebuiltRules } from '../../objects/rule';
 import { cleanKibana } from '../../tasks/common';
 
-describe('Alerts rules, prebuilt rules', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/105791
+describe.skip('Alerts rules, prebuilt rules', () => {
   beforeEach(() => {
     cleanKibana();
   });
@@ -126,18 +127,12 @@ describe('Actions with prebuilt rules', () => {
       'have.text',
       `Elastic rules (${expectedNumberOfRulesAfterDeletion})`
     );
-
-    // Have to add a 5 minute timeout wait as this can timeout on slow CI system
-    cy.get(RELOAD_PREBUILT_RULES_BTN, { timeout: 300000 }).should('exist');
-    cy.get(RELOAD_PREBUILT_RULES_BTN, { timeout: 300000 }).should(
-      'have.text',
-      'Install 1 Elastic prebuilt rule '
-    );
+    cy.get(RELOAD_PREBUILT_RULES_BTN).should('exist');
+    cy.get(RELOAD_PREBUILT_RULES_BTN).should('have.text', 'Install 1 Elastic prebuilt rule ');
 
     reloadDeletedRules();
 
-    // Have to add a 5 minute timeout wait as this can timeout on slow CI system
-    cy.get(RELOAD_PREBUILT_RULES_BTN, { timeout: 300000 }).should('not.exist');
+    cy.get(RELOAD_PREBUILT_RULES_BTN).should('not.exist');
 
     cy.reload();
     changeRowsPerPageTo100();
@@ -160,9 +155,8 @@ describe('Actions with prebuilt rules', () => {
     cy.reload();
     changeRowsPerPageTo100();
 
-    // Have to add a 5 minute timeout wait as this can timeout on slow CI system
-    cy.get(RELOAD_PREBUILT_RULES_BTN, { timeout: 300000 }).should('exist');
-    cy.get(RELOAD_PREBUILT_RULES_BTN, { timeout: 300000 }).should(
+    cy.get(RELOAD_PREBUILT_RULES_BTN).should('exist');
+    cy.get(RELOAD_PREBUILT_RULES_BTN).should(
       'have.text',
       `Install ${numberOfRulesToBeSelected} Elastic prebuilt rules `
     );
@@ -173,8 +167,7 @@ describe('Actions with prebuilt rules', () => {
 
     reloadDeletedRules();
 
-    // Have to add a 5 minute timeout wait as this can timeout on slow CI system
-    cy.get(RELOAD_PREBUILT_RULES_BTN, { timeout: 300000 }).should('not.exist');
+    cy.get(RELOAD_PREBUILT_RULES_BTN).should('not.exist');
 
     cy.reload();
     changeRowsPerPageTo100();
