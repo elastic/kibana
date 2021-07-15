@@ -2,27 +2,24 @@
 [[managing-tags]]
 == Tags
 
-Tags enable you to categorize your saved objects. You can then easily filter for related objects based on shared tags.
-
-To begin, open the main menu, click *Stack Management*, then click *Tags*.
+Tags enable you to categorize your saved objects.
+You can then filter for related objects based on shared tags.
 
 [role="screenshot"]
-image::images/tags/tag-management-section.png[Tags management section]
+image::images/tags/tag-management-section.png[Tags managementtag-ta]
 
 [float]
 === Required permissions
 
-Access to *Tags* requires the `Tag Management` {kib} privilege. To add the privilege, open the menu, 
-click *Stack Management*, then click *Roles*.
+To create tags, you must meet the minimum requirements.
 
-In addition:
-
+* You must have the `Tag Management` {kib} privilege. To add the privilege, open the main menu,
+and then click *Stack Management > Roles*.
 * The `read` privilege allows you to assign tags to the saved objects for which you have write permission.
 * The `write` privilege enables you to create, edit, and delete tags.
 
-
-NOTE: Having the `Tag Management` {kib} privilege is not required to
-view tags assigned on objects the user has `read` access to, or to filter objects by tags
+Having the `Tag Management` {kib} privilege is not required to
+view tags assigned on objects you have `read` access to, or to filter objects by tags
 in {kib} applications or from the navigational search.
 
 [float]
@@ -31,10 +28,9 @@ in {kib} applications or from the navigational search.
 
 Create a tag to assign to your saved objects.
 
+. Open the main menu, and then click *Stack Management > Tags*.
 . Click *Create tag*.
-+
-[role="screenshot"]
-image::images/tags/create-tag.png[Tag creation popin]
+
 . Enter a name and select a color for the new tag.
 +
 The name cannot be longer than 50 characters.
@@ -42,33 +38,32 @@ The name cannot be longer than 50 characters.
 
 [float]
 [[settings-assign-tag]]
-=== Assign a tag to saved objects
+=== Assign a tag to an object
 
-Assign or remove tags to one or more saved objects. You must have `write` permission
+To assign and remove tags from saved objects, you must have `write` permission
 on the objects to which you assign the tags.
 
-. Click the action (...) icon in the tag row, and then select the *Manage assignments* action.
+. In the *Tags* view, find the tag you want to assign.
+. Click the action menu (...) in the tag row,
+and then select the *Manage assignments* action.
+
+. Select the objects to which you want to assign or remove tags.
 +
 [role="screenshot"]
 image::images/tags/manage-assignments-flyout.png[Assign flyout]
-. Select the objects to which you want to assign or remove tags.
-. Click on *Save tag assignments*.
 
-TIP: To assign multiple tags to objects at once, select their checkboxes
-and then select *Manage tag assignments* from the *selected tags* menu.
+. Click *Save tag assignments*.
 
-[role="screenshot"]
-image::images/tags/bulk-assign-selection.png[Bulk assign tags]
+TIP: To assign, delete, or clear multiple tags at once,
+select their checkboxes in the *Tags* view, and then select
+the desired action from the *selected tags* menu.
 
 [float]
 [[settings-delete-tag]]
 === Delete a tag
 
-Delete a tag and remove it from any saved objects.
+When you delete a tag, you remove it from all saved objects that use it.
 
-. Click the action (...) icon in the tag row, and then select the *Delete* action.
+. Click the action menu (...) in the tag row, and then select the *Delete* action.
 
 . Click *Delete tag*.
-
-TIP: To delete multiple tags at once, select their checkboxes in the list view,
-and then select *Delete* action from the *selected tags* menu.
