@@ -80,7 +80,6 @@ export type {
 } from './update_and_pickup_mappings';
 export { updateAndPickupMappings } from './update_and_pickup_mappings';
 
-import type { UnknownDocsFound } from './check_for_unknown_docs';
 export type {
   CheckForUnknownDocsParams,
   UnknownDocsFound,
@@ -131,7 +130,6 @@ export interface ActionErrorTypeMap {
   alias_not_found_exception: AliasNotFound;
   remove_index_not_a_concrete_index: RemoveIndexNotAConcreteIndex;
   documents_transform_failed: DocumentsTransformFailed;
-  unknown_docs_found: UnknownDocsFound;
 }
 
 /**
