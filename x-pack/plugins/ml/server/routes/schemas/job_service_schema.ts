@@ -66,7 +66,7 @@ export const jobIdsSchema = schema.object({
   jobIds: schema.arrayOf(schema.string()),
 });
 
-export const optionaljobIdsSchema = schema.object({
+export const optionalJobIdsSchema = schema.object({
   /** Optional list of job IDs. */
   jobIds: schema.maybe(schema.arrayOf(schema.string())),
 });
@@ -141,9 +141,15 @@ export const jobsExistSchema = schema.object({
   allSpaces: schema.maybe(schema.boolean()),
 });
 
-export const bulkCreateSchema = schema.object({
-  job: schema.any(),
-  datafeed: schema.any(),
-  // job: schema.object(anomalyDetectionJobSchema),
-  // datafeed: datafeedConfigSchema,
-});
+export const bulkCreateSchema = schema.oneOf([
+  schema.arrayOf(
+    schema.object({
+      job: schema.object(anomalyDetectionJobSchema),
+      datafeed: datafeedConfigSchema,
+    })
+  ),
+  schema.object({
+    job: schema.object(anomalyDetectionJobSchema),
+    datafeed: datafeedConfigSchema,
+  }),
+]);

@@ -16,7 +16,7 @@ import {
   datafeedIdsSchema,
   forceStartDatafeedSchema,
   jobIdsSchema,
-  optionaljobIdsSchema,
+  optionalJobIdsSchema,
   jobsWithTimerangeSchema,
   lookBackProgressSchema,
   topCategoriesSchema,
@@ -24,7 +24,7 @@ import {
   revertModelSnapshotSchema,
   jobsExistSchema,
   datafeedPreviewSchema,
-  // bulkCreateSchema,
+  bulkCreateSchema,
 } from './schemas/job_service_schema';
 
 import { jobIdSchema } from './schemas/anomaly_detectors_schema';
@@ -32,6 +32,7 @@ import { jobIdSchema } from './schemas/anomaly_detectors_schema';
 import { jobServiceProvider } from '../models/job_service';
 import { categorizationExamplesProvider } from '../models/job_service/new_job';
 import { getAuthorizationHeader } from '../lib/request_authorization';
+import { Datafeed, Job } from '../../common/types/anomaly_detection_jobs';
 
 /**
  * Routes for job service
@@ -216,7 +217,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
    *  For any supplied job IDs, full job information will be returned, which include the analysis configuration,
    *  job stats, datafeed stats, and calendars.
    *
-   * @apiSchema (body) optionaljobIdsSchema
+   * @apiSchema (body) optionalJobIdsSchema
    *
    * @apiSuccess {Array} jobsList list of jobs. For any supplied job IDs, the job object will contain a fullJob property
    *    which includes the full configuration and stats for the job.
@@ -225,7 +226,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     {
       path: '/api/ml/jobs/jobs_summary',
       validate: {
-        body: optionaljobIdsSchema,
+        body: optionalJobIdsSchema,
       },
       options: {
         tags: ['access:ml:canGetJobs'],
@@ -324,13 +325,13 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
    * @apiName CreateFullJobsList
    * @apiDescription Creates a list of jobs
    *
-   * @apiSchema (body) optionaljobIdsSchema
+   * @apiSchema (body) optionalJobIdsSchema
    */
   router.post(
     {
       path: '/api/ml/jobs/jobs',
       validate: {
-        body: optionaljobIdsSchema,
+        body: optionalJobIdsSchema,
       },
       options: {
         tags: ['access:ml:canGetJobs'],
@@ -883,18 +884,17 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup JobService
    *
-   * @api {post} /api/ml/jobs/datafeed_preview Get datafeed preview
-   * @apiName DatafeedPreview
-   * @apiDescription Returns a preview of the datafeed search
+   * @api {post} /api/ml/jobs/bulk_create Bulk create jobs and datafeeds
+   * @apiName BulkCreateJobs
+   * @apiDescription Bulk create jobs and datafeeds.
    *
-   * @apiSchema (body) datafeedPreviewSchema
+   * @apiSchema (body) bulkCreateSchema
    */
   router.post(
     {
       path: '/api/ml/jobs/bulk_create',
       validate: {
-        body: schema.any(),
-        // body: bulkCreateSchema,
+        body: bulkCreateSchema,
       },
       options: {
         tags: ['access:ml:canPreviewDatafeed'],
@@ -905,10 +905,11 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
         const bulkJobs = request.body;
 
         const { bulkCreate } = jobServiceProvider(client, mlClient);
-        const body = await bulkCreate(
-          Array.isArray(bulkJobs) ? bulkJobs : [bulkJobs],
-          getAuthorizationHeader(request)
-        );
+        const jobs = (Array.isArray(bulkJobs) ? bulkJobs : [bulkJobs]) as Array<{
+          job: Job;
+          datafeed: Datafeed;
+        }>;
+        const body = await bulkCreate(jobs, getAuthorizationHeader(request));
         return response.ok({
           body,
         });
