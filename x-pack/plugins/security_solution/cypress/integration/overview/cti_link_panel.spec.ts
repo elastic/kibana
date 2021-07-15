@@ -64,40 +64,5 @@ describe('CTI Link Panel', () => {
       cy.get(`${OVERVIEW_CTI_VIEW_DASHBOARD_BUTTON}`).should('be.disabled');
       cy.get(`${OVERVIEW_CTI_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 1 indicator');
     });
-
-    // TODO: find a way to properly load a 'threat intel' tag, and a dashboard that has that tag, for the following tests to work
-    //
-    // describe('enabled dashboard module', () => {
-    //   before(() => {
-    //     esArchiverLoad('cti_tag');
-    //   });
-    //
-    //   after(() => {
-    //     esArchiverUnload('cti_tag');
-    //   });
-    //
-    //   it('renders as expected when there are no events in the selected time period', () => {
-    //     loginAndWaitForPage(
-    //       `${OVERVIEW_URL}?sourcerer=(timerange:(from:%272021-07-08T04:00:00.000Z%27,kind:absolute,to:%272021-07-09T03:59:59.999Z%27))`
-    //     );
-    //     cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_WARNING_INNER_PANEL}`).should('exist');
-    //     cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_INFO_INNER_PANEL}`).should(
-    //       'not.exist'
-    //     );
-    //     cy.get(`${OVERVIEW_CTI_VIEW_DASHBOARD_BUTTON}`).should('be.enabled');
-    //     cy.get(`${OVERVIEW_CTI_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 0 events');
-    //   });
-    //
-    //   it('renders as expected when there are events in the selected time period', () => {
-    //     cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_WARNING_INNER_PANEL}`).should(
-    //       'not.exist'
-    //     );
-    //     cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_INFO_INNER_PANEL}`).should(
-    //       'not.exist'
-    //     );
-    //     cy.get(`${OVERVIEW_CTI_VIEW_DASHBOARD_BUTTON}`).should('be.enabled');
-    //     cy.get(`${OVERVIEW_CTI_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 1 event');;
-    //   });
-    // });
   });
 });
