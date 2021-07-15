@@ -28,12 +28,8 @@ import {
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 
-interface AnalyzeDataButtonProps {
-  serviceName: string;
-}
-
-export function AnalyzeDataButton({ serviceName }: AnalyzeDataButtonProps) {
-  const { agentName } = useApmServiceContext();
+export function AnalyzeDataButton() {
+  const { agentName, serviceName } = useApmServiceContext();
   const { services } = useKibana();
   const { urlParams } = useUrlParams();
   const { rangeTo, rangeFrom, environment } = urlParams;

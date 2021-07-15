@@ -28,14 +28,14 @@ export default {
   component: AnalyzeDataButton,
   decorators: [
     (StoryComponent: ComponentType, { args }: StoryContext) => {
-      const { agentName, environment } = args;
+      const { agentName, environment, serviceName } = args;
 
       return (
         <MockUrlParamsContextProvider
           params={{ environment, rangeFrom: 'now-15m', rangeTo: 'now' }}
         >
           <APMServiceContext.Provider
-            value={{ agentName, alerts: [], transactionTypes: [] }}
+            value={{ agentName, alerts: [], transactionTypes: [], serviceName }}
           >
             <KibanaContext.Provider>
               <StoryComponent />
@@ -47,8 +47,8 @@ export default {
   ],
 };
 
-export const Example: Story<Args> = ({ serviceName }) => {
-  return <AnalyzeDataButton serviceName={serviceName} />;
+export const Example: Story<Args> = () => {
+  return <AnalyzeDataButton />;
 };
 Example.args = {
   agentName: 'iOS/swift',

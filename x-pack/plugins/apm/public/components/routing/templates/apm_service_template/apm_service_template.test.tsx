@@ -14,7 +14,7 @@ const { Example } = composeStories(stories);
 
 describe('ApmServiceTemplate', () => {
   it('renders the heading', () => {
-    render(<Example serviceName="testServiceName" />);
+    render(<Example title="testServiceName" />);
 
     expect(
       screen.getByRole('heading', { name: /testServiceName/ })

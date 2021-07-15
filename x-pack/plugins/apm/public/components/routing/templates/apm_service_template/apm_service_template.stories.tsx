@@ -23,7 +23,7 @@ interface Args {
   containerType: ContainerType;
   environment: string;
   selectedTab: ComponentProps<typeof ApmServiceTemplate>['selectedTab'];
-  serviceName: string;
+  title: string;
 }
 
 const KibanaContext = createKibanaReactContext(({
@@ -78,9 +78,9 @@ export default {
   ],
 };
 
-export const Example: Story<Args> = ({ selectedTab, serviceName }) => {
+export const Example: Story<Args> = ({ selectedTab, title }) => {
   return (
-    <ApmServiceTemplate selectedTab={selectedTab} serviceName={serviceName}>
+    <ApmServiceTemplate selectedTab={selectedTab} title={title}>
       &nbsp;
     </ApmServiceTemplate>
   );
@@ -91,5 +91,5 @@ Example.args = {
   containerType: 'Docker',
   environment: 'testEnvironment',
   selectedTab: 'transactions',
-  serviceName: 'testServiceName',
+  title: 'testServiceName',
 };
