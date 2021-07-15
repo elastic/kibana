@@ -33,6 +33,9 @@ export class ReportingPlugin
   }
 
   public setup(core: CoreSetup, plugins: ReportingSetupDeps) {
+    const { http } = core;
+    const { screenshotMode, features, licensing, security, spaces, taskManager } = plugins;
+
     const reportingCore = new ReportingCore(this.logger, this.initContext);
 
     // prevent throwing errors in route handlers about async deps not being initialized
@@ -45,9 +48,6 @@ export class ReportingPlugin
         return null;
       }
     });
-
-    const { http } = core;
-    const { screenshotMode, features, licensing, security, spaces, taskManager } = plugins;
 
     const router = http.createRouter<ReportingRequestHandlerContext>();
     const basePath = http.basePath;

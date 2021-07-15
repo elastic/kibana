@@ -42,7 +42,7 @@ export const RedirectApp: FunctionComponent<Props> = ({ apiClient, history, shar
       try {
         if (!jobId || !locatorOffset || Array.isArray(jobId) || Array.isArray(locatorOffset)) {
           throw new Error(
-            `Unexpected redirect parameters, received: (1) job id: "${jobId}" (expected id) and (2) locator offset: "${locatorOffset}" (expected number).`
+            `Unexpected redirect parameters, received: (1) job id: "${jobId}" (expected id) and (2) locator offset: "${locatorOffset}.`
           );
         }
         const {

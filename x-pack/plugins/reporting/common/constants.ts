@@ -111,14 +111,21 @@ export const REPORTING_MANAGEMENT_HOME = '/app/management/insightsAndAlerting/re
 export const REDIRECT_APP_PATH_HOME =
   '/app/management/insightsAndAlerting/reporting/r/{reportSavedObjectId}/{locatorIdx}';
 
+/**
+ * A way to get the client side route for the reporting redirect app. We should remove this once we are able to
+ * use the Reporting locator to generate this value for us.
+ *
+ * TODO: Remove this and use a Reporting locator in future
+ * TODO: Accommodate 'forceNow' value that some visualizations may rely on
+ */
 export const getRedirectAppPathHome = ({
   reportSavedObjectId,
-  locatorIdx = '0',
+  locatorOffset,
 }: {
-  locatorIdx?: string;
+  locatorOffset: string;
   reportSavedObjectId: string;
 }) => {
-  return `/app/management/insightsAndAlerting/reporting/r/${reportSavedObjectId}/${locatorIdx}`;
+  return `/app/management/insightsAndAlerting/reporting/r?jobId=${reportSavedObjectId}&locatorOffset=${locatorOffset}`;
 };
 
 // Statuses

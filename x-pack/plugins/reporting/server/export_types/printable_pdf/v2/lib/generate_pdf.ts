@@ -8,13 +8,14 @@
 import { groupBy } from 'lodash';
 import * as Rx from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
-import { getRedirectAppPathHome } from '../../../../../common/constants';
 import { Locator } from '../../../../../common/types';
+import { getRedirectAppPathHome } from '../../../../../common/constants';
 import { ReportingCore } from '../../../../';
 import { LevelLogger } from '../../../../lib';
 import { createLayout, LayoutParams } from '../../../../lib/layouts';
 import { ScreenshotResults } from '../../../../lib/screenshots';
 import { ConditionalHeaders } from '../../../common';
+import { getFullUrls } from '../../../common/v2/get_full_urls';
 import { PdfMaker } from './pdf';
 import { getTracker } from './tracker';
 
@@ -51,11 +52,23 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
     tracker.endLayout();
 
     tracker.startScreenshots();
+
+    /**
+     * For each locator, we generate a unique, relative URL that will load each of the locators in the
+     * reporting client side.
+     */
+    const relativeUrls = locators.map((_, idx) =>
+      getRedirectAppPathHome({
+        reportSavedObjectId: jobId,
+        locatorOffset: String(idx),
+      })
+    );
+
+    const urls = getFullUrls(reporting.getConfig(), relativeUrls);
+
     const screenshots$ = getScreenshots({
       logger,
-      urls: locators.map((_, idx) =>
-        getRedirectAppPathHome({ reportSavedObjectId: jobId, locatorIdx: String(idx) })
-      ),
+      urls,
       conditionalHeaders,
       layout,
       browserTimezone,
