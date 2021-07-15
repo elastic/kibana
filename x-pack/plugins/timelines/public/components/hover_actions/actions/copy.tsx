@@ -7,22 +7,21 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { WithCopyToClipboard } from '../../../lib/clipboard/with_copy_to_clipboard';
-import { COPY_TO_CLIPBOARD_KEYBOARD_SHORTCUT } from '../keyboard_shortcut_constants';
+import { WithCopyToClipboard } from '../../clipboard/with_copy_to_clipboard';
+import { HoverActionComponentProps } from './types';
 
-export const FIELD = i18n.translate('xpack.securitySolution.hoverActions.fieldLabel', {
+export const FIELD = i18n.translate('xpack.timelines.hoverActions.fieldLabel', {
   defaultMessage: 'Field',
 });
 
-interface Props {
-  field: string;
-  isHoverAction?: boolean;
-  ownFocus: boolean;
-  value?: string[] | string | null;
-}
+export const COPY_TO_CLIPBOARD_KEYBOARD_SHORTCUT = 'c';
 
-export const CopyButton: React.FC<Props> = React.memo(
-  ({ isHoverAction, field, ownFocus, value }) => {
+export type CopyProps = Omit<HoverActionComponentProps, 'onClick'> & {
+  isHoverAction?: boolean;
+};
+
+export const CopyButton: React.FC<CopyProps> = React.memo(
+  ({ field, isHoverAction, ownFocus, value }) => {
     return (
       <WithCopyToClipboard
         data-test-subj="copy-to-clipboard"

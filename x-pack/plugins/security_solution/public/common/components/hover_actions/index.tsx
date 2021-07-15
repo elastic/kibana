@@ -13,7 +13,6 @@ import { i18n } from '@kbn/i18n';
 import { getAllFieldsByName } from '../../containers/source';
 import { COPY_TO_CLIPBOARD_BUTTON_CLASS_NAME } from '../../lib/clipboard/clipboard';
 import { useKibana } from '../../lib/kibana';
-import { createFilter } from '../add_filter_to_global_search_bar';
 import { allowTopN } from './utils';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { ColumnHeaderOptions, TimelineId } from '../../../../common/types/timeline';
@@ -21,22 +20,8 @@ import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererScope } from '../../containers/sourcerer';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { stopPropagationAndPreventDefault } from '../../../../../timelines/public';
-import { FilterForValueButton } from './actions/filter_for_value';
-import { FilterOutValueButton } from './actions/filter_out_value';
-import { AddToTimelineButton } from './actions/add_to_timeline';
 import { ShowTopNButton } from './actions/show_top_n';
-import { ToggleColumnButton } from './actions/toggle_column';
-import { CopyButton } from './actions/copy';
-import {
-  FILTER_FOR_VALUE_KEYBOARD_SHORTCUT,
-  FILTER_OUT_VALUE_KEYBOARD_SHORTCUT,
-  ADD_TO_TIMELINE_KEYBOARD_SHORTCUT,
-  SHOW_TOP_N_KEYBOARD_SHORTCUT,
-  COPY_TO_CLIPBOARD_KEYBOARD_SHORTCUT,
-} from './keyboard_shortcut_constants';
-import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
-import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
-import { EventFieldsData } from '../event_details/types';
+import { SHOW_TOP_N_KEYBOARD_SHORTCUT } from './keyboard_shortcut_constants';
 
 export const YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS = (fieldName: string) =>
   i18n.translate(
@@ -57,17 +42,20 @@ const StyledHoverActionsContainer = styled.div<{ $showTopN: boolean }>`
   padding: ${(props) => (props.$showTopN ? 'none' : props.theme.eui.paddingSizes.s)};
 
   &:focus-within {
+    .timelines__hoverActionButton,
     .securitySolution__hoverActionButton {
       opacity: 1;
     }
   }
 
   &:hover {
+    .timelines__hoverActionButton,
     .securitySolution__hoverActionButton {
       opacity: 1;
     }
   }
 
+  .timelines__hoverActionButton,
   .securitySolution__hoverActionButton {
     // TODO: Using this logic from discover
     /* @include euiBreakpoint('m', 'l', 'xl') {
@@ -83,7 +71,7 @@ const StyledHoverActionsContainer = styled.div<{ $showTopN: boolean }>`
 
 interface Props {
   additionalContent?: React.ReactNode;
-  dataType?: EventFieldsData['type'];
+  dataType?: string;
   draggableId?: DraggableId;
   field: string;
   isObjectArray: boolean;
@@ -130,10 +118,31 @@ export const HoverActions: React.FC<Props> = React.memo(
   }) => {
     const kibana = useKibana();
     const { timelines } = kibana.services;
-    const { startDragToTimeline } = timelines.getUseAddToTimeline()({
-      draggableId,
-      fieldName: field,
-    });
+    // Common actions used by the alert table and alert flyout
+    const {
+      addToTimeline: {
+        AddToTimelineButton,
+        keyboardShortcut: addToTimelineKeyboardShortcut,
+        useGetHandleStartDragToTimeline,
+      },
+      columnToggle: {
+        ColumnToggleButton,
+        columnToggleFn,
+        keyboardShortcut: columnToggleKeyboardShortcut,
+      },
+      copy: { CopyButton, keyboardShortcut: copyKeyboardShortcut },
+      filterForValue: {
+        FilterForValueButton,
+        filterForValueFn,
+        keyboardShortcut: filterForValueKeyboardShortcut,
+      },
+      filterOutValue: {
+        FilterOutValueButton,
+        filterOutValueFn,
+        keyboardShortcut: filterOutValueKeyboardShortcut,
+      },
+    } = timelines.getHoverActions();
+
     const filterManagerBackup = useMemo(() => kibana.services.data.query.filterManager, [
       kibana.services.data.query.filterManager,
     ]);
@@ -141,9 +150,6 @@ export const HoverActions: React.FC<Props> = React.memo(
     const { filterManager: activeFilterMananager } = useDeepEqualSelector((state) =>
       getManageTimeline(state, timelineId ?? '')
     );
-    const defaultFocusedButtonRef = useRef<HTMLButtonElement | null>(null);
-    const panelRef = useRef<HTMLDivElement | null>(null);
-
     const filterManager = useMemo(
       () => (timelineId === TimelineId.active ? activeFilterMananager : filterManagerBackup),
       [timelineId, activeFilterMananager, filterManagerBackup]
@@ -165,49 +171,27 @@ export const HoverActions: React.FC<Props> = React.memo(
         ? SourcererScopeName.detections
         : SourcererScopeName.default;
     const { browserFields } = useSourcererScope(activeScope);
-    const handleStartDragToTimeline = useCallback(() => {
-      startDragToTimeline();
-    }, [startDragToTimeline]);
 
-    const filterForValue = useCallback(() => {
-      const filter =
-        value?.length === 0 ? createFilter(field, undefined) : createFilter(field, value);
-      const activeFilterManager = filterManager;
+    const handleStartDragToTimeline = useGetHandleStartDragToTimeline({ draggableId, field });
 
-      if (activeFilterManager != null) {
-        activeFilterManager.addFilters(filter);
-        if (onFilterAdded != null) {
-          onFilterAdded();
-        }
-      }
-    }, [field, value, filterManager, onFilterAdded]);
+    const handleFilterForValue = useCallback(
+      () => filterForValueFn({ field, value, filterManager, onFilterAdded }),
+      [filterForValueFn, field, value, filterManager, onFilterAdded]
+    );
 
-    const filterOutValue = useCallback(() => {
-      const filter =
-        value?.length === 0 ? createFilter(field, null, false) : createFilter(field, value, true);
-      const activeFilterManager = filterManager;
+    const handleFilterOutValue = useCallback(
+      () => filterOutValueFn({ field, value, filterManager, onFilterAdded }),
+      [filterOutValueFn, field, value, filterManager, onFilterAdded]
+    );
 
-      if (activeFilterManager != null) {
-        activeFilterManager.addFilters(filter);
-        if (onFilterAdded != null) {
-          onFilterAdded();
-        }
-      }
-    }, [field, value, filterManager, onFilterAdded]);
-
-    const toggleFieldColumn = useCallback(
-      () =>
-        toggleColumn
-          ? toggleColumn({
-              columnHeaderType: defaultColumnHeaderType,
-              id: field,
-              initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
-            })
-          : null,
-      [field, toggleColumn]
+    const handleToggleColumn = useCallback(
+      () => (toggleColumn ? columnToggleFn({ toggleColumn, field }) : null),
+      [columnToggleFn, field, toggleColumn]
     );
 
     const isInit = useRef(true);
+    const defaultFocusedButtonRef = useRef<HTMLButtonElement | null>(null);
+    const panelRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
       if (isInit.current && goGetTimelineId != null && timelineId == null) {
@@ -230,23 +214,15 @@ export const HoverActions: React.FC<Props> = React.memo(
           return;
         }
         switch (keyboardEvent.key) {
-          case FILTER_FOR_VALUE_KEYBOARD_SHORTCUT:
-            stopPropagationAndPreventDefault(keyboardEvent);
-            filterForValue();
-            break;
-          case FILTER_OUT_VALUE_KEYBOARD_SHORTCUT:
-            stopPropagationAndPreventDefault(keyboardEvent);
-            filterOutValue();
-            break;
-          case ADD_TO_TIMELINE_KEYBOARD_SHORTCUT:
+          case addToTimelineKeyboardShortcut:
             stopPropagationAndPreventDefault(keyboardEvent);
             handleStartDragToTimeline();
             break;
-          case SHOW_TOP_N_KEYBOARD_SHORTCUT:
+          case columnToggleKeyboardShortcut:
             stopPropagationAndPreventDefault(keyboardEvent);
-            toggleTopN();
+            handleToggleColumn();
             break;
-          case COPY_TO_CLIPBOARD_KEYBOARD_SHORTCUT:
+          case copyKeyboardShortcut:
             stopPropagationAndPreventDefault(keyboardEvent);
             const copyToClipboardButton = panelRef.current?.querySelector<HTMLButtonElement>(
               `.${COPY_TO_CLIPBOARD_BUTTON_CLASS_NAME}`
@@ -254,6 +230,18 @@ export const HoverActions: React.FC<Props> = React.memo(
             if (copyToClipboardButton != null) {
               copyToClipboardButton.click();
             }
+            break;
+          case filterForValueKeyboardShortcut:
+            stopPropagationAndPreventDefault(keyboardEvent);
+            handleFilterForValue();
+            break;
+          case filterOutValueKeyboardShortcut:
+            stopPropagationAndPreventDefault(keyboardEvent);
+            handleFilterOutValue();
+            break;
+          case SHOW_TOP_N_KEYBOARD_SHORTCUT:
+            stopPropagationAndPreventDefault(keyboardEvent);
+            toggleTopN();
             break;
           case 'Enter':
             break;
@@ -265,7 +253,19 @@ export const HoverActions: React.FC<Props> = React.memo(
         }
       },
 
-      [filterForValue, filterOutValue, handleStartDragToTimeline, ownFocus, toggleTopN]
+      [
+        addToTimelineKeyboardShortcut,
+        columnToggleKeyboardShortcut,
+        copyKeyboardShortcut,
+        filterForValueKeyboardShortcut,
+        filterOutValueKeyboardShortcut,
+        handleFilterForValue,
+        handleFilterOutValue,
+        handleStartDragToTimeline,
+        handleToggleColumn,
+        ownFocus,
+        toggleTopN,
+      ]
     );
 
     const showFilters = !showTopN && value != null;
@@ -289,24 +289,26 @@ export const HoverActions: React.FC<Props> = React.memo(
               <FilterForValueButton
                 defaultFocusedButtonRef={defaultFocusedButtonRef}
                 field={field}
-                onClick={filterForValue}
+                onClick={handleFilterForValue}
                 ownFocus={ownFocus}
+                showTooltip
                 value={value}
               />
               <FilterOutValueButton
                 field={field}
-                onClick={filterOutValue}
+                onClick={handleFilterOutValue}
                 ownFocus={ownFocus}
+                showTooltip
                 value={value}
               />
             </>
           )}
           {toggleColumn && (
-            <ToggleColumnButton
+            <ColumnToggleButton
               field={field}
               isDisabled={isObjectArray && dataType !== 'geo_point'}
               isObjectArray={isObjectArray}
-              onClick={toggleFieldColumn}
+              onClick={handleToggleColumn}
               ownFocus={ownFocus}
               value={value}
             />
@@ -317,6 +319,7 @@ export const HoverActions: React.FC<Props> = React.memo(
               field={field}
               onClick={handleStartDragToTimeline}
               ownFocus={ownFocus}
+              showTooltip
               value={value}
             />
           )}
@@ -335,7 +338,7 @@ export const HoverActions: React.FC<Props> = React.memo(
             />
           )}
           {!showTopN && (
-            <CopyButton field={field} ownFocus={ownFocus} value={value} isHoverAction />
+            <CopyButton field={field} isHoverAction ownFocus={ownFocus} showTooltip value={value} />
           )}
         </EuiFocusTrap>
       </StyledHoverActionsContainer>
