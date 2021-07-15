@@ -29,9 +29,9 @@ export function FieldValueSuggestions({
   compressed,
   asFilterButton,
   usePrependLabel,
-  allowExclusions,
   allowAllValuesSelection,
   required,
+  allowExclusions = true,
   asCombobox = true,
   onChange: onSelectionChange,
 }: FieldValueSuggestionsProps) {
