@@ -41,8 +41,8 @@ export function ToolBarPagerButtons(props: Props) {
         <EuiButtonIcon
           display="base"
           iconType="arrowRight"
-          iconSize="l"
-          size="s"
+          iconSize="m"
+          size="xs"
           onClick={() => props.onPageNext()}
           isDisabled={!props.hasNextPage}
           data-test-subj="btnNextPage"

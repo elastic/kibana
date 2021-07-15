@@ -16,3 +16,11 @@
   display: flex;
   align-items: center;
 }
+.kbnDocTableHeader__button {
+  height: $euiSizeM;
+  width: $euiSizeM;
+
+  & > span.euiButtonEmpty__content {
+    padding: 0;
+  }
+}

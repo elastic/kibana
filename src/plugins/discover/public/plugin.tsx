@@ -47,6 +47,7 @@ import {
   setScopedHistory,
   getScopedHistory,
   syncHistoryLocations,
+  getServices,
 } from './kibana_services';
 import { createSavedSearchesLoader } from './saved_searches';
 import { registerFeature } from './register_feature';
