@@ -98,6 +98,7 @@ export interface MachineLearningRule {
 
 export const getIndexPatterns = (): string[] => [
   'apm-*-transaction*',
+  'traces-apm*',
   'auditbeat-*',
   'endgame-*',
   'filebeat-*',

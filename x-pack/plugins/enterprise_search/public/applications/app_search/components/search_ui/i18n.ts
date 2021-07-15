@@ -42,9 +42,17 @@ export const URL_FIELD_LABEL = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.searchUI.urlFieldLabel',
   { defaultMessage: 'URL field (Optional)' }
 );
+export const THUMBNAIL_FIELD_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.searchUI.thumbnailFieldLabel',
+  { defaultMessage: 'Thumbnail field (Optional)' }
+);
 export const URL_FIELD_HELP_TEXT = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.searchUI.urlFieldHelpText',
   { defaultMessage: "Used as a result's link target, if applicable" }
+);
+export const THUMBNAIL_FIELD_HELP_TEXT = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.searchUI.thumbnailFieldHelpText',
+  { defaultMessage: 'Provide an image URL to show a thumbnail image' }
 );
 export const GENERATE_PREVIEW_BUTTON_LABEL = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.searchUI.generatePreviewButtonLabel',
