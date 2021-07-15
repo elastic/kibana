@@ -37,6 +37,12 @@ Task Manager runs background tasks by polling for work on an interval.  You can 
   `monitored_stats_health_verbose_log.`
   `warn_delayed_task_start_in_seconds`
   | The amount of seconds we allow a task to delay before printing a warning server log.  Defaults to 60.
+
+  | `xpack.task_manager.ephemeral_tasks.enabled`
+  | Enables an experimental feature that executes actions without incurring latency from persisting as traditional tasks in Task Manager. Defaults to false.
+
+  | `xpack.task_manager.ephemeral_tasks.request_capacity`
+  | Sets the size of the ephemeral queue. Defaults to 10.
 |===
 
 [float]

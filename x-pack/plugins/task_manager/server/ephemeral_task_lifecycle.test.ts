@@ -23,8 +23,6 @@ import { TaskPoolRunResult } from './task_pool';
 import { TaskPoolMock } from './task_pool.mock';
 
 describe('EphemeralTaskLifecycle', () => {
-  // let clock: sinon.SinonFakeTimers;
-
   function initTaskLifecycleParams({
     config,
     ...optOverrides
@@ -86,12 +84,6 @@ describe('EphemeralTaskLifecycle', () => {
 
     return { poolCapacity, lifecycleEvent$, pool, elasticsearchAndSOAvailability$, opts };
   }
-
-  // beforeEach(() => {
-  //   clock = sinon.useFakeTimers();
-  // });
-
-  // afterEach(() => clock.restore());
 
   describe('constructor', () => {
     test('avoids unnecesery subscription if ephemeral tasks are disabled', () => {
