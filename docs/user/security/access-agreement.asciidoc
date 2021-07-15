@@ -2,7 +2,9 @@
 [[xpack-security-access-agreement]]
 === Access agreement
 
-Some work environments require you to acknowledge and accept an agreement before you can access {kib}, which can contain sensitive information. The agreement text supports Markdown format and can be specified using the `xpack.security.authc.providers.<provider-type>.<provider-name>.accessAgreement.message` setting.
+Access agreement is a https://www.elastic.co/subscriptions[subscription feature] that requires users to acknowledge and accept an
+agreement before accessing {kib}. The agreement text supports Markdown format and can be specified using the
+`xpack.security.authc.providers.<provider-type>.<provider-name>.accessAgreement.message` setting.
 
 [NOTE]
 ============================================================================
@@ -18,7 +20,7 @@ xpack.security.authc.providers:
     order: 0
     accessAgreement:
       message: |
-        **You are accessing a system with a sensitive information**
+        **You are accessing a system with sensitive information**
 
         By logging in, you acknowledge that information system usage
         ...(shortened)

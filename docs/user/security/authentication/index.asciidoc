@@ -208,7 +208,7 @@ OpenID Connect (OIDC) authentication is part of single sign-on (SSO), a https://
 to SAML, authentication with OIDC allows users to log in to {kib} using an OIDC Provider such as Google, or Okta. OIDC should also
 be configured in {es}. For more details, see {ref}/oidc-guide.html[Configuring single sign-on to the {stack} using OpenID Connect].
 
-Enable OIDC authentication by specifying which OIDC realm in {es} should be used:
+Enable OIDC authentication by specifying which OIDC realm in {es} to use:
 
 [source,yaml]
 --------------------------------------------------------------------------------
@@ -218,7 +218,7 @@ xpack.security.authc.providers:
     realm: oidc1
 --------------------------------------------------------------------------------
 
-If you want to use Third Party initiated SSO, configure your OpenID Provider to use `/api/security/oidc/initiate_login` as `Initiate Login URI`.
+To use third party initiated SSO, configure your OpenID Provider to use `/api/security/oidc/initiate_login` as `Initiate Login URI`.
 
 It's also possible to configure multiple OpenID Connect authentication providers at the same time. In this case, you need to choose which provider to use for login at the Login Selector UI:
 
