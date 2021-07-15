@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 interface Props {
   startItem: number;
@@ -17,14 +17,12 @@ interface Props {
 
 export function ToolBarPagerText({ startItem, endItem, totalItems }: Props) {
   return (
-    <I18nProvider>
-      <div className="kuiToolBarText" data-test-subj="toolBarPagerText">
-        <FormattedMessage
-          id="discover.docTable.pagerControl.pagesCountLabel"
-          defaultMessage="{startItem}&ndash;{endItem} of {totalItems}"
-          values={{ startItem, endItem, totalItems }}
-        />
-      </div>
-    </I18nProvider>
+    <div className="kuiToolBarText" data-test-subj="toolBarPagerText">
+      <FormattedMessage
+        id="discover.docTable.pagerControl.pagesCountLabel"
+        defaultMessage="{startItem}&ndash;{endItem} of {totalItems} documents"
+        values={{ startItem, endItem, totalItems }}
+      />
+    </div>
   );
 }

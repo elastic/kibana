@@ -8,52 +8,44 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
-interface PagerProps {
-  totalItems: number;
-  pageSize: number;
-  startingPage: number;
-}
-
 interface MetaParams {
   currentPage: number;
   totalItems: number;
-  pageSize: number;
   totalPages: number;
   startIndex: number;
   startItem: number;
   endItem: number;
   hasNextPage: boolean;
-  hasPreviousPage: boolean;
 }
 
 function clamp(val: number, min: number, max: number) {
   return Math.min(Math.max(min, val), max);
 }
 
-export const usePager = ({ startingPage, totalItems, pageSize }: PagerProps) => {
+export const PAGE_SIZE = 50;
+
+export const usePager = ({ totalItems }: { totalItems: number }) => {
   const [meta, setMeta] = useState<MetaParams>({
-    currentPage: startingPage,
+    currentPage: 0,
     totalItems,
-    pageSize,
-    totalPages: Math.ceil(totalItems / pageSize),
-    startItem: 1,
-    endItem: pageSize,
     startIndex: 0,
-    hasNextPage: false,
-    hasPreviousPage: false,
+    totalPages: Math.ceil(totalItems / PAGE_SIZE),
+    startItem: 1,
+    endItem: PAGE_SIZE,
+    hasNextPage: true,
   });
 
   const getNewMeta = useCallback(
     (updatedCurrentPage?: number) => {
-      const actualCurrentPage = updatedCurrentPage || meta.currentPage;
+      const actualCurrentPage = updatedCurrentPage ?? meta.currentPage;
 
-      const newTotalPages = Math.ceil(totalItems / pageSize);
-      const newCurrentPage = clamp(actualCurrentPage, 1, newTotalPages);
+      const newTotalPages = Math.ceil(totalItems / PAGE_SIZE);
+      const newCurrentPage = clamp(actualCurrentPage, 0, newTotalPages);
 
-      let newStartItem = (newCurrentPage - 1) * pageSize + 1;
+      let newStartItem = newCurrentPage * PAGE_SIZE + 1;
       newStartItem = clamp(newStartItem, 0, totalItems);
 
-      let newEndItem = newStartItem - 1 + pageSize;
+      let newEndItem = newStartItem + PAGE_SIZE;
       newEndItem = clamp(newEndItem, 0, totalItems);
 
       const newStartIndex = newStartItem - 1;
@@ -65,22 +57,14 @@ export const usePager = ({ startingPage, totalItems, pageSize }: PagerProps) => 
         startItem: newStartItem,
         endItem: newEndItem,
         totalItems,
-        pageSize,
-        hasNextPage: meta.currentPage < meta.totalPages,
-        hasPreviousPage: meta.currentPage > 1,
+        hasNextPage: meta.currentPage + 1 < meta.totalPages,
       };
     },
-    [meta.currentPage, meta.totalPages, pageSize, totalItems]
+    [meta.currentPage, meta.totalPages, totalItems]
   );
 
-  const onPageNext = useCallback(() => setMeta(getNewMeta(meta.currentPage + 1)), [
+  const onPageChange = useCallback((pageIndex: number) => setMeta(getNewMeta(pageIndex)), [
     getNewMeta,
-    meta.currentPage,
-  ]);
-
-  const onPagePrevious = useCallback(() => setMeta(getNewMeta(meta.currentPage + 1)), [
-    getNewMeta,
-    meta.currentPage,
   ]);
 
   /**
@@ -90,7 +74,6 @@ export const usePager = ({ startingPage, totalItems, pageSize }: PagerProps) => 
 
   return {
     ...meta,
-    onPageNext,
-    onPagePrevious,
+    onPageChange,
   };
 };

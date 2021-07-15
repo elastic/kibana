@@ -7,12 +7,13 @@
  */
 
 import React, { Fragment, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiPagination } from '@elastic/eui';
 import { SAMPLE_SIZE_SETTING } from '../../../../common';
 import { getServices } from '../../../kibana_services';
-import { ToolBarPagerButtons } from './components/pager/tool_bar_pager_buttons';
 import { ToolBarPagerText } from './components/pager/tool_bar_pager_text';
-import { usePager } from './lib/use_pager';
+import { PAGE_SIZE, usePager } from './lib/use_pager';
 import { CommonDocTableProps } from './doc_table';
 
 export interface DocTableEmbeddableProps extends CommonDocTableProps {
@@ -20,15 +21,15 @@ export interface DocTableEmbeddableProps extends CommonDocTableProps {
 }
 
 export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
-  const pager = usePager({ totalItems: props.totalHitCount, pageSize: 50, startingPage: 1 });
+  const pager = usePager({ totalItems: props.rows.length });
 
   const pageOfItems = useMemo(
-    () => props.rows.slice(pager.startIndex, pager.pageSize + pager.startIndex),
-    [pager.pageSize, pager.startIndex, props.rows]
+    () => props.rows.slice(pager.startIndex, PAGE_SIZE + pager.startIndex),
+    [pager.startIndex, props.rows]
   );
 
   const shouldShowLimitedResultsWarning = () =>
-    !pager.hasNextPage && pager.totalItems < props.totalHitCount;
+    !pager.hasNextPage && props.rows.length < props.totalHitCount;
 
   const limitedResultsWarning = (
     <FormattedMessage
@@ -48,11 +49,14 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
         endItem={pager.endItem}
         totalItems={props.totalHitCount}
       />
-      <ToolBarPagerButtons
-        hasPreviousPage={pager.hasPreviousPage}
-        hasNextPage={pager.hasNextPage}
-        onPageNext={pager.onPageNext}
-        onPagePrevious={pager.onPagePrevious}
+      <EuiPagination
+        aria-label={i18n.translate('discover.docTable.documentsNavigation', {
+          defaultMessage: 'Documents navigation',
+        })}
+        pageCount={pager.totalPages}
+        activePage={pager.currentPage}
+        onPageClick={pager.onPageChange}
+        compressed
       />
     </div>
   );

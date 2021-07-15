@@ -5,6 +5,6 @@ exports[`it renders ToolBarPagerText without crashing 1`] = `
   class="kuiToolBarText"
   data-test-subj="toolBarPagerText"
 >
-  1–2 of 3
+  1–2 of 3 documents
 </div>
 `;
