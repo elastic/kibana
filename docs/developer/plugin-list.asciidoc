@@ -100,7 +100,7 @@ for use in their own application.
 
 
 |{kib-repo}blob/{branch}/src/plugins/index_pattern_editor/README.md[indexPatternEditor]
-|The reusable index pattern creation flyout UI
+|Create index patterns from within Kibana apps.
 
 
 |{kib-repo}blob/{branch}/src/plugins/index_pattern_field_editor/README.md[indexPatternFieldEditor]
