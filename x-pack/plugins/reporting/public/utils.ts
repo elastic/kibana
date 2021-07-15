@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { REACT_ROUTER_REDIRECT_APP_PATH } from './constants';
+
 export const isRedirectAppPath = (pathname: string) => {
-  return pathname.startsWith('/r/');
+  return pathname.startsWith(REACT_ROUTER_REDIRECT_APP_PATH);
 };

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const REACT_ROUTER_REDIRECT_APP_PATH = '/r/:jobId/:locatorIdx';
+export const REACT_ROUTER_REDIRECT_APP_PATH = '/r';

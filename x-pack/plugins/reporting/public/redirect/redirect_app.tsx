@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { FunctionComponent } from 'react';
-import { matchPath } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { EuiTitle } from '@elastic/eui';
+import { EuiTitle, EuiCallOut, EuiCodeBlock } from '@elastic/eui';
+import qs from 'query-string';
 
 import type { ScopedHistory } from 'src/core/public';
 
 import { ReportingAPIClient } from '../lib/reporting_api_client';
-import { REACT_ROUTER_REDIRECT_APP_PATH } from '../constants';
-
 import type { SharePluginSetup } from '../shared_imports';
 
 interface Props {
@@ -25,49 +23,56 @@ interface Props {
 }
 
 const i18nTexts = {
+  errorTitle: i18n.translate('xpack.reporting.redirectApp.errorTitle', {
+    defaultMessage: 'Redirect error',
+  }),
   redirectingTitle: i18n.translate('xpack.reporting.redirectApp.redirectingMessage', {
     defaultMessage: 'Redirecting...',
   }),
 };
 
 export const RedirectApp: FunctionComponent<Props> = ({ apiClient, history, share }) => {
-  const pathname = history.location.pathname;
-  const match = useMemo(
-    () =>
-      matchPath<{ jobId: string; locatorIdx: string }>(pathname, {
-        path: REACT_ROUTER_REDIRECT_APP_PATH,
-        exact: true,
-      }),
-    [pathname]
-  );
-
-  if (!match) {
-    throw new Error(`Unexpected redirect parameters, received: ${pathname}`);
-  }
-
-  const {
-    params: { jobId, locatorIdx },
-  } = match;
+  const [error, setError] = useState<undefined | Error>();
+  const search = history.location.search;
 
   useEffect(() => {
     async function fetchReportJob() {
-      const {
-        payload: { locators },
-      } = await apiClient.getInfo(jobId);
+      const { jobId, locatorOffset } = qs.parse(search);
 
-      if (locators) {
-        const { [parseInt(locatorIdx, 10)]: locatorParams } = locators;
-        if (locatorParams) {
-          share.navigate(locatorParams);
-          return;
+      try {
+        if (!jobId || !locatorOffset || Array.isArray(jobId) || Array.isArray(locatorOffset)) {
+          throw new Error(
+            `Unexpected redirect parameters, received: (1) job id: "${jobId}" (expected id) and (2) locator offset: "${locatorOffset}" (expected number).`
+          );
         }
-        throw new Error(`No locator params found at ${locatorIdx} for job ID ${jobId}`);
+        const {
+          payload: { locators },
+        } = await apiClient.getInfo(jobId);
+
+        if (!locators) {
+          throw new Error(`No locators for this report job for job ID ${jobId}`);
+        }
+
+        const { [parseInt(locatorOffset, 10)]: locatorParams } = locators;
+
+        if (!locatorParams) {
+          throw new Error(`No locator params found at ${locatorOffset} for job ID ${jobId}`);
+        }
+
+        share.navigate(locatorParams);
+      } catch (e) {
+        setError(e);
+        throw e;
       }
-      throw new Error(`No locators for this report job for job ID ${jobId}`);
     }
     fetchReportJob();
-  });
-  return (
+  }, [apiClient, search, share]);
+  return error ? (
+    <EuiCallOut title={i18nTexts.errorTitle} color="danger">
+      <p>{error.message}</p>
+      {error.stack && <EuiCodeBlock>{error.stack}</EuiCodeBlock>}
+    </EuiCallOut>
+  ) : (
     <EuiTitle>
       <h1>{i18nTexts.redirectingTitle}</h1>
     </EuiTitle>
