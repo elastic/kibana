@@ -23,6 +23,7 @@ export const UptimeIndexPatternContextProvider: React.FC<{ data: DataPublicPlugi
 
   const { data } = useFetcher<Promise<IndexPattern | undefined>>(async () => {
     if (heartbeatIndices) {
+      // this only creates an index pattern in memory, not as saved object
       return indexPatterns.create({ title: heartbeatIndices });
     }
   }, [heartbeatIndices]);

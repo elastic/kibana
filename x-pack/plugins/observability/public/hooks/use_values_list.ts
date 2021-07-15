@@ -117,31 +117,29 @@ export const useValuesList = ({
   );
 
   useEffect(() => {
-    if (!loading) {
-      const newValues =
-        data?.aggregations?.values.buckets.map(
-          ({ key: value, doc_count: count, count: aggsCount }) => {
-            if (aggsCount) {
-              return {
-                count: aggsCount.value,
-                label: String(value),
-              };
-            } else {
-              return {
-                count,
-                label: String(value),
-              };
-            }
+    const newValues =
+      data?.aggregations?.values.buckets.map(
+        ({ key: value, doc_count: count, count: aggsCount }) => {
+          if (aggsCount) {
+            return {
+              count: aggsCount.value,
+              label: String(value),
+            };
+          } else {
+            return {
+              count,
+              label: String(value),
+            };
           }
-        ) ?? [];
+        }
+      ) ?? [];
 
-      if (keepHistory && query) {
-        setValues((prevState) => {
-          return union(newValues, prevState);
-        });
-      } else {
-        setValues(newValues);
-      }
+    if (keepHistory && query) {
+      setValues((prevState) => {
+        return union(newValues, prevState);
+      });
+    } else {
+      setValues(newValues);
     }
   }, [data, keepHistory, loading, query]);
 
