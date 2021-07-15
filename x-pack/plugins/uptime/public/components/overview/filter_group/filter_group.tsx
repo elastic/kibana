@@ -32,66 +32,30 @@ export const FilterGroup = () => {
 
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
 
-  const { selectedLocations, selectedPorts, selectedSchemes, selectedTags } = useSelectedFilters();
-
-  const onFilterFieldChange = (fieldName: string, values: string[]) => {
-    setUpdatedFieldValues({ fieldName, values });
-  };
-
-  const isMonitorPage = useRouteMatch(MONITOR_ROUTE);
-
-  const filterPopoverProps = [
-    {
-      onFilterFieldChange,
-      fieldName: 'observer.geo.name',
-      selectedItems: selectedLocations,
-      title: filterLabels.LOCATION,
-    },
-    // on monitor page we only display location filter in ping list
-    ...(!isMonitorPage
-      ? [
-          {
-            onFilterFieldChange,
-            fieldName: 'url.port',
-            selectedItems: selectedPorts,
-            title: filterLabels.PORT,
-          },
-          {
-            onFilterFieldChange,
-            fieldName: 'monitor.type',
-            selectedItems: selectedSchemes,
-            title: filterLabels.SCHEME,
-          },
-          {
-            onFilterFieldChange,
-            fieldName: 'tags',
-            selectedItems: selectedTags,
-            title: filterLabels.TAG,
-          },
-        ]
-      : []),
-  ];
+  const { filtersList } = useSelectedFilters();
 
   const indexPattern = useIndexPattern();
 
   const [isOpen, setIsOpen] = useState('');
 
+  const onFilterFieldChange = (fieldName: string, values?: string[]) => {
+    setUpdatedFieldValues({ fieldName, values });
+    setIsOpen('');
+  };
+
   return (
     <>
       <Container>
         {indexPattern &&
-          filterPopoverProps.map(({ fieldName, title, selectedItems }) => (
+          filtersList.map(({ fieldName, label, selectedItems }) => (
             <FieldValueSuggestions
               key={fieldName}
               compressed={false}
               indexPatternTitle={indexPattern.title}
               sourceField={fieldName}
-              label={title}
+              label={label}
               selectedValue={selectedItems}
-              onChange={(values) => {
-                setUpdatedFieldValues({ fieldName, values });
-                setIsOpen('');
-              }}
+              onChange={(values) => onFilterFieldChange(fieldName, values)}
               asCombobox={false}
               asFilterButton={true}
               forceOpen={isOpen === fieldName}

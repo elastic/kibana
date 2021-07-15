@@ -16,20 +16,13 @@ interface Props {
 }
 export const SelectedFilters = ({ onChange }: Props) => {
   const indexPattern = useIndexPattern();
-  const { selectedLocations, selectedPorts, selectedSchemes, selectedTags } = useSelectedFilters();
-
-  const filters = [
-    { field: 'observer.geo.name', label: 'Location', selected: selectedLocations },
-    { field: 'url.port', label: 'Port', selected: selectedPorts },
-    { field: 'monitor.type', label: 'Type', selected: selectedSchemes },
-    { field: 'tags', label: 'Tag', selected: selectedTags },
-  ];
+  const { filtersList } = useSelectedFilters();
 
   return indexPattern ? (
     <EuiFlexGroup gutterSize="xs">
-      {filters.map(({ field, selected, label }) => (
+      {filtersList.map(({ field, selectedItems, label }) => (
         <Fragment key={field}>
-          {selected.map((value) => (
+          {selectedItems.map((value) => (
             <EuiFlexItem key={field + value} grow={false}>
               <FilterValueLabel
                 indexPattern={indexPattern}
