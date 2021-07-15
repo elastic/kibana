@@ -137,7 +137,7 @@ export type ExecutionContainer<Output = ExpressionValue> = StateContainer<Execut
 // @public
 export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters, ExecutionContextSearch extends SerializableState_2 = SerializableState_2> {
     abortSignal: AbortSignal;
-    readonly executionContext?: IExecutionContextContainer;
+    getExecutionContext: () => IExecutionContextContainer | undefined;
     getKibanaRequest?: () => KibanaRequest;
     getSearchContext: () => ExecutionContextSearch;
     getSearchSessionId: () => string | undefined;
