@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   generateFilterDSL,
   hasFilters,
@@ -62,7 +61,12 @@ const mockOptions = (
     shouldCheckStatus: true,
   },
   services = alertsMock.createAlertServices(),
-  state = {}
+  state = {},
+  rule = {
+    schedule: {
+      interval: '5m',
+    },
+  }
 ): any => {
   services.scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
   services.scopedClusterClient.asCurrentUser = (jest.fn() as unknown) as any;
@@ -77,13 +81,16 @@ const mockOptions = (
     params,
     services,
     state,
+    rule,
   };
 };
 
 describe('status check alert', () => {
   let toISOStringSpy: jest.SpyInstance<string, []>;
+  const mockDate = new Date('2021-05-13T12:33:37.000Z');
   beforeEach(() => {
     toISOStringSpy = jest.spyOn(Date.prototype, 'toISOString');
+    Date.now = jest.fn().mockReturnValue(mockDate);
   });
 
   afterEach(() => {
@@ -108,8 +115,12 @@ describe('status check alert', () => {
             "filters": undefined,
             "locations": Array [],
             "numTimes": 5,
-            "timerange": Object {
+            "timespanRange": Object {
               "from": "now-15m",
+              "to": "now",
+            },
+            "timestampRange": Object {
+              "from": 1620821917000,
               "to": "now",
             },
             "uptimeEsClient": Object {
@@ -163,8 +174,12 @@ describe('status check alert', () => {
             "filters": undefined,
             "locations": Array [],
             "numTimes": 5,
-            "timerange": Object {
+            "timespanRange": Object {
               "from": "now-15m",
+              "to": "now",
+            },
+            "timestampRange": Object {
+              "from": 1620821917000,
               "to": "now",
             },
             "uptimeEsClient": Object {
@@ -476,8 +491,12 @@ describe('status check alert', () => {
             },
             "locations": Array [],
             "numTimes": 3,
-            "timerange": Object {
+            "timespanRange": Object {
               "from": "now-15m",
+              "to": "now",
+            },
+            "timestampRange": Object {
+              "from": 1620821917000,
               "to": "now",
             },
             "uptimeEsClient": Object {
@@ -583,8 +602,12 @@ describe('status check alert', () => {
             },
             "locations": Array [],
             "numTimes": 20,
-            "timerange": Object {
+            "timespanRange": Object {
               "from": "now-30h",
+              "to": "now",
+            },
+            "timestampRange": Object {
+              "from": 1620714817000,
               "to": "now",
             },
             "uptimeEsClient": Object {
@@ -898,6 +921,85 @@ describe('status check alert', () => {
         ]
       `);
     });
+  });
+
+  it('generates timespan and @timestamp ranges appropriately', async () => {
+    const mockGetter = jest.fn();
+    mockGetter.mockReturnValue([]);
+    const { server, libs, plugins } = bootstrapDependencies({
+      getIndexPattern: jest.fn(),
+      getMonitorStatus: mockGetter,
+    });
+    const alert = statusCheckAlertFactory(server, libs, plugins);
+    const options = mockOptions({
+      numTimes: 20,
+      timerangeCount: 30,
+      timerangeUnit: 'h',
+      filters: {
+        'monitor.type': ['http'],
+        'observer.geo.name': [],
+        tags: [],
+        'url.port': [],
+      },
+      search: 'url.full: *',
+    });
+    await alert.executor(options);
+
+    expect(mockGetter).toHaveBeenCalledTimes(1);
+    expect(mockGetter.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        timespanRange: {
+          from: 'now-30h',
+          to: 'now',
+        },
+        timestampRange: {
+          from: mockDate.setHours(mockDate.getHours() - 54).valueOf(), // now minus the timerange (30h), plus an additional 24 hour buffer
+          to: 'now',
+        },
+      })
+    );
+  });
+
+  it('uses the larger of alert interval and timerange when defining timestampRange', async () => {
+    const mockGetter = jest.fn();
+    mockGetter.mockReturnValue([]);
+    const { server, libs, plugins } = bootstrapDependencies({
+      getIndexPattern: jest.fn(),
+      getMonitorStatus: mockGetter,
+    });
+    const alert = statusCheckAlertFactory(server, libs, plugins);
+    const options = mockOptions(
+      {
+        numTimes: 20,
+        timerangeCount: 30,
+        timerangeUnit: 'h',
+        filters: {
+          'monitor.type': ['http'],
+          'observer.geo.name': [],
+          tags: [],
+          'url.port': [],
+        },
+        search: 'url.full: *',
+      },
+      undefined,
+      undefined,
+      { schedule: { interval: '60h' } }
+    );
+    await alert.executor(options);
+
+    expect(mockGetter).toHaveBeenCalledTimes(1);
+    expect(mockGetter.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        timespanRange: {
+          from: 'now-30h',
+          to: 'now',
+        },
+        timestampRange: {
+          from: mockDate.setHours(mockDate.getHours() - 60).valueOf(), // 60h rule schedule interval is larger than 30h timerange, so use now - 60h to define timestamp range
+          to: 'now',
+        },
+      })
+    );
   });
 
   describe('hasFilters', () => {

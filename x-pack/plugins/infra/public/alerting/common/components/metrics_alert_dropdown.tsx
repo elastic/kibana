@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback, useMemo } from 'react';
 import {
   EuiPopover,
-  EuiButtonEmpty,
+  EuiHeaderLink,
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
@@ -134,8 +134,7 @@ export const MetricsAlertDropdown = () => {
         panelPaddingSize="none"
         anchorPosition="downLeft"
         button={
-          <EuiButtonEmpty
-            size="xs"
+          <EuiHeaderLink
             color="text"
             iconSide={'right'}
             iconType={'arrowDown'}
@@ -145,7 +144,7 @@ export const MetricsAlertDropdown = () => {
               id="xpack.infra.alerting.alertsButton"
               defaultMessage="Alerts and rules"
             />
-          </EuiButtonEmpty>
+          </EuiHeaderLink>
         }
         isOpen={popoverOpen}
         closePopover={closePopover}

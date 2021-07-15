@@ -6,20 +6,9 @@
  */
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
-import type {
-  ListOperatorEnum as OperatorEnum,
-  ListOperatorTypeEnum as OperatorTypeEnum,
-} from '@kbn/securitysolution-io-ts-list-types';
 
 export interface GetGenericComboBoxPropsReturn {
   comboOptions: EuiComboBoxOptionOption[];
   labels: string[];
   selectedComboOptions: EuiComboBoxOptionOption[];
-}
-
-export interface OperatorOption {
-  message: string;
-  value: string;
-  operator: OperatorEnum;
-  type: OperatorTypeEnum;
 }

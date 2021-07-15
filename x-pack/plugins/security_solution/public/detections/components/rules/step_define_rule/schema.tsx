@@ -13,6 +13,7 @@ import React from 'react';
 import {
   singleEntryThreat,
   containsInvalidItems,
+  customValidators,
 } from '../../../../common/components/threat_match/helpers';
 import { isThreatMatchRule, isThresholdRule } from '../../../../../common/detection_engine/utils';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
@@ -369,6 +370,19 @@ export const schema: FormSchema<DefineStepRule> = {
               }
             )
           )(...args);
+        },
+      },
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ formData, value }] = args;
+          const needsValidation = isThreatMatchRule(formData.ruleType);
+          if (!needsValidation) {
+            return;
+          }
+
+          return customValidators.forbiddenField(value, '*');
         },
       },
     ],
