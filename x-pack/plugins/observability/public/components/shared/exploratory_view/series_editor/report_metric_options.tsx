@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { EuiSuperSelect } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useSeriesStorage } from '../hooks/use_series_storage';
 import { SeriesConfig, SeriesUrl } from '../types';
-import { i18n } from '../../../../../../../../../../../../private/var/tmp/_bazel_shahzad/23eed4ccf09918e56eb034cb7806afe1/execroot/kibana/bazel-out/darwin-fastbuild/bin/packages/kbn-i18n';
 
 interface Props {
   seriesId: string;
