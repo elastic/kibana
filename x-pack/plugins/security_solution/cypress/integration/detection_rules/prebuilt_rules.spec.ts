@@ -126,12 +126,18 @@ describe('Actions with prebuilt rules', () => {
       'have.text',
       `Elastic rules (${expectedNumberOfRulesAfterDeletion})`
     );
-    cy.get(RELOAD_PREBUILT_RULES_BTN).should('exist');
-    cy.get(RELOAD_PREBUILT_RULES_BTN).should('have.text', 'Install 1 Elastic prebuilt rule ');
+
+    // Have to add a 5 minute timeout wait as this can timeout on slow CI system
+    cy.get(RELOAD_PREBUILT_RULES_BTN, { timeout: 300000 }).should('exist');
+    cy.get(RELOAD_PREBUILT_RULES_BTN, { timeout: 300000 }).should(
+      'have.text',
+      'Install 1 Elastic prebuilt rule '
+    );
 
     reloadDeletedRules();
 
-    cy.get(RELOAD_PREBUILT_RULES_BTN).should('not.exist');
+    // Have to add a 5 minute timeout wait as this can timeout on slow CI system
+    cy.get(RELOAD_PREBUILT_RULES_BTN, { timeout: 300000 }).should('not.exist');
 
     cy.reload();
     changeRowsPerPageTo100();
@@ -154,8 +160,9 @@ describe('Actions with prebuilt rules', () => {
     cy.reload();
     changeRowsPerPageTo100();
 
-    cy.get(RELOAD_PREBUILT_RULES_BTN).should('exist');
-    cy.get(RELOAD_PREBUILT_RULES_BTN).should(
+    // Have to add a 5 minute timeout wait as this can timeout on slow CI system
+    cy.get(RELOAD_PREBUILT_RULES_BTN, { timeout: 300000 }).should('exist');
+    cy.get(RELOAD_PREBUILT_RULES_BTN, { timeout: 300000 }).should(
       'have.text',
       `Install ${numberOfRulesToBeSelected} Elastic prebuilt rules `
     );
@@ -166,7 +173,8 @@ describe('Actions with prebuilt rules', () => {
 
     reloadDeletedRules();
 
-    cy.get(RELOAD_PREBUILT_RULES_BTN).should('not.exist');
+    // Have to add a 5 minute timeout wait as this can timeout on slow CI system
+    cy.get(RELOAD_PREBUILT_RULES_BTN, { timeout: 300000 }).should('not.exist');
 
     cy.reload();
     changeRowsPerPageTo100();
