@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { ReorderableTable } from '../../../shared/reorderable_table';
 import { Schema, SchemaType } from '../../../shared/schema/types';
 import { Result } from '../result';
 
@@ -256,6 +257,13 @@ export const Library: React.FC = () => {
           <EuiSpacer />
           <Result {...props} schemaForTypeHighlights={schema} />
           <EuiSpacer />
+
+          <EuiTitle size="m">
+            <h2>ReorderableTable</h2>
+          </EuiTitle>
+          <EuiSpacer />
+
+          <ReorderableTable />
         </EuiPageContentBody>
       </EuiPageContent>
     </>
