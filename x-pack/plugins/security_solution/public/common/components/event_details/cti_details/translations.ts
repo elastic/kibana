@@ -17,14 +17,14 @@ export const PROVIDER_PREPOSITION = i18n.translate(
 export const INDICATOR_TOOLTIP_TITLE = i18n.translate(
   'xpack.securitySolution.eventDetails.ctiSummary.indicatorEnrichmentTooltipTitle',
   {
-    defaultMessage: 'Indicator rule enrichment',
+    defaultMessage: 'Threat Match Detected',
   }
 );
 
 export const INVESTIGATION_TOOLTIP_TITLE = i18n.translate(
   'xpack.securitySolution.eventDetails.ctiSummary.investigationEnrichmentTooltipTitle',
   {
-    defaultMessage: 'Investigation time enrichment',
+    defaultMessage: 'Enriched with Threat Intelligence',
   }
 );
 
@@ -32,7 +32,7 @@ export const INDICATOR_TOOLTIP_CONTENT = i18n.translate(
   'xpack.securitySolution.eventDetails.ctiSummary.indicatorEnrichmentTooltipContent',
   {
     defaultMessage:
-      'This field matched a known indicator, and was enriched by an indicator match rule. See more details on the Threat Intel tab.',
+      'This field value matched a threat intelligence indicator with a rule you created.',
   }
 );
 
@@ -40,42 +40,35 @@ export const INVESTIGATION_TOOLTIP_CONTENT = i18n.translate(
   'xpack.securitySolution.eventDetails.ctiSummary.investigationEnrichmentTooltipContent',
   {
     defaultMessage:
-      'This field matched a known indicator; see more details on the Threat Intel tab.',
+      'This field value has additional information available from threat intelligence sources.',
   }
 );
 
 export const NO_INDICATOR_ENRICHMENTS_TITLE = i18n.translate(
   'xpack.securitySolution.alertDetails.noIndicatorEnrichmentsTitle',
   {
-    defaultMessage: 'No indicator match rule enrichments found',
+    defaultMessage: 'No Threat Matches Detected',
   }
 );
 
 export const NO_INVESTIGATION_ENRICHMENTS_TITLE = i18n.translate(
   'xpack.securitySolution.alertDetails.noInvestigationEnrichmentsTitle',
   {
-    defaultMessage: 'No investigation time enrichments found',
+    defaultMessage: 'No Enrichment with Threat Intelligence Found',
   }
 );
 
 export const NO_INVESTIGATION_ENRICHMENTS_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.alertDetails.noInvestigationEnrichmentsDescription',
   {
-    defaultMessage: "We haven't found any indicator matches from the last 30 days.",
+    defaultMessage: "We haven't found any threat intelligence from the last 30 days.",
   }
 );
 
 export const NO_ENRICHMENTS_FOUND_TITLE = i18n.translate(
   'xpack.securitySolution.alertDetails.noEnrichmentsFoundTitle',
   {
-    defaultMessage: 'No indicator match rule or investigation time enrichments found',
-  }
-);
-
-export const NO_ENRICHMENTS_FOUND_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.alertDetails.noEnrichmentFoundDescription',
-  {
-    defaultMessage: 'No indicator match rule or investigation time enrichments found',
+    defaultMessage: 'No Threat Intelligence Found',
   }
 );
 
@@ -94,6 +87,6 @@ export const CHECK_DOCS = i18n.translate('xpack.securitySolution.alertDetails.ch
 export const INVESTIGATION_QUERY_TITLE = i18n.translate(
   'xpack.securitySolution.alertDetails.investigationTimeQueryTitle',
   {
-    defaultMessage: 'Investigation time enrichment',
+    defaultMessage: 'Enrichment with Threat Intelligence',
   }
 );
