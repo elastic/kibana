@@ -7,6 +7,7 @@
  */
 
 import React, { Component } from 'react';
+import { memoize } from 'lodash';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -35,6 +36,10 @@ interface DataDownloadOptionsProps {
   isFormatted?: boolean;
   fieldFormats: FieldFormatsStart;
 }
+
+const detectFormulasInTables = memoize((datatables: Datatable[]) =>
+  datatables.some(({ columns, rows }) => tableHasFormulas(columns, rows))
+);
 
 class DataDownloadOptions extends Component<DataDownloadOptionsProps, DataDownloadOptionsState> {
   static propTypes = {
@@ -103,9 +108,7 @@ class DataDownloadOptions extends Component<DataDownloadOptionsProps, DataDownlo
   };
 
   renderFormattedDownloads() {
-    const detectedFormulasInTables = this.props.datatables.some(({ columns, rows }) =>
-      tableHasFormulas(columns, rows)
-    );
+    const detectedFormulasInTables = detectFormulasInTables(this.props.datatables);
     const button = (
       <EuiButton iconType="arrowDown" iconSide="right" size="s" onClick={this.onTogglePopover}>
         <FormattedMessage
