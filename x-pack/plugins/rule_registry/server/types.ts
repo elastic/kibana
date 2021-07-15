@@ -12,7 +12,7 @@ import {
   AlertTypeParams,
   AlertTypeState,
 } from '../../alerting/common';
-import { AlertType } from '../../alerting/server';
+import { AlertExecutorOptions, AlertServices, AlertType } from '../../alerting/server';
 import { AlertsClient } from './alert_data_client/alerts_client';
 
 type SimpleAlertType<
@@ -42,6 +42,20 @@ export type AlertTypeWithExecutor<
   'executor'
 > & {
   executor: AlertTypeExecutor<TState, TParams, TAlertInstanceContext, TServices>;
+};
+
+export type AlertExecutorOptionsWithExtraServices<
+  Params extends AlertTypeParams = never,
+  State extends AlertTypeState = never,
+  InstanceState extends AlertInstanceState = never,
+  InstanceContext extends AlertInstanceContext = never,
+  ActionGroupIds extends string = never,
+  TExtraServices extends {} = never
+> = Omit<
+  AlertExecutorOptions<Params, State, InstanceState, InstanceContext, ActionGroupIds>,
+  'services'
+> & {
+  services: AlertServices<InstanceState, InstanceContext, ActionGroupIds> & TExtraServices;
 };
 
 /**
