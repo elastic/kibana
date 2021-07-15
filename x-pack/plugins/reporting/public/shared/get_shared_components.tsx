@@ -8,7 +8,7 @@
 import { CoreSetup } from 'kibana/public';
 import React from 'react';
 import { ReportingAPIClient } from '../';
-import { PDF_REPORT_TYPE, PDF_REPORT_TYPE_V2 } from '../../common/constants';
+import { PDF_REPORT_TYPE, PDF_REPORT_TYPE_V2, PNG_REPORT_TYPE_V2 } from '../../common/constants';
 import type { Props as PanelPropsScreenCapture } from '../share_context_menu/screen_capture_panel_content';
 import { ScreenCapturePanelContent } from '../share_context_menu/screen_capture_panel_content_lazy';
 
@@ -16,7 +16,7 @@ interface IncludeOnCloseFn {
   onClose: () => void;
 }
 
-type PropsPDF = Pick<PanelPropsScreenCapture, 'getJobParams' | 'layoutOption'> & IncludeOnCloseFn;
+type Props = Pick<PanelPropsScreenCapture, 'getJobParams' | 'layoutOption'> & IncludeOnCloseFn;
 
 /*
  * As of 7.14, the only shared component is a PDF report that is suited for Canvas integration.
@@ -25,7 +25,7 @@ type PropsPDF = Pick<PanelPropsScreenCapture, 'getJobParams' | 'layoutOption'> &
  */
 export function getSharedComponents(core: CoreSetup) {
   return {
-    ReportingPanelPDF(props: PropsPDF) {
+    ReportingPanelPDF(props: Props) {
       return (
         <ScreenCapturePanelContent
           layoutOption={props.layoutOption}
@@ -37,12 +37,24 @@ export function getSharedComponents(core: CoreSetup) {
         />
       );
     },
-    ReportingPanelPDFV2(props: PropsPDF) {
+    ReportingPanelPDFV2(props: Props) {
       return (
         <ScreenCapturePanelContent
           layoutOption={props.layoutOption}
           requiresSavedState={false}
           reportType={PDF_REPORT_TYPE_V2}
+          apiClient={new ReportingAPIClient(core.http)}
+          toasts={core.notifications.toasts}
+          {...props}
+        />
+      );
+    },
+    ReportingPanelPNGV2(props: Props) {
+      return (
+        <ScreenCapturePanelContent
+          layoutOption={props.layoutOption}
+          requiresSavedState={false}
+          reportType={PNG_REPORT_TYPE_V2}
           apiClient={new ReportingAPIClient(core.http)}
           toasts={core.notifications.toasts}
           {...props}

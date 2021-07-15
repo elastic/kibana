@@ -8,7 +8,6 @@
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { finalize, map, tap } from 'rxjs/operators';
-import { Locator } from '../../../../../common/types';
 import { ReportingCore } from '../../../../';
 import { LevelLogger } from '../../../../lib';
 import { LayoutParams, PreserveLayout } from '../../../../lib/layouts';
@@ -29,7 +28,7 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
 
   return function generatePngObservable(
     logger: LevelLogger,
-    locator: Locator,
+    urls: string[],
     browserTimezone: string | undefined,
     conditionalHeaders: ConditionalHeaders,
     layoutParams: LayoutParams
@@ -46,7 +45,7 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
     let apmBuffer: typeof apm.currentSpan;
     const screenshots$ = getScreenshots({
       logger,
-      urls: [[locator.id, locator]],
+      urls,
       conditionalHeaders,
       layout,
       browserTimezone,

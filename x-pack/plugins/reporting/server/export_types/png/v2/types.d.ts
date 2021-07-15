@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import type { SerializableState } from 'src/plugins/kibana_utils/common';
 import { Locator } from '../../../../common/types';
 import { LayoutParams } from '../../../lib/layouts';
 import { BaseParams, BasePayload } from '../../../types';
 
-interface BaseParamsPNGV2<P extends object = object> {
+interface BaseParamsPNGV2<P extends SerializableState = SerializableState> {
   layout: LayoutParams;
   forceNow?: string;
   /**
@@ -17,7 +18,7 @@ interface BaseParamsPNGV2<P extends object = object> {
    * report to be created. This value is typically used by the plugin client to re-create
    * the same visual state as when the report was requested as well as navigate to the correct page.
    */
-  locator: Locator<P>;
+  locators: Array<Locator<P>>;
 }
 
 // Job params: structure of incoming user request data

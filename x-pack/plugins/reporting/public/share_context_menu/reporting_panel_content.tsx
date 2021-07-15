@@ -26,6 +26,7 @@ import {
   PDF_REPORT_TYPE,
   PDF_REPORT_TYPE_V2,
   PNG_REPORT_TYPE,
+  PNG_REPORT_TYPE_V2,
 } from '../../common/constants';
 import { BaseParams } from '../../common/types';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
@@ -209,7 +210,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
       case 'csv_searchsource':
         return CSV_REPORT_TYPE;
       case 'png':
-      case 'pngV2':
+      case PNG_REPORT_TYPE_V2:
         return PNG_REPORT_TYPE;
       default:
         return this.props.reportType;

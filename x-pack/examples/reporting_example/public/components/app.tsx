@@ -37,6 +37,7 @@ import {
   JobParamsPDF,
   JobParamsPDFV2,
 } from '../../../../plugins/reporting/server/export_types/printable_pdf/types';
+import { JobParamsPNGV2 } from '../../../../plugins/reporting/server/export_types/png/types';
 
 import { REPORTING_EXAMPLE_LOCATOR_ID } from '../../common';
 
@@ -109,8 +110,26 @@ export const ReportingExampleApp = ({
     };
   };
 
+  const getPNGJobParamsDefaultV2 = (): JobParamsPNGV2 => {
+    return {
+      layout: {
+        id: constants.LAYOUT_TYPES.PRESERVE_LAYOUT,
+        selectors: getDefaultLayoutSelectors(),
+      },
+      locators: [{ id: REPORTING_EXAMPLE_LOCATOR_ID, version: '1', params: { myTestState: {} } }],
+      objectType: 'develeloperExample',
+      title: 'Reporting Developer Example',
+    };
+  };
+
   const panels = [
-    { id: 0, items: [{ name: 'PDF Reports', icon: 'document', panel: 1 }] },
+    {
+      id: 0,
+      items: [
+        { name: 'PDF Reports', icon: 'document', panel: 1 },
+        { name: 'PNG Reports', icon: 'document', panel: 7 },
+      ],
+    },
     {
       id: 1,
       initialFocusedItemIndex: 1,
@@ -120,6 +139,12 @@ export const ReportingExampleApp = ({
         { name: 'V2 No Layout Option', icon: 'document', panel: 4 },
         { name: 'Canvas Layout Option', icon: 'canvasApp', panel: 3 },
       ],
+    },
+    {
+      id: 7,
+      initialFocusedItemIndex: 0,
+      title: 'PNG Reports',
+      items: [{ name: 'V2 No Layout Option', icon: 'document', panel: 5 }],
     },
     {
       id: 2,
@@ -148,6 +173,16 @@ export const ReportingExampleApp = ({
       content: (
         <reporting.components.ReportingPanelPDFV2
           getJobParams={getPDFJobParamsDefaultV2}
+          onClose={closePopover}
+        />
+      ),
+    },
+    {
+      id: 5,
+      title: 'V2 No Layout Option',
+      content: (
+        <reporting.components.ReportingPanelPNGV2
+          getJobParams={getPNGJobParamsDefaultV2}
           onClose={closePopover}
         />
       ),

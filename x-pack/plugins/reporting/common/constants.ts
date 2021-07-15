@@ -68,7 +68,7 @@ export const PDF_JOB_TYPE = 'printable_pdf';
 export const PDF_JOB_TYPE_V2 = 'printable_pdf_v2';
 
 export const PNG_REPORT_TYPE = 'PNG';
-export const PNG_REPORT_TYPE_V2 = 'PNGV2';
+export const PNG_REPORT_TYPE_V2 = 'pngV2';
 export const PNG_JOB_TYPE = 'PNG';
 export const PNG_JOB_TYPE_V2 = 'PNGV2';
 

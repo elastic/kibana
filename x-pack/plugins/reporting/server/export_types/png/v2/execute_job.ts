@@ -8,15 +8,11 @@
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, finalize, map, mergeMap, takeUntil } from 'rxjs/operators';
-import { PNG_JOB_TYPE_V2 } from '../../../../common/constants';
+import { PNG_JOB_TYPE_V2, getRedirectAppPathHome } from '../../../../common/constants';
 import { TaskRunResult } from '../../../lib/tasks';
 import { RunTaskFn, RunTaskFnFactory } from '../../../types';
-import {
-  decryptJobHeaders,
-  getConditionalHeaders,
-  getFullUrls,
-  omitBlockedHeaders,
-} from '../../common';
+import { decryptJobHeaders, getConditionalHeaders, omitBlockedHeaders } from '../../common';
+import { getFullUrls } from '../../common/v2/get_full_urls';
 import { generatePngObservableFactory } from './lib/generate_png';
 import { TaskPayloadPNGV2 } from './types';
 
@@ -38,21 +34,18 @@ export const runTaskFnFactory: RunTaskFnFactory<
       map((decryptedHeaders) => omitBlockedHeaders(decryptedHeaders)),
       map((filteredHeaders) => getConditionalHeaders(config, filteredHeaders)),
       mergeMap((conditionalHeaders) => {
-        const { locator } = job;
-        // TODO: HACK, temporary hack before we have URL locators and an app client side to handle redirects
-        const urls = getFullUrls(config, {
-          ...job,
-          relativeUrl: locator.id,
-        });
+        const { locators } = job;
+        const relativeUrls = locators.map((_, idx) =>
+          getRedirectAppPathHome({ reportSavedObjectId: jobId, locatorOffset: String(idx) })
+        );
+        const urls = getFullUrls(config, relativeUrls);
 
-        const hashUrl = urls[0];
         if (apmGetAssets) apmGetAssets.end();
 
         apmGeneratePng = apmTrans?.startSpan('generate_png_pipeline', 'execute');
         return generatePngObservable(
           jobLogger,
-          // TODO: HACK, temporary hack before we have URL locators and an app client side to handle redirects
-          { ...locator, id: hashUrl },
+          urls,
           job.browserTimezone,
           conditionalHeaders,
           job.layout
