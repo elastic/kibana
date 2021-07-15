@@ -9,8 +9,11 @@ import { EuiHorizontalRule, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { flatten, isEmpty } from 'lodash';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useApmParams } from '../../../hooks/use_apm_params';
+import { useApmRouter } from '../../../hooks/use_apm_router';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTransactionDistributionFetcher } from '../../../hooks/use_transaction_distribution_fetcher';
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
@@ -28,17 +31,33 @@ interface Sample {
 export function TransactionDetails() {
   const { urlParams } = useUrlParams();
   const history = useHistory();
-  const {
-    distributionData,
-    distributionStatus,
-  } = useTransactionDistributionFetcher();
 
   const {
     waterfall,
     exceedsMax,
     status: waterfallStatus,
   } = useWaterfallFetcher();
-  const { transactionName } = urlParams;
+
+  const { path, query } = useApmParams(
+    '/services/:serviceName/transactions/view'
+  );
+
+  const apmRouter = useApmRouter();
+
+  const { transactionName } = query;
+
+  const {
+    distributionData,
+    distributionStatus,
+  } = useTransactionDistributionFetcher({ transactionName });
+
+  useBreadcrumb({
+    title: transactionName,
+    href: apmRouter.link('/services/:serviceName/transactions/view', {
+      path,
+      query,
+    }),
+  });
 
   const selectedSample = flatten(
     distributionData.buckets.map((bucket) => bucket.samples)
@@ -90,7 +109,6 @@ export function TransactionDetails() {
         <TransactionDistribution
           distribution={distributionData}
           fetchStatus={distributionStatus}
-          urlParams={urlParams}
           bucketIndex={bucketIndex}
           onBucketClick={(bucket) => {
             if (!isEmpty(bucket.samples)) {
