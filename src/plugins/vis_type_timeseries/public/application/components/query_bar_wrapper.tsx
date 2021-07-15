@@ -9,7 +9,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 
 import { CoreStartContext } from '../contexts/query_input_bar_context';
-import { DefaultIndexPatternContext } from '../contexts/default_index_context';
 import type { IndexPatternValue } from '../../../common/types';
 
 import { QueryStringInput, QueryStringInputProps } from '../../../../../plugins/data/public';
@@ -25,7 +24,6 @@ export function QueryBarWrapper({ query, onChange, indexPatterns }: QueryBarWrap
   const [indexes, setIndexes] = useState<QueryStringInputProps['indexPatterns']>([]);
 
   const coreStartContext = useContext(CoreStartContext);
-  const defaultIndex = useContext(DefaultIndexPatternContext);
 
   useEffect(() => {
     async function fetchIndexes() {
@@ -42,15 +40,19 @@ export function QueryBarWrapper({ query, onChange, indexPatterns }: QueryBarWrap
               i.push(indexPattern);
             }
           }
-        } else if (defaultIndex) {
-          i.push(defaultIndex);
+        } else {
+          const defaultIndex = await indexPatternsService.getDefault();
+
+          if (defaultIndex) {
+            i.push(defaultIndex);
+          }
         }
       }
       setIndexes(i);
     }
 
     fetchIndexes();
-  }, [indexPatterns, indexPatternsService, defaultIndex]);
+  }, [indexPatterns, indexPatternsService]);
 
   return (
     <QueryStringInput
