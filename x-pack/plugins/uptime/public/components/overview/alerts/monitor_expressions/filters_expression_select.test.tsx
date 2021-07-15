@@ -25,12 +25,6 @@ describe('FiltersExpressionSelect', () => {
         alertParams={{}}
         newFilters={[]}
         onRemoveFilter={jest.fn()}
-        filters={{
-          locations: [],
-          ports: [],
-          schemes: [],
-          tags: [],
-        }}
         setAlertParams={jest.fn()}
         shouldUpdateUrl={false}
       />
@@ -57,12 +51,6 @@ describe('FiltersExpressionSelect', () => {
         alertParams={{}}
         newFilters={newFilters}
         onRemoveFilter={jest.fn()}
-        filters={{
-          tags: [],
-          ports: [],
-          schemes: [],
-          locations: [],
-        }}
         setAlertParams={jest.fn()}
         shouldUpdateUrl={false}
       />
@@ -84,12 +72,6 @@ describe('FiltersExpressionSelect', () => {
         alertParams={{}}
         newFilters={[LOCATION_FIELD_NAME, SCHEME_FIELD_NAME, PORT_FIELD_NAME, TAG_FIELD_NAME]}
         onRemoveFilter={onRemoveFilterMock}
-        filters={{
-          tags: ['prod'],
-          ports: [5601],
-          schemes: ['http'],
-          locations: ['nyc'],
-        }}
         setAlertParams={setAlertParamsMock}
         shouldUpdateUrl={false}
       />
@@ -183,7 +165,6 @@ describe('FiltersExpressionSelect', () => {
           alertParams={{}}
           newFilters={newFilters}
           onRemoveFilter={jest.fn()}
-          filters={filters}
           setAlertParams={jest.fn()}
           shouldUpdateUrl={false}
         />

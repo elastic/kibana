@@ -128,7 +128,7 @@ export const FiltersExpressionsSelect: React.FC<FilterExpressionsSelectProps> = 
               {indexPattern && (
                 <FieldValueSuggestions
                   filters={[]}
-                  indexPattern={indexPattern}
+                  indexPatternTitle={indexPattern.title}
                   sourceField={fieldName}
                   label={title}
                   onChange={(vals) => {

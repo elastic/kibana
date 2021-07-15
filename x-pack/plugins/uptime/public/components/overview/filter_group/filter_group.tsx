@@ -8,10 +8,7 @@
 import React, { useState } from 'react';
 import { EuiFilterGroup } from '@elastic/eui';
 import styled from 'styled-components';
-import { useRouteMatch } from 'react-router-dom';
-import { filterLabels } from './translations';
 import { useFilterUpdate } from '../../../hooks/use_filter_update';
-import { MONITOR_ROUTE } from '../../../../common/constants';
 import { useSelectedFilters } from '../../../hooks/use_selected_filters';
 import { FieldValueSuggestions } from '../../../../../observability/public';
 import { SelectedFilters } from './selected_filters';

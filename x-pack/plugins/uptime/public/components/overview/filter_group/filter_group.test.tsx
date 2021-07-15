@@ -8,24 +8,16 @@
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../../lib/helper/rtl_helpers';
-import { FilterGroupComponent } from './filter_group';
+import { FilterGroup } from './filter_group';
 
-describe('FilterGroupComponent', () => {
-  const overviewFilters = {
-    locations: ['nyc', 'fairbanks'],
-    ports: [5601, 9200],
-    schemes: ['http', 'tcp'],
-    tags: ['prod', 'dev'],
-  };
+describe('FilterGroup', () => {
   it.each([
     ['expands filter group for Location filter', 'Search for location'],
     ['expands filter group for Port filter', 'Search for port'],
     ['expands filter group for Scheme filter', 'Search for scheme'],
     ['expands filter group for Tag filter', 'Search for tag'],
   ])('handles loading', async (popoverButtonLabel, searchInputLabel) => {
-    const { getByLabelText } = render(
-      <FilterGroupComponent loading={true} overviewFilters={overviewFilters} />
-    );
+    const { getByLabelText } = render(<FilterGroup />);
 
     const popoverButton = getByLabelText(popoverButtonLabel);
     fireEvent.click(popoverButton);
@@ -59,9 +51,7 @@ describe('FilterGroupComponent', () => {
   ])(
     'displays filter items when clicked',
     async (popoverButtonLabel, searchInputLabel, filterItemButtonLabels) => {
-      const { getByLabelText } = render(
-        <FilterGroupComponent loading={false} overviewFilters={overviewFilters} />
-      );
+      const { getByLabelText } = render(<FilterGroup />);
 
       const popoverButton = getByLabelText(popoverButtonLabel);
       fireEvent.click(popoverButton);
