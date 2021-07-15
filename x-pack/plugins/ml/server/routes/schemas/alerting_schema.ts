@@ -62,7 +62,7 @@ export type MlAnomalyDetectionAlertPreviewRequest = TypeOf<
 >;
 
 export const anomalyDetectionJobsHealthRuleParams = schema.object({
-  includeJobs: schema.oneOf([jobsSelectionSchema, schema.literal('_all')]),
+  includeJobs: jobsSelectionSchema,
   excludeJobs: schema.nullable(jobsSelectionSchema),
   testsConfig: schema.nullable(
     schema.object({

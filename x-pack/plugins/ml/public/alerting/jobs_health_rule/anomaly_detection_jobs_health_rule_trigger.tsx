@@ -7,6 +7,7 @@
 
 import React, { FC, useCallback, useMemo } from 'react';
 import { EuiForm, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { AlertTypeParamsExpressionProps } from '../../../../triggers_actions_ui/public';
 import { MlAnomalyDetectionJobsHealthRuleParams } from '../../../common/types/alerts';
 import { JobSelectorControl } from '../job_selector';
@@ -49,6 +50,13 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
         adJobsApiService={adJobsApiService}
         onChange={useCallback(onAlertParamChange('includeJobs'), [])}
         errors={Array.isArray(errors.includeJobs) ? errors.includeJobs : []}
+        multiSelect
+        label={
+          <FormattedMessage
+            id="xpack.ml.alertTypes.jobsHealthAlertingRule.includeJobs.label"
+            defaultMessage="Include jobs or groups"
+          />
+        }
       />
 
       <EuiSpacer size="m" />

@@ -114,12 +114,10 @@ interface CommonHealthCheckConfig {
 }
 
 export type MlAnomalyDetectionJobsHealthRuleParams = {
-  includeJobs:
-    | {
-        jobIds?: string[];
-        groupIds?: string[];
-      }
-    | '_all';
+  includeJobs: {
+    jobIds?: string[];
+    groupIds?: string[];
+  };
   excludeJobs?: {
     jobIds?: string[];
     groupIds?: string[];

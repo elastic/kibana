@@ -15,3 +15,5 @@ export type MlAlertType = typeof ML_ALERT_TYPES[keyof typeof ML_ALERT_TYPES];
 export const ALERT_PREVIEW_SAMPLE_SIZE = 5;
 
 export const TOP_N_BUCKETS_COUNT = 1;
+
+export const ALL_JOBS_SELECTION = '*';
