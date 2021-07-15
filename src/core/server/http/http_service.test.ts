@@ -247,6 +247,42 @@ test('stops `preboot` server if it is running', async () => {
   expect(mockHapiServer.stop).toHaveBeenCalledTimes(2);
 });
 
+test('does not try to stop `preboot` server if it has been already stopped', async () => {
+  const prebootHttpServer = {
+    isListening: () => false,
+    setup: jest.fn().mockReturnValue({ server: fakeHapiServer, registerStaticDir: jest.fn() }),
+    start: noop,
+    stop: jest.fn(),
+  };
+  const standardHttpServer = {
+    isListening: () => false,
+    setup: jest.fn().mockReturnValue({ server: fakeHapiServer }),
+    start: noop,
+    stop: jest.fn(),
+  };
+
+  mockHttpServer
+    .mockImplementationOnce(() => prebootHttpServer)
+    .mockImplementationOnce(() => standardHttpServer);
+
+  const service = new HttpService({ coreId, configService: createConfigService(), env, logger });
+  await service.preboot(prebootDeps);
+  await service.setup(setupDeps);
+
+  expect(prebootHttpServer.stop).not.toHaveBeenCalled();
+  expect(standardHttpServer.stop).not.toHaveBeenCalled();
+
+  await service.start();
+
+  expect(prebootHttpServer.stop).toHaveBeenCalledTimes(1);
+  expect(standardHttpServer.stop).not.toHaveBeenCalled();
+
+  await service.stop();
+
+  expect(prebootHttpServer.stop).toHaveBeenCalledTimes(1);
+  expect(standardHttpServer.stop).toHaveBeenCalledTimes(1);
+});
+
 test('register route handler', async () => {
   const configService = createConfigService();
 

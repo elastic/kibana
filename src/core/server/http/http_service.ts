@@ -53,6 +53,7 @@ interface SetupDeps {
 export class HttpService
   implements CoreService<InternalHttpServiceSetup, InternalHttpServiceStart> {
   private readonly prebootServer: HttpServer;
+  private isPrebootServerStopped = false;
   private readonly httpServer: HttpServer;
   private readonly httpsRedirectServer: HttpsRedirectServer;
   private readonly config$: Observable<HttpConfig>;
@@ -196,6 +197,7 @@ export class HttpService
     if (this.shouldListen(config)) {
       this.log.debug('stopping preboot server');
       await this.prebootServer.stop();
+      this.isPrebootServerStopped = true;
 
       // If a redirect port is specified, we start an HTTP server at this port and
       // redirect all requests to the SSL port.
@@ -223,7 +225,11 @@ export class HttpService
     this.configSubscription?.unsubscribe();
     this.configSubscription = undefined;
 
-    await this.prebootServer.stop();
+    if (!this.isPrebootServerStopped) {
+      this.isPrebootServerStopped = false;
+      await this.prebootServer.stop();
+    }
+
     await this.httpServer.stop();
     await this.httpsRedirectServer.stop();
   }
