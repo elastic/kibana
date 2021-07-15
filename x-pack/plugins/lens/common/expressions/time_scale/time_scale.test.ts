@@ -7,14 +7,25 @@
 
 import moment from 'moment';
 import { Datatable } from 'src/plugins/expressions/public';
-import { DataPublicPluginStart, TimeRange } from 'src/plugins/data/public';
-import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
+import { TimeRange } from 'src/plugins/data/public';
 import { functionWrapper } from 'src/plugins/expressions/common/expression_functions/specs/tests/utils';
-import { getTimeScaleFunction, TimeScaleArgs } from './time_scale';
+
+// mock the specific inner variable:
+// there are intra dependencies in the data plugin we might break trying to mock the whole thing
+jest.mock('../../../../../../src/plugins/data/common/query/timefilter/get_time', () => {
+  const localMoment = jest.requireActual('moment');
+  return {
+    calculateBounds: jest.fn(({ from, to }) => ({
+      min: localMoment(from),
+      max: localMoment(to),
+    })),
+  };
+});
+
+import { timeScale, TimeScaleArgs } from './time_scale';
 
 describe('time_scale', () => {
-  let timeScale: (input: Datatable, args: TimeScaleArgs) => Promise<Datatable>;
-  let dataMock: jest.Mocked<DataPublicPluginStart>;
+  let timeScaleWrapped: (input: Datatable, args: TimeScaleArgs) => Promise<Datatable>;
 
   const emptyTable: Datatable = {
     type: 'datatable',
@@ -61,7 +72,6 @@ describe('time_scale', () => {
   }
 
   beforeEach(() => {
-    dataMock = dataPluginMock.createStartContract();
     setDateHistogramMeta({
       timeZone: 'UTC',
       timeRange: {
@@ -70,17 +80,11 @@ describe('time_scale', () => {
       },
       interval: '1d',
     });
-    (dataMock.query.timefilter.timefilter.calculateBounds as jest.Mock).mockImplementation(
-      ({ from, to }) => ({
-        min: moment(from),
-        max: moment(to),
-      })
-    );
-    timeScale = functionWrapper(getTimeScaleFunction(dataMock));
+    timeScaleWrapped = functionWrapper(timeScale);
   });
 
   it('should apply time scale factor to each row', async () => {
-    const result = await timeScale(
+    const result = await timeScaleWrapped(
       {
         ...emptyTable,
         rows: [
@@ -115,7 +119,7 @@ describe('time_scale', () => {
   });
 
   it('should skip gaps in the data', async () => {
-    const result = await timeScale(
+    const result = await timeScaleWrapped(
       {
         ...emptyTable,
         rows: [
@@ -163,7 +167,7 @@ describe('time_scale', () => {
         },
       ],
     };
-    const result = await timeScale(mismatchedTable, {
+    const result = await timeScaleWrapped(mismatchedTable, {
       ...defaultArgs,
       inputColumnId: 'nonexistent',
     });
@@ -180,7 +184,7 @@ describe('time_scale', () => {
       },
       interval: '1h',
     });
-    const result = await timeScale(
+    const result = await timeScaleWrapped(
       {
         ...emptyTable,
         rows: [
@@ -220,7 +224,7 @@ describe('time_scale', () => {
       },
       interval: '3h',
     });
-    const result = await timeScale(
+    const result = await timeScaleWrapped(
       {
         ...emptyTable,
         rows: [
@@ -262,7 +266,7 @@ describe('time_scale', () => {
       },
       interval: '1d',
     });
-    const result = await timeScale(
+    const result = await timeScaleWrapped(
       {
         ...emptyTable,
         rows: [
@@ -307,7 +311,7 @@ describe('time_scale', () => {
       },
       interval: '1d',
     });
-    const result = await timeScale(
+    const result = await timeScaleWrapped(
       {
         ...emptyTable,
         rows: [
@@ -347,7 +351,7 @@ describe('time_scale', () => {
       },
       interval: '1y',
     });
-    const result = await timeScale(
+    const result = await timeScaleWrapped(
       {
         ...emptyTable,
         rows: [

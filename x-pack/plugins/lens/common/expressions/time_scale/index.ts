@@ -5,4 +5,5 @@
  * 2.0.
  */
 
+export * from './time_scale';
 export * from './types';

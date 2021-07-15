@@ -69,18 +69,17 @@ export function columnToOperation(column: IndexPatternColumn, uniqueLabel?: stri
   };
 }
 
+export { CounterRateArgs, ExpressionFunctionCounterRate, counterRate } from '../../common';
 export {
-  CounterRateArgs,
-  ExpressionFunctionCounterRate,
-  counterRate,
   FormatColumnArgs,
   supportedFormats,
   formatColumn,
   getSuffixFormatter,
   unitSuffixesLong,
 } from '../../common';
+export { timeScale, TimeScaleArgs } from '../../common';
+
 export * from './rename_columns';
-export * from './time_scale';
 
 export function getIndexPatternDatasource({
   core,
