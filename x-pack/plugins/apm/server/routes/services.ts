@@ -584,32 +584,17 @@ export const serviceInstancesMetadataDetails = createApmServerRoute({
       serviceName: t.string,
       serviceNodeName: t.string,
     }),
-    query: t.intersection([
-      t.type({ transactionType: t.string }),
-      environmentRt,
-      kueryRt,
-      rangeRt,
-    ]),
+    query: rangeRt,
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const setup = await setupRequest(resources);
     const { serviceName, serviceNodeName } = resources.params.path;
-    const { transactionType, environment, kuery } = resources.params.query;
-
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
-      ...setup,
-      kuery,
-    });
 
     return await getServiceInstanceMetadataDetails({
-      searchAggregatedTransactions,
       setup,
       serviceName,
       serviceNodeName,
-      transactionType,
-      environment,
-      kuery,
     });
   },
 });
