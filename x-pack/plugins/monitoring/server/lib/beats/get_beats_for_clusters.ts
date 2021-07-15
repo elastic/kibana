@@ -9,8 +9,8 @@ import { checkParam } from '../error_missing_required';
 import { BeatsClusterMetric } from '../metrics';
 import { createBeatsQuery } from './create_beats_query';
 import { beatsAggFilterPath, beatsUuidsAgg, beatsAggResponseHandler } from './_beats_stats';
-import type { ElasticsearchResponse, ElasticsearchModifiedSource } from '../../../common/types/es';
-import { LegacyRequest } from '../../types';
+import type { ElasticsearchResponse } from '../../../common/types/es';
+import { LegacyRequest, Cluster } from '../../types';
 
 export function handleResponse(clusterUuid: string, response: ElasticsearchResponse) {
   const { beatTotal, beatTypes, totalEvents, bytesSent } = beatsAggResponseHandler(response);
@@ -34,7 +34,7 @@ export function handleResponse(clusterUuid: string, response: ElasticsearchRespo
 export function getBeatsForClusters(
   req: LegacyRequest,
   beatsIndexPattern: string,
-  clusters: ElasticsearchModifiedSource[]
+  clusters: Cluster[]
 ) {
   checkParam(beatsIndexPattern, 'beatsIndexPattern in beats/getBeatsForClusters');
 

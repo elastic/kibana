@@ -7,7 +7,7 @@
 
 import { CODE_PATH_ALL } from '../../../common/constants';
 
-export function isInCodePath(codePaths, codePathsToTest) {
+export function isInCodePath(codePaths: string[], codePathsToTest: string[]) {
   if (codePaths.includes(CODE_PATH_ALL)) {
     return true;
   }

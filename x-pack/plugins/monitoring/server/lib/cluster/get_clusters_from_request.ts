@@ -7,7 +7,6 @@
 
 import { notFound } from '@hapi/boom';
 import { set } from '@elastic/safer-lodash-set';
-import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { getClustersStats } from './get_clusters_stats';
 import { flagSupportedClusters } from './flag_supported_clusters';
@@ -16,7 +15,7 @@ import { getKibanasForClusters } from '../kibana';
 import { getLogstashForClusters } from '../logstash';
 import { getLogstashPipelineIds } from '../logstash/get_pipeline_ids';
 import { getBeatsForClusters } from '../beats';
-import { getClustersSummary } from './get_clusters_summary';
+import { getClustersSummary, EnhancedClusters } from './get_clusters_summary';
 import {
   STANDALONE_CLUSTER_CLUSTER_UUID,
   CODE_PATH_ML,
@@ -27,7 +26,6 @@ import {
   CODE_PATH_BEATS,
   CODE_PATH_APM,
 } from '../../../common/constants';
-import { ElasticsearchModifiedSource } from '../../../common/types/es';
 
 import { getApmsForClusters } from '../apm/get_apms_for_clusters';
 import { checkCcrEnabled } from '../elasticsearch/ccr';
@@ -35,15 +33,20 @@ import { fetchStatus } from '../alerts/fetch_status';
 import { getStandaloneClusterDefinition, hasStandaloneClusters } from '../standalone_clusters';
 import { getLogTypes } from '../logs';
 import { isInCodePath } from './is_in_code_path';
-import { LegacyRequest } from '../../types';
+import { LegacyRequest, Cluster } from '../../types';
 
 /**
  * Get all clusters or the cluster associated with {@code clusterUuid} when it is defined.
  */
 export async function getClustersFromRequest(
   req: LegacyRequest,
-  indexPatterns,
-  { clusterUuid, start, end, codePaths } = {}
+  indexPatterns: { [x: string]: string },
+  {
+    clusterUuid,
+    start,
+    end,
+    codePaths,
+  }: { clusterUuid: string; start: number; end: number; codePaths: string[] }
 ) {
   const {
     esIndexPattern,
@@ -57,7 +60,7 @@ export async function getClustersFromRequest(
   const config = req.server.config();
   const isStandaloneCluster = clusterUuid === STANDALONE_CLUSTER_CLUSTER_UUID;
 
-  let clusters: ElasticsearchModifiedSource[] = [];
+  let clusters: Cluster[] = [];
 
   if (isStandaloneCluster) {
     clusters.push(getStandaloneClusterDefinition());
@@ -101,7 +104,7 @@ export async function getClustersFromRequest(
 
     cluster.logs = isInCodePath(codePaths, [CODE_PATH_LOGS])
       ? await getLogTypes(req, filebeatIndexPattern, {
-          clusterUuid: get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid),
+          clusterUuid: cluster.elasticsearch?.cluster?.id ?? cluster.cluster_uuid,
           start,
           end,
         })
@@ -123,9 +126,8 @@ export async function getClustersFromRequest(
       const alertsClient = req.getAlertsClient();
       const alertStatus = await fetchStatus(
         alertsClient,
-        req.server.plugins.monitoring.info,
         undefined,
-        clusters.map((cluster) => get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid))
+        clusters.map((cluster) => cluster.elasticsearch?.cluster?.id ?? cluster.cluster_uuid)
       );
 
       for (const cluster of clusters) {
@@ -142,16 +144,16 @@ export async function getClustersFromRequest(
               list: Object.keys(alertStatus).reduce((accum, alertName) => {
                 const value = alertStatus[alertName];
                 if (value.states && value.states.length) {
-                  accum[alertName] = {
+                  Reflect.set(accum, alertName, {
                     ...value,
                     states: value.states.filter(
                       (state) =>
-                        state.state.cluster.clusterUuid ===
-                        get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid)
+                        state.state.cluster.clusterUuid === cluster.elasticsearch?.cluster?.id ??
+                        cluster.cluster_uuid
                     ),
-                  };
+                  });
                 } else {
-                  accum[alertName] = value;
+                  Reflect.set(accum, alertName, value);
                 }
                 return accum;
               }, {}),
@@ -183,8 +185,7 @@ export async function getClustersFromRequest(
   // add the kibana data to each cluster
   kibanas.forEach((kibana) => {
     const clusterIndex = clusters.findIndex(
-      (cluster) =>
-        get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid) === kibana.clusterUuid
+      (cluster) => cluster.elasticsearch?.cluster?.id ?? cluster.cluster_uuid === kibana.clusterUuid
     );
     set(clusters[clusterIndex], 'kibana', kibana.stats);
   });
@@ -196,13 +197,12 @@ export async function getClustersFromRequest(
     logstashes.forEach((logstash) => {
       const clusterIndex = clusters.findIndex(
         (cluster) =>
-          get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid) === logstash.clusterUuid
+          cluster.elasticsearch?.cluster?.id ?? cluster.cluster_uuid === logstash.clusterUuid
       );
       // withhold LS overview stats until there is at least 1 pipeline
-      if (logstash.clusterUuid === clusterUuid && !pipelines.length) {
-        logstash.stats = {};
+      if (logstash.clusterUuid !== clusterUuid && pipelines.length) {
+        set(clusters[clusterIndex], 'logstash', logstash.stats);
       }
-      set(clusters[clusterIndex], 'logstash', logstash.stats);
     });
   }
 
@@ -212,8 +212,7 @@ export async function getClustersFromRequest(
     : [];
   beatsByCluster.forEach((beats) => {
     const clusterIndex = clusters.findIndex(
-      (cluster) =>
-        get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid) === beats.clusterUuid
+      (cluster) => cluster.elasticsearch?.cluster?.id ?? cluster.cluster_uuid === beats.clusterUuid
     );
     set(clusters[clusterIndex], 'beats', beats.stats);
   });
@@ -224,22 +223,21 @@ export async function getClustersFromRequest(
     : [];
   apmsByCluster.forEach((apm) => {
     const clusterIndex = clusters.findIndex(
-      (cluster) =>
-        get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid) === apm.clusterUuid
+      (cluster) => cluster.elasticsearch?.cluster?.id ?? cluster.cluster_uuid === apm.clusterUuid
     );
     if (clusterIndex >= 0) {
-      const { stats, config } = apm;
-      clusters[clusterIndex].apm = {
+      const { stats, config: apmConfig } = apm;
+      Reflect.set(clusters[clusterIndex], 'apm', {
         ...stats,
-        config,
-      };
+        config: apmConfig,
+      });
     }
   });
 
   // check ccr configuration
   const isCcrEnabled = await checkCcrEnabled(req, esIndexPattern);
 
-  const kibanaUuid = config.get('server.uuid');
+  const kibanaUuid = config.get('server.uuid')!;
 
-  return getClustersSummary(req.server, clusters, kibanaUuid, isCcrEnabled);
+  return getClustersSummary(req.server, clusters as EnhancedClusters[], kibanaUuid, isCcrEnabled);
 }

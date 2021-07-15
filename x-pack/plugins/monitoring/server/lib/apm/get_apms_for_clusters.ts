@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
+import { LegacyRequest, Cluster } from '../../types';
 import { checkParam } from '../error_missing_required';
 import { createApmQuery } from './create_apm_query';
 import { ApmMetric } from '../metrics';
 import { apmAggResponseHandler, apmUuidsAgg, apmAggFilterPath } from './_apm_stats';
 import { getTimeOfLastEvent } from './_get_time_of_last_event';
 
-export function handleResponse(clusterUuid, response) {
+export function handleResponse(clusterUuid: string, response) {
   const { apmTotal, totalEvents, memRss, versions } = apmAggResponseHandler(response);
 
   // combine stats
@@ -31,7 +31,11 @@ export function handleResponse(clusterUuid, response) {
   };
 }
 
-export function getApmsForClusters(req, apmIndexPattern, clusters) {
+export function getApmsForClusters(
+  req: LegacyRequest,
+  apmIndexPattern: string,
+  clusters: Cluster[]
+) {
   checkParam(apmIndexPattern, 'apmIndexPattern in apms/getApmsForClusters');
 
   const start = req.payload.timeRange.min;
@@ -42,7 +46,7 @@ export function getApmsForClusters(req, apmIndexPattern, clusters) {
 
   return Promise.all(
     clusters.map(async (cluster) => {
-      const clusterUuid = get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid);
+      const clusterUuid = cluster.elasticsearch?.cluster?.id ?? cluster.cluster_uuid;
       const params = {
         index: apmIndexPattern,
         size: 0,

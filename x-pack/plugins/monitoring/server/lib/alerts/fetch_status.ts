@@ -14,11 +14,9 @@ import {
   CommonAlertFilter,
 } from '../../../common/types/alerts';
 import { ALERTS } from '../../../common/constants';
-import { MonitoringLicenseService } from '../../types';
 
 export async function fetchStatus(
   alertsClient: AlertsClient,
-  licenseService: MonitoringLicenseService,
   alertTypes: string[] | undefined,
   clusterUuids: string[],
   filters: CommonAlertFilter[] = []

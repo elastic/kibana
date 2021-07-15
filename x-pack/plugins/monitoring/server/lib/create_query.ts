@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { defaults, get } from 'lodash';
+import { defaults } from 'lodash';
 import moment from 'moment';
 import { BeatsMetricFields } from './metrics';
 import { MissingRequiredError } from './error_missing_required';
 import { standaloneClusterFilter } from './standalone_clusters';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../common/constants';
 
-interface TimerangeFilter {
+export interface TimerangeFilter {
   range: {
     [x: string]: {
       format: 'epoch_millis';
@@ -22,13 +22,17 @@ interface TimerangeFilter {
   };
 }
 
-export function createTimeFilter(options: { start?: Date | number; end?: Date | number }) {
+export function createTimeFilter(options: {
+  start?: Date | number;
+  end?: Date | number;
+  metric?: { timestampField: string };
+}) {
   const { start, end } = options;
   if (!start && !end) {
     return null;
   }
 
-  const timestampField = get(options, 'metric.timestampField');
+  const timestampField = options.metric?.timestampField;
   if (!timestampField) {
     throw new MissingRequiredError('metric.timestampField');
   }
@@ -64,7 +68,7 @@ export function createTimeFilter(options: { start?: Date | number; end?: Date | 
 export function createQuery(options: {
   type?: string;
   types?: string[];
-  filters: any[];
+  filters?: any[];
   clusterUuid: string;
   uuid?: string;
   start?: Date | number;

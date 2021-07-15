@@ -6,12 +6,14 @@
  */
 
 import moment from 'moment';
+import type { BeatsElasticsearchResponse } from './types';
+import { LegacyRequest } from '../../types';
 import { checkParam } from '../error_missing_required';
 import { createBeatsQuery } from './create_beats_query';
 import { beatsAggFilterPath, beatsUuidsAgg, beatsAggResponseHandler } from './_beats_stats';
 
-export function handleResponse(...args) {
-  const { beatTotal, beatTypes, totalEvents, bytesSent } = beatsAggResponseHandler(...args);
+export function handleResponse(response: BeatsElasticsearchResponse) {
+  const { beatTotal, beatTypes, totalEvents, bytesSent } = beatsAggResponseHandler(response);
 
   return {
     total: beatTotal,
@@ -23,7 +25,7 @@ export function handleResponse(...args) {
   };
 }
 
-export async function getStats(req, beatsIndexPattern, clusterUuid) {
+export async function getStats(req: LegacyRequest, beatsIndexPattern: string, clusterUuid: string) {
   checkParam(beatsIndexPattern, 'beatsIndexPattern in getBeats');
 
   const config = req.server.config();
@@ -42,12 +44,12 @@ export async function getStats(req, beatsIndexPattern, clusterUuid) {
         end,
         clusterUuid,
       }),
-      aggs: beatsUuidsAgg(maxBucketSize),
+      aggs: beatsUuidsAgg(maxBucketSize!),
     },
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  const response = await callWithRequest(req, 'search', params);
+  const response: BeatsElasticsearchResponse = await callWithRequest(req, 'search', params);
 
-  return handleResponse(response, start, end);
+  return handleResponse(response);
 }

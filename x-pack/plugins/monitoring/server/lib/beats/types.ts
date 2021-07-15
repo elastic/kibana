@@ -6,17 +6,7 @@
  */
 
 import type { ElasticsearchResponse } from '../../../common/types/es';
-
-interface Bucket {
-  key: string;
-  uuids: {
-    buckets: unknown[];
-  };
-}
-
-interface Aggregation {
-  buckets: Bucket[];
-}
+import type { Aggregation } from '../../types';
 
 export type BucketCount<T> = Array<
   T & {

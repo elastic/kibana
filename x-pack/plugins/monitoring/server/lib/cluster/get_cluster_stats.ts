@@ -6,8 +6,9 @@
  */
 
 import { badRequest, notFound } from '@hapi/boom';
-import { getClustersStats } from './get_clusters_stats';
 import { i18n } from '@kbn/i18n';
+import { LegacyRequest } from '../../types';
+import { getClustersStats } from './get_clusters_stats';
 
 /**
  * This will fetch the cluster stats and cluster state as a single object for the cluster specified by the {@code req}.
@@ -17,7 +18,7 @@ import { i18n } from '@kbn/i18n';
  * @param {String} clusterUuid The requested cluster's UUID
  * @return {Promise} The object cluster response.
  */
-export function getClusterStats(req, esIndexPattern, clusterUuid) {
+export function getClusterStats(req: LegacyRequest, esIndexPattern: string, clusterUuid: string) {
   if (!clusterUuid) {
     throw badRequest(
       i18n.translate('xpack.monitoring.clusterStats.uuidNotSpecifiedErrorMessage', {

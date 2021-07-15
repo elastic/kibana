@@ -6,7 +6,8 @@
  */
 
 import Bluebird from 'bluebird';
-import { chain, find, get } from 'lodash';
+import { chain, find } from 'lodash';
+import { LegacyRequest, Cluster, Bucket } from '../../types';
 import { checkParam } from '../error_missing_required';
 import { createQuery } from '../create_query';
 import { KibanaClusterMetric } from '../metrics';
@@ -24,7 +25,11 @@ import { KibanaClusterMetric } from '../metrics';
  *  - number of instances
  *  - combined health
  */
-export function getKibanasForClusters(req, kbnIndexPattern, clusters) {
+export function getKibanasForClusters(
+  req: LegacyRequest,
+  kbnIndexPattern: string,
+  clusters: Cluster[]
+) {
   checkParam(kbnIndexPattern, 'kbnIndexPattern in kibana/getKibanasForClusters');
 
   const config = req.server.config();
@@ -32,7 +37,7 @@ export function getKibanasForClusters(req, kbnIndexPattern, clusters) {
   const end = req.payload.timeRange.max;
 
   return Bluebird.map(clusters, (cluster) => {
-    const clusterUuid = get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid);
+    const clusterUuid = cluster.elasticsearch?.cluster?.id ?? cluster.cluster_uuid;
     const metric = KibanaClusterMetric.getMetricFields();
     const params = {
       index: kbnIndexPattern,
@@ -162,9 +167,9 @@ export function getKibanasForClusters(req, kbnIndexPattern, clusters) {
 
     const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
     return callWithRequest(req, 'search', params).then((result) => {
-      const aggregations = get(result, 'aggregations', {});
-      const kibanaUuids = get(aggregations, 'kibana_uuids.buckets', []);
-      const statusBuckets = get(aggregations, 'status.buckets', []);
+      const aggregations = result.aggregations ?? {};
+      const kibanaUuids = aggregations.kibana_uuids?.buckets ?? [];
+      const statusBuckets = aggregations.status?.buckets ?? [];
 
       // everything is initialized such that it won't impact any rollup
       let status = null;
@@ -185,19 +190,19 @@ export function getKibanasForClusters(req, kbnIndexPattern, clusters) {
           statusBuckets,
           (bucket) => bucket.max_timestamp.value === latestTimestamp
         );
-        status = get(latestBucket, 'key');
+        status = latestBucket.key;
 
-        requestsTotal = get(aggregations, 'requests_total.value');
-        connections = get(aggregations, 'concurrent_connections.value');
-        responseTime = get(aggregations, 'response_time_max.value');
-        memorySize = get(aggregations, 'memory_rss.value'); // resident set size
-        memoryLimit = get(aggregations, 'memory_heap_size_limit.value'); // max old space
+        requestsTotal = aggregations.requests_total?.value;
+        connections = aggregations.concurrent_connections?.value;
+        responseTime = aggregations.response_time_max?.value;
+        memorySize = aggregations.memory_rss?.value;
+        memoryLimit = aggregations.memory_heap_size_limit?.value;
       }
 
       return {
         clusterUuid,
         stats: {
-          uuids: get(aggregations, 'kibana_uuids.buckets', []).map(({ key }) => key),
+          uuids: (aggregations?.kibana_uuids.buckets ?? []).map(({ key }: Bucket) => key),
           status,
           requests_total: requestsTotal,
           concurrent_connections: connections,

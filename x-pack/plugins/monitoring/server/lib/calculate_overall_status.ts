@@ -9,7 +9,7 @@
  * A reduce that takes statuses from different products in a cluster and boil
  * it down into a single status
  */
-export function calculateOverallStatus(set: string[]) {
+export function calculateOverallStatus(set: Array<string | null | undefined>) {
   return set.reduce((result, current) => {
     if (!current) {
       return result;

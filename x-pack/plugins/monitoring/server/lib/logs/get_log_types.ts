@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-// @ts-ignore
 import { checkParam } from '../error_missing_required';
-// @ts-ignore
-import { createTimeFilter } from '../create_query';
-// @ts-ignore
+import { createTimeFilter, TimerangeFilter } from '../create_query';
 import { detectReason } from './detect_reason';
-// @ts-ignore
 import { detectReasonFromException } from './detect_reason_from_exception';
 import { LegacyRequest } from '../../types';
 import { FilebeatResponse } from '../../../common/types/filebeat';
@@ -25,7 +21,7 @@ async function handleResponse(
   response: FilebeatResponse,
   req: LegacyRequest,
   filebeatIndexPattern: string,
-  opts: { clusterUuid: string; nodeUuid: string; indexUuid: string; start: number; end: number }
+  opts: { clusterUuid?: string; nodeUuid?: string; indexUuid?: string; start: number; end: number }
 ) {
   const result: { enabled: boolean; types: LogType[]; reason?: any } = {
     enabled: false,
@@ -62,12 +58,12 @@ export async function getLogTypes(
     indexUuid,
     start,
     end,
-  }: { clusterUuid: string; nodeUuid: string; indexUuid: string; start: number; end: number }
+  }: { clusterUuid?: string; nodeUuid?: string; indexUuid?: string; start: number; end: number }
 ) {
   checkParam(filebeatIndexPattern, 'filebeatIndexPattern in logs/getLogTypes');
 
   const metric = { timestampField: '@timestamp' };
-  const filter = [
+  const filter: Array<{ term: { [x: string]: string } } | TimerangeFilter | null> = [
     { term: { 'service.type': 'elasticsearch' } },
     createTimeFilter({ start, end, metric }),
   ];
