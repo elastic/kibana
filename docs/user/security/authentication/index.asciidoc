@@ -61,7 +61,7 @@ xpack.security.authc.providers:
 --------------------------------------------------------------------------------
 
 [role="screenshot"]
-image::user/security/images/kibana-login.png["Login Selector UI"]
+image::security/images/kibana-login.png["Login Selector UI"]
 
 For more information, refer to <<authentication-security-settings, authentication security settings>>.
 

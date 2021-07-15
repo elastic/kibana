@@ -16,7 +16,7 @@ With *Role mappings*, you can:
 * Create/Edit/Delete role mappings
 
 [role="screenshot"]
-image:user/security/role-mappings/images/role-mappings-grid.png["Role mappings"]
+image:images/role-mappings-grid.png["Role mappings"]
 
 [float]
 ==== Required permissions
@@ -45,12 +45,12 @@ starts with `sls_`, *or* belongs to the `executive` group.
 First, we give the role mapping a name, and assign the `sales` role:
 
 [role="screenshot"]
-image:user/security/role-mappings/images/role-mappings-create-step-1.png["Create role mapping, step 1"]
+image:images/role-mappings-create-step-1.png["Create role mapping, step 1"]
 
 Next, we define the two rules, making sure to set the group to *Any are true*:
 
 [role="screenshot"]
-image:user/security/role-mappings/images/role-mappings-create-step-2.gif["Create role mapping, step 2"]
+image:images/role-mappings-create-step-2.gif["Create role mapping, step 2"]
 
 Click *Save role mapping* once you're finished.
 

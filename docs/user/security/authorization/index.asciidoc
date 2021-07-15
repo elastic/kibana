@@ -63,7 +63,7 @@ With field-level security (FLS), you can instruct {es} to grant or deny access t
 .. `read` and `view_index_metadata` in the **Privileges** field.
 
 [role="screenshot"]
-image::user/security/images/create-role-index-example.png[Create role with index privileges]
+image::security/images/create-role-index-example.png[Create role with index privileges]
 
 [[index_privilege_dls_example]]
 ===== Example: Grant read access to specific documents in indices that match the `filebeat-*` pattern
@@ -89,7 +89,7 @@ image::user/security/images/create-role-index-example.png[Create role with index
 NOTE: {kib} automatically surrounds your DLS query with a `query` block, so you don't have to provide your own.
 
 [role="screenshot"]
-image::user/security/images/create-role-dls-example.png[Create role with DLS index privileges]
+image::security/images/create-role-dls-example.png[Create role with DLS index privileges]
 
 [[adding_kibana_privileges]]
 ==== {kib} privileges
@@ -113,7 +113,7 @@ To apply your changes, click **Add {kib} privilege**. The privilege shows up und
 
 
 [role="screenshot"]
-image::user/security/images/create-space-privilege.png[Add {kib} privilege]
+image::security/images/create-space-privilege.png[Add {kib} privilege]
 
 ==== Feature availability
 
@@ -151,7 +151,7 @@ Additionally, if you’ve already assigned privileges at *** All Spaces**, you a
 To view a summary of the privileges granted, click **View privilege summary**.
 
 [role="screenshot"]
-image::user/security/images/view-privilege-summary.png[View privilege summary]
+image::security/images/view-privilege-summary.png[View privilege summary]
 
 ==== Example 1: Grant all access to Dashboard at an individual space
 
@@ -162,7 +162,7 @@ image::user/security/images/view-privilege-summary.png[View privilege summary]
 . Click **Add {kib} privilege**.
 
 [role="screenshot"]
-image::user/security/images/privilege-example-1.png[Privilege example 1]
+image::security/images/privilege-example-1.png[Privilege example 1]
 
 ==== Example 2: Grant all access to one space and read access to another
 
@@ -175,7 +175,7 @@ image::user/security/images/privilege-example-1.png[Privilege example 1]
 . Click **Add {kib} privilege**.
 
 [role="screenshot"]
-image::user/security/images/privilege-example-2.png[Privilege example 2]
+image::security/images/privilege-example-2.png[Privilege example 2]
 
 ==== Example 3: Grant read access to all spaces and write access to an individual space
 
@@ -188,4 +188,4 @@ image::user/security/images/privilege-example-2.png[Privilege example 2]
 . Click **Add {kib} privilege**.
 
 [role="screenshot"]
-image::user/security/images/privilege-example-3.png[Privilege example 3]
+image::security/images/privilege-example-3.png[Privilege example 3]

@@ -12,7 +12,7 @@ spaces, you're asked to choose a space when you log in to Kibana. You can change
 current space at any time by using the menu.
 
 [role="screenshot"]
-image::spaces/images/change-space.png["Change current space menu"]
+image::images/change-space.png["Change current space menu"]
 
 Kibana supports spaces in several ways.  You can:
 
@@ -40,7 +40,7 @@ Open the main menu, then click *Stack Management > Spaces* for an overview of yo
 for you to create, edit, and delete spaces.
 
 [role="screenshot"]
-image::spaces/images/space-management.png["Space management"]
+image::images/space-management.png["Space management"]
 
 [float]
 ==== Create or edit a space
@@ -57,7 +57,7 @@ You cannot change the space identifier once you create the space.
 if you prefer to create spaces programatically.
 
 [role="screenshot"]
-image::spaces/images/edit-space.png["Space management"]
+image::images/edit-space.png["Space management"]
 
 [float]
 ==== Delete a space
@@ -81,7 +81,7 @@ to specific features on a per-user basis, you must configure
 <<xpack-security-authorization, Kibana Security>>.
 
 [role="screenshot"]
-image::spaces/images/edit-space-feature-visibility.png["Controlling features visiblity"]
+image::images/edit-space-feature-visibility.png["Controlling features visiblity"]
 
 [float]
 [[spaces-control-user-access]]
@@ -95,7 +95,7 @@ while analysts or executives might have Dashboard and Canvas with read-only priv
 See <<adding_kibana_privileges>> for details.
 
 [role="screenshot"]
-image::spaces/images/spaces-roles.png["Controlling features visiblity"]
+image::images/spaces-roles.png["Controlling features visiblity"]
 
 [float]
 [[spaces-moving-objects]]
@@ -115,7 +115,7 @@ To configure the landing page, use the default route setting in
 For example, you might set the default route to `/app/dashboards`.
 
 [role="screenshot"]
-image::spaces/images/spaces-configure-landing-page.png["Configure space-level landing page"]
+image::images/spaces-configure-landing-page.png["Configure space-level landing page"]
 
 
 [float]

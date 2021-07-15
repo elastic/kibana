@@ -27,4 +27,4 @@ xpack.security.authc.providers:
 When you authenticate using `basic.basic1`, you'll see the following agreement that you must acknowledge before you can access {kib}:
 
 [role="screenshot"]
-image::user/security/images/access-agreement.png["Access Agreement UI"]
+image::images/access-agreement.png["Access Agreement UI"]
