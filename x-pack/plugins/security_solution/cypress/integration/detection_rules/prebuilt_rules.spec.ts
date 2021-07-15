@@ -39,7 +39,8 @@ import { ALERTS_URL } from '../../urls/navigation';
 import { totalNumberOfPrebuiltRules } from '../../objects/rule';
 import { cleanKibana } from '../../tasks/common';
 
-describe('Alerts rules, prebuilt rules', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/105791
+describe.skip('Alerts rules, prebuilt rules', () => {
   beforeEach(() => {
     cleanKibana();
   });
