@@ -7,11 +7,12 @@
 
 import fs from 'fs';
 import { ReactChildren, createElement } from 'react';
-import { create, act } from 'react-test-renderer';
 import path from 'path';
 import moment from 'moment';
 import 'moment-timezone';
 import ReactDOM from 'react-dom';
+import { shallow } from 'enzyme';
+import { create, act } from 'react-test-renderer';
 
 import initStoryshots, { Stories2SnapsConverter } from '@storybook/addon-storyshots';
 // @ts-expect-error untyped library
@@ -133,4 +134,5 @@ initStoryshots({
   },
   // Don't snapshot tests that start with 'redux'
   storyNameRegex: /^((?!.*?redux).)*$/,
+  renderer: shallow,
 });
