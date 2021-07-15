@@ -1,5 +1,5 @@
 post:
-  summary: Agent - Bulk Upgrade
+  summary: Agents - Bulk Upgrade
   tags: []
   responses:
     '200':
