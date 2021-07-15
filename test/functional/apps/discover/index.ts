@@ -12,8 +12,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/104466
-  describe.skip('discover app', function () {
+  describe('discover app', function () {
     this.tags('ciGroup6');
 
     before(function () {
@@ -51,5 +50,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_indexpattern_with_unmapped_fields'));
     loadTestFile(require.resolve('./_runtime_fields_editor'));
     loadTestFile(require.resolve('./_huge_fields'));
+    loadTestFile(require.resolve('./_date_nested'));
   });
 }

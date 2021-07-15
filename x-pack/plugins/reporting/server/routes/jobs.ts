@@ -71,7 +71,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
       path: `${MAIN_ENTRY}/count`,
       validate: false,
     },
-    userHandler(async (user, context, req, res) => {
+    userHandler(async (user, context, _req, res) => {
       // ensure the async dependencies are loaded
       if (!context.reporting) {
         return handleUnavailable(res);
@@ -115,22 +115,20 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
       } = await reporting.getLicenseInfo();
 
       const jobsQuery = jobsQueryFactory(reporting);
-      const result = await jobsQuery.get(user, docId, { includeContent: true });
+      const result = await jobsQuery.getContent(user, docId);
 
       if (!result) {
         throw Boom.notFound();
       }
 
-      const {
-        _source: { jobtype: jobType, output: jobOutput },
-      } = result;
+      const { jobtype: jobType, output } = result;
 
       if (!jobTypes.includes(jobType)) {
         throw Boom.unauthorized(`Sorry, you are not authorized to download ${jobType} reports`);
       }
 
       return res.ok({
-        body: jobOutput || {},
+        body: output?.content ?? {},
         headers: {
           'content-type': 'application/json',
         },
@@ -166,21 +164,14 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         throw Boom.notFound();
       }
 
-      const { _source: job } = result;
-      const { jobtype: jobType, payload: jobPayload } = job;
+      const { jobtype: jobType } = result;
 
       if (!jobTypes.includes(jobType)) {
         throw Boom.unauthorized(`Sorry, you are not authorized to view ${jobType} info`);
       }
 
       return res.ok({
-        body: {
-          ...job,
-          payload: {
-            ...jobPayload,
-            headers: undefined,
-          },
-        },
+        body: result,
         headers: {
           'content-type': 'application/json',
         },

@@ -12,18 +12,47 @@ The path and query string parameters are defined in the calls to `createRoute` w
 
 ### Client-side
 
-The client-side routing uses [React Router](https://reactrouter.com/), The [`ApmRoute` component from the Elastic RUM Agent](https://www.elastic.co/guide/en/apm/agent/rum-js/current/react-integration.html), and the `history` object provided by the Kibana Platform.
+The client-side routing uses `@kbn/typed-react-router-config`, which is a wrapper around [React Router](https://reactrouter.com/) and [React Router Config](https://www.npmjs.com/package/react-router-config). Its goal is to provide a layer of high-fidelity types that allows us to parse and format URLs for routes while making sure the needed parameters are provided and/or available (typed and validated at runtime). The `history` object used by React Router is injected by the Kibana Platform.
 
-Routes are defined in [public/components/app/Main/route_config/index.tsx](../public/components/app/Main/route_config/index.tsx). These contain route definitions as well as the breadcrumb text.
+Routes (and their parameters) are defined in [public/components/routing/apm_config.tsx](../public/components/routing/apm_config.tsx).
 
 #### Parameter handling
 
-Path parameters (like `serviceName` in '/services/:serviceName/transactions') are handled by the `match.params` props passed into
-routes by React Router. The types of these parameters are defined in the route definitions.
+Path (like `serviceName` in '/services/:serviceName/transactions') and query parameters are defined in the route definitions.
 
-If the parameters are not available as props you can use React Router's `useParams`, but their type definitions should be delcared inline and it's a good idea to make the properties optional if you don't know where a component will be used, since those parameters might not be available at that route.
+For each parameter, an io-ts runtime type needs to be present:
 
-Query string parameters can be used in any component with `useUrlParams`. All of the available parameters are defined by this hook and its context.
+```tsx
+{
+  route: '/services/:serviceName',
+  element: <Outlet/>,
+  params: t.intersection([
+    t.type({
+      path: t.type({
+        serviceName: t.string,
+      })
+    }),
+    t.partial({
+      query: t.partial({
+        transactionType: t.string
+      })
+    })
+  ])
+}
+```
+
+To be able to use the parameters, you can use `useApmParams`, which will automatically infer the parameter types from the route path:
+
+```ts
+const {
+  path: { serviceName }, // string
+  query: { transactionType } // string | undefined
+} = useApmParams('/services/:serviceName');
+```
+
+`useApmParams` will strip query parameters for which there is no validation. The route path should match exactly, but you can also use wildcards: `useApmParams('/*)`. In that case, the return type will be a union type of all possible matching routes.
+
+Previously we used `useUrlParams` for path and query parameters, which we are trying to get away from. When possible, any usage of `useUrlParams` should be replaced by `useApmParams` or other custom hooks that use `useApmParams` internally.
 
 ## Linking
 
@@ -31,7 +60,16 @@ Raw URLs should almost never be used in the APM UI. Instead, we have mechanisms 
 
 ### In-app linking
 
-Links that stay inside APM should use the [`getAPMHref` function and `APMLink` component](../public/components/shared/Links/apm/APMLink.tsx). Other components inside that directory contain other functions and components that provide the same functionality for linking to more specific sections inside the APM plugin.
+For links that stay inside APM, the preferred way of linking is to call the `useApmRouter` hook, and call `router.link` with the route path and required path and query parameters:
+
+```ts
+const apmRouter = useApmRouter();
+const serviceOverviewLink = apmRouter.link('/services/:serviceName', { path: { serviceName: 'opbeans-java' }, query: { transactionType: 'request' }});
+```
+
+ If you're not in React context, you can also import `apmRouter` directly and call its `link` function - but you have to prepend the basePath manually in that case.
+
+We also have the [`getAPMHref` function and `APMLink` component](../public/components/shared/Links/apm/APMLink.tsx), but we should consider them deprecated, in favor of `router.link`. Other components inside that directory contain other functions and components that provide the same functionality for linking to more specific sections inside the APM plugin.
 
 ### Cross-app linking
 
