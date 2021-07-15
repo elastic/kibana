@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { get } from 'lodash';
 import { EuiFieldNumber, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 import { ArgumentStrings } from '../../../i18n';
@@ -21,25 +20,24 @@ const { Number: strings } = ArgumentStrings;
 // TODO: Support max/min as options
 const NumberArgInput = ({ argId, argValue, typeInstance, onValueChange }) => {
   const [value, setValue] = useState(argValue);
-  const confirm = get(typeInstance, 'options.confirm');
+  const confirm = typeInstance?.options?.confirm;
 
   useEffect(() => {
     setValue(argValue);
   }, [argValue]);
 
+  const onChange = useCallback(
+    (ev) => {
+      const onChangeFn = confirm ? setValue : onValueChange;
+      onChangeFn(ev.target.value);
+    },
+    [confirm, onValueChange]
+  );
+
   return (
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem>
-        <EuiFieldNumber
-          compressed
-          id={argId}
-          value={Number(value)}
-          onChange={
-            confirm
-              ? (ev) => setValue(ev.target.value)
-              : (ev) => onValueChange(Number(ev.target.value))
-          }
-        />
+        <EuiFieldNumber compressed id={argId} value={Number(value)} onChange={onChange} />
       </EuiFlexItem>
 
       {confirm && (
