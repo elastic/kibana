@@ -110,10 +110,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('loads the correlation results', async function () {
         await retry.try(async () => {
           // Assert that the data fully loaded to 100%
-          const apmCorrelationsFlyoutHeader = await testSubjects.getVisibleText(
+          const apmCorrelationsLatencyCorrelationsProgressTitle = await testSubjects.getVisibleText(
             'apmCorrelationsLatencyCorrelationsProgressTitle'
           );
-          expect(apmCorrelationsFlyoutHeader).to.be('Progress: 100%');
+          expect(apmCorrelationsLatencyCorrelationsProgressTitle).to.be('Progress: 100%');
 
           // Assert that the Correlations Chart and its header are present
           const apmCorrelationsLatencyCorrelationsChartTitle = await testSubjects.getVisibleText(
@@ -127,7 +127,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           });
 
           // Assert that results for the given service didn't find any correlations
-          // apmCorrelationsTable
           const apmCorrelationsTable = await testSubjects.getVisibleText('apmCorrelationsTable');
           expect(apmCorrelationsTable).to.be('No significant correlations found');
         });
