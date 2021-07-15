@@ -284,7 +284,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
         setMatchedIndices(matchedIndicesResult);
         setIsLoadingMatchedIndices(false);
-        form.getFields().timestampField.reset();
+        // todo reenable
+        // form.getFields().timestampField.reset();
 
         return matchedIndicesResult;
       };
@@ -300,7 +301,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
       i18nTexts.rollupLabel,
       rollupIndicesCapabilities,
       // loadTimestampFieldOptions,
-      form,
+      // form,
     ]
   );
 

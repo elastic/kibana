@@ -12,7 +12,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'visualize', 'timePicker', 'visChart']);
   const inspector = getService('inspector');
 
-  describe.skip('hybrid index pattern', () => {
+  describe('hybrid index pattern', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/hybrid/kibana');
       await esArchiver.load('x-pack/test/functional/es_archives/hybrid/logstash');
