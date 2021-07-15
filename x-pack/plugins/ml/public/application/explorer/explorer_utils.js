@@ -409,9 +409,9 @@ export function loadOverallAnnotations(selectedJobs, interval, bounds) {
 
         const annotationsData = [];
         jobIds.forEach((jobId) => {
-          const jobAnnotationss = resp.annotations[jobId];
-          if (jobAnnotationss !== undefined) {
-            annotationsData.push(...jobAnnotationss);
+          const jobAnnotations = resp.annotations[jobId];
+          if (jobAnnotations !== undefined) {
+            annotationsData.push(...jobAnnotations);
           }
         });
 
@@ -470,9 +470,9 @@ export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, 
 
         const annotationsData = [];
         jobIds.forEach((jobId) => {
-          const jobAnnotationss = resp.annotations[jobId];
-          if (jobAnnotationss !== undefined) {
-            annotationsData.push(...jobAnnotationss);
+          const jobAnnotations = resp.annotations[jobId];
+          if (jobAnnotations !== undefined) {
+            annotationsData.push(...jobAnnotations);
           }
         });
 

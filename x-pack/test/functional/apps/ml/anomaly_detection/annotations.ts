@@ -6,7 +6,6 @@
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { Job, Datafeed } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
 import { Annotation } from '../../../../../plugins/ml/common/types/annotations';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -17,32 +16,9 @@ export default function ({ getService }: FtrProviderContext) {
     this.tags(['mlqa']);
     const jobId = `fq_single_1_smv_${Date.now()}`;
 
-    // @ts-expect-error doesn't implement the full interface
-    const JOB_CONFIG: Job = {
-      job_id: jobId,
-      description: 'mean(responsetime) on farequote dataset with 15m bucket span',
-      groups: ['farequote', 'automated', 'single-metric'],
-      analysis_config: {
-        bucket_span: '15m',
-        influencers: [],
-        detectors: [
-          {
-            function: 'mean',
-            field_name: 'responsetime',
-          },
-        ],
-      },
-      data_description: { time_field: '@timestamp' },
-      analysis_limits: { model_memory_limit: '10mb' },
-      model_plot_config: { enabled: true },
-    };
-    // @ts-expect-error doesn't implement the full interface
-    const DATAFEED_CONFIG: Datafeed = {
-      datafeed_id: `datafeed-${jobId}`,
-      indices: ['ft_farequote'],
-      job_id: jobId,
-      query: { bool: { must: [{ match_all: {} }] } },
-    };
+    const JOB_CONFIG = ml.commonConfig.getADFqSingleMetricJobConfig(jobId);
+    const DATAFEED_CONFIG = ml.commonConfig.getADFqDatafeedConfig(jobId);
+
     const annotation = {
       timestamp: 1455142431586,
       end_timestamp: 1455200689604,
@@ -87,15 +63,12 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.jobTable.clickOpenJobInSingleMetricViewerButton(JOB_CONFIG.job_id);
         await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
 
-        await ml.testExecution.logTestStep('pre-fills the job selection');
-        await ml.jobSelection.assertJobSelection([JOB_CONFIG.job_id]);
-
-        await ml.testExecution.logTestStep('pre-fills the detector input');
-        await ml.singleMetricViewer.assertDetectorInputExist();
-        await ml.singleMetricViewer.assertDetectorInputValue('0');
         await ml.singleMetricViewer.assertAnnotationsExists('loaded');
 
+        await ml.testExecution.logTestStep('creates new annotation');
         await ml.jobAnnotations.createAnnotation(newText);
+
+        await ml.testExecution.logTestStep('displays newly created annotation');
         await ml.jobAnnotations.ensureSingleMetricViewerAnnotationsPanelOpen();
         await ml.jobAnnotations.assertAnnotationExists({
           annotation: newText,
@@ -161,13 +134,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         await ml.jobTable.clickOpenJobInSingleMetricViewerButton(JOB_CONFIG.job_id);
         await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
-
-        await ml.testExecution.logTestStep('pre-fills the job selection');
-        await ml.jobSelection.assertJobSelection([JOB_CONFIG.job_id]);
-
-        await ml.testExecution.logTestStep('pre-fills the detector input');
-        await ml.singleMetricViewer.assertDetectorInputExist();
-        await ml.singleMetricViewer.assertDetectorInputValue('0');
         await ml.singleMetricViewer.assertAnnotationsExists('loaded');
 
         await ml.testExecution.logTestStep('displays annotation content');
@@ -236,13 +202,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         await ml.jobTable.clickOpenJobInSingleMetricViewerButton(JOB_CONFIG.job_id);
         await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
-
-        await ml.testExecution.logTestStep('pre-fills the job selection');
-        await ml.jobSelection.assertJobSelection([JOB_CONFIG.job_id]);
-
-        await ml.testExecution.logTestStep('pre-fills the detector input');
-        await ml.singleMetricViewer.assertDetectorInputExist();
-        await ml.singleMetricViewer.assertDetectorInputValue('0');
         await ml.singleMetricViewer.assertAnnotationsExists('loaded');
 
         await ml.testExecution.logTestStep('displays annotation content');
@@ -259,7 +218,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('deletes the annotation', async () => {
-        await ml.testExecution.logTestStep('opens edit annotation flyout');
         await ml.jobAnnotations.deleteAnnotation(annotationId);
         await ml.jobAnnotations.assertAnnotationsRowMissing(annotationId);
       });
@@ -299,13 +257,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         await ml.jobTable.clickOpenJobInSingleMetricViewerButton(JOB_CONFIG.job_id);
         await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
-
-        await ml.testExecution.logTestStep('pre-fills the job selection');
-        await ml.jobSelection.assertJobSelection([JOB_CONFIG.job_id]);
-
-        await ml.testExecution.logTestStep('pre-fills the detector input');
-        await ml.singleMetricViewer.assertDetectorInputExist();
-        await ml.singleMetricViewer.assertDetectorInputValue('0');
 
         await ml.testExecution.logTestStep(
           'should display the annotations section showing an error'

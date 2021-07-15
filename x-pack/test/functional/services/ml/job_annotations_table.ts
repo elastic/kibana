@@ -197,8 +197,8 @@ export function MachineLearningJobAnnotationsProvider({ getService }: FtrProvide
         await testSubjects.existOrFail('mlAnnotationFlyout');
         await testSubjects.existOrFail('mlAnnotationFlyoutTitle');
 
-        const title = await (await testSubjects.find('mlAnnotationFlyoutTitle')).getVisibleText();
-        expect(title).to.contain(
+        const title = await testSubjects.getVisibleText('mlAnnotationFlyoutTitle');
+        expect(title).to.eql(
           'Edit annotation',
           `Expected annotations flyout title to be 'Edit annotation' but got ${title}`
         );
@@ -238,7 +238,7 @@ export function MachineLearningJobAnnotationsProvider({ getService }: FtrProvide
         const buttonTxt = await (
           await testSubjects.find('annotationFlyoutUpdateOrCreateButton')
         ).getVisibleText();
-        expect(buttonTxt).to.contain(
+        expect(buttonTxt).to.eql(
           'Update',
           `Expected annotations flyout button to be 'Update' but got ${buttonTxt}`
         );
@@ -319,7 +319,7 @@ export function MachineLearningJobAnnotationsProvider({ getService }: FtrProvide
         const buttonTxt = await (
           await testSubjects.find('annotationFlyoutUpdateOrCreateButton')
         ).getVisibleText();
-        expect(buttonTxt).to.contain(
+        expect(buttonTxt).to.eql(
           'Create',
           `Expected annotations flyout button to be 'Create' but got ${buttonTxt}`
         );
