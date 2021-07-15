@@ -337,7 +337,7 @@ For more details and a reference of audit events, refer to <<xpack-security-audi
 [cols="2*<"]
 |======
 | `xpack.security.audit.enabled` {ess-icon}
-| Set to `true` and configure where the audit log should be written to using `xpack.security.audit.appender` to enable audit logging. *Default:* `false`
+| Set to `true` to enable audit logging and configure where the audit log should be written to using `xpack.security.audit.appender` . *Default:* `false`
 
 2+a| For example:
 [source,yaml]
@@ -371,7 +371,7 @@ xpack.security.audit.appender.type: rolling-file
 
 [NOTE]
 ============
-deprecated:[7.15.0,"In 8.0 and later, the legacy audit logger will be removed, and this setting alone will instead enable the ECS audit logger with a default appender."] To enable the legacy audit logger only specify:
+deprecated:[7.15.0,"In 8.0 and later, the legacy audit logger will be removed, and this setting will enable the ECS audit logger with a default appender."] To enable the legacy audit logger only specify:
 
 [source,yaml]
 ----------------------------------------
