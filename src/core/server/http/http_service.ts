@@ -114,6 +114,7 @@ export class HttpService
       basePath: prebootSetup.basePath,
       registerStaticDir: prebootSetup.registerStaticDir.bind(prebootSetup),
       auth: prebootSetup.auth,
+      server: prebootSetup.server,
       registerRouteHandlerContext: (pluginOpaqueId, contextName, provider) =>
         prebootServerRequestHandlerContext.registerContext(pluginOpaqueId, contextName, provider),
       registerRoutes: (path, registerCallback) => {

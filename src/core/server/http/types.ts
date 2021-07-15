@@ -154,6 +154,7 @@ export interface InternalHttpServicePreboot
     | 'externalUrl'
     | 'registerStaticDir'
     | 'registerRouteHandlerContext'
+    | 'server'
   > {
   registerRoutes(path: string, callback: (router: IRouter) => void): void;
 }
