@@ -111,6 +111,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
     },
   });
 
+  const { getFields } = form;
+
   const [{ title, allowHidden, type }] = useFormData<FormInternal>({ form });
   const [isLoadingSources, setIsLoadingSources] = useState<boolean>(true);
 
@@ -122,7 +124,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const [remoteClustersExist, setRemoteClustersExist] = useState<boolean>(false);
   const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
   const [goToForm, setGoToForm] = useState<boolean>(false);
-  const [disableSubmit, setDisableSubmit] = useState<boolean>(true);
   const [existingIndexPatterns, setExistingIndexPatterns] = useState<string[]>([]);
   const [rollupIndex, setRollupIndex] = useState<string | undefined>();
   const [
@@ -196,7 +197,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
     async (query: string) => {
       let timestampOptions: TimestampOption[] = [];
       const isValidResult =
-        !existingIndexPatterns.includes(title) && matchedIndices.exactMatchedIndices.length > 0;
+        !existingIndexPatterns.includes(query) && matchedIndices.exactMatchedIndices.length > 0;
       if (isValidResult) {
         setIsLoadingTimestampFields(true);
         const getFieldsOptions: GetFieldsOptions = {
@@ -221,11 +222,15 @@ const IndexPatternEditorFlyoutContentComponent = ({
       indexPatternService,
       requireTimestampField,
       rollupIndex,
-      title,
       type,
       matchedIndices.exactMatchedIndices,
     ]
   );
+
+  useEffect(() => {
+    loadTimestampFieldOptions(title);
+    getFields().timestampField?.setValue('');
+  }, [matchedIndices, loadTimestampFieldOptions, title, getFields]);
 
   const reloadMatchedIndices = useCallback(
     async (title2: string) => {
@@ -284,8 +289,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
         setMatchedIndices(matchedIndicesResult);
         setIsLoadingMatchedIndices(false);
-        // todo reenable
-        // form.getFields().timestampField.reset();
 
         return matchedIndicesResult;
       };
@@ -392,14 +395,6 @@ TODO MOVE SOME OF THIS COMPLEXITY INTO A COMPONENT
     );
   };
 
-  if (title) {
-    // needed to trigger validation without touching advanced options
-    form.validate().then((isValid) => {
-      const disable = !isValid;
-      setDisableSubmit(disable);
-    });
-  }
-
   const previewPanelContent = isLoadingIndexPatterns ? (
     <LoadingIndices />
   ) : (
@@ -421,7 +416,6 @@ TODO MOVE SOME OF THIS COMPLEXITY INTO A COMPONENT
     matchedIndices.exactMatchedIndices.length
       ? i18nTexts.noTimestampOptionText
       : '';
-  //
 
   return (
     <>
@@ -451,8 +445,6 @@ TODO MOVE SOME OF THIS COMPLEXITY INTO A COMPONENT
                   options={timestampFieldOptions}
                   isLoadingOptions={isLoadingTimestampFields}
                   helpText={timestampNoFieldsHelp || selectTimestampHelp}
-                  loadTimestampFieldOptions={loadTimestampFieldOptions}
-                  // loadTimestampFieldOptions={() => Promise.resolve([])}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -461,7 +453,7 @@ TODO MOVE SOME OF THIS COMPLEXITY INTO A COMPONENT
           <Footer
             onCancel={onCancel}
             onSubmit={() => form.submit()}
-            submitDisabled={disableSubmit}
+            submitDisabled={form.isSubmitted && !form.isValid}
           />
         </FlyoutPanels.Item>
         <FlyoutPanels.Item>{previewPanelContent}</FlyoutPanels.Item>

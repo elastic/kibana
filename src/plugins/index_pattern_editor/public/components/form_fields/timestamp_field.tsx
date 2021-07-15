@@ -6,12 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiFormRow, EuiComboBox, EuiFormHelpText, EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { UseField, FieldConfig, ValidationConfig } from '../../shared_imports';
+import {
+  UseField,
+  FieldConfig,
+  ValidationConfig,
+  getFieldValidityAndErrorMessage,
+} from '../../shared_imports';
 
 import { TimestampOption } from '../index_pattern_editor_flyout_content';
 import { schema } from '../form_schema';
@@ -20,18 +25,10 @@ interface Props {
   options: TimestampOption[];
   isLoadingOptions: boolean;
   helpText: string;
-  loadTimestampFieldOptions: (title: string) => Promise<TimestampOption[]>;
 }
 
-interface GetTimestampConfigArgs {
-  loadTimestampFieldOptions: (title: string) => Promise<TimestampOption[]>;
-}
-
-const requireTimestampOptionValidator = (
-  loadTimestampFieldOptions: (title: string) => Promise<TimestampOption[]>
-): ValidationConfig => ({
-  validator: async ({ value, formData }) => {
-    const options = await loadTimestampFieldOptions(formData.title);
+const requireTimestampOptionValidator = (options: Props['options']): ValidationConfig => ({
+  validator: async ({ value }) => {
     const isValueRequired = !!options.length;
     if (isValueRequired && !value) {
       return {
@@ -46,15 +43,15 @@ const requireTimestampOptionValidator = (
   },
 });
 
-const getTimestampConfig = ({
-  loadTimestampFieldOptions,
-}: GetTimestampConfigArgs): FieldConfig<EuiComboBoxOptionOption<string>> => {
+const getTimestampConfig = (
+  options: Props['options']
+): FieldConfig<EuiComboBoxOptionOption<string>> => {
   const timestampFieldConfig = schema.timestampField;
 
   const validations = [
     ...timestampFieldConfig.validations,
     // note this is responsible for triggering the state update for the selected source list.
-    requireTimestampOptionValidator(loadTimestampFieldOptions),
+    requireTimestampOptionValidator(options),
   ];
 
   return {
@@ -67,27 +64,33 @@ export const TimestampField = ({
   options = [],
   helpText = '',
   isLoadingOptions = false,
-  loadTimestampFieldOptions,
 }: Props) => {
   const optionsAsComboBoxOptions = options.map(({ display, fieldName }) => ({
     label: display,
     value: fieldName,
   }));
+  const timestampConfig = useMemo(() => getTimestampConfig(options), [options]);
 
   return (
-    <UseField<EuiComboBoxOptionOption<string>>
-      config={getTimestampConfig({ loadTimestampFieldOptions })}
-      // config={getTimestampConfig({ options })}
-      path="timestampField"
-    >
-      {({ label, value, setValue }) => {
+    <UseField<EuiComboBoxOptionOption<string>> config={timestampConfig} path="timestampField">
+      {(field) => {
+        const { label, value, setValue } = field;
+
         if (value === undefined) {
           return null;
         }
 
+        const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+        const isDisabled = !optionsAsComboBoxOptions.length;
+
         return (
           <>
-            <EuiFormRow label={label} fullWidth>
+            <EuiFormRow
+              label={label}
+              error={isDisabled ? null : errorMessage}
+              isInvalid={!isDisabled && isInvalid}
+              fullWidth
+            >
               <>
                 <EuiComboBox<string>
                   placeholder={i18n.translate(
@@ -108,7 +111,7 @@ export const TimestampField = ({
                     setValue(newValue[0]);
                   }}
                   isClearable={false}
-                  isDisabled={!optionsAsComboBoxOptions.length}
+                  isDisabled={isDisabled}
                   data-test-subj="timestampField"
                   aria-label={i18n.translate(
                     'indexPatternEditor.editor.form.timestampSelectAriaLabel',

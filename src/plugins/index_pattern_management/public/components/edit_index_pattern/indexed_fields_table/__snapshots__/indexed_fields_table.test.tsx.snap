@@ -125,7 +125,7 @@ exports[`IndexedFieldsTable IndexedFieldsTable with rollup index pattern should 
           "hasRuntime": false,
           "info": Array [
             "Rollup aggregations:",
-            "histogram (interval: 5)",
+            "histogram (interval: )",
             "avg",
             "max",
             "min",
