@@ -55,31 +55,39 @@ export interface TaskRunResult {
 }
 
 export interface ReportSource {
-  jobtype: string;
-  kibana_name: string;
-  kibana_id: string;
-  created_by: string | false;
+  /*
+   * Required fields: populated in enqueue_job when the request comes in to
+   * generate the report
+   */
+  jobtype: string; // refers to `ExportTypeDefinition.jobType`
+  created_by: string | false; // username or `false` if security is disabled. Used for ensuring users can only access the reports they've created.
   payload: {
     headers: string; // encrypted headers
-    browserTimezone?: string; // may use timezone from advanced settings
-    objectType: string;
-    title: string;
-    layout?: LayoutParams;
-    isDeprecated?: boolean;
-  };
-  meta: { objectType: string; layout?: string };
-  browser_type: string;
-  migration_version: string;
-  max_attempts: number;
-  timeout: number;
-
+    isDeprecated?: boolean; // set to true when the export type is being phased out
+  } & BaseParams;
+  meta: { objectType: string; layout?: string }; // for telemetry
+  migration_version: string; // for reminding the user to update their POST URL
+  attempts: number; // initially populated as 0
+  created_at: string; // timestamp in UTC
   status: JobStatus;
-  attempts: number;
+
+  /*
+   * `output` is only populated if the report job is completed or failed.
+   */
   output: TaskRunResult | null;
-  started_at?: string;
-  completed_at?: string;
-  created_at: string;
-  process_expiration?: string | null; // must be set to null to clear the expiration
+
+  /*
+   * Optional fields: populated when the job is claimed to execute, and after
+   * execution has finished
+   */
+  kibana_name?: string; // for troubleshooting
+  kibana_id?: string; // for troubleshooting
+  browser_type?: string; // no longer used since chromium is the only option (used to allow phantomjs)
+  timeout?: number; // for troubleshooting: the actual comparison uses the config setting xpack.reporting.queue.timeout
+  max_attempts?: number; // for troubleshooting: the actual comparison uses the config setting xpack.reporting.capture.maxAttempts
+  started_at?: string; // timestamp in UTC
+  completed_at?: string; // timestamp in UTC
+  process_expiration?: string | null; // timestamp in UTC - is overwritten with `null` when the job needs a retry
 }
 
 /*
@@ -97,48 +105,41 @@ export interface BaseParams {
 }
 
 export type JobId = string;
+
+/*
+ * JobStatus:
+ *  - Begins as 'pending'
+ *  - Changes to 'processing` when the job is claimed
+ *  - Then 'completed' | 'failed' when execution is done
+ * If the job needs a retry, it reverts back to 'pending'.
+ */
 export type JobStatus =
-  | 'completed'
-  | 'completed_with_warnings'
-  | 'pending'
-  | 'processing'
-  | 'failed';
+  | 'completed' // Report was successful
+  | 'completed_with_warnings' // The download available for troubleshooting - it **should** show a meaningful error
+  | 'pending' // Report job is waiting to be claimed
+  | 'processing' // Report job has been claimed and is executing
+  | 'failed'; // Report was not successful, and all retries are done. Nothing to download.
 
 export interface JobContent {
   content: string;
 }
 
-export interface ReportApiJSON {
+/*
+ * Info API response: to avoid unnecessary large payloads on a network, the
+ * report query results do not include `payload.headers` or `output.content`,
+ * which can be long strings of meaningless text
+ */
+interface ReportSimple extends Omit<ReportSource, 'payload' | 'output'> {
+  payload: Omit<ReportSource['payload'], 'headers'>;
+  output?: Omit<TaskRunResult, 'content'>; // is undefined for report jobs that are not completed
+}
+
+/*
+ * The response format for all of the report job APIs
+ */
+export interface ReportApiJSON extends ReportSimple {
   id: string;
   index: string;
-  kibana_name: string;
-  kibana_id: string;
-  browser_type: string | undefined;
-  created_at: string;
-  jobtype: string;
-  created_by: string | false;
-  timeout?: number;
-  output?: {
-    content_type: string;
-    size: number;
-    warnings?: string[];
-  };
-  process_expiration?: string;
-  completed_at: string | undefined;
-  payload: {
-    layout?: LayoutParams;
-    title: string;
-    browserTimezone?: string;
-    isDeprecated?: boolean;
-  };
-  meta: {
-    layout?: string;
-    objectType: string;
-  };
-  max_attempts: number;
-  started_at: string | undefined;
-  attempts: number;
-  status: string;
 }
 
 export interface LicenseCheckResults {
@@ -147,13 +148,14 @@ export interface LicenseCheckResults {
   message: string;
 }
 
+/* Notifier Toasts */
 export interface JobSummary {
   id: JobId;
   status: JobStatus;
-  title: string;
-  jobtype: string;
-  maxSizeReached?: boolean;
-  csvContainsFormulas?: boolean;
+  jobtype: ReportSource['jobtype'];
+  title: ReportSource['payload']['title'];
+  maxSizeReached: TaskRunResult['max_size_reached'];
+  csvContainsFormulas: TaskRunResult['csv_contains_formulas'];
 }
 
 export interface JobSummarySet {

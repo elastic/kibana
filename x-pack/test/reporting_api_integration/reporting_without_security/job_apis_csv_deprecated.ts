@@ -7,11 +7,7 @@
 
 import expect from '@kbn/expect';
 import { pick } from 'lodash';
-import {
-  ReportApiJSON,
-  ReportDocument,
-  ReportSource,
-} from '../../../plugins/reporting/common/types';
+import { ReportApiJSON } from '../../../plugins/reporting/common/types';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { JOB_PARAMS_RISON_CSV_DEPRECATED } from '../services/fixtures';
 
@@ -19,7 +15,6 @@ const apiResponseFields = [
   'attempts',
   'created_by',
   'jobtype',
-  'max_attempts',
   'meta',
   'payload.isDeprecated',
   'payload.title',
@@ -27,18 +22,8 @@ const apiResponseFields = [
   'status',
 ];
 
-// TODO: clean up the /list and /info endpoints to return ReportApiJSON interface data
-const documentResponseFields = [
-  '_source.attempts',
-  '_source.created_by',
-  '_source.jobtype',
-  '_source.max_attempts',
-  '_source.meta',
-  '_source.payload.isDeprecated',
-  '_source.payload.title',
-  '_source.payload.type',
-  '_source.status',
-];
+const parseApiJSON = (apiResponseText: string): { job: ReportApiJSON; path: string } =>
+  JSON.parse(apiResponseText);
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
@@ -68,13 +53,12 @@ export default function ({ getService }: FtrProviderContext) {
         .send({ jobParams: JOB_PARAMS_RISON_CSV_DEPRECATED });
       expect(resStatus).to.be(200);
 
-      const { job, path }: { job: ReportApiJSON; path: string } = JSON.parse(resText);
+      const { job, path } = parseApiJSON(resText);
       expectSnapshot(pick(job, apiResponseFields)).toMatchInline(`
         Object {
           "attempts": 0,
           "created_by": false,
           "jobtype": "csv",
-          "max_attempts": 1,
           "meta": Object {},
           "payload": Object {
             "isDeprecated": true,
@@ -103,30 +87,27 @@ export default function ({ getService }: FtrProviderContext) {
         .send({ jobParams: JOB_PARAMS_RISON_CSV_DEPRECATED });
       expect(resStatus).to.be(200);
 
-      const { job, path }: { job: ReportApiJSON; path: string } = JSON.parse(resText);
+      const { job, path } = parseApiJSON(resText);
       // call the single job listing api (status check)
       const { text: listText } = await supertestNoAuth
         .get(`/api/reporting/jobs/list?page=0&ids=${job.id}`)
         .set('kbn-xsrf', 'xxx');
 
-      const listingJobs: ReportDocument[] = JSON.parse(listText);
-      expect(listingJobs[0]._id).to.be(job.id);
-      expectSnapshot(listingJobs.map((j) => pick(j, documentResponseFields))).toMatchInline(`
+      const listingJobs: ReportApiJSON[] = JSON.parse(listText);
+      expect(listingJobs[0].id).to.be(job.id);
+      expectSnapshot(listingJobs.map((j) => pick(j, apiResponseFields))).toMatchInline(`
         Array [
           Object {
-            "_source": Object {
-              "attempts": 0,
-              "created_by": false,
-              "jobtype": "csv",
-              "max_attempts": 1,
-              "meta": Object {},
-              "payload": Object {
-                "isDeprecated": true,
-                "title": "A Saved Search With a DATE FILTER",
-                "type": "search",
-              },
-              "status": "pending",
+            "attempts": 0,
+            "created_by": false,
+            "jobtype": "csv",
+            "meta": Object {},
+            "payload": Object {
+              "isDeprecated": true,
+              "title": "A Saved Search With a DATE FILTER",
+              "type": "search",
             },
+            "status": "pending",
           },
         ]
       `);
@@ -141,30 +122,27 @@ export default function ({ getService }: FtrProviderContext) {
         .send({ jobParams: JOB_PARAMS_RISON_CSV_DEPRECATED });
       expect(resStatus).to.be(200);
 
-      const { job, path }: { job: ReportApiJSON; path: string } = JSON.parse(resText);
+      const { job, path } = parseApiJSON(resText);
       // call the ALL job listing api
       const { text: listText } = await supertestNoAuth
         .get(`/api/reporting/jobs/list?page=0`)
         .set('kbn-xsrf', 'xxx');
 
-      const listingJobs: ReportDocument[] = JSON.parse(listText);
-      expect(listingJobs[0]._id).to.eql(job.id);
-      expectSnapshot(listingJobs.map((j) => pick(j, documentResponseFields))).toMatchInline(`
+      const listingJobs: ReportApiJSON[] = JSON.parse(listText);
+      expect(listingJobs[0].id).to.eql(job.id);
+      expectSnapshot(listingJobs.map((j) => pick(j, apiResponseFields))).toMatchInline(`
         Array [
           Object {
-            "_source": Object {
-              "attempts": 0,
-              "created_by": false,
-              "jobtype": "csv",
-              "max_attempts": 1,
-              "meta": Object {},
-              "payload": Object {
-                "isDeprecated": true,
-                "title": "A Saved Search With a DATE FILTER",
-                "type": "search",
-              },
-              "status": "pending",
+            "attempts": 0,
+            "created_by": false,
+            "jobtype": "csv",
+            "meta": Object {},
+            "payload": Object {
+              "isDeprecated": true,
+              "title": "A Saved Search With a DATE FILTER",
+              "type": "search",
             },
+            "status": "pending",
           },
         ]
       `);
@@ -179,18 +157,17 @@ export default function ({ getService }: FtrProviderContext) {
         .send({ jobParams: JOB_PARAMS_RISON_CSV_DEPRECATED });
       expect(resStatus).to.be(200);
 
-      const { job, path }: { job: ReportApiJSON; path: string } = JSON.parse(resText);
+      const { job, path } = parseApiJSON(resText);
       const { text: infoText } = await supertestNoAuth
         .get(`/api/reporting/jobs/info/${job.id}`)
         .set('kbn-xsrf', 'xxx');
 
-      const info: ReportSource = JSON.parse(infoText);
+      const info = JSON.parse(infoText);
       expectSnapshot(pick(info, apiResponseFields)).toMatchInline(`
         Object {
           "attempts": 0,
           "created_by": false,
           "jobtype": "csv",
-          "max_attempts": 1,
           "meta": Object {},
           "payload": Object {
             "isDeprecated": true,
