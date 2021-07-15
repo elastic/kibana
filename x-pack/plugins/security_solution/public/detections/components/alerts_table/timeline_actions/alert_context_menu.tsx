@@ -88,7 +88,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     [ecsRowData]
   );
 
-  // TO DO Steph/ueba remove when past experimental
+  // TODO: Steph/ueba remove when past experimental
   const uebaEnabled = useIsExperimentalFeatureEnabled('uebaEnabled');
   const isEvent = useMemo(() => indexOf(ecsRowData.event?.kind, 'event') !== -1, [ecsRowData]);
   const ruleIndices = useMemo((): string[] => {

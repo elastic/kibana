@@ -123,7 +123,7 @@ export const DEFAULT_INDEX_PATTERN = [
 ];
 
 export const DEFAULT_INDEX_PATTERN_EXPERIMENTAL = [
-  // TO DO Steph/ueba TEMP for testing UEBA data
+  // TODO: Steph/ueba TEMP for testing UEBA data
   'risk_score_*',
 ];
 

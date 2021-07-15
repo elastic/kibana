@@ -103,7 +103,7 @@ const RiskScoreTableComponent: React.FC<RiskScoreTableProps> = ({
           //     sort,
           //     uebaType: type,
           //   })
-          // ); TO DO Steph/ueba implement sorting
+          // ); TODO: Steph/ueba implement sorting
         }
       }
     },
