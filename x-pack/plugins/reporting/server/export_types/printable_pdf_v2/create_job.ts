@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { cryptoFactory } from '../../../lib';
-import { CreateJobFn, CreateJobFnFactory } from '../../../types';
+import { cryptoFactory } from '../../lib';
+import { CreateJobFn, CreateJobFnFactory } from '../../types';
 import { JobParamsPDFV2, TaskPayloadPDFV2 } from './types';
 
 export const createJobFnFactory: CreateJobFnFactory<

@@ -6,7 +6,7 @@
  */
 
 import { forEach, isArray } from 'lodash';
-import { url } from '../../../../../../../../src/plugins/kibana_utils/server';
+import { url } from '../../../../../../../src/plugins/kibana_utils/server';
 
 function toKeyValue(obj) {
   const parts = [];

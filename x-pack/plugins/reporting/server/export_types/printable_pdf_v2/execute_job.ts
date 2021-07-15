@@ -8,12 +8,12 @@
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
-import { PDF_JOB_TYPE_V2 } from '../../../../common/constants';
-import { TaskRunResult } from '../../../lib/tasks';
-import { RunTaskFn, RunTaskFnFactory } from '../../../types';
-import { decryptJobHeaders, getConditionalHeaders, omitBlockedHeaders } from '../../common';
+import { PDF_JOB_TYPE_V2 } from '../../../common/constants';
+import { TaskRunResult } from '../../lib/tasks';
+import { RunTaskFn, RunTaskFnFactory } from '../../types';
+import { decryptJobHeaders, getConditionalHeaders, omitBlockedHeaders } from '../common';
 import { generatePdfObservableFactory } from './lib/generate_pdf';
-import { getCustomLogo } from '../lib/get_custom_logo';
+import { getCustomLogo } from './lib/get_custom_logo';
 import { TaskPayloadPDFV2 } from './types';
 
 export const runTaskFnFactory: RunTaskFnFactory<

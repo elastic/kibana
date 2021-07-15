@@ -8,14 +8,14 @@
 import { groupBy } from 'lodash';
 import * as Rx from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
-import { Locator } from '../../../../../common/types';
-import { getRedirectAppPathHome } from '../../../../../common/constants';
-import { ReportingCore } from '../../../../';
-import { LevelLogger } from '../../../../lib';
-import { createLayout, LayoutParams } from '../../../../lib/layouts';
-import { ScreenshotResults } from '../../../../lib/screenshots';
-import { ConditionalHeaders } from '../../../common';
-import { getFullUrls } from '../../../common/v2/get_full_urls';
+import { Locator } from '../../../../common/types';
+import { getRedirectAppPathHome } from '../../../../common/constants';
+import { ReportingCore } from '../../../';
+import { LevelLogger } from '../../../lib';
+import { createLayout, LayoutParams } from '../../../lib/layouts';
+import { ScreenshotResults } from '../../../lib/screenshots';
+import { ConditionalHeaders } from '../../common';
+import { getFullUrls } from '../../common/v2/get_full_urls';
 import { PdfMaker } from './pdf';
 import { getTracker } from './tracker';
 

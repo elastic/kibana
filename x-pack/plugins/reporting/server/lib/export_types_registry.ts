@@ -11,10 +11,9 @@ import { getExportType as getTypeCsvFromSavedObject } from '../export_types/csv_
 import { getExportType as getTypeCsv } from '../export_types/csv_searchsource';
 import { getExportType as getTypePng } from '../export_types/png';
 import { getExportType as getTypePngV2 } from '../export_types/png_v2';
-import {
-  getExportType as getTypePrintablePdf,
-  getExportTypeV2 as getTypePrintablePdfV2,
-} from '../export_types/printable_pdf';
+import { getExportType as getTypePrintablePdf } from '../export_types/printable_pdf';
+import { getExportType as getTypePrintablePdfV2 } from '../export_types/printable_pdf_v2';
+
 import { CreateJobFn, ExportTypeDefinition } from '../types';
 
 type GetCallbackFn = (item: ExportTypeDefinition) => boolean;
