@@ -15,14 +15,16 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
-import { get } from 'lodash';
-import React, { Component, Fragment } from 'react';
+import { injectI18n } from '@kbn/i18n/react';
+import React, { Component } from 'react';
 import { USES_HEADLESS_JOB_TYPES } from '../../common/constants';
-import { ReportApiJSON } from '../../common/types';
+import { Job } from '../lib/job';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
+import { Props as ListingProps } from './report_listing';
 
-interface Props {
+interface Props extends Pick<ListingProps, 'apiClient' | 'intl'> {
   jobId: string;
   apiClient: ReportingAPIClient;
 }
@@ -31,23 +33,23 @@ interface State {
   isLoading: boolean;
   isFlyoutVisible: boolean;
   calloutTitle: string;
-  info: ReportApiJSON | null;
+  info: Job | null;
   error: Error | null;
 }
 
 const NA = 'n/a';
 const UNKNOWN = 'unknown';
 
-const getDimensions = (info: ReportApiJSON): string => {
+const getDimensions = (info: Job): string => {
   const defaultDimensions = { width: null, height: null };
-  const { width, height } = get(info, 'payload.layout.dimensions', defaultDimensions);
+  const { width, height } = info.layout?.dimensions || defaultDimensions;
   if (width && height) {
     return `Width: ${width} x Height: ${height}`;
   }
-  return NA;
+  return UNKNOWN;
 };
 
-export class ReportInfoButton extends Component<Props, State> {
+class ReportInfoButtonUi extends Component<Props, State> {
   private mounted?: boolean;
 
   constructor(props: Props) {
@@ -75,133 +77,60 @@ export class ReportInfoButton extends Component<Props, State> {
     }
 
     const jobType = info.jobtype || NA;
-
-    interface JobInfo {
-      title: string;
-      description: string;
-    }
-
-    interface JobInfoMap {
-      [thing: string]: JobInfo[];
-    }
-
     const attempts = info.attempts ? info.attempts.toString() : NA;
     const maxAttempts = info.max_attempts ? info.max_attempts.toString() : NA;
     const timeout = info.timeout ? info.timeout.toString() : NA;
-    const warnings = info.output && info.output.warnings ? info.output.warnings.join(',') : null;
+    const warnings = info.warnings?.join(',') ?? null;
 
-    const jobInfoDateTimes: JobInfo[] = [
-      {
-        title: 'Created By',
-        description: info.created_by || NA,
-      },
-      {
-        title: 'Created At',
-        description: info.created_at || NA,
-      },
-      {
-        title: 'Started At',
-        description: info.started_at || NA,
-      },
-      {
-        title: 'Completed At',
-        description: info.completed_at || NA,
-      },
+    const jobInfo = [
+      { title: 'Title', description: info.title || NA },
+      { title: 'Created By', description: info.created_by || NA },
+      { title: 'Created At', description: info.created_at || NA },
+      { title: 'Timezone', description: info.browserTimezone || NA },
+      { title: 'Status', description: info.status || NA },
+    ];
+
+    const processingInfo = [
+      { title: 'Started At', description: info.started_at || NA },
+      { title: 'Completed At', description: info.completed_at || NA },
       {
         title: 'Processed By',
         description:
-          info.kibana_name && info.kibana_id ? `${info.kibana_name} (${info.kibana_id})` : UNKNOWN,
+          info.kibana_name && info.kibana_id ? `${info.kibana_name} (${info.kibana_id})` : NA,
       },
-      {
-        title: 'Browser Timezone',
-        description: get(info, 'payload.browserTimezone') || NA,
-      },
-    ];
-    const jobInfoPayload: JobInfo[] = [
-      {
-        title: 'Title',
-        description: get(info, 'payload.title') || NA,
-      },
-      {
-        title: 'Layout',
-        description: get(info, 'meta.layout') || NA,
-      },
-      {
-        title: 'Dimensions',
-        description: getDimensions(info),
-      },
-      {
-        title: 'Job Type',
-        description: jobType,
-      },
-      {
-        title: 'Content Type',
-        description: get(info, 'output.content_type') || NA,
-      },
-      {
-        title: 'Size in Bytes',
-        description: get(info, 'output.size') || NA,
-      },
-    ];
-    const jobInfoStatus: JobInfo[] = [
-      {
-        title: 'Attempts',
-        description: attempts,
-      },
-      {
-        title: 'Max Attempts',
-        description: maxAttempts,
-      },
-      {
-        title: 'Timeout',
-        description: timeout,
-      },
-      {
-        title: 'Status',
-        description: info.status || NA,
-      },
-      {
-        title: 'Browser Type',
-        description: USES_HEADLESS_JOB_TYPES.includes(jobType) ? info.browser_type || UNKNOWN : NA,
-      },
+      { title: 'Content Type', description: info.content_type || NA },
+      { title: 'Size in Bytes', description: info.size?.toString() || NA },
+      { title: 'Attempts', description: attempts },
+      { title: 'Max Attempts', description: maxAttempts },
+      { title: 'Timeout', description: timeout },
     ];
 
-    if (warnings) {
-      jobInfoStatus.push({
-        title: 'Errors',
-        description: warnings,
-      });
-    }
+    const jobScreenshot = [
+      { title: 'Dimensions', description: getDimensions(info) },
+      { title: 'Layout', description: info.layout?.id || UNKNOWN },
+      { title: 'Browser Type', description: info.browser_type || NA },
+    ];
 
-    const jobInfoParts: JobInfoMap = {
-      datetimes: jobInfoDateTimes,
-      payload: jobInfoPayload,
-      status: jobInfoStatus,
-    };
+    const warningInfo = warnings && [{ title: 'Errors', description: warnings }];
 
     return (
-      <Fragment>
-        <EuiDescriptionList
-          listItems={jobInfoParts.datetimes}
-          type="column"
-          align="center"
-          compressed
-        />
+      <>
+        <EuiDescriptionList listItems={jobInfo} type="column" align="center" compressed />
         <EuiSpacer size="s" />
-        <EuiDescriptionList
-          listItems={jobInfoParts.payload}
-          type="column"
-          align="center"
-          compressed
-        />
-        <EuiSpacer size="s" />
-        <EuiDescriptionList
-          listItems={jobInfoParts.status}
-          type="column"
-          align="center"
-          compressed
-        />
-      </Fragment>
+        <EuiDescriptionList listItems={processingInfo} type="column" align="center" compressed />
+        {USES_HEADLESS_JOB_TYPES.includes(jobType) ? (
+          <>
+            <EuiSpacer size="s" />
+            <EuiDescriptionList listItems={jobScreenshot} type="column" align="center" compressed />
+          </>
+        ) : null}
+        {warningInfo ? (
+          <>
+            <EuiSpacer size="s" />
+            <EuiDescriptionList listItems={warningInfo} type="column" align="center" compressed />
+          </>
+        ) : null}
+      </>
     );
   }
 
@@ -240,23 +169,31 @@ export class ReportInfoButton extends Component<Props, State> {
     }
 
     return (
-      <Fragment>
-        <EuiButtonIcon
-          onClick={this.showFlyout}
-          iconType="iInCircle"
-          color={'primary'}
-          data-test-subj="reportInfoButton"
-          aria-label="Show report info"
-        />
+      <>
+        <EuiToolTip
+          position="top"
+          content={this.props.intl.formatMessage({
+            id: 'xpack.reporting.listing.table.reportInfo',
+            defaultMessage: 'Job info',
+          })}
+        >
+          <EuiButtonIcon
+            onClick={this.showFlyout}
+            iconType="iInCircle"
+            color={'primary'}
+            data-test-subj="reportInfoButton"
+            aria-label="Show report info"
+          />
+        </EuiToolTip>
         {flyout}
-      </Fragment>
+      </>
     );
   }
 
   private loadInfo = async () => {
     this.setState({ isLoading: true });
     try {
-      const info: ReportApiJSON = await this.props.apiClient.getInfo(this.props.jobId);
+      const info = await this.props.apiClient.getInfo(this.props.jobId);
       if (this.mounted) {
         this.setState({ isLoading: false, info });
       }
@@ -287,3 +224,5 @@ export class ReportInfoButton extends Component<Props, State> {
     }
   };
 }
+
+export const ReportInfoButton = injectI18n(ReportInfoButtonUi);

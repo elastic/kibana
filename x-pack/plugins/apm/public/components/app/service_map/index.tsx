@@ -11,7 +11,7 @@ import {
   EuiLoadingSpinner,
   EuiPanel,
 } from '@elastic/eui';
-import React, { PropsWithChildren, ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import {
   invalidLicenseMessage,
@@ -31,10 +31,7 @@ import { Popover } from './Popover';
 import { TimeoutPrompt } from './timeout_prompt';
 import { useRefDimensions } from './useRefDimensions';
 import { SearchBar } from '../../shared/search_bar';
-
-interface ServiceMapProps {
-  serviceName?: string;
-}
+import { useServiceName } from '../../../hooks/use_service_name';
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
@@ -66,12 +63,12 @@ function LoadingSpinner() {
   );
 }
 
-export function ServiceMap({
-  serviceName,
-}: PropsWithChildren<ServiceMapProps>) {
+export function ServiceMap() {
   const theme = useTheme();
   const license = useLicenseContext();
   const { urlParams } = useUrlParams();
+
+  const serviceName = useServiceName();
 
   const { data = { elements: [] }, status, error } = useFetcher(
     (callApmApi) => {
