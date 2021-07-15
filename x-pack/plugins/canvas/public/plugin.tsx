@@ -30,7 +30,7 @@ import { Start as InspectorStart } from '../../../../src/plugins/inspector/publi
 import { BfetchPublicSetup } from '../../../../src/plugins/bfetch/public';
 import { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
 import { getPluginApi, CanvasApi } from './plugin_api';
-import { CanvasSrcPlugin } from '../canvas_plugin_src/plugin';
+import { pluginServiceRegistry } from './services/kibana';
 
 export { CoreStart, CoreSetup };
 
