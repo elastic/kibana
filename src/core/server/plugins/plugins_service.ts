@@ -90,6 +90,7 @@ export interface PluginsServiceDiscoverDeps {
 export class PluginsService implements CoreService<PluginsServiceSetup, PluginsServiceStart> {
   private readonly log: Logger;
   private readonly prebootPluginsSystem = new PluginsSystem(this.coreContext, PluginType.preboot);
+  private arePrebootPluginsStopped = false;
   private readonly prebootUiPluginInternalInfo = new Map<PluginName, InternalPluginInfo>();
   private readonly standardPluginsSystem = new PluginsSystem(this.coreContext, PluginType.standard);
   private readonly standardUiPluginInternalInfo = new Map<PluginName, InternalPluginInfo>();
@@ -181,14 +182,22 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
 
   public async start(deps: PluginsServiceStartDeps) {
     this.log.debug('Plugins service starts plugins');
+
     await this.prebootPluginsSystem.stopPlugins();
+    this.arePrebootPluginsStopped = true;
+
     const contracts = await this.standardPluginsSystem.startPlugins(deps);
     return { contracts };
   }
 
   public async stop() {
     this.log.debug('Stopping plugins service');
-    await this.prebootPluginsSystem.stopPlugins();
+
+    if (!this.arePrebootPluginsStopped) {
+      this.arePrebootPluginsStopped = false;
+      await this.prebootPluginsSystem.stopPlugins();
+    }
+
     await this.standardPluginsSystem.stopPlugins();
   }
 

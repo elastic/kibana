@@ -1052,5 +1052,23 @@ describe('PluginsService', () => {
       expect(standardMockPluginSystem.stopPlugins).toHaveBeenCalledTimes(1);
       expect(prebootMockPluginSystem.stopPlugins).toHaveBeenCalledTimes(1);
     });
+
+    it('`stop` does not try to stop preboot plugins system if it was stopped during `start`.', async () => {
+      await pluginsService.preboot(prebootDeps);
+      await pluginsService.setup(setupDeps);
+
+      expect(prebootMockPluginSystem.stopPlugins).not.toHaveBeenCalled();
+      expect(standardMockPluginSystem.stopPlugins).not.toHaveBeenCalled();
+
+      await pluginsService.start(startDeps);
+
+      expect(prebootMockPluginSystem.stopPlugins).toHaveBeenCalledTimes(1);
+      expect(standardMockPluginSystem.stopPlugins).not.toHaveBeenCalled();
+
+      await pluginsService.stop();
+
+      expect(prebootMockPluginSystem.stopPlugins).toHaveBeenCalledTimes(1);
+      expect(standardMockPluginSystem.stopPlugins).toHaveBeenCalledTimes(1);
+    });
   });
 });
