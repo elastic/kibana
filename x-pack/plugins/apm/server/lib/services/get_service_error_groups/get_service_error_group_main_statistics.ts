@@ -14,11 +14,8 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import {
-  environmentQuery,
-  rangeQuery,
-  kqlQuery,
-} from '../../../../server/utils/queries';
+import { rangeQuery, kqlQuery } from '../../../../../observability/server';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getErrorName } from '../../helpers/get_error_name';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
