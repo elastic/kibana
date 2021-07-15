@@ -71,8 +71,7 @@ export const getEditorOpener = ({ core, indexPatternService }: Dependencies) => 
         </KibanaReactContextProvider>
       ),
       {
-        // todo - I'm confused why this is throwing ts errors
-        // hideCloseButton: true,
+        hideCloseButton: true,
         size: 'l',
       }
     );
