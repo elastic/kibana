@@ -69,7 +69,7 @@ function createDetectorDescription(jobCreator: RareJobCreator, detectorType: RAR
   const rareSplitSummary = i18n.translate(
     'xpack.ml.newJob.wizard.pickFieldsStep.rareField.plainText.rareSplitSummary',
     {
-      defaultMessage: 'For each {splitFieldName} value, detects rare {rareFieldName} values.',
+      defaultMessage: 'For each {splitFieldName}, detects rare {rareFieldName} values.',
       values: { splitFieldName, rareFieldName },
     }
   );
@@ -105,7 +105,7 @@ function createDetectorDescription(jobCreator: RareJobCreator, detectorType: RAR
     'xpack.ml.newJob.wizard.pickFieldsStep.rareField.plainText.rareSplitPopulationSummary',
     {
       defaultMessage:
-        'For each {splitFieldName} value, detects {populationFieldName} values that have rare {rareFieldName} values relative to the population.',
+        'For each {splitFieldName}, detects {populationFieldName} values that have rare {rareFieldName} values relative to the population.',
       values: { splitFieldName, populationFieldName, rareFieldName },
     }
   );
