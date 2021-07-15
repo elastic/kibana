@@ -12,6 +12,8 @@ export const reportingService: ReportingService = {
     usesUiCapabilities: () => true,
     components: {
       ReportingPanelPDF: () => (null as unknown) as JSX.Element,
+      ReportingPanelPDFV2: () => (null as unknown) as JSX.Element,
+      ReportingPanelPNGV2: () => (null as unknown) as JSX.Element,
     },
     getDefaultLayoutSelectors: () => ({
       screenshot: 'stub',
