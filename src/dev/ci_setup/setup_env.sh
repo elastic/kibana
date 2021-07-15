@@ -163,11 +163,6 @@ function checks-reporter-with-killswitch() {
 
 export -f checks-reporter-with-killswitch
 
-###
-### source the env keys we have in Vault that are exported,
-### these will include the FullStory orgId and api key
-### Question: Do we need to re-export these for CI to have access to them? I don't think so
-###
 source "$KIBANA_DIR/src/dev/ci_setup/load_env_keys.sh"
 
 ES_DIR="$WORKSPACE/elasticsearch"
