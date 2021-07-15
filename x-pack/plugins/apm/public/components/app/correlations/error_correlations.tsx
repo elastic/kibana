@@ -18,8 +18,8 @@ import {
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
 import { useUiTracker } from '../../../../../observability/public';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
@@ -51,7 +51,7 @@ export function ErrorCorrelations({ onClose }: Props) {
     setSelectedSignificantTerm,
   ] = useState<SelectedSignificantTerm | null>(null);
 
-  const { serviceName } = useParams<{ serviceName?: string }>();
+  const { serviceName } = useApmServiceContext();
   const { urlParams } = useUrlParams();
   const {
     environment,

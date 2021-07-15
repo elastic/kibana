@@ -5,16 +5,19 @@
  * 2.0.
  */
 
+import { pipe } from 'fp-ts/lib/pipeable';
+import { getOrElse } from 'fp-ts/lib/Either';
+import { failure } from 'io-ts/lib/PathReporter';
+import * as t from 'io-ts';
+
 import type { estypes } from '@elastic/elasticsearch';
-import {
-  PROCESSOR_EVENT,
-  SERVICE_NAME,
-  TRANSACTION_DURATION,
-  TRANSACTION_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
+import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
 import type { SearchServiceParams } from '../../../../common/search_strategies/correlations/types';
-import { environmentQuery as getEnvironmentQuery } from '../../../../common/utils/environment_query';
-import { ProcessorEvent } from '../../../../common/processor_event';
+import { rangeRt } from '../../../routes/default_api_types';
+
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+
+import { getCorrelationsFilters } from '../../correlations/get_filters';
 
 const getPercentileThresholdValueQuery = (
   percentileThresholdValue: number | undefined
@@ -39,26 +42,6 @@ export const getTermsQuery = (
   return fieldName && fieldValue ? [{ term: { [fieldName]: fieldValue } }] : [];
 };
 
-const getRangeQuery = (
-  start?: string,
-  end?: string
-): estypes.QueryDslQueryContainer[] => {
-  if (start === undefined && end === undefined) {
-    return [];
-  }
-
-  return [
-    {
-      range: {
-        '@timestamp': {
-          ...(start !== undefined ? { gte: start } : {}),
-          ...(end !== undefined ? { lte: end } : {}),
-        },
-      },
-    },
-  ];
-};
-
 interface QueryParams {
   params: SearchServiceParams;
   fieldName?: string;
@@ -71,21 +54,37 @@ export const getQueryWithParams = ({
 }: QueryParams) => {
   const {
     environment,
+    kuery,
     serviceName,
     start,
     end,
     percentileThresholdValue,
+    transactionType,
     transactionName,
   } = params;
+
+  // converts string based start/end to epochmillis
+  const setup = pipe(
+    rangeRt.decode({ start, end }),
+    getOrElse<t.Errors, { start: number; end: number }>((errors) => {
+      throw new Error(failure(errors).join('\n'));
+    })
+  ) as Setup & SetupTimeRange;
+
+  const filters = getCorrelationsFilters({
+    setup,
+    environment,
+    kuery,
+    serviceName,
+    transactionType,
+    transactionName,
+  });
+
   return {
     bool: {
       filter: [
-        ...getTermsQuery(PROCESSOR_EVENT, ProcessorEvent.transaction),
-        ...getTermsQuery(SERVICE_NAME, serviceName),
-        ...getTermsQuery(TRANSACTION_NAME, transactionName),
+        ...filters,
         ...getTermsQuery(fieldName, fieldValue),
-        ...getRangeQuery(start, end),
-        ...getEnvironmentQuery(environment),
         ...getPercentileThresholdValueQuery(percentileThresholdValue),
       ] as estypes.QueryDslQueryContainer[],
     },
