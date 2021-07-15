@@ -96,6 +96,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
     setJobType(null);
     setTotalJobsRead(0);
     setValidatingJobs(false);
+    setShowFileReadError(false);
   }, [showFlyout]);
 
   function toggleFlyout() {
@@ -104,50 +105,8 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
 
   const onFilePickerChange = useCallback(async (files: any) => {
     setShowFileReadError(false);
-    if (files.length) {
-      try {
-        const loadedFile = await readJobConfigs(files[0]);
-        if (loadedFile.jobType === null) {
-          setShowFileReadError(true);
-          return;
-        }
 
-        setTotalJobsRead(loadedFile.jobs.length);
-
-        const validatedJobs = await validateJobs(
-          loadedFile.jobs as ImportedAdJob[],
-          loadedFile.jobType,
-          getIndexPatternTitles
-        );
-
-        if (loadedFile.jobType === 'anomaly-detector') {
-          const tempJobs = (loadedFile.jobs as ImportedAdJob[]).filter((j) =>
-            validatedJobs.jobIds.includes(j.job.job_id)
-          );
-          setAdJobs(tempJobs);
-        } else if (loadedFile.jobType === 'data-frame-analytics') {
-          const tempJobs = (loadedFile.jobs as DataFrameAnalyticsConfig[]).filter((j) =>
-            validatedJobs.jobIds.includes(j.id)
-          );
-          setDfaJobs(tempJobs);
-        }
-
-        setJobType(loadedFile.jobType);
-        setJobIds(
-          validatedJobs.jobIds.map((id) => ({
-            id,
-            originalId: id,
-            valid: true,
-            invalidMessage: '',
-          }))
-        );
-        setIdsMash(validatedJobs.jobIds.map((id) => id).join(''));
-        setValidatingJobs(true);
-        setSkippedJobs(validatedJobs.skippedJobs);
-      } catch (error) {
-        // show error
-      }
-    } else {
+    if (files.length === 0) {
       setAdJobs([]);
       setDfaJobs([]);
       setJobIds([]);
@@ -156,6 +115,51 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
       setJobType(null);
       setTotalJobsRead(0);
       setValidatingJobs(false);
+      setShowFileReadError(false);
+      return;
+    }
+
+    try {
+      const loadedFile = await readJobConfigs(files[0]);
+      if (loadedFile.jobType === null) {
+        setShowFileReadError(true);
+        return;
+      }
+
+      setTotalJobsRead(loadedFile.jobs.length);
+
+      const validatedJobs = await validateJobs(
+        loadedFile.jobs as ImportedAdJob[],
+        loadedFile.jobType,
+        getIndexPatternTitles
+      );
+
+      if (loadedFile.jobType === 'anomaly-detector') {
+        const tempJobs = (loadedFile.jobs as ImportedAdJob[]).filter((j) =>
+          validatedJobs.jobIds.includes(j.job.job_id)
+        );
+        setAdJobs(tempJobs);
+      } else if (loadedFile.jobType === 'data-frame-analytics') {
+        const tempJobs = (loadedFile.jobs as DataFrameAnalyticsConfig[]).filter((j) =>
+          validatedJobs.jobIds.includes(j.id)
+        );
+        setDfaJobs(tempJobs);
+      }
+
+      setJobType(loadedFile.jobType);
+      setJobIds(
+        validatedJobs.jobIds.map((id) => ({
+          id,
+          originalId: id,
+          valid: true,
+          invalidMessage: '',
+        }))
+      );
+      setIdsMash(validatedJobs.jobIds.map((id) => id).join(''));
+      setValidatingJobs(true);
+      setSkippedJobs(validatedJobs.skippedJobs);
+    } catch (error) {
+      // show error
     }
   }, []);
 
