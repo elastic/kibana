@@ -32,3 +32,6 @@ export const tail = (xs) => {
 };
 // Conversion Archive Log Marker
 export const acMark = '[Archive Conversion]';
+export const join2Str = (xs: string[]) => xs.join(',');
+export const computeName = (kbnArchivefixtureDir: string) => (esArchiveName: string) =>
+  `${kbnArchivefixtureDir}/${esArchiveName.split('es_archives/')[1]}`;

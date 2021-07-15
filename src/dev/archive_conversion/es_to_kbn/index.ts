@@ -7,15 +7,13 @@
  */
 
 import { ToolingLog } from '@kbn/dev-utils';
-import { creep } from './creep';
+import { prok } from './prok';
 
 export const convertArchives = () => {
-  // TODO: Externalize basePath as a cli arg.
-  // const basePath = 'non existing'
   const basePath = 'x-pack/test/functional/es_archives';
-  const creepPath = creep(basePath);
+  const prokPath = prok(basePath);
 
-  creepPath(
+  prokPath(
     new ToolingLog({
       level: 'info',
       writeTo: process.stdout,

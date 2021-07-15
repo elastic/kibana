@@ -7,31 +7,21 @@
  */
 
 import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
-import fs from 'fs';
-import { resolve, join } from 'path';
-import { EsArchiver } from '@kbn/es-archiver';
+import { resolve } from 'path';
 import { spawnSync } from 'child_process';
 import shell from 'shelljs';
-import { acMark, flatten, pathExists, tail } from './utils';
+import { acMark, pathExists, tail, join2Str, computeName } from './utils';
+import { getDirectoriesRecursive } from './recurse_directories';
 
 const resolveRoot = resolve.bind(null, REPO_ROOT);
 
 type BaseArchivePath = string;
 
-const getDirectories = (srcpath): unknown =>
-  fs
-    .readdirSync(srcpath)
-    .map((file) => join(srcpath, file))
-    .filter((path) => fs.statSync(path).isDirectory());
-const getDirectoriesRecursive = (srcpath): unknown => [
-  srcpath,
-  ...flatten(getDirectories(srcpath).map(getDirectoriesRecursive)),
-];
-
 const prokSync = (script) => (opts) => {
   const merged = [script, ...opts];
   spawnSync(process.execPath, merged);
 };
+
 const esArchiver = resolveRoot('scripts/es_archiver.js');
 const kbnArchiver = resolveRoot('scripts/kbn_archiver.js');
 
@@ -41,23 +31,20 @@ const kbnArchiverScript = prokSync(kbnArchiver);
 const xpackConfig = resolveRoot('x-pack/test/functional/config.js');
 const kbnArchiveFixturesDir = resolveRoot('x-pack/test/functional/fixtures/kbn_archiver');
 
-const computeName = (fixtureDir: string) => (esArchiveName: string) => {
-  return `${fixtureDir}/${esArchiveName}_NOT_COMPUTED_YET`;
-};
+const computeKbnArchiveName = computeName(kbnArchiveFixturesDir);
 
-const join2Str = (xs: string[]) => xs.join(',');
-const soTypes = ['index-pattern', 'lens', 'canvas-workpad'];
+const joinedSoTypes = process.env.SO_TYPES || join2Str(['index-pattern', 'lens', 'canvas-workpad']);
 
-const loadAndSave = (log: ToolingLog) => (name: string) => {
-  log.info(`${acMark} processing: \n\t[${name}]`);
+const loadAndSave = (log: ToolingLog) => (esArchiveName: string) => {
+  log.info(`${acMark} processing: \n\t[${esArchiveName}]`);
 
-  const computed = computeName(kbnArchiveFixturesDir)(name);
+  const computed = computeKbnArchiveName(esArchiveName);
 
   try {
-    esArchiverScript(['--config', xpackConfig, 'load', name]);
+    esArchiverScript(['--config', xpackConfig, 'load', esArchiveName]);
     log.info(`${acMark} creating: \n\t${computed}`);
     shell.mkdir('-p', computed);
-    kbnArchiverScript(['--config', xpackConfig, 'save', computed, '--type', join2Str(soTypes)]);
+    kbnArchiverScript(['--config', xpackConfig, 'save', computed, '--type', joinedSoTypes]);
   } catch (err) {
     log.error(`${acMark} ${err}`);
   }
@@ -70,7 +57,7 @@ const creepThru = (log: ToolingLog) => (base: BaseArchivePath) => {
   }
 };
 
-const creepFs = (archiveRoot: BaseArchivePath) => (log: ToolingLog) => {
+const validate = (archiveRoot: BaseArchivePath) => (log: ToolingLog) => {
   // archiveRoot = 'fake'
   log.info('Creeping through', archiveRoot);
 
@@ -79,5 +66,5 @@ const creepFs = (archiveRoot: BaseArchivePath) => (log: ToolingLog) => {
   const creepWithLog = creepThru(log);
   pathExists(archiveRoot).fold(logNotFound, creepWithLog);
 };
-export const creep = (base: string): ((log: ToolingLog) => void) => (log) =>
-  creepFs(resolveRoot(base))(log);
+export const prok = (base: string): ((log: ToolingLog) => void) => (log) =>
+  validate(resolveRoot(base))(log);
