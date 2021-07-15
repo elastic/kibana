@@ -13,11 +13,11 @@ exports[`it renders ToolBarPagerButtons 1`] = `
       aria-label="Previous page in table"
       data-test-subj="btnPrevPage"
       display="base"
-      iconSize="l"
+      iconSize="m"
       iconType="arrowLeft"
       isDisabled={false}
       onClick={[Function]}
-      size="s"
+      size="xs"
     />
   </EuiFlexItem>
   <EuiFlexItem
@@ -27,11 +27,11 @@ exports[`it renders ToolBarPagerButtons 1`] = `
       aria-label="Next page in table"
       data-test-subj="btnNextPage"
       display="base"
-      iconSize="l"
+      iconSize="m"
       iconType="arrowRight"
       isDisabled={false}
       onClick={[Function]}
-      size="s"
+      size="xs"
     />
   </EuiFlexItem>
 </EuiFlexGroup>
