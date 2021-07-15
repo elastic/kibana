@@ -16,9 +16,6 @@ export default function ({ getService }: FtrProviderContext) {
     this.tags(['mlqa']);
     const jobId = `fq_single_1_smv_${Date.now()}`;
 
-    const JOB_CONFIG = ml.commonConfig.getADFqSingleMetricJobConfig(jobId);
-    const DATAFEED_CONFIG = ml.commonConfig.getADFqDatafeedConfig(jobId);
-
     const annotation = {
       timestamp: 1455142431586,
       end_timestamp: 1455200689604,
@@ -37,6 +34,9 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
+
+      const JOB_CONFIG = ml.commonConfig.getADFqSingleMetricJobConfig(jobId);
+      const DATAFEED_CONFIG = ml.commonConfig.getADFqDatafeedConfig(jobId);
 
       await ml.api.createAndRunAnomalyDetectionLookbackJob(JOB_CONFIG, DATAFEED_CONFIG);
 
@@ -58,9 +58,9 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.navigation.navigateToJobManagement();
 
         await ml.jobTable.waitForJobsToLoad();
-        await ml.jobTable.filterWithSearchString(JOB_CONFIG.job_id, 1);
+        await ml.jobTable.filterWithSearchString(jobId, 1);
 
-        await ml.jobTable.clickOpenJobInSingleMetricViewerButton(JOB_CONFIG.job_id);
+        await ml.jobTable.clickOpenJobInSingleMetricViewerButton(jobId);
         await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
 
         await ml.singleMetricViewer.assertAnnotationsExists('loaded');
@@ -90,8 +90,8 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.testExecution.logTestStep('should display created annotation in job list');
         await ml.navigation.navigateToJobManagement();
         await ml.jobTable.waitForJobsToLoad();
-        await ml.jobTable.filterWithSearchString(JOB_CONFIG.job_id, 1);
-        await ml.jobTable.openAnnotationsTab(JOB_CONFIG.job_id);
+        await ml.jobTable.filterWithSearchString(jobId, 1);
+        await ml.jobTable.openAnnotationsTab(jobId);
         await ml.jobAnnotations.assertAnnotationExists({
           annotation: newText,
           event: 'user',
@@ -125,14 +125,14 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.navigation.navigateToJobManagement();
 
         await ml.jobTable.waitForJobsToLoad();
-        await ml.jobTable.filterWithSearchString(JOB_CONFIG.job_id, 1);
-        await ml.jobTable.openAnnotationsTab(JOB_CONFIG.job_id);
+        await ml.jobTable.filterWithSearchString(jobId, 1);
+        await ml.jobTable.openAnnotationsTab(jobId);
         await ml.jobAnnotations.assertAnnotationContentById(
           annotationId,
           expectedOriginalAnnotation
         );
 
-        await ml.jobTable.clickOpenJobInSingleMetricViewerButton(JOB_CONFIG.job_id);
+        await ml.jobTable.clickOpenJobInSingleMetricViewerButton(jobId);
         await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
         await ml.singleMetricViewer.assertAnnotationsExists('loaded');
 
@@ -179,8 +179,8 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.testExecution.logTestStep('should display edited annotation in job list');
         await ml.navigation.navigateToJobManagement();
         await ml.jobTable.waitForJobsToLoad();
-        await ml.jobTable.filterWithSearchString(JOB_CONFIG.job_id, 1);
-        await ml.jobTable.openAnnotationsTab(JOB_CONFIG.job_id);
+        await ml.jobTable.filterWithSearchString(jobId, 1);
+        await ml.jobTable.openAnnotationsTab(jobId);
         await ml.jobAnnotations.assertAnnotationContentById(annotationId, expectedEditedAnnotation);
       });
     });
@@ -198,9 +198,9 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.navigation.navigateToJobManagement();
 
         await ml.jobTable.waitForJobsToLoad();
-        await ml.jobTable.filterWithSearchString(JOB_CONFIG.job_id, 1);
+        await ml.jobTable.filterWithSearchString(jobId, 1);
 
-        await ml.jobTable.clickOpenJobInSingleMetricViewerButton(JOB_CONFIG.job_id);
+        await ml.jobTable.clickOpenJobInSingleMetricViewerButton(jobId);
         await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
         await ml.singleMetricViewer.assertAnnotationsExists('loaded');
 
@@ -234,8 +234,8 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.testExecution.logTestStep('does not show the deleted annotation in job list');
         await ml.navigation.navigateToJobManagement();
         await ml.jobTable.waitForJobsToLoad();
-        await ml.jobTable.filterWithSearchString(JOB_CONFIG.job_id, 1);
-        await ml.jobTable.openAnnotationsTab(JOB_CONFIG.job_id);
+        await ml.jobTable.filterWithSearchString(jobId, 1);
+        await ml.jobTable.openAnnotationsTab(jobId);
         await ml.jobAnnotations.assertAnnotationsRowMissing(annotationId);
       });
     });
@@ -244,7 +244,7 @@ export default function ({ getService }: FtrProviderContext) {
       before(async () => {
         // Points the read/write aliases of annotations to an index with wrong mappings
         // so we can simulate errors when requesting annotations.
-        await ml.testResources.setupBrokenAnnotationsIndexState(JOB_CONFIG.job_id);
+        await ml.testResources.setupBrokenAnnotationsIndexState(jobId);
       });
 
       it('displays error on broken annotation index and recovers after fix', async () => {
@@ -253,9 +253,9 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.navigation.navigateToJobManagement();
 
         await ml.jobTable.waitForJobsToLoad();
-        await ml.jobTable.filterWithSearchString(JOB_CONFIG.job_id, 1);
+        await ml.jobTable.filterWithSearchString(jobId, 1);
 
-        await ml.jobTable.clickOpenJobInSingleMetricViewerButton(JOB_CONFIG.job_id);
+        await ml.jobTable.clickOpenJobInSingleMetricViewerButton(jobId);
         await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
 
         await ml.testExecution.logTestStep(
