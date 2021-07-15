@@ -67,7 +67,8 @@ describe.skip('Alerts rules, prebuilt rules', () => {
   });
 });
 
-describe('Actions with prebuilt rules', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/105791
+describe.skip('Actions with prebuilt rules', () => {
   beforeEach(() => {
     const expectedNumberOfRules = totalNumberOfPrebuiltRules;
     const expectedElasticRulesBtnText = `Elastic rules (${expectedNumberOfRules})`;
