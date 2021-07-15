@@ -12,21 +12,19 @@ import type { TelemetryPluginSetup } from 'src/plugins/telemetry/public';
 import type TelemetryManagementSection from './telemetry_management_section';
 export type TelemetryManagementSectionWrapperProps = Omit<
   TelemetryManagementSection['props'],
-  'telemetryService' | 'showAppliesSettingMessage' | 'isSecurityExampleEnabled'
+  'telemetryService' | 'showAppliesSettingMessage'
 >;
 
 const TelemetryManagementSectionComponent = lazy(() => import('./telemetry_management_section'));
 
 export function telemetryManagementSectionWrapper(
-  telemetryService: TelemetryPluginSetup['telemetryService'],
-  shouldShowSecuritySolutionUsageExample: () => boolean
+  telemetryService: TelemetryPluginSetup['telemetryService']
 ) {
   const TelemetryManagementSectionWrapper = (props: TelemetryManagementSectionWrapperProps) => (
     <Suspense fallback={<EuiLoadingSpinner />}>
       <TelemetryManagementSectionComponent
         showAppliesSettingMessage={true}
         telemetryService={telemetryService}
-        isSecurityExampleEnabled={shouldShowSecuritySolutionUsageExample}
         {...props}
       />
     </Suspense>
