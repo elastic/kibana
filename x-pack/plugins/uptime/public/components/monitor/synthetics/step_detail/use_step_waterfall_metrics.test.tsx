@@ -48,7 +48,11 @@ describe('useStepWaterfallMetrics', () => {
     });
 
     const { result } = renderHook(
-      (props) => useStepWaterfallMetrics({ checkGroup: '44D-444FFF-444-FFF-3333' }),
+      (props) =>
+        useStepWaterfallMetrics({
+          checkGroup: '44D-444FFF-444-FFF-3333',
+          hasNavigationRequest: true,
+        }),
       {}
     );
 
@@ -76,7 +80,7 @@ describe('useStepWaterfallMetrics', () => {
         },
         index: 'heartbeat-*',
       },
-      ['heartbeat-*', '44D-444FFF-444-FFF-3333']
+      ['heartbeat-*', '44D-444FFF-444-FFF-3333', true]
     );
     expect(result.current).toEqual({
       loading: false,
