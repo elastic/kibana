@@ -13,124 +13,145 @@ import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/serv
 import { migrationMocks } from 'src/core/server/mocks';
 
 const context = migrationMocks.createContext();
-const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
+const encryptedSavedObjectsSetupNoError = encryptedSavedObjectsMock.createSetup();
+const encryptedSavedObjectsSetupThrowsError = encryptedSavedObjectsMock.createSetup();
+
+beforeAll(() => {
+  encryptedSavedObjectsSetupNoError.createMigration.mockImplementation((_, migration) => migration);
+  encryptedSavedObjectsSetupThrowsError.createMigration.mockImplementation(() => () => {
+    throw new Error(`Can't migrate!`);
+  });
+});
+
+function testMigrationWhenNoEsoErrors(
+  connector: SavedObjectUnsanitizedDoc<Partial<RawAction>>,
+  expectedMigratedConnector: SavedObjectUnsanitizedDoc<Partial<RawAction>>,
+  version: string
+) {
+  // should migrate correctly when no decrypt errors
+  expect(
+    getMigrations(encryptedSavedObjectsSetupNoError)[version](connector, context)
+  ).toMatchObject(expectedMigratedConnector);
+}
+
+function testMigrationWhenEsoThrowsError(
+  connector: SavedObjectUnsanitizedDoc<Partial<RawAction>>,
+  expectedMigratedConnector: SavedObjectUnsanitizedDoc<Partial<RawAction>>,
+  version: string
+) {
+  // should log error when decryption throws error but migrated correctly
+  expect(
+    getMigrations(encryptedSavedObjectsSetupThrowsError)[version](connector, context)
+  ).toMatchObject(expectedMigratedConnector);
+  expect(context.log.error).toHaveBeenCalledWith(
+    `encryptedSavedObject ${version} migration failed for connector ${connector.id} with error: Can't migrate!`,
+    {
+      migrations: {
+        connectorDocument: connector,
+      },
+    }
+  );
+}
 
 describe('7.10.0', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-    encryptedSavedObjectsSetup.createMigration.mockImplementation(
-      (shouldMigrateWhenPredicate, migration) => migration
-    );
-  });
-
   test('add hasAuth config property for .email actions', () => {
-    const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
-    const action = getMockDataForEmail({});
-    const migratedAction = migration710(action, context);
-    expect(migratedAction.attributes.config).toEqual({
-      hasAuth: true,
-    });
-    expect(migratedAction).toEqual({
-      ...action,
+    const connector = getMockDataForEmail({});
+    const expectedMigratedConnector: SavedObjectUnsanitizedDoc<Partial<RawAction>> = {
+      ...connector,
       attributes: {
-        ...action.attributes,
+        ...connector.attributes,
         config: {
           hasAuth: true,
         },
       },
-    });
+    };
+
+    testMigrationWhenNoEsoErrors(connector, expectedMigratedConnector, '7.10.0');
+    testMigrationWhenEsoThrowsError(connector, expectedMigratedConnector, '7.10.0');
   });
 
   test('rename cases configuration object', () => {
-    const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
-    const action = getCasesMockData({});
-    const migratedAction = migration710(action, context);
-    expect(migratedAction.attributes.config).toEqual({
-      incidentConfiguration: { mapping: [] },
-    });
-    expect(migratedAction).toEqual({
-      ...action,
+    const connector = getCasesMockData({});
+    const expectedMigratedConnector: SavedObjectUnsanitizedDoc<Partial<RawAction>> = {
+      ...connector,
       attributes: {
-        ...action.attributes,
+        ...connector.attributes,
         config: {
           incidentConfiguration: { mapping: [] },
         },
       },
-    });
+    };
+
+    testMigrationWhenNoEsoErrors(connector, expectedMigratedConnector, '7.10.0');
+    testMigrationWhenEsoThrowsError(connector, expectedMigratedConnector, '7.10.0');
   });
 });
 
 describe('7.11.0', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-    encryptedSavedObjectsSetup.createMigration.mockImplementation(
-      (shouldMigrateWhenPredicate, migration) => migration
-    );
-  });
-
   test('add hasAuth = true for .webhook actions with user and password', () => {
-    const migration711 = getMigrations(encryptedSavedObjectsSetup)['7.11.0'];
-    const action = getMockDataForWebhook({}, true);
-    expect(migration711(action, context)).toMatchObject({
-      ...action,
+    const connector = getMockDataForWebhook({}, true);
+    const expectedMigratedConnector: SavedObjectUnsanitizedDoc<Partial<RawAction>> = {
+      ...connector,
       attributes: {
-        ...action.attributes,
+        ...connector.attributes,
         config: {
           hasAuth: true,
         },
       },
-    });
+    };
+
+    testMigrationWhenNoEsoErrors(connector, expectedMigratedConnector, '7.11.0');
+    testMigrationWhenEsoThrowsError(connector, expectedMigratedConnector, '7.11.0');
   });
 
   test('add hasAuth = false for .webhook actions without user and password', () => {
-    const migration711 = getMigrations(encryptedSavedObjectsSetup)['7.11.0'];
-    const action = getMockDataForWebhook({}, false);
-    expect(migration711(action, context)).toMatchObject({
-      ...action,
+    const connector = getMockDataForWebhook({}, false);
+    const expectedMigratedConnector: SavedObjectUnsanitizedDoc<Partial<RawAction>> = {
+      ...connector,
       attributes: {
-        ...action.attributes,
+        ...connector.attributes,
         config: {
           hasAuth: false,
         },
       },
-    });
+    };
+
+    testMigrationWhenNoEsoErrors(connector, expectedMigratedConnector, '7.11.0');
+    testMigrationWhenEsoThrowsError(connector, expectedMigratedConnector, '7.11.0');
   });
+
   test('remove cases mapping object', () => {
-    const migration711 = getMigrations(encryptedSavedObjectsSetup)['7.11.0'];
-    const action = getMockData({
+    const connector = getMockData({
       config: { incidentConfiguration: { mapping: [] }, isCaseOwned: true, another: 'value' },
     });
-    expect(migration711(action, context)).toEqual({
-      ...action,
+    const expectedMigratedConnector: SavedObjectUnsanitizedDoc<Partial<RawAction>> = {
+      ...connector,
       attributes: {
-        ...action.attributes,
+        ...connector.attributes,
         config: {
           another: 'value',
         },
       },
-    });
+    };
+
+    testMigrationWhenNoEsoErrors(connector, expectedMigratedConnector, '7.11.0');
+    testMigrationWhenEsoThrowsError(connector, expectedMigratedConnector, '7.11.0');
   });
 });
 
 describe('7.14.0', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-    encryptedSavedObjectsSetup.createMigration.mockImplementation(
-      (shouldMigrateWhenPredicate, migration) => migration
-    );
-  });
-
   test('add isMissingSecrets property for actions', () => {
-    const migration714 = getMigrations(encryptedSavedObjectsSetup)['7.14.0'];
-    const action = getMockData({ isMissingSecrets: undefined });
-    const migratedAction = migration714(action, context);
-    expect(migratedAction).toEqual({
-      ...action,
+    const connector = getMockData({ isMissingSecrets: undefined });
+    const expectedMigratedConnector: SavedObjectUnsanitizedDoc<Partial<RawAction>> = {
+      ...connector,
       attributes: {
-        ...action.attributes,
+        ...connector.attributes,
         isMissingSecrets: false,
       },
-    });
+    };
+
+    testMigrationWhenNoEsoErrors(connector, expectedMigratedConnector, '7.14.0');
+    testMigrationWhenEsoThrowsError(connector, expectedMigratedConnector, '7.14.0');
   });
 });
 

@@ -77,7 +77,7 @@ function executeMigrationWithErrorHandling(
       return migrationFunctions.esoMigrationFn(doc, context);
     } catch (ex) {
       context.log.error<ConnectorLogMeta>(
-        `encryptedSavedObject ${version} migration failed for action ${doc.id} with error: ${ex.message}`,
+        `encryptedSavedObject ${version} migration failed for connector ${doc.id} with error: ${ex.message}`,
         {
           migrations: {
             connectorDocument: doc,
