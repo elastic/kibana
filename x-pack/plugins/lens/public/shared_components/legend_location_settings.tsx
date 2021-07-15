@@ -52,7 +52,6 @@ const locationOptions: Array<{
   id: string;
   value: 'outside' | 'inside';
   label: string;
-  'data-test-subj': string;
 }> = [
   {
     id: `xy_location_outside`,
@@ -60,7 +59,6 @@ const locationOptions: Array<{
     label: i18n.translate('xpack.lens.xyChart.legendLocation.outside', {
       defaultMessage: 'Outside',
     }),
-    'data-test-subj': 'lnsXY_legendLocation-outside',
   },
   {
     id: `xy_location_inside`,
@@ -68,7 +66,6 @@ const locationOptions: Array<{
     label: i18n.translate('xpack.lens.xyChart.legendLocation.inside', {
       defaultMessage: 'Inside',
     }),
-    'data-test-subj': 'lnsXY_legendLocation-inside',
   },
 ];
 
