@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PNG_REPORT_TYPE_V2 } from '../../../../common/constants';
+import { PNG_REPORT_TYPE_V2 } from '../../../common/constants';
 
 export const metadata = {
   id: PNG_REPORT_TYPE_V2,

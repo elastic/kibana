@@ -6,9 +6,9 @@
  */
 
 import type { SerializableState } from 'src/plugins/kibana_utils/common';
-import { Locator } from '../../../../common/types';
-import { LayoutParams } from '../../../lib/layouts';
-import { BaseParams, BasePayload } from '../../../types';
+import { Locator } from '../../../common/types';
+import { LayoutParams } from '../../lib/layouts';
+import { BaseParams, BasePayload } from '../../types';
 
 interface BaseParamsPNGV2<P extends SerializableState = SerializableState> {
   layout: LayoutParams;
