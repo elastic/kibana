@@ -62,7 +62,40 @@ export type MlAnomalyDetectionAlertPreviewRequest = TypeOf<
 >;
 
 export const anomalyDetectionJobsHealthRuleParams = schema.object({
-  jobSelection: jobsSelectionSchema,
+  includeJobs: schema.oneOf([jobsSelectionSchema, schema.literal('_all')]),
+  excludeJobs: schema.nullable(jobsSelectionSchema),
+  testsConfig: schema.nullable(
+    schema.object({
+      dataFeed: schema.nullable(
+        schema.object({
+          enabled: schema.boolean({ defaultValue: true }),
+        })
+      ),
+      mml: schema.nullable(
+        schema.object({
+          enabled: schema.boolean({ defaultValue: true }),
+        })
+      ),
+      delayedData: schema.nullable(
+        schema.object({
+          enabled: schema.boolean({ defaultValue: true }),
+          docsCount: schema.nullable(schema.number()),
+          timeInterval: schema.nullable(schema.string()),
+        })
+      ),
+      behindRealtime: schema.nullable(
+        schema.object({
+          enabled: schema.boolean({ defaultValue: true }),
+          timeInterval: schema.nullable(schema.string()),
+        })
+      ),
+      errorMessages: schema.nullable(
+        schema.object({
+          enabled: schema.boolean({ defaultValue: true }),
+        })
+      ),
+    })
+  ),
 });
 
 export type AnomalyDetectionJobsHealthRuleParams = TypeOf<

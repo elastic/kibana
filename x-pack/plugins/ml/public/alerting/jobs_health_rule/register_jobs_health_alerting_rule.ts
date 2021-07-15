@@ -11,6 +11,7 @@ import { TriggersAndActionsUIPublicPluginSetup } from '../../../../triggers_acti
 import { PluginSetupContract as AlertingSetup } from '../../../../alerting/public';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import { MlAnomalyDetectionJobsHealthRuleParams } from '../../../common/types/alerts';
+import { isPopulatedObject } from '../../../common';
 
 export function registerJobsHealthAlertingRule(
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup,
@@ -29,16 +30,19 @@ export function registerJobsHealthAlertingRule(
     validate: (alertParams: MlAnomalyDetectionJobsHealthRuleParams) => {
       const validationResult = {
         errors: {
-          jobSelection: new Array<string>(),
+          includeJobs: new Array<string>(),
         } as Record<keyof MlAnomalyDetectionJobsHealthRuleParams, string[]>,
       };
 
       if (
-        !alertParams.jobSelection?.jobIds?.length &&
-        !alertParams.jobSelection?.groupIds?.length
+        !alertParams.includeJobs ||
+        (alertParams.includeJobs !== '_all' &&
+          isPopulatedObject(alertParams.includeJobs) &&
+          !alertParams.includeJobs?.jobIds?.length &&
+          !alertParams.includeJobs?.groupIds?.length)
       ) {
-        validationResult.errors.jobSelection.push(
-          i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.jobSelection.errorMessage', {
+        validationResult.errors.includeJobs.push(
+          i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.includeJobs.errorMessage', {
             defaultMessage: 'Job selection is required',
           })
         );

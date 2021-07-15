@@ -30,7 +30,7 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
 
   const jobsAndGroupIds: string[] = useMemo(
     () => (Object.values(alertParams.includeJobs ?? {}) as string[][]).flat(),
-    [alertParams.jobSelection]
+    [alertParams.includeJobs]
   );
 
   const onAlertParamChange = useCallback(
@@ -43,12 +43,12 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   );
 
   return (
-    <EuiForm data-test-subj={'mlAnomalyAlertForm'}>
+    <EuiForm data-test-subj={'mlJobsHealthAlertingRuleForm'}>
       <JobSelectorControl
         jobsAndGroupIds={jobsAndGroupIds}
         adJobsApiService={adJobsApiService}
         onChange={useCallback(onAlertParamChange('includeJobs'), [])}
-        errors={Array.isArray(errors.jobSelection) ? errors.jobSelection : []}
+        errors={Array.isArray(errors.includeJobs) ? errors.includeJobs : []}
       />
 
       <EuiSpacer size="m" />

@@ -10,8 +10,8 @@ import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
 import {
+  anomalyDetectionJobsHealthRuleParams,
   AnomalyDetectionJobsHealthRuleParams,
-  mlAnomalyDetectionAlertParams,
 } from '../../routes/schemas/alerting_schema';
 import { RegisterAlertParams } from './register_ml_alerts';
 import {
@@ -54,7 +54,7 @@ export function registerJobsMonitoringRuleType({
     actionGroups: [REALTIME_ISSUE_DETECTED],
     defaultActionGroupId: ANOMALY_DETECTION_JOB_REALTIME_ISSUE,
     validate: {
-      params: mlAnomalyDetectionAlertParams,
+      params: anomalyDetectionJobsHealthRuleParams,
     },
     actionVariables: {
       context: [
