@@ -60,6 +60,7 @@ export class DatasourceComponent extends PureComponent {
     setPreviewing: PropTypes.func,
     isInvalid: PropTypes.bool,
     setInvalid: PropTypes.func,
+    renderError: PropTypes.func,
   };
 
   state = { defaultIndex: '' };
@@ -125,6 +126,7 @@ export class DatasourceComponent extends PureComponent {
       setPreviewing,
       isInvalid,
       setInvalid,
+      renderError,
     } = this.props;
 
     const { defaultIndex } = this.state;
@@ -155,6 +157,7 @@ export class DatasourceComponent extends PureComponent {
         isInvalid,
         setInvalid,
         defaultIndex,
+        renderError,
       });
 
     const hasExpressionArgs = Object.values(stateArgs).some((a) => a && typeof a[0] === 'object');

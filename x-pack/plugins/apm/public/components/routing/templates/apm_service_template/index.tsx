@@ -13,6 +13,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { omit } from 'lodash';
 import React from 'react';
 import {
   isIosAgentName,
@@ -23,15 +24,10 @@ import { enableServiceOverview } from '../../../../../common/ui_settings_keys';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useBreadcrumb } from '../../../../context/breadcrumbs/use_breadcrumb';
+import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { Correlations } from '../../../app/correlations';
-import { useErrorOverviewHref } from '../../../shared/Links/apm/ErrorOverviewLink';
-import { useMetricOverviewHref } from '../../../shared/Links/apm/MetricOverviewLink';
-import { useServiceMapHref } from '../../../shared/Links/apm/ServiceMapLink';
-import { useServiceNodeOverviewHref } from '../../../shared/Links/apm/ServiceNodeOverviewLink';
-import { useServiceOverviewHref } from '../../../shared/Links/apm/service_overview_link';
-import { useServiceProfilingHref } from '../../../shared/Links/apm/service_profiling_link';
-import { useTransactionsOverviewHref } from '../../../shared/Links/apm/transaction_overview_link';
 import { SearchBar } from '../../../shared/search_bar';
 import { ServiceIcons } from '../../../shared/service_icons';
 import { ApmMainTemplate } from '../apm_main_template';
@@ -39,19 +35,19 @@ import { AnalyzeDataButton } from './analyze_data_button';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
+    | 'overview'
+    | 'transactions'
     | 'errors'
     | 'metrics'
     | 'nodes'
-    | 'overview'
     | 'service-map'
-    | 'profiling'
-    | 'transactions';
+    | 'profiling';
   hidden?: boolean;
 };
 
 interface Props {
+  title: string;
   children: React.ReactNode;
-  serviceName: string;
   selectedTab: Tab['key'];
   searchBarOptions?: React.ComponentProps<typeof SearchBar>;
 }
@@ -65,12 +61,27 @@ export function ApmServiceTemplate(props: Props) {
 }
 
 function TemplateWithContext({
+  title,
   children,
-  serviceName,
   selectedTab,
   searchBarOptions,
 }: Props) {
-  const tabs = useTabs({ serviceName, selectedTab });
+  const {
+    path: { serviceName },
+    query,
+  } = useApmParams('/services/:serviceName/*');
+
+  const router = useApmRouter();
+
+  const tabs = useTabs({ selectedTab });
+
+  useBreadcrumb({
+    title,
+    href: router.link(`/services/:serviceName/${selectedTab}` as const, {
+      path: { serviceName },
+      query,
+    }),
+  });
 
   return (
     <ApmMainTemplate
@@ -93,7 +104,7 @@ function TemplateWithContext({
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <AnalyzeDataButton serviceName={serviceName} />
+              <AnalyzeDataButton />
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
@@ -110,21 +121,32 @@ function TemplateWithContext({
   );
 }
 
-function useTabs({
-  serviceName,
-  selectedTab,
-}: {
-  serviceName: string;
-  selectedTab: Tab['key'];
-}) {
-  const { agentName, transactionType } = useApmServiceContext();
+function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
+  const { agentName } = useApmServiceContext();
   const { core, config } = useApmPluginContext();
-  const { urlParams } = useUrlParams();
+
+  const router = useApmRouter();
+
+  const {
+    path: { serviceName },
+    query: queryFromUrl,
+  } = useApmParams(`/services/:serviceName/${selectedTab}` as const);
+
+  const query = omit(
+    queryFromUrl,
+    'page',
+    'pageSize',
+    'sortField',
+    'sortDirection'
+  );
 
   const tabs: Tab[] = [
     {
       key: 'overview',
-      href: useServiceOverviewHref({ serviceName, transactionType }),
+      href: router.link('/services/:serviceName/overview', {
+        path: { serviceName },
+        query,
+      }),
       label: i18n.translate('xpack.apm.serviceDetails.overviewTabLabel', {
         defaultMessage: 'Overview',
       }),
@@ -132,10 +154,9 @@ function useTabs({
     },
     {
       key: 'transactions',
-      href: useTransactionsOverviewHref({
-        serviceName,
-        latencyAggregationType: urlParams.latencyAggregationType,
-        transactionType,
+      href: router.link('/services/:serviceName/transactions', {
+        path: { serviceName },
+        query,
       }),
       label: i18n.translate('xpack.apm.serviceDetails.transactionsTabLabel', {
         defaultMessage: 'Transactions',
@@ -143,22 +164,20 @@ function useTabs({
     },
     {
       key: 'errors',
-      href: useErrorOverviewHref(serviceName),
+      href: router.link('/services/:serviceName/errors', {
+        path: { serviceName },
+        query,
+      }),
       label: i18n.translate('xpack.apm.serviceDetails.errorsTabLabel', {
         defaultMessage: 'Errors',
       }),
     },
     {
-      key: 'nodes',
-      href: useServiceNodeOverviewHref(serviceName),
-      label: i18n.translate('xpack.apm.serviceDetails.nodesTabLabel', {
-        defaultMessage: 'JVMs',
-      }),
-      hidden: !isJavaAgentName(agentName),
-    },
-    {
       key: 'metrics',
-      href: useMetricOverviewHref(serviceName),
+      href: router.link('/services/:serviceName/metrics', {
+        path: { serviceName },
+        query,
+      }),
       label: i18n.translate('xpack.apm.serviceDetails.metricsTabLabel', {
         defaultMessage: 'Metrics',
       }),
@@ -169,15 +188,34 @@ function useTabs({
         isIosAgentName(agentName),
     },
     {
+      key: 'nodes',
+      href: router.link('/services/:serviceName/nodes', {
+        path: { serviceName },
+        query,
+      }),
+      label: i18n.translate('xpack.apm.serviceDetails.nodesTabLabel', {
+        defaultMessage: 'JVMs',
+      }),
+      hidden: !isJavaAgentName(agentName),
+    },
+    {
       key: 'service-map',
-      href: useServiceMapHref(serviceName),
+      href: router.link('/services/:serviceName/service-map', {
+        path: { serviceName },
+        query,
+      }),
       label: i18n.translate('xpack.apm.home.serviceMapTabLabel', {
         defaultMessage: 'Service Map',
       }),
     },
     {
       key: 'profiling',
-      href: useServiceProfilingHref({ serviceName }),
+      href: router.link('/services/:serviceName/profiling', {
+        path: {
+          serviceName,
+        },
+        query,
+      }),
       hidden: !config.profilingEnabled,
       label: (
         <EuiFlexGroup direction="row" gutterSize="s">

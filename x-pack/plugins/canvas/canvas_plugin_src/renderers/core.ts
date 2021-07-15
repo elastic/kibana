@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { debug } from './debug';
-import { error } from './error';
 import { image } from './image';
 import { markdown } from './markdown';
 import { metric } from './metric';
@@ -19,8 +17,6 @@ import { table } from './table';
 import { text } from './text';
 
 export const renderFunctions = [
-  debug,
-  error,
   image,
   markdown,
   metric,
