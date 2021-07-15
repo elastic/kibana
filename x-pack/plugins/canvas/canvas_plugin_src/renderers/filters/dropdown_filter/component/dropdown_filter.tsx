@@ -74,7 +74,6 @@ export const DropdownFilter: FunctionComponent<Props> = ({
     <div className="canvasDropdownFilter">
       <select
         className="canvasDropdownFilter__select"
-        defaultValue={'x-pack'}
         value={value}
         onChange={changeHandler}
         data-test-subj="canvasDropdownFilter__select"
