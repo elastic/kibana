@@ -66,7 +66,7 @@ export function WaterfallCharMarkers() {
           dataValues={[
             {
               dataValue: offset,
-              details: markersInfo[id]?.label,
+              details: markersInfo[id]?.label ?? id,
               header: i18n.translate('xpack.uptime.synthetics.waterfall.offsetUnit', {
                 defaultMessage: '{offset} ms',
                 values: { offset },
@@ -77,7 +77,7 @@ export function WaterfallCharMarkers() {
           style={{
             line: {
               strokeWidth: 2,
-              stroke: markersInfo[id].color,
+              stroke: markersInfo[id]?.color ?? theme.eui.euiColorMediumShade,
               opacity: 1,
             },
           }}

@@ -23,6 +23,7 @@ export interface NetworkEventsState {
       loading: boolean;
       error?: Error;
       isWaterfallSupported: boolean;
+      hasNavigationRequest?: boolean;
     };
   };
 }
@@ -71,7 +72,14 @@ export const networkEventsReducer = handleActions<NetworkEventsState, Payload>(
     [String(getNetworkEventsSuccess)]: (
       state: NetworkEventsState,
       {
-        payload: { events, total, checkGroup, stepIndex, isWaterfallSupported },
+        payload: {
+          events,
+          total,
+          checkGroup,
+          stepIndex,
+          isWaterfallSupported,
+          hasNavigationRequest,
+        },
       }: Action<SyntheticsNetworkEventsApiResponse & FetchNetworkEventsParams>
     ) => {
       return {
@@ -85,12 +93,14 @@ export const networkEventsReducer = handleActions<NetworkEventsState, Payload>(
                     events,
                     total,
                     isWaterfallSupported,
+                    hasNavigationRequest,
                   }
                 : {
                     loading: false,
                     events,
                     total,
                     isWaterfallSupported,
+                    hasNavigationRequest,
                   },
             }
           : {
@@ -99,6 +109,7 @@ export const networkEventsReducer = handleActions<NetworkEventsState, Payload>(
                 events,
                 total,
                 isWaterfallSupported,
+                hasNavigationRequest,
               },
             },
       };

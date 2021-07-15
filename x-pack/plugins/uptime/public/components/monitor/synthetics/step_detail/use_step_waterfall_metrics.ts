@@ -12,46 +12,49 @@ import { MarkerItems } from '../waterfall/context/waterfall_chart';
 
 export interface Props {
   checkGroup: string;
+  hasNavigationRequest?: boolean;
 }
 export const BROWSER_TRACE_TYPE = 'browser.relative_trace.type';
 export const BROWSER_TRACE_NAME = 'browser.relative_trace.name';
 export const BROWSER_TRACE_START = 'browser.relative_trace.start.us';
 
-export const useStepWaterfallMetrics = ({ checkGroup }: Props) => {
+export const useStepWaterfallMetrics = ({ checkGroup, hasNavigationRequest }: Props) => {
   const { settings } = useSelector(selectDynamicSettings);
 
   const heartbeatIndices = settings?.heartbeatIndices || '';
 
   const { data, loading } = useEsSearch(
-    createEsParams({
-      index: heartbeatIndices!,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  'monitor.check_group': checkGroup,
-                },
+    hasNavigationRequest
+      ? createEsParams({
+          index: heartbeatIndices!,
+          body: {
+            query: {
+              bool: {
+                filter: [
+                  {
+                    term: {
+                      'monitor.check_group': checkGroup,
+                    },
+                  },
+                  {
+                    term: {
+                      'synthetics.type': 'journey/metrics',
+                    },
+                  },
+                ],
               },
-              {
-                term: {
-                  'synthetics.type': 'journey/metrics',
-                },
-              },
-            ],
+            },
+            fields: ['browser.*'],
+            _source: false,
           },
-        },
-        fields: ['browser.*'],
-        _source: false,
-      },
-    }),
-    [heartbeatIndices, checkGroup]
+        })
+      : {},
+    [heartbeatIndices, checkGroup, hasNavigationRequest]
   );
 
   const metrics: MarkerItems = [];
 
-  if (data) {
+  if (data && hasNavigationRequest) {
     const metricDocs = (data.hits.hits as unknown) as Array<{ fields: any }>;
     let navigationStart = 0;
     let navigationStartExist = false;
