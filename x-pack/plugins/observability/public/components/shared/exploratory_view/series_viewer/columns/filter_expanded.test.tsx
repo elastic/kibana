@@ -96,8 +96,6 @@ describe('FilterExpanded', function () {
       { initSeries }
     );
 
-    screen.debug();
-
     fireEvent.click(screen.getByText('Browser Family'));
 
     expect(screen.queryByText('Firefox')).toBeTruthy();

@@ -55,7 +55,5 @@ describe('Action Menu', function () {
     fireEvent.click(await findByText('Save'));
 
     expect(await screen.findByText('Lens Save Modal Component')).toBeInTheDocument();
-
-    screen.debug();
   });
 });

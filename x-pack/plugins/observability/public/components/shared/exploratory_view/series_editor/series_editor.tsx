@@ -78,7 +78,7 @@ export const getSeriesToEdit = ({
     });
 };
 
-export const SeriesEditor = React.memo(function ({}: {}) {
+export const SeriesEditor = React.memo(function () {
   const [editorItems, setEditorItems] = useState<BuilderItem[]>([]);
 
   const { getSeries, allSeries, reportType, removeSeries } = useSeriesStorage();
@@ -165,7 +165,7 @@ export const SeriesEditor = React.memo(function ({}: {}) {
           <EuiButtonIcon
             onClick={() => toggleDetails(item)}
             isDisabled={!item.series.dataType || !item.series.selectedMetricField}
-            aria-label={itemIdToExpandedRowMap[item.id] ? 'Collapse' : 'Expand'}
+            aria-label={itemIdToExpandedRowMap[item.id] ? COLLAPSE_LABEL : EXPAND_LABEL}
             iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
           />
         ) : null,
@@ -189,7 +189,9 @@ export const SeriesEditor = React.memo(function ({}: {}) {
       ),
     },
     {
-      name: 'Data type',
+      name: i18n.translate('xpack.observability.expView.seriesEditor.dataType', {
+        defaultMessage: 'Data type',
+      }),
       field: 'id',
       width: '15%',
       render: (seriesId: string, { series }: BuilderItem) => (
@@ -197,7 +199,9 @@ export const SeriesEditor = React.memo(function ({}: {}) {
       ),
     },
     {
-      name: 'Report metric',
+      name: i18n.translate('xpack.observability.expView.seriesEditor.reportMetric', {
+        defaultMessage: 'Report metric',
+      }),
       field: 'id',
       width: '15%',
       render: (seriesId: string, { seriesConfig, series }: BuilderItem) => (
@@ -209,7 +213,9 @@ export const SeriesEditor = React.memo(function ({}: {}) {
       ),
     },
     {
-      name: 'Date/Time',
+      name: i18n.translate('xpack.observability.expView.seriesEditor.time', {
+        defaultMessage: 'Time',
+      }),
       field: 'id',
       width: '27%',
       render: (seriesId: string, { series }: BuilderItem) => (
@@ -274,18 +280,18 @@ export const SeriesEditor = React.memo(function ({}: {}) {
 
   return (
     <Wrapper>
-      <StyledScrollDiv>
+      <div>
         <EuiSpacer />
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiFormRow label="Report type" display="columnCompressed">
+            <EuiFormRow label={REPORT_TYPE_LABEL} display="columnCompressed">
               <ReportTypesSelect />
             </EuiFormRow>
           </EuiFlexItem>
           {reportType && (
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty onClick={() => resetView()} color="text">
-                Reset
+                {RESET_LABEL}
               </EuiButtonEmpty>
             </EuiFlexItem>
           )}
@@ -309,14 +315,11 @@ export const SeriesEditor = React.memo(function ({}: {}) {
           />
         )}
         <EuiSpacer />
-      </StyledScrollDiv>
+      </div>
     </Wrapper>
   );
 });
 
-const StyledScrollDiv = euiStyled.div`
-
-`;
 const Wrapper = euiStyled.div`
   max-height: 50vh;
   &::-webkit-scrollbar {
@@ -368,3 +371,22 @@ export const SELECT_REPORT_TYPE = i18n.translate(
     defaultMessage: 'No report type selected',
   }
 );
+
+export const RESET_LABEL = i18n.translate('xpack.observability.expView.seriesBuilder.reset', {
+  defaultMessage: 'Reset',
+});
+
+export const REPORT_TYPE_LABEL = i18n.translate(
+  'xpack.observability.expView.seriesBuilder.reportType',
+  {
+    defaultMessage: 'Report type',
+  }
+);
+
+const COLLAPSE_LABEL = i18n.translate('xpack.observability.expView.seriesBuilder.collapse', {
+  defaultMessage: 'Collapse',
+});
+
+const EXPAND_LABEL = i18n.translate('xpack.observability.expView.seriesBuilder.expand', {
+  defaultMessage: 'Exapnd',
+});

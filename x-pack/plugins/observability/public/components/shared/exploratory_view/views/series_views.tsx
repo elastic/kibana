@@ -16,13 +16,13 @@ import { PanelId } from '../exploratory_view';
 
 const tabs = [
   {
-    id: 'preview',
+    id: 'preview' as const,
     name: i18n.translate('xpack.observability.overview.exploratoryView.preview', {
       defaultMessage: 'Preview',
     }),
   },
   {
-    id: 'configure',
+    id: 'configure' as const,
     name: i18n.translate('xpack.observability.overview.exploratoryView.configureSeries', {
       defaultMessage: 'Configure series',
     }),
@@ -42,9 +42,9 @@ export function SeriesViews({
 
   const history = useHistory();
 
-  const [selectedTabId, setSelectedTabId] = useState('configure');
+  const [selectedTabId, setSelectedTabId] = useState<ViewTab>('configure');
 
-  const onSelectedTabChanged = (id: string) => {
+  const onSelectedTabChanged = (id: ViewTab) => {
     setSelectedTabId(id);
     history.push('/exploratory-view/' + id);
   };

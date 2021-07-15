@@ -38,6 +38,11 @@ interface Props {
   filters: SeriesConfig['baseFilters'];
 }
 
+export interface NestedFilterOpen {
+  value: string;
+  negate: boolean;
+}
+
 export function FilterExpanded({
   seriesId,
   series,
@@ -50,7 +55,7 @@ export function FilterExpanded({
   const [value, setValue] = useState('');
 
   const [isOpen, setIsOpen] = useState(false);
-  const [isNestedOpen, setIsNestedOpen] = useState({ value: '', negate: false });
+  const [isNestedOpen, setIsNestedOpen] = useState<NestedFilterOpen>({ value: '', negate: false });
 
   const queryFilters: ESFilter[] = [];
 

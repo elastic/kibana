@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiSuperSelect } from '@elastic/eui';
 import { useSeriesStorage } from '../hooks/use_series_storage';
 import { SeriesConfig, SeriesUrl } from '../types';
+import { i18n } from '../../../../../../../../../../../../private/var/tmp/_bazel_shahzad/23eed4ccf09918e56eb034cb7806afe1/execroot/kibana/bazel-out/darwin-fastbuild/bin/packages/kbn-i18n';
 
 interface Props {
   seriesId: string;
@@ -33,8 +34,8 @@ export function ReportMetricOptions({ seriesId, series, metricOptions }: Props) 
     return null;
   }
 
-  const options = (metricOptions ?? []).map(({ label, field: fd, id }) => ({
-    value: fd || id,
+  const options = (metricOptions ?? []).map(({ label, field, id }) => ({
+    value: field || id,
     inputDisplay: label,
   }));
 
@@ -44,7 +45,7 @@ export function ReportMetricOptions({ seriesId, series, metricOptions }: Props) 
       options={
         series.selectedMetricField
           ? options
-          : [{ value: SELECT_REPORT_METRIC, inputDisplay: 'Select report metric' }, ...options]
+          : [{ value: SELECT_REPORT_METRIC, inputDisplay: SELECT_REPORT_METRIC_LABEL }, ...options]
       }
       valueOfSelected={series.selectedMetricField || SELECT_REPORT_METRIC}
       onChange={(value) => onChange(value)}
@@ -52,3 +53,10 @@ export function ReportMetricOptions({ seriesId, series, metricOptions }: Props) 
     />
   );
 }
+
+const SELECT_REPORT_METRIC_LABEL = i18n.translate(
+  'xpack.observability.expView.seriesEditor.selectReportMetric',
+  {
+    defaultMessage: 'Select report metric',
+  }
+);

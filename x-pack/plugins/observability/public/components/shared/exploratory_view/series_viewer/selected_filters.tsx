@@ -28,10 +28,10 @@ export function SelectedFilters({ seriesId, series, seriesConfig }: Props) {
 
   let definitionFilters: UrlFilter[] = getFiltersFromDefs(reportDefinitions);
 
-  const isNew = !!useRouteMatch('/exploratory-view/configure');
+  const isConfigure = !!useRouteMatch('/exploratory-view/configure');
 
   // we don't want to display report definition filters in new series view
-  if (isNew) {
+  if (isConfigure) {
     definitionFilters = [];
   }
 
@@ -84,9 +84,7 @@ export function SelectedFilters({ seriesId, series, seriesConfig }: Props) {
                 field={field}
                 label={labels[field]}
                 value={values}
-                removeFilter={() => {
-                  // FIXME handle this use case
-                }}
+                removeFilter={() => {}}
                 negate={false}
                 definitionFilter={true}
                 indexPattern={indexPattern}

@@ -17,19 +17,13 @@ import { SeriesUrl, useFetcher } from '../../../../..';
 import { SeriesConfig } from '../../types';
 import { SeriesChartTypesSelect } from '../../series_editor/columns/chart_types';
 
-const CHART_TYPE_LABEL = i18n.translate('xpack.observability.expView.chartTypes.label', {
-  defaultMessage: 'Chart type',
-});
-
-export function SeriesChartTypes({
-  seriesId,
-  series,
-  seriesConfig,
-}: {
+interface Props {
   seriesId: string;
   series: SeriesUrl;
   seriesConfig: SeriesConfig;
-}) {
+}
+
+export function SeriesChartTypes({ seriesId, series, seriesConfig }: Props) {
   const seriesType = series?.seriesType ?? seriesConfig.defaultSeriesType;
 
   const {
@@ -45,7 +39,7 @@ export function SeriesChartTypes({
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
       button={
-        <EuiToolTip content={'Edit chart type for series'}>
+        <EuiToolTip content={EDIT_CHART_TYPE_LABEL}>
           <ToolbarButton
             size="s"
             iconType={(data ?? []).find(({ id }) => id === seriesType)?.icon!}
@@ -63,3 +57,14 @@ export function SeriesChartTypes({
     </EuiPopover>
   );
 }
+
+const EDIT_CHART_TYPE_LABEL = i18n.translate(
+  'xpack.observability.expView.seriesEditor.editChartSeriesLabel',
+  {
+    defaultMessage: 'Edit chart type for series',
+  }
+);
+
+const CHART_TYPE_LABEL = i18n.translate('xpack.observability.expView.chartTypes.label', {
+  defaultMessage: 'Chart type',
+});

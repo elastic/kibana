@@ -67,7 +67,7 @@ export function SeriesInfo({ seriesId, series, seriesConfig }: Props) {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem grow={false}>
-        {isIncomplete && !loading && <EuiBadge color="warning">{incompleteMessage}</EuiBadge>}
+        {isIncomplete && <EuiBadge color="warning">{incompleteMessage}</EuiBadge>}
       </EuiFlexItem>
       {!isConfigure && (
         <EuiFlexItem>

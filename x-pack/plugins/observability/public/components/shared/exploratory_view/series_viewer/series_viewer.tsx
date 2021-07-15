@@ -9,7 +9,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { EuiBasicTable, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { SeriesFilter } from './columns/series_filter';
 import { SeriesConfig, SeriesUrl } from '../types';
 import { useSeriesStorage } from '../hooks/use_series_storage';
@@ -69,14 +68,9 @@ export function SeriesViewer() {
       ),
     },
     {
-      name: (
-        <div>
-          <FormattedMessage
-            id="xpack.observability.expView.seriesEditor.time"
-            defaultMessage="Time"
-          />
-        </div>
-      ),
+      name: i18n.translate('xpack.observability.expView.seriesEditor.time', {
+        defaultMessage: 'Time',
+      }),
       width: '35%',
       field: 'id',
       render: (seriesId: string, { series }: EditItem) => (

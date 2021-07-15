@@ -30,5 +30,5 @@ export function SeriesName({ series, seriesId }: Props) {
     }
   };
 
-  return <EuiFieldText value={value} onChange={onChange} fullWidth onBlur={() => onSave()} />;
+  return <EuiFieldText value={value} onChange={onChange} fullWidth onBlur={onSave} />;
 }

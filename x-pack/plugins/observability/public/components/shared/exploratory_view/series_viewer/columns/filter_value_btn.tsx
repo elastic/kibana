@@ -12,6 +12,7 @@ import { useSeriesFilters } from '../../hooks/use_series_filters';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import FieldValueSuggestions from '../../../field_value_suggestions';
 import { SeriesUrl } from '../../types';
+import { NestedFilterOpen } from './filter_expanded';
 
 interface Props {
   value: string;
@@ -25,7 +26,7 @@ interface Props {
     value: string;
     negate: boolean;
   };
-  setIsNestedOpen: (val: { value: string; negate: boolean }) => void;
+  setIsNestedOpen: (val: NestedFilterOpen) => void;
 }
 
 export function FilterValueButton({

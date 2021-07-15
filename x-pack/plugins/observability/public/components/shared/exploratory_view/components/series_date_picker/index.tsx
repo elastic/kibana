@@ -40,7 +40,7 @@ const readableUnit: Record<string, string> = {
     defaultMessage: 'Hour',
   }),
   d: i18n.translate('xpack.observability.overview.exploratoryView.day', {
-    defaultMessage: 'day',
+    defaultMessage: 'Day',
   }),
 };
 

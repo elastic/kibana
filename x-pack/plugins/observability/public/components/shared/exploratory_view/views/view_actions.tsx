@@ -22,7 +22,16 @@ import { DEFAULT_TIME } from '../configurations/constants';
 
 export function ViewActions() {
   const [editorItems, setEditorItems] = useState<BuilderItem[]>([]);
-  const { getSeries, allSeries, setSeries, storage, reportType } = useSeriesStorage();
+  const {
+    getSeries,
+    allSeries,
+    setSeries,
+    storage,
+    reportType,
+    autoApply,
+    setAutoApply,
+    applyChanges,
+  } = useSeriesStorage();
 
   const { loading, indexPatterns } = useAppIndexPatternContext();
 
@@ -45,15 +54,13 @@ export function ViewActions() {
     }
   };
 
-  const { autoApply, setAutoApply, applyChanges } = useSeriesStorage();
-
   const noChanges = isEqual(allSeries, convertAllShortSeries(storage.get(allSeriesKey) ?? []));
 
   return (
     <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiSwitch
-          label="Auto apply"
+          label={AUTO_APPLY_LABEL}
           checked={autoApply}
           onChange={(e) => setAutoApply(!autoApply)}
           compressed
@@ -78,3 +85,7 @@ export function ViewActions() {
     </EuiFlexGroup>
   );
 }
+
+const AUTO_APPLY_LABEL = i18n.translate('xpack.observability.expView.seriesBuilder.autoApply', {
+  defaultMessage: 'Auto apply',
+});
