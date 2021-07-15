@@ -19,34 +19,45 @@ import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objec
 
 const SIEM_APP_ID = 'securitySolution';
 const SIEM_SERVER_APP_ID = 'siem';
+const SUPPORT_INCIDENTS_ACTION_TYPES = ['.servicenow', '.jira', '.resilient'];
 export const LEGACY_LAST_MODIFIED_VERSION = 'pre-7.10.0';
 
-interface AlertLogMeta extends LogMeta {
-  migrations: { alertDocument: SavedObjectUnsanitizedDoc<RawAlert> };
+// Remove this when we finish updating terminology in the code
+type RawRule = RawAlert;
+type RawRuleAction = RawAlertAction;
+
+interface RuleLogMeta extends LogMeta {
+  migrations: { ruleDocument: SavedObjectUnsanitizedDoc<RawRule> };
 }
 
-type AlertMigration = (
-  doc: SavedObjectUnsanitizedDoc<RawAlert>
-) => SavedObjectUnsanitizedDoc<RawAlert>;
+type RuleMigration = (
+  doc: SavedObjectUnsanitizedDoc<RawRule>
+) => SavedObjectUnsanitizedDoc<RawRule>;
 
-const SUPPORT_INCIDENTS_ACTION_TYPES = ['.servicenow', '.jira', '.resilient'];
+type IsMigrationNeededPredicate<InputAttributes> = (
+  doc: SavedObjectUnsanitizedDoc<InputAttributes>
+) => doc is SavedObjectUnsanitizedDoc<InputAttributes>;
 
-export const isAnyActionSupportIncidents = (doc: SavedObjectUnsanitizedDoc<RawAlert>): boolean =>
+interface RuleMigrationFns<InputAttributes, MigratedAttributes> {
+  esoMigrationFn: SavedObjectMigrationFn<InputAttributes, MigratedAttributes>;
+  fallbackMigrationFn: SavedObjectMigrationFn<InputAttributes, MigratedAttributes>;
+}
+
+export const isAnyActionSupportIncidents = (doc: SavedObjectUnsanitizedDoc<RawRule>): boolean =>
   doc.attributes.actions.some((action) =>
     SUPPORT_INCIDENTS_ACTION_TYPES.includes(action.actionTypeId)
   );
 
-export const isSecuritySolutionRule = (doc: SavedObjectUnsanitizedDoc<RawAlert>): boolean =>
+export const isSecuritySolutionRule = (doc: SavedObjectUnsanitizedDoc<RawRule>): boolean =>
   doc.attributes.alertTypeId === 'siem.signals';
 
 export function getMigrations(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ): SavedObjectMigrationMap {
-  const migrationWhenRBACWasIntroduced = encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
-    function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<RawAlert> {
-      // migrate all documents in 7.10 in order to add the "meta" RBAC field
-      return true;
-    },
+  const migrationWhenRBACWasIntroduced = createMigrationFns(
+    encryptedSavedObjects,
+    // migrate all documents in 7.10 in order to add the "meta" RBAC field
+    (doc): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
     pipeMigrations(
       markAsLegacyAndChangeConsumer,
       setAlertIdAsDefaultDedupkeyOnPagerDutyActions,
@@ -54,22 +65,22 @@ export function getMigrations(
     )
   );
 
-  const migrationAlertUpdatedAtAndNotifyWhen = encryptedSavedObjects.createMigration<
-    RawAlert,
-    RawAlert
-  >(
+  const migrationAlertUpdatedAtAndNotifyWhen = createMigrationFns(
+    encryptedSavedObjects,
     // migrate all documents in 7.11 in order to add the "updatedAt" and "notifyWhen" fields
-    (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => true,
+    (doc): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
     pipeMigrations(setAlertUpdatedAtDate, setNotifyWhen)
   );
 
-  const migrationActions7112 = encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
-    (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => isAnyActionSupportIncidents(doc),
+  const migrationActions7112 = createMigrationFns(
+    encryptedSavedObjects,
+    (doc): doc is SavedObjectUnsanitizedDoc<RawRule> => isAnyActionSupportIncidents(doc),
     pipeMigrations(restructureConnectorsThatSupportIncident)
   );
 
-  const migrationSecurityRules713 = encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
-    (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => isSecuritySolutionRule(doc),
+  const migrationSecurityRules713 = createMigrationFns(
+    encryptedSavedObjects,
+    (doc): doc is SavedObjectUnsanitizedDoc<RawRule> => isSecuritySolutionRule(doc),
     pipeMigrations(removeNullsFromSecurityRules)
   );
 
@@ -82,29 +93,29 @@ export function getMigrations(
 }
 
 function executeMigrationWithErrorHandling(
-  migrationFunc: SavedObjectMigrationFn<RawAlert, RawAlert>,
+  migrationFunctions: RuleMigrationFns<RawRule, RawRule>,
   version: string
 ) {
-  return (doc: SavedObjectUnsanitizedDoc<RawAlert>, context: SavedObjectMigrationContext) => {
+  return (doc: SavedObjectUnsanitizedDoc<RawRule>, context: SavedObjectMigrationContext) => {
     try {
-      return migrationFunc(doc, context);
+      return migrationFunctions.esoMigrationFn(doc, context);
     } catch (ex) {
-      context.log.error<AlertLogMeta>(
-        `encryptedSavedObject ${version} migration failed for alert ${doc.id} with error: ${ex.message}`,
+      context.log.error<RuleLogMeta>(
+        `encryptedSavedObject ${version} migration failed for rule ${doc.id} with error: ${ex.message}`,
         {
           migrations: {
-            alertDocument: doc,
+            ruleDocument: doc,
           },
         }
       );
     }
-    return doc;
+    return migrationFunctions.fallbackMigrationFn(doc, context);
   };
 }
 
 const setAlertUpdatedAtDate = (
-  doc: SavedObjectUnsanitizedDoc<RawAlert>
-): SavedObjectUnsanitizedDoc<RawAlert> => {
+  doc: SavedObjectUnsanitizedDoc<RawRule>
+): SavedObjectUnsanitizedDoc<RawRule> => {
   const updatedAt = doc.updated_at || doc.attributes.createdAt;
   return {
     ...doc,
@@ -116,8 +127,8 @@ const setAlertUpdatedAtDate = (
 };
 
 const setNotifyWhen = (
-  doc: SavedObjectUnsanitizedDoc<RawAlert>
-): SavedObjectUnsanitizedDoc<RawAlert> => {
+  doc: SavedObjectUnsanitizedDoc<RawRule>
+): SavedObjectUnsanitizedDoc<RawRule> => {
   const notifyWhen = doc.attributes.throttle ? 'onThrottleInterval' : 'onActiveAlert';
   return {
     ...doc,
@@ -137,8 +148,8 @@ const consumersToChange: Map<string, string> = new Map(
 );
 
 function markAsLegacyAndChangeConsumer(
-  doc: SavedObjectUnsanitizedDoc<RawAlert>
-): SavedObjectUnsanitizedDoc<RawAlert> {
+  doc: SavedObjectUnsanitizedDoc<RawRule>
+): SavedObjectUnsanitizedDoc<RawRule> {
   const {
     attributes: { consumer },
   } = doc;
@@ -156,8 +167,8 @@ function markAsLegacyAndChangeConsumer(
 }
 
 function setAlertIdAsDefaultDedupkeyOnPagerDutyActions(
-  doc: SavedObjectUnsanitizedDoc<RawAlert>
-): SavedObjectUnsanitizedDoc<RawAlert> {
+  doc: SavedObjectUnsanitizedDoc<RawRule>
+): SavedObjectUnsanitizedDoc<RawRule> {
   const { attributes } = doc;
   return {
     ...doc,
@@ -184,8 +195,8 @@ function setAlertIdAsDefaultDedupkeyOnPagerDutyActions(
 }
 
 function initializeExecutionStatus(
-  doc: SavedObjectUnsanitizedDoc<RawAlert>
-): SavedObjectUnsanitizedDoc<RawAlert> {
+  doc: SavedObjectUnsanitizedDoc<RawRule>
+): SavedObjectUnsanitizedDoc<RawRule> {
   const { attributes } = doc;
   return {
     ...doc,
@@ -210,8 +221,8 @@ function isEmptyObject(obj: {}) {
 }
 
 function restructureConnectorsThatSupportIncident(
-  doc: SavedObjectUnsanitizedDoc<RawAlert>
-): SavedObjectUnsanitizedDoc<RawAlert> {
+  doc: SavedObjectUnsanitizedDoc<RawRule>
+): SavedObjectUnsanitizedDoc<RawRule> {
   const { actions } = doc.attributes;
   const newActions = actions.reduce((acc, action) => {
     if (
@@ -268,7 +279,7 @@ function restructureConnectorsThatSupportIncident(
               },
             },
           },
-        ] as RawAlertAction[];
+        ] as RawRuleAction[];
       } else if (action.actionTypeId === '.jira') {
         const {
           title,
@@ -308,7 +319,7 @@ function restructureConnectorsThatSupportIncident(
               },
             },
           },
-        ] as RawAlertAction[];
+        ] as RawRuleAction[];
       } else if (action.actionTypeId === '.resilient') {
         const { title, comments, description, incidentTypes, severityCode, name } = action.params
           .subActionParams as {
@@ -336,12 +347,12 @@ function restructureConnectorsThatSupportIncident(
               },
             },
           },
-        ] as RawAlertAction[];
+        ] as RawRuleAction[];
       }
     }
 
     return [...acc, action];
-  }, [] as RawAlertAction[]);
+  }, [] as RawRuleAction[]);
 
   return {
     ...doc,
@@ -357,8 +368,8 @@ function convertNullToUndefined(attribute: SavedObjectAttribute) {
 }
 
 function removeNullsFromSecurityRules(
-  doc: SavedObjectUnsanitizedDoc<RawAlert>
-): SavedObjectUnsanitizedDoc<RawAlert> {
+  doc: SavedObjectUnsanitizedDoc<RawRule>
+): SavedObjectUnsanitizedDoc<RawRule> {
   const {
     attributes: { params },
   } = doc;
@@ -420,7 +431,27 @@ function removeNullsFromSecurityRules(
   };
 }
 
-function pipeMigrations(...migrations: AlertMigration[]): AlertMigration {
-  return (doc: SavedObjectUnsanitizedDoc<RawAlert>) =>
+function pipeMigrations(...migrations: RuleMigration[]): RuleMigration {
+  return (doc: SavedObjectUnsanitizedDoc<RawRule>) =>
     migrations.reduce((migratedDoc, nextMigration) => nextMigration(migratedDoc), doc);
+}
+
+function createMigrationFns(
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
+  isMigrationNeededPredicate: IsMigrationNeededPredicate<RawRule>,
+  migrationFunc: RuleMigration
+): RuleMigrationFns<RawRule, RawRule> {
+  return {
+    esoMigrationFn: encryptedSavedObjects.createMigration<RawRule, RawRule>(
+      isMigrationNeededPredicate,
+      migrationFunc
+    ),
+    fallbackMigrationFn: (doc: SavedObjectUnsanitizedDoc<RawRule>) => {
+      if (!isMigrationNeededPredicate(doc)) {
+        return doc;
+      }
+
+      return migrationFunc(doc);
+    },
+  };
 }

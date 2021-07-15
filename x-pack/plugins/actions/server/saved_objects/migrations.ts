@@ -15,34 +15,49 @@ import {
 import { RawAction } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 
-interface ActionsLogMeta extends LogMeta {
-  migrations: { actionDocument: SavedObjectUnsanitizedDoc<RawAction> };
+// Remove this when we finish updating terminology in the code
+type RawConnector = RawAction;
+
+interface ConnectorLogMeta extends LogMeta {
+  migrations: { connectorDocument: SavedObjectUnsanitizedDoc<RawConnector> };
 }
 
-type ActionMigration = (
-  doc: SavedObjectUnsanitizedDoc<RawAction>
-) => SavedObjectUnsanitizedDoc<RawAction>;
+type ConnectorMigration = (
+  doc: SavedObjectUnsanitizedDoc<RawConnector>
+) => SavedObjectUnsanitizedDoc<RawConnector>;
+
+type IsMigrationNeededPredicate<InputAttributes> = (
+  doc: SavedObjectUnsanitizedDoc<InputAttributes>
+) => doc is SavedObjectUnsanitizedDoc<InputAttributes>;
+
+interface ConnectorMigrationFns<InputAttributes, MigratedAttributes> {
+  esoMigrationFn: SavedObjectMigrationFn<InputAttributes, MigratedAttributes>;
+  fallbackMigrationFn: SavedObjectMigrationFn<InputAttributes, MigratedAttributes>;
+}
 
 export function getMigrations(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ): SavedObjectMigrationMap {
-  const migrationActionsTen = encryptedSavedObjects.createMigration<RawAction, RawAction>(
-    (doc): doc is SavedObjectUnsanitizedDoc<RawAction> =>
+  const migrationActionsTen = createMigrationFns(
+    encryptedSavedObjects,
+    (doc): doc is SavedObjectUnsanitizedDoc<RawConnector> =>
       doc.attributes.config?.hasOwnProperty('casesConfiguration') ||
       doc.attributes.actionTypeId === '.email',
     pipeMigrations(renameCasesConfigurationObject, addHasAuthConfigurationObject)
   );
 
-  const migrationActionsEleven = encryptedSavedObjects.createMigration<RawAction, RawAction>(
-    (doc): doc is SavedObjectUnsanitizedDoc<RawAction> =>
+  const migrationActionsEleven = createMigrationFns(
+    encryptedSavedObjects,
+    (doc): doc is SavedObjectUnsanitizedDoc<RawConnector> =>
       doc.attributes.config?.hasOwnProperty('isCaseOwned') ||
       doc.attributes.config?.hasOwnProperty('incidentConfiguration') ||
       doc.attributes.actionTypeId === '.webhook',
     pipeMigrations(removeCasesFieldMappings, addHasAuthConfigurationObject)
   );
 
-  const migrationActionsFourteen = encryptedSavedObjects.createMigration<RawAction, RawAction>(
-    (doc): doc is SavedObjectUnsanitizedDoc<RawAction> => true,
+  const migrationActionsFourteen = createMigrationFns(
+    encryptedSavedObjects,
+    (doc): doc is SavedObjectUnsanitizedDoc<RawConnector> => true,
     pipeMigrations(addisMissingSecretsField)
   );
 
@@ -54,29 +69,29 @@ export function getMigrations(
 }
 
 function executeMigrationWithErrorHandling(
-  migrationFunc: SavedObjectMigrationFn<RawAction, RawAction>,
+  migrationFunctions: ConnectorMigrationFns<RawConnector, RawConnector>,
   version: string
 ) {
-  return (doc: SavedObjectUnsanitizedDoc<RawAction>, context: SavedObjectMigrationContext) => {
+  return (doc: SavedObjectUnsanitizedDoc<RawConnector>, context: SavedObjectMigrationContext) => {
     try {
-      return migrationFunc(doc, context);
+      return migrationFunctions.esoMigrationFn(doc, context);
     } catch (ex) {
-      context.log.error<ActionsLogMeta>(
+      context.log.error<ConnectorLogMeta>(
         `encryptedSavedObject ${version} migration failed for action ${doc.id} with error: ${ex.message}`,
         {
           migrations: {
-            actionDocument: doc,
+            connectorDocument: doc,
           },
         }
       );
     }
-    return doc;
+    return migrationFunctions.fallbackMigrationFn(doc, context);
   };
 }
 
 function renameCasesConfigurationObject(
-  doc: SavedObjectUnsanitizedDoc<RawAction>
-): SavedObjectUnsanitizedDoc<RawAction> {
+  doc: SavedObjectUnsanitizedDoc<RawConnector>
+): SavedObjectUnsanitizedDoc<RawConnector> {
   if (!doc.attributes.config?.casesConfiguration) {
     return doc;
   }
@@ -95,8 +110,8 @@ function renameCasesConfigurationObject(
 }
 
 function removeCasesFieldMappings(
-  doc: SavedObjectUnsanitizedDoc<RawAction>
-): SavedObjectUnsanitizedDoc<RawAction> {
+  doc: SavedObjectUnsanitizedDoc<RawConnector>
+): SavedObjectUnsanitizedDoc<RawConnector> {
   if (
     !doc.attributes.config?.hasOwnProperty('isCaseOwned') &&
     !doc.attributes.config?.hasOwnProperty('incidentConfiguration')
@@ -115,8 +130,8 @@ function removeCasesFieldMappings(
 }
 
 const addHasAuthConfigurationObject = (
-  doc: SavedObjectUnsanitizedDoc<RawAction>
-): SavedObjectUnsanitizedDoc<RawAction> => {
+  doc: SavedObjectUnsanitizedDoc<RawConnector>
+): SavedObjectUnsanitizedDoc<RawConnector> => {
   if (doc.attributes.actionTypeId !== '.email' && doc.attributes.actionTypeId !== '.webhook') {
     return doc;
   }
@@ -134,8 +149,8 @@ const addHasAuthConfigurationObject = (
 };
 
 const addisMissingSecretsField = (
-  doc: SavedObjectUnsanitizedDoc<RawAction>
-): SavedObjectUnsanitizedDoc<RawAction> => {
+  doc: SavedObjectUnsanitizedDoc<RawConnector>
+): SavedObjectUnsanitizedDoc<RawConnector> => {
   return {
     ...doc,
     attributes: {
@@ -145,7 +160,27 @@ const addisMissingSecretsField = (
   };
 };
 
-function pipeMigrations(...migrations: ActionMigration[]): ActionMigration {
-  return (doc: SavedObjectUnsanitizedDoc<RawAction>) =>
+function pipeMigrations(...migrations: ConnectorMigration[]): ConnectorMigration {
+  return (doc: SavedObjectUnsanitizedDoc<RawConnector>) =>
     migrations.reduce((migratedDoc, nextMigration) => nextMigration(migratedDoc), doc);
+}
+
+function createMigrationFns(
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
+  isMigrationNeededPredicate: IsMigrationNeededPredicate<RawConnector>,
+  migrationFunc: ConnectorMigration
+): ConnectorMigrationFns<RawConnector, RawConnector> {
+  return {
+    esoMigrationFn: encryptedSavedObjects.createMigration<RawConnector, RawConnector>(
+      isMigrationNeededPredicate,
+      migrationFunc
+    ),
+    fallbackMigrationFn: (doc: SavedObjectUnsanitizedDoc<RawConnector>) => {
+      if (!isMigrationNeededPredicate(doc)) {
+        return doc;
+      }
+
+      return migrationFunc(doc);
+    },
+  };
 }
