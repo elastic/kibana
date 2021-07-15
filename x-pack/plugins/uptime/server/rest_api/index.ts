@@ -24,7 +24,7 @@ import {
   createGetStatusBarRoute,
 } from './monitors';
 import { createGetMonitorDurationRoute } from './monitors/monitors_durations';
-import { createGetIndexPatternRoute, createGetIndexStatusRoute } from './index_state';
+import { createGetIndexStatusRoute } from './index_state';
 import { createNetworkEventsRoute } from './network_events';
 import { createJourneyFailedStepsRoute } from './pings/journeys';
 import { createLastSuccessfulStepRoute } from './synthetics/last_successful_step';
@@ -36,7 +36,6 @@ export { uptimeRouteWrapper } from './uptime_route_wrapper';
 export const restApiRoutes: UMRestApiRouteFactory[] = [
   createGetCertsRoute,
   createGetPingsRoute,
-  createGetIndexPatternRoute,
   createGetIndexStatusRoute,
   createGetDynamicSettingsRoute,
   createPostDynamicSettingsRoute,

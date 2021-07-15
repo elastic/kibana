@@ -125,11 +125,9 @@ export const formatFilterString = async (
 ) =>
   await generateFilterDSL(
     () =>
-      libs?.requests?.getIndexPattern
-        ? libs?.requests?.getIndexPattern({ uptimeEsClient })
-        : getUptimeIndexPattern({
-            uptimeEsClient,
-          }),
+      getUptimeIndexPattern({
+        uptimeEsClient,
+      }),
     filters,
     search
   );

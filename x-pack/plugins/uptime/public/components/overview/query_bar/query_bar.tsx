@@ -9,10 +9,10 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexItem } from '@elastic/eui';
 import { QueryStringInput } from '../../../../../../../src/plugins/data/public/';
-import { useIndexPattern } from './use_index_pattern';
 import { SyntaxType, useQueryBar } from './use_query_bar';
 import { KQL_PLACE_HOLDER, SIMPLE_SEARCH_PLACEHOLDER } from './translations';
 import { useGetUrlParams } from '../../../hooks';
+import { useIndexPattern } from '../../../contexts';
 
 const SYNTAX_STORAGE = 'uptime:queryBarSyntax';
 
@@ -36,7 +36,7 @@ export const QueryBar = () => {
 
   const { query, setQuery, submitImmediately } = useQueryBar();
 
-  const { index_pattern: indexPattern } = useIndexPattern();
+  const indexPattern = useIndexPattern();
 
   const [inputVal, setInputVal] = useState<string>(query.query as string);
 

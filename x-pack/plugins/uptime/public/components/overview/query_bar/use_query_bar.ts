@@ -9,9 +9,13 @@ import React, { useCallback, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { useDispatch } from 'react-redux';
 import { Query } from 'src/plugins/data/common';
-import { useGetUrlParams, useUpdateKueryString, useUrlParams } from '../../../hooks';
+import {
+  useGetUrlParams,
+  useIndexPattern,
+  useUpdateKueryString,
+  useUrlParams,
+} from '../../../hooks';
 import { setEsKueryString } from '../../../state/actions';
-import { useIndexPattern } from './use_index_pattern';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { UptimePluginServices } from '../../../apps/plugin';
 
@@ -64,7 +68,7 @@ export const useQueryBar = (): UseQueryBarUtils => {
         }
   );
 
-  const { index_pattern: indexPattern } = useIndexPattern();
+  const indexPattern = useIndexPattern();
 
   const updateUrlParams = useUrlParams()[1];
 

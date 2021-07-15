@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { createGetIndexPatternRoute } from './get_index_pattern';
 export { createGetIndexStatusRoute } from './get_index_status';

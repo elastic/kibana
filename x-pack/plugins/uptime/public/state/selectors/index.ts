@@ -29,8 +29,6 @@ export const monitorStatusSelector = (state: AppState) => state.monitorStatus.st
 
 export const selectDynamicSettings = (state: AppState) => state.dynamicSettings;
 
-export const selectIndexPattern = ({ indexPattern }: AppState) => indexPattern;
-
 export const selectPingHistogram = ({ ping }: AppState) => ping;
 
 export const selectPingList = ({ pingList }: AppState) => pingList;

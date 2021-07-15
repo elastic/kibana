@@ -11,7 +11,6 @@ import { uiReducer } from './ui';
 import { monitorStatusReducer } from './monitor_status';
 import { monitorListReducer } from './monitor_list';
 import { dynamicSettingsReducer } from './dynamic_settings';
-import { indexPatternReducer } from './index_pattern';
 import { pingReducer } from './ping';
 import { pingListReducer } from './ping_list';
 import { monitorDurationReducer } from './monitor_duration';
@@ -29,7 +28,6 @@ export const rootReducer = combineReducers({
   monitorList: monitorListReducer,
   monitorStatus: monitorStatusReducer,
   dynamicSettings: dynamicSettingsReducer,
-  indexPattern: indexPatternReducer,
   ping: pingReducer,
   pingList: pingListReducer,
   ml: mlJobsReducer,
