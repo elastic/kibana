@@ -50,7 +50,7 @@ export const getRiskScoreColumns = (): RiskScoreColumns => [
                   <Provider dataProvider={dataProvider} />
                 </DragEffects>
               ) : (
-                <UebaDetailsLink data-test-subj={'ueba-link-ddd'} hostName={hostName} />
+                <UebaDetailsLink hostName={hostName} />
               )
             }
           />

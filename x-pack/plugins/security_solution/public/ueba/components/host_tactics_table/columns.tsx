@@ -116,7 +116,11 @@ export const getHostTacticsColumns = (): HostTacticsColumns => [
               id,
               name: `${riskScore}`,
               kqlQuery: '',
-              queryMatch: { field: 'signal.rule.type', value: riskScore, operator: IS_OPERATOR },
+              queryMatch: {
+                field: 'signal.rule.risk_score',
+                value: riskScore,
+                operator: IS_OPERATOR,
+              },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
@@ -139,9 +143,9 @@ export const getHostTacticsColumns = (): HostTacticsColumns => [
     truncateText: false,
     hideForMobile: false,
     sortable: false,
-    render: (riskKeyword) => {
-      if (riskKeyword != null) {
-        return riskKeyword;
+    render: (hits) => {
+      if (hits != null) {
+        return hits;
       }
       return getEmptyTagValue();
     },
