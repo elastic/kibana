@@ -14,6 +14,7 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { UIProcessorEvent } from '../../../../common/processor_event';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 import { IUrlParams } from '../../../context/url_params_context/types';
 
 export function getBoolFilter({
@@ -32,6 +33,14 @@ export function getBoolFilter({
   if (serviceName) {
     boolFilter.push({
       term: { [SERVICE_NAME]: serviceName },
+    });
+  }
+
+  boolFilter.push(...environmentQuery(urlParams.environment));
+
+  if (urlParams.transactionType) {
+    boolFilter.push({
+      term: { [TRANSACTION_TYPE]: urlParams.transactionType },
     });
   }
 

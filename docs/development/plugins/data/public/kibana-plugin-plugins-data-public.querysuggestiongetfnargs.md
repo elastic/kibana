@@ -19,6 +19,7 @@ export interface QuerySuggestionGetFnArgs
 |  [boolFilter](./kibana-plugin-plugins-data-public.querysuggestiongetfnargs.boolfilter.md) | <code>any</code> |  |
 |  [indexPatterns](./kibana-plugin-plugins-data-public.querysuggestiongetfnargs.indexpatterns.md) | <code>IIndexPattern[]</code> |  |
 |  [language](./kibana-plugin-plugins-data-public.querysuggestiongetfnargs.language.md) | <code>string</code> |  |
+|  [method](./kibana-plugin-plugins-data-public.querysuggestiongetfnargs.method.md) | <code>ValueSuggestionsMethod</code> |  |
 |  [query](./kibana-plugin-plugins-data-public.querysuggestiongetfnargs.query.md) | <code>string</code> |  |
 |  [selectionEnd](./kibana-plugin-plugins-data-public.querysuggestiongetfnargs.selectionend.md) | <code>number</code> |  |
 |  [selectionStart](./kibana-plugin-plugins-data-public.querysuggestiongetfnargs.selectionstart.md) | <code>number</code> |  |

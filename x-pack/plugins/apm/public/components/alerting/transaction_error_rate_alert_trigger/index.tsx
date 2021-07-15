@@ -10,7 +10,6 @@ import { defaults } from 'lodash';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { asPercent } from '../../../../common/utils/formatters';
-import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
@@ -23,6 +22,10 @@ import {
 } from '../fields';
 import { getAbsoluteTimeRange } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
+import { useServiceName } from '../../../hooks/use_service_name';
+import { useServiceTransactionTypesFetcher } from '../../../context/apm_service/use_service_transaction_types_fetcher';
+import { useServiceAgentNameFetcher } from '../../../context/apm_service/use_service_agent_name_fetcher';
+import { getTransactionType } from '../../../context/apm_service/apm_service_context';
 
 interface AlertParams {
   windowSize: number;
@@ -42,28 +45,36 @@ interface Props {
 export function TransactionErrorRateAlertTrigger(props: Props) {
   const { setAlertParams, alertParams, setAlertProperty } = props;
   const { urlParams } = useUrlParams();
-  const {
-    transactionType: transactionTypeFromContext,
+
+  const serviceNameFromUrl = useServiceName();
+
+  const transactionTypes = useServiceTransactionTypesFetcher(
+    serviceNameFromUrl
+  );
+  const { agentName } = useServiceAgentNameFetcher(serviceNameFromUrl);
+
+  const transactionTypeFromUrl = getTransactionType({
+    transactionType: urlParams.transactionType,
     transactionTypes,
-    serviceName: serviceNameFromContext,
-  } = useApmServiceContext();
+    agentName,
+  });
 
   const { start, end, environment: environmentFromUrl } = urlParams;
 
-  const params = defaults<Partial<AlertParams>, AlertParams>(
+  const params = defaults(
+    { ...alertParams },
     {
       threshold: 30,
       windowSize: 5,
       windowUnit: 'm',
-      transactionType: transactionTypeFromContext,
+      transactionType: transactionTypeFromUrl,
       environment: environmentFromUrl || ENVIRONMENT_ALL.value,
-      serviceName: serviceNameFromContext,
-    },
-    alertParams
+      serviceName: serviceNameFromUrl,
+    }
   );
 
   const { environmentOptions } = useEnvironmentsFetcher({
-    serviceName: serviceNameFromContext,
+    serviceName: params.serviceName,
     start,
     end,
   });

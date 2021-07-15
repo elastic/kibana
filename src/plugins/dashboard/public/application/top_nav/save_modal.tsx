@@ -8,6 +8,7 @@
 
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiTextArea, EuiSwitch } from '@elastic/eui';
 
 import type { SavedObjectsTaggingApi } from '../../services/saved_objects_tagging_oss';
@@ -148,7 +149,9 @@ export class DashboardSaveModal extends React.Component<Props, State> {
         title={this.props.title}
         showCopyOnSave={this.props.showCopyOnSave}
         initialCopyOnSave={this.props.showCopyOnSave}
-        objectType="dashboard"
+        objectType={i18n.translate('dashboard.topNav.saveModal.objectType', {
+          defaultMessage: 'dashboard',
+        })}
         options={this.renderDashboardSaveOptions()}
         showDescription={false}
       />
