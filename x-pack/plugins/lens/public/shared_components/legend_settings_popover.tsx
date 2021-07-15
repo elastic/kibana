@@ -185,6 +185,7 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
           onAlignmentChange={onAlignmentChange}
           floatingColumns={floatingColumns}
           onFloatingColumnsChange={onFloatingColumnsChange}
+          isDisabled={mode === 'hide'}
         />
       )}
       {(!location || location === 'outside') && (

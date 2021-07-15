@@ -40,6 +40,10 @@ export interface LegendLocationSettingsProps {
    * Callback on horizontal alignment option change
    */
   onFloatingColumnsChange?: (value: number) => void;
+  /**
+   * Flag to disable the location settings
+   */
+  isDisabled?: boolean;
 }
 
 const DEFAULT_FLOATING_COLUMNS = 1;
@@ -48,6 +52,7 @@ const locationOptions: Array<{
   id: string;
   value: 'outside' | 'inside';
   label: string;
+  'data-test-subj': string;
 }> = [
   {
     id: `xy_location_outside`,
@@ -55,6 +60,7 @@ const locationOptions: Array<{
     label: i18n.translate('xpack.lens.xyChart.legendLocation.outside', {
       defaultMessage: 'Outside',
     }),
+    'data-test-subj': 'lnsXY_legendLocation-outside',
   },
   {
     id: `xy_location_inside`,
@@ -62,6 +68,7 @@ const locationOptions: Array<{
     label: i18n.translate('xpack.lens.xyChart.legendLocation.inside', {
       defaultMessage: 'Inside',
     }),
+    'data-test-subj': 'lnsXY_legendLocation-inside',
   },
 ];
 
@@ -102,9 +109,11 @@ const horizontalAlignButtonsIcons = [
 const FloatingColumnsSlider = ({
   value,
   setValue,
+  isDisabled,
 }: {
   value: number;
   setValue: (value: number) => void;
+  isDisabled: boolean;
 }) => {
   const { inputValue, handleInputChange } = useDebouncedValue({ value, onChange: setValue });
   return (
@@ -115,6 +124,7 @@ const FloatingColumnsSlider = ({
       max={10}
       showInput
       compressed
+      disabled={isDisabled}
       onChange={(e) => {
         handleInputChange(Number(e.currentTarget.value));
       }}
@@ -130,6 +140,7 @@ export const LegendLocationSettings: React.FunctionComponent<LegendLocationSetti
   onAlignmentChange = () => {},
   floatingColumns,
   onFloatingColumnsChange = () => {},
+  isDisabled = false,
 }) => {
   return (
     <>
@@ -148,6 +159,7 @@ export const LegendLocationSettings: React.FunctionComponent<LegendLocationSetti
           name="legendLocation"
           buttonSize="compressed"
           options={locationOptions}
+          isDisabled={isDisabled}
           idSelected={locationOptions.find(({ value }) => value === location)!.id}
           onChange={(optionId) => {
             const newLocation = locationOptions.find(({ id }) => id === optionId)!.value;
@@ -172,6 +184,7 @@ export const LegendLocationSettings: React.FunctionComponent<LegendLocationSetti
                 data-test-subj="lens-legend-inside-valign-btn"
                 name="legendInsideVAlign"
                 buttonSize="compressed"
+                isDisabled={isDisabled}
                 options={verticalAlignButtonsIcons}
                 idSelected={verticalAlignment || VerticalAlignment.Top}
                 onChange={(id) => onAlignmentChange(id, 'vertical')}
@@ -185,6 +198,7 @@ export const LegendLocationSettings: React.FunctionComponent<LegendLocationSetti
                 data-test-subj="lens-legend-inside-halign-btn"
                 name="legendInsideHAlign"
                 buttonSize="compressed"
+                isDisabled={isDisabled}
                 options={horizontalAlignButtonsIcons}
                 idSelected={horizontalAlignment || HorizontalAlignment.Right}
                 onChange={(id) => onAlignmentChange(id, 'horizontal')}
@@ -202,6 +216,7 @@ export const LegendLocationSettings: React.FunctionComponent<LegendLocationSetti
             <FloatingColumnsSlider
               value={floatingColumns ?? DEFAULT_FLOATING_COLUMNS}
               setValue={onFloatingColumnsChange}
+              isDisabled={isDisabled}
             />
           </EuiFormRow>
         </>

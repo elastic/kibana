@@ -61,4 +61,17 @@ describe('Legend Location Settings', () => {
       component.find('[data-test-subj="lens-legend-location-columns-slider"]').at(0).prop('value')
     ).toEqual(1);
   });
+
+  it('should disable the components when is Disabled is true', () => {
+    const component = shallow(<LegendLocationSettings {...props} isDisabled={true} />);
+    expect(
+      component.find('[data-test-subj="lens-legend-location-btn"]').prop('isDisabled')
+    ).toEqual(true);
+    expect(
+      component.find('[data-test-subj="lens-legend-inside-valign-btn"]').prop('isDisabled')
+    ).toEqual(true);
+    expect(
+      component.find('[data-test-subj="lens-legend-inside-halign-btn"]').prop('isDisabled')
+    ).toEqual(true);
+  });
 });
