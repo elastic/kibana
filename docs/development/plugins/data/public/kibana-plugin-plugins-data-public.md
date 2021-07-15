@@ -120,6 +120,8 @@
 |  [injectSearchSourceReferences](./kibana-plugin-plugins-data-public.injectsearchsourcereferences.md) |  |
 |  [isCompleteResponse](./kibana-plugin-plugins-data-public.iscompleteresponse.md) |  |
 |  [isErrorResponse](./kibana-plugin-plugins-data-public.iserrorresponse.md) |  |
+|  [isFilter](./kibana-plugin-plugins-data-public.isfilter.md) |  |
+|  [isFilters](./kibana-plugin-plugins-data-public.isfilters.md) |  |
 |  [isPartialResponse](./kibana-plugin-plugins-data-public.ispartialresponse.md) |  |
 |  [isQuery](./kibana-plugin-plugins-data-public.isquery.md) |  |
 |  [isTimeRange](./kibana-plugin-plugins-data-public.istimerange.md) |  |
@@ -142,11 +144,14 @@
 |  [AggsStart](./kibana-plugin-plugins-data-public.aggsstart.md) | AggsStart represents the actual external contract as AggsCommonStart is only used internally. The difference is that AggsStart includes the typings for the registry with initialized agg types. |
 |  [AutocompleteStart](./kibana-plugin-plugins-data-public.autocompletestart.md) | \* |
 |  [AutoRefreshDoneFn](./kibana-plugin-plugins-data-public.autorefreshdonefn.md) |  |
+|  [CustomFilter](./kibana-plugin-plugins-data-public.customfilter.md) |  |
 |  [EsaggsExpressionFunctionDefinition](./kibana-plugin-plugins-data-public.esaggsexpressionfunctiondefinition.md) |  |
 |  [EsdslExpressionFunctionDefinition](./kibana-plugin-plugins-data-public.esdslexpressionfunctiondefinition.md) |  |
+|  [EsQueryConfig](./kibana-plugin-plugins-data-public.esqueryconfig.md) |  |
 |  [EsQuerySortValue](./kibana-plugin-plugins-data-public.esquerysortvalue.md) |  |
 |  [EsRawResponseExpressionTypeDefinition](./kibana-plugin-plugins-data-public.esrawresponseexpressiontypedefinition.md) |  |
 |  [ExecutionContextSearch](./kibana-plugin-plugins-data-public.executioncontextsearch.md) |  |
+|  [ExistsFilter](./kibana-plugin-plugins-data-public.existsfilter.md) |  |
 |  [ExpressionFunctionKibana](./kibana-plugin-plugins-data-public.expressionfunctionkibana.md) |  |
 |  [ExpressionFunctionKibanaContext](./kibana-plugin-plugins-data-public.expressionfunctionkibanacontext.md) |  |
 |  [ExpressionValueSearchContext](./kibana-plugin-plugins-data-public.expressionvaluesearchcontext.md) |  |
@@ -154,6 +159,7 @@
 |  [FieldFormatsContentType](./kibana-plugin-plugins-data-public.fieldformatscontenttype.md) | \* |
 |  [FieldFormatsGetConfigFn](./kibana-plugin-plugins-data-public.fieldformatsgetconfigfn.md) |  |
 |  [FieldFormatsStart](./kibana-plugin-plugins-data-public.fieldformatsstart.md) |  |
+|  [Filter](./kibana-plugin-plugins-data-public.filter.md) |  |
 |  [IAggConfig](./kibana-plugin-plugins-data-public.iaggconfig.md) |  AggConfig This class represents an aggregation, which is displayed in the left-hand nav of the Visualize app. |
 |  [IAggType](./kibana-plugin-plugins-data-public.iaggtype.md) |  |
 |  [IEsError](./kibana-plugin-plugins-data-public.ieserror.md) |  |
@@ -161,6 +167,7 @@
 |  [IFieldFormat](./kibana-plugin-plugins-data-public.ifieldformat.md) |  |
 |  [IFieldFormatsRegistry](./kibana-plugin-plugins-data-public.ifieldformatsregistry.md) |  |
 |  [IFieldParamType](./kibana-plugin-plugins-data-public.ifieldparamtype.md) |  |
+|  [IFieldSubType](./kibana-plugin-plugins-data-public.ifieldsubtype.md) |  |
 |  [IMetricAggType](./kibana-plugin-plugins-data-public.imetricaggtype.md) |  |
 |  [IndexPatternAggRestrictions](./kibana-plugin-plugins-data-public.indexpatternaggrestrictions.md) |  |
 |  [IndexPatternLoadExpressionFunctionDefinition](./kibana-plugin-plugins-data-public.indexpatternloadexpressionfunctiondefinition.md) |  |
@@ -172,10 +179,17 @@
 |  [ISessionsClient](./kibana-plugin-plugins-data-public.isessionsclient.md) |  |
 |  [ISessionService](./kibana-plugin-plugins-data-public.isessionservice.md) |  |
 |  [KibanaContext](./kibana-plugin-plugins-data-public.kibanacontext.md) |  |
+|  [KueryNode](./kibana-plugin-plugins-data-public.kuerynode.md) |  |
+|  [MatchAllFilter](./kibana-plugin-plugins-data-public.matchallfilter.md) |  |
 |  [ParsedInterval](./kibana-plugin-plugins-data-public.parsedinterval.md) |  |
+|  [PhraseFilter](./kibana-plugin-plugins-data-public.phrasefilter.md) |  |
+|  [PhrasesFilter](./kibana-plugin-plugins-data-public.phrasesfilter.md) |  |
 |  [QueryStart](./kibana-plugin-plugins-data-public.querystart.md) |  |
 |  [QuerySuggestion](./kibana-plugin-plugins-data-public.querysuggestion.md) | \* |
 |  [QuerySuggestionGetFn](./kibana-plugin-plugins-data-public.querysuggestiongetfn.md) |  |
+|  [RangeFilter](./kibana-plugin-plugins-data-public.rangefilter.md) |  |
+|  [RangeFilterMeta](./kibana-plugin-plugins-data-public.rangefiltermeta.md) |  |
+|  [RangeFilterParams](./kibana-plugin-plugins-data-public.rangefilterparams.md) |  |
 |  [SavedQueryTimeFilter](./kibana-plugin-plugins-data-public.savedquerytimefilter.md) |  |
 |  [SearchBarProps](./kibana-plugin-plugins-data-public.searchbarprops.md) |  |
 |  [StatefulSearchBarProps](./kibana-plugin-plugins-data-public.statefulsearchbarprops.md) |  |

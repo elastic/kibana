@@ -4,6 +4,7 @@
 
 ## SearchSourceFields.filter property
 
+[Filter](./kibana-plugin-plugins-data-public.filter.md)
 
 <b>Signature:</b>
 

@@ -21,15 +21,15 @@ import {
   toElasticsearchQuery,
   buildEsQuery,
   buildQueryFromFilters,
-} from '@kbn/es-query';
+} from '../common';
 import { PluginConfigDescriptor, PluginInitializerContext } from '../../../core/server';
 import { ConfigSchema, configSchema } from '../config';
 import { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
 
 /*
+ * @deprecated Please import from the package kbn/es-query directly. This will be deprecated in v8.0.0.
  * Filter helper namespace:
  */
-
 export const esFilters = {
   buildQueryFilter,
   buildCustomFilter,
@@ -58,19 +58,27 @@ export const exporters = {
 
 import { getEsQueryConfig } from '../common';
 
+/*
+ * @deprecated Please import from the package kbn/es-query directly. This will be deprecated in v8.0.0.
+ * Filter helper namespace:
+ */
 export const esKuery = {
   nodeTypes,
   fromKueryExpression,
   toElasticsearchQuery,
 };
 
+/*
+ * @deprecated Please import from the package kbn/es-query directly. This will be deprecated in v8.0.0.
+ * Filter helper namespace:
+ */
 export const esQuery = {
   buildQueryFromFilters,
   getEsQueryConfig,
   buildEsQuery,
 };
 
-export type { EsQueryConfig, KueryNode, IFieldSubType } from '@kbn/es-query';
+export type { EsQueryConfig, KueryNode, IFieldSubType } from '../common';
 
 /*
  * Field Formats:

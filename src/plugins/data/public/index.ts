@@ -6,6 +6,17 @@
  * Side Public License, v 1.
  */
 
+/*
+ * esQuery and esKuery:
+ */
+
+import { PluginInitializerContext } from '../../../core/public';
+import { ConfigSchema } from '../config';
+
+/*
+ * Filters:
+ */
+
 import {
   getPhraseFilterField,
   getPhraseFilterValue,
@@ -32,19 +43,11 @@ import {
   buildQueryFromFilters,
   luceneStringToDsl,
   decorateQuery,
-} from '@kbn/es-query';
-/*
- * esQuery and esKuery:
- */
-
-import { PluginInitializerContext } from '../../../core/public';
-import { ConfigSchema } from '../config';
-
-/*
- * Filters:
- */
-
-import { FILTERS, FilterStateStore, compareFilters, COMPARE_ALL_OPTIONS } from '../common';
+  FILTERS,
+  FilterStateStore,
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
+} from '../common';
 
 import { FilterLabel } from './ui';
 import { FilterItem } from './ui/filter_bar';
@@ -102,9 +105,6 @@ export const esFilters = {
   extractTimeRange,
 };
 
-/**
- * @deprecated Import from `@kbn/es-query` directly.
- */
 export {
   KueryNode,
   RangeFilter,
@@ -119,7 +119,7 @@ export {
   EsQueryConfig,
   isFilter,
   isFilters,
-} from '@kbn/es-query';
+} from '../common';
 
 import { getEsQueryConfig } from '../common';
 
