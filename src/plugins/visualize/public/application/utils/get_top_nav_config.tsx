@@ -449,7 +449,9 @@ export const getTopNavConfig = (
                     onSave={onSave}
                     options={tagOptions}
                     getAppNameFromId={stateTransfer.getAppNameFromId}
-                    objectType={'visualization'}
+                    objectType={i18n.translate('visualize.topNavMenu.saveVisualizationObjectType', {
+                      defaultMessage: 'visualization',
+                    })}
                     onClose={() => {}}
                     originatingApp={originatingApp}
                     returnToOriginSwitchLabel={
@@ -475,7 +477,9 @@ export const getTopNavConfig = (
                     canSaveByReference={Boolean(visualizeCapabilities.save)}
                     onSave={onSave}
                     tagOptions={tagOptions}
-                    objectType={'visualization'}
+                    objectType={i18n.translate('visualize.topNavMenu.saveVisualizationObjectType', {
+                      defaultMessage: 'visualization',
+                    })}
                     onClose={() => {}}
                   />
                 );

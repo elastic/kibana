@@ -12,6 +12,7 @@ import { ApmServiceNameAgg } from './types';
 import { ENDPOINT_METADATA_INDEX } from '../../../common/constants';
 
 const APM_INDEX_NAME = 'apm-*-transaction*';
+const APM_DATA_STREAM = 'traces-apm*';
 
 export class ElasticsearchSourceStatusAdapter implements SourceStatusAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
@@ -23,7 +24,9 @@ export class ElasticsearchSourceStatusAdapter implements SourceStatusAdapter {
       // Add endpoint metadata index to indices to check
       indexNames.push(ENDPOINT_METADATA_INDEX);
       // Remove APM index if exists, and only query if length > 0 in case it's the only index provided
-      const nonApmIndexNames = indexNames.filter((name) => name !== APM_INDEX_NAME);
+      const nonApmIndexNames = indexNames.filter(
+        (name) => name !== APM_INDEX_NAME && name !== APM_DATA_STREAM
+      );
       const indexCheckResponse = await (nonApmIndexNames.length > 0
         ? this.framework.callWithRequest(request, 'search', {
             index: nonApmIndexNames,
@@ -39,7 +42,8 @@ export class ElasticsearchSourceStatusAdapter implements SourceStatusAdapter {
 
       // Note: Additional check necessary for APM-specific index. For details see: https://github.com/elastic/kibana/issues/56363
       // Only verify if APM data exists if indexNames includes `apm-*-transaction*` (default included apm index)
-      const includesApmIndex = indexNames.includes(APM_INDEX_NAME);
+      const includesApmIndex =
+        indexNames.includes(APM_INDEX_NAME) || indexNames.includes(APM_DATA_STREAM);
       const hasApmDataResponse = await (includesApmIndex
         ? this.framework.callWithRequest<{}, ApmServiceNameAgg>(
             request,

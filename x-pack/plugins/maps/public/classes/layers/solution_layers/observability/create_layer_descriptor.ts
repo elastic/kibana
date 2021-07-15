@@ -39,7 +39,7 @@ import { getDefaultDynamicProperties } from '../../../styles/vector/vector_style
 
 // redefining APM constant to avoid making maps app depend on APM plugin
 export const APM_INDEX_PATTERN_ID = 'apm_static_index_pattern_id';
-export const APM_INDEX_PATTERN_TITLE = 'apm-*';
+export const APM_INDEX_PATTERN_TITLE = 'traces-apm*,logs-apm*,metrics-apm*,apm-*';
 
 const defaultDynamicProperties = getDefaultDynamicProperties();
 

@@ -414,7 +414,7 @@ export interface IndexTemplateMappings {
 
 // This is an index template v2, see https://github.com/elastic/elasticsearch/issues/53101
 // until "proper" documentation of the new format is available.
-// Ingest Manager does not use nor support the legacy index template v1 format at all
+// Fleet does not use nor support the legacy index template v1 format at all
 export interface IndexTemplate {
   priority: number;
   index_patterns: string[];
