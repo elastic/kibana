@@ -55,7 +55,13 @@ export class AnomalyTimelineService {
   }
 
   public static isOverallSwimlaneData(arg: unknown): arg is OverallSwimlaneData {
-    return this.isSwimlaneData(arg) && isPopulatedObject(arg, ['earliest', 'latest']);
+    // Important to check if all laneLabels are 'Overall'
+    // because ViewBySwimLaneData also extends OverallSwimlaneData
+    return (
+      this.isSwimlaneData(arg) &&
+      isPopulatedObject(arg, ['earliest', 'latest']) &&
+      !arg.laneLabels.some((label) => label !== 'Overall')
+    );
   }
 
   public setTimeRange(timeRange: TimeRange) {
