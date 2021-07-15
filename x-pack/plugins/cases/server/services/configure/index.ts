@@ -49,7 +49,10 @@ interface PatchCaseConfigureArgs extends ClientArgs {
   updatedAttributes: Partial<CasesConfigureAttributes>;
 }
 
-function transformOrUseNoneConnector(connector?: ESCaseConnectorNoID, connectorID?: string) {
+function transformOrUseNoneConnector(
+  connector?: ESCaseConnectorNoID,
+  connectorID?: string
+): CaseConnector {
   return transformToExternalConnector(connector, connectorID) ?? getNoneCaseConnector();
 }
 
@@ -57,8 +60,15 @@ function transformToExternalConnector(
   connector?: ESCaseConnectorNoID,
   connectorID?: string
 ): CaseConnector | undefined {
-  if (!connector || !connectorID) {
+  if (!connector) {
     return;
+  }
+
+  // if the connector is valid, but we can't find it's ID in the reference, then it must be malformed
+  // or it was a none connector which doesn't have a reference (a none connector doesn't point to any actual connector
+  // saved object)
+  if (!connectorID) {
+    return getNoneCaseConnector();
   }
 
   const connectorTypeField = {
@@ -82,7 +92,9 @@ function transformToExternalConnector(
   };
 }
 
-function findConnectorIDReference(references?: SavedObjectReference[]) {
+function findConnectorIDReference(
+  references?: SavedObjectReference[]
+): SavedObjectReference | undefined {
   return references?.find(
     (ref) =>
       ref.type === ACTION_SAVED_OBJECT_TYPE && ref.name === configurationConnectorReferenceName
@@ -94,13 +106,15 @@ function transformUpdateToExternalModel(
 ): SavedObjectsUpdateResponse<CasesConfigurePatch> {
   const connectorIDRef = findConnectorIDReference(updatedConfiguration.references);
 
-  const { connector, ...restUpdatedAttributes } = updatedConfiguration.attributes;
+  const { connector, ...restUpdatedAttributes } = updatedConfiguration.attributes ?? {};
 
+  const transformedConnector = transformToExternalConnector(connector, connectorIDRef?.id);
   return {
     ...updatedConfiguration,
     attributes: {
       ...restUpdatedAttributes,
-      connector: transformToExternalConnector(connector, connectorIDRef?.id),
+      // this will avoid setting connector to undefined, it won't include to field at all
+      ...(transformedConnector && { connector: transformedConnector }),
     },
   };
 }
