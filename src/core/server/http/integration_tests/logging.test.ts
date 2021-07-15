@@ -118,7 +118,7 @@ describe('request logging', () => {
         },
       };
 
-      beforeEach(async () => {
+      beforeEach(() => {
         root = kbnTestServer.createRoot(config);
       });
 
