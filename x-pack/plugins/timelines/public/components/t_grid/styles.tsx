@@ -138,6 +138,7 @@ export const EventsThGroupData = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__thGroupData ${className}`,
 }))<{ isDragging?: boolean }>`
   display: flex;
+
   > div:hover .siemEventsHeading__handle {
     display: ${({ isDragging }) => (isDragging ? 'none' : 'block')};
     opacity: 1;
@@ -155,17 +156,21 @@ export const EventsTh = styled.div.attrs<{ role: string }>(
   display: flex;
   flex-shrink: 0;
   min-width: 0;
+
   .siemEventsTable__thGroupActions &:first-child:last-child {
     flex: 1;
   }
+
   .siemEventsTable__thGroupData &:hover {
     background-color: ${({ theme }) => theme.eui.euiTableHoverColor};
     cursor: move; /* Fallback for IE11 */
     cursor: grab;
   }
+
   > div:focus {
     outline: 0; /* disable focus on Resizable element */
   }
+
   /* don't display Draggable placeholder */
   [data-rbd-placeholder-context-id] {
     display: none !important;
@@ -185,6 +190,7 @@ export const EventsThContent = styled.div.attrs(({ className = '' }) => ({
     width != null
       ? `${width}px`
       : '100%'}; /* Using width: 100% instead of flex: 1 and max-width: 100% for IE11 */
+
   > button.euiButtonIcon,
   > .euiToolTipAnchor > button.euiButtonIcon {
     margin-left: ${({ theme }) => `-${theme.eui.paddingSizes.xs}`};

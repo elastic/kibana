@@ -87,7 +87,7 @@ describe('Body', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="header-data-grid"]').first().exists()).toEqual(true);
+      expect(wrapper.find('[data-test-subj="column-headers"]').first().exists()).toEqual(true);
     });
 
     test('it renders the scroll container', () => {
