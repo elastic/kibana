@@ -1,7 +1,7 @@
 {
   "attributes": {
-    "@created": "2020-07-16T20:33:21.826Z",
-    "@timestamp": "2020-07-16T20:34:01.093Z",
+    "@created": "2020-10-21T23:50:26.466Z",
+    "@timestamp": "2020-10-22T23:44:48.387Z",
     "assets": {},
     "colors": [
       "#37988d",
@@ -36,28 +36,28 @@
       "rgba(255,255,255,0)"
     ],
     "css": ".canvasPage {\n\n}",
-    "height": 720,
+    "height": 8,
     "isWriteable": true,
-    "name": "Workpad of Death",
+    "name": "The Very Cool Workpad for PDF Tests",
     "page": 0,
     "pages": [
       {
         "elements": [
           {
-            "expression": "image \n  dataurl=\"https://via.placeholder.com/728x90.png?text=test+external+image\" mode=\"contain\"\n| render",
-            "id": "element-4612f502-7880-418b-8107-a629e9b842bc",
+            "expression": "shape \"square\" fill=\"#4cbce4\" border=\"rgba(255,255,255,0)\" borderWidth=0 maintainAspect=false | render",
+            "id": "element-e05237c6-0fda-49e7-84fc-b8573739b515",
             "position": {
               "angle": 0,
-              "height": 300,
-              "left": 20,
+              "height": 18,
+              "left": -1,
               "parent": null,
-              "top": 20,
-              "width": 500
+              "top": -1,
+              "width": 15.5
             }
           }
         ],
         "groups": [],
-        "id": "page-28d24ed2-c162-408c-92b3-978d7433aa1d",
+        "id": "page-c0e601aa-1c72-4d4a-b73f-8fb72a9d8d3a",
         "style": {
           "background": "#FFF"
         },
@@ -65,15 +65,15 @@
       }
     ],
     "variables": [],
-    "width": 1080
+    "width": 8
   },
   "coreMigrationVersion": "8.0.0",
-  "id": "workpad-e7464259-0b75-4b8c-81c8-8422b15ff201",
+  "id": "workpad-c13808dc-e690-4bab-be06-2073ba071754",
   "migrationVersion": {
     "canvas-workpad": "7.0.0"
   },
   "references": [],
   "type": "canvas-workpad",
-  "updated_at": "2020-07-16T20:34:01.098Z",
-  "version": "WzIsMl0="
+  "updated_at": "2020-10-22T23:44:48.392Z",
+  "version": "WzgsMl0="
 }

@@ -1,0 +1,76 @@
+{
+  "attributes": {
+    "fieldAttrs": "{}",
+    "fields": "[]",
+    "title": "foo"
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "f8a1e9a0-2dc5-11eb-8af3-cb3aa84dbabd",
+  "migrationVersion": {
+    "index-pattern": "7.11.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "updated_at": "2020-11-23T19:56:26.810Z",
+  "version": "WzM4LDJd"
+}
+
+{
+  "attributes": {
+    "description": "",
+    "state": {
+      "datasourceStates": {
+        "indexpattern": {
+          "layers": {
+            "c6af0915-fc1c-41b5-b195-7b05a51b0271": {
+              "columnOrder": [
+                "0ee222c6-215d-4adc-aac0-b45469d5f9c1"
+              ],
+              "columns": {
+                "0ee222c6-215d-4adc-aac0-b45469d5f9c1": {
+                  "dataType": "number",
+                  "isBucketed": false,
+                  "label": "Average of field",
+                  "operationType": "average",
+                  "scale": "ratio",
+                  "sourceField": "field"
+                }
+              }
+            }
+          }
+        }
+      },
+      "filters": [],
+      "query": {
+        "language": "kuery",
+        "query": ""
+      },
+      "visualization": {
+        "accessor": "0ee222c6-215d-4adc-aac0-b45469d5f9c1",
+        "layerId": "c6af0915-fc1c-41b5-b195-7b05a51b0271"
+      }
+    },
+    "title": "visualization",
+    "visualizationType": "lnsMetric"
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "2be82220-2dc6-11eb-8af3-cb3aa84dbabd",
+  "migrationVersion": {
+    "lens": "7.14.0"
+  },
+  "references": [
+    {
+      "id": "f8a1e9a0-2dc5-11eb-8af3-cb3aa84dbabd",
+      "name": "indexpattern-datasource-current-indexpattern",
+      "type": "index-pattern"
+    },
+    {
+      "id": "f8a1e9a0-2dc5-11eb-8af3-cb3aa84dbabd",
+      "name": "indexpattern-datasource-layer-c6af0915-fc1c-41b5-b195-7b05a51b0271",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "lens",
+  "updated_at": "2020-11-23T19:57:52.834Z",
+  "version": "WzUyLDJd"
+}
