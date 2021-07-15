@@ -97,7 +97,7 @@ describe('get()', () => {
                   },
                   Object {
                     "term": Object {
-                      "kibana.rac.alert.space_ids": "test_default_space_id",
+                      "kibana.space_ids": "test_default_space_id",
                     },
                   },
                 ],
