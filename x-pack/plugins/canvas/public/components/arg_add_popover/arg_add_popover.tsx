@@ -9,9 +9,7 @@ import React, { MouseEventHandler, FC } from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-// @ts-expect-error untyped local
-import { Popover, PopoverChildrenProps } from '../popover';
+import { Popover } from '../popover';
 import { ArgAdd } from '../arg_add';
 // @ts-expect-error untyped local
 import { Arg } from '../../expression_types/arg';
@@ -49,7 +47,7 @@ export const ArgAddPopover: FC<Props> = ({ options }) => {
       panelPaddingSize="none"
       button={button}
     >
-      {({ closePopover }: PopoverChildrenProps) =>
+      {({ closePopover }) =>
         options.map((opt) => (
           <ArgAdd
             key={`${opt.arg.name}-add`}

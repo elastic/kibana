@@ -47,7 +47,6 @@ export function enqueueJobFactory(
       reporting.getStore(),
     ]);
 
-    const config = reporting.getConfig();
     const job = await createJob!(jobParams, context, request);
 
     // 1. Add the report to ReportingStore to show as pending
@@ -55,7 +54,6 @@ export function enqueueJobFactory(
       new Report({
         jobtype: exportType.jobType,
         created_by: user ? user.username : false,
-        max_attempts: config.get('capture', 'maxAttempts'), // NOTE: since max attempts is stored in the document, changing the capture.maxAttempts setting does not affect existing pending reports
         payload: job,
         meta: {
           objectType: jobParams.objectType,
