@@ -346,6 +346,7 @@ describe('7.11.2', () => {
         {
           actionTypeId: '.jira',
           group: 'threshold met',
+          actionRef: '',
           params: {
             subAction: 'pushToService',
             subActionParams: {
@@ -369,6 +370,7 @@ describe('7.11.2', () => {
         {
           actionTypeId: '.resilient',
           group: 'threshold met',
+          actionRef: '',
           params: {
             subAction: 'pushToService',
             subActionParams: {
@@ -390,6 +392,7 @@ describe('7.11.2', () => {
         {
           actionTypeId: '.servicenow',
           group: 'threshold met',
+          actionRef: '',
           params: {
             subAction: 'pushToService',
             subActionParams: {
@@ -414,6 +417,7 @@ describe('7.11.2', () => {
           {
             actionTypeId: '.jira',
             group: 'threshold met',
+            actionRef: '',
             params: {
               subAction: 'pushToService',
               subActionParams: {
@@ -438,6 +442,7 @@ describe('7.11.2', () => {
           {
             actionTypeId: '.resilient',
             group: 'threshold met',
+            actionRef: '',
             params: {
               subAction: 'pushToService',
               subActionParams: {
@@ -460,6 +465,7 @@ describe('7.11.2', () => {
           {
             actionTypeId: '.servicenow',
             group: 'threshold met',
+            actionRef: '',
             params: {
               subAction: 'pushToService',
               subActionParams: {
@@ -628,6 +634,7 @@ describe('7.11.2', () => {
         {
           actionTypeId: '.server-log',
           group: 'threshold met',
+          actionRef: '',
           params: {
             level: 'info',
             message: 'log message',
@@ -637,6 +644,7 @@ describe('7.11.2', () => {
         {
           actionTypeId: '.servicenow',
           group: 'threshold met',
+          actionRef: '',
           params: {
             subAction: 'pushToService',
             subActionParams: {
@@ -662,6 +670,7 @@ describe('7.11.2', () => {
           {
             actionTypeId: '.servicenow',
             group: 'threshold met',
+            actionRef: '',
             params: {
               subAction: 'pushToService',
               subActionParams: {
