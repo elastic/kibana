@@ -18,6 +18,13 @@ const defaultIndexPatternListName = i18n.translate(
   }
 );
 
+const rollupIndexPatternListName = i18n.translate(
+  'indexPatternManagement.editIndexPattern.list.rollupIndexPatternListName',
+  {
+    defaultMessage: 'Rollup',
+  }
+);
+
 const isRollup = (indexPattern: IIndexPattern | SimpleSavedObject<IIndexPattern>) => {
   return (
     indexPattern.type === 'rollup' ||
@@ -78,7 +85,7 @@ export const getTags = (
   if (isRollup(indexPattern)) {
     tags.push({
       key: 'rollup',
-      name: 'Rollup', // todo localize
+      name: rollupIndexPatternListName,
     });
   }
   return tags;
@@ -107,11 +114,36 @@ export const getFieldInfo = (indexPattern: IndexPattern, field: IFieldType) => {
       const agg = allAggs![aggName][field.name];
       switch (aggName) {
         case 'date_histogram':
-          return `${aggName} (interval: ${agg.fixed_interval}, ${
-            agg.delay ? `delay: ${agg.delay},` : ''
-          } ${agg.time_zone})`;
+          return i18n.translate(
+            'indexPatternManagement.editIndexPattern.list.dateHistogramSummary',
+            {
+              defaultMessage: '{aggName} (interval: {interval}, {delay} {time_zone})',
+              values: {
+                aggName,
+                interval: agg.fixed_interval,
+                delay: agg.delay
+                  ? i18n.translate(
+                      'indexPatternManagement.editIndexPattern.list.DateHistogramDelaySummary',
+                      {
+                        defaultMessage: 'delay: {delay},',
+                        values: {
+                          delay: agg.delay,
+                        },
+                      }
+                    )
+                  : '',
+                time_zone: agg.time_zone,
+              },
+            }
+          );
         case 'histogram':
-          return `${aggName} (interval: ${agg.fixed_interval})`;
+          return i18n.translate('indexPatternManagement.editIndexPattern.list.histogramSummary', {
+            defaultMessage: '{aggName} (interval: {interval})',
+            values: {
+              aggName,
+              interval: agg.fixed_interval,
+            },
+          });
         default:
           return aggName;
       }
