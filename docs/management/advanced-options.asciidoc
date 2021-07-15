@@ -480,10 +480,11 @@ of buckets to try to represent.
 
 [horizontal]
 [[visualization-visualize-chartslibrary]]`visualization:visualize:legacyChartsLibrary`::
-Enables the legacy charts library for aggregation-based area, line, and bar charts in *Visualize*.
+**The legacy XY charts are deprecated and will not be supported as of 7.16.**
+The visualize editor uses a new XY charts library with improved performance, color palettes, fill capacity, and more. Enable this option if you prefer to use the legacy charts library.
 
 [[visualization-visualize-pieChartslibrary]]`visualization:visualize:legacyPieChartsLibrary`::
-Enables the legacy charts library for aggregation-based pie charts in *Visualize*.
+The visualize editor uses new pie charts with improved performance, color palettes, label positioning, and more. Enable this option if you prefer to use to the legacy charts library.
 
 [[visualization-colormapping]]`visualization:colorMapping`::
 **This setting is deprecated and will not be supported as of 8.0.**

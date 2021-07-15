@@ -264,7 +264,6 @@ export class DocLinksService {
           maps: `${ELASTIC_WEBSITE_URL}maps`,
           vega: `${KIBANA_DOCS}vega.html`,
           tsvbIndexPatternMode: `${KIBANA_DOCS}tsvb.html#tsvb-index-pattern-mode`,
-          aggregationBased: `${KIBANA_DOCS}add-aggregation-based-visualization-panels.html#new-charts-library`,
         },
         observability: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/index.html`,

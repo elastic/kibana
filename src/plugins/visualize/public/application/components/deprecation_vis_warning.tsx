@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { getCoreStart } from '../../services';
@@ -14,10 +14,6 @@ import { getCoreStart } from '../../services';
 export const LEGACY_CHARTS_LIBRARY = 'visualization:visualize:legacyChartsLibrary';
 
 export const DeprecationWarning = () => {
-  const documentationLink = useMemo(
-    () => getCoreStart().docLinks.links.visualize.aggregationBased,
-    []
-  );
   const canEditAdvancedSettings = getCoreStart().application.capabilities.advancedSettings.save;
   const advancedSettingsLink = getCoreStart().http.basePath.prepend(
     `/app/management/kibana/settings?query=${LEGACY_CHARTS_LIBRARY}`
@@ -29,20 +25,20 @@ export const DeprecationWarning = () => {
       title={
         <FormattedMessage
           id="visualize.legacyCharts.notificationMessage"
-          defaultMessage="You are using the legacy XY charts library which will be removed in the next minor release, 7.16, after being deprecated in 7.12. {advancedSettingsMessage} Check our documentation {documentationLink}"
+          defaultMessage="You are using the legacy charts library, which will be removed in 7.16. {conditionalMessage}"
           values={{
-            advancedSettingsMessage: (
+            conditionalMessage: (
               <>
                 {canEditAdvancedSettings && (
                   <FormattedMessage
-                    id="visualize.legacyCharts.advancedSettingsMessage.newLibrary"
-                    defaultMessage="Switch to the new library {link}"
+                    id="visualize.legacyCharts.conditionalMessage.newLibrary"
+                    defaultMessage="Switch to the new library in {link}"
                     values={{
                       link: (
                         <EuiLink href={advancedSettingsLink}>
                           <FormattedMessage
-                            id="visualize.legacyCharts.advancedSettingsMessage.linkText"
-                            defaultMessage="in your advanced settings."
+                            id="visualize.legacyCharts.conditionalMessage.advanced settings link"
+                            defaultMessage="Advanced settings."
                           />
                         </EuiLink>
                       ),
@@ -51,19 +47,11 @@ export const DeprecationWarning = () => {
                 )}
                 {!canEditAdvancedSettings && (
                   <FormattedMessage
-                    id="visualize.legacyCharts.advancedSettingsMessage.noPermissions"
-                    defaultMessage="To switch to the new library in your advanced settings, contact your administrator."
+                    id="visualize.legacyCharts.conditionalMessage.noPermissions"
+                    defaultMessage="Contact your system administrator to switch to the new library."
                   />
                 )}
               </>
-            ),
-            documentationLink: (
-              <EuiLink href={documentationLink} target="_blank" external>
-                <FormattedMessage
-                  id="visualize.legacyCharts.documentationLink"
-                  defaultMessage="here."
-                />
-              </EuiLink>
             ),
           }}
         />
