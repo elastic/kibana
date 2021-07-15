@@ -56,6 +56,7 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
       handleOnEventClosed={[Function]}
       isAlert={false}
       loading={true}
+      ruleName=""
     >
       <Styled(EuiFlexGroup)
         gutterSize="none"
@@ -306,6 +307,7 @@ Array [
             <ExpandableEventTitle
               isAlert={false}
               loading={true}
+              ruleName=""
             >
               <Styled(EuiFlexGroup)
                 gutterSize="none"
@@ -522,6 +524,7 @@ Array [
           <ExpandableEventTitle
             isAlert={false}
             loading={true}
+            ruleName=""
           >
             <Styled(EuiFlexGroup)
               gutterSize="none"
