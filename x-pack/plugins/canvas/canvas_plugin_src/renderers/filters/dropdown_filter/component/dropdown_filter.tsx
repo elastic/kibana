@@ -34,14 +34,14 @@ export interface Props {
 }
 
 export const DropdownFilter: FunctionComponent<Props> = ({
-  initialValue,
+  initialValue = '',
   commit,
   choices = [],
 }) => {
-  const [value, setValue] = useState<string>(initialValue ?? '');
+  const [value, setValue] = useState<string>(initialValue);
 
   useEffect(() => {
-    setValue(initialValue ?? '');
+    setValue(initialValue);
   }, [initialValue]);
 
   let options = [
