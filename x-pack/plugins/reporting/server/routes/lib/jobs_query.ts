@@ -33,7 +33,7 @@ function getSearchBody(body: SearchRequest['body']): SearchRequest['body'] {
 }
 
 export type ReportContent = Pick<ReportSource, 'status' | 'jobtype' | 'output'> & {
-  payload?: Pick<ReportSource['payload'], 'title'>;
+  payload?: Pick<ReportSource['payload'], 'title' | 'locatorParams'>;
 };
 
 interface JobsQueryFactory {

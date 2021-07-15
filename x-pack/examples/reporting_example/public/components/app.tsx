@@ -104,7 +104,9 @@ export const ReportingExampleApp = ({
         id: constants.LAYOUT_TYPES.PRESERVE_LAYOUT,
         selectors: getDefaultLayoutSelectors(),
       },
-      locators: [{ id: REPORTING_EXAMPLE_LOCATOR_ID, version: '1', params: { myTestState: {} } }],
+      locatorParams: [
+        { id: REPORTING_EXAMPLE_LOCATOR_ID, version: '1', params: { myTestState: {} } },
+      ],
       objectType: 'develeloperExample',
       title: 'Reporting Developer Example',
     };
@@ -116,7 +118,9 @@ export const ReportingExampleApp = ({
         id: constants.LAYOUT_TYPES.PRESERVE_LAYOUT,
         selectors: getDefaultLayoutSelectors(),
       },
-      locators: [{ id: REPORTING_EXAMPLE_LOCATOR_ID, version: '1', params: { myTestState: {} } }],
+      locatorParams: [
+        { id: REPORTING_EXAMPLE_LOCATOR_ID, version: '1', params: { myTestState: {} } },
+      ],
       objectType: 'develeloperExample',
       title: 'Reporting Developer Example',
     };

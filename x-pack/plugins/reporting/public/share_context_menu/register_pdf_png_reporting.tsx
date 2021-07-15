@@ -84,10 +84,10 @@ const getPngJobParamsV1 = (opts: JobParamsProviderOptions) => (): JobParamsPNG =
 };
 
 const getPngJobParamsV2 = (opts: JobParamsProviderOptions) => (): JobParamsPNGV2 => {
-  const locator = opts.sharingData.locator as LocatorParams;
+  const locatorParams = opts.sharingData.locatorParams as LocatorParams;
   return {
     ...jobParamsProvider(opts),
-    locator, // single locator for PNG
+    locatorParams: [locatorParams],
   };
 };
 

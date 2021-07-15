@@ -42,24 +42,22 @@ export const RedirectApp: FunctionComponent<Props> = ({ apiClient, history, shar
       try {
         if (!jobId || !locatorOffset || Array.isArray(jobId) || Array.isArray(locatorOffset)) {
           throw new Error(
-            `Unexpected redirect parameters, received: (1) job id: "${jobId}" (expected id) and (2) locator offset: "${locatorOffset}.`
+            `Unexpected redirect parameters, received: (1) report id: "${jobId}" (expected id) and (2) locator offset: "${locatorOffset}.`
           );
         }
-        const {
-          payload: { locators },
-        } = await apiClient.getInfo(jobId);
+        const locatorParams = await apiClient.getLocatorParams(jobId);
 
-        if (!locators) {
-          throw new Error(`No locators for this report job for job ID ${jobId}`);
+        if (!locatorParams || locatorParams.length === 0) {
+          throw new Error(`No locators for report ID ${jobId}`);
         }
 
-        const { [parseInt(locatorOffset, 10)]: locatorParams } = locators;
+        const { [parseInt(locatorOffset, 10)]: locatorParam } = locatorParams;
 
-        if (!locatorParams) {
-          throw new Error(`No locator params found at ${locatorOffset} for job ID ${jobId}`);
+        if (!locatorParam) {
+          throw new Error(`No locator params found at ${locatorOffset} for report ID ${jobId}`);
         }
 
-        share.navigate(locatorParams);
+        share.navigate(locatorParam);
       } catch (e) {
         setError(e);
         throw e;
