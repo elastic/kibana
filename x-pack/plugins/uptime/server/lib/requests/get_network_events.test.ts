@@ -298,6 +298,7 @@ describe('getNetworkEvents', () => {
             "url": "www.test.com",
           },
         ],
+        "hasNavigationRequest": false,
         "isWaterfallSupported": true,
         "total": 1,
       }
