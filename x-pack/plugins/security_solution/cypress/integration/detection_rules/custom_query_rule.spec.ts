@@ -88,6 +88,7 @@ import {
 import {
   changeRowsPerPageTo100,
   deleteFirstRule,
+  deleteRuleFromDetailsPage,
   deleteSelectedRules,
   editFirstRule,
   filterByCustomRules,
@@ -237,8 +238,10 @@ describe('Custom detection rules deletion and edition', () => {
       goToManageAlertsDetectionRules();
       waitForAlertsIndexToBeCreated();
       createCustomRuleActivated(getNewRule(), 'rule1');
-      createCustomRuleActivated(getNewOverrideRule(), 'rule2');
-      createCustomRuleActivated(getExistingRule(), 'rule3');
+      createCustomRuleActivated(getNewRule(), 'rule2');
+
+      createCustomRuleActivated(getNewOverrideRule(), 'rule3');
+      createCustomRuleActivated(getExistingRule(), 'rule4');
       reload();
     });
 
@@ -292,12 +295,44 @@ describe('Custom detection rules deletion and edition', () => {
           });
           cy.get(SHOWING_RULES_TEXT).should(
             'have.text',
-            `Showing ${expectedNumberOfRulesAfterDeletion} rule`
+            `Showing ${expectedNumberOfRulesAfterDeletion} rules`
           );
           cy.get(CUSTOM_RULES_BTN).should(
             'have.text',
             `Custom rules (${expectedNumberOfRulesAfterDeletion})`
           );
+        });
+    });
+
+    it('Deletes one rule from detail page', () => {
+      cy.get(RULES_TABLE)
+        .find(RULES_ROW)
+        .then((rules) => {
+          const initialNumberOfRules = rules.length;
+          const expectedNumberOfRulesAfterDeletion = initialNumberOfRules - 1;
+
+          goToRuleDetails();
+          cy.intercept('POST', '/api/detection_engine/rules/_bulk_delete').as('deleteRule');
+
+          deleteRuleFromDetailsPage();
+
+          cy.waitFor('@deleteRule').then(() => {
+            cy.get(RULES_TABLE).should('exist');
+            cy.get(RULES_TABLE).then(($table) => {
+              cy.wrap($table.find(RULES_ROW).length).should(
+                'eql',
+                expectedNumberOfRulesAfterDeletion
+              );
+            });
+            cy.get(SHOWING_RULES_TEXT).should(
+              'have.text',
+              `Showing ${expectedNumberOfRulesAfterDeletion} rules`
+            );
+            cy.get(CUSTOM_RULES_BTN).should(
+              'have.text',
+              `Custom rules (${expectedNumberOfRulesAfterDeletion})`
+            );
+          });
         });
     });
   });
