@@ -27,5 +27,10 @@
     "home",
     "ml",
     "embeddable"
-  ]
+  ],
+  "owner": {
+    "name": "Logs and Metrics UI",
+    "githubTeam": "logs-metrics-ui"
+  },
+  "description": "This plugin visualizes data from Filebeat and Metricbeat, and integrates with other Observability solutions"
 }

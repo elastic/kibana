@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { useHistory, useLocation, useParams } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import {
   EuiCode,
   EuiAccordion,
@@ -39,6 +39,7 @@ import { useCorrelations } from './use_correlations';
 import { push } from '../../shared/Links/url_helpers';
 import { useUiTracker } from '../../../../../observability/public';
 import { asPreciseDecimal } from '../../../../common/utils/formatters';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { LatencyCorrelationsHelpPopover } from './ml_latency_correlations_help_popover';
 
 const DEFAULT_PERCENTILE_THRESHOLD = 95;
@@ -63,17 +64,10 @@ export function MlLatencyCorrelations({ onClose }: Props) {
     core: { notifications },
   } = useApmPluginContext();
 
-  const { serviceName } = useParams<{ serviceName: string }>();
-  const {
-    urlParams: {
-      environment,
-      kuery,
-      transactionName,
-      transactionType,
-      start,
-      end,
-    },
-  } = useUrlParams();
+  const { serviceName, transactionType } = useApmServiceContext();
+  const { urlParams } = useUrlParams();
+
+  const { environment, kuery, transactionName, start, end } = urlParams;
 
   const location = useLocation();
   const displayLog = location.search.includes('debug=true');
