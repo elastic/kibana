@@ -9,6 +9,8 @@ import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useState } from 'react';
+import { CoreStart, OverlayRef } from 'kibana/public';
+import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { TableText } from '../';
 import { OnActionClick, OnActionComplete, OnActionDismiss } from './types';
@@ -18,12 +20,12 @@ interface DeleteButtonProps {
   name: string;
   api: SearchSessionsMgmtAPI;
   onActionComplete: OnActionComplete;
-  onActionDismiss: OnActionDismiss;
+  overlays: CoreStart['overlays'];
   onActionClick: OnActionClick;
 }
 
-const DeleteConfirm = ({ onActionDismiss, ...props }: DeleteButtonProps) => {
-  const { id, name, api, onActionComplete } = props;
+const DeleteConfirm = (props: DeleteButtonProps & { onActionDismiss: OnActionDismiss }) => {
+  const { id, name, api, onActionComplete, onActionDismiss } = props;
   const [isLoading, setIsLoading] = useState(false);
 
   const title = i18n.translate('xpack.data.mgmt.searchSessions.cancelModal.title', {
@@ -63,13 +65,16 @@ const DeleteConfirm = ({ onActionDismiss, ...props }: DeleteButtonProps) => {
 };
 
 export const DeleteButton = (props: DeleteButtonProps) => {
-  const { onActionClick } = props;
+  const { overlays, onActionClick } = props;
 
   return (
     <>
       <TableText
         onClick={() => {
-          onActionClick(<DeleteConfirm {...props} />);
+          onActionClick();
+          const ref = overlays.openModal(
+            toMountPoint(<DeleteConfirm onActionDismiss={() => ref?.close()} {...props} />)
+          );
         }}
       >
         <FormattedMessage

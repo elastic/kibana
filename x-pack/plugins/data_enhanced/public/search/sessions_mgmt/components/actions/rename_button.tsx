@@ -20,20 +20,25 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useState } from 'react';
+import { CoreStart, OverlayRef } from 'kibana/public';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { TableText } from '../';
+import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
 import { OnActionClick, OnActionComplete, OnActionDismiss } from './types';
 
 interface RenameButtonProps {
   id: string;
   name: string;
   api: SearchSessionsMgmtAPI;
+  overlays: CoreStart['overlays'];
   onActionComplete: OnActionComplete;
   onActionClick: OnActionClick;
-  onActionDismiss: OnActionDismiss;
 }
 
-const RenameDialog = ({ onActionDismiss, ...props }: RenameButtonProps) => {
+const RenameDialog = ({
+  onActionDismiss,
+  ...props
+}: RenameButtonProps & { onActionDismiss: OnActionDismiss }) => {
   const { id, name: originalName, api, onActionComplete } = props;
   const [isLoading, setIsLoading] = useState(false);
   const [newName, setNewName] = useState(originalName);
@@ -100,10 +105,13 @@ const RenameDialog = ({ onActionDismiss, ...props }: RenameButtonProps) => {
 };
 
 export const RenameButton = (props: RenameButtonProps) => {
-  const { onActionClick } = props;
+  const { overlays, onActionClick } = props;
 
   const onClick = () => {
-    onActionClick(<RenameDialog {...props} />);
+    onActionClick();
+    const ref = overlays.openModal(
+      toMountPoint(<RenameDialog onActionDismiss={() => ref?.close()} {...props} />)
+    );
   };
 
   return (

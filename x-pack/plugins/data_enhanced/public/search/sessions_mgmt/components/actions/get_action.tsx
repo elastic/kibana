@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { CoreStart } from 'kibana/public';
 import { IClickActionDescriptor } from '../';
 import extendSessionIcon from '../../icons/extend_session.svg';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
@@ -13,18 +14,19 @@ import { UISession } from '../../types';
 import { DeleteButton } from './delete_button';
 import { ExtendButton } from './extend_button';
 import { InspectButton } from './inspect_button';
-import { ACTION, OnActionClick, OnActionComplete, OnActionDismiss } from './types';
+import { ACTION, OnActionClick, OnActionComplete } from './types';
 import { RenameButton } from './rename_button';
 
 export const getAction = (
   api: SearchSessionsMgmtAPI,
   actionType: string,
   uiSession: UISession,
+  core: CoreStart,
   onActionClick: OnActionClick,
-  onActionComplete: OnActionComplete,
-  onActionDismiss: OnActionDismiss
+  onActionComplete: OnActionComplete
 ): IClickActionDescriptor | null => {
   const { id, name, expires } = uiSession;
+  const { overlays, uiSettings } = core;
   switch (actionType) {
     case ACTION.INSPECT:
       return {
@@ -32,9 +34,10 @@ export const getAction = (
         textColor: 'default',
         label: (
           <InspectButton
+            overlays={overlays}
             searchSession={uiSession}
+            uiSettings={uiSettings}
             onActionClick={onActionClick}
-            onActionDismiss={onActionDismiss}
           />
         ),
       };
@@ -48,8 +51,8 @@ export const getAction = (
             api={api}
             id={id}
             name={name}
+            overlays={overlays}
             onActionComplete={onActionComplete}
-            onActionDismiss={onActionDismiss}
             onActionClick={onActionClick}
           />
         ),
@@ -65,9 +68,9 @@ export const getAction = (
             id={id}
             name={name}
             expires={expires}
+            overlays={overlays}
             extendBy={api.getExtendByDuration()}
             onActionComplete={onActionComplete}
-            onConfirmDismiss={onActionDismiss}
             onActionClick={onActionClick}
           />
         ),
@@ -82,9 +85,9 @@ export const getAction = (
             api={api}
             id={id}
             name={name}
+            overlays={overlays}
             onActionComplete={onActionComplete}
             onActionClick={onActionClick}
-            onActionDismiss={onActionDismiss}
           />
         ),
       };

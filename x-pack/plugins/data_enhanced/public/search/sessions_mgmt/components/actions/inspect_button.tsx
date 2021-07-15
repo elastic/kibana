@@ -5,30 +5,32 @@
  * 2.0.
  */
 
-import {
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiPortal,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlyoutBody, EuiFlyoutHeader, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
+import { CoreStart } from 'kibana/public';
 import { UISession } from '../../types';
 import { TableText } from '..';
-import { CodeEditor } from '../../../../../../../../src/plugins/kibana_react/public';
+import {
+  CodeEditor,
+  createKibanaReactContext,
+  toMountPoint,
+} from '../../../../../../../../src/plugins/kibana_react/public';
 import './inspect_button.scss';
-import { OnActionClick, OnActionDismiss } from './types';
+import { OnActionClick } from './types';
 
 interface InspectFlyoutProps {
   searchSession: UISession;
+  overlays: CoreStart['overlays'];
+  uiSettings: CoreStart['uiSettings'];
   onActionClick: OnActionClick;
-  onActionDismiss: OnActionDismiss;
 }
 
-const InspectFlyout = ({ onActionDismiss, searchSession }: InspectFlyoutProps) => {
+const InspectFlyout = ({ uiSettings, searchSession }: InspectFlyoutProps) => {
+  const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
+    uiSettings,
+  });
+
   const renderInfo = () => {
     return (
       <Fragment>
@@ -54,50 +56,44 @@ const InspectFlyout = ({ onActionDismiss, searchSession }: InspectFlyoutProps) =
   };
 
   return (
-    <EuiPortal>
-      <EuiFlyout
-        ownFocus
-        onClose={onActionDismiss}
-        size="s"
-        aria-labelledby="flyoutTitle"
-        data-test-subj="searchSessionsFlyout"
-        className="searchSessionsFlyout"
-      >
-        <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="m">
-            <h2 id="flyoutTitle">
+    <KibanaReactContextProvider>
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="m">
+          <h2 id="flyoutTitle">
+            <FormattedMessage
+              id="xpack.data.sessions.management.flyoutTitle"
+              defaultMessage="Inspect search session"
+            />
+          </h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody className="searchSessionsFlyout" data-test-subj="searchSessionsFlyout">
+        <EuiText>
+          <EuiText size="xs">
+            <p>
               <FormattedMessage
-                id="xpack.data.sessions.management.flyoutTitle"
-                defaultMessage="Inspect search session"
+                id="xpack.data.sessions.management.flyoutText"
+                defaultMessage="Configuration for this search session"
               />
-            </h2>
-          </EuiTitle>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          <EuiText>
-            <EuiText size="xs">
-              <p>
-                <FormattedMessage
-                  id="xpack.data.sessions.management.flyoutText"
-                  defaultMessage="Configuration for this search session"
-                />
-              </p>
-            </EuiText>
-            <EuiSpacer />
-            {renderInfo()}
+            </p>
           </EuiText>
-        </EuiFlyoutBody>
-      </EuiFlyout>
-    </EuiPortal>
+          <EuiSpacer />
+          {renderInfo()}
+        </EuiText>
+      </EuiFlyoutBody>
+    </KibanaReactContextProvider>
   );
 };
 export const InspectButton = (props: InspectFlyoutProps) => {
-  const { onActionClick } = props;
+  const { overlays, onActionClick } = props;
+
   return (
     <Fragment>
       <TableText
         onClick={() => {
-          onActionClick(<InspectFlyout {...props} />);
+          onActionClick();
+          const flyout = <InspectFlyout {...props} />;
+          overlays.openFlyout(toMountPoint(flyout));
         }}
       >
         <FormattedMessage

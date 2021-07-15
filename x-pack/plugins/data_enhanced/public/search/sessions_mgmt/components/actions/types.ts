@@ -6,7 +6,7 @@
  */
 
 export type OnActionComplete = () => void;
-export type OnActionClick = (actionElement: React.ReactElement) => void;
+export type OnActionClick = () => void;
 export type OnActionDismiss = () => void;
 
 export enum ACTION {

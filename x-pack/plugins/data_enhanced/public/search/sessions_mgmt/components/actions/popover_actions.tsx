@@ -21,6 +21,7 @@ import {
   EuiContextMenuPanelItemSeparator,
 } from '@elastic/eui/src/components/context_menu/context_menu';
 import { i18n } from '@kbn/i18n';
+import { CoreStart } from 'kibana/public';
 import React, { ReactElement, useState } from 'react';
 import { TableText } from '../';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
@@ -39,6 +40,7 @@ interface PopoverActionItemsProps {
   session: UISession;
   api: SearchSessionsMgmtAPI;
   onActionComplete: OnActionComplete;
+  core: CoreStart;
 }
 
 // helper
@@ -53,9 +55,13 @@ const PopoverAction = ({ textColor, iconType, children, ...props }: PopoverActio
   </EuiFlexGroup>
 );
 
-export const PopoverActionsMenu = ({ api, onActionComplete, session }: PopoverActionItemsProps) => {
+export const PopoverActionsMenu = ({
+  api,
+  onActionComplete,
+  session,
+  core,
+}: PopoverActionItemsProps) => {
   const [isPopoverOpen, setPopover] = useState(false);
-  const [actionElement, setActionElement] = useState<React.ReactElement | undefined>(undefined);
 
   const onPopoverClick = () => {
     setPopover(!isPopoverOpen);
@@ -65,14 +71,8 @@ export const PopoverActionsMenu = ({ api, onActionComplete, session }: PopoverAc
     setPopover(false);
   };
 
-  const onPopoverDismiss = () => {
+  const onActionClick = () => {
     closePopover();
-    setActionElement(undefined);
-  };
-
-  const onActionClick = (elem: React.ReactElement) => {
-    closePopover();
-    setActionElement(elem);
   };
 
   const renderPopoverButton = () => (
@@ -95,14 +95,7 @@ export const PopoverActionsMenu = ({ api, onActionComplete, session }: PopoverAc
   const actions = session.actions || [];
   // Generic set of actions - up to the API to return what is available
   const items = actions.reduce((itemSet, actionType) => {
-    const actionDef = getAction(
-      api,
-      actionType,
-      session,
-      onActionClick,
-      onActionComplete,
-      onPopoverDismiss
-    );
+    const actionDef = getAction(api, actionType, session, core, onActionClick, onActionComplete);
     if (actionDef) {
       const { label, textColor, iconType } = actionDef;
 
@@ -147,7 +140,6 @@ export const PopoverActionsMenu = ({ api, onActionComplete, session }: PopoverAc
           <EuiContextMenu initialPanelId={0} panels={panels} />
         </EuiPopover>
       ) : null}
-      {actionElement}
     </>
   );
 };
