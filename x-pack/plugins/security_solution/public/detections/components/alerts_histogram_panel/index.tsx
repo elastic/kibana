@@ -6,13 +6,12 @@
  */
 
 import { Position } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiPanel, EuiTabs, EuiTab } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash/fp';
 import uuid from 'uuid';
-
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { DEFAULT_NUMBER_FORMAT, APP_ID } from '../../../../common/constants';
 import { UpdateDateRange } from '../../../common/components/charts/common';
@@ -34,14 +33,18 @@ import * as i18n from './translations';
 import { AlertsHistogramOption, AlertsAggregation, AlertsTotal } from './types';
 import { LinkButton } from '../../../common/components/links';
 import { SecurityPageName } from '../../../app/types';
+import { AlertsCount } from './alerts_count';
 
-const DEFAULT_PANEL_HEIGHT = 300;
-
-const StyledEuiPanel = styled(EuiPanel)<{ height?: number }>`
+const StyledEuiPanel = styled(EuiPanel)`
   display: flex;
   flex-direction: column;
-  ${({ height }) => (height != null ? `height: ${height}px;` : '')}
+  height: 500px;
   position: relative;
+  overflow: scroll;
+
+  @media only screen and (min-width: ${(props) => props.theme.eui.euiBreakpoints.m}) {
+    height: 300px;
+  }
 `;
 
 const defaultTotalAlertsObj: AlertsTotal = {
@@ -66,7 +69,6 @@ interface AlertsHistogramPanelProps
   onlyField?: string;
   query?: Query;
   legendPosition?: Position;
-  panelHeight?: number;
   signalIndexName: string | null;
   showLinkToAlerts?: boolean;
   showTotalAlertsCount?: boolean;
@@ -74,6 +76,7 @@ interface AlertsHistogramPanelProps
   timelineId?: string;
   title?: string;
   updateDateRange: UpdateDateRange;
+  showCountTable?: boolean;
 }
 
 const getHistogramOption = (fieldName: string): MatrixHistogramOption => ({
@@ -103,6 +106,37 @@ export const buildCombinedQueries = (query?: string) => {
   }
 };
 
+const TABS_HEADER_HEIGHT = 74;
+const GRAPH_TAB_ID = 'graph';
+const COUNT_TAB_ID = 'count';
+
+type TabId = typeof GRAPH_TAB_ID | typeof COUNT_TAB_ID;
+
+interface TabTitleProps {
+  graphTabTitle: string;
+  selectedTab: TabId;
+  onTabClicked: (id: TabId) => void;
+}
+
+const TabTitle: React.FC<TabTitleProps> = ({ graphTabTitle, onTabClicked, selectedTab }) => (
+  <EuiTabs display="condensed" size="l">
+    <EuiTab
+      isSelected={selectedTab === GRAPH_TAB_ID}
+      data-test-subj="stepAboutDetailsToggleGraph"
+      onClick={() => onTabClicked(GRAPH_TAB_ID)}
+    >
+      {graphTabTitle}
+    </EuiTab>
+    <EuiTab
+      isSelected={selectedTab === COUNT_TAB_ID}
+      data-test-subj="stepAboutDetailsToggleCount"
+      onClick={() => onTabClicked(COUNT_TAB_ID)}
+    >
+      {i18n.COUNT_TAB}
+    </EuiTab>
+  </EuiTabs>
+);
+
 export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
   ({
     chartHeight,
@@ -115,7 +149,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     query,
     from,
     legendPosition = 'right',
-    panelHeight = DEFAULT_PANEL_HEIGHT,
+    showCountTable = false,
     setQuery,
     signalIndexName,
     showLinkToAlerts = false,
@@ -145,6 +179,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     } = useQueryAlerts<{}, AlertsAggregation>({
       query: getAlertsHistogramQuery(
         selectedStackByOption.value,
+        showCountTable,
         from,
         to,
         buildCombinedQueries(combinedQueries)
@@ -266,6 +301,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
         setAlertsQuery(
           getAlertsHistogramQuery(
             selectedStackByOption.value,
+            showCountTable,
             from,
             to,
             !isEmpty(converted) ? [converted] : []
@@ -273,7 +309,9 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
         );
       } catch (e) {
         setIsInspectDisabled(true);
-        setAlertsQuery(getAlertsHistogramQuery(selectedStackByOption.value, from, to, []));
+        setAlertsQuery(
+          getAlertsHistogramQuery(selectedStackByOption.value, showCountTable, from, to, [])
+        );
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedStackByOption.value, from, to, query, filters, combinedQueries]);
@@ -299,12 +337,25 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       title,
     ]);
 
+    const [selectedTab, setTab] = useState<TabId>(GRAPH_TAB_ID);
+
     return (
       <InspectButtonContainer data-test-subj="alerts-histogram-panel" show={!isInitialLoading}>
-        <StyledEuiPanel height={panelHeight} hasBorder>
+        <StyledEuiPanel hasBorder>
           <HeaderSection
             id={uniqueQueryId}
-            title={titleText}
+            height={showCountTable ? TABS_HEADER_HEIGHT : undefined}
+            title={
+              !showCountTable ? (
+                titleText
+              ) : (
+                <TabTitle
+                  graphTabTitle={titleText}
+                  onTabClicked={setTab}
+                  selectedTab={selectedTab}
+                />
+              )
+            }
             titleSize={onlyField == null ? 'm' : 's'}
             subtitle={!isInitialLoading && showTotalAlertsCount && totalAlerts}
             isInspectDisabled={isInspectDisabled}
@@ -325,9 +376,9 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
             </EuiFlexGroup>
           </HeaderSection>
 
-          {isInitialLoading ? (
-            <MatrixLoader />
-          ) : (
+          {isInitialLoading && <MatrixLoader />}
+
+          {!isInitialLoading && selectedTab === GRAPH_TAB_ID && (
             <AlertsHistogram
               chartHeight={chartHeight}
               data={formattedAlertsData}
@@ -337,6 +388,14 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
               loading={isLoadingAlerts}
               to={to}
               updateDateRange={updateDateRange}
+            />
+          )}
+
+          {!isInitialLoading && selectedTab === COUNT_TAB_ID && (
+            <AlertsCount
+              data={alertsData}
+              loading={isLoadingAlerts}
+              selectedStackByOption={selectedStackByOption.value}
             />
           )}
         </StyledEuiPanel>

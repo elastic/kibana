@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 
-import { showAllOthersBucket } from '../../../../common/constants';
+import { DEFAULT_MAX_TABLE_QUERY_SIZE, showAllOthersBucket } from '../../../../common/constants';
 import { HistogramData, AlertsAggregation, AlertsBucket, AlertsGroupBucket } from './types';
 import { AlertSearchResponse } from '../../containers/detection_engine/alerts/types';
 import * as i18n from './translations';
@@ -34,6 +34,7 @@ export const formatAlertsData = (alertsData: AlertSearchResponse<{}, AlertsAggre
 
 export const getAlertsHistogramQuery = (
   stackByField: string,
+  fetchCount: boolean,
   from: string,
   to: string,
   additionalFilters: Array<{
@@ -46,8 +47,23 @@ export const getAlertsHistogramQuery = (
       }
     : {};
 
+  const alertsCountAgg = {
+    alertsByGroupingCount: {
+      terms: {
+        field: stackByField,
+        ...missing,
+        order: {
+          _count: 'desc',
+        },
+        size: DEFAULT_MAX_TABLE_QUERY_SIZE,
+      },
+    },
+  };
+
   return {
+    size: 0, // Only return results for aggregations.
     aggs: {
+      ...(fetchCount && alertsCountAgg),
       alertsByGrouping: {
         terms: {
           field: stackByField,
@@ -91,11 +107,12 @@ export const getAlertsHistogramQuery = (
 };
 
 /**
- * Returns `true` when the alerts histogram initial loading spinner should be shown
- *
- * @param isInitialLoading The loading spinner will only be displayed if this value is `true`, because after initial load, a different, non-spinner loading indicator is displayed
- * @param isLoadingAlerts When `true`, IO is being performed to request alerts (for rendering in the histogram)
- */
+* Returns `true` when the alerts histogram initial loading spinner should be shown
+*
+* @param isInitialLoading The loading spinner will only be displayed if this value is `true`, because after initial load, a different, non-spinner loading indicator is
+displayed
+* @param isLoadingAlerts When `true`, IO is being performed to request alerts (for rendering in the histogram)
+*/
 export const showInitialLoadingSpinner = ({
   isInitialLoading,
   isLoadingAlerts,

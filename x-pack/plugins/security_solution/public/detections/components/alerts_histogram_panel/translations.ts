@@ -111,6 +111,13 @@ export const VIEW_ALERTS = i18n.translate(
   }
 );
 
+export const COUNT_TAB = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.histogram.countTabTitle',
+  {
+    defaultMessage: 'Count',
+  }
+);
+
 export const SHOWING_ALERTS = (
   totalAlertsFormatted: string,
   totalAlerts: number,
@@ -121,3 +128,10 @@ export const SHOWING_ALERTS = (
     defaultMessage:
       'Showing: {modifier}{totalAlertsFormatted} {totalAlerts, plural, =1 {alert} other {alerts}}',
   });
+
+export const COUNT_TABLE_COLUMN_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.histogram.countTableColumnTitle',
+  {
+    defaultMessage: 'Count',
+  }
+);

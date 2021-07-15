@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { waitFor } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
 import { shallow, mount } from 'enzyme';
 
 import '../../../common/mock/match_media';
@@ -69,7 +69,7 @@ describe('AlertsHistogramPanel', () => {
   it('renders correctly', () => {
     const wrapper = shallow(<AlertsHistogramPanel {...defaultProps} />);
 
-    expect(wrapper.find('[id="detections-histogram"]')).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="alerts-histogram-panel"]').exists()).toBeTruthy();
   });
 
   describe('Button view alerts', () => {
@@ -78,7 +78,7 @@ describe('AlertsHistogramPanel', () => {
       const wrapper = shallow(<AlertsHistogramPanel {...props} />);
 
       expect(
-        wrapper.find('[data-test-subj="alerts-histogram-panel-go-to-alerts-page"]')
+        wrapper.find('[data-test-subj="alerts-histogram-panel-go-to-alerts-page"]').exists()
       ).toBeTruthy();
     });
 
@@ -99,6 +99,45 @@ describe('AlertsHistogramPanel', () => {
     });
   });
 
+  describe('Count table', () => {
+    it('renders Graph and Count tabs', async () => {
+      const props = { ...defaultProps, showLinkToAlerts: true };
+      const wrapper = mount(
+        <TestProviders>
+          <AlertsHistogramPanel {...props} showCountTable />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(wrapper.find('TabTitle').exists()).toBeTruthy();
+        expect(
+          wrapper.find('[data-test-subj="stepAboutDetailsToggleGraph"]').exists()
+        ).toBeTruthy();
+        expect(
+          wrapper.find('[data-test-subj="stepAboutDetailsToggleCount"]').exists()
+        ).toBeTruthy();
+      });
+    });
+
+    it('renders alert count table when count tab is clicked', async () => {
+      const props = { ...defaultProps, showLinkToAlerts: true };
+
+      await act(async () => {
+        const wrapper = mount(
+          <TestProviders>
+            <AlertsHistogramPanel {...props} showCountTable />
+          </TestProviders>
+        );
+        wrapper.find('button[data-test-subj="stepAboutDetailsToggleCount"]').simulate('click');
+
+        await waitFor(() => {
+          wrapper.update();
+          expect(wrapper.find('AlertsCount').exists()).toBeTruthy();
+        });
+      });
+    });
+  });
+
   describe('Query', () => {
     it('it render with a illegal KQL', async () => {
       const spyOnBuildEsQuery = jest.spyOn(esQuery, 'buildEsQuery');
@@ -113,7 +152,7 @@ describe('AlertsHistogramPanel', () => {
       );
 
       await waitFor(() => {
-        expect(wrapper.find('[id="detections-histogram"]')).toBeTruthy();
+        expect(wrapper.find('[data-test-subj="alerts-histogram-panel"]').exists()).toBeTruthy();
       });
     });
   });
@@ -140,6 +179,7 @@ describe('AlertsHistogramPanel', () => {
       await waitFor(() => {
         expect(mockGetAlertsHistogramQuery.mock.calls[0]).toEqual([
           'signal.rule.name',
+          false,
           '2020-07-07T08:20:18.966Z',
           '2020-07-08T08:20:18.966Z',
           [

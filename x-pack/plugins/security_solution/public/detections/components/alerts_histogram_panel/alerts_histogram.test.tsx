@@ -26,6 +26,6 @@ describe('AlertsHistogram', () => {
       />
     );
 
-    expect(wrapper.find('Chart')).toBeTruthy();
+    expect(wrapper.find('Chart').exists()).toBeTruthy();
   });
 });

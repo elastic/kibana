@@ -261,6 +261,7 @@ const DetectionEnginePageComponent = () => {
                 stackByOptions={alertsHistogramOptions}
                 to={to}
                 updateDateRange={updateDateRangeCallback}
+                showCountTable
               />
               <EuiSpacer size="l" />
             </Display>

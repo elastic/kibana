@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { GenericBuckets } from '../../../../common';
 import { inputsModel } from '../../../common/store';
 
 export interface AlertsHistogramOption {
@@ -22,8 +23,10 @@ export interface AlertsAggregation {
   alertsByGrouping: {
     buckets: AlertsGroupBucket[];
   };
+  alertsByGroupingCount: {
+    buckets: GenericBuckets[];
+  };
 }
-
 export interface AlertsBucket {
   key_as_string: string;
   key: number;
@@ -32,6 +35,7 @@ export interface AlertsBucket {
 
 export interface AlertsGroupBucket {
   key: string;
+  doc_count: number;
   alerts: {
     buckets: AlertsBucket[];
   };
