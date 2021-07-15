@@ -217,9 +217,10 @@ export const waitForRulesTableToBeAutoRefreshed = () => {
 };
 
 export const waitForPrebuiltDetectionRulesToBeLoaded = () => {
-  cy.get(LOAD_PREBUILT_RULES_BTN).should('not.exist');
-  cy.get(RULES_TABLE).should('exist');
-  cy.get(RULES_TABLE_REFRESH_INDICATOR).should('not.exist');
+  // Wait up to 5 minutes for the rules to load as in CI containers this can be very slow
+  cy.get(LOAD_PREBUILT_RULES_BTN, { timeout: 300000 }).should('not.exist');
+  cy.get(RULES_TABLE, { timeout: 300000 }).should('exist');
+  cy.get(RULES_TABLE_REFRESH_INDICATOR, { timeout: 300000 }).should('not.exist');
 };
 
 export const waitForRuleToChangeStatus = () => {
