@@ -182,9 +182,9 @@ const IndexPatternEditorFlyoutContentComponent = ({
         // Silently swallow failure responses such as expired trials
       }
     };
-    if (type === INDEX_PATTERN_TYPE.ROLLUP) {
-      getRollups();
-    }
+
+    getRollups();
+
     return () => {
       isMounted = false;
     };
