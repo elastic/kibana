@@ -16,11 +16,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { Popover, ClosePopoverFn } from '../../popover';
 import {
-  withSuspense,
-  LazyPopoverComponent,
-  ClosePopoverFn,
-} from '../../../../../../../src/plugins/presentation_util/public';
-import {
   MAX_ZOOM_LEVEL,
   MIN_ZOOM_LEVEL,
   CONTEXT_MENU_TOP_BORDER_CLASSNAME,
@@ -93,8 +88,6 @@ const strings = {
 };
 
 const QUICK_ZOOM_LEVELS = [0.5, 1, 2];
-
-const Popover = withSuspense(LazyPopoverComponent);
 
 export interface Props {
   /**
