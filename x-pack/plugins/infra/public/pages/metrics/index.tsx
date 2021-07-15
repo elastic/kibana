@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 
-import { EuiErrorBoundary, EuiFlexItem, EuiFlexGroup, EuiButtonEmpty } from '@elastic/eui';
+import { EuiErrorBoundary, EuiHeaderLinks, EuiHeaderLink } from '@elastic/eui';
 import { IIndexPattern } from 'src/plugins/data/common';
 import { MetricsSourceConfigurationProperties } from '../../../common/metrics_sources';
 import { DocumentTitle } from '../../components/document_title';
@@ -86,31 +86,22 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
 
                   {setHeaderActionMenu && (
                     <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu}>
-                      <EuiFlexGroup alignItems="center" gutterSize={'xs'} responsive={false}>
-                        <EuiFlexItem grow={false}>
-                          <EuiButtonEmpty size={'xs'} color={'text'} {...settingsLinkProps}>
-                            {settingsTabTitle}
-                          </EuiButtonEmpty>
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <Route path={'/inventory'} component={AnomalyDetectionFlyout} />
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <MetricsAlertDropdown />
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiButtonEmpty
-                            href={kibana.services?.application?.getUrlForApp(
-                              '/home#/tutorial_directory/metrics'
-                            )}
-                            size="s"
-                            color="primary"
-                            iconType="indexOpen"
-                          >
-                            {ADD_DATA_LABEL}
-                          </EuiButtonEmpty>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
+                      <EuiHeaderLinks gutterSize="xs">
+                        <EuiHeaderLink color={'text'} {...settingsLinkProps}>
+                          {settingsTabTitle}
+                        </EuiHeaderLink>
+                        <Route path={'/inventory'} component={AnomalyDetectionFlyout} />
+                        <MetricsAlertDropdown />
+                        <EuiHeaderLink
+                          href={kibana.services?.application?.getUrlForApp(
+                            '/home#/tutorial_directory/metrics'
+                          )}
+                          color="primary"
+                          iconType="indexOpen"
+                        >
+                          {ADD_DATA_LABEL}
+                        </EuiHeaderLink>
+                      </EuiHeaderLinks>
                     </HeaderMenuPortal>
                   )}
                   <Switch>

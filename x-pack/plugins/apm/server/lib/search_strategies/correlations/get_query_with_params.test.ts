@@ -10,10 +10,23 @@ import { getQueryWithParams } from './get_query_with_params';
 describe('correlations', () => {
   describe('getQueryWithParams', () => {
     it('returns the most basic query filtering on processor.event=transaction', () => {
-      const query = getQueryWithParams({ params: { index: 'apm-*' } });
+      const query = getQueryWithParams({
+        params: { index: 'apm-*', start: '2020', end: '2021' },
+      });
       expect(query).toEqual({
         bool: {
-          filter: [{ term: { 'processor.event': 'transaction' } }],
+          filter: [
+            { term: { 'processor.event': 'transaction' } },
+            {
+              range: {
+                '@timestamp': {
+                  format: 'epoch_millis',
+                  gte: 1577836800000,
+                  lte: 1609459200000,
+                },
+              },
+            },
+          ],
         },
       });
     });
@@ -24,8 +37,8 @@ describe('correlations', () => {
           index: 'apm-*',
           serviceName: 'actualServiceName',
           transactionName: 'actualTransactionName',
-          start: '01-01-2021',
-          end: '31-01-2021',
+          start: '2020',
+          end: '2021',
           environment: 'dev',
           percentileThresholdValue: 75,
         },
@@ -33,7 +46,25 @@ describe('correlations', () => {
       expect(query).toEqual({
         bool: {
           filter: [
-            { term: { 'processor.event': 'transaction' } },
+            {
+              term: {
+                'processor.event': 'transaction',
+              },
+            },
+            {
+              range: {
+                '@timestamp': {
+                  format: 'epoch_millis',
+                  gte: 1577836800000,
+                  lte: 1609459200000,
+                },
+              },
+            },
+            {
+              term: {
+                'service.environment': 'dev',
+              },
+            },
             {
               term: {
                 'service.name': 'actualServiceName',
@@ -42,19 +73,6 @@ describe('correlations', () => {
             {
               term: {
                 'transaction.name': 'actualTransactionName',
-              },
-            },
-            {
-              range: {
-                '@timestamp': {
-                  gte: '01-01-2021',
-                  lte: '31-01-2021',
-                },
-              },
-            },
-            {
-              term: {
-                'service.environment': 'dev',
               },
             },
             {
@@ -71,7 +89,7 @@ describe('correlations', () => {
 
     it('returns a query considering a custom field/value pair', () => {
       const query = getQueryWithParams({
-        params: { index: 'apm-*' },
+        params: { index: 'apm-*', start: '2020', end: '2021' },
         fieldName: 'actualFieldName',
         fieldValue: 'actualFieldValue',
       });
@@ -79,6 +97,15 @@ describe('correlations', () => {
         bool: {
           filter: [
             { term: { 'processor.event': 'transaction' } },
+            {
+              range: {
+                '@timestamp': {
+                  format: 'epoch_millis',
+                  gte: 1577836800000,
+                  lte: 1609459200000,
+                },
+              },
+            },
             {
               term: {
                 actualFieldName: 'actualFieldValue',
