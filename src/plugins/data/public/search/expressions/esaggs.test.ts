@@ -56,6 +56,7 @@ describe('esaggs expression function - public', () => {
       abortSignal: (jest.fn() as unknown) as jest.Mocked<AbortSignal>,
       getSearchContext: jest.fn(),
       getSearchSessionId: jest.fn().mockReturnValue('abc123'),
+      getExecutionContext: jest.fn(),
       inspectorAdapters: jest.fn(),
       variables: {},
       types: {},

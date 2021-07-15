@@ -67,7 +67,7 @@ export interface ExecutionContext<
   /**
    * Contains the meta-data about the source of the expression.
    */
-  readonly executionContext?: IExecutionContextContainer;
+  getExecutionContext: () => IExecutionContextContainer | undefined;
 }
 
 /**

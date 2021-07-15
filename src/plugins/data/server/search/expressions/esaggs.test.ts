@@ -58,6 +58,7 @@ describe('esaggs expression function - server', () => {
       getKibanaRequest: jest.fn().mockReturnValue({ id: 'hi' } as KibanaRequest),
       getSearchContext: jest.fn(),
       getSearchSessionId: jest.fn().mockReturnValue('abc123'),
+      getExecutionContext: jest.fn(),
       inspectorAdapters: jest.fn(),
       variables: {},
       types: {},

@@ -38,7 +38,7 @@ export function getFunctionDefinition({
     async fn(
       input,
       args,
-      { inspectorAdapters, abortSignal, getSearchSessionId, executionContext }
+      { inspectorAdapters, abortSignal, getSearchSessionId, getExecutionContext }
     ) {
       const { aggs, indexPatterns, searchSource, getNow } = await getStartDependencies();
 
@@ -62,7 +62,7 @@ export function getFunctionDefinition({
         timeFields: args.timeFields,
         timeRange: get(input, 'timeRange', undefined),
         getNow,
-        executionContext: executionContext?.toJSON(),
+        executionContext: getExecutionContext()?.toJSON(),
       });
     },
   });
