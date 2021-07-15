@@ -209,8 +209,8 @@ const layerList = [
               origin: 'source',
               name: 'doc_count',
             },
-            minSize: 1,
-            maxSize: 16,
+            minSize: 4,
+            maxSize: 32,
             fieldMetaOptions: {
               isEnabled: false,
               sigma: 3,
