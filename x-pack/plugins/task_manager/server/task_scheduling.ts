@@ -247,7 +247,9 @@ export class TaskScheduling {
         });
 
       if (cancel) {
-        cancel.then(() => subscription.unsubscribe());
+        cancel.then(() => {
+          subscription.unsubscribe();
+        });
       }
     });
   }

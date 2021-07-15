@@ -331,8 +331,7 @@ instanceStateValue: true
       });
     });
 
-    // TODO: CHRIS
-    it.skip('should handle custom retry logic', async () => {
+    it('should handle custom retry logic', async () => {
       // We'll use this start time to query tasks created after this point
       const testStart = new Date().toISOString();
       // We have to provide the test.rate-limit the next runAt, for testing purposes

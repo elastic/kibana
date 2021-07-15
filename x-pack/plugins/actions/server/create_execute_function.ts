@@ -96,13 +96,18 @@ export function createEphemeralExecutionEnqueuerFunction({
     const action = await getAction(unsecuredSavedObjectsClient, preconfiguredActions, id);
     validateCanActionBeUsed(action);
 
+    const { actionTypeId } = action;
+    if (!actionTypeRegistry.isActionExecutable(id, actionTypeId, { notifyUsage: true })) {
+      actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+    }
+
     const taskParams: ActionTaskExecutorParams = {
       spaceId,
-      // TODO
-      // @ts-ignore
       taskParams: {
         actionId: id,
-        params,
+        // Saved Objects won't allow us to enforce unknown rather than any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        params: params as Record<string, any>,
         ...(apiKey ? { apiKey } : {}),
       },
       ...executionSourceAsSavedObjectReferences(source),
