@@ -6,8 +6,6 @@
  */
 
 import React, { useState } from 'react';
-
-import useDebounce from 'react-use/lib/useDebounce';
 import { useValuesList } from '../../../hooks/use_values_list';
 import { FieldValueSelection } from './field_value_selection';
 import { FieldValueSuggestionsProps } from './types';
@@ -38,7 +36,6 @@ export function FieldValueSuggestions({
   onChange: onSelectionChange,
 }: FieldValueSuggestionsProps) {
   const [query, setQuery] = useState('');
-  const [debouncedValue, setDebouncedValue] = useState('');
 
   const { values, loading } = useValuesList({
     indexPatternTitle,
@@ -49,14 +46,6 @@ export function FieldValueSuggestions({
     keepHistory: true,
   });
 
-  useDebounce(
-    () => {
-      setQuery(debouncedValue);
-    },
-    400,
-    [debouncedValue]
-  );
-
   const SelectionComponent = asCombobox ? FieldValueCombobox : FieldValueSelection;
 
   return (
@@ -66,7 +55,8 @@ export function FieldValueSuggestions({
       values={values}
       label={label}
       onChange={onSelectionChange}
-      setQuery={setDebouncedValue}
+      query={query}
+      setQuery={setQuery}
       loading={loading}
       selectedValue={selectedValue}
       excludedValue={excludedValue}
