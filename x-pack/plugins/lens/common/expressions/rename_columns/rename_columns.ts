@@ -6,14 +6,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition, Datatable, DatatableColumn } from 'src/plugins/expressions';
-import { IndexPatternColumn } from './operations';
+import {
+  ExpressionFunctionDefinition,
+  Datatable,
+  DatatableColumn,
+} from '../../../../../../src/plugins/expressions/common';
 
 interface RemapArgs {
   idMap: string;
 }
 
-export type OriginalColumn = { id: string } & IndexPatternColumn;
+type OriginalColumn = { id: string; label: string } & (
+  | { operationType: 'date_histogram'; sourceField: string }
+  | { operationType: string; sourceField: never }
+);
 
 export const renameColumns: ExpressionFunctionDefinition<
   'lens_rename_columns',
@@ -75,7 +81,7 @@ export const renameColumns: ExpressionFunctionDefinition<
 };
 
 function getColumnName(originalColumn: OriginalColumn, newColumn: DatatableColumn) {
-  if (originalColumn && originalColumn.operationType === 'date_histogram') {
+  if (originalColumn?.operationType === 'date_histogram') {
     const fieldName = originalColumn.sourceField;
 
     // HACK: This is a hack, and introduces some fragility into

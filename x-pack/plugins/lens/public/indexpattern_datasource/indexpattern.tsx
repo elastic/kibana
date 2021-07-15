@@ -78,8 +78,7 @@ export {
   unitSuffixesLong,
 } from '../../common';
 export { timeScale, TimeScaleArgs } from '../../common';
-
-export * from './rename_columns';
+export { renameColumns } from '../../common';
 
 export function getIndexPatternDatasource({
   core,
