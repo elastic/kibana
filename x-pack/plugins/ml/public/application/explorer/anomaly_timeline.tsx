@@ -40,7 +40,7 @@ import { AnomalyTimelineHelpPopover } from './anomaly_timeline_help_popover';
 import { isDefined } from '../../../common/types/guards';
 import { MlTooltipComponent } from '../components/chart_tooltip';
 import { SwimlaneAnnotationContainer } from './swimlane_annotation_container';
-import { isOverallSwimlaneData } from './swimlane_data_utils';
+import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
 
 function mapSwimlaneOptionsToEuiOptions(options: string[]) {
   return options.map((option) => ({
@@ -146,7 +146,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
     const annotationXDomain = useMemo(
       () =>
-        isOverallSwimlaneData(overallSwimlaneData)
+        AnomalyTimelineService.isOverallSwimlaneData(overallSwimlaneData)
           ? {
               min: overallSwimlaneData.earliest * 1000,
               max: overallSwimlaneData.latest * 1000,
