@@ -15,19 +15,23 @@ export default function canvasExpressionTest({ getService, getPageObjects }: Ftr
   const PageObjects = getPageObjects(['canvas', 'common']);
   const find = getService('find');
   const kibanaServer = getService('kibanaServer');
+  const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/default';
 
   describe('expression editor', function () {
     // there is an issue with FF not properly clicking on workpad elements
     this.tags('skipFirefox');
 
     before(async () => {
-      await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/canvas/default'
-      );
+      await kibanaServer.importExport.load(archive);
+
       // load test workpad
       await PageObjects.common.navigateToApp('canvas', {
         hash: '/workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31/page/1',
       });
+    });
+
+    after(async () => {
+      await kibanaServer.importExport.unload(archive);
     });
 
     it('updates when element is changed via side bar', async () => {
