@@ -337,7 +337,7 @@ For more details and a reference of audit events, refer to <<xpack-security-audi
 [cols="2*<"]
 |======
 | `xpack.security.audit.enabled` {ess-icon}
-| Set to `true` to enable audit logging and configure where the audit log should be written to using `xpack.security.audit.appender` . *Default:* `false`
+| Set to `true` _and_ configure an appender with `xpack.security.audit.appender` to enable ECS audit logging`. *Default:* `false`
 
 2+a| For example:
 [source,yaml]
