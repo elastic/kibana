@@ -21,17 +21,17 @@ import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import {
   OsqueryPluginSetup,
   OsqueryPluginStart,
-  // SetupPlugins,
   StartPlugins,
   AppPluginStartDependencies,
 } from './types';
 import { OSQUERY_INTEGRATION_NAME, PLUGIN_NAME } from '../common';
-import { epmRouteService, GetPackagesResponse } from '../../fleet/common';
+import { Installation } from '../../fleet/common';
 import {
   LazyOsqueryManagedPolicyCreateImportExtension,
   LazyOsqueryManagedPolicyEditExtension,
   LazyOsqueryManagedCustomButtonExtension,
 } from './fleet_integration';
+import { getLazyOsqueryAction } from './shared_components';
 
 export function toggleOsqueryPlugin(
   updater$: Subject<AppUpdater>,
@@ -47,12 +47,9 @@ export function toggleOsqueryPlugin(
   }
 
   http
-    .fetch<GetPackagesResponse>(epmRouteService.getListPath(), { query: { experimental: true } })
-    .then(({ response }) => {
-      const installed = response.find(
-        (integration) =>
-          integration?.name === OSQUERY_INTEGRATION_NAME && integration?.status === 'installed'
-      );
+    .fetch<Installation | undefined>(`/internal/osquery/status`)
+    .then((response) => {
+      const installed = response?.install_status === 'installed';
 
       if (installed && registerExtension) {
         registerExtension({
@@ -137,24 +134,26 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       packs: boolean;
     }>();
 
+    if (!config.enabled) {
+      return {};
+    }
+
     if (plugins.fleet) {
       const { registerExtension } = plugins.fleet;
 
-      if (config.enabled) {
-        toggleOsqueryPlugin(this.appUpdater$, core.http, registerExtension);
+      toggleOsqueryPlugin(this.appUpdater$, core.http, registerExtension);
 
-        registerExtension({
-          package: OSQUERY_INTEGRATION_NAME,
-          view: 'package-policy-create',
-          Component: LazyOsqueryManagedPolicyCreateImportExtension,
-        });
+      registerExtension({
+        package: OSQUERY_INTEGRATION_NAME,
+        view: 'package-policy-create',
+        Component: LazyOsqueryManagedPolicyCreateImportExtension,
+      });
 
-        registerExtension({
-          package: OSQUERY_INTEGRATION_NAME,
-          view: 'package-policy-edit',
-          Component: LazyOsqueryManagedPolicyEditExtension,
-        });
-      }
+      registerExtension({
+        package: OSQUERY_INTEGRATION_NAME,
+        view: 'package-policy-edit',
+        Component: LazyOsqueryManagedPolicyEditExtension,
+      });
     } else {
       this.appUpdater$.next(() => ({
         status: AppStatus.inaccessible,
@@ -162,7 +161,14 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       }));
     }
 
-    return {};
+    return {
+      OsqueryAction: getLazyOsqueryAction({
+        ...core,
+        ...plugins,
+        storage: this.storage,
+        kibanaVersion: this.kibanaVersion,
+      }),
+    };
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function

@@ -195,9 +195,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const loadTimestampFieldOptions = useCallback(
     async (query: string) => {
       let timestampOptions: TimestampOption[] = [];
-      // async (query: string, exactMatched: MatchedItem[]) => {
-      // const isValidResult = !existingIndexPatterns.includes(title) && exactMatched.length > 0;
-      const isValidResult = !existingIndexPatterns.includes(title); // && exactMatched.length > 0;
+      const isValidResult =
+        !existingIndexPatterns.includes(title) && matchedIndices.exactMatchedIndices.length > 0;
       if (isValidResult) {
         setIsLoadingTimestampFields(true);
         const getFieldsOptions: GetFieldsOptions = {
@@ -217,7 +216,15 @@ const IndexPatternEditorFlyoutContentComponent = ({
       setTimestampFieldOptions(timestampOptions);
       return timestampOptions;
     },
-    [existingIndexPatterns, indexPatternService, requireTimestampField, rollupIndex, title, type]
+    [
+      existingIndexPatterns,
+      indexPatternService,
+      requireTimestampField,
+      rollupIndex,
+      title,
+      type,
+      matchedIndices.exactMatchedIndices,
+    ]
   );
 
   const reloadMatchedIndices = useCallback(

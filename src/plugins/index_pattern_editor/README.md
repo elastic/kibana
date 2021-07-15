@@ -1,15 +1,6 @@
 # Index pattern editor
 
-
-// TODO
-
-
 Create index patterns from within Kibana apps. 
-
-This editor can be used to
-
-* create an index pattern.  
-* edit concrete (mapped) fields. In this case certain functionalities will be disabled like the possibility to change the field _type_ or to set the field _value_.
 
 ## How to use
 

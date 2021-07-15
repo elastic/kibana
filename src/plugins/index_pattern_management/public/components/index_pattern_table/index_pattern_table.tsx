@@ -110,7 +110,7 @@ export const IndexPatternTable = ({
         }
       ) => (
         <>
-          <EuiButtonEmpty size="xs" {...reactRouterNavigate(history, `patterns/${index.id}`)}>
+          <EuiButtonEmpty size="s" {...reactRouterNavigate(history, `patterns/${index.id}`)}>
             {name}
           </EuiButtonEmpty>
           &emsp;

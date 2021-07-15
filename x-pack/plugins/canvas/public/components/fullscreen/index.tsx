@@ -6,12 +6,18 @@
  */
 
 import React, { FC, useContext } from 'react';
-// @ts-expect-error
 import { Fullscreen as Component } from './fullscreen';
 
 import { WorkpadRoutingContext } from '../../routes/workpad';
 
-export const Fullscreen: FC = ({ children }) => {
+interface Props {
+  children: (props: {
+    isFullscreen: boolean;
+    windowSize: { width: number; height: number };
+  }) => JSX.Element;
+}
+
+export const Fullscreen: FC<Props> = ({ children }) => {
   const { isFullscreen } = useContext(WorkpadRoutingContext);
 
   return <Component isFullscreen={isFullscreen} children={children} />;

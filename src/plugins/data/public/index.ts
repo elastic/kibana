@@ -271,6 +271,7 @@ export {
   GetFieldsOptions,
   INDEX_PATTERN_SAVED_OBJECT_TYPE,
   AggregationRestrictions,
+  IndexPatternType,
 } from '../common';
 
 export { DuplicateIndexPatternError } from '../common/index_patterns/errors';
