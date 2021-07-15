@@ -22,7 +22,6 @@ import { InspectButtonContainer } from '../../../common/components/inspect';
 import { HeaderSection } from '../../../common/components/header_section';
 import { ID as CTIEventCountQueryId } from '../../containers/overview_cti_links/use_cti_event_counts';
 import { CtiListItem } from '../../containers/overview_cti_links/helpers';
-import { LinkButton } from '../../../common/components/links';
 import { useKibana } from '../../../common/lib/kibana';
 import { CtiInnerPanel } from './cti_inner_panel';
 import * as i18n from './translations';
@@ -96,12 +95,17 @@ export const ThreatIntelPanelView: React.FC<ThreatIntelPanelViewProps> = ({
 
   const button = useMemo(
     () => (
-      <LinkButton href={buttonHref} disabled={!buttonHref}>
+        <EuiButton
+            href={buttonHref}
+            isDisabled={!buttonHref}
+            data-test-subj="cti-view-dashboard-button"
+            target="_blank"
+        >
         <FormattedMessage
           id="xpack.securitySolution.overview.ctiViewDasboard"
           defaultMessage="View dashboard"
         />
-      </LinkButton>
+      </EuiButton>
     ),
     [buttonHref]
   );
@@ -113,7 +117,7 @@ export const ThreatIntelPanelView: React.FC<ThreatIntelPanelViewProps> = ({
     () =>
       isDashboardPluginDisabled ? (
         <CtiInnerPanel
-          data-test-subj="cti-inner-panel-info"
+          dataTestSubj="cti-inner-panel-info"
           color={'primary'}
           title={i18n.INFO_TITLE}
           body={i18n.INFO_BODY}
