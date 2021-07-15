@@ -1327,13 +1327,13 @@ export interface IUiSettingsClient {
 }
 
 // @public (undocumented)
-export type KibanaExecutionContext = {
-    readonly type: string;
-    readonly name: string;
-    readonly id: string;
+export interface KibanaExecutionContext {
     readonly description: string;
+    readonly id: string;
+    readonly name: string;
+    readonly type: string;
     readonly url?: string;
-};
+}
 
 // @public
 export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Method extends RouteMethod = any> {

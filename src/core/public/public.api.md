@@ -967,13 +967,13 @@ export interface IUiSettingsClient {
 }
 
 // @public (undocumented)
-export type KibanaExecutionContext = {
-    readonly type: string;
-    readonly name: string;
-    readonly id: string;
+export interface KibanaExecutionContext {
     readonly description: string;
+    readonly id: string;
+    readonly name: string;
+    readonly type: string;
     readonly url?: string;
-};
+}
 
 // @public
 export type MountPoint<T extends HTMLElement = HTMLElement> = (element: T) => UnmountCallback;
