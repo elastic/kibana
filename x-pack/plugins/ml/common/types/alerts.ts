@@ -109,9 +109,31 @@ export interface JobAlertingRuleStats {
   alerting_rules?: MlAnomalyDetectionAlertRule[];
 }
 
+interface CommonHealthCheckConfig {
+  enabled: boolean;
+}
+
 export type MlAnomalyDetectionJobsHealthRuleParams = {
-  jobSelection: {
+  includeJobs:
+    | {
+        jobIds?: string[];
+        groupIds?: string[];
+      }
+    | '_all';
+  excludeJobs?: {
     jobIds?: string[];
     groupIds?: string[];
+  };
+  testsConfig?: {
+    dataFeed?: CommonHealthCheckConfig;
+    mml?: CommonHealthCheckConfig;
+    delayedData?: CommonHealthCheckConfig & {
+      docsCount?: number;
+      timeInterval?: string;
+    };
+    behindRealtime?: CommonHealthCheckConfig & {
+      timeInterval?: string;
+    };
+    errorMessages?: CommonHealthCheckConfig;
   };
 } & AlertTypeParams;

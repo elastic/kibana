@@ -6,13 +6,14 @@
  */
 
 import React, { FC, useCallback, useMemo } from 'react';
-import { EuiForm } from '@elastic/eui';
+import { EuiForm, EuiSpacer } from '@elastic/eui';
 import { AlertTypeParamsExpressionProps } from '../../../../triggers_actions_ui/public';
 import { MlAnomalyDetectionJobsHealthRuleParams } from '../../../common/types/alerts';
 import { JobSelectorControl } from '../job_selector';
 import { jobsApiProvider } from '../../application/services/ml_api_service/jobs';
 import { HttpService } from '../../application/services/http_service';
 import { useMlKibana } from '../../application/contexts/kibana';
+import { TestsSelectionControl } from './tests_selection_control';
 
 export type MlAnomalyAlertTriggerProps = AlertTypeParamsExpressionProps<MlAnomalyDetectionJobsHealthRuleParams>;
 
@@ -28,7 +29,7 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   const adJobsApiService = useMemo(() => jobsApiProvider(mlHttpService), [mlHttpService]);
 
   const jobsAndGroupIds: string[] = useMemo(
-    () => (Object.values(alertParams.jobSelection ?? {}) as string[][]).flat(),
+    () => (Object.values(alertParams.includeJobs ?? {}) as string[][]).flat(),
     [alertParams.jobSelection]
   );
 
@@ -46,8 +47,15 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
       <JobSelectorControl
         jobsAndGroupIds={jobsAndGroupIds}
         adJobsApiService={adJobsApiService}
-        onChange={useCallback(onAlertParamChange('jobSelection'), [])}
+        onChange={useCallback(onAlertParamChange('includeJobs'), [])}
         errors={Array.isArray(errors.jobSelection) ? errors.jobSelection : []}
+      />
+
+      <EuiSpacer size="m" />
+
+      <TestsSelectionControl
+        config={alertParams.testsConfig}
+        onChange={useCallback(onAlertParamChange('testsConfig'), [])}
       />
     </EuiForm>
   );
