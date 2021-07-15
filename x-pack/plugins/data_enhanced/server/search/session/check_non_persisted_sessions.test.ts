@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { checkNonPersistedSessions as checkNonPersistedSessions$ } from './check_non_persiseted_sessions';
+import { checkNonPersistedSessions as checkNonPersistedSessions$ } from './check_non_persisted_sessions';
 import {
   SearchSessionStatus,
   SearchSessionSavedObjectAttributes,
@@ -321,6 +321,46 @@ describe('checkNonPersistedSessions', () => {
 
       const { id } = mockClient.asyncSearch.delete.mock.calls[0][0];
       expect(id).toBe('async-id');
+    });
+
+    test("doesn't attempt to delete errored out async search", async () => {
+      mockClient.asyncSearch.delete = jest.fn();
+
+      savedObjectsClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '123',
+            attributes: {
+              persisted: false,
+              status: SearchSessionStatus.ERROR,
+              expires: moment().add(moment.duration(3, 'm')),
+              created: moment().subtract(moment.duration(30, 'm')),
+              touched: moment().subtract(moment.duration(6, 'm')),
+              idMapping: {
+                'map-key': {
+                  strategy: ENHANCED_ES_SEARCH_STRATEGY,
+                  id: 'async-id',
+                  status: SearchStatus.ERROR,
+                },
+              },
+            },
+          },
+        ],
+        total: 1,
+      } as any);
+
+      await checkNonPersistedSessions(
+        {
+          savedObjectsClient,
+          client: mockClient,
+          logger: mockLogger,
+        },
+        config
+      );
+
+      expect(savedObjectsClient.bulkUpdate).not.toBeCalled();
+      expect(savedObjectsClient.delete).toBeCalled();
+      expect(mockClient.asyncSearch.delete).not.toBeCalled();
     });
   });
 
