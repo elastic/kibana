@@ -2931,6 +2931,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/typed-react-router-config@link:bazel-bin/packages/kbn-typed-react-router-config":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ui-framework@link:bazel-bin/packages/kbn-ui-framework":
   version "0.0.0"
   uid ""
@@ -5878,6 +5882,15 @@
   integrity sha512-i115c58mAIXGS4CnDmKv5N5KNbPcABhph7SSfpsfBEjx9KJ0JcYKDeNc73H200Eo7vVSFnAIIDs7EmVWeoZiaw==
   dependencies:
     "@types/react" "*"
+
+"@types/react-router-config@^5.0.2":
+  version "5.0.2"
+  resolved "https://registry.yarnpkg.com/@types/react-router-config/-/react-router-config-5.0.2.tgz#4d3b52e71ed363a1976a12321e67b09a99ad6d10"
+  integrity sha512-WOSetDV3YPxbkVJAdv/bqExJjmcdCi/vpCJh3NfQOy1X15vHMSiMioXIcGekXDJJYhqGUMDo9e337mh508foAA==
+  dependencies:
+    "@types/history" "*"
+    "@types/react" "*"
+    "@types/react-router" "*"
 
 "@types/react-router-dom@^5.1.5":
   version "5.1.5"
@@ -23279,6 +23292,13 @@ react-reverse-portal@^1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/react-reverse-portal/-/react-reverse-portal-1.0.4.tgz#d127d2c9147549b25c4959aba1802eca4b144cd4"
   integrity sha512-WESex/wSjxHwdG7M0uwPNkdQXaLauXNHi4INQiRybmFIXVzAqgf/Ak2OzJ4MLf4UuCD/IzEwJOkML2SxnnontA==
+
+react-router-config@^5.1.1:
+  version "5.1.1"
+  resolved "https://registry.yarnpkg.com/react-router-config/-/react-router-config-5.1.1.tgz#0f4263d1a80c6b2dc7b9c1902c9526478194a988"
+  integrity sha512-DuanZjaD8mQp1ppHjgnnUnyOlqYXZVjnov/JzFhjLEwd3Z4dYjMSnqrEzzGThH47vpCOqPPwJM2FtthLeJ8Pbg==
+  dependencies:
+    "@babel/runtime" "^7.1.2"
 
 react-router-dom@^5.2.0:
   version "5.2.0"
