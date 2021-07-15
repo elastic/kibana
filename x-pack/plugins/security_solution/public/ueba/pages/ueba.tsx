@@ -9,7 +9,6 @@ import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import styled from 'styled-components';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef } from 'react';
-// import { useDispatch } from 'react-redux';
 import { isTab } from '../../../../timelines/public';
 
 import { SecurityPageName } from '../../app/types';
@@ -60,7 +59,6 @@ const StyledFullHeightContainer = styled.div`
 `;
 
 const UebaComponent = () => {
-  // const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(

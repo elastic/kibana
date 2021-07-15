@@ -14,8 +14,6 @@ import { UebaDetailsModel, UebaPageModel, UebaTableType } from './model';
 const selectUebaPage = (state: State): UebaPageModel => state.ueba.page;
 const selectUebaDetailsPage = (state: State): UebaDetailsModel => state.ueba.details;
 
-// const selectUebaDetails = (state: State): UebaDetailsModel => state.ueba.details;
-
 export const riskScoreSelector = () =>
   createSelector(selectUebaPage, (ueba) => ueba.queries[UebaTableType.riskScore]);
 
