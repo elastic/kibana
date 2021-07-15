@@ -317,3 +317,8 @@ This content has moved. Refer to <<embedded-content-authentication>> and <<embed
 == System dependencies
 
 This content has moved. Refer to <<install-reporting-packages>>.
+
+[role="exclude",id="profiler-getting-started"]
+== Getting start with Search Profiler
+
+This content has moved. Refer to <<xpack-profiler>>.

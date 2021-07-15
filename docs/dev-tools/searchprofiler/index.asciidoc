@@ -1,19 +1,67 @@
 [role="xpack"]
 [[xpack-profiler]]
-== Profiling queries and aggregations
+== Profile queries and aggregations
 
 {es} has a powerful {ref}/search-profile.html[Profile API] which can be used to inspect and analyze
 your search queries. The response returns a large JSON blob, which can be
 difficult to analyze manually.
 
-The {searchprofiler} tool can transform this JSON output
+The *{searchprofiler}* tool can transform this JSON output
 into a visualization that is easy to navigate, allowing you to diagnose and debug
 poorly performing queries much faster.
 
-
 image::dev-tools/searchprofiler/images/overview.png["{searchprofiler} Visualization"]
 
-include::getting-started.asciidoc[]
+[float]
+[[search-profiler-getting-started]]
+=== Getting started
+
+The {searchprofiler} is automatically enabled in {kib}. Open the main menu,
+click *Dev Tools*, and then click *{searchprofiler}*
+to get started.
+
+{searchprofiler} displays the names of the indices searched, the shards in each index,
+and how long it took for the query to complete. To try it out, replace the default `match_all` query
+with the query you want to profile and click *Profile*.
+
+The following example shows the results of profiling the `match_all` query.
+If you take a closer look at the information for the `.security_7` sample index, the
+*Cumulative time* field shows you that the query took 0.028ms to execute.
+
+[role="screenshot"]
+image::dev-tools/searchprofiler/images/overview.png["{searchprofiler} example"]
+
+
+[NOTE]
+====
+The cumulative time metric is the sum of individual shard times.
+It is not necessarily the actual time it took for the query to return (wall clock time).
+Because shards might be processed in parallel on multiple nodes, the wall clock time can
+be significantly less than the cumulative time. However, if shards are colocated on the
+same node and executed serially, the wall clock time is closer to the cumulative time.
+
+While the cumulative time metric is useful for comparing the performance of your
+indices and shards, it doesn't necessarily represent the actual physical query times.
+====
+
+You can click *View details* to see more profiling information,
+including details about the query components that ran on the shard, as well as the timing
+breakdown of low-level methods. For more information, see {ref}/search-profile.html#profiling-queries[Profiling queries].
+
+[float]
+=== Index and type filtering
+
+By default, all queries executed by the *{searchprofiler}* are sent
+to `GET /_search`. It searches across your entire cluster (all indices, all types).
+
+To query a specific index or type (or several), you can use the *Index* filter.
+
+In the following example, the query is executed against the indices `.security-7` and `kibana_sample_data_ecommerce`.
+This is equivalent making a request to `GET /test,kibana_1/_search`.
+
+[role="screenshot"]
+image::dev-tools/searchprofiler/images/filter.png["Filtering by index and type"]
+
 
 include::more-complicated.asciidoc[]
 
