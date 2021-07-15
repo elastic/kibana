@@ -25,7 +25,6 @@ const SEARCH_TERMS = ['telemetry', 'usage', 'data', 'usage data'];
 interface Props {
   telemetryService: TelemetryService;
   onQueryMatchChange: (searchTermMatches: boolean) => void;
-  isSecurityExampleEnabled: () => boolean;
   showAppliesSettingMessage: boolean;
   enableSaving: boolean;
   query?: { text: string };
