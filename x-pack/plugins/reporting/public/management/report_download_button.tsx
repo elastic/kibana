@@ -8,7 +8,8 @@
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
 import { JOB_STATUSES } from '../../common/constants';
-import { Job as ListingJob, Props as ListingProps } from './report_listing';
+import { Job as ListingJob } from '../lib/job';
+import { Props as ListingProps } from './report_listing';
 
 type Props = { record: ListingJob } & ListingProps;
 

@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { useRouteMatch } from 'react-router-dom';
+import { useApmParams } from './use_apm_params';
 
 export function useServiceName(): string | undefined {
-  const match = useRouteMatch<{ serviceName?: string }>(
-    '/services/:serviceName'
-  );
+  const { path } = useApmParams('/*');
 
-  return match ? match.params.serviceName : undefined;
+  return 'serviceName' in path ? path.serviceName : undefined;
 }

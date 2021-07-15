@@ -17,10 +17,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React from 'react';
-import { useLocation } from 'react-router-dom';
+import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useFetcher } from '../../../../hooks/use_fetcher';
-import { createAgentConfigurationHref } from '../../../shared/Links/apm/agentConfigurationLinks';
 import { AgentConfigurationList } from './List';
 
 const INITIAL_DATA = { configurations: [] };
@@ -72,10 +71,10 @@ export function AgentConfigurations() {
 }
 
 function CreateConfigurationButton() {
+  const href = useApmRouter().link('/settings/agent-configuration/create');
+
   const { core } = useApmPluginContext();
-  const { basePath } = core.http;
-  const { search } = useLocation();
-  const href = createAgentConfigurationHref(search, basePath);
+
   const canSave = core.application.capabilities.apm.save;
   return (
     <EuiFlexItem>
