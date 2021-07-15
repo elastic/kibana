@@ -174,3 +174,7 @@ TIP: Aggregation-based panels support a maximum of three *Split series*.
 image:images/bar-chart-tutorial-2.png[Bar chart with sample logs data]
 
 . Click *Save and return*.
+
+
+
+
