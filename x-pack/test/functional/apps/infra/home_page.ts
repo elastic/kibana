@@ -55,5 +55,36 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.getNoMetricsDataPrompt();
       });
     });
+
+    describe('Saved Views', () => {
+      before(() => esArchiver.load('infra/metrics_and_logs'));
+      after(() => esArchiver.unload('infra/metrics_and_logs'));
+
+      describe('Inverntory Test save functionality', () => {
+        it('should have save and load controls', async () => {
+          await pageObjects.common.navigateToApp('infraOps');
+          await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
+          await pageObjects.infraHome.getSaveViewButton();
+          await pageObjects.infraHome.getLoadViewsButton();
+        });
+
+        it('should open flyout list', async () => {
+          await pageObjects.infraHome.openSaveViewsFlyout();
+          await pageObjects.infraHome.closeSavedViewFlyout();
+        });
+
+        it('should open saved view modal', async () => {
+          await pageObjects.infraHome.openCreateSaveViewModal();
+        });
+
+        it('should be able to enter a view name', async () => {
+          await pageObjects.infraHome.openEnterViewNameAndSave();
+        });
+
+        it('should see a saved view in list', async () => {
+          await pageObjects.infraHome.openSaveViewsFlyout();
+        });
+      });
+    });
   });
 };
