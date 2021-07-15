@@ -6,7 +6,9 @@ exports[`ReportInfoButton handles button click flyout on click 1`] = `
   className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
   data-test-subj="reportInfoButton"
   disabled={false}
+  onBlur={[Function]}
   onClick={[Function]}
+  onFocus={[Function]}
   type="button"
 >
   <EuiIcon
