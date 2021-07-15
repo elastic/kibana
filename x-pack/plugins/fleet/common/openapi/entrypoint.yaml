@@ -1,11 +1,14 @@
 openapi: 3.0.0
+tags: []
 info:
-  title: Ingest Manager
+  title: Fleet
+  description: OpenAPI schema for Fleet API endpoints
   version: '0.2'
   contact:
-    name: Ingest Team
+    name: Fleet Team
   license:
-    name: Elastic
+    name: Elastic License 2.0
+    url: https://www.elastic.co/licensing/elastic-license
 servers:
   - url: 'http://localhost:5601/api/fleet'
     description: local
@@ -42,8 +45,6 @@ paths:
     $ref: 'paths/epm@packages@{pkgkey}.yaml'
   '/agents/{agentId}':
     $ref: 'paths/agents@{agent_id}.yaml'
-  '/install/{osType}':
-    $ref: 'paths/install@{os_type}.yaml'
   /package_policies:
     $ref: paths/package_policies.yaml
   '/package_policies/{packagePolicyId}':
@@ -55,12 +56,12 @@ components:
     basicAuth:
       type: http
       scheme: basic
-    Enrollment API Key:
+    Enrollment_API_Key:
       name: Authorization
       type: apiKey
       in: header
       description: 'e.g. Authorization: ApiKey base64EnrollmentApiKey'
-    Access API Key:
+    Access_API_Key:
       name: Authorization
       type: apiKey
       in: header
