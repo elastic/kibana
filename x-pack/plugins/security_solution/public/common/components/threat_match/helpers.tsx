@@ -204,7 +204,7 @@ export const customValidators = {
           'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.threatMatchIndexForbiddenError',
           {
             defaultMessage:
-              'The index pattern can not be { forbiddenString }. Please create a different index pattern.',
+              'The index pattern cannot be { forbiddenString }. Please choose a more specific index pattern.',
             values: {
               forbiddenString,
             },

@@ -86,7 +86,6 @@ import {
   getCustomQueryInvalidationText,
   getDefineContinueButton,
   getIndexPatternClearButton,
-  getIndexPatternForbiddenText,
   getIndexPatternInvalidationText,
   getIndicatorAndButton,
   getIndicatorAtLeastOneInvalidationText,
@@ -168,11 +167,6 @@ describe('indicator match', () => {
         it('Shows invalidation text if you try to continue without filling it out', () => {
           getDefineContinueButton().click();
           getIndexPatternInvalidationText().should('exist');
-        });
-
-        it('Shows invalidation text if you try to create invalid index pattern', () => {
-          getIndicatorIndicatorIndex().type(`*{enter}`);
-          getIndexPatternForbiddenText().should('exist');
         });
       });
 

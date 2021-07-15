@@ -92,7 +92,6 @@ import {
   EMAIL_CONNECTOR_PORT_INPUT,
   EMAIL_CONNECTOR_USER_INPUT,
   EMAIL_CONNECTOR_PASSWORD_INPUT,
-  FORBIDDEN_INDEX_PATTERN,
 } from '../screens/create_new_rule';
 import { TOAST_ERROR } from '../screens/shared';
 import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
@@ -433,8 +432,6 @@ export const getIndicatorAtLeastOneInvalidationText = () => cy.contains(AT_LEAST
 
 /** Returns that at least one index pattern is required content */
 export const getIndexPatternInvalidationText = () => cy.contains(AT_LEAST_ONE_INDEX_PATTERN);
-
-export const getIndexPatternForbiddenText = () => cy.contains(FORBIDDEN_INDEX_PATTERN);
 
 /** Returns the continue button on the step of about */
 export const getAboutContinueButton = () => cy.get(ABOUT_CONTINUE_BTN);

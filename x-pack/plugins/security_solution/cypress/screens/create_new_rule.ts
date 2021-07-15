@@ -94,9 +94,6 @@ export const AT_LEAST_ONE_VALID_MATCH = 'At least one indicator match is require
 
 export const AT_LEAST_ONE_INDEX_PATTERN = 'A minimum of one index pattern is required.';
 
-export const FORBIDDEN_INDEX_PATTERN =
-  'The index pattern can not be *. Please create a different index pattern.';
-
 export const CUSTOM_QUERY_REQUIRED = 'A custom query is required.';
 
 export const DEFINE_CONTINUE_BUTTON = '[data-test-subj="define-continue"]';
