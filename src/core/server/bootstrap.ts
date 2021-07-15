@@ -45,7 +45,7 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
     cliArgs,
   });
 
-  const rawConfigService = new RawConfigService(configs, applyConfigOverrides);
+  const rawConfigService = new RawConfigService(env.configs, applyConfigOverrides);
   rawConfigService.loadConfig();
 
   const nodeInfo = await getNodeInfo(rawConfigService);

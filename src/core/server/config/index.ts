@@ -8,6 +8,7 @@
 
 export { coreDeprecationProvider } from './deprecation';
 export { ensureValidConfiguration } from './ensure_valid_configuration';
+export { setupCoreConfig } from './setup_core_config';
 
 export {
   ConfigService,

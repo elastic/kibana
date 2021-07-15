@@ -35,7 +35,7 @@ export class KibanaWorker implements KibanaRoot {
   ) {
     this.loggingSystem = new LoggingSystem();
     this.logger = this.loggingSystem.asLoggerFactory();
-    this.log = this.logger.get('root.node.worker');
+    this.log = this.logger.get('node', 'worker');
     this.server = new Server(this.rawConfigService, this.env, this.loggingSystem);
   }
 
@@ -49,9 +49,9 @@ export class KibanaWorker implements KibanaRoot {
     }
 
     try {
+      this.log.debug(`Setting up KibanaWorker`);
       this.server.setupCoreConfig();
       await this.setupLogging();
-      this.log.debug(`Setting up KibanaWorker: [NodeInfo: ${JSON.stringify(this.nodeInfo)}]`);
       return await this.server.setup();
     } catch (e) {
       await this.shutdown(e);

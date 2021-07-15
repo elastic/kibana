@@ -31,6 +31,9 @@ export const config = {
   schema: schema.object({
     // Eventually the goal is to enable this by default
     enabled: schema.boolean({ defaultValue: false }),
+    // TODO: determine strategy for when/if to support this.
+    // It will add complexity as we'd probably need to spawn an
+    // intermediary process before starting up the actual coordinator.
     coordinator: coordinatorSchema,
     workers: schema.oneOf([
       workersSchema,

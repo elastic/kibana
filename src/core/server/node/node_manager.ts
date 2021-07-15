@@ -8,7 +8,7 @@
 
 import cluster from 'cluster';
 import { omit } from 'lodash';
-import { Logger, LoggerFactory } from '@kbn/logging';
+import { Logger } from '@kbn/logging';
 import { ConfigService } from '../config';
 import {
   NodeConfigType,
@@ -24,11 +24,8 @@ import { isBroadcastMessage } from './utils';
  */
 export class NodeManager {
   private config?: NodeConfigType;
-  private readonly logger: Logger;
 
-  constructor(private readonly configService: ConfigService, logger: LoggerFactory) {
-    this.logger = logger.get('node-manager');
-  }
+  constructor(private readonly configService: ConfigService, private readonly log: Logger) {}
 
   public async setup() {
     this.config = this.configService.atPathSync<NodeConfigType>(nodeConfig.path);
@@ -82,7 +79,7 @@ export class NodeManager {
     };
 
     const createWorker = (config: WorkerConfig) => {
-      this.logger.info(`*** Creating worker ${config.worker_type}: ${config}`);
+      this.log.info(`*** Creating worker: ${JSON.stringify(config)}`);
       // Passes all config through to the worker's `env`.
       // Will probably need to do some additional processing here eventually.
       const worker = cluster.fork(config);
@@ -92,7 +89,7 @@ export class NodeManager {
     };
 
     cluster.on('online', (worker) => {
-      this.logger.info(`*** Worker online: ${worker.id}`);
+      this.log.info(`*** Worker online: ${worker.id}`);
     });
 
     cluster.on('exit', (worker, code) => {
