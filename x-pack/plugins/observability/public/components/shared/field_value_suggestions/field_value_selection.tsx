@@ -126,7 +126,7 @@ export function FieldValueSelection({
       hasActiveFilters={numOfFilters > 0}
       iconType="arrowDown"
       numActiveFilters={numOfFilters}
-      numFilters={values.length}
+      numFilters={options.length}
       onClick={onButtonClick}
     >
       {label}
@@ -166,7 +166,7 @@ export function FieldValueSelection({
             }),
             compressed,
             onInput: onValueChange,
-            autoComplete: 'off',
+            'data-test-subj': 'suggestionInputField',
           }}
           listProps={{
             onFocusBadge: false,
@@ -181,7 +181,7 @@ export function FieldValueSelection({
               <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
               {list}
               {loading && query && (
-                <EuiText className="eui-textCenter">
+                <EuiText className="eui-textCenter" color="subdued">
                   {i18n.translate('xpack.observability.fieldValueSelection.loading', {
                     defaultMessage: 'Loading',
                   })}{' '}
