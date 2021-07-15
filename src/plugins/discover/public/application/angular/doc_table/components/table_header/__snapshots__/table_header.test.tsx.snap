@@ -21,10 +21,11 @@ exports[`TableHeader with time column renders correctly 1`] = `
       >
         <button
           aria-label="Sort time descending"
-          class="kbnDocTableHeader__sortChange"
+          class=""
           data-test-subj="docTableHeaderFieldSort_time"
         >
           <span
+            color="primary"
             data-euiicon-type="sortUp"
           />
         </button>

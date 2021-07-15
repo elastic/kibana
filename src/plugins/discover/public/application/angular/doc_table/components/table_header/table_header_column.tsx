@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { SortOrder } from './helpers';
 
 interface Props {
@@ -24,10 +24,10 @@ interface Props {
   sortOrder: SortOrder[];
 }
 
-const sortDirectionToIcon: Record<string, string> = {
-  desc: 'sortDown',
-  asc: 'sortUp',
-  '': 'sortable',
+const sortDirectionToIcon: Record<string, { type: string; color?: string }> = {
+  desc: { type: 'sortDown', color: 'primary' },
+  asc: { type: 'sortUp', color: 'primary' },
+  '': { type: 'sortable' },
 };
 
 export function TableHeaderColumn({
@@ -105,7 +105,7 @@ export function TableHeaderColumn({
       active: isSortable && typeof onChangeSortOrder === 'function',
       ariaLabel: getSortButtonAriaLabel(),
       className: (!sortDirection && 'kbnDocTableHeader__sortChange') || '',
-      iconTpe: sortDirectionToIcon[sortDirection],
+      iconProps: sortDirectionToIcon[sortDirection],
       onClick: handleChangeSortOrder,
       testSubject: `docTableHeaderFieldSort_${name}`,
       tooltip: getSortButtonAriaLabel(),
@@ -118,7 +118,7 @@ export function TableHeaderColumn({
         values: { columnName: name },
       }),
       className: 'kbnDocTableHeader__move',
-      iconTpe: 'cross',
+      iconProps: { type: 'cross' },
       onClick: () => onRemoveColumn && onRemoveColumn(name),
       testSubject: `docTableRemoveHeader-${name}`,
       tooltip: i18n.translate('discover.docTable.tableHeader.removeColumnButtonTooltip', {
@@ -133,7 +133,7 @@ export function TableHeaderColumn({
         values: { columnName: name },
       }),
       className: 'kbnDocTableHeader__move',
-      iconTpe: 'sortLeft',
+      iconProps: { type: 'sortLeft' },
       onClick: () => onMoveColumn && onMoveColumn(name, colLeftIdx),
       testSubject: `docTableMoveLeftHeader-${name}`,
       tooltip: i18n.translate('discover.docTable.tableHeader.moveColumnLeftButtonTooltip', {
@@ -148,7 +148,7 @@ export function TableHeaderColumn({
         values: { columnName: name },
       }),
       className: 'kbnDocTableHeader__move',
-      iconTpe: 'sortRight',
+      iconProps: { type: 'sortRight' },
       onClick: () => onMoveColumn && onMoveColumn(name, colRightIdx),
       testSubject: `docTableMoveRightHeader-${name}`,
       tooltip: i18n.translate('discover.docTable.tableHeader.moveColumnRightButtonTooltip', {
@@ -169,14 +169,14 @@ export function TableHeaderColumn({
               content={button.tooltip}
               key={`button-${idx}`}
             >
-              <EuiButtonEmpty
+              <button
                 aria-label={button.ariaLabel}
-                className={button.className + ' kbnDocTableHeader__button'}
+                className={button.className}
                 data-test-subj={button.testSubject}
                 onClick={button.onClick}
               >
-                <EuiIcon type={button.iconTpe} size="s" />
-              </EuiButtonEmpty>
+                <EuiIcon {...button.iconProps} size="s" />
+              </button>
             </EuiToolTip>
           ))}
       </span>
