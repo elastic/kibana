@@ -124,7 +124,7 @@ export {
 import { getEsQueryConfig } from '../common';
 
 /**
- * @deprecated Please import helpers from the package kbn/es-query directly. This import will be eprecated in v8.0.0.
+ * @deprecated Please import helpers from the package kbn/es-query directly. This import will be deprecated in v8.0.0.
  */
 export const esKuery = {
   nodeTypes,
@@ -133,7 +133,7 @@ export const esKuery = {
 };
 
 /**
- * @deprecated Please import helpers from the package kbn/es-query directly. This import will be eprecated in v8.0.0.
+ * @deprecated Please import helpers from the package kbn/es-query directly. This import will be deprecated in v8.0.0.
  */
 export const esQuery = {
   buildEsQuery,
