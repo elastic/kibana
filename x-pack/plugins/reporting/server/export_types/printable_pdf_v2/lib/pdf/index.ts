@@ -12,7 +12,7 @@ import _ from 'lodash';
 import path from 'path';
 import Printer from 'pdfmake';
 import { Content, ContentImage, ContentText } from 'pdfmake/interfaces';
-import { LayoutInstance } from '../../../lib/layouts';
+import { LayoutInstance } from '../../../../lib/layouts';
 import { getDocOptions, REPORTING_TABLE_LAYOUT } from './get_doc_options';
 import { getFont } from './get_font';
 import { getTemplate } from './get_template';
