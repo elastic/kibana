@@ -24,8 +24,6 @@ import {
   isMachineLearningParams,
 } from '../signals/utils';
 import { DEFAULT_MAX_SIGNALS, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
-import { bulkCreateFactory } from './factories/bulk_create_factory';
-import { wrapHitsFactory } from './factories/wrap_hits_factory';
 import { CreateSecurityRuleTypeFactory } from './types';
 import { getListClient } from './utils/get_list_client';
 import {
@@ -34,6 +32,8 @@ import {
 } from '../notifications/schedule_notification_actions';
 import { getNotificationResultsLink } from '../notifications/utils';
 import { createResultObject } from './utils';
+import { bulkCreateFactory } from '../signals/bulk_create_factory';
+import { wrapHitsFactory } from '../signals/wrap_hits_factory';
 
 export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
   lists,
@@ -182,7 +182,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
 
         const bulkCreate = bulkCreateFactory(
           logger,
-          services.scopedClusterClient.asCurrentUser,
+          ruleDataClient.getWriter().bulk,
           buildRuleMessage,
           refresh
         );

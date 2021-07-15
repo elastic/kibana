@@ -7,7 +7,11 @@
 
 import { performance } from 'perf_hooks';
 import { countBy, isEmpty, get } from 'lodash';
-import { ElasticsearchClient, Logger } from 'kibana/server';
+
+import { BulkRequest, BulkResponse } from '@elastic/elasticsearch/api/types';
+import { ApiResponse, TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
+
+import { Logger } from 'kibana/server';
 import { BuildRuleMessage } from './rule_messages';
 import { RefreshTypes } from '../types';
 import { BaseHit } from '../../../../common/detection_engine/types';
@@ -16,14 +20,16 @@ import { errorAggregator, makeFloatString } from './utils';
 export interface GenericBulkCreateResponse<T> {
   success: boolean;
   bulkCreateDuration: string;
-  createdItemsCount: number;
   createdItems: Array<T & { _id: string; _index: string }>;
   errors: string[];
 }
 
 export const bulkCreateFactory = (
   logger: Logger,
-  esClient: ElasticsearchClient,
+  bulkIndexer: <TSource = unknown, TContext = unknown>(
+    params: BulkRequest<TSource>,
+    options?: TransportRequestOptions
+  ) => Promise<ApiResponse<BulkResponse, TContext>>,
   buildRuleMessage: BuildRuleMessage,
   refreshForBulkCreate: RefreshTypes
 ) => async <T>(wrappedDocs: Array<BaseHit<T>>): Promise<GenericBulkCreateResponse<T>> => {
@@ -32,7 +38,6 @@ export const bulkCreateFactory = (
       errors: [],
       success: true,
       bulkCreateDuration: '0',
-      createdItemsCount: 0,
       createdItems: [],
     };
   }
@@ -48,7 +53,7 @@ export const bulkCreateFactory = (
   ]);
   const start = performance.now();
 
-  const { body: response } = await esClient.bulk({
+  const { body: response } = await bulkIndexer({
     refresh: refreshForBulkCreate,
     body: bulkBody,
   });
@@ -85,7 +90,6 @@ export const bulkCreateFactory = (
       errors: Object.keys(errorCountByMessage),
       success: false,
       bulkCreateDuration: makeFloatString(end - start),
-      createdItemsCount,
       createdItems,
     };
   } else {
@@ -93,7 +97,6 @@ export const bulkCreateFactory = (
       errors: [],
       success: true,
       bulkCreateDuration: makeFloatString(end - start),
-      createdItemsCount,
       createdItems,
     };
   }

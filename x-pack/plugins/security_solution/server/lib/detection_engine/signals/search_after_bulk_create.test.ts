@@ -63,7 +63,7 @@ describe('searchAfterAndBulkCreate', () => {
     }).tuples[0];
     bulkCreate = bulkCreateFactory(
       mockLogger,
-      mockService.scopedClusterClient.asCurrentUser,
+      mockService.scopedClusterClient.asCurrentUser.bulk,
       buildRuleMessage,
       false
     );

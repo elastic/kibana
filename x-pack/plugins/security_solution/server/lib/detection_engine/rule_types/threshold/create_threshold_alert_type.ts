@@ -153,16 +153,14 @@ export const createThresholdAlertType = (createOptions: {
       };
 
       if (searchErrors.length === 0) {
-        services
-          .alertWithPersistence((alerts as unknown) as Array<Record<string, unknown>>)
-          .forEach((alert) => {
-            alert.scheduleActions('default', { server: 'server-test' });
-          });
+        const bulkCreateResult = bulkCreate(alerts);
+        return {
+          ...result,
+          ...bulkCreateResult,
+        };
       } else {
         throw new Error(searchErrors.join('\n'));
       }
-
-      return result;
     },
   });
 };

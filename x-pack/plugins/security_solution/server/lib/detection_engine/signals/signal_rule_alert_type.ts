@@ -228,7 +228,7 @@ export const signalRulesAlertType = ({
 
         const bulkCreate = bulkCreateFactory(
           logger,
-          services.scopedClusterClient.asCurrentUser,
+          services.scopedClusterClient.asCurrentUser.bulk,
           buildRuleMessage,
           refresh
         );

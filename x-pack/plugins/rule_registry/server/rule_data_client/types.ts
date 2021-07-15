@@ -29,7 +29,9 @@ export interface RuleDataReader {
 }
 
 export interface RuleDataWriter {
-  bulk(request: BulkRequest): Promise<ApiResponse<BulkResponse>>;
+  bulk<TSource = unknown, TContext = unknown>(
+    request: BulkRequest<TSource>
+  ): Promise<ApiResponse<BulkResponse, TContext>>;
 }
 
 export interface IRuleDataClient {
