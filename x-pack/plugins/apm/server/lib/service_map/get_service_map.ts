@@ -15,7 +15,7 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { getServicesProjection } from '../../projections/services';
 import { mergeProjection } from '../../projections/util/merge_projection';
-import { environmentQuery } from '../../../server/utils/queries';
+import { environmentQuery } from '../../../common/utils/environment_query';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
