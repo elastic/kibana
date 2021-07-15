@@ -19,6 +19,7 @@ import {
   getFormattedEntries,
   getFormattedEntry,
   getUpdatedEntriesOnDelete,
+  customValidators,
 } from './helpers';
 import { ThreatMapEntry } from '@kbn/securitysolution-io-ts-alerting-types';
 
@@ -292,6 +293,21 @@ describe('Helpers', () => {
         },
       ]);
       expect(items).toEqual([{ entries: [entry] }]);
+    });
+  });
+
+  describe('customValidators.forbiddenField', () => {
+    const FORBIDDEN = '*';
+
+    test('it returns expected value when a forbidden value is passed in', () => {
+      expect(customValidators.forbiddenField('*', FORBIDDEN)).toEqual({
+        code: 'ERR_FIELD_FORMAT',
+        message: 'The index pattern cannot be *. Please choose a more specific index pattern.',
+      });
+    });
+
+    test('it returns undefined when a non-forbidden value is passed in', () => {
+      expect(customValidators.forbiddenField('.test-index', FORBIDDEN)).not.toBeDefined();
     });
   });
 });
