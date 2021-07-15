@@ -36,6 +36,7 @@ import { CannotImportJobsCallout, SkippedJobs } from './cannot_import_jobs_callo
 import { CannotReadFileCallout } from './cannot_read_file_callout';
 import { isJobIdValid } from '../../../../../common/util/job_utils';
 import { JOB_ID_MAX_LENGTH } from '../../../../../common/constants/validation';
+import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
 
 interface ImportedAdJob {
   job: Job;
@@ -71,6 +72,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
       data: {
         indexPatterns: { getTitles: getIndexPatternTitles },
       },
+      notifications: { toasts },
     },
   } = useMlKibana();
   const [showFlyout, setShowFlyout] = useState(false);
@@ -87,7 +89,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
   const [validatingJobs, setValidatingJobs] = useState(false);
   const [showFileReadError, setShowFileReadError] = useState(false);
 
-  useEffect(() => {
+  const reset = useCallback((showFileError = false) => {
     setAdJobs([]);
     setDfaJobs([]);
     setJobIds([]);
@@ -96,7 +98,11 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
     setJobType(null);
     setTotalJobsRead(0);
     setValidatingJobs(false);
-    setShowFileReadError(false);
+    setShowFileReadError(showFileError);
+  }, []);
+
+  useEffect(() => {
+    reset();
   }, [showFlyout]);
 
   function toggleFlyout() {
@@ -107,22 +113,14 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
     setShowFileReadError(false);
 
     if (files.length === 0) {
-      setAdJobs([]);
-      setDfaJobs([]);
-      setJobIds([]);
-      setIdsMash('');
-      setImporting(false);
-      setJobType(null);
-      setTotalJobsRead(0);
-      setValidatingJobs(false);
-      setShowFileReadError(false);
+      reset();
       return;
     }
 
     try {
       const loadedFile = await readJobConfigs(files[0]);
       if (loadedFile.jobType === null) {
-        setShowFileReadError(true);
+        reset(true);
         return;
       }
 
@@ -159,7 +157,8 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
       setValidatingJobs(true);
       setSkippedJobs(validatedJobs.skippedJobs);
     } catch (error) {
-      // show error
+      const { displayErrorToast } = toastNotificationServiceProvider(toasts);
+      displayErrorToast(error);
     }
   }, []);
 
@@ -167,8 +166,13 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
     setImporting(true);
     if (jobType === 'anomaly-detector') {
       const renamedJobs = renameAdJobs(jobIds, adJobs);
-      await bulkCreateJobs(renamedJobs);
-      // TODO show errors
+      try {
+        await bulkCreateADJobs(renamedJobs);
+      } catch (error) {
+        // display unexpected error
+        const { displayErrorToast } = toastNotificationServiceProvider(toasts);
+        displayErrorToast(error);
+      }
     } else if (jobType === 'data-frame-analytics') {
       const renamedJobs = renameDfaJobs(jobIds, dfaJobs);
       await bulkCreateDfaJobs(renamedJobs);
@@ -178,13 +182,41 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
     refreshJobs();
   }, [jobType, jobIds, adJobs, dfaJobs]);
 
+  const bulkCreateADJobs = useCallback(async (jobs: ImportedAdJob[]) => {
+    const results = await bulkCreateJobs(jobs);
+    Object.entries(results).forEach(([jobId, { job, datafeed }]) => {
+      if (job.error || datafeed.error) {
+        const { displayErrorToast } = toastNotificationServiceProvider(toasts);
+        if (job.error) {
+          const title = i18n.translate('xpack.ml.importExport.importFlyout.importADJobError', {
+            defaultMessage: 'Could not create job {jobId}',
+            values: { jobId },
+          });
+          displayErrorToast(job.error, title);
+        }
+        if (datafeed.error) {
+          const title = i18n.translate('xpack.ml.importExport.importFlyout.importDatafeedError', {
+            defaultMessage: 'Could not create datafeed for job {jobId}',
+            values: { jobId },
+          });
+          displayErrorToast(datafeed.error, title);
+        }
+      }
+    });
+  }, []);
+
   const bulkCreateDfaJobs = useCallback(async (jobs: DataFrameAnalyticsConfig[]) => {
     Promise.all(
       jobs.map(async ({ id, ...config }) => {
         try {
           await createDataFrameAnalytics(id, config);
         } catch (error) {
-          // TODO show errors
+          const title = i18n.translate('xpack.ml.importExport.importFlyout.importDFAJobError', {
+            defaultMessage: 'Could not create job {id}',
+            values: { id },
+          });
+          const { displayErrorToast } = toastNotificationServiceProvider(toasts);
+          displayErrorToast(error, title);
         }
       })
     );

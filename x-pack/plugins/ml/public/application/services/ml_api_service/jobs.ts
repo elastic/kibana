@@ -367,10 +367,21 @@ export const jobsApiProvider = (httpService: HttpService) => ({
 
   bulkCreateJobs(jobs: { job: Job; datafeed: Datafeed } | Array<{ job: Job; datafeed: Datafeed }>) {
     const body = JSON.stringify(jobs);
-    return httpService.http<{
-      total: number;
-      categories: Array<{ count?: number; category: Category }>;
-    }>({
+    return httpService.http<
+      Record<
+        string,
+        {
+          job: {
+            success: boolean;
+            error?: any;
+          };
+          datafeed: {
+            success: boolean;
+            error?: any;
+          };
+        }
+      >
+    >({
       path: `${ML_BASE_PATH}/jobs/bulk_create`,
       method: 'POST',
       body,

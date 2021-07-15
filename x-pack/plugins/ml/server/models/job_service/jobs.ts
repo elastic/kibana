@@ -597,7 +597,7 @@ export function jobsProvider(
           await mlClient.putJob({ job_id: job.job_id, body: job });
           results[job.job_id].job = { success: true };
         } catch (error) {
-          results[job.job_id].job = { success: false, error };
+          results[job.job_id].job = { success: false, error: error.body ?? error };
         }
 
         try {
@@ -607,7 +607,7 @@ export function jobsProvider(
           );
           results[job.job_id].datafeed = { success: true };
         } catch (error) {
-          results[job.job_id].datafeed = { success: false, error };
+          results[job.job_id].datafeed = { success: false, error: error.body ?? error };
         }
       })
     );
