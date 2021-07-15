@@ -4,6 +4,11 @@
 
 ## esKuery variable
 
+> Warning: This API is now obsolete.
+> 
+> Please import helpers from the package kbn/es-query directly. This import will be eprecated in v8.0.0.
+> 
+
 <b>Signature:</b>
 
 ```typescript

@@ -123,12 +123,18 @@ export {
 
 import { getEsQueryConfig } from '../common';
 
+/**
+ * @deprecated Please import helpers from the package kbn/es-query directly. This import will be eprecated in v8.0.0.
+ */
 export const esKuery = {
   nodeTypes,
   fromKueryExpression,
   toElasticsearchQuery,
 };
 
+/**
+ * @deprecated Please import helpers from the package kbn/es-query directly. This import will be eprecated in v8.0.0.
+ */
 export const esQuery = {
   buildEsQuery,
   getEsQueryConfig,

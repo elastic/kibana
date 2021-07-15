@@ -59,8 +59,8 @@ export const exporters = {
 import { getEsQueryConfig } from '../common';
 
 /*
+ * Filter helper namespace
  * @deprecated Please import from the package kbn/es-query directly. This will be deprecated in v8.0.0.
- * Filter helper namespace:
  */
 export const esKuery = {
   nodeTypes,
@@ -69,8 +69,8 @@ export const esKuery = {
 };
 
 /*
+ * Filter helper namespace
  * @deprecated Please import from the package kbn/es-query directly. This will be deprecated in v8.0.0.
- * Filter helper namespace:
  */
 export const esQuery = {
   buildQueryFromFilters,
