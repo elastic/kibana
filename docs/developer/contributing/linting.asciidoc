@@ -47,8 +47,8 @@ file types.
 "eslint.validate": [
   "javascript",
   "javascriptreact",
-  { "language": "typescript", "autoFix": true },
-  { "language": "typescriptreact", "autoFix": true }
+  "typescript",
+  "typescriptreact",
 ]
 ----
 
@@ -59,6 +59,13 @@ file by adding this line in your setting.
 ----
   "eslint.autoFixOnSave": true,
 ----
+
+For VScode versions v1.58 and above
+
+[source,json]
+  "editor.codeActionsOnSave": {
+     "source.fixAll.eslint": true
+  }
 
 :warning: It is *not* recommended to use the
 https://prettier.io/[`Prettier` extension/IDE plugin] while
