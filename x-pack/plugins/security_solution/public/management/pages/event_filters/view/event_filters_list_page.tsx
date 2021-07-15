@@ -60,6 +60,8 @@ const AdministrationListPage = styled(_AdministrationListPage)`
   }
 `;
 
+// TEST
+
 export const EventFiltersListPage = memo(() => {
   const { state: routeState } = useLocation<ListPageRouteState | undefined>();
   const history = useHistory();
