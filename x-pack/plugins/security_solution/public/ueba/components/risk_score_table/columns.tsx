@@ -60,23 +60,6 @@ export const getRiskScoreColumns = (): RiskScoreColumns => [
     },
   },
   {
-    field: 'node.risk_score',
-    name: i18n.RISK_SCORE,
-    truncateText: false,
-    hideForMobile: false,
-    sortable: false,
-    render: (riskScore) => {
-      if (riskScore != null) {
-        return (
-          <AddFilterToGlobalSearchBar filter={createFilter('risk_score', `${riskScore}`)}>
-            <>{riskScore}</>
-          </AddFilterToGlobalSearchBar>
-        );
-      }
-      return getEmptyTagValue();
-    },
-  },
-  {
     field: 'node.risk_keyword',
     name: i18n.CURRENT_RISK,
     truncateText: false,

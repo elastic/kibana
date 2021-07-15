@@ -35,10 +35,6 @@ export const hostTactics: SecuritySolutionFactory<UebaQueries.hostTactics> = {
     const totalCount = getOr(0, 'aggregations.tactic_count.value', response.rawResponse);
     const techniqueCount = getOr(0, 'aggregations.technique_count.value', response.rawResponse);
     const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
-    console.log(
-      'BUCKET',
-      JSON.stringify(getOr([], 'aggregations.tactic.buckets', response.rawResponse))
-    );
     const hostTacticsEdges: HostTacticsEdges[] = formatHostTacticsData(
       getOr([], 'aggregations.tactic.buckets', response.rawResponse)
     );

@@ -43,7 +43,6 @@ interface RiskScoreTableProps {
 
 export type RiskScoreColumns = [
   Columns<RiskScoreItem['host_name']>,
-  Columns<RiskScoreItem['risk_score']>,
   Columns<RiskScoreItem['risk_keyword']>
 ];
 
@@ -64,7 +63,6 @@ const RiskScoreTableComponent: React.FC<RiskScoreTableProps> = ({
   type,
 }) => {
   const dispatch = useDispatch();
-  // const getRiskScoreSelector = useMemo(() => uebaSelectors.riskScoreSelector(), []);
   const { activePage, limit, sort } = useDeepEqualSelector(uebaSelectors.riskScoreSelector());
   const updateLimitPagination = useCallback(
     (newLimit) =>
