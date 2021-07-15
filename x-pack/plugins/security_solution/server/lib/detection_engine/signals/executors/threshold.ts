@@ -63,10 +63,9 @@ export const thresholdExecutor = async ({
   let result = createSearchAfterReturnType();
   const ruleParams = rule.attributes.params;
   if (hasLargeValueItem(exceptionItems)) {
-    result.warningMessages.push(
+    result.warnings.push(
       'Exceptions that use "is in list" or "is not in list" operators are not applied to Threshold rules'
     );
-    result.warning = true;
   }
   const inputIndex = await getInputIndex(services, version, ruleParams.index);
 
@@ -117,13 +116,7 @@ export const thresholdExecutor = async ({
     buildRuleMessage,
   });
 
-  const {
-    success,
-    bulkCreateDuration,
-    createdItemsCount,
-    createdItems,
-    errors,
-  } = await bulkCreateThresholdSignals({
+  const { success, bulkCreateDuration, createdItems, errors } = await bulkCreateThresholdSignals({
     someResult: thresholdResults,
     ruleSO: rule,
     filter: esFilter,
@@ -147,7 +140,6 @@ export const thresholdExecutor = async ({
     createSearchAfterReturnType({
       success,
       errors: [...errors, ...previousSearchErrors, ...searchErrors],
-      createdSignalsCount: createdItemsCount,
       createdSignals: createdItems,
       bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],
       searchAfterTimes: [thresholdSearchDuration],

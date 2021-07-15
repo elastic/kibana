@@ -178,7 +178,7 @@ describe('searchAfterAndBulkCreate', () => {
       },
     ];
 
-    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
+    const { success, createdSignals, lastLookBackDate } = await searchAfterAndBulkCreate({
       tuple,
       ruleSO,
       listClient,
@@ -197,7 +197,7 @@ describe('searchAfterAndBulkCreate', () => {
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(5);
-    expect(createdSignalsCount).toEqual(4);
+    expect(createdSignals.length).toEqual(4);
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 
@@ -282,7 +282,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       },
     ];
-    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
+    const { success, createdSignals, lastLookBackDate } = await searchAfterAndBulkCreate({
       ruleSO,
       tuple,
       listClient,
@@ -301,7 +301,7 @@ describe('searchAfterAndBulkCreate', () => {
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(4);
-    expect(createdSignalsCount).toEqual(3);
+    expect(createdSignals.length).toEqual(3);
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 
@@ -360,7 +360,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       },
     ];
-    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
+    const { success, createdSignals, lastLookBackDate } = await searchAfterAndBulkCreate({
       ruleSO,
       tuple,
       listClient,
@@ -379,7 +379,7 @@ describe('searchAfterAndBulkCreate', () => {
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
-    expect(createdSignalsCount).toEqual(4);
+    expect(createdSignals.length).toEqual(4);
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 
@@ -419,7 +419,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       },
     ];
-    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
+    const { success, createdSignals, lastLookBackDate } = await searchAfterAndBulkCreate({
       ruleSO,
       tuple,
       listClient,
@@ -438,7 +438,7 @@ describe('searchAfterAndBulkCreate', () => {
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
-    expect(createdSignalsCount).toEqual(0); // should not create any signals because all events were in the allowlist
+    expect(createdSignals.length).toEqual(0); // should not create any signals because all events were in the allowlist
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 
@@ -498,7 +498,7 @@ describe('searchAfterAndBulkCreate', () => {
         )
       );
 
-    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
+    const { success, createdSignals, lastLookBackDate } = await searchAfterAndBulkCreate({
       ruleSO,
       tuple,
       listClient,
@@ -517,7 +517,7 @@ describe('searchAfterAndBulkCreate', () => {
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
-    expect(createdSignalsCount).toEqual(4);
+    expect(createdSignals.length).toEqual(4);
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 
@@ -553,7 +553,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       },
     ];
-    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
+    const { success, createdSignals, lastLookBackDate } = await searchAfterAndBulkCreate({
       ruleSO,
       tuple,
       listClient,
@@ -572,7 +572,7 @@ describe('searchAfterAndBulkCreate', () => {
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
-    expect(createdSignalsCount).toEqual(0); // should not create any signals because all events were in the allowlist
+    expect(createdSignals.length).toEqual(0); // should not create any signals because all events were in the allowlist
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 
@@ -625,7 +625,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       },
     ];
-    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
+    const { success, createdSignals, lastLookBackDate } = await searchAfterAndBulkCreate({
       ruleSO,
       tuple,
       listClient,
@@ -644,7 +644,7 @@ describe('searchAfterAndBulkCreate', () => {
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
-    expect(createdSignalsCount).toEqual(4);
+    expect(createdSignals.length).toEqual(4);
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 
@@ -699,7 +699,7 @@ describe('searchAfterAndBulkCreate', () => {
         }))
       )
     );
-    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
+    const { success, createdSignals, lastLookBackDate } = await searchAfterAndBulkCreate({
       ruleSO,
       tuple,
       listClient,
@@ -718,7 +718,7 @@ describe('searchAfterAndBulkCreate', () => {
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
-    expect(createdSignalsCount).toEqual(4);
+    expect(createdSignals.length).toEqual(4);
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 
@@ -750,7 +750,7 @@ describe('searchAfterAndBulkCreate', () => {
         )
       )
     );
-    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
+    const { success, createdSignals, lastLookBackDate } = await searchAfterAndBulkCreate({
       listClient,
       exceptionsList: [exceptionItem],
       tuple,
@@ -769,7 +769,7 @@ describe('searchAfterAndBulkCreate', () => {
     });
     expect(mockLogger.error).toHaveBeenCalled();
     expect(success).toEqual(false);
-    expect(createdSignalsCount).toEqual(0);
+    expect(createdSignals.length).toEqual(0);
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 
@@ -797,7 +797,7 @@ describe('searchAfterAndBulkCreate', () => {
         }))
       )
     );
-    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
+    const { success, createdSignals, lastLookBackDate } = await searchAfterAndBulkCreate({
       listClient,
       exceptionsList: [exceptionItem],
       tuple,
@@ -815,7 +815,7 @@ describe('searchAfterAndBulkCreate', () => {
       wrapHits,
     });
     expect(success).toEqual(true);
-    expect(createdSignalsCount).toEqual(0);
+    expect(createdSignals.length).toEqual(0);
     expect(lastLookBackDate).toEqual(null);
   });
 
@@ -858,7 +858,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       },
     ];
-    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
+    const { success, createdSignals, lastLookBackDate } = await searchAfterAndBulkCreate({
       listClient,
       exceptionsList: [exceptionItem],
       tuple,
@@ -876,7 +876,7 @@ describe('searchAfterAndBulkCreate', () => {
       wrapHits,
     });
     expect(success).toEqual(false);
-    expect(createdSignalsCount).toEqual(0); // should not create signals if search threw error
+    expect(createdSignals.length).toEqual(0); // should not create signals if search threw error
     expect(lastLookBackDate).toEqual(null);
   });
 
@@ -979,12 +979,7 @@ describe('searchAfterAndBulkCreate', () => {
         sampleDocSearchResultsNoSortIdNoHits()
       )
     );
-    const {
-      success,
-      createdSignalsCount,
-      lastLookBackDate,
-      errors,
-    } = await searchAfterAndBulkCreate({
+    const { success, createdSignals, lastLookBackDate, errors } = await searchAfterAndBulkCreate({
       ruleSO,
       tuple,
       listClient,
@@ -1004,7 +999,7 @@ describe('searchAfterAndBulkCreate', () => {
     expect(success).toEqual(false);
     expect(errors).toEqual(['error on creation']);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(5);
-    expect(createdSignalsCount).toEqual(4);
+    expect(createdSignals.length).toEqual(4);
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 
@@ -1079,7 +1074,7 @@ describe('searchAfterAndBulkCreate', () => {
     );
 
     const mockEnrichment = jest.fn((a) => a);
-    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
+    const { success, createdSignals, lastLookBackDate } = await searchAfterAndBulkCreate({
       enrichment: mockEnrichment,
       ruleSO,
       tuple,
@@ -1112,7 +1107,7 @@ describe('searchAfterAndBulkCreate', () => {
     );
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(4);
-    expect(createdSignalsCount).toEqual(3);
+    expect(createdSignals.length).toEqual(3);
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 });

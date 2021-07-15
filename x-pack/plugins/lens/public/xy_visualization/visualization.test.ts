@@ -963,7 +963,7 @@ describe('xy_visualization', () => {
       (frame.datasourceLayers.first.getOperationForColumnId as jest.Mock).mockReturnValue({
         label: 'Label B',
       });
-      const warningMessages = xyVisualization.getWarningMessages!(
+      const warnings = xyVisualization.getWarningMessages!(
         {
           ...exampleState(),
           layers: [
@@ -977,8 +977,8 @@ describe('xy_visualization', () => {
         },
         frame
       );
-      expect(warningMessages).toHaveLength(1);
-      expect(warningMessages && warningMessages[0]).toMatchInlineSnapshot(`
+      expect(warnings).toHaveLength(1);
+      expect(warnings && warnings[0]).toMatchInlineSnapshot(`
         <FormattedMessage
           defaultMessage="{label} contains array values. Your visualization may not render as expected."
           id="xpack.lens.xyVisualization.arrayValues"

@@ -61,10 +61,9 @@ export const eqlExecutor = async ({
   const result = createSearchAfterReturnType();
   const ruleParams = rule.attributes.params;
   if (hasLargeValueItem(exceptionItems)) {
-    result.warningMessages.push(
+    result.warnings.push(
       'Exceptions that use "is in list" or "is not in list" operators are not applied to EQL rules'
     );
-    result.warning = true;
   }
   try {
     const signalIndexVersion = await getIndexVersion(
@@ -123,7 +122,6 @@ export const eqlExecutor = async ({
   if (newSignals?.length) {
     const insertResult = await bulkCreate(newSignals);
     result.bulkCreateTimes.push(insertResult.bulkCreateDuration);
-    result.createdSignalsCount += insertResult.createdItemsCount;
     result.createdSignals = insertResult.createdItems;
   }
   result.success = true;

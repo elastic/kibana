@@ -51,26 +51,22 @@ describe('utils', () => {
     test('it should combine two results with success set to "true" if both are "true"', () => {
       const existingResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
-        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: undefined,
-        createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
-        warningMessages: [],
+        warnings: [],
       };
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
-        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: undefined,
-        createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
-        warningMessages: [],
+        warnings: [],
       };
       const combinedResults = combineResults(existingResult, newResult);
       expect(combinedResults.success).toEqual(true);
@@ -79,26 +75,22 @@ describe('utils', () => {
     test('it should combine two results with success set to "false" if one of them is "false"', () => {
       const existingResult: SearchAfterAndBulkCreateReturnType = {
         success: false,
-        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: undefined,
-        createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
-        warningMessages: [],
+        warnings: [],
       };
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
-        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: undefined,
-        createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
-        warningMessages: [],
+        warnings: [],
       };
       const combinedResults = combineResults(existingResult, newResult);
       expect(combinedResults.success).toEqual(false);
@@ -107,26 +99,22 @@ describe('utils', () => {
     test('it should use the latest date if it is set in the new result', () => {
       const existingResult: SearchAfterAndBulkCreateReturnType = {
         success: false,
-        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: undefined,
-        createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
-        warningMessages: [],
+        warnings: [],
       };
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
-        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'),
-        createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
-        warningMessages: [],
+        warnings: [],
       };
       const combinedResults = combineResults(existingResult, newResult);
       expect(combinedResults.lastLookBackDate?.toISOString()).toEqual('2020-09-16T03:34:32.390Z');
@@ -135,26 +123,22 @@ describe('utils', () => {
     test('it should combine the searchAfterTimes and the bulkCreateTimes', () => {
       const existingResult: SearchAfterAndBulkCreateReturnType = {
         success: false,
-        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: undefined,
-        createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
-        warningMessages: [],
+        warnings: [],
       };
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
-        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'),
-        createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
-        warningMessages: [],
+        warnings: [],
       };
       const combinedResults = combineResults(existingResult, newResult);
       expect(combinedResults).toEqual(
@@ -168,26 +152,22 @@ describe('utils', () => {
     test('it should combine errors together without duplicates', () => {
       const existingResult: SearchAfterAndBulkCreateReturnType = {
         success: false,
-        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: undefined,
-        createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: ['error 1', 'error 2', 'error 3'],
-        warningMessages: [],
+        warnings: [],
       };
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
-        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'),
-        createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: ['error 4', 'error 1', 'error 3', 'error 5'],
-        warningMessages: [],
+        warnings: [],
       };
       const combinedResults = combineResults(existingResult, newResult);
       expect(combinedResults).toEqual(
@@ -292,25 +272,21 @@ describe('utils', () => {
     test('it should use the maximum found if given an empty array for newResults', () => {
       const existingResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
-        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: undefined,
-        createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
-        warningMessages: [],
+        warnings: [],
       };
       const expectedResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
-        warning: false,
         searchAfterTimes: ['30'], // max value from existingResult.searchAfterTimes
         bulkCreateTimes: ['25'], // max value from existingResult.bulkCreateTimes
         lastLookBackDate: undefined,
-        createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
-        warningMessages: [],
+        warnings: [],
       };
       const combinedResults = combineConcurrentResults(existingResult, []);
       expect(combinedResults).toEqual(expectedResult);
@@ -319,36 +295,30 @@ describe('utils', () => {
     test('it should work with empty arrays for searchAfterTimes and bulkCreateTimes and createdSignals', () => {
       const existingResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
-        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: undefined,
-        createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
-        warningMessages: [],
+        warnings: [],
       };
       const newResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
-        warning: false,
         searchAfterTimes: [],
         bulkCreateTimes: [],
         lastLookBackDate: undefined,
-        createdSignalsCount: 0,
         createdSignals: [],
         errors: [],
-        warningMessages: [],
+        warnings: [],
       };
       const expectedResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
-        warning: false,
         searchAfterTimes: ['30'], // max value from existingResult.searchAfterTimes
         bulkCreateTimes: ['25'], // max value from existingResult.bulkCreateTimes
         lastLookBackDate: undefined,
-        createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
-        warningMessages: [],
+        warnings: [],
       };
 
       const combinedResults = combineConcurrentResults(existingResult, [newResult]);
@@ -358,48 +328,40 @@ describe('utils', () => {
     test('it should get the max of two new results and then combine the result with an existingResult correctly', () => {
       const existingResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
-        warning: false,
         searchAfterTimes: ['10', '20', '30'], // max is 30
         bulkCreateTimes: ['5', '15', '25'], // max is 25
         lastLookBackDate: undefined,
-        createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
-        warningMessages: [],
+        warnings: [],
       };
       const newResult1: SearchAfterAndBulkCreateReturnType = {
         success: true,
-        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'),
-        createdSignalsCount: 5,
         createdSignals: Array(5).fill(sampleSignalHit()),
         errors: [],
-        warningMessages: [],
+        warnings: [],
       };
       const newResult2: SearchAfterAndBulkCreateReturnType = {
         success: true,
-        warning: false,
         searchAfterTimes: ['40', '5', '15'],
         bulkCreateTimes: ['50', '5', '15'],
         lastLookBackDate: new Date('2020-09-16T04:34:32.390Z'),
-        createdSignalsCount: 8,
         createdSignals: Array(8).fill(sampleSignalHit()),
         errors: [],
-        warningMessages: [],
+        warnings: [],
       };
 
       const expectedResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
-        warning: false,
         searchAfterTimes: ['70'], // max value between newResult1 and newResult2 + max array value of existingResult (40 + 30 = 70)
         bulkCreateTimes: ['75'], // max value between newResult1 and newResult2 + max array value of existingResult (50 + 25 = 75)
         lastLookBackDate: new Date('2020-09-16T04:34:32.390Z'), // max lastLookBackDate
-        createdSignalsCount: 16, // all the signals counted together (8 + 5 + 3)
         createdSignals: Array(16).fill(sampleSignalHit()),
         errors: [],
-        warningMessages: [],
+        warnings: [],
       };
 
       const combinedResults = combineConcurrentResults(existingResult, [newResult1, newResult2]);
@@ -409,48 +371,40 @@ describe('utils', () => {
     test('it should get the max of two new results and then combine the result with an existingResult correctly when the results are flipped around', () => {
       const existingResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
-        warning: false,
         searchAfterTimes: ['10', '20', '30'], // max is 30
         bulkCreateTimes: ['5', '15', '25'], // max is 25
         lastLookBackDate: undefined,
-        createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
-        warningMessages: [],
+        warnings: [],
       };
       const newResult1: SearchAfterAndBulkCreateReturnType = {
         success: true,
-        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'),
-        createdSignalsCount: 5,
         createdSignals: Array(5).fill(sampleSignalHit()),
         errors: [],
-        warningMessages: [],
+        warnings: [],
       };
       const newResult2: SearchAfterAndBulkCreateReturnType = {
         success: true,
-        warning: false,
         searchAfterTimes: ['40', '5', '15'],
         bulkCreateTimes: ['50', '5', '15'],
         lastLookBackDate: new Date('2020-09-16T04:34:32.390Z'),
-        createdSignalsCount: 8,
         createdSignals: Array(8).fill(sampleSignalHit()),
         errors: [],
-        warningMessages: [],
+        warnings: [],
       };
 
       const expectedResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
-        warning: false,
         searchAfterTimes: ['70'], // max value between newResult1 and newResult2 + max array value of existingResult (40 + 30 = 70)
         bulkCreateTimes: ['75'], // max value between newResult1 and newResult2 + max array value of existingResult (50 + 25 = 75)
         lastLookBackDate: new Date('2020-09-16T04:34:32.390Z'), // max lastLookBackDate
-        createdSignalsCount: 16, // all the signals counted together (8 + 5 + 3)
         createdSignals: Array(16).fill(sampleSignalHit()),
         errors: [],
-        warningMessages: [],
+        warnings: [],
       };
 
       const combinedResults = combineConcurrentResults(existingResult, [newResult2, newResult1]); // two array elements are flipped
@@ -460,48 +414,40 @@ describe('utils', () => {
     test('it should return the max date correctly if one date contains a null', () => {
       const existingResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
-        warning: false,
         searchAfterTimes: ['10', '20', '30'], // max is 30
         bulkCreateTimes: ['5', '15', '25'], // max is 25
         lastLookBackDate: undefined,
-        createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
-        warningMessages: [],
+        warnings: [],
       };
       const newResult1: SearchAfterAndBulkCreateReturnType = {
         success: true,
-        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'),
-        createdSignalsCount: 5,
         createdSignals: Array(5).fill(sampleSignalHit()),
         errors: [],
-        warningMessages: [],
+        warnings: [],
       };
       const newResult2: SearchAfterAndBulkCreateReturnType = {
         success: true,
-        warning: false,
         searchAfterTimes: ['40', '5', '15'],
         bulkCreateTimes: ['50', '5', '15'],
         lastLookBackDate: null,
-        createdSignalsCount: 8,
         createdSignals: Array(8).fill(sampleSignalHit()),
         errors: [],
-        warningMessages: [],
+        warnings: [],
       };
 
       const expectedResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
-        warning: false,
         searchAfterTimes: ['70'], // max value between newResult1 and newResult2 + max array value of existingResult (40 + 30 = 70)
         bulkCreateTimes: ['75'], // max value between newResult1 and newResult2 + max array value of existingResult (50 + 25 = 75)
         lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'), // max lastLookBackDate
-        createdSignalsCount: 16, // all the signals counted together (8 + 5 + 3)
         createdSignals: Array(16).fill(sampleSignalHit()),
         errors: [],
-        warningMessages: [],
+        warnings: [],
       };
 
       const combinedResults = combineConcurrentResults(existingResult, [newResult1, newResult2]);
@@ -511,26 +457,22 @@ describe('utils', () => {
     test('it should combine two results with success set to "true" if both are "true"', () => {
       const existingResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
-        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: undefined,
-        createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
-        warningMessages: [],
+        warnings: [],
       };
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
-        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: undefined,
-        createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
-        warningMessages: [],
+        warnings: [],
       };
       const combinedResults = combineConcurrentResults(existingResult, [newResult]);
       expect(combinedResults.success).toEqual(true);
@@ -539,26 +481,22 @@ describe('utils', () => {
     test('it should combine two results with success set to "false" if one of them is "false"', () => {
       const existingResult: SearchAfterAndBulkCreateReturnType = {
         success: false,
-        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: undefined,
-        createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
-        warningMessages: [],
+        warnings: [],
       };
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
-        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: undefined,
-        createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
-        warningMessages: [],
+        warnings: [],
       };
       const combinedResults = combineConcurrentResults(existingResult, [newResult]);
       expect(combinedResults.success).toEqual(false);
@@ -567,26 +505,22 @@ describe('utils', () => {
     test('it should use the latest date if it is set in the new result', () => {
       const existingResult: SearchAfterAndBulkCreateReturnType = {
         success: false,
-        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: undefined,
-        createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
-        warningMessages: [],
+        warnings: [],
       };
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
-        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'),
-        createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
-        warningMessages: [],
+        warnings: [],
       };
       const combinedResults = combineConcurrentResults(existingResult, [newResult]);
       expect(combinedResults.lastLookBackDate?.toISOString()).toEqual('2020-09-16T03:34:32.390Z');
@@ -595,26 +529,22 @@ describe('utils', () => {
     test('it should combine the searchAfterTimes and the bulkCreateTimes', () => {
       const existingResult: SearchAfterAndBulkCreateReturnType = {
         success: false,
-        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: undefined,
-        createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
-        warningMessages: [],
+        warnings: [],
       };
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
-        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'),
-        createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
-        warningMessages: [],
+        warnings: [],
       };
       const combinedResults = combineConcurrentResults(existingResult, [newResult]);
       expect(combinedResults).toEqual(
@@ -628,26 +558,22 @@ describe('utils', () => {
     test('it should combine errors together without duplicates', () => {
       const existingResult: SearchAfterAndBulkCreateReturnType = {
         success: false,
-        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: undefined,
-        createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: ['error 1', 'error 2', 'error 3'],
-        warningMessages: [],
+        warnings: [],
       };
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
-        warning: false,
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'),
-        createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: ['error 4', 'error 1', 'error 3', 'error 5'],
-        warningMessages: [],
+        warnings: [],
       };
       const combinedResults = combineConcurrentResults(existingResult, [newResult]);
       expect(combinedResults).toEqual(

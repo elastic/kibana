@@ -77,9 +77,8 @@ export const mlExecutor = async ({
         ].join(', ')
       )
     );
-    result.warningMessages.push(warningMessage);
+    result.warnings.push(warningMessage);
     logger.warn(warningMessage);
-    result.warning = true;
   }
 
   const anomalyResults = await findMlSignals({
@@ -107,13 +106,7 @@ export const mlExecutor = async ({
   if (anomalyCount) {
     logger.info(buildRuleMessage(`Found ${anomalyCount} signals from ML anomalies.`));
   }
-  const {
-    success,
-    errors,
-    bulkCreateDuration,
-    createdItemsCount,
-    createdItems,
-  } = await bulkCreateMlSignals({
+  const { success, errors, bulkCreateDuration, createdItems } = await bulkCreateMlSignals({
     someResult: filteredAnomalyResults,
     ruleSO: rule,
     services,
@@ -137,7 +130,6 @@ export const mlExecutor = async ({
     createSearchAfterReturnType({
       success: success && filteredAnomalyResults._shards.failed === 0,
       errors: [...errors, ...searchErrors],
-      createdSignalsCount: createdItemsCount,
       createdSignals: createdItems,
       bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],
     }),

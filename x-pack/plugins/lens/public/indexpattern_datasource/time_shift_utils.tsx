@@ -148,7 +148,7 @@ export function getStateTimeShiftWarningMessages(
   { activeData }: FramePublicAPI
 ) {
   if (!state) return;
-  const warningMessages: React.ReactNode[] = [];
+  const warnings: React.ReactNode[] = [];
   Object.entries(state.layers).forEach(([layerId, layer]) => {
     const dateHistogramInterval = getDateHistogramInterval(
       layer,
@@ -189,7 +189,7 @@ export function getStateTimeShiftWarningMessages(
       if (timeShift === 0) return;
       if (timeShift < shiftInterval) {
         timeShiftMap[timeShift].forEach((columnId) => {
-          warningMessages.push(
+          warnings.push(
             <FormattedMessage
               key={`small-${columnId}`}
               id="xpack.lens.indexPattern.timeShiftSmallWarning"
@@ -204,7 +204,7 @@ export function getStateTimeShiftWarningMessages(
         });
       } else if (!Number.isInteger(timeShift / shiftInterval)) {
         timeShiftMap[timeShift].forEach((columnId) => {
-          warningMessages.push(
+          warnings.push(
             <FormattedMessage
               key={`multiple-${columnId}`}
               id="xpack.lens.indexPattern.timeShiftMultipleWarning"
@@ -220,7 +220,7 @@ export function getStateTimeShiftWarningMessages(
       }
     });
   });
-  return warningMessages;
+  return warnings;
 }
 
 export function getColumnTimeShiftWarnings(

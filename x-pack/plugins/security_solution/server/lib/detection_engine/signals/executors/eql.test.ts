@@ -81,7 +81,7 @@ describe('eql_executor', () => {
         wrapHits: jest.fn(),
         wrapSequences: jest.fn(),
       });
-      expect(response.warningMessages.length).toEqual(1);
+      expect(response.warnings.length).toEqual(1);
     });
   });
 });
