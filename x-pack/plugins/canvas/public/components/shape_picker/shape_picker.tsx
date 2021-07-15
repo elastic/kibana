@@ -18,21 +18,19 @@ interface Props {
   onChange?: (key: string) => void;
 }
 
-export const ShapePicker: FC<Props> = ({ shapes, onChange = () => {} }) => {
-  return (
-    <EuiFlexGrid gutterSize="s" columns={4} className="canvasShapePicker">
-      {Object.keys(shapes)
-        .sort()
-        .map((shapeKey) => (
-          <EuiFlexItem key={shapeKey}>
-            <EuiLink onClick={() => onChange(shapeKey)}>
-              <ShapePreview shape={shapes[shapeKey]} />
-            </EuiLink>
-          </EuiFlexItem>
-        ))}
-    </EuiFlexGrid>
-  );
-};
+export const ShapePicker: FC<Props> = ({ shapes, onChange = () => {} }) => (
+  <EuiFlexGrid gutterSize="s" columns={4} className="canvasShapePicker">
+    {Object.keys(shapes)
+      .sort()
+      .map((shapeKey) => (
+        <EuiFlexItem key={shapeKey}>
+          <EuiLink onClick={() => onChange(shapeKey)}>
+            <ShapePreview shape={shapes[shapeKey]} />
+          </EuiLink>
+        </EuiFlexItem>
+      ))}
+  </EuiFlexGrid>
+);
 
 ShapePicker.propTypes = {
   onChange: PropTypes.func,
