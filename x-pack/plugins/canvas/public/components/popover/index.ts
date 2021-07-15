@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './popover';
+export { Popover, ClosePopoverFn } from './popover';
