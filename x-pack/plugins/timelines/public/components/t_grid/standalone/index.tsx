@@ -284,8 +284,9 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     );
     dispatch(
       tGridActions.initializeTGridSettings({
-        footerText,
         id: STANDALONE_ID,
+        defaultColumns: columns,
+        footerText,
         loadingText,
         unit,
       })

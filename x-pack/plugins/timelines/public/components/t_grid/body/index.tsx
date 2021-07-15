@@ -33,7 +33,8 @@ import { getEventIdToDataMapping } from './helpers';
 import { Sort } from './sort';
 
 import { EventsTable, TimelineBody, TimelineBodyGlobalStyle } from '../styles';
-import { ColumnHeadersDummy } from './column_headers';
+import { ColumnHeaders } from './column_headers';
+import { TimelineToolbar } from '../toolbar';
 import { Events } from './events';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
 import { BrowserFields } from '../../../../common/search_strategy/index_fields';
@@ -230,7 +231,13 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
             $rowCount={data.length}
             $totalPages={totalPages}
           >
-            <ColumnHeadersDummy
+            <TimelineToolbar
+              browserFields={browserFields}
+              columnHeaders={columnHeaders}
+              timelineId={id}
+            />
+
+            <ColumnHeaders
               actionsColumnWidth={actionsColumnWidth}
               browserFields={browserFields}
               columnHeaders={columnHeaders}

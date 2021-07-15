@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import { get, getOr, isEmpty, uniqBy } from 'lodash/fp';
-import type {
-  BrowserField,
-  BrowserFields,
-} from '../../../../../common/search_strategy/index_fields';
+import { get } from 'lodash/fp';
+import type { BrowserFields } from '../../../../../common/search_strategy/index_fields';
 import type { ColumnHeaderOptions } from '../../../../../common/types/timeline';
 
 import {
@@ -58,76 +55,4 @@ export const getActionsColumnWidth = (
   return actionsColumnWidth > MINIMUM_ACTIONS_COLUMN_WIDTH + checkboxesWidth
     ? actionsColumnWidth
     : MINIMUM_ACTIONS_COLUMN_WIDTH + checkboxesWidth;
-};
-
-/**
- * Returns a collection of columns, where the first column in the collection
- * is a timestamp, and the remaining columns are all the columns in the
- * specified category
- */
-export const getColumnsWithTimestamp = ({
-  browserFields,
-  category,
-}: {
-  browserFields: BrowserFields;
-  category: string;
-}): ColumnHeaderOptions[] => {
-  const emptyFields: Record<string, Partial<BrowserField>> = {};
-  const timestamp = get('base.fields.@timestamp', browserFields);
-  const categoryFields: Array<Partial<BrowserField>> = [
-    ...Object.values(getOr(emptyFields, `${category}.fields`, browserFields)),
-  ];
-
-  return timestamp != null && categoryFields.length
-    ? uniqBy('id', [
-        getColumnHeaderFromBrowserField({
-          browserField: timestamp,
-          width: DEFAULT_DATE_COLUMN_MIN_WIDTH,
-        }),
-        ...categoryFields.map((f) => getColumnHeaderFromBrowserField({ browserField: f })),
-      ])
-    : [];
-};
-
-export const getColumnHeaderFromBrowserField = ({
-  browserField,
-  width = DEFAULT_COLUMN_MIN_WIDTH,
-}: {
-  browserField: Partial<BrowserField>;
-  width?: number;
-}): ColumnHeaderOptions => ({
-  category: browserField.category,
-  columnHeaderType: 'not-filtered',
-  description: browserField.description != null ? browserField.description : undefined,
-  example: browserField.example != null ? `${browserField.example}` : undefined,
-  id: browserField.name || '',
-  type: browserField.type,
-  aggregatable: browserField.aggregatable,
-  initialWidth: width,
-});
-
-/** Returns example text, or an empty string if the field does not have an example */
-export const getExampleText = (example: string | number | null | undefined): string =>
-  !isEmpty(example) ? `Example: ${example}` : '';
-
-export const getIconFromType = (type: string | null) => {
-  switch (type) {
-    case 'string': // fall through
-    case 'keyword':
-      return 'string';
-    case 'number': // fall through
-    case 'long':
-      return 'number';
-    case 'date':
-      return 'clock';
-    case 'ip':
-    case 'geo_point':
-      return 'globe';
-    case 'object':
-      return 'questionInCircle';
-    case 'float':
-      return 'number';
-    default:
-      return 'questionInCircle';
-  }
 };
