@@ -245,7 +245,7 @@ paths:
                   list:
                     type: array
                     items:
-                      $ref: '#/components/schemas/agent_policy'
+                      $ref: '#/components/schemas/agent'
                   total:
                     type: number
                   page:
@@ -980,6 +980,70 @@ components:
           required:
             - id
             - status
+    agent_type:
+      type: string
+      title: AgentType
+      enum:
+        - PERMANENT
+        - EPHEMERAL
+        - TEMPORARY
+    agent_metadata:
+      title: AgentMetadata
+      type: object
+    agent_status:
+      type: string
+      title: AgentStatus
+      enum:
+        - offline
+        - error
+        - online
+        - inactive
+        - warning
+    agent:
+      title: Agent
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/agent_type'
+        active:
+          type: boolean
+        enrolled_at:
+          type: string
+        unenrolled_at:
+          type: string
+        unenrollment_started_at:
+          type: string
+        shared_id:
+          type: string
+          deprecated: true
+        access_api_key_id:
+          type: string
+        default_api_key_id:
+          type: string
+        policy_id:
+          type: string
+        policy_revision:
+          type: number
+        last_checkin:
+          type: string
+        user_provided_metadata:
+          $ref: '#/components/schemas/agent_metadata'
+        local_metadata:
+          $ref: '#/components/schemas/agent_metadata'
+        id:
+          type: string
+        access_api_key:
+          type: string
+        status:
+          $ref: '#/components/schemas/agent_status'
+        default_api_key:
+          type: string
+      required:
+        - type
+        - active
+        - enrolled_at
+        - id
+        - status
     upgrade_agent:
       title: UpgradeAgent
       oneOf:
@@ -1212,70 +1276,6 @@ components:
         - format_version
         - download
         - path
-    agent_type:
-      type: string
-      title: AgentType
-      enum:
-        - PERMANENT
-        - EPHEMERAL
-        - TEMPORARY
-    agent_metadata:
-      title: AgentMetadata
-      type: object
-    agent_status:
-      type: string
-      title: AgentStatus
-      enum:
-        - offline
-        - error
-        - online
-        - inactive
-        - warning
-    agent:
-      title: Agent
-      type: object
-      properties:
-        type:
-          $ref: '#/components/schemas/agent_type'
-        active:
-          type: boolean
-        enrolled_at:
-          type: string
-        unenrolled_at:
-          type: string
-        unenrollment_started_at:
-          type: string
-        shared_id:
-          type: string
-          deprecated: true
-        access_api_key_id:
-          type: string
-        default_api_key_id:
-          type: string
-        policy_id:
-          type: string
-        policy_revision:
-          type: number
-        last_checkin:
-          type: string
-        user_provided_metadata:
-          $ref: '#/components/schemas/agent_metadata'
-        local_metadata:
-          $ref: '#/components/schemas/agent_metadata'
-        id:
-          type: string
-        access_api_key:
-          type: string
-        status:
-          $ref: '#/components/schemas/agent_status'
-        default_api_key:
-          type: string
-      required:
-        - type
-        - active
-        - enrolled_at
-        - id
-        - status
     update_package_policy:
       title: UpdatePackagePolicy
       allOf:
