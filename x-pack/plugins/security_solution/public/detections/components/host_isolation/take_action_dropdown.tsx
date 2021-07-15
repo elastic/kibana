@@ -7,18 +7,33 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { EuiContextMenuItem, EuiContextMenuPanel, EuiButton, EuiPopover } from '@elastic/eui';
-import { ISOLATE_HOST, UNISOLATE_HOST } from './translations';
+import { INVESTIGATE_IN_TIMELINE, ISOLATE_HOST, UNISOLATE_HOST } from './translations';
 import { TAKE_ACTION } from '../alerts_table/alerts_utility_bar/translations';
 import { useHostIsolationStatus } from '../../containers/detection_engine/alerts/use_host_isolation_status';
 import { HostStatus } from '../../../../common/endpoint/types';
+import { InvestigateInTimelineAction } from '../alerts_table/timeline_actions/investigate_in_timeline_action';
+import { Ecs } from '../../../../common/ecs';
+import { getEventType } from '../../../timelines/components/timeline/body/helpers';
 
 export const TakeActionDropdown = React.memo(
   ({
     onChange,
     agentId,
+    ecsData,
+    isAlert,
+    isIsolationAllowed,
+    isEndpointAlert,
+    isolationSupported,
+    isHostIsolationPanelOpen,
   }: {
     onChange: (action: 'isolateHost' | 'unisolateHost') => void;
     agentId: string;
+    ecsData: Ecs;
+    isAlert: boolean;
+    isIsolationAllowed: boolean;
+    isEndpointAlert: boolean;
+    isolationSupported: boolean;
+    isHostIsolationPanelOpen: boolean;
   }) => {
     const { loading, isIsolated: isolationStatus, agentStatus } = useHostIsolationStatus({
       agentId,
@@ -44,7 +59,7 @@ export const TakeActionDropdown = React.memo(
           iconSide="right"
           fill
           iconType="arrowDown"
-          disabled={loading || agentStatus === HostStatus.UNENROLLED}
+          // disabled={loading || agentStatus === HostStatus.UNENROLLED}
           onClick={() => {
             setIsPopoverOpen(!isPopoverOpen);
           }}
@@ -52,7 +67,11 @@ export const TakeActionDropdown = React.memo(
           {TAKE_ACTION}
         </EuiButton>
       );
-    }, [isPopoverOpen, loading, agentStatus]);
+    }, [isPopoverOpen]);
+
+    const isolateHostKey = isolationStatus === false ? 'isolateHost' : 'unisolateHost';
+    const isolateHostTitle = isolationStatus === false ? ISOLATE_HOST : UNISOLATE_HOST;
+    const eventType = getEventType(ecsData);
 
     return (
       <EuiPopover
@@ -64,13 +83,28 @@ export const TakeActionDropdown = React.memo(
         anchorPosition="downLeft"
       >
         <EuiContextMenuPanel size="s">
-          {isolationStatus === false ? (
-            <EuiContextMenuItem key="isolateHost" onClick={isolateHostHandler}>
-              {ISOLATE_HOST}
-            </EuiContextMenuItem>
-          ) : (
-            <EuiContextMenuItem key="unisolateHost" onClick={isolateHostHandler}>
-              {UNISOLATE_HOST}
+          {isIsolationAllowed &&
+            isEndpointAlert &&
+            isolationSupported &&
+            isHostIsolationPanelOpen === false && (
+              <EuiContextMenuItem
+                key={isolateHostKey}
+                onClick={isolateHostHandler}
+                disabled={loading || agentStatus === HostStatus.UNENROLLED}
+              >
+                {isolateHostTitle}
+              </EuiContextMenuItem>
+            )}
+
+          {eventType === 'signal' && (
+            <EuiContextMenuItem key="take-action-inspect">
+              <InvestigateInTimelineAction
+                ariaLabel={INVESTIGATE_IN_TIMELINE}
+                key="investigate-in-timeline-from-flyout"
+                ecsRowData={ecsData}
+                nonEcsRowData={[]}
+                type="text"
+              />
             </EuiContextMenuItem>
           )}
         </EuiContextMenuPanel>

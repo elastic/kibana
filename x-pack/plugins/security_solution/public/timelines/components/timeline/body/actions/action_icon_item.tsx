@@ -6,7 +6,7 @@
  */
 
 import React, { MouseEvent } from 'react';
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
 import { EventsTdContent } from '../../styles';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
@@ -20,6 +20,7 @@ interface ActionIconItemProps {
   isDisabled?: boolean;
   onClick?: (event: MouseEvent) => void;
   children?: React.ReactNode;
+  type?: 'text' | 'icon';
 }
 
 const ActionIconItemComponent: React.FC<ActionIconItemProps> = ({
@@ -31,22 +32,38 @@ const ActionIconItemComponent: React.FC<ActionIconItemProps> = ({
   isDisabled = false,
   onClick,
   children,
+  type = 'icon',
 }) => (
-  <div>
-    <EventsTdContent textAlign="center" width={width}>
-      {children ?? (
-        <EuiToolTip data-test-subj={`${dataTestSubj}-tool-tip`} content={content}>
-          <EuiButtonIcon
-            aria-label={ariaLabel}
-            data-test-subj={`${dataTestSubj}-button`}
-            iconType={iconType}
-            isDisabled={isDisabled}
-            onClick={onClick}
-          />
-        </EuiToolTip>
-      )}
-    </EventsTdContent>
-  </div>
+  <>
+    {type === 'icon' && iconType && (
+      <div>
+        <EventsTdContent textAlign="center" width={width}>
+          {children ?? (
+            <EuiToolTip data-test-subj={`${dataTestSubj}-tool-tip`} content={content}>
+              <EuiButtonIcon
+                aria-label={ariaLabel}
+                data-test-subj={`${dataTestSubj}-button`}
+                iconType={iconType}
+                isDisabled={isDisabled}
+                onClick={onClick}
+              />
+            </EuiToolTip>
+          )}
+        </EventsTdContent>
+      </div>
+    )}
+    {(type === 'text' || !iconType) && (
+      <EuiButtonEmpty
+        aria-label={ariaLabel}
+        data-test-subj={`${dataTestSubj}-button`}
+        isDisabled={isDisabled}
+        onClick={onClick}
+        color="text"
+      >
+        {content}
+      </EuiButtonEmpty>
+    )}
+  </>
 );
 
 ActionIconItemComponent.displayName = 'ActionIconItemComponent';

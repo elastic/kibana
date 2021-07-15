@@ -469,6 +469,7 @@ export type TimelineExpandedEventType =
       params?: {
         eventId: string;
         indexName: string;
+        ecsData: Ecs;
       };
     }
   | EmptyObject;

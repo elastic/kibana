@@ -179,12 +179,14 @@ const StatefulEventComponent: React.FC<Props> = ({
   const handleOnEventDetailPanelOpened = useCallback(() => {
     const eventId = event._id;
     const indexName = event._index!;
+    const ecsData = event.ecs;
 
     const updatedExpandedDetail: TimelineExpandedDetailType = {
       panelView: 'eventDetail',
       params: {
         eventId,
         indexName,
+        ecsData,
       },
     };
 
@@ -199,7 +201,7 @@ const StatefulEventComponent: React.FC<Props> = ({
     if (timelineId === TimelineId.active && tabType === TimelineTabs.query) {
       activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
     }
-  }, [dispatch, event._id, event._index, tabType, timelineId]);
+  }, [dispatch, event._id, event._index, event.ecs, tabType, timelineId]);
 
   const associateNote = useCallback(
     (noteId: string) => {

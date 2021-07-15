@@ -37,6 +37,7 @@ import { isIsolationSupported } from '../../../../../common/endpoint/service/hos
 import { endpointAlertCheck } from '../../../../common/utils/endpoint_alert_check';
 import { useWithCaseDetailsRefresh } from '../../../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
 import { TimelineEventsDetailsItem } from '../../../../../common';
+import { Ecs } from '../../../../../common/ecs';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
@@ -69,7 +70,7 @@ const getFieldValue = (
 interface EventDetailsPanelProps {
   browserFields: BrowserFields;
   docValueFields: DocValueFields[];
-  expandedEvent: { eventId: string; indexName: string };
+  expandedEvent: { eventId: string; indexName: string; ecsData: Ecs };
   handleOnEventClosed: () => void;
   isFlyoutView?: boolean;
   tabType: TimelineTabs;
@@ -225,18 +226,28 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
           />
         )}
       </StyledEuiFlyoutBody>
-      {isIsolationAllowed &&
+      {
+        /* isIsolationAllowed &&
         isEndpointAlert &&
         isolationSupported &&
-        isHostIsolationPanelOpen === false && (
-          <EuiFlyoutFooter>
-            <EuiFlexGroup justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                <TakeActionDropdown onChange={showHostIsolationPanel} agentId={agentId} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutFooter>
-        )}
+        isHostIsolationPanelOpen === false && */
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <TakeActionDropdown
+                ecsData={expandedEvent.ecsData}
+                isAlert={isAlert}
+                isIsolationAllowed={isIsolationAllowed}
+                isEndpointAlert={isEndpointAlert}
+                isolationSupported={isolationSupported}
+                isHostIsolationPanelOpen={isHostIsolationPanelOpen}
+                onChange={showHostIsolationPanel}
+                agentId={agentId}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      }
     </>
   ) : (
     <>

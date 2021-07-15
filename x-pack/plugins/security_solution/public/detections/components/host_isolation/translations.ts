@@ -21,6 +21,13 @@ export const UNISOLATE_HOST = i18n.translate(
   }
 );
 
+export const INVESTIGATE_IN_TIMELINE = i18n.translate(
+  'xpack.securitySolution.endpoint.hostIsolation.investigateInTimeline',
+  {
+    defaultMessage: 'investigate in timeline',
+  }
+);
+
 export const CASES_ASSOCIATED_WITH_ALERT = (caseCount: number): string =>
   i18n.translate(
     'xpack.securitySolution.endpoint.hostIsolation.isolateHost.casesAssociatedWithAlert',
