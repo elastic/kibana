@@ -48,7 +48,7 @@ describe('Class Report', () => {
       index: '.reporting-test-index-12345',
       jobtype: 'test-report',
       max_attempts: 50,
-      payload: { headers: 'payload_test_field', objectType: 'testOt' },
+      payload: { objectType: 'testOt' },
       meta: { objectType: 'test' },
       status: 'pending',
       timeout: 30000,
@@ -109,7 +109,7 @@ describe('Class Report', () => {
       jobtype: 'test-report',
       max_attempts: 50,
       meta: { objectType: 'stange' },
-      payload: { headers: 'payload_test_field', objectType: 'testOt' },
+      payload: { objectType: 'testOt' },
       started_at: undefined,
       status: 'pending',
       timeout: 30000,
@@ -117,7 +117,7 @@ describe('Class Report', () => {
   });
 
   it('throws error if converted to task JSON before being synced with ES storage', () => {
-    const report = new Report({} as any);
+    const report = new Report({ jobtype: 'spam', payload: {} } as any);
     expect(() => report.updateWithEsDoc(report)).toThrowErrorMatchingInlineSnapshot(
       `"Report object from ES has missing fields!"`
     );
