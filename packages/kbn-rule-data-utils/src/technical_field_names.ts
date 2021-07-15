@@ -8,9 +8,7 @@
 
 import { ValuesType } from 'utility-types';
 
-const KIBANA_NAMESPACE = 'kibana';
-
-const ALERT_NAMESPACE = `${KIBANA_NAMESPACE}.rac.alert`;
+const ALERT_NAMESPACE = 'kibana.rac.alert' as const;
 
 const TIMESTAMP = '@timestamp' as const;
 const EVENT_KIND = 'event.kind' as const;
@@ -30,7 +28,7 @@ const ALERT_DURATION = `${ALERT_NAMESPACE}.duration.us` as const;
 const ALERT_SEVERITY_LEVEL = `${ALERT_NAMESPACE}.severity.level` as const;
 const ALERT_SEVERITY_VALUE = `${ALERT_NAMESPACE}.severity.value` as const;
 const ALERT_STATUS = `${ALERT_NAMESPACE}.status` as const;
-const SPACE_IDS = `${KIBANA_NAMESPACE}.space_ids` as const;
+const SPACE_IDS = 'kibana.space_ids' as const;
 const ALERT_EVALUATION_THRESHOLD = `${ALERT_NAMESPACE}.evaluation.threshold` as const;
 const ALERT_EVALUATION_VALUE = `${ALERT_NAMESPACE}.evaluation.value` as const;
 
