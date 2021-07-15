@@ -16,10 +16,7 @@ describe('ServiceNodeMetrics', () => {
       expect(() =>
         shallow(
           <MockApmPluginContextWrapper>
-            <ServiceNodeMetrics
-              serviceName="my-service"
-              serviceNodeName="node-name"
-            />
+            <ServiceNodeMetrics />
           </MockApmPluginContextWrapper>
         )
       ).not.toThrowError();

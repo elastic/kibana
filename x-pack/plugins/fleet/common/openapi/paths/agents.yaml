@@ -12,7 +12,7 @@ get:
               list:
                 type: array
                 items:
-                  type: object
+                  $ref: ../components/schemas/agent.yaml
               total:
                 type: number
               page:

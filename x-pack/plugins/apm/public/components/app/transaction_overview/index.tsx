@@ -49,14 +49,10 @@ function getRedirectLocation({
   }
 }
 
-interface TransactionOverviewProps {
-  serviceName: string;
-}
-
-export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
+export function TransactionOverview() {
   const location = useLocation();
   const { urlParams } = useUrlParams();
-  const { transactionType } = useApmServiceContext();
+  const { transactionType, serviceName } = useApmServiceContext();
 
   // redirect to first transaction type
   useRedirect(getRedirectLocation({ location, transactionType, urlParams }));
