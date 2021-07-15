@@ -29,7 +29,7 @@ export const SelectedFilters = ({ onChange }: Props) => {
                 removeFilter={() => {
                   onChange(
                     field,
-                    selected.filter((valT) => valT !== value)
+                    selectedItems.filter((valT) => valT !== value)
                   );
                 }}
                 invertFilter={(val) => {}}

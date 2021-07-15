@@ -44,18 +44,18 @@ export const FilterGroup = () => {
     <>
       <Container>
         {indexPattern &&
-          filtersList.map(({ fieldName, label, selectedItems }) => (
+          filtersList.map(({ field, label, selectedItems }) => (
             <FieldValueSuggestions
-              key={fieldName}
+              key={field}
               compressed={false}
               indexPatternTitle={indexPattern.title}
-              sourceField={fieldName}
+              sourceField={field}
               label={label}
               selectedValue={selectedItems}
-              onChange={(values) => onFilterFieldChange(fieldName, values)}
+              onChange={(values) => onFilterFieldChange(field, values)}
               asCombobox={false}
               asFilterButton={true}
-              forceOpen={isOpen === fieldName}
+              forceOpen={isOpen === field}
               setForceOpen={() => {
                 setIsOpen('');
               }}

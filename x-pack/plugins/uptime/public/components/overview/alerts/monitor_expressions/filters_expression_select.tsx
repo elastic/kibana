@@ -11,6 +11,7 @@ import { filterLabels } from '../../filter_group/translations';
 import { alertFilterLabels, filterAriaLabels } from './translations';
 import { FieldValueSuggestions } from '../../../../../../observability/public';
 import { useIndexPattern } from '../../../../contexts/uptime_index_pattern_context';
+import { FILTER_FIELDS } from '../../../../../common/constants';
 
 export interface FilterExpressionsSelectProps {
   alertParams: { [key: string]: any };
@@ -20,6 +21,8 @@ export interface FilterExpressionsSelectProps {
   shouldUpdateUrl: boolean;
 }
 
+const { TYPE, TAGS, LOCATION, PORT } = FILTER_FIELDS;
+
 export const FiltersExpressionsSelect: React.FC<FilterExpressionsSelectProps> = ({
   alertParams,
   newFilters,
@@ -28,12 +31,12 @@ export const FiltersExpressionsSelect: React.FC<FilterExpressionsSelectProps> = 
 }) => {
   const alertFilters = alertParams?.filters;
 
-  const selectedPorts = alertFilters?.['url.port'] ?? [];
-  const selectedLocations = alertFilters?.['observer.geo.name'] ?? [];
-  const selectedSchemes = alertFilters?.['monitor.type'] ?? [];
-  const selectedTags = alertFilters?.tags ?? [];
+  const selectedPorts = alertFilters?.[PORT] ?? [];
+  const selectedLocations = alertFilters?.[LOCATION] ?? [];
+  const selectedSchemes = alertFilters?.[TYPE] ?? [];
+  const selectedTags = alertFilters?.[TAGS] ?? [];
 
-  const onFilterFieldChange = (fieldName: string, values: string[]) => {
+  const onFilterFieldChange = (fieldName: string, values?: string[]) => {
     // the `filters` field is no longer a string
     if (alertParams.filters && typeof alertParams.filters !== 'string') {
       setAlertParams('filters', { ...alertParams.filters, [fieldName]: values });
@@ -43,12 +46,12 @@ export const FiltersExpressionsSelect: React.FC<FilterExpressionsSelectProps> = 
         Object.assign(
           {},
           {
-            tags: [],
-            'url.port': [],
-            'observer.geo.name': [],
-            'monitor.type': [],
+            [TAGS]: [],
+            [PORT]: [],
+            [LOCATION]: [],
+            [TYPE]: [],
           },
-          { [fieldName]: values }
+          { [fieldName]: values ?? [] }
         )
       );
     }
@@ -150,6 +153,7 @@ export const FiltersExpressionsSelect: React.FC<FilterExpressionsSelectProps> = 
                     setIsOpen({ ...isOpen, [id]: !isOpen[id] });
                   }}
                   asCombobox={false}
+                  allowExclusions={false}
                 />
               )}
             </EuiFlexItem>

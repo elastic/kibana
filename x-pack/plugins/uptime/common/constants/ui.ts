@@ -67,3 +67,10 @@ export enum CERT_STATUS {
 }
 
 export const KQL_SYNTAX_LOCAL_STORAGE = 'xpack.uptime.kql.syntax';
+
+export const FILTER_FIELDS = {
+  TAGS: 'tags',
+  PORT: 'url.port',
+  LOCATION: 'observer.geo.name',
+  TYPE: 'monitor.type',
+};

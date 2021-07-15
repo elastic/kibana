@@ -30,6 +30,7 @@ export function FieldValueSuggestions({
   asFilterButton,
   allowAllValuesSelection,
   isSyntheticsData,
+  allowExclusions,
   asCombobox = true,
   onChange: onSelectionChange,
 }: FieldValueSuggestionsProps) {
@@ -67,6 +68,7 @@ export function FieldValueSuggestions({
       compressed={compressed}
       asFilterButton={asFilterButton}
       allowAllValuesSelection={allowAllValuesSelection}
+      allowExclusions={allowExclusions}
     />
   );
 }

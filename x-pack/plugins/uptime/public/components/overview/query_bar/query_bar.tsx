@@ -11,8 +11,7 @@ import { EuiFlexItem } from '@elastic/eui';
 import { QueryStringInput } from '../../../../../../../src/plugins/data/public/';
 import { SyntaxType, useQueryBar } from './use_query_bar';
 import { KQL_PLACE_HOLDER, SIMPLE_SEARCH_PLACEHOLDER } from './translations';
-import { useGetUrlParams } from '../../../hooks';
-import { useIndexPattern } from '../../../contexts';
+import { useGetUrlParams, useIndexPattern } from '../../../hooks';
 
 const SYNTAX_STORAGE = 'uptime:queryBarSyntax';
 
