@@ -17,10 +17,8 @@ const resolveRoot = resolve.bind(null, REPO_ROOT);
 
 type BaseArchivePath = string;
 
-const prokSync = (script) => (opts) => {
-  const merged = [script, ...opts];
-  spawnSync(process.execPath, merged);
-};
+const prokSync = (script: string) => (opts: string[]) =>
+  spawnSync(process.execPath, [script, ...opts]);
 
 const esArchiver = resolveRoot('scripts/es_archiver.js');
 const kbnArchiver = resolveRoot('scripts/kbn_archiver.js');
@@ -33,7 +31,9 @@ const kbnArchiveFixturesDir = resolveRoot('x-pack/test/functional/fixtures/kbn_a
 
 const computeKbnArchiveName = computeName(kbnArchiveFixturesDir);
 
-const joinedSoTypes = process.env.SO_TYPES || join2Str(['index-pattern', 'lens', 'canvas-workpad']);
+const joinedSoTypes =
+  process.env.SO_TYPES ||
+  join2Str(['dashboard', 'visualization', 'index-pattern', 'lens', 'canvas-workpad']);
 
 const loadAndSave = (log: ToolingLog) => (esArchiveName: string) => {
   log.info(`${acMark} processing: \n\t[${esArchiveName}]`);
@@ -61,7 +61,7 @@ const validate = (archiveRoot: BaseArchivePath) => (log: ToolingLog) => {
   // archiveRoot = 'fake'
   log.info('Creeping through', archiveRoot);
 
-  const logNotFound = log.error.bind(log, `Not found: [${archiveRoot}]`);
+  const logNotFound = log.error.bind(log, `${acMark} Not found: [${archiveRoot}]`);
 
   const creepWithLog = creepThru(log);
   pathExists(archiveRoot).fold(logNotFound, creepWithLog);
