@@ -5,8 +5,12 @@
  * 2.0.
  */
 
+/* eslint-disable @kbn/eslint/no-restricted-paths */
+import { rawRules } from '../../server/lib/detection_engine/rules/prepackaged_rules/index';
 import { getMockThreatData } from '../../public/detections/mitre/mitre_tactics_techniques';
 import { getTimeline, CompleteTimeline, getIndicatorMatchTimelineTemplate } from './timeline';
+
+export const totalNumberOfPrebuiltRules = rawRules.length;
 
 const ccsRemoteName: string = Cypress.env('CCS_REMOTE_NAME');
 
