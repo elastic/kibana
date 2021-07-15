@@ -100,8 +100,6 @@ export const handleRequest = async ({
   requestSearchSource.setField('filter', filters);
   requestSearchSource.setField('query', query);
 
-  inspectorAdapters.requests?.reset();
-
   const { rawResponse: response } = await requestSearchSource
     .fetch$({
       abortSignal,

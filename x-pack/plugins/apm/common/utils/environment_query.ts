@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import { ESFilter } from '../../../../../src/core/types/elasticsearch';
-import { SERVICE_ENVIRONMENT } from '../../common/elasticsearch_fieldnames';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { SERVICE_ENVIRONMENT } from '../elasticsearch_fieldnames';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
-} from '../../common/environment_filter_values';
-export { kqlQuery, rangeQuery } from '../../../observability/server';
-
-type QueryDslQueryContainer = ESFilter;
+} from '../environment_filter_values';
 
 export function environmentQuery(
   environment?: string
