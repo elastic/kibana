@@ -23,6 +23,14 @@ import type { SearchServiceParams } from '../../../../common/search_strategies/c
 
 import { getQueryWithParams } from './get_query_with_params';
 
+const getHistogramRangeSteps = (min: number, max: number, steps: number) => {
+  // A d3 based scale function as a helper to get equally distributed bins on a log scale.
+  const logFn = scaleLog().domain([min, max]).range([1, steps]);
+  return [...Array(steps).keys()]
+    .map(logFn.invert)
+    .map((d) => (isNaN(d) ? 0 : d));
+};
+
 export const getHistogramIntervalRequest = (
   params: SearchServiceParams
 ): estypes.SearchRequest => ({
@@ -37,19 +45,24 @@ export const getHistogramIntervalRequest = (
   },
 });
 
-export const fetchTransactionDurationHistogramRangesteps = async (
+export const fetchTransactionDurationHistogramRangeSteps = async (
   esClient: ElasticsearchClient,
   params: SearchServiceParams
 ): Promise<number[]> => {
+  const steps = 100;
+
   const resp = await esClient.search(getHistogramIntervalRequest(params));
+
+  if ((resp.body.hits.total as estypes.SearchTotalHits).value === 0) {
+    return getHistogramRangeSteps(0, 1, 100);
+  }
 
   if (resp.body.aggregations === undefined) {
     throw new Error(
-      'fetchTransactionDurationHistogramInterval failed, did not return aggregations.'
+      'fetchTransactionDurationHistogramRangeSteps failed, did not return aggregations.'
     );
   }
 
-  const steps = 100;
   const min = (resp.body.aggregations
     .transaction_duration_min as estypes.AggregationsValueAggregate).value;
   const max =
@@ -57,9 +70,5 @@ export const fetchTransactionDurationHistogramRangesteps = async (
       .transaction_duration_max as estypes.AggregationsValueAggregate).value *
     2;
 
-  // A d3 based scale function as a helper to get equally distributed bins on a log scale.
-  const logFn = scaleLog().domain([min, max]).range([1, steps]);
-  return [...Array(steps).keys()]
-    .map(logFn.invert)
-    .map((d) => (isNaN(d) ? 0 : d));
+  return getHistogramRangeSteps(min, max, steps);
 };
