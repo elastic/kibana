@@ -7,7 +7,6 @@
 
 export * from './monitor';
 export * from './monitor_list';
-export * from './overview_filters';
 export * from './snapshot';
 export * from './monitor_status';
 export * from './dynamic_settings';
