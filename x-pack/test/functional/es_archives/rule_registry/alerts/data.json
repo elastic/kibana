@@ -9,7 +9,7 @@
       "message": "hello world 1",
       "kibana.rac.alert.owner": "apm",
       "kibana.rac.alert.status": "open",
-      "kibana.rac.alert.space_ids": ["space1", "space2"]
+      "kibana.space_ids": ["space1", "space2"]
     }
   }
 }
@@ -25,7 +25,7 @@
       "message": "hello world 1",
       "kibana.rac.alert.owner": "apm",
       "kibana.rac.alert.status": "open",
-      "kibana.rac.alert.space_ids": ["space1"]
+      "kibana.space_ids": ["space1"]
     }
   }
 }
@@ -41,7 +41,7 @@
       "message": "hello world 1",
       "kibana.rac.alert.owner": "apm",
       "kibana.rac.alert.status": "open",
-      "kibana.rac.alert.space_ids": ["space2"]
+      "kibana.space_ids": ["space2"]
     }
   }
 }
@@ -57,7 +57,7 @@
       "message": "hello world security",
       "kibana.rac.alert.owner": "siem",
       "kibana.rac.alert.status": "open",
-      "kibana.rac.alert.space_ids": ["space1", "space2"]
+      "kibana.space_ids": ["space1", "space2"]
     }
   }
 }
