@@ -25,7 +25,7 @@ describe('KibanaExecutionContext', () => {
       };
 
       const value = new ExecutionContextContainer(context).toString();
-      expect(value).toMatchInlineSnapshot(`"1234-5678;kibana:test-type:42"`);
+      expect(value).toMatchInlineSnapshot(`"1234-5678;kibana:test-type:test-name:42"`);
     });
 
     it('returns a limited representation if optional properties are omitted', () => {
@@ -45,9 +45,7 @@ describe('KibanaExecutionContext', () => {
       };
 
       const value = new ExecutionContextContainer(context).toString();
-      expect(value).toMatchInlineSnapshot(
-        `"1234-5678;kibana:test-type:Visualization%E2%98%BA%E6%BC%A2%E5%AD%97"`
-      );
+      expect(value).toMatchInlineSnapshot(`"1234-5678"`);
     });
 
     it('trims a string representation of provided execution context if it is bigger max allowed size', () => {

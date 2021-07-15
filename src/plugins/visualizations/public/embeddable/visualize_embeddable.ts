@@ -392,9 +392,9 @@ export class VisualizeEmbeddable
       uiState: this.vis.uiState,
       inspectorAdapters: this.inspectorAdapters,
       executionContext: this.deps.start().core.executionContext.create({
-        type: this.vis.params.type,
+        type: 'visualization',
         name: this.vis.type.name,
-        id: this.vis.id ?? 'unknown_id',
+        id: this.vis.id ?? 'an_unsaved_vis',
         description: this.vis.title ?? this.vis.type.title,
         url: this.output.editUrl,
       }),

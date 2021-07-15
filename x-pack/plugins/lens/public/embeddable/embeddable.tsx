@@ -326,7 +326,7 @@ export class Embeddable
       this.input.onLoad(true);
     }
     const executionContext = this.deps.executionContext.create({
-      type: this.savedVis.type ?? 'lens',
+      type: 'lens',
       name: this.savedVis.visualizationType ?? '',
       description: this.savedVis.title ?? this.savedVis.description ?? '',
       id: this.id,
