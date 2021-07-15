@@ -118,6 +118,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
         setGlobalState('time', {
           from: start,
           to: end,
+          ...(start === 'now' || end === 'now' ? { ts: Date.now() } : {}),
         });
       }
     }
@@ -145,7 +146,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
         setBounds(timefilterBounds);
       }
     }
-  }, [lastRefresh, globalState?.time?.from, globalState?.time?.to]);
+  }, [globalState?.time?.from, globalState?.time?.to, globalState?.time?.ts]);
 
   const selectedJobIds = globalState?.ml?.jobIds;
   // Sort selectedJobIds so we can be sure comparison works when stringifying.
