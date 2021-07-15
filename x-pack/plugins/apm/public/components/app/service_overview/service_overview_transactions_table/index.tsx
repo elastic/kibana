@@ -25,10 +25,6 @@ import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time
 import { ServiceOverviewTableContainer } from '../service_overview_table_container';
 import { getColumns } from './get_columns';
 
-interface Props {
-  serviceName: string;
-}
-
 type ApiResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics'>;
 const INITIAL_STATE = {
   transactionGroups: [] as ApiResponse['transactionGroups'],
@@ -45,7 +41,7 @@ const DEFAULT_SORT = {
   field: 'impact' as const,
 };
 
-export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
+export function ServiceOverviewTransactionsTable() {
   const [tableOptions, setTableOptions] = useState<{
     pageIndex: number;
     sort: {
@@ -60,7 +56,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
   const { pageIndex, sort } = tableOptions;
   const { direction, field } = sort;
 
-  const { transactionType } = useApmServiceContext();
+  const { transactionType, serviceName } = useApmServiceContext();
   const {
     urlParams: {
       start,
