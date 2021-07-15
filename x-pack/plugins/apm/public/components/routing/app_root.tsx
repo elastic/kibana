@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ApmRoute } from '@elastic/apm-rum-react';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import React from 'react';
-import { Route, RouteComponentProps, Router, Switch } from 'react-router-dom';
+import { Route } from 'react-router-dom';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
 import { APP_WRAPPER_CLASS } from '../../../../../../src/core/public';
 import {
@@ -25,13 +25,13 @@ import {
   ApmPluginContextValue,
 } from '../../context/apm_plugin/apm_plugin_context';
 import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
+import { BreadcrumbsContextProvider } from '../../context/breadcrumbs/context';
 import { LicenseProvider } from '../../context/license/license_context';
 import { UrlParamsProvider } from '../../context/url_params_context/url_params_context';
-import { useApmBreadcrumbs } from '../../hooks/use_apm_breadcrumbs';
 import { ApmPluginStartDeps } from '../../plugin';
 import { ApmHeaderActionMenu } from '../shared/apm_header_action_menu';
-import { apmRouteConfig } from './apm_route_config';
-import { TelemetryWrapper } from './telemetry_wrapper';
+import { apmRouter } from './apm_route_config';
+import { TrackPageview } from './track_pageview';
 
 export function ApmAppRoot({
   apmPluginContextValue,
@@ -54,33 +54,24 @@ export function ApmAppRoot({
       <ApmPluginContext.Provider value={apmPluginContextValue}>
         <KibanaContextProvider services={{ ...core, ...pluginsStart }}>
           <i18nCore.Context>
-            <Router history={history}>
-              <UrlParamsProvider>
-                <LicenseProvider>
-                  <AnomalyDetectionJobsContextProvider>
-                    <ApmThemeProvider>
-                      <MountApmHeaderActionMenu />
+            <RouterProvider history={history} router={apmRouter as any}>
+              <TrackPageview>
+                <BreadcrumbsContextProvider>
+                  <UrlParamsProvider>
+                    <LicenseProvider>
+                      <AnomalyDetectionJobsContextProvider>
+                        <ApmThemeProvider>
+                          <MountApmHeaderActionMenu />
 
-                      <Route component={ScrollToTopOnPathChange} />
-                      <Switch>
-                        {apmRouteConfig.map((route, i) => {
-                          const { component, render, ...rest } = route;
-                          return (
-                            <ApmRoute
-                              key={i}
-                              {...rest}
-                              component={(props: RouteComponentProps) => {
-                                return TelemetryWrapper({ route, props });
-                              }}
-                            />
-                          );
-                        })}
-                      </Switch>
-                    </ApmThemeProvider>
-                  </AnomalyDetectionJobsContextProvider>
-                </LicenseProvider>
-              </UrlParamsProvider>
-            </Router>
+                          <Route component={ScrollToTopOnPathChange} />
+                          <RouteRenderer />
+                        </ApmThemeProvider>
+                      </AnomalyDetectionJobsContextProvider>
+                    </LicenseProvider>
+                  </UrlParamsProvider>
+                </BreadcrumbsContextProvider>
+              </TrackPageview>
+            </RouterProvider>
           </i18nCore.Context>
         </KibanaContextProvider>
       </ApmPluginContext.Provider>
@@ -89,7 +80,6 @@ export function ApmAppRoot({
 }
 
 function MountApmHeaderActionMenu() {
-  useApmBreadcrumbs(apmRouteConfig);
   const { setHeaderActionMenu } = useApmPluginContext().appMountParameters;
 
   return (

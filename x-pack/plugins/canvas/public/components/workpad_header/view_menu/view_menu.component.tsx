@@ -14,7 +14,7 @@ import {
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
+import { Popover, ClosePopoverFn } from '../../popover';
 import {
   MAX_ZOOM_LEVEL,
   MIN_ZOOM_LEVEL,
@@ -22,7 +22,6 @@ import {
 } from '../../../../common/lib/constants';
 
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
-import { Popover, ClosePopoverFn } from '../../popover';
 import { AutoRefreshControls } from './auto_refresh_controls';
 import { KioskControls } from './kiosk_controls';
 

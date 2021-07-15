@@ -37,5 +37,5 @@
     "name": "Uptime",
     "githubTeam": "uptime"
   },
-  "description": "This plugin visualizes data from from Synthetics and Heartbeat, and integrates with other Observability solutions."
+  "description": "This plugin visualizes data from Synthetics and Heartbeat, and integrates with other Observability solutions."
 }
