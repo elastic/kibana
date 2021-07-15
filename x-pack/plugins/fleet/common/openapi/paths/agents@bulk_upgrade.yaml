@@ -1,5 +1,5 @@
 post:
-  summary: Fleet - Agent - Bulk Upgrade
+  summary: Agent - Bulk Upgrade
   tags: []
   responses:
     '200':

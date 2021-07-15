@@ -15,7 +15,7 @@ servers:
 paths:
   /agent_policies:
     get:
-      summary: Agent policy - List
+      summary: Agent policies - List
       tags: []
       responses:
         '200':
@@ -188,7 +188,7 @@ paths:
     parameters: []
   /agent-status:
     get:
-      summary: Fleet - Agent - Summary stats
+      summary: Agent - Summary stats
       tags: []
       responses:
         '200':
@@ -232,7 +232,7 @@ paths:
           required: false
   /agents:
     get:
-      summary: Fleet - Agent - List
+      summary: Agents - List
       tags: []
       responses:
         '200':
@@ -268,7 +268,7 @@ paths:
         in: path
         required: true
     post:
-      summary: Fleet - Agent - Unenroll
+      summary: Agent - Unenroll
       tags: []
       responses:
         '200':
@@ -313,7 +313,7 @@ paths:
         in: path
         required: true
     post:
-      summary: Fleet - Agent - Upgrade
+      summary: Agent - Upgrade
       tags: []
       responses:
         '200':
@@ -339,7 +339,7 @@ paths:
               $ref: '#/components/schemas/upgrade_agent'
   /agents/bulk_upgrade:
     post:
-      summary: Fleet - Agent - Bulk Upgrade
+      summary: Agent - Bulk Upgrade
       tags: []
       responses:
         '200':
@@ -414,7 +414,7 @@ paths:
         - $ref: '#/components/parameters/kbn_xsrf'
   /enrollment-api-keys:
     get:
-      summary: Enrollment - List
+      summary: Enrollment API Keys - List
       tags: []
       responses:
         '200':
@@ -442,7 +442,7 @@ paths:
       operationId: get-fleet-enrollment-api-keys
       parameters: []
     post:
-      summary: Enrollment - Create
+      summary: Enrollment API Key - Create
       tags: []
       responses:
         '200':
@@ -506,7 +506,7 @@ paths:
         - $ref: '#/components/parameters/kbn_xsrf'
   /epm/categories:
     get:
-      summary: EPM - Categories
+      summary: Packages - Categories
       tags: []
       responses:
         '200':
@@ -531,7 +531,7 @@ paths:
       operationId: get-epm-categories
   /epm/packages:
     get:
-      summary: EPM - Packages - List
+      summary: Packages - List
       tags: []
       responses:
         '200':
@@ -546,7 +546,7 @@ paths:
     parameters: []
   '/epm/packages/{pkgkey}':
     get:
-      summary: EPM - Packages - Info
+      summary: Packages - Info
       tags: []
       responses:
         '200':
@@ -580,7 +580,7 @@ paths:
         in: path
         required: true
     post:
-      summary: EPM - Packages - Install
+      summary: Packages - Install
       tags: []
       responses:
         '200':
@@ -609,7 +609,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
     delete:
-      summary: EPM - Packages - Delete
+      summary: Packages - Delete
       tags: []
       responses:
         '200':
@@ -652,7 +652,7 @@ paths:
         in: path
         required: true
     get:
-      summary: Fleet - Agent - Info
+      summary: Agent - Info
       tags: []
       responses:
         '200':
@@ -668,7 +668,7 @@ paths:
                   - item
       operationId: get-fleet-agents-agentId
     put:
-      summary: Fleet - Agent - Update
+      summary: Agent - Update
       tags: []
       responses:
         '200':
@@ -686,7 +686,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
     delete:
-      summary: Fleet - Agent - Delete
+      summary: Agent - Delete
       tags: []
       responses:
         '200':
@@ -707,7 +707,7 @@ paths:
         - $ref: '#/components/parameters/kbn_xsrf'
   /package_policies:
     get:
-      summary: PackagePolicies - List
+      summary: Package policies - List
       tags: []
       responses:
         '200':
@@ -734,7 +734,7 @@ paths:
       parameters: []
     parameters: []
     post:
-      summary: PackagePolicies - Create
+      summary: Package policy - Create
       operationId: post-packagePolicies
       responses:
         '200':
@@ -748,7 +748,7 @@ paths:
         - $ref: '#/components/parameters/kbn_xsrf'
   '/package_policies/{packagePolicyId}':
     get:
-      summary: PackagePolicies - Info
+      summary: Package policy - Info
       tags: []
       responses:
         '200':
@@ -770,7 +770,7 @@ paths:
         in: path
         required: true
     put:
-      summary: PackagePolicies - Update
+      summary: Package policy - Update
       operationId: put-packagePolicies-packagePolicyId
       requestBody:
         content:
@@ -796,7 +796,7 @@ paths:
         - $ref: '#/components/parameters/kbn_xsrf'
   /setup:
     post:
-      summary: Fleet - Setup
+      summary: Setup
       tags: []
       responses:
         '200':

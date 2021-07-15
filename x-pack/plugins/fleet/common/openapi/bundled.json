@@ -22,7 +22,7 @@
   "paths": {
     "/agent_policies": {
       "get": {
-        "summary": "Agent policy - List",
+        "summary": "Agent policies - List",
         "tags": [],
         "responses": {
           "200": {
@@ -305,7 +305,7 @@
     },
     "/agent-status": {
       "get": {
-        "summary": "Fleet - Agent - Summary stats",
+        "summary": "Agent - Summary stats",
         "tags": [],
         "responses": {
           "200": {
@@ -370,7 +370,7 @@
     },
     "/agents": {
       "get": {
-        "summary": "Fleet - Agent - List",
+        "summary": "Agents - List",
         "tags": [],
         "responses": {
           "200": {
@@ -427,7 +427,7 @@
         }
       ],
       "post": {
-        "summary": "Fleet - Agent - Unenroll",
+        "summary": "Agent - Unenroll",
         "tags": [],
         "responses": {
           "200": {
@@ -502,7 +502,7 @@
         }
       ],
       "post": {
-        "summary": "Fleet - Agent - Upgrade",
+        "summary": "Agent - Upgrade",
         "tags": [],
         "responses": {
           "200": {
@@ -546,7 +546,7 @@
     },
     "/agents/bulk_upgrade": {
       "post": {
-        "summary": "Fleet - Agent - Bulk Upgrade",
+        "summary": "Agent - Bulk Upgrade",
         "tags": [],
         "responses": {
           "200": {
@@ -672,7 +672,7 @@
     },
     "/enrollment-api-keys": {
       "get": {
-        "summary": "Enrollment - List",
+        "summary": "Enrollment API Keys - List",
         "tags": [],
         "responses": {
           "200": {
@@ -713,7 +713,7 @@
         "parameters": []
       },
       "post": {
-        "summary": "Enrollment - Create",
+        "summary": "Enrollment API Key - Create",
         "tags": [],
         "responses": {
           "200": {
@@ -818,7 +818,7 @@
     },
     "/epm/categories": {
       "get": {
-        "summary": "EPM - Categories",
+        "summary": "Packages - Categories",
         "tags": [],
         "responses": {
           "200": {
@@ -856,7 +856,7 @@
     },
     "/epm/packages": {
       "get": {
-        "summary": "EPM - Packages - List",
+        "summary": "Packages - List",
         "tags": [],
         "responses": {
           "200": {
@@ -879,7 +879,7 @@
     },
     "/epm/packages/{pkgkey}": {
       "get": {
-        "summary": "EPM - Packages - Info",
+        "summary": "Packages - Info",
         "tags": [],
         "responses": {
           "200": {
@@ -938,7 +938,7 @@
         }
       ],
       "post": {
-        "summary": "EPM - Packages - Install",
+        "summary": "Packages - Install",
         "tags": [],
         "responses": {
           "200": {
@@ -984,7 +984,7 @@
         ]
       },
       "delete": {
-        "summary": "EPM - Packages - Delete",
+        "summary": "Packages - Delete",
         "tags": [],
         "responses": {
           "200": {
@@ -1055,7 +1055,7 @@
         }
       ],
       "get": {
-        "summary": "Fleet - Agent - Info",
+        "summary": "Agent - Info",
         "tags": [],
         "responses": {
           "200": {
@@ -1080,7 +1080,7 @@
         "operationId": "get-fleet-agents-agentId"
       },
       "put": {
-        "summary": "Fleet - Agent - Update",
+        "summary": "Agent - Update",
         "tags": [],
         "responses": {
           "200": {
@@ -1110,7 +1110,7 @@
         ]
       },
       "delete": {
-        "summary": "Fleet - Agent - Delete",
+        "summary": "Agent - Delete",
         "tags": [],
         "responses": {
           "200": {
@@ -1145,7 +1145,7 @@
     },
     "/package_policies": {
       "get": {
-        "summary": "PackagePolicies - List",
+        "summary": "Package policies - List",
         "tags": [],
         "responses": {
           "200": {
@@ -1185,7 +1185,7 @@
       },
       "parameters": [],
       "post": {
-        "summary": "PackagePolicies - Create",
+        "summary": "Package policy - Create",
         "operationId": "post-packagePolicies",
         "responses": {
           "200": {
@@ -1210,7 +1210,7 @@
     },
     "/package_policies/{packagePolicyId}": {
       "get": {
-        "summary": "PackagePolicies - Info",
+        "summary": "Package policy - Info",
         "tags": [],
         "responses": {
           "200": {
@@ -1245,7 +1245,7 @@
         }
       ],
       "put": {
-        "summary": "PackagePolicies - Update",
+        "summary": "Package policy - Update",
         "operationId": "put-packagePolicies-packagePolicyId",
         "requestBody": {
           "content": {
@@ -1289,7 +1289,7 @@
     },
     "/setup": {
       "post": {
-        "summary": "Fleet - Setup",
+        "summary": "Setup",
         "tags": [],
         "responses": {
           "200": {
