@@ -1,0 +1,25 @@
+{
+  "open_point_in_time": {
+    "url_params": {
+      "preference": "random",
+      "routing": "",
+      "ignore_unavailable": "__flag__",
+      "expand_wildcards": [
+        "open",
+        "closed",
+        "hidden",
+        "none",
+        "all"
+      ],
+      "keep_alive": ""
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_pit",
+      "{indices}/_pit"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/point-in-time-api.html"
+  }
+}
