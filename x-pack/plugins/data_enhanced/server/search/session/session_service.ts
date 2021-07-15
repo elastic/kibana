@@ -57,7 +57,7 @@ import {
   SEARCH_SESSIONS_CLEANUP_TASK_TYPE,
   checkNonPersistedSessions,
   SEARCH_SESSIONS_CLEANUP_TASK_ID,
-} from './check_non_persiseted_sessions';
+} from './check_non_persisted_sessions';
 import {
   SEARCH_SESSIONS_EXPIRE_TASK_TYPE,
   SEARCH_SESSIONS_EXPIRE_TASK_ID,

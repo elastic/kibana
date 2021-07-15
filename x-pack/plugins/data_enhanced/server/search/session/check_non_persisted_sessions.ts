@@ -18,7 +18,7 @@ import {
   KueryNode,
 } from '../../../../../../src/plugins/data/common';
 import { checkSearchSessionsByPage, getSearchSessionsPage$ } from './get_search_session_page';
-import { SearchSessionsConfig, CheckSearchSessionsDeps } from './types';
+import { SearchSessionsConfig, CheckSearchSessionsDeps, SearchStatus } from './types';
 import { bulkUpdateSessions, getAllSessionsStatusUpdates } from './update_session_status';
 
 export const SEARCH_SESSIONS_CLEANUP_TASK_TYPE = 'search_sessions_cleanup';
@@ -83,6 +83,8 @@ function checkNonPersistedSessionsPage(
             // Send a delete request for each async search to ES
             Object.keys(session.attributes.idMapping).map(async (searchKey: string) => {
               const searchInfo = session.attributes.idMapping[searchKey];
+              if (searchInfo.status === SearchStatus.ERROR) return; // skip attempting to delete async search in case we know it has errored out
+
               if (searchInfo.strategy === ENHANCED_ES_SEARCH_STRATEGY) {
                 try {
                   await client.asyncSearch.delete({ id: searchInfo.id });
