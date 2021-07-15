@@ -12,12 +12,15 @@ import { AppMountParameters, CoreStart } from 'kibana/public';
 import { I18nProvider } from '@kbn/i18n/react';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 import { TimelinesUIStart } from '../../../../../../../plugins/timelines/public';
+import { DataPublicPluginStart } from '../../../../../../../../src/plugins/data/public';
+
+type CoreStartTimelines = CoreStart & {data: DataPublicPluginStart};
 
 /**
  * Render the Timeline Test app. Returns a cleanup function.
  */
 export function renderApp(
-  coreStart: CoreStart,
+  coreStart: CoreStartTimelines,
   parameters: AppMountParameters,
   timelinesPluginSetup: TimelinesUIStart | null
 ) {
@@ -41,7 +44,7 @@ const AppRoot = React.memo(
     parameters,
     timelinesPluginSetup,
   }: {
-    coreStart: CoreStart;
+    coreStart: CoreStartTimelines;
     parameters: AppMountParameters;
     timelinesPluginSetup: TimelinesUIStart | null;
   }) => {
@@ -50,14 +53,11 @@ const AppRoot = React.memo(
     const setRefetch = useCallback((_refetch) => {
       refetch.current = _refetch;
     }, []);
-    const services = {
-      ...coreStart,
-      data: { search: () => {} },
-    };
+
     return (
       <I18nProvider>
         <Router history={parameters.history}>
-          <KibanaContextProvider services={services}>
+          <KibanaContextProvider services={coreStart}>
             {(timelinesPluginSetup &&
               timelinesPluginSetup.getTGrid &&
               timelinesPluginSetup.getTGrid<'standalone'>({
