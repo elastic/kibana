@@ -6411,7 +6411,7 @@
     "expressionShape.functions.shape.args.fillHelpText": "填充形状的 {SVG} 颜色。",
     "expressionShape.functions.shape.args.maintainAspectHelpText": "维持形状的原始纵横比？",
     "expressionShape.functions.shape.args.shapeHelpText": "选取形状。",
-    "expressionShape.functions.helpText": "创建形状。",
+    "expressionShape.functions.shape.helpText": "创建形状。",
     "xpack.canvas.functions.sort.args.byHelpText": "排序依据的列。如果未指定，则 {DATATABLE} 按第一列排序。",
     "xpack.canvas.functions.sort.args.reverseHelpText": "反转排序顺序。如果未指定，则 {DATATABLE} 按升序排序。",
     "xpack.canvas.functions.sortHelpText": "按指定列对 {DATATABLE} 进行排序。",
