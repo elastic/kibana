@@ -60,7 +60,8 @@ export class AnomalyTimelineService {
     return (
       this.isSwimlaneData(arg) &&
       isPopulatedObject(arg, ['earliest', 'latest']) &&
-      !arg.laneLabels.some((label) => label !== 'Overall')
+      arg.laneLabels.length === 1 &&
+      arg.laneLabels[0] === OVERALL_LABEL
     );
   }
 
