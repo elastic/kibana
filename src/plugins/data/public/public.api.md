@@ -2178,6 +2178,10 @@ export interface QuerySuggestionGetFnArgs {
     indexPatterns: IIndexPattern[];
     // (undocumented)
     language: string;
+    // Warning: (ae-forgotten-export) The symbol "ValueSuggestionsMethod" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    method?: ValueSuggestionsMethod;
     // (undocumented)
     query: string;
     // (undocumented)
