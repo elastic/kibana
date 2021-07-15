@@ -7,11 +7,12 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import { OperatorOption } from '@kbn/securitysolution-list-utils';
 
 import { IFieldType } from '../../../../../../../src/plugins/data/common';
 
 import { getGenericComboBoxProps, getOperators } from './helpers';
-import { GetGenericComboBoxPropsReturn, OperatorOption } from './types';
+import { GetGenericComboBoxPropsReturn } from './types';
 
 const AS_PLAIN_TEXT = { asPlainText: true };
 

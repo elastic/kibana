@@ -19,7 +19,7 @@ import {
   DocumentsTransformSuccess,
 } from '../migrations/core/migrate_raw_docs';
 
-export type MigrationLogLevel = 'error' | 'info';
+export type MigrationLogLevel = 'error' | 'info' | 'warning';
 
 export interface MigrationLog {
   level: MigrationLogLevel;

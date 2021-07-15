@@ -14,21 +14,25 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useTrackPageview } from '../../../../../observability/public';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group_distribution_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { ErrorDistribution } from '../error_group_details/Distribution';
 import { ErrorGroupList } from './List';
 
-interface ErrorGroupOverviewProps {
-  serviceName: string;
-}
+export function ErrorGroupOverview() {
+  const { serviceName } = useApmServiceContext();
 
-export function ErrorGroupOverview({ serviceName }: ErrorGroupOverviewProps) {
   const {
-    urlParams: { environment, kuery, start, end, sortField, sortDirection },
+    query: { environment, kuery, sortField, sortDirection },
+  } = useApmParams('/services/:serviceName/errors');
+
+  const {
+    urlParams: { start, end },
   } = useUrlParams();
+
   const { errorDistributionData } = useErrorGroupDistributionFetcher({
     serviceName,
     groupId: undefined,
@@ -59,12 +63,6 @@ export function ErrorGroupOverview({ serviceName }: ErrorGroupOverviewProps) {
     },
     [environment, kuery, serviceName, start, end, sortField, sortDirection]
   );
-
-  useTrackPageview({
-    app: 'apm',
-    path: 'error_group_overview',
-  });
-  useTrackPageview({ app: 'apm', path: 'error_group_overview', delay: 15000 });
 
   if (!errorDistributionData || !errorGroupListData) {
     return null;

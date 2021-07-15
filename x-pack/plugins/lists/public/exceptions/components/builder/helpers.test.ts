@@ -24,6 +24,7 @@ import {
   EmptyEntry,
   ExceptionsBuilderExceptionItem,
   FormattedBuilderEntry,
+  OperatorOption,
   doesNotExistOperator,
   existsOperator,
   filterExceptionItems,
@@ -64,7 +65,6 @@ import { getEntryNestedMock } from '../../../../common/schemas/types/entry_neste
 import { getEntryMatchMock } from '../../../../common/schemas/types/entry_match.mock';
 import { getEntryMatchAnyMock } from '../../../../common/schemas/types/entry_match_any.mock';
 import { getListResponseMock } from '../../../../common/schemas/response/list_schema.mock';
-import { OperatorOption } from '../autocomplete/types';
 import { getEntryListMock } from '../../../../common/schemas/types/entry_list.mock';
 
 // TODO: ALL THESE TESTS SHOULD BE MOVED TO @kbn/securitysolution-list-utils for its helper. The only reason why they're here is due to missing other packages we hae to create or missing things from kbn packages such as mocks from kibana core

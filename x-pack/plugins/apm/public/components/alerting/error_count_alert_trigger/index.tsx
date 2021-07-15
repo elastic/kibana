@@ -18,7 +18,7 @@ import { ChartPreview } from '../chart_preview';
 import { EnvironmentField, IsAboveField, ServiceField } from '../fields';
 import { getAbsoluteTimeRange } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
-import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { useServiceName } from '../../../hooks/use_service_name';
 
 export interface AlertParams {
   windowSize: number;
@@ -37,12 +37,12 @@ interface Props {
 export function ErrorCountAlertTrigger(props: Props) {
   const { setAlertParams, setAlertProperty, alertParams } = props;
 
-  const { serviceName: serviceNameFromContext } = useApmServiceContext();
+  const serviceNameFromUrl = useServiceName();
 
   const { urlParams } = useUrlParams();
   const { start, end, environment: environmentFromUrl } = urlParams;
   const { environmentOptions } = useEnvironmentsFetcher({
-    serviceName: serviceNameFromContext,
+    serviceName: serviceNameFromUrl,
     start,
     end,
   });
@@ -56,7 +56,7 @@ export function ErrorCountAlertTrigger(props: Props) {
       windowSize: 1,
       windowUnit: 'm',
       environment: environmentFromUrl || ENVIRONMENT_ALL.value,
-      serviceName: serviceNameFromContext,
+      serviceName: serviceNameFromUrl,
     }
   );
 
