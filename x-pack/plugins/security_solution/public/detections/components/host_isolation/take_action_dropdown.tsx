@@ -104,6 +104,7 @@ export const TakeActionDropdown = React.memo(
                 ecsRowData={ecsData}
                 nonEcsRowData={[]}
                 type="text"
+                onInvestigateInTimelineAlertClick={closePopoverHandler}
               />
             </EuiContextMenuItem>
           )}

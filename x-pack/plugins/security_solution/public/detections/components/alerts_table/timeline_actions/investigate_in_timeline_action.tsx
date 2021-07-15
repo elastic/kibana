@@ -29,6 +29,7 @@ interface InvestigateInTimelineActionProps {
   alertIds?: string[];
   fetchEcsAlertsData?: (alertIds?: string[]) => Promise<Ecs[]>;
   type?: 'text' | 'icon';
+  onInvestigateInTimelineAlertClick?: () => void;
 }
 
 const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineActionProps> = ({
@@ -38,6 +39,7 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
   fetchEcsAlertsData,
   nonEcsRowData,
   type,
+  onInvestigateInTimelineAlertClick,
 }) => {
   const {
     data: { search: searchStrategyClient },
@@ -71,6 +73,9 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
   );
 
   const investigateInTimelineAlertClick = useCallback(async () => {
+    if (onInvestigateInTimelineAlertClick) {
+      onInvestigateInTimelineAlertClick();
+    }
     try {
       if (ecsRowData != null) {
         await sendAlertToTimelineAction({
@@ -100,6 +105,7 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
     ecsRowData,
     fetchEcsAlertsData,
     nonEcsRowData,
+    onInvestigateInTimelineAlertClick,
     searchStrategyClient,
     updateTimelineIsLoading,
   ]);
