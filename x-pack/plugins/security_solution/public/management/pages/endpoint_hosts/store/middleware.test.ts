@@ -270,6 +270,7 @@ describe('endpoint list middleware', () => {
     const dispatchGetActivityLogLoading = () => {
       dispatch({
         type: 'endpointDetailsActivityLogChanged',
+        // Ignore will be fixed with when AsyncResourceState is refactored (#830)
         // @ts-ignore
         payload: createLoadingResourceState({ previousState: createUninitialisedResourceState() }),
       });
