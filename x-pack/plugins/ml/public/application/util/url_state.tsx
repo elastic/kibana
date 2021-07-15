@@ -14,7 +14,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { Dictionary } from '../../../common/types/common';
 
 import { getNestedProperty } from './object_utils';
-import { MlPages } from '../../../common/constants/ml_url_generator';
+import { MlPages } from '../../../common/constants/locator';
 
 type Accessor = '_a' | '_g';
 export type SetUrlState = (

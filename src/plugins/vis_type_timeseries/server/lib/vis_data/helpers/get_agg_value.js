@@ -45,10 +45,10 @@ export const getAggValue = (row, metric) => {
       }
 
       const hits = get(row, [metric.id, 'docs', 'hits', 'hits'], []);
-      const values = hits.map((doc) => get(doc, `_source.${metric.field}`));
+      const values = hits.map((doc) => doc.fields[metric.field]);
       const aggWith = (metric.agg_with && aggFns[metric.agg_with]) || aggFns.noop;
 
-      return aggWith(values);
+      return aggWith(values.flat());
     case METRIC_TYPES.COUNT:
       return get(row, 'doc_count', null);
     default:

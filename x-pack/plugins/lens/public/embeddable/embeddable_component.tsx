@@ -9,6 +9,7 @@ import React, { FC, useEffect } from 'react';
 import { CoreStart } from 'kibana/public';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import type { Start as InspectorStartContract } from 'src/plugins/inspector/public';
+import { EuiLoadingChart } from '@elastic/eui';
 import {
   EmbeddableInput,
   EmbeddableOutput,
@@ -68,6 +69,10 @@ export function getEmbeddableComponent(core: CoreStart, plugins: PluginsStartDep
     const input = { ...props };
     const [embeddable, loading, error] = useEmbeddableFactory({ factory, input });
     const hasActions = props.withActions === true;
+
+    if (loading) {
+      return <EuiLoadingChart />;
+    }
 
     if (embeddable && hasActions) {
       return (

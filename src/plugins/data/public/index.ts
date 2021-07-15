@@ -269,6 +269,7 @@ export {
   IndexPatternLoadExpressionFunctionDefinition,
   fieldList,
   INDEX_PATTERN_SAVED_OBJECT_TYPE,
+  IndexPatternType,
 } from '../common';
 
 export { DuplicateIndexPatternError } from '../common/index_patterns/errors';

@@ -411,7 +411,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
           >
             <>
               <div>
-                <div style={{ height: `${containerHeight}px` }}>
+                <div style={{ height: `${containerHeight}px`, position: 'relative' }}>
                   {showSwimlane && !isLoading && (
                     <Chart className={'mlSwimLaneContainer'}>
                       <Settings

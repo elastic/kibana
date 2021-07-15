@@ -430,7 +430,9 @@ export const EditPackagePolicyForm = memo<{
             />
           )}
           {configurePackage}
-          <EuiSpacer size="l" />
+          {/* Extra space to accomodate the EuiBottomBar height */}
+          <EuiSpacer size="xxl" />
+          <EuiSpacer size="xxl" />
           <EuiBottomBar>
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem grow={false}>

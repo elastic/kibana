@@ -120,7 +120,6 @@ export const EndpointList = () => {
     areEndpointsEnrolling,
     agentsWithEndpointsTotalError,
     endpointsTotalError,
-    isTransformEnabled,
   } = useEndpointSelector(selector);
   const { search } = useFormatUrl(SecurityPageName.administration);
   const { getAppUrl } = useAppUrl();
@@ -476,8 +475,8 @@ export const EndpointList = () => {
   const hasListData = listData && listData.length > 0;
 
   const refreshStyle = useMemo(() => {
-    return { display: endpointsExist && isTransformEnabled ? 'flex' : 'none', maxWidth: 200 };
-  }, [endpointsExist, isTransformEnabled]);
+    return { display: endpointsExist ? 'flex' : 'none', maxWidth: 200 };
+  }, [endpointsExist]);
 
   const refreshIsPaused = useMemo(() => {
     return !endpointsExist ? false : hasSelectedEndpoint ? true : !isAutoRefreshEnabled;
@@ -492,8 +491,8 @@ export const EndpointList = () => {
   }, [endpointsTotalError, agentsWithEndpointsTotalError]);
 
   const shouldShowKQLBar = useMemo(() => {
-    return endpointsExist && !patternsError && isTransformEnabled;
-  }, [endpointsExist, patternsError, isTransformEnabled]);
+    return endpointsExist && !patternsError;
+  }, [endpointsExist, patternsError]);
 
   return (
     <AdministrationListPage

@@ -10,20 +10,15 @@ import { SearchResponse } from 'elasticsearch';
 import { HostMetadata } from '../../../common/endpoint/types';
 import { SecuritySolutionRequestHandlerContext } from '../../types';
 import { getESQueryHostMetadataByIDs } from '../routes/metadata/query_builders';
-import { EndpointAppContext } from '../types';
+import { queryResponseToHostListResult } from '../routes/metadata/support/query_strategies';
 
 export async function getMetadataForEndpoints(
   endpointIDs: string[],
-  requestHandlerContext: SecuritySolutionRequestHandlerContext,
-  endpointAppContext: EndpointAppContext
+  requestHandlerContext: SecuritySolutionRequestHandlerContext
 ): Promise<HostMetadata[]> {
-  const queryStrategy = await endpointAppContext.service
-    ?.getMetadataService()
-    ?.queryStrategy(requestHandlerContext.core.savedObjects.client);
-
-  const query = getESQueryHostMetadataByIDs(endpointIDs, queryStrategy!);
+  const query = getESQueryHostMetadataByIDs(endpointIDs);
   const esClient = requestHandlerContext.core.elasticsearch.client.asCurrentUser;
   const { body } = await esClient.search<HostMetadata>(query as SearchRequest);
-  const hosts = queryStrategy!.queryResponseToHostListResult(body as SearchResponse<HostMetadata>);
+  const hosts = queryResponseToHostListResult(body as SearchResponse<HostMetadata>);
   return hosts.resultList;
 }

@@ -15,6 +15,20 @@ export const ACTIVITY_LOG = {
   tabTitle: i18n.translate('xpack.securitySolution.endpointDetails.activityLog', {
     defaultMessage: 'Activity Log',
   }),
+  datePicker: {
+    startDate: i18n.translate(
+      'xpack.securitySolution.endpointDetails.activityLog.datePicker.startDate',
+      {
+        defaultMessage: 'Pick a start date',
+      }
+    ),
+    endDate: i18n.translate(
+      'xpack.securitySolution.endpointDetails.activityLog.datePicker.endDate',
+      {
+        defaultMessage: 'Pick an end date',
+      }
+    ),
+  },
   LogEntry: {
     endOfLog: i18n.translate(
       'xpack.securitySolution.endpointDetails.activityLog.logEntry.action.endOfLog',

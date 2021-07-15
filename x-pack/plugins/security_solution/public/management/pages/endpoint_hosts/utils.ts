@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { HostInfo, HostMetadata } from '../../../../common/endpoint/types';
 
 export const isPolicyOutOfDate = (
@@ -22,4 +23,19 @@ export const isPolicyOutOfDate = (
     reported.version >= current.agent.configured.revision &&
     reported.endpoint_policy_version >= current.endpoint.revision
   );
+};
+
+export const getIsInvalidDateRange = ({
+  startDate,
+  endDate,
+}: {
+  startDate?: string;
+  endDate?: string;
+}) => {
+  if (startDate && endDate) {
+    const start = moment(startDate);
+    const end = moment(endDate);
+    return start.isAfter(end);
+  }
+  return false;
 };

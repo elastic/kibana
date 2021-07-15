@@ -367,6 +367,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "kibana.rac.alert.id": Array [
               "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
             ],
+            "kibana.rac.alert.owner": Array [
+              "apm",
+            ],
             "kibana.rac.alert.producer": Array [
               "apm",
             ],
@@ -436,6 +439,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ],
             "kibana.rac.alert.id": Array [
               "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
+            ],
+            "kibana.rac.alert.owner": Array [
+              "apm",
             ],
             "kibana.rac.alert.producer": Array [
               "apm",
@@ -540,6 +546,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ],
             "kibana.rac.alert.id": Array [
               "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
+            ],
+            "kibana.rac.alert.owner": Array [
+              "apm",
             ],
             "kibana.rac.alert.producer": Array [
               "apm",

@@ -23,7 +23,7 @@ const warning = (
 
 export const CtiNoEventsComponent = ({ to, from }: { to: string; from: string }) => {
   const { buttonHref, listItems, isDashboardPluginDisabled } = useCtiDashboardLinks(
-    { ...emptyEventCountsByDataset },
+    emptyEventCountsByDataset,
     to,
     from
   );

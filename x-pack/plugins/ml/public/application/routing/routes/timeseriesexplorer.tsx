@@ -43,7 +43,7 @@ import { useToastNotificationService } from '../../services/toast_notification_s
 import { AnnotationUpdatesService } from '../../services/annotations_service';
 import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
 import { useTimeSeriesExplorerUrlState } from '../../timeseriesexplorer/hooks/use_timeseriesexplorer_url_state';
-import type { TimeSeriesExplorerAppState } from '../../../../common/types/ml_url_generator';
+import type { TimeSeriesExplorerAppState } from '../../../../common/types/locator';
 import type { TimeRangeBounds } from '../../util/time_buckets';
 
 export const timeSeriesExplorerRouteFactory = (
@@ -142,10 +142,10 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
       // Only if both min/max bounds are valid moment times set the bounds.
       // An invalid string restored from globalState might return `undefined`.
       if (timefilterBounds?.min !== undefined && timefilterBounds?.max !== undefined) {
-        setBounds(timefilter.getBounds());
+        setBounds(timefilterBounds);
       }
     }
-  }, [globalState?.time?.from, globalState?.time?.to]);
+  }, [lastRefresh, globalState?.time?.from, globalState?.time?.to]);
 
   const selectedJobIds = globalState?.ml?.jobIds;
   // Sort selectedJobIds so we can be sure comparison works when stringifying.
@@ -309,7 +309,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
           );
         });
     }
-  }, [selectedForecastId]);
+  }, [boundsMinMs, boundsMaxMs, selectedJob, selectedForecastId, autoZoomDuration]);
 
   const [tableInterval] = useTableInterval();
   const [tableSeverity] = useTableSeverity();

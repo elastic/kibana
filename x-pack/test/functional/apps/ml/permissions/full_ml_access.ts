@@ -94,8 +94,6 @@ export default function ({ getService }: FtrProviderContext) {
       const ecIndexPattern = 'ft_module_sample_ecommerce';
       const ecExpectedTotalCount = '287';
 
-      const ecExpectedModuleId = 'sample_data_ecommerce';
-
       const uploadFilePath = path.join(
         __dirname,
         '..',
@@ -367,7 +365,6 @@ export default function ({ getService }: FtrProviderContext) {
 
             await ml.testExecution.logTestStep('should display job cards');
             await ml.dataVisualizerIndexBased.assertCreateAdvancedJobCardExists();
-            await ml.dataVisualizerIndexBased.assertRecognizerCardExists(ecExpectedModuleId);
             await ml.dataVisualizerIndexBased.assertCreateDataFrameAnalyticsCardExists();
           });
 

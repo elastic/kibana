@@ -333,6 +333,128 @@ describe('#auth', () => {
   });
 });
 
+describe('#serviceAccountToken', () => {
+  it('is set when #auth is true, and a token is provided', () => {
+    expect(
+      parseElasticsearchClientConfig(
+        {
+          apiVersion: 'v7.0.0',
+          customHeaders: { xsrf: 'something' },
+          sniffOnStart: true,
+          sniffOnConnectionFault: true,
+          hosts: ['https://es.local'],
+          requestHeadersWhitelist: [],
+          serviceAccountToken: 'ABC123',
+        },
+        logger.get(),
+        'custom-type',
+        { auth: true }
+      )
+    ).toMatchInlineSnapshot(`
+      Object {
+        "apiVersion": "v7.0.0",
+        "hosts": Array [
+          Object {
+            "headers": Object {
+              "x-elastic-product-origin": "kibana",
+              "xsrf": "something",
+            },
+            "host": "es.local",
+            "path": "/",
+            "port": "443",
+            "protocol": "https:",
+            "query": null,
+          },
+        ],
+        "keepAlive": true,
+        "log": [Function],
+        "serviceAccountToken": "ABC123",
+        "sniffOnConnectionFault": true,
+        "sniffOnStart": true,
+      }
+    `);
+  });
+
+  it('is not set when #auth is true, and a token is not provided', () => {
+    expect(
+      parseElasticsearchClientConfig(
+        {
+          apiVersion: 'v7.0.0',
+          customHeaders: { xsrf: 'something' },
+          sniffOnStart: true,
+          sniffOnConnectionFault: true,
+          hosts: ['https://es.local'],
+          requestHeadersWhitelist: [],
+        },
+        logger.get(),
+        'custom-type',
+        { auth: true }
+      )
+    ).toMatchInlineSnapshot(`
+      Object {
+        "apiVersion": "v7.0.0",
+        "hosts": Array [
+          Object {
+            "headers": Object {
+              "x-elastic-product-origin": "kibana",
+              "xsrf": "something",
+            },
+            "host": "es.local",
+            "path": "/",
+            "port": "443",
+            "protocol": "https:",
+            "query": null,
+          },
+        ],
+        "keepAlive": true,
+        "log": [Function],
+        "sniffOnConnectionFault": true,
+        "sniffOnStart": true,
+      }
+    `);
+  });
+
+  it('is not set when #auth is false, and a token is provided', () => {
+    expect(
+      parseElasticsearchClientConfig(
+        {
+          apiVersion: 'v7.0.0',
+          customHeaders: { xsrf: 'something' },
+          sniffOnStart: true,
+          sniffOnConnectionFault: true,
+          hosts: ['https://es.local'],
+          requestHeadersWhitelist: [],
+          serviceAccountToken: 'ABC123',
+        },
+        logger.get(),
+        'custom-type',
+        { auth: false }
+      )
+    ).toMatchInlineSnapshot(`
+      Object {
+        "apiVersion": "v7.0.0",
+        "hosts": Array [
+          Object {
+            "headers": Object {
+              "x-elastic-product-origin": "kibana",
+              "xsrf": "something",
+            },
+            "host": "es.local",
+            "path": "/",
+            "port": "443",
+            "protocol": "https:",
+            "query": null,
+          },
+        ],
+        "keepAlive": true,
+        "log": [Function],
+        "sniffOnConnectionFault": true,
+        "sniffOnStart": true,
+      }
+    `);
+  });
+});
+
 describe('#customHeaders', () => {
   test('override the default headers', () => {
     const headerKey = Object.keys(DEFAULT_HEADERS)[0];
