@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect, useCallback } from 'react';
+import React, { FC, useState, useEffect, useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
@@ -88,6 +88,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
   const [idsMash, setIdsMash] = useState('');
   const [validatingJobs, setValidatingJobs] = useState(false);
   const [showFileReadError, setShowFileReadError] = useState(false);
+  const { displayErrorToast } = useMemo(() => toastNotificationServiceProvider(toasts), [toasts]);
 
   const reset = useCallback((showFileError = false) => {
     setAdJobs([]);
@@ -157,7 +158,6 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
       setValidatingJobs(true);
       setSkippedJobs(validatedJobs.skippedJobs);
     } catch (error) {
-      const { displayErrorToast } = toastNotificationServiceProvider(toasts);
       displayErrorToast(error);
     }
   }, []);
@@ -170,7 +170,6 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
         await bulkCreateADJobs(renamedJobs);
       } catch (error) {
         // display unexpected error
-        const { displayErrorToast } = toastNotificationServiceProvider(toasts);
         displayErrorToast(error);
       }
     } else if (jobType === 'data-frame-analytics') {
@@ -186,7 +185,6 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
     const results = await bulkCreateJobs(jobs);
     Object.entries(results).forEach(([jobId, { job, datafeed }]) => {
       if (job.error || datafeed.error) {
-        const { displayErrorToast } = toastNotificationServiceProvider(toasts);
         if (job.error) {
           const title = i18n.translate('xpack.ml.importExport.importFlyout.importADJobError', {
             defaultMessage: 'Could not create job {jobId}',
@@ -215,7 +213,6 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
             defaultMessage: 'Could not create job {id}',
             values: { id },
           });
-          const { displayErrorToast } = toastNotificationServiceProvider(toasts);
           displayErrorToast(error, title);
         }
       })
