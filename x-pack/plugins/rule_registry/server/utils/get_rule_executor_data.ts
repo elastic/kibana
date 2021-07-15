@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AlertExecutorOptions } from '../../../alerting/server';
 import {
   PRODUCER,
   RULE_CATEGORY,
@@ -35,5 +36,16 @@ export function getRuleExecutorData(
     [RULE_NAME]: options.name,
     [TAGS]: options.tags,
     [PRODUCER]: type.producer,
+  };
+}
+
+export function getRuleData(options: AlertExecutorOptions<any, any, any, any, any>) {
+  return {
+    [RULE_ID]: options.rule.ruleTypeId,
+    [RULE_UUID]: options.alertId,
+    [RULE_CATEGORY]: options.rule.ruleTypeName,
+    [RULE_NAME]: options.rule.name,
+    [TAGS]: options.tags,
+    [PRODUCER]: options.rule.producer,
   };
 }
