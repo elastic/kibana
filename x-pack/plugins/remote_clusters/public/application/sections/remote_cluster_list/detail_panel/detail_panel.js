@@ -494,6 +494,7 @@ export class DetailPanel extends Component {
         aria-labelledby="remoteClusterDetailsFlyoutTitle"
         size="m"
         maxWidth={550}
+        className="eui-textBreakAll"
       >
         <EuiFlyoutHeader>
           <EuiFlexGroup alignItems="center" gutterSize="s">
