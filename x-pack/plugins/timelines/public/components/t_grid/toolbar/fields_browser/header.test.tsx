@@ -28,9 +28,7 @@ describe('Header', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="field-browser-title"]').first().text()).toEqual(
-      'Customize Columns'
-    );
+    expect(wrapper.find('[data-test-subj="field-browser-title"]').first().text()).toEqual('Fields');
   });
 
   test('it renders the Reset Fields button', () => {

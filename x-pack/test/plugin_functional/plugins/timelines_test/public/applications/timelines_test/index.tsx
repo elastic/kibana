@@ -50,10 +50,14 @@ const AppRoot = React.memo(
     const setRefetch = useCallback((_refetch) => {
       refetch.current = _refetch;
     }, []);
+    const services = {
+      ...coreStart,
+      data: { search: () => {} },
+    };
     return (
       <I18nProvider>
         <Router history={parameters.history}>
-          <KibanaContextProvider services={coreStart}>
+          <KibanaContextProvider services={services}>
             {(timelinesPluginSetup &&
               timelinesPluginSetup.getTGrid &&
               timelinesPluginSetup.getTGrid<'standalone'>({

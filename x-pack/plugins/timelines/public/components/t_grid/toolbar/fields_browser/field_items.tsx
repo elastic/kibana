@@ -18,7 +18,7 @@ import { uniqBy } from 'lodash/fp';
 import styled from 'styled-components';
 
 import { getEmptyValue } from '../../../empty_value';
-import { getExampleText, getIconFromType } from '../../body/column_headers/helpers';
+import { getExampleText, getIconFromType } from '../../../utils/helpers';
 import { ColumnHeaderOptions, BrowserField } from '../../../../../common';
 import { defaultColumnHeaderType } from '../../body/column_headers/default_headers';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../body/constants';
