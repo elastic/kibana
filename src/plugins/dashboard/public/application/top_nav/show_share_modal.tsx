@@ -119,17 +119,6 @@ export function ShowShareModal({
     objectType: 'dashboard',
     sharingData: {
       title: savedDashboard.title,
-      locator: {
-        version: '1',
-        // id: 'test', // TODO: Use real dashboard locator ID
-        id: setStateToKbnUrl(
-          '_a',
-          dashboardStateManager.getAppState(),
-          { useHash: false, storeInHashQuery: true },
-          unhashUrl(window.location.href)
-        ),
-        value: dashboardStateManager.appState,
-      },
     },
     embedUrlParamExtensions: [
       {

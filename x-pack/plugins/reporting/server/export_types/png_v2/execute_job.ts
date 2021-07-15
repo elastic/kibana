@@ -34,8 +34,8 @@ export const runTaskFnFactory: RunTaskFnFactory<
       map((decryptedHeaders) => omitBlockedHeaders(decryptedHeaders)),
       map((filteredHeaders) => getConditionalHeaders(config, filteredHeaders)),
       mergeMap((conditionalHeaders) => {
-        const { locators } = job;
-        const relativeUrls = locators.map((_, idx) =>
+        const { locatorParams } = job;
+        const relativeUrls = locatorParams.map((_, idx) =>
           getRedirectAppPathHome({ reportSavedObjectId: jobId, locatorOffset: String(idx) })
         );
         const urls = getFullUrls(config, relativeUrls);

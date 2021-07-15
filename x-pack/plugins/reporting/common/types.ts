@@ -69,7 +69,7 @@ export interface ReportSource {
      * PDF V2 reports will contain locators that will be converted to {@link KibanaLocation}s when
      * generating a report
      */
-    locators?: Locator[];
+    locatorParams?: LocatorParams[];
     isDeprecated?: boolean; // set to true when the export type is being phased out
   } & BaseParams;
   meta: { objectType: string; layout?: string }; // for telemetry
@@ -176,7 +176,7 @@ export type DownloadReportFn = (jobId: JobId) => DownloadLink;
 type ManagementLink = string;
 export type ManagementLinkFn = () => ManagementLink;
 
-export interface Locator<P extends SerializableState = SerializableState> {
+export interface LocatorParams<P extends SerializableState = SerializableState> {
   id: string;
   version: string;
   params: P;

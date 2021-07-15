@@ -38,7 +38,7 @@ export const runTaskFnFactory: RunTaskFnFactory<
         getCustomLogo(reporting, conditionalHeaders, job.spaceId, jobLogger)
       ),
       mergeMap(({ logo, conditionalHeaders }) => {
-        const { browserTimezone, layout, title, locators } = job;
+        const { browserTimezone, layout, title, locatorParams } = job;
         if (apmGetAssets) apmGetAssets.end();
 
         apmGeneratePdf = apmTrans?.startSpan('generate_pdf_pipeline', 'execute');
@@ -46,7 +46,7 @@ export const runTaskFnFactory: RunTaskFnFactory<
           jobLogger,
           jobId,
           title,
-          locators,
+          locatorParams,
           browserTimezone,
           conditionalHeaders,
           layout,

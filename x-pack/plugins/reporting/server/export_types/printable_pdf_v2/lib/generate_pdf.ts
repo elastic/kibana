@@ -8,7 +8,7 @@
 import { groupBy } from 'lodash';
 import * as Rx from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
-import { Locator } from '../../../../common/types';
+import { LocatorParams } from '../../../../common/types';
 import { getRedirectAppPathHome } from '../../../../common/constants';
 import { ReportingCore } from '../../../';
 import { LevelLogger } from '../../../lib';
@@ -38,7 +38,7 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
     logger: LevelLogger,
     jobId: string,
     title: string,
-    locators: Locator[],
+    locatorParams: LocatorParams[],
     browserTimezone: string | undefined,
     conditionalHeaders: ConditionalHeaders,
     layoutParams: LayoutParams,
@@ -57,7 +57,7 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
      * For each locator, we generate a unique, relative URL that will load each of the locators in the
      * reporting client side.
      */
-    const relativeUrls = locators.map((_, idx) =>
+    const relativeUrls = locatorParams.map((_, idx) =>
       getRedirectAppPathHome({
         reportSavedObjectId: jobId,
         locatorOffset: String(idx),

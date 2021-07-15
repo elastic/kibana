@@ -13,10 +13,13 @@ import type { IUiSettingsClient, ToastsSetup } from 'src/core/public';
 import { CoreStart } from 'src/core/public';
 import { ShareContext } from 'src/plugins/share/public';
 import type { LicensingPluginSetup } from '../../../licensing/public';
-import type { LayoutParams, Locator } from '../../common/types';
+import type { LayoutParams, LocatorParams } from '../../common/types';
 import { isJobV2Params } from '../../common/job_utils';
-import type { JobParamsPNG, JobParamsPNGV2 } from '../../server/export_types/png/types';
-import type { JobParamsPDF, JobParamsPDFV2 } from '../../server/export_types/printable_pdf/types';
+import type { JobParamsPNG } from '../../server/export_types/png/types';
+import type { JobParamsPNGV2 } from '../../server/export_types/png_v2/types';
+import type { JobParamsPDF } from '../../server/export_types/printable_pdf/types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { JobParamsPDFV2 } from '../../server/export_types/printable_pdf_v2/types';
 import { checkLicense } from '../lib/license_check';
 import type { ReportingAPIClient } from '../lib/reporting_api_client';
 import { ScreenCapturePanelContent } from './screen_capture_panel_content_lazy';
@@ -57,10 +60,10 @@ const getPdfV1JobParams = (opts: JobParamsProviderOptions) => (): JobParamsPDF =
 };
 
 const getPdfV2JobParams = (opts: JobParamsProviderOptions) => (): JobParamsPDFV2 => {
-  const locator = opts.sharingData.locator as Locator;
+  const locatorParams = opts.sharingData.locatorParams as LocatorParams;
   return {
     ...jobParamsProvider(opts),
-    locators: [locator], // multi URL for PDF
+    locatorParams: [locatorParams], // multi locator for PDF
   };
 };
 
@@ -81,10 +84,7 @@ const getPngJobParamsV1 = (opts: JobParamsProviderOptions) => (): JobParamsPNG =
 };
 
 const getPngJobParamsV2 = (opts: JobParamsProviderOptions) => (): JobParamsPNGV2 => {
-  const locator = opts.sharingData.locator as Locator;
-  // TODO: Remove this once we have URL service locators since we are not going to treat locator.id as the store for the url
-  locator.id = locator.id.replace(window.location.origin + opts.apiClient.getServerBasePath(), '');
-
+  const locator = opts.sharingData.locator as LocatorParams;
   return {
     ...jobParamsProvider(opts),
     locator, // single locator for PNG

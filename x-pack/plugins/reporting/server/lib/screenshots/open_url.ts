@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Locator } from '../../../common/types';
 import { LevelLogger, startTrace } from '../';
 import { durationToNumber } from '../../../common/schema_utils';
 import { HeadlessChromiumDriver } from '../../browsers';
