@@ -2,9 +2,9 @@
 [[xpack-security-audit-logging]]
 === Audit logs
 
-You can enable auditing to keep track of security-related events such as
-authorization success and failures. Logging these events enables you to monitor
-{kib} for suspicious activity and provides evidence in the event of an attack.
+Audit logging is a https://www.elastic.co/subscriptions[subscription feature] that you can enable to keep track of security-related events,
+such as authorization success and failures. Logging these events enables you to monitor {kib} for suspicious activity and provides evidence
+in the event of an attack.
 
 Use the {kib} audit logs in conjunction with {ref}/enable-audit-logging.html[{es} audit logging] to get a
 holistic view of all security related events. {kib} defers to the {es} security
