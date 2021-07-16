@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { once } from 'lodash';
+import { once, merge } from 'lodash';
 import { Observable } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import LRU from 'lru-cache';
+import { estypes } from '@elastic/elasticsearch';
 
 import {
   CoreSetup,
@@ -91,6 +92,9 @@ import { licenseService } from './lib/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
+import aadFieldConversion from './lib/detection_engine/routes/index/signal_aad_mapping.json';
+import signalExtraFields from './lib/detection_engine/routes/index/signal_extra_fields.json';
+import { getSignalsTemplate } from './lib/detection_engine/routes/index/get_signals_template';
 
 export interface SetupPlugins {
   alerting: AlertingSetup;
@@ -418,7 +422,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     compose(core, plugins, endpointContext);
 
-    core.getStartServices().then(([_, depsStart]) => {
+    core.getStartServices().then(([coreStart, depsStart]) => {
       const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(
         depsStart.data,
         endpointContext
@@ -427,6 +431,70 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         'securitySolutionSearchStrategy',
         securitySolutionSearchStrategy
       );
+      if (isRuleRegistryEnabled) {
+        const clusterClient = coreStart.elasticsearch.client.asInternalUser;
+        const updateExistingSignalsIndices = async () => {
+          const signalIndices = await clusterClient.indices
+            .get({
+              index: `${config.signalsIndex}-*`,
+            })
+            .catch((err) => {
+              this.logger.error(`Failed to fetch existing siem signals indices: ${err.message}`);
+            });
+          if (!signalIndices || Object.keys(signalIndices.body).length === 0) {
+            return;
+          }
+          const signalsTemplate = getSignalsTemplate(config.signalsIndex);
+          const aliases: Record<string, unknown> = {};
+          Object.entries(aadFieldConversion).forEach(([key, value]) => {
+            aliases[value] = {
+              type: 'alias',
+              path: key,
+            };
+          });
+          merge(signalsTemplate.mappings.properties, aliases);
+          await clusterClient.indices
+            .putTemplate({
+              name: config.signalsIndex,
+              body: signalsTemplate as Record<string, unknown>,
+            })
+            .catch((err) => {
+              this.logger.error(
+                `Failed to install new legacy siem signals template: ${err.message}`
+              );
+            });
+          await clusterClient.indices
+            .deleteTemplate({
+              name: `${config.signalsIndex}-*`,
+            })
+            .catch((err) => {
+              if (err.meta?.body?.status !== 404) {
+                this.logger.error(`Failed to delete old signals index templates: ${err.message}`);
+              }
+            });
+          // Make sure that all signal fields we add aliases for are guaranteed to exist in the mapping for ALL historical
+          // signals indices (either by adding them to signalExtraFields or ensuring they exist in the original signals
+          // mapping) or else this call will fail and not update ANY signals indices
+          const newMapping = {
+            properties: {
+              ...signalExtraFields,
+              ...aliases,
+            },
+          };
+          await clusterClient.indices
+            .putMapping({
+              index: `${config.signalsIndex}*`,
+              body: newMapping,
+              allow_no_indices: true,
+            } as estypes.IndicesPutMappingRequest)
+            .catch((err) => {
+              this.logger.error(
+                `Failed to insert alerts as data field aliases to signals indices: ${err.message}`
+              );
+            });
+        };
+        updateExistingSignalsIndices();
+      }
     });
 
     this.telemetryEventsSender.setup(plugins.telemetry, plugins.taskManager);

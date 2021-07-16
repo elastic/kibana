@@ -1,0 +1,644 @@
+{
+  "properties": {
+    "kibana": {
+      "type": "object",
+      "properties": {
+        "alert": {
+          "type": "object",
+          "properties": {
+            "ancestors": {
+              "type": "object",
+              "properties": {
+                "depth": {
+                  "type": "alias",
+                  "path": "signal.ancestors.depth"
+                },
+                "id": {
+                  "type": "alias",
+                  "path": "signal.ancestors.id"
+                },
+                "index": {
+                  "type": "alias",
+                  "path": "signal.ancestors.index"
+                },
+                "type": {
+                  "type": "alias",
+                  "path": "signal.ancestors.type"
+                }
+              }
+            },
+            "depth": {
+              "type": "alias",
+              "path": "signal.depth"
+            },
+            "original_event": {
+              "type": "object",
+              "properties": {
+                "action": {
+                  "type": "alias",
+                  "path": "signal.original_event.action"
+                },
+                "category": {
+                  "type": "alias",
+                  "path": "signal.original_event.category"
+                },
+                "code": {
+                  "type": "alias",
+                  "path": "signal.original_event.code"
+                },
+                "created": {
+                  "type": "alias",
+                  "path": "signal.original_event.created"
+                },
+                "dataset": {
+                  "type": "alias",
+                  "path": "signal.original_event.dataset"
+                },
+                "duration": {
+                  "type": "alias",
+                  "path": "signal.original_event.duration"
+                },
+                "end": {
+                  "type": "alias",
+                  "path": "signal.original_event.end"
+                },
+                "hash": {
+                  "type": "alias",
+                  "path": "signal.original_event.hash"
+                },
+                "id": {
+                  "type": "alias",
+                  "path": "signal.original_event.id"
+                },
+                "kind": {
+                  "type": "alias",
+                  "path": "signal.original_event.kind"
+                },
+                "module": {
+                  "type": "alias",
+                  "path": "signal.original_event.module"
+                },
+                "outcome": {
+                  "type": "alias",
+                  "path": "signal.original_event.outcome"
+                },
+                "provider": {
+                  "type": "alias",
+                  "path": "signal.original_event.provider"
+                },
+                "risk_score": {
+                  "type": "alias",
+                  "path": "signal.original_event.risk_score"
+                },
+                "risk_score_norm": {
+                  "type": "alias",
+                  "path": "signal.original_event.risk_score_norm"
+                },
+                "sequence": {
+                  "type": "alias",
+                  "path": "signal.original_event.sequence"
+                },
+                "severity": {
+                  "type": "alias",
+                  "path": "signal.original_event.severity"
+                },
+                "start": {
+                  "type": "alias",
+                  "path": "signal.original_event.start"
+                },
+                "timezone": {
+                  "type": "alias",
+                  "path": "signal.original_event.timezone"
+                },
+                "type": {
+                  "type": "alias",
+                  "path": "signal.original_event.type"
+                }
+              }
+            },
+            "original_time": {
+              "type": "alias",
+              "path": "signal.original_time"
+            },
+            "risk_score": {
+              "type": "alias",
+              "path": "signal.rule.risk_score"
+            },
+            "rule": {
+              "type": "object",
+              "properties": {
+                "author": {
+                  "type": "alias",
+                  "path": "signal.rule.author"
+                },
+                "building_block_type": {
+                  "type": "alias",
+                  "path": "signal.rule.building_block_type"
+                },
+                "created_at": {
+                  "type": "alias",
+                  "path": "signal.rule.created_at"
+                },
+                "created_by": {
+                  "type": "alias",
+                  "path": "signal.rule.created_by"
+                },
+                "description": {
+                  "type": "alias",
+                  "path": "signal.rule.description"
+                },
+                "enabled": {
+                  "type": "alias",
+                  "path": "signal.rule.enabled"
+                },
+                "false_positives": {
+                  "type": "alias",
+                  "path": "signal.rule.false_positives"
+                },
+                "from": {
+                  "type": "alias",
+                  "path": "signal.rule.from"
+                },
+                "id": {
+                  "type": "alias",
+                  "path": "signal.rule.id"
+                },
+                "immutable": {
+                  "type": "alias",
+                  "path": "signal.rule.immutable"
+                },
+                "index": {
+                  "type": "alias",
+                  "path": "signal.rule.index"
+                },
+                "interval": {
+                  "type": "alias",
+                  "path": "signal.rule.interval"
+                },
+                "language": {
+                  "type": "alias",
+                  "path": "signal.rule.language"
+                },
+                "license": {
+                  "type": "alias",
+                  "path": "signal.rule.license"
+                },
+                "max_signals": {
+                  "type": "alias",
+                  "path": "signal.rule.max_signals"
+                },
+                "name": {
+                  "type": "alias",
+                  "path": "signal.rule.name"
+                },
+                "note": {
+                  "type": "alias",
+                  "path": "signal.rule.note"
+                },
+                "query": {
+                  "type": "alias",
+                  "path": "signal.rule.query"
+                },
+                "references": {
+                  "type": "alias",
+                  "path": "signal.rule.references"
+                },
+                "risk_score_mapping": {
+                  "type": "object",
+                  "properties": {
+                    "field": {
+                      "type": "alias",
+                      "path": "signal.rule.risk_score_mapping.field"
+                    },
+                    "operator": {
+                      "type": "alias",
+                      "path": "signal.rule.risk_score_mapping.operator"
+                    },
+                    "value": {
+                      "type": "alias",
+                      "path": "signal.rule.risk_score_mapping.value"
+                    }
+                  }
+                },
+                "rule_id": {
+                  "type": "alias",
+                  "path": "signal.rule.rule_id"
+                },
+                "rule_name_override": {
+                  "type": "alias",
+                  "path": "signal.rule.rule_name_override"
+                },
+                "saved_id": {
+                  "type": "alias",
+                  "path": "signal.rule.saved_id"
+                },
+                "severity_mapping": {
+                  "type": "object",
+                  "properties": {
+                    "field": {
+                      "type": "alias",
+                      "path": "signal.rule.severity_mapping.field"
+                    },
+                    "operator": {
+                      "type": "alias",
+                      "path": "signal.rule.severity_mapping.operator"
+                    },
+                    "value": {
+                      "type": "alias",
+                      "path": "signal.rule.severity_mapping.value"
+                    },
+                    "severity": {
+                      "type": "alias",
+                      "path": "signal.rule.severity_mapping.severity"
+                    }
+                  }
+                },
+                "tags": {
+                  "type": "alias",
+                  "path": "signal.rule.tags"
+                },
+                "threat": {
+                  "type": "object",
+                  "properties": {
+                    "framework": {
+                      "type": "alias",
+                      "path": "signal.rule.threat.framework"
+                    },
+                    "tactic": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "alias",
+                          "path": "signal.rule.threat.tactic.id"
+                        },
+                        "name": {
+                          "type": "alias",
+                          "path": "signal.rule.threat.tactic.name"
+                        },
+                        "reference": {
+                          "type": "alias",
+                          "path": "signal.rule.threat.tactic.reference"
+                        }
+                      }
+                    },
+                    "technique": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "alias",
+                          "path": "signal.rule.threat.technique.id"
+                        },
+                        "name": {
+                          "type": "alias",
+                          "path": "signal.rule.threat.technique.name"
+                        },
+                        "reference": {
+                          "type": "alias",
+                          "path": "signal.rule.threat.technique.reference"
+                        },
+                        "subtechnique": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "alias",
+                              "path": "signal.rule.threat.technique.subtechnique.id"
+                            },
+                            "name": {
+                              "type": "alias",
+                              "path": "signal.rule.threat.technique.subtechnique.name"
+                            },
+                            "reference": {
+                              "type": "alias",
+                              "path": "signal.rule.threat.technique.subtechnique.reference"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "threat_index": {
+                  "type": "alias",
+                  "path": "signal.rule.threat_index"
+                },
+                "threat_indicator_path": {
+                  "type": "alias",
+                  "path": "signal.rule.threat_indicator_path"
+                },
+                "threat_language": {
+                  "type": "alias",
+                  "path": "signal.rule.threat_language"
+                },
+                "threat_mapping": {
+                  "type": "object",
+                  "properties": {
+                    "entries": {
+                      "type": "object",
+                      "properties": {
+                        "field": {
+                          "type": "alias",
+                          "path": "signal.rule.threat_mapping.entries.field"
+                        },
+                        "value": {
+                          "type": "alias",
+                          "path": "signal.rule.threat_mapping.entries.value"
+                        },
+                        "type": {
+                          "type": "alias",
+                          "path": "signal.rule.threat_mapping.entries.type"
+                        }
+                      }
+                    }
+                  }
+                },
+                "threat_query": {
+                  "type": "alias",
+                  "path": "signal.rule.threat_query"
+                },
+                "threshold": {
+                  "type": "object",
+                  "properties": {
+                    "field": {
+                      "type": "alias",
+                      "path": "signal.rule.threshold.field"
+                    },
+                    "value": {
+                      "type": "alias",
+                      "path": "signal.rule.threshold.value"
+                    }
+                  }
+                },
+                "timeline_id": {
+                  "type": "alias",
+                  "path": "signal.rule.timeline_id"
+                },
+                "timeline_title": {
+                  "type": "alias",
+                  "path": "signal.rule.timeline_title"
+                },
+                "to": {
+                  "type": "alias",
+                  "path": "signal.rule.to"
+                },
+                "type": {
+                  "type": "alias",
+                  "path": "signal.rule.type"
+                },
+                "updated_at": {
+                  "type": "alias",
+                  "path": "signal.rule.updated_at"
+                },
+                "updated_by": {
+                  "type": "alias",
+                  "path": "signal.rule.updated_by"
+                },
+                "version": {
+                  "type": "alias",
+                  "path": "signal.rule.version"
+                }
+              }
+            },
+            "severity": {
+              "type": "alias",
+              "path": "signal.rule.severity"
+            },
+            "threshold_result": {
+              "type": "object",
+              "properties": {
+                "from": {
+                  "type": "alias",
+                  "path": "signal.threshold_result.from"
+                },
+                "terms": {
+                  "properties": {
+                    "field": {
+                      "type": "alias",
+                      "path": "signal.threshold_result.terms.field"
+                    },
+                    "value": {
+                      "type": "alias",
+                      "path": "signal.threshold_result.terms.value"
+                    }
+                  }
+                },
+                "cardinality": {
+                  "properties": {
+                    "field": {
+                      "type": "alias",
+                      "path": "signal.threshold_result.cardinality.field"
+                    },
+                    "value": {
+                      "type": "alias",
+                      "path": "signal.threshold_result.cardinality.value"
+                    }
+                  }
+                },
+                "count": {
+                  "type": "alias",
+                  "path": "signal.threshold_result.count"
+                }
+              }
+            },
+            "workflow_status": {
+              "type": "alias",
+              "path": "signal.status"
+            }
+          }
+        }
+      }
+    },
+    "signal": {
+      "type": "object",
+      "properties": {
+        "_meta": {
+          "type": "object",
+          "properties": {
+            "version": {
+              "type": "long"
+            }
+          }
+        },
+        "ancestors": {
+          "properties": {
+            "rule": {
+              "type": "keyword"
+            },
+            "index": {
+              "type": "keyword"
+            },
+            "id": {
+              "type": "keyword"
+            },
+            "type": {
+              "type": "keyword"
+            },
+            "depth": {
+              "type": "long"
+            }
+          }
+        },
+        "depth": {
+          "type": "integer"
+        },
+        "group": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "index": {
+              "type": "integer"
+            }
+          }
+        },
+        "rule": {
+          "type": "object",
+          "properties": {
+            "author": {
+              "type": "keyword"
+            },
+            "building_block_type": {
+              "type": "keyword"
+            },
+            "license": {
+              "type": "keyword"
+            },
+            "note": {
+              "type": "text"
+            },
+            "risk_score_mapping": {
+              "type": "object",
+              "properties": {
+                "field": {
+                  "type": "keyword"
+                },
+                "operator": {
+                  "type": "keyword"
+                },
+                "value": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "rule_name_override": {
+              "type": "keyword"
+            },
+            "severity_mapping": {
+              "type": "object",
+              "properties": {
+                "field": {
+                  "type": "keyword"
+                },
+                "operator": {
+                  "type": "keyword"
+                },
+                "value": {
+                  "type": "keyword"
+                },
+                "severity": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "threat": {
+              "type": "object",
+              "properties": {
+                "technique": {
+                  "type": "object",
+                  "properties": {
+                    "subtechnique": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "keyword"
+                        },
+                        "name": {
+                          "type": "keyword"
+                        },
+                        "reference": {
+                          "type": "keyword"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "threat_index": {
+              "type": "keyword"
+            },
+            "threat_indicator_path": {
+              "type": "keyword"
+            },
+            "threat_language": {
+              "type": "keyword"
+            },
+            "threat_mapping": {
+              "type": "object",
+              "properties": {
+                "entries": {
+                  "type": "object",
+                  "properties": {
+                    "field": {
+                      "type": "keyword"
+                    },
+                    "value": {
+                      "type": "keyword"
+                    },
+                    "type": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            },
+            "threat_query": {
+              "type": "keyword"
+            },
+            "threshold": {
+              "type": "object",
+              "properties": {
+                "field": {
+                  "type": "keyword"
+                },
+                "value": {
+                  "type": "float"
+                }
+              }
+            }
+          }
+        },
+        "threshold_result": {
+          "properties": {
+            "from": {
+              "type": "date"
+            },
+            "terms": {
+              "properties": {
+                "field": {
+                  "type": "keyword"
+                },
+                "value": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "cardinality": {
+              "properties": {
+                "field": {
+                  "type": "keyword"
+                },
+                "value": {
+                  "type": "long"
+                }
+              }
+            },
+            "count": {
+              "type": "long"
+            }
+          }
+        }
+      }
+    }
+  }
+}

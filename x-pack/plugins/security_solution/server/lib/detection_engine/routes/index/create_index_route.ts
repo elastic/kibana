@@ -26,8 +26,10 @@ import signalsPolicy from './signals_policy.json';
 import { templateNeedsUpdate } from './check_template_version';
 import { getIndexVersion } from './get_index_version';
 import { isOutdated } from '../../migrations/helpers';
+import { parseExperimentalConfigValue } from '../../../../../common/experimental_features';
+import { ConfigType } from '../../../../config';
 
-export const createIndexRoute = (router: SecuritySolutionPluginRouter) => {
+export const createIndexRoute = (router: SecuritySolutionPluginRouter, config: ConfigType) => {
   router.post(
     {
       path: DETECTION_ENGINE_INDEX_URL,
@@ -37,6 +39,10 @@ export const createIndexRoute = (router: SecuritySolutionPluginRouter) => {
       },
     },
     async (context, request, response) => {
+      const { ruleRegistryEnabled } = parseExperimentalConfigValue(config.enableExperimental);
+      if (ruleRegistryEnabled) {
+        return response.ok({ body: { acknowledged: true } });
+      }
       const siemResponse = buildSiemResponse(response);
 
       try {
