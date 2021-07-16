@@ -1027,6 +1027,21 @@ describe('PluginsService', () => {
       });
     });
 
+    it('does not try to stop `preboot` plugins and start `standard` ones if plugins.initialize is `false`', async () => {
+      config$.next({ plugins: { initialize: false } });
+
+      await pluginsService.discover({ environment: environmentPreboot });
+      await pluginsService.preboot(prebootDeps);
+      await pluginsService.setup(setupDeps);
+
+      const { contracts } = await pluginsService.start(startDeps);
+      expect(contracts).toBeInstanceOf(Map);
+      expect(contracts.size).toBe(0);
+
+      expect(prebootMockPluginSystem.stopPlugins).not.toHaveBeenCalled();
+      expect(standardMockPluginSystem.startPlugins).not.toHaveBeenCalled();
+    });
+
     it('stops `preboot` plugins and starts `standard` ones', async () => {
       await pluginsService.discover({ environment: environmentPreboot });
       await pluginsService.preboot(prebootDeps);

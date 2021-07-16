@@ -183,6 +183,14 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
   public async start(deps: PluginsServiceStartDeps) {
     this.log.debug('Plugins service starts plugins');
 
+    const config = await this.config$.pipe(first()).toPromise();
+    if (!config.initialize) {
+      this.log.info(
+        'Skipping `start` for `standard` plugins since plugin initialization is disabled.'
+      );
+      return { contracts: new Map() };
+    }
+
     await this.prebootPluginsSystem.stopPlugins();
     this.arePrebootPluginsStopped = true;
 
