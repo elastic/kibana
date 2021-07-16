@@ -33,11 +33,9 @@ import { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
 import { CoreStart } from '../../../../../src/core/public';
 import { NavigationPublicPluginStart } from '../../../../../src/plugins/navigation/public';
 import { constants, ReportingStart } from '../../../../../x-pack/plugins/reporting/public';
-import {
-  JobParamsPDF,
-  JobParamsPDFV2,
-} from '../../../../plugins/reporting/server/export_types/printable_pdf/types';
-import { JobParamsPNGV2 } from '../../../../plugins/reporting/server/export_types/png/types';
+import type { JobParamsPDF } from '../../../../plugins/reporting/server/export_types/printable_pdf/types';
+import type { JobParamsPDFV2 } from '../../../../plugins/reporting/server/export_types/printable_pdf_v2/types';
+import type { JobParamsPNGV2 } from '../../../../plugins/reporting/server/export_types/png/types';
 
 import { REPORTING_EXAMPLE_LOCATOR_ID } from '../../common';
 

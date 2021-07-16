@@ -20,5 +20,3 @@ export type JobParamsPDF = BaseParamsPDF & BaseParams;
 
 // Job payload: structure of stored job data provided by create_job
 export type TaskPayloadPDF = BaseParamsPDF & BasePayload;
-
-export * from './v2/types';
