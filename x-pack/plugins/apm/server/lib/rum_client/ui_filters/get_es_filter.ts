@@ -34,5 +34,8 @@ export function getEsFilter(uiFilters: UxUIFilters, exclude?: boolean) {
       };
     }) as ESFilter[];
 
-  return [...mappedFilters, ...environmentQuery(uiFilters.environment)];
+  return [
+    ...mappedFilters,
+    ...(exclude ? [] : environmentQuery(uiFilters.environment)),
+  ];
 }
