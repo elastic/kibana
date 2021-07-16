@@ -41,11 +41,14 @@ describe('KibanaExecutionContext', () => {
       const context: KibanaServerExecutionContext = {
         id: 'Visualization☺漢字',
         type: 'test-type',
+        name: 'test-name',
         requestId: '1234-5678',
       };
 
       const value = new ExecutionContextContainer(context).toString();
-      expect(value).toMatchInlineSnapshot(`"1234-5678"`);
+      expect(value).toMatchInlineSnapshot(
+        `"1234-5678;kibana:test-type:test-name:Visualization%E2%98%BA%E6%BC%A2%E5%AD%97"`
+      );
     });
 
     it('trims a string representation of provided execution context if it is bigger max allowed size', () => {
