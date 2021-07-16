@@ -15,7 +15,6 @@ import type { TelemetryPluginSetup } from 'src/plugins/telemetry/public';
 import type { DocLinksStart, ToastsStart } from 'src/core/public';
 import { PRIVACY_STATEMENT_URL } from '../../../telemetry/common/constants';
 import { OptInExampleFlyout } from './opt_in_example_flyout';
-import { OptInSecurityExampleFlyout } from './opt_in_security_example_flyout';
 import { LazyField } from '../../../advanced_settings/public';
 import { TrackApplicationView } from '../../../usage_collection/public';
 
@@ -26,7 +25,6 @@ const SEARCH_TERMS = ['telemetry', 'usage', 'data', 'usage data'];
 interface Props {
   telemetryService: TelemetryService;
   onQueryMatchChange: (searchTermMatches: boolean) => void;
-  isSecurityExampleEnabled: () => boolean;
   showAppliesSettingMessage: boolean;
   enableSaving: boolean;
   query?: { text: string };
@@ -37,7 +35,6 @@ interface Props {
 interface State {
   processing: boolean;
   showExample: boolean;
-  showSecurityExample: boolean;
   queryMatches: boolean | null;
   enabled: boolean;
 }
@@ -49,7 +46,6 @@ export class TelemetryManagementSection extends Component<Props, State> {
     this.state = {
       processing: false,
       showExample: false,
-      showSecurityExample: false,
       queryMatches: props.query ? this.checkQueryMatch(props.query) : null,
       enabled: this.props.telemetryService.getIsOptedIn() || false,
     };
@@ -80,9 +76,8 @@ export class TelemetryManagementSection extends Component<Props, State> {
   }
 
   render() {
-    const { telemetryService, isSecurityExampleEnabled } = this.props;
-    const { showExample, showSecurityExample, queryMatches, enabled, processing } = this.state;
-    const securityExampleEnabled = isSecurityExampleEnabled();
+    const { telemetryService } = this.props;
+    const { showExample, queryMatches, enabled, processing } = this.state;
 
     if (!telemetryService.getCanChangeOptInStatus()) {
       return null;
@@ -100,11 +95,6 @@ export class TelemetryManagementSection extends Component<Props, State> {
               fetchExample={telemetryService.fetchExample}
               onClose={this.toggleExample}
             />
-          </TrackApplicationView>
-        )}
-        {showSecurityExample && securityExampleEnabled && (
-          <TrackApplicationView viewId="optInSecurityExampleFlyout">
-            <OptInSecurityExampleFlyout onClose={this.toggleSecurityExample} />
           </TrackApplicationView>
         )}
         <EuiSplitPanel.Outer hasBorder>
@@ -182,17 +172,9 @@ export class TelemetryManagementSection extends Component<Props, State> {
   };
 
   renderDescription = () => {
-    const { isSecurityExampleEnabled } = this.props;
-    const securityExampleEnabled = isSecurityExampleEnabled();
     const clusterDataLink = (
       <EuiLink onClick={this.toggleExample} data-test-id="cluster_data_example">
         <FormattedMessage id="telemetry.clusterData" defaultMessage="cluster data" />
-      </EuiLink>
-    );
-
-    const endpointSecurityDataLink = (
-      <EuiLink onClick={this.toggleSecurityExample} data-test-id="endpoint_security_example">
-        <FormattedMessage id="telemetry.securityData" defaultMessage="endpoint security data" />
       </EuiLink>
     );
 
@@ -216,24 +198,13 @@ export class TelemetryManagementSection extends Component<Props, State> {
           />
         </p>
         <p>
-          {securityExampleEnabled ? (
-            <FormattedMessage
-              id="telemetry.seeExampleOfClusterDataAndEndpointSecuity"
-              defaultMessage="See examples of the {clusterData} and {endpointSecurityData} that we collect."
-              values={{
-                clusterData: clusterDataLink,
-                endpointSecurityData: endpointSecurityDataLink,
-              }}
-            />
-          ) : (
-            <FormattedMessage
-              id="telemetry.seeExampleOfClusterData"
-              defaultMessage="See an example of the {clusterData} that we collect."
-              values={{
-                clusterData: clusterDataLink,
-              }}
-            />
-          )}
+          <FormattedMessage
+            id="telemetry.seeExampleOfClusterData"
+            defaultMessage="See an example of the {clusterData} that we collect."
+            values={{
+              clusterData: clusterDataLink,
+            }}
+          />
         </p>
       </Fragment>
     );
@@ -275,15 +246,6 @@ export class TelemetryManagementSection extends Component<Props, State> {
   toggleExample = () => {
     this.setState({
       showExample: !this.state.showExample,
-    });
-  };
-
-  toggleSecurityExample = () => {
-    const { isSecurityExampleEnabled } = this.props;
-    const securityExampleEnabled = isSecurityExampleEnabled();
-    if (!securityExampleEnabled) return;
-    this.setState({
-      showSecurityExample: !this.state.showSecurityExample,
     });
   };
 }
