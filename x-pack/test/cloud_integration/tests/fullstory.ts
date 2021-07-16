@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
   describe('Cloud FullStory integration', function () {
+    this.tags('ciGroup13');
     before(async () => {
       // Create role mapping so user gets superuser access
       await getService('esSupertest')

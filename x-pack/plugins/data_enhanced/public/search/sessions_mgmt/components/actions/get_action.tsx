@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { CoreStart } from 'kibana/public';
 import { IClickActionDescriptor } from '../';
 import extendSessionIcon from '../../icons/extend_session.svg';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
@@ -13,29 +14,48 @@ import { UISession } from '../../types';
 import { DeleteButton } from './delete_button';
 import { ExtendButton } from './extend_button';
 import { InspectButton } from './inspect_button';
-import { ACTION, OnActionComplete } from './types';
+import { ACTION, OnActionClick, OnActionComplete } from './types';
 import { RenameButton } from './rename_button';
 
 export const getAction = (
   api: SearchSessionsMgmtAPI,
   actionType: string,
   uiSession: UISession,
+  core: CoreStart,
+  onActionClick: OnActionClick,
   onActionComplete: OnActionComplete
 ): IClickActionDescriptor | null => {
   const { id, name, expires } = uiSession;
+  const { overlays, uiSettings } = core;
   switch (actionType) {
     case ACTION.INSPECT:
       return {
         iconType: 'document',
         textColor: 'default',
-        label: <InspectButton searchSession={uiSession} />,
+        label: (
+          <InspectButton
+            overlays={overlays}
+            searchSession={uiSession}
+            uiSettings={uiSettings}
+            onActionClick={onActionClick}
+          />
+        ),
       };
 
     case ACTION.DELETE:
       return {
         iconType: 'crossInACircleFilled',
         textColor: 'default',
-        label: <DeleteButton api={api} id={id} name={name} onActionComplete={onActionComplete} />,
+        label: (
+          <DeleteButton
+            api={api}
+            id={id}
+            name={name}
+            overlays={overlays}
+            onActionComplete={onActionComplete}
+            onActionClick={onActionClick}
+          />
+        ),
       };
 
     case ACTION.EXTEND:
@@ -48,8 +68,10 @@ export const getAction = (
             id={id}
             name={name}
             expires={expires}
+            overlays={overlays}
             extendBy={api.getExtendByDuration()}
             onActionComplete={onActionComplete}
+            onActionClick={onActionClick}
           />
         ),
       };
@@ -58,7 +80,16 @@ export const getAction = (
       return {
         iconType: 'pencil',
         textColor: 'default',
-        label: <RenameButton api={api} id={id} name={name} onActionComplete={onActionComplete} />,
+        label: (
+          <RenameButton
+            api={api}
+            id={id}
+            name={name}
+            overlays={overlays}
+            onActionComplete={onActionComplete}
+            onActionClick={onActionClick}
+          />
+        ),
       };
 
     default:
