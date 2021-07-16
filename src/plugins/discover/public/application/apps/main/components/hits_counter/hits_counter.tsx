@@ -61,7 +61,7 @@ export function HitsCounter({ showResetButton, onResetQuery, savedSearchData$ }:
       justifyContent="center"
       alignItems="center"
     >
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} aria-live="polite">
         <EuiText>
           {data.fetchStatus === FetchStatus.PARTIAL && (
             <FormattedMessage
@@ -81,7 +81,12 @@ export function HitsCounter({ showResetButton, onResetQuery, savedSearchData$ }:
       </EuiFlexItem>
       {data.fetchStatus === FetchStatus.PARTIAL && (
         <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="m" />
+          <EuiLoadingSpinner
+            size="m"
+            aria-label={i18n.translate('discover.hitCountSpinnerAriaLabel', {
+              defaultMessage: 'Final hit count still loading',
+            })}
+          />
         </EuiFlexItem>
       )}
       {showResetButton && (
