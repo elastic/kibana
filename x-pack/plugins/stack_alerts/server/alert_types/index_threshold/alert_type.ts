@@ -180,7 +180,7 @@ export function getAlertType(
         groupResult.metrics && groupResult.metrics.length > 0 ? groupResult.metrics[0] : null;
       const value = metric && metric.length === 2 ? metric[1] : null;
 
-      if (value === null) {
+      if (value === null || value === undefined) {
         logger.debug(
           `alert ${ID}:${alertId} "${name}": no metrics found for group ${instanceId}} from groupResult ${JSON.stringify(
             groupResult

@@ -208,4 +208,134 @@ describe('alertType', () => {
 
     expect(alertServices.alertInstanceFactory).toHaveBeenCalledWith('all documents');
   });
+
+  it('should ensure a null result does not fire actions', async () => {
+    const customAlertServices: AlertServicesMock = alertsMock.createAlertServices();
+    data.timeSeriesQuery.mockImplementation((...args) => {
+      return {
+        results: [
+          {
+            group: 'all documents',
+            metrics: [['2021-07-14T14:49:30.978Z', null]],
+          },
+        ],
+      };
+    });
+    const params: Params = {
+      index: 'index-name',
+      timeField: 'time-field',
+      aggType: 'foo',
+      groupBy: 'all',
+      timeWindowSize: 5,
+      timeWindowUnit: 'm',
+      thresholdComparator: '<',
+      threshold: [1],
+    };
+
+    await alertType.executor({
+      alertId: uuid.v4(),
+      startedAt: new Date(),
+      previousStartedAt: new Date(),
+      services: (customAlertServices as unknown) as AlertServices<
+        {},
+        ActionContext,
+        typeof ActionGroupId
+      >,
+      params,
+      state: {
+        latestTimestamp: undefined,
+      },
+      spaceId: uuid.v4(),
+      name: uuid.v4(),
+      tags: [],
+      createdBy: null,
+      updatedBy: null,
+      rule: {
+        name: uuid.v4(),
+        tags: [],
+        consumer: '',
+        producer: '',
+        ruleTypeId: '',
+        ruleTypeName: '',
+        enabled: true,
+        schedule: {
+          interval: '1h',
+        },
+        actions: [],
+        createdBy: null,
+        updatedBy: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        throttle: null,
+        notifyWhen: null,
+      },
+    });
+
+    expect(customAlertServices.alertInstanceFactory).not.toHaveBeenCalled();
+  });
+
+  it('should ensure an undefined result does not fire actions', async () => {
+    const customAlertServices: AlertServicesMock = alertsMock.createAlertServices();
+    data.timeSeriesQuery.mockImplementation((...args) => {
+      return {
+        results: [
+          {
+            group: 'all documents',
+            metrics: [['2021-07-14T14:49:30.978Z', undefined]],
+          },
+        ],
+      };
+    });
+    const params: Params = {
+      index: 'index-name',
+      timeField: 'time-field',
+      aggType: 'foo',
+      groupBy: 'all',
+      timeWindowSize: 5,
+      timeWindowUnit: 'm',
+      thresholdComparator: '<',
+      threshold: [1],
+    };
+
+    await alertType.executor({
+      alertId: uuid.v4(),
+      startedAt: new Date(),
+      previousStartedAt: new Date(),
+      services: (customAlertServices as unknown) as AlertServices<
+        {},
+        ActionContext,
+        typeof ActionGroupId
+      >,
+      params,
+      state: {
+        latestTimestamp: undefined,
+      },
+      spaceId: uuid.v4(),
+      name: uuid.v4(),
+      tags: [],
+      createdBy: null,
+      updatedBy: null,
+      rule: {
+        name: uuid.v4(),
+        tags: [],
+        consumer: '',
+        producer: '',
+        ruleTypeId: '',
+        ruleTypeName: '',
+        enabled: true,
+        schedule: {
+          interval: '1h',
+        },
+        actions: [],
+        createdBy: null,
+        updatedBy: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        throttle: null,
+        notifyWhen: null,
+      },
+    });
+
+    expect(customAlertServices.alertInstanceFactory).not.toHaveBeenCalled();
+  });
 });
