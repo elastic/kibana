@@ -26,11 +26,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const queryBar = getService('queryBar');
   const pieChart = getService('pieChart');
-  const inspector = getService('inspector');
   const retry = getService('retry');
   const elasticChart = getService('elasticChart');
   const kibanaServer = getService('kibanaServer');
-  const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
   const enableNewChartLibraryDebug = async () => {
