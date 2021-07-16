@@ -2945,13 +2945,6 @@
     },
     "maps": {
       "properties": {
-        "settings": {
-          "properties": {
-            "showMapVisualizationTypes": {
-              "type": "boolean"
-            }
-          }
-        },
         "indexPatternsWithGeoFieldCount": {
           "type": "long"
         },
