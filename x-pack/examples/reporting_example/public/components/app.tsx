@@ -35,7 +35,7 @@ import { NavigationPublicPluginStart } from '../../../../../src/plugins/navigati
 import { constants, ReportingStart } from '../../../../../x-pack/plugins/reporting/public';
 import type { JobParamsPDF } from '../../../../plugins/reporting/server/export_types/printable_pdf/types';
 import type { JobParamsPDFV2 } from '../../../../plugins/reporting/server/export_types/printable_pdf_v2/types';
-import type { JobParamsPNGV2 } from '../../../../plugins/reporting/server/export_types/png/types';
+import type { JobParamsPNGV2 } from '../../../../plugins/reporting/server/export_types/png_v2/types';
 
 import { REPORTING_EXAMPLE_LOCATOR_ID } from '../../common';
 
@@ -107,6 +107,7 @@ export const ReportingExampleApp = ({
       ],
       objectType: 'develeloperExample',
       title: 'Reporting Developer Example',
+      forceNow: new Date().toISOString(),
     };
   };
 
@@ -123,6 +124,7 @@ export const ReportingExampleApp = ({
       },
       objectType: 'develeloperExample',
       title: 'Reporting Developer Example',
+      forceNow: new Date().toISOString(),
     };
   };
 

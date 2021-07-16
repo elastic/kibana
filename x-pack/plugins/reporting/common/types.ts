@@ -65,6 +65,11 @@ export interface ReportSource {
   created_by: string | false; // username or `false` if security is disabled. Used for ensuring users can only access the reports they've created.
   payload: {
     headers: string; // encrypted headers
+    /**
+     * PDF V2 reports will contain locators parameters (see {@link LocatorPublic}) that will be converted to {@link KibanaLocation}s when
+     * generating a report
+     */
+    locatorParams?: LocatorParams[];
     isDeprecated?: boolean; // set to true when the export type is being phased out
   } & BaseParams;
   meta: { objectType: string; layout?: string }; // for telemetry
@@ -101,11 +106,7 @@ export interface ReportDocument extends ReportDocumentHead {
 
 export interface BaseParams {
   browserTimezone?: string; // browserTimezone is optional: it is not in old POST URLs that were generated prior to being added to this interface
-  /**
-   * PDF V2 reports will contain locators parameters (see {@link LocatorPublic}) that will be converted to {@link KibanaLocation}s when
-   * generating a report
-   */
-  locatorParams?: LocatorParams[];
+
   layout?: LayoutParams;
   objectType: string;
   title: string;
