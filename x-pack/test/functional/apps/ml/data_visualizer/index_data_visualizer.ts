@@ -496,7 +496,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
   }
 
-  describe('index based', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/105087
+  describe.skip('index based', function () {
     this.tags(['mlqa']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');

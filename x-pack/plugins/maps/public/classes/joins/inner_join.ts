@@ -118,15 +118,21 @@ export class InnerJoin {
       });
     }
 
-    const joinKey = feature.properties[this._leftField.getName()];
-    const coercedKey =
-      typeof joinKey === 'undefined' || joinKey === null ? null : joinKey.toString();
-    if (coercedKey !== null && propertiesMap.has(coercedKey)) {
-      Object.assign(feature.properties, propertiesMap.get(coercedKey));
+    const joinKey = this.getJoinKey(feature);
+    if (joinKey !== null && propertiesMap.has(joinKey)) {
+      Object.assign(feature.properties, propertiesMap.get(joinKey));
       return true;
     } else {
       return false;
     }
+  }
+
+  getJoinKey(feature: Feature): string | null {
+    const joinKey =
+      feature.properties && this._leftField
+        ? feature.properties[this._leftField.getName()]
+        : undefined;
+    return joinKey === undefined || joinKey === null ? null : joinKey.toString();
   }
 
   getRightJoinSource(): ITermJoinSource {
