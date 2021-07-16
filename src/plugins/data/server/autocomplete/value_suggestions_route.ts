@@ -33,6 +33,9 @@ export function registerValueSuggestionsRoute(router: IRouter, config$: Observab
             query: schema.string(),
             filters: schema.maybe(schema.any()),
             fieldMeta: schema.maybe(schema.any()),
+            method: schema.maybe(
+              schema.oneOf([schema.literal('terms_agg'), schema.literal('terms_enum')])
+            ),
           },
           { unknowns: 'allow' }
         ),
@@ -40,13 +43,13 @@ export function registerValueSuggestionsRoute(router: IRouter, config$: Observab
     },
     async (context, request, response) => {
       const config = await config$.pipe(first()).toPromise();
-      const { field: fieldName, query, filters, fieldMeta } = request.body;
+      const { field: fieldName, query, filters, fieldMeta, method } = request.body;
       const { index } = request.params;
       const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
       try {
         const fn =
-          config.autocomplete.valueSuggestions.method === 'terms_enum'
+          (method ?? config.autocomplete.valueSuggestions.method) === 'terms_enum'
             ? termsEnumSuggestions
             : termsAggSuggestions;
         const body = await fn(

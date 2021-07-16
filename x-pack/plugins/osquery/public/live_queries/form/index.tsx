@@ -110,7 +110,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       {
         agentSelection: {
           agents: [],
-          allAgentsSelected: true,
+          allAgentsSelected: false,
           platformsSelected: [],
           policiesSelected: [],
         },

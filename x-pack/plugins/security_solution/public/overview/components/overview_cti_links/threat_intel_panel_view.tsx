@@ -25,6 +25,7 @@ import { CtiListItem } from '../../containers/overview_cti_links/helpers';
 import { useKibana } from '../../../common/lib/kibana';
 import { CtiInnerPanel } from './cti_inner_panel';
 import * as i18n from './translations';
+import { shortenCountIntoString } from '../../../common/utils/shorten_count_into_string';
 
 const DashboardLink = styled.li`
   margin: 0 ${({ theme }) => theme.eui.paddingSizes.s} 0 ${({ theme }) => theme.eui.paddingSizes.m};
@@ -84,7 +85,7 @@ export const ThreatIntelPanelView: React.FC<ThreatIntelPanelViewProps> = ({
     () => (
       <FormattedMessage
         data-test-subj="cti-total-event-count"
-        defaultMessage="Showing: {totalEventCount} {totalEventCount, plural, one {event} other {events}}"
+        defaultMessage="Showing: {totalEventCount} {totalEventCount, plural, one {indicator} other {indicators}}"
         id="xpack.securitySolution.overview.ctiDashboardSubtitle"
         values={{ totalEventCount }}
       />
@@ -94,7 +95,12 @@ export const ThreatIntelPanelView: React.FC<ThreatIntelPanelViewProps> = ({
 
   const button = useMemo(
     () => (
-      <EuiButton href={buttonHref} isDisabled={!buttonHref} target="_blank">
+      <EuiButton
+        href={buttonHref}
+        isDisabled={!buttonHref}
+        data-test-subj="cti-view-dashboard-button"
+        target="_blank"
+      >
         <FormattedMessage
           id="xpack.securitySolution.overview.ctiViewDasboard"
           defaultMessage="View dashboard"
@@ -111,7 +117,7 @@ export const ThreatIntelPanelView: React.FC<ThreatIntelPanelViewProps> = ({
     () =>
       isDashboardPluginDisabled ? (
         <CtiInnerPanel
-          data-test-subj="cti-inner-panel-info"
+          dataTestSubj="cti-inner-panel-info"
           color={'primary'}
           title={i18n.INFO_TITLE}
           body={i18n.INFO_BODY}
@@ -160,7 +166,7 @@ export const ThreatIntelPanelView: React.FC<ThreatIntelPanelViewProps> = ({
                           justifyContent="flexEnd"
                         >
                           <DashboardRightSideElement key={`${title}-count`} grow={false}>
-                            {count}
+                            {shortenCountIntoString(count)}
                           </DashboardRightSideElement>
                           <DashboardRightSideElement key={`${title}-source`} grow={false}>
                             {path ? (
