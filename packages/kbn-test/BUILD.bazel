@@ -28,6 +28,7 @@ filegroup(
 NPM_MODULE_EXTRA_FILES = [
   "jest/package.json",
   "jest-preset.js",
+  "jest_integration/jest-preset.js",
   "jest.config.js",
   "README.md",
   "package.json",
