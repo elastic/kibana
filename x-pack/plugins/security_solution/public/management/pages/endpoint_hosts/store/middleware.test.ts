@@ -46,7 +46,6 @@ import {
 } from '../../../../common/lib/endpoint_isolation/mocks';
 import { FleetActionGenerator } from '../../../../../common/endpoint/data_generators/fleet_action_generator';
 import { endpointPageHttpMock } from '../mocks';
-import { EndpointDetailsTabsTypes } from '../view/details/components/endpoint_details_tabs';
 
 jest.mock('../../policy/store/services/ingest', () => ({
   sendGetAgentConfigList: () => Promise.resolve({ items: [] }),
@@ -223,19 +222,11 @@ describe('endpoint list middleware', () => {
   describe('handle ActivityLog State Change actions', () => {
     const endpointList = getEndpointListApiResponse();
     const search = getEndpointDetailsPath({
-      name: 'endpointDetails',
+      name: 'endpointActivityLog',
       selected_endpoint: endpointList.hosts[0].metadata.agent.id,
     });
     const dispatchUserChangedUrl = () => {
       dispatchUserChangedUrlToEndpointList({ search: `?${search.split('?').pop()}` });
-    };
-    const dispatchFlyoutViewChange = () => {
-      dispatch({
-        type: 'endpointDetailsFlyoutTabChanged',
-        payload: {
-          flyoutView: EndpointDetailsTabsTypes.activityLog,
-        },
-      });
     };
 
     const fleetActionGenerator = new FleetActionGenerator('seed');
@@ -284,7 +275,6 @@ describe('endpoint list middleware', () => {
 
     it('should set ActivityLog state to loading', async () => {
       dispatchUserChangedUrl();
-      dispatchFlyoutViewChange();
 
       const loadingDispatched = waitForAction('endpointDetailsActivityLogChanged', {
         validate(action) {
