@@ -38,7 +38,7 @@ export function RemoveSeries({ seriesId }: Props) {
     >
       <EuiButtonIcon
         aria-label={i18n.translate('xpack.observability.expView.seriesEditor.removeSeries', {
-          defaultMessage: 'Click to remove series',
+          defaultMessage: 'Remove series',
         })}
         iconType="trash"
         color="text"
