@@ -66,11 +66,11 @@ describe('AnalyzeDataButton', () => {
   });
 
   describe('with environment all', () => {
-    it('does not include the environment', () => {
+    it('uses ALL_VALUES', () => {
       render(<Example environment={ENVIRONMENT_ALL.value} />);
 
       expect((screen.getByRole('link') as HTMLAnchorElement).href).toEqual(
-        'http://localhost/app/observability/exploratory-view#?sr=(apm-series:(dt:mobile,isNew:!t,op:average,rdf:(service.name:!(testServiceName)),rt:kpi-over-time,time:(from:now-15m,to:now)))'
+        'http://localhost/app/observability/exploratory-view#?sr=(apm-series:(dt:mobile,isNew:!t,op:average,rdf:(service.environment:!(ALL_VALUES),service.name:!(testServiceName)),rt:kpi-over-time,time:(from:now-15m,to:now)))'
       );
     });
   });

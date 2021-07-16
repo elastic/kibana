@@ -13,6 +13,7 @@ import {
   createExploratoryViewUrl,
   SeriesUrl,
 } from '../../../../../../observability/public';
+import { ALL_VALUES_SELECTED } from '../../../../../../observability/public';
 import {
   isIosAgentName,
   isRumAgentName,
@@ -28,19 +29,24 @@ import {
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 
+function getEnvironmentDefinition(environment?: string) {
+  switch (environment) {
+    case ENVIRONMENT_ALL.value:
+      return { [SERVICE_ENVIRONMENT]: [ALL_VALUES_SELECTED] };
+    case ENVIRONMENT_NOT_DEFINED.value:
+    case undefined:
+      return {};
+    default:
+      return { [SERVICE_ENVIRONMENT]: [environment] };
+  }
+}
+
 export function AnalyzeDataButton() {
   const { agentName, serviceName } = useApmServiceContext();
   const { services } = useKibana();
   const { urlParams } = useUrlParams();
   const { rangeTo, rangeFrom, environment } = urlParams;
   const basepath = services.http?.basePath.get();
-
-  const environmentDefinition =
-    !environment ||
-    environment === ENVIRONMENT_NOT_DEFINED.value ||
-    environment === ENVIRONMENT_ALL.value
-      ? {}
-      : { [SERVICE_ENVIRONMENT]: [environment] };
 
   if (isRumAgentName(agentName) || isIosAgentName(agentName)) {
     const href = createExploratoryViewUrl(
@@ -51,7 +57,7 @@ export function AnalyzeDataButton() {
           reportType: 'kpi-over-time',
           reportDefinitions: {
             [SERVICE_NAME]: [serviceName],
-            ...environmentDefinition,
+            ...getEnvironmentDefinition(environment),
           },
           operationType: 'average',
           isNew: true,
