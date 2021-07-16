@@ -14,11 +14,8 @@ const { RawSource } = require('webpack-sources');
 
 const UiSharedDeps = require('./src/index');
 
-const FSEVENTS_SRC = require.resolve('fsevents') || '';
 const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
 const WEBPACK_SRC = require.resolve('webpack');
-
-const FSEVENTS_EXTERNAL = FSEVENTS_SRC ? { fsevents: 'fsevents' } : {};
 
 module.exports = {
   node: {
@@ -27,7 +24,6 @@ module.exports = {
   },
   externals: {
     module: 'module',
-    ...FSEVENTS_EXTERNAL,
   },
   mode: 'production',
   entry: {
@@ -51,7 +47,7 @@ module.exports = {
   },
 
   module: {
-    noParse: [FSEVENTS_SRC, MOMENT_SRC, WEBPACK_SRC],
+    noParse: [MOMENT_SRC, WEBPACK_SRC],
     rules: [
       {
         include: [require.resolve('./src/entry.js')],
