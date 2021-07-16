@@ -7,27 +7,23 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SUMMARY = i18n.translate('xpack.securitySolution.alertDetails.summary', {
-  defaultMessage: 'Summary',
-});
-
 export const THREAT_INTEL = i18n.translate('xpack.securitySolution.alertDetails.threatIntel', {
   defaultMessage: 'Threat Intel',
 });
 
 export const INVESTIGATION_GUIDE = i18n.translate(
-  'xpack.securitySolution.alertDetails.summary.investigationGuide',
+  'xpack.securitySolution.alertDetails.overview.investigationGuide',
   {
     defaultMessage: 'Investigation guide',
   }
 );
 
-export const OVERVIEW = i18n.translate('xpack.securitySolution.alertDetails.summary.overview', {
+export const OVERVIEW = i18n.translate('xpack.securitySolution.alertDetails.overview', {
   defaultMessage: 'Overview',
 });
 
 export const DUCOMENT_SUMMARY = i18n.translate(
-  'xpack.securitySolution.alertDetails.summary.documentSummary',
+  'xpack.securitySolution.alertDetails.overview.documentSummary',
   {
     defaultMessage: 'Document Summary',
   }

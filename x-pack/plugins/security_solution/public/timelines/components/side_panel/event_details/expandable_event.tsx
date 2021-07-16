@@ -62,13 +62,11 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
   ({ isAlert, loading, handleOnEventClosed, ruleName }) => (
     <StyledEuiFlexGroup gutterSize="none" justifyContent="spaceBetween" wrap={true}>
       <EuiFlexItem grow={false}>
-        <EuiTitle size="s">
-          {!loading ? (
+        {!loading && (
+          <EuiTitle size="s">
             <h4>{isAlert && !isEmpty(ruleName) ? ruleName : i18n.EVENT_DETAILS}</h4>
-          ) : (
-            <></>
-          )}
-        </EuiTitle>
+          </EuiTitle>
+        )}
       </EuiFlexItem>
       {handleOnEventClosed && (
         <EuiFlexItem grow={false}>
