@@ -89,7 +89,6 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
       indexPatternId,
       geoField: 'coordinates',
       filterByMapBounds: false,
-      useDefaultMappings: true,
     });
     const layerDescriptor = VectorLayer.createDescriptor(
       { sourceDescriptor },

@@ -88,7 +88,6 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
         typeof descriptor.applyGlobalQuery !== 'undefined' ? descriptor.applyGlobalQuery : true,
       applyGlobalTime:
         typeof descriptor.applyGlobalTime !== 'undefined' ? descriptor.applyGlobalTime : true,
-      useDefaultMappings: false,
     };
   }
 

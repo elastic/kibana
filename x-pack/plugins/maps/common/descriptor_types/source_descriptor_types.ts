@@ -42,7 +42,6 @@ export type AbstractESSourceDescriptor = AbstractSourceDescriptor & {
   geoField?: string;
   applyGlobalQuery: boolean;
   applyGlobalTime: boolean;
-  useDefaultMappings?: boolean;
 };
 
 type AbstractAggDescriptor = {
