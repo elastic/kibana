@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { newRule } from '../../objects/rule';
+import { getNewRule } from '../../objects/rule';
 import {
   ALERTS,
   ALERTS_COUNT,
@@ -39,7 +39,7 @@ describe('Closing alerts', () => {
     loginAndWaitForPage(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
-    createCustomRuleActivated(newRule, '1', '100m', 100);
+    createCustomRuleActivated(getNewRule(), '1', '100m', 100);
     refreshPage();
     waitForAlertsToPopulate(100);
     deleteCustomRule();
