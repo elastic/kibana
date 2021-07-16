@@ -13,7 +13,8 @@ import { mergeMap } from 'rxjs/operators';
 import { lastValueFrom } from '@kbn/std';
 import { ToolingLog, isAxiosResponseError, createFailError } from '@kbn/dev-utils';
 
-import { KbnClientRequester, uriencode } from './kbn_client_requester';
+import { KbnClientRequester } from './kbn_client_requester';
+import { uriencode } from '../utils';
 
 type MigrationVersion = Record<string, string>;
 

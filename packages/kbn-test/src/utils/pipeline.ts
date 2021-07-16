@@ -6,4 +6,7 @@
  * Side Public License, v 1.
  */
 
-export * from './kbn_client';
+import { promisify } from 'util';
+import { pipeline } from 'stream';
+
+export const asyncPipeline = promisify(pipeline);

@@ -13,6 +13,8 @@ import Qs from 'querystring';
 import Axios, { AxiosResponse, ResponseType } from 'axios';
 import { ToolingLog, isAxiosRequestError, isAxiosResponseError } from '@kbn/dev-utils';
 
+import { uriencode } from '../utils';
+
 const isConcliftOnGetError = (error: any) => {
   return (
     isAxiosResponseError(error) && error.config.method === 'GET' && error.response.status === 409
@@ -34,30 +36,6 @@ export const pathWithSpace = (space?: string) => {
     const path = uriencode(strings, ...args);
     return path.startsWith('/') || path === '' ? `${prefix}${path}` : `${prefix}/${path}`;
   };
-};
-
-export const uriencode = (
-  strings: TemplateStringsArray,
-  ...values: Array<string | number | boolean>
-) => {
-  const queue = strings.slice();
-
-  if (queue.length === 0) {
-    throw new Error('how could strings passed to `uriencode` template tag be empty?');
-  }
-
-  if (queue.length !== values.length + 1) {
-    throw new Error('strings and values passed to `uriencode` template tag are unbalanced');
-  }
-
-  // pull the first string off the queue, there is one less item in `values`
-  // since the values are always wrapped in strings, so we shift the extra string
-  // off the queue to balance the queue and values array.
-  const leadingString = queue.shift()!;
-  return queue.reduce(
-    (acc, string, i) => `${acc}${encodeURIComponent(values[i])}${string}`,
-    leadingString
-  );
 };
 
 const DEFAULT_MAX_ATTEMPTS = 5;

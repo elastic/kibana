@@ -6,4 +6,12 @@
  * Side Public License, v 1.
  */
 
-export * from './kbn_client';
+import Path from 'path';
+
+import { REPO_ROOT } from '@kbn/dev-utils';
+
+const DATA_DIR = Path.resolve(REPO_ROOT, 'data/test-apm-server');
+
+export const INSTALLS_DIR = Path.resolve(DATA_DIR, 'installs');
+export const ARCHIVES_DIR = Path.resolve(DATA_DIR, 'archives');
+export const STAGING_DIR = Path.resolve(ARCHIVES_DIR, 'staging');

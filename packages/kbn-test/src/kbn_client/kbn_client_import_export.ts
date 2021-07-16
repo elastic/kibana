@@ -14,7 +14,8 @@ import Path from 'path';
 import FormData from 'form-data';
 import { ToolingLog, isAxiosResponseError, createFailError, REPO_ROOT } from '@kbn/dev-utils';
 
-import { KbnClientRequester, uriencode, ReqOptions } from './kbn_client_requester';
+import { uriencode } from '../utils';
+import { KbnClientRequester, ReqOptions } from './kbn_client_requester';
 import { KbnClientSavedObjects } from './kbn_client_saved_objects';
 import { parseArchive } from './import_export/parse_archive';
 

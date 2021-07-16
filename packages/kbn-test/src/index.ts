@@ -57,3 +57,7 @@ export { runJest } from './jest/run';
 export * from './kbn_archiver_cli';
 
 export * from './kbn_client';
+
+export { uriencode } from './utils';
+
+export * from './apm_server';

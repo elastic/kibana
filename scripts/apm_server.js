@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from './kbn_client';
+require('../src/setup_node_env/no_transpilation');
+require('@kbn/test').runApmServerCli();

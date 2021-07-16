@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { KbnClientRequester, uriencode } from './kbn_client_requester';
+import { KbnClientRequester } from './kbn_client_requester';
+import { uriencode } from '../utils';
 
 interface UpdateBody {
   name: string;

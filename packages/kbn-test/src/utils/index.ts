@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from './kbn_client';
+export * from './uriencode';
+export * from './pipeline';
