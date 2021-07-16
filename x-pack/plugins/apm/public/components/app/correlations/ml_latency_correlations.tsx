@@ -339,7 +339,7 @@ export function MlLatencyCorrelations({ onClose }: Props) {
                 'xpack.apm.correlations.latencyCorrelations.ccsWarningCalloutBody',
                 {
                   defaultMessage:
-                    'Data for the correlation analysis could not be retrieved. This feature is only supported for versions 7.14 and above.',
+                    'Data for the correlation analysis could not be fully retrieved. This feature is only supported for versions 7.14 and above.',
                 }
               )}
             </p>

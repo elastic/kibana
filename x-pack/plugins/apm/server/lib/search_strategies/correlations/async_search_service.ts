@@ -276,7 +276,7 @@ export const asyncSearchServiceProvider = (
     const sortedValues = values.sort((a, b) => b.correlation - a.correlation);
 
     return {
-      ccsWarning: true,
+      ccsWarning,
       error,
       log,
       isRunning,
