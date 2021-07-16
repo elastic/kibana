@@ -1,5 +1,5 @@
 get:
-  summary: PackagePolicies - List
+  summary: Package policies - List
   tags: []
   responses:
     '200':
@@ -26,7 +26,7 @@ get:
   parameters: []
 parameters: []
 post:
-  summary: PackagePolicies - Create
+  summary: Package policy - Create
   operationId: post-packagePolicies
   responses:
     '200':

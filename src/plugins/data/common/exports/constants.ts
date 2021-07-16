@@ -6,12 +6,6 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { shallowWithIntl } from '@kbn/test/jest';
-import ExampleSecurityPayload from './example_security_payload';
-
-describe('example security payload', () => {
-  it('renders as expected', () => {
-    expect(shallowWithIntl(<ExampleSecurityPayload />)).toMatchSnapshot();
-  });
-});
+export const CSV_FORMULA_CHARS = ['=', '+', '-', '@'];
+export const nonAlphaNumRE = /[^a-zA-Z0-9]/;
+export const allDoubleQuoteRE = /"/g;
