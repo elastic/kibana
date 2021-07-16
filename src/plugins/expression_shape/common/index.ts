@@ -9,3 +9,4 @@
 export * from './constants';
 export * from './types';
 export * from './expression_functions';
+export { getAvailableShapes } from './lib';

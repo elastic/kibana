@@ -8,7 +8,7 @@
 
 import { createShape } from '../../../../presentation_util/public';
 
-export const TriangleRight = createShape({
+const TriangleRight = createShape({
   viewBox: {
     minX: 0,
     minY: 0,
@@ -19,3 +19,6 @@ export const TriangleRight = createShape({
     points: '0, 10 0, 100 90, 100',
   },
 });
+
+// eslint-disable-next-line import/no-default-export
+export default TriangleRight;

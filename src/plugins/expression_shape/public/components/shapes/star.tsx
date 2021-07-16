@@ -8,7 +8,7 @@
 
 import { createShape } from '../../../../presentation_util/public';
 
-export const Star = createShape({
+const Star = createShape({
   viewBox: {
     minX: 0,
     minY: 0,
@@ -20,3 +20,6 @@ export const Star = createShape({
       '41.183, 37.865 12.652, 37.865 35.734, 54.635 26.917, 81.771 50.000, 65.000 73.265, 81.904 64.266, 54.635 87.348, 37.865 58.817, 37.865 50.07, 10.515',
   },
 });
+
+// eslint-disable-next-line import/no-default-export
+export default Star;

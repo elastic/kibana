@@ -7,3 +7,4 @@
  */
 
 export * from './view_box';
+export * from './available_shapes';

@@ -6,19 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { createShape } from '../../../../presentation_util/public';
-
-const Triangle = createShape({
-  viewBox: {
-    minX: 0,
-    minY: 0,
-    width: 100,
-    height: 100,
-  },
-  shapeProps: {
-    points: '50.000, 20.000 15.359, 80.000 84.641, 80.000',
-  },
-});
-
-// eslint-disable-next-line import/no-default-export
-export default Triangle;
+export * from './use_load';

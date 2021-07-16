@@ -8,7 +8,7 @@
 
 import { createShape } from '../../../../presentation_util/public';
 
-export const SpeechBubble = createShape({
+const SpeechBubble = createShape({
   viewBox: {
     minX: 0,
     minY: 0,
@@ -20,3 +20,6 @@ export const SpeechBubble = createShape({
     strokeLinejoin: 'round',
   },
 });
+
+// eslint-disable-next-line import/no-default-export
+export default SpeechBubble;

@@ -16,3 +16,4 @@ export function plugin() {
 
 export * from './expression_renderers';
 export * from './components/shapes';
+export * from '../common/types';

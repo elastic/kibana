@@ -8,8 +8,8 @@
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { ShapePreview } from '../shape_preview';
-import { shapes } from '../../../../../../../src/plugins/expression_shape/public';
+import { Shape } from '../../../../../../../src/plugins/expression_shape/public';
 
 storiesOf('components/Shapes/ShapePreview', module)
-  .add('arrow', () => <ShapePreview shape={shapes.arrow} />)
-  .add('square', () => <ShapePreview shape={shapes.square} />);
+  .add('arrow', () => <ShapePreview shape={Shape.ARROW} />)
+  .add('square', () => <ShapePreview shape={Shape.SQUARE} />);

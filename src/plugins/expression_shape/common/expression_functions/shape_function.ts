@@ -9,6 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { ExpressionShapeFunction, Shape } from '../types';
 import { SVG } from '../constants';
+import { getAvailableShapes } from '../lib';
 
 export const strings = {
   help: i18n.translate('expressionShape.functions.shapeHelpText', {
@@ -37,6 +38,18 @@ export const strings = {
       defaultMessage: `Maintain the shape's original aspect ratio?`,
     }),
   },
+};
+
+export const errors = {
+  invalidShape: (shape: string) =>
+    new Error(
+      i18n.translate('expressionShape.functions.shape.invalidShapeErrorMessage', {
+        defaultMessage: "Invalid value: '{shape}'. Such a shape doesn't exist.",
+        values: {
+          shape,
+        },
+      })
+    ),
 };
 
 export const shapeFunction: ExpressionShapeFunction = () => {
@@ -78,9 +91,16 @@ export const shapeFunction: ExpressionShapeFunction = () => {
         options: [true, false],
       },
     },
-    fn: (input, args) => ({
-      type: 'shape',
-      ...args,
-    }),
+    fn: (input, args) => {
+      const avaliableShapes = getAvailableShapes();
+      if (!avaliableShapes.includes(args.shape)) {
+        throw errors.invalidShape(args.shape);
+      }
+
+      return {
+        type: 'shape',
+        ...args,
+      };
+    },
   };
 };

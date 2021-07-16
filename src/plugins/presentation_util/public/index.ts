@@ -41,6 +41,8 @@ export {
   ShapeType,
 } from './components';
 
+export { useLoad } from './hooks';
+
 export * from './components/types';
 
 export {

@@ -7,32 +7,47 @@
 
 import React, { FC } from 'react';
 import PropTypes from 'prop-types';
-import { ViewBoxParams, ShapeType } from '../../../../../../src/plugins/presentation_util/public';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import { getShape, Shape } from '../../../../../../src/plugins/expression_shape/public';
+import {
+  withSuspense,
+  ViewBoxParams,
+  ShapeType,
+  ShapeProps,
+  useLoad,
+} from '../../../../../../src/plugins/presentation_util/public';
 
 interface Props {
-  shape?: ShapeType;
+  shape?: Shape;
 }
 
-export const ShapePreview: FC<Props> = ({ shape: Shape }) => {
-  if (!Shape) return <div className="canvasShapePreview" />;
+function getViewBox(defaultWidth: number, defaultViewBox: ViewBoxParams): ViewBoxParams {
+  const { minX, minY, width, height } = defaultViewBox;
+  return {
+    minX: minX - defaultWidth / 2,
+    minY: minY - defaultWidth / 2,
+    width: width + defaultWidth,
+    height: height + defaultWidth,
+  };
+}
 
-  function getViewBox(defaultWidth: number, defaultViewBox: ViewBoxParams): ViewBoxParams {
-    const { minX, minY, width, height } = defaultViewBox;
-    return {
-      minX: minX - defaultWidth / 2,
-      minY: minY - defaultWidth / 2,
-      width: width + defaultWidth,
-      height: height + defaultWidth,
-    };
-  }
+export const ShapePreview: FC<Props> = ({ shape }) => {
+  const shapeLoader = shape ? getShape(shape) : undefined;
+  const { data, error, loading } = useLoad<{ default: ShapeType }>(shapeLoader);
 
+  if (!shapeLoader || !data || !data.default) return <div className="canvasShapePreview" />;
+  if (loading) return <EuiLoadingSpinner />;
+  if (error) throw new Error(error.message);
+
+  const loadedShape = data?.default || {};
+  const ShapeComponent = withSuspense<ShapeProps>(loadedShape.Component);
   return (
     <div className="canvasShapePreview">
-      <Shape.Component
+      <ShapeComponent
         shapeAttributes={{
           fill: 'none',
           stroke: 'black',
-          viewBox: getViewBox(5, Shape.data.viewBox),
+          viewBox: getViewBox(5, loadedShape.data?.viewBox),
         }}
       />
     </div>
@@ -40,5 +55,5 @@ export const ShapePreview: FC<Props> = ({ shape: Shape }) => {
 };
 
 ShapePreview.propTypes = {
-  shape: PropTypes.func,
+  shape: PropTypes.string,
 };

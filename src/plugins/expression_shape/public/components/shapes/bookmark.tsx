@@ -8,7 +8,7 @@
 
 import { createShape } from '../../../../presentation_util/public';
 
-export const Bookmark = createShape({
+const Bookmark = createShape({
   viewBox: {
     minX: 0,
     minY: 0,
@@ -19,3 +19,6 @@ export const Bookmark = createShape({
     points: '0,0 60,0 60,95 30,75 0,95 0,0',
   },
 });
+
+// eslint-disable-next-line import/no-default-export
+export default Bookmark;

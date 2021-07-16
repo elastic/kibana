@@ -8,7 +8,7 @@
 
 import { createShape } from '../../../../presentation_util/public';
 
-export const Rhombus = createShape({
+const Rhombus = createShape({
   viewBox: {
     minX: 0,
     minY: 0,
@@ -19,3 +19,6 @@ export const Rhombus = createShape({
     points: '50,10 10,50 50,90 90,50',
   },
 });
+
+// eslint-disable-next-line import/no-default-export
+export default Rhombus;
