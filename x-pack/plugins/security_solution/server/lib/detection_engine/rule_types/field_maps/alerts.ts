@@ -6,74 +6,14 @@
  */
 
 export const alertsFieldMap = {
-  'kibana.alert.consumer': {
-    type: 'keyword',
-    array: false,
-    required: true,
-  },
-  'kibana.alert.space_ids': {
-    type: 'keyword',
+  'kibana.alert.ancestors': {
+    type: 'object',
     array: true,
-    required: true,
-  },
-  'kibana.alert._meta_version': {
-    type: 'keyword',
-    array: false,
-    required: true,
-  },
-  'kibana.alert.depth': {
-    type: 'long',
-    array: false,
-    required: true,
-  },
-  'kibana.alert.original_time': {
-    type: 'date',
-    array: false,
-    required: true,
-  },
-  'kibana.alert.duration': {
-    type: 'long',
-    array: false,
-    required: true,
-  },
-  'kibana.alert.workflow_status': {
-    type: 'keyword',
-    array: false,
-    required: true,
-  },
-  'kibana.alert.workflow_user': {
-    type: 'keyword',
-    array: false,
-    required: true,
-  },
-  'kibana.alert.workflow_reason': {
-    type: 'text',
-    array: false,
-    required: true,
-  },
-  'kibana.alert.system_status': {
-    type: 'keyword',
-    array: false,
-    required: true,
-  },
-  'kibana.alert.severity': {
-    type: 'keyword',
-    array: false,
-    required: true,
-  },
-  'kibana.alert.risk_score': {
-    type: 'long',
-    array: false,
     required: true,
   },
   'kibana.alert.ancestors.depth': {
     type: 'long',
     array: false,
-    required: true,
-  },
-  'kibana.alert.ancestors': {
-    type: 'object',
-    array: true,
     required: true,
   },
   'kibana.alert.ancestors.id': {
@@ -90,6 +30,16 @@ export const alertsFieldMap = {
     type: 'keyword',
     array: false,
     required: true,
+  },
+  'kibana.alert.depth': {
+    type: 'long',
+    array: false,
+    required: true,
+  },
+  'kibana.alert.original_event': {
+    type: 'object',
+    array: false,
+    required: false,
   },
   'kibana.alert.original_event.action': {
     type: 'keyword',
@@ -121,5 +71,124 @@ export const alertsFieldMap = {
     array: false,
     required: true,
   },
-  // TODO: rule fields
+  'kibana.alert.original_time': {
+    type: 'date',
+    array: false,
+    required: true,
+  },
+  'kibana.alert.threat': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'kibana.alert.threat.framework': {
+    type: 'keyword',
+    array: false,
+    required: true,
+  },
+  'kibana.alert.threat.tactic': {
+    type: 'keyword',
+    array: false,
+    required: true,
+  },
+  'kibana.alert.threat.tactic.id': {
+    type: 'keyword',
+    array: false,
+    required: true,
+  },
+  'kibana.alert.threat.tactic.name': {
+    type: 'keyword',
+    array: false,
+    required: true,
+  },
+  'kibana.alert.threat.tactic.reference': {
+    type: 'keyword',
+    array: false,
+    required: true,
+  },
+  'kibana.alert.threat.technique': {
+    type: 'object',
+    array: false,
+    required: true,
+  },
+  'kibana.alert.threat.technique.id': {
+    type: 'keyword',
+    array: false,
+    required: true,
+  },
+  'kibana.alert.threat.technique.name': {
+    type: 'keyword',
+    array: false,
+    required: true,
+  },
+  'kibana.alert.threat.technique.reference': {
+    type: 'keyword',
+    array: false,
+    required: true,
+  },
+  'kibana.alert.threat.technique.subtechnique': {
+    type: 'object',
+    array: false,
+    required: true,
+  },
+  'kibana.alert.threat.technique.subtechnique.id': {
+    type: 'keyword',
+    array: false,
+    required: true,
+  },
+  'kibana.alert.threat.technique.subtechnique.name': {
+    type: 'keyword',
+    array: false,
+    required: true,
+  },
+  'kibana.alert.threat.technique.subtechnique.reference': {
+    type: 'keyword',
+    array: false,
+    required: true,
+  },
+  'kibana.alert.threshold_result': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'kibana.alert.threshold_result.cardinality': {
+    type: 'object',
+    array: false,
+    required: true,
+  },
+  'kibana.alert.threshold_result.cardinality.field': {
+    type: 'keyword',
+    array: false,
+    required: true,
+  },
+  'kibana.alert.threshold_result.cardinality.value': {
+    type: 'long',
+    array: false,
+    required: true,
+  },
+  'kibana.alert.threshold_result.count': {
+    type: 'long',
+    array: false,
+    required: true,
+  },
+  'kibana.alert.threshold_result.from': {
+    type: 'date',
+    array: false,
+    required: true,
+  },
+  'kibana.alert.threshold_result.terms': {
+    type: 'object',
+    array: false,
+    required: true,
+  },
+  'kibana.alert.threshold_result.terms.field': {
+    type: 'keyword',
+    array: false,
+    required: true,
+  },
+  'kibana.alert.threshold_result.terms.value': {
+    type: 'long',
+    array: false,
+    required: true,
+  },
 };

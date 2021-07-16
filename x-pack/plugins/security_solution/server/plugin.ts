@@ -93,6 +93,7 @@ import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
 import { alertsFieldMap } from './lib/detection_engine/rule_types/field_maps/alerts';
+import { rulesFieldMap } from './lib/detection_engine/rule_types/field_maps/rules';
 import { getKibanaPrivilegesFeaturePrivileges } from './features';
 
 export interface SetupPlugins {
@@ -216,7 +217,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               settings: {
                 number_of_shards: 1,
               },
-              mappings: mappingFromFieldMap(alertsFieldMap),
+              mappings: mappingFromFieldMap({ ...alertsFieldMap, ...rulesFieldMap }),
             },
           },
         });
