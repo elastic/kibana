@@ -17128,7 +17128,6 @@
     "xpack.observability.expView.seriesEditor.clearFilter": "フィルターを消去",
     "xpack.observability.expView.seriesEditor.filters": "フィルター",
     "xpack.observability.expView.seriesEditor.name": "名前",
-    "xpack.observability.expView.seriesEditor.removeSeries": "クリックすると、系列を削除します",
     "xpack.observability.expView.seriesEditor.time": "時間",
     "xpack.observability.featureCatalogueDescription": "専用UIで、ログ、メトリック、アプリケーショントレース、システム可用性を連結します。",
     "xpack.observability.featureCatalogueDescription1": "インフラストラクチャメトリックを監視します。",

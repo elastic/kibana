@@ -17364,7 +17364,6 @@
     "xpack.observability.expView.seriesEditor.clearFilter": "清除筛选",
     "xpack.observability.expView.seriesEditor.filters": "筛选",
     "xpack.observability.expView.seriesEditor.name": "名称",
-    "xpack.observability.expView.seriesEditor.removeSeries": "单击移除序列",
     "xpack.observability.expView.seriesEditor.time": "时间",
     "xpack.observability.featureCatalogueDescription": "通过专用 UI 整合您的日志、指标、应用程序跟踪和系统可用性。",
     "xpack.observability.featureCatalogueDescription1": "监测基础架构指标。",
