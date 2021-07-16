@@ -12,7 +12,7 @@ import { BaseParams, BasePayload } from '../../types';
 
 interface BaseParamsPDFV2<P extends SerializableState = SerializableState> {
   layout: LayoutParams;
-  forceNow?: string;
+  forceNow: string;
   /**
    * This value is used to re-create the same visual state as when the report was requested as well as navigate to the correct page.
    */
