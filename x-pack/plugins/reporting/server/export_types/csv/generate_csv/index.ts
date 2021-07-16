@@ -8,12 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import { ElasticsearchClient, IUiSettingsClient } from 'src/core/server';
 import { ReportingConfig } from '../../../';
+import { createEscapeValue } from '../../../../../../../src/plugins/data/common';
 import { CancellationToken } from '../../../../../../plugins/reporting/common';
 import { CSV_BOM_CHARS } from '../../../../common/constants';
 import { byteSizeValueToNumber } from '../../../../common/schema_utils';
 import { LevelLogger } from '../../../lib';
 import { getFieldFormats } from '../../../services';
-import { createEscapeValue } from '../../csv_searchsource/generate_csv/escape_value';
 import { MaxSizeStringBuilder } from '../../csv_searchsource/generate_csv/max_size_string_builder';
 import {
   IndexPatternSavedObjectDeprecatedCSV,
