@@ -30,6 +30,9 @@ export const TelemetryEndpointTaskConstants = {
   VERSION: '1.0.0',
 };
 
+// Endpoint agent uses this Policy ID while it's installing.
+const DefaultEndpointPolicyIdToIgnore = '00000000-0000-0000-0000-000000000000';
+
 /** Telemetry Endpoint Task
  *
  * The Endpoint Telemetry task is a daily batch job that collects and transmits non-sensitive
@@ -176,7 +179,7 @@ export class TelemetryEndpointTask {
     }
 
     const fleetAgents = agentsResponse?.agents.reduce((cache, agent) => {
-      if (agent.id === '00000000-0000-0000-0000-000000000000') {
+      if (agent.id === DefaultEndpointPolicyIdToIgnore) {
         return cache;
       }
 
