@@ -23,7 +23,6 @@ import {
 import {
   BulkInstallPackageInfo,
   BulkInstallPackagesResponse,
-  CreateFleetSetupResponse,
   IBulkInstallPackageHTTPError,
   PostIngestSetupResponse,
 } from '../../../fleet/common/types/rest_spec';
@@ -79,7 +78,7 @@ async function doIngestSetup(kbnClient: KbnClient) {
     const setupResponse = (await kbnClient.request({
       path: AGENTS_SETUP_API_ROUTES.CREATE_PATTERN,
       method: 'POST',
-    })) as AxiosResponse<CreateFleetSetupResponse>;
+    })) as AxiosResponse<PostIngestSetupResponse>;
 
     if (!setupResponse.data.isInitialized) {
       console.error(setupResponse.data);

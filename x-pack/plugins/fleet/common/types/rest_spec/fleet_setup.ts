@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-export interface CreateFleetSetupResponse {
+export interface PostIngestSetupResponse {
   isInitialized: boolean;
+  nonFatalErrors: Array<{ name: string; message: string }>;
 }
 
 export interface GetFleetStatusResponse {

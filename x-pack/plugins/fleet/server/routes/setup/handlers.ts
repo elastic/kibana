@@ -46,21 +46,20 @@ export const fleetSetupHandler: RequestHandler = async (context, request, respon
   try {
     const soClient = context.core.savedObjects.client;
     const esClient = context.core.elasticsearch.client.asCurrentUser;
-    const body: PostIngestSetupResponse = await setupIngestManager(soClient, esClient);
+    const setupStatus = await setupIngestManager(soClient, esClient);
+    const body: PostIngestSetupResponse = {
+      ...setupStatus,
+      nonFatalErrors: setupStatus.nonFatalErrors.map((e) => {
+        // JSONify the error object so it can be displayed properly in the UI
+        const error = e.error ?? e;
+        return {
+          name: error.name,
+          message: error.message,
+        };
+      }),
+    };
 
-    return response.ok({
-      body: {
-        ...body,
-        nonFatalErrors: body.nonFatalErrors?.map((e) => {
-          // JSONify the error object so it can be displayed properly in the UI
-          const error = e.error ?? e;
-          return {
-            name: error.name,
-            message: error.message,
-          };
-        }),
-      },
-    });
+    return response.ok({ body });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });
   }
