@@ -68,17 +68,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('has the correct start date', () => {
         expectSnapshot(
           new Date(first(throughputResponse.currentPeriod)?.x ?? NaN).toISOString()
-        ).toMatchInline(`"2020-12-08T13:57:30.000Z"`);
+        ).toMatchInline(`"2020-12-08T13:57:00.000Z"`);
       });
 
       it('has the correct end date', () => {
         expectSnapshot(
           new Date(last(throughputResponse.currentPeriod)?.x ?? NaN).toISOString()
-        ).toMatchInline(`"2020-12-08T14:27:30.000Z"`);
+        ).toMatchInline(`"2020-12-08T14:27:00.000Z"`);
       });
 
       it('has the correct number of buckets', () => {
-        expectSnapshot(throughputResponse.currentPeriod.length).toMatchInline(`61`);
+        expectSnapshot(throughputResponse.currentPeriod.length).toMatchInline(`31`);
       });
 
       it('has the correct throughput', () => {
@@ -122,26 +122,26 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('has the correct start date', () => {
         expectSnapshot(
           new Date(first(throughputResponse.currentPeriod)?.x ?? NaN).toISOString()
-        ).toMatchInline(`"2020-12-08T14:12:50.000Z"`);
+        ).toMatchInline(`"2020-12-08T14:12:00.000Z"`);
 
         expectSnapshot(
           new Date(first(throughputResponse.previousPeriod)?.x ?? NaN).toISOString()
-        ).toMatchInline(`"2020-12-08T14:12:50.000Z"`);
+        ).toMatchInline(`"2020-12-08T14:12:00.000Z"`);
       });
 
       it('has the correct end date', () => {
         expectSnapshot(
           new Date(last(throughputResponse.currentPeriod)?.x ?? NaN).toISOString()
-        ).toMatchInline(`"2020-12-08T14:27:50.000Z"`);
+        ).toMatchInline(`"2020-12-08T14:27:00.000Z"`);
 
         expectSnapshot(
           new Date(last(throughputResponse.previousPeriod)?.x ?? NaN).toISOString()
-        ).toMatchInline(`"2020-12-08T14:27:50.000Z"`);
+        ).toMatchInline(`"2020-12-08T14:27:00.000Z"`);
       });
 
       it('has the correct number of buckets', () => {
-        expectSnapshot(throughputResponse.currentPeriod.length).toMatchInline(`91`);
-        expectSnapshot(throughputResponse.previousPeriod.length).toMatchInline(`91`);
+        expectSnapshot(throughputResponse.currentPeriod.length).toMatchInline(`16`);
+        expectSnapshot(throughputResponse.previousPeriod.length).toMatchInline(`16`);
       });
 
       it('has the correct throughput', () => {
