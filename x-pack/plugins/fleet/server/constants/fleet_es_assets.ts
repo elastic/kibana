@@ -122,6 +122,8 @@ processors:
         trusted_users:
           - username: elastic
             realm: reserved
+          - username: cloud-internal-agent-server
+            realm: found
   - remove:
       field: _security
       ignore_missing: true
