@@ -325,8 +325,8 @@ export const getCodeSignatureValue = (
   if (Array.isArray(codeSignature) && codeSignature.length > 0) {
     return codeSignature.map((signature) => {
       return {
-        subjectName: signature.subject_name ?? '',
-        trusted: signature?.trusted.toString() ?? '',
+        subjectName: signature?.subject_name ?? '',
+        trusted: signature?.trusted?.toString() ?? '',
       };
     });
   } else {
