@@ -70,8 +70,14 @@ export const createRuleTypeMocks = () => {
     executor: async ({ params }: { params: Record<string, any> }) => {
       return alertExecutor({
         services,
-        rule: { consumer: APM_SERVER_FEATURE_ID },
         params,
+        rule: {
+          consumer: APM_SERVER_FEATURE_ID,
+          name: 'name',
+          producer: 'producer',
+          ruleTypeId: 'ruleTypeId',
+          ruleTypeName: 'ruleTypeName',
+        },
         startedAt: new Date(),
       });
     },
