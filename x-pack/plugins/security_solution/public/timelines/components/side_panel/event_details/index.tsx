@@ -32,12 +32,10 @@ import {
   UNISOLATE_HOST,
 } from '../../../../detections/components/host_isolation/translations';
 import { ALERT_DETAILS } from './translations';
-import { useIsolationPrivileges } from '../../../../common/hooks/endpoint/use_isolate_privileges';
 import { isIsolationSupported } from '../../../../../common/endpoint/service/host_isolation/utils';
 import { endpointAlertCheck } from '../../../../common/utils/endpoint_alert_check';
 import { useWithCaseDetailsRefresh } from '../../../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
 import { TimelineEventsDetailsItem } from '../../../../../common';
-import { Ecs } from '../../../../../common/ecs';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
@@ -70,7 +68,7 @@ const getFieldValue = (
 interface EventDetailsPanelProps {
   browserFields: BrowserFields;
   docValueFields: DocValueFields[];
-  expandedEvent: { eventId: string; indexName: string; ecsData: Ecs };
+  expandedEvent: { eventId: string; indexName: string };
   handleOnEventClosed: () => void;
   isFlyoutView?: boolean;
   tabType: TimelineTabs;
@@ -108,7 +106,6 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     setIsIsolateActionSuccessBannerVisible(false);
   }, []);
 
-  const { isAllowed: isIsolationAllowed } = useIsolationPrivileges();
   const showHostIsolationPanel = useCallback((action) => {
     if (action === 'isolateHost' || action === 'unisolateHost') {
       setIsHostIsolationPanel(true);
@@ -227,22 +224,18 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         )}
       </StyledEuiFlyoutBody>
       {
-        /* isIsolationAllowed &&
-        isEndpointAlert &&
-        isolationSupported &&
-        isHostIsolationPanelOpen === false && */
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <TakeActionDropdown
-                ecsData={expandedEvent.ecsData}
+                agentId={agentId}
+                eventId={expandedEvent?.eventId}
                 isAlert={isAlert}
-                isIsolationAllowed={isIsolationAllowed}
                 isEndpointAlert={isEndpointAlert}
                 isolationSupported={isolationSupported}
                 isHostIsolationPanelOpen={isHostIsolationPanelOpen}
                 onChange={showHostIsolationPanel}
-                agentId={agentId}
+                // timelineId={timelineId}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
