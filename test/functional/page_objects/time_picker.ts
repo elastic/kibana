@@ -102,11 +102,15 @@ export class TimePickerPageObject extends FtrService {
   private async showStartEndTimes() {
     // This first await makes sure the superDatePicker has loaded before we check for the ShowDatesButton
     await this.testSubjects.exists('superDatePickerToggleQuickMenuButton', { timeout: 20000 });
-    const isShowDatesButton = await this.testSubjects.exists('superDatePickerShowDatesButton');
-    if (isShowDatesButton) {
-      await this.testSubjects.click('superDatePickerShowDatesButton');
-    }
-    await this.testSubjects.exists('superDatePickerstartDatePopoverButton');
+    await this.retry.tryForTime(5000, async () => {
+      const isShowDatesButton = await this.testSubjects.exists('superDatePickerShowDatesButton', {
+        timeout: 50,
+      });
+      if (isShowDatesButton) {
+        await this.testSubjects.click('superDatePickerShowDatesButton', 50);
+      }
+      await this.testSubjects.exists('superDatePickerstartDatePopoverButton', { timeout: 1000 });
+    });
   }
 
   /**
