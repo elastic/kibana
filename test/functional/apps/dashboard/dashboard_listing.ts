@@ -15,7 +15,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const listingTable = getService('listingTable');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/86948
   describe('dashboard listing page', function describeIndexTests() {
     const dashboardName = 'Dashboard Listing Test';
 
