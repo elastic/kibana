@@ -16,7 +16,7 @@ jest.mock('../lib/es_version_precheck', () => ({
 // Need to require to get mock on named export to work.
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const MigrationApis = require('../lib/es_deprecations_status');
-MigrationApis.getUpgradeAssistantStatus = jest.fn();
+MigrationApis.getESUpgradeStatus = jest.fn();
 
 import { registerESDeprecationRoutes } from './es_deprecations';
 
@@ -43,7 +43,7 @@ describe('ES deprecations API', () => {
 
   describe('GET /api/upgrade_assistant/es_deprecations', () => {
     it('returns state', async () => {
-      MigrationApis.getUpgradeAssistantStatus.mockResolvedValue({
+      MigrationApis.getESUpgradeStatus.mockResolvedValue({
         cluster: [],
         indices: [],
         nodes: [],
@@ -63,7 +63,7 @@ describe('ES deprecations API', () => {
       const e: any = new Error(`you can't go here!`);
       e.statusCode = 403;
 
-      MigrationApis.getUpgradeAssistantStatus.mockRejectedValue(e);
+      MigrationApis.getESUpgradeStatus.mockRejectedValue(e);
       const resp = await routeDependencies.router.getHandler({
         method: 'get',
         pathPattern: '/api/upgrade_assistant/es_deprecations',
@@ -73,7 +73,7 @@ describe('ES deprecations API', () => {
     });
 
     it('returns an 500 error if it throws', async () => {
-      MigrationApis.getUpgradeAssistantStatus.mockRejectedValue(new Error(`scary error!`));
+      MigrationApis.getESUpgradeStatus.mockRejectedValue(new Error('scary error!'));
 
       await expect(
         routeDependencies.router.getHandler({

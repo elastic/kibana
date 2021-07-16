@@ -104,7 +104,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
       getDeprecationsService: async () => {
         const [coreStart] = await getStartServices();
         return coreStart.deprecations;
-      }
+      },
     };
 
     // Initialize version service with current kibana version

@@ -72,6 +72,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [DeprecationsDetails](./kibana-plugin-core-server.deprecationsdetails.md) |  |
 |  [DeprecationSettings](./kibana-plugin-core-server.deprecationsettings.md) | UiSettings deprecation field options. |
 |  [DeprecationsServiceSetup](./kibana-plugin-core-server.deprecationsservicesetup.md) | The deprecations service provides a way for the Kibana platform to communicate deprecated features and configs with its users. These deprecations are only communicated if the deployment is using these features. Allowing for a user tailored experience for upgrading the stack version.<!-- -->The Deprecation service is consumed by the upgrade assistant to assist with the upgrade experience.<!-- -->If a deprecated feature can be resolved without manual user intervention. Using correctiveActions.api allows the Upgrade Assistant to use this api to correct the deprecation upon a user trigger. |
+|  [DeprecationsServiceStart](./kibana-plugin-core-server.deprecationsservicestart.md) |  |
 |  [DiscoveredPlugin](./kibana-plugin-core-server.discoveredplugin.md) | Small container object used to expose information about discovered plugins that may or may not have been started. |
 |  [ElasticsearchServiceSetup](./kibana-plugin-core-server.elasticsearchservicesetup.md) |  |
 |  [ElasticsearchServiceStart](./kibana-plugin-core-server.elasticsearchservicestart.md) |  |

@@ -165,6 +165,7 @@ function createCoreStartMock() {
     uiSettings: uiSettingsServiceMock.createStartContract(),
     coreUsageData: coreUsageDataServiceMock.createStartContract(),
     executionContext: executionContextServiceMock.createInternalStartContract(),
+    deprecations: deprecationsServiceMock.createStartContract(),
   };
 
   return mock;
@@ -201,6 +202,7 @@ function createInternalCoreStartMock() {
     uiSettings: uiSettingsServiceMock.createStartContract(),
     coreUsageData: coreUsageDataServiceMock.createStartContract(),
     executionContext: executionContextServiceMock.createInternalStartContract(),
+    deprecations: deprecationsServiceMock.createStartContract(),
   };
   return startDeps;
 }
