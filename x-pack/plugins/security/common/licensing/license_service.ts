@@ -16,6 +16,7 @@ export interface SecurityLicense {
   isEnabled(): boolean;
   getType(): LicenseType | undefined;
   getFeatures(): SecurityLicenseFeatures;
+  hasAtLeast(licenseType: LicenseType): boolean | undefined;
   features$: Observable<SecurityLicenseFeatures>;
 }
 
@@ -40,6 +41,8 @@ export class SecurityLicenseService {
         isEnabled: () => this.isSecurityEnabledFromRawLicense(rawLicense),
 
         getType: () => rawLicense?.type,
+
+        hasAtLeast: (licenseType: LicenseType) => rawLicense?.hasAtLeast(licenseType),
 
         getFeatures: () => this.calculateFeaturesFromRawLicense(rawLicense),
 

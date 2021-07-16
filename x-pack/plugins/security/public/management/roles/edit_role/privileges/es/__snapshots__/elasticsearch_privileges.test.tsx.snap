@@ -184,6 +184,7 @@ exports[`it renders without crashing 1`] = `
         },
         "getFeatures": [MockFunction],
         "getType": [MockFunction],
+        "hasAtLeast": [MockFunction],
         "isEnabled": [MockFunction],
         "isLicenseAvailable": [MockFunction],
       }
