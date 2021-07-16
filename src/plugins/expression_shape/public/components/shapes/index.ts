@@ -28,4 +28,5 @@ const shapes: { [key in Shape]: () => Promise<{ default: ShapeType }> } = {
   triangleRight: () => import('./triangle_right'),
 };
 
-export const getShape = (shapeType: keyof typeof shapes | null) => shapes[shapeType];
+export const getShape = (shapeType: keyof typeof shapes | null) =>
+  shapeType ? shapes[shapeType] : undefined;
