@@ -23,7 +23,6 @@ import {
   EuiTab,
 } from '@elastic/eui';
 
-// import { Job, Datafeed } from '../../../../../common/types/anomaly_detection_jobs';
 import { useMlApiContext } from '../../../contexts/kibana';
 import { exportAnomalyDetectionJobs, exportDataframeAnalyticsJobs } from '../utils';
 import { JobType } from '../../../../../common/types/saved_objects';

@@ -28,35 +28,22 @@ import {
   EuiFieldText,
 } from '@elastic/eui';
 
-import type { Job, Datafeed } from '../../../../../common/types/anomaly_detection_jobs';
-import { DataFrameAnalyticsConfig } from '../../../data_frame_analytics/common';
+import type { DataFrameAnalyticsConfig } from '../../../data_frame_analytics/common';
+import type { JobType } from '../../../../../common/types/saved_objects';
 import { useMlApiContext, useMlKibana } from '../../../contexts/kibana';
-import { JobType } from '../../../../../common/types/saved_objects';
 import { CannotImportJobsCallout, SkippedJobs } from './cannot_import_jobs_callout';
 import { CannotReadFileCallout } from './cannot_read_file_callout';
 import { isJobIdValid } from '../../../../../common/util/job_utils';
 import { JOB_ID_MAX_LENGTH } from '../../../../../common/constants/validation';
 import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
-
-interface ImportedAdJob {
-  job: Job;
-  datafeed: Datafeed;
-}
-
-function isImportedAdJobs(obj: any): obj is ImportedAdJob[] {
-  return Array.isArray(obj) && obj.some((o) => o.job && o.datafeed);
-}
-
-function isDataFrameAnalyticsConfigs(obj: any): obj is DataFrameAnalyticsConfig[] {
-  return Array.isArray(obj) && obj.some((o) => o.dest && o.analysis);
-}
-
-interface JobId {
-  id: string;
-  originalId: string;
-  valid: boolean;
-  invalidMessage: string;
-}
+import {
+  ImportedAdJob,
+  JobId,
+  readJobConfigs,
+  renameAdJobs,
+  renameDfaJobs,
+  validateJobs,
+} from './utils';
 
 interface Props {
   isDisabled: boolean;
@@ -457,121 +444,6 @@ const FlyoutButton: FC<{ isDisabled: boolean; onClick(): void }> = ({ isDisabled
     </EuiButtonEmpty>
   );
 };
-
-function readFile(file: File) {
-  return new Promise((resolve, reject) => {
-    if (file && file.size) {
-      const reader = new FileReader();
-      reader.readAsText(file);
-
-      reader.onload = (() => {
-        return () => {
-          const data = reader.result;
-          if (typeof data === 'string') {
-            try {
-              const json = JSON.parse(data);
-              resolve(json);
-            } catch (error) {
-              reject();
-            }
-          } else {
-            reject();
-          }
-        };
-      })();
-    } else {
-      reject();
-    }
-  });
-}
-async function readJobConfigs(
-  file: File
-): Promise<{
-  jobs: ImportedAdJob[] | DataFrameAnalyticsConfig[];
-  jobIds: string[];
-  jobType: JobType | null;
-}> {
-  try {
-    const json = await readFile(file);
-    const jobs = Array.isArray(json) ? json : [json];
-
-    if (isImportedAdJobs(jobs)) {
-      const jobIds = jobs.map((j) => j.job.job_id);
-      return { jobs, jobIds, jobType: 'anomaly-detector' };
-    } else if (isDataFrameAnalyticsConfigs(jobs)) {
-      const jobIds = jobs.map((j) => j.id);
-      return { jobs, jobIds, jobType: 'data-frame-analytics' };
-    } else {
-      return { jobs: [], jobIds: [], jobType: null };
-    }
-  } catch (error) {
-    return { jobs: [], jobIds: [], jobType: null };
-  }
-}
-
-function renameAdJobs(jobIds: JobId[], jobs: ImportedAdJob[]) {
-  if (jobs.length !== jobs.length) {
-    return jobs;
-  }
-
-  return jobs.map((j, i) => {
-    const { id } = jobIds[i];
-    j.job.job_id = id;
-    j.datafeed.job_id = id;
-    j.datafeed.datafeed_id = `datafeed-${id}`;
-    return j;
-  });
-}
-
-function renameDfaJobs(jobIds: JobId[], jobs: DataFrameAnalyticsConfig[]) {
-  if (jobs.length !== jobs.length) {
-    return jobs;
-  }
-
-  return jobs.map((j, i) => {
-    const { id } = jobIds[i];
-    j.id = id;
-    return j;
-  });
-}
-
-async function validateJobs(
-  jobs: ImportedAdJob[] | DataFrameAnalyticsConfig[],
-  type: JobType,
-  getIndexPatternTitles: (refresh?: boolean) => Promise<string[]>
-) {
-  const existingIndexPatterns = new Set(await getIndexPatternTitles());
-  const tempJobIds: string[] = [];
-  const tempSkippedJobIds: SkippedJobs[] = [];
-
-  const commonJobs: Array<{ jobId: string; indices: string[] }> =
-    type === 'anomaly-detector'
-      ? (jobs as ImportedAdJob[]).map((j) => ({
-          jobId: j.job.job_id,
-          indices: j.datafeed.indices,
-        }))
-      : (jobs as DataFrameAnalyticsConfig[]).map((j) => ({
-          jobId: j.id,
-          indices: Array.isArray(j.source.index) ? j.source.index : [j.source.index],
-        }));
-
-  commonJobs.forEach(({ jobId, indices }) => {
-    const missingIndices = indices.filter((i) => existingIndexPatterns.has(i) === false);
-    if (missingIndices.length === 0) {
-      tempJobIds.push(jobId);
-    } else {
-      tempSkippedJobIds.push({
-        jobId,
-        missingIndices,
-      });
-    }
-  });
-
-  return {
-    jobIds: tempJobIds,
-    skippedJobs: tempSkippedJobIds,
-  };
-}
 
 const jobEmpty = i18n.translate('xpack.ml.importExport.importFlyout.validateJobId.jobNameEmpty', {
   defaultMessage: 'Enter a valid job ID',
