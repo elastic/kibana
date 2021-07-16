@@ -403,7 +403,15 @@ export function MlLatencyCorrelations({ onClose }: Props) {
         ) : null}
       </div>
       {log.length > 0 && displayLog && (
-        <EuiAccordion id="accordion1" buttonContent="Log">
+        <EuiAccordion
+          id="accordion1"
+          buttonContent={i18n.translate(
+            'xpack.apm.correlations.latencyCorrelations.logButtonContent',
+            {
+              defaultMessage: 'Log',
+            }
+          )}
+        >
           <EuiPanel color="subdued">
             {log.map((d, i) => {
               const splitItem = d.split(': ');
