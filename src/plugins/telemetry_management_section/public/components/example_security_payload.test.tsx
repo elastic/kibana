@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { TelemetryManagementSectionPlugin } from './plugin';
+import React from 'react';
+import { shallowWithIntl } from '@kbn/test/jest';
+import ExampleSecurityPayload from './example_security_payload';
 
-export { OptInExampleFlyout } from './components';
-
-export type { TelemetryManagementSectionPluginSetup } from './plugin';
-export function plugin() {
-  return new TelemetryManagementSectionPlugin();
-}
+describe('example security payload', () => {
+  it('renders as expected', () => {
+    expect(shallowWithIntl(<ExampleSecurityPayload />)).toMatchSnapshot();
+  });
+});
