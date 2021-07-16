@@ -15,15 +15,15 @@ jest.mock('../lib/es_version_precheck', () => ({
 
 // Need to require to get mock on named export to work.
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const MigrationApis = require('../lib/es_deprecations_status');
-MigrationApis.getESUpgradeStatus = jest.fn();
+const ESUpgradeStatusApis = require('../lib/es_deprecations_status');
+ESUpgradeStatusApis.getESUpgradeStatus = jest.fn();
 
 import { registerESDeprecationRoutes } from './es_deprecations';
 
 /**
  * Since these route callbacks are so thin, these serve simply as integration tests
  * to ensure they're wired up to the lib functions correctly. Business logic is tested
- * more thoroughly in the es_migration_apis test.
+ * more thoroughly in the es_deprecations_status test.
  */
 describe('ES deprecations API', () => {
   let mockRouter: MockRouter;
@@ -43,7 +43,7 @@ describe('ES deprecations API', () => {
 
   describe('GET /api/upgrade_assistant/es_deprecations', () => {
     it('returns state', async () => {
-      MigrationApis.getESUpgradeStatus.mockResolvedValue({
+      ESUpgradeStatusApis.getESUpgradeStatus.mockResolvedValue({
         cluster: [],
         indices: [],
         nodes: [],
@@ -63,7 +63,7 @@ describe('ES deprecations API', () => {
       const e: any = new Error(`you can't go here!`);
       e.statusCode = 403;
 
-      MigrationApis.getESUpgradeStatus.mockRejectedValue(e);
+      ESUpgradeStatusApis.getESUpgradeStatus.mockRejectedValue(e);
       const resp = await routeDependencies.router.getHandler({
         method: 'get',
         pathPattern: '/api/upgrade_assistant/es_deprecations',
@@ -73,7 +73,7 @@ describe('ES deprecations API', () => {
     });
 
     it('returns an 500 error if it throws', async () => {
-      MigrationApis.getESUpgradeStatus.mockRejectedValue(new Error('scary error!'));
+      ESUpgradeStatusApis.getESUpgradeStatus.mockRejectedValue(new Error('scary error!'));
 
       await expect(
         routeDependencies.router.getHandler({
