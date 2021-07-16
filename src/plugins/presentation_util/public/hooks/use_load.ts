@@ -16,7 +16,7 @@ interface UseLoadResult<T> {
 
 const isFn = (fn: any) => typeof fn === 'function';
 
-export function useLoad<T = {}>(asyncFn: void | (() => Promise<T>)): UseLoadResult<T> {
+export function useLoad<T = {}>(asyncFn: undefined | (() => Promise<T>)): UseLoadResult<T> {
   const [loading, setLoading] = useState<boolean>(isFn(asyncFn));
   const [error, setError] = useState<any>(null);
   const [data, setData] = useState<T | null>(null);
