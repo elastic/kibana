@@ -1,5 +1,5 @@
 get:
-  summary: Fleet - Agent - List
+  summary: Agents - List
   tags: []
   responses:
     '200':
