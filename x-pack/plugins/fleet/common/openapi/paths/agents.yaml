@@ -1,5 +1,5 @@
 get:
-  summary: Fleet - Agent - List
+  summary: Agents - List
   tags: []
   responses:
     '200':
@@ -12,7 +12,7 @@ get:
               list:
                 type: array
                 items:
-                  $ref: ../components/schemas/agent_policy.yaml
+                  $ref: ../components/schemas/agent.yaml
               total:
                 type: number
               page:

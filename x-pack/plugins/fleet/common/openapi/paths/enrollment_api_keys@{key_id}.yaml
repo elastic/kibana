@@ -5,7 +5,7 @@ parameters:
     in: path
     required: true
 get:
-  summary: Enrollment - Info
+  summary: Enrollment API Key - Info
   tags: []
   responses:
     '200':
@@ -21,7 +21,7 @@ get:
               - item
   operationId: get-fleet-enrollment-api-keys-keyId
 delete:
-  summary: Enrollment - Delete
+  summary: Enrollment API Key - Delete
   tags: []
   responses:
     '200':
