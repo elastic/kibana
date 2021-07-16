@@ -14,7 +14,7 @@ const { RawSource } = require('webpack-sources');
 
 const UiSharedDeps = require('./src/index');
 
-const FSEVENTS_SRC = require.resolve('fsevents');
+const FSEVENTS_SRC = require.resolve('fsevents') || '';
 const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
 const WEBPACK_SRC = require.resolve('webpack');
 
