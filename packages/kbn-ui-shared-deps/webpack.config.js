@@ -18,6 +18,8 @@ const FSEVENTS_SRC = require.resolve('fsevents') || '';
 const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
 const WEBPACK_SRC = require.resolve('webpack');
 
+const FSEVENTS_EXTERNAL = FSEVENTS_SRC ? { fsevents: 'fsevents' } : {};
+
 module.exports = {
   node: {
     child_process: 'empty',
@@ -25,7 +27,7 @@ module.exports = {
   },
   externals: {
     module: 'module',
-    fsevents: 'fsevents',
+    ...FSEVENTS_EXTERNAL,
   },
   mode: 'production',
   entry: {
