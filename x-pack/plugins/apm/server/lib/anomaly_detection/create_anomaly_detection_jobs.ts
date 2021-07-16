@@ -11,7 +11,7 @@ import { snakeCase } from 'lodash';
 import Boom from '@hapi/boom';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { environmentQuery } from '../../../server/utils/queries';
+import { environmentQuery } from '../../../common/utils/environment_query';
 import { Setup } from '../helpers/setup_request';
 import {
   TRANSACTION_DURATION,
