@@ -352,7 +352,7 @@ export const IndexPattern = ({
                     disabled={
                       disabled ||
                       isEntireTimeRangeActive(model, isTimeSeries) ||
-                      !(model[intervalName] === AUTO_INTERVAL || !model[intervalName])
+                      !(isAutoInterval(model[intervalName]) || isGteInterval(model[intervalName]))
                     }
                     min={0}
                     max={maxBarsUiSettings}
