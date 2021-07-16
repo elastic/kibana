@@ -54,7 +54,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(metrics.length).to.equal(0);
       });
 
-      it('should display "Missing Metric" message for zero metrics', async () => {});
+      it('should display "Missing Metric" message for zero metrics', async () => {
+        await pageObjects.infraMetricsExplorer.getMissingMetricMessage();
+      });
 
       it('should add a metric', async () => {
         await pageObjects.infraMetricsExplorer.addMetric('system.cpu.user.pct');
@@ -69,6 +71,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('should display multple charts', async () => {
         const charts = await pageObjects.infraMetricsExplorer.getCharts();
         expect(charts.length).to.equal(6);
+      });
+
+      it('should render as area chart by default', async () => {
+        const charts = await pageObjects.infraMetricsExplorer.getCharts();
+        const chartType = await pageObjects.infraMetricsExplorer.getChartType(charts[0]);
+        expect(chartType).to.equal('area chart');
+      });
+
+      it('should change to bar chart', async () => {
+        await pageObjects.infraMetricsExplorer.switchChartType('bar');
+        const charts = await pageObjects.infraMetricsExplorer.getCharts();
+        const chartType = await pageObjects.infraMetricsExplorer.getChartType(charts[0]);
+        expect(chartType).to.equal('bar chart');
       });
     });
 

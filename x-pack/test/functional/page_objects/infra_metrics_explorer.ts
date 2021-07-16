@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function InfraMetricsExplorerProvider({ getService }: FtrProviderContext) {
@@ -39,6 +40,21 @@ export function InfraMetricsExplorerProvider({ getService }: FtrProviderContext)
 
     async getMissingMetricMessage() {
       return await testSubjects.find('metricsExplorer-missingMetricMessage');
+    },
+
+    async getChartType(chart: WebElementWrapper) {
+      const figure = await chart.findByCssSelector('figure');
+      const descId = await figure.getAttribute('aria-describedby');
+      const descElement = await chart.findByCssSelector(`dd[id="${descId}"]`);
+      return await descElement.getAttribute('textContent');
+    },
+
+    async switchChartType(type: string) {
+      const customizeButton = await testSubjects.find('metricsExplorer-customize');
+      await customizeButton.click();
+      const chartRadio = await testSubjects.find(`metricsExplorer-chartRadio-${type}`);
+      const radioInput = await chartRadio.findByCssSelector(`label[for="${type}"]`);
+      return await radioInput.click();
     },
   };
 }
