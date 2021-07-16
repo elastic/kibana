@@ -8,6 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { EuiIcon, EuiText } from '@elastic/eui';
 import moment from 'moment';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 interface Props {
   lastUpdated?: number;
@@ -38,7 +39,14 @@ export function LastUpdated({ lastUpdated }: Props) {
 
   return (
     <EuiText color={isDanger ? 'danger' : isWarning ? 'warning' : 'subdued'} size="s">
-      <EuiIcon type="clock" /> Last Updated: {moment(lastUpdated).from(refresh)}
+      <EuiIcon type="clock" />
+      <FormattedMessage
+        id="xpack.observability.expView.lastUpdated.label"
+        defaultMessage="Last Updated: {updatedDate}"
+        values={{
+          updatedDate: moment(lastUpdated).from(refresh),
+        }}
+      />
     </EuiText>
   );
 }

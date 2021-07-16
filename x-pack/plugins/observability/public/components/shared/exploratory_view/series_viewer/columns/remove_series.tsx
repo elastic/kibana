@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 
 interface Props {
@@ -20,16 +20,32 @@ export function RemoveSeries({ seriesId }: Props) {
   const onClick = () => {
     removeSeries(seriesId);
   };
+
+  const isDisabled = firstSeries!.name === seriesId && allSeries.length > 1;
+
   return (
-    <EuiButtonIcon
-      aria-label={i18n.translate('xpack.observability.expView.seriesEditor.removeSeries', {
-        defaultMessage: 'Click to remove series',
-      })}
-      iconType="trash"
-      color="text"
-      onClick={onClick}
-      size="s"
-      isDisabled={firstSeries!.name === seriesId && allSeries.length > 1}
-    />
+    <EuiToolTip
+      content={
+        isDisabled
+          ? i18n.translate('xpack.observability.expView.seriesEditor.removeSeries', {
+              defaultMessage:
+                'Main series cannot be removed. Please remove all series below before you can remove this.',
+            })
+          : i18n.translate('xpack.observability.expView.seriesEditor.removeSeries', {
+              defaultMessage: 'Remove series',
+            })
+      }
+    >
+      <EuiButtonIcon
+        aria-label={i18n.translate('xpack.observability.expView.seriesEditor.removeSeries', {
+          defaultMessage: 'Click to remove series',
+        })}
+        iconType="trash"
+        color="text"
+        onClick={onClick}
+        size="s"
+        isDisabled={isDisabled}
+      />
+    </EuiToolTip>
   );
 }

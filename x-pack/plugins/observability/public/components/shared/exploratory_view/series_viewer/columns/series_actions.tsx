@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RemoveSeries } from './remove_series';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
@@ -40,28 +40,40 @@ export function SeriesActions({ seriesId, series, editorMode = false }: Props) {
     <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="center">
       {editorMode && (
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType={series.hidden ? 'eyeClosed' : 'eye'}
-            aria-label={i18n.translate('xpack.observability.seriesEditor.hide', {
+          <EuiToolTip
+            content={i18n.translate('xpack.observability.seriesEditor.hide', {
               defaultMessage: 'Hide series',
             })}
-            size="s"
-            color="text"
-            onClick={toggleSeries}
-          />
+          >
+            <EuiButtonIcon
+              iconType={series.hidden ? 'eyeClosed' : 'eye'}
+              aria-label={i18n.translate('xpack.observability.seriesEditor.hide', {
+                defaultMessage: 'Hide series',
+              })}
+              size="s"
+              color="text"
+              onClick={toggleSeries}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       )}
       {editorMode && (
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType={'copy'}
-            color="text"
-            aria-label={i18n.translate('xpack.observability.seriesEditor.clone', {
+          <EuiToolTip
+            content={i18n.translate('xpack.observability.seriesEditor.clone', {
               defaultMessage: 'Copy series',
             })}
-            size="s"
-            onClick={copySeries}
-          />
+          >
+            <EuiButtonIcon
+              iconType={'copy'}
+              color="text"
+              aria-label={i18n.translate('xpack.observability.seriesEditor.clone', {
+                defaultMessage: 'Copy series',
+              })}
+              size="s"
+              onClick={copySeries}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
