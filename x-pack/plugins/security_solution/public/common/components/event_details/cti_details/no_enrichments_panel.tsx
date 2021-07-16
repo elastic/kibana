@@ -41,7 +41,7 @@ export const NoEnrichmentsPanel: React.FC<{
   const threatIntelDocsUrl = `${
     useKibana().services.docLinks.links.filebeat.base
   }/filebeat-module-threatintel.html`;
-  const noIndicatorEnrichmentsDescription = (
+  const noIntelligenceCTA = (
     <>
       {i18n.IF_CTI_NOT_ENABLED}
       <EuiLink href={threatIntelDocsUrl} target="_blank">
@@ -55,10 +55,9 @@ export const NoEnrichmentsPanel: React.FC<{
       <NoEnrichmentsPanelView
         title={<h2>{i18n.NO_ENRICHMENTS_FOUND_TITLE}</h2>}
         description={
-          <>
-            <p>{noIndicatorEnrichmentsDescription}</p>
-            <p>{i18n.NO_INVESTIGATION_ENRICHMENTS_DESCRIPTION}</p>
-          </>
+          <p>
+            {i18n.NO_ENRICHMENTS_FOUND_DESCRIPTION} {noIntelligenceCTA}
+          </p>
         }
       />
     );
@@ -68,7 +67,11 @@ export const NoEnrichmentsPanel: React.FC<{
         <EuiHorizontalRule margin="s" />
         <NoEnrichmentsPanelView
           title={<h2>{i18n.NO_INDICATOR_ENRICHMENTS_TITLE}</h2>}
-          description={noIndicatorEnrichmentsDescription}
+          description={
+            <p>
+              {i18n.NO_INDICATOR_ENRICHMENTS_DESCRIPTION} {noIntelligenceCTA}
+            </p>
+          }
         />
       </>
     );
@@ -78,7 +81,11 @@ export const NoEnrichmentsPanel: React.FC<{
         <EuiHorizontalRule margin="s" />
         <NoEnrichmentsPanelView
           title={<h2>{i18n.NO_INVESTIGATION_ENRICHMENTS_TITLE}</h2>}
-          description={i18n.NO_INVESTIGATION_ENRICHMENTS_DESCRIPTION}
+          description={
+            <p>
+              {i18n.NO_INVESTIGATION_ENRICHMENTS_DESCRIPTION} {noIntelligenceCTA}
+            </p>
+          }
         />
       </>
     );

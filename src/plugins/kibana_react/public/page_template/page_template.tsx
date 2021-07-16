@@ -48,6 +48,7 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
   isEmptyState,
   restrictWidth = true,
   pageSideBar,
+  pageSideBarProps,
   solutionNav,
   ...rest
 }) => {
@@ -117,8 +118,8 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
       pageSideBar={pageSideBar}
       pageSideBarProps={{
         paddingSize: solutionNav ? 'none' : 'l',
-        ...rest.pageSideBarProps,
-        className: classNames(sideBarClasses, rest.pageSideBarProps?.className),
+        ...pageSideBarProps,
+        className: classNames(sideBarClasses, pageSideBarProps?.className),
       }}
       {...rest}
     >
