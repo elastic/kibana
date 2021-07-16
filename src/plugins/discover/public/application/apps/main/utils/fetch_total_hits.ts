@@ -42,6 +42,7 @@ export function fetchTotalHits(
   searchSource.setField('size', 0);
   searchSource.removeField('sort');
   searchSource.removeField('fields');
+  searchSource.removeField('aggs');
 
   sendLoadingMsg(totalHits$);
 
