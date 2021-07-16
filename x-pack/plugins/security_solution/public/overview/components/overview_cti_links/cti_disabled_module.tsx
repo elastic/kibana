@@ -21,15 +21,20 @@ export const CtiDisabledModuleComponent = () => {
   const danger = useMemo(
     () => (
       <CtiInnerPanel
-        color={'danger'}
+        color={'warning'}
         title={i18n.DANGER_TITLE}
         body={i18n.DANGER_BODY}
         button={
-          <EuiButton href={threatIntelDocLink} color={'danger'} fill>
+          <EuiButton
+            href={threatIntelDocLink}
+            color={'warning'}
+            target="_blank"
+            data-test-subj="cti-enable-module-button"
+          >
             {i18n.DANGER_BUTTON}
           </EuiButton>
         }
-        data-test-subj="cti-inner-panel-danger"
+        dataTestSubj="cti-inner-panel-danger"
       />
     ),
     [threatIntelDocLink]

@@ -257,9 +257,11 @@ Note:
 6. Set a write block on the source index. This prevents any further writes from outdated nodes.
 7. Create a new temporary index `.kibana_7.10.0_reindex_temp` with `dynamic: false` on the top-level mappings so that any kind of document can be written to the index. This allows us to write untransformed documents to the index which might have fields which have been removed from the latest mappings defined by the plugin. Define minimal mappings for the `migrationVersion` and `type` fields so that we're still able to search for outdated documents that need to be transformed.
    1. Ignore errors if the target index already exists.
-8. Reindex the source index into the new temporary index.
-   1. Use `op_type=create` `conflicts=proceed` and `wait_for_completion=false` so that multiple instances can perform the reindex in parallel but only one write per document will succeed.
-   2. Wait for the reindex task to complete. If reindexing doesn’t complete within the 60s timeout, log a warning for visibility and poll again.
+8. Reindex the source index into the new temporary index using a 'client-side' reindex, by reading batches of documents from the source, migrating them, and indexing them into the temp index.
+   1. Use `op_type=index` so that multiple instances can perform the reindex in parallel (last node running will override the documents, with no effect as the input data is the same)
+   2. Ignore `version_conflict_engine_exception` exceptions as they just mean that another node was indexing the same documents
+   3. If a `target_index_had_write_block` exception is encountered for all document of a batch, assume that another node already completed the temporary index reindex, and jump to the next step
+   4. If a document transform throws an exception, add the document to a failure list and continue trying to transform all other documents (without writing them to the temp index). If any failures occured, log the complete list of documents that failed to transform, then fail the migration.
 9. Clone the temporary index into the target index `.kibana_7.10.0_001`. Since any further writes will only happen against the cloned target index this prevents a lost delete from occuring where one instance finishes the migration and deletes a document and another instance's reindex operation re-creates the deleted document.
    1. Set a write block on the temporary index
    2. Clone the temporary index into the target index while specifying that the target index should have writes enabled.

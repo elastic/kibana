@@ -591,6 +591,7 @@ export class ImportView extends Component {
                       timeFieldName={timeFieldName}
                       createIndexPattern={createIndexPattern}
                       showFilebeatFlyout={this.showFilebeatFlyout}
+                      additionalLinks={this.props.resultsLinks ?? []}
                     />
 
                     {isFilebeatFlyoutVisible && (

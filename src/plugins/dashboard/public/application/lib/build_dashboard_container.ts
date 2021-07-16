@@ -64,6 +64,11 @@ export const buildDashboardContainer = async ({
     getLatestDashboardState,
     canStoreSearchSession: dashboardCapabilities.storeSearchSession,
   });
+
+  if (incomingEmbeddable?.searchSessionId) {
+    session.continue(incomingEmbeddable?.searchSessionId);
+  }
+
   const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
   if (searchSessionIdFromURL) {
     session.restore(searchSessionIdFromURL);

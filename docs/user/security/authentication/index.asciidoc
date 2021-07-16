@@ -61,9 +61,13 @@ xpack.security.authc.providers:
 --------------------------------------------------------------------------------
 
 [role="screenshot"]
-image::user/security/images/kibana-login.png["Login Selector UI"]
+image::security/images/kibana-login.png["Login Selector UI"]
 
 For more information, refer to <<authentication-security-settings, authentication security settings>>.
+
+TIP: If you have multiple authentication providers configured, you can use the `auth_provider_hint` URL query parameter to create a deep
+link to any provider and bypass the Login Selector UI. Using the `kibana.yml` above as an example, you can add `?auth_provider_hint=basic1`
+to the login page URL, which will take you directly to the basic login page.
 
 [[basic-authentication]]
 ==== Basic authentication
@@ -78,7 +82,9 @@ For more information about basic authentication and built-in users, see
 [[token-authentication]]
 ==== Token authentication
 
-Token authentication allows users to log in using the same {kib} provided login form as basic authentication, and is based on the Native security realm or LDAP security realm that is provided by {es}. The token authentication provider is built on {es} token APIs.
+Token authentication is a https://www.elastic.co/subscriptions[subscription feature]. This allows users to log in using the same {kib}
+provided login form as basic authentication, and is based on the Native security realm or LDAP security realm that is provided by {es}. The
+token authentication provider is built on {es} token APIs.
 
 Prior to configuring {kib}, ensure token support is enabled in {es}. See the {ref}/security-api-get-token.html[{es} token API] documentation for more information.
 
@@ -103,7 +109,11 @@ Switching to the token authentication provider from basic one will make {kib} to
 PKI authentication will not work if {kib} is hosted behind a TLS termination reverse proxy. In this configuration, {kib} does not have direct access to the client certificates and cannot authenticate the user.
 ============================================================================
 
-PKI authentication allows users to log into {kib} using X.509 client certificates that must be presented while connecting to {kib}. The certificates must first be accepted for authentication on the {kib} TLS layer, and then they are further validated by an {es} PKI realm. The PKI authentication provider relies on the {es} {ref}/security-api-delegate-pki-authentication.html[Delegate PKI authentication API] to exchange X.509 client certificates to access tokens. All subsequent requests to {es} APIs on behalf of users will be authenticated using these access tokens.
+PKI authentication is a https://www.elastic.co/subscriptions[subscription feature]. This allows users to log
+into {kib} using X.509 client certificates that must be presented while connecting to {kib}. The certificates must first be accepted for
+authentication on the {kib} TLS layer, and then they are further validated by an {es} PKI realm. The PKI authentication provider relies on
+the {es} {ref}/security-api-delegate-pki-authentication.html[Delegate PKI authentication API] to exchange X.509 client certificates to
+access tokens. All subsequent requests to {es} APIs on behalf of users will be authenticated using these access tokens.
 
 Prior to configuring {kib}, ensure that the PKI realm is enabled in {es} and configured to permit delegation. See {ref}/configuring-pki-realm.html[Configuring a PKI realm] for more information.
 
@@ -140,9 +150,11 @@ Note that with `server.ssl.clientAuthentication` set to `required`, users are as
 [[saml]]
 ==== SAML single sign-on
 
-SAML authentication allows users to log in to {kib} with an external Identity Provider, such as Okta or Auth0. Make sure that SAML is enabled and configured in {es} before setting it up in {kib}. See {ref}/saml-guide.html[Configuring SAML single sign-on on the Elastic Stack].
+SAML authentication is part of single sign-on (SSO), a https://www.elastic.co/subscriptions[subscription feature]. This allows users to log
+in to {kib} with an external Identity Provider, such as Okta or Auth0. Make sure that SAML is enabled and configured in {es} before setting
+it up in {kib}. See {ref}/saml-guide.html[Configuring SAML single sign-on on the Elastic Stack].
 
-Enable the SAML authentication specifying which SAML realm in {es} should be used:
+Enable SAML authentication by specifying which SAML realm in {es} should be used:
 
 [source,yaml]
 --------------------------------------------------------------------------------
@@ -152,7 +164,7 @@ xpack.security.authc.providers:
     realm: saml1
 --------------------------------------------------------------------------------
 
-You can log in to {kib} via SAML Single Sign-On by navigating directly to the {kib} URL. If you aren't authenticated, you are redirected to the Identity Provider for login. Most Identity Providers maintain a long-lived session. If you log in to a different application using the same Identity Provider in the same browser, you are automatically authenticated. An exception is if {es} or the Identity Provider is configured to force you to re-authenticate. This login scenario is called _Service Provider initiated login_.
+You can log in to {kib} via SAML SSO by navigating directly to the {kib} URL. If you aren't authenticated, you are redirected to the Identity Provider for login. Most Identity Providers maintain a long-lived session. If you log in to a different application using the same Identity Provider in the same browser, you are automatically authenticated. An exception is if {es} or the Identity Provider is configured to force you to re-authenticate. This login scenario is called _Service Provider initiated login_.
 
 It's also possible to configure multiple SAML authentication providers at the same time. In this case, you will need to choose which provider to use for login at the Login Selector UI:
 
@@ -172,7 +184,7 @@ xpack.security.authc.providers:
 [float]
 ===== SAML and basic authentication
 
-You can also configure both SAML and basic authentication for the same {kib} instance. This might be the case for {kib} or {es} admins whose accounts aren't linked to the Single Sign-On users database:
+You can also configure both SAML and basic authentication for the same {kib} instance. This might be the case for {kib} or {es} admins whose accounts aren't linked to the SSO users database:
 
 [source,yaml]
 --------------------------------------------------------------------------------
@@ -192,10 +204,11 @@ To support basic authentication for the applications like `curl` or when the `Au
 [[oidc]]
 ==== OpenID Connect single sign-on
 
-Similar to SAML, authentication with OpenID Connect allows users to log in to {kib} using an OpenID Connect Provider such as Google, or Okta. OpenID Connect
-should also be configured in {es}. For more details, see {ref}/oidc-guide.html[Configuring single sign-on to the {stack} using OpenID Connect].
+OpenID Connect (OIDC) authentication is part of single sign-on (SSO), a https://www.elastic.co/subscriptions[subscription feature]. Similar
+to SAML, authentication with OIDC allows users to log in to {kib} using an OIDC Provider such as Google, or Okta. OIDC should also
+be configured in {es}. For more details, see {ref}/oidc-guide.html[Configuring single sign-on to the {stack} using OpenID Connect].
 
-Enable the OpenID Connect authentication specifying which OpenID Connect realm in {es} should be used:
+Enable OIDC authentication by specifying which OIDC realm in {es} to use:
 
 [source,yaml]
 --------------------------------------------------------------------------------
@@ -205,7 +218,7 @@ xpack.security.authc.providers:
     realm: oidc1
 --------------------------------------------------------------------------------
 
-If you want to use Third Party initiated Single Sign-On, configure your OpenID Provider to use `/api/security/oidc/initiate_login` as `Initiate Login URI`.
+To use third party initiated SSO, configure your OpenID Provider to use `/api/security/oidc/initiate_login` as `Initiate Login URI`.
 
 It's also possible to configure multiple OpenID Connect authentication providers at the same time. In this case, you need to choose which provider to use for login at the Login Selector UI:
 
@@ -225,7 +238,7 @@ xpack.security.authc.providers:
 [float]
 ===== OpenID Connect and basic authentication
 
-You can also configure both OpenID Connect and basic authentication for the same {kib} instance. This might be the case for {kib} or {es} admins whose accounts aren't linked to the Single Sign-On users database:
+You can also configure both OpenID Connect and basic authentication for the same {kib} instance. This might be the case for {kib} or {es} admins whose accounts aren't linked to the SSO users database:
 
 [source,yaml]
 --------------------------------------------------------------------------------
@@ -250,7 +263,7 @@ The following sections apply both to <<saml>> and <<oidc>>
 [float]
 ===== Access and refresh tokens
 
-Once the user logs in to {kib} Single Sign-On, either using SAML or OpenID Connect, {es} issues access and refresh tokens
+Once the user logs in to {kib} with SSO, either using SAML or OpenID Connect, {es} issues access and refresh tokens
 that {kib} encrypts and stores as a part of its own session. This way, the user isn't redirected to the Identity Provider
 for every request that requires authentication. It also means that the {kib} session depends on the <<security-session-and-cookie-settings,
 `xpack.security.session.idleTimeout` and `xpack.security.session.lifespan`>> settings, and the user is automatically logged
@@ -277,7 +290,8 @@ all applications associated with the active provider session.
 [[kerberos]]
 ==== Kerberos single sign-on
 
-As with the previous SSOs, make sure that you have configured {es} first accordingly. See {ref}/kerberos-realm.html[Kerberos authentication].
+Kerberos authentication is part of single sign-on (SSO), a https://www.elastic.co/subscriptions[subscription feature]. Make sure that
+Kerberos is enabled and configured in {es} before setting it up in {kib}. See {ref}/kerberos-realm.html[Kerberos authentication].
 
 Next, to enable Kerberos in {kib}, you will need to enable the Kerberos authentication provider in the `kibana.yml` configuration file, as follows:
 
@@ -451,7 +465,7 @@ xpack.security.sameSiteCookies: "None"
 For more information about possible values and implications, refer to <<xpack-security-sameSiteCookies, xpack.security.sameSiteCookies>>.
 For more information about iframe and cookies, refer to https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe[iframe] and https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite[SameSite cookies].
 
-If you're embedding {kib} in a website that supports Single Sign-On with SAML, OpenID Connect, Kerberos, or PKI, it's highly advisable to configure {kib} as a part of the Single Sign-On setup. Operating in a single and properly configured security domain provides you with the most secure and seamless user experience.
+If you're embedding {kib} in a website that supports single sign-on (SSO) with SAML, OpenID Connect, Kerberos, or PKI, it's highly advisable to configure {kib} as a part of the SSO setup. Operating in a single and properly configured security domain provides you with the most secure and seamless user experience.
 
 If you have multiple authentication providers enabled, and you want to automatically log in anonymous users when embedding anything other than dashboards and visualizations, then you will need to add the `auth_provider_hint=<anonymous-provider-name>` query string parameter to the {kib} URL that you're embedding.
 

@@ -72,7 +72,7 @@ export class IndexWriter {
     for (const item of items) {
       if (item.doc === undefined) continue;
 
-      bulkBody.push({ create: { _index: item.index } });
+      bulkBody.push({ create: { _index: item.index, version: 1 } });
       bulkBody.push(item.doc);
     }
 

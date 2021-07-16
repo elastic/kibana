@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { newRule } from '../../objects/rule';
+import { getNewRule } from '../../objects/rule';
 import { ROLES } from '../../../common/test';
 
 import { waitForAlertsIndexToBeCreated, waitForAlertsPanelToBeLoaded } from '../../tasks/alerts';
@@ -30,7 +30,7 @@ describe('Alerts timeline', () => {
     loginAndWaitForPage(ALERTS_URL, ROLES.platform_engineer);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
-    createCustomRuleActivated(newRule);
+    createCustomRuleActivated(getNewRule());
     refreshPage();
     waitForAlertsToPopulate(500);
 

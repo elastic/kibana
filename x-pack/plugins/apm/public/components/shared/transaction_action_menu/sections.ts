@@ -17,6 +17,7 @@ import { getDiscoverHref } from '../Links/DiscoverLinks/DiscoverLink';
 import { getDiscoverQuery } from '../Links/DiscoverLinks/DiscoverTransactionLink';
 import { getInfraHref } from '../Links/InfraLink';
 import { fromQuery } from '../Links/url_helpers';
+import { SectionRecord, getNonEmptySections, Action } from './sections_helper';
 
 function getInfraMetricsQuery(transaction: Transaction) {
   const timestamp = new Date(transaction['@timestamp']).getTime();
@@ -27,22 +28,6 @@ function getInfraMetricsQuery(transaction: Transaction) {
     to: timestamp + fiveMinutes,
   };
 }
-
-interface Action {
-  key: string;
-  label: string;
-  href: string;
-  condition: boolean;
-}
-
-interface Section {
-  key: string;
-  title?: string;
-  subtitle?: string;
-  actions: Action[];
-}
-
-type SectionRecord = Record<string, Section[]>;
 
 export const getSections = ({
   transaction,
@@ -296,14 +281,5 @@ export const getSections = ({
   };
 
   // Filter out actions that shouldnt be shown and sections without any actions.
-  return Object.values(sectionRecord)
-    .map((sections) =>
-      sections
-        .map((section) => ({
-          ...section,
-          actions: section.actions.filter((action) => action.condition),
-        }))
-        .filter((section) => !isEmpty(section.actions))
-    )
-    .filter((sections) => !isEmpty(sections));
+  return getNonEmptySections(sectionRecord);
 };

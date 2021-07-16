@@ -6,8 +6,11 @@
  */
 
 import * as i18n from '../translations';
-import { SecurityPageName, SecurityPageGroupName } from '../types';
-import { SiemNavTab, NavTabGroups } from '../../common/components/navigation/types';
+import {
+  SecurityNav,
+  SecurityNavGroup,
+  SecurityNavGroupKey,
+} from '../../common/components/navigation/types';
 import {
   APP_OVERVIEW_PATH,
   APP_RULES_PATH,
@@ -21,9 +24,10 @@ import {
   APP_ENDPOINTS_PATH,
   APP_TRUSTED_APPS_PATH,
   APP_EVENT_FILTERS_PATH,
+  SecurityPageName,
 } from '../../../common/constants';
 
-export const navTabs: SiemNavTab = {
+export const navTabs: SecurityNav = {
   [SecurityPageName.overview]: {
     id: SecurityPageName.overview,
     name: i18n.OVERVIEW,
@@ -36,21 +40,21 @@ export const navTabs: SiemNavTab = {
     name: i18n.ALERTS,
     href: APP_ALERTS_PATH,
     disabled: false,
-    urlKey: SecurityPageName.alerts,
+    urlKey: 'alerts',
   },
   [SecurityPageName.rules]: {
     id: SecurityPageName.rules,
     name: i18n.RULES,
     href: APP_RULES_PATH,
     disabled: false,
-    urlKey: SecurityPageName.rules,
+    urlKey: 'rules',
   },
   [SecurityPageName.exceptions]: {
     id: SecurityPageName.exceptions,
     name: i18n.EXCEPTIONS,
     href: APP_EXCEPTIONS_PATH,
     disabled: false,
-    urlKey: SecurityPageName.exceptions,
+    urlKey: 'exceptions',
   },
   [SecurityPageName.hosts]: {
     id: SecurityPageName.hosts,
@@ -85,46 +89,46 @@ export const navTabs: SiemNavTab = {
     name: i18n.ADMINISTRATION,
     href: APP_MANAGEMENT_PATH,
     disabled: false,
-    urlKey: SecurityPageName.administration,
+    urlKey: 'administration',
   },
   [SecurityPageName.endpoints]: {
     id: SecurityPageName.endpoints,
     name: i18n.ENDPOINTS,
     href: APP_ENDPOINTS_PATH,
     disabled: false,
-    urlKey: SecurityPageName.administration,
+    urlKey: 'administration',
   },
   [SecurityPageName.trustedApps]: {
     id: SecurityPageName.trustedApps,
     name: i18n.TRUSTED_APPLICATIONS,
     href: APP_TRUSTED_APPS_PATH,
     disabled: false,
-    urlKey: SecurityPageName.administration,
+    urlKey: 'administration',
   },
   [SecurityPageName.eventFilters]: {
     id: SecurityPageName.eventFilters,
     name: i18n.EVENT_FILTERS,
     href: APP_EVENT_FILTERS_PATH,
     disabled: false,
-    urlKey: SecurityPageName.administration,
+    urlKey: 'administration',
   },
 };
 
-export const navTabGroups: NavTabGroups = {
-  [SecurityPageGroupName.detect]: {
-    id: SecurityPageGroupName.detect,
+export const securityNavGroup: SecurityNavGroup = {
+  [SecurityNavGroupKey.detect]: {
+    id: SecurityNavGroupKey.detect,
     name: i18n.DETECT,
   },
-  [SecurityPageGroupName.explore]: {
-    id: SecurityPageGroupName.explore,
+  [SecurityNavGroupKey.explore]: {
+    id: SecurityNavGroupKey.explore,
     name: i18n.EXPLORE,
   },
-  [SecurityPageGroupName.investigate]: {
-    id: SecurityPageGroupName.investigate,
+  [SecurityNavGroupKey.investigate]: {
+    id: SecurityNavGroupKey.investigate,
     name: i18n.INVESTIGATE,
   },
-  [SecurityPageGroupName.manage]: {
-    id: SecurityPageGroupName.manage,
+  [SecurityNavGroupKey.manage]: {
+    id: SecurityNavGroupKey.manage,
     name: i18n.MANAGE,
   },
 };

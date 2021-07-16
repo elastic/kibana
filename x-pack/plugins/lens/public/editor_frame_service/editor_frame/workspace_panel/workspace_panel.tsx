@@ -479,6 +479,7 @@ export const VisualizationWrapper = ({
           <EuiButton
             data-test-subj="errorFixAction"
             onClick={async () => {
+              trackUiEvent('error_fix_action');
               const newState = await validationError.fixAction?.newState(framePublicAPI);
               dispatchLens(
                 updateDatasourceState({

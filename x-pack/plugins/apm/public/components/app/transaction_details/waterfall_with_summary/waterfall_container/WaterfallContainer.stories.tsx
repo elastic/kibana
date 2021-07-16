@@ -7,7 +7,6 @@
 
 import React, { ComponentType } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { EuiThemeProvider } from '../../../../../../../../../src/plugins/kibana_react/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TraceAPIResponse } from '../../../../../../server/lib/traces/get_trace';
 import { MockApmPluginContextWrapper } from '../../../../../context/apm_plugin/mock_apm_plugin_context';
@@ -27,11 +26,9 @@ export default {
   decorators: [
     (Story: ComponentType) => (
       <MemoryRouter>
-        <EuiThemeProvider>
-          <MockApmPluginContextWrapper>
-            <Story />
-          </MockApmPluginContextWrapper>
-        </EuiThemeProvider>
+        <MockApmPluginContextWrapper>
+          <Story />
+        </MockApmPluginContextWrapper>
       </MemoryRouter>
     ),
   ],

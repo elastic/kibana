@@ -286,13 +286,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(unfilteredServiceNames).to.eql(filteredServiceNames);
 
-        expect(
-          filteredResponse.body.items.every((item) => {
-            // make sure it did not query transaction data
-            return isEmpty(item.avgResponseTime);
-          })
-        ).to.be(true);
-
         expect(filteredResponse.body.items.every((item) => !!item.agentName)).to.be(true);
       });
     }

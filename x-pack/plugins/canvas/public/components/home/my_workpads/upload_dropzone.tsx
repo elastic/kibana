@@ -11,8 +11,7 @@ import Dropzone from 'react-dropzone';
 
 import { useNotifyService } from '../../../services';
 import { ErrorStrings } from '../../../../i18n';
-import { useImportWorkpad, useCreateWorkpad } from '../hooks';
-import { CanvasWorkpad } from '../../../../types';
+import { useImportWorkpad } from '../hooks';
 
 import { UploadDropzone as Component } from './upload_dropzone.component';
 
@@ -21,17 +20,7 @@ const { WorkpadDropzone: errors } = ErrorStrings;
 export const UploadDropzone: FC = ({ children }) => {
   const notify = useNotifyService();
   const uploadWorkpad = useImportWorkpad();
-  const createWorkpad = useCreateWorkpad();
   const [isDisabled, setIsDisabled] = useState(false);
-
-  const onComplete = async (workpad?: CanvasWorkpad) => {
-    if (!workpad) {
-      setIsDisabled(false);
-      return;
-    }
-
-    await createWorkpad(workpad);
-  };
 
   const onDrop = (files: FileList) => {
     if (!files) {
@@ -44,7 +33,7 @@ export const UploadDropzone: FC = ({ children }) => {
     }
 
     setIsDisabled(true);
-    uploadWorkpad(files[0], onComplete);
+    uploadWorkpad(files[0], () => setIsDisabled(false));
   };
 
   return (

@@ -98,12 +98,7 @@ export const appendBetaNotificationItem = (sideNav: KibanaPageTemplateProps['sol
     sideNav.items.push({
       id: 'beta',
       name: '',
-      className: 'betaNotificationSideNavItem',
-      renderItem: () => (
-        <div className="betaNotificationWrapper">
-          <BetaNotification />
-        </div>
-      ),
+      renderItem: () => <BetaNotification />,
     });
   }
 };
