@@ -24,12 +24,11 @@ describe('ThreatSummaryView', () => {
     jest.clearAllMocks();
   });
 
-  const enrichments = [
-    buildEventEnrichmentMock(),
-    buildEventEnrichmentMock({ 'matched.id': ['other.id'], 'matched.field': ['other.field'] }),
-  ];
-
   it('renders a row for each enrichment', () => {
+    const enrichments = [
+      buildEventEnrichmentMock(),
+      buildEventEnrichmentMock({ 'matched.id': ['other.id'], 'matched.field': ['other.field'] }),
+    ];
     const wrapper = mount(
       <TestProviders>
         <ThreatSummaryView enrichments={enrichments} eventId={eventId} timelineId={timelineId} />
