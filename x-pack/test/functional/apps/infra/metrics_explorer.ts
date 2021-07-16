@@ -54,6 +54,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(metrics.length).to.equal(0);
       });
 
+      it('should display "Missing Metric" message for zero metrics', async () => {});
+
       it('should add a metric', async () => {
         await pageObjects.infraMetricsExplorer.addMetric('system.cpu.user.pct');
         const metrics = await pageObjects.infraMetricsExplorer.getMetrics();

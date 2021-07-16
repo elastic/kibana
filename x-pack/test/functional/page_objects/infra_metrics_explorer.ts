@@ -36,5 +36,9 @@ export function InfraMetricsExplorerProvider({ getService }: FtrProviderContext)
     async getCharts() {
       return await testSubjects.findAll('metricsExplorer-chart');
     },
+
+    async getMissingMetricMessage() {
+      return await testSubjects.find('metricsExplorer-missingMetricMessage');
+    },
   };
 }
