@@ -32,4 +32,10 @@ describe('ReorderableTable', () => {
     const wrapper = shallow(<ReorderableTable items={[]} columns={[]} className="foo" />);
     expect(wrapper.hasClass('foo')).toBe(true);
   });
+
+  it('can append additional properties to each row, which can be dynamically calculated from the item in that row', () => {
+    const rowProps = () => ({});
+    const wrapper = shallow(<ReorderableTable items={[]} columns={[]} rowProps={rowProps} />);
+    expect(wrapper.find(BodyRows).prop('rowProps')).toBe(rowProps);
+  });
 });

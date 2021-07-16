@@ -15,12 +15,17 @@ import { Column } from './types';
 interface BodyRowProps<Item> {
   columns: Array<Column<Item>>;
   item: Item;
+  additionalProps?: object;
 }
 
-export const BodyRow = <Item extends object>({ columns, item }: BodyRowProps<Item>) => {
+export const BodyRow = <Item extends object>({
+  columns,
+  item,
+  additionalProps,
+}: BodyRowProps<Item>) => {
   return (
     <div className="reorderable-table-row">
-      <EuiFlexGroup alignItems="center">
+      <EuiFlexGroup data-test-subj="row" alignItems="center" {...(additionalProps || {})}>
         <EuiFlexItem>
           <EuiFlexGroup alignItems="flexStart">
             {columns.map((column, columnIndex) => (

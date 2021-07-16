@@ -11,16 +11,26 @@ import { BodyRow } from './body_row';
 
 import { Column } from './types';
 
-interface BodyRowsProps<Item> {
+export interface BodyRowsProps<Item> {
   columns: Array<Column<Item>>;
   items: Item[];
+  rowProps?: (item: Item) => object;
 }
 
-export const BodyRows = <Item extends object>({ columns, items }: BodyRowsProps<Item>) => {
+export const BodyRows = <Item extends object>({
+  columns,
+  items,
+  rowProps = () => ({}),
+}: BodyRowsProps<Item>) => {
   return (
     <div>
       {items.map((item, itemIndex) => (
-        <BodyRow key={`table_draggable_row_${itemIndex}`} columns={columns} item={item} />
+        <BodyRow
+          key={`table_draggable_row_${itemIndex}`}
+          columns={columns}
+          item={item}
+          additionalProps={rowProps(item)}
+        />
       ))}
     </div>
   );

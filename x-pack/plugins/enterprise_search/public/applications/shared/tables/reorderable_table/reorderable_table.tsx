@@ -10,7 +10,7 @@ import React from 'react';
 import classNames from 'classnames';
 
 import './reorderable_table.scss';
-import { BodyRows } from './body_rows';
+import { BodyRows, BodyRowsProps } from './body_rows';
 import { HeaderRow } from './header_row';
 import { Column } from './types';
 
@@ -18,17 +18,19 @@ interface ReorderableTableProps<Item> {
   className?: string;
   columns: Array<Column<Item>>;
   items: Item[];
+  rowProps?: BodyRowsProps<Item>['rowProps'];
 }
 
 export const ReorderableTable = <Item extends object>({
   className,
   columns,
   items,
+  rowProps,
 }: ReorderableTableProps<Item>) => {
   return (
     <div className={classNames(className, 'reorderable-table')}>
       <HeaderRow columns={columns} />
-      <BodyRows items={items} columns={columns} />
+      <BodyRows items={items} columns={columns} rowProps={rowProps} />
     </div>
   );
 };

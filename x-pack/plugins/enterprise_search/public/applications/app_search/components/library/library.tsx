@@ -250,6 +250,13 @@ export const Library: React.FC = () => {
           </EuiDragDropContext>
           <EuiSpacer />
 
+          <EuiTitle size="s">
+            <h3>With field value type highlights</h3>
+          </EuiTitle>
+          <EuiSpacer />
+          <Result {...props} schemaForTypeHighlights={schema} />
+          <EuiSpacer />
+
           <EuiTitle size="m">
             <h2>ReorderableTable</h2>
           </EuiTitle>
@@ -263,12 +270,25 @@ export const Library: React.FC = () => {
             ]}
           />
 
-          <EuiSpacer />
           <EuiTitle size="s">
-            <h3>With field value type highlights</h3>
+            <h3>Using the rowProps prop to apply dynamic properties to each row</h3>
           </EuiTitle>
           <EuiSpacer />
-          <Result {...props} schemaForTypeHighlights={schema} />
+          <ReorderableTable
+            rowProps={(item) => ({
+              style: {
+                backgroundColor: item.id % 2 === 0 ? 'red' : 'green',
+              },
+            })}
+            items={[{ id: 1 }, { id: 2 }, { id: 3 }]}
+            columns={[
+              { name: 'ID', render: (item) => <div>{item.id}</div> },
+              { name: 'Whatever', render: (item) => <div>Whatever</div> },
+            ]}
+          />
+
+          <EuiSpacer />
+          <EuiSpacer />
           <EuiSpacer />
         </EuiPageContentBody>
       </EuiPageContent>

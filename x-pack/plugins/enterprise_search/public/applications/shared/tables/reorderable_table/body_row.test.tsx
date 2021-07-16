@@ -12,26 +12,29 @@ import { shallow } from 'enzyme';
 import { BodyRow } from './body_row';
 import { Cell } from './cell';
 
+interface Foo {
+  id: number;
+}
+
 describe('BodyRow', () => {
+  const columns = [
+    {
+      name: 'ID',
+      flexBasis: 'foo',
+      flexGrow: 0,
+      alignItems: 'bar',
+      render: (item: Foo) => item.id,
+    },
+    {
+      name: 'Whatever',
+      render: () => 'Whatever',
+    },
+  ];
+
+  const item = { id: 1 };
+
   it('renders a table row from the provided item and columns', () => {
-    const wrapper = shallow(
-      <BodyRow
-        columns={[
-          {
-            name: 'ID',
-            flexBasis: 'foo',
-            flexGrow: 0,
-            alignItems: 'bar',
-            render: (item) => item.id,
-          },
-          {
-            name: 'Whatever',
-            render: () => 'Whatever',
-          },
-        ]}
-        item={{ id: 1 }}
-      />
-    );
+    const wrapper = shallow(<BodyRow columns={columns} item={item} />);
 
     const cells = wrapper.find(Cell);
     expect(cells.length).toBe(2);
@@ -46,5 +49,19 @@ describe('BodyRow', () => {
     expect(cells.at(1).props()).toEqual({
       children: 'Whatever',
     });
+  });
+
+  it('will accept additional properties to apply to this row', () => {
+    const wrapper = shallow(
+      <BodyRow
+        columns={columns}
+        item={item}
+        additionalProps={{
+          className: 'some_class_name',
+        }}
+      />
+    );
+
+    expect(wrapper.find('[data-test-subj="row"]').hasClass('some_class_name')).toBe(true);
   });
 });

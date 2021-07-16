@@ -25,13 +25,38 @@ describe('BodyRows', () => {
     expect(rows.length).toBe(2);
 
     expect(rows.at(0).props()).toEqual({
+      additionalProps: {},
       columns,
       item: { id: 1 },
     });
 
     expect(rows.at(1).props()).toEqual({
+      additionalProps: {},
       columns,
       item: { id: 2 },
+    });
+  });
+
+  it('can append additional properties to each row, which can be dynamically calculated from the item in that row', () => {
+    const columns: Array<Column<Foo>> = [];
+    const rowProps = (item: Foo) => ({
+      isFirst: item.id === 1,
+      foo: 'foo',
+    });
+
+    const wrapper = shallow(
+      <BodyRows items={[{ id: 1 }, { id: 2 }]} columns={columns} rowProps={rowProps} />
+    );
+    const rows = wrapper.find(BodyRow);
+
+    expect(rows.at(0).prop('additionalProps')).toEqual({
+      isFirst: true,
+      foo: 'foo',
+    });
+
+    expect(rows.at(1).prop('additionalProps')).toEqual({
+      isFirst: false,
+      foo: 'foo',
     });
   });
 });
