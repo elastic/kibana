@@ -138,7 +138,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
     getDefaultDescription: () =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.communityId', {
-        defaultMessage: 'Computes the Community id for network flow data.',
+        defaultMessage: 'Computes the Community ID for network flow data.',
       }),
   },
   convert: {
