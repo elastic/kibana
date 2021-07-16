@@ -21,7 +21,6 @@ export const licenseMock = {
   ): jest.Mocked<SecurityLicense> => ({
     isLicenseAvailable: jest.fn().mockReturnValue(true),
     isEnabled: jest.fn().mockReturnValue(true),
-    getType: jest.fn().mockReturnValue(licenseType),
     getFeatures: jest.fn().mockReturnValue(features),
     hasAtLeast: jest
       .fn()
