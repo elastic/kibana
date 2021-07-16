@@ -20,7 +20,7 @@ interface Props {
 export const DetectorDescription: FC<Props> = ({ detectorType }) => {
   const { jobCreator: jc, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as RareJobCreator;
-  const [description, setDescription] = useState<string[] | null>(null);
+  const [description, setDescription] = useState<string | null>(null);
 
   useEffect(() => {
     const desc = createDetectorDescription(jobCreator, detectorType);
@@ -41,9 +41,7 @@ export const DetectorDescription: FC<Props> = ({ detectorType }) => {
       )}
     >
       <ul>
-        {description.map((d) => (
-          <li>{d}</li>
-        ))}
+        <li>{description}</li>
       </ul>
     </EuiCallOut>
   );
@@ -110,31 +108,19 @@ function createDetectorDescription(jobCreator: RareJobCreator, detectorType: RAR
     }
   );
 
-  const desc = [];
-
   if (detectorType === RARE_DETECTOR_TYPE.RARE) {
-    if (splitFieldName !== undefined) {
-      desc.push(rareSplitSummary);
-    } else {
-      desc.push(rareSummary);
-    }
+    return splitFieldName !== undefined ? rareSplitSummary : rareSummary;
   }
 
   if (detectorType === RARE_DETECTOR_TYPE.FREQ_RARE_POPULATION) {
-    if (splitFieldName !== undefined) {
-      desc.push(freqRareSplitPopulationSummary);
-    } else {
-      desc.push(freqRarePopulationSummary);
-    }
+    return splitFieldName !== undefined
+      ? freqRareSplitPopulationSummary
+      : freqRarePopulationSummary;
   }
 
   if (detectorType === RARE_DETECTOR_TYPE.RARE_POPULATION) {
-    if (splitFieldName !== undefined) {
-      desc.push(rareSplitPopulationSummary);
-    } else {
-      desc.push(rarePopulationSummary);
-    }
+    return splitFieldName !== undefined ? rareSplitPopulationSummary : rarePopulationSummary;
   }
 
-  return desc;
+  return null;
 }
