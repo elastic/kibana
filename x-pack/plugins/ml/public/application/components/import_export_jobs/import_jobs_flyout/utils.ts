@@ -8,18 +8,22 @@
 import type { JobType } from '../../../../../common/types/saved_objects';
 import type { Job, Datafeed } from '../../../../../common/types/anomaly_detection_jobs';
 import type { DataFrameAnalyticsConfig } from '../../../data_frame_analytics/common';
-import type { SkippedJobs } from './cannot_import_jobs_callout';
 
 export interface ImportedAdJob {
   job: Job;
   datafeed: Datafeed;
 }
 
-export interface JobId {
+export interface JobIdWrapper {
   id: string;
   originalId: string;
   valid: boolean;
   invalidMessage: string;
+}
+
+export interface SkippedJobs {
+  jobId: string;
+  missingIndices: string[];
 }
 
 function isImportedAdJobs(obj: any): obj is ImportedAdJob[] {
@@ -81,7 +85,7 @@ export async function readJobConfigs(
   }
 }
 
-export function renameAdJobs(jobIds: JobId[], jobs: ImportedAdJob[]) {
+export function renameAdJobs(jobIds: JobIdWrapper[], jobs: ImportedAdJob[]) {
   if (jobs.length !== jobs.length) {
     return jobs;
   }
@@ -95,7 +99,7 @@ export function renameAdJobs(jobIds: JobId[], jobs: ImportedAdJob[]) {
   });
 }
 
-export function renameDfaJobs(jobIds: JobId[], jobs: DataFrameAnalyticsConfig[]) {
+export function renameDfaJobs(jobIds: JobIdWrapper[], jobs: DataFrameAnalyticsConfig[]) {
   if (jobs.length !== jobs.length) {
     return jobs;
   }

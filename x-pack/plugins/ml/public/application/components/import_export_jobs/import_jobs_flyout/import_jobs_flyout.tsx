@@ -31,19 +31,13 @@ import {
 import type { DataFrameAnalyticsConfig } from '../../../data_frame_analytics/common';
 import type { JobType } from '../../../../../common/types/saved_objects';
 import { useMlApiContext, useMlKibana } from '../../../contexts/kibana';
-import { CannotImportJobsCallout, SkippedJobs } from './cannot_import_jobs_callout';
+import { CannotImportJobsCallout } from './cannot_import_jobs_callout';
 import { CannotReadFileCallout } from './cannot_read_file_callout';
 import { isJobIdValid } from '../../../../../common/util/job_utils';
 import { JOB_ID_MAX_LENGTH } from '../../../../../common/constants/validation';
 import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
-import {
-  ImportedAdJob,
-  JobId,
-  readJobConfigs,
-  renameAdJobs,
-  renameDfaJobs,
-  validateJobs,
-} from './utils';
+import { readJobConfigs, renameAdJobs, renameDfaJobs, validateJobs } from './utils';
+import type { ImportedAdJob, JobIdWrapper, SkippedJobs } from './utils';
 
 interface Props {
   isDisabled: boolean;
@@ -62,10 +56,11 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
       notifications: { toasts },
     },
   } = useMlKibana();
+
   const [showFlyout, setShowFlyout] = useState(false);
   const [adJobs, setAdJobs] = useState<ImportedAdJob[]>([]);
   const [dfaJobs, setDfaJobs] = useState<DataFrameAnalyticsConfig[]>([]);
-  const [jobIds, setJobIds] = useState<JobId[]>([]);
+  const [jobIds, setJobIds] = useState<JobIdWrapper[]>([]);
   const [skippedJobs, setSkippedJobs] = useState<SkippedJobs[]>([]);
   const [importing, setImporting] = useState(false);
   const [jobType, setJobType] = useState<JobType | null>(null);
@@ -278,6 +273,8 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
     }
   }, [idsMash, jobIds]);
 
+  useDebounce(validateIds, 400, [idsMash]);
+
   const renameJob = useCallback(
     (id: string, i: number) => {
       jobIds[i].id = id;
@@ -288,8 +285,6 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
     },
     [jobIds]
   );
-
-  useDebounce(validateIds, 400, [idsMash]);
 
   const DeleteJobButton: FC<{ index: number }> = ({ index }) => (
     <EuiButtonIcon

@@ -26,6 +26,7 @@ import {
   MlJobsResponse,
   MlJobsStatsResponse,
   JobsExistResponse,
+  BulkCreateResults,
 } from '../../../common/types/job_service';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
 import { datafeedsProvider, MlDatafeedsResponse, MlDatafeedsStatsResponse } from './datafeeds';
@@ -49,13 +50,6 @@ interface Results {
   [id: string]: {
     [status: string]: boolean;
     error?: any;
-  };
-}
-
-export interface BulkCreateResults {
-  [id: string]: {
-    job: { success: boolean; error?: any };
-    datafeed: { success: boolean; error?: any };
   };
 }
 

@@ -24,8 +24,8 @@ import {
 } from '@elastic/eui';
 
 import { useMlApiContext } from '../../../contexts/kibana';
-import { exportAnomalyDetectionJobs, exportDataframeAnalyticsJobs } from '../utils';
-import { JobType } from '../../../../../common/types/saved_objects';
+import { utilsProvider } from './utils';
+import type { JobType } from '../../../../../common/types/saved_objects';
 
 interface Props {
   isDisabled: boolean;
@@ -33,10 +33,14 @@ interface Props {
 }
 
 export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
+  const mlApiServices = useMlApiContext();
   const {
     getJobs,
     dataFrameAnalytics: { getDataFrameAnalytics },
-  } = useMlApiContext();
+  } = mlApiServices;
+
+  const { exportAnomalyDetectionJobs, exportDataframeAnalyticsJobs } = utilsProvider(mlApiServices);
+
   const [showFlyout, setShowFlyout] = useState(false);
   const [adJobIds, setAdJobIds] = useState<string[]>([]);
   const [dfaJobIds, setDfaJobIds] = useState<string[]>([]);

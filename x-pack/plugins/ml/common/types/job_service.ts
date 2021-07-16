@@ -40,3 +40,10 @@ export interface BucketSpanEstimatorData {
   runtimeMappings?: RuntimeMappings;
   indicesOptions?: IndicesOptions;
 }
+
+export interface BulkCreateResults {
+  [id: string]: {
+    job: { success: boolean; error?: any };
+    datafeed: { success: boolean; error?: any };
+  };
+}

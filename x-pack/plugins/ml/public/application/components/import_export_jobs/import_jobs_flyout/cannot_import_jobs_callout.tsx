@@ -10,14 +10,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiCallOut, EuiText, EuiAccordion, EuiSpacer } from '@elastic/eui';
+import type { SkippedJobs } from './utils';
 
 interface Props {
   jobs: SkippedJobs[];
   autoExpand?: boolean;
-}
-export interface SkippedJobs {
-  jobId: string;
-  missingIndices: string[];
 }
 
 export const CannotImportJobsCallout: FC<Props> = ({ jobs, autoExpand = false }) => {
