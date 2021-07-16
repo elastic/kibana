@@ -168,6 +168,7 @@ function defineTypeWithMigration(core: CoreSetup<PluginsStart>, deps: PluginsSet
             },
           };
         },
+        false,
         // type hasn't changed as the field we're updating is not an encrypted one
         typePriorTo790,
         typePriorTo790
@@ -193,6 +194,7 @@ function defineTypeWithMigration(core: CoreSetup<PluginsStart>, deps: PluginsSet
             },
           };
         },
+        false,
         typePriorTo790
       ),
     },
