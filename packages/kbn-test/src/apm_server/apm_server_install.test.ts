@@ -108,7 +108,7 @@ describe('#extract()', () => {
     expect(Fs.rm.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          <absolute path>/data/test-apm-server/foo,
+          <absolute path>/data/test-apm-server/installs/foo,
           Object {
             "force": true,
             "recursive": true,
@@ -122,7 +122,7 @@ describe('#extract()', () => {
           Object {
             "archivePath": "/artifacts/bar.tar.gz",
             "stripComponents": 1,
-            "targetDir": <absolute path>/data/test-apm-server/foo,
+            "targetDir": <absolute path>/data/test-apm-server/installs/foo,
           },
         ],
       ]
@@ -149,7 +149,7 @@ describe('#configureInstall()', () => {
     expect(Fs.writeFile.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          <absolute path>/data/test-apm-server/foo/apm-server.yml,
+          <absolute path>/data/test-apm-server/installs/foo/apm-server.yml,
           "apm-server:
         host: 'localhost:48484'
         rum:
@@ -181,7 +181,7 @@ describe('#configureInstall()', () => {
     expect(Fs.writeFile.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          <absolute path>/data/test-apm-server/foo/apm-server.yml,
+          <absolute path>/data/test-apm-server/installs/foo/apm-server.yml,
           "apm-server:
         rum:
           enabled: true
@@ -223,7 +223,7 @@ describe('#run()', () => {
           "run",
         ],
         Object {
-          "cwd": <absolute path>/data/test-apm-server/foo,
+          "cwd": <absolute path>/data/test-apm-server/installs/foo,
           "extendEnv": false,
           "stdio": Array [
             "ignore",
@@ -250,10 +250,10 @@ describe('#run()', () => {
 
     expect(logCollector.messages).toMatchInlineSnapshot(`
       Array [
-        " info [apm-server/mock] progress info",
-        "ERROR [apm-server/mock] SOMETHING went wrong!",
-        " debg [apm-server/mock] something that might be helpful for debugging",
-        " info plain-text log line",
+        " info [foo] [mock] progress info",
+        "ERROR [foo] [mock] SOMETHING went wrong!",
+        " debg [foo] [mock] something that might be helpful for debugging",
+        " info [foo] plain-text log line",
         " info apm-server exitted with code 0",
       ]
     `);
