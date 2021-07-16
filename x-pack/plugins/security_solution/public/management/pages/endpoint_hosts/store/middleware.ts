@@ -34,8 +34,8 @@ import {
   getActivityLogDataPaging,
   getLastLoadedActivityLogData,
   detailsData,
-  getEndpointDetailsFlyoutView,
   getIsEndpointPackageInfoUninitialized,
+  getIsOnEndpointDetailsActivityLog,
 } from './selectors';
 import { AgentIdsPendingActions, EndpointState, PolicyIds } from '../types';
 import {
@@ -63,7 +63,6 @@ import { AppAction } from '../../../../common/store/actions';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 import { EndpointPackageInfoStateChanged } from './action';
 import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint_pending_actions';
-import { EndpointDetailsTabsTypes } from '../view/details/components/endpoint_details_tabs';
 import { getIsInvalidDateRange } from '../utils';
 
 type EndpointPageStore = ImmutableMiddlewareAPI<EndpointState, AppAction>;
@@ -369,7 +368,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
     if (
       action.type === 'userChangedUrl' &&
       hasSelectedEndpoint(getState()) === true &&
-      getEndpointDetailsFlyoutView(getState()) === EndpointDetailsTabsTypes.activityLog
+      getIsOnEndpointDetailsActivityLog(getState())
     ) {
       // call the activity log api
       dispatch({

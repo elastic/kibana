@@ -109,17 +109,17 @@ export class DataLoader {
             'The request may have timed out. Try using a smaller sample size or narrowing the time range.',
           values: {
             index: this._indexPattern.title,
-            message: err.message,
+            message: err.error ?? err.message,
           },
         }),
       });
     } else {
       this._toastNotifications.addError(err, {
-        title: i18n.translate('xpack.dataVisualizer.index.errorLoadingDataMessage.', {
-          defaultMessage: 'Error loading data in index {index}. {message}',
+        title: i18n.translate('xpack.dataVisualizer.index.errorLoadingDataMessage', {
+          defaultMessage: 'Error loading data in index {index}. {message}.',
           values: {
             index: this._indexPattern.title,
-            message: err.message,
+            message: err.error ?? err.message,
           },
         }),
       });

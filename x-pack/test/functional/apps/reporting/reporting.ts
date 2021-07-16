@@ -12,9 +12,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['dashboard', 'common', 'reporting']);
   const es = getService('es');
   const esArchiver = getService('esArchiver');
+  const retry = getService('retry');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/102722
-  describe.skip('Reporting', function () {
+  describe('Reporting', function () {
     this.tags(['smoke', 'ciGroup2']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/packaging');
@@ -33,6 +33,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       this.timeout(180000);
 
       await pageObjects.common.navigateToApp('dashboards');
+      await retry.waitFor('dashboard landing page', async () => {
+        return await pageObjects.dashboard.onDashboardLandingPage();
+      });
       await pageObjects.dashboard.loadSavedDashboard('dashboard');
       await pageObjects.reporting.openPdfReportingPanel();
       await pageObjects.reporting.clickGenerateReportButton();
