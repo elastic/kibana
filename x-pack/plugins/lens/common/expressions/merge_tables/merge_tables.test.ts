@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { mergeTables } from './merge_tables';
+import { mergeTables } from './index';
 import { ExpressionValueSearchContext } from 'src/plugins/data/public';
 import {
   Datatable,

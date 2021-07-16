@@ -6,16 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  ExecutionContext,
-  Datatable,
+import type {
   ExpressionFunctionDefinition,
-} from 'src/plugins/expressions/public';
-import { ExpressionValueSearchContext, search } from '../../../../../src/plugins/data/public';
-const { toAbsoluteDates } = search.aggs;
+  Datatable,
+  ExecutionContext,
+} from '../../../../../../src/plugins/expressions/common';
+import { toAbsoluteDates } from '../../../../../../src/plugins/data/common';
+import type { ExpressionValueSearchContext } from '../../../../../../src/plugins/data/common';
 
-import { LensMultiTable } from '../../common';
-import { Adapters } from '../../../../../src/plugins/inspector/common';
+import type { LensMultiTable } from '../../types';
+import { Adapters } from '../../../../../../src/plugins/inspector/common';
 
 interface MergeTables {
   layerIds: string[];
