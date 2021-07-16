@@ -149,6 +149,7 @@ export const buildEventEnrichmentMock = (
   'threatintel.indicator.file.type': ['html'],
   'threatintel.indicator.first_seen': ['2021-05-28T18:33:29.000Z'],
   'threatintel.indicator.type': ['file'],
+  'threatintel.indicator.provider': ['abuseurl'],
   ...overrides,
 });
 

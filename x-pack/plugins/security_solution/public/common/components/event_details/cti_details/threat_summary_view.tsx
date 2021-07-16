@@ -84,29 +84,43 @@ const EnrichmentDescription: React.FC<ThreatSummaryItem['description']> = ({
   );
 };
 
-const buildThreatSummaryItems = (
+export const buildThreatSummaryItems = (
   enrichments: CtiEnrichment[],
   timelineId: string,
   eventId: string
 ) => {
-  return enrichments.map((enrichment, index) => {
-    const { field, type, value, provider } = getEnrichmentIdentifiers(enrichment);
-
-    return {
-      title: {
-        title: field,
-        type,
-      },
-      description: {
-        eventId,
-        fieldName: field,
-        index,
-        provider,
-        timelineId,
-        value,
-      },
-    };
-  });
+  const accumulator: { cache: { [key: string]: boolean }; uniqueItems: ThreatSummaryItem[] } = {
+    cache: {},
+    uniqueItems: [],
+  };
+  return enrichments
+    .reduce((acc, enrichment, index) => {
+      const { field, type, value, provider } = getEnrichmentIdentifiers(enrichment);
+      const id = `${field}${type}${value}${provider}`;
+      if (!acc.cache[id]) {
+        acc.cache[id] = true;
+        acc.uniqueItems.push({
+          title: {
+            title: field,
+            type,
+          },
+          description: {
+            eventId,
+            fieldName: field,
+            index,
+            provider,
+            timelineId,
+            value,
+          },
+        });
+      }
+      return acc;
+    }, accumulator)
+    .uniqueItems.sort((a, b) => {
+      if (!a.description.provider) return 1;
+      if (!b.description.provider) return -1;
+      return a.description.provider > b.description.provider ? 1 : -1;
+    });
 };
 
 const columns: Array<EuiBasicTableColumn<ThreatSummaryItem>> = [

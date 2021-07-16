@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
+import { isEqual } from 'lodash';
 
-import { ThreatSummaryView } from './threat_summary_view';
+import { ThreatSummaryView, buildThreatSummaryItems } from './threat_summary_view';
 import { TestProviders } from '../../../mock';
 import { useMountAppended } from '../../../utils/use_mount_appended';
 import { buildEventEnrichmentMock } from '../../../../../common/search_strategy/security_solution/cti/index.mock';
@@ -23,11 +24,12 @@ describe('ThreatSummaryView', () => {
     jest.clearAllMocks();
   });
 
+  const enrichments = [
+    buildEventEnrichmentMock(),
+    buildEventEnrichmentMock({ 'matched.id': ['other.id'], 'matched.field': ['other.field'] }),
+  ];
+
   it('renders a row for each enrichment', () => {
-    const enrichments = [
-      buildEventEnrichmentMock(),
-      buildEventEnrichmentMock({ 'matched.id': ['other.id'], 'matched.field': ['other.field'] }),
-    ];
     const wrapper = mount(
       <TestProviders>
         <ThreatSummaryView enrichments={enrichments} eventId={eventId} timelineId={timelineId} />
@@ -37,5 +39,39 @@ describe('ThreatSummaryView', () => {
     expect(wrapper.find('[data-test-subj="threat-summary-view"] .euiTableRow')).toHaveLength(
       enrichments.length
     );
+  });
+
+  describe('buildThreatSummaryItems', () => {
+    it('dedupes same key-value-provider items', () => {
+      const enrichmentsWithDupes = [
+        buildEventEnrichmentMock(),
+        buildEventEnrichmentMock(),
+        buildEventEnrichmentMock({ 'matched.id': ['other.id'], 'matched.field': ['other.field'] }),
+        buildEventEnrichmentMock({ 'matched.id': ['other.id'], 'matched.field': ['other.field'] }),
+      ];
+      expect(
+        buildThreatSummaryItems(enrichmentsWithDupes, 'test_timeline_id', 'test_event_id')
+      ).toHaveLength(2);
+    });
+
+    it('sorts by provider', () => {
+      const enrichmentsWithUnsortedProviders = [
+        buildEventEnrichmentMock({ 'threatintel.indicator.provider': [''] }),
+        buildEventEnrichmentMock({ 'threatintel.indicator.provider': ['b'] }),
+        buildEventEnrichmentMock({ 'threatintel.indicator.provider': ['z'] }),
+        buildEventEnrichmentMock({ 'threatintel.indicator.provider': ['a'] }),
+      ];
+
+      expect(
+        isEqual(
+          buildThreatSummaryItems(
+            enrichmentsWithUnsortedProviders,
+            'test_timeline_id',
+            'test_event_id'
+          ).map((item) => item.description.provider),
+          ['a', 'b', 'z', '']
+        )
+      ).toBe(true);
+    });
   });
 });
