@@ -16,7 +16,7 @@ import { CoreContext } from '../core_context';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { executionContextServiceMock } from '../execution_context/execution_context_service.mock';
-import { ElasticsearchConfig } from './elasticsearch_config';
+import { configSchema, ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService } from './elasticsearch_service';
 import { elasticsearchServiceMock } from './elasticsearch_service.mock';
 import { elasticsearchClientMock } from './client/mocks';
@@ -31,17 +31,6 @@ const setupDeps = {
   http: httpServiceMock.createInternalSetupContract(),
   executionContext: executionContextServiceMock.createInternalSetupContract(),
 };
-configService.atPath.mockReturnValue(
-  new BehaviorSubject({
-    hosts: ['http://1.2.3.4'],
-    healthCheck: {
-      delay: duration(10),
-    },
-    ssl: {
-      verificationMode: 'none',
-    },
-  } as any)
-);
 
 let env: Env;
 let coreContext: CoreContext;
@@ -51,9 +40,20 @@ let mockClusterClientInstance: ReturnType<typeof elasticsearchClientMock.createC
 let mockLegacyClusterClientInstance: ReturnType<
   typeof elasticsearchServiceMock.createLegacyCustomClusterClient
 >;
-
+let mockConfig$: BehaviorSubject<any>;
 beforeEach(() => {
   env = Env.createDefault(REPO_ROOT, getEnvOptions());
+
+  mockConfig$ = new BehaviorSubject({
+    hosts: ['http://1.2.3.4'],
+    healthCheck: {
+      delay: duration(10),
+    },
+    ssl: {
+      verificationMode: 'none',
+    },
+  });
+  configService.atPath.mockReturnValue(mockConfig$);
 
   coreContext = { coreId: Symbol(), env, logger, configService: configService as any };
   elasticsearchService = new ElasticsearchService(coreContext);
@@ -70,9 +70,32 @@ beforeEach(() => {
 afterEach(() => jest.clearAllMocks());
 
 describe('#preboot', () => {
-  it('gives access to the current config', async () => {
-    const prebootContract = await elasticsearchService.preboot();
-    expect(prebootContract.config).toBeInstanceOf(ElasticsearchConfig);
+  describe('#config', () => {
+    it('exposes `hosts`', async () => {
+      const prebootContract = await elasticsearchService.preboot();
+      expect(prebootContract.config).toEqual({
+        credentialsSpecified: false,
+        hosts: ['http://1.2.3.4'],
+      });
+    });
+
+    it('set `credentialsSpecified` to `true` if `username` is specified', async () => {
+      mockConfig$.next(configSchema.validate({ username: 'kibana_system' }));
+      const prebootContract = await elasticsearchService.preboot();
+      expect(prebootContract.config.credentialsSpecified).toBe(true);
+    });
+
+    it('set `credentialsSpecified` to `true` if `password` is specified', async () => {
+      mockConfig$.next(configSchema.validate({ password: 'changeme' }));
+      const prebootContract = await elasticsearchService.preboot();
+      expect(prebootContract.config.credentialsSpecified).toBe(true);
+    });
+
+    it('set `credentialsSpecified` to `true` if `serviceAccountToken` is specified', async () => {
+      mockConfig$.next(configSchema.validate({ serviceAccountToken: 'xxxx' }));
+      const prebootContract = await elasticsearchService.preboot();
+      expect(prebootContract.config.credentialsSpecified).toBe(true);
+    });
   });
 
   describe('#createClient', () => {
@@ -310,7 +333,7 @@ describe('#setup', () => {
 
 describe('#start', () => {
   it('throws if called before `setup`', async () => {
-    expect(() => elasticsearchService.start()).rejects.toMatchInlineSnapshot(
+    await expect(() => elasticsearchService.start()).rejects.toMatchInlineSnapshot(
       `[Error: ElasticsearchService needs to be setup before calling start]`
     );
   });

@@ -992,9 +992,15 @@ export class ElasticsearchConfig {
     readonly username?: string;
 }
 
+// @public
+export interface ElasticsearchConfigPreboot {
+    readonly credentialsSpecified: boolean;
+    readonly hosts: string[];
+}
+
 // @public (undocumented)
 export interface ElasticsearchServicePreboot {
-    readonly config: ElasticsearchConfig;
+    readonly config: ElasticsearchConfigPreboot;
     readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ICustomClusterClient;
 }
 

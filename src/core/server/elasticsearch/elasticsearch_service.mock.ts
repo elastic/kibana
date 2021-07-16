@@ -46,7 +46,7 @@ type MockedElasticSearchServiceStart = MockedElasticSearchServiceSetup & {
 
 const createPrebootContractMock = () => {
   const prebootContract: MockedElasticSearchServicePreboot = {
-    config: {} as ElasticsearchConfig,
+    config: { hosts: [], credentialsSpecified: false },
     createClient: jest.fn(),
   };
   prebootContract.createClient.mockImplementation(() =>

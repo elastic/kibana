@@ -24,14 +24,14 @@ import { ServiceStatus } from '../status';
  */
 export interface ElasticsearchServicePreboot {
   /**
-   * Default Elasticsearch config.
+   * A limited set of Elasticsearch configuration entries.
    *
    * @example
    * ```js
-   * const defaultConfig = core.elasticsearch.config;
+   * const { hosts, credentialsSpecified } = core.elasticsearch.config;
    * ```
    */
-  readonly config: ElasticsearchConfig;
+  readonly config: ElasticsearchConfigPreboot;
 
   /**
    * Create application specific Elasticsearch cluster API client with customized config. See {@link IClusterClient}.
@@ -239,3 +239,21 @@ export interface FakeRequest {
  * See {@link KibanaRequest}.
  */
 export type ScopeableRequest = KibanaRequest | LegacyRequest | FakeRequest;
+
+/**
+ * A limited set of Elasticsearch configuration entries exposed to the `preboot` plugins at `setup`.
+ *
+ * @public
+ */
+export interface ElasticsearchConfigPreboot {
+  /**
+   * Hosts that the client will connect to. If sniffing is enabled, this list will
+   * be used as seeds to discover the rest of your cluster.
+   */
+  readonly hosts: string[];
+
+  /**
+   * Indicates whether Elasticsearch configuration includes credentials (`username`, `password` or `serviceAccountToken`).
+   */
+  readonly credentialsSpecified: boolean;
+}

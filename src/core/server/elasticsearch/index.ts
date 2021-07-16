@@ -20,6 +20,7 @@ export type {
   InternalElasticsearchServiceStart,
   FakeRequest,
   ScopeableRequest,
+  ElasticsearchConfigPreboot,
 } from './types';
 export * from './legacy';
 export type {

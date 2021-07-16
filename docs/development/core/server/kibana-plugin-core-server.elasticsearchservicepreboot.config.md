@@ -4,19 +4,19 @@
 
 ## ElasticsearchServicePreboot.config property
 
-Default Elasticsearch config.
+A limited set of Elasticsearch configuration entries.
 
 <b>Signature:</b>
 
 ```typescript
-readonly config: ElasticsearchConfig;
+readonly config: ElasticsearchConfigPreboot;
 ```
 
 ## Example
 
 
 ```js
-const defaultConfig = core.elasticsearch.config;
+const { hosts, credentialsSpecified } = core.elasticsearch.config;
 
 ```
 

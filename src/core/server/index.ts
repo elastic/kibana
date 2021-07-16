@@ -150,6 +150,7 @@ export type {
   ShardsResponse,
   GetResponse,
   DeleteDocumentResponse,
+  ElasticsearchConfigPreboot,
 } from './elasticsearch';
 
 export type {

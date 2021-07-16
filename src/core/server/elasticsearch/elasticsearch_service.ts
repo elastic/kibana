@@ -66,7 +66,13 @@ export class ElasticsearchService
 
     const config = await this.config$.pipe(first()).toPromise();
     return {
-      config,
+      config: {
+        hosts: config.hosts,
+        credentialsSpecified:
+          config.username !== undefined ||
+          config.password !== undefined ||
+          config.serviceAccountToken !== undefined,
+      },
       createClient: (type, clientConfig) => this.createClusterClient(type, config, clientConfig),
     };
   }
