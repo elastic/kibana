@@ -11,9 +11,13 @@ import { catchError, finalize, map, mergeMap, takeUntil } from 'rxjs/operators';
 import { PNG_JOB_TYPE_V2, getRedirectAppPathHome } from '../../../common/constants';
 import { TaskRunResult } from '../../lib/tasks';
 import { RunTaskFn, RunTaskFnFactory } from '../../types';
-import { decryptJobHeaders, getConditionalHeaders, omitBlockedHeaders } from '../common';
+import {
+  decryptJobHeaders,
+  getConditionalHeaders,
+  omitBlockedHeaders,
+  generatePngObservableFactory,
+} from '../common';
 import { getFullUrls } from '../common/v2/get_full_urls';
-import { generatePngObservableFactory } from './lib/generate_png';
 import { TaskPayloadPNGV2 } from './types';
 
 export const runTaskFnFactory: RunTaskFnFactory<

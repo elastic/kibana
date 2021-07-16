@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ReportingCore } from '../../../';
-import { UI_SETTINGS_CUSTOM_PDF_LOGO } from '../../../../common/constants';
-import { LevelLogger } from '../../../lib';
-import { ConditionalHeaders } from '../../common';
+import { ReportingCore } from '../../';
+import { UI_SETTINGS_CUSTOM_PDF_LOGO } from '../../../common/constants';
+import { LevelLogger } from '../../lib';
+import { ConditionalHeaders } from '../common';
 
 export const getCustomLogo = async (
   reporting: ReportingCore,

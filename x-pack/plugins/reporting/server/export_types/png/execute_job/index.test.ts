@@ -14,7 +14,7 @@ import {
   createMockConfigSchema,
   createMockReportingCore,
 } from '../../../test_helpers';
-import { generatePngObservableFactory } from '../lib/generate_png';
+import { generatePngObservableFactory } from '../../common';
 import { TaskPayloadPNG } from '../types';
 import { runTaskFnFactory } from './';
 

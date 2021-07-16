@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ReportingCore } from '../../../';
+import { ReportingCore } from '../..';
 import {
   createMockConfig,
   createMockConfigSchema,
   createMockLevelLogger,
   createMockReportingCore,
-} from '../../../test_helpers';
-import { getConditionalHeaders } from '../../common';
+} from '../../test_helpers';
+import { getConditionalHeaders } from '.';
 import { getCustomLogo } from './get_custom_logo';
 
 let mockReportingPlugin: ReportingCore;
