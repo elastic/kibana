@@ -97,6 +97,7 @@ describe('endpoint list middleware', () => {
   });
 
   it('handles `userChangedUrl`', async () => {
+    endpointPageHttpMock(fakeHttpServices);
     const apiResponse = getEndpointListApiResponse();
     fakeHttpServices.post.mockResolvedValue(apiResponse);
     expect(fakeHttpServices.post).not.toHaveBeenCalled();
@@ -113,6 +114,7 @@ describe('endpoint list middleware', () => {
   });
 
   it('handles `appRequestedEndpointList`', async () => {
+    endpointPageHttpMock(fakeHttpServices);
     const apiResponse = getEndpointListApiResponse();
     fakeHttpServices.post.mockResolvedValue(apiResponse);
     expect(fakeHttpServices.post).not.toHaveBeenCalled();
