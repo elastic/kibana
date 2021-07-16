@@ -1,5 +1,5 @@
 get:
-  summary: PackagePolicies - Info
+  summary: Package policy - Info
   tags: []
   responses:
     '200':
@@ -21,7 +21,7 @@ parameters:
     in: path
     required: true
 put:
-  summary: PackagePolicies - Update
+  summary: Package policy - Update
   operationId: put-packagePolicies-packagePolicyId
   requestBody:
     content:
