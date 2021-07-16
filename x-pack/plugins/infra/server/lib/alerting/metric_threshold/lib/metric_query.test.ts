@@ -64,13 +64,4 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
       );
     });
   });
-
-  describe('handles time', () => {
-    const end = new Date('2020-07-08T22:07:27.235Z').valueOf();
-    const timerange = {
-      end,
-      start: end - 5 * 60 * 1000,
-    };
-    getElasticsearchMetricQuery(expressionParams, timefield, timerange, undefined, undefined);
-  });
 });
