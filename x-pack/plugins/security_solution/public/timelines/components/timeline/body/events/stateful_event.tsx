@@ -180,6 +180,7 @@ const StatefulEventComponent: React.FC<Props> = ({
     const eventId = event._id;
     const indexName = event._index!;
     const ecsData = event.ecs;
+    const nonEcsData = event?.data;
 
     const updatedExpandedDetail: TimelineExpandedDetailType = {
       panelView: 'eventDetail',
@@ -187,6 +188,7 @@ const StatefulEventComponent: React.FC<Props> = ({
         eventId,
         indexName,
         ecsData,
+        nonEcsData,
       },
     };
 
@@ -201,7 +203,7 @@ const StatefulEventComponent: React.FC<Props> = ({
     if (timelineId === TimelineId.active && tabType === TimelineTabs.query) {
       activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
     }
-  }, [dispatch, event._id, event._index, event.ecs, tabType, timelineId]);
+  }, [dispatch, event._id, event._index, event?.data, event.ecs, tabType, timelineId]);
 
   const associateNote = useCallback(
     (noteId: string) => {

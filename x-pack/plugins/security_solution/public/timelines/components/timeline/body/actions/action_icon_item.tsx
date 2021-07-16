@@ -20,7 +20,7 @@ interface ActionIconItemProps {
   isDisabled?: boolean;
   onClick?: (event: MouseEvent) => void;
   children?: React.ReactNode;
-  type?: 'text' | 'icon';
+  buttonType?: 'text' | 'icon';
 }
 
 const ActionIconItemComponent: React.FC<ActionIconItemProps> = ({
@@ -32,10 +32,10 @@ const ActionIconItemComponent: React.FC<ActionIconItemProps> = ({
   isDisabled = false,
   onClick,
   children,
-  type = 'icon',
+  buttonType = 'icon',
 }) => (
   <>
-    {type === 'icon' && iconType && (
+    {buttonType === 'icon' && iconType && (
       <div>
         <EventsTdContent textAlign="center" width={width}>
           {children ?? (
@@ -52,7 +52,7 @@ const ActionIconItemComponent: React.FC<ActionIconItemProps> = ({
         </EventsTdContent>
       </div>
     )}
-    {(type === 'text' || !iconType) && (
+    {(buttonType === 'text' || !iconType) && (
       <EuiButtonEmpty
         aria-label={ariaLabel}
         data-test-subj={`${dataTestSubj}-button`}

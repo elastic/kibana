@@ -28,7 +28,7 @@ interface InvestigateInTimelineActionProps {
   ariaLabel?: string;
   alertIds?: string[];
   fetchEcsAlertsData?: (alertIds?: string[]) => Promise<Ecs[]>;
-  type?: 'text' | 'icon';
+  buttonType?: 'text' | 'icon';
   onInvestigateInTimelineAlertClick?: () => void;
 }
 
@@ -38,7 +38,7 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
   ecsRowData,
   fetchEcsAlertsData,
   nonEcsRowData,
-  type,
+  buttonType,
   onInvestigateInTimelineAlertClick,
 }) => {
   const {
@@ -118,7 +118,7 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
       iconType="timeline"
       onClick={investigateInTimelineAlertClick}
       isDisabled={false}
-      type={type}
+      buttonType={buttonType}
     />
   );
 };
