@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn, EuiSpacer, EuiHorizontalRule, EuiTitle } from '@elastic/eui';
+import { EuiBasicTableColumn, EuiSpacer, EuiHorizontalRule, EuiTitle, EuiText } from '@elastic/eui';
 import { get, getOr, find } from 'lodash/fp';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
@@ -246,14 +246,16 @@ const AlertSummaryViewComponent: React.FC<{
       {maybeRule?.note && (
         <>
           <EuiHorizontalRule />
-          <EuiTitle size="xxs" data-test-subj="summary-view-guide">
-            <h6>{i18n.INVESTIGATION_GUIDE}</h6>
+          <EuiTitle size="xxxs" data-test-subj="summary-view-guide">
+            <h5>{i18n.INVESTIGATION_GUIDE}</h5>
           </EuiTitle>
           <EuiSpacer size="s" />
           <Indent>
-            <LineClamp>
-              <MarkdownRenderer>{maybeRule.note}</MarkdownRenderer>
-            </LineClamp>
+            <EuiText size="xs">
+              <LineClamp lineClampHeight={4.5}>
+                <MarkdownRenderer>{maybeRule.note}</MarkdownRenderer>
+              </LineClamp>
+            </EuiText>
           </Indent>
         </>
       )}

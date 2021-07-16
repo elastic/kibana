@@ -35,8 +35,8 @@ export const SummaryViewComponent: React.FC<{
   return (
     <>
       {title && (
-        <EuiTitle size="xxs">
-          <h6>{title}</h6>
+        <EuiTitle size="xxxs">
+          <h5>{title}</h5>
         </EuiTitle>
       )}
       <Indent>
