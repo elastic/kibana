@@ -9,7 +9,10 @@ import { act } from 'react-dom/test-utils';
 import { TestBed } from '@kbn/test/jest';
 
 export const getCommonActions = (testBed: TestBed) => {
-  const toggleFormRow = (row: 'customLabel' | 'value' | 'format', value: 'on' | 'off' = 'on') => {
+  const toggleFormRow = async (
+    row: 'customLabel' | 'value' | 'format',
+    value: 'on' | 'off' = 'on'
+  ) => {
     const testSubj = `${row}Row.toggle`;
     const toggle = testBed.find(testSubj);
     const isOn = toggle.props()['aria-checked'];
@@ -18,10 +21,27 @@ export const getCommonActions = (testBed: TestBed) => {
       return;
     }
 
-    testBed.form.toggleEuiSwitch(testSubj);
+    await act(async () => {
+      testBed.form.toggleEuiSwitch(testSubj);
+    });
+
+    testBed.component.update();
   };
 
-  const changeFieldType = async (value: string, label?: string) => {
+  // Fields
+  const updateName = async (value: string) => {
+    await act(async () => {
+      testBed.form.setInputValue('nameField.input', value);
+    });
+  };
+
+  const updateScript = async (value: string) => {
+    await act(async () => {
+      testBed.form.setInputValue('scriptField', value);
+    });
+  };
+
+  const updateType = async (value: string, label?: string) => {
     await act(async () => {
       testBed.find('typeField').simulate('change', [
         {
@@ -33,8 +53,23 @@ export const getCommonActions = (testBed: TestBed) => {
     testBed.component.update();
   };
 
+  // The preview updates on a debounce of 500ms whenever
+  // a parameter changes (script, type)
+  const waitForPreviewUpdate = async () => {
+    await act(async () => {
+      jest.advanceTimersByTime(1000);
+    });
+
+    testBed.component.update();
+  };
+
   return {
     toggleFormRow,
-    changeFieldType,
+    waitForPreviewUpdate,
+    fields: {
+      updateName,
+      updateType,
+      updateScript,
+    },
   };
 };

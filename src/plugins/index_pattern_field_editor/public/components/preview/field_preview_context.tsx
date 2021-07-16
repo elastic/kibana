@@ -429,11 +429,9 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
    * the 500ms of the debounce, we set the loading state in this effect
    */
   useEffect(() => {
-    if (fieldTypeToProcess !== 'runtime' || !allParamsDefined()) {
-      return;
+    if (fieldTypeToProcess === 'runtime' && allParamsDefined()) {
+      setIsLoadingPreview(true);
     }
-
-    setIsLoadingPreview(true);
   }, [fieldTypeToProcess, allParamsDefined]);
 
   /**

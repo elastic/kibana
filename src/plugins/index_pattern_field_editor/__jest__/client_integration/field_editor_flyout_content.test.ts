@@ -8,7 +8,7 @@
 import { act } from 'react-dom/test-utils';
 
 import type { Props } from '../../public/components/field_editor_flyout_content';
-import { setupEnvironment } from './helpers';
+import { setupEnvironment, spySearchResult } from './helpers';
 import { setup } from './field_editor_flyout_content.helpers';
 
 describe('<FieldEditorFlyoutContent />', () => {
@@ -114,20 +114,12 @@ describe('<FieldEditorFlyoutContent />', () => {
 
       const {
         find,
-        component,
-        form,
-        actions: { toggleFormRow, changeFieldType },
+        actions: { toggleFormRow, fields },
       } = await setup({ onSave });
 
-      act(() => {
-        form.setInputValue('nameField.input', 'someName');
-        toggleFormRow('value');
-      });
-      component.update();
-
-      await act(async () => {
-        form.setInputValue('scriptField', 'echo("hello")');
-      });
+      await fields.updateName('someName');
+      await toggleFormRow('value');
+      await fields.updateScript('echo("hello")');
 
       await act(async () => {
         // Let's make sure that validation has finished running
@@ -149,7 +141,7 @@ describe('<FieldEditorFlyoutContent />', () => {
       });
 
       // Change the type and make sure it is forwarded
-      await changeFieldType('other_type', 'Other type');
+      await fields.updateType('other_type', 'Other type');
 
       await act(async () => {
         find('fieldSaveButton').simulate('click');
@@ -162,6 +154,83 @@ describe('<FieldEditorFlyoutContent />', () => {
         type: 'other_type',
         script: { source: 'echo("hello")' },
       });
+    });
+  });
+
+  describe('preview panel', () => {
+    const mockDocuments = [
+      {
+        _id: '123',
+        _source: {
+          title: 'foo',
+        },
+      },
+      {
+        _id: '456',
+        _source: {
+          title: 'bar',
+        },
+      },
+    ];
+
+    beforeEach(() => {
+      spySearchResult.mockResolvedValue({
+        rawResponse: {
+          hits: {
+            total: mockDocuments.length,
+            hits: mockDocuments,
+          },
+        },
+      });
+    });
+
+    test('should display the preview panel when either "set value" or "set format" is activated', async () => {
+      const {
+        exists,
+        actions: { toggleFormRow },
+      } = await setup();
+
+      expect(exists('previewPanel')).toBe(false);
+
+      await toggleFormRow('value');
+      expect(exists('previewPanel')).toBe(true);
+
+      await toggleFormRow('value', 'off');
+      expect(exists('previewPanel')).toBe(false);
+
+      await toggleFormRow('format');
+      expect(exists('previewPanel')).toBe(true);
+
+      await toggleFormRow('format', 'off');
+      expect(exists('previewPanel')).toBe(false);
+    });
+
+    test('should display an empty prompt if no name and no script are defined', async () => {
+      const {
+        exists,
+        actions: { toggleFormRow, fields, waitForPreviewUpdate },
+      } = await setup();
+
+      await toggleFormRow('value');
+      expect(exists('previewPanel')).toBe(true);
+      expect(exists('previewPanel.emptyPrompt')).toBe(true);
+
+      await fields.updateName('someName');
+      await waitForPreviewUpdate();
+      expect(exists('previewPanel.emptyPrompt')).toBe(false);
+
+      await fields.updateName(' ');
+      await waitForPreviewUpdate();
+      expect(exists('previewPanel.emptyPrompt')).toBe(true);
+
+      // The name is empty and the empty prompt is there, let's add some script...
+      await fields.updateScript('echo("hello")');
+      await waitForPreviewUpdate();
+      expect(exists('previewPanel.emptyPrompt')).toBe(false);
+
+      await fields.updateScript(' ');
+      await waitForPreviewUpdate();
+      expect(exists('previewPanel.emptyPrompt')).toBe(true);
     });
   });
 });

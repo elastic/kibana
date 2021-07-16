@@ -239,7 +239,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange, syntaxErr
     <Form
       form={form}
       className="indexPatternFieldEditor__form"
-      data-test-subj={'indexPatternFieldEditorForm'}
+      data-test-subj="indexPatternFieldEditorForm"
     >
       <EuiFlexGroup>
         {/* Name */}

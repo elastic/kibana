@@ -22,7 +22,7 @@ import { init as initHttpRequests } from './http_requests';
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 const dataStart = dataPluginMock.createStartContract();
-const { search } = dataStart;
+const { search, fieldFormats } = dataStart;
 
 export const spySearchResult = jest.fn();
 
@@ -59,10 +59,21 @@ export const indexPatternFields = [
   },
 ];
 
+export const fieldFormatsOptions = [{ id: 'upper', title: 'UpperCaseString' } as any];
+
 export const WithFieldEditorDependencies = <T extends object = { [key: string]: unknown }>(
   Comp: FunctionComponent<T>,
   overridingDependencies?: Partial<Context>
 ) => (props: T) => {
+  // Setup mocks
+  (fieldFormats.getByFieldType as jest.MockedFunction<
+    typeof fieldFormats['getByFieldType']
+  >).mockReturnValue(fieldFormatsOptions);
+
+  (fieldFormats.getDefaultType as jest.MockedFunction<
+    typeof fieldFormats['getDefaultType']
+  >).mockReturnValue({ id: 'testDefaultFormat', title: 'TestDefaultFormat' } as any);
+
   const dependencies: Context = {
     indexPattern: {
       title: 'testIndexPattern',
@@ -84,11 +95,7 @@ export const WithFieldEditorDependencies = <T extends object = { [key: string]: 
       getAll: () => [],
       getById: () => undefined,
     },
-    fieldFormats: {
-      getDefaultInstance: () => ({
-        convert: (val: any) => val,
-      }),
-    } as any,
+    fieldFormats,
   };
 
   const mergedDependencies = merge({}, dependencies, overridingDependencies);

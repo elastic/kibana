@@ -8,6 +8,10 @@
 
 export { findTestSubject, TestBed } from '@kbn/test/jest';
 
-export { setupEnvironment, WithFieldEditorDependencies } from './setup_environment';
+export {
+  setupEnvironment,
+  WithFieldEditorDependencies,
+  spySearchResult,
+} from './setup_environment';
 
 export { getCommonActions } from './common_actions';

@@ -136,14 +136,9 @@ describe('<FieldEditor />', () => {
 
       const { form, component, actions } = testBed;
 
-      await act(async () => {
-        actions.toggleFormRow('value');
-      });
-
-      await act(async () => {
-        form.setInputValue('nameField.input', existingFields[0]);
-        form.setInputValue('scriptField', 'echo("hello")');
-      });
+      await actions.toggleFormRow('value');
+      await actions.fields.updateName(existingFields[0]);
+      await actions.fields.updateScript('echo("hello")');
 
       await act(async () => {
         jest.advanceTimersByTime(1000); // Make sure our debounced error message is in the DOM
@@ -180,6 +175,7 @@ describe('<FieldEditor />', () => {
       const lastState = getLastStateUpdate();
       await submitFormAndGetData(lastState);
       component.update();
+
       expect(getLastStateUpdate().isValid).toBe(true);
       expect(form.getErrorsMessages()).toEqual([]);
     });
@@ -237,7 +233,7 @@ describe('<FieldEditor />', () => {
         form,
         component,
         find,
-        actions: { changeFieldType },
+        actions: { fields },
       } = testBed;
 
       // We set some dummy painless error
@@ -249,7 +245,7 @@ describe('<FieldEditor />', () => {
       expect(form.getErrorsMessages()).toEqual(['Awwww! Painless syntax error']);
 
       // We change the type and expect the form error to not be there anymore
-      await changeFieldType('keyword');
+      await fields.updateType('keyword');
       expect(form.getErrorsMessages()).toEqual([]);
     });
   });
