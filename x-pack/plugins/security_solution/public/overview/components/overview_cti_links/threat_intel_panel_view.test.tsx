@@ -159,7 +159,7 @@ describe('ThreatIntelPanelView', () => {
     expect(wrapper.exists('[data-test-subj="inspect-icon-button"]')).toBe(true);
   });
 
-  it('does not render inspect button if displayInspect is false', () => {
+  it('does not render inspect button if isInspectEnabled is false', () => {
     const wrapper = mount(
       <Provider store={store}>
         <I18nProvider>
