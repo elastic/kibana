@@ -10,7 +10,8 @@ import type { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import type { Datatable } from 'src/plugins/expressions';
 import type { AccessorConfig, FramePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
-import type { XYLayerConfig, FormatFactory } from '../../common';
+import type { FormatFactory } from '../../common';
+import type { XYLayerConfig } from '../../common/expressions';
 
 const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
 
