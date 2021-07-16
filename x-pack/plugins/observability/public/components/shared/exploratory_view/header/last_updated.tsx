@@ -25,6 +25,10 @@ export function LastUpdated({ lastUpdated }: Props) {
     };
   }, []);
 
+  useEffect(() => {
+    setRefresh(Date.now());
+  }, [lastUpdated]);
+
   if (!lastUpdated) {
     return null;
   }
