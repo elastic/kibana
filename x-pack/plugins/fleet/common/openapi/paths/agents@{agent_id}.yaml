@@ -5,7 +5,7 @@ parameters:
     in: path
     required: true
 get:
-  summary: Fleet - Agent - Info
+  summary: Agent - Info
   tags: []
   responses:
     '200':
@@ -16,21 +16,45 @@ get:
             type: object
             properties:
               item:
-                type: object
+                $ref: ../components/schemas/agent.yaml
             required:
               - item
   operationId: get-fleet-agents-agentId
 put:
-  summary: Fleet - Agent - Update
+  summary: Agent - Update
   tags: []
-  responses: {}
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              item:
+                $ref: ../components/schemas/agent.yaml
+            required:
+              - item
   operationId: put-fleet-agents-agentId
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
 delete:
-  summary: Fleet - Agent - Delete
+  summary: Agent - Delete
   tags: []
-  responses: {}
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              action:
+                type: string
+                enum:
+                  - deleted
+            required:
+              - action
   operationId: delete-fleet-agents-agentId
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml

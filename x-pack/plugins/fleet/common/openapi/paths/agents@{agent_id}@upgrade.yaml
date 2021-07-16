@@ -5,7 +5,7 @@ parameters:
     in: path
     required: true
 post:
-  summary: Fleet - Agent - Upgrade
+  summary: Agent - Upgrade
   tags: []
   responses:
     '200':
