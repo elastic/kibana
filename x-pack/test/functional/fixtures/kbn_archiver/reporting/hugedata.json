@@ -103,4 +103,84 @@
   "type": "index-pattern",
   "updated_at": "2021-02-06T02:15:25.565Z",
   "version": "WzcsMl0="
+<<<<<<< HEAD
+=======
+}
+
+{
+  "attributes": {
+    "columns": [
+      "_id",
+      "name",
+      "gender",
+      "value",
+      "year",
+      "years_ago",
+      "date_informal"
+    ],
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"sort\":[{\"date\":\"desc\"}],\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"fieldsFromSource\":[\"_id\",\"_index\",\"_score\",\"_source\",\"_type\",\"date\",\"gender\",\"name\",\"percent\",\"value\",\"year\",\"years_ago\",\"date_informal\"],\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "sort": [
+      [
+        "date",
+        "desc"
+      ]
+    ],
+    "title": "namessearch",
+    "version": 1
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "cdb908f0-6820-11eb-9375-4bd700f7d8d4",
+  "migrationVersion": {
+    "search": "7.9.3"
+  },
+  "references": [
+    {
+      "id": "89655130-5013-11e9-bce7-4dabcb8bef24",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search",
+  "updated_at": "2021-02-06T02:15:31.253Z",
+  "version": "WzYsMl0="
+}
+
+{
+  "attributes": {
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
+    },
+    "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
+    "panelsJSON": "[{\"version\":\"7.11.0\",\"type\":\"search\",\"gridData\":{\"x\":0,\"y\":0,\"w\":48,\"h\":13,\"i\":\"56f914c9-9597-4781-bfc6-229d40b382c7\"},\"panelIndex\":\"56f914c9-9597-4781-bfc6-229d40b382c7\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_56f914c9-9597-4781-bfc6-229d40b382c7\"},{\"version\":\"7.11.0\",\"type\":\"lens\",\"gridData\":{\"x\":0,\"y\":13,\"w\":48,\"h\":14,\"i\":\"f3ea512f-e441-4206-8aa7-000b1418ea2b\"},\"panelIndex\":\"f3ea512f-e441-4206-8aa7-000b1418ea2b\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_f3ea512f-e441-4206-8aa7-000b1418ea2b\"}]",
+    "timeRestore": false,
+    "title": "names dashboard",
+    "version": 1
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "52af6d10-6821-11eb-9375-4bd700f7d8d4",
+  "migrationVersion": {
+    "dashboard": "7.14.0"
+  },
+  "references": [
+    {
+      "id": "cdb908f0-6820-11eb-9375-4bd700f7d8d4",
+      "name": "56f914c9-9597-4781-bfc6-229d40b382c7:panel_56f914c9-9597-4781-bfc6-229d40b382c7",
+      "type": "search"
+    },
+    {
+      "id": "4b498150-6821-11eb-9375-4bd700f7d8d4",
+      "name": "f3ea512f-e441-4206-8aa7-000b1418ea2b:panel_f3ea512f-e441-4206-8aa7-000b1418ea2b",
+      "type": "lens"
+    }
+  ],
+  "type": "dashboard",
+  "updated_at": "2021-02-06T02:16:29.540Z",
+  "version": "WzksMl0="
+>>>>>>> 3e4bfa7cca5... Updated archives with new so types:
 }

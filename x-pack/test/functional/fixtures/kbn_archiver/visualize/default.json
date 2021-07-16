@@ -16,6 +16,37 @@
 
 {
   "attributes": {
+<<<<<<< HEAD
+=======
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "title": "A Pie",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"title\":\"A Pie\",\"type\":\"pie\",\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"isDonut\":true,\"labels\":{\"show\":false,\"values\":true,\"last_level\":true,\"truncate\":100},\"dimensions\":{\"metric\":{\"accessor\":0,\"format\":{\"id\":\"number\"},\"params\":{},\"aggType\":\"count\"}},\"palette\":{\"type\":\"palette\",\"name\":\"kibana_palette\"},\"distinctColors\":true},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"geo.src\",\"size\":5,\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\"}}]}"
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "i-exist",
+  "migrationVersion": {
+    "visualization": "7.14.0"
+  },
+  "references": [
+    {
+      "id": "logstash-*",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "visualization",
+  "updated_at": "2019-01-22T19:32:31.206Z",
+  "version": "WzEzLDJd"
+}
+
+{
+  "attributes": {
+>>>>>>> 3e4bfa7cca5... Updated archives with new so types:
     "fields": "[{\"name\":\"scripted_date\",\"type\":\"date\",\"count\":0,\"scripted\":true,\"script\":\"1234\",\"lang\":\"painless\",\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"scripted_string\",\"type\":\"string\",\"count\":0,\"scripted\":true,\"script\":\"return 'hello'\",\"lang\":\"painless\",\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false}]",
     "runtimeFieldMap": "{\"runtime_string_field\":{\"type\":\"keyword\",\"script\":{\"source\":\"emit('hello world!')\"}},\"runtime_number_field\":{\"type\":\"double\",\"script\":{\"source\":\"emit(5)\"}}}",
     "timeFieldName": "@timestamp",

@@ -332,4 +332,75 @@
   "type": "lens",
   "updated_at": "2019-10-16T00:43:27.907Z",
   "version": "WzI0LDJd"
+<<<<<<< HEAD
+=======
+}
+
+{
+  "attributes": {
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+    },
+    "optionsJSON": "{\"useMargins\":true,\"hidePanelTitles\":false}",
+    "panelsJSON": "[{\"version\":\"8.0.0\",\"type\":\"lens\",\"gridData\":{\"w\":24,\"h\":15,\"x\":0,\"y\":0,\"i\":\"e5966143-f050-40eb-b4e7-f94469c1426c\"},\"panelIndex\":\"e5966143-f050-40eb-b4e7-f94469c1426c\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_e5966143-f050-40eb-b4e7-f94469c1426c\"},{\"version\":\"8.0.0\",\"type\":\"lens\",\"gridData\":{\"w\":24,\"h\":15,\"x\":24,\"y\":0,\"i\":\"f9ff2513-2de9-4944-a8d1-a9fead4b020d\"},\"panelIndex\":\"f9ff2513-2de9-4944-a8d1-a9fead4b020d\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_f9ff2513-2de9-4944-a8d1-a9fead4b020d\"},{\"version\":\"8.0.0\",\"type\":\"lens\",\"gridData\":{\"w\":24,\"h\":15,\"x\":0,\"y\":15,\"i\":\"b62d7d36-83ca-415b-8971-34d891b09a1a\"},\"panelIndex\":\"b62d7d36-83ca-415b-8971-34d891b09a1a\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_b62d7d36-83ca-415b-8971-34d891b09a1a\"}]",
+    "timeRestore": false,
+    "title": "Lens reportz",
+    "version": 1
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "c27849f0-e523-11e9-9af5-2b261e1eb063",
+  "migrationVersion": {
+    "dashboard": "7.14.0"
+  },
+  "references": [
+    {
+      "id": "74b0f140-e523-11e9-9af5-2b261e1eb063",
+      "name": "e5966143-f050-40eb-b4e7-f94469c1426c:panel_e5966143-f050-40eb-b4e7-f94469c1426c",
+      "type": "lens"
+    },
+    {
+      "id": "84320f00-e523-11e9-9af5-2b261e1eb063",
+      "name": "f9ff2513-2de9-4944-a8d1-a9fead4b020d:panel_f9ff2513-2de9-4944-a8d1-a9fead4b020d",
+      "type": "lens"
+    },
+    {
+      "id": "9325b9d0-e523-11e9-9af5-2b261e1eb063",
+      "name": "b62d7d36-83ca-415b-8971-34d891b09a1a:panel_b62d7d36-83ca-415b-8971-34d891b09a1a",
+      "type": "lens"
+    }
+  ],
+  "type": "dashboard",
+  "updated_at": "2019-10-02T14:48:56.079Z",
+  "version": "WzIxLDJd"
+}
+
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "title": "A Pie",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"title\":\"A Pie\",\"type\":\"pie\",\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"isDonut\":true,\"labels\":{\"show\":false,\"values\":true,\"last_level\":true,\"truncate\":100},\"dimensions\":{\"metric\":{\"accessor\":0,\"format\":{\"id\":\"number\"},\"params\":{},\"aggType\":\"count\"}},\"palette\":{\"type\":\"palette\",\"name\":\"kibana_palette\"},\"distinctColors\":true},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"geo.src\",\"size\":5,\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\"}}]}"
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "i-exist",
+  "migrationVersion": {
+    "visualization": "7.14.0"
+  },
+  "references": [
+    {
+      "id": "logstash-*",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "visualization",
+  "updated_at": "2019-01-22T19:32:31.206Z",
+  "version": "WzE2LDJd"
+>>>>>>> 3e4bfa7cca5... Updated archives with new so types:
 }
