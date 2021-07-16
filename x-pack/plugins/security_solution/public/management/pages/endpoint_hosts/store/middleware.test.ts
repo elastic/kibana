@@ -18,7 +18,6 @@ import {
   Immutable,
   HostResultList,
   HostIsolationResponse,
-  ActivityLog,
   ISOLATION_ACTIONS,
 } from '../../../../../common/endpoint/types';
 import { AppAction } from '../../../../common/store/actions';
@@ -30,7 +29,6 @@ import { endpointMiddlewareFactory } from './middleware';
 import { getEndpointListPath, getEndpointDetailsPath } from '../../../common/routing';
 import {
   createUninitialisedResourceState,
-  createLoadedResourceState,
   createLoadingResourceState,
   FailedResourceState,
   isFailedResourceState,
@@ -44,7 +42,6 @@ import {
   hostIsolationRequestBodyMock,
   hostIsolationResponseMock,
 } from '../../../../common/lib/endpoint_isolation/mocks';
-import { FleetActionGenerator } from '../../../../../common/endpoint/data_generators/fleet_action_generator';
 import { endpointPageHttpMock } from '../mocks';
 
 jest.mock('../../policy/store/services/ingest', () => ({
@@ -220,43 +217,21 @@ describe('endpoint list middleware', () => {
   });
 
   describe('handle ActivityLog State Change actions', () => {
+    let mockedApis: ReturnType<typeof endpointPageHttpMock>;
+
+    beforeEach(() => {
+      mockedApis = endpointPageHttpMock(fakeHttpServices);
+    });
+
     const endpointList = getEndpointListApiResponse();
+    const agentId = endpointList.hosts[0].metadata.agent.id;
     const search = getEndpointDetailsPath({
       name: 'endpointActivityLog',
-      selected_endpoint: endpointList.hosts[0].metadata.agent.id,
+      selected_endpoint: agentId,
     });
     const dispatchUserChangedUrl = () => {
       dispatchUserChangedUrlToEndpointList({ search: `?${search.split('?').pop()}` });
     };
-
-    const fleetActionGenerator = new FleetActionGenerator('seed');
-    const actionData = fleetActionGenerator.generate({
-      agents: [endpointList.hosts[0].metadata.agent.id],
-    });
-    const responseData = fleetActionGenerator.generateResponse({
-      agent_id: endpointList.hosts[0].metadata.agent.id,
-    });
-    const getMockEndpointActivityLog = () =>
-      ({
-        page: 1,
-        pageSize: 50,
-        data: [
-          {
-            type: 'response',
-            item: {
-              id: '',
-              data: responseData,
-            },
-          },
-          {
-            type: 'action',
-            item: {
-              id: '',
-              data: actionData,
-            },
-          },
-        ],
-      } as ActivityLog);
 
     const dispatchGetActivityLogLoading = () => {
       dispatch({
@@ -266,24 +241,25 @@ describe('endpoint list middleware', () => {
         payload: createLoadingResourceState({ previousState: createUninitialisedResourceState() }),
       });
     };
-    const dispatchGetActivityLogLoaded = () => {
-      dispatch({
-        type: 'endpointDetailsActivityLogChanged',
-        payload: createLoadedResourceState(getMockEndpointActivityLog()),
-      });
-    };
 
     it('should set ActivityLog state to loading', async () => {
       dispatchUserChangedUrl();
+      dispatchGetActivityLogLoading();
 
       const loadingDispatched = waitForAction('endpointDetailsActivityLogChanged', {
         validate(action) {
           return isLoadingResourceState(action.payload);
         },
       });
-      dispatchGetActivityLogLoading();
 
       const loadingDispatchedResponse = await loadingDispatched;
+      expect(mockedApis.responseProvider.activityLogResponse).toHaveBeenCalledWith({
+        path: expect.any(String),
+        query: {
+          page: 1,
+          page_size: 50,
+        },
+      });
       expect(loadingDispatchedResponse.payload.type).toEqual('LoadingResourceState');
     });
 
@@ -296,12 +272,15 @@ describe('endpoint list middleware', () => {
         },
       });
 
-      dispatchGetActivityLogLoaded();
-      const loadedDispatchedResponse = await loadedDispatched;
-      const activityLogData = (loadedDispatchedResponse.payload as LoadedResourceState<ActivityLog>)
-        .data;
-
-      expect(activityLogData).toEqual(getMockEndpointActivityLog());
+      const activityLogResponse = await loadedDispatched;
+      expect(mockedApis.responseProvider.activityLogResponse).toHaveBeenCalledWith({
+        path: expect.any(String),
+        query: {
+          page: 1,
+          page_size: 50,
+        },
+      });
+      expect(activityLogResponse.payload.type).toEqual('LoadedResourceState');
     });
   });
 
