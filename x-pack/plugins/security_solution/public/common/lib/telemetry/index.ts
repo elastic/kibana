@@ -27,9 +27,14 @@ export const track: TrackFn = (type, event, count) => {
 };
 
 export const initTelemetry = (
-  { usageCollection }: Pick<SetupPlugins, 'usageCollection'>,
+  {
+    usageCollection,
+    telemetryManagementSection,
+  }: Pick<SetupPlugins, 'usageCollection' | 'telemetryManagementSection'>,
   appId: string
 ) => {
+  telemetryManagementSection?.toggleSecuritySolutionExample(true);
+
   _track = usageCollection?.reportUiCounter?.bind(null, appId) ?? noop;
 };
 
