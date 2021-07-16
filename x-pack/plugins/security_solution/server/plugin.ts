@@ -209,7 +209,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         if (!ruleDataService.isWriteEnabled()) {
           return;
         }
-
+        const aliases: Record<string, estypes.MappingProperty> = {};
+        Object.entries(aadFieldConversion).forEach(([key, value]) => {
+          aliases[key] = {
+            type: 'alias',
+            path: value,
+          };
+        });
         await ruleDataService.createOrUpdateComponentTemplate({
           name: componentTemplateName,
           body: {
@@ -217,6 +223,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               settings: {
                 number_of_shards: 1,
               },
+              // TODO: once https://github.com/elastic/kibana/pull/105096 is merged, add aliases into mappings.
+              // Until we add the actual fields to the mappings we can't add aliases for them
               mappings: {}, // TODO: Add mappings here via `mappingFromFieldMap()`
             },
           },
