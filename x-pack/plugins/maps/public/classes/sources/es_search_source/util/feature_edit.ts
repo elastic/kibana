@@ -48,3 +48,11 @@ export const getMatchingIndexes = async (indexPattern: string) => {
     method: 'GET',
   });
 };
+
+export const getIsDrawLayer = async (index: string) => {
+  return await getHttp().fetch({
+    path: CHECK_IS_DRAWING_INDEX,
+    method: 'GET',
+    query: { index },
+  });
+};

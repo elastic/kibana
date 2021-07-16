@@ -30,6 +30,7 @@ import {
   FieldFormatter,
   SUPPORTS_FEATURE_EDITING_REQUEST_ID,
   KBN_IS_TILE_COMPLETE,
+  IS_DRAW_LAYER_REQUEST_ID,
 } from '../../../../common/constants';
 import { JoinTooltipProperty } from '../../tooltips/join_tooltip_property';
 import { DataRequestAbortError } from '../../util/data_request';
@@ -89,6 +90,7 @@ export interface IVectorLayer extends ILayer {
   hasJoins(): boolean;
   canShowTooltip(): boolean;
   supportsFeatureEditing(): boolean;
+  isDrawingLayer(): boolean;
   getLeftJoinFields(): Promise<IField[]>;
   addFeature(geometry: Geometry | Position[]): Promise<void>;
   deleteFeature(featureId: string): Promise<void>;
@@ -184,8 +186,13 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   supportsFeatureEditing(): boolean {
     const dataRequest = this.getDataRequest(SUPPORTS_FEATURE_EDITING_REQUEST_ID);
     const data = dataRequest?.getData() as { supportsFeatureEditing: boolean } | undefined;
-
     return data ? data.supportsFeatureEditing : false;
+  }
+
+  isDrawingLayer(): boolean {
+    const dataRequest = this.getDataRequest(IS_DRAW_LAYER_REQUEST_ID);
+    const data = dataRequest?.getData() as { isDrawingLayer: boolean } | undefined;
+    return data ? data.isDrawingLayer : false;
   }
 
   hasJoins() {
@@ -650,6 +657,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
         },
       });
       await this._syncSupportsFeatureEditing({ syncContext, source });
+      await this._syncIsDrawingLayer({ syncContext, source });
       if (
         !sourceResult.featureCollection ||
         !sourceResult.featureCollection.features.length ||
@@ -693,6 +701,33 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       startLoading(dataRequestId, requestToken);
       const supportsFeatureEditing = await source.supportsFeatureEditing();
       stopLoading(dataRequestId, requestToken, { supportsFeatureEditing });
+    } catch (error) {
+      onLoadError(dataRequestId, requestToken, error.message);
+      throw error;
+    }
+  }
+
+  async _syncIsDrawingLayer({
+    syncContext,
+    source,
+  }: {
+    syncContext: DataRequestContext;
+    source: IVectorSource;
+  }) {
+    if (syncContext.dataFilters.isReadOnly || !this.supportsFeatureEditing()) {
+      return;
+    }
+    const { startLoading, stopLoading, onLoadError } = syncContext;
+    const dataRequestId = IS_DRAW_LAYER_REQUEST_ID;
+    const requestToken = Symbol(`layer-${this.getId()}-${dataRequestId}`);
+    const prevDataRequest = this.getDataRequest(dataRequestId);
+    if (prevDataRequest) {
+      return;
+    }
+    try {
+      startLoading(dataRequestId, requestToken);
+      const isDrawingLayer = await source.isDrawingIndex();
+      stopLoading(dataRequestId, requestToken, { isDrawingLayer });
     } catch (error) {
       onLoadError(dataRequestId, requestToken, error.message);
       throw error;
@@ -1114,9 +1149,9 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     return source.getUpdateDueToTimeslice(prevMeta, timeslice);
   }
 
-  async addFeature(geometry: Geometry | Position[]) {
+  async addFeature(geometry: Geometry | Position[], addDefaultFields: boolean) {
     const layerSource = this.getSource();
-    await layerSource.addFeature(geometry);
+    await layerSource.addFeature(geometry, addDefaultFields);
   }
 
   async deleteFeature(featureId: string) {

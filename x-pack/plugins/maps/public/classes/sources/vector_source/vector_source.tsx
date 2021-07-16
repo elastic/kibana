@@ -69,6 +69,7 @@ export interface IVectorSource extends ISource {
   getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig;
   getTimesliceMaskFieldName(): Promise<string | null>;
   supportsFeatureEditing(): Promise<boolean>;
+  isDrawingIndex(): Promise<boolean>;
   addFeature(geometry: Geometry | Position[]): Promise<void>;
   deleteFeature(featureId: string): Promise<void>;
 }
@@ -172,6 +173,10 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
   }
 
   async supportsFeatureEditing(): Promise<boolean> {
+    return false;
+  }
+
+  async isDrawingIndex(): Promise<boolean> {
     return false;
   }
 }

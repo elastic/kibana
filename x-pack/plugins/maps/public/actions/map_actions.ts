@@ -384,7 +384,7 @@ export function addNewFeatureToIndex(geometry: Geometry | Position[]) {
     if (!layer || !(layer instanceof VectorLayer)) {
       return;
     }
-    await layer.addFeature(geometry);
+    await layer.addFeature(geometry, layer.isDrawingLayer());
     await dispatch(syncDataForLayer(layer, true));
   };
 }

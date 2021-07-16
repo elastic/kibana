@@ -61,7 +61,12 @@ import { isValidStringConfig } from '../../util/valid_string_config';
 import { TopHitsUpdateSourceEditor } from './top_hits';
 import { getDocValueAndSourceFields, ScriptField } from './util/get_docvalue_source_fields';
 import { ITiledSingleLayerMvtParams } from '../tiled_single_layer_vector_source/tiled_single_layer_vector_source';
-import { addFeatureToIndex, deleteFeatureFromIndex, getMatchingIndexes } from './util/feature_edit';
+import {
+  addFeatureToIndex,
+  deleteFeatureFromIndex,
+  getIsDrawLayer,
+  getMatchingIndexes,
+} from './util/feature_edit';
 
 export function timerangeToTimeextent(timerange: TimeRange): Timeslice | undefined {
   const timeRangeBounds = getTimeFilter().calculateBounds(timerange);
@@ -431,6 +436,15 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return matchingIndexes.length === 1;
   }
 
+  async isDrawingIndex(): Promise<boolean> {
+    await this.getIndexPattern();
+    if (!(this.indexPattern && this.indexPattern.title)) {
+      return false;
+    }
+    const { success, isDrawingIndex } = await getIsDrawLayer(this.indexPattern.title);
+    return success && isDrawingIndex;
+  }
+
   _hasSort(): boolean {
     const { sortField, sortOrder } = this._descriptor;
     return !!sortField && !!sortOrder;
@@ -703,9 +717,9 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return MVT_SOURCE_LAYER_NAME;
   }
 
-  async addFeature(geometry: Geometry | Position[]) {
+  async addFeature(geometry: Geometry | Position[], addDefaultFields: boolean) {
     const indexPattern = await this.getIndexPattern();
-    await addFeatureToIndex(indexPattern.title, geometry, this.getGeoFieldName());
+    await addFeatureToIndex(indexPattern.title, geometry, this.getGeoFieldName(), addDefaultFields);
   }
 
   async deleteFeature(featureId: string) {
