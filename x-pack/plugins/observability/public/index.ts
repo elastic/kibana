@@ -68,5 +68,9 @@ export { createExploratoryViewUrl } from './components/shared/exploratory_view/c
 export { FilterValueLabel } from './components/shared/filter_value_label/filter_value_label';
 export type { SeriesUrl } from './components/shared/exploratory_view/types';
 
-export type { ObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
+export type {
+  ObservabilityRuleTypeFormatter,
+  ObservabilityRuleTypeModel,
+  ObservabilityRuleTypeRegistry,
+} from './rules/create_observability_rule_type_registry';
 export { createObservabilityRuleTypeRegistryMock } from './rules/observability_rule_type_registry_mock';

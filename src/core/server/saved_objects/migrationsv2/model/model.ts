@@ -10,7 +10,7 @@ import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 
 import { AliasAction, isLeftTypeof } from '../actions';
-import { AllActionStates, State } from '../types';
+import { AllActionStates, MigrationLog, State } from '../types';
 import type { ResponseType } from '../next';
 import { disableUnknownTypeMappingFields } from '../../migrations/core/migration_context';
 import {
@@ -318,6 +318,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     }
   } else if (stateP.controlState === 'CHECK_UNKNOWN_DOCUMENTS') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+
     if (Either.isRight(res)) {
       const source = stateP.sourceIndex;
       const target = stateP.versionIndex;
@@ -336,17 +337,24 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           { add: { index: target, alias: stateP.versionAlias } },
           { remove_index: { index: stateP.tempIndex } },
         ]),
+
+        logs: [
+          ...stateP.logs,
+          ...(res.right.unknownDocs.length > 0
+            ? ([
+                {
+                  level: 'warning',
+                  message: `CHECK_UNKNOWN_DOCUMENTS ${extractUnknownDocFailureReason(
+                    res.right.unknownDocs,
+                    target
+                  )}`,
+                },
+              ] as MigrationLog[])
+            : []),
+        ],
       };
     } else {
-      if (isLeftTypeof(res.left, 'unknown_docs_found')) {
-        return {
-          ...stateP,
-          controlState: 'FATAL',
-          reason: extractUnknownDocFailureReason(res.left.unknownDocs, stateP.sourceIndex.value),
-        };
-      } else {
-        return throwBadResponse(stateP, res.left);
-      }
+      return throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'SET_SOURCE_WRITE_BLOCK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;

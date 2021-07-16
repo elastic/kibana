@@ -23,7 +23,12 @@ import {
   EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
 } from '@kbn/securitysolution-list-constants';
 
-import type { OperatorOption } from '../autocomplete_operators/types';
+export interface OperatorOption {
+  message: string;
+  value: string;
+  operator: OperatorEnum;
+  type: OperatorTypeEnum;
+}
 
 /**
  * @deprecated Use the one from core once it is in its own package which will be from:
