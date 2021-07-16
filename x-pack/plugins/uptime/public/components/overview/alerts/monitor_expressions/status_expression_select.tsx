@@ -13,10 +13,15 @@ import { statusExpLabels } from './translations';
 
 interface Props {
   alertParams: { [param: string]: any };
+  hasFilters: boolean;
   setAlertParams: (key: string, value: any) => void;
 }
 
-export const StatusExpressionSelect: React.FC<Props> = ({ alertParams, setAlertParams }) => {
+export const StatusExpressionSelect: React.FC<Props> = ({
+  alertParams,
+  hasFilters,
+  setAlertParams,
+}) => {
   const [isEnabled, setIsEnabled] = useState<boolean>(alertParams.shouldCheckStatus ?? true);
 
   useEffect(() => {
@@ -36,6 +41,7 @@ export const StatusExpressionSelect: React.FC<Props> = ({ alertParams, setAlertP
       <EuiFlexItem>
         <DownNoExpressionSelect
           defaultNumTimes={alertParams.numTimes}
+          hasFilters={hasFilters}
           isEnabled={isEnabled}
           setAlertParams={setAlertParams}
         />

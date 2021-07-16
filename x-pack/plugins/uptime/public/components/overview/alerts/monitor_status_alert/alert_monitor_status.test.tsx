@@ -20,7 +20,6 @@ describe('alert monitor status component', () => {
         timerangeCount: 21,
       },
       enabled: true,
-      hasFilters: false,
       isOldAlert: true,
       snapshotCount: 0,
       snapshotLoading: false,

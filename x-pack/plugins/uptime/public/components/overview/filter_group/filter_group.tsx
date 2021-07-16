@@ -23,9 +23,14 @@ export const FilterGroup = () => {
   const [updatedFieldValues, setUpdatedFieldValues] = useState<{
     fieldName: string;
     values?: string[];
-  }>({ fieldName: '', values: [] });
+    notValues?: string[];
+  }>({ fieldName: '', values: [], notValues: [] });
 
-  useFilterUpdate(updatedFieldValues.fieldName, updatedFieldValues.values);
+  useFilterUpdate(
+    updatedFieldValues.fieldName,
+    updatedFieldValues.values,
+    updatedFieldValues.notValues
+  );
 
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
 
@@ -35,8 +40,8 @@ export const FilterGroup = () => {
 
   const [isOpen, setIsOpen] = useState('');
 
-  const onFilterFieldChange = (fieldName: string, values?: string[]) => {
-    setUpdatedFieldValues({ fieldName, values });
+  const onFilterFieldChange = (fieldName: string, values?: string[], notValues?: string[]) => {
+    setUpdatedFieldValues({ fieldName, values, notValues });
     setIsOpen('');
   };
 
@@ -52,7 +57,7 @@ export const FilterGroup = () => {
               sourceField={field}
               label={label}
               selectedValue={selectedItems}
-              onChange={(values) => onFilterFieldChange(field, values)}
+              onChange={(values, notValues) => onFilterFieldChange(field, values)}
               asCombobox={false}
               asFilterButton={true}
               forceOpen={isOpen === field}

@@ -8,12 +8,14 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiCallOut, EuiSpacer, EuiHorizontalRule, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { isEmpty } from 'lodash';
 import { FiltersExpressionsSelect, StatusExpressionSelect } from '../monitor_expressions';
 import { AddFilterButton } from './add_filter_btn';
 import { OldAlertCallOut } from './old_alert_call_out';
 import { AvailabilityExpressionSelect } from '../monitor_expressions/availability_expression_select';
 import { AlertQueryBar } from '../alert_query_bar/query_bar';
 import { useGetUrlParams } from '../../../../hooks';
+import { FILTER_FIELDS } from '../../../../../common/constants';
 
 export interface AlertMonitorStatusProps {
   alertParams: { [key: string]: any };
@@ -28,6 +30,22 @@ export interface AlertMonitorStatusProps {
     to: string;
   };
 }
+
+const hasFilters = (filters: any) => {
+  if (isEmpty(filters)) {
+    return false;
+  }
+
+  let hasFilter = false;
+
+  Object.entries(FILTER_FIELDS).forEach(([_, field]) => {
+    if (!isEmpty(filters[field])) {
+      hasFilter = true;
+    }
+  });
+
+  return hasFilter;
+};
 
 export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (props) => {
   const { alertParams, isOldAlert, setAlertParams, snapshotCount, snapshotLoading } = props;
@@ -100,7 +118,11 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
 
       <EuiHorizontalRule />
 
-      <StatusExpressionSelect alertParams={alertParams} setAlertParams={setAlertParams} />
+      <StatusExpressionSelect
+        alertParams={alertParams}
+        setAlertParams={setAlertParams}
+        hasFilters={hasFilters(alertParams?.filters)}
+      />
 
       <EuiHorizontalRule />
 
@@ -108,6 +130,7 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
         alertParams={alertParams}
         isOldAlert={isOldAlert}
         setAlertParams={setAlertParams}
+        hasFilters={hasFilters(alertParams?.filters)}
       />
 
       <EuiSpacer size="m" />

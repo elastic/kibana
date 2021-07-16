@@ -72,11 +72,6 @@ export const selectAlertFlyoutVisibility = ({ ui: { alertFlyoutVisible } }: AppS
 
 export const selectAlertFlyoutType = ({ ui: { alertFlyoutType } }: AppState) => alertFlyoutType;
 
-export const selectMonitorStatusAlert = ({ indexPattern, ui }: AppState) => ({
-  filters: ui.esKuery,
-  indexPattern: indexPattern.index_pattern,
-});
-
 export const indexStatusSelector = ({ indexStatus }: AppState) => indexStatus.indexStatus;
 
 export const monitorListSelector = ({ monitorList }: AppState) => monitorList;

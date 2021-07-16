@@ -8,22 +8,7 @@
 import { useEffect } from 'react';
 import { useUrlParams } from './use_url_params';
 
-export const useFilterUpdate = (
-  fieldName?: string,
-  values?: string[],
-  shouldUpdateUrl: boolean = true
-) => {
-  const [getUrlParams, updateUrl] = useUrlParams();
-
-  const { filters: currentFilters } = getUrlParams();
-
-  // update filters in the URL from filter group
-  const onFilterUpdate = (filtersKuery: string) => {
-    if (currentFilters !== filtersKuery && shouldUpdateUrl) {
-      updateUrl({ filters: filtersKuery, pagination: '' });
-    }
-  };
-
+const parseFiltersMap = (currentFilters: string) => {
   let filterKueries: Map<string, string[]>;
   try {
     filterKueries = new Map<string, string[]>(JSON.parse(currentFilters));
@@ -31,23 +16,57 @@ export const useFilterUpdate = (
     filterKueries = new Map<string, string[]>();
   }
 
-  useEffect(() => {
-    if (fieldName) {
-      // add new term to filter map, toggle it off if already present
-      const updatedFilterMap = new Map<string, string[] | undefined>(filterKueries);
-      updatedFilterMap.set(fieldName, values);
-      Array.from(updatedFilterMap.keys()).forEach((key) => {
-        const value = updatedFilterMap.get(key);
-        if (value && value.length === 0) {
-          updatedFilterMap.delete(key);
-        }
-      });
+  return filterKueries;
+};
 
-      // store the new set of filters
-      const persistedFilters = Array.from(updatedFilterMap);
-      onFilterUpdate(persistedFilters.length === 0 ? '' : JSON.stringify(persistedFilters));
+const getUpdateFilters = (
+  filterKueries: Map<string, string[]>,
+  fieldName: string,
+  values?: string[]
+) => {
+  // add new term to filter map, toggle it off if already present
+
+  const updatedFilterMap = new Map<string, string[] | undefined>(filterKueries);
+  updatedFilterMap.set(fieldName, values);
+  Array.from(updatedFilterMap.keys()).forEach((key) => {
+    const value = updatedFilterMap.get(key);
+    if (value && value.length === 0) {
+      updatedFilterMap.delete(key);
     }
+  });
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fieldName, values]);
+  // store the new set of filters
+  const persistedFilters = Array.from(updatedFilterMap);
+  return persistedFilters.length === 0 ? '' : JSON.stringify(persistedFilters);
+};
+
+export const useFilterUpdate = (
+  fieldName?: string,
+  values?: string[],
+  notValues?: string[],
+  shouldUpdateUrl: boolean = true
+) => {
+  const [getUrlParams, updateUrl] = useUrlParams();
+
+  const { filters: currentFilters, excludedFilters: currentExcludedFilters } = getUrlParams();
+
+  useEffect(() => {
+    const filterKueries: Map<string, string[]> = parseFiltersMap(currentFilters);
+    const excludedFilterKueries: Map<string, string[]> = parseFiltersMap(currentExcludedFilters);
+
+    if (fieldName) {
+      // store the new set of filters
+      // update filters in the URL from filter group
+      const newFilters = getUpdateFilters(filterKueries, fieldName, values);
+      if (currentFilters !== newFilters && shouldUpdateUrl) {
+        updateUrl({ filters: newFilters, pagination: '' });
+      }
+
+      const newExcludedFilters = getUpdateFilters(excludedFilterKueries, fieldName, notValues);
+      if (currentExcludedFilters !== newExcludedFilters && shouldUpdateUrl) {
+        updateUrl({ excludedFilters: newExcludedFilters, pagination: '' });
+      }
+    }
+    // eslint-disable-next-line
+  }, [fieldName, values, notValues]);
 };
