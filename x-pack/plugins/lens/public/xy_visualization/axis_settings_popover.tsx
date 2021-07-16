@@ -20,7 +20,7 @@ import {
   EuiFieldNumber,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { XYLayerConfig, AxesSettingsConfig, AxisExtentConfig } from '../../common';
+import { XYLayerConfig, AxesSettingsConfig, AxisExtentConfig } from '../../common/expressions';
 import { ToolbarPopover, useDebouncedValue } from '../shared_components';
 import { isHorizontalChart } from './state_helpers';
 import { EuiIconAxisBottom } from '../assets/axis_bottom';

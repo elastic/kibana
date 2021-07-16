@@ -17,7 +17,8 @@ import { AutoScale } from './auto_scale';
 import { VisualizationContainer } from '../visualization_container';
 import { EmptyPlaceholder } from '../shared_components';
 import { LensIconChartMetric } from '../assets/chart_metric';
-import type { MetricChartProps, FormatFactory } from '../../common';
+import type { FormatFactory } from '../../common';
+import type { MetricChartProps } from '../../common/expressions';
 
 export const getMetricChartRenderer = (
   formatFactory: Promise<FormatFactory>

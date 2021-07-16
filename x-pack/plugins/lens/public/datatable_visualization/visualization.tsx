@@ -21,8 +21,7 @@ import { LensIconChartDatatable } from '../assets/chart_datatable';
 import { TableDimensionEditor } from './components/dimension_editor';
 import { CUSTOM_PALETTE } from '../shared_components/coloring/constants';
 import { getStopsForFixedMode } from '../shared_components';
-import { getDefaultSummaryLabel } from '../../common';
-import type { ColumnState } from '../../common';
+import { getDefaultSummaryLabel, ColumnState } from '../../common/expressions';
 
 export interface SortingState {
   columnId: string | undefined;

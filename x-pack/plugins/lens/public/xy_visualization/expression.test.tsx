@@ -20,21 +20,19 @@ import {
 } from '@elastic/charts';
 import { PaletteOutput } from 'src/plugins/charts/public';
 import { calculateMinInterval, XYChart, XYChartRenderProps } from './expression';
-import type {
-  XYArgs,
-  XYChartProps,
-  LegendConfig,
-  LayerArgs,
-  AxesSettingsConfig,
-  LensMultiTable,
-} from '../../common';
+import type { LensMultiTable } from '../../common';
 import {
   xyChart,
   layerConfig,
   legendConfig,
   tickLabelsConfig,
   gridlinesConfig,
-} from '../../common';
+  XYArgs,
+  XYChartProps,
+  LegendConfig,
+  LayerArgs,
+  AxesSettingsConfig,
+} from '../../common/expressions';
 import { Datatable, DatatableRow } from '../../../../../src/plugins/expressions/public';
 import React from 'react';
 import { shallow } from 'enzyme';

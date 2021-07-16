@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-export { metricChart } from '../../common';
-export type { MetricChartProps, MetricState, MetricConfig, MetricRender } from '../../common';
+export { metricChart } from '../../common/expressions';
+export type {
+  MetricChartProps,
+  MetricState,
+  MetricConfig,
+  MetricRender,
+} from '../../common/expressions';
 export * from './expression';
 export * from './visualization';

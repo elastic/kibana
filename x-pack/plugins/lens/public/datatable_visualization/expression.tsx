@@ -18,7 +18,8 @@ import { IUiSettingsClient } from 'kibana/public';
 import { DatatableComponent } from './components/table_basic';
 
 import type { ILensInterpreterRenderHandlers } from '../types';
-import type { DatatableProps, FormatFactory } from '../../common';
+import type { FormatFactory } from '../../common';
+import type { DatatableProps } from '../../common/expressions';
 
 export const getDatatableRenderer = (dependencies: {
   formatFactory: FormatFactory;

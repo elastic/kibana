@@ -8,8 +8,8 @@
 import React, { useContext, useEffect } from 'react';
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { IUiSettingsClient } from 'kibana/public';
-import type { FormatFactory, ColumnConfig } from '../../../common';
-import { getOriginalId } from '../../../common';
+import type { FormatFactory } from '../../../common';
+import { getOriginalId, ColumnConfig } from '../../../common/expressions';
 import type { DataContextType } from './types';
 import { getContrastColor, getNumericValue } from '../../shared_components/coloring/utils';
 

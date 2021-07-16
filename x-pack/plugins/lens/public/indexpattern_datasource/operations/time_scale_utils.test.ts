@@ -6,7 +6,7 @@
  */
 
 import type { IndexPatternLayer } from '../types';
-import type { TimeScaleUnit } from '../../../common';
+import type { TimeScaleUnit } from '../../../common/expressions';
 import type { IndexPatternColumn } from './definitions';
 import { adjustTimeScaleLabelSuffix, adjustTimeScaleOnOtherColumnChange } from './time_scale_utils';
 

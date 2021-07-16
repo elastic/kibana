@@ -7,7 +7,7 @@
 
 import { Query } from 'src/plugins/data/public';
 import type { Operation } from '../../../types';
-import type { TimeScaleUnit } from '../../../../common';
+import type { TimeScaleUnit } from '../../../../common/expressions';
 import type { OperationType } from '../definitions';
 
 export interface BaseIndexPatternColumn extends Operation {

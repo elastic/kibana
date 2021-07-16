@@ -15,7 +15,8 @@ import type {
 } from 'src/plugins/expressions/public';
 import type { LensFilterEvent } from '../types';
 import { PieComponent } from './render_function';
-import type { PieExpressionProps, FormatFactory } from '../../common';
+import type { FormatFactory } from '../../common';
+import type { PieExpressionProps } from '../../common/expressions';
 import type { ChartsPluginSetup, PaletteRegistry } from '../../../../../src/plugins/charts/public';
 
 export const getPieRenderer = (dependencies: {

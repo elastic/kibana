@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionAST } from '@kbn/interpreter/common';
 import memoizeOne from 'memoize-one';
-import type { TimeScaleUnit } from '../../../../../common';
+import type { TimeScaleUnit } from '../../../../../common/expressions';
 import type { IndexPattern, IndexPatternLayer } from '../../../types';
 import { adjustTimeScaleLabelSuffix } from '../../time_scale_utils';
 import type { ReferenceBasedIndexPatternColumn } from '../column_types';

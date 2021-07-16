@@ -29,13 +29,13 @@ import type {
   FramePublicAPI,
 } from '../types';
 import { State, visualizationTypes, XYState } from './types';
+import type { FormatFactory } from '../../common';
 import type {
   SeriesType,
   YAxisMode,
   AxesSettingsConfig,
   AxisExtentConfig,
-  FormatFactory,
-} from '../../common';
+} from '../../common/expressions';
 import { isHorizontalChart, isHorizontalSeries, getSeriesColor } from './state_helpers';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { LegendSettingsPopover } from '../shared_components';

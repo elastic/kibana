@@ -23,7 +23,7 @@ import type {
   DatasourcePublicAPI,
 } from '../types';
 import { State, visualizationTypes, XYState } from './types';
-import type { SeriesType, XYLayerConfig } from '../../common';
+import type { SeriesType, XYLayerConfig } from '../../common/expressions';
 import { isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import { LensIconChartBarStacked } from '../assets/chart_bar_stacked';

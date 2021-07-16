@@ -9,7 +9,7 @@ import { getXyVisualization } from './visualization';
 import { Position } from '@elastic/charts';
 import { Operation } from '../types';
 import type { State } from './types';
-import type { SeriesType, XYLayerConfig } from '../../common';
+import type { SeriesType, XYLayerConfig } from '../../common/expressions';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { LensIconChartBar } from '../assets/chart_bar';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';

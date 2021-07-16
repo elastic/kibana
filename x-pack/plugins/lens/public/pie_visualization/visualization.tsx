@@ -12,7 +12,7 @@ import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type { Visualization, OperationMetadata, AccessorConfig } from '../types';
 import { toExpression, toPreviewExpression } from './to_expression';
-import type { PieLayerState, PieVisualizationState } from '../../common';
+import type { PieLayerState, PieVisualizationState } from '../../common/expressions';
 import { suggestions } from './suggestions';
 import { CHART_NAMES, MAX_PIE_BUCKETS, MAX_TREEMAP_BUCKETS } from './constants';
 import { DimensionEditor, PieToolbar } from './toolbar';

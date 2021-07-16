@@ -6,7 +6,7 @@
  */
 
 import { Fit } from '@elastic/charts';
-import { FittingFunction } from '../../common';
+import { FittingFunction } from '../../common/expressions';
 
 export function getFitEnum(fittingFunction?: FittingFunction) {
   if (fittingFunction) {

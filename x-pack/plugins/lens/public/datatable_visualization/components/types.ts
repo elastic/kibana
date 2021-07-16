@@ -11,7 +11,8 @@ import type { IAggType } from 'src/plugins/data/public';
 import type { Datatable, RenderMode } from 'src/plugins/expressions';
 import type { ILensInterpreterRenderHandlers, LensEditEvent } from '../../types';
 import { LENS_EDIT_SORT_ACTION, LENS_EDIT_RESIZE_ACTION, LENS_TOGGLE_ACTION } from './constants';
-import type { FormatFactory, DatatableProps, LensGridDirection } from '../../../common';
+import type { FormatFactory } from '../../../common';
+import type { DatatableProps, LensGridDirection } from '../../../common/expressions';
 
 export interface LensSortActionData {
   columnId: string | undefined;

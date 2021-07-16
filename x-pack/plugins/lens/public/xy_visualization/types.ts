@@ -27,7 +27,7 @@ import {
   XYCurveType,
   AxesSettingsConfig,
   FittingFunction,
-} from '../../common';
+} from '../../common/expressions';
 
 // Persisted parts of the state
 export interface XYState {

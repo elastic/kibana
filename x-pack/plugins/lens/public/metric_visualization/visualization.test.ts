@@ -6,7 +6,7 @@
  */
 
 import { metricVisualization } from './visualization';
-import type { MetricState } from '../../common';
+import type { MetricState } from '../../common/expressions';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { generateId } from '../id_generator';
 import { DatasourcePublicAPI, FramePublicAPI } from '../types';

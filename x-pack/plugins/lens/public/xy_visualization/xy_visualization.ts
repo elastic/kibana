@@ -14,7 +14,7 @@ export {
   axisExtentConfig,
   layerConfig,
   xyChart,
-} from '../../common';
+} from '../../common/expressions';
 export * from './expression';
 export * from './types';
 export * from './visualization';

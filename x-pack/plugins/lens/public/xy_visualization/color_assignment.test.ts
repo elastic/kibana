@@ -6,7 +6,8 @@
  */
 
 import { getColorAssignments } from './color_assignment';
-import type { LayerArgs, FormatFactory, LensMultiTable } from '../../common';
+import type { FormatFactory, LensMultiTable } from '../../common';
+import type { LayerArgs } from '../../common/expressions';
 
 describe('color_assignment', () => {
   const layers: LayerArgs[] = [

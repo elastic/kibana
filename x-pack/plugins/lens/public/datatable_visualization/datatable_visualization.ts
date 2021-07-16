@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { datatableColumn, getDatatable } from '../../common';
+export { datatableColumn, getDatatable } from '../../common/expressions';
 export * from './expression';
 export * from './visualization';

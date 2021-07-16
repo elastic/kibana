@@ -11,7 +11,7 @@ import { PaletteRegistry } from 'src/plugins/charts/public';
 import { State } from './types';
 import { OperationMetadata, DatasourcePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
-import { ValidLayer, XYLayerConfig } from '../../common';
+import { ValidLayer, XYLayerConfig } from '../../common/expressions';
 
 export const getSortedAccessors = (datasource: DatasourcePublicAPI, layer: XYLayerConfig) => {
   const originalOrder = datasource

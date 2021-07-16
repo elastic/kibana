@@ -19,8 +19,12 @@ import {
   EuiDataGridStyle,
 } from '@elastic/eui';
 import type { LensFilterEvent, LensTableRowContextMenuEvent } from '../../types';
-import type { FormatFactory, LensGridDirection } from '../../../common';
-import { getFinalSummaryConfiguration, getOriginalId } from '../../../common';
+import type { FormatFactory } from '../../../common';
+import {
+  getFinalSummaryConfiguration,
+  getOriginalId,
+  LensGridDirection,
+} from '../../../common/expressions';
 import { VisualizationContainer } from '../../visualization_container';
 import { EmptyPlaceholder, findMinMaxByColumnId } from '../../shared_components';
 import { LensIconChartDatatable } from '../../assets/chart_datatable';

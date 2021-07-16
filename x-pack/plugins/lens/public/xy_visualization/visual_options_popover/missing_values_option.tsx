@@ -8,8 +8,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow, EuiIconTip, EuiSuperSelect, EuiText } from '@elastic/eui';
-import { fittingFunctionDefinitions } from '../../../common';
-import type { FittingFunction, ValueLabelConfig } from '../../../common';
+import { fittingFunctionDefinitions } from '../../../common/expressions';
+import type { FittingFunction, ValueLabelConfig } from '../../../common/expressions';
 
 export interface MissingValuesOptionProps {
   valueLabels?: ValueLabelConfig;

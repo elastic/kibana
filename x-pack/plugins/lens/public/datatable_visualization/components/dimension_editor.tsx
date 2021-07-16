@@ -32,15 +32,16 @@ import {
   PalettePanelContainer,
   findMinMaxByColumnId,
 } from '../../shared_components/';
-import './dimension_editor.scss';
-import type { ColumnState } from '../../../common';
+import type { ColumnState } from '../../../common/expressions';
 import {
   getDefaultSummaryLabel,
   getFinalSummaryConfiguration,
   getSummaryRowOptions,
   getOriginalId,
   isNumericFieldForDatatable,
-} from '../../../common';
+} from '../../../common/expressions';
+
+import './dimension_editor.scss';
 
 const idPrefix = htmlIdGenerator()();
 

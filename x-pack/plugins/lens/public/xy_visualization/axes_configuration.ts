@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { AxisExtentConfig, XYLayerConfig, FormatFactory } from '../../common';
+import { FormatFactory } from '../../common';
+import { AxisExtentConfig, XYLayerConfig } from '../../common/expressions';
 import { Datatable, SerializedFieldFormat } from '../../../../../src/plugins/expressions/public';
 import { IFieldFormat } from '../../../../../src/plugins/data/public';
 

@@ -17,7 +17,7 @@ import type { HeatmapExpressionProps } from './types';
 import type { ChartsPluginSetup, PaletteRegistry } from '../../../../../src/plugins/charts/public';
 import { HeatmapChartReportable } from './chart_component';
 
-export { heatmapGridConfig, heatmapLegendConfig, heatmap } from '../../common';
+export { heatmapGridConfig, heatmapLegendConfig, heatmap } from '../../common/expressions';
 
 export const getHeatmapRenderer = (dependencies: {
   formatFactory: Promise<FormatFactory>;

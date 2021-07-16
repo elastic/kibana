@@ -26,7 +26,7 @@ export type {
   YAxisMode,
   XYCurveType,
   YConfig,
-} from '../common';
+} from '../common/expressions';
 export type { DatatableVisualizationState } from './datatable_visualization/visualization';
 export type {
   IndexPatternPersistedState,

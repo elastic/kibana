@@ -6,12 +6,12 @@
  */
 
 import { MetricChart } from './expression';
-import { metricChart } from '../../common';
+import { metricChart, MetricConfig } from '../../common/expressions';
 import React from 'react';
 import { shallow } from 'enzyme';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 import { IFieldFormat } from '../../../../../src/plugins/data/public';
-import type { MetricConfig, LensMultiTable } from '../../common';
+import type { LensMultiTable } from '../../common';
 
 function sampleArgs() {
   const data: LensMultiTable = {
