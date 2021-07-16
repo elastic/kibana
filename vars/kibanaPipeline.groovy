@@ -106,7 +106,7 @@ def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
     "KBN_NP_PLUGINS_BUILT=true",
     "FLEET_PACKAGE_REGISTRY_PORT=${fleetPackageRegistryPort}",
     "ALERTING_PROXY_PORT=${alertingProxyPort}",
-    "ELASTIC_APM_ACTIVE=${apmActive}",
+    "ELASTIC_APM_ACTIVE=false",
     "ELASTIC_APM_TRANSACTION_SAMPLE_RATE=0.1",
   ] + additionalEnvs) {
     closure()
