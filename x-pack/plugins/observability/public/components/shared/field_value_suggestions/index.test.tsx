@@ -13,7 +13,8 @@ import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/
 
 jest.setTimeout(30000);
 
-describe('FieldValueSuggestions', () => {
+// flaky https://github.com/elastic/kibana/issues/105784
+describe.skip('FieldValueSuggestions', () => {
   jest.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockReturnValue(1500);
   jest.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockReturnValue(1500);
 

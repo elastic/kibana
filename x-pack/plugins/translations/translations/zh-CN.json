@@ -17399,7 +17399,6 @@
     "xpack.observability.notAvailable": "不可用",
     "xpack.observability.overview.alert.allTypes": "所有类型",
     "xpack.observability.overview.alert.appLink": "管理告警",
-    "xpack.observability.overview.alert.view": "查看",
     "xpack.observability.overview.alerts.muted": "已静音",
     "xpack.observability.overview.alerts.title": "告警",
     "xpack.observability.overview.apm.appLink": "在应用中查看",
