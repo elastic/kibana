@@ -206,7 +206,7 @@ const credentialsProvidedByEnvironment = (): boolean =>
  */
 const loginViaEnvironmentCredentials = () => {
   const providerName =
-    Cypress.env('protocol') === 'http' || Cypress.config().baseUrl.includes('staging')
+    Cypress.env('protocol') === 'http' || Cypress.config().baseUrl!.includes('staging')
       ? 'basic'
       : 'cloud-basic';
 
