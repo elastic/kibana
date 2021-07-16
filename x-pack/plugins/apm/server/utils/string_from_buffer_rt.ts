@@ -4,22 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { either } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
 
 export const stringFromBufferRt = new t.Type<string, Buffer, unknown>(
-  'toSourceMapRt',
+  'stringFromBufferRt',
   t.string.is,
   (input, context) => {
-    return either.chain(
-      t.unknown.validate(input, context),
-      (inputAsUnknown) => {
-        const inputAsString = (inputAsUnknown as Buffer).toString();
-        return inputAsString
-          ? t.success(inputAsString)
-          : t.failure(input, context, 'could not parse buffer to string');
-      }
-    );
+    return Buffer.isBuffer(input)
+      ? t.success(input.toString('utf-8'))
+      : t.failure(input, context, 'Input is not a Buffer');
   },
   (str) => {
     return Buffer.from(str);

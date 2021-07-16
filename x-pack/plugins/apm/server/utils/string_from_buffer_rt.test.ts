@@ -32,18 +32,9 @@ const sourceMap = {
 
 describe('stringFromBufferRt', () => {
   describe('decode', () => {
-    it('converts from buffer to SourceMap', () => {
+    it('converts from buffer to string', () => {
       const sourceMapBuffer = Buffer.from(JSON.stringify(sourceMap));
       const decoded = stringFromBufferRt.decode(sourceMapBuffer);
-      if (isRight(decoded)) {
-        expect(decoded.right).toEqual(JSON.stringify(sourceMap));
-      } else {
-        expect(true).toBeFalsy();
-      }
-    });
-    it('converts from string to SourceMap', () => {
-      const sourceMapString = JSON.stringify(sourceMap);
-      const decoded = stringFromBufferRt.decode(sourceMapString);
       if (isRight(decoded)) {
         expect(decoded.right).toEqual(JSON.stringify(sourceMap));
       } else {
