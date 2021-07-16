@@ -101,6 +101,7 @@ export const FilterRatioAgg = (props) => {
                 defaultMessage="Numerator"
               />
             }
+            data-test-subj="numeratorRow"
           >
             <QueryBarWrapper
               query={model.numerator}
@@ -119,6 +120,7 @@ export const FilterRatioAgg = (props) => {
                 defaultMessage="Denominator"
               />
             }
+            data-test-subj="denominatorRow"
           >
             <QueryBarWrapper
               query={model.denominator}

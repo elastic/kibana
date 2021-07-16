@@ -92,8 +92,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('should display correct values for filter ratio aggregation with numerator and denominator', async () => {
         const EXPECTED = 'OS Filter Ratio\nwin 8 2\nwin xp 0\nwin 7 3\nios 0\nosx 0';
         await visualBuilder.selectAggType('Filter Ratio');
-        await visualBuilder.setFilterRatioNumerator('extension.raw : "css"');
-        await visualBuilder.setFilterRatioDenominator('bytes <= 3000');
+        await visualBuilder.setFilterRatioOption('numerator', 'extension.raw : "css"');
+        await visualBuilder.setFilterRatioOption('denominator', 'bytes <= 3000');
         await visChart.waitForVisualizationRenderingStabilized();
 
         const tableData = await visualBuilder.getViewTable();
