@@ -10,13 +10,13 @@ import { Capabilities } from 'src/core/public';
 import { EuiCheckboxGroup } from '@elastic/eui';
 import React from 'react';
 import { ReactElement, useState } from 'react';
+import { SerializableState } from 'src/plugins/kibana_utils/common';
 import { DashboardSavedObject } from '../..';
-import { setStateToKbnUrl, unhashUrl } from '../../services/kibana_utils';
 import { SharePluginStart } from '../../services/share';
 import { dashboardUrlParams } from '../dashboard_router';
 import { shareModalStrings } from '../../dashboard_strings';
-import { DashboardAppCapabilities, DashboardState } from '../../types';
-import { stateToRawDashboardState } from '../lib/convert_dashboard_state';
+import { DashboardAppCapabilities, DashboardPanelMap, DashboardState } from '../../types';
+import { DashboardShareLocator } from '../../locator';
 
 const showFilterBarId = 'showFilterBar';
 
@@ -28,6 +28,7 @@ interface ShowShareModalProps {
   savedDashboard: DashboardSavedObject;
   currentDashboardState: DashboardState;
   dashboardCapabilities: DashboardAppCapabilities;
+  shareLocator: DashboardShareLocator;
 }
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
@@ -40,6 +41,7 @@ export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => 
 
 export function ShowShareModal({
   share,
+  shareLocator,
   isDirty,
   kibanaVersion,
   anchorElement,
@@ -104,28 +106,39 @@ export function ShowShareModal({
     );
   };
 
-  share.toggleShareContextMenu({
-    isDirty,
-    anchorElement,
-    allowEmbed: true,
-    allowShortUrl: dashboardCapabilities.createShortUrl,
-    shareableUrl: setStateToKbnUrl(
-      '_a',
-      stateToRawDashboardState({ state: currentDashboardState, version: kibanaVersion }),
-      { useHash: false, storeInHashQuery: true },
-      unhashUrl(window.location.href)
-    ),
-    objectId: savedDashboard.id,
-    objectType: 'dashboard',
-    sharingData: {
-      title: savedDashboard.title,
-    },
-    embedUrlParamExtensions: [
-      {
-        paramName: 'embed',
-        component: EmbedUrlParamExtension,
-      },
-    ],
-    showPublicUrlSwitch,
-  });
+  const params = {
+    ...currentDashboardState,
+    options: { ...currentDashboardState.options },
+    // TODO: why is this necessary?  also seems like everyone has to do this.
+    panels: { ...currentDashboardState.panels } as DashboardPanelMap & SerializableState,
+    version: kibanaVersion,
+  };
+
+  shareLocator
+    .getRedirectUrl(params)
+    .then((url) => {
+      share.toggleShareContextMenu({
+        isDirty,
+        anchorElement,
+        allowEmbed: true,
+        allowShortUrl: dashboardCapabilities.createShortUrl,
+        shareableUrl: url,
+        objectId: savedDashboard.id,
+        objectType: 'dashboard',
+        sharingData: {
+          title: savedDashboard.title,
+        },
+        embedUrlParamExtensions: [
+          {
+            paramName: 'embed',
+            component: EmbedUrlParamExtension,
+          },
+        ],
+        showPublicUrlSwitch,
+      });
+    })
+    .catch((err) => {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    });
 }

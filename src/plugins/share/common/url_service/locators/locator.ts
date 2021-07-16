@@ -29,6 +29,14 @@ export interface LocatorDependencies {
    * Resolve a Kibana URL given KibanaLocation.
    */
   getUrl: (location: KibanaLocation, getUrlParams: LocatorGetUrlParams) => Promise<string>;
+
+  /**
+   * Create an absolute, redirected, migrateable URL.
+   */
+  getRedirectUrl: <P extends SerializableState>(
+    definition: LocatorDefinition<P>,
+    params: P
+  ) => Promise<string>;
 }
 
 export class Locator<P extends SerializableRecord> implements LocatorPublic<P> {
@@ -74,6 +82,10 @@ export class Locator<P extends SerializableRecord> implements LocatorPublic<P> {
     const url = this.deps.getUrl(location, { absolute });
 
     return url;
+  }
+
+  public async getRedirectUrl(params: P): Promise<string> {
+    return this.deps.getRedirectUrl(this.definition, params);
   }
 
   public async navigate(

@@ -37,6 +37,9 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
       getUrl: async () => {
         throw new Error('Locator .getUrl() currently is not supported on the server.');
       },
+      getRedirectUrl: async () => {
+        throw new Error('Locator .getRedirectUrl() currently is not supported on the server.');
+      },
     });
 
     createRoutes(core, this.initializerContext.logger.get());

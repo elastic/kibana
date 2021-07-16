@@ -7,13 +7,13 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { TimeRange, Filter, Query, QueryState, RefreshInterval } from '../../data/public';
-import type { LocatorDefinition, LocatorPublic } from '../../share/public';
-import type { SavedDashboardPanel } from '../common/types';
-import { esFilters } from '../../data/public';
-import { setStateToKbnUrl } from '../../kibana_utils/public';
-import { ViewMode } from '../../embeddable/public';
-import { DashboardConstants } from './dashboard_constants';
+import type { TimeRange, Filter, Query, QueryState, RefreshInterval } from '../../../data/public';
+import type { LocatorDefinition, LocatorPublic } from '../../../share/public';
+import type { SavedDashboardPanel } from '../../common/types';
+import { esFilters } from '../../../data/public';
+import { setStateToKbnUrl } from '../../../kibana_utils/public';
+import { ViewMode } from '../../../embeddable/public';
+import { DashboardConstants } from '../dashboard_constants';
 
 const cleanEmptyKeys = (stateObj: Record<string, unknown>) => {
   Object.keys(stateObj).forEach((key) => {

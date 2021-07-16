@@ -72,7 +72,12 @@ import {
   DASHBOARD_APP_URL_GENERATOR,
   DashboardUrlGeneratorState,
 } from './url_generator';
-import { DashboardAppLocatorDefinition, DashboardAppLocator } from './locator';
+import {
+  DashboardAppLocatorDefinition,
+  DashboardAppLocator,
+  DashboardShareLocatorDefinition,
+  DashboardShareLocator,
+} from './locator';
 import { createSavedDashboardLoader } from './saved_dashboards';
 import { DashboardConstants } from './dashboard_constants';
 import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
@@ -124,6 +129,7 @@ export interface DashboardStartDependencies {
 
 export interface DashboardSetup {
   locator?: DashboardAppLocator;
+  shareLocator?: DashboardShareLocator;
 }
 
 export interface DashboardStart {
@@ -141,6 +147,7 @@ export interface DashboardStart {
    */
   dashboardUrlGenerator?: DashboardUrlGenerator;
   locator?: DashboardAppLocator;
+  shareLocator?: DashboardShareLocator;
   dashboardFeatureFlagConfig: DashboardFeatureFlagConfig;
 }
 
@@ -159,6 +166,7 @@ export class DashboardPlugin
    */
   private dashboardUrlGenerator?: DashboardUrlGenerator;
   private locator?: DashboardAppLocator;
+  private shareLocator?: DashboardShareLocator;
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
@@ -230,6 +238,11 @@ export class DashboardPlugin
             const dashboard = await selfStart.getSavedDashboardLoader().get(dashboardId);
             return dashboard?.searchSource?.getField('filter') ?? [];
           },
+        })
+      );
+      this.shareLocator = share.url.locators.create(
+        new DashboardShareLocatorDefinition({
+          kibanaVersion: this.initializerContext.env.packageInfo.version,
         })
       );
     }
@@ -365,6 +378,7 @@ export class DashboardPlugin
 
     return {
       locator: this.locator,
+      shareLocator: this.shareLocator,
     };
   }
 
@@ -451,6 +465,7 @@ export class DashboardPlugin
       },
       dashboardUrlGenerator: this.dashboardUrlGenerator,
       locator: this.locator,
+      shareLocator: this.shareLocator,
       dashboardFeatureFlagConfig: this.dashboardFeatureFlagConfig!,
     };
   }

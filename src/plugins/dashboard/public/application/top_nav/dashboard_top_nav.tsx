@@ -107,6 +107,7 @@ export function DashboardTopNav({
     dashboardCapabilities,
     dashboardSessionStorage,
     allowByValueEmbeddables,
+    shareLocator,
   } = useKibana<DashboardAppServices>().services;
   const { version: kibanaVersion } = initializerContext.env.packageInfo;
   const timefilter = data.query.timefilter.timefilter;
@@ -402,7 +403,7 @@ export function DashboardTopNav({
 
   const showShare = useCallback(
     (anchorElement: HTMLElement) => {
-      if (!share) return;
+      if (!share || !shareLocator) return;
       const currentState = dashboardAppState.getLatestDashboardState();
       ShowShareModal({
         share,
@@ -412,9 +413,10 @@ export function DashboardTopNav({
         currentDashboardState: currentState,
         savedDashboard: dashboardAppState.savedDashboard,
         isDirty: Boolean(dashboardAppState.hasUnsavedChanges),
+        shareLocator,
       });
     },
-    [dashboardAppState, dashboardCapabilities, share, kibanaVersion]
+    [dashboardAppState, dashboardCapabilities, share, kibanaVersion, shareLocator]
   );
 
   const dashboardTopNavActions = useMemo(() => {

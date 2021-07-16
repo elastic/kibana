@@ -18,6 +18,7 @@ const url = new UrlService({
   getUrl: async ({ app, path }, { absolute }) => {
     return `${absolute ? 'http://localhost:8888' : ''}/app/${app}${path}`;
   },
+  getRedirectUrl: async () => 'http://localhost:8888',
 });
 
 const createSetupContract = (): Setup => {
@@ -55,6 +56,7 @@ const createLocator = <T extends SerializableRecord = SerializableRecord>(): jes
   inject: jest.fn(),
   telemetry: jest.fn(),
   migrations: {},
+  getRedirectUrl: jest.fn(),
 });
 
 export const sharePluginMock = {

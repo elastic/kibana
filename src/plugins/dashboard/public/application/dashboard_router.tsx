@@ -110,6 +110,7 @@ export async function mountApp({
     uiSettings: coreStart.uiSettings,
     scopedHistory: () => scopedHistory,
     indexPatterns: dataStart.indexPatterns,
+    shareLocator: dashboardStart.shareLocator,
     savedQueryService: dataStart.query.savedQueries,
     savedObjectsClient: coreStart.savedObjects.client,
     savedDashboards: dashboardStart.getSavedDashboardLoader(),

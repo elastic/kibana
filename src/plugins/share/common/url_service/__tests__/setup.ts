@@ -37,6 +37,9 @@ export const urlServiceTestSetup = (partialDeps: Partial<UrlServiceDependencies>
     getUrl: async () => {
       throw new Error('not implemented');
     },
+    getRedirectUrl: async () => {
+      throw new Error('not implemented');
+    },
     ...partialDeps,
   };
   const service = new UrlService(deps);

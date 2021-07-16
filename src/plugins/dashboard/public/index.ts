@@ -28,7 +28,12 @@ export {
   createDashboardUrlGenerator,
   DashboardUrlGeneratorState,
 } from './url_generator';
-export { DashboardAppLocator, DashboardAppLocatorParams } from './locator';
+export {
+  DashboardAppLocator,
+  DashboardAppLocatorParams,
+  DashboardShareLocator,
+  DashboardShareLocatorParams,
+} from './locator';
 
 export { DashboardSavedObject } from './saved_dashboards';
 export { SavedDashboardPanel, DashboardContainerInput } from './types';

@@ -8,7 +8,7 @@
 
 import './index.scss';
 
-import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 import { ShareMenuManager, ShareMenuManagerStart } from './services';
 import type { SecurityOssPluginSetup, SecurityOssPluginStart } from '../../security_oss/public';
 import { ShareMenuRegistry, ShareMenuRegistrySetup } from './services';
@@ -19,7 +19,7 @@ import {
   UrlGeneratorsStart,
 } from './url_generators/url_generator_service';
 import { UrlService } from '../common/url_service';
-import { RedirectManager, RedirectOptions } from './url_service';
+import { formatSearchParams, RedirectManager, RedirectOptions } from './url_service';
 
 export interface ShareSetupDependencies {
   securityOss?: SecurityOssPluginSetup;
@@ -78,6 +78,7 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
 
   private redirectManager?: RedirectManager;
   private url?: UrlService;
+  constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: ShareSetupDependencies): SharePluginSetup {
     core.application.register(createShortUrlRedirectApp(core, window.location));
@@ -96,6 +97,15 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
         const url = start[0].application.getUrlForApp(app, {
           path,
           absolute,
+        });
+        return url;
+      },
+      getRedirectUrl: async (definition, params) => {
+        const start = await core.getStartServices();
+        const version = this.initializerContext.env.packageInfo.version;
+        const url = start[0].application.getUrlForApp('r', {
+          path: '?' + formatSearchParams({ id: definition.id, version, params }).toString(),
+          absolute: true,
         });
         return url;
       },
