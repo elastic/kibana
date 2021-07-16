@@ -310,9 +310,6 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
         const response = await coreStart.http.get<HostInfo>(
           resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: selectedEndpoint as string })
         );
-        if (!response) {
-          return;
-        }
         dispatch({
           type: 'serverReturnedEndpointDetails',
           payload: response,
@@ -702,12 +699,7 @@ const loadEndpointsPendingActions = async ({
   }
 
   try {
-    const response = await fetchPendingActionsByAgentId(Array.from(agentsIds));
-    if (!response) {
-      return;
-    }
-    const { data: pendingActions } = response;
-
+    const { data: pendingActions } = await fetchPendingActionsByAgentId(Array.from(agentsIds));
     const agentIdToPendingActions: AgentIdsPendingActions = new Map();
 
     for (const pendingAction of pendingActions) {
