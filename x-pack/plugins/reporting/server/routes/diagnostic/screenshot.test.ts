@@ -20,7 +20,7 @@ import type { ReportingRequestHandlerContext } from '../../types';
 
 jest.mock('../../export_types/png/lib/generate_png');
 
-import { generatePngObservableFactory } from '../../export_types/png/lib/generate_png';
+import { generatePngObservableFactory } from '../../export_types/common';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
