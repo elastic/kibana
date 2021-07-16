@@ -44,7 +44,7 @@ export const renderApp = ({
             ...subPlugins.hosts.routes,
             ...subPlugins.network.routes,
             // will be undefined if enabledExperimental.uebaEnabled === false
-            ...(subPlugins.ueba!= null ? subPlugins.ueba.routes : []),
+            ...(subPlugins.ueba != null ? subPlugins.ueba.routes : []),
             ...subPlugins.timelines.routes,
             ...subPlugins.cases.routes,
             ...subPlugins.management.routes,

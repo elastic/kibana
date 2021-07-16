@@ -35,6 +35,7 @@ import { ManagementState } from '../../management/types';
 import { initialSourcererState, SourcererScopeName } from '../store/sourcerer/model';
 import { mockBrowserFields, mockDocValueFields } from '../containers/source/mock';
 import { mockIndexPattern } from './index_pattern';
+import { allowedExperimentalValues } from '../../../common/experimental_features';
 
 export const mockGlobalState: State = {
   app: {
@@ -43,13 +44,7 @@ export const mockGlobalState: State = {
       { id: 'error-id-1', title: 'title-1', message: ['error-message-1'] },
       { id: 'error-id-2', title: 'title-2', message: ['error-message-2'] },
     ],
-    enableExperimental: {
-      trustedAppsByPolicyEnabled: false,
-      metricsEntitiesEnabled: false,
-      ruleRegistryEnabled: false,
-      tGridEnabled: false,
-      uebaEnabled: false,
-    },
+    enableExperimental: allowedExperimentalValues,
   },
   hosts: {
     page: {
