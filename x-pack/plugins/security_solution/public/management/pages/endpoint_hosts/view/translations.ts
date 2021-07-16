@@ -54,13 +54,13 @@ export const ACTIVITY_LOG = {
       isolatedAction: i18n.translate(
         'xpack.securitySolution.endpointDetails.activityLog.logEntry.action.isolated',
         {
-          defaultMessage: 'isolate host submitted',
+          defaultMessage: 'submitted isolate host',
         }
       ),
       unisolatedAction: i18n.translate(
         'xpack.securitySolution.endpointDetails.activityLog.logEntry.action.unisolated',
         {
-          defaultMessage: 'release host submitted',
+          defaultMessage: 'submitted release host',
         }
       ),
     },
