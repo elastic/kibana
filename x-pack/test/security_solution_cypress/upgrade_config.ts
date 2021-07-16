@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
-
 import { SecuritySolutionCypressUpgradeCliTestRunner } from './runner';
 
-export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const securitySolutionCypressConfig = await readConfigFile(require.resolve('./config.ts'));
+export default async function () {
   return {
-    ...securitySolutionCypressConfig.getAll(),
-
     testRunner: SecuritySolutionCypressUpgradeCliTestRunner,
   };
 }
