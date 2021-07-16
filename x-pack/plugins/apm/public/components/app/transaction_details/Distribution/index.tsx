@@ -25,7 +25,6 @@ import { isEmpty, keyBy } from 'lodash';
 import React from 'react';
 import { ValuesType } from 'utility-types';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
-import type { IUrlParams } from '../../../../context/url_params_context/types';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
@@ -94,7 +93,6 @@ export const formatYLong = (t: number) => {
 
 interface Props {
   distribution?: TransactionDistributionAPIResponse;
-  urlParams: IUrlParams;
   fetchStatus: FETCH_STATUS;
   bucketIndex: number;
   onBucketClick: (
@@ -104,7 +102,6 @@ interface Props {
 
 export function TransactionDistribution({
   distribution,
-  urlParams: { transactionType },
   fetchStatus,
   bucketIndex,
   onBucketClick,
