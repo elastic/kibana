@@ -23,7 +23,8 @@ export const config: PluginConfigDescriptor<MapsXPackConfig> = {
     preserveDrawingBuffer: true,
   },
   schema: configSchema,
-  deprecations: () => [
+  deprecations: ({ unusedFromRoot }) => [
+    unusedFromRoot('xpack.maps.showMapVisualizationTypes'),
     (
       completeConfig: Record<string, any>,
       rootPath: string,
