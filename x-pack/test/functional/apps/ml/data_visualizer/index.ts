@@ -8,8 +8,7 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  // eslint-disable-next-line ban/ban
-  describe.only('data visualizer', function () {
+  describe('data visualizer', function () {
     this.tags(['skipFirefox']);
 
     loadTestFile(require.resolve('./index_data_visualizer'));
