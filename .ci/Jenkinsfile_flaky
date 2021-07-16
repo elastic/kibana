@@ -20,20 +20,35 @@ kibanaPipeline(timeoutMinutes: 180) {
   def agents = [:]
   def workerFailures = []
 
+  def xpackCount = 13
+  def ossCount = 12
+
   def worker = getWorkerFromParams(IS_XPACK, JOB, CI_GROUP)
 
-  for(def agentNumber = 1; agentNumber <= AGENT_COUNT; agentNumber++) {
-    def agentExecutions = floor(EXECUTIONS/AGENT_COUNT) + (agentNumber <= EXECUTIONS%AGENT_COUNT ? 1 : 0)
-
-    agents["agent-${agentNumber}"] = {
+  for(def agentNumber = 1; agentNumber <= xpackCount; agentNumber++) {
+    agents["agent-xpack-${agentNumber}"] = {
       agentProcess(
         agentNumber: agentNumber,
-        agentExecutions: agentExecutions,
-        worker: worker,
+        agentExecutions: 20,
+        worker: getWorkerFromParams(true, 'ciGroup', agentNumber),
         workerFailures: workerFailures,
-        needBuild: NEED_BUILD,
-        isXpack: IS_XPACK,
-        ciGroup: CI_GROUP
+        needBuild: true,
+        isXpack: true,
+        ciGroup: agentNumber
+      )
+    }
+  }
+
+  for(def agentNumber = 1; agentNumber <= ossCount; agentNumber++) {
+    agents["agent-oss-${agentNumber}"] = {
+      agentProcess(
+        agentNumber: agentNumber,
+        agentExecutions: 20,
+        worker: getWorkerFromParams(false, 'ciGroup', agentNumber),
+        workerFailures: workerFailures,
+        needBuild: true,
+        isXpack: false,
+        ciGroup: agentNumber
       )
     }
   }
