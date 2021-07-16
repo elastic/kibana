@@ -76,3 +76,17 @@ export const NESTED_COLUMN = (field: string) =>
 export const AGENT_STATUS = i18n.translate('xpack.securitySolution.detections.alerts.agentStatus', {
   defaultMessage: 'Agent status',
 });
+
+export const MULTI_FIELD_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.eventDetails.multiFieldTooltipContent',
+  {
+    defaultMessage: 'Multi-fields can have multiple values per field',
+  }
+);
+
+export const MULTI_FIELD_BADGE = i18n.translate(
+  'xpack.securitySolution.eventDetails.multiFieldTooltipContent',
+  {
+    defaultMessage: 'multi-field',
+  }
+);

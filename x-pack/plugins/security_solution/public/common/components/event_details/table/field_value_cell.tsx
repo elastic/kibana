@@ -13,7 +13,7 @@ import { FormattedFieldValue } from '../../../../timelines/components/timeline/b
 import { MESSAGE_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
 import { EventFieldsData } from '../types';
 
-export interface ValueCellProps {
+export interface FieldValueCellProps {
   contextId: string;
   data: EventFieldsData;
   eventId: string;
@@ -22,10 +22,17 @@ export interface ValueCellProps {
   values: string[] | null | undefined;
 }
 
-export const ValueCell = React.memo(
-  ({ contextId, data, eventId, fieldFromBrowserField, getLinkValue, values }: ValueCellProps) => {
+export const FieldValueCell = React.memo(
+  ({
+    contextId,
+    data,
+    eventId,
+    fieldFromBrowserField,
+    getLinkValue,
+    values,
+  }: FieldValueCellProps) => {
     return (
-      <div>
+      <div className="eventFieldsTable__fieldValueCell">
         {values != null &&
           values.map((value, i) => {
             if (fieldFromBrowserField == null) {
@@ -55,4 +62,4 @@ export const ValueCell = React.memo(
   }
 );
 
-ValueCell.displayName = 'ValueCell';
+FieldValueCell.displayName = 'FieldValueCell';
