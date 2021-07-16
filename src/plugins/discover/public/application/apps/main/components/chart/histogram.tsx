@@ -8,7 +8,7 @@
 import './histogram.scss';
 import moment, { unitOfTime } from 'moment-timezone';
 import React, { useState, useEffect, useCallback } from 'react';
-import { EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiLoadingChart, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
@@ -145,9 +145,9 @@ export function DiscoverHistogram({
     return (
       <div className="dscChart__loading">
         <EuiText size="xs" color="subdued">
-          <EuiLoadingSpinner />
+          <EuiLoadingChart mono />
           <EuiSpacer size="s" />
-          <FormattedMessage id="discover.loadingChartResults" defaultMessage="Loading results" />
+          <FormattedMessage id="discover.loadingChartResults" defaultMessage="Loading chart" />
         </EuiText>
       </div>
     );
