@@ -14,7 +14,7 @@ def AGENT_COUNT = getAgentCount(EXECUTIONS)
 def NEED_BUILD = JOB != 'jestIntegration' && JOB != 'apiIntegration'
 
 currentBuild.displayName += trunc(" ${params.GITHUB_OWNER}:${params.branch_specifier}", 24)
-currentBuild.description = "${params.CI_GROUP}<br />Agents: ${AGENT_COUNT}<br />Executions: ${params.NUMBER_EXECUTIONS}"
+currentBuild.description = "ALL ${IS_XPACK ? 'X-PACK' : 'OSS'} CI GROUPS"
 
 kibanaPipeline(timeoutMinutes: 180) {
   def agents = [:]
@@ -25,31 +25,36 @@ kibanaPipeline(timeoutMinutes: 180) {
 
   def worker = getWorkerFromParams(IS_XPACK, JOB, CI_GROUP)
 
-  for(def agentNumber = 1; agentNumber <= xpackCount; agentNumber++) {
-    agents["agent-xpack-${agentNumber}"] = {
-      agentProcess(
-        agentNumber: agentNumber,
-        agentExecutions: 20,
-        worker: getWorkerFromParams(true, 'ciGroup', agentNumber),
-        workerFailures: workerFailures,
-        needBuild: true,
-        isXpack: true,
-        ciGroup: agentNumber
-      )
+  if (IS_XPACK) {
+    for(def ciGroup = 1; ciGroup <= xpackCount; ciGroup++) {
+      def agentNumber = ciGroup
+      agents["agent-xpack-${agentNumber}"] = {
+        agentProcess(
+          agentNumber: agentNumber,
+          agentExecutions: 20,
+          worker: getWorkerFromParams(true, 'ciGroup', agentNumber),
+          workerFailures: workerFailures,
+          needBuild: true,
+          isXpack: true,
+          ciGroup: agentNumber
+        )
+      }
     }
   }
-
-  for(def agentNumber = 1; agentNumber <= ossCount; agentNumber++) {
-    agents["agent-oss-${agentNumber}"] = {
-      agentProcess(
-        agentNumber: agentNumber,
-        agentExecutions: 20,
-        worker: getWorkerFromParams(false, 'ciGroup', agentNumber),
-        workerFailures: workerFailures,
-        needBuild: true,
-        isXpack: false,
-        ciGroup: agentNumber
-      )
+  else {
+    for(def ciGroup = 1; ciGroup <= ossCount; ciGroup++) {
+      def agentNumber = ciGroup
+      agents["agent-oss-${agentNumber}"] = {
+        agentProcess(
+          agentNumber: agentNumber,
+          agentExecutions: 20,
+          worker: getWorkerFromParams(false, 'ciGroup', agentNumber),
+          workerFailures: workerFailures,
+          needBuild: true,
+          isXpack: false,
+          ciGroup: agentNumber
+        )
+      }
     }
   }
 
