@@ -85,7 +85,6 @@ function TemplateWithContext({
 
   return (
     <ApmMainTemplate
-      data-test-subj="ApmMainTemplate"
       pageHeader={{
         tabs,
         pageTitle: (
