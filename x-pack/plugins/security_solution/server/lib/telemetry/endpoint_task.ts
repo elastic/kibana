@@ -12,10 +12,13 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '../../../../task_manager/server';
-import { batchTelemetryRecords, getPreviousEpMetaTaskTimestamp } from './helpers';
+import {
+  batchTelemetryRecords,
+  getPreviousEpMetaTaskTimestamp,
+  isPackagePolicyList,
+} from './helpers';
 import { TelemetryEventsSender } from './sender';
 import { PolicyData } from '../../../common/endpoint/types';
-import { PackagePolicy } from '../../../../fleet/common/types/models/package_policy';
 import { FLEET_ENDPOINT_PACKAGE } from '../../../../fleet/common';
 import {
   EndpointMetricsAggregation,
@@ -194,23 +197,25 @@ export class TelemetryEndpointTask {
     for (const policyInfo of fleetAgents.values()) {
       if (policyInfo !== null && policyInfo !== undefined && !endpointPolicyCache.has(policyInfo)) {
         const agentPolicy = await this.sender.fetchPolicyConfigs(policyInfo);
-        const packagePolicies = agentPolicy?.package_policies as PackagePolicy[];
+        const packagePolicies = agentPolicy?.package_policies;
 
-        packagePolicies
-          .map((pPolicy) => pPolicy as PolicyData)
-          .forEach((pPolicy) => {
-            if (pPolicy.inputs[0].config !== undefined) {
-              pPolicy.inputs.forEach((input) => {
-                if (
-                  input.type === FLEET_ENDPOINT_PACKAGE &&
-                  input.config !== undefined &&
-                  policyInfo !== undefined
-                ) {
-                  endpointPolicyCache.set(policyInfo, pPolicy);
-                }
-              });
-            }
-          });
+        if (packagePolicies !== undefined && isPackagePolicyList(packagePolicies)) {
+          packagePolicies
+            .map((pPolicy) => pPolicy as PolicyData)
+            .forEach((pPolicy) => {
+              if (pPolicy.inputs[0].config !== undefined) {
+                pPolicy.inputs.forEach((input) => {
+                  if (
+                    input.type === FLEET_ENDPOINT_PACKAGE &&
+                    input.config !== undefined &&
+                    policyInfo !== undefined
+                  ) {
+                    endpointPolicyCache.set(policyInfo, pPolicy);
+                  }
+                });
+              }
+            });
+        }
       }
     }
 

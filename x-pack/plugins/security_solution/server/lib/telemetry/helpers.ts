@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment';
+import { PackagePolicy } from '../../../../fleet/common/types/models/package_policy';
 
 /**
  * Determines the when the last run was in order to execute to.
@@ -66,3 +67,19 @@ export const batchTelemetryRecords = (
   [...Array(Math.ceil(telemetryRecords.length / batchSize))].map((_) =>
     telemetryRecords.splice(0, batchSize)
   );
+
+/**
+ * User defined type guard for PackagePolicy
+ *
+ * @param data the union type of package policies
+ * @returns type confirmation
+ */
+export function isPackagePolicyList(
+  data: string[] | PackagePolicy[] | undefined
+): data is PackagePolicy[] {
+  if (data === undefined || data.length < 1) {
+    return false;
+  }
+
+  return (data as PackagePolicy[])[0].inputs !== undefined;
+}

@@ -6,10 +6,12 @@
  */
 
 import moment from 'moment';
+import { createMockPackagePolicy } from './mocks';
 import {
   getPreviousDiagTaskTimestamp,
   getPreviousEpMetaTaskTimestamp,
   batchTelemetryRecords,
+  isPackagePolicyList,
 } from './helpers';
 
 describe('test diagnostic telemetry scheduled task timing helper', () => {
@@ -91,5 +93,35 @@ describe('telemetry batching logic', () => {
 
     const records = batchTelemetryRecords(stubTelemetryRecords, batchSize);
     expect(records.length).toEqual(0);
+  });
+});
+
+describe('test package policy type guard', () => {
+  test('string records are not package policies', async () => {
+    const arr = ['a', 'b', 'c'];
+    const result = isPackagePolicyList(arr);
+
+    expect(result).toEqual(false);
+  });
+
+  test('empty array are not package policies', () => {
+    const arr: string[] = [];
+    const result = isPackagePolicyList(arr);
+
+    expect(result).toEqual(false);
+  });
+
+  test('undefined is not a list of package policies', () => {
+    const arr = undefined;
+    const result = isPackagePolicyList(arr);
+
+    expect(result).toEqual(false);
+  });
+
+  test('package policies are list of package policies', () => {
+    const arr = [createMockPackagePolicy(), createMockPackagePolicy(), createMockPackagePolicy()];
+    const result = isPackagePolicyList(arr);
+
+    expect(result).toEqual(true);
   });
 });
