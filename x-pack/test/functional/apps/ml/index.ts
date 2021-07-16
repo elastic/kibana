@@ -12,8 +12,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const ml = getService('ml');
 
   describe('machine learning', function () {
-    // eslint-disable-next-line ban/ban
-    describe.only('', function () {
+    describe('', function () {
       this.tags('ciGroup3');
 
       before(async () => {
