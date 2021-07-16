@@ -1,0 +1,26 @@
+.reorderable-table {
+
+  &-no-items {
+    border-top: $euiBorderThin;
+    background-color: $euiColorEmptyShade;
+  }
+
+  &-row {
+    border-top: $euiBorderThin;
+    background-color: $euiColorEmptyShade;
+
+    > .euiFlexGroup--directionRow.euiFlexGroup--gutterLarge {
+      margin: 0;
+    }
+  }
+
+  &-header {
+    > .euiFlexGroup--directionRow.euiFlexGroup--gutterLarge {
+      margin: -12px 0;
+    }
+  }
+
+  .euiDraggable .euiDraggable__item.euiDraggable__item--isDisabled {
+    cursor: unset;
+  }
+}

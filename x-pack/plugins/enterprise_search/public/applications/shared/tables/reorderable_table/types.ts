@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-// empty react component named ReorderableTable
-import React from 'react';
-
-export const ReorderableTable: React.FC = () => {
-  return <div>ReorderableTable</div>;
-};
+export interface Column<Item> {
+  alignItems?: string;
+  flexBasis?: string;
+  flexGrow?: number;
+  name: string;
+  render: (item: Item) => React.ReactNode;
+}

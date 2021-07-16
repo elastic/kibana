@@ -22,8 +22,8 @@ import {
 } from '@elastic/eui';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { ReorderableTable } from '../../../shared/reorderable_table';
 import { Schema, SchemaType } from '../../../shared/schema/types';
+import { ReorderableTable } from '../../../shared/tables/reorderable_table';
 import { Result } from '../result';
 
 export const Library: React.FC = () => {
@@ -250,6 +250,19 @@ export const Library: React.FC = () => {
           </EuiDragDropContext>
           <EuiSpacer />
 
+          <EuiTitle size="m">
+            <h2>ReorderableTable</h2>
+          </EuiTitle>
+          <EuiSpacer />
+
+          <ReorderableTable
+            items={[{ id: 1 }, { id: 2 }, { id: 3 }]}
+            columns={[
+              { name: 'ID', render: (item) => <div>{item.id}</div> },
+              { name: 'Whatever', render: (item) => <div>Whatever</div> },
+            ]}
+          />
+
           <EuiSpacer />
           <EuiTitle size="s">
             <h3>With field value type highlights</h3>
@@ -257,13 +270,6 @@ export const Library: React.FC = () => {
           <EuiSpacer />
           <Result {...props} schemaForTypeHighlights={schema} />
           <EuiSpacer />
-
-          <EuiTitle size="m">
-            <h2>ReorderableTable</h2>
-          </EuiTitle>
-          <EuiSpacer />
-
-          <ReorderableTable />
         </EuiPageContentBody>
       </EuiPageContent>
     </>
