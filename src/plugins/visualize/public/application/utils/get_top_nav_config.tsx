@@ -160,7 +160,7 @@ export const getTopNavConfig = (
               state: {
                 type: VISUALIZE_EMBEDDABLE_TYPE,
                 input: { savedObjectId: id },
-                embeddableId,
+                embeddableId: savedVis.copyOnSave ? undefined : embeddableId,
                 searchSessionId: data.search.session.getSessionId(),
               },
               path,
