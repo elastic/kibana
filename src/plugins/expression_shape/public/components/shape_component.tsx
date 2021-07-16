@@ -33,9 +33,7 @@ function ShapeComponent({
   const shapeLoader = getShape(shapeType);
   const { error, loading, data } = useLoad<{ default: ShapeType }>(shapeLoader);
 
-  if (error) {
-    throw new Error(error.message);
-  }
+  if (error) throw new Error(error.message);
 
   const parentNodeDimensions = useResizeObserver(parentNode);
   const [dimensions, setDimensions] = useState<Dimensions>({
@@ -51,10 +49,7 @@ function ShapeComponent({
     onLoaded();
   }, [parentNode, parentNodeDimensions, onLoaded]);
 
-  if (loading) return <EuiLoadingSpinner />;
-  if (!data) {
-    throw new Error('Shape not found');
-  }
+  if (loading || !data) return <EuiLoadingSpinner />;
 
   const Shape = data?.default;
   const strokeWidth = Math.max(borderWidth, 0);
