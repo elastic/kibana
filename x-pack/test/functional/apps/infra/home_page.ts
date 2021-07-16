@@ -57,8 +57,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Saved Views', () => {
-      before(() => esArchiver.load('infra/metrics_and_logs'));
-      after(() => esArchiver.unload('infra/metrics_and_logs'));
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
 
       describe('Inverntory Test save functionality', () => {
         it('should have save and load controls', async () => {
