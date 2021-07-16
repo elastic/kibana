@@ -56,6 +56,7 @@ const RightSideLink = styled(EuiLink)`
 interface ThreatIntelPanelViewProps {
   buttonHref?: string;
   isDashboardPluginDisabled?: boolean;
+  isInspectEnabled?: boolean;
   listItems: CtiListItem[];
   splitPanel?: JSX.Element;
   totalEventCount: number;
@@ -78,6 +79,7 @@ const panelTitle = (
 export const ThreatIntelPanelView: React.FC<ThreatIntelPanelViewProps> = ({
   buttonHref = '',
   isDashboardPluginDisabled,
+  isInspectEnabled = true,
   listItems,
   splitPanel,
   totalEventCount,
@@ -134,7 +136,11 @@ export const ThreatIntelPanelView: React.FC<ThreatIntelPanelViewProps> = ({
         <EuiFlexItem grow={1}>
           <InspectButtonContainer>
             <EuiPanel hasBorder>
-              <HeaderSection id={CTIEventCountQueryId} subtitle={subtitle} title={panelTitle}>
+              <HeaderSection
+                id={isInspectEnabled ? CTIEventCountQueryId : undefined}
+                subtitle={subtitle}
+                title={panelTitle}
+              >
                 <>{button}</>
               </HeaderSection>
               {splitPanel}
