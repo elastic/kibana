@@ -63,6 +63,7 @@ const getPdfV2JobParams = (opts: JobParamsProviderOptions) => (): JobParamsPDFV2
   const locatorParams = opts.sharingData.locatorParams as LocatorParams;
   return {
     ...jobParamsProvider(opts),
+    forceNow: new Date().toISOString(),
     locatorParams: [locatorParams], // multi locator for PDF
   };
 };
@@ -87,7 +88,8 @@ const getPngJobParamsV2 = (opts: JobParamsProviderOptions) => (): JobParamsPNGV2
   const locatorParams = opts.sharingData.locatorParams as LocatorParams;
   return {
     ...jobParamsProvider(opts),
-    locatorParams: [locatorParams],
+    forceNow: new Date().toISOString(),
+    locatorParams,
   };
 };
 

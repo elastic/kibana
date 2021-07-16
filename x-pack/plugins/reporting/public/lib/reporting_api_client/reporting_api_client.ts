@@ -121,7 +121,7 @@ export class ReportingAPIClient implements IReportingAPI {
     return new Job(report);
   }
 
-  public async getLocatorParams(jobId: string) {
+  public async getLocatorParams(jobId: string): Promise<ReportApiJSON['payload']['locatorParams']> {
     return await this.http.get(`${API_LIST_URL}/locator_params/${jobId}`, {
       asSystemRequest: true,
     });

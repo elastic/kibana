@@ -181,7 +181,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
   // return some info about the job
   router.get(
     {
-      path: `${MAIN_ENTRY}/payload/{docId}`,
+      path: `${MAIN_ENTRY}/info/{docId}`,
       validate: {
         params: schema.object({
           docId: schema.string({ minLength: 2 }),

@@ -34,11 +34,11 @@ export const runTaskFnFactory: RunTaskFnFactory<
       map((decryptedHeaders) => omitBlockedHeaders(decryptedHeaders)),
       map((filteredHeaders) => getConditionalHeaders(config, filteredHeaders)),
       mergeMap((conditionalHeaders) => {
-        const { locatorParams } = job;
-        const relativeUrls = locatorParams.map((_, idx) =>
-          getRedirectAppPathHome({ reportSavedObjectId: jobId, locatorOffset: String(idx) })
-        );
-        const urls = getFullUrls(config, relativeUrls);
+        const relativeUrl = getRedirectAppPathHome({
+          reportSavedObjectId: jobId,
+          locatorOffset: '0', // We only ever have one locator for PNG
+        });
+        const urls = getFullUrls(config, [relativeUrl]);
 
         if (apmGetAssets) apmGetAssets.end();
 

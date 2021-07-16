@@ -13,14 +13,20 @@ import { BaseParams, BasePayload } from '../../types';
 interface BaseParamsPNGV2<P extends SerializableState = SerializableState> {
   layout: LayoutParams;
   forceNow: string;
-  /**
-   * This value is used to re-create the same visual state as when the report was requested as well as navigate to the correct page.
-   */
-  locatorParams: Array<LocatorParams<P>>;
 }
 
 // Job params: structure of incoming user request data
-export type JobParamsPNGV2 = BaseParamsPNGV2 & BaseParams;
+export interface JobParamsPNGV2 extends BaseParamsPNGV2, BaseParams {
+  /**
+   * This value is used to re-create the same visual state as when the report was requested as well as navigate to the correct page.
+   */
+  locatorParams: LocatorParams<P>;
+}
 
 // Job payload: structure of stored job data provided by create_job
-export type TaskPayloadPNGV2 = BaseParamsPNGV2 & BasePayload;
+export interface TaskPayloadPNGV2 extends BaseParamsPNGV2, BasePayload {
+  /**
+   * Even though we only ever handle one locator for a PNG, we store it as an array for consistency with how PDFs are stored
+   */
+  locatorParams: Array<LocatorParams<P>>;
+}

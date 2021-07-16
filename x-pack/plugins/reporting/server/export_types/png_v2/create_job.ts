@@ -27,7 +27,7 @@ export const createJobFnFactory: CreateJobFnFactory<
       spaceId: reporting.getSpaceId(req, logger),
       objectType,
       title,
-      locatorParams,
+      locatorParams: [locatorParams],
       browserTimezone,
       layout,
       forceNow: new Date().toISOString(),
