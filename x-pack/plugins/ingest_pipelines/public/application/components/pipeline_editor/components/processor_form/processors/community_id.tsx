@@ -40,7 +40,7 @@ const seedValidator = {
     than: SEED_MIN_VALUE,
     allowEquality: true,
     message: i18n.translate('xpack.ingestPipelines.pipelineEditor.communityId.seedMinNumberError', {
-      defaultMessage: `This number must be equals or greater than {minValue}.`,
+      defaultMessage: `This number must be equal or greater than {minValue}.`,
       values: { minValue: SEED_MIN_VALUE },
     }),
   }),
