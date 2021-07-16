@@ -54,13 +54,13 @@ export const ACTIVITY_LOG = {
       isolatedAction: i18n.translate(
         'xpack.securitySolution.endpointDetails.activityLog.logEntry.action.isolated',
         {
-          defaultMessage: 'isolated host',
+          defaultMessage: 'isolate host submitted',
         }
       ),
       unisolatedAction: i18n.translate(
         'xpack.securitySolution.endpointDetails.activityLog.logEntry.action.unisolated',
         {
-          defaultMessage: 'released host',
+          defaultMessage: 'release host submitted',
         }
       ),
     },
@@ -68,25 +68,25 @@ export const ACTIVITY_LOG = {
       isolationSuccessful: i18n.translate(
         'xpack.securitySolution.endpointDetails.activityLog.logEntry.response.isolationSuccessful',
         {
-          defaultMessage: 'host isolation successful',
+          defaultMessage: 'host isolation acknowledged',
         }
       ),
       isolationFailed: i18n.translate(
         'xpack.securitySolution.endpointDetails.activityLog.logEntry.response.isolationFailed',
         {
-          defaultMessage: 'host isolation failed',
+          defaultMessage: 'host isolation acknowledged with errors',
         }
       ),
       unisolationSuccessful: i18n.translate(
         'xpack.securitySolution.endpointDetails.activityLog.logEntry.response.unisolationSuccessful',
         {
-          defaultMessage: 'host release successful',
+          defaultMessage: 'host release acknowledged',
         }
       ),
       unisolationFailed: i18n.translate(
         'xpack.securitySolution.endpointDetails.activityLog.logEntry.response.unisolationFailed',
         {
-          defaultMessage: 'host release failed',
+          defaultMessage: 'host release acknowledged with errors',
         }
       ),
     },
