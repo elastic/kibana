@@ -131,7 +131,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     FieldsComponent: CommunityId,
     docLinkPath: '/community-id-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.communityId', {
-      defaultMessage: 'Community id',
+      defaultMessage: 'Community ID',
     }),
     typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.communityId', {
       defaultMessage: 'Computes the Community ID for network flow data.',
