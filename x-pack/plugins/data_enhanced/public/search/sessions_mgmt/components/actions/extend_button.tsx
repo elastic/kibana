@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useState } from 'react';
 import { Duration } from 'moment';
 import moment from 'moment';
-import { CoreStart, OverlayRef } from 'kibana/public';
+import { CoreStart } from 'kibana/public';
 import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { TableText } from '../';
