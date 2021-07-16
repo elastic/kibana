@@ -39,7 +39,7 @@ export const useCreateSavedQuery = ({ withRedirect }: UseCreateSavedQueryProps) 
 
       const conflictingEntries = await savedObjects.client.find({
         type: savedQuerySavedObjectType,
-      // @ts-expect-error update types
+        // @ts-expect-error update types
         search: payload.id,
         searchFields: ['id'],
       });
