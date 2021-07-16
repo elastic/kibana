@@ -11,15 +11,17 @@ import React, { useCallback, useMemo, useRef } from 'react';
 import styled from 'styled-components';
 import {
   arrayIndexToAriaIndex,
-  BrowserFields,
   DATA_COLINDEX_ATTRIBUTE,
   DATA_ROWINDEX_ATTRIBUTE,
   onKeyDownFocusHandler,
-  OnUpdateColumns,
 } from '../../../../../common';
+// eslint-disable-next-line no-duplicate-imports
+import type { BrowserFields, OnUpdateColumns } from '../../../../../common';
 
 import { CategoryTitle } from './category_title';
-import { FieldItem, getFieldColumns } from './field_items';
+import { getFieldColumns } from './field_items';
+// eslint-disable-next-line no-duplicate-imports
+import type { FieldItem } from './field_items';
 import { CATEGORY_TABLE_CLASS_NAME, TABLE_HEIGHT } from './helpers';
 
 import * as i18n from './translations';

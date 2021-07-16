@@ -10,11 +10,12 @@ import { noop } from 'lodash/fp';
 import React, { useCallback, useRef } from 'react';
 import styled from 'styled-components';
 import {
-  BrowserFields,
   DATA_COLINDEX_ATTRIBUTE,
   DATA_ROWINDEX_ATTRIBUTE,
   onKeyDownFocusHandler,
 } from '../../../../../common';
+// eslint-disable-next-line no-duplicate-imports
+import type { BrowserFields } from '../../../../../common';
 import { getCategoryColumns } from './category_columns';
 import { CATEGORIES_PANE_CLASS_NAME, TABLE_HEIGHT } from './helpers';
 

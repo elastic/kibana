@@ -254,9 +254,12 @@ export const defaultTimelineToTimelineModel = (
   timelineType?: TimelineType
 ): TimelineModel => {
   const isTemplate = timeline.timelineType === TimelineType.template;
+  const columns =
+    timeline.columns != null ? timeline.columns.map(setTimelineColumn) : defaultHeaders;
   const timelineEntries = {
     ...timeline,
-    columns: timeline.columns != null ? timeline.columns.map(setTimelineColumn) : defaultHeaders,
+    columns,
+    defaultColumns: columns,
     dateRange:
       timeline.status === TimelineStatus.immutable &&
       timeline.timelineType === TimelineType.template

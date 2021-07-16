@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiScreenReaderOnly, EuiTitle } from '@elast
 import React from 'react';
 
 import { CountBadge, getFieldBrowserCategoryTitleClassName, getFieldCount } from './helpers';
-import { BrowserFields, OnUpdateColumns } from '../../../../../common';
+import type { BrowserFields, OnUpdateColumns } from '../../../../../common';
 
 import { ViewAllButton } from './category_columns';
 import * as i18n from './translations';

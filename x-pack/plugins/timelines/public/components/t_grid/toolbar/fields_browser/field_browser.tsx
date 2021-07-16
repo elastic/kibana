@@ -19,13 +19,9 @@ import { noop } from 'lodash/fp';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
-import {
-  BrowserFields,
-  ColumnHeaderOptions,
-  isEscape,
-  isTab,
-  stopPropagationAndPreventDefault,
-} from '../../../../../common';
+import type { BrowserFields, ColumnHeaderOptions } from '../../../../../common';
+// eslint-disable-next-line no-duplicate-imports
+import { isEscape, isTab, stopPropagationAndPreventDefault } from '../../../../../common';
 import { CategoriesPane } from './categories_pane';
 import { FieldsPane } from './fields_pane';
 import { Header } from './header';
@@ -38,7 +34,7 @@ import {
   PANES_FLEX_GROUP_WIDTH,
   scrollCategoriesPane,
 } from './helpers';
-import { FieldBrowserProps, OnHideFieldBrowser } from './types';
+import type { FieldBrowserProps, OnHideFieldBrowser } from './types';
 import { tGridActions } from '../../../../store/t_grid';
 
 import * as i18n from './translations';

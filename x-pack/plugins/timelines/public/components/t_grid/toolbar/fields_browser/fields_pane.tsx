@@ -11,12 +11,12 @@ import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
 import { Category } from './category';
-import { FieldBrowserProps } from './types';
+import type { FieldBrowserProps } from './types';
 import { getFieldItems } from './field_items';
 import { FIELDS_PANE_WIDTH, TABLE_HEIGHT } from './helpers';
 
 import * as i18n from './translations';
-import { BrowserFields, ColumnHeaderOptions, OnUpdateColumns } from '../../../../../common';
+import type { BrowserFields, ColumnHeaderOptions, OnUpdateColumns } from '../../../../../common';
 import { tGridActions } from '../../../../store/t_grid';
 
 const NoFieldsPanel = styled.div`

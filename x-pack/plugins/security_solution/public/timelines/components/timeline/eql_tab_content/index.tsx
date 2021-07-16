@@ -201,6 +201,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     dispatch(
       timelineActions.initializeTGridSettings({
         id: timelineId,
+        defaultColumns: defaultHeaders,
       })
     );
   }, [dispatch, timelineId]);

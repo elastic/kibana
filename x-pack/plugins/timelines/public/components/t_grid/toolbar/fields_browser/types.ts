@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { BrowserFields } from '../../../../../common/search_strategy/index_fields';
-import { ColumnHeaderOptions } from '../../../../../common/types/timeline/columns';
+import type { BrowserFields } from '../../../../../common/search_strategy/index_fields';
+import type { ColumnHeaderOptions } from '../../../../../common/types/timeline/columns';
 
 export type OnFieldSelected = (fieldId: string) => void;
 export type OnHideFieldBrowser = () => void;
