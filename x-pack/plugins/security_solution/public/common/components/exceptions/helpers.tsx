@@ -326,7 +326,7 @@ export const getCodeSignatureValue = (
     return codeSignature.map((signature) => {
       return {
         subjectName: signature.subject_name ?? '',
-        trusted: signature.trusted.toString() ?? '',
+        trusted: signature?.trusted.toString() ?? '',
       };
     });
   } else {
