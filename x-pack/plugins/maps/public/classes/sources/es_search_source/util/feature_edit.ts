@@ -18,7 +18,7 @@ export const addFeatureToIndex = async (
   indexName: string,
   geometry: Geometry | Position[],
   path: string,
-  applyDefaultFields: boolean
+  applyDefaultFields: boolean = false
 ) => {
   const data = set({}, path, geometry);
   return await getHttp().fetch({
