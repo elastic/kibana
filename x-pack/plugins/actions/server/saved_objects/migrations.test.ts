@@ -15,121 +15,185 @@ import { migrationMocks } from 'src/core/server/mocks';
 const context = migrationMocks.createContext();
 const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
 
-describe('7.10.0', () => {
+describe('successful migrations', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    encryptedSavedObjectsSetup.createMigration.mockImplementation(
-      (shouldMigrateWhenPredicate, migration) => migration
-    );
+    encryptedSavedObjectsSetup.createMigration.mockImplementation((_, migration) => migration);
   });
 
-  test('add hasAuth config property for .email actions', () => {
-    const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
-    const action = getMockDataForEmail({});
-    const migratedAction = migration710(action, context);
-    expect(migratedAction.attributes.config).toEqual({
-      hasAuth: true,
-    });
-    expect(migratedAction).toEqual({
-      ...action,
-      attributes: {
-        ...action.attributes,
-        config: {
-          hasAuth: true,
+  describe('7.10.0', () => {
+    test('add hasAuth config property for .email actions', () => {
+      const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
+      const action = getMockDataForEmail({});
+      const migratedAction = migration710(action, context);
+      expect(migratedAction.attributes.config).toEqual({
+        hasAuth: true,
+      });
+      expect(migratedAction).toEqual({
+        ...action,
+        attributes: {
+          ...action.attributes,
+          config: {
+            hasAuth: true,
+          },
         },
-      },
+      });
+    });
+
+    test('rename cases configuration object', () => {
+      const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
+      const action = getCasesMockData({});
+      const migratedAction = migration710(action, context);
+      expect(migratedAction.attributes.config).toEqual({
+        incidentConfiguration: { mapping: [] },
+      });
+      expect(migratedAction).toEqual({
+        ...action,
+        attributes: {
+          ...action.attributes,
+          config: {
+            incidentConfiguration: { mapping: [] },
+          },
+        },
+      });
     });
   });
 
-  test('rename cases configuration object', () => {
-    const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
-    const action = getCasesMockData({});
-    const migratedAction = migration710(action, context);
-    expect(migratedAction.attributes.config).toEqual({
-      incidentConfiguration: { mapping: [] },
-    });
-    expect(migratedAction).toEqual({
-      ...action,
-      attributes: {
-        ...action.attributes,
-        config: {
-          incidentConfiguration: { mapping: [] },
+  describe('7.11.0', () => {
+    test('add hasAuth = true for .webhook actions with user and password', () => {
+      const migration711 = getMigrations(encryptedSavedObjectsSetup)['7.11.0'];
+      const action = getMockDataForWebhook({}, true);
+      expect(migration711(action, context)).toMatchObject({
+        ...action,
+        attributes: {
+          ...action.attributes,
+          config: {
+            hasAuth: true,
+          },
         },
-      },
+      });
+    });
+
+    test('add hasAuth = false for .webhook actions without user and password', () => {
+      const migration711 = getMigrations(encryptedSavedObjectsSetup)['7.11.0'];
+      const action = getMockDataForWebhook({}, false);
+      expect(migration711(action, context)).toMatchObject({
+        ...action,
+        attributes: {
+          ...action.attributes,
+          config: {
+            hasAuth: false,
+          },
+        },
+      });
+    });
+    test('remove cases mapping object', () => {
+      const migration711 = getMigrations(encryptedSavedObjectsSetup)['7.11.0'];
+      const action = getMockData({
+        config: { incidentConfiguration: { mapping: [] }, isCaseOwned: true, another: 'value' },
+      });
+      expect(migration711(action, context)).toEqual({
+        ...action,
+        attributes: {
+          ...action.attributes,
+          config: {
+            another: 'value',
+          },
+        },
+      });
+    });
+  });
+
+  describe('7.14.0', () => {
+    test('add isMissingSecrets property for actions', () => {
+      const migration714 = getMigrations(encryptedSavedObjectsSetup)['7.14.0'];
+      const action = getMockData({ isMissingSecrets: undefined });
+      const migratedAction = migration714(action, context);
+      expect(migratedAction).toEqual({
+        ...action,
+        attributes: {
+          ...action.attributes,
+          isMissingSecrets: false,
+        },
+      });
     });
   });
 });
 
-describe('7.11.0', () => {
+describe('handles errors during migrations', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    encryptedSavedObjectsSetup.createMigration.mockImplementation(
-      (shouldMigrateWhenPredicate, migration) => migration
-    );
-  });
-
-  test('add hasAuth = true for .webhook actions with user and password', () => {
-    const migration711 = getMigrations(encryptedSavedObjectsSetup)['7.11.0'];
-    const action = getMockDataForWebhook({}, true);
-    expect(migration711(action, context)).toMatchObject({
-      ...action,
-      attributes: {
-        ...action.attributes,
-        config: {
-          hasAuth: true,
-        },
-      },
+    encryptedSavedObjectsSetup.createMigration.mockImplementation(() => () => {
+      throw new Error(`Can't migrate!`);
     });
   });
 
-  test('add hasAuth = false for .webhook actions without user and password', () => {
-    const migration711 = getMigrations(encryptedSavedObjectsSetup)['7.11.0'];
-    const action = getMockDataForWebhook({}, false);
-    expect(migration711(action, context)).toMatchObject({
-      ...action,
-      attributes: {
-        ...action.attributes,
-        config: {
-          hasAuth: false,
-        },
-      },
+  describe('7.10.0 throws if migration fails', () => {
+    test('should show the proper exception', () => {
+      const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
+      const action = getMockDataForEmail({});
+      expect(() => {
+        migration710(action, context);
+      }).toThrowError(`Can't migrate!`);
+      expect(context.log.error).toHaveBeenCalledWith(
+        `encryptedSavedObject 7.10.0 migration failed for action ${action.id} with error: Can't migrate!`,
+        {
+          migrations: {
+            actionDocument: {
+              ...action,
+              attributes: {
+                ...action.attributes,
+              },
+            },
+          },
+        }
+      );
     });
-  });
-  test('remove cases mapping object', () => {
-    const migration711 = getMigrations(encryptedSavedObjectsSetup)['7.11.0'];
-    const action = getMockData({
-      config: { incidentConfiguration: { mapping: [] }, isCaseOwned: true, another: 'value' },
-    });
-    expect(migration711(action, context)).toEqual({
-      ...action,
-      attributes: {
-        ...action.attributes,
-        config: {
-          another: 'value',
-        },
-      },
-    });
-  });
-});
-
-describe('7.14.0', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-    encryptedSavedObjectsSetup.createMigration.mockImplementation(
-      (shouldMigrateWhenPredicate, migration) => migration
-    );
   });
 
-  test('add isMissingSecrets property for actions', () => {
-    const migration714 = getMigrations(encryptedSavedObjectsSetup)['7.14.0'];
-    const action = getMockData({ isMissingSecrets: undefined });
-    const migratedAction = migration714(action, context);
-    expect(migratedAction).toEqual({
-      ...action,
-      attributes: {
-        ...action.attributes,
-        isMissingSecrets: false,
-      },
+  describe('7.11.0 throws if migration fails', () => {
+    test('should show the proper exception', () => {
+      const migration711 = getMigrations(encryptedSavedObjectsSetup)['7.11.0'];
+      const action = getMockDataForEmail({});
+      expect(() => {
+        migration711(action, context);
+      }).toThrowError(`Can't migrate!`);
+      expect(context.log.error).toHaveBeenCalledWith(
+        `encryptedSavedObject 7.11.0 migration failed for action ${action.id} with error: Can't migrate!`,
+        {
+          migrations: {
+            actionDocument: {
+              ...action,
+              attributes: {
+                ...action.attributes,
+              },
+            },
+          },
+        }
+      );
+    });
+  });
+
+  describe('7.14.0 throws if migration fails', () => {
+    test('should show the proper exception', () => {
+      const migration714 = getMigrations(encryptedSavedObjectsSetup)['7.14.0'];
+      const action = getMockDataForEmail({});
+      expect(() => {
+        migration714(action, context);
+      }).toThrowError(`Can't migrate!`);
+      expect(context.log.error).toHaveBeenCalledWith(
+        `encryptedSavedObject 7.14.0 migration failed for action ${action.id} with error: Can't migrate!`,
+        {
+          migrations: {
+            actionDocument: {
+              ...action,
+              attributes: {
+                ...action.attributes,
+              },
+            },
+          },
+        }
+      );
     });
   });
 });

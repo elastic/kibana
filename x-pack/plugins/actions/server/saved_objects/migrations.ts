@@ -23,17 +23,35 @@ type ActionMigration = (
   doc: SavedObjectUnsanitizedDoc<RawAction>
 ) => SavedObjectUnsanitizedDoc<RawAction>;
 
+type IsMigrationNeededPredicate<InputAttributes> = (
+  doc: SavedObjectUnsanitizedDoc<InputAttributes>
+) => doc is SavedObjectUnsanitizedDoc<InputAttributes>;
+
+function createEsoMigration(
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
+  isMigrationNeededPredicate: IsMigrationNeededPredicate<RawAction>,
+  migrationFunc: ActionMigration
+) {
+  return encryptedSavedObjects.createMigration<RawAction, RawAction>(
+    isMigrationNeededPredicate,
+    migrationFunc,
+    true // shouldMigrateIfDecryptionFails flag that applies the migration to undecrypted document if decryption fails
+  );
+}
+
 export function getMigrations(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ): SavedObjectMigrationMap {
-  const migrationActionsTen = encryptedSavedObjects.createMigration<RawAction, RawAction>(
+  const migrationActionsTen = createEsoMigration(
+    encryptedSavedObjects,
     (doc): doc is SavedObjectUnsanitizedDoc<RawAction> =>
       doc.attributes.config?.hasOwnProperty('casesConfiguration') ||
       doc.attributes.actionTypeId === '.email',
     pipeMigrations(renameCasesConfigurationObject, addHasAuthConfigurationObject)
   );
 
-  const migrationActionsEleven = encryptedSavedObjects.createMigration<RawAction, RawAction>(
+  const migrationActionsEleven = createEsoMigration(
+    encryptedSavedObjects,
     (doc): doc is SavedObjectUnsanitizedDoc<RawAction> =>
       doc.attributes.config?.hasOwnProperty('isCaseOwned') ||
       doc.attributes.config?.hasOwnProperty('incidentConfiguration') ||
@@ -41,7 +59,8 @@ export function getMigrations(
     pipeMigrations(removeCasesFieldMappings, addHasAuthConfigurationObject)
   );
 
-  const migrationActionsFourteen = encryptedSavedObjects.createMigration<RawAction, RawAction>(
+  const migrationActionsFourteen = createEsoMigration(
+    encryptedSavedObjects,
     (doc): doc is SavedObjectUnsanitizedDoc<RawAction> => true,
     pipeMigrations(addisMissingSecretsField)
   );
@@ -69,8 +88,8 @@ function executeMigrationWithErrorHandling(
           },
         }
       );
+      throw ex;
     }
-    return doc;
   };
 }
 

@@ -29,6 +29,22 @@ type AlertMigration = (
   doc: SavedObjectUnsanitizedDoc<RawAlert>
 ) => SavedObjectUnsanitizedDoc<RawAlert>;
 
+type IsMigrationNeededPredicate<InputAttributes> = (
+  doc: SavedObjectUnsanitizedDoc<InputAttributes>
+) => doc is SavedObjectUnsanitizedDoc<InputAttributes>;
+
+function createEsoMigration(
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
+  isMigrationNeededPredicate: IsMigrationNeededPredicate<RawAlert>,
+  migrationFunc: AlertMigration
+) {
+  return encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
+    isMigrationNeededPredicate,
+    migrationFunc,
+    true // shouldMigrateIfDecryptionFails flag that applies the migration to undecrypted document if decryption fails
+  );
+}
+
 const SUPPORT_INCIDENTS_ACTION_TYPES = ['.servicenow', '.jira', '.resilient'];
 
 export const isAnyActionSupportIncidents = (doc: SavedObjectUnsanitizedDoc<RawAlert>): boolean =>
@@ -42,11 +58,10 @@ export const isSecuritySolutionRule = (doc: SavedObjectUnsanitizedDoc<RawAlert>)
 export function getMigrations(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ): SavedObjectMigrationMap {
-  const migrationWhenRBACWasIntroduced = encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
-    function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<RawAlert> {
-      // migrate all documents in 7.10 in order to add the "meta" RBAC field
-      return true;
-    },
+  const migrationWhenRBACWasIntroduced = createEsoMigration(
+    encryptedSavedObjects,
+    // migrate all documents in 7.10 in order to add the "meta" RBAC field
+    (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => true,
     pipeMigrations(
       markAsLegacyAndChangeConsumer,
       setAlertIdAsDefaultDedupkeyOnPagerDutyActions,
@@ -54,21 +69,21 @@ export function getMigrations(
     )
   );
 
-  const migrationAlertUpdatedAtAndNotifyWhen = encryptedSavedObjects.createMigration<
-    RawAlert,
-    RawAlert
-  >(
+  const migrationAlertUpdatedAtAndNotifyWhen = createEsoMigration(
+    encryptedSavedObjects,
     // migrate all documents in 7.11 in order to add the "updatedAt" and "notifyWhen" fields
     (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => true,
     pipeMigrations(setAlertUpdatedAtDate, setNotifyWhen)
   );
 
-  const migrationActions7112 = encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
+  const migrationActions7112 = createEsoMigration(
+    encryptedSavedObjects,
     (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => isAnyActionSupportIncidents(doc),
     pipeMigrations(restructureConnectorsThatSupportIncident)
   );
 
-  const migrationSecurityRules713 = encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
+  const migrationSecurityRules713 = createEsoMigration(
+    encryptedSavedObjects,
     (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => isSecuritySolutionRule(doc),
     pipeMigrations(removeNullsFromSecurityRules)
   );
@@ -97,8 +112,8 @@ function executeMigrationWithErrorHandling(
           },
         }
       );
+      throw ex;
     }
-    return doc;
   };
 }
 
