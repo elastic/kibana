@@ -323,8 +323,7 @@ describe('Navigation Breadcrumbs', () => {
         },
         {
           text: 'Create',
-          href:
-            "securitySolution/rules/create?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
+          href: '',
         },
       ]);
     });
@@ -382,7 +381,7 @@ describe('Navigation Breadcrumbs', () => {
         },
         {
           text: 'Edit',
-          href: `securitySolution/rules/id/${mockDetailName}/edit?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))`,
+          href: '',
         },
       ]);
     });

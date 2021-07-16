@@ -23,7 +23,7 @@ import {
   EuiBetaBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useHistory, useParams } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { MlLatencyCorrelations } from './ml_latency_correlations';
 import { ErrorCorrelations } from './error_correlations';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
@@ -49,6 +49,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 
 const errorRateTab = {
   key: 'errorRate',
@@ -70,7 +71,7 @@ export function Correlations() {
   const license = useLicenseContext();
   const hasActivePlatinumLicense = isActivePlatinumLicense(license);
   const { urlParams } = useUrlParams();
-  const { serviceName } = useParams<{ serviceName: string }>();
+  const { serviceName } = useApmServiceContext();
 
   const history = useHistory();
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
