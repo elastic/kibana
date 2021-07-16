@@ -68,9 +68,11 @@ export const asyncSearchServiceProvider = (
   };
 
   const fetchCorrelations = async () => {
+    let params: SearchServiceFetchParams | undefined;
+
     try {
       const indices = await getApmIndices();
-      const params: SearchServiceFetchParams = {
+      params = {
         ...searchServiceParams,
         index: indices['apm_oss.transactionIndices'],
       };
@@ -183,7 +185,7 @@ export const asyncSearchServiceProvider = (
 
       async function* fetchTransactionDurationHistograms() {
         for (const item of shuffle(fieldValuePairs)) {
-          if (item === undefined || isCancelled) {
+          if (params === undefined || item === undefined || isCancelled) {
             isRunning = false;
             return;
           }
@@ -239,7 +241,7 @@ export const asyncSearchServiceProvider = (
             logMessage(
               `Failed to fetch correlation/kstest for '${item.field}/${item.value}'`
             );
-            if (params.index.includes(':')) {
+            if (params?.index.includes(':')) {
               ccsWarning = true;
             }
             yield undefined;
@@ -263,7 +265,7 @@ export const asyncSearchServiceProvider = (
       error = e;
     }
 
-    if (error !== undefined && params.index.includes(':')) {
+    if (error !== undefined && params?.index.includes(':')) {
       ccsWarning = true;
     }
 
