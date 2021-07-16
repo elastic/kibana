@@ -26,7 +26,7 @@ kibanaPipeline(timeoutMinutes: 180) {
     agents["agent-${agentNumber}"] = {
       kibanaPipeline.withTasks {
         task {
-          buildKibana(48)
+          kibanaPipeline.buildKibana(48)
           tasks.functionalOss()
           tasks.functionalXpack()
         }
