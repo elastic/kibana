@@ -83,6 +83,7 @@ export const PopoverActionsMenu = ({
           key: `action-${actionType}`,
           name: label,
           icon: iconType,
+          'data-test-subj': `sessionManagementPopoverAction-${actionType}`,
           onClick: async () => {
             closePopover();
             await onClick();
