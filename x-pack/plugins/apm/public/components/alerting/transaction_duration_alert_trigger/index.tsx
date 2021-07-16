@@ -12,10 +12,13 @@ import React from 'react';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { getDurationFormatter } from '../../../../common/utils/formatters';
-import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { getTransactionType } from '../../../context/apm_service/apm_service_context';
+import { useServiceAgentNameFetcher } from '../../../context/apm_service/use_service_agent_name_fetcher';
+import { useServiceTransactionTypesFetcher } from '../../../context/apm_service/use_service_transaction_types_fetcher';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
+import { useServiceName } from '../../../hooks/use_service_name';
 import {
   getMaxY,
   getResponseTimeTickFormatter,
@@ -74,11 +77,18 @@ export function TransactionDurationAlertTrigger(props: Props) {
 
   const { start, end, environment: environmentFromUrl } = urlParams;
 
-  const {
+  const serviceNameFromUrl = useServiceName();
+
+  const transactionTypes = useServiceTransactionTypesFetcher(
+    serviceNameFromUrl
+  );
+  const { agentName } = useServiceAgentNameFetcher(serviceNameFromUrl);
+
+  const transactionTypeFromUrl = getTransactionType({
+    transactionType: urlParams.transactionType,
     transactionTypes,
-    transactionType: transactionTypeFromContext,
-    serviceName: serviceNameFromContext,
-  } = useApmServiceContext();
+    agentName,
+  });
 
   const params = defaults(
     {
@@ -90,8 +100,8 @@ export function TransactionDurationAlertTrigger(props: Props) {
       threshold: 1500,
       windowSize: 5,
       windowUnit: 'm',
-      transactionType: transactionTypeFromContext,
-      serviceName: serviceNameFromContext,
+      transactionType: transactionTypeFromUrl,
+      serviceName: serviceNameFromUrl,
     }
   );
 
