@@ -32,14 +32,14 @@ export const FieldValueCell = React.memo(
     values,
   }: FieldValueCellProps) => {
     return (
-      <div className="eventFieldsTable__fieldValueCell">
+      <div>
         {values != null &&
           values.map((value, i) => {
             if (fieldFromBrowserField == null) {
               return <EuiText size="s">{value}</EuiText>;
             }
             return (
-              <div>
+              <div className="eventFieldsTable__fieldValue">
                 {data.field === MESSAGE_FIELD_NAME ? (
                   <OverflowField value={value} />
                 ) : (

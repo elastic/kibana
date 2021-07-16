@@ -94,7 +94,7 @@ const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
     padding: ${({ theme }) => theme.eui.euiSizeXS};
   }
 
-  .eventFieldsTable__valueCell {
+  .eventFieldsTable__fieldValue {
     display: inline-block;
     word-break: break-all;
     word-wrap: break-word;

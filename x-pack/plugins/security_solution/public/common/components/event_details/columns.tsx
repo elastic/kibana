@@ -120,6 +120,7 @@ export const getColumns = ({
   },
   {
     field: 'values',
+    className: 'eventFieldsTable__fieldValueCell',
     name: (
       <EuiText size="xs">
         <strong>{i18n.VALUE}</strong>
