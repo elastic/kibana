@@ -94,9 +94,10 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         fields: {
           [ALERT_EVALUATION_THRESHOLD]: threshold,
           [ALERT_EVALUATION_VALUE]: value,
-          ...inventoryMetricRuleDataRT.encode({
-            [inventoryMetricThresholdRuleDataSerializedParamsKey]: [params],
-          }),
+          // TEMP, serialized params need to be fixed
+          // ...inventoryMetricRuleDataRT.encode({
+          //   [inventoryMetricThresholdRuleDataSerializedParamsKey]: [params],
+          // }),
         },
       });
 
@@ -194,7 +195,9 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
             : nextState === AlertStates.WARNING
             ? WARNING_ACTIONS.id
             : FIRED_ACTIONS.id;
-        const alertInstance = services.alertInstanceFactory(`${item}`);
+        const threshold = 20; // TEMP
+        const value = 30; // TEMP
+        const alertInstance = alertInstanceFactory(`${item}`, threshold, value);
         alertInstance.scheduleActions(
           /**
            * TODO: We're lying to the compiler here as explicitly  calling `scheduleActions` on
