@@ -31,6 +31,7 @@ import {
   legendConfig,
   tickLabelsConfig,
   mergeTables,
+  datatableColumn,
 } from '../common/expressions';
 
 const expressions = [
@@ -44,6 +45,7 @@ const expressions = [
   layerConfig,
   legendConfig,
   tickLabelsConfig,
+  datatableColumn,
 ];
 
 export interface PluginSetupContract {
