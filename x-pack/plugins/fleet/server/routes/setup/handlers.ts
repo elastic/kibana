@@ -8,7 +8,7 @@
 import type { RequestHandler } from 'src/core/server';
 
 import { appContextService } from '../../services';
-import type { GetFleetStatusResponse, PostIngestSetupResponse } from '../../../common';
+import type { GetFleetStatusResponse, PostFleetSetupResponse } from '../../../common';
 import { setupIngestManager } from '../../services/setup';
 import { hasFleetServers } from '../../services/fleet_server';
 import { defaultIngestErrorHandler } from '../../errors';
@@ -47,7 +47,7 @@ export const fleetSetupHandler: RequestHandler = async (context, request, respon
     const soClient = context.core.savedObjects.client;
     const esClient = context.core.elasticsearch.client.asCurrentUser;
     const setupStatus = await setupIngestManager(soClient, esClient);
-    const body: PostIngestSetupResponse = {
+    const body: PostFleetSetupResponse = {
       ...setupStatus,
       nonFatalErrors: setupStatus.nonFatalErrors.map((e) => {
         // JSONify the error object so it can be displayed properly in the UI

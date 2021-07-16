@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export interface PostIngestSetupResponse {
+export interface PostFleetSetupResponse {
   isInitialized: boolean;
   nonFatalErrors: Array<{ name: string; message: string }>;
 }
