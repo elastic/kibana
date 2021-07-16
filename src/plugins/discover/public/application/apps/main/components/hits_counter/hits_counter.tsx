@@ -40,7 +40,7 @@ export function HitsCounter({ showResetButton, onResetQuery, savedSearchData$ }:
 
   const hits = data.result || 0;
   if (!hits && data.fetchStatus === FetchStatus.LOADING) {
-    return <EuiLoadingSpinner />;
+    return null;
   }
 
   const formattedHits = (

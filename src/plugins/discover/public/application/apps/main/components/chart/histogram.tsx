@@ -145,7 +145,7 @@ export function DiscoverHistogram({
     return (
       <div className="dscChart__loading">
         <EuiText size="xs" color="subdued">
-          <EuiLoadingChart mono />
+          <EuiLoadingChart mono size="l" />
           <EuiSpacer size="s" />
           <FormattedMessage id="discover.loadingChartResults" defaultMessage="Loading chart" />
         </EuiText>
