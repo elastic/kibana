@@ -98,7 +98,7 @@ export class MVTSingleLayerVectorSource
     });
   }
 
-  addFeature(geometry: Geometry | Position[]): Promise<void> {
+  addFeature(geometry: Geometry | Position[], addDefaultFields: boolean): Promise<void> {
     throw new Error('Does not implement addFeature');
   }
 

@@ -92,7 +92,7 @@ export interface IVectorLayer extends ILayer {
   supportsFeatureEditing(): boolean;
   isDrawingLayer(): boolean;
   getLeftJoinFields(): Promise<IField[]>;
-  addFeature(geometry: Geometry | Position[]): Promise<void>;
+  addFeature(geometry: Geometry | Position[], addDefaultFields: boolean): Promise<void>;
   deleteFeature(featureId: string): Promise<void>;
 }
 

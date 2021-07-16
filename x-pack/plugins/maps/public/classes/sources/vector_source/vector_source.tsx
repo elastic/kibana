@@ -70,7 +70,7 @@ export interface IVectorSource extends ISource {
   getTimesliceMaskFieldName(): Promise<string | null>;
   supportsFeatureEditing(): Promise<boolean>;
   isDrawingIndex(): Promise<boolean>;
-  addFeature(geometry: Geometry | Position[]): Promise<void>;
+  addFeature(geometry: Geometry | Position[], addDefaultFields: boolean): Promise<void>;
   deleteFeature(featureId: string): Promise<void>;
 }
 
@@ -164,7 +164,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     return null;
   }
 
-  async addFeature(geometry: Geometry | Position[]) {
+  async addFeature(geometry: Geometry | Position[], addDefaultFields: boolean) {
     throw new Error('Should implement VectorSource#addFeature');
   }
 
