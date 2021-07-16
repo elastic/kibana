@@ -11,11 +11,11 @@ import {
   CASE_CONFIGURE_SAVED_OBJECT,
   ConnectorTypes,
   ESCaseConnector,
-  ESCasesConfigureAttributes,
   SECURITY_SOLUTION_OWNER,
 } from '../../common';
 import { getNoneCaseConnector } from '../common';
-import { configurationConnectorReferenceName } from '../services';
+import { connectorIDReferenceName } from '../services';
+import { ESCasesConfigureAttributes } from '../services/configure';
 import { configureConnectorIdMigration } from './migrations';
 
 const createLegacyConfigSchema = (connector: ESCaseConnector) => ({
@@ -67,7 +67,7 @@ describe('migrations', () => {
         ) as SavedObjectSanitizedDoc<ESCasesConfigureAttributes>;
 
         expect(migratedConnector.references).toEqual([
-          { id: '123', type: ACTION_SAVED_OBJECT_TYPE, name: configurationConnectorReferenceName },
+          { id: '123', type: ACTION_SAVED_OBJECT_TYPE, name: connectorIDReferenceName },
         ]);
         expect(migratedConnector.attributes.connector).not.toHaveProperty('id');
       });

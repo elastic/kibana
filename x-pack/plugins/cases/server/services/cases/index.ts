@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import * as rt from 'io-ts';
+
 import pMap from 'p-map';
 import {
   KibanaRequest,
@@ -32,7 +34,6 @@ import {
   CommentAttributes,
   CommentType,
   ENABLE_CASE_CONNECTOR,
-  ESCaseAttributes,
   GetCaseIdsByAlertIdAggs,
   MAX_CONCURRENT_SEARCHES,
   MAX_DOCS_PER_PAGE,
@@ -41,6 +42,9 @@ import {
   SubCaseAttributes,
   SubCaseResponse,
   User,
+  CaseAttributes,
+  ESCaseConnectorNoID,
+  CaseExternalServiceBasicRt,
 } from '../../../common';
 import {
   defaultSortField,
@@ -54,6 +58,7 @@ import { ClientArgs } from '..';
 import { combineFilters } from '../../client/utils';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import { EnsureSOAuthCallback } from '../../authorization';
+import { transformCaseSavedObjectToExternalModel } from './model';
 
 interface GetCaseIdsByAlertIdArgs extends ClientArgs {
   alertId: string;
@@ -210,6 +215,17 @@ const transformNewSubCase = ({
     updated_by: null,
     owner,
   };
+};
+
+// TODO: add comments
+export type ExternalServicesWithoutConnectorID = Omit<
+  rt.TypeOf<typeof CaseExternalServiceBasicRt>,
+  'connector_id'
+>;
+
+export type ESCaseAttributes = Omit<CaseAttributes, 'connector' | 'external_service'> & {
+  connector: ESCaseConnectorNoID;
+  external_service: ExternalServicesWithoutConnectorID | null;
 };
 
 export class CasesService {
@@ -713,10 +729,14 @@ export class CasesService {
   public async getCase({
     unsecuredSavedObjectsClient,
     id: caseId,
-  }: GetCaseArgs): Promise<SavedObject<ESCaseAttributes>> {
+  }: GetCaseArgs): Promise<SavedObject<CaseAttributes>> {
     try {
       this.log.debug(`Attempting to GET case ${caseId}`);
-      return await unsecuredSavedObjectsClient.get<ESCaseAttributes>(CASE_SAVED_OBJECT, caseId);
+      const caseSavedObject = await unsecuredSavedObjectsClient.get<ESCaseAttributes>(
+        CASE_SAVED_OBJECT,
+        caseId
+      );
+      return transformCaseSavedObjectToExternalModel(caseSavedObject);
     } catch (error) {
       this.log.error(`Error on GET case ${caseId}: ${error}`);
       throw error;

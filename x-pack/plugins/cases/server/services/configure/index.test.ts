@@ -12,7 +12,6 @@ import {
   CASE_CONFIGURE_SAVED_OBJECT,
   ConnectorTypes,
   ESCaseConnector,
-  ESCasesConfigureAttributes,
   SECURITY_SOLUTION_OWNER,
 } from '../../../common';
 import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
@@ -22,11 +21,12 @@ import {
   SavedObjectsFindResult,
   SavedObjectsUpdateResponse,
 } from 'kibana/server';
-import { configurationConnectorReferenceName } from '..';
+import { connectorIDReferenceName } from '..';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import { loggerMock } from '@kbn/logging/target/mocks';
-import { CaseConfigureService } from '.';
+import { CaseConfigureService, ESCasesConfigureAttributes } from '.';
 import { getNoneCaseConnector } from '../../common';
+import { createESConnector, createJiraConnector } from '../test_utils';
 
 const basicConfigFields = {
   closure_type: 'close-by-pushing' as const,
@@ -64,7 +64,7 @@ const createUpdateConfigSO = (
       ? [
           {
             id: connector.id,
-            name: configurationConnectorReferenceName,
+            name: connectorIDReferenceName,
             type: ACTION_SAVED_OBJECT_TYPE,
           },
         ]
@@ -88,7 +88,7 @@ const createConfigSO = (connector?: ESCaseConnector): SavedObject<ESCasesConfigu
     ? [
         {
           id: connector.id,
-          name: configurationConnectorReferenceName,
+          name: connectorIDReferenceName,
           type: ACTION_SAVED_OBJECT_TYPE,
         },
       ]
@@ -132,35 +132,6 @@ const createSOFindResponse = (
   per_page: savedObjects.length,
   page: 1,
 });
-
-const createESConnector = (overrides?: Partial<ESCaseConnector>): ESCaseConnector => {
-  return {
-    id: '1',
-    name: ConnectorTypes.jira,
-    fields: [
-      { key: 'issueType', value: 'bug' },
-      { key: 'priority', value: 'high' },
-      { key: 'parent', value: '2' },
-    ],
-    type: ConnectorTypes.jira,
-    ...(overrides && { ...overrides }),
-  };
-};
-
-const createJiraConnector = (setFieldsToNull?: boolean): CaseConnector => {
-  return {
-    id: '1',
-    name: ConnectorTypes.jira,
-    type: ConnectorTypes.jira,
-    fields: setFieldsToNull
-      ? null
-      : {
-          issueType: 'bug',
-          priority: 'high',
-          parent: '2',
-        },
-  };
-};
 
 describe('CaseConfigureService', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
@@ -677,7 +648,7 @@ describe('CaseConfigureService', () => {
             references: [
               {
                 id: '1',
-                name: configurationConnectorReferenceName,
+                name: connectorIDReferenceName,
                 type: ACTION_SAVED_OBJECT_TYPE,
               },
             ],

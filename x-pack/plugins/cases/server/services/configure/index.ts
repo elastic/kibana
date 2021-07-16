@@ -14,19 +14,18 @@ import {
   SavedObjectsUpdateResponse,
 } from 'kibana/server';
 
-import { getNoneCaseConnector, SavedObjectFindOptionsKueryNode } from '../../common';
+import { SavedObjectFindOptionsKueryNode } from '../../common';
 import {
   CASE_CONFIGURE_SAVED_OBJECT,
-  ESCasesConfigureAttributes,
   CasesConfigureAttributes,
   CaseConnector,
-  ConnectorTypeFields,
-  ESCaseConnectorNoID,
   CasesConfigurePatch,
   ESConnectorFields,
+  ESCaseConnectorNoID,
 } from '../../../common';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
-import { configurationConnectorReferenceName } from '..';
+import { connectorIDReferenceName } from '..';
+import { transformStoredConnector, transformStoredConnectorOrUseDefault } from '../transform';
 
 interface ClientArgs {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
@@ -49,66 +48,17 @@ interface PatchCaseConfigureArgs extends ClientArgs {
   updatedAttributes: Partial<CasesConfigureAttributes>;
 }
 
-function transformOrUseNoneConnector(
-  connector?: ESCaseConnectorNoID,
-  connectorID?: string
-): CaseConnector {
-  return transformToExternalConnector(connector, connectorID) ?? getNoneCaseConnector();
-}
-
-function transformToExternalConnector(
-  connector?: ESCaseConnectorNoID,
-  connectorID?: string
-): CaseConnector | undefined {
-  if (!connector) {
-    return;
-  }
-
-  // if the connector is valid, but we can't find it's ID in the reference, then it must be malformed
-  // or it was a none connector which doesn't have a reference (a none connector doesn't point to any actual connector
-  // saved object)
-  if (!connectorID) {
-    return getNoneCaseConnector();
-  }
-
-  const connectorTypeField = {
-    type: connector.type,
-    fields:
-      connector.fields != null && connector.fields.length > 0
-        ? connector.fields.reduce(
-            (fields, { key, value }) => ({
-              ...fields,
-              [key]: value,
-            }),
-            {}
-          )
-        : null,
-  } as ConnectorTypeFields;
-
-  return {
-    id: connectorID,
-    name: connector.name,
-    ...connectorTypeField,
-  };
-}
-
-function findConnectorIDReference(
-  references?: SavedObjectReference[]
-): SavedObjectReference | undefined {
-  return references?.find(
-    (ref) =>
-      ref.type === ACTION_SAVED_OBJECT_TYPE && ref.name === configurationConnectorReferenceName
-  );
-}
-
 function transformUpdateToExternalModel(
   updatedConfiguration: SavedObjectsUpdateResponse<ESCasesConfigureAttributes>
 ): SavedObjectsUpdateResponse<CasesConfigurePatch> {
-  const connectorIDRef = findConnectorIDReference(updatedConfiguration.references);
-
   const { connector, ...restUpdatedAttributes } = updatedConfiguration.attributes ?? {};
 
-  const transformedConnector = transformToExternalConnector(connector, connectorIDRef?.id);
+  const transformedConnector = transformStoredConnector(
+    connector,
+    updatedConfiguration.references,
+    connectorIDReferenceName
+  );
+
   return {
     ...updatedConfiguration,
     attributes: {
@@ -122,17 +72,18 @@ function transformUpdateToExternalModel(
 function transformToExternalModel(
   configuration: SavedObject<ESCasesConfigureAttributes>
 ): SavedObject<CasesConfigureAttributes> {
-  const connectorIDRef = findConnectorIDReference(configuration.references);
+  const connector = transformStoredConnectorOrUseDefault(
+    // if the saved object had an error the attributes field will not exist
+    configuration.attributes?.connector,
+    configuration.references,
+    connectorIDReferenceName
+  );
 
   return {
     ...configuration,
     attributes: {
       ...configuration.attributes,
-      connector: transformOrUseNoneConnector(
-        // if the saved object had an error the attributes field will not exist
-        configuration.attributes?.connector,
-        connectorIDRef?.id
-      ),
+      connector,
     },
   };
 }
@@ -171,7 +122,7 @@ function buildReferences(id: string): SavedObjectReference[] | undefined {
     ? [
         {
           id,
-          name: configurationConnectorReferenceName,
+          name: connectorIDReferenceName,
           type: ACTION_SAVED_OBJECT_TYPE,
         },
       ]
@@ -227,6 +178,11 @@ function transformUpdateAttributesToESModel(
     references: buildReferences(connector.id),
   };
 }
+
+// TODO: add comment
+export type ESCasesConfigureAttributes = Omit<CasesConfigureAttributes, 'connector'> & {
+  connector: ESCaseConnectorNoID;
+};
 
 export class CaseConfigureService {
   constructor(private readonly log: Logger) {}

@@ -17,7 +17,7 @@ import {
   SECURITY_SOLUTION_OWNER,
 } from '../../common';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../actions/server';
-import { configurationConnectorReferenceName } from '../services';
+import { connectorIDReferenceName } from '../services';
 
 interface UnsanitizedCaseConnector {
   connector_id: string;
@@ -152,7 +152,7 @@ export const configureConnectorIdMigration = (
             id: connectorId,
             type: ACTION_SAVED_OBJECT_TYPE,
 
-            name: configurationConnectorReferenceName,
+            name: connectorIDReferenceName,
           },
         ]
       : [];

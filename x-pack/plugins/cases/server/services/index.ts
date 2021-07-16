@@ -18,4 +18,13 @@ export interface ClientArgs {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
 }
 
-export const configurationConnectorReferenceName = 'connectorID';
+/**
+ * The name of the saved object reference indicating the action connector ID. This is stored in the Saved Object reference
+ * field's name property.
+ */
+export const connectorIDReferenceName = 'connectorID';
+
+/**
+ * The name of the saved object reference indicating the action connector ID that was used to push a case.
+ */
+export const pushConnectorIDReferenceName = 'pushConnectorID';

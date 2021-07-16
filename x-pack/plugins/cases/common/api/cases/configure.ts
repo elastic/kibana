@@ -83,8 +83,4 @@ export type CasesConfigureAttributes = rt.TypeOf<typeof CaseConfigureAttributesR
 export type CasesConfigureResponse = rt.TypeOf<typeof CaseConfigureResponseRt>;
 export type CasesConfigurationsResponse = rt.TypeOf<typeof CaseConfigurationsResponseRt>;
 
-export type ESCasesConfigureAttributes = Omit<CasesConfigureAttributes, 'connector'> & {
-  connector: ESCaseConnectorNoID;
-};
-
 export type GetConfigureFindRequest = rt.TypeOf<typeof GetConfigureFindRequestRt>;

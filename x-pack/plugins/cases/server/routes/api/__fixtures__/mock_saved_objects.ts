@@ -8,16 +8,16 @@
 import { SavedObject } from 'kibana/server';
 import {
   AssociationType,
+  CaseAttributes,
   CaseStatuses,
   CaseType,
   CommentAttributes,
   CommentType,
   ConnectorTypes,
-  ESCaseAttributes,
   SECURITY_SOLUTION_OWNER,
 } from '../../../../common';
 
-export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
+export const mockCases: Array<SavedObject<CaseAttributes>> = [
   {
     type: 'cases',
     id: 'mock-id-1',
@@ -28,7 +28,7 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
         id: 'none',
         name: 'none',
         type: ConnectorTypes.none,
-        fields: [],
+        fields: null,
       },
       created_at: '2019-11-25T21:54:48.952Z',
       created_by: {
@@ -67,7 +67,7 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
         id: 'none',
         name: 'none',
         type: ConnectorTypes.none,
-        fields: [],
+        fields: null,
       },
       created_at: '2019-11-25T22:32:00.900Z',
       created_by: {
@@ -106,11 +106,7 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
         id: '123',
         name: 'My connector',
         type: ConnectorTypes.jira,
-        fields: [
-          { key: 'issueType', value: 'Task' },
-          { key: 'priority', value: 'High' },
-          { key: 'parent', value: null },
-        ],
+        fields: { issueType: 'Task', priority: 'High', parent: null },
       },
       created_at: '2019-11-25T22:32:17.947Z',
       created_by: {
@@ -153,11 +149,7 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
         id: '123',
         name: 'My connector',
         type: ConnectorTypes.jira,
-        fields: [
-          { key: 'issueType', value: 'Task' },
-          { key: 'priority', value: 'High' },
-          { key: 'parent', value: null },
-        ],
+        fields: { issueType: 'Task', priority: 'High', parent: null },
       },
       created_at: '2019-11-25T22:32:17.947Z',
       created_by: {
