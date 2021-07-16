@@ -27,6 +27,7 @@ import {
 import { uiSettingsType } from './saved_objects';
 import { registerRoutes } from './routes';
 import { getCoreSettings } from './settings';
+import { UiSettingsDefaultsClient } from './ui_settings_defaults_client';
 
 export interface SetupDeps {
   http: InternalHttpServiceSetup;
@@ -56,16 +57,12 @@ export class UiSettingsService
 
     this.register(getCoreSettings({ isDist: this.isDist }));
 
-    const { version, buildNum } = this.coreContext.env.packageInfo;
     return {
       createDefaultsClient: () =>
-        new UiSettingsClient({
-          type: 'config',
-          id: version,
-          buildNum,
+        new UiSettingsDefaultsClient({
           defaults: mapToObject(this.uiSettingsDefaults),
           overrides: this.overrides,
-          log: this.log,
+          log: this.log.get('core defaults'),
         }),
     };
   }

@@ -1000,7 +1000,7 @@ export interface ElasticsearchConfigPreboot {
 
 // @public (undocumented)
 export interface ElasticsearchServicePreboot {
-    readonly config: ElasticsearchConfigPreboot;
+    readonly config: Readonly<ElasticsearchConfigPreboot>;
     readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ICustomClusterClient;
 }
 

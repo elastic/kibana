@@ -11,6 +11,7 @@ import { schema } from '@kbn/config-schema';
 
 import {
   MockUiSettingsClientConstructor,
+  MockUiSettingsDefaultsClientConstructor,
   getCoreSettingsMock,
 } from './ui_settings_service.test.mock';
 import { UiSettingsService, SetupDeps } from './ui_settings_service';
@@ -19,7 +20,7 @@ import { savedObjectsClientMock } from '../mocks';
 import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
 import { mockCoreContext } from '../core_context.mock';
 import { uiSettingsType } from './saved_objects';
-import { UiSettingsClient } from './ui_settings_client';
+import { UiSettingsDefaultsClient } from './ui_settings_defaults_client';
 
 const overrides = {
   overrideBaz: 'baz',
@@ -65,11 +66,11 @@ describe('uiSettings', () => {
       const { createDefaultsClient } = await service.preboot();
 
       const client = createDefaultsClient();
-      expect(client).toBeInstanceOf(UiSettingsClient);
+      expect(client).toBeInstanceOf(UiSettingsDefaultsClient);
 
-      expect(MockUiSettingsClientConstructor).toBeCalledTimes(1);
-      const [[constructorArgs]] = MockUiSettingsClientConstructor.mock.calls;
-      expect(constructorArgs).toMatchObject({ type: 'config', overrides, defaults: {} });
+      expect(MockUiSettingsDefaultsClientConstructor).toBeCalledTimes(1);
+      const [[constructorArgs]] = MockUiSettingsDefaultsClientConstructor.mock.calls;
+      expect(constructorArgs).toMatchObject({ overrides, defaults: {} });
       expect(constructorArgs.overrides).toBe(overrides);
     });
   });

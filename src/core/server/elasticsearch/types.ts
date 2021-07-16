@@ -31,7 +31,7 @@ export interface ElasticsearchServicePreboot {
    * const { hosts, credentialsSpecified } = core.elasticsearch.config;
    * ```
    */
-  readonly config: ElasticsearchConfigPreboot;
+  readonly config: Readonly<ElasticsearchConfigPreboot>;
 
   /**
    * Create application specific Elasticsearch cluster API client with customized config. See {@link IClusterClient}.

@@ -9,7 +9,7 @@ A limited set of Elasticsearch configuration entries.
 <b>Signature:</b>
 
 ```typescript
-readonly config: ElasticsearchConfigPreboot;
+readonly config: Readonly<ElasticsearchConfigPreboot>;
 ```
 
 ## Example
