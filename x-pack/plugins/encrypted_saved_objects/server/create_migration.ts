@@ -103,6 +103,10 @@ export const getCreateMigration = (
         if (!shouldMigrateIfDecryptionFails) {
           throw err;
         }
+
+        context.log.warning(
+          `decryption failed for encryptedSavedObject ${encryptedDoc.id} of type ${encryptedDoc.type} with error: ${err.message}. Migration will be applied to the un-decrypted document but this may cause decryption errors later on.`
+        );
         shouldEncrypt = false;
         return encryptedDoc.attributes;
       }
