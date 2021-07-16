@@ -37,6 +37,16 @@ export const useCreateSavedQuery = ({ withRedirect }: UseCreateSavedQueryProps) 
         throw new Error('CurrentUser is missing');
       }
 
+      const conflictingEntries = await savedObjects.client.find({
+        type: savedQuerySavedObjectType,
+      // @ts-expect-error update types
+        search: payload.id,
+        searchFields: ['id'],
+      });
+      if (conflictingEntries.savedObjects.length) {
+        // @ts-expect-error update types
+        throw new Error(`Saved query with id ${payload.id} already exists.`);
+      }
       return savedObjects.client.create(savedQuerySavedObjectType, {
         // @ts-expect-error update types
         ...payload,

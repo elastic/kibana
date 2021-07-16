@@ -12,8 +12,8 @@ import { produce } from 'immer';
 import { useMemo } from 'react';
 import { FormConfig, useForm } from '../../shared_imports';
 import { OsqueryManagerPackagePolicyConfigRecord } from '../../../common/types';
-import { useScheduledQueryGroups } from '../use_scheduled_query_groups';
 import { createFormSchema } from './schema';
+import { useScheduledQueryGroup } from '../use_scheduled_query_group';
 
 const FORM_ID = 'editQueryFlyoutForm';
 
@@ -39,14 +39,13 @@ export const useScheduledQueryGroupQueryForm = ({
   defaultValue,
   handleSubmit,
 }: UseScheduledQueryGroupQueryFormProps) => {
-  const { data } = useScheduledQueryGroups();
+  const { data } = useScheduledQueryGroup({ scheduledQueryGroupId });
   const ids = useMemo<string[]>(
     () =>
-      data?.items
-        .find((value) => value.id === scheduledQueryGroupId)
-        ?.inputs.map((input) => input.streams.map((stream) => stream.compiled_stream.id))
+      data?.inputs
+        .map((input) => input.streams.map((stream) => stream.compiled_stream.id))
         .flat() ?? [],
-    [data, scheduledQueryGroupId]
+    [data]
   );
   const idSet = useMemo<Set<string>>(() => {
     const res = new Set<string>(ids);
