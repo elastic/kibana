@@ -48,7 +48,7 @@ export const useQueryBar = (): UseQueryBarUtils => {
   const dispatch = useDispatch();
 
   const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = useGetUrlParams();
-  const { search, query: queryParam, filters: paramFilters } = params;
+  const { search, query: queryParam, filters: paramFilters, excludedFilters } = params;
 
   const {
     services: { storage },
@@ -75,7 +75,8 @@ export const useQueryBar = (): UseQueryBarUtils => {
   const [esFilters, error] = useUpdateKueryString(
     indexPattern,
     query.language === SyntaxType.kuery ? (query.query as string) : undefined,
-    paramFilters
+    paramFilters,
+    excludedFilters
   );
 
   const setEsKueryFilters = useCallback(

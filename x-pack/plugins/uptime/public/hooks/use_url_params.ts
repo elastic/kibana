@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { UptimeUrlParams, getSupportedUrlParams } from '../lib/helper';
 import { selectedFiltersSelector } from '../state/selectors';
 import { setSelectedFilters } from '../state/actions/selected_filters';
+import { getFiltersFromMap } from './use_selected_filters';
 
 export type GetUrlParams = () => UptimeUrlParams;
 export type UpdateUrlParams = (updatedParams: {
@@ -40,13 +41,6 @@ const getMapFromFilters = (value: any): Map<string, any> | undefined => {
   }
 };
 
-const mapMapToObject = (map: Map<string, any>) => ({
-  locations: map.get('observer.geo.name') ?? [],
-  ports: map.get('url.port') ?? [],
-  schemes: map.get('monitor.type') ?? [],
-  tags: map.get('tags') ?? [],
-});
-
 export const useUrlParams: UptimeUrlParamsHook = () => {
   const location = useLocation();
   const history = useHistory();
@@ -57,7 +51,7 @@ export const useUrlParams: UptimeUrlParamsHook = () => {
     if (selectedFilters === null) {
       const filterMap = getMapFromFilters(filters);
       if (filterMap) {
-        dispatch(setSelectedFilters(mapMapToObject(filterMap)));
+        dispatch(setSelectedFilters(getFiltersFromMap(filterMap)));
       }
     }
   }, [dispatch, filters, selectedFilters]);
@@ -93,7 +87,7 @@ export const useUrlParams: UptimeUrlParamsHook = () => {
       if (!filterMap) {
         dispatch(setSelectedFilters(null));
       } else {
-        dispatch(setSelectedFilters(mapMapToObject(filterMap)));
+        dispatch(setSelectedFilters(getFiltersFromMap(filterMap)));
       }
     },
     [dispatch, history, location]

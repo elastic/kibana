@@ -12,7 +12,7 @@ import { useIndexPattern } from '../../../contexts/uptime_index_pattern_context'
 import { useSelectedFilters } from '../../../hooks/use_selected_filters';
 
 interface Props {
-  onChange: (fieldName: string, values: string[]) => void;
+  onChange: (fieldName: string, values: string[], notValues: string[]) => void;
 }
 export const SelectedFilters = ({ onChange }: Props) => {
   const indexPattern = useIndexPattern();
@@ -20,7 +20,7 @@ export const SelectedFilters = ({ onChange }: Props) => {
 
   return indexPattern ? (
     <EuiFlexGroup gutterSize="xs">
-      {filtersList.map(({ field, selectedItems, label }) => (
+      {filtersList.map(({ field, selectedItems, excludedItems, label }) => (
         <Fragment key={field}>
           {selectedItems.map((value) => (
             <EuiFlexItem key={field + value} grow={false}>
@@ -29,13 +29,33 @@ export const SelectedFilters = ({ onChange }: Props) => {
                 removeFilter={() => {
                   onChange(
                     field,
-                    selectedItems.filter((valT) => valT !== value)
+                    selectedItems.filter((valT) => valT !== value),
+                    excludedItems
                   );
                 }}
                 invertFilter={(val) => {}}
                 field={field}
                 value={value}
                 negate={false}
+                label={label}
+              />
+            </EuiFlexItem>
+          ))}
+          {excludedItems.map((value) => (
+            <EuiFlexItem key={field + value} grow={false}>
+              <FilterValueLabel
+                indexPattern={indexPattern}
+                removeFilter={() => {
+                  onChange(
+                    field,
+                    selectedItems,
+                    excludedItems.filter((valT) => valT !== value)
+                  );
+                }}
+                invertFilter={(val) => {}}
+                field={field}
+                value={value}
+                negate={true}
                 label={label}
               />
             </EuiFlexItem>

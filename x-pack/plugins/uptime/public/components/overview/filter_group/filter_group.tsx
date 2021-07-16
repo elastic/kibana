@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { EuiFilterGroup } from '@elastic/eui';
 import styled from 'styled-components';
 import { useFilterUpdate } from '../../../hooks/use_filter_update';
@@ -40,16 +40,19 @@ export const FilterGroup = () => {
 
   const [isOpen, setIsOpen] = useState('');
 
-  const onFilterFieldChange = (fieldName: string, values?: string[], notValues?: string[]) => {
-    setUpdatedFieldValues({ fieldName, values, notValues });
-    setIsOpen('');
-  };
+  const onFilterFieldChange = useCallback(
+    (fieldName: string, values?: string[], notValues?: string[]) => {
+      setUpdatedFieldValues({ fieldName, values, notValues });
+      setIsOpen('');
+    },
+    []
+  );
 
   return (
     <>
       <Container>
         {indexPattern &&
-          filtersList.map(({ field, label, selectedItems }) => (
+          filtersList.map(({ field, label, selectedItems, excludedItems }) => (
             <FieldValueSuggestions
               key={field}
               compressed={false}
@@ -57,7 +60,8 @@ export const FilterGroup = () => {
               sourceField={field}
               label={label}
               selectedValue={selectedItems}
-              onChange={(values, notValues) => onFilterFieldChange(field, values)}
+              excludedValue={excludedItems}
+              onChange={(values, notValues) => onFilterFieldChange(field, values, notValues)}
               asCombobox={false}
               asFilterButton={true}
               forceOpen={isOpen === field}

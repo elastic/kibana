@@ -8,7 +8,7 @@
 import { useEffect } from 'react';
 import { useUrlParams } from './use_url_params';
 
-const parseFiltersMap = (currentFilters: string) => {
+export const parseFiltersMap = (currentFilters: string) => {
   let filterKueries: Map<string, string[]>;
   try {
     filterKueries = new Map<string, string[]>(JSON.parse(currentFilters));
@@ -27,7 +27,7 @@ const getUpdateFilters = (
   // add new term to filter map, toggle it off if already present
 
   const updatedFilterMap = new Map<string, string[] | undefined>(filterKueries);
-  updatedFilterMap.set(fieldName, values);
+  updatedFilterMap.set(fieldName, values ?? []);
   Array.from(updatedFilterMap.keys()).forEach((key) => {
     const value = updatedFilterMap.get(key);
     if (value && value.length === 0) {
