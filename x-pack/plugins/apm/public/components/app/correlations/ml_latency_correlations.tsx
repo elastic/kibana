@@ -8,6 +8,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
+  EuiCallOut,
   EuiCode,
   EuiAccordion,
   EuiPanel,
@@ -73,6 +74,7 @@ export function MlLatencyCorrelations({ onClose }: Props) {
   const displayLog = location.search.includes('debug=true');
 
   const {
+    ccsWarning,
     log,
     error,
     histograms,
@@ -320,6 +322,30 @@ export function MlLatencyCorrelations({ onClose }: Props) {
         </EuiFlexItem>
       </EuiFlexGroup>
 
+      {ccsWarning && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.apm.correlations.latencyCorrelations.ccsWarningCalloutTitle',
+              {
+                defaultMessage: 'Cross-cluster search compatilibity.',
+              }
+            )}
+            color="warning"
+          >
+            <p>
+              {i18n.translate(
+                'xpack.apm.correlations.latencyCorrelations.ccsWarningCalloutBody',
+                {
+                  defaultMessage:
+                    'Data for the correlation analysis could not be retrieved. This feature is only supported for versions 7.14 and above.',
+                }
+              )}
+            </p>
+          </EuiCallOut>
+        </>
+      )}
       <EuiSpacer size="m" />
       {overallHistogram !== undefined ? (
         <>

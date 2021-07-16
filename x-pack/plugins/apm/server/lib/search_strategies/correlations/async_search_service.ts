@@ -37,6 +37,7 @@ export const asyncSearchServiceProvider = (
   let isCancelled = false;
   let isRunning = true;
   let error: Error;
+  let ccsWarning = false;
   const log: string[] = [];
   const logMessage = (message: string) =>
     log.push(`${currentTimeAsString()}: ${message}`);
@@ -232,10 +233,15 @@ export const asyncSearchServiceProvider = (
               yield undefined;
             }
           } catch (e) {
-            // don't fail the whole process for individual correlation queries, just add the error to the internal log.
+            // don't fail the whole process for individual correlation queries,
+            // just add the error to the internal log and check if we'd want to set the
+            // cross-cluster search compatibility warning to true.
             logMessage(
               `Failed to fetch correlation/kstest for '${item.field}/${item.value}'`
             );
+            if (params.index.includes(':')) {
+              ccsWarning = true;
+            }
             yield undefined;
           }
         }
@@ -257,6 +263,10 @@ export const asyncSearchServiceProvider = (
       error = e;
     }
 
+    if (error !== undefined && params.index.includes(':')) {
+      ccsWarning = true;
+    }
+
     isRunning = false;
   };
 
@@ -266,6 +276,7 @@ export const asyncSearchServiceProvider = (
     const sortedValues = values.sort((a, b) => b.correlation - a.correlation);
 
     return {
+      ccsWarning: true,
       error,
       log,
       isRunning,

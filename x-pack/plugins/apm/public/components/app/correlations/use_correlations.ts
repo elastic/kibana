@@ -36,6 +36,7 @@ interface RawResponse {
   values: SearchServiceValue[];
   overallHistogram: HistogramItem[];
   log: string[];
+  ccsWarning: boolean;
 }
 
 export const useCorrelations = (params: CorrelationsOptions) => {
@@ -105,6 +106,7 @@ export const useCorrelations = (params: CorrelationsOptions) => {
   };
 
   return {
+    ccsWarning: rawResponse?.ccsWarning ?? false,
     log: rawResponse?.log ?? [],
     error,
     histograms: rawResponse?.values ?? [],

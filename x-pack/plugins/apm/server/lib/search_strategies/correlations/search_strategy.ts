@@ -77,6 +77,7 @@ export const apmCorrelationsSearchStrategyProvider = (
       const id = request.id ?? uuid();
 
       const {
+        ccsWarning,
         error,
         log,
         isRunning,
@@ -106,6 +107,7 @@ export const apmCorrelationsSearchStrategyProvider = (
         isRunning,
         isPartial: isRunning,
         rawResponse: {
+          ccsWarning,
           log,
           took,
           values,
