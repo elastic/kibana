@@ -11,18 +11,18 @@ describe('getEfFilters', function () {
   it('should return environment in include filters', function () {
     const result = getEsFilter({
       browser: ['Chrome'],
-      environment: ['production'],
+      environment: 'production',
     });
 
     expect(result).toEqual([
       { terms: { 'user_agent.name': ['Chrome'] } },
-      { term: { 'service.environment': ['production'] } },
+      { term: { 'service.environment': 'production' } },
     ]);
   });
 
   it('should not return environment in exclude filters', function () {
     const result = getEsFilter(
-      { browserExcluded: ['Chrome'], environment: ['production'] },
+      { browserExcluded: ['Chrome'], environment: 'production' },
       true
     );
 
