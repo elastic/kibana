@@ -37,6 +37,12 @@ else
   KIBANA_BUILDBUDDY_CI_API_KEY=$(retry 5 vault read -field=value secret/kibana-issues/dev/kibana-buildbuddy-ci-api-key)
   export KIBANA_BUILDBUDDY_CI_API_KEY
 
+  # read FullStory env vars
+  FULLSTORY_ORG_ID=$(retry 5 vault read -field=org_id secret/kibana-issues/dev/fullstory-credentials)
+  export FULLSTORY_ORG_ID
+  FULLSTORY_API_KEY=$(retry 5 vault read -field=api_key secret/kibana-issues/dev/fullstory-credentials)
+  export FULLSTORY_API_KEY
+
   # remove vault related secrets
   unset VAULT_ROLE_ID VAULT_SECRET_ID VAULT_TOKEN VAULT_ADDR
 fi
