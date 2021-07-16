@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
-  const PageObjects = getPageObjects(['visualize', 'header', 'maps']);
+  const PageObjects = getPageObjects(['header', 'maps']);
 
   const security = getService('security');
 
@@ -49,28 +49,6 @@ export default function ({ getService, getPageObjects }) {
           const hasMapsApp = await PageObjects.visualize.hasMapsApp();
           expect(hasMapsApp).to.equal(false);
         });
-      });
-    });
-
-    describe('aggregion based visualizations', () => {
-      before(async () => {
-        await security.testUser.setRoles(['global_visualize_all'], false);
-
-        await PageObjects.visualize.navigateToNewAggBasedVisualization();
-      });
-
-      after(async () => {
-        await security.testUser.restoreDefaults();
-      });
-
-      it('should not show legacy region map visualizion in create menu', async () => {
-        const hasLegecyViz = await PageObjects.visualize.hasRegionMap();
-        expect(hasLegecyViz).to.equal(false);
-      });
-
-      it('should not show legacy tilemap map visualizion in create menu', async () => {
-        const hasLegecyViz = await PageObjects.visualize.hasTileMap();
-        expect(hasLegecyViz).to.equal(false);
       });
     });
   });

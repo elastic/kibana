@@ -24,7 +24,6 @@ import { VisualBuilderPageObject } from './visual_builder_page';
 import { VisualizePageObject } from './visualize_page';
 import { VisualizeEditorPageObject } from './visualize_editor_page';
 import { VisualizeChartPageObject } from './visualize_chart_page';
-import { TileMapPageObject } from './tile_map_page';
 import { TimeToVisualizePageObject } from './time_to_visualize_page';
 import { TagCloudPageObject } from './tag_cloud_page';
 import { VegaChartPageObject } from './vega_chart_page';
@@ -51,7 +50,6 @@ export const pageObjects = {
   visualize: VisualizePageObject,
   visEditor: VisualizeEditorPageObject,
   visChart: VisualizeChartPageObject,
-  tileMap: TileMapPageObject,
   timeToVisualize: TimeToVisualizePageObject,
   tagCloud: TagCloudPageObject,
   vegaChart: VegaChartPageObject,
