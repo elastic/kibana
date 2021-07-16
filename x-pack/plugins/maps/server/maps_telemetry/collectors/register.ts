@@ -7,11 +7,9 @@
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { getMapsTelemetry, MapsUsage } from '../maps_telemetry';
-import { MapsConfigType } from '../../../config';
 
 export function registerMapsUsageCollector(
   usageCollection: UsageCollectionSetup,
-  config: MapsConfigType
 ): void {
   if (!usageCollection) {
     return;
@@ -20,11 +18,8 @@ export function registerMapsUsageCollector(
   const mapsUsageCollector = usageCollection.makeUsageCollector<MapsUsage>({
     type: 'maps',
     isReady: () => true,
-    fetch: async () => await getMapsTelemetry(config),
+    fetch: async () => await getMapsTelemetry(),
     schema: {
-      settings: {
-        showMapVisualizationTypes: { type: 'boolean' },
-      },
       indexPatternsWithGeoFieldCount: { type: 'long' },
       indexPatternsWithGeoPointFieldCount: { type: 'long' },
       indexPatternsWithGeoShapeFieldCount: { type: 'long' },

@@ -154,7 +154,7 @@ export class MapsPlugin
       plugins.home.featureCatalogue.register(featureCatalogueEntry);
     }
     plugins.visualizations.registerAlias(
-      getMapsVisTypeAlias(plugins.visualizations, config.showMapVisualizationTypes)
+      getMapsVisTypeAlias(plugins.visualizations)
     );
     plugins.embeddable.registerEmbeddableFactory(MAP_SAVED_OBJECT_TYPE, new MapEmbeddableFactory());
 

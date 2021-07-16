@@ -23,7 +23,6 @@ import {
 } from '../../common/descriptor_types';
 import { MapSavedObject, MapSavedObjectAttributes } from '../../common/map_saved_object_type';
 import { getIndexPatternsService, getInternalRepository } from '../kibana_server_services';
-import { MapsConfigType } from '../../config';
 import { injectReferences } from '././../../common/migrations/references';
 import {
   getBaseMapsPerCluster,
@@ -37,10 +36,6 @@ import {
   TELEMETRY_SCALING_OPTION_COUNTS_PER_CLUSTER,
   TELEMETRY_TERM_JOIN_COUNTS_PER_CLUSTER,
 } from './util';
-
-interface Settings {
-  showMapVisualizationTypes: boolean;
-}
 
 interface IStats {
   [key: string]: {
@@ -85,9 +80,7 @@ export interface LayersStatsUsage {
   };
 }
 
-export interface MapsUsage extends LayersStatsUsage, GeoIndexPatternsUsage {
-  settings: Settings;
-}
+export type MapsUsage = LayersStatsUsage & GeoIndexPatternsUsage;
 
 function getUniqueLayerCounts(layerCountsList: ILayerTypeCount[], mapsCount: number) {
   const uniqueLayerTypes = _.uniq(_.flatten(layerCountsList.map((lTypes) => Object.keys(lTypes))));
@@ -327,7 +320,7 @@ export async function execTransformOverMultipleSavedObjectPages<T>(
   } while (page * perPage < total);
 }
 
-export async function getMapsTelemetry(config: MapsConfigType): Promise<MapsUsage> {
+export async function getMapsTelemetry(): Promise<MapsUsage> {
   // Get layer descriptors for Maps saved objects. This is not set up
   // to be done incrementally (i.e. - per page) but minimally we at least
   // build a list of small footprint objects
@@ -350,9 +343,6 @@ export async function getMapsTelemetry(config: MapsConfigType): Promise<MapsUsag
   const indexPatternsTelemetry = await buildMapsIndexPatternsTelemetry(layerLists);
 
   return {
-    settings: {
-      showMapVisualizationTypes: config.showMapVisualizationTypes,
-    },
     ...indexPatternsTelemetry,
     ...savedObjectsTelemetry,
   };

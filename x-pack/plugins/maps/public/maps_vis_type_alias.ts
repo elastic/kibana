@@ -23,11 +23,8 @@ import {
 
 export function getMapsVisTypeAlias(
   visualizations: VisualizationsSetup,
-  showMapVisualizationTypes: boolean
 ) {
-  if (!showMapVisualizationTypes) {
-    visualizations.hideTypes(['region_map', 'tile_map']);
-  }
+  visualizations.hideTypes(['region_map', 'tile_map']);
 
   const appDescription = i18n.translate('xpack.maps.visTypeAlias.description', {
     defaultMessage: 'Create and style maps with multiple layers and indices.',
