@@ -144,4 +144,32 @@ describe('ThreatIntelPanelView', () => {
       `Showing: ${mockThreatIntelPanelViewProps.totalEventCount} indicators`
     );
   });
+
+  it('renders inspect button by default', () => {
+    const wrapper = mount(
+      <Provider store={store}>
+        <I18nProvider>
+          <ThemeProvider theme={mockTheme}>
+            <ThreatIntelPanelView {...mockThreatIntelPanelViewProps} />
+          </ThemeProvider>
+        </I18nProvider>
+      </Provider>
+    );
+
+    expect(wrapper.exists('[data-test-subj="inspect-icon-button"]')).toBe(true);
+  });
+
+  it('does not render inspect button if displayInspect is false', () => {
+    const wrapper = mount(
+      <Provider store={store}>
+        <I18nProvider>
+          <ThemeProvider theme={mockTheme}>
+            <ThreatIntelPanelView {...mockThreatIntelPanelViewProps} isInspectEnabled={false} />
+          </ThemeProvider>
+        </I18nProvider>
+      </Provider>
+    );
+
+    expect(wrapper.exists('[data-test-subj="inspect-icon-button"]')).toBe(false);
+  });
 });
