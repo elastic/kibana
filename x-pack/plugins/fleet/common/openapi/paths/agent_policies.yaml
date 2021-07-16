@@ -1,5 +1,5 @@
 get:
-  summary: Agent policy - List
+  summary: Agent policies - List
   tags: []
   responses:
     '200':

@@ -202,7 +202,8 @@ export const sortByActivatedRules = () => {
 
 export const waitForRulesTableToBeLoaded = () => {
   cy.get(RULES_TABLE_INITIAL_LOADING_INDICATOR).should('exist');
-  cy.get(RULES_TABLE_INITIAL_LOADING_INDICATOR).should('not.exist');
+  // Wait up to 5 minutes for the rules to load as in CI containers this can be very slow
+  cy.get(RULES_TABLE_INITIAL_LOADING_INDICATOR, { timeout: 300000 }).should('not.exist');
 };
 
 export const waitForRulesTableToBeRefreshed = () => {
