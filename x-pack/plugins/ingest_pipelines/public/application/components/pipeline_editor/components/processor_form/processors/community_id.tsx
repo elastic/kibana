@@ -32,7 +32,7 @@ const seedValidator = {
     than: SEED_MAX_VALUE,
     allowEquality: true,
     message: i18n.translate('xpack.ingestPipelines.pipelineEditor.communityId.seedMaxNumberError', {
-      defaultMessage: `This number must be equals or less than {maxValue}.`,
+      defaultMessage: `This number must be equal or less than {maxValue}.`,
       values: { maxValue: SEED_MAX_VALUE },
     }),
   }),
