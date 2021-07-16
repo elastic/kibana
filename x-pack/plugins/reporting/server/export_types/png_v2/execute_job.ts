@@ -42,14 +42,14 @@ export const runTaskFnFactory: RunTaskFnFactory<
           reportSavedObjectId: jobId,
           locatorOffset: '0', // We only ever have one locator for PNG
         });
-        const urls = getFullUrls(config, [relativeUrl]);
+        const [url] = getFullUrls(config, [relativeUrl]);
 
         if (apmGetAssets) apmGetAssets.end();
 
         apmGeneratePng = apmTrans?.startSpan('generate_png_pipeline', 'execute');
         return generatePngObservable(
           jobLogger,
-          urls,
+          url,
           job.browserTimezone,
           conditionalHeaders,
           job.layout
