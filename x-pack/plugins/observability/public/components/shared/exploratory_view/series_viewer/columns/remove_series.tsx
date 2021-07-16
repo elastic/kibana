@@ -27,7 +27,7 @@ export function RemoveSeries({ seriesId }: Props) {
     <EuiToolTip
       content={
         isDisabled
-          ? i18n.translate('xpack.observability.expView.seriesEditor.removeSeries', {
+          ? i18n.translate('xpack.observability.expView.seriesEditor.removeSeriesDisabled', {
               defaultMessage:
                 'Main series cannot be removed. Please remove all series below before you can remove this.',
             })
