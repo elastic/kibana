@@ -84,10 +84,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('space with Canvas disabled', () => {
+      const spaceWithCanvasDisabledArchive =
+        'x-pack/test/functional/es_archives/spaces/disabled_features';
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load('x-pack/test/functional/es_archives/spaces/disabled_features');
+        await esArchiver.load(spaceWithCanvasDisabledArchive);
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
@@ -97,7 +99,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await spacesService.delete('custom_space');
-        await esArchiver.unload('x-pack/test/functional/es_archives/spaces/disabled_features');
+        await esArchiver.unload(spaceWithCanvasDisabledArchive);
       });
 
       it(`doesn't show canvas navlink`, async () => {

@@ -15,21 +15,23 @@ export default function canvasFiltersTest({ getService, getPageObjects }: FtrPro
   const PageObjects = getPageObjects(['canvas', 'common']);
   const find = getService('find');
   const kibanaServer = getService('kibanaServer');
+  const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/filter';
 
   describe('filters', function () {
     // there is an issue with FF not properly clicking on workpad elements
     this.tags('skipFirefox');
 
     before(async () => {
-      await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/canvas/filter'
-      );
+      await kibanaServer.importExport.load(archive);
       // load test workpad
       await PageObjects.common.navigateToApp('canvas', {
         hash: '/workpad/workpad-b5618217-56d2-47fa-b756-1be2306cda68/page/1',
       });
     });
 
+    after(async () => {
+      await kibanaServer.importExport.unload(archive);
+    });
     it('filter updates when dropdown is changed', async () => {
       // wait for all our elements to load up
       await retry.try(async () => {
