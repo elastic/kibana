@@ -165,70 +165,36 @@ export function createExecutionHandler<
 
       const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
 
+      const enqueueOptions = {
+        id: action.id,
+        params: action.params,
+        spaceId,
+        apiKey: apiKey ?? null,
+        source: asSavedObjectExecutionSource({
+          id: alertId,
+          type: 'alert',
+        }),
+        relatedSavedObjects: [
+          {
+            id: alertId,
+            type: 'alert',
+            namespace: namespace.namespace,
+            typeId: alertType.id,
+          },
+        ],
+      };
+
       // TODO would be nice  to add the action name here, but it's not available
       const actionLabel = `${action.actionTypeId}:${action.id}`;
       if (supportsEphemeralTasks && ephemeralActionsToSchedule > 0) {
         ephemeralActionsToSchedule--;
-        actionsClient
-          .ephemeralEnqueuedExecution({
-            id: action.id,
-            params: action.params,
-            spaceId,
-            apiKey: apiKey ?? null,
-            source: asSavedObjectExecutionSource({
-              id: alertId,
-              type: 'alert',
-            }),
-            relatedSavedObjects: [
-              {
-                id: alertId,
-                type: 'alert',
-                namespace: namespace.namespace,
-                typeId: alertType.id,
-              },
-            ],
-          })
-          .catch((err) => {
-            if (isEphemeralTaskRejectedDueToCapacityError(err)) {
-              actionsClient.enqueueExecution({
-                id: action.id,
-                params: action.params,
-                spaceId,
-                apiKey: apiKey ?? null,
-                source: asSavedObjectExecutionSource({
-                  id: alertId,
-                  type: 'alert',
-                }),
-                relatedSavedObjects: [
-                  {
-                    id: alertId,
-                    type: 'alert',
-                    namespace: namespace.namespace,
-                    typeId: alertType.id,
-                  },
-                ],
-              });
-            }
-          });
-      } else {
-        await actionsClient.enqueueExecution({
-          id: action.id,
-          params: action.params,
-          spaceId,
-          apiKey: apiKey ?? null,
-          source: asSavedObjectExecutionSource({
-            id: alertId,
-            type: 'alert',
-          }),
-          relatedSavedObjects: [
-            {
-              id: alertId,
-              type: 'alert',
-              namespace: namespace.namespace,
-              typeId: alertType.id,
-            },
-          ],
+        actionsClient.ephemeralEnqueuedExecution(enqueueOptions).catch((err) => {
+          if (isEphemeralTaskRejectedDueToCapacityError(err)) {
+            actionsClient.enqueueExecution(enqueueOptions);
+          }
         });
+      } else {
+        await actionsClient.enqueueExecution(enqueueOptions);
       }
 
       const event: IEvent = {
