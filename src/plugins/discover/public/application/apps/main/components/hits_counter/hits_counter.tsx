@@ -16,9 +16,8 @@ import {
   EuiText,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, FormattedNumber } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { formatNumWithCommas } from '../../../../helpers';
 import { DataTotalHits$, DataTotalHitsMsg } from '../../services/use_saved_search';
 import { FetchStatus } from '../../../../types';
 import { useDataState } from '../../utils/use_data_state';
@@ -44,6 +43,16 @@ export function HitsCounter({ showResetButton, onResetQuery, savedSearchData$ }:
     return <EuiLoadingSpinner />;
   }
 
+  const formattedHits = (
+    <strong
+      data-test-subj={
+        data.fetchStatus === FetchStatus.PARTIAL ? 'discoverQueryHitsPartial' : 'discoverQueryHits'
+      }
+    >
+      <FormattedNumber value={hits} />
+    </strong>
+  );
+
   return (
     <EuiFlexGroup
       className="dscHitsCounter"
@@ -54,16 +63,27 @@ export function HitsCounter({ showResetButton, onResetQuery, savedSearchData$ }:
     >
       <EuiFlexItem grow={false}>
         <EuiText>
-          <strong data-test-subj="discoverQueryHits">{formatNumWithCommas(hits)}</strong>{' '}
-          <FormattedMessage
-            id="discover.hitsPluralTitle"
-            defaultMessage="{hits, plural, one {hit} other {hits}}"
-            values={{
-              hits,
-            }}
-          />
+          {data.fetchStatus === FetchStatus.PARTIAL && (
+            <FormattedMessage
+              id="discover.partialHits"
+              defaultMessage="≥{formattedHits} {hits, plural, one {hit} other {hits}}"
+              values={{ hits, formattedHits }}
+            />
+          )}
+          {data.fetchStatus !== FetchStatus.PARTIAL && (
+            <FormattedMessage
+              id="discover.hitsPluralTitle"
+              defaultMessage="{formattedHits} {hits, plural, one {hit} other {hits}}"
+              values={{ hits, formattedHits }}
+            />
+          )}
         </EuiText>
       </EuiFlexItem>
+      {data.fetchStatus === FetchStatus.PARTIAL && (
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="m" />
+        </EuiFlexItem>
+      )}
       {showResetButton && (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty

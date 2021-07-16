@@ -28,7 +28,7 @@ export const fetchDocuments = (
     searchSessionId: string;
   }
 ) => {
-  const { documents$ } = data$;
+  const { documents$, totalHits$ } = data$;
   searchSource.setField('trackTotalHits', false);
   searchSource.setField('highlightAll', true);
   searchSource.setField('version', false);
@@ -54,6 +54,15 @@ export const fetchDocuments = (
   fetch$.subscribe(
     (res) => {
       const documents = res.rawResponse.hits.hits;
+
+      // If the total hits query is still loading for hits, emit a partial
+      // hit count that's at least our document count
+      if (totalHits$.getValue().fetchStatus === FetchStatus.LOADING) {
+        totalHits$.next({
+          fetchStatus: FetchStatus.PARTIAL,
+          result: documents.length,
+        });
+      }
 
       documents$.next({
         fetchStatus: FetchStatus.COMPLETE,
