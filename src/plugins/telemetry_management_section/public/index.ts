@@ -10,6 +10,7 @@ import { TelemetryManagementSectionPlugin } from './plugin';
 
 export { OptInExampleFlyout } from './components';
 
+export type { TelemetryManagementSectionPluginSetup } from './plugin';
 export function plugin() {
   return new TelemetryManagementSectionPlugin();
 }

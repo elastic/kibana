@@ -33,7 +33,8 @@
     "usageCollection",
     "lists",
     "home",
-    "telemetry"
+    "telemetry",
+    "telemetryManagementSection"
   ],
   "server": true,
   "ui": true,

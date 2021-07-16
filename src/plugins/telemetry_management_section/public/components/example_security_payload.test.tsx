@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { useLocation } from 'react-router-dom';
-import { useRouter } from './use_router';
+import React from 'react';
+import { shallowWithIntl } from '@kbn/test/jest';
+import ExampleSecurityPayload from './example_security_payload';
 
-export function useParams(path: string, optional: boolean = false) {
-  const router = useRouter();
-  const location = useLocation();
-
-  return router.getParams(path as never, location, optional);
-}
+describe('example security payload', () => {
+  it('renders as expected', () => {
+    expect(shallowWithIntl(<ExampleSecurityPayload />)).toMatchSnapshot();
+  });
+});
