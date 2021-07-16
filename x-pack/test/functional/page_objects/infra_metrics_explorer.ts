@@ -5,17 +5,36 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect.js';
-import { Key } from 'selenium-webdriver';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function InfraMetricsExplorerProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const comboBox = getService('comboBox');
 
   return {
     async getMetrics() {
       const subject = await testSubjects.find('metricsExplorer-metrics');
-      return subject;
+      return await subject.findAllByCssSelector('span.euiBadge');
+    },
+
+    async removeMetric(value: string) {
+      const subject = await testSubjects.find('metricsExplorer-metrics');
+      const button = await subject.findByCssSelector(`span.euiBadge[value="${value}"] button`);
+      return await button.click();
+    },
+
+    async addMetric(value: string) {
+      const subject = await testSubjects.find('metricsExplorer-metrics');
+      return await comboBox.setElement(subject, value);
+    },
+
+    async setGroupBy(value: string) {
+      const subject = await testSubjects.find('metricsExplorer-groupBy');
+      return await comboBox.setElement(subject, value);
+    },
+
+    async getCharts() {
+      return await testSubjects.findAll('metricsExplorer-chart');
     },
   };
 }
