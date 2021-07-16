@@ -7,6 +7,7 @@
 
 import { cloneDeep } from 'lodash';
 import axios from 'axios';
+import { SearchRequest } from '@elastic/elasticsearch/api/types';
 import { LegacyAPICaller, SavedObjectsClientContract } from 'kibana/server';
 import { URL } from 'url';
 import { CoreStart, ElasticsearchClient, Logger } from 'src/core/server';
@@ -144,7 +145,7 @@ export class TelemetryEventsSender {
       throw Error('could not fetch policy responses. es client is not available');
     }
 
-    const query = {
+    const query: SearchRequest = {
       expand_wildcards: 'open,hidden',
       index: `.ds-metrics-endpoint.metrics-*`,
       ignore_unavailable: false,
@@ -183,7 +184,6 @@ export class TelemetryEventsSender {
       },
     };
 
-    // @ts-expect-error The types of 'body.aggs' are incompatible between these types.
     return this.esClient.search(query);
   }
 
@@ -213,7 +213,7 @@ export class TelemetryEventsSender {
       throw Error('could not fetch policy responses. es client is not available');
     }
 
-    const query = {
+    const query: SearchRequest = {
       expand_wildcards: 'open,hidden',
       index: `.ds-metrics-endpoint.policy*`,
       ignore_unavailable: false,
@@ -252,7 +252,6 @@ export class TelemetryEventsSender {
       },
     };
 
-    // @ts-expect-error The types of 'body.aggs' are incompatible between these types.
     return this.esClient.search(query);
   }
 
