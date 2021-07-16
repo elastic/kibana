@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useContext, useEffect, useState } from 'react';
+import React, { FC, useContext, useEffect, useState, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { RareJobCreator } from '../../../../../common/job_creator';
@@ -17,20 +17,35 @@ import { RARE_DETECTOR_TYPE } from './rare_view';
 import { DetectorDescription } from './detector_description';
 
 const DTR_IDX = 0;
-interface Props {
-  rareDetectorType: RARE_DETECTOR_TYPE;
-}
 
-export const RareDetectorsSummary: FC<Props> = ({ rareDetectorType }) => {
-  const { jobCreator: jc, chartLoader, resultsLoader, chartInterval } = useContext(
-    JobCreatorContext
-  );
+export const RareDetectorsSummary: FC = () => {
+  const {
+    jobCreator: jc,
+    chartLoader,
+    resultsLoader,
+    chartInterval,
+    jobCreatorUpdated,
+  } = useContext(JobCreatorContext);
   const jobCreator = jc as RareJobCreator;
 
   const [loadingData, setLoadingData] = useState(false);
   const [anomalyData, setAnomalyData] = useState<Anomaly[]>([]);
   const [eventRateChartData, setEventRateChartData] = useState<LineChartPoint[]>([]);
   const [jobIsRunning, setJobIsRunning] = useState(false);
+
+  const rareDetectorType = useMemo(() => {
+    if (jobCreator.rareField !== null) {
+      if (jobCreator.populationField === null) {
+        return RARE_DETECTOR_TYPE.RARE;
+      } else {
+        return jobCreator.frequentlyRare
+          ? RARE_DETECTOR_TYPE.FREQ_RARE_POPULATION
+          : RARE_DETECTOR_TYPE.RARE_POPULATION;
+      }
+    } else {
+      return RARE_DETECTOR_TYPE.RARE;
+    }
+  }, [jobCreatorUpdated]);
 
   function setResultsWrapper(results: Results) {
     const anomalies = results.anomalies[DTR_IDX];
@@ -48,6 +63,7 @@ export const RareDetectorsSummary: FC<Props> = ({ rareDetectorType }) => {
     const resultsSubscription = resultsLoader.subscribeToResults(setResultsWrapper);
     jobCreator.subscribeToProgress(watchProgress);
     loadChart();
+
     return () => {
       resultsSubscription.unsubscribe();
     };
