@@ -351,6 +351,21 @@
 /x-pack/test/case_api_integration @elastic/security-threat-hunting
 /x-pack/plugins/lists @elastic/security-detections-response
 
+## Security Solution sub teams - security-onboarding-and-lifecycle-mgt 
+/x-pack/plugins/security_solution/public/management/ @elastic/security-onboarding-and-lifecycle-mgt
+/x-pack/plugins/security_solution/public/common/lib/endpoint*/ @elastic/security-onboarding-and-lifecycle-mgt
+/x-pack/plugins/security_solution/public/common/components/endpoint/ @elastic/security-onboarding-and-lifecycle-mgt
+/x-pack/plugins/security_solution/common/endpoint/ @elastic/security-onboarding-and-lifecycle-mgt
+/x-pack/plugins/security_solution/server/endpoint/routes/trusted_apps/ @elastic/security-onboarding-and-lifecycle-mgt
+/x-pack/plugins/security_solution/server/endpoint/routes/actions/ @elastic/security-onboarding-and-lifecycle-mgt
+/x-pack/plugins/security_solution/server/endpoint/routes/metadata/ @elastic/security-onboarding-and-lifecycle-mgt
+/x-pack/plugins/security_solution/server/endpoint/lib/policy/ @elastic/security-onboarding-and-lifecycle-mgt
+/x-pack/plugins/security_solution/server/lib/license/ @elastic/security-onboarding-and-lifecycle-mgt
+/x-pack/plugins/security_solution/server/fleet_integration/ @elastic/security-onboarding-and-lifecycle-mgt
+/x-pack/plugins/security_solution/scripts/endpoint/event_filters/ @elastic/security-onboarding-and-lifecycle-mgt
+/x-pack/plugins/security_solution/scripts/endpoint/trusted_apps/ @elastic/security-onboarding-and-lifecycle-mgt
+/x-pack/test/security_solution_endpoint/apps/endpoint/ @elastic/security-onboarding-and-lifecycle-mgt
+
 # Security Intelligence And Analytics
 /x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules @elastic/security-intelligence-analytics
 
