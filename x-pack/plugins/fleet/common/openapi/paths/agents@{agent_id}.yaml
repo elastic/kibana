@@ -5,7 +5,7 @@ parameters:
     in: path
     required: true
 get:
-  summary: Fleet - Agent - Info
+  summary: Agent - Info
   tags: []
   responses:
     '200':
@@ -21,7 +21,7 @@ get:
               - item
   operationId: get-fleet-agents-agentId
 put:
-  summary: Fleet - Agent - Update
+  summary: Agent - Update
   tags: []
   responses:
     '200':
@@ -39,7 +39,7 @@ put:
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
 delete:
-  summary: Fleet - Agent - Delete
+  summary: Agent - Delete
   tags: []
   responses:
     '200':
