@@ -13,7 +13,7 @@ import { Filter } from '../es_query/filters';
 
 export const extract = (filters: Filter[]) => {
   const references: SavedObjectReference[] = [];
-  const updatedFilters = ((filters as unknown) as Filter[]).map((filter) => {
+  const updatedFilters = filters.map((filter) => {
     if (filter.meta?.index) {
       const id = uuid();
       references.push({
@@ -36,7 +36,7 @@ export const extract = (filters: Filter[]) => {
 };
 
 export const inject = (filters: Filter[], references: SavedObjectReference[]) => {
-  return ((filters as unknown) as Filter[]).map((filter) => {
+  return filters.map((filter) => {
     if (!filter.meta.index) {
       return filter;
     }
@@ -56,7 +56,7 @@ export const telemetry = (filters: SerializableState, collector: unknown) => {
 };
 
 export const migrateToLatest = (filters: Filter[], version: string) => {
-  return { state: filters, version: '' };
+  return filters;
 };
 
 export const getAllMigrations = () => {
