@@ -18,14 +18,13 @@ import {
 } from '../../../../common/alerting/metrics';
 import {
   AlertTypeParams,
-  AlertTypeState,
   ActionGroupIdsOf,
   ActionGroup,
   AlertInstanceContext,
   AlertInstanceState,
   RecoveredActionGroup,
 } from '../../../../../alerting/common';
-import { AlertInstance } from '../../../../../alerting/server';
+import { AlertInstance, AlertTypeState } from '../../../../../alerting/server';
 import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
 import { InfraBackendLibs } from '../../infra_types';
 import { METRIC_FORMATTERS } from '../../../../common/formatters/snapshot_metric_formats';
@@ -49,9 +48,9 @@ interface InventoryMetricThresholdParams {
 }
 
 export type InventoryMetricThresholdActionGroups = ActionGroupIdsOf<
-  typeof FIRED_ACTIONS | typeof WARNING_ACTIONS | typeof RecoveredActionGroup
+  typeof FIRED_ACTIONS | typeof WARNING_ACTIONS
 >;
-export type InventoryMetricThresholdAlertTypeParams = InventoryMetricThresholdParams;
+export type InventoryMetricThresholdAlertTypeParams = Record<string, any>;
 export type InventoryMetricThresholdAlertTypeState = AlertTypeState; // no specific state used
 export type InventoryMetricThresholdAlertInstanceState = AlertInstanceState; // no specific state used
 export type InventoryMetricThresholdAlertInstanceContext = AlertInstanceContext; // no specific instance context used
@@ -67,7 +66,7 @@ type InventoryMetricThresholdAlertInstanceFactory = (
   value: number
 ) => InventoryMetricThresholdAlertInstance;
 
-export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) => {
+export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =>
   libs.metricsRules.createLifecycleRuleExecutor<
     InventoryMetricThresholdAlertTypeParams,
     InventoryMetricThresholdAlertTypeState,
@@ -217,7 +216,6 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
       }
     }
   });
-};
 
 const buildReasonWithVerboseMetricName = (
   resultItem: any,
