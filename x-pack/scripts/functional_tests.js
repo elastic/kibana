@@ -91,4 +91,4 @@ require('@kbn/test').runTestsCli([
   require.resolve('../test/fleet_functional/config.ts'),
   require.resolve('../test/examples/config.ts'),
   require.resolve('../test/cloud_integration/config.ts'),
-];
+]);
