@@ -176,6 +176,7 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
             payload: {
               processor: {
                 ...mode.arg.processor,
+                // Always prefer the newly selected processor type, as it might change during editing
                 type: processorTypeAndOptions.type,
                 options: updatedProcessorOptions,
               },
