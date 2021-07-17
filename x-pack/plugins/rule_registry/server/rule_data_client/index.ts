@@ -96,7 +96,8 @@ export class RuleDataClient implements IRuleDataClient {
           if (response.body.errors) {
             if (
               response.body.items.length > 0 &&
-              response.body.items?.[0]?.index?.error?.type === 'index_not_found_exception'
+              (response.body.items?.[0]?.index?.error?.type === 'index_not_found_exception' ||
+                response.body.items?.[0]?.index?.error?.type === 'illegal_argument_exception')
             ) {
               return this.createWriteTargetIfNeeded({ namespace }).then(() => {
                 return clusterClient.bulk(requestWithDefaultParameters);
@@ -116,29 +117,22 @@ export class RuleDataClient implements IRuleDataClient {
 
     const clusterClient = await this.getClusterClient();
 
-    const { body: aliasExists } = await clusterClient.indices.existsAlias({
-      name: alias,
-    });
-
     const concreteIndexName = `${alias}-000001`;
-
-    if (!aliasExists) {
-      try {
-        await clusterClient.indices.create({
-          index: concreteIndexName,
-          body: {
-            aliases: {
-              [alias]: {
-                is_write_index: true,
-              },
+    try {
+      await clusterClient.indices.create({
+        index: concreteIndexName,
+        body: {
+          aliases: {
+            [alias]: {
+              is_write_index: true,
             },
           },
-        });
-      } catch (err) {
-        // something might have created the index already, that sounds OK
-        if (err?.meta?.body?.error?.type !== 'resource_already_exists_exception') {
-          throw err;
-        }
+        },
+      });
+    } catch (err) {
+      // something might have created the index already, that sounds OK
+      if (err?.meta?.body?.error?.type !== 'resource_already_exists_exception') {
+        throw err;
       }
     }
   }

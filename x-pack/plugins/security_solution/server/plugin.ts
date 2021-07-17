@@ -442,51 +442,65 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       if (isRuleRegistryEnabled) {
         const clusterClient = coreStart.elasticsearch.client.asInternalUser;
         const updateExistingSignalsIndices = async () => {
-          const signalIndices = await clusterClient.indices
-            .get({
-              index: `${config.signalsIndex}-*`,
-            })
-            .catch((err) => {
-              this.logger.error(`Failed to fetch existing siem signals indices: ${err.message}`);
-            });
-          if (!signalIndices || Object.keys(signalIndices.body).length === 0) {
-            return;
-          }
-          const signalsTemplate = getSignalsTemplate(config.signalsIndex);
-          const aliases: Record<string, unknown> = {};
+          const { body: existingSignalsTemplates } = await clusterClient.indices.getTemplate({
+            name: `${config.signalsIndex}-*`,
+          });
+          const fieldAliases: Record<string, unknown> = {};
           Object.entries(aadFieldConversion).forEach(([key, value]) => {
-            aliases[value] = {
+            fieldAliases[value] = {
               type: 'alias',
               path: key,
             };
           });
-          merge(signalsTemplate.mappings.properties, aliases);
-          await clusterClient.indices
-            .putTemplate({
-              name: config.signalsIndex,
-              body: signalsTemplate as Record<string, unknown>,
-            })
-            .catch((err) => {
-              this.logger.error(
-                `Failed to install new legacy siem signals template: ${err.message}`
-              );
-            });
-          await clusterClient.indices
-            .deleteTemplate({
-              name: `${config.signalsIndex}-*`,
-            })
-            .catch((err) => {
-              if (err.meta?.body?.status !== 404) {
-                this.logger.error(`Failed to delete old signals index templates: ${err.message}`);
-              }
-            });
+          const existingTemplateNames = Object.keys(existingSignalsTemplates);
+          for (const existingTemplateName of existingTemplateNames) {
+            const spaceId = existingTemplateName.substr(config.signalsIndex.length + 1);
+            const { ruleDataService } = plugins.ruleRegistry;
+            const alertsIndexPattern = ruleDataService.getFullAssetName('security.alerts');
+            const aadIndexAliasName = `${alertsIndexPattern}-${spaceId}`;
+
+            const indexAliases = {
+              aliases: {
+                [aadIndexAliasName]: {
+                  is_write_index: false,
+                },
+              },
+            };
+            const signalsTemplate = getSignalsTemplate(existingTemplateName);
+            merge(signalsTemplate.mappings.properties, fieldAliases);
+            merge(signalsTemplate, indexAliases);
+
+            await clusterClient.indices
+              .putTemplate({
+                name: existingTemplateName,
+                body: signalsTemplate as Record<string, unknown>,
+              })
+              .catch((err) => {
+                this.logger.error(
+                  `Failed to install new legacy siem signals template: ${err.message}`
+                );
+              });
+            await clusterClient.indices
+              .putAlias({
+                index: `${existingTemplateName}-*`,
+                name: aadIndexAliasName,
+                body: {
+                  is_write_index: false,
+                },
+              })
+              .catch((err) => {
+                this.logger.error(
+                  `Failed to add alerts as data alias to existing signals indices: ${err.message}`
+                );
+              });
+          }
           // Make sure that all signal fields we add aliases for are guaranteed to exist in the mapping for ALL historical
           // signals indices (either by adding them to signalExtraFields or ensuring they exist in the original signals
           // mapping) or else this call will fail and not update ANY signals indices
           const newMapping = {
             properties: {
               ...signalExtraFields,
-              ...aliases,
+              ...fieldAliases,
             },
           };
           await clusterClient.indices
