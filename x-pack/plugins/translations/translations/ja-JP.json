@@ -8070,7 +8070,6 @@
     "xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.featuredResults.title": "強調された結果",
     "xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.go.button": "Go",
     "xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.lastUpdated.heading": "最終更新",
-    "xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.leaveUnassigned.field": "割り当てなし",
     "xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.preview.title": "プレビュー",
     "xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.reset.button": "リセット",
     "xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.resultDetail.label": "結果詳細",
