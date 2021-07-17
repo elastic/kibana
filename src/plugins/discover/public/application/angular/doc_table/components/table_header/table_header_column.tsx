@@ -104,7 +104,7 @@ export function TableHeaderColumn({
     {
       active: isSortable && typeof onChangeSortOrder === 'function',
       ariaLabel: getSortButtonAriaLabel(),
-      className: (!sortDirection && 'kbnDocTableHeader__sortChange') || '',
+      className: !sortDirection ? 'kbnDocTableHeader__sortChange' : '',
       iconProps: sortDirectionToIcon[sortDirection],
       onClick: handleChangeSortOrder,
       testSubject: `docTableHeaderFieldSort_${name}`,
