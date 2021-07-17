@@ -4,11 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import Boom from '@hapi/boom';
 
-import { SavedObjectsFindResult, SavedObjectsFindResponse, SavedObject } from 'kibana/server';
-import { isEmpty } from 'lodash';
+import Boom from '@hapi/boom';
+import unified from 'unified';
+import type { Node } from 'unist';
+// installed by @elastic/eui
+// eslint-disable-next-line import/no-extraneous-dependencies
+import markdown from 'remark-parse';
+import {
+  SavedObjectsFindResult,
+  SavedObjectsFindResponse,
+  SavedObject,
+  SavedObjectReference,
+} from 'kibana/server';
+import { filter, flatMap, uniqWith, isEmpty, xorWith } from 'lodash';
+import { TimeRange } from 'src/plugins/data/server';
 import { AlertInfo } from '.';
+import { LensDocShape714 } from '../../../lens/server';
 
 import {
   AssociationType,
@@ -35,6 +47,7 @@ import {
   User,
 } from '../../common';
 import { UpdateAlertRequest } from '../client/alerts/types';
+import { LensParser, ID as LENS_ID } from './lens_parser';
 
 /**
  * Default sort field for querying saved objects.
@@ -430,3 +443,51 @@ export function checkEnabledCaseConnectorOrThrow(subCaseID: string | undefined) 
     );
   }
 }
+
+interface LensMarkdownNode {
+  timeRange: TimeRange;
+  editMode: boolean;
+  attributes: LensDocShape714 & { references: SavedObjectReference[] };
+}
+
+interface LensMarkdownParent extends Node {
+  children: LensMarkdownNode[];
+}
+
+export const extractLensReferencesFromCommentString = (comment: string): SavedObjectReference[] => {
+  const processor = unified().use([[markdown, {}], LensParser]);
+  const parsedComment = processor.parse(comment) as LensMarkdownParent;
+  const lensReferences = filter(parsedComment.children, { type: LENS_ID }) as LensMarkdownNode[];
+  const flattenRefs = flatMap(lensReferences, (lensObject) => lensObject.attributes.references);
+
+  const uniqRefs = uniqWith(
+    flattenRefs,
+    (refA, refB) => refA.type === refB.type && refA.id === refB.id
+  );
+
+  return uniqRefs;
+};
+
+export const getOrUpdateLensReferences = (
+  newComment: string,
+  currentComment?: SavedObject<CommentRequestUserType>
+) => {
+  if (!currentComment) {
+    return extractLensReferencesFromCommentString(newComment);
+  }
+
+  const savedObjectReferences = currentComment.references;
+  const savedObjectLensReferences = extractLensReferencesFromCommentString(
+    currentComment.attributes.comment
+  );
+
+  const currentNonLensReferences = xorWith(
+    savedObjectReferences,
+    savedObjectLensReferences,
+    (refA, refB) => refA.type === refB.type && refA.id === refB.id
+  );
+
+  const newCommentLensReferences = extractLensReferencesFromCommentString(newComment);
+
+  return currentNonLensReferences.concat(newCommentLensReferences);
+};

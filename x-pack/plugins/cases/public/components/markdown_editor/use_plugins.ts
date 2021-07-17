@@ -36,12 +36,11 @@ export const usePlugins = () => {
 
     if (kibanaConfig?.markdownPlugins?.lens) {
       uiPlugins.push(lensMarkdownPlugin.plugin);
-
-      parsingPlugins.push(lensMarkdownPlugin.parser);
-
-      // This line of code is TS-compatible and it will break if [1][1] change in the future.
-      processingPlugins[1][1].components.lens = lensMarkdownPlugin.renderer;
     }
+
+    parsingPlugins.push(lensMarkdownPlugin.parser);
+    // This line of code is TS-compatible and it will break if [1][1] change in the future.
+    processingPlugins[1][1].components.lens = lensMarkdownPlugin.renderer;
 
     return {
       uiPlugins,

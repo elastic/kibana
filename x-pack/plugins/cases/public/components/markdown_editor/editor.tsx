@@ -72,26 +72,22 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
       };
     });
 
-    const editor = (
-      <EuiMarkdownEditor
-        ref={editorRef}
-        aria-label={ariaLabel}
-        editorId={editorId}
-        onChange={onChange}
-        value={value}
-        uiPlugins={uiPlugins}
-        parsingPluginList={parsingPlugins}
-        processingPluginList={processingPlugins}
-        onParse={onParse}
-        errors={markdownErrorMessages}
-        data-test-subj={dataTestSubj}
-        height={height}
-      />
-    );
-
     return (
       <CommentEditorContext.Provider value={commentEditorContextValue}>
-        {editor}
+        <EuiMarkdownEditor
+          ref={editorRef}
+          aria-label={ariaLabel}
+          editorId={editorId}
+          onChange={onChange}
+          value={value}
+          uiPlugins={uiPlugins}
+          parsingPluginList={parsingPlugins}
+          processingPluginList={processingPlugins}
+          onParse={onParse}
+          errors={markdownErrorMessages}
+          data-test-subj={dataTestSubj}
+          height={height}
+        />
       </CommentEditorContext.Provider>
     );
   }

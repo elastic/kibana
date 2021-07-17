@@ -118,8 +118,8 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
         draftComment.position,
         `!{${ID}${JSON.stringify({
           timeRange,
-          attributes: lensEmbeddableAttributes,
           editMode,
+          attributes: lensEmbeddableAttributes,
         })}}`
       );
 
@@ -131,8 +131,8 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
       onSave(
         `!{${ID}${JSON.stringify({
           timeRange,
-          attributes: lensEmbeddableAttributes,
           editMode,
+          attributes: lensEmbeddableAttributes,
         })}}`,
         {
           block: true,

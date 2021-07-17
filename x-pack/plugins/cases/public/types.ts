@@ -14,7 +14,7 @@ import type {
   TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
 } from '../../triggers_actions_ui/public';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import type { Storage } from '../../../../src/plugins/kibana_utils/public';
 

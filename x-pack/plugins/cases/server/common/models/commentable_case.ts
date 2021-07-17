@@ -10,6 +10,7 @@ import {
   SavedObject,
   SavedObjectReference,
   SavedObjectsClientContract,
+  SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
   Logger,
 } from 'src/core/server';
@@ -30,6 +31,7 @@ import {
   SUB_CASE_SAVED_OBJECT,
   SubCaseAttributes,
   User,
+  CommentRequestUserType,
 } from '../../../common';
 import {
   transformESConnectorToCaseConnector,
@@ -40,6 +42,7 @@ import {
 import { AttachmentService, CasesService } from '../../services';
 import { createCaseError } from '../error';
 import { countAlertsForID } from '../index';
+import { getOrUpdateLensReferences } from '../utils';
 
 interface UpdateCommentResp {
   comment: SavedObjectsUpdateResponse<CommentAttributes>;
@@ -216,6 +219,22 @@ export class CommentableCase {
   }): Promise<UpdateCommentResp> {
     try {
       const { id, version, ...queryRestAttributes } = updateRequest;
+      const options: SavedObjectsUpdateOptions<CommentAttributes> = {
+        version,
+      };
+
+      if (queryRestAttributes.type === CommentType.user && queryRestAttributes?.comment) {
+        const currentComment = (await this.attachmentService.get({
+          unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
+          attachmentId: id,
+        })) as SavedObject<CommentRequestUserType>;
+
+        const updatedReferences = getOrUpdateLensReferences(
+          queryRestAttributes.comment,
+          currentComment
+        );
+        options.references = updatedReferences;
+      }
 
       const [comment, commentableCase] = await Promise.all([
         this.attachmentService.update({
@@ -226,7 +245,7 @@ export class CommentableCase {
             updated_at: updatedAt,
             updated_by: user,
           },
-          version,
+          options,
         }),
         this.update({ date: updatedAt, user }),
       ]);
@@ -272,6 +291,13 @@ export class CommentableCase {
         throw Boom.badRequest('The owner field of the comment must match the case');
       }
 
+      const references = this.buildRefsToCase();
+
+      if (commentReq.type === CommentType.user && commentReq?.comment) {
+        const commentStringReferences = getOrUpdateLensReferences(commentReq.comment);
+        references.concat(commentStringReferences);
+      }
+
       const [comment, commentableCase] = await Promise.all([
         this.attachmentService.create({
           unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
@@ -281,7 +307,7 @@ export class CommentableCase {
             ...commentReq,
             ...user,
           }),
-          references: this.buildRefsToCase(),
+          references,
           id,
         }),
         this.update({ date: createdDate, user }),

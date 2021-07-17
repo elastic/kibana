@@ -9,6 +9,7 @@ import { PluginInitializerContext, PluginConfigDescriptor } from 'kibana/server'
 import { LensServerPlugin } from './plugin';
 
 export * from './plugin';
+export * from './migrations/types';
 
 import { configSchema, ConfigSchema } from '../config';
 
