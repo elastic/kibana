@@ -9,9 +9,7 @@ import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import {
-  createExploratoryViewUrl,
-} from '../../../../../../observability/public';
+import { createExploratoryViewUrl } from '../../../../../../observability/public';
 import { ALL_VALUES_SELECTED } from '../../../../../../observability/public';
 import {
   isIosAgentName,
@@ -20,6 +18,7 @@ import {
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
+  TRANSACTION_DURATION,
 } from '../../../../../common/elasticsearch_fieldnames';
 import {
   ENVIRONMENT_ALL,
@@ -47,21 +46,30 @@ export function AnalyzeDataButton() {
   const { rangeTo, rangeFrom, environment } = urlParams;
   const basepath = services.http?.basePath.get();
 
-  if ((isRumAgentName(agentName) || isIosAgentName(agentName)) && rangeFrom && rangeTo) {
+  if (
+    (isRumAgentName(agentName) || isIosAgentName(agentName)) &&
+    rangeFrom &&
+    rangeTo
+  ) {
     const href = createExploratoryViewUrl(
       {
         reportType: 'kpi-over-time',
-        'allSeries':[{
-          dataType: isRumAgentName(agentName) ? 'ux' : 'mobile',
-          time: { from: rangeFrom, to: rangeTo },
-          reportDefinitions: {
-            [SERVICE_NAME]: [serviceName],
-            ...getEnvironmentDefinition(environment),
+        allSeries: [
+          {
+            order: 0,
+            name: `${serviceName}-response-latency`,
+            selectedMetricField: TRANSACTION_DURATION,
+            dataType: isRumAgentName(agentName) ? 'ux' : 'mobile',
+            time: { from: rangeFrom, to: rangeTo },
+            reportDefinitions: {
+              [SERVICE_NAME]: [serviceName],
+              ...(environment ? getEnvironmentDefinition(environment) : {}),
+            },
+            operationType: 'average',
+            isNew: true,
           },
-          operationType: 'average',
-          isNew: true,
-        },
-      ],
+        ],
+      },
       basepath
     );
 
