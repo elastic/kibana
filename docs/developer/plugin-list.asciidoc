@@ -220,7 +220,7 @@ generating deep links to other apps, and creating short URLs.
 
 
 |{kib-repo}blob/{branch}/src/plugins/telemetry_management_section/README.md[telemetryManagementSection]
-|This plugin adds the Advanced Settings section for the Usage Data collection (aka Telemetry).
+|This plugin adds the Advanced Settings section for the Usage and Security Data collection (aka Telemetry).
 
 
 |{kib-repo}blob/{branch}/src/plugins/tile_map/README.md[tileMap]
