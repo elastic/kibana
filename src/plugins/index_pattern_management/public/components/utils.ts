@@ -25,7 +25,7 @@ const rollupIndexPatternListName = i18n.translate(
   }
 );
 
-const isRollup = (indexPattern: IIndexPattern | SimpleSavedObject<IIndexPattern>) => {
+const isRollup = (indexPattern: IndexPattern) => {
   return indexPattern.type === 'rollup';
 };
 
@@ -66,11 +66,7 @@ export async function getIndexPatterns(
   );
 }
 
-export const getTags = (
-  // todo might be able to tighten types
-  indexPattern: IIndexPattern | SimpleSavedObject<IIndexPattern>,
-  isDefault: boolean
-) => {
+export const getTags = (indexPattern: IndexPattern, isDefault: boolean) => {
   const tags = [];
   if (isDefault) {
     tags.push({
@@ -87,9 +83,7 @@ export const getTags = (
   return tags;
 };
 
-export const areScriptedFieldsEnabled = (
-  indexPattern: IIndexPattern | SimpleSavedObject<IIndexPattern>
-) => {
+export const areScriptedFieldsEnabled = (indexPattern: IndexPattern) => {
   return !isRollup(indexPattern);
 };
 
