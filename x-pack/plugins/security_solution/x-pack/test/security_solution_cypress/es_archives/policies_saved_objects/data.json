@@ -1,0 +1,34 @@
+{
+  "type": "doc",
+  "value": {
+      "index": ".kibana_8.0.0_001",
+      "id": "ingest-agent-policies:6bd7c2a0-e626-11eb-9744-7b597182ffe0",
+      "source": {
+          "ingest-agent-policies": {
+              "name": "My agent policy",
+              "description": "",
+              "namespace": "default",
+              "monitoring_enabled": [
+                  "logs",
+                  "metrics"
+              ],
+              "status": "active",
+              "is_managed": false,
+              "revision": 3,
+              "updated_at": "2021-07-16T12:11:23.754Z",
+              "updated_by": "elastic",
+              "package_policies": [
+                  "908c19f1-1137-44d8-b6d2-f2c2ce465f07",
+                  "3af5db6b-b024-406d-a509-185f5bb4ef77"
+              ]
+          },
+          "type": "ingest-agent-policies",
+          "references": [],
+          "migrationVersion": {
+              "ingest-agent-policies": "7.12.0"
+          },
+          "coreMigrationVersion": "8.0.0",
+          "updated_at": "2021-07-16T12:11:23.758Z"
+      }
+  }
+}

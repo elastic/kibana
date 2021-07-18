@@ -1,0 +1,60 @@
+{
+  "type": "doc",
+  "value": {
+    "index": ".fleet-agents-7",
+    "id": "86f0c767-0ac1-4e18-8797-34536aa6e682",
+    "source": {
+      "access_api_key_id": "F2A7r3oBAdNyh9eI0voq",
+      "action_seq_no": [
+        -1
+      ],
+      "active": true,
+      "enrolled_at": "2021-07-16T12:12:51Z",
+      "local_metadata": {
+        "elastic": {
+          "agent": {
+            "build.original": "7.14.0-SNAPSHOT (build: 7847d38e3c7257b640ff2d26660f0cc18de5e49e at 2021-06-09 18:45:38 +0000 UTC)",
+            "id": "86f0c767-0ac1-4e18-8797-34536aa6e682",
+            "log_level": "info",
+            "snapshot": true,
+            "upgradeable": true,
+            "version": "7.14.0"
+          }
+        },
+        "host": {
+          "architecture": "x86_64",
+          "hostname": "WinDev2104Eval",
+          "id": "17d9cabc-7edd-43bc-bacb-8da5f5e6c0e5",
+          "ip": [
+            "fe80::21a6:63d3:d70e:e3ad/64",
+            "10.0.2.15/24",
+            "::1/128",
+            "127.0.0.1/8"
+          ],
+          "mac": [
+            "08:00:27:b1:1d:5a"
+          ],
+          "name": "WinDev2104Eval"
+        },
+        "os": {
+          "family": "windows",
+          "full": "Windows 10 Enterprise Evaluation(10.0)",
+          "kernel": "10.0.19041.906 (WinBuild.160101.0800)",
+          "name": "Windows 10 Enterprise Evaluation",
+          "platform": "windows",
+          "version": "10.0"
+        }
+      },
+      "policy_id": "6bd7c2a0-e626-11eb-9744-7b597182ffe0",
+      "type": "PERMANENT",
+      "default_api_key": "GWA7r3oBAdNyh9eI3Ppc:-sgos9WaQYOSrAnSJpwPVw",
+      "policy_output_permissions_hash": "f9d3fc71361f782a8699c157bc8870a9d9fce82da7fcbc42dd6ffc1e55062d3b",
+      "default_api_key_id": "GWA7r3oBAdNyh9eI3Ppc",
+      "updated_at": "2021-07-16T12:15:56Z",
+      "last_checkin_status": "online",
+      "last_checkin": "2021-07-16T12:15:50Z",
+      "policy_revision_idx": 3,
+      "policy_coordinator_idx": 1
+    }
+  }
+}

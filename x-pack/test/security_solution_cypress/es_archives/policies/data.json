@@ -1,0 +1,783 @@
+{
+  "type": "doc",
+  "value": {
+      "index": ".fleet-policies-7",
+      "id": "00d1c2dc-dca0-4ac3-aea9-17f726420311",
+      "source": {
+          "@timestamp": "2021-07-16T11:33:01.365Z",
+          "revision_idx": 2,
+          "coordinator_idx": 0,
+          "data": {
+              "id": "6bd7c2a0-e626-11eb-9744-7b597182ffe0",
+              "outputs": {
+                  "default": {
+                      "type": "elasticsearch",
+                      "hosts": [
+                          "http://localhost:9200"
+                      ]
+                  }
+              },
+              "inputs": [
+                  {
+                      "id": "908c19f1-1137-44d8-b6d2-f2c2ce465f07",
+                      "revision": 1,
+                      "name": "system-1",
+                      "type": "logfile",
+                      "data_stream": {
+                          "namespace": "default"
+                      },
+                      "use_output": "default",
+                      "streams": [
+                          {
+                              "id": "logfile-system.auth-908c19f1-1137-44d8-b6d2-f2c2ce465f07",
+                              "data_stream": {
+                                  "type": "logs",
+                                  "dataset": "system.auth"
+                              },
+                              "paths": [
+                                  "/var/log/auth.log*",
+                                  "/var/log/secure*"
+                              ],
+                              "exclude_files": [
+                                  ".gz$"
+                              ],
+                              "multiline": {
+                                  "pattern": "^\\s",
+                                  "match": "after"
+                              },
+                              "processors": [
+                                  {
+                                      "add_locale": null
+                                  },
+                                  {
+                                      "add_fields": {
+                                          "target": "",
+                                          "fields": {
+                                              "ecs.version": "1.9.0"
+                                          }
+                                      }
+                                  }
+                              ]
+                          },
+                          {
+                              "id": "logfile-system.syslog-908c19f1-1137-44d8-b6d2-f2c2ce465f07",
+                              "data_stream": {
+                                  "type": "logs",
+                                  "dataset": "system.syslog"
+                              },
+                              "paths": [
+                                  "/var/log/messages*",
+                                  "/var/log/syslog*"
+                              ],
+                              "exclude_files": [
+                                  ".gz$"
+                              ],
+                              "multiline": {
+                                  "pattern": "^\\s",
+                                  "match": "after"
+                              },
+                              "processors": [
+                                  {
+                                      "add_locale": null
+                                  },
+                                  {
+                                      "add_fields": {
+                                          "target": "",
+                                          "fields": {
+                                              "ecs.version": "1.9.0"
+                                          }
+                                      }
+                                  }
+                              ]
+                          }
+                      ],
+                      "meta": {
+                          "package": {
+                              "name": "system",
+                              "version": "1.0.0"
+                          }
+                      }
+                  },
+                  {
+                      "id": "908c19f1-1137-44d8-b6d2-f2c2ce465f07",
+                      "revision": 1,
+                      "name": "system-1",
+                      "type": "winlog",
+                      "data_stream": {
+                          "namespace": "default"
+                      },
+                      "use_output": "default",
+                      "streams": [
+                          {
+                              "id": "winlog-system.application-908c19f1-1137-44d8-b6d2-f2c2ce465f07",
+                              "data_stream": {
+                                  "type": "logs",
+                                  "dataset": "system.application"
+                              },
+                              "name": "Application",
+                              "condition": "${host.platform} == 'windows'",
+                              "ignore_older": "72h",
+                              "tags": null
+                          },
+                          {
+                              "id": "winlog-system.security-908c19f1-1137-44d8-b6d2-f2c2ce465f07",
+                              "data_stream": {
+                                  "type": "logs",
+                                  "dataset": "system.security"
+                              },
+                              "name": "Security",
+                              "condition": "${host.platform} == 'windows'",
+                              "tags": null
+                          },
+                          {
+                              "id": "winlog-system.system-908c19f1-1137-44d8-b6d2-f2c2ce465f07",
+                              "data_stream": {
+                                  "type": "logs",
+                                  "dataset": "system.system"
+                              },
+                              "name": "System",
+                              "condition": "${host.platform} == 'windows'",
+                              "tags": null
+                          }
+                      ],
+                      "meta": {
+                          "package": {
+                              "name": "system",
+                              "version": "1.0.0"
+                          }
+                      }
+                  },
+                  {
+                      "id": "908c19f1-1137-44d8-b6d2-f2c2ce465f07",
+                      "revision": 1,
+                      "name": "system-1",
+                      "type": "system/metrics",
+                      "data_stream": {
+                          "namespace": "default"
+                      },
+                      "use_output": "default",
+                      "streams": [
+                          {
+                              "id": "system/metrics-system.cpu-908c19f1-1137-44d8-b6d2-f2c2ce465f07",
+                              "data_stream": {
+                                  "type": "metrics",
+                                  "dataset": "system.cpu"
+                              },
+                              "metricsets": [
+                                  "cpu"
+                              ],
+                              "cpu.metrics": [
+                                  "percentages",
+                                  "normalized_percentages"
+                              ],
+                              "period": "10s"
+                          },
+                          {
+                              "id": "system/metrics-system.diskio-908c19f1-1137-44d8-b6d2-f2c2ce465f07",
+                              "data_stream": {
+                                  "type": "metrics",
+                                  "dataset": "system.diskio"
+                              },
+                              "metricsets": [
+                                  "diskio"
+                              ],
+                              "diskio.include_devices": null,
+                              "period": "10s"
+                          },
+                          {
+                              "id": "system/metrics-system.filesystem-908c19f1-1137-44d8-b6d2-f2c2ce465f07",
+                              "data_stream": {
+                                  "type": "metrics",
+                                  "dataset": "system.filesystem"
+                              },
+                              "metricsets": [
+                                  "filesystem"
+                              ],
+                              "period": "1m",
+                              "processors": [
+                                  {
+                                      "drop_event.when.regexp": {
+                                          "system.filesystem.mount_point": "^/(sys|cgroup|proc|dev|etc|host|lib|snap)($|/)"
+                                      }
+                                  }
+                              ]
+                          },
+                          {
+                              "id": "system/metrics-system.fsstat-908c19f1-1137-44d8-b6d2-f2c2ce465f07",
+                              "data_stream": {
+                                  "type": "metrics",
+                                  "dataset": "system.fsstat"
+                              },
+                              "metricsets": [
+                                  "fsstat"
+                              ],
+                              "period": "1m",
+                              "processors": [
+                                  {
+                                      "drop_event.when.regexp": {
+                                          "system.fsstat.mount_point": "^/(sys|cgroup|proc|dev|etc|host|lib|snap)($|/)"
+                                      }
+                                  }
+                              ]
+                          },
+                          {
+                              "id": "system/metrics-system.load-908c19f1-1137-44d8-b6d2-f2c2ce465f07",
+                              "data_stream": {
+                                  "type": "metrics",
+                                  "dataset": "system.load"
+                              },
+                              "metricsets": [
+                                  "load"
+                              ],
+                              "condition": "${host.platform} != 'windows'",
+                              "period": "10s"
+                          },
+                          {
+                              "id": "system/metrics-system.memory-908c19f1-1137-44d8-b6d2-f2c2ce465f07",
+                              "data_stream": {
+                                  "type": "metrics",
+                                  "dataset": "system.memory"
+                              },
+                              "metricsets": [
+                                  "memory"
+                              ],
+                              "period": "10s"
+                          },
+                          {
+                              "id": "system/metrics-system.network-908c19f1-1137-44d8-b6d2-f2c2ce465f07",
+                              "data_stream": {
+                                  "type": "metrics",
+                                  "dataset": "system.network"
+                              },
+                              "metricsets": [
+                                  "network"
+                              ],
+                              "period": "10s",
+                              "network.interfaces": null
+                          },
+                          {
+                              "id": "system/metrics-system.process-908c19f1-1137-44d8-b6d2-f2c2ce465f07",
+                              "data_stream": {
+                                  "type": "metrics",
+                                  "dataset": "system.process"
+                              },
+                              "metricsets": [
+                                  "process"
+                              ],
+                              "period": "10s",
+                              "process.include_top_n.by_cpu": 5,
+                              "process.include_top_n.by_memory": 5,
+                              "process.cmdline.cache.enabled": true,
+                              "process.cgroups.enabled": false,
+                              "process.include_cpu_ticks": false,
+                              "processes": [
+                                  ".*"
+                              ]
+                          },
+                          {
+                              "id": "system/metrics-system.process.summary-908c19f1-1137-44d8-b6d2-f2c2ce465f07",
+                              "data_stream": {
+                                  "type": "metrics",
+                                  "dataset": "system.process.summary"
+                              },
+                              "metricsets": [
+                                  "process_summary"
+                              ],
+                              "period": "10s"
+                          },
+                          {
+                              "id": "system/metrics-system.socket_summary-908c19f1-1137-44d8-b6d2-f2c2ce465f07",
+                              "data_stream": {
+                                  "type": "metrics",
+                                  "dataset": "system.socket_summary"
+                              },
+                              "metricsets": [
+                                  "socket_summary"
+                              ],
+                              "period": "10s"
+                          },
+                          {
+                              "id": "system/metrics-system.uptime-908c19f1-1137-44d8-b6d2-f2c2ce465f07",
+                              "data_stream": {
+                                  "type": "metrics",
+                                  "dataset": "system.uptime"
+                              },
+                              "metricsets": [
+                                  "uptime"
+                              ],
+                              "period": "10s"
+                          }
+                      ],
+                      "meta": {
+                          "package": {
+                              "name": "system",
+                              "version": "1.0.0"
+                          }
+                      }
+                  },
+                  {
+                      "id": "3af5db6b-b024-406d-a509-185f5bb4ef77",
+                      "revision": 1,
+                      "name": "endpoint Integration",
+                      "type": "endpoint",
+                      "data_stream": {
+                          "namespace": "default"
+                      },
+                      "use_output": "default",
+                      "artifact_manifest": {
+                          "manifest_version": "1.0.0",
+                          "schema_version": "v1",
+                          "artifacts": {
+                              "endpoint-exceptionlist-macos-v1": {
+                                  "encryption_algorithm": "none",
+                                  "decoded_sha256": "d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658",
+                                  "decoded_size": 14,
+                                  "encoded_sha256": "f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda",
+                                  "encoded_size": 22,
+                                  "relative_url": "/api/fleet/artifacts/endpoint-exceptionlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658",
+                                  "compression_algorithm": "zlib"
+                              },
+                              "endpoint-exceptionlist-windows-v1": {
+                                  "encryption_algorithm": "none",
+                                  "decoded_sha256": "d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658",
+                                  "decoded_size": 14,
+                                  "encoded_sha256": "f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda",
+                                  "encoded_size": 22,
+                                  "relative_url": "/api/fleet/artifacts/endpoint-exceptionlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658",
+                                  "compression_algorithm": "zlib"
+                              },
+                              "endpoint-exceptionlist-linux-v1": {
+                                  "encryption_algorithm": "none",
+                                  "decoded_sha256": "d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658",
+                                  "decoded_size": 14,
+                                  "encoded_sha256": "f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda",
+                                  "encoded_size": 22,
+                                  "relative_url": "/api/fleet/artifacts/endpoint-exceptionlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658",
+                                  "compression_algorithm": "zlib"
+                              },
+                              "endpoint-trustlist-macos-v1": {
+                                  "encryption_algorithm": "none",
+                                  "decoded_sha256": "d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658",
+                                  "decoded_size": 14,
+                                  "encoded_sha256": "f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda",
+                                  "encoded_size": 22,
+                                  "relative_url": "/api/fleet/artifacts/endpoint-trustlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658",
+                                  "compression_algorithm": "zlib"
+                              },
+                              "endpoint-trustlist-windows-v1": {
+                                  "encryption_algorithm": "none",
+                                  "decoded_sha256": "d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658",
+                                  "decoded_size": 14,
+                                  "encoded_sha256": "f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda",
+                                  "encoded_size": 22,
+                                  "relative_url": "/api/fleet/artifacts/endpoint-trustlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658",
+                                  "compression_algorithm": "zlib"
+                              },
+                              "endpoint-trustlist-linux-v1": {
+                                  "encryption_algorithm": "none",
+                                  "decoded_sha256": "d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658",
+                                  "decoded_size": 14,
+                                  "encoded_sha256": "f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda",
+                                  "encoded_size": 22,
+                                  "relative_url": "/api/fleet/artifacts/endpoint-trustlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658",
+                                  "compression_algorithm": "zlib"
+                              },
+                              "endpoint-eventfilterlist-macos-v1": {
+                                  "encryption_algorithm": "none",
+                                  "decoded_sha256": "d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658",
+                                  "decoded_size": 14,
+                                  "encoded_sha256": "f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda",
+                                  "encoded_size": 22,
+                                  "relative_url": "/api/fleet/artifacts/endpoint-eventfilterlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658",
+                                  "compression_algorithm": "zlib"
+                              },
+                              "endpoint-eventfilterlist-windows-v1": {
+                                  "encryption_algorithm": "none",
+                                  "decoded_sha256": "d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658",
+                                  "decoded_size": 14,
+                                  "encoded_sha256": "f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda",
+                                  "encoded_size": 22,
+                                  "relative_url": "/api/fleet/artifacts/endpoint-eventfilterlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658",
+                                  "compression_algorithm": "zlib"
+                              },
+                              "endpoint-eventfilterlist-linux-v1": {
+                                  "encryption_algorithm": "none",
+                                  "decoded_sha256": "d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658",
+                                  "decoded_size": 14,
+                                  "encoded_sha256": "f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda",
+                                  "encoded_size": 22,
+                                  "relative_url": "/api/fleet/artifacts/endpoint-eventfilterlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658",
+                                  "compression_algorithm": "zlib"
+                              }
+                          }
+                      },
+                      "policy": {
+                          "windows": {
+                              "events": {
+                                  "dll_and_driver_load": true,
+                                  "dns": true,
+                                  "file": true,
+                                  "network": true,
+                                  "process": true,
+                                  "registry": true,
+                                  "security": true
+                              },
+                              "malware": {
+                                  "mode": "prevent"
+                              },
+                              "ransomware": {
+                                  "mode": "prevent",
+                                  "supported": true
+                              },
+                              "popup": {
+                                  "malware": {
+                                      "message": "",
+                                      "enabled": true
+                                  },
+                                  "ransomware": {
+                                      "message": "",
+                                      "enabled": true
+                                  }
+                              },
+                              "logging": {
+                                  "file": "info"
+                              },
+                              "antivirus_registration": {
+                                  "enabled": false
+                              }
+                          },
+                          "mac": {
+                              "events": {
+                                  "process": true,
+                                  "file": true,
+                                  "network": true
+                              },
+                              "malware": {
+                                  "mode": "prevent"
+                              },
+                              "popup": {
+                                  "malware": {
+                                      "message": "",
+                                      "enabled": true
+                                  }
+                              },
+                              "logging": {
+                                  "file": "info"
+                              }
+                          },
+                          "linux": {
+                              "events": {
+                                  "process": true,
+                                  "file": true,
+                                  "network": true
+                              },
+                              "malware": {
+                                  "mode": "prevent"
+                              },
+                              "popup": {
+                                  "malware": {
+                                      "message": "",
+                                      "enabled": true
+                                  }
+                              },
+                              "logging": {
+                                  "file": "info"
+                              }
+                          }
+                      },
+                      "meta": {
+                          "package": {
+                              "name": "endpoint",
+                              "version": "0.20.1"
+                          }
+                      }
+                  }
+              ],
+              "revision": 2,
+              "agent": {
+                  "monitoring": {
+                      "namespace": "default",
+                      "use_output": "default",
+                      "enabled": true,
+                      "logs": true,
+                      "metrics": true
+                  }
+              },
+              "output_permissions": {
+                  "default": {
+                      "system-1": {
+                          "indices": [
+                              {
+                                  "names": [
+                                      "logs-system.auth-default"
+                                  ],
+                                  "privileges": [
+                                      "auto_configure",
+                                      "create_doc"
+                                  ]
+                              },
+                              {
+                                  "names": [
+                                      "logs-system.syslog-default"
+                                  ],
+                                  "privileges": [
+                                      "auto_configure",
+                                      "create_doc"
+                                  ]
+                              },
+                              {
+                                  "names": [
+                                      "logs-system.application-default"
+                                  ],
+                                  "privileges": [
+                                      "auto_configure",
+                                      "create_doc"
+                                  ]
+                              },
+                              {
+                                  "names": [
+                                      "logs-system.security-default"
+                                  ],
+                                  "privileges": [
+                                      "auto_configure",
+                                      "create_doc"
+                                  ]
+                              },
+                              {
+                                  "names": [
+                                      "logs-system.system-default"
+                                  ],
+                                  "privileges": [
+                                      "auto_configure",
+                                      "create_doc"
+                                  ]
+                              },
+                              {
+                                  "names": [
+                                      "metrics-system.cpu-default"
+                                  ],
+                                  "privileges": [
+                                      "auto_configure",
+                                      "create_doc"
+                                  ]
+                              },
+                              {
+                                  "names": [
+                                      "metrics-system.diskio-default"
+                                  ],
+                                  "privileges": [
+                                      "auto_configure",
+                                      "create_doc"
+                                  ]
+                              },
+                              {
+                                  "names": [
+                                      "metrics-system.filesystem-default"
+                                  ],
+                                  "privileges": [
+                                      "auto_configure",
+                                      "create_doc"
+                                  ]
+                              },
+                              {
+                                  "names": [
+                                      "metrics-system.fsstat-default"
+                                  ],
+                                  "privileges": [
+                                      "auto_configure",
+                                      "create_doc"
+                                  ]
+                              },
+                              {
+                                  "names": [
+                                      "metrics-system.load-default"
+                                  ],
+                                  "privileges": [
+                                      "auto_configure",
+                                      "create_doc"
+                                  ]
+                              },
+                              {
+                                  "names": [
+                                      "metrics-system.memory-default"
+                                  ],
+                                  "privileges": [
+                                      "auto_configure",
+                                      "create_doc"
+                                  ]
+                              },
+                              {
+                                  "names": [
+                                      "metrics-system.network-default"
+                                  ],
+                                  "privileges": [
+                                      "auto_configure",
+                                      "create_doc"
+                                  ]
+                              },
+                              {
+                                  "names": [
+                                      "metrics-system.process-default"
+                                  ],
+                                  "privileges": [
+                                      "auto_configure",
+                                      "create_doc"
+                                  ]
+                              },
+                              {
+                                  "names": [
+                                      "metrics-system.process.summary-default"
+                                  ],
+                                  "privileges": [
+                                      "auto_configure",
+                                      "create_doc"
+                                  ]
+                              },
+                              {
+                                  "names": [
+                                      "metrics-system.socket_summary-default"
+                                  ],
+                                  "privileges": [
+                                      "auto_configure",
+                                      "create_doc"
+                                  ]
+                              },
+                              {
+                                  "names": [
+                                      "metrics-system.uptime-default"
+                                  ],
+                                  "privileges": [
+                                      "auto_configure",
+                                      "create_doc"
+                                  ]
+                              }
+                          ]
+                      },
+                      "endpoint Integration": {
+                          "indices": [
+                              {
+                                  "names": [
+                                      "logs-endpoint.alerts-default"
+                                  ],
+                                  "privileges": [
+                                      "auto_configure",
+                                      "create_doc"
+                                  ]
+                              },
+                              {
+                                  "names": [
+                                      ".logs-endpoint.diagnostic.collection-default"
+                                  ],
+                                  "privileges": [
+                                      "auto_configure",
+                                      "create_doc"
+                                  ]
+                              },
+                              {
+                                  "names": [
+                                      "logs-endpoint.events.file-default"
+                                  ],
+                                  "privileges": [
+                                      "auto_configure",
+                                      "create_doc"
+                                  ]
+                              },
+                              {
+                                  "names": [
+                                      "logs-endpoint.events.library-default"
+                                  ],
+                                  "privileges": [
+                                      "auto_configure",
+                                      "create_doc"
+                                  ]
+                              },
+                              {
+                                  "names": [
+                                      "metrics-endpoint.metadata-default"
+                                  ],
+                                  "privileges": [
+                                      "auto_configure",
+                                      "create_doc"
+                                  ]
+                              },
+                              {
+                                  "names": [
+                                      "metrics-endpoint.metrics-default"
+                                  ],
+                                  "privileges": [
+                                      "auto_configure",
+                                      "create_doc"
+                                  ]
+                              },
+                              {
+                                  "names": [
+                                      "logs-endpoint.events.network-default"
+                                  ],
+                                  "privileges": [
+                                      "auto_configure",
+                                      "create_doc"
+                                  ]
+                              },
+                              {
+                                  "names": [
+                                      "metrics-endpoint.policy-default"
+                                  ],
+                                  "privileges": [
+                                      "auto_configure",
+                                      "create_doc"
+                                  ]
+                              },
+                              {
+                                  "names": [
+                                      "logs-endpoint.events.process-default"
+                                  ],
+                                  "privileges": [
+                                      "auto_configure",
+                                      "create_doc"
+                                  ]
+                              },
+                              {
+                                  "names": [
+                                      "logs-endpoint.events.registry-default"
+                                  ],
+                                  "privileges": [
+                                      "auto_configure",
+                                      "create_doc"
+                                  ]
+                              },
+                              {
+                                  "names": [
+                                      "logs-endpoint.events.security-default"
+                                  ],
+                                  "privileges": [
+                                      "auto_configure",
+                                      "create_doc"
+                                  ]
+                              }
+                          ]
+                      },
+                      "_elastic_agent_checks": {
+                          "cluster": [
+                              "monitor"
+                          ],
+                          "indices": [
+                              {
+                                  "names": [
+                                      "logs-elastic_agent*-default",
+                                      "metrics-elastic_agent*-default"
+                                  ],
+                                  "privileges": [
+                                      "auto_configure",
+                                      "create_doc"
+                                  ]
+                              }
+                          ]
+                      }
+                  }
+              }
+          },
+          "policy_id": "6bd7c2a0-e626-11eb-9744-7b597182ffe0",
+          "default_fleet_server": false
+      }
+  }
+}

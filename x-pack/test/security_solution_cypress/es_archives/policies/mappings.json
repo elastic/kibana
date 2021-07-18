@@ -1,0 +1,62 @@
+{
+  "type": "index",
+  "value": {
+    "index": ".fleet-policies",
+    "aliases": {
+      ".fleet-policies": {}
+    },
+    "mappings": {
+      "dynamic": "false",
+      "_meta": {
+        "version": "7.14.0"
+      },
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "coordinator_idx": {
+          "type": "integer"
+        },
+        "data": {
+          "type": "object",
+          "enabled": false
+        },
+        "default_fleet_server": {
+          "type": "boolean"
+        },
+        "policy_id": {
+          "type": "keyword"
+        },
+        "revision_idx": {
+          "type": "integer"
+        },
+        "unenroll_timeout": {
+          "type": "integer"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "routing": {
+          "allocation": {
+            "include": {
+              "_tier_preference": "data_content"
+            }
+          }
+        },
+        "number_of_shards": "1",
+        "auto_expand_replicas": "0-1",
+        "blocks": {
+          "read_only_allow_delete": "false"
+        },
+        "provided_name": ".fleet-policies",
+        "creation_date": "1626257936636",
+        "number_of_replicas": "1",
+        "uuid": "23E8uNi_Tl6XD078sfghhg",
+        "version": {
+          "created": "7130099"
+        }
+      }
+    }
+  }
+}

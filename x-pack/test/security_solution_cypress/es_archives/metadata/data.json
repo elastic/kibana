@@ -1,0 +1,87 @@
+{
+  "type": "doc",
+  "value": {
+    "index": "metrics-endpoint.metadata_current_default",
+    "id": "Nh-KBMPYUBH3oWTvWo1-O0cAAAAAAAAA",
+    "source": {
+      "agent": {
+        "build": {
+          "original": "version: 7.14.0-SNAPSHOT, compiled: Mon May 24 20:25:45 2021, branch: 7.x, commit: 7b49f58be7b5f9a33cd2b752480f37565859d603"
+        },
+        "id": "6f97936e-a676-930c-8400-7ad73a3c839e",
+        "type": "endpoint",
+        "version": "7.14.0-SNAPSHOT"
+      },
+      "@timestamp": "2021-07-16T12:18:39.3786288Z",
+      "Endpoint": {
+        "policy": {
+          "applied": {
+            "name": "endpoint Integration",
+            "id": "3af5db6b-b024-406d-a509-185f5bb4ef77",
+            "endpoint_policy_version": "1",
+            "version": "3",
+            "status": "success"
+          }
+        },
+        "status": "enrolled"
+      },
+      "ecs": {
+        "version": "1.6.0"
+      },
+      "data_stream": {
+        "namespace": "default",
+        "type": "metrics",
+        "dataset": "endpoint.metadata"
+      },
+      "elastic": {
+        "agent": {
+          "id": "86f0c767-0ac1-4e18-8797-34536aa6e682"
+        }
+      },
+      "host": {
+        "hostname": "WinDev2104Eval",
+        "os": {
+          "Ext": {
+            "variant": "Windows 10 Enterprise Evaluation"
+          },
+          "kernel": "2009 (10.0.19042.906)",
+          "name": "Windows",
+          "family": "windows",
+          "version": "2009 (10.0.19042.906)",
+          "platform": "windows",
+          "full": "Windows 10 Enterprise Evaluation 2009 (10.0.19042.906)"
+        },
+        "ip": [
+          "10.0.2.15",
+          "fe80::21a6:63d3:d70e:e3ad",
+          "127.0.0.1",
+          "::1"
+        ],
+        "name": "WinDev2104Eval",
+        "id": "17d9cabc-7edd-43bc-bacb-8da5f5e6c0e5",
+        "mac": [
+          "08:00:27:b1:1d:5a"
+        ],
+        "architecture": "x86_64"
+      },
+      "message": "Endpoint metadata",
+      "event": {
+        "agent_id_status": "mismatch",
+        "sequence": 45438,
+        "ingested": "2021-07-16T12:18:39.592012Z",
+        "created": "2021-07-16T12:18:39.3786288Z",
+        "kind": "metric",
+        "module": "endpoint",
+        "action": "endpoint_metadata",
+        "id": "MD3rm+eVy4dgit/n+++++jaW",
+        "category": [
+          "host"
+        ],
+        "type": [
+          "info"
+        ],
+        "dataset": "endpoint.metadata"
+      }
+    }
+  }
+}
