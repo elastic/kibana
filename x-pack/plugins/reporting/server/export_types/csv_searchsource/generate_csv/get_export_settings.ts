@@ -8,6 +8,7 @@
 import { ByteSizeValue } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { IUiSettingsClient } from 'kibana/server';
+import { createEscapeValue } from '../../../../../../../src/plugins/data/common';
 import { ReportingConfig } from '../../../';
 import {
   CSV_BOM_CHARS,
@@ -16,7 +17,6 @@ import {
   UI_SETTINGS_CSV_SEPARATOR,
 } from '../../../../common/constants';
 import { LevelLogger } from '../../../lib';
-import { createEscapeValue } from './escape_value';
 
 export interface CsvExportSettings {
   timezone: string;
