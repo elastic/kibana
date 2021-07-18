@@ -8,7 +8,6 @@
 
 import { IndexPatternsContract } from 'src/plugins/data/public';
 import { IndexPattern, IFieldType } from 'src/plugins/data/public';
-import { SimpleSavedObject } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 
 const defaultIndexPatternListName = i18n.translate(
