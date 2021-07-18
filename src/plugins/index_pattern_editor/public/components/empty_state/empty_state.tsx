@@ -26,26 +26,23 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 
-import { IndexPatternEditorContext } from '../../types';
-
-import { useKibana } from '../../shared_imports';
+import { ApplicationStart } from 'src/core/public';
 
 export const EmptyState = ({
   onRefresh,
   closeFlyout,
   createAnyway,
+  canSaveIndexPattern,
+  addDataUrl,
+  navigateToApp,
 }: {
   onRefresh: () => void;
   closeFlyout: () => void;
   createAnyway: () => void;
+  canSaveIndexPattern: boolean;
+  addDataUrl: string;
+  navigateToApp: ApplicationStart['navigateToApp'];
 }) => {
-  const {
-    services: {
-      docLinks,
-      application: { navigateToApp, capabilities },
-    },
-  } = useKibana<IndexPatternEditorContext>();
-
   const createAnywayLink = (
     <EuiText color="subdued" textAlign="center" size="xs">
       <FormattedMessage
@@ -168,7 +165,7 @@ export const EmptyState = ({
                         />
                       ),
                       description: (
-                        <EuiLink href={docLinks.links.addData} target="_blank" external>
+                        <EuiLink href={addDataUrl} target="_blank" external>
                           <FormattedMessage
                             id="indexPatternEditor.createIndexPattern.emptyState.readDocs"
                             defaultMessage="Read documentation"
@@ -207,7 +204,7 @@ export const EmptyState = ({
         </EuiPageContentBody>
       </EuiPageContent>
       <EuiSpacer />
-      {capabilities.indexPatterns.save && createAnywayLink}
+      {canSaveIndexPattern && createAnywayLink}
     </>
   );
 };

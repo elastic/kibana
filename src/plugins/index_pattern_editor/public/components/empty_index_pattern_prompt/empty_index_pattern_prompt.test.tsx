@@ -12,7 +12,13 @@ import { shallowWithI18nProvider } from '@kbn/test/jest';
 
 describe('EmptyIndexPatternPrompt', () => {
   it('should render normally', () => {
-    const component = shallowWithI18nProvider(<EmptyIndexPatternPrompt goToCreate={() => {}} />);
+    const component = shallowWithI18nProvider(
+      <EmptyIndexPatternPrompt
+        goToCreate={() => {}}
+        canSaveIndexPattern={true}
+        indexPatternsIntroUrl={'http://elastic.co/'}
+      />
+    );
 
     expect(component).toMatchSnapshot();
   });

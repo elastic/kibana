@@ -75,7 +75,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   requireTimestampField = false,
 }: Props) => {
   const {
-    services: { http, indexPatternService, uiSettings },
+    services: { http, indexPatternService, uiSettings, docLinks, application },
   } = useKibana<IndexPatternEditorContext>();
 
   const i18nTexts = geti18nTexts();
@@ -323,11 +323,20 @@ const IndexPatternEditorFlyoutContentComponent = ({
           onRefresh={loadSources}
           closeFlyout={onCancel}
           createAnyway={() => setGoToForm(true)}
+          canSaveIndexPattern={application.capabilities.indexPatterns.save as boolean}
+          navigateToApp={application.navigateToApp}
+          addDataUrl={docLinks.links.indexPatterns.introduction}
         />
       );
     } else {
       // first time
-      return <EmptyIndexPatternPrompt goToCreate={() => setGoToForm(true)} />;
+      return (
+        <EmptyIndexPatternPrompt
+          goToCreate={() => setGoToForm(true)}
+          indexPatternsIntroUrl={docLinks.links.indexPatterns.introduction}
+          canSaveIndexPattern={application.capabilities.indexPatterns.save as boolean}
+        />
+      );
     }
   }
 

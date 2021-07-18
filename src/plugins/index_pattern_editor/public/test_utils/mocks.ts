@@ -15,10 +15,3 @@ export const docLinks: DocLinksStart = {
   DOC_LINK_VERSION: 'jest',
   links: {} as any,
 };
-
-// TODO check how we can better stub an index pattern format
-export const fieldFormats = {
-  getDefaultInstance: () => ({
-    convert: (val: any) => val,
-  }),
-} as any;

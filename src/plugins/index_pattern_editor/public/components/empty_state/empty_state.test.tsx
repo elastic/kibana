@@ -22,7 +22,14 @@ jest.mock('react-router-dom', () => ({
 describe('EmptyState', () => {
   it('should render normally', () => {
     const component = shallow(
-      <EmptyState onRefresh={() => {}} createAnyway={() => {}} closeFlyout={() => {}} />
+      <EmptyState
+        onRefresh={() => {}}
+        createAnyway={() => {}}
+        closeFlyout={() => {}}
+        addDataUrl={'http://elastic.co'}
+        navigateToApp={async (appId) => {}}
+        canSaveIndexPattern={true}
+      />
     );
 
     expect(component).toMatchSnapshot();
@@ -34,7 +41,14 @@ describe('EmptyState', () => {
         const onRefreshHandler = sinon.stub();
 
         const component = mountWithIntl(
-          <EmptyState onRefresh={onRefreshHandler} createAnyway={() => {}} closeFlyout={() => {}} />
+          <EmptyState
+            onRefresh={onRefreshHandler}
+            createAnyway={() => {}}
+            closeFlyout={() => {}}
+            addDataUrl={'http://elastic.co'}
+            navigateToApp={async (appId) => {}}
+            canSaveIndexPattern={true}
+          />
         );
 
         findTestSubject(component, 'refreshIndicesButton').simulate('click');

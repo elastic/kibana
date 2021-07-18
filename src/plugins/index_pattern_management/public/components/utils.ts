@@ -7,7 +7,7 @@
  */
 
 import { IndexPatternsContract } from 'src/plugins/data/public';
-import { IIndexPattern, IndexPattern, IFieldType } from 'src/plugins/data/public';
+import { IndexPattern, IndexPattern, IFieldType } from 'src/plugins/data/public';
 import { SimpleSavedObject } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 
@@ -26,11 +26,7 @@ const rollupIndexPatternListName = i18n.translate(
 );
 
 const isRollup = (indexPattern: IIndexPattern | SimpleSavedObject<IIndexPattern>) => {
-  return (
-    indexPattern.type === 'rollup' ||
-    ((indexPattern as SimpleSavedObject<IIndexPattern>).get &&
-      (indexPattern as SimpleSavedObject<IIndexPattern>).get('type') === 'rollup')
-  );
+  return indexPattern.type === 'rollup';
 };
 
 export async function getIndexPatterns(
