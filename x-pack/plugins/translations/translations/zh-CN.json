@@ -8109,7 +8109,6 @@
     "xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.featuredResults.title": "精选结果",
     "xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.go.button": "执行",
     "xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.lastUpdated.heading": "上次更新时间",
-    "xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.leaveUnassigned.field": "不分配",
     "xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.preview.title": "预览",
     "xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.reset.button": "重置",
     "xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.resultDetail.label": "结果详情",
