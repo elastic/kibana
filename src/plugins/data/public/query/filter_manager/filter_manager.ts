@@ -24,8 +24,16 @@ import {
   COMPARE_ALL_OPTIONS,
   UI_SETTINGS,
 } from '../../../common';
+import { PersistableStateService } from '../../../../kibana_utils/common/persistable_state';
+import {
+  getAllMigrations,
+  migrateToLatest,
+  inject,
+  extract,
+  telemetry,
+} from '../../../common/query/persistable_state';
 
-export class FilterManager {
+export class FilterManager implements PersistableStateService {
   private filters: Filter[] = [];
   private updated$: Subject<void> = new Subject();
   private fetch$: Subject<void> = new Subject();
@@ -220,4 +228,17 @@ export class FilterManager {
       }
     });
   }
+
+  // Filter needs to implement SerializableState
+  public extract = extract as any;
+
+  // Filter needs to implement SerializableState
+  public inject = inject as any;
+
+  public telemetry = telemetry;
+
+  // Filter needs to implement SerializableState
+  public migrateToLatest = migrateToLatest as any;
+
+  public getAllMigrations = getAllMigrations;
 }

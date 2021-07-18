@@ -216,10 +216,12 @@ export {
  * Exporters (CSV)
  */
 
-import { datatableToCSV, CSV_MIME_TYPE } from '../common';
+import { datatableToCSV, CSV_MIME_TYPE, cellHasFormulas, tableHasFormulas } from '../common';
 export const exporters = {
   datatableToCSV,
   CSV_MIME_TYPE,
+  cellHasFormulas,
+  tableHasFormulas,
 };
 
 /*

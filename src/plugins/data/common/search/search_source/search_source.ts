@@ -286,6 +286,8 @@ export class SearchSource {
     // This still uses bfetch for batching.
     if (!options?.strategy && syncSearchByDefault) {
       options.strategy = ES_SEARCH_STRATEGY;
+      // `ES_SEARCH_STRATEGY` doesn't support search sessions, hence remove sessionId
+      options.sessionId = undefined;
     }
 
     const s$ = defer(() => this.requestIsStarting(options)).pipe(
