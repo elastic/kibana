@@ -16,7 +16,7 @@ exports[`EmptyState should render normally 1`] = `
           <h2>
             <FormattedMessage
               defaultMessage="Ready to try Kibana? First, you need data."
-              id="indexPatternManagement.createIndexPattern.emptyState.noDataTitle"
+              id="indexPatternEditor.createIndexPattern.emptyState.noDataTitle"
               values={Object {}}
             />
           </h2>
@@ -38,7 +38,7 @@ exports[`EmptyState should render normally 1`] = `
             description={
               <FormattedMessage
                 defaultMessage="Add data from a variety of sources."
-                id="indexPatternManagement.createIndexPattern.emptyState.integrationCardDescription"
+                id="indexPatternEditor.createIndexPattern.emptyState.integrationCardDescription"
                 values={Object {}}
               />
             }
@@ -53,7 +53,7 @@ exports[`EmptyState should render normally 1`] = `
             title={
               <FormattedMessage
                 defaultMessage="Add integration"
-                id="indexPatternManagement.createIndexPattern.emptyState.integrationCardTitle"
+                id="indexPatternEditor.createIndexPattern.emptyState.integrationCardTitle"
                 values={Object {}}
               />
             }
@@ -65,7 +65,7 @@ exports[`EmptyState should render normally 1`] = `
             description={
               <FormattedMessage
                 defaultMessage="Import a CSV, NDJSON, or log file."
-                id="indexPatternManagement.createIndexPattern.emptyState.uploadCardDescription"
+                id="indexPatternEditor.createIndexPattern.emptyState.uploadCardDescription"
                 values={Object {}}
               />
             }
@@ -80,7 +80,7 @@ exports[`EmptyState should render normally 1`] = `
             title={
               <FormattedMessage
                 defaultMessage="Upload a file"
-                id="indexPatternManagement.createIndexPattern.emptyState.uploadCardTitle"
+                id="indexPatternEditor.createIndexPattern.emptyState.uploadCardTitle"
                 values={Object {}}
               />
             }
@@ -92,7 +92,7 @@ exports[`EmptyState should render normally 1`] = `
             description={
               <FormattedMessage
                 defaultMessage="Load a data set and a Kibana dashboard."
-                id="indexPatternManagement.createIndexPattern.emptyState.sampleDataCardDescription"
+                id="indexPatternEditor.createIndexPattern.emptyState.sampleDataCardDescription"
                 values={Object {}}
               />
             }
@@ -107,7 +107,7 @@ exports[`EmptyState should render normally 1`] = `
             title={
               <FormattedMessage
                 defaultMessage="Add sample data"
-                id="indexPatternManagement.createIndexPattern.emptyState.sampleDataCardTitle"
+                id="indexPatternEditor.createIndexPattern.emptyState.sampleDataCardTitle"
                 values={Object {}}
               />
             }
@@ -131,18 +131,18 @@ exports[`EmptyState should render normally 1`] = `
                   Object {
                     "description": <EuiLink
                       external={true}
-                      href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/connect-to-elasticsearch.html"
+                      href="http://elastic.co"
                       target="_blank"
                     >
                       <FormattedMessage
                         defaultMessage="Read documentation"
-                        id="indexPatternManagement.createIndexPattern.emptyState.readDocs"
+                        id="indexPatternEditor.createIndexPattern.emptyState.readDocs"
                         values={Object {}}
                       />
                     </EuiLink>,
                     "title": <FormattedMessage
                       defaultMessage="Want to learn more?"
-                      id="indexPatternManagement.createIndexPattern.emptyState.learnMore"
+                      id="indexPatternEditor.createIndexPattern.emptyState.learnMore"
                       values={Object {}}
                     />,
                   },
@@ -164,7 +164,7 @@ exports[`EmptyState should render normally 1`] = `
                     >
                       <FormattedMessage
                         defaultMessage="Check for new data"
-                        id="indexPatternManagement.createIndexPattern.emptyState.checkDataButton"
+                        id="indexPatternEditor.createIndexPattern.emptyState.checkDataButton"
                         values={Object {}}
                       />
                        
@@ -175,7 +175,7 @@ exports[`EmptyState should render normally 1`] = `
                     </EuiLink>,
                     "title": <FormattedMessage
                       defaultMessage="Think you already have data?"
-                      id="indexPatternManagement.createIndexPattern.emptyState.haveData"
+                      id="indexPatternEditor.createIndexPattern.emptyState.haveData"
                       values={Object {}}
                     />,
                   },
@@ -195,7 +195,7 @@ exports[`EmptyState should render normally 1`] = `
   >
     <FormattedMessage
       defaultMessage="Some indices may be hidden. Try to {link} anyway."
-      id="indexPatternManagement.createIndexPattern.emptyState.createAnyway"
+      id="indexPatternEditor.createIndexPattern.emptyState.createAnyway"
       values={
         Object {
           "link": <EuiLink
@@ -204,7 +204,7 @@ exports[`EmptyState should render normally 1`] = `
           >
             <FormattedMessage
               defaultMessage="create an index pattern"
-              id="indexPatternManagement.createIndexPattern.emptyState.createAnywayLink"
+              id="indexPatternEditor.createIndexPattern.emptyState.createAnywayLink"
               values={Object {}}
             />
           </EuiLink>,

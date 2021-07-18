@@ -7,7 +7,7 @@
  */
 
 import { IndexPatternsContract } from 'src/plugins/data/public';
-import { IndexPattern, IndexPattern, IFieldType } from 'src/plugins/data/public';
+import { IndexPattern, IFieldType } from 'src/plugins/data/public';
 import { SimpleSavedObject } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 
