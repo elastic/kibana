@@ -24,11 +24,15 @@ kibanaPipeline(timeoutMinutes: 180) {
   for(def i = 1; i <= agentCount; i++) {
     def agentNumber = i
     agents["agent-${agentNumber}"] = {
-      kibanaPipeline.withTasks {
-        task {
-          kibanaPipeline.buildKibana(48)
-          tasks.functionalOss()
-          tasks.functionalXpack()
+      withEnv([
+        'IGNORE_SHIP_CI_STATS_ERROR=true',
+      ]) {
+        kibanaPipeline.withTasks {
+          task {
+            kibanaPipeline.buildKibana(48)
+            tasks.functionalOss()
+            tasks.functionalXpack()
+          }
         }
       }
     }
