@@ -7,12 +7,19 @@
  */
 
 import React, { Component } from 'react';
+import { memoize } from 'lodash';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
-import { CSV_MIME_TYPE, datatableToCSV } from '../../../../common';
+import {
+  EuiButton,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopover,
+  EuiToolTip,
+} from '@elastic/eui';
+import { CSV_MIME_TYPE, datatableToCSV, tableHasFormulas } from '../../../../common';
 import { Datatable } from '../../../../../expressions';
 import { downloadMultipleAs } from '../../../../../share/public';
 import { FieldFormatsStart } from '../../../field_formats';
@@ -29,6 +36,10 @@ interface DataDownloadOptionsProps {
   isFormatted?: boolean;
   fieldFormats: FieldFormatsStart;
 }
+
+const detectFormulasInTables = memoize((datatables: Datatable[]) =>
+  datatables.some(({ columns, rows }) => tableHasFormulas(columns, rows))
+);
 
 class DataDownloadOptions extends Component<DataDownloadOptionsProps, DataDownloadOptionsState> {
   static propTypes = {
@@ -74,6 +85,7 @@ class DataDownloadOptions extends Component<DataDownloadOptionsProps, DataDownlo
               quoteValues: this.props.uiSettings.get('csv:quoteValues', true),
               raw: !isFormatted,
               formatFactory: this.props.fieldFormats.deserialize,
+              escapeFormulaValues: false,
             }),
             type: CSV_MIME_TYPE,
           };
@@ -96,6 +108,7 @@ class DataDownloadOptions extends Component<DataDownloadOptionsProps, DataDownlo
   };
 
   renderFormattedDownloads() {
+    const detectedFormulasInTables = detectFormulasInTables(this.props.datatables);
     const button = (
       <EuiButton iconType="arrowDown" iconSide="right" size="s" onClick={this.onTogglePopover}>
         <FormattedMessage
@@ -104,6 +117,20 @@ class DataDownloadOptions extends Component<DataDownloadOptionsProps, DataDownlo
         />
       </EuiButton>
     );
+    const downloadButton = detectedFormulasInTables ? (
+      <EuiToolTip
+        position="top"
+        content={i18n.translate('data.inspector.table.exportButtonFormulasWarning', {
+          defaultMessage:
+            'Your CSV contains characters which spreadsheet applications can interpret as formulas',
+        })}
+      >
+        {button}
+      </EuiToolTip>
+    ) : (
+      button
+    );
+
     const items = [
       <EuiContextMenuItem
         key="csv"
@@ -139,7 +166,7 @@ class DataDownloadOptions extends Component<DataDownloadOptionsProps, DataDownlo
     return (
       <EuiPopover
         id="inspectorDownloadData"
-        button={button}
+        button={downloadButton}
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover}
         panelPaddingSize="none"

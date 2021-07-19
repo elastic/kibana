@@ -13,11 +13,8 @@ import {
   TRANSACTION_RESULT,
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
-import {
-  environmentQuery,
-  kqlQuery,
-  rangeQuery,
-} from '../../../../server/utils/queries';
+import { kqlQuery, rangeQuery } from '../../../../../observability/server';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
