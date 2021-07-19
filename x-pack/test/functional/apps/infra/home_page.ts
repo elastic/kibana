@@ -13,7 +13,7 @@ const DATE_WITHOUT_DATA = DATES.metricsAndLogs.hosts.withoutData;
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
-  const pageObjects = getPageObjects(['common', 'infraHome']);
+  const pageObjects = getPageObjects(['common', 'infraHome', 'infraSavedViews']);
 
   describe('Home page', function () {
     this.tags('includeFirefox');
@@ -64,25 +64,28 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         it('should have save and load controls', async () => {
           await pageObjects.common.navigateToApp('infraOps');
           await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
-          await pageObjects.infraHome.getSaveViewButton();
-          await pageObjects.infraHome.getLoadViewsButton();
+          await pageObjects.infraSavedViews.getSavedViewsButton();
+          await pageObjects.infraSavedViews.ensureViewIsLoaded('Default view');
         });
 
-        it('should open flyout list', async () => {
-          await pageObjects.infraHome.openSaveViewsFlyout();
-          await pageObjects.infraHome.closeSavedViewFlyout();
+        it('should open popover', async () => {
+          await pageObjects.infraSavedViews.clickSavedViewsButton();
+          await pageObjects.infraSavedViews.closeSavedViewsPopover();
         });
 
-        it('should open saved view modal', async () => {
-          await pageObjects.infraHome.openCreateSaveViewModal();
+        it('should create new saved view and load it', async () => {
+          await pageObjects.infraSavedViews.clickSavedViewsButton();
+          await pageObjects.infraSavedViews.clickSaveNewViewButton();
+          await pageObjects.infraSavedViews.getCreateSavedViewModal();
+          await pageObjects.infraSavedViews.createNewSavedView('view1');
+          await pageObjects.infraSavedViews.ensureViewIsLoaded('view1');
         });
 
-        it('should be able to enter a view name', async () => {
-          await pageObjects.infraHome.openEnterViewNameAndSave();
-        });
-
-        it('should see a saved view in list', async () => {
-          await pageObjects.infraHome.openSaveViewsFlyout();
+        it('should new views should be listed in the load views list', async () => {
+          await pageObjects.infraSavedViews.clickSavedViewsButton();
+          await pageObjects.infraSavedViews.clickLoadViewButton();
+          await pageObjects.infraSavedViews.ensureViewIsLoadable('view1');
+          await pageObjects.infraSavedViews.closeSavedViewsLoadModal();
         });
       });
     });
