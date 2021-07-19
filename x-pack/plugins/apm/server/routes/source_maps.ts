@@ -51,6 +51,15 @@ const listSourceMapRoute = createApmServerRoute({
   },
 });
 
+function getCleanedBundleFilePath(bundleFilePath: string) {
+  try {
+    const cleanedBundleFilepath = new URL(bundleFilePath);
+    return cleanedBundleFilepath.href;
+  } catch (e) {
+    return bundleFilePath;
+  }
+}
+
 const uploadSourceMapRoute = createApmServerRoute({
   endpoint: 'POST /api/apm/sourcemaps',
   options: {
@@ -72,7 +81,7 @@ const uploadSourceMapRoute = createApmServerRoute({
       bundle_filepath: bundleFilepath,
       sourcemap: sourceMap,
     } = params.body;
-    const cleanedBundleFilepath = new URL(bundleFilepath);
+    const cleanedBundleFilepath = getCleanedBundleFilePath(bundleFilepath);
     const fleetPluginStart = await plugins.fleet?.start();
     const coreStart = await core.start();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
@@ -84,7 +93,7 @@ const uploadSourceMapRoute = createApmServerRoute({
           apmArtifactBody: {
             serviceName,
             serviceVersion,
-            bundleFilepath: cleanedBundleFilepath.href,
+            bundleFilepath: cleanedBundleFilepath,
             sourceMap,
           },
         });
