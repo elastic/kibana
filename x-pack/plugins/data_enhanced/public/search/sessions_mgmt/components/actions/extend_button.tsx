@@ -11,9 +11,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useState } from 'react';
 import { Duration } from 'moment';
 import moment from 'moment';
+import { CoreStart } from 'kibana/public';
+import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { TableText } from '../';
-import { OnActionComplete } from './types';
+import { OnActionClick, OnActionComplete, OnActionDismiss } from './types';
 
 interface ExtendButtonProps {
   id: string;
@@ -21,14 +23,13 @@ interface ExtendButtonProps {
   expires: string | null;
   extendBy: Duration;
   api: SearchSessionsMgmtAPI;
+  overlays: CoreStart['overlays'];
+  onActionClick: OnActionClick;
   onActionComplete: OnActionComplete;
 }
 
-const ExtendConfirm = ({
-  onConfirmDismiss,
-  ...props
-}: ExtendButtonProps & { onConfirmDismiss: () => void }) => {
-  const { id, name, expires, api, extendBy, onActionComplete } = props;
+const ExtendConfirm = ({ ...props }: ExtendButtonProps & { onActionDismiss: OnActionDismiss }) => {
+  const { id, name, expires, api, extendBy, onActionComplete, onActionDismiss } = props;
   const [isLoading, setIsLoading] = useState(false);
   const extendByDuration = moment.duration(extendBy);
 
@@ -54,12 +55,12 @@ const ExtendConfirm = ({
   return (
     <EuiConfirmModal
       title={title}
-      onCancel={onConfirmDismiss}
+      onCancel={onActionDismiss}
       onConfirm={async () => {
         setIsLoading(true);
         await api.sendExtend(id, `${newExpiration.toISOString()}`);
         setIsLoading(false);
-        onConfirmDismiss();
+        onActionDismiss();
         onActionComplete();
       }}
       confirmButtonText={confirm}
@@ -74,25 +75,23 @@ const ExtendConfirm = ({
 };
 
 export const ExtendButton = (props: ExtendButtonProps) => {
-  const [showConfirm, setShowConfirm] = useState(false);
-
-  const onClick = () => {
-    setShowConfirm(true);
-  };
-
-  const onConfirmDismiss = () => {
-    setShowConfirm(false);
-  };
+  const { overlays, onActionClick } = props;
 
   return (
     <>
-      <TableText onClick={onClick}>
+      <TableText
+        onClick={() => {
+          onActionClick();
+          const ref = overlays.openModal(
+            toMountPoint(<ExtendConfirm onActionDismiss={() => ref?.close()} {...props} />)
+          );
+        }}
+      >
         <FormattedMessage
           id="xpack.data.mgmt.searchSessions.actionExtend"
           defaultMessage="Extend"
         />
       </TableText>
-      {showConfirm ? <ExtendConfirm {...props} onConfirmDismiss={onConfirmDismiss} /> : null}
     </>
   );
 };

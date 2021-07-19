@@ -941,6 +941,11 @@
       "post": {
         "summary": "Agent policy - copy one policy",
         "operationId": "agent-policy-copy",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -981,8 +986,7 @@
             }
           },
           "description": ""
-        },
-        "description": "Copies one agent policy"
+        }
       }
     },
     "/agent_policies/delete": {
