@@ -2,12 +2,12 @@
 id: formLibCoreFieldHook
 slug: /form-lib/core/field-hook
 title: Field hook
-summary: You don't manually create them but you'll get all the love from them
+description: You don't manually create them but you'll get all the love from them
 tags: ['forms', 'kibana', 'dev']
 date: 2021-04-14
 ---
 
-When you use the  `<UseField />` component you receive back a `field` hook object that you can connect to your React components.  
+When you use the  `<UseField />` component you receive back a `field` hook object that you can connect to your React components.
 
 This hook has the following properties and handlers:
 
@@ -89,15 +89,15 @@ Flag that indicates if the field value is changing. If you have set the [`valueC
 
 ### setValue()
 
-**Arguments:** `value: T | (prevValue: T) => T`  
+**Arguments:** `value: T | (prevValue: T) => T`
 **Returns:** `void`
 
-Handler to set the value of the field.  
+Handler to set the value of the field.
 You can either pass the value directly or provide a callback that will receive the previous field value and you will have to return the next value.
 
 ### onChange()
 
-**Arguments:** `event: React.ChangeEvent<HTMLInputElement>`  
+**Arguments:** `event: React.ChangeEvent<HTMLInputElement>`
 **Returns:** `void`
 
 Use the `onChange` helper to directly hook into the forms fields inputs `onChange` prop without having to extract the event value and call `setValue()` on the field.
@@ -120,27 +120,27 @@ Use the `onChange` helper to directly hook into the forms fields inputs `onChang
 
 ### setErrors()
 
-**Arguments:** `ValidationError[]`  
+**Arguments:** `ValidationError[]`
 **Returns:** `void`
 
 Handler to set the errors of the field.
 
 ### clearErrors()
 
-**Arguments:** `type?: string | string[]`  
+**Arguments:** `type?: string | string[]`
 **Returns:** `void`
 
-Handler to clear the errors of the field. You can optionally provide the type of error to clear.  
+Handler to clear the errors of the field. You can optionally provide the type of error to clear.
 See an example of typed validation when <DocLink id="formLibExampleValidation" section="validating-arrays-of-items" text="validating an array of items" />.
 
 ### getErrorsMessages()
 
-**Arguments:** `options?: { validationType?: string; errorCode?: string }`  
+**Arguments:** `options?: { validationType?: string; errorCode?: string }`
 **Returns:** `string | null`
 
 Returns a concatenated string with all the error messages if the field has errors, or `null` otherwise.
 
-You can optionally provide an error code or a validation type to narrow down the errors you want to receive back.  
+You can optionally provide an error code or a validation type to narrow down the errors you want to receive back.
 
 **Note:** You can add error code to your errors by adding a `code` property to your validation errors.
 
@@ -157,14 +157,14 @@ const nameValidator = ({ value }) => {
 
 ### validate()
 
-**Arguments:** `options?: { formData?: any; value?: T; validationType?: string; }`  
+**Arguments:** `options?: { formData?: any; value?: T; validationType?: string; }`
 **Returns:** `FieldValidateResponse | Promise<FieldValidateResponse>`
 
 Validate the field by calling all the validations declared in its config.  Optionally you can provide an options object with the following properties:
 
 * `formData` - The form data
 * `value` - The value to validate
-* `validationType` - The validation type to run against the value 
+* `validationType` - The validation type to run against the value
 
 You rarely need to manually call this method as it is automatically done for you whenever the field value changes.
 
@@ -176,7 +176,7 @@ The user changes the value inside one of your components and you receive this va
 
 ### reset()
 
-**Arguments:** `options?: { resetValue?: boolean; defaultValue?: T }`  
+**Arguments:** `options?: { resetValue?: boolean; defaultValue?: T }`
 **Returns:** `T | undefined`
 
 Resets the field to its initial state. It accepts an optional configuration object:

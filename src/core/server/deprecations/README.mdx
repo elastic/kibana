@@ -2,7 +2,7 @@
 id: kibCoreDeprecationsService
 slug: /kibana-dev-docs/services/deprecations-service
 title: Core Deprecations service
-summary: The Deprecations service helps surface deprecated configs and features for plugins to our users
+description: The Deprecations service helps surface deprecated configs and features for plugins to our users
 date: 2021-06-27
 tags: ['kibana','dev', 'contributor', 'api docs']
 ---
@@ -33,7 +33,7 @@ To display deprecations in the UA set `xpack.upgrade_assistant.readonly: false` 
 The UA is in read-only mode and will be enabled up until the last minor before the next major release.
 
 ## How do I use this service for deprecated plugin configurations?
-The deprecations service automatically hooks deprecated configs with the deprecations service. 
+The deprecations service automatically hooks deprecated configs with the deprecations service.
 
 All the config deprecation functions (`unused`, `unusedFromRoot`, `rename`, `renameFromRoot`) accept an
 optional parameter to customize the deprecation details.
@@ -118,7 +118,7 @@ the deprecations service.
 
 Examples of non-config deprecations include things like
 - timelion sheets
-- kibana_user security roles 
+- kibana_user security roles
 
 This service is not intended to be used for non-user facing deprecations or cases where the deprecation
 cannot be 'detected' by this mechanism.

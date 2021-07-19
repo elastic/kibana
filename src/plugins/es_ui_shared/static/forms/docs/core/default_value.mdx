@@ -2,7 +2,7 @@
 id: formLibCoreDefaultValue
 slug: /form-lib/core/default-value
 title: Default value
-summary: Initiate a field with the correct value
+description: Initiate a field with the correct value
 tags: ['forms', 'kibana', 'dev']
 date: 2021-04-14
 ---
@@ -21,7 +21,7 @@ There are multiple places where you can define the default value of a field. By 
 This takes over any other `defaultValue` defined elsewhere. What you provide as prop is what you will have as default value for the field. Remember that the `<UseField />` **is not** a controlled component, so changing the `defaultValue` prop to another value does not have any effect.
 
 ```js
-// Here we manually set the default value 
+// Here we manually set the default value
 <UseField path="user.firstName" defaultValue="John" />
 ```
 

@@ -2,7 +2,7 @@
 id: formLibCoreUseFormData
 slug: /form-lib/core/use-form-data
 title: useFormData()
-summary: Get fields value updates from anywhere
+description: Get fields value updates from anywhere
 tags: ['forms', 'kibana', 'dev']
 date: 2021-04-14
 ---
@@ -17,7 +17,7 @@ Have a look at the examples on how to use this hook in <DocLink id="formLibExamp
 
 ### form
 
-**Type:** `FormHook`  
+**Type:** `FormHook`
 
 The form hook object. It is only required to provide the form hook object in your **root form component**.
 
@@ -44,7 +44,7 @@ const ChildComponent = () => {
 
 ### watch
 
-**Type:** `string | string[]`  
+**Type:** `string | string[]`
 
 This option lets you define which field(s) to get updates from. If you don't specify a `watch` option, you will get updates when any form field changes. This will trigger a re-render of your component. If you want to only get update when a specific field changes you can pass it in the `watch`.
 

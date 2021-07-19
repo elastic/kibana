@@ -2,12 +2,12 @@
 id: formLibExampleStyleFields
 slug: /form-lib/examples/styles-fields
 title: Style fields
-summary: Customize your fields however you want
+description: Customize your fields however you want
 tags: ['forms', 'kibana', 'dev']
 date: 2021-04-14
 ---
 
-The `<UseField />` is a render prop component that returns a <DocLink id="formLibCoreFieldHook" text="Field hook"/>.  
+The `<UseField />` is a render prop component that returns a <DocLink id="formLibCoreFieldHook" text="Field hook"/>.
 You can then connect its states and handlers to any UI.
 
 ```js
@@ -56,7 +56,7 @@ export const MyComponent = () => {
 
 ## Using the `component` prop
 
-The above example can be simplified by extracting the children into its own component and by using the `component` prop on `<UseField />`.  
+The above example can be simplified by extracting the children into its own component and by using the `component` prop on `<UseField />`.
 The component will receive the `field` hook as a prop and any other props you pass to `componentProps`.
 
 ```js

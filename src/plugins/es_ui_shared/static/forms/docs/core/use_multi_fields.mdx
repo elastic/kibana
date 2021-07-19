@@ -2,7 +2,7 @@
 id: formLibCoreUseMultiFields
 slug: /form-lib/core/use-multi-fields
 title: <UseMultiFields />
-summary: Because sometimes you need more than one field
+description: Because sometimes you need more than one field
 tags: ['forms', 'kibana', 'dev']
 date: 2021-04-14
 ---
@@ -78,11 +78,11 @@ A map of field id to `<UseField />` props.  The id does not have to match the fi
 
 **Type:** `(fields: { fieldId: string: FieldHook }) => JSX.Element`
 
-The children of `<UseMultiField />` is a function child which receives a map of field id to FieldHook. You are then responsible to return a JSX element from that function.  
+The children of `<UseMultiField />` is a function child which receives a map of field id to FieldHook. You are then responsible to return a JSX element from that function.
 
 ## Typescript value type
 
-You can provide the field value type for each field (`unknown` by default) on the component. 
+You can provide the field value type for each field (`unknown` by default) on the component.
 
 ```js
 interface Fields {

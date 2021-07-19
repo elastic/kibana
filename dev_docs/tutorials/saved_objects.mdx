@@ -2,7 +2,7 @@
 id: kibDevTutorialSavedObject
 slug: /kibana-dev-docs/tutorial/saved-objects
 title: Register a new saved object type
-summary: Learn how to register a new saved object type.
+description: Learn how to register a new saved object type.
 date: 2021-02-05
 tags: ['kibana','onboarding', 'dev', 'architecture', 'tutorials']
 ---
@@ -38,7 +38,7 @@ export const dashboardVisualization: SavedObjectsType = {
 };
 ```
 
-[1] Since the name of a Saved Object type forms part of the url path for the public Saved Objects HTTP API, 
+[1] Since the name of a Saved Object type forms part of the url path for the public Saved Objects HTTP API,
 these should follow our API URL path convention and always be written as snake case.
 
 **src/plugins/my_plugin/server/saved_objects/index.ts**
@@ -114,11 +114,11 @@ Will result in the following mappings being applied to the .kibana index:
   }
 }
 ```
-Do not use field mappings like you would use data types for the columns of a SQL database. Instead, field mappings are analogous to a 
+Do not use field mappings like you would use data types for the columns of a SQL database. Instead, field mappings are analogous to a
 SQL index. Only specify field mappings for the fields you wish to search on or query. By specifying `dynamic: false`
  in any level of your mappings, Elasticsearch will accept and store any other fields even if they are not specified in your mappings.
 
-Since Elasticsearch has a default limit of 1000 fields per index, plugins should carefully consider the 
+Since Elasticsearch has a default limit of 1000 fields per index, plugins should carefully consider the
 fields they add to the mappings. Similarly, Saved Object types should never use `dynamic: true` as this can cause an arbitrary
  amount of fields to be added to the .kibana index.
 
@@ -150,9 +150,9 @@ router.get(
   }
 );
 ```
-[1] Note how `dashboard.panels[0].visualization` stores the name property of the reference (not the id directly) to be able to uniquely 
+[1] Note how `dashboard.panels[0].visualization` stores the name property of the reference (not the id directly) to be able to uniquely
 identify this reference. This guarantees that the id the reference points to always remains up to date. If a
- visualization id was directly stored in `dashboard.panels[0].visualization` there is a risk that this id gets updated without 
+ visualization id was directly stored in `dashboard.panels[0].visualization` there is a risk that this id gets updated without
  updating the reference in the references array.
 
 ## Writing migrations
@@ -232,7 +232,7 @@ export const dashboardVisualization: SavedObjectsType = {
   },
 };
 ```
-[1] It is useful to define an interface for each version of the schema. This allows TypeScript to ensure that you are properly handling the input and output 
+[1] It is useful to define an interface for each version of the schema. This allows TypeScript to ensure that you are properly handling the input and output
  types correctly as the schema evolves.
 
 [2] Returning a shallow copy is necessary to avoid type errors when using different types for the input and output shape.
@@ -241,10 +241,10 @@ export const dashboardVisualization: SavedObjectsType = {
  in which this migration was released. So if you are creating a migration which will
  be part of the v7.10.0 release, but will also be backported and released as v7.9.3, the migration version should be: 7.9.3.
 
- Migrations should be written defensively, an exception in a migration function will prevent a Kibana upgrade from succeeding and will cause downtime for our users. 
- Having said that, if a 
+ Migrations should be written defensively, an exception in a migration function will prevent a Kibana upgrade from succeeding and will cause downtime for our users.
+ Having said that, if a
  document is encountered that is not in the expected shape, migrations are encouraged to throw an exception to abort the upgrade. In most scenarios, it is better to
   fail an upgrade than to silently ignore a corrupt document which can cause unexpected behaviour at some future point in time.
 
-It is critical that you have extensive tests to ensure that migrations behave as expected with all possible input documents. Given how simple it is to test all the branch 
+It is critical that you have extensive tests to ensure that migrations behave as expected with all possible input documents. Given how simple it is to test all the branch
 conditions in a migration function and the high impact of a bug in this code, there’s really no reason not to aim for 100% test code coverage.

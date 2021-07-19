@@ -2,12 +2,12 @@
 id: formLibCoreUseField
 slug: /form-lib/core/use-field
 title: <UseField />
-summary: Drop it anywhere in your <Form /> and see the magic happen
+description: Drop it anywhere in your <Form /> and see the magic happen
 tags: ['forms', 'kibana', 'dev']
 date: 2021-04-14
 ---
 
-To declare a field in the form you use the `<UseField />` component. 
+To declare a field in the form you use the `<UseField />` component.
 
 This component accepts the following props (the only required prop is the `path`).
 
@@ -168,8 +168,8 @@ The `ValidationConfig` accepts the following parameters:
 
 ##### validator (Required)
 
-**Type:** `ValidationFunc`  
-**Arguments:** `data: ValidationFuncArg`  
+**Type:** `ValidationFunc`
+**Arguments:** `data: ValidationFuncArg`
 **Returns:** `ValidationError | void | Promise<ValidationError> | Promise<void>`
 
 A validator function to execute. It can be synchronous or asynchronous.
@@ -198,7 +198,7 @@ A specific type for the validation. <DocLink id="formLibExampleValidation" secti
 
 By default all validation are blockers, which means that if they fail, the field `isValid` state is set to `false`. There might be some cases where you don't want the form to be invalid when a fied validation fails.
 
-For example: when we add an item to the ComboBox array, we don't want to block the UI and set the field (array) as invalid if the item is invalid. We won't add the item to the array but the field is still valid. For that we will pass `isBlocking: false` to the validation on the array item. 
+For example: when we add an item to the ComboBox array, we don't want to block the UI and set the field (array) as invalid if the item is invalid. We won't add the item to the array but the field is still valid. For that we will pass `isBlocking: false` to the validation on the array item.
 
 ##### exitOnFail
 
@@ -292,7 +292,7 @@ const nameConfig = {
 
 #### fieldsToValidateOnChange
 
-**Type:** `string[]` - An array of field paths 
+**Type:** `string[]` - An array of field paths
 **Default:** `[<current-field-path>]`
 
 By default when a field value changes, it is the only field that is validated. In some cases you might also want to run the validation on another field that is linked.
@@ -359,7 +359,7 @@ The (optional) children of `<UseField />` is a function child which receives the
 
 ### `getUseField()`
 
-**Arguments:** `props: UseFieldProps` 
+**Arguments:** `props: UseFieldProps`
 
 In some cases you might find yourself declaring the exact same prop on `<UseField />` for all your fields. (e.g. using the [the `Field` component](../helpers/components#field) everywhere).
 
@@ -382,7 +382,7 @@ const MyFormComponent = () => {
 
 ## Typescript value type
 
-You can provide the value type (`unknown` by default) on the component. 
+You can provide the value type (`unknown` by default) on the component.
 
 ```js
 <UseField<string> path="name" defaultValue="mustBeAString" />

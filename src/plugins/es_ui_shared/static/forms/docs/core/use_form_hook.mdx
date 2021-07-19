@@ -2,7 +2,7 @@
 id: formLibCoreUseForm
 slug: /form-lib/core/use-form
 title: useForm()
-summary: The only hook you'll need to declare a new form
+description: The only hook you'll need to declare a new form
 tags: ['forms', 'kibana', 'dev']
 date: 2021-04-14
 ---
@@ -15,7 +15,7 @@ Use the `useForm` hook to declare a new form object. As we have seen in the <Doc
 
 ### onSubmit(data, isValid)
 
-**Arguments:** `data: T, isValid: boolean`  
+**Arguments:** `data: T, isValid: boolean`
 **Returns:** `Promise<void>`
 
 The `onSubmit` handler is executed when calling `form.submit()`. It receives the form data and a boolean for the validity of the form.
@@ -48,7 +48,7 @@ const { form } = useForm<MyFormData>({ onSubmit: onFormSubmit });
 
 **Type:** `Record<string, any>`
 
-The `defaultValue` is an object that you provide to give the initial value for your fields. 
+The `defaultValue` is an object that you provide to give the initial value for your fields.
 
 **Note:** There are multiple places where you can define the default value of a field, <DocLink id="formLibCoreDefaultValue" text="read the difference between them"/>.
 
@@ -104,8 +104,8 @@ export const MyComponent = () => {
 
 ### deserializer
 
-When you provide a `defaultValue` to the form, you might want to parse the object and modify it (e.g. add an extra field just for the UI). You would use a `deserializer` to do that. This handler receives the `defaultValue` provided and return a new object with updated fields default values.  
-**Note:** It is recommended to keep this pure function _outside_ your component and not declare it inline on the hook.  
+When you provide a `defaultValue` to the form, you might want to parse the object and modify it (e.g. add an extra field just for the UI). You would use a `deserializer` to do that. This handler receives the `defaultValue` provided and return a new object with updated fields default values.
+**Note:** It is recommended to keep this pure function _outside_ your component and not declare it inline on the hook.
 
 ```js
 import { Form, useForm, useFormData, Field, FIELD_TYPES, FormDataProvider } from '<path-to-form-lib>';
@@ -151,7 +151,7 @@ export const MyComponent = ({ fetchedData }: Props) => {
 
 ### serializer
 
-Serializer is the inverse process of the deserializer. It is executed when we build the form data (when calling `form.submit()` for example).  
+Serializer is the inverse process of the deserializer. It is executed when we build the form data (when calling `form.submit()` for example).
 **Note:** As with the `deserializer`, it is recommended to keep this pure function _outside_ your component and not declare it inline on the hook.
 
 If we run the example above for the `deserializer`, and we click on the "Submit" button, we would get this in the console
@@ -223,13 +223,13 @@ return (
     {(field) => {
       let isInvalid = false;
       let errorMessage = null;
-  
+
       if (!field.isChangingValue) {
         // Only update this derived state after 300ms of the last key stroke
         isInvalid = field.errors.length > 0;
         errorMessage = isInvalid ? field.errors[0].message : null;
       }
-  
+
       return (
         <div>
           <input type="text" value={field.value} onChange={field.onChange} />

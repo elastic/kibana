@@ -2,12 +2,12 @@
 id: formLibCoreFormHook
 slug: /form-lib/core/form-hook
 title: Form hook
-summary: The heart of the lib; It manages your fields so you don't have to
+description: The heart of the lib; It manages your fields so you don't have to
 tags: ['forms', 'kibana', 'dev']
 date: 2021-04-14
 ---
 
-When you call `useForm()` you receive back a `form` hook object.  
+When you call `useForm()` you receive back a `form` hook object.
 This object has the following properties and handlers
 
 ## Properties
@@ -16,7 +16,7 @@ This object has the following properties and handlers
 
 **Type:** `boolean`
 
-Flag that indicates if the form has been submitted at least once. It is set to `true` when we call <DocLink id="formLibCoreFormHook" section="submit" text="submit()"/>.  
+Flag that indicates if the form has been submitted at least once. It is set to `true` when we call <DocLink id="formLibCoreFormHook" section="submit" text="submit()"/>.
 
 **Note:** If you have a dynamic form where fields are removed and added, the `isSubmitted` is set to `false` whenever a new field is added, as in such case the user has a new form in front of him.
 
@@ -44,16 +44,16 @@ Each time a field value changes, it is validated. When **all** fields have chang
 ```js
 export const MyComponent = () => {
   const { form } = useForm();
-  
+
   const onClickSubmit = async () => {
     // We validate all the form fields and get its "isValid" state (true|false)
     const { isValid, data } = await form.submit();
-  
+
     if (isValid) {
       // ...
     }
   };
-  
+
   return (
     <Form form={form}>
       ...
@@ -66,7 +66,7 @@ export const MyComponent = () => {
 }
 ```
 
-* calling the `validate()` handler on the form. As you can see in the example below, as we don't use the `form.submit()`, we have to manually declare and update the `isSubmitting` and `isSubmitted` states.  
+* calling the `validate()` handler on the form. As you can see in the example below, as we don't use the `form.submit()`, we have to manually declare and update the `isSubmitting` and `isSubmitted` states.
 
 **Note:** It is usually better to use `form.submit()`, but you might need at some stage to know the form validity without updating its `isSubmitted` state, and that's what `validate()` is for.
 
@@ -150,7 +150,7 @@ const { name: nameField }  = form.getFields();
 
 ### getFormData()
 
-**Arguments:** `options?: { unflatten?: boolean }`  
+**Arguments:** `options?: { unflatten?: boolean }`
 **Returns:** `T | R`
 
 Return the form data. Accepts an optional `options` with an `unflatten` parameter (defaults to `true`). If you are only interested in the raw form data, pass `unflatten: false` to the handler.
@@ -173,7 +173,7 @@ const errors  = form.getErrors();
 
 ### reset()
 
-**Arguments:** `options?: { resetValues?: boolean; defaultValue?: any }` 
+**Arguments:** `options?: { resetValues?: boolean; defaultValue?: any }`
 
 Resets the form to its initial state. It accepts an optional configuration object:
 
@@ -195,7 +195,7 @@ form.reset({ defaultValue: { type: 'SomeValueToKeep' } });
 
 ### setFieldValue()
 
-**Arguments:** `fieldName: string, value: unknown` 
+**Arguments:** `fieldName: string, value: unknown`
 
 Sets a field value imperatively.
 
@@ -205,7 +205,7 @@ form.setFieldValue('name', 'John');
 
 ### setFieldErrors()
 
-**Arguments:** `fieldName: string, errors: ValidationError[]` 
+**Arguments:** `fieldName: string, errors: ValidationError[]`
 
 Sets field errors imperatively.
 
