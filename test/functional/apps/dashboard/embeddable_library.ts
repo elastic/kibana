@@ -39,7 +39,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const originalPanel = await testSubjects.find('embeddablePanelHeading-RenderingTest:heatmap');
       await panelActions.unlinkFromLibary(originalPanel);
-      await testSubjects.existOrFail('unlinkPanelSuccess');
 
       const updatedPanel = await testSubjects.find('embeddablePanelHeading-RenderingTest:heatmap');
       const libraryActionExists = await testSubjects.descendantExists(
@@ -80,7 +79,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const originalPanel = await testSubjects.find('embeddablePanelHeading-RenderingTest:geomap');
       // Why does unlinkFromLibrary sometimes end up clicking the ACTION_LIBRARY_NOTIFICATION button that's on the 'heatmap - copy' panel?
       await panelActions.unlinkFromLibary(originalPanel);
-      await testSubjects.existOrFail('unlinkPanelSuccess');
 
       const updatedPanel = await testSubjects.find('embeddablePanelHeading-RenderingTest:geomap');
       const libraryActionExists = await testSubjects.descendantExists(

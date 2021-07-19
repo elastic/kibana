@@ -191,12 +191,13 @@ export class DashboardPanelActionsService extends FtrService {
 
   async unlinkFromLibary(parent?: WebElementWrapper) {
     this.log.debug('unlinkFromLibrary');
-    await this.retry.tryForTime(10000, async () => {
+    await this.retry.tryForTime(30000, async () => {
       const libraryNotification = parent
         ? await this.testSubjects.findDescendant(LIBRARY_NOTIFICATION_TEST_SUBJ, parent)
         : await this.testSubjects.find(LIBRARY_NOTIFICATION_TEST_SUBJ);
       await libraryNotification.clickWithRetries(0);
       await this.testSubjects.clickWithRetries('libraryNotificationUnlinkButton', 0, 10);
+      await this.testSubjects.existOrFail('unlinkPanelSuccess', { timeout: 10000 });
     });
   }
 
