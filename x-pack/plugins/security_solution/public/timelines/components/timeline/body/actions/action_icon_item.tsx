@@ -6,7 +6,7 @@
  */
 
 import React, { MouseEvent } from 'react';
-import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiContextMenuItem, EuiButtonIcon, EuiToolTip, EuiText } from '@elastic/eui';
 
 import { EventsTdContent } from '../../styles';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
@@ -53,15 +53,18 @@ const ActionIconItemComponent: React.FC<ActionIconItemProps> = ({
       </div>
     )}
     {buttonType === 'text' && (
-      <EuiButtonEmpty
+      <EuiContextMenuItem
         aria-label={ariaLabel}
-        data-test-subj={`${dataTestSubj}-button`}
-        isDisabled={isDisabled}
+        data-test-subj={`${dataTestSubj}-button-menu-item`}
+        disabled={isDisabled}
         onClick={onClick}
         color="text"
+        size="s"
       >
-        {content}
-      </EuiButtonEmpty>
+        <EuiText data-test-subj={`${dataTestSubj}-button`} size="m">
+          {content}
+        </EuiText>
+      </EuiContextMenuItem>
     )}
   </>
 );

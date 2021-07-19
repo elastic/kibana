@@ -74,6 +74,7 @@ interface EventDetailsPanelProps {
     indexName: string;
     ecsData?: Ecs;
     nonEcsData?: TimelineNonEcsData[];
+    refetch?: () => void;
   };
   handleOnEventClosed: () => void;
   isFlyoutView?: boolean;
@@ -244,6 +245,9 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
                 isHostIsolationPanelOpen={isHostIsolationPanelOpen}
                 loadingEventDetails={loading}
                 onChange={showHostIsolationPanel}
+                timelineId={timelineId}
+                refetch={expandedEvent?.refetch}
+                handleOnEventClosed={handleOnEventClosed}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

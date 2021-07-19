@@ -7,6 +7,7 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { EuiContextMenuItem, EuiContextMenuPanel, EuiButton, EuiPopover } from '@elastic/eui';
+import { noop } from 'lodash';
 import { ISOLATE_HOST, UNISOLATE_HOST } from './translations';
 import { TAKE_ACTION } from '../alerts_table/alerts_utility_bar/translations';
 import { useHostIsolationStatus } from '../../containers/detection_engine/alerts/use_host_isolation_status';
@@ -17,6 +18,9 @@ import { getEventType } from '../../../timelines/components/timeline/body/helper
 import { InvestigateInTimelineAction } from '../alerts_table/timeline_actions/investigate_in_timeline_action';
 import { TimelineNonEcsData } from '../../../../common';
 import { Ecs } from '../../../../common/ecs';
+import { useExceptionModal } from '../alerts_table/timeline_actions/use_add_exception_modal';
+import { useAlertsActions } from '../alerts_table/timeline_actions/use_alerts_actions.ts';
+import { AddExceptionModalWrapper } from '../alerts_table/timeline_actions/alert_context_menu';
 
 export const TakeActionDropdown = React.memo(
   ({
@@ -30,6 +34,9 @@ export const TakeActionDropdown = React.memo(
     isolationSupported,
     isHostIsolationPanelOpen,
     loadingEventDetails,
+    timelineId,
+    refetch,
+    handleOnEventClosed,
   }: {
     onChange: (action: 'isolateHost' | 'unisolateHost') => void;
     agentId: string;
@@ -41,6 +48,9 @@ export const TakeActionDropdown = React.memo(
     isolationSupported: boolean;
     isHostIsolationPanelOpen: boolean;
     loadingEventDetails: boolean;
+    timelineId: string;
+    refetch: (() => void) | undefined;
+    handleOnEventClosed: () => void;
   }) => {
     const { loading, isIsolated: isolationStatus, agentStatus } = useHostIsolationStatus({
       agentId,
@@ -58,6 +68,11 @@ export const TakeActionDropdown = React.memo(
       setIsPopoverOpen(false);
     }, []);
 
+    const closePopOverAndFlyout = useCallback(() => {
+      closePopoverHandler();
+      handleOnEventClosed();
+    }, [closePopoverHandler, handleOnEventClosed]);
+
     const isolateHostHandler = useCallback(() => {
       setIsPopoverOpen(false);
       if (isolationStatus === false) {
@@ -71,8 +86,32 @@ export const TakeActionDropdown = React.memo(
     const isolateHostTitle = isolationStatus === false ? ISOLATE_HOST : UNISOLATE_HOST;
     const eventType = ecsData != null ? getEventType(ecsData) : null;
 
+    const {
+      exceptionModalType,
+      ruleId,
+      ruleName,
+      ruleIndices,
+      alertStatus,
+      handleOpenExceptionModal,
+      onAddExceptionCancel,
+      onAddExceptionConfirm,
+    } = useExceptionModal({
+      ecsRowData: ecsData!,
+      refetch: refetch ?? noop,
+      timelineId,
+    });
+
+    const { items: alertStatusActionsItems } = useAlertsActions({
+      ecsRowData: ecsData!,
+      timelineId,
+      closePopover: closePopOverAndFlyout,
+      handleOpenExceptionModal,
+      openAddEventFilterModal: noop,
+    });
+
     const items = useMemo(
       () => [
+        ...alertStatusActionsItems,
         ...(isIsolationAllowed &&
         isEndpointAlert &&
         isolationSupported &&
@@ -89,19 +128,18 @@ export const TakeActionDropdown = React.memo(
           : []),
         ...(eventType === 'signal' && ecsData != null
           ? [
-              <EuiContextMenuItem key="take-action-inspect">
-                <InvestigateInTimelineAction
-                  key="investigate-in-timeline"
-                  ecsRowData={ecsData}
-                  nonEcsRowData={nonEcsData ?? []}
-                  buttonType="text"
-                />
-              </EuiContextMenuItem>,
+              <InvestigateInTimelineAction
+                key="investigate-in-timeline"
+                ecsRowData={ecsData}
+                nonEcsRowData={nonEcsData ?? []}
+                buttonType="text"
+              />,
             ]
           : []),
       ],
       [
         agentStatus,
+        alertStatusActionsItems,
         ecsData,
         eventType,
         isEndpointAlert,
@@ -125,16 +163,30 @@ export const TakeActionDropdown = React.memo(
     }, [togglePopoverHandler]);
 
     return items.length > 0 && !loadingEventDetails ? (
-      <EuiPopover
-        id="hostIsolationTakeActionPanel"
-        button={takeActionButton}
-        isOpen={isPopoverOpen}
-        closePopover={closePopoverHandler}
-        panelPaddingSize="none"
-        anchorPosition="downLeft"
-      >
-        <EuiContextMenuPanel size="s" items={items} />
-      </EuiPopover>
+      <>
+        <EuiPopover
+          id="hostIsolationTakeActionPanel"
+          button={takeActionButton}
+          isOpen={isPopoverOpen}
+          closePopover={closePopoverHandler}
+          panelPaddingSize="none"
+          anchorPosition="downLeft"
+        >
+          <EuiContextMenuPanel size="s" items={items} />
+        </EuiPopover>
+        {exceptionModalType != null && ruleId != null && ecsData != null && (
+          <AddExceptionModalWrapper
+            ruleName={ruleName}
+            ruleId={ruleId}
+            ruleIndices={ruleIndices}
+            exceptionListType={exceptionModalType}
+            ecsData={ecsData}
+            onCancel={onAddExceptionCancel}
+            onConfirm={onAddExceptionConfirm}
+            alertStatus={alertStatus}
+          />
+        )}
+      </>
     ) : null;
   }
 );
