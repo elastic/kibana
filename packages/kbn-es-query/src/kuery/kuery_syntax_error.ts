@@ -28,6 +28,18 @@ const grammarRuleTranslations: Record<string, string> = {
   }),
 };
 
+const getItemText = (item: KQLSyntaxErrorExpected): string => {
+  if (item.type === 'other') {
+    return item.description!;
+  } else if (item.type === 'literal') {
+    return `"${item.text!}"`;
+  } else if (item.type === 'end') {
+    return 'end of input';
+  } else {
+    return item.text || item.description || '';
+  }
+};
+
 interface KQLSyntaxErrorData extends Error {
   found: string;
   expected: KQLSyntaxErrorExpected[] | null;
@@ -47,7 +59,7 @@ export class KQLSyntaxError extends Error {
     let message = error.message;
     if (error.expected) {
       const translatedExpectations = error.expected.map((expected) => {
-        const key = this.getItemText(expected);
+        const key = getItemText(expected);
         return grammarRuleTranslations[key] || key;
       });
 
@@ -72,17 +84,5 @@ export class KQLSyntaxError extends Error {
     super(fullMessage);
     this.name = 'KQLSyntaxError';
     this.shortMessage = message;
-  }
-
-  private getItemText(item: KQLSyntaxErrorExpected): string {
-    if (item.type === 'other') {
-      return item.description!;
-    } else if (item.type === 'literal') {
-      return `"${item.text!}"`;
-    } else if (item.type === 'end') {
-      return 'end of input';
-    } else {
-      return item.text || item.description || '';
-    }
   }
 }
