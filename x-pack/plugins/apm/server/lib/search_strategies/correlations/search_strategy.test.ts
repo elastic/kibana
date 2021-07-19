@@ -122,6 +122,8 @@ describe('APM Correlations search strategy', () => {
       } as unknown) as SearchStrategyDependencies;
       params = {
         index: 'apm-*',
+        start: '2020',
+        end: '2021',
       };
     });
 
@@ -154,10 +156,22 @@ describe('APM Correlations search strategy', () => {
               },
               query: {
                 bool: {
-                  filter: [{ term: { 'processor.event': 'transaction' } }],
+                  filter: [
+                    { term: { 'processor.event': 'transaction' } },
+                    {
+                      range: {
+                        '@timestamp': {
+                          format: 'epoch_millis',
+                          gte: 1577836800000,
+                          lte: 1609459200000,
+                        },
+                      },
+                    },
+                  ],
                 },
               },
               size: 0,
+              track_total_hits: true,
             })
           );
         });
@@ -167,11 +181,17 @@ describe('APM Correlations search strategy', () => {
         it('retrieves the current request', async () => {
           const searchStrategy = await apmCorrelationsSearchStrategyProvider();
           const response = await searchStrategy
-            .search({ id: 'my-search-id', params }, {}, mockDeps)
+            .search({ params }, {}, mockDeps)
             .toPromise();
 
-          expect(response).toEqual(
-            expect.objectContaining({ id: 'my-search-id' })
+          const searchStrategyId = response.id;
+
+          const response2 = await searchStrategy
+            .search({ id: searchStrategyId, params }, {}, mockDeps)
+            .toPromise();
+
+          expect(response2).toEqual(
+            expect.objectContaining({ id: searchStrategyId })
           );
         });
       });
@@ -226,7 +246,7 @@ describe('APM Correlations search strategy', () => {
 
         expect(response2.id).toEqual(response1.id);
         expect(response2).toEqual(
-          expect.objectContaining({ loaded: 10, isRunning: false })
+          expect.objectContaining({ loaded: 100, isRunning: false })
         );
       });
     });

@@ -14,7 +14,7 @@ import {
   getTransactionDurationRangesRequest,
 } from './query_fractions';
 
-const params = { index: 'apm-*' };
+const params = { index: 'apm-*', start: '2020', end: '2021' };
 const ranges = [{ to: 1 }, { from: 1, to: 3 }, { from: 3, to: 5 }, { from: 5 }];
 
 describe('query_fractions', () => {
