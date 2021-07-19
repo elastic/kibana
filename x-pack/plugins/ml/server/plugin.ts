@@ -196,7 +196,7 @@ export class MlServerPlugin
 
     initMlServerLog({ log: this.log });
 
-    const sharedServices = createSharedServices(
+    const { mlServicesProviders, shared } = createSharedServices(
       this.mlLicense,
       getSpaces,
       plugins.cloud,
@@ -211,7 +211,8 @@ export class MlServerPlugin
       registerMlAlerts({
         alerting: plugins.alerting,
         logger: this.log,
-        mlSharedServices: sharedServices,
+        mlSharedServices: shared,
+        mlServicesProviders,
       });
     }
 
@@ -219,7 +220,7 @@ export class MlServerPlugin
       registerCollector(plugins.usageCollection, this.kibanaIndexConfig.kibana.index);
     }
 
-    return { ...sharedServices };
+    return shared;
   }
 
   public start(coreStart: CoreStart): MlPluginStart {

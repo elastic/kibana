@@ -30,6 +30,10 @@ import {
   getAlertingServiceProvider,
   MlAlertingServiceProvider,
 } from './providers/alerting_service';
+import {
+  getJobsHealthServiceProvider,
+  JobsHealthServiceProvider,
+} from '../lib/alerts/jobs_health_service';
 
 export type SharedServices = JobServiceProvider &
   AnomalyDetectorsProvider &
@@ -37,6 +41,8 @@ export type SharedServices = JobServiceProvider &
   ModulesProvider &
   ResultsServiceProvider &
   MlAlertingServiceProvider;
+
+export type MlServicesProviders = JobsHealthServiceProvider;
 
 interface Guards {
   isMinimumLicense(): Guards;
@@ -71,7 +77,10 @@ export function createSharedServices(
   getClusterClient: () => IClusterClient | null,
   getInternalSavedObjectsClient: () => SavedObjectsClientContract | null,
   isMlReady: () => Promise<void>
-): SharedServices {
+): {
+  shared: SharedServices;
+  mlServicesProviders: MlServicesProviders;
+} {
   const { isFullLicense, isMinimumLicense } = licenseChecks(mlLicense);
   function getGuards(
     request: KibanaRequest,
@@ -118,12 +127,23 @@ export function createSharedServices(
   }
 
   return {
-    ...getJobServiceProvider(getGuards),
-    ...getAnomalyDetectorsProvider(getGuards),
-    ...getModulesProvider(getGuards),
-    ...getResultsServiceProvider(getGuards),
-    ...getMlSystemProvider(getGuards, mlLicense, getSpaces, cloud, resolveMlCapabilities),
-    ...getAlertingServiceProvider(getGuards),
+    /**
+     * Exposed shared services for other plugins
+     */
+    shared: {
+      ...getJobServiceProvider(getGuards),
+      ...getAnomalyDetectorsProvider(getGuards),
+      ...getModulesProvider(getGuards),
+      ...getResultsServiceProvider(getGuards),
+      ...getMlSystemProvider(getGuards, mlLicense, getSpaces, cloud, resolveMlCapabilities),
+      ...getAlertingServiceProvider(getGuards),
+    },
+    /**
+     * Services for ML internal usage
+     */
+    mlServicesProviders: {
+      ...getJobsHealthServiceProvider(getGuards),
+    },
   };
 }
 

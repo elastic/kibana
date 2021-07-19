@@ -101,3 +101,6 @@ export const anomalyDetectionJobsHealthRuleParams = schema.object({
 export type AnomalyDetectionJobsHealthRuleParams = TypeOf<
   typeof anomalyDetectionJobsHealthRuleParams
 >;
+
+export type TestsConfig = AnomalyDetectionJobsHealthRuleParams['testsConfig'];
+export type JobSelection = AnomalyDetectionJobsHealthRuleParams['includeJobs'];

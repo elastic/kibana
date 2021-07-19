@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { KibanaRequest } from 'kibana/server';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
@@ -38,7 +39,7 @@ export const REALTIME_ISSUE_DETECTED: ActionGroup<AnomalyDetectionJobRealtimeIss
 
 export function registerJobsMonitoringRuleType({
   alerting,
-  mlSharedServices,
+  mlServicesProviders,
 }: RegisterAlertParams) {
   alerting.registerType<
     AnomalyDetectionJobsHealthRuleParams,
@@ -87,6 +88,20 @@ export function registerJobsMonitoringRuleType({
     producer: PLUGIN_ID,
     minimumLicenseRequired: MINIMUM_FULL_LICENSE,
     isExportable: true,
-    async executor({ services, params, alertId, state, previousStartedAt, startedAt }) {},
+    async executor({ services, params, alertId, state, previousStartedAt, startedAt }) {
+      const fakeRequest = {} as KibanaRequest;
+      const { getTestsResults } = mlServicesProviders.jobsHealthServiceProvider(
+        services.savedObjectsClient,
+        fakeRequest
+      );
+      const executionResult = await getTestsResults(params);
+
+      if (executionResult) {
+        executionResult.forEach(({ name: alertInstanceName, context }) => {
+          const alertInstance = services.alertInstanceFactory(alertInstanceName);
+          alertInstance.scheduleActions(ANOMALY_DETECTION_JOB_REALTIME_ISSUE, context);
+        });
+      }
+    },
   });
 }
