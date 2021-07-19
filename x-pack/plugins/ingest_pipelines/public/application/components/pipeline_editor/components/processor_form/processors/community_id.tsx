@@ -56,7 +56,8 @@ const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.communityId.sourceIpHelpText"
-        defaultMessage="Field containing the source IP address."
+        defaultMessage="Field containing the source IP address. Defaults to {defaultValue}."
+        values={{ defaultValue: <EuiCode>{'source.ip'}</EuiCode> }}
       />
     ),
   },
@@ -69,7 +70,8 @@ const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.communityId.sourcePortHelpText"
-        defaultMessage="Field containing the source port."
+        defaultMessage="Field containing the source port. Defaults to {defaultValue}."
+        values={{ defaultValue: <EuiCode>{'source.port'}</EuiCode> }}
       />
     ),
   },
@@ -82,7 +84,8 @@ const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.communityId.destinationIpHelpText"
-        defaultMessage="Field containing the destination IP address."
+        defaultMessage="Field containing the destination IP address. Defaults to {defaultValue}."
+        values={{ defaultValue: <EuiCode>{'destination.ip'}</EuiCode> }}
       />
     ),
   },
@@ -95,7 +98,8 @@ const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.communityId.destinationPortHelpText"
-        defaultMessage="Field containing the destination port."
+        defaultMessage="Field containing the destination port. Defaults to {defaultValue}."
+        values={{ defaultValue: <EuiCode>{'destination.port'}</EuiCode> }}
       />
     ),
   },
@@ -108,7 +112,8 @@ const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.communityId.icmpTypeHelpText"
-        defaultMessage="Field containing the destination ICMP type."
+        defaultMessage="Field containing the destination ICMP type. Defaults to {defaultValue}."
+        values={{ defaultValue: <EuiCode>{'icmp.type'}</EuiCode> }}
       />
     ),
   },
@@ -121,7 +126,8 @@ const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.communityId.icmpCodeHelpText"
-        defaultMessage="Field containing the ICMP code."
+        defaultMessage="Field containing the ICMP code. Defaults to {defaultValue}."
+        values={{ defaultValue: <EuiCode>{'icmp.code'}</EuiCode> }}
       />
     ),
   },
@@ -134,9 +140,10 @@ const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.communityId.ianaNumberHelpText"
-        defaultMessage="Field containing the IANA number. Used only when {field} is not specified."
+        defaultMessage="Field containing the IANA number. Used only when {field} is not specified. Defaults to {defaultValue}."
         values={{
-          field: <EuiCode>{'transport'}</EuiCode>,
+          field: <EuiCode>{'Transport'}</EuiCode>,
+          defaultValue: <EuiCode>{'network.iana_number'}</EuiCode>,
         }}
       />
     ),
@@ -150,9 +157,10 @@ const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.communityId.transportHelpText"
-        defaultMessage="Field containing the transport protocol. Used only when {field} is not specified."
+        defaultMessage="Field containing the transport protocol. Used only when {field} is not specified. Defaults to {defaultValue}."
         values={{
-          field: <EuiCode>{'iana_number'}</EuiCode>,
+          field: <EuiCode>{'IANA number'}</EuiCode>,
+          defaultValue: <EuiCode>{'network.transport'}</EuiCode>,
         }}
       />
     ),
@@ -167,7 +175,8 @@ const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.communityId.seedHelpText"
-        defaultMessage="Seed for the community ID hash."
+        defaultMessage="Seed for the community ID hash. Defaults to {defaultValue}."
+        values={{ defaultValue: <EuiCode>{'0'}</EuiCode> }}
       />
     ),
     validations: [
