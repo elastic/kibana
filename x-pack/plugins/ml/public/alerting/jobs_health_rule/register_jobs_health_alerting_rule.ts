@@ -48,6 +48,7 @@ export function registerJobsHealthAlertingRule(
       'xpack.ml.alertTypes.jobsHealthAlertingRule.defaultActionMessage',
       {
         defaultMessage: `Anomaly detection jobs health check result:
+\\{\\{context.message\\}\\}
 - Job IDs: \\{\\{context.jobIds\\}\\}
 `,
       }

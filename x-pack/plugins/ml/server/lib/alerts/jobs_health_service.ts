@@ -6,6 +6,7 @@
  */
 
 import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
+import { i18n } from '@kbn/i18n';
 import { Logger } from 'kibana/server';
 import { MlClient } from '../ml_client';
 import {
@@ -139,6 +140,12 @@ export function jobsHealthServiceProvider(
             name: 'dataFeed',
             context: {
               jobIds: [...new Set(response.map((v) => v.job_id))],
+              message: i18n.translate(
+                'xpack.ml.alertTypes.jobsHealthAlertingRule.dataFeedStateMessage',
+                {
+                  defaultMessage: 'Datafeed is not started for the following jobs:',
+                }
+              ),
             },
           });
         }

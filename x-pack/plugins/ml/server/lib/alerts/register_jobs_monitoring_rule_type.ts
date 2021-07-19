@@ -24,6 +24,7 @@ import {
 
 export type AnomalyDetectionJobsHealthAlertContext = {
   jobIds: string[];
+  message: string;
 } & AlertInstanceContext;
 
 export const ANOMALY_DETECTION_JOB_REALTIME_ISSUE = 'anomaly_detection_realtime_issue';
