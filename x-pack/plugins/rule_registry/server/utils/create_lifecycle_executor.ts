@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
+import type { PublicContract } from '@kbn/utility-types';
 import { getOrElse } from 'fp-ts/lib/Either';
 import * as rt from 'io-ts';
 import { Mutable } from 'utility-types';
@@ -31,6 +32,7 @@ import {
   OWNER,
   RULE_UUID,
   TIMESTAMP,
+  SPACE_IDS,
 } from '../../common/technical_rule_data_field_names';
 import { RuleDataClient } from '../rule_data_client';
 import { AlertExecutorOptionsWithExtraServices } from '../types';
@@ -97,7 +99,10 @@ export type WrappedLifecycleRuleState<State extends AlertTypeState> = AlertTypeS
   trackedAlerts: Record<string, TrackedLifecycleAlertState>;
 };
 
-export const createLifecycleExecutor = (logger: Logger, ruleDataClient: RuleDataClient) => <
+export const createLifecycleExecutor = (
+  logger: Logger,
+  ruleDataClient: PublicContract<RuleDataClient>
+) => <
   Params extends AlertTypeParams = never,
   State extends AlertTypeState = never,
   InstanceState extends AlertInstanceState = never,
@@ -124,6 +129,7 @@ export const createLifecycleExecutor = (logger: Logger, ruleDataClient: RuleData
     rule,
     services: { alertInstanceFactory },
     state: previousState,
+    spaceId,
   } = options;
 
   const ruleExecutorData = getRuleData(options);
@@ -240,7 +246,7 @@ export const createLifecycleExecutor = (logger: Logger, ruleDataClient: RuleData
       ...alertData,
       ...ruleExecutorData,
       [TIMESTAMP]: timestamp,
-      [EVENT_KIND]: 'event',
+      [EVENT_KIND]: 'signal',
       [OWNER]: rule.consumer,
       [ALERT_ID]: alertId,
     };
@@ -257,6 +263,15 @@ export const createLifecycleExecutor = (logger: Logger, ruleDataClient: RuleData
 
     event[ALERT_START] = started;
     event[ALERT_UUID] = alertUuid;
+
+    // not sure why typescript needs the non-null assertion here
+    // we already assert the value is not undefined with the ternary
+    // still getting an error with the ternary.. strange.
+
+    event[SPACE_IDS] =
+      event[SPACE_IDS] == null
+        ? [spaceId]
+        : [spaceId, ...event[SPACE_IDS]!.filter((sid) => sid !== spaceId)];
 
     if (isNew) {
       event[EVENT_ACTION] = 'open';
@@ -300,14 +315,7 @@ export const createLifecycleExecutor = (logger: Logger, ruleDataClient: RuleData
 
     if (ruleDataClient.isWriteEnabled()) {
       await ruleDataClient.getWriter().bulk({
-        body: eventsToIndex
-          .flatMap((event) => [{ index: {} }, event])
-          .concat(
-            Array.from(alertEvents.values()).flatMap((event) => [
-              { index: { _id: event[ALERT_UUID]! } },
-              event,
-            ])
-          ),
+        body: eventsToIndex.flatMap((event) => [{ index: { _id: event[ALERT_UUID]! } }, event]),
       });
     }
   }
