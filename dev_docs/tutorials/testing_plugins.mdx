@@ -939,54 +939,37 @@ instance of Kibana. You can then leverage the import API to test migrations. Thi
 imported documents as are applied at Kibana startup and is much easier to work with for testing.
 
 ```ts
-import type supertest from 'supertest';
 // You may need to adjust these paths depending on where your test file is located.
-// The absolute path is src/core/test_helpers/kbn_server
-import * as kbnTestServer from '../../../../src/core/test_helpers/kbn_server';
-// The absolute path is src/core/server
-import { Root } from '../../../src/core/server';
+// The absolute path is src/core/test_helpers/so_migrations
+import { createTestHarness, SavedObjectTestHarness } from '../../../../src/core/test_helpers/so_migrations';
 
 describe('my plugin migrations', () => {
-  let esServer: kbnTestServer.TestElasticsearchUtils;
-  let kibanaRoot: Root;
-  let importApi: supertest.Test;
-  let exportApi: supertest.Test;
+  let testHarness: SavedObjectTestHarness;
 
   beforeAll(async () => {
-    const { startES } = kbnTestServer.createTestServers({ adjustTimeout: jest.setTimeout });
-    esServer = await startES();
-    root = kbnTestServer.createRootWithCorePlugins({}, { oss: false }) // oss: false flag necessary if you need to load x-pack plugins
-    await root.setup();
-    await root.start();
-    // Create a pre-configured instance of supertest for the import export APIs
-    importApi = kbnTestServer.getSupertest(root, 'POST', '/api/saved_objects/_import').set('Content-Type: application/ndjson');
-    exportApi = kbnTestServer.getSupertest(root, 'POST', '/api/saved_objects/_export')
+    testHarness = createTestHarness();
+    await testHarness.start();
   });
 
   afterAll(async () => {
-    if (root) await root.shutdown();
-    if (esServer) await esServer.stop();
+    await testHarness.stop();
   });
 
-  it('successfully imports valid case documents', async () => {
-    // Request body should be in ndjson format
-    await importApi.send(`
-      {"type": "case", "id": "1", "attributes": { "connector_id": "1234" } }\n
-      {"type": "case", "id": "2", "attributes": { "connector_id": "" } }\n
-      {"type": "case", "id": "3", "attributes": { "connector_id": null } }\n
-    `).expect(200);
-
-    const response = await exportApi.send({
-      type: 'case',
-      excludeExportDetails: true // removes the metadata attached by the export system
-    }).expect(200);
-
-    // Verify ndjson response has correct transformations
-    expect(response.body).toEqual(`
-      {"type": "case", "id": "1", "attributes": { "connector": { id: "1234", "name": "none" } }\n
-      {"type": "case", "id": "2", "attributes": { "connector": { id: "none", "name": "none" } }\n
-      {"type": "case", "id": "3", "attributes": { "connector": { id: "none", "name": "none" } }\n
-    `);
+  it('successfully migrates valid case documents', async () => {
+    expect(
+      await testHarness.migrate([
+        { type: 'case', id: '1', attributes: { connector_id: '1234' }, references: [] },
+        { type: 'case', id: '2', attributes: { connector_id: '' }, references: [] },
+        { type: 'case', id: '3', attributes: { connector_id: null }, references: [] },
+      ])
+    ).toEqual([
+      expect.objectContaining(
+        { type: 'case', id: '1', attributes: { connector: { id: '1234', name: 'none' } } }),
+      expect.objectContaining(
+        { type: 'case', id: '2', attributes: { connector: { id: 'none', name: 'none' } } }),
+      expect.objectContaining(
+        { type: 'case', id: '3', attributes: { connector: { id: 'none', name: 'none' } } }),
+    ])
   })
 })
 ```
