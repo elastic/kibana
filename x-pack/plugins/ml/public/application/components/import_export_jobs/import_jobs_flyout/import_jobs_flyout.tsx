@@ -327,7 +327,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
       <FlyoutButton onClick={toggleFlyout} isDisabled={isDisabled} />
 
       {showFlyout === true && isDisabled === false && (
-        <EuiFlyout onClose={() => setShowFlyout(false)} hideCloseButton size="m">
+        <EuiFlyout onClose={setShowFlyout.bind(null, false)} hideCloseButton size="m">
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
               <h2>
