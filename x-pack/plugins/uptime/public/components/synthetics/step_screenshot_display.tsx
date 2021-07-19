@@ -36,16 +36,13 @@ interface StepScreenshotDisplayProps {
   lazyLoad?: boolean;
 }
 
-const IMAGE_WIDTH = 640;
-const IMAGE_HEIGHT = 360;
+const IMAGE_MAX_WIDTH = 450;
 
 const StepImage = styled(EuiImage)`
   &&& {
     figcaption {
       display: none;
     }
-    width: ${IMAGE_WIDTH},
-    height: ${IMAGE_HEIGHT},
     objectFit: 'cover',
     objectPosition: 'center top',
   }
@@ -141,10 +138,7 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
 
   const shouldRenderImage = hasIntersected || !lazyLoad;
   return (
-    <div
-      ref={containerRef}
-      style={{ backgroundColor: pageBackground, height: IMAGE_HEIGHT, width: IMAGE_WIDTH }}
-    >
+    <div ref={containerRef} style={{ backgroundColor: pageBackground, maxWidth: IMAGE_MAX_WIDTH }}>
       {shouldRenderImage && isScreenshotBlob && (
         <BaseStepImage stepName={stepName} stepIndex={stepIndex} url={url} />
       )}
