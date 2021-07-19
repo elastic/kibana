@@ -35,7 +35,6 @@ const createRequestContextMock = (
       elasticsearch: {
         ...coreContext.elasticsearch,
         client: clients.newClusterClient,
-        legacy: { ...coreContext.elasticsearch.legacy, client: clients.clusterClient },
       },
       savedObjects: { client: clients.savedObjectsClient },
     },

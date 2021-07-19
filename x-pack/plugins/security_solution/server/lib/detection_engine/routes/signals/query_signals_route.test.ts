@@ -16,16 +16,21 @@ import {
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock, createMockConfig } from '../__mocks__';
 import { querySignalsRoute } from './query_signals_route';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
 describe('query for signal', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let { clients, context } = requestContextMock.createTools();
+  let { context } = requestContextMock.createTools();
 
   beforeEach(() => {
     server = serverMock.create();
-    ({ clients, context } = requestContextMock.createTools());
+    ({ context } = requestContextMock.createTools());
 
-    clients.clusterClient.callAsCurrentUser.mockResolvedValue(getEmptySignalsResponse());
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise(getEmptySignalsResponse())
+    );
 
     querySignalsRoute(server.router, createMockConfig());
   });
@@ -35,9 +40,10 @@ describe('query for signal', () => {
       const response = await server.inject(getSignalsQueryRequest(), context);
 
       expect(response.status).toEqual(200);
-      expect(clients.clusterClient.callAsCurrentUser).toHaveBeenCalledWith(
-        'search',
-        expect.objectContaining({ body: typicalSignalsQuery() })
+      expect(context.core.elasticsearch.client.asCurrentUser.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: typicalSignalsQuery(),
+        })
       );
     });
 
@@ -45,9 +51,8 @@ describe('query for signal', () => {
       const response = await server.inject(getSignalsAggsQueryRequest(), context);
 
       expect(response.status).toEqual(200);
-      expect(clients.clusterClient.callAsCurrentUser).toHaveBeenCalledWith(
-        'search',
-        expect.objectContaining({ body: typicalSignalsQueryAggs() })
+      expect(context.core.elasticsearch.client.asCurrentUser.search).toHaveBeenCalledWith(
+        expect.objectContaining({ body: typicalSignalsQueryAggs(), ignore_unavailable: true })
       );
     });
 
@@ -55,8 +60,7 @@ describe('query for signal', () => {
       const response = await server.inject(getSignalsAggsAndQueryRequest(), context);
 
       expect(response.status).toEqual(200);
-      expect(clients.clusterClient.callAsCurrentUser).toHaveBeenCalledWith(
-        'search',
+      expect(context.core.elasticsearch.client.asCurrentUser.search).toHaveBeenCalledWith(
         expect.objectContaining({
           body: {
             ...typicalSignalsQuery(),
@@ -67,9 +71,10 @@ describe('query for signal', () => {
     });
 
     test('catches error if query throws error', async () => {
-      clients.clusterClient.callAsCurrentUser.mockImplementation(async () => {
-        throw new Error('Test error');
-      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValue(
+        elasticsearchClientMock.createErrorTransportRequestPromise(new Error('Test error'))
+      );
       const response = await server.inject(getSignalsAggsQueryRequest(), context);
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({

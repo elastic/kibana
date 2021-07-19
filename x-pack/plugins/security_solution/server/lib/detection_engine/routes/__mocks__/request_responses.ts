@@ -50,6 +50,7 @@ export const typicalSetStatusSignalByQueryPayload = (): SetSignalsStatusSchemaDe
 });
 
 export const typicalSignalsQuery = (): QuerySignalsSchemaDecoded => ({
+  aggs: {},
   query: { match_all: {} },
 });
 

@@ -108,7 +108,9 @@ export class TelemetryDiagTask {
     }
     this.logger.debug(`Received ${hits.length} diagnostic alerts`);
 
-    const diagAlerts: TelemetryEvent[] = hits.map((h) => h._source);
+    const diagAlerts: TelemetryEvent[] = hits.flatMap((h) =>
+      h._source != null ? [h._source] : []
+    );
     this.sender.queueTelemetryEvents(diagAlerts);
     return diagAlerts.length;
   };

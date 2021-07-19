@@ -16,17 +16,22 @@ import {
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { setSignalsStatusRoute } from './open_close_signals_route';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
 describe('set signal status', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let { clients, context } = requestContextMock.createTools();
+  let { context } = requestContextMock.createTools();
 
   beforeEach(() => {
     server = serverMock.create();
-    ({ clients, context } = requestContextMock.createTools());
-
-    clients.clusterClient.callAsCurrentUser.mockResolvedValue(getSuccessfulSignalUpdateResponse());
-
+    ({ context } = requestContextMock.createTools());
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise(
+        getSuccessfulSignalUpdateResponse()
+      )
+    );
     setSignalsStatusRoute(server.router);
   });
 
@@ -53,9 +58,10 @@ describe('set signal status', () => {
     });
 
     test('catches error if callAsCurrentUser throws error', async () => {
-      clients.clusterClient.callAsCurrentUser.mockImplementation(async () => {
-        throw new Error('Test error');
-      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (context.core.elasticsearch.client.asCurrentUser.updateByQuery as any).mockResolvedValue(
+        elasticsearchClientMock.createErrorTransportRequestPromise(new Error('Test error'))
+      );
       const response = await server.inject(getSetSignalStatusByQueryRequest(), context);
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({

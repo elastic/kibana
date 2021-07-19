@@ -32,7 +32,7 @@ export const setSignalsStatusRoute = (router: SecuritySolutionPluginRouter) => {
     },
     async (context, request, response) => {
       const { conflicts, signal_ids: signalIds, query, status } = request.body;
-      const clusterClient = context.core.elasticsearch.legacy.client;
+      const esClient = context.core.elasticsearch.client.asCurrentUser;
       const siemClient = context.securitySolution?.getAppClient();
       const siemResponse = buildSiemResponse(response);
       const validationErrors = setSignalStatusValidateTypeDependents(request.body);
@@ -57,10 +57,11 @@ export const setSignalsStatusRoute = (router: SecuritySolutionPluginRouter) => {
         };
       }
       try {
-        const result = await clusterClient.callAsCurrentUser('updateByQuery', {
+        const result = await esClient.updateByQuery({
           index: siemClient.getSignalsIndex(),
           conflicts: conflicts ?? 'abort',
-          refresh: 'wait_for',
+          // https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update-by-query.html#_refreshing_shards_2
+          // Note: We cannot use "refresh: wait_for" here.
           body: {
             script: {
               source: `ctx._source.signal.status = '${status}'`,
@@ -68,7 +69,7 @@ export const setSignalsStatusRoute = (router: SecuritySolutionPluginRouter) => {
             },
             query: queryObject,
           },
-          ignoreUnavailable: true,
+          ignore_unavailable: true,
         });
         return response.ok({ body: result });
       } catch (err) {
