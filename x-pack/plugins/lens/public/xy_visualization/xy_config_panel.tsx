@@ -8,7 +8,7 @@
 import './xy_config_panel.scss';
 import React, { useMemo, useState, memo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Position, ScaleType } from '@elastic/charts';
+import { Position, ScaleType, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
 import { debounce } from 'lodash';
 import {
   EuiButtonGroup,
@@ -380,11 +380,13 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
                 legend: { ...state.legend, position: id as Position },
               });
             }}
-            onAlignmentChange={(id, type) => {
-              const key = type === 'horizontal' ? 'horizontalAlignment' : 'verticalAlignment';
+            onAlignmentChange={(value) => {
+              const [vertical, horizontal] = value.split('_');
+              const verticalAlignment = vertical as VerticalAlignment;
+              const horizontalAlignment = horizontal as HorizontalAlignment;
               setState({
                 ...state,
-                legend: { ...state.legend, [key]: id },
+                legend: { ...state.legend, verticalAlignment, horizontalAlignment },
               });
             }}
             renderValueInLegendSwitch={nonOrdinalXAxis}

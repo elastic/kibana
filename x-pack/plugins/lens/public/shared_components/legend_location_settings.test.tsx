@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
+import { Position } from '@elastic/charts';
 import { shallowWithIntl as shallow, mountWithIntl as mount } from '@kbn/test/jest';
 import { LegendLocationSettings, LegendLocationSettingsProps } from './legend_location_settings';
 
@@ -14,64 +14,119 @@ describe('Legend Location Settings', () => {
   let props: LegendLocationSettingsProps;
   beforeEach(() => {
     props = {
-      location: 'inside',
       onLocationChange: jest.fn(),
+      onPositionChange: jest.fn(),
     };
   });
 
-  it('should have selected the given location', () => {
+  it('should have default the Position to right when no position is given', () => {
     const component = shallow(<LegendLocationSettings {...props} />);
+    expect(
+      component.find('[data-test-subj="lens-legend-position-btn"]').prop('idSelected')
+    ).toEqual(Position.Right);
+  });
+
+  it('should have called the onPositionChange function on ButtonGroup change', () => {
+    const component = shallow(<LegendLocationSettings {...props} />);
+    component.find('[data-test-subj="lens-legend-position-btn"]').simulate('change');
+    expect(props.onPositionChange).toHaveBeenCalled();
+  });
+
+  it('should disable the position group if isDisabled prop is true', () => {
+    const component = shallow(<LegendLocationSettings {...props} isDisabled />);
+    expect(
+      component.find('[data-test-subj="lens-legend-position-btn"]').prop('isDisabled')
+    ).toEqual(true);
+  });
+
+  it('should hide the position button group if location inside is given', () => {
+    const newProps = {
+      ...props,
+      location: 'inside',
+    } as LegendLocationSettingsProps;
+    const component = shallow(<LegendLocationSettings {...newProps} />);
+    expect(component.find('[data-test-subj="lens-legend-position-btn"]').length).toEqual(0);
+  });
+
+  it('should render the location settings if location inside is given', () => {
+    const newProps = {
+      ...props,
+      location: 'inside',
+    } as LegendLocationSettingsProps;
+    const component = shallow(<LegendLocationSettings {...newProps} />);
+    expect(component.find('[data-test-subj="lens-legend-location-btn"]').length).toEqual(1);
+  });
+
+  it('should have selected the given location', () => {
+    const newProps = {
+      ...props,
+      location: 'inside',
+    } as LegendLocationSettingsProps;
+    const component = shallow(<LegendLocationSettings {...newProps} />);
     expect(
       component.find('[data-test-subj="lens-legend-location-btn"]').prop('idSelected')
     ).toEqual('xy_location_inside');
   });
 
   it('should have called the onLocationChange function on ButtonGroup change', () => {
-    const component = shallow(<LegendLocationSettings {...props} />);
+    const newProps = {
+      ...props,
+      location: 'inside',
+    } as LegendLocationSettingsProps;
+    const component = shallow(<LegendLocationSettings {...newProps} />);
     component
       .find('[data-test-subj="lens-legend-location-btn"]')
       .simulate('change', 'xy_location_outside');
     expect(props.onLocationChange).toHaveBeenCalled();
   });
 
-  it('should have default the Vertical alignment to top when no value is given', () => {
-    const component = shallow(<LegendLocationSettings {...props} />);
+  it('should default the alignment to top right when no value is given', () => {
+    const newProps = {
+      ...props,
+      location: 'inside',
+    } as LegendLocationSettingsProps;
+    const component = shallow(<LegendLocationSettings {...newProps} />);
     expect(
-      component.find('[data-test-subj="lens-legend-inside-valign-btn"]').prop('idSelected')
-    ).toEqual(VerticalAlignment.Top);
-  });
-
-  it('should have default the Horizontal alignment to right when no value is given', () => {
-    const component = shallow(<LegendLocationSettings {...props} />);
-    expect(
-      component.find('[data-test-subj="lens-legend-inside-halign-btn"]').prop('idSelected')
-    ).toEqual(HorizontalAlignment.Right);
+      component.find('[data-test-subj="lens-legend-inside-alignment-btn"]').prop('idSelected')
+    ).toEqual('xy_location_alignment_top_right');
   });
 
   it('should have called the onAlignmentChange function on ButtonGroup change', () => {
-    const newProps = { ...props, onAlignmentChange: jest.fn() };
+    const newProps = {
+      ...props,
+      onAlignmentChange: jest.fn(),
+      location: 'inside',
+    } as LegendLocationSettingsProps;
     const component = shallow(<LegendLocationSettings {...newProps} />);
-    component.find('[data-test-subj="lens-legend-inside-halign-btn"]').simulate('change');
+    component
+      .find('[data-test-subj="lens-legend-inside-alignment-btn"]')
+      .simulate('change', 'xy_location_alignment_top_left');
     expect(newProps.onAlignmentChange).toHaveBeenCalled();
   });
 
-  it('should have default the columns slider to 1 when no value is given', () => {
-    const component = mount(<LegendLocationSettings {...props} />);
+  it('should have default the columns input to 1 when no value is given', () => {
+    const newProps = {
+      ...props,
+      location: 'inside',
+    } as LegendLocationSettingsProps;
+    const component = mount(<LegendLocationSettings {...newProps} />);
     expect(
-      component.find('[data-test-subj="lens-legend-location-columns-slider"]').at(0).prop('value')
+      component.find('[data-test-subj="lens-legend-location-columns-input"]').at(0).prop('value')
     ).toEqual(1);
   });
 
   it('should disable the components when is Disabled is true', () => {
-    const component = shallow(<LegendLocationSettings {...props} isDisabled={true} />);
+    const newProps = {
+      ...props,
+      location: 'inside',
+      isDisabled: true,
+    } as LegendLocationSettingsProps;
+    const component = shallow(<LegendLocationSettings {...newProps} />);
     expect(
       component.find('[data-test-subj="lens-legend-location-btn"]').prop('isDisabled')
     ).toEqual(true);
     expect(
-      component.find('[data-test-subj="lens-legend-inside-valign-btn"]').prop('isDisabled')
-    ).toEqual(true);
-    expect(
-      component.find('[data-test-subj="lens-legend-inside-halign-btn"]').prop('isDisabled')
+      component.find('[data-test-subj="lens-legend-inside-alignment-btn"]').prop('isDisabled')
     ).toEqual(true);
   });
 });
