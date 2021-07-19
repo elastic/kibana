@@ -26,11 +26,7 @@ import { APP_ID, APP_ICON, MAP_SAVED_OBJECT_TYPE, getFullPath } from '../common/
 import { mapSavedObjects, mapsTelemetrySavedObjects } from './saved_objects';
 import { MapsXPackConfig } from '../config';
 // @ts-ignore
-import {
-  setIndexPatternsService,
-  setInternalRepository,
-  setSecurityPlugin,
-} from './kibana_server_services';
+import { setIndexPatternsService, setInternalRepository } from './kibana_server_services';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { emsBoundariesSpecProvider } from './tutorials/ems';
 // @ts-ignore
@@ -43,7 +39,7 @@ import { EMSSettings } from '../common/ems_settings';
 import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 import { EmbeddableSetup } from '../../../../src/plugins/embeddable/server';
 import { embeddableMigrations } from './embeddable_migrations';
-import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
+import { SecurityPluginSetup } from '../../security/server';
 
 interface SetupDeps {
   features: FeaturesPluginSetupContract;
@@ -57,7 +53,6 @@ interface SetupDeps {
 
 export interface StartDeps {
   data: DataPluginStart;
-  security: SecurityPluginStart;
 }
 
 export class MapsPlugin implements Plugin {
@@ -233,6 +228,5 @@ export class MapsPlugin implements Plugin {
       plugins.data.indexPatterns.indexPatternsServiceFactory,
       core.elasticsearch.client.asInternalUser
     );
-    setSecurityPlugin(plugins.security);
   }
 }
