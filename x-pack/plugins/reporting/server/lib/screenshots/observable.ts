@@ -8,6 +8,7 @@
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, concatMap, first, mergeMap, take, takeUntil, toArray } from 'rxjs/operators';
+import { LocatorParams } from '../../../common/types';
 import { HeadlessChromiumDriverFactory } from '../../browsers';
 import { CaptureConfig } from '../../types';
 import {
@@ -42,7 +43,7 @@ export function screenshotsObservableFactory(
 ): ScreenshotsObservableFn {
   return function screenshotsObservable({
     logger,
-    urls,
+    urlsOrUrlLocatorTuples,
     conditionalHeaders,
     layout,
     browserTimezone,
@@ -60,10 +61,19 @@ export function screenshotsObservableFactory(
         apmCreatePage?.end();
         exit$.subscribe({ error: () => apmTrans?.end() });
 
-        return Rx.from(urls).pipe(
-          concatMap((url, index) => {
+        return Rx.from(urlsOrUrlLocatorTuples).pipe(
+          concatMap((urlOrUrlLocatorTuple, index) => {
             const setup$: Rx.Observable<ScreenSetupData> = Rx.of(1).pipe(
               mergeMap(() => {
+                let url: string;
+                let locator: undefined | LocatorParams;
+
+                if (typeof urlOrUrlLocatorTuple === 'string') {
+                  url = urlOrUrlLocatorTuple;
+                } else {
+                  [url, locator] = urlOrUrlLocatorTuple;
+                }
+
                 // If we're moving to another page in the app, we'll want to wait for the app to tell us
                 // it's loaded the next page.
                 const p = index + 1;
@@ -76,7 +86,8 @@ export function screenshotsObservableFactory(
                   url,
                   pageLoadSelector,
                   conditionalHeaders,
-                  logger
+                  logger,
+                  locator
                 );
               }),
               mergeMap(() => getNumberOfItems(captureConfig, driver, layout, logger)),
@@ -140,7 +151,7 @@ export function screenshotsObservableFactory(
               )
             );
           }),
-          take(urls.length),
+          take(urlsOrUrlLocatorTuples.length),
           toArray()
         );
       }),

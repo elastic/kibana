@@ -12,6 +12,7 @@ import { ReportingCore } from '../..';
 import { LevelLogger } from '../../lib';
 import { LayoutParams, PreserveLayout } from '../../lib/layouts';
 import { ScreenshotResults } from '../../lib/screenshots';
+import { UrlOrUrlLocatorTuple } from '../../types';
 import { ConditionalHeaders } from './';
 
 function getBase64DecodedSize(value: string) {
@@ -28,7 +29,7 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
 
   return function generatePngObservable(
     logger: LevelLogger,
-    url: string,
+    urlOrUrlLocatorTuple: UrlOrUrlLocatorTuple,
     browserTimezone: string | undefined,
     conditionalHeaders: ConditionalHeaders,
     layoutParams: LayoutParams
@@ -45,7 +46,7 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
     let apmBuffer: typeof apm.currentSpan;
     const screenshots$ = getScreenshots({
       logger,
-      urls: [url],
+      urlsOrUrlLocatorTuples: [urlOrUrlLocatorTuple],
       conditionalHeaders,
       layout,
       browserTimezone,

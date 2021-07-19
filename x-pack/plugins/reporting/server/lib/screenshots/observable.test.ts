@@ -70,7 +70,7 @@ describe('Screenshot Observable Pipeline', () => {
     const getScreenshots$ = screenshotsObservableFactory(captureConfig, mockBrowserDriverFactory);
     const result = await getScreenshots$({
       logger,
-      urls: ['/welcome/home/start/index.htm'],
+      urlsOrUrlLocatorTuples: ['/welcome/home/start/index.htm'],
       conditionalHeaders: {} as ConditionalHeaders,
       layout: mockLayout,
       browserTimezone: 'UTC',
@@ -131,7 +131,10 @@ describe('Screenshot Observable Pipeline', () => {
     const getScreenshots$ = screenshotsObservableFactory(captureConfig, mockBrowserDriverFactory);
     const result = await getScreenshots$({
       logger,
-      urls: ['/welcome/home/start/index2.htm', '/welcome/home/start/index.php3?page=./home.php'],
+      urlsOrUrlLocatorTuples: [
+        '/welcome/home/start/index2.htm',
+        '/welcome/home/start/index.php3?page=./home.php',
+      ],
       conditionalHeaders: {} as ConditionalHeaders,
       layout: mockLayout,
       browserTimezone: 'UTC',
@@ -231,7 +234,7 @@ describe('Screenshot Observable Pipeline', () => {
       const getScreenshot = async () => {
         return await getScreenshots$({
           logger,
-          urls: [
+          urlsOrUrlLocatorTuples: [
             '/welcome/home/start/index2.htm',
             '/welcome/home/start/index.php3?page=./home.php3',
           ],
@@ -326,7 +329,7 @@ describe('Screenshot Observable Pipeline', () => {
       const getScreenshot = async () => {
         return await getScreenshots$({
           logger,
-          urls: ['/welcome/home/start/index.php3?page=./home.php3'],
+          urlsOrUrlLocatorTuples: ['/welcome/home/start/index.php3?page=./home.php3'],
           conditionalHeaders: {} as ConditionalHeaders,
           layout: mockLayout,
           browserTimezone: 'UTC',
@@ -359,7 +362,7 @@ describe('Screenshot Observable Pipeline', () => {
       const getScreenshot = async () => {
         return await getScreenshots$({
           logger,
-          urls: ['/welcome/home/start/index.php3?page=./home.php3'],
+          urlsOrUrlLocatorTuples: ['/welcome/home/start/index.php3?page=./home.php3'],
           conditionalHeaders: {} as ConditionalHeaders,
           layout: mockLayout,
           browserTimezone: 'UTC',

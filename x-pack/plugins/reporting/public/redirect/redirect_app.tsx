@@ -9,9 +9,11 @@ import React, { useEffect, useState } from 'react';
 import type { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiTitle, EuiCallOut, EuiCodeBlock } from '@elastic/eui';
-import qs from 'query-string';
 
 import type { ScopedHistory } from 'src/core/public';
+
+import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../../common/constants';
+import { LocatorParams } from '../../common/types';
 
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import type { SharePluginSetup } from '../shared_imports';
@@ -31,40 +33,25 @@ const i18nTexts = {
   }),
 };
 
-export const RedirectApp: FunctionComponent<Props> = ({ apiClient, history, share }) => {
+export const RedirectApp: FunctionComponent<Props> = ({ share }) => {
   const [error, setError] = useState<undefined | Error>();
-  const search = history.location.search;
 
   useEffect(() => {
-    async function fetchReportJob() {
-      const { jobId, locatorOffset } = qs.parse(search);
+    try {
+      const locatorParams = ((window as unknown) as Record<string, LocatorParams>)[
+        REPORTING_REDIRECT_LOCATOR_STORE_KEY
+      ];
 
-      try {
-        if (!jobId || !locatorOffset || Array.isArray(jobId) || Array.isArray(locatorOffset)) {
-          throw new Error(
-            `Unexpected redirect parameters, received: (1) report id: "${jobId}" (expected id) and (2) locator offset: "${locatorOffset}.`
-          );
-        }
-        const locatorParams = await apiClient.getLocatorParams(jobId);
-
-        if (!locatorParams || locatorParams.length === 0) {
-          throw new Error(`No locators for report ID ${jobId}`);
-        }
-
-        const { [parseInt(locatorOffset, 10)]: locatorParam } = locatorParams;
-
-        if (!locatorParam) {
-          throw new Error(`No locator params found at ${locatorOffset} for report ID ${jobId}`);
-        }
-
-        share.navigate(locatorParam);
-      } catch (e) {
-        setError(e);
-        throw e;
+      if (!locatorParams) {
+        throw new Error('Could not find locator for report');
       }
+      share.navigate(locatorParams);
+    } catch (e) {
+      setError(e);
+      throw e;
     }
-    fetchReportJob();
-  }, [apiClient, search, share]);
+  }, [share]);
+
   return error ? (
     <EuiCallOut title={i18nTexts.errorTitle} color="danger">
       <p>{error.message}</p>

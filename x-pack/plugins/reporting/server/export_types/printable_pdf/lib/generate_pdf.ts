@@ -50,7 +50,7 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
     tracker.startScreenshots();
     const screenshots$ = getScreenshots({
       logger,
-      urls,
+      urlsOrUrlLocatorTuples: urls,
       conditionalHeaders,
       layout,
       browserTimezone,

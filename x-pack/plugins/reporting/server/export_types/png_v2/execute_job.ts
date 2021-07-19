@@ -38,18 +38,16 @@ export const runTaskFnFactory: RunTaskFnFactory<
       map((decryptedHeaders) => omitBlockedHeaders(decryptedHeaders)),
       map((filteredHeaders) => getConditionalHeaders(config, filteredHeaders)),
       mergeMap((conditionalHeaders) => {
-        const relativeUrl = getRedirectAppPathHome({
-          reportSavedObjectId: jobId,
-          locatorOffset: '0', // We only ever have one locator for PNG
-        });
+        const relativeUrl = getRedirectAppPathHome();
         const [url] = getFullUrls(config, [relativeUrl]);
+        const [locatorParams] = job.locatorParams;
 
         if (apmGetAssets) apmGetAssets.end();
 
         apmGeneratePng = apmTrans?.startSpan('generate_png_pipeline', 'execute');
         return generatePngObservable(
           jobLogger,
-          url,
+          [url, locatorParams],
           job.browserTimezone,
           conditionalHeaders,
           job.layout

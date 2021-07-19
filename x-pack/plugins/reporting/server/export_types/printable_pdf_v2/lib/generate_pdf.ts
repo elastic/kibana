@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { groupBy } from 'lodash';
+import { groupBy, zip } from 'lodash';
 import * as Rx from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 import { LocatorParams } from '../../../../common/types';
 import { getRedirectAppPathHome } from '../../../../common/constants';
 import { ReportingCore } from '../../../';
+import { UrlOrUrlLocatorTuple } from '../../../types';
 import { LevelLogger } from '../../../lib';
 import { createLayout, LayoutParams } from '../../../lib/layouts';
 import { ScreenshotResults } from '../../../lib/screenshots';
@@ -54,21 +55,14 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
     tracker.startScreenshots();
 
     /**
-     * For each locator, we generate a unique, relative URL that will load each of the locators in the
-     * reporting client side.
+     * For each locator we get the relative URL to the redirect app
      */
-    const relativeUrls = locatorParams.map((_, idx) =>
-      getRedirectAppPathHome({
-        reportSavedObjectId: jobId,
-        locatorOffset: String(idx),
-      })
-    );
-
+    const relativeUrls = locatorParams.map(() => getRedirectAppPathHome());
     const urls = getFullUrls(reporting.getConfig(), relativeUrls);
 
     const screenshots$ = getScreenshots({
       logger,
-      urls,
+      urlsOrUrlLocatorTuples: zip(urls, locatorParams) as UrlOrUrlLocatorTuple[],
       conditionalHeaders,
       layout,
       browserTimezone,

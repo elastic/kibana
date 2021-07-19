@@ -48,7 +48,6 @@ interface IReportingAPI {
   total(): Promise<number>;
   getError(jobId: string): Promise<JobContent>;
   getInfo(jobId: string): Promise<Job>;
-  getLocatorParams(jobId: string): Promise<ReportApiJSON['payload']['locatorParams']>;
   findForJobIds(jobIds: string[]): Promise<Job[]>;
 
   // Function props
@@ -119,12 +118,6 @@ export class ReportingAPIClient implements IReportingAPI {
       asSystemRequest: true,
     });
     return new Job(report);
-  }
-
-  public async getLocatorParams(jobId: string): Promise<ReportApiJSON['payload']['locatorParams']> {
-    return await this.http.get(`${API_LIST_URL}/locator_params/${jobId}`, {
-      asSystemRequest: true,
-    });
   }
 
   public async findForJobIds(jobIds: JobId[]) {

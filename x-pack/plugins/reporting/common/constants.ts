@@ -108,8 +108,7 @@ export const API_GENERATE_IMMEDIATE = `${API_BASE_URL_V1}/generate/immediate/csv
 // Management UI route
 export const REPORTING_MANAGEMENT_HOME = '/app/management/insightsAndAlerting/reporting';
 
-export const REDIRECT_APP_PATH_HOME =
-  '/app/management/insightsAndAlerting/reporting/r/{reportSavedObjectId}/{locatorIdx}';
+export const REPORTING_REDIRECT_LOCATOR_STORE_KEY = '__REPORTING_REDIRECT_LOCATOR_STORE_KEY__';
 
 /**
  * A way to get the client side route for the reporting redirect app.
@@ -119,14 +118,8 @@ export const REDIRECT_APP_PATH_HOME =
  *
  * TODO: Accommodate 'forceNow' value that some visualizations may rely on
  */
-export const getRedirectAppPathHome = ({
-  reportSavedObjectId,
-  locatorOffset,
-}: {
-  locatorOffset: string;
-  reportSavedObjectId: string;
-}) => {
-  return `/app/management/insightsAndAlerting/reporting/r?jobId=${reportSavedObjectId}&locatorOffset=${locatorOffset}`;
+export const getRedirectAppPathHome = () => {
+  return '/app/management/insightsAndAlerting/reporting/r';
 };
 
 // Statuses
