@@ -23,10 +23,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  isInitialized:
-                    type: boolean
+                $ref: '#/components/schemas/fleet_setup_response'
         '500':
           description: Internal Server Error
           content:
@@ -207,12 +204,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  isInitialized:
-                    type: boolean
-                required:
-                  - isInitialized
+                $ref: '#/components/schemas/fleet_setup_response'
       requestBody:
         content:
           application/json:
@@ -865,6 +857,27 @@ components:
       schema:
         type: string
   schemas:
+    fleet_setup_response:
+      title: Fleet Setup response
+      type: object
+      properties:
+        isInitialized:
+          type: boolean
+        nonFatalErrors:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              message:
+                type: string
+            required:
+              - name
+              - message
+      required:
+        - isInitialized
+        - nonFatalErrors
     search_result:
       title: SearchResult
       type: object

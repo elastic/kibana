@@ -25,12 +25,7 @@ post:
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              isInitialized:
-                type: boolean
-            required:
-              - isInitialized
+            $ref: ../components/schemas/fleet_setup_response.yaml
   requestBody:
     content:
       application/json:
