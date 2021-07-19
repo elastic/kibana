@@ -30,7 +30,7 @@ const LockedPolicyDiv = styled.div`
   }
 `;
 
-export const LockedPolicyCard = memo(({ title }: { title: React.ReactNode }) => {
+export const LockedPolicyCard = memo(({ title }: { title: string }) => {
   return (
     <LockedPolicyDiv>
       <EuiCard
