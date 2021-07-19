@@ -7,7 +7,7 @@
  */
 import { createShape } from '../../../../presentation_util/public';
 
-const Arrow = createShape({
+export const Arrow = createShape({
   viewBox: {
     minX: 0,
     minY: 0,
@@ -18,6 +18,3 @@ const Arrow = createShape({
     points: '0,40 60,40 60,20 95,50 60,80 60,60 0,60',
   },
 });
-
-// eslint-disable-next-line import/no-default-export
-export default Arrow;

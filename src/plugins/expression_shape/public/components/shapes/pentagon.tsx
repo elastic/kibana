@@ -8,7 +8,7 @@
 
 import { createShape } from '../../../../presentation_util/public';
 
-const Pentagon = createShape({
+export const Pentagon = createShape({
   viewBox: {
     minX: 0,
     minY: 0,
@@ -19,6 +19,3 @@ const Pentagon = createShape({
     points: '50.0000, 14.0000 11.9577, 41.6393 26.4886, 86.3607 73.5114, 86.3607 88.0423, 41.6393',
   },
 });
-
-// eslint-disable-next-line import/no-default-export
-export default Pentagon;

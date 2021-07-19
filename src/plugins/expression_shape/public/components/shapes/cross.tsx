@@ -8,7 +8,7 @@
 
 import { createShape } from '../../../../presentation_util/public';
 
-const Cross = createShape({
+export const Cross = createShape({
   viewBox: {
     minX: 0,
     minY: 0,
@@ -19,6 +19,3 @@ const Cross = createShape({
     points: '30,0 70,0 70,30 100,30 100,70 70,70 70,100 30,100 30,70 0,70 0,30 30,30',
   },
 });
-
-// eslint-disable-next-line import/no-default-export
-export default Cross;

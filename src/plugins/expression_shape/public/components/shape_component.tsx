@@ -6,20 +6,21 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, useCallback, RefCallback } from 'react';
 import { useResizeObserver } from '@elastic/eui';
-import { EuiLoadingSpinner } from '@elastic/eui';
 import {
   ShapeAttributes,
   ShapeContentAttributes,
-  ShapeProps,
-  ShapeType,
-  useLoad,
+  SvgConfig,
+  getDefaultShapeData,
   withSuspense,
 } from '../../../presentation_util/public';
 import { Dimensions, ShapeComponentProps } from './types';
-import { getShape } from './shapes';
 import { getViewBox } from '../../common/lib';
+import type { ShapeRef } from './shape_drawer';
+
+const LazyShapeDrawer = lazy(() => import('./shape_drawer'));
+const ShapeDrawer = withSuspense(LazyShapeDrawer);
 
 function ShapeComponent({
   onLoaded,
@@ -30,16 +31,12 @@ function ShapeComponent({
   borderWidth,
   maintainAspect,
 }: ShapeComponentProps) {
-  const shapeLoader = getShape(shapeType);
-  const { error, loading, data } = useLoad<{ default: ShapeType }>(shapeLoader);
-
-  if (error) throw new Error(error.message);
-
   const parentNodeDimensions = useResizeObserver(parentNode);
   const [dimensions, setDimensions] = useState<Dimensions>({
     width: parentNode.offsetWidth,
     height: parentNode.offsetHeight,
   });
+  const [shapeData, setShapeData] = useState<SvgConfig>(getDefaultShapeData());
 
   useEffect(() => {
     setDimensions({
@@ -49,9 +46,10 @@ function ShapeComponent({
     onLoaded();
   }, [parentNode, parentNodeDimensions, onLoaded]);
 
-  if (loading || !data) return <EuiLoadingSpinner />;
+  const shapeRef = useCallback<RefCallback<ShapeRef>>((node) => {
+    if (node !== null) setShapeData(node.getData());
+  }, []);
 
-  const Shape = data?.default;
   const strokeWidth = Math.max(borderWidth, 0);
 
   const shapeContentAttributes: ShapeContentAttributes = {
@@ -69,7 +67,7 @@ function ShapeComponent({
     height,
     overflow: 'visible',
     preserveAspectRatio: maintainAspect ? 'xMidYMid meet' : 'none',
-    viewBox: getViewBox(Shape?.data?.viewBox, {
+    viewBox: getViewBox(shapeData.viewBox, {
       borderOffset: strokeWidth,
       width,
       height,
@@ -77,13 +75,14 @@ function ShapeComponent({
   };
 
   parentNode.style.lineHeight = '0';
-  const Component = withSuspense<ShapeProps>(Shape?.Component);
 
   return (
     <div className="shapeAligner">
-      <Component
+      <ShapeDrawer
+        shapeType={shapeType}
         shapeContentAttributes={shapeContentAttributes}
         shapeAttributes={shapeAttributes}
+        ref={shapeRef}
       />
     </div>
   );

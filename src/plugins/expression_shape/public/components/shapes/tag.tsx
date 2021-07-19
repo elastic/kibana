@@ -8,7 +8,7 @@
 
 import { createShape } from '../../../../presentation_util/public';
 
-const Tag = createShape({
+export const Tag = createShape({
   viewBox: {
     minX: 0,
     minY: 0,
@@ -19,6 +19,3 @@ const Tag = createShape({
     points: '0,0 75,0 90,30 75,60 0,60',
   },
 });
-
-// eslint-disable-next-line import/no-default-export
-export default Tag;

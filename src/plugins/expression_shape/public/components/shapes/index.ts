@@ -6,26 +6,42 @@
  * Side Public License, v 1.
  */
 
+import { Arrow as arrow } from './arrow';
+import { ArrowMulti as arrowMulti } from './arrow_multi';
+import { Bookmark as bookmark } from './bookmark';
+import { Cross as cross } from './cross';
+import { Circle as circle } from './circle';
+import { Hexagon as hexagon } from './hexagon';
+import { Kite as kite } from './kite';
+import { Pentagon as pentagon } from './pentagon';
+import { Rhombus as rhombus } from './rhombus';
+import { Semicircle as semicircle } from './semicircle';
+import { SpeechBubble as speechBubble } from './speech_bubble';
+import { Square as square } from './square';
+import { Star as star } from './star';
+import { Tag as tag } from './tag';
+import { Triangle as triangle } from './triangle';
+import { TriangleRight as triangleRight } from './triangle_right';
 import { Shape } from '../../../common/types';
 import { ShapeType } from '../../../../../../src/plugins/presentation_util/public';
 
-const shapes: { [key in Shape]: () => Promise<{ default: ShapeType }> } = {
-  arrow: () => import('./arrow'),
-  arrowMulti: () => import('./arrow_multi'),
-  bookmark: () => import('./bookmark'),
-  cross: () => import('./cross'),
-  circle: () => import('./circle'),
-  hexagon: () => import('./hexagon'),
-  kite: () => import('./kite'),
-  pentagon: () => import('./pentagon'),
-  rhombus: () => import('./rhombus'),
-  semicircle: () => import('./semicircle'),
-  speechBubble: () => import('./speech_bubble'),
-  square: () => import('./square'),
-  star: () => import('./star'),
-  tag: () => import('./tag'),
-  triangle: () => import('./triangle'),
-  triangleRight: () => import('./triangle_right'),
+const shapes: { [key in Shape]: ShapeType } = {
+  arrow,
+  arrowMulti,
+  bookmark,
+  cross,
+  circle,
+  hexagon,
+  kite,
+  pentagon,
+  rhombus,
+  semicircle,
+  speechBubble,
+  square,
+  star,
+  tag,
+  triangle,
+  triangleRight,
 };
 
 export const getShape = (shapeType: keyof typeof shapes | null) =>

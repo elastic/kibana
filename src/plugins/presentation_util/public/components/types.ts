@@ -73,7 +73,7 @@ interface PathParams {
 }
 
 interface PolygonParams {
-  points: SVGProps<SVGPolygonElement>['points'];
+  points?: SVGProps<SVGPolygonElement>['points'];
   strokeLinejoin?: SVGProps<SVGPolygonElement>['strokeLinejoin'];
 }
 

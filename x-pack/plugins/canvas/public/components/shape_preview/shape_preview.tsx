@@ -5,21 +5,26 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, RefCallback, useCallback, useState } from 'react';
 import PropTypes from 'prop-types';
-import { EuiLoadingSpinner } from '@elastic/eui';
-import { getShape, Shape } from '../../../../../../src/plugins/expression_shape/public';
+import {
+  Shape,
+  ShapeDrawerProps,
+  LazyShapeDrawer,
+  ShapeRef,
+} from '../../../../../../src/plugins/expression_shape/public';
 import {
   withSuspense,
   ViewBoxParams,
-  ShapeType,
-  ShapeProps,
-  useLoad,
+  getDefaultShapeData,
+  SvgConfig,
 } from '../../../../../../src/plugins/presentation_util/public';
 
 interface Props {
   shape?: Shape;
 }
+
+const ShapeDrawer = withSuspense<ShapeDrawerProps, ShapeRef>(LazyShapeDrawer);
 
 function getViewBox(defaultWidth: number, defaultViewBox: ViewBoxParams): ViewBoxParams {
   const { minX, minY, width, height } = defaultViewBox;
@@ -32,22 +37,22 @@ function getViewBox(defaultWidth: number, defaultViewBox: ViewBoxParams): ViewBo
 }
 
 export const ShapePreview: FC<Props> = ({ shape }) => {
-  const shapeLoader = shape ? getShape(shape) : undefined;
-  const { data, error, loading } = useLoad<{ default: ShapeType }>(shapeLoader);
+  const [shapeData, setShapeData] = useState<SvgConfig>(getDefaultShapeData());
 
-  if (!shapeLoader || !data || !data.default) return <div className="canvasShapePreview" />;
-  if (loading) return <EuiLoadingSpinner />;
-  if (error) throw new Error(error.message);
+  const shapeRef = useCallback<RefCallback<ShapeRef>>((node) => {
+    if (node !== null) setShapeData(node.getData());
+  }, []);
 
-  const loadedShape = data?.default || {};
-  const ShapeComponent = withSuspense<ShapeProps>(loadedShape.Component);
+  if (!shape) return <div className="canvasShapePreview" />;
   return (
     <div className="canvasShapePreview">
-      <ShapeComponent
+      <ShapeDrawer
+        ref={shapeRef}
+        shapeType={shape}
         shapeAttributes={{
           fill: 'none',
           stroke: 'black',
-          viewBox: getViewBox(5, loadedShape.data?.viewBox),
+          viewBox: getViewBox(5, shapeData.viewBox),
         }}
       />
     </div>

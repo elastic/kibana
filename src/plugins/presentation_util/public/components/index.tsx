@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { Suspense, ComponentType, ReactElement } from 'react';
+import React, { Suspense, ComponentType, ReactElement, Ref } from 'react';
 import { EuiLoadingSpinner, EuiErrorBoundary } from '@elastic/eui';
 
 /**
@@ -14,16 +14,19 @@ import { EuiLoadingSpinner, EuiErrorBoundary } from '@elastic/eui';
  * @param Component A component deferred by `React.lazy`
  * @param fallback A fallback component to render while things load; default is `EuiLoadingSpinner`
  */
-export const withSuspense = <P extends {}>(
+export const withSuspense = <P extends {}, R = {}>(
   Component: ComponentType<P>,
   fallback: ReactElement | null = <EuiLoadingSpinner />
-) => (props: P) => (
-  <EuiErrorBoundary>
-    <Suspense fallback={fallback}>
-      <Component {...props} />
-    </Suspense>
-  </EuiErrorBoundary>
-);
+) =>
+  React.forwardRef((props: P, ref: Ref<R>) => {
+    return (
+      <EuiErrorBoundary>
+        <Suspense fallback={fallback}>
+          <Component {...props} ref={ref} />
+        </Suspense>
+      </EuiErrorBoundary>
+    );
+  });
 
 export const LazyLabsBeakerButton = React.lazy(() => import('./labs/labs_beaker_button'));
 
@@ -35,5 +38,5 @@ export const LazySavedObjectSaveModalDashboard = React.lazy(
   () => import('./saved_object_save_modal_dashboard')
 );
 
-export { createShape, ShapeType } from './shape';
+export { createShape, ShapeType, getDefaultShapeData } from './shape';
 export * from './types';

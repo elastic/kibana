@@ -8,7 +8,7 @@
 
 import { createShape, SvgElementTypes } from '../../../../presentation_util/public';
 
-const Square = createShape({
+export const Square = createShape({
   viewBox: {
     minX: 0,
     minY: 0,
@@ -23,6 +23,3 @@ const Square = createShape({
   },
   shapeType: SvgElementTypes.rect,
 });
-
-// eslint-disable-next-line import/no-default-export
-export default Square;

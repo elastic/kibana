@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { lazy } from 'react';
+
+export type { ShapeRef, Props as ShapeDrawerProps } from './shape_drawer';
 export * from './shape_component';
+export const LazyShapeDrawer = lazy(() => import('./shape_drawer'));

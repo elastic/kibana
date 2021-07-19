@@ -7,7 +7,7 @@
  */
 import { createShape } from '../../../../presentation_util/public';
 
-const ArrowMulti = createShape({
+export const ArrowMulti = createShape({
   viewBox: {
     minX: 0,
     minY: 0,
@@ -18,6 +18,3 @@ const ArrowMulti = createShape({
     points: '5,30 25,10 25,20 75,20 75,10 95,30 75,50 75,40 25,40 25,50',
   },
 });
-
-// eslint-disable-next-line import/no-default-export
-export default ArrowMulti;

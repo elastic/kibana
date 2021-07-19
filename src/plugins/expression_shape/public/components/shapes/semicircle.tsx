@@ -8,7 +8,7 @@
 
 import { createShape, SvgElementTypes } from '../../../../presentation_util/public';
 
-const Semicircle = createShape({
+export const Semicircle = createShape({
   viewBox: {
     minX: 0,
     minY: 0,
@@ -20,6 +20,3 @@ const Semicircle = createShape({
   },
   shapeType: SvgElementTypes.path,
 });
-
-// eslint-disable-next-line import/no-default-export
-export default Semicircle;

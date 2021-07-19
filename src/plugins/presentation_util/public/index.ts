@@ -38,6 +38,7 @@ export {
   LazySavedObjectSaveModalDashboard,
   withSuspense,
   createShape,
+  getDefaultShapeData,
   ShapeType,
 } from './components';
 

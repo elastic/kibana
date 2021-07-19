@@ -8,7 +8,7 @@
 
 import { createShape } from '../../../../presentation_util/public';
 
-const Hexagon = createShape({
+export const Hexagon = createShape({
   viewBox: {
     minX: 0,
     minY: 0,
@@ -20,6 +20,3 @@ const Hexagon = createShape({
       '70.000, 15.359 30.000, 15.359 10.000, 50.000 30.000, 84.641 70.000, 84.641 90.000, 50.000',
   },
 });
-
-// eslint-disable-next-line import/no-default-export
-export default Hexagon;

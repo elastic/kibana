@@ -8,7 +8,7 @@
 
 import { createShape } from '../../../../presentation_util/public';
 
-const Kite = createShape({
+export const Kite = createShape({
   viewBox: {
     minX: 0,
     minY: 0,
@@ -19,6 +19,3 @@ const Kite = createShape({
     points: '50,10 10,50 50,140 90,50',
   },
 });
-
-// eslint-disable-next-line import/no-default-export
-export default Kite;

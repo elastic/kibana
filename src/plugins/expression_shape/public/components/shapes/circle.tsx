@@ -8,7 +8,7 @@
 
 import { createShape, SvgElementTypes } from '../../../../presentation_util/public';
 
-const Circle = createShape({
+export const Circle = createShape({
   viewBox: {
     minX: 0,
     minY: 0,
@@ -22,6 +22,3 @@ const Circle = createShape({
   },
   shapeType: SvgElementTypes.circle,
 });
-
-// eslint-disable-next-line import/no-default-export
-export default Circle;
