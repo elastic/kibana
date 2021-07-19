@@ -26,7 +26,7 @@ import {
 } from '@elastic/eui';
 
 import { useMlApiContext, useMlKibana } from '../../../contexts/kibana';
-import { utilsProvider } from './utils';
+import { JobsExportService } from './jobs_export_service';
 import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
 import type { JobType } from '../../../../../common/types/saved_objects';
 
@@ -48,7 +48,7 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
     },
   } = useMlKibana();
 
-  const { exportAnomalyDetectionJobs, exportDataframeAnalyticsJobs } = utilsProvider(mlApiServices);
+  const jobsExportService = useMemo(() => new JobsExportService(mlApiServices), []);
 
   const [loadingADJobs, setLoadingADJobs] = useState(true);
   const [loadingDFAJobs, setLoadingDFAJobs] = useState(true);
@@ -111,9 +111,9 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
 
     try {
       if (selectedJobType === 'anomaly-detector') {
-        await exportAnomalyDetectionJobs(selectedJobIds);
+        await jobsExportService.exportAnomalyDetectionJobs(selectedJobIds);
       } else {
-        await exportDataframeAnalyticsJobs(selectedJobIds);
+        await jobsExportService.exportDataframeAnalyticsJobs(selectedJobIds);
       }
 
       setExporting(false);

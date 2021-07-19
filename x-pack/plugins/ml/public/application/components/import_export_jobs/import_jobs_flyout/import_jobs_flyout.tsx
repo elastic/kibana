@@ -36,8 +36,8 @@ import { CannotReadFileCallout } from './cannot_read_file_callout';
 import { isJobIdValid } from '../../../../../common/util/job_utils';
 import { JOB_ID_MAX_LENGTH } from '../../../../../common/constants/validation';
 import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
-import { readJobConfigs, renameAdJobs, renameDfaJobs, validateJobs } from './utils';
-import type { ImportedAdJob, JobIdWrapper, SkippedJobs } from './utils';
+import { JobImportService } from './jobs_export_service';
+import type { ImportedAdJob, JobIdWrapper, SkippedJobs } from './jobs_export_service';
 
 interface Props {
   isDisabled: boolean;
@@ -56,6 +56,8 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
       notifications: { toasts },
     },
   } = useMlKibana();
+
+  const jobImportService = useMemo(() => new JobImportService(), []);
 
   const [showFlyout, setShowFlyout] = useState(false);
   const [adJobs, setAdJobs] = useState<ImportedAdJob[]>([]);
@@ -104,7 +106,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
     }
 
     try {
-      const loadedFile = await readJobConfigs(files[0]);
+      const loadedFile = await jobImportService.readJobConfigs(files[0]);
       if (loadedFile.jobType === null) {
         reset(true);
         return;
@@ -112,7 +114,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
 
       setTotalJobsRead(loadedFile.jobs.length);
 
-      const validatedJobs = await validateJobs(
+      const validatedJobs = await jobImportService.validateJobs(
         loadedFile.jobs as ImportedAdJob[],
         loadedFile.jobType,
         getIndexPatternTitles
@@ -150,7 +152,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
   const onImport = useCallback(async () => {
     setImporting(true);
     if (jobType === 'anomaly-detector') {
-      const renamedJobs = renameAdJobs(jobIds, adJobs);
+      const renamedJobs = jobImportService.renameAdJobs(jobIds, adJobs);
       try {
         await bulkCreateADJobs(renamedJobs);
       } catch (error) {
@@ -158,7 +160,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
         displayErrorToast(error);
       }
     } else if (jobType === 'data-frame-analytics') {
-      const renamedJobs = renameDfaJobs(jobIds, dfaJobs);
+      const renamedJobs = jobImportService.renameDfaJobs(jobIds, dfaJobs);
       await bulkCreateDfaJobs(renamedJobs);
     }
 
