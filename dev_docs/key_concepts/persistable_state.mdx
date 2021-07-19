@@ -11,12 +11,14 @@ tags: ['kibana','dev', 'contributor', 'api docs']
  
 ## Exposing state that can be persisted
 
-Any plugin that exposes state or configuration that another plugin might persist should implement `PersistableStateService`
-interface on their `setup` contract. This will allow plugins persisting the state to easily access migrations and other utilities.
+Any plugin that exposes state that another plugin might persist should implement `PersistableStateService` interface on their `setup` contract. This will allow plugins persisting the state to easily access migrations and other utilities.
 
 example: Data plugin allows you to generate filters. Those filters can be persisted by applications in their saved 
 objects or in the URL. In order to allow apps migrating the filters in case the structure changes in the future Data 
 plugin implements `PersistableStateService` on `data.query.filterManager`.
+
+note: There is currently no obvious way for a plugin to know which state is safe to persist. The developer must manually look for a matching `PersistableStateService`, or ad-hoc provided migration utilities (as is the case with Rule Type Parameters).
+In the future, we hope to make it easier for producers of state to understand when they need to write a migration with changes, and also make it easier for consumers of such state, to understand whether it is safe to persist.
 
 ## exposing state that can be persisted but is not owned by plugin exposing it (registry)
 
