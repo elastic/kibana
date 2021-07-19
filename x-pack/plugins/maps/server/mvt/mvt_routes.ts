@@ -135,7 +135,6 @@ export function initMVTRoutes({
       return sendResponse(response, tile);
     }
   );
-
   router.get(
     {
       path: `${API_ROOT_PATH}/${MVT_GETESTILE_API_PATH}/{z}/{x}/{y}.pbf`,

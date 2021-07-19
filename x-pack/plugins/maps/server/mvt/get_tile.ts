@@ -131,10 +131,10 @@ export async function getEsGridTile({
       method: 'GET',
       path: path,
     });
-    console.log('b', typeof tile.body, tile.body.length);
+    // console.log('b', typeof tile.body, tile.body.length);
     let buffer = Buffer.from(tile.body, 'base64');
     // let buffer = tile.body;
-    console.log('bfl',buffer, buffer.length);
+    // console.log('bfl',buffer, buffer.length);
     // const buffer= tile.body;
     return buffer;
   } catch (e) {
