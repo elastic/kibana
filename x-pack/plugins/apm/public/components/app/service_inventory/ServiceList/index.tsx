@@ -113,6 +113,7 @@ export function getServiceColumns({
               )}
               <EuiFlexItem className="apmServiceList__serviceNameContainer">
                 <AppLink
+                  data-test-subj="apmServiceListAppLink"
                   serviceName={serviceName}
                   transactionType={transactionType}
                   className="eui-textTruncate"
