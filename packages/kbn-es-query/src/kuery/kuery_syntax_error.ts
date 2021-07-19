@@ -47,17 +47,13 @@ export class KQLSyntaxError extends Error {
     let message = error.message;
     if (error.expected) {
       const translatedExpectations = error.expected.map((expected) => {
-        return (
-          grammarRuleTranslations[expected.description || ''] ||
-          expected.description ||
-          expected.text
-        );
+        const key = this.getItemText(expected);
+        return grammarRuleTranslations[key] || key;
       });
 
       const translatedExpectationText = uniq(translatedExpectations)
         .filter((item) => item !== undefined)
         .sort()
-        .map((item) => `"${item}"`)
         .join(', ');
 
       message = i18n.translate('esQuery.kql.errors.syntaxError', {
@@ -76,5 +72,17 @@ export class KQLSyntaxError extends Error {
     super(fullMessage);
     this.name = 'KQLSyntaxError';
     this.shortMessage = message;
+  }
+
+  private getItemText(item: KQLSyntaxErrorExpected): string {
+    if (item.type === 'other') {
+      return item.description!;
+    } else if (item.type === 'literal') {
+      return item.text!;
+    } else if (item.type === 'end') {
+      return 'end of input';
+    } else {
+      return item.text || item.description || '';
+    }
   }
 }

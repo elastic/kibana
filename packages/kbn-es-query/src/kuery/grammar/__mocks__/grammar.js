@@ -177,7 +177,7 @@ function peg$parse(input, options) {
   var peg$FAILED = {};
   var peg$source = options.grammarSource;
 
-  var peg$startRuleFunctions = { start: peg$parsestart };
+  var peg$startRuleFunctions = { start: peg$parsestart, Literal: peg$parseLiteral };
   var peg$startRuleFunction = peg$parsestart;
 
   var peg$c0 = "(";
@@ -2187,7 +2187,6 @@ function peg$parse(input, options) {
 
 
     const { parseCursor, cursorSymbol, allowLeadingWildcards = true, helpers: { nodeTypes } } = options;
-    console.log( '--------------------------------------', nodeTypes )
     const buildFunctionNode = nodeTypes.function.buildNodeWithArgumentNodes;
     const buildLiteralNode = nodeTypes.literal.buildNode;
     const buildWildcardNode = nodeTypes.wildcard.buildNode;
