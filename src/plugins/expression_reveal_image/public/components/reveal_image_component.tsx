@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-/** @jsx jsx */
-import { useRef, useState, useEffect, useCallback } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useResizeObserver } from '@elastic/eui';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { css, CSSObject, jsx } from '@emotion/react';
