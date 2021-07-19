@@ -57,7 +57,7 @@ export const setSignalsStatusRoute = (router: SecuritySolutionPluginRouter) => {
         };
       }
       try {
-        const result = await esClient.updateByQuery({
+        const { body } = await esClient.updateByQuery({
           index: siemClient.getSignalsIndex(),
           conflicts: conflicts ?? 'abort',
           // https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update-by-query.html#_refreshing_shards_2
@@ -71,7 +71,7 @@ export const setSignalsStatusRoute = (router: SecuritySolutionPluginRouter) => {
           },
           ignore_unavailable: true,
         });
-        return response.ok({ body: result });
+        return response.ok({ body });
       } catch (err) {
         // error while getting or updating signal with id: id in signal index .siem-signals
         const error = transformError(err);

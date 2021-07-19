@@ -57,7 +57,7 @@ export const querySignalsRoute = (router: SecuritySolutionPluginRouter, config: 
       const { ruleRegistryEnabled } = parseExperimentalConfigValue(config.enableExperimental);
 
       try {
-        const result = await esClient.search({
+        const { body } = await esClient.search({
           index: ruleRegistryEnabled ? DEFAULT_ALERTS_INDEX : siemClient.getSignalsIndex(),
           body: {
             query,
@@ -69,7 +69,7 @@ export const querySignalsRoute = (router: SecuritySolutionPluginRouter, config: 
           },
           ignore_unavailable: true,
         });
-        return response.ok({ body: result });
+        return response.ok({ body });
       } catch (err) {
         // error while getting or updating signal with id: id in signal index .siem-signals
         const error = transformError(err);
