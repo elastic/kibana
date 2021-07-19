@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { repeat } from 'lodash';
+import { repeat, uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 const endOfInputText = i18n.translate('esQuery.kql.errors.endOfInputText', {
@@ -35,7 +35,9 @@ interface KQLSyntaxErrorData extends Error {
 }
 
 interface KQLSyntaxErrorExpected {
-  description: string;
+  description?: string;
+  text?: string;
+  type: string;
 }
 
 export class KQLSyntaxError extends Error {
@@ -45,10 +47,18 @@ export class KQLSyntaxError extends Error {
     let message = error.message;
     if (error.expected) {
       const translatedExpectations = error.expected.map((expected) => {
-        return grammarRuleTranslations[expected.description] || expected.description;
+        return (
+          grammarRuleTranslations[expected.description || ''] ||
+          expected.description ||
+          expected.text
+        );
       });
 
-      const translatedExpectationText = translatedExpectations.join(', ');
+      const translatedExpectationText = uniq(translatedExpectations)
+        .filter((item) => item !== undefined)
+        .sort()
+        .map((item) => `"${item}"`)
+        .join(', ');
 
       message = i18n.translate('esQuery.kql.errors.syntaxError', {
         defaultMessage: 'Expected {expectedList} but {foundInput} found.',
