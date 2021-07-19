@@ -70,7 +70,10 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
   const [idsMash, setIdsMash] = useState('');
   const [validatingJobs, setValidatingJobs] = useState(false);
   const [showFileReadError, setShowFileReadError] = useState(false);
-  const { displayErrorToast } = useMemo(() => toastNotificationServiceProvider(toasts), [toasts]);
+  const { displayErrorToast, displaySuccessToast } = useMemo(
+    () => toastNotificationServiceProvider(toasts),
+    [toasts]
+  );
 
   const reset = useCallback((showFileError = false) => {
     setAdJobs([]);
@@ -158,6 +161,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
       const renamedJobs = renameDfaJobs(jobIds, dfaJobs);
       await bulkCreateDfaJobs(renamedJobs);
     }
+
     setImporting(false);
     setShowFlyout(false);
     refreshJobs();
@@ -165,6 +169,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
 
   const bulkCreateADJobs = useCallback(async (jobs: ImportedAdJob[]) => {
     const results = await bulkCreateJobs(jobs);
+    let successCount = 0;
     Object.entries(results).forEach(([jobId, { job, datafeed }]) => {
       if (job.error || datafeed.error) {
         if (job.error) {
@@ -181,15 +186,21 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
           });
           displayErrorToast(datafeed.error, title);
         }
+      } else {
+        successCount++;
       }
     });
+
+    if (successCount > 0) {
+      displayImportSuccessToast(successCount);
+    }
   }, []);
 
   const bulkCreateDfaJobs = useCallback(async (jobs: DataFrameAnalyticsConfig[]) => {
-    Promise.all(
+    const results = await Promise.all(
       jobs.map(async ({ id, ...config }) => {
         try {
-          await createDataFrameAnalytics(id, config);
+          return await createDataFrameAnalytics(id, config);
         } catch (error) {
           const title = i18n.translate('xpack.ml.importExport.importFlyout.importDFAJobError', {
             defaultMessage: 'Could not create job {id}',
@@ -199,6 +210,18 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
         }
       })
     );
+    const successCount = Object.values(results).filter((job) => job !== undefined).length;
+    if (successCount > 0) {
+      displayImportSuccessToast(successCount);
+    }
+  }, []);
+
+  const displayImportSuccessToast = useCallback((count: number) => {
+    const title = i18n.translate('xpack.ml.importExport.importFlyout.importJobSuccessToast', {
+      defaultMessage: '{count, plural, one {# job} other {# jobs}} successfully imported',
+      values: { count },
+    });
+    displaySuccessToast(title);
   }, []);
 
   const deleteJob = useCallback(
