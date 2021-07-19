@@ -7,7 +7,7 @@
  */
 
 export { LogLevel, LogLevelId } from './log_level';
-export { LogRecord } from './log_record';
+export { LogRecord, SerializableLogRecord } from './log_record';
 export { Logger } from './logger';
 export { LogMeta } from './log_meta';
 export { LoggerFactory } from './logger_factory';

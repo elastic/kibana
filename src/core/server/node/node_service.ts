@@ -41,7 +41,7 @@ export class NodeService {
   private readonly messageHandlers = new Map<string, MessageHandler[]>();
 
   constructor(coreContext: CoreContext) {
-    this.log = coreContext.logger.get('node');
+    this.log = coreContext.logger.get('node', 'service');
     this.configService = coreContext.configService;
   }
 

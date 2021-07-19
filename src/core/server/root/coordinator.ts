@@ -32,12 +32,12 @@ export class KibanaCoordinator implements KibanaRoot {
     private readonly nodeInfo: NodeInfo,
     private readonly onShutdown?: (reason?: Error | string) => void
   ) {
-    this.loggingSystem = new LoggingSystem();
+    this.loggingSystem = new LoggingSystem(this.nodeInfo);
     this.logger = this.loggingSystem.asLoggerFactory();
     this.configService = new ConfigService(rawConfigProvider, this.env, this.logger);
 
     this.log = this.logger.get('node', 'coordinator');
-    this.nodeManager = new NodeManager(this.configService, this.log);
+    this.nodeManager = new NodeManager(this.configService, this.logger, this.log);
   }
 
   async setup() {

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { SerializableLogRecord } from '@kbn/logging';
 import { Serializable } from '../../types';
 
 /** @public */
@@ -18,12 +19,19 @@ export interface BroadcastOptions {
    */
   sendToSelf?: boolean;
 }
+
 /** @internal */
 export interface TransferBroadcastMessage {
   _kind: 'kibana-broadcast';
   type: string;
   payload?: NodeMessagePayload;
   options?: BroadcastOptions;
+}
+
+/** @internal */
+export interface LogRecordMessage {
+  _kind: 'kibana-log-record';
+  payload: SerializableLogRecord;
 }
 
 /** @public */

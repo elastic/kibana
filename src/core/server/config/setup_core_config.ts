@@ -30,7 +30,9 @@ import { coreDeprecationProvider } from './deprecation';
 
 const rootConfigPath = '';
 
-// TODO: This is copied from Server, need to dedupe
+// TODO: This is copied from Server, need to dedupe.
+// We probably don't need to do this in the Server if
+// it's already handled in the coordinator.
 export function setupCoreConfig(configService: ConfigService) {
   const configDescriptors: Array<ServiceConfigDescriptor<unknown>> = [
     pathConfig,

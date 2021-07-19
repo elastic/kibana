@@ -33,7 +33,7 @@ export class KibanaWorker implements KibanaRoot {
     private readonly nodeInfo: NodeInfo,
     private readonly onShutdown?: (reason?: Error | string) => void
   ) {
-    this.loggingSystem = new LoggingSystem();
+    this.loggingSystem = new LoggingSystem(this.nodeInfo);
     this.logger = this.loggingSystem.asLoggerFactory();
     this.log = this.logger.get('node', 'worker');
     this.server = new Server(this.rawConfigService, this.env, this.loggingSystem);

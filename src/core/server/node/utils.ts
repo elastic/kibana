@@ -6,8 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { TransferBroadcastMessage } from './types';
+import { LogRecordMessage, TransferBroadcastMessage } from './types';
 
 export const isBroadcastMessage = (message: any): message is TransferBroadcastMessage => {
   return message._kind === 'kibana-broadcast';
+};
+
+export const isLogRecordMessage = (message: any): message is LogRecordMessage => {
+  return message._kind === 'kibana-log-record';
 };

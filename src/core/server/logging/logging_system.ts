@@ -8,6 +8,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { DisposableAppender, LogLevel, Logger, LoggerFactory } from '@kbn/logging';
+import { NodeInfo } from '../node';
 import { Appenders } from './appenders/appenders';
 import { BufferAppender } from './appenders/buffer/buffer_appender';
 import { BaseLogger } from './logger';
@@ -38,7 +39,7 @@ export class LoggingSystem implements LoggerFactory {
   private readonly loggers: Map<string, LoggerAdapter> = new Map();
   private readonly contextConfigs = new Map<string, LoggerContextConfigType>();
 
-  constructor() {}
+  constructor(private readonly nodeInfo: NodeInfo) {}
 
   public get(...contextParts: string[]): Logger {
     const context = LoggingConfig.getLoggerContext(contextParts);
@@ -124,14 +125,26 @@ export class LoggingSystem implements LoggerFactory {
     if (config === undefined) {
       // If we don't have config yet, use `buffered` appender that will store all logged messages in the memory
       // until the config is ready.
-      return new BaseLogger(context, LogLevel.All, [this.bufferAppender], this.asLoggerFactory());
+      return new BaseLogger(
+        context,
+        LogLevel.All,
+        [this.bufferAppender],
+        this.asLoggerFactory(),
+        this.nodeInfo
+      );
     }
 
     const { level, appenders } = this.getLoggerConfigByContext(config, context);
     const loggerLevel = LogLevel.fromId(level);
     const loggerAppenders = appenders.map((appenderKey) => this.appenders.get(appenderKey)!);
 
-    return new BaseLogger(context, loggerLevel, loggerAppenders, this.asLoggerFactory());
+    return new BaseLogger(
+      context,
+      loggerLevel,
+      loggerAppenders,
+      this.asLoggerFactory(),
+      this.nodeInfo
+    );
   }
 
   private getLoggerConfigByContext(config: LoggingConfig, context: string): LoggerConfigType {

@@ -120,6 +120,17 @@ export interface LoggerContextConfigInput {
  */
 export class LoggingConfig {
   /**
+   * Helper method that takes a single context string and splits it into separated context parts.
+   * In case the provided context is an empty string, `root` context name is returned.
+   * @param context The context string (e.g. 'parent.child').
+   * @returns {string[]} Separated context parts (e.g. ['parent', 'child']).
+   */
+  public static getLoggerContextParts(context: string) {
+    const parts = context.split(CONTEXT_SEPARATOR);
+    return parts.length ? parts : [ROOT_CONTEXT_NAME];
+  }
+
+  /**
    * Helper method that joins separate string context parts into single context string.
    * In case joined context is an empty string, `root` context name is returned.
    * @param contextParts List of the context parts (e.g. ['parent', 'child'].

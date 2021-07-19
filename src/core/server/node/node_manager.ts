@@ -8,8 +8,10 @@
 
 import cluster from 'cluster';
 import { omit } from 'lodash';
-import { Logger } from '@kbn/logging';
+import { Logger, LoggerFactory } from '@kbn/logging';
 import { ConfigService } from '../config';
+import { BaseLogger } from '../logging/logger';
+import { LoggingConfig } from '../logging/logging_config';
 import {
   NodeConfigType,
   WorkersConfigType,
@@ -17,7 +19,7 @@ import {
   config as nodeConfig,
 } from './node_config';
 import { TransferBroadcastMessage } from './types';
-import { isBroadcastMessage } from './utils';
+import { isBroadcastMessage, isLogRecordMessage } from './utils';
 
 /**
  * Coordinator-side node clustering service
@@ -25,7 +27,11 @@ import { isBroadcastMessage } from './utils';
 export class NodeManager {
   private config?: NodeConfigType;
 
-  constructor(private readonly configService: ConfigService, private readonly log: Logger) {}
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly logger: LoggerFactory,
+    private readonly log: Logger
+  ) {}
 
   public async setup() {
     this.config = this.configService.atPathSync<NodeConfigType>(nodeConfig.path);
@@ -56,6 +62,10 @@ export class NodeManager {
     const handleWorkerMessage = (workerId: number, message: any) => {
       if (isBroadcastMessage(message)) {
         this.broadcast(message, workerId);
+      } else if (isLogRecordMessage(message)) {
+        const context = LoggingConfig.getLoggerContextParts(message.payload.context);
+        const log = this.logger.get(...context);
+        log.log(BaseLogger.fromSerializableLogRecord(message.payload));
       }
     };
 
