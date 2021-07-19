@@ -25,10 +25,11 @@ const indexPattern = getStubIndexPattern(
 );
 
 describe('discover sidebar field details', function () {
+  const onAddFilter = jest.fn();
   const defaultProps = {
     indexPattern,
     details: { buckets: [], error: '', exists: 1, total: 2, columns: [] },
-    onAddFilter: jest.fn(),
+    onAddFilter,
   };
 
   function mountComponent(field: IndexPatternField) {
@@ -36,7 +37,7 @@ describe('discover sidebar field details', function () {
     return mountWithIntl(<DiscoverFieldDetails {...compProps} />);
   }
 
-  it('should enable the visualize link for a number field', function () {
+  it('click on addFilter calls the function', function () {
     const visualizableField = new IndexPatternField({
       name: 'bytes',
       type: 'number',
@@ -47,37 +48,9 @@ describe('discover sidebar field details', function () {
       aggregatable: true,
       readFromDocValues: true,
     });
-    const comp = mountComponent(visualizableField);
-    expect(findTestSubject(comp, 'fieldVisualize-bytes')).toBeTruthy();
-  });
-
-  it('should disable the visualize link for an _id field', function () {
-    const conflictField = new IndexPatternField({
-      name: '_id',
-      type: 'string',
-      esTypes: ['_id'],
-      count: 0,
-      scripted: false,
-      searchable: true,
-      aggregatable: true,
-      readFromDocValues: true,
-    });
-    const comp = mountComponent(conflictField);
-    expect(findTestSubject(comp, 'fieldVisualize-_id')).toEqual({});
-  });
-
-  it('should disable the visualize link for an unknown field', function () {
-    const unknownField = new IndexPatternField({
-      name: 'test',
-      type: 'unknown',
-      esTypes: ['double'],
-      count: 0,
-      scripted: false,
-      searchable: true,
-      aggregatable: true,
-      readFromDocValues: true,
-    });
-    const comp = mountComponent(unknownField);
-    expect(findTestSubject(comp, 'fieldVisualize-test')).toEqual({});
+    const component = mountComponent(visualizableField);
+    const onAddButton = findTestSubject(component, 'onAddFilterButton');
+    onAddButton.simulate('click');
+    expect(onAddFilter).toHaveBeenCalledWith('_exists_', visualizableField.name, '+');
   });
 });

@@ -363,13 +363,14 @@ describe('Case Configuration API', () => {
     });
 
     test('check url, method, signal', async () => {
-      await patchComment(
-        basicCase.id,
-        basicCase.comments[0].id,
-        'updated comment',
-        basicCase.comments[0].version,
-        abortCtrl.signal
-      );
+      await patchComment({
+        caseId: basicCase.id,
+        commentId: basicCase.comments[0].id,
+        commentUpdate: 'updated comment',
+        version: basicCase.comments[0].version,
+        signal: abortCtrl.signal,
+        owner: SECURITY_SOLUTION_OWNER,
+      });
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}/comments`, {
         method: 'PATCH',
         body: JSON.stringify({
@@ -377,19 +378,21 @@ describe('Case Configuration API', () => {
           type: CommentType.user,
           id: basicCase.comments[0].id,
           version: basicCase.comments[0].version,
+          owner: SECURITY_SOLUTION_OWNER,
         }),
         signal: abortCtrl.signal,
       });
     });
 
     test('happy path', async () => {
-      const resp = await patchComment(
-        basicCase.id,
-        basicCase.comments[0].id,
-        'updated comment',
-        basicCase.comments[0].version,
-        abortCtrl.signal
-      );
+      const resp = await patchComment({
+        caseId: basicCase.id,
+        commentId: basicCase.comments[0].id,
+        commentUpdate: 'updated comment',
+        version: basicCase.comments[0].version,
+        signal: abortCtrl.signal,
+        owner: SECURITY_SOLUTION_OWNER,
+      });
       expect(resp).toEqual(basicCase);
     });
   });

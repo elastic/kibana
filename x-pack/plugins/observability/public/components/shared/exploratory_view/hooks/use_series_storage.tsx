@@ -12,7 +12,7 @@ import {
 } from '../../../../../../../../src/plugins/kibana_utils/public';
 import type {
   AppDataType,
-  ReportViewTypeId,
+  ReportViewType,
   SeriesUrl,
   UrlFilter,
   URLReportDefinition,
@@ -36,6 +36,16 @@ interface ProviderProps {
   storage: IKbnUrlStateStorage | ISessionStorageStateStorage;
 }
 
+function convertAllShortSeries(allShortSeries: AllShortSeries) {
+  const allSeriesIds = Object.keys(allShortSeries);
+  const allSeriesN: AllSeries = {};
+  allSeriesIds.forEach((seriesKey) => {
+    allSeriesN[seriesKey] = convertFromShortUrl(allShortSeries[seriesKey]);
+  });
+
+  return allSeriesN;
+}
+
 export function UrlStorageContextProvider({
   children,
   storage,
@@ -45,18 +55,19 @@ export function UrlStorageContextProvider({
   const [allShortSeries, setAllShortSeries] = useState<AllShortSeries>(
     () => storage.get(allSeriesKey) ?? {}
   );
-  const [allSeries, setAllSeries] = useState<AllSeries>({});
+  const [allSeries, setAllSeries] = useState<AllSeries>(() =>
+    convertAllShortSeries(storage.get(allSeriesKey) ?? {})
+  );
   const [firstSeriesId, setFirstSeriesId] = useState('');
+  const [firstSeries, setFirstSeries] = useState<SeriesUrl>();
 
   useEffect(() => {
     const allSeriesIds = Object.keys(allShortSeries);
-    const allSeriesN: AllSeries = {};
-    allSeriesIds.forEach((seriesKey) => {
-      allSeriesN[seriesKey] = convertFromShortUrl(allShortSeries[seriesKey]);
-    });
+    const allSeriesN: AllSeries = convertAllShortSeries(allShortSeries ?? {});
 
     setAllSeries(allSeriesN);
     setFirstSeriesId(allSeriesIds?.[0]);
+    setFirstSeries(allSeriesN?.[allSeriesIds?.[0]]);
     (storage as IKbnUrlStateStorage).set(allSeriesKey, allShortSeries);
   }, [allShortSeries, storage]);
 
@@ -68,8 +79,10 @@ export function UrlStorageContextProvider({
   };
 
   const removeSeries = (seriesIdN: string) => {
-    delete allShortSeries[seriesIdN];
-    delete allSeries[seriesIdN];
+    setAllShortSeries((prevState) => {
+      delete prevState[seriesIdN];
+      return { ...prevState };
+    });
   };
 
   const allSeriesIds = Object.keys(allShortSeries);
@@ -89,7 +102,7 @@ export function UrlStorageContextProvider({
     firstSeriesId,
     allSeries,
     allSeriesIds,
-    firstSeries: allSeries?.[firstSeriesId],
+    firstSeries: firstSeries!,
   };
   return <UrlStorageContext.Provider value={value}>{children}</UrlStorageContext.Provider>;
 }
@@ -99,7 +112,7 @@ export function useSeriesStorage() {
 }
 
 function convertFromShortUrl(newValue: ShortUrlSeries): SeriesUrl {
-  const { dt, op, st, rt, bd, ft, time, rdf, ...restSeries } = newValue;
+  const { dt, op, st, rt, bd, ft, time, rdf, mt, ...restSeries } = newValue;
   return {
     operationType: op,
     reportType: rt!,
@@ -109,18 +122,20 @@ function convertFromShortUrl(newValue: ShortUrlSeries): SeriesUrl {
     time: time!,
     reportDefinitions: rdf,
     dataType: dt!,
+    selectedMetricField: mt,
     ...restSeries,
   };
 }
 
 interface ShortUrlSeries {
   [URL_KEYS.OPERATION_TYPE]?: OperationType;
-  [URL_KEYS.REPORT_TYPE]?: ReportViewTypeId;
+  [URL_KEYS.REPORT_TYPE]?: ReportViewType;
   [URL_KEYS.DATA_TYPE]?: AppDataType;
   [URL_KEYS.SERIES_TYPE]?: SeriesType;
   [URL_KEYS.BREAK_DOWN]?: string;
   [URL_KEYS.FILTERS]?: UrlFilter[];
   [URL_KEYS.REPORT_DEFINITIONS]?: URLReportDefinition;
+  [URL_KEYS.SELECTED_METRIC]?: string;
   time?: {
     to: string;
     from: string;

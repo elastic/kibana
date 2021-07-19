@@ -35,6 +35,6 @@ describe('CrawlerLanding', () => {
   it('contains a link to standalone App Search', () => {
     const externalDocumentationLink = wrapper.find('[data-test-subj="CrawlerStandaloneLink"]');
 
-    expect(externalDocumentationLink.prop('href')).toBe('/as/engines/some-engine/crawler');
+    expect(externalDocumentationLink.prop('href')).toBe('/as#/engines/some-engine/crawler');
   });
 });

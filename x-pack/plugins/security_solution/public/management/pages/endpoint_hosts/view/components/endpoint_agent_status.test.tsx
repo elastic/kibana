@@ -41,7 +41,7 @@ describe('When using the EndpointAgentStatus component', () => {
     };
 
     act(() => {
-      mockedContext.history.push('/endpoints');
+      mockedContext.history.push('/administration/endpoints');
     });
   });
 

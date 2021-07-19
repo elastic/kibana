@@ -15,7 +15,41 @@ export const ACTIVITY_LOG = {
   tabTitle: i18n.translate('xpack.securitySolution.endpointDetails.activityLog', {
     defaultMessage: 'Activity Log',
   }),
+  datePicker: {
+    startDate: i18n.translate(
+      'xpack.securitySolution.endpointDetails.activityLog.datePicker.startDate',
+      {
+        defaultMessage: 'Pick a start date',
+      }
+    ),
+    endDate: i18n.translate(
+      'xpack.securitySolution.endpointDetails.activityLog.datePicker.endDate',
+      {
+        defaultMessage: 'Pick an end date',
+      }
+    ),
+  },
   LogEntry: {
+    endOfLog: i18n.translate(
+      'xpack.securitySolution.endpointDetails.activityLog.logEntry.action.endOfLog',
+      {
+        defaultMessage: 'Nothing more to show',
+      }
+    ),
+    emptyState: {
+      title: i18n.translate(
+        'xpack.securitySolution.endpointDetails.activityLog.logEntry.emptyState.title',
+        {
+          defaultMessage: 'No logged actions',
+        }
+      ),
+      body: i18n.translate(
+        'xpack.securitySolution.endpointDetails.activityLog.logEntry.emptyState.body',
+        {
+          defaultMessage: 'No actions have been logged for this endpoint.',
+        }
+      ),
+    },
     action: {
       isolatedAction: i18n.translate(
         'xpack.securitySolution.endpointDetails.activityLog.logEntry.action.isolated',

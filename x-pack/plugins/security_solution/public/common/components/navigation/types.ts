@@ -5,57 +5,63 @@
  * 2.0.
  */
 
-import { Filter, Query } from '../../../../../../../src/plugins/data/public';
-import { HostsTableType } from '../../../hosts/store/model';
-import { UrlInputsModel } from '../../store/inputs/model';
-import { TimelineUrl } from '../../../timelines/store/timeline/model';
-import { CONSTANTS, UrlStateType } from '../url_state/constants';
+import { UrlStateType } from '../url_state/constants';
 import { SecurityPageName } from '../../../app/types';
-import { SourcererScopePatterns } from '../../store/sourcerer/model';
+import { UrlState } from '../url_state/types';
+import { SiemRouteType } from '../../utils/route/types';
 
-export interface SiemNavigationProps {
+export interface SecuritySolutionTabNavigationProps {
   display?: 'default' | 'condensed';
   navTabs: Record<string, NavTab>;
 }
-
-export interface SiemNavigationComponentProps {
-  pathName: string;
+export interface TabNavigationComponentProps {
   pageName: string;
-  tabName: HostsTableType | undefined;
-  urlState: {
-    [CONSTANTS.appQuery]?: Query;
-    [CONSTANTS.filters]?: Filter[];
-    [CONSTANTS.savedQuery]?: string;
-    [CONSTANTS.sourcerer]: SourcererScopePatterns;
-    [CONSTANTS.timerange]: UrlInputsModel;
-    [CONSTANTS.timeline]: TimelineUrl;
-  };
+  tabName: SiemRouteType | undefined;
+  urlState: UrlState;
+  pathName: string;
 }
 
 export type SearchNavTab = NavTab | { urlKey: UrlStateType; isDetailPage: boolean };
 
+export interface NavGroupTab {
+  id: string;
+  name: string;
+}
+export enum SecurityNavGroupKey {
+  detect = 'detect',
+  explore = 'explore',
+  investigate = 'investigate',
+  manage = 'manage',
+}
+
+export type SecurityNavGroup = Record<SecurityNavGroupKey, NavGroupTab>;
 export interface NavTab {
   id: string;
   name: string;
   href: string;
   disabled: boolean;
-  urlKey: UrlStateType;
-  isDetailPage?: boolean;
+  urlKey?: UrlStateType;
   pageId?: SecurityPageName;
 }
-
-export type SiemNavTabKey =
+export type SecurityNavKey =
   | SecurityPageName.overview
   | SecurityPageName.hosts
   | SecurityPageName.network
-  | SecurityPageName.detections
+  | SecurityPageName.alerts
+  | SecurityPageName.rules
+  | SecurityPageName.exceptions
   | SecurityPageName.timelines
   | SecurityPageName.case
-  | SecurityPageName.administration;
+  | SecurityPageName.administration
+  | SecurityPageName.endpoints
+  | SecurityPageName.trustedApps
+  | SecurityPageName.eventFilters;
 
-export type SiemNavTab = Record<SiemNavTabKey, NavTab>;
+export type SecurityNav = Record<SecurityNavKey, NavTab>;
 
 export type GetUrlForApp = (
   appId: string,
-  options?: { path?: string; absolute?: boolean }
+  options?: { deepLinkId?: string; path?: string; absolute?: boolean }
 ) => string;
+
+export type NavigateToUrl = (url: string) => void;

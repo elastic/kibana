@@ -11,10 +11,9 @@ import { mockAppIndexPattern, render } from '../../rtl_helpers';
 import { ReportTypesCol, SELECTED_DATA_TYPE_FOR_REPORT } from './report_types_col';
 import { ReportTypes } from '../series_builder';
 import { DEFAULT_TIME } from '../../configurations/constants';
-import { NEW_SERIES_KEY } from '../../hooks/use_series_storage';
 
 describe('ReportTypesCol', function () {
-  const seriesId = 'test-series-id';
+  const seriesId = 'performance-distribution';
 
   mockAppIndexPattern();
 
@@ -37,10 +36,9 @@ describe('ReportTypesCol', function () {
     fireEvent.click(screen.getByText(/KPI over time/i));
 
     expect(setSeries).toHaveBeenCalledWith(seriesId, {
-      breakdown: 'user_agent.name',
       dataType: 'ux',
-      reportDefinitions: {},
-      reportType: 'kpi',
+      selectedMetricField: undefined,
+      reportType: 'kpi-over-time',
       time: { from: 'now-15m', to: 'now' },
     });
     expect(setSeries).toHaveBeenCalledTimes(1);
@@ -49,11 +47,12 @@ describe('ReportTypesCol', function () {
   it('should set selected as filled', function () {
     const initSeries = {
       data: {
-        [NEW_SERIES_KEY]: {
+        [seriesId]: {
           dataType: 'synthetics' as const,
-          reportType: 'kpi' as const,
+          reportType: 'kpi-over-time' as const,
           breakdown: 'monitor.status',
           time: { from: 'now-15m', to: 'now' },
+          isNew: true,
         },
       },
     };
@@ -74,6 +73,7 @@ describe('ReportTypesCol', function () {
     expect(setSeries).toHaveBeenCalledWith(seriesId, {
       dataType: 'synthetics',
       time: DEFAULT_TIME,
+      isNew: true,
     });
   });
 });

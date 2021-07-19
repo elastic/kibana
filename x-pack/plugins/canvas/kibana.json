@@ -10,6 +10,8 @@
       "charts",
       "data",
       "embeddable",
+      "expressionError",
+      "expressionRevealImage",
       "expressions",
       "features",
       "inspector",

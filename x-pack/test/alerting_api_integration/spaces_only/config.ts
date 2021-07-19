@@ -13,6 +13,6 @@ export default createTestConfig('spaces_only', {
   license: 'trial',
   enableActionsProxy: false,
   verificationMode: 'none',
-  customizeLocalHostTls: true,
+  customizeLocalHostSsl: true,
   preconfiguredAlertHistoryEsIndex: true,
 });

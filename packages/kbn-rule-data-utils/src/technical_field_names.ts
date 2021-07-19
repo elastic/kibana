@@ -8,7 +8,7 @@
 
 import { ValuesType } from 'utility-types';
 
-const ALERT_NAMESPACE = 'kibana.rac.alert';
+const ALERT_NAMESPACE = 'kibana.rac.alert' as const;
 
 const TIMESTAMP = '@timestamp' as const;
 const EVENT_KIND = 'event.kind' as const;
@@ -19,6 +19,7 @@ const RULE_NAME = 'rule.name' as const;
 const RULE_CATEGORY = 'rule.category' as const;
 const TAGS = 'tags' as const;
 const PRODUCER = `${ALERT_NAMESPACE}.producer` as const;
+const OWNER = `${ALERT_NAMESPACE}.owner` as const;
 const ALERT_ID = `${ALERT_NAMESPACE}.id` as const;
 const ALERT_UUID = `${ALERT_NAMESPACE}.uuid` as const;
 const ALERT_START = `${ALERT_NAMESPACE}.start` as const;
@@ -27,6 +28,7 @@ const ALERT_DURATION = `${ALERT_NAMESPACE}.duration.us` as const;
 const ALERT_SEVERITY_LEVEL = `${ALERT_NAMESPACE}.severity.level` as const;
 const ALERT_SEVERITY_VALUE = `${ALERT_NAMESPACE}.severity.value` as const;
 const ALERT_STATUS = `${ALERT_NAMESPACE}.status` as const;
+const SPACE_IDS = 'kibana.space_ids' as const;
 const ALERT_EVALUATION_THRESHOLD = `${ALERT_NAMESPACE}.evaluation.threshold` as const;
 const ALERT_EVALUATION_VALUE = `${ALERT_NAMESPACE}.evaluation.value` as const;
 
@@ -40,6 +42,7 @@ const fields = {
   RULE_CATEGORY,
   TAGS,
   PRODUCER,
+  OWNER,
   ALERT_ID,
   ALERT_UUID,
   ALERT_START,
@@ -50,6 +53,7 @@ const fields = {
   ALERT_STATUS,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  SPACE_IDS,
 };
 
 export {
@@ -62,6 +66,7 @@ export {
   RULE_CATEGORY,
   TAGS,
   PRODUCER,
+  OWNER,
   ALERT_ID,
   ALERT_UUID,
   ALERT_START,
@@ -72,6 +77,7 @@ export {
   ALERT_STATUS,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  SPACE_IDS,
 };
 
 export type TechnicalRuleDataFieldName = ValuesType<typeof fields>;

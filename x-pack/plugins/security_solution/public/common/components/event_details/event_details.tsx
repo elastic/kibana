@@ -5,27 +5,35 @@
  * 2.0.
  */
 
-import { EuiTabbedContent, EuiTabbedContentTab, EuiSpacer } from '@elastic/eui';
+import {
+  EuiTabbedContent,
+  EuiTabbedContentTab,
+  EuiSpacer,
+  EuiLoadingContent,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
-import { ThreatSummaryView } from './threat_summary_view';
-import { ThreatDetailsView } from './threat_details_view';
+import { ThreatSummaryView } from './cti_details/threat_summary_view';
+import { ThreatDetailsView } from './cti_details/threat_details_view';
 import * as i18n from './translations';
 import { AlertSummaryView } from './alert_summary_view';
 import { BrowserFields } from '../../containers/source';
+import { useInvestigationTimeEnrichment } from '../../containers/cti/event_enrichment';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 import { TimelineTabs } from '../../../../common/types/timeline';
-import { INDICATOR_DESTINATION_PATH } from '../../../../common/constants';
-import { getDataFromSourceHits } from '../../../../common/utils/field_formatters';
+import {
+  filterDuplicateEnrichments,
+  getEnrichmentFields,
+  parseExistingEnrichments,
+  timelineDataToEnrichment,
+} from './cti_details/helpers';
+import { NoEnrichmentsPanel } from './cti_details/no_enrichments_panel';
 
-interface EventViewTab {
-  id: EventViewId;
-  name: string;
-  content: JSX.Element;
-}
+type EventViewTab = EuiTabbedContentTab;
 
 export type EventViewId =
   | EventsViewType.tableView
@@ -91,22 +99,31 @@ const EventDetailsComponent: React.FC<Props> = ({
     [setSelectedTabId]
   );
 
-  const threatData = useMemo(() => {
-    if (isAlert && data) {
-      const threatIndicator = data.find(
-        ({ field, originalValue }) => field === INDICATOR_DESTINATION_PATH && originalValue
-      );
-      if (!threatIndicator) return [];
-      const { originalValue } = threatIndicator;
-      const values = Array.isArray(originalValue) ? originalValue : [originalValue];
-      return values.map((value) => getDataFromSourceHits(JSON.parse(value)));
+  const eventFields = useMemo(() => getEnrichmentFields(data), [data]);
+  const existingEnrichments = useMemo(
+    () =>
+      isAlert
+        ? parseExistingEnrichments(data).map((enrichmentData) =>
+            timelineDataToEnrichment(enrichmentData)
+          )
+        : [],
+    [data, isAlert]
+  );
+  const {
+    loading: enrichmentsLoading,
+    result: enrichmentsResponse,
+  } = useInvestigationTimeEnrichment(eventFields);
+
+  const allEnrichments = useMemo(() => {
+    if (enrichmentsLoading || !enrichmentsResponse?.enrichments) {
+      return existingEnrichments;
     }
-    return [];
-  }, [data, isAlert]);
+    return filterDuplicateEnrichments([...existingEnrichments, ...enrichmentsResponse.enrichments]);
+  }, [enrichmentsLoading, enrichmentsResponse, existingEnrichments]);
 
-  const threatCount = useMemo(() => threatData.length, [threatData.length]);
+  const enrichmentCount = allEnrichments.length;
 
-  const summaryTab = useMemo(
+  const summaryTab: EventViewTab | undefined = useMemo(
     () =>
       isAlert
         ? {
@@ -120,15 +137,34 @@ const EventDetailsComponent: React.FC<Props> = ({
                     eventId: id,
                     browserFields,
                     timelineId,
-                    title: threatCount ? i18n.ALERT_SUMMARY : undefined,
                   }}
                 />
-                {threatCount > 0 && <ThreatSummaryView {...{ data, timelineId, eventId: id }} />}
+                {enrichmentCount > 0 && (
+                  <ThreatSummaryView
+                    eventId={id}
+                    timelineId={timelineId}
+                    enrichments={allEnrichments}
+                  />
+                )}
+                {enrichmentsLoading && (
+                  <>
+                    <EuiLoadingContent lines={2} />
+                  </>
+                )}
               </>
             ),
           }
         : undefined,
-    [browserFields, data, id, isAlert, timelineId, threatCount]
+    [
+      isAlert,
+      data,
+      id,
+      browserFields,
+      timelineId,
+      enrichmentsLoading,
+      enrichmentCount,
+      allEnrichments,
+    ]
   );
 
   const threatIntelTab = useMemo(
@@ -137,11 +173,26 @@ const EventDetailsComponent: React.FC<Props> = ({
         ? {
             id: EventsViewType.threatIntelView,
             'data-test-subj': 'threatIntelTab',
-            name: `${i18n.THREAT_INTEL} (${threatCount})`,
-            content: <ThreatDetailsView threatData={threatData} />,
+            name: (
+              <span>
+                {`${i18n.THREAT_INTEL} `}
+                {enrichmentsLoading ? <EuiLoadingSpinner /> : `(${enrichmentCount})`}
+              </span>
+            ),
+            content: (
+              <>
+                <ThreatDetailsView enrichments={allEnrichments} />
+                <NoEnrichmentsPanel
+                  isInvestigationTimeEnrichmentsPresent={
+                    enrichmentCount > existingEnrichments.length
+                  }
+                  isIndicatorMatchesPresent={existingEnrichments.length > 0}
+                />
+              </>
+            ),
           }
         : undefined,
-    [isAlert, threatCount, threatData]
+    [allEnrichments, enrichmentCount, enrichmentsLoading, existingEnrichments.length, isAlert]
   );
 
   const tableTab = useMemo(
@@ -188,7 +239,7 @@ const EventDetailsComponent: React.FC<Props> = ({
     );
   }, [summaryTab, threatIntelTab, tableTab, jsonTab]);
 
-  const selectedTab = useMemo(() => tabs.find((tab) => tab.id === selectedTabId), [
+  const selectedTab = useMemo(() => tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0], [
     tabs,
     selectedTabId,
   ]);

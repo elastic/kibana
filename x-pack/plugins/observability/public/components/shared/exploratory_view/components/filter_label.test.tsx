@@ -29,6 +29,7 @@ describe('FilterLabel', function () {
         negate={false}
         seriesId={'kpi-over-time'}
         removeFilter={jest.fn()}
+        indexPattern={mockIndexPattern}
       />
     );
 
@@ -52,6 +53,7 @@ describe('FilterLabel', function () {
         negate={false}
         seriesId={'kpi-over-time'}
         removeFilter={removeFilter}
+        indexPattern={mockIndexPattern}
       />
     );
 
@@ -74,6 +76,7 @@ describe('FilterLabel', function () {
         negate={false}
         seriesId={'kpi-over-time'}
         removeFilter={removeFilter}
+        indexPattern={mockIndexPattern}
       />
     );
 
@@ -99,6 +102,7 @@ describe('FilterLabel', function () {
         negate={true}
         seriesId={'kpi-over-time'}
         removeFilter={jest.fn()}
+        indexPattern={mockIndexPattern}
       />
     );
 

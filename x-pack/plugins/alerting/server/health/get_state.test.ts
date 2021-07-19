@@ -71,7 +71,6 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
-        enableImportExport: false,
       }),
       pollInterval
     ).subscribe();
@@ -105,7 +104,6 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
-        enableImportExport: false,
       }),
       pollInterval,
       retryDelay
@@ -150,7 +148,6 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
-        enableImportExport: false,
       })
     ).toPromise();
 
@@ -181,7 +178,6 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
-        enableImportExport: false,
       })
     ).toPromise();
 
@@ -212,7 +208,6 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
-        enableImportExport: false,
       })
     ).toPromise();
 
@@ -240,7 +235,6 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
-        enableImportExport: false,
       }),
       retryDelay
     ).subscribe((status) => {
@@ -271,7 +265,6 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
-        enableImportExport: false,
       }),
       retryDelay
     ).subscribe((status) => {
@@ -308,7 +301,6 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
-        enableImportExport: false,
       })
     ).toPromise();
 

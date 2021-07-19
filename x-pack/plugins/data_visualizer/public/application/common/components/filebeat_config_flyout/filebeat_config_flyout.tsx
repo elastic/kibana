@@ -64,7 +64,7 @@ export const FilebeatConfigFlyout: FC<Props> = ({
   }, [username, index, ingestPipelineId, results]);
 
   return (
-    <EuiFlyout onClose={closeFlyout} hideCloseButton size={'m'}>
+    <EuiFlyout onClose={closeFlyout} hideCloseButton size={'m'} ownFocus={false}>
       <EuiFlyoutBody>
         <EuiFlexGroup>
           <Contents value={fileBeatConfig} username={username} index={index} />
@@ -73,7 +73,12 @@ export const FilebeatConfigFlyout: FC<Props> = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
+            <EuiButtonEmpty
+              iconType="cross"
+              onClick={closeFlyout}
+              flush="left"
+              data-test-subj="fileBeatConfigFlyoutCloseButton"
+            >
               <FormattedMessage
                 id="xpack.dataVisualizer.fileBeatConfigFlyout.closeButton"
                 defaultMessage="Close"

@@ -15,7 +15,7 @@ export async function fetchClusterHealth(
 ): Promise<AlertClusterHealth[]> {
   const params = {
     index,
-    filterPath: [
+    filter_path: [
       'hits.hits._source.cluster_state.status',
       'hits.hits._source.cluster_uuid',
       'hits.hits._index',

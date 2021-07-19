@@ -13,6 +13,7 @@ import { Server as HapiServer } from '@hapi/hapi';
 import { createHttpServer } from '../../http/test_utils';
 import { HttpService, IRouter } from '../../http';
 import { contextServiceMock } from '../../context/context_service.mock';
+import { executionContextServiceMock } from '../../execution_context/execution_context_service.mock';
 import { ServerMetricsCollector } from '../collectors/server';
 
 const requestWaitDelay = 25;
@@ -29,7 +30,10 @@ describe('ServerMetricsCollector', () => {
   beforeEach(async () => {
     server = createHttpServer();
     const contextSetup = contextServiceMock.createSetupContract();
-    const httpSetup = await server.setup({ context: contextSetup });
+    const httpSetup = await server.setup({
+      context: contextSetup,
+      executionContext: executionContextServiceMock.createInternalSetupContract(),
+    });
     hapiServer = httpSetup.server;
     router = httpSetup.createRouter('/');
     collector = new ServerMetricsCollector(hapiServer);

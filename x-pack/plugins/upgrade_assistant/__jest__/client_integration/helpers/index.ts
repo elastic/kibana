@@ -7,6 +7,7 @@
 
 export { setup as setupOverviewPage, OverviewTestBed } from './overview.helpers';
 export { setup as setupIndicesPage, IndicesTestBed } from './indices.helpers';
+export { setup as setupClusterPage, ClusterTestBed } from './cluster.helpers';
 export { setup as setupKibanaPage, KibanaTestBed } from './kibana.helpers';
 
 export { setupEnvironment } from './setup_environment';

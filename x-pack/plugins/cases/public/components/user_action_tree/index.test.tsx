@@ -13,7 +13,14 @@ import routeData from 'react-router';
 
 import { getFormMock, useFormMock, useFormDataMock } from '../__mock__/form';
 import { useUpdateComment } from '../../containers/use_update_comment';
-import { basicCase, basicPush, getUserAction } from '../../containers/mock';
+import {
+  basicCase,
+  basicPush,
+  getUserAction,
+  getHostIsolationUserAction,
+  hostIsolationComment,
+  hostReleaseComment,
+} from '../../containers/mock';
 import { UserActionTree } from '.';
 import { TestProviders } from '../../common/mock';
 import { Ecs } from '../../../common';
@@ -28,6 +35,7 @@ const defaultProps = {
   caseUserActions: [],
   connectors: [],
   getCaseDetailHrefWithCommentId: jest.fn(),
+  actionsNavigation: { href: jest.fn(), onClick: jest.fn() },
   getRuleDetailsHref: jest.fn(),
   onRuleDetailsClick: jest.fn(),
   data: basicCase,
@@ -36,6 +44,7 @@ const defaultProps = {
   isLoadingUserActions: false,
   onUpdateField,
   selectedAlertPatterns: ['some-test-pattern'],
+  statusActionButton: null,
   updateCase,
   userCanCrud: true,
   useFetchAlertData: (): [boolean, Record<string, Ecs>] => [
@@ -364,6 +373,84 @@ describe(`UserActionTree`, () => {
           .first()
           .hasClass('outlined')
       ).toEqual(true);
+    });
+  });
+  describe('Host isolation action', () => {
+    it('renders in the cases details view', async () => {
+      const isolateAction = [getHostIsolationUserAction()];
+      const props = {
+        ...defaultProps,
+        caseUserActions: isolateAction,
+        data: { ...defaultProps.data, comments: [...basicCase.comments, hostIsolationComment()] },
+      };
+
+      const wrapper = mount(
+        <TestProviders>
+          <UserActionTree {...props} />
+        </TestProviders>
+      );
+      await waitFor(() => {
+        expect(wrapper.find(`[data-test-subj="endpoint-action"]`).exists()).toBe(true);
+      });
+    });
+
+    it('shows the correct username', async () => {
+      const isolateAction = [getHostIsolationUserAction()];
+      const props = {
+        ...defaultProps,
+        caseUserActions: isolateAction,
+        data: { ...defaultProps.data, comments: [hostIsolationComment()] },
+      };
+
+      const wrapper = mount(
+        <TestProviders>
+          <UserActionTree {...props} />
+        </TestProviders>
+      );
+      await waitFor(() => {
+        expect(wrapper.find(`[data-test-subj="user-action-avatar"]`).first().prop('name')).toEqual(
+          defaultProps.data.createdBy.fullName
+        );
+      });
+    });
+
+    it('shows a lock icon if the action is isolate', async () => {
+      const isolateAction = [getHostIsolationUserAction()];
+      const props = {
+        ...defaultProps,
+        caseUserActions: isolateAction,
+        data: { ...defaultProps.data, comments: [hostIsolationComment()] },
+      };
+
+      const wrapper = mount(
+        <TestProviders>
+          <UserActionTree {...props} />
+        </TestProviders>
+      );
+      await waitFor(() => {
+        expect(
+          wrapper.find(`[data-test-subj="endpoint-action"]`).first().prop('timelineIcon')
+        ).toBe('lock');
+      });
+    });
+    it('shows a lockOpen icon if the action is unisolate/release', async () => {
+      const isolateAction = [getHostIsolationUserAction()];
+      const props = {
+        ...defaultProps,
+        caseUserActions: isolateAction,
+        data: { ...defaultProps.data, comments: [hostReleaseComment()] },
+      };
+
+      const wrapper = mount(
+        <TestProviders>
+          <UserActionTree {...props} />
+        </TestProviders>
+      );
+      await waitFor(() => {
+        expect(
+          wrapper.find(`[data-test-subj="endpoint-action"]`).first().prop('timelineIcon')
+        ).toBe('lockOpen');
+      });
     });
   });
 });

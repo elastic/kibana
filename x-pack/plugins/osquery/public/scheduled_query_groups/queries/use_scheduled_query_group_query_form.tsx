@@ -45,6 +45,9 @@ export const useScheduledQueryGroupQueryForm = ({
     // @ts-expect-error update types
     serializer: (payload) =>
       produce(payload, (draft) => {
+        if (isArray(draft.platform)) {
+          draft.platform.join(',');
+        }
         if (draft.platform?.split(',').length === 3) {
           // if all platforms are checked then use undefined
           delete draft.platform;

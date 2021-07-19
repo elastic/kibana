@@ -7,11 +7,11 @@
  */
 
 import { getFields } from './get_fields';
-import { IIndexPattern, IFieldType, KueryNode } from '../../../..';
+import { IndexPatternBase, IndexPatternFieldBase, KueryNode } from '../../../..';
 
 export function getFullFieldNameNode(
   rootNameNode: any,
-  indexPattern?: IIndexPattern,
+  indexPattern?: IndexPatternBase,
   nestedPath?: string
 ): KueryNode {
   const fullFieldNameNode = {
@@ -27,7 +27,7 @@ export function getFullFieldNameNode(
   }
   const fields = getFields(fullFieldNameNode, indexPattern);
 
-  const errors = fields!.reduce((acc: any, field: IFieldType) => {
+  const errors = fields!.reduce((acc: any, field: IndexPatternFieldBase) => {
     const nestedPathFromField =
       field.subType && field.subType.nested ? field.subType.nested.path : undefined;
 

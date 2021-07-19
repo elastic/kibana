@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-interpret<T>(ast: ExpressionAstNode, input: T): Observable<unknown>;
+interpret<T>(ast: ExpressionAstNode, input: T): Observable<ExecutionResult<unknown>>;
 ```
 
 ## Parameters
@@ -19,5 +19,5 @@ interpret<T>(ast: ExpressionAstNode, input: T): Observable<unknown>;
 
 <b>Returns:</b>
 
-`Observable<unknown>`
+`Observable<ExecutionResult<unknown>>`
 

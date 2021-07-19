@@ -35,8 +35,11 @@ import { getStubIndexPattern } from '../../../../../../../src/plugins/data/publi
 import indexPatternData from './configurations/test_data/test_index_pattern.json';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { setIndexPatterns } from '../../../../../../../src/plugins/data/public/services';
-import { IndexPatternsContract } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
-import { UrlFilter } from './types';
+import {
+  IndexPattern,
+  IndexPatternsContract,
+} from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import { AppDataType, UrlFilter } from './types';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { ListItem } from '../../../hooks/use_values_list';
 
@@ -232,11 +235,11 @@ export const mockAppIndexPattern = () => {
   const loadIndexPattern = jest.fn();
   const spy = jest.spyOn(useAppIndexPatternHook, 'useAppIndexPatternContext').mockReturnValue({
     indexPattern: mockIndexPattern,
-    selectedApp: 'ux',
     hasData: true,
     loading: false,
     hasAppData: { ux: true } as any,
     loadIndexPattern,
+    indexPatterns: ({ ux: mockIndexPattern } as unknown) as Record<AppDataType, IndexPattern>,
   });
   return { spy, loadIndexPattern };
 };
@@ -260,7 +263,7 @@ function mockSeriesStorageContext({
 }) {
   const mockDataSeries = data || {
     'performance-distribution': {
-      reportType: 'dist',
+      reportType: 'data-distribution',
       dataType: 'ux',
       breakdown: breakdown || 'user_agent.name',
       time: { from: 'now-15m', to: 'now' },

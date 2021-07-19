@@ -57,6 +57,7 @@ exports.externals = {
   '@kbn/i18n': '__kbnSharedDeps__.KbnI18n',
   '@kbn/i18n/angular': '__kbnSharedDeps__.KbnI18nAngular',
   '@kbn/i18n/react': '__kbnSharedDeps__.KbnI18nReact',
+  '@emotion/react': '__kbnSharedDeps__.EmotionReact',
   jquery: '__kbnSharedDeps__.Jquery',
   moment: '__kbnSharedDeps__.Moment',
   'moment-timezone': '__kbnSharedDeps__.MomentTimezone',
@@ -85,6 +86,8 @@ exports.externals = {
   '@elastic/eui/dist/eui_charts_theme': '__kbnSharedDeps__.ElasticEuiChartsTheme',
   '@elastic/eui/dist/eui_theme_light.json': '__kbnSharedDeps__.Theme.euiLightVars',
   '@elastic/eui/dist/eui_theme_dark.json': '__kbnSharedDeps__.Theme.euiDarkVars',
+  // transient dep of eui
+  'react-beautiful-dnd': '__kbnSharedDeps__.ReactBeautifulDnD',
   lodash: '__kbnSharedDeps__.Lodash',
   'lodash/fp': '__kbnSharedDeps__.LodashFp',
   fflate: '__kbnSharedDeps__.Fflate',

@@ -67,7 +67,10 @@ describe('healthRoute', () => {
       id,
       getTaskManagerConfig({
         monitored_stats_required_freshness: 1000,
-        monitored_stats_warn_delayed_task_start_in_seconds: 100,
+        monitored_stats_health_verbose_log: {
+          enabled: true,
+          warn_delayed_task_start_in_seconds: 100,
+        },
         monitored_aggregated_stats_refresh_rate: 60000,
       })
     );
@@ -114,7 +117,10 @@ describe('healthRoute', () => {
       id,
       getTaskManagerConfig({
         monitored_stats_required_freshness: 1000,
-        monitored_stats_warn_delayed_task_start_in_seconds: 120,
+        monitored_stats_health_verbose_log: {
+          enabled: true,
+          warn_delayed_task_start_in_seconds: 120,
+        },
         monitored_aggregated_stats_refresh_rate: 60000,
       })
     );
@@ -173,7 +179,10 @@ describe('healthRoute', () => {
       id,
       getTaskManagerConfig({
         monitored_stats_required_freshness: 1000,
-        monitored_stats_warn_delayed_task_start_in_seconds: 120,
+        monitored_stats_health_verbose_log: {
+          enabled: true,
+          warn_delayed_task_start_in_seconds: 120,
+        },
         monitored_aggregated_stats_refresh_rate: 60000,
       })
     );
@@ -455,7 +464,7 @@ function mockHealthStats(overrides = {}) {
           non_recurring: 20,
           owner_ids: [0, 0, 0, 1, 2, 0, 0, 2, 2, 2, 1, 2, 1, 1],
           estimated_schedule_density: [],
-          capacity_requirments: {
+          capacity_requirements: {
             per_minute: 150,
             per_hour: 360,
             per_day: 820,

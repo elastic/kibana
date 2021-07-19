@@ -63,6 +63,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
     actionConnector,
     issueType: incident.issueType ?? '',
   });
+
   const editSubActionProperty = useCallback(
     (key: string, value: any) => {
       if (key === 'issueType') {
@@ -75,9 +76,11 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
           index
         );
       }
+
       if (key === 'comments') {
         return editAction('subActionParams', { incident, comments: value }, index);
       }
+
       return editAction(
         'subActionParams',
         {
@@ -124,6 +127,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
       text: type.name ?? '',
     }));
   }, [editSubActionProperty, incident, issueTypes]);
+
   const prioritiesSelectOptions: EuiSelectOption[] = useMemo(() => {
     if (incident.issueType != null && fields != null) {
       const priorities = fields.priority != null ? fields.priority.allowedValues : [];
@@ -141,6 +145,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
     }
     return [];
   }, [editSubActionProperty, fields, incident.issueType, incident.priority]);
+
   useEffect(() => {
     if (!hasPriority && incident.priority != null) {
       editSubActionProperty('priority', null);
@@ -167,6 +172,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionConnector]);
+
   useEffect(() => {
     if (!actionParams.subAction) {
       editAction('subAction', 'pushToService', index);

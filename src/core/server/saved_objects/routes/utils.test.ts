@@ -101,6 +101,22 @@ describe('createSavedObjectsStreamFromNdJson', () => {
       },
     ]);
   });
+
+  it('handles an ndjson stream that only contains excluded saved objects', async () => {
+    const savedObjectsStream = await createSavedObjectsStreamFromNdJson(
+      new Readable({
+        read() {
+          this.push(
+            '{"excludedObjects":[{"id":"foo","reason":"excluded","type":"foo-type"}],"excludedObjectsCount":1,"exportedCount":0,"missingRefCount":0,"missingReferences":[]}\n'
+          );
+          this.push(null);
+        },
+      })
+    );
+
+    const result = await readStreamToCompletion(savedObjectsStream);
+    expect(result).toEqual([]);
+  });
 });
 
 describe('validateTypes', () => {

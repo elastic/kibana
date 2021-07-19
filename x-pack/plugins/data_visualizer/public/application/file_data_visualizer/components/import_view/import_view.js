@@ -31,7 +31,6 @@ import {
   addCombinedFieldsToMappings,
   getDefaultCombinedFields,
 } from '../../../common/components/combined_fields';
-import { ExperimentalBadge } from '../../../common/components/experimental_badge';
 
 const DEFAULT_TIME_FIELD = '@timestamp';
 const DEFAULT_INDEX_SETTINGS = { number_of_shards: 1 };
@@ -510,15 +509,6 @@ export class ImportView extends Component {
                   id="xpack.dataVisualizer.file.importView.importDataTitle"
                   defaultMessage="Import data"
                 />
-                &nbsp;
-                <ExperimentalBadge
-                  tooltipContent={
-                    <FormattedMessage
-                      id="xpack.dataVisualizer.file.importView.experimentalFeatureTooltip"
-                      defaultMessage="Experimental feature. We'd love to hear your feedback."
-                    />
-                  }
-                />
               </h2>
             </EuiTitle>
 
@@ -601,6 +591,7 @@ export class ImportView extends Component {
                       timeFieldName={timeFieldName}
                       createIndexPattern={createIndexPattern}
                       showFilebeatFlyout={this.showFilebeatFlyout}
+                      additionalLinks={this.props.resultsLinks ?? []}
                     />
 
                     {isFilebeatFlyoutVisible && (

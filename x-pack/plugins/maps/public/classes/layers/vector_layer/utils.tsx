@@ -13,7 +13,13 @@ import {
   SOURCE_DATA_REQUEST_ID,
   VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
-import { MapExtent, MapQuery, VectorSourceRequestMeta } from '../../../../common/descriptor_types';
+import {
+  DataMeta,
+  MapExtent,
+  MapQuery,
+  Timeslice,
+  VectorSourceRequestMeta,
+} from '../../../../common/descriptor_types';
 import { DataRequestContext } from '../../../actions';
 import { IVectorSource } from '../../sources/vector_source';
 import { DataRequestAbortError } from '../../util/data_request';
@@ -52,6 +58,7 @@ export async function syncVectorSource({
   requestMeta,
   syncContext,
   source,
+  getUpdateDueToTimeslice,
 }: {
   layerId: string;
   layerName: string;
@@ -59,6 +66,7 @@ export async function syncVectorSource({
   requestMeta: VectorSourceRequestMeta;
   syncContext: DataRequestContext;
   source: IVectorSource;
+  getUpdateDueToTimeslice: (timeslice?: Timeslice) => boolean;
 }): Promise<{ refreshed: boolean; featureCollection: FeatureCollection }> {
   const {
     startLoading,
@@ -76,6 +84,7 @@ export async function syncVectorSource({
         prevDataRequest,
         nextMeta: requestMeta,
         extentAware: source.isFilterByMapBounds(),
+        getUpdateDueToTimeslice,
       });
   if (canSkipFetch) {
     return {
@@ -104,7 +113,14 @@ export async function syncVectorSource({
     ) {
       layerFeatureCollection.features.push(...getCentroidFeatures(layerFeatureCollection));
     }
-    stopLoading(dataRequestId, requestToken, layerFeatureCollection, meta);
+    const responseMeta: DataMeta = meta ? { ...meta } : {};
+    if (requestMeta.applyGlobalTime && (await source.isTimeAware())) {
+      const timesiceMaskField = await source.getTimesliceMaskFieldName();
+      if (timesiceMaskField) {
+        responseMeta.timesiceMaskField = timesiceMaskField;
+      }
+    }
+    stopLoading(dataRequestId, requestToken, layerFeatureCollection, responseMeta);
     return {
       refreshed: true,
       featureCollection: layerFeatureCollection,

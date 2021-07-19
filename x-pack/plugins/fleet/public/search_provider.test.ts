@@ -90,7 +90,7 @@ describe('Package search provider', () => {
               id: 'test-test',
               score: 80,
               title: 'test',
-              type: 'package',
+              type: 'integration',
               url: {
                 path: 'undefined#/detail/test-test/overview',
                 prependBasePath: false,
@@ -100,7 +100,7 @@ describe('Package search provider', () => {
               id: 'test1-test1',
               score: 80,
               title: 'test1',
-              type: 'package',
+              type: 'integration',
               url: {
                 path: 'undefined#/detail/test1-test1/overview',
                 prependBasePath: false,
@@ -164,18 +164,18 @@ describe('Package search provider', () => {
         const packageSearchProvider = createPackageSearchProvider(setupMock);
         expectObservable(
           packageSearchProvider.find(
-            { term: 'test' },
+            { term: 'test1' },
             { aborted$: NEVER, maxResults: 1, preference: '' }
           )
         ).toBe('--(a|)', {
           a: [
             {
-              id: 'test-test',
+              id: 'test1-test1',
               score: 80,
-              title: 'test',
-              type: 'package',
+              title: 'test1',
+              type: 'integration',
               url: {
-                path: 'undefined#/detail/test-test/overview',
+                path: 'undefined#/detail/test1-test1/overview',
                 prependBasePath: false,
               },
             },
@@ -209,7 +209,7 @@ describe('Package search provider', () => {
         expect(sendGetPackages).toHaveBeenCalledTimes(0);
       });
 
-      test('with packages tag, with no search term', () => {
+      test('with integration tag, with no search term', () => {
         getTestScheduler().run(({ hot, expectObservable }) => {
           mockSendGetPackages.mockReturnValue(
             hot('--(a|)', { a: { data: { response: testResponse } } })
@@ -220,7 +220,7 @@ describe('Package search provider', () => {
           const packageSearchProvider = createPackageSearchProvider(setupMock);
           expectObservable(
             packageSearchProvider.find(
-              { types: ['package'] },
+              { types: ['integration'] },
               { aborted$: NEVER, maxResults: 100, preference: '' }
             )
           ).toBe('--(a|)', {
@@ -229,7 +229,7 @@ describe('Package search provider', () => {
                 id: 'test-test',
                 score: 80,
                 title: 'test',
-                type: 'package',
+                type: 'integration',
                 url: {
                   path: 'undefined#/detail/test-test/overview',
                   prependBasePath: false,
@@ -239,7 +239,7 @@ describe('Package search provider', () => {
                 id: 'test1-test1',
                 score: 80,
                 title: 'test1',
-                type: 'package',
+                type: 'integration',
                 url: {
                   path: 'undefined#/detail/test1-test1/overview',
                   prependBasePath: false,
@@ -252,7 +252,7 @@ describe('Package search provider', () => {
         expect(sendGetPackages).toHaveBeenCalledTimes(1);
       });
 
-      test('with packages tag, with search term', () => {
+      test('with integration tag, with search term', () => {
         getTestScheduler().run(({ hot, expectObservable }) => {
           mockSendGetPackages.mockReturnValue(
             hot('--(a|)', { a: { data: { response: testResponse } } })
@@ -263,7 +263,7 @@ describe('Package search provider', () => {
           const packageSearchProvider = createPackageSearchProvider(setupMock);
           expectObservable(
             packageSearchProvider.find(
-              { term: 'test1', types: ['package'] },
+              { term: 'test1', types: ['integration'] },
               { aborted$: NEVER, maxResults: 100, preference: '' }
             )
           ).toBe('--(a|)', {
@@ -272,7 +272,7 @@ describe('Package search provider', () => {
                 id: 'test1-test1',
                 score: 80,
                 title: 'test1',
-                type: 'package',
+                type: 'integration',
                 url: {
                   path: 'undefined#/detail/test1-test1/overview',
                   prependBasePath: false,

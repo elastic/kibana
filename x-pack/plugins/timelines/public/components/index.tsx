@@ -6,24 +6,55 @@
  */
 
 import React from 'react';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { Provider } from 'react-redux';
+import { I18nProvider } from '@kbn/i18n/react';
+import { Store } from 'redux';
 
-import { PLUGIN_NAME } from '../../common';
-import { TimelineProps } from '../types';
+import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import { createStore } from '../store/t_grid';
 
-export const Timeline = (props: TimelineProps) => {
+import { TGrid as TGridComponent } from './tgrid';
+import { TGridProps } from '../types';
+import { DragDropContextWrapper } from './drag_and_drop';
+import { initialTGridState } from '../store/t_grid/reducer';
+import { TGridIntegratedProps } from './t_grid/integrated';
+
+const EMPTY_BROWSER_FIELDS = {};
+
+type TGridComponent = TGridProps & {
+  store?: Store;
+  storage: Storage;
+  data?: DataPublicPluginStart;
+  setStore: (store: Store) => void;
+};
+
+export const TGrid = (props: TGridComponent) => {
+  const { store, storage, setStore, ...tGridProps } = props;
+  let tGridStore = store;
+  if (!tGridStore && props.type === 'standalone') {
+    tGridStore = createStore(initialTGridState, storage);
+    setStore(tGridStore);
+  }
+  let browserFields = EMPTY_BROWSER_FIELDS;
+  if ((tGridProps as TGridIntegratedProps).browserFields != null) {
+    browserFields = (tGridProps as TGridIntegratedProps).browserFields;
+  }
   return (
-    <I18nProvider>
-      <div data-test-subj="timeline-wrapper">
-        <FormattedMessage
-          id="xpack.timelines.placeholder"
-          defaultMessage="Plugin: {name} Timeline: {timelineId}"
-          values={{ name: PLUGIN_NAME, timelineId: props.timelineId }}
-        />
-      </div>
-    </I18nProvider>
+    <Provider store={tGridStore!}>
+      <I18nProvider>
+        <DragDropContextWrapper browserFields={browserFields} defaultsHeader={props.columns}>
+          <TGridComponent {...tGridProps} />
+        </DragDropContextWrapper>
+      </I18nProvider>
+    </Provider>
   );
 };
 
 // eslint-disable-next-line import/no-default-export
-export { Timeline as default };
+export { TGrid as default };
+
+export * from './drag_and_drop';
+export * from './draggables';
+export * from './last_updated';
+export * from './loading';

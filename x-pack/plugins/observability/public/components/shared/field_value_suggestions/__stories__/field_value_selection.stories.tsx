@@ -6,11 +6,10 @@
  */
 
 import React, { ComponentType, useEffect, useState } from 'react';
-import { IntlProvider } from 'react-intl';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
 import { Observable } from 'rxjs';
 import { CoreStart } from 'src/core/public';
 import { text } from '@storybook/addon-knobs';
-import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
 import { createKibanaReactContext } from '../../../../../../../../src/plugins/kibana_react/public';
 import { FieldValueSelectionProps } from '../types';
 import { FieldValueSelection } from '../field_value_selection';
@@ -31,16 +30,14 @@ export default {
     (Story: ComponentType<FieldValueSelectionProps>) => (
       <IntlProvider locale="en">
         <KibanaReactContext.Provider>
-          <EuiThemeProvider>
-            <FieldValueSelection
-              label="Service name"
-              values={values}
-              onChange={() => {}}
-              selectedValue={[]}
-              loading={false}
-              setQuery={() => {}}
-            />
-          </EuiThemeProvider>
+          <FieldValueSelection
+            label="Service name"
+            values={values}
+            onChange={() => {}}
+            selectedValue={[]}
+            loading={false}
+            setQuery={() => {}}
+          />
         </KibanaReactContext.Provider>
       </IntlProvider>
     ),

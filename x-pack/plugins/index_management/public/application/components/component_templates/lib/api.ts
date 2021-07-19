@@ -10,7 +10,6 @@ import {
   ComponentTemplateListItem,
   ComponentTemplateDeserialized,
   ComponentTemplateSerialized,
-  Error,
 } from '../shared_imports';
 import {
   UIM_COMPONENT_TEMPLATE_DELETE_MANY,
@@ -26,7 +25,7 @@ export const getApi = (
   trackMetric: (type: UiCounterMetricType, eventName: string) => void
 ) => {
   function useLoadComponentTemplates() {
-    return useRequest<ComponentTemplateListItem[], Error>({
+    return useRequest<ComponentTemplateListItem[]>({
       path: `${apiBasePath}/component_templates`,
       method: 'get',
     });

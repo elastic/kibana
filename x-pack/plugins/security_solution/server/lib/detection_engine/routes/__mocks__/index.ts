@@ -24,12 +24,8 @@ export const createMockConfig = (): ConfigType => ({
   enableExperimental: [],
   endpointResultListDefaultFirstPageIndex: 0,
   endpointResultListDefaultPageSize: 10,
-  alertResultListDefaultDateRange: {
-    from: 'now-15m',
-    to: 'now',
-  },
   packagerTaskInterval: '60s',
-  validateArtifactDownloads: true,
+  alertMergeStrategy: 'missingFields',
 });
 
 export const mockGetCurrentUser = {

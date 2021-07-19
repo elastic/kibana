@@ -10,11 +10,11 @@ import { i18nTexts } from '../../../../public/application/sections/edit_policy/i
 
 import { PhaseWithTiming } from '../../../../common/types';
 import { setupEnvironment } from '../../helpers';
-import { EditPolicyTestBed, setup } from '../edit_policy.helpers';
+import { setupValidationTestBed, ValidationTestBed } from './validation.helpers';
 
 describe('<EditPolicy /> timing validation', () => {
-  let testBed: EditPolicyTestBed;
-  let actions: EditPolicyTestBed['actions'];
+  let testBed: ValidationTestBed;
+  let actions: ValidationTestBed['actions'];
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
@@ -31,7 +31,7 @@ describe('<EditPolicy /> timing validation', () => {
     httpRequestsMockHelpers.setLoadPolicies([]);
 
     await act(async () => {
-      testBed = await setup();
+      testBed = await setupValidationTestBed();
     });
 
     const { component } = testBed;

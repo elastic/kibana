@@ -110,20 +110,24 @@ export const push = async (
       alertsInfo,
     });
 
-    const connectorMappings = await casesClientInternal.configuration.getMappings({
+    const getMappingsResponse = await casesClientInternal.configuration.getMappings({
       connector: theCase.connector,
     });
 
-    if (connectorMappings.length === 0) {
-      throw new Error('Connector mapping has not been created');
-    }
+    const mappings =
+      getMappingsResponse.length === 0
+        ? await casesClientInternal.configuration.createMappings({
+            connector: theCase.connector,
+            owner: theCase.owner,
+          })
+        : getMappingsResponse[0].attributes.mappings;
 
     const externalServiceIncident = await createIncident({
       actionsClient,
       theCase,
       userActions,
       connector: connector as ActionConnector,
-      mappings: connectorMappings[0].attributes.mappings,
+      mappings,
       alerts,
       casesConnectors,
     });

@@ -9,7 +9,7 @@ import { exportTimeline } from '../../tasks/timelines';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import {
   expectedExportedTimelineTemplate,
-  timeline as timelineTemplate,
+  getTimeline as getTimelineTemplate,
 } from '../../objects/timeline';
 
 import { TIMELINE_TEMPLATES_URL } from '../../urls/navigation';
@@ -20,7 +20,7 @@ describe('Export timelines', () => {
   beforeEach(() => {
     cleanKibana();
     cy.intercept('POST', 'api/timeline/_export?file_name=timelines_export.ndjson').as('export');
-    createTimelineTemplate(timelineTemplate).then((response) => {
+    createTimelineTemplate(getTimelineTemplate()).then((response) => {
       cy.wrap(response).as('templateResponse');
       cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('templateId');
     });

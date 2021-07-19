@@ -16,40 +16,27 @@ import {
 import { useDispatch } from 'react-redux';
 
 import styled from 'styled-components';
-import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
+import {
+  HeaderActionProps,
+  SortDirection,
+  TimelineId,
+  TimelineTabs,
+} from '../../../../../../common/types/timeline';
 import { EXIT_FULL_SCREEN } from '../../../../../common/components/exit_full_screen/translations';
 import { FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../../../common/constants';
 import {
   useGlobalFullScreen,
   useTimelineFullScreen,
 } from '../../../../../common/containers/use_full_screen';
-import { BrowserFields } from '../../../../../common/containers/source';
-import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
-import { OnSelectAll } from '../../events';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
 import { StatefulFieldsBrowser } from '../../../fields_browser';
 import { StatefulRowRenderersBrowser } from '../../../row_renderers_browser';
 import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from '../../../fields_browser/helpers';
 import { EventsTh, EventsThContent } from '../../styles';
-import { Sort, SortDirection } from '../sort';
 import { EventsSelect } from '../column_headers/events_select';
 import * as i18n from '../column_headers/translations';
 import { timelineActions } from '../../../../store/timeline';
 import { isFullScreen } from '../column_headers';
-
-export interface HeaderActionProps {
-  width: number;
-  browserFields: BrowserFields;
-  columnHeaders: ColumnHeaderOptions[];
-  isEventViewer?: boolean;
-  isSelectAllChecked: boolean;
-  onSelectAll: OnSelectAll;
-  showEventsSelect: boolean;
-  showSelectAllCheckbox: boolean;
-  sort: Sort[];
-  tabType: TimelineTabs;
-  timelineId: string;
-}
 
 const SortingColumnsContainer = styled.div`
   button {

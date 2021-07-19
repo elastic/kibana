@@ -118,6 +118,7 @@ export {
 export { CountIndexPatternColumn } from './count';
 export { LastValueIndexPatternColumn } from './last_value';
 export { RangeIndexPatternColumn } from './ranges';
+export { FormulaIndexPatternColumn, MathIndexPatternColumn } from './formula';
 
 // List of all operation definitions registered to this data source.
 // If you want to implement a new operation, add the definition to this array and

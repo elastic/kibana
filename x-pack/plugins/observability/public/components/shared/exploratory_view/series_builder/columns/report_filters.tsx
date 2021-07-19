@@ -7,23 +7,23 @@
 
 import React from 'react';
 import { SeriesFilter } from '../../series_editor/columns/series_filter';
-import { DataSeries } from '../../types';
+import { SeriesConfig } from '../../types';
 
 export function ReportFilters({
-  dataViewSeries,
+  seriesConfig,
   seriesId,
 }: {
-  dataViewSeries: DataSeries;
+  seriesConfig: SeriesConfig;
   seriesId: string;
 }) {
   return (
     <SeriesFilter
-      series={dataViewSeries}
-      defaultFilters={dataViewSeries.defaultFilters}
-      filters={dataViewSeries.filters}
+      seriesConfig={seriesConfig}
+      filterFields={seriesConfig.filterFields}
+      baseFilters={seriesConfig.baseFilters}
       seriesId={seriesId}
       isNew={true}
-      labels={dataViewSeries.labels}
+      labels={seriesConfig.labels}
     />
   );
 }

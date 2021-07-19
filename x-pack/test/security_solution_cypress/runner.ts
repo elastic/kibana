@@ -88,6 +88,30 @@ export async function SecuritySolutionCypressCliFirefoxTestRunner({
   });
 }
 
+export async function SecuritySolutionCypressCcsTestRunner({ getService }: FtrProviderContext) {
+  const log = getService('log');
+
+  await withProcRunner(log, async (procs) => {
+    await procs.run('cypress', {
+      cmd: 'yarn',
+      args: ['cypress:run:ccs'],
+      cwd: resolve(__dirname, '../../plugins/security_solution'),
+      env: {
+        FORCE_COLOR: '1',
+        CYPRESS_BASE_URL: process.env.TEST_KIBANA_URL,
+        CYPRESS_ELASTICSEARCH_URL: process.env.TEST_ES_URL,
+        CYPRESS_ELASTICSEARCH_USERNAME: process.env.ELASTICSEARCH_USERNAME,
+        CYPRESS_ELASTICSEARCH_PASSWORD: process.env.ELASTICSEARCH_PASSWORD,
+        CYPRESS_CCS_KIBANA_URL: process.env.TEST_KIBANA_URLDATA,
+        CYPRESS_CCS_ELASTICSEARCH_URL: process.env.TEST_ES_URLDATA,
+        CYPRESS_CCS_REMOTE_NAME: process.env.TEST_CCS_REMOTE_NAME,
+        ...process.env,
+      },
+      wait: true,
+    });
+  });
+}
+
 export async function SecuritySolutionCypressVisualTestRunner({ getService }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');
@@ -119,6 +143,37 @@ export async function SecuritySolutionCypressVisualTestRunner({ getService }: Ft
           hostname: config.get('servers.kibana.hostname'),
           port: config.get('servers.kibana.port'),
         }),
+        ...process.env,
+      },
+      wait: true,
+    });
+  });
+}
+
+export async function SecuritySolutionCypressUpgradeCliTestRunner({
+  getService,
+}: FtrProviderContext) {
+  const log = getService('log');
+
+  await withProcRunner(log, async (procs) => {
+    await procs.run('cypress', {
+      cmd: 'yarn',
+      args: ['cypress:run:upgrade'],
+      cwd: resolve(__dirname, '../../plugins/security_solution'),
+      env: {
+        FORCE_COLOR: '1',
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        CYPRESS_baseUrl: process.env.TEST_KIBANA_URL,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        CYPRESS_protocol: process.env.TEST_KIBANA_PROTOCOL,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        CYPRESS_hostname: process.env.TEST_KIBANA_HOSTNAME,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        CYPRESS_configport: process.env.TEST_KIBANA_PORT,
+        CYPRESS_ELASTICSEARCH_URL: process.env.TEST_ES_URL,
+        CYPRESS_ELASTICSEARCH_USERNAME: process.env.TEST_ES_USER,
+        CYPRESS_ELASTICSEARCH_PASSWORD: process.env.TEST_ES_PASS,
+        CYPRESS_KIBANA_URL: process.env.TEST_KIBANA_URL,
         ...process.env,
       },
       wait: true,

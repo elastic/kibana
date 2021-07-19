@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
 import {
   CoreSetup,
   CoreStart,
@@ -14,7 +13,7 @@ import {
 import { promisify } from 'util';
 import { unzip } from 'zlib';
 import { Artifact } from '../../../../fleet/server';
-import { sourceMapRt } from '../../routes/source_maps';
+import { SourceMap } from '../../routes/source_maps';
 import { APMPluginStartDependencies } from '../../types';
 import { getApmPackgePolicies } from './get_apm_package_policies';
 import { APM_SERVER, PackagePolicy } from './register_fleet_policy_callbacks';
@@ -23,7 +22,7 @@ export interface ApmArtifactBody {
   serviceName: string;
   serviceVersion: string;
   bundleFilepath: string;
-  sourceMap: t.TypeOf<typeof sourceMapRt>;
+  sourceMap: SourceMap;
 }
 export type ArtifactSourceMap = Omit<Artifact, 'body'> & {
   body: ApmArtifactBody;
@@ -97,9 +96,6 @@ export function getPackagePolicyWithSourceMap({
   packagePolicy: PackagePolicy;
   artifacts: ArtifactSourceMap[];
 }) {
-  if (!artifacts.length) {
-    return packagePolicy;
-  }
   const [firstInput, ...restInputs] = packagePolicy.inputs;
   return {
     ...packagePolicy,

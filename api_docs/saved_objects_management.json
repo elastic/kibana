@@ -102,7 +102,7 @@
             "label": "refreshOnFinish",
             "description": [],
             "signature": [
-              "(() => boolean) | undefined"
+              "(() => { type: string; id: string; }[]) | undefined"
             ],
             "source": {
               "path": "src/plugins/saved_objects_management/public/services/types/action.ts",

@@ -100,22 +100,22 @@ the selected transaction group.
 image::apm/images/apm-transaction-response-dist.png[Example view of response time distribution]
 
 [[transaction-duration-distribution]]
-==== Transactions duration distribution
+==== Latency distribution
 
-This chart plots all transaction durations for the given time period.
+A plot of all transaction durations for the given time period.
 The screenshot below shows a typical distribution,
 and indicates most of our requests were served quickly -- awesome!
-It's the requests on the right, the ones taking longer than average, that we probably want to focus on.
+It's the requests on the right, the ones taking longer than average, that we probably need to focus on.
 
 [role="screenshot"]
-image::apm/images/apm-transaction-duration-dist.png[Example view of transactions duration distribution graph]
+image::apm/images/apm-transaction-duration-dist.png[Example view of latency distribution graph]
 
-Select a transaction duration _bucket_ to display up to ten trace samples.
+Select a latency duration _bucket_ to display up to ten trace samples.
 
 [[transaction-trace-sample]]
 ==== Trace sample
 
-Trace samples are based on the _bucket_ selection in the *Transactions duration distribution* chart;
+Trace samples are based on the _bucket_ selection in the *Latency distribution* chart;
 update the samples by selecting a new _bucket_.
 The number of requests per bucket is displayed when hovering over the graph,
 and the selected bucket is highlighted to stand out.

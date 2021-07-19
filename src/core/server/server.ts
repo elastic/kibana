@@ -31,6 +31,7 @@ import { CapabilitiesService } from './capabilities';
 import { EnvironmentService, config as pidConfig } from './environment';
 // do not try to shorten the import to `./status`, it will break server test mocking
 import { StatusService } from './status/status_service';
+import { ExecutionContextService } from './execution_context';
 
 import { config as cspConfig } from './csp';
 import { config as elasticsearchConfig } from './elasticsearch';
@@ -48,6 +49,7 @@ import { CoreUsageDataService } from './core_usage_data';
 import { DeprecationsService } from './deprecations';
 import { CoreRouteHandlerContext } from './core_route_handler_context';
 import { config as externalUrlConfig } from './external_url';
+import { config as executionContextConfig } from './execution_context';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
@@ -73,6 +75,7 @@ export class Server {
   private readonly coreUsageData: CoreUsageDataService;
   private readonly i18n: I18nService;
   private readonly deprecations: DeprecationsService;
+  private readonly executionContext: ExecutionContextService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
   private resolveSavedObjectsStartPromise?: (value: SavedObjectsServiceStart) => void;
@@ -109,6 +112,7 @@ export class Server {
     this.coreUsageData = new CoreUsageDataService(core);
     this.i18n = new I18nService(core);
     this.deprecations = new DeprecationsService(core);
+    this.executionContext = new ExecutionContextService(core);
 
     this.savedObjectsStartPromise = new Promise((resolve) => {
       this.resolveSavedObjectsStartPromise = resolve;
@@ -133,9 +137,11 @@ export class Server {
     const contextServiceSetup = this.context.setup({
       pluginDependencies: new Map([...pluginTree.asOpaqueIds]),
     });
+    const executionContextSetup = this.executionContext.setup();
 
     const httpSetup = await this.http.setup({
       context: contextServiceSetup,
+      executionContext: executionContextSetup,
     });
 
     // setup i18n prior to any other service, to have translations ready
@@ -145,6 +151,7 @@ export class Server {
 
     const elasticsearchServiceSetup = await this.elasticsearch.setup({
       http: httpSetup,
+      executionContext: executionContextSetup,
     });
 
     const metricsSetup = await this.metrics.setup({ http: httpSetup });
@@ -200,6 +207,7 @@ export class Server {
       context: contextServiceSetup,
       elasticsearch: elasticsearchServiceSetup,
       environment: environmentSetup,
+      executionContext: executionContextSetup,
       http: httpSetup,
       i18n: i18nServiceSetup,
       savedObjects: savedObjectsSetup,
@@ -230,6 +238,7 @@ export class Server {
     this.log.debug('starting server');
     const startTransaction = apm.startTransaction('server_start', 'kibana_platform');
 
+    const executionContextStart = this.executionContext.start();
     const elasticsearchStart = await this.elasticsearch.start();
     const soStartSpan = startTransaction?.startSpan('saved_objects.migration', 'migration');
     const savedObjectsStart = await this.savedObjects.start({
@@ -248,10 +257,12 @@ export class Server {
       savedObjects: savedObjectsStart,
       exposedConfigsToUsage: this.plugins.getExposedPluginConfigsToUsage(),
     });
+    this.status.start();
 
     this.coreStart = {
       capabilities: capabilitiesStart,
       elasticsearch: elasticsearchStart,
+      executionContext: executionContextStart,
       http: httpStart,
       metrics: metricsStart,
       savedObjects: savedObjectsStart,
@@ -261,7 +272,6 @@ export class Server {
 
     await this.plugins.start(this.coreStart);
 
-    this.status.start();
     await this.http.start();
 
     startTransaction?.end();
@@ -297,6 +307,7 @@ export class Server {
 
   public setupCoreConfig() {
     const configDescriptors: Array<ServiceConfigDescriptor<unknown>> = [
+      executionContextConfig,
       pathConfig,
       cspConfig,
       elasticsearchConfig,

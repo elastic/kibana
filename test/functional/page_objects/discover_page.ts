@@ -448,7 +448,10 @@ export class DiscoverPageObject extends FtrService {
 
   public async closeSidebarFieldFilter() {
     await this.testSubjects.click('toggleFieldFilterButton');
-    await this.testSubjects.missingOrFail('filterSelectionPanel');
+
+    await this.retry.waitFor('sidebar filter closed', async () => {
+      return !(await this.testSubjects.exists('filterSelectionPanel'));
+    });
   }
 
   public async waitForChartLoadingComplete(renderCount: number) {

@@ -30,6 +30,7 @@ import {
 } from '../types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 import { asSavedObjectExecutionSource } from './action_execution_source';
+import { validatedRelatedSavedObjects } from './related_saved_objects';
 
 export interface TaskRunnerContext {
   logger: Logger;
@@ -71,13 +72,17 @@ export class TaskRunnerFactory {
       getUnsecuredSavedObjectsClient,
     } = this.taskRunnerContext!;
 
+    const taskInfo = {
+      scheduled: taskInstance.runAt,
+    };
+
     return {
       async run() {
         const { spaceId, actionTaskParamsId } = taskInstance.params as Record<string, string>;
         const namespace = spaceIdToNamespace(spaceId);
 
         const {
-          attributes: { actionId, params, apiKey },
+          attributes: { actionId, params, apiKey, relatedSavedObjects },
           references,
         } = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<ActionTaskParams>(
           ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
@@ -117,6 +122,8 @@ export class TaskRunnerFactory {
             actionId,
             request: fakeRequest,
             ...getSourceFromReferences(references),
+            taskInfo,
+            relatedSavedObjects: validatedRelatedSavedObjects(logger, relatedSavedObjects),
           });
         } catch (e) {
           if (e instanceof ActionTypeDisabledError) {

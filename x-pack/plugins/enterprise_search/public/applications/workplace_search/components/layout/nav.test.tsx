@@ -6,8 +6,7 @@
  */
 
 jest.mock('../../../shared/layout', () => ({
-  ...jest.requireActual('../../../shared/layout'),
-  generateNavLink: jest.fn(({ to }) => ({ href: to })),
+  generateNavLink: jest.fn(({ to, items }) => ({ href: to, items })),
 }));
 jest.mock('../../views/content_sources/components/source_sub_nav', () => ({
   useSourceSubNav: () => [],
@@ -19,13 +18,7 @@ jest.mock('../../views/settings/components/settings_sub_nav', () => ({
   useSettingsSubNav: () => [],
 }));
 
-import React from 'react';
-
-import { shallow } from 'enzyme';
-
-import { SideNav, SideNavLink } from '../../../shared/layout';
-
-import { useWorkplaceSearchNav, WorkplaceSearchNav } from './';
+import { useWorkplaceSearchNav } from './';
 
 describe('useWorkplaceSearchNav', () => {
   it('returns an array of top-level Workplace Search nav items', () => {
@@ -53,8 +46,8 @@ describe('useWorkplaceSearchNav', () => {
           },
           {
             id: 'usersRoles',
-            name: 'Users & roles',
-            href: '/role_mappings',
+            name: 'Users and roles',
+            href: '/users_and_roles',
           },
           {
             id: 'security',
@@ -70,17 +63,5 @@ describe('useWorkplaceSearchNav', () => {
         ],
       },
     ]);
-  });
-});
-
-// TODO: Delete below once fully migrated to KibanaPageTemplate
-
-describe('WorkplaceSearchNav', () => {
-  it('renders', () => {
-    const wrapper = shallow(<WorkplaceSearchNav />);
-
-    expect(wrapper.find(SideNav)).toHaveLength(1);
-    expect(wrapper.find(SideNavLink).first().prop('to')).toEqual('/');
-    expect(wrapper.find(SideNavLink)).toHaveLength(6);
   });
 });

@@ -10,27 +10,21 @@ import { Route, Switch } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
-import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { ENGINE_REINDEX_JOB_PATH } from '../../routes';
-import { EngineLogic, getEngineBreadcrumbs } from '../engine';
+import { EngineLogic } from '../engine';
 
-import { SCHEMA_TITLE } from './constants';
 import { ReindexJob } from './reindex_job';
 import { Schema, MetaEngineSchema } from './views';
 
 export const SchemaRouter: React.FC = () => {
   const { isMetaEngine } = useValues(EngineLogic);
-  const schemaBreadcrumb = getEngineBreadcrumbs([SCHEMA_TITLE]);
 
   return (
     <Switch>
       <Route path={ENGINE_REINDEX_JOB_PATH}>
-        <ReindexJob schemaBreadcrumb={schemaBreadcrumb} />
+        <ReindexJob />
       </Route>
-      <Route>
-        <SetPageChrome trail={schemaBreadcrumb} />
-        {isMetaEngine ? <MetaEngineSchema /> : <Schema />}
-      </Route>
+      <Route>{isMetaEngine ? <MetaEngineSchema /> : <Schema />}</Route>
     </Switch>
   );
 };

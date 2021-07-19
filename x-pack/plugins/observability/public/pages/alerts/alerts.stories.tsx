@@ -7,7 +7,7 @@
 
 import { StoryContext } from '@storybook/react';
 import React, { ComponentType } from 'react';
-import { IntlProvider } from 'react-intl';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
 import { MemoryRouter } from 'react-router-dom';
 import { AlertsPage } from '.';
 import { HttpSetup } from '../../../../../../src/core/public';

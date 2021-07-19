@@ -28,6 +28,7 @@ export function createRuleDataClientMock() {
     getWriter: jest.fn(() => ({
       bulk,
     })),
+    isWriteEnabled: jest.fn(() => true),
   } as unknown) as Assign<
     RuleDataClient & Omit<MockInstances<RuleDataClient>, 'options' | 'getClusterClient'>,
     {

@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { useQuery } from 'react-query';
 
 import { GetAgentsResponse, agentRouteService } from '../../../fleet/common';
+import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useKibana } from '../common/lib/kibana';
 
 interface UseAllAgents {
@@ -28,36 +29,30 @@ export const useAllAgents = (
   opts: RequestOptions = { perPage: 9000 }
 ) => {
   const { perPage } = opts;
-  const {
-    http,
-    notifications: { toasts },
-  } = useKibana().services;
+  const { http } = useKibana().services;
+  const setErrorToast = useErrorToast();
   const { isLoading: agentsLoading, data: agentData } = useQuery<GetAgentsResponse>(
     ['agents', osqueryPolicies, searchValue, perPage],
     () => {
-      const kueryFragments: string[] = [];
-      if (osqueryPolicies.length) {
-        kueryFragments.push(`${osqueryPolicies.map((p) => `policy_id:${p}`).join(' or ')}`);
-      }
+      const policyFragment = osqueryPolicies.map((p) => `policy_id:${p}`).join(' or ');
+      let kuery = `last_checkin_status: online and (${policyFragment})`;
 
       if (searchValue) {
-        kueryFragments.push(
-          `local_metadata.host.hostname:*${searchValue}* or local_metadata.elastic.agent.id:*${searchValue}*`
-        );
+        kuery += ` and (local_metadata.host.hostname:*${searchValue}* or local_metadata.elastic.agent.id:*${searchValue}*)`;
       }
 
       return http.get(agentRouteService.getListPath(), {
         query: {
-          kuery: kueryFragments.map((frag) => `(${frag})`).join(' and '),
+          kuery,
           perPage,
-          showInactive: true,
         },
       });
     },
     {
-      enabled: !osqueryPoliciesLoading,
+      enabled: !osqueryPoliciesLoading && osqueryPolicies.length > 0,
+      onSuccess: () => setErrorToast(),
       onError: (error) =>
-        toasts.addError(error as Error, {
+        setErrorToast(error as Error, {
           title: i18n.translate('xpack.osquery.agents.fetchError', {
             defaultMessage: 'Error while fetching agents',
           }),

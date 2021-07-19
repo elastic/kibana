@@ -703,106 +703,85 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                     <div
                       className="euiForm"
                     >
-                      <EuiFlexGroup
-                        justifyContent="center"
+                      <EuiFilePicker
+                        compressed={false}
+                        display="large"
+                        fullWidth={true}
+                        id="licenseFile"
+                        initialPromptText={
+                          <FormattedMessage
+                            defaultMessage="Select or drag your license file"
+                            id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
+                            values={Object {}}
+                          />
+                        }
+                        onChange={[Function]}
                       >
-                        <div
-                          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                        <EuiI18n
+                          defaults={
+                            Array [
+                              "Clear selected files",
+                              "files selected",
+                            ]
+                          }
+                          tokens={
+                            Array [
+                              "euiFilePicker.clearSelectedFiles",
+                              "euiFilePicker.filesSelected",
+                            ]
+                          }
                         >
-                          <EuiFlexItem
-                            grow={false}
+                          <div
+                            className="euiFilePicker euiFilePicker--large euiFilePicker--fullWidth"
                           >
                             <div
-                              className="euiFlexItem euiFlexItem--flexGrowZero"
+                              className="euiFilePicker__wrap"
                             >
-                              <EuiText>
-                                <div
-                                  className="euiText euiText--medium"
+                              <EuiValidatableControl>
+                                <input
+                                  aria-describedby="licenseFile-filePicker__prompt"
+                                  className="euiFilePicker__input"
+                                  id="licenseFile"
+                                  onChange={[Function]}
+                                  onDragLeave={[Function]}
+                                  onDragOver={[Function]}
+                                  onDrop={[Function]}
+                                  type="file"
+                                />
+                              </EuiValidatableControl>
+                              <div
+                                className="euiFilePicker__prompt"
+                                id="licenseFile-filePicker__prompt"
+                              >
+                                <EuiIcon
+                                  aria-hidden="true"
+                                  className="euiFilePicker__icon"
+                                  size="l"
+                                  type="importAction"
                                 >
-                                  <EuiFilePicker
-                                    compressed={false}
-                                    display="large"
-                                    id="licenseFile"
-                                    initialPromptText={
-                                      <FormattedMessage
-                                        defaultMessage="Select or drag your license file"
-                                        id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
-                                        values={Object {}}
-                                      />
-                                    }
-                                    onChange={[Function]}
+                                  <span
+                                    aria-hidden="true"
+                                    className="euiFilePicker__icon"
+                                    data-euiicon-type="importAction"
+                                    size="l"
+                                  />
+                                </EuiIcon>
+                                <div
+                                  className="euiFilePicker__promptText"
+                                >
+                                  <FormattedMessage
+                                    defaultMessage="Select or drag your license file"
+                                    id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
+                                    values={Object {}}
                                   >
-                                    <EuiI18n
-                                      defaults={
-                                        Array [
-                                          "Clear selected files",
-                                          "files selected",
-                                        ]
-                                      }
-                                      tokens={
-                                        Array [
-                                          "euiFilePicker.clearSelectedFiles",
-                                          "euiFilePicker.filesSelected",
-                                        ]
-                                      }
-                                    >
-                                      <div
-                                        className="euiFilePicker euiFilePicker--large"
-                                      >
-                                        <div
-                                          className="euiFilePicker__wrap"
-                                        >
-                                          <EuiValidatableControl>
-                                            <input
-                                              aria-describedby="licenseFile-filePicker__prompt"
-                                              className="euiFilePicker__input"
-                                              id="licenseFile"
-                                              onChange={[Function]}
-                                              onDragLeave={[Function]}
-                                              onDragOver={[Function]}
-                                              onDrop={[Function]}
-                                              type="file"
-                                            />
-                                          </EuiValidatableControl>
-                                          <div
-                                            className="euiFilePicker__prompt"
-                                            id="licenseFile-filePicker__prompt"
-                                          >
-                                            <EuiIcon
-                                              aria-hidden="true"
-                                              className="euiFilePicker__icon"
-                                              size="l"
-                                              type="importAction"
-                                            >
-                                              <span
-                                                aria-hidden="true"
-                                                className="euiFilePicker__icon"
-                                                data-euiicon-type="importAction"
-                                                size="l"
-                                              />
-                                            </EuiIcon>
-                                            <div
-                                              className="euiFilePicker__promptText"
-                                            >
-                                              <FormattedMessage
-                                                defaultMessage="Select or drag your license file"
-                                                id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
-                                                values={Object {}}
-                                              >
-                                                Select or drag your license file
-                                              </FormattedMessage>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </EuiI18n>
-                                  </EuiFilePicker>
+                                    Select or drag your license file
+                                  </FormattedMessage>
                                 </div>
-                              </EuiText>
+                              </div>
                             </div>
-                          </EuiFlexItem>
-                        </div>
-                      </EuiFlexGroup>
+                          </div>
+                        </EuiI18n>
+                      </EuiFilePicker>
                       <EuiSpacer
                         size="m"
                       >
@@ -1417,124 +1396,113 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                               </span>
                             </div>
                             <EuiText
+                              color="default"
                               size="s"
                             >
                               <div
                                 className="euiText euiText--small"
                               >
-                                <ul>
-                                  <li
-                                    className="euiForm__error"
-                                    key="0"
+                                <EuiTextColor
+                                  color="default"
+                                  component="div"
+                                >
+                                  <div
+                                    className="euiTextColor euiTextColor--default"
                                   >
-                                    The supplied license has expired.
-                                  </li>
-                                </ul>
+                                    <ul>
+                                      <li
+                                        className="euiForm__error"
+                                        key="0"
+                                      >
+                                        The supplied license has expired.
+                                      </li>
+                                    </ul>
+                                  </div>
+                                </EuiTextColor>
                               </div>
                             </EuiText>
                           </div>
                         </EuiCallOut>
                       </EuiI18n>
-                      <EuiFlexGroup
-                        justifyContent="center"
+                      <EuiFilePicker
+                        compressed={false}
+                        display="large"
+                        fullWidth={true}
+                        id="licenseFile"
+                        initialPromptText={
+                          <FormattedMessage
+                            defaultMessage="Select or drag your license file"
+                            id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
+                            values={Object {}}
+                          />
+                        }
+                        onChange={[Function]}
                       >
-                        <div
-                          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                        <EuiI18n
+                          defaults={
+                            Array [
+                              "Clear selected files",
+                              "files selected",
+                            ]
+                          }
+                          tokens={
+                            Array [
+                              "euiFilePicker.clearSelectedFiles",
+                              "euiFilePicker.filesSelected",
+                            ]
+                          }
                         >
-                          <EuiFlexItem
-                            grow={false}
+                          <div
+                            className="euiFilePicker euiFilePicker--large euiFilePicker--fullWidth"
                           >
                             <div
-                              className="euiFlexItem euiFlexItem--flexGrowZero"
+                              className="euiFilePicker__wrap"
                             >
-                              <EuiText>
-                                <div
-                                  className="euiText euiText--medium"
+                              <EuiValidatableControl>
+                                <input
+                                  aria-describedby="licenseFile-filePicker__prompt"
+                                  className="euiFilePicker__input"
+                                  id="licenseFile"
+                                  onChange={[Function]}
+                                  onDragLeave={[Function]}
+                                  onDragOver={[Function]}
+                                  onDrop={[Function]}
+                                  type="file"
+                                />
+                              </EuiValidatableControl>
+                              <div
+                                className="euiFilePicker__prompt"
+                                id="licenseFile-filePicker__prompt"
+                              >
+                                <EuiIcon
+                                  aria-hidden="true"
+                                  className="euiFilePicker__icon"
+                                  size="l"
+                                  type="importAction"
                                 >
-                                  <EuiFilePicker
-                                    compressed={false}
-                                    display="large"
-                                    id="licenseFile"
-                                    initialPromptText={
-                                      <FormattedMessage
-                                        defaultMessage="Select or drag your license file"
-                                        id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
-                                        values={Object {}}
-                                      />
-                                    }
-                                    onChange={[Function]}
+                                  <span
+                                    aria-hidden="true"
+                                    className="euiFilePicker__icon"
+                                    data-euiicon-type="importAction"
+                                    size="l"
+                                  />
+                                </EuiIcon>
+                                <div
+                                  className="euiFilePicker__promptText"
+                                >
+                                  <FormattedMessage
+                                    defaultMessage="Select or drag your license file"
+                                    id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
+                                    values={Object {}}
                                   >
-                                    <EuiI18n
-                                      defaults={
-                                        Array [
-                                          "Clear selected files",
-                                          "files selected",
-                                        ]
-                                      }
-                                      tokens={
-                                        Array [
-                                          "euiFilePicker.clearSelectedFiles",
-                                          "euiFilePicker.filesSelected",
-                                        ]
-                                      }
-                                    >
-                                      <div
-                                        className="euiFilePicker euiFilePicker--large"
-                                      >
-                                        <div
-                                          className="euiFilePicker__wrap"
-                                        >
-                                          <EuiValidatableControl>
-                                            <input
-                                              aria-describedby="licenseFile-filePicker__prompt"
-                                              className="euiFilePicker__input"
-                                              id="licenseFile"
-                                              onChange={[Function]}
-                                              onDragLeave={[Function]}
-                                              onDragOver={[Function]}
-                                              onDrop={[Function]}
-                                              type="file"
-                                            />
-                                          </EuiValidatableControl>
-                                          <div
-                                            className="euiFilePicker__prompt"
-                                            id="licenseFile-filePicker__prompt"
-                                          >
-                                            <EuiIcon
-                                              aria-hidden="true"
-                                              className="euiFilePicker__icon"
-                                              size="l"
-                                              type="importAction"
-                                            >
-                                              <span
-                                                aria-hidden="true"
-                                                className="euiFilePicker__icon"
-                                                data-euiicon-type="importAction"
-                                                size="l"
-                                              />
-                                            </EuiIcon>
-                                            <div
-                                              className="euiFilePicker__promptText"
-                                            >
-                                              <FormattedMessage
-                                                defaultMessage="Select or drag your license file"
-                                                id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
-                                                values={Object {}}
-                                              >
-                                                Select or drag your license file
-                                              </FormattedMessage>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </EuiI18n>
-                                  </EuiFilePicker>
+                                    Select or drag your license file
+                                  </FormattedMessage>
                                 </div>
-                              </EuiText>
+                              </div>
                             </div>
-                          </EuiFlexItem>
-                        </div>
-                      </EuiFlexGroup>
+                          </div>
+                        </EuiI18n>
+                      </EuiFilePicker>
                       <EuiSpacer
                         size="m"
                       >
@@ -2149,124 +2117,113 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                               </span>
                             </div>
                             <EuiText
+                              color="default"
                               size="s"
                             >
                               <div
                                 className="euiText euiText--small"
                               >
-                                <ul>
-                                  <li
-                                    className="euiForm__error"
-                                    key="0"
+                                <EuiTextColor
+                                  color="default"
+                                  component="div"
+                                >
+                                  <div
+                                    className="euiTextColor euiTextColor--default"
                                   >
-                                    The supplied license is not valid for this product.
-                                  </li>
-                                </ul>
+                                    <ul>
+                                      <li
+                                        className="euiForm__error"
+                                        key="0"
+                                      >
+                                        The supplied license is not valid for this product.
+                                      </li>
+                                    </ul>
+                                  </div>
+                                </EuiTextColor>
                               </div>
                             </EuiText>
                           </div>
                         </EuiCallOut>
                       </EuiI18n>
-                      <EuiFlexGroup
-                        justifyContent="center"
+                      <EuiFilePicker
+                        compressed={false}
+                        display="large"
+                        fullWidth={true}
+                        id="licenseFile"
+                        initialPromptText={
+                          <FormattedMessage
+                            defaultMessage="Select or drag your license file"
+                            id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
+                            values={Object {}}
+                          />
+                        }
+                        onChange={[Function]}
                       >
-                        <div
-                          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                        <EuiI18n
+                          defaults={
+                            Array [
+                              "Clear selected files",
+                              "files selected",
+                            ]
+                          }
+                          tokens={
+                            Array [
+                              "euiFilePicker.clearSelectedFiles",
+                              "euiFilePicker.filesSelected",
+                            ]
+                          }
                         >
-                          <EuiFlexItem
-                            grow={false}
+                          <div
+                            className="euiFilePicker euiFilePicker--large euiFilePicker--fullWidth"
                           >
                             <div
-                              className="euiFlexItem euiFlexItem--flexGrowZero"
+                              className="euiFilePicker__wrap"
                             >
-                              <EuiText>
-                                <div
-                                  className="euiText euiText--medium"
+                              <EuiValidatableControl>
+                                <input
+                                  aria-describedby="licenseFile-filePicker__prompt"
+                                  className="euiFilePicker__input"
+                                  id="licenseFile"
+                                  onChange={[Function]}
+                                  onDragLeave={[Function]}
+                                  onDragOver={[Function]}
+                                  onDrop={[Function]}
+                                  type="file"
+                                />
+                              </EuiValidatableControl>
+                              <div
+                                className="euiFilePicker__prompt"
+                                id="licenseFile-filePicker__prompt"
+                              >
+                                <EuiIcon
+                                  aria-hidden="true"
+                                  className="euiFilePicker__icon"
+                                  size="l"
+                                  type="importAction"
                                 >
-                                  <EuiFilePicker
-                                    compressed={false}
-                                    display="large"
-                                    id="licenseFile"
-                                    initialPromptText={
-                                      <FormattedMessage
-                                        defaultMessage="Select or drag your license file"
-                                        id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
-                                        values={Object {}}
-                                      />
-                                    }
-                                    onChange={[Function]}
+                                  <span
+                                    aria-hidden="true"
+                                    className="euiFilePicker__icon"
+                                    data-euiicon-type="importAction"
+                                    size="l"
+                                  />
+                                </EuiIcon>
+                                <div
+                                  className="euiFilePicker__promptText"
+                                >
+                                  <FormattedMessage
+                                    defaultMessage="Select or drag your license file"
+                                    id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
+                                    values={Object {}}
                                   >
-                                    <EuiI18n
-                                      defaults={
-                                        Array [
-                                          "Clear selected files",
-                                          "files selected",
-                                        ]
-                                      }
-                                      tokens={
-                                        Array [
-                                          "euiFilePicker.clearSelectedFiles",
-                                          "euiFilePicker.filesSelected",
-                                        ]
-                                      }
-                                    >
-                                      <div
-                                        className="euiFilePicker euiFilePicker--large"
-                                      >
-                                        <div
-                                          className="euiFilePicker__wrap"
-                                        >
-                                          <EuiValidatableControl>
-                                            <input
-                                              aria-describedby="licenseFile-filePicker__prompt"
-                                              className="euiFilePicker__input"
-                                              id="licenseFile"
-                                              onChange={[Function]}
-                                              onDragLeave={[Function]}
-                                              onDragOver={[Function]}
-                                              onDrop={[Function]}
-                                              type="file"
-                                            />
-                                          </EuiValidatableControl>
-                                          <div
-                                            className="euiFilePicker__prompt"
-                                            id="licenseFile-filePicker__prompt"
-                                          >
-                                            <EuiIcon
-                                              aria-hidden="true"
-                                              className="euiFilePicker__icon"
-                                              size="l"
-                                              type="importAction"
-                                            >
-                                              <span
-                                                aria-hidden="true"
-                                                className="euiFilePicker__icon"
-                                                data-euiicon-type="importAction"
-                                                size="l"
-                                              />
-                                            </EuiIcon>
-                                            <div
-                                              className="euiFilePicker__promptText"
-                                            >
-                                              <FormattedMessage
-                                                defaultMessage="Select or drag your license file"
-                                                id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
-                                                values={Object {}}
-                                              >
-                                                Select or drag your license file
-                                              </FormattedMessage>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </EuiI18n>
-                                  </EuiFilePicker>
+                                    Select or drag your license file
+                                  </FormattedMessage>
                                 </div>
-                              </EuiText>
+                              </div>
                             </div>
-                          </EuiFlexItem>
-                        </div>
-                      </EuiFlexGroup>
+                          </div>
+                        </EuiI18n>
+                      </EuiFilePicker>
                       <EuiSpacer
                         size="m"
                       >
@@ -2881,124 +2838,113 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                               </span>
                             </div>
                             <EuiText
+                              color="default"
                               size="s"
                             >
                               <div
                                 className="euiText euiText--small"
                               >
-                                <ul>
-                                  <li
-                                    className="euiForm__error"
-                                    key="0"
+                                <EuiTextColor
+                                  color="default"
+                                  component="div"
+                                >
+                                  <div
+                                    className="euiTextColor euiTextColor--default"
                                   >
-                                    Error encountered uploading license: Check your license file.
-                                  </li>
-                                </ul>
+                                    <ul>
+                                      <li
+                                        className="euiForm__error"
+                                        key="0"
+                                      >
+                                        Error encountered uploading license: Check your license file.
+                                      </li>
+                                    </ul>
+                                  </div>
+                                </EuiTextColor>
                               </div>
                             </EuiText>
                           </div>
                         </EuiCallOut>
                       </EuiI18n>
-                      <EuiFlexGroup
-                        justifyContent="center"
+                      <EuiFilePicker
+                        compressed={false}
+                        display="large"
+                        fullWidth={true}
+                        id="licenseFile"
+                        initialPromptText={
+                          <FormattedMessage
+                            defaultMessage="Select or drag your license file"
+                            id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
+                            values={Object {}}
+                          />
+                        }
+                        onChange={[Function]}
                       >
-                        <div
-                          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                        <EuiI18n
+                          defaults={
+                            Array [
+                              "Clear selected files",
+                              "files selected",
+                            ]
+                          }
+                          tokens={
+                            Array [
+                              "euiFilePicker.clearSelectedFiles",
+                              "euiFilePicker.filesSelected",
+                            ]
+                          }
                         >
-                          <EuiFlexItem
-                            grow={false}
+                          <div
+                            className="euiFilePicker euiFilePicker--large euiFilePicker--fullWidth"
                           >
                             <div
-                              className="euiFlexItem euiFlexItem--flexGrowZero"
+                              className="euiFilePicker__wrap"
                             >
-                              <EuiText>
-                                <div
-                                  className="euiText euiText--medium"
+                              <EuiValidatableControl>
+                                <input
+                                  aria-describedby="licenseFile-filePicker__prompt"
+                                  className="euiFilePicker__input"
+                                  id="licenseFile"
+                                  onChange={[Function]}
+                                  onDragLeave={[Function]}
+                                  onDragOver={[Function]}
+                                  onDrop={[Function]}
+                                  type="file"
+                                />
+                              </EuiValidatableControl>
+                              <div
+                                className="euiFilePicker__prompt"
+                                id="licenseFile-filePicker__prompt"
+                              >
+                                <EuiIcon
+                                  aria-hidden="true"
+                                  className="euiFilePicker__icon"
+                                  size="l"
+                                  type="importAction"
                                 >
-                                  <EuiFilePicker
-                                    compressed={false}
-                                    display="large"
-                                    id="licenseFile"
-                                    initialPromptText={
-                                      <FormattedMessage
-                                        defaultMessage="Select or drag your license file"
-                                        id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
-                                        values={Object {}}
-                                      />
-                                    }
-                                    onChange={[Function]}
+                                  <span
+                                    aria-hidden="true"
+                                    className="euiFilePicker__icon"
+                                    data-euiicon-type="importAction"
+                                    size="l"
+                                  />
+                                </EuiIcon>
+                                <div
+                                  className="euiFilePicker__promptText"
+                                >
+                                  <FormattedMessage
+                                    defaultMessage="Select or drag your license file"
+                                    id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
+                                    values={Object {}}
                                   >
-                                    <EuiI18n
-                                      defaults={
-                                        Array [
-                                          "Clear selected files",
-                                          "files selected",
-                                        ]
-                                      }
-                                      tokens={
-                                        Array [
-                                          "euiFilePicker.clearSelectedFiles",
-                                          "euiFilePicker.filesSelected",
-                                        ]
-                                      }
-                                    >
-                                      <div
-                                        className="euiFilePicker euiFilePicker--large"
-                                      >
-                                        <div
-                                          className="euiFilePicker__wrap"
-                                        >
-                                          <EuiValidatableControl>
-                                            <input
-                                              aria-describedby="licenseFile-filePicker__prompt"
-                                              className="euiFilePicker__input"
-                                              id="licenseFile"
-                                              onChange={[Function]}
-                                              onDragLeave={[Function]}
-                                              onDragOver={[Function]}
-                                              onDrop={[Function]}
-                                              type="file"
-                                            />
-                                          </EuiValidatableControl>
-                                          <div
-                                            className="euiFilePicker__prompt"
-                                            id="licenseFile-filePicker__prompt"
-                                          >
-                                            <EuiIcon
-                                              aria-hidden="true"
-                                              className="euiFilePicker__icon"
-                                              size="l"
-                                              type="importAction"
-                                            >
-                                              <span
-                                                aria-hidden="true"
-                                                className="euiFilePicker__icon"
-                                                data-euiicon-type="importAction"
-                                                size="l"
-                                              />
-                                            </EuiIcon>
-                                            <div
-                                              className="euiFilePicker__promptText"
-                                            >
-                                              <FormattedMessage
-                                                defaultMessage="Select or drag your license file"
-                                                id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
-                                                values={Object {}}
-                                              >
-                                                Select or drag your license file
-                                              </FormattedMessage>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </EuiI18n>
-                                  </EuiFilePicker>
+                                    Select or drag your license file
+                                  </FormattedMessage>
                                 </div>
-                              </EuiText>
+                              </div>
                             </div>
-                          </EuiFlexItem>
-                        </div>
-                      </EuiFlexGroup>
+                          </div>
+                        </EuiI18n>
+                      </EuiFilePicker>
                       <EuiSpacer
                         size="m"
                       >
@@ -3613,124 +3559,113 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                               </span>
                             </div>
                             <EuiText
+                              color="default"
                               size="s"
                             >
                               <div
                                 className="euiText euiText--small"
                               >
-                                <ul>
-                                  <li
-                                    className="euiForm__error"
-                                    key="0"
+                                <EuiTextColor
+                                  color="default"
+                                  component="div"
+                                >
+                                  <div
+                                    className="euiTextColor euiTextColor--default"
                                   >
-                                    Error encountered uploading license: Can not upgrade to a production license unless TLS is configured or security is disabled
-                                  </li>
-                                </ul>
+                                    <ul>
+                                      <li
+                                        className="euiForm__error"
+                                        key="0"
+                                      >
+                                        Error encountered uploading license: Can not upgrade to a production license unless TLS is configured or security is disabled
+                                      </li>
+                                    </ul>
+                                  </div>
+                                </EuiTextColor>
                               </div>
                             </EuiText>
                           </div>
                         </EuiCallOut>
                       </EuiI18n>
-                      <EuiFlexGroup
-                        justifyContent="center"
+                      <EuiFilePicker
+                        compressed={false}
+                        display="large"
+                        fullWidth={true}
+                        id="licenseFile"
+                        initialPromptText={
+                          <FormattedMessage
+                            defaultMessage="Select or drag your license file"
+                            id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
+                            values={Object {}}
+                          />
+                        }
+                        onChange={[Function]}
                       >
-                        <div
-                          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                        <EuiI18n
+                          defaults={
+                            Array [
+                              "Clear selected files",
+                              "files selected",
+                            ]
+                          }
+                          tokens={
+                            Array [
+                              "euiFilePicker.clearSelectedFiles",
+                              "euiFilePicker.filesSelected",
+                            ]
+                          }
                         >
-                          <EuiFlexItem
-                            grow={false}
+                          <div
+                            className="euiFilePicker euiFilePicker--large euiFilePicker--fullWidth"
                           >
                             <div
-                              className="euiFlexItem euiFlexItem--flexGrowZero"
+                              className="euiFilePicker__wrap"
                             >
-                              <EuiText>
-                                <div
-                                  className="euiText euiText--medium"
+                              <EuiValidatableControl>
+                                <input
+                                  aria-describedby="licenseFile-filePicker__prompt"
+                                  className="euiFilePicker__input"
+                                  id="licenseFile"
+                                  onChange={[Function]}
+                                  onDragLeave={[Function]}
+                                  onDragOver={[Function]}
+                                  onDrop={[Function]}
+                                  type="file"
+                                />
+                              </EuiValidatableControl>
+                              <div
+                                className="euiFilePicker__prompt"
+                                id="licenseFile-filePicker__prompt"
+                              >
+                                <EuiIcon
+                                  aria-hidden="true"
+                                  className="euiFilePicker__icon"
+                                  size="l"
+                                  type="importAction"
                                 >
-                                  <EuiFilePicker
-                                    compressed={false}
-                                    display="large"
-                                    id="licenseFile"
-                                    initialPromptText={
-                                      <FormattedMessage
-                                        defaultMessage="Select or drag your license file"
-                                        id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
-                                        values={Object {}}
-                                      />
-                                    }
-                                    onChange={[Function]}
+                                  <span
+                                    aria-hidden="true"
+                                    className="euiFilePicker__icon"
+                                    data-euiicon-type="importAction"
+                                    size="l"
+                                  />
+                                </EuiIcon>
+                                <div
+                                  className="euiFilePicker__promptText"
+                                >
+                                  <FormattedMessage
+                                    defaultMessage="Select or drag your license file"
+                                    id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
+                                    values={Object {}}
                                   >
-                                    <EuiI18n
-                                      defaults={
-                                        Array [
-                                          "Clear selected files",
-                                          "files selected",
-                                        ]
-                                      }
-                                      tokens={
-                                        Array [
-                                          "euiFilePicker.clearSelectedFiles",
-                                          "euiFilePicker.filesSelected",
-                                        ]
-                                      }
-                                    >
-                                      <div
-                                        className="euiFilePicker euiFilePicker--large"
-                                      >
-                                        <div
-                                          className="euiFilePicker__wrap"
-                                        >
-                                          <EuiValidatableControl>
-                                            <input
-                                              aria-describedby="licenseFile-filePicker__prompt"
-                                              className="euiFilePicker__input"
-                                              id="licenseFile"
-                                              onChange={[Function]}
-                                              onDragLeave={[Function]}
-                                              onDragOver={[Function]}
-                                              onDrop={[Function]}
-                                              type="file"
-                                            />
-                                          </EuiValidatableControl>
-                                          <div
-                                            className="euiFilePicker__prompt"
-                                            id="licenseFile-filePicker__prompt"
-                                          >
-                                            <EuiIcon
-                                              aria-hidden="true"
-                                              className="euiFilePicker__icon"
-                                              size="l"
-                                              type="importAction"
-                                            >
-                                              <span
-                                                aria-hidden="true"
-                                                className="euiFilePicker__icon"
-                                                data-euiicon-type="importAction"
-                                                size="l"
-                                              />
-                                            </EuiIcon>
-                                            <div
-                                              className="euiFilePicker__promptText"
-                                            >
-                                              <FormattedMessage
-                                                defaultMessage="Select or drag your license file"
-                                                id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
-                                                values={Object {}}
-                                              >
-                                                Select or drag your license file
-                                              </FormattedMessage>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </EuiI18n>
-                                  </EuiFilePicker>
+                                    Select or drag your license file
+                                  </FormattedMessage>
                                 </div>
-                              </EuiText>
+                              </div>
                             </div>
-                          </EuiFlexItem>
-                        </div>
-                      </EuiFlexGroup>
+                          </div>
+                        </EuiI18n>
+                      </EuiFilePicker>
                       <EuiSpacer
                         size="m"
                       >

@@ -469,6 +469,7 @@ export class ActionsClient {
     actionId,
     params,
     source,
+    relatedSavedObjects,
   }: Omit<ExecuteOptions, 'request'>): Promise<ActionTypeExecutorResult<unknown>> {
     if (
       (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
@@ -476,7 +477,13 @@ export class ActionsClient {
     ) {
       await this.authorization.ensureAuthorized('execute');
     }
-    return this.actionExecutor.execute({ actionId, params, source, request: this.request });
+    return this.actionExecutor.execute({
+      actionId,
+      params,
+      source,
+      request: this.request,
+      relatedSavedObjects,
+    });
   }
 
   public async enqueueExecution(options: EnqueueExecutionOptions): Promise<void> {

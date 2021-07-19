@@ -6,14 +6,13 @@
  */
 
 import React, { memo } from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { HostInfo, HostMetadata } from '../../../../../../common/endpoint/types';
-import { HOST_STATUS_TO_BADGE_COLOR } from '../host_constants';
 import { EndpointHostIsolationStatus } from '../../../../../common/components/endpoint/host_isolation';
 import { useEndpointSelector } from '../hooks';
 import { getEndpointHostIsolationStatusPropsCallback } from '../../store/selectors';
+import { AgentStatus } from '../../../../../common/components/endpoint/agent_status';
 
 const EuiFlexGroupStyled = styled(EuiFlexGroup)`
   .isolation-status {
@@ -34,16 +33,7 @@ export const EndpointAgentStatus = memo<EndpointAgentStatusProps>(
     return (
       <EuiFlexGroupStyled gutterSize="none" responsive={false} className="eui-textTruncate">
         <EuiFlexItem grow={false}>
-          <EuiBadge
-            color={hostStatus != null ? HOST_STATUS_TO_BADGE_COLOR[hostStatus] : 'warning'}
-            data-test-subj="rowHostStatus"
-          >
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.list.hostStatusValue"
-              defaultMessage="{hostStatus, select, healthy {Healthy} unhealthy {Unhealthy} updating {Updating} offline {Offline} inactive {Inactive} other {Unhealthy}}"
-              values={{ hostStatus }}
-            />
-          </EuiBadge>
+          <AgentStatus hostStatus={hostStatus} />
         </EuiFlexItem>
         <EuiFlexItem grow={false} className="eui-textTruncate isolation-status">
           <EndpointHostIsolationStatus

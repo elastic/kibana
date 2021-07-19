@@ -19,6 +19,7 @@ const rewriteBodyRes: RewriteResponseCase<RegistryAlertTypeWithAuth[]> = (result
       actionGroups,
       defaultActionGroupId,
       minimumLicenseRequired,
+      isExportable,
       actionVariables,
       authorizedConsumers,
       ...rest
@@ -29,6 +30,7 @@ const rewriteBodyRes: RewriteResponseCase<RegistryAlertTypeWithAuth[]> = (result
       action_groups: actionGroups,
       default_action_group_id: defaultActionGroupId,
       minimum_license_required: minimumLicenseRequired,
+      is_exportable: isExportable,
       action_variables: actionVariables,
       authorized_consumers: authorizedConsumers,
     })

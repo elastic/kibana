@@ -37,8 +37,9 @@ import {
 } from '../../../../common/constants';
 import { StartServices } from '../../../types';
 import { createSecuritySolutionStorageMock } from '../../mock/mock_local_storage';
-import { MlUrlGenerator } from '../../../../../ml/public';
+import { MlLocatorDefinition } from '../../../../../ml/public';
 import { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
+import { MockUrlService } from 'src/plugins/share/common/mocks';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
@@ -93,6 +94,8 @@ export const createStartServicesMock = (): StartServices => {
   const { storage } = createSecuritySolutionStorageMock();
   const data = dataPluginMock.createStartContract();
   const security = securityMock.createSetup();
+  const urlService = new MockUrlService();
+  const locator = urlService.locators.create(new MlLocatorDefinition());
 
   return ({
     ...core,
@@ -139,10 +142,7 @@ export const createStartServicesMock = (): StartServices => {
     security,
     storage,
     ml: {
-      urlGenerator: new MlUrlGenerator({
-        appBasePath: '/app/ml',
-        useHash: false,
-      }),
+      locator,
     },
   } as unknown) as StartServices;
 };

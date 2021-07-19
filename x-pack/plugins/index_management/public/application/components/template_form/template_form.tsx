@@ -8,7 +8,7 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiSpacer, EuiButton } from '@elastic/eui';
+import { EuiSpacer, EuiButton, EuiPageHeader } from '@elastic/eui';
 import { ScopedHistory } from 'kibana/public';
 
 import { TemplateDeserialized } from '../../../../common';
@@ -292,7 +292,7 @@ export const TemplateForm = ({
   return (
     <>
       {/* Form header */}
-      {title}
+      <EuiPageHeader pageTitle={<span data-test-subj="pageTitle">{title}</span>} bottomBorder />
 
       <EuiSpacer size="m" />
 

@@ -8,11 +8,13 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { matchPath } from 'react-router-dom';
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useIndexFields } from '../source';
 import { useUserInfo } from '../../../detections/components/user_info';
 import { timelineSelectors } from '../../../timelines/store/timeline';
+import { ALERTS_PATH, RULES_PATH } from '../../../../common/constants';
 import { TimelineId } from '../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 
@@ -124,4 +126,15 @@ export const useSourcererScope = (scope: SourcererScopeName = SourcererScopeName
   const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
   const SourcererScope = useDeepEqualSelector((state) => sourcererScopeSelector(state, scope));
   return SourcererScope;
+};
+
+export const getScopeFromPath = (
+  pathname: string
+): SourcererScopeName.default | SourcererScopeName.detections => {
+  return matchPath(pathname, {
+    path: [ALERTS_PATH, `${RULES_PATH}/id/:id`],
+    strict: false,
+  }) == null
+    ? SourcererScopeName.default
+    : SourcererScopeName.detections;
 };

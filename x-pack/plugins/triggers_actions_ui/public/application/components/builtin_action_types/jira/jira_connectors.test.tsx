@@ -12,7 +12,7 @@ import { JiraActionConnector } from './types';
 jest.mock('../../../../common/lib/kibana');
 
 describe('JiraActionConnectorFields renders', () => {
-  test('alerting Jira connector fields is rendered', () => {
+  test('alerting Jira connector fields are rendered', () => {
     const actionConnector = {
       secrets: {
         email: 'email',

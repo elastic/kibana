@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty, EuiHeaderLinks, EuiHeaderSectionItem, EuiToolTip } from '@elastic/eui';
+import { EuiHeaderLinks, EuiToolTip, EuiHeaderLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useHistory } from 'react-router-dom';
@@ -40,63 +40,56 @@ export function ActionMenuContent(): React.ReactElement {
 
   const syntheticExploratoryViewLink = createExploratoryViewUrl(
     {
-      'synthetics-series': {
+      'synthetics-series': ({
         dataType: 'synthetics',
+        isNew: true,
         time: { from: dateRangeStart, to: dateRangeEnd },
-      } as SeriesUrl,
+      } as unknown) as SeriesUrl,
     },
     basePath
   );
 
   return (
     <EuiHeaderLinks gutterSize="xs">
-      <EuiHeaderSectionItem>
-        <EuiButtonEmpty
-          size="xs"
-          aria-label={i18n.translate('xpack.uptime.page_header.settingsLink.label', {
-            defaultMessage: 'Navigate to the Uptime settings page',
+      <EuiHeaderLink
+        aria-label={i18n.translate('xpack.uptime.page_header.settingsLink.label', {
+          defaultMessage: 'Navigate to the Uptime settings page',
+        })}
+        color="text"
+        data-test-subj="settings-page-link"
+        href={history.createHref({
+          pathname: SETTINGS_ROUTE,
+          search: stringifyUrlParams(params, true),
+        })}
+      >
+        <FormattedMessage id="xpack.uptime.page_header.settingsLink" defaultMessage="Settings" />
+      </EuiHeaderLink>
+
+      <ToggleAlertFlyoutButton />
+
+      <EuiToolTip position="top" content={<p>{ANALYZE_MESSAGE}</p>}>
+        <EuiHeaderLink
+          aria-label={i18n.translate('xpack.uptime.page_header.analyzeData.label', {
+            defaultMessage: 'Navigate to the "Analyze Data" view to visualize Synthetics/User data',
           })}
+          href={syntheticExploratoryViewLink}
           color="text"
-          data-test-subj="settings-page-link"
-          href={history.createHref({
-            pathname: SETTINGS_ROUTE,
-            search: stringifyUrlParams(params, true),
-          })}
+          iconType="visBarVerticalStacked"
         >
-          <FormattedMessage id="xpack.uptime.page_header.settingsLink" defaultMessage="Settings" />
-        </EuiButtonEmpty>
-      </EuiHeaderSectionItem>
-      <EuiHeaderSectionItem>
-        <ToggleAlertFlyoutButton />
-      </EuiHeaderSectionItem>
-      <EuiHeaderSectionItem>
-        <EuiToolTip position="top" content={<p>{ANALYZE_MESSAGE}</p>}>
-          <EuiButtonEmpty
-            size="xs"
-            aria-label={i18n.translate('xpack.uptime.page_header.analyzeData.label', {
-              defaultMessage:
-                'Navigate to the "Analyze Data" view to visualize Synthetics/User data',
-            })}
-            href={syntheticExploratoryViewLink}
-            color="text"
-            iconType="visBarVerticalStacked"
-          >
-            {ANALYZE_DATA}
-          </EuiButtonEmpty>
-        </EuiToolTip>
-      </EuiHeaderSectionItem>
-      <EuiHeaderSectionItem>
-        <EuiButtonEmpty
-          aria-label={i18n.translate('xpack.uptime.page_header.addDataLink.label', {
-            defaultMessage: 'Navigate to a tutorial about adding Uptime data',
-          })}
-          href={kibana.services?.application?.getUrlForApp('/home#/tutorial/uptimeMonitors')}
-          color="primary"
-          iconType="indexOpen"
-        >
-          {ADD_DATA_LABEL}
-        </EuiButtonEmpty>
-      </EuiHeaderSectionItem>
+          {ANALYZE_DATA}
+        </EuiHeaderLink>
+      </EuiToolTip>
+
+      <EuiHeaderLink
+        aria-label={i18n.translate('xpack.uptime.page_header.addDataLink.label', {
+          defaultMessage: 'Navigate to a tutorial about adding Uptime data',
+        })}
+        href={kibana.services?.application?.getUrlForApp('/home#/tutorial/uptimeMonitors')}
+        color="primary"
+        iconType="indexOpen"
+      >
+        {ADD_DATA_LABEL}
+      </EuiHeaderLink>
     </EuiHeaderLinks>
   );
 }

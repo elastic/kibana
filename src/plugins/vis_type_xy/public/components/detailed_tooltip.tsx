@@ -19,7 +19,6 @@ import {
 import { Aspects } from '../types';
 
 import './_detailed_tooltip.scss';
-import { fillEmptyValue } from '../utils/get_series_name_fn';
 import { COMPLEX_SPLIT_ACCESSOR, isRangeAggType } from '../utils/accessors';
 
 interface TooltipData {
@@ -100,8 +99,7 @@ export const getTooltipData = (
   return data;
 };
 
-const renderData = ({ label, value: rawValue }: TooltipData, index: number) => {
-  const value = fillEmptyValue(rawValue);
+const renderData = ({ label, value }: TooltipData, index: number) => {
   return label && value ? (
     <tr key={label + value + index}>
       <td className="detailedTooltip__label">

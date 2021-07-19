@@ -8,7 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { map, reduce, mapValues, get, keys, pickBy } from 'lodash';
 import { Filter, FilterMeta } from './meta_filter';
-import { IIndexPattern, IFieldType } from '../../index_patterns';
+import { IndexPatternBase, IndexPatternFieldBase } from '..';
 
 const OPERANDS_IN_RANGE = 2;
 
@@ -82,18 +82,15 @@ export const getRangeFilterField = (filter: RangeFilter) => {
   return filter.range && Object.keys(filter.range)[0];
 };
 
-const formatValue = (field: IFieldType, params: any[]) =>
-  map(params, (val: any, key: string) => get(operators, key) + format(field, val)).join(' ');
-
-const format = (field: IFieldType, value: any) =>
-  field && field.format && field.format.convert ? field.format.convert(value) : value;
+const formatValue = (params: any[]) =>
+  map(params, (val: any, key: string) => get(operators, key) + val).join(' ');
 
 // Creates a filter where the value for the given field is in the given range
 // params should be an object containing `lt`, `lte`, `gt`, and/or `gte`
 export const buildRangeFilter = (
-  field: IFieldType,
+  field: IndexPatternFieldBase,
   params: RangeFilterParams,
-  indexPattern: IIndexPattern,
+  indexPattern: IndexPatternBase,
   formattedValue?: string
 ): RangeFilter => {
   const filter: any = { meta: { index: indexPattern.id, params: {} } };
@@ -126,7 +123,7 @@ export const buildRangeFilter = (
     filter.meta.field = field.name;
   } else if (field.scripted) {
     filter.script = getRangeScript(field, params);
-    filter.script.script.params.value = formatValue(field, filter.script.script.params);
+    filter.script.script.params.value = formatValue(filter.script.script.params);
 
     filter.meta.field = field.name;
   } else {
@@ -137,7 +134,7 @@ export const buildRangeFilter = (
   return filter as RangeFilter;
 };
 
-export const getRangeScript = (field: IFieldType, params: RangeFilterParams) => {
+export const getRangeScript = (field: IndexPatternFieldBase, params: RangeFilterParams) => {
   const knownParams = mapValues(
     pickBy(params, (val, key: any) => key in operators),
     (value) => (field.type === 'number' && typeof value === 'string' ? parseFloat(value) : value)

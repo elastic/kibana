@@ -7,30 +7,12 @@
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC } from 'react';
-import { i18n } from '@kbn/i18n';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLink,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-
-import { ExperimentalBadge } from '../../../common/components/experimental_badge';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
 import { useDataVisualizerKibana } from '../../../kibana_context';
 
 export const WelcomeContent: FC = () => {
-  const toolTipContent = i18n.translate(
-    'xpack.dataVisualizer.file.welcomeContent.experimentalFeatureTooltip',
-    {
-      defaultMessage: "Experimental feature. We'd love to hear your feedback.",
-    }
-  );
-
   const {
     services: {
       fileUpload: { getMaxBytesFormatted },
@@ -48,10 +30,7 @@ export const WelcomeContent: FC = () => {
           <h1>
             <FormattedMessage
               id="xpack.dataVisualizer.file.welcomeContent.visualizeDataFromLogFileTitle"
-              defaultMessage="Visualize data from a log file&nbsp;{experimentalBadge}"
-              values={{
-                experimentalBadge: <ExperimentalBadge tooltipContent={toolTipContent} />,
-              }}
+              defaultMessage="Visualize data from a log file"
             />
           </h1>
         </EuiTitle>
@@ -129,25 +108,6 @@ export const WelcomeContent: FC = () => {
               id="xpack.dataVisualizer.file.welcomeContent.uploadedFilesAllowedSizeDescription"
               defaultMessage="You can upload files up to {maxFileSize}."
               values={{ maxFileSize }}
-            />
-          </p>
-        </EuiText>
-        <EuiSpacer size="s" />
-        <EuiText>
-          <p>
-            <FormattedMessage
-              id="xpack.dataVisualizer.file.welcomeContent.experimentalFeatureDescription"
-              defaultMessage="This feature is experimental. Got feedback? Please create an issue in&nbsp;{githubLink}."
-              values={{
-                githubLink: (
-                  <EuiLink
-                    href="https://github.com/elastic/kibana/issues/new/choose"
-                    target="_blank"
-                  >
-                    GitHub
-                  </EuiLink>
-                ),
-              }}
             />
           </p>
         </EuiText>

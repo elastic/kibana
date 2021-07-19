@@ -6,9 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
+import type {
+  FormattedIndexPatternColumn,
+  ReferenceBasedIndexPatternColumn,
+} from '../column_types';
 import { optionallHistogramBasedOperationToExpression } from './utils';
-import { OperationDefinition } from '..';
+import type { OperationDefinition } from '..';
 import { getFormatFromPreviousColumn } from '../helpers';
 
 type OverallMetricIndexPatternColumn<T extends string> = FormattedIndexPatternColumn &
@@ -75,7 +78,7 @@ function buildOverallMetricOperation<T extends OverallMetricIndexPatternColumn<s
             : undefined
         ),
         dataType: 'number',
-        operationType: 'overall_sum',
+        operationType: `overall_${metric}`,
         isBucketed: false,
         scale: 'ratio',
         references: referenceIds,
@@ -115,7 +118,7 @@ export const overallSumOperation = buildOverallMetricOperation<OverallSumIndexPa
     });
   },
   metric: 'sum',
-  description: i18n.translate('xpack.lens.indexPattern.overall_sum.documentation', {
+  description: i18n.translate('xpack.lens.indexPattern.overall_sum.documentation.markdown', {
     defaultMessage: `
 Calculates the sum of a metric of all data points of a series in the current chart. A series is defined by a dimension using a date histogram or interval function.
 Other dimensions breaking down the data like top values or filter are treated as separate series.
@@ -146,7 +149,7 @@ export const overallMinOperation = buildOverallMetricOperation<OverallMinIndexPa
     });
   },
   metric: 'min',
-  description: i18n.translate('xpack.lens.indexPattern.overall_min.documentation', {
+  description: i18n.translate('xpack.lens.indexPattern.overall_min.documentation.markdown', {
     defaultMessage: `
 Calculates the minimum of a metric for all data points of a series in the current chart. A series is defined by a dimension using a date histogram or interval function.
 Other dimensions breaking down the data like top values or filter are treated as separate series.
@@ -154,7 +157,7 @@ Other dimensions breaking down the data like top values or filter are treated as
 If no date histograms or interval functions are used in the current chart, \`overall_min\` is calculating the minimum over all dimensions no matter the used function
 
 Example: Percentage of range
-\`(sum(bytes) - overall_min(sum(bytes)) / (overall_max(bytes) - overall_min(bytes))\`
+\`(sum(bytes) - overall_min(sum(bytes)) / (overall_max(sum(bytes)) - overall_min(sum(bytes)))\`
       `,
   }),
 });
@@ -177,7 +180,7 @@ export const overallMaxOperation = buildOverallMetricOperation<OverallMaxIndexPa
     });
   },
   metric: 'max',
-  description: i18n.translate('xpack.lens.indexPattern.overall_max.documentation', {
+  description: i18n.translate('xpack.lens.indexPattern.overall_max.documentation.markdown', {
     defaultMessage: `
 Calculates the maximum of a metric for all data points of a series in the current chart. A series is defined by a dimension using a date histogram or interval function.
 Other dimensions breaking down the data like top values or filter are treated as separate series.
@@ -185,7 +188,7 @@ Other dimensions breaking down the data like top values or filter are treated as
 If no date histograms or interval functions are used in the current chart, \`overall_max\` is calculating the maximum over all dimensions no matter the used function
 
 Example: Percentage of range
-\`(sum(bytes) - overall_min(sum(bytes)) / (overall_max(bytes) - overall_min(bytes))\`
+\`(sum(bytes) - overall_min(sum(bytes))) / (overall_max(sum(bytes)) - overall_min(sum(bytes)))\`
       `,
   }),
 });
@@ -209,7 +212,7 @@ export const overallAverageOperation = buildOverallMetricOperation<OverallAverag
       });
     },
     metric: 'average',
-    description: i18n.translate('xpack.lens.indexPattern.overall_average.documentation', {
+    description: i18n.translate('xpack.lens.indexPattern.overall_average.documentation.markdown', {
       defaultMessage: `
 Calculates the average of a metric for all data points of a series in the current chart. A series is defined by a dimension using a date histogram or interval function.
 Other dimensions breaking down the data like top values or filter are treated as separate series.

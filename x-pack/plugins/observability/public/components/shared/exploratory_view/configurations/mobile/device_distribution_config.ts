@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { ConfigProps, DataSeries } from '../../types';
-import { FieldLabels, USE_BREAK_DOWN_COLUMN } from '../constants';
+import { ConfigProps, SeriesConfig } from '../../types';
+import { FieldLabels, REPORT_METRIC_FIELD, USE_BREAK_DOWN_COLUMN } from '../constants';
 import { buildPhraseFilter } from '../utils';
 import { SERVICE_NAME } from '../constants/elasticsearch_fieldnames';
 import { MOBILE_APP, NUMBER_OF_DEVICES } from '../constants/labels';
 import { MobileFields } from './mobile_fields';
 
-export function getMobileDeviceDistributionConfig({ indexPattern }: ConfigProps): DataSeries {
+export function getMobileDeviceDistributionConfig({ indexPattern }: ConfigProps): SeriesConfig {
   return {
-    reportType: 'mobile-device-distribution',
+    reportType: 'device-data-distribution',
     defaultSeriesType: 'bar',
     seriesTypes: ['bar', 'bar_horizontal'],
     xAxisColumn: {
@@ -22,15 +22,14 @@ export function getMobileDeviceDistributionConfig({ indexPattern }: ConfigProps)
     },
     yAxisColumns: [
       {
-        sourceField: 'labels.device_id',
+        sourceField: REPORT_METRIC_FIELD,
         operationType: 'unique_count',
-        label: NUMBER_OF_DEVICES,
       },
     ],
     hasOperationType: false,
-    defaultFilters: Object.keys(MobileFields),
-    breakdowns: Object.keys(MobileFields),
-    filters: [
+    filterFields: Object.keys(MobileFields),
+    breakdownFields: Object.keys(MobileFields),
+    baseFilters: [
       ...buildPhraseFilter('agent.name', 'iOS/swift', indexPattern),
       ...buildPhraseFilter('processor.event', 'transaction', indexPattern),
     ],
@@ -39,11 +38,13 @@ export function getMobileDeviceDistributionConfig({ indexPattern }: ConfigProps)
       ...MobileFields,
       [SERVICE_NAME]: MOBILE_APP,
     },
-    reportDefinitions: [
+    metricOptions: [
       {
-        field: SERVICE_NAME,
-        required: true,
+        id: 'labels.device_id',
+        field: 'labels.device_id',
+        label: NUMBER_OF_DEVICES,
       },
     ],
+    definitionFields: [SERVICE_NAME],
   };
 }

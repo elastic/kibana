@@ -21,6 +21,7 @@ import {
   EuiCheckboxGroup,
   EuiButton,
   EuiLink,
+  EuiFieldNumber,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -60,6 +61,15 @@ export const agentPolicyFormValidation = (
 
   if (!namespaceValidation.valid && namespaceValidation.error) {
     errors.namespace = [namespaceValidation.error];
+  }
+
+  if (agentPolicy.unenroll_timeout && agentPolicy.unenroll_timeout < 0) {
+    errors.unenroll_timeout = [
+      <FormattedMessage
+        id="xpack.fleet.agentPolicyForm.unenrollTimeoutMinValueErrorMessage"
+        defaultMessage="Timeout must be greater than zero."
+      />,
+    ];
   }
 
   return errors;
@@ -296,6 +306,46 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
             });
           }}
         />
+      </EuiDescribedFormGroup>
+      <EuiDescribedFormGroup
+        title={
+          <h4>
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.unenrollmentTimeoutLabel"
+              defaultMessage="Unenrollment timeout"
+            />
+          </h4>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.fleet.agentPolicyForm.unenrollmentTimeoutDescription"
+            defaultMessage="An optional timeout in seconds. If provided, an agent will automatically unenroll after being gone for this period of time."
+          />
+        }
+      >
+        <EuiFormRow
+          fullWidth
+          error={
+            touchedFields.unenroll_timeout && validation.unenroll_timeout
+              ? validation.unenroll_timeout
+              : null
+          }
+          isInvalid={Boolean(touchedFields.unenroll_timeout && validation.unenroll_timeout)}
+        >
+          <EuiFieldNumber
+            fullWidth
+            disabled={agentPolicy.is_managed === true}
+            value={agentPolicy.unenroll_timeout || ''}
+            min={0}
+            onChange={(e) => {
+              updateAgentPolicy({
+                unenroll_timeout: e.target.value ? Number(e.target.value) : 0,
+              });
+            }}
+            isInvalid={Boolean(touchedFields.unenroll_timeout && validation.unenroll_timeout)}
+            onBlur={() => setTouchedFields({ ...touchedFields, unenroll_timeout: true })}
+          />
+        </EuiFormRow>
       </EuiDescribedFormGroup>
       {isEditing &&
       'id' in agentPolicy &&

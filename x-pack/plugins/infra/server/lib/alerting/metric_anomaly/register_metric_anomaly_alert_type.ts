@@ -64,6 +64,7 @@ export const registerMetricAnomalyAlertType = (
   actionGroups: [FIRED_ACTIONS],
   producer: 'infrastructure',
   minimumLicenseRequired: 'basic',
+  isExportable: true,
   executor: createMetricAnomalyExecutor(libs, ml),
   actionVariables: {
     context: [

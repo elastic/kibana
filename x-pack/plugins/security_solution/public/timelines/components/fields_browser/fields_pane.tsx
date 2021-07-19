@@ -11,7 +11,6 @@ import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
 import { BrowserFields } from '../../../common/containers/source';
-import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { OnUpdateColumns } from '../timeline/events';
 import { Category } from './category';
@@ -20,6 +19,7 @@ import { getFieldItems } from './field_items';
 import { FIELDS_PANE_WIDTH, TABLE_HEIGHT } from './helpers';
 
 import * as i18n from './translations';
+import { ColumnHeaderOptions } from '../../../../common';
 
 const NoFieldsPanel = styled.div`
   background-color: ${(props) => props.theme.eui.euiColorLightestShade};
