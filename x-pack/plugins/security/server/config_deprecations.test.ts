@@ -165,6 +165,68 @@ describe('Config Deprecations', () => {
     `);
   });
 
+  it('warns when using the legacy audit logger', () => {
+    const config = {
+      xpack: {
+        security: {
+          audit: {
+            enabled: true,
+          },
+        },
+      },
+    };
+    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    expect(migrated.xpack.security.audit.appender).not.toBeDefined();
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "The legacy audit logger is deprecated in favor of the new ECS-compliant audit logger.",
+      ]
+    `);
+  });
+
+  it('does not warn when using the ECS audit logger', () => {
+    const config = {
+      xpack: {
+        security: {
+          audit: {
+            enabled: true,
+            appender: {
+              type: 'file',
+              fileName: './audit.log',
+            },
+          },
+        },
+      },
+    };
+    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    expect(migrated).toEqual(config);
+    expect(messages).toHaveLength(0);
+  });
+
+  it('does not warn about using the legacy logger when using the ECS audit logger, even when using the deprecated ECS appender config', () => {
+    const config = {
+      xpack: {
+        security: {
+          audit: {
+            enabled: true,
+            appender: {
+              type: 'file',
+              path: './audit.log',
+            },
+          },
+        },
+      },
+    };
+    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    expect(migrated.xpack.security.audit.appender.path).not.toBeDefined();
+    expect(migrated.xpack.security.audit.appender.fileName).toEqual('./audit.log');
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "\\"xpack.security.audit.appender.path\\" is deprecated and has been replaced by \\"xpack.security.audit.appender.fileName\\"",
+      ]
+    `);
+  });
+
   it(`warns that 'authorization.legacyFallback.enabled' is unused`, () => {
     const config = {
       xpack: {
