@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSwitch } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import {
@@ -18,7 +18,7 @@ import {
 import { SeriesUrl } from '../types';
 import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
 import { BuilderItem, getSeriesToEdit } from '../series_editor/series_editor';
-import { DEFAULT_TIME } from '../configurations/constants';
+import { DEFAULT_TIME, ReportTypes } from '../configurations/constants';
 
 export function ViewActions() {
   const [editorItems, setEditorItems] = useState<BuilderItem[]>([]);
@@ -56,6 +56,12 @@ export function ViewActions() {
 
   const noChanges = isEqual(allSeries, convertAllShortSeries(storage.get(allSeriesKey) ?? []));
 
+  const isAddDisabled =
+    !reportType ||
+    ((reportType === ReportTypes.CORE_WEB_VITAL ||
+      reportType === ReportTypes.DEVICE_DISTRIBUTION) &&
+      allSeries.length > 0);
+
   return (
     <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
       <EuiFlexItem grow={false}>
@@ -76,11 +82,28 @@ export function ViewActions() {
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
-        <EuiButton color="secondary" onClick={() => addSeries()} isDisabled={!reportType}>
-          {i18n.translate('xpack.observability.expView.seriesBuilder.addSeries', {
-            defaultMessage: 'Add series',
-          })}
-        </EuiButton>
+        <EuiToolTip
+          content={
+            !reportType
+              ? i18n.translate(
+                  'xpack.observability.expView.seriesBuilder.addSeries.selectReportType',
+                  {
+                    defaultMessage: 'Please select report type before you can add series.',
+                  }
+                )
+              : isAddDisabled
+              ? i18n.translate('xpack.observability.expView.seriesBuilder.addSeries.limitation', {
+                  defaultMessage: 'You can only add one series of this report type.',
+                })
+              : ''
+          }
+        >
+          <EuiButton color="secondary" onClick={() => addSeries()} isDisabled={isAddDisabled}>
+            {i18n.translate('xpack.observability.expView.seriesBuilder.addSeries', {
+              defaultMessage: 'Add series',
+            })}
+          </EuiButton>
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

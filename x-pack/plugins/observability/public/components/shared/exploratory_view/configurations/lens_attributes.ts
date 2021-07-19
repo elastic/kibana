@@ -572,6 +572,12 @@ export class LensAttributes {
 
       const { sourceField } = seriesConfig.xAxisColumn;
 
+      let label = timeShift ? `${mainYAxis.label}(${timeShift})` : mainYAxis.label;
+
+      if (layerConfig.seriesConfig.reportType !== ReportTypes.CORE_WEB_VITAL && layerConfig.name) {
+        label = layerConfig.name;
+      }
+
       layers[layerId] = {
         columnOrder: [
           `x-axis-column-${layerId}`,
@@ -585,9 +591,7 @@ export class LensAttributes {
           [`x-axis-column-${layerId}`]: this.getXAxis(layerConfig, layerId),
           [`y-axis-column-${layerId}`]: {
             ...mainYAxis,
-            label:
-              layerConfig.name ||
-              (timeShift ? `${mainYAxis.label}(${timeShift})` : mainYAxis.label),
+            label,
             filter: { query: columnFilter, language: 'kuery' },
             ...(timeShift ? { timeShift } : {}),
           },
