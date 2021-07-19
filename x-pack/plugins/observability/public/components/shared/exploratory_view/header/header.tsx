@@ -16,7 +16,7 @@ import { combineTimeRanges } from '../lens_embeddable';
 import { ExpViewActionMenu } from '../components/action_menu';
 
 interface Props {
-  seriesId?: string;
+  seriesId?: number;
   lastUpdated?: number;
   lensAttributes: TypedLensByValueInput['attributes'] | null;
 }

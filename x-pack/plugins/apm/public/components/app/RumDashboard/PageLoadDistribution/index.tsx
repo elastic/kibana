@@ -90,7 +90,6 @@ export function PageLoadDistribution() {
       reportType: 'kpi-over-time',
       allSeries: [
         {
-          order: 0,
           name: `${serviceName}-page-views`,
           dataType: 'ux',
           time: { from: rangeFrom!, to: rangeTo! },

@@ -11,23 +11,22 @@ import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { SeriesUrl } from '../../types';
 
 interface Props {
-  seriesId: string;
+  seriesId: number;
   series: SeriesUrl;
 }
 
 export function SeriesName({ series, seriesId }: Props) {
   const { setSeries } = useSeriesStorage();
 
-  const [value, setValue] = useState(seriesId);
+  const [value, setValue] = useState(series.name);
 
   const onChange = (e: ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value);
-    e.stopPropagation();
   };
 
   const onSave = () => {
-    if (value !== seriesId) {
-      setSeries(series.name, { ...series, name: value });
+    if (value !== series.name) {
+      setSeries(seriesId, { ...series, name: value });
     }
   };
 

@@ -20,9 +20,7 @@ describe('Breakdowns', function () {
   });
 
   it('should render properly', async function () {
-    render(
-      <Breakdowns seriesId={'series-id'} seriesConfig={dataViewSeries} series={mockUxSeries} />
-    );
+    render(<Breakdowns seriesId={0} seriesConfig={dataViewSeries} series={mockUxSeries} />);
 
     screen.getAllByText('Browser family');
   });
@@ -32,7 +30,7 @@ describe('Breakdowns', function () {
 
     const { setSeries } = render(
       <Breakdowns
-        seriesId={'series-id'}
+        seriesId={0}
         seriesConfig={dataViewSeries}
         series={{ ...mockUxSeries, breakdown: USER_AGENT_OS }}
       />,
@@ -45,11 +43,10 @@ describe('Breakdowns', function () {
 
     fireEvent.click(screen.getByText('Browser family'));
 
-    expect(setSeries).toHaveBeenCalledWith('series-id', {
+    expect(setSeries).toHaveBeenCalledWith(0, {
       breakdown: 'user_agent.name',
       dataType: 'ux',
       name: 'performance-distribution',
-      order: 0,
       reportDefinitions: {
         'service.name': ['elastic-co'],
       },

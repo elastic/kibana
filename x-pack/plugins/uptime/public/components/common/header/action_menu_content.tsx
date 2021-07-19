@@ -49,7 +49,6 @@ export function ActionMenuContent(): React.ReactElement {
       reportType: 'kpi-over-time',
       allSeries: [
         {
-          order: 0,
           dataType: 'synthetics',
           seriesType: 'area_stacked',
           selectedMetricField: 'monitor.duration.us',

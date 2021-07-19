@@ -15,7 +15,7 @@ import { useSeriesFilters } from '../hooks/use_series_filters';
 import { getFiltersFromDefs } from '../hooks/use_lens_attributes';
 
 interface Props {
-  seriesId: string;
+  seriesId: number;
   series: SeriesUrl;
   seriesConfig: SeriesConfig;
 }

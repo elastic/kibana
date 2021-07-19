@@ -20,7 +20,7 @@ describe('ExploratoryViewHeader', function () {
   it('should render properly', function () {
     const { getByText } = render(
       <ExploratoryViewHeader
-        seriesId={'dummy-series'}
+        seriesId={0}
         lensAttributes={{ title: 'Performance distribution' } as any}
       />
     );

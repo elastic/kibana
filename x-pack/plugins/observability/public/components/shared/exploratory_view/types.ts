@@ -82,7 +82,6 @@ export interface SeriesUrl {
   reportDefinitions?: URLReportDefinition;
   selectedMetricField?: string;
   hidden?: boolean;
-  order: number;
   color?: string;
 }
 

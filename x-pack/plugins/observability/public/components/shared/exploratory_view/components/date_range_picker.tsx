@@ -18,7 +18,7 @@ import { ReportTypes } from '../configurations/constants';
 export const parseAbsoluteDate = (date: string, options = {}) => {
   return DateMath.parse(date, options)!;
 };
-export function DateRangePicker({ seriesId, series }: { seriesId: string; series: SeriesUrl }) {
+export function DateRangePicker({ seriesId, series }: { seriesId: number; series: SeriesUrl }) {
   const { firstSeries, setSeries, reportType } = useSeriesStorage();
   const dateFormat = useUiSetting<string>('dateFormat');
 

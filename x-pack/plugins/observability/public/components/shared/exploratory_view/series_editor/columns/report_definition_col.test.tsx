@@ -19,7 +19,7 @@ import { ReportDefinitionCol } from './report_definition_col';
 
 describe('Series Builder ReportDefinitionCol', function () {
   mockAppIndexPattern();
-  const seriesId = 'test-series-id';
+  const seriesId = 0;
 
   const seriesConfig = getDefaultConfigs({
     reportType: 'data-distribution',
@@ -67,7 +67,6 @@ describe('Series Builder ReportDefinitionCol', function () {
     expect(setSeries).toHaveBeenCalledTimes(1);
 
     expect(setSeries).toHaveBeenCalledWith(seriesId, {
-      order: 0,
       dataType: 'ux',
       name: 'performance-distribution',
       breakdown: 'user_agent.name',

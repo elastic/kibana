@@ -53,7 +53,7 @@ export const combineTimeRanges = (
   return { to, from };
 };
 
-export const LensEmbeddable = React.memo(function (props: Props) {
+export function LensEmbeddable(props: Props) {
   const { lensAttributes, setLastUpdated } = props;
 
   const {
@@ -62,7 +62,9 @@ export const LensEmbeddable = React.memo(function (props: Props) {
 
   const LensComponent = lens?.EmbeddableComponent;
 
-  const { firstSeriesId, firstSeries, setSeries, allSeries, reportType } = useSeriesStorage();
+  const { firstSeries, setSeries, allSeries, reportType } = useSeriesStorage();
+
+  const firstSeriesId = 0;
 
   const timeRange = firstSeries ? combineTimeRanges(reportType, allSeries, firstSeries) : null;
 
@@ -72,7 +74,7 @@ export const LensEmbeddable = React.memo(function (props: Props) {
 
   const onBrushEnd = useCallback(
     ({ range }: { range: number[] }) => {
-      if (reportType !== 'data-distribution' && firstSeriesId && firstSeries) {
+      if (reportType !== 'data-distribution' && firstSeries) {
         setSeries(firstSeriesId, {
           ...firstSeries,
           time: {
@@ -88,10 +90,10 @@ export const LensEmbeddable = React.memo(function (props: Props) {
         );
       }
     },
-    [reportType, setSeries, firstSeriesId, firstSeries, notifications?.toasts]
+    [reportType, setSeries, firstSeries, notifications?.toasts]
   );
 
-  if (timeRange === null || !firstSeriesId || !firstSeries) {
+  if (timeRange === null || !firstSeries) {
     return null;
   }
 
@@ -106,7 +108,7 @@ export const LensEmbeddable = React.memo(function (props: Props) {
       />
     </LensWrapper>
   );
-});
+}
 
 const LensWrapper = styled.div`
   height: 100%;

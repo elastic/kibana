@@ -11,17 +11,17 @@ import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 
 interface Props {
-  seriesId: string;
+  seriesId: number;
 }
 
 export function RemoveSeries({ seriesId }: Props) {
-  const { removeSeries, firstSeries, allSeries } = useSeriesStorage();
+  const { removeSeries, allSeries } = useSeriesStorage();
 
   const onClick = () => {
     removeSeries(seriesId);
   };
 
-  const isDisabled = firstSeries!.name === seriesId && allSeries.length > 1;
+  const isDisabled = seriesId === 0 && allSeries.length > 1;
 
   return (
     <EuiToolTip

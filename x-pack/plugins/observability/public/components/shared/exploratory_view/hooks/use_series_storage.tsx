@@ -24,16 +24,15 @@ import { URL_KEYS } from '../configurations/constants/url_constants';
 
 export interface SeriesContextValue {
   firstSeries?: SeriesUrl;
-  firstSeriesId?: string;
   autoApply: boolean;
   lastRefresh: number;
   setLastRefresh: (val: number) => void;
   setAutoApply: (val: boolean) => void;
   applyChanges: () => void;
   allSeries: AllSeries;
-  setSeries: (seriesIdN: string, newValue: SeriesUrl) => void;
-  getSeries: (seriesId: string) => SeriesUrl | undefined;
-  removeSeries: (seriesId: string) => void;
+  setSeries: (seriesIndex: number, newValue: SeriesUrl) => void;
+  getSeries: (seriesIndex: number) => SeriesUrl | undefined;
+  removeSeries: (seriesIndex: number) => void;
   setReportType: (reportType: string) => void;
   storage: IKbnUrlStateStorage | ISessionStorageStateStorage;
   reportType: ReportViewType;
@@ -67,17 +66,14 @@ export function UrlStorageContextProvider({
     () => (storage as IKbnUrlStateStorage).get(reportTypeKey) ?? ''
   );
 
-  const [firstSeriesId, setFirstSeriesId] = useState<string>();
-
   const [firstSeries, setFirstSeries] = useState<SeriesUrl>();
   const isPreview = !!useRouteMatch('/exploratory-view/preview');
 
   useEffect(() => {
     const allShortSeries = allSeries.map((series) => convertToShortUrl(series));
 
-    const firstSeriesT = allSeries.find((seriesT) => seriesT.order === 0);
+    const firstSeriesT = allSeries?.[0];
 
-    setFirstSeriesId(firstSeriesT?.name);
     setFirstSeries(firstSeriesT);
 
     if (autoApply) {
@@ -95,11 +91,20 @@ export function UrlStorageContextProvider({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPreview, storage]);
 
-  const setSeries = useCallback((name: string, newValue: SeriesUrl) => {
+  const setSeries = useCallback((seriesIndex: number, newValue: SeriesUrl) => {
     setAllSeries((prevAllSeries) => {
-      const newStateRest = prevAllSeries.filter((series) => series.name !== name);
+      const newStateRest = prevAllSeries.map((series, index) => {
+        if (index === seriesIndex) {
+          return newValue;
+        }
+        return series;
+      });
 
-      return [newValue, ...newStateRest];
+      if (prevAllSeries.length === seriesIndex) {
+        return [...newStateRest, newValue];
+      }
+
+      return [...newStateRest];
     });
   }, []);
 
@@ -107,15 +112,15 @@ export function UrlStorageContextProvider({
     (storage as IKbnUrlStateStorage).set(reportTypeKey, reportType);
   }, [reportType, storage]);
 
-  const removeSeries = useCallback((seriesNameN: string) => {
+  const removeSeries = useCallback((seriesIndex: number) => {
     setAllSeries((prevAllSeries) =>
-      prevAllSeries.filter((seriesT) => seriesT.name !== seriesNameN)
+      prevAllSeries.filter((seriesT, index) => index !== seriesIndex)
     );
   }, []);
 
   const getSeries = useCallback(
-    (seriesName: string) => {
-      return allSeries.find(({ name }) => name === seriesName);
+    (seriesIndex: number) => {
+      return allSeries[seriesIndex];
     },
     [allSeries]
   );
@@ -139,7 +144,6 @@ export function UrlStorageContextProvider({
     getSeries,
     setSeries,
     removeSeries,
-    firstSeriesId,
     allSeries,
     lastRefresh,
     setLastRefresh,
@@ -155,7 +159,7 @@ export function useSeriesStorage() {
 }
 
 function convertFromShortUrl(newValue: ShortUrlSeries): SeriesUrl {
-  const { dt, op, st, bd, ft, time, rdf, mt, h, o, n, c, ...restSeries } = newValue;
+  const { dt, op, st, bd, ft, time, rdf, mt, h, n, c, ...restSeries } = newValue;
   return {
     operationType: op,
     seriesType: st,
@@ -167,7 +171,6 @@ function convertFromShortUrl(newValue: ShortUrlSeries): SeriesUrl {
     selectedMetricField: mt,
     hidden: h,
     name: n,
-    order: o,
     color: c,
     ...restSeries,
   };
@@ -182,7 +185,6 @@ interface ShortUrlSeries {
   [URL_KEYS.REPORT_DEFINITIONS]?: URLReportDefinition;
   [URL_KEYS.SELECTED_METRIC]?: string;
   [URL_KEYS.HIDDEN]?: boolean;
-  [URL_KEYS.ORDER]: number;
   [URL_KEYS.NAME]: string;
   [URL_KEYS.COLOR]?: string;
   time?: {

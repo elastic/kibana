@@ -12,7 +12,7 @@ import { OperationTypeSelect } from './operation_type_select';
 
 describe('OperationTypeSelect', function () {
   it('should render properly', function () {
-    render(<OperationTypeSelect seriesId={'series-id'} series={mockUxSeries} />);
+    render(<OperationTypeSelect seriesId={0} series={mockUxSeries} />);
 
     screen.getByText('Select an option: , is selected');
   });
@@ -21,7 +21,6 @@ describe('OperationTypeSelect', function () {
     const initSeries = {
       data: [
         {
-          order: 0,
           name: 'performance-distribution',
           dataType: 'ux' as const,
           operationType: 'median' as const,
@@ -30,7 +29,7 @@ describe('OperationTypeSelect', function () {
       ],
     };
 
-    render(<OperationTypeSelect seriesId={'series-id'} series={initSeries.data[0]} />, {
+    render(<OperationTypeSelect seriesId={0} series={initSeries.data[0]} />, {
       initSeries,
     });
 
@@ -41,8 +40,7 @@ describe('OperationTypeSelect', function () {
     const initSeries = {
       data: [
         {
-          order: 0,
-          name: 'series-id',
+          name: 'performance-distribution',
           dataType: 'ux' as const,
           operationType: 'median' as const,
           time: { from: 'now-15m', to: 'now' },
@@ -50,28 +48,25 @@ describe('OperationTypeSelect', function () {
       ],
     };
 
-    const { setSeries } = render(
-      <OperationTypeSelect seriesId={'series-id'} series={initSeries.data[0]} />,
-      { initSeries }
-    );
+    const { setSeries } = render(<OperationTypeSelect seriesId={0} series={initSeries.data[0]} />, {
+      initSeries,
+    });
 
     fireEvent.click(screen.getByTestId('operationTypeSelect'));
 
-    expect(setSeries).toHaveBeenCalledWith('series-id', {
+    expect(setSeries).toHaveBeenCalledWith(0, {
       operationType: 'median',
       dataType: 'ux',
       time: { from: 'now-15m', to: 'now' },
-      name: 'series-id',
-      order: 0,
+      name: 'performance-distribution',
     });
 
     fireEvent.click(screen.getByText('95th Percentile'));
-    expect(setSeries).toHaveBeenCalledWith('series-id', {
+    expect(setSeries).toHaveBeenCalledWith(0, {
       operationType: '95th',
       dataType: 'ux',
       time: { from: 'now-15m', to: 'now' },
-      name: 'series-id',
-      order: 0,
+      name: 'performance-distribution',
     });
   });
 });

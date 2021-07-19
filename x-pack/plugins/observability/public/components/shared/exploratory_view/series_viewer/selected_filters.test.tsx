@@ -27,7 +27,7 @@ describe('SelectedFilters', function () {
 
     render(
       <SelectedFilters
-        seriesId={'series-id'}
+        seriesId={0}
         seriesConfig={dataViewSeries}
         series={{ ...mockUxSeries, filters }}
       />,

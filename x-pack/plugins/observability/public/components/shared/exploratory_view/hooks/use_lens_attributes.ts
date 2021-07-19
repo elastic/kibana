@@ -51,44 +51,42 @@ export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null 
 
     const layerConfigs: LayerConfig[] = [];
 
-    allSeriesT
-      .sort((a, b) => a.order - b.order)
-      .forEach((series) => {
-        const indexPattern = indexPatterns?.[series?.dataType];
+    allSeriesT.forEach((series, seriesIndex) => {
+      const indexPattern = indexPatterns?.[series?.dataType];
 
-        if (
-          indexPattern &&
-          !isEmpty(series.reportDefinitions) &&
-          !series.hidden &&
-          series.selectedMetricField
-        ) {
-          const seriesConfig = getDefaultConfigs({
-            reportType,
-            indexPattern,
-            dataType: series.dataType,
-          });
+      if (
+        indexPattern &&
+        !isEmpty(series.reportDefinitions) &&
+        !series.hidden &&
+        series.selectedMetricField
+      ) {
+        const seriesConfig = getDefaultConfigs({
+          reportType,
+          indexPattern,
+          dataType: series.dataType,
+        });
 
-          const filters: UrlFilter[] = (series.filters ?? []).concat(
-            getFiltersFromDefs(series.reportDefinitions)
-          );
+        const filters: UrlFilter[] = (series.filters ?? []).concat(
+          getFiltersFromDefs(series.reportDefinitions)
+        );
 
-          const color = `euiColorVis${series.order}`;
+        const color = `euiColorVis${seriesIndex}`;
 
-          layerConfigs.push({
-            filters,
-            indexPattern,
-            seriesConfig,
-            time: series.time,
-            name: series.name,
-            breakdown: series.breakdown,
-            seriesType: series.seriesType,
-            operationType: series.operationType,
-            reportDefinitions: series.reportDefinitions ?? {},
-            selectedMetricField: series.selectedMetricField,
-            color: series.color ?? ((theme.eui as unknown) as Record<string, string>)[color],
-          });
-        }
-      });
+        layerConfigs.push({
+          filters,
+          indexPattern,
+          seriesConfig,
+          time: series.time,
+          name: series.name,
+          breakdown: series.breakdown,
+          seriesType: series.seriesType,
+          operationType: series.operationType,
+          reportDefinitions: series.reportDefinitions ?? {},
+          selectedMetricField: series.selectedMetricField,
+          color: series.color ?? ((theme.eui as unknown) as Record<string, string>)[color],
+        });
+      }
+    });
 
     if (layerConfigs.length < 1) {
       return null;

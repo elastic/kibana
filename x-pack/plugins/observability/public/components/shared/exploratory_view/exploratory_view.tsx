@@ -46,7 +46,7 @@ export function ExploratoryView({
 
   const { loadIndexPattern, loading } = useAppIndexPatternContext();
 
-  const { firstSeriesId, firstSeries, allSeries, lastRefresh, reportType } = useSeriesStorage();
+  const { firstSeries, allSeries, lastRefresh, reportType } = useSeriesStorage();
 
   const lensAttributesT = useLensAttributes();
 
@@ -101,7 +101,7 @@ export function ExploratoryView({
         <>
           <ExploratoryViewHeader
             lensAttributes={lensAttributes}
-            seriesId={firstSeriesId}
+            seriesId={0}
             lastUpdated={lastUpdated}
           />
           <LensWrapper ref={wrapperRef} height={height}>

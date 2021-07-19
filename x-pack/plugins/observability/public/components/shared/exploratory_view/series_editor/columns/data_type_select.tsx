@@ -13,7 +13,7 @@ import { AppDataType, SeriesUrl } from '../../types';
 import { DataTypes, ReportTypes } from '../../configurations/constants';
 
 interface Props {
-  seriesId: string;
+  seriesId: number;
   series: SeriesUrl;
 }
 
@@ -62,6 +62,7 @@ export function DataTypesSelect({ seriesId, series }: Props) {
       ...series,
       dataType,
       reportDefinitions: {},
+      selectedMetricField: undefined,
     });
   };
 

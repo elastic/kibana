@@ -15,7 +15,7 @@ interface Props {
   field: string;
   label: string;
   value: string | string[];
-  seriesId: string;
+  seriesId: number;
   series: SeriesUrl;
   negate: boolean;
   definitionFilter?: boolean;

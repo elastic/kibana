@@ -29,7 +29,7 @@ import { PersistableFilter } from '../../../../../../../lens/common';
 import { ExistsFilter } from '../../../../../../../../../src/plugins/data/common/es_query/filters';
 
 interface Props {
-  seriesId: string;
+  seriesId: number;
   series: SeriesUrl;
   label: string;
   field: string;

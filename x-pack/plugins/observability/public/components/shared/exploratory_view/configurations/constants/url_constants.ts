@@ -15,6 +15,5 @@ export enum URL_KEYS {
   SELECTED_METRIC = 'mt',
   HIDDEN = 'h',
   NAME = 'n',
-  ORDER = 'o',
   COLOR = 'c',
 }

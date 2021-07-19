@@ -13,7 +13,6 @@ import { getHistoryFromUrl } from '../rtl_helpers';
 
 const mockSingleSeries = [
   {
-    order: 0,
     name: 'performance-distribution',
     dataType: 'ux',
     breakdown: 'user_agent.name',
@@ -23,14 +22,12 @@ const mockSingleSeries = [
 
 const mockMultipleSeries = [
   {
-    order: 0,
     name: 'performance-distribution',
     dataType: 'ux',
     breakdown: 'user_agent.name',
     time: { from: 'now-15m', to: 'now' },
   },
   {
-    order: 1,
     name: 'kpi-over-time',
     dataType: 'synthetics',
     breakdown: 'user_agent.name',
@@ -79,7 +76,6 @@ describe('userSeriesStorage', function () {
       expect.objectContaining({
         allSeries: [
           {
-            order: 0,
             name: 'performance-distribution',
             dataType: 'ux',
             breakdown: 'user_agent.name',
@@ -87,13 +83,11 @@ describe('userSeriesStorage', function () {
           },
         ],
         firstSeries: {
-          order: 0,
           name: 'performance-distribution',
           dataType: 'ux',
           breakdown: 'user_agent.name',
           time: { from: 'now-15m', to: 'now' },
         },
-        firstSeriesId: 'performance-distribution',
       })
     );
   });
@@ -106,14 +100,12 @@ describe('userSeriesStorage', function () {
       expect.objectContaining({
         allSeries: [
           {
-            order: 0,
             name: 'performance-distribution',
             dataType: 'ux',
             breakdown: 'user_agent.name',
             time: { from: 'now-15m', to: 'now' },
           },
           {
-            order: 1,
             name: 'kpi-over-time',
             dataType: 'synthetics',
             breakdown: 'user_agent.name',
@@ -121,13 +113,11 @@ describe('userSeriesStorage', function () {
           },
         ],
         firstSeries: {
-          order: 0,
           name: 'performance-distribution',
           dataType: 'ux',
           breakdown: 'user_agent.name',
           time: { from: 'now-15m', to: 'now' },
         },
-        firstSeriesId: 'performance-distribution',
       })
     );
   });
@@ -140,7 +130,6 @@ describe('userSeriesStorage', function () {
       expect.objectContaining({
         allSeries: [],
         firstSeries: undefined,
-        firstSeriesId: undefined,
       })
     );
   });

@@ -196,7 +196,6 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
       reportType: 'kpi-over-time',
       allSeries: [
         {
-          order: 0,
           name: `${monitorId}-pings`,
           dataType: 'synthetics',
           selectedMetricField: 'summary.up',

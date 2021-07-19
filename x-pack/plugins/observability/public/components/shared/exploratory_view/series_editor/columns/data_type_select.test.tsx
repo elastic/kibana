@@ -12,7 +12,7 @@ import { DataTypesLabels, DataTypesSelect } from './data_type_select';
 import { DataTypes } from '../../configurations/constants';
 
 describe('DataTypeSelect', function () {
-  const seriesId = 'test-series-id';
+  const seriesId = 0;
 
   mockAppIndexPattern();
 
@@ -31,9 +31,7 @@ describe('DataTypeSelect', function () {
       breakdown: 'user_agent.name',
       dataType: 'synthetics',
       name: 'performance-distribution',
-      order: 0,
       reportDefinitions: {},
-      selectedMetricField: 'transaction.duration.us',
       time: {
         from: 'now-15m',
         to: 'now',

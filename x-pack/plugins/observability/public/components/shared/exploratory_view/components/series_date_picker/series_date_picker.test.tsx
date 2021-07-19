@@ -15,7 +15,6 @@ describe('SeriesDatePicker', function () {
     const initSeries = {
       data: [
         {
-          order: 0,
           name: 'uptime-pings-histogram',
           dataType: 'synthetics' as const,
           breakdown: 'monitor.status',
@@ -23,10 +22,9 @@ describe('SeriesDatePicker', function () {
         },
       ],
     };
-    const { getByText } = render(
-      <SeriesDatePicker seriesId={'series-id'} series={initSeries.data[0]} />,
-      { initSeries }
-    );
+    const { getByText } = render(<SeriesDatePicker seriesId={0} series={initSeries.data[0]} />, {
+      initSeries,
+    });
 
     getByText('Last 30 Minutes');
   });
@@ -35,7 +33,6 @@ describe('SeriesDatePicker', function () {
     const initSeries = {
       data: [
         {
-          order: 0,
           name: 'uptime-pings-histogram',
           dataType: 'synthetics' as const,
           breakdown: 'monitor.status',
@@ -46,7 +43,7 @@ describe('SeriesDatePicker', function () {
 
     const { onRefreshTimeRange } = mockUseHasData();
     const { getByTestId, setSeries } = render(
-      <SeriesDatePicker seriesId={'series-id'} series={initSeries.data[0]} readonly={false} />,
+      <SeriesDatePicker seriesId={0} series={initSeries.data[0]} readonly={false} />,
       {
         initSeries,
       }
@@ -60,8 +57,7 @@ describe('SeriesDatePicker', function () {
 
     expect(onRefreshTimeRange).toHaveBeenCalledTimes(1);
 
-    expect(setSeries).toHaveBeenCalledWith('series-id', {
-      order: 0,
+    expect(setSeries).toHaveBeenCalledWith(0, {
       name: 'uptime-pings-histogram',
       breakdown: 'monitor.status',
       dataType: 'synthetics',

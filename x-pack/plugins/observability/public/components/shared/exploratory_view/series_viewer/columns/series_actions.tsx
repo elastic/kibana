@@ -13,7 +13,7 @@ import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { SeriesUrl } from '../../types';
 
 interface Props {
-  seriesId: string;
+  seriesId: number;
   series: SeriesUrl;
   editorMode?: boolean;
 }
@@ -25,7 +25,7 @@ export function SeriesActions({ seriesId, series, editorMode = false }: Props) {
     if (allSeries.find(({ name }) => name === copySeriesId)) {
       copySeriesId = copySeriesId + allSeries.length;
     }
-    setSeries(copySeriesId, { ...series, name: copySeriesId, order: allSeries.length++ });
+    setSeries(allSeries.length, { ...series, name: copySeriesId });
   };
 
   const toggleSeries = () => {

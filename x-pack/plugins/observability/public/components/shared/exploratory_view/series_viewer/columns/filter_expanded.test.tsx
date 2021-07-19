@@ -22,7 +22,7 @@ describe('FilterExpanded', function () {
 
     render(
       <FilterExpanded
-        seriesId={'series-id'}
+        seriesId={0}
         series={mockSeries}
         label={'Browser Family'}
         field={USER_AGENT_NAME}
@@ -38,7 +38,7 @@ describe('FilterExpanded', function () {
 
     render(
       <FilterExpanded
-        seriesId={'series-id'}
+        seriesId={0}
         series={mockSeries}
         label={'Browser Family'}
         field={USER_AGENT_NAME}
@@ -60,7 +60,7 @@ describe('FilterExpanded', function () {
 
     render(
       <FilterExpanded
-        seriesId={'series-id'}
+        seriesId={0}
         series={mockSeries}
         label={'Browser Family'}
         field={USER_AGENT_NAME}
@@ -87,7 +87,7 @@ describe('FilterExpanded', function () {
 
     render(
       <FilterExpanded
-        seriesId={mockUxSeries.name}
+        seriesId={0}
         series={mockUxSeries}
         label={'Browser Family'}
         field={USER_AGENT_NAME}

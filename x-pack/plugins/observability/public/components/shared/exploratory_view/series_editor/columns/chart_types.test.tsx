@@ -12,13 +12,7 @@ import { SeriesChartTypesSelect, XYChartTypesSelect } from './chart_types';
 
 describe.skip('SeriesChartTypesSelect', function () {
   it('should render properly', async function () {
-    render(
-      <SeriesChartTypesSelect
-        seriesId={'series-id'}
-        defaultChartType={'line'}
-        series={mockUxSeries}
-      />
-    );
+    render(<SeriesChartTypesSelect seriesId={0} defaultChartType={'line'} series={mockUxSeries} />);
 
     await waitFor(() => {
       screen.getByText(/chart type/i);
@@ -27,11 +21,7 @@ describe.skip('SeriesChartTypesSelect', function () {
 
   it('should call set series on change', async function () {
     const { setSeries } = render(
-      <SeriesChartTypesSelect
-        seriesId={'series-id'}
-        defaultChartType={'line'}
-        series={mockUxSeries}
-      />
+      <SeriesChartTypesSelect seriesId={0} defaultChartType={'line'} series={mockUxSeries} />
     );
 
     await waitFor(() => {

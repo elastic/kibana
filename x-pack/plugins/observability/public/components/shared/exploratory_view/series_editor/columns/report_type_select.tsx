@@ -36,7 +36,7 @@ export const reportTypesList: Array<{
 ];
 
 export function ReportTypesSelect() {
-  const { firstSeriesId, setReportType, reportType: selectedReportType } = useSeriesStorage();
+  const { setReportType, reportType: selectedReportType, allSeries } = useSeriesStorage();
 
   const onReportTypeChange = (reportType: ReportViewType) => {
     setReportType(reportType);
@@ -57,8 +57,8 @@ export function ReportTypesSelect() {
       valueOfSelected={selectedReportType ?? SELECT_REPORT_TYPE}
       onChange={(value) => onReportTypeChange(value as ReportViewType)}
       style={{ minWidth: 200 }}
-      isInvalid={!selectedReportType && firstSeriesId}
-      disabled={Boolean(firstSeriesId)}
+      isInvalid={!selectedReportType && allSeries.length > 0}
+      disabled={allSeries.length > 0}
     />
   );
 }

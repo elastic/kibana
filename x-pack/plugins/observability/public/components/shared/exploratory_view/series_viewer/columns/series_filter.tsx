@@ -16,7 +16,7 @@ import { SelectedFilters } from '../selected_filters';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 
 interface Props {
-  seriesId: string;
+  seriesId: number;
   seriesConfig: SeriesConfig;
   series: SeriesUrl;
 }

@@ -22,7 +22,7 @@ function getColumnType(seriesConfig: SeriesConfig, selectedMetricField?: string)
 }
 
 interface Props {
-  seriesId: string;
+  seriesId: number;
   series: SeriesUrl;
   seriesConfig: SeriesConfig;
 }

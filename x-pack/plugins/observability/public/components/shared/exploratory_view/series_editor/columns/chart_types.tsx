@@ -23,7 +23,7 @@ export function SeriesChartTypesSelect({
   series,
   defaultChartType,
 }: {
-  seriesId: string;
+  seriesId: number;
   series: SeriesUrl;
   defaultChartType: SeriesType;
 }) {

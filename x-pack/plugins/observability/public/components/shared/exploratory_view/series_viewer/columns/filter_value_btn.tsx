@@ -20,7 +20,7 @@ interface Props {
   allSelectedValues?: string[];
   negate: boolean;
   nestedField?: string;
-  seriesId: string;
+  seriesId: number;
   series: SeriesUrl;
   isNestedOpen: {
     value: string;

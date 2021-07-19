@@ -19,7 +19,7 @@ describe('FilterValueButton', function () {
     render(
       <FilterValueButton
         field={USER_AGENT_NAME}
-        seriesId={'series-id'}
+        seriesId={0}
         value={'Chrome'}
         isNestedOpen={{ value: '', negate: false }}
         setIsNestedOpen={jest.fn()}
@@ -35,7 +35,7 @@ describe('FilterValueButton', function () {
     render(
       <FilterValueButton
         field={USER_AGENT_NAME}
-        seriesId={'series-id'}
+        seriesId={0}
         value={'Chrome'}
         isNestedOpen={{ value: '', negate: false }}
         setIsNestedOpen={jest.fn()}
@@ -56,7 +56,7 @@ describe('FilterValueButton', function () {
     render(
       <FilterValueButton
         field={USER_AGENT_NAME}
-        seriesId={'series-id'}
+        seriesId={0}
         value={'Chrome'}
         isNestedOpen={{ value: '', negate: false }}
         setIsNestedOpen={jest.fn()}
@@ -83,7 +83,7 @@ describe('FilterValueButton', function () {
     render(
       <FilterValueButton
         field={USER_AGENT_NAME}
-        seriesId={'series-id'}
+        seriesId={0}
         value={'Chrome'}
         isNestedOpen={{ value: '', negate: false }}
         setIsNestedOpen={jest.fn()}
@@ -108,7 +108,7 @@ describe('FilterValueButton', function () {
     render(
       <FilterValueButton
         field={USER_AGENT_NAME}
-        seriesId={'series-id'}
+        seriesId={0}
         value={'Chrome'}
         isNestedOpen={{ value: '', negate: false }}
         setIsNestedOpen={jest.fn()}
@@ -134,7 +134,7 @@ describe('FilterValueButton', function () {
     render(
       <FilterValueButton
         field={USER_AGENT_NAME}
-        seriesId={'series-id'}
+        seriesId={0}
         value={'Chrome'}
         isNestedOpen={{ value: 'Chrome', negate: false }}
         setIsNestedOpen={jest.fn()}
@@ -166,7 +166,7 @@ describe('FilterValueButton', function () {
     render(
       <FilterValueButton
         field={USER_AGENT_NAME}
-        seriesId={'series-id'}
+        seriesId={0}
         value={'Chrome'}
         isNestedOpen={{ value: 'Chrome', negate: false }}
         setIsNestedOpen={jest.fn()}
@@ -201,7 +201,7 @@ describe('FilterValueButton', function () {
     render(
       <FilterValueButton
         field={USER_AGENT_NAME}
-        seriesId={'series-id'}
+        seriesId={0}
         value={'Chrome'}
         isNestedOpen={{ value: '', negate: false }}
         setIsNestedOpen={setIsNestedOpen}
@@ -227,7 +227,7 @@ describe('FilterValueButton', function () {
     render(
       <FilterValueButton
         field={USER_AGENT_NAME}
-        seriesId={'series-id'}
+        seriesId={0}
         value={'Chrome'}
         isNestedOpen={{ value: '', negate: true }}
         setIsNestedOpen={setIsNestedOpen}

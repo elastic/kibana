@@ -80,7 +80,7 @@ export const sampleAttributeCoreWebVital = {
                   query: 'transaction.type: page-load and processor.event: transaction',
                 },
                 isBucketed: false,
-                label: 'test-series',
+                label: 'Good',
                 operationType: 'count',
                 scale: 'ratio',
                 sourceField: 'Records',

@@ -42,13 +42,18 @@ export function ViewActions() {
   const addSeries = () => {
     const prevSeries = allSeries?.[0];
     const name = `${NEW_SERIES_KEY}-${editorItems.length + 1}`;
-    const nextSeries = { name, order: editorItems.length } as SeriesUrl;
+    const nextSeries = { name } as SeriesUrl;
+
+    const nextSeriesId = allSeries.length;
 
     if (reportType === 'data-distribution') {
-      setSeries(name, { ...nextSeries, time: prevSeries?.time || DEFAULT_TIME } as SeriesUrl);
+      setSeries(nextSeriesId, {
+        ...nextSeries,
+        time: prevSeries?.time || DEFAULT_TIME,
+      } as SeriesUrl);
     } else {
       setSeries(
-        name,
+        nextSeriesId,
         prevSeries ? nextSeries : ({ ...nextSeries, time: DEFAULT_TIME } as SeriesUrl)
       );
     }

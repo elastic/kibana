@@ -17,7 +17,7 @@ import { SeriesColorPicker } from '../../components/series_color_picker';
 import { dataTypes } from '../../series_editor/columns/data_type_select';
 
 interface Props {
-  seriesId: string;
+  seriesId: number;
   series: SeriesUrl;
   seriesConfig?: SeriesConfig;
 }

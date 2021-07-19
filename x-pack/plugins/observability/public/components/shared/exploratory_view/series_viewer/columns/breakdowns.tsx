@@ -14,7 +14,7 @@ import { USE_BREAK_DOWN_COLUMN } from '../../configurations/constants';
 import { SeriesConfig, SeriesUrl } from '../../types';
 
 interface Props {
-  seriesId: string;
+  seriesId: number;
   series: SeriesUrl;
   seriesConfig: SeriesConfig;
 }

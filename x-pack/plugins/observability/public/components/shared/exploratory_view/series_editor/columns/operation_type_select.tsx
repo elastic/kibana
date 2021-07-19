@@ -18,7 +18,7 @@ export function OperationTypeSelect({
   series,
   defaultOperationType,
 }: {
-  seriesId: string;
+  seriesId: number;
   series: SeriesUrl;
   defaultOperationType?: OperationType;
 }) {

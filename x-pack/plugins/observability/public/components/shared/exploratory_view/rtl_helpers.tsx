@@ -256,7 +256,6 @@ export const mockUseValuesList = (values?: ListItem[]) => {
 };
 
 export const mockUxSeries = {
-  order: 0,
   name: 'performance-distribution',
   dataType: 'ux',
   breakdown: 'user_agent.name',
@@ -282,16 +281,12 @@ function mockSeriesStorageContext({
 
   const mockDataSeries = data || [testSeries];
 
-  const allSeriesIds = Object.keys(mockDataSeries);
-  const firstSeriesId = allSeriesIds?.[0];
-
   const removeSeries = jest.fn();
   const setSeries = jest.fn();
 
   const getSeries = jest.fn().mockReturnValue(testSeries);
 
   return {
-    firstSeriesId,
     removeSeries,
     setSeries,
     getSeries,

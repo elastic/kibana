@@ -7,26 +7,69 @@
 
 import React from 'react';
 import styled from 'styled-components';
+import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { DateRangePicker } from '../../components/date_range_picker';
 import { SeriesDatePicker } from '../../components/series_date_picker';
-import { SeriesUrl } from '../../types';
+import { AppDataType, SeriesUrl } from '../../types';
 import { ReportTypes } from '../../configurations/constants';
+import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
+import { SyntheticsAddData } from '../../../add_data_buttons/synthetics_add_data';
+import { MobileAddData } from '../../../add_data_buttons/mobile_add_data';
+import { UXAddData } from '../../../add_data_buttons/ux_add_data';
 
 interface Props {
-  seriesId: string;
+  seriesId: number;
   series: SeriesUrl;
 }
-export function DatePickerCol({ seriesId, series }: Props) {
-  const { firstSeriesId, reportType } = useSeriesStorage();
 
-  if (!series.dataType || !series.selectedMetricField) {
+const AddDataComponents: Record<AppDataType, React.FC | null> = {
+  mobile: MobileAddData,
+  ux: UXAddData,
+  synthetics: SyntheticsAddData,
+  apm: null,
+  infra_logs: null,
+  infra_metrics: null,
+};
+
+export function DatePickerCol({ seriesId, series }: Props) {
+  const { reportType } = useSeriesStorage();
+
+  const { hasAppData } = useAppIndexPatternContext();
+
+  if (!series.dataType) {
+    return null;
+  }
+
+  const AddDataButton = AddDataComponents[series.dataType];
+  if (hasAppData[series.dataType] === false && AddDataButton !== null) {
+    return (
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={false}>
+          <strong>
+            {i18n.translate('xpack.observability.overview.exploratoryView.noDataAvailable', {
+              defaultMessage: 'No {dataType} data available.',
+              values: {
+                dataType: series.dataType,
+              },
+            })}
+          </strong>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <AddDataButton />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  if (!series.selectedMetricField) {
     return null;
   }
 
   return (
     <Wrapper>
-      {firstSeriesId === seriesId || reportType !== ReportTypes.KPI ? (
+      {seriesId === 0 || reportType !== ReportTypes.KPI ? (
         <SeriesDatePicker seriesId={seriesId} series={series} readonly={false} />
       ) : (
         <DateRangePicker seriesId={seriesId} series={series} />

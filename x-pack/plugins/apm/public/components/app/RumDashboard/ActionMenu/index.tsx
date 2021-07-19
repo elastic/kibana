@@ -45,7 +45,6 @@ export function UXActionMenu({
       reportType: 'kpi-over-time',
       allSeries: [
         {
-          order: 0,
           dataType: 'ux',
           name: `${serviceName}-page-views`,
           time: { from: rangeFrom!, to: rangeTo! },

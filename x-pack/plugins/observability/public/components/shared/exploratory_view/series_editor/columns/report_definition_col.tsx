@@ -16,7 +16,7 @@ export function ReportDefinitionCol({
   series,
   seriesConfig,
 }: {
-  seriesId: string;
+  seriesId: number;
   series: SeriesUrl;
   seriesConfig: SeriesConfig;
 }) {

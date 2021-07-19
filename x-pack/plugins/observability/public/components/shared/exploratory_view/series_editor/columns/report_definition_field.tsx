@@ -17,7 +17,7 @@ import { SeriesConfig, SeriesUrl } from '../../types';
 import { ALL_VALUES_SELECTED } from '../../../field_value_suggestions/field_value_combobox';
 
 interface Props {
-  seriesId: string;
+  seriesId: number;
   series: SeriesUrl;
   field: string;
   seriesConfig: SeriesConfig;

@@ -14,7 +14,7 @@ export interface UpdateFilter {
   negate?: boolean;
 }
 
-export const useSeriesFilters = ({ seriesId, series }: { seriesId: string; series: SeriesUrl }) => {
+export const useSeriesFilters = ({ seriesId, series }: { seriesId: number; series: SeriesUrl }) => {
   const { setSeries } = useSeriesStorage();
 
   const filters = series.filters ?? [];

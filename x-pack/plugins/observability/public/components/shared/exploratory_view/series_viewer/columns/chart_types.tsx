@@ -18,7 +18,7 @@ import { SeriesConfig } from '../../types';
 import { SeriesChartTypesSelect } from '../../series_editor/columns/chart_types';
 
 interface Props {
-  seriesId: string;
+  seriesId: number;
   series: SeriesUrl;
   seriesConfig: SeriesConfig;
 }

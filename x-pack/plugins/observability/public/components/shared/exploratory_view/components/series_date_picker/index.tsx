@@ -28,7 +28,7 @@ export interface TimePickerQuickRange extends TimePickerTime {
 }
 
 interface Props {
-  seriesId: string;
+  seriesId: number;
   series: SeriesUrl;
   readonly?: boolean;
 }
@@ -54,8 +54,8 @@ export function SeriesDatePicker({ series, seriesId, readonly = true }: Props) {
   function onTimeChange({ start, end }: { start: string; end: string }) {
     onRefreshTimeRange();
     if (reportType === ReportTypes.KPI) {
-      allSeries.forEach((currSeries) => {
-        setSeries(currSeries.name, { ...currSeries, time: { from: start, to: end } });
+      allSeries.forEach((currSeries, seriesIndex) => {
+        setSeries(seriesIndex, { ...currSeries, time: { from: start, to: end } });
       });
     } else {
       setSeries(seriesId, { ...series, time: { from: start, to: end } });

@@ -23,7 +23,6 @@ export function convertToShortUrl(series: SeriesUrl) {
     selectedMetricField,
     hidden,
     name,
-    order,
     color,
     ...restSeries
   } = series;
@@ -38,7 +37,6 @@ export function convertToShortUrl(series: SeriesUrl) {
     [URL_KEYS.SELECTED_METRIC]: selectedMetricField,
     [URL_KEYS.HIDDEN]: hidden,
     [URL_KEYS.NAME]: name,
-    [URL_KEYS.ORDER]: order,
     [URL_KEYS.COLOR]: color,
     ...restSeries,
   };

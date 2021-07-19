@@ -20,7 +20,7 @@ import { Breakdowns } from './columns/breakdowns';
 import { SeriesDatePicker } from '../components/series_date_picker';
 
 interface EditItem {
-  id: string;
+  id: number;
   series: SeriesUrl;
   seriesConfig: SeriesConfig;
 }
@@ -33,7 +33,7 @@ export function SeriesViewer() {
       name: '',
       field: 'id',
       width: '10%',
-      render: (seriesId: string, { seriesConfig, series }: EditItem) => (
+      render: (seriesId: number, { seriesConfig, series }: EditItem) => (
         <SeriesInfo seriesId={seriesId} series={series} seriesConfig={seriesConfig} />
       ),
     },
@@ -43,7 +43,7 @@ export function SeriesViewer() {
       }),
       field: 'id',
       width: '15%',
-      render: (seriesId: string, { series }: EditItem) => (
+      render: (seriesId: number, { series }: EditItem) => (
         <SeriesName seriesId={seriesId} series={series} />
       ),
     },
@@ -53,7 +53,7 @@ export function SeriesViewer() {
       }),
       field: 'id',
       width: '25%',
-      render: (seriesId: string, { series, seriesConfig }: EditItem) => (
+      render: (seriesId: number, { series, seriesConfig }: EditItem) => (
         <SeriesFilter seriesId={seriesId} series={series} seriesConfig={seriesConfig} />
       ),
     },
@@ -63,7 +63,7 @@ export function SeriesViewer() {
       }),
       field: 'seriesId',
       width: '10%',
-      render: (seriesId: string, { seriesConfig, series }: EditItem) => (
+      render: (seriesId: number, { seriesConfig, series }: EditItem) => (
         <Breakdowns seriesId={seriesId} seriesConfig={seriesConfig} series={series} />
       ),
     },
@@ -73,7 +73,7 @@ export function SeriesViewer() {
       }),
       width: '35%',
       field: 'id',
-      render: (seriesId: string, { series }: EditItem) => (
+      render: (seriesId: number, { series }: EditItem) => (
         <SeriesDatePicker seriesId={seriesId} series={series} readonly={true} />
       ),
     },
@@ -82,11 +82,11 @@ export function SeriesViewer() {
   const { indexPatterns } = useAppIndexPatternContext();
   const items: EditItem[] = [];
 
-  allSeries.forEach((series) => {
+  allSeries.forEach((series, seriesIndex) => {
     if (indexPatterns[series.dataType] && !isEmpty(series.reportDefinitions)) {
       items.push({
         series,
-        id: series.name,
+        id: seriesIndex,
         seriesConfig: getDefaultConfigs({
           reportType,
           dataType: series.dataType,

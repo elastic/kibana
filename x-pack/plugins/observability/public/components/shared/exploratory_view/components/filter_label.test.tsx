@@ -27,7 +27,7 @@ describe('FilterLabel', function () {
         value={'elastic-co'}
         label={'Web Application'}
         negate={false}
-        seriesId={'kpi-over-time'}
+        seriesId={0}
         removeFilter={jest.fn()}
         indexPattern={mockIndexPattern}
         series={mockUxSeries}
@@ -52,7 +52,7 @@ describe('FilterLabel', function () {
         value={'elastic-co'}
         label={'Web Application'}
         negate={false}
-        seriesId={'kpi-over-time'}
+        seriesId={0}
         removeFilter={removeFilter}
         indexPattern={mockIndexPattern}
         series={mockUxSeries}
@@ -76,7 +76,7 @@ describe('FilterLabel', function () {
         value={'elastic-co'}
         label={'Web Application'}
         negate={false}
-        seriesId={'kpi-over-time'}
+        seriesId={0}
         removeFilter={removeFilter}
         indexPattern={mockIndexPattern}
         series={mockUxSeries}
@@ -103,7 +103,7 @@ describe('FilterLabel', function () {
         value={'elastic-co'}
         label={'Web Application'}
         negate={true}
-        seriesId={'kpi-over-time'}
+        seriesId={0}
         removeFilter={jest.fn()}
         indexPattern={mockIndexPattern}
         series={mockUxSeries}

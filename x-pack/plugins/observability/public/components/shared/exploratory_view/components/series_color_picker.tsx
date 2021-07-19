@@ -13,7 +13,7 @@ import { useSeriesStorage } from '../hooks/use_series_storage';
 import { ToolbarButton } from '../../../../../../../../src/plugins/kibana_react/public';
 import { SeriesUrl } from '../types';
 
-export function SeriesColorPicker({ seriesId, series }: { seriesId: string; series: SeriesUrl }) {
+export function SeriesColorPicker({ seriesId, series }: { seriesId: number; series: SeriesUrl }) {
   const theme = useTheme();
 
   const { setSeries } = useSeriesStorage();
@@ -25,8 +25,7 @@ export function SeriesColorPicker({ seriesId, series }: { seriesId: string; seri
   };
 
   const color =
-    series.color ??
-    ((theme.eui as unknown) as Record<string, string>)[`euiColorVis${series.order}`];
+    series.color ?? ((theme.eui as unknown) as Record<string, string>)[`euiColorVis${seriesId}`];
 
   const button = (
     <EuiToolTip content={EDIT_SERIES_COLOR_LABEL}>

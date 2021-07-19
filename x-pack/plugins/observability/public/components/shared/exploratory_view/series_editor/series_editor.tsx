@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { MouseEvent, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiBasicTable,
@@ -42,8 +42,7 @@ export interface ReportTypeItem {
 }
 
 export interface BuilderItem {
-  id: string;
-  order: number;
+  id: number;
   series: SeriesUrl;
   seriesConfig: SeriesConfig;
 }
@@ -69,13 +68,11 @@ export const getSeriesToEdit = ({
     }
   };
 
-  return allSeries
-    .sort((a, b) => a.order - b.order)
-    .map((series) => {
-      const seriesConfig = getDataViewSeries(series.dataType)!;
+  return allSeries.map((series, seriesIndex) => {
+    const seriesConfig = getDataViewSeries(series.dataType)!;
 
-      return { id: series.name, order: series.order, series, seriesConfig };
-    });
+    return { id: seriesIndex, series, seriesConfig };
+  });
 };
 
 export const SeriesEditor = React.memo(function () {
@@ -103,6 +100,7 @@ export const SeriesEditor = React.memo(function () {
         const prevSeriesItem = prevState.find(({ id: prevId }) => prevId === id);
         if (
           prevSeriesItem &&
+          series.selectedMetricField &&
           prevSeriesItem.series.selectedMetricField !== series.selectedMetricField
         ) {
           newExpandRows[id] = (
@@ -160,7 +158,7 @@ export const SeriesEditor = React.memo(function () {
       isExpander: true,
       field: 'id',
       name: '',
-      render: (id: string, item: BuilderItem) =>
+      render: (id: number, item: BuilderItem) =>
         item.series.dataType && item.series.selectedMetricField ? (
           <EuiButtonIcon
             onClick={() => toggleDetails(item)}
@@ -174,7 +172,7 @@ export const SeriesEditor = React.memo(function () {
       name: '',
       field: 'id',
       width: '40px',
-      render: (seriesId: string, { seriesConfig, series }: BuilderItem) => (
+      render: (seriesId: number, { seriesConfig, series }: BuilderItem) => (
         <SeriesInfo seriesId={seriesId} series={series} seriesConfig={seriesConfig} />
       ),
     },
@@ -184,7 +182,7 @@ export const SeriesEditor = React.memo(function () {
       }),
       field: 'id',
       width: '20%',
-      render: (seriesId: string, { series }: BuilderItem) => (
+      render: (seriesId: number, { series }: BuilderItem) => (
         <SeriesName seriesId={seriesId} series={series} />
       ),
     },
@@ -194,7 +192,7 @@ export const SeriesEditor = React.memo(function () {
       }),
       field: 'id',
       width: '15%',
-      render: (seriesId: string, { series }: BuilderItem) => (
+      render: (seriesId: number, { series }: BuilderItem) => (
         <DataTypesSelect seriesId={seriesId} series={series} />
       ),
     },
@@ -204,7 +202,7 @@ export const SeriesEditor = React.memo(function () {
       }),
       field: 'id',
       width: '15%',
-      render: (seriesId: string, { seriesConfig, series }: BuilderItem) => (
+      render: (seriesId: number, { seriesConfig, series }: BuilderItem) => (
         <ReportMetricOptions
           series={series}
           seriesId={seriesId}
@@ -218,7 +216,7 @@ export const SeriesEditor = React.memo(function () {
       }),
       field: 'id',
       width: '27%',
-      render: (seriesId: string, { series }: BuilderItem) => (
+      render: (seriesId: number, { series }: BuilderItem) => (
         <DatePickerCol seriesId={seriesId} series={series} />
       ),
     },
@@ -229,7 +227,7 @@ export const SeriesEditor = React.memo(function () {
       }),
       width: '10%',
       field: 'id',
-      render: (seriesId: string, { series, seriesConfig }: BuilderItem) => (
+      render: (seriesId: number, { series, seriesConfig }: BuilderItem) => (
         <Breakdowns seriesConfig={seriesConfig} seriesId={seriesId} series={series} />
       ),
     },
@@ -241,7 +239,7 @@ export const SeriesEditor = React.memo(function () {
       align: 'center' as const,
       width: '8%',
       field: 'id',
-      render: (seriesId: string, { series }: BuilderItem) => (
+      render: (seriesId: number, { series }: BuilderItem) => (
         <SeriesActions seriesId={seriesId} series={series} editorMode={true} />
       ),
     },
@@ -253,29 +251,34 @@ export const SeriesEditor = React.memo(function () {
     return {
       className: classNames({
         isExpanded: itemIdToExpandedRowMap[item.id],
-        isIncomplete: !dataType || isEmpty(reportDefinitions),
+        isIncomplete: !dataType || isEmpty(reportDefinitions) || !selectedMetricField,
       }),
-      ...(dataType && selectedMetricField
-        ? {
-            onClick: (evt: MouseEvent) => {
-              const targetElem = evt.target as HTMLElement;
-
-              if (
-                targetElem.classList.contains('euiTableCellContent') &&
-                targetElem.tagName !== 'BUTTON'
-              ) {
-                toggleDetails(item);
-              }
-            },
-          }
-        : {}),
+      // commenting this for now, since adding on click on row, blocks adding space
+      // into text field for name column
+      // ...(dataType && selectedMetricField
+      //   ? {
+      //       onClick: (evt: MouseEvent) => {
+      //         const targetElem = evt.target as HTMLElement;
+      //
+      //         if (
+      //           targetElem.classList.contains('euiTableCellContent') &&
+      //           targetElem.tagName !== 'BUTTON'
+      //         ) {
+      //           toggleDetails(item);
+      //         }
+      //         evt.stopPropagation();
+      //         evt.preventDefault();
+      //       },
+      //     }
+      //   : {}),
     };
   };
 
   const resetView = () => {
-    allSeries.forEach((seriesT) => {
-      removeSeries(seriesT.name);
-    });
+    const totalSeries = allSeries.length;
+    for (let i = totalSeries; i >= 0; i--) {
+      removeSeries(i);
+    }
   };
 
   return (

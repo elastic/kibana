@@ -54,7 +54,6 @@ export function AnalyzeDataButton() {
         reportType: 'kpi-over-time',
         allSeries: [
           {
-            order: 0,
             name: `${serviceName}-response-latency`,
             selectedMetricField: TRANSACTION_DURATION,
             dataType: isRumAgentName(agentName) ? 'ux' : 'mobile',
