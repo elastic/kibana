@@ -284,6 +284,7 @@ describe('policy details: ', () => {
                       security: true,
                     },
                     malware: { mode: 'prevent' },
+                    memory_protection: { mode: 'off', supported: false },
                     ransomware: { mode: 'off', supported: false },
                     popup: {
                       malware: {
@@ -291,6 +292,10 @@ describe('policy details: ', () => {
                         message: '',
                       },
                       ransomware: {
+                        enabled: false,
+                        message: '',
+                      },
+                      memory_protection: {
                         enabled: false,
                         message: '',
                       },
