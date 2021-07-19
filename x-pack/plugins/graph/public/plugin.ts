@@ -19,10 +19,7 @@ import {
 } from '../../../../src/core/public';
 
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import {
-  initAngularBootstrap,
-  KibanaLegacyStart,
-} from '../../../../src/plugins/kibana_legacy/public';
+import { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/plugins/navigation/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 
@@ -77,7 +74,6 @@ export class GraphPlugin
 
     const config = this.initializerContext.config.get();
 
-    initAngularBootstrap();
     core.application.register({
       id: 'graph',
       title: 'Graph',
@@ -88,6 +84,7 @@ export class GraphPlugin
       updater$: this.appUpdater$,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
+        await pluginsStart.kibanaLegacy.loadAngularBootstrap();
         coreStart.chrome.docTitle.change(
           i18n.translate('xpack.graph.pageTitle', { defaultMessage: 'Graph' })
         );

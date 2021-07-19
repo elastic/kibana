@@ -53,6 +53,18 @@ export const configSchema = schema.object({
     )
   ),
   password: schema.maybe(schema.string()),
+  serviceAccountToken: schema.maybe(
+    schema.conditional(
+      schema.siblingRef('username'),
+      schema.never(),
+      schema.string(),
+      schema.string({
+        validate: () => {
+          return `serviceAccountToken cannot be specified when "username" is also set.`;
+        },
+      })
+    )
+  ),
   requestHeadersWhitelist: schema.oneOf(
     [
       schema.string({
@@ -272,6 +284,7 @@ export class ElasticsearchConfig {
   /**
    * If Elasticsearch is protected with basic authentication, this setting provides
    * the username that the Kibana server uses to perform its administrative functions.
+   * Cannot be used in conjunction with serviceAccountToken.
    */
   public readonly username?: string;
 
@@ -280,6 +293,14 @@ export class ElasticsearchConfig {
    * the password that the Kibana server uses to perform its administrative functions.
    */
   public readonly password?: string;
+
+  /**
+   * If Elasticsearch security features are enabled, this setting provides the service account
+   * token that the Kibana server users to perform its administrative functions.
+   *
+   * This is an alternative to specifying a username and password.
+   */
+  public readonly serviceAccountToken?: string;
 
   /**
    * Set of settings configure SSL connection between Kibana and Elasticsearch that
@@ -314,6 +335,7 @@ export class ElasticsearchConfig {
     this.healthCheckDelay = rawConfig.healthCheck.delay;
     this.username = rawConfig.username;
     this.password = rawConfig.password;
+    this.serviceAccountToken = rawConfig.serviceAccountToken;
     this.customHeaders = rawConfig.customHeaders;
 
     const { alwaysPresentCertificate, verificationMode } = rawConfig.ssl;

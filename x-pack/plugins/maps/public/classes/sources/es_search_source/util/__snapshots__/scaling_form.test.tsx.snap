@@ -28,7 +28,7 @@ exports[`scaling form should disable clusters option when clustering is not supp
       <EuiRadio
         checked={true}
         id="LIMIT"
-        label="Limit results to 10000."
+        label="Limit results to 10,000"
         onChange={[Function]}
       />
       <EuiToolTip
@@ -40,7 +40,7 @@ exports[`scaling form should disable clusters option when clustering is not supp
           checked={false}
           disabled={true}
           id="CLUSTERS"
-          label="Show clusters when results exceed 10000."
+          label="Show clusters when results exceed 10,000"
           onChange={[Function]}
         />
       </EuiToolTip>
@@ -114,14 +114,14 @@ exports[`scaling form should render 1`] = `
       <EuiRadio
         checked={true}
         id="LIMIT"
-        label="Limit results to 10000."
+        label="Limit results to 10,000"
         onChange={[Function]}
       />
       <EuiRadio
         checked={false}
         disabled={false}
         id="CLUSTERS"
-        label="Show clusters when results exceed 10000."
+        label="Show clusters when results exceed 10,000"
         onChange={[Function]}
       />
       <EuiToolTip

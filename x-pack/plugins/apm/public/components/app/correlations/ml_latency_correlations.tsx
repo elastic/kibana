@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import {
   EuiIcon,
   EuiBasicTableColumn,
@@ -36,6 +36,8 @@ import { useCorrelations } from './use_correlations';
 import { push } from '../../shared/Links/url_helpers';
 import { useUiTracker } from '../../../../../observability/public';
 import { asPreciseDecimal } from '../../../../common/utils/formatters';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { LatencyCorrelationsHelpPopover } from './ml_latency_correlations_help_popover';
 
 const DEFAULT_PERCENTILE_THRESHOLD = 95;
 const isErrorMessage = (arg: unknown): arg is Error => {
@@ -59,18 +61,10 @@ export function MlLatencyCorrelations({ onClose }: Props) {
     core: { notifications },
   } = useApmPluginContext();
 
-  const { serviceName } = useParams<{ serviceName: string }>();
+  const { serviceName, transactionType } = useApmServiceContext();
   const { urlParams } = useUrlParams();
 
-  const fetchOptions = useMemo(
-    () => ({
-      ...{
-        serviceName,
-        ...urlParams,
-      },
-    }),
-    [serviceName, urlParams]
-  );
+  const { environment, kuery, transactionName, start, end } = urlParams;
 
   const {
     error,
@@ -84,7 +78,15 @@ export function MlLatencyCorrelations({ onClose }: Props) {
   } = useCorrelations({
     index: 'apm-*',
     ...{
-      ...fetchOptions,
+      ...{
+        environment,
+        kuery,
+        serviceName,
+        transactionName,
+        transactionType,
+        start,
+        end,
+      },
       percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
     },
   });
@@ -151,7 +153,7 @@ export function MlLatencyCorrelations({ onClose }: Props) {
               'xpack.apm.correlations.latencyCorrelations.correlationsTable.correlationColumnDescription',
               {
                 defaultMessage:
-                  'The impact of a field on the latency of the service, ranging from 0 to 1.',
+                  'The correlation score [0-1] of an attribute; the greater the score, the more an attribute increases latency.',
               }
             )}
           >
@@ -263,20 +265,6 @@ export function MlLatencyCorrelations({ onClose }: Props) {
 
   return (
     <>
-      <EuiText size="s" color="subdued">
-        <p>
-          {i18n.translate(
-            'xpack.apm.correlations.latencyCorrelations.description',
-            {
-              defaultMessage:
-                'What is slowing down my service? Correlations will help discover a slower performance in a particular cohort of your data.',
-            }
-          )}
-        </p>
-      </EuiText>
-
-      <EuiSpacer size="m" />
-
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           {!isRunning && (
@@ -320,6 +308,9 @@ export function MlLatencyCorrelations({ onClose }: Props) {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <LatencyCorrelationsHelpPopover />
+        </EuiFlexItem>
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
@@ -332,8 +323,7 @@ export function MlLatencyCorrelations({ onClose }: Props) {
                 {
                   defaultMessage: 'Latency distribution for {name}',
                   values: {
-                    name:
-                      fetchOptions.transactionName ?? fetchOptions.serviceName,
+                    name: transactionName ?? serviceName,
                   },
                 }
               )}

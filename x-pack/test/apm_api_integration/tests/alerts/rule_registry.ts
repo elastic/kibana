@@ -376,6 +376,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "kibana.rac.alert.status": Array [
               "open",
             ],
+            "kibana.space_ids": Array [
+              "default",
+            ],
             "processor.event": Array [
               "transaction",
             ],
@@ -448,6 +451,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ],
             "kibana.rac.alert.status": Array [
               "open",
+            ],
+            "kibana.space_ids": Array [
+              "default",
             ],
             "processor.event": Array [
               "transaction",
@@ -555,6 +561,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ],
             "kibana.rac.alert.status": Array [
               "closed",
+            ],
+            "kibana.space_ids": Array [
+              "default",
             ],
             "processor.event": Array [
               "transaction",
