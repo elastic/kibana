@@ -34,8 +34,7 @@ module.exports = {
     'kbn-ui-shared-deps.v8.light': ['@elastic/eui/dist/eui_theme_amsterdam_light.css'],
   },
   context: __dirname,
-  // cheap-source-map should be used if needed
-  devtool: false,
+  devtool: 'eval-cheap-source-map',
   output: {
     path: UiSharedDeps.distDir,
     filename: '[name].js',
