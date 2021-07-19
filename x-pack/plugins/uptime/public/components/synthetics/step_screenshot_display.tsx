@@ -16,7 +16,7 @@ import {
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useContext, useEffect, useRef, useState, FC } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState, FC } from 'react';
 import useIntersection from 'react-use/lib/useIntersection';
 import {
   isScreenshotRef as isAScreenshotRef,
@@ -36,7 +36,7 @@ interface StepScreenshotDisplayProps {
   lazyLoad?: boolean;
 }
 
-const IMAGE_MAX_WIDTH = 450;
+const IMAGE_MAX_WIDTH = 640;
 
 const StepImage = styled(EuiImage)`
   &&& {
@@ -136,9 +136,23 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
     }
   }, [basePath, checkGroup, stepIndex, isScreenshotRef]);
 
+  const refDimensions = useMemo(() => {
+    if (isAScreenshotRef(screenshotRef)) {
+      const { height, width } = screenshotRef.ref.screenshotRef.screenshot_ref;
+      return { height, width };
+    }
+  }, [screenshotRef]);
+
   const shouldRenderImage = hasIntersected || !lazyLoad;
   return (
-    <div ref={containerRef} style={{ backgroundColor: pageBackground, maxWidth: IMAGE_MAX_WIDTH }}>
+    <div
+      ref={containerRef}
+      style={{
+        backgroundColor: pageBackground,
+        maxWidth: Math.min(IMAGE_MAX_WIDTH, refDimensions?.width ?? Number.MAX_VALUE),
+        maxHeight: refDimensions?.height ?? undefined,
+      }}
+    >
       {shouldRenderImage && isScreenshotBlob && (
         <BaseStepImage stepName={stepName} stepIndex={stepIndex} url={url} />
       )}
