@@ -15,7 +15,7 @@ const bodySchema = schema.object({
   maxNumSegments: schema.maybe(schema.number()),
 });
 
-export function registerForcemergeRoute({ router, lib }: RouteDependencies) {
+export function registerForcemergeRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.post(
     {
       path: addBasePath('/indices/forcemerge'),
@@ -38,15 +38,8 @@ export function registerForcemergeRoute({ router, lib }: RouteDependencies) {
       try {
         await client.asCurrentUser.indices.forcemerge(params);
         return response.ok();
-      } catch (e) {
-        if (lib.isEsError(e)) {
-          return response.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
-        }
-        // Case: default
-        throw e;
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     }
   );

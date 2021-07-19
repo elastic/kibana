@@ -21,7 +21,7 @@ function formatHit(hit: { [key: string]: {} }) {
   return hit[key];
 }
 
-export function registerLoadRoute({ router, lib }: RouteDependencies) {
+export function registerLoadRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.get(
     { path: addBasePath('/settings/{indexName}'), validate: { params: paramsSchema } },
     async (context, request, response) => {
@@ -38,15 +38,8 @@ export function registerLoadRoute({ router, lib }: RouteDependencies) {
       try {
         const { body: hit } = await client.asCurrentUser.indices.getSettings(params);
         return response.ok({ body: formatHit(hit) });
-      } catch (e) {
-        if (lib.isEsError(e)) {
-          return response.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
-        }
-        // Case: default
-        throw e;
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     }
   );

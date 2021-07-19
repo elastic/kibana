@@ -12,7 +12,7 @@ import { addBasePath } from '../index';
 
 const bodySchema = schema.object({}, { unknowns: 'allow' });
 
-export function registerSimulateRoute({ router, lib }: RouteDependencies) {
+export function registerSimulateRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.post(
     {
       path: addBasePath('/index_templates/simulate'),
@@ -28,19 +28,8 @@ export function registerSimulateRoute({ router, lib }: RouteDependencies) {
         });
 
         return response.ok({ body: templatePreview });
-      } catch (e) {
-        if (lib.isEsError(e)) {
-          const error = lib.parseEsError(e.response);
-          return response.customError({
-            statusCode: e.statusCode,
-            body: {
-              message: error.message,
-              attributes: error,
-            },
-          });
-        }
-        // Case: default
-        throw e;
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     }
   );

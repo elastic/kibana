@@ -14,7 +14,7 @@ const bodySchema = schema.object({
   indices: schema.arrayOf(schema.string()),
 });
 
-export function registerDeleteRoute({ router, lib }: RouteDependencies) {
+export function registerDeleteRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.post(
     { path: addBasePath('/indices/delete'), validate: { body: bodySchema } },
     async (context, request, response) => {
@@ -30,15 +30,8 @@ export function registerDeleteRoute({ router, lib }: RouteDependencies) {
       try {
         await client.asCurrentUser.indices.delete(params);
         return response.ok();
-      } catch (e) {
-        if (lib.isEsError(e)) {
-          return response.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
-        }
-        // Case: default
-        throw e;
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     }
   );

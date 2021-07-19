@@ -16,7 +16,7 @@ const paramsSchema = schema.object({
   indexName: schema.string(),
 });
 
-export function registerUpdateRoute({ router, lib }: RouteDependencies) {
+export function registerUpdateRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.put(
     {
       path: addBasePath('/settings/{indexName}'),
@@ -36,15 +36,8 @@ export function registerUpdateRoute({ router, lib }: RouteDependencies) {
       try {
         const { body: responseBody } = await client.asCurrentUser.indices.putSettings(params);
         return response.ok({ body: responseBody });
-      } catch (e) {
-        if (lib.isEsError(e)) {
-          return response.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
-        }
-        // Case: default
-        throw e;
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     }
   );

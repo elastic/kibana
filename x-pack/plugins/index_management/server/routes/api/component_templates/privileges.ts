@@ -17,7 +17,11 @@ const extractMissingPrivileges = (privilegesObject: { [key: string]: boolean } =
     return privileges;
   }, []);
 
-export const registerPrivilegesRoute = ({ router, config }: RouteDependencies) => {
+export const registerPrivilegesRoute = ({
+  router,
+  config,
+  lib: { handleEsError },
+}: RouteDependencies) => {
   router.get(
     {
       path: addBasePath('/component_templates/privileges'),
@@ -39,7 +43,9 @@ export const registerPrivilegesRoute = ({ router, config }: RouteDependencies) =
       const { client } = context.core.elasticsearch;
 
       try {
-        const { body: { has_all_requested: hasAllPrivileges, cluster } } = await client.asCurrentUser.security.hasPrivileges({
+        const {
+          body: { has_all_requested: hasAllPrivileges, cluster },
+        } = await client.asCurrentUser.security.hasPrivileges({
           body: {
             cluster: ['manage_index_templates'],
           },
@@ -52,8 +58,8 @@ export const registerPrivilegesRoute = ({ router, config }: RouteDependencies) =
         privilegesResult.hasAllPrivileges = hasAllPrivileges;
 
         return response.ok({ body: privilegesResult });
-      } catch (e) {
-        throw e;
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     }
   );

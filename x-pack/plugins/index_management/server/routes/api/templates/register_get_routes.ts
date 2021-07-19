@@ -66,7 +66,7 @@ const querySchema = schema.object({
   legacy: schema.maybe(schema.oneOf([schema.literal('true'), schema.literal('false')])),
 });
 
-export function registerGetOneRoute({ router, lib }: RouteDependencies) {
+export function registerGetOneRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.get(
     {
       path: addBasePath('/index_templates/{name}'),
@@ -109,15 +109,8 @@ export function registerGetOneRoute({ router, lib }: RouteDependencies) {
         }
 
         return response.notFound();
-      } catch (e) {
-        if (lib.isEsError(e)) {
-          return response.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
-        }
-        // Case: default
-        throw e;
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     }
   );

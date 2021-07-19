@@ -9,7 +9,11 @@ import { fetchIndices } from '../../../lib/fetch_indices';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 
-export function registerListRoute({ router, indexDataEnricher, lib }: RouteDependencies) {
+export function registerListRoute({
+  router,
+  indexDataEnricher,
+  lib: { handleEsError },
+}: RouteDependencies) {
   router.get(
     { path: addBasePath('/indices'), validate: false },
     async (context, request, response) => {
@@ -17,15 +21,8 @@ export function registerListRoute({ router, indexDataEnricher, lib }: RouteDepen
       try {
         const indices = await fetchIndices(client, indexDataEnricher);
         return response.ok({ body: indices });
-      } catch (e) {
-        if (lib.isEsError(e)) {
-          return response.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
-        }
-        // Case: default
-        throw e;
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     }
   );

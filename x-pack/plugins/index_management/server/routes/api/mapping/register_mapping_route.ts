@@ -21,7 +21,7 @@ function formatHit(hit: { [key: string]: { mappings: any } }, indexName: string)
   };
 }
 
-export function registerMappingRoute({ router, lib }: RouteDependencies) {
+export function registerMappingRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.get(
     { path: addBasePath('/mapping/{indexName}'), validate: { params: paramsSchema } },
     async (context, request, response) => {
@@ -36,15 +36,8 @@ export function registerMappingRoute({ router, lib }: RouteDependencies) {
         const { body: hit } = await client.asCurrentUser.indices.getMapping(params);
         const responseBody = formatHit(hit, indexName);
         return response.ok({ body: responseBody });
-      } catch (e) {
-        if (lib.isEsError(e)) {
-          return response.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
-        }
-        // Case: default
-        throw e;
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     }
   );

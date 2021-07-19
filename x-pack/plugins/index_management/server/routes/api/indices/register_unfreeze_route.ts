@@ -14,7 +14,7 @@ const bodySchema = schema.object({
   indices: schema.arrayOf(schema.string()),
 });
 
-export function registerUnfreezeRoute({ router, lib }: RouteDependencies) {
+export function registerUnfreezeRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.post(
     { path: addBasePath('/indices/unfreeze'), validate: { body: bodySchema } },
     async (context, request, response) => {
@@ -26,15 +26,8 @@ export function registerUnfreezeRoute({ router, lib }: RouteDependencies) {
           index: encodeURIComponent(indices.join(',')),
         });
         return response.ok();
-      } catch (e) {
-        if (lib.isEsError(e)) {
-          return response.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
-        }
-        // Case: default
-        throw e;
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     }
   );

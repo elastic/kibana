@@ -22,7 +22,7 @@ const bodySchema = schema.object({
   ),
 });
 
-export function registerDeleteRoute({ router }: RouteDependencies) {
+export function registerDeleteRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.post(
     {
       path: addBasePath('/delete_index_templates'),
@@ -53,11 +53,8 @@ export function registerDeleteRoute({ router }: RouteDependencies) {
             }
 
             return responseBody.templatesDeleted.push(name);
-          } catch (e) {
-            return responseBody.errors.push({
-              name,
-              error: wrapEsError(e),
-            });
+          } catch (error) {
+            return response.errors.push(handleEsError({ error, response: res }));
           }
         })
       );
