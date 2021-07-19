@@ -58,11 +58,11 @@ export const UNKNOWN_RULE = i18n.translate('xpack.cases.caseView.unknownRule.lab
 });
 
 export const ISOLATED_HOST = i18n.translate('xpack.cases.caseView.isolatedHost', {
-  defaultMessage: 'isolate submitted on host',
+  defaultMessage: 'isolate request submitted on host',
 });
 
 export const RELEASED_HOST = i18n.translate('xpack.cases.caseView.releasedHost', {
-  defaultMessage: 'release submitted on host',
+  defaultMessage: 'release request submitted on host',
 });
 
 export const OTHER_ENDPOINTS = (endpoints: number): string =>
