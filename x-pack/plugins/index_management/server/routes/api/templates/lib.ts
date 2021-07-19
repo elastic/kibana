@@ -21,6 +21,7 @@ export const doesTemplateExist = async ({
   if (isLegacy) {
     return await client.asCurrentUser.indices.existsTemplate({ name });
   }
+
   return await client.asCurrentUser.indices.existsIndexTemplate({ name });
 };
 

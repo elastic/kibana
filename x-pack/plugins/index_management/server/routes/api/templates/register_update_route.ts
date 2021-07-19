@@ -18,7 +18,7 @@ const paramsSchema = schema.object({
   name: schema.string(),
 });
 
-export function registerUpdateRoute({ router, lib }: RouteDependencies) {
+export function registerUpdateRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.put(
     {
       path: addBasePath('/index_templates/{name}'),
@@ -28,35 +28,25 @@ export function registerUpdateRoute({ router, lib }: RouteDependencies) {
       const { client } = context.core.elasticsearch;
       const { name } = request.params as typeof paramsSchema.type;
       const template = request.body as TemplateDeserialized;
-      const {
-        _kbnMeta: { isLegacy },
-      } = template;
-
-      // Verify the template exists (ES will throw 404 if not)
-      const { body: templateExists } = await doesTemplateExist({ name, client, isLegacy });
-
-      if (!templateExists) {
-        return response.notFound();
-      }
 
       try {
+        const {
+          _kbnMeta: { isLegacy },
+        } = template;
+
+        // Verify the template exists (ES will throw 404 if not)
+        const { body: templateExists } = await doesTemplateExist({ name, client, isLegacy });
+
+        if (!templateExists) {
+          return response.notFound();
+        }
+
         // Next, update index template
         const { body: responseBody } = await saveTemplate({ template, client, isLegacy });
 
         return response.ok({ body: responseBody });
-      } catch (e) {
-        if (lib.isEsError(e)) {
-          const error = lib.parseEsError(e.response);
-          return response.customError({
-            statusCode: e.statusCode,
-            body: {
-              message: error.message,
-              attributes: error,
-            },
-          });
-        }
-        // Case: default
-        throw e;
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     }
   );

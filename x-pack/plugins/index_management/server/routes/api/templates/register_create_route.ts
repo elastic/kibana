@@ -15,54 +15,44 @@ import { saveTemplate, doesTemplateExist } from './lib';
 
 const bodySchema = templateSchema;
 
-export function registerCreateRoute({ router, lib }: RouteDependencies) {
+export function registerCreateRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.post(
     { path: addBasePath('/index_templates'), validate: { body: bodySchema } },
     async (context, request, response) => {
       const { client } = context.core.elasticsearch;
       const template = request.body as TemplateDeserialized;
-      const {
-        _kbnMeta: { isLegacy },
-      } = template;
-
-      // Check that template with the same name doesn't already exist
-      const { body: templateExists } = await doesTemplateExist({
-        name: template.name,
-        client,
-        isLegacy,
-      });
-
-      if (templateExists) {
-        return response.conflict({
-          body: new Error(
-            i18n.translate('xpack.idxMgmt.createRoute.duplicateTemplateIdErrorMessage', {
-              defaultMessage: "There is already a template with name '{name}'.",
-              values: {
-                name: template.name,
-              },
-            })
-          ),
-        });
-      }
 
       try {
+        const {
+          _kbnMeta: { isLegacy },
+        } = template;
+
+        // Check that template with the same name doesn't already exist
+        const { body: templateExists } = await doesTemplateExist({
+          name: template.name,
+          client,
+          isLegacy,
+        });
+
+        if (templateExists) {
+          return response.conflict({
+            body: new Error(
+              i18n.translate('xpack.idxMgmt.createRoute.duplicateTemplateIdErrorMessage', {
+                defaultMessage: "There is already a template with name '{name}'.",
+                values: {
+                  name: template.name,
+                },
+              })
+            ),
+          });
+        }
+
         // Otherwise create new index template
         const { body: responseBody } = await saveTemplate({ template, client, isLegacy });
 
         return response.ok({ body: responseBody });
-      } catch (e) {
-        if (lib.isEsError(e)) {
-          const error = lib.parseEsError(e.response);
-          return response.customError({
-            statusCode: e.statusCode,
-            body: {
-              message: error.message,
-              attributes: error,
-            },
-          });
-        }
-        // Case: default
-        throw e;
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     }
   );

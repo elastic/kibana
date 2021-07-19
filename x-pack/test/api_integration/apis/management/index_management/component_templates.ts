@@ -281,8 +281,19 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body).to.eql({
           statusCode: 404,
           error: 'Not Found',
-          message:
-            '[resource_not_found_exception] component template matching [component_does_not_exist] not found',
+          message: 'component template matching [component_does_not_exist] not found',
+          attributes: {
+            error: {
+              reason: 'component template matching [component_does_not_exist] not found',
+              root_cause: [
+                {
+                  reason: 'component template matching [component_does_not_exist] not found',
+                  type: 'resource_not_found_exception',
+                },
+              ],
+              type: 'resource_not_found_exception',
+            },
+          },
         });
       });
     });
@@ -356,10 +367,19 @@ export default function ({ getService }: FtrProviderContext) {
         const uri = `${API_BASE_PATH}/component_templates/${componentTemplateName},${COMPONENT_DOES_NOT_EXIST}`;
 
         const { body } = await supertest.delete(uri).set('kbn-xsrf', 'xxx').expect(200);
-
         expect(body.itemsDeleted).to.eql([componentTemplateName]);
         expect(body.errors[0].name).to.eql(COMPONENT_DOES_NOT_EXIST);
-        expect(body.errors[0].error.msg).to.contain('resource_not_found_exception');
+
+        expect(body.errors[0].error.payload.attributes.error).to.eql({
+          root_cause: [
+            {
+              type: 'resource_not_found_exception',
+              reason: 'component_does_not_exist',
+            },
+          ],
+          type: 'resource_not_found_exception',
+          reason: 'component_does_not_exist',
+        });
       });
     });
 
