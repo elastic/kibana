@@ -10,6 +10,7 @@ import {
   CoreStart,
   SavedObjectsClientContract,
 } from 'kibana/server';
+import { TelemetryUsageCounter } from '../../routes/typings';
 import { APMPluginStartDependencies } from '../../types';
 import { getInternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client';
 import { Setup } from '../helpers/setup_request';
@@ -21,11 +22,19 @@ export async function syncAgentConfigsToApmPackagePolicies({
   core,
   fleetPluginStart,
   setup,
+  telemetryUsageCounter,
 }: {
   core: { setup: CoreSetup; start: () => Promise<CoreStart> };
   fleetPluginStart: NonNullable<APMPluginStartDependencies['fleet']>;
   setup: Setup;
+  telemetryUsageCounter?: TelemetryUsageCounter;
 }) {
+  if (telemetryUsageCounter) {
+    telemetryUsageCounter.incrementCounter({
+      counterName: 'sync_agent_config_to_apm_package_policies',
+      counterType: 'success',
+    });
+  }
   const coreStart = await core.start();
   const esClient = coreStart.elasticsearch.client.asInternalUser;
   const [

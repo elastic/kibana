@@ -58,6 +58,13 @@ export const useValuesList = ({
     [query]
   );
 
+  useEffect(() => {
+    if (!query) {
+      // in case query is cleared, we don't wait for debounce
+      setDebounceQuery(query);
+    }
+  }, [query]);
+
   const { data, loading } = useEsSearch(
     createEsParams({
       index: indexPatternTitle!,

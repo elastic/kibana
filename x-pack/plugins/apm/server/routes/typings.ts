@@ -18,6 +18,7 @@ import type { RacApiRequestHandlerContext } from '../../../rule_registry/server'
 import { LicensingApiRequestHandlerContext } from '../../../licensing/server';
 import { APMConfig } from '..';
 import { APMPluginDependencies } from '../types';
+import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server';
 
 export interface ApmPluginRequestHandlerContext extends RequestHandlerContext {
   licensing: LicensingApiRequestHandlerContext;
@@ -47,6 +48,10 @@ export interface APMRouteCreateOptions {
   };
 }
 
+export type TelemetryUsageCounter = ReturnType<
+  UsageCollectionSetup['createUsageCounter']
+>;
+
 export interface APMRouteHandlerResources {
   request: KibanaRequest;
   context: ApmPluginRequestHandlerContext;
@@ -68,4 +73,5 @@ export interface APMRouteHandlerResources {
     };
   };
   ruleDataClient: RuleDataClient;
+  telemetryUsageCounter?: TelemetryUsageCounter;
 }

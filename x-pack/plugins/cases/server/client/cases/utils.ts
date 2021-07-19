@@ -93,13 +93,53 @@ const getCommentContent = (comment: CommentResponse): string => {
   return '';
 };
 
-const countAlerts = (comments: CaseResponse['comments']): number =>
-  comments?.reduce<number>((total, comment) => {
-    if (comment.type === CommentType.alert || comment.type === CommentType.generatedAlert) {
-      return total + (Array.isArray(comment.alertId) ? comment.alertId.length : 1);
-    }
-    return total;
-  }, 0) ?? 0;
+interface CountAlertsInfo {
+  totalComments: number;
+  pushed: number;
+  totalAlerts: number;
+}
+
+const getAlertsInfo = (
+  comments: CaseResponse['comments']
+): { totalAlerts: number; hasUnpushedAlertComments: boolean } => {
+  const countingInfo = { totalComments: 0, pushed: 0, totalAlerts: 0 };
+
+  const res =
+    comments?.reduce<CountAlertsInfo>(({ totalComments, pushed, totalAlerts }, comment) => {
+      if (comment.type === CommentType.alert || comment.type === CommentType.generatedAlert) {
+        return {
+          totalComments: totalComments + 1,
+          pushed: comment.pushed_at != null ? pushed + 1 : pushed,
+          totalAlerts: totalAlerts + (Array.isArray(comment.alertId) ? comment.alertId.length : 1),
+        };
+      }
+      return { totalComments, pushed, totalAlerts };
+    }, countingInfo) ?? countingInfo;
+
+  return {
+    totalAlerts: res.totalAlerts,
+    hasUnpushedAlertComments: res.totalComments > res.pushed,
+  };
+};
+
+const addAlertMessage = (
+  caseId: string,
+  caseComments: CaseResponse['comments'],
+  comments: ExternalServiceComment[]
+): ExternalServiceComment[] => {
+  const { totalAlerts, hasUnpushedAlertComments } = getAlertsInfo(caseComments);
+
+  const newComments = [...comments];
+
+  if (hasUnpushedAlertComments) {
+    newComments.push({
+      comment: `Elastic Alerts attached to the case: ${totalAlerts}`,
+      commentId: `${caseId}-total-alerts`,
+    });
+  }
+
+  return newComments;
+};
 
 export const createIncident = async ({
   actionsClient,
@@ -177,8 +217,6 @@ export const createIncident = async ({
       commentsIdsToBeUpdated.has(comment.id)
   );
 
-  const totalAlerts = countAlerts(caseComments);
-
   let comments: ExternalServiceComment[] = [];
 
   if (commentsToBeUpdated && Array.isArray(commentsToBeUpdated) && commentsToBeUpdated.length > 0) {
@@ -188,12 +226,7 @@ export const createIncident = async ({
     }
   }
 
-  if (totalAlerts > 0) {
-    comments.push({
-      comment: `Elastic Alerts attached to the case: ${totalAlerts}`,
-      commentId: `${theCase.id}-total-alerts`,
-    });
-  }
+  comments = addAlertMessage(theCase.id, caseComments, comments);
 
   return { incident, comments };
 };
