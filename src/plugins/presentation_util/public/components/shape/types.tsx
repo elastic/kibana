@@ -71,8 +71,8 @@ export interface SvgConfig {
 }
 
 export type ShapeDrawerProps = {
-  shapeType: any;
-  getShape: (shapeType: any) => ShapeType | undefined;
+  shapeType: string;
+  getShape: (shapeType: string) => ShapeType | undefined;
   ref: Ref<ShapeRef>;
 } & ShapeProps;
 

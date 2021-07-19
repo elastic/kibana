@@ -22,10 +22,9 @@ import { Star as star } from './star';
 import { Tag as tag } from './tag';
 import { Triangle as triangle } from './triangle';
 import { TriangleRight as triangleRight } from './triangle_right';
-import { Shape } from '../../../common/types';
 import { ShapeType } from '../../../../../../src/plugins/presentation_util/public';
 
-const shapes: { [key in Shape]: ShapeType } = {
+const shapes: { [key: string]: ShapeType } = {
   arrow,
   arrowMulti,
   bookmark,
@@ -44,5 +43,4 @@ const shapes: { [key in Shape]: ShapeType } = {
   triangleRight,
 };
 
-export const getShape = (shapeType: keyof typeof shapes | null) =>
-  shapeType ? shapes[shapeType] : undefined;
+export const getShape = (shapeType: string) => shapes[shapeType];
