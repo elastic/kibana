@@ -7,7 +7,10 @@
 
 import { KibanaRequest } from 'src/core/server';
 import { CancellationToken } from '../../../common';
-import { CSV_SEARCHSOURCE_IMMEDIATE_TYPE } from '../../../common/constants';
+import {
+  CSV_SEARCHSOURCE_IMMEDIATE_TYPE,
+  CSV_SEARCHSOURCE_VERSION,
+} from '../../../common/constants';
 import { TaskRunResult } from '../../lib/tasks';
 import { getFieldFormats } from '../../services';
 import { ReportingRequestHandlerContext, RunTaskFnFactory } from '../../types';
@@ -32,9 +35,10 @@ export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function e
   const config = reporting.getConfig();
   const logger = parentLogger.clone([CSV_SEARCHSOURCE_IMMEDIATE_TYPE, 'execute-job']);
 
-  return async function runTask(jobId, immediateJobParams, context, req) {
+  return async function runTask(_jobId, immediateJobParams, context, req) {
     const job = {
       objectType: 'immediate-search',
+      version: CSV_SEARCHSOURCE_VERSION,
       ...immediateJobParams,
     };
 

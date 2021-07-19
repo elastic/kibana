@@ -11,7 +11,8 @@ import type { BaseParams, BasePayload } from '../../types';
 export type RawValue = string | object | null | undefined;
 
 interface BaseParamsCSV {
-  browserTimezone: string;
+  browserTimezone: string; // used for formatting timestamps
+  version: string; // version of the last supported release in case it needs migration for forward-compatibility
   searchSource: SearchSourceFields;
   columns?: string[];
 }

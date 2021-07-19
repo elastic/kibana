@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CSV_JOB_TYPE } from '../../../common/constants';
+import { CSV_JOB_TYPE, CSV_SEARCHSOURCE_VERSION } from '../../../common/constants';
 import { cryptoFactory } from '../../lib';
 import { CreateJobFn, CreateJobFnFactory } from '../../types';
 import { JobParamsCSV, TaskPayloadCSV } from './types';
@@ -18,8 +18,16 @@ export const createJobFnFactory: CreateJobFnFactory<
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
 
-  return async function createJob(jobParams, context, request) {
+  return async function createJob(jobParams, _context, request) {
     const serializedEncryptedHeaders = await crypto.encrypt(request.headers);
+
+    if (jobParams.version) {
+      logger.debug(`Using SearchSource v${jobParams.version}`);
+    } else {
+      logger.warning(
+        `No version provided for SearchSource version. Assuming ${CSV_SEARCHSOURCE_VERSION}`
+      );
+    }
 
     return {
       headers: serializedEncryptedHeaders,

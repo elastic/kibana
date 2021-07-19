@@ -68,6 +68,10 @@ export const PDF_JOB_TYPE = 'printable_pdf';
 export const PNG_REPORT_TYPE = 'PNG';
 export const PNG_JOB_TYPE = 'PNG';
 
+// searchsource data from incoming jobs must be compatible with this version,
+// or else a migration is needed
+export const CSV_SEARCHSOURCE_VERSION = '7.13.0';
+
 export const CSV_SEARCHSOURCE_IMMEDIATE_TYPE = 'csv_searchsource_immediate';
 
 // This is deprecated because it lacks support for runtime fields
