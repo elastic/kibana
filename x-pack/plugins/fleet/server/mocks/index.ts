@@ -77,7 +77,8 @@ export const createPackagePolicyServiceMock = () => {
     runExternalCallbacks: jest.fn(),
     upgrade: jest.fn(),
     getUpgradeDryRunDiff: jest.fn(),
-  } as jest.Mocked<Omit<PackagePolicyServiceInterface, 'getUpgradePackagePolicyInfo'>>;
+    getUpgradePackagePolicyInfo: jest.fn(),
+  } as jest.Mocked<PackagePolicyServiceInterface>;
 };
 
 /**

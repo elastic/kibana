@@ -438,7 +438,7 @@ class PackagePolicyService {
     return result;
   }
 
-  private async getUpgradePackagePolicyInfo(soClient: SavedObjectsClientContract, id: string) {
+  public async getUpgradePackagePolicyInfo(soClient: SavedObjectsClientContract, id: string) {
     const packagePolicy = await this.get(soClient, id);
     if (!packagePolicy) {
       throw new Error(
