@@ -158,6 +158,12 @@ describe('createRouter', () => {
         router.getParams('/service-map', history.location);
       }).toThrowError('No matching route found for /service-map');
     });
+
+    it('does not throw an error if the given path does not match any routes but is marked as optional', () => {
+      expect(() => {
+        router.getParams('/service-map', history.location, true);
+      }).not.toThrowError();
+    });
   });
 
   describe('matchRoutes', () => {
