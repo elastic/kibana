@@ -7,6 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { Observable } from 'rxjs';
 
 import { Datatable, ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 
@@ -22,7 +23,7 @@ import { handleRequest } from './request_handler';
 const name = 'esaggs';
 
 type Input = KibanaContext | null;
-type Output = Promise<Datatable>;
+type Output = Observable<Datatable>;
 
 interface Arguments {
   index: IndexPatternExpressionType;
