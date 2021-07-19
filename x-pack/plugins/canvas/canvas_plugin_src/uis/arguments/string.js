@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexItem, EuiFlexGroup, EuiFieldText, EuiButton } from '@elastic/eui';
 import { get } from 'lodash';
@@ -22,17 +22,18 @@ const StringArgInput = ({ argValue, typeInstance, onValueChange, argId }) => {
     setValue(argValue);
   }, [argValue]);
 
+  const onChange = useCallback(
+    (ev) => {
+      const onChangeFn = confirm ? setValue : onValueChange;
+      onChangeFn(ev.target.value);
+    },
+    [confirm, onValueChange]
+  );
+
   return (
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem>
-        <EuiFieldText
-          compressed
-          id={argId}
-          value={value}
-          onChange={
-            confirm ? (ev) => setValue(ev.target.value) : (ev) => onValueChange(ev.target.value)
-          }
-        />
+        <EuiFieldText compressed id={argId} value={value} onChange={onChange} />
       </EuiFlexItem>
       {confirm && (
         <EuiFlexItem grow={false} className="canvasSidebar__panel-noMinWidth">
