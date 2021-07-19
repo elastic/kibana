@@ -1,5 +1,5 @@
 post:
-  summary: Ingest Manager - Setup
+  summary: Setup
   tags: []
   responses:
     '200':
