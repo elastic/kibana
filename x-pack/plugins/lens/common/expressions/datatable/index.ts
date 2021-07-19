@@ -6,6 +6,7 @@
  */
 
 export * from './datatable_column';
+export * from './datatable_transformer';
 export * from './datatable';
 export * from './sorting';
 export * from './summary';

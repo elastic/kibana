@@ -6,22 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { cloneDeep } from 'lodash';
-import type {
-  DatatableColumnMeta,
-  ExpressionFunctionDefinition,
-} from '../../../../../../src/plugins/expressions/common';
-import type { FormatFactory, LensMultiTable } from '../../types';
-import type { ColumnConfigArg } from './datatable_column';
-import { getSortingCriteria } from './sorting';
-import { computeSummaryRowForColumn } from './summary';
-import { transposeTable } from './transpose_helpers';
+import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common';
+import type { DatatableTransformerResult, DatatableTransformerArgs } from './datatable_transformer';
 
-export interface DatatableProps {
-  data: LensMultiTable;
-  untransposedData?: LensMultiTable;
+export type DatatableProps = Omit<DatatableTransformerResult, 'type'> & {
   args: DatatableArgs;
-}
+};
 
 export interface DatatableRender {
   type: 'render';
@@ -29,31 +19,25 @@ export interface DatatableRender {
   value: DatatableProps;
 }
 
-export interface DatatableArgs {
+interface DatatableRendererArgs extends Omit<DatatableTransformerArgs, 'columns'> {
   title: string;
   description?: string;
-  columns: ColumnConfigArg[];
-  sortingColumnId: string | undefined;
-  sortingDirection: 'asc' | 'desc' | 'none';
 }
 
-function isRange(meta: { params?: { id?: string } } | undefined) {
-  return meta?.params?.id === 'range';
+export interface DatatableArgs extends DatatableTransformerArgs {
+  title: string;
+  description?: string;
 }
 
-export const getDatatable = ({
-  formatFactory,
-}: {
-  formatFactory: FormatFactory;
-}): ExpressionFunctionDefinition<
+export const datatable: ExpressionFunctionDefinition<
   'lens_datatable',
-  LensMultiTable,
-  DatatableArgs,
+  DatatableTransformerResult,
+  DatatableRendererArgs,
   DatatableRender
-> => ({
+> = {
   name: 'lens_datatable',
   type: 'render',
-  inputTypes: ['lens_multitable'],
+  inputTypes: ['multiple_lens_multitable'],
   help: i18n.translate('xpack.lens.datatable.expressionHelpLabel', {
     defaultMessage: 'Datatable renderer',
   }),
@@ -68,11 +52,6 @@ export const getDatatable = ({
       types: ['string'],
       help: '',
     },
-    columns: {
-      types: ['lens_datatable_column'],
-      help: '',
-      multi: true,
-    },
     sortingColumnId: {
       types: ['string'],
       help: '',
@@ -83,60 +62,14 @@ export const getDatatable = ({
     },
   },
   fn(data, args, context) {
-    let untransposedData: LensMultiTable | undefined;
-    // do the sorting at this level to propagate it also at CSV download
-    const [firstTable] = Object.values(data.tables);
-    const [layerId] = Object.keys(context.inspectorAdapters.tables || {});
-    const formatters: Record<string, ReturnType<FormatFactory>> = {};
-
-    firstTable.columns.forEach((column) => {
-      formatters[column.id] = formatFactory(column.meta?.params);
-    });
-
-    const hasTransposedColumns = args.columns.some((c) => c.isTransposed);
-    if (hasTransposedColumns) {
-      // store original shape of data separately
-      untransposedData = cloneDeep(data);
-      // transposes table and args inplace
-      transposeTable(args, firstTable, formatters);
-    }
-
+    const [firstTable] = Object.values(data.data.tables);
     const { sortingColumnId: sortBy, sortingDirection: sortDirection } = args;
 
-    const columnsReverseLookup = firstTable.columns.reduce<
-      Record<string, { name: string; index: number; meta?: DatatableColumnMeta }>
-    >((memo, { id, name, meta }, i) => {
-      memo[id] = { name, index: i, meta };
-      return memo;
-    }, {});
-
-    const columnsWithSummary = args.columns.filter((c) => c.summaryRow);
-    for (const column of columnsWithSummary) {
-      column.summaryRowValue = computeSummaryRowForColumn(
-        column,
-        firstTable,
-        formatters,
-        formatFactory({ id: 'number' })
-      );
-    }
-
-    if (sortBy && columnsReverseLookup[sortBy] && sortDirection !== 'none') {
-      // Sort on raw values for these types, while use the formatted value for the rest
-      const sortingCriteria = getSortingCriteria(
-        isRange(columnsReverseLookup[sortBy]?.meta)
-          ? 'range'
-          : columnsReverseLookup[sortBy]?.meta?.type,
-        sortBy,
-        formatters[sortBy],
-        sortDirection
-      );
-      // replace the table here
-      context.inspectorAdapters.tables[layerId].rows = (firstTable.rows || [])
-        .slice()
-        .sort(sortingCriteria);
-      // replace also the local copy
-      firstTable.rows = context.inspectorAdapters.tables[layerId].rows;
-    } else {
+    if (
+      !sortBy ||
+      sortDirection === 'none' ||
+      !firstTable.columns.some(({ id }) => id === sortBy)
+    ) {
       args.sortingColumnId = undefined;
       args.sortingDirection = 'none';
     }
@@ -144,10 +77,12 @@ export const getDatatable = ({
       type: 'render',
       as: 'lens_datatable_renderer',
       value: {
-        data,
-        untransposedData,
-        args,
+        ...data,
+        args: {
+          ...args,
+          columns: data.columns,
+        },
       },
     };
   },
-});
+};

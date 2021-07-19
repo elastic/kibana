@@ -31,7 +31,8 @@ export class DatatableVisualization {
   ) {
     editorFrame.registerVisualization(async () => {
       const {
-        getDatatable,
+        datatable,
+        getDatatableTransformer,
         datatableColumn,
         getDatatableRenderer,
         getDatatableVisualization,
@@ -40,7 +41,10 @@ export class DatatableVisualization {
       const resolvedFormatFactory = await formatFactory;
 
       expressions.registerFunction(() => datatableColumn);
-      expressions.registerFunction(() => getDatatable({ formatFactory: resolvedFormatFactory }));
+      expressions.registerFunction(() => datatable);
+      expressions.registerFunction(() =>
+        getDatatableTransformer({ formatFactory: resolvedFormatFactory })
+      );
       expressions.registerRenderer(() =>
         getDatatableRenderer({
           formatFactory: resolvedFormatFactory,

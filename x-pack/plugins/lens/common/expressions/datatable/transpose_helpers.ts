@@ -46,7 +46,7 @@ export function getOriginalId(id: string) {
  * @param formatters Formatters for all columns to transpose columns by actual display values
  */
 export function transposeTable(
-  args: DatatableArgs,
+  args: Pick<DatatableArgs, 'columns'>,
   firstTable: Datatable,
   formatters: Record<string, FieldFormat>
 ) {
@@ -116,7 +116,7 @@ function transposeRows(
  * grouped by unique value
  */
 function updateColumnArgs(
-  args: DatatableArgs,
+  args: Pick<DatatableArgs, 'columns'>,
   bucketsColumnArgs: ColumnConfig['columns'],
   transposedColumnGroups: Array<ColumnConfig['columns']>
 ) {
@@ -154,7 +154,7 @@ function getUniqueValues(table: Datatable, formatter: FieldFormat, columnId: str
  * @param uniqueValues
  */
 function transposeColumns(
-  args: DatatableArgs,
+  args: Pick<DatatableArgs, 'columns'>,
   bucketsColumnArgs: ColumnConfig['columns'],
   metricColumns: ColumnConfig['columns'],
   firstTable: Datatable,

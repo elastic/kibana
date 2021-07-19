@@ -320,15 +320,18 @@ export const getDatatableVisualization = ({
       .filter((columnId) => datasource!.getOperationForColumnId(columnId))
       .map((columnId) => columnMap[columnId]);
 
+    const columnArgs = {
+      sortingColumnId: [state.sorting?.columnId || ''],
+      sortingDirection: [state.sorting?.direction || 'none'],
+    };
+
     return {
       type: 'expression',
       chain: [
         {
           type: 'function',
-          function: 'lens_datatable',
+          function: 'lens_datatable_transformer',
           arguments: {
-            title: [title || ''],
-            description: [description || ''],
             columns: columns.map((column) => {
               const paletteParams = {
                 ...column.palette?.params,
@@ -344,10 +347,10 @@ export const getDatatableVisualization = ({
               const hasNoSummaryRow = column.summaryRow == null || column.summaryRow === 'none';
 
               return {
-                type: 'expression',
+                type: 'expression' as const,
                 chain: [
                   {
-                    type: 'function',
+                    type: 'function' as const,
                     function: 'lens_datatable_column',
                     arguments: {
                       columnId: [column.columnId],
@@ -370,8 +373,16 @@ export const getDatatableVisualization = ({
                 ],
               };
             }),
-            sortingColumnId: [state.sorting?.columnId || ''],
-            sortingDirection: [state.sorting?.direction || 'none'],
+            ...columnArgs,
+          },
+        },
+        {
+          type: 'function',
+          function: 'lens_datatable',
+          arguments: {
+            title: [title || ''],
+            description: [description || ''],
+            ...columnArgs,
           },
         },
       ],
