@@ -20,7 +20,6 @@ import {
 } from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
 import { KibanaLogic } from '../../../../../shared/kibana';
-import { parseQueryParams } from '../../../../../shared/query_params';
 import { AppLogic } from '../../../../app_logic';
 import { CUSTOM_SERVICE_TYPE, WORKPLACE_SEARCH_URL_PREFIX } from '../../../../constants';
 import {
@@ -95,7 +94,11 @@ export interface AddSourceActions {
     isUpdating: boolean,
     successCallback?: () => void
   ): { isUpdating: boolean; successCallback?(): void };
-  saveSourceParams(search: Search): { search: Search };
+  saveSourceParams(
+    search: Search,
+    params: OauthParams,
+    isOrganization: boolean
+  ): { search: Search; params: OauthParams; isOrganization: boolean };
   getSourceConfigData(serviceType: string): { serviceType: string };
   getSourceConnectData(
     serviceType: string,
@@ -206,7 +209,11 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       isUpdating,
       successCallback,
     }),
-    saveSourceParams: (search: Search) => ({ search }),
+    saveSourceParams: (search: Search, params: OauthParams, isOrganization: boolean) => ({
+      search,
+      params,
+      isOrganization,
+    }),
     createContentSource: (
       serviceType: string,
       successCallback: () => void,
@@ -500,15 +507,12 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         actions.setButtonNotLoading();
       }
     },
-    saveSourceParams: async ({ search }) => {
+    saveSourceParams: async ({ search, params, isOrganization }) => {
       const { http } = HttpLogic.values;
       const { navigateToUrl } = KibanaLogic.values;
       const { setAddedSource } = SourcesLogic.actions;
-      const params = (parseQueryParams(search) as unknown) as OauthParams;
       const query = { ...params, kibana_host: kibanaHost };
       const route = '/api/workplace_search/sources/create';
-      const state = JSON.parse(params.state);
-      const isOrganization = state.context !== 'account';
 
       /**
         There is an extreme edge case where the user is trying to connect Github as source from ent-search,
@@ -539,7 +543,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         // GitHub requires an intermediate configuration step, where we collect the repos to index.
         if (hasConfigureStep && !values.oauthConfigCompleted) {
           actions.setPreContentSourceId(preContentSourceId);
-          navigateToUrl(`${ADD_GITHUB_PATH}/configure${search}`);
+          navigateToUrl(getSourcesPath(`${ADD_GITHUB_PATH}/configure${search}`, isOrganization));
         } else {
           setAddedSource(serviceName, indexPermissions, serviceType);
           navigateToUrl(getSourcesPath(SOURCES_PATH, isOrganization));
