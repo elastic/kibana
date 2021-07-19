@@ -164,7 +164,7 @@ export const TableRow = ({
           />
         );
       } else {
-        const isFilterable = Boolean(mapping(column) && mapping(column)?.filterable && filter);
+        const isFilterable = Boolean(mapping(column)?.filterable && filter);
         rowCells.push(
           <TableCell
             key={column}
