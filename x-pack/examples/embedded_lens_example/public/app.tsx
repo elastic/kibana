@@ -196,7 +196,9 @@ export const App = (props: {
                             timeRange: time,
                             attributes: getLensAttributes(props.defaultIndexPattern!, color),
                           },
-                          false
+                          {
+                            openInNewTab: false,
+                          }
                         );
                       }}
                     >

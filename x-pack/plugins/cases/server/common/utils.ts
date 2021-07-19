@@ -11,7 +11,6 @@ import type { Node, Parent } from 'unist';
 // installed by @elastic/eui
 // eslint-disable-next-line import/no-extraneous-dependencies
 import markdown from 'remark-parse';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import remarkStringify from 'remark-stringify';
 
 import {
