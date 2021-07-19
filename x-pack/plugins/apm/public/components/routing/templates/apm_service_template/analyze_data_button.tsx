@@ -27,13 +27,11 @@ import {
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 
-function getEnvironmentDefinition(environment?: string) {
+function getEnvironmentDefinition(environment: string) {
   switch (environment) {
     case ENVIRONMENT_ALL.value:
       return { [SERVICE_ENVIRONMENT]: [ALL_VALUES_SELECTED] };
     case ENVIRONMENT_NOT_DEFINED.value:
-    case undefined:
-      return {};
     default:
       return { [SERVICE_ENVIRONMENT]: [environment] };
   }
@@ -66,7 +64,6 @@ export function AnalyzeDataButton() {
               ...(environment ? getEnvironmentDefinition(environment) : {}),
             },
             operationType: 'average',
-            isNew: true,
           },
         ],
       },
