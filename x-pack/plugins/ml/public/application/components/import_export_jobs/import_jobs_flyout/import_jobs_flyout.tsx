@@ -383,7 +383,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
 
                   <FormattedMessage
                     id="xpack.ml.importExport.importFlyout.importableFiles"
-                    defaultMessage="{num} importable {num, plural, one {job} other {jobs}}"
+                    defaultMessage="Import {num, plural, one {# job} other {# jobs}}"
                     values={{ num: jobIds.length }}
                   />
                   <EuiSpacer size="m" />
