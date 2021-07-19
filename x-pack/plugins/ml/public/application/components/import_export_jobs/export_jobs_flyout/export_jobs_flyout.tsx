@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC, useState, useEffect, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiFlyout,
   EuiFlyoutFooter,
@@ -23,8 +24,9 @@ import {
   EuiTab,
 } from '@elastic/eui';
 
-import { useMlApiContext } from '../../../contexts/kibana';
+import { useMlApiContext, useMlKibana } from '../../../contexts/kibana';
 import { utilsProvider } from './utils';
+import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
 import type { JobType } from '../../../../../common/types/saved_objects';
 
 interface Props {
@@ -39,6 +41,12 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
     dataFrameAnalytics: { getDataFrameAnalytics },
   } = mlApiServices;
 
+  const {
+    services: {
+      notifications: { toasts },
+    },
+  } = useMlKibana();
+
   const { exportAnomalyDetectionJobs, exportDataframeAnalyticsJobs } = utilsProvider(mlApiServices);
 
   const [showFlyout, setShowFlyout] = useState(false);
@@ -47,6 +55,10 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
   const [selectedJobIds, setSelectedJobIds] = useState<string[]>([]);
   const [exporting, setExporting] = useState(false);
   const [selectedJobType, setSelectedJobType] = useState<JobType>(currentTab);
+  const { displayErrorToast, displaySuccessToast } = useMemo(
+    () => toastNotificationServiceProvider(toasts),
+    [toasts]
+  );
 
   useEffect(() => {
     setAdJobIds([]);
@@ -70,13 +82,28 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
 
   async function onExport() {
     setExporting(true);
-    if (selectedJobType === 'anomaly-detector') {
-      await exportAnomalyDetectionJobs(selectedJobIds);
-    } else {
-      await exportDataframeAnalyticsJobs(selectedJobIds);
+    const title = i18n.translate('xpack.ml.importExport.exportFlyout.exportDownloading', {
+      defaultMessage: 'Your file is downloading in the background',
+      values: { count: selectedJobIds.length },
+    });
+    displaySuccessToast(title);
+
+    try {
+      if (selectedJobType === 'anomaly-detector') {
+        await exportAnomalyDetectionJobs(selectedJobIds);
+      } else {
+        await exportDataframeAnalyticsJobs(selectedJobIds);
+      }
+
+      setExporting(false);
+      setShowFlyout(false);
+    } catch (error) {
+      const errorTitle = i18n.translate('xpack.ml.importExport.exportFlyout.exportError', {
+        defaultMessage: 'Could not export selected jobs',
+      });
+      displayErrorToast(error, errorTitle);
+      setExporting(false);
     }
-    setExporting(false);
-    setShowFlyout(false);
   }
 
   function toggleSelectedJob(checked: boolean, id: string) {
