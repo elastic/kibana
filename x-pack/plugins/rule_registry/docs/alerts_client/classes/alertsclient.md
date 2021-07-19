@@ -18,6 +18,7 @@ on alerts as data.
 - [authorization](alertsclient.md#authorization)
 - [esClient](alertsclient.md#esclient)
 - [logger](alertsclient.md#logger)
+- [spaceId](alertsclient.md#spaceid)
 
 ### Methods
 
@@ -41,7 +42,7 @@ on alerts as data.
 
 #### Defined in
 
-[rule_registry/server/alert_data_client/alerts_client.ts:59](https://github.com/elastic/kibana/blob/f2a94addc85/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L59)
+[rule_registry/server/alert_data_client/alerts_client.ts:66](https://github.com/elastic/kibana/blob/48e1b91d751/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L66)
 
 ## Properties
 
@@ -51,7 +52,7 @@ on alerts as data.
 
 #### Defined in
 
-[rule_registry/server/alert_data_client/alerts_client.ts:57](https://github.com/elastic/kibana/blob/f2a94addc85/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L57)
+[rule_registry/server/alert_data_client/alerts_client.ts:63](https://github.com/elastic/kibana/blob/48e1b91d751/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L63)
 
 ___
 
@@ -61,7 +62,7 @@ ___
 
 #### Defined in
 
-[rule_registry/server/alert_data_client/alerts_client.ts:58](https://github.com/elastic/kibana/blob/f2a94addc85/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L58)
+[rule_registry/server/alert_data_client/alerts_client.ts:64](https://github.com/elastic/kibana/blob/48e1b91d751/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L64)
 
 ___
 
@@ -71,7 +72,7 @@ ___
 
 #### Defined in
 
-[rule_registry/server/alert_data_client/alerts_client.ts:59](https://github.com/elastic/kibana/blob/f2a94addc85/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L59)
+[rule_registry/server/alert_data_client/alerts_client.ts:65](https://github.com/elastic/kibana/blob/48e1b91d751/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L65)
 
 ___
 
@@ -81,7 +82,17 @@ ___
 
 #### Defined in
 
-[rule_registry/server/alert_data_client/alerts_client.ts:56](https://github.com/elastic/kibana/blob/f2a94addc85/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L56)
+[rule_registry/server/alert_data_client/alerts_client.ts:62](https://github.com/elastic/kibana/blob/48e1b91d751/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L62)
+
+___
+
+### spaceId
+
+• `Private` `Readonly` **spaceId**: `Promise`<undefined \| string\>
+
+#### Defined in
+
+[rule_registry/server/alert_data_client/alerts_client.ts:66](https://github.com/elastic/kibana/blob/48e1b91d751/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L66)
 
 ## Methods
 
@@ -101,7 +112,7 @@ ___
 
 #### Defined in
 
-[rule_registry/server/alert_data_client/alerts_client.ts:79](https://github.com/elastic/kibana/blob/f2a94addc85/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L79)
+[rule_registry/server/alert_data_client/alerts_client.ts:87](https://github.com/elastic/kibana/blob/48e1b91d751/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L87)
 
 ___
 
@@ -121,7 +132,7 @@ ___
 
 #### Defined in
 
-[rule_registry/server/alert_data_client/alerts_client.ts:115](https://github.com/elastic/kibana/blob/f2a94addc85/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L115)
+[rule_registry/server/alert_data_client/alerts_client.ts:134](https://github.com/elastic/kibana/blob/48e1b91d751/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L134)
 
 ___
 
@@ -142,7 +153,7 @@ ___
 
 #### Defined in
 
-[rule_registry/server/alert_data_client/alerts_client.ts:68](https://github.com/elastic/kibana/blob/f2a94addc85/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L68)
+[rule_registry/server/alert_data_client/alerts_client.ts:76](https://github.com/elastic/kibana/blob/48e1b91d751/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L76)
 
 ___
 
@@ -162,7 +173,7 @@ ___
 
 #### Defined in
 
-[rule_registry/server/alert_data_client/alerts_client.ts:219](https://github.com/elastic/kibana/blob/f2a94addc85/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L219)
+[rule_registry/server/alert_data_client/alerts_client.ts:238](https://github.com/elastic/kibana/blob/48e1b91d751/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L238)
 
 ___
 
@@ -188,4 +199,4 @@ ___
 
 #### Defined in
 
-[rule_registry/server/alert_data_client/alerts_client.ts:160](https://github.com/elastic/kibana/blob/f2a94addc85/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L160)
+[rule_registry/server/alert_data_client/alerts_client.ts:179](https://github.com/elastic/kibana/blob/48e1b91d751/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L179)
