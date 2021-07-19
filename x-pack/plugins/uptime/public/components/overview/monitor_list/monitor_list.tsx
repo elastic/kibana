@@ -4,17 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import React, { useState } from 'react';
+import useWindowSize from 'react-use/lib/useWindowSize';
+import useDebounce from 'react-use/lib/useDebounce';
 import {
   EuiButtonIcon,
   EuiBasicTable,
+  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiPanel,
   EuiSpacer,
+  getBreakpoint,
 } from '@elastic/eui';
-import React, { useState } from 'react';
 import { HistogramPoint, X509Expiry } from '../../../../common/runtime_types';
 import { MonitorSummary } from '../../../../common/runtime_types';
 import { MonitorListStatusColumn } from './columns/monitor_status_column';
@@ -52,11 +55,29 @@ export const MonitorListComponent: ({
   setPageSize,
 }: Props) => any = ({ filters, monitorList: { list, error, loading }, pageSize, setPageSize }) => {
   const [drawerIds, updateDrawerIds] = useState<string[]>([]);
+  const { width } = useWindowSize();
+  const [hideExtraColumns, setHideExtraColumns] = useState(false);
+
+  useDebounce(
+    () => {
+      setHideExtraColumns(['m', 'l'].includes(getBreakpoint(width)));
+    },
+    50,
+    [width]
+  );
 
   const items = list.summaries ?? [];
 
   const nextPagePagination = list.nextPagePagination ?? '';
   const prevPagePagination = list.prevPagePagination ?? '';
+
+  const toggleDrawer = (id: string) => {
+    if (drawerIds.includes(id)) {
+      updateDrawerIds(drawerIds.filter((p) => p !== id));
+    } else {
+      updateDrawerIds([...drawerIds, id]);
+    }
+  };
 
   const getExpandedRowMap = () => {
     return drawerIds.reduce((map: ExpandedRowMap, id: string) => {
@@ -72,104 +93,113 @@ export const MonitorListComponent: ({
   };
 
   const columns = [
-    {
-      align: 'left' as const,
-      field: 'state.summary.status',
-      name: labels.STATUS_COLUMN_LABEL,
-      mobileOptions: {
-        fullWidth: true,
+    ...[
+      {
+        align: 'left' as const,
+        field: 'state.summary.status',
+        name: labels.STATUS_COLUMN_LABEL,
+        mobileOptions: {
+          fullWidth: true,
+        },
+        render: (status: string, { state: { timestamp, summaryPings } }: MonitorSummary) => {
+          return (
+            <MonitorListStatusColumn
+              status={status}
+              timestamp={timestamp}
+              summaryPings={summaryPings ?? []}
+            />
+          );
+        },
       },
-      render: (status: string, { state: { timestamp, summaryPings } }: MonitorSummary) => {
-        return (
-          <MonitorListStatusColumn
-            status={status}
-            timestamp={timestamp}
-            summaryPings={summaryPings ?? []}
+      {
+        align: 'left' as const,
+        field: 'state.monitor.name',
+        name: labels.NAME_COLUMN_LABEL,
+        mobileOptions: {
+          fullWidth: true,
+        },
+        render: (_name: string, summary: MonitorSummary) => <MonitorNameColumn summary={summary} />,
+        sortable: true,
+      },
+      {
+        align: 'left' as const,
+        field: 'state.url.full',
+        name: URL_LABEL,
+        width: '30%',
+        render: (url: string) => (
+          <EuiLink href={url} target="_blank" color="text" external>
+            {url}
+          </EuiLink>
+        ),
+      },
+      {
+        align: 'left' as const,
+        field: 'state.monitor.name',
+        name: TAGS_LABEL,
+        width: '12%',
+        render: (_name: string, summary: MonitorSummary) => <MonitorTags summary={summary} />,
+      },
+      {
+        align: 'left' as const,
+        field: 'state.tls.server.x509',
+        name: labels.TLS_COLUMN_LABEL,
+        render: (x509: X509Expiry) => <CertStatusColumn expiry={x509} />,
+      },
+    ],
+    ...(!hideExtraColumns
+      ? [
+          {
+            align: 'left' as const,
+            field: 'histogram.points',
+            name: labels.HISTORY_COLUMN_LABEL,
+            mobileOptions: {
+              show: false,
+            },
+            render: (histogramSeries: HistogramPoint[] | null, summary: MonitorSummary) => (
+              <MonitorBarSeries
+                histogramSeries={histogramSeries}
+                minInterval={summary.minInterval!}
+              />
+            ),
+          },
+        ]
+      : []),
+    ...[
+      {
+        align: 'center' as const,
+        field: '',
+        name: STATUS_ALERT_COLUMN,
+        width: '100px',
+        render: (item: MonitorSummary) => (
+          <EnableMonitorAlert
+            monitorId={item.monitor_id}
+            selectedMonitor={item.state.summaryPings[0]}
           />
-        );
+        ),
       },
-    },
-    {
-      align: 'left' as const,
-      field: 'state.monitor.name',
-      name: labels.NAME_COLUMN_LABEL,
-      mobileOptions: {
-        fullWidth: true,
-      },
-      render: (name: string, summary: MonitorSummary) => <MonitorNameColumn summary={summary} />,
-      sortable: true,
-    },
-    {
-      align: 'left' as const,
-      field: 'state.url.full',
-      name: URL_LABEL,
-      width: '30%',
-      render: (url: string) => (
-        <EuiLink href={url} target="_blank" color="text" external>
-          {url}
-        </EuiLink>
-      ),
-    },
-    {
-      align: 'left' as const,
-      field: 'state.monitor.name',
-      name: TAGS_LABEL,
-      width: '12%',
-      render: (_name: string, summary: MonitorSummary) => <MonitorTags summary={summary} />,
-    },
-    {
-      align: 'left' as const,
-      field: 'state.tls.server.x509',
-      name: labels.TLS_COLUMN_LABEL,
-      render: (x509: X509Expiry) => <CertStatusColumn expiry={x509} />,
-    },
-    {
-      align: 'center' as const,
-      field: 'histogram.points',
-      name: labels.HISTORY_COLUMN_LABEL,
-      mobileOptions: {
-        show: false,
-      },
-      render: (histogramSeries: HistogramPoint[] | null, summary: MonitorSummary) => (
-        <MonitorBarSeries histogramSeries={histogramSeries} minInterval={summary.minInterval!} />
-      ),
-    },
-    {
-      align: 'center' as const,
-      field: '',
-      name: STATUS_ALERT_COLUMN,
-      width: '100px',
-      render: (item: MonitorSummary) => (
-        <EnableMonitorAlert
-          monitorId={item.monitor_id}
-          selectedMonitor={item.state.summaryPings[0]}
-        />
-      ),
-    },
-    {
-      align: 'right' as const,
-      field: 'monitor_id',
-      name: '',
-      sortable: true,
-      isExpander: true,
-      width: '40px',
-      render: (id: string) => {
-        return (
-          <EuiButtonIcon
-            aria-label={labels.getExpandDrawerLabel(id)}
-            data-test-subj={`xpack.uptime.monitorList.${id}.expandMonitorDetail`}
-            iconType={drawerIds.includes(id) ? 'arrowUp' : 'arrowDown'}
-            onClick={() => {
-              if (drawerIds.includes(id)) {
-                updateDrawerIds(drawerIds.filter((p) => p !== id));
-              } else {
-                updateDrawerIds([...drawerIds, id]);
-              }
-            }}
-          />
-        );
-      },
-    },
+    ],
+    ...(!hideExtraColumns
+      ? [
+          {
+            align: 'right' as const,
+            field: 'monitor_id',
+            name: '',
+            sortable: true,
+            isExpander: true,
+            width: '40px',
+            render: (id: string) => {
+              return (
+                <EuiButtonIcon
+                  aria-label={labels.getExpandDrawerLabel(id)}
+                  data-test-subj={`xpack.uptime.monitorList.${id}.expandMonitorDetail`}
+                  iconType={drawerIds.includes(id) ? 'arrowUp' : 'arrowDown'}
+                  onClick={() => toggleDrawer(id)}
+                />
+              );
+            },
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -188,6 +218,14 @@ export const MonitorListComponent: ({
         noItemsMessage={noItemsMessage(loading, filters)}
         columns={columns}
         tableLayout={'auto'}
+        rowProps={
+          hideExtraColumns
+            ? ({ monitor_id: monitorId }) => ({
+                onClick: () => toggleDrawer(monitorId),
+                'aria-label': labels.getExpandDrawerLabel(monitorId),
+              })
+            : undefined
+        }
       />
       <EuiSpacer size="m" />
       <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
