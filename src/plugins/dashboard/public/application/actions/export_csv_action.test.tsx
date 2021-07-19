@@ -105,7 +105,7 @@ describe('Export CSV action', () => {
       | Record<string, { content: string; type: string }>;
     expect(result).toEqual({
       'Hello Kibana.csv': {
-        content: `First Name,Last Name${LINE_FEED_CHARACTER}Kibana,undefined${LINE_FEED_CHARACTER}`,
+        content: `First Name,Last Name${LINE_FEED_CHARACTER}Kibana,${LINE_FEED_CHARACTER}`,
         type: 'text/plain;charset=utf-8',
       },
     });
