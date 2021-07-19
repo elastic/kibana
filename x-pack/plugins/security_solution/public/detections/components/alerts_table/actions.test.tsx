@@ -26,6 +26,7 @@ import {
 import { ISearchStart } from '../../../../../../../src/plugins/data/public';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { getTimelineTemplate } from '../../../timelines/containers/api';
+import { defaultHeaders } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 
 jest.mock('../../../timelines/containers/api', () => ({
   getTimelineTemplate: jest.fn(),
@@ -95,52 +96,51 @@ describe('alert actions', () => {
           updateTimelineIsLoading,
           searchStrategyClient,
         });
-        const columns = [
-          {
-            columnHeaderType: 'not-filtered',
-            id: '@timestamp',
-            type: 'number',
-            initialWidth: 190,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'message',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'event.category',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'host.name',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'source.ip',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'destination.ip',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'user.name',
-            initialWidth: 180,
-          },
-        ];
         const expected = {
           from: '2018-11-05T18:58:25.937Z',
           notes: null,
           timeline: {
             activeTab: TimelineTabs.query,
             prevActiveTab: TimelineTabs.query,
-            columns,
-            defaultColumns: columns,
+            columns: [
+              {
+                columnHeaderType: 'not-filtered',
+                id: '@timestamp',
+                type: 'number',
+                initialWidth: 190,
+              },
+              {
+                columnHeaderType: 'not-filtered',
+                id: 'message',
+                initialWidth: 180,
+              },
+              {
+                columnHeaderType: 'not-filtered',
+                id: 'event.category',
+                initialWidth: 180,
+              },
+              {
+                columnHeaderType: 'not-filtered',
+                id: 'host.name',
+                initialWidth: 180,
+              },
+              {
+                columnHeaderType: 'not-filtered',
+                id: 'source.ip',
+                initialWidth: 180,
+              },
+              {
+                columnHeaderType: 'not-filtered',
+                id: 'destination.ip',
+                initialWidth: 180,
+              },
+              {
+                columnHeaderType: 'not-filtered',
+                id: 'user.name',
+                initialWidth: 180,
+              },
+            ],
+            defaultColumns: defaultHeaders,
             dataProviders: [],
             dateRange: {
               end: '2018-11-05T19:03:25.937Z',

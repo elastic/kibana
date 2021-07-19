@@ -247,7 +247,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       timelineActions.initializeTGridSettings({
         filterManager,
         id: timelineId,
-        defaultColumns: defaultHeaders,
       })
     );
   }, [filterManager, timelineId, dispatch]);
