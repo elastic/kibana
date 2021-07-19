@@ -150,18 +150,27 @@ const breadcrumbGetters: {
 };
 
 export function useBreadcrumbs(page: Page, values: DynamicPagePathValues = {}) {
-  const { chrome, http } = useStartServices();
+  const { chrome, http, application } = useStartServices();
   const breadcrumbs =
-    breadcrumbGetters[page]?.(values).map((breadcrumb) => ({
-      ...breadcrumb,
-      href: breadcrumb.href
+    breadcrumbGetters[page]?.(values).map((breadcrumb) => {
+      const href = breadcrumb.href
         ? http.basePath.prepend(
-            `${breadcrumb.useIntegrationsBasePath ? INTEGRATIONS_BASE_PATH : FLEET_BASE_PATH}#${
+            `${breadcrumb.useIntegrationsBasePath ? INTEGRATIONS_BASE_PATH : FLEET_BASE_PATH}${
               breadcrumb.href
             }`
           )
-        : undefined,
-    })) || [];
+        : undefined;
+      return {
+        ...breadcrumb,
+        href,
+        onClick: href
+          ? (ev: React.MouseEvent) => {
+              ev.preventDefault();
+              application.navigateToUrl(href);
+            }
+          : undefined,
+      };
+    }) || [];
   const docTitle: string[] = [...breadcrumbs]
     .reverse()
     .map((breadcrumb) => breadcrumb.text as string);
