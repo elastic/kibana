@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { KibanaExecutionContext } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import { defer } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
@@ -32,6 +32,7 @@ export interface RequestHandlerParams {
   timeFields?: string[];
   timeRange?: TimeRange;
   getNow?: () => Date;
+  executionContext?: KibanaExecutionContext;
 }
 
 export const handleRequest = ({
@@ -47,6 +48,7 @@ export const handleRequest = ({
   timeFields,
   timeRange,
   getNow,
+  executionContext,
 }: RequestHandlerParams) => {
   return defer(async () => {
     const forceNow = getNow?.();
@@ -122,6 +124,7 @@ export const handleRequest = ({
                 'This request queries Elasticsearch to fetch the data for the visualization.',
             }),
           },
+          executionContext,
         })
         .pipe(
           map(({ rawResponse: response }) => {
