@@ -1,5 +1,5 @@
 post:
-  summary: Fleet - Setup
+  summary: Setup
   tags: []
   responses:
     '200':

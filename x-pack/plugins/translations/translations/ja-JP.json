@@ -17195,7 +17195,6 @@
     "xpack.observability.notAvailable": "N/A",
     "xpack.observability.overview.alert.allTypes": "すべてのタイプ",
     "xpack.observability.overview.alert.appLink": "アラートを管理",
-    "xpack.observability.overview.alert.view": "表示",
     "xpack.observability.overview.alerts.muted": "ミュート",
     "xpack.observability.overview.alerts.title": "アラート",
     "xpack.observability.overview.apm.appLink": "アプリで表示",
