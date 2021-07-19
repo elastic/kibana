@@ -62,8 +62,8 @@ type InventoryMetricThresholdAlertInstance = AlertInstance<
 >;
 type InventoryMetricThresholdAlertInstanceFactory = (
   id: string,
-  threshold: number,
-  value: number
+  threshold: number | undefined,
+  value: number | undefined
 ) => InventoryMetricThresholdAlertInstance;
 
 export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =>
@@ -82,7 +82,6 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
       alertOnNoData,
     } = params as InventoryMetricThresholdParams;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
-
     const { alertWithLifecycle, savedObjectsClient } = services;
     const alertInstanceFactory: InventoryMetricThresholdAlertInstanceFactory = (
       id,
@@ -94,10 +93,6 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         fields: {
           [ALERT_EVALUATION_THRESHOLD]: threshold,
           [ALERT_EVALUATION_VALUE]: value,
-          // TEMP, serialized params need to be fixed
-          // ...inventoryMetricRuleDataRT.encode({
-          //   [inventoryMetricThresholdRuleDataSerializedParamsKey]: [params],
-          // }),
         },
       });
 
@@ -153,17 +148,24 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         : shouldAlertWarn
         ? AlertStates.WARNING
         : AlertStates.OK;
-
       let reason;
+      let threshold;
+      let value;
       if (nextState === AlertStates.ALERT || nextState === AlertStates.WARNING) {
         reason = results
-          .map((result) =>
-            buildReasonWithVerboseMetricName(
-              result[item],
+          .map((result) => {
+            const resultItem = result[item];
+            value = resultItem.currentValue;
+            threshold =
+              nextState === AlertStates.WARNING
+                ? resultItem.warningThreshold!
+                : resultItem.threshold;
+            return buildReasonWithVerboseMetricName(
+              resultItem,
               buildFiredAlertReason,
               nextState === AlertStates.WARNING
-            )
-          )
+            );
+          })
           .join('\n');
         /*
          * Custom recovery actions aren't yet available in the alerting framework
@@ -195,8 +197,6 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
             : nextState === AlertStates.WARNING
             ? WARNING_ACTIONS.id
             : FIRED_ACTIONS.id;
-        const threshold = 20; // TEMP
-        const value = 30; // TEMP
         const alertInstance = alertInstanceFactory(`${item}`, threshold, value);
         alertInstance.scheduleActions(
           /**
