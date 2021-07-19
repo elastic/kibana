@@ -205,7 +205,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       describe('Color rules', () => {
         it('should apply color rules to visualization background and inner gauge circle', async () => {
           await visualBuilder.selectAggType('Filter Ratio');
-          await visualBuilder.setFilterRatioNumerator('bytes < 0');
+          await visualBuilder.setFilterRatioOption('Numerator', 'bytes < 0');
           await visualBuilder.clickPanelOptions('gauge');
           await visualBuilder.setColorRuleOperator('< less than');
           await visualBuilder.setColorRuleValue(21);
@@ -213,7 +213,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await visualBuilder.setColorPickerValue('#AD7DE6', 1);
 
           const backGroundStyle = await visualBuilder.getBackgroundStyle();
-          const gaugeInnerColor = await visualBuilder.getGaugeInnerColor();
+          const gaugeInnerColor = await visualBuilder.getGaugeColor('Inner');
 
           expect(backGroundStyle).to.eql('background-color: rgb(255, 207, 223);');
           expect(gaugeInnerColor).to.eql('rgba(173,125,230,1)');

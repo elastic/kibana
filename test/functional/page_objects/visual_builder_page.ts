@@ -358,20 +358,10 @@ export class VisualBuilderPageObject extends FtrService {
     return await gaugeCount.getVisibleText();
   }
 
-  public async getGaugeColor(): Promise<string> {
+  public async getGaugeColor(type: undefined | 'Inner' = undefined): Promise<string> {
     await this.visChart.waitForVisualizationRenderingStabilized();
-    const [, gaugeColoredCircle] = await this.find.allByCssSelector(
-      '[data-test-subj="tvbVisGaugeContainer"] circle'
-    );
+    const gaugeColoredCircle = await this.testSubjects.find(`gaugeCircle${type ?? ''}`);
     return await gaugeColoredCircle.getAttribute('stroke');
-  }
-
-  public async getGaugeInnerColor(): Promise<string> {
-    await this.visChart.waitForVisualizationRenderingStabilized();
-    const gaugeInnerCircle = await this.find.byCssSelector(
-      '[data-test-subj="tvbVisGaugeContainer"] circle'
-    );
-    return await gaugeInnerCircle.getAttribute('stroke');
   }
 
   public async clickTopN() {
@@ -756,10 +746,8 @@ export class VisualBuilderPageObject extends FtrService {
     });
   }
 
-  public async setFilterRatioNumerator(numerator: string) {
-    const numeratorInput = await this.find.byCssSelector(
-      '.tvbAggRow [data-test-subj="queryInput"]'
-    );
-    await numeratorInput.type(numerator);
+  public async setFilterRatioOption(optionType: 'Numerator' | 'Denominator', query: string) {
+    const optionInput = await this.testSubjects.find(`filterRatio${optionType}Input`);
+    await optionInput.type(query);
   }
 }
