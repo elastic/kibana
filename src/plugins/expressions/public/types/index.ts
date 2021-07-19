@@ -48,7 +48,18 @@ export interface IExpressionLoaderParams {
   renderMode?: RenderMode;
   syncColors?: boolean;
   hasCompatibleActions?: ExpressionRenderHandlerParams['hasCompatibleActions'];
+
+  /**
+   * The flag to toggle on emitting partial results.
+   * By default, the partial results are disabled.
+   */
   partial?: boolean;
+
+  /**
+   * Throttling of partial results in milliseconds. 0 is disabling the throttling.
+   * By default, it equals 1000.
+   */
+  throttle?: number;
 }
 
 export interface ExpressionRenderError extends Error {

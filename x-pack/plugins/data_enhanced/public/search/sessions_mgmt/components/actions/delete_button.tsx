@@ -12,20 +12,18 @@ import React, { useState } from 'react';
 import { CoreStart } from 'kibana/public';
 import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
-import { TableText } from '../';
-import { OnActionClick, OnActionComplete, OnActionDismiss } from './types';
+import { IClickActionDescriptor } from '../';
+import { OnActionDismiss } from './types';
+import { UISession } from '../../types';
 
 interface DeleteButtonProps {
-  id: string;
-  name: string;
   api: SearchSessionsMgmtAPI;
-  onActionComplete: OnActionComplete;
-  overlays: CoreStart['overlays'];
-  onActionClick: OnActionClick;
+  searchSession: UISession;
 }
 
 const DeleteConfirm = (props: DeleteButtonProps & { onActionDismiss: OnActionDismiss }) => {
-  const { id, name, api, onActionComplete, onActionDismiss } = props;
+  const { searchSession, api, onActionDismiss } = props;
+  const { name, id } = searchSession;
   const [isLoading, setIsLoading] = useState(false);
 
   const title = i18n.translate('xpack.data.mgmt.searchSessions.cancelModal.title', {
@@ -51,7 +49,6 @@ const DeleteConfirm = (props: DeleteButtonProps & { onActionDismiss: OnActionDis
       onConfirm={async () => {
         setIsLoading(true);
         await api.sendCancel(id);
-        onActionComplete();
         onActionDismiss();
       }}
       confirmButtonText={confirm}
@@ -65,24 +62,21 @@ const DeleteConfirm = (props: DeleteButtonProps & { onActionDismiss: OnActionDis
   );
 };
 
-export const DeleteButton = (props: DeleteButtonProps) => {
-  const { overlays, onActionClick } = props;
-
-  return (
-    <>
-      <TableText
-        onClick={() => {
-          onActionClick();
-          const ref = overlays.openModal(
-            toMountPoint(<DeleteConfirm onActionDismiss={() => ref?.close()} {...props} />)
-          );
-        }}
-      >
-        <FormattedMessage
-          id="xpack.data.mgmt.searchSessions.actionDelete"
-          defaultMessage="Delete"
-        />
-      </TableText>
-    </>
-  );
-};
+export const createDeleteActionDescriptor = (
+  api: SearchSessionsMgmtAPI,
+  uiSession: UISession,
+  core: CoreStart
+): IClickActionDescriptor => ({
+  iconType: 'crossInACircleFilled',
+  label: (
+    <FormattedMessage id="xpack.data.mgmt.searchSessions.actionDelete" defaultMessage="Delete" />
+  ),
+  onClick: async () => {
+    const ref = core.overlays.openModal(
+      toMountPoint(
+        <DeleteConfirm onActionDismiss={() => ref?.close()} searchSession={uiSession} api={api} />
+      )
+    );
+    await ref.onClose;
+  },
+});
