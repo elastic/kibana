@@ -33,10 +33,6 @@ const calculateBucketData = (timeInterval: string, capabilities: SearchCapabilit
     bucketSize = 1;
   }
 
-  if (bucketSize > capabilities.maxBucketsLimit) {
-    bucketSize = capabilities.maxBucketsLimit;
-  }
-
   // Check decimal
   if (parsedInterval && parsedInterval.value % 1 !== 0) {
     if (parsedInterval.unit !== 'ms') {
