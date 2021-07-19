@@ -56,8 +56,8 @@ export interface IExpressionLoaderParams {
   partial?: boolean;
 
   /**
-   * Throttling of partial results in milliseconds.
-   * By default, throttling is disabled.
+   * Throttling of partial results in milliseconds. 0 is disabling the throttling.
+   * By default, it equals 1000.
    */
   throttle?: number;
 }

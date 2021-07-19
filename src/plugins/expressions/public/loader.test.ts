@@ -137,6 +137,7 @@ describe('ExpressionLoader', () => {
     const expressionLoader = new ExpressionLoader(element, 'var foo', {
       variables: { foo: of(1, 2) },
       partial: true,
+      throttle: 0,
     });
     const { result, partial } = await expressionLoader.data$.pipe(first()).toPromise();
 

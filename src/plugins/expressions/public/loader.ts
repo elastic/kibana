@@ -181,7 +181,7 @@ export class ExpressionLoader {
     this.params.syncColors = params.syncColors;
     this.params.debug = Boolean(params.debug);
     this.params.partial = Boolean(params.partial);
-    this.params.throttle = Number(params.throttle);
+    this.params.throttle = Number(params.throttle ?? 1000);
 
     this.params.inspectorAdapters = (params.inspectorAdapters ||
       this.execution?.inspect()) as Adapters;
