@@ -13,7 +13,6 @@ import memoizeOne from 'memoize-one';
 import React from 'react';
 import styled from 'styled-components';
 import { BrowserFields } from '../../containers/source';
-import { IIndexPattern } from '../../../../../../../src/plugins/data/public';
 import { OnUpdateColumns } from '../../../timelines/components/timeline/events';
 import * as i18n from './translations';
 import { EventFieldsData } from './types';
@@ -44,7 +43,6 @@ export const getColumns = ({
   browserFields,
   columnHeaders,
   eventId,
-  indexPattern,
   onUpdateColumns,
   contextId,
   timelineId,
@@ -54,7 +52,6 @@ export const getColumns = ({
   browserFields: BrowserFields;
   columnHeaders: ColumnHeaderOptions[];
   eventId: string;
-  indexPattern: IIndexPattern;
   onUpdateColumns: OnUpdateColumns;
   contextId: string;
   timelineId: string;
@@ -75,12 +72,17 @@ export const getColumns = ({
       const label = data.isObjectArray
         ? i18n.NESTED_COLUMN(data.field)
         : i18n.VIEW_COLUMN(data.field);
+      const fieldFromBrowserField = getFieldFromBrowserField(
+        [data.category, 'fields', data.field],
+        browserFields
+      );
       return (
         <ActionCell
           aria-label={label}
           contextId={contextId}
           data={data}
           eventId={eventId}
+          fieldFromBrowserField={fieldFromBrowserField}
           getLinkValue={getLinkValue}
           toggleColumn={toggleColumn}
           timelineId={timelineId}
@@ -100,8 +102,6 @@ export const getColumns = ({
     sortable: true,
     truncateText: false,
     render: (field: string, data: EventFieldsData) => {
-      // TODO: Do we need this?
-      // const fieldMapping = indexPattern.fields.find((currField) => currField.name === field);
       const fieldFromBrowserField = getFieldFromBrowserField(
         [data.category, 'fields', field],
         browserFields
@@ -142,13 +142,5 @@ export const getColumns = ({
         />
       );
     },
-  },
-  {
-    field: 'valuesConcatenated',
-    name: i18n.BLANK,
-    render: () => null,
-    sortable: false,
-    truncateText: true,
-    width: '1px',
   },
 ];

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiToolTip } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import * as i18n from '../translations';
 import { FieldIcon } from '../../../../../../../../src/plugins/kibana_react/public';
@@ -26,9 +26,10 @@ export interface FieldNameCellProps {
 export const FieldNameCell = React.memo(
   ({ data, field, fieldMapping, scripted }: FieldNameCellProps) => {
     const typeName = getFieldTypeName(data.type);
+    // TODO: We don't have fieldMapping or isMultiField until kibana indexPatterns is implemented. Will default to field for now
     const displayName = fieldMapping && fieldMapping.displayName ? fieldMapping.displayName : field;
     const defaultTooltip = displayName !== field ? `${field} (${displayName})` : field;
-    // TODO: What was used to show the plaintext fieldName vs the tooltip one
+    // TODO: Remove. This is what was used to show the plaintext fieldName vs the tooltip one
     // const showPlainTextName =
     //   (data.isObjectArray && data.type !== 'geo_point') || fieldFromBrowserField == null;
     const isMultiField = !!fieldMapping?.spec?.subType?.multi;
@@ -38,8 +39,8 @@ export const FieldNameCell = React.memo(
           <FieldIcon
             data-test-subj="field-type-icon"
             type={data.type}
-            label={typeName} // create typename
-            scripted={scripted} // TODO: Do we have this anywhere?
+            label={typeName}
+            scripted={scripted} // TODO: Will get with kibana indexPatterns;
           />
         </EuiFlexItem>
         <EuiFlexGroup wrap={true} gutterSize="none" responsive={false} alignItems="flexStart">

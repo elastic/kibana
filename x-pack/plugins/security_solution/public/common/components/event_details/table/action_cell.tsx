@@ -12,12 +12,14 @@ import { useActionCellDataProvider } from './use_action_cell_data_provider';
 import { EventFieldsData } from '../types';
 import { useGetTimelineId } from '../../drag_and_drop/draggable_wrapper_hover_content';
 import { ColumnHeaderOptions } from '../../../../../common/types/timeline';
+import { BrowserField } from '../../../containers/source';
 
 interface Props {
   contextId: string;
   data: EventFieldsData;
   disabled?: boolean;
   eventId: string;
+  fieldFromBrowserField: Readonly<Record<string, Partial<BrowserField>>>;
   getLinkValue: (field: string) => string | null;
   onFilterAdded?: () => void;
   timelineId?: string;
@@ -26,16 +28,27 @@ interface Props {
 }
 
 export const ActionCell: React.FC<Props> = React.memo(
-  ({ contextId, data, eventId, getLinkValue, onFilterAdded, timelineId, toggleColumn, values }) => {
-    const dataProvider = useActionCellDataProvider({
+  ({
+    contextId,
+    data,
+    eventId,
+    fieldFromBrowserField,
+    getLinkValue,
+    onFilterAdded,
+    timelineId,
+    toggleColumn,
+    values,
+  }) => {
+    const actionCellConfig = useActionCellDataProvider({
       contextId,
       eventId,
       field: data.field,
       fieldFormat: data.format,
+      fieldFromBrowserField,
       fieldType: data.type,
       isObjectArray: data.isObjectArray,
       linkValue: getLinkValue(data.field),
-      value: values?.length ? values[0] : null,
+      values,
     });
 
     const draggableRef = useRef<HTMLDivElement | null>(null);
@@ -51,11 +64,13 @@ export const ActionCell: React.FC<Props> = React.memo(
       });
     }, []);
 
+    const draggableIds = actionCellConfig?.idList.map((id) => getDraggableId(id));
+
     return (
       <HoverActions
         dataType={data.type}
-        draggableId={dataProvider ? getDraggableId(dataProvider.id) : undefined}
-        field={dataProvider?.queryMatch.field ?? data.field}
+        draggableIds={draggableIds || undefined}
+        field={data.field}
         goGetTimelineId={setGoGetTimelineId}
         isObjectArray={data.isObjectArray}
         onFilterAdded={onFilterAdded}
@@ -64,11 +79,7 @@ export const ActionCell: React.FC<Props> = React.memo(
         timelineId={timelineId ?? timelineIdFind}
         toggleColumn={toggleColumn}
         toggleTopN={toggleTopN}
-        value={
-          typeof dataProvider?.queryMatch.value !== 'number'
-            ? dataProvider?.queryMatch.value
-            : `${dataProvider?.queryMatch.value}`
-        }
+        values={actionCellConfig?.stringValues}
       />
     );
   }

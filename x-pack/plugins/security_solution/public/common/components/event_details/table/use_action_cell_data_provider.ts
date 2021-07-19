@@ -29,16 +29,18 @@ import { BYTES_FORMAT } from '../../../../timelines/components/timeline/body/ren
 import { EVENT_DURATION_FIELD_NAME } from '../../../../timelines/components/duration';
 import { PORT_NAMES } from '../../../../network/components/port';
 import { INDICATOR_REFERENCE } from '../../../../../common/cti/constants';
+import { BrowserField } from '../../../containers/source';
 
 export interface UseActionCellDataProvider {
   contextId?: string;
   eventId?: string;
   field: string;
   fieldFormat?: string;
+  fieldFromBrowserField: Readonly<Record<string, Partial<BrowserField>>>;
   fieldType?: string;
   isObjectArray?: boolean;
   linkValue?: string | null;
-  value?: string | null;
+  values: string[] | null | undefined;
 }
 
 export const useActionCellDataProvider = ({
@@ -46,72 +48,71 @@ export const useActionCellDataProvider = ({
   eventId,
   field,
   fieldFormat,
+  fieldFromBrowserField,
   fieldType,
   isObjectArray,
   linkValue,
-  value,
-}: UseActionCellDataProvider): DataProvider | null => {
-  let id = null;
-  let valueAsString: string = `${value}`;
+  values,
+}: UseActionCellDataProvider): { idList: string[]; stringValues: string[] } | null => {
+  if (values === null || values === undefined) return null;
 
-  const appendedUniqueId = `${contextId}-${eventId}-${field}-0-${value}-${eventId}-${field}-${value}`;
-
-  if (isObjectArray || fieldType === GEO_FIELD_TYPE || [MESSAGE_FIELD_NAME].includes(field)) {
-    return null;
-  } else if (fieldType === IP_FIELD_TYPE) {
-    id = `formatted-ip-data-provider-${contextId}-${field}-${value}-${eventId}`;
-    if (isString(value) && !isEmpty(value)) {
-      try {
-        const addresses = JSON.parse(value);
-        if (isArray(addresses)) {
-          valueAsString = addresses.join(',');
+  const stringifiedValues: string[] = [];
+  const idList = values.map((value, index) => {
+    if (fieldFromBrowserField) return null;
+    let id = null;
+    let valueAsString: string = isString(value) ? value : `${values}`;
+    // TODO: Remove 0 and repalce with value index
+    const appendedUniqueId = `${contextId}-${eventId}-${field}-${index}-${value}-${eventId}-${field}-${value}`;
+    if (isObjectArray || fieldType === GEO_FIELD_TYPE || [MESSAGE_FIELD_NAME].includes(field)) {
+      return null;
+    } else if (fieldType === IP_FIELD_TYPE) {
+      id = `formatted-ip-data-provider-${contextId}-${field}-${value}-${eventId}`;
+      if (isString(value) && !isEmpty(value)) {
+        try {
+          const addresses = JSON.parse(value);
+          if (isArray(addresses)) {
+            valueAsString = addresses.join(',');
+          }
+        } catch (_) {
+          // Default to keeping the existing string value
         }
-      } catch (_) {
-        // Default to keeping the existing string value
       }
+    } else if (PORT_NAMES.some((portName) => field === portName)) {
+      id = `port-default-draggable-${appendedUniqueId}`;
+    } else if (field === EVENT_DURATION_FIELD_NAME) {
+      id = `duration-default-draggable-${appendedUniqueId}`;
+    } else if (field === HOST_NAME_FIELD_NAME) {
+      id = `event-details-value-default-draggable-${appendedUniqueId}`;
+    } else if (fieldFormat === BYTES_FORMAT) {
+      id = `bytes-default-draggable-${appendedUniqueId}`;
+    } else if (field === SIGNAL_RULE_NAME_FIELD_NAME) {
+      id = `event-details-value-default-draggable-${appendedUniqueId}-${linkValue}`;
+    } else if (field === EVENT_MODULE_FIELD_NAME) {
+      id = `event-details-value-default-draggable-${appendedUniqueId}-${value}`;
+    } else if (field === SIGNAL_STATUS_FIELD_NAME) {
+      id = `alert-details-value-default-draggable-${appendedUniqueId}`;
+    } else if (field === AGENT_STATUS_FIELD_NAME) {
+      const valueToUse = typeof value === 'string' ? value : '';
+      id = `event-details-value-default-draggable-${appendedUniqueId}`;
+      valueAsString = valueToUse;
+    } else if (
+      [
+        RULE_REFERENCE_FIELD_NAME,
+        REFERENCE_URL_FIELD_NAME,
+        EVENT_URL_FIELD_NAME,
+        INDICATOR_REFERENCE,
+      ].includes(field)
+    ) {
+      id = `event-details-value-default-draggable-${appendedUniqueId}-${value}`;
+    } else {
+      id = `event-details-value-default-draggable-${appendedUniqueId}`;
     }
-  } else if (PORT_NAMES.some((portName) => field === portName)) {
-    id = `port-default-draggable-${appendedUniqueId}`;
-  } else if (field === EVENT_DURATION_FIELD_NAME) {
-    id = `duration-default-draggable-${appendedUniqueId}`;
-  } else if (field === HOST_NAME_FIELD_NAME) {
-    id = `event-details-value-default-draggable-${appendedUniqueId}`;
-  } else if (fieldFormat === BYTES_FORMAT) {
-    id = `bytes-default-draggable-${appendedUniqueId}`;
-  } else if (field === SIGNAL_RULE_NAME_FIELD_NAME) {
-    id = `event-details-value-default-draggable-${appendedUniqueId}-${linkValue}`;
-  } else if (field === EVENT_MODULE_FIELD_NAME) {
-    id = `event-details-value-default-draggable-${appendedUniqueId}-${value}`;
-  } else if (field === SIGNAL_STATUS_FIELD_NAME) {
-    id = `alert-details-value-default-draggable-${appendedUniqueId}`;
-  } else if (field === AGENT_STATUS_FIELD_NAME) {
-    const valueToUse = typeof value === 'string' ? value : '';
-    id = `event-details-value-default-draggable-${appendedUniqueId}`;
-    valueAsString = valueToUse;
-  } else if (
-    [
-      RULE_REFERENCE_FIELD_NAME,
-      REFERENCE_URL_FIELD_NAME,
-      EVENT_URL_FIELD_NAME,
-      INDICATOR_REFERENCE,
-    ].includes(field)
-  ) {
-    id = `event-details-value-default-draggable-${appendedUniqueId}-${value}`;
-  } else {
-    id = `event-details-value-default-draggable-${appendedUniqueId}`;
-  }
+    stringifiedValues.push(valueAsString);
+    return escapeDataProviderId(id);
+  });
 
   return {
-    and: [],
-    enabled: true,
-    id: escapeDataProviderId(id),
-    name: field ? field : valueAsString ?? '',
-    excluded: false,
-    kqlQuery: '',
-    queryMatch: {
-      field,
-      value: valueAsString ?? '',
-      operator: IS_OPERATOR,
-    },
+    idList: idList.filter((id) => id),
+    stringValues: stringifiedValues,
   };
 };

@@ -14,7 +14,7 @@ import { EventFieldsData } from './types';
 
 interface Column {
   field: string;
-  name: string;
+  name: string | JSX.Element;
   sortable: boolean;
   render: (field: string, data: EventFieldsData) => JSX.Element;
 }
@@ -42,8 +42,8 @@ describe('getColumns', () => {
     });
   });
 
-  describe('column checkbox', () => {
-    let checkboxColumn: Column;
+  describe('column hover actions', () => {
+    let actionsColumn: Column;
     const mockDataToUse = mockBrowserFields.agent;
     const testData = {
       type: 'someType',
@@ -52,13 +52,13 @@ describe('getColumns', () => {
     } as EventFieldsData;
 
     beforeEach(() => {
-      checkboxColumn = getColumns(defaultProps)[0] as Column;
+      actionsColumn = getColumns(defaultProps)[0] as Column;
     });
 
     test('should be enabled when the field does not exist', () => {
       const testField = 'nonExistingField';
       const wrapper = mount(
-        <TestProviders>{checkboxColumn.render(testField, testData)}</TestProviders>
+        <TestProviders>{actionsColumn.render(testField, testData)}</TestProviders>
       ) as ReactWrapper;
       expect(
         wrapper.find(`[data-test-subj="toggle-field-${testField}"]`).first().prop('disabled')
@@ -70,7 +70,7 @@ describe('getColumns', () => {
         ? Object.keys(mockDataToUse.fields)[0]
         : 'agent.hostname';
       const wrapper = mount(
-        <TestProviders>{checkboxColumn.render(testField, testData)}</TestProviders>
+        <TestProviders>{actionsColumn.render(testField, testData)}</TestProviders>
       ) as ReactWrapper;
       expect(
         wrapper.find(`[data-test-subj="toggle-field-${testField}"]`).first().prop('disabled')

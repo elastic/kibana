@@ -28,7 +28,6 @@ import { getColumns } from './columns';
 import { EVENT_FIELDS_TABLE_CLASS_NAME, onEventDetailsTabKeyPressed, search } from './helpers';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { ColumnHeaderOptions, TimelineTabs } from '../../../../common/types/timeline';
-import { useSourcererScope } from '../../containers/sourcerer';
 
 interface Props {
   browserFields: BrowserFields;
@@ -121,7 +120,6 @@ export const EventFieldsBrowser = React.memo<Props>(
     const dispatch = useDispatch();
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
     const fieldsByName = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
-    const { indexPattern } = useSourcererScope();
     const items = useMemo(
       () =>
         sortBy(['field'], data).map((item, i) => ({
@@ -193,7 +191,6 @@ export const EventFieldsBrowser = React.memo<Props>(
           browserFields,
           columnHeaders,
           eventId,
-          indexPattern,
           onUpdateColumns,
           contextId: `event-fields-browser-for-${timelineId}-${timelineTabType}`,
           timelineId,
@@ -204,7 +201,6 @@ export const EventFieldsBrowser = React.memo<Props>(
         browserFields,
         columnHeaders,
         eventId,
-        indexPattern,
         onUpdateColumns,
         timelineId,
         timelineTabType,
