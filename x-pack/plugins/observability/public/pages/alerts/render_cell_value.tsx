@@ -68,7 +68,7 @@ export const getRenderCellValue = ({
           },
         });
       }
-    }, [columnId, data, setCellProps]);
+    }, [columnId, setCellProps]);
 
     switch (columnId) {
       case ALERT_STATUS:
