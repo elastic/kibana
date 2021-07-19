@@ -134,6 +134,7 @@ export function Correlations() {
   return (
     <>
       <EuiButton
+        data-test-subj="apmViewCorrelationsButton"
         fill
         onClick={() => {
           setIsFlyoutVisible(true);
@@ -147,13 +148,17 @@ export function Correlations() {
       {isFlyoutVisible && (
         <EuiPortal>
           <EuiFlyout
+            data-test-subj="apmCorrelationsFlyout"
             size="l"
             ownFocus
             onClose={() => setIsFlyoutVisible(false)}
           >
             <EuiFlyoutHeader hasBorder aria-labelledby="correlations-flyout">
               <EuiTitle>
-                <h2 id="correlations-flyout">
+                <h2
+                  data-test-subj="apmCorrelationsFlyoutHeader"
+                  id="correlations-flyout"
+                >
                   {CORRELATIONS_TITLE}
                   &nbsp;
                   <EuiBetaBadge

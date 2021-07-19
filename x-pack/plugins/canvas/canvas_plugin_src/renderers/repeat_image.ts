@@ -8,7 +8,7 @@
 import $ from 'jquery';
 import { times } from 'lodash';
 import {
-  elasticOutline,
+  getElasticOutline,
   isValidUrl,
 } from '../../../../../src/plugins/presentation_util/common/lib';
 import { RendererStrings, ErrorStrings } from '../../i18n';
@@ -23,10 +23,14 @@ export const repeatImage: RendererFactory<Arguments> = () => ({
   displayName: strings.getDisplayName(),
   help: strings.getHelpDescription(),
   reuseDomNode: true,
-  render(domNode, config, handlers) {
+  render: async (domNode, config, handlers) => {
+    let image = config.image;
+    if (!isValidUrl(config.image)) {
+      image = (await getElasticOutline()).elasticOutline;
+    }
     const settings = {
       ...config,
-      image: isValidUrl(config.image) ? config.image : elasticOutline,
+      image,
       emptyImage: config.emptyImage || '',
     };
 
