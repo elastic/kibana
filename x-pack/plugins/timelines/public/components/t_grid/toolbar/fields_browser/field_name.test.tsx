@@ -7,7 +7,6 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { waitFor } from '@testing-library/react';
 import { mockBrowserFields, TestProviders } from '../../../../mock';
 import { getColumnsWithTimestamp } from '../../../utils/helpers';
 

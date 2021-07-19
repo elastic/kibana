@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { EuiHighlight, EuiText } from '@elastic/eui';
-import styled from 'styled-components';
 
 /** Renders a field name in it's non-dragging state */
 export const FieldName = React.memo<{
