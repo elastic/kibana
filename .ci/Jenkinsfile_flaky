@@ -14,31 +14,88 @@ def AGENT_COUNT = getAgentCount(EXECUTIONS)
 def NEED_BUILD = JOB != 'jestIntegration' && JOB != 'apiIntegration'
 
 currentBuild.displayName += trunc(" ${params.GITHUB_OWNER}:${params.branch_specifier}", 24)
-currentBuild.description = "ALL TESTS x20"
+currentBuild.description = "${params.CI_GROUP}<br />Agents: ${AGENT_COUNT}<br />Executions: ${params.NUMBER_EXECUTIONS}"
 
 kibanaPipeline(timeoutMinutes: 180) {
   def agents = [:]
+  def workerFailures = []
 
-  def agentCount = 20
+  def worker = getWorkerFromParams(IS_XPACK, JOB, CI_GROUP)
 
-  for(def i = 1; i <= agentCount; i++) {
-    def agentNumber = i
+  for(def agentNumber = 1; agentNumber <= AGENT_COUNT; agentNumber++) {
+    def agentExecutions = floor(EXECUTIONS/AGENT_COUNT) + (agentNumber <= EXECUTIONS%AGENT_COUNT ? 1 : 0)
+
     agents["agent-${agentNumber}"] = {
-      withEnv([
-        'IGNORE_SHIP_CI_STATS_ERROR=true',
+      agentProcess(
+        agentNumber: agentNumber,
+        agentExecutions: agentExecutions,
+        worker: worker,
+        workerFailures: workerFailures,
+        needBuild: NEED_BUILD,
+        isXpack: IS_XPACK,
+        ciGroup: CI_GROUP
+      )
+    }
+  }
+
+  parallel(agents)
+
+  currentBuild.description += ", Failures: ${workerFailures.size()}"
+
+  if (workerFailures.size() > 0) {
+    print "There were ${workerFailures.size()} test suite failures."
+    print "The executions that failed were:"
+    print workerFailures.join("\n")
+    print "Please check 'Test Result' and 'Pipeline Steps' pages for more info"
+  }
+}
+
+def agentProcess(Map params = [:]) {
+  def config = [
+    agentNumber: 1,
+    agentExecutions: 0,
+    worker: {},
+    workerFailures: [],
+    needBuild: false,
+    isXpack: false,
+    ciGroup: null,
+  ] + params
+
+  catchErrors {
+    print "Agent ${config.agentNumber} - ${config.agentExecutions} executions"
+
+    withEnv([
+      'IGNORE_SHIP_CI_STATS_ERROR=true',
+    ]) {
+      kibanaPipeline.withTasks([
+        parallel: 20,
       ]) {
-        kibanaPipeline.withTasks {
-          task {
-            kibanaPipeline.buildKibana(48)
-            tasks.functionalOss()
-            tasks.functionalXpack()
+        task {
+          if (config.needBuild) {
+            kibanaPipeline.buildKibana()
+          }
+
+          for(def i = 0; i < config.agentExecutions; i++) {
+            def taskNumber = i
+            task({
+              withEnv([
+                "REMOVE_KIBANA_INSTALL_DIR=1",
+              ]) {
+                catchErrors {
+                  try {
+                    config.worker()
+                  } catch (ex) {
+                    config.workerFailures << "agent-${config.agentNumber}-${taskNumber}"
+                    throw ex
+                  }
+                }
+              }
+            })
           }
         }
       }
     }
   }
-
-  parallel(agents)
 }
 
 def getWorkerFromParams(isXpack, job, ciGroup) {
