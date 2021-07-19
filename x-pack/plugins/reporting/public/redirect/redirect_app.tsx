@@ -31,6 +31,12 @@ const i18nTexts = {
   redirectingTitle: i18n.translate('xpack.reporting.redirectApp.redirectingMessage', {
     defaultMessage: 'Redirecting...',
   }),
+  consoleMessagePrefix: i18n.translate(
+    'xpack.reporting.redirectApp.redirectConsoleErrorPrefixLabel',
+    {
+      defaultMessage: 'Redirect page error:',
+    }
+  ),
 };
 
 export const RedirectApp: FunctionComponent<Props> = ({ share }) => {
@@ -45,9 +51,12 @@ export const RedirectApp: FunctionComponent<Props> = ({ share }) => {
       if (!locatorParams) {
         throw new Error('Could not find locator for report');
       }
+
       share.navigate(locatorParams);
     } catch (e) {
       setError(e);
+      // eslint-disable-next-line no-console
+      console.error(i18nTexts.consoleMessagePrefix, e.message);
       throw e;
     }
   }, [share]);

@@ -63,6 +63,11 @@ export const ReportingExampleApp = ({
 }: ReportingExampleAppDeps) => {
   const { getDefaultLayoutSelectors } = reporting;
 
+  useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.log('forwardedParams', forwardedParams);
+  }, [forwardedParams]);
+
   // Context Menu
   const [isPopoverOpen, setPopover] = useState(false);
   const onButtonClick = () => {
@@ -103,7 +108,7 @@ export const ReportingExampleApp = ({
         selectors: getDefaultLayoutSelectors(),
       },
       locatorParams: [
-        { id: REPORTING_EXAMPLE_LOCATOR_ID, version: '1', params: { myTestState: {} } },
+        { id: REPORTING_EXAMPLE_LOCATOR_ID, version: '0.5.0', params: { myTestState: {} } },
       ],
       objectType: 'develeloperExample',
       title: 'Reporting Developer Example',
@@ -225,18 +230,29 @@ export const ReportingExampleApp = ({
 
                   <EuiHorizontalRule />
 
-                  {forwardedParams && (
-                    <>
-                      <EuiTitle>
-                        <h2>Forwarded app state</h2>
-                      </EuiTitle>
-                      <EuiCodeBlock>{JSON.stringify(forwardedParams)}</EuiCodeBlock>
-                      <EuiHorizontalRule />
-                    </>
-                  )}
-
-                  <div data-shared-items-container data-shared-items-count="4">
+                  <div data-shared-items-container data-shared-items-count="5">
                     <EuiFlexGroup gutterSize="l">
+                      <EuiFlexItem data-shared-item>
+                        {forwardedParams ? (
+                          <>
+                            <EuiText>
+                              <p>
+                                <strong>Forwarded app state</strong>
+                              </p>
+                            </EuiText>
+                            <EuiCodeBlock>{JSON.stringify(forwardedParams)}</EuiCodeBlock>
+                          </>
+                        ) : (
+                          <>
+                            <EuiText>
+                              <p>
+                                <strong>No forwarded app state found</strong>
+                              </p>
+                            </EuiText>
+                            <EuiCodeBlock>{'{}'}</EuiCodeBlock>
+                          </>
+                        )}
+                      </EuiFlexItem>
                       {logos.map((item, index) => (
                         <EuiFlexItem key={index} data-shared-item>
                           <EuiCard
