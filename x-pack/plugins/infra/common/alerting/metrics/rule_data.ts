@@ -17,7 +17,6 @@ export const serializedParamsKey = 'serialized_params';
 export const inventoryMetricThresholdRuleDataNamespace = METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID;
 export const inventoryMetricThresholdRuleDataSerializedParamsKey = `${inventoryMetricThresholdRuleDataNamespace}.${serializedParamsKey}` as const;
 
-// TODO change name (threshold)
 export const inventoryMetricRuleDataRT = rt.type({
   [inventoryMetricThresholdRuleDataSerializedParamsKey]: rt.array(
     jsonRt.pipe(inventoryMetricThresholdAlertParamsRT)

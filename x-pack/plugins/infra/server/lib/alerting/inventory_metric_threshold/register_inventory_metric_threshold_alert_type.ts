@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { ActionGroupIdsOf, PluginSetupContract } from '../../../../../alerting/server';
+import { PluginSetupContract } from '../../../../../alerting/server';
 import {
   createInventoryMetricThresholdExecutor,
   FIRED_ACTIONS,
@@ -46,19 +46,8 @@ const condition = schema.object({
   ),
 });
 
-export type InventoryMetricThresholdAllowedActionGroups = ActionGroupIdsOf<
-  typeof FIRED_ACTIONS | typeof WARNING_ACTIONS
->;
-
-export interface InventoryMetricPluginSetupContract
-  extends Omit<PluginSetupContract, 'ActionGroupIds'> {
-  ActionGroupIds: InventoryMetricThresholdAllowedActionGroups;
-}
-
 export async function registerMetricInventoryThresholdAlertType(
-  alertingPlugin: Omit<PluginSetupContract, 'ActionGroupIds'> & {
-    ActionGroupIds: InventoryMetricThresholdAllowedActionGroups;
-  },
+  alertingPlugin: PluginSetupContract,
   libs: InfraBackendLibs
 ) {
   alertingPlugin.registerType({

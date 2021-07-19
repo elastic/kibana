@@ -17,7 +17,7 @@ import { ObservabilityRuleTypeFormatter } from '../../../../observability/public
 export const formatReason: ObservabilityRuleTypeFormatter = ({ fields }) => {
   const actualCount = fields[ALERT_EVALUATION_VALUE];
   const thresholdCount = fields[ALERT_EVALUATION_THRESHOLD];
-  const reason = i18n.translate('xpack.infra.logs.alerting.threshold.ratioAlertReasonDescription', {
+  const reason = i18n.translate('xpack.infra.metrics.alerting.inventory.alertReasonDescription', {
     defaultMessage: 'Current value is {actualCount} (threshold of {thresholdCount}).',
     values: {
       actualCount,

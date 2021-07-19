@@ -13,11 +13,6 @@ import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_m
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
 import { AlertStates, InventoryMetricConditions } from './types';
 import {
-  inventoryMetricRuleDataRT,
-  inventoryMetricThresholdRuleDataSerializedParamsKey,
-} from '../../../../common/alerting/metrics';
-import {
-  AlertTypeParams,
   ActionGroupIdsOf,
   ActionGroup,
   AlertInstanceContext,
@@ -37,7 +32,6 @@ import {
   stateToAlertMessage,
 } from '../common/messages';
 import { evaluateCondition } from './evaluate_condition';
-import { InventoryMetricThresholdAllowedActionGroups } from './register_inventory_metric_threshold_alert_type';
 
 interface InventoryMetricThresholdParams {
   criteria: InventoryMetricConditions[];
@@ -46,6 +40,10 @@ interface InventoryMetricThresholdParams {
   sourceId?: string;
   alertOnNoData?: boolean;
 }
+
+type InventoryMetricThresholdAllowedActionGroups = ActionGroupIdsOf<
+  typeof FIRED_ACTIONS | typeof WARNING_ACTIONS
+>;
 
 export type InventoryMetricThresholdActionGroups = ActionGroupIdsOf<
   typeof FIRED_ACTIONS | typeof WARNING_ACTIONS
