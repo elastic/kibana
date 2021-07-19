@@ -27,6 +27,7 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
 
 beforeEach(() => {
   jest.resetAllMocks();
+  alertingAuthMock.getSpaceId.mockImplementation(() => Promise.resolve('test_default_space_id'));
 });
 
 describe('update()', () => {
@@ -57,6 +58,7 @@ describe('update()', () => {
                   message: 'hello world 1',
                   'kibana.rac.alert.owner': 'apm',
                   'kibana.rac.alert.status': 'open',
+                  'kibana.rac.alert.space_ids': ['test_default_space_id'],
                 },
               },
             ],
@@ -142,6 +144,7 @@ describe('update()', () => {
                   message: 'hello world 1',
                   'kibana.rac.alert.owner': 'apm',
                   'kibana.rac.alert.status': 'open',
+                  'kibana.rac.alert.space_ids': ['test_default_space_id'],
                 },
               },
             ],
@@ -234,6 +237,7 @@ describe('update()', () => {
                   message: 'hello world 1',
                   'kibana.rac.alert.owner': 'apm',
                   'kibana.rac.alert.status': 'open',
+                  'kibana.rac.alert.space_ids': ['test_default_space_id'],
                 },
               },
             ],
@@ -293,6 +297,7 @@ describe('update()', () => {
                     message: 'hello world 1',
                     'kibana.rac.alert.owner': 'apm',
                     'kibana.rac.alert.status': 'open',
+                    'kibana.rac.alert.space_ids': ['test_default_space_id'],
                   },
                 },
               ],
