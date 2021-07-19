@@ -25,7 +25,7 @@ export const CtiDisabledModuleComponent = () => {
         title={i18n.DANGER_TITLE}
         body={i18n.DANGER_BODY}
         button={
-          <EuiButton href={threatIntelDocLink} color={'danger'} fill>
+          <EuiButton href={threatIntelDocLink} color={'danger'} fill target="_blank">
             {i18n.DANGER_BUTTON}
           </EuiButton>
         }
