@@ -7,9 +7,9 @@
 <b>Signature:</b>
 
 ```typescript
-export declare function getCapabilitiesForRollupIndices(indices: {
-    [key: string]: any;
-}): {
+export declare function getCapabilitiesForRollupIndices(indices: Record<string, {
+    rollup_jobs: any;
+}>): {
     [key: string]: any;
 };
 ```
@@ -18,7 +18,7 @@ export declare function getCapabilitiesForRollupIndices(indices: {
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  indices | <code>{</code><br/><code>    [key: string]: any;</code><br/><code>}</code> |  |
+|  indices | <code>Record&lt;string, {</code><br/><code>    rollup_jobs: any;</code><br/><code>}&gt;</code> |  |
 
 <b>Returns:</b>
 
