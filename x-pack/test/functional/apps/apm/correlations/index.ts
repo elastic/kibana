@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('APM specs', function () {
-    this.tags('ciGroup6');
-    loadTestFile(require.resolve('./feature_controls'));
-    loadTestFile(require.resolve('./correlations'));
+  describe('correlations', function () {
+    this.tags('skipFirefox');
+    loadTestFile(require.resolve('./latency_correlations'));
   });
 }

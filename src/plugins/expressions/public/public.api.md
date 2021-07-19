@@ -908,7 +908,6 @@ export interface IExpressionLoaderParams {
     //
     // (undocumented)
     onRenderError?: RenderErrorHandlerFnType;
-    // (undocumented)
     partial?: boolean;
     // Warning: (ae-forgotten-export) The symbol "RenderMode" needs to be exported by the entry point index.d.ts
     //
@@ -920,6 +919,7 @@ export interface IExpressionLoaderParams {
     searchSessionId?: string;
     // (undocumented)
     syncColors?: boolean;
+    throttle?: number;
     // (undocumented)
     uiState?: unknown;
     // (undocumented)
