@@ -6,6 +6,7 @@
  */
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
+
 import { AlertTypeParams } from '../../../alerting/server';
 import {
   ReadOperations,
@@ -16,7 +17,12 @@ import {
 import { Logger, ElasticsearchClient } from '../../../../../src/core/server';
 import { alertAuditEvent, AlertAuditAction } from './audit_events';
 import { AuditLogger } from '../../../security/server';
-import { ALERT_STATUS, OWNER, RULE_ID } from '../../common/technical_rule_data_field_names';
+import {
+  ALERT_STATUS,
+  OWNER,
+  RULE_ID,
+  SPACE_IDS,
+} from '../../common/technical_rule_data_field_names';
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import { mapConsumerToIndexName, validFeatureIds, isValidFeatureId } from '../utils/rbac';
 
@@ -57,12 +63,14 @@ export class AlertsClient {
   private readonly auditLogger?: AuditLogger;
   private readonly authorization: PublicMethodsOf<AlertingAuthorization>;
   private readonly esClient: ElasticsearchClient;
+  private readonly spaceId: Promise<string | undefined>;
 
   constructor({ auditLogger, authorization, logger, esClient }: ConstructorOptions) {
     this.logger = logger;
     this.authorization = authorization;
     this.esClient = esClient;
     this.auditLogger = auditLogger;
+    this.spaceId = this.authorization.getSpaceId();
   }
 
   public async getAlertsIndex(
@@ -81,13 +89,24 @@ export class AlertsClient {
     index,
   }: GetAlertParams): Promise<(AlertType & { _version: string | undefined }) | null | undefined> {
     try {
+      const alertSpaceId = await this.spaceId;
+      if (alertSpaceId == null) {
+        this.logger.error('Failed to acquire spaceId from authorization client');
+        return;
+      }
       const result = await this.esClient.search<ParsedTechnicalFields>({
         // Context: Originally thought of always just searching `.alerts-*` but that could
         // result in a big performance hit. If the client already knows which index the alert
         // belongs to, passing in the index will speed things up
         index: index ?? '.alerts-*',
         ignore_unavailable: true,
-        body: { query: { term: { _id: id } } },
+        body: {
+          query: {
+            bool: {
+              filter: [{ term: { _id: id } }, { term: { [SPACE_IDS]: alertSpaceId } }],
+            },
+          },
+        },
         seq_no_primary_term: true,
       });
 

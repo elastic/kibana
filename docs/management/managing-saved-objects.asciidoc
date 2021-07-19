@@ -37,11 +37,14 @@ and select *Relationships*.
 [[managing-saved-objects-export-objects]]
 === Import and export
 
-Using the import and export commands, you can move objects between different
+Using the import and export actions, you can move objects between different
 {kib} instances. This action is useful when you
 have multiple environments for development and production.
 Import and export also work well when you have a large number
 of objects to update and want to batch the process.
+
+In addition to the user interface, {kib} provides beta <<saved-objects-api-import, import>> and <<saved-objects-api-export, export>> APIs if
+you want to automate this process.
 
 [float]
 ==== Compatibility across versions
