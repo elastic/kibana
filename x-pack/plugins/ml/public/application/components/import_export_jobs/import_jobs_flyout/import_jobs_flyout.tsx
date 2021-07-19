@@ -21,6 +21,7 @@ import {
   EuiButtonIcon,
   EuiFlyoutBody,
   EuiTitle,
+  EuiText,
   EuiFilePicker,
   EuiSpacer,
   EuiPanel,
@@ -37,13 +38,12 @@ import { isJobIdValid } from '../../../../../common/util/job_utils';
 import { JOB_ID_MAX_LENGTH } from '../../../../../common/constants/validation';
 import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
 import { JobImportService } from './jobs_export_service';
-import type { ImportedAdJob, JobIdWrapper, SkippedJobs } from './jobs_export_service';
+import type { ImportedAdJob, JobIdObject, SkippedJobs } from './jobs_export_service';
 
 interface Props {
   isDisabled: boolean;
-  refreshJobs(): void;
 }
-export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
+export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
   const {
     jobs: { bulkCreateJobs, jobsExist: adJobsExist },
     dataFrameAnalytics: { createDataFrameAnalytics, jobsExist: dfaJobsExist },
@@ -62,7 +62,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
   const [showFlyout, setShowFlyout] = useState(false);
   const [adJobs, setAdJobs] = useState<ImportedAdJob[]>([]);
   const [dfaJobs, setDfaJobs] = useState<DataFrameAnalyticsConfig[]>([]);
-  const [jobIds, setJobIds] = useState<JobIdWrapper[]>([]);
+  const [jobIdObjects, setJobIdObjects] = useState<JobIdObject[]>([]);
   const [skippedJobs, setSkippedJobs] = useState<SkippedJobs[]>([]);
   const [importing, setImporting] = useState(false);
   const [jobType, setJobType] = useState<JobType | null>(null);
@@ -80,7 +80,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
   const reset = useCallback((showFileError = false) => {
     setAdJobs([]);
     setDfaJobs([]);
-    setJobIds([]);
+    setJobIdObjects([]);
     setIdsMash('');
     setImporting(false);
     setJobType(null);
@@ -133,7 +133,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
       }
 
       setJobType(loadedFile.jobType);
-      setJobIds(
+      setJobIdObjects(
         validatedJobs.jobIds.map((id) => ({
           id,
           originalId: id,
@@ -152,7 +152,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
   const onImport = useCallback(async () => {
     setImporting(true);
     if (jobType === 'anomaly-detector') {
-      const renamedJobs = jobImportService.renameAdJobs(jobIds, adJobs);
+      const renamedJobs = jobImportService.renameAdJobs(jobIdObjects, adJobs);
       try {
         await bulkCreateADJobs(renamedJobs);
       } catch (error) {
@@ -160,14 +160,13 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
         displayErrorToast(error);
       }
     } else if (jobType === 'data-frame-analytics') {
-      const renamedJobs = jobImportService.renameDfaJobs(jobIds, dfaJobs);
+      const renamedJobs = jobImportService.renameDfaJobs(jobIdObjects, dfaJobs);
       await bulkCreateDfaJobs(renamedJobs);
     }
 
     setImporting(false);
     setShowFlyout(false);
-    refreshJobs();
-  }, [jobType, jobIds, adJobs, dfaJobs]);
+  }, [jobType, jobIdObjects, adJobs, dfaJobs]);
 
   const bulkCreateADJobs = useCallback(async (jobs: ImportedAdJob[]) => {
     const results = await bulkCreateJobs(jobs);
@@ -237,29 +236,29 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
         js.splice(index, 1);
         setDfaJobs(js);
       }
-      const js = [...jobIds];
+      const js = [...jobIdObjects];
       js.splice(index, 1);
-      setJobIds(js);
+      setJobIdObjects(js);
       setIdsMash(js.map(({ id }) => id).join(''));
       setValidatingJobs(true);
     },
-    [jobIds, adJobs, dfaJobs]
+    [jobIdObjects, adJobs, dfaJobs]
   );
 
   useEffect(() => {
     const disabled =
-      jobIds.length === 0 ||
+      jobIdObjects.length === 0 ||
       importing === true ||
       validatingJobs === true ||
-      jobIds.some(({ valid }) => valid === false);
+      jobIdObjects.some(({ valid }) => valid === false);
     setImportDisabled(disabled);
 
     setDeleteDisabled(importing === true || validatingJobs === true);
-  }, [jobIds, idsMash, validatingJobs, importing]);
+  }, [jobIdObjects, idsMash, validatingJobs, importing]);
 
   const validateIds = useCallback(async () => {
     const existsChecks: string[] = [];
-    jobIds.forEach((j) => {
+    jobIdObjects.forEach((j) => {
       existsChecks.push(j.id);
       j.valid = true;
       j.invalidMessage = '';
@@ -284,7 +283,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
     if (jobType !== null) {
       const jobsExist = jobType === 'anomaly-detector' ? adJobsExist : dfaJobsExist;
       jobsExist(existsChecks, true).then((resp) => {
-        jobIds.forEach((j) => {
+        jobIdObjects.forEach((j) => {
           if (j.valid === true) {
             // only apply the exists result if the previous checks are ok
             const hh = resp[j.id];
@@ -292,29 +291,31 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
             j.invalidMessage = hh.exists ? jobExists : '';
           }
         });
-        setJobIds([...jobIds]);
+        setJobIdObjects([...jobIdObjects]);
         setValidatingJobs(false);
       });
     }
-  }, [idsMash, jobIds]);
+  }, [idsMash, jobIdObjects]);
 
   useDebounce(validateIds, 400, [idsMash]);
 
   const renameJob = useCallback(
     (id: string, i: number) => {
-      jobIds[i].id = id;
-      jobIds[i].valid = false;
-      setJobIds([...jobIds]);
-      setIdsMash(jobIds.map(({ id: jId }) => jId).join(''));
+      jobIdObjects[i].id = id;
+      jobIdObjects[i].valid = false;
+      setJobIdObjects([...jobIdObjects]);
+      setIdsMash(jobIdObjects.map(({ id: jId }) => jId).join(''));
       setValidatingJobs(true);
     },
-    [jobIds]
+    [jobIdObjects]
   );
 
   const DeleteJobButton: FC<{ index: number }> = ({ index }) => (
     <EuiButtonIcon
       iconType="trash"
-      aria-label="Delete"
+      aria-label={i18n.translate('xpack.ml.importExport.importFlyout.deleteButtonAria', {
+        defaultMessage: 'Delete',
+      })}
       color={deleteDisabled ? 'subdued' : 'danger'}
       disabled={deleteDisabled}
       onClick={() => deleteJob(index)}
@@ -339,10 +340,10 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
             <>
-              <div style={{ textAlign: 'center' }}>
+              <EuiText textAlign="center">
                 <EuiFilePicker
                   disabled={importing}
-                  fullWidth={true}
+                  fullWidth
                   id="filePicker"
                   initialPromptText={i18n.translate(
                     'xpack.ml.importExport.importFlyout.fileSelect',
@@ -350,12 +351,12 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
                       defaultMessage: 'Select or drag and drop a file',
                     }
                   )}
-                  onChange={(files) => onFilePickerChange(files)}
+                  onChange={onFilePickerChange}
                   className="file-datavisualizer-file-picker"
                 />
-              </div>
+              </EuiText>
 
-              {showFileReadError && <CannotReadFileCallout />}
+              {showFileReadError ? <CannotReadFileCallout /> : null}
 
               {totalJobsRead > 0 && jobType !== null && (
                 <>
@@ -380,18 +381,18 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
 
                   <CannotImportJobsCallout
                     jobs={skippedJobs}
-                    autoExpand={jobIds.length === 0 || skippedJobs.length === 1}
+                    autoExpand={jobIdObjects.length === 0 || skippedJobs.length === 1}
                   />
 
                   <FormattedMessage
                     id="xpack.ml.importExport.importFlyout.importableFiles"
                     defaultMessage="Import {num, plural, one {# job} other {# jobs}}"
-                    values={{ num: jobIds.length }}
+                    values={{ num: jobIdObjects.length }}
                   />
                   <EuiSpacer size="m" />
 
-                  {jobIds.map((jobId, i) => (
-                    <div key={i}>
+                  {jobIdObjects.map((jobId, i) => (
+                    <div key={jobId.originalId}>
                       <EuiPanel hasBorder={true}>
                         <EuiFlexGroup>
                           <EuiFlexItem>
@@ -429,7 +430,11 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty iconType="cross" onClick={() => setShowFlyout(false)} flush="left">
+                <EuiButtonEmpty
+                  iconType="cross"
+                  onClick={setShowFlyout.bind(null, false)}
+                  flush="left"
+                >
                   <FormattedMessage
                     id="xpack.ml.importExport.importFlyout.closeButton"
                     defaultMessage="Close"

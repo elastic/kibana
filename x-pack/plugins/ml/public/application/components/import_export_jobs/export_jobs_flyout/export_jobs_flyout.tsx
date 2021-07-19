@@ -169,7 +169,7 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
             <EuiTabs size="s">
               <EuiTab
                 isSelected={selectedJobType === 'anomaly-detector'}
-                onClick={() => changeTab('anomaly-detector')}
+                onClick={changeTab.bind(null, 'anomaly-detector')}
                 disabled={exporting}
               >
                 <FormattedMessage
@@ -179,7 +179,7 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
               </EuiTab>
               <EuiTab
                 isSelected={selectedJobType === 'data-frame-analytics'}
-                onClick={() => changeTab('data-frame-analytics')}
+                onClick={changeTab.bind(null, 'data-frame-analytics')}
                 disabled={exporting}
               >
                 <FormattedMessage
@@ -255,7 +255,11 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty iconType="cross" onClick={() => setShowFlyout(false)} flush="left">
+                <EuiButtonEmpty
+                  iconType="cross"
+                  onClick={setShowFlyout.bind(null, false)}
+                  flush="left"
+                >
                   <FormattedMessage
                     id="xpack.ml.importExport.exportFlyout.closeButton"
                     defaultMessage="Close"

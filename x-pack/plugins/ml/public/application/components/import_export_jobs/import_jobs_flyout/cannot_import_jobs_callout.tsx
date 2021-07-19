@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiCallOut, EuiText, EuiAccordion, EuiSpacer } from '@elastic/eui';
-import type { SkippedJobs } from './utils';
+import type { SkippedJobs } from './jobs_export_service';
 
 interface Props {
   jobs: SkippedJobs[];
@@ -65,16 +65,14 @@ const SkippedJobList: FC<{ jobs: SkippedJobs[] }> = ({ jobs }) => (
     {jobs.length > 0 && (
       <>
         {jobs.map(({ jobId, missingIndices }) => (
-          <>
-            <EuiText size="s">
-              <h5>{jobId}</h5>
-              <FormattedMessage
-                id="xpack.ml.importExport.importFlyout.cannotImportJobCallout.missingIndex"
-                defaultMessage="Missing index {num, plural, one {pattern} other {patterns}}: {indices}"
-                values={{ num: missingIndices.length, indices: missingIndices.join(',') }}
-              />
-            </EuiText>
-          </>
+          <EuiText size="s">
+            <h5>{jobId}</h5>
+            <FormattedMessage
+              id="xpack.ml.importExport.importFlyout.cannotImportJobCallout.missingIndex"
+              defaultMessage="Missing index {num, plural, one {pattern} other {patterns}}: {indices}"
+              values={{ num: missingIndices.length, indices: missingIndices.join(',') }}
+            />
+          </EuiText>
         ))}
       </>
     )}

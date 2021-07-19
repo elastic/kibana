@@ -14,7 +14,7 @@ export interface ImportedAdJob {
   datafeed: Datafeed;
 }
 
-export interface JobIdWrapper {
+export interface JobIdObject {
   id: string;
   originalId: string;
   valid: boolean;
@@ -86,7 +86,7 @@ export class JobImportService {
     }
   }
 
-  public renameAdJobs(jobIds: JobIdWrapper[], jobs: ImportedAdJob[]) {
+  public renameAdJobs(jobIds: JobIdObject[], jobs: ImportedAdJob[]) {
     if (jobs.length !== jobs.length) {
       return jobs;
     }
@@ -100,7 +100,7 @@ export class JobImportService {
     });
   }
 
-  public renameDfaJobs(jobIds: JobIdWrapper[], jobs: DataFrameAnalyticsConfig[]) {
+  public renameDfaJobs(jobIds: JobIdObject[], jobs: DataFrameAnalyticsConfig[]) {
     if (jobs.length !== jobs.length) {
       return jobs;
     }

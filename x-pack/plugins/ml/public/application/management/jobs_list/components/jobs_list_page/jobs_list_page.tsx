@@ -264,7 +264,7 @@ export const JobsListPage: FC<{
                     <ExportJobsFlyout isDisabled={false} currentTab={currentTabId} />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <ImportJobsFlyout refreshJobs={() => {}} isDisabled={false} />
+                    <ImportJobsFlyout isDisabled={false} />
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 {renderTabs()}
