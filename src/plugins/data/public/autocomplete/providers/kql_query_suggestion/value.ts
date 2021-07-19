@@ -35,7 +35,7 @@ export const setupGetValueSuggestions: KqlQuerySuggestionProvider = (
     .getStartServices()
     .then(([_, __, dataStart]) => dataStart.autocomplete);
   return async (
-    { indexPatterns, boolFilter, useTimeRange, signal },
+    { indexPatterns, boolFilter, useTimeRange, signal, method },
     { start, end, prefix, suffix, fieldName, nestedPath }
   ): Promise<QuerySuggestion[]> => {
     const fullFieldName = nestedPath ? `${nestedPath}.${fieldName}` : fieldName;
@@ -59,6 +59,7 @@ export const setupGetValueSuggestions: KqlQuerySuggestionProvider = (
           boolFilter,
           useTimeRange,
           signal,
+          method,
         }).then((valueSuggestions) => {
           const quotedValues = valueSuggestions.map((value) =>
             typeof value === 'string' ? `"${escapeQuotes(value)}"` : `${value}`
