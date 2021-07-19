@@ -6,8 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { errors as revealImage } from './dict/reveal_image';
+import React from 'react';
+import { shallowWithIntl } from '@kbn/test/jest';
+import ExampleSecurityPayload from './example_security_payload';
 
-export const getFunctionErrors = () => ({
-  revealImage,
+describe('example security payload', () => {
+  it('renders as expected', () => {
+    expect(shallowWithIntl(<ExampleSecurityPayload />)).toMatchSnapshot();
+  });
 });
