@@ -44,13 +44,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('can navigate to APM app', async () => {
         await PageObjects.common.navigateToApp('apm');
-        await testSubjects.existOrFail('apmMainContainer', {
-          timeout: 10000,
-        });
 
-        const apmMainContainerText = await testSubjects.getVisibleTextAll('apmMainContainer');
-        const apmMainContainerTextItems = apmMainContainerText[0].split('\n');
-        expect(apmMainContainerTextItems).to.contain('No services found');
+        await retry.try(async () => {
+          await testSubjects.existOrFail('apmMainContainer', {
+            timeout: 10000,
+          });
+
+          const apmMainContainerText = await testSubjects.getVisibleTextAll('apmMainContainer');
+          const apmMainContainerTextItems = apmMainContainerText[0].split('\n');
+          expect(apmMainContainerTextItems).to.contain('No services found');
+        });
       });
 
       it('sets the timePicker to return data', async () => {
