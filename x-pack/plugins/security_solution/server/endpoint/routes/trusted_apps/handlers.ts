@@ -72,7 +72,7 @@ const packagePolicyClientFromEndpointContext = (
   const packagePolicy = endpointAppContext.service.getPackagePolicyService();
 
   if (!packagePolicy) {
-    throw new Error('Agent policy service not found');
+    throw new Error('Package policy service not found');
   }
 
   return packagePolicy;
@@ -85,7 +85,7 @@ const savedObjectClientFromEndpointContext = (
   const savedObjectClient = endpointAppContext.service.getScopedSavedObjectsClient(req);
 
   if (!savedObjectClient) {
-    throw new Error('Agent policy service not found');
+    throw new Error('Saved Object client not found');
   }
 
   return savedObjectClient;
