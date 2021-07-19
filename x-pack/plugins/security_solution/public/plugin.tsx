@@ -43,6 +43,9 @@ import {
   DETECTION_ENGINE_INDEX_URL,
   DEFAULT_ALERTS_INDEX,
   APP_ICON_SOLUTION,
+  DEFAULT_INDEX_PATTERN_ID,
+  DEFAULT_INDEX_PATTERN,
+  DEFAULT_TIME_FIELD,
 } from '../common/constants';
 
 import { getDeepLinks, updateGlobalNavigation } from './app/deep_links';
@@ -61,6 +64,7 @@ import { getLazyEndpointPackageCustomExtension } from './management/pages/policy
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import type { TimelineState } from '../../timelines/public';
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
+import { IndexPattern, IndexPatternsContract } from '../../../../src/plugins/data/common';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;
@@ -325,6 +329,23 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     };
   }
 
+  private async getKibanaIndexPattern(
+    indexPatternsService: IndexPatternsContract,
+    defaultIndicesName: string[]
+  ): Promise<IndexPattern | undefined> {
+    let indexPattern;
+    try {
+      indexPattern = await indexPatternsService.get(DEFAULT_INDEX_PATTERN_ID);
+    } catch (e) {
+      indexPattern = await indexPatternsService.create({
+        id: DEFAULT_INDEX_PATTERN_ID,
+        title: [...DEFAULT_INDEX_PATTERN, ...defaultIndicesName].join(','),
+        timeFieldName: DEFAULT_TIME_FIELD,
+      });
+    }
+    return indexPattern;
+  }
+
   /**
    * Lazily instantiate a `SecurityAppStore`. We lazily instantiate this because it requests large dynamic imports. We instantiate it once because each subPlugin needs to share the same reference.
    */
@@ -342,6 +363,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         { createStore, createInitialState },
         kibanaIndexPatterns,
         configIndexPatterns,
+        kip,
       ] = await Promise.all([
         this.lazyApplicationDependencies(),
         startPlugins.data.indexPatterns.getIdsWithTitle(),
@@ -353,6 +375,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             }
           )
           .toPromise(),
+        this.getKibanaIndexPattern(startPlugins.data.indexPatterns, defaultIndicesName),
       ]);
 
       let signal: { name: string | null } = { name: null };
