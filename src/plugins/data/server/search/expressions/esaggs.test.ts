@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { of as mockOf } from 'rxjs';
 import type { MockedKeys } from '@kbn/utility-types/jest';
 import { KibanaRequest } from 'src/core/server';
 import type { ExecutionContext } from 'src/plugins/expressions/server';
@@ -21,7 +22,7 @@ import { getFunctionDefinition } from './esaggs';
 
 jest.mock('../../../common/search/expressions', () => ({
   getEsaggsMeta: jest.fn().mockReturnValue({ name: 'esaggs' }),
-  handleEsaggsRequest: jest.fn().mockResolvedValue({}),
+  handleEsaggsRequest: jest.fn(() => mockOf({})),
 }));
 
 import { getEsaggsMeta, handleEsaggsRequest } from '../../../common/search/expressions';
@@ -76,19 +77,19 @@ describe('esaggs expression function - server', () => {
   });
 
   test('calls getStartDependencies with the KibanaRequest', async () => {
-    await definition().fn(null, args, mockHandlers);
+    await definition().fn(null, args, mockHandlers).toPromise();
 
     expect(getStartDependencies).toHaveBeenCalledWith({ id: 'hi' });
   });
 
   test('calls indexPatterns.create with the values provided by the subexpression arg', async () => {
-    await definition().fn(null, args, mockHandlers);
+    await definition().fn(null, args, mockHandlers).toPromise();
 
     expect(startDependencies.indexPatterns.create).toHaveBeenCalledWith(args.index.value, true);
   });
 
   test('calls aggs.createAggConfigs with the values provided by the subexpression arg', async () => {
-    await definition().fn(null, args, mockHandlers);
+    await definition().fn(null, args, mockHandlers).toPromise();
 
     expect(startDependencies.aggs.createAggConfigs).toHaveBeenCalledWith(
       {},
@@ -104,15 +105,17 @@ describe('esaggs expression function - server', () => {
   });
 
   test('calls handleEsaggsRequest with all of the right dependencies', async () => {
-    await definition().fn(null, args, mockHandlers);
+    await definition().fn(null, args, mockHandlers).toPromise();
 
     expect(handleEsaggsRequest).toHaveBeenCalledWith({
       abortSignal: mockHandlers.abortSignal,
-      aggs: { foo: 'bar' },
+      aggs: {
+        foo: 'bar',
+        hierarchical: args.metricsAtAllLevels,
+      },
       filters: undefined,
       indexPattern: {},
       inspectorAdapters: mockHandlers.inspectorAdapters,
-      metricsAtAllLevels: args.metricsAtAllLevels,
       partialRows: args.partialRows,
       query: undefined,
       searchSessionId: 'abc123',
@@ -133,7 +136,7 @@ describe('esaggs expression function - server', () => {
       timeRange: { from: 'a', to: 'b' },
     } as KibanaContext;
 
-    await definition().fn(input, args, mockHandlers);
+    await definition().fn(input, args, mockHandlers).toPromise();
 
     expect(handleEsaggsRequest).toHaveBeenCalledWith(
       expect.objectContaining({

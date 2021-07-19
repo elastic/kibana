@@ -8,9 +8,9 @@
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { rgba } from 'polished';
 import styled, { createGlobalStyle } from 'styled-components';
+import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 
 import { TimelineEventsType } from '../../../../common/types/timeline';
-import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '../../../common/components/drag_and_drop/helpers';
 
 import { ACTIONS_COLUMN_ARIA_COL_INDEX } from './helpers';
 import { EVENTS_TABLE_ARIA_LABEL } from './translations';
@@ -299,10 +299,10 @@ export const EventsTdGroupActions = styled.div.attrs(({ className = '' }) => ({
   'aria-colindex': `${ACTIONS_COLUMN_ARIA_COL_INDEX}`,
   className: `siemEventsTable__tdGroupActions ${className}`,
   role: 'gridcell',
-}))<{ actionsColumnWidth: number }>`
+}))<{ width: number }>`
   align-items: center;
   display: flex;
-  flex: 0 0 ${({ actionsColumnWidth }) => `${actionsColumnWidth}px`};
+  flex: 0 0 ${({ width }) => `${width}px`};
   min-width: 0;
 `;
 

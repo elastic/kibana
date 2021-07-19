@@ -82,6 +82,9 @@ describe('updateDueToExtent', () => {
 
 describe('canSkipSourceUpdate', () => {
   const SOURCE_DATA_REQUEST_ID = 'foo';
+  const getUpdateDueToTimeslice = () => {
+    return true;
+  };
 
   describe('isQueryAware', () => {
     const queryAwareSourceMock = {
@@ -136,6 +139,7 @@ describe('canSkipSourceUpdate', () => {
           prevDataRequest,
           nextMeta,
           extentAware: queryAwareSourceMock.isFilterByMapBounds(),
+          getUpdateDueToTimeslice,
         });
 
         expect(canSkipUpdate).toBe(true);
@@ -156,6 +160,7 @@ describe('canSkipSourceUpdate', () => {
           prevDataRequest,
           nextMeta,
           extentAware: queryAwareSourceMock.isFilterByMapBounds(),
+          getUpdateDueToTimeslice,
         });
 
         expect(canSkipUpdate).toBe(true);
@@ -176,6 +181,7 @@ describe('canSkipSourceUpdate', () => {
           prevDataRequest,
           nextMeta,
           extentAware: queryAwareSourceMock.isFilterByMapBounds(),
+          getUpdateDueToTimeslice,
         });
 
         expect(canSkipUpdate).toBe(false);
@@ -193,6 +199,7 @@ describe('canSkipSourceUpdate', () => {
           prevDataRequest,
           nextMeta,
           extentAware: queryAwareSourceMock.isFilterByMapBounds(),
+          getUpdateDueToTimeslice,
         });
 
         expect(canSkipUpdate).toBe(false);
@@ -224,6 +231,7 @@ describe('canSkipSourceUpdate', () => {
           prevDataRequest,
           nextMeta,
           extentAware: queryAwareSourceMock.isFilterByMapBounds(),
+          getUpdateDueToTimeslice,
         });
 
         expect(canSkipUpdate).toBe(false);
@@ -244,6 +252,7 @@ describe('canSkipSourceUpdate', () => {
           prevDataRequest,
           nextMeta,
           extentAware: queryAwareSourceMock.isFilterByMapBounds(),
+          getUpdateDueToTimeslice,
         });
 
         expect(canSkipUpdate).toBe(false);
@@ -264,6 +273,7 @@ describe('canSkipSourceUpdate', () => {
           prevDataRequest,
           nextMeta,
           extentAware: queryAwareSourceMock.isFilterByMapBounds(),
+          getUpdateDueToTimeslice,
         });
 
         expect(canSkipUpdate).toBe(false);
@@ -281,9 +291,338 @@ describe('canSkipSourceUpdate', () => {
           prevDataRequest,
           nextMeta,
           extentAware: queryAwareSourceMock.isFilterByMapBounds(),
+          getUpdateDueToTimeslice,
         });
 
         expect(canSkipUpdate).toBe(false);
+      });
+    });
+  });
+
+  describe('isTimeAware', () => {
+    function createSourceMock() {
+      return {
+        isTimeAware: () => {
+          return true;
+        },
+        isRefreshTimerAware: () => {
+          return false;
+        },
+        isFilterByMapBounds: () => {
+          return false;
+        },
+        isFieldAware: () => {
+          return false;
+        },
+        isQueryAware: () => {
+          return false;
+        },
+        isGeoGridPrecisionAware: () => {
+          return false;
+        },
+      };
+    }
+
+    describe('applyGlobalTime', () => {
+      it('can not skip update when applyGlobalTime changes', async () => {
+        const canSkipUpdate = await canSkipSourceUpdate({
+          source: createSourceMock(),
+          prevDataRequest: new DataRequest({
+            dataId: SOURCE_DATA_REQUEST_ID,
+            dataMeta: {
+              applyGlobalTime: true,
+            },
+            data: {},
+          }),
+          nextMeta: {
+            applyGlobalTime: false,
+          },
+          extentAware: false,
+          getUpdateDueToTimeslice,
+        });
+
+        expect(canSkipUpdate).toBe(false);
+      });
+
+      it('can skip update when applyGlobalTime does not change', async () => {
+        const canSkipUpdate = await canSkipSourceUpdate({
+          source: createSourceMock(),
+          prevDataRequest: new DataRequest({
+            dataId: SOURCE_DATA_REQUEST_ID,
+            dataMeta: {
+              applyGlobalTime: true,
+            },
+            data: {},
+          }),
+          nextMeta: {
+            applyGlobalTime: true,
+          },
+          extentAware: false,
+          getUpdateDueToTimeslice,
+        });
+
+        expect(canSkipUpdate).toBe(true);
+      });
+    });
+
+    describe('timeFilters', () => {
+      it('can not skip update when time range changes', async () => {
+        const canSkipUpdate = await canSkipSourceUpdate({
+          source: createSourceMock(),
+          prevDataRequest: new DataRequest({
+            dataId: SOURCE_DATA_REQUEST_ID,
+            dataMeta: {
+              applyGlobalTime: true,
+              timeFilters: {
+                from: 'now-15m',
+                to: 'now',
+              },
+            },
+            data: {},
+          }),
+          nextMeta: {
+            applyGlobalTime: true,
+            timeFilters: {
+              from: 'now-7d',
+              to: 'now',
+            },
+          },
+          extentAware: false,
+          getUpdateDueToTimeslice,
+        });
+
+        expect(canSkipUpdate).toBe(false);
+      });
+
+      it('can skip update when time range does not change', async () => {
+        const canSkipUpdate = await canSkipSourceUpdate({
+          source: createSourceMock(),
+          prevDataRequest: new DataRequest({
+            dataId: SOURCE_DATA_REQUEST_ID,
+            dataMeta: {
+              applyGlobalTime: true,
+              timeFilters: {
+                from: 'now-15m',
+                to: 'now',
+              },
+            },
+            data: {},
+          }),
+          nextMeta: {
+            applyGlobalTime: true,
+            timeFilters: {
+              from: 'now-15m',
+              to: 'now',
+            },
+          },
+          extentAware: false,
+          getUpdateDueToTimeslice,
+        });
+
+        expect(canSkipUpdate).toBe(true);
+      });
+
+      it('can skip update when time range changes but applyGlobalTime is false', async () => {
+        const canSkipUpdate = await canSkipSourceUpdate({
+          source: createSourceMock(),
+          prevDataRequest: new DataRequest({
+            dataId: SOURCE_DATA_REQUEST_ID,
+            dataMeta: {
+              applyGlobalTime: false,
+              timeFilters: {
+                from: 'now-15m',
+                to: 'now',
+              },
+            },
+            data: {},
+          }),
+          nextMeta: {
+            applyGlobalTime: false,
+            timeFilters: {
+              from: 'now-7d',
+              to: 'now',
+            },
+          },
+          extentAware: false,
+          getUpdateDueToTimeslice,
+        });
+
+        expect(canSkipUpdate).toBe(true);
+      });
+    });
+
+    describe('timeslice', () => {
+      const mockSource = createSourceMock();
+      it('can not skip update when timeslice changes (undefined => provided)', async () => {
+        const canSkipUpdate = await canSkipSourceUpdate({
+          source: mockSource,
+          prevDataRequest: new DataRequest({
+            dataId: SOURCE_DATA_REQUEST_ID,
+            dataMeta: {
+              applyGlobalTime: true,
+              timeFilters: {
+                from: 'now-7d',
+                to: 'now',
+              },
+            },
+            data: {},
+          }),
+          nextMeta: {
+            applyGlobalTime: true,
+            timeFilters: {
+              from: 'now-7d',
+              to: 'now',
+            },
+            timeslice: {
+              from: 0,
+              to: 1000,
+            },
+          },
+          extentAware: false,
+          getUpdateDueToTimeslice,
+        });
+
+        expect(canSkipUpdate).toBe(false);
+      });
+
+      it('can not skip update when timeslice changes', async () => {
+        const canSkipUpdate = await canSkipSourceUpdate({
+          source: mockSource,
+          prevDataRequest: new DataRequest({
+            dataId: SOURCE_DATA_REQUEST_ID,
+            dataMeta: {
+              applyGlobalTime: true,
+              timeFilters: {
+                from: 'now-7d',
+                to: 'now',
+              },
+              timeslice: {
+                from: 0,
+                to: 1000,
+              },
+            },
+            data: {},
+          }),
+          nextMeta: {
+            applyGlobalTime: true,
+            timeFilters: {
+              from: 'now-7d',
+              to: 'now',
+            },
+            timeslice: {
+              from: 1000,
+              to: 2000,
+            },
+          },
+          extentAware: false,
+          getUpdateDueToTimeslice,
+        });
+
+        expect(canSkipUpdate).toBe(false);
+      });
+
+      it('can not skip update when timeslice changes (provided => undefined)', async () => {
+        const canSkipUpdate = await canSkipSourceUpdate({
+          source: mockSource,
+          prevDataRequest: new DataRequest({
+            dataId: SOURCE_DATA_REQUEST_ID,
+            dataMeta: {
+              applyGlobalTime: true,
+              timeFilters: {
+                from: 'now-7d',
+                to: 'now',
+              },
+              timeslice: {
+                from: 0,
+                to: 1000,
+              },
+            },
+            data: {},
+          }),
+          nextMeta: {
+            applyGlobalTime: true,
+            timeFilters: {
+              from: 'now-7d',
+              to: 'now',
+            },
+          },
+          extentAware: false,
+          getUpdateDueToTimeslice,
+        });
+
+        expect(canSkipUpdate).toBe(false);
+      });
+
+      it('can skip update when timeslice does not change', async () => {
+        const canSkipUpdate = await canSkipSourceUpdate({
+          source: mockSource,
+          prevDataRequest: new DataRequest({
+            dataId: SOURCE_DATA_REQUEST_ID,
+            dataMeta: {
+              applyGlobalTime: true,
+              timeFilters: {
+                from: 'now-7d',
+                to: 'now',
+              },
+              timeslice: {
+                from: 0,
+                to: 1000,
+              },
+            },
+            data: {},
+          }),
+          nextMeta: {
+            applyGlobalTime: true,
+            timeFilters: {
+              from: 'now-7d',
+              to: 'now',
+            },
+            timeslice: {
+              from: 0,
+              to: 1000,
+            },
+          },
+          extentAware: false,
+          getUpdateDueToTimeslice,
+        });
+
+        expect(canSkipUpdate).toBe(true);
+      });
+
+      it('can skip update when timeslice changes but applyGlobalTime is false', async () => {
+        const canSkipUpdate = await canSkipSourceUpdate({
+          source: mockSource,
+          prevDataRequest: new DataRequest({
+            dataId: SOURCE_DATA_REQUEST_ID,
+            dataMeta: {
+              applyGlobalTime: false,
+              timeFilters: {
+                from: 'now-7d',
+                to: 'now',
+              },
+              timeslice: {
+                from: 0,
+                to: 1000,
+              },
+            },
+            data: {},
+          }),
+          nextMeta: {
+            applyGlobalTime: false,
+            timeFilters: {
+              from: 'now-7d',
+              to: 'now',
+            },
+            timeslice: {
+              from: 1000,
+              to: 2000,
+            },
+          },
+          extentAware: false,
+          getUpdateDueToTimeslice,
+        });
+
+        expect(canSkipUpdate).toBe(true);
       });
     });
   });

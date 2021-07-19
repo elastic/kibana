@@ -15,7 +15,7 @@ import { RouteDependencies } from '../../../types';
 export const registerFetchRoute = ({
   router,
   license,
-  lib: { isEsError, formatEsError },
+  lib: { handleEsError },
 }: RouteDependencies) => {
   router.get(
     {
@@ -23,21 +23,20 @@ export const registerFetchRoute = ({
       validate: false,
     },
     license.guardApiRoute(async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
+
       try {
-        const result = await context.crossClusterReplication!.client.callAsCurrentUser(
-          'ccr.autoFollowPatterns'
-        );
+        const {
+          body: { patterns },
+        } = await client.asCurrentUser.ccr.getAutoFollowPattern();
         return response.ok({
           body: {
-            patterns: deserializeListAutoFollowPatterns(result.patterns),
+            // @ts-expect-error Once #98266 is merged, test this again.
+            patterns: deserializeListAutoFollowPatterns(patterns),
           },
         });
-      } catch (err) {
-        if (isEsError(err)) {
-          return response.customError(formatEsError(err));
-        }
-        // Case: default
-        throw err;
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     })
   );

@@ -23,7 +23,7 @@ export interface ExpressionFunctionDefinition<Name extends string, Input, Argume
 |  [help](./kibana-plugin-plugins-expressions-public.expressionfunctiondefinition.help.md) | <code>string</code> | Help text displayed in the Expression editor. This text should be internationalized. |
 |  [inputTypes](./kibana-plugin-plugins-expressions-public.expressionfunctiondefinition.inputtypes.md) | <code>Array&lt;TypeToString&lt;Input&gt;&gt;</code> | List of allowed type names for input value of this function. If this property is set the input of function will be cast to the first possible type in this list. If this property is missing the input will be provided to the function as-is. |
 |  [name](./kibana-plugin-plugins-expressions-public.expressionfunctiondefinition.name.md) | <code>Name</code> | The name of the function, as will be used in expression. |
-|  [type](./kibana-plugin-plugins-expressions-public.expressionfunctiondefinition.type.md) | <code>TypeToString&lt;UnwrapPromiseOrReturn&lt;Output&gt;&gt;</code> | Name of type of value this function outputs. |
+|  [type](./kibana-plugin-plugins-expressions-public.expressionfunctiondefinition.type.md) | <code>TypeString&lt;Output&gt; &#124; UnmappedTypeStrings</code> | Name of type of value this function outputs. |
 
 ## Methods
 

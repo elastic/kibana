@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, Fragment } from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -151,7 +151,7 @@ export const GroupByExpression = ({
           </EuiFlexItem>
 
           {groupByTypes[groupBy].sizeRequired ? (
-            <Fragment>
+            <>
               <EuiFlexItem grow={false}>
                 <EuiFormRow isInvalid={errors.termSize.length > 0} error={errors.termSize}>
                   <EuiFieldNumber
@@ -201,7 +201,7 @@ export const GroupByExpression = ({
                   />
                 </EuiFormRow>
               </EuiFlexItem>
-            </Fragment>
+            </>
           ) : null}
         </EuiFlexGroup>
       </div>

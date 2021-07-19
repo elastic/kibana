@@ -25,6 +25,8 @@ describe('Alerting Plugin', () => {
     let coreSetup: ReturnType<typeof coreMock.createSetup>;
     let pluginsSetup: jest.Mocked<AlertingPluginsSetup>;
 
+    beforeEach(() => jest.clearAllMocks());
+
     it('should log warning when Encrypted Saved Objects plugin is missing encryption key', async () => {
       const context = coreMock.createPluginInitializerContext<AlertsConfig>({
         healthCheck: {
@@ -63,6 +65,7 @@ describe('Alerting Plugin', () => {
         id: 'test',
         name: 'test',
         minimumLicenseRequired: 'basic',
+        isExportable: true,
         actionGroups: [],
         defaultActionGroupId: 'default',
         producer: 'test',
@@ -200,6 +203,58 @@ describe('Alerting Plugin', () => {
         } as unknown) as KibanaRequest;
         startContract.getAlertsClientWithRequest(fakeRequest);
       });
+    });
+
+    test(`exposes getAlertingAuthorizationWithRequest()`, async () => {
+      const context = coreMock.createPluginInitializerContext<AlertsConfig>({
+        healthCheck: {
+          interval: '5m',
+        },
+        invalidateApiKeysTask: {
+          interval: '5m',
+          removalDelay: '1h',
+        },
+      });
+      const plugin = new AlertingPlugin(context);
+
+      const encryptedSavedObjectsSetup = {
+        ...encryptedSavedObjectsMock.createSetup(),
+        canEncrypt: true,
+      };
+      plugin.setup(coreMock.createSetup(), {
+        licensing: licensingMock.createSetup(),
+        encryptedSavedObjects: encryptedSavedObjectsSetup,
+        taskManager: taskManagerMock.createSetup(),
+        eventLog: eventLogServiceMock.create(),
+        actions: actionsMock.createSetup(),
+        statusService: statusServiceMock.createSetupContract(),
+      });
+
+      const startContract = plugin.start(coreMock.createStart(), {
+        actions: actionsMock.createStart(),
+        encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+        features: mockFeatures(),
+        licensing: licensingMock.createStart(),
+        eventLog: eventLogMock.createStart(),
+        taskManager: taskManagerMock.createStart(),
+      });
+
+      const fakeRequest = ({
+        headers: {},
+        getBasePath: () => '',
+        path: '/',
+        route: { settings: {} },
+        url: {
+          href: '/',
+        },
+        raw: {
+          req: {
+            url: '/',
+          },
+        },
+        getSavedObjectsClient: jest.fn(),
+      } as unknown) as KibanaRequest;
+      startContract.getAlertingAuthorizationWithRequest(fakeRequest);
     });
   });
 });

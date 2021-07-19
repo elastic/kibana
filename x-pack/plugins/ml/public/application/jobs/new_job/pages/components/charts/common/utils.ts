@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-export function getYRange(chartData: any[]) {
+export function getYRange(chartData?: any[]) {
+  const fit = false;
+
+  if (chartData === undefined) {
+    return { fit };
+  }
+
   if (chartData.length === 0) {
-    return { min: 0, max: 0 };
+    return { min: 0, max: 0, fit };
   }
 
   let max: number = Number.MIN_VALUE;
@@ -24,6 +30,7 @@ export function getYRange(chartData: any[]) {
   return {
     min,
     max,
+    fit,
   };
 }
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { AggRow } from './agg_row';
 import { AggSelect } from './agg_select';
 import { FieldSelect } from './field_select';
@@ -25,7 +25,7 @@ import {
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
-import { PANEL_TYPES } from '../../../../common/panel_types';
+import { PANEL_TYPES } from '../../../../common/enums';
 import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
 
 const isFieldTypeEnabled = (fieldRestrictions, fieldType) =>
@@ -62,6 +62,7 @@ const getAggWithOptions = (field = {}, fieldTypesRestriction) => {
           },
         ];
       case KBN_FIELD_TYPES.STRING:
+      case KBN_FIELD_TYPES.DATE:
         return [
           {
             label: i18n.translate('visTypeTimeseries.topHit.aggWithOptions.concatenate', {
@@ -91,16 +92,18 @@ const getOrderOptions = () => [
   },
 ];
 
+const AGG_WITH_KEY = 'agg_with';
 const ORDER_DATE_RESTRICT_FIELDS = [KBN_FIELD_TYPES.DATE];
+
+const getModelDefaults = () => ({
+  size: 1,
+  order: 'desc',
+  [AGG_WITH_KEY]: 'noop',
+});
 
 const TopHitAggUi = (props) => {
   const { fields, series, panel } = props;
-  const defaults = {
-    size: 1,
-    agg_with: 'noop',
-    order: 'desc',
-  };
-  const model = { ...defaults, ...props.model };
+  const model = useMemo(() => ({ ...getModelDefaults(), ...props.model }), [props.model]);
   const indexPattern = series.override_index_pattern
     ? series.series_index_pattern
     : panel.index_pattern;
@@ -110,7 +113,7 @@ const TopHitAggUi = (props) => {
     PANEL_TYPES.METRIC,
     PANEL_TYPES.MARKDOWN,
   ].includes(panel.type)
-    ? [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.STRING]
+    ? [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.STRING, KBN_FIELD_TYPES.DATE]
     : [KBN_FIELD_TYPES.NUMBER];
 
   const handleChange = createChangeHandler(props.onChange, model);
@@ -124,12 +127,22 @@ const TopHitAggUi = (props) => {
   const htmlId = htmlIdGenerator();
 
   const selectedAggWithOption = aggWithOptions.find((option) => {
-    return model.agg_with === option.value;
+    return model[AGG_WITH_KEY] === option.value;
   });
 
   const selectedOrderOption = orderOptions.find((option) => {
     return model.order === option.value;
   });
+
+  useEffect(() => {
+    const defaultFn = aggWithOptions?.[0]?.value;
+    const aggWith = model[AGG_WITH_KEY];
+    if (aggWith && defaultFn && aggWith !== defaultFn && !selectedAggWithOption) {
+      handleChange({
+        [AGG_WITH_KEY]: defaultFn,
+      });
+    }
+  }, [model, selectedAggWithOption, aggWithOptions, handleChange]);
 
   return (
     <AggRow
@@ -195,7 +208,7 @@ const TopHitAggUi = (props) => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow
-            id={htmlId('agg_with')}
+            id={htmlId(AGG_WITH_KEY)}
             label={
               <FormattedMessage
                 id="visTypeTimeseries.topHit.aggregateWithLabel"
@@ -213,8 +226,9 @@ const TopHitAggUi = (props) => {
               )}
               options={aggWithOptions}
               selectedOptions={selectedAggWithOption ? [selectedAggWithOption] : []}
-              onChange={handleSelectChange('agg_with')}
+              onChange={handleSelectChange(AGG_WITH_KEY)}
               singleSelection={{ asPlainText: true }}
+              data-test-subj="topHitAggregateWithComboBox"
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -231,6 +245,7 @@ const TopHitAggUi = (props) => {
             onChange={handleSelectChange('order_by')}
             indexPattern={indexPattern}
             fields={fields}
+            data-test-subj="topHitOrderByFieldSelect"
           />
         </EuiFlexItem>
         <EuiFlexItem>

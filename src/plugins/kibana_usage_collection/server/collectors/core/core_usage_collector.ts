@@ -238,6 +238,38 @@ export function getCoreUsageCollector(
               },
             },
           },
+          securityResponseHeaders: {
+            strictTransportSecurity: {
+              type: 'keyword',
+              _meta: {
+                description: 'The strictTransportSecurity response header, "NULL" if disabled.',
+              },
+            },
+            xContentTypeOptions: {
+              type: 'keyword',
+              _meta: {
+                description: 'The xContentTypeOptions response header, "NULL" if disabled.',
+              },
+            },
+            referrerPolicy: {
+              type: 'keyword',
+              _meta: { description: 'The referrerPolicy response header, "NULL" if disabled.' },
+            },
+            permissionsPolicyConfigured: {
+              type: 'boolean',
+              _meta: {
+                description:
+                  'Indicates if the permissionsPolicy response header has been configured.',
+              },
+            },
+            disableEmbedding: {
+              type: 'boolean',
+              _meta: {
+                description:
+                  'Indicates if security headers to disable embedding have been configured.',
+              },
+            },
+          },
         },
 
         logging: {
@@ -273,6 +305,23 @@ export function getCoreUsageCollector(
             type: 'long',
             _meta: {
               description: 'Maximum count of saved objects that can be imported or exported.',
+            },
+          },
+        },
+
+        deprecatedKeys: {
+          set: {
+            type: 'array',
+            items: {
+              type: 'keyword',
+              _meta: { description: 'Config path added during config deprecation.' },
+            },
+          },
+          unset: {
+            type: 'array',
+            items: {
+              type: 'keyword',
+              _meta: { description: 'Config path removed during config deprecation.' },
             },
           },
         },
@@ -325,6 +374,34 @@ export function getCoreUsageCollector(
                 _meta: {
                   description: 'The size in bytes of the index, for primaries and replicas.',
                 },
+              },
+            },
+          },
+          legacyUrlAliases: {
+            inactiveCount: {
+              type: 'long',
+              _meta: {
+                description:
+                  'Count of legacy URL aliases that are inactive; they are not disabled, but they have not been resolved.',
+              },
+            },
+            activeCount: {
+              type: 'long',
+              _meta: {
+                description:
+                  'Count of legacy URL aliases that are active; they are not disabled, and they have been resolved at least once.',
+              },
+            },
+            disabledCount: {
+              type: 'long',
+              _meta: {
+                description: 'Count of legacy URL aliases that are disabled.',
+              },
+            },
+            totalCount: {
+              type: 'long',
+              _meta: {
+                description: 'Total count of legacy URL aliases.',
               },
             },
           },
@@ -863,6 +940,38 @@ export function getCoreUsageCollector(
         type: 'long',
         _meta: {
           description: 'How many times this API has been called without all types selected.',
+        },
+      },
+      // Saved Objects Repository counters
+      'savedObjectsRepository.resolvedOutcome.exactMatch': {
+        type: 'long',
+        _meta: {
+          description: 'How many times a saved object has resolved with an exact match outcome.',
+        },
+      },
+      'savedObjectsRepository.resolvedOutcome.aliasMatch': {
+        type: 'long',
+        _meta: {
+          description: 'How many times a saved object has resolved with an alias match outcome.',
+        },
+      },
+      'savedObjectsRepository.resolvedOutcome.conflict': {
+        type: 'long',
+        _meta: {
+          description: 'How many times a saved object has resolved with a conflict outcome.',
+        },
+      },
+      'savedObjectsRepository.resolvedOutcome.notFound': {
+        type: 'long',
+        _meta: {
+          description: 'How many times a saved object has resolved with a not found outcome.',
+        },
+      },
+      'savedObjectsRepository.resolvedOutcome.total': {
+        type: 'long',
+        _meta: {
+          description:
+            'How many times a saved object has resolved with any of the four possible outcomes.',
         },
       },
     },

@@ -13,7 +13,7 @@ export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
 
   describe('overview', () => {
-    const archive = 'monitoring/apm';
+    const archive = 'x-pack/test/functional/es_archives/monitoring/apm';
     const timeRange = {
       min: '2018-08-31T12:59:49.104Z',
       max: '2018-08-31T13:59:49.104Z',

@@ -19,6 +19,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
   describe('vertical bar chart', function () {
+    let isNewChartsLibraryEnabled = false;
+    before(async () => {
+      isNewChartsLibraryEnabled = await PageObjects.visChart.isNewChartsLibraryEnabled();
+      await PageObjects.visualize.initTests(isNewChartsLibraryEnabled);
+    });
+
     const vizName1 = 'Visualization VerticalBarChart';
 
     const initBarChart = async () => {

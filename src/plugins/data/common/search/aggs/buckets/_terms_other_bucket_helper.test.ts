@@ -174,6 +174,57 @@ const nestedTermResponse = {
   status: 200,
 };
 
+const exhaustiveNestedTermResponse = {
+  took: 10,
+  timed_out: false,
+  _shards: {
+    total: 1,
+    successful: 1,
+    skipped: 0,
+    failed: 0,
+  },
+  hits: {
+    total: 14005,
+    max_score: 0,
+    hits: [],
+  },
+  aggregations: {
+    '1': {
+      doc_count_error_upper_bound: 0,
+      sum_other_doc_count: 8325,
+      buckets: [
+        {
+          '2': {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [
+              { key: 'ios', doc_count: 2850 },
+              { key: 'win xp', doc_count: 2830 },
+              { key: '__missing__', doc_count: 1430 },
+            ],
+          },
+          key: 'US-with-dash',
+          doc_count: 2850,
+        },
+        {
+          '2': {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [
+              { key: 'ios', doc_count: 1850 },
+              { key: 'win xp', doc_count: 1830 },
+              { key: '__missing__', doc_count: 130 },
+            ],
+          },
+          key: 'IN-with-dash',
+          doc_count: 2830,
+        },
+      ],
+    },
+  },
+  status: 200,
+};
+
 const nestedTermResponseNoResults = {
   took: 10,
   timed_out: false,
@@ -326,6 +377,17 @@ describe('Terms Agg Other bucket helper', () => {
       }
     });
 
+    test('does not build query if sum_other_doc_count is 0 (exhaustive terms)', () => {
+      const aggConfigs = getAggConfigs(nestedTerm.aggs);
+      expect(
+        buildOtherBucketAgg(
+          aggConfigs,
+          aggConfigs.aggs[1] as IBucketAggConfig,
+          exhaustiveNestedTermResponse
+        )
+      ).toBeFalsy();
+    });
+
     test('excludes exists filter for scripted fields', () => {
       const aggConfigs = getAggConfigs(nestedTerm.aggs);
       aggConfigs.aggs[1].params.field.scripted = true;
@@ -433,7 +495,7 @@ describe('Terms Agg Other bucket helper', () => {
           aggConfigs.aggs[0] as IBucketAggConfig,
           otherAggConfig()
         );
-        expect(mergedResponse.aggregations['1'].buckets[3].key).toEqual('__other__');
+        expect((mergedResponse!.aggregations!['1'] as any).buckets[3].key).toEqual('__other__');
       }
     });
 
@@ -455,7 +517,7 @@ describe('Terms Agg Other bucket helper', () => {
           otherAggConfig()
         );
 
-        expect(mergedResponse.aggregations['1'].buckets[1]['2'].buckets[3].key).toEqual(
+        expect((mergedResponse!.aggregations!['1'] as any).buckets[1]['2'].buckets[3].key).toEqual(
           '__other__'
         );
       }
@@ -471,7 +533,7 @@ describe('Terms Agg Other bucket helper', () => {
         aggConfigs.aggs[0] as IBucketAggConfig
       );
       expect(
-        updatedResponse.aggregations['1'].buckets.find(
+        (updatedResponse!.aggregations!['1'] as any).buckets.find(
           (bucket: Record<string, any>) => bucket.key === '__missing__'
         )
       ).toBeDefined();

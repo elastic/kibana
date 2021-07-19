@@ -20,12 +20,16 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
     let agentPolicyId: string;
     before(async () => {
-      await getService('esArchiver').load('empty_kibana');
-      await getService('esArchiver').load('fleet/empty_fleet_server');
+      await getService('esArchiver').load('x-pack/test/functional/es_archives/empty_kibana');
+      await getService('esArchiver').load(
+        'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
+      );
     });
     after(async () => {
-      await getService('esArchiver').unload('empty_kibana');
-      await getService('esArchiver').unload('fleet/empty_fleet_server');
+      await getService('esArchiver').unload('x-pack/test/functional/es_archives/empty_kibana');
+      await getService('esArchiver').unload(
+        'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
+      );
     });
 
     before(async function () {
@@ -46,20 +50,20 @@ export default function (providerContext: FtrProviderContext) {
         .send({ agentPolicyId });
     });
 
-    it('can only add to managed agent policies using the force parameter', async function () {
-      // get a managed policy
+    it('can only add to hosted agent policies using the force parameter', async function () {
+      // get a hosted policy
       const {
-        body: { item: managedPolicy },
+        body: { item: hostedPolicy },
       } = await supertest
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: `Managed policy from ${Date.now()}`,
+          name: `Hosted policy from ${Date.now()}`,
           namespace: 'default',
           is_managed: true,
         });
 
-      // try to add an integration to the managed policy
+      // try to add an integration to the hosted policy
       const { body: responseWithoutForce } = await supertest
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
@@ -67,7 +71,7 @@ export default function (providerContext: FtrProviderContext) {
           name: 'filetest-1',
           description: '',
           namespace: 'default',
-          policy_id: managedPolicy.id,
+          policy_id: hostedPolicy.id,
           enabled: true,
           output_id: '',
           inputs: [],
@@ -80,7 +84,9 @@ export default function (providerContext: FtrProviderContext) {
         .expect(400);
 
       expect(responseWithoutForce.statusCode).to.be(400);
-      expect(responseWithoutForce.message).to.contain('Cannot add integrations to managed policy');
+      expect(responseWithoutForce.message).to.contain(
+        'Cannot add integrations to hosted agent policy'
+      );
 
       // try same request with `force: true`
       const { body: responseWithForce } = await supertest
@@ -91,7 +97,7 @@ export default function (providerContext: FtrProviderContext) {
           name: 'filetest-1',
           description: '',
           namespace: 'default',
-          policy_id: managedPolicy.id,
+          policy_id: hostedPolicy.id,
           enabled: true,
           output_id: '',
           inputs: [],
@@ -107,7 +113,7 @@ export default function (providerContext: FtrProviderContext) {
 
       // delete policy we just made
       await supertest.post(`/api/fleet/agent_policies/delete`).set('kbn-xsrf', 'xxxx').send({
-        agentPolicyId: managedPolicy.id,
+        agentPolicyId: hostedPolicy.id,
       });
     });
 

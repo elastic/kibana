@@ -17,6 +17,7 @@ import {
   registerManagementUsageCollector,
   createCollectorFetch,
 } from './telemetry_management_collector';
+import { IUiSettingsClient } from 'kibana/server';
 
 const logger = loggingSystemMock.createLogger();
 
@@ -30,7 +31,7 @@ describe('telemetry_application_usage_collector', () => {
   });
 
   const uiSettingsClient = uiSettingsServiceMock.createClient();
-  const getUiSettingsClient = jest.fn(() => uiSettingsClient);
+  const getUiSettingsClient = jest.fn((): IUiSettingsClient | undefined => uiSettingsClient);
   const mockedFetchContext = createCollectorFetchContextMock();
 
   beforeAll(() => {
@@ -42,7 +43,7 @@ describe('telemetry_application_usage_collector', () => {
   });
 
   test('isReady() => false if no client', () => {
-    getUiSettingsClient.mockImplementationOnce(() => undefined as any);
+    getUiSettingsClient.mockImplementationOnce(() => undefined);
     expect(collector.isReady()).toBe(false);
   });
 
@@ -60,7 +61,7 @@ describe('telemetry_application_usage_collector', () => {
   });
 
   test('fetch() should not fail if invoked when not ready', async () => {
-    getUiSettingsClient.mockImplementationOnce(() => undefined as any);
+    getUiSettingsClient.mockImplementationOnce(() => undefined);
     await expect(collector.fetch(mockedFetchContext)).resolves.toBe(undefined);
   });
 });

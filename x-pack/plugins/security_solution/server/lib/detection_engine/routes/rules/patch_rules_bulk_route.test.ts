@@ -76,7 +76,7 @@ describe('patch_rules_bulk', () => {
           data: expect.objectContaining({
             params: expect.objectContaining({
               anomalyThreshold: 4,
-              machineLearningJobId: 'some_job_id',
+              machineLearningJobId: ['some_job_id'],
             }),
           }),
         })

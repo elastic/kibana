@@ -6,14 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IUiSettingsClient } from 'src/core/server';
+import { ElasticsearchClient, IUiSettingsClient } from 'src/core/server';
 import { ReportingConfig } from '../../../';
+import { createEscapeValue } from '../../../../../../../src/plugins/data/common';
 import { CancellationToken } from '../../../../../../plugins/reporting/common';
 import { CSV_BOM_CHARS } from '../../../../common/constants';
 import { byteSizeValueToNumber } from '../../../../common/schema_utils';
 import { LevelLogger } from '../../../lib';
 import { getFieldFormats } from '../../../services';
-import { createEscapeValue } from '../../csv_searchsource/generate_csv/escape_value';
 import { MaxSizeStringBuilder } from '../../csv_searchsource/generate_csv/max_size_string_builder';
 import {
   IndexPatternSavedObjectDeprecatedCSV,
@@ -24,7 +24,7 @@ import { fieldFormatMapFactory } from './field_format_map';
 import { createFlattenHit } from './flatten_hit';
 import { createFormatCsvValues } from './format_csv_values';
 import { getUiSettings } from './get_ui_settings';
-import { createHitIterator, EndpointCaller } from './hit_iterator';
+import { createHitIterator } from './hit_iterator';
 
 interface SearchRequest {
   index: string;
@@ -56,7 +56,7 @@ export function createGenerateCsv(logger: LevelLogger) {
     job: GenerateCsvParams,
     config: ReportingConfig,
     uiSettingsClient: IUiSettingsClient,
-    callEndpoint: EndpointCaller,
+    elasticsearchClient: ElasticsearchClient,
     cancellationToken: CancellationToken
   ): Promise<SavedSearchGeneratorResultDeprecatedCSV> {
     const settings = await getUiSettings(job.browserTimezone, uiSettingsClient, config, logger);
@@ -79,7 +79,7 @@ export function createGenerateCsv(logger: LevelLogger) {
 
     const iterator = hitIterator(
       settings.scroll,
-      callEndpoint,
+      elasticsearchClient,
       job.searchRequest,
       cancellationToken
     );

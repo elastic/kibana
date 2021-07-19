@@ -26,6 +26,7 @@ exports[`NewCalendar Renders new calendar form 1`] = `
           isGlobalCalendar={false}
           isNewCalendarIdValid={true}
           jobIds={Array []}
+          loading={true}
           onCalendarIdChange={[Function]}
           onCreate={[Function]}
           onCreateGroupOption={[Function]}

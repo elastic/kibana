@@ -19,7 +19,8 @@ const mockLogger = mockLoggerFactory.get('mock logger');
 const KIBANA_VERSION = '5.1.0';
 
 const createEsSuccess = elasticsearchClientMock.createSuccessTransportRequestPromise;
-const createEsError = elasticsearchClientMock.createErrorTransportRequestPromise;
+const createEsErrorReturn = (err: any) =>
+  elasticsearchClientMock.createErrorTransportRequestPromise(err);
 
 function createNodes(...versions: string[]): NodesInfo {
   const nodes = {} as any;
@@ -102,6 +103,28 @@ describe('mapNodesVersionCompatibility', () => {
       `"You're running Kibana 5.1.0 with some different versions of Elasticsearch. Update Kibana or Elasticsearch to the same version to prevent compatibility issues: v5.1.1 @ http_address (ip)"`
     );
   });
+
+  it('returns isCompatible=false without an extended message when a nodesInfoRequestError is not provided', async () => {
+    const result = mapNodesVersionCompatibility({ nodes: {} }, KIBANA_VERSION, false);
+    expect(result.isCompatible).toBe(false);
+    expect(result.nodesInfoRequestError).toBeUndefined();
+    expect(result.message).toMatchInlineSnapshot(
+      `"Unable to retrieve version information from Elasticsearch nodes."`
+    );
+  });
+
+  it('returns isCompatible=false with an extended message when a nodesInfoRequestError is present', async () => {
+    const result = mapNodesVersionCompatibility(
+      { nodes: {}, nodesInfoRequestError: new Error('connection refused') },
+      KIBANA_VERSION,
+      false
+    );
+    expect(result.isCompatible).toBe(false);
+    expect(result.nodesInfoRequestError).toBeTruthy();
+    expect(result.message).toMatchInlineSnapshot(
+      `"Unable to retrieve version information from Elasticsearch nodes. connection refused"`
+    );
+  });
 });
 
 describe('pollEsNodesVersion', () => {
@@ -119,10 +142,10 @@ describe('pollEsNodesVersion', () => {
     internalClient.nodes.info.mockImplementationOnce(() => createEsSuccess(infos));
   };
   const nodeInfosErrorOnce = (error: any) => {
-    internalClient.nodes.info.mockImplementationOnce(() => createEsError(error));
+    internalClient.nodes.info.mockImplementationOnce(() => createEsErrorReturn(new Error(error)));
   };
 
-  it('returns iscCompatible=false and keeps polling when a poll request throws', (done) => {
+  it('returns isCompatible=false and keeps polling when a poll request throws', (done) => {
     expect.assertions(3);
     const expectedCompatibilityResults = [false, false, true];
     jest.clearAllMocks();
@@ -142,6 +165,100 @@ describe('pollEsNodesVersion', () => {
       .subscribe({
         next: (result) => {
           expect(result.isCompatible).toBe(expectedCompatibilityResults.shift());
+        },
+        complete: done,
+        error: done,
+      });
+  });
+
+  it('returns the error from a failed nodes.info call when a poll request throws', (done) => {
+    expect.assertions(2);
+    const expectedCompatibilityResults = [false];
+    const expectedMessageResults = [
+      'Unable to retrieve version information from Elasticsearch nodes. mock request error',
+    ];
+    jest.clearAllMocks();
+
+    nodeInfosErrorOnce('mock request error');
+
+    pollEsNodesVersion({
+      internalClient,
+      esVersionCheckInterval: 1,
+      ignoreVersionMismatch: false,
+      kibanaVersion: KIBANA_VERSION,
+      log: mockLogger,
+    })
+      .pipe(take(1))
+      .subscribe({
+        next: (result) => {
+          expect(result.isCompatible).toBe(expectedCompatibilityResults.shift());
+          expect(result.message).toBe(expectedMessageResults.shift());
+        },
+        complete: done,
+        error: done,
+      });
+  });
+
+  it('only emits if the error from a failed nodes.info call changed from the previous poll', (done) => {
+    expect.assertions(4);
+    const expectedCompatibilityResults = [false, false];
+    const expectedMessageResults = [
+      'Unable to retrieve version information from Elasticsearch nodes. mock request error',
+      'Unable to retrieve version information from Elasticsearch nodes. mock request error 2',
+    ];
+    jest.clearAllMocks();
+
+    nodeInfosErrorOnce('mock request error'); // emit
+    nodeInfosErrorOnce('mock request error'); // ignore, same error message
+    nodeInfosErrorOnce('mock request error 2'); // emit
+
+    pollEsNodesVersion({
+      internalClient,
+      esVersionCheckInterval: 1,
+      ignoreVersionMismatch: false,
+      kibanaVersion: KIBANA_VERSION,
+      log: mockLogger,
+    })
+      .pipe(take(2))
+      .subscribe({
+        next: (result) => {
+          expect(result.message).toBe(expectedMessageResults.shift());
+          expect(result.isCompatible).toBe(expectedCompatibilityResults.shift());
+        },
+        complete: done,
+        error: done,
+      });
+  });
+
+  it('returns isCompatible=false and keeps polling when a poll request throws, only responding again if the error message has changed', (done) => {
+    expect.assertions(8);
+    const expectedCompatibilityResults = [false, false, true, false];
+    const expectedMessageResults = [
+      'This version of Kibana (v5.1.0) is incompatible with the following Elasticsearch nodes in your cluster: v5.0.0 @ http_address (ip)',
+      'Unable to retrieve version information from Elasticsearch nodes. mock request error',
+      "You're running Kibana 5.1.0 with some different versions of Elasticsearch. Update Kibana or Elasticsearch to the same version to prevent compatibility issues: v5.2.0 @ http_address (ip), v5.1.1-Beta1 @ http_address (ip)",
+      'Unable to retrieve version information from Elasticsearch nodes. mock request error',
+    ];
+    jest.clearAllMocks();
+
+    nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.0.0')); // emit
+    nodeInfosErrorOnce('mock request error'); // emit
+    nodeInfosErrorOnce('mock request error'); // ignore
+    nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.1.1-Beta1')); // emit
+    nodeInfosErrorOnce('mock request error'); // emit
+
+    pollEsNodesVersion({
+      internalClient,
+      esVersionCheckInterval: 1,
+      ignoreVersionMismatch: false,
+      kibanaVersion: KIBANA_VERSION,
+      log: mockLogger,
+    })
+      .pipe(take(4))
+      .subscribe({
+        next: (result) => {
+          expect(result.isCompatible).toBe(expectedCompatibilityResults.shift());
+          expect(result.message).toBe(expectedMessageResults.shift());
         },
         complete: done,
         error: done,

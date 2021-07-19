@@ -40,8 +40,7 @@ export async function checkIfPngsMatch(
     log.debug(`writeFile: ${baselineCopyPath}`);
     await fs.writeFile(baselineCopyPath, await fs.readFile(baselinepngPath));
   } catch (error) {
-    log.error(`No baseline png found at ${baselinepngPath}`);
-    return 0;
+    throw new Error(`No baseline png found at ${baselinepngPath}`);
   }
   log.debug(`writeFile: ${actualCopyPath}`);
   await fs.writeFile(actualCopyPath, await fs.readFile(actualpngPath));

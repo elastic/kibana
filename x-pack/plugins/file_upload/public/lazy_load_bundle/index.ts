@@ -7,43 +7,51 @@
 
 import React from 'react';
 import { FeatureCollection } from 'geojson';
-import { IndexPattern } from 'src/plugins/data/public';
 import { HttpStart } from 'src/core/public';
-import { IImporter, ImportFactoryOptions, ImportResults } from '../importer';
+import { IImporter, ImportFactoryOptions } from '../importer';
 import { getHttp } from '../kibana_services';
+import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/public';
+import { IndexNameFormProps } from '../';
+
+export interface FileUploadGeoResults {
+  indexPatternId: string;
+  geoFieldName: string;
+  geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE;
+  docCount: number;
+}
 
 export interface FileUploadComponentProps {
   isIndexingTriggered: boolean;
-  onFileUpload: (geojsonFile: FeatureCollection, name: string, previewCoverage: number) => void;
-  onFileRemove: () => void;
-  onIndexReady: (indexReady: boolean) => void;
-  onIndexingComplete: (results: {
-    indexDataResp: ImportResults;
-    indexPattern: IndexPattern;
-  }) => void;
-  onIndexingError: () => void;
+  onFileSelect: (geojsonFile: FeatureCollection, name: string, previewCoverage: number) => void;
+  onFileClear: () => void;
+  enableImportBtn: () => void;
+  disableImportBtn: () => void;
+  onUploadComplete: (results: FileUploadGeoResults) => void;
+  onUploadError: () => void;
 }
 
 let loadModulesPromise: Promise<LazyLoadedFileUploadModules>;
 
-interface LazyLoadedFileUploadModules {
+export interface LazyLoadedFileUploadModules {
   JsonUploadAndParse: React.ComponentType<FileUploadComponentProps>;
+  IndexNameForm: React.ComponentType<IndexNameFormProps>;
   importerFactory: (format: string, options: ImportFactoryOptions) => IImporter | undefined;
   getHttp: () => HttpStart;
 }
 
-export async function lazyLoadFileUploadModules(): Promise<LazyLoadedFileUploadModules> {
+export async function lazyLoadModules(): Promise<LazyLoadedFileUploadModules> {
   if (typeof loadModulesPromise !== 'undefined') {
     return loadModulesPromise;
   }
 
   loadModulesPromise = new Promise(async (resolve) => {
-    const { JsonUploadAndParse, importerFactory } = await import('./lazy');
+    const { JsonUploadAndParse, importerFactory, IndexNameForm } = await import('./lazy');
 
     resolve({
       JsonUploadAndParse,
       importerFactory,
       getHttp,
+      IndexNameForm,
     });
   });
   return loadModulesPromise;

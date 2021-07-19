@@ -265,6 +265,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
         const { body } = await mlClient.putDataFrameAnalytics(
           {
             id: analyticsId,
+            // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
             body: request.body,
           },
           getAuthorizationHeader(request)
@@ -301,6 +302,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
       try {
         const { body } = await mlClient.evaluateDataFrame(
           {
+            // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
             body: request.body,
           },
           getAuthorizationHeader(request)
@@ -338,6 +340,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
       try {
         const { body } = await mlClient.explainDataFrameAnalytics(
           {
+            // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
             body: request.body,
           },
           getAuthorizationHeader(request)
@@ -673,11 +676,13 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
 
         let results;
         if (treatAsRoot === 'true' || treatAsRoot === true) {
+          // @ts-expect-error never used as analyticsId
           results = await getExtendedMap(mlClient, client, {
             analyticsId: type !== JOB_MAP_NODE_TYPES.INDEX ? analyticsId : undefined,
             index: type === JOB_MAP_NODE_TYPES.INDEX ? analyticsId : undefined,
           });
         } else {
+          // @ts-expect-error never used as analyticsId
           results = await getAnalyticsMap(mlClient, client, {
             analyticsId: type !== JOB_MAP_NODE_TYPES.TRAINED_MODEL ? analyticsId : undefined,
             modelId: type === JOB_MAP_NODE_TYPES.TRAINED_MODEL ? analyticsId : undefined,
@@ -714,7 +719,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
     routeGuard.fullLicenseAPIGuard(async ({ client, request, response, context }) => {
       try {
         const { indexPattern } = request.params;
-        const isRollup = request.query.rollup === 'true';
+        const isRollup = request.query?.rollup === 'true';
         const savedObjectsClient = context.core.savedObjects.client;
         const fieldService = fieldServiceProvider(
           indexPattern,
@@ -761,6 +766,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
     routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
       const jobConfig = request.body;
       try {
+        // @ts-expect-error DFA schemas are incorrect
         const results = await validateAnalyticsJob(client, jobConfig);
         return response.ok({
           body: results,

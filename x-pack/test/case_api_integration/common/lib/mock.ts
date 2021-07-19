@@ -31,6 +31,11 @@ import {
 } from '../../../../plugins/cases/common/api';
 
 export const defaultUser = { email: null, full_name: null, username: 'elastic' };
+/**
+ * A null filled user will occur when the security plugin is disabled
+ */
+export const nullUser = { email: null, full_name: null, username: null };
+
 export const postCaseReq: CasePostRequest = {
   description: 'This is a brand new case of a bad meanie defacing data',
   title: 'Super Bad Security Issue',
@@ -44,7 +49,16 @@ export const postCaseReq: CasePostRequest = {
   settings: {
     syncAlerts: true,
   },
+  owner: 'securitySolutionFixture',
 };
+
+/**
+ * Return a request for creating a case.
+ */
+export const getPostCaseRequest = (req?: Partial<CasePostRequest>): CasePostRequest => ({
+  ...postCaseReq,
+  ...req,
+});
 
 /**
  * The fields for creating a collection style case.
@@ -65,6 +79,7 @@ export const userActionPostResp: CasesClientPostRequest = {
 export const postCommentUserReq: CommentRequestUserType = {
   comment: 'This is a cool comment',
   type: CommentType.user,
+  owner: 'securitySolutionFixture',
 };
 
 export const postCommentAlertReq: CommentRequestAlertType = {
@@ -72,6 +87,7 @@ export const postCommentAlertReq: CommentRequestAlertType = {
   index: 'test-index',
   rule: { id: 'test-rule-id', name: 'test-index-id' },
   type: CommentType.alert,
+  owner: 'securitySolutionFixture',
 };
 
 export const postCommentGenAlertReq: ContextTypeGeneratedAlertType = {
@@ -80,14 +96,15 @@ export const postCommentGenAlertReq: ContextTypeGeneratedAlertType = {
     { _id: 'test-id2', _index: 'test-index', ruleId: 'rule-id', ruleName: 'rule name' },
   ]),
   type: CommentType.generatedAlert,
+  owner: 'securitySolutionFixture',
 };
 
 export const postCaseResp = (
-  id: string,
+  id?: string | null,
   req: CasePostRequest = postCaseReq
 ): Partial<CaseResponse> => ({
   ...req,
-  id,
+  ...(id != null ? { id } : {}),
   comments: [],
   totalAlerts: 0,
   totalComment: 0,
@@ -155,60 +172,6 @@ export const subCaseResp = ({
   created_by: defaultUser,
   updated_by: defaultUser,
 });
-
-interface FormattedCollectionResponse {
-  caseInfo: Partial<CaseResponse>;
-  subCases?: Array<Partial<SubCaseResponse>>;
-  comments?: Array<Partial<CommentResponse>>;
-}
-
-export const formatCollectionResponse = (caseInfo: CaseResponse): FormattedCollectionResponse => {
-  const subCase = removeServerGeneratedPropertiesFromSubCase(caseInfo.subCases?.[0]);
-  return {
-    caseInfo: removeServerGeneratedPropertiesFromCaseCollection(caseInfo),
-    subCases: subCase ? [subCase] : undefined,
-    comments: removeServerGeneratedPropertiesFromComments(
-      caseInfo.subCases?.[0].comments ?? caseInfo.comments
-    ),
-  };
-};
-
-export const removeServerGeneratedPropertiesFromSubCase = (
-  subCase: Partial<SubCaseResponse> | undefined
-): Partial<SubCaseResponse> | undefined => {
-  if (!subCase) {
-    return;
-  }
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { closed_at, created_at, updated_at, version, comments, ...rest } = subCase;
-  return rest;
-};
-
-export const removeServerGeneratedPropertiesFromCaseCollection = (
-  config: Partial<CaseResponse>
-): Partial<CaseResponse> => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { closed_at, created_at, updated_at, version, subCases, ...rest } = config;
-  return rest;
-};
-
-export const removeServerGeneratedPropertiesFromCase = (
-  config: Partial<CaseResponse>
-): Partial<CaseResponse> => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { closed_at, created_at, updated_at, version, ...rest } = config;
-  return rest;
-};
-
-export const removeServerGeneratedPropertiesFromComments = (
-  comments: CommentResponse[] | undefined
-): Array<Partial<CommentResponse>> | undefined => {
-  return comments?.map((comment) => {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { created_at, updated_at, version, ...rest } = comment;
-    return rest;
-  });
-};
 
 const findCommon = {
   page: 1,

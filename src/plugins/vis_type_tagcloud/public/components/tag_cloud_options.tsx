@@ -6,16 +6,22 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
-import { SelectOption, SwitchOption } from '../../../vis_default_editor/public';
+import type { PaletteRegistry } from '../../../charts/public';
+import { VisEditorOptionsProps } from '../../../visualizations/public';
+import { SelectOption, SwitchOption, PalettePicker } from '../../../vis_default_editor/public';
 import { ValidatedDualRange } from '../../../kibana_react/public';
-import { TagCloudVisParams } from '../types';
+import { TagCloudVisParams, TagCloudTypeProps } from '../types';
 import { collections } from './collections';
 
-function TagCloudOptions({ stateParams, setValue }: VisEditorOptionsProps<TagCloudVisParams>) {
+interface TagCloudOptionsProps
+  extends VisEditorOptionsProps<TagCloudVisParams>,
+    TagCloudTypeProps {}
+
+function TagCloudOptions({ stateParams, setValue, palettes }: TagCloudOptionsProps) {
+  const [palettesRegistry, setPalettesRegistry] = useState<PaletteRegistry | undefined>(undefined);
   const handleFontSizeChange = ([minFontSize, maxFontSize]: [string | number, string | number]) => {
     setValue('minFontSize', Number(minFontSize));
     setValue('maxFontSize', Number(maxFontSize));
@@ -23,6 +29,14 @@ function TagCloudOptions({ stateParams, setValue }: VisEditorOptionsProps<TagClo
   const fontSizeRangeLabel = i18n.translate('visTypeTagCloud.visParams.fontSizeLabel', {
     defaultMessage: 'Font size range in pixels',
   });
+
+  useEffect(() => {
+    const fetchPalettes = async () => {
+      const palettesService = await palettes?.getPalettes();
+      setPalettesRegistry(palettesService);
+    };
+    fetchPalettes();
+  }, [palettes]);
 
   return (
     <EuiPanel paddingSize="s">
@@ -35,6 +49,17 @@ function TagCloudOptions({ stateParams, setValue }: VisEditorOptionsProps<TagClo
         value={stateParams.scale}
         setValue={setValue}
       />
+
+      {palettesRegistry && (
+        <PalettePicker
+          palettes={palettesRegistry}
+          activePalette={stateParams.palette}
+          paramName="palette"
+          setPalette={(paramName, value) => {
+            setValue(paramName, value);
+          }}
+        />
+      )}
 
       <SelectOption
         label={i18n.translate('visTypeTagCloud.visParams.orientationsLabel', {
@@ -71,4 +96,6 @@ function TagCloudOptions({ stateParams, setValue }: VisEditorOptionsProps<TagClo
   );
 }
 
-export { TagCloudOptions };
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { TagCloudOptions as default };

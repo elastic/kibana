@@ -7,12 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { EMSClient, FileLayer, TMSService } from '@elastic/ems-client';
-import { FeatureCollection } from 'geojson';
-// @ts-expect-error
-import * as topojson from 'topojson-client';
 import _ from 'lodash';
-
-import fetch from 'node-fetch';
 import {
   GIS_API_PATH,
   EMS_FILES_CATALOGUE_PATH,
@@ -20,21 +15,9 @@ import {
   EMS_GLYPHS_PATH,
   EMS_APP_NAME,
   FONTS_API_PATH,
-  FORMAT_TYPE,
 } from '../common/constants';
-import {
-  getHttp,
-  getRegionmapLayers,
-  getTilemap,
-  getKibanaVersion,
-  getEMSSettings,
-} from './kibana_services';
+import { getHttp, getTilemap, getKibanaVersion, getEMSSettings } from './kibana_services';
 import { getLicenseId } from './licensed_features';
-import { LayerConfig } from '../../../../src/plugins/maps_ems/public';
-
-export function getKibanaRegionList(): LayerConfig[] {
-  return getRegionmapLayers();
-}
 
 export function getKibanaTileMap(): unknown {
   return getTilemap();
@@ -117,42 +100,4 @@ export function getGlyphUrl(): string {
 
 export function isRetina(): boolean {
   return window.devicePixelRatio === 2;
-}
-
-export async function fetchGeoJson(
-  fetchUrl: string,
-  format: FORMAT_TYPE,
-  featureCollectionPath: string
-): Promise<FeatureCollection> {
-  let fetchedJson;
-  try {
-    const response = await fetch(fetchUrl);
-    if (!response.ok) {
-      throw new Error('Request failed');
-    }
-    fetchedJson = await response.json();
-  } catch (e) {
-    throw new Error(
-      i18n.translate('xpack.maps.util.requestFailedErrorMessage', {
-        defaultMessage: `Unable to fetch vector shapes from url: {fetchUrl}`,
-        values: { fetchUrl },
-      })
-    );
-  }
-
-  if (format === FORMAT_TYPE.GEOJSON) {
-    return fetchedJson;
-  }
-
-  if (format === FORMAT_TYPE.TOPOJSON) {
-    const features = _.get(fetchedJson, `objects.${featureCollectionPath}`);
-    return topojson.feature(fetchedJson, features);
-  }
-
-  throw new Error(
-    i18n.translate('xpack.maps.util.formatErrorMessage', {
-      defaultMessage: `Unable to fetch vector shapes from url: {format}`,
-      values: { format },
-    })
-  );
 }

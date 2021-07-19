@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { Observable, of } from 'rxjs';
 import { AbortError, abortSignalToPromise, defer } from '../../../kibana_utils/public';
 import {
   ItemBufferParams,
   TimedItemBufferParams,
   createBatchedFunction,
-  BatchResponseItem,
   ErrorLike,
+  normalizeError,
 } from '../../common';
-import { fetchStreaming, split } from '../streaming';
-import { normalizeError } from '../../common';
+import { fetchStreaming } from '../streaming';
 import { BatchedFunc, BatchItem } from './types';
 
 export interface BatchedFunctionProtocolError extends ErrorLike {
@@ -47,6 +47,11 @@ export interface StreamingBatchedFunctionParams<Payload, Result> {
    * before sending the batch request.
    */
   maxItemAge?: TimedItemBufferParams<any>['maxItemAge'];
+
+  /**
+   * Disabled zlib compression of response chunks.
+   */
+  compressionDisabled$?: Observable<boolean>;
 }
 
 /**
@@ -64,6 +69,7 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
     fetchStreaming: fetchStreamingInjected = fetchStreaming,
     flushOnMaxItems = 25,
     maxItemAge = 10,
+    compressionDisabled$ = of(false),
   } = params;
   const [fn] = createBatchedFunction({
     onCall: (payload: Payload, signal?: AbortSignal) => {
@@ -119,6 +125,7 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
           body: JSON.stringify({ batch }),
           method: 'POST',
           signal: abortController.signal,
+          compressionDisabled$,
         });
 
         const handleStreamError = (error: any) => {
@@ -127,10 +134,10 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
           for (const { future } of items) future.reject(normalizedError);
         };
 
-        stream.pipe(split('\n')).subscribe({
+        stream.subscribe({
           next: (json: string) => {
             try {
-              const response = JSON.parse(json) as BatchResponseItem<Result, ErrorLike>;
+              const response = JSON.parse(json);
               if (response.error) {
                 items[response.id].future.reject(response.error);
               } else if (response.result !== undefined) {

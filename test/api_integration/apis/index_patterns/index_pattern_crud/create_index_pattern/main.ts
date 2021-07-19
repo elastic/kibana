@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const esArchiver = getService('esArchiver');
 
   describe('main', () => {
     it('can create an index_pattern with just a title', async () => {
@@ -45,7 +46,6 @@ export default function ({ getService }: FtrProviderContext) {
         index_pattern: {
           title,
           id,
-          version: 'test-version',
           type: 'test-type',
           timeFieldName: 'test-timeFieldName',
         },
@@ -54,7 +54,6 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.status).to.be(200);
       expect(response.body.index_pattern.title).to.be(title);
       expect(response.body.index_pattern.id).to.be(id);
-      expect(response.body.index_pattern.version).to.be('test-version');
       expect(response.body.index_pattern.type).to.be('test-type');
       expect(response.body.index_pattern.timeFieldName).to.be('test-timeFieldName');
     });
@@ -77,60 +76,115 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.body.index_pattern.sourceFilters[0].value).to.be('foo');
     });
 
-    it('can specify optional fields attribute when creating an index pattern', async () => {
-      const title = `foo-${Date.now()}-${Math.random()}*`;
-      const response = await supertest.post('/api/index_patterns/index_pattern').send({
-        index_pattern: {
-          title,
-          fields: {
-            foo: {
-              name: 'foo',
-              type: 'string',
-            },
-          },
-        },
+    describe('creating fields', () => {
+      before(async () => {
+        await esArchiver.load(
+          'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
+        );
       });
 
-      expect(response.status).to.be(200);
-      expect(response.body.index_pattern.title).to.be(title);
-      expect(response.body.index_pattern.fields.foo.name).to.be('foo');
-      expect(response.body.index_pattern.fields.foo.type).to.be('string');
-    });
-
-    it('can add two fields, one with all fields specified', async () => {
-      const title = `foo-${Date.now()}-${Math.random()}*`;
-      const response = await supertest.post('/api/index_patterns/index_pattern').send({
-        index_pattern: {
-          title,
-          fields: {
-            foo: {
-              name: 'foo',
-              type: 'string',
-            },
-            bar: {
-              name: 'bar',
-              type: 'number',
-              count: 123,
-              script: '',
-              esTypes: ['test-type'],
-              scripted: true,
-            },
-          },
-        },
+      after(async () => {
+        await esArchiver.unload(
+          'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
+        );
       });
 
-      expect(response.status).to.be(200);
-      expect(response.body.index_pattern.title).to.be(title);
+      it('can specify optional fields attribute when creating an index pattern', async () => {
+        const title = `basic_index*`;
+        const response = await supertest.post('/api/index_patterns/index_pattern').send({
+          override: true,
+          index_pattern: {
+            title,
+            fields: {
+              foo: {
+                name: 'foo',
+                type: 'string',
+                scripted: true,
+                script: "doc['field_name'].value",
+              },
+            },
+          },
+        });
 
-      expect(response.body.index_pattern.fields.foo.name).to.be('foo');
-      expect(response.body.index_pattern.fields.foo.type).to.be('string');
+        expect(response.status).to.be(200);
+        expect(response.body.index_pattern.title).to.be(title);
+        expect(response.body.index_pattern.fields.foo.name).to.be('foo');
+        expect(response.body.index_pattern.fields.foo.type).to.be('string');
+        expect(response.body.index_pattern.fields.foo.scripted).to.be(true);
+        expect(response.body.index_pattern.fields.foo.script).to.be("doc['field_name'].value");
 
-      expect(response.body.index_pattern.fields.bar.name).to.be('bar');
-      expect(response.body.index_pattern.fields.bar.type).to.be('number');
-      expect(response.body.index_pattern.fields.bar.count).to.be(123);
-      expect(response.body.index_pattern.fields.bar.script).to.be('');
-      expect(response.body.index_pattern.fields.bar.esTypes[0]).to.be('test-type');
-      expect(response.body.index_pattern.fields.bar.scripted).to.be(true);
+        expect(response.body.index_pattern.fields.bar.name).to.be('bar'); // created from es index
+        expect(response.body.index_pattern.fields.bar.type).to.be('boolean');
+      });
+
+      it('can add scripted fields, other fields created from es index', async () => {
+        const title = `basic_index*`;
+        const response = await supertest.post('/api/index_patterns/index_pattern').send({
+          override: true,
+          index_pattern: {
+            title,
+            fields: {
+              foo: {
+                name: 'foo',
+                type: 'string',
+              },
+              fake: {
+                name: 'fake',
+                type: 'string',
+              },
+              bar: {
+                name: 'bar',
+                type: 'number',
+                count: 123,
+                script: '',
+                esTypes: ['test-type'],
+                scripted: true,
+              },
+            },
+          },
+        });
+
+        expect(response.status).to.be(200);
+        expect(response.body.index_pattern.title).to.be(title);
+
+        expect(response.body.index_pattern.fields.foo.name).to.be('foo');
+        expect(response.body.index_pattern.fields.foo.type).to.be('number'); // picked up from index
+
+        expect(response.body.index_pattern.fields.fake).to.be(undefined); // not in index, so not created
+
+        expect(response.body.index_pattern.fields.bar.name).to.be('bar');
+        expect(response.body.index_pattern.fields.bar.type).to.be('number');
+        expect(response.body.index_pattern.fields.bar.count).to.be(123);
+        expect(response.body.index_pattern.fields.bar.script).to.be('');
+        expect(response.body.index_pattern.fields.bar.esTypes[0]).to.be('test-type');
+        expect(response.body.index_pattern.fields.bar.scripted).to.be(true);
+      });
+
+      it('can add runtime fields', async () => {
+        const title = `basic_index*`;
+        const response = await supertest.post('/api/index_patterns/index_pattern').send({
+          override: true,
+          index_pattern: {
+            title,
+            runtimeFieldMap: {
+              runtimeFoo: {
+                type: 'keyword',
+                script: {
+                  source: 'emit(doc["foo"].value)',
+                },
+              },
+            },
+          },
+        });
+
+        expect(response.status).to.be(200);
+        expect(response.body.index_pattern.title).to.be(title);
+
+        expect(response.body.index_pattern.runtimeFieldMap.runtimeFoo.type).to.be('keyword');
+        expect(response.body.index_pattern.runtimeFieldMap.runtimeFoo.script.source).to.be(
+          'emit(doc["foo"].value)'
+        );
+      });
     });
 
     it('can specify optional typeMeta attribute when creating an index pattern', async () => {

@@ -7,6 +7,7 @@
 
 import signalsMapping from './signals_mapping.json';
 import ecsMapping from './ecs_mapping.json';
+import otherMapping from './other_mappings.json';
 
 /**
   @constant
@@ -21,7 +22,7 @@ import ecsMapping from './ecs_mapping.json';
   incremented by 10 in order to add "room" for the aforementioned patch
   release
 */
-export const SIGNALS_TEMPLATE_VERSION = 26;
+export const SIGNALS_TEMPLATE_VERSION = 45;
 export const MIN_EQL_RULE_INDEX_VERSION = 2;
 
 export const getSignalsTemplate = (index: string) => {
@@ -41,18 +42,19 @@ export const getSignalsTemplate = (index: string) => {
     },
     index_patterns: [`${index}-*`],
     mappings: {
-      ...ecsMapping.mappings,
+      dynamic: false,
       properties: {
         ...ecsMapping.mappings.properties,
+        ...otherMapping.mappings.properties,
         signal: signalsMapping.mappings.properties.signal,
         threat: {
           ...ecsMapping.mappings.properties.threat,
           properties: {
             ...ecsMapping.mappings.properties.threat.properties,
             indicator: {
-              ...ecsMapping.mappings.properties.threat.properties.indicator,
+              ...otherMapping.mappings.properties.threat.properties.indicator,
               properties: {
-                ...ecsMapping.mappings.properties.threat.properties.indicator.properties,
+                ...otherMapping.mappings.properties.threat.properties.indicator.properties,
                 event: ecsMapping.mappings.properties.event,
               },
             },

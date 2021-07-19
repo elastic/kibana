@@ -17,21 +17,72 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EnrichedDeprecationInfo } from '../../../../../common/types';
+import {
+  EnrichedDeprecationInfo,
+  MlAction,
+  ReindexAction,
+  IndexSettingAction,
+} from '../../../../../common/types';
 import { AppContext } from '../../../app_context';
 import { ReindexButton } from './reindex';
 import { FixIndexSettingsButton } from './index_settings';
+import { FixMlSnapshotsButton } from './ml_snapshots';
 
 interface DeprecationCellProps {
   items?: Array<{ title?: string; body: string }>;
-  reindexIndexName?: string;
-  deprecatedIndexSettings?: string[];
   docUrl?: string;
   headline?: string;
   healthColor?: string;
   children?: ReactNode;
-  reindexBlocker?: EnrichedDeprecationInfo['blockerForReindexing'];
+  correctiveAction?: EnrichedDeprecationInfo['correctiveAction'];
+  indexName?: string;
 }
+
+interface CellActionProps {
+  correctiveAction: EnrichedDeprecationInfo['correctiveAction'];
+  indexName?: string;
+  items: Array<{ title?: string; body: string }>;
+}
+
+const CellAction: FunctionComponent<CellActionProps> = ({ correctiveAction, indexName, items }) => {
+  const { type: correctiveActionType } = correctiveAction!;
+  switch (correctiveActionType) {
+    case 'mlSnapshot':
+      const { jobId, snapshotId } = correctiveAction as MlAction;
+      return (
+        <FixMlSnapshotsButton
+          jobId={jobId}
+          snapshotId={snapshotId}
+          // There will only ever be a single item for the cluster deprecations list, so we can use the index to access the first one
+          description={items[0]?.body}
+        />
+      );
+
+    case 'reindex':
+      const { blockerForReindexing } = correctiveAction as ReindexAction;
+
+      return (
+        <AppContext.Consumer>
+          {({ http, docLinks }) => (
+            <ReindexButton
+              docLinks={docLinks}
+              reindexBlocker={blockerForReindexing}
+              indexName={indexName!}
+              http={http}
+            />
+          )}
+        </AppContext.Consumer>
+      );
+
+    case 'indexSetting':
+      const { deprecatedSettings } = correctiveAction as IndexSettingAction;
+
+      return <FixIndexSettingsButton settings={deprecatedSettings} index={indexName!} />;
+
+    default:
+      throw new Error(`No UI defined for corrective action: ${correctiveActionType}`);
+  }
+};
 
 /**
  * Used to display a deprecation with links to docs, a health indicator, and other descriptive information.
@@ -39,12 +90,11 @@ interface DeprecationCellProps {
 export const DeprecationCell: FunctionComponent<DeprecationCellProps> = ({
   headline,
   healthColor,
-  reindexIndexName,
-  deprecatedIndexSettings,
+  correctiveAction,
+  indexName,
   docUrl,
   items = [],
   children,
-  reindexBlocker,
 }) => (
   <div className="upgDeprecationCell">
     <EuiFlexGroup responsive={false} wrap alignItems="baseline">
@@ -61,46 +111,30 @@ export const DeprecationCell: FunctionComponent<DeprecationCellProps> = ({
           </EuiTitle>
         )}
 
+        {items.map((item, index) => (
+          <EuiText key={`deprecation-item-${index}`}>
+            {item.title && <h6>{item.title}</h6>}
+            <p>{item.body}</p>
+          </EuiText>
+        ))}
+
         {docUrl && (
-          <div>
+          <>
+            <EuiSpacer size="s" />
+
             <EuiLink href={docUrl} target="_blank">
               <FormattedMessage
                 id="xpack.upgradeAssistant.checkupTab.deprecations.documentationButtonLabel"
                 defaultMessage="Documentation"
               />
             </EuiLink>
-            <EuiSpacer size="s" />
-          </div>
+          </>
         )}
-
-        {items.map((item) => (
-          <div key={item.title || item.body}>
-            <EuiText>
-              {item.title && <h6>{item.title}</h6>}
-              <p>{item.body}</p>
-            </EuiText>
-          </div>
-        ))}
       </EuiFlexItem>
 
-      {reindexIndexName && (
+      {correctiveAction && (
         <EuiFlexItem grow={false}>
-          <AppContext.Consumer>
-            {({ http, docLinks }) => (
-              <ReindexButton
-                docLinks={docLinks}
-                reindexBlocker={reindexBlocker}
-                indexName={reindexIndexName}
-                http={http}
-              />
-            )}
-          </AppContext.Consumer>
-        </EuiFlexItem>
-      )}
-
-      {deprecatedIndexSettings?.length && (
-        <EuiFlexItem grow={false}>
-          <FixIndexSettingsButton settings={deprecatedIndexSettings} index={reindexIndexName!} />
+          <CellAction correctiveAction={correctiveAction} indexName={indexName} items={items} />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

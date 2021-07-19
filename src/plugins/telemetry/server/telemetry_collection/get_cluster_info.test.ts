@@ -9,14 +9,10 @@
 import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 import { getClusterInfo } from './get_cluster_info';
 
-export function mockGetClusterInfo(clusterInfo: any) {
+export function mockGetClusterInfo<ClusterInfo>(clusterInfo: ClusterInfo) {
   const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-  esClient.info.mockResolvedValue(
-    // @ts-expect-error we only care about the response body
-    {
-      body: { ...clusterInfo },
-    }
-  );
+  // @ts-expect-error we only care about the response body
+  esClient.info.mockResolvedValue({ body: { ...clusterInfo } });
   return esClient;
 }
 

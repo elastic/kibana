@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
+import { IndexPattern, IndexPatternsContract } from '../../../../../src/plugins/data/common';
+import { ObjectEntries } from '../utility_types';
+import { ResolveLogSourceConfigurationError } from './errors';
 import {
-  LogSourceConfigurationProperties,
   LogSourceColumnConfiguration,
+  LogSourceConfigurationProperties,
 } from './log_source_configuration';
-import { IndexPatternsContract, IndexPattern } from '../../../../../src/plugins/data/common';
 
 export interface ResolvedLogSourceConfiguration {
   name: string;
@@ -19,6 +22,7 @@ export interface ResolvedLogSourceConfiguration {
   tiebreakerField: string;
   messageField: string[];
   fields: IndexPattern['fields'];
+  runtimeMappings: estypes.MappingRuntimeFields;
   columns: LogSourceColumnConfiguration[];
 }
 
@@ -41,10 +45,19 @@ const resolveLegacyReference = async (
     throw new Error('This function can only resolve legacy references');
   }
 
-  const fields = await indexPatternsService.getFieldsForWildcard({
-    pattern: sourceConfiguration.logIndices.indexName,
-    allowNoIndex: true,
-  });
+  const indices = sourceConfiguration.logIndices.indexName;
+
+  const fields = await indexPatternsService
+    .getFieldsForWildcard({
+      pattern: indices,
+      allowNoIndex: true,
+    })
+    .catch((error) => {
+      throw new ResolveLogSourceConfigurationError(
+        `Failed to fetch fields for indices "${indices}": ${error}`,
+        error
+      );
+    });
 
   return {
     indices: sourceConfiguration.logIndices.indexName,
@@ -52,6 +65,7 @@ const resolveLegacyReference = async (
     tiebreakerField: sourceConfiguration.fields.tiebreaker,
     messageField: sourceConfiguration.fields.message,
     fields,
+    runtimeMappings: {},
     columns: sourceConfiguration.logColumns,
     name: sourceConfiguration.name,
     description: sourceConfiguration.description,
@@ -66,9 +80,14 @@ const resolveKibanaIndexPatternReference = async (
     throw new Error('This function can only resolve Kibana Index Pattern references');
   }
 
-  const indexPattern = await indexPatternsService.get(
-    sourceConfiguration.logIndices.indexPatternId
-  );
+  const { indexPatternId } = sourceConfiguration.logIndices;
+
+  const indexPattern = await indexPatternsService.get(indexPatternId).catch((error) => {
+    throw new ResolveLogSourceConfigurationError(
+      `Failed to fetch index pattern "${indexPatternId}": ${error}`,
+      error
+    );
+  });
 
   return {
     indices: indexPattern.title,
@@ -76,8 +95,36 @@ const resolveKibanaIndexPatternReference = async (
     tiebreakerField: '_doc',
     messageField: ['message'],
     fields: indexPattern.fields,
+    runtimeMappings: resolveRuntimeMappings(indexPattern),
     columns: sourceConfiguration.logColumns,
     name: sourceConfiguration.name,
     description: sourceConfiguration.description,
   };
+};
+
+// this might take other sources of runtime fields into account in the future
+const resolveRuntimeMappings = (indexPattern: IndexPattern): estypes.MappingRuntimeFields => {
+  const { runtimeFields } = indexPattern.getComputedFields();
+
+  const runtimeMappingsFromIndexPattern = (Object.entries(runtimeFields) as ObjectEntries<
+    typeof runtimeFields
+  >).reduce<estypes.MappingRuntimeFields>(
+    (accumulatedMappings, [runtimeFieldName, runtimeFieldSpec]) => ({
+      ...accumulatedMappings,
+      [runtimeFieldName]: {
+        type: runtimeFieldSpec.type,
+        ...(runtimeFieldSpec.script != null
+          ? {
+              script: {
+                lang: 'painless', // required in the es types
+                source: runtimeFieldSpec.script.source,
+              },
+            }
+          : {}),
+      },
+    }),
+    {}
+  );
+
+  return runtimeMappingsFromIndexPattern;
 };

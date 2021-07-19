@@ -9,7 +9,6 @@ import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import {
   CoreSetup,
-  ILegacyCustomClusterClient,
   Plugin,
   Logger,
   PluginInitializerContext,
@@ -33,7 +32,6 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
   private readonly logger: Logger;
   private readonly globalConfig$: Observable<SharedGlobalConfig>;
   private readonly license: License;
-  private rollupEsClient?: ILegacyCustomClusterClient;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -121,9 +119,5 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
 
   start() {}
 
-  stop() {
-    if (this.rollupEsClient) {
-      this.rollupEsClient.close();
-    }
-  }
+  stop() {}
 }

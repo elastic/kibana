@@ -6,9 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ValuesType } from 'utility-types';
-import { ActionGroup } from '../../alerting/common';
-import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD } from '../../ml/common';
+import type { ValuesType } from 'utility-types';
+import type { ActionGroup } from '../../alerting/common';
+import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD } from './ml_constants';
+
+export const APM_SERVER_FEATURE_ID = 'apm';
 
 export enum AlertType {
   ErrorCount = 'apm.error_rate', // ErrorRate was renamed to ErrorCount but the key is kept as `error_rate` for backwards-compat.
@@ -33,6 +35,7 @@ export const ALERT_TYPES_CONFIG: Record<
     actionGroups: Array<ActionGroup<ThresholdMetActionGroupId>>;
     defaultActionGroupId: ThresholdMetActionGroupId;
     minimumLicenseRequired: string;
+    isExportable: boolean;
     producer: string;
   }
 > = {
@@ -43,7 +46,8 @@ export const ALERT_TYPES_CONFIG: Record<
     actionGroups: [THRESHOLD_MET_GROUP],
     defaultActionGroupId: THRESHOLD_MET_GROUP_ID,
     minimumLicenseRequired: 'basic',
-    producer: 'apm',
+    producer: APM_SERVER_FEATURE_ID,
+    isExportable: true,
   },
   [AlertType.TransactionDuration]: {
     name: i18n.translate('xpack.apm.transactionDurationAlert.name', {
@@ -52,7 +56,8 @@ export const ALERT_TYPES_CONFIG: Record<
     actionGroups: [THRESHOLD_MET_GROUP],
     defaultActionGroupId: THRESHOLD_MET_GROUP_ID,
     minimumLicenseRequired: 'basic',
-    producer: 'apm',
+    producer: APM_SERVER_FEATURE_ID,
+    isExportable: true,
   },
   [AlertType.TransactionDurationAnomaly]: {
     name: i18n.translate('xpack.apm.transactionDurationAnomalyAlert.name', {
@@ -61,7 +66,8 @@ export const ALERT_TYPES_CONFIG: Record<
     actionGroups: [THRESHOLD_MET_GROUP],
     defaultActionGroupId: THRESHOLD_MET_GROUP_ID,
     minimumLicenseRequired: 'basic',
-    producer: 'apm',
+    producer: APM_SERVER_FEATURE_ID,
+    isExportable: true,
   },
   [AlertType.TransactionErrorRate]: {
     name: i18n.translate('xpack.apm.transactionErrorRateAlert.name', {
@@ -70,7 +76,8 @@ export const ALERT_TYPES_CONFIG: Record<
     actionGroups: [THRESHOLD_MET_GROUP],
     defaultActionGroupId: THRESHOLD_MET_GROUP_ID,
     minimumLicenseRequired: 'basic',
-    producer: 'apm',
+    producer: APM_SERVER_FEATURE_ID,
+    isExportable: true,
   },
 };
 

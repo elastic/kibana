@@ -77,15 +77,15 @@ describe('ML runtime field utils', () => {
       ).toBe(false);
     });
 
-    it('allows object with most basic runtime mapping', () => {
+    it('allows object with most basic runtime field', () => {
       expect(isRuntimeMappings({ fieldName: { type: 'keyword' } })).toBe(true);
     });
-    it('allows object with multiple most basic runtime mappings', () => {
+    it('allows object with multiple most basic runtime fields', () => {
       expect(
         isRuntimeMappings({ fieldName1: { type: 'keyword' }, fieldName2: { type: 'keyword' } })
       ).toBe(true);
     });
-    it('allows object with runtime mappings including scripts', () => {
+    it('allows object with runtime fields including scripts', () => {
       expect(
         isRuntimeMappings({
           fieldName1: { type: 'keyword' },

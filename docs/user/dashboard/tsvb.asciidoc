@@ -2,7 +2,8 @@
 === TSVB
 
 *TSVB* enables you to visualize the data from multiple data series, supports <<aggregation-reference, 
-most {es} metric aggregations>>, multiple visualization types, custom functions, and some math. To use *TSVB*, your data must have a date field. 
+most {es} metric aggregations>>, multiple visualization types, custom functions, and some math. 
+To create *TSVB* visualization panels, your data must have a time field. 
 
 [role="screenshot"]
 image::visualize/images/tsvb-screenshot.png[TSVB overview]
@@ -13,19 +14,45 @@ image::visualize/images/tsvb-screenshot.png[TSVB overview]
 
 Open *TSVB*, then make sure the required settings are configured.
 
-. On the dashboard, click *Create panel*.
+. On the dashboard, click *All types*, then select *TSVB*.
 
-. On the *New visualization* window, click *TSVB*.
+. In *TSVB*, click *Panel options*, then specify the required *Data* settings.
 
-. In *TSVB*, click *Panel options*, then make sure the following settings are configured:
+.. From the *Index pattern* dropdown, select the index pattern you want to visualize. 
++
+To visualize an {es} index, open the *Index pattern select mode* menu, deselect *Use only {kib} index patterns*, then enter the {es} index.
 
-* *Index pattern*
-* *Time field*
-* *Interval*
+.. From the *Time field* dropdown, select the field you want to visualize, then enter the field *Interval*.
 
-. Select a *Drop last bucket* option. It is dropped by default because the time filter intersects the time range of the last bucket, but can be enabled to see the partial data.
+.. Select a *Drop last bucket* option. 
++
+By default, *TSVB* drops the last bucket because the time filter intersects the time range of the last bucket. To view the partial data, select *No*.
 
-. In the *Panel filter* field, specify any <<kuery-query, KQL filters>> to select specific documents.
+.. In the *Panel filter* field, enter <<kuery-query, KQL filters>> to view specific documents.
+
+[float]
+[[tsvb-index-pattern-mode]]
+==== Index pattern mode
+Create *TSVB* visualizations with {kib} index patterns. 
+
+IMPORTANT: Creating *TSVB* visualizations with an {es} index string is deprecated and will be removed in a future release.
+It is the default one for new visualizations but it can also be switched for the old implementations:
+
+. Click *Panel options*, then click the gear icon to open the *Index pattern selection mode* options.
+. Select *Use only Kibana index patterns*.
+. Reselect the index pattern from the dropdown, then select the *Time field*.
+
+image::images/tsvb_index_pattern_selection_mode.png[Change index pattern selection mode action]
+
+The index pattern mode unlocks many new features, such as:
+
+* Runtime fields
+
+* URL drilldowns
+
+* Interactive filters for time series visualizations
+
+* Better performance
 
 [float]
 [[configure-the-data-series]]
@@ -122,6 +149,27 @@ The *Markdown* visualization supports Markdown with Handlebar (mustache) syntax 
 For answers to frequently asked *TSVB* question, review the following. 
 
 [float]
+===== How do I create dashboard drilldowns for Top N and Table visualizations?
+
+You can create dashboard drilldowns that include the specified time range for *Top N* and *Table* visualizations.
+
+. Open the dashboard that you want to link to, then copy the URL.
+
+. Open the dashboard with the *Top N* and *Table* visualization panel, then click *Edit* in the toolbar. 
+
+. Open the *Top N* or *Table* panel menu, then select *Edit visualization*.
+
+. Click *Panel options*. 
+
+. In the *Item URL* field, enter the URL. 
++
+For example `dashboards#/view/f193ca90-c9f4-11eb-b038-dd3270053a27`.
+
+. Click *Save and return*.
+
+. In the toolbar, cick *Save as*, then make sure *Store time with dashboard* is deselected. 
+
+[float]
 ===== Why is my TSVB visualization missing data?
 
 It depends, but most often there are two causes:
@@ -163,3 +211,15 @@ For other types of month over month calculations, use <<timelion, *Timelion*>> o
   
 Calculating the duration between the start and end of an event is unsupported in *TSVB* because *TSVB* requires correlation between different time periods. 
 *TSVB* requires that the duration is pre-calculated.
+
+[float]
+===== How do I group on multiple fields?
+  
+To group with multiple fields, create runtime fields in the index pattern you are visualizing.
+
+. Create a runtime field. Refer to <<managing-index-patterns, *Manage index patterns data fields*>> for more information.
++
+[role="screenshot"]
+image::images/tsvb_group_by_multiple_fields.png[Group by multiple fields]
+
+. Create a new TSVB visualization and group by this field.

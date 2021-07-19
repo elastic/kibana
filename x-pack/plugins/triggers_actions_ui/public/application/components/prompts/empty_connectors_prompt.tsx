@@ -6,7 +6,7 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Fragment } from 'react';
+import React from 'react';
 import { EuiButton, EuiEmptyPrompt, EuiIcon, EuiSpacer, EuiTitle } from '@elastic/eui';
 import './empty_connectors_prompt.scss';
 
@@ -14,7 +14,7 @@ export const EmptyConnectorsPrompt = ({ onCTAClicked }: { onCTAClicked: () => vo
   <EuiEmptyPrompt
     data-test-subj="createFirstConnectorEmptyPrompt"
     title={
-      <Fragment>
+      <>
         <EuiIcon type="logoSlack" size="xl" className="actEmptyConnectorsPrompt__logo" />
         <EuiIcon type="logoGmail" size="xl" className="actEmptyConnectorsPrompt__logo" />
         <EuiIcon type="logoWebhook" size="xl" className="actEmptyConnectorsPrompt__logo" />
@@ -27,7 +27,7 @@ export const EmptyConnectorsPrompt = ({ onCTAClicked }: { onCTAClicked: () => vo
             />
           </h2>
         </EuiTitle>
-      </Fragment>
+      </>
     }
     body={
       <p>

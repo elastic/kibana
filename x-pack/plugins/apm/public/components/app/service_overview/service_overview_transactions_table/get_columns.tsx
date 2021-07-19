@@ -16,29 +16,29 @@ import {
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
-import { px, unit } from '../../../../style/variables';
+import { unit } from '../../../../utils/style';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ImpactBar } from '../../../shared/ImpactBar';
 import { TransactionDetailLink } from '../../../shared/Links/apm/transaction_detail_link';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { getLatencyColumnLabel } from '../get_latency_column_label';
 
-type TransactionGroupPrimaryStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/primary_statistics'>;
+type TransactionGroupMainStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics'>;
 
 type ServiceTransactionGroupItem = ValuesType<
-  TransactionGroupPrimaryStatistics['transactionGroups']
+  TransactionGroupMainStatistics['transactionGroups']
 >;
-type TransactionGroupComparisonStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/comparison_statistics'>;
+type TransactionGroupDetailedStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/detailed_statistics'>;
 
 export function getColumns({
   serviceName,
   latencyAggregationType,
-  transactionGroupComparisonStatistics,
+  transactionGroupDetailedStatistics,
   comparisonEnabled,
 }: {
   serviceName: string;
   latencyAggregationType?: LatencyAggregationType;
-  transactionGroupComparisonStatistics?: TransactionGroupComparisonStatistics;
+  transactionGroupDetailedStatistics?: TransactionGroupDetailedStatistics;
   comparisonEnabled?: boolean;
 }): Array<EuiBasicTableColumn<ServiceTransactionGroupItem>> {
   return [
@@ -71,12 +71,12 @@ export function getColumns({
       field: 'latency',
       sortable: true,
       name: getLatencyColumnLabel(latencyAggregationType),
-      width: px(unit * 10),
+      width: `${unit * 10}px`,
       render: (_, { latency, name }) => {
         const currentTimeseries =
-          transactionGroupComparisonStatistics?.currentPeriod?.[name]?.latency;
+          transactionGroupDetailedStatistics?.currentPeriod?.[name]?.latency;
         const previousTimeseries =
-          transactionGroupComparisonStatistics?.previousPeriod?.[name]?.latency;
+          transactionGroupDetailedStatistics?.previousPeriod?.[name]?.latency;
         return (
           <SparkPlot
             color="euiColorVis1"
@@ -97,13 +97,12 @@ export function getColumns({
         'xpack.apm.serviceOverview.transactionsTableColumnThroughput',
         { defaultMessage: 'Throughput' }
       ),
-      width: px(unit * 10),
+      width: `${unit * 10}px`,
       render: (_, { throughput, name }) => {
         const currentTimeseries =
-          transactionGroupComparisonStatistics?.currentPeriod?.[name]
-            ?.throughput;
+          transactionGroupDetailedStatistics?.currentPeriod?.[name]?.throughput;
         const previousTimeseries =
-          transactionGroupComparisonStatistics?.previousPeriod?.[name]
+          transactionGroupDetailedStatistics?.previousPeriod?.[name]
             ?.throughput;
         return (
           <SparkPlot
@@ -125,14 +124,12 @@ export function getColumns({
         'xpack.apm.serviceOverview.transactionsTableColumnErrorRate',
         { defaultMessage: 'Error rate' }
       ),
-      width: px(unit * 8),
+      width: `${unit * 8}px`,
       render: (_, { errorRate, name }) => {
         const currentTimeseries =
-          transactionGroupComparisonStatistics?.currentPeriod?.[name]
-            ?.errorRate;
+          transactionGroupDetailedStatistics?.currentPeriod?.[name]?.errorRate;
         const previousTimeseries =
-          transactionGroupComparisonStatistics?.previousPeriod?.[name]
-            ?.errorRate;
+          transactionGroupDetailedStatistics?.previousPeriod?.[name]?.errorRate;
         return (
           <SparkPlot
             color="euiColorVis7"
@@ -153,19 +150,19 @@ export function getColumns({
         'xpack.apm.serviceOverview.transactionsTableColumnImpact',
         { defaultMessage: 'Impact' }
       ),
-      width: px(unit * 5),
+      width: `${unit * 5}px`,
       render: (_, { name }) => {
         const currentImpact =
-          transactionGroupComparisonStatistics?.currentPeriod?.[name]?.impact ??
+          transactionGroupDetailedStatistics?.currentPeriod?.[name]?.impact ??
           0;
         const previousImpact =
-          transactionGroupComparisonStatistics?.previousPeriod?.[name]?.impact;
+          transactionGroupDetailedStatistics?.previousPeriod?.[name]?.impact;
         return (
           <EuiFlexGroup gutterSize="xs" direction="column">
             <EuiFlexItem>
               <ImpactBar value={currentImpact} size="m" />
             </EuiFlexItem>
-            {comparisonEnabled && previousImpact && (
+            {comparisonEnabled && previousImpact !== undefined && (
               <EuiFlexItem>
                 <ImpactBar value={previousImpact} size="s" color="subdued" />
               </EuiFlexItem>

@@ -17,8 +17,12 @@ import {
   getRequestId,
 } from '@kbn/server-http-tools';
 
+import type { Duration } from 'moment';
+import { Observable } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { Logger, LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';
+import type { InternalExecutionContextSetup } from '../execution_context';
 import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';
 import { adoptToHapiOnPreAuth, OnPreAuthHandler } from './lifecycle/on_pre_auth';
 import { adoptToHapiOnPostAuthFormat, OnPostAuthHandler } from './lifecycle/on_post_auth';
@@ -30,6 +34,7 @@ import {
   KibanaRouteOptions,
   KibanaRequestState,
   isSafeMethod,
+  RouterRoute,
 } from './router';
 import {
   SessionStorageCookieOptions,
@@ -49,6 +54,13 @@ export interface HttpServerSetup {
    * @param router {@link IRouter} - a router with registered route handlers.
    */
   registerRouter: (router: IRouter) => void;
+  /**
+   * Add all the routes registered with `router` to HTTP server request listeners.
+   * Unlike `registerRouter`, this function allows routes to be registered even after the server
+   * has started listening for requests.
+   * @param router {@link IRouter} - a router with registered route handlers.
+   */
+  registerRouterAfterListening: (router: IRouter) => void;
   registerStaticDir: (path: string, dirPath: string) => void;
   basePath: HttpServiceSetup['basePath'];
   csp: HttpServiceSetup['csp'];
@@ -80,6 +92,7 @@ export class HttpServer {
   private authRegistered = false;
   private cookieSessionStorageCreated = false;
   private handleServerResponseEvent?: (req: Request) => void;
+  private stopping = false;
   private stopped = false;
 
   private readonly log: Logger;
@@ -87,7 +100,11 @@ export class HttpServer {
   private readonly authRequestHeaders: AuthHeadersStorage;
   private readonly authResponseHeaders: AuthHeadersStorage;
 
-  constructor(private readonly logger: LoggerFactory, private readonly name: string) {
+  constructor(
+    private readonly logger: LoggerFactory,
+    private readonly name: string,
+    private readonly shutdownTimeout$: Observable<Duration>
+  ) {
     this.authState = new AuthStateStorage(() => this.authRegistered);
     this.authRequestHeaders = new AuthHeadersStorage();
     this.authResponseHeaders = new AuthHeadersStorage();
@@ -106,21 +123,39 @@ export class HttpServer {
     this.registeredRouters.add(router);
   }
 
-  public async setup(config: HttpConfig): Promise<HttpServerSetup> {
+  private registerRouterAfterListening(router: IRouter) {
+    if (this.isListening()) {
+      for (const route of router.getRoutes()) {
+        this.configureRoute(route);
+      }
+    } else {
+      // Not listening yet, add to set of registeredRouters so that it can be added after listening has started.
+      this.registeredRouters.add(router);
+    }
+  }
+
+  public async setup(
+    config: HttpConfig,
+    executionContext?: InternalExecutionContextSetup
+  ): Promise<HttpServerSetup> {
     const serverOptions = getServerOptions(config);
     const listenerOptions = getListenerOptions(config);
     this.server = createServer(serverOptions, listenerOptions);
     await this.server.register([HapiStaticFiles]);
     this.config = config;
 
+    // It's important to have setupRequestStateAssignment call the very first, otherwise context passing will be broken.
+    // That's the only reason why context initialization exists in this method.
+    this.setupRequestStateAssignment(config, executionContext);
     const basePathService = new BasePath(config.basePath, config.publicBaseUrl);
     this.setupBasePathRewrite(config, basePathService);
     this.setupConditionalCompression(config);
     this.setupResponseLogging();
-    this.setupRequestStateAssignment(config);
+    this.setupGracefulShutdownHandlers();
 
     return {
       registerRouter: this.registerRouter.bind(this),
+      registerRouterAfterListening: this.registerRouterAfterListening.bind(this),
       registerStaticDir: this.registerStaticDir.bind(this),
       registerOnPreRouting: this.registerOnPreRouting.bind(this),
       registerOnPreAuth: this.registerOnPreAuth.bind(this),
@@ -153,7 +188,7 @@ export class HttpServer {
     if (this.server === undefined) {
       throw new Error('Http server is not setup up yet');
     }
-    if (this.stopped) {
+    if (this.stopping || this.stopped) {
       this.log.warn(`start called after stop`);
       return;
     }
@@ -161,45 +196,7 @@ export class HttpServer {
 
     for (const router of this.registeredRouters) {
       for (const route of router.getRoutes()) {
-        this.log.debug(`registering route handler for [${route.path}]`);
-        // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
-        const validate = isSafeMethod(route.method) ? undefined : { payload: true };
-        const { authRequired, tags, body = {}, timeout } = route.options;
-        const { accepts: allow, maxBytes, output, parse } = body;
-
-        const kibanaRouteOptions: KibanaRouteOptions = {
-          xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
-        };
-
-        this.server.route({
-          handler: route.handler,
-          method: route.method,
-          path: route.path,
-          options: {
-            auth: this.getAuthOption(authRequired),
-            app: kibanaRouteOptions,
-            tags: tags ? Array.from(tags) : undefined,
-            // TODO: This 'validate' section can be removed once the legacy platform is completely removed.
-            // We are telling Hapi that NP routes can accept any payload, so that it can bypass the default
-            // validation applied in ./http_tools#getServerOptions
-            // (All NP routes are already required to specify their own validation in order to access the payload)
-            validate,
-            // @ts-expect-error Types are outdated and doesn't allow `payload.multipart` to be `true`
-            payload: [allow, maxBytes, output, parse, timeout?.payload].some((x) => x !== undefined)
-              ? {
-                  allow,
-                  maxBytes,
-                  output,
-                  parse,
-                  timeout: timeout?.payload,
-                  multipart: true,
-                }
-              : undefined,
-            timeout: {
-              socket: timeout?.idleSocket ?? this.config!.socketTimeout,
-            },
-          },
-        });
+        this.configureRoute(route);
       }
     }
 
@@ -213,19 +210,29 @@ export class HttpServer {
   }
 
   public async stop() {
-    this.stopped = true;
+    this.stopping = true;
     if (this.server === undefined) {
+      this.stopping = false;
+      this.stopped = true;
       return;
     }
 
     const hasStarted = this.server.info.started > 0;
     if (hasStarted) {
       this.log.debug('stopping http server');
+
+      const shutdownTimeout = await this.shutdownTimeout$.pipe(take(1)).toPromise();
+      await this.server.stop({ timeout: shutdownTimeout.asMilliseconds() });
+
+      this.log.debug(`http server stopped`);
+
+      // Removing the listener after stopping so we don't leave any pending requests unhandled
       if (this.handleServerResponseEvent) {
         this.server.events.removeListener('response', this.handleServerResponseEvent);
       }
-      await this.server.stop();
     }
+    this.stopping = false;
+    this.stopped = true;
   }
 
   private getAuthOption(
@@ -244,6 +251,18 @@ export class HttpServer {
     if (authRequired === false) {
       return false;
     }
+  }
+
+  private setupGracefulShutdownHandlers() {
+    this.registerOnPreRouting((request, response, toolkit) => {
+      if (this.stopping || this.stopped) {
+        return response.customError({
+          statusCode: 503,
+          body: { message: 'Kibana is shutting down and not accepting new incoming requests' },
+        });
+      }
+      return toolkit.next();
+    });
   }
 
   private setupBasePathRewrite(config: HttpConfig, basePathService: BasePath) {
@@ -266,7 +285,7 @@ export class HttpServer {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
-    if (this.stopped) {
+    if (this.stopping || this.stopped) {
       this.log.warn(`setupConditionalCompression called after stop`);
     }
 
@@ -296,25 +315,36 @@ export class HttpServer {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
-    if (this.stopped) {
+    if (this.stopping || this.stopped) {
       this.log.warn(`setupResponseLogging called after stop`);
     }
 
     const log = this.logger.get('http', 'server', 'response');
 
     this.handleServerResponseEvent = (request) => {
-      const { message, ...meta } = getEcsResponseLog(request, this.log);
+      const { message, meta } = getEcsResponseLog(request, this.log);
       log.debug(message!, meta);
     };
 
     this.server.events.on('response', this.handleServerResponseEvent);
   }
 
-  private setupRequestStateAssignment(config: HttpConfig) {
+  private setupRequestStateAssignment(
+    config: HttpConfig,
+    executionContext?: InternalExecutionContextSetup
+  ) {
     this.server!.ext('onRequest', (request, responseToolkit) => {
+      const requestId = getRequestId(request, config.requestId);
+
+      const parentContext = executionContext?.getParentContextFrom(request.headers);
+      executionContext?.set({
+        ...parentContext,
+        requestId,
+      });
+
       request.app = {
         ...(request.app ?? {}),
-        requestId: getRequestId(request, config.requestId),
+        requestId,
         requestUuid: uuid.v4(),
       } as KibanaRequestState;
       return responseToolkit.continue;
@@ -325,7 +355,7 @@ export class HttpServer {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
-    if (this.stopped) {
+    if (this.stopping || this.stopped) {
       this.log.warn(`registerOnPreAuth called after stop`);
     }
 
@@ -336,7 +366,7 @@ export class HttpServer {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
-    if (this.stopped) {
+    if (this.stopping || this.stopped) {
       this.log.warn(`registerOnPostAuth called after stop`);
     }
 
@@ -347,7 +377,7 @@ export class HttpServer {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
-    if (this.stopped) {
+    if (this.stopping || this.stopped) {
       this.log.warn(`registerOnPreRouting called after stop`);
     }
 
@@ -358,7 +388,7 @@ export class HttpServer {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
-    if (this.stopped) {
+    if (this.stopping || this.stopped) {
       this.log.warn(`registerOnPreResponse called after stop`);
     }
 
@@ -372,7 +402,7 @@ export class HttpServer {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
-    if (this.stopped) {
+    if (this.stopping || this.stopped) {
       this.log.warn(`createCookieSessionStorageFactory called after stop`);
     }
     if (this.cookieSessionStorageCreated) {
@@ -392,7 +422,7 @@ export class HttpServer {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
-    if (this.stopped) {
+    if (this.stopping || this.stopped) {
       this.log.warn(`registerAuth called after stop`);
     }
     if (this.authRegistered) {
@@ -438,7 +468,7 @@ export class HttpServer {
     if (this.server === undefined) {
       throw new Error('Http server is not setup up yet');
     }
-    if (this.stopped) {
+    if (this.stopping || this.stopped) {
       this.log.warn(`registerStaticDir called after stop`);
     }
 
@@ -452,7 +482,55 @@ export class HttpServer {
           lookupCompressed: true,
         },
       },
-      options: { auth: false },
+      options: {
+        auth: false,
+        cache: {
+          privacy: 'public',
+          otherwise: 'must-revalidate',
+        },
+      },
+    });
+  }
+
+  private configureRoute(route: RouterRoute) {
+    this.log.debug(`registering route handler for [${route.path}]`);
+    // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
+    const validate = isSafeMethod(route.method) ? undefined : { payload: true };
+    const { authRequired, tags, body = {}, timeout } = route.options;
+    const { accepts: allow, maxBytes, output, parse } = body;
+
+    const kibanaRouteOptions: KibanaRouteOptions = {
+      xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
+    };
+
+    this.server!.route({
+      handler: route.handler,
+      method: route.method,
+      path: route.path,
+      options: {
+        auth: this.getAuthOption(authRequired),
+        app: kibanaRouteOptions,
+        tags: tags ? Array.from(tags) : undefined,
+        // TODO: This 'validate' section can be removed once the legacy platform is completely removed.
+        // We are telling Hapi that NP routes can accept any payload, so that it can bypass the default
+        // validation applied in ./http_tools#getServerOptions
+        // (All NP routes are already required to specify their own validation in order to access the payload)
+        validate,
+        // @ts-expect-error Types are outdated and doesn't allow `payload.multipart` to be `true`
+        payload: [allow, maxBytes, output, parse, timeout?.payload].some((x) => x !== undefined)
+          ? {
+              allow,
+              maxBytes,
+              output,
+              parse,
+              timeout: timeout?.payload,
+              multipart: true,
+            }
+          : undefined,
+        timeout: {
+          socket: timeout?.idleSocket ?? this.config!.socketTimeout,
+        },
+      },
     });
   }
 }

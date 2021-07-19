@@ -9,19 +9,19 @@
 import { i18n } from '@kbn/i18n';
 
 import { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/public';
-import { TagCloudVisParams } from './types';
+import { TagCloudVisParams, TagCloudVisConfig } from './types';
 
 const name = 'tagcloud';
 
-interface Arguments extends TagCloudVisParams {
-  metric: any; // these aren't typed yet
-  bucket?: any; // these aren't typed yet
+interface Arguments extends TagCloudVisConfig {
+  palette: string;
 }
 
 export interface TagCloudVisRenderValue {
   visType: typeof name;
   visData: Datatable;
-  visParams: Arguments;
+  visParams: TagCloudVisParams;
+  syncColors: boolean;
 }
 
 export type TagcloudExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -70,6 +70,13 @@ export const createTagCloudFn = (): TagcloudExpressionFunctionDefinition => ({
       default: true,
       help: '',
     },
+    palette: {
+      types: ['string'],
+      help: i18n.translate('visTypeTagCloud.function.paletteHelpText', {
+        defaultMessage: 'Defines the chart palette name',
+      }),
+      default: 'default',
+    },
     metric: {
       types: ['vis_dimension'],
       help: i18n.translate('visTypeTagCloud.function.metric.help', {
@@ -92,11 +99,14 @@ export const createTagCloudFn = (): TagcloudExpressionFunctionDefinition => ({
       maxFontSize: args.maxFontSize,
       showLabel: args.showLabel,
       metric: args.metric,
-    } as Arguments;
-
-    if (args.bucket !== undefined) {
-      visParams.bucket = args.bucket;
-    }
+      ...(args.bucket && {
+        bucket: args.bucket,
+      }),
+      palette: {
+        type: 'palette',
+        name: args.palette,
+      },
+    } as TagCloudVisParams;
 
     if (handlers?.inspectorAdapters?.tables) {
       handlers.inspectorAdapters.tables.logDatatable('default', input);
@@ -108,6 +118,7 @@ export const createTagCloudFn = (): TagcloudExpressionFunctionDefinition => ({
         visData: input,
         visType: name,
         visParams,
+        syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
       },
     };
   },

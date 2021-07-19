@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { difference, fromPairs, identity } from 'lodash/fp';
-import { useCallback, useMemo } from 'react';
-import useEffectOnce from 'react-use/lib/useEffectOnce';
+import { difference, fromPairs, identity, intersection, isEqual } from 'lodash/fp';
+import { useCallback, useEffect } from 'react';
 import useMap from 'react-use/lib/useMap';
 import { useMessagesStorage } from '../../containers/local_storage/use_messages_storage';
 import { CallOutMessage } from './callout_types';
@@ -24,8 +23,7 @@ export const useCallOutStorage = (
 ): CallOutStorage => {
   const { getMessages, addMessage } = useMessagesStorage();
 
-  const visibilityStateInitial = useMemo(() => createInitialVisibilityState(messages), [messages]);
-  const [visibilityState, setVisibilityState] = useMap(visibilityStateInitial);
+  const [visibilityState, setVisibilityState] = useMap<Record<string, boolean>>({});
 
   const dismissedMessagesKey = getDismissedMessagesStorageKey(namespace);
 
@@ -58,16 +56,27 @@ export const useCallOutStorage = (
     [setVisibilityState, addMessage, dismissedMessagesKey]
   );
 
-  useEffectOnce(() => {
-    const idsAll = Object.keys(visibilityState);
-    const idsDismissed = getMessages(dismissedMessagesKey);
-    const idsToMakeVisible = difference(idsAll)(idsDismissed);
+  const populateVisibilityState = useCallback(
+    (ids: string[]) => {
+      const idsDismissed = getMessages(dismissedMessagesKey);
+      const idsToShow = difference(ids, idsDismissed);
+      const idsToHide = intersection(ids, idsDismissed);
 
-    setVisibilityState.setAll({
-      ...createVisibilityState(idsToMakeVisible, true),
-      ...createVisibilityState(idsDismissed, false),
-    });
-  });
+      setVisibilityState.setAll({
+        ...createVisibilityState(idsToShow, true),
+        ...createVisibilityState(idsToHide, false),
+      });
+    },
+    [getMessages, dismissedMessagesKey, setVisibilityState]
+  );
+
+  useEffect(() => {
+    const idsFromProps = messages.map((m) => m.id);
+    const idsFromState = Object.keys(visibilityState);
+    if (!isEqual(idsFromProps, idsFromState)) {
+      populateVisibilityState(idsFromProps);
+    }
+  }, [messages, visibilityState, populateVisibilityState]);
 
   return {
     getVisibleMessageIds,
@@ -78,12 +87,6 @@ export const useCallOutStorage = (
 
 const getDismissedMessagesStorageKey = (namespace: string) =>
   `kibana.securitySolution.${namespace}.callouts.dismissed`;
-
-const createInitialVisibilityState = (messages: CallOutMessage[]) =>
-  createVisibilityState(
-    messages.map((m) => m.id),
-    false
-  );
 
 const createVisibilityState = (messageIds: string[], isVisible: boolean) =>
   mapToObject(messageIds, identity, () => isVisible);

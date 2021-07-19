@@ -57,14 +57,14 @@ export const PopulationDetectorsSummary: FC = () => {
     if (allDataReady()) {
       loadCharts();
     }
-  }, [JSON.stringify(fieldValuesPerDetector), jobCreator.splitField]);
+  }, [JSON.stringify(fieldValuesPerDetector), jobCreator.populationField]);
 
   // watch for changes in split field or by fields.
   // load example field values
   // changes to fieldValues here will trigger the card effect via setFieldValuesPerDetector
   useEffect(() => {
     loadFieldExamples();
-  }, [jobCreator.splitField]);
+  }, [jobCreator.populationField]);
 
   async function loadCharts() {
     if (allDataReady()) {
@@ -76,10 +76,9 @@ export const PopulationDetectorsSummary: FC = () => {
           jobCreator.start,
           jobCreator.end,
           aggFieldPairList,
-          jobCreator.splitField,
+          jobCreator.populationField,
           cs.intervalMs,
           jobCreator.runtimeMappings,
-          // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
           jobCreator.datafeedConfig.indices_options
         );
 
@@ -103,7 +102,6 @@ export const PopulationDetectorsSummary: FC = () => {
               fields: await chartLoader.loadFieldExampleValues(
                 field,
                 jobCreator.runtimeMappings,
-                // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
                 jobCreator.datafeedConfig.indices_options
               ),
             };
@@ -145,18 +143,18 @@ export const PopulationDetectorsSummary: FC = () => {
 
   return (
     <Fragment>
-      {jobCreator.splitField !== null && (
+      {jobCreator.populationField !== null && (
         <Fragment>
           <FormattedMessage
             id="xpack.ml.newJob.wizard.pickFieldsStep.populationView.splitFieldTitle"
             defaultMessage="Population split by {field}"
-            values={{ field: jobCreator.splitField.name }}
+            values={{ field: jobCreator.populationField.name }}
           />
           <EuiSpacer />
           <ChartGrid
             aggFieldPairList={jobCreator.aggFieldPairs}
             chartSettings={chartSettings}
-            splitField={jobCreator.splitField}
+            splitField={jobCreator.populationField}
             lineChartsData={lineChartsData}
             modelData={modelData}
             anomalyData={anomalyData}

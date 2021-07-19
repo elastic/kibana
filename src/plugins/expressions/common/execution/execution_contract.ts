@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Execution } from './execution';
+import { of, Observable } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { Execution, ExecutionResult } from './execution';
 import { ExpressionValueError } from '../expression_types/specs';
 import { ExpressionAstExpression } from '../ast';
 
@@ -37,19 +39,22 @@ export class ExecutionContract<Input = unknown, Output = unknown, InspectorAdapt
    * wraps that error into `ExpressionValueError` type and returns that.
    * This function never throws.
    */
-  getData = async (): Promise<Output | ExpressionValueError> => {
-    try {
-      return await this.execution.result;
-    } catch (e) {
-      return {
-        type: 'error',
-        error: {
-          name: e.name,
-          message: e.message,
-          stack: e.stack,
-        },
-      };
-    }
+  getData = (): Observable<ExecutionResult<Output | ExpressionValueError>> => {
+    return this.execution.result.pipe(
+      catchError(({ name, message, stack }) =>
+        of({
+          partial: false,
+          result: {
+            type: 'error',
+            error: {
+              name,
+              message,
+              stack,
+            },
+          } as ExpressionValueError,
+        })
+      )
+    );
   };
 
   /**

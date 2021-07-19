@@ -7,7 +7,7 @@
 
 import { isFunction, get } from 'lodash';
 
-export function appendMetricbeatIndex(config, indexPattern, bypass = false) {
+export function appendMetricbeatIndex(config, indexPattern, ccs, bypass = false) {
   if (bypass) {
     return indexPattern;
   }
@@ -19,6 +19,10 @@ export function appendMetricbeatIndex(config, indexPattern, bypass = false) {
     mbIndex = config.get('monitoring.ui.metricbeat.index');
   } else {
     mbIndex = get(config, 'ui.metricbeat.index');
+  }
+
+  if (ccs) {
+    mbIndex = `${mbIndex},${ccs}:${mbIndex}`;
   }
 
   return `${indexPattern},${mbIndex}`;
@@ -46,7 +50,12 @@ export function prefixIndexPattern(config, indexPattern, ccs, monitoringIndicesO
   }
 
   if (!ccsEnabled || !ccs) {
-    return appendMetricbeatIndex(config, indexPattern, monitoringIndicesOnly);
+    return appendMetricbeatIndex(
+      config,
+      indexPattern,
+      ccsEnabled ? ccs : undefined,
+      monitoringIndicesOnly
+    );
   }
 
   const patterns = indexPattern.split(',');
@@ -57,11 +66,12 @@ export function prefixIndexPattern(config, indexPattern, ccs, monitoringIndicesO
     return appendMetricbeatIndex(
       config,
       `${prefixedPattern},${indexPattern}`,
+      ccs,
       monitoringIndicesOnly
     );
   }
 
-  return appendMetricbeatIndex(config, prefixedPattern, monitoringIndicesOnly);
+  return appendMetricbeatIndex(config, prefixedPattern, ccs, monitoringIndicesOnly);
 }
 
 /**

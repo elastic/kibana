@@ -226,7 +226,7 @@ export const reindexServiceFactory = (
     if (reindexOp.attributes.lastCompletedStep >= ReindexStep.readonly) {
       await esClient.indices.putSettings({
         index: reindexOp.attributes.indexName,
-        body: { index: { blocks: { write: false } } },
+        body: { settings: { blocks: { write: false } } },
       });
     }
 
@@ -290,7 +290,7 @@ export const reindexServiceFactory = (
     const { indexName } = reindexOp.attributes;
     const { body: putReadonly } = await esClient.indices.putSettings({
       index: indexName,
-      body: { index: { blocks: { write: true } } },
+      body: { settings: { blocks: { write: true } } },
     });
 
     if (!putReadonly.acknowledged) {

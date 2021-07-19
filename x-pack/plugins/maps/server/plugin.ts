@@ -22,7 +22,7 @@ import { getFlightsSavedObjects } from './sample_data/flights_saved_objects.js';
 // @ts-ignore
 import { getWebLogsSavedObjects } from './sample_data/web_logs_saved_objects.js';
 import { registerMapsUsageCollector } from './maps_telemetry/collectors/register';
-import { APP_ID, APP_ICON, MAP_SAVED_OBJECT_TYPE, getExistingMapPath } from '../common/constants';
+import { APP_ID, APP_ICON, MAP_SAVED_OBJECT_TYPE, getFullPath } from '../common/constants';
 import { mapSavedObjects, mapsTelemetrySavedObjects } from './saved_objects';
 import { MapsXPackConfig } from '../config';
 // @ts-ignore
@@ -37,6 +37,8 @@ import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
 import { MapsEmsPluginSetup } from '../../../../src/plugins/maps_ems/server';
 import { EMSSettings } from '../common/ems_settings';
 import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
+import { EmbeddableSetup } from '../../../../src/plugins/embeddable/server';
+import { embeddableMigrations } from './embeddable_migrations';
 
 interface SetupDeps {
   features: FeaturesPluginSetupContract;
@@ -44,6 +46,7 @@ interface SetupDeps {
   home: HomeServerPluginSetup;
   licensing: LicensingPluginSetup;
   mapsEms: MapsEmsPluginSetup;
+  embeddable: EmbeddableSetup;
 }
 
 export interface StartDeps {
@@ -74,7 +77,7 @@ export class MapsPlugin implements Plugin {
 
       home.sampleData.addAppLinksToSampleDataset('ecommerce', [
         {
-          path: getExistingMapPath('2c9c1f60-1909-11e9-919b-ffe5949a18d2'),
+          path: getFullPath('2c9c1f60-1909-11e9-919b-ffe5949a18d2'),
           label: sampleDataLinkLabel,
           icon: APP_ICON,
         },
@@ -96,7 +99,7 @@ export class MapsPlugin implements Plugin {
 
       home.sampleData.addAppLinksToSampleDataset('flights', [
         {
-          path: getExistingMapPath('5dd88580-1906-11e9-919b-ffe5949a18d2'),
+          path: getFullPath('5dd88580-1906-11e9-919b-ffe5949a18d2'),
           label: sampleDataLinkLabel,
           icon: APP_ICON,
         },
@@ -117,7 +120,7 @@ export class MapsPlugin implements Plugin {
       home.sampleData.addSavedObjectsToSampleDataset('logs', getWebLogsSavedObjects());
       home.sampleData.addAppLinksToSampleDataset('logs', [
         {
-          path: getExistingMapPath('de71f4f0-1902-11e9-919b-ffe5949a18d2'),
+          path: getFullPath('de71f4f0-1902-11e9-919b-ffe5949a18d2'),
           label: sampleDataLinkLabel,
           icon: APP_ICON,
         },
@@ -167,14 +170,7 @@ export class MapsPlugin implements Plugin {
       lastLicenseId = license.uid;
     });
 
-    initRoutes(
-      core,
-      () => lastLicenseId,
-      emsSettings,
-      this.kibanaVersion,
-      this._logger,
-      currentConfig.enableDrawingFeature
-    );
+    initRoutes(core, () => lastLicenseId, emsSettings, this.kibanaVersion, this._logger);
 
     this._initHomeData(home, core.http.basePath.prepend, emsSettings);
 
@@ -189,7 +185,6 @@ export class MapsPlugin implements Plugin {
       catalogue: [APP_ID],
       privileges: {
         all: {
-          api: ['fileUpload:import'],
           app: [APP_ID, 'kibana'],
           catalogue: [APP_ID],
           savedObject: {
@@ -213,6 +208,11 @@ export class MapsPlugin implements Plugin {
     core.savedObjects.registerType(mapsTelemetrySavedObjects);
     core.savedObjects.registerType(mapSavedObjects);
     registerMapsUsageCollector(usageCollection, currentConfig);
+
+    plugins.embeddable.registerEmbeddableFactory({
+      id: MAP_SAVED_OBJECT_TYPE,
+      migrations: embeddableMigrations,
+    });
 
     return {
       config: config$,

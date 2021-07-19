@@ -1,13 +1,13 @@
 [[create-panels-with-editors]]
 == Create panels with editors
 
-{kib} provides several editors that you can use to create dashboard panels.
+{kib} provides several editors that you can use to create panels of your data.
 
 [cols="2"]
 |===
 
 | <<lens,*Lens*>>
-| Create visualizations with the drag and drop editor. *Lens* is recommended for most users.
+| Create visualizations with the drag and drop editor.
 
 | <<maps,*Maps*>>
 | Create visualizations with your geographical data.
@@ -30,13 +30,16 @@
 [[lens-editor]]
 === Lens
 
-*Lens* is the drag and drop editor that creates visualizations of your data.
+*Lens* is the drag and drop editor that creates visualizations of your data, recommended for most
+users.
 
 With *Lens*, you can:
 
 * Use the automatically generated suggestions to change the visualization type.
 * Create visualizations with multiple layers and indices.
 * Change the aggregation and labels to customize the data.
+* Perform math on aggregations using *Formula*.
+* Use time shifts to compare data at two times, such as month over month.
 
 [role="screenshot"]
 image:dashboard/images/lens_advanced_1_1.png[Lens]

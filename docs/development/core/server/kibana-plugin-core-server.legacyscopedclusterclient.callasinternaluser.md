@@ -6,7 +6,7 @@
 
 > Warning: This API is now obsolete.
 > 
-> Use [IScopedClusterClient.asInternalUser](./kibana-plugin-core-server.iscopedclusterclient.asinternaluser.md)<!-- -->.
+> Use [IScopedClusterClient.asInternalUser](./kibana-plugin-core-server.iscopedclusterclient.asinternaluser.md)<!-- -->.  7.16
 > 
 
 Calls specified `endpoint` with provided `clientParams` on behalf of the Kibana internal user. See [LegacyAPICaller](./kibana-plugin-core-server.legacyapicaller.md)<!-- -->.

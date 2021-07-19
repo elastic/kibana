@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import ApolloClient from 'apollo-client';
 import * as H from 'history';
 import { ActionCreator } from 'typescript-fsa';
 import {
@@ -35,7 +34,23 @@ export const ALL_URL_STATE_KEYS: KeyUrlState[] = [
 ];
 
 export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
-  detections: [
+  alerts: [
+    CONSTANTS.appQuery,
+    CONSTANTS.filters,
+    CONSTANTS.savedQuery,
+    CONSTANTS.sourcerer,
+    CONSTANTS.timerange,
+    CONSTANTS.timeline,
+  ],
+  rules: [
+    CONSTANTS.appQuery,
+    CONSTANTS.filters,
+    CONSTANTS.savedQuery,
+    CONSTANTS.sourcerer,
+    CONSTANTS.timerange,
+    CONSTANTS.timeline,
+  ],
+  exceptions: [
     CONSTANTS.appQuery,
     CONSTANTS.filters,
     CONSTANTS.savedQuery,
@@ -89,7 +104,7 @@ export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
 export type LocationTypes =
   | CONSTANTS.caseDetails
   | CONSTANTS.casePage
-  | CONSTANTS.detectionsPage
+  | CONSTANTS.alertsPage
   | CONSTANTS.hostsDetails
   | CONSTANTS.hostsPage
   | CONSTANTS.networkDetails
@@ -148,7 +163,6 @@ export interface UrlStateToRedux {
 }
 
 export interface SetInitialStateFromUrl<TCache> {
-  apolloClient: ApolloClient<TCache> | ApolloClient<{}> | undefined;
   detailName: string | undefined;
   filterManager: FilterManager;
   indexPattern: IIndexPattern | undefined;
@@ -160,7 +174,6 @@ export interface SetInitialStateFromUrl<TCache> {
 }
 
 export type DispatchSetInitialStateFromUrl = <TCache>({
-  apolloClient,
   detailName,
   indexPattern,
   pageName,

@@ -6,15 +6,23 @@
  */
 
 import { DEFAULT_INITIAL_APP_DATA } from '../../common/__mocks__';
+import '../__mocks__/http_agent.mock.ts';
 
 jest.mock('node-fetch');
 import fetch from 'node-fetch';
 
 const { Response } = jest.requireActual('node-fetch');
 
+jest.mock('@kbn/utils', () => ({
+  kibanaPackageJson: { version: '1.0.0' },
+}));
+
 import { loggingSystemMock } from 'src/core/server/mocks';
 
-import { callEnterpriseSearchConfigAPI } from './enterprise_search_config_api';
+import {
+  callEnterpriseSearchConfigAPI,
+  warnMismatchedVersions,
+} from './enterprise_search_config_api';
 
 describe('callEnterpriseSearchConfigAPI', () => {
   const mockConfig = {
@@ -40,6 +48,10 @@ describe('callEnterpriseSearchConfigAPI', () => {
       read_only_mode: false,
       ilm_enabled: true,
       is_federated_auth: false,
+      search_oauth: {
+        client_id: 'someUID',
+        redirect_url: 'http://localhost:3002/ws/search_callback',
+      },
       configured_limits: {
         app_search: {
           engine: {
@@ -128,7 +140,10 @@ describe('callEnterpriseSearchConfigAPI', () => {
       publicUrl: undefined,
       readOnlyMode: false,
       ilmEnabled: false,
-      isFederatedAuth: false,
+      searchOAuth: {
+        clientId: undefined,
+        redirectUrl: undefined,
+      },
       configuredLimits: {
         appSearch: {
           engine: {
@@ -217,5 +232,23 @@ describe('callEnterpriseSearchConfigAPI', () => {
     expect(mockDependencies.log.warn).toHaveBeenCalledWith(
       "Exceeded 200ms timeout while checking http://localhost:3002. Please consider increasing your enterpriseSearch.accessCheckTimeout value so that users aren't prevented from accessing Enterprise Search plugins due to slow responses."
     );
+  });
+
+  describe('warnMismatchedVersions', () => {
+    it("logs a warning when Enterprise Search and Kibana's versions are not the same", () => {
+      warnMismatchedVersions('1.1.0', mockDependencies.log);
+
+      expect(mockDependencies.log.warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Your Kibana instance (v1.0.0) is not the same version as your Enterprise Search instance (v1.1.0)'
+        )
+      );
+    });
+
+    it("does not log a warning when Enterprise Search and Kibana's versions are the same", () => {
+      warnMismatchedVersions('1.0.0', mockDependencies.log);
+
+      expect(mockDependencies.log.warn).not.toHaveBeenCalled();
+    });
   });
 });

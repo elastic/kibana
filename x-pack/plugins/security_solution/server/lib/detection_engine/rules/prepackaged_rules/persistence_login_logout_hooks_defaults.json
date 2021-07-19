@@ -11,7 +11,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Persistence via Login or Logout Hook",
-  "query": "process where event.type in (\"start\", \"process_started\") and\n process.name == \"defaults\" and process.args == \"write\" and process.args in (\"LoginHook\", \"LogoutHook\")\n",
+  "query": "process where event.type == \"start\" and\n process.name == \"defaults\" and process.args == \"write\" and process.args in (\"LoginHook\", \"LogoutHook\") and\n not process.args :\n       (\n         \"Support/JAMF/ManagementFrameworkScripts/logouthook.sh\",\n         \"Support/JAMF/ManagementFrameworkScripts/loginhook.sh\",\n         \"/Library/Application Support/JAMF/ManagementFrameworkScripts/logouthook.sh\",\n         \"/Library/Application Support/JAMF/ManagementFrameworkScripts/loginhook.sh\"\n       )\n",
   "references": [
     "https://www.virusbulletin.com/uploads/pdf/conference_slides/2014/Wardle-VB2014.pdf",
     "https://www.manpagez.com/man/1/defaults/"
@@ -45,5 +45,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 4
 }

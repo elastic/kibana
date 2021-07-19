@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { isRuntimeField } from './utils/runtime_field_utils';
 
 export const analyzeFileQuerySchema = schema.object({
   charset: schema.maybe(schema.string()),
@@ -40,3 +41,15 @@ export const importFileBodySchema = schema.object({
     pipeline: schema.maybe(schema.any()),
   }),
 });
+
+export const runtimeMappingsSchema = schema.object(
+  {},
+  {
+    unknowns: 'allow',
+    validate: (v: object) => {
+      if (Object.values(v).some((o) => !isRuntimeField(o))) {
+        return 'Invalid runtime field';
+      }
+    },
+  }
+);

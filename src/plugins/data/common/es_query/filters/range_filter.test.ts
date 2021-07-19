@@ -9,15 +9,15 @@
 import { each } from 'lodash';
 import { buildRangeFilter, getRangeFilterField, RangeFilter } from './range_filter';
 import { fields, getField } from '../../index_patterns/mocks';
-import { IIndexPattern, IFieldType } from '../../index_patterns';
+import { IndexPatternBase, IndexPatternFieldBase } from '../es_query';
 
 describe('Range filter builder', () => {
-  let indexPattern: IIndexPattern;
+  let indexPattern: IndexPatternBase;
 
   beforeEach(() => {
     indexPattern = {
       id: 'id',
-    } as IIndexPattern;
+    } as IndexPatternBase;
   });
 
   it('should be a function', () => {
@@ -45,6 +45,29 @@ describe('Range filter builder', () => {
     const field = getField('script number');
 
     expect(buildRangeFilter(field, { gte: 1, lte: 3 }, indexPattern)).toEqual({
+      meta: {
+        field: 'script number',
+        index: 'id',
+        params: {},
+      },
+      script: {
+        script: {
+          lang: 'expression',
+          source: '(' + field!.script + ')>=gte && (' + field!.script + ')<=lte',
+          params: {
+            value: '>=1 <=3',
+            gte: 1,
+            lte: 3,
+          },
+        },
+      },
+    });
+  });
+
+  it('should convert strings to numbers if the field is scripted and type number', () => {
+    const field = getField('script number');
+
+    expect(buildRangeFilter(field, { gte: '1', lte: '3' }, indexPattern)).toEqual({
       meta: {
         field: 'script number',
         index: 'id',
@@ -107,7 +130,7 @@ describe('Range filter builder', () => {
   });
 
   describe('when given params where one side is infinite', () => {
-    let field: IFieldType;
+    let field: IndexPatternFieldBase;
     let filter: RangeFilter;
 
     beforeEach(() => {
@@ -137,7 +160,7 @@ describe('Range filter builder', () => {
   });
 
   describe('when given params where both sides are infinite', () => {
-    let field: IFieldType;
+    let field: IndexPatternFieldBase;
     let filter: RangeFilter;
 
     beforeEach(() => {
@@ -163,9 +186,9 @@ describe('Range filter builder', () => {
 });
 
 describe('getRangeFilterField', function () {
-  const indexPattern: IIndexPattern = ({
+  const indexPattern: IndexPatternBase = ({
     fields,
-  } as unknown) as IIndexPattern;
+  } as unknown) as IndexPatternBase;
 
   test('should return the name of the field a range query is targeting', () => {
     const field = indexPattern.fields.find((patternField) => patternField.name === 'bytes');

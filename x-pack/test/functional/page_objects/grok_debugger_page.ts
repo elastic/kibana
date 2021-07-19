@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrService } from '../ftr_provider_context';
 
-export function GrokDebuggerPageProvider({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common']);
-  const grokDebugger = getService('grokDebugger');
+export class GrokDebuggerPageObject extends FtrService {
+  private readonly common = this.ctx.getPageObject('common');
+  private readonly grokDebugger = this.ctx.getService('grokDebugger');
 
-  return new (class LogstashPage {
-    async gotoGrokDebugger() {
-      await PageObjects.common.navigateToApp('grokDebugger');
-      await grokDebugger.assertExists();
-    }
-  })();
+  async gotoGrokDebugger() {
+    await this.common.navigateToApp('grokDebugger');
+    await this.grokDebugger.assertExists();
+  }
 }

@@ -14,10 +14,10 @@ import { Tooltip } from '../components/tooltip';
 import { Chart } from './_chart';
 import { TimeMarker } from './time_marker';
 import { seriesTypes } from './point_series/series_types';
-import touchdownTmplHtml from '../partials/touchdown.tmpl.html';
+import { touchdownTemplate } from '../partials/touchdown_template';
 
 const seriTypes = seriesTypes;
-const touchdownTmpl = _.template(touchdownTmplHtml);
+
 /**
  * Line Chart Visualization
  *
@@ -169,7 +169,7 @@ export class PointSeries extends Chart {
     }
 
     function textFormatter() {
-      return touchdownTmpl(callPlay(d3.event));
+      return touchdownTemplate(callPlay(d3.event));
     }
 
     const endzoneTT = new Tooltip('endzones', this.handler.el, textFormatter, null);

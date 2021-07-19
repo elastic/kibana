@@ -7,10 +7,10 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { debounce } from 'lodash';
+import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import { AutocompleteStart } from '../../../../../../../../src/plugins/data/public';
 import { IFieldType, IIndexPattern } from '../../../../../../../../src/plugins/data/common';
-import { OperatorTypeEnum } from '../../../../../common';
 
 interface FuncArgs {
   fieldSelected: IFieldType | undefined;
@@ -33,7 +33,10 @@ export interface UseFieldValueAutocompleteProps {
 }
 /**
  * Hook for using the field value autocomplete service
+ * There is a copy within:
+ * x-pack/plugins/security_solution/public/common/components/autocomplete/hooks/use_field_value_autocomplete.ts
  *
+ * TODO: This should be in its own packaged and not copied, https://github.com/elastic/kibana/issues/105378
  */
 export const useFieldValueAutocomplete = ({
   selectedField,

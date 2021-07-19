@@ -51,7 +51,7 @@ export const PolicyRetentionSchedule: React.FunctionComponent<Props> = ({
 
   const renderRetentionPanel = (cronSchedule: string) => (
     <>
-      <EuiPanel>
+      <EuiPanel hasBorder>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiText>

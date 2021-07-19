@@ -86,7 +86,7 @@ export const applyMigrationCleanupPolicy = async ({
   await esClient.indices.putSettings({
     index,
     body: {
-      index: {
+      settings: {
         lifecycle: {
           name: getMigrationCleanupPolicyName(alias),
         },

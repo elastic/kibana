@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ESFilter } from '../../../../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
 import {
   SERVICE_NAME,
@@ -13,20 +13,16 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
-import {
-  environmentQuery,
-  rangeQuery,
-  kqlQuery,
-} from '../../../../server/utils/queries';
+import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
+import { kqlQuery, rangeQuery } from '../../../../../observability/server';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../../lib/helpers/aggregated_transactions';
-import { getBucketSize } from '../../../lib/helpers/get_bucket_size';
 import { Setup, SetupTimeRange } from '../../../lib/helpers/setup_request';
-import { offsetPreviousPeriodCoordinates } from '../../../utils/offset_previous_period_coordinate';
-import { withApmSpan } from '../../../utils/with_apm_span';
+import { getBucketSizeForAggregatedTransactions } from '../../helpers/get_bucket_size_for_aggregated_transactions';
 import {
   getLatencyAggregation,
   getLatencyValue,
@@ -59,7 +55,11 @@ function searchLatency({
   end: number;
 }) {
   const { apmEventClient } = setup;
-  const { intervalString } = getBucketSize({ start, end });
+  const { intervalString } = getBucketSizeForAggregatedTransactions({
+    start,
+    end,
+    searchAggregatedTransactions,
+  });
 
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
@@ -112,10 +112,10 @@ function searchLatency({
     },
   };
 
-  return apmEventClient.search(params);
+  return apmEventClient.search('get_latency_charts', params);
 }
 
-export function getLatencyTimeseries({
+export async function getLatencyTimeseries({
   environment,
   kuery,
   serviceName,
@@ -138,40 +138,38 @@ export function getLatencyTimeseries({
   start: number;
   end: number;
 }) {
-  return withApmSpan('get_latency_charts', async () => {
-    const response = await searchLatency({
-      environment,
-      kuery,
-      serviceName,
-      transactionType,
-      transactionName,
-      setup,
-      searchAggregatedTransactions,
-      latencyAggregationType,
-      start,
-      end,
-    });
-
-    if (!response.aggregations) {
-      return { latencyTimeseries: [], overallAvgDuration: null };
-    }
-
-    return {
-      overallAvgDuration:
-        response.aggregations.overall_avg_duration.value || null,
-      latencyTimeseries: response.aggregations.latencyTimeseries.buckets.map(
-        (bucket) => {
-          return {
-            x: bucket.key,
-            y: getLatencyValue({
-              latencyAggregationType,
-              aggregation: bucket.latency,
-            }),
-          };
-        }
-      ),
-    };
+  const response = await searchLatency({
+    environment,
+    kuery,
+    serviceName,
+    transactionType,
+    transactionName,
+    setup,
+    searchAggregatedTransactions,
+    latencyAggregationType,
+    start,
+    end,
   });
+
+  if (!response.aggregations) {
+    return { latencyTimeseries: [], overallAvgDuration: null };
+  }
+
+  return {
+    overallAvgDuration:
+      response.aggregations.overall_avg_duration.value || null,
+    latencyTimeseries: response.aggregations.latencyTimeseries.buckets.map(
+      (bucket) => {
+        return {
+          x: bucket.key,
+          y: getLatencyValue({
+            latencyAggregationType,
+            aggregation: bucket.latency,
+          }),
+        };
+      }
+    ),
+  };
 }
 
 export async function getLatencyPeriods({
@@ -184,6 +182,7 @@ export async function getLatencyPeriods({
   comparisonStart,
   comparisonEnd,
   kuery,
+  environment,
 }: {
   serviceName: string;
   transactionType: string | undefined;
@@ -194,6 +193,7 @@ export async function getLatencyPeriods({
   comparisonStart?: number;
   comparisonEnd?: number;
   kuery?: string;
+  environment?: string;
 }) {
   const { start, end } = setup;
   const options = {
@@ -203,6 +203,7 @@ export async function getLatencyPeriods({
     setup,
     searchAggregatedTransactions,
     kuery,
+    environment,
   };
 
   const currentPeriodPromise = getLatencyTimeseries({

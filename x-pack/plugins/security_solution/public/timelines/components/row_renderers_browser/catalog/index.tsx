@@ -24,6 +24,7 @@ import {
   SystemFimExample,
   SystemSecurityEventExample,
   SystemSocketExample,
+  ThreatMatchExample,
   ZeekExample,
 } from '../examples';
 import * as i18n from './translations';
@@ -203,6 +204,13 @@ export const renderers: RowRendererOption[] = [
     ),
     example: SuricataExample,
     searchableDescription: `${i18n.SURICATA_DESCRIPTION_PART1} ${i18n.SURICATA_NAME} ${i18n.SURICATA_DESCRIPTION_PART2}`,
+  },
+  {
+    id: RowRendererId.threat_match,
+    name: i18n.THREAT_MATCH_NAME,
+    description: i18n.THREAT_MATCH_DESCRIPTION,
+    example: ThreatMatchExample,
+    searchableDescription: `${i18n.THREAT_MATCH_NAME} ${i18n.THREAT_MATCH_DESCRIPTION}`,
   },
   {
     id: RowRendererId.zeek,

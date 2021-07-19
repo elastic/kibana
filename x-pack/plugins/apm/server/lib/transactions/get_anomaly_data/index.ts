@@ -14,7 +14,7 @@ import { getBucketSize } from '../../helpers/get_bucket_size';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { anomalySeriesFetcher } from './fetcher';
 import { getMLJobIds } from '../../service_map/get_service_anomalies';
-import { ANOMALY_THRESHOLD } from '../../../../../ml/common';
+import { ANOMALY_THRESHOLD } from '../../../../common/ml_constants';
 import { withApmSpan } from '../../../utils/with_apm_span';
 
 export async function getAnomalySeries({

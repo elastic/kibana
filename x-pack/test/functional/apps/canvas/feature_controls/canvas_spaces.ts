@@ -13,18 +13,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const spacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'canvas', 'security', 'spaceSelector']);
   const appsMenu = getService('appsMenu');
+  const testSubjects = getService('testSubjects');
 
   describe('spaces feature controls', function () {
     this.tags(['skipFirefox']);
     before(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
     });
 
     describe('space with no features disabled', () => {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load('canvas/default');
+        await esArchiver.load('x-pack/test/functional/es_archives/canvas/default');
 
         await spacesService.create({
           id: 'custom_space',
@@ -35,7 +36,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await spacesService.delete('custom_space');
-        await esArchiver.unload('canvas/default');
+        await esArchiver.unload('x-pack/test/functional/es_archives/canvas/default');
       });
 
       it('shows canvas navlink', async () => {
@@ -55,10 +56,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`allows a workpad to be created`, async () => {
-        await PageObjects.common.navigateToActualUrl('canvas', 'workpad/create', {
+        await PageObjects.common.navigateToActualUrl('canvas', '', {
           ensureCurrentUrl: true,
           shouldLoginIfPrompted: false,
         });
+
+        await testSubjects.click('create-workpad-button');
 
         await PageObjects.canvas.expectAddElementButton();
       });
@@ -81,7 +84,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load('spaces/disabled_features');
+        await esArchiver.load('x-pack/test/functional/es_archives/spaces/disabled_features');
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
@@ -91,7 +94,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await spacesService.delete('custom_space');
-        await esArchiver.unload('spaces/disabled_features');
+        await esArchiver.unload('x-pack/test/functional/es_archives/spaces/disabled_features');
       });
 
       it(`doesn't show canvas navlink`, async () => {
@@ -103,7 +106,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`create new workpad returns a 404`, async () => {
-        await PageObjects.common.navigateToActualUrl('canvas', 'workpad/create', {
+        await PageObjects.common.navigateToActualUrl('canvas', '', {
           basePath: '/s/custom_space',
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,

@@ -30,6 +30,7 @@ describe('getType()', () => {
   });
 
   test('throws if object has no .type property', () => {
+    expect(() => getType([])).toThrow();
     expect(() => getType({})).toThrow();
     expect(() => getType({ _type: 'foo' })).toThrow();
     expect(() => getType({ tipe: 'foo' })).toThrow();

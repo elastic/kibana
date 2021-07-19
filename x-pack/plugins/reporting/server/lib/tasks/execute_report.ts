@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { UpdateResponse } from '@elastic/elasticsearch/api/types';
 import moment from 'moment';
 import * as Rx from 'rxjs';
 import { timeout } from 'rxjs/operators';
@@ -19,9 +20,9 @@ import { CancellationToken } from '../../../common';
 import { durationToNumber, numberToDuration } from '../../../common/schema_utils';
 import { ReportingConfigType } from '../../config';
 import { BasePayload, RunTaskFn } from '../../types';
-import { Report, ReportingStore } from '../store';
+import { Report, ReportDocument, ReportingStore } from '../store';
+import { ReportFailedFields, ReportProcessingFields } from '../store/store';
 import {
-  ReportingExecuteTaskInstance,
   ReportingTask,
   ReportingTaskStatus,
   REPORTING_EXECUTE_TYPE,
@@ -29,6 +30,13 @@ import {
   TaskRunResult,
 } from './';
 import { errorLogger } from './error_logger';
+
+interface ReportingExecuteTaskInstance {
+  state: object;
+  taskType: string;
+  params: ReportTaskParams;
+  runAt?: Date;
+}
 
 function isOutput(output: TaskRunResult | Error): output is TaskRunResult {
   return typeof output === 'object' && (output as TaskRunResult).content != null;
@@ -101,15 +109,21 @@ export class ExecuteReportTask implements ReportingTask {
   }
 
   public async _claimJob(task: ReportTaskParams): Promise<Report> {
-    const store = await this.getStore();
+    if (this.kibanaId == null) {
+      throw new Error(`Kibana instance ID is undefined!`);
+    }
+    if (this.kibanaName == null) {
+      throw new Error(`Kibana instance name is undefined!`);
+    }
 
+    const store = await this.getStore();
     let report: Report;
     if (task.id && task.index) {
       // if this is an ad-hoc report, there is a corresponding "pending" record in ReportingStore in need of updating
-      report = await store.findReportFromTask(task); // update seq_no
+      report = await store.findReportFromTask(task); // receives seq_no and primary_term
     } else {
       // if this is a scheduled report (not implemented), the report object needs to be instantiated
-      throw new Error('scheduled reports are not supported!');
+      throw new Error('Could not find matching report document!');
     }
 
     // Check if this is a completed job. This may happen if the `reports:monitor`
@@ -121,12 +135,11 @@ export class ExecuteReportTask implements ReportingTask {
 
     const m = moment();
 
-    // check if job has exceeded maxAttempts (stored in job params) and somehow hasn't been marked as failed yet
-    // NOTE: the max attempts value comes from the stored document, so changing the capture.maxAttempts config setting does not affect existing pending reports
-    const maxAttempts = task.max_attempts;
+    // check if job has exceeded the configured maxAttempts
+    const maxAttempts = this.config.capture.maxAttempts;
     if (report.attempts >= maxAttempts) {
       const err = new Error(`Max attempts reached (${maxAttempts}). Queue timeout reached.`);
-      await this._failJob(task, err);
+      await this._failJob(report, err);
       throw err;
     }
 
@@ -134,29 +147,39 @@ export class ExecuteReportTask implements ReportingTask {
     const startTime = m.toISOString();
     const expirationTime = m.add(queueTimeout).toISOString();
 
-    const stats = {
+    const doc: ReportProcessingFields = {
       kibana_id: this.kibanaId,
       kibana_name: this.kibanaName,
       browser_type: this.config.capture.browser.type,
       attempts: report.attempts + 1,
+      max_attempts: maxAttempts,
       started_at: startTime,
       timeout: queueTimeout,
       process_expiration: expirationTime,
     };
 
-    this.logger.debug(`Claiming ${report.jobtype} job ${report._id}`);
-
     const claimedReport = new Report({
       ...report,
-      ...stats,
+      ...doc,
     });
-    await store.setReportClaimed(claimedReport, stats);
 
+    this.logger.debug(
+      `Claiming ${claimedReport.jobtype} ${report._id} ` +
+        `[_index: ${report._index}]  ` +
+        `[_seq_no: ${report._seq_no}]  ` +
+        `[_primary_term: ${report._primary_term}]  ` +
+        `[attempts: ${report.attempts}]  ` +
+        `[process_expiration: ${expirationTime}]`
+    );
+
+    const resp = await store.setReportClaimed(claimedReport, doc);
+    claimedReport._seq_no = resp._seq_no;
+    claimedReport._primary_term = resp._primary_term;
     return claimedReport;
   }
 
-  private async _failJob(task: ReportTaskParams, error?: Error) {
-    const message = `Failing ${task.jobtype} job ${task.id}`;
+  private async _failJob(report: Report, error?: Error): Promise<UpdateResponse<ReportDocument>> {
+    const message = `Failing ${report.jobtype} job ${report._id}`;
 
     // log the error
     let docOutput;
@@ -169,17 +192,16 @@ export class ExecuteReportTask implements ReportingTask {
 
     // update the report in the store
     const store = await this.getStore();
-    const report = await store.findReportFromTask(task);
     const completedTime = moment().toISOString();
-    const doc = {
+    const doc: ReportFailedFields = {
       completed_at: completedTime,
-      output: docOutput,
+      output: docOutput ?? null,
     };
 
     return await store.setReportFailed(report, doc);
   }
 
-  private _formatOutput(output: TaskRunResult | Error) {
+  private _formatOutput(output: TaskRunResult | Error): TaskRunResult {
     const docOutput = {} as TaskRunResult;
     const unknownMime = null;
 
@@ -201,7 +223,10 @@ export class ExecuteReportTask implements ReportingTask {
     return docOutput;
   }
 
-  public async _performJob(task: ReportTaskParams, cancellationToken: CancellationToken) {
+  public async _performJob(
+    task: ReportTaskParams,
+    cancellationToken: CancellationToken
+  ): Promise<TaskRunResult> {
     if (!this.taskExecutors) {
       throw new Error(`Task run function factories have not been called yet!`);
     }
@@ -220,10 +245,10 @@ export class ExecuteReportTask implements ReportingTask {
       .toPromise();
   }
 
-  public async _completeJob(task: ReportTaskParams, output: TaskRunResult) {
-    let docId = `/${task.index}/_doc/${task.id}`;
+  public async _completeJob(report: Report, output: TaskRunResult): Promise<Report> {
+    let docId = `/${report._index}/_doc/${report._id}`;
 
-    this.logger.info(`Saving ${task.jobtype} job ${docId}.`);
+    this.logger.debug(`Saving ${report.jobtype} to ${docId}.`);
 
     const completedTime = moment().toISOString();
     const docOutput = this._formatOutput(output);
@@ -233,16 +258,13 @@ export class ExecuteReportTask implements ReportingTask {
       completed_at: completedTime,
       output: docOutput,
     };
-    const report = await store.findReportFromTask(task); // update seq_no and primary_term
     docId = `/${report._index}/_doc/${report._id}`;
 
-    try {
-      await store.setReportCompleted(report, doc);
-      this.logger.debug(`Saved ${report.jobtype} job ${docId}`);
-    } catch (err) {
-      if (err.statusCode === 409) return false;
-      errorLogger(this.logger, `Failure saving completed job ${docId}!`);
-    }
+    const resp = await store.setReportCompleted(report, doc);
+    this.logger.info(`Saved ${report.jobtype} job ${docId}`);
+    report._seq_no = resp._seq_no;
+    report._primary_term = resp._primary_term;
+    return report;
   }
 
   /*
@@ -264,7 +286,6 @@ export class ExecuteReportTask implements ReportingTask {
          */
         run: async () => {
           let report: Report | undefined;
-          let attempts = 0;
 
           // find the job in the store and set status to processing
           const task = context.taskInstance.params as ReportTaskParams;
@@ -278,64 +299,76 @@ export class ExecuteReportTask implements ReportingTask {
 
             // Update job status to claimed
             report = await this._claimJob(task);
-
-            const { jobtype: jobType, attempts: attempt, max_attempts: maxAttempts } = task;
-            this.logger.info(
-              `Starting ${jobType} report ${jobId}: attempt ${attempt + 1} of ${maxAttempts}.`
-            );
-            this.logger.debug(`Reports running: ${this.reporting.countConcurrentReports()}.`);
           } catch (failedToClaim) {
             // error claiming report - log the error
             // could be version conflict, or no longer connected to ES
-            errorLogger(this.logger, `Error in claiming report!`, failedToClaim);
+            errorLogger(this.logger, `Error in claiming ${jobId}`, failedToClaim);
           }
 
           if (!report) {
-            errorLogger(this.logger, `Report could not be claimed. Exiting...`);
+            this.reporting.untrackReport(jobId);
+            errorLogger(this.logger, `Job ${jobId} could not be claimed. Exiting...`);
             return;
           }
 
-          attempts = report.attempts;
+          const { jobtype: jobType, attempts } = report;
+          const maxAttempts = this.config.capture.maxAttempts;
+
+          this.logger.debug(
+            `Starting ${jobType} report ${jobId}: attempt ${attempts} of ${maxAttempts}.`
+          );
+          this.logger.debug(`Reports running: ${this.reporting.countConcurrentReports()}.`);
 
           try {
             const output = await this._performJob(task, cancellationToken);
             if (output) {
-              await this._completeJob(task, output);
+              report = await this._completeJob(report, output);
             }
-
             // untrack the report for concurrency awareness
             this.logger.debug(`Stopping ${jobId}.`);
-            this.reporting.untrackReport(jobId);
-            this.logger.debug(`Reports running: ${this.reporting.countConcurrentReports()}.`);
           } catch (failedToExecuteErr) {
             cancellationToken.cancel();
 
-            const maxAttempts = this.config.capture.maxAttempts;
             if (attempts < maxAttempts) {
-              // attempts remain - reschedule
+              // attempts remain, reschedule
               try {
+                if (report == null) {
+                  throw new Error(`Report ${jobId} is null!`);
+                }
                 // reschedule to retry
                 const remainingAttempts = maxAttempts - report.attempts;
                 errorLogger(
                   this.logger,
-                  `Scheduling retry. Retries remaining: ${remainingAttempts}.`,
+                  `Scheduling retry for job ${jobId}. Retries remaining: ${remainingAttempts}.`,
                   failedToExecuteErr
                 );
 
                 await this.rescheduleTask(reportFromTask(task).toReportTaskJSON(), this.logger);
               } catch (rescheduleErr) {
                 // can not be rescheduled - log the error
-                errorLogger(this.logger, `Could not reschedule the errored job!`, rescheduleErr);
+                errorLogger(
+                  this.logger,
+                  `Could not reschedule the errored job ${jobId}!`,
+                  rescheduleErr
+                );
               }
             } else {
               // 0 attempts remain - fail the job
               try {
-                const maxAttemptsMsg = `Max attempts reached (${attempts}). Failed with: ${failedToExecuteErr}`;
-                await this._failJob(task, new Error(maxAttemptsMsg));
+                const maxAttemptsMsg = `Max attempts (${attempts}) reached for job ${jobId}. Failed with: ${failedToExecuteErr}`;
+                if (report == null) {
+                  throw new Error(`Report ${jobId} is null!`);
+                }
+                const resp = await this._failJob(report, new Error(maxAttemptsMsg));
+                report._seq_no = resp._seq_no;
+                report._primary_term = resp._primary_term;
               } catch (failedToFailError) {
-                errorLogger(this.logger, `Could not fail the job!`, failedToFailError);
+                errorLogger(this.logger, `Could not fail ${jobId}!`, failedToFailError);
               }
             }
+          } finally {
+            this.reporting.untrackReport(jobId);
+            this.logger.debug(`Reports running: ${this.reporting.countConcurrentReports()}.`);
           }
         },
 
@@ -374,11 +407,12 @@ export class ExecuteReportTask implements ReportingTask {
       state: {},
       params: report,
     };
+
     return await this.getTaskManagerStart().schedule(taskInstance);
   }
 
   private async rescheduleTask(task: ReportTaskParams, logger: LevelLogger) {
-    logger.info(`Rescheduling ${task.id} to retry after error.`);
+    logger.info(`Rescheduling task:${task.id} to retry after error.`);
 
     const oldTaskInstance: ReportingExecuteTaskInstance = {
       taskType: REPORTING_EXECUTE_TYPE,
@@ -386,7 +420,7 @@ export class ExecuteReportTask implements ReportingTask {
       params: task,
     };
     const newTask = await this.getTaskManagerStart().schedule(oldTaskInstance);
-    logger.debug(`Rescheduled ${task.id}`);
+    logger.debug(`Rescheduled task:${task.id}. New task: task:${newTask.id}`);
     return newTask;
   }
 

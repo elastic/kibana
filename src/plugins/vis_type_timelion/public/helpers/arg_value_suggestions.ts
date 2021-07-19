@@ -10,13 +10,7 @@ import { get } from 'lodash';
 import { getIndexPatterns } from './plugin_services';
 import { TimelionFunctionArgs } from '../../common/types';
 import { TimelionExpressionFunction, TimelionExpressionArgument } from '../../common/parser';
-import {
-  IndexPatternField,
-  indexPatterns as indexPatternsUtils,
-  KBN_FIELD_TYPES,
-} from '../../../data/public';
-
-const isRuntimeField = (field: IndexPatternField) => Boolean(field.runtimeField);
+import { indexPatterns as indexPatternsUtils, KBN_FIELD_TYPES } from '../../../data/public';
 
 export function getArgValueSuggestions() {
   const indexPatterns = getIndexPatterns();
@@ -51,6 +45,7 @@ export function getArgValueSuggestions() {
 
         return (await indexPatterns.find(search, size)).map(({ title }) => ({
           name: title,
+          insertText: title,
         }));
       },
       async metric(partial: string, functionArgs: TimelionExpressionFunction[]) {
@@ -76,12 +71,18 @@ export function getArgValueSuggestions() {
           .getByType(KBN_FIELD_TYPES.NUMBER)
           .filter(
             (field) =>
-              !isRuntimeField(field) &&
               field.aggregatable &&
               containsFieldName(valueSplit[1], field) &&
               !indexPatternsUtils.isNestedField(field)
           )
-          .map((field) => ({ name: `${valueSplit[0]}:${field.name}`, help: field.type }));
+          .map((field) => {
+            const suggestionValue = field.name.replaceAll(':', '\\:');
+            return {
+              name: `${valueSplit[0]}:${suggestionValue}`,
+              help: field.type,
+              insertText: suggestionValue,
+            };
+          });
       },
       async split(partial: string, functionArgs: TimelionExpressionFunction[]) {
         const indexPattern = await getIndexPattern(functionArgs);
@@ -93,7 +94,6 @@ export function getArgValueSuggestions() {
           .getAll()
           .filter(
             (field) =>
-              !isRuntimeField(field) &&
               field.aggregatable &&
               [
                 KBN_FIELD_TYPES.NUMBER,
@@ -105,7 +105,7 @@ export function getArgValueSuggestions() {
               containsFieldName(partial, field) &&
               !indexPatternsUtils.isNestedField(field)
           )
-          .map((field) => ({ name: field.name, help: field.type }));
+          .map((field) => ({ name: field.name, help: field.type, insertText: field.name }));
       },
       async timefield(partial: string, functionArgs: TimelionExpressionFunction[]) {
         const indexPattern = await getIndexPattern(functionArgs);
@@ -116,12 +116,9 @@ export function getArgValueSuggestions() {
         return indexPattern.fields
           .getByType(KBN_FIELD_TYPES.DATE)
           .filter(
-            (field) =>
-              !isRuntimeField(field) &&
-              containsFieldName(partial, field) &&
-              !indexPatternsUtils.isNestedField(field)
+            (field) => containsFieldName(partial, field) && !indexPatternsUtils.isNestedField(field)
           )
-          .map((field) => ({ name: field.name }));
+          .map((field) => ({ name: field.name, insertText: field.name }));
       },
     },
   };

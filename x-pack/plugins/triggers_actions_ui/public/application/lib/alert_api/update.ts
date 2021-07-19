@@ -41,7 +41,7 @@ export async function updateAlert({
   >;
   id: string;
 }): Promise<Alert> {
-  const res = await http.put(`${BASE_ALERTING_API_PATH}/rule/${id}`, {
+  const res = await http.put(`${BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(id)}`, {
     body: JSON.stringify(
       rewriteBodyRequest(
         pick(alert, ['throttle', 'name', 'tags', 'schedule', 'params', 'actions', 'notifyWhen'])

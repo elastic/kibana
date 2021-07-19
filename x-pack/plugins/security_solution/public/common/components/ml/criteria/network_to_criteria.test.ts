@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FlowTarget } from '../../../../graphql/types';
+import { FlowTarget } from '../../../../../common/search_strategy';
 import { CriteriaFields } from '../types';
 import { networkToCriteria } from './network_to_criteria';
 

@@ -5,26 +5,29 @@
  * 2.0.
  */
 
-import { failure } from 'io-ts/lib/PathReporter';
-import { identity, constant } from 'fp-ts/lib/function';
+import { fold, map } from 'fp-ts/lib/Either';
+import { constant, identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { map, fold } from 'fp-ts/lib/Either';
+import { failure } from 'io-ts/lib/PathReporter';
 import { inRange } from 'lodash';
-import { SavedObjectsClientContract } from 'src/core/server';
-import { defaultSourceConfiguration } from './defaults';
-import { AnomalyThresholdRangeError, NotFoundError } from './errors';
-import { infraSourceConfigurationSavedObjectName } from './saved_object_type';
+import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
 import {
   InfraSavedSourceConfiguration,
+  InfraSource,
   InfraSourceConfiguration,
   InfraStaticSourceConfiguration,
-  pickSavedSourceConfiguration,
-  SourceConfigurationSavedObjectRuntimeType,
-  InfraSource,
-  sourceConfigurationConfigFilePropertiesRT,
   SourceConfigurationConfigFileProperties,
+  sourceConfigurationConfigFilePropertiesRT,
+  SourceConfigurationSavedObjectRuntimeType,
 } from '../../../common/source_configuration/source_configuration';
 import { InfraConfig } from '../../../server';
+import { defaultSourceConfiguration } from './defaults';
+import { AnomalyThresholdRangeError, NotFoundError } from './errors';
+import {
+  extractSavedObjectReferences,
+  resolveSavedObjectReferences,
+} from './saved_object_references';
+import { infraSourceConfigurationSavedObjectName } from './saved_object_type';
 
 interface Libs {
   config: InfraConfig;
@@ -113,13 +116,13 @@ export class InfraSources {
       staticDefaultSourceConfiguration,
       source
     );
+    const { attributes, references } = extractSavedObjectReferences(newSourceConfiguration);
 
     const createdSourceConfiguration = convertSavedObjectToSavedSourceConfiguration(
-      await savedObjectsClient.create(
-        infraSourceConfigurationSavedObjectName,
-        pickSavedSourceConfiguration(newSourceConfiguration) as any,
-        { id: sourceId }
-      )
+      await savedObjectsClient.create(infraSourceConfigurationSavedObjectName, attributes, {
+        id: sourceId,
+        references,
+      })
     );
 
     return {
@@ -158,16 +161,19 @@ export class InfraSources {
       configuration,
       sourceProperties
     );
+    const { attributes, references } = extractSavedObjectReferences(
+      updatedSourceConfigurationAttributes
+    );
 
     const updatedSourceConfiguration = convertSavedObjectToSavedSourceConfiguration(
-      await savedObjectsClient.update(
-        infraSourceConfigurationSavedObjectName,
-        sourceId,
-        pickSavedSourceConfiguration(updatedSourceConfigurationAttributes) as any,
-        {
-          version,
-        }
-      )
+      // update() will perform a deep merge. We use create() with overwrite: true instead. mergeSourceConfiguration()
+      // ensures the correct and intended merging of properties.
+      await savedObjectsClient.create(infraSourceConfigurationSavedObjectName, attributes, {
+        id: sourceId,
+        overwrite: true,
+        references,
+        version,
+      })
     );
 
     return {
@@ -264,7 +270,7 @@ const mergeSourceConfiguration = (
     first
   );
 
-export const convertSavedObjectToSavedSourceConfiguration = (savedObject: unknown) =>
+export const convertSavedObjectToSavedSourceConfiguration = (savedObject: SavedObject<unknown>) =>
   pipe(
     SourceConfigurationSavedObjectRuntimeType.decode(savedObject),
     map((savedSourceConfiguration) => ({
@@ -272,7 +278,10 @@ export const convertSavedObjectToSavedSourceConfiguration = (savedObject: unknow
       version: savedSourceConfiguration.version,
       updatedAt: savedSourceConfiguration.updated_at,
       origin: 'stored' as 'stored',
-      configuration: savedSourceConfiguration.attributes,
+      configuration: resolveSavedObjectReferences(
+        savedSourceConfiguration.attributes,
+        savedObject.references
+      ),
     })),
     fold((errors) => {
       throw new Error(failure(errors).join('\n'));

@@ -10,6 +10,7 @@ import moment from 'moment';
 
 import { TimeBuckets, TimeBucketsConfig } from './time_buckets';
 import { autoInterval } from '../../_interval_options';
+import { InvalidEsCalendarIntervalError } from '../../../utils';
 
 describe('TimeBuckets', () => {
   const timeBucketConfig: TimeBucketsConfig = {
@@ -109,12 +110,22 @@ describe('TimeBuckets', () => {
     }
   });
 
-  test('setInterval/getInterval - intreval is a "auto"', () => {
+  test('setInterval/getInterval - interval is a "auto"', () => {
     const timeBuckets = new TimeBuckets(timeBucketConfig);
     timeBuckets.setInterval(autoInterval);
     const interval = timeBuckets.getInterval();
 
     expect(interval.description).toEqual('0 milliseconds');
+    expect(interval.esValue).toEqual(0);
+    expect(interval.esUnit).toEqual('ms');
+    expect(interval.expression).toEqual('0ms');
+  });
+
+  test('setInterval/getInterval - interval is a "auto" (useNormalizedEsInterval is false)', () => {
+    const timeBuckets = new TimeBuckets(timeBucketConfig);
+    timeBuckets.setInterval(autoInterval);
+    const interval = timeBuckets.getInterval(false);
+
     expect(interval.esValue).toEqual(0);
     expect(interval.esUnit).toEqual('ms');
     expect(interval.expression).toEqual('0ms');
@@ -126,5 +137,15 @@ describe('TimeBuckets', () => {
     timeBuckets.getScaledDateFormat();
     const format = timeBuckets.getScaledDateFormat();
     expect(format).toEqual('HH:mm');
+  });
+
+  test('allows days but throws error on weeks', () => {
+    const timeBuckets = new TimeBuckets(timeBucketConfig);
+    timeBuckets.setInterval('14d');
+    const interval = timeBuckets.getInterval(false);
+    expect(interval.esUnit).toEqual('d');
+
+    timeBuckets.setInterval('2w');
+    expect(() => timeBuckets.getInterval(false)).toThrow(InvalidEsCalendarIntervalError);
   });
 });

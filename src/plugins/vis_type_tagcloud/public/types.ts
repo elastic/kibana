@@ -5,11 +5,37 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import type { ChartsPluginSetup, PaletteOutput } from '../../charts/public';
+import type { SerializedFieldFormat } from '../../expressions/public';
+import { ExpressionValueVisDimension } from '../../visualizations/public';
 
-export interface TagCloudVisParams {
+interface Dimension {
+  accessor: number;
+  format: {
+    id?: string;
+    params?: SerializedFieldFormat<object>;
+  };
+}
+
+interface TagCloudCommonParams {
   scale: 'linear' | 'log' | 'square root';
   orientation: 'single' | 'right angled' | 'multiple';
   minFontSize: number;
   maxFontSize: number;
   showLabel: boolean;
+}
+
+export interface TagCloudVisConfig extends TagCloudCommonParams {
+  metric: ExpressionValueVisDimension;
+  bucket?: ExpressionValueVisDimension;
+}
+
+export interface TagCloudVisParams extends TagCloudCommonParams {
+  palette: PaletteOutput;
+  metric: Dimension;
+  bucket?: Dimension;
+}
+
+export interface TagCloudTypeProps {
+  palettes: ChartsPluginSetup['palettes'];
 }

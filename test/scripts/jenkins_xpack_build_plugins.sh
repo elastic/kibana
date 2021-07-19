@@ -13,6 +13,7 @@ node scripts/build_kibana_platform_plugins \
   --scan-dir "$XPACK_DIR/test/plugin_api_perf/plugins" \
   --scan-dir "$XPACK_DIR/test/licensing_plugin/plugins" \
   --scan-dir "$XPACK_DIR/test/usage_collection/plugins" \
+  --scan-dir "$XPACK_DIR/test/security_functional/fixtures/common" \
   --scan-dir "$KIBANA_DIR/examples" \
   --scan-dir "$XPACK_DIR/examples" \
   --workers 12 \

@@ -6,17 +6,20 @@
  */
 
 import React, { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
-
-import { Location } from 'history';
 
 import { useActions, useValues } from 'kea';
 
+import { i18n } from '@kbn/i18n';
+
+import { setSuccessMessage } from '../../../../../shared/flash_messages';
 import { KibanaLogic } from '../../../../../shared/kibana';
-import { Loading } from '../../../../../shared/loading';
 import { AppLogic } from '../../../../app_logic';
-import { CUSTOM_SERVICE_TYPE } from '../../../../constants';
-import { SOURCE_ADDED_PATH, getSourcesPath } from '../../../../routes';
+import {
+  WorkplaceSearchPageTemplate,
+  PersonalDashboardLayout,
+} from '../../../../components/layout';
+import { NAV, CUSTOM_SERVICE_TYPE } from '../../../../constants';
+import { SOURCES_PATH, getSourcesPath } from '../../../../routes';
 import { SourceDataItem } from '../../../../types';
 import { staticSourceData } from '../../source_data';
 
@@ -34,7 +37,6 @@ import { SaveCustom } from './save_custom';
 import './add_source.scss';
 
 export const AddSource: React.FC<AddSourceProps> = (props) => {
-  const { search } = useLocation() as Location;
   const {
     initializeAddSource,
     setAddSourceStep,
@@ -72,12 +74,17 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
     return resetSourceState;
   }, []);
 
-  if (dataLoading) return <Loading />;
-
   const goToConfigurationIntro = () => setAddSourceStep(AddSourceSteps.ConfigIntroStep);
   const goToSaveConfig = () => setAddSourceStep(AddSourceSteps.SaveConfigStep);
   const setConfigCompletedStep = () => setAddSourceStep(AddSourceSteps.ConfigCompletedStep);
   const goToConfigCompleted = () => saveSourceConfig(false, setConfigCompletedStep);
+  const FORM_SOURCE_ADDED_SUCCESS_MESSAGE = i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.contentSource.formSourceAddedSuccessMessage',
+    {
+      defaultMessage: '{name} connected',
+      values: { name },
+    }
+  );
 
   const goToConnectInstance = () => {
     setAddSourceStep(AddSourceSteps.ConnectInstanceStep);
@@ -88,15 +95,15 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
   const goToSaveCustom = () => createContentSource(CUSTOM_SERVICE_TYPE, saveCustomSuccess);
 
   const goToFormSourceCreated = () => {
-    KibanaLogic.values.navigateToUrl(
-      `${getSourcesPath(SOURCE_ADDED_PATH, isOrganization)}${search}`
-    );
+    KibanaLogic.values.navigateToUrl(`${getSourcesPath(SOURCES_PATH, isOrganization)}`);
+    setSuccessMessage(FORM_SOURCE_ADDED_SUCCESS_MESSAGE);
   };
 
   const header = <AddSourceHeader name={name} serviceType={serviceType} categories={categories} />;
+  const Layout = isOrganization ? WorkplaceSearchPageTemplate : PersonalDashboardLayout;
 
   return (
-    <>
+    <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE, name || '...']} isLoading={dataLoading}>
       {addSourceCurrentStep === AddSourceSteps.ConfigIntroStep && (
         <ConfigurationIntro name={name} advanceStep={goToSaveConfig} header={header} />
       )}
@@ -153,6 +160,6 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
       {addSourceCurrentStep === AddSourceSteps.ReauthenticateStep && (
         <Reauthenticate name={name} header={header} />
       )}
-    </>
+    </Layout>
   );
 };

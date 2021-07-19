@@ -13,12 +13,12 @@ beforeEach(() => jest.resetAllMocks());
 
 describe('disableAlert', () => {
   test('should call disable alert API', async () => {
-    const result = await disableAlert({ http, id: '1' });
+    const result = await disableAlert({ http, id: '1/' });
     expect(result).toEqual(undefined);
     expect(http.post.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "/api/alerting/rule/1/_disable",
+          "/api/alerting/rule/1%2F/_disable",
         ],
       ]
     `);
@@ -27,7 +27,7 @@ describe('disableAlert', () => {
 
 describe('disableAlerts', () => {
   test('should call disable alert API per alert', async () => {
-    const ids = ['1', '2', '3'];
+    const ids = ['1', '2', '/'];
     const result = await disableAlerts({ http, ids });
     expect(result).toEqual(undefined);
     expect(http.post.mock.calls).toMatchInlineSnapshot(`
@@ -39,7 +39,7 @@ describe('disableAlerts', () => {
           "/api/alerting/rule/2/_disable",
         ],
         Array [
-          "/api/alerting/rule/3/_disable",
+          "/api/alerting/rule/%2F/_disable",
         ],
       ]
     `);

@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+/* eslint-disable complexity */
+
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { isNumber, isEmpty } from 'lodash/fp';
 import React from 'react';
 
+import { INDICATOR_REFERENCE } from '../../../../../../common/cti/constants';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { Bytes, BYTES_FORMAT } from './bytes';
 import { Duration, EVENT_DURATION_FIELD_NAME } from '../../../duration';
@@ -29,11 +32,13 @@ import {
   REFERENCE_URL_FIELD_NAME,
   EVENT_URL_FIELD_NAME,
   SIGNAL_STATUS_FIELD_NAME,
+  AGENT_STATUS_FIELD_NAME,
   GEO_FIELD_TYPE,
 } from './constants';
 import { RenderRuleName, renderEventModule, renderUrl } from './formatted_field_helpers';
 import { RuleStatus } from './rule_status';
 import { HostName } from './host_name';
+import { AgentStatuses } from './agent_statuses';
 
 // simple black-list to prevent dragging and dropping fields such as message name
 const columnNamesNotDraggable = [MESSAGE_FIELD_NAME];
@@ -115,8 +120,22 @@ const FormattedFieldValueComponent: React.FC<{
     return (
       <RuleStatus contextId={contextId} eventId={eventId} fieldName={fieldName} value={value} />
     );
+  } else if (fieldName === AGENT_STATUS_FIELD_NAME) {
+    return (
+      <AgentStatuses
+        contextId={contextId}
+        eventId={eventId}
+        fieldName={fieldName}
+        value={typeof value === 'string' ? value : ''}
+      />
+    );
   } else if (
-    [RULE_REFERENCE_FIELD_NAME, REFERENCE_URL_FIELD_NAME, EVENT_URL_FIELD_NAME].includes(fieldName)
+    [
+      RULE_REFERENCE_FIELD_NAME,
+      REFERENCE_URL_FIELD_NAME,
+      EVENT_URL_FIELD_NAME,
+      INDICATOR_REFERENCE,
+    ].includes(fieldName)
   ) {
     return renderUrl({ contextId, eventId, fieldName, linkValue, truncate, value });
   } else if (columnNamesNotDraggable.includes(fieldName)) {

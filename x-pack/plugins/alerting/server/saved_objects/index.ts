@@ -5,10 +5,21 @@
  * 2.0.
  */
 
-import { SavedObjectsServiceSetup } from 'kibana/server';
+import type {
+  Logger,
+  SavedObject,
+  SavedObjectsExportTransformContext,
+  SavedObjectsServiceSetup,
+  SavedObjectsTypeMappingDefinition,
+} from 'kibana/server';
 import mappings from './mappings.json';
 import { getMigrations } from './migrations';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
+import { transformRulesForExport } from './transform_rule_for_export';
+import { RawAlert } from '../types';
+import { getImportWarnings } from './get_import_warnings';
+import { isRuleExportable } from './is_rule_exportable';
+import { AlertTypeRegistry } from '../alert_type_registry';
 
 export { partiallyUpdateAlert } from './partially_update_alert';
 
@@ -35,14 +46,36 @@ export type AlertAttributesExcludedFromAADType =
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
+  ruleTypeRegistry: AlertTypeRegistry,
+  logger: Logger
 ) {
   savedObjects.registerType({
     name: 'alert',
     hidden: true,
     namespaceType: 'single',
     migrations: getMigrations(encryptedSavedObjects),
-    mappings: mappings.alert,
+    mappings: mappings.alert as SavedObjectsTypeMappingDefinition,
+    management: {
+      importableAndExportable: true,
+      getTitle(ruleSavedObject: SavedObject<RawAlert>) {
+        return `Rule: [${ruleSavedObject.attributes.name}]`;
+      },
+      onImport(ruleSavedObjects) {
+        return {
+          warnings: getImportWarnings(ruleSavedObjects),
+        };
+      },
+      onExport<RawAlert>(
+        context: SavedObjectsExportTransformContext,
+        objects: Array<SavedObject<RawAlert>>
+      ) {
+        return transformRulesForExport(objects);
+      },
+      isExportable<RawAlert>(ruleSavedObject: SavedObject<RawAlert>) {
+        return isRuleExportable(ruleSavedObject, ruleTypeRegistry, logger);
+      },
+    },
   });
 
   savedObjects.registerType({

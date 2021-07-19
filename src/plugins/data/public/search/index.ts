@@ -12,7 +12,6 @@ export {
   ISearchSetup,
   ISearchStart,
   ISearchStartSearchSource,
-  SearchEnhancements,
   SearchUsageCollector,
 } from './types';
 

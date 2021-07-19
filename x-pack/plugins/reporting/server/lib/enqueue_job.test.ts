@@ -10,7 +10,6 @@ import { ReportingCore } from '../';
 import { TaskManagerStartContract } from '../../../task_manager/server';
 import { ReportingInternalStart } from '../core';
 import {
-  createMockConfig,
   createMockConfigSchema,
   createMockLevelLogger,
   createMockReportingCore,
@@ -23,8 +22,6 @@ import { TaskRunResult } from './tasks';
 
 describe('Enqueue Job', () => {
   const logger = createMockLevelLogger();
-  const mockSchema = createMockConfigSchema();
-  const mockConfig = createMockConfig(mockSchema);
   let mockReporting: ReportingCore;
   let mockExportTypesRegistry: ExportTypesRegistry;
 
@@ -42,7 +39,7 @@ describe('Enqueue Job', () => {
       runTaskFnFactory: () => async () =>
         (({ runParamsTest: { test2: 'yes' } } as unknown) as TaskRunResult),
     });
-    mockReporting = await createMockReportingCore(mockConfig);
+    mockReporting = await createMockReportingCore(createMockConfigSchema());
     mockReporting.getExportTypesRegistry = () => mockExportTypesRegistry;
     mockReporting.getStore = () =>
       Promise.resolve(({

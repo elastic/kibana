@@ -222,11 +222,11 @@ export class JobCreator {
   }
 
   public get description(): string {
-    return this._job_config.description;
+    return this._job_config.description ?? '';
   }
 
   public get groups(): string[] {
-    return this._job_config.groups;
+    return this._job_config.groups ?? [];
   }
 
   public set groups(groups: string[]) {
@@ -394,6 +394,9 @@ export class JobCreator {
     // change the detector to be a non-zer or non-null count or sum.
     // note, the aggregations will always be a standard count or sum and not a non-null or non-zero version
     this._detectors.forEach((d, i) => {
+      if (this._aggs[i] === undefined) {
+        return;
+      }
       switch (this._aggs[i].id) {
         case ML_JOB_AGGREGATION.COUNT:
           d.function = this._sparseData
@@ -642,7 +645,6 @@ export class JobCreator {
       this._job_config.custom_settings !== undefined &&
       this._job_config.custom_settings[setting] !== undefined
     ) {
-      // @ts-expect-error
       return this._job_config.custom_settings[setting];
     }
     return null;
@@ -711,13 +713,14 @@ export class JobCreator {
   }
 
   private _extractRuntimeMappings() {
-    const runtimeFieldMap = this._indexPattern.toSpec().runtimeFieldMap;
+    const runtimeFieldMap = this._indexPattern.toSpec().runtimeFieldMap as
+      | RuntimeMappings
+      | undefined;
     if (runtimeFieldMap !== undefined) {
       if (this._datafeed_config.runtime_mappings === undefined) {
         this._datafeed_config.runtime_mappings = {};
       }
       Object.entries(runtimeFieldMap).forEach(([key, val]) => {
-        // @ts-expect-error
         this._datafeed_config.runtime_mappings![key] = val;
       });
     }

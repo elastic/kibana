@@ -85,9 +85,9 @@ export const CanvasComponent = ({
     // any point, or change the interval, we need to make sure the interval is
     // killed on React re-render-- otherwise the pages will start bouncing around
     // as timeouts are accumulated.
-    clearTimeout(timeout);
+    window.clearTimeout(timeout);
 
-    timeout = setTimeout(
+    timeout = window.setTimeout(
       () => onSetPage(page >= workpad.pages.length - 1 ? 0 : page + 1),
       getTimeInterval(autoplay.interval)
     );

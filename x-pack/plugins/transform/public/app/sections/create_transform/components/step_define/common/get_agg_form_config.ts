@@ -12,6 +12,7 @@ import {
 
 import { PivotAggsConfigBase, PivotAggsConfigWithUiBase } from '../../../../../common/pivot_aggs';
 import { getFilterAggConfig } from './filter_agg/config';
+import { getTopMetricsAggConfig } from './top_metrics_agg/config';
 
 /**
  * Gets form configuration for provided aggregation type.
@@ -23,6 +24,8 @@ export function getAggFormConfig(
   switch (agg) {
     case PIVOT_SUPPORTED_AGGS.FILTER:
       return getFilterAggConfig(commonConfig);
+    case PIVOT_SUPPORTED_AGGS.TOP_METRICS:
+      return getTopMetricsAggConfig(commonConfig);
     default:
       return commonConfig;
   }

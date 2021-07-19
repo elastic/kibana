@@ -33,6 +33,7 @@ exports[`Storyshots components/SavedElementsModal/ElementControls has two button
           <span
             aria-hidden="true"
             className="euiButtonIcon__icon"
+            color="inherit"
             data-euiicon-type="pencil"
             size="m"
           />
@@ -61,6 +62,7 @@ exports[`Storyshots components/SavedElementsModal/ElementControls has two button
           <span
             aria-hidden="true"
             className="euiButtonIcon__icon"
+            color="inherit"
             data-euiicon-type="trash"
             size="m"
           />

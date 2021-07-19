@@ -9,9 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { WATCH_TYPES } from '../../../../common/constants';
 import { serializeJsonWatch, serializeThresholdWatch } from '../../../../common/lib/serialization';
-import { isEsError } from '../../../shared_imports';
 import { RouteDependencies } from '../../../types';
-import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 const paramsSchema = schema.object({
   id: schema.string(),
@@ -26,8 +24,8 @@ const bodySchema = schema.object(
   { unknowns: 'allow' }
 );
 
-export function registerSaveRoute(deps: RouteDependencies) {
-  deps.router.put(
+export function registerSaveRoute({ router, license, lib: { handleEsError } }: RouteDependencies) {
+  router.put(
     {
       path: '/api/watcher/watch/{id}',
       validate: {
@@ -35,16 +33,16 @@ export function registerSaveRoute(deps: RouteDependencies) {
         body: bodySchema,
       },
     },
-    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+    license.guardApiRoute(async (ctx, request, response) => {
       const { id } = request.params;
       const { type, isNew, isActive, ...watchConfig } = request.body;
 
-      const dataClient = ctx.watcher!.client;
+      const dataClient = ctx.core.elasticsearch.client;
 
       // For new watches, verify watch with the same ID doesn't already exist
       if (isNew) {
         try {
-          const existingWatch = await dataClient.callAsCurrentUser('watcher.getWatch', {
+          const { body: existingWatch } = await dataClient.asCurrentUser.watcher.getWatch({
             id,
           });
           if (existingWatch.found) {
@@ -60,7 +58,7 @@ export function registerSaveRoute(deps: RouteDependencies) {
             });
           }
         } catch (e) {
-          const es404 = isEsError(e) && e.statusCode === 404;
+          const es404 = e?.statusCode === 404;
           if (!es404) {
             throw e;
           }
@@ -83,21 +81,16 @@ export function registerSaveRoute(deps: RouteDependencies) {
 
       try {
         // Create new watch
+        const { body: putResult } = await dataClient.asCurrentUser.watcher.putWatch({
+          id,
+          active: isActive,
+          body: serializedWatch,
+        });
         return response.ok({
-          body: await dataClient.callAsCurrentUser('watcher.putWatch', {
-            id,
-            active: isActive,
-            body: serializedWatch,
-          }),
+          body: putResult,
         });
       } catch (e) {
-        // Case: Error from Elasticsearch JS client
-        if (isEsError(e)) {
-          return response.customError({ statusCode: e.statusCode, body: e });
-        }
-
-        // Case: default
-        throw e;
+        return handleEsError({ error: e, response });
       }
     })
   );

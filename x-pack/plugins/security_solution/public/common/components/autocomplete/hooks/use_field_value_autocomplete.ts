@@ -8,9 +8,9 @@
 import { useEffect, useState, useRef } from 'react';
 import { debounce } from 'lodash';
 
+import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { IFieldType, IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { useKibana } from '../../../../common/lib/kibana';
-import { OperatorTypeEnum } from '../../../../lists_plugin_deps';
 
 interface FuncArgs {
   fieldSelected: IFieldType | undefined;
@@ -30,9 +30,13 @@ export interface UseFieldValueAutocompleteProps {
   query: string;
   indexPattern: IIndexPattern | undefined;
 }
+
 /**
  * Hook for using the field value autocomplete service
+ * There is a copy within:
+ * x-pack/plugins/lists/public/exceptions/components/autocomplete/hooks.ts
  *
+ * TODO: This should be in its own packaged and not copied, https://github.com/elastic/kibana/issues/105378
  */
 export const useFieldValueAutocomplete = ({
   selectedField,

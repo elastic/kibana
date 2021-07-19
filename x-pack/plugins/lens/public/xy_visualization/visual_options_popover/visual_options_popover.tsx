@@ -7,13 +7,13 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { ToolbarPopover } from '../../shared_components';
+import { ToolbarPopover, TooltipWrapper } from '../../shared_components';
 import { MissingValuesOptions } from './missing_values_option';
 import { LineCurveOption } from './line_curve_option';
+import { FillOpacityOption } from './fill_opacity_option';
 import { XYState } from '../types';
 import { hasHistogramSeries } from '../state_helpers';
 import { ValidLayer } from '../types';
-import { TooltipWrapper } from '../tooltip_wrapper';
 import { FramePublicAPI } from '../../types';
 
 function getValueLabelDisableReason({
@@ -59,6 +59,10 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
 
   const hasBarNotStacked = state?.layers.some(({ seriesType }) =>
     ['bar', 'bar_horizontal'].includes(seriesType)
+  );
+
+  const hasAreaSeries = state?.layers.some(({ seriesType }) =>
+    ['area_stacked', 'area', 'area_percentage_stacked'].includes(seriesType)
   );
 
   const isHistogramSeries = Boolean(
@@ -108,6 +112,17 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
           }}
           onFittingFnChange={(newVal) => {
             setState({ ...state, fittingFunction: newVal });
+          }}
+        />
+
+        <FillOpacityOption
+          isFillOpacityEnabled={hasAreaSeries}
+          value={state?.fillOpacity ?? 0.3}
+          onChange={(newValue) => {
+            setState({
+              ...state,
+              fillOpacity: newValue,
+            });
           }}
         />
       </ToolbarPopover>

@@ -29,9 +29,9 @@ import { isPivotAggConfigWithUiSupport } from '../../../../common/pivot_group_by
 
 const advancedEditorsSidebarWidth = '220px';
 const COPY_TO_CLIPBOARD_RUNTIME_MAPPINGS = i18n.translate(
-  'xpack.transform.indexPreview.copyRuntimeMappingsClipboardTooltip',
+  'xpack.transform.indexPreview.copyRuntimeFieldsClipboardTooltip',
   {
-    defaultMessage: 'Copy Dev Console statement of the runtime mappings to the clipboard.',
+    defaultMessage: 'Copy Dev Console statement of the runtime fields to the clipboard.',
   }
 );
 
@@ -46,7 +46,7 @@ export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook> = (props) =
     },
   } = props.runtimeMappingsEditor;
   const {
-    actions: { deleteAggregation, deleteGroupBy },
+    actions: { deleteAggregation, deleteGroupBy, updateAggregation },
     state: { groupByList, aggList },
   } = props.pivotConfig;
 
@@ -54,6 +54,9 @@ export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook> = (props) =
     const nextConfig =
       advancedRuntimeMappingsConfig === '' ? {} : JSON.parse(advancedRuntimeMappingsConfig);
     const previousConfig = runtimeMappings;
+
+    const isFieldDeleted = (field: string) =>
+      previousConfig?.hasOwnProperty(field) && !nextConfig.hasOwnProperty(field);
 
     applyRuntimeMappingsEditorChanges();
 
@@ -71,13 +74,16 @@ export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook> = (props) =
     });
     Object.keys(aggList).forEach((aggName) => {
       const agg = aggList[aggName] as PivotAggsConfigWithUiSupport;
-      if (
-        isPivotAggConfigWithUiSupport(agg) &&
-        agg.field !== undefined &&
-        previousConfig?.hasOwnProperty(agg.field) &&
-        !nextConfig.hasOwnProperty(agg.field)
-      ) {
-        deleteAggregation(aggName);
+
+      if (isPivotAggConfigWithUiSupport(agg)) {
+        if (Array.isArray(agg.field)) {
+          const newFields = agg.field.filter((f) => !isFieldDeleted(f));
+          updateAggregation(aggName, { ...agg, field: newFields });
+        } else {
+          if (agg.field !== undefined && isFieldDeleted(agg.field)) {
+            deleteAggregation(aggName);
+          }
+        }
       }
     });
   };
@@ -87,15 +93,15 @@ export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook> = (props) =
 
       <EuiFormRow
         fullWidth={true}
-        label={i18n.translate('xpack.transform.stepDefineForm.runtimeMappingsLabel', {
-          defaultMessage: 'Runtime mappings',
+        label={i18n.translate('xpack.transform.stepDefineForm.runtimeFieldsLabel', {
+          defaultMessage: 'Runtime fields',
         })}
       >
         <EuiFlexGroup alignItems="baseline" justifyContent="spaceBetween">
           <EuiFlexItem grow={true}>
             {runtimeMappings !== undefined && Object.keys(runtimeMappings).length > 0 ? (
               <FormattedMessage
-                id="xpack.transform.stepDefineForm.runtimeMappingsListLabel"
+                id="xpack.transform.stepDefineForm.runtimeFieldsListLabel"
                 defaultMessage="{runtimeFields}"
                 values={{
                   runtimeFields: Object.keys(runtimeMappings).join(','),
@@ -104,7 +110,7 @@ export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook> = (props) =
             ) : (
               <FormattedMessage
                 id="xpack.transform.stepDefineForm.noRuntimeMappingsLabel"
-                defaultMessage="No runtime mapping"
+                defaultMessage="No runtime field"
               />
             )}
 
@@ -145,10 +151,10 @@ export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook> = (props) =
                   <EuiSpacer size="s" />
                   <EuiText size="xs">
                     {i18n.translate(
-                      'xpack.transform.stepDefineForm.advancedRuntimeMappingsEditorHelpText',
+                      'xpack.transform.stepDefineForm.advancedRuntimeFieldsEditorHelpText',
                       {
                         defaultMessage:
-                          'The advanced editor allows you to edit the runtime mappings of the transform configuration.',
+                          'The advanced editor allows you to edit the runtime fields of the transform configuration.',
                       }
                     )}
                   </EuiText>

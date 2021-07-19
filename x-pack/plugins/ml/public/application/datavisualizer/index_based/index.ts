@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { Page } from './page';
+export { IndexDataVisualizerPage } from './index_data_visualizer';

@@ -37,6 +37,7 @@ interface FleetAppProps {
   history: AppMountParameters['history'];
   kibanaVersion: string;
   extensions: UIExtensionsStorage;
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
 const FleetApp = ({
   basepath,
@@ -45,6 +46,7 @@ const FleetApp = ({
   history,
   kibanaVersion,
   extensions,
+  setHeaderActionMenu,
 }: FleetAppProps) => {
   return (
     <FleetAppContext
@@ -56,7 +58,7 @@ const FleetApp = ({
       extensions={extensions}
     >
       <WithPermissionsAndSetup>
-        <AppRoutes />
+        <AppRoutes setHeaderActionMenu={setHeaderActionMenu} />
       </WithPermissionsAndSetup>
     </FleetAppContext>
   );
@@ -64,7 +66,7 @@ const FleetApp = ({
 
 export function renderApp(
   startServices: FleetStartServices,
-  { element, appBasePath, history }: AppMountParameters,
+  { element, appBasePath, history, setHeaderActionMenu }: AppMountParameters,
   config: FleetConfigType,
   kibanaVersion: string,
   extensions: UIExtensionsStorage
@@ -77,6 +79,7 @@ export function renderApp(
       history={history}
       kibanaVersion={kibanaVersion}
       extensions={extensions}
+      setHeaderActionMenu={setHeaderActionMenu}
     />,
     element
   );

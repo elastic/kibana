@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { transformError } from '@kbn/securitysolution-es-utils';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_TAGS_URL } from '../../../../../common/constants';
-import { transformError, buildSiemResponse } from '../utils';
+import { buildSiemResponse } from '../utils';
+
 import { readTags } from '../../tags/read_tags';
 
 export const readTagsRoute = (router: SecuritySolutionPluginRouter) => {

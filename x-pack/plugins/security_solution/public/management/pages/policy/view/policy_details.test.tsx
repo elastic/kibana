@@ -16,18 +16,7 @@ import { getPolicyDetailPath, getEndpointListPath } from '../../../common/routin
 import { policyListApiPathHandlers } from '../store/test_mock_utils';
 import { licenseService } from '../../../../common/hooks/use_license';
 
-jest.mock('../../../../common/components/link_to');
-jest.mock('../../../../common/hooks/use_license', () => {
-  const licenseServiceInstance = {
-    isPlatinumPlus: jest.fn(),
-  };
-  return {
-    licenseService: licenseServiceInstance,
-    useLicense: () => {
-      return licenseServiceInstance;
-    },
-  };
-});
+jest.mock('../../../../common/hooks/use_license');
 
 describe('Policy Details', () => {
   type FindReactWrapperResponse = ReturnType<ReturnType<typeof render>['find']>;
@@ -63,7 +52,7 @@ describe('Policy Details', () => {
   describe('when displayed with invalid id', () => {
     let releaseApiFailure: () => void;
     beforeEach(() => {
-      http.get.mockImplementationOnce(async () => {
+      http.get.mockImplementation(async () => {
         await new Promise((_, reject) => {
           releaseApiFailure = reject.bind(null, new Error('policy not found'));
         });
@@ -140,7 +129,7 @@ describe('Policy Details', () => {
 
       const backToListLink = policyView.find('LinkIcon[dataTestSubj="policyDetailsBackLink"]');
       expect(backToListLink.prop('iconType')).toBe('arrowLeft');
-      expect(backToListLink.prop('href')).toBe(endpointListPath);
+      expect(backToListLink.prop('href')).toBe(`/app/security${endpointListPath}`);
       expect(backToListLink.text()).toBe('Back to endpoint hosts');
 
       const pageTitle = policyView.find('h1[data-test-subj="header-page-title"]');
@@ -161,7 +150,7 @@ describe('Policy Details', () => {
 
       const agentsSummary = policyView.find('EuiFlexGroup[data-test-subj="policyAgentsSummary"]');
       expect(agentsSummary).toHaveLength(1);
-      expect(agentsSummary.text()).toBe('Endpoints5Online3Offline1Error1');
+      expect(agentsSummary.text()).toBe('Agents5Healthy3Unhealthy1Offline1');
     });
     it('should display cancel button', async () => {
       await asyncActions;
@@ -182,7 +171,7 @@ describe('Policy Details', () => {
       cancelbutton.simulate('click', { button: 0 });
       const navigateToAppMockedCalls = coreStart.application.navigateToApp.mock.calls;
       expect(navigateToAppMockedCalls[navigateToAppMockedCalls.length - 1]).toEqual([
-        'securitySolution:administration',
+        'securitySolution',
         { path: endpointListPath },
       ]);
     });

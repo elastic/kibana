@@ -31,6 +31,7 @@ export type FilterMeta = {
   controlledBy?: string;
   // index and type are optional only because when you create a new filter, there are no defaults
   index?: string;
+  isMultiIndex?: boolean;
   type?: string;
   key?: string;
   params?: any;

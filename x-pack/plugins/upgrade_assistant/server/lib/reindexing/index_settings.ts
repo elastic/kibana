@@ -104,11 +104,14 @@ export const getDeprecatedSettingWarning = (
   });
 
   // Translog settings are only marked as deprecated if soft deletes is enabled
+  // @ts-expect-error @elastic/elasticsearch doesn't declare such a setting
   if (settings['index.soft_deletes.enabled'] === 'true') {
+    // @ts-expect-error @elastic/elasticsearch doesn't declare such a setting
     if (settings['index.translog.retention.size']) {
       deprecatedSettingsInUse.push('index.translog.retention.size');
     }
 
+    // @ts-expect-error @elastic/elasticsearch doesn't declare such a setting
     if (settings['index.translog.retention.age']) {
       deprecatedSettingsInUse.push('index.translog.retention.age');
     }
@@ -183,12 +186,17 @@ const removeDeprecatedSettings = (settings: FlatSettings['settings']) => {
   const updatedSettings = { ...settings };
 
   // Translog settings are only marked as deprecated if soft deletes is enabled
+  // @ts-expect-error @elastic/elasticsearch doesn't declare such a setting
   if (updatedSettings['index.soft_deletes.enabled'] === 'true') {
+    // @ts-expect-error @elastic/elasticsearch doesn't declare such a setting
     if (updatedSettings['index.translog.retention.size']) {
+      // @ts-expect-error @elastic/elasticsearch doesn't declare such a setting
       delete updatedSettings['index.translog.retention.size'];
     }
 
+    // @ts-expect-error @elastic/elasticsearch doesn't declare such a setting
     if (settings['index.translog.retention.age']) {
+      // @ts-expect-error @elastic/elasticsearch doesn't declare such a setting
       delete updatedSettings['index.translog.retention.age'];
     }
   }

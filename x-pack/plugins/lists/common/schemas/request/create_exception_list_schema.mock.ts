@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+
 import {
   DESCRIPTION,
   ENDPOINT_TYPE,
@@ -14,8 +16,6 @@ import {
   NAMESPACE_TYPE,
   VERSION,
 } from '../../constants.mock';
-
-import { CreateExceptionListSchema } from './create_exception_list_schema';
 
 export const getCreateExceptionListSchemaMock = (): CreateExceptionListSchema => ({
   description: DESCRIPTION,

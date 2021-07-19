@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { act } from 'react-dom/test-utils';
 import { setup, SetupResult } from './pipeline_processors_editor.helpers';
 import { Pipeline } from '../../../../../common/types';
 
@@ -13,6 +14,7 @@ const testProcessors: Pick<Pipeline, 'processors'> = {
     {
       script: {
         source: 'ctx._type = null',
+        description: 'my script',
       },
     },
     {
@@ -116,6 +118,37 @@ describe('Pipeline Editor', () => {
         // This unknown_field is not supported in the form
         unknown_field_foo: 'unknown_value',
         value: 'test44',
+      });
+    });
+
+    it('allows to edit an existing processor and change its type', async () => {
+      const { actions, exists, component, find } = testBed;
+
+      // Open one of the existing processors
+      actions.openProcessorEditor('processors>2');
+      expect(exists('editProcessorForm')).toBeTruthy();
+
+      // Change its type to `append` and set the missing required fields
+      await actions.setProcessorType('append');
+      await act(async () => {
+        find('appendValueField.input').simulate('change', [{ label: 'some_value' }]);
+      });
+      component.update();
+
+      await actions.submitProcessorForm();
+
+      const [onUpdateResult] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
+      const {
+        processors: { 2: editedProcessor },
+      } = onUpdateResult.getData();
+
+      expect(editedProcessor.append).toEqual({
+        if: undefined,
+        tag: undefined,
+        description: undefined,
+        ignore_failure: undefined,
+        field: 'test',
+        value: ['some_value'],
       });
     });
 
@@ -251,6 +284,67 @@ describe('Pipeline Editor', () => {
       const data = onUpdateResult2.getData();
       expect(data.processors).toEqual([testProcessors.processors[1], testProcessors.processors[2]]);
       expect(data.on_failure).toEqual([testProcessors.processors[0]]);
+    });
+
+    it('shows user provided descriptions rather than default descriptions and default descriptions rather than no description', async () => {
+      const { actions, find } = testBed;
+
+      await actions.addProcessor('processors', 'test', { if: '1 == 1' });
+
+      const processorDescriptions = {
+        userProvided: 'my script',
+        default: 'Sets value of "test" to "test"',
+        none: 'No description',
+      };
+
+      const createAssertForProcessor = (processorIndex: string) => ({
+        description,
+        descriptionVisible,
+      }: {
+        description: string;
+        descriptionVisible: boolean;
+      }) => {
+        expect(find(`processors>${processorIndex}.inlineTextInputNonEditableText`).text()).toBe(
+          description
+        );
+        expect(
+          (find(`processors>${processorIndex}.pipelineProcessorItemDescriptionContainer`).props()
+            .className as string).includes('--displayNone')
+        ).toBe(!descriptionVisible);
+      };
+
+      const assertScriptProcessor = createAssertForProcessor('0');
+      const assertSetProcessor = createAssertForProcessor('2');
+      const assertTestProcessor = createAssertForProcessor('3');
+
+      assertScriptProcessor({
+        description: processorDescriptions.userProvided,
+        descriptionVisible: true,
+      });
+
+      assertSetProcessor({
+        description: processorDescriptions.default,
+        descriptionVisible: true,
+      });
+
+      assertTestProcessor({ description: processorDescriptions.none, descriptionVisible: true });
+
+      // Enter "move" mode
+      find('processors>0.moveItemButton').simulate('click');
+
+      // We expect that descriptions remain exactly the same, but the processor with "No description" has
+      // its description hidden
+      assertScriptProcessor({
+        description: processorDescriptions.userProvided,
+        descriptionVisible: true,
+      });
+
+      assertSetProcessor({
+        description: processorDescriptions.default,
+        descriptionVisible: true,
+      });
+
+      assertTestProcessor({ description: processorDescriptions.none, descriptionVisible: false });
     });
   });
 });

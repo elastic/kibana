@@ -7,30 +7,22 @@
 
 import { cloneDeep } from 'lodash';
 import axios from 'axios';
-import { LegacyAPICaller } from 'kibana/server';
+import { LegacyAPICaller, SavedObjectsClientContract } from 'kibana/server';
 import { URL } from 'url';
-import { Logger, CoreStart } from '../../../../../../src/core/server';
+import { CoreStart, ElasticsearchClient, Logger } from 'src/core/server';
+import { TelemetryPluginStart, TelemetryPluginSetup } from 'src/plugins/telemetry/server';
 import { transformDataToNdjson } from '../../utils/read_stream/create_stream_from_ndjson';
-import {
-  TelemetryPluginStart,
-  TelemetryPluginSetup,
-} from '../../../../../../src/plugins/telemetry/server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '../../../../task_manager/server';
-import { TelemetryDiagTask } from './task';
+import { TelemetryDiagTask } from './diagnostic_task';
+import { TelemetryEndpointTask } from './endpoint_task';
+import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
+import { AgentService, AgentPolicyServiceInterface } from '../../../../fleet/server';
 
-export type SearchTypes =
-  | string
-  | string[]
-  | number
-  | number[]
-  | boolean
-  | boolean[]
-  | object
-  | object[]
-  | undefined;
+type BaseSearchTypes = string | number | boolean | object;
+export type SearchTypes = BaseSearchTypes | BaseSearchTypes[] | undefined;
 
 export interface TelemetryEvent {
   [key: string]: SearchTypes;
@@ -53,6 +45,7 @@ export interface TelemetryEvent {
 export class TelemetryEventsSender {
   private readonly initialCheckDelayMs = 10 * 1000;
   private readonly checkIntervalMs = 60 * 1000;
+  private readonly max_records = 10_000;
   private readonly logger: Logger;
   private core?: CoreStart;
   private maxQueueSize = 100;
@@ -63,6 +56,11 @@ export class TelemetryEventsSender {
   private queue: TelemetryEvent[] = [];
   private isOptedIn?: boolean = true; // Assume true until the first check
   private diagTask?: TelemetryDiagTask;
+  private epMetricsTask?: TelemetryEndpointTask;
+  private agentService?: AgentService;
+  private agentPolicyService?: AgentPolicyServiceInterface;
+  private esClient?: ElasticsearchClient;
+  private savedObjectClient?: SavedObjectsClientContract;
 
   constructor(logger: Logger) {
     this.logger = logger.get('telemetry_events');
@@ -73,20 +71,27 @@ export class TelemetryEventsSender {
 
     if (taskManager) {
       this.diagTask = new TelemetryDiagTask(this.logger, taskManager, this);
+      this.epMetricsTask = new TelemetryEndpointTask(this.logger, taskManager, this);
     }
   }
 
   public start(
     core?: CoreStart,
     telemetryStart?: TelemetryPluginStart,
-    taskManager?: TaskManagerStartContract
+    taskManager?: TaskManagerStartContract,
+    endpointContextService?: EndpointAppContextService
   ) {
     this.telemetryStart = telemetryStart;
     this.core = core;
+    this.esClient = core?.elasticsearch.client.asInternalUser;
+    this.agentService = endpointContextService?.getAgentService();
+    this.agentPolicyService = endpointContextService?.getAgentPolicyService();
+    this.savedObjectClient = (core?.savedObjects.createInternalRepository() as unknown) as SavedObjectsClientContract;
 
-    if (taskManager && this.diagTask) {
-      this.logger.debug(`Starting diag task`);
+    if (taskManager && this.diagTask && this.epMetricsTask) {
+      this.logger.debug(`Starting diagnostic and endpoint telemetry tasks`);
       this.diagTask.start(taskManager);
+      this.epMetricsTask.start(taskManager);
     }
 
     this.logger.debug(`Starting local task`);
@@ -132,6 +137,112 @@ export class TelemetryEventsSender {
     }
     const callCluster = this.core.elasticsearch.legacy.client.callAsInternalUser;
     return callCluster('search', query);
+  }
+
+  public async fetchEndpointMetrics() {
+    if (this.esClient === undefined) {
+      throw Error('could not fetch policy responses. es client is not available');
+    }
+
+    const query = {
+      expand_wildcards: 'open,hidden',
+      index: `.ds-metrics-endpoint.metrics*`,
+      ignore_unavailable: false,
+      size: 0, // no query results required - only aggregation quantity
+      body: {
+        aggs: {
+          endpoint_agents: {
+            terms: {
+              size: this.max_records,
+              field: 'agent.id.keyword',
+            },
+            aggs: {
+              latest_metrics: {
+                top_hits: {
+                  size: 1,
+                  sort: [
+                    {
+                      '@timestamp': {
+                        order: 'desc',
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    // @ts-expect-error The types of 'body.aggs' are incompatible between these types.
+    return this.esClient.search(query);
+  }
+
+  public async fetchFleetAgents() {
+    if (this.esClient === undefined) {
+      throw Error('could not fetch policy responses. es client is not available');
+    }
+
+    return this.agentService?.listAgents(this.esClient, {
+      perPage: this.max_records,
+      showInactive: true,
+      sortField: 'enrolled_at',
+      sortOrder: 'desc',
+    });
+  }
+
+  public async fetchEndpointPolicyConfigs(id: string) {
+    if (this.savedObjectClient === undefined) {
+      throw Error('could not fetch endpoint policy configs. saved object client is not available');
+    }
+
+    return this.agentPolicyService?.getFullAgentPolicy(this.savedObjectClient, id);
+  }
+
+  public async fetchFailedEndpointPolicyResponses() {
+    if (this.esClient === undefined) {
+      throw Error('could not fetch policy responses. es client is not available');
+    }
+
+    const query = {
+      expand_wildcards: 'open,hidden',
+      index: `.ds-metrics-endpoint.policy*`,
+      ignore_unavailable: false,
+      size: 0, // no query results required - only aggregation quantity
+      body: {
+        query: {
+          match: {
+            'Endpoint.policy.applied.status': 'failure',
+          },
+        },
+        aggs: {
+          policy_responses: {
+            terms: {
+              size: this.max_records,
+              field: 'Endpoint.policy.applied.id.keyword',
+            },
+            aggs: {
+              latest_response: {
+                top_hits: {
+                  size: 1,
+                  sort: [
+                    {
+                      '@timestamp': {
+                        order: 'desc',
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    // @ts-expect-error The types of 'body.aggs' are incompatible between these types.
+    return this.esClient.search(query);
   }
 
   public queueTelemetryEvents(events: TelemetryEvent[]) {
@@ -187,7 +298,7 @@ export class TelemetryEventsSender {
       }
 
       const [telemetryUrl, clusterInfo, licenseInfo] = await Promise.all([
-        this.fetchTelemetryUrl(),
+        this.fetchTelemetryUrl('alerts-endpoint'),
         this.fetchClusterInfo(),
         this.fetchLicenseInfo(),
       ]);
@@ -219,6 +330,39 @@ export class TelemetryEventsSender {
     this.isSending = false;
   }
 
+  /**
+   * This function sends events to the elastic telemetry channel. Caution is required
+   * because it does no allowlist filtering. The caller is responsible for making sure
+   * that there is no sensitive material or PII in the records that are sent upstream.
+   *
+   * @param channel the elastic telemetry channel
+   * @param toSend telemetry events
+   */
+  public async sendOnDemand(channel: string, toSend: unknown[]) {
+    try {
+      const [telemetryUrl, clusterInfo, licenseInfo] = await Promise.all([
+        this.fetchTelemetryUrl(channel),
+        this.fetchClusterInfo(),
+        this.fetchLicenseInfo(),
+      ]);
+
+      this.logger.debug(`Telemetry URL: ${telemetryUrl}`);
+      this.logger.debug(
+        `cluster_uuid: ${clusterInfo?.cluster_uuid} cluster_name: ${clusterInfo?.cluster_name}`
+      );
+
+      await this.sendEvents(
+        toSend,
+        telemetryUrl,
+        clusterInfo.cluster_uuid,
+        clusterInfo.version?.number,
+        licenseInfo?.uid
+      );
+    } catch (err) {
+      this.logger.warn(`Error sending telemetry events data: ${err}`);
+    }
+  }
+
   private async fetchClusterInfo(): Promise<ESClusterInfo> {
     if (!this.core) {
       throw Error("Couldn't fetch cluster info because core is not available");
@@ -227,12 +371,12 @@ export class TelemetryEventsSender {
     return getClusterInfo(callCluster);
   }
 
-  private async fetchTelemetryUrl(): Promise<string> {
+  private async fetchTelemetryUrl(channel: string): Promise<string> {
     const telemetryUrl = await this.telemetrySetup?.getTelemetryUrl();
     if (!telemetryUrl) {
       throw Error("Couldn't get telemetry URL");
     }
-    return getV3UrlFromV2(telemetryUrl.toString(), 'alerts-endpoint');
+    return getV3UrlFromV2(telemetryUrl.toString(), channel);
   }
 
   private async fetchLicenseInfo(): Promise<ESLicense | undefined> {
@@ -266,7 +410,6 @@ export class TelemetryEventsSender {
     clusterVersionNumber: string | undefined,
     licenseId: string | undefined
   ) {
-    // this.logger.debug(`Sending events: ${JSON.stringify(events, null, 2)}`);
     const ndjson = transformDataToNdjson(events);
     // this.logger.debug(`NDJSON: ${ndjson}`);
 
@@ -294,61 +437,44 @@ interface AllowlistFields {
 }
 
 // Allow list process fields within events.  This includes "process" and "Target.process".'
-/* eslint-disable @typescript-eslint/naming-convention */
 const allowlistProcessFields: AllowlistFields = {
+  args: true,
   name: true,
   executable: true,
   command_line: true,
   hash: true,
   pid: true,
+  pe: {
+    original_file_name: true,
+  },
   uptime: true,
   Ext: {
     architecture: true,
     code_signature: true,
     dll: true,
+    malware_signature: true,
     token: {
       integrity_level_name: true,
     },
   },
-  parent: {
-    name: true,
-    executable: true,
-    command_line: true,
-    hash: true,
-    Ext: {
-      architecture: true,
-      code_signature: true,
-      dll: true,
-      token: {
-        integrity_level_name: true,
-      },
-    },
-    uptime: true,
-    pid: true,
-    ppid: true,
-  },
   thread: true,
+  working_directory: true,
 };
 
-// Allow list for the data we include in the events. True means that it is deep-cloned
-// blindly. Object contents means that we only copy the fields that appear explicitly in
-// the sub-object.
-const allowlistEventFields: AllowlistFields = {
-  '@timestamp': true,
-  agent: true,
-  Endpoint: true,
-  Memory_protection: true,
-  Ransomware: true,
-  data_stream: true,
-  ecs: true,
-  elastic: true,
-  event: true,
-  rule: {
-    id: true,
+// Allow list for event-related fields, which can also be nested under events[]
+const allowlistBaseEventFields: AllowlistFields = {
+  dll: {
     name: true,
-    ruleset: true,
+    path: true,
+    code_signature: true,
+    malware_signature: true,
+    pe: {
+      original_file_name: true,
+    },
   },
+  event: true,
   file: {
+    extension: true,
     name: true,
     path: true,
     size: true,
@@ -359,19 +485,65 @@ const allowlistEventFields: AllowlistFields = {
     hash: true,
     Ext: {
       code_signature: true,
+      header_data: true,
       malware_classification: true,
       malware_signature: true,
       quarantine_result: true,
       quarantine_message: true,
     },
   },
+  process: {
+    parent: allowlistProcessFields,
+    ...allowlistProcessFields,
+  },
+  network: {
+    direction: true,
+  },
+  registry: {
+    data: {
+      strings: true,
+    },
+    hive: true,
+    key: true,
+    path: true,
+    value: true,
+  },
+  Target: {
+    process: {
+      parent: allowlistProcessFields,
+      ...allowlistProcessFields,
+    },
+  },
+  user: {
+    id: true,
+  },
+};
+
+// Allow list for the data we include in the events. True means that it is deep-cloned
+// blindly. Object contents means that we only copy the fields that appear explicitly in
+// the sub-object.
+const allowlistEventFields: AllowlistFields = {
+  '@timestamp': true,
+  agent: true,
+  Endpoint: true,
+  /* eslint-disable @typescript-eslint/naming-convention */
+  Memory_protection: true,
+  Ransomware: true,
+  data_stream: true,
+  ecs: true,
+  elastic: true,
+  // behavioral protection re-nests some field sets under events.*
+  events: allowlistBaseEventFields,
+  rule: {
+    id: true,
+    name: true,
+    ruleset: true,
+    version: true,
+  },
   host: {
     os: true,
   },
-  process: allowlistProcessFields,
-  Target: {
-    process: allowlistProcessFields,
-  },
+  ...allowlistBaseEventFields,
 };
 
 export function copyAllowlistedFields(
@@ -383,6 +555,12 @@ export function copyAllowlistedFields(
     if (eventValue !== null && eventValue !== undefined) {
       if (allowValue === true) {
         return { ...newEvent, [allowKey]: eventValue };
+      } else if (typeof allowValue === 'object' && Array.isArray(eventValue)) {
+        const subValues = eventValue.filter((v) => typeof v === 'object');
+        return {
+          ...newEvent,
+          [allowKey]: subValues.map((v) => copyAllowlistedFields(allowValue, v as TelemetryEvent)),
+        };
       } else if (typeof allowValue === 'object' && typeof eventValue === 'object') {
         const values = copyAllowlistedFields(allowValue, eventValue as TelemetryEvent);
         return {

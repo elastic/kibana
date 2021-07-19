@@ -6,31 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { Client } from 'elasticsearch';
 import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
 import {
-  // @ts-expect-error https://github.com/elastic/kibana/issues/95679
-  createLegacyEsTestCluster,
-  // @ts-expect-error https://github.com/elastic/kibana/issues/95679
-  DEFAULT_SUPERUSER_PASS,
-  // @ts-expect-error https://github.com/elastic/kibana/issues/95679
+  createTestEsCluster,
+  CreateTestEsClusterOptions,
   esTestConfig,
-  // @ts-expect-error https://github.com/elastic/kibana/issues/95679
-  kbnTestConfig,
-  // @ts-expect-error https://github.com/elastic/kibana/issues/95679
   kibanaServerTestUser,
-  // @ts-expect-error https://github.com/elastic/kibana/issues/95679
   kibanaTestUser,
-  // @ts-expect-error https://github.com/elastic/kibana/issues/95679
-  setupUsers,
 } from '@kbn/test';
-import { defaultsDeep, get } from 'lodash';
+import { defaultsDeep } from 'lodash';
 import { resolve } from 'path';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
 
 import { InternalCoreSetup, InternalCoreStart } from '../server/internal_types';
-import { LegacyAPICaller } from '../server/elasticsearch';
 import { CliArgs, Env } from '../server/config';
 import { Root } from '../server/root';
 
@@ -47,15 +36,6 @@ const DEFAULTS_SETTINGS = {
   logging: { silent: true },
   plugins: {},
   migrations: { skip: false },
-};
-
-const DEFAULT_SETTINGS_WITH_CORE_PLUGINS = {
-  plugins: { scanDirs: [resolve(__dirname, '../../legacy/core_plugins')] },
-  elasticsearch: {
-    hosts: [esTestConfig.getUrl()],
-    username: kibanaServerTestUser.username,
-    password: kibanaServerTestUser.password,
-  },
 };
 
 export function createRootWithSettings(
@@ -118,6 +98,15 @@ export function createRoot(settings = {}, cliArgs: Partial<CliArgs> = {}) {
  *  @returns {Root}
  */
 export function createRootWithCorePlugins(settings = {}, cliArgs: Partial<CliArgs> = {}) {
+  const DEFAULT_SETTINGS_WITH_CORE_PLUGINS = {
+    plugins: { scanDirs: [resolve(__dirname, '../../legacy/core_plugins')] },
+    elasticsearch: {
+      hosts: [esTestConfig.getUrl()],
+      username: kibanaServerTestUser.username,
+      password: kibanaServerTestUser.password,
+    },
+  };
+
   return createRootWithSettings(
     defaultsDeep({}, settings, DEFAULT_SETTINGS_WITH_CORE_PLUGINS),
     cliArgs
@@ -135,19 +124,9 @@ export const request: Record<
   put: (root, path) => getSupertest(root, 'put', path),
 };
 
-export interface TestElasticsearchServer {
-  getStartTimeout: () => number;
-  start: (esArgs: string[], esEnvVars: Record<string, string>) => Promise<void>;
-  stop: () => Promise<void>;
-  cleanup: () => Promise<void>;
-  getClient: () => Client;
-  getCallCluster: () => LegacyAPICaller;
-  getUrl: () => string;
-}
-
 export interface TestElasticsearchUtils {
   stop: () => Promise<void>;
-  es: TestElasticsearchServer;
+  es: ReturnType<typeof createTestEsCluster>;
   hosts: string[];
   username: string;
   password: string;
@@ -180,10 +159,7 @@ export function createTestServers({
 }: {
   adjustTimeout: (timeout: number) => void;
   settings?: {
-    es?: {
-      license: 'basic' | 'gold' | 'trial';
-      [key: string]: any;
-    };
+    es?: Partial<CreateTestEsClusterOptions>;
     kbn?: {
       /**
        * An array of directories paths, passed in via absolute path strings
@@ -204,8 +180,8 @@ export function createTestServers({
   if (!adjustTimeout) {
     throw new Error('adjustTimeout is required in order to avoid flaky tests');
   }
-  const license = get(settings, 'es.license', 'basic');
-  const usersToBeAdded = get(settings, 'users', []);
+  const license = settings.es?.license ?? 'basic';
+  const usersToBeAdded = settings.users ?? [];
   if (usersToBeAdded.length > 0) {
     if (license !== 'trial') {
       throw new Error(
@@ -223,11 +199,10 @@ export function createTestServers({
   log.info('starting elasticsearch');
   log.indent(4);
 
-  const es = createLegacyEsTestCluster(
-    defaultsDeep({}, get(settings, 'es', {}), {
+  const es = createTestEsCluster(
+    defaultsDeep({}, settings.es ?? {}, {
       log,
       license,
-      password: license === 'trial' ? DEFAULT_SUPERUSER_PASS : undefined,
     })
   );
 
@@ -236,28 +211,16 @@ export function createTestServers({
   // Add time for KBN and adding users
   adjustTimeout(es.getStartTimeout() + 100000);
 
-  const kbnSettings: any = get(settings, 'kbn', {});
+  const kbnSettings = settings.kbn ?? {};
 
   return {
     startES: async () => {
-      await es.start(get(settings, 'es.esArgs', []));
+      await es.start();
 
       if (['gold', 'trial'].includes(license)) {
-        await setupUsers({
-          log,
-          esPort: esTestConfig.getUrlParts().port,
-          updates: [
-            ...usersToBeAdded,
-            // user elastic
-            esTestConfig.getUrlParts(),
-            // user kibana
-            kbnTestConfig.getUrlParts(),
-          ],
-        });
-
-        // Override provided configs, we know what the elastic user is now
+        // Override provided configs
         kbnSettings.elasticsearch = {
-          hosts: [esTestConfig.getUrl()],
+          hosts: es.getHostUrls(),
           username: kibanaServerTestUser.username,
           password: kibanaServerTestUser.password,
         };
@@ -266,7 +229,7 @@ export function createTestServers({
       return {
         stop: async () => await es.cleanup(),
         es,
-        hosts: [esTestConfig.getUrl()],
+        hosts: es.getHostUrls(),
         username: kibanaServerTestUser.username,
         password: kibanaServerTestUser.password,
       };

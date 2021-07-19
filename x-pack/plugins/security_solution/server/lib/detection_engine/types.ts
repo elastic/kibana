@@ -6,41 +6,10 @@
  */
 
 import {
-  AnomalyThresholdOrUndefined,
-  Description,
-  NoteOrUndefined,
-  ThreatsOrUndefined,
-  ThresholdOrUndefined,
-  FalsePositives,
   From,
-  Immutable,
-  IndexOrUndefined,
-  LanguageOrUndefined,
-  MaxSignals,
   MachineLearningJobIdOrUndefined,
   RiskScore,
-  OutputIndex,
-  QueryOrUndefined,
-  References,
-  SavedIdOrUndefined,
-  Severity,
-  To,
-  TimelineIdOrUndefined,
-  TimelineTitleOrUndefined,
-  Version,
-  MetaOrUndefined,
-  RuleId,
-  AuthorOrUndefined,
-  BuildingBlockTypeOrUndefined,
-  LicenseOrUndefined,
   RiskScoreMappingOrUndefined,
-  RuleNameOverrideOrUndefined,
-  SeverityMappingOrUndefined,
-  TimestampOverrideOrUndefined,
-  Type,
-  EventCategoryOverrideOrUndefined,
-} from '../../../common/detection_engine/schemas/common/schemas';
-import {
   ThreatIndexOrUndefined,
   ThreatQueryOrUndefined,
   ThreatMappingOrUndefined,
@@ -48,11 +17,43 @@ import {
   ConcurrentSearchesOrUndefined,
   ItemsPerSearchOrUndefined,
   ThreatIndicatorPathOrUndefined,
-} from '../../../common/detection_engine/schemas/types/threat_mapping';
+  ThreatsOrUndefined,
+  Type,
+  LanguageOrUndefined,
+  Severity,
+  SeverityMappingOrUndefined,
+  MaxSignals,
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import { Version } from '@kbn/securitysolution-io-ts-types';
+
+import type { ListArrayOrUndefined } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  AnomalyThresholdOrUndefined,
+  Description,
+  NoteOrUndefined,
+  ThresholdOrUndefined,
+  FalsePositives,
+  Immutable,
+  IndexOrUndefined,
+  OutputIndex,
+  QueryOrUndefined,
+  References,
+  SavedIdOrUndefined,
+  To,
+  TimelineIdOrUndefined,
+  TimelineTitleOrUndefined,
+  MetaOrUndefined,
+  RuleId,
+  AuthorOrUndefined,
+  BuildingBlockTypeOrUndefined,
+  LicenseOrUndefined,
+  RuleNameOverrideOrUndefined,
+  TimestampOverrideOrUndefined,
+  EventCategoryOverrideOrUndefined,
+} from '../../../common/detection_engine/schemas/common/schemas';
 
 import { LegacyCallAPIOptions } from '../../../../../../src/core/server';
 import { Filter } from '../../../../../../src/plugins/data/server';
-import { ListArrayOrUndefined } from '../../../common/detection_engine/schemas/types';
 import { AlertTypeParams } from '../../../../alerting/common';
 
 export type PartialFilter = Partial<Filter>;

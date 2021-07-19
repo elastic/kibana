@@ -17,49 +17,49 @@ import {
 import { ArtifactConstants } from './common';
 import { Manifest } from './manifest';
 
-export const getMockArtifacts = async (opts?: { compress: boolean }) => {
+export const getMockArtifacts = async () => {
   return Promise.all([
     // Exceptions items
     ...ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS.map<Promise<InternalArtifactCompleteSchema>>(
       async (os) => {
-        return getInternalArtifactMock(os, 'v1', opts);
+        return getInternalArtifactMock(os, 'v1');
       }
     ),
     // Trusted Apps items
     ...ArtifactConstants.SUPPORTED_TRUSTED_APPS_OPERATING_SYSTEMS.map<
       Promise<InternalArtifactCompleteSchema>
     >(async (os) => {
-      return getInternalArtifactMock(os, 'v1', opts, ArtifactConstants.GLOBAL_TRUSTED_APPS_NAME);
+      return getInternalArtifactMock(os, 'v1', ArtifactConstants.GLOBAL_TRUSTED_APPS_NAME);
     }),
   ]);
 };
 
-export const getMockArtifactsWithDiff = async (opts?: { compress: boolean }) => {
+export const getMockArtifactsWithDiff = async () => {
   return Promise.all(
     ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS.map<Promise<InternalArtifactCompleteSchema>>(
       async (os) => {
         if (os === 'macos') {
           return getInternalArtifactMockWithDiffs(os, 'v1');
         }
-        return getInternalArtifactMock(os, 'v1', opts);
+        return getInternalArtifactMock(os, 'v1');
       }
     )
   );
 };
 
-export const getEmptyMockArtifacts = async (opts?: { compress: boolean }) => {
+export const getEmptyMockArtifacts = async () => {
   return Promise.all(
     ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS.map<Promise<InternalArtifactCompleteSchema>>(
       async (os) => {
-        return getEmptyInternalArtifactMock(os, 'v1', opts);
+        return getEmptyInternalArtifactMock(os, 'v1');
       }
     )
   );
 };
 
-export const getMockManifest = async (opts?: { compress: boolean }) => {
+export const getMockManifest = async () => {
   const manifest = new Manifest();
-  const artifacts = await getMockArtifacts(opts);
+  const artifacts = await getMockArtifacts();
   artifacts.forEach((artifact) => manifest.addEntry(artifact));
   return manifest;
 };
@@ -71,7 +71,7 @@ const toArtifactRecord = (artifactName: string, artifact: InternalArtifactComple
   encoded_sha256: artifact.encodedSha256,
   encoded_size: artifact.encodedSize,
   encryption_algorithm: artifact.encryptionAlgorithm,
-  relative_url: `/api/endpoint/artifacts/download/${artifactName}/${artifact.decodedSha256}`,
+  relative_url: `/api/fleet/artifacts/${artifactName}/${artifact.decodedSha256}`,
 });
 
 export const toArtifactRecords = (artifacts: Record<string, InternalArtifactCompleteSchema>) =>
@@ -92,6 +92,36 @@ export const createPackagePolicyWithInitialManifestMock = (): PackagePolicy => {
       artifact_manifest: {
         value: {
           artifacts: {
+            'endpoint-eventfilterlist-linux-v1': {
+              compression_algorithm: 'zlib',
+              decoded_sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+              decoded_size: 14,
+              encoded_sha256: 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+              encoded_size: 22,
+              encryption_algorithm: 'none',
+              relative_url:
+                '/api/fleet/artifacts/endpoint-eventfilterlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+            },
+            'endpoint-eventfilterlist-macos-v1': {
+              compression_algorithm: 'zlib',
+              decoded_sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+              decoded_size: 14,
+              encoded_sha256: 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+              encoded_size: 22,
+              encryption_algorithm: 'none',
+              relative_url:
+                '/api/fleet/artifacts/endpoint-eventfilterlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+            },
+            'endpoint-eventfilterlist-windows-v1': {
+              compression_algorithm: 'zlib',
+              decoded_sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+              decoded_size: 14,
+              encoded_sha256: 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+              encoded_size: 22,
+              encryption_algorithm: 'none',
+              relative_url:
+                '/api/fleet/artifacts/endpoint-eventfilterlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+            },
             'endpoint-exceptionlist-macos-v1': {
               compression_algorithm: 'zlib',
               encryption_algorithm: 'none',
@@ -100,7 +130,7 @@ export const createPackagePolicyWithInitialManifestMock = (): PackagePolicy => {
               decoded_size: 14,
               encoded_size: 22,
               relative_url:
-                '/api/endpoint/artifacts/download/endpoint-exceptionlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                '/api/fleet/artifacts/endpoint-exceptionlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
             },
             'endpoint-exceptionlist-windows-v1': {
               compression_algorithm: 'zlib',
@@ -110,7 +140,7 @@ export const createPackagePolicyWithInitialManifestMock = (): PackagePolicy => {
               decoded_size: 14,
               encoded_size: 22,
               relative_url:
-                '/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                '/api/fleet/artifacts/endpoint-exceptionlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
             },
           },
           manifest_version: '1.0.0',
@@ -135,7 +165,7 @@ export const createPackagePolicyWithManifestMock = (): PackagePolicy => {
               decoded_size: 432,
               encoded_size: 147,
               relative_url:
-                '/api/endpoint/artifacts/download/endpoint-exceptionlist-macos-v1/96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+                '/api/fleet/artifacts/endpoint-exceptionlist-macos-v1/96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
             },
             'endpoint-exceptionlist-windows-v1': {
               compression_algorithm: 'zlib',
@@ -145,7 +175,7 @@ export const createPackagePolicyWithManifestMock = (): PackagePolicy => {
               decoded_size: 432,
               encoded_size: 147,
               relative_url:
-                '/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-v1/96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+                '/api/fleet/artifacts/endpoint-exceptionlist-windows-v1/96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
             },
           },
           manifest_version: '1.0.1',

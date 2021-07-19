@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+// eslint-disable-next-line max-classes-per-file
 import { TelemetryEventsSender } from './sender';
-import { TelemetryDiagTask } from './task';
+import { TelemetryDiagTask } from './diagnostic_task';
+import { TelemetryEndpointTask } from './endpoint_task';
 
 /**
  * Creates a mocked Telemetry Events Sender
@@ -35,5 +37,12 @@ export const createMockTelemetryEventsSender = (
  * Creates a mocked Telemetry Diagnostic Task
  */
 export class MockTelemetryDiagnosticTask extends TelemetryDiagTask {
+  public runTask = jest.fn();
+}
+
+/**
+ * Creates a mocked Telemetry Endpoint Task
+ */
+export class MockTelemetryEndpointTask extends TelemetryEndpointTask {
   public runTask = jest.fn();
 }

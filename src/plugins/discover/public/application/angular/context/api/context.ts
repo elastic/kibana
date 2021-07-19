@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { Filter, IndexPatternsContract, IndexPattern } from 'src/plugins/data/public';
 import { reverseSortDir, SortDirection } from './utils/sorting';
 import { extractNanos, convertIsoToMillis } from './utils/date_conversion';
@@ -15,13 +16,22 @@ import { getEsQuerySearchAfter } from './utils/get_es_query_search_after';
 import { getEsQuerySort } from './utils/get_es_query_sort';
 import { getServices } from '../../../../kibana_services';
 
-export type SurrDocType = 'successors' | 'predecessors';
-export interface EsHitRecord {
-  fields: Record<string, any>;
-  sort: number[];
-  _source: Record<string, any>;
-  _id: string;
+export enum SurrDocType {
+  SUCCESSORS = 'successors',
+  PREDECESSORS = 'predecessors',
 }
+
+export type EsHitRecord = Required<
+  Pick<
+    estypes.SearchResponse['hits']['hits'][number],
+    '_id' | 'fields' | 'sort' | '_index' | '_version'
+  >
+> & {
+  _source?: Record<string, unknown>;
+  _score?: number;
+  isAnchor?: boolean;
+};
+
 export type EsHitRecordList = EsHitRecord[];
 
 const DAY_MILLIS = 24 * 60 * 60 * 1000;
@@ -39,7 +49,7 @@ function fetchContextProvider(indexPatterns: IndexPatternsContract, useNewFields
    *
    * @param {SurrDocType} type - `successors` or `predecessors`
    * @param {string} indexPatternId
-   * @param {EsHitRecord} anchor - anchor record
+   * @param {AnchorHitRecord} anchor - anchor record
    * @param {string} timeField - name of the timefield, that's sorted on
    * @param {string} tieBreakerField - name of the tie breaker, the 2nd sort field
    * @param {SortDirection} sortDir - direction of sorting
@@ -56,19 +66,19 @@ function fetchContextProvider(indexPatterns: IndexPatternsContract, useNewFields
     sortDir: SortDirection,
     size: number,
     filters: Filter[]
-  ) {
+  ): Promise<EsHitRecordList> {
     if (typeof anchor !== 'object' || anchor === null || !size) {
       return [];
     }
     const indexPattern = await indexPatterns.get(indexPatternId);
     const searchSource = await createSearchSource(indexPattern, filters);
-    const sortDirToApply = type === 'successors' ? sortDir : reverseSortDir(sortDir);
+    const sortDirToApply = type === SurrDocType.SUCCESSORS ? sortDir : reverseSortDir(sortDir);
 
     const nanos = indexPattern.isTimeNanosBased() ? extractNanos(anchor.fields[timeField][0]) : '';
     const timeValueMillis =
       nanos !== '' ? convertIsoToMillis(anchor.fields[timeField][0]) : anchor.sort[0];
 
-    const intervals = generateIntervals(LOOKUP_OFFSETS, timeValueMillis, type, sortDir);
+    const intervals = generateIntervals(LOOKUP_OFFSETS, timeValueMillis as number, type, sortDir);
     let documents: EsHitRecordList = [];
 
     for (const interval of intervals) {
@@ -87,7 +97,7 @@ function fetchContextProvider(indexPatterns: IndexPatternsContract, useNewFields
         useNewFieldsApi
       );
 
-      const sort = getEsQuerySort(timeField, tieBreakerField, sortDirToApply);
+      const sort = getEsQuerySort(timeField, tieBreakerField, sortDirToApply, nanos);
 
       const hits = await fetchHitsInInterval(
         searchSource,
@@ -102,7 +112,9 @@ function fetchContextProvider(indexPatterns: IndexPatternsContract, useNewFields
       );
 
       documents =
-        type === 'successors' ? [...documents, ...hits] : [...hits.slice().reverse(), ...documents];
+        type === SurrDocType.SUCCESSORS
+          ? [...documents, ...hits]
+          : [...hits.slice().reverse(), ...documents];
     }
 
     return documents;

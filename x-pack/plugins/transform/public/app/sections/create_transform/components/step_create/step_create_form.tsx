@@ -12,7 +12,6 @@ import {
   EuiButton,
   EuiCard,
   EuiCopy,
-  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -26,6 +25,11 @@ import {
 
 import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
 
+import {
+  DISCOVER_APP_URL_GENERATOR,
+  DiscoverUrlGeneratorState,
+} from '../../../../../../../../../src/plugins/discover/public';
+
 import type { PutTransformsResponseSchema } from '../../../../../../common/api_schemas/transforms';
 import {
   isGetTransformsStatsResponseSchema,
@@ -36,7 +40,7 @@ import { PROGRESS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants
 
 import { getErrorMessage } from '../../../../../../common/utils/errors';
 
-import { getTransformProgress, getDiscoverUrl } from '../../../../common';
+import { getTransformProgress } from '../../../../common';
 import { useApi } from '../../../../hooks/use_api';
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { RedirectToTransformManagement } from '../../../../common/navigation';
@@ -86,13 +90,45 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
     const [progressPercentComplete, setProgressPercentComplete] = useState<undefined | number>(
       undefined
     );
+    const [discoverLink, setDiscoverLink] = useState<string>();
 
     const deps = useAppDependencies();
     const indexPatterns = deps.data.indexPatterns;
     const toastNotifications = useToastNotifications();
+    const { getUrlGenerator } = deps.share.urlGenerators;
+    const isDiscoverAvailable = deps.application.capabilities.discover?.show ?? false;
 
     useEffect(() => {
+      let unmounted = false;
+
       onChange({ created, started, indexPatternId });
+
+      const getDiscoverUrl = async (): Promise<void> => {
+        const state: DiscoverUrlGeneratorState = {
+          indexPatternId,
+        };
+
+        let discoverUrlGenerator;
+        try {
+          discoverUrlGenerator = getUrlGenerator(DISCOVER_APP_URL_GENERATOR);
+        } catch (error) {
+          // ignore error thrown when url generator is not available
+          return;
+        }
+
+        const discoverUrl = await discoverUrlGenerator.createUrl(state);
+        if (!unmounted) {
+          setDiscoverLink(discoverUrl);
+        }
+      };
+
+      if (started === true && indexPatternId !== undefined && isDiscoverAvailable) {
+        getDiscoverUrl();
+      }
+
+      return () => {
+        unmounted = true;
+      };
       // custom comparison
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [created, started, indexPatternId]);
@@ -443,8 +479,8 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
           {created && (
             <Fragment>
               <EuiHorizontalRule />
-              <EuiFlexGrid gutterSize="l">
-                <EuiFlexItem style={PANEL_ITEM_STYLE}>
+              <EuiFlexGroup gutterSize="l">
+                <EuiFlexItem style={PANEL_ITEM_STYLE} grow={false}>
                   <EuiCard
                     icon={<EuiIcon size="xxl" type="list" />}
                     title={i18n.translate('xpack.transform.stepCreateForm.transformListCardTitle', {
@@ -461,7 +497,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
                   />
                 </EuiFlexItem>
                 {started === true && createIndexPattern === true && indexPatternId === undefined && (
-                  <EuiFlexItem style={PANEL_ITEM_STYLE}>
+                  <EuiFlexItem style={PANEL_ITEM_STYLE} grow={false}>
                     <EuiPanel style={{ position: 'relative' }}>
                       <EuiProgress size="xs" color="primary" position="absolute" />
                       <EuiText color="subdued" size="s">
@@ -477,8 +513,8 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
                     </EuiPanel>
                   </EuiFlexItem>
                 )}
-                {started === true && indexPatternId !== undefined && (
-                  <EuiFlexItem style={PANEL_ITEM_STYLE}>
+                {isDiscoverAvailable && discoverLink !== undefined && (
+                  <EuiFlexItem style={PANEL_ITEM_STYLE} grow={false}>
                     <EuiCard
                       icon={<EuiIcon size="xxl" type="discoverApp" />}
                       title={i18n.translate('xpack.transform.stepCreateForm.discoverCardTitle', {
@@ -490,12 +526,12 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
                           defaultMessage: 'Use Discover to explore the transform.',
                         }
                       )}
-                      href={getDiscoverUrl(indexPatternId, deps.http.basePath.get())}
+                      href={discoverLink}
                       data-test-subj="transformWizardCardDiscover"
                     />
                   </EuiFlexItem>
                 )}
-              </EuiFlexGrid>
+              </EuiFlexGroup>
             </Fragment>
           )}
         </EuiForm>

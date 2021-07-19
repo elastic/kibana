@@ -7,9 +7,9 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { Logger } from 'src/core/server';
 
+import type { Type, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ListClient } from '../../../../../../lists/server';
 import { BuildRuleMessage } from '../rule_messages';
-import { ExceptionListItemSchema, Type } from '../../../../../../lists/common/schemas';
 
 export interface FilterEventsAgainstListOptions<T> {
   listClient: ListClient;
@@ -20,7 +20,7 @@ export interface FilterEventsAgainstListOptions<T> {
 }
 
 export interface CreateSetToFilterAgainstOptions<T> {
-  events: Array<estypes.Hit<T>>;
+  events: Array<estypes.SearchHit<T>>;
   field: string;
   listId: string;
   listType: Type;
@@ -30,12 +30,12 @@ export interface CreateSetToFilterAgainstOptions<T> {
 }
 
 export interface FilterEventsOptions<T> {
-  events: Array<estypes.Hit<T>>;
+  events: Array<estypes.SearchHit<T>>;
   fieldAndSetTuples: FieldSet[];
 }
 
 export interface CreateFieldAndSetTuplesOptions<T> {
-  events: Array<estypes.Hit<T>>;
+  events: Array<estypes.SearchHit<T>>;
   exceptionItem: ExceptionListItemSchema;
   listClient: ListClient;
   logger: Logger;

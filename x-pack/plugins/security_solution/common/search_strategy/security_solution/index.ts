@@ -61,10 +61,16 @@ import {
 } from './network';
 import {
   MatrixHistogramQuery,
+  MatrixHistogramQueryEntities,
   MatrixHistogramRequestOptions,
   MatrixHistogramStrategyResponse,
 } from './matrix_histogram';
 import { TimerangeInput, SortField, PaginationInput, PaginationInputPaginated } from '../common';
+import {
+  CtiEventEnrichmentRequestOptions,
+  CtiEventEnrichmentStrategyResponse,
+  CtiQueries,
+} from './cti';
 
 export * from './hosts';
 export * from './matrix_histogram';
@@ -75,13 +81,15 @@ export type FactoryQueryTypes =
   | HostsKpiQueries
   | NetworkQueries
   | NetworkKpiQueries
-  | typeof MatrixHistogramQuery;
+  | CtiQueries
+  | typeof MatrixHistogramQuery
+  | typeof MatrixHistogramQueryEntities;
 
 export interface RequestBasicOptions extends IEsSearchRequest {
   timerange: TimerangeInput;
   filterQuery: ESQuery | string | undefined;
   defaultIndex: string[];
-  docValueFields?: estypes.DocValueField[];
+  docValueFields?: estypes.SearchDocValueField[];
   factoryQueryType?: FactoryQueryTypes;
 }
 
@@ -143,6 +151,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? NetworkKpiUniquePrivateIpsStrategyResponse
   : T extends typeof MatrixHistogramQuery
   ? MatrixHistogramStrategyResponse
+  : T extends CtiQueries.eventEnrichment
+  ? CtiEventEnrichmentStrategyResponse
   : never;
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
@@ -191,4 +201,12 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? NetworkKpiUniquePrivateIpsRequestOptions
   : T extends typeof MatrixHistogramQuery
   ? MatrixHistogramRequestOptions
+  : T extends CtiQueries.eventEnrichment
+  ? CtiEventEnrichmentRequestOptions
   : never;
+
+export interface DocValueFieldsInput {
+  field: string;
+
+  format: string;
+}

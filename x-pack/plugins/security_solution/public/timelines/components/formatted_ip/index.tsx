@@ -196,7 +196,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
           <Provider dataProvider={dataProviderProp} />
         </DragEffects>
       ) : (
-        <Content field={fieldName} tooltipContent={address}>
+        <Content field={fieldName} tooltipContent={fieldName}>
           <LinkAnchor
             href={formatUrl(getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(address))))}
             data-test-subj="network-details"

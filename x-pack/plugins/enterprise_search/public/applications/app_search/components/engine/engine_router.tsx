@@ -13,34 +13,38 @@ import { useValues, useActions } from 'kea';
 import { i18n } from '@kbn/i18n';
 
 import { setQueuedErrorMessage } from '../../../shared/flash_messages';
-import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { Loading } from '../../../shared/loading';
 import { AppLogic } from '../../app_logic';
 
-// TODO: Uncomment and add more routes as we migrate them
 import {
+  ENGINE_PATH,
   ENGINES_PATH,
   ENGINE_ANALYTICS_PATH,
   ENGINE_DOCUMENTS_PATH,
   ENGINE_DOCUMENT_DETAIL_PATH,
-  // ENGINE_SCHEMA_PATH,
-  // ENGINE_CRAWLER_PATH,
-  // META_ENGINE_SOURCE_ENGINES_PATH,
+  ENGINE_SCHEMA_PATH,
+  ENGINE_CRAWLER_PATH,
+  META_ENGINE_SOURCE_ENGINES_PATH,
   ENGINE_RELEVANCE_TUNING_PATH,
-  // ENGINE_SYNONYMS_PATH,
+  ENGINE_SYNONYMS_PATH,
   ENGINE_CURATIONS_PATH,
   ENGINE_RESULT_SETTINGS_PATH,
-  // ENGINE_SEARCH_UI_PATH,
+  ENGINE_SEARCH_UI_PATH,
   ENGINE_API_LOGS_PATH,
 } from '../../routes';
 import { AnalyticsRouter } from '../analytics';
 import { ApiLogs } from '../api_logs';
+import { CrawlerRouter } from '../crawler';
 import { CurationsRouter } from '../curations';
 import { DocumentDetail, Documents } from '../documents';
 import { EngineOverview } from '../engine_overview';
+import { AppSearchPageTemplate } from '../layout';
+import { NotFound } from '../not_found';
 import { RelevanceTuning } from '../relevance_tuning';
-
 import { ResultSettings } from '../result_settings';
+import { SchemaRouter } from '../schema';
+import { SearchUI } from '../search_ui';
+import { SourceEngines } from '../source_engines';
+import { Synonyms } from '../synonyms';
 
 import { EngineLogic, getEngineBreadcrumbs } from './';
 
@@ -48,27 +52,34 @@ export const EngineRouter: React.FC = () => {
   const {
     myRole: {
       canViewEngineAnalytics,
-      // canViewEngineDocuments,
-      // canViewEngineSchema,
-      // canViewEngineCrawler,
-      // canViewMetaEngineSourceEngines,
+      canViewEngineDocuments,
+      canViewEngineSchema,
+      canViewEngineCrawler,
+      canViewMetaEngineSourceEngines,
       canManageEngineRelevanceTuning,
-      // canManageEngineSynonyms,
+      canManageEngineSynonyms,
       canManageEngineCurations,
       canManageEngineResultSettings,
-      // canManageEngineSearchUi,
+      canManageEngineSearchUi,
       canViewEngineApiLogs,
     },
   } = useValues(AppLogic);
 
   const { engineName: engineNameFromUrl } = useParams() as { engineName: string };
-  const { engineName, dataLoading, engineNotFound } = useValues(EngineLogic);
-  const { setEngineName, initializeEngine, clearEngine } = useActions(EngineLogic);
+  const { engineName, dataLoading, engineNotFound, isMetaEngine } = useValues(EngineLogic);
+  const { setEngineName, initializeEngine, pollEmptyEngine, stopPolling, clearEngine } = useActions(
+    EngineLogic
+  );
 
   useEffect(() => {
     setEngineName(engineNameFromUrl);
     initializeEngine();
-    return clearEngine;
+    pollEmptyEngine();
+
+    return () => {
+      stopPolling();
+      clearEngine();
+    };
   }, [engineNameFromUrl]);
 
   if (engineNotFound) {
@@ -82,24 +93,41 @@ export const EngineRouter: React.FC = () => {
   }
 
   const isLoadingNewEngine = engineName !== engineNameFromUrl;
-  if (isLoadingNewEngine || dataLoading) return <Loading />;
+  if (isLoadingNewEngine || dataLoading) return <AppSearchPageTemplate isLoading />;
 
   return (
     <Switch>
+      <Route exact path={ENGINE_PATH}>
+        <EngineOverview />
+      </Route>
       {canViewEngineAnalytics && (
         <Route path={ENGINE_ANALYTICS_PATH}>
           <AnalyticsRouter />
         </Route>
       )}
-      <Route path={ENGINE_DOCUMENT_DETAIL_PATH}>
-        <DocumentDetail />
-      </Route>
-      <Route path={ENGINE_DOCUMENTS_PATH}>
-        <Documents />
-      </Route>
-      {canManageEngineCurations && (
-        <Route path={ENGINE_CURATIONS_PATH}>
-          <CurationsRouter />
+      {canViewEngineDocuments && (
+        <Route path={ENGINE_DOCUMENT_DETAIL_PATH}>
+          <DocumentDetail />
+        </Route>
+      )}
+      {canViewEngineDocuments && (
+        <Route path={ENGINE_DOCUMENTS_PATH}>
+          <Documents />
+        </Route>
+      )}
+      {canViewEngineSchema && (
+        <Route path={ENGINE_SCHEMA_PATH}>
+          <SchemaRouter />
+        </Route>
+      )}
+      {canViewMetaEngineSourceEngines && isMetaEngine && (
+        <Route path={META_ENGINE_SOURCE_ENGINES_PATH}>
+          <SourceEngines />
+        </Route>
+      )}
+      {canViewEngineCrawler && !isMetaEngine && (
+        <Route path={ENGINE_CRAWLER_PATH}>
+          <CrawlerRouter />
         </Route>
       )}
       {canManageEngineRelevanceTuning && (
@@ -107,9 +135,24 @@ export const EngineRouter: React.FC = () => {
           <RelevanceTuning />
         </Route>
       )}
+      {canManageEngineSynonyms && (
+        <Route path={ENGINE_SYNONYMS_PATH}>
+          <Synonyms />
+        </Route>
+      )}
+      {canManageEngineCurations && (
+        <Route path={ENGINE_CURATIONS_PATH}>
+          <CurationsRouter />
+        </Route>
+      )}
       {canManageEngineResultSettings && (
         <Route path={ENGINE_RESULT_SETTINGS_PATH}>
           <ResultSettings />
+        </Route>
+      )}
+      {canManageEngineSearchUi && (
+        <Route path={ENGINE_SEARCH_UI_PATH}>
+          <SearchUI />
         </Route>
       )}
       {canViewEngineApiLogs && (
@@ -118,8 +161,7 @@ export const EngineRouter: React.FC = () => {
         </Route>
       )}
       <Route>
-        <SetPageChrome trail={getEngineBreadcrumbs()} />
-        <EngineOverview />
+        <NotFound pageChrome={getEngineBreadcrumbs()} />
       </Route>
     </Switch>
   );

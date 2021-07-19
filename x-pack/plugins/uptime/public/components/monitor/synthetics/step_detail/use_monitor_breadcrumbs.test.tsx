@@ -64,6 +64,10 @@ describe('useMonitorBreadcrumbs', () => {
     expect(getBreadcrumbs()).toMatchInlineSnapshot(`
       Array [
         Object {
+          "href": "",
+          "text": "Observability",
+        },
+        Object {
           "href": "/app/uptime",
           "onClick": [Function],
           "text": "Uptime",
@@ -129,6 +133,10 @@ describe('useMonitorBreadcrumbs', () => {
 
     expect(getBreadcrumbs()).toMatchInlineSnapshot(`
       Array [
+        Object {
+          "href": "",
+          "text": "Observability",
+        },
         Object {
           "href": "/app/uptime",
           "onClick": [Function],

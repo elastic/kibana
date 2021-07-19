@@ -25,7 +25,9 @@ export function calculateNodeType(node, masterNodeId) {
     return attr === 'false';
   }
 
-  if (node.uuid !== undefined && node.uuid === masterNodeId) {
+  const uuid = node.uuid ?? node.id;
+
+  if (uuid !== undefined && uuid === masterNodeId) {
     return 'master';
   }
   if (includes(node.node_ids, masterNodeId)) {

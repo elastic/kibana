@@ -27,6 +27,7 @@ describe('IndexMigrator', () => {
       index: '.kibana',
       kibanaVersion: '7.10.0',
       log: loggingSystemMock.create().get(),
+      setStatus: jest.fn(),
       mappingProperties: {},
       pollInterval: 1,
       scrollDuration: '1m',
@@ -449,7 +450,7 @@ function withIndex(
   client.tasks.get.mockReturnValue(
     elasticsearchClientMock.createSuccessTransportRequestPromise({
       completed: true,
-    } as estypes.GetTaskResponse)
+    } as estypes.TaskGetResponse)
   );
   client.search.mockReturnValue(
     elasticsearchClientMock.createSuccessTransportRequestPromise(searchResult(0) as any)

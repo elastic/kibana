@@ -11,12 +11,12 @@ import { AlertsClient, ConstructorOptions } from '../alerts_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
-import { alertsAuthorizationMock } from '../../authorization/alerts_authorization.mock';
+import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
 import { IntervalSchedule, InvalidatePendingApiKey } from '../../types';
 import { RecoveredActionGroup } from '../../../common';
 import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
 import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
-import { AlertsAuthorization } from '../../authorization/alerts_authorization';
+import { AlertingAuthorization } from '../../authorization/alerting_authorization';
 import { resolvable } from '../../test_utils';
 import { ActionsAuthorization, ActionsClient } from '../../../../actions/server';
 import { TaskStatus } from '../../../../task_manager/server';
@@ -28,7 +28,7 @@ const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
-const authorization = alertsAuthorizationMock.create();
+const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest());
 
@@ -37,7 +37,7 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   alertTypeRegistry,
   unsecuredSavedObjectsClient,
-  authorization: (authorization as unknown) as AlertsAuthorization,
+  authorization: (authorization as unknown) as AlertingAuthorization,
   actionsAuthorization: (actionsAuthorization as unknown) as ActionsAuthorization,
   spaceId: 'default',
   namespace: 'default',
@@ -60,6 +60,7 @@ setGlobalDate();
 
 describe('update()', () => {
   let alertsClient: AlertsClient;
+  let actionsClient: jest.Mocked<ActionsClient>;
   const existingAlert = {
     id: '1',
     type: 'alert',
@@ -96,8 +97,28 @@ describe('update()', () => {
     },
   };
 
-  beforeEach(() => {
+  beforeEach(async () => {
     alertsClient = new AlertsClient(alertsClientParams);
+    actionsClient = (await alertsClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
+    actionsClient.getBulk.mockReset();
+    actionsClient.getBulk.mockResolvedValue([
+      {
+        id: '1',
+        actionTypeId: 'test',
+        config: {
+          from: 'me@me.com',
+          hasAuth: false,
+          host: 'hello',
+          port: 22,
+          secure: null,
+          service: null,
+        },
+        isMissingSecrets: false,
+        name: 'email connector',
+        isPreconfigured: false,
+      },
+    ]);
+    alertsClientParams.getActionsClient.mockResolvedValue(actionsClient);
     unsecuredSavedObjectsClient.get.mockResolvedValue(existingAlert);
     encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingDecryptedAlert);
     alertTypeRegistry.get.mockReturnValue({
@@ -106,6 +127,7 @@ describe('update()', () => {
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      isExportable: true,
       recoveryActionGroup: RecoveredActionGroup,
       async executor() {},
       producer: 'alerts',
@@ -113,6 +135,39 @@ describe('update()', () => {
   });
 
   test('updates given parameters', async () => {
+    actionsClient.getBulk.mockReset();
+    actionsClient.getBulk.mockResolvedValue([
+      {
+        id: '1',
+        actionTypeId: 'test',
+        config: {
+          from: 'me@me.com',
+          hasAuth: false,
+          host: 'hello',
+          port: 22,
+          secure: null,
+          service: null,
+        },
+        isMissingSecrets: false,
+        name: 'email connector',
+        isPreconfigured: false,
+      },
+      {
+        id: '2',
+        actionTypeId: 'test2',
+        config: {
+          from: 'me@me.com',
+          hasAuth: false,
+          host: 'hello',
+          port: 22,
+          secure: null,
+          service: null,
+        },
+        isMissingSecrets: false,
+        name: 'email connector',
+        isPreconfigured: false,
+      },
+    ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -342,25 +397,11 @@ describe('update()', () => {
         "version": "123",
       }
     `);
-    const actionsClient = (await alertsClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
     expect(actionsClient.isActionTypeEnabled).toHaveBeenCalledWith('test', { notifyUsage: true });
     expect(actionsClient.isActionTypeEnabled).toHaveBeenCalledWith('test2', { notifyUsage: true });
   });
 
   it('calls the createApiKey function', async () => {
-    unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
-      saved_objects: [
-        {
-          id: '1',
-          type: 'action',
-          attributes: {
-            actions: [],
-            actionTypeId: 'test',
-          },
-          references: [],
-        },
-      ],
-    });
     alertsClientParams.createAPIKey.mockResolvedValueOnce({
       apiKeysEnabled: true,
       result: { id: '123', name: '123', api_key: 'abc' },
@@ -530,19 +571,6 @@ describe('update()', () => {
         enabled: false,
       },
     });
-    unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
-      saved_objects: [
-        {
-          id: '1',
-          type: 'action',
-          attributes: {
-            actions: [],
-            actionTypeId: 'test',
-          },
-          references: [],
-        },
-      ],
-    });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -692,6 +720,53 @@ describe('update()', () => {
     `);
   });
 
+  it('throws an error if API key creation throws', async () => {
+    alertsClientParams.createAPIKey.mockImplementation(() => {
+      throw new Error('no');
+    });
+    expect(
+      async () =>
+        await alertsClient.update({
+          id: '1',
+          data: {
+            schedule: { interval: '10s' },
+            name: 'abc',
+            tags: ['foo'],
+            params: {
+              bar: true,
+            },
+            throttle: null,
+            notifyWhen: 'onActiveAlert',
+            actions: [
+              {
+                group: 'default',
+                id: '1',
+                params: {
+                  foo: true,
+                },
+              },
+              {
+                group: 'default',
+                id: '1',
+                params: {
+                  foo: true,
+                },
+              },
+              {
+                group: 'default',
+                id: '2',
+                params: {
+                  foo: true,
+                },
+              },
+            ],
+          },
+        })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Error updating rule: could not create API key - no"`
+    );
+  });
+
   it('should validate params', async () => {
     alertTypeRegistry.get.mockReturnValueOnce({
       id: '123',
@@ -699,6 +774,7 @@ describe('update()', () => {
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      isExportable: true,
       recoveryActionGroup: RecoveredActionGroup,
       validate: {
         params: schema.object({
@@ -737,19 +813,6 @@ describe('update()', () => {
   });
 
   it('should trim alert name in the API key name', async () => {
-    unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
-      saved_objects: [
-        {
-          id: '1',
-          type: 'action',
-          attributes: {
-            actions: [],
-            actionTypeId: 'test',
-          },
-          references: [],
-        },
-      ],
-    });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -795,19 +858,6 @@ describe('update()', () => {
   });
 
   it('swallows error when invalidate API key throws', async () => {
-    unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
-      saved_objects: [
-        {
-          id: '1',
-          type: 'action',
-          attributes: {
-            actions: [],
-            actionTypeId: 'test',
-          },
-          references: [],
-        },
-      ],
-    });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -867,28 +917,39 @@ describe('update()', () => {
 
   it('swallows error when getDecryptedAsInternalUser throws', async () => {
     encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValue(new Error('Fail'));
-    unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
-      saved_objects: [
-        {
-          id: '1',
-          type: 'action',
-          attributes: {
-            actions: [],
-            actionTypeId: 'test',
-          },
-          references: [],
+    actionsClient.getBulk.mockReset();
+    actionsClient.getBulk.mockResolvedValue([
+      {
+        id: '1',
+        actionTypeId: 'test',
+        config: {
+          from: 'me@me.com',
+          hasAuth: false,
+          host: 'hello',
+          port: 22,
+          secure: null,
+          service: null,
         },
-        {
-          id: '2',
-          type: 'action',
-          attributes: {
-            actions: [],
-            actionTypeId: 'test2',
-          },
-          references: [],
+        isMissingSecrets: false,
+        name: 'email connector',
+        isPreconfigured: false,
+      },
+      {
+        id: '2',
+        actionTypeId: 'test2',
+        config: {
+          from: 'me@me.com',
+          hasAuth: false,
+          host: 'hello',
+          port: 22,
+          secure: null,
+          service: null,
         },
-      ],
-    });
+        isMissingSecrets: false,
+        name: 'email connector',
+        isPreconfigured: false,
+      },
+    ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -993,19 +1054,6 @@ describe('update()', () => {
       apiKeysEnabled: true,
       result: { id: '234', name: '234', api_key: 'abc' },
     });
-    unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
-      saved_objects: [
-        {
-          id: '1',
-          type: 'action',
-          attributes: {
-            actions: [],
-            actionTypeId: 'test',
-          },
-          references: [],
-        },
-      ],
-    });
     unsecuredSavedObjectsClient.create.mockRejectedValue(new Error('Fail'));
     await expect(
       alertsClient.update({
@@ -1050,22 +1098,10 @@ describe('update()', () => {
         actionGroups: [{ id: 'default', name: 'Default' }],
         defaultActionGroupId: 'default',
         minimumLicenseRequired: 'basic',
+        isExportable: true,
         recoveryActionGroup: RecoveredActionGroup,
         async executor() {},
         producer: 'alerts',
-      });
-      unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
-        saved_objects: [
-          {
-            id: '1',
-            type: 'action',
-            attributes: {
-              actions: [],
-              actionTypeId: 'test',
-            },
-            references: [],
-          },
-        ],
       });
       encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
         id: alertId,
@@ -1266,6 +1302,84 @@ describe('update()', () => {
     });
   });
 
+  test('throws error when updating action using connector with missing secrets', async () => {
+    // Reset from default behaviour
+    actionsClient.getBulk.mockReset();
+    actionsClient.getBulk.mockResolvedValueOnce([
+      {
+        id: '1',
+        actionTypeId: 'test',
+        config: {
+          from: 'me@me.com',
+          hasAuth: false,
+          host: 'hello',
+          port: 22,
+          secure: null,
+          service: null,
+        },
+        isMissingSecrets: false,
+        name: 'email connector',
+        isPreconfigured: false,
+      },
+      {
+        id: '2',
+        actionTypeId: 'tes2',
+        config: {
+          from: 'me@me.com',
+          hasAuth: false,
+          host: 'hello',
+          port: 22,
+          secure: null,
+          service: null,
+        },
+        isMissingSecrets: true,
+        name: 'another connector',
+        isPreconfigured: false,
+      },
+    ]);
+
+    await expect(
+      alertsClient.update({
+        id: '1',
+        data: {
+          schedule: { interval: '10s' },
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+          },
+          throttle: null,
+          notifyWhen: 'onActiveAlert',
+          actions: [
+            {
+              group: 'default',
+              id: '1',
+              params: {
+                foo: true,
+              },
+            },
+            {
+              group: 'default',
+              id: '1',
+              params: {
+                foo: true,
+              },
+            },
+            {
+              group: 'default',
+              id: '2',
+              params: {
+                foo: true,
+              },
+            },
+          ],
+        },
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Invalid connectors: another connector"`);
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
+
   describe('authorization', () => {
     beforeEach(() => {
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -1304,7 +1418,12 @@ describe('update()', () => {
         },
       });
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('myType', 'myApp', 'update');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        entity: 'rule',
+        consumer: 'myApp',
+        operation: 'update',
+        ruleTypeId: 'myType',
+      });
     });
 
     test('throws when user is not authorised to update this type of alert', async () => {
@@ -1331,7 +1450,12 @@ describe('update()', () => {
         `[Error: Unauthorized to update a "myType" alert for "myApp"]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('myType', 'myApp', 'update');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        entity: 'rule',
+        consumer: 'myApp',
+        operation: 'update',
+        ruleTypeId: 'myType',
+      });
     });
   });
 
@@ -1355,7 +1479,7 @@ describe('update()', () => {
       });
     });
 
-    test('logs audit event when updating an alert', async () => {
+    test('logs audit event when updating a rule', async () => {
       await alertsClient.update({
         id: '1',
         data: {
@@ -1374,7 +1498,7 @@ describe('update()', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'alert_update',
+            action: 'rule_update',
             outcome: 'unknown',
           }),
           kibana: { saved_object: { id: '1', type: 'alert' } },
@@ -1382,7 +1506,7 @@ describe('update()', () => {
       );
     });
 
-    test('logs audit event when not authorised to update an alert', async () => {
+    test('logs audit event when not authorised to update a rule', async () => {
       authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
 
       await expect(
@@ -1405,7 +1529,7 @@ describe('update()', () => {
         expect.objectContaining({
           event: expect.objectContaining({
             outcome: 'failure',
-            action: 'alert_update',
+            action: 'rule_update',
           }),
           kibana: {
             saved_object: {

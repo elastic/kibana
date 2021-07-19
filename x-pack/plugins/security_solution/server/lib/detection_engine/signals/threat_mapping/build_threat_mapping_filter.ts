@@ -7,7 +7,7 @@
 
 import get from 'lodash/fp/get';
 import { Filter } from 'src/plugins/data/common';
-import { ThreatMapping } from '../../../../../common/detection_engine/schemas/types/threat_mapping';
+import { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import {
   BooleanFilter,
   BuildEntriesMappingFilterOptions,

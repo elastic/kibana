@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LogicMounter } from '../../../../__mocks__';
+import { LogicMounter } from '../../../../__mocks__/kea_logic';
 import { mockApiLog } from '../__mocks__/api_log.mock';
 
 import { ApiLogLogic } from './';

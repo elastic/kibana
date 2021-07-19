@@ -6,10 +6,9 @@
  */
 
 import { REMOTE_CLUSTER_NAME } from './constants';
-import { getRandomString } from './lib';
 
 export const getFollowerIndexPayload = (
-  leaderIndexName = getRandomString(),
+  leaderIndexName = 'test-leader-index',
   remoteCluster = REMOTE_CLUSTER_NAME,
   advancedSettings = {}
 ) => ({

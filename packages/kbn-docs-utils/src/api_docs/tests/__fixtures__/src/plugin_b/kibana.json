@@ -1,0 +1,5 @@
+{
+  "id": "pluginB",
+  "summary": "This an example plugin for testing the api documentation system",
+  "version": "kibana"
+}

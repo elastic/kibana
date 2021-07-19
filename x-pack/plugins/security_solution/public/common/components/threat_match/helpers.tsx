@@ -6,15 +6,14 @@
  */
 
 import uuid from 'uuid';
-import {
-  ThreatMap,
-  threatMap,
-  ThreatMapping,
-} from '../../../../common/detection_engine/schemas/types';
+import { i18n } from '@kbn/i18n';
+import { addIdToItem } from '@kbn/securitysolution-utils';
+import { ThreatMap, threatMap, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import { IndexPattern, IFieldType } from '../../../../../../../src/plugins/data/common';
 import { Entry, FormattedEntry, ThreatMapEntries, EmptyEntry } from './types';
-import { addIdToItem } from '../../../../common/add_remove_id_to_item';
+import { ValidationFunc } from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
+import { ERROR_CODE } from '../../../../../../../src/plugins/es_ui_shared/static/forms/helpers/field_validators/types';
 
 /**
  * Formats the entry into one that is easily usable for the UI.
@@ -181,4 +180,37 @@ export const singleEntryThreat = (items: ThreatMapEntries[]): boolean => {
     items[0].entries[0].field === '' &&
     items[0].entries[0].value === ''
   );
+};
+
+export const customValidators = {
+  forbiddenField: (
+    value: unknown,
+    forbiddenString: string
+  ): ReturnType<ValidationFunc<{}, ERROR_CODE>> => {
+    let match: boolean;
+
+    if (typeof value === 'string') {
+      match = value === forbiddenString;
+    } else if (Array.isArray(value)) {
+      match = !!value.find((item) => item === forbiddenString);
+    } else {
+      match = false;
+    }
+
+    if (match) {
+      return {
+        code: 'ERR_FIELD_FORMAT',
+        message: i18n.translate(
+          'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.threatMatchIndexForbiddenError',
+          {
+            defaultMessage:
+              'The index pattern cannot be { forbiddenString }. Please choose a more specific index pattern.',
+            values: {
+              forbiddenString,
+            },
+          }
+        ),
+      };
+    }
+  },
 };

@@ -102,7 +102,7 @@ export enum INDEX_STATUS {
 
 export interface FieldSelectionItem {
   name: string;
-  mappings_types: string[];
+  mappings_types?: string[];
   is_included: boolean;
   is_required: boolean;
   feature_type?: string;
@@ -366,7 +366,7 @@ export function getValuesFromResponse(response: RegressionEvaluateResponse) {
       if (response.regression.hasOwnProperty(statType)) {
         let currentStatValue =
           response.regression[statType as keyof RegressionEvaluateResponse['regression']]?.value;
-        if (currentStatValue && !isNaN(currentStatValue)) {
+        if (currentStatValue && Number.isFinite(currentStatValue)) {
           currentStatValue = Number(currentStatValue.toPrecision(DEFAULT_SIG_FIGS));
         }
         results[statType as keyof RegressionEvaluateExtractedResponse] = currentStatValue;

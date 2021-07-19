@@ -7,6 +7,8 @@
  */
 
 import { SavedSearch } from '../saved_searches';
+import { createSearchSourceMock } from '../../../data/public/mocks';
+import { indexPatternMock } from './index_pattern';
 
 export const savedSearchMock = ({
   id: 'the-saved-search-id',
@@ -27,4 +29,5 @@ export const savedSearchMock = ({
   ],
   migrationVersion: { search: '7.5.0' },
   error: undefined,
+  searchSource: createSearchSourceMock({ index: indexPatternMock }),
 } as unknown) as SavedSearch;

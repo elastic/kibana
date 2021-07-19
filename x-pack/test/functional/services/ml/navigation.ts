@@ -115,6 +115,13 @@ export function MachineLearningNavigationProvider({
       await this.navigateToArea('~mlMainTab & ~dataFrameAnalytics', 'mlPageDataFrameAnalytics');
     },
 
+    async navigateToTrainedModels() {
+      await this.navigateToMl();
+      await this.navigateToDataFrameAnalytics();
+      await testSubjects.click('mlTrainedModelsTab');
+      await testSubjects.existOrFail('mlModelsTableContainer');
+    },
+
     async navigateToDataVisualizer() {
       await this.navigateToArea('~mlMainTab & ~dataVisualizer', 'mlPageDataVisualizerSelector');
     },
@@ -135,6 +142,15 @@ export function MachineLearningNavigationProvider({
         await testSubjects.existOrFail('mlPageStackManagementJobsList');
         // verify that the default tab with the anomaly detection jobs list got loaded
         await testSubjects.existOrFail('ml-jobs-list');
+      });
+    },
+
+    async navigateToStackManagementInsuficientLicensePage() {
+      // clicks the jobsListLink and loads the jobs list page
+      await testSubjects.click('jobsListLink');
+      await retry.tryForTime(60 * 1000, async () => {
+        // verify that the overall page is present
+        await testSubjects.existOrFail('mlPageInsufficientLicense');
       });
     },
 

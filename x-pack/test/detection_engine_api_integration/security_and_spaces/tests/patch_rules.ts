@@ -55,6 +55,22 @@ export default ({ getService }: FtrProviderContext) => {
         expect(bodyToCompare).to.eql(outputRule);
       });
 
+      it("should patch a machine_learning rule's job ID if in a legacy format", async () => {
+        await createRule(supertest, getSimpleMlRule('rule-1'));
+
+        // patch a simple rule's name
+        const { body } = await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send({ rule_id: 'rule-1', machine_learning_job_id: 'some_job_id' })
+          .expect(200);
+
+        const outputRule = getSimpleMlRuleOutput();
+        outputRule.version = 2;
+        const bodyToCompare = removeServerGeneratedProperties(body);
+        expect(bodyToCompare).to.eql(outputRule);
+      });
+
       it('should patch a single rule property of name using a rule_id of type "machine learning"', async () => {
         await createRule(supertest, getSimpleMlRule('rule-1'));
 

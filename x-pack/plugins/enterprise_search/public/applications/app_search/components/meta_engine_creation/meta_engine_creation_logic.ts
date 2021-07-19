@@ -11,7 +11,7 @@ import { kea, MakeLogicType } from 'kea';
 
 import { Meta } from '../../../../../common/types';
 import { DEFAULT_META } from '../../../shared/constants';
-import { flashAPIErrors, setQueuedSuccessMessage } from '../../../shared/flash_messages';
+import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { ENGINE_PATH } from '../../routes';
@@ -25,6 +25,7 @@ interface MetaEngineCreationValues {
   name: string;
   rawName: string;
   selectedIndexedEngineNames: string[];
+  isLoading: boolean;
 }
 
 interface MetaEngineCreationActions {
@@ -38,6 +39,7 @@ interface MetaEngineCreationActions {
     selectedIndexedEngineNames: MetaEngineCreationValues['selectedIndexedEngineNames']
   ): { selectedIndexedEngineNames: MetaEngineCreationValues['selectedIndexedEngineNames'] };
   submitEngine(): void;
+  onSubmitError(): void;
 }
 
 export const MetaEngineCreationLogic = kea<
@@ -50,9 +52,17 @@ export const MetaEngineCreationLogic = kea<
     setIndexedEngineNames: (indexedEngineNames) => ({ indexedEngineNames }),
     setRawName: (rawName) => ({ rawName }),
     setSelectedIndexedEngineNames: (selectedIndexedEngineNames) => ({ selectedIndexedEngineNames }),
-    submitEngine: () => null,
+    submitEngine: true,
+    onSubmitError: true,
   },
   reducers: {
+    isLoading: [
+      false,
+      {
+        submitEngine: () => true,
+        onSubmitError: () => false,
+      },
+    ],
     indexedEngineNames: [
       [],
       {
@@ -103,7 +113,7 @@ export const MetaEngineCreationLogic = kea<
       const { navigateToUrl } = KibanaLogic.values;
       const enginePath = generatePath(ENGINE_PATH, { engineName: name });
 
-      setQueuedSuccessMessage(META_ENGINE_CREATION_SUCCESS_MESSAGE);
+      flashSuccessToast(META_ENGINE_CREATION_SUCCESS_MESSAGE(name));
       navigateToUrl(enginePath);
     },
     submitEngine: async () => {
@@ -121,6 +131,7 @@ export const MetaEngineCreationLogic = kea<
         actions.onEngineCreationSuccess();
       } catch (e) {
         flashAPIErrors(e);
+        actions.onSubmitError();
       }
     },
   }),

@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-export { Loading } from './loading';
-export { Error } from './error';
-export { Header, HeaderProps } from './header';
-export { AlphaMessaging } from './alpha_messaging';
-export { PackageIcon } from './package_icon';
-export { ContextMenuActions } from './context_menu_actions';
-export { SearchBar } from './search_bar';
-export * from './settings_flyout';
-export * from './link_and_revision';
+export * from '../../../components';
+
+export * from './search_bar';

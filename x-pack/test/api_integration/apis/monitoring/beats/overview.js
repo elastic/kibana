@@ -13,7 +13,7 @@ export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
 
   describe('overview', () => {
-    const archive = 'monitoring/beats';
+    const archive = 'x-pack/test/functional/es_archives/monitoring/beats';
     const timeRange = {
       min: '2017-12-19T18:11:32.000Z',
       max: '2017-12-19T18:14:38.000Z',

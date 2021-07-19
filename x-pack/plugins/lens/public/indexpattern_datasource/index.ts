@@ -15,6 +15,7 @@ import {
   DataPublicPluginStart,
 } from '../../../../../src/plugins/data/public';
 import { Datasource, EditorFrameSetup } from '../types';
+import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 
 export interface IndexPatternDatasourceSetupPlugins {
   expressions: ExpressionsSetup;
@@ -26,6 +27,7 @@ export interface IndexPatternDatasourceSetupPlugins {
 export interface IndexPatternDatasourceStartPlugins {
   data: DataPublicPluginStart;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  uiActions: UiActionsStart;
 }
 
 export class IndexPatternDatasource {
@@ -44,20 +46,23 @@ export class IndexPatternDatasource {
         getTimeScaleFunction,
         getSuffixFormatter,
       } = await import('../async_services');
-      return core.getStartServices().then(([coreStart, { data, indexPatternFieldEditor }]) => {
-        data.fieldFormats.register([getSuffixFormatter(data.fieldFormats.deserialize)]);
-        expressions.registerFunction(getTimeScaleFunction(data));
-        expressions.registerFunction(counterRate);
-        expressions.registerFunction(renameColumns);
-        expressions.registerFunction(formatColumn);
-        return getIndexPatternDatasource({
-          core: coreStart,
-          storage: new Storage(localStorage),
-          data,
-          charts,
-          indexPatternFieldEditor,
-        });
-      }) as Promise<Datasource>;
+      return core
+        .getStartServices()
+        .then(([coreStart, { data, indexPatternFieldEditor, uiActions }]) => {
+          data.fieldFormats.register([getSuffixFormatter(data.fieldFormats.deserialize)]);
+          expressions.registerFunction(getTimeScaleFunction(data));
+          expressions.registerFunction(counterRate);
+          expressions.registerFunction(renameColumns);
+          expressions.registerFunction(formatColumn);
+          return getIndexPatternDatasource({
+            core: coreStart,
+            storage: new Storage(localStorage),
+            data,
+            charts,
+            indexPatternFieldEditor,
+            uiActions,
+          });
+        }) as Promise<Datasource>;
     });
   }
 }

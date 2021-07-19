@@ -27,6 +27,8 @@ export const AdvancedQueryEditorSwitch: FC<StepDefineFormHook> = ({
       isAdvancedSourceEditorEnabled,
       isAdvancedSourceEditorSwitchModalVisible,
       sourceConfigUpdated,
+      advancedEditorSourceConfigLastApplied,
+      advancedEditorSourceConfig,
     },
   },
   searchBar: {
@@ -53,7 +55,11 @@ export const AdvancedQueryEditorSwitch: FC<StepDefineFormHook> = ({
         )}
         checked={isAdvancedSourceEditorEnabled}
         onChange={() => {
-          if (isAdvancedSourceEditorEnabled && sourceConfigUpdated) {
+          if (
+            isAdvancedSourceEditorEnabled &&
+            (sourceConfigUpdated ||
+              advancedEditorSourceConfig !== advancedEditorSourceConfigLastApplied)
+          ) {
             setAdvancedSourceEditorSwitchModalVisible(true);
             return;
           }

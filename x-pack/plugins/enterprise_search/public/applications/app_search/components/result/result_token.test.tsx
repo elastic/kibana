@@ -11,6 +11,8 @@ import { shallow } from 'enzyme';
 
 import { EuiToken } from '@elastic/eui';
 
+import { SchemaType } from '../../../shared/schema/types';
+
 import { ResultToken } from './result_token';
 
 describe('ResultToken', () => {
@@ -20,7 +22,7 @@ describe('ResultToken', () => {
 
   it('render a token icon based on the provided field type', () => {
     expect(
-      shallow(<ResultToken fieldType="text" />)
+      shallow(<ResultToken fieldType={SchemaType.Text} />)
         .find(EuiToken)
         .prop('iconType')
     ).toBe('tokenString');

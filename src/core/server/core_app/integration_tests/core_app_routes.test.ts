@@ -39,6 +39,10 @@ describe('Core app routes', () => {
       expect(response.get('location')).toEqual('/base-path/some-path?foo=bar');
     });
 
+    it('does not redirect if the path starts with `//`', async () => {
+      await kbnTestServer.request.get(root, '//some-path/').expect(404);
+    });
+
     it('does not redirect if the path does not end with `/`', async () => {
       await kbnTestServer.request.get(root, '/some-path').expect(404);
     });

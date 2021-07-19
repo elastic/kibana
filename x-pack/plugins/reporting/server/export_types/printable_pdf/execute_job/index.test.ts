@@ -11,11 +11,7 @@ import * as Rx from 'rxjs';
 import { ReportingCore } from '../../../';
 import { CancellationToken } from '../../../../common';
 import { cryptoFactory, LevelLogger } from '../../../lib';
-import {
-  createMockConfig,
-  createMockConfigSchema,
-  createMockReportingCore,
-} from '../../../test_helpers';
+import { createMockConfigSchema, createMockReportingCore } from '../../../test_helpers';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
 import { TaskPayloadPDF } from '../types';
 import { runTaskFnFactory } from './';
@@ -53,22 +49,7 @@ beforeEach(async () => {
     'kibanaServer.protocol': 'http',
   };
   const mockSchema = createMockConfigSchema(reportingConfig);
-  const mockReportingConfig = createMockConfig(mockSchema);
-
-  mockReporting = await createMockReportingCore(mockReportingConfig);
-
-  const mockElasticsearch = {
-    legacy: {
-      client: {
-        asScoped: () => ({ callAsCurrentUser: jest.fn() }),
-      },
-    },
-  };
-  const mockGetElasticsearch = jest.fn();
-  mockGetElasticsearch.mockImplementation(() => Promise.resolve(mockElasticsearch));
-  mockReporting.getElasticsearchService = mockGetElasticsearch;
-  // @ts-ignore over-riding config
-  mockReporting.config = mockReportingConfig;
+  mockReporting = await createMockReportingCore(mockSchema);
 
   (generatePdfObservableFactory as jest.Mock).mockReturnValue(jest.fn());
 });

@@ -12,11 +12,7 @@ import {
   requestContextMock,
   createMockConfig,
 } from '../../../../detection_engine/routes/__mocks__';
-import {
-  getTimelineOrNull,
-  getTimelineTemplateOrNull,
-  getAllTimeline,
-} from '../../../saved_object/timelines';
+import { getTimelineOrNull, getTimelineTemplateOrNull } from '../../../saved_object/timelines';
 
 import { mockGetCurrentUser } from '../../../__mocks__/import_timelines';
 import { getTimelineRequest } from '../../../__mocks__/request_responses';
@@ -66,11 +62,8 @@ describe('get timeline', () => {
     expect((getTimelineOrNull as jest.Mock).mock.calls[0][1]).toEqual(id);
   });
 
-  test('should call getAllTimeline if nither templateTimelineId nor id is given', async () => {
-    (getAllTimeline as jest.Mock).mockResolvedValue({ totalCount: 3 });
-
-    await server.inject(getTimelineRequest(), context);
-
-    expect(getAllTimeline as jest.Mock).toHaveBeenCalledTimes(2);
+  test('should throw error message if nither templateTimelineId nor id is given', async () => {
+    const res = await server.inject(getTimelineRequest(), context);
+    expect(res.body.message).toEqual('please provide id or template_timeline_id');
   });
 });

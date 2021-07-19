@@ -7,10 +7,10 @@
 
 import { LensPlugin } from './plugin';
 
-export {
+export type {
   EmbeddableComponentProps,
   TypedLensByValueInput,
-} from './editor_frame_service/embeddable/embeddable_component';
+} from './embeddable/embeddable_component';
 export type {
   XYState,
   AxesSettingsConfig,
@@ -20,6 +20,7 @@ export type {
   ValueLabelConfig,
   YAxisMode,
   XYCurveType,
+  YConfig,
 } from './xy_visualization/types';
 export type { DataType, OperationMetadata } from './types';
 export type {
@@ -53,7 +54,12 @@ export type {
   CounterRateIndexPatternColumn,
   DerivativeIndexPatternColumn,
   MovingAverageIndexPatternColumn,
+  FormulaIndexPatternColumn,
+  MathIndexPatternColumn,
+  OverallSumIndexPatternColumn,
 } from './indexpattern_datasource/types';
+export type { LensEmbeddableInput } from './embeddable';
+
 export { LensPublicStart } from './plugin';
 
 export const plugin = () => new LensPlugin();

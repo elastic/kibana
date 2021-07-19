@@ -108,7 +108,7 @@ it('passes correct args to sub-classes', () => {
             "bar",
             "baz",
           ],
-          "gracefulTimeout": 5000,
+          "gracefulTimeout": 30000,
           "log": <TestLog>,
           "mapLogLine": [Function],
           "script": <absolute path>/scripts/kibana,

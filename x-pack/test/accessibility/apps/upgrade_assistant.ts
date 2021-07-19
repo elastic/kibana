@@ -34,19 +34,57 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await a11y.testAppSnapshot();
       });
 
-      it('Elasticsearch cluster tab', async () => {
-        await testSubjects.click('esDeprecationsLink');
-        await retry.waitFor('Upgrade Assistant Cluster tab to be visible', async () => {
+      it('Elasticsearch cluster deprecations', async () => {
+        await PageObjects.common.navigateToUrl(
+          'management',
+          'stack/upgrade_assistant/es_deprecations/cluster',
+          {
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+            shouldUseHashForSubUrl: false,
+          }
+        );
+
+        await retry.waitFor('Cluster tab to be visible', async () => {
           return testSubjects.exists('clusterTabContent');
         });
+
         await a11y.testAppSnapshot();
       });
 
-      it('Elasticsearch indices tab', async () => {
-        await testSubjects.click('upgradeAssistantIndicesTab');
-        await retry.waitFor('Upgrade Assistant Indices tab to be visible', async () => {
+      it('Elasticsearch index deprecations', async () => {
+        await PageObjects.common.navigateToUrl(
+          'management',
+          'stack/upgrade_assistant/es_deprecations/indices',
+          {
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+            shouldUseHashForSubUrl: false,
+          }
+        );
+
+        await retry.waitFor('Indices tab to be visible', async () => {
           return testSubjects.exists('indexTabContent');
         });
+
+        await a11y.testAppSnapshot();
+      });
+
+      it('Kibana deprecations', async () => {
+        await PageObjects.common.navigateToUrl(
+          'management',
+          'stack/upgrade_assistant/kibana_deprecations',
+          {
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+            shouldUseHashForSubUrl: false,
+          }
+        );
+
+        await retry.waitFor('Kibana deprecations to be visible', async () => {
+          return testSubjects.exists('kibanaDeprecationsContent');
+        });
+
         await a11y.testAppSnapshot();
       });
     });

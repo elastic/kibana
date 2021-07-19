@@ -19,5 +19,6 @@ export { xaxisFormatterProvider } from './helpers/xaxis_formatter';
 export { generateTicksProvider } from './helpers/tick_generator';
 
 export { DEFAULT_TIME_FORMAT, calculateInterval } from '../common/lib';
+export { parseTimelionExpressionAsync } from '../common/parser_async';
 
 export { VisTypeTimelionPluginStart, VisTypeTimelionPluginSetup } from './plugin';

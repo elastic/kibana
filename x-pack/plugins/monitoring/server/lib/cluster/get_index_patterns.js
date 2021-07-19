@@ -32,7 +32,7 @@ export function getIndexPatterns(server, additionalPatterns = {}, ccs = '*') {
     ...Object.keys(additionalPatterns).reduce((accum, varName) => {
       return {
         ...accum,
-        [varName]: prefixIndexPattern(config, additionalPatterns[varName], ccs),
+        [varName]: prefixIndexPattern(config, additionalPatterns[varName], ccs, true),
       };
     }, {}),
   };

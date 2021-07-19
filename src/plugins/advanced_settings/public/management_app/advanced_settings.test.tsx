@@ -59,7 +59,6 @@ function mockConfig() {
     isCustom: (key: string) => false,
     isOverridden: (key: string) => Boolean(config.getAll()[key].isOverridden),
     getRegistered: () => ({} as Readonly<Record<string, PublicUiSettingsParams>>),
-    overrideLocalDefault: (key: string, value: any) => {},
     getUpdate$: () =>
       new Observable<{
         key: string;

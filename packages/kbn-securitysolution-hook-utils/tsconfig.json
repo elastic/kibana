@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "declaration": true,
+    "declarationMap": true,
+    "incremental": true,
+    "outDir": "target",
+    "rootDir": "src",
+    "sourceMap": true,
+    "sourceRoot": "../../../../packages/kbn-securitysolution-hook-utils/src",
+    "types": ["jest", "node"]
+  },
+  "include": ["src/**/*"]
+}

@@ -24,6 +24,8 @@ import {
   generateTemplateIndexPattern,
 } from './template';
 
+const FLEET_COMPONENT_TEMPLATE = '.fleet_component_template-1';
+
 // Add our own serialiser to just do JSON.stringify
 expect.addSnapshotSerializer({
   print(val) {
@@ -67,7 +69,7 @@ describe('EPM template', () => {
       composedOfTemplates,
       templatePriority: 200,
     });
-    expect(template.composed_of).toStrictEqual(composedOfTemplates);
+    expect(template.composed_of).toStrictEqual([...composedOfTemplates, FLEET_COMPONENT_TEMPLATE]);
   });
 
   it('adds empty composed_of correctly', () => {
@@ -82,7 +84,7 @@ describe('EPM template', () => {
       composedOfTemplates,
       templatePriority: 200,
     });
-    expect(template.composed_of).toStrictEqual(composedOfTemplates);
+    expect(template.composed_of).toStrictEqual([FLEET_COMPONENT_TEMPLATE]);
   });
 
   it('adds hidden field correctly', () => {
@@ -609,6 +611,116 @@ describe('EPM template', () => {
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(JSON.stringify(mappings)).toEqual(JSON.stringify(constantKeywordMapping));
+  });
+
+  it('tests constant_keyword field type with value', () => {
+    const constantKeywordLiteralYaml = `
+- name: constantKeyword
+  type: constant_keyword
+  value: always_the_same
+  `;
+    const constantKeywordMapping = {
+      properties: {
+        constantKeyword: {
+          type: 'constant_keyword',
+          value: 'always_the_same',
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(constantKeywordLiteralYaml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(JSON.stringify(mappings)).toEqual(JSON.stringify(constantKeywordMapping));
+  });
+
+  it('processes meta fields', () => {
+    const metaFieldLiteralYaml = `
+- name: fieldWithMetas
+  type: integer
+  unit: byte
+  metric_type: gauge
+  `;
+    const metaFieldMapping = {
+      properties: {
+        fieldWithMetas: {
+          type: 'long',
+          meta: {
+            metric_type: 'gauge',
+            unit: 'byte',
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(metaFieldLiteralYaml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(JSON.stringify(mappings)).toEqual(JSON.stringify(metaFieldMapping));
+  });
+
+  it('processes meta fields with only one meta value', () => {
+    const metaFieldLiteralYaml = `
+- name: fieldWithMetas
+  type: integer
+  metric_type: gauge
+  `;
+    const metaFieldMapping = {
+      properties: {
+        fieldWithMetas: {
+          type: 'long',
+          meta: {
+            metric_type: 'gauge',
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(metaFieldLiteralYaml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(JSON.stringify(mappings)).toEqual(JSON.stringify(metaFieldMapping));
+  });
+
+  it('processes grouped meta fields', () => {
+    const metaFieldLiteralYaml = `
+- name: groupWithMetas
+  type: group
+  unit: byte
+  metric_type: gauge
+  fields:
+    - name: fieldA
+      type: integer
+      unit: byte
+      metric_type: gauge
+    - name: fieldB
+      type: integer
+      unit: byte
+      metric_type: gauge
+  `;
+    const metaFieldMapping = {
+      properties: {
+        groupWithMetas: {
+          properties: {
+            fieldA: {
+              type: 'long',
+              meta: {
+                metric_type: 'gauge',
+                unit: 'byte',
+              },
+            },
+            fieldB: {
+              type: 'long',
+              meta: {
+                metric_type: 'gauge',
+                unit: 'byte',
+              },
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(metaFieldLiteralYaml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(JSON.stringify(mappings)).toEqual(JSON.stringify(metaFieldMapping));
   });
 
   it('tests priority and index pattern for data stream without dataset_is_prefix', () => {

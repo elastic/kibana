@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiPage, EuiErrorBoundary } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
 import { Router } from 'react-router-dom';
+import { EuiErrorBoundary } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { I18nStart, ChromeBreadcrumb, CoreStart, AppMountParameters } from 'kibana/public';
 import {
   KibanaContextProvider,
@@ -110,6 +109,7 @@ const Application = (props: UptimeAppProps) => {
               storage,
               data: startPlugins.data,
               triggersActionsUi: startPlugins.triggersActionsUi,
+              observability: startPlugins.observability,
             }}
           >
             <Router history={appMountParameters.history}>
@@ -118,7 +118,7 @@ const Application = (props: UptimeAppProps) => {
                   <UptimeSettingsContextProvider {...props}>
                     <UptimeThemeContextProvider darkMode={darkMode}>
                       <UptimeStartupPluginsContextProvider {...startPlugins}>
-                        <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
+                        <div data-test-subj="uptimeApp">
                           <RedirectAppLinks application={core.application}>
                             <main>
                               <UptimeAlertsFlyoutWrapper />
@@ -126,7 +126,7 @@ const Application = (props: UptimeAppProps) => {
                               <ActionMenu appMountParameters={appMountParameters} />
                             </main>
                           </RedirectAppLinks>
-                        </EuiPage>
+                        </div>
                       </UptimeStartupPluginsContextProvider>
                     </UptimeThemeContextProvider>
                   </UptimeSettingsContextProvider>

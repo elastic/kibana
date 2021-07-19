@@ -64,6 +64,7 @@ import {
   CoreUsageStats,
   CoreUsageData,
   CoreConfigUsageData,
+  ConfigUsageData,
   CoreEnvironmentUsageData,
   CoreServicesUsageData,
 } from './core_usage_data';
@@ -74,7 +75,18 @@ export type {
   CoreConfigUsageData,
   CoreEnvironmentUsageData,
   CoreServicesUsageData,
+  ConfigUsageData,
 };
+
+import type { ExecutionContextSetup, ExecutionContextStart } from './execution_context';
+
+export type {
+  ExecutionContextSetup,
+  ExecutionContextStart,
+  IExecutionContextContainer,
+  KibanaServerExecutionContext,
+  KibanaExecutionContext,
+} from './execution_context';
 
 export { bootstrap } from './bootstrap';
 export type {
@@ -236,6 +248,11 @@ export type { IRenderOptions } from './rendering';
 export type {
   Logger,
   LoggerFactory,
+  Ecs,
+  EcsEventCategory,
+  EcsEventKind,
+  EcsEventOutcome,
+  EcsEventType,
   LogMeta,
   LogRecord,
   LogLevel,
@@ -256,6 +273,7 @@ export type {
   PluginManifest,
   PluginName,
   SharedGlobalConfig,
+  MakeUsageFromSchema,
 } from './plugins';
 
 export {
@@ -287,6 +305,7 @@ export type {
   SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsCreateOptions,
   SavedObjectsExportResultDetails,
+  SavedObjectsExportExcludedObject,
   SavedObjectsFindResult,
   SavedObjectsFindResponse,
   SavedObjectsImportConflictError,
@@ -312,12 +331,16 @@ export type {
   SavedObjectsResolveResponse,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
-  SavedObjectsAddToNamespacesOptions,
-  SavedObjectsAddToNamespacesResponse,
-  SavedObjectsDeleteFromNamespacesOptions,
-  SavedObjectsDeleteFromNamespacesResponse,
   SavedObjectsRemoveReferencesToOptions,
   SavedObjectsRemoveReferencesToResponse,
+  SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectsCollectMultiNamespaceReferencesOptions,
+  SavedObjectReferenceWithContext,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
+  SavedObjectsUpdateObjectsSpacesObject,
+  SavedObjectsUpdateObjectsSpacesOptions,
+  SavedObjectsUpdateObjectsSpacesResponse,
+  SavedObjectsUpdateObjectsSpacesResponseObject,
   SavedObjectsServiceStart,
   SavedObjectsServiceSetup,
   SavedObjectStatusMeta,
@@ -327,8 +350,6 @@ export type {
   SavedObjectsDeleteByNamespaceOptions,
   SavedObjectsIncrementCounterOptions,
   SavedObjectsIncrementCounterField,
-  SavedObjectsComplexFieldMapping,
-  SavedObjectsCoreFieldMapping,
   SavedObjectsFieldMapping,
   SavedObjectsTypeMappingDefinition,
   SavedObjectsMappingProperties,
@@ -364,11 +385,7 @@ export type {
   UiSettingsServiceSetup,
   UiSettingsServiceStart,
   UserProvidedValues,
-  ImageValidation,
   DeprecationSettings,
-  StringValidation,
-  StringValidationRegex,
-  StringValidationRegexString,
 } from './ui_settings';
 
 export type {
@@ -389,7 +406,7 @@ export type {
 } from './deprecations';
 
 export type { AppCategory } from '../types';
-export { DEFAULT_APP_CATEGORIES } from '../utils';
+export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
 
 export type {
   SavedObject,
@@ -468,6 +485,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   context: ContextSetup;
   /** {@link ElasticsearchServiceSetup} */
   elasticsearch: ElasticsearchServiceSetup;
+  /** {@link ExecutionContextSetup} */
+  executionContext: ExecutionContextSetup;
   /** {@link HttpServiceSetup} */
   http: HttpServiceSetup & {
     /** {@link HttpResources} */
@@ -514,6 +533,8 @@ export interface CoreStart {
   capabilities: CapabilitiesStart;
   /** {@link ElasticsearchServiceStart} */
   elasticsearch: ElasticsearchServiceStart;
+  /** {@link ExecutionContextStart} */
+  executionContext: ExecutionContextStart;
   /** {@link HttpServiceStart} */
   http: HttpServiceStart;
   /** {@link MetricsServiceStart} */

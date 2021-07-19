@@ -10,7 +10,7 @@ import {
   mockKibanaValues,
   mockFlashMessageHelpers,
   mockHttpValues,
-} from '../../../__mocks__';
+} from '../../../__mocks__/kea_logic';
 import { groups } from '../../__mocks__/groups.mock';
 import { mockGroupValues } from './__mocks__/group_logic.mock';
 
@@ -34,7 +34,6 @@ describe('GroupLogic', () => {
 
   const group = groups[0];
   const sourceIds = ['123', '124'];
-  const userIds = ['1z1z'];
   const sourcePriorities = { [sourceIds[0]]: 1, [sourceIds[1]]: 0.5 };
 
   beforeEach(() => {
@@ -55,7 +54,6 @@ describe('GroupLogic', () => {
         expect(GroupLogic.values.dataLoading).toEqual(false);
         expect(GroupLogic.values.groupNameInputValue).toEqual(group.name);
         expect(GroupLogic.values.selectedGroupSources).toEqual(sourceIds);
-        expect(GroupLogic.values.selectedGroupUsers).toEqual(userIds);
         expect(GroupLogic.values.cachedSourcePriorities).toEqual(sourcePriorities);
         expect(GroupLogic.values.activeSourcePriorities).toEqual(sourcePriorities);
         expect(GroupLogic.values.groupPrioritiesUnchanged).toEqual(true);
@@ -112,24 +110,6 @@ describe('GroupLogic', () => {
       });
     });
 
-    describe('addGroupUser', () => {
-      it('sets reducer', () => {
-        GroupLogic.actions.addGroupUser(sourceIds[0]);
-
-        expect(GroupLogic.values.selectedGroupUsers).toEqual([sourceIds[0]]);
-      });
-    });
-
-    describe('removeGroupUser', () => {
-      it('sets reducers', () => {
-        GroupLogic.actions.addGroupUser(sourceIds[0]);
-        GroupLogic.actions.addGroupUser(sourceIds[1]);
-        GroupLogic.actions.removeGroupUser(sourceIds[0]);
-
-        expect(GroupLogic.values.selectedGroupUsers).toEqual([sourceIds[1]]);
-      });
-    });
-
     describe('onGroupSourcesSaved', () => {
       it('sets reducers', () => {
         GroupLogic.actions.onGroupSourcesSaved(group);
@@ -139,16 +119,6 @@ describe('GroupLogic', () => {
         expect(GroupLogic.values.selectedGroupSources).toEqual(sourceIds);
         expect(GroupLogic.values.cachedSourcePriorities).toEqual(sourcePriorities);
         expect(GroupLogic.values.activeSourcePriorities).toEqual(sourcePriorities);
-      });
-    });
-
-    describe('onGroupUsersSaved', () => {
-      it('sets reducers', () => {
-        GroupLogic.actions.onGroupUsersSaved(group);
-
-        expect(GroupLogic.values.group).toEqual(group);
-        expect(GroupLogic.values.manageUsersModalVisible).toEqual(false);
-        expect(GroupLogic.values.selectedGroupUsers).toEqual(userIds);
       });
     });
 
@@ -170,29 +140,11 @@ describe('GroupLogic', () => {
       });
     });
 
-    describe('hideManageUsersModal', () => {
-      it('sets reducers', () => {
-        GroupLogic.actions.hideManageUsersModal(group);
-
-        expect(GroupLogic.values.manageUsersModalVisible).toEqual(false);
-        expect(GroupLogic.values.managerModalFormErrors).toEqual([]);
-        expect(GroupLogic.values.selectedGroupUsers).toEqual(userIds);
-      });
-    });
-
     describe('selectAllSources', () => {
       it('sets reducers', () => {
         GroupLogic.actions.selectAllSources(group.contentSources);
 
         expect(GroupLogic.values.selectedGroupSources).toEqual(sourceIds);
-      });
-    });
-
-    describe('selectAllUsers', () => {
-      it('sets reducers', () => {
-        GroupLogic.actions.selectAllUsers(group.users);
-
-        expect(GroupLogic.values.selectedGroupUsers).toEqual(userIds);
       });
     });
 
@@ -349,36 +301,6 @@ describe('GroupLogic', () => {
       });
     });
 
-    describe('saveGroupUsers', () => {
-      beforeEach(() => {
-        GroupLogic.actions.onInitializeGroup(group);
-      });
-      it('updates name', async () => {
-        const onGroupUsersSavedSpy = jest.spyOn(GroupLogic.actions, 'onGroupUsersSaved');
-        http.post.mockReturnValue(Promise.resolve(group));
-
-        GroupLogic.actions.saveGroupUsers();
-        expect(http.post).toHaveBeenCalledWith('/api/workplace_search/groups/123/assign', {
-          body: JSON.stringify({ user_ids: userIds }),
-        });
-
-        await nextTick();
-        expect(onGroupUsersSavedSpy).toHaveBeenCalledWith(group);
-        expect(setSuccessMessage).toHaveBeenCalledWith(
-          'Successfully updated the users of this group.'
-        );
-      });
-
-      it('handles error', async () => {
-        http.post.mockReturnValue(Promise.reject('this is an error'));
-
-        GroupLogic.actions.saveGroupUsers();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
-      });
-    });
-
     describe('saveGroupSourcePrioritization', () => {
       beforeEach(() => {
         GroupLogic.actions.onInitializeGroup(group);
@@ -431,15 +353,6 @@ describe('GroupLogic', () => {
         GroupLogic.actions.showSharedSourcesModal();
 
         expect(GroupLogic.values.sharedSourcesModalVisible).toEqual(true);
-        expect(clearFlashMessages).toHaveBeenCalled();
-      });
-    });
-
-    describe('showManageUsersModal', () => {
-      it('sets reducer and clears flash messages', () => {
-        GroupLogic.actions.showManageUsersModal();
-
-        expect(GroupLogic.values.manageUsersModalVisible).toEqual(true);
         expect(clearFlashMessages).toHaveBeenCalled();
       });
     });

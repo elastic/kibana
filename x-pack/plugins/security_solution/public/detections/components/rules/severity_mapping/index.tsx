@@ -19,6 +19,11 @@ import {
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import {
+  Severity,
+  SeverityMapping,
+  SeverityMappingItem,
+} from '@kbn/securitysolution-io-ts-alerting-types';
 import * as i18n from './translations';
 import { FieldHook } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 import { SeverityOptionItem } from '../step_about_rule/data';
@@ -29,11 +34,6 @@ import {
 } from '../../../../../../../../src/plugins/data/common/index_patterns';
 import { FieldComponent } from '../../../../common/components/autocomplete/field';
 import { AutocompleteFieldMatchComponent } from '../../../../common/components/autocomplete/field_value_match';
-import {
-  Severity,
-  SeverityMapping,
-  SeverityMappingItem,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
 
 const NestedContent = styled.div`
   margin-left: 24px;

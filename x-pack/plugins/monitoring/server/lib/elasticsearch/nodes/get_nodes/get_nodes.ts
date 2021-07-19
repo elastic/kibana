@@ -76,7 +76,7 @@ export async function getNodes(
   const params = {
     index: esIndexPattern,
     size: config.get('monitoring.ui.max_bucket_size'),
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       query: createQuery({
         type: 'node_stats',
@@ -110,8 +110,9 @@ export async function getNodes(
       },
       sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
     },
-    filterPath: [
+    filter_path: [
       'hits.hits._source.source_node',
+      'hits.hits._source.service.address',
       'hits.hits._source.elasticsearch.node',
       'aggregations.nodes.buckets.key',
       ...LISTING_METRICS_PATHS,

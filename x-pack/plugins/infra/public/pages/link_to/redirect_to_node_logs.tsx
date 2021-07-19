@@ -6,9 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import flowRight from 'lodash/flowRight';
+import { flowRight } from 'lodash';
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 import useMount from 'react-use/lib/useMount';
@@ -36,7 +34,7 @@ export const RedirectToNodeLogs = ({
   location,
 }: RedirectToNodeLogsType) => {
   const { services } = useKibanaContextForPlugin();
-  const { isLoading, loadSourceConfiguration, sourceConfiguration } = useLogSource({
+  const { isLoading, loadSource, sourceConfiguration } = useLogSource({
     fetch: services.http.fetch,
     sourceId,
     indexPatternsService: services.data.indexPatterns,
@@ -44,7 +42,7 @@ export const RedirectToNodeLogs = ({
   const fields = sourceConfiguration?.configuration.fields;
 
   useMount(() => {
-    loadSourceConfiguration();
+    loadSource();
   });
 
   if (isLoading) {
@@ -68,7 +66,7 @@ export const RedirectToNodeLogs = ({
   const filter = userFilter ? `(${nodeFilter}) and (${userFilter})` : nodeFilter;
 
   const searchString = flowRight(
-    replaceLogFilterInQueryString(filter),
+    replaceLogFilterInQueryString({ language: 'kuery', query: filter }),
     replaceLogPositionInQueryString(getTimeFromLocation(location)),
     replaceSourceIdInQueryString(sourceId)
   )('');

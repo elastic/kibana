@@ -8,9 +8,7 @@
 import { EuiButtonEmpty, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import React, { FC, memo, useCallback, useState, useEffect } from 'react';
 import styled from 'styled-components';
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import isEqual from 'lodash/isEqual';
+import { isEqual } from 'lodash';
 
 import { IndexPattern } from 'src/plugins/data/public';
 import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
@@ -65,7 +63,7 @@ interface StepDefineRuleProps extends RuleStepProps {
 const stepDefineDefaultValue: DefineStepRule = {
   anomalyThreshold: 50,
   index: [],
-  machineLearningJobId: '',
+  machineLearningJobId: [],
   ruleType: 'query',
   threatIndex: [],
   queryBar: {
@@ -304,7 +302,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     ),
     [threatBrowserFields, threatIndexPatternsLoading, threatIndexPatterns, indexPatterns]
   );
-
   return isReadOnlyView ? (
     <StepContentWrapper data-test-subj="definitionRule" addPadding={addPadding}>
       <StepRuleDescription
@@ -345,7 +342,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   'data-test-subj': 'detectionEngineStepDefineRuleIndices',
                   euiFieldProps: {
                     fullWidth: true,
-                    isDisabled: isLoading,
                     placeholder: '',
                   },
                 }}

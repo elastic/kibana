@@ -41,7 +41,6 @@ import {
   ChromeNavControls,
   ChromeNavLink,
   ChromeNavLinks,
-  ChromeNavLinkUpdateableFields,
   ChromeDocTitle,
   ChromeStart,
   ChromeRecentlyAccessed,
@@ -66,6 +65,7 @@ import { ApplicationSetup, Capabilities, ApplicationStart } from './application'
 import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
 import { DeprecationsServiceStart } from './deprecations';
+import type { ExecutionContextServiceStart } from './execution_context';
 
 export type {
   PackageInfo,
@@ -74,17 +74,8 @@ export type {
   DomainDeprecationDetails,
 } from '../server/types';
 export type { CoreContext, CoreSystem } from './core_system';
-export { DEFAULT_APP_CATEGORIES } from '../utils';
-export type {
-  AppCategory,
-  UiSettingsParams,
-  UserProvidedValues,
-  UiSettingsType,
-  ImageValidation,
-  StringValidation,
-  StringValidationRegex,
-  StringValidationRegexString,
-} from '../types';
+export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
+export type { AppCategory, UiSettingsParams, UserProvidedValues, UiSettingsType } from '../types';
 
 export { AppNavLinkStatus, AppStatus, ScopedHistory } from './application';
 export type {
@@ -99,17 +90,17 @@ export type {
   AppLeaveAction,
   AppLeaveDefaultAction,
   AppLeaveConfirmAction,
-  AppMeta,
   AppUpdatableFields,
   AppUpdater,
-  AppSearchDeepLink,
+  AppNavOptions,
+  AppDeepLink,
   PublicAppInfo,
-  PublicAppMetaInfo,
-  PublicAppSearchDeepLinkInfo,
+  PublicAppDeepLinkInfo,
   NavigateToAppOptions,
 } from './application';
 
 export { SimpleSavedObject } from './saved_objects';
+export type { ResolvedSimpleSavedObject } from './saved_objects';
 export type {
   SavedObjectsBatchResponse,
   SavedObjectsBulkCreateObject,
@@ -118,6 +109,7 @@ export type {
   SavedObjectsBulkUpdateOptions,
   SavedObjectsCreateOptions,
   SavedObjectsFindResponsePublic,
+  SavedObjectsResolveResponse,
   SavedObjectsUpdateOptions,
   SavedObject,
   SavedObjectAttribute,
@@ -144,6 +136,8 @@ export type {
   SavedObjectsImportSimpleWarning,
   SavedObjectsImportActionRequiredWarning,
   SavedObjectsImportWarning,
+  SavedObjectReferenceWithContext,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
 } from './saved_objects';
 
 export { HttpFetchError } from './http';
@@ -191,6 +185,12 @@ export type {
 } from './notifications';
 
 export type { DeprecationsServiceStart, ResolveDeprecationResponse } from './deprecations';
+
+export type {
+  IExecutionContextContainer,
+  ExecutionContextServiceStart,
+  KibanaExecutionContext,
+} from './execution_context';
 
 export type { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
 
@@ -278,6 +278,8 @@ export interface CoreStart {
   fatalErrors: FatalErrorsStart;
   /** {@link DeprecationsServiceStart} */
   deprecations: DeprecationsServiceStart;
+  /** {@link ExecutionContextServiceStart} */
+  executionContext: ExecutionContextServiceStart;
   /**
    * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
    * use *only* to retrieve config values. There is no way to set injected values
@@ -305,7 +307,6 @@ export type {
   ChromeNavControls,
   ChromeNavLink,
   ChromeNavLinks,
-  ChromeNavLinkUpdateableFields,
   ChromeDocTitle,
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,

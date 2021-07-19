@@ -9,7 +9,7 @@
 import { includes, startsWith } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { lookup } from './agg_lookup';
-import { MetricsItemsSchema, SanitizedFieldType } from './types';
+import { Metric, SanitizedFieldType } from './types';
 import { extractFieldLabel } from './fields_utils';
 
 const paths = [
@@ -28,8 +28,8 @@ const paths = [
 ];
 
 export const calculateLabel = (
-  metric: MetricsItemsSchema,
-  metrics: MetricsItemsSchema[] = [],
+  metric: Metric,
+  metrics: Metric[] = [],
   fields: SanitizedFieldType[] = [],
   isThrowErrorOnFieldNotFound: boolean = true
 ): string => {

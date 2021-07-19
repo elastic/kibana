@@ -21,7 +21,7 @@ import { FlyoutBody } from './flyout_body';
 import { LayerDescriptor } from '../../../common/descriptor_types';
 import { LayerWizard } from '../../classes/layers/layer_wizard_registry';
 
-const ADD_LAYER_STEP_ID = 'ADD_LAYER_STEP_ID';
+export const ADD_LAYER_STEP_ID = 'ADD_LAYER_STEP_ID';
 const ADD_LAYER_STEP_LABEL = i18n.translate('xpack.maps.addLayerPanel.addLayer', {
   defaultMessage: 'Add layer',
 });
@@ -33,6 +33,7 @@ export interface Props {
   hasPreviewLayers: boolean;
   isLoadingPreviewLayers: boolean;
   promotePreviewLayers: () => void;
+  enableEditMode: () => void;
 }
 
 interface State {
@@ -91,6 +92,9 @@ export class AddLayerPanel extends Component<Props, State> {
     if (this.state.layerSteps.length - 1 === this.state.currentStepIndex) {
       // last step
       this.props.promotePreviewLayers();
+      if (this.state.layerWizard?.showFeatureEditTools) {
+        this.props.enableEditMode();
+      }
     } else {
       this.setState((prevState) => {
         const nextIndex = prevState.currentStepIndex + 1;
@@ -168,6 +172,9 @@ export class AddLayerPanel extends Component<Props, State> {
           previewLayers={this._previewLayers}
           showBackButton={!this.state.isStepLoading}
           currentStepId={this.state.currentStep ? this.state.currentStep.id : null}
+          isOnFinalStep={
+            this.state.currentStep ? this.state.currentStep.id === ADD_LAYER_STEP_ID : false
+          }
           enableNextBtn={this._enableNextBtn}
           disableNextBtn={this._disableNextBtn}
           startStepLoading={this._startStepLoading}

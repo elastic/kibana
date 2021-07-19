@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import {
-  Severity,
-  SeverityMappingOrUndefined,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
+import { Severity, SeverityMappingOrUndefined } from '@kbn/securitysolution-io-ts-alerting-types';
+
 import { sampleDocSeverity } from '../__mocks__/es_results';
 import {
   buildSeverityFromMapping,

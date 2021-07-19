@@ -14,7 +14,6 @@ import { CustomizeTimeRangeModal } from './customize_time_range_modal';
 import { OpenModal, CommonlyUsedRange } from './types';
 
 export const CUSTOM_TIME_RANGE = 'CUSTOM_TIME_RANGE';
-const SEARCH_EMBEDDABLE_TYPE = 'search';
 
 export interface TimeRangeInput extends EmbeddableInput {
   timeRange: TimeRange;
@@ -80,13 +79,7 @@ export class CustomTimeRangeAction implements Action<TimeRangeActionContext> {
       isVisualizeEmbeddable(embeddable) &&
       (embeddable as VisualizeEmbeddable).getOutput().visTypeName === 'markdown';
     return Boolean(
-      embeddable &&
-        hasTimeRange(embeddable) &&
-        // Saved searches don't listen to the time range from the container that is passed down to them so it
-        // won't work without a fix.  For now, just leave them out.
-        embeddable.type !== SEARCH_EMBEDDABLE_TYPE &&
-        !isInputControl &&
-        !isMarkdown
+      embeddable && embeddable.parent && hasTimeRange(embeddable) && !isInputControl && !isMarkdown
     );
   }
 

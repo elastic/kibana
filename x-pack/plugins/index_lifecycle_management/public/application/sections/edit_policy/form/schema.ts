@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { PhaseExceptDelete, PhaseWithTiming } from '../../../../../common/types';
 import { FormSchema, fieldValidators } from '../../../../shared_imports';
 import { defaultIndexPriority } from '../../../constants';
 import { ROLLOVER_FORM_PATHS, CLOUD_DEFAULT_REPO } from '../constants';
-import { MinAgePhase } from '../types';
 import { i18nTexts } from '../i18n_texts';
 import {
   ifExistsNumberGreaterThanZero,
@@ -107,8 +107,8 @@ const numberOfShardsField = {
   serializer: serializers.stringToNumber,
 };
 
-const getPriorityField = (phase: 'hot' | 'warm' | 'cold' | 'frozen') => ({
-  defaultValue: defaultIndexPriority[phase] as any,
+const getPriorityField = (phase: PhaseExceptDelete) => ({
+  defaultValue: defaultIndexPriority[phase],
   label: i18nTexts.editPolicy.indexPriorityFieldLabel,
   validations: [
     {
@@ -119,7 +119,7 @@ const getPriorityField = (phase: 'hot' | 'warm' | 'cold' | 'frozen') => ({
   serializer: serializers.stringToNumber,
 });
 
-const getMinAgeField = (phase: MinAgePhase, defaultValue?: string) => ({
+const getMinAgeField = (phase: PhaseWithTiming, defaultValue?: string) => ({
   defaultValue,
   // By passing an empty array we make sure to *not* trigger the validation when the field value changes.
   // The validation will be triggered when the millisecond variant (in the _meta) is updated (in sync)

@@ -19,12 +19,15 @@ import {
   EuiEmptyPrompt,
 } from '@elastic/eui';
 
-import { Loading } from '../../../../../shared/loading';
 import { AppLogic } from '../../../../app_logic';
 import noSharedSourcesIcon from '../../../../assets/share_circle.svg';
+import {
+  WorkplaceSearchPageTemplate,
+  PersonalDashboardLayout,
+} from '../../../../components/layout';
 import { ContentSection } from '../../../../components/shared/content_section';
 import { ViewContentHeader } from '../../../../components/shared/view_content_header';
-import { CUSTOM_SERVICE_TYPE } from '../../../../constants';
+import { NAV, CUSTOM_SERVICE_TYPE } from '../../../../constants';
 import { SourceDataItem } from '../../../../types';
 import { SourcesLogic } from '../../sources_logic';
 
@@ -57,8 +60,6 @@ export const AddSourceList: React.FC = () => {
     initializeSources();
     return resetSourcesState;
   }, []);
-
-  if (dataLoading) return <Loading />;
 
   const hasSources = contentSources.length > 0;
   const showConfiguredSourcesList = configuredSources.find(
@@ -97,12 +98,24 @@ export const AddSourceList: React.FC = () => {
     filterConfiguredSources
   ) as SourceDataItem[];
 
+  const Layout = isOrganization ? WorkplaceSearchPageTemplate : PersonalDashboardLayout;
+
   return (
-    <>
-      <ViewContentHeader title={PAGE_TITLE} description={PAGE_DESCRIPTION} />
+    <Layout
+      pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE]}
+      pageViewTelemetry="add_source"
+      pageHeader={
+        dataLoading ? undefined : { pageTitle: PAGE_TITLE, description: PAGE_DESCRIPTION }
+      }
+      isLoading={dataLoading}
+    >
+      {!isOrganization && (
+        <div>
+          <ViewContentHeader title={PAGE_TITLE} description={PAGE_DESCRIPTION} />
+        </div>
+      )}
       {showConfiguredSourcesList || isOrganization ? (
         <ContentSection>
-          <EuiSpacer size="m" />
           <EuiFormRow>
             <EuiFieldSearch
               data-test-subj="FilterSourcesInput"
@@ -126,7 +139,7 @@ export const AddSourceList: React.FC = () => {
           <EuiFlexGroup justifyContent="center" alignItems="stretch">
             <EuiFlexItem>
               <EuiSpacer size="xl" />
-              <EuiPanel>
+              <EuiPanel hasShadow={false} color="subdued">
                 <EuiSpacer size="s" />
                 <EuiSpacer size="xxl" />
                 <EuiEmptyPrompt
@@ -142,6 +155,6 @@ export const AddSourceList: React.FC = () => {
           </EuiFlexGroup>
         </ContentSection>
       )}
-    </>
+    </Layout>
   );
 };

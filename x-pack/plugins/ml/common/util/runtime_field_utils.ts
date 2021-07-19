@@ -11,7 +11,7 @@ import type { RuntimeMappings } from '../types/fields';
 
 type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
 
-export function isRuntimeField(arg: unknown): arg is estypes.RuntimeField {
+export function isRuntimeField(arg: unknown): arg is estypes.MappingRuntimeField {
   return (
     ((isPopulatedObject(arg, ['type']) && Object.keys(arg).length === 1) ||
       (isPopulatedObject(arg, ['type', 'script']) &&

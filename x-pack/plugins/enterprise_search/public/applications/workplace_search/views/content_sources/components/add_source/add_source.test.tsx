@@ -6,14 +6,21 @@
  */
 
 import '../../../../../__mocks__/shallow_useeffect.mock';
-import { mockKibanaValues, setMockActions, setMockValues } from '../../../../../__mocks__';
+import {
+  mockKibanaValues,
+  setMockActions,
+  setMockValues,
+} from '../../../../../__mocks__/kea_logic';
 import { sourceConfigData } from '../../../../__mocks__/content_sources.mock';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { Loading } from '../../../../../shared/loading';
+import {
+  WorkplaceSearchPageTemplate,
+  PersonalDashboardLayout,
+} from '../../../../components/layout';
 
 import { AddSource } from './add_source';
 import { AddSourceSteps } from './add_source_logic';
@@ -64,11 +71,27 @@ describe('AddSourceList', () => {
     expect(setAddSourceStep).toHaveBeenCalledWith(AddSourceSteps.SaveConfigStep);
   });
 
-  it('handles loading state', () => {
-    setMockValues({ ...mockValues, dataLoading: true });
+  describe('layout', () => {
+    it('renders the default workplace search layout when on an organization view', () => {
+      setMockValues({ ...mockValues, isOrganization: true });
+      const wrapper = shallow(<AddSource sourceIndex={1} />);
+
+      expect(wrapper.type()).toEqual(WorkplaceSearchPageTemplate);
+    });
+
+    it('renders the personal dashboard layout when not in an organization', () => {
+      setMockValues({ ...mockValues, isOrganization: false });
+      const wrapper = shallow(<AddSource sourceIndex={1} />);
+
+      expect(wrapper.type()).toEqual(PersonalDashboardLayout);
+    });
+  });
+
+  it('renders a breadcrumb fallback while data is loading', () => {
+    setMockValues({ ...mockValues, dataLoading: true, sourceConfigData: {} });
     const wrapper = shallow(<AddSource sourceIndex={1} />);
 
-    expect(wrapper.find(Loading)).toHaveLength(1);
+    expect(wrapper.prop('pageChrome')).toEqual(['Sources', 'Add Source', '...']);
   });
 
   it('renders Config Completed step', () => {

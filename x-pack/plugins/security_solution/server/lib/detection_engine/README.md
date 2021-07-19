@@ -35,7 +35,7 @@ source ~/.zshrc
 Open your `kibana.dev.yml` file and add these lines:
 
 ```sh
-xpack.security_solution.signalsIndex: .siem-signals-${your user id}
+xpack.securitySolution.signalsIndex: .siem-signals-${your user id}
 ```
 
 Restart Kibana and ensure that you are using `--no-base-path` as changing the base path is a feature but will

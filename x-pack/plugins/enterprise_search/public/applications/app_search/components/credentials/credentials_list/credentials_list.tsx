@@ -32,17 +32,23 @@ export const CredentialsList: React.FC = () => {
 
   const columns: Array<EuiBasicTableColumn<ApiToken>> = [
     {
-      name: 'Name',
+      name: i18n.translate('xpack.enterpriseSearch.appSearch.credentials.list.nameTitle', {
+        defaultMessage: 'Name',
+      }),
       width: '12%',
       render: (token: ApiToken) => token.name,
     },
     {
-      name: 'Type',
+      name: i18n.translate('xpack.enterpriseSearch.appSearch.credentials.list.typeTitle', {
+        defaultMessage: 'Type',
+      }),
       width: '15%',
       render: (token: ApiToken) => TOKEN_TYPE_DISPLAY_NAMES[token.type],
     },
     {
-      name: 'Key',
+      name: i18n.translate('xpack.enterpriseSearch.appSearch.credentials.list.keyTitle', {
+        defaultMessage: 'Key',
+      }),
       width: '36%',
       className: 'eui-textBreakAll',
       render: (token: ApiToken) => {
@@ -71,12 +77,16 @@ export const CredentialsList: React.FC = () => {
       },
     },
     {
-      name: 'Modes',
+      name: i18n.translate('xpack.enterpriseSearch.appSearch.credentials.list.modesTitle', {
+        defaultMessage: 'Modes',
+      }),
       width: '10%',
       render: (token: ApiToken) => getModeDisplayText(token),
     },
     {
-      name: 'Engines',
+      name: i18n.translate('xpack.enterpriseSearch.appSearch.credentials.list.enginesTitle', {
+        defaultMessage: 'Engines',
+      }),
       width: '18%',
       render: (token: ApiToken) => getEnginesDisplayText(token),
     },
@@ -116,7 +126,7 @@ export const CredentialsList: React.FC = () => {
           title={
             <h2>
               {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.empty.title', {
-                defaultMessage: 'No API Keys have been created yet.',
+                defaultMessage: 'Create your first API key',
               })}
             </h2>
           }

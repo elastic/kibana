@@ -12,24 +12,24 @@ import { get } from 'lodash';
 // not typed yet
 // @ts-expect-error
 import { buildRequestBody } from './table/build_request_body';
-// @ts-expect-error
 import { handleErrorResponse } from './handle_error_response';
 // @ts-expect-error
 import { processBucket } from './table/process_bucket';
 
 import { createFieldsFetcher } from '../search_strategies/lib/fields_fetcher';
 import { extractFieldLabel } from '../../../common/fields_utils';
+
 import type {
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesRequestServices,
   VisTypeTimeseriesVisDataRequest,
 } from '../../types';
-import type { PanelSchema } from '../../../common/types';
+import type { Panel } from '../../../common/types';
 
 export async function getTableData(
   requestContext: VisTypeTimeseriesRequestHandlerContext,
   req: VisTypeTimeseriesVisDataRequest,
-  panel: PanelSchema,
+  panel: Panel,
   services: VisTypeTimeseriesRequestServices
 ) {
   const panelIndex = await services.cachedIndexPatternFetcher(panel.index_pattern);
@@ -71,6 +71,8 @@ export async function getTableData(
     uiRestrictions: capabilities.uiRestrictions,
   };
 
+  const handleError = handleErrorResponse(panel);
+
   try {
     const body = await buildRequestBody(
       req,
@@ -78,7 +80,8 @@ export async function getTableData(
       services.esQueryConfig,
       panelIndex,
       capabilities,
-      services.uiSettings
+      services.uiSettings,
+      () => services.buildSeriesMetaParams(panelIndex, Boolean(panel.use_kibana_indexes))
     );
 
     const [resp] = await searchStrategy.search(requestContext, req, [
@@ -107,13 +110,9 @@ export async function getTableData(
       series,
     };
   } catch (err) {
-    if (err.body) {
-      err.response = err.body;
-
-      return {
-        ...meta,
-        ...handleErrorResponse(panel)(err),
-      };
-    }
+    return {
+      ...meta,
+      ...handleError(err),
+    };
   }
 }

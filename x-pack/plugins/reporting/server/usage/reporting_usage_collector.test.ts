@@ -9,9 +9,9 @@ import * as Rx from 'rxjs';
 import sinon from 'sinon';
 import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
-import { ReportingConfig, ReportingCore } from '../';
+import { ReportingCore } from '../';
 import { getExportTypesRegistry } from '../lib/export_types_registry';
-import { createMockConfig, createMockConfigSchema, createMockReportingCore } from '../test_helpers';
+import { createMockConfigSchema, createMockReportingCore } from '../test_helpers';
 import { ReportingSetupDeps } from '../types';
 import { FeaturesAvailability } from './';
 import {
@@ -64,11 +64,9 @@ const getMockFetchClients = (resp: any) => {
   return fetchParamsMock;
 };
 describe('license checks', () => {
-  let mockConfig: ReportingConfig;
   let mockCore: ReportingCore;
   beforeAll(async () => {
-    mockConfig = createMockConfig(createMockConfigSchema());
-    mockCore = await createMockReportingCore(mockConfig);
+    mockCore = await createMockReportingCore(createMockConfigSchema());
   });
 
   describe('with a basic license', () => {
@@ -185,12 +183,10 @@ describe('license checks', () => {
 });
 
 describe('data modeling', () => {
-  let mockConfig: ReportingConfig;
   let mockCore: ReportingCore;
   let collectorFetchContext: CollectorFetchContext;
   beforeAll(async () => {
-    mockConfig = createMockConfig(createMockConfigSchema());
-    mockCore = await createMockReportingCore(mockConfig);
+    mockCore = await createMockReportingCore(createMockConfigSchema());
   });
   test('with normal looking usage data', async () => {
     const plugins = getPluginsMock();
@@ -456,8 +452,7 @@ describe('data modeling', () => {
 
 describe('Ready for collection observable', () => {
   test('converts observable to promise', async () => {
-    const mockConfig = createMockConfig(createMockConfigSchema());
-    const mockReporting = await createMockReportingCore(mockConfig);
+    const mockReporting = await createMockReportingCore(createMockConfigSchema());
 
     const usageCollection = getMockUsageCollection();
     const makeCollectorSpy = sinon.spy();

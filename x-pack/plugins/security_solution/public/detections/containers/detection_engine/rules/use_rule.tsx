@@ -6,8 +6,8 @@
  */
 
 import { useEffect, useState } from 'react';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
-import { errorToToaster, useStateToaster } from '../../../../common/components/toasters';
 import { fetchRuleById } from './api';
 import { transformInput } from './transforms';
 import * as i18n from './translations';
@@ -24,7 +24,7 @@ export type ReturnRule = [boolean, Rule | null];
 export const useRule = (id: string | undefined): ReturnRule => {
   const [rule, setRule] = useState<Rule | null>(null);
   const [loading, setLoading] = useState(true);
-  const [, dispatchToaster] = useStateToaster();
+  const { addError } = useAppToasts();
 
   useEffect(() => {
     let isSubscribed = true;
@@ -45,7 +45,7 @@ export const useRule = (id: string | undefined): ReturnRule => {
       } catch (error) {
         if (isSubscribed) {
           setRule(null);
-          errorToToaster({ title: i18n.RULE_AND_TIMELINE_FETCH_FAILURE, error, dispatchToaster });
+          addError(error, { title: i18n.RULE_AND_TIMELINE_FETCH_FAILURE });
         }
       }
       if (isSubscribed) {
@@ -59,7 +59,7 @@ export const useRule = (id: string | undefined): ReturnRule => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [id, dispatchToaster]);
+  }, [id, addError]);
 
   return [loading, rule];
 };

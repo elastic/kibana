@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { RoleMappingsRouter } from './role_mappings_router';
+export { RoleMappings } from './role_mappings';

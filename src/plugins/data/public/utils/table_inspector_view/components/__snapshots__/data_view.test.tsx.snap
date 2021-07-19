@@ -176,27 +176,27 @@ exports[`Inspector Data View component should render empty state 1`] = `
       <div
         className="euiEmptyPrompt"
       >
+        <EuiTitle
+          size="m"
+        >
+          <h2
+            className="euiTitle euiTitle--medium"
+          >
+            <FormattedMessage
+              defaultMessage="No data available"
+              id="data.inspector.table.noDataAvailableTitle"
+              values={Object {}}
+            >
+              No data available
+            </FormattedMessage>
+          </h2>
+        </EuiTitle>
         <EuiTextColor
           color="subdued"
         >
           <span
             className="euiTextColor euiTextColor--subdued"
           >
-            <EuiTitle
-              size="m"
-            >
-              <h2
-                className="euiTitle euiTitle--medium"
-              >
-                <FormattedMessage
-                  defaultMessage="No data available"
-                  id="data.inspector.table.noDataAvailableTitle"
-                  values={Object {}}
-                >
-                  No data available
-                </FormattedMessage>
-              </h2>
-            </EuiTitle>
             <EuiSpacer
               size="m"
             >
@@ -718,11 +718,13 @@ exports[`Inspector Data View component should render single table without select
                             >
                               <EuiIcon
                                 className="euiButtonContent__icon"
+                                color="inherit"
                                 size="m"
                                 type="arrowDown"
                               >
                                 <span
                                   className="euiButtonContent__icon"
+                                  color="inherit"
                                   data-euiicon-type="arrowDown"
                                   size="m"
                                 />
@@ -996,6 +998,7 @@ exports[`Inspector Data View component should render single table without select
                                         <EuiButtonContent
                                           className="euiButtonEmpty__content"
                                           iconSide="right"
+                                          iconSize="s"
                                           iconType="arrowDown"
                                           textProps={
                                             Object {
@@ -1008,13 +1011,15 @@ exports[`Inspector Data View component should render single table without select
                                           >
                                             <EuiIcon
                                               className="euiButtonContent__icon"
-                                              size="m"
+                                              color="inherit"
+                                              size="s"
                                               type="arrowDown"
                                             >
                                               <span
                                                 className="euiButtonContent__icon"
+                                                color="inherit"
                                                 data-euiicon-type="arrowDown"
-                                                size="m"
+                                                size="s"
                                               />
                                             </EuiIcon>
                                             <span
@@ -1066,7 +1071,6 @@ exports[`Inspector Data View component should render single table without select
                       <tr>
                         <EuiTableHeaderCell
                           align="left"
-                          allowNeutralSort={true}
                           data-test-subj="tableHeaderCell_1_0"
                           isSorted={false}
                           key="_data_h_1_0"
@@ -1091,40 +1095,34 @@ exports[`Inspector Data View component should render single table without select
                               onClick={[Function]}
                               type="button"
                             >
-                              <span
+                              <CellContents
                                 className="euiTableCellContent"
+                                isSorted={false}
+                                showSortMsg={true}
                               >
-                                <EuiInnerText>
-                                  <EuiI18n
-                                    default="{innerText}; Sorted in {ariaSortValue} order"
-                                    token="euiTableHeaderCell.titleTextWithSort"
-                                    values={
-                                      Object {
-                                        "ariaSortValue": "none",
-                                        "innerText": undefined,
-                                      }
-                                    }
-                                  >
-                                    <span
-                                      className="euiTableCellContent__text"
-                                    >
-                                      column1
-                                    </span>
-                                  </EuiI18n>
-                                </EuiInnerText>
-                                <EuiScreenReaderOnly>
-                                  <span
-                                    className="euiScreenReaderOnly"
-                                  >
+                                <span
+                                  className="euiTableCellContent"
+                                >
+                                  <EuiInnerText>
                                     <EuiI18n
-                                      default="Click to sort in ascending order"
-                                      token="euiTableHeaderCell.clickForAscending"
+                                      default="{innerText}; {description}"
+                                      token="euiTableHeaderCell.titleTextWithDesc"
+                                      values={
+                                        Object {
+                                          "description": undefined,
+                                          "innerText": undefined,
+                                        }
+                                      }
                                     >
-                                      Click to sort in ascending order
+                                      <span
+                                        className="euiTableCellContent__text"
+                                      >
+                                        column1
+                                      </span>
                                     </EuiI18n>
-                                  </span>
-                                </EuiScreenReaderOnly>
-                              </span>
+                                  </EuiInnerText>
+                                </span>
+                              </CellContents>
                             </button>
                           </th>
                         </EuiTableHeaderCell>
@@ -1171,7 +1169,6 @@ exports[`Inspector Data View component should render single table without select
                               >
                                 <EuiFlexGroup
                                   alignItems="center"
-                                  className=""
                                   gutterSize="s"
                                   key=".0"
                                   responsive={false}
@@ -1322,6 +1319,7 @@ exports[`Inspector Data View component should render single table without select
                                     <EuiButtonContent
                                       className="euiButtonEmpty__content"
                                       iconSide="right"
+                                      iconSize="s"
                                       iconType="arrowDown"
                                       textProps={
                                         Object {
@@ -1334,13 +1332,15 @@ exports[`Inspector Data View component should render single table without select
                                       >
                                         <EuiIcon
                                           className="euiButtonContent__icon"
-                                          size="m"
+                                          color="inherit"
+                                          size="s"
                                           type="arrowDown"
                                         >
                                           <span
                                             className="euiButtonContent__icon"
+                                            color="inherit"
                                             data-euiicon-type="arrowDown"
-                                            size="m"
+                                            size="s"
                                           />
                                         </EuiIcon>
                                         <span
@@ -1411,12 +1411,14 @@ exports[`Inspector Data View component should render single table without select
                                       <EuiIcon
                                         aria-hidden="true"
                                         className="euiButtonIcon__icon"
+                                        color="inherit"
                                         size="m"
                                         type="arrowLeft"
                                       >
                                         <span
                                           aria-hidden="true"
                                           className="euiButtonIcon__icon"
+                                          color="inherit"
                                           data-euiicon-type="arrowLeft"
                                           size="m"
                                         />
@@ -1487,6 +1489,7 @@ exports[`Inspector Data View component should render single table without select
                                               <EuiButtonContent
                                                 className="euiButtonEmpty__content"
                                                 iconSide="left"
+                                                iconSize="m"
                                                 textProps={
                                                   Object {
                                                     "className": "euiButtonEmpty__text",
@@ -1543,12 +1546,14 @@ exports[`Inspector Data View component should render single table without select
                                       <EuiIcon
                                         aria-hidden="true"
                                         className="euiButtonIcon__icon"
+                                        color="inherit"
                                         size="m"
                                         type="arrowRight"
                                       >
                                         <span
                                           aria-hidden="true"
                                           className="euiButtonIcon__icon"
+                                          color="inherit"
                                           data-euiicon-type="arrowRight"
                                           size="m"
                                         />
@@ -2038,6 +2043,7 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                                 <EuiButtonContent
                                   className="euiButtonEmpty__content"
                                   iconSide="right"
+                                  iconSize="m"
                                   iconType="arrowDown"
                                   textProps={
                                     Object {
@@ -2050,11 +2056,13 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                                   >
                                     <EuiIcon
                                       className="euiButtonContent__icon"
+                                      color="inherit"
                                       size="m"
                                       type="arrowDown"
                                     >
                                       <span
                                         className="euiButtonContent__icon"
+                                        color="inherit"
                                         data-euiicon-type="arrowDown"
                                         size="m"
                                       />
@@ -2247,11 +2255,13 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                             >
                               <EuiIcon
                                 className="euiButtonContent__icon"
+                                color="inherit"
                                 size="m"
                                 type="arrowDown"
                               >
                                 <span
                                   className="euiButtonContent__icon"
+                                  color="inherit"
                                   data-euiicon-type="arrowDown"
                                   size="m"
                                 />
@@ -2549,6 +2559,7 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                                         <EuiButtonContent
                                           className="euiButtonEmpty__content"
                                           iconSide="right"
+                                          iconSize="s"
                                           iconType="arrowDown"
                                           textProps={
                                             Object {
@@ -2561,13 +2572,15 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                                           >
                                             <EuiIcon
                                               className="euiButtonContent__icon"
-                                              size="m"
+                                              color="inherit"
+                                              size="s"
                                               type="arrowDown"
                                             >
                                               <span
                                                 className="euiButtonContent__icon"
+                                                color="inherit"
                                                 data-euiicon-type="arrowDown"
-                                                size="m"
+                                                size="s"
                                               />
                                             </EuiIcon>
                                             <span
@@ -2619,7 +2632,6 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                       <tr>
                         <EuiTableHeaderCell
                           align="left"
-                          allowNeutralSort={true}
                           data-test-subj="tableHeaderCell_1_0"
                           isSorted={false}
                           key="_data_h_1_0"
@@ -2644,41 +2656,35 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                               onClick={[Function]}
                               type="button"
                             >
-                              <span
+                              <CellContents
                                 className="euiTableCellContent"
+                                isSorted={false}
+                                showSortMsg={true}
                               >
-                                <EuiInnerText>
-                                  <EuiI18n
-                                    default="{innerText}; Sorted in {ariaSortValue} order"
-                                    token="euiTableHeaderCell.titleTextWithSort"
-                                    values={
-                                      Object {
-                                        "ariaSortValue": "none",
-                                        "innerText": "column1",
-                                      }
-                                    }
-                                  >
-                                    <span
-                                      className="euiTableCellContent__text"
-                                      title="column1"
-                                    >
-                                      column1
-                                    </span>
-                                  </EuiI18n>
-                                </EuiInnerText>
-                                <EuiScreenReaderOnly>
-                                  <span
-                                    className="euiScreenReaderOnly"
-                                  >
+                                <span
+                                  className="euiTableCellContent"
+                                >
+                                  <EuiInnerText>
                                     <EuiI18n
-                                      default="Click to sort in ascending order"
-                                      token="euiTableHeaderCell.clickForAscending"
+                                      default="{innerText}; {description}"
+                                      token="euiTableHeaderCell.titleTextWithDesc"
+                                      values={
+                                        Object {
+                                          "description": undefined,
+                                          "innerText": "column1",
+                                        }
+                                      }
                                     >
-                                      Click to sort in ascending order
+                                      <span
+                                        className="euiTableCellContent__text"
+                                        title="column1"
+                                      >
+                                        column1
+                                      </span>
                                     </EuiI18n>
-                                  </span>
-                                </EuiScreenReaderOnly>
-                              </span>
+                                  </EuiInnerText>
+                                </span>
+                              </CellContents>
                             </button>
                           </th>
                         </EuiTableHeaderCell>
@@ -2725,7 +2731,6 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                               >
                                 <EuiFlexGroup
                                   alignItems="center"
-                                  className=""
                                   gutterSize="s"
                                   key=".0"
                                   responsive={false}
@@ -2876,6 +2881,7 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                                     <EuiButtonContent
                                       className="euiButtonEmpty__content"
                                       iconSide="right"
+                                      iconSize="s"
                                       iconType="arrowDown"
                                       textProps={
                                         Object {
@@ -2888,13 +2894,15 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                                       >
                                         <EuiIcon
                                           className="euiButtonContent__icon"
-                                          size="m"
+                                          color="inherit"
+                                          size="s"
                                           type="arrowDown"
                                         >
                                           <span
                                             className="euiButtonContent__icon"
+                                            color="inherit"
                                             data-euiicon-type="arrowDown"
-                                            size="m"
+                                            size="s"
                                           />
                                         </EuiIcon>
                                         <span
@@ -2965,12 +2973,14 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                                       <EuiIcon
                                         aria-hidden="true"
                                         className="euiButtonIcon__icon"
+                                        color="inherit"
                                         size="m"
                                         type="arrowLeft"
                                       >
                                         <span
                                           aria-hidden="true"
                                           className="euiButtonIcon__icon"
+                                          color="inherit"
                                           data-euiicon-type="arrowLeft"
                                           size="m"
                                         />
@@ -3041,6 +3051,7 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                                               <EuiButtonContent
                                                 className="euiButtonEmpty__content"
                                                 iconSide="left"
+                                                iconSize="m"
                                                 textProps={
                                                   Object {
                                                     "className": "euiButtonEmpty__text",
@@ -3097,12 +3108,14 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                                       <EuiIcon
                                         aria-hidden="true"
                                         className="euiButtonIcon__icon"
+                                        color="inherit"
                                         size="m"
                                         type="arrowRight"
                                       >
                                         <span
                                           aria-hidden="true"
                                           className="euiButtonIcon__icon"
+                                          color="inherit"
                                           data-euiicon-type="arrowRight"
                                           size="m"
                                         />

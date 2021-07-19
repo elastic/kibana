@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldNumber } from '@elastic/eui';
-import { useDebounceWithOptions } from '../helpers';
+import { useDebounceWithOptions } from '../../../../shared_components';
 
 export const ValuesInput = ({
   value,

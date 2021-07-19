@@ -110,6 +110,12 @@ export interface CoreUsageStats {
   'apiCalls.savedObjectsExport.namespace.custom.kibanaRequest.no'?: number;
   'apiCalls.savedObjectsExport.allTypesSelected.yes'?: number;
   'apiCalls.savedObjectsExport.allTypesSelected.no'?: number;
+  // Saved Objects Repository counters
+  'savedObjectsRepository.resolvedOutcome.exactMatch'?: number;
+  'savedObjectsRepository.resolvedOutcome.aliasMatch'?: number;
+  'savedObjectsRepository.resolvedOutcome.conflict'?: number;
+  'savedObjectsRepository.resolvedOutcome.notFound'?: number;
+  'savedObjectsRepository.resolvedOutcome.total'?: number;
 }
 
 /**
@@ -121,6 +127,18 @@ export interface CoreUsageData extends CoreUsageStats {
   services: CoreServicesUsageData;
   environment: CoreEnvironmentUsageData;
 }
+
+/**
+ * Type describing Core's usage data payload
+ * @internal
+ */
+export type ConfigUsageData = Record<string, any | any[]>;
+
+/**
+ * Type describing Core's usage data payload
+ * @internal
+ */
+export type ExposedConfigsToUsage = Map<string, Record<string, boolean>>;
 
 /**
  * Usage data from Core services
@@ -138,6 +156,12 @@ export interface CoreServicesUsageData {
       storeSizeBytes: number;
       primaryStoreSizeBytes: number;
     }[];
+    legacyUrlAliases: {
+      activeCount: number;
+      inactiveCount: number;
+      disabledCount: number;
+      totalCount: number;
+    };
   };
 }
 
@@ -212,6 +236,13 @@ export interface CoreConfigUsageData {
       supportedProtocols: string[];
       clientAuthentication: 'none' | 'optional' | 'required';
     };
+    securityResponseHeaders: {
+      strictTransportSecurity: string;
+      xContentTypeOptions: string;
+      referrerPolicy: string;
+      permissionsPolicyConfigured: boolean;
+      disableEmbedding: boolean;
+    };
   };
 
   logging: {
@@ -235,6 +266,11 @@ export interface CoreConfigUsageData {
   // uiSettings: {
   //   overridesCount: number;
   // };
+
+  deprecatedKeys: {
+    set: string[];
+    unset: string[];
+  };
 }
 
 /** @internal */
@@ -263,4 +299,5 @@ export interface CoreUsageDataStart {
    * @internal
    * */
   getCoreUsageData(): Promise<CoreUsageData>;
+  getConfigsUsageData(): Promise<ConfigUsageData>;
 }

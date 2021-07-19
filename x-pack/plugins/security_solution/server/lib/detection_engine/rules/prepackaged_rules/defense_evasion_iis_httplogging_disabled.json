@@ -9,11 +9,11 @@
     "logs-endpoint.events.*",
     "logs-windows.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License v2",
   "max_signals": 33,
   "name": "IIS HTTP Logging Disabled",
-  "query": "event.category:process and event.type:(start or process_started) and (process.name:appcmd.exe or process.pe.original_file_name:appcmd.exe) and process.args:/dontLog\\:\\\"True\\\" and not process.parent.name:iissetup.exe",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  (process.name : \"appcmd.exe\" or process.pe.original_file_name == \"appcmd.exe\") and\n  process.args : \"/dontLog*:*True\" and\n  not process.parent.name : \"iissetup.exe\"\n",
   "risk_score": 73,
   "rule_id": "ebf1adea-ccf2-4943-8b96-7ab11ca173a5",
   "severity": "high",
@@ -42,6 +42,6 @@
     }
   ],
   "timestamp_override": "event.ingested",
-  "type": "query",
-  "version": 4
+  "type": "eql",
+  "version": 5
 }

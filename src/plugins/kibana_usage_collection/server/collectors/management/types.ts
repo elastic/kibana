@@ -22,17 +22,19 @@ export interface UsageStats {
   /**
    * non-sensitive settings
    */
+  'bfetch:disableCompression': boolean;
   'autocomplete:useTimeRange': boolean;
   'search:timeout': number;
   'visualization:visualize:legacyChartsLibrary': boolean;
+  'visualization:visualize:legacyPieChartsLibrary': boolean;
   'doc_table:legacy': boolean;
   'discover:modifyColumnsOnSwitch': boolean;
   'discover:searchFieldsFromSource': boolean;
+  'discover:showMultiFields': boolean;
   'discover:maxDocFieldsDisplayed': number;
   'securitySolution:rulesTableRefresh': string;
   'apm:enableSignificantTerms': boolean;
   'apm:enableServiceOverview': boolean;
-  'observability:enableAlertingExperience': boolean;
   'observability:enableInspectEsQueries': boolean;
   'visualize:enableLabs': boolean;
   'visualization:heatmap:maxBuckets': number;
@@ -119,5 +121,9 @@ export interface UsageStats {
   'banners:placement': string;
   'banners:textColor': string;
   'banners:backgroundColor': string;
-  'labs:presentation:unifiedToolbar': boolean;
+  'labs:canvas:enable_ui': boolean;
+  'labs:canvas:useDataService': boolean;
+  'labs:presentation:timeToPresent': boolean;
+  'labs:dashboard:enable_ui': boolean;
+  'labs:dashboard:deferBelowFold': boolean;
 }

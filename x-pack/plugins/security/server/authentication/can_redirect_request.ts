@@ -7,7 +7,8 @@
 
 import type { KibanaRequest } from 'src/core/server';
 
-const ROUTE_TAG_API = 'api';
+import { ROUTE_TAG_API, ROUTE_TAG_CAN_REDIRECT } from '../routes/tags';
+
 const KIBANA_XSRF_HEADER = 'kbn-xsrf';
 const KIBANA_VERSION_HEADER = 'kbn-version';
 
@@ -24,9 +25,9 @@ export function canRedirectRequest(request: KibanaRequest) {
 
   const isApiRoute =
     route.options.tags.includes(ROUTE_TAG_API) ||
-    (route.path.startsWith('/api/') && route.path !== '/api/security/logout') ||
+    route.path.startsWith('/api/') ||
     route.path.startsWith('/internal/');
   const isAjaxRequest = hasVersionHeader || hasXsrfHeader;
 
-  return !isApiRoute && !isAjaxRequest;
+  return !isAjaxRequest && (!isApiRoute || route.options.tags.includes(ROUTE_TAG_CAN_REDIRECT));
 }

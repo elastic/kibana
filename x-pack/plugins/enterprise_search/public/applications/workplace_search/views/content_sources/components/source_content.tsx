@@ -31,12 +31,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { Loading } from '../../../../shared/loading';
 import { TruncatedContent } from '../../../../shared/truncate';
 import { ComponentLoader } from '../../../components/shared/component_loader';
 import { TablePaginationBar } from '../../../components/shared/table_pagination_bar';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
-import { CUSTOM_SERVICE_TYPE } from '../../../constants';
+import { NAV, CUSTOM_SERVICE_TYPE } from '../../../constants';
 import { CUSTOM_SOURCE_DOCS_URL } from '../../../routes';
 import { SourceContentItem } from '../../../types';
 import {
@@ -51,17 +50,16 @@ import {
 } from '../constants';
 import { SourceLogic } from '../source_logic';
 
+import { SourceLayout } from './source_layout';
+
 const MAX_LENGTH = 28;
 
 export const SourceContent: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
-  const {
-    setActivePage,
-    searchContentSourceDocuments,
-    resetSourceState,
-    setContentFilterValue,
-  } = useActions(SourceLogic);
+  const { setActivePage, searchContentSourceDocuments, setContentFilterValue } = useActions(
+    SourceLogic
+  );
 
   const {
     contentSource: { id, serviceType, urlField, titleField, urlFieldIsLinkable, isFederatedSource },
@@ -70,19 +68,12 @@ export const SourceContent: React.FC = () => {
     },
     contentItems,
     contentFilterValue,
-    dataLoading,
     sectionLoading,
   } = useValues(SourceLogic);
 
   useEffect(() => {
-    return resetSourceState;
-  }, []);
-
-  useEffect(() => {
     searchContentSourceDocuments(id);
   }, [contentFilterValue, activePage]);
-
-  if (dataLoading) return <Loading />;
 
   const showPagination = totalPages > 1;
   const hasItems = totalItems > 0;
@@ -106,7 +97,7 @@ export const SourceContent: React.FC = () => {
   const isCustomSource = serviceType === CUSTOM_SERVICE_TYPE;
 
   const emptyState = (
-    <EuiPanel>
+    <EuiPanel hasShadow={false} color="subdued">
       <EuiEmptyPrompt
         title={<h2>{emptyMessage}</h2>}
         iconType="documents"
@@ -146,7 +137,7 @@ export const SourceContent: React.FC = () => {
             <TruncatedContent tooltipType="title" content={url.toString()} length={MAX_LENGTH} />
           )}
           {urlFieldIsLinkable && (
-            <EuiLink target="_blank" href={url}>
+            <EuiLink target="_blank" href={url.toString()}>
               <TruncatedContent tooltipType="title" content={url.toString()} length={MAX_LENGTH} />
             </EuiLink>
           )}
@@ -200,7 +191,7 @@ export const SourceContent: React.FC = () => {
   );
 
   return (
-    <>
+    <SourceLayout pageChrome={[NAV.CONTENT]} pageViewTelemetry="source_overview">
       <ViewContentHeader title={SOURCE_CONTENT_TITLE} />
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
@@ -226,6 +217,6 @@ export const SourceContent: React.FC = () => {
       <EuiSpacer size="xl" />
       {sectionLoading && <ComponentLoader text={CONTENT_LOADING_TEXT} />}
       {!sectionLoading && (hasItems ? contentTable : emptyState)}
-    </>
+    </SourceLayout>
   );
 };

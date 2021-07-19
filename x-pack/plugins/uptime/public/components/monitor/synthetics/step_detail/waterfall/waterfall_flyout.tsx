@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, ReactNode } from 'react';
 
-import styled from 'styled-components';
+import styled, { StyledComponent } from 'styled-components';
 
 import {
   EuiFlyout,
@@ -49,7 +49,11 @@ export const RESPONSE_HEADERS = i18n.translate(
   }
 );
 
-const FlyoutContainer = styled(EuiFlyout)`
+// TODO: EUI team follow up on complex types and styled-components `styled`
+// https://github.com/elastic/eui/issues/4855
+const FlyoutContainer: StyledComponent<typeof EuiFlyout, {}, { children?: ReactNode }> = styled(
+  EuiFlyout
+)`
   z-index: ${(props) => props.theme.eui.euiZLevel5};
 `;
 
@@ -77,7 +81,7 @@ export const WaterfallFlyout = ({
     return null;
   }
 
-  const { url, details, certificates, requestHeaders, responseHeaders } = flyoutData;
+  const { x, url, details, certificates, requestHeaders, responseHeaders } = flyoutData;
 
   trackMetric({ metric: 'waterfall_flyout', metricType: METRIC_TYPE.CLICK });
 
@@ -93,7 +97,13 @@ export const WaterfallFlyout = ({
           <EuiTitle size="s">
             <h2 id="flyoutTitle">
               <EuiFlexItem>
-                <MiddleTruncatedText text={url} url={url} ariaLabel={url} />
+                <MiddleTruncatedText
+                  index={x + 1}
+                  text={url}
+                  url={url}
+                  ariaLabel={url}
+                  highestIndex={x + 1}
+                />
               </EuiFlexItem>
             </h2>
           </EuiTitle>

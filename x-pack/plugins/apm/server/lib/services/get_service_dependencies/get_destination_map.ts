@@ -21,7 +21,8 @@ import {
   SPAN_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { environmentQuery, rangeQuery } from '../../../../server/utils/queries';
+import { rangeQuery } from '../../../../../observability/server';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { withApmSpan } from '../../../utils/with_apm_span';
@@ -38,56 +39,54 @@ export const getDestinationMap = ({
   return withApmSpan('get_service_destination_map', async () => {
     const { start, end, apmEventClient } = setup;
 
-    const response = await withApmSpan('get_exit_span_samples', async () =>
-      apmEventClient.search({
-        apm: {
-          events: [ProcessorEvent.span],
-        },
-        body: {
-          size: 0,
-          query: {
-            bool: {
-              filter: [
-                { term: { [SERVICE_NAME]: serviceName } },
-                { exists: { field: SPAN_DESTINATION_SERVICE_RESOURCE } },
-                ...rangeQuery(start, end),
-                ...environmentQuery(environment),
-              ],
-            },
+    const response = await apmEventClient.search('get_exit_span_samples', {
+      apm: {
+        events: [ProcessorEvent.span],
+      },
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              { term: { [SERVICE_NAME]: serviceName } },
+              { exists: { field: SPAN_DESTINATION_SERVICE_RESOURCE } },
+              ...rangeQuery(start, end),
+              ...environmentQuery(environment),
+            ],
           },
-          aggs: {
-            connections: {
-              composite: {
-                size: 1000,
-                sources: asMutableArray([
-                  {
-                    [SPAN_DESTINATION_SERVICE_RESOURCE]: {
-                      terms: { field: SPAN_DESTINATION_SERVICE_RESOURCE },
+        },
+        aggs: {
+          connections: {
+            composite: {
+              size: 1000,
+              sources: asMutableArray([
+                {
+                  [SPAN_DESTINATION_SERVICE_RESOURCE]: {
+                    terms: { field: SPAN_DESTINATION_SERVICE_RESOURCE },
+                  },
+                },
+                // make sure we get samples for both successful
+                // and failed calls
+                { [EVENT_OUTCOME]: { terms: { field: EVENT_OUTCOME } } },
+              ] as const),
+            },
+            aggs: {
+              sample: {
+                top_hits: {
+                  size: 1,
+                  _source: [SPAN_TYPE, SPAN_SUBTYPE, SPAN_ID],
+                  sort: [
+                    {
+                      '@timestamp': 'desc' as const,
                     },
-                  },
-                  // make sure we get samples for both successful
-                  // and failed calls
-                  { [EVENT_OUTCOME]: { terms: { field: EVENT_OUTCOME } } },
-                ] as const),
-              },
-              aggs: {
-                sample: {
-                  top_hits: {
-                    size: 1,
-                    _source: [SPAN_TYPE, SPAN_SUBTYPE, SPAN_ID],
-                    sort: [
-                      {
-                        '@timestamp': 'desc' as const,
-                      },
-                    ],
-                  },
+                  ],
                 },
               },
             },
           },
         },
-      })
-    );
+      },
+    });
 
     const outgoingConnections =
       response.aggregations?.connections.buckets.map((bucket) => {
@@ -103,38 +102,37 @@ export const getDestinationMap = ({
         };
       }) ?? [];
 
-    const transactionResponse = await withApmSpan(
+    const transactionResponse = await apmEventClient.search(
       'get_transactions_for_exit_spans',
-      () =>
-        apmEventClient.search({
-          apm: {
-            events: [ProcessorEvent.transaction],
-          },
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  {
-                    terms: {
-                      [PARENT_ID]: outgoingConnections.map(
-                        (connection) => connection[SPAN_ID]
-                      ),
-                    },
+      {
+        apm: {
+          events: [ProcessorEvent.transaction],
+        },
+        body: {
+          query: {
+            bool: {
+              filter: [
+                {
+                  terms: {
+                    [PARENT_ID]: outgoingConnections.map(
+                      (connection) => connection[SPAN_ID]
+                    ),
                   },
-                  ...rangeQuery(start, end),
-                ],
-              },
+                },
+                ...rangeQuery(start, end),
+              ],
             },
-            size: outgoingConnections.length,
-            docvalue_fields: asMutableArray([
-              SERVICE_NAME,
-              SERVICE_ENVIRONMENT,
-              AGENT_NAME,
-              PARENT_ID,
-            ] as const),
-            _source: false,
           },
-        })
+          size: outgoingConnections.length,
+          docvalue_fields: asMutableArray([
+            SERVICE_NAME,
+            SERVICE_ENVIRONMENT,
+            AGENT_NAME,
+            PARENT_ID,
+          ] as const),
+          _source: false,
+        },
+      }
     );
 
     const incomingConnections = transactionResponse.hits.hits.map((hit) => ({

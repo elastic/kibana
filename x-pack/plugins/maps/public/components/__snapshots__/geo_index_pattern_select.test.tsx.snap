@@ -5,22 +5,19 @@ exports[`should render 1`] = `
   <EuiFormRow
     describedByIds={Array []}
     display="row"
+    error="Index pattern does not contain any geospatial fields"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
+    isInvalid={true}
     label="Index pattern"
     labelType="label"
   >
     <MockIndexPatternSelect
-      fieldTypes={
-        Array [
-          "geo_point",
-          "geo_shape",
-        ]
-      }
       indexPatternId="indexPatternId"
       isClearable={false}
       isDisabled={false}
+      isInvalid={true}
       onChange={[Function]}
       onNoIndexPatterns={[Function]}
       placeholder="Select index pattern"
@@ -33,7 +30,7 @@ exports[`should render no index pattern warning when there are no matching index
 <Fragment>
   <EuiCallOut
     color="warning"
-    title="Couldn't find any index patterns with geospatial fields"
+    title="Couldn't find any index patterns"
   >
     <p>
       <FormattedMessage
@@ -45,20 +42,15 @@ exports[`should render no index pattern warning when there are no matching index
         href="abc//app/management/kibana/indexPatterns"
       >
         <FormattedMessage
-          defaultMessage="create an index pattern"
+          defaultMessage="Create an index pattern."
           id="xpack.maps.noIndexPattern.doThisLinkTextDescription"
           values={Object {}}
         />
       </EuiLink>
-      <FormattedMessage
-        defaultMessage=" with geospatial fields."
-        id="xpack.maps.noIndexPattern.doThisSuffixDescription"
-        values={Object {}}
-      />
     </p>
     <p>
       <FormattedMessage
-        defaultMessage="Don't have any geospatial data sets? "
+        defaultMessage="Don't have any data? "
         id="xpack.maps.noIndexPattern.hintDescription"
         values={Object {}}
       />
@@ -79,22 +71,19 @@ exports[`should render no index pattern warning when there are no matching index
   <EuiFormRow
     describedByIds={Array []}
     display="row"
+    error="Index pattern does not contain any geospatial fields"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
+    isInvalid={true}
     label="Index pattern"
     labelType="label"
   >
     <MockIndexPatternSelect
-      fieldTypes={
-        Array [
-          "geo_point",
-          "geo_shape",
-        ]
-      }
       indexPatternId="indexPatternId"
       isClearable={false}
       isDisabled={true}
+      isInvalid={true}
       onChange={[Function]}
       onNoIndexPatterns={[Function]}
       placeholder="Select index pattern"

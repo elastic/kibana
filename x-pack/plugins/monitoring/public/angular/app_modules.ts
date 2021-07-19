@@ -42,6 +42,8 @@ import { licenseProvider } from '../services/license';
 // @ts-ignore
 import { titleProvider } from '../services/title';
 // @ts-ignore
+import { enableAlertsModalProvider } from '../services/enable_alerts_modal';
+// @ts-ignore
 import { monitoringMlListingProvider } from '../directives/elasticsearch/ml_job_listing';
 // @ts-ignore
 import { monitoringMainProvider } from '../directives/main';
@@ -142,6 +144,9 @@ function createMonitoringAppServices() {
     .service('features', function (Private: IPrivate) {
       return Private(featuresProvider);
     })
+    .service('enableAlertsModal', function (Private: IPrivate) {
+      return Private(enableAlertsModalProvider);
+    })
     .service('license', function (Private: IPrivate) {
       return Private(licenseProvider);
     })
@@ -231,6 +236,11 @@ function createHrefModule(core: CoreStart) {
               const url = getSafeForExternalLink(val as string);
               $attr.$set('href', core.http.basePath.prepend(url));
             }
+          });
+
+          _$scope.$on('$locationChangeSuccess', () => {
+            const url = getSafeForExternalLink($attr.href as string);
+            $attr.$set('href', core.http.basePath.prepend(url));
           });
         },
       },

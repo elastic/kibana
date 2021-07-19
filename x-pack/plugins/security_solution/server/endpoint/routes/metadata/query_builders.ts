@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'kibana/server';
+import type { estypes } from '@elastic/elasticsearch';
+import { metadataCurrentIndexPattern } from '../../../../common/endpoint/constants';
+import { KibanaRequest } from '../../../../../../../src/core/server';
 import { esKuery } from '../../../../../../../src/plugins/data/server';
-import { EndpointAppContext, MetadataQueryStrategy } from '../../types';
+import { EndpointAppContext } from '../../types';
 
 export interface QueryBuilderOptions {
   unenrolledAgentIds?: string[];
@@ -19,7 +21,7 @@ export interface QueryBuilderOptions {
 // using unmapped_type avoids errors when the given field doesn't exist, and sets to the 0-value for that type
 // effectively ignoring it
 // https://www.elastic.co/guide/en/elasticsearch/reference/current/sort-search-results.html#_ignoring_unmapped_fields
-const MetadataSortMethod = [
+const MetadataSortMethod: estypes.SearchSortContainer[] = [
   {
     'event.created': {
       order: 'desc',
@@ -38,7 +40,6 @@ export async function kibanaRequestToMetadataListESQuery(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   request: KibanaRequest<any, any, any>,
   endpointAppContext: EndpointAppContext,
-  metadataQueryStrategy: MetadataQueryStrategy,
   queryBuilderOptions?: QueryBuilderOptions
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<Record<string, any>> {
@@ -48,16 +49,15 @@ export async function kibanaRequestToMetadataListESQuery(
     body: {
       query: buildQueryBody(
         request,
-        metadataQueryStrategy,
         queryBuilderOptions?.unenrolledAgentIds!,
         queryBuilderOptions?.statusAgentIDs!
       ),
-      ...metadataQueryStrategy.extraBodyProperties,
+      track_total_hits: true,
       sort: MetadataSortMethod,
     },
     from: pagingProperties.pageIndex * pagingProperties.pageSize,
     size: pagingProperties.pageSize,
-    index: metadataQueryStrategy.index,
+    index: metadataCurrentIndexPattern,
   };
 }
 
@@ -85,7 +85,6 @@ async function getPagingProperties(
 function buildQueryBody(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   request: KibanaRequest<any, any, any>,
-  metadataQueryStrategy: MetadataQueryStrategy,
   unerolledAgentIds: string[] | undefined,
   statusAgentIDs: string[] | undefined
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -143,10 +142,7 @@ function buildQueryBody(
       };
 }
 
-export function getESQueryHostMetadataByID(
-  agentID: string,
-  metadataQueryStrategy: MetadataQueryStrategy
-) {
+export function getESQueryHostMetadataByID(agentID: string): estypes.SearchRequest {
   return {
     body: {
       query: {
@@ -166,6 +162,29 @@ export function getESQueryHostMetadataByID(
       sort: MetadataSortMethod,
       size: 1,
     },
-    index: metadataQueryStrategy.index,
+    index: metadataCurrentIndexPattern,
+  };
+}
+
+export function getESQueryHostMetadataByIDs(agentIDs: string[]) {
+  return {
+    body: {
+      query: {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [
+                  { terms: { 'agent.id': agentIDs } },
+                  { terms: { 'HostDetails.agent.id': agentIDs } },
+                ],
+              },
+            },
+          ],
+        },
+      },
+      sort: MetadataSortMethod,
+    },
+    index: metadataCurrentIndexPattern,
   };
 }

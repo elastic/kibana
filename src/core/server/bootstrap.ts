@@ -46,22 +46,22 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
 
   const root = new Root(rawConfigService, env, onRootShutdown);
 
-  process.on('SIGHUP', () => reloadLoggingConfig());
+  process.on('SIGHUP', () => reloadConfiguration());
 
   // This is only used by the LogRotator service
   // in order to be able to reload the log configuration
   // under the cluster mode
   process.on('message', (msg) => {
-    if (!msg || msg.reloadLoggingConfig !== true) {
+    if (!msg || msg.reloadConfiguration !== true) {
       return;
     }
 
-    reloadLoggingConfig();
+    reloadConfiguration();
   });
 
-  function reloadLoggingConfig() {
+  function reloadConfiguration() {
     const cliLogger = root.logger.get('cli');
-    cliLogger.info('Reloading logging configuration due to SIGHUP.', { tags: ['config'] });
+    cliLogger.info('Reloading Kibana configuration due to SIGHUP.', { tags: ['config'] });
 
     try {
       rawConfigService.reloadConfig();
@@ -69,7 +69,7 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
       return shutdown(err);
     }
 
-    cliLogger.info('Reloaded logging configuration due to SIGHUP.', { tags: ['config'] });
+    cliLogger.info('Reloaded Kibana configuration due to SIGHUP.', { tags: ['config'] });
   }
 
   process.on('SIGINT', () => shutdown());

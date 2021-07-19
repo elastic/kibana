@@ -12,7 +12,7 @@ import { schema } from '@kbn/config-schema';
 
 import { IRouter } from '../../http';
 import { MetricsServiceSetup } from '../../metrics';
-import { ServiceStatus, CoreStatus } from '../types';
+import { ServiceStatus, CoreStatus, ServiceStatusLevels } from '../types';
 import { PluginName } from '../../plugins';
 import { calculateLegacyStatus, LegacyStatusInfo } from '../legacy_status';
 import { PackageInfo } from '../../config';
@@ -160,7 +160,8 @@ export const registerStatusRoute = ({ router, config, metrics, status }: Deps) =
         },
       };
 
-      return res.ok({ body });
+      const statusCode = overall.level >= ServiceStatusLevels.unavailable ? 503 : 200;
+      return res.custom({ body, statusCode, bypassErrorFormat: true });
     }
   );
 };

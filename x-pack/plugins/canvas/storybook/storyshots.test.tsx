@@ -6,13 +6,15 @@
  */
 
 import fs from 'fs';
-import { ReactChildren } from 'react';
+import { ReactChildren, createElement } from 'react';
 import path from 'path';
 import moment from 'moment';
 import 'moment-timezone';
 import ReactDOM from 'react-dom';
+import { shallow } from 'enzyme';
+import { create, act } from 'react-test-renderer';
 
-import initStoryshots, { multiSnapshotWithOptions } from '@storybook/addon-storyshots';
+import initStoryshots, { Stories2SnapsConverter } from '@storybook/addon-storyshots';
 // @ts-expect-error untyped library
 import styleSheetSerializer from 'jest-styled-components/src/styleSheetSerializer';
 import { addSerializer } from 'jest-specific-snapshot';
@@ -90,6 +92,11 @@ import { EuiObserver } from '@elastic/eui/test-env/components/observer/observer'
 jest.mock('@elastic/eui/test-env/components/observer/observer');
 EuiObserver.mockImplementation(() => 'EuiObserver');
 
+// @ts-expect-error untyped library
+import Dropzone from 'react-dropzone';
+jest.mock('react-dropzone');
+Dropzone.mockImplementation(() => 'Dropzone');
+
 // This element uses a `ref` and cannot be rendered by Jest snapshots.
 import { RenderedElement } from '../shareable_runtime/components/rendered_element';
 jest.mock('../shareable_runtime/components/rendered_element');
@@ -109,11 +116,23 @@ jest.mock('../public/lib/es_service', () => ({
 
 addSerializer(styleSheetSerializer);
 
+const converter = new Stories2SnapsConverter();
+
 // Initialize Storyshots and build the Jest Snapshots
 initStoryshots({
-  configPath: path.resolve(__dirname, './../storybook'),
+  configPath: path.resolve(__dirname),
   framework: 'react',
-  test: multiSnapshotWithOptions({}),
+  asyncJest: true,
+  test: async ({ story, context, done }) => {
+    const renderer = create(createElement(story.render));
+    // wait until the element will perform all renders and resolve all promises (lazy loading, especially)
+    await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+    // save each snapshot to a different file (similar to "multiSnapshotWithOptions")
+    const snapshotFileName = converter.getSnapshotFileName(context);
+    expect(renderer).toMatchSpecificSnapshot(snapshotFileName);
+    done?.();
+  },
   // Don't snapshot tests that start with 'redux'
   storyNameRegex: /^((?!.*?redux).)*$/,
+  renderer: shallow,
 });

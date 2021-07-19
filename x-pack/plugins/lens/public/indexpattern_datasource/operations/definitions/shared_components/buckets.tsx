@@ -51,7 +51,7 @@ const BucketContainer = ({
   isNotRemovable,
 }: BucketContainerProps) => {
   return (
-    <EuiPanel paddingSize="none" data-test-subj={dataTestSubj}>
+    <EuiPanel paddingSize="none" data-test-subj={dataTestSubj} hasShadow={false} hasBorder>
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>{/* Empty for spacing */}</EuiFlexItem>
         <EuiFlexItem grow={false}>

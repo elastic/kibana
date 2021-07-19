@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import React from 'react';
 import { Provider } from 'react-redux';
@@ -25,13 +26,12 @@ import {
   TimeRange,
   Filter,
   Query,
-  RefreshInterval,
 } from '../../../../../src/plugins/data/public';
+import { createExtentFilter } from '../../common/elasticsearch_util';
 import {
   replaceLayerList,
   setMapSettings,
   setQuery,
-  setRefreshConfig,
   disableScrollZoom,
   setReadOnly,
 } from '../actions';
@@ -43,17 +43,20 @@ import {
   EventHandlers,
 } from '../reducers/non_serializable_instances';
 import {
+  getGeoFieldNames,
   getMapCenter,
   getMapBuffer,
+  getMapExtent,
+  getMapReady,
   getMapZoom,
   getHiddenLayerIds,
   getQueryableUniqueIndexPatternIds,
 } from '../selectors/map_selectors';
 import {
   APP_ID,
-  getExistingMapPath,
+  getEditPath,
+  getFullPath,
   MAP_SAVED_OBJECT_TYPE,
-  MAP_PATH,
   RawValue,
 } from '../../common/constants';
 import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
@@ -64,12 +67,13 @@ import {
   getChartsPaletteServiceGetColor,
   getSearchService,
 } from '../kibana_services';
-import { LayerDescriptor } from '../../common/descriptor_types';
+import { LayerDescriptor, MapExtent } from '../../common/descriptor_types';
 import { MapContainer } from '../connected_components/map_container';
 import { SavedMap } from '../routes/map_page';
 import { getIndexPatternsFromIds } from '../index_pattern_util';
 import { getMapAttributeService } from '../map_attribute_service';
 import { isUrlDrilldown, toValueClickDataFormat } from '../trigger_actions/trigger_utils';
+import { waitUntilTimeLayersLoad$ } from '../routes/map_page/map_app/wait_until_time_layers_load';
 
 import {
   MapByValueInput,
@@ -78,7 +82,6 @@ import {
   MapEmbeddableInput,
   MapEmbeddableOutput,
 } from './types';
-export { MapEmbeddableInput, MapEmbeddableOutput };
 
 function getIsRestore(searchSessionId?: string) {
   if (!searchSessionId) {
@@ -97,16 +100,18 @@ export class MapEmbeddable
   private _savedMap: SavedMap;
   private _renderTooltipContent?: RenderToolTipContent;
   private _subscription: Subscription;
+  private _prevFilterByMapExtent: boolean;
   private _prevIsRestore: boolean = false;
+  private _prevMapExtent?: MapExtent;
   private _prevTimeRange?: TimeRange;
   private _prevQuery?: Query;
-  private _prevRefreshConfig?: RefreshInterval;
-  private _prevFilters?: Filter[];
+  private _prevFilters: Filter[] = [];
   private _prevSyncColors?: boolean;
   private _prevSearchSessionId?: string;
   private _domNode?: HTMLElement;
   private _unsubscribeFromStore?: Unsubscribe;
   private _isInitialized = false;
+  private _controlledBy: string;
 
   constructor(config: MapEmbeddableConfig, initialInput: MapEmbeddableInput, parent?: IContainer) {
     super(
@@ -123,6 +128,9 @@ export class MapEmbeddable
     this._savedMap = new SavedMap({ mapEmbeddableInput: initialInput });
     this._initializeSaveMap();
     this._subscription = this.getUpdated$().subscribe(() => this.onUpdate());
+    this._controlledBy = `mapEmbeddablePanel${this.id}`;
+    this._prevFilterByMapExtent =
+      this.input.filterByMapExtent === undefined ? false : this.input.filterByMapExtent;
   }
 
   private async _initializeSaveMap() {
@@ -152,13 +160,15 @@ export class MapEmbeddable
     const store = this._savedMap.getStore();
     store.dispatch(setReadOnly(true));
     store.dispatch(disableScrollZoom());
+    store.dispatch(
+      setMapSettings({
+        showTimesliderToggleButton: false,
+      })
+    );
 
     this._dispatchSetQuery({
       forceRefresh: false,
     });
-    if (this.input.refreshConfig) {
-      this._dispatchSetRefreshConfig(this.input.refreshConfig);
-    }
 
     this._unsubscribeFromStore = this._savedMap.getStore().subscribe(() => {
       this._handleStoreChanges();
@@ -171,13 +181,13 @@ export class MapEmbeddable
       : '';
     const input = this.getInput();
     const title = input.hidePanelTitles ? '' : input.title || savedMapTitle;
-    const savedObjectId = (input as MapByReferenceInput).savedObjectId;
+    const savedObjectId = 'savedObjectId' in input ? input.savedObjectId : undefined;
     this.updateOutput({
       ...this.getOutput(),
       defaultTitle: savedMapTitle,
       title,
-      editPath: `/${MAP_PATH}/${savedObjectId}`,
-      editUrl: getHttp().basePath.prepend(getExistingMapPath(savedObjectId)),
+      editPath: getEditPath(savedObjectId),
+      editUrl: getHttp().basePath.prepend(getFullPath(savedObjectId)),
       indexPatterns: await this._getIndexPatterns(),
     });
   }
@@ -223,25 +233,33 @@ export class MapEmbeddable
 
   onUpdate() {
     if (
+      this.input.filterByMapExtent !== undefined &&
+      this._prevFilterByMapExtent !== this.input.filterByMapExtent
+    ) {
+      this._prevFilterByMapExtent = this.input.filterByMapExtent;
+      if (this.input.filterByMapExtent) {
+        this.setMapExtentFilter();
+      } else {
+        this.clearMapExtentFilter();
+      }
+    }
+
+    if (
       !_.isEqual(this.input.timeRange, this._prevTimeRange) ||
       !_.isEqual(this.input.query, this._prevQuery) ||
-      !esFilters.onlyDisabledFiltersChanged(this.input.filters, this._prevFilters) ||
-      this.input.searchSessionId !== this._prevSearchSessionId
+      !esFilters.compareFilters(this._getFilters(), this._prevFilters) ||
+      this._getSearchSessionId() !== this._prevSearchSessionId
     ) {
       this._dispatchSetQuery({
         forceRefresh: false,
       });
     }
 
-    if (this.input.refreshConfig && !_.isEqual(this.input.refreshConfig, this._prevRefreshConfig)) {
-      this._dispatchSetRefreshConfig(this.input.refreshConfig);
-    }
-
     if (this.input.syncColors !== this._prevSyncColors) {
       this._dispatchSetChartsPaletteServiceGetColor(this.input.syncColors);
     }
 
-    const isRestore = getIsRestore(this.input.searchSessionId);
+    const isRestore = getIsRestore(this._getSearchSessionId());
     if (isRestore !== this._prevIsRestore) {
       this._prevIsRestore = isRestore;
       this._savedMap.getStore().dispatch(
@@ -253,34 +271,40 @@ export class MapEmbeddable
     }
   }
 
+  _getFilters() {
+    return this.input.filters
+      ? this.input.filters.filter(
+          (filter) => !filter.meta.disabled && filter.meta.controlledBy !== this._controlledBy
+        )
+      : [];
+  }
+
+  _getSearchSessionId() {
+    // New search session id causes all layers from elasticsearch to refetch data.
+    // Dashboard provides a new search session id anytime filters change.
+    // Thus, filtering embeddable container by map extent causes a new search session id any time the map is moved.
+    // Disabling search session when filtering embeddable container by map extent.
+    // The use case for search sessions (restoring results because of slow responses) does not match the use case of
+    // filtering by map extent (rapid responses as users explore their map).
+    return this.input.filterByMapExtent ? undefined : this.input.searchSessionId;
+  }
+
   _dispatchSetQuery({ forceRefresh }: { forceRefresh: boolean }) {
+    const filters = this._getFilters();
     this._prevTimeRange = this.input.timeRange;
     this._prevQuery = this.input.query;
-    this._prevFilters = this.input.filters;
-    this._prevSearchSessionId = this.input.searchSessionId;
-    const enabledFilters = this.input.filters
-      ? this.input.filters.filter((filter) => !filter.meta.disabled)
-      : [];
+    this._prevFilters = filters;
+    this._prevSearchSessionId = this._getSearchSessionId();
     this._savedMap.getStore().dispatch<any>(
       setQuery({
-        filters: enabledFilters,
+        filters,
         query: this.input.query,
         timeFilters: this.input.timeRange,
         forceRefresh,
-        searchSessionId: this.input.searchSessionId,
-        searchSessionMapBuffer: getIsRestore(this.input.searchSessionId)
+        searchSessionId: this._getSearchSessionId(),
+        searchSessionMapBuffer: getIsRestore(this._getSearchSessionId())
           ? this.input.mapBuffer
           : undefined,
-      })
-    );
-  }
-
-  _dispatchSetRefreshConfig(refreshConfig: RefreshInterval) {
-    this._prevRefreshConfig = refreshConfig;
-    this._savedMap.getStore().dispatch(
-      setRefreshConfig({
-        isPaused: refreshConfig.pause,
-        interval: refreshConfig.value,
       })
     );
   }
@@ -322,6 +346,7 @@ export class MapEmbeddable
             renderTooltipContent={this._renderTooltipContent}
             title={this.getTitle()}
             description={this.getDescription()}
+            waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(this._savedMap.getStore())}
           />
         </I18nContext>
       </Provider>,
@@ -404,6 +429,56 @@ export class MapEmbeddable
     } as ActionExecutionContext;
   };
 
+  setMapExtentFilter() {
+    const state = this._savedMap.getStore().getState();
+    const mapExtent = getMapExtent(state);
+    const geoFieldNames = getGeoFieldNames(state);
+    const center = getMapCenter(state);
+    const zoom = getMapZoom(state);
+
+    if (center === undefined || mapExtent === undefined || geoFieldNames.length === 0) {
+      return;
+    }
+
+    this._prevMapExtent = mapExtent;
+
+    const mapExtentFilter = createExtentFilter(mapExtent, geoFieldNames);
+    mapExtentFilter.meta.controlledBy = this._controlledBy;
+    mapExtentFilter.meta.alias = i18n.translate('xpack.maps.embeddable.boundsFilterLabel', {
+      defaultMessage: 'Map bounds at center: {lat}, {lon}, zoom: {zoom}',
+      values: {
+        lat: center.lat,
+        lon: center.lon,
+        zoom,
+      },
+    });
+
+    const executeContext = {
+      ...this.getActionContext(),
+      filters: [mapExtentFilter],
+      controlledBy: this._controlledBy,
+    };
+    const action = getUiActions().getAction(ACTION_GLOBAL_APPLY_FILTER);
+    if (!action) {
+      throw new Error('Unable to apply map extent filter, could not locate action');
+    }
+    action.execute(executeContext);
+  }
+
+  clearMapExtentFilter() {
+    this._prevMapExtent = undefined;
+    const executeContext = {
+      ...this.getActionContext(),
+      filters: [],
+      controlledBy: this._controlledBy,
+    };
+    const action = getUiActions().getAction(ACTION_GLOBAL_APPLY_FILTER);
+    if (!action) {
+      throw new Error('Unable to apply map extent filter, could not locate action');
+    }
+    action.execute(executeContext);
+  }
+
   destroy() {
     super.destroy();
     this._isActive = false;
@@ -427,9 +502,15 @@ export class MapEmbeddable
   }
 
   _handleStoreChanges() {
-    if (!this._isActive) {
+    if (!this._isActive || !getMapReady(this._savedMap.getStore().getState())) {
       return;
     }
+
+    const mapExtent = getMapExtent(this._savedMap.getStore().getState());
+    if (this.input.filterByMapExtent && !_.isEqual(this._prevMapExtent, mapExtent)) {
+      this.setMapExtentFilter();
+    }
+
     const center = getMapCenter(this._savedMap.getStore().getState());
     const zoom = getMapZoom(this._savedMap.getStore().getState());
 

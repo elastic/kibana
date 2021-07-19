@@ -8,6 +8,7 @@
 
 import { Observable } from 'rxjs';
 import { MaybePromise } from '@kbn/utility-types';
+import type { IExecutionContextContainer } from '../execution_context';
 
 /** @public */
 export interface HttpSetup {
@@ -270,6 +271,8 @@ export interface HttpFetchOptions extends HttpRequestInit {
    * response information. When `false`, the return type will just be the parsed response body. Defaults to `false`.
    */
   asResponse?: boolean;
+
+  context?: IExecutionContextContainer;
 }
 
 /**
@@ -339,7 +342,7 @@ export interface IHttpFetchError extends Error {
    * @deprecated Provided for legacy compatibility. Prefer the `response` property instead.
    */
   readonly res?: Response;
-  readonly body?: any;
+  readonly body?: any; // TODO: this should be unknown
 }
 
 /** @public */

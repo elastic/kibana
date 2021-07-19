@@ -387,6 +387,149 @@ describe('Task Run Statistics', () => {
     });
   });
 
+  test('frequency of executed tasks by their persistence', async () => {
+    const events$ = new Subject<TaskLifecycleEvent>();
+
+    const taskPollingLifecycle = taskPollingLifecycleMock.create({
+      events$: events$ as Observable<TaskLifecycleEvent>,
+    });
+
+    const runningAverageWindowSize = 5;
+    const taskRunAggregator = createTaskRunAggregator(
+      taskPollingLifecycle,
+      runningAverageWindowSize
+    );
+
+    return new Promise<void>((resolve, reject) => {
+      taskRunAggregator
+        .pipe(
+          // skip initial stat which is just initialized data which
+          // ensures we don't stall on combineLatest
+          skip(1),
+          // Use 'summarizeTaskRunStat' to receive summarize stats
+          map(({ key, value }: AggregatedStat<TaskRunStat>) => ({
+            key,
+            value: summarizeTaskRunStat(
+              value,
+              getTaskManagerConfig({
+                monitored_task_execution_thresholds: {
+                  custom: {
+                    'alerting:test': {
+                      error_threshold: 59,
+                      warn_threshold: 39,
+                    },
+                  },
+                },
+              })
+            ).value,
+          })),
+          take(10),
+          bufferCount(10)
+        )
+        .subscribe((taskStats: Array<AggregatedStat<SummarizedTaskRunStat>>) => {
+          try {
+            /**
+             * At any given time we only keep track of the last X Polling Results
+             * In the tests this is ocnfiugured to a window size of 5
+             */
+            expect(taskStats.map((taskStat) => taskStat.value.execution.persistence))
+              .toMatchInlineSnapshot(`
+              Array [
+                Object {
+                  "ephemeral": 0,
+                  "non_recurring": 100,
+                  "recurring": 0,
+                },
+                Object {
+                  "ephemeral": 0,
+                  "non_recurring": 100,
+                  "recurring": 0,
+                },
+                Object {
+                  "ephemeral": 0,
+                  "non_recurring": 67,
+                  "recurring": 33,
+                },
+                Object {
+                  "ephemeral": 0,
+                  "non_recurring": 75,
+                  "recurring": 25,
+                },
+                Object {
+                  "ephemeral": 0,
+                  "non_recurring": 80,
+                  "recurring": 20,
+                },
+                Object {
+                  "ephemeral": 0,
+                  "non_recurring": 60,
+                  "recurring": 40,
+                },
+                Object {
+                  "ephemeral": 0,
+                  "non_recurring": 40,
+                  "recurring": 60,
+                },
+                Object {
+                  "ephemeral": 0,
+                  "non_recurring": 60,
+                  "recurring": 40,
+                },
+                Object {
+                  "ephemeral": 0,
+                  "non_recurring": 60,
+                  "recurring": 40,
+                },
+                Object {
+                  "ephemeral": 0,
+                  "non_recurring": 40,
+                  "recurring": 60,
+                },
+              ]
+            `);
+            resolve();
+          } catch (e) {
+            reject(e);
+          }
+        });
+
+      events$.next(mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Success));
+      events$.next(mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Success));
+      events$.next(
+        mockTaskRunEvent(
+          { schedule: { interval: '3s' } },
+          { start: 0, stop: 0 },
+          TaskRunResult.Success
+        )
+      );
+      events$.next(mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Failed));
+      events$.next(mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Failed));
+      events$.next(
+        mockTaskRunEvent(
+          { schedule: { interval: '3s' } },
+          { start: 0, stop: 0 },
+          TaskRunResult.Failed
+        )
+      );
+      events$.next(
+        mockTaskRunEvent(
+          { schedule: { interval: '3s' } },
+          { start: 0, stop: 0 },
+          TaskRunResult.RetryScheduled
+        )
+      );
+      events$.next(mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.RetryScheduled));
+      events$.next(mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Success));
+      events$.next(
+        mockTaskRunEvent(
+          { schedule: { interval: '3s' } },
+          { start: 0, stop: 0 },
+          TaskRunResult.Success
+        )
+      );
+    });
+  });
+
   test('returns polling stats', async () => {
     const expectedTimestamp: string[] = [];
     const events$ = new Subject<TaskLifecycleEvent>();

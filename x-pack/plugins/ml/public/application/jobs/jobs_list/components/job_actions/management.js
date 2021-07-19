@@ -63,10 +63,10 @@ export function actionsMenuContent(
     },
     {
       name: i18n.translate('xpack.ml.jobsList.managementActions.createAlertLabel', {
-        defaultMessage: 'Create alert',
+        defaultMessage: 'Create alert rule',
       }),
       description: i18n.translate('xpack.ml.jobsList.managementActions.createAlertLabel', {
-        defaultMessage: 'Create alert',
+        defaultMessage: 'Create alert rule',
       }),
       icon: 'bell',
       enabled: (item) => item.deleting !== true,

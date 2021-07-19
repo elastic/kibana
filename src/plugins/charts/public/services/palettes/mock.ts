@@ -14,8 +14,8 @@ export const getPaletteRegistry = () => {
   const mockPalette1: jest.Mocked<PaletteDefinition> = {
     id: 'default',
     title: 'My Palette',
-    getColor: jest.fn((_: SeriesLayer[]) => 'black'),
-    getColors: jest.fn((num: number) => ['red', 'black']),
+    getCategoricalColor: jest.fn((_: SeriesLayer[]) => 'black'),
+    getCategoricalColors: jest.fn((num: number) => ['red', 'black']),
     toExpression: jest.fn(() => ({
       type: 'expression',
       chain: [
@@ -33,8 +33,32 @@ export const getPaletteRegistry = () => {
   const mockPalette2: jest.Mocked<PaletteDefinition> = {
     id: 'mocked',
     title: 'Mocked Palette',
-    getColor: jest.fn((_: SeriesLayer[]) => 'blue'),
-    getColors: jest.fn((num: number) => ['blue', 'yellow']),
+    getCategoricalColor: jest.fn((_: SeriesLayer[]) => 'blue'),
+    getCategoricalColors: jest.fn((num: number) => ['blue', 'yellow']),
+    toExpression: jest.fn(() => ({
+      type: 'expression',
+      chain: [
+        {
+          type: 'function',
+          function: 'system_palette',
+          arguments: {
+            name: ['mocked'],
+          },
+        },
+      ],
+    })),
+  };
+
+  const mockPalette3: jest.Mocked<PaletteDefinition> = {
+    id: 'custom',
+    title: 'Custom Mocked Palette',
+    getCategoricalColor: jest.fn((_: SeriesLayer[]) => 'blue'),
+    getCategoricalColors: jest.fn((num: number) => ['blue', 'yellow']),
+    getColorForValue: jest.fn(
+      (num: number | undefined, state: unknown, minMax: { min: number; max: number }) =>
+        num == null || num < 1 ? undefined : 'blue'
+    ),
+    canDynamicColoring: true,
     toExpression: jest.fn(() => ({
       type: 'expression',
       chain: [
@@ -50,8 +74,9 @@ export const getPaletteRegistry = () => {
   };
 
   return {
-    get: (name: string) => (name !== 'default' ? mockPalette2 : mockPalette1),
-    getAll: () => [mockPalette1, mockPalette2],
+    get: (name: string) =>
+      name === 'custom' ? mockPalette3 : name !== 'default' ? mockPalette2 : mockPalette1,
+    getAll: () => [mockPalette1, mockPalette2, mockPalette3],
   };
 };
 

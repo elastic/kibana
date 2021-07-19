@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { AnnotationItemsSchema, PanelSchema } from 'src/plugins/vis_type_timeseries/common/types';
+import type { Annotation, Panel } from '../../../../common/types';
 import { buildAnnotationRequest } from './build_request_body';
-import {
+import type {
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesRequestServices,
   VisTypeTimeseriesVisDataRequest,
 } from '../../../types';
-import { AbstractSearchStrategy, DefaultSearchCapabilities } from '../../search_strategies';
+import type { SearchStrategy, SearchCapabilities } from '../../search_strategies';
 
 export type AnnotationServices = VisTypeTimeseriesRequestServices & {
-  capabilities: DefaultSearchCapabilities;
+  capabilities: SearchCapabilities;
   requestContext: VisTypeTimeseriesRequestHandlerContext;
-  searchStrategy: AbstractSearchStrategy;
+  searchStrategy: SearchStrategy;
 };
 
 export async function getAnnotationRequestParams(
   req: VisTypeTimeseriesVisDataRequest,
-  panel: PanelSchema,
-  annotation: AnnotationItemsSchema,
+  panel: Panel,
+  annotation: Annotation,
   {
     esShardTimeout,
     esQueryConfig,
@@ -35,15 +35,15 @@ export async function getAnnotationRequestParams(
 ) {
   const annotationIndex = await cachedIndexPatternFetcher(annotation.index_pattern);
 
-  const request = await buildAnnotationRequest(
+  const request = await buildAnnotationRequest({
     req,
     panel,
     annotation,
     esQueryConfig,
     annotationIndex,
     capabilities,
-    uiSettings
-  );
+    uiSettings,
+  });
 
   return {
     index: annotationIndex.indexPatternString,

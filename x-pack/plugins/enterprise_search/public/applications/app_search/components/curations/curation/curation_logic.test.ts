@@ -10,7 +10,7 @@ import {
   mockHttpValues,
   mockKibanaValues,
   mockFlashMessageHelpers,
-} from '../../../../__mocks__';
+} from '../../../../__mocks__/kea_logic';
 import '../../../__mocks__/engine_logic.mock';
 
 import { nextTick } from '@kbn/test/jest';
@@ -287,7 +287,10 @@ describe('CurationLogic', () => {
         await nextTick();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/app_search/engines/some-engine/curations/cur-123456789'
+          '/api/app_search/engines/some-engine/curations/cur-123456789',
+          {
+            query: { skip_record_analytics: 'true' },
+          }
         );
         expect(CurationLogic.actions.onCurationLoad).toHaveBeenCalledWith(MOCK_CURATION_RESPONSE);
       });

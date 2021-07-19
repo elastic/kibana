@@ -8,8 +8,6 @@
 import {
   EuiCallOut,
   EuiCode,
-  EuiFlexGroup,
-  EuiPage,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
@@ -19,15 +17,13 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { Location } from 'history';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { useTrackPageview } from '../../../../../observability/public';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { IUrlParams } from '../../../context/url_params_context/types';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
-import { SearchBar } from '../../shared/search_bar';
-import { TransactionList } from './TransactionList';
+import { TransactionList } from './transaction_list';
 import { useRedirect } from './useRedirect';
 import { useTransactionListFetcher } from './use_transaction_list';
 
@@ -53,20 +49,14 @@ function getRedirectLocation({
   }
 }
 
-interface TransactionOverviewProps {
-  serviceName: string;
-}
-
-export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
+export function TransactionOverview() {
   const location = useLocation();
   const { urlParams } = useUrlParams();
-  const { transactionType } = useApmServiceContext();
+  const { transactionType, serviceName } = useApmServiceContext();
 
   // redirect to first transaction type
   useRedirect(getRedirectLocation({ location, transactionType, urlParams }));
 
-  useTrackPageview({ app: 'apm', path: 'transaction_overview' });
-  useTrackPageview({ app: 'apm', path: 'transaction_overview', delay: 15000 });
   const {
     transactionListData,
     transactionListStatus,
@@ -80,62 +70,55 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
 
   return (
     <>
-      <SearchBar showTransactionTypeSelector />
-      <EuiPage>
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <TransactionCharts />
-          <EuiSpacer size="s" />
-          <EuiPanel>
-            <EuiTitle size="xs">
-              <h3>Transactions</h3>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            {!transactionListData.isAggregationAccurate && (
-              <EuiCallOut
-                title={i18n.translate(
-                  'xpack.apm.transactionCardinalityWarning.title',
-                  {
-                    defaultMessage:
-                      'This view shows a subset of reported transactions.',
-                  }
-                )}
-                color="danger"
-                iconType="alert"
-              >
-                <p>
-                  <FormattedMessage
-                    id="xpack.apm.transactionCardinalityWarning.body"
-                    defaultMessage="The number of unique transaction names exceeds the configured value of {bucketSize}. Try reconfiguring your agents to group similar transactions or increase the value of {codeBlock}"
-                    values={{
-                      bucketSize: transactionListData.bucketSize,
-                      codeBlock: (
-                        <EuiCode>
-                          xpack.apm.ui.transactionGroupBucketSize
-                        </EuiCode>
-                      ),
-                    }}
-                  />
-
-                  <ElasticDocsLink
-                    section="/kibana"
-                    path="/troubleshooting.html#troubleshooting-too-many-transactions"
-                  >
-                    {i18n.translate(
-                      'xpack.apm.transactionCardinalityWarning.docsLink',
-                      { defaultMessage: 'Learn more in the docs' }
-                    )}
-                  </ElasticDocsLink>
-                </p>
-              </EuiCallOut>
+      <TransactionCharts />
+      <EuiSpacer size="s" />
+      <EuiPanel hasBorder={true}>
+        <EuiTitle size="xs">
+          <h3>Transactions</h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        {!transactionListData.isAggregationAccurate && (
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.apm.transactionCardinalityWarning.title',
+              {
+                defaultMessage:
+                  'This view shows a subset of reported transactions.',
+              }
             )}
-            <EuiSpacer size="s" />
-            <TransactionList
-              isLoading={transactionListStatus === 'loading'}
-              items={transactionListData.items || []}
-            />
-          </EuiPanel>
-        </EuiFlexGroup>
-      </EuiPage>
+            color="danger"
+            iconType="alert"
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.apm.transactionCardinalityWarning.body"
+                defaultMessage="The number of unique transaction names exceeds the configured value of {bucketSize}. Try reconfiguring your agents to group similar transactions or increase the value of {codeBlock}"
+                values={{
+                  bucketSize: transactionListData.bucketSize,
+                  codeBlock: (
+                    <EuiCode>xpack.apm.ui.transactionGroupBucketSize</EuiCode>
+                  ),
+                }}
+              />
+
+              <ElasticDocsLink
+                section="/kibana"
+                path="/troubleshooting.html#troubleshooting-too-many-transactions"
+              >
+                {i18n.translate(
+                  'xpack.apm.transactionCardinalityWarning.docsLink',
+                  { defaultMessage: 'Learn more in the docs' }
+                )}
+              </ElasticDocsLink>
+            </p>
+          </EuiCallOut>
+        )}
+        <EuiSpacer size="s" />
+        <TransactionList
+          isLoading={transactionListStatus === 'loading'}
+          items={transactionListData.items || []}
+        />
+      </EuiPanel>
     </>
   );
 }

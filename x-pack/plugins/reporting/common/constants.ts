@@ -53,6 +53,7 @@ export const UI_SETTINGS_CSV_QUOTE_VALUES = 'csv:quoteValues';
 export const UI_SETTINGS_DATEFORMAT_TZ = 'dateFormat:tz';
 
 export const LAYOUT_TYPES = {
+  CANVAS: 'canvas',
   PRESERVE_LAYOUT: 'preserve_layout',
   PRINT: 'print',
 };
@@ -89,6 +90,12 @@ export const API_BASE_URL = '/api/reporting'; // "Generation URL" from share men
 export const API_BASE_GENERATE = `${API_BASE_URL}/generate`;
 export const API_LIST_URL = `${API_BASE_URL}/jobs`;
 export const API_DIAGNOSE_URL = `${API_BASE_URL}/diagnose`;
+
+export const API_GET_ILM_POLICY_STATUS = `${API_BASE_URL}/ilm_policy_status`;
+export const API_CREATE_ILM_POLICY_URL = `${API_BASE_URL}/ilm_policy`;
+export const API_MIGRATE_ILM_POLICY_URL = `${API_BASE_URL}/deprecations/migrate_ilm_policy`;
+
+export const ILM_POLICY_NAME = 'kibana-reporting';
 
 // hacky endpoint: download CSV without queueing a report
 export const API_BASE_URL_V1 = '/api/reporting/v1'; //

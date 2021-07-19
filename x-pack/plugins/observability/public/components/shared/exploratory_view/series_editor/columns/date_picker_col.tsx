@@ -7,14 +7,23 @@
 
 import React from 'react';
 import { SeriesDatePicker } from '../../series_date_picker';
+import { useSeriesStorage } from '../../hooks/use_series_storage';
+import { DateRangePicker } from '../../series_date_picker/date_range_picker';
 
 interface Props {
   seriesId: string;
 }
 export function DatePickerCol({ seriesId }: Props) {
+  const { firstSeriesId, getSeries } = useSeriesStorage();
+  const { reportType } = getSeries(firstSeriesId);
+
   return (
     <div style={{ maxWidth: 300 }}>
-      <SeriesDatePicker seriesId={seriesId} />
+      {firstSeriesId === seriesId || reportType !== 'kpi-over-time' ? (
+        <SeriesDatePicker seriesId={seriesId} />
+      ) : (
+        <DateRangePicker seriesId={seriesId} />
+      )}
     </div>
   );
 }

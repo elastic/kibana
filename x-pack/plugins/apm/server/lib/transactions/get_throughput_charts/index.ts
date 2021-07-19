@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ESFilter } from '../../../../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
 import {
   SERVICE_NAME,
@@ -13,18 +13,14 @@ import {
   TRANSACTION_RESULT,
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
-import {
-  environmentQuery,
-  rangeQuery,
-  kqlQuery,
-} from '../../../../server/utils/queries';
+import { kqlQuery, rangeQuery } from '../../../../../observability/server';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
 } from '../../../lib/helpers/aggregated_transactions';
-import { getBucketSize } from '../../../lib/helpers/get_bucket_size';
 import { Setup, SetupTimeRange } from '../../../lib/helpers/setup_request';
-import { withApmSpan } from '../../../utils/with_apm_span';
+import { getBucketSizeForAggregatedTransactions } from '../../helpers/get_bucket_size_for_aggregated_transactions';
 import { getThroughputBuckets } from './transform';
 
 export type ThroughputChartsResponse = PromiseReturnType<
@@ -96,7 +92,7 @@ function searchThroughput({
     },
   };
 
-  return apmEventClient.search(params);
+  return apmEventClient.search('get_transaction_throughput_series', params);
 }
 
 export async function getThroughputCharts({
@@ -116,26 +112,29 @@ export async function getThroughputCharts({
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
 }) {
-  return withApmSpan('get_transaction_throughput_series', async () => {
-    const { bucketSize, intervalString } = getBucketSize(setup);
-
-    const response = await searchThroughput({
-      environment,
-      kuery,
-      serviceName,
-      transactionType,
-      transactionName,
-      setup,
+  const { bucketSize, intervalString } = getBucketSizeForAggregatedTransactions(
+    {
+      ...setup,
       searchAggregatedTransactions,
-      intervalString,
-    });
+    }
+  );
 
-    return {
-      throughputTimeseries: getThroughputBuckets({
-        throughputResultBuckets: response.aggregations?.throughput.buckets,
-        bucketSize,
-        setupTimeRange: setup,
-      }),
-    };
+  const response = await searchThroughput({
+    environment,
+    kuery,
+    serviceName,
+    transactionType,
+    transactionName,
+    setup,
+    searchAggregatedTransactions,
+    intervalString,
   });
+
+  return {
+    throughputTimeseries: getThroughputBuckets({
+      throughputResultBuckets: response.aggregations?.throughput.buckets,
+      bucketSize,
+      setupTimeRange: setup,
+    }),
+  };
 }

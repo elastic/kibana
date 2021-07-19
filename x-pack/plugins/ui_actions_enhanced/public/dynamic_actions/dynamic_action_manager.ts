@@ -213,6 +213,11 @@ export class DynamicActionManager {
    * @param triggers List of triggers to which action should react.
    */
   public async createEvent(action: SerializedAction, triggers: string[]) {
+    if (!triggers.length) {
+      // This error should never happen, hence it is not translated.
+      throw new Error('No triggers selected for event.');
+    }
+
     const event: SerializedEvent = {
       eventId: uuidv4(),
       triggers,

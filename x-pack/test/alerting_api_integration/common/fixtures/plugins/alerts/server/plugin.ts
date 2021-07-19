@@ -15,6 +15,7 @@ import { defineActionTypes } from './action_types';
 import { defineRoutes } from './routes';
 import { SpacesPluginStart } from '../../../../../../../plugins/spaces/server';
 import { SecurityPluginStart } from '../../../../../../../plugins/security/server';
+import { PluginStartContract as ActionsPluginStart } from '../../../../../../../plugins/actions/server';
 
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;
@@ -26,6 +27,7 @@ export interface FixtureStartDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
+  actions: ActionsPluginStart;
 }
 
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
@@ -67,21 +69,23 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
             read: [],
           },
           alerting: {
-            all: [
-              'test.always-firing',
-              'test.cumulative-firing',
-              'test.never-firing',
-              'test.failing',
-              'test.authorization',
-              'test.validation',
-              'test.onlyContextVariables',
-              'test.onlyStateVariables',
-              'test.noop',
-              'test.unrestricted-noop',
-              'test.patternFiring',
-              'test.throw',
-              'test.longRunning',
-            ],
+            rule: {
+              all: [
+                'test.always-firing',
+                'test.cumulative-firing',
+                'test.never-firing',
+                'test.failing',
+                'test.authorization',
+                'test.validation',
+                'test.onlyContextVariables',
+                'test.onlyStateVariables',
+                'test.noop',
+                'test.unrestricted-noop',
+                'test.patternFiring',
+                'test.throw',
+                'test.longRunning',
+              ],
+            },
           },
           ui: [],
         },
@@ -92,21 +96,23 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
             read: ['alert'],
           },
           alerting: {
-            read: [
-              'test.always-firing',
-              'test.cumulative-firing',
-              'test.never-firing',
-              'test.failing',
-              'test.authorization',
-              'test.validation',
-              'test.onlyContextVariables',
-              'test.onlyStateVariables',
-              'test.noop',
-              'test.unrestricted-noop',
-              'test.patternFiring',
-              'test.throw',
-              'test.longRunning',
-            ],
+            rule: {
+              read: [
+                'test.always-firing',
+                'test.cumulative-firing',
+                'test.never-firing',
+                'test.failing',
+                'test.authorization',
+                'test.validation',
+                'test.onlyContextVariables',
+                'test.onlyStateVariables',
+                'test.noop',
+                'test.unrestricted-noop',
+                'test.patternFiring',
+                'test.throw',
+                'test.longRunning',
+              ],
+            },
           },
           ui: [],
         },

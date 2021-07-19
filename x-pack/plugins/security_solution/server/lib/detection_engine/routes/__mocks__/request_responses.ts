@@ -18,6 +18,7 @@ import {
   DETECTION_ENGINE_PREPACKAGED_URL,
   DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL,
   DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL,
+  DETECTION_ENGINE_RULES_BULK_ACTION,
 } from '../../../../../common/constants';
 import { ShardsResponse } from '../../../types';
 import {
@@ -36,6 +37,7 @@ import { getSignalsMigrationStatusSchemaMock } from '../../../../../common/detec
 import { RuleParams } from '../../schemas/rule_schemas';
 import { Alert } from '../../../../../../alerting/common';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
+import { getPerformBulkActionSchemaMock } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
 
 export const typicalSetStatusSignalByIdsPayload = (): SetSignalsStatusSchemaDecoded => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],
@@ -105,6 +107,13 @@ export const getPatchBulkRequest = () =>
     method: 'patch',
     path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
     body: [getCreateRulesSchemaMock()],
+  });
+
+export const getBulkActionRequest = () =>
+  requestMock.create({
+    method: 'patch',
+    path: DETECTION_ENGINE_RULES_BULK_ACTION,
+    body: getPerformBulkActionSchemaMock(),
   });
 
 export const getDeleteBulkRequest = () =>
@@ -489,6 +498,72 @@ export const getFindResultStatus = (): SavedObjectsFindResponse<IRuleSavedAttrib
       version: 'WzMyLDFd',
     },
   ],
+});
+
+export const getFindBulkResultStatus = (): SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => ({
+  page: 1,
+  per_page: 6,
+  total: 2,
+  saved_objects: [],
+  aggregations: {
+    alertIds: {
+      buckets: [
+        {
+          key: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+          most_recent_statuses: {
+            hits: {
+              hits: [
+                {
+                  _source: {
+                    'siem-detection-engine-rule-status': {
+                      alertId: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+                      statusDate: '2020-02-18T15:26:49.783Z',
+                      status: 'succeeded',
+                      lastFailureAt: undefined,
+                      lastSuccessAt: '2020-02-18T15:26:49.783Z',
+                      lastFailureMessage: undefined,
+                      lastSuccessMessage: 'succeeded',
+                      lastLookBackDate: new Date('2020-02-18T15:14:58.806Z').toISOString(),
+                      gap: '500.32',
+                      searchAfterTimeDurations: ['200.00'],
+                      bulkCreateTimeDurations: ['800.43'],
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+        {
+          key: '1ea5a820-4da1-4e82-92a1-2b43a7bece08',
+          most_recent_statuses: {
+            hits: {
+              hits: [
+                {
+                  _source: {
+                    'siem-detection-engine-rule-status': {
+                      alertId: '1ea5a820-4da1-4e82-92a1-2b43a7bece08',
+                      statusDate: '2020-02-18T15:15:58.806Z',
+                      status: 'failed',
+                      lastFailureAt: '2020-02-18T15:15:58.806Z',
+                      lastSuccessAt: '2020-02-13T20:31:59.855Z',
+                      lastFailureMessage:
+                        'Signal rule name: "Query with a rule id Number 1", id: "1ea5a820-4da1-4e82-92a1-2b43a7bece08", rule_id: "query-rule-id-1" has a time gap of 5 days (412682928ms), and could be missing signals within that time. Consider increasing your look behind time or adding more Kibana instances.',
+                      lastSuccessMessage: 'succeeded',
+                      lastLookBackDate: new Date('2020-02-18T15:14:58.806Z').toISOString(),
+                      gap: '500.32',
+                      searchAfterTimeDurations: ['200.00'],
+                      bulkCreateTimeDurations: ['800.43'],
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      ],
+    },
+  },
 });
 
 export const getEmptySignalsResponse = (): SignalSearchResponse => ({

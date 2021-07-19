@@ -27,11 +27,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('spaces integration', () => {
     before(async () => {
-      await esArchiver.load('saved_objects_management/spaces_integration');
+      await esArchiver.load(
+        'x-pack/test/functional/es_archives/saved_objects_management/spaces_integration'
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('saved_objects_management/spaces_integration');
+      await esArchiver.unload(
+        'x-pack/test/functional/es_archives/saved_objects_management/spaces_integration'
+      );
     });
 
     beforeEach(async () => {

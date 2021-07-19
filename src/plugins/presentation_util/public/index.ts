@@ -8,9 +8,27 @@
 
 import { PresentationUtilPlugin } from './plugin';
 
+export {
+  PresentationCapabilitiesService,
+  PresentationDashboardsService,
+  PresentationLabsService,
+  getStubPluginServices,
+} from './services';
+
+export {
+  KibanaPluginServiceFactory,
+  PluginServiceFactory,
+  PluginServices,
+  PluginServiceProviders,
+  PluginServiceProvider,
+  PluginServiceRegistry,
+  KibanaPluginServiceParams,
+} from './services/create';
+
 export { PresentationUtilPluginSetup, PresentationUtilPluginStart } from './types';
 export { SaveModalDashboardProps } from './components/types';
 export { projectIDs, ProjectID, Project } from '../common/labs';
+export * from '../common/lib';
 
 export {
   LazyLabsBeakerButton,
@@ -19,6 +37,7 @@ export {
   LazySavedObjectSaveModalDashboard,
   withSuspense,
 } from './components';
+
 export {
   AddFromLibraryButton,
   PrimaryActionButton,
@@ -33,3 +52,7 @@ export {
 export function plugin() {
   return new PresentationUtilPlugin();
 }
+
+import { pluginServices } from './services';
+
+export const useLabs = () => (() => pluginServices.getHooks().labs.useService())();

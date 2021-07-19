@@ -13,6 +13,9 @@ import {
   DEFAULT_EMS_LANDING_PAGE_URL,
   DEFAULT_EMS_TILE_API_URL,
   DEFAULT_EMS_FILE_API_URL,
+  DEFAULT_EMS_ROADMAP_ID,
+  DEFAULT_EMS_ROADMAP_DESATURATED_ID,
+  DEFAULT_EMS_DARKMAP_ID,
 } from './common';
 
 const tileMapConfigOptionsSchema = schema.object({
@@ -77,9 +80,9 @@ export const emsConfigSchema = schema.object({
     defaultValue: DEFAULT_EMS_FONT_LIBRARY_URL,
   }),
   emsTileLayerId: schema.object({
-    bright: schema.string({ defaultValue: 'road_map' }),
-    desaturated: schema.string({ defaultValue: 'road_map_desaturated' }),
-    dark: schema.string({ defaultValue: 'dark_map' }),
+    bright: schema.string({ defaultValue: DEFAULT_EMS_ROADMAP_ID }),
+    desaturated: schema.string({ defaultValue: DEFAULT_EMS_ROADMAP_DESATURATED_ID }),
+    dark: schema.string({ defaultValue: DEFAULT_EMS_DARKMAP_ID }),
   }),
 });
 

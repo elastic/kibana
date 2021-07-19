@@ -44,6 +44,7 @@ Array [
           <span
             aria-hidden="true"
             className="euiCallOutHeader__icon"
+            color="inherit"
             data-euiicon-type="alert"
             size="m"
           />
@@ -250,6 +251,7 @@ Array [
             >
               <span
                 className="euiButtonContent__icon"
+                color="inherit"
                 data-euiicon-type="save"
                 size="m"
               />
@@ -331,6 +333,7 @@ Array [
           <span
             aria-hidden="true"
             className="euiCallOutHeader__icon"
+            color="inherit"
             data-euiicon-type="alert"
             size="m"
           />
@@ -476,6 +479,7 @@ Array [
             >
               <span
                 className="euiButtonContent__icon"
+                color="inherit"
                 data-euiicon-type="save"
                 size="m"
               />
@@ -557,6 +561,7 @@ Array [
           <span
             aria-hidden="true"
             className="euiCallOutHeader__icon"
+            color="inherit"
             data-euiicon-type="alert"
             size="m"
           />
@@ -702,6 +707,7 @@ Array [
             >
               <span
                 className="euiButtonContent__icon"
+                color="inherit"
                 data-euiicon-type="save"
                 size="m"
               />
@@ -904,6 +910,7 @@ Array [
             >
               <span
                 className="euiButtonContent__icon"
+                color="inherit"
                 data-euiicon-type="save"
                 size="m"
               />

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { getEmailConnector, EmailConnector } from '../objects/connector';
 import {
   CustomRule,
   MachineLearningRule,
-  machineLearningRule,
+  getMachineLearningRule,
   OverrideRule,
   ThreatIndicatorRule,
   ThresholdRule,
@@ -44,8 +45,7 @@ import {
   INVESTIGATION_NOTES_TEXTAREA,
   LOOK_BACK_INTERVAL,
   LOOK_BACK_TIME_TYPE,
-  MACHINE_LEARNING_DROPDOWN,
-  MACHINE_LEARNING_LIST,
+  MACHINE_LEARNING_DROPDOWN_INPUT,
   MACHINE_LEARNING_TYPE,
   MITRE_ATTACK_ADD_SUBTECHNIQUE_BUTTON,
   MITRE_ATTACK_ADD_TACTIC_BUTTON,
@@ -86,6 +86,12 @@ import {
   THRESHOLD_FIELD_SELECTION,
   THRESHOLD_INPUT_AREA,
   THRESHOLD_TYPE,
+  CONNECTOR_NAME_INPUT,
+  EMAIL_CONNECTOR_FROM_INPUT,
+  EMAIL_CONNECTOR_HOST_INPUT,
+  EMAIL_CONNECTOR_PORT_INPUT,
+  EMAIL_CONNECTOR_USER_INPUT,
+  EMAIL_CONNECTOR_PASSWORD_INPUT,
 } from '../screens/create_new_rule';
 import { TOAST_ERROR } from '../screens/shared';
 import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
@@ -261,9 +267,33 @@ export const fillScheduleRuleAndContinue = (rule: CustomRule | MachineLearningRu
   cy.get(LOOK_BACK_TIME_TYPE).select(rule.lookBack.timeType);
 };
 
+export const fillDefineThresholdRule = (rule: ThresholdRule) => {
+  const thresholdField = 0;
+  const threshold = 1;
+
+  cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
+  cy.get(TIMELINE(rule.timeline.id!)).click();
+  cy.get(COMBO_BOX_CLEAR_BTN).click();
+
+  rule.index.forEach((index) => {
+    cy.get(COMBO_BOX_INPUT).first().type(`${index}{enter}`);
+  });
+
+  cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
+  cy.get(THRESHOLD_INPUT_AREA)
+    .find(INPUT)
+    .then((inputs) => {
+      cy.wrap(inputs[thresholdField]).type(rule.thresholdField);
+      cy.get(THRESHOLD_FIELD_SELECTION).click({ force: true });
+      cy.wrap(inputs[threshold]).clear().type(rule.threshold);
+    });
+};
+
 export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
   const thresholdField = 0;
   const threshold = 1;
+
+  const typeThresholdField = ($el: Cypress.ObjectLike) => cy.wrap($el).type(rule.thresholdField);
 
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
   cy.get(TIMELINE(rule.timeline.id!)).click();
@@ -271,7 +301,7 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
   cy.get(THRESHOLD_INPUT_AREA)
     .find(INPUT)
     .then((inputs) => {
-      cy.wrap(inputs[thresholdField]).type(rule.thresholdField);
+      cy.wrap(inputs[thresholdField]).pipe(typeThresholdField);
       cy.get(THRESHOLD_FIELD_SELECTION).click({ force: true });
       cy.wrap(inputs[threshold]).clear().type(rule.threshold);
     });
@@ -367,6 +397,15 @@ export const fillIndexAndIndicatorIndexPattern = (
   getIndicatorIndicatorIndex().type(`${indicatorIndex}{enter}`);
 };
 
+export const fillEmailConnectorForm = (connector: EmailConnector = getEmailConnector()) => {
+  cy.get(CONNECTOR_NAME_INPUT).type(connector.name);
+  cy.get(EMAIL_CONNECTOR_FROM_INPUT).type(connector.from);
+  cy.get(EMAIL_CONNECTOR_HOST_INPUT).type(connector.host);
+  cy.get(EMAIL_CONNECTOR_PORT_INPUT).type(connector.port);
+  cy.get(EMAIL_CONNECTOR_USER_INPUT).type(connector.user);
+  cy.get(EMAIL_CONNECTOR_PASSWORD_INPUT).type(connector.password);
+};
+
 /** Returns the indicator index drop down field. Pass in row number, default is 1 */
 export const getIndicatorIndexComboField = (row = 1) =>
   cy.get(THREAT_COMBO_BOX_INPUT).eq(row * 2 - 2);
@@ -434,14 +473,20 @@ export const fillDefineIndicatorMatchRuleAndContinue = (rule: ThreatIndicatorRul
 };
 
 export const fillDefineMachineLearningRuleAndContinue = (rule: MachineLearningRule) => {
-  cy.get(MACHINE_LEARNING_DROPDOWN).click({ force: true });
-  cy.contains(MACHINE_LEARNING_LIST, rule.machineLearningJob).click();
-  cy.get(ANOMALY_THRESHOLD_INPUT).type(`{selectall}${machineLearningRule.anomalyScoreThreshold}`, {
-    force: true,
+  rule.machineLearningJobs.forEach((machineLearningJob) => {
+    cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).click({ force: true });
+    cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type(`${machineLearningJob}{enter}`);
+    cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type('{esc}');
   });
+  cy.get(ANOMALY_THRESHOLD_INPUT).type(
+    `{selectall}${getMachineLearningRule().anomalyScoreThreshold}`,
+    {
+      force: true,
+    }
+  );
   getDefineContinueButton().should('exist').click({ force: true });
 
-  cy.get(MACHINE_LEARNING_DROPDOWN).should('not.exist');
+  cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).should('not.exist');
 };
 
 export const goToDefineStepTab = () => {
@@ -476,7 +521,11 @@ export const selectThresholdRuleType = () => {
   cy.get(THRESHOLD_TYPE).click({ force: true });
 };
 
-export const waitForAlertsToPopulate = async () => {
+export const previewResults = () => {
+  cy.get(QUERY_PREVIEW_BUTTON).click();
+};
+
+export const waitForAlertsToPopulate = async (alertCountThreshold = 1) => {
   cy.waitUntil(
     () => {
       refreshPage();
@@ -485,7 +534,7 @@ export const waitForAlertsToPopulate = async () => {
         .invoke('text')
         .then((countText) => {
           const alertCount = parseInt(countText, 10) || 0;
-          return alertCount > 0;
+          return alertCount >= alertCountThreshold;
         });
     },
     { interval: 500, timeout: 12000 }

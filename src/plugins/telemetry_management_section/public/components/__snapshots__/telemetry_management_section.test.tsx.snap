@@ -47,129 +47,143 @@ exports[`TelemetryManagementSectionComponent does not show the endpoint link whe
 
 exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
 <Fragment>
-  <EuiPanel
-    paddingSize="l"
+  <_EuiSplitPanelOuter
+    hasBorder={true}
   >
     <EuiForm>
-      <EuiText>
-        <EuiFlexGroup
-          alignItems="baseline"
-        >
-          <EuiFlexItem
-            grow={false}
-          >
-            <h2>
-              <FormattedMessage
-                defaultMessage="Usage Data"
-                id="telemetry.usageDataTitle"
-                values={Object {}}
-              />
-            </h2>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiText>
-      <EuiCallOut
-        color="primary"
-        iconType="spacesApp"
-        title={
-          <p>
+      <_EuiSplitPanelInner
+        color="subdued"
+      >
+        <EuiTitle>
+          <h2>
             <FormattedMessage
-              defaultMessage="Changes to this setting apply to {allOfKibanaText} and are saved automatically."
-              id="telemetry.callout.appliesSettingTitle"
-              values={
-                Object {
-                  "allOfKibanaText": <strong>
-                    <FormattedMessage
-                      defaultMessage="all of Kibana"
-                      id="telemetry.callout.appliesSettingTitle.allOfKibanaText"
-                      values={Object {}}
-                    />
-                  </strong>,
-                }
-              }
+              defaultMessage="Usage Data"
+              id="telemetry.usageDataTitle"
+              values={Object {}}
             />
-          </p>
-        }
-      />
-      <EuiSpacer
-        size="s"
-      />
-      <lazy
-        dockLinks={null}
-        enableSaving={true}
-        handleChange={[Function]}
-        loading={false}
-        setting={
-          Object {
-            "ariaName": "Provide usage statistics",
-            "defVal": true,
-            "description": <React.Fragment>
-              <p>
-                <FormattedMessage
-                  defaultMessage="Enabling data usage collection helps us manage and improve our products and services. See our {privacyStatementLink} for more details."
-                  id="telemetry.telemetryConfigAndLinkDescription"
-                  values={
-                    Object {
-                      "privacyStatementLink": <EuiLink
-                        href="https://www.elastic.co/legal/privacy-statement"
-                        target="_blank"
-                      >
-                        <FormattedMessage
-                          defaultMessage="Privacy Statement"
-                          id="telemetry.readOurUsageDataPrivacyStatementLinkText"
-                          values={Object {}}
-                        />
-                      </EuiLink>,
-                    }
+          </h2>
+        </EuiTitle>
+      </_EuiSplitPanelInner>
+      <_EuiSplitPanelInner>
+        <EuiCallOut
+          color="primary"
+          iconType="spacesApp"
+          title={
+            <p>
+              <FormattedMessage
+                defaultMessage="Changes to this setting apply to {allOfKibanaText} and are saved automatically."
+                id="telemetry.callout.appliesSettingTitle"
+                values={
+                  Object {
+                    "allOfKibanaText": <strong>
+                      <FormattedMessage
+                        defaultMessage="all of Kibana"
+                        id="telemetry.callout.appliesSettingTitle.allOfKibanaText"
+                        values={Object {}}
+                      />
+                    </strong>,
                   }
-                />
-              </p>
-              <p>
-                <FormattedMessage
-                  defaultMessage="See examples of the {clusterData} and {endpointSecurityData} that we collect."
-                  id="telemetry.seeExampleOfClusterDataAndEndpointSecuity"
-                  values={
-                    Object {
-                      "clusterData": <EuiLink
-                        data-test-id="cluster_data_example"
-                        onClick={[Function]}
-                      >
-                        <FormattedMessage
-                          defaultMessage="cluster data"
-                          id="telemetry.clusterData"
-                          values={Object {}}
-                        />
-                      </EuiLink>,
-                      "endpointSecurityData": <EuiLink
-                        data-test-id="endpoint_security_example"
-                        onClick={[Function]}
-                      >
-                        <FormattedMessage
-                          defaultMessage="endpoint security data"
-                          id="telemetry.securityData"
-                          values={Object {}}
-                        />
-                      </EuiLink>,
-                    }
-                  }
-                />
-              </p>
-            </React.Fragment>,
-            "displayName": "Provide usage statistics",
-            "name": "telemetry:enabled",
-            "type": "boolean",
-            "value": true,
+                }
+              />
+            </p>
           }
-        }
-        toasts={null}
-      />
+        />
+        <EuiSpacer
+          size="s"
+        />
+        <lazy
+          dockLinks={Object {}}
+          enableSaving={true}
+          handleChange={[Function]}
+          loading={false}
+          setting={
+            Object {
+              "ariaName": "Provide usage statistics",
+              "category": Array [],
+              "defVal": true,
+              "description": <React.Fragment>
+                <p>
+                  <FormattedMessage
+                    defaultMessage="Enabling data usage collection helps us manage and improve our products and services. See our {privacyStatementLink} for more details."
+                    id="telemetry.telemetryConfigAndLinkDescription"
+                    values={
+                      Object {
+                        "privacyStatementLink": <EuiLink
+                          href="https://www.elastic.co/legal/privacy-statement"
+                          target="_blank"
+                        >
+                          <FormattedMessage
+                            defaultMessage="Privacy Statement"
+                            id="telemetry.readOurUsageDataPrivacyStatementLinkText"
+                            values={Object {}}
+                          />
+                        </EuiLink>,
+                      }
+                    }
+                  />
+                </p>
+                <p>
+                  <FormattedMessage
+                    defaultMessage="See examples of the {clusterData} and {endpointSecurityData} that we collect."
+                    id="telemetry.seeExampleOfClusterDataAndEndpointSecuity"
+                    values={
+                      Object {
+                        "clusterData": <EuiLink
+                          data-test-id="cluster_data_example"
+                          onClick={[Function]}
+                        >
+                          <FormattedMessage
+                            defaultMessage="cluster data"
+                            id="telemetry.clusterData"
+                            values={Object {}}
+                          />
+                        </EuiLink>,
+                        "endpointSecurityData": <EuiLink
+                          data-test-id="endpoint_security_example"
+                          onClick={[Function]}
+                        >
+                          <FormattedMessage
+                            defaultMessage="endpoint security data"
+                            id="telemetry.securityData"
+                            values={Object {}}
+                          />
+                        </EuiLink>,
+                      }
+                    }
+                  />
+                </p>
+              </React.Fragment>,
+              "displayName": "Provide usage statistics",
+              "isCustom": true,
+              "isOverridden": false,
+              "name": "telemetry:enabled",
+              "requiresPageReload": false,
+              "type": "boolean",
+              "value": true,
+            }
+          }
+          toasts={
+            Object {
+              "add": [MockFunction],
+              "addDanger": [MockFunction],
+              "addError": [MockFunction],
+              "addInfo": [MockFunction],
+              "addSuccess": [MockFunction],
+              "addWarning": [MockFunction],
+              "get$": [MockFunction],
+              "remove": [MockFunction],
+            }
+          }
+        />
+      </_EuiSplitPanelInner>
     </EuiForm>
-  </EuiPanel>
+  </_EuiSplitPanelOuter>
 </Fragment>
 `;
 
 exports[`TelemetryManagementSectionComponent renders null because allowChangingOptInStatus is false 1`] = `
 <TelemetryManagementSection
+  docLinks={Object {}}
   enableSaving={true}
   intl={
     Object {
@@ -290,6 +304,7 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
   showAppliesSettingMessage={true}
   telemetryService={
     TelemetryService {
+      "canSendTelemetry": [Function],
       "currentKibanaVersion": "mock_kibana_version",
       "defaultConfig": Object {
         "allowChangingOptInStatus": false,
@@ -334,6 +349,7 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
         "post": [MockFunction],
         "put": [MockFunction],
       },
+      "isScreenshotMode": false,
       "notifications": Object {
         "toasts": Object {
           "add": [MockFunction],

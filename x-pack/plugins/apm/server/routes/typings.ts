@@ -12,12 +12,18 @@ import {
   KibanaRequest,
   CoreStart,
 } from 'src/core/server';
+import { RuleDataClient } from '../../../rule_registry/server';
+import { AlertingApiRequestHandlerContext } from '../../../alerting/server';
+import type { RacApiRequestHandlerContext } from '../../../rule_registry/server';
 import { LicensingApiRequestHandlerContext } from '../../../licensing/server';
 import { APMConfig } from '..';
 import { APMPluginDependencies } from '../types';
+import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server';
 
 export interface ApmPluginRequestHandlerContext extends RequestHandlerContext {
   licensing: LicensingApiRequestHandlerContext;
+  alerting: AlertingApiRequestHandlerContext;
+  rac: RacApiRequestHandlerContext;
 }
 
 export type InspectResponse = Array<{
@@ -26,6 +32,7 @@ export type InspectResponse = Array<{
   requestType: string;
   requestParams: Record<string, unknown>;
   esError: Error;
+  operationName: string;
 }>;
 
 export interface APMRouteCreateOptions {
@@ -36,8 +43,14 @@ export interface APMRouteCreateOptions {
       | 'access:ml:canGetJobs'
       | 'access:ml:canCreateJob'
     >;
+    body?: { accepts: Array<'application/json' | 'multipart/form-data'> };
+    disableTelemetry?: boolean;
   };
 }
+
+export type TelemetryUsageCounter = ReturnType<
+  UsageCollectionSetup['createUsageCounter']
+>;
 
 export interface APMRouteHandlerResources {
   request: KibanaRequest;
@@ -59,4 +72,6 @@ export interface APMRouteHandlerResources {
       start: () => Promise<Required<APMPluginDependencies>[key]['start']>;
     };
   };
+  ruleDataClient: RuleDataClient;
+  telemetryUsageCounter?: TelemetryUsageCounter;
 }

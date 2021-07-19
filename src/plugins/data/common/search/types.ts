@@ -7,9 +7,8 @@
  */
 
 import { Observable } from 'rxjs';
-import { IEsSearchRequest, IEsSearchResponse } from './es_search';
-import { IndexPattern } from '..';
-import type { RequestResponder } from '../../../inspector/common';
+import { IEsSearchRequest, IEsSearchResponse, IndexPattern } from '..';
+import type { RequestAdapter } from '../../../inspector/common';
 
 export type ISearchGeneric = <
   SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
@@ -67,6 +66,11 @@ export interface IKibanaSearchResponse<RawResponse = any> {
   isPartial?: boolean;
 
   /**
+   * Indicates whether the results returned are from the async-search index
+   */
+  isRestored?: boolean;
+
+  /**
    * The raw response returned by the internal search method (usually the raw ES response)
    */
   rawResponse: RawResponse;
@@ -79,6 +83,13 @@ export interface IKibanaSearchRequest<Params = any> {
   id?: string;
 
   params?: Params;
+}
+
+export interface IInspectorInfo {
+  adapter?: RequestAdapter;
+  title: string;
+  id?: string;
+  description?: string;
 }
 
 export interface ISearchOptions {
@@ -117,10 +128,12 @@ export interface ISearchOptions {
   /**
    * Index pattern reference is used for better error messages
    */
-
   indexPattern?: IndexPattern;
 
-  requestResponder?: RequestResponder;
+  /**
+   * Inspector integration options
+   */
+  inspector?: IInspectorInfo;
 }
 
 /**

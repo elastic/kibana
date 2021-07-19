@@ -9,7 +9,7 @@ import { generatePath } from 'react-router-dom';
 
 import { kea, MakeLogicType } from 'kea';
 
-import { flashAPIErrors, setQueuedSuccessMessage } from '../../../shared/flash_messages';
+import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { ENGINE_PATH } from '../../routes';
@@ -22,9 +22,11 @@ interface EngineCreationActions {
   setLanguage(language: string): { language: string };
   setRawName(rawName: string): { rawName: string };
   submitEngine(): void;
+  onSubmitError(): void;
 }
 
 interface EngineCreationValues {
+  isLoading: boolean;
   language: string;
   name: string;
   rawName: string;
@@ -37,8 +39,16 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
     setLanguage: (language) => ({ language }),
     setRawName: (rawName) => ({ rawName }),
     submitEngine: true,
+    onSubmitError: true,
   },
   reducers: {
+    isLoading: [
+      false,
+      {
+        submitEngine: () => true,
+        onSubmitError: () => false,
+      },
+    ],
     language: [
       DEFAULT_LANGUAGE,
       {
@@ -67,6 +77,7 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
         actions.onEngineCreationSuccess();
       } catch (e) {
         flashAPIErrors(e);
+        actions.onSubmitError();
       }
     },
     onEngineCreationSuccess: () => {
@@ -74,7 +85,7 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
       const { navigateToUrl } = KibanaLogic.values;
       const enginePath = generatePath(ENGINE_PATH, { engineName: name });
 
-      setQueuedSuccessMessage(ENGINE_CREATION_SUCCESS_MESSAGE);
+      flashSuccessToast(ENGINE_CREATION_SUCCESS_MESSAGE(name));
       navigateToUrl(enginePath);
     },
   }),

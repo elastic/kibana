@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mockKibanaValues } from '../../__mocks__';
+import { mockKibanaValues } from '../../__mocks__/kea_logic';
 
 import { resetContext } from 'kea';
 
@@ -31,6 +31,12 @@ describe('KibanaLogic', () => {
       mountKibanaLogic({ ...mockKibanaValues, config: undefined } as any);
 
       expect(KibanaLogic.values.config).toEqual({});
+    });
+
+    it('gracefully handles disabled security', () => {
+      mountKibanaLogic({ ...mockKibanaValues, security: undefined } as any);
+
+      expect(KibanaLogic.values.security).toEqual({});
     });
 
     it('gracefully handles non-cloud installs', () => {

@@ -69,7 +69,11 @@ export async function runTypeCheckCli() {
     process.exit();
   }
 
-  await buildAllTsRefs(log);
+  const { failed } = await buildAllTsRefs(log);
+  if (failed) {
+    log.error('Unable to build TS project refs');
+    process.exit(1);
+  }
 
   const tscArgs = [
     // composite project cannot be used with --noEmit

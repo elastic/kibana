@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, Plugin, CoreSetup } from 'src/core/server';
+import { i18n } from '@kbn/i18n';
+import {
+  PluginInitializerContext,
+  Plugin,
+  CoreSetup,
+  DEFAULT_APP_CATEGORIES,
+} from '../../../../src/core/server';
 import { ObservabilityConfig } from '.';
 import {
   bootstrapAnnotations,
@@ -13,26 +19,68 @@ import {
   AnnotationsAPI,
 } from './lib/annotations/bootstrap_annotations';
 import type { RuleRegistryPluginSetupContract } from '../../rule_registry/server';
+import { PluginSetupContract as FeaturesSetup } from '../../features/server';
 import { uiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
 import { getGlobalObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
-import { observabilityRuleRegistrySettings } from '../common/observability_rule_registry';
+import { casesFeatureId, observabilityFeatureId } from '../common';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
-export type ObservabilityRuleRegistry = ObservabilityPluginSetup['ruleRegistry'];
+
+interface PluginSetup {
+  features: FeaturesSetup;
+  ruleRegistry: RuleRegistryPluginSetupContract;
+}
 
 export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
   }
 
-  public setup(
-    core: CoreSetup,
-    plugins: {
-      ruleRegistry: RuleRegistryPluginSetupContract;
-    }
-  ) {
+  public setup(core: CoreSetup, plugins: PluginSetup) {
     const config = this.initContext.config.get<ObservabilityConfig>();
+
+    if (config.unsafe.cases.enabled) {
+      plugins.features.registerKibanaFeature({
+        id: casesFeatureId,
+        name: i18n.translate('xpack.observability.featureRegistry.linkObservabilityTitle', {
+          defaultMessage: 'Cases',
+        }),
+        order: 1100,
+        category: DEFAULT_APP_CATEGORIES.observability,
+        app: [casesFeatureId, 'kibana'],
+        catalogue: [observabilityFeatureId],
+        cases: [observabilityFeatureId],
+        privileges: {
+          all: {
+            app: [casesFeatureId, 'kibana'],
+            catalogue: [observabilityFeatureId],
+            cases: {
+              all: [observabilityFeatureId],
+            },
+            api: [],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: ['crud_cases', 'read_cases'], // uiCapabilities[casesFeatureId].crud_cases or read_cases
+          },
+          read: {
+            app: [casesFeatureId, 'kibana'],
+            catalogue: [observabilityFeatureId],
+            cases: {
+              read: [observabilityFeatureId],
+            },
+            api: [],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: ['read_cases'], // uiCapabilities[uiCapabilities[casesFeatureId]].read_cases
+          },
+        },
+      });
+    }
 
     let annotationsApiPromise: Promise<AnnotationsAPI> | undefined;
 
@@ -50,18 +98,22 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       });
     }
 
-    const observabilityRuleRegistry = plugins.ruleRegistry.create(
-      observabilityRuleRegistrySettings
+    const start = () => core.getStartServices().then(([coreStart]) => coreStart);
+
+    const ruleDataClient = plugins.ruleRegistry.ruleDataService.getRuleDataClient(
+      'observability',
+      plugins.ruleRegistry.ruleDataService.getFullAssetName(),
+      () => Promise.resolve()
     );
 
     registerRoutes({
       core: {
         setup: core,
-        start: () => core.getStartServices().then(([coreStart]) => coreStart),
+        start,
       },
-      ruleRegistry: observabilityRuleRegistry,
       logger: this.initContext.logger.get(),
       repository: getGlobalObservabilityServerRouteRepository(),
+      ruleDataClient,
     });
 
     return {
@@ -69,7 +121,6 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
         const api = await annotationsApiPromise;
         return api?.getScopedAnnotationsClient(...args);
       },
-      ruleRegistry: observabilityRuleRegistry,
     };
   }
 

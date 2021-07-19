@@ -8,14 +8,14 @@
 
 import { SpacesOssPlugin } from './plugin';
 
-export {
+export type {
   SpacesOssPluginSetup,
   SpacesOssPluginStart,
   SpacesAvailableStartContract,
   SpacesUnavailableStartContract,
 } from './types';
 
-export {
+export type {
   LazyComponentFn,
   SpacesApi,
   SpacesApiUi,

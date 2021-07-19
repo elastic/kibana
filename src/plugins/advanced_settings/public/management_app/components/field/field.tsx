@@ -39,13 +39,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { FieldSetting, FieldState } from '../../types';
 import { isDefaultValue } from '../../lib';
-import {
-  UiSettingsType,
-  ImageValidation,
-  StringValidationRegex,
-  DocLinksStart,
-  ToastsStart,
-} from '../../../../../../core/public';
+import { UiSettingsType, DocLinksStart, ToastsStart } from '../../../../../../core/public';
 
 interface FieldProps {
   setting: FieldSetting;
@@ -166,7 +160,7 @@ export class Field extends PureComponent<FieldProps> {
     this.onFieldChange(e.target.value);
 
   onFieldChange = (targetValue: any) => {
-    const { type, validation, value, defVal } = this.props.setting;
+    const { type, value, defVal } = this.props.setting;
     let newUnsavedValue;
 
     switch (type) {
@@ -184,20 +178,8 @@ export class Field extends PureComponent<FieldProps> {
         newUnsavedValue = targetValue;
     }
 
-    let errorParams = {};
-
-    if ((validation as StringValidationRegex)?.regex) {
-      if (!(validation as StringValidationRegex).regex!.test(newUnsavedValue.toString())) {
-        errorParams = {
-          error: (validation as StringValidationRegex).message,
-          isInvalid: true,
-        };
-      }
-    }
-
     this.handleChange({
       value: newUnsavedValue,
-      ...errorParams,
     });
   };
 
@@ -212,30 +194,15 @@ export class Field extends PureComponent<FieldProps> {
     }
 
     const file = files[0];
-    const { maxSize } = this.props.setting.validation as ImageValidation;
     try {
       let base64Image = '';
       if (file instanceof File) {
         base64Image = (await this.getImageAsBase64(file)) as string;
       }
 
-      let errorParams = {};
-      const isInvalid = !!(maxSize?.length && base64Image.length > maxSize.length);
-      if (isInvalid) {
-        errorParams = {
-          isInvalid,
-          error: i18n.translate('advancedSettings.field.imageTooLargeErrorMessage', {
-            defaultMessage: 'Image is too large, maximum size is {maxSizeDescription}',
-            values: {
-              maxSizeDescription: maxSize.description,
-            },
-          }),
-        };
-      }
       this.handleChange({
         changeImage: true,
         value: base64Image,
-        ...errorParams,
       });
     } catch (err) {
       this.props.toasts.addDanger(

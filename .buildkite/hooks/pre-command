@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+source .buildkite/scripts/lifecycle/pre_command.sh

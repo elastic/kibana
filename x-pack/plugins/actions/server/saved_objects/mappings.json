@@ -12,6 +12,9 @@
       "actionTypeId": {
         "type": "keyword"
       },
+      "isMissingSecrets": {
+        "type": "boolean"
+      },
       "config": {
         "enabled": false,
         "type": "object"
@@ -32,6 +35,10 @@
       },
       "apiKey": {
         "type": "binary"
+      },
+      "relatedSavedObjects": {
+        "enabled": false,
+        "type": "object"
       }
     }
   }

@@ -9,11 +9,13 @@ export type ElasticAgentName =
   | 'go'
   | 'java'
   | 'js-base'
+  | 'iOS/swift'
   | 'rum-js'
   | 'nodejs'
   | 'python'
   | 'dotnet'
-  | 'ruby';
+  | 'ruby'
+  | 'php';
 
 export type OpenTelemetryAgentName =
   | 'otlp'
@@ -26,6 +28,7 @@ export type OpenTelemetryAgentName =
   | 'opentelemetry/php'
   | 'opentelemetry/python'
   | 'opentelemetry/ruby'
+  | 'opentelemetry/swift'
   | 'opentelemetry/webjs';
 
 /*

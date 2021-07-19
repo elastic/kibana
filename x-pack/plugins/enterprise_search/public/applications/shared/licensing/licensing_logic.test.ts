@@ -15,11 +15,19 @@ import { LicensingLogic, mountLicensingLogic } from './licensing_logic';
 describe('LicensingLogic', () => {
   const mockLicense = licensingMock.createLicense();
   const mockLicense$ = new BehaviorSubject(mockLicense);
-  const mount = () => mountLicensingLogic({ license$: mockLicense$ });
+  const mount = (props?: object) =>
+    mountLicensingLogic({ license$: mockLicense$, canManageLicense: true, ...props });
 
   beforeEach(() => {
     jest.clearAllMocks();
     resetContext({});
+  });
+
+  describe('canManageLicense', () => {
+    it('sets value from props', () => {
+      mount({ canManageLicense: false });
+      expect(LicensingLogic.values.canManageLicense).toEqual(false);
+    });
   });
 
   describe('setLicense()', () => {
@@ -61,7 +69,7 @@ describe('LicensingLogic', () => {
     describe('on unmount', () => {
       it('unsubscribes to the license observable', () => {
         const mockUnsubscribe = jest.fn();
-        const unmount = mountLicensingLogic({
+        const unmount = mount({
           license$: { subscribe: () => ({ unsubscribe: mockUnsubscribe }) } as any,
         });
         unmount();
@@ -156,6 +164,35 @@ describe('LicensingLogic', () => {
 
         updateLicense({ status: 'active', type: 'standard' });
         expect(LicensingLogic.values.hasGoldLicense).toEqual(false);
+      });
+    });
+
+    describe('isTrial', () => {
+      it('is true for active trial license', () => {
+        updateLicense({ status: 'active', type: 'trial' });
+        expect(LicensingLogic.values.isTrial).toEqual(true);
+      });
+
+      it('is false if the trial license is expired', () => {
+        updateLicense({ status: 'expired', type: 'trial' });
+        expect(LicensingLogic.values.isTrial).toEqual(false);
+      });
+
+      it('is false for all non-trial licenses', () => {
+        updateLicense({ status: 'active', type: 'basic' });
+        expect(LicensingLogic.values.isTrial).toEqual(false);
+
+        updateLicense({ status: 'active', type: 'standard' });
+        expect(LicensingLogic.values.isTrial).toEqual(false);
+
+        updateLicense({ status: 'active', type: 'gold' });
+        expect(LicensingLogic.values.isTrial).toEqual(false);
+
+        updateLicense({ status: 'active', type: 'platinum' });
+        expect(LicensingLogic.values.isTrial).toEqual(false);
+
+        updateLicense({ status: 'active', type: 'enterprise' });
+        expect(LicensingLogic.values.isTrial).toEqual(false);
       });
     });
   });

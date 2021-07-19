@@ -41,11 +41,11 @@ export const validateMustache = (params: AlertAction['params']) => {
   return errors;
 };
 
-export const validateActionParams = (
+export const validateActionParams = async (
   actionItem: AlertAction,
   actionTypeRegistry: ActionTypeRegistryContract
-): string[] => {
-  const actionErrors = actionTypeRegistry
+): Promise<string[]> => {
+  const actionErrors = await actionTypeRegistry
     .get(actionItem.actionTypeId)
     ?.validateParams(actionItem.params);
 

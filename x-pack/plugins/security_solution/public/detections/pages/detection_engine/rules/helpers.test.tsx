@@ -18,7 +18,7 @@ import {
   getPrePackagedRuleStatus,
   getPrePackagedTimelineStatus,
   determineDetailsValue,
-  userHasNoPermissions,
+  userHasPermissions,
   fillEmptySeverityMappings,
 } from './helpers';
 import { mockRuleWithEverything, mockRule } from './all/__mocks__/mock';
@@ -34,7 +34,7 @@ import {
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 
 describe('rule helpers', () => {
-  // @ts-ignore
+  // @ts-expect-error
   moment.suppressDeprecationWarnings = true;
   describe('getStepsData', () => {
     test('returns object with about, define, schedule and actions step properties formatted', () => {
@@ -51,7 +51,7 @@ describe('rule helpers', () => {
         ruleType: 'saved_query',
         anomalyThreshold: 50,
         index: ['auditbeat-*'],
-        machineLearningJobId: '',
+        machineLearningJobId: [],
         queryBar: {
           query: {
             query: 'user.name: root or user.name: admin',
@@ -204,7 +204,7 @@ describe('rule helpers', () => {
       const expected = {
         ruleType: 'saved_query',
         anomalyThreshold: 50,
-        machineLearningJobId: '',
+        machineLearningJobId: [],
         index: ['auditbeat-*'],
         queryBar: {
           query: {
@@ -246,7 +246,7 @@ describe('rule helpers', () => {
       const expected = {
         ruleType: 'saved_query',
         anomalyThreshold: 50,
-        machineLearningJobId: '',
+        machineLearningJobId: [],
         index: ['auditbeat-*'],
         queryBar: {
           query: {
@@ -403,26 +403,26 @@ describe('rule helpers', () => {
     });
   });
 
-  describe('userHasNoPermissions', () => {
-    test("returns false when user's CRUD operations are null", () => {
-      const result: boolean = userHasNoPermissions(null);
-      const userHasNoPermissionsExpectedResult = false;
+  describe('userHasPermissions', () => {
+    test("returns true when user's CRUD operations are null", () => {
+      const result: boolean = userHasPermissions(null);
+      const userHasPermissionsExpectedResult = true;
 
-      expect(result).toEqual(userHasNoPermissionsExpectedResult);
+      expect(result).toEqual(userHasPermissionsExpectedResult);
     });
 
-    test('returns true when user cannot CRUD', () => {
-      const result: boolean = userHasNoPermissions(false);
-      const userHasNoPermissionsExpectedResult = true;
+    test('returns false when user cannot CRUD', () => {
+      const result: boolean = userHasPermissions(false);
+      const userHasPermissionsExpectedResult = false;
 
-      expect(result).toEqual(userHasNoPermissionsExpectedResult);
+      expect(result).toEqual(userHasPermissionsExpectedResult);
     });
 
-    test('returns false when user can CRUD', () => {
-      const result: boolean = userHasNoPermissions(true);
-      const userHasNoPermissionsExpectedResult = false;
+    test('returns true when user can CRUD', () => {
+      const result: boolean = userHasPermissions(true);
+      const userHasPermissionsExpectedResult = true;
 
-      expect(result).toEqual(userHasNoPermissionsExpectedResult);
+      expect(result).toEqual(userHasPermissionsExpectedResult);
     });
   });
 

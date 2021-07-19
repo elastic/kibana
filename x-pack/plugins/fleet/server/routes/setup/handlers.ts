@@ -6,14 +6,12 @@
  */
 
 import type { RequestHandler } from 'src/core/server';
-import type { TypeOf } from '@kbn/config-schema';
 
 import { appContextService } from '../../services';
 import type { GetFleetStatusResponse, PostIngestSetupResponse } from '../../../common';
-import { setupFleet, setupIngestManager } from '../../services/setup';
+import { setupIngestManager } from '../../services/setup';
 import { hasFleetServers } from '../../services/fleet_server';
 import { defaultIngestErrorHandler } from '../../errors';
-import type { PostFleetSetupRequestSchema } from '../../types';
 
 export const getFleetStatusHandler: RequestHandler = async (context, request, response) => {
   try {
@@ -21,15 +19,12 @@ export const getFleetStatusHandler: RequestHandler = async (context, request, re
       .getSecurity()
       .authc.apiKeys.areAPIKeysEnabled();
     const isFleetServerSetup = await hasFleetServers(appContextService.getInternalUserESClient());
-    const canEncrypt = appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt === true;
 
     const missingRequirements: GetFleetStatusResponse['missing_requirements'] = [];
     if (!isApiKeysEnabled) {
       missingRequirements.push('api_keys');
     }
-    if (!canEncrypt) {
-      missingRequirements.push('encrypted_saved_object_encryption_key_required');
-    }
+
     if (!isFleetServerSetup) {
       missingRequirements.push('fleet_server');
     }
@@ -51,32 +46,20 @@ export const fleetSetupHandler: RequestHandler = async (context, request, respon
   try {
     const soClient = context.core.savedObjects.client;
     const esClient = context.core.elasticsearch.client.asCurrentUser;
-    const body: PostIngestSetupResponse = { isInitialized: true };
-    await setupIngestManager(soClient, esClient);
+    const body: PostIngestSetupResponse = await setupIngestManager(soClient, esClient);
 
     return response.ok({
-      body,
-    });
-  } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
-  }
-};
-
-// TODO should be removed as part https://github.com/elastic/kibana/issues/94303
-export const fleetAgentSetupHandler: RequestHandler<
-  undefined,
-  undefined,
-  TypeOf<typeof PostFleetSetupRequestSchema.body>
-> = async (context, request, response) => {
-  try {
-    const soClient = context.core.savedObjects.client;
-    const esClient = context.core.elasticsearch.client.asCurrentUser;
-    const body: PostIngestSetupResponse = { isInitialized: true };
-    await setupIngestManager(soClient, esClient);
-    await setupFleet(soClient, esClient, { forceRecreate: request.body?.forceRecreate === true });
-
-    return response.ok({
-      body,
+      body: {
+        ...body,
+        nonFatalErrors: body.nonFatalErrors?.map((e) => {
+          // JSONify the error object so it can be displayed properly in the UI
+          const error = e.error ?? e;
+          return {
+            name: error.name,
+            message: error.message,
+          };
+        }),
+      },
     });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });

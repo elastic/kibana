@@ -6,7 +6,7 @@
  */
 
 import datemath from '@elastic/datemath';
-import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiPanel, EuiSuperDatePicker } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiSuperDatePicker } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -26,18 +26,30 @@ import {
   useLogEntryCategoriesResultsUrlState,
 } from './use_log_entry_categories_results_url_state';
 import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis/log_analysis_capabilities';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { LogsPageTemplate } from '../page_template';
+import { RecreateJobButton } from '../../../components/logging/log_analysis_setup/create_job_button';
+import { AnalyzeInMlButton } from '../../../components/logging/log_analysis_results';
+import { useMlHref, ML_PAGES } from '../../../../../ml/public';
+import { DatasetsSelector } from '../../../components/logging/log_analysis_results/datasets_selector';
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;
 
 interface LogEntryCategoriesResultsContentProps {
   onOpenSetup: () => void;
+  pageTitle: string;
 }
 
 export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryCategoriesResultsContentProps> = ({
   onOpenSetup,
+  pageTitle,
 }) => {
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_results' });
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_results', delay: 15000 });
+
+  const {
+    services: { ml, http },
+  } = useKibanaContextForPlugin();
 
   const { hasLogAnalysisSetupCapabilities } = useLogAnalysisCapabilitiesContext();
 
@@ -178,17 +190,48 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryC
     autoRefresh.isPaused ? null : autoRefresh.interval
   );
 
+  const analyzeInMlLink = useMlHref(ml, http.basePath.get(), {
+    page: ML_PAGES.ANOMALY_EXPLORER,
+    pageState: {
+      jobIds: [jobIds['log-entry-categories-count']],
+      timeRange: {
+        from: moment(categoryQueryTimeRange.timeRange.startTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+        to: moment(categoryQueryTimeRange.timeRange.endTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+        mode: 'absolute',
+      },
+    },
+  });
+
   return (
     <ViewLogInContext.Provider
       sourceId={sourceId}
       startTimestamp={categoryQueryTimeRange.timeRange.startTime}
       endTimestamp={categoryQueryTimeRange.timeRange.endTime}
     >
-      <ResultsContentPage>
+      <LogsPageTemplate
+        pageHeader={{
+          pageTitle,
+          rightSideItems: [
+            <RecreateJobButton
+              hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
+              onClick={onOpenSetup}
+              size="s"
+            />,
+            <AnalyzeInMlButton href={analyzeInMlLink} />,
+          ],
+        }}
+      >
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-              <EuiFlexItem />
+              <EuiFlexItem>
+                <DatasetsSelector
+                  availableDatasets={logEntryCategoryDatasets}
+                  isLoading={isLoadingLogEntryCategoryDatasets}
+                  onChangeDatasetSelection={setCategoryQueryDatasets}
+                  selectedDatasets={categoryQueryDatasets}
+                />
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiSuperDatePicker
                   start={selectedTimeRange.startTime}
@@ -215,26 +258,18 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryC
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiPanel paddingSize="m">
-              <TopCategoriesSection
-                availableDatasets={logEntryCategoryDatasets}
-                hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
-                isLoadingDatasets={isLoadingLogEntryCategoryDatasets}
-                isLoadingTopCategories={isLoadingTopLogEntryCategories}
-                jobId={jobIds['log-entry-categories-count']}
-                onChangeDatasetSelection={setCategoryQueryDatasets}
-                onRequestRecreateMlJob={onOpenSetup}
-                selectedDatasets={categoryQueryDatasets}
-                sourceId={sourceId}
-                timeRange={categoryQueryTimeRange.timeRange}
-                topCategories={topLogEntryCategories}
-                sortOptions={sortOptions}
-                changeSortOptions={changeSortOptions}
-              />
-            </EuiPanel>
+            <TopCategoriesSection
+              isLoadingTopCategories={isLoadingTopLogEntryCategories}
+              jobId={jobIds['log-entry-categories-count']}
+              sourceId={sourceId}
+              timeRange={categoryQueryTimeRange.timeRange}
+              topCategories={topLogEntryCategories}
+              sortOptions={sortOptions}
+              changeSortOptions={changeSortOptions}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </ResultsContentPage>
+      </LogsPageTemplate>
       <PageViewLogInContext />
     </ViewLogInContext.Provider>
   );

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { AuditEvent, EventOutcome, EventCategory, EventType } from '../../../security/server';
+import type { EcsEventOutcome, EcsEventType } from 'src/core/server';
+import { AuditEvent } from '../../../security/server';
 
 export enum ConnectorAuditAction {
   CREATE = 'connector_create',
@@ -27,18 +28,18 @@ const eventVerbs: Record<ConnectorAuditAction, VerbsTuple> = {
   connector_execute: ['execute', 'executing', 'executed'],
 };
 
-const eventTypes: Record<ConnectorAuditAction, EventType | undefined> = {
-  connector_create: EventType.CREATION,
-  connector_get: EventType.ACCESS,
-  connector_update: EventType.CHANGE,
-  connector_delete: EventType.DELETION,
-  connector_find: EventType.ACCESS,
+const eventTypes: Record<ConnectorAuditAction, EcsEventType | undefined> = {
+  connector_create: 'creation',
+  connector_get: 'access',
+  connector_update: 'change',
+  connector_delete: 'deletion',
+  connector_find: 'access',
   connector_execute: undefined,
 };
 
 export interface ConnectorAuditEventParams {
   action: ConnectorAuditAction;
-  outcome?: EventOutcome;
+  outcome?: EcsEventOutcome;
   savedObject?: NonNullable<AuditEvent['kibana']>['saved_object'];
   error?: Error;
 }
@@ -53,7 +54,7 @@ export function connectorAuditEvent({
   const [present, progressive, past] = eventVerbs[action];
   const message = error
     ? `Failed attempt to ${present} ${doc}`
-    : outcome === EventOutcome.UNKNOWN
+    : outcome === 'unknown'
     ? `User is ${progressive} ${doc}`
     : `User has ${past} ${doc}`;
   const type = eventTypes[action];
@@ -62,9 +63,9 @@ export function connectorAuditEvent({
     message,
     event: {
       action,
-      category: EventCategory.DATABASE,
-      type,
-      outcome: outcome ?? (error ? EventOutcome.FAILURE : EventOutcome.SUCCESS),
+      category: ['database'],
+      type: type ? [type] : undefined,
+      outcome: outcome ?? (error ? 'failure' : 'success'),
     },
     kibana: {
       saved_object: savedObject,

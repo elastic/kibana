@@ -6,6 +6,7 @@
  */
 
 import type { IUiSettingsClient } from 'kibana/public';
+import { partition } from 'lodash';
 import {
   AggFunctionsMapping,
   EsaggsExpressionFunctionDefinition,
@@ -53,42 +54,75 @@ function getExpressionForLayer(
         }
       });
     }
+
+    if (
+      'references' in column &&
+      rootDef.shiftable &&
+      rootDef.input === 'fullReference' &&
+      column.timeShift
+    ) {
+      // inherit time shift to all referenced operations
+      column.references.forEach((referenceColumnId) => {
+        const referencedColumn = columns[referenceColumnId];
+        const referenceDef = operationDefinitionMap[column.operationType];
+        if (referenceDef.shiftable) {
+          columns[referenceColumnId] = { ...referencedColumn, timeShift: column.timeShift };
+        }
+      });
+    }
   });
 
   const columnEntries = columnOrder.map((colId) => [colId, columns[colId]] as const);
 
-  if (columnEntries.length) {
+  const [referenceEntries, esAggEntries] = partition(
+    columnEntries,
+    ([, col]) =>
+      operationDefinitionMap[col.operationType]?.input === 'fullReference' ||
+      operationDefinitionMap[col.operationType]?.input === 'managedReference'
+  );
+
+  if (referenceEntries.length || esAggEntries.length) {
     const aggs: ExpressionAstExpressionBuilder[] = [];
     const expressions: ExpressionAstFunction[] = [];
-    columnEntries.forEach(([colId, col]) => {
+
+    sortedReferences(referenceEntries).forEach((colId) => {
+      const col = columns[colId];
       const def = operationDefinitionMap[col.operationType];
-      if (def.input === 'fullReference') {
+      if (def.input === 'fullReference' || def.input === 'managedReference') {
         expressions.push(...def.toExpression(layer, colId, indexPattern));
-      } else {
+      }
+    });
+
+    const orderedColumnIds = esAggEntries.map(([colId]) => colId);
+    esAggEntries.forEach(([colId, col], index) => {
+      const def = operationDefinitionMap[col.operationType];
+      if (def.input !== 'fullReference' && def.input !== 'managedReference') {
         const wrapInFilter = Boolean(def.filterable && col.filter);
         let aggAst = def.toEsAggsFn(
           col,
-          wrapInFilter ? `${colId}-metric` : colId,
+          wrapInFilter ? `${index}-metric` : String(index),
           indexPattern,
           layer,
-          uiSettings
+          uiSettings,
+          orderedColumnIds
         );
         if (wrapInFilter) {
           aggAst = buildExpressionFunction<AggFunctionsMapping['aggFilteredMetric']>(
             'aggFilteredMetric',
             {
-              id: colId,
+              id: String(index),
               enabled: true,
               schema: 'metric',
               customBucket: buildExpression([
                 buildExpressionFunction<AggFunctionsMapping['aggFilter']>('aggFilter', {
-                  id: `${colId}-filter`,
+                  id: `${index}-filter`,
                   enabled: true,
                   schema: 'bucket',
                   filter: JSON.stringify(col.filter),
                 }),
               ]),
               customMetric: buildExpression({ type: 'expression', chain: [aggAst] }),
+              timeShift: col.timeShift,
             }
           ).toAst();
         }
@@ -101,8 +135,8 @@ function getExpressionForLayer(
       }
     });
 
-    const idMap = columnEntries.reduce((currentIdMap, [colId, column], index) => {
-      const esAggsId = `col-${columnEntries.length === 1 ? 0 : index}-${colId}`;
+    const idMap = esAggEntries.reduce((currentIdMap, [colId, column], index) => {
+      const esAggsId = `col-${index}-${index}`;
       return {
         ...currentIdMap,
         [esAggsId]: {
@@ -196,6 +230,26 @@ function getExpressionForLayer(
       }
     );
 
+    if (esAggEntries.length === 0) {
+      return {
+        type: 'expression',
+        chain: [
+          {
+            type: 'function',
+            function: 'createTable',
+            arguments: {
+              ids: [],
+              names: [],
+              rowCount: [1],
+            },
+          },
+          ...expressions,
+          ...formatterOverrides,
+          ...timeScaleFunctions,
+        ],
+      };
+    }
+
     const allDateHistogramFields = Object.values(columns)
       .map((column) =>
         column.operationType === dateHistogramOperation.type ? column.sourceField : null
@@ -232,6 +286,33 @@ function getExpressionForLayer(
   }
 
   return null;
+}
+
+// Topologically sorts references so that we can execute them in sequence
+function sortedReferences(columns: Array<readonly [string, IndexPatternColumn]>) {
+  const allNodes: Record<string, string[]> = {};
+  columns.forEach(([id, col]) => {
+    allNodes[id] = 'references' in col ? col.references : [];
+  });
+  // remove real metric references
+  columns.forEach(([id]) => {
+    allNodes[id] = allNodes[id].filter((refId) => !!allNodes[refId]);
+  });
+  const ordered: string[] = [];
+
+  while (ordered.length < columns.length) {
+    Object.keys(allNodes).forEach((id) => {
+      if (allNodes[id].length === 0) {
+        ordered.push(id);
+        delete allNodes[id];
+        Object.keys(allNodes).forEach((k) => {
+          allNodes[k] = allNodes[k].filter((i) => i !== id);
+        });
+      }
+    });
+  }
+
+  return ordered;
 }
 
 export function toExpression(

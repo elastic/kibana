@@ -41,7 +41,7 @@ import { buildSortedEventsQuery } from '../../../common/build_sorted_events_quer
 import { EsQueryAlertParams } from './types';
 import { IndexSelectPopover } from '../components/index_select_popover';
 
-function totalHitsToNumber(total: estypes.HitsMetadata['total']): number {
+function totalHitsToNumber(total: estypes.SearchHitsMetadata['total']): number {
   return typeof total === 'number' ? total : total.value;
 }
 

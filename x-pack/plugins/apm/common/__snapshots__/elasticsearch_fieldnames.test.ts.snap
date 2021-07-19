@@ -23,7 +23,13 @@ Object {
 }
 `;
 
+exports[`Error CLOUD_ACCOUNT_ID 1`] = `undefined`;
+
 exports[`Error CLOUD_AVAILABILITY_ZONE 1`] = `"europe-west1-c"`;
+
+exports[`Error CLOUD_INSTANCE_ID 1`] = `undefined`;
+
+exports[`Error CLOUD_INSTANCE_NAME 1`] = `undefined`;
 
 exports[`Error CLOUD_MACHINE_TYPE 1`] = `undefined`;
 
@@ -108,6 +114,8 @@ exports[`Error METRIC_SYSTEM_CPU_PERCENT 1`] = `undefined`;
 exports[`Error METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
 
 exports[`Error METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
+
+exports[`Error METRICSET_NAME 1`] = `undefined`;
 
 exports[`Error OBSERVER_HOSTNAME 1`] = `undefined`;
 
@@ -258,7 +266,13 @@ Object {
 }
 `;
 
+exports[`Span CLOUD_ACCOUNT_ID 1`] = `undefined`;
+
 exports[`Span CLOUD_AVAILABILITY_ZONE 1`] = `"europe-west1-c"`;
+
+exports[`Span CLOUD_INSTANCE_ID 1`] = `undefined`;
+
+exports[`Span CLOUD_INSTANCE_NAME 1`] = `undefined`;
 
 exports[`Span CLOUD_MACHINE_TYPE 1`] = `undefined`;
 
@@ -339,6 +353,8 @@ exports[`Span METRIC_SYSTEM_CPU_PERCENT 1`] = `undefined`;
 exports[`Span METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
 
 exports[`Span METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
+
+exports[`Span METRICSET_NAME 1`] = `undefined`;
 
 exports[`Span OBSERVER_HOSTNAME 1`] = `undefined`;
 
@@ -485,7 +501,13 @@ Object {
 }
 `;
 
+exports[`Transaction CLOUD_ACCOUNT_ID 1`] = `undefined`;
+
 exports[`Transaction CLOUD_AVAILABILITY_ZONE 1`] = `"europe-west1-c"`;
+
+exports[`Transaction CLOUD_INSTANCE_ID 1`] = `undefined`;
+
+exports[`Transaction CLOUD_INSTANCE_NAME 1`] = `undefined`;
 
 exports[`Transaction CLOUD_MACHINE_TYPE 1`] = `undefined`;
 
@@ -576,6 +598,8 @@ exports[`Transaction METRIC_SYSTEM_CPU_PERCENT 1`] = `undefined`;
 exports[`Transaction METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
 
 exports[`Transaction METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
+
+exports[`Transaction METRICSET_NAME 1`] = `undefined`;
 
 exports[`Transaction OBSERVER_HOSTNAME 1`] = `undefined`;
 

@@ -117,7 +117,7 @@ export default function ({
             'ecommerce_map',
             updateBaselines
           );
-          expect(percentDifference).to.be.lessThan(0.02);
+          expect(percentDifference.toFixed(3)).to.be.lessThan(0.031);
         });
       });
 
@@ -128,7 +128,7 @@ export default function ({
           });
           await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.home.addSampleDataSet('flights');
-          await PageObjects.maps.loadSavedMap('[Flights] Origin and Destination Flight Time');
+          await PageObjects.maps.loadSavedMap('[Flights] Origin Time Delayed');
           await PageObjects.maps.toggleLayerVisibility('Road map');
           await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
           await PageObjects.maps.enterFullScreen();
@@ -141,7 +141,7 @@ export default function ({
             'flights_map',
             updateBaselines
           );
-          expect(percentDifference).to.be.lessThan(0.02);
+          expect(percentDifference.toFixed(3)).to.be.lessThan(0.031);
         });
       });
 
@@ -166,7 +166,7 @@ export default function ({
             'web_logs_map',
             updateBaselines
           );
-          expect(percentDifference).to.be.lessThan(0.02);
+          expect(percentDifference.toFixed(3)).to.be.lessThan(0.031);
         });
       });
     });

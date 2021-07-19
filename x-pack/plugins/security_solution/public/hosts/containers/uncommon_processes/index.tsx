@@ -32,6 +32,7 @@ import { ESTermQuery } from '../../../../common/typed_json';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
 const ID = 'hostsUncommonProcessesQuery';
 
@@ -72,7 +73,7 @@ export const useUncommonProcesses = ({
   const { activePage, limit } = useDeepEqualSelector((state: State) =>
     getUncommonProcessesSelector(state, type)
   );
-  const { data, notifications } = useKibana().services;
+  const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
@@ -81,6 +82,7 @@ export const useUncommonProcesses = ({
     uncommonProcessesRequest,
     setUncommonProcessesRequest,
   ] = useState<HostsUncommonProcessesRequestOptions | null>(null);
+  const { addError, addWarning } = useAppToasts();
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
@@ -150,15 +152,14 @@ export const useUncommonProcesses = ({
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading(false);
-                notifications.toasts.addWarning(i18n.ERROR_UNCOMMON_PROCESSES);
+                addWarning(i18n.ERROR_UNCOMMON_PROCESSES);
                 searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
               setLoading(false);
-              notifications.toasts.addDanger({
+              addError(msg, {
                 title: i18n.FAIL_UNCOMMON_PROCESSES,
-                text: msg.message,
               });
               searchSubscription$.current.unsubscribe();
             },
@@ -169,7 +170,7 @@ export const useUncommonProcesses = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, notifications.toasts, skip]
+    [data.search, addError, addWarning, skip]
   );
 
   useEffect(() => {

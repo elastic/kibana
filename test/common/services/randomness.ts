@@ -7,8 +7,20 @@
  */
 
 import Chance from 'chance';
+import { ToolingLog } from '@kbn/dev-utils';
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrService } from '../ftr_provider_context';
+
+let __CACHED_SEED__: number | undefined;
+function getSeed(log: ToolingLog) {
+  if (__CACHED_SEED__ !== undefined) {
+    return __CACHED_SEED__;
+  }
+
+  __CACHED_SEED__ = Date.now();
+  log.debug('randomness seed: %j', __CACHED_SEED__);
+  return __CACHED_SEED__;
+}
 
 interface CharOptions {
   pool?: string;
@@ -27,52 +39,45 @@ interface NumberOptions {
   max?: number;
 }
 
-export function RandomnessProvider({ getService }: FtrProviderContext) {
-  const log = getService('log');
+export class RandomnessService extends FtrService {
+  private readonly chance = new Chance(getSeed(this.ctx.getService('log')));
 
-  const seed = Date.now();
-  log.debug('randomness seed: %j', seed);
+  /**
+   * Generate a random natural number
+   *
+   *  range: 0 to 9007199254740991
+   *
+   */
+  naturalNumber(options?: NumberOptions) {
+    return this.chance.natural(options);
+  }
 
-  const chance = new Chance(seed);
+  /**
+   * Generate a random integer
+   */
+  integer(options?: NumberOptions) {
+    return this.chance.integer(options);
+  }
 
-  return new (class RandomnessService {
-    /**
-     * Generate a random natural number
-     *
-     *  range: 0 to 9007199254740991
-     *
-     */
-    naturalNumber(options?: NumberOptions) {
-      return chance.natural(options);
-    }
+  /**
+   * Generate a random number, defaults to at least 4 and no more than 8 syllables
+   */
+  word(options: { syllables?: number } = {}) {
+    const { syllables = this.naturalNumber({ min: 4, max: 8 }) } = options;
 
-    /**
-     * Generate a random integer
-     */
-    integer(options?: NumberOptions) {
-      return chance.integer(options);
-    }
+    return this.chance.word({
+      syllables,
+    });
+  }
 
-    /**
-     * Generate a random number, defaults to at least 4 and no more than 8 syllables
-     */
-    word(options: { syllables?: number } = {}) {
-      const { syllables = this.naturalNumber({ min: 4, max: 8 }) } = options;
-
-      return chance.word({
-        syllables,
-      });
-    }
-
-    /**
-     * Generate a random string, defaults to at least 8 and no more than 15 alpha-numeric characters
-     */
-    string(options: StringOptions = {}) {
-      return chance.string({
-        length: this.naturalNumber({ min: 8, max: 15 }),
-        ...(options.pool === 'undefined' ? { alpha: true, numeric: true, symbols: false } : {}),
-        ...options,
-      });
-    }
-  })();
+  /**
+   * Generate a random string, defaults to at least 8 and no more than 15 alpha-numeric characters
+   */
+  string(options: StringOptions = {}) {
+    return this.chance.string({
+      length: this.naturalNumber({ min: 8, max: 15 }),
+      ...(options.pool === 'undefined' ? { alpha: true, numeric: true, symbols: false } : {}),
+      ...options,
+    });
+  }
 }

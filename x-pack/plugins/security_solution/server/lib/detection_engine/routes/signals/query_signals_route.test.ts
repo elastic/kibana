@@ -14,7 +14,7 @@ import {
   getSignalsAggsAndQueryRequest,
   getEmptySignalsResponse,
 } from '../__mocks__/request_responses';
-import { requestContextMock, serverMock, requestMock } from '../__mocks__';
+import { requestContextMock, serverMock, requestMock, createMockConfig } from '../__mocks__';
 import { querySignalsRoute } from './query_signals_route';
 
 describe('query for signal', () => {
@@ -27,7 +27,7 @@ describe('query for signal', () => {
 
     clients.clusterClient.callAsCurrentUser.mockResolvedValue(getEmptySignalsResponse());
 
-    querySignalsRoute(server.router);
+    querySignalsRoute(server.router, createMockConfig());
   });
 
   describe('query and agg on signals index', () => {

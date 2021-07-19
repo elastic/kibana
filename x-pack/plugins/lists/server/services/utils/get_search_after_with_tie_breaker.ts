@@ -5,8 +5,7 @@
  * 2.0.
  */
 import type { estypes } from '@elastic/elasticsearch';
-
-import { SortFieldOrUndefined } from '../../../common/schemas';
+import type { SortFieldOrUndefined } from '@kbn/securitysolution-io-ts-list-types';
 
 export type TieBreaker<T> = T & {
   tie_breaker_id: string;

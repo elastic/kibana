@@ -8,7 +8,7 @@
 import { History } from 'history';
 import { parse, stringify } from 'query-string';
 import { url } from '../../../../../../../src/plugins/kibana_utils/public';
-import { LocalUIFilterName } from '../../../../common/ui_filter';
+import { UxLocalUIFilterName } from '../../../../common/ux_ui_filter';
 
 export function toQuery(search?: string): APMQueryParamsRaw {
   return search ? parse(search.slice(1), { sort: false }) : {};
@@ -88,7 +88,13 @@ export type APMQueryParams = {
   latencyAggregationType?: string;
   comparisonEnabled?: boolean;
   comparisonType?: string;
-} & { [key in LocalUIFilterName]?: string };
+  transactionResult?: string;
+  host?: string;
+  containerId?: string;
+  podName?: string;
+  agentName?: string;
+  serviceVersion?: string;
+} & { [key in UxLocalUIFilterName]?: string };
 
 // forces every value of T[K] to be type: string
 type StringifyAll<T> = { [K in keyof T]: string };

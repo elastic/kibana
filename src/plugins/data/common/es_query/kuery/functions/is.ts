@@ -11,7 +11,7 @@ import { getPhraseScript } from '../../filters';
 import { getFields } from './utils/get_fields';
 import { getTimeZoneFromSettings } from '../../utils';
 import { getFullFieldNameNode } from './utils/get_full_field_name_node';
-import { IIndexPattern, KueryNode, IFieldType } from '../../..';
+import { IndexPatternBase, KueryNode, IndexPatternFieldBase } from '../../..';
 
 import * as ast from '../ast';
 
@@ -39,19 +39,28 @@ export function buildNodeParams(fieldName: string, value: any, isPhrase: boolean
 
 export function toElasticsearchQuery(
   node: KueryNode,
-  indexPattern?: IIndexPattern,
+  indexPattern?: IndexPatternBase,
   config: Record<string, any> = {},
   context: Record<string, any> = {}
 ) {
   const {
     arguments: [fieldNameArg, valueArg, isPhraseArg],
   } = node;
+
+  const isExistsQuery = valueArg.type === 'wildcard' && valueArg.value === wildcard.wildcardSymbol;
+  const isAllFieldsQuery =
+    fieldNameArg.type === 'wildcard' && fieldNameArg.value === wildcard.wildcardSymbol;
+  const isMatchAllQuery = isExistsQuery && isAllFieldsQuery;
+
+  if (isMatchAllQuery) {
+    return { match_all: {} };
+  }
+
   const fullFieldNameArg = getFullFieldNameNode(
     fieldNameArg,
     indexPattern,
     context?.nested ? context.nested.path : undefined
   );
-  const fieldName = ast.toElasticsearchQuery(fullFieldNameArg);
   const value = !isUndefined(valueArg) ? ast.toElasticsearchQuery(valueArg) : valueArg;
   const type = isPhraseArg.value ? 'phrase' : 'best_fields';
   if (fullFieldNameArg.value === null) {
@@ -86,17 +95,12 @@ export function toElasticsearchQuery(
     });
   }
 
-  const isExistsQuery = valueArg.type === 'wildcard' && (value as any) === '*';
-  const isAllFieldsQuery =
-    (fullFieldNameArg.type === 'wildcard' && ((fieldName as unknown) as string) === '*') ||
-    (fields && indexPattern && fields.length === indexPattern.fields.length);
-  const isMatchAllQuery = isExistsQuery && isAllFieldsQuery;
-
-  if (isMatchAllQuery) {
+  // Special case for wildcards where there are no fields or all fields share the same prefix
+  if (isExistsQuery && (!fields?.length || fields?.length === indexPattern?.fields.length)) {
     return { match_all: {} };
   }
 
-  const queries = fields!.reduce((accumulator: any, field: IFieldType) => {
+  const queries = fields!.reduce((accumulator: any, field: IndexPatternFieldBase) => {
     const wrapWithNestedQuery = (query: any) => {
       // Wildcards can easily include nested and non-nested fields. There isn't a good way to let
       // users handle this themselves so we automatically add nested queries in this scenario.

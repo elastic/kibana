@@ -79,6 +79,12 @@ export function registerAnomalyDetectionAlertType({
           }),
         },
         {
+          name: 'message',
+          description: i18n.translate('xpack.ml.alertContext.messageDescription', {
+            defaultMessage: 'Alert info message',
+          }),
+        },
+        {
           name: 'isInterim',
           description: i18n.translate('xpack.ml.alertContext.isInterimDescription', {
             defaultMessage: 'Indicate if top hits contain interim results',
@@ -113,6 +119,7 @@ export function registerAnomalyDetectionAlertType({
     },
     producer: PLUGIN_ID,
     minimumLicenseRequired: MINIMUM_FULL_LICENSE,
+    isExportable: true,
     async executor({ services, params, alertId, state, previousStartedAt, startedAt }) {
       const fakeRequest = {} as KibanaRequest;
       const { execute } = mlSharedServices.alertingServiceProvider(

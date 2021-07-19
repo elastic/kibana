@@ -16,10 +16,14 @@ import {
   SavedObjectsClientContract as SavedObjectsApi,
   SavedObjectsFindOptions as SavedObjectFindOptionsServer,
   SavedObjectsMigrationVersion,
+  SavedObjectsResolveResponse,
 } from '../../server';
 
 import { SimpleSavedObject } from './simple_saved_object';
+import type { ResolvedSimpleSavedObject } from './types';
 import { HttpFetchOptions, HttpSetup } from '../http';
+
+export type { SavedObjectsResolveResponse };
 
 type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;
 
@@ -77,10 +81,9 @@ export interface SavedObjectsBulkUpdateOptions {
 }
 
 /** @public */
-export interface SavedObjectsUpdateOptions {
+export interface SavedObjectsUpdateOptions<Attributes = unknown> {
   version?: string;
-  /** {@inheritDoc SavedObjectsMigrationVersion} */
-  migrationVersion?: SavedObjectsMigrationVersion;
+  upsert?: Attributes;
   references?: SavedObjectReference[];
 }
 
@@ -103,7 +106,9 @@ export interface SavedObjectsDeleteOptions {
  *
  * @public
  */
-export interface SavedObjectsFindResponsePublic<T = unknown> extends SavedObjectsBatchResponse<T> {
+export interface SavedObjectsFindResponsePublic<T = unknown, A = unknown>
+  extends SavedObjectsBatchResponse<T> {
+  aggregations?: A;
   total: number;
   perPage: number;
   page: number;
@@ -310,7 +315,7 @@ export class SavedObjectsClient {
    * @property {object} [options.hasReference] - { type, id }
    * @returns A find result with objects matching the specified search.
    */
-  public find = <T = unknown>(
+  public find = <T = unknown, A = unknown>(
     options: SavedObjectsFindOptions
   ): Promise<SavedObjectsFindResponsePublic<T>> => {
     const path = this.getPath(['_find']);
@@ -326,6 +331,7 @@ export class SavedObjectsClient {
       sortField: 'sort_field',
       type: 'type',
       filter: 'filter',
+      aggs: 'aggs',
       namespaces: 'namespaces',
       preference: 'preference',
     };
@@ -342,6 +348,12 @@ export class SavedObjectsClient {
       query.has_reference = JSON.stringify(query.has_reference);
     }
 
+    // `aggs` is a structured object. we need to stringify it before sending it, as `fetch`
+    // is not doing it implicitly.
+    if (query.aggs) {
+      query.aggs = JSON.stringify(query.aggs);
+    }
+
     const request: ReturnType<SavedObjectsApi['find']> = this.savedObjectsFetch(path, {
       method: 'GET',
       query,
@@ -349,6 +361,7 @@ export class SavedObjectsClient {
     return request.then((resp) => {
       return renameKeys<SavedObjectsFindResponse, SavedObjectsFindResponsePublic>(
         {
+          aggregations: 'aggregations',
           saved_objects: 'savedObjects',
           total: 'total',
           per_page: 'perPage',
@@ -413,6 +426,29 @@ export class SavedObjectsClient {
   }
 
   /**
+   * Resolves a single object
+   *
+   * @param {string} type
+   * @param {string} id
+   * @returns The resolve result for the saved object for the given type and id.
+   */
+  public resolve = <T = unknown>(
+    type: string,
+    id: string
+  ): Promise<ResolvedSimpleSavedObject<T>> => {
+    if (!type || !id) {
+      return Promise.reject(new Error('requires type and id'));
+    }
+
+    const path = `${this.getPath(['resolve'])}/${type}/${id}`;
+    const request: Promise<SavedObjectsResolveResponse<T>> = this.savedObjectsFetch(path, {});
+    return request.then(({ saved_object: object, outcome, aliasTargetId }) => {
+      const savedObject = new SimpleSavedObject<T>(this, object);
+      return { savedObject, outcome, aliasTargetId };
+    });
+  };
+
+  /**
    * Updates an object
    *
    * @param {string} type
@@ -427,7 +463,7 @@ export class SavedObjectsClient {
     type: string,
     id: string,
     attributes: T,
-    { version, migrationVersion, references }: SavedObjectsUpdateOptions = {}
+    { version, references, upsert }: SavedObjectsUpdateOptions = {}
   ): Promise<SimpleSavedObject<T>> {
     if (!type || !id || !attributes) {
       return Promise.reject(new Error('requires type, id and attributes'));
@@ -436,9 +472,9 @@ export class SavedObjectsClient {
     const path = this.getPath([type, id]);
     const body = {
       attributes,
-      migrationVersion,
       references,
       version,
+      upsert,
     };
 
     return this.savedObjectsFetch(path, {

@@ -32,7 +32,7 @@ describe('updateAlert', () => {
     };
     const resolvedValue: Alert = {
       ...alertToUpdate,
-      id: '123',
+      id: '12/3',
       enabled: true,
       alertTypeId: 'test',
       createdBy: null,
@@ -46,11 +46,11 @@ describe('updateAlert', () => {
     };
     http.put.mockResolvedValueOnce(resolvedValue);
 
-    const result = await updateAlert({ http, id: '123', alert: alertToUpdate });
+    const result = await updateAlert({ http, id: '12/3', alert: alertToUpdate });
     expect(result).toEqual(resolvedValue);
     expect(http.put.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/alerting/rule/123",
+        "/api/alerting/rule/12%2F3",
         Object {
           "body": "{\\"throttle\\":\\"1m\\",\\"name\\":\\"test\\",\\"tags\\":[\\"foo\\"],\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"params\\":{},\\"notify_when\\":\\"onThrottleInterval\\",\\"actions\\":[]}",
         },

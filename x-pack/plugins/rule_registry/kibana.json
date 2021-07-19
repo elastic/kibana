@@ -8,11 +8,10 @@
   ],
   "requiredPlugins": [
     "alerting",
+    "data",
+    "spaces",
     "triggersActionsUi"
   ],
-  "server": true,
-  "ui": true,
-  "extraPublicDirs": [
-    "common"
-  ]
+  "optionalPlugins": ["security"],
+  "server": true
 }

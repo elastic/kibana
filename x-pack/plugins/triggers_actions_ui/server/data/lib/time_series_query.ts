@@ -147,7 +147,7 @@ export async function timeSeriesQuery(
   return getResultFromEs(isCountAgg, isGroupAgg, esResult);
 }
 
-function getResultFromEs(
+export function getResultFromEs(
   isCountAgg: boolean,
   isGroupAgg: boolean,
   esResult: estypes.SearchResponse<unknown>
@@ -155,8 +155,8 @@ function getResultFromEs(
   const aggregations = esResult?.aggregations || {};
 
   // add a fake 'all documents' group aggregation, if a group aggregation wasn't used
-  if (!isGroupAgg) {
-    const dateAgg = aggregations.dateAgg || {};
+  if (!isGroupAgg && aggregations.dateAgg) {
+    const dateAgg = aggregations.dateAgg;
 
     aggregations.groupAgg = {
       buckets: [{ key: 'all documents', dateAgg }],
@@ -165,7 +165,7 @@ function getResultFromEs(
     delete aggregations.dateAgg;
   }
 
-  // @ts-expect-error @elastic/elasticsearch Aggregate does not specify buckets
+  // @ts-expect-error specify aggregations type explicitly
   const groupBuckets = aggregations.groupAgg?.buckets || [];
   const result: TimeSeriesResult = {
     results: [],

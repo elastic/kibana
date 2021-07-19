@@ -17,7 +17,7 @@ import { EmsFileParser } from './ems_file_parser';
 import { UrlParser } from './url_parser';
 
 interface Body {
-  aggs?: Record<string, estypes.AggregationContainer>;
+  aggs?: Record<string, estypes.AggregationsAggregationContainer>;
   query?: Query;
   timeout?: string;
 }
@@ -147,7 +147,7 @@ export interface Bool {
   bool?: Bool;
   must?: DslQuery[];
   filter?: Filter[];
-  should?: never[];
+  should?: Filter[];
   must_not?: Filter[];
 }
 

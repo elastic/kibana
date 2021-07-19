@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import './main.scss';
 
 import React from 'react';
 import { EuiPage, EuiPageBody, EuiPageContent, EuiPageContentHeader } from '@elastic/eui';
-import { first } from 'rxjs/operators';
+import { first, pluck } from 'rxjs/operators';
 import {
   IInterpreterRenderHandlers,
   ExpressionValue,
@@ -58,7 +59,9 @@ class Main extends React.Component<{}, State> {
           inspectorAdapters: adapters,
           searchContext: initialContext as any,
         })
-        .getData();
+        .getData()
+        .pipe(pluck('result'))
+        .toPromise();
     };
 
     let lastRenderHandler: ExpressionRenderHandler;

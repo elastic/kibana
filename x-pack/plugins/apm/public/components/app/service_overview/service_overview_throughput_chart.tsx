@@ -8,7 +8,6 @@
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useParams } from 'react-router-dom';
 import { asTransactionRate } from '../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
@@ -31,7 +30,7 @@ export function ServiceOverviewThroughputChart({
   height?: number;
 }) {
   const theme = useTheme();
-  const { serviceName } = useParams<{ serviceName?: string }>();
+
   const {
     urlParams: {
       environment,
@@ -42,12 +41,14 @@ export function ServiceOverviewThroughputChart({
       comparisonType,
     },
   } = useUrlParams();
-  const { transactionType } = useApmServiceContext();
+
+  const { transactionType, serviceName } = useApmServiceContext();
   const comparisonChartTheme = getComparisonChartTheme(theme);
   const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
     start,
     end,
     comparisonType,
+    comparisonEnabled,
   });
 
   const { data = INITIAL_STATE, status } = useFetcher(
@@ -98,7 +99,7 @@ export function ServiceOverviewThroughputChart({
           {
             data: data.previousPeriod,
             type: 'area',
-            color: theme.eui.euiColorLightestShade,
+            color: theme.eui.euiColorMediumShade,
             title: i18n.translate(
               'xpack.apm.serviceOverview.throughtputChart.previousPeriodLabel',
               { defaultMessage: 'Previous period' }
@@ -109,7 +110,7 @@ export function ServiceOverviewThroughputChart({
   ];
 
   return (
-    <EuiPanel>
+    <EuiPanel hasBorder={true}>
       <EuiTitle size="xs">
         <h2>
           {i18n.translate('xpack.apm.serviceOverview.throughtputChartTitle', {

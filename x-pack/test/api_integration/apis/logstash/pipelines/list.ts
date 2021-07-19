@@ -13,7 +13,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   describe('list', () => {
-    const archive = 'logstash/example_pipelines';
+    const archive = 'x-pack/test/functional/es_archives/logstash/example_pipelines';
 
     before('load pipelines archive', () => {
       return esArchiver.load(archive);

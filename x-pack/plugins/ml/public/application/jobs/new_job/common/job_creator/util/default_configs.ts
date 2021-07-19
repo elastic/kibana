@@ -11,7 +11,7 @@ import { Job, Datafeed, Detector } from '../../../../../../../common/types/anoma
 import { splitIndexPatternNames } from '../../../../../../../common/util/job_utils';
 
 export function createEmptyJob(): Job {
-  // @ts-expect-error
+  // @ts-expect-error incomplete job
   return {
     job_id: '',
     description: '',
@@ -28,7 +28,7 @@ export function createEmptyJob(): Job {
 }
 
 export function createEmptyDatafeed(indexPatternTitle: IndexPatternTitle): Datafeed {
-  // @ts-expect-error
+  // @ts-expect-error incomplete datafeed
   return {
     datafeed_id: '',
     job_id: '',

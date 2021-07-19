@@ -232,7 +232,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
               autoIndent={(event) => {
                 autoIndent(editorInstanceRef.current!, event);
               }}
-              addNotification={({ title }) => notifications.toasts.add({ title })}
+              notifications={notifications}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

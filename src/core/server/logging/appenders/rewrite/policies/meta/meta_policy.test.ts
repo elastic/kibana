@@ -26,12 +26,14 @@ describe('MetaRewritePolicy', () => {
 
   describe('mode: update', () => {
     it('updates existing properties in LogMeta', () => {
+      // @ts-expect-error ECS custom meta
       const log = createLogRecord({ a: 'before' });
       const policy = createPolicy('update', [{ path: 'a', value: 'after' }]);
       expect(policy.rewrite(log).meta!.a).toBe('after');
     });
 
     it('updates nested properties in LogMeta', () => {
+      // @ts-expect-error ECS custom meta
       const log = createLogRecord({ a: 'before a', b: { c: 'before b.c' }, d: [0, 1] });
       const policy = createPolicy('update', [
         { path: 'a', value: 'after a' },
@@ -60,6 +62,7 @@ describe('MetaRewritePolicy', () => {
         { path: 'd', value: 'hi' },
       ]);
       const log = createLogRecord({
+        // @ts-expect-error ECS custom meta
         a: 'a',
         b: 'b',
         c: 'c',
@@ -80,6 +83,7 @@ describe('MetaRewritePolicy', () => {
         { path: 'a.b', value: 'foo' },
         { path: 'a.c', value: 'bar' },
       ]);
+      // @ts-expect-error ECS custom meta
       const log = createLogRecord({ a: { b: 'existing meta' } });
       const { meta } = policy.rewrite(log);
       expect(meta!.a.b).toBe('foo');
@@ -106,12 +110,14 @@ describe('MetaRewritePolicy', () => {
 
   describe('mode: remove', () => {
     it('removes existing properties in LogMeta', () => {
+      // @ts-expect-error ECS custom meta
       const log = createLogRecord({ a: 'goodbye' });
       const policy = createPolicy('remove', [{ path: 'a' }]);
       expect(policy.rewrite(log).meta!.a).toBeUndefined();
     });
 
     it('removes nested properties in LogMeta', () => {
+      // @ts-expect-error ECS custom meta
       const log = createLogRecord({ a: 'a', b: { c: 'b.c' }, d: [0, 1] });
       const policy = createPolicy('remove', [{ path: 'b.c' }, { path: 'd[1]' }]);
       expect(policy.rewrite(log).meta).toMatchInlineSnapshot(`
@@ -127,6 +133,7 @@ describe('MetaRewritePolicy', () => {
     });
 
     it('has no effect if property does not exist', () => {
+      // @ts-expect-error ECS custom meta
       const log = createLogRecord({ a: 'a' });
       const policy = createPolicy('remove', [{ path: 'b' }]);
       expect(policy.rewrite(log).meta).toMatchInlineSnapshot(`

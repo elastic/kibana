@@ -10,6 +10,8 @@ import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'src/core/se
 import { CloudConfigType } from './config';
 import { registerCloudUsageCollector } from './collectors';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
+import { parseDeploymentIdFromDeploymentUrl } from './utils';
+import { registerFullstoryRoute } from './routes/fullstory';
 
 interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
@@ -17,6 +19,7 @@ interface PluginsSetup {
 
 export interface CloudSetup {
   cloudId?: string;
+  deploymentId?: string;
   isCloudEnabled: boolean;
   apm: {
     url?: string;
@@ -38,8 +41,16 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     const isCloudEnabled = getIsCloudEnabled(this.config.id);
     registerCloudUsageCollector(usageCollection, { isCloudEnabled });
 
+    if (this.config.full_story.enabled) {
+      registerFullstoryRoute({
+        httpResources: core.http.resources,
+        packageInfo: this.context.env.packageInfo,
+      });
+    }
+
     return {
       cloudId: this.config.id,
+      deploymentId: parseDeploymentIdFromDeploymentUrl(this.config.deployment_url),
       isCloudEnabled,
       apm: {
         url: this.config.apm?.url,

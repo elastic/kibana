@@ -32,6 +32,9 @@ export {
   CounterRateIndexPatternColumn,
   DerivativeIndexPatternColumn,
   MovingAverageIndexPatternColumn,
+  FormulaIndexPatternColumn,
+  MathIndexPatternColumn,
+  OverallSumIndexPatternColumn,
 } from './operations';
 
 export type DraggedField = DragDropIdentifier & {
@@ -87,6 +90,9 @@ export interface IndexPatternPrivateState {
   existingFields: Record<string, Record<string, boolean>>;
   isFirstExistenceFetch: boolean;
   existenceFetchFailed?: boolean;
+  existenceFetchTimeout?: boolean;
+
+  isDimensionClosePrevented?: boolean;
 }
 
 export interface IndexPatternRef {

@@ -7,17 +7,8 @@
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { OperatorEnum, OperatorTypeEnum } from '../../../lists_plugin_deps';
-
 export interface GetGenericComboBoxPropsReturn {
   comboOptions: EuiComboBoxOptionOption[];
   labels: string[];
   selectedComboOptions: EuiComboBoxOptionOption[];
-}
-
-export interface OperatorOption {
-  message: string;
-  value: string;
-  operator: OperatorEnum;
-  type: OperatorTypeEnum;
 }

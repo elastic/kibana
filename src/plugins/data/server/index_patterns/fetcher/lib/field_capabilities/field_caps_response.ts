@@ -69,7 +69,7 @@ import { FieldDescriptor } from '../../../fetcher';
  *  @return {Array<FieldDescriptor>}
  */
 export function readFieldCapsResponse(
-  fieldCapsResponse: estypes.FieldCapabilitiesResponse
+  fieldCapsResponse: estypes.FieldCapsResponse
 ): FieldDescriptor[] {
   const capsByNameThenType = fieldCapsResponse.fields;
 

@@ -101,7 +101,7 @@ export const beatsUuidsAgg = (maxBucketSize) => ({
 export const beatsAggResponseHandler = (response) => {
   // beat types stat
   const buckets = get(response, 'aggregations.types.buckets', []);
-  const beatTotal = get(response, 'aggregations.total.value', null);
+  const beatTotal = get(response, 'aggregations.total.value', 0);
   const beatTypes = buckets.reduce((types, typeBucket) => {
     return [
       ...types,
@@ -112,10 +112,10 @@ export const beatsAggResponseHandler = (response) => {
     ];
   }, []);
 
-  const eventsTotalMax = get(response, 'aggregations.max_events_total.value', null);
-  const eventsTotalMin = get(response, 'aggregations.min_events_total.value', null);
-  const bytesSentMax = get(response, 'aggregations.max_bytes_sent_total.value', null);
-  const bytesSentMin = get(response, 'aggregations.min_bytes_sent_total.value', null);
+  const eventsTotalMax = get(response, 'aggregations.max_events_total.value', 0);
+  const eventsTotalMin = get(response, 'aggregations.min_events_total.value', 0);
+  const bytesSentMax = get(response, 'aggregations.max_bytes_sent_total.value', 0);
+  const bytesSentMin = get(response, 'aggregations.min_bytes_sent_total.value', 0);
 
   return {
     beatTotal,

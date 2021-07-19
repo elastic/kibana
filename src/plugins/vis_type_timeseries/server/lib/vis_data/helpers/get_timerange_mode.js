@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  TIME_RANGE_DATA_MODES,
-  TIME_RANGE_MODE_KEY,
-} from '../../../../common/timerange_data_modes';
-import { PANEL_TYPES } from '../../../../common/panel_types';
+import { PANEL_TYPES, TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../../../common/enums';
 
 const OVERRIDE_INDEX_PATTERN_KEY = 'override_index_pattern';
 

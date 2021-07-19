@@ -8,7 +8,8 @@
 
 import { visTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
 import { BaseVisType } from './base_vis_type';
-import { VisTypeDefinition, VisGroups } from './types';
+import { VisTypeDefinition } from './types';
+import { VisGroups } from './vis_groups_enum';
 
 /**
  * Vis Types Service

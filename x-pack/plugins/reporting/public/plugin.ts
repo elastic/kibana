@@ -15,7 +15,6 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'src/core/public';
-import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
 import { CONTEXT_MENU_TRIGGER } from '../../../../src/plugins/embeddable/public';
 import {
   FeatureCatalogueCategory,
@@ -23,29 +22,29 @@ import {
   HomePublicPluginStart,
 } from '../../../../src/plugins/home/public';
 import { ManagementSetup, ManagementStart } from '../../../../src/plugins/management/public';
-import { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
 import { constants, getDefaultLayoutSelectors } from '../common';
 import { durationToNumber } from '../common/schema_utils';
 import { JobId, JobSummarySet } from '../common/types';
 import { ReportingSetup, ReportingStart } from './';
-import {
-  getGeneralErrorToast,
-  ScreenCapturePanelContent as ScreenCapturePanel,
-} from './components';
 import { ReportingAPIClient } from './lib/reporting_api_client';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
-import { GetCsvReportPanelAction } from './panel_actions/get_csv_panel_action';
-import { csvReportingProvider } from './share_context_menu/register_csv_reporting';
-import { reportingPDFPNGProvider } from './share_context_menu/register_pdf_png_reporting';
+import { getGeneralErrorToast } from './notifier';
+import { ReportingCsvPanelAction } from './panel_actions/get_csv_panel_action';
+import { getSharedComponents } from './shared';
+import { ReportingCsvShareProvider } from './share_context_menu/register_csv_reporting';
+import { reportingScreenshotShareProvider } from './share_context_menu/register_pdf_png_reporting';
+
+import type {
+  SharePluginSetup,
+  SharePluginStart,
+  UiActionsSetup,
+  UiActionsStart,
+} from './shared_imports';
 
 export interface ClientConfigType {
-  poll: {
-    jobsRefresh: {
-      interval: number;
-      intervalErrorMultiplier: number;
-    };
-  };
+  poll: { jobsRefresh: { interval: number; intervalErrorMultiplier: number } };
+  roles: { enabled: boolean };
 }
 
 function getStored(): JobId[] {
@@ -90,11 +89,6 @@ export class ReportingPublicPlugin
       ReportingPublicPluginSetupDendencies,
       ReportingPublicPluginStartDendencies
     > {
-  private readonly contract: ReportingStart = {
-    components: { ScreenCapturePanel },
-    getDefaultLayoutSelectors,
-    ReportingAPIClient,
-  };
   private readonly stop$ = new Rx.ReplaySubject(1);
   private readonly title = i18n.translate('xpack.reporting.management.reportingTitle', {
     defaultMessage: 'Reporting',
@@ -103,25 +97,42 @@ export class ReportingPublicPlugin
     defaultMessage: 'Reporting',
   });
   private config: ClientConfigType;
+  private contract?: ReportingSetup;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ClientConfigType>();
   }
 
-  public setup(
-    core: CoreSetup,
-    { home, management, licensing, uiActions, share }: ReportingPublicPluginSetupDendencies
-  ) {
+  private getContract(core?: CoreSetup) {
+    if (core) {
+      this.contract = {
+        getDefaultLayoutSelectors,
+        usesUiCapabilities: () => this.config.roles?.enabled === false,
+        components: getSharedComponents(core),
+      };
+    }
+
+    if (!this.contract) {
+      throw new Error(`Setup error in Reporting plugin!`);
+    }
+
+    return this.contract;
+  }
+
+  public setup(core: CoreSetup, setupDeps: ReportingPublicPluginSetupDendencies) {
+    const { http, getStartServices, uiSettings } = core;
     const {
-      http,
-      notifications: { toasts },
-      getStartServices,
-      uiSettings,
-    } = core;
-    const { license$ } = licensing;
+      home,
+      management,
+      licensing: { license$ },
+      share,
+      uiActions,
+    } = setupDeps;
+
+    const startServices$ = Rx.from(getStartServices());
+    const usesUiCapabilities = !this.config.roles.enabled;
 
     const apiClient = new ReportingAPIClient(http);
-    const action = new GetCsvReportPanelAction(core, license$);
 
     home.featureCatalogue.register({
       id: 'reporting',
@@ -136,6 +147,7 @@ export class ReportingPublicPlugin
       showOnHomePage: false,
       category: FeatureCatalogueCategory.ADMIN,
     });
+
     management.sections.section.insightsAndAlerting.registerApp({
       id: 'reporting',
       title: this.title,
@@ -144,7 +156,7 @@ export class ReportingPublicPlugin
         params.setBreadcrumbs([{ text: this.breadcrumbText }]);
         const [[start], { mountManagementSection }] = await Promise.all([
           getStartServices(),
-          import('./mount_management_section'),
+          import('./management/mount_management_section'),
         ]);
         return await mountManagementSection(
           core,
@@ -152,24 +164,43 @@ export class ReportingPublicPlugin
           license$,
           this.config.poll,
           apiClient,
+          share.url,
           params
         );
       },
     });
 
-    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, action);
+    uiActions.addTriggerAction(
+      CONTEXT_MENU_TRIGGER,
+      new ReportingCsvPanelAction({ core, startServices$, license$, usesUiCapabilities })
+    );
 
-    share.register(csvReportingProvider({ apiClient, toasts, license$, uiSettings }));
+    const reportingStart = this.getContract(core);
+    const { toasts } = core.notifications;
+
     share.register(
-      reportingPDFPNGProvider({
+      ReportingCsvShareProvider({
         apiClient,
         toasts,
         license$,
+        startServices$,
         uiSettings,
+        usesUiCapabilities,
       })
     );
 
-    return this.contract;
+    share.register(
+      reportingScreenshotShareProvider({
+        apiClient,
+        toasts,
+        license$,
+        startServices$,
+        uiSettings,
+        usesUiCapabilities,
+      })
+    );
+
+    return reportingStart;
   }
 
   public start(core: CoreStart) {
@@ -188,7 +219,7 @@ export class ReportingPublicPlugin
       )
       .subscribe();
 
-    return this.contract;
+    return this.getContract();
   }
 
   public stop() {

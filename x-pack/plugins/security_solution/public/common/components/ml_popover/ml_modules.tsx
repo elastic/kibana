@@ -17,6 +17,8 @@ export const mlModules: string[] = [
   'siem_packetbeat',
   'siem_winlogbeat',
   'siem_winlogbeat_auth',
+  'security_auth',
   'security_linux',
+  'security_network',
   'security_windows',
 ];

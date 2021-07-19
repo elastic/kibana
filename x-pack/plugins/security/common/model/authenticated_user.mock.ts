@@ -9,8 +9,10 @@ import type { AuthenticatedUser } from './authenticated_user';
 
 // We omit `roles` here since the original interface defines this field as `readonly string[]` that makes it hard to use
 // in various mocks that expect mutable string array.
-type AuthenticatedUserProps = Partial<Omit<AuthenticatedUser, 'roles'> & { roles: string[] }>;
-export function mockAuthenticatedUser(user: AuthenticatedUserProps = {}) {
+export type MockAuthenticatedUserProps = Partial<
+  Omit<AuthenticatedUser, 'roles'> & { roles: string[] }
+>;
+export function mockAuthenticatedUser(user: MockAuthenticatedUserProps = {}) {
   return {
     username: 'user',
     email: 'email',

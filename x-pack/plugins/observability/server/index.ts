@@ -16,11 +16,18 @@ export { rangeQuery, kqlQuery } from './utils/queries';
 export * from './types';
 
 export const config = {
+  exposeToBrowser: {
+    unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } },
+  },
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     annotations: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
       index: schema.string({ defaultValue: 'observability-annotations' }),
+    }),
+    unsafe: schema.object({
+      alertingExperience: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
+      cases: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
     }),
   }),
 };

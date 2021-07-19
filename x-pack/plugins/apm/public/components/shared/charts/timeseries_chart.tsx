@@ -24,9 +24,12 @@ import {
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { Suspense, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useChartTheme } from '../../../../../observability/public';
+import {
+  LazyAlertsFlyout,
+  useChartTheme,
+} from '../../../../../observability/public';
 import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
 import {
   Coordinate,
@@ -37,10 +40,13 @@ import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
 import { useAnnotationsContext } from '../../../context/annotations/use_annotations_context';
 import { useChartPointerEventContext } from '../../../context/chart_pointer_event/use_chart_pointer_event_context';
-import { unit } from '../../../style/variables';
+import { unit } from '../../../utils/style';
 import { ChartContainer } from './chart_container';
 import { onBrushEnd, isTimeseriesEmpty } from './helper/helper';
 import { getLatencyChartSelector } from '../../../selectors/latency_chart_selectors';
+import { APMServiceAlert } from '../../../context/apm_service/apm_service_context';
+import { getAlertAnnotations } from './helper/get_alert_annotations';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 interface Props {
   id: string;
@@ -62,8 +68,8 @@ interface Props {
     typeof getLatencyChartSelector
   >['anomalyTimeseries'];
   customTheme?: Record<string, unknown>;
+  alerts?: APMServiceAlert[];
 }
-
 export function TimeseriesChart({
   id,
   height = unit * 16,
@@ -76,12 +82,18 @@ export function TimeseriesChart({
   yDomain,
   anomalyTimeseries,
   customTheme = {},
+  alerts,
 }: Props) {
   const history = useHistory();
+  const { observabilityRuleTypeRegistry } = useApmPluginContext();
+  const { getFormatter } = observabilityRuleTypeRegistry;
   const { annotations } = useAnnotationsContext();
   const { setPointerEvent, chartRef } = useChartPointerEventContext();
   const theme = useTheme();
   const chartTheme = useChartTheme();
+  const [selectedAlertId, setSelectedAlertId] = useState<string | undefined>(
+    undefined
+  );
 
   const xValues = timeseries.flatMap(({ data }) => data.map(({ x }) => x));
 
@@ -95,7 +107,12 @@ export function TimeseriesChart({
   const xDomain = isEmpty ? { min: 0, max: 1 } : { min, max };
 
   return (
-    <ChartContainer hasData={!isEmpty} height={height} status={fetchStatus}>
+    <ChartContainer
+      hasData={!isEmpty}
+      height={height}
+      status={fetchStatus}
+      id={id}
+    >
       <Chart ref={chartRef} id={id}>
         <Settings
           onBrushEnd={({ x }) => onBrushEnd({ x, history })}
@@ -193,6 +210,25 @@ export function TimeseriesChart({
             style={{ fill: anomalyTimeseries.scores.color }}
           />
         )}
+        {getAlertAnnotations({
+          alerts,
+          chartStartTime: xValues[0],
+          getFormatter,
+          selectedAlertId,
+          setSelectedAlertId,
+          theme,
+        })}
+        <Suspense fallback={null}>
+          <LazyAlertsFlyout
+            alerts={alerts}
+            isInApp={true}
+            observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
+            onClose={() => {
+              setSelectedAlertId(undefined);
+            }}
+            selectedAlertId={selectedAlertId}
+          />
+        </Suspense>
       </Chart>
     </ChartContainer>
   );

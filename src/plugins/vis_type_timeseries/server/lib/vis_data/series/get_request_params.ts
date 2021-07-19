@@ -8,24 +8,25 @@
 
 import { buildRequestBody } from './build_request_body';
 
-import type { FetchedIndexPattern, PanelSchema, SeriesItemsSchema } from '../../../../common/types';
+import type { FetchedIndexPattern, Panel, Series } from '../../../../common/types';
 import type {
   VisTypeTimeseriesRequestServices,
   VisTypeTimeseriesVisDataRequest,
 } from '../../../types';
-import type { DefaultSearchCapabilities } from '../../search_strategies';
+import type { SearchCapabilities } from '../../search_strategies';
 
 export async function getSeriesRequestParams(
   req: VisTypeTimeseriesVisDataRequest,
-  panel: PanelSchema,
+  panel: Panel,
   panelIndex: FetchedIndexPattern,
-  series: SeriesItemsSchema,
-  capabilities: DefaultSearchCapabilities,
+  series: Series,
+  capabilities: SearchCapabilities,
   {
     esQueryConfig,
     esShardTimeout,
     uiSettings,
     cachedIndexPatternFetcher,
+    buildSeriesMetaParams,
   }: VisTypeTimeseriesRequestServices
 ) {
   let seriesIndex = panelIndex;
@@ -41,7 +42,8 @@ export async function getSeriesRequestParams(
     esQueryConfig,
     seriesIndex,
     capabilities,
-    uiSettings
+    uiSettings,
+    () => buildSeriesMetaParams(seriesIndex, Boolean(panel.use_kibana_indexes), series)
   );
 
   return {

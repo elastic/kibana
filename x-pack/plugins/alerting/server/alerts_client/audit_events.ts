@@ -5,73 +5,74 @@
  * 2.0.
  */
 
-import { AuditEvent, EventOutcome, EventCategory, EventType } from '../../../security/server';
+import { EcsEventOutcome, EcsEventType } from 'src/core/server';
+import { AuditEvent } from '../../../security/server';
 
-export enum AlertAuditAction {
-  CREATE = 'alert_create',
-  GET = 'alert_get',
-  UPDATE = 'alert_update',
-  UPDATE_API_KEY = 'alert_update_api_key',
-  ENABLE = 'alert_enable',
-  DISABLE = 'alert_disable',
-  DELETE = 'alert_delete',
-  FIND = 'alert_find',
-  MUTE = 'alert_mute',
-  UNMUTE = 'alert_unmute',
-  MUTE_INSTANCE = 'alert_instance_mute',
-  UNMUTE_INSTANCE = 'alert_instance_unmute',
+export enum RuleAuditAction {
+  CREATE = 'rule_create',
+  GET = 'rule_get',
+  UPDATE = 'rule_update',
+  UPDATE_API_KEY = 'rule_update_api_key',
+  ENABLE = 'rule_enable',
+  DISABLE = 'rule_disable',
+  DELETE = 'rule_delete',
+  FIND = 'rule_find',
+  MUTE = 'rule_mute',
+  UNMUTE = 'rule_unmute',
+  MUTE_ALERT = 'rule_alert_mute',
+  UNMUTE_ALERT = 'rule_alert_unmute',
 }
 
 type VerbsTuple = [string, string, string];
 
-const eventVerbs: Record<AlertAuditAction, VerbsTuple> = {
-  alert_create: ['create', 'creating', 'created'],
-  alert_get: ['access', 'accessing', 'accessed'],
-  alert_update: ['update', 'updating', 'updated'],
-  alert_update_api_key: ['update API key of', 'updating API key of', 'updated API key of'],
-  alert_enable: ['enable', 'enabling', 'enabled'],
-  alert_disable: ['disable', 'disabling', 'disabled'],
-  alert_delete: ['delete', 'deleting', 'deleted'],
-  alert_find: ['access', 'accessing', 'accessed'],
-  alert_mute: ['mute', 'muting', 'muted'],
-  alert_unmute: ['unmute', 'unmuting', 'unmuted'],
-  alert_instance_mute: ['mute instance of', 'muting instance of', 'muted instance of'],
-  alert_instance_unmute: ['unmute instance of', 'unmuting instance of', 'unmuted instance of'],
+const eventVerbs: Record<RuleAuditAction, VerbsTuple> = {
+  rule_create: ['create', 'creating', 'created'],
+  rule_get: ['access', 'accessing', 'accessed'],
+  rule_update: ['update', 'updating', 'updated'],
+  rule_update_api_key: ['update API key of', 'updating API key of', 'updated API key of'],
+  rule_enable: ['enable', 'enabling', 'enabled'],
+  rule_disable: ['disable', 'disabling', 'disabled'],
+  rule_delete: ['delete', 'deleting', 'deleted'],
+  rule_find: ['access', 'accessing', 'accessed'],
+  rule_mute: ['mute', 'muting', 'muted'],
+  rule_unmute: ['unmute', 'unmuting', 'unmuted'],
+  rule_alert_mute: ['mute alert of', 'muting alert of', 'muted alert of'],
+  rule_alert_unmute: ['unmute alert of', 'unmuting alert of', 'unmuted alert of'],
 };
 
-const eventTypes: Record<AlertAuditAction, EventType> = {
-  alert_create: EventType.CREATION,
-  alert_get: EventType.ACCESS,
-  alert_update: EventType.CHANGE,
-  alert_update_api_key: EventType.CHANGE,
-  alert_enable: EventType.CHANGE,
-  alert_disable: EventType.CHANGE,
-  alert_delete: EventType.DELETION,
-  alert_find: EventType.ACCESS,
-  alert_mute: EventType.CHANGE,
-  alert_unmute: EventType.CHANGE,
-  alert_instance_mute: EventType.CHANGE,
-  alert_instance_unmute: EventType.CHANGE,
+const eventTypes: Record<RuleAuditAction, EcsEventType> = {
+  rule_create: 'creation',
+  rule_get: 'access',
+  rule_update: 'change',
+  rule_update_api_key: 'change',
+  rule_enable: 'change',
+  rule_disable: 'change',
+  rule_delete: 'deletion',
+  rule_find: 'access',
+  rule_mute: 'change',
+  rule_unmute: 'change',
+  rule_alert_mute: 'change',
+  rule_alert_unmute: 'change',
 };
 
-export interface AlertAuditEventParams {
-  action: AlertAuditAction;
-  outcome?: EventOutcome;
+export interface RuleAuditEventParams {
+  action: RuleAuditAction;
+  outcome?: EcsEventOutcome;
   savedObject?: NonNullable<AuditEvent['kibana']>['saved_object'];
   error?: Error;
 }
 
-export function alertAuditEvent({
+export function ruleAuditEvent({
   action,
   savedObject,
   outcome,
   error,
-}: AlertAuditEventParams): AuditEvent {
-  const doc = savedObject ? `alert [id=${savedObject.id}]` : 'an alert';
+}: RuleAuditEventParams): AuditEvent {
+  const doc = savedObject ? `rule [id=${savedObject.id}]` : 'a rule';
   const [present, progressive, past] = eventVerbs[action];
   const message = error
     ? `Failed attempt to ${present} ${doc}`
-    : outcome === EventOutcome.UNKNOWN
+    : outcome === 'unknown'
     ? `User is ${progressive} ${doc}`
     : `User has ${past} ${doc}`;
   const type = eventTypes[action];
@@ -80,9 +81,9 @@ export function alertAuditEvent({
     message,
     event: {
       action,
-      category: EventCategory.DATABASE,
-      type,
-      outcome: outcome ?? (error ? EventOutcome.FAILURE : EventOutcome.SUCCESS),
+      category: ['database'],
+      type: type ? [type] : undefined,
+      outcome: outcome ?? (error ? 'failure' : 'success'),
     },
     kibana: {
       saved_object: savedObject,

@@ -106,19 +106,7 @@ export const cleanKibana = () => {
     },
   });
 
-  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
-    query: {
-      bool: {
-        filter: [
-          {
-            match: {
-              type: 'cases',
-            },
-          },
-        ],
-      },
-    },
-  });
+  deleteCases();
 
   cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
     query: {
@@ -147,6 +135,23 @@ export const cleanKibana = () => {
   );
 
   esArchiverResetKibana();
+};
+
+export const deleteCases = () => {
+  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
+  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
+    query: {
+      bool: {
+        filter: [
+          {
+            match: {
+              type: 'cases',
+            },
+          },
+        ],
+      },
+    },
+  });
 };
 
 export const scrollToBottom = () => cy.scrollTo('bottom');

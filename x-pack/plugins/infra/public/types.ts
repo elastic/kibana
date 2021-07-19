@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin as PluginClass } from 'kibana/public';
+import { IHttpFetchError } from 'src/core/public';
 import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import type { EmbeddableSetup } from '../../../../src/plugins/embeddable/public';
@@ -59,3 +60,10 @@ export type InfraClientPluginClass = PluginClass<
   InfraClientSetupDeps,
   InfraClientStartDeps
 >;
+
+export interface InfraHttpError extends IHttpFetchError {
+  readonly body?: {
+    statusCode: number;
+    message?: string;
+  };
+}

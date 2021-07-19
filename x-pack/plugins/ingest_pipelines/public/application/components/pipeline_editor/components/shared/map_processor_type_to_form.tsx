@@ -23,6 +23,7 @@ import {
   Drop,
   Enrich,
   Fail,
+  Fingerprint,
   Foreach,
   GeoIP,
   Grok,
@@ -33,7 +34,9 @@ import {
   Json,
   Kv,
   Lowercase,
+  NetworkDirection,
   Pipeline,
+  RegisteredDomain,
   Remove,
   Rename,
   Script,
@@ -307,6 +310,20 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
         defaultMessage: 'Raises an exception that halts execution',
       }),
   },
+  fingerprint: {
+    FieldsComponent: Fingerprint,
+    docLinkPath: '/fingerprint-processor.html',
+    label: i18n.translate('xpack.ingestPipelines.processors.label.fingerprint', {
+      defaultMessage: 'Fingerprint',
+    }),
+    typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.fingerprint', {
+      defaultMessage: 'Computes a hash of the document’s content.',
+    }),
+    getDefaultDescription: () =>
+      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.fingerprint', {
+        defaultMessage: 'Computes a hash of the document’s content.',
+      }),
+  },
   foreach: {
     FieldsComponent: Foreach,
     docLinkPath: '/foreach-processor.html',
@@ -501,6 +518,23 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
         },
       }),
   },
+  network_direction: {
+    FieldsComponent: NetworkDirection,
+    docLinkPath: '/network-direction-processor.html',
+    label: i18n.translate('xpack.ingestPipelines.processors.label.networkDirection', {
+      defaultMessage: 'Network Direction',
+    }),
+    typeDescription: i18n.translate(
+      'xpack.ingestPipelines.processors.description.networkDirection',
+      {
+        defaultMessage: 'Calculates the network direction given a source IP address.',
+      }
+    ),
+    getDefaultDescription: () =>
+      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.networkDirection', {
+        defaultMessage: 'Calculates the network direction given a source IP address.',
+      }),
+  },
   pipeline: {
     FieldsComponent: Pipeline,
     docLinkPath: '/pipeline-processor.html',
@@ -515,6 +549,28 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
         defaultMessage: 'Runs the "{name}" ingest pipeline',
         values: {
           name,
+        },
+      }),
+  },
+  registered_domain: {
+    FieldsComponent: RegisteredDomain,
+    docLinkPath: '/registered-domain-processor.html',
+    label: i18n.translate('xpack.ingestPipelines.processors.label.registeredDomain', {
+      defaultMessage: 'Registered domain',
+    }),
+    typeDescription: i18n.translate(
+      'xpack.ingestPipelines.processors.description.registeredDomain',
+      {
+        defaultMessage:
+          'Extracts the registered domain (effective top-level domain), sub-domain, and top-level domain from a fully qualified domain name.',
+      }
+    ),
+    getDefaultDescription: ({ field }) =>
+      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.registeredDomain', {
+        defaultMessage:
+          'Extracts the registered domain, sub-domain, and top-level domain from "{field}"',
+        values: {
+          field,
         },
       }),
   },

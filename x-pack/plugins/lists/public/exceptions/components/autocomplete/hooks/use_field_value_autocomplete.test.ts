@@ -6,10 +6,10 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
+import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import { stubIndexPatternWithFields } from '../../../../../../../../src/plugins/data/common/index_patterns/index_pattern.stub';
 import { getField } from '../../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
-import { OperatorTypeEnum } from '../../../../../common';
 import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
 
 import {

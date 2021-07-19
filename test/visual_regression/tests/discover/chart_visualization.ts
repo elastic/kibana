@@ -24,17 +24,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover', function describeIndexTests() {
     before(async function () {
-      await esArchiver.load('discover');
+      await esArchiver.load('test/functional/fixtures/es_archiver/discover');
 
       // and load a set of makelogs data
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
     after(function unloadMakelogs() {
-      return esArchiver.unload('logstash_functional');
+      return esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
     async function refreshDiscover() {

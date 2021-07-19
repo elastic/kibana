@@ -6,8 +6,10 @@
  */
 
 export interface ActionsUsage {
+  alert_history_connector_enabled: boolean;
   count_total: number;
   count_active_total: number;
+  count_active_alert_history_connectors: number;
   count_by_type: Record<string, number>;
   count_active_by_type: Record<string, number>;
   // TODO: Implement executions count telemetry with eventLog, when it will write to index

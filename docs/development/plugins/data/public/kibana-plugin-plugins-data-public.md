@@ -11,6 +11,7 @@
 |  [AggConfig](./kibana-plugin-plugins-data-public.aggconfig.md) |  |
 |  [AggConfigs](./kibana-plugin-plugins-data-public.aggconfigs.md) |  |
 |  [AggParamType](./kibana-plugin-plugins-data-public.aggparamtype.md) |  |
+|  [DataPlugin](./kibana-plugin-plugins-data-public.dataplugin.md) |  |
 |  [DuplicateIndexPatternError](./kibana-plugin-plugins-data-public.duplicateindexpatternerror.md) |  |
 |  [FieldFormat](./kibana-plugin-plugins-data-public.fieldformat.md) |  |
 |  [FilterManager](./kibana-plugin-plugins-data-public.filtermanager.md) |  |
@@ -19,7 +20,6 @@
 |  [IndexPatternsService](./kibana-plugin-plugins-data-public.indexpatternsservice.md) |  |
 |  [OptionedParamType](./kibana-plugin-plugins-data-public.optionedparamtype.md) |  |
 |  [PainlessError](./kibana-plugin-plugins-data-public.painlesserror.md) |  |
-|  [Plugin](./kibana-plugin-plugins-data-public.plugin.md) |  |
 |  [SearchInterceptor](./kibana-plugin-plugins-data-public.searchinterceptor.md) |  |
 |  [SearchSource](./kibana-plugin-plugins-data-public.searchsource.md) | \* |
 |  [SearchTimeoutError](./kibana-plugin-plugins-data-public.searchtimeouterror.md) | Request Failure - When an entire multi request fails |
@@ -31,6 +31,7 @@
 |  --- | --- |
 |  [BUCKET\_TYPES](./kibana-plugin-plugins-data-public.bucket_types.md) |  |
 |  [ES\_FIELD\_TYPES](./kibana-plugin-plugins-data-public.es_field_types.md) | \* |
+|  [IndexPatternType](./kibana-plugin-plugins-data-public.indexpatterntype.md) |  |
 |  [KBN\_FIELD\_TYPES](./kibana-plugin-plugins-data-public.kbn_field_types.md) | \* |
 |  [METRIC\_TYPES](./kibana-plugin-plugins-data-public.metric_types.md) |  |
 |  [QuerySuggestionTypes](./kibana-plugin-plugins-data-public.querysuggestiontypes.md) |  |
@@ -46,6 +47,7 @@
 |  [getEsPreference(uiSettings, sessionId)](./kibana-plugin-plugins-data-public.getespreference.md) |  |
 |  [getSearchParamsFromRequest(searchRequest, dependencies)](./kibana-plugin-plugins-data-public.getsearchparamsfromrequest.md) |  |
 |  [getTime(indexPattern, timeRange, options)](./kibana-plugin-plugins-data-public.gettime.md) |  |
+|  [isEsError(e)](./kibana-plugin-plugins-data-public.iseserror.md) | Checks if a given errors originated from Elasticsearch. Those params are assigned to the attributes property of an error. |
 |  [plugin(initializerContext)](./kibana-plugin-plugins-data-public.plugin.md) |  |
 |  [waitUntilNextSessionCompletes$(sessionService, { waitForIdle })](./kibana-plugin-plugins-data-public.waituntilnextsessioncompletes_.md) | Creates an observable that emits when next search session completes. This utility is helpful to use in the application to delay some tasks until next session completes. |
 
@@ -66,7 +68,7 @@
 |  [IEsSearchRequest](./kibana-plugin-plugins-data-public.iessearchrequest.md) |  |
 |  [IFieldSubType](./kibana-plugin-plugins-data-public.ifieldsubtype.md) |  |
 |  [IFieldType](./kibana-plugin-plugins-data-public.ifieldtype.md) |  |
-|  [IIndexPattern](./kibana-plugin-plugins-data-public.iindexpattern.md) | IIndexPattern allows for an IndexPattern OR an index pattern saved object too ambiguous, should be avoided |
+|  [IIndexPattern](./kibana-plugin-plugins-data-public.iindexpattern.md) |  |
 |  [IIndexPatternFieldList](./kibana-plugin-plugins-data-public.iindexpatternfieldlist.md) |  |
 |  [IKibanaSearchRequest](./kibana-plugin-plugins-data-public.ikibanasearchrequest.md) |  |
 |  [IKibanaSearchResponse](./kibana-plugin-plugins-data-public.ikibanasearchresponse.md) |  |
@@ -86,6 +88,7 @@
 |  [QuerySuggestionField](./kibana-plugin-plugins-data-public.querysuggestionfield.md) | \* |
 |  [QuerySuggestionGetFnArgs](./kibana-plugin-plugins-data-public.querysuggestiongetfnargs.md) | \* |
 |  [RangeFilterParams](./kibana-plugin-plugins-data-public.rangefilterparams.md) |  |
+|  [Reason](./kibana-plugin-plugins-data-public.reason.md) |  |
 |  [RefreshInterval](./kibana-plugin-plugins-data-public.refreshinterval.md) |  |
 |  [SavedQuery](./kibana-plugin-plugins-data-public.savedquery.md) |  |
 |  [SavedQueryService](./kibana-plugin-plugins-data-public.savedqueryservice.md) |  |
@@ -116,6 +119,7 @@
 |  [fieldFormats](./kibana-plugin-plugins-data-public.fieldformats.md) |  |
 |  [fieldList](./kibana-plugin-plugins-data-public.fieldlist.md) |  |
 |  [getKbnTypeNames](./kibana-plugin-plugins-data-public.getkbntypenames.md) | Get the esTypes known by all kbnFieldTypes {<!-- -->Array<string>} |
+|  [INDEX\_PATTERN\_SAVED\_OBJECT\_TYPE](./kibana-plugin-plugins-data-public.index_pattern_saved_object_type.md) | \* |
 |  [indexPatterns](./kibana-plugin-plugins-data-public.indexpatterns.md) |  |
 |  [injectSearchSourceReferences](./kibana-plugin-plugins-data-public.injectsearchsourcereferences.md) |  |
 |  [isCompleteResponse](./kibana-plugin-plugins-data-public.iscompleteresponse.md) |  |
@@ -161,6 +165,7 @@
 |  [Filter](./kibana-plugin-plugins-data-public.filter.md) |  |
 |  [IAggConfig](./kibana-plugin-plugins-data-public.iaggconfig.md) |  AggConfig This class represents an aggregation, which is displayed in the left-hand nav of the Visualize app. |
 |  [IAggType](./kibana-plugin-plugins-data-public.iaggtype.md) |  |
+|  [IEsError](./kibana-plugin-plugins-data-public.ieserror.md) |  |
 |  [IEsSearchResponse](./kibana-plugin-plugins-data-public.iessearchresponse.md) |  |
 |  [IFieldFormat](./kibana-plugin-plugins-data-public.ifieldformat.md) |  |
 |  [IFieldFormatsRegistry](./kibana-plugin-plugins-data-public.ifieldformatsregistry.md) |  |

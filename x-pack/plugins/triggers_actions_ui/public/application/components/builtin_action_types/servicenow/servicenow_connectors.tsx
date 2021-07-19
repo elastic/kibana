@@ -8,7 +8,6 @@
 import React, { useCallback } from 'react';
 
 import {
-  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,7 +15,6 @@ import {
   EuiFieldPassword,
   EuiSpacer,
   EuiLink,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -26,6 +24,7 @@ import { ActionConnectorFieldsProps } from '../../../../types';
 import * as i18n from './translations';
 import { ServiceNowActionConnector } from './types';
 import { useKibana } from '../../../../common/lib/kibana';
+import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
 
 const ServiceNowConnectorFields: React.FC<
   ActionConnectorFieldsProps<ServiceNowActionConnector>
@@ -33,12 +32,15 @@ const ServiceNowConnectorFields: React.FC<
   const { docLinks } = useKibana().services;
   const { apiUrl } = action.config;
 
-  const isApiUrlInvalid: boolean = errors.apiUrl.length > 0 && apiUrl !== undefined;
+  const isApiUrlInvalid: boolean =
+    errors.apiUrl !== undefined && errors.apiUrl.length > 0 && apiUrl !== undefined;
 
   const { username, password } = action.secrets;
 
-  const isUsernameInvalid: boolean = errors.username.length > 0 && username !== undefined;
-  const isPasswordInvalid: boolean = errors.password.length > 0 && password !== undefined;
+  const isUsernameInvalid: boolean =
+    errors.username !== undefined && errors.username.length > 0 && username !== undefined;
+  const isPasswordInvalid: boolean =
+    errors.password !== undefined && errors.password.length > 0 && password !== undefined;
 
   const handleOnChangeActionConfig = useCallback(
     (key: string, value: string) => editActionConfig(key, value),
@@ -96,7 +98,14 @@ const ServiceNowConnectorFields: React.FC<
       <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiFormRow fullWidth>{getEncryptedFieldNotifyLabel(!action.id)}</EuiFormRow>
+          <EuiFormRow fullWidth>
+            {getEncryptedFieldNotifyLabel(
+              !action.id,
+              2,
+              action.isMissingSecrets ?? false,
+              i18n.REENTER_VALUES_LABEL
+            )}
+          </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
@@ -156,24 +165,6 @@ const ServiceNowConnectorFields: React.FC<
     </>
   );
 };
-
-function getEncryptedFieldNotifyLabel(isCreate: boolean) {
-  if (isCreate) {
-    return (
-      <EuiText size="s" data-test-subj="rememberValuesMessage">
-        {i18n.REMEMBER_VALUES_LABEL}
-      </EuiText>
-    );
-  }
-  return (
-    <EuiCallOut
-      size="s"
-      iconType="iInCircle"
-      title={i18n.REENTER_VALUES_LABEL}
-      data-test-subj="reenterValuesMessage"
-    />
-  );
-}
 
 // eslint-disable-next-line import/no-default-export
 export { ServiceNowConnectorFields as default };

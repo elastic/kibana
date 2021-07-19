@@ -6,16 +6,15 @@
  */
 
 import { TooltipInfo } from '@elastic/charts';
-import React, { ComponentType } from 'react';
-import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
+import React from 'react';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
-import { PrimaryStatsServiceInstanceItem } from '../../../app/service_overview/service_overview_instances_chart_and_table';
+import { MainStatsServiceInstanceItem } from '../../../app/service_overview/service_overview_instances_chart_and_table';
 import { CustomTooltip } from './custom_tooltip';
 
 function getLatencyFormatter(props: TooltipInfo) {
   const maxLatency = Math.max(
     ...props.values.map((value) => {
-      const datum = (value.datum as unknown) as PrimaryStatsServiceInstanceItem;
+      const datum = (value.datum as unknown) as MainStatsServiceInstanceItem;
       return datum.latency ?? 0;
     })
   );
@@ -25,13 +24,6 @@ function getLatencyFormatter(props: TooltipInfo) {
 export default {
   title: 'shared/charts/InstancesLatencyDistributionChart/CustomTooltip',
   component: CustomTooltip,
-  decorators: [
-    (Story: ComponentType) => (
-      <EuiThemeProvider>
-        <Story />
-      </EuiThemeProvider>
-    ),
-  ],
 };
 
 export function Example(props: TooltipInfo) {

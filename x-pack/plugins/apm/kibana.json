@@ -3,32 +3,37 @@
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "requiredPlugins": [
-    "features",
     "apmOss",
     "data",
-    "licensing",
-    "triggersActionsUi",
     "embeddable",
+    "features",
     "infra",
-    "observability"
+    "licensing",
+    "observability",
+    "ruleRegistry",
+    "triggersActionsUi"
   ],
   "optionalPlugins": [
-    "spaces",
-    "cloud",
-    "usageCollection",
-    "taskManager",
     "actions",
     "alerting",
-    "security",
-    "ml",
+    "cloud",
     "home",
-    "maps"
+    "maps",
+    "ml",
+    "security",
+    "spaces",
+    "taskManager",
+    "usageCollection",
+    "fleet"
   ],
   "server": true,
   "ui": true,
-  "configPath": ["xpack", "apm"],
-  "extraPublicDirs": ["public/style/variables"],
+  "configPath": [
+    "xpack",
+    "apm"
+  ],
   "requiredBundles": [
+    "fleet",
     "home",
     "kibanaReact",
     "kibanaUtils",

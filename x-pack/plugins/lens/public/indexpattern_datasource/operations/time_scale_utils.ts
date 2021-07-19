@@ -12,24 +12,36 @@ import type { IndexPatternColumn } from './definitions';
 
 export const DEFAULT_TIME_SCALE = 's' as TimeScaleUnit;
 
+function getSuffix(scale: TimeScaleUnit | undefined, shift: string | undefined) {
+  return (
+    (shift || scale ? ' ' : '') +
+    (scale ? unitSuffixesLong[scale] : '') +
+    (shift && scale ? ' ' : '') +
+    (shift ? `-${shift}` : '')
+  );
+}
+
 export function adjustTimeScaleLabelSuffix(
   oldLabel: string,
   previousTimeScale: TimeScaleUnit | undefined,
-  newTimeScale: TimeScaleUnit | undefined
+  newTimeScale: TimeScaleUnit | undefined,
+  previousShift: string | undefined,
+  newShift: string | undefined
 ) {
   let cleanedLabel = oldLabel;
   // remove added suffix if column had a time scale previously
-  if (previousTimeScale) {
-    const suffixPosition = oldLabel.lastIndexOf(` ${unitSuffixesLong[previousTimeScale]}`);
+  if (previousTimeScale || previousShift) {
+    const suffix = getSuffix(previousTimeScale, previousShift);
+    const suffixPosition = oldLabel.lastIndexOf(suffix);
     if (suffixPosition !== -1) {
       cleanedLabel = oldLabel.substring(0, suffixPosition);
     }
   }
-  if (!newTimeScale) {
+  if (!newTimeScale && !newShift) {
     return cleanedLabel;
   }
   // add new suffix if column has a time scale now
-  return `${cleanedLabel} ${unitSuffixesLong[newTimeScale]}`;
+  return `${cleanedLabel}${getSuffix(newTimeScale, newShift)}`;
 }
 
 export function adjustTimeScaleOnOtherColumnChange<T extends IndexPatternColumn>(
@@ -54,6 +66,12 @@ export function adjustTimeScaleOnOtherColumnChange<T extends IndexPatternColumn>
   return {
     ...column,
     timeScale: undefined,
-    label: adjustTimeScaleLabelSuffix(column.label, column.timeScale, undefined),
+    label: adjustTimeScaleLabelSuffix(
+      column.label,
+      column.timeScale,
+      undefined,
+      column.timeShift,
+      column.timeShift
+    ),
   };
 }

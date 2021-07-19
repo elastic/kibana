@@ -25,13 +25,13 @@ export function registerPipelineLoadRoute(router: LogstashPluginRouter) {
     wrapRouteWithLicenseCheck(
       checkLicense,
       router.handleLegacyErrors(async (context, request, response) => {
-        const client = context.logstash!.esClient;
+        const { id } = request.params;
+        const { client } = context.core.elasticsearch;
 
-        const result = await client.callAsCurrentUser('transport.request', {
-          path: '/_logstash/pipeline/' + encodeURIComponent(request.params.id),
-          method: 'GET',
-          ignore: [404],
-        });
+        const { body: result } = await client.asCurrentUser.logstash.getPipeline(
+          { id },
+          { ignore: [404] }
+        );
 
         if (result[request.params.id] === undefined) {
           return response.notFound();

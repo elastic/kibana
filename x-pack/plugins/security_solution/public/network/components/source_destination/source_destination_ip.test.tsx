@@ -8,7 +8,7 @@
 import { get } from 'lodash/fp';
 import React from 'react';
 
-import { removeExternalLinkText } from '../../../../common/test_utils';
+import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
 import { asArrayIfExists } from '../../../common/lib/helpers';
 import { getMockNetflowData } from '../../../common/mock';
 import '../../../common/mock/match_media';
@@ -37,6 +37,8 @@ import {
   SOURCE_GEO_COUNTRY_NAME_FIELD_NAME,
   SOURCE_GEO_REGION_NAME_FIELD_NAME,
 } from './geo_fields';
+
+jest.mock('../../../common/lib/kibana');
 
 jest.mock('../../../common/components/link_to');
 

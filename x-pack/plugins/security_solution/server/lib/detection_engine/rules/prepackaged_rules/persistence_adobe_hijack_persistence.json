@@ -9,10 +9,10 @@
     "logs-endpoint.events.*",
     "logs-windows.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License v2",
   "name": "Adobe Hijack Persistence",
-  "query": "event.category:file and event.type:creation and file.path:(\"C:\\Program Files (x86)\\Adobe\\Acrobat Reader DC\\Reader\\AcroCEF\\RdrCEF.exe\" or \"C:\\Program Files\\Adobe\\Acrobat Reader DC\\Reader\\AcroCEF\\RdrCEF.exe\") and not process.name:msiexec.exe",
+  "query": "file where event.type == \"creation\" and\n  file.path : (\"?:\\\\Program Files (x86)\\\\Adobe\\\\Acrobat Reader DC\\\\Reader\\\\AcroCEF\\\\RdrCEF.exe\",\n               \"?:\\\\Program Files\\\\Adobe\\\\Acrobat Reader DC\\\\Reader\\\\AcroCEF\\\\RdrCEF.exe\") and\n  not process.name : \"msiexec.exe\"\n",
   "risk_score": 21,
   "rule_id": "2bf78aa2-9c56-48de-b139-f169bf99cf86",
   "severity": "low",
@@ -48,6 +48,6 @@
     }
   ],
   "timestamp_override": "event.ingested",
-  "type": "query",
-  "version": 8
+  "type": "eql",
+  "version": 9
 }

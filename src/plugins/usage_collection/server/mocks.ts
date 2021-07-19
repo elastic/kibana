@@ -13,9 +13,10 @@ import {
   savedObjectsClientMock,
 } from '../../../../src/core/server/mocks';
 
-import { CollectorOptions, Collector, CollectorSet } from './collector';
+import { CollectorOptions, CollectorSet } from './collector';
+import { Collector } from './collector/collector';
 import { UsageCollectionSetup, CollectorFetchContext } from './index';
-
+import { usageCountersServiceMock } from './usage_counters/usage_counters_service.mock';
 export type { CollectorOptions };
 export { Collector };
 
@@ -24,10 +25,14 @@ export const createUsageCollectionSetupMock = () => {
     logger: loggingSystemMock.createLogger(),
     maximumWaitTimeForAllCollectorsInS: 1,
   });
+  const {
+    createUsageCounter,
+    getUsageCounterByType,
+  } = usageCountersServiceMock.createSetupContract();
 
   const usageCollectionSetupMock: jest.Mocked<UsageCollectionSetup> = {
-    createUsageCounter: jest.fn(),
-    getUsageCounterByType: jest.fn(),
+    createUsageCounter,
+    getUsageCounterByType,
     areAllCollectorsReady: jest.fn().mockImplementation(collectorSet.areAllCollectorsReady),
     bulkFetch: jest.fn().mockImplementation(collectorSet.bulkFetch),
     getCollectorByType: jest.fn().mockImplementation(collectorSet.getCollectorByType),

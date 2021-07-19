@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './release_notes';
 export * from './api_docs';

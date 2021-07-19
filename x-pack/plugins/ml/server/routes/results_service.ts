@@ -11,6 +11,7 @@ import {
   anomaliesTableDataSchema,
   categoryDefinitionSchema,
   categoryExamplesSchema,
+  getDatafeedResultsChartDataSchema,
   maxAnomalyScoreSchema,
   partitionFieldValuesSchema,
   anomalySearchSchema,
@@ -344,6 +345,39 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const resp = await getCategoryStoppedPartitions(mlClient, request.body);
+        return response.ok({
+          body: resp,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup ResultsService
+   *
+   * @api {post} /api/ml/results/datafeed_results_chart Get datafeed results chart data
+   * @apiName GetDatafeedResultsChartData
+   * @apiDescription Returns datafeed results chart data
+   *
+   * @apiSchema (body) getDatafeedResultsChartDataSchema
+   */
+  router.post(
+    {
+      path: '/api/ml/results/datafeed_results_chart',
+      validate: {
+        body: getDatafeedResultsChartDataSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+      try {
+        const { getDatafeedResultsChartData } = resultsServiceProvider(mlClient, client);
+        const resp = await getDatafeedResultsChartData(request.body);
+
         return response.ok({
           body: resp,
         });

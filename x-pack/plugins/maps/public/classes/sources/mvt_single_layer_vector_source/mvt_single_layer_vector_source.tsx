@@ -8,9 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import React from 'react';
-import { GeoJsonProperties } from 'geojson';
+import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import { AbstractSource, ImmutableSourceProperty, SourceEditorArgs } from '../source';
-import { BoundsFilters, GeoJsonWithMeta, ITiledSingleLayerVectorSource } from '../vector_source';
+import { BoundsFilters, GeoJsonWithMeta } from '../vector_source';
+import { ITiledSingleLayerVectorSource } from '../tiled_single_layer_vector_source';
 import {
   FIELD_ORIGIN,
   MAX_ZOOM,
@@ -30,6 +31,7 @@ import { MVTField } from '../../fields/mvt_field';
 import { UpdateSourceEditor } from './update_source_editor';
 import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
+import { ITiledSingleLayerMvtParams } from '../tiled_single_layer_vector_source/tiled_single_layer_vector_source';
 
 export const sourceTitle = i18n.translate(
   'xpack.maps.source.MVTSingleLayerVectorSource.sourceTitle',
@@ -96,6 +98,14 @@ export class MVTSingleLayerVectorSource
     });
   }
 
+  addFeature(geometry: Geometry | Position[]): Promise<void> {
+    throw new Error('Does not implement addFeature');
+  }
+
+  deleteFeature(featureId: string): Promise<void> {
+    throw new Error('Does not implement deleteFeature');
+  }
+
   getMVTFields(): MVTField[] {
     return this._descriptor.fields.map((field: MVTFieldDescriptor) => {
       return new MVTField({
@@ -154,7 +164,7 @@ export class MVTSingleLayerVectorSource
     return this.getLayerName();
   }
 
-  async getUrlTemplateWithMeta() {
+  async getUrlTemplateWithMeta(): Promise<ITiledSingleLayerMvtParams> {
     return {
       urlTemplate: this._descriptor.urlTemplate,
       layerName: this._descriptor.layerName,
@@ -167,7 +177,7 @@ export class MVTSingleLayerVectorSource
     return [VECTOR_SHAPE_TYPE.POINT, VECTOR_SHAPE_TYPE.LINE, VECTOR_SHAPE_TYPE.POLYGON];
   }
 
-  canFormatFeatureProperties(): boolean {
+  hasTooltipProperties(): boolean {
     return !!this._tooltipFields.length;
   }
 
@@ -220,6 +230,14 @@ export class MVTSingleLayerVectorSource
       }
     }
     return tooltips;
+  }
+
+  async getTimesliceMaskFieldName() {
+    return null;
+  }
+
+  async supportsFeatureEditing(): Promise<boolean> {
+    return false;
   }
 }
 

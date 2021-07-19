@@ -48,7 +48,7 @@ export function BeatsPanel(props) {
     />
   ) : null;
 
-  const beatTypes = props.beats.types.map((beat, index) => {
+  const beatTypes = get(props, 'beats.types', []).map((beat, index) => {
     return [
       <EuiDescriptionListTitle
         key={`beat-types-type-${index}`}

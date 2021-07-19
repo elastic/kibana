@@ -17,7 +17,7 @@ import { UMBackendFrameworkAdapter } from './adapters';
 import { UMLicenseCheck } from './domains';
 import { UptimeRequests } from './requests';
 import { savedObjectsAdapter } from './saved_objects';
-import { ESSearchResponse } from '../../../../../typings/elasticsearch';
+import { ESSearchResponse } from '../../../../../src/core/types/elasticsearch';
 
 export interface UMDomainLibs {
   requests: UptimeRequests;
@@ -29,15 +29,18 @@ export interface UMServerLibs extends UMDomainLibs {
 }
 
 export interface CountResponse {
-  body: {
-    count: number;
-    _shards: {
-      total: number;
-      successful: number;
-      skipped: number;
-      failed: number;
+  result: {
+    body: {
+      count: number;
+      _shards: {
+        total: number;
+        successful: number;
+        skipped: number;
+        failed: number;
+      };
     };
   };
+  indices: string;
 }
 
 export type UptimeESClient = ReturnType<typeof createUptimeESClient>;
@@ -107,7 +110,7 @@ export function createUptimeESClient({
         throw esError;
       }
 
-      return res;
+      return { result: res, indices: dynamicSettings.heartbeatIndices };
     },
     getSavedObjectsClient() {
       return savedObjectsClient;

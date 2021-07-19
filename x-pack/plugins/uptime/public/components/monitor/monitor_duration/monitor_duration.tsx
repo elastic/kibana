@@ -18,6 +18,7 @@ interface DurationChartProps {
   hasMLJob: boolean;
   anomalies: AnomalyRecords | null;
   locationDurationLines: LocationDurationLine[];
+  exploratoryViewLink: string;
 }
 
 /**
@@ -33,8 +34,8 @@ export const MonitorDurationComponent = ({
   hasMLJob,
 }: DurationChartProps) => {
   return (
-    <EuiPanel paddingSize="m">
-      <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
+    <EuiPanel paddingSize="m" hasBorder>
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="s">
             <h3>
@@ -56,6 +57,11 @@ export const MonitorDurationComponent = ({
         <EuiFlexItem grow={false}>
           <MLIntegrationComponent />
         </EuiFlexItem>
+        {/* <EuiFlexItem grow={false}>*/}
+        {/*  <EuiButton size="s" isDisabled={loading} href={exploratoryViewLink}>*/}
+        {/*    <FormattedMessage id="xpack.uptime.monitorDuration.analyze" defaultMessage="Analyze" />*/}
+        {/*  </EuiButton>*/}
+        {/* </EuiFlexItem>*/}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <DurationChartComponent

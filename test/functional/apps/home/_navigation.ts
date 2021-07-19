@@ -17,8 +17,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Kibana browser back navigation should work', function describeIndexTests() {
     before(async () => {
-      await esArchiver.loadIfNeeded('discover');
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/discover');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
     it('detect navigate back issues', async () => {

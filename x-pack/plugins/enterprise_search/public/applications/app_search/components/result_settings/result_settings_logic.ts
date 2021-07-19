@@ -10,9 +10,9 @@ import { omit, isEqual } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 
-import { flashAPIErrors, setSuccessMessage } from '../../../shared/flash_messages';
+import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
-import { Schema, SchemaConflicts } from '../../../shared/types';
+import { Schema, SchemaConflicts } from '../../../shared/schema/types';
 import { EngineLogic } from '../engine';
 
 import { DEFAULT_SNIPPET_SIZE } from './constants';
@@ -24,6 +24,7 @@ import {
 
 import {
   areFieldsAtDefaultSettings,
+  areFieldsEmpty,
   clearAllFields,
   convertServerResultFieldsToResultFields,
   convertToServerFieldResultSetting,
@@ -91,7 +92,7 @@ const RESET_CONFIRMATION_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.resultSettings.confirmResetMessage',
   {
     defaultMessage:
-      'This will revert your settings back to the default: all fields set to raw. The default will take over immediately and impact your search results.',
+      'Are you sure you want to restore result settings defaults? This will set all fields back to raw with no limits.',
   }
 );
 
@@ -196,6 +197,10 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     resultFieldsAtDefaultSettings: [
       () => [selectors.resultFields],
       (resultFields) => areFieldsAtDefaultSettings(resultFields),
+    ],
+    resultFieldsEmpty: [
+      () => [selectors.resultFields],
+      (resultFields) => areFieldsEmpty(resultFields),
     ],
     stagedUpdates: [
       () => [selectors.lastSavedResultFields, selectors.resultFields],
@@ -328,11 +333,11 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
         }
 
         actions.initializeResultFields(response.result_fields, values.schema);
-        setSuccessMessage(
+        flashSuccessToast(
           i18n.translate(
             'xpack.enterpriseSearch.appSearch.engine.resultSettings.saveSuccessMessage',
             {
-              defaultMessage: 'Result settings have been saved successfully.',
+              defaultMessage: 'Result settings were saved',
             }
           )
         );

@@ -6,10 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { get } from 'lodash';
-import { isEsError } from '../../../shared_imports';
-import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 import { RouteDependencies } from '../../../types';
 // @ts-ignore
@@ -24,30 +22,36 @@ const bodySchema = schema.object({
   watch: schema.object({}, { unknowns: 'allow' }),
 });
 
-function executeWatch(dataClient: ILegacyScopedClusterClient, executeDetails: any, watchJson: any) {
+function executeWatch(dataClient: IScopedClusterClient, executeDetails: any, watchJson: any) {
   const body = executeDetails;
   body.watch = watchJson;
 
-  return dataClient.callAsCurrentUser('watcher.executeWatch', {
-    body,
-  });
+  return dataClient.asCurrentUser.watcher
+    .executeWatch({
+      body,
+    })
+    .then(({ body: returnValue }) => returnValue);
 }
 
-export function registerExecuteRoute(deps: RouteDependencies) {
-  deps.router.put(
+export function registerExecuteRoute({
+  router,
+  license,
+  lib: { handleEsError },
+}: RouteDependencies) {
+  router.put(
     {
       path: '/api/watcher/watch/execute',
       validate: {
         body: bodySchema,
       },
     },
-    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+    license.guardApiRoute(async (ctx, request, response) => {
       const executeDetails = ExecuteDetails.fromDownstreamJson(request.body.executeDetails);
       const watch = Watch.fromDownstreamJson(request.body.watch);
 
       try {
         const hit = await executeWatch(
-          ctx.watcher!.client,
+          ctx.core.elasticsearch.client,
           executeDetails.upstreamJson,
           watch.watchJson
         );
@@ -68,13 +72,7 @@ export function registerExecuteRoute(deps: RouteDependencies) {
           },
         });
       } catch (e) {
-        // Case: Error from Elasticsearch JS client
-        if (isEsError(e)) {
-          return response.customError({ statusCode: e.statusCode, body: e });
-        }
-
-        // Case: default
-        throw e;
+        return handleEsError({ error: e, response });
       }
     })
   );

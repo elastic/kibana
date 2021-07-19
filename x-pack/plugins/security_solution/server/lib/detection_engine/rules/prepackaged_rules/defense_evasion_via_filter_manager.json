@@ -9,13 +9,13 @@
     "logs-endpoint.events.*",
     "logs-windows.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License v2",
   "name": "Potential Evasion via Filter Manager",
-  "query": "event.category:process and event.type:(start or process_started) and process.name:fltMC.exe",
-  "risk_score": 21,
+  "query": "process where event.type in (\"start\", \"process_started\") and \n process.name : \"fltMC.exe\" and process.args : \"unload\"\n",
+  "risk_score": 47,
   "rule_id": "06dceabf-adca-48af-ac79-ffdf4c3b1e9a",
-  "severity": "low",
+  "severity": "medium",
   "tags": [
     "Elastic",
     "Host",
@@ -41,6 +41,6 @@
     }
   ],
   "timestamp_override": "event.ingested",
-  "type": "query",
-  "version": 6
+  "type": "eql",
+  "version": 7
 }

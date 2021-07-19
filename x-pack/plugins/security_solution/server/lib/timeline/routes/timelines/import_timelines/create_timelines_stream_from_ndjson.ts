@@ -9,9 +9,9 @@ import * as rt from 'io-ts';
 import { Transform } from 'stream';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
-import { failure } from 'io-ts/lib/PathReporter';
 import { identity } from 'fp-ts/lib/function';
 import { createConcatStream, createSplitStream, createMapStream } from '@kbn/utils';
+import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import {
   parseNdjsonStrings,
   filterExportedCounts,
@@ -20,15 +20,11 @@ import {
 
 import { ImportTimelineResponse } from './types';
 import { ImportTimelinesSchemaRt } from '../../../schemas/timelines/import_timelines_schema';
-import { BadRequestError } from '../../../../detection_engine/errors/bad_request_error';
+import { throwErrors } from '../../../utils/common';
 
 type ErrorFactory = (message: string) => Error;
 
 export const createPlainError = (message: string) => new Error(message);
-
-export const throwErrors = (createError: ErrorFactory) => (errors: rt.Errors) => {
-  throw createError(failure(errors).join('\n'));
-};
 
 export const decodeOrThrow = <A, O, I>(
   runtimeType: rt.Type<A, O, I>,

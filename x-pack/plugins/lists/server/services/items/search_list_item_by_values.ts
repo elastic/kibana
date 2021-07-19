@@ -6,13 +6,14 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
+import type { SearchListItemArraySchema, Type } from '@kbn/securitysolution-io-ts-list-types';
 
-import { SearchEsListItemSchema, SearchListItemArraySchema, Type } from '../../../common/schemas';
 import {
   TransformElasticMSearchToListItemOptions,
   getQueryFilterFromTypeValue,
   transformElasticNamedSearchToListItem,
 } from '../utils';
+import { SearchEsListItemSchema } from '../../schemas/elastic_response';
 
 export interface SearchListItemByValuesOptions {
   listId: string;

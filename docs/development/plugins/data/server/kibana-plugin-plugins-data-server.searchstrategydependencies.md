@@ -15,6 +15,7 @@ export interface SearchStrategyDependencies
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [esClient](./kibana-plugin-plugins-data-server.searchstrategydependencies.esclient.md) | <code>IScopedClusterClient</code> |  |
+|  [request](./kibana-plugin-plugins-data-server.searchstrategydependencies.request.md) | <code>KibanaRequest</code> |  |
 |  [savedObjectsClient](./kibana-plugin-plugins-data-server.searchstrategydependencies.savedobjectsclient.md) | <code>SavedObjectsClientContract</code> |  |
 |  [searchSessionsClient](./kibana-plugin-plugins-data-server.searchstrategydependencies.searchsessionsclient.md) | <code>IScopedSearchSessionsClient</code> |  |
 |  [uiSettingsClient](./kibana-plugin-plugins-data-server.searchstrategydependencies.uisettingsclient.md) | <code>IUiSettingsClient</code> |  |

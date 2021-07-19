@@ -27,12 +27,11 @@ import { PartialFilter } from '../../types';
 import { BulkError, ImportSuccessError } from '../utils';
 import { getOutputRuleAlertForRest } from '../__mocks__/utils';
 import { PartialAlert } from '../../../../../../alerting/server';
-import { SanitizedAlert } from '../../../../../../alerting/server/types';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { RuleAlertType } from '../../rules/types';
 import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
-import { ThreatMapping } from '../../../../../common/detection_engine/schemas/types/threat_mapping';
+import { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request';
 import {
   getMlRuleParams,
@@ -87,14 +86,14 @@ describe('utils', () => {
     test('transforms ML Rule fields', () => {
       const mlRule = getAlertMock(getMlRuleParams());
       mlRule.params.anomalyThreshold = 55;
-      mlRule.params.machineLearningJobId = 'some_job_id';
+      mlRule.params.machineLearningJobId = ['some_job_id'];
       mlRule.params.type = 'machine_learning';
 
       const rule = transformAlertToRule(mlRule);
       expect(rule).toEqual(
         expect.objectContaining({
           anomaly_threshold: 55,
-          machine_learning_job_id: 'some_job_id',
+          machine_learning_job_id: ['some_job_id'],
           type: 'machine_learning',
         })
       );
@@ -256,7 +255,7 @@ describe('utils', () => {
 
   describe('transformFindAlerts', () => {
     test('outputs empty data set when data set is empty correct', () => {
-      const output = transformFindAlerts({ data: [], page: 1, perPage: 0, total: 0 }, []);
+      const output = transformFindAlerts({ data: [], page: 1, perPage: 0, total: 0 }, {}, {});
       expect(output).toEqual({ data: [], page: 1, perPage: 0, total: 0 });
     });
 
@@ -268,7 +267,8 @@ describe('utils', () => {
           total: 0,
           data: [getAlertMock(getQueryRuleParams())],
         },
-        []
+        {},
+        {}
       );
       const expected = getOutputRuleAlertForRest();
       expect(output).toEqual({
@@ -277,20 +277,6 @@ describe('utils', () => {
         total: 0,
         data: [expected],
       });
-    });
-
-    test('returns 500 if the data is not of type siem alert', () => {
-      const unsafeCast = ([{ name: 'something else' }] as unknown) as SanitizedAlert[];
-      const output = transformFindAlerts(
-        {
-          data: unsafeCast,
-          page: 1,
-          perPage: 1,
-          total: 1,
-        },
-        []
-      );
-      expect(output).toBeNull();
     });
   });
 

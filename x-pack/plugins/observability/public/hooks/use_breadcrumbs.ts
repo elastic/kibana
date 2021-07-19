@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import { ChromeBreadcrumb } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
+import { ChromeBreadcrumb } from 'kibana/public';
 import { MouseEvent, useEffect } from 'react';
-import { EuiBreadcrumb } from '@elastic/eui';
-import { stringify } from 'query-string';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../utils/kibana_react';
 import { useQueryParams } from './use_query_params';
 
-const EMPTY_QUERY = '?';
-
-function handleBreadcrumbClick(
+function addClickHandlers(
   breadcrumbs: ChromeBreadcrumb[],
   navigateToHref?: (url: string) => Promise<void>
 ) {
@@ -34,38 +30,37 @@ function handleBreadcrumbClick(
   }));
 }
 
-export const makeBaseBreadcrumb = (href: string, params?: any): EuiBreadcrumb => {
-  if (params) {
-    const crumbParams = { ...params };
-
-    delete crumbParams.statusFilter;
-    const query = stringify(crumbParams, { skipEmptyString: true, skipNull: true });
-    href += query === EMPTY_QUERY ? '' : query;
-  }
-  return {
-    text: i18n.translate('xpack.observability.breadcrumbs.observability', {
-      defaultMessage: 'Observability',
-    }),
-    href,
-  };
-};
+function getTitleFromBreadCrumbs(breadcrumbs: ChromeBreadcrumb[]) {
+  return breadcrumbs.map(({ text }) => text?.toString() ?? '').reverse();
+}
 
 export const useBreadcrumbs = (extraCrumbs: ChromeBreadcrumb[]) => {
   const params = useQueryParams();
 
   const {
-    services: { chrome, application },
+    services: {
+      chrome: { docTitle, setBreadcrumbs },
+      application: { getUrlForApp, navigateToUrl },
+    },
   } = useKibana();
-
-  const setBreadcrumbs = chrome?.setBreadcrumbs;
-  const appPath = application?.getUrlForApp('observability-overview') ?? '';
-  const navigate = application?.navigateToUrl;
+  const setTitle = docTitle.change;
+  const appPath = getUrlForApp('observability-overview') ?? '';
 
   useEffect(() => {
+    const breadcrumbs = [
+      {
+        text: i18n.translate('xpack.observability.breadcrumbs.observabilityLinkText', {
+          defaultMessage: 'Observability',
+        }),
+        href: appPath + '/overview',
+      },
+      ...extraCrumbs,
+    ];
     if (setBreadcrumbs) {
-      setBreadcrumbs(
-        handleBreadcrumbClick([makeBaseBreadcrumb(appPath, params)].concat(extraCrumbs), navigate)
-      );
+      setBreadcrumbs(addClickHandlers(breadcrumbs, navigateToUrl));
     }
-  }, [appPath, extraCrumbs, navigate, params, setBreadcrumbs]);
+    if (setTitle) {
+      setTitle(getTitleFromBreadCrumbs(breadcrumbs));
+    }
+  }, [appPath, extraCrumbs, navigateToUrl, params, setBreadcrumbs, setTitle]);
 };

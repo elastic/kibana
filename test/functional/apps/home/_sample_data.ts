@@ -15,7 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const log = getService('log');
   const security = getService('security');
-  const pieChart = getService('pieChart');
+  const elasticChart = getService('elasticChart');
   const renderable = getService('renderable');
   const dashboardExpect = getService('dashboardExpect');
   const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard', 'timePicker']);
@@ -89,26 +89,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const toTime = `${todayYearMonthDay} @ 23:59:59.999`;
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         const panelCount = await PageObjects.dashboard.getPanelCount();
-        expect(panelCount).to.be(18);
+        expect(panelCount).to.be(17);
       });
 
       it('should render visualizations', async () => {
         await PageObjects.home.launchSampleDashboard('flights');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
-        log.debug('Checking pie charts rendered');
-        await pieChart.expectPieSliceCount(4);
-        log.debug('Checking area, bar and heatmap charts rendered');
-        await dashboardExpect.seriesElementCount(15);
+        log.debug('Checking charts rendered');
+        await elasticChart.waitForRenderComplete('lnsVisualizationContainer');
         log.debug('Checking saved searches rendered');
-        await dashboardExpect.savedSearchRowCount(50);
+        await dashboardExpect.savedSearchRowCount(10);
         log.debug('Checking input controls rendered');
         await dashboardExpect.inputControlItemCount(3);
         log.debug('Checking tag cloud rendered');
         await dashboardExpect.tagCloudWithValuesFound(['Sunny', 'Rain', 'Clear', 'Cloudy', 'Hail']);
         log.debug('Checking vega chart rendered');
-        const tsvb = await find.existsByCssSelector('.vgaVis__view');
-        expect(tsvb).to.be(true);
+        expect(await find.existsByCssSelector('.vgaVis__view')).to.be(true);
       });
 
       it('should launch sample logs data set dashboard', async () => {

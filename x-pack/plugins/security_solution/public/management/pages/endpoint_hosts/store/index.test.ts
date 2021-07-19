@@ -41,9 +41,22 @@ describe('EndpointList store concerns', () => {
         total: 0,
         loading: false,
         error: undefined,
-        details: undefined,
-        detailsLoading: false,
-        detailsError: undefined,
+        endpointDetails: {
+          activityLog: {
+            paging: {
+              disabled: false,
+              page: 1,
+              pageSize: 50,
+              isInvalidDateRange: false,
+            },
+            logData: { type: 'UninitialisedResourceState' },
+          },
+          hostDetails: {
+            details: undefined,
+            detailsLoading: false,
+            detailsError: undefined,
+          },
+        },
         policyResponse: undefined,
         policyResponseLoading: false,
         policyResponseError: undefined,
@@ -51,7 +64,9 @@ describe('EndpointList store concerns', () => {
         policyItems: [],
         selectedPolicyId: undefined,
         policyItemsLoading: false,
-        endpointPackageInfo: undefined,
+        endpointPackageInfo: {
+          type: 'UninitialisedResourceState',
+        },
         nonExistingPolicies: {},
         agentPolicies: {},
         endpointsExist: true,
@@ -65,6 +80,13 @@ describe('EndpointList store concerns', () => {
         endpointsTotalError: undefined,
         queryStrategyVersion: undefined,
         policyVersionInfo: undefined,
+        isolationRequestState: {
+          type: 'UninitialisedResourceState',
+        },
+        endpointPendingActions: {
+          data: new Map(),
+          type: 'LoadedResourceState',
+        },
       });
     });
 

@@ -6,22 +6,72 @@
  */
 
 import { isEmpty, isEqual, keys, map } from 'lodash/fp';
-import { EuiDataGrid, EuiDataGridProps, EuiDataGridColumn, EuiLink } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiDataGrid,
+  EuiDataGridSorting,
+  EuiDataGridProps,
+  EuiDataGridColumn,
+  EuiLink,
+  EuiLoadingContent,
+  EuiProgress,
+  EuiSpacer,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
 
-import { EuiDataGridSorting } from '@elastic/eui';
+import { pagePathGetters } from '../../../fleet/public';
 import { useAllResults } from './use_all_results';
 import { Direction, ResultEdges } from '../../common/search_strategy';
-import { useRouterNavigate } from '../common/lib/kibana';
+import { useKibana } from '../common/lib/kibana';
+import { useActionResults } from '../action_results/use_action_results';
+import { generateEmptyDataMessage } from './translations';
+import {
+  ViewResultsInDiscoverAction,
+  ViewResultsInLensAction,
+  ViewResultsActionButtonType,
+} from '../scheduled_query_groups/scheduled_query_group_queries_table';
 
 const DataContext = createContext<ResultEdges>([]);
 
 interface ResultsTableComponentProps {
   actionId: string;
-  agentId?: string;
+  selectedAgent?: string;
+  agentIds?: string[];
+  endDate?: string;
+  startDate?: string;
 }
 
-const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId, agentId }) => {
+const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
+  actionId,
+  agentIds,
+  startDate,
+  endDate,
+}) => {
+  const [isLive, setIsLive] = useState(true);
+  const {
+    // @ts-expect-error update types
+    data: { aggregations },
+  } = useActionResults({
+    actionId,
+    activePage: 0,
+    agentIds,
+    limit: 0,
+    direction: Direction.asc,
+    sortField: '@timestamp',
+    isLive,
+  });
+  const expired = useMemo(() => (!endDate ? false : new Date(endDate) < new Date()), [endDate]);
+  const { getUrlForApp } = useKibana().services.application;
+
+  const getFleetAppUrl = useCallback(
+    (agentId) =>
+      getUrlForApp('fleet', {
+        path: `#` + pagePathGetters.agent_details({ agentId })[1],
+      }),
+    [getUrlForApp]
+  );
+
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
   const onChangeItemsPerPage = useCallback(
     (pageSize) =>
@@ -37,24 +87,23 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId,
     [setPagination]
   );
 
+  const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([
+    {
+      id: 'agent.name',
+      direction: Direction.asc,
+    },
+  ]);
   const [columns, setColumns] = useState<EuiDataGridColumn[]>([]);
 
-  // ** Sorting config
-  const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
-  const onSort = useCallback(
-    (newSortingColumns) => {
-      setSortingColumns(newSortingColumns);
-    },
-    [setSortingColumns]
-  );
-
-  const { data: allResultsData = [] } = useAllResults({
+  const { data: allResultsData, isFetched } = useAllResults({
     actionId,
-    agentId,
     activePage: pagination.pageIndex,
     limit: pagination.pageSize,
-    direction: Direction.asc,
-    sortField: '@timestamp',
+    isLive,
+    sort: sortingColumns.map((sortedColumn) => ({
+      field: sortedColumn.id,
+      direction: sortedColumn.direction as Direction,
+    })),
   });
 
   const [visibleColumns, setVisibleColumns] = useState<string[]>([]);
@@ -68,24 +117,22 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId,
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const data = useContext(DataContext);
 
-      // @ts-expect-error fields is optional
-      const value = data[rowIndex].fields[columnId];
+      // @ts-expect-error update types
+      const value = data[rowIndex % pagination.pageSize]?.fields[columnId];
 
       if (columnId === 'agent.name') {
-        // @ts-expect-error fields is optional
-        const agentIdValue = data[rowIndex].fields['agent.id'];
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        const linkProps = useRouterNavigate(`/live_query/${actionId}/results/${agentIdValue}`);
-        return <EuiLink {...linkProps}>{value}</EuiLink>;
+        // @ts-expect-error update types
+        const agentIdValue = data[rowIndex % pagination.pageSize]?.fields['agent.id'];
+
+        return <EuiLink href={getFleetAppUrl(agentIdValue)}>{value}</EuiLink>;
       }
 
       return !isEmpty(value) ? value : '-';
     },
-    [actionId]
+    [getFleetAppUrl, pagination.pageSize]
   );
 
-  const tableSorting = useMemo(() => ({ columns: sortingColumns, onSort }), [
-    onSort,
+  const tableSorting = useMemo(() => ({ columns: sortingColumns, onSort: setSortingColumns }), [
     sortingColumns,
   ]);
 
@@ -100,61 +147,126 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId,
   );
 
   useEffect(() => {
-    // @ts-expect-error update types
-    if (!allResultsData?.results) {
+    if (!allResultsData?.edges) {
       return;
     }
-    // @ts-expect-error update types
-    const newColumns = keys(allResultsData?.results[0]?.fields)
+
+    const newColumns = keys(allResultsData?.edges[0]?.fields)
       .sort()
-      .reduce((acc, fieldName) => {
-        if (fieldName === 'agent.name') {
-          return [
-            ...acc,
-            {
+      .reduce(
+        (acc, fieldName) => {
+          const { data, seen } = acc;
+          if (fieldName === 'agent.name') {
+            data.push({
               id: fieldName,
-              displayAsText: 'agent',
+              displayAsText: i18n.translate(
+                'xpack.osquery.liveQueryResults.table.agentColumnTitle',
+                {
+                  defaultMessage: 'agent',
+                }
+              ),
               defaultSortDirection: Direction.asc,
-            },
-          ];
-        }
+            });
 
-        if (fieldName.startsWith('osquery.')) {
-          return [
-            ...acc,
-            {
-              id: fieldName,
-              displayAsText: fieldName.split('.')[1],
-              defaultSortDirection: Direction.asc,
-            },
-          ];
-        }
+            return acc;
+          }
 
-        return acc;
-      }, [] as EuiDataGridColumn[]);
+          if (fieldName.startsWith('osquery.')) {
+            const displayAsText = fieldName.split('.')[1];
+            if (!seen.has(displayAsText)) {
+              data.push({
+                id: fieldName,
+                displayAsText,
+                defaultSortDirection: Direction.asc,
+              });
+              seen.add(displayAsText);
+            }
+            return acc;
+          }
+
+          return acc;
+        },
+        { data: [], seen: new Set<string>() } as { data: EuiDataGridColumn[]; seen: Set<string> }
+      ).data;
 
     if (!isEqual(columns, newColumns)) {
       setColumns(newColumns);
       setVisibleColumns(map('id', newColumns));
     }
-    // @ts-expect-error update types
-  }, [columns, allResultsData?.results]);
+  }, [columns, allResultsData?.edges]);
+
+  const toolbarVisibility = useMemo(
+    () => ({
+      additionalControls: (
+        <>
+          <ViewResultsInDiscoverAction
+            actionId={actionId}
+            buttonType={ViewResultsActionButtonType.button}
+            endDate={endDate}
+            startDate={startDate}
+          />
+          <ViewResultsInLensAction
+            actionId={actionId}
+            buttonType={ViewResultsActionButtonType.button}
+            endDate={endDate}
+            startDate={startDate}
+          />
+        </>
+      ),
+    }),
+    [actionId, endDate, startDate]
+  );
+
+  useEffect(
+    () =>
+      setIsLive(() => {
+        if (!agentIds?.length || expired) return false;
+
+        const uniqueAgentsRepliedCount =
+          // @ts-expect-error-type
+          allResultsData?.rawResponse.aggregations?.unique_agents.value ?? 0;
+
+        return !!(uniqueAgentsRepliedCount !== agentIds?.length - aggregations.failed);
+      }),
+    [
+      agentIds?.length,
+      aggregations.failed,
+      // @ts-expect-error-type
+      allResultsData?.rawResponse.aggregations?.unique_agents.value,
+      expired,
+    ]
+  );
+
+  if (!isFetched) {
+    return <EuiLoadingContent lines={5} />;
+  }
 
   return (
-    // @ts-expect-error update types
-    <DataContext.Provider value={allResultsData?.results}>
-      <EuiDataGrid
-        aria-label="Osquery results"
-        columns={columns}
-        columnVisibility={columnVisibility}
+    <>
+      {isLive && <EuiProgress color="primary" size="xs" />}
+
+      {isFetched && !allResultsData?.edges.length ? (
+        <>
+          <EuiCallOut title={generateEmptyDataMessage(aggregations.totalResponded)} />
+          <EuiSpacer />
+        </>
+      ) : (
         // @ts-expect-error update types
-        rowCount={allResultsData?.totalCount ?? 0}
-        renderCellValue={renderCellValue}
-        sorting={tableSorting}
-        pagination={tablePagination}
-        height="300px"
-      />
-    </DataContext.Provider>
+        <DataContext.Provider value={allResultsData?.edges}>
+          <EuiDataGrid
+            aria-label="Osquery results"
+            columns={columns}
+            columnVisibility={columnVisibility}
+            rowCount={allResultsData?.totalCount ?? 0}
+            renderCellValue={renderCellValue}
+            sorting={tableSorting}
+            pagination={tablePagination}
+            height="500px"
+            toolbarVisibility={toolbarVisibility}
+          />
+        </DataContext.Provider>
+      )}
+    </>
   );
 };
 

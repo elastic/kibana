@@ -28,7 +28,7 @@ class CaseError extends Error {
    * and data from that.
    */
   public boomify(): Boom<unknown> {
-    const message = this.message ?? this.wrappedError?.message;
+    const message = this.wrappedError?.message ?? this.message;
     let statusCode = 500;
     let data: unknown | undefined;
 

@@ -9,7 +9,6 @@ import React from 'react';
 import { isValidCertVal, SettingsPage } from './settings';
 import { render } from '../lib/helper/rtl_helpers';
 import { fireEvent, waitFor } from '@testing-library/dom';
-import { act } from 'react-dom/test-utils';
 import * as alertApi from '../state/api/alerts';
 
 describe('settings', () => {
@@ -44,11 +43,9 @@ describe('settings', () => {
 
       expect(getByText('heartbeat-8*,synthetics-*'));
 
-      act(() => {
-        fireEvent.click(getByTestId('createConnectorButton'));
-      });
+      fireEvent.click(getByTestId('createConnectorButton'));
       await waitFor(() => expect(getByText('Select a connector')));
-    });
+    }, 10000);
   });
 
   describe('isValidCertVal', () => {

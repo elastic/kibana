@@ -8,7 +8,7 @@
 
 import { ElasticsearchClient } from 'src/core/server';
 import { SavedObjectsClientContract, ISavedObjectsRepository } from 'kibana/server';
-import { TIME_RANGE_DATA_MODES } from '../../common/timerange_data_modes';
+import { TIME_RANGE_DATA_MODES } from '../../common/enums';
 import { findByValueEmbeddables } from '../../../dashboard/server';
 
 export interface TimeseriesUsage {

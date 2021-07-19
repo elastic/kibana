@@ -37,13 +37,11 @@ Before starting, add the eCommerce sample data that you'll use in your spec, the
 
 Open *Vega-Lite* and change the time range.
 
-. On the dashboard, click *Create panel*.
-
-. On the *New visualization* window, click *Custom visualization*.
+. On the dashboard, click *All types*, then select *Custom visualization*.
 +
 A pre-populated line chart displays the total number of documents. 
 
-. Change the <<set-time-filter,time range>> to *Last 7 days*.
+. Make sure the <<set-time-filter,time filter>> is *Last 7 days*.
 
 [float]
 [[vega-tutorial-create-a-stacked-area-chart]]
@@ -595,9 +593,9 @@ Add the {es} search query with the `data` block, then click *Update*:
 ```
 
 [float]
-===== Change the X- and Y-axes
+===== Change the x- and y-axes
 
-Display labels for the X- and Y-axes. 
+Display labels for the x- and y-axes. 
 
 In the *Vega* spec, add the `scales` block, then click *Update*:
 

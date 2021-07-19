@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { LogicMounter, mockHttpValues, mockFlashMessageHelpers } from '../../../__mocks__';
+import {
+  LogicMounter,
+  mockHttpValues,
+  mockFlashMessageHelpers,
+} from '../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test/jest';
 
@@ -18,7 +22,7 @@ import { EnginesLogic } from './';
 describe('EnginesLogic', () => {
   const { mount } = new LogicMounter(EnginesLogic);
   const { http } = mockHttpValues;
-  const { flashAPIErrors, setSuccessMessage } = mockFlashMessageHelpers;
+  const { flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
 
   const DEFAULT_VALUES = {
     dataLoading: true,
@@ -166,6 +170,16 @@ describe('EnginesLogic', () => {
         });
         expect(EnginesLogic.actions.onEnginesLoad).toHaveBeenCalledWith(MOCK_ENGINES_API_RESPONSE);
       });
+
+      it('handles errors', async () => {
+        http.get.mockReturnValueOnce(Promise.reject('error'));
+        mount();
+
+        EnginesLogic.actions.loadEngines();
+        await nextTick();
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('error');
+      });
     });
 
     describe('loadMetaEngines', () => {
@@ -188,6 +202,16 @@ describe('EnginesLogic', () => {
           MOCK_ENGINES_API_RESPONSE
         );
       });
+
+      it('handles errors', async () => {
+        http.get.mockReturnValueOnce(Promise.reject('error'));
+        mount();
+
+        EnginesLogic.actions.loadMetaEngines();
+        await nextTick();
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('error');
+      });
     });
 
     describe('onDeleteEngineSuccess', () => {
@@ -195,10 +219,10 @@ describe('EnginesLogic', () => {
         mount();
       });
 
-      it('should call setSuccessMessage', () => {
+      it('should call flashSuccessToast', () => {
         EnginesLogic.actions.onDeleteEngineSuccess(MOCK_ENGINE);
 
-        expect(setSuccessMessage).toHaveBeenCalled();
+        expect(flashSuccessToast).toHaveBeenCalled();
       });
 
       it('should call loadEngines if engine.type === default', () => {

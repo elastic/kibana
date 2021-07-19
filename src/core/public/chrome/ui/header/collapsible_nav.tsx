@@ -15,7 +15,7 @@ import {
   EuiListGroup,
   EuiListGroupItem,
   EuiShowFor,
-  EuiText,
+  EuiCollapsibleNavProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { groupBy, sortBy } from 'lodash';
@@ -78,6 +78,7 @@ interface Props {
   navigateToApp: InternalApplicationStart['navigateToApp'];
   navigateToUrl: InternalApplicationStart['navigateToUrl'];
   customNavLink$: Rx.Observable<ChromeNavLink | undefined>;
+  button: EuiCollapsibleNavProps['button'];
 }
 
 export function CollapsibleNav({
@@ -91,6 +92,7 @@ export function CollapsibleNav({
   closeNav,
   navigateToApp,
   navigateToUrl,
+  button,
   ...observables
 }: Props) {
   const navLinks = useObservable(observables.navLinks$, []).filter((link) => !link.hidden);
@@ -107,7 +109,7 @@ export function CollapsibleNav({
       link,
       appId,
       dataTestSubj: 'collapsibleNavAppLink',
-      navigateToApp,
+      navigateToUrl,
       onClick: closeNav,
       ...(needsIcon && { basePath }),
     });
@@ -121,8 +123,10 @@ export function CollapsibleNav({
         defaultMessage: 'Primary',
       })}
       isOpen={isNavOpen}
-      isDocked={isLocked}
       onClose={closeNav}
+      button={button}
+      ownFocus={false}
+      size={248}
     >
       {customNavLink && (
         <Fragment>
@@ -137,7 +141,7 @@ export function CollapsibleNav({
                   createEuiListItem({
                     link: customNavLink,
                     basePath,
-                    navigateToApp,
+                    navigateToUrl,
                     dataTestSubj: 'collapsibleNavCustomNavLink',
                     onClick: closeNav,
                     externalLink: true,
@@ -192,16 +196,18 @@ export function CollapsibleNav({
       </EuiFlexItem>
 
       {/* Recently viewed */}
-      <EuiCollapsibleNavGroup
-        key="recentlyViewed"
-        background="light"
-        title={i18n.translate('core.ui.recentlyViewed', { defaultMessage: 'Recently viewed' })}
-        isCollapsible={true}
-        initialIsOpen={getIsCategoryOpen('recentlyViewed', storage)}
-        onToggle={(isCategoryOpen) => setIsCategoryOpen('recentlyViewed', isCategoryOpen, storage)}
-        data-test-subj="collapsibleNavGroup-recentlyViewed"
-      >
-        {recentlyAccessed.length > 0 ? (
+      {recentlyAccessed.length > 0 && (
+        <EuiCollapsibleNavGroup
+          key="recentlyViewed"
+          background="light"
+          title={i18n.translate('core.ui.recentlyViewed', { defaultMessage: 'Recently viewed' })}
+          isCollapsible={true}
+          initialIsOpen={getIsCategoryOpen('recentlyViewed', storage)}
+          onToggle={(isCategoryOpen) =>
+            setIsCategoryOpen('recentlyViewed', isCategoryOpen, storage)
+          }
+          data-test-subj="collapsibleNavGroup-recentlyViewed"
+        >
           <EuiListGroup
             aria-label={i18n.translate('core.ui.recentlyViewedAriaLabel', {
               defaultMessage: 'Recently viewed links',
@@ -233,16 +239,8 @@ export function CollapsibleNav({
             size="s"
             className="kbnCollapsibleNav__recentsListGroup"
           />
-        ) : (
-          <EuiText size="s" color="subdued" style={{ padding: '0 8px 8px' }}>
-            <p>
-              {i18n.translate('core.ui.EmptyRecentlyViewed', {
-                defaultMessage: 'No recently viewed items',
-              })}
-            </p>
-          </EuiText>
-        )}
-      </EuiCollapsibleNavGroup>
+        </EuiCollapsibleNavGroup>
+      )}
 
       <EuiHorizontalRule margin="none" />
 
@@ -255,6 +253,7 @@ export function CollapsibleNav({
             <EuiCollapsibleNavGroup
               key={category.id}
               iconType={category.euiIconType}
+              iconSize="m"
               title={category.label}
               isCollapsible={true}
               initialIsOpen={getIsCategoryOpen(category.id, storage)}
@@ -286,7 +285,7 @@ export function CollapsibleNav({
         ))}
 
         {/* Docking button only for larger screens that can support it*/}
-        <EuiShowFor sizes={['l', 'xl']}>
+        <EuiShowFor sizes={'none'}>
           <EuiCollapsibleNavGroup>
             <EuiListGroup flush>
               <EuiListGroupItem

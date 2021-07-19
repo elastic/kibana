@@ -9,7 +9,6 @@ import Boom from '@hapi/boom';
 
 import type {
   ISavedObjectTypeRegistry,
-  SavedObjectsAddToNamespacesOptions,
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
@@ -17,13 +16,17 @@ import type {
   SavedObjectsCheckConflictsObject,
   SavedObjectsClientContract,
   SavedObjectsClosePointInTimeOptions,
+  SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectsCollectMultiNamespaceReferencesOptions,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
   SavedObjectsCreateOptions,
   SavedObjectsCreatePointInTimeFinderDependencies,
   SavedObjectsCreatePointInTimeFinderOptions,
-  SavedObjectsDeleteFromNamespacesOptions,
   SavedObjectsFindOptions,
   SavedObjectsOpenPointInTimeOptions,
   SavedObjectsRemoveReferencesToOptions,
+  SavedObjectsUpdateObjectsSpacesObject,
+  SavedObjectsUpdateObjectsSpacesOptions,
   SavedObjectsUpdateOptions,
 } from 'src/core/server';
 
@@ -171,7 +174,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
    * @property {object} [options.hasReference] - { type, id }
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
-  public async find<T = unknown>(options: SavedObjectsFindOptions) {
+  public async find<T = unknown, A = unknown>(options: SavedObjectsFindOptions) {
     throwErrorIfNamespaceSpecified(options);
 
     let namespaces = options.namespaces;
@@ -187,12 +190,12 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
         }
         if (namespaces.length === 0) {
           // return empty response, since the user is unauthorized in this space (or these spaces), but we don't return forbidden errors for `find` operations
-          return SavedObjectsUtils.createEmptyFindResponse<T>(options);
+          return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
         }
       } catch (err) {
         if (Boom.isBoom(err) && err.output.payload.statusCode === 403) {
           // return empty response, since the user is unauthorized in any space, but we don't return forbidden errors for `find` operations
-          return SavedObjectsUtils.createEmptyFindResponse<T>(options);
+          return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
         }
         throw err;
       }
@@ -200,7 +203,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
       namespaces = [this.spaceId];
     }
 
-    return await this.client.find<T>({
+    return await this.client.find<T, A>({
       ...options,
       type: (options.type ? coerceToArray(options.type) : this.types).filter(
         (type) => type !== 'space'
@@ -300,50 +303,6 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
   }
 
   /**
-   * Adds namespaces to a SavedObject
-   *
-   * @param type
-   * @param id
-   * @param namespaces
-   * @param options
-   */
-  public async addToNamespaces(
-    type: string,
-    id: string,
-    namespaces: string[],
-    options: SavedObjectsAddToNamespacesOptions = {}
-  ) {
-    throwErrorIfNamespaceSpecified(options);
-
-    return await this.client.addToNamespaces(type, id, namespaces, {
-      ...options,
-      namespace: spaceIdToNamespace(this.spaceId),
-    });
-  }
-
-  /**
-   * Removes namespaces from a SavedObject
-   *
-   * @param type
-   * @param id
-   * @param namespaces
-   * @param options
-   */
-  public async deleteFromNamespaces(
-    type: string,
-    id: string,
-    namespaces: string[],
-    options: SavedObjectsDeleteFromNamespacesOptions = {}
-  ) {
-    throwErrorIfNamespaceSpecified(options);
-
-    return await this.client.deleteFromNamespaces(type, id, namespaces, {
-      ...options,
-      namespace: spaceIdToNamespace(this.spaceId),
-    });
-  }
-
-  /**
    * Updates an array of objects by id
    *
    * @param {array} objects - an array ids, or an array of objects containing id, type, attributes and optionally version, references and namespace
@@ -380,6 +339,44 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
   ) {
     throwErrorIfNamespaceSpecified(options);
     return await this.client.removeReferencesTo(type, id, {
+      ...options,
+      namespace: spaceIdToNamespace(this.spaceId),
+    });
+  }
+
+  /**
+   * Gets all references and transitive references of the listed objects. Ignores any object that is not a multi-namespace type.
+   *
+   * @param objects
+   * @param options
+   */
+  public async collectMultiNamespaceReferences(
+    objects: SavedObjectsCollectMultiNamespaceReferencesObject[],
+    options: SavedObjectsCollectMultiNamespaceReferencesOptions = {}
+  ): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse> {
+    throwErrorIfNamespaceSpecified(options);
+    return await this.client.collectMultiNamespaceReferences(objects, {
+      ...options,
+      namespace: spaceIdToNamespace(this.spaceId),
+    });
+  }
+
+  /**
+   * Updates one or more objects to add and/or remove them from specified spaces.
+   *
+   * @param objects
+   * @param spacesToAdd
+   * @param spacesToRemove
+   * @param options
+   */
+  public async updateObjectsSpaces(
+    objects: SavedObjectsUpdateObjectsSpacesObject[],
+    spacesToAdd: string[],
+    spacesToRemove: string[],
+    options: SavedObjectsUpdateObjectsSpacesOptions = {}
+  ) {
+    throwErrorIfNamespaceSpecified(options);
+    return await this.client.updateObjectsSpaces(objects, spacesToAdd, spacesToRemove, {
       ...options,
       namespace: spaceIdToNamespace(this.spaceId),
     });
@@ -434,7 +431,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
    * @param {object} findOptions - {@link SavedObjectsCreatePointInTimeFinderOptions}
    * @param {object} [dependencies] - {@link SavedObjectsCreatePointInTimeFinderDependencies}
    */
-  createPointInTimeFinder(
+  createPointInTimeFinder<T = unknown, A = unknown>(
     findOptions: SavedObjectsCreatePointInTimeFinderOptions,
     dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
   ) {
@@ -443,7 +440,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     // is simply a helper that calls `find`, `openPointInTimeForType`, and
     // `closePointInTime` internally, so namespaces will already be handled
     // in those methods.
-    return this.client.createPointInTimeFinder(findOptions, {
+    return this.client.createPointInTimeFinder<T, A>(findOptions, {
       client: this,
       // Include dependencies last so that subsequent SO client wrappers have their settings applied.
       ...dependencies,

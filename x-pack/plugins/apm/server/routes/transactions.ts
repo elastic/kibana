@@ -15,7 +15,7 @@ import {
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceTransactionGroups } from '../lib/services/get_service_transaction_groups';
-import { getServiceTransactionGroupComparisonStatisticsPeriods } from '../lib/services/get_service_transaction_group_comparison_statistics';
+import { getServiceTransactionGroupDetailedStatisticsPeriods } from '../lib/services/get_service_transaction_group_detailed_statistics';
 import { getTransactionBreakdown } from '../lib/transactions/breakdown';
 import { getTransactionDistribution } from '../lib/transactions/distribution';
 import { getAnomalySeries } from '../lib/transactions/get_anomaly_data';
@@ -34,7 +34,7 @@ import {
 
 /**
  * Returns a list of transactions grouped by name
- * //TODO: delete this once we moved away from the old table in the transaction overview page. It should be replaced by /transactions/groups/primary_statistics/
+ * //TODO: delete this once we moved away from the old table in the transaction overview page. It should be replaced by /transactions/groups/main_statistics/
  */
 const transactionGroupsRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/services/{serviceName}/transactions/groups',
@@ -56,9 +56,10 @@ const transactionGroupsRoute = createApmServerRoute({
     const { serviceName } = params.path;
     const { environment, kuery, transactionType } = params.query;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
-      setup
-    );
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      ...setup,
+      kuery,
+    });
 
     return getTransactionGroupList(
       {
@@ -74,9 +75,9 @@ const transactionGroupsRoute = createApmServerRoute({
   },
 });
 
-const transactionGroupsPrimaryStatisticsRoute = createApmServerRoute({
+const transactionGroupsMainStatisticsRoute = createApmServerRoute({
   endpoint:
-    'GET /api/apm/services/{serviceName}/transactions/groups/primary_statistics',
+    'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics',
   params: t.type({
     path: t.type({ serviceName: t.string }),
     query: t.intersection([
@@ -95,15 +96,15 @@ const transactionGroupsPrimaryStatisticsRoute = createApmServerRoute({
   handler: async (resources) => {
     const { params } = resources;
     const setup = await setupRequest(resources);
-
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
-      setup
-    );
-
     const {
       path: { serviceName },
       query: { environment, kuery, latencyAggregationType, transactionType },
     } = params;
+
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      ...setup,
+      kuery,
+    });
 
     return getServiceTransactionGroups({
       environment,
@@ -117,9 +118,9 @@ const transactionGroupsPrimaryStatisticsRoute = createApmServerRoute({
   },
 });
 
-const transactionGroupsComparisonStatisticsRoute = createApmServerRoute({
+const transactionGroupsDetailedStatisticsRoute = createApmServerRoute({
   endpoint:
-    'GET /api/apm/services/{serviceName}/transactions/groups/comparison_statistics',
+    'GET /api/apm/services/{serviceName}/transactions/groups/detailed_statistics',
   params: t.type({
     path: t.type({ serviceName: t.string }),
     query: t.intersection([
@@ -140,11 +141,6 @@ const transactionGroupsComparisonStatisticsRoute = createApmServerRoute({
   },
   handler: async (resources) => {
     const setup = await setupRequest(resources);
-
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
-      setup
-    );
-
     const { params } = resources;
 
     const {
@@ -161,7 +157,12 @@ const transactionGroupsComparisonStatisticsRoute = createApmServerRoute({
       },
     } = params;
 
-    return await getServiceTransactionGroupComparisonStatisticsPeriods({
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      ...setup,
+      kuery,
+    });
+
+    return await getServiceTransactionGroupDetailedStatisticsPeriods({
       environment,
       kuery,
       setup,
@@ -208,9 +209,10 @@ const transactionLatencyChartsRoute = createApmServerRoute({
       comparisonEnd,
     } = params.query;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
-      setup
-    );
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      ...setup,
+      kuery,
+    });
 
     const options = {
       environment,
@@ -276,9 +278,10 @@ const transactionThroughputChartsRoute = createApmServerRoute({
       transactionName,
     } = params.query;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
-      setup
-    );
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      ...setup,
+      kuery,
+    });
 
     return await getThroughputCharts({
       environment,
@@ -327,9 +330,10 @@ const transactionChartsDistributionRoute = createApmServerRoute({
       traceId = '',
     } = params.query;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
-      setup
-    );
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      ...setup,
+      kuery,
+    });
 
     return getTransactionDistribution({
       environment,
@@ -411,9 +415,10 @@ const transactionChartsErrorRateRoute = createApmServerRoute({
       comparisonEnd,
     } = params.query;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
-      setup
-    );
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      ...setup,
+      kuery,
+    });
 
     return getErrorRatePeriods({
       environment,
@@ -431,8 +436,8 @@ const transactionChartsErrorRateRoute = createApmServerRoute({
 
 export const transactionRouteRepository = createApmServerRouteRepository()
   .add(transactionGroupsRoute)
-  .add(transactionGroupsPrimaryStatisticsRoute)
-  .add(transactionGroupsComparisonStatisticsRoute)
+  .add(transactionGroupsMainStatisticsRoute)
+  .add(transactionGroupsDetailedStatisticsRoute)
   .add(transactionLatencyChartsRoute)
   .add(transactionThroughputChartsRoute)
   .add(transactionChartsDistributionRoute)

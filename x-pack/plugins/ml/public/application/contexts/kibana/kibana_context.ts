@@ -18,8 +18,7 @@ import { MlServicesContext } from '../../app';
 import { IStorageWrapper } from '../../../../../../../src/plugins/kibana_utils/public';
 import type { EmbeddableStart } from '../../../../../../../src/plugins/embeddable/public';
 import type { MapsStartApi } from '../../../../../maps/public';
-import type { FileUploadPluginStart } from '../../../../../file_upload/public';
-import type { LensPublicStart } from '../../../../../lens/public';
+import type { DataVisualizerPluginStart } from '../../../../../data_visualizer/public';
 import { TriggersAndActionsUIPublicPluginStart } from '../../../../../triggers_actions_ui/public';
 
 interface StartPlugins {
@@ -29,9 +28,8 @@ interface StartPlugins {
   share: SharePluginStart;
   embeddable: EmbeddableStart;
   maps?: MapsStartApi;
-  lens?: LensPublicStart;
   triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
-  fileUpload?: FileUploadPluginStart;
+  dataVisualizer?: DataVisualizerPluginStart;
 }
 export type StartServices = CoreStart &
   StartPlugins & {

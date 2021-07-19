@@ -15,10 +15,11 @@ import {
 } from '@elastic/eui';
 import { uniq } from 'lodash';
 
+import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import { useFieldValueAutocomplete } from './hooks/use_field_value_autocomplete';
 import { paramIsValid, getGenericComboBoxProps } from './helpers';
-import { OperatorTypeEnum } from '../../../lists_plugin_deps';
+
 import { GetGenericComboBoxPropsReturn } from './types';
 import * as i18n from './translations';
 
@@ -37,6 +38,11 @@ interface AutocompleteFieldMatchProps {
   onError?: (arg: boolean) => void;
 }
 
+/**
+ * There is a copy of this within:
+ * x-pack/plugins/lists/public/exceptions/components/autocomplete/field_value_match.tsx
+ * TODO: This should be in its own packaged and not copied, https://github.com/elastic/kibana/issues/105378
+ */
 export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchProps> = ({
   placeholder,
   rowLabel,

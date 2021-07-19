@@ -7,7 +7,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from 'src/core/server';
 
-export type ESLicense = estypes.LicenseInformation;
+export type ESLicense = estypes.LicenseGetLicenseInformation;
 
 let cachedLicense: ESLicense | undefined;
 

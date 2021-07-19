@@ -20,6 +20,7 @@ import { ConfigSchema } from '../../../config';
 import {
   createSessionStateContainer,
   SearchSessionState,
+  SessionStateInternal,
   SessionMeta,
   SessionStateContainer,
 } from './search_session_state';
@@ -34,6 +35,11 @@ export type ISessionService = PublicContract<SessionService>;
 export interface TrackSearchDescriptor {
   abort: () => void;
 }
+
+/**
+ * Represents a search session state in {@link SessionService} in any given moment of time
+ */
+export type SessionSnapshot = SessionStateInternal<TrackSearchDescriptor>;
 
 /**
  * Provide info about current search session to be stored in the Search Session saved object
@@ -73,7 +79,7 @@ export interface SearchSessionIndicatorUiConfig {
 }
 
 /**
- * Responsible for tracking a current search session. Supports only a single session at a time.
+ * Responsible for tracking a current search session. Supports a single session at a time.
  */
 export class SessionService {
   public readonly state$: Observable<SearchSessionState>;
@@ -87,6 +93,13 @@ export class SessionService {
   private hasAccessToSearchSessions: boolean = false;
 
   private toastService?: ToastService;
+
+  /**
+   * Holds snapshot of last cleared session so that it can be continued
+   * Can be used to re-use a session between apps
+   * @private
+   */
+  private lastSessionSnapshot?: SessionSnapshot;
 
   constructor(
     initializerContext: PluginInitializerContext<ConfigSchema>,
@@ -173,6 +186,7 @@ export class SessionService {
   public destroy() {
     this.subscription.unsubscribe();
     this.clear();
+    this.lastSessionSnapshot = undefined;
   }
 
   /**
@@ -213,7 +227,9 @@ export class SessionService {
    */
   public start() {
     if (!this.currentApp) throw new Error('this.currentApp is missing');
+
     this.state.transitions.start({ appName: this.currentApp });
+
     return this.getSessionId()!;
   }
 
@@ -224,6 +240,33 @@ export class SessionService {
   public restore(sessionId: string) {
     this.state.transitions.restore(sessionId);
     this.refreshSearchSessionSavedObject();
+  }
+
+  /**
+   * Continue previous search session
+   * Can be used to share a running search session between different apps, so they can reuse search cache
+   *
+   * This is different from {@link restore} as it reuses search session state and search results held in client memory instead of restoring search results from elasticsearch
+   * @param sessionId
+   */
+  public continue(sessionId: string) {
+    if (this.lastSessionSnapshot?.sessionId === sessionId) {
+      this.state.set({
+        ...this.lastSessionSnapshot,
+        // have to change a name, so that current app can cancel a session that it continues
+        appName: this.currentApp,
+        // also have to drop all pending searches which are used to derive client side state of search session indicator,
+        // if we weren't dropping this searches, then we would get into "infinite loading" state when continuing a session that was cleared with pending searches
+        // possible solution to this problem is to refactor session service to support multiple sessions
+        pendingSearches: [],
+      });
+      this.lastSessionSnapshot = undefined;
+    } else {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `Continue search session: last known search session id: "${this.lastSessionSnapshot?.sessionId}", but received ${sessionId}`
+      );
+    }
   }
 
   /**
@@ -242,6 +285,9 @@ export class SessionService {
       return;
     }
 
+    if (this.getSessionId()) {
+      this.lastSessionSnapshot = this.state.get();
+    }
     this.state.transitions.clear();
     this.searchSessionInfoProvider = undefined;
     this.searchSessionIndicatorUiConfig = undefined;

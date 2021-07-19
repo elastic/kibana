@@ -7,25 +7,22 @@
 
 import { StoryContext } from '@storybook/react';
 import React, { ComponentType } from 'react';
-import { IntlProvider } from 'react-intl';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
 import { MemoryRouter } from 'react-router-dom';
 import { AlertsPage } from '.';
 import { HttpSetup } from '../../../../../../src/core/public';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import {
+  KibanaContextProvider,
+  KibanaPageTemplate,
+} from '../../../../../../src/plugins/kibana_react/public';
 import { PluginContext, PluginContextValue } from '../../context/plugin_context';
-import { createObservabilityRuleRegistryMock } from '../../rules/observability_rule_registry_mock';
+import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
 import { createCallObservabilityApi } from '../../services/call_observability_api';
 import type { ObservabilityAPIReturnType } from '../../services/call_observability_api/types';
-import { AlertsFlyout } from './alerts_flyout';
-import { TopAlert } from './alerts_table';
-import { apmAlertResponseExample, dynamicIndexPattern, flyoutItemExample } from './example_data';
+import { apmAlertResponseExample, dynamicIndexPattern } from './example_data';
 
 interface PageArgs {
   items: ObservabilityAPIReturnType<'GET /api/observability/rules/alerts/top'>;
-}
-
-interface FlyoutArgs {
-  alert: TopAlert;
 }
 
 export default {
@@ -68,7 +65,8 @@ export default {
                     core: {
                       http: { basePath: { prepend: (_: string) => '' } },
                     },
-                    observabilityRuleRegistry: createObservabilityRuleRegistryMock(),
+                    observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
+                    ObservabilityPageTemplate: KibanaPageTemplate,
                   } as unknown) as PluginContextValue
                 }
               >
@@ -95,8 +93,3 @@ export function EmptyState(_args: PageArgs) {
   return <AlertsPage routeParams={{ query: {} }} />;
 }
 EmptyState.args = { items: [] } as PageArgs;
-
-export function Flyout({ alert }: FlyoutArgs) {
-  return <AlertsFlyout alert={alert} onClose={() => {}} />;
-}
-Flyout.args = { alert: flyoutItemExample } as FlyoutArgs;

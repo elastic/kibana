@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }) {
 
       //Delete all data indices that were created.
       await esDeleteAllIndices([targetIndexName, rollupSourceIndexPattern]);
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       await security.testUser.restoreDefaults();
     });
   });

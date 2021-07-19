@@ -36,14 +36,11 @@ import type {
 } from '../../../../src/plugins/visualizations/public';
 import { APP_ICON_SOLUTION, APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '../../../../src/plugins/ui_actions/public';
-import {
-  createMapsUrlGenerator,
-  createRegionMapUrlGenerator,
-  createTileMapUrlGenerator,
-} from './url_generator';
 import { visualizeGeoFieldAction } from './trigger_actions/visualize_geo_field_action';
+import { filterByMapExtentAction } from './trigger_actions/filter_by_map_extent_action';
 import { MapEmbeddableFactory } from './embeddable/map_embeddable_factory';
 import type { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+import { CONTEXT_MENU_TRIGGER } from '../../../../src/plugins/embeddable/public';
 import { MapsXPackConfig, MapsConfigType } from '../config';
 import { getAppTitle } from '../common/i18n_getters';
 import { lazyLoadMapModules } from './lazy_load_bundle';
@@ -69,6 +66,11 @@ import {
 import { EMSSettings } from '../common/ems_settings';
 import type { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
 import type { ChartsPluginStart } from '../../../../src/plugins/charts/public';
+import {
+  MapsAppLocatorDefinition,
+  MapsAppRegionMapLocatorDefinition,
+  MapsAppTileMapLocatorDefinition,
+} from './locators';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -131,17 +133,21 @@ export class MapsPlugin
     const emsSettings = new EMSSettings(plugins.mapsEms.config, getIsEnterprisePlus);
     setEMSSettings(emsSettings);
 
-    // register url generators
-    const getStartServices = async () => {
-      const [coreStart] = await core.getStartServices();
-      return {
-        appBasePath: coreStart.application.getUrlForApp('maps'),
-        useHashedUrl: coreStart.uiSettings.get('state:storeInSessionStorage'),
-      };
-    };
-    plugins.share.urlGenerators.registerUrlGenerator(createMapsUrlGenerator(getStartServices));
-    plugins.share.urlGenerators.registerUrlGenerator(createTileMapUrlGenerator(getStartServices));
-    plugins.share.urlGenerators.registerUrlGenerator(createRegionMapUrlGenerator(getStartServices));
+    const locator = plugins.share.url.locators.create(
+      new MapsAppLocatorDefinition({
+        useHash: core.uiSettings.get('state:storeInSessionStorage'),
+      })
+    );
+    plugins.share.url.locators.create(
+      new MapsAppTileMapLocatorDefinition({
+        locator,
+      })
+    );
+    plugins.share.url.locators.create(
+      new MapsAppRegionMapLocatorDefinition({
+        locator,
+      })
+    );
 
     plugins.inspector.registerView(MapView);
     if (plugins.home) {
@@ -173,6 +179,7 @@ export class MapsPlugin
     if (core.application.capabilities.maps.show) {
       plugins.uiActions.addTriggerAction(VISUALIZE_GEO_FIELD_TRIGGER, visualizeGeoFieldAction);
     }
+    plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, filterByMapExtentAction);
 
     if (!core.application.capabilities.maps.save) {
       plugins.visualizations.unRegisterAlias(APP_ID);

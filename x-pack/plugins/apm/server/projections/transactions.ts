@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import { QueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { Setup, SetupTimeRange } from '../../server/lib/helpers/setup_request';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
   TRANSACTION_NAME,
 } from '../../common/elasticsearch_fieldnames';
-import {
-  environmentQuery,
-  rangeQuery,
-  kqlQuery,
-} from '../../server/utils/queries';
+import { rangeQuery, kqlQuery } from '../../../observability/server';
+import { environmentQuery } from '../../common/utils/environment_query';
 import {
   getProcessorEventForAggregatedTransactions,
   getDocumentTypeFilterForAggregatedTransactions,
@@ -62,7 +59,7 @@ export function getTransactionsProjection({
       ...rangeQuery(start, end),
       ...environmentQuery(environment),
       ...kqlQuery(kuery),
-    ] as QueryContainer[],
+    ] as QueryDslQueryContainer[],
   };
 
   return {

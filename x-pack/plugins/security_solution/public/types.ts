@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { AppFrontendLibs } from './common/lib/lib';
 import { CoreStart } from '../../../../src/core/public';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
@@ -22,19 +21,24 @@ import {
   TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
 } from '../../triggers_actions_ui/public';
+import { CasesUiStart } from '../../cases/public';
 import { SecurityPluginSetup } from '../../security/public';
+import { TimelinesUIStart } from '../../timelines/public';
 import { ResolverPluginSetup } from './resolver/types';
 import { Inspect } from '../common/search_strategy';
 import { MlPluginSetup, MlPluginStart } from '../../ml/public';
 
 import { Detections } from './detections';
 import { Cases } from './cases';
+import { Exceptions } from './exceptions';
 import { Hosts } from './hosts';
 import { Network } from './network';
 import { Overview } from './overview';
+import { Rules } from './rules';
 import { Timelines } from './timelines';
 import { Management } from './management';
 import { LicensingPluginStart, LicensingPluginSetup } from '../../licensing/public';
+import { DashboardStart } from '../../../../src/plugins/dashboard/public';
 
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
@@ -47,7 +51,9 @@ export interface SetupPlugins {
 }
 
 export interface StartPlugins {
+  cases: CasesUiStart;
   data: DataPublicPluginStart;
+  dashboard?: DashboardStart;
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
   fleet?: FleetStart;
@@ -55,6 +61,7 @@ export interface StartPlugins {
   licensing: LicensingPluginStart;
   newsfeed?: NewsfeedPublicPluginStart;
   triggersActionsUi: TriggersActionsStart;
+  timelines: TimelinesUIStart;
   uiActions: UiActionsStart;
   ml?: MlPluginStart;
 }
@@ -71,18 +78,33 @@ export interface PluginSetup {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginStart {}
 
-export interface AppObservableLibs extends AppFrontendLibs {
+export interface AppObservableLibs {
   kibana: CoreStart;
 }
 
 export type InspectResponse = Inspect & { response: string[] };
 
 export interface SubPlugins {
-  detections: Detections;
+  alerts: Detections;
+  rules: Rules;
+  exceptions: Exceptions;
   cases: Cases;
   hosts: Hosts;
   network: Network;
   overview: Overview;
   timelines: Timelines;
   management: Management;
+}
+
+// TODO: find a better way to defined these types
+export interface StartedSubPlugins {
+  alerts: ReturnType<Detections['start']>;
+  rules: ReturnType<Rules['start']>;
+  exceptions: ReturnType<Exceptions['start']>;
+  cases: ReturnType<Cases['start']>;
+  hosts: ReturnType<Hosts['start']>;
+  network: ReturnType<Network['start']>;
+  overview: ReturnType<Overview['start']>;
+  timelines: ReturnType<Timelines['start']>;
+  management: ReturnType<Management['start']>;
 }

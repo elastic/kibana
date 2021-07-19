@@ -3,6 +3,7 @@
   "client": {
     "classes": [
       {
+        "parentPluginId": "devTools",
         "id": "def-public.DevToolsPlugin",
         "type": "Class",
         "tags": [],
@@ -34,11 +35,19 @@
           },
           ", void, object, object>"
         ],
+        "source": {
+          "path": "src/plugins/dev_tools/public/plugin.ts",
+          "lineNumber": 35
+        },
+        "deprecated": false,
         "children": [
           {
+            "parentPluginId": "devTools",
             "id": "def-public.DevToolsPlugin.setup",
             "type": "Function",
+            "tags": [],
             "label": "setup",
+            "description": [],
             "signature": [
               "(coreSetup: ",
               {
@@ -54,13 +63,19 @@
               "DevToolApp",
               "; }"
             ],
-            "description": [],
+            "source": {
+              "path": "src/plugins/dev_tools/public/plugin.ts",
+              "lineNumber": 43
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "devTools",
                 "id": "def-public.DevToolsPlugin.setup.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "coreSetup",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "core",
@@ -71,84 +86,84 @@
                   },
                   "<object, unknown>"
                 ],
+                "source": {
+                  "path": "src/plugins/dev_tools/public/plugin.ts",
+                  "lineNumber": 43
+                },
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "devTools",
+                "id": "def-public.DevToolsPlugin.setup.$2.urlForwarding",
+                "type": "Object",
+                "tags": [],
+                "label": "{ urlForwarding }",
                 "description": [],
                 "source": {
                   "path": "src/plugins/dev_tools/public/plugin.ts",
                   "lineNumber": 43
-                }
-              },
-              {
-                "id": "def-public.DevToolsPlugin.setup.$2.urlForwarding",
-                "type": "Object",
-                "label": "{ urlForwarding }",
-                "tags": [],
-                "description": [],
+                },
+                "deprecated": false,
                 "children": [
                   {
-                    "tags": [],
+                    "parentPluginId": "devTools",
                     "id": "def-public.DevToolsPlugin.setup.$2.urlForwarding.urlForwarding",
                     "type": "Object",
+                    "tags": [],
                     "label": "urlForwarding",
                     "description": [],
+                    "signature": [
+                      "{ forwardApp: (legacyAppId: string, newAppId: string, rewritePath?: ((legacyPath: string) => string) | undefined) => void; }"
+                    ],
                     "source": {
                       "path": "src/plugins/dev_tools/public/plugin.ts",
                       "lineNumber": 43
                     },
-                    "signature": [
-                      "{ forwardApp: (legacyAppId: string, newAppId: string, rewritePath?: ((legacyPath: string) => string) | undefined) => void; }"
-                    ]
+                    "deprecated": false
                   }
-                ],
-                "source": {
-                  "path": "src/plugins/dev_tools/public/plugin.ts",
-                  "lineNumber": 43
-                }
+                ]
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/dev_tools/public/plugin.ts",
-              "lineNumber": 43
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "devTools",
             "id": "def-public.DevToolsPlugin.start",
             "type": "Function",
+            "tags": [],
             "label": "start",
+            "description": [],
             "signature": [
               "() => void"
             ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "src/plugins/dev_tools/public/plugin.ts",
               "lineNumber": 84
-            }
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
+            "parentPluginId": "devTools",
             "id": "def-public.DevToolsPlugin.stop",
             "type": "Function",
+            "tags": [],
             "label": "stop",
+            "description": [],
             "signature": [
               "() => void"
             ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "src/plugins/dev_tools/public/plugin.ts",
-              "lineNumber": 90
-            }
+              "lineNumber": 104
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
-        "source": {
-          "path": "src/plugins/dev_tools/public/plugin.ts",
-          "lineNumber": 35
-        },
         "initialIsOpen": false
       }
     ],
@@ -158,36 +173,63 @@
     "misc": [],
     "objects": [],
     "setup": {
+      "parentPluginId": "devTools",
       "id": "def-public.DevToolsSetup",
       "type": "Interface",
+      "tags": [],
       "label": "DevToolsSetup",
       "description": [],
-      "tags": [],
+      "source": {
+        "path": "src/plugins/dev_tools/public/plugin.ts",
+        "lineNumber": 21
+      },
+      "deprecated": false,
       "children": [
         {
-          "tags": [],
+          "parentPluginId": "devTools",
           "id": "def-public.DevToolsSetup.register",
           "type": "Function",
+          "tags": [],
           "label": "register",
           "description": [
             "\nRegister a developer tool. It will be available\nin the dev tools app under a separate tab.\n\nRegistering dev tools works almost similar to registering\napplications in the core application service,\nbut they will be rendered with a frame containing tabs\nto switch between the tools."
           ],
-          "source": {
-            "path": "src/plugins/dev_tools/public/plugin.ts",
-            "lineNumber": 32
-          },
           "signature": [
             "(devTool: ",
             "CreateDevToolArgs",
             ") => ",
             "DevToolApp"
+          ],
+          "source": {
+            "path": "src/plugins/dev_tools/public/plugin.ts",
+            "lineNumber": 32
+          },
+          "deprecated": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "devTools",
+              "id": "def-public.devTool",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "devTool",
+              "description": [
+                "The dev tools descriptor"
+              ],
+              "signature": [
+                "Pick<",
+                "DevToolApp",
+                ", \"title\" | \"id\" | \"order\" | \"mount\" | \"tooltipContent\" | \"enableRouting\"> & { disabled?: boolean | undefined; }"
+              ],
+              "source": {
+                "path": "src/plugins/dev_tools/public/plugin.ts",
+                "lineNumber": 32
+              },
+              "deprecated": false
+            }
           ]
         }
       ],
-      "source": {
-        "path": "src/plugins/dev_tools/public/plugin.ts",
-        "lineNumber": 21
-      },
       "lifecycle": "setup",
       "initialIsOpen": true
     }

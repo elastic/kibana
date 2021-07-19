@@ -13,3 +13,9 @@ export const mockPackage = {
 jest.doMock('load-json-file', () => ({
   sync: () => mockPackage.raw,
 }));
+
+const { scanPluginSearchPaths } = jest.requireActual('./scan_plugin_search_paths');
+export const scanPluginSearchPathsMock = jest.fn().mockImplementation(scanPluginSearchPaths);
+jest.doMock('./scan_plugin_search_paths', () => ({
+  scanPluginSearchPaths: scanPluginSearchPathsMock,
+}));

@@ -9,26 +9,25 @@ import { i18n } from '@kbn/i18n';
 import { flow } from 'lodash';
 import {
   ActionConnector,
-  CaseResponse,
   CaseFullExternalService,
+  CaseResponse,
   CaseUserActionsResponse,
   CommentResponse,
   CommentResponseAlertsType,
   CommentType,
   ConnectorMappingsAttributes,
-  ConnectorTypes,
   CommentAttributes,
   CommentRequestUserType,
   CommentRequestAlertType,
-} from '../../../common/api';
+  CommentRequestActionsType,
+} from '../../../common';
 import { ActionsClient } from '../../../../actions/server';
-import { externalServiceFormatters, FormatterConnectorTypes } from '../../connectors';
 import { CasesClientGetAlertsResponse } from '../../client/alerts/types';
 import {
   BasicParams,
   EntityInformation,
-  ExternalServiceParams,
   ExternalServiceComment,
+  ExternalServiceParams,
   Incident,
   MapIncident,
   PipedField,
@@ -38,7 +37,8 @@ import {
   TransformerArgs,
   TransformFieldsArgs,
 } from './types';
-import { getAlertIds } from '../../routes/api/utils';
+import { getAlertIds } from '../utils';
+import { CasesConnectorsMap } from '../../connectors';
 
 interface CreateIncidentArgs {
   actionsClient: ActionsClient;
@@ -47,6 +47,7 @@ interface CreateIncidentArgs {
   connector: ActionConnector;
   mappings: ConnectorMappingsAttributes[];
   alerts: CasesClientGetAlertsResponse;
+  casesConnectors: CasesConnectorsMap;
 }
 
 export const getLatestPushInfo = (
@@ -70,27 +71,75 @@ export const getLatestPushInfo = (
   return null;
 };
 
-const isConnectorSupported = (connectorId: string): connectorId is FormatterConnectorTypes =>
-  Object.values(ConnectorTypes).includes(connectorId as ConnectorTypes);
-
 const getCommentContent = (comment: CommentResponse): string => {
   if (comment.type === CommentType.user) {
     return comment.comment;
   } else if (comment.type === CommentType.alert || comment.type === CommentType.generatedAlert) {
     const ids = getAlertIds(comment);
     return `Alert with ids ${ids.join(', ')} added to case`;
+  } else if (
+    comment.type === CommentType.actions &&
+    (comment.actions.type === 'isolate' || comment.actions.type === 'unisolate')
+  ) {
+    const firstHostname =
+      comment.actions.targets?.length > 0 ? comment.actions.targets[0].hostname : 'unknown';
+    const totalHosts = comment.actions.targets.length;
+    const actionText = comment.actions.type === 'isolate' ? 'Isolated' : 'Released';
+    const additionalHostsText = totalHosts - 1 > 0 ? `and ${totalHosts - 1} more ` : ``;
+
+    return `${actionText} host ${firstHostname} ${additionalHostsText}with comment: ${comment.comment}`;
   }
 
   return '';
 };
 
-const countAlerts = (comments: CaseResponse['comments']): number =>
-  comments?.reduce<number>((total, comment) => {
-    if (comment.type === CommentType.alert || comment.type === CommentType.generatedAlert) {
-      return total + (Array.isArray(comment.alertId) ? comment.alertId.length : 1);
-    }
-    return total;
-  }, 0) ?? 0;
+interface CountAlertsInfo {
+  totalComments: number;
+  pushed: number;
+  totalAlerts: number;
+}
+
+const getAlertsInfo = (
+  comments: CaseResponse['comments']
+): { totalAlerts: number; hasUnpushedAlertComments: boolean } => {
+  const countingInfo = { totalComments: 0, pushed: 0, totalAlerts: 0 };
+
+  const res =
+    comments?.reduce<CountAlertsInfo>(({ totalComments, pushed, totalAlerts }, comment) => {
+      if (comment.type === CommentType.alert || comment.type === CommentType.generatedAlert) {
+        return {
+          totalComments: totalComments + 1,
+          pushed: comment.pushed_at != null ? pushed + 1 : pushed,
+          totalAlerts: totalAlerts + (Array.isArray(comment.alertId) ? comment.alertId.length : 1),
+        };
+      }
+      return { totalComments, pushed, totalAlerts };
+    }, countingInfo) ?? countingInfo;
+
+  return {
+    totalAlerts: res.totalAlerts,
+    hasUnpushedAlertComments: res.totalComments > res.pushed,
+  };
+};
+
+const addAlertMessage = (
+  caseId: string,
+  caseComments: CaseResponse['comments'],
+  comments: ExternalServiceComment[]
+): ExternalServiceComment[] => {
+  const { totalAlerts, hasUnpushedAlertComments } = getAlertsInfo(caseComments);
+
+  const newComments = [...comments];
+
+  if (hasUnpushedAlertComments) {
+    newComments.push({
+      comment: `Elastic Alerts attached to the case: ${totalAlerts}`,
+      commentId: `${caseId}-total-alerts`,
+    });
+  }
+
+  return newComments;
+};
 
 export const createIncident = async ({
   actionsClient,
@@ -99,6 +148,7 @@ export const createIncident = async ({
   connector,
   mappings,
   alerts,
+  casesConnectors,
 }: CreateIncidentArgs): Promise<MapIncident> => {
   const {
     comments: caseComments,
@@ -110,20 +160,15 @@ export const createIncident = async ({
     updated_by: updatedBy,
   } = theCase;
 
-  if (!isConnectorSupported(connector.actionTypeId)) {
-    throw new Error('Invalid external service');
-  }
-
   const params = { title, description, createdAt, createdBy, updatedAt, updatedBy };
   const latestPushInfo = getLatestPushInfo(connector.id, userActions);
   const externalId = latestPushInfo?.pushedInfo?.external_id ?? null;
   const defaultPipes = externalId ? ['informationUpdated'] : ['informationCreated'];
   let currentIncident: ExternalServiceParams | undefined;
 
-  const externalServiceFields = externalServiceFormatters[connector.actionTypeId].format(
-    theCase,
-    alerts
-  );
+  const externalServiceFields =
+    casesConnectors.get(connector.actionTypeId)?.format(theCase, alerts) ?? {};
+
   let incident: Partial<PushToServiceApiParams['incident']> = { ...externalServiceFields };
 
   if (externalId) {
@@ -168,10 +213,9 @@ export const createIncident = async ({
   const commentsToBeUpdated = caseComments?.filter(
     (comment) =>
       // We push only user's comments
-      comment.type === CommentType.user && commentsIdsToBeUpdated.has(comment.id)
+      (comment.type === CommentType.user || comment.type === CommentType.actions) &&
+      commentsIdsToBeUpdated.has(comment.id)
   );
-
-  const totalAlerts = countAlerts(caseComments);
 
   let comments: ExternalServiceComment[] = [];
 
@@ -182,12 +226,7 @@ export const createIncident = async ({
     }
   }
 
-  if (totalAlerts > 0) {
-    comments.push({
-      comment: `Elastic Security Alerts attached to the case: ${totalAlerts}`,
-      commentId: `${theCase.id}-total-alerts`,
-    });
-  }
+  comments = addAlertMessage(theCase.id, caseComments, comments);
 
   return { incident, comments };
 };
@@ -259,6 +298,7 @@ export const prepareFieldsForTransformation = ({
   mappings.reduce(
     (acc: PipedField[], mapping) =>
       mapping != null &&
+      mapping.target != null &&
       mapping.target !== 'not_mapped' &&
       mapping.action_type !== 'nothing' &&
       mapping.source !== 'comments'
@@ -328,12 +368,14 @@ export const isCommentAlertType = (
 
 export const getCommentContextFromAttributes = (
   attributes: CommentAttributes
-): CommentRequestUserType | CommentRequestAlertType => {
+): CommentRequestUserType | CommentRequestAlertType | CommentRequestActionsType => {
+  const owner = attributes.owner;
   switch (attributes.type) {
     case CommentType.user:
       return {
         type: CommentType.user,
         comment: attributes.comment,
+        owner,
       };
     case CommentType.generatedAlert:
     case CommentType.alert:
@@ -342,11 +384,23 @@ export const getCommentContextFromAttributes = (
         alertId: attributes.alertId,
         index: attributes.index,
         rule: attributes.rule,
+        owner,
+      };
+    case CommentType.actions:
+      return {
+        type: attributes.type,
+        comment: attributes.comment,
+        actions: {
+          targets: attributes.actions.targets,
+          type: attributes.actions.type,
+        },
+        owner,
       };
     default:
       return {
         type: CommentType.user,
         comment: '',
+        owner,
       };
   }
 };

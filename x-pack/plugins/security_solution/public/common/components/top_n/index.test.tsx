@@ -11,7 +11,6 @@ import { waitFor } from '@testing-library/react';
 import '../../mock/match_media';
 import { mockBrowserFields } from '../../containers/source/mock';
 import {
-  apolloClientObservable,
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
@@ -19,17 +18,11 @@ import {
   createSecuritySolutionStorageMock,
   mockIndexPattern,
 } from '../../mock';
-import { FilterManager } from '../../../../../../../src/plugins/data/public';
 import { createStore, State } from '../../store';
 
 import { Props } from './top_n';
 import { StatefulTopN } from '.';
-import {
-  ManageGlobalTimeline,
-  getTimelineDefaults,
-} from '../../../timelines/components/manage_timeline';
 import { TimelineId } from '../../../../common/types/timeline';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -45,8 +38,6 @@ jest.mock('react-router-dom', () => {
 jest.mock('../link_to');
 jest.mock('../../lib/kibana');
 jest.mock('../../../timelines/store/timeline/actions');
-
-const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
 const field = 'process.name';
 const value = 'nice';
@@ -157,13 +148,7 @@ const state: State = {
 };
 
 const { storage } = createSecuritySolutionStorageMock();
-const store = createStore(
-  state,
-  SUB_PLUGINS_REDUCER,
-  apolloClientObservable,
-  kibanaObservable,
-  storage
-);
+const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
 let testProps = {
   browserFields: mockBrowserFields,
@@ -182,9 +167,7 @@ describe('StatefulTopN', () => {
     beforeEach(() => {
       wrapper = mount(
         <TestProviders store={store}>
-          <ManageGlobalTimeline>
-            <StatefulTopN {...testProps} />
-          </ManageGlobalTimeline>
+          <StatefulTopN {...testProps} />
         </TestProviders>
       );
     });
@@ -251,26 +234,16 @@ describe('StatefulTopN', () => {
   });
 
   describe('rendering in a timeline context', () => {
-    let filterManager: FilterManager;
     let wrapper: ReactWrapper;
 
     beforeEach(() => {
-      filterManager = new FilterManager(mockUiSettingsForFilterManager);
-      const manageTimelineForTesting = {
-        [TimelineId.active]: {
-          ...getTimelineDefaults(TimelineId.active),
-          filterManager,
-        },
-      };
       testProps = {
         ...testProps,
         timelineId: TimelineId.active,
       };
       wrapper = mount(
         <TestProviders store={store}>
-          <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
-            <StatefulTopN {...testProps} />
-          </ManageGlobalTimeline>
+          <StatefulTopN {...testProps} />
         </TestProviders>
       );
     });
@@ -327,25 +300,13 @@ describe('StatefulTopN', () => {
   });
   describe('rendering in a NON-active timeline context', () => {
     test(`defaults to the 'Alert events' option when rendering in a NON-active timeline context (e.g. the Alerts table on the Detections page) when 'documentType' from 'useTimelineTypeContext()' is 'alerts'`, async () => {
-      const filterManager = new FilterManager(mockUiSettingsForFilterManager);
-
-      const manageTimelineForTesting = {
-        [TimelineId.active]: {
-          ...getTimelineDefaults(TimelineId.active),
-          filterManager,
-          documentType: 'alerts',
-        },
-      };
-
       testProps = {
         ...testProps,
         timelineId: TimelineId.detectionsPage,
       };
       const wrapper = mount(
         <TestProviders store={store}>
-          <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
-            <StatefulTopN {...testProps} />
-          </ManageGlobalTimeline>
+          <StatefulTopN {...testProps} />
         </TestProviders>
       );
       await waitFor(() => {

@@ -12,12 +12,14 @@ import { JiraFieldsRT } from './jira';
 import { ResilientFieldsRT } from './resilient';
 import { ServiceNowITSMFieldsRT } from './servicenow_itsm';
 import { ServiceNowSIRFieldsRT } from './servicenow_sir';
+import { SwimlaneFieldsRT } from './swimlane';
 
 export * from './jira';
 export * from './servicenow_itsm';
 export * from './servicenow_sir';
 export * from './resilient';
 export * from './mappings';
+export * from './swimlane';
 
 export type ActionConnector = ActionResult;
 export type ActionTypeConnector = ActionType;
@@ -32,11 +34,14 @@ export const ConnectorFieldsRt = rt.union([
 
 export enum ConnectorTypes {
   jira = '.jira',
+  none = '.none',
   resilient = '.resilient',
   serviceNowITSM = '.servicenow',
   serviceNowSIR = '.servicenow-sir',
-  none = '.none',
+  swimlane = '.swimlane',
 }
+
+export const connectorTypes = Object.values(ConnectorTypes);
 
 const ConnectorJiraTypeFieldsRt = rt.type({
   type: rt.literal(ConnectorTypes.jira),
@@ -53,6 +58,11 @@ const ConnectorServiceNowITSMTypeFieldsRt = rt.type({
   fields: rt.union([ServiceNowITSMFieldsRT, rt.null]),
 });
 
+const ConnectorSwimlaneTypeFieldsRt = rt.type({
+  type: rt.literal(ConnectorTypes.swimlane),
+  fields: rt.union([SwimlaneFieldsRT, rt.null]),
+});
+
 const ConnectorServiceNowSIRTypeFieldsRt = rt.type({
   type: rt.literal(ConnectorTypes.serviceNowSIR),
   fields: rt.union([ServiceNowSIRFieldsRT, rt.null]),
@@ -65,10 +75,11 @@ const ConnectorNoneTypeFieldsRt = rt.type({
 
 export const ConnectorTypeFieldsRt = rt.union([
   ConnectorJiraTypeFieldsRt,
+  ConnectorNoneTypeFieldsRt,
   ConnectorResillientTypeFieldsRt,
   ConnectorServiceNowITSMTypeFieldsRt,
   ConnectorServiceNowSIRTypeFieldsRt,
-  ConnectorNoneTypeFieldsRt,
+  ConnectorSwimlaneTypeFieldsRt,
 ]);
 
 export const CaseConnectorRt = rt.intersection([
@@ -83,6 +94,7 @@ export type CaseConnector = rt.TypeOf<typeof CaseConnectorRt>;
 export type ConnectorTypeFields = rt.TypeOf<typeof ConnectorTypeFieldsRt>;
 export type ConnectorJiraTypeFields = rt.TypeOf<typeof ConnectorJiraTypeFieldsRt>;
 export type ConnectorResillientTypeFields = rt.TypeOf<typeof ConnectorResillientTypeFieldsRt>;
+export type ConnectorSwimlaneTypeFields = rt.TypeOf<typeof ConnectorSwimlaneTypeFieldsRt>;
 export type ConnectorServiceNowITSMTypeFields = rt.TypeOf<
   typeof ConnectorServiceNowITSMTypeFieldsRt
 >;

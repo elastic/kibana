@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { PutSnapshotLifecycleRequest } from '@elastic/elasticsearch/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { schema, TypeOf } from '@kbn/config-schema';
 
 import { SlmPolicyEs, PolicyIndicesResponse } from '../../../common/types';
@@ -103,7 +103,7 @@ export function registerPolicyRoutes({
         const response = await clusterClient.asCurrentUser.slm.putLifecycle({
           policy_id: name,
           // TODO: bring {@link SlmPolicyEs['policy']} in line with {@link PutSnapshotLifecycleRequest['body']}
-          body: (serializePolicy(policy) as unknown) as PutSnapshotLifecycleRequest['body'],
+          body: (serializePolicy(policy) as unknown) as estypes.SlmPutLifecycleRequest['body'],
         });
 
         return res.ok({ body: response.body });
@@ -133,7 +133,7 @@ export function registerPolicyRoutes({
         const response = await clusterClient.asCurrentUser.slm.putLifecycle({
           policy_id: name,
           // TODO: bring {@link SlmPolicyEs['policy']} in line with {@link PutSnapshotLifecycleRequest['body']}
-          body: (serializePolicy(policy) as unknown) as PutSnapshotLifecycleRequest['body'],
+          body: (serializePolicy(policy) as unknown) as estypes.SlmPutLifecycleRequest['body'],
         });
 
         return res.ok({ body: response.body });
@@ -205,6 +205,7 @@ export function registerPolicyRoutes({
           name: '*',
           expand_wildcards: 'all',
         });
+        // @ts-expect-error Type 'ResolveIndexAliasItem[]' is not comparable to type 'IndexAndAliasFromEs[]'.
         const resolvedIndicesResponse = response.body as ResolveIndexResponseFromES;
 
         const body: PolicyIndicesResponse = {

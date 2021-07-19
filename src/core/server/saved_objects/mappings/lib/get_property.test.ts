@@ -34,7 +34,7 @@ const MAPPINGS = {
       },
     },
   },
-};
+} as const;
 
 function runTest(key: string | string[], mapping: IndexMapping | SavedObjectsFieldMapping) {
   expect(typeof key === 'string' || Array.isArray(key)).toBeTruthy();

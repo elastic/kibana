@@ -12,7 +12,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
@@ -20,14 +20,15 @@ import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
 import {
   PAGE_SIZE,
-  PrimaryStatsServiceInstanceItem,
+  MainStatsServiceInstanceItem,
   SortDirection,
   SortField,
 } from '../service_overview_instances_chart_and_table';
 import { ServiceOverviewTableContainer } from '../service_overview_table_container';
 import { getColumns } from './get_columns';
+import { InstanceDetails } from './intance_details';
 
-type ServiceInstanceComparisonStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/comparison_statistics'>;
+type ServiceInstanceDetailedStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
 
 export interface TableOptions {
   pageIndex: number;
@@ -38,26 +39,26 @@ export interface TableOptions {
 }
 
 interface Props {
-  primaryStatsItems: PrimaryStatsServiceInstanceItem[];
+  mainStatsItems: MainStatsServiceInstanceItem[];
   serviceName: string;
-  primaryStatsStatus: FETCH_STATUS;
-  primaryStatsItemCount: number;
+  mainStatsStatus: FETCH_STATUS;
+  mainStatsItemCount: number;
   tableOptions: TableOptions;
   onChangeTableOptions: (newTableOptions: {
     page?: { index: number };
     sort?: { field: string; direction: SortDirection };
   }) => void;
-  comparisonStatsData?: ServiceInstanceComparisonStatistics;
+  detailedStatsData?: ServiceInstanceDetailedStatistics;
   isLoading: boolean;
 }
 export function ServiceOverviewInstancesTable({
-  primaryStatsItems = [],
-  primaryStatsItemCount,
+  mainStatsItems = [],
+  mainStatsItemCount,
   serviceName,
-  primaryStatsStatus: status,
+  mainStatsStatus: status,
   tableOptions,
   onChangeTableOptions,
-  comparisonStatsData: comparisonStatsData,
+  detailedStatsData: detailedStatsData,
   isLoading,
 }: Props) {
   const { agentName } = useApmServiceContext();
@@ -65,21 +66,64 @@ export function ServiceOverviewInstancesTable({
     urlParams: { latencyAggregationType, comparisonEnabled },
   } = useUrlParams();
 
+  const [
+    itemIdToOpenActionMenuRowMap,
+    setItemIdToOpenActionMenuRowMap,
+  ] = useState<Record<string, boolean>>({});
+
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
+    Record<string, ReactNode>
+  >({});
+
+  useEffect(() => {
+    // Closes any open rows when fetching new items
+    setItemIdToExpandedRowMap({});
+  }, [status]);
+
   const { pageIndex, sort } = tableOptions;
   const { direction, field } = sort;
+
+  const toggleRowActionMenu = (selectedServiceNodeName: string) => {
+    const actionMenuRowMapValues = { ...itemIdToOpenActionMenuRowMap };
+    if (actionMenuRowMapValues[selectedServiceNodeName]) {
+      delete actionMenuRowMapValues[selectedServiceNodeName];
+    } else {
+      actionMenuRowMapValues[selectedServiceNodeName] = true;
+    }
+    setItemIdToOpenActionMenuRowMap(actionMenuRowMapValues);
+  };
+
+  const toggleRowDetails = (selectedServiceNodeName: string) => {
+    const expandedRowMapValues = { ...itemIdToExpandedRowMap };
+    if (expandedRowMapValues[selectedServiceNodeName]) {
+      delete expandedRowMapValues[selectedServiceNodeName];
+    } else {
+      expandedRowMapValues[selectedServiceNodeName] = (
+        <InstanceDetails
+          serviceNodeName={selectedServiceNodeName}
+          serviceName={serviceName}
+        />
+      );
+    }
+    setItemIdToExpandedRowMap(expandedRowMapValues);
+  };
 
   const columns = getColumns({
     agentName,
     serviceName,
     latencyAggregationType,
-    comparisonStatsData,
+    detailedStatsData,
     comparisonEnabled,
+    toggleRowDetails,
+    itemIdToExpandedRowMap,
+    toggleRowActionMenu,
+    itemIdToOpenActionMenuRowMap,
   });
 
   const pagination = {
     pageIndex,
     pageSize: PAGE_SIZE,
-    totalItemCount: primaryStatsItemCount,
+    totalItemCount: mainStatsItemCount,
     hidePerPageOptions: true,
   };
 
@@ -89,23 +133,26 @@ export function ServiceOverviewInstancesTable({
         <EuiTitle size="xs">
           <h2>
             {i18n.translate('xpack.apm.serviceOverview.instancesTableTitle', {
-              defaultMessage: 'All instances',
+              defaultMessage: 'Instances',
             })}
           </h2>
         </EuiTitle>
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem data-test-subj="serviceInstancesTableContainer">
         <TableFetchWrapper status={status}>
           <ServiceOverviewTableContainer
-            isEmptyAndLoading={primaryStatsItemCount === 0 && isLoading}
+            isEmptyAndLoading={mainStatsItemCount === 0 && isLoading}
           >
             <EuiBasicTable
+              data-test-subj="instancesTable"
               loading={isLoading}
-              items={primaryStatsItems}
+              items={mainStatsItems}
               columns={columns}
               pagination={pagination}
               sorting={{ sort: { field, direction } }}
               onChange={onChangeTableOptions}
+              itemId="serviceNodeName"
+              itemIdToExpandedRowMap={itemIdToExpandedRowMap}
             />
           </ServiceOverviewTableContainer>
         </TableFetchWrapper>

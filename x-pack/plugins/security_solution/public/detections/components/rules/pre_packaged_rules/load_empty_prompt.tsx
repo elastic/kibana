@@ -9,7 +9,6 @@ import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { useHistory } from 'react-router-dom';
 import { getCreateRuleUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import * as i18n from './translations';
 import { LinkButton } from '../../../../common/components/links';
@@ -17,6 +16,7 @@ import { SecurityPageName } from '../../../../app/types';
 import { useFormatUrl } from '../../../../common/components/link_to';
 import { usePrePackagedRules } from '../../../containers/detection_engine/rules';
 import { useUserData } from '../../user_info';
+import { useNavigateTo } from '../../../../common/lib/kibana/hooks';
 
 const EmptyPrompt = styled(EuiEmptyPrompt)`
   align-self: center; /* Corrects horizontal centering in IE11 */
@@ -27,26 +27,26 @@ EmptyPrompt.displayName = 'EmptyPrompt';
 interface PrePackagedRulesPromptProps {
   createPrePackagedRules: () => void;
   loading: boolean;
-  userHasNoPermissions: boolean;
+  userHasPermissions: boolean;
 }
 
 const PrePackagedRulesPromptComponent: React.FC<PrePackagedRulesPromptProps> = ({
   createPrePackagedRules,
   loading = false,
-  userHasNoPermissions = true,
+  userHasPermissions = false,
 }) => {
-  const history = useHistory();
   const handlePreBuiltCreation = useCallback(() => {
     createPrePackagedRules();
   }, [createPrePackagedRules]);
-  const { formatUrl } = useFormatUrl(SecurityPageName.detections);
+  const { formatUrl } = useFormatUrl(SecurityPageName.rules);
+  const { navigateTo } = useNavigateTo();
 
   const goToCreateRule = useCallback(
     (ev) => {
       ev.preventDefault();
-      history.push(getCreateRuleUrl());
+      navigateTo({ deepLinkId: SecurityPageName.rules, path: getCreateRuleUrl() });
     },
-    [history]
+    [navigateTo]
   );
 
   const [
@@ -64,16 +64,17 @@ const PrePackagedRulesPromptComponent: React.FC<PrePackagedRulesPromptProps> = (
   const loadPrebuiltRulesAndTemplatesButton = useMemo(
     () =>
       getLoadPrebuiltRulesAndTemplatesButton({
-        isDisabled: userHasNoPermissions,
+        isDisabled: !userHasPermissions || loading,
         onClick: handlePreBuiltCreation,
         fill: true,
         'data-test-subj': 'load-prebuilt-rules',
       }),
-    [getLoadPrebuiltRulesAndTemplatesButton, handlePreBuiltCreation, userHasNoPermissions]
+    [getLoadPrebuiltRulesAndTemplatesButton, handlePreBuiltCreation, userHasPermissions, loading]
   );
 
   return (
     <EmptyPrompt
+      data-test-subj="rulesEmptyPrompt"
       title={<h2>{i18n.PRE_BUILT_TITLE}</h2>}
       body={<p>{i18n.PRE_BUILT_MSG}</p>}
       actions={
@@ -81,7 +82,7 @@ const PrePackagedRulesPromptComponent: React.FC<PrePackagedRulesPromptProps> = (
           <EuiFlexItem grow={false}>{loadPrebuiltRulesAndTemplatesButton}</EuiFlexItem>
           <EuiFlexItem grow={false}>
             <LinkButton
-              isDisabled={userHasNoPermissions}
+              isDisabled={!userHasPermissions}
               onClick={goToCreateRule}
               href={formatUrl(getCreateRuleUrl())}
               iconType="plusInCircle"

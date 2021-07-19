@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LogicMounter } from '../../../__mocks__/kea.mock';
+import { LogicMounter } from '../../../__mocks__/kea_logic';
 
 import { DocumentsLogic } from './documents_logic';
 

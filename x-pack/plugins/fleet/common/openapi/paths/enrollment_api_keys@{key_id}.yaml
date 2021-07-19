@@ -5,14 +5,38 @@ parameters:
     in: path
     required: true
 get:
-  summary: Enrollment - Info
+  summary: Enrollment API Key - Info
   tags: []
-  responses: {}
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              item:
+                $ref: ../components/schemas/enrollment_api_key.yaml
+            required:
+              - item
   operationId: get-fleet-enrollment-api-keys-keyId
 delete:
-  summary: Enrollment - Delete
+  summary: Enrollment API Key - Delete
   tags: []
-  responses: {}
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              action:
+                type: string
+                enum:
+                  - deleted
+            required:
+              - action
   operationId: delete-fleet-enrollment-api-keys-keyId
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml

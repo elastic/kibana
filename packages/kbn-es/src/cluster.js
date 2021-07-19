@@ -133,19 +133,20 @@ exports.Cluster = class Cluster {
   }
 
   /**
-   * Unpakcs a tar or zip file containing the data directory for an
+   * Unpacks a tar or zip file containing the data directory for an
    * ES cluster.
    *
    * @param {String} installPath
    * @param {String} archivePath
+   * @param {String} [extractDirName]
    */
-  async extractDataDirectory(installPath, archivePath) {
+  async extractDataDirectory(installPath, archivePath, extractDirName = 'data') {
     this._log.info(chalk.bold(`Extracting data directory`));
     this._log.indent(4);
 
     // decompress excludes the root directory as that is how our archives are
     // structured. This works in our favor as we can explicitly extract into the data dir
-    const extractPath = path.resolve(installPath, 'data');
+    const extractPath = path.resolve(installPath, extractDirName);
     this._log.info(`Data archive: ${archivePath}`);
     this._log.info(`Extract path: ${extractPath}`);
 
@@ -236,9 +237,13 @@ exports.Cluster = class Cluster {
    * @param {String} installPath
    * @param {Object} options
    * @property {string|Array} options.esArgs
+   * @property {string} options.esJavaOpts
+   * @property {Boolean} options.skipNativeRealmSetup
    * @return {undefined}
    */
-  _exec(installPath, options = {}) {
+  _exec(installPath, opts = {}) {
+    const { skipNativeRealmSetup = false, ...options } = opts;
+
     if (this._process || this._outcome) {
       throw new Error('ES has already been started');
     }
@@ -246,7 +251,10 @@ exports.Cluster = class Cluster {
     this._log.info(chalk.bold('Starting'));
     this._log.indent(4);
 
-    const esArgs = ['action.destructive_requires_name=true'].concat(options.esArgs || []);
+    const esArgs = [
+      'action.destructive_requires_name=true',
+      'ingest.geoip.downloader.enabled=false',
+    ].concat(options.esArgs || []);
 
     // Add to esArgs if ssl is enabled
     if (this._ssl) {
@@ -265,14 +273,17 @@ exports.Cluster = class Cluster {
 
     this._log.debug('%s %s', ES_BIN, args.join(' '));
 
-    options.esEnvVars = options.esEnvVars || {};
+    let esJavaOpts = `${options.esJavaOpts || ''} ${process.env.ES_JAVA_OPTS || ''}`;
 
     // ES now automatically sets heap size to 50% of the machine's available memory
     // so we need to set it to a smaller size for local dev and CI
     // especially because we currently run many instances of ES on the same machine during CI
-    options.esEnvVars.ES_JAVA_OPTS =
-      (options.esEnvVars.ES_JAVA_OPTS ? `${options.esEnvVars.ES_JAVA_OPTS} ` : '') +
-      '-Xms1g -Xmx1g';
+    // inital and max must be the same, so we only need to check the max
+    if (!esJavaOpts.includes('Xmx')) {
+      esJavaOpts += ' -Xms1g -Xmx1g';
+    }
+
+    this._log.debug('ES_JAVA_OPTS: %s', esJavaOpts.trim());
 
     this._process = execa(ES_BIN, args, {
       cwd: installPath,
@@ -280,7 +291,7 @@ exports.Cluster = class Cluster {
         ...(installPath ? { ES_TMPDIR: path.resolve(installPath, 'ES_TMPDIR') } : {}),
         ...process.env,
         JAVA_HOME: '', // By default, we want to always unset JAVA_HOME so that the bundled JDK will be used
-        ...(options.esEnvVars || {}),
+        ES_JAVA_OPTS: esJavaOpts.trim(),
       },
       stdio: ['ignore', 'pipe', 'pipe'],
     });
@@ -296,6 +307,10 @@ exports.Cluster = class Cluster {
 
     // once the http port is available setup the native realm
     this._nativeRealmSetup = httpPort.then(async (port) => {
+      if (skipNativeRealmSetup) {
+        return;
+      }
+
       const caCert = await this._caCertPromise;
       const nativeRealm = new NativeRealm({
         port,

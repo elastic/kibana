@@ -11,10 +11,12 @@ import { EnvironmentMode } from '@kbn/config';
 import { EventEmitter } from 'events';
 import { KibanaRequest } from 'src/core/server';
 import { Observable } from 'rxjs';
+import { ObservableLike } from '@kbn/utility-types';
 import { PackageInfo } from '@kbn/config';
 import { Plugin as Plugin_2 } from 'src/core/public';
 import { PluginInitializerContext as PluginInitializerContext_2 } from 'src/core/public';
 import React from 'react';
+import { UnwrapObservable } from '@kbn/utility-types';
 import { UnwrapPromiseOrReturn } from '@kbn/utility-types';
 
 // Warning: (ae-missing-release-tag) "AnyExpressionFunctionDefinition" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -110,17 +112,17 @@ export class Execution<Input = unknown, Output = unknown, InspectorAdapters exte
     // (undocumented)
     get inspectorAdapters(): InspectorAdapters;
     // (undocumented)
-    interpret<T>(ast: ExpressionAstNode, input: T): Promise<unknown>;
+    interpret<T>(ast: ExpressionAstNode, input: T): Observable<ExecutionResult<unknown>>;
     // (undocumented)
-    invokeChain(chainArr: ExpressionAstFunction[], input: unknown): Promise<any>;
+    invokeChain(chainArr: ExpressionAstFunction[], input: unknown): Observable<any>;
     // (undocumented)
-    invokeFunction(fn: ExpressionFunction, input: unknown, args: Record<string, unknown>): Promise<any>;
+    invokeFunction(fn: ExpressionFunction, input: unknown, args: Record<string, unknown>): Observable<any>;
     // (undocumented)
-    resolveArgs(fnDef: ExpressionFunction, input: unknown, argAsts: any): Promise<any>;
-    // (undocumented)
-    get result(): Promise<Output | ExpressionValueError>;
-    start(input?: Input): void;
-    readonly state: ExecutionContainer<Output | ExpressionValueError>;
+    resolveArgs(fnDef: ExpressionFunction, input: unknown, argAsts: any): Observable<any>;
+    readonly result: Observable<ExecutionResult<Output | ExpressionValueError>>;
+    start(input?: Input, isSubExpression?: boolean): Observable<ExecutionResult<Output | ExpressionValueError>>;
+    // Warning: (ae-forgotten-export) The symbol "ExecutionResult" needs to be exported by the entry point index.d.ts
+    readonly state: ExecutionContainer<ExecutionResult<Output | ExpressionValueError>>;
 }
 
 // Warning: (ae-forgotten-export) The symbol "StateContainer" needs to be exported by the entry point index.d.ts
@@ -154,7 +156,7 @@ export class ExecutionContract<Input = unknown, Output = unknown, InspectorAdapt
     // (undocumented)
     protected readonly execution: Execution<Input, Output, InspectorAdapters>;
     getAst: () => ExpressionAstExpression;
-    getData: () => Promise<Output | ExpressionValueError>;
+    getData: () => Observable<ExecutionResult<Output | ExpressionValueError>>;
     getExpression: () => string;
     inspect: () => InspectorAdapters;
     // (undocumented)
@@ -229,7 +231,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     registerFunction(functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)): void;
     // (undocumented)
     registerType(typeDefinition: AnyExpressionTypeDefinition | (() => AnyExpressionTypeDefinition)): void;
-    run<Input, Output>(ast: string | ExpressionAstExpression, input: Input, params?: ExpressionExecutionParams): Promise<Output>;
+    run<Input, Output>(ast: string | ExpressionAstExpression, input: Input, params?: ExpressionExecutionParams): Observable<ExecutionResult<Output | ExpressionValueError>>;
     // (undocumented)
     readonly state: ExecutorContainer<Context>;
     // (undocumented)
@@ -374,7 +376,7 @@ export interface ExpressionFunctionDefinition<Name extends string, Input, Argume
     help: string;
     inputTypes?: Array<TypeToString<Input>>;
     name: Name;
-    type?: TypeToString<UnwrapPromiseOrReturn<Output>>;
+    type?: TypeString<Output> | UnmappedTypeStrings;
 }
 
 // @public
@@ -399,6 +401,10 @@ export interface ExpressionFunctionDefinitions {
     //
     // (undocumented)
     moving_average: ExpressionFunctionMovingAverage;
+    // Warning: (ae-forgotten-export) The symbol "ExpressionFunctionOverallMetric" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    overall_metric: ExpressionFunctionOverallMetric;
     // Warning: (ae-forgotten-export) The symbol "ExpressionFunctionTheme" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -611,8 +617,8 @@ export class ExpressionsService implements PersistableStateService<ExpressionAst
     readonly renderers: ExpressionRendererRegistry;
     // (undocumented)
     readonly run: ExpressionsServiceStart['run'];
-    setup(): ExpressionsServiceSetup;
-    start(): ExpressionsServiceStart;
+    setup(...args: unknown[]): ExpressionsServiceSetup;
+    start(...args: unknown[]): ExpressionsServiceStart;
     // (undocumented)
     stop(): void;
     readonly telemetry: (state: ExpressionAstExpression, telemetryData?: Record<string, any>) => Record<string, any>;
@@ -632,7 +638,7 @@ export interface ExpressionsServiceStart {
     getFunction: (name: string) => ReturnType<Executor['getFunction']>;
     getRenderer: (name: string) => ReturnType<ExpressionRendererRegistry['get']>;
     getType: (name: string) => ReturnType<Executor['getType']>;
-    run: <Input, Output>(ast: string | ExpressionAstExpression, input: Input, params?: ExpressionExecutionParams) => Promise<Output>;
+    run: <Input, Output>(ast: string | ExpressionAstExpression, input: Input, params?: ExpressionExecutionParams) => Observable<ExecutionResult<Output | ExpressionValueError>>;
 }
 
 // Warning: (ae-missing-release-tag) "ExpressionsSetup" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -902,6 +908,7 @@ export interface IExpressionLoaderParams {
     //
     // (undocumented)
     onRenderError?: RenderErrorHandlerFnType;
+    partial?: boolean;
     // Warning: (ae-forgotten-export) The symbol "RenderMode" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -912,6 +919,7 @@ export interface IExpressionLoaderParams {
     searchSessionId?: string;
     // (undocumented)
     syncColors?: boolean;
+    throttle?: number;
     // (undocumented)
     uiState?: unknown;
     // (undocumented)
@@ -1068,7 +1076,7 @@ export interface ReactExpressionRendererProps extends IExpressionLoaderParams {
     // (undocumented)
     expression: string | ExpressionAstExpression;
     // (undocumented)
-    onData$?: <TData, TInspectorAdapters>(data: TData, adapters?: TInspectorAdapters) => void;
+    onData$?: <TData, TInspectorAdapters>(data: TData, adapters?: TInspectorAdapters, partial?: boolean) => void;
     // (undocumented)
     onEvent?: (event: ExpressionRendererEvent) => void;
     // (undocumented)
@@ -1160,7 +1168,7 @@ export class TypesRegistry implements IRegistry<ExpressionType> {
 // Warning: (ae-missing-release-tag) "TypeString" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
-export type TypeString<T> = KnownTypeToString<UnwrapPromiseOrReturn<T>>;
+export type TypeString<T> = KnownTypeToString<T extends ObservableLike<any> ? UnwrapObservable<T> : UnwrapPromiseOrReturn<T>>;
 
 // Warning: (ae-missing-release-tag) "TypeToString" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //

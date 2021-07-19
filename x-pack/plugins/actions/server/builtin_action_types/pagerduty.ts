@@ -85,11 +85,19 @@ const ParamsSchema = schema.object(
   { validate: validateParams }
 );
 
+function validateTimestamp(timestamp?: string): string | null {
+  if (timestamp) {
+    return timestamp.trim().length > 0 ? timestamp.trim() : null;
+  }
+  return null;
+}
+
 function validateParams(paramsObject: unknown): string | void {
   const { timestamp, eventAction, dedupKey } = paramsObject as ActionParamsType;
-  if (timestamp != null) {
+  const validatedTimestamp = validateTimestamp(timestamp);
+  if (validatedTimestamp != null) {
     try {
-      const date = Date.parse(timestamp);
+      const date = Date.parse(validatedTimestamp);
       if (isNaN(date)) {
         return i18n.translate('xpack.actions.builtin.pagerduty.invalidTimestampErrorMessage', {
           defaultMessage: `error parsing timestamp "{timestamp}"`,
@@ -279,11 +287,14 @@ function getBodyForEventAction(actionId: string, params: ActionParamsType): Page
     return data;
   }
 
+  const validatedTimestamp = validateTimestamp(params.timestamp);
+
   data.payload = {
     summary: params.summary || 'No summary provided.',
     source: params.source || `Kibana Action ${actionId}`,
     severity: params.severity || 'info',
-    ...omitBy(pick(params, ['timestamp', 'component', 'group', 'class']), isUndefined),
+    ...(validatedTimestamp ? { timestamp: validatedTimestamp } : {}),
+    ...omitBy(pick(params, ['component', 'group', 'class']), isUndefined),
   };
 
   return data;

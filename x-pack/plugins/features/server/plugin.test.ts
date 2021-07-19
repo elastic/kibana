@@ -27,6 +27,20 @@ describe('Features Plugin', () => {
         namespaceType: 'single' as 'single',
       },
     ]);
+    typeRegistry.getImportableAndExportableTypes.mockReturnValue([
+      {
+        name: 'hidden-importableAndExportable',
+        hidden: true,
+        mappings: { properties: {} },
+        namespaceType: 'single' as 'single',
+      },
+      {
+        name: 'not-hidden-importableAndExportable',
+        hidden: false,
+        mappings: { properties: {} },
+        namespaceType: 'single' as 'single',
+      },
+    ]);
     coreStart.savedObjects.getTypeRegistry.mockReturnValue(typeRegistry);
   });
 
@@ -87,7 +101,9 @@ describe('Features Plugin', () => {
     `);
   });
 
-  it('registers kibana features with not hidden saved objects types', async () => {
+  it('registers kibana features with visible saved objects types and hidden saved object types that are importable and exportable', async () => {
+    typeRegistry.isHidden.mockReturnValueOnce(true);
+    typeRegistry.isHidden.mockReturnValueOnce(false);
     const plugin = new FeaturesPlugin(initContext);
     await plugin.setup(coreSetup, {});
     const { getKibanaFeatures } = plugin.start(coreStart);
@@ -98,6 +114,8 @@ describe('Features Plugin', () => {
 
     expect(soTypes.includes('foo')).toBe(true);
     expect(soTypes.includes('bar')).toBe(false);
+    expect(soTypes.includes('hidden-importableAndExportable')).toBe(true);
+    expect(soTypes.includes('not-hidden-importableAndExportable')).toBe(false);
   });
 
   it('returns registered elasticsearch features', async () => {

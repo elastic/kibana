@@ -92,9 +92,18 @@ const createActions = (testBed: TestBed<TestSubject>) => {
           jsonContent: JSON.stringify(options),
         });
       });
+      component.update();
       await act(async () => {
         find('addProcessorForm.submitButton').simulate('click');
       });
+      component.update();
+    },
+
+    async setProcessorType(type: string) {
+      await act(async () => {
+        find('processorTypeSelector.input').simulate('change', [{ value: type }]);
+      });
+      component.update();
     },
 
     removeProcessor(processorSelector: string) {

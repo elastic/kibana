@@ -5,27 +5,29 @@
  * 2.0.
  */
 
-import { CanvasServices, services } from '../';
-import { embeddablesService } from './embeddables';
-import { expressionsService } from './expressions';
-import { navLinkService } from './nav_link';
-import { notifyService } from './notify';
-import { labsService } from './labs';
-import { platformService } from './platform';
+export * from '../legacy/stubs';
 
-export const stubs: CanvasServices = {
-  embeddables: embeddablesService,
-  expressions: expressionsService,
-  navLink: navLinkService,
-  notify: notifyService,
-  platform: platformService,
-  labs: labsService,
+import {
+  PluginServiceProviders,
+  PluginServiceProvider,
+  PluginServiceRegistry,
+} from '../../../../../../src/plugins/presentation_util/public';
+
+import { CanvasPluginServices } from '..';
+import { workpadServiceFactory } from './workpad';
+import { notifyServiceFactory } from './notify';
+import { platformServiceFactory } from './platform';
+
+export { workpadServiceFactory } from './workpad';
+export { notifyServiceFactory } from './notify';
+export { platformServiceFactory } from './platform';
+
+export const pluginServiceProviders: PluginServiceProviders<CanvasPluginServices> = {
+  workpad: new PluginServiceProvider(workpadServiceFactory),
+  notify: new PluginServiceProvider(notifyServiceFactory),
+  platform: new PluginServiceProvider(platformServiceFactory),
 };
 
-export const startServices = async (providedServices: Partial<CanvasServices> = {}) => {
-  Object.entries(services).forEach(([key, provider]) => {
-    // @ts-expect-error Object.entries isn't strongly typed
-    const stub = providedServices[key] || stubs[key];
-    provider.setService(stub);
-  });
-};
+export const pluginServiceRegistry = new PluginServiceRegistry<CanvasPluginServices>(
+  pluginServiceProviders
+);

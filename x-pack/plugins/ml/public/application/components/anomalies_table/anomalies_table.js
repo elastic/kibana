@@ -152,7 +152,10 @@ export class AnomaliesTableInternal extends Component {
     const result = {
       pageIndex: page && page.index !== undefined ? page.index : tableState.pageIndex,
       pageSize: page && page.size !== undefined ? page.size : tableState.pageSize,
-      sortField: sort && sort.field !== undefined ? sort.field : tableState.sortField,
+      sortField:
+        sort && sort.field !== undefined && typeof sort.field === 'string'
+          ? sort.field
+          : tableState.sortField,
       sortDirection:
         sort && sort.direction !== undefined ? sort.direction : tableState.sortDirection,
     };

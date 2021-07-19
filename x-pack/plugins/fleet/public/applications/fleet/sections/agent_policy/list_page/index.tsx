@@ -9,7 +9,6 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiTableActionsColumnType, EuiTableFieldDataColumnType } from '@elastic/eui';
 import {
   EuiSpacer,
-  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
@@ -25,7 +24,6 @@ import { useHistory } from 'react-router-dom';
 
 import type { AgentPolicy } from '../../../types';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../constants';
-import { WithHeaderLayout } from '../../../layouts';
 import {
   useCapabilities,
   useGetAgentPolicies,
@@ -36,45 +34,14 @@ import {
   useUrlParams,
   useBreadcrumbs,
 } from '../../../hooks';
-import { LinkAndRevision, SearchBar } from '../../../components';
+import { AgentPolicySummaryLine, SearchBar } from '../../../components';
 import { LinkedAgentCount, AgentPolicyActionMenu } from '../components';
 
 import { CreateAgentPolicyFlyout } from './components';
 
-const AgentPolicyListPageLayout: React.FunctionComponent = ({ children }) => (
-  <WithHeaderLayout
-    leftColumn={
-      <EuiFlexGroup direction="column" gutterSize="m">
-        <EuiFlexItem>
-          <EuiText>
-            <h1>
-              <FormattedMessage
-                id="xpack.fleet.agentPolicyList.pageTitle"
-                defaultMessage="Agent policies"
-              />
-            </h1>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText color="subdued">
-            <p>
-              <FormattedMessage
-                id="xpack.fleet.agentPolicyList.pageSubtitle"
-                defaultMessage="Use agent policies to manage your agents and the data they collect."
-              />
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    }
-  >
-    {children}
-  </WithHeaderLayout>
-);
-
 export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
   useBreadcrumbs('policies_list');
-  const { getHref, getPath } = useLink();
+  const { getPath } = useLink();
   const hasWriteCapabilites = useCapabilities().write;
   const {
     agents: { enabled: isFleetEnabled },
@@ -132,13 +99,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         }),
         width: '20%',
         render: (name: string, agentPolicy: AgentPolicy) => (
-          <LinkAndRevision
-            href={getHref('policy_details', { policyId: agentPolicy.id })}
-            title={name || agentPolicy.id}
-            revision={agentPolicy.revision}
-          >
-            {name || agentPolicy.id}
-          </LinkAndRevision>
+          <AgentPolicySummaryLine policy={agentPolicy} />
         ),
       },
       {
@@ -205,7 +166,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
     }
 
     return cols;
-  }, [getHref, isFleetEnabled, resendRequest]);
+  }, [isFleetEnabled, resendRequest]);
 
   const createAgentPolicyButton = useMemo(
     () => (
@@ -252,7 +213,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
   };
 
   return (
-    <AgentPolicyListPageLayout>
+    <>
       {isCreateAgentPolicyFlyoutOpen ? (
         <CreateAgentPolicyFlyout
           onClose={() => {
@@ -328,6 +289,6 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         sorting={{ sort: sorting }}
         onChange={onTableChange}
       />
-    </AgentPolicyListPageLayout>
+    </>
   );
 };

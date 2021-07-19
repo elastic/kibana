@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsServiceSetup } from 'kibana/server';
+import type { SavedObjectsServiceSetup, SavedObjectsTypeMappingDefinition } from 'kibana/server';
 import mappings from './mappings.json';
 import { migrations } from './migrations';
 import { TaskManagerConfig } from '../config.js';
@@ -19,7 +19,7 @@ export function setupSavedObjects(
     namespaceType: 'agnostic',
     hidden: true,
     convertToAliasScript: `ctx._id = ctx._source.type + ':' + ctx._id; ctx._source.remove("kibana")`,
-    mappings: mappings.task,
+    mappings: mappings.task as SavedObjectsTypeMappingDefinition,
     migrations,
     indexPattern: config.index,
   });

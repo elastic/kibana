@@ -9,10 +9,10 @@
     "logs-endpoint.events.*",
     "logs-windows.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License v2",
   "name": "Potential Application Shimming via Sdbinst",
-  "query": "event.category:process and event.type:(start or process_started) and process.name:sdbinst.exe",
+  "query": "process where event.type in (\"start\", \"process_started\") and process.name : \"sdbinst.exe\"\n",
   "risk_score": 21,
   "rule_id": "fd4a992d-6130-4802-9ff8-829b89ae801f",
   "severity": "low",
@@ -70,6 +70,6 @@
     }
   ],
   "timestamp_override": "event.ingested",
-  "type": "query",
-  "version": 7
+  "type": "eql",
+  "version": 8
 }

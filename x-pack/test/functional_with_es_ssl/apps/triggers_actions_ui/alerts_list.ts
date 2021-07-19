@@ -50,12 +50,25 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return createdAction;
   }
 
+  async function muteAlert(alertId: string) {
+    const { body: alert } = await supertest
+      .post(`/api/alerting/rule/${alertId}/_mute_all`)
+      .set('kbn-xsrf', 'foo');
+    return alert;
+  }
+
+  async function disableAlert(alertId: string) {
+    const { body: alert } = await supertest
+      .post(`/api/alerting/rule/${alertId}/_disable`)
+      .set('kbn-xsrf', 'foo');
+    return alert;
+  }
+
   async function refreshAlertsList() {
     await testSubjects.click('rulesTab');
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/95591
-  describe.skip('alerts list', function () {
+  describe('alerts list', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('rulesTab');
@@ -89,6 +102,43 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(searchResults).to.eql([
         {
           name: createdAlert.name,
+          tagsText: 'foo, bar',
+          alertType: 'Test: Noop',
+          interval: '1m',
+        },
+      ]);
+    });
+
+    it('should update alert list on the search clear button click', async () => {
+      await createAlert({ name: 'b' });
+      await createAlert({ name: 'c' });
+      await refreshAlertsList();
+      await pageObjects.triggersActionsUI.searchAlerts('b');
+
+      const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
+      expect(searchResults).to.eql([
+        {
+          name: 'b',
+          tagsText: 'foo, bar',
+          alertType: 'Test: Noop',
+          interval: '1m',
+        },
+      ]);
+      const searchClearButton = await find.byCssSelector('.euiFormControlLayoutClearButton');
+      await searchClearButton.click();
+      await find.byCssSelector(
+        '.euiBasicTable[data-test-subj="alertsList"]:not(.euiBasicTable-loading)'
+      );
+      const searchResultsAfterClear = await pageObjects.triggersActionsUI.getAlertsList();
+      expect(searchResultsAfterClear).to.eql([
+        {
+          name: 'b',
+          tagsText: 'foo, bar',
+          alertType: 'Test: Noop',
+          interval: '1m',
+        },
+        {
+          name: 'c',
           tagsText: 'foo, bar',
           alertType: 'Test: Noop',
           interval: '1m',
@@ -138,25 +188,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should re-enable single alert', async () => {
       const createdAlert = await createAlert();
+      await disableAlert(createdAlert.id);
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       await testSubjects.click('collapsedItemActions');
 
       await pageObjects.triggersActionsUI.toggleSwitch('disableSwitch');
-
-      await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
-        createdAlert.name,
-        'disableSwitch',
-        'true'
-      );
-
-      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-
-      await testSubjects.click('collapsedItemActions');
-
-      await pageObjects.triggersActionsUI.toggleSwitch('disableSwitch');
-
       await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
         createdAlert.name,
         'disableSwitch',
@@ -172,7 +210,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('collapsedItemActions');
 
       await pageObjects.triggersActionsUI.toggleSwitch('muteSwitch');
-
       await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
         createdAlert.name,
         'muteSwitch',
@@ -182,25 +219,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should unmute single alert', async () => {
       const createdAlert = await createAlert();
+      await muteAlert(createdAlert.id);
       await refreshAlertsList();
-      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-
-      await testSubjects.click('collapsedItemActions');
-
-      await pageObjects.triggersActionsUI.toggleSwitch('muteSwitch');
-
-      await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
-        createdAlert.name,
-        'muteSwitch',
-        'true'
-      );
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       await testSubjects.click('collapsedItemActions');
 
       await pageObjects.triggersActionsUI.toggleSwitch('muteSwitch');
-
       await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
         createdAlert.name,
         'muteSwitch',

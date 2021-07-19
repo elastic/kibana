@@ -8,8 +8,17 @@ date: 2020-11-16
 tags: ['contributor', 'dev', 'apidocs', 'kibana', 'reporting']
 warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system. Reach out in #docs-engineering for more info.
 ---
-
 import reportingObj from './reporting.json';
+
+
+
+
+
+**Code health stats**
+
+| Public API count  | Any count | Items lacking comments | Missing exports | 
+|-------------------|-----------|------------------------|-----------------|
+| 132 | 1 | 131 | 18 |
 
 ## Client
 
@@ -23,6 +32,9 @@ import reportingObj from './reporting.json';
 <DocDefinitionList data={reportingObj.client.classes}/>
 
 ## Server
+
+### Start
+<DocDefinitionList data={[reportingObj.server.start]}/>
 
 ### Classes
 <DocDefinitionList data={reportingObj.server.classes}/>

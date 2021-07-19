@@ -18,6 +18,7 @@ import {
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { BrowserFields } from '../../../common/containers/source';
 import { getColumnsWithTimestamp } from '../../../common/components/event_details/helpers';
 import { CountBadge } from '../../../common/components/page';
@@ -29,7 +30,7 @@ import {
   VIEW_ALL_BUTTON_CLASS_NAME,
 } from './helpers';
 import * as i18n from './translations';
-import { useManageTimeline } from '../manage_timeline';
+import { timelineSelectors } from '../../store/timeline';
 
 const CategoryName = styled.span<{ bold: boolean }>`
   .euiText {
@@ -67,11 +68,10 @@ interface ViewAllButtonProps {
 
 export const ViewAllButton = React.memo<ViewAllButtonProps>(
   ({ categoryId, browserFields, onUpdateColumns, timelineId }) => {
-    const { getManageTimelineById } = useManageTimeline();
-    const { isLoading } = useMemo(() => getManageTimelineById(timelineId) ?? { isLoading: false }, [
-      getManageTimelineById,
-      timelineId,
-    ]);
+    const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
+    const { isLoading } = useDeepEqualSelector((state) =>
+      getManageTimeline(state, timelineId ?? '')
+    );
 
     const handleClick = useCallback(() => {
       onUpdateColumns(

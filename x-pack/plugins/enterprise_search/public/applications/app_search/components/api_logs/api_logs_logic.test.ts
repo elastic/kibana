@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { LogicMounter, mockHttpValues, mockFlashMessageHelpers } from '../../../__mocks__';
+import {
+  LogicMounter,
+  mockHttpValues,
+  mockFlashMessageHelpers,
+} from '../../../__mocks__/kea_logic';
 import { mockApiLog } from './__mocks__/api_log.mock';
 import '../../__mocks__/engine_logic.mock';
 

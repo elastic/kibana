@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Path from 'path';
 import { castArray, groupBy } from 'lodash';
 import callsites from 'callsites';
 import { maybe } from '../../../plugins/apm/common/utils/maybe';
@@ -140,7 +141,12 @@ export const registry = {
             const log = logWithTimer();
             for (const archiveName of condition.archives) {
               log(`Loading ${archiveName}`);
-              await esArchiver.load(archiveName);
+              await esArchiver.load(
+                Path.join(
+                  'x-pack/test/apm_api_integration/common/fixtures/es_archiver',
+                  archiveName
+                )
+              );
             }
             if (condition.archives.length) {
               log('Loaded all archives');
@@ -151,7 +157,12 @@ export const registry = {
             const log = logWithTimer();
             for (const archiveName of condition.archives) {
               log(`Unloading ${archiveName}`);
-              await esArchiver.unload(archiveName);
+              await esArchiver.unload(
+                Path.join(
+                  'x-pack/test/apm_api_integration/common/fixtures/es_archiver',
+                  archiveName
+                )
+              );
             }
             if (condition.archives.length) {
               log('Unloaded all archives');

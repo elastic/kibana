@@ -8,11 +8,10 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
-import { TypesStart, VisGroups } from '../vis_types';
+import { TypesStart, VisGroups, BaseVisType } from '../vis_types';
 import NewVisModal from './new_vis_modal';
 import { ApplicationStart, SavedObjectsStart, DocLinksStart } from '../../../../core/public';
 import { embeddablePluginMock } from '../../../embeddable/public/mocks';
-import { BaseVisType } from '../vis_types';
 
 describe('NewVisModal', () => {
   const defaultVisTypeParams = {

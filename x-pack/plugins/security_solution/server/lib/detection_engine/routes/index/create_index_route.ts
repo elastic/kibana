@@ -5,19 +5,22 @@
  * 2.0.
  */
 
+import {
+  transformError,
+  getIndexExists,
+  getPolicyExists,
+  setPolicy,
+  setTemplate,
+  createBootstrapIndex,
+} from '@kbn/securitysolution-es-utils';
 import type {
   AppClient,
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../../types';
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
-import { transformError, buildSiemResponse } from '../utils';
-import { getIndexExists } from '../../index/get_index_exists';
-import { getPolicyExists } from '../../index/get_policy_exists';
-import { setPolicy } from '../../index/set_policy';
-import { setTemplate } from '../../index/set_template';
+import { buildSiemResponse } from '../utils';
 import { getSignalsTemplate, SIGNALS_TEMPLATE_VERSION } from './get_signals_template';
-import { createBootstrapIndex } from '../../index/create_bootstrap_index';
 import { ensureMigrationCleanupPolicy } from '../../migrations/migration_cleanup';
 import signalsPolicy from './signals_policy.json';
 import { templateNeedsUpdate } from './check_template_version';

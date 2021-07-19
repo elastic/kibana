@@ -7,19 +7,18 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*",
     "logs-windows.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License v2",
   "name": "User Added to Privileged Group in Active Directory",
-  "query": "event.category:iam and event.action:\"added-member-to-group\" and group.name:(Administrators or \"Local Administrators\" or \"Domain Admins\" or \"Enterprise Admins\" or \"Backup Admins\" or \"Schema Admins\" or \"DnsAdmins\")",
+  "query": "iam where event.action == \"added-member-to-group\" and\n  group.name : (\"Admin*\",\n                \"Local Administrators\",\n                \"Domain Admins\",\n                \"Enterprise Admins\",\n                \"Backup Admins\",\n                \"Schema Admins\",\n                \"DnsAdmins\",\n                \"Exchange Organization Administrators\")\n",
   "references": [
     "https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-b--privileged-accounts-and-groups-in-active-directory"
   ],
-  "risk_score": 21,
+  "risk_score": 47,
   "rule_id": "5cd8e1f7-0050-4afc-b2df-904e40b2f5ae",
-  "severity": "low",
+  "severity": "medium",
   "tags": [
     "Elastic",
     "Host",
@@ -52,6 +51,6 @@
     }
   ],
   "timestamp_override": "event.ingested",
-  "type": "query",
-  "version": 1
+  "type": "eql",
+  "version": 2
 }

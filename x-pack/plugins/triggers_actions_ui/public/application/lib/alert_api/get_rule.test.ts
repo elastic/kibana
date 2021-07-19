@@ -13,9 +13,10 @@ const http = httpServiceMock.createStartContract();
 
 describe('loadAlert', () => {
   test('should call get API with base parameters', async () => {
-    const alertId = uuid.v4();
+    const alertId = `${uuid.v4()}/`;
+    const alertIdEncoded = encodeURIComponent(alertId);
     const resolvedValue = {
-      id: '1',
+      id: '1/',
       params: {
         aggType: 'count',
         termSize: 5,
@@ -56,7 +57,7 @@ describe('loadAlert', () => {
     http.get.mockResolvedValueOnce(resolvedValue);
 
     expect(await loadAlert({ http, alertId })).toEqual({
-      id: '1',
+      id: '1/',
       params: {
         aggType: 'count',
         termSize: 5,
@@ -94,6 +95,6 @@ describe('loadAlert', () => {
         },
       ],
     });
-    expect(http.get).toHaveBeenCalledWith(`/api/alerting/rule/${alertId}`);
+    expect(http.get).toHaveBeenCalledWith(`/api/alerting/rule/${alertIdEncoded}`);
   });
 });

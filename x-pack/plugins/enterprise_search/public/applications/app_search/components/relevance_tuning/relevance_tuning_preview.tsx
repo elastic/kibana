@@ -21,6 +21,7 @@ import { RelevanceTuningLogic } from '.';
 const emptyCallout = (
   <EuiEmptyPrompt
     data-test-subj="EmptyQueryPrompt"
+    iconType="glasses"
     body={i18n.translate(
       'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.preview.enterQueryMessage',
       {

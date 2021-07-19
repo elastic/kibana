@@ -17,9 +17,11 @@ export type {
   SavedObjectsCreateOptions,
   SavedObjectsFindResponsePublic,
   SavedObjectsUpdateOptions,
+  SavedObjectsResolveResponse,
   SavedObjectsBulkUpdateOptions,
 } from './saved_objects_client';
 export { SimpleSavedObject } from './simple_saved_object';
+export type { ResolvedSimpleSavedObject } from './types';
 export type { SavedObjectsStart } from './saved_objects_service';
 export type {
   SavedObjectsBaseOptions,
@@ -39,6 +41,8 @@ export type {
   SavedObjectsImportSimpleWarning,
   SavedObjectsImportActionRequiredWarning,
   SavedObjectsImportWarning,
+  SavedObjectReferenceWithContext,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
 } from '../../server/types';
 
 export type {

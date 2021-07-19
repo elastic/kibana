@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { functionWrapper } from '../../test_helpers/function_wrapper';
+import { functionWrapper } from '../../../../../src/plugins/presentation_util/public';
 import { testPlot } from '../../canvas_plugin_src/functions/common/__fixtures__/test_pointseries';
 import {
   fontStyle,
@@ -21,7 +21,7 @@ describe('plot', () => {
   const fn = functionWrapper(
     plotFunctionFactory({
       get: () => ({
-        getColors: () => ['red', 'black'],
+        getCategoricalColors: () => ['red', 'black'],
       }),
     })
   );
@@ -33,12 +33,15 @@ describe('plot', () => {
   });
 
   describe('data', () => {
-    const result = fn(testPlot).value.data;
     it('is sorted by the series labels', () => {
+      const result = fn(testPlot).value.data;
+
       expect(result.every((val, i) => (!!i ? val.label >= result[i - 1].label : true))).toBe(true);
     });
 
     it('has one series per unique label', () => {
+      const result = fn(testPlot).value.data;
+
       const uniqueLabels = testPlot.rows
         .reduce(
           (unique, series) =>
@@ -52,6 +55,8 @@ describe('plot', () => {
     });
 
     it('populates the data of the plot with points from the pointseries', () => {
+      const result = fn(testPlot).value.data;
+
       expect(result[0].data).toEqual([
         [1517842800950, 605, { size: 100, text: 605 }],
         [1517929200950, 583, { size: 200, text: 583 }],
@@ -118,10 +123,11 @@ describe('plot', () => {
     describe('palette', () => {
       it('sets the color palette', () => {
         const mockedColors = jest.fn(() => ['#FFFFFF', '#888888', '#000000']);
+
         const mockedFn = functionWrapper(
           plotFunctionFactory({
             get: () => ({
-              getColors: mockedColors,
+              getCategoricalColors: mockedColors,
             }),
           })
         );

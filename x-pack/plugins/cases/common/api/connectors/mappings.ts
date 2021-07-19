@@ -31,6 +31,7 @@ export const ConnectorMappingsAttributesRT = rt.type({
 
 export const ConnectorMappingsRt = rt.type({
   mappings: rt.array(ConnectorMappingsAttributesRT),
+  owner: rt.string,
 });
 
 export type ConnectorMappingsAttributes = rt.TypeOf<typeof ConnectorMappingsAttributesRT>;
@@ -47,9 +48,6 @@ const ConnectorFieldRt = rt.type({
 
 export type ConnectorField = rt.TypeOf<typeof ConnectorFieldRt>;
 
-const GetFieldsResponseRt = rt.type({
-  defaultMappings: rt.array(ConnectorMappingsAttributesRT),
-  fields: rt.array(ConnectorFieldRt),
-});
+const GetDefaultMappingsResponseRt = rt.array(ConnectorMappingsAttributesRT);
 
-export type GetFieldsResponse = rt.TypeOf<typeof GetFieldsResponseRt>;
+export type GetDefaultMappingsResponse = rt.TypeOf<typeof GetDefaultMappingsResponseRt>;

@@ -6,80 +6,79 @@
  * Side Public License, v 1.
  */
 
-import { FtrProviderContext } from 'test/functional/ftr_provider_context';
-import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
+import { FtrService } from '../../ftr_provider_context';
+import { WebElementWrapper } from '../../services/lib/web_element_wrapper';
 
-export function LegacyDataTableVisProvider({ getService, getPageObjects }: FtrProviderContext) {
-  const testSubjects = getService('testSubjects');
-  const retry = getService('retry');
+export class LegacyDataTableVisPageObject extends FtrService {
+  private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly retry = this.ctx.getService('retry');
 
-  class LegacyDataTableVis {
-    /**
-     * Converts the table data into nested array
-     * [ [cell1_in_row1, cell2_in_row1], [cell1_in_row2, cell2_in_row2] ]
-     * @param element table
-     */
-    private async getDataFromElement(element: WebElementWrapper): Promise<string[][]> {
-      const $ = await element.parseDomContent();
-      return $('tr')
-        .toArray()
-        .map((row) =>
-          $(row)
-            .find('td')
-            .toArray()
-            .map((cell) =>
-              $(cell)
-                .text()
-                .replace(/&nbsp;/g, '')
-                .trim()
-            )
-        );
-    }
-
-    public async getTableVisContent({ stripEmptyRows = true } = {}) {
-      return await retry.try(async () => {
-        const container = await testSubjects.find('tableVis');
-        const allTables = await testSubjects.findAllDescendant('paginated-table-body', container);
-
-        if (allTables.length === 0) {
-          return [];
-        }
-
-        const allData = await Promise.all(
-          allTables.map(async (t) => {
-            let data = await this.getDataFromElement(t);
-            if (stripEmptyRows) {
-              data = data.filter(
-                (row) => row.length > 0 && row.some((cell) => cell.trim().length > 0)
-              );
-            }
-            return data;
-          })
-        );
-
-        if (allTables.length === 1) {
-          // If there was only one table we return only the data for that table
-          // This prevents an unnecessary array around that single table, which
-          // is the case we have in most tests.
-          return allData[0];
-        }
-
-        return allData;
-      });
-    }
-
-    public async filterOnTableCell(columnIndex: number, rowIndex: number) {
-      await retry.try(async () => {
-        const tableVis = await testSubjects.find('tableVis');
-        const cell = await tableVis.findByCssSelector(
-          `tbody tr:nth-child(${rowIndex}) td:nth-child(${columnIndex})`
-        );
-        await cell.moveMouseTo();
-        const filterBtn = await testSubjects.findDescendant('filterForCellValue', cell);
-        await filterBtn.click();
-      });
-    }
+  /**
+   * Converts the table data into nested array
+   * [ [cell1_in_row1, cell2_in_row1], [cell1_in_row2, cell2_in_row2] ]
+   * @param element table
+   */
+  private async getDataFromElement(element: WebElementWrapper): Promise<string[][]> {
+    const $ = await element.parseDomContent();
+    return $('tr')
+      .toArray()
+      .map((row) =>
+        $(row)
+          .find('td')
+          .toArray()
+          .map((cell) =>
+            $(cell)
+              .text()
+              .replace(/&nbsp;/g, '')
+              .trim()
+          )
+      );
   }
 
-  return new LegacyDataTableVis();
+  public async getTableVisContent({ stripEmptyRows = true } = {}) {
+    return await this.retry.try(async () => {
+      const container = await this.testSubjects.find('tableVis');
+      const allTables = await this.testSubjects.findAllDescendant(
+        'paginated-table-body',
+        container
+      );
+
+      if (allTables.length === 0) {
+        return [];
+      }
+
+      const allData = await Promise.all(
+        allTables.map(async (t) => {
+          let data = await this.getDataFromElement(t);
+          if (stripEmptyRows) {
+            data = data.filter(
+              (row) => row.length > 0 && row.some((cell) => cell.trim().length > 0)
+            );
+          }
+          return data;
+        })
+      );
+
+      if (allTables.length === 1) {
+        // If there was only one table we return only the data for that table
+        // This prevents an unnecessary array around that single table, which
+        // is the case we have in most tests.
+        return allData[0];
+      }
+
+      return allData;
+    });
+  }
+
+  public async filterOnTableCell(columnIndex: number, rowIndex: number) {
+    await this.retry.try(async () => {
+      const tableVis = await this.testSubjects.find('tableVis');
+      const cell = await tableVis.findByCssSelector(
+        `tbody tr:nth-child(${rowIndex}) td:nth-child(${columnIndex})`
+      );
+      await cell.moveMouseTo();
+      const filterBtn = await this.testSubjects.findDescendant('filterForCellValue', cell);
+      await filterBtn.click();
+    });
+  }
 }

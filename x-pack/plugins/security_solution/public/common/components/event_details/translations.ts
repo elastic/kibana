@@ -11,12 +11,8 @@ export const SUMMARY = i18n.translate('xpack.securitySolution.alertDetails.summa
   defaultMessage: 'Summary',
 });
 
-export const THREAT_SUMMARY = i18n.translate('xpack.securitySolution.alertDetails.threatSummary', {
-  defaultMessage: 'Threat Summary',
-});
-
-export const THREAT_DETAILS = i18n.translate('xpack.securitySolution.alertDetails.threatDetails', {
-  defaultMessage: 'Threat Details',
+export const THREAT_INTEL = i18n.translate('xpack.securitySolution.alertDetails.threatIntel', {
+  defaultMessage: 'Threat Intel',
 });
 
 export const INVESTIGATION_GUIDE = i18n.translate(
@@ -76,3 +72,7 @@ export const NESTED_COLUMN = (field: string) =>
     defaultMessage:
       'The {field} field is an object, and is broken down into nested fields which can be added as column',
   });
+
+export const AGENT_STATUS = i18n.translate('xpack.securitySolution.detections.alerts.agentStatus', {
+  defaultMessage: 'Agent status',
+});

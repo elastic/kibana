@@ -25,7 +25,7 @@ const pageSchema = schema.object({
   current: schema.nullable(schema.number()),
   size: schema.nullable(schema.number()),
   total_pages: schema.nullable(schema.number()),
-  total_results: schema.number(),
+  total_results: schema.nullable(schema.number()),
 });
 
 const oauthConfigSchema = schema.object({
@@ -45,9 +45,13 @@ const displayFieldSchema = schema.object({
 
 const displaySettingsSchema = schema.object({
   titleField: schema.maybe(schema.string()),
-  subtitleField: schema.maybe(schema.string()),
-  descriptionField: schema.maybe(schema.string()),
+  subtitleField: schema.nullable(schema.string()),
+  descriptionField: schema.nullable(schema.string()),
   urlField: schema.maybe(schema.string()),
+  typeField: schema.nullable(schema.string()),
+  mediaTypeField: schema.nullable(schema.string()),
+  createdByField: schema.nullable(schema.string()),
+  updatedByField: schema.nullable(schema.string()),
   color: schema.string(),
   urlFieldIsLinkable: schema.boolean(),
   detailFields: schema.oneOf([schema.arrayOf(displayFieldSchema), displayFieldSchema]),
@@ -131,7 +135,7 @@ export function registerAccountCreateSourceRoute({
           login: schema.maybe(schema.string()),
           password: schema.maybe(schema.string()),
           organizations: schema.maybe(schema.arrayOf(schema.string())),
-          indexPermissions: schema.boolean(),
+          indexPermissions: schema.maybe(schema.boolean()),
         }),
       },
     },
@@ -381,26 +385,6 @@ export function registerAccountSourceReindexJobRoute({
   );
 }
 
-export function registerAccountSourceReindexJobStatusRoute({
-  router,
-  enterpriseSearchRequestHandler,
-}: RouteDependencies) {
-  router.get(
-    {
-      path: '/api/workplace_search/account/sources/{sourceId}/reindex_job/{jobId}/status',
-      validate: {
-        params: schema.object({
-          sourceId: schema.string(),
-          jobId: schema.string(),
-        }),
-      },
-    },
-    enterpriseSearchRequestHandler.createRequest({
-      path: '/ws/sources/:sourceId/reindex_job/:jobId/status',
-    })
-  );
-}
-
 export function registerAccountSourceDownloadDiagnosticsRoute({
   router,
   enterpriseSearchRequestHandler,
@@ -416,6 +400,7 @@ export function registerAccountSourceDownloadDiagnosticsRoute({
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/ws/sources/:sourceId/download_diagnostics',
+      hasJsonResponse: false,
     })
   );
 }
@@ -749,26 +734,6 @@ export function registerOrgSourceReindexJobRoute({
   );
 }
 
-export function registerOrgSourceReindexJobStatusRoute({
-  router,
-  enterpriseSearchRequestHandler,
-}: RouteDependencies) {
-  router.get(
-    {
-      path: '/api/workplace_search/org/sources/{sourceId}/reindex_job/{jobId}/status',
-      validate: {
-        params: schema.object({
-          sourceId: schema.string(),
-          jobId: schema.string(),
-        }),
-      },
-    },
-    enterpriseSearchRequestHandler.createRequest({
-      path: '/ws/org/sources/:sourceId/reindex_job/:jobId/status',
-    })
-  );
-}
-
 export function registerOrgSourceDownloadDiagnosticsRoute({
   router,
   enterpriseSearchRequestHandler,
@@ -784,6 +749,7 @@ export function registerOrgSourceDownloadDiagnosticsRoute({
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/ws/org/sources/:sourceId/download_diagnostics',
+      hasJsonResponse: false,
     })
   );
 }
@@ -937,7 +903,6 @@ export const registerSourcesRoutes = (dependencies: RouteDependencies) => {
   registerAccountSourceDisplaySettingsConfig(dependencies);
   registerAccountSourceSchemasRoute(dependencies);
   registerAccountSourceReindexJobRoute(dependencies);
-  registerAccountSourceReindexJobStatusRoute(dependencies);
   registerAccountSourceDownloadDiagnosticsRoute(dependencies);
   registerOrgSourcesRoute(dependencies);
   registerOrgSourcesStatusRoute(dependencies);
@@ -953,7 +918,6 @@ export const registerSourcesRoutes = (dependencies: RouteDependencies) => {
   registerOrgSourceDisplaySettingsConfig(dependencies);
   registerOrgSourceSchemasRoute(dependencies);
   registerOrgSourceReindexJobRoute(dependencies);
-  registerOrgSourceReindexJobStatusRoute(dependencies);
   registerOrgSourceDownloadDiagnosticsRoute(dependencies);
   registerOrgSourceOauthConfigurationsRoute(dependencies);
   registerOrgSourceOauthConfigurationRoute(dependencies);

@@ -78,7 +78,7 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -86,7 +86,7 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
                 >
                   Location
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -94,7 +94,7 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent euiTableCellContent--alignRight"
               >
                 <span
@@ -102,7 +102,7 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
                 >
                   Availability
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -110,7 +110,7 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent euiTableCellContent--alignRight"
               >
                 <span
@@ -118,7 +118,7 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
                 >
                   Last check
                 </span>
-              </div>
+              </span>
             </th>
           </tr>
         </thead>
@@ -316,7 +316,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -324,7 +324,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
                 >
                   Location
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -332,7 +332,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent euiTableCellContent--alignRight"
               >
                 <span
@@ -340,7 +340,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
                 >
                   Availability
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -348,7 +348,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent euiTableCellContent--alignRight"
               >
                 <span
@@ -356,7 +356,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
                 >
                   Last check
                 </span>
-              </div>
+              </span>
             </th>
           </tr>
         </thead>
@@ -554,7 +554,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -562,7 +562,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                 >
                   Location
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -570,7 +570,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent euiTableCellContent--alignRight"
               >
                 <span
@@ -578,7 +578,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                 >
                   Availability
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -586,7 +586,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent euiTableCellContent--alignRight"
               >
                 <span
@@ -594,7 +594,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                 >
                   Last check
                 </span>
-              </div>
+              </span>
             </th>
           </tr>
         </thead>
@@ -983,6 +983,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
               <span
                 aria-hidden="true"
                 class="euiButtonIcon__icon"
+                color="inherit"
                 data-euiicon-type="arrowLeft"
               />
             </button>
@@ -1046,6 +1047,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
               <span
                 aria-hidden="true"
                 class="euiButtonIcon__icon"
+                color="inherit"
                 data-euiicon-type="arrowRight"
               />
             </a>

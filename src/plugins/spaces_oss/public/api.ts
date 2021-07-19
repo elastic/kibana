@@ -12,30 +12,37 @@ import type { Observable } from 'rxjs';
 import type { Space } from '../common';
 
 /**
- * @public
+ * Client-side Spaces API.
  */
 export interface SpacesApi {
-  readonly activeSpace$: Observable<Space>;
-  getActiveSpace(): Promise<Space>;
   /**
-   * UI API to use to add spaces capabilities to an application
+   * Observable representing the currently active space.
+   * The details of the space can change without a full page reload (such as display name, color, etc.)
+   */
+  getActiveSpace$(): Observable<Space>;
+
+  /**
+   * Retrieve the currently active space.
+   */
+  getActiveSpace(): Promise<Space>;
+
+  /**
+   * UI components and services to add spaces capabilities to an application.
    */
   ui: SpacesApiUi;
 }
 
 /**
  * Function that returns a promise for a lazy-loadable component.
- *
- * @public
  */
 export type LazyComponentFn<T> = (props: T) => ReactElement;
 
 /**
- * @public
+ * UI components and services to add spaces capabilities to an application.
  */
 export interface SpacesApiUi {
   /**
-   * Lazy-loadable {@link SpacesApiUiComponent | React components} to support the spaces feature.
+   * Lazy-loadable {@link SpacesApiUiComponent | React components} to support the Spaces feature.
    */
   components: SpacesApiUiComponent;
   /**
@@ -62,9 +69,7 @@ export interface SpacesApiUi {
 }
 
 /**
- * React UI components to be used to display the spaces feature in any application.
- *
- * @public
+ * React UI components to be used to display the Spaces feature in any application.
  */
 export interface SpacesApiUiComponent {
   /**
@@ -111,7 +116,7 @@ export interface SpacesApiUiComponent {
 }
 
 /**
- * @public
+ * Properties for the SpacesContext.
  */
 export interface SpacesContextProps {
   /**
@@ -121,7 +126,7 @@ export interface SpacesContextProps {
 }
 
 /**
- * @public
+ * Properties for the ShareToSpaceFlyout.
  */
 export interface ShareToSpaceFlyoutProps {
   /**
@@ -163,15 +168,19 @@ export interface ShareToSpaceFlyoutProps {
    */
   behaviorContext?: 'within-space' | 'outside-space';
   /**
-   * Optional handler that is called when the user has saved changes and there are spaces to be added to and/or removed from the object. If
-   * this is not defined, a default handler will be used that calls `/api/spaces/_share_saved_object_add` and/or
-   * `/api/spaces/_share_saved_object_remove` and displays toast(s) indicating what occurred.
+   * Optional handler that is called when the user has saved changes and there are spaces to be added to and/or removed from the object and
+   * its relatives. If this is not defined, a default handler will be used that calls `/api/spaces/_update_objects_spaces` and displays a
+   * toast indicating what occurred.
    */
-  changeSpacesHandler?: (spacesToAdd: string[], spacesToRemove: string[]) => Promise<void>;
+  changeSpacesHandler?: (
+    objects: Array<{ type: string; id: string }>,
+    spacesToAdd: string[],
+    spacesToRemove: string[]
+  ) => Promise<void>;
   /**
-   * Optional callback when the target object is updated.
+   * Optional callback when the target object and its relatives are updated.
    */
-  onUpdate?: () => void;
+  onUpdate?: (updatedObjects: Array<{ type: string; id: string }>) => void;
   /**
    * Optional callback when the flyout is closed.
    */
@@ -179,7 +188,7 @@ export interface ShareToSpaceFlyoutProps {
 }
 
 /**
- * @public
+ * Describes the target saved object during a share operation.
  */
 export interface ShareToSpaceSavedObjectTarget {
   /**
@@ -215,7 +224,7 @@ export interface ShareToSpaceSavedObjectTarget {
 }
 
 /**
- * @public
+ * Properties for the SpaceList component.
  */
 export interface SpaceListProps {
   /**
@@ -240,7 +249,7 @@ export interface SpaceListProps {
 }
 
 /**
- * @public
+ * Properties for the LegacyUrlConflict component.
  */
 export interface LegacyUrlConflictProps {
   /**
@@ -265,16 +274,29 @@ export interface LegacyUrlConflictProps {
 }
 
 /**
- * @public
+ * Properties for the SpaceAvatar component.
  */
 export interface SpaceAvatarProps {
+  /** The space to represent with an avatar. */
   space: Partial<Space>;
+
+  /** The size of the avatar. */
   size?: 's' | 'm' | 'l' | 'xl';
+
+  /** Optional CSS class(es) to apply. */
   className?: string;
+
   /**
    * When enabled, allows EUI to provide an aria-label for this component, which is announced on screen readers.
    *
    * Default value is true.
    */
   announceSpaceName?: boolean;
+
+  /**
+   * Whether or not to render the avatar in a disabled state.
+   *
+   * Default value is false.
+   */
+  isDisabled?: boolean;
 }

@@ -12,10 +12,12 @@ import { Subscription } from 'rxjs';
 
 import { TransformId } from '../../../common/types/transform';
 
-// Transform name must contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores;
-// It must also start and end with an alphanumeric character.
+// Via https://github.com/elastic/elasticsearch/blob/master/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/transform/utils/TransformStrings.java#L24
+// Matches a string that contains lowercase characters, digits, hyphens, underscores or dots.
+// The string may start and end only in characters or digits.
+// Note that '.' is allowed but not documented.
 export function isTransformIdValid(transformId: TransformId) {
-  return /^[a-z0-9\-\_]+$/g.test(transformId) && !/^([_-].*)?(.*[_-])?$/g.test(transformId);
+  return /^[a-z0-9](?:[a-z0-9_\-\.]*[a-z0-9])?$/g.test(transformId);
 }
 
 export enum REFRESH_TRANSFORM_LIST_STATE {

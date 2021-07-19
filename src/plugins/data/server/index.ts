@@ -117,7 +117,12 @@ export const fieldFormats = {
   HistogramFormat,
 };
 
-export { IFieldFormatsRegistry, FieldFormatsGetConfigFn, FieldFormatConfig } from '../common';
+export {
+  IFieldFormatsRegistry,
+  FieldFormatsGetConfigFn,
+  FieldFormatConfig,
+  INDEX_PATTERN_SAVED_OBJECT_TYPE,
+} from '../common';
 
 /*
  * Index patterns:
@@ -170,7 +175,7 @@ import {
   dateHistogramInterval,
   InvalidEsCalendarIntervalError,
   InvalidEsIntervalFormatError,
-  Ipv4Address,
+  IpAddress,
   isValidEsInterval,
   isValidInterval,
   parseEsInterval,
@@ -181,6 +186,7 @@ import {
   tabifyGetColumns,
   calcAutoIntervalLessThan,
 } from '../common';
+import { autocompleteConfigDeprecationProvider } from './config_deprecations';
 
 export {
   // aggs
@@ -235,6 +241,9 @@ export {
   ISearchSessionService,
   SearchRequestHandlerContext,
   DataRequestHandlerContext,
+  AsyncSearchResponse,
+  AsyncSearchStatusResponse,
+  NoSearchIdInSessionError,
 } from './search';
 
 // Search namespace
@@ -245,7 +254,7 @@ export const search = {
     intervalOptions,
     InvalidEsCalendarIntervalError,
     InvalidEsIntervalFormatError,
-    Ipv4Address,
+    IpAddress,
     isNumberType,
     isStringType,
     isType,
@@ -299,6 +308,7 @@ export {
 };
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
+  deprecations: autocompleteConfigDeprecationProvider,
   exposeToBrowser: {
     autocomplete: true,
     search: true,

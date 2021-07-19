@@ -49,7 +49,6 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
         jobCreator.end,
         chartInterval.getInterval().asMilliseconds(),
         jobCreator.runtimeMappings ?? undefined,
-        // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
         jobCreator.datafeedConfig.indices_options
       );
       setEventRateChartData(resp);

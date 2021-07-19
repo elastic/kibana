@@ -158,11 +158,78 @@ Object {
 
     expect(telemetry).toMatchInlineSnapshot(`
 Object {
+  "countByAlertHistoryConnectorType": 0,
   "countByType": Object {
     "__server-log": 1,
     "__slack": 1,
   },
   "countTotal": 2,
+}
+`);
+  });
+
+  test('getInUseTotalCount should count preconfigured alert history connector usage', async () => {
+    const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+    mockEsClient.search.mockReturnValue(
+      // @ts-expect-error not full search response
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        aggregations: {
+          refs: {
+            actionRefIds: {
+              value: {
+                connectorIds: {
+                  '1': 'action_0',
+                  '123': 'action_1',
+                  'preconfigured-alert-history-es-index': 'action_2',
+                },
+                total: 3,
+              },
+            },
+          },
+          hits: {
+            hits: [],
+          },
+        },
+      })
+    );
+    const actionsBulkGet = jest.fn();
+    actionsBulkGet.mockReturnValue({
+      saved_objects: [
+        {
+          id: '1',
+          attributes: {
+            actionTypeId: '.server-log',
+          },
+        },
+        {
+          id: '123',
+          attributes: {
+            actionTypeId: '.slack',
+          },
+        },
+        {
+          id: 'preconfigured-alert-history-es-index',
+          error: {
+            statusCode: 404,
+            error: 'Not Found',
+            message: 'Saved object [action/preconfigured-alert-history-es-index] not found',
+          },
+        },
+      ],
+    });
+    const telemetry = await getInUseTotalCount(mockEsClient, actionsBulkGet, 'test');
+
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+    expect(actionsBulkGet).toHaveBeenCalledTimes(1);
+
+    expect(telemetry).toMatchInlineSnapshot(`
+Object {
+  "countByAlertHistoryConnectorType": 1,
+  "countByType": Object {
+    "__server-log": 1,
+    "__slack": 1,
+  },
+  "countTotal": 3,
 }
 `);
   });

@@ -11,7 +11,6 @@ import { delay } from 'bluebird';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-// @ts-expect-error https://github.com/elastic/kibana/issues/95679
 import { adminTestUser } from '@kbn/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -62,7 +61,21 @@ export default function ({ getService }: FtrProviderContext) {
         .ca(CA_CERT)
         .pfx(UNTRUSTED_CLIENT_CERT)
         .set('kbn-xsrf', 'xxx')
+        .expect(401, { statusCode: 401, error: 'Unauthorized', message: 'Unauthorized' });
+    });
+
+    it('should fail and redirect if untrusted certificate is used', async () => {
+      // Unlike the call to '/internal/security/me' above, this route can be redirected (see pre-response in `AuthenticationService`).
+      const unauthenticatedResponse = await supertest
+        .get('/security/account')
+        .ca(CA_CERT)
+        .pfx(UNTRUSTED_CLIENT_CERT)
         .expect(401);
+
+      expect(unauthenticatedResponse.headers['content-security-policy']).to.be(
+        `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+      );
+      expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
     });
 
     it('does not prevent basic login', async () => {
@@ -319,7 +332,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(302);
 
         expect(logoutResponse.headers['set-cookie']).to.be(undefined);
-        expect(logoutResponse.headers.location).to.be('/');
+        expect(logoutResponse.headers.location).to.be('/security/logged_out?msg=LOGGED_OUT');
       });
     });
 

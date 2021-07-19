@@ -6,39 +6,52 @@
  * Side Public License, v 1.
  */
 
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { Subject, Observable } from 'rxjs';
+import { takeUntil, first } from 'rxjs/operators';
+import { get } from 'lodash';
+import { hasConfigPathIntersection, ChangedDeprecatedPaths } from '@kbn/config';
 
 import { CoreService } from 'src/core/types';
 import { Logger, SavedObjectsServiceStart, SavedObjectTypeRegistry } from 'src/core/server';
+import {
+  AggregationsFiltersAggregate,
+  AggregationsFiltersBucketItem,
+  SearchTotalHits,
+} from '@elastic/elasticsearch/api/types';
 import { CoreContext } from '../core_context';
 import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
 import { HttpConfigType, InternalHttpServiceSetup } from '../http';
 import { LoggingConfigType } from '../logging';
 import { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
-import {
+import type {
   CoreServicesUsageData,
   CoreUsageData,
   CoreUsageDataStart,
   CoreUsageDataSetup,
+  ConfigUsageData,
 } from './types';
 import { isConfigured } from './is_configured';
 import { ElasticsearchServiceStart } from '../elasticsearch';
 import { KibanaConfigType } from '../kibana_config';
 import { coreUsageStatsType } from './core_usage_stats';
+import { LEGACY_URL_ALIAS_TYPE } from '../saved_objects/object_types';
 import { CORE_USAGE_STATS_TYPE } from './constants';
 import { CoreUsageStatsClient } from './core_usage_stats_client';
 import { MetricsServiceSetup, OpsMetrics } from '..';
+
+export type ExposedConfigsToUsage = Map<string, Record<string, boolean>>;
 
 export interface SetupDeps {
   http: InternalHttpServiceSetup;
   metrics: MetricsServiceSetup;
   savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
+  changedDeprecatedConfigPath$: Observable<ChangedDeprecatedPaths>;
 }
 
 export interface StartDeps {
   savedObjects: SavedObjectsServiceStart;
   elasticsearch: ElasticsearchServiceStart;
+  exposedConfigsToUsage: ExposedConfigsToUsage;
 }
 
 /**
@@ -83,6 +96,7 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
   private opsMetrics?: OpsMetrics;
   private kibanaConfig?: KibanaConfigType;
   private coreUsageStatsClient?: CoreUsageStatsClient;
+  private deprecatedConfigPaths: ChangedDeprecatedPaths = { set: [], unset: [] };
 
   constructor(core: CoreContext) {
     this.logger = core.logger.get('core-usage-stats-service');
@@ -90,11 +104,25 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
     this.stop$ = new Subject();
   }
 
-  private async getSavedObjectIndicesUsageData(
+  private async getSavedObjectUsageData(
     savedObjects: SavedObjectsServiceStart,
     elasticsearch: ElasticsearchServiceStart
   ): Promise<CoreServicesUsageData['savedObjects']> {
-    const indices = await Promise.all(
+    const [indices, legacyUrlAliases] = await Promise.all([
+      this.getSavedObjectIndicesUsageData(savedObjects, elasticsearch),
+      this.getSavedObjectAliasUsageData(elasticsearch),
+    ]);
+    return {
+      indices,
+      legacyUrlAliases,
+    };
+  }
+
+  private async getSavedObjectIndicesUsageData(
+    savedObjects: SavedObjectsServiceStart,
+    elasticsearch: ElasticsearchServiceStart
+  ) {
+    return Promise.all(
       Array.from(
         savedObjects
           .getTypeRegistry()
@@ -118,22 +146,54 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
             const stats = body[0];
             return {
               alias: kibanaOrTaskManagerIndex(index, this.kibanaConfig!.index),
-              // @ts-expect-error @elastic/elasticsearch declares it 'docs.count' as optional
-              docsCount: parseInt(stats['docs.count'], 10),
-              // @ts-expect-error @elastic/elasticsearch declares it 'docs.deleted' as optional
-              docsDeleted: parseInt(stats['docs.deleted'], 10),
-              // @ts-expect-error @elastic/elasticsearch declares it 'store.size' as string | number
-              storeSizeBytes: parseInt(stats['store.size'], 10),
-              // @ts-expect-error @elastic/elasticsearch declares it 'pri.store.size' as string | number
-              primaryStoreSizeBytes: parseInt(stats['pri.store.size'], 10),
+              docsCount: stats['docs.count'] ? parseInt(stats['docs.count'], 10) : 0,
+              docsDeleted: stats['docs.deleted'] ? parseInt(stats['docs.deleted'], 10) : 0,
+              storeSizeBytes: stats['store.size'] ? parseInt(stats['store.size'], 10) : 0,
+              primaryStoreSizeBytes: stats['pri.store.size']
+                ? parseInt(stats['pri.store.size'], 10)
+                : 0,
             };
           });
       })
     );
+  }
 
-    return {
-      indices,
-    };
+  private async getSavedObjectAliasUsageData(elasticsearch: ElasticsearchServiceStart) {
+    // Note: this agg can be changed to use `savedObjectsRepository.find` in the future after `filters` is supported.
+    // See src/core/server/saved_objects/service/lib/aggregations/aggs_types/bucket_aggs.ts for supported aggregations.
+    const { body: resp } = await elasticsearch.client.asInternalUser.search({
+      index: this.kibanaConfig!.index,
+      body: {
+        track_total_hits: true,
+        query: { match: { type: LEGACY_URL_ALIAS_TYPE } },
+        aggs: {
+          aliases: {
+            filters: {
+              filters: {
+                disabled: { term: { [`${LEGACY_URL_ALIAS_TYPE}.disabled`]: true } },
+                active: {
+                  bool: {
+                    must_not: { term: { [`${LEGACY_URL_ALIAS_TYPE}.disabled`]: true } },
+                    must: { range: { [`${LEGACY_URL_ALIAS_TYPE}.resolveCounter`]: { gte: 1 } } },
+                  },
+                },
+              },
+            },
+          },
+        },
+        size: 0,
+      },
+    });
+
+    const { hits, aggregations } = resp;
+    const totalCount = (hits.total as SearchTotalHits).value;
+    const aggregate = aggregations!.aliases as AggregationsFiltersAggregate;
+    const buckets = aggregate.buckets as Record<string, AggregationsFiltersBucketItem>;
+    const disabledCount = buckets.disabled.doc_count as number;
+    const activeCount = buckets.active.doc_count as number;
+    const inactiveCount = totalCount - disabledCount - activeCount;
+
+    return { totalCount, disabledCount, activeCount, inactiveCount };
   }
 
   private async getCoreUsageData(
@@ -156,7 +216,7 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
     }
 
     const es = this.elasticsearchConfig;
-    const soUsageData = await this.getSavedObjectIndicesUsageData(savedObjects, elasticsearch);
+    const soUsageData = await this.getSavedObjectUsageData(savedObjects, elasticsearch);
     const coreUsageStatsData = await this.coreUsageStatsClient.getUsageStats();
 
     const http = this.httpConfig;
@@ -225,6 +285,16 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
             keystoreConfigured: isConfigured.record(http.ssl.keystore),
             truststoreConfigured: isConfigured.record(http.ssl.truststore),
           },
+          securityResponseHeaders: {
+            // ES does not index `null` and it cannot be searched, so we coalesce these to string values instead
+            strictTransportSecurity: http.securityResponseHeaders.strictTransportSecurity ?? 'NULL',
+            xContentTypeOptions: http.securityResponseHeaders.xContentTypeOptions ?? 'NULL',
+            referrerPolicy: http.securityResponseHeaders.referrerPolicy ?? 'NULL',
+            permissionsPolicyConfigured: isConfigured.string(
+              http.securityResponseHeaders.permissionsPolicy ?? undefined
+            ),
+            disableEmbedding: http.securityResponseHeaders.disableEmbedding,
+          },
         },
 
         logging: {
@@ -241,6 +311,8 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
           maxImportPayloadBytes: this.soConfig.maxImportPayloadBytes.getValueInBytes(),
           maxImportExportSize: this.soConfig.maxImportExportSize,
         },
+
+        deprecatedKeys: this.deprecatedConfigPaths,
       },
       environment: {
         memory: {
@@ -256,7 +328,111 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
     };
   }
 
-  setup({ http, metrics, savedObjectsStartPromise }: SetupDeps) {
+  private getMarkedAsSafe(
+    exposedConfigsToUsage: ExposedConfigsToUsage,
+    usedPath: string,
+    pluginId?: string
+  ): { explicitlyMarked: boolean; isSafe: boolean } {
+    if (pluginId) {
+      const exposeDetails = exposedConfigsToUsage.get(pluginId) || {};
+      const exposeKeyDetails = Object.keys(exposeDetails).find((exposeKey) => {
+        const fullPath = `${pluginId}.${exposeKey}`;
+        return hasConfigPathIntersection(usedPath, fullPath);
+      });
+
+      if (exposeKeyDetails) {
+        const explicitlyMarkedAsSafe = exposeDetails[exposeKeyDetails];
+
+        if (typeof explicitlyMarkedAsSafe === 'boolean') {
+          return {
+            explicitlyMarked: true,
+            isSafe: explicitlyMarkedAsSafe,
+          };
+        }
+      }
+    }
+
+    return { explicitlyMarked: false, isSafe: false };
+  }
+
+  private async getNonDefaultKibanaConfigs(
+    exposedConfigsToUsage: ExposedConfigsToUsage
+  ): Promise<ConfigUsageData> {
+    const config = await this.configService.getConfig$().pipe(first()).toPromise();
+    const nonDefaultConfigs = config.toRaw();
+    const usedPaths = await this.configService.getUsedPaths();
+    const exposedConfigsKeys = [...exposedConfigsToUsage.keys()];
+
+    return usedPaths.reduce((acc, usedPath) => {
+      const rawConfigValue = get(nonDefaultConfigs, usedPath);
+      const pluginId = exposedConfigsKeys.find(
+        (exposedConfigsKey) =>
+          usedPath === exposedConfigsKey || usedPath.startsWith(`${exposedConfigsKey}.`)
+      );
+
+      const { explicitlyMarked, isSafe } = this.getMarkedAsSafe(
+        exposedConfigsToUsage,
+        usedPath,
+        pluginId
+      );
+
+      // explicitly marked as safe
+      if (explicitlyMarked && isSafe) {
+        // report array of objects as redacted even if explicitly marked as safe.
+        // TS typings prevent explicitly marking arrays of objects as safe
+        // this makes sure to report redacted even if TS was bypassed.
+        if (
+          Array.isArray(rawConfigValue) &&
+          rawConfigValue.some((item) => typeof item === 'object')
+        ) {
+          acc[usedPath] = '[redacted]';
+        } else {
+          acc[usedPath] = rawConfigValue;
+        }
+      }
+
+      // explicitly marked as unsafe
+      if (explicitlyMarked && !isSafe) {
+        acc[usedPath] = '[redacted]';
+      }
+
+      /**
+       * not all types of values may contain sensitive values.
+       * Report boolean and number configs if not explicitly marked as unsafe.
+       */
+      if (!explicitlyMarked) {
+        switch (typeof rawConfigValue) {
+          case 'number':
+          case 'boolean':
+            acc[usedPath] = rawConfigValue;
+            break;
+          case 'undefined':
+            acc[usedPath] = 'undefined';
+            break;
+          case 'object': {
+            // non-array object types are already handled
+            if (Array.isArray(rawConfigValue)) {
+              if (
+                rawConfigValue.every(
+                  (item) => typeof item === 'number' || typeof item === 'boolean'
+                )
+              ) {
+                acc[usedPath] = rawConfigValue;
+                break;
+              }
+            }
+          }
+          default: {
+            acc[usedPath] = '[redacted]';
+          }
+        }
+      }
+
+      return acc;
+    }, {} as Record<string, any | any[]>);
+  }
+
+  setup({ http, metrics, savedObjectsStartPromise, changedDeprecatedConfigPath$ }: SetupDeps) {
     metrics
       .getOpsMetrics$()
       .pipe(takeUntil(this.stop$))
@@ -297,6 +473,10 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
         this.kibanaConfig = config;
       });
 
+    changedDeprecatedConfigPath$
+      .pipe(takeUntil(this.stop$))
+      .subscribe((deprecatedConfigPaths) => (this.deprecatedConfigPaths = deprecatedConfigPaths));
+
     const internalRepositoryPromise = savedObjectsStartPromise.then((savedObjects) =>
       savedObjects.createInternalRepository([CORE_USAGE_STATS_TYPE])
     );
@@ -316,10 +496,13 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
     return { registerType, getClient } as CoreUsageDataSetup;
   }
 
-  start({ savedObjects, elasticsearch }: StartDeps) {
+  start({ savedObjects, elasticsearch, exposedConfigsToUsage }: StartDeps) {
     return {
-      getCoreUsageData: () => {
-        return this.getCoreUsageData(savedObjects, elasticsearch);
+      getCoreUsageData: async () => {
+        return await this.getCoreUsageData(savedObjects, elasticsearch);
+      },
+      getConfigsUsageData: async () => {
+        return await this.getNonDefaultKibanaConfigs(exposedConfigsToUsage);
       },
     };
   }

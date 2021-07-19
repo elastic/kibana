@@ -36,22 +36,22 @@
   ],
   "datafeeds": [
     {
-      "id": "datafeed_high_count_by_destination_country",
+      "id": "datafeed-high_count_by_destination_country",
       "file": "datafeed_high_count_by_destination_country.json",
       "job_id": "high_count_by_destination_country"
     },
     {
-      "id": "datafeed_high_count_network_denies",
+      "id": "datafeed-high_count_network_denies",
       "file": "datafeed_high_count_network_denies.json",
       "job_id": "high_count_network_denies"
     },
     {
-      "id": "datafeed_high_count_network_events",
+      "id": "datafeed-high_count_network_events",
       "file": "datafeed_high_count_network_events.json",
       "job_id": "high_count_network_events"
     },
     {
-      "id": "datafeed_rare_destination_country",
+      "id": "datafeed-rare_destination_country",
       "file": "datafeed_rare_destination_country.json",
       "job_id": "rare_destination_country"
     }

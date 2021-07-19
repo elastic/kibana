@@ -6,14 +6,12 @@
  */
 
 import React, { useEffect, useState, ChangeEvent, FormEvent } from 'react';
-import { Link } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 import { isEmpty } from 'lodash';
 
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiConfirmModal,
   EuiFieldText,
   EuiFlexGroup,
@@ -22,10 +20,14 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { HttpLogic } from '../../../../shared/http';
+import { EuiButtonEmptyTo } from '../../../../shared/react_router_helpers';
 import { AppLogic } from '../../../app_logic';
 import { ContentSection } from '../../../components/shared/content_section';
 import { SourceConfigFields } from '../../../components/shared/source_config_fields';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
+import { NAV } from '../../../constants';
+
 import {
   CANCEL_BUTTON,
   OK_BUTTON,
@@ -36,6 +38,7 @@ import {
 import { SourceDataItem } from '../../../types';
 import { AddSourceLogic } from '../components/add_source/add_source_logic';
 import {
+  SOURCE_SETTINGS_HEADING,
   SOURCE_SETTINGS_TITLE,
   SOURCE_SETTINGS_DESCRIPTION,
   SOURCE_NAME_LABEL,
@@ -51,8 +54,12 @@ import {
 import { staticSourceData } from '../source_data';
 import { SourceLogic } from '../source_logic';
 
+import { SourceLayout } from './source_layout';
+
 export const SourceSettings: React.FC = () => {
-  const { updateContentSource, removeContentSource, resetSourceState } = useActions(SourceLogic);
+  const { http } = useValues(HttpLogic);
+
+  const { updateContentSource, removeContentSource } = useActions(SourceLogic);
   const { getSourceConfigData } = useActions(AddSourceLogic);
 
   const {
@@ -68,7 +75,6 @@ export const SourceSettings: React.FC = () => {
 
   useEffect(() => {
     getSourceConfigData(serviceType);
-    return resetSourceState;
   }, []);
 
   const {
@@ -86,8 +92,8 @@ export const SourceSettings: React.FC = () => {
   const { clientId, clientSecret, publicKey, consumerKey, baseUrl } = configuredFields || {};
 
   const diagnosticsPath = isOrganization
-    ? `/api/workplace_search/org/sources/${id}/download_diagnostics`
-    : `/api/workplace_search/account/sources/${id}/download_diagnostics`;
+    ? http.basePath.prepend(`/api/workplace_search/org/sources/${id}/download_diagnostics`)
+    : http.basePath.prepend(`/api/workplace_search/account/sources/${id}/download_diagnostics`);
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => setValue(e.target.value);
 
@@ -128,8 +134,8 @@ export const SourceSettings: React.FC = () => {
   );
 
   return (
-    <>
-      <ViewContentHeader title="Source settings" />
+    <SourceLayout pageChrome={[NAV.SETTINGS]} pageViewTelemetry="source_settings">
+      <ViewContentHeader title={SOURCE_SETTINGS_HEADING} />
       <ContentSection title={SOURCE_SETTINGS_TITLE} description={SOURCE_SETTINGS_DESCRIPTION}>
         <form onSubmit={submitNameChange}>
           <EuiFlexGroup>
@@ -168,9 +174,9 @@ export const SourceSettings: React.FC = () => {
             baseUrl={baseUrl}
           />
           <EuiFormRow>
-            <Link to={editPath}>
-              <EuiButtonEmpty flush="left">{SOURCE_CONFIG_LINK}</EuiButtonEmpty>
-            </Link>
+            <EuiButtonEmptyTo to={editPath} flush="left">
+              {SOURCE_CONFIG_LINK}
+            </EuiButtonEmptyTo>
           </EuiFormRow>
         </ContentSection>
       )}
@@ -180,7 +186,7 @@ export const SourceSettings: React.FC = () => {
           href={diagnosticsPath}
           isLoading={buttonLoading}
           data-test-subj="DownloadDiagnosticsButton"
-          download
+          download={`${id}_${serviceType}_${Date.now()}_diagnostics.json`}
         >
           {SYNC_DIAGNOSTICS_BUTTON}
         </EuiButton>
@@ -197,6 +203,6 @@ export const SourceSettings: React.FC = () => {
         </EuiButton>
         {confirmModalVisible && confirmModal}
       </ContentSection>
-    </>
+    </SourceLayout>
   );
 };

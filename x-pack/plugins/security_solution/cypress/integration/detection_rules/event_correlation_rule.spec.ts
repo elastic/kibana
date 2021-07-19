@@ -6,7 +6,7 @@
  */
 
 import { formatMitreAttackDescription } from '../../helpers/rules';
-import { eqlRule, eqlSequenceRule, indexPatterns } from '../../objects/rule';
+import { getEqlRule, getEqlSequenceRule, getIndexPatterns } from '../../objects/rule';
 
 import {
   ALERT_RULE_METHOD,
@@ -56,7 +56,7 @@ import {
   waitForAlertsPanelToBeLoaded,
 } from '../../tasks/alerts';
 import {
-  changeRowsPerPageTo300,
+  changeRowsPerPageTo100,
   filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
@@ -75,23 +75,23 @@ import {
 } from '../../tasks/create_new_rule';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
-import { DETECTIONS_URL } from '../../urls/navigation';
+import { ALERTS_URL } from '../../urls/navigation';
 
 describe('Detection rules, EQL', () => {
-  const expectedUrls = eqlRule.referenceUrls.join('');
-  const expectedFalsePositives = eqlRule.falsePositivesExamples.join('');
-  const expectedTags = eqlRule.tags.join('');
-  const expectedMitre = formatMitreAttackDescription(eqlRule.mitre);
+  const expectedUrls = getEqlRule().referenceUrls.join('');
+  const expectedFalsePositives = getEqlRule().falsePositivesExamples.join('');
+  const expectedTags = getEqlRule().tags.join('');
+  const expectedMitre = formatMitreAttackDescription(getEqlRule().mitre);
   const expectedNumberOfRules = 1;
   const expectedNumberOfAlerts = 7;
 
   beforeEach(() => {
     cleanKibana();
-    createTimeline(eqlRule.timeline).then((response) => {
+    createTimeline(getEqlRule().timeline).then((response) => {
       cy.wrap({
-        ...eqlRule,
+        ...getEqlRule(),
         timeline: {
-          ...eqlRule.timeline,
+          ...getEqlRule().timeline,
           id: response.body.data.persistTimeline.timeline.savedObjectId,
         },
       }).as('rule');
@@ -99,7 +99,7 @@ describe('Detection rules, EQL', () => {
   });
 
   it('Creates and activates a new EQL rule', function () {
-    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
@@ -113,7 +113,7 @@ describe('Detection rules, EQL', () => {
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-    changeRowsPerPageTo300();
+    changeRowsPerPageTo100();
 
     cy.get(RULES_TABLE).then(($table) => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
@@ -131,7 +131,7 @@ describe('Detection rules, EQL', () => {
 
     goToRuleDetails();
 
-    cy.get(RULE_NAME_HEADER).should('have.text', `${this.rule.name}`);
+    cy.get(RULE_NAME_HEADER).should('contain', `${this.rule.name}`);
     cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', this.rule.description);
     cy.get(ABOUT_DETAILS).within(() => {
       getDetails(SEVERITY_DETAILS).should('have.text', this.rule.severity);
@@ -148,7 +148,7 @@ describe('Detection rules, EQL', () => {
     cy.get(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
     cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
     cy.get(DEFINITION_DETAILS).within(() => {
-      getDetails(INDEX_PATTERNS_DETAILS).should('have.text', indexPatterns.join(''));
+      getDetails(INDEX_PATTERNS_DETAILS).should('have.text', getIndexPatterns().join(''));
       getDetails(CUSTOM_QUERY_DETAILS).should('have.text', this.rule.customQuery);
       getDetails(RULE_TYPE_DETAILS).should('have.text', 'Event Correlation');
       getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
@@ -182,11 +182,11 @@ describe('Detection rules, sequence EQL', () => {
 
   beforeEach(() => {
     cleanKibana();
-    createTimeline(eqlSequenceRule.timeline).then((response) => {
+    createTimeline(getEqlSequenceRule().timeline).then((response) => {
       cy.wrap({
-        ...eqlSequenceRule,
+        ...getEqlSequenceRule(),
         timeline: {
-          ...eqlSequenceRule.timeline,
+          ...getEqlSequenceRule().timeline,
           id: response.body.data.persistTimeline.timeline.savedObjectId,
         },
       }).as('rule');
@@ -194,7 +194,7 @@ describe('Detection rules, sequence EQL', () => {
   });
 
   it('Creates and activates a new EQL rule with a sequence', function () {
-    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
@@ -208,7 +208,7 @@ describe('Detection rules, sequence EQL', () => {
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-    changeRowsPerPageTo300();
+    changeRowsPerPageTo100();
 
     cy.get(RULES_TABLE).then(($table) => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);

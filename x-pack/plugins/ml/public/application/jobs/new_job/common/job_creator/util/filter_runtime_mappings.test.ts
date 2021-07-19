@@ -9,7 +9,7 @@ import { Job, Datafeed } from '../../../../../../../common/types/anomaly_detecti
 import { filterRuntimeMappings } from './filter_runtime_mappings';
 
 function getJob(): Job {
-  // @ts-expect-error
+  // @ts-expect-error incomplete job type for test
   return {
     job_id: 'test',
     description: '',
@@ -54,19 +54,19 @@ function getDatafeed(): Datafeed {
     runtime_mappings: {
       responsetime_big: {
         type: 'double',
-        // @ts-expect-error @elastic/elasticsearch StoredScript.language is required
         script: {
           source: "emit(doc['responsetime'].value * 100.0)",
         },
       },
       airline_lower: {
         type: 'keyword',
-        // @ts-expect-error @elastic/elasticsearch StoredScript.language is required
         script: {
           source: "emit(doc['airline'].value.toLowerCase())",
         },
       },
     },
+    chunking_config: { mode: 'auto' },
+    delayed_data_check_config: { enabled: false },
   };
 }
 
@@ -102,7 +102,7 @@ describe('filter_runtime_mappings', () => {
       datafeed = getDatafeed();
     });
 
-    test('returns no runtime mappings, no mappings in aggs', () => {
+    test('returns no runtime fields, no mappings in aggs', () => {
       const resp = filterRuntimeMappings(job, datafeed);
       expect(Object.keys(resp.runtime_mappings).length).toEqual(0);
 
@@ -111,7 +111,7 @@ describe('filter_runtime_mappings', () => {
       expect(resp.discarded_mappings.airline_lower).not.toEqual(undefined);
     });
 
-    test('returns no runtime mappings, no runtime mappings in datafeed', () => {
+    test('returns no runtime fields, no runtime fields in datafeed', () => {
       datafeed.runtime_mappings = undefined;
       const resp = filterRuntimeMappings(job, datafeed);
       expect(Object.keys(resp.runtime_mappings).length).toEqual(0);
@@ -131,7 +131,7 @@ describe('filter_runtime_mappings', () => {
       expect(resp.discarded_mappings.airline_lower).not.toEqual(undefined);
     });
 
-    test('return no runtime mappings, no mappings in aggs', () => {
+    test('return no runtime fields, no mappings in aggs', () => {
       datafeed.aggregations = getAggs();
       datafeed.aggregations!.buckets!.aggregations!.responsetime!.avg!.field! = 'responsetime';
 
@@ -154,7 +154,7 @@ describe('filter_runtime_mappings', () => {
       expect(resp.discarded_mappings.airline_lower).not.toEqual(undefined);
     });
 
-    test('return two runtime mappings, no mappings in aggs', () => {
+    test('return two runtime fields, no mappings in aggs', () => {
       // set the detector field to be a runtime mapping
       job.analysis_config.detectors[0].field_name = 'responsetime_big';
       // set the detector by field to be a runtime mapping
@@ -167,7 +167,7 @@ describe('filter_runtime_mappings', () => {
       expect(Object.keys(resp.discarded_mappings).length).toEqual(0);
     });
 
-    test('return two runtime mappings, no mappings in aggs, categorization job', () => {
+    test('return two runtime fields, no mappings in aggs, categorization job', () => {
       job.analysis_config.detectors[0].function = 'count';
       // set the detector field to be a runtime mapping
       job.analysis_config.detectors[0].field_name = undefined;

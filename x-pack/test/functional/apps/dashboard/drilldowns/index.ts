@@ -15,17 +15,19 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     this.tags(['skipFirefox']);
 
     before(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.load('dashboard/drilldowns');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.load('x-pack/test/functional/es_archives/dashboard/drilldowns');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
     });
 
     after(async () => {
-      await esArchiver.unload('dashboard/drilldowns');
+      await esArchiver.unload('x-pack/test/functional/es_archives/dashboard/drilldowns');
     });
 
     loadTestFile(require.resolve('./dashboard_to_dashboard_drilldown'));
     loadTestFile(require.resolve('./dashboard_to_url_drilldown'));
+    // Requires xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled
+    // setting set in kibana.yml to work (not enabled by default)
     loadTestFile(require.resolve('./explore_data_panel_action'));
 
     // Disabled for now as it requires xpack.discoverEnhanced.actions.exploreDataInChart.enabled

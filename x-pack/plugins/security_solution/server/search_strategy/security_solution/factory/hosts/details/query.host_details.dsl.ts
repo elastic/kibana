@@ -16,7 +16,10 @@ export const buildHostDetailsQuery = ({
   defaultIndex,
   timerange: { from, to },
 }: HostDetailsRequestOptions): ISearchRequestParams => {
-  const esFields = reduceFields(HOST_FIELDS, { ...hostFieldsMap, ...cloudFieldsMap });
+  const esFields = reduceFields(HOST_FIELDS, {
+    ...hostFieldsMap,
+    ...cloudFieldsMap,
+  });
 
   const filter = [
     { term: { 'host.name': hostName } },
@@ -39,6 +42,20 @@ export const buildHostDetailsQuery = ({
     body: {
       aggregations: {
         ...buildFieldsTermAggregation(esFields.filter((field) => !['@timestamp'].includes(field))),
+        endpoint_id: {
+          filter: {
+            term: {
+              'agent.type': 'endpoint',
+            },
+          },
+          aggs: {
+            value: {
+              terms: {
+                field: 'agent.id',
+              },
+            },
+          },
+        },
       },
       query: { bool: { filter } },
       size: 0,

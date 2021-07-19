@@ -21,9 +21,5 @@ export type {
   InternalUiSettingsServiceStart,
   UiSettingsType,
   UserProvidedValues,
-  ImageValidation,
   DeprecationSettings,
-  StringValidation,
-  StringValidationRegex,
-  StringValidationRegexString,
 } from './types';

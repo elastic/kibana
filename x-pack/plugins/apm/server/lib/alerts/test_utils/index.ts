@@ -8,8 +8,9 @@
 import { Logger } from 'kibana/server';
 import { of } from 'rxjs';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
-import { APMConfig } from '../../..';
-import { APMRuleRegistry } from '../../../plugin';
+import type { RuleDataClient } from '../../../../../rule_registry/server';
+import { PluginSetupContract as AlertingPluginSetupContract } from '../../../../../alerting/server';
+import { APMConfig, APM_SERVER_FEATURE_ID } from '../../..';
 
 export const createRuleTypeMocks = () => {
   let alertExecutor: (...args: any[]) => Promise<any>;
@@ -27,18 +28,18 @@ export const createRuleTypeMocks = () => {
     error: jest.fn(),
   } as unknown) as Logger;
 
-  const registry = {
+  const alerting = {
     registerType: ({ executor }) => {
       alertExecutor = executor;
     },
-  } as APMRuleRegistry;
+  } as AlertingPluginSetupContract;
 
   const scheduleActions = jest.fn();
 
   const services = {
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
-    scopedRuleRegistryClient: {
-      bulkIndex: jest.fn(),
+    savedObjectsClient: {
+      get: () => ({ attributes: { consumer: APM_SERVER_FEATURE_ID } }),
     },
     alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
     alertWithLifecycle: jest.fn(),
@@ -47,9 +48,22 @@ export const createRuleTypeMocks = () => {
 
   return {
     dependencies: {
-      registry,
+      alerting,
       config$: mockedConfig$,
       logger: loggerMock,
+      ruleDataClient: ({
+        getReader: () => {
+          return {
+            search: jest.fn(),
+          };
+        },
+        getWriter: () => {
+          return {
+            bulk: jest.fn(),
+          };
+        },
+        isWriteEnabled: jest.fn(() => true),
+      } as unknown) as RuleDataClient,
     },
     services,
     scheduleActions,
@@ -57,6 +71,13 @@ export const createRuleTypeMocks = () => {
       return alertExecutor({
         services,
         params,
+        rule: {
+          consumer: APM_SERVER_FEATURE_ID,
+          name: 'name',
+          producer: 'producer',
+          ruleTypeId: 'ruleTypeId',
+          ruleTypeName: 'ruleTypeName',
+        },
         startedAt: new Date(),
       });
     },

@@ -8,7 +8,6 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { Provider } from 'react-redux';
-import { ThemeProvider } from 'styled-components';
 
 import {
   createSampleTrustedApp,
@@ -21,13 +20,7 @@ import {
 } from '../../../test_utils';
 
 import { TrustedAppsGrid } from '.';
-import { getMockTheme } from '../../../../../../common/lib/kibana/kibana_react.mock';
-
-const mockTheme = getMockTheme({
-  eui: {
-    euiSize: '16px',
-  },
-});
+import { EuiThemeProvider } from '../../../../../../../../../../src/plugins/kibana_react/common';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',
@@ -38,7 +31,7 @@ const now = 111111;
 const renderList = (store: ReturnType<typeof createGlobalNoMiddlewareStore>) => {
   const Wrapper: React.FC = ({ children }) => (
     <Provider store={store}>
-      <ThemeProvider theme={mockTheme}>{children}</ThemeProvider>
+      <EuiThemeProvider>{children}</EuiThemeProvider>
     </Provider>
   );
 
@@ -92,7 +85,9 @@ describe('TrustedAppsGrid', () => {
         createListLoadedResourceState({ pageSize: 10 }, now)
       )
     );
-    store.dispatch(createUserChangedUrlAction('/trusted_apps', '?page_index=2&page_size=50'));
+    store.dispatch(
+      createUserChangedUrlAction('/administration/trusted_apps', '?page_index=2&page_size=50')
+    );
 
     expect(renderList(store).container).toMatchSnapshot();
   });
