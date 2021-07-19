@@ -169,3 +169,12 @@ export async function updateSourceMapsOnFleetPolicies({
     })
   );
 }
+
+export function getCleanedBundleFilePath(bundleFilePath: string) {
+  try {
+    const cleanedBundleFilepath = new URL(bundleFilePath);
+    return cleanedBundleFilepath.href;
+  } catch (e) {
+    return bundleFilePath;
+  }
+}

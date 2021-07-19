@@ -13,6 +13,7 @@ import {
   deleteApmArtifact,
   listArtifacts,
   updateSourceMapsOnFleetPolicies,
+  getCleanedBundleFilePath,
 } from '../lib/fleet/source_maps';
 import { getInternalSavedObjectsClient } from '../lib/helpers/get_internal_saved_objects_client';
 import { createApmServerRoute } from './create_apm_server_route';
@@ -50,15 +51,6 @@ const listSourceMapRoute = createApmServerRoute({
     }
   },
 });
-
-function getCleanedBundleFilePath(bundleFilePath: string) {
-  try {
-    const cleanedBundleFilepath = new URL(bundleFilePath);
-    return cleanedBundleFilepath.href;
-  } catch (e) {
-    return bundleFilePath;
-  }
-}
 
 const uploadSourceMapRoute = createApmServerRoute({
   endpoint: 'POST /api/apm/sourcemaps',
