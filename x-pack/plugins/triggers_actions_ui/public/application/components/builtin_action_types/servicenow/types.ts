@@ -29,6 +29,7 @@ export interface ServiceNowSIRActionParams {
 
 export interface ServiceNowConfig {
   apiUrl: string;
+  isLegacy: boolean;
 }
 
 export interface ServiceNowSecrets {

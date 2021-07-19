@@ -25,12 +25,13 @@ import * as i18n from './translations';
 import { ServiceNowActionConnector } from './types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
+import { DeprecatedCallout } from './deprecated_callout';
 
 const ServiceNowConnectorFields: React.FC<
   ActionConnectorFieldsProps<ServiceNowActionConnector>
 > = ({ action, editActionSecrets, editActionConfig, errors, consumer, readOnly, setCallbacks }) => {
   const { docLinks } = useKibana().services;
-  const { apiUrl } = action.config;
+  const { apiUrl, isLegacy } = action.config;
 
     const isApiUrlInvalid: boolean =
       errors.apiUrl !== undefined && errors.apiUrl.length > 0 && apiUrl !== undefined;
@@ -170,28 +171,23 @@ const ServiceNowConnectorFields: React.FC<
               fullWidth
               error={errors.password}
               isInvalid={isPasswordInvalid}
-              label={i18n.PASSWORD_LABEL}
-            >
-              <EuiFieldPassword
-                fullWidth
-                readOnly={readOnly}
-                isInvalid={isPasswordInvalid}
-                name="connector-servicenow-password"
-                value={password || ''} // Needed to prevent uncontrolled input error when value is undefined
-                data-test-subj="connector-servicenow-password-form-input"
-                onChange={(evt) => handleOnChangeSecretConfig('password', evt.target.value)}
-                onBlur={() => {
-                  if (!password) {
-                    editActionSecrets('password', '');
-                  }
-                }}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </>
-    );
-  };
+              name="connector-servicenow-password"
+              value={password || ''} // Needed to prevent uncontrolled input error when value is undefined
+              data-test-subj="connector-servicenow-password-form-input"
+              onChange={(evt) => handleOnChangeSecretConfig('password', evt.target.value)}
+              onBlur={() => {
+                if (!password) {
+                  editActionSecrets('password', '');
+                }
+              }}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {isLegacy && <DeprecatedCallout />}
+    </>
+  );
+};
 
 // eslint-disable-next-line import/no-default-export
 export { ServiceNowConnectorFields as default };
