@@ -80,6 +80,12 @@ export interface ActionConnectorFieldsProps<TActionConnector> {
   errors: IErrorObject;
   readOnly: boolean;
   consumer?: string;
+  setCallbacks: React.Dispatch<
+    React.SetStateAction<{
+      beforeActionConnectorSave?: (() => void) | undefined;
+      afterActionConnectorSave?: ((connector: ActionConnector) => void) | undefined;
+    } | null>
+  >;
 }
 
 export enum AlertFlyoutCloseReason {
