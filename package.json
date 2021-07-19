@@ -99,7 +99,7 @@
     "@elastic/apm-rum-react": "^1.2.11",
     "@elastic/charts": "32.0.0",
     "@elastic/datemath": "link:bazel-bin/packages/elastic-datemath",
-    "@elastic/elasticsearch": "npm:@elastic/elasticsearch-canary@^8.0.0-canary.13",
+    "@elastic/elasticsearch": "npm:@elastic/elasticsearch-canary@^8.0.0-canary.14",
     "@elastic/ems-client": "7.14.0",
     "@elastic/eui": "35.0.0",
     "@elastic/filesaver": "1.1.2",
