@@ -20,7 +20,6 @@ import {
   ComparatorToi18nMap,
   logThresholdRuleDataRT,
   logThresholdRuleDataSerializedParamsKey,
-  ratioAlertParamsRT,
 } from '../../../common/alerting/logs/log_threshold';
 
 export const formatReason: ObservabilityRuleTypeFormatter = ({ fields }) => {
@@ -32,6 +31,7 @@ export const formatReason: ObservabilityRuleTypeFormatter = ({ fields }) => {
           defaultMessage: 'unknown reason',
         }),
       (logThresholdRuleData) => {
+        console.log(logThresholdRuleData, 'rule_data');
         const params = logThresholdRuleData[logThresholdRuleDataSerializedParamsKey][0];
 
         const actualCount = fields[ALERT_EVALUATION_VALUE];

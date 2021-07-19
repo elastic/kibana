@@ -56,6 +56,27 @@ export interface MetricAnomalyParams {
   influencerFilter: rt.TypeOf<typeof metricAnomalyInfluencerFilterRT> | undefined;
 }
 
+export interface InventoryMetricConditions {
+  // metric: SnapshotMetricType;
+  timeSize: number;
+  // timeUnit: Unit;
+  sourceId?: string;
+  threshold: number[];
+  comparator: Comparator;
+  // customMetric?: SnapshotCustomMetricInput;
+  warningThreshold?: number[];
+  warningComparator?: Comparator;
+}
+export type InventoryItemType = rt.TypeOf<typeof ItemTypeRT>;
+
+export interface InventoryMetricThresholdAlertParams {
+  criteria: InventoryMetricConditions[];
+  filterQuery: string | undefined;
+  nodeType: InventoryItemType;
+  sourceId?: string;
+  alertOnNoData?: boolean;
+}
+
 // Alert Preview API
 export const baseAlertRequestParamsRT = rt.intersection([
   rt.partial({
@@ -79,6 +100,22 @@ export const baseAlertRequestParamsRT = rt.intersection([
     alertNotifyWhen: rt.string,
   }),
 ]);
+
+// export const inventoryMetricThresholdAlertParamsRT = rt.intersection([
+//   baseAlertRequestParamsRT,
+//   rt.type({
+//     nodeType: ItemTypeRT,
+//     alertType: rt.literal(METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID),
+//     criteria: rt.array(rt.any),
+//     filterQuery: rt.union([rt.string, rt.undefined]),
+//     // nodeType: InventoryItemType;
+//     sourceId?: rt.string,
+//     alertOnNoData?: rt.boolean,
+//   })
+// ]);
+
+// export const alertParamsRT = inventoryMetricThresholdAlertParamsRT;
+// export const AlertParams = rt.TypeOf<typeof alertParamsRT>;
 
 const metricThresholdAlertPreviewRequestParamsRT = rt.intersection([
   baseAlertRequestParamsRT,
