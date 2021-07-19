@@ -78,7 +78,7 @@ export class KQLSyntaxError extends Error {
     if (item.type === 'other') {
       return item.description!;
     } else if (item.type === 'literal') {
-      return item.text!;
+      return `"${item.text!}"`;
     } else if (item.type === 'end') {
       return 'end of input';
     } else {
