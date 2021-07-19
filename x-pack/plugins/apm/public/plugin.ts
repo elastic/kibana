@@ -48,6 +48,8 @@ import {
   getApmEnrollmentFlyoutData,
   LazyApmCustomAssetsExtension,
 } from './components/fleet_integration';
+import { getLazyAPMPolicyCreateExtension } from './components/fleet_integration/lazy_apm_policy_create_extension';
+import { getLazyAPMPolicyEditExtension } from './components/fleet_integration/lazy_apm_policy_edit_extension';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 
@@ -331,6 +333,18 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         package: 'apm',
         view: 'package-detail-assets',
         Component: LazyApmCustomAssetsExtension,
+      });
+
+      fleet.registerExtension({
+        package: 'apm',
+        view: 'package-policy-create',
+        Component: getLazyAPMPolicyCreateExtension(core),
+      });
+
+      fleet.registerExtension({
+        package: 'apm',
+        view: 'package-policy-edit',
+        Component: getLazyAPMPolicyEditExtension(core),
       });
     }
   }
