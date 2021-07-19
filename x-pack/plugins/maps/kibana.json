@@ -21,13 +21,13 @@
     "usageCollection",
     "savedObjects",
     "share",
-    "presentationUtil",
-    "security"
+    "presentationUtil"
   ],
   "optionalPlugins": [
     "home",
     "savedObjectsTagging",
-    "charts"
+    "charts",
+    "security"
   ],
   "ui": true,
   "server": true,

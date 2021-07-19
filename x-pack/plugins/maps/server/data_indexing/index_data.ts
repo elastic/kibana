@@ -16,7 +16,7 @@ export async function writeDataToIndex(
   asCurrentUser: ElasticsearchClient,
   applyDefaultFields: boolean,
   request: KibanaRequest,
-  securityPlugin: SecurityPluginSetup
+  securityPlugin?: SecurityPluginSetup
 ) {
   try {
     const { body: indexExists } = await asCurrentUser.indices.exists({ index });
@@ -52,11 +52,11 @@ export async function writeDataToIndex(
   }
 }
 
-const getDefaultFields = (request: KibanaRequest, securityPlugin: SecurityPluginSetup) => {
-  const user = securityPlugin.authc.getCurrentUser(request);
+const getDefaultFields = (request: KibanaRequest, securityPlugin?: SecurityPluginSetup) => {
+  const user = securityPlugin?.authc.getCurrentUser(request);
   const timestamp = new Date().toISOString();
   return {
-    user: user?.username,
+    ...(user ? { user: user.username } : {}),
     '@timestamp': timestamp,
   };
 };
