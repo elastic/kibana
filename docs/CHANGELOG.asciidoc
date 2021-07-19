@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 7.x releases.
 
+* <<release-notes-7.13.4>>
 * <<release-notes-7.13.3>>
 * <<release-notes-7.13.2>>
 * <<release-notes-7.13.1>>
@@ -55,6 +56,30 @@ Review important information about the {kib} 7.x releases.
 * <<release-notes-7.0.0-alpha1>>
 
 --
+
+=======
+[[release-notes-7.13.4]]
+== {kib} 7.13.4
+
+For information about the {kib} 7.13.4 release, review the following information.
+
+[float]
+[[breaking-changes-7.13.4]]
+=== Breaking changes
+
+Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade to 7.13.4, review the <<breaking-changes-7.13.0,7.13.0 breaking changes>>, then mitigate the impact to your application.
+
+[float]
+[[fixes-v7.13.4]]
+=== Bug Fixes
+
+The 7.13.4 release includes the following bug fixes.
+
+Maps::
+* Fixes tracking threshold alerts improper handling of {es} epoch millis strings {kibana-pull}105010[#105010]
+Operations::
+* Fixes `KBN_PATH_CONF` expansion in Windows binaries. Paths are now treated as a string {kibana-pull}104517[#104517]
 
 [[release-notes-7.13.3]]
 == {kib} 7.13.3
