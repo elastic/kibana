@@ -30,7 +30,6 @@ import { HostLink } from './host_link';
 import { formatDuration } from './lib/format_duration';
 import { MetricWithSparkline } from './metric_with_sparkline';
 
-const SPARK_LINE_COLUMN_WIDTH = '120px';
 const COLOR_ORANGE = 7;
 const COLOR_BLUE = 1;
 const COLOR_GREEN = 0;
@@ -120,12 +119,11 @@ export function MetricsSection({ bucketSize }: Props) {
       sortable: true,
       truncateText: true,
       isExpander: true,
+      textOnly: true,
       render: (value: StringOrNull, record: MetricsFetchDataSeries) => (
         <HostLink
           id={record.id}
           name={value}
-          provider={record.provider}
-          platform={record.platform}
           timerange={{ from: absoluteStart, to: absoluteEnd }}
         />
       ),
@@ -136,7 +134,6 @@ export function MetricsSection({ bucketSize }: Props) {
         defaultMessage: 'CPU %',
       }),
       sortable: true,
-      width: SPARK_LINE_COLUMN_WIDTH,
       render: (value: NumberOrNull, record: MetricsFetchDataSeries) => (
         <MetricWithSparkline
           id="cpu"
@@ -153,7 +150,6 @@ export function MetricsSection({ bucketSize }: Props) {
         defaultMessage: 'Load 15',
       }),
       sortable: true,
-      width: SPARK_LINE_COLUMN_WIDTH,
       render: (value: NumberOrNull, record: MetricsFetchDataSeries) => (
         <MetricWithSparkline
           id="load"
@@ -168,7 +164,6 @@ export function MetricsSection({ bucketSize }: Props) {
       field: 'rx',
       name: 'RX',
       sortable: true,
-      width: SPARK_LINE_COLUMN_WIDTH,
       render: (value: NumberOrNull, record: MetricsFetchDataSeries) => (
         <MetricWithSparkline
           id="rx"
@@ -183,7 +178,6 @@ export function MetricsSection({ bucketSize }: Props) {
       field: 'tx',
       name: 'TX',
       sortable: true,
-      width: SPARK_LINE_COLUMN_WIDTH,
       render: (value: NumberOrNull, record: MetricsFetchDataSeries) => (
         <MetricWithSparkline
           id="tx"

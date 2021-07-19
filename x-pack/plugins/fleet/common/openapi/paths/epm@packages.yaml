@@ -1,5 +1,5 @@
 get:
-  summary: EPM - Packages - List
+  summary: Packages - List
   tags: []
   responses:
     '200':
