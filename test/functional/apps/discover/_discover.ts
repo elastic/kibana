@@ -96,11 +96,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(time.end).to.be('Sep 21, 2015 @ 12:00:00.000');
         await retry.waitForWithTimeout(
           'doc table to contain the right search result',
-          1000,
+          2000,
           async () => {
             const rowData = await PageObjects.discover.getDocTableField(1);
             log.debug(`The first timestamp value in doc table: ${rowData}`);
             return rowData.includes('Sep 21, 2015 @ 11:59:22.316');
+          },
+          async () => {
+            await PageObjects.common.sleep(250);
           }
         );
       });
