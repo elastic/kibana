@@ -373,16 +373,16 @@ describe('PluginsService', () => {
             "Plugin \\"explicitly-disabled-plugin-standard\\" is disabled.",
           ],
           Array [
-            "Plugin \\"plugin-with-missing-required-deps-preboot\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible type: [missing-plugin-preboot]",
+            "Plugin \\"plugin-with-missing-required-deps-preboot\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [missing-plugin-preboot]",
           ],
           Array [
-            "Plugin \\"plugin-with-missing-required-deps-standard\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible type: [missing-plugin-standard]",
+            "Plugin \\"plugin-with-missing-required-deps-standard\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [missing-plugin-standard]",
           ],
           Array [
-            "Plugin \\"plugin-with-disabled-transitive-dep-preboot\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible type: [another-explicitly-disabled-plugin-preboot]",
+            "Plugin \\"plugin-with-disabled-transitive-dep-preboot\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [another-explicitly-disabled-plugin-preboot]",
           ],
           Array [
-            "Plugin \\"plugin-with-disabled-transitive-dep-standard\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible type: [another-explicitly-disabled-plugin-standard]",
+            "Plugin \\"plugin-with-disabled-transitive-dep-standard\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [another-explicitly-disabled-plugin-standard]",
           ],
           Array [
             "Plugin \\"another-explicitly-disabled-plugin-preboot\\" is disabled.",
@@ -391,16 +391,16 @@ describe('PluginsService', () => {
             "Plugin \\"another-explicitly-disabled-plugin-standard\\" is disabled.",
           ],
           Array [
-            "Plugin \\"plugin-with-disabled-nested-transitive-dep-preboot\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible type: [plugin-with-disabled-transitive-dep-preboot]",
+            "Plugin \\"plugin-with-disabled-nested-transitive-dep-preboot\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [plugin-with-disabled-transitive-dep-preboot]",
           ],
           Array [
-            "Plugin \\"plugin-with-disabled-nested-transitive-dep-standard\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible type: [plugin-with-disabled-transitive-dep-standard]",
+            "Plugin \\"plugin-with-disabled-nested-transitive-dep-standard\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [plugin-with-disabled-transitive-dep-standard]",
           ],
           Array [
-            "Plugin \\"plugin-with-missing-nested-dep-preboot\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible type: [plugin-with-missing-required-deps-preboot]",
+            "Plugin \\"plugin-with-missing-nested-dep-preboot\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [plugin-with-missing-required-deps-preboot]",
           ],
           Array [
-            "Plugin \\"plugin-with-missing-nested-dep-standard\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible type: [plugin-with-missing-required-deps-standard]",
+            "Plugin \\"plugin-with-missing-nested-dep-standard\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [plugin-with-missing-required-deps-standard]",
           ],
         ]
       `);

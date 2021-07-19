@@ -18,7 +18,7 @@ export interface InternalPrebootServicePreboot {
   /**
    * Registers a `Promise` as a precondition before Kibana can proceed to `setup`. This method can be invoked multiple
    * times and from multiple `preboot` plugins. Kibana will proceed to `setup` only when all registered `Promise` are
-   * resolved, or it will shut down if any of them is rejected.
+   * resolved, or it will shut down if any of them are rejected.
    * @param pluginName Name of the plugin that needs to hold `setup`.
    * @param reason A string that explains the reason why this promise should hold `setup`. It's supposed to be a human
    * readable string that will be recorded in the logs or standard output.
@@ -32,7 +32,7 @@ export interface InternalPrebootServicePreboot {
 
   /**
    * Returns a `Promise` that is resolved only when all `Promise` instances registered with {@link holdSetupUntilResolved}
-   * are resolved, or rejected if any of them is rejected. If the supplied `Promise` resolves to an object with the
+   * are resolved, or rejected if any of them are rejected. If the supplied `Promise` resolves to an object with the
    * `shouldReloadConfig` property set to `true`, it indicates that Kibana configuration might have changed and Kibana
    * needs to reload it from the disk.
    */

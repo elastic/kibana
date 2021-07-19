@@ -346,7 +346,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
         }
       } else if (isEnabled) {
         this.log.info(
-          `Plugin "${pluginName}" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible type: [${pluginEnablement.missingOrIncompatibleDependencies.join(
+          `Plugin "${pluginName}" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [${pluginEnablement.missingOrIncompatibleDependencies.join(
             ', '
           )}]`
         );
