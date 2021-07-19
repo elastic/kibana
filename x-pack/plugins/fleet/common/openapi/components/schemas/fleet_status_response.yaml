@@ -1,0 +1,16 @@
+title: Fleet status response
+type: object
+properties:
+  isReady:
+    type: boolean
+  missing_requirements:
+    type: string
+    enum:
+      - 'tls_required'
+      - 'api_keys'
+      - 'fleet_admin_user'
+      - 'fleet_server'
+      - 'encrypted_saved_object_encryption_key_required'
+required:
+  - isReady
+  - missing_requirements

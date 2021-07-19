@@ -186,12 +186,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  isInitialized:
-                    type: boolean
-                required:
-                  - isInitialized
+                $ref: '#/components/schemas/fleet_status_response'
       operationId: get-agents-setup
       security:
         - basicAuth: []
@@ -1031,6 +1026,23 @@ components:
         - format_version
         - download
         - path
+    fleet_status_response:
+      title: Fleet status response
+      type: object
+      properties:
+        isReady:
+          type: boolean
+        missing_requirements:
+          type: string
+          enum:
+            - tls_required
+            - api_keys
+            - fleet_admin_user
+            - fleet_server
+            - encrypted_saved_object_encryption_key_required
+      required:
+        - isReady
+        - missing_requirements
     agent_type:
       type: string
       title: AgentType
