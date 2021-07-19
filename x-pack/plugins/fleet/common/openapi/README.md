@@ -16,8 +16,8 @@ For example, online viewers for the specification like these:
   * It's currently generated with:
 
     ```
-    npx swagger-cli bundle -o bundled.json -t json entrypoint.yaml
-    npx swagger-cli bundle -o bundled.yaml -t yaml entrypoint.yaml
+    npx @redocly/openapi-cli bundle --ext yaml --output bundled.yaml entrypoint.yaml
+    npx @redocly/openapi-cli bundle --ext json --output bundled.json entrypoint.yaml
     ```
 * [Paths](paths/README.md): this defines each endpoint.  A path can have one operation per http method.
 * [Components](components/README.md): Reusable components like [`schemas`](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#schemaObject),
