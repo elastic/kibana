@@ -35,6 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             browserTimezone: 'UTC',
             title: 'testfooyu78yt90-',
+            version: '7.13.0',
           } as any
         )) as supertest.Response;
         expect(res.status).to.eql(403);
@@ -52,6 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             browserTimezone: 'UTC',
             title: 'testfooyu78yt90-',
+            version: '7.13.0',
           } as any
         )) as supertest.Response;
         expect(res.status).to.eql(200);
@@ -164,6 +166,7 @@ export default function ({ getService }: FtrProviderContext) {
             searchSource: {},
             objectType: 'search',
             title: 'test disallowed',
+            version: '7.13.0',
           }
         );
         expect(res.status).to.eql(403);
@@ -183,6 +186,7 @@ export default function ({ getService }: FtrProviderContext) {
               index: '5193f870-d861-11e9-a311-0fa548c5f953',
             } as any,
             columns: [],
+            version: '7.13.0',
           }
         );
         expect(res.status).to.eql(200);
