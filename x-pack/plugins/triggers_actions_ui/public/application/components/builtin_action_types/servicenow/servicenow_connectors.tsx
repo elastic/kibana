@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 
 import {
   EuiFieldText,
@@ -26,10 +26,11 @@ import { ServiceNowActionConnector } from './types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
 
-const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowActionConnector>> =
-  ({ action, editActionSecrets, editActionConfig, errors, consumer, readOnly }) => {
-    const { docLinks } = useKibana().services;
-    const { apiUrl } = action.config;
+const ServiceNowConnectorFields: React.FC<
+  ActionConnectorFieldsProps<ServiceNowActionConnector>
+> = ({ action, editActionSecrets, editActionConfig, errors, consumer, readOnly, setCallbacks }) => {
+  const { docLinks } = useKibana().services;
+  const { apiUrl } = action.config;
 
     const isApiUrlInvalid: boolean =
       errors.apiUrl !== undefined && errors.apiUrl.length > 0 && apiUrl !== undefined;
@@ -46,16 +47,43 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowA
       [editActionConfig]
     );
 
-    const handleOnChangeSecretConfig = useCallback(
-      (key: string, value: string) => editActionSecrets(key, value),
-      [editActionSecrets]
-    );
-    return (
-      <>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiFormRow
-              id="apiUrl"
+  const handleOnChangeSecretConfig = useCallback(
+    (key: string, value: string) => editActionSecrets(key, value),
+    [editActionSecrets]
+  );
+
+  const beforeActionConnectorSave = useCallback(() => {
+    // TODO: Validate instance
+  }, []);
+
+  const afterActionConnectorSave = useCallback(() => {
+    // TODO: Implement
+  }, []);
+
+  // Callbacks are being set only once mount.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => setCallbacks({ beforeActionConnectorSave, afterActionConnectorSave }), []);
+
+  return (
+    <>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFormRow
+            id="apiUrl"
+            fullWidth
+            error={errors.apiUrl}
+            isInvalid={isApiUrlInvalid}
+            label={i18n.API_URL_LABEL}
+            helpText={
+              <EuiLink href={docLinks.links.alerting.serviceNowAction} target="_blank">
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.components.builtinActionTypes.serviceNowAction.apiUrlHelpLabel"
+                  defaultMessage="Configure a Personal Developer Instance"
+                />
+              </EuiLink>
+            }
+          >
+            <EuiFieldText
               fullWidth
               error={errors.apiUrl}
               isInvalid={isApiUrlInvalid}
