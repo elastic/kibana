@@ -53,7 +53,7 @@ export const getPrepackagedRulesStatusRoute = (
       }
 
       try {
-        const latestPrepackagedRules = await getLatestPrepackagedRules(ruleAssetsClient);
+        const latestPrepackagedRules = await getLatestPrepackagedRules(ruleAssetsClient, config);
         const customRules = await findRules({
           alertsClient,
           perPage: 1,

@@ -21,6 +21,7 @@ import { rawRules } from './prepackaged_rules';
 import { RuleAssetSavedObjectsClient } from './rule_asset_saved_objects_client';
 import { IRuleAssetSOAttributes } from './types';
 import { SavedObjectAttributes } from '../../../../../../../src/core/types';
+import { ConfigType } from '../../../config';
 
 /**
  * Validate the rules from the file system and throw any errors indicating to the developer
@@ -103,21 +104,27 @@ export const getPrepackagedRules = (
 };
 
 export const getLatestPrepackagedRules = async (
-  client: RuleAssetSavedObjectsClient
+  client: RuleAssetSavedObjectsClient,
+  config: ConfigType
 ): Promise<AddPrepackagedRulesSchemaDecoded[]> => {
   // build a map of the most recent version of each rule
-  const prepackaged = getPrepackagedRules();
+  const fromFS = config.prebuiltRulesFromFileSystem;
+  const fromFleet = config.prebuiltRulesFromSavedObjects;
+
+  const prepackaged = fromFS ? getPrepackagedRules() : [];
   const ruleMap = new Map(prepackaged.map((r) => [r.rule_id, r]));
 
   // check the rules installed via fleet and create/update if the version is newer
-  const fleetRules = await getFleetInstalledRules(client);
-  const fleetUpdates = fleetRules.filter((r) => {
-    const rule = ruleMap.get(r.rule_id);
-    return rule == null || rule.version < r.version;
-  });
+  if (fromFleet) {
+    const fleetRules = await getFleetInstalledRules(client);
+    const fleetUpdates = fleetRules.filter((r) => {
+      const rule = ruleMap.get(r.rule_id);
+      return rule == null || rule.version < r.version;
+    });
 
-  // add the new or updated rules to the map
-  fleetUpdates.forEach((r) => ruleMap.set(r.rule_id, r));
+    // add the new or updated rules to the map
+    fleetUpdates.forEach((r) => ruleMap.set(r.rule_id, r));
+  }
 
   return Array.from(ruleMap.values());
 };
