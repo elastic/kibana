@@ -113,15 +113,14 @@ const EventDetailsComponent: React.FC<Props> = ({
     loading: enrichmentsLoading,
     result: enrichmentsResponse,
   } = useInvestigationTimeEnrichment(eventFields);
-  const investigationEnrichments = useMemo(() => enrichmentsResponse?.enrichments ?? [], [
-    enrichmentsResponse?.enrichments,
-  ]);
+
   const allEnrichments = useMemo(() => {
     if (enrichmentsLoading || !enrichmentsResponse?.enrichments) {
       return existingEnrichments;
     }
     return filterDuplicateEnrichments([...existingEnrichments, ...enrichmentsResponse.enrichments]);
   }, [enrichmentsLoading, enrichmentsResponse, existingEnrichments]);
+
   const enrichmentCount = allEnrichments.length;
 
   const summaryTab: EventViewTab | undefined = useMemo(
@@ -184,21 +183,16 @@ const EventDetailsComponent: React.FC<Props> = ({
               <>
                 <ThreatDetailsView enrichments={allEnrichments} />
                 <NoEnrichmentsPanel
-                  investigationEnrichmentsCount={investigationEnrichments.length}
-                  existingEnrichmentsCount={existingEnrichments.length}
+                  isInvestigationTimeEnrichmentsPresent={
+                    enrichmentCount > existingEnrichments.length
+                  }
+                  isIndicatorMatchesPresent={existingEnrichments.length > 0}
                 />
               </>
             ),
           }
         : undefined,
-    [
-      allEnrichments,
-      enrichmentCount,
-      enrichmentsLoading,
-      existingEnrichments.length,
-      investigationEnrichments.length,
-      isAlert,
-    ]
+    [allEnrichments, enrichmentCount, enrichmentsLoading, existingEnrichments.length, isAlert]
   );
 
   const tableTab = useMemo(
