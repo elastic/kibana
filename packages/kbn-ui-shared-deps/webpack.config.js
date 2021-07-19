@@ -10,7 +10,6 @@ const Path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 const { REPO_ROOT } = require('@kbn/utils');
-const { RawSource } = require('webpack-sources');
 
 const UiSharedDeps = require('./src/index');
 
@@ -141,32 +140,5 @@ module.exports = {
     new MiniCssExtractPlugin({
       filename: '[name].css',
     }),
-    new (class MetricsPlugin {
-      apply(compiler) {
-        compiler.hooks.emit.tap('MetricsPlugin', (compilation) => {
-          const metrics = [
-            {
-              group: 'page load bundle size',
-              id: 'kbnUiSharedDeps-js',
-              value: compilation.assets['kbn-ui-shared-deps.js'].size(),
-            },
-            {
-              group: 'page load bundle size',
-              id: 'kbnUiSharedDeps-css',
-              value:
-                compilation.assets['kbn-ui-shared-deps.css'].size() +
-                compilation.assets['kbn-ui-shared-deps.v7.light.css'].size(),
-            },
-            {
-              group: 'page load bundle size',
-              id: 'kbnUiSharedDeps-elastic',
-              value: compilation.assets['kbn-ui-shared-deps.@elastic.js'].size(),
-            },
-          ];
-
-          compilation.emitAsset('metrics.json', new RawSource(JSON.stringify(metrics, null, 2)));
-        });
-      }
-    })(),
   ],
 };

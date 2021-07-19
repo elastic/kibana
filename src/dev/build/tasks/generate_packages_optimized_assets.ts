@@ -9,6 +9,7 @@
 import { pipeline } from 'stream';
 import { promisify } from 'util';
 
+import fs from 'fs';
 import gulpBrotli from 'gulp-brotli';
 // @ts-expect-error
 import gulpGzip from 'gulp-gzip';
@@ -20,9 +21,10 @@ import terser from 'terser';
 import vfs from 'vinyl-fs';
 
 import { ToolingLog } from '@kbn/dev-utils';
-import { Task, Build } from '../lib';
+import { Task, Build, write } from '../lib';
 
 const asyncPipeline = promisify(pipeline);
+const asyncStat = promisify(fs.stat);
 
 const minifyKbnUiSharedDepsCSS = async (log: ToolingLog, build: Build) => {
   const buildRoot = build.resolvePath();
@@ -104,10 +106,76 @@ const gzipCompressKbnUiSharedDeps = async (log: ToolingLog, build: Build) => {
   );
 };
 
+const createKbnUiSharedDepsBundleMetrics = async (log: ToolingLog, build: Build) => {
+  const bundleMetricsFilePath = build.resolvePath(
+    'node_modules/@kbn/ui-shared-deps/shared_built_assets',
+    'metrics.json'
+  );
+
+  const kbnUISharedDepsJSFileSize = (
+    await asyncStat(
+      build.resolvePath(
+        'node_modules/@kbn/ui-shared-deps/shared_built_assets',
+        'kbn-ui-shared-deps.js'
+      )
+    )
+  ).size;
+
+  const kbnUISharedDepsCSSFileSize =
+    (
+      await asyncStat(
+        build.resolvePath(
+          'node_modules/@kbn/ui-shared-deps/shared_built_assets',
+          'kbn-ui-shared-deps.css'
+        )
+      )
+    ).size +
+    (
+      await asyncStat(
+        build.resolvePath(
+          'node_modules/@kbn/ui-shared-deps/shared_built_assets',
+          'kbn-ui-shared-deps.v7.light.css'
+        )
+      )
+    ).size;
+
+  const kbnUISharedDepsElasticJSFileSize = (
+    await asyncStat(
+      build.resolvePath(
+        'node_modules/@kbn/ui-shared-deps/shared_built_assets',
+        'kbn-ui-shared-deps.@elastic.js'
+      )
+    )
+  ).size;
+
+  log.debug('Create metrics.json');
+
+  const metrics = [
+    {
+      group: 'page load bundle size',
+      id: 'kbnUiSharedDeps-js',
+      value: kbnUISharedDepsJSFileSize,
+    },
+    {
+      group: 'page load bundle size',
+      id: 'kbnUiSharedDeps-css',
+      value: kbnUISharedDepsCSSFileSize,
+    },
+    {
+      group: 'page load bundle size',
+      id: 'kbnUiSharedDeps-elastic',
+      value: kbnUISharedDepsElasticJSFileSize,
+    },
+  ];
+
+  await write(bundleMetricsFilePath, JSON.stringify(metrics, null, 2));
+};
+
 const generateKbnUiSharedDepsOptimizedAssets = async (log: ToolingLog, build: Build) => {
   log.info('Creating optimized assets for @kbn/ui-shared-deps');
   await minifyKbnUiSharedDepsCSS(log, build);
   await minifyKbnUiSharedDepsJS(log, build);
+  await createKbnUiSharedDepsBundleMetrics(log, build);
   await brotliCompressKbnUiSharedDeps(log, build);
   await gzipCompressKbnUiSharedDeps(log, build);
 };
