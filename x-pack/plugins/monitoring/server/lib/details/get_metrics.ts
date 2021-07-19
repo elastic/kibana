@@ -6,21 +6,23 @@
  */
 
 import moment from 'moment';
-import { isPlainObject } from 'lodash';
 import Bluebird from 'bluebird';
 import { checkParam } from '../error_missing_required';
 import { getSeries } from './get_series';
 import { calculateTimeseriesInterval } from '../calculate_timeseries_interval';
 import { getTimezone } from '../get_timezone';
+import { LegacyRequest } from '../../types';
+
+type Metric = string | { keys: string; name: string };
 
 export async function getMetrics(
-  req,
-  indexPattern,
-  metricSet = [],
+  req: LegacyRequest,
+  indexPattern: string,
+  metricSet: Metric[] = [],
   filters = [],
   metricOptions = {},
-  numOfBuckets = 0,
-  groupBy = null
+  numOfBuckets: number = 0,
+  groupBy: string | string[] | null = null
 ) {
   checkParam(indexPattern, 'indexPattern in details/getMetrics');
   checkParam(metricSet, 'metricSet in details/getMetrics');
@@ -29,7 +31,7 @@ export async function getMetrics(
   // TODO: Pass in req parameters as explicit function parameters
   let min = moment.utc(req.payload.timeRange.min).valueOf();
   const max = moment.utc(req.payload.timeRange.max).valueOf();
-  const minIntervalSeconds = config.get('monitoring.ui.min_interval_seconds');
+  const minIntervalSeconds = Number(config.get('monitoring.ui.min_interval_seconds'));
   const bucketSize = calculateTimeseriesInterval(min, max, minIntervalSeconds);
   const timezone = await getTimezone(req);
 
@@ -38,11 +40,11 @@ export async function getMetrics(
     min = max - numOfBuckets * bucketSize * 1000;
   }
 
-  return Bluebird.map(metricSet, (metric) => {
+  return Bluebird.map(metricSet, (metric: Metric) => {
     // metric names match the literal metric name, but they can be supplied in groups or individually
     let metricNames;
 
-    if (isPlainObject(metric)) {
+    if (typeof metric !== 'string') {
       metricNames = metric.keys;
     } else {
       metricNames = [metric];
@@ -50,17 +52,17 @@ export async function getMetrics(
 
     return Bluebird.map(metricNames, (metricName) => {
       return getSeries(req, indexPattern, metricName, metricOptions, filters, groupBy, {
-        min,
-        max,
+        min: String(min),
+        max: String(max),
         bucketSize,
         timezone,
       });
     });
   }).then((rows) => {
-    const data = {};
+    const data: Record<string, any> = {};
     metricSet.forEach((key, index) => {
       // keyName must match the value stored in the html template
-      const keyName = isPlainObject(key) ? key.name : key;
+      const keyName = typeof key === 'string' ? key : key.name;
       data[keyName] = rows[index];
     });
 

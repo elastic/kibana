@@ -75,8 +75,7 @@ export function createQuery(options: {
   end?: Date | number;
   metric: BeatsMetricFields;
 }) {
-  options = defaults(options, { filters: [] });
-  const { type, types, clusterUuid, uuid, filters } = options;
+  const { type, types, clusterUuid, uuid, filters } = defaults(options, { filters: [] });
 
   const isFromStandaloneCluster = clusterUuid === STANDALONE_CLUSTER_CLUSTER_UUID;
 
@@ -102,23 +101,26 @@ export function createQuery(options: {
   let uuidFilter;
   // options.uuid can be null, for example getting all the clusters
   if (uuid) {
-    const uuidField = get(options, 'metric.uuidField');
+    const uuidField = options.metric.uuidField;
     if (!uuidField) {
       throw new MissingRequiredError('options.uuid given but options.metric.uuidField is false');
     }
     uuidFilter = { term: { [uuidField]: uuid } };
   }
 
-  const timestampField = get(options, 'metric.timestampField');
+  const timestampField = options.metric.timestampField;
   if (!timestampField) {
     throw new MissingRequiredError('metric.timestampField');
   }
   const timeRangeFilter = createTimeFilter(options);
 
-  const combinedFilters = [typeFilter, clusterUuidFilter, uuidFilter, ...filters];
-  if (timeRangeFilter) {
-    combinedFilters.push(timeRangeFilter);
-  }
+  const combinedFilters = [
+    typeFilter,
+    clusterUuidFilter,
+    uuidFilter,
+    timeRangeFilter ?? undefined,
+    ...filters,
+  ];
 
   if (isFromStandaloneCluster) {
     combinedFilters.push(standaloneClusterFilter);

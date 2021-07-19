@@ -5,14 +5,36 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
 import moment from 'moment';
+import { ElasticsearchResponse } from '../../../common/types/es';
+import { LegacyRequest, Bucket } from '../../types';
 import { checkParam } from '../error_missing_required';
 import { metrics } from '../metrics';
 import { createQuery } from '../create_query';
 import { formatTimestampToDuration } from '../../../common';
 import { NORMALIZED_DERIVATIVE_UNIT, CALCULATE_DURATION_UNTIL } from '../../../common/constants';
 import { formatUTCTimestampForTimezone } from '../format_timezone';
+
+type SeriesBucket = Bucket & { metric_mb_deriv?: { normalized_value: number } };
+
+interface Metric {
+  app: string;
+  derivative: boolean;
+  mbField?: string;
+  aggs: any;
+  getDateHistogramSubAggs?: Function;
+  dateHistogramSubAggs?: any;
+  metricAgg: string;
+  field: string;
+  timestampField: string;
+  calculation: (
+    b: SeriesBucket,
+    key: string,
+    metric: Metric,
+    defaultSizeInSeconds: number
+  ) => number | null;
+  serialize: () => string;
+}
 
 /**
  * Derivative metrics for the first two agg buckets are unusable. For the first bucket, there
@@ -27,12 +49,12 @@ import { formatUTCTimestampForTimezone } from '../format_timezone';
  * @param {int} minInMsSinceEpoch Lower bound of timepicker range, in ms-since-epoch
  * @param {int} bucketSizeInSeconds Size of a single date_histogram bucket, in seconds
  */
-function offsetMinForDerivativeMetric(minInMsSinceEpoch, bucketSizeInSeconds) {
+function offsetMinForDerivativeMetric(minInMsSinceEpoch: number, bucketSizeInSeconds: number) {
   return minInMsSinceEpoch - 2 * bucketSizeInSeconds * 1000;
 }
 
 // Use the metric object as the source of truth on where to find the UUID
-function getUuid(req, metric) {
+function getUuid(req: LegacyRequest, metric: Metric) {
   if (metric.app === 'kibana') {
     return req.params.kibanaUuid;
   } else if (metric.app === 'logstash') {
@@ -42,12 +64,11 @@ function getUuid(req, metric) {
   }
 }
 
-function defaultCalculation(bucket, key) {
-  const mbKey = `metric_mb_deriv.normalized_value`;
-  const legacyValue = get(bucket, key, null);
-  const mbValue = get(bucket, mbKey, null);
+function defaultCalculation(bucket: SeriesBucket, key: string) {
+  const legacyValue = Reflect.get(bucket, key) ?? null;
+  const mbValue = bucket.metric_mb_deriv?.normalized_value ?? null;
   let value;
-  if (!isNaN(mbValue) && mbValue > 0) {
+  if (mbValue !== null && !isNaN(mbValue) && mbValue > 0) {
     value = mbValue;
   } else {
     value = legacyValue;
@@ -60,7 +81,7 @@ function defaultCalculation(bucket, key) {
   return value;
 }
 
-function createMetricAggs(metric) {
+function createMetricAggs(metric: Metric) {
   if (metric.derivative) {
     const mbDerivative = metric.mbField
       ? {
@@ -90,18 +111,20 @@ function createMetricAggs(metric) {
 }
 
 async function fetchSeries(
-  req,
-  indexPattern,
-  metric,
-  metricOptions,
-  groupBy,
-  min,
-  max,
-  bucketSize,
-  filters
+  req: LegacyRequest,
+  indexPattern: string,
+  metric: Metric,
+  metricOptions: any,
+  groupBy: string | string[] | null,
+  min: string,
+  max: string,
+  bucketSize: number,
+  filters: string[]
 ) {
   // if we're using a derivative metric, offset the min (also @see comment on offsetMinForDerivativeMetric function)
-  const adjustedMin = metric.derivative ? offsetMinForDerivativeMetric(min, bucketSize) : min;
+  const adjustedMin = metric.derivative
+    ? offsetMinForDerivativeMetric(Number(min), bucketSize)
+    : Number(min);
 
   let dateHistogramSubAggs = null;
   if (metric.getDateHistogramSubAggs) {
@@ -118,15 +141,15 @@ async function fetchSeries(
       ...createMetricAggs(metric),
     };
     if (metric.mbField) {
-      dateHistogramSubAggs.metric_mb = {
+      Reflect.set(dateHistogramSubAggs, 'metric_mb', {
         [metric.metricAgg]: {
           field: metric.mbField,
         },
-      };
+      });
     }
   }
 
-  let aggs = {
+  let aggs: any = {
     check: {
       date_histogram: {
         field: metric.timestampField,
@@ -154,7 +177,7 @@ async function fetchSeries(
     body: {
       query: createQuery({
         start: adjustedMin,
-        end: max,
+        end: Number(max),
         metric,
         clusterUuid: req.params.clusterUuid,
         // TODO: Pass in the UUID as an explicit function parameter
@@ -164,10 +187,6 @@ async function fetchSeries(
       aggs,
     },
   };
-
-  if (metric.debug) {
-    console.log('metric.debug', JSON.stringify(params));
-  }
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   return await callWithRequest(req, 'search', params);
@@ -180,11 +199,11 @@ async function fetchSeries(
  * @param {String} min Max timestamp for results to exist within.
  * @return {Number} Index position to use for the first bucket. {@code buckets.length} if none should be used.
  */
-function findFirstUsableBucketIndex(buckets, min) {
+function findFirstUsableBucketIndex(buckets: SeriesBucket[], min: string) {
   const minInMillis = moment.utc(min).valueOf();
 
   for (let i = 0; i < buckets.length; ++i) {
-    const bucketTime = get(buckets, [i, 'key']);
+    const bucketTime = buckets[i].key;
     const bucketTimeInMillis = moment.utc(bucketTime).valueOf();
 
     // if the bucket start time, without knowing the bucket size, is before the filter time, then it's inherently a partial bucket
@@ -208,11 +227,16 @@ function findFirstUsableBucketIndex(buckets, min) {
  * @param {Number} bucketSizeInMillis Size of a bucket in milliseconds. Set to 0 to allow partial trailing buckets.
  * @return {Number} Index position to use for the last bucket. {@code -1} if none should be used.
  */
-function findLastUsableBucketIndex(buckets, max, firstUsableBucketIndex, bucketSizeInMillis = 0) {
+function findLastUsableBucketIndex(
+  buckets: SeriesBucket[],
+  max: string,
+  firstUsableBucketIndex: number,
+  bucketSizeInMillis: number = 0
+) {
   const maxInMillis = moment.utc(max).valueOf();
 
   for (let i = buckets.length - 1; i > firstUsableBucketIndex - 1; --i) {
-    const bucketTime = get(buckets, [i, 'key']);
+    const bucketTime = buckets[i].key;
     const bucketTimeInMillis = moment.utc(bucketTime).valueOf() + bucketSizeInMillis;
 
     if (bucketTimeInMillis <= maxInMillis) {
@@ -224,41 +248,25 @@ function findLastUsableBucketIndex(buckets, max, firstUsableBucketIndex, bucketS
   return -1;
 }
 
-const formatBucketSize = (bucketSizeInSeconds) => {
+const formatBucketSize = (bucketSizeInSeconds: number) => {
   const now = moment();
   const timestamp = moment(now).add(bucketSizeInSeconds, 'seconds'); // clone the `now` object
 
   return formatTimestampToDuration(timestamp, CALCULATE_DURATION_UNTIL, now);
 };
 
-function isObject(value) {
-  return typeof value === 'object' && !!value && !Array.isArray(value);
-}
-
-function countBuckets(data, count = 0) {
-  if (data && data.buckets) {
-    count += data.buckets.length;
-    for (const bucket of data.buckets) {
-      for (const key of Object.keys(bucket)) {
-        if (isObject(bucket[key])) {
-          count = countBuckets(bucket[key], count);
-        }
-      }
-    }
-  } else if (data) {
-    for (const key of Object.keys(data)) {
-      if (isObject(data[key])) {
-        count = countBuckets(data[key], count);
-      }
-    }
-  }
-  return count;
-}
-
-function handleSeries(metric, groupBy, min, max, bucketSizeInSeconds, timezone, response) {
+function handleSeries(
+  metric: Metric,
+  groupBy: string | string[] | null,
+  min: string,
+  max: string,
+  bucketSizeInSeconds: number,
+  timezone: string,
+  response: ElasticsearchResponse
+) {
   const { derivative, calculation: customCalculation } = metric;
 
-  function getAggregatedData(buckets) {
+  function getAggregatedData(buckets: SeriesBucket[]) {
     const firstUsableBucketIndex = findFirstUsableBucketIndex(buckets, min);
     const lastUsableBucketIndex = findLastUsableBucketIndex(
       buckets,
@@ -266,20 +274,7 @@ function handleSeries(metric, groupBy, min, max, bucketSizeInSeconds, timezone, 
       firstUsableBucketIndex,
       bucketSizeInSeconds * 1000
     );
-    let data = [];
-
-    if (metric.debug) {
-      console.log(
-        `metric.debug field=${metric.field} bucketsCreated: ${countBuckets(
-          get(response, 'aggregations.check')
-        )}`
-      );
-      console.log(`metric.debug`, {
-        bucketsLength: buckets.length,
-        firstUsableBucketIndex,
-        lastUsableBucketIndex,
-      });
-    }
+    let data: Array<[string, number]> = [];
 
     if (firstUsableBucketIndex <= lastUsableBucketIndex) {
       // map buckets to values for charts
@@ -306,15 +301,17 @@ function handleSeries(metric, groupBy, min, max, bucketSizeInSeconds, timezone, 
   }
 
   if (groupBy) {
-    return get(response, 'aggregations.groupBy.buckets', []).map((bucket) => {
-      return {
-        groupedBy: bucket.key,
-        ...getAggregatedData(get(bucket, 'check.buckets', [])),
-      };
-    });
+    return (response?.aggregations?.groupBy?.buckets ?? []).map(
+      (bucket: Bucket & { check: { buckets: SeriesBucket[] } }) => {
+        return {
+          groupedBy: bucket.key,
+          ...getAggregatedData(bucket.check.buckets ?? []),
+        };
+      }
+    );
   }
 
-  return getAggregatedData(get(response, 'aggregations.check.buckets', []));
+  return getAggregatedData(response.aggregations?.check?.buckets ?? []);
 }
 
 /**
@@ -329,13 +326,18 @@ function handleSeries(metric, groupBy, min, max, bucketSizeInSeconds, timezone, 
  * @return {Promise} The object response containing the {@code timeRange}, {@code metric}, and {@code data}.
  */
 export async function getSeries(
-  req,
-  indexPattern,
-  metricName,
-  metricOptions,
-  filters,
-  groupBy,
-  { min, max, bucketSize, timezone }
+  req: LegacyRequest,
+  indexPattern: string,
+  metricName: string,
+  metricOptions: Record<string, any>,
+  filters: string[],
+  groupBy: string | string[] | null,
+  {
+    min,
+    max,
+    bucketSize,
+    timezone,
+  }: { min: string; max: string; bucketSize: number; timezone: string }
 ) {
   checkParam(indexPattern, 'indexPattern in details/getSeries');
 
