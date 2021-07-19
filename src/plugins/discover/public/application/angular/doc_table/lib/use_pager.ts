@@ -45,7 +45,7 @@ export const usePager = ({ totalItems }: { totalItems: number }) => {
       let newStartItem = newCurrentPage * PAGE_SIZE + 1;
       newStartItem = clamp(newStartItem, 0, totalItems);
 
-      let newEndItem = newStartItem + PAGE_SIZE;
+      let newEndItem = newStartItem - 1 + PAGE_SIZE;
       newEndItem = clamp(newEndItem, 0, totalItems);
 
       const newStartIndex = newStartItem - 1;

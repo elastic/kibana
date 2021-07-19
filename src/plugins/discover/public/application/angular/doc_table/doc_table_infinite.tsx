@@ -8,10 +8,13 @@
 
 import React, { useEffect, useState } from 'react';
 import { debounce } from 'lodash';
-import { CommonDocTableProps } from './doc_table';
+import { DocTableRow } from './components/table_row';
 
-interface DocTableInfiniteProps extends CommonDocTableProps {
+interface DocTableInfiniteProps {
   minimumVisibleRows: number;
+  rows: DocTableRow[];
+  renderRows: (row: DocTableRow[]) => JSX.Element[];
+  renderHeader: () => JSX.Element;
 }
 
 export const DocTableInfinite = (props: DocTableInfiniteProps) => {

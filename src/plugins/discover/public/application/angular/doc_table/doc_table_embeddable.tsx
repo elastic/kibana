@@ -14,10 +14,13 @@ import { SAMPLE_SIZE_SETTING } from '../../../../common';
 import { getServices } from '../../../kibana_services';
 import { ToolBarPagerText } from './components/pager/tool_bar_pager_text';
 import { PAGE_SIZE, usePager } from './lib/use_pager';
-import { CommonDocTableProps } from './doc_table';
+import { DocTableRow } from './components/table_row';
 
-export interface DocTableEmbeddableProps extends CommonDocTableProps {
+export interface DocTableEmbeddableProps {
   totalHitCount: number;
+  rows: DocTableRow[];
+  renderRows: (row: DocTableRow[]) => JSX.Element[];
+  renderHeader: () => JSX.Element;
 }
 
 export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
@@ -65,7 +68,7 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
     <Fragment>
       <div className="kuiBar kbnDocTable__bar">{pagerToolbar}</div>
       <div className="kbnDocTable__container kbnDocTable__padBottom">
-        <table className="kbnDocTable table" ng-if="indexPattern" data-test-subj="docTable">
+        <table className="kbnDocTable table" data-test-subj="docTable">
           <thead>{props.renderHeader()}</thead>
           <tbody>{props.renderRows(pageOfItems)}</tbody>
         </table>

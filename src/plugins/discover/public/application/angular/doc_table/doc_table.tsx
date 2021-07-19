@@ -57,7 +57,7 @@ export interface DocTableProps {
   /**
    * New fields api switch
    */
-  useNewFieldsApi?: boolean;
+  useNewFieldsApi: boolean;
   /**
    * Current search description
    */
@@ -94,22 +94,6 @@ export interface DocTableProps {
    * Remove column callback
    */
   onRemoveColumn?: (column: string) => void;
-}
-
-export interface CommonDocTableProps {
-  columns: string[];
-  rows: DocTableRow[];
-  indexPattern: IndexPattern;
-  totalHitCount?: number;
-  minimumVisibleRows?: number;
-  useNewFieldsApi?: boolean;
-  sharedItemTitle?: string;
-  onSort?: (sort: string[][]) => void;
-  onAddColumn?: (column: string) => void;
-  onMoveColumn?: (columns: string, newIdx: number) => void;
-  onRemoveColumn?: (column: string) => void;
-  renderRows: (row: DocTableRow[]) => JSX.Element[];
-  renderHeader: () => JSX.Element;
 }
 
 const DocTableEmbeddableMemoized = memo(DocTableEmbeddable);

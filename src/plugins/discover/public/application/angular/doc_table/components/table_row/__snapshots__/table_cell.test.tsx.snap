@@ -20,78 +20,83 @@ exports[`Doc table cell component renders a cell with filter buttons if it is fi
     <span>
       formatted content
     </span>
-    <span
-      className="kbnDocTableCell__filter"
+    <TableCellActions
+      handleFilterFor={[Function]}
+      handleFilterOut={[Function]}
     >
-      <EuiToolTip
-        className="kbnDocTableCell__filterButton"
-        content="Filter for value"
-        delay="regular"
-        position="bottom"
+      <span
+        className="kbnDocTableCell__filter"
       >
-        <span
-          className="euiToolTipAnchor"
-          onKeyUp={[Function]}
-          onMouseOut={[Function]}
-          onMouseOver={[Function]}
+        <EuiToolTip
+          className="kbnDocTableCell__filterButton"
+          content="Filter for value"
+          delay="regular"
+          position="bottom"
         >
-          <button
-            aria-label="Filter for value"
-            className="kbnDocTableRowFilterButton"
-            data-test-subj="docTableCellFilter"
-            onBlur={[Function]}
-            onClick={[Function]}
-            onFocus={[Function]}
+          <span
+            className="euiToolTipAnchor"
+            onKeyUp={[Function]}
+            onMouseOut={[Function]}
+            onMouseOver={[Function]}
           >
-            <EuiIcon
-              color="primary"
-              size="s"
-              type="plusInCircle"
+            <button
+              aria-label="Filter for value"
+              className="kbnDocTableRowFilterButton"
+              data-test-subj="docTableCellFilter"
+              onBlur={[Function]}
+              onClick={[Function]}
+              onFocus={[Function]}
             >
-              <span
+              <EuiIcon
                 color="primary"
-                data-euiicon-type="plusInCircle"
                 size="s"
-              />
-            </EuiIcon>
-          </button>
-        </span>
-      </EuiToolTip>
-      <EuiToolTip
-        className="kbnDocTableCell__filterButton"
-        content="Filter out value"
-        delay="regular"
-        position="bottom"
-      >
-        <span
-          className="euiToolTipAnchor"
-          onKeyUp={[Function]}
-          onMouseOut={[Function]}
-          onMouseOver={[Function]}
+                type="plusInCircle"
+              >
+                <span
+                  color="primary"
+                  data-euiicon-type="plusInCircle"
+                  size="s"
+                />
+              </EuiIcon>
+            </button>
+          </span>
+        </EuiToolTip>
+        <EuiToolTip
+          className="kbnDocTableCell__filterButton"
+          content="Filter out value"
+          delay="regular"
+          position="bottom"
         >
-          <button
-            aria-label="Filter out value"
-            className="kbnDocTableRowFilterButton"
-            data-test-subj="docTableCellFilterNegate"
-            onBlur={[Function]}
-            onClick={[Function]}
-            onFocus={[Function]}
+          <span
+            className="euiToolTipAnchor"
+            onKeyUp={[Function]}
+            onMouseOut={[Function]}
+            onMouseOver={[Function]}
           >
-            <EuiIcon
-              color="primary"
-              size="s"
-              type="minusInCircle"
+            <button
+              aria-label="Filter out value"
+              className="kbnDocTableRowFilterButton"
+              data-test-subj="docTableCellFilterNegate"
+              onBlur={[Function]}
+              onClick={[Function]}
+              onFocus={[Function]}
             >
-              <span
+              <EuiIcon
                 color="primary"
-                data-euiicon-type="minusInCircle"
                 size="s"
-              />
-            </EuiIcon>
-          </button>
-        </span>
-      </EuiToolTip>
-    </span>
+                type="minusInCircle"
+              >
+                <span
+                  color="primary"
+                  data-euiicon-type="minusInCircle"
+                  size="s"
+                />
+              </EuiIcon>
+            </button>
+          </span>
+        </EuiToolTip>
+      </span>
+    </TableCellActions>
   </td>
 </TableCell>
 `;
