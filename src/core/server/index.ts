@@ -81,8 +81,6 @@ export type {
 import type { ExecutionContextSetup, ExecutionContextStart } from './execution_context';
 
 export type {
-  ExecutionContextSetup,
-  ExecutionContextStart,
   IExecutionContextContainer,
   KibanaServerExecutionContext,
   KibanaExecutionContext,
@@ -551,6 +549,8 @@ export type {
   CapabilitiesSetup,
   CapabilitiesStart,
   ContextSetup,
+  ExecutionContextSetup,
+  ExecutionContextStart,
   HttpResources,
   PluginsServiceSetup,
   PluginsServiceStart,
