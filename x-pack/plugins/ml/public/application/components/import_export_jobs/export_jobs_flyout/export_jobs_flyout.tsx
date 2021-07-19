@@ -22,6 +22,7 @@ import {
   EuiCheckbox,
   EuiTabs,
   EuiTab,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 
 import { useMlApiContext, useMlKibana } from '../../../contexts/kibana';
@@ -49,6 +50,8 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
 
   const { exportAnomalyDetectionJobs, exportDataframeAnalyticsJobs } = utilsProvider(mlApiServices);
 
+  const [loadingADJobs, setLoadingADJobs] = useState(true);
+  const [loadingDFAJobs, setLoadingDFAJobs] = useState(true);
   const [showFlyout, setShowFlyout] = useState(false);
   const [adJobIds, setAdJobIds] = useState<string[]>([]);
   const [dfaJobIds, setDfaJobIds] = useState<string[]>([]);
@@ -61,18 +64,36 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
   );
 
   useEffect(() => {
+    setLoadingADJobs(true);
+    setLoadingDFAJobs(true);
     setAdJobIds([]);
     setSelectedJobIds([]);
     setExporting(false);
     setSelectedJobType(currentTab);
 
     if (showFlyout) {
-      getJobs().then(({ jobs }) => {
-        setAdJobIds(jobs.map((j) => j.job_id));
-      });
-      getDataFrameAnalytics().then(({ data_frame_analytics: dataFrameAnalytics }) => {
-        setDfaJobIds(dataFrameAnalytics.map((j) => j.id));
-      });
+      getJobs()
+        .then(({ jobs }) => {
+          setLoadingADJobs(false);
+          setAdJobIds(jobs.map((j) => j.job_id));
+        })
+        .catch((error) => {
+          const errorTitle = i18n.translate('xpack.ml.importExport.exportFlyout.adJobsError', {
+            defaultMessage: 'Could not load anomaly detection jobs',
+          });
+          displayErrorToast(error, errorTitle);
+        });
+      getDataFrameAnalytics()
+        .then(({ data_frame_analytics: dataFrameAnalytics }) => {
+          setLoadingDFAJobs(false);
+          setDfaJobIds(dataFrameAnalytics.map((j) => j.id));
+        })
+        .catch((error) => {
+          const errorTitle = i18n.translate('xpack.ml.importExport.exportFlyout.dfaJobsError', {
+            defaultMessage: 'Could not load data frame analytics jobs',
+          });
+          displayErrorToast(error, errorTitle);
+        });
     }
   }, [showFlyout]);
 
@@ -171,50 +192,62 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
             <>
               {selectedJobType === 'anomaly-detector' && (
                 <>
-                  <EuiButtonEmpty size="xs" onClick={onSelectAll} isDisabled={isDisabled}>
-                    <FormattedMessage
-                      id="xpack.ml.importExport.exportFlyout.adSelectAllButton"
-                      defaultMessage="Select all"
-                    />
-                  </EuiButtonEmpty>
+                  {loadingADJobs === true ? (
+                    <LoadingSpinner />
+                  ) : (
+                    <>
+                      <EuiButtonEmpty size="xs" onClick={onSelectAll} isDisabled={isDisabled}>
+                        <FormattedMessage
+                          id="xpack.ml.importExport.exportFlyout.adSelectAllButton"
+                          defaultMessage="Select all"
+                        />
+                      </EuiButtonEmpty>
 
-                  <EuiSpacer size="xs" />
+                      <EuiSpacer size="xs" />
 
-                  {adJobIds.map((id) => (
-                    <div key={id}>
-                      <EuiCheckbox
-                        id={id}
-                        label={id}
-                        checked={selectedJobIds.includes(id)}
-                        onChange={(e) => toggleSelectedJob(e.target.checked, id)}
-                      />
-                      <EuiSpacer size="s" />
-                    </div>
-                  ))}
+                      {adJobIds.map((id) => (
+                        <div key={id}>
+                          <EuiCheckbox
+                            id={id}
+                            label={id}
+                            checked={selectedJobIds.includes(id)}
+                            onChange={(e) => toggleSelectedJob(e.target.checked, id)}
+                          />
+                          <EuiSpacer size="s" />
+                        </div>
+                      ))}
+                    </>
+                  )}
                 </>
               )}
               {selectedJobType === 'data-frame-analytics' && (
                 <>
-                  <EuiButtonEmpty size="xs" onClick={onSelectAll} isDisabled={isDisabled}>
-                    <FormattedMessage
-                      id="xpack.ml.importExport.exportFlyout.dfaSelectAllButton"
-                      defaultMessage="Select all"
-                    />
-                  </EuiButtonEmpty>
+                  {loadingDFAJobs === true ? (
+                    <LoadingSpinner />
+                  ) : (
+                    <>
+                      <EuiButtonEmpty size="xs" onClick={onSelectAll} isDisabled={isDisabled}>
+                        <FormattedMessage
+                          id="xpack.ml.importExport.exportFlyout.dfaSelectAllButton"
+                          defaultMessage="Select all"
+                        />
+                      </EuiButtonEmpty>
 
-                  <EuiSpacer size="xs" />
+                      <EuiSpacer size="xs" />
 
-                  {dfaJobIds.map((id) => (
-                    <div key={id}>
-                      <EuiCheckbox
-                        id={id}
-                        label={id}
-                        checked={selectedJobIds.includes(id)}
-                        onChange={(e) => toggleSelectedJob(e.target.checked, id)}
-                      />
-                      <EuiSpacer size="s" />
-                    </div>
-                  ))}
+                      {dfaJobIds.map((id) => (
+                        <div key={id}>
+                          <EuiCheckbox
+                            id={id}
+                            label={id}
+                            checked={selectedJobIds.includes(id)}
+                            onChange={(e) => toggleSelectedJob(e.target.checked, id)}
+                          />
+                          <EuiSpacer size="s" />
+                        </div>
+                      ))}
+                    </>
+                  )}
                 </>
               )}
             </>
@@ -261,3 +294,14 @@ const FlyoutButton: FC<{ isDisabled: boolean; onClick(): void }> = ({ isDisabled
     </EuiButtonEmpty>
   );
 };
+
+const LoadingSpinner: FC = () => (
+  <>
+    <EuiSpacer size="l" />
+    <EuiFlexGroup justifyContent="spaceAround">
+      <EuiFlexItem grow={false}>
+        <EuiLoadingSpinner size="l" />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </>
+);
