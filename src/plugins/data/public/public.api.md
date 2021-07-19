@@ -86,7 +86,7 @@ import { Required } from '@kbn/utility-types';
 import * as Rx from 'rxjs';
 import { SavedObject } from 'src/core/server';
 import { SavedObject as SavedObject_2 } from 'kibana/server';
-import { SavedObjectReference } from 'src/core/types';
+import { SavedObjectReference as SavedObjectReference_2 } from 'src/core/types';
 import { SavedObjectsClientContract } from 'src/core/public';
 import { SavedObjectsFindOptions } from 'kibana/public';
 import { SavedObjectsFindResponse } from 'kibana/server';
@@ -953,7 +953,7 @@ export type ExpressionValueSearchContext = ExpressionValueBoxed<'kibana_context'
 // @public (undocumented)
 export const extractSearchSourceReferences: (state: SearchSourceFields) => [SearchSourceFields & {
     indexRefName?: string;
-}, SavedObjectReference[]];
+}, SavedObjectReference_2[]];
 
 // Warning: (ae-missing-release-tag) "FieldFormat" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1086,13 +1086,18 @@ export type Filter = {
     query?: any;
 };
 
+// Warning: (ae-forgotten-export) The symbol "PersistableStateService" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "FilterManager" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export class FilterManager {
+export class FilterManager implements PersistableStateService {
     constructor(uiSettings: IUiSettingsClient);
     // (undocumented)
     addFilters(filters: Filter[] | Filter, pinFilterStatus?: boolean): void;
+    // (undocumented)
+    extract: any;
+    // (undocumented)
+    getAllMigrations: () => {};
     // (undocumented)
     getAppFilters(): Filter[];
     // (undocumented)
@@ -1108,6 +1113,10 @@ export class FilterManager {
     // (undocumented)
     getUpdates$(): import("rxjs").Observable<void>;
     // (undocumented)
+    inject: any;
+    // (undocumented)
+    migrateToLatest: any;
+    // (undocumented)
     removeAll(): void;
     // (undocumented)
     removeFilter(filter: Filter): void;
@@ -1117,6 +1126,8 @@ export class FilterManager {
     // (undocumented)
     static setFiltersStore(filters: Filter[], store: FilterStateStore, shouldOverrideStore?: boolean): void;
     setGlobalFilters(newGlobalFilters: Filter[]): void;
+    // (undocumented)
+    telemetry: (filters: import("../../../../kibana_utils/common/persistable_state").SerializableState, collector: unknown) => {};
     }
 
 // Warning: (ae-forgotten-export) The symbol "QueryLanguage" needs to be exported by the entry point index.d.ts
@@ -1718,7 +1729,7 @@ export interface IndexPatternTypeMeta {
 // @public (undocumented)
 export const injectSearchSourceReferences: (searchSourceFields: SearchSourceFields & {
     indexRefName: string;
-}, references: SavedObjectReference[]) => SearchSourceFields;
+}, references: SavedObjectReference_2[]) => SearchSourceFields;
 
 // Warning: (ae-missing-release-tag) "InputTimeRange" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
