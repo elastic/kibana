@@ -10,7 +10,6 @@ import { PluginInitializerContext } from '../../../../src/core/public';
 import { TimelinesPlugin } from './plugin';
 export * as tGridActions from './store/t_grid/actions';
 export * as tGridSelectors from './store/t_grid/selectors';
-export { EventsThContent } from './components/t_grid/styles';
 export type {
   Inspect,
   SortField,
