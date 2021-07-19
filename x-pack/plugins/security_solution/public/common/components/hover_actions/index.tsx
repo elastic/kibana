@@ -173,7 +173,14 @@ export const HoverActions: React.FC<Props> = React.memo(
         : SourcererScopeName.default;
     const { browserFields } = useSourcererScope(activeScope);
 
-    const handleStartDragToTimeline = useGetHandleStartDragToTimeline({ draggableId, field });
+    const handleStartDragToTimeline = (() => {
+      const handleStartDragToTimelineFns = draggableIds?.map((draggableId) => {
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        return useGetHandleStartDragToTimeline({ draggableId, field });
+      });
+      console.log(handleStartDragToTimelineFns); // eslint-disable-line
+      return () => handleStartDragToTimelineFns?.forEach((dragFn) => dragFn());
+    })();
 
     const handleFilterForValue = useCallback(() => {
       if (values) {
@@ -283,7 +290,7 @@ export const HoverActions: React.FC<Props> = React.memo(
       ]
     );
 
-    const showFilters = !showTopN && value != null;
+    const showFilters = !showTopN && values != null;
 
     return (
       <StyledHoverActionsContainer onKeyDown={onKeyDown} ref={panelRef} $showTopN={showTopN}>
@@ -329,7 +336,7 @@ export const HoverActions: React.FC<Props> = React.memo(
             />
           )}
 
-          {showFilters && draggableId != null && (
+          {showFilters && draggableIds != null && (
             <AddToTimelineButton
               field={field}
               onClick={handleStartDragToTimeline}
