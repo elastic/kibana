@@ -14,7 +14,10 @@ export type { RacRequestHandlerContext, RacApiRequestHandlerContext } from './ty
 export { RuleDataClient } from './rule_data_client';
 export { IRuleDataClient } from './rule_data_client/types';
 export { getRuleExecutorData, RuleExecutorData } from './utils/get_rule_executor_data';
-export { createLifecycleRuleTypeFactory } from './utils/create_lifecycle_rule_type_factory';
+export {
+  createLifecycleRuleTypeFactory,
+  LifecycleAlertService,
+} from './utils/create_lifecycle_rule_type_factory';
 export {
   LifecycleRuleExecutor,
   LifecycleAlertServices,
@@ -22,7 +25,7 @@ export {
 } from './utils/create_lifecycle_executor';
 export { createPersistenceRuleTypeFactory } from './utils/create_persistence_rule_type_factory';
 export * from './utils/persistence_types';
-export { AlertTypeWithExecutor } from './types';
+export type { AlertTypeWithExecutor } from './types';
 
 export const plugin = (initContext: PluginInitializerContext) =>
   new RuleRegistryPlugin(initContext);
