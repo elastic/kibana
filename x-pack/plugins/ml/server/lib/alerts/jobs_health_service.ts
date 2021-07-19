@@ -135,7 +135,7 @@ export function jobsHealthServiceProvider(
 
       if (config.dataFeed.enabled) {
         const response = await this.getNotStartedDatafeed(includeJobs, excludeJobs);
-        if (response) {
+        if (response && response.length > 0) {
           results.push({
             name: 'dataFeed',
             context: {
