@@ -34,7 +34,7 @@ describe('Details Panel Component', () => {
     },
   };
 
-  const hostExpandedDetail: TimelineExpandedDetail = {
+  const hostExpandedDetail = {
     [TimelineTabs.query]: {
       panelView: 'hostDetail',
       params: {
@@ -43,7 +43,7 @@ describe('Details Panel Component', () => {
     },
   };
 
-  const networkExpandedDetail: TimelineExpandedDetail = {
+  const networkExpandedDetail = {
     [TimelineTabs.query]: {
       panelView: 'networkDetail',
       params: {
@@ -53,12 +53,14 @@ describe('Details Panel Component', () => {
     },
   };
 
-  const eventExpandedDetail: TimelineExpandedDetail = {
+  const eventExpandedDetail = {
     [TimelineTabs.query]: {
       panelView: 'eventDetail',
       params: {
         eventId: 'my-id',
         indexName: 'my-index',
+        ecsData: {},
+        nonEcsData: [],
       },
     },
   };
@@ -101,7 +103,7 @@ describe('Details Panel Component', () => {
 
   describe('DetailsPanel:EventDetails: rendering', () => {
     beforeEach(() => {
-      state.timeline.timelineById.test.expandedDetail = eventExpandedDetail;
+      state.timeline.timelineById.test.expandedDetail = (eventExpandedDetail as unknown) as TimelineExpandedDetail;
       store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     });
 
@@ -139,7 +141,7 @@ describe('Details Panel Component', () => {
 
   describe('DetailsPanel:HostDetails: rendering', () => {
     beforeEach(() => {
-      state.timeline.timelineById.test.expandedDetail = hostExpandedDetail;
+      state.timeline.timelineById.test.expandedDetail = (hostExpandedDetail as unknown) as TimelineExpandedDetail;
       store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     });
 
@@ -156,7 +158,7 @@ describe('Details Panel Component', () => {
 
   describe('DetailsPanel:NetworkDetails: rendering', () => {
     beforeEach(() => {
-      state.timeline.timelineById.test.expandedDetail = networkExpandedDetail;
+      state.timeline.timelineById.test.expandedDetail = (networkExpandedDetail as unknown) as TimelineExpandedDetail;
       store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     });
 

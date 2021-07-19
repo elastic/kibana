@@ -35,7 +35,7 @@ const ActionIconItemComponent: React.FC<ActionIconItemProps> = ({
   buttonType = 'icon',
 }) => (
   <>
-    {buttonType === 'icon' && iconType && (
+    {buttonType === 'icon' && (
       <div>
         <EventsTdContent textAlign="center" width={width}>
           {children ?? (
@@ -52,7 +52,7 @@ const ActionIconItemComponent: React.FC<ActionIconItemProps> = ({
         </EventsTdContent>
       </div>
     )}
-    {(buttonType === 'text' || !iconType) && (
+    {buttonType === 'text' && (
       <EuiButtonEmpty
         aria-label={ariaLabel}
         data-test-subj={`${dataTestSubj}-button`}
