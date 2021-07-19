@@ -16,7 +16,7 @@ import {
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { DataPublicPluginStart, AggregationRestrictions } from './shared_imports';
+import { DataPublicPluginStart, IndexPatternAggRestrictions } from './shared_imports';
 import { OpenEditorOptions } from './open_editor';
 
 export interface IndexPatternEditorContext {
@@ -125,7 +125,7 @@ export enum ResolveIndexResponseItemIndexAttrs {
 }
 
 export interface RollupIndiciesCapability {
-  aggs: Record<string, AggregationRestrictions>;
+  aggs: Record<string, IndexPatternAggRestrictions>;
   error: string;
 }
 
