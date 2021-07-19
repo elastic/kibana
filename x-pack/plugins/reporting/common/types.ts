@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SerializableState } from '../../../../src/plugins/kibana_utils/common';
+import type { SerializableState } from 'src/plugins/kibana_utils/common';
 
 export interface PageSizeParams {
   pageMarginTop: number;

@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import type { SerializableState } from 'src/plugins/kibana_utils/common';
 import { LocatorParams } from '../../../common/types';
 import { LayoutParams } from '../../lib/layouts';
 import { BaseParams, BasePayload } from '../../types';
 
-interface BaseParamsPDFV2<P extends SerializableState = SerializableState> {
+interface BaseParamsPDFV2 {
   layout: LayoutParams;
   forceNow: string;
   /**
    * This value is used to re-create the same visual state as when the report was requested as well as navigate to the correct page.
    */
-  locatorParams: Array<LocatorParams<P>>;
+  locatorParams: LocatorParams[];
 }
 
 // Job params: structure of incoming user request data, after being parsed from RISON
