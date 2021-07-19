@@ -5,48 +5,37 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import {
+  EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageHeaderProps,
   EuiTitle,
-  EuiBetaBadge,
-  EuiToolTip,
-  EuiButtonEmpty,
 } from '@elastic/eui';
-import { ApmMainTemplate } from './apm_main_template';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { ApmServiceContextProvider } from '../../../context/apm_service/apm_service_context';
-import { enableServiceOverview } from '../../../../common/ui_settings_keys';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 import {
+  isIosAgentName,
   isJavaAgentName,
   isRumAgentName,
-  isIosAgentName,
-} from '../../../../common/agent_name';
-import { ServiceIcons } from '../../shared/service_icons';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { useErrorOverviewHref } from '../../shared/Links/apm/ErrorOverviewLink';
-import { useMetricOverviewHref } from '../../shared/Links/apm/MetricOverviewLink';
-import { useServiceMapHref } from '../../shared/Links/apm/ServiceMapLink';
-import { useServiceNodeOverviewHref } from '../../shared/Links/apm/ServiceNodeOverviewLink';
-import { useServiceOverviewHref } from '../../shared/Links/apm/service_overview_link';
-import { useServiceProfilingHref } from '../../shared/Links/apm/service_profiling_link';
-import { useTransactionsOverviewHref } from '../../shared/Links/apm/transaction_overview_link';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
-import { ENVIRONMENT_NOT_DEFINED } from '../../../../common/environment_filter_values';
-import {
-  SERVICE_NAME,
-  SERVICE_ENVIRONMENT,
-} from '../../../../common/elasticsearch_fieldnames';
-import { Correlations } from '../../app/correlations';
-import { SearchBar } from '../../shared/search_bar';
-import {
-  createExploratoryViewUrl,
-  SeriesUrl,
-} from '../../../../../observability/public';
+} from '../../../../../common/agent_name';
+import { enableServiceOverview } from '../../../../../common/ui_settings_keys';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { Correlations } from '../../../app/correlations';
+import { useErrorOverviewHref } from '../../../shared/Links/apm/ErrorOverviewLink';
+import { useMetricOverviewHref } from '../../../shared/Links/apm/MetricOverviewLink';
+import { useServiceMapHref } from '../../../shared/Links/apm/ServiceMapLink';
+import { useServiceNodeOverviewHref } from '../../../shared/Links/apm/ServiceNodeOverviewLink';
+import { useServiceOverviewHref } from '../../../shared/Links/apm/service_overview_link';
+import { useServiceProfilingHref } from '../../../shared/Links/apm/service_profiling_link';
+import { useTransactionsOverviewHref } from '../../../shared/Links/apm/transaction_overview_link';
+import { SearchBar } from '../../../shared/search_bar';
+import { ServiceIcons } from '../../../shared/service_icons';
+import { AnalyzeDataButton } from './analyze_data_button';
+import { ApmMainTemplate } from '../apm_main_template';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
@@ -93,7 +82,7 @@ function TemplateWithContext({
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="l">
-                    <h1>{serviceName}</h1>
+                    <>{serviceName}</>
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -103,7 +92,7 @@ function TemplateWithContext({
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <AnalyzeDataButton serviceName={serviceName} />
+              <AnalyzeDataButton />
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
@@ -118,53 +107,6 @@ function TemplateWithContext({
       {children}
     </ApmMainTemplate>
   );
-}
-
-function AnalyzeDataButton({ serviceName }: { serviceName: string }) {
-  const { agentName } = useApmServiceContext();
-  const { services } = useKibana();
-  const { urlParams } = useUrlParams();
-  const { rangeTo, rangeFrom, environment } = urlParams;
-  const basepath = services.http?.basePath.get();
-
-  if (isRumAgentName(agentName) || isIosAgentName(agentName)) {
-    const href = createExploratoryViewUrl(
-      {
-        'apm-series': {
-          dataType: isRumAgentName(agentName) ? 'ux' : 'mobile',
-          time: { from: rangeFrom, to: rangeTo },
-          reportType: 'kpi-over-time',
-          reportDefinitions: {
-            [SERVICE_NAME]: [serviceName],
-            ...(!!environment && ENVIRONMENT_NOT_DEFINED.value !== environment
-              ? { [SERVICE_ENVIRONMENT]: [environment] }
-              : {}),
-          },
-          operationType: 'average',
-          isNew: true,
-        } as SeriesUrl,
-      },
-      basepath
-    );
-
-    return (
-      <EuiToolTip
-        position="top"
-        content={i18n.translate('xpack.apm.analyzeDataButton.tooltip', {
-          defaultMessage:
-            'EXPERIMENTAL - Analyze Data allows you to select and filter result data in any dimension, and look for the cause or impact of performance problems',
-        })}
-      >
-        <EuiButtonEmpty href={href} iconType="visBarVerticalStacked">
-          {i18n.translate('xpack.apm.analyzeDataButton.label', {
-            defaultMessage: 'Analyze data',
-          })}
-        </EuiButtonEmpty>
-      </EuiToolTip>
-    );
-  }
-
-  return null;
 }
 
 function useTabs({
