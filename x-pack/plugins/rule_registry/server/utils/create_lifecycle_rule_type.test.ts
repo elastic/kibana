@@ -198,6 +198,9 @@ describe('createLifecycleRuleTypeFactory', () => {
               "kibana.rac.alert.producer": "producer",
               "kibana.rac.alert.start": "2021-06-16T09:01:00.000Z",
               "kibana.rac.alert.status": "open",
+              "kibana.space_ids": Array [
+                "spaceId",
+              ],
               "rule.category": "ruleTypeName",
               "rule.id": "ruleTypeId",
               "rule.name": "name",
@@ -217,6 +220,9 @@ describe('createLifecycleRuleTypeFactory', () => {
               "kibana.rac.alert.producer": "producer",
               "kibana.rac.alert.start": "2021-06-16T09:01:00.000Z",
               "kibana.rac.alert.status": "open",
+              "kibana.space_ids": Array [
+                "spaceId",
+              ],
               "rule.category": "ruleTypeName",
               "rule.id": "ruleTypeId",
               "rule.name": "name",
