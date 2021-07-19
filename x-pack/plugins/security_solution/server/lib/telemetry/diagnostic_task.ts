@@ -12,7 +12,7 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '../../../../task_manager/server';
-import { getLastTaskExecutionTimestamp } from './helpers';
+import { getPreviousDiagTaskTimestamp } from './helpers';
 import { TelemetryEventsSender, TelemetryEvent } from './sender';
 
 export const TelemetryDiagTaskConstants = {
@@ -44,7 +44,7 @@ export class TelemetryDiagTask {
           return {
             run: async () => {
               const executeTo = moment().utc().toISOString();
-              const executeFrom = getLastTaskExecutionTimestamp(
+              const executeFrom = getPreviousDiagTaskTimestamp(
                 executeTo,
                 taskInstance.state?.lastExecutionTimestamp
               );
