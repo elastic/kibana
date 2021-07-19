@@ -9,20 +9,20 @@ import React, { memo } from 'react';
 import { EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-const DeprecatedCalloutComponent: React.FC = () => {
+const ApplicationRequiredCalloutComponent: React.FC = () => {
   return (
     <>
       <EuiSpacer size="s" />
       <EuiCallOut
         size="s"
-        iconType="help"
+        iconType="alert"
         data-test-subj="snDeprecatedCallout"
-        color="warning"
+        color="danger"
         title={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.deprecatedCallout',
+          'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.applicationRequiredCallout',
           {
             defaultMessage:
-              'You are running a deprecated connector. Create a new connector to upgrade.',
+              'The Elastic App is not installed. Please go to the ServiceNow Store and install the application.',
           }
         )}
       />
@@ -31,4 +31,4 @@ const DeprecatedCalloutComponent: React.FC = () => {
   );
 };
 
-export const DeprecatedCallout = memo(DeprecatedCalloutComponent);
+export const ApplicationRequiredCallout = memo(ApplicationRequiredCalloutComponent);

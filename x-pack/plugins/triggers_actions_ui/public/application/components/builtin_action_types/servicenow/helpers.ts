@@ -6,7 +6,10 @@
  */
 
 import { EuiSelectOption } from '@elastic/eui';
-import { Choice } from './types';
+import { AppInfo, Choice, RESTApiError } from './types';
 
 export const choicesToEuiOptions = (choices: Choice[]): EuiSelectOption[] =>
   choices.map((choice) => ({ value: choice.value, text: choice.label }));
+
+export const isRESTApiError = (res: AppInfo | RESTApiError): res is RESTApiError =>
+  (res as RESTApiError).error != null || (res as RESTApiError).status === 'failure';

@@ -51,3 +51,11 @@ export interface AppInfo {
   scope: string;
   version: string;
 }
+
+export interface RESTApiError {
+  error: {
+    message: string;
+    detail: string;
+  };
+  status: string;
+}

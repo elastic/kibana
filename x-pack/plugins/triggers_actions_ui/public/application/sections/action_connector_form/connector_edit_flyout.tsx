@@ -35,7 +35,6 @@ import {
   IErrorObject,
   EditConectorTabs,
   UserConfiguredActionConnector,
-  ActionConnectorFieldsSetCallbacks,
   ActionConnectorFieldsCallbacks,
 } from '../../../types';
 import { ConnectorReducer, createConnectorReducer } from './connector_reducer';
@@ -240,22 +239,35 @@ const ConnectorEditFlyout = ({
       });
   };
 
+  const setConnectorWithErrors = () =>
+    setConnector(
+      getConnectorWithInvalidatedFields(
+        connector,
+        errors.configErrors,
+        errors.secretsErrors,
+        errors.connectorBaseErrors
+      )
+    );
+
   const onSaveClicked = async (closeAfterSave: boolean = true) => {
     if (hasErrors) {
-      setConnector(
-        getConnectorWithInvalidatedFields(
-          connector,
-          errors.configErrors,
-          errors.secretsErrors,
-          errors.connectorBaseErrors
-        )
-      );
+      setConnectorWithErrors();
       return;
     }
+
     setIsSaving(true);
-    await callbacks?.beforeActionConnectorSave?.();
+
+    // Do not allow to save the connector if there is an error
+    try {
+      await callbacks?.beforeActionConnectorSave?.();
+    } catch (e) {
+      setIsSaving(false);
+      return;
+    }
+
     const savedAction = await onActionConnectorSave();
     setIsSaving(false);
+
     if (savedAction) {
       setHasChanges(false);
       await callbacks?.afterActionConnectorSave?.(savedAction);

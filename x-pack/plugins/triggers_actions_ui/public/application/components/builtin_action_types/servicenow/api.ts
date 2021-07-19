@@ -7,7 +7,7 @@
 
 import { HttpSetup } from 'kibana/public';
 import { BASE_ACTION_API_PATH } from '../../../constants';
-import { AppInfo } from './types';
+import { AppInfo, RESTApiError } from './types';
 
 export async function getChoices({
   http,
@@ -44,7 +44,7 @@ export async function getAppInfo({
   apiUrl: string;
   username: string;
   password: string;
-}): Promise<AppInfo> {
+}): Promise<AppInfo | RESTApiError> {
   const urlWithoutTrailingSlash = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
   const response = await fetch(getAppInfoUrl(urlWithoutTrailingSlash), {
     method: 'GET',

@@ -200,6 +200,6 @@ export const PRIORITY_LABEL = i18n.translate(
 export const APP_INFO_API_ERROR = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.unableToGetAppInfoMessage',
   {
-    defaultMessage: 'Unreachable Elastic Application in the ServiceNow instance.',
+    defaultMessage: 'Unreachable Elastic Application in ServiceNow instance.',
   }
 );
