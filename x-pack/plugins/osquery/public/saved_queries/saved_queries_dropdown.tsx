@@ -6,7 +6,7 @@
  */
 
 import { find } from 'lodash/fp';
-import { EuiCodeBlock, EuiFormRow, EuiComboBox, EuiText } from '@elastic/eui';
+import { EuiCodeBlock, EuiFormRow, EuiComboBox, EuiTextColor } from '@elastic/eui';
 import React, {
   forwardRef,
   useCallback,
@@ -19,12 +19,24 @@ import { SimpleSavedObject } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useHistory, useLocation } from 'react-router-dom';
+import styled from 'styled-components';
 
 import { useSavedQueries } from './use_saved_queries';
 
 export interface SavedQueriesDropdownRef {
   clearSelection: () => void;
 }
+
+const TextTruncate = styled.div`
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const StyledEuiCodeBlock = styled(EuiCodeBlock)`
+  .euiCodeBlock__line {
+    white-space: nowrap;
+  }
+`;
 
 interface SavedQueriesDropdownProps {
   disabled?: boolean;
@@ -88,12 +100,12 @@ const SavedQueriesDropdownComponent = forwardRef<
     ({ value }) => (
       <>
         <strong>{value.id}</strong>
-        <EuiText size="s" color="subdued">
-          <p className="euiTextColor--subdued">{value.description}</p>
-        </EuiText>
-        <EuiCodeBlock language="sql" fontSize="m" paddingSize="s">
-          {value.query}
-        </EuiCodeBlock>
+        <TextTruncate>
+          <EuiTextColor color="subdued">{value.description}</EuiTextColor>
+        </TextTruncate>
+        <StyledEuiCodeBlock language="sql" fontSize="m" paddingSize="s">
+          {value.query.split('\n').join(' ')}
+        </StyledEuiCodeBlock>
       </>
     ),
     []
@@ -145,7 +157,7 @@ const SavedQueriesDropdownComponent = forwardRef<
         selectedOptions={selectedOptions}
         onChange={handleSavedQueryChange}
         renderOption={renderOption}
-        rowHeight={90}
+        rowHeight={110}
       />
     </EuiFormRow>
   );

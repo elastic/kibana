@@ -36,6 +36,8 @@ export interface FormHook<T extends FormData = FormData, I extends FormData = T>
   setFieldErrors: (fieldName: string, errors: ValidationError[]) => void;
   /** Access the fields on the form. */
   getFields: () => FieldsMap;
+  /** Access the defaultValue for a specific field */
+  getFieldDefaultValue: (path: string) => unknown;
   /**
    * Return the form data. It accepts an optional options object with an `unflatten` parameter (defaults to `true`).
    * If you are only interested in the raw form data, pass `unflatten: false` to the handler
@@ -60,7 +62,6 @@ export interface FormHook<T extends FormData = FormData, I extends FormData = T>
   __updateFormDataAt: (field: string, value: unknown) => void;
   __updateDefaultValueAt: (field: string, value: unknown) => void;
   __readFieldConfigFromSchema: (field: string) => FieldConfig;
-  __getFieldDefaultValue: (path: string) => unknown;
 }
 
 export type FormSchema<T extends FormData = FormData> = {

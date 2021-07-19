@@ -37,4 +37,5 @@ export interface ProcessParentData {
 export interface Thread {
   id?: number[];
   start?: string[];
+  Ext?: Ext;
 }
