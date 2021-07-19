@@ -21,7 +21,7 @@ import { createDocSource } from './create_doc_source';
 import { writeDataToIndex } from './index_data';
 import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
 import { getMatchingIndexes } from './get_indexes_matching_pattern';
-import { SecurityPluginSetup } from '../../../security/server';
+import { SecurityPluginStart } from '../../../security/server';
 
 export function initIndexingRoutes({
   router,
@@ -32,7 +32,7 @@ export function initIndexingRoutes({
   router: IRouter<DataRequestHandlerContext>;
   logger: Logger;
   dataPlugin: DataPluginStart;
-  securityPlugin: SecurityPluginSetup;
+  securityPlugin?: SecurityPluginStart;
 }) {
   router.post(
     {
