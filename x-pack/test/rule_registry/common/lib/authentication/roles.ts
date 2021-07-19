@@ -24,10 +24,7 @@ export const globalRead: Role = {
     },
     kibana: [
       {
-        feature: {
-          siem: ['read'],
-          apm: ['read'],
-        },
+        base: ['read'],
         spaces: ['*'],
       },
     ],

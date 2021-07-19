@@ -14,7 +14,7 @@ import {
 import { getInitialAlertValues } from '../get_initial_alert_values';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { useServiceName } from '../../../hooks/use_service_name';
-import { ApmServiceContextProvider } from '../../../context/apm_service/apm_service_context';
+
 interface Props {
   addFlyoutVisible: boolean;
   setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
@@ -44,11 +44,5 @@ export function AlertingFlyout(props: Props) {
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [alertType, onCloseAddFlyout, services.triggersActionsUi]
   );
-  return (
-    <>
-      {addFlyoutVisible && (
-        <ApmServiceContextProvider>{addAlertFlyout}</ApmServiceContextProvider>
-      )}
-    </>
-  );
+  return <>{addFlyoutVisible && addAlertFlyout}</>;
 }

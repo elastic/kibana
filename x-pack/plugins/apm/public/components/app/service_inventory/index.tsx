@@ -9,7 +9,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
-import { useTrackPageview } from '../../../../../observability/public';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
@@ -91,13 +90,6 @@ function useServicesFetcher() {
 export function ServiceInventory() {
   const { core } = useApmPluginContext();
   const { servicesData, servicesStatus } = useServicesFetcher();
-
-  // The page is called "service inventory" to avoid confusion with the
-  // "service overview", but this is tracked in some dashboards because it's the
-  // initial landing page for APM, so it stays as "services_overview" (plural.)
-  // for backward compatibility.
-  useTrackPageview({ app: 'apm', path: 'services_overview' });
-  useTrackPageview({ app: 'apm', path: 'services_overview', delay: 15000 });
 
   const {
     anomalyDetectionJobsData,
