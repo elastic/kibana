@@ -15,6 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const fieldEditor = getService('fieldEditor');
+  const retry = getService('retry');
 
   describe('lens formula', () => {
     it('should transition from count to formula', async () => {
@@ -54,8 +55,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const input = await find.activeElement();
       await input.type('*');
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('14,005');
+      await retry.try(async () => {
+        expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('14,005');
+      });
     });
 
     it('should insert single quotes and escape when needed to create valid KQL', async () => {
@@ -78,15 +80,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.common.sleep(100);
 
-      let element = await find.byCssSelector('.monaco-editor');
-      expect(await element.getVisibleText()).to.equal(`count(kql='Men\\'s Clothing ')`);
+      PageObjects.lens.expectFormulaText(`count(kql='Men\\'s Clothing ')`);
 
       await PageObjects.lens.typeFormula('count(kql=');
+
       input = await find.activeElement();
       await input.type(`Men\'s Clothing`);
 
-      element = await find.byCssSelector('.monaco-editor');
-      expect(await element.getVisibleText()).to.equal(`count(kql='Men\\'s Clothing')`);
+      PageObjects.lens.expectFormulaText(`count(kql='Men\\'s Clothing')`);
     });
 
     it('should insert single quotes and escape when needed to create valid field name', async () => {
@@ -108,20 +109,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.lens.switchToFormula();
-      let element = await find.byCssSelector('.monaco-editor');
-      expect(await element.getVisibleText()).to.equal(`unique_count('*\\' "\\'')`);
+      PageObjects.lens.expectFormulaText(`unique_count('*\\' "\\'')`);
 
+      await PageObjects.lens.typeFormula('unique_count(');
       const input = await find.activeElement();
-      await input.clearValueWithKeyboard({ charByChar: true });
-      await input.type('unique_count(');
-      await PageObjects.common.sleep(100);
       await input.type('*');
       await input.pressKeys(browser.keys.ENTER);
 
       await PageObjects.common.sleep(100);
 
-      element = await find.byCssSelector('.monaco-editor');
-      expect(await element.getVisibleText()).to.equal(`unique_count('*\\' "\\'')`);
+      PageObjects.lens.expectFormulaText(`unique_count('*\\' "\\'')`);
     });
 
     it('should persist a broken formula on close', async () => {

@@ -38,12 +38,14 @@ export function onPremInstructions({
   metricsIndices,
   sourcemapIndices,
   onboardingIndices,
+  isFleetPluginEnabled,
 }: {
   errorIndices: string;
   transactionIndices: string;
   metricsIndices: string;
   sourcemapIndices: string;
   onboardingIndices: string;
+  isFleetPluginEnabled: boolean;
 }): InstructionsSchema {
   const EDIT_CONFIG = createEditConfig();
   const START_SERVER_UNIX = createStartServerUnix();
@@ -69,12 +71,17 @@ export function onPremInstructions({
           iconType: 'alert',
         },
         instructionVariants: [
-          {
-            id: INSTRUCTION_VARIANT.FLEET,
-            instructions: [
-              { customComponentName: 'TutorialFleetInstructions' },
-            ],
-          },
+          // hides fleet section when plugin is disabled
+          ...(isFleetPluginEnabled
+            ? [
+                {
+                  id: INSTRUCTION_VARIANT.FLEET,
+                  instructions: [
+                    { customComponentName: 'TutorialFleetInstructions' },
+                  ],
+                },
+              ]
+            : []),
           {
             id: INSTRUCTION_VARIANT.OSX,
             instructions: [

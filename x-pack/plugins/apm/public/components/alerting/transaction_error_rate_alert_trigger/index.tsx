@@ -6,11 +6,10 @@
  */
 
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { defaults } from 'lodash';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { asPercent } from '../../../../common/utils/formatters';
-import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
@@ -23,6 +22,10 @@ import {
 } from '../fields';
 import { getAbsoluteTimeRange } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
+import { useServiceName } from '../../../hooks/use_service_name';
+import { useServiceTransactionTypesFetcher } from '../../../context/apm_service/use_service_transaction_types_fetcher';
+import { useServiceAgentNameFetcher } from '../../../context/apm_service/use_service_agent_name_fetcher';
+import { getTransactionType } from '../../../context/apm_service/apm_service_context';
 
 interface AlertParams {
   windowSize: number;
@@ -42,63 +45,73 @@ interface Props {
 export function TransactionErrorRateAlertTrigger(props: Props) {
   const { setAlertParams, alertParams, setAlertProperty } = props;
   const { urlParams } = useUrlParams();
-  const { transactionTypes } = useApmServiceContext();
-  const { serviceName } = useParams<{ serviceName?: string }>();
-  const { start, end, transactionType } = urlParams;
+
+  const serviceNameFromUrl = useServiceName();
+
+  const transactionTypes = useServiceTransactionTypesFetcher(
+    serviceNameFromUrl
+  );
+  const { agentName } = useServiceAgentNameFetcher(serviceNameFromUrl);
+
+  const transactionTypeFromUrl = getTransactionType({
+    transactionType: urlParams.transactionType,
+    transactionTypes,
+    agentName,
+  });
+
+  const { start, end, environment: environmentFromUrl } = urlParams;
+
+  const params = defaults(
+    { ...alertParams },
+    {
+      threshold: 30,
+      windowSize: 5,
+      windowUnit: 'm',
+      transactionType: transactionTypeFromUrl,
+      environment: environmentFromUrl || ENVIRONMENT_ALL.value,
+      serviceName: serviceNameFromUrl,
+    }
+  );
+
   const { environmentOptions } = useEnvironmentsFetcher({
-    serviceName,
+    serviceName: params.serviceName,
     start,
     end,
   });
 
-  const { threshold, windowSize, windowUnit, environment } = alertParams;
-
-  const thresholdAsPercent = (threshold ?? 0) / 100;
+  const thresholdAsPercent = (params.threshold ?? 0) / 100;
 
   const { data } = useFetcher(
     (callApmApi) => {
-      if (windowSize && windowUnit) {
+      if (params.windowSize && params.windowUnit) {
         return callApmApi({
           endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_rate',
           params: {
             query: {
-              ...getAbsoluteTimeRange(windowSize, windowUnit),
-              environment,
-              serviceName,
-              transactionType: alertParams.transactionType,
+              ...getAbsoluteTimeRange(params.windowSize, params.windowUnit),
+              environment: params.environment,
+              serviceName: params.serviceName,
+              transactionType: params.transactionType,
             },
           },
         });
       }
     },
     [
-      alertParams.transactionType,
-      environment,
-      serviceName,
-      windowSize,
-      windowUnit,
+      params.transactionType,
+      params.environment,
+      params.serviceName,
+      params.windowSize,
+      params.windowUnit,
     ]
   );
 
-  if (serviceName && !transactionTypes.length) {
+  if (params.serviceName && !transactionTypes.length) {
     return null;
   }
 
-  const defaultParams = {
-    threshold: 30,
-    windowSize: 5,
-    windowUnit: 'm',
-    transactionType: transactionType || transactionTypes[0],
-    environment: urlParams.environment || ENVIRONMENT_ALL.value,
-  };
-
-  const params = {
-    ...defaultParams,
-    ...alertParams,
-  };
-
   const fields = [
-    <ServiceField value={serviceName} />,
+    <ServiceField value={params.serviceName} />,
     <TransactionTypeField
       currentValue={params.transactionType}
       options={transactionTypes.map((key) => ({ text: key, value: key }))}
@@ -141,7 +154,7 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
   return (
     <ServiceAlertTrigger
       fields={fields}
-      defaults={defaultParams}
+      defaults={params}
       setAlertParams={setAlertParams}
       setAlertProperty={setAlertProperty}
       chartPreview={chartPreview}

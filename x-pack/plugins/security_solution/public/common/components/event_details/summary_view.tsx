@@ -13,11 +13,12 @@ import { SummaryRow } from './helpers';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
-  .euiTableHeaderCell {
-    border: none;
-  }
+  .euiTableHeaderCell,
   .euiTableRowCell {
     border: none;
+  }
+  .euiTableHeaderCell .euiTableCellContent {
+    padding: 0;
   }
 `;
 

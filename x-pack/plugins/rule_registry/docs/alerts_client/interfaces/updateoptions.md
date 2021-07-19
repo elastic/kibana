@@ -25,7 +25,7 @@
 
 #### Defined in
 
-[rule_registry/server/alert_data_client/alerts_client.ts:41](https://github.com/dhurley14/kibana/blob/d2173f5090e/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L41)
+[rule_registry/server/alert_data_client/alerts_client.ts:47](https://github.com/elastic/kibana/blob/48e1b91d751/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L47)
 
 ___
 
@@ -35,7 +35,7 @@ ___
 
 #### Defined in
 
-[rule_registry/server/alert_data_client/alerts_client.ts:39](https://github.com/dhurley14/kibana/blob/d2173f5090e/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L39)
+[rule_registry/server/alert_data_client/alerts_client.ts:45](https://github.com/elastic/kibana/blob/48e1b91d751/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L45)
 
 ___
 
@@ -45,7 +45,7 @@ ___
 
 #### Defined in
 
-[rule_registry/server/alert_data_client/alerts_client.ts:42](https://github.com/dhurley14/kibana/blob/d2173f5090e/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L42)
+[rule_registry/server/alert_data_client/alerts_client.ts:48](https://github.com/elastic/kibana/blob/48e1b91d751/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L48)
 
 ___
 
@@ -55,4 +55,4 @@ ___
 
 #### Defined in
 
-[rule_registry/server/alert_data_client/alerts_client.ts:40](https://github.com/dhurley14/kibana/blob/d2173f5090e/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L40)
+[rule_registry/server/alert_data_client/alerts_client.ts:46](https://github.com/elastic/kibana/blob/48e1b91d751/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L46)
