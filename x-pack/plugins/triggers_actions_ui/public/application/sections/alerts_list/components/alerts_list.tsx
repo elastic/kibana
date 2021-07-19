@@ -503,12 +503,7 @@ export const AlertsList: React.FunctionComponent = () => {
                     <EuiButtonIcon
                       color={'danger'}
                       className="alertSidebarItem__action"
-                      onClick={async () => {
-                        asyncScheduler.schedule(async () => {
-                          await muteAlert({ http, id: item.id });
-                          loadAlertsData();
-                        }, 10);
-                      }}
+                      onClick={() => setAlertsToDelete([item.id])}
                       iconType={'trash'}
                       aria-label={i18n.translate(
                         'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.deleteAriaLabel',
