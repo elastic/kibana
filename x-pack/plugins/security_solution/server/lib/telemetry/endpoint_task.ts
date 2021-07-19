@@ -274,6 +274,8 @@ export class TelemetryEndpointTask {
           }
         }
 
+        const { cpu, memory, uptime } = endpoint.endpoint_metrics.Endpoint.metrics;
+
         return {
           '@timestamp': executeTo,
           agent_id: fleetAgentId,
@@ -281,19 +283,9 @@ export class TelemetryEndpointTask {
           endpoint_version: endpoint.endpoint_version,
           endpoint_package_version: policyConfig?.package?.version || null,
           endpoint_metrics: {
-            cpu: {
-              histogram: endpoint.endpoint_metrics.Endpoint.metrics.cpu.endpoint.histogram,
-              latest: endpoint.endpoint_metrics.Endpoint.metrics.cpu.endpoint.latest,
-              mean: endpoint.endpoint_metrics.Endpoint.metrics.cpu.endpoint.mean,
-            },
-            memory: {
-              latest: endpoint.endpoint_metrics.Endpoint.metrics.memory.endpoint.private.latest,
-              mean: endpoint.endpoint_metrics.Endpoint.metrics.memory.endpoint.private.mean,
-            },
-            uptime: {
-              endpoint: endpoint.endpoint_metrics.Endpoint.metrics.uptime.endpoint,
-              system: endpoint.endpoint_metrics.Endpoint.metrics.uptime.system,
-            },
+            cpu: cpu.endpoint,
+            memory: memory.endpoint.private,
+            uptime,
           },
           endpoint_meta: {
             os: endpoint.endpoint_metrics.host.os,
