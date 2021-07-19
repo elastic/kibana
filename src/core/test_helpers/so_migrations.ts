@@ -117,7 +117,6 @@ export const createTestHarness = () => {
       await root.setup();
       await root.start();
 
-      console.log(`Waiting for Kibana to be ready...`);
       await waitForTrue(async () => {
         const statusApi = kbnTestServer.getSupertest(root, 'get', '/api/status');
         const response = await statusApi.send();
