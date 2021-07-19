@@ -27,7 +27,7 @@ in ingest node and Logstash.
 
 [float]
 [[grokdebugger-getting-started]]
-=== Getting started with the Grok Debugger
+=== Get started
 
 This example walks you through using the *Grok Debugger*. This tool
 is automatically enabled in {kib}.
@@ -66,12 +66,12 @@ image::dev-tools/grokdebugger/images/grok-debugger-overview.png["Grok Debugger"]
 
 [float]
 [[grokdebugger-custom-patterns]]
-=== Testing custom patterns
+=== Test custom patterns
 
 If the default grok pattern dictionary doesn't contain the patterns you need,
-you can define, test, and debug custom patterns using the Grok Debugger.
+you can define, test, and debug custom patterns using the *Grok Debugger*.
 
-Custom patterns that you enter in the Grok Debugger are not saved. Custom patterns
+Custom patterns that you enter in the *Grok Debugger* are not saved. Custom patterns
 are only available for the current debugging session and have no side effects.
 
 Follow this example to define a custom pattern.
