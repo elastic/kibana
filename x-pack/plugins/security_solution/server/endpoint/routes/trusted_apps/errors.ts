@@ -12,6 +12,13 @@ export class TrustedAppNotFoundError extends Error {
     super(`Trusted Application (${id}) not found`);
   }
 }
+export class TrustedAppPolicyNotExistsError extends Error {
+  constructor(name: string, policyIds: string[]) {
+    super(
+      `Trusted Application (${name}) has one or more removed policies: ${policyIds.join(', ')}`
+    );
+  }
+}
 
 export class TrustedAppVersionConflictError extends Error {
   constructor(id: string, public sourceError: Error) {

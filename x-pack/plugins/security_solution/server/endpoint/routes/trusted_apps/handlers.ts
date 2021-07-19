@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import type { KibanaResponseFactory, RequestHandler, IKibanaResponse, Logger } from 'kibana/server';
+import type {
+  KibanaResponseFactory,
+  RequestHandler,
+  IKibanaResponse,
+  Logger,
+  KibanaRequest,
+  SavedObjectsClientContract,
+} from 'kibana/server';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 
 import { ExceptionListClient } from '../../../../../lists/server';
@@ -28,7 +35,12 @@ import {
   getTrustedAppsSummary,
   updateTrustedApp,
 } from './service';
-import { TrustedAppNotFoundError, TrustedAppVersionConflictError } from './errors';
+import {
+  TrustedAppNotFoundError,
+  TrustedAppVersionConflictError,
+  TrustedAppPolicyNotExistsError,
+} from './errors';
+import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
 
 const getBodyAfterFeatureFlagCheck = (
   body: PutTrustedAppUpdateRequest | PostTrustedAppCreateRequest,
@@ -54,12 +66,42 @@ const exceptionListClientFromContext = (
   return exceptionLists;
 };
 
+const packagePolicyClientFromEndpointContext = (
+  endpointAppContext: EndpointAppContext
+): PackagePolicyServiceInterface => {
+  const packagePolicy = endpointAppContext.service.getPackagePolicyService();
+
+  if (!packagePolicy) {
+    throw new Error('Agent policy service not found');
+  }
+
+  return packagePolicy;
+};
+
+const savedObjectClientFromEndpointContext = (
+  endpointAppContext: EndpointAppContext,
+  req: KibanaRequest
+): SavedObjectsClientContract => {
+  const savedObjectClient = endpointAppContext.service.getScopedSavedObjectsClient(req);
+
+  if (!savedObjectClient) {
+    throw new Error('Agent policy service not found');
+  }
+
+  return savedObjectClient;
+};
+
 const errorHandler = <E extends Error>(
   logger: Logger,
   res: KibanaResponseFactory,
   error: E
 ): IKibanaResponse => {
   if (error instanceof TrustedAppNotFoundError) {
+    logger.error(error);
+    return res.notFound({ body: error });
+  }
+
+  if (error instanceof TrustedAppPolicyNotExistsError) {
     logger.error(error);
     return res.notFound({ body: error });
   }
@@ -150,7 +192,12 @@ export const getTrustedAppsCreateRouteHandler = (
       const body = getBodyAfterFeatureFlagCheck(req.body, endpointAppContext);
 
       return res.ok({
-        body: await createTrustedApp(exceptionListClientFromContext(context), body),
+        body: await createTrustedApp(
+          exceptionListClientFromContext(context),
+          savedObjectClientFromEndpointContext(endpointAppContext, req),
+          packagePolicyClientFromEndpointContext(endpointAppContext),
+          body
+        ),
       });
     } catch (error) {
       return errorHandler(logger, res, error);
@@ -173,7 +220,13 @@ export const getTrustedAppsUpdateRouteHandler = (
       const body = getBodyAfterFeatureFlagCheck(req.body, endpointAppContext);
 
       return res.ok({
-        body: await updateTrustedApp(exceptionListClientFromContext(context), req.params.id, body),
+        body: await updateTrustedApp(
+          exceptionListClientFromContext(context),
+          savedObjectClientFromEndpointContext(endpointAppContext, req),
+          packagePolicyClientFromEndpointContext(endpointAppContext),
+          req.params.id,
+          body
+        ),
       });
     } catch (error) {
       return errorHandler(logger, res, error);
