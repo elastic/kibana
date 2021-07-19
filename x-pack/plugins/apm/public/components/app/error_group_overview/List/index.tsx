@@ -79,7 +79,7 @@ function ErrorGroupList({ items, serviceName }: Props) {
         ),
         field: 'groupId',
         sortable: false,
-        width: unit * 6,
+        width: `${unit * 6}`,
         render: (groupId: string) => {
           return (
             <GroupIdLink serviceName={serviceName} errorGroupId={groupId}>
