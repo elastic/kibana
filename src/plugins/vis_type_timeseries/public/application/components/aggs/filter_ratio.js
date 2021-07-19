@@ -101,12 +101,12 @@ export const FilterRatioAgg = (props) => {
                 defaultMessage="Numerator"
               />
             }
-            data-test-subj="numeratorRow"
           >
             <QueryBarWrapper
               query={model.numerator}
               onChange={handleNumeratorQueryChange}
               indexPatterns={[indexPattern]}
+              data-test-subj="filterRatioNumeratorInput"
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -120,12 +120,12 @@ export const FilterRatioAgg = (props) => {
                 defaultMessage="Denominator"
               />
             }
-            data-test-subj="denominatorRow"
           >
             <QueryBarWrapper
               query={model.denominator}
               onChange={handleDenominatorQueryChange}
               indexPatterns={[indexPattern]}
+              data-test-subj="filterRatioDenominatorInput"
             />
           </EuiFormRow>
         </EuiFlexItem>

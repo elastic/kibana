@@ -728,10 +728,8 @@ export class VisualBuilderPageObject extends FtrService {
     });
   }
 
-  public async setFilterRatioOption(optionType: 'numerator' | 'denominator', query: string) {
-    const optionInput = await this.find.byCssSelector(
-      `[data-test-subj="${optionType}Row"] [data-test-subj="queryInput"]`
-    );
+  public async setFilterRatioOption(optionType: 'Numerator' | 'Denominator', query: string) {
+    const optionInput = await this.testSubjects.find(`filterRatio${optionType}Input`);
     await optionInput.type(query);
   }
 }
