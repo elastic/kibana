@@ -21,6 +21,7 @@ interface BuildEventsSearchQuery {
   sortOrder?: SortOrderOrUndefined;
   searchAfterSortIds: estypes.SearchSortResults | undefined;
   timestampOverride: TimestampOverrideOrUndefined;
+  trackTotalHits?: boolean;
 }
 
 export const buildEventsSearchQuery = ({
@@ -33,6 +34,7 @@ export const buildEventsSearchQuery = ({
   searchAfterSortIds,
   sortOrder,
   timestampOverride,
+  trackTotalHits,
 }: BuildEventsSearchQuery) => {
   const defaultTimeFields = ['@timestamp'];
   const timestamps =
@@ -97,11 +99,28 @@ export const buildEventsSearchQuery = ({
     { bool: { filter: [{ bool: { should: [...rangeFilter], minimum_should_match: 1 } }] } },
   ];
 
+  const sort = [];
+  if (timestampOverride) {
+    sort.push({
+      [timestampOverride]: {
+        order: sortOrder ?? 'asc',
+        unmapped_type: 'date',
+      },
+    });
+  }
+  sort.push({
+    '@timestamp': {
+      order: sortOrder ?? 'asc',
+      unmapped_type: 'date',
+    },
+  });
+
   const searchQuery = {
     allow_no_indices: true,
     index,
     size,
     ignore_unavailable: true,
+    track_total_hits: trackTotalHits,
     body: {
       query: {
         bool: {
@@ -121,31 +140,7 @@ export const buildEventsSearchQuery = ({
         ...docFields,
       ],
       ...(aggregations ? { aggregations } : {}),
-      sort: [
-        ...(timestampOverride != null
-          ? [
-              {
-                [timestampOverride]: {
-                  order: sortOrder ?? 'asc',
-                  unmapped_type: 'date',
-                },
-              },
-              {
-                '@timestamp': {
-                  order: sortOrder ?? 'asc',
-                  unmapped_type: 'date',
-                },
-              },
-            ]
-          : [
-              {
-                '@timestamp': {
-                  order: sortOrder ?? 'asc',
-                  unmapped_type: 'date',
-                },
-              },
-            ]),
-      ],
+      sort,
     },
   };
 

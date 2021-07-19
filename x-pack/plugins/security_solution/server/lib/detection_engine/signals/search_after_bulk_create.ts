@@ -37,6 +37,8 @@ export const searchAfterAndBulkCreate = async ({
   enrichment = identity,
   bulkCreate,
   wrapHits,
+  sortOrder,
+  trackTotalHits,
 }: SearchAfterAndBulkCreateParams): Promise<SearchAfterAndBulkCreateReturnType> => {
   const ruleParams = ruleSO.attributes.params;
   let toReturn = createSearchAfterReturnType();
@@ -75,6 +77,8 @@ export const searchAfterAndBulkCreate = async ({
           filter,
           pageSize: Math.ceil(Math.min(tuple.maxSignals, pageSize)),
           timestampOverride: ruleParams.timestampOverride,
+          trackTotalHits,
+          sortOrder,
         });
         mergedSearchResults = mergeSearchResults([mergedSearchResults, searchResult]);
         toReturn = mergeReturns([

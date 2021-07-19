@@ -34,6 +34,7 @@ interface SingleSearchAfterParams {
   filter: estypes.QueryDslQueryContainer;
   timestampOverride: TimestampOverrideOrUndefined;
   buildRuleMessage: BuildRuleMessage;
+  trackTotalHits?: boolean;
 }
 
 // utilize search_after for paging results into bulk.
@@ -50,6 +51,7 @@ export const singleSearchAfter = async ({
   sortOrder,
   timestampOverride,
   buildRuleMessage,
+  trackTotalHits,
 }: SingleSearchAfterParams): Promise<{
   searchResult: SignalSearchResponse;
   searchDuration: string;
@@ -66,6 +68,7 @@ export const singleSearchAfter = async ({
       sortOrder,
       searchAfterSortIds,
       timestampOverride,
+      trackTotalHits,
     });
 
     const start = performance.now();

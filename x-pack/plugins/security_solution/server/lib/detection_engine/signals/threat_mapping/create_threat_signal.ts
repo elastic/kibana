@@ -86,6 +86,8 @@ export const createThreatSignal = async ({
       enrichment: threatEnrichment,
       bulkCreate,
       wrapHits,
+      sortOrder: 'desc',
+      trackTotalHits: false,
     });
     logger.debug(
       buildRuleMessage(
