@@ -196,7 +196,7 @@ export class DashboardPanelActionsService extends FtrService {
         ? await this.testSubjects.findDescendant(LIBRARY_NOTIFICATION_TEST_SUBJ, parent)
         : await this.testSubjects.find(LIBRARY_NOTIFICATION_TEST_SUBJ);
       await libraryNotification.clickWithRetries(0);
-      await this.testSubjects.click('libraryNotificationUnlinkButton', 10);
+      await this.testSubjects.clickWithRetries('libraryNotificationUnlinkButton', 0, 10);
     });
   }
 
