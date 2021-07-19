@@ -15,12 +15,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
+  const soInfo = getService('savedObjectInfo');
+  const log = getService('log');
 
   describe('spaces feature controls', function () {
     this.tags(['skipFirefox']);
 
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+    });
+
+    after(async () => {
+      await kibanaServer.savedObjects.clean({ types: ['canvas-workpad'] });
+      await soInfo.logSoTypes(log);
     });
 
     describe('space with no features disabled', () => {
@@ -41,7 +48,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       after(async () => {
         await spacesService.delete('custom_space');
         await kibanaServer.importExport.unload(canvasDefaultArchive);
-        // await soInfo.logSoTypes(log, 'First after');
       });
 
       it('shows canvas navlink', async () => {
