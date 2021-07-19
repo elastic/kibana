@@ -14,7 +14,8 @@ import {
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { environmentQuery, rangeQuery } from '../../../../server/utils/queries';
+import { environmentQuery } from '../../../../common/utils/environment_query';
+import { rangeQuery } from '../../../../../observability/server';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { EventOutcome } from '../../../../common/event_outcome';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';

@@ -135,7 +135,7 @@ export function registerAccountCreateSourceRoute({
           login: schema.maybe(schema.string()),
           password: schema.maybe(schema.string()),
           organizations: schema.maybe(schema.arrayOf(schema.string())),
-          indexPermissions: schema.boolean(),
+          indexPermissions: schema.maybe(schema.boolean()),
         }),
       },
     },

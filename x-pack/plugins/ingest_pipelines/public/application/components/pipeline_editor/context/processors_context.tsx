@@ -158,18 +158,26 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
             'internal_networks_field',
           ];
 
+          // If the processor type is changed while editing, we need to ignore unkownOptions as they
+          // will contain the fields from the previous processor resulting in the wrong request.
+          const hasProcessorTypeChanged = mode.arg.processor.type !== processorTypeAndOptions.type;
           // The processor that we are updating may have options configured the UI does not know about
-          const unknownOptions = omit(mode.arg.processor.options, knownOptionNames);
+          const unknownOptions = hasProcessorTypeChanged
+            ? {}
+            : omit(mode.arg.processor.options, knownOptionNames);
           // In order to keep the options we don't get back from our UI, we merge the known and unknown options
           const updatedProcessorOptions = {
             ...processorTypeAndOptions.options,
             ...unknownOptions,
           };
+
           processorsDispatch({
             type: 'updateProcessor',
             payload: {
               processor: {
                 ...mode.arg.processor,
+                // Always prefer the newly selected processor type, as it might change during editing
+                type: processorTypeAndOptions.type,
                 options: updatedProcessorOptions,
               },
               selector: mode.arg.selector,
