@@ -38,7 +38,7 @@ xpack.security.session.lifespan: "7d"
 
 [IMPORTANT]
 ============================================================================
-If you specify neither session idle timeout nor lifespan, then {kib} will not automatically remove session information from the index unless you explicitly log out. This might lead to an infinitely growing session index. Configure the idle timeout and lifespan settings for the {kib} sessions so that they can be cleaned up even if you don't explicitly log out.
+If you disable session idle timeout and lifespan, then Kibana will not automatically remove session information from the index unless you explicitly log out. This might lead to an infinitely growing session index. As long as either idle timeout or lifespan is configured, Kibana sessions will be cleaned up even if you don't explicitly log out.
 ============================================================================
 
 You can configure the interval at which {kib} tries to remove expired and invalid sessions from the session index. By default, this value is 1 hour and cannot be less than 10 seconds. To define another interval, set the `xpack.security.session.cleanupInterval` property in the `kibana.yml` configuration file. The interval is formatted as a duration of `<count>[ms|s|m|h|d|w|M|Y]` (e.g. '20m', '24h', '7d', '1w'). For example, schedule the session index cleanup to perform once a day:
