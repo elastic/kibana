@@ -329,7 +329,7 @@ export function MlLatencyCorrelations({ onClose }: Props) {
             title={i18n.translate(
               'xpack.apm.correlations.latencyCorrelations.ccsWarningCalloutTitle',
               {
-                defaultMessage: 'Cross-cluster search compatilibity.',
+                defaultMessage: 'Cross-cluster search compatibility',
               }
             )}
             color="warning"
@@ -339,7 +339,7 @@ export function MlLatencyCorrelations({ onClose }: Props) {
                 'xpack.apm.correlations.latencyCorrelations.ccsWarningCalloutBody',
                 {
                   defaultMessage:
-                    'Data for the correlation analysis could not be fully retrieved. This feature is only supported for versions 7.14 and above.',
+                    'Data for the correlation analysis could not be fully retrieved. This feature is supported only for 7.14 and later versions.',
                 }
               )}
             </p>
