@@ -28,6 +28,8 @@ export class VisualBuilderPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly comboBox = this.ctx.getService('comboBox');
+  private readonly elasticChart = this.ctx.getService('elasticChart');
+  private readonly kibanaServer = this.ctx.getService('kibanaServer');
   private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
   private readonly timePicker = this.ctx.getPageObject('timePicker');
@@ -442,6 +444,51 @@ export class VisualBuilderPageObject extends FtrService {
     await this.header.waitUntilLoadingHasFinished();
   }
 
+  public async clickAnnotationsTab() {
+    await this.testSubjects.click('timeSeriesEditorAnnotationsBtn');
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
+  public async clickAnnotationsAddDataSourceButton() {
+    await this.testSubjects.click('addDataSourceButton');
+  }
+
+  public async setAnnotationFilter(query: string) {
+    const annotationQueryBar = await this.testSubjects.find('annotationQueryBar');
+    await annotationQueryBar.type(query);
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
+  public async setAnnotationFields(fields: string) {
+    const annotationFieldsInput = await this.testSubjects.find('annotationFieldsInput');
+    await annotationFieldsInput.type(fields);
+  }
+
+  public async setAnnotationRowTemplate(template: string) {
+    const annotationRowTemplateInput = await this.testSubjects.find('annotationRowTemplateInput');
+    await annotationRowTemplateInput.type(template);
+  }
+
+  public async getAnnotationsCount() {
+    const annotationsIcons = (await this.find.allByCssSelector('.echAnnotation')) ?? [];
+    return annotationsIcons.length;
+  }
+
+  public async clickAnnotationIcon(nth: number = 0) {
+    const annotationsIcons = (await this.find.allByCssSelector('.echAnnotation')) ?? [];
+    await annotationsIcons[nth].click();
+  }
+
+  public async getAnnotationTooltipHeader() {
+    const annotationTooltipHeader = await this.find.byClassName('echAnnotation__header');
+    return await annotationTooltipHeader.getVisibleText();
+  }
+
+  public async getAnnotationTooltipDetails() {
+    const annotationTooltipDetails = await this.find.byClassName('echAnnotation__details');
+    return await annotationTooltipDetails.getVisibleText();
+  }
+
   public async switchIndexPatternSelectionMode(useKibanaIndices: boolean) {
     await this.testSubjects.click('switchIndexPatternSelectionModePopover');
     await this.testSubjects.setEuiSwitch(
@@ -477,13 +524,21 @@ export class VisualBuilderPageObject extends FtrService {
 
   public async setIntervalValue(value: string) {
     const el = await this.testSubjects.find('metricsIndexPatternInterval');
-    await el.clearValue();
+    await el.clearValueWithKeyboard();
     await el.type(value);
     await this.header.waitUntilLoadingHasFinished();
   }
 
   public async setDropLastBucket(value: boolean) {
     const option = await this.testSubjects.find(`metricsDropLastBucket-${value ? 'yes' : 'no'}`);
+    (await option.findByCssSelector('label')).click();
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
+  public async setOverrideIndexPattern(value: boolean) {
+    const option = await this.testSubjects.find(
+      `seriesOverrideIndexPattern-${value ? 'yes' : 'no'}`
+    );
     (await option.findByCssSelector('label')).click();
     await this.header.waitUntilLoadingHasFinished();
   }
@@ -671,14 +726,16 @@ export class VisualBuilderPageObject extends FtrService {
     return await this.find.allByCssSelector('.tvbSeriesEditor');
   }
 
+  public async setMetricsGroupBy(option: string) {
+    const groupBy = await this.testSubjects.find('groupBySelect');
+    await this.comboBox.setElement(groupBy, option, { clickWithMouse: true });
+  }
+
   public async setMetricsGroupByTerms(
     field: string,
     filtering: { include?: string; exclude?: string } = {}
   ) {
-    const groupBy = await this.find.byCssSelector(
-      '.tvbAggRow--split [data-test-subj="comboBoxInput"]'
-    );
-    await this.comboBox.setElement(groupBy, 'Terms', { clickWithMouse: true });
+    await this.setMetricsGroupBy('terms');
     await this.common.sleep(1000);
     const byField = await this.testSubjects.find('groupByField');
     await this.comboBox.setElement(byField, field);
@@ -701,10 +758,41 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async checkSelectedMetricsGroupByValue(value: string) {
-    const groupBy = await this.find.byCssSelector(
-      '.tvbAggRow--split [data-test-subj="comboBoxInput"]'
-    );
+    const groupByField = await this.testSubjects.find('groupByField');
+    const groupBy = await this.testSubjects.findDescendant('comboBoxInput', groupByField);
     return await this.comboBox.isOptionSelected(groupBy, value);
+  }
+
+  public async addGroupByFilterRow() {
+    const addButton = await this.testSubjects.find('filterRowAddBtn');
+    await addButton.click();
+  }
+
+  public async setGroupByFilterQuery(query: string, nth: number = 0) {
+    const filterQueryInput = await this.testSubjects.findAll('filterItemsQueryBar');
+    await filterQueryInput[nth].type(query);
+  }
+
+  public async setGroupByFilterLabel(label: string, nth: number = 0) {
+    const filterLabelInput = await this.testSubjects.findAll('filterItemsLabel');
+    await filterLabelInput[nth].type(label);
+  }
+
+  public async setChartType(type: string, nth: number = 0) {
+    const seriesChartTypeComboBoxes = await this.testSubjects.findAll('seriesChartTypeComboBox');
+    return await this.comboBox.setElement(seriesChartTypeComboBoxes[nth], type);
+  }
+
+  public async setSeriesFilter(query: string) {
+    const seriesFilterQueryInput = await this.testSubjects.find('seriesConfigQueryBar');
+    await seriesFilterQueryInput.type(query);
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
+  public async setPanelFilter(query: string) {
+    const panelFilterQueryInput = await this.testSubjects.find('panelFilterQueryBar');
+    await panelFilterQueryInput.type(query);
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   public async setMetricsDataTimerangeMode(value: string) {
@@ -726,5 +814,38 @@ export class VisualBuilderPageObject extends FtrService {
       await this.comboBox.clearInputField('topHitOrderByFieldSelect');
       await this.comboBox.set('topHitOrderByFieldSelect', timeField);
     });
+  }
+
+  public async toggleNewChartsLibraryWithDebug(enabled: boolean) {
+    await this.kibanaServer.uiSettings.update({
+      'visualization:visualize:legacyChartsLibrary': !enabled,
+    });
+    await this.elasticChart.setNewChartUiDebugFlag(enabled);
+  }
+
+  public async getXAxisTitle() {
+    const [xAxis] = (await this.elasticChart.getChartDebugData())?.axes?.x ?? [];
+    return xAxis.title;
+  }
+
+  public async getLegendName(nth: number = 0) {
+    const legendItems = (await this.elasticChart.getChartDebugData())?.legend?.items ?? [];
+    return legendItems[nth]?.name;
+  }
+
+  public async getChartItemColor(nth: number = 0, itemType: 'areas' | 'bars' | 'lines' = 'areas') {
+    const chartItems = (await this.elasticChart.getChartDebugData())?.[itemType] ?? [];
+    return chartItems[nth]?.color;
+  }
+
+  public async getChartItemsCount(itemType: 'areas' | 'bars' | 'lines' = 'areas') {
+    const chartItems = (await this.elasticChart.getChartDebugData())?.[itemType] ?? [];
+    return chartItems.length;
+  }
+
+  public async getChartDatumArray(nth: number = 0) {
+    const areas = (await this.elasticChart.getChartDebugData())?.areas ?? [];
+    const points = areas[nth]?.lines.y1.points;
+    return points.map(({ x, y }) => [x, y]);
   }
 }
