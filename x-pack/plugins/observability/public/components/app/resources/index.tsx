@@ -45,7 +45,7 @@ export function Resources() {
           </h4>
         </EuiTitle>
       </EuiFlexItem>
-      <EuiListGroup flush listItems={resources} data-test-subj="list-group" />
+      <EuiListGroup flush listItems={resources} data-test-subj="list-group" size="s" />
     </EuiFlexGroup>
   );
 }

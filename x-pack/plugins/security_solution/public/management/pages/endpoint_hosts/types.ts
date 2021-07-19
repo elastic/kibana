@@ -36,7 +36,6 @@ export interface EndpointState {
   /** api error from retrieving host list */
   error?: ServerApiError;
   endpointDetails: {
-    flyoutView: EndpointIndexUIQueryParams['show'];
     activityLog: {
       paging: {
         disabled?: boolean;
