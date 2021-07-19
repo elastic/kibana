@@ -6,12 +6,17 @@
  */
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { InjectedIntl } from '@kbn/i18n/react';
 import React, { FunctionComponent } from 'react';
 import { JOB_STATUSES } from '../../common/constants';
 import { Job as ListingJob } from '../lib/job';
-import { Props as ListingProps } from './report_listing';
+import { ReportingAPIClient } from '../lib/reporting_api_client';
 
-type Props = { record: ListingJob } & ListingProps;
+interface Props {
+  intl: InjectedIntl;
+  apiClient: ReportingAPIClient;
+  record: ListingJob;
+}
 
 export const ReportDownloadButton: FunctionComponent<Props> = (props: Props) => {
   const { record, apiClient, intl } = props;
@@ -31,28 +36,14 @@ export const ReportDownloadButton: FunctionComponent<Props> = (props: Props) => 
     />
   );
 
-  if (record.csv_contains_formulas) {
+  const warnings = record.getWarnings();
+  if (warnings) {
     return (
       <EuiToolTip
         position="top"
         content={intl.formatMessage({
-          id: 'xpack.reporting.listing.table.csvContainsFormulas',
-          defaultMessage:
-            'Your CSV contains characters which spreadsheet applications can interpret as formulas.',
-        })}
-      >
-        {button}
-      </EuiToolTip>
-    );
-  }
-
-  if (record.max_size_reached) {
-    return (
-      <EuiToolTip
-        position="top"
-        content={intl.formatMessage({
-          id: 'xpack.reporting.listing.table.maxSizeReachedTooltip',
-          defaultMessage: 'Max size reached, contains partial data.',
+          id: 'xpack.reporting.listing.table.downloadReportWithWarnings',
+          defaultMessage: 'Download report with warnings.',
         })}
       >
         {button}

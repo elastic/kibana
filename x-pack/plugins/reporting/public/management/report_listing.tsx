@@ -17,12 +17,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import moment from 'moment';
 import { Component, default as React, Fragment } from 'react';
 import { Subscription } from 'rxjs';
 import { ApplicationStart, ToastsSetup } from 'src/core/public';
 import { ILicense, LicensingPluginSetup } from '../../../licensing/public';
-import { JOB_STATUSES as JobStatuses } from '../../common/constants';
 import { Poller } from '../../common/poller';
 import { durationToNumber } from '../../common/schema_utils';
 import { useIlmPolicyStatus, UseIlmPolicyStatusReturn } from '../lib/ilm_policy_status_context';
@@ -31,7 +29,11 @@ import { checkLicense } from '../lib/license_check';
 import { ReportingAPIClient, useInternalApiClient } from '../lib/reporting_api_client';
 import { ClientConfigType } from '../plugin';
 import type { SharePluginSetup } from '../shared_imports';
-import { ReportDeleteButton, ReportDownloadButton, ReportErrorButton, ReportInfoButton } from './';
+import { ReportDeleteButton } from './report_delete_button';
+import { ReportDownloadButton } from './report_download_button';
+import { ReportInfoButton } from './report_info_button';
+import { ReportErrorButton } from './report_error_button';
+import { ReportWarningsButton } from './report_warnings_button';
 import { IlmPolicyLink } from './ilm_policy_link';
 import { MigrateIlmPolicyCallOut } from './migrate_ilm_policy_callout';
 import { ReportDiagnostic } from './report_diagnostic';
@@ -58,45 +60,6 @@ interface State {
   enableLinks: boolean;
   badLicenseMessage: string;
 }
-
-const jobStatusLabelsMap = new Map<JobStatuses, string>([
-  [
-    JobStatuses.PENDING,
-    i18n.translate('xpack.reporting.jobStatuses.pendingText', {
-      defaultMessage: 'Pending',
-    }),
-  ],
-  [
-    JobStatuses.PROCESSING,
-    i18n.translate('xpack.reporting.jobStatuses.processingText', {
-      defaultMessage: 'Processing',
-    }),
-  ],
-  [
-    JobStatuses.COMPLETED,
-    i18n.translate('xpack.reporting.jobStatuses.completedText', {
-      defaultMessage: 'Completed',
-    }),
-  ],
-  [
-    JobStatuses.WARNINGS,
-    i18n.translate('xpack.reporting.jobStatuses.warningText', {
-      defaultMessage: 'Completed with warnings',
-    }),
-  ],
-  [
-    JobStatuses.FAILED,
-    i18n.translate('xpack.reporting.jobStatuses.failedText', {
-      defaultMessage: 'Failed',
-    }),
-  ],
-  [
-    JobStatuses.CANCELLED,
-    i18n.translate('xpack.reporting.jobStatuses.cancelledText', {
-      defaultMessage: 'Cancelled',
-    }),
-  ],
-]);
 
 class ReportListingUi extends Component<Props, State> {
   private isInitialJobsFetch: boolean;
@@ -312,15 +275,6 @@ class ReportListingUi extends Component<Props, State> {
     return this.state.showLinks && this.state.enableLinks;
   };
 
-  private formatDate(timestamp: string) {
-    try {
-      return moment(timestamp).format('YYYY-MM-DD @ hh:mm A');
-    } catch (error) {
-      // ignore parse error and display unformatted value
-      return timestamp;
-    }
-  }
-
   private renderTable() {
     const { intl } = this.props;
 
@@ -348,17 +302,7 @@ class ReportListingUi extends Component<Props, State> {
           id: 'xpack.reporting.listing.tableColumns.createdAtTitle',
           defaultMessage: 'Created at',
         }),
-        render: (createdAt: string, record: Job) => {
-          if (record.created_by) {
-            return (
-              <div>
-                <div>{this.formatDate(createdAt)}</div>
-                <span>{record.created_by}</span>
-              </div>
-            );
-          }
-          return this.formatDate(createdAt);
-        },
+        render: (_createdAt: string, record: Job) => record.getCreatedAtLabel(),
       },
       {
         field: 'status',
@@ -366,89 +310,7 @@ class ReportListingUi extends Component<Props, State> {
           id: 'xpack.reporting.listing.tableColumns.statusTitle',
           defaultMessage: 'Status',
         }),
-        render: (status: string, record: Job) => {
-          if (status === 'pending') {
-            return (
-              <div>
-                <FormattedMessage
-                  id="xpack.reporting.listing.tableValue.statusDetail.pendingStatusReachedText"
-                  defaultMessage="Pending - waiting for job to be processed"
-                />
-              </div>
-            );
-          }
-
-          let maxSizeReached;
-          if (record.max_size_reached) {
-            maxSizeReached = (
-              <span>
-                <FormattedMessage
-                  id="xpack.reporting.listing.tableValue.statusDetail.maxSizeReachedText"
-                  defaultMessage=" - Max size reached"
-                />
-              </span>
-            );
-          }
-
-          let warnings;
-          if (record.warnings) {
-            warnings = (
-              <EuiText size="s">
-                <EuiTextColor color="subdued">
-                  <FormattedMessage
-                    id="xpack.reporting.listing.tableValue.statusDetail.warningsText"
-                    defaultMessage="Errors occurred: see job info for details."
-                  />
-                </EuiTextColor>
-              </EuiText>
-            );
-          }
-
-          let statusTimestamp;
-          if (status === JobStatuses.PROCESSING && record.started_at) {
-            statusTimestamp = this.formatDate(record.started_at);
-          } else if (
-            record.completed_at &&
-            ([
-              JobStatuses.COMPLETED,
-              JobStatuses.FAILED,
-              JobStatuses.WARNINGS,
-            ] as string[]).includes(status)
-          ) {
-            statusTimestamp = this.formatDate(record.completed_at);
-          }
-
-          let statusLabel = jobStatusLabelsMap.get(status as JobStatuses) || status;
-
-          if (status === JobStatuses.PROCESSING) {
-            statusLabel = statusLabel + ` (attempt ${record.attempts} of ${record.max_attempts})`;
-          }
-
-          if (statusTimestamp) {
-            return (
-              <div>
-                <FormattedMessage
-                  id="xpack.reporting.listing.tableValue.statusDetail.statusTimestampText"
-                  defaultMessage="{statusLabel} at {statusTimestamp}"
-                  values={{
-                    statusLabel,
-                    statusTimestamp: <span className="eui-textNoWrap">{statusTimestamp}</span>,
-                  }}
-                />
-                {maxSizeReached}
-                {warnings}
-              </div>
-            );
-          }
-
-          // unknown status
-          return (
-            <div>
-              {statusLabel}
-              {maxSizeReached}
-            </div>
-          );
-        },
+        render: (_status: string, record: Job) => record.getStatusLabel(),
       },
       {
         name: intl.formatMessage({
@@ -460,9 +322,10 @@ class ReportListingUi extends Component<Props, State> {
             render: (record: Job) => {
               return (
                 <div>
-                  <ReportDownloadButton {...this.props} record={record} />
+                  <ReportInfoButton {...this.props} record={record} />
+                  <ReportWarningsButton {...this.props} record={record} />
                   <ReportErrorButton {...this.props} record={record} />
-                  <ReportInfoButton {...this.props} jobId={record.id} />
+                  <ReportDownloadButton {...this.props} record={record} />
                 </div>
               );
             },

@@ -6,18 +6,14 @@
  */
 
 import { EuiToolTip, EuiButtonIcon, EuiCallOut, EuiPopover } from '@elastic/eui';
-import { InjectedIntl } from '@kbn/i18n/react';
+import type { FunctionComponent } from 'react';
 import React, { useState } from 'react';
 import { Job as ListingJob } from '../lib/job';
-import { ReportingAPIClient } from '../lib/reporting_api_client';
+import { Props as ListingProps } from './report_listing';
 
-interface Props {
-  intl: InjectedIntl;
-  apiClient: ReportingAPIClient;
-  record: ListingJob;
-}
+type Props = { record: ListingJob } & ListingProps;
 
-export const ReportErrorButton = (props: Props) => {
+export const ReportWarningsButton: FunctionComponent<Props> = (props: Props) => {
   const { record, intl } = props;
 
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
@@ -30,8 +26,8 @@ export const ReportErrorButton = (props: Props) => {
     }
   };
 
-  const errorMessage = record.getError();
-  if (!errorMessage) {
+  const warnings = record.getWarnings();
+  if (!warnings) {
     return null;
   }
 
@@ -39,17 +35,17 @@ export const ReportErrorButton = (props: Props) => {
     <EuiToolTip
       position="top"
       content={props.intl.formatMessage({
-        id: 'xpack.reporting.errorButton.seeError',
-        defaultMessage: 'See error message',
+        id: 'xpack.reporting.errorButton.seeWarnings',
+        defaultMessage: 'See warning messages',
       })}
     >
       <EuiButtonIcon
         onClick={togglePopover}
         iconType="alert"
-        color={'danger'}
+        color="warning"
         aria-label={intl.formatMessage({
-          id: 'xpack.reporting.errorButton.showReportErrorAriaLabel',
-          defaultMessage: 'Show report error',
+          id: 'xpack.reporting.listing.table.warningsReportAriaLabel',
+          defaultMessage: 'See warning messages',
         })}
       />
     </EuiToolTip>
@@ -57,7 +53,7 @@ export const ReportErrorButton = (props: Props) => {
 
   return (
     <EuiPopover
-      id="popover"
+      id="warnings_popover"
       button={button}
       isOpen={isPopoverOpen}
       closePopover={() => setPopoverIsOpen(false)}
@@ -66,11 +62,11 @@ export const ReportErrorButton = (props: Props) => {
       <EuiCallOut
         color="danger"
         title={props.intl.formatMessage({
-          id: 'xpack.reporting.errorButton.unableToGenerateReportTitle',
-          defaultMessage: 'Unable to generate report',
+          id: 'xpack.reporting.warningsButton.reportHasWarnings',
+          defaultMessage: 'This report has warnings',
         })}
       >
-        {errorMessage}
+        {warnings}
       </EuiCallOut>
     </EuiPopover>
   );

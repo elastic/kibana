@@ -110,6 +110,5 @@ export enum JOB_STATUSES {
   PROCESSING = 'processing',
   COMPLETED = 'completed',
   FAILED = 'failed',
-  CANCELLED = 'cancelled',
   WARNINGS = 'completed_with_warnings',
 }
