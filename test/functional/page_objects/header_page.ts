@@ -52,7 +52,7 @@ export class HeaderPageObject extends FtrService {
 
   public async waitUntilLoadingHasFinished() {
     try {
-      await this.isGlobalLoadingIndicatorVisible(); // why does this always take 1.5s?
+      await this.isGlobalLoadingIndicatorVisible();
     } catch (exception) {
       if (exception.name === 'ElementNotVisible') {
         // selenium might just have been too slow to catch it
@@ -65,7 +65,7 @@ export class HeaderPageObject extends FtrService {
 
   public async isGlobalLoadingIndicatorVisible() {
     this.log.debug('isGlobalLoadingIndicatorVisible');
-    return await this.testSubjects.exists('globalLoadingIndicator', { timeout: 1500 }); // can this be shortened or something?
+    return await this.testSubjects.exists('globalLoadingIndicator', { timeout: 1500 });
   }
 
   public async awaitGlobalLoadingIndicatorHidden() {
