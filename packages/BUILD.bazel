@@ -57,6 +57,7 @@ filegroup(
       "//packages/kbn-test:build",
       "//packages/kbn-test-subj-selector:build",
       "//packages/kbn-tinymath:build",
+      "//packages/kbn-typed-react-router-config:build",
       "//packages/kbn-ui-framework:build",
       "//packages/kbn-ui-shared-deps:build",
       "//packages/kbn-utility-types:build",

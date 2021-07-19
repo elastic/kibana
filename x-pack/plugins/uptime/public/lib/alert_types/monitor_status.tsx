@@ -6,11 +6,17 @@
  */
 
 import React from 'react';
-import { AlertTypeModel, ValidationResult } from '../../../../triggers_actions_ui/public';
-import { AlertTypeInitializer } from '.';
+import moment from 'moment';
+
+import { ObservabilityRuleTypeModel } from '../../../../observability/public';
+import { ValidationResult } from '../../../../triggers_actions_ui/public';
 
 import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
 import { MonitorStatusTranslations } from '../../../common/translations';
+
+import { getMonitorRouteFromMonitorId } from './common';
+
+import { AlertTypeInitializer } from '.';
 
 const { defaultActionMessage, description } = MonitorStatusTranslations;
 
@@ -21,12 +27,12 @@ let validateFunc: (alertParams: any) => ValidationResult;
 export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   core,
   plugins,
-}): AlertTypeModel => ({
+}): ObservabilityRuleTypeModel => ({
   id: CLIENT_ALERT_TYPES.MONITOR_STATUS,
   description,
   iconClass: 'uptimeApp',
   documentationUrl(docLinks) {
-    return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/uptime/${docLinks.DOC_LINK_VERSION}/uptime-alerting.html#_monitor_status_alerts`;
+    return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/observability/${docLinks.DOC_LINK_VERSION}/monitor-status-alert.html`;
   },
   alertParamsExpression: (params: any) => (
     <MonitorStatusAlert core={core} plugins={plugins} params={params} />
@@ -44,4 +50,18 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   },
   defaultActionMessage,
   requiresAppContext: false,
+  format: ({ fields }) => ({
+    reason: fields.reason,
+    link: getMonitorRouteFromMonitorId({
+      monitorId: fields['monitor.id']!,
+      dateRangeEnd:
+        fields['kibana.rac.alert.status'] === 'open' ? 'now' : fields['kibana.rac.alert.end']!,
+      dateRangeStart: moment(new Date(fields['kibana.rac.alert.start']!))
+        .subtract('5', 'm')
+        .toISOString(),
+      filters: {
+        'observer.geo.name': [fields['observer.geo.name'][0]],
+      },
+    }),
+  }),
 });

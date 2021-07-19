@@ -9,7 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from 'src/core/server';
 
-import type { SearchServiceParams } from '../../../../common/search_strategies/correlations/types';
+import type { SearchServiceFetchParams } from '../../../../common/search_strategies/correlations/types';
 
 import { getQueryWithParams } from './get_query_with_params';
 import { Field } from './query_field_value_pairs';
@@ -37,7 +37,7 @@ export const hasPrefixToInclude = (fieldName: string) => {
 };
 
 export const getRandomDocsRequest = (
-  params: SearchServiceParams
+  params: SearchServiceFetchParams
 ): estypes.SearchRequest => ({
   index: params.index,
   body: {
@@ -56,7 +56,7 @@ export const getRandomDocsRequest = (
 
 export const fetchTransactionDurationFieldCandidates = async (
   esClient: ElasticsearchClient,
-  params: SearchServiceParams
+  params: SearchServiceFetchParams
 ): Promise<{ fieldCandidates: Field[] }> => {
   const { index } = params;
   // Get all fields with keyword mapping
