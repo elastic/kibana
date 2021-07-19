@@ -188,9 +188,9 @@ export function createExecutionHandler<
       const actionLabel = `${action.actionTypeId}:${action.id}`;
       if (supportsEphemeralTasks && ephemeralActionsToSchedule > 0) {
         ephemeralActionsToSchedule--;
-        actionsClient.ephemeralEnqueuedExecution(enqueueOptions).catch((err) => {
+        actionsClient.ephemeralEnqueuedExecution(enqueueOptions).catch(async (err) => {
           if (isEphemeralTaskRejectedDueToCapacityError(err)) {
-            actionsClient.enqueueExecution(enqueueOptions);
+            await actionsClient.enqueueExecution(enqueueOptions);
           }
         });
       } else {

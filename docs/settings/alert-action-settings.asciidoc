@@ -211,6 +211,6 @@ Use `full` to perform hostname verification, `certificate` to skip hostname veri
 |===
 
 | `xpack.alerting.maxEphemeralActionsPerAlert`
-  | Sets the number of actions that will be executed ephemerally.
+  | Sets the number of actions that will be executed ephemerally. To use this, enable ephemeral tasks in task manager first with <<task-manager-settings,`xpack.task_manager.ephemeral_tasks.enabled`>>
 
 |===

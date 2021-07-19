@@ -162,7 +162,7 @@ export class TaskManagerPlugin
       logger: this.logger,
       middleware: this.middleware,
       elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
-      pool: this.taskPollingLifecycle?.pool,
+      pool: this.taskPollingLifecycle.pool,
       lifecycleEvent: this.taskPollingLifecycle.events,
     });
 

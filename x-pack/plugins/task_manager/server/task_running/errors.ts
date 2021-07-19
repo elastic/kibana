@@ -44,5 +44,5 @@ export function throwUnrecoverableError(error: Error) {
 export function isEphemeralTaskRejectedDueToCapacityError(
   error: Error | EphemeralTaskRejectedDueToCapacityError
 ) {
-  return Boolean(error && (error as EphemeralTaskRejectedDueToCapacityError).task);
+  return Boolean(error && error instanceof EphemeralTaskRejectedDueToCapacityError);
 }

@@ -12,6 +12,7 @@ export const DEFAULT_MAX_WORKERS = 10;
 export const DEFAULT_POLL_INTERVAL = 3000;
 export const DEFAULT_MAX_POLL_INACTIVITY_CYCLES = 10;
 export const DEFAULT_VERSION_CONFLICT_THRESHOLD = 80;
+export const DEFAULT_MAX_EPHEMERAL_REQUEST_CAPACITY = MAX_WORKERS_LIMIT;
 
 // Monitoring Constants
 // ===================
@@ -124,6 +125,7 @@ export const configSchema = schema.object(
         // a nice round contrived number, feel free to change as we learn how it behaves
         defaultValue: 10,
         min: 1,
+        max: DEFAULT_MAX_EPHEMERAL_REQUEST_CAPACITY,
       }),
     }),
   },

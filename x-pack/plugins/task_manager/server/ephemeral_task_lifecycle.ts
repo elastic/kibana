@@ -32,9 +32,6 @@ export interface EphemeralTaskLifecycleOpts {
 
 export type EphemeralTaskInstanceRequest = Omit<EphemeralTaskInstance, 'startedAt'>;
 
-/**
- * The public interface into the task manager system.
- */
 export class EphemeralTaskLifecycle {
   private definitions: TaskTypeDictionary;
   private pool: TaskPool;
@@ -50,11 +47,6 @@ export class EphemeralTaskLifecycle {
   private middleware: Middleware;
   private lifecycleSubscription: Subscription = Subscription.EMPTY;
 
-  /**
-   * Initializes the task manager, preventing any further addition of middleware,
-   * enabling the task manipulation methods, and beginning the background polling
-   * mechanism.
-   */
   constructor({
     logger,
     middleware,

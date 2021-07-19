@@ -11,6 +11,8 @@
  * rescheduling, middleware application, etc.
  */
 
+import apm from 'elastic-apm-node';
+import { withSpan } from '@kbn/apm-utils';
 import { identity } from 'lodash';
 import { Logger } from '../../../../../src/core/server';
 
@@ -182,22 +184,38 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
       );
     }
     this.logger.debug(`Running ephemeral task ${this}`);
+    const apmTrans = apm.startTransaction(this.taskType, 'taskManager ephemeral run', {
+      childOf: this.instance.task.traceparent,
+    });
     const modifiedContext = await this.beforeRun({
       taskInstance: asConcreteInstance(this.instance.task),
     });
     const stopTaskTimer = startTaskTimer();
     try {
       this.task = this.definition.createTaskRunner(modifiedContext);
-      const result = await this.task.run();
+      const result = await withSpan({ name: 'ephemeral run', type: 'task manager' }, () =>
+        this.task!.run()
+      );
       const validatedResult = this.validateResult(result);
-      return this.processResult(validatedResult, stopTaskTimer());
+      const processedResult = await withSpan(
+        { name: 'process ephemeral result', type: 'task manager' },
+        () => this.processResult(validatedResult, stopTaskTimer())
+      );
+      if (apmTrans) apmTrans.end('success');
+      return processedResult;
     } catch (err) {
       this.logger.error(`Task ${this} failed: ${err}`);
       // in error scenario, we can not get the RunResult
-      return this.processResult(
-        asErr({ error: err, state: modifiedContext.taskInstance.state }),
-        stopTaskTimer()
+      const processedResult = await withSpan(
+        { name: 'process ephemeral result', type: 'task manager' },
+        () =>
+          this.processResult(
+            asErr({ error: err, state: modifiedContext.taskInstance.state }),
+            stopTaskTimer()
+          )
       );
+      if (apmTrans) apmTrans.end('failure');
+      return processedResult;
     }
   }
 
@@ -215,6 +233,8 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
       );
     }
 
+    const apmTrans = apm.startTransaction('taskManager', 'taskManager markTaskAsRunning');
+
     const now = new Date();
     try {
       const { taskInstance } = await this.beforeMarkRunning({
@@ -229,9 +249,11 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
         retryAt: null,
       });
 
+      if (apmTrans) apmTrans.end('success');
       this.onTaskEvent(asTaskMarkRunningEvent(this.id, asOk(this.instance.task)));
       return true;
     } catch (error) {
+      if (apmTrans) apmTrans.end('failure');
       this.onTaskEvent(asTaskMarkRunningEvent(this.id, asErr(error)));
     }
     return false;
