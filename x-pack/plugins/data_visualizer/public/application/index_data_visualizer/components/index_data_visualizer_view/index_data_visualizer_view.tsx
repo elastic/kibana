@@ -800,6 +800,27 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
 
   const helpLink = docLinks.links.ml.guide;
 
+  if (true) {
+    return (
+      <>
+        <EuiSpacer size={'l'} />
+        <FieldCountPanel
+          showEmptyFields={showEmptyFields}
+          toggleShowEmptyFields={toggleShowEmptyFields}
+          fieldsCountStats={fieldsCountStats}
+          metricsStats={metricsStats}
+        />
+        <EuiSpacer size={'m'} />
+        <DataVisualizerTable<FieldVisConfig>
+          items={configs}
+          pageState={dataVisualizerListState}
+          updatePageState={setDataVisualizerListState}
+          getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
+          extendedColumns={extendedColumns}
+        />
+      </>
+    );
+  }
   return (
     <Fragment>
       <EuiPage data-test-subj="dataVisualizerIndexPage">

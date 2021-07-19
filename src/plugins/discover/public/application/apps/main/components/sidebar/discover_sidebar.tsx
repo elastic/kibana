@@ -36,6 +36,7 @@ import { FieldFilterState, getDefaultFieldFilter, setFieldFilterProp } from './l
 import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
 import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
+import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../../../../../../../../../x-pack/plugins/ml/public/embeddables';
 
 /**
  * Default number of available fields displayed and added on scroll
