@@ -31,6 +31,7 @@ import {
   OWNER,
   RULE_UUID,
   TIMESTAMP,
+  SPACE_IDS,
 } from '../../common/technical_rule_data_field_names';
 import { RuleDataClient } from '../rule_data_client';
 import { AlertExecutorOptionsWithExtraServices } from '../types';
@@ -124,6 +125,7 @@ export const createLifecycleExecutor = (logger: Logger, ruleDataClient: RuleData
     rule,
     services: { alertInstanceFactory },
     state: previousState,
+    spaceId,
   } = options;
 
   const ruleExecutorData = getRuleData(options);
@@ -257,6 +259,15 @@ export const createLifecycleExecutor = (logger: Logger, ruleDataClient: RuleData
 
     event[ALERT_START] = started;
     event[ALERT_UUID] = alertUuid;
+
+    // not sure why typescript needs the non-null assertion here
+    // we already assert the value is not undefined with the ternary
+    // still getting an error with the ternary.. strange.
+
+    event[SPACE_IDS] =
+      event[SPACE_IDS] == null
+        ? [spaceId]
+        : [spaceId, ...event[SPACE_IDS]!.filter((sid) => sid !== spaceId)];
 
     if (isNew) {
       event[EVENT_ACTION] = 'open';
