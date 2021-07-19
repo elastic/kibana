@@ -8,7 +8,7 @@
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import qs from 'query-string';
 
 import { WithHeaderLayout } from '../../../components/layouts';
@@ -19,11 +19,17 @@ import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
 
 const NewLiveQueryPageComponent = () => {
   useBreadcrumbs('live_query_new');
+  const { replace } = useHistory();
   const location = useLocation();
   const liveQueryListProps = useRouterNavigate('live_queries');
 
   const formDefaultValue = useMemo(() => {
     const queryParams = qs.parse(location.search);
+
+    if (location.state?.form.query) {
+      replace({ state: null });
+      return { query: location.state?.form.query };
+    }
 
     if (queryParams?.agentPolicyId) {
       return {
@@ -37,7 +43,7 @@ const NewLiveQueryPageComponent = () => {
     }
 
     return undefined;
-  }, [location.search]);
+  }, [location.search, location.state, replace]);
 
   const LeftColumn = useMemo(
     () => (

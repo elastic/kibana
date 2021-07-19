@@ -28,15 +28,14 @@ import {
   nonExistingPolicies,
   patterns,
   searchBarQuery,
-  isTransformEnabled,
   getIsIsolationRequestPending,
   getCurrentIsolationRequestState,
   getActivityLogData,
   getActivityLogDataPaging,
   getLastLoadedActivityLogData,
   detailsData,
-  getEndpointDetailsFlyoutView,
   getIsEndpointPackageInfoUninitialized,
+  getIsOnEndpointDetailsActivityLog,
 } from './selectors';
 import { AgentIdsPendingActions, EndpointState, PolicyIds } from '../types';
 import {
@@ -64,7 +63,6 @@ import { AppAction } from '../../../../common/store/actions';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 import { EndpointPackageInfoStateChanged } from './action';
 import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint_pending_actions';
-import { EndpointDetailsTabsTypes } from '../view/details/components/endpoint_details_tabs';
 import { getIsInvalidDateRange } from '../utils';
 
 type EndpointPageStore = ImmutableMiddlewareAPI<EndpointState, AppAction>;
@@ -180,7 +178,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       }
 
       // get index pattern and fields for search bar
-      if (patterns(getState()).length === 0 && isTransformEnabled(getState())) {
+      if (patterns(getState()).length === 0) {
         try {
           const indexPatterns = await fetchIndexPatterns();
           if (indexPatterns !== undefined) {
@@ -370,7 +368,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
     if (
       action.type === 'userChangedUrl' &&
       hasSelectedEndpoint(getState()) === true &&
-      getEndpointDetailsFlyoutView(getState()) === EndpointDetailsTabsTypes.activityLog
+      getIsOnEndpointDetailsActivityLog(getState())
     ) {
       // call the activity log api
       dispatch({
@@ -509,13 +507,17 @@ const getAgentAndPoliciesForEndpointsList = async (
   }
 
   // Create an array of unique policy IDs that are not yet known to be non-existing.
-  const policyIdsToCheck = Array.from(
-    new Set(
-      hosts
-        .filter((host) => !currentNonExistingPolicies[host.metadata.Endpoint.policy.applied.id])
-        .map((host) => host.metadata.Endpoint.policy.applied.id)
-    )
-  );
+  const policyIdsToCheck = [
+    ...new Set(
+      hosts.reduce((acc: string[], host) => {
+        const appliedPolicyId = host.metadata.Endpoint.policy.applied.id;
+        if (!currentNonExistingPolicies[appliedPolicyId]) {
+          acc.push(appliedPolicyId);
+        }
+        return acc;
+      }, [])
+    ),
+  ];
 
   if (policyIdsToCheck.length === 0) {
     return;

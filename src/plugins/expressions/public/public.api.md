@@ -120,7 +120,7 @@ export class Execution<Input = unknown, Output = unknown, InspectorAdapters exte
     // (undocumented)
     resolveArgs(fnDef: ExpressionFunction, input: unknown, argAsts: any): Observable<any>;
     readonly result: Observable<ExecutionResult<Output | ExpressionValueError>>;
-    start(input?: Input): Observable<ExecutionResult<Output | ExpressionValueError>>;
+    start(input?: Input, isSubExpression?: boolean): Observable<ExecutionResult<Output | ExpressionValueError>>;
     // Warning: (ae-forgotten-export) The symbol "ExecutionResult" needs to be exported by the entry point index.d.ts
     readonly state: ExecutionContainer<ExecutionResult<Output | ExpressionValueError>>;
 }
@@ -908,7 +908,6 @@ export interface IExpressionLoaderParams {
     //
     // (undocumented)
     onRenderError?: RenderErrorHandlerFnType;
-    // (undocumented)
     partial?: boolean;
     // Warning: (ae-forgotten-export) The symbol "RenderMode" needs to be exported by the entry point index.d.ts
     //
@@ -920,6 +919,7 @@ export interface IExpressionLoaderParams {
     searchSessionId?: string;
     // (undocumented)
     syncColors?: boolean;
+    throttle?: number;
     // (undocumented)
     uiState?: unknown;
     // (undocumented)

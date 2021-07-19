@@ -39,5 +39,5 @@ export declare class Execution<Input = unknown, Output = unknown, InspectorAdapt
 |  [invokeChain(chainArr, input)](./kibana-plugin-plugins-expressions-server.execution.invokechain.md) |  |  |
 |  [invokeFunction(fn, input, args)](./kibana-plugin-plugins-expressions-server.execution.invokefunction.md) |  |  |
 |  [resolveArgs(fnDef, input, argAsts)](./kibana-plugin-plugins-expressions-server.execution.resolveargs.md) |  |  |
-|  [start(input)](./kibana-plugin-plugins-expressions-server.execution.start.md) |  | Call this method to start execution.<!-- -->N.B. <code>input</code> is initialized to <code>null</code> rather than <code>undefined</code> for legacy reasons, because in legacy interpreter it was set to <code>null</code> by default. |
+|  [start(input, isSubExpression)](./kibana-plugin-plugins-expressions-server.execution.start.md) |  | Call this method to start execution.<!-- -->N.B. <code>input</code> is initialized to <code>null</code> rather than <code>undefined</code> for legacy reasons, because in legacy interpreter it was set to <code>null</code> by default. |
 

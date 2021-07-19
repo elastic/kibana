@@ -10,7 +10,6 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiLink,
@@ -737,9 +736,8 @@ export const OnPremInstructions: React.FC = () => {
   }, [notifications.toasts]);
 
   return (
-    <EuiPanel paddingSize="l" grow={false} hasShadow={false} hasBorder={true}>
-      <EuiSpacer size="s" />
-      <EuiText className="eui-textCenter">
+    <>
+      <EuiText>
         <h2>
           <FormattedMessage
             id="xpack.fleet.fleetServerSetup.setupTitle"
@@ -788,6 +786,6 @@ export const OnPremInstructions: React.FC = () => {
             : CompleteStep(),
         ]}
       />
-    </EuiPanel>
+    </>
   );
 };
