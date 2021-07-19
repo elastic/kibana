@@ -466,6 +466,7 @@ export const stringifyComment = (comment: Parent) =>
         {
           allowDangerousHtml: true,
           handlers: {
+            // @ts-expect-error
             lens: (a) =>
               `!{lens${JSON.stringify({
                 timeRange: a.timeRange,
