@@ -17,7 +17,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { Location } from 'history';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { useTrackPageview } from '../../../../../observability/public';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { IUrlParams } from '../../../context/url_params_context/types';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
@@ -50,20 +49,14 @@ function getRedirectLocation({
   }
 }
 
-interface TransactionOverviewProps {
-  serviceName: string;
-}
-
-export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
+export function TransactionOverview() {
   const location = useLocation();
   const { urlParams } = useUrlParams();
-  const { transactionType } = useApmServiceContext();
+  const { transactionType, serviceName } = useApmServiceContext();
 
   // redirect to first transaction type
   useRedirect(getRedirectLocation({ location, transactionType, urlParams }));
 
-  useTrackPageview({ app: 'apm', path: 'transaction_overview' });
-  useTrackPageview({ app: 'apm', path: 'transaction_overview', delay: 15000 });
   const {
     transactionListData,
     transactionListStatus,

@@ -15,6 +15,7 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useUiTracker } from '../../../../../../observability/public';
 import { ElasticDocsLink } from '../../../shared/Links/ElasticDocsLink';
 
 interface Props {
@@ -27,6 +28,7 @@ export function ConfirmSwitchModal({
   onCancel,
   unsupportedConfigs,
 }: Props) {
+  const trackApmEvent = useUiTracker({ app: 'apm' });
   const [isConfirmChecked, setIsConfirmChecked] = useState(false);
   const hasUnsupportedConfigs = !!unsupportedConfigs.length;
   return (
@@ -48,7 +50,12 @@ export function ConfirmSwitchModal({
         }
       )}
       defaultFocusedButton="confirm"
-      onConfirm={onConfirm}
+      onConfirm={() => {
+        trackApmEvent({
+          metric: 'confirm_data_stream_switch',
+        });
+        onConfirm();
+      }}
       confirmButtonDisabled={!isConfirmChecked}
     >
       <p>
