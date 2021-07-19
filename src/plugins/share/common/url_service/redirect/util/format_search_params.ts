@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { RedirectOptions } from '../redirect_manager';
+import { RedirectOptions } from '..';
 
 export function formatSearchParams(opts: RedirectOptions): URLSearchParams {
   const searchParams = new URLSearchParams();

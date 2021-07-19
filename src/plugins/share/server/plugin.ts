@@ -12,7 +12,7 @@ import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
 import { createRoutes } from './routes/create_routes';
 import { url } from './saved_objects';
 import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../common/constants';
-import { UrlService } from '../common/url_service';
+import { UrlService, formatSearchParams } from '../common/url_service';
 
 /** @public */
 export interface SharePluginSetup {
@@ -37,8 +37,13 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
       getUrl: async () => {
         throw new Error('Locator .getUrl() currently is not supported on the server.');
       },
-      getRedirectUrl: async () => {
-        throw new Error('Locator .getRedirectUrl() currently is not supported on the server.');
+      getRedirectUrl: async (definition, params) => {
+        const start = await core.getStartServices();
+        const version = this.initializerContext.env.packageInfo.version;
+        const redirect = start[0].http.basePath.prepend(
+          'r?' + formatSearchParams({ id: definition.id, version, params }).toString()
+        );
+        return redirect;
       },
     });
 

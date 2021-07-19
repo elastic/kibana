@@ -18,6 +18,7 @@ export class MockUrlService extends UrlService {
       getUrl: async ({ app, path }, { absolute }) => {
         return `${absolute ? 'http://localhost:8888' : ''}/app/${app}${path}`;
       },
+      getRedirectUrl: async () => 'http://localhost:8888',
     });
   }
 }

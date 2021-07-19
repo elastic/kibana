@@ -19,6 +19,7 @@ const createSetupContract = (): Setup => {
     locator: {
       getLocation: jest.fn(),
       getUrl: jest.fn(),
+      getRedirectUrl: jest.fn(),
       useUrl: jest.fn(),
       navigate: jest.fn(),
       extract: jest.fn(),
@@ -39,6 +40,7 @@ const createStartContract = (): Start => {
     locator: {
       getLocation: jest.fn(),
       getUrl: jest.fn(),
+      getRedirectUrl: jest.fn(),
       useUrl: jest.fn(),
       navigate: jest.fn(),
       extract: jest.fn(),

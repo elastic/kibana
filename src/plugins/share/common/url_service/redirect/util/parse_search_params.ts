@@ -8,7 +8,7 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
-import type { RedirectOptions } from '../redirect_manager';
+import type { RedirectOptions } from '..';
 
 /**
  * Parses redirect endpoint URL path search parameters. Expects them in the

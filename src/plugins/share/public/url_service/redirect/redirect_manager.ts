@@ -9,22 +9,10 @@
 import type { CoreSetup } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
-import type { SerializableRecord } from '@kbn/utility-types';
 import { migrateToLatest } from '../../../../kibana_utils/common';
-import type { UrlService } from '../../../common/url_service';
+import type { UrlService, RedirectOptions } from '../../../common/url_service';
+import { parseSearchParams } from '../../../common/url_service';
 import { render } from './render';
-import { parseSearchParams } from './util/parse_search_params';
-
-export interface RedirectOptions {
-  /** Locator ID. */
-  id: string;
-
-  /** Kibana version when locator params where generated. */
-  version: string;
-
-  /** Locator params. */
-  params: unknown & SerializableRecord;
-}
 
 export interface RedirectManagerDependencies {
   url: UrlService;

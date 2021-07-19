@@ -37,6 +37,7 @@ const createSetupContract = (): ManagementSetup => ({
       state: {},
     })),
     getUrl: jest.fn(),
+    getRedirectUrl: jest.fn(),
     useUrl: jest.fn(),
     navigate: jest.fn(),
     extract: jest.fn(),

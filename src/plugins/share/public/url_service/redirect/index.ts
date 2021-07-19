@@ -7,5 +7,3 @@
  */
 
 export * from './redirect_manager';
-export { formatSearchParams } from './util/format_search_params';
-export { parseSearchParams } from './util/parse_search_params';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableState } from 'src/plugins/kibana_utils/common';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { Filter, Query } from '../../../data/public';
 import { LocatorDefinition, LocatorPublic } from '../../../share/public';
 import type { DashboardOptions, DashboardPanelMap } from '../types';
@@ -17,7 +17,7 @@ import { stateToRawDashboardState } from '../application/lib/convert_dashboard_s
 
 export const DASHBOARD_SHARE_LOCATOR = 'DASHBOARD_SHARE_LOCATOR';
 
-export interface DashboardShareLocatorParams extends SerializableState {
+export interface DashboardShareLocatorParams extends SerializableRecord {
   query: Query;
   title: string;
   tags: string[];
@@ -28,8 +28,8 @@ export interface DashboardShareLocatorParams extends SerializableState {
   timeRestore: boolean;
   fullScreenMode: boolean;
   expandedPanelId?: string;
-  options: DashboardOptions & SerializableState;
-  panels: DashboardPanelMap & SerializableState;
+  options: DashboardOptions & SerializableRecord;
+  panels: DashboardPanelMap & SerializableRecord;
 }
 
 export type DashboardShareLocator = LocatorPublic<DashboardShareLocatorParams>;

@@ -33,7 +33,7 @@ export interface LocatorDependencies {
   /**
    * Create an absolute, redirected, migrateable URL.
    */
-  getRedirectUrl: <P extends SerializableState>(
+  getRedirectUrl: <P extends SerializableRecord>(
     definition: LocatorDefinition<P>,
     params: P
   ) => Promise<string>;

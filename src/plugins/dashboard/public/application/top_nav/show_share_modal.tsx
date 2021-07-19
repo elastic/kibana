@@ -10,7 +10,7 @@ import { Capabilities } from 'src/core/public';
 import { EuiCheckboxGroup } from '@elastic/eui';
 import React from 'react';
 import { ReactElement, useState } from 'react';
-import { SerializableState } from 'src/plugins/kibana_utils/common';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { DashboardSavedObject } from '../..';
 import { SharePluginStart } from '../../services/share';
 import { dashboardUrlParams } from '../dashboard_router';
@@ -110,7 +110,7 @@ export function ShowShareModal({
     ...currentDashboardState,
     options: { ...currentDashboardState.options },
     // TODO: why is this necessary?  also seems like everyone has to do this.
-    panels: { ...currentDashboardState.panels } as DashboardPanelMap & SerializableState,
+    panels: { ...currentDashboardState.panels } as DashboardPanelMap & SerializableRecord,
     version: kibanaVersion,
   };
 
