@@ -10,7 +10,7 @@ import React from 'react';
 import type { AdvancedSettingsSetup } from 'src/plugins/advanced_settings/public';
 import type { TelemetryPluginSetup } from 'src/plugins/telemetry/public';
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import type { CoreStart, CoreSetup } from 'src/core/public';
+import type { Plugin, CoreStart, CoreSetup } from 'src/core/public';
 
 import {
   telemetryManagementSectionWrapper,
@@ -34,7 +34,17 @@ export interface TelemetryManagementSectionPluginDepsSetup {
   usageCollection?: UsageCollectionSetup;
 }
 
-export class TelemetryManagementSectionPlugin {
+export interface TelemetryManagementSectionPluginSetup {
+  toggleSecuritySolutionExample: (enabled: boolean) => void;
+}
+
+export class TelemetryManagementSectionPlugin
+  implements Plugin<TelemetryManagementSectionPluginSetup> {
+  private showSecuritySolutionExample = false;
+  private shouldShowSecuritySolutionExample = () => {
+    return this.showSecuritySolutionExample;
+  };
+
   public setup(
     core: CoreSetup,
     {
@@ -50,16 +60,21 @@ export class TelemetryManagementSectionPlugin {
       (props) => {
         return (
           <ApplicationUsageTrackingProvider>
-            {telemetryManagementSectionWrapper(telemetryService)(
-              props as TelemetryManagementSectionWrapperProps
-            )}
+            {telemetryManagementSectionWrapper(
+              telemetryService,
+              this.shouldShowSecuritySolutionExample
+            )(props as TelemetryManagementSectionWrapperProps)}
           </ApplicationUsageTrackingProvider>
         );
       },
       true
     );
 
-    return {};
+    return {
+      toggleSecuritySolutionExample: (enabled: boolean) => {
+        this.showSecuritySolutionExample = enabled;
+      },
+    };
   }
 
   public start(core: CoreStart) {}
