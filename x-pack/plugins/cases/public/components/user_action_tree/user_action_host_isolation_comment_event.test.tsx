@@ -26,7 +26,7 @@ describe('UserActionHostIsolationCommentEvent', () => {
   it('renders with the correct action and hostname', async () => {
     const wrapper = mount(<HostIsolationCommentEvent {...defaultProps()} />);
     expect(wrapper.find(`[data-test-subj="actions-link-e1"]`).first().exists()).toBeTruthy();
-    expect(wrapper.text()).toBe('isolate submitted on host host1');
+    expect(wrapper.text()).toBe('isolate request submitted on host host1');
   });
 
   it('navigates to app on link click', async () => {
