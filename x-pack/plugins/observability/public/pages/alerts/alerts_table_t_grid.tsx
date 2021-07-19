@@ -22,7 +22,6 @@ import type { TimelinesUIStart } from '../../../../timelines/public';
 import type { TopAlert } from './';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import type { ActionProps, ColumnHeaderOptions, RowRenderer } from '../../../../timelines/common';
-// import { EventsThContent } from '../../../../timelines/public';
 
 import { getRenderCellValue } from './render_cell_value';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -38,7 +37,6 @@ interface AlertsTableTGridProps {
   setRefetch: (ref: () => void) => void;
 }
 
-// TODO import EventsThContent from timelines plugin and customize a few css properties (position & padding-top)
 const EventsThContent = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__thContent ${className}`,
 }))<{ textAlign?: string; width?: number }>`
@@ -126,7 +124,13 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       id: 'expand',
       width: 40,
       headerCellRender: () => {
-        return <EventsThContent>Actions</EventsThContent>; // TODO: internationalization
+        return (
+          <EventsThContent>
+            {i18n.translate('xpack.observability.alertsTable.actionsTextLabel', {
+              defaultMessage: 'Actions',
+            })}
+          </EventsThContent>
+        );
       },
       rowCellRender: ({ data }: ActionProps) => {
         const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
