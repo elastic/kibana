@@ -22,24 +22,22 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useState } from 'react';
 import { CoreStart } from 'kibana/public';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
-import { TableText } from '../';
+import { IClickActionDescriptor } from '../';
 import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
-import { OnActionClick, OnActionComplete, OnActionDismiss } from './types';
+import { OnActionDismiss } from './types';
+import { UISession } from '../../types';
 
 interface RenameButtonProps {
-  id: string;
-  name: string;
+  searchSession: UISession;
   api: SearchSessionsMgmtAPI;
-  overlays: CoreStart['overlays'];
-  onActionComplete: OnActionComplete;
-  onActionClick: OnActionClick;
 }
 
 const RenameDialog = ({
   onActionDismiss,
   ...props
 }: RenameButtonProps & { onActionDismiss: OnActionDismiss }) => {
-  const { id, name: originalName, api, onActionComplete } = props;
+  const { api, searchSession } = props;
+  const { id, name: originalName } = searchSession;
   const [isLoading, setIsLoading] = useState(false);
   const [newName, setNewName] = useState(originalName);
 
@@ -92,7 +90,6 @@ const RenameDialog = ({
             await api.sendRename(id, newName);
             setIsLoading(false);
             onActionDismiss();
-            onActionComplete();
           }}
           fill
           isLoading={isLoading}
@@ -104,24 +101,21 @@ const RenameDialog = ({
   );
 };
 
-export const RenameButton = (props: RenameButtonProps) => {
-  const { overlays, onActionClick } = props;
-
-  const onClick = () => {
-    onActionClick();
-    const ref = overlays.openModal(
-      toMountPoint(<RenameDialog onActionDismiss={() => ref?.close()} {...props} />)
+export const createRenameActionDescriptor = (
+  api: SearchSessionsMgmtAPI,
+  uiSession: UISession,
+  core: CoreStart
+): IClickActionDescriptor => ({
+  iconType: 'pencil',
+  label: (
+    <FormattedMessage id="xpack.data.mgmt.searchSessions.actionRename" defaultMessage="Edit name" />
+  ),
+  onClick: async () => {
+    const ref = core.overlays.openModal(
+      toMountPoint(
+        <RenameDialog onActionDismiss={() => ref?.close()} api={api} searchSession={uiSession} />
+      )
     );
-  };
-
-  return (
-    <>
-      <TableText onClick={onClick}>
-        <FormattedMessage
-          id="xpack.data.mgmt.searchSessions.actionRename"
-          defaultMessage="Edit name"
-        />
-      </TableText>
-    </>
-  );
-};
+    await ref.onClose;
+  },
+});
