@@ -1,5 +1,5 @@
 get:
-  summary: Enrollment - List
+  summary: Enrollment API Keys - List
   tags: []
   responses:
     '200':
@@ -27,7 +27,7 @@ get:
   operationId: get-fleet-enrollment-api-keys
   parameters: []
 post:
-  summary: Enrollment - Create
+  summary: Enrollment API Key - Create
   tags: []
   responses:
     '200':
