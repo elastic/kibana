@@ -10,7 +10,6 @@ import useDebounce from 'react-use/lib/useDebounce';
 import {
   EuiButtonIcon,
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
@@ -60,7 +59,7 @@ export const MonitorListComponent: ({
 
   useDebounce(
     () => {
-      setHideExtraColumns(['m', 'l'].includes(getBreakpoint(width)));
+      setHideExtraColumns(['m', 'l'].includes(getBreakpoint(width) ?? ''));
     },
     50,
     [width]
