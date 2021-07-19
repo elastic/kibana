@@ -6,17 +6,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
-
+import {
+  CoreSetup,
+  PluginInitializerContext,
+  Plugin,
+  Logger,
+} from '../../../../src/core/server';
 import { schema } from '@kbn/config-schema';
 import { PLUGIN } from '../common/constants';
 import { License } from './services';
-import { Dependencies } from './types';
-import { registerExecuteRoute } from './routes/api';
+import { EcsMapperPluginDependencies } from './types';
 
 export const config = {
   schema: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+    enabled: schema.boolean({ defaultValue: true }),
   }),
 };
 
@@ -29,9 +32,7 @@ export class EcsMapperServerPlugin implements Plugin {
     this.license = new License();
   }
 
-  setup({ http }: CoreSetup, { licensing }: Dependencies) {
-    const router = http.createRouter();
-
+  setup({ http }: CoreSetup, { licensing }: EcsMapperPluginDependencies) {
     this.license.setup(
       {
         pluginId: PLUGIN.id,
@@ -45,8 +46,6 @@ export class EcsMapperServerPlugin implements Plugin {
         logger: this.logger,
       }
     );
-
-    registerExecuteRoute({ router, license: this.license });
   }
 
   start() {}

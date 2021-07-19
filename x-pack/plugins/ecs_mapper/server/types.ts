@@ -5,15 +5,21 @@
  * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter } from 'src/core/server/http';
 import { LicensingPluginSetup } from '../../licensing/server';
-import { License } from './services';
+import { License, Mapper } from './services';
 
-export interface Dependencies {
+export enum FieldRenameAction {
+  Copy = 'copy',
+  Rename = 'rename',
+}
+
+export interface EcsMapperPluginDependencies {
   licensing: LicensingPluginSetup;
 }
 
 export interface RouteDependencies {
   router: IRouter;
   license: License;
+  mapper: Mapper;
 }

@@ -7,8 +7,9 @@
 
 import React, { Component } from 'react';
 
-import { AboutPanel, LoadingPanel } from './upload_panel';
+import { AboutPanel, LoadingPanel, ResultsPanel } from './upload_panel';
 import { readFile } from '../util/utils';
+import { FieldRenameAction } from '../../../../server/types';
 
 export class EcsMapperUploadView extends Component {
   constructor(props) {
@@ -64,13 +65,17 @@ export class EcsMapperUploadView extends Component {
     if (file.size <= this.maxFileUploadBytes) {
       try {
         const { data, fileContents } = await readFile(file, this.maxFileUploadBytes);
-        console.log(fileContents);
         this.setState({
           data,
           fileContents,
           fileName: file.name,
           fileSize: file.size,
+          loading: true,
+        }); 
+        const result = this.props.mapperService.mapToIngestPipeline(file, FieldRenameAction.Copy);
+        this.setState({
           loading: false,
+          loaded: true
         });
       } catch (error) {
         this.setState({
@@ -108,6 +113,8 @@ export class EcsMapperUploadView extends Component {
           )}
 
           {loading && <LoadingPanel />}
+
+          {loaded && <ResultsPanel />}
         </>
       </div>
     );

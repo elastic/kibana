@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { License } from './license';
+export { License} from './license';
+export { Mapper } from './mapper'

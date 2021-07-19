@@ -10,17 +10,18 @@ import { getPluginsStart } from '../../kibana_services';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 
 // @ts-ignore
-import { EcsMapperUploadView } from '../components/upload/index';
+import { EcsMapperUploadView } from '../components/map/index';
 
 export const EcsMapperMainUi: FC = () => {
-  const { fileUpload } = getPluginsStart();
+  const { fileUpload, mapper } = getPluginsStart();
   const services = {
     fileUpload,
+    mapper
   };
 
   return (
     <KibanaContextProvider services={{ ...services }}>
-      <EcsMapperUploadView fileUpload={fileUpload} />
+      <EcsMapperUploadView fileUpload={fileUpload} mapperService={mapper} />
     </KibanaContextProvider>
   );
 };

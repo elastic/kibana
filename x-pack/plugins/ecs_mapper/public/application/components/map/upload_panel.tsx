@@ -87,3 +87,24 @@ export const LoadingPanel: FC = () => {
     </EuiPage>
   );
 };
+
+export const ResultsPanel: FC = () => {
+  return (
+    <EuiPage className="prfDevTool__page mapper-main" data-test-subj="ecsMapperResultsLoaded">
+      <EuiPageBody className="prfDevTool__page__pageBody">
+        <EuiPageContent className="prfDevTool__page__pageBodyContent">
+          <div style={{ textAlign: 'center' }}>
+            <EuiTitle size="s">
+              <h1 role="alert">
+                <FormattedMessage
+                  id="xpack.ecsMapper.file.upload.resultsTitle"
+                  defaultMessage="Super exciting results coming soon...."
+                />
+              </h1>
+            </EuiTitle>
+          </div>
+        </EuiPageContent>
+      </EuiPageBody>
+    </EuiPage>
+  );
+};
