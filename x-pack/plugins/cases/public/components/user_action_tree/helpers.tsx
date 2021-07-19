@@ -5,9 +5,17 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiCommentProps } from '@elastic/eui';
-import React from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiCommentProps,
+  EuiToken,
+} from '@elastic/eui';
+import React, { useContext } from 'react';
 import classNames from 'classnames';
+import { ThemeContext } from 'styled-components';
 import {
   CaseFullExternalService,
   ActionConnector,
@@ -37,6 +45,7 @@ interface LabelTitle {
   action: CaseUserActions;
   field: string;
 }
+
 export type RuleDetailsNavigation = CasesNavigation<string | null | undefined, 'configurable'>;
 
 export type ActionsNavigation = CasesNavigation<string, 'configurable'>;
@@ -365,6 +374,22 @@ export const getGeneratedAlertsAttachment = ({
   ),
 });
 
+const ActionIcon = React.memo<{
+  actionType: string;
+}>(({ actionType }) => {
+  const theme = useContext(ThemeContext);
+  return (
+    <EuiToken
+      style={{ marginTop: '8px' }}
+      iconType={actionType === 'isolate' ? 'lock' : 'lockOpen'}
+      size="m"
+      shape="circle"
+      color={theme.eui.euiColorLightestShade}
+      data-test-subj="endpoint-action-icon"
+    />
+  );
+});
+
 export const getActionAttachment = ({
   comment,
   userCanCrud,
@@ -397,7 +422,7 @@ export const getActionAttachment = ({
   ),
   'data-test-subj': 'endpoint-action',
   timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
-  timelineIcon: comment.actions.type === 'isolate' ? 'lock' : 'lockOpen',
+  timelineIcon: <ActionIcon actionType={comment.actions.type} />,
   actions: (
     <UserActionCopyLink
       id={comment.id}
