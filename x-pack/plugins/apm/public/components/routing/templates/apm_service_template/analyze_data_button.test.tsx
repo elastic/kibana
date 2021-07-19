@@ -30,7 +30,7 @@ describe('AnalyzeDataButton', () => {
       render(<Example agentName="rum-js" />);
 
       expect((screen.getByRole('link') as HTMLAnchorElement).href).toEqual(
-        'http://localhost/app/observability/exploratory-view#?sr=(apm-series:(dt:ux,isNew:!t,op:average,rdf:(service.environment:!(testEnvironment),service.name:!(testServiceName)),rt:kpi-over-time,time:(from:now-15m,to:now)))'
+        'http://localhost/app/observability/exploratory-view/configure#?reportType=kpi-over-time&sr=!((dt:ux,mt:transaction.duration.us,n:testServiceName-response-latency,o:0,op:average,rdf:(service.environment:!(testEnvironment),service.name:!(testServiceName)),time:(from:now-15m,to:now)))'
       );
     });
   });
@@ -40,7 +40,7 @@ describe('AnalyzeDataButton', () => {
       render(<Example agentName="iOS/swift" />);
 
       expect((screen.getByRole('link') as HTMLAnchorElement).href).toEqual(
-        'http://localhost/app/observability/exploratory-view#?sr=(apm-series:(dt:mobile,isNew:!t,op:average,rdf:(service.environment:!(testEnvironment),service.name:!(testServiceName)),rt:kpi-over-time,time:(from:now-15m,to:now)))'
+        'http://localhost/app/observability/exploratory-view/configure#?reportType=kpi-over-time&sr=!((dt:mobile,mt:transaction.duration.us,n:testServiceName-response-latency,o:0,op:average,rdf:(service.environment:!(testEnvironment),service.name:!(testServiceName)),time:(from:now-15m,to:now)))'
       );
     });
   });
@@ -50,7 +50,7 @@ describe('AnalyzeDataButton', () => {
       render(<Example environment={undefined} />);
 
       expect((screen.getByRole('link') as HTMLAnchorElement).href).toEqual(
-        'http://localhost/app/observability/exploratory-view#?sr=(apm-series:(dt:mobile,isNew:!t,op:average,rdf:(service.name:!(testServiceName)),rt:kpi-over-time,time:(from:now-15m,to:now)))'
+        'http://localhost/app/observability/exploratory-view/configure#?reportType=kpi-over-time&sr=!((dt:mobile,mt:transaction.duration.us,n:testServiceName-response-latency,o:0,op:average,rdf:(service.name:!(testServiceName)),time:(from:now-15m,to:now)))'
       );
     });
   });
@@ -60,7 +60,7 @@ describe('AnalyzeDataButton', () => {
       render(<Example environment={ENVIRONMENT_NOT_DEFINED.value} />);
 
       expect((screen.getByRole('link') as HTMLAnchorElement).href).toEqual(
-        'http://localhost/app/observability/exploratory-view#?sr=(apm-series:(dt:mobile,isNew:!t,op:average,rdf:(service.name:!(testServiceName)),rt:kpi-over-time,time:(from:now-15m,to:now)))'
+        'http://localhost/app/observability/exploratory-view/configure#?reportType=kpi-over-time&sr=!((dt:mobile,mt:transaction.duration.us,n:testServiceName-response-latency,o:0,op:average,rdf:(service.environment:!(ENVIRONMENT_NOT_DEFINED),service.name:!(testServiceName)),time:(from:now-15m,to:now)))'
       );
     });
   });
@@ -70,7 +70,7 @@ describe('AnalyzeDataButton', () => {
       render(<Example environment={ENVIRONMENT_ALL.value} />);
 
       expect((screen.getByRole('link') as HTMLAnchorElement).href).toEqual(
-        'http://localhost/app/observability/exploratory-view#?sr=(apm-series:(dt:mobile,isNew:!t,op:average,rdf:(service.environment:!(ALL_VALUES),service.name:!(testServiceName)),rt:kpi-over-time,time:(from:now-15m,to:now)))'
+        'http://localhost/app/observability/exploratory-view/configure#?reportType=kpi-over-time&sr=!((dt:mobile,mt:transaction.duration.us,n:testServiceName-response-latency,o:0,op:average,rdf:(service.environment:!(ALL_VALUES),service.name:!(testServiceName)),time:(from:now-15m,to:now)))'
       );
     });
   });
