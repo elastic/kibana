@@ -54,13 +54,13 @@ export const ACTIVITY_LOG = {
       isolatedAction: i18n.translate(
         'xpack.securitySolution.endpointDetails.activityLog.logEntry.action.isolated',
         {
-          defaultMessage: 'submitted isolate host',
+          defaultMessage: 'submitted request: Isolate host',
         }
       ),
       unisolatedAction: i18n.translate(
         'xpack.securitySolution.endpointDetails.activityLog.logEntry.action.unisolated',
         {
-          defaultMessage: 'submitted release host',
+          defaultMessage: 'submitted request: Release host',
         }
       ),
     },
@@ -68,25 +68,25 @@ export const ACTIVITY_LOG = {
       isolationSuccessful: i18n.translate(
         'xpack.securitySolution.endpointDetails.activityLog.logEntry.response.isolationSuccessful',
         {
-          defaultMessage: 'host isolation acknowledged',
+          defaultMessage: 'Host isolation request received by Endpoint',
         }
       ),
       isolationFailed: i18n.translate(
         'xpack.securitySolution.endpointDetails.activityLog.logEntry.response.isolationFailed',
         {
-          defaultMessage: 'host isolation acknowledged with errors',
+          defaultMessage: 'Host isolation request received by Endpoint with errors',
         }
       ),
       unisolationSuccessful: i18n.translate(
         'xpack.securitySolution.endpointDetails.activityLog.logEntry.response.unisolationSuccessful',
         {
-          defaultMessage: 'host release acknowledged',
+          defaultMessage: 'Release host request received by Endpoint',
         }
       ),
       unisolationFailed: i18n.translate(
         'xpack.securitySolution.endpointDetails.activityLog.logEntry.response.unisolationFailed',
         {
-          defaultMessage: 'host release acknowledged with errors',
+          defaultMessage: 'Release host request received by Endpoint with errors',
         }
       ),
     },
