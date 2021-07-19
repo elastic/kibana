@@ -79,7 +79,7 @@ describe('Processor: Set', () => {
     });
   });
 
-  test('allows to set either value or copy_From', async () => {
+  test('allows to set either value or copy_from', async () => {
     const { find, form } = testBed;
 
     expect(find('valueFieldInput').exists()).toBe(true);

@@ -48,7 +48,15 @@ const fieldsConfig: FieldsConfig = {
       {
         validator: ({ value, path, formData }) => {
           if (isEmpty(value) && isEmpty(formData['fields.copy_from'])) {
-            return { path, message: 'Either this field or copy_from should be specified.' };
+            return {
+              path,
+              message: i18n.translate(
+                'xpack.ingestPipelines.pipelineEditor.setForm.valueFieldError',
+                {
+                  defaultMessage: 'Either this field or copy_from should be specified.',
+                }
+              ),
+            };
           }
         },
       },
@@ -63,9 +71,10 @@ const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.setForm.copyFromFieldHelpText"
-        defaultMessage="The origin field which will be copied to field. Used only when {field} is not specified."
+        defaultMessage="The origin field which will be copied to {field}. Used only when {value} is not specified."
         values={{
-          field: <EuiCode>{'value'}</EuiCode>,
+          field: <EuiCode>{'field'}</EuiCode>,
+          value: <EuiCode>{'value'}</EuiCode>,
         }}
       />
     ),
@@ -74,7 +83,15 @@ const fieldsConfig: FieldsConfig = {
       {
         validator: ({ value, path, formData }) => {
           if (isEmpty(value) && isEmpty(formData['fields.value'])) {
-            return { path, message: 'Either this field or value should be specified.' };
+            return {
+              path,
+              message: i18n.translate(
+                'xpack.ingestPipelines.pipelineEditor.setForm.copyFromFieldError',
+                {
+                  defaultMessage: 'Either this field or value should be specified.',
+                }
+              ),
+            };
           }
         },
       },
@@ -146,6 +163,12 @@ export const SetProcessor: FunctionComponent = () => {
 
   return (
     <>
+      <FieldNameField
+        helpText={i18n.translate('xpack.ingestPipelines.pipelineEditor.setForm.fieldNameField', {
+          defaultMessage: 'Field to insert or update.',
+        })}
+      />
+
       <UseField
         config={fieldsConfig.value}
         component={Field}
@@ -195,12 +218,6 @@ export const SetProcessor: FunctionComponent = () => {
           },
         }}
         data-test-subj="copyFromField"
-      />
-
-      <FieldNameField
-        helpText={i18n.translate('xpack.ingestPipelines.pipelineEditor.setForm.fieldNameField', {
-          defaultMessage: 'Field to insert or update.',
-        })}
       />
 
       <UseField
