@@ -7,21 +7,20 @@
 
 /* eslint-disable react/display-name */
 
-import { EuiCheckbox, EuiPanel, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiPanel, EuiText } from '@elastic/eui';
 import { get } from 'lodash';
 import memoizeOne from 'memoize-one';
 import React from 'react';
 import styled from 'styled-components';
 import { BrowserFields } from '../../containers/source';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/public';
-import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
-import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import { OnUpdateColumns } from '../../../timelines/components/timeline/events';
 import * as i18n from './translations';
 import { EventFieldsData } from './types';
 import { ColumnHeaderOptions } from '../../../../common';
 import { FieldValueCell } from './table/field_value_cell';
 import { FieldNameCell } from './table/field_name_cell';
+import { ActionCell } from './table/action_cell';
 
 const HoverActionsContainer = styled(EuiPanel)`
   align-items: center;
@@ -63,31 +62,30 @@ export const getColumns = ({
   getLinkValue: (field: string) => string | null;
 }) => [
   {
-    field: 'field',
-    name: '',
+    field: 'values',
+    name: (
+      <EuiText size="xs">
+        <strong>{i18n.ACTIONS}</strong>
+      </EuiText>
+    ),
     sortable: false,
     truncateText: false,
-    width: '30px',
-    render: (field: string, data: EventFieldsData) => {
-      const label = data.isObjectArray ? i18n.NESTED_COLUMN(field) : i18n.VIEW_COLUMN(field);
+    width: '180px',
+    render: (values: string[] | null | undefined, data: EventFieldsData) => {
+      const label = data.isObjectArray
+        ? i18n.NESTED_COLUMN(data.field)
+        : i18n.VIEW_COLUMN(data.field);
       return (
-        <EuiToolTip content={label}>
-          <EuiCheckbox
-            aria-label={label}
-            checked={columnHeaders.findIndex((c) => c.id === field) !== -1}
-            data-test-subj={`toggle-field-${field}`}
-            data-colindex={1}
-            id={field}
-            onChange={() =>
-              toggleColumn({
-                columnHeaderType: defaultColumnHeaderType,
-                id: field,
-                initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
-              })
-            }
-            disabled={data.isObjectArray && data.type !== 'geo_point'}
-          />
-        </EuiToolTip>
+        <ActionCell
+          aria-label={label}
+          contextId={contextId}
+          data={data}
+          eventId={eventId}
+          getLinkValue={getLinkValue}
+          toggleColumn={toggleColumn}
+          timelineId={timelineId}
+          values={values}
+        />
       );
     },
   },

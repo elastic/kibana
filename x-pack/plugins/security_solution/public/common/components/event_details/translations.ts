@@ -90,3 +90,7 @@ export const MULTI_FIELD_BADGE = i18n.translate(
     defaultMessage: 'multi-field',
   }
 );
+
+export const ACTIONS = i18n.translate('xpack.securitySolution.eventDetails.table.actions', {
+  defaultMessage: 'Actions',
+});

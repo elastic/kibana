@@ -68,22 +68,22 @@ const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
           opacity: 1;
         }
       }
-      &:hover {
-        .timelines__hoverActionButton,
-        .securitySolution__hoverActionButton {
-          opacity: 1;
-        }
-      }
+    }
+    &:hover {
       .timelines__hoverActionButton,
       .securitySolution__hoverActionButton {
-        // TODO: Using this logic from discover
-        /* @include euiBreakpoint('m', 'l', 'xl') {
-          opacity: 0;
-        } */
+        opacity: 1;
+      }
+    }
+    .timelines__hoverActionButton,
+    .securitySolution__hoverActionButton {
+      // TODO: Using this logic from discover
+      /* @include euiBreakpoint('m', 'l', 'xl') {
         opacity: 0;
-        &:focus {
-          opacity: 1;
-        }
+      } */
+      opacity: 0;
+      &:focus {
+        opacity: 1;
       }
     }
   }

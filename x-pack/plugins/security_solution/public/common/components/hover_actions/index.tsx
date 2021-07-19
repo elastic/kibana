@@ -40,6 +40,7 @@ AdditionalContent.displayName = 'AdditionalContent';
 
 const StyledHoverActionsContainer = styled.div<{ $showTopN: boolean }>`
   padding: ${(props) => (props.$showTopN ? 'none' : props.theme.eui.paddingSizes.s)};
+  display: flex;
 
   &:focus-within {
     .timelines__hoverActionButton,
@@ -74,8 +75,8 @@ interface Props {
   dataType?: string;
   draggableId?: DraggableId;
   field: string;
-  isObjectArray: boolean;
   goGetTimelineId?: (args: boolean) => void;
+  isObjectArray: boolean;
   onFilterAdded?: () => void;
   ownFocus: boolean;
   showTopN: boolean;

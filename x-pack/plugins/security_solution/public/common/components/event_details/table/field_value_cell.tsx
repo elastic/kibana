@@ -44,7 +44,7 @@ export const FieldValueCell = React.memo(
                   <OverflowField value={value} />
                 ) : (
                   <FormattedFieldValue
-                    contextId={`event-details-value-formatted-field-value-${contextId}-${eventId}-${data.field}-${i}-${value}`}
+                    contextId={`${contextId}-${eventId}-${data.field}-${i}-${value}`}
                     eventId={eventId}
                     fieldFormat={data.format}
                     fieldName={data.field}
