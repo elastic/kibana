@@ -8,11 +8,3 @@
   }
 }
 
-/*
-This ensures the wizard goes full page width, and that the data grid in the page does not
-cause the body of the wizard page to overflow into the side navigation of the Kibana
-Stack Management page on resize.
-*/
-.transform__wizardBody {
-  max-width: calc(100% - 16px);
-}
