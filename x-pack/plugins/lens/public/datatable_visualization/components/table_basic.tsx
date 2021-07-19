@@ -329,7 +329,15 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   }, [columnConfig.columns, alignments, firstTable, columns]);
 
   if (isEmpty) {
-    return <EmptyPlaceholder icon={LensIconChartDatatable} />;
+    return (
+      <VisualizationContainer
+        className="lnsDataTableContainer"
+        reportTitle={props.args.title}
+        reportDescription={props.args.description}
+      >
+        <EmptyPlaceholder icon={LensIconChartDatatable} />;
+      </VisualizationContainer>
+    );
   }
 
   const dataGridAriaLabel =
