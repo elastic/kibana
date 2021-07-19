@@ -12,6 +12,8 @@ export {
   setupEnvironment,
   WithFieldEditorDependencies,
   spySearchResult,
+  spyIndexPatternGetAllFields,
+  fieldFormatsOptions,
 } from './setup_environment';
 
 export { getCommonActions } from './common_actions';

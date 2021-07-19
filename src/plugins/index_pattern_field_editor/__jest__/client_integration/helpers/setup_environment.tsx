@@ -25,6 +25,7 @@ const dataStart = dataPluginMock.createStartContract();
 const { search, fieldFormats } = dataStart;
 
 export const spySearchResult = jest.fn();
+export const spyIndexPatternGetAllFields = jest.fn().mockImplementation(() => []);
 
 search.search = () =>
   ({
@@ -44,21 +45,6 @@ export const setupEnvironment = () => {
   };
 };
 
-export const indexPatternFields = [
-  {
-    name: 'field1',
-    displayName: 'field1',
-  },
-  {
-    name: 'field2',
-    displayName: 'field2',
-  },
-  {
-    name: 'field3',
-    displayName: 'field3',
-  },
-];
-
 export const fieldFormatsOptions = [{ id: 'upper', title: 'UpperCaseString' } as any];
 
 export const WithFieldEditorDependencies = <T extends object = { [key: string]: unknown }>(
@@ -74,10 +60,24 @@ export const WithFieldEditorDependencies = <T extends object = { [key: string]: 
     typeof fieldFormats['getDefaultType']
   >).mockReturnValue({ id: 'testDefaultFormat', title: 'TestDefaultFormat' } as any);
 
+  (fieldFormats.getInstance as jest.MockedFunction<
+    typeof fieldFormats['getInstance']
+  >).mockImplementation((id: string) => {
+    if (id === 'upper') {
+      return {
+        convertObject: {
+          html(value) {
+            return `<span>${value.toUpperCase()}</span>`;
+          },
+        },
+      };
+    }
+  });
+
   const dependencies: Context = {
     indexPattern: {
       title: 'testIndexPattern',
-      fields: { getAll: () => indexPatternFields },
+      fields: { getAll: spyIndexPatternGetAllFields },
     } as any,
     uiSettings: uiSettingsServiceMock.createStartContract(),
     fieldTypeToProcess: 'runtime',

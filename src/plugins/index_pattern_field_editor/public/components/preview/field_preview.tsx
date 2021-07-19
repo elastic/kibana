@@ -57,7 +57,7 @@ export const FieldPreview = () => {
 
     return (
       <ul>
-        <li>
+        <li data-test-subj="fieldPreviewItem">
           <PreviewListItem field={field} highlighted />
         </li>
       </ul>
@@ -92,6 +92,7 @@ export const FieldPreview = () => {
               }
             )}
             fullWidth
+            data-test-subj="filterFieldsInput"
           />
           <EuiSpacer size="s" />
 

@@ -33,12 +33,16 @@ export const getCommonActions = (testBed: TestBed) => {
     await act(async () => {
       testBed.form.setInputValue('nameField.input', value);
     });
+
+    testBed.component.update();
   };
 
   const updateScript = async (value: string) => {
     await act(async () => {
       testBed.form.setInputValue('scriptField', value);
     });
+
+    testBed.component.update();
   };
 
   const updateType = async (value: string, label?: string) => {
@@ -50,6 +54,15 @@ export const getCommonActions = (testBed: TestBed) => {
         },
       ]);
     });
+
+    testBed.component.update();
+  };
+
+  const updateFormat = async (value: string, label?: string) => {
+    await act(async () => {
+      testBed.find('editorSelectedFormatId').simulate('change', { target: { value } });
+    });
+
     testBed.component.update();
   };
 
@@ -70,6 +83,7 @@ export const getCommonActions = (testBed: TestBed) => {
       updateName,
       updateType,
       updateScript,
+      updateFormat,
     },
   };
 };

@@ -70,11 +70,19 @@ export const PreviewListItem: React.FC<Props> = ({
 
   return (
     <>
-      <EuiFlexGroup className={classes} gutterSize="none">
+      <EuiFlexGroup className={classes} gutterSize="none" data-test-subj="listItem">
         <EuiFlexItem className="indexPatternFieldEditor__previewFieldList__item__key">
-          <div className="indexPatternFieldEditor__previewFieldList__item__key__wrapper">{key}</div>
+          <div
+            className="indexPatternFieldEditor__previewFieldList__item__key__wrapper"
+            data-test-subj="key"
+          >
+            {key}
+          </div>
         </EuiFlexItem>
-        <EuiFlexItem className="indexPatternFieldEditor__previewFieldList__item__value">
+        <EuiFlexItem
+          className="indexPatternFieldEditor__previewFieldList__item__value"
+          data-test-subj="value"
+        >
           <EuiToolTip
             position="top"
             content={typeof value !== 'string' ? JSON.stringify(value) : value}
@@ -94,6 +102,7 @@ export const PreviewListItem: React.FC<Props> = ({
               }}
               color="text"
               iconType="pinFilled"
+              data-test-subj="pinFieldButton"
               aria-label={i18n.translate(
                 'indexPatternFieldEditor.fieldPreview.pinFieldButtonLabel',
                 {
