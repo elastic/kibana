@@ -43,10 +43,12 @@ export function AnalyzeDataButton() {
   const { urlParams } = useUrlParams();
   const { rangeTo, rangeFrom, environment } = urlParams;
   const basepath = services.http?.basePath.get();
+  const canShowDashboard = services.application?.capabilities.dashboard.show;
 
   if (
     (isRumAgentName(agentName) || isIosAgentName(agentName)) &&
     rangeFrom &&
+    canShowDashboard &&
     rangeTo
   ) {
     const href = createExploratoryViewUrl(
