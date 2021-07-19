@@ -76,7 +76,7 @@ id: ${getPluginApiDocId(doc.id)}
 slug: /kibana-dev-docs/${doc.id}PluginApi
 title: ${doc.id}
 image: https://source.unsplash.com/400x175/?github
-summary: API docs for the ${doc.id} plugin
+description: API docs for the ${doc.id} plugin
 date: 2020-11-16
 tags: ['contributor', 'dev', 'apidocs', 'kibana', '${doc.id}']
 warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system. Reach out in #docs-engineering for more info.
@@ -85,21 +85,19 @@ import ${json} from './${fileName}.json';
 
 ${plugin.manifest.description ?? ''}
 
-${
-  plugin.manifest.owner?.githubTeam && name
-    ? `Contact [${name}](https://github.com/orgs/elastic/teams/${plugin.manifest.owner?.githubTeam}) for questions regarding this plugin.`
-    : name
-    ? `Contact ${name} for questions regarding this plugin.`
-    : ''
-}
+${plugin.manifest.owner?.githubTeam && name
+        ? `Contact [${name}](https://github.com/orgs/elastic/teams/${plugin.manifest.owner?.githubTeam}) for questions regarding this plugin.`
+        : name
+          ? `Contact ${name} for questions regarding this plugin.`
+          : ''
+      }
 
 **Code health stats**
 
-| Public API count  | Any count | Items lacking comments | Missing exports | 
+| Public API count  | Any count | Items lacking comments | Missing exports |
 |-------------------|-----------|------------------------|-----------------|
-| ${pluginStats.apiCount} | ${pluginStats.isAnyType.length} | ${
-      pluginStats.missingComments.length
-    } | ${pluginStats.missingExports} |
+| ${pluginStats.apiCount} | ${pluginStats.isAnyType.length} | ${pluginStats.missingComments.length
+      } | ${pluginStats.missingExports} |
 
 `) + '\n\n';
 

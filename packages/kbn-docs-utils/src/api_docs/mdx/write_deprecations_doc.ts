@@ -23,21 +23,18 @@ export function writeDeprecationDoc(
     .map((key) => {
       return `
     ## ${key}
-    
+
     | Deprecated API | Reference location | Remove By |
     | ---------------|-----------|-----------|
     ${deprecations[key]
-      .map((dep) => {
-        const path = dep.ref.link.path;
-        return `| <DocLink id="${getPluginApiDocId(dep.deprecatedApi.parentPluginId)}" section="${
-          dep.deprecatedApi.id
-        }" text="${dep.deprecatedApi.label}"/> | [${path.substr(path.lastIndexOf(Path.sep) + 1)}#L${
-          dep.ref.link.lineNumber
-        }](https://github.com/elastic/kibana/tree/master/${path}#L${dep.ref.link.lineNumber}) | ${
-          dep.deprecatedApi.removeBy ? dep.deprecatedApi.removeBy : '-'
-        } |`;
-      })
-      .join('\n')}
+          .map((dep) => {
+            const path = dep.ref.link.path;
+            return `| <DocLink id="${getPluginApiDocId(dep.deprecatedApi.parentPluginId)}" section="${dep.deprecatedApi.id
+              }" text="${dep.deprecatedApi.label}"/> | [${path.substr(path.lastIndexOf(Path.sep) + 1)}#L${dep.ref.link.lineNumber
+              }](https://github.com/elastic/kibana/tree/master/${path}#L${dep.ref.link.lineNumber}) | ${dep.deprecatedApi.removeBy ? dep.deprecatedApi.removeBy : '-'
+              } |`;
+          })
+          .join('\n')}
     `;
     })
     .join('\n\n');
@@ -47,13 +44,13 @@ export function writeDeprecationDoc(
 id: kibDevDocsDeprecations
 slug: /kibana-dev-docs/deprecated-api-list
 title: Deprecated API usage
-summary: A list of deprecated APIs, which plugins are still referencing them, and when they need to be removed by.
+description: A list of deprecated APIs, which plugins are still referencing them, and when they need to be removed by.
 date: 2021-05-02
 tags: ['contributor', 'dev', 'apidocs', 'kibana']
 warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system.
 ---
 
-${tableMdx}   
+${tableMdx}
 
 `);
 
