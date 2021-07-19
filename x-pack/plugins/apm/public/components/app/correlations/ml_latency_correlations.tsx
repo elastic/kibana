@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import {
   EuiCallOut,
   EuiCode,
@@ -38,7 +38,10 @@ import {
 } from './correlations_table';
 import { useCorrelations } from './use_correlations';
 import { push } from '../../shared/Links/url_helpers';
-import { useUiTracker } from '../../../../../observability/public';
+import {
+  enableInspectEsQueries,
+  useUiTracker,
+} from '../../../../../observability/public';
 import { asPreciseDecimal } from '../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { LatencyCorrelationsHelpPopover } from './ml_latency_correlations_help_popover';
@@ -62,7 +65,7 @@ interface MlCorrelationsTerms {
 
 export function MlLatencyCorrelations({ onClose }: Props) {
   const {
-    core: { notifications },
+    core: { notifications, uiSettings },
   } = useApmPluginContext();
 
   const { serviceName, transactionType } = useApmServiceContext();
@@ -70,8 +73,7 @@ export function MlLatencyCorrelations({ onClose }: Props) {
 
   const { environment, kuery, transactionName, start, end } = urlParams;
 
-  const location = useLocation();
-  const displayLog = location.search.includes('debug=true');
+  const displayLog = uiSettings.get<boolean>(enableInspectEsQueries);
 
   const {
     ccsWarning,
