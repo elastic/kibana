@@ -29,7 +29,7 @@ import {
 import * as i18n from './translations';
 import { tGridSelectors } from '../../../../store/t_grid';
 import { getColumnsWithTimestamp } from '../../../utils/helpers';
-import { OnUpdateColumns, BrowserFields } from '../../../../../common';
+import type { OnUpdateColumns, BrowserFields } from '../../../../../common';
 
 const CategoryName = styled.span<{ bold: boolean }>`
   .euiText {

@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { BrowserFields, OnUpdateColumns } from '../../../../../common';
+import type { BrowserFields, OnUpdateColumns } from '../../../../../common';
 import { useDeepEqualSelector } from '../../../../hooks/use_selector';
 import { tGridSelectors } from '../../../../store/t_grid';
 

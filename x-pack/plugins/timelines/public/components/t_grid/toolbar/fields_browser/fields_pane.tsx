@@ -104,12 +104,9 @@ export const FieldsPane = React.memo<Props>(
           data-test-subj="category"
           filteredBrowserFields={filteredBrowserFields}
           fieldItems={getFieldItems({
-            // browserFields: filteredBrowserFields,
             category: filteredBrowserFields[selectedCategoryId],
-            // categoryId: selectedCategoryId,
             columnHeaders,
             highlight: searchInput,
-            // onUpdateColumns,
             timelineId,
             toggleColumn,
           })}

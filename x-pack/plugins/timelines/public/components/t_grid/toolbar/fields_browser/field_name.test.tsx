@@ -48,22 +48,6 @@ describe('FieldName', () => {
     ).toEqual(timestampFieldId);
   });
 
-  // TODO: does this drag&drop-integrated functionality need to be migrated?
-  test.skip('it renders a copy to clipboard action menu item a user hovers over the name', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <FieldName {...defaultProps} />
-      </TestProviders>
-    );
-    await waitFor(() => {
-      wrapper.find('[data-test-subj="withHoverActionsButton"]').at(0).simulate('mouseenter');
-      wrapper.update();
-      jest.runAllTimers();
-      wrapper.update();
-      expect(wrapper.find('[data-test-subj="copy-to-clipboard"]').exists()).toBe(true);
-    });
-  });
-
   test('it highlights the text specified by the `highlight` prop', () => {
     const highlight = 'stamp';
 
