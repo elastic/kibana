@@ -23,7 +23,10 @@ import {
   ServiceField,
   TransactionTypeField,
 } from '../fields';
-import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { useServiceName } from '../../../hooks/use_service_name';
+import { useServiceTransactionTypesFetcher } from '../../../context/apm_service/use_service_transaction_types_fetcher';
+import { useServiceAgentNameFetcher } from '../../../context/apm_service/use_service_agent_name_fetcher';
+import { getTransactionType } from '../../../context/apm_service/apm_service_context';
 
 interface AlertParams {
   windowSize: number;
@@ -47,11 +50,19 @@ interface Props {
 export function TransactionDurationAnomalyAlertTrigger(props: Props) {
   const { setAlertParams, alertParams, setAlertProperty } = props;
   const { urlParams } = useUrlParams();
-  const {
-    serviceName: serviceNameFromContext,
-    transactionType: transactionTypeFromContext,
+
+  const serviceNameFromUrl = useServiceName();
+
+  const transactionTypes = useServiceTransactionTypesFetcher(
+    serviceNameFromUrl
+  );
+  const { agentName } = useServiceAgentNameFetcher(serviceNameFromUrl);
+
+  const transactionTypeFromUrl = getTransactionType({
+    transactionType: urlParams.transactionType,
     transactionTypes,
-  } = useApmServiceContext();
+    agentName,
+  });
 
   const { start, end, environment: environmentFromUrl } = urlParams;
 
@@ -62,10 +73,10 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
     {
       windowSize: 15,
       windowUnit: 'm',
-      transactionType: transactionTypeFromContext,
+      transactionType: transactionTypeFromUrl,
       environment: environmentFromUrl || ENVIRONMENT_ALL.value,
       anomalySeverityType: ANOMALY_SEVERITY.CRITICAL,
-      serviceName: serviceNameFromContext,
+      serviceName: serviceNameFromUrl,
     }
   );
 
