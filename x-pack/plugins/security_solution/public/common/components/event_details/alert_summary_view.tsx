@@ -6,7 +6,7 @@
  */
 
 import { EuiBasicTableColumn, EuiSpacer, EuiHorizontalRule, EuiTitle, EuiText } from '@elastic/eui';
-import { get, getOr, find } from 'lodash/fp';
+import { get, getOr, find, isEmpty } from 'lodash/fp';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -35,6 +35,7 @@ import { useRuleWithFallback } from '../../../detections/containers/detection_en
 import { MarkdownRenderer } from '../markdown_editor';
 import { LineClamp } from '../line_clamp';
 import { endpointAlertCheck } from '../../utils/endpoint_alert_check';
+import { getEmptyValue } from '../empty_value';
 
 export const Indent = styled.div`
   padding: 0 8px;
@@ -82,16 +83,21 @@ const getDescription = ({
   value,
   fieldType = '',
   linkValue,
-}: AlertSummaryRow['description']) => (
-  <FormattedFieldValue
-    contextId={`alert-details-value-formatted-field-value-${contextId}-${eventId}-${fieldName}-${value}`}
-    eventId={eventId}
-    fieldName={fieldName}
-    fieldType={fieldType}
-    value={value}
-    linkValue={linkValue}
-  />
-);
+}: AlertSummaryRow['description']) => {
+  if (isEmpty(value)) {
+    return <>{getEmptyValue()}</>;
+  }
+  return (
+    <FormattedFieldValue
+      contextId={`alert-details-value-formatted-field-value-${contextId}-${eventId}-${fieldName}-${value}`}
+      eventId={eventId}
+      fieldName={fieldName}
+      fieldType={fieldType}
+      value={value}
+      linkValue={linkValue}
+    />
+  );
+};
 
 const getSummaryRows = ({
   data,
@@ -120,9 +126,26 @@ const getSummaryRows = ({
 
   return data != null
     ? tableFields.reduce<SummaryRow[]>((acc, item) => {
+        const initialDescription = {
+          title: item.label ?? item.id,
+          description: {
+            contextId: timelineId,
+            eventId,
+            fieldName: item.id,
+            value: null,
+            fieldType: 'string',
+            linkValue: undefined,
+          },
+        };
         const field = data.find((d) => d.field === item.id);
         if (!field) {
-          return acc;
+          return [
+            ...acc,
+            {
+              title: item.label ?? item.id,
+              description: initialDescription,
+            },
+          ];
         }
         const linkValueField =
           item.linkField != null && data.find((d) => d.field === item.linkField);
@@ -131,9 +154,7 @@ const getSummaryRows = ({
         const category = field.category;
         const fieldType = get(`${category}.fields.${field.field}.type`, browserFields) as string;
         const description = {
-          contextId: timelineId,
-          eventId,
-          fieldName: item.id,
+          ...initialDescription,
           value,
           fieldType: item.fieldType ?? fieldType,
           linkValue: linkValue ?? undefined,
