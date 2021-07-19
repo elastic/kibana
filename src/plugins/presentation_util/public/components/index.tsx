@@ -38,5 +38,5 @@ export const LazySavedObjectSaveModalDashboard = React.lazy(
   () => import('./saved_object_save_modal_dashboard')
 );
 
-export { createShape, ShapeType, getDefaultShapeData } from './shape';
+export { createShape, getDefaultShapeData, ShapeDrawer } from './shape';
 export * from './types';

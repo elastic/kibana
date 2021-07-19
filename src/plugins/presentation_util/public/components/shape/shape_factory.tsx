@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { viewBoxToString } from '../../common/lib';
+import { viewBoxToString } from '../../../common/lib';
 import { ShapeProps, SvgConfig, SvgElementTypes } from './types';
 
 export const getShapeComponent = (svgParams: SvgConfig) =>
@@ -45,8 +45,6 @@ export const createShape = (props: SvgConfig) => {
     data: props,
   };
 };
-
-export type ShapeType = ReturnType<typeof createShape>;
 
 export const getDefaultShapeData = (): SvgConfig => ({
   viewBox: {

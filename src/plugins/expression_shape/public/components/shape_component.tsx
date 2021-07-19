@@ -14,10 +14,10 @@ import {
   SvgConfig,
   getDefaultShapeData,
   withSuspense,
+  ShapeRef,
 } from '../../../presentation_util/public';
 import { Dimensions, ShapeComponentProps } from './types';
 import { getViewBox } from '../../common/lib';
-import type { ShapeRef } from './shape_drawer';
 
 const LazyShapeDrawer = lazy(() => import('./shape_drawer'));
 const ShapeDrawer = withSuspense(LazyShapeDrawer);

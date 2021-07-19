@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SVGProps } from 'react';
 import { OnSaveProps, SaveModalState } from '../../../../plugins/saved_objects/public';
-import { ViewBoxParams } from '../../common/types';
 
 interface SaveModalDocumentInfo {
   id?: string;
@@ -25,62 +23,4 @@ export interface SaveModalDashboardProps {
   tagOptions?: React.ReactNode | ((state: SaveModalState) => React.ReactNode);
 }
 
-export interface ShapeProps {
-  shapeAttributes?: ShapeAttributes;
-  shapeContentAttributes?: ShapeContentAttributes;
-}
-
-export enum SvgElementTypes {
-  polygon,
-  circle,
-  rect,
-  path,
-}
-
-export interface ShapeAttributes {
-  fill?: SVGProps<SVGElement>['fill'];
-  stroke?: SVGProps<SVGElement>['stroke'];
-  width?: SVGProps<SVGElement>['width'];
-  height?: SVGProps<SVGElement>['height'];
-  viewBox?: ViewBoxParams;
-  overflow?: SVGProps<SVGElement>['overflow'];
-  preserveAspectRatio?: SVGProps<SVGElement>['preserveAspectRatio'];
-}
-
-export interface ShapeContentAttributes {
-  strokeWidth?: SVGProps<SVGElement>['strokeWidth'];
-  stroke?: SVGProps<SVGElement>['stroke'];
-  fill?: SVGProps<SVGElement>['fill'];
-  vectorEffect?: SVGProps<SVGElement>['vectorEffect'];
-  strokeMiterlimit?: SVGProps<SVGElement>['strokeMiterlimit'];
-}
-
-interface CircleParams {
-  r: SVGProps<SVGCircleElement>['r'];
-  cx: SVGProps<SVGCircleElement>['cx'];
-  cy: SVGProps<SVGCircleElement>['cy'];
-}
-
-interface RectParams {
-  x: SVGProps<SVGRectElement>['x'];
-  y: SVGProps<SVGRectElement>['y'];
-  width: SVGProps<SVGRectElement>['width'];
-  height: SVGProps<SVGRectElement>['height'];
-}
-
-interface PathParams {
-  d: SVGProps<SVGPathElement>['d'];
-}
-
-interface PolygonParams {
-  points?: SVGProps<SVGPolygonElement>['points'];
-  strokeLinejoin?: SVGProps<SVGPolygonElement>['strokeLinejoin'];
-}
-
-type SpecificShapeContentAttributes = CircleParams | RectParams | PathParams | PolygonParams;
-
-export interface SvgConfig {
-  shapeType?: SvgElementTypes;
-  viewBox: ViewBoxParams;
-  shapeProps: ShapeContentAttributes & SpecificShapeContentAttributes;
-}
+export * from './shape/types';

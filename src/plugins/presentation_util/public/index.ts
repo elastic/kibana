@@ -39,7 +39,7 @@ export {
   withSuspense,
   createShape,
   getDefaultShapeData,
-  ShapeType,
+  ShapeDrawer,
 } from './components';
 
 export { useLoad } from './hooks';

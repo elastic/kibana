@@ -8,23 +8,23 @@
 import React, { FC, RefCallback, useCallback, useState } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Shape,
-  ShapeDrawerProps,
   LazyShapeDrawer,
-  ShapeRef,
+  Shape,
+  ShapeDrawerComponentProps,
 } from '../../../../../../src/plugins/expression_shape/public';
 import {
   withSuspense,
   ViewBoxParams,
   getDefaultShapeData,
   SvgConfig,
+  ShapeRef,
 } from '../../../../../../src/plugins/presentation_util/public';
 
 interface Props {
   shape?: Shape;
 }
 
-const ShapeDrawer = withSuspense<ShapeDrawerProps, ShapeRef>(LazyShapeDrawer);
+const ShapeDrawer = withSuspense<ShapeDrawerComponentProps, ShapeRef>(LazyShapeDrawer);
 
 function getViewBox(defaultWidth: number, defaultViewBox: ViewBoxParams): ViewBoxParams {
   const { minX, minY, width, height } = defaultViewBox;
