@@ -35,12 +35,10 @@ export const createInitialState = (
   pluginsInitState: SecuritySubPlugins['store']['initialState'],
   {
     kibanaIndexPatterns,
-    configIndexPatterns,
     signalIndexName,
     enableExperimental,
   }: {
     kibanaIndexPatterns: KibanaIndexPatterns;
-    configIndexPatterns: string[];
     signalIndexName: string | null;
     enableExperimental: ExperimentalFeatures;
   }
@@ -56,11 +54,10 @@ export const createInitialState = (
         ...sourcererModel.initialSourcererState.sourcererScopes,
         default: {
           ...sourcererModel.initialSourcererState.sourcererScopes.default,
-          indicesExist: configIndexPatterns.length > 0,
+          indicesExist: [].length > 0, // TODO: Steph/sourcerer get new default KIP to be selected by default
         },
       },
       kibanaIndexPatterns,
-      configIndexPatterns,
       signalIndexName,
     },
   };

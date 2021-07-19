@@ -15,11 +15,10 @@ export interface IndicesSelector {
 
 export const getIndicesSelector = () => {
   const getkibanaIndexPatternsSelector = sourcererSelectors.kibanaIndexPatternsSelector();
-  const getConfigIndexPatternsSelector = sourcererSelectors.configIndexPatternsSelector();
   const getSignalIndexNameSelector = sourcererSelectors.signalIndexNameSelector();
 
   const mapStateToProps = (state: State): IndicesSelector => {
-    const rawIndices = new Set(getConfigIndexPatternsSelector(state));
+    const rawIndices = new Set<string>();
     const kibanaIndexPatterns = getkibanaIndexPatternsSelector(state);
     const alertIndexName = getSignalIndexNameSelector(state);
     kibanaIndexPatterns.forEach(({ title }) => {

@@ -16,9 +16,6 @@ export const sourcererKibanaIndexPatternsSelector = ({ sourcerer }: State): Kiba
 export const sourcererSignalIndexNameSelector = ({ sourcerer }: State): string | null =>
   sourcerer.signalIndexName;
 
-export const sourcererConfigIndexPatternsSelector = ({ sourcerer }: State): string[] =>
-  sourcerer.configIndexPatterns;
-
 export const sourcererScopeIdSelector = (
   { sourcerer }: State,
   scopeId: SourcererScopeName
@@ -40,25 +37,16 @@ export const kibanaIndexPatternsSelector = () =>
 export const signalIndexNameSelector = () =>
   createSelector(sourcererSignalIndexNameSelector, (signalIndexName) => signalIndexName);
 
-export const configIndexPatternsSelector = () =>
-  createSelector(
-    sourcererConfigIndexPatternsSelector,
-    (configIndexPatterns) => configIndexPatterns
-  );
-
 export const getIndexNamesSelectedSelector = () => {
   const getScopeSelector = scopeIdSelector();
-  const getConfigIndexPatternsSelector = configIndexPatternsSelector();
 
   const mapStateToProps = (
     state: State,
     scopeId: SourcererScopeName
   ): { indexNames: string[]; previousIndexNames: string } => {
     const scope = getScopeSelector(state, scopeId);
-    const configIndexPatterns = getConfigIndexPatternsSelector(state);
     return {
-      indexNames:
-        scope.selectedPatterns.length === 0 ? configIndexPatterns : scope.selectedPatterns,
+      indexNames: scope.selectedPatterns.length === 0 ? [] : scope.selectedPatterns, // TODO: Steph/sourcerer get new default KIP to be selected by default
       previousIndexNames: scope.indexPattern.title,
     };
   };
@@ -67,15 +55,12 @@ export const getIndexNamesSelectedSelector = () => {
 
 export const getAllExistingIndexNamesSelector = () => {
   const getSignalIndexNameSelector = signalIndexNameSelector();
-  const getConfigIndexPatternsSelector = configIndexPatternsSelector();
 
   const mapStateToProps = (state: State): string[] => {
     const signalIndexName = getSignalIndexNameSelector(state);
-    const configIndexPatterns = getConfigIndexPatternsSelector(state);
-
     return signalIndexName != null
-      ? [...configIndexPatterns, signalIndexName]
-      : configIndexPatterns;
+      ? [...[], signalIndexName] // TODO: Steph/sourcerer get new default KIP to be selected by default
+      : [];
   };
 
   return mapStateToProps;

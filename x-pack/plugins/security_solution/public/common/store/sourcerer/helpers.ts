@@ -19,12 +19,11 @@ export const createDefaultIndexPatterns = ({ eventType, id, selectedPatterns, st
   const kibanaIndexPatterns = state.kibanaIndexPatterns.map((kip) => kip.title);
   const newSelectedPatterns = selectedPatterns.filter(
     (sp) =>
-      state.configIndexPatterns.includes(sp) ||
       kibanaIndexPatterns.includes(sp) ||
       (!isEmpty(state.signalIndexName) && state.signalIndexName === sp)
   );
   if (isEmpty(newSelectedPatterns)) {
-    let defaultIndexPatterns = state.configIndexPatterns;
+    let defaultIndexPatterns = []; // TODO: Steph/sourcerer get new default KIP to be selected by default
     if (id === SourcererScopeName.timeline && isEmpty(newSelectedPatterns)) {
       defaultIndexPatterns = defaultIndexPatternByEventType({ state, eventType });
     } else if (id === SourcererScopeName.detections && isEmpty(newSelectedPatterns)) {
@@ -42,11 +41,11 @@ export const defaultIndexPatternByEventType = ({
   state: SourcererModel;
   eventType?: TimelineEventsType;
 }) => {
-  let defaultIndexPatterns = state.configIndexPatterns;
+  let defaultIndexPatterns: string[] = []; // TODO: Steph/sourcerer get new default KIP to be selected by default
   if (eventType === 'all' && !isEmpty(state.signalIndexName)) {
-    defaultIndexPatterns = [...state.configIndexPatterns, state.signalIndexName ?? ''];
+    defaultIndexPatterns = [...[], state.signalIndexName ?? '']; // TODO: Steph/sourcerer get new default KIP to be selected by default
   } else if (eventType === 'raw') {
-    defaultIndexPatterns = state.configIndexPatterns;
+    defaultIndexPatterns = []; // TODO: Steph/sourcerer get new default KIP to be selected by default
   } else if (!isEmpty(state.signalIndexName) && (eventType === 'signal' || eventType === 'alert')) {
     defaultIndexPatterns = [state.signalIndexName ?? ''];
   }

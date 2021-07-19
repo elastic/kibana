@@ -126,7 +126,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   const [showAdvanceSettings, setAdvanceSettings] = useState(eventType === 'custom');
   const [filterEventType, setFilterEventType] = useState<TimelineEventsType>(eventType);
   const sourcererScopeSelector = useMemo(getSourcererScopeSelector, []);
-  const { configIndexPatterns, kibanaIndexPatterns, signalIndexName, sourcererScope } = useSelector<
+  const { kibanaIndexPatterns, signalIndexName, sourcererScope } = useSelector<
     State,
     SourcererScopeSelector
   >((state) => sourcererScopeSelector(state, SourcererScopeName.timeline), deepEqual);
@@ -139,17 +139,15 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
 
   const indexesPatternOptions = useMemo(
     () =>
-      [
-        ...configIndexPatterns,
-        ...kibanaIndexPatterns.map((kip) => kip.title),
-        signalIndexName,
-      ].reduce<Array<EuiComboBoxOptionOption<string>>>((acc, index) => {
+      [...kibanaIndexPatterns.map((kip) => kip.title), signalIndexName].reduce<
+        Array<EuiComboBoxOptionOption<string>>
+      >((acc, index) => {
         if (index != null && !acc.some((o) => o.label.includes(index))) {
           return [...acc, { label: index, value: index }];
         }
         return acc;
       }, []),
-    [configIndexPatterns, kibanaIndexPatterns, signalIndexName]
+    [kibanaIndexPatterns, signalIndexName]
   );
 
   const renderOption = useCallback(
@@ -171,11 +169,11 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
     (newSelectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
       const localSelectedPatterns = newSelectedOptions.map((nso) => nso.label);
       if (
-        localSelectedPatterns.sort().join() ===
-        [...configIndexPatterns, signalIndexName].sort().join()
+        localSelectedPatterns.sort().join() === [...[], signalIndexName].sort().join() // TODO: Steph/sourcerer get new default KIP to be selected by default
       ) {
         setFilterEventType('all');
-      } else if (localSelectedPatterns.sort().join() === configIndexPatterns.sort().join()) {
+        // TODO: Steph/sourcerer get new default KIP to be selected by default
+      } else if (localSelectedPatterns.sort().join() === [].sort().join()) {
         setFilterEventType('raw');
       } else if (localSelectedPatterns.sort().join() === signalIndexName) {
         setFilterEventType('alert');
@@ -185,7 +183,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
 
       setSelectedOptions(newSelectedOptions);
     },
-    [configIndexPatterns, signalIndexName]
+    [signalIndexName]
   );
 
   const onChangeFilter = useCallback(
@@ -193,14 +191,16 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
       setFilterEventType(filter);
       if (filter === 'all') {
         setSelectedOptions(
-          [...configIndexPatterns, signalIndexName ?? ''].map((indexSelected) => ({
+          [...[], signalIndexName ?? ''].map((indexSelected) => ({
+            // TODO: Steph/sourcerer get new default KIP to be selected by default
             label: indexSelected,
             value: indexSelected,
           }))
         );
       } else if (filter === 'raw') {
         setSelectedOptions(
-          configIndexPatterns.map((indexSelected) => ({
+          [].map((indexSelected) => ({
+            // TODO: Steph/sourcerer get new default KIP to be selected by default
             label: indexSelected,
             value: indexSelected,
           }))
@@ -221,7 +221,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
         );
       }
     },
-    [configIndexPatterns, kibanaIndexPatterns, signalIndexName]
+    [kibanaIndexPatterns, signalIndexName]
   );
 
   const togglePopover = useCallback(

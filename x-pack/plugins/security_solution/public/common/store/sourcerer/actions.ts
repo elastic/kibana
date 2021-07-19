@@ -19,7 +19,6 @@ export const setSource = actionCreator<{
 
 export const setIndexPatternsList = actionCreator<{
   kibanaIndexPatterns: KibanaIndexPatterns;
-  configIndexPatterns: string[];
 }>('SET_INDEX_PATTERNS_LIST');
 
 export const setSignalIndexName = actionCreator<{ signalIndexName: string }>(

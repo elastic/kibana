@@ -43,10 +43,10 @@ interface SourcererComponentProps {
 export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }) => {
   const dispatch = useDispatch();
   const sourcererScopeSelector = useMemo(getSourcererScopeSelector, []);
-  const { configIndexPatterns, kibanaIndexPatterns, sourcererScope } = useSelector<
-    State,
-    SourcererScopeSelector
-  >((state) => sourcererScopeSelector(state, scopeId), deepEqual);
+  const { kibanaIndexPatterns, sourcererScope } = useSelector<State, SourcererScopeSelector>(
+    (state) => sourcererScopeSelector(state, scopeId),
+    deepEqual
+  );
   const { selectedPatterns, loading } = sourcererScope;
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
@@ -89,12 +89,13 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
 
   const resetDataSources = useCallback(() => {
     setSelectedOptions(
-      configIndexPatterns.map((indexSelected) => ({
+      // TODO: Steph/sourcerer get new default KIP to be selected by default
+      [].map((indexSelected) => ({
         label: indexSelected,
         value: indexSelected,
       }))
     );
-  }, [configIndexPatterns]);
+  }, []);
 
   const handleSaveIndices = useCallback(() => {
     onChangeIndexPattern(selectedOptions.map((so) => so.label));
@@ -107,15 +108,17 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
 
   const indexesPatternOptions = useMemo(
     () =>
-      [...configIndexPatterns, ...kibanaIndexPatterns.map((kip) => kip.title)].reduce<
-        Array<EuiComboBoxOptionOption<string>>
-      >((acc, index) => {
-        if (index != null && !acc.some((o) => o.label.includes(index))) {
-          return [...acc, { label: index, value: index }];
-        }
-        return acc;
-      }, []),
-    [configIndexPatterns, kibanaIndexPatterns]
+      // TODO: Steph/sourcerer double check this
+      kibanaIndexPatterns.reduce<Array<EuiComboBoxOptionOption<string>>>(
+        (acc, { title: index }) => {
+          if (index != null && !acc.some((o) => o.label.includes(index))) {
+            return [...acc, { label: index, value: index }];
+          }
+          return acc;
+        },
+        []
+      ),
+    [kibanaIndexPatterns]
   );
 
   const trigger = useMemo(

@@ -25,11 +25,6 @@ export const useInitSourcerer = (
   const initialTimelineSourcerer = useRef(true);
   const initialDetectionSourcerer = useRef(true);
   const { loading: loadingSignalIndex, isSignalIndexExists, signalIndexName } = useUserInfo();
-  const getConfigIndexPatternsSelector = useMemo(
-    () => sourcererSelectors.configIndexPatternsSelector(),
-    []
-  );
-  const ConfigIndexPatterns = useDeepEqualSelector(getConfigIndexPatternsSelector);
 
   const getSignalIndexNameSelector = useMemo(
     () => sourcererSelectors.signalIndexNameSelector(),
@@ -65,7 +60,7 @@ export const useInitSourcerer = (
       dispatch(
         sourcererActions.setSelectedIndexPatterns({
           id: SourcererScopeName.timeline,
-          selectedPatterns: [...ConfigIndexPatterns, signalIndexName],
+          selectedPatterns: [...[], signalIndexName], // TODO: Steph/sourcerer get new default KIP to be selected by default
         })
       );
     } else if (
@@ -78,18 +73,11 @@ export const useInitSourcerer = (
       dispatch(
         sourcererActions.setSelectedIndexPatterns({
           id: SourcererScopeName.timeline,
-          selectedPatterns: [...ConfigIndexPatterns, signalIndexNameSelector],
+          selectedPatterns: [...[], signalIndexNameSelector], // TODO: Steph/sourcerer get new default KIP to be selected by default
         })
       );
     }
-  }, [
-    activeTimeline,
-    ConfigIndexPatterns,
-    dispatch,
-    loadingSignalIndex,
-    signalIndexName,
-    signalIndexNameSelector,
-  ]);
+  }, [activeTimeline, dispatch, loadingSignalIndex, signalIndexName, signalIndexNameSelector]);
 
   // Related to the detection page
   useEffect(() => {

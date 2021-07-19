@@ -337,7 +337,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     try {
       indexPattern = await indexPatternsService.get(DEFAULT_INDEX_PATTERN_ID);
     } catch (e) {
-      indexPattern = await indexPatternsService.create({
+      indexPattern = await indexPatternsService.createAndSave({
         id: DEFAULT_INDEX_PATTERN_ID,
         title: [...DEFAULT_INDEX_PATTERN, ...defaultIndicesName].join(','),
         timeFieldName: DEFAULT_TIME_FIELD,
@@ -359,24 +359,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         this.config.enableExperimental || []
       );
       const defaultIndicesName = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
-      const [
-        { createStore, createInitialState },
-        kibanaIndexPatterns,
-        configIndexPatterns,
-        kip,
-      ] = await Promise.all([
+      const [{ createStore, createInitialState }, kip, kibanaIndexPatterns] = await Promise.all([
         this.lazyApplicationDependencies(),
-        startPlugins.data.indexPatterns.getIdsWithTitle(),
-        startPlugins.data.search
-          .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
-            { indices: defaultIndicesName, onlyCheckIfIndicesExist: true },
-            {
-              strategy: 'indexFields',
-            }
-          )
-          .toPromise(),
         this.getKibanaIndexPattern(startPlugins.data.indexPatterns, defaultIndicesName),
+        startPlugins.data.indexPatterns.getIdsWithTitle(),
       ]);
+      console.log('kip', { kip, kibanaIndexPatterns });
 
       let signal: { name: string | null } = { name: null };
       try {
@@ -427,7 +415,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           },
           {
             kibanaIndexPatterns,
-            configIndexPatterns: configIndexPatterns.indicesExist,
             signalIndexName: signal.name,
             enableExperimental: experimentalFeatures,
           }

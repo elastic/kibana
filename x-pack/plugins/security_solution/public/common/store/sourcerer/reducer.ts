@@ -22,10 +22,9 @@ import { createDefaultIndexPatterns, defaultIndexPatternByEventType } from './he
 export type SourcererState = SourcererModel;
 
 export const sourcererReducer = reducerWithInitialState(initialSourcererState)
-  .case(setIndexPatternsList, (state, { kibanaIndexPatterns, configIndexPatterns }) => ({
+  .case(setIndexPatternsList, (state, { kibanaIndexPatterns }) => ({
     ...state,
     kibanaIndexPatterns,
-    configIndexPatterns,
   }))
   .case(setSignalIndexName, (state, { signalIndexName }) => ({
     ...state,
@@ -78,7 +77,7 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
           ...state.sourcererScopes[id],
           ...sourcererScopes,
           ...(state.sourcererScopes[id].selectedPatterns.length === 0
-            ? { selectedPatterns: state.configIndexPatterns }
+            ? { selectedPatterns: [] } // TODO: Steph/sourcerer get new default KIP to be selected by default
             : {}),
         },
       },
