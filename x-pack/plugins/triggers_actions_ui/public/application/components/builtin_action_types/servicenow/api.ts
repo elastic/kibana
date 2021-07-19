@@ -7,6 +7,7 @@
 
 import { HttpSetup } from 'kibana/public';
 import { BASE_ACTION_API_PATH } from '../../../constants';
+import { AppInfo } from './types';
 
 export async function getChoices({
   http,
@@ -28,4 +29,38 @@ export async function getChoices({
       signal,
     }
   );
+}
+
+// TODO: When app is certified change x_463134_elastic to the published namespace.
+const getAppInfoUrl = (url: string) => `${url}/api/x_463134_elastic/elastic/health`;
+
+export async function getAppInfo({
+  signal,
+  apiUrl,
+  username,
+  password,
+}: {
+  signal: AbortSignal;
+  apiUrl: string;
+  username: string;
+  password: string;
+}): Promise<AppInfo> {
+  const urlWithoutTrailingSlash = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
+  const response = await fetch(getAppInfoUrl(urlWithoutTrailingSlash), {
+    method: 'GET',
+    signal,
+    headers: {
+      Authorization: 'Basic ' + btoa(username + ':' + password),
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Received status: ${response.status} when attempting to get app info`);
+  }
+
+  const data = await response.json();
+
+  return {
+    ...data.result,
+  };
 }
