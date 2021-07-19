@@ -302,11 +302,11 @@ export class TelemetryEndpointTask {
           policy_response:
             failedPolicy !== null && failedPolicy !== undefined
               ? {
-                  agent_policy_status: failedPolicy?._source.event.agent_id_status,
+                  agent_policy_status: failedPolicy._source.event.agent_id_status,
                   manifest_version:
-                    failedPolicy?._source.Endpoint.policy.applied.artifacts.global.version,
-                  status: failedPolicy?._source.Endpoint.policy.applied.status,
-                  actions: failedPolicy?._source.Endpoint.policy.applied.actions
+                    failedPolicy._source.Endpoint.policy.applied.artifacts.global.version,
+                  status: failedPolicy._source.Endpoint.policy.applied.status,
+                  actions: failedPolicy._source.Endpoint.policy.applied.actions
                     .map((action) => (action.status !== 'success' ? action : null))
                     .filter((action) => action !== null),
                 }
