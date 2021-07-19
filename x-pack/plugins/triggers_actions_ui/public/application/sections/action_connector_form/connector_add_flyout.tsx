@@ -158,6 +158,7 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
         actionTypeRegistry={actionTypeRegistry}
         consumer={consumer}
         setCallbacks={setCallbacks}
+        isEdit={false}
       />
     );
 

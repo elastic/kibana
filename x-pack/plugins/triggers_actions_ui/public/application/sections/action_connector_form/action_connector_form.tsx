@@ -91,7 +91,7 @@ interface ActionConnectorProps<
     body: { message: string; error: string };
   };
   setCallbacks: ActionConnectorFieldsSetCallbacks;
-  setCallbacks: ActionConnectorFieldsProps['setCallbacks'];
+  isEdit: boolean;
 }
 
 export const ActionConnectorForm = ({
@@ -103,6 +103,7 @@ export const ActionConnectorForm = ({
   actionTypeRegistry,
   consumer,
   setCallbacks,
+  isEdit,
 }: ActionConnectorProps) => {
   const {
     docLinks,
