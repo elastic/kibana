@@ -57,7 +57,6 @@ Review important information about the {kib} 7.x releases.
 
 --
 
-=======
 [[release-notes-7.13.4]]
 == {kib} 7.13.4
 
@@ -84,11 +83,21 @@ Operations::
 [[release-notes-7.13.3]]
 == {kib} 7.13.3
 
-The 7.13.3 release includes the following bug fixes.
+For information about the {kib} 7.13.3 release, review the following information.
+
+[float]
+[[breaking-changes-7.13.3]]
+=== Breaking changes
+
+Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade to 7.13.3, review the <<breaking-changes-7.13.0,7.13.0 breaking changes>>, then mitigate the impact to your application.
 
 [float]
 [[fixes-v7.13.3]]
 === Bug Fixes
+
+The 7.13.3 release includes the following bug fixes.
+
 Dashboard::
 * Fixes disabled viz filter is applied {kibana-pull}101859[#101859]
 Discover::
@@ -111,13 +120,21 @@ Uptime::
 [[release-notes-7.13.2]]
 == {kib} 7.13.2
 
-coming::[7.13.2]
+For information about the {kib} 7.13.2 release, review the following information.
 
-The 7.13.2 release includes the following bug fixes.
+[float]
+[[breaking-changes-7.13.2]]
+=== Breaking changes
+
+Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade to 7.13.2, review the <<breaking-changes-7.13.0,7.13.0 breaking changes>>, then mitigate the impact to your application.
 
 [float]
 [[fixes-v7.13.2]]
 === Bug Fixes
+
+The 7.13.2 release includes the following bug fixes.
+
 Fleet::
 * Fixes the double install button on the Integrations page {kibana-pull}101511[#101511]
 * Fixes packages being upgraded accidentally after adding to policy {kibana-pull}101542[#101542]
@@ -147,6 +164,8 @@ For more information, refer to {kibana-issue}102180[#102180].
 [[release-notes-7.13.1]]
 == {kib} 7.13.1
 
+For information about the {kib} 7.13.1 release, review the following information.
+
 [discrete]
 [[known-issue-7.13.1]]
 === Known issue
@@ -154,6 +173,13 @@ For more information, refer to {kibana-issue}102180[#102180].
 Kibana instances with dashboard panels that are `by value` and have drilldowns may fail to start after upgrade.  
 We recommend that users who have been using drilldowns in Kibana wait for 7.13.2 to upgrade.
 For more information, refer to {kibana-issue}101430[#101430].
+
+[float]
+[[breaking-changes-7.13.1]]
+=== Breaking changes
+
+Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade to 7.13.1, review the <<breaking-changes-7.13.0,7.13.0 breaking changes>>, then mitigate the impact to your application.
 
 [float]
 [[fixes-v7.13.1]]
