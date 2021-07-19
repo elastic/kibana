@@ -9,7 +9,7 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useResizeObserver } from '@elastic/eui';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
-import { css, CSSObject, jsx } from '@emotion/react';
+import { css, CSSObject } from '@emotion/react';
 import { NodeDimensions, RevealImageRendererConfig, OriginString } from '../../common/types';
 import { isValidUrl } from '../../../presentation_util/public';
 
