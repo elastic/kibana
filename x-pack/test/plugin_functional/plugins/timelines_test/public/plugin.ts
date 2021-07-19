@@ -41,8 +41,8 @@ export class TimelinesTestPlugin
       }),
       mount: async (params: AppMountParameters<unknown>) => {
         const startServices = await core.getStartServices();
-        const [coreStart, {data}] = startServices;
-        return renderApp({...coreStart, data}, params, this.timelinesPlugin);
+        const [coreStart, { data }] = startServices;
+        return renderApp({ ...coreStart, data }, params, this.timelinesPlugin);
       },
     });
   }

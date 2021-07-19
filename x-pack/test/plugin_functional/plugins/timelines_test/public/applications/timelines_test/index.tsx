@@ -14,7 +14,7 @@ import { KibanaContextProvider } from '../../../../../../../../src/plugins/kiban
 import { TimelinesUIStart } from '../../../../../../../plugins/timelines/public';
 import { DataPublicPluginStart } from '../../../../../../../../src/plugins/data/public';
 
-type CoreStartTimelines = CoreStart & {data: DataPublicPluginStart};
+type CoreStartTimelines = CoreStart & { data: DataPublicPluginStart };
 
 /**
  * Render the Timeline Test app. Returns a cleanup function.
