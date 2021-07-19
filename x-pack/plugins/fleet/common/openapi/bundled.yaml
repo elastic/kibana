@@ -579,6 +579,8 @@ paths:
     post:
       summary: Agent policy - copy one policy
       operationId: agent-policy-copy
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
       responses:
         '200':
           description: OK
@@ -604,7 +606,6 @@ paths:
               required:
                 - name
         description: ''
-      description: Copies one agent policy
   /agent_policies/delete:
     post:
       summary: Agent policy - Delete
