@@ -38,10 +38,10 @@ export class EphemeralTaskLifecycle {
   private lifecycleEvent: Observable<TaskLifecycleEvent>;
   // all task related events (task claimed, task marked as running, etc.) are emitted through events$
   private events$ = new Subject<TaskLifecycleEvent>();
-  private ephemeralTaskQueue = new Set<{
+  private ephemeralTaskQueue: Array<{
     task: EphemeralTaskInstanceRequest;
     enqueuedAt: number;
-  }>();
+  }> = [];
   private logger: Logger;
   private config: TaskManagerConfig;
   private middleware: Middleware;
@@ -98,7 +98,10 @@ export class EphemeralTaskLifecycle {
               }
             })
             .map((ephemeralTask) => {
-              this.ephemeralTaskQueue.delete(ephemeralTask);
+              const index = this.ephemeralTaskQueue.indexOf(ephemeralTask);
+              if (index >= 0) {
+                this.ephemeralTaskQueue.splice(index, 1);
+              }
               this.emitEvent(
                 asTaskManagerStatEvent(
                   'ephemeralTaskDelay',
@@ -160,7 +163,7 @@ export class EphemeralTaskLifecycle {
   }
 
   public get queuedTasks() {
-    return this.ephemeralTaskQueue.size;
+    return this.ephemeralTaskQueue.length;
   }
 
   private createTaskRunnerForTask = (
@@ -187,16 +190,16 @@ export class EphemeralTaskLifecycle {
  * @param value A value T to push into the set if it is there
  */
 function pushIntoSetWithTimestamp(
-  set: Set<{
+  set: Array<{
     task: EphemeralTaskInstanceRequest;
     enqueuedAt: number;
   }>,
   maxCapacity: number,
   task: EphemeralTaskInstanceRequest
 ): Result<EphemeralTaskInstanceRequest, EphemeralTaskInstanceRequest> {
-  if (set.size >= maxCapacity) {
+  if (set.length >= maxCapacity) {
     return asErr(task);
   }
-  set.add({ task, enqueuedAt: Date.now() });
+  set.push({ task, enqueuedAt: Date.now() });
   return asOk(task);
 }

@@ -343,6 +343,36 @@ describe('EphemeralTaskLifecycle', () => {
     expect(asStrings).toContain(`foo "${fooTasks[1].id}" (Ephemeral)`);
     expect(asStrings).toContain(`foo "${fooTasks[2].id}" (Ephemeral)`);
   });
+
+  test('properly removes from the queue after pulled', () => {
+    const { poolCapacity, opts, lifecycleEvent$ } = initTaskLifecycleParams();
+
+    const ephemeralTaskLifecycle = new EphemeralTaskLifecycle(opts);
+
+    const tasks = [mockTask(), mockTask(), mockTask()];
+    expect(ephemeralTaskLifecycle.attemptToRun(tasks[0])).toMatchObject(asOk(tasks[0]));
+    expect(ephemeralTaskLifecycle.attemptToRun(tasks[1])).toMatchObject(asOk(tasks[1]));
+    expect(ephemeralTaskLifecycle.attemptToRun(tasks[2])).toMatchObject(asOk(tasks[2]));
+
+    expect(ephemeralTaskLifecycle.queuedTasks).toBe(3);
+    poolCapacity.mockReturnValue({
+      availableWorkers: 1,
+    });
+    lifecycleEvent$.next(asTaskPollingCycleEvent(asOk({ result: FillPoolResult.NoTasksClaimed })));
+    expect(ephemeralTaskLifecycle.queuedTasks).toBe(2);
+
+    poolCapacity.mockReturnValue({
+      availableWorkers: 1,
+    });
+    lifecycleEvent$.next(asTaskPollingCycleEvent(asOk({ result: FillPoolResult.NoTasksClaimed })));
+    expect(ephemeralTaskLifecycle.queuedTasks).toBe(1);
+
+    poolCapacity.mockReturnValue({
+      availableWorkers: 1,
+    });
+    lifecycleEvent$.next(asTaskPollingCycleEvent(asOk({ result: FillPoolResult.NoTasksClaimed })));
+    expect(ephemeralTaskLifecycle.queuedTasks).toBe(0);
+  });
 });
 
 function mockTask(overrides: Partial<ConcreteTaskInstance> = {}): ConcreteTaskInstance {
