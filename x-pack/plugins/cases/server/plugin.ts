@@ -8,6 +8,7 @@
 import { IContextProvider, KibanaRequest, Logger, PluginInitializerContext } from 'kibana/server';
 import { CoreSetup, CoreStart } from 'src/core/server';
 
+import { LensPluginSetup } from '../../lens/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import {
   PluginSetupContract as ActionsPluginSetup,
@@ -18,7 +19,7 @@ import { APP_ID, ENABLE_CASE_CONNECTOR } from '../common';
 import { ConfigType } from './config';
 import { initCaseApi } from './routes/api';
 import {
-  caseCommentSavedObjectType,
+  createCaseCommentSavedObjectType,
   caseConfigureSavedObjectType,
   caseConnectorMappingsSavedObjectType,
   caseSavedObjectType,
@@ -40,6 +41,7 @@ function createConfig(context: PluginInitializerContext) {
 export interface PluginsSetup {
   security?: SecurityPluginSetup;
   actions: ActionsPluginSetup;
+  lens: LensPluginSetup;
 }
 
 export interface PluginsStart {
@@ -81,7 +83,9 @@ export class CasePlugin {
 
     this.securityPluginSetup = plugins.security;
 
-    core.savedObjects.registerType(caseCommentSavedObjectType);
+    core.savedObjects.registerType(
+      createCaseCommentSavedObjectType({ getLensMigrations: plugins.lens.getAllMigrations })
+    );
     core.savedObjects.registerType(caseConfigureSavedObjectType);
     core.savedObjects.registerType(caseConnectorMappingsSavedObjectType);
     core.savedObjects.registerType(caseSavedObjectType);

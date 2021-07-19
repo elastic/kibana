@@ -43,7 +43,7 @@ interface CreateAttachmentArgs extends ClientArgs {
 interface UpdateArgs {
   attachmentId: string;
   updatedAttributes: AttachmentPatchAttributes;
-  options: SavedObjectsUpdateOptions<AttachmentAttributes>;
+  options?: SavedObjectsUpdateOptions<AttachmentAttributes>;
 }
 
 export type UpdateAttachmentArgs = UpdateArgs & ClientArgs;

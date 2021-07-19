@@ -7,7 +7,18 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '../../../../../src/core/server';
+import { flow, mapValues } from 'lodash';
+import { LensPluginSetup } from '../../../lens/server';
+import {
+  mergeMigrationFunctionMaps,
+  MigrateFunction,
+  MigrateFunctionsObject,
+} from '../../../../../src/plugins/kibana_utils/common';
+import {
+  SavedObjectUnsanitizedDoc,
+  SavedObjectSanitizedDoc,
+  SavedObjectMigrationFn,
+} from '../../../../../src/core/server';
 import {
   ConnectorTypes,
   CommentType,
@@ -16,6 +27,7 @@ import {
   ESConnectorFields,
   SECURITY_SOLUTION_OWNER,
 } from '../../common';
+import { parseCommentString, stringifyComment } from '../common';
 
 interface UnsanitizedCaseConnector {
   connector_id: string;
@@ -224,44 +236,86 @@ interface SanitizedCommentForSubCases {
   rule?: { id: string | null; name: string | null };
 }
 
-export const commentsMigrations = {
-  '7.11.0': (
-    doc: SavedObjectUnsanitizedDoc<UnsanitizedComment>
-  ): SavedObjectSanitizedDoc<SanitizedComment> => {
-    return {
-      ...doc,
-      attributes: {
-        ...doc.attributes,
-        type: CommentType.user,
-      },
-      references: doc.references || [],
-    };
-  },
-  '7.12.0': (
-    doc: SavedObjectUnsanitizedDoc<UnsanitizedComment>
-  ): SavedObjectSanitizedDoc<SanitizedCommentForSubCases> => {
-    let attributes: SanitizedCommentForSubCases & UnsanitizedComment = {
-      ...doc.attributes,
-      associationType: AssociationType.case,
-    };
-
-    // only add the rule object for alert comments. Prior to 7.12 we only had CommentType.alert, generated alerts are
-    // introduced in 7.12.
-    if (doc.attributes.type === CommentType.alert) {
-      attributes = { ...attributes, rule: { id: null, name: null } };
+const migrateByValueLensVisualizations = (
+  migrate: MigrateFunction,
+  version: string
+): SavedObjectMigrationFn => (doc: any) => {
+  const parsedComment = parseCommentString(doc.attributes.comment);
+  const migratedComment = parsedComment.children.map((comment) => {
+    if (comment?.type === 'lens') {
+      // @ts-expect-error
+      return migrate(comment);
     }
 
-    return {
-      ...doc,
-      attributes,
-      references: doc.references || [],
-    };
-  },
-  '7.14.0': (
-    doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
-  ): SavedObjectSanitizedDoc<SanitizedCaseOwner> => {
-    return addOwnerToSO(doc);
-  },
+    return comment;
+  });
+
+  // @ts-expect-error
+  parsedComment.children = migratedComment;
+  doc.attributes.comment = stringifyComment(parsedComment);
+
+  return doc;
+};
+
+export interface CreateCommentsMigrationsDeps {
+  getLensMigrations: LensPluginSetup['getAllMigrations'];
+}
+
+export const createCommentsMigrations = (migrationDeps: CreateCommentsMigrationsDeps) => {
+  // @ts-expect-error
+  const lensMigrations = mapValues<MigrateFunctionsObject, SavedObjectMigrationFn>(
+    // @ts-expect-error
+    migrationDeps.getLensMigrations(),
+    migrateByValueLensVisualizations
+  ) as MigrateFunctionsObject;
+
+  const commentsMigrations = {
+    '7.11.0': flow(
+      (
+        doc: SavedObjectUnsanitizedDoc<UnsanitizedComment>
+      ): SavedObjectSanitizedDoc<SanitizedComment> => {
+        return {
+          ...doc,
+          attributes: {
+            ...doc.attributes,
+            type: CommentType.user,
+          },
+          references: doc.references || [],
+        };
+      }
+    ),
+    '7.12.0': flow(
+      (
+        doc: SavedObjectUnsanitizedDoc<UnsanitizedComment>
+      ): SavedObjectSanitizedDoc<SanitizedCommentForSubCases> => {
+        let attributes: SanitizedCommentForSubCases & UnsanitizedComment = {
+          ...doc.attributes,
+          associationType: AssociationType.case,
+        };
+
+        // only add the rule object for alert comments. Prior to 7.12 we only had CommentType.alert, generated alerts are
+        // introduced in 7.12.
+        if (doc.attributes.type === CommentType.alert) {
+          attributes = { ...attributes, rule: { id: null, name: null } };
+        }
+
+        return {
+          ...doc,
+          attributes,
+          references: doc.references || [],
+        };
+      }
+    ),
+    '7.14.0': flow(
+      (
+        doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
+      ): SavedObjectSanitizedDoc<SanitizedCaseOwner> => {
+        return addOwnerToSO(doc);
+      }
+    ),
+  };
+
+  return mergeMigrationFunctionMaps(commentsMigrations, lensMigrations);
 };
 
 export const connectorMappingsMigrations = {

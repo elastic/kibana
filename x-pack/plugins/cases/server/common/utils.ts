@@ -7,10 +7,13 @@
 
 import Boom from '@hapi/boom';
 import unified from 'unified';
-import type { Node } from 'unist';
+import type { Node, Parent } from 'unist';
 // installed by @elastic/eui
 // eslint-disable-next-line import/no-extraneous-dependencies
 import markdown from 'remark-parse';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import remarkStringify from 'remark-stringify';
+
 import {
   SavedObjectsFindResult,
   SavedObjectsFindResponse,
@@ -450,15 +453,38 @@ interface LensMarkdownNode {
   attributes: LensDocShape714 & { references: SavedObjectReference[] };
 }
 
-interface LensMarkdownParent extends Node {
-  children: LensMarkdownNode[];
-}
+export const parseCommentString = (comment: string) => {
+  const processor = unified().use([[markdown, {}], LensParser]);
+  return processor.parse(comment) as Parent;
+};
+
+export const stringifyComment = (comment: Parent) =>
+  unified()
+    .use([
+      [
+        remarkStringify,
+        {
+          allowDangerousHtml: true,
+          handlers: {
+            lens: (a) =>
+              `!{lens${JSON.stringify({
+                timeRange: a.timeRange,
+                editMode: a.editMode,
+                attributes: a.attributes,
+              })}}`,
+          },
+        },
+      ],
+    ])
+    .stringify(comment);
+
+export const getLensVisualizations = (parsedComment: Array<LensMarkdownNode | Node>) =>
+  filter(parsedComment, { type: LENS_ID }) as LensMarkdownNode[];
 
 export const extractLensReferencesFromCommentString = (comment: string): SavedObjectReference[] => {
-  const processor = unified().use([[markdown, {}], LensParser]);
-  const parsedComment = processor.parse(comment) as LensMarkdownParent;
-  const lensReferences = filter(parsedComment.children, { type: LENS_ID }) as LensMarkdownNode[];
-  const flattenRefs = flatMap(lensReferences, (lensObject) => lensObject.attributes.references);
+  const parsedComment = parseCommentString(comment);
+  const lensVisualizations = getLensVisualizations(parsedComment.children);
+  const flattenRefs = flatMap(lensVisualizations, (lensObject) => lensObject.attributes.references);
 
   const uniqRefs = uniqWith(
     flattenRefs,
