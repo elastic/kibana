@@ -36,6 +36,13 @@ export const TelemetryEndpointTaskConstants = {
 // Endpoint agent uses this Policy ID while it's installing.
 const DefaultEndpointPolicyIdToIgnore = '00000000-0000-0000-0000-000000000000';
 
+const EmptyFleetAgentResponse = {
+  agents: [],
+  total: 0,
+  page: 0,
+  perPage: 0,
+};
+
 /** Telemetry Endpoint Task
  *
  * The Endpoint Telemetry task is a daily batch job that collects and transmits non-sensitive
@@ -120,7 +127,9 @@ export class TelemetryEndpointTask {
 
     return {
       fleetAgentsResponse:
-        fleetAgentsResponse.status === 'fulfilled' ? fleetAgentsResponse.value : undefined,
+        fleetAgentsResponse.status === 'fulfilled'
+          ? fleetAgentsResponse.value
+          : EmptyFleetAgentResponse,
       endpointMetrics:
         epMetricsResponse.status === 'fulfilled' ? epMetricsResponse.value : undefined,
       epPolicyResponse: policyResponse.status === 'fulfilled' ? policyResponse.value : undefined,
@@ -148,13 +157,14 @@ export class TelemetryEndpointTask {
      * report its metrics once per day OR every time a policy change has occured. If
      * a metric document(s) exists for an EP agent we map to fleet agent and policy
      */
+    if (endpointData.endpointMetrics === undefined) {
+      this.logger.debug(`no endpoint metrics to report`);
+      return 0;
+    }
+
     const { body: endpointMetricsResponse } = (endpointData.endpointMetrics as unknown) as {
       body: EndpointMetricsAggregation;
     };
-    if (endpointMetricsResponse.aggregations === undefined) {
-      this.logger.debug(`No endpoint metrics`);
-      return 0;
-    }
 
     const endpointMetrics = endpointMetricsResponse.aggregations.endpoint_agents.buckets.map(
       (epMetrics) => {
@@ -180,8 +190,7 @@ export class TelemetryEndpointTask {
     if (agentsResponse === undefined) {
       return 0;
     }
-
-    const fleetAgents = agentsResponse?.agents.reduce((cache, agent) => {
+    const fleetAgents = agentsResponse.agents.reduce((cache, agent) => {
       if (agent.id === DefaultEndpointPolicyIdToIgnore) {
         return cache;
       }
@@ -248,73 +257,78 @@ export class TelemetryEndpointTask {
      * make improvements to the product.
      *
      */
-    const telemetryPayloads = endpointMetrics.map((endpoint) => {
-      let policyConfig = null;
-      let failedPolicy = null;
+    try {
+      const telemetryPayloads = endpointMetrics.map((endpoint) => {
+        let policyConfig = null;
+        let failedPolicy = null;
 
-      const fleetAgentId = endpoint.endpoint_metrics.elastic.agent.id;
-      const endpointAgentId = endpoint.endpoint_agent;
+        const fleetAgentId = endpoint.endpoint_metrics.elastic.agent.id;
+        const endpointAgentId = endpoint.endpoint_agent;
 
-      const policyInformation = fleetAgents.get(fleetAgentId);
-      if (policyInformation) {
-        policyConfig = endpointPolicyCache.get(policyInformation);
+        const policyInformation = fleetAgents.get(fleetAgentId);
+        if (policyInformation) {
+          policyConfig = endpointPolicyCache.get(policyInformation);
 
-        if (policyConfig) {
-          failedPolicy = policyResponses.get(policyConfig?.id);
+          if (policyConfig) {
+            failedPolicy = policyResponses.get(policyConfig?.id);
+          }
         }
-      }
 
-      return {
-        '@timestamp': executeTo,
-        agent_id: fleetAgentId,
-        endpoint_id: endpointAgentId,
-        endpoint_version: endpoint.endpoint_version,
-        endpoint_package_version: policyConfig?.package?.version || null,
-        endpoint_metrics: {
-          cpu: {
-            histogram: endpoint.endpoint_metrics.Endpoint.metrics.cpu.endpoint.histogram,
-            latest: endpoint.endpoint_metrics.Endpoint.metrics.cpu.endpoint.latest,
-            mean: endpoint.endpoint_metrics.Endpoint.metrics.cpu.endpoint.mean,
+        return {
+          '@timestamp': executeTo,
+          agent_id: fleetAgentId,
+          endpoint_id: endpointAgentId,
+          endpoint_version: endpoint.endpoint_version,
+          endpoint_package_version: policyConfig?.package?.version || null,
+          endpoint_metrics: {
+            cpu: {
+              histogram: endpoint.endpoint_metrics.Endpoint.metrics.cpu.endpoint.histogram,
+              latest: endpoint.endpoint_metrics.Endpoint.metrics.cpu.endpoint.latest,
+              mean: endpoint.endpoint_metrics.Endpoint.metrics.cpu.endpoint.mean,
+            },
+            memory: {
+              latest: endpoint.endpoint_metrics.Endpoint.metrics.memory.endpoint.private.latest,
+              mean: endpoint.endpoint_metrics.Endpoint.metrics.memory.endpoint.private.mean,
+            },
+            uptime: {
+              endpoint: endpoint.endpoint_metrics.Endpoint.metrics.uptime.endpoint,
+              system: endpoint.endpoint_metrics.Endpoint.metrics.uptime.system,
+            },
           },
-          memory: {
-            latest: endpoint.endpoint_metrics.Endpoint.metrics.memory.endpoint.private.latest,
-            mean: endpoint.endpoint_metrics.Endpoint.metrics.memory.endpoint.private.mean,
+          endpoint_meta: {
+            os: endpoint.endpoint_metrics.host.os,
           },
-          uptime: {
-            endpoint: endpoint.endpoint_metrics.Endpoint.metrics.uptime.endpoint,
-            system: endpoint.endpoint_metrics.Endpoint.metrics.uptime.system,
+          policy_config: policyConfig !== null ? policyConfig?.inputs[0].config.policy : {},
+          policy_response:
+            failedPolicy !== null && failedPolicy !== undefined
+              ? {
+                  agent_policy_status: failedPolicy?._source.event.agent_id_status,
+                  manifest_version:
+                    failedPolicy?._source.Endpoint.policy.applied.artifacts.global.version,
+                  status: failedPolicy?._source.Endpoint.policy.applied.status,
+                  actions: failedPolicy?._source.Endpoint.policy.applied.actions
+                    .map((action) => (action.status !== 'success' ? action : null))
+                    .filter((action) => action !== null),
+                }
+              : {},
+          telemetry_meta: {
+            metrics_timestamp: endpoint.endpoint_metrics['@timestamp'],
           },
-        },
-        endpoint_meta: {
-          os: endpoint.endpoint_metrics.host.os,
-        },
-        policy_config: policyConfig !== null ? policyConfig?.inputs[0].config.policy : {},
-        policy_response:
-          failedPolicy !== null && failedPolicy !== undefined
-            ? {
-                agent_policy_status: failedPolicy?._source.event.agent_id_status,
-                manifest_version:
-                  failedPolicy?._source.Endpoint.policy.applied.artifacts.global.version,
-                status: failedPolicy?._source.Endpoint.policy.applied.status,
-                actions: failedPolicy?._source.Endpoint.policy.applied.actions
-                  .map((action) => (action.status !== 'success' ? action : null))
-                  .filter((action) => action !== null),
-              }
-            : {},
-        telemetry_meta: {
-          metrics_timestamp: endpoint.endpoint_metrics['@timestamp'],
-        },
-      };
-    });
+        };
+      });
 
-    /**
-     * STAGE 5 - Send the documents
-     *
-     * Send the documents in a batches of 100
-     */
-    batchTelemetryRecords(telemetryPayloads, 100).forEach((telemetryBatch) =>
-      this.sender.sendOnDemand('endpoint-metadata', telemetryBatch)
-    );
-    return telemetryPayloads.length;
+      /**
+       * STAGE 5 - Send the documents
+       *
+       * Send the documents in a batches of 100
+       */
+      batchTelemetryRecords(telemetryPayloads, 100).forEach((telemetryBatch) =>
+        this.sender.sendOnDemand('endpoint-metadata', telemetryBatch)
+      );
+      return telemetryPayloads.length;
+    } catch (err) {
+      this.logger.error('Could not send endpoint alert telemetry');
+      return 0;
+    }
   };
 }
