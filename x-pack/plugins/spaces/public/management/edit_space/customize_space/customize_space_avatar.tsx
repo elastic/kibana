@@ -29,7 +29,7 @@ interface Props {
 }
 
 export class CustomizeSpaceAvatar extends Component<Props> {
-  private storeImageChanges(imageUrl: string) {
+  private storeImageChanges(imageUrl: string | undefined) {
     this.props.onChange({
       ...this.props.space,
       imageUrl,
@@ -80,7 +80,10 @@ export class CustomizeSpaceAvatar extends Component<Props> {
   };
 
   private onFileUpload = (files: FileList | null) => {
-    if (files == null) return;
+    if (files == null || files.length === 0) {
+      this.storeImageChanges(undefined);
+      return;
+    }
     const file = files[0];
     if (imageTypes.indexOf(file.type) > -1) {
       encode(file).then((dataurl: string) => this.handleImageUpload(dataurl));

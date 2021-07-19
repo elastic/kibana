@@ -51,7 +51,18 @@ exports[`renders correctly 1`] = `
       helpText="The description appears on the space selection screen."
       isInvalid={false}
       label="Description"
-      labelAppend="Optional"
+      labelAppend={
+        <EuiText
+          color="subdued"
+          size="xs"
+        >
+          <FormattedMessage
+            defaultMessage="Optional"
+            id="xpack.spaces.management.manageSpacePage.optionalLabel"
+            values={Object {}}
+          />
+        </EuiText>
+      }
       labelType="label"
     >
       <EuiTextArea

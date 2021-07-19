@@ -10,6 +10,7 @@ import {
   EuiFieldText,
   EuiFormRow,
   EuiLoadingSpinner,
+  EuiText,
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
@@ -102,9 +103,14 @@ export class CustomizeSpace extends Component<Props, State> {
                 defaultMessage: 'Description',
               }
             )}
-            labelAppend={i18n.translate('xpack.spaces.management.manageSpacePage.optionalLabel', {
-              defaultMessage: 'Optional',
-            })}
+            labelAppend={
+              <EuiText color="subdued" size="xs">
+                <FormattedMessage
+                  id="xpack.spaces.management.manageSpacePage.optionalLabel"
+                  defaultMessage="Optional"
+                />
+              </EuiText>
+            }
             helpText={i18n.translate(
               'xpack.spaces.management.manageSpacePage.spaceDescriptionHelpText',
               {
@@ -176,7 +182,7 @@ export class CustomizeSpace extends Component<Props, State> {
                   <LazySpaceAvatar
                     space={{
                       ...space,
-                      initials: undefined,
+                      initials: '?',
                       name: undefined,
                     }}
                     size="xl"
