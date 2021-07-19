@@ -9,10 +9,10 @@ import React from 'react';
 import { waitFor } from '@testing-library/react';
 import { shallow, mount } from 'enzyme';
 
-import '../../../common/mock/match_media';
-import { esQuery } from '../../../../../../../src/plugins/data/public';
-import { TestProviders } from '../../../common/mock';
-import { SecurityPageName } from '../../../app/types';
+import '../../../../../common/mock/match_media';
+import { esQuery } from '../../../../../../../../../../src/plugins/data/public';
+import { TestProviders } from '../../../../../../common/mock';
+import { SecurityPageName } from '../../../../../../app/types';
 
 import { AlertsHistogramPanel, buildCombinedQueries, parseCombinedQueries } from './index';
 import * as helpers from './helpers';

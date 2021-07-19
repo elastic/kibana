@@ -26,6 +26,7 @@ import { combineQueries } from '../../../timelines/components/timeline/helpers';
 import { getOptions } from './helpers';
 import { TopN } from './top_n';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
+import { AlertsStackByField } from '../../../detections/components/kpis/common/types';
 
 const EMPTY_FILTERS: Filter[] = [];
 const EMPTY_QUERY: Query = { query: '', language: 'kuery' };
@@ -75,7 +76,7 @@ const connector = connect(makeMapStateToProps);
 //    to the index pattern.
 export interface OwnProps {
   browserFields: BrowserFields;
-  field: string;
+  field: AlertsStackByField;
   indexPattern: IIndexPattern;
   timelineId?: string;
   toggleTopN: () => void;

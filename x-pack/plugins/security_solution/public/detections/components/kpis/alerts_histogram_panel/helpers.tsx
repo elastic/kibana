@@ -7,9 +7,9 @@
 
 import moment from 'moment';
 
-import { showAllOthersBucket } from '../../../../common/constants';
+import { showAllOthersBucket } from '../../../../../common/constants';
 import { HistogramData, AlertsAggregation, AlertsBucket, AlertsGroupBucket } from './types';
-import { AlertSearchResponse } from '../../containers/detection_engine/alerts/types';
+import { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
 import * as i18n from './translations';
 
 const EMPTY_ALERTS_DATA: HistogramData[] = [];

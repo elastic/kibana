@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { AlertsHistogramOption } from './types';
+import { AlertsStackByOption } from './types';
 
-export const alertsHistogramOptions: AlertsHistogramOption[] = [
+export const alertsStackByOptions: AlertsStackByOption[] = [
   { text: 'signal.rule.risk_score', value: 'signal.rule.risk_score' },
   { text: 'signal.rule.severity', value: 'signal.rule.severity' },
   { text: 'signal.rule.threat.tactic.name', value: 'signal.rule.threat.tactic.name' },
@@ -20,3 +20,8 @@ export const alertsHistogramOptions: AlertsHistogramOption[] = [
   { text: 'source.ip', value: 'source.ip' },
   { text: 'user.name', value: 'user.name' },
 ];
+
+export const DEFAULT_STACK_BY = 'signal.rule.name';
+
+export const PANEL_HEIGHT = 300;
+export const DATA_HEIGHT = 200;

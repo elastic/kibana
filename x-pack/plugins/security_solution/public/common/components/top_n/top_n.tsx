@@ -22,6 +22,7 @@ import { TopNOption } from './helpers';
 import * as i18n from './translations';
 import { getIndicesSelector, IndicesSelector } from './selectors';
 import { State } from '../../store';
+import { AlertsStackByField } from '../../../detections/components/kpis/common/types';
 
 const TopNContainer = styled.div`
   width: 600px;
@@ -50,7 +51,7 @@ const TopNContent = styled.div`
 export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
   combinedQueries?: string;
   defaultView: TimelineEventsType;
-  field: string;
+  field: AlertsStackByField;
   filters: Filter[];
   indexPattern: IIndexPattern;
   options: TopNOption[];

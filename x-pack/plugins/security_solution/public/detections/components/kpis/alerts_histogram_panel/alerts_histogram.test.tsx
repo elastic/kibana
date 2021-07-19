@@ -8,7 +8,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import '../../../common/mock/match_media';
+import '../../../../common/mock/match_media';
 import { AlertsHistogram } from './alerts_histogram';
 
 jest.mock('../../../common/lib/kibana');

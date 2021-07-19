@@ -54,8 +54,7 @@ import { useListsConfig } from '../../../../containers/detection_engine/lists/us
 import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
 import { StepAboutRuleToggleDetails } from '../../../../components/rules/step_about_rule_details';
 import { DetectionEngineHeaderPage } from '../../../../components/detection_engine_header_page';
-import { AlertsHistogramPanel } from '../../../../components/alerts_histogram_panel';
-import { AlertsHistogramOption } from '../../../../components/alerts_histogram_panel/types';
+import { AlertsHistogramPanel } from '../../../../components/kpis/alerts_histogram_panel';
 import { AlertsTable } from '../../../../components/alerts_table';
 import { useUserData } from '../../../../components/user_info';
 import { OverviewEmpty } from '../../../../../overview/components/overview_empty';
@@ -72,7 +71,6 @@ import { RuleSwitch } from '../../../../components/rules/rule_switch';
 import { StepPanel } from '../../../../components/rules/step_panel';
 import { getStepsData, redirectToDetections, userHasPermissions } from '../helpers';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
-import { alertsHistogramOptions } from '../../../../components/alerts_histogram_panel/config';
 import { inputsSelectors } from '../../../../../common/store/inputs';
 import { setAbsoluteRangeDatePicker } from '../../../../../common/store/inputs/actions';
 import { RuleActionsOverflow } from '../../../../components/rules/rule_actions_overflow';
@@ -119,6 +117,8 @@ import { getRuleStatusText } from '../../../../../../common/detection_engine/uti
 import { MissingPrivilegesCallOut } from '../../../../components/callouts/missing_privileges_callout';
 import { useRuleWithFallback } from '../../../../containers/detection_engine/rules/use_rule_with_fallback';
 import { BadgeOptions } from '../../../../../common/components/header_page/types';
+import { alertsStackByOptions } from '../../../../components/kpis/common/config';
+import { AlertsStackByOption } from '../../../../components/kpis/common/types';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -572,7 +572,7 @@ const RuleDetailsPageComponent = () => {
     return null;
   }
 
-  const defaultRuleStackByOption: AlertsHistogramOption = {
+  const defaultRuleStackByOption: AlertsStackByOption = {
     text: 'event.category',
     value: 'event.category',
   };
@@ -717,7 +717,7 @@ const RuleDetailsPageComponent = () => {
                     from={from}
                     signalIndexName={signalIndexName}
                     setQuery={setQuery}
-                    stackByOptions={alertsHistogramOptions}
+                    stackByOptions={alertsStackByOptions}
                     defaultStackByOption={defaultRuleStackByOption}
                     to={to}
                     updateDateRange={updateDateRangeCallback}

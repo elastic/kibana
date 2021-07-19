@@ -6,36 +6,34 @@
  */
 
 import { Position } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiPanel, EuiTitleSize } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash/fp';
 import uuid from 'uuid';
 
-import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
-import { DEFAULT_NUMBER_FORMAT, APP_ID } from '../../../../common/constants';
-import { UpdateDateRange } from '../../../common/components/charts/common';
-import { LegendItem } from '../../../common/components/charts/draggable_legend_item';
-import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
-import { HeaderSection } from '../../../common/components/header_section';
-import { Filter, esQuery, Query } from '../../../../../../../src/plugins/data/public';
-import { useQueryAlerts } from '../../containers/detection_engine/alerts/use_query';
-import { getDetectionEngineUrl, useFormatUrl } from '../../../common/components/link_to';
-import { defaultLegendColors } from '../../../common/components/matrix_histogram/utils';
-import { InspectButtonContainer } from '../../../common/components/inspect';
-import { MatrixLoader } from '../../../common/components/matrix_histogram/matrix_loader';
-import { MatrixHistogramOption } from '../../../common/components/matrix_histogram/types';
-import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
-import { alertsHistogramOptions } from './config';
+import { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
+import { DEFAULT_NUMBER_FORMAT, APP_ID } from '../../../../../common/constants';
+import { UpdateDateRange } from '../../../../common/components/charts/common';
+import { LegendItem } from '../../../../common/components/charts/draggable_legend_item';
+import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
+import { HeaderSection } from '../../../../common/components/header_section';
+import { Filter, esQuery, Query } from '../../../../../../../../src/plugins/data/public';
+import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
+import { getDetectionEngineUrl, useFormatUrl } from '../../../../common/components/link_to';
+import { defaultLegendColors } from '../../../../common/components/matrix_histogram/utils';
+import { InspectButtonContainer } from '../../../../common/components/inspect';
+import { MatrixLoader } from '../../../../common/components/matrix_histogram/matrix_loader';
+import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
 import { formatAlertsData, getAlertsHistogramQuery, showInitialLoadingSpinner } from './helpers';
 import { AlertsHistogram } from './alerts_histogram';
 import * as i18n from './translations';
-import { AlertsHistogramOption, AlertsAggregation, AlertsTotal } from './types';
-import { LinkButton } from '../../../common/components/links';
-import { SecurityPageName } from '../../../app/types';
-
-const DEFAULT_PANEL_HEIGHT = 300;
+import { AlertsAggregation, AlertsTotal } from './types';
+import { LinkButton } from '../../../../common/components/links';
+import { SecurityPageName } from '../../../../app/types';
+import { alertsStackByOptions, DEFAULT_STACK_BY, PANEL_HEIGHT } from '../common/config';
+import { AlertsStackByField, AlertsStackByOption } from '../common/types';
 
 const StyledEuiPanel = styled(EuiPanel)<{ height?: number }>`
   display: flex;
@@ -59,33 +57,32 @@ interface AlertsHistogramPanelProps
   extends Pick<GlobalTimeArgs, 'from' | 'to' | 'setQuery' | 'deleteQuery'> {
   chartHeight?: number;
   combinedQueries?: string;
-  defaultStackByOption?: AlertsHistogramOption;
+  defaultStackByOption?: AlertsStackByOption;
   filters?: Filter[];
   headerChildren?: React.ReactNode;
   /** Override all defaults, and only display this field */
-  onlyField?: string;
+  onlyField?: AlertsStackByField;
+  titleSize?: EuiTitleSize;
   query?: Query;
   legendPosition?: Position;
-  panelHeight?: number;
   signalIndexName: string | null;
   showLinkToAlerts?: boolean;
   showTotalAlertsCount?: boolean;
-  stackByOptions?: AlertsHistogramOption[];
+  stackByOptions?: AlertsStackByOption[];
   timelineId?: string;
   title?: string;
   updateDateRange: UpdateDateRange;
 }
 
-const getHistogramOption = (fieldName: string): MatrixHistogramOption => ({
+const getHistogramOption = (fieldName: AlertsStackByField): AlertsStackByOption => ({
   text: fieldName,
   value: fieldName,
 });
 
 const NO_LEGEND_DATA: LegendItem[] = [];
 
-const DEFAULT_STACK_BY = 'signal.rule.name';
-const getDefaultStackByOption = (): AlertsHistogramOption =>
-  alertsHistogramOptions.find(({ text }) => text === DEFAULT_STACK_BY) ?? alertsHistogramOptions[0];
+const getDefaultStackByOption = (): AlertsStackByOption =>
+  alertsStackByOptions.find(({ text }) => text === DEFAULT_STACK_BY) ?? alertsStackByOptions[0];
 
 export const parseCombinedQueries = (query?: string) => {
   try {
@@ -115,7 +112,6 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     query,
     from,
     legendPosition = 'right',
-    panelHeight = DEFAULT_PANEL_HEIGHT,
     setQuery,
     signalIndexName,
     showLinkToAlerts = false,
@@ -125,6 +121,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     title = i18n.HISTOGRAM_HEADER,
     to,
     updateDateRange,
+    titleSize = 'm',
   }) => {
     // create a unique, but stable (across re-renders) query id
     const uniqueQueryId = useMemo(() => `${DETECTIONS_HISTOGRAM_ID}-${uuid.v4()}`, []);
@@ -132,9 +129,10 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     const [isInspectDisabled, setIsInspectDisabled] = useState(false);
     const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
     const [totalAlertsObj, setTotalAlertsObj] = useState<AlertsTotal>(defaultTotalAlertsObj);
-    const [selectedStackByOption, setSelectedStackByOption] = useState<AlertsHistogramOption>(
+    const [selectedStackByOption, setSelectedStackByOption] = useState<AlertsStackByOption>(
       onlyField == null ? defaultStackByOption : getHistogramOption(onlyField)
     );
+
     const {
       loading: isLoadingAlerts,
       data: alertsData,
@@ -301,11 +299,11 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
 
     return (
       <InspectButtonContainer data-test-subj="alerts-histogram-panel" show={!isInitialLoading}>
-        <StyledEuiPanel height={panelHeight} hasBorder>
+        <StyledEuiPanel height={PANEL_HEIGHT} hasBorder>
           <HeaderSection
             id={uniqueQueryId}
             title={titleText}
-            titleSize={onlyField == null ? 'm' : 's'}
+            titleSize={titleSize}
             subtitle={!isInitialLoading && showTotalAlertsCount && totalAlerts}
             isInspectDisabled={isInspectDisabled}
           >
