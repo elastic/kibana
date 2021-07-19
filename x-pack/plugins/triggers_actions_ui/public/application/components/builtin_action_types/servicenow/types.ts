@@ -45,3 +45,9 @@ export interface Choice {
 }
 
 export type Fields = Record<string, Choice[]>;
+export interface AppInfo {
+  id: string;
+  name: string;
+  scope: string;
+  version: string;
+}

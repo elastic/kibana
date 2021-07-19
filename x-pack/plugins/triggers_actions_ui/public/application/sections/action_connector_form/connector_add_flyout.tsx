@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useReducer, useEffect, useMemo } from 'react';
+import React, { useCallback, useState, useReducer, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiTitle,
@@ -33,6 +33,7 @@ import {
   IErrorObject,
   ConnectorAddFlyoutProps,
   ActionTypeModel,
+  ActionConnectorFieldsCallbacks,
 } from '../../../types';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { createActionConnector } from '../../lib/action_connector_api';
@@ -121,10 +122,7 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
   };
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [callbacks, setCallbacks] = useState<null | {
-    beforeActionConnectorSave?: () => void;
-    afterActionConnectorSave?: () => void;
-  }>(null);
+  const [callbacks, setCallbacks] = useState<ActionConnectorFieldsCallbacks>(null);
 
   const closeFlyout = useCallback(() => {
     onClose();
@@ -207,9 +205,9 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
       setIsSaving(true);
       await callbacks?.beforeActionConnectorSave?.();
       const savedAction = await onActionConnectorSave();
-      await callbacks?.afterActionConnectorSave?.();
       setIsSaving(false);
       if (savedAction) {
+        await callbacks?.afterActionConnectorSave?.(savedAction);
         closeFlyout();
         if (reloadConnectors) {
           await reloadConnectors();

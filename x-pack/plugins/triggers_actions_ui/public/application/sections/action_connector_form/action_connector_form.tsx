@@ -24,8 +24,7 @@ import {
   ActionTypeRegistryContract,
   UserConfiguredActionConnector,
   ActionTypeModel,
-  ActionConnector,
-  ActionConnectorFieldsProps,
+  ActionConnectorFieldsSetCallbacks,
 } from '../../../types';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { useKibana } from '../../../common/lib/kibana';
@@ -91,6 +90,7 @@ interface ActionConnectorProps<
   serverError?: {
     body: { message: string; error: string };
   };
+  setCallbacks: ActionConnectorFieldsSetCallbacks;
   setCallbacks: ActionConnectorFieldsProps['setCallbacks'];
 }
 
@@ -242,6 +242,7 @@ export const ActionConnectorForm = ({
                 editActionSecrets={setActionSecretsProperty}
                 consumer={consumer}
                 setCallbacks={setCallbacks}
+                isEdit={isEdit}
               />
             </Suspense>
           </EuiErrorBoundary>
