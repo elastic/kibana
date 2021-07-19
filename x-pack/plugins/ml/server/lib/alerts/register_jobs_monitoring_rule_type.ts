@@ -40,6 +40,7 @@ export const REALTIME_ISSUE_DETECTED: ActionGroup<AnomalyDetectionJobRealtimeIss
 export function registerJobsMonitoringRuleType({
   alerting,
   mlServicesProviders,
+  logger,
 }: RegisterAlertParams) {
   alerting.registerType<
     AnomalyDetectionJobsHealthRuleParams,
@@ -92,11 +93,16 @@ export function registerJobsMonitoringRuleType({
       const fakeRequest = {} as KibanaRequest;
       const { getTestsResults } = mlServicesProviders.jobsHealthServiceProvider(
         services.savedObjectsClient,
-        fakeRequest
+        fakeRequest,
+        logger
       );
       const executionResult = await getTestsResults(params);
 
       if (executionResult) {
+        logger.info(
+          `Scheduling actions for tests: ${executionResult.map((v) => v.name).join(', ')}`
+        );
+
         executionResult.forEach(({ name: alertInstanceName, context }) => {
           const alertInstance = services.alertInstanceFactory(alertInstanceName);
           alertInstance.scheduleActions(ANOMALY_DETECTION_JOB_REALTIME_ISSUE, context);

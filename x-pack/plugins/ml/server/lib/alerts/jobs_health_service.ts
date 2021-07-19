@@ -6,6 +6,7 @@
  */
 
 import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
+import { Logger } from 'kibana/server';
 import { MlClient } from '../ml_client';
 import {
   AnomalyDetectionJobsHealthRuleParams,
@@ -27,7 +28,11 @@ type TestsResults = TestResult[];
 
 type NotStartedDatafeedResponse = Array<DatafeedStats & { job_id: string }>;
 
-export function jobsHealthServiceProvider(mlClient: MlClient, datafeedsService: DatafeedsService) {
+export function jobsHealthServiceProvider(
+  mlClient: MlClient,
+  datafeedsService: DatafeedsService,
+  logger: Logger
+) {
   /**
    * Extract result list of job ids based on included and excluded selection of jobs and groups.
    * @param includeJobs
@@ -77,6 +82,7 @@ export function jobsHealthServiceProvider(mlClient: MlClient, datafeedsService: 
       excludeJobs?: JobSelection | null
     ): Promise<NotStartedDatafeedResponse | void> {
       const jobIds = await getResultJobIds(includeJobs, excludeJobs);
+      logger.debug(`Performing health checks for job ids: ${jobIds.join(', ')}`);
       const dataFeeds = await datafeedsService.getDatafeedByJobId(jobIds);
 
       if (dataFeeds) {
@@ -149,7 +155,8 @@ export function getJobsHealthServiceProvider(getGuards: GetGuards) {
   return {
     jobsHealthServiceProvider(
       savedObjectsClient: SavedObjectsClientContract,
-      request: KibanaRequest
+      request: KibanaRequest,
+      logger: Logger
     ) {
       return {
         getTestsResults: async (
@@ -161,7 +168,8 @@ export function getJobsHealthServiceProvider(getGuards: GetGuards) {
             .ok(({ mlClient, scopedClient }) =>
               jobsHealthServiceProvider(
                 mlClient,
-                datafeedsProvider(scopedClient, mlClient)
+                datafeedsProvider(scopedClient, mlClient),
+                logger
               ).getTestsResults(...args)
             );
         },
