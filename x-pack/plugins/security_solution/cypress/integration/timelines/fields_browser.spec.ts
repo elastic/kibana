@@ -10,7 +10,6 @@ import {
   FIELDS_BROWSER_FIELDS_COUNT,
   FIELDS_BROWSER_HOST_CATEGORIES_COUNT,
   FIELDS_BROWSER_HOST_GEO_CITY_NAME_HEADER,
-  FIELDS_BROWSER_HOST_GEO_COUNTRY_NAME_HEADER,
   FIELDS_BROWSER_HEADER_HOST_GEO_CONTINENT_NAME_HEADER,
   FIELDS_BROWSER_MESSAGE_HEADER,
   FIELDS_BROWSER_SELECTED_CATEGORY_TITLE,
@@ -24,7 +23,6 @@ import { cleanKibana } from '../../tasks/common';
 import {
   addsHostGeoCityNameToTimeline,
   addsHostGeoContinentNameToTimeline,
-  addsHostGeoCountryNameToTimelineDraggingIt,
   clearFieldsBrowser,
   closeFieldsBrowser,
   filterFieldsBrowser,
