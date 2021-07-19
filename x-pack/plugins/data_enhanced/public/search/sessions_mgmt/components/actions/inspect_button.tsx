@@ -10,20 +10,18 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
 import { CoreStart } from 'kibana/public';
 import { UISession } from '../../types';
-import { TableText } from '..';
+import { IClickActionDescriptor } from '..';
 import {
   CodeEditor,
   createKibanaReactContext,
   toMountPoint,
 } from '../../../../../../../../src/plugins/kibana_react/public';
 import './inspect_button.scss';
-import { OnActionClick } from './types';
+import { SearchSessionsMgmtAPI } from '../../lib/api';
 
 interface InspectFlyoutProps {
   searchSession: UISession;
-  overlays: CoreStart['overlays'];
   uiSettings: CoreStart['uiSettings'];
-  onActionClick: OnActionClick;
 }
 
 const InspectFlyout = ({ uiSettings, searchSession }: InspectFlyoutProps) => {
@@ -84,24 +82,23 @@ const InspectFlyout = ({ uiSettings, searchSession }: InspectFlyoutProps) => {
     </KibanaReactContextProvider>
   );
 };
-export const InspectButton = (props: InspectFlyoutProps) => {
-  const { overlays, onActionClick } = props;
 
-  return (
-    <Fragment>
-      <TableText
-        onClick={() => {
-          onActionClick();
-          const flyout = <InspectFlyout {...props} />;
-          overlays.openFlyout(toMountPoint(flyout));
-        }}
-      >
-        <FormattedMessage
-          id="xpack.data.mgmt.searchSessions.flyoutTitle"
-          aria-label="Inspect"
-          defaultMessage="Inspect"
-        />
-      </TableText>
-    </Fragment>
-  );
-};
+export const createInspectActionDescriptor = (
+  api: SearchSessionsMgmtAPI,
+  uiSession: UISession,
+  core: CoreStart
+): IClickActionDescriptor => ({
+  iconType: 'document',
+  label: (
+    <FormattedMessage
+      id="xpack.data.mgmt.searchSessions.flyoutTitle"
+      aria-label="Inspect"
+      defaultMessage="Inspect"
+    />
+  ),
+  onClick: async () => {
+    const flyout = <InspectFlyout uiSettings={core.uiSettings} searchSession={uiSession} />;
+    const overlay = core.overlays.openFlyout(toMountPoint(flyout));
+    await overlay.onClose;
+  },
+});
