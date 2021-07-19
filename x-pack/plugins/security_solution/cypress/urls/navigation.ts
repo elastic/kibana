@@ -23,6 +23,8 @@ export const SECURITY_DETECTIONS_RULES_CREATION_URL = '/app/security/detections/
 export const EXCEPTIONS_URL = 'app/security/exceptions';
 
 export const HOSTS_URL = '/app/security/hosts/allHosts';
+export const hostDetailsUrl = (hostName: string) =>
+  `/app/security/hosts/${hostName}/authentications`;
 export const HOSTS_PAGE_TAB_URLS = {
   allHosts: '/app/security/hosts/allHosts',
   anomalies: '/app/security/hosts/anomalies',

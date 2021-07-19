@@ -32,6 +32,8 @@ const mockResponse = {
   },
 } as ApiResponse<SearchResponse<any>>;
 
+jest.mock('../index_patterns');
+
 describe('terms agg suggestions', () => {
   beforeEach(() => {
     const requestHandlerContext = coreMock.createRequestHandlerContext();
@@ -62,6 +64,52 @@ describe('terms agg suggestions', () => {
               "terms": Object {
                 "execution_hint": "map",
                 "field": "field_name",
+                "include": "query.*",
+                "shard_size": 10,
+              },
+            },
+          },
+          "query": Object {
+            "bool": Object {
+              "filter": Array [],
+            },
+          },
+          "size": 0,
+          "terminate_after": 98430,
+          "timeout": "4513ms",
+        },
+        "index": "index",
+      }
+    `);
+    expect(result).toMatchInlineSnapshot(`
+      Array [
+        "whoa",
+        "amazing",
+      ]
+    `);
+  });
+
+  it('calls the _search API with a terms agg and fallback to fieldName when field is null', async () => {
+    const result = await termsAggSuggestions(
+      configMock,
+      savedObjectsClientMock,
+      esClientMock,
+      'index',
+      'fieldName',
+      'query',
+      []
+    );
+
+    const [[args]] = esClientMock.search.mock.calls;
+
+    expect(args).toMatchInlineSnapshot(`
+      Object {
+        "body": Object {
+          "aggs": Object {
+            "suggestions": Object {
+              "terms": Object {
+                "execution_hint": "map",
+                "field": "fieldName",
                 "include": "query.*",
                 "shard_size": 10,
               },

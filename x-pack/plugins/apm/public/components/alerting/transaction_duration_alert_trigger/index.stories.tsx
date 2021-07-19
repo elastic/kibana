@@ -17,7 +17,7 @@ import {
 import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
 
 export default {
-  title: 'app/TransactionDurationAlertTrigger',
+  title: 'alerting/TransactionDurationAlertTrigger',
   component: TransactionDurationAlertTrigger,
   decorators: [
     (Story: ComponentType) => {
@@ -26,7 +26,7 @@ export default {
           http: {
             get: (endpoint: string) => {
               if (endpoint === '/api/apm/environments') {
-                return Promise.resolve(['production']);
+                return Promise.resolve({ environments: ['production'] });
               } else {
                 return Promise.resolve({
                   transactionTypes: ['request'],

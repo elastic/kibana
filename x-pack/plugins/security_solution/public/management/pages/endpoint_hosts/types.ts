@@ -13,7 +13,6 @@ import {
   HostPolicyResponse,
   AppLocation,
   PolicyData,
-  MetadataQueryStrategyVersions,
   HostStatus,
   HostIsolationResponse,
   EndpointPendingActions,
@@ -37,12 +36,14 @@ export interface EndpointState {
   /** api error from retrieving host list */
   error?: ServerApiError;
   endpointDetails: {
-    flyoutView: EndpointIndexUIQueryParams['show'];
     activityLog: {
       paging: {
-        disabled: boolean;
+        disabled?: boolean;
         page: number;
         pageSize: number;
+        startDate?: string;
+        endDate?: string;
+        isInvalidDateRange: boolean;
       };
       logData: AsyncResourceState<ActivityLog>;
     };
@@ -93,8 +94,6 @@ export interface EndpointState {
   endpointsTotal: number;
   /** api error for total, actual Endpoints */
   endpointsTotalError?: ServerApiError;
-  /** The query strategy version that informs whether the transform for KQL is enabled or not */
-  queryStrategyVersion?: MetadataQueryStrategyVersions;
   /** The policy IDs and revision number of the corresponding agent, and endpoint. May be more recent than what's running */
   policyVersionInfo?: HostInfo['policy_info'];
   /** The status of the host, which is mapped to the Elastic Agent status in Fleet */

@@ -13,6 +13,7 @@ import {
 import { CanvasPluginServices } from '..';
 import { pluginServiceProviders as stubProviders } from '../stubs';
 import { workpadServiceFactory } from './workpad';
+import { notifyServiceFactory } from './notify';
 
 export interface StorybookParams {
   hasTemplates?: boolean;
@@ -26,6 +27,7 @@ export const pluginServiceProviders: PluginServiceProviders<
 > = {
   ...stubProviders,
   workpad: new PluginServiceProvider(workpadServiceFactory),
+  notify: new PluginServiceProvider(notifyServiceFactory),
 };
 
 export const argTypes = {

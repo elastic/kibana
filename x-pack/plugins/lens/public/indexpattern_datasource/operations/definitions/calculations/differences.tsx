@@ -114,7 +114,7 @@ export const derivativeOperation: OperationDefinition<
     signature: i18n.translate('xpack.lens.indexPattern.differences.signature', {
       defaultMessage: 'metric: number',
     }),
-    description: i18n.translate('xpack.lens.indexPattern.differences.documentation', {
+    description: i18n.translate('xpack.lens.indexPattern.differences.documentation.markdown', {
       defaultMessage: `
 Calculates the difference to the last value of a metric over time. To use this function, you need to configure a date histogram dimension as well.
 Differences requires the data to be sequential. If your data is empty when using differences, try increasing the date histogram interval.

@@ -16,10 +16,11 @@ import {
   EuiFieldText,
   EuiButtonIcon,
   EuiLoadingSpinner,
+  EuiFormRow,
 } from '@elastic/eui';
 
+import { MAX_TITLE_LENGTH } from '../../../common';
 import * as i18n from './translations';
-
 import { Title } from './title';
 
 const MyEuiButtonIcon = styled(EuiButtonIcon)`
@@ -37,7 +38,7 @@ const MySpinner = styled(EuiLoadingSpinner)`
 export interface EditableTitleProps {
   userCanCrud: boolean;
   isLoading: boolean;
-  title: string | React.ReactNode;
+  title: string;
   onSubmit: (title: string) => void;
 }
 
@@ -48,57 +49,72 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({
   title,
 }) => {
   const [editMode, setEditMode] = useState(false);
-  const [changedTitle, onTitleChange] = useState<string>(typeof title === 'string' ? title : '');
+  const [errors, setErrors] = useState<string[]>([]);
+  const [newTitle, setNewTitle] = useState<string>(title);
 
-  const onCancel = useCallback(() => setEditMode(false), []);
+  const onCancel = useCallback(() => {
+    setEditMode(false);
+    setErrors([]);
+    setNewTitle(title);
+  }, [title]);
+
   const onClickEditIcon = useCallback(() => setEditMode(true), []);
-
   const onClickSubmit = useCallback((): void => {
-    if (changedTitle !== title) {
-      onSubmit(changedTitle);
+    if (newTitle.length > MAX_TITLE_LENGTH) {
+      setErrors([i18n.MAX_LENGTH_ERROR('title', MAX_TITLE_LENGTH)]);
+      return;
+    }
+
+    if (newTitle !== title) {
+      onSubmit(newTitle);
     }
     setEditMode(false);
-  }, [changedTitle, onSubmit, title]);
+  }, [newTitle, onSubmit, title]);
 
   const handleOnChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => onTitleChange(e.target.value),
+    (e: ChangeEvent<HTMLInputElement>) => setNewTitle(e.target.value),
     []
   );
+
+  const hasErrors = errors.length > 0;
+
   return editMode ? (
-    <EuiFlexGroup alignItems="center" gutterSize="m" justifyContent="spaceBetween">
-      <EuiFlexItem grow={false}>
-        <EuiFieldText
-          onChange={handleOnChange}
-          value={`${changedTitle}`}
-          data-test-subj="editable-title-input-field"
-        />
-      </EuiFlexItem>
-      <EuiFlexGroup gutterSize="none" responsive={false} wrap={true}>
+    <EuiFormRow isInvalid={hasErrors} error={errors} fullWidth>
+      <EuiFlexGroup alignItems="center" gutterSize="m" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiButton
-            color="secondary"
-            data-test-subj="editable-title-submit-btn"
-            fill
-            iconType="save"
-            onClick={onClickSubmit}
-            size="s"
-          >
-            {i18n.SAVE}
-          </EuiButton>
+          <EuiFieldText
+            onChange={handleOnChange}
+            value={`${newTitle}`}
+            data-test-subj="editable-title-input-field"
+          />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            data-test-subj="editable-title-cancel-btn"
-            iconType="cross"
-            onClick={onCancel}
-            size="s"
-          >
-            {i18n.CANCEL}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
+        <EuiFlexGroup gutterSize="none" responsive={false} wrap={true}>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              color="secondary"
+              data-test-subj="editable-title-submit-btn"
+              fill
+              iconType="save"
+              onClick={onClickSubmit}
+              size="s"
+            >
+              {i18n.SAVE}
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              data-test-subj="editable-title-cancel-btn"
+              iconType="cross"
+              onClick={onCancel}
+              size="s"
+            >
+              {i18n.CANCEL}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiFlexItem />
       </EuiFlexGroup>
-      <EuiFlexItem />
-    </EuiFlexGroup>
+    </EuiFormRow>
   ) : (
     <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
       <EuiFlexItem grow={false}>

@@ -42,7 +42,9 @@ export const getTransactionDurationRangesRequest = (
     },
     [{ to: 0 }] as Array<{ from?: number; to?: number }>
   );
-  ranges.push({ from: ranges[ranges.length - 1].to });
+  if (ranges.length > 0) {
+    ranges.push({ from: ranges[ranges.length - 1].to });
+  }
 
   return {
     index: params.index,

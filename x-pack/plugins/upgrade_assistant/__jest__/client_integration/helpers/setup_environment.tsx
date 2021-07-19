@@ -33,7 +33,6 @@ export const WithAppDependencies = (Comp: any, overrides: Record<string, unknown
 
   const contextValue = {
     http: (mockHttpClient as unknown) as HttpSetup,
-    isCloudEnabled: false,
     docLinks: docLinksServiceMock.createStartContract(),
     kibanaVersionInfo: {
       currentMajor: mockKibanaSemverVersion.major,

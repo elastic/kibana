@@ -28,16 +28,14 @@ import {
   nonExistingPolicies,
   patterns,
   searchBarQuery,
-  isTransformEnabled,
   getIsIsolationRequestPending,
   getCurrentIsolationRequestState,
   getActivityLogData,
   getActivityLogDataPaging,
   getLastLoadedActivityLogData,
   detailsData,
-  getEndpointDetailsFlyoutView,
-  getIsEndpointPackageInfoPending,
-  getIsEndpointPackageInfoSuccessful,
+  getIsEndpointPackageInfoUninitialized,
+  getIsOnEndpointDetailsActivityLog,
 } from './selectors';
 import { AgentIdsPendingActions, EndpointState, PolicyIds } from '../types';
 import {
@@ -65,7 +63,7 @@ import { AppAction } from '../../../../common/store/actions';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 import { EndpointPackageInfoStateChanged } from './action';
 import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint_pending_actions';
-import { EndpointDetailsTabsTypes } from '../view/details/components/endpoint_details_tabs';
+import { getIsInvalidDateRange } from '../utils';
 
 type EndpointPageStore = ImmutableMiddlewareAPI<EndpointState, AppAction>;
 
@@ -167,6 +165,8 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
             });
           }
         } catch (error) {
+          // TODO should handle the error instead of logging it to the browser
+          // Also this is an anti-pattern we shouldn't use
           // Ignore Errors, since this should not hinder the user's ability to use the UI
           logError(error);
         }
@@ -178,7 +178,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       }
 
       // get index pattern and fields for search bar
-      if (patterns(getState()).length === 0 && isTransformEnabled(getState())) {
+      if (patterns(getState()).length === 0) {
         try {
           const indexPatterns = await fetchIndexPatterns();
           if (indexPatterns !== undefined) {
@@ -287,6 +287,8 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
               });
             }
           } catch (error) {
+            // TODO should handle the error instead of logging it to the browser
+            // Also this is an anti-pattern we shouldn't use
             // Ignore Errors, since this should not hinder the user's ability to use the UI
             logError(error);
           }
@@ -332,6 +334,8 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
             });
           }
         } catch (error) {
+          // TODO should handle the error instead of logging it to the browser
+          // Also this is an anti-pattern we shouldn't use
           // Ignore Errors, since this should not hinder the user's ability to use the UI
           logError(error);
         }
@@ -364,7 +368,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
     if (
       action.type === 'userChangedUrl' &&
       hasSelectedEndpoint(getState()) === true &&
-      getEndpointDetailsFlyoutView(getState()) === EndpointDetailsTabsTypes.activityLog
+      getIsOnEndpointDetailsActivityLog(getState())
     ) {
       // call the activity log api
       dispatch({
@@ -395,21 +399,50 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
     }
 
     // page activity log API
-    if (action.type === 'appRequestedEndpointActivityLog' && hasSelectedEndpoint(getState())) {
-      dispatch({
-        type: 'endpointDetailsActivityLogChanged',
-        // ts error to be fixed when AsyncResourceState is refactored (#830)
-        // @ts-expect-error
-        payload: createLoadingResourceState<ActivityLog>(getActivityLogData(getState())),
-      });
-
+    if (
+      action.type === 'endpointDetailsActivityLogUpdatePaging' &&
+      hasSelectedEndpoint(getState())
+    ) {
       try {
-        const { page, pageSize } = getActivityLogDataPaging(getState());
+        const { disabled, page, pageSize, startDate, endDate } = getActivityLogDataPaging(
+          getState()
+        );
+        // don't page when paging is disabled or when date ranges are invalid
+        if (disabled) {
+          return;
+        }
+        if (getIsInvalidDateRange({ startDate, endDate })) {
+          dispatch({
+            type: 'endpointDetailsActivityLogUpdateIsInvalidDateRange',
+            payload: {
+              isInvalidDateRange: true,
+            },
+          });
+          return;
+        }
+
+        dispatch({
+          type: 'endpointDetailsActivityLogUpdateIsInvalidDateRange',
+          payload: {
+            isInvalidDateRange: false,
+          },
+        });
+        dispatch({
+          type: 'endpointDetailsActivityLogChanged',
+          // ts error to be fixed when AsyncResourceState is refactored (#830)
+          // @ts-expect-error
+          payload: createLoadingResourceState<ActivityLog>(getActivityLogData(getState())),
+        });
         const route = resolvePathVariables(ENDPOINT_ACTION_LOG_ROUTE, {
           agent_id: selectedAgent(getState()),
         });
         const activityLog = await coreStart.http.get<ActivityLog>(route, {
-          query: { page, page_size: pageSize },
+          query: {
+            page,
+            page_size: pageSize,
+            start_date: startDate,
+            end_date: endDate,
+          },
         });
 
         const lastLoadedLogData = getLastLoadedActivityLogData(getState());
@@ -423,6 +456,8 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
           const updatedLogData = {
             page: activityLog.page,
             pageSize: activityLog.pageSize,
+            startDate: activityLog.startDate,
+            endDate: activityLog.endDate,
             data: activityLog.page === 1 ? activityLog.data : updatedLogDataItems,
           };
           dispatch({
@@ -434,8 +469,10 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
               type: 'endpointDetailsActivityLogUpdatePaging',
               payload: {
                 disabled: true,
-                page: activityLog.page - 1,
+                page: activityLog.page > 1 ? activityLog.page - 1 : 1,
                 pageSize: activityLog.pageSize,
+                startDate: activityLog.startDate,
+                endDate: activityLog.endDate,
               },
             });
           }
@@ -470,13 +507,17 @@ const getAgentAndPoliciesForEndpointsList = async (
   }
 
   // Create an array of unique policy IDs that are not yet known to be non-existing.
-  const policyIdsToCheck = Array.from(
-    new Set(
-      hosts
-        .filter((host) => !currentNonExistingPolicies[host.metadata.Endpoint.policy.applied.id])
-        .map((host) => host.metadata.Endpoint.policy.applied.id)
-    )
-  );
+  const policyIdsToCheck = [
+    ...new Set(
+      hosts.reduce((acc: string[], host) => {
+        const appliedPolicyId = host.metadata.Endpoint.policy.applied.id;
+        if (!currentNonExistingPolicies[appliedPolicyId]) {
+          acc.push(appliedPolicyId);
+        }
+        return acc;
+      }, [])
+    ),
+  ];
 
   if (policyIdsToCheck.length === 0) {
     return;
@@ -538,6 +579,8 @@ const endpointsTotal = async (http: HttpStart): Promise<number> => {
       })
     ).total;
   } catch (error) {
+    // TODO should handle the error instead of logging it to the browser
+    // Also this is an anti-pattern we shouldn't use
     logError(`error while trying to check for total endpoints`);
     logError(error);
   }
@@ -548,6 +591,8 @@ const doEndpointsExist = async (http: HttpStart): Promise<boolean> => {
   try {
     return (await endpointsTotal(http)) > 0;
   } catch (error) {
+    // TODO should handle the error instead of logging it to the browser
+    // Also this is an anti-pattern we shouldn't use
     logError(`error while trying to check if endpoints exist`);
     logError(error);
   }
@@ -598,7 +643,7 @@ async function getEndpointPackageInfo(
   dispatch: Dispatch<EndpointPackageInfoStateChanged>,
   coreStart: CoreStart
 ) {
-  if (getIsEndpointPackageInfoPending(state) || getIsEndpointPackageInfoSuccessful(state)) return;
+  if (!getIsEndpointPackageInfoUninitialized(state)) return;
 
   dispatch({
     type: 'endpointPackageInfoStateChanged',
@@ -614,6 +659,8 @@ async function getEndpointPackageInfo(
       payload: createLoadedResourceState(packageInfo),
     });
   } catch (error) {
+    // TODO should handle the error instead of logging it to the browser
+    // Also this is an anti-pattern we shouldn't use
     // Ignore Errors, since this should not hinder the user's ability to use the UI
     logError(error);
     dispatch({
@@ -664,6 +711,8 @@ const loadEndpointsPendingActions = async ({
       payload: createLoadedResourceState(agentIdToPendingActions),
     });
   } catch (error) {
+    // TODO should handle the error instead of logging it to the browser
+    // Also this is an anti-pattern we shouldn't use
     logError(error);
   }
 };

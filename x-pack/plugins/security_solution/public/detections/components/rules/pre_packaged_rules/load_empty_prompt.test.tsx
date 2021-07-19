@@ -27,7 +27,20 @@ jest.mock('react-router-dom', () => {
 });
 
 jest.mock('../../../../common/components/link_to');
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../common/lib/kibana/kibana_react', () => {
+  const original = jest.requireActual('../../../../common/lib/kibana/kibana_react');
+  return {
+    ...original,
+    useKibana: () => ({
+      services: {
+        application: {
+          navigateToApp: jest.fn(),
+          getUrlForApp: jest.fn(),
+        },
+      },
+    }),
+  };
+});
 
 jest.mock('../../../containers/detection_engine/rules/api', () => ({
   getPrePackagedRulesStatus: jest.fn().mockResolvedValue({

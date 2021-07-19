@@ -97,7 +97,7 @@ export const Toolbar: FC<Props> = ({
           <EuiFlexItem grow={false} className="canvasToolbar__home">
             {workpadName}
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem>
             <EuiFlexGroup alignItems="center" gutterSize="none" className="canvasToolbar__controls">
               <EuiFlexItem grow={false}>
                 <RoutingButtonIcon

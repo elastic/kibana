@@ -372,6 +372,7 @@ export class FileDataVisualizerView extends Component {
               hideBottomBar={this.hideBottomBar}
               savedObjectsClient={this.savedObjectsClient}
               fileUpload={this.props.fileUpload}
+              resultsLinks={this.props.resultsLinks}
             />
 
             {bottomBarVisible && (

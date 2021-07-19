@@ -87,11 +87,6 @@ export const DashboardListing = ({
     };
   }, [title, savedObjectsClient, redirectTo, data.query, kbnUrlStateStorage]);
 
-  // clear dangling session because they are not required here
-  useEffect(() => {
-    data.search.session.clear();
-  }, [data.search.session]);
-
   const hideWriteControls = dashboardCapabilities.hideWriteControls;
   const listingLimit = savedObjects.settings.getListingLimit();
   const defaultFilter = title ? `"${title}"` : '';

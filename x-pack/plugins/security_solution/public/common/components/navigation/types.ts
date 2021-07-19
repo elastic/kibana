@@ -6,7 +6,7 @@
  */
 
 import { UrlStateType } from '../url_state/constants';
-import { SecurityPageName, SecurityPageGroupName } from '../../../app/types';
+import { SecurityPageName } from '../../../app/types';
 import { UrlState } from '../url_state/types';
 import { SiemRouteType } from '../../utils/route/types';
 
@@ -27,15 +27,14 @@ export interface NavGroupTab {
   id: string;
   name: string;
 }
+export enum SecurityNavGroupKey {
+  detect = 'detect',
+  explore = 'explore',
+  investigate = 'investigate',
+  manage = 'manage',
+}
 
-export type SecurityNavTabGroupKey =
-  | SecurityPageGroupName.detect
-  | SecurityPageGroupName.explore
-  | SecurityPageGroupName.investigate
-  | SecurityPageGroupName.manage;
-
-export type NavTabGroups = Record<SecurityNavTabGroupKey, NavGroupTab>;
-
+export type SecurityNavGroup = Record<SecurityNavGroupKey, NavGroupTab>;
 export interface NavTab {
   id: string;
   name: string;
@@ -44,8 +43,7 @@ export interface NavTab {
   urlKey?: UrlStateType;
   pageId?: SecurityPageName;
 }
-
-export type SiemNavTabKey =
+export type SecurityNavKey =
   | SecurityPageName.overview
   | SecurityPageName.hosts
   | SecurityPageName.network
@@ -59,7 +57,7 @@ export type SiemNavTabKey =
   | SecurityPageName.trustedApps
   | SecurityPageName.eventFilters;
 
-export type SiemNavTab = Record<SiemNavTabKey, NavTab>;
+export type SecurityNav = Record<SecurityNavKey, NavTab>;
 
 export type GetUrlForApp = (
   appId: string,

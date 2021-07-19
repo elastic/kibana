@@ -18,7 +18,6 @@ import { CaseHeaderPage } from '../components/case_header_page';
 import { Create } from '../components/create';
 import * as i18n from './translations';
 import { APP_ID } from '../../../common/constants';
-import { SiemNavTabKey } from '../../common/components/navigation/types';
 
 export const CreateCasePage = React.memo(() => {
   const userPermissions = useGetUserCasesPermissions();
@@ -29,9 +28,9 @@ export const CreateCasePage = React.memo(() => {
 
   const backOptions = useMemo(
     () => ({
-      href: getCaseUrl(search),
+      path: getCaseUrl(search),
       text: i18n.BACK_TO_ALL,
-      pageId: SecurityPageName.case as SiemNavTabKey,
+      pageId: SecurityPageName.case,
     }),
     [search]
   );

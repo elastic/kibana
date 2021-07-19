@@ -33,10 +33,10 @@ const TutorialDirectoryHeaderLink: TutorialDirectoryHeaderLinkComponent = memo((
 
   return hasIngestManager && noticeState.settingsDataLoaded && noticeState.hasSeenNotice ? (
     <RedirectAppLinks application={application}>
-      <EuiButtonEmpty size="s" iconType="link" flush="right" href={getHref('overview')}>
+      <EuiButtonEmpty size="s" iconType="link" flush="right" href={getHref('integrations')}>
         <FormattedMessage
           id="xpack.fleet.homeIntegration.tutorialDirectory.fleetAppButtonText"
-          defaultMessage="Try Fleet Beta"
+          defaultMessage="Try Integrations"
         />
       </EuiButtonEmpty>
     </RedirectAppLinks>

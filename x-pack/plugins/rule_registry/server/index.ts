@@ -10,11 +10,21 @@ import { RuleRegistryPlugin } from './plugin';
 
 export * from './config';
 export type { RuleRegistryPluginSetupContract, RuleRegistryPluginStartContract } from './plugin';
+export type { RacRequestHandlerContext, RacApiRequestHandlerContext } from './types';
 export { RuleDataClient } from './rule_data_client';
 export { IRuleDataClient } from './rule_data_client/types';
 export { getRuleExecutorData, RuleExecutorData } from './utils/get_rule_executor_data';
-export { createLifecycleRuleTypeFactory } from './utils/create_lifecycle_rule_type_factory';
+export {
+  createLifecycleRuleTypeFactory,
+  LifecycleAlertService,
+} from './utils/create_lifecycle_rule_type_factory';
+export {
+  LifecycleRuleExecutor,
+  LifecycleAlertServices,
+  createLifecycleExecutor,
+} from './utils/create_lifecycle_executor';
 export { createPersistenceRuleTypeFactory } from './utils/create_persistence_rule_type_factory';
+export type { AlertTypeWithExecutor } from './types';
 
 export const plugin = (initContext: PluginInitializerContext) =>
   new RuleRegistryPlugin(initContext);

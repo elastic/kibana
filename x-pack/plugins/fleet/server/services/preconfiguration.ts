@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
-import { groupBy, omit, isEqual } from 'lodash';
+import { groupBy, omit, pick, isEqual } from 'lodash';
 
 import type {
   NewPackagePolicy,
@@ -142,14 +142,16 @@ export async function ensurePreconfiguredPackagesAndPolicies(
 
       if (!created) {
         if (!policy?.is_managed) return { created, policy };
-        const configTopLevelFields = omit(preconfiguredAgentPolicy, 'package_policies', 'id');
-        const currentTopLevelFields = omit(policy, 'package_policies');
-        if (!isEqual(configTopLevelFields, currentTopLevelFields)) {
+        const { hasChanged, fields } = comparePreconfiguredPolicyToCurrent(
+          preconfiguredAgentPolicy,
+          policy
+        );
+        if (hasChanged) {
           const updatedPolicy = await agentPolicyService.update(
             soClient,
             esClient,
             String(preconfiguredAgentPolicy.id),
-            configTopLevelFields
+            fields
           );
           return { created, policy: updatedPolicy };
         }
@@ -240,6 +242,19 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     ),
     packages: fulfilledPackages.map((pkg) => pkgToPkgKey(pkg)),
     nonFatalErrors: [...rejectedPackages, ...rejectedPolicies],
+  };
+}
+
+export function comparePreconfiguredPolicyToCurrent(
+  policyFromConfig: PreconfiguredAgentPolicy,
+  currentPolicy: AgentPolicy
+) {
+  const configTopLevelFields = omit(policyFromConfig, 'package_policies', 'id');
+  const currentTopLevelFields = pick(currentPolicy, ...Object.keys(configTopLevelFields));
+
+  return {
+    hasChanged: !isEqual(configTopLevelFields, currentTopLevelFields),
+    fields: configTopLevelFields,
   };
 }
 

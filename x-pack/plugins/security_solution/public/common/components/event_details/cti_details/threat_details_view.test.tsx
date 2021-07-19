@@ -31,15 +31,6 @@ describe('ThreatDetailsView', () => {
     );
   });
 
-  it('renders an empty view if there are no enrichments', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <ThreatDetailsView enrichments={[]} />
-      </TestProviders>
-    );
-    expect(wrapper.find('[data-test-subj="empty-threat-details-view"]').exists()).toEqual(true);
-  });
-
   it('renders anchor links for event.url and event.reference', () => {
     const enrichments = [
       buildEventEnrichmentMock({

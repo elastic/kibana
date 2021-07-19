@@ -228,3 +228,9 @@ export const SELECTABLE_MESSAGE_COLLECTIONS = i18n.translate(
 export const SELECT_CASE_TITLE = i18n.translate('xpack.cases.common.allCases.caseModal.title', {
   defaultMessage: 'Select case',
 });
+
+export const MAX_LENGTH_ERROR = (field: string, length: number) =>
+  i18n.translate('xpack.cases.createCase.maxLengthError', {
+    values: { field, length },
+    defaultMessage: 'The length of the {field} is too long. The maximum length is {length}.',
+  });

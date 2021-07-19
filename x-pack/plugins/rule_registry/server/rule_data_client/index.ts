@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
-import type { estypes } from '@elastic/elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { IndexPatternsFetcher } from '../../../../../src/plugins/data/server';
 import { RuleDataWriteDisabledError } from '../rule_data_plugin_service/errors';
@@ -100,7 +98,7 @@ export class RuleDataClient implements IRuleDataClient {
               response.body.items.length > 0 &&
               response.body.items?.[0]?.index?.error?.type === 'index_not_found_exception'
             ) {
-              return this.createOrUpdateWriteTarget({ namespace }).then(() => {
+              return this.createWriteTargetIfNeeded({ namespace }).then(() => {
                 return clusterClient.bulk(requestWithDefaultParameters);
               });
             }
@@ -113,7 +111,7 @@ export class RuleDataClient implements IRuleDataClient {
     };
   }
 
-  async createOrUpdateWriteTarget({ namespace }: { namespace?: string }) {
+  async createWriteTargetIfNeeded({ namespace }: { namespace?: string }) {
     const alias = getNamespacedAlias({ alias: this.options.alias, namespace });
 
     const clusterClient = await this.getClusterClient();
@@ -138,25 +136,10 @@ export class RuleDataClient implements IRuleDataClient {
         });
       } catch (err) {
         // something might have created the index already, that sounds OK
-        if (err?.meta?.body?.type !== 'resource_already_exists_exception') {
+        if (err?.meta?.body?.error?.type !== 'resource_already_exists_exception') {
           throw err;
         }
       }
     }
-
-    const { body: simulateResponse } = await clusterClient.transport.request({
-      method: 'POST',
-      path: `/_index_template/_simulate_index/${concreteIndexName}`,
-    });
-
-    const mappings: estypes.MappingTypeMapping = simulateResponse.template.mappings;
-
-    if (isEmpty(mappings)) {
-      throw new Error(
-        'No mappings would be generated for this index, possibly due to failed/misconfigured bootstrapping'
-      );
-    }
-
-    await clusterClient.indices.putMapping({ index: `${alias}*`, body: mappings });
   }
 }

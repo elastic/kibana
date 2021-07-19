@@ -11,12 +11,13 @@ import {
   CASE_CONFIGURE_URL,
   SECURITY_SOLUTION_OWNER,
 } from '../../../../../../plugins/cases/common/constants';
-import { getConfiguration } from '../../../../common/lib/utils';
+import { getConfiguration, getConnectorMappingsFromES } from '../../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
-export default function createGetTests({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const es = getService('es');
 
   describe('migrations', () => {
     describe('7.10.0', () => {
@@ -63,6 +64,16 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         });
 
         expect(configuration[0].owner).to.be(SECURITY_SOLUTION_OWNER);
+      });
+
+      it('adds the owner field to the connector mapping', async () => {
+        // We don't get the owner field back from the mappings when we retrieve the configuration so the only way to
+        // check that the migration worked is by checking the saved object stored in Elasticsearch directly
+        const mappings = await getConnectorMappingsFromES({ es });
+        expect(mappings.body.hits.hits.length).to.be(1);
+        expect(mappings.body.hits.hits[0]._source?.['cases-connector-mappings'].owner).to.eql(
+          SECURITY_SOLUTION_OWNER
+        );
       });
     });
   });

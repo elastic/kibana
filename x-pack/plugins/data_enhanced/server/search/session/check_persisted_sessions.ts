@@ -36,7 +36,11 @@ function checkPersistedSessionsPage(
         `${SEARCH_SESSIONS_TASK_TYPE} Found ${persistedSearchSessions.total} sessions, processing ${persistedSearchSessions.saved_objects.length}`
       );
 
-      const updatedSessions = await getAllSessionsStatusUpdates(deps, persistedSearchSessions);
+      const updatedSessions = await getAllSessionsStatusUpdates(
+        deps,
+        config,
+        persistedSearchSessions
+      );
       await bulkUpdateSessions(deps, updatedSessions);
 
       return persistedSearchSessions;

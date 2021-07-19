@@ -95,22 +95,19 @@ describe('Processor: Date', () => {
       component,
     } = testBed;
 
+    // Set required parameters
     form.setInputValue('fieldNameField.input', 'field_1');
 
-    // Set optional parameteres
     await act(async () => {
       find('formatsValueField.input').simulate('change', [{ label: 'ISO8601' }]);
     });
     component.update();
 
-    // Set target field
+    // Set optional parameters
     form.setInputValue('targetField.input', 'target_field');
-
-    // Set locale field
     form.setInputValue('localeField.input', 'SPANISH');
-
-    // Set timezone field.
     form.setInputValue('timezoneField.input', 'EST');
+    form.setInputValue('outputFormatField.input', 'yyyy-MM-dd');
 
     // Save the field with new changes
     await saveNewProcessor();
@@ -122,6 +119,7 @@ describe('Processor: Date', () => {
       target_field: 'target_field',
       locale: 'SPANISH',
       timezone: 'EST',
+      output_format: 'yyyy-MM-dd',
     });
   });
 });

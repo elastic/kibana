@@ -40,6 +40,7 @@ import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from '../styles';
 import * as i18n from './translations';
+import { InspectButtonContainer } from '../../inspect';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
 const UTILITY_BAR_HEIGHT = 19; // px
@@ -103,7 +104,9 @@ export interface TGridStandaloneProps {
   columns: ColumnHeaderOptions[];
   deletedEventIds: Readonly<string[]>;
   end: string;
+  loadingText: React.ReactNode;
   filters: Filter[];
+  footerText: React.ReactNode;
   headerFilterGroup?: React.ReactNode;
   height?: number;
   indexNames: string[];
@@ -113,6 +116,7 @@ export interface TGridStandaloneProps {
   onRuleChange?: () => void;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
+  setRefetch: (ref: () => void) => void;
   start: string;
   sort: SortColumnTimeline[];
   utilityBar?: (refetch: Refetch, totalCount: number) => React.ReactNode;
@@ -120,13 +124,17 @@ export interface TGridStandaloneProps {
   leadingControlColumns: ControlColumnProps[];
   trailingControlColumns: ControlColumnProps[];
   data?: DataPublicPluginStart;
+  unit: (total: number) => React.ReactNode;
 }
+const basicUnit = (n: number) => i18n.UNIT(n);
 
 const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   columns,
   deletedEventIds,
   end,
+  loadingText,
   filters,
+  footerText,
   headerFilterGroup,
   indexNames,
   itemsPerPage,
@@ -135,6 +143,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   query,
   renderCellValue,
   rowRenderers,
+  setRefetch,
   start,
   sort,
   utilityBar,
@@ -142,6 +151,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   leadingControlColumns,
   trailingControlColumns,
   data,
+  unit = basicUnit,
 }) => {
   const dispatch = useDispatch();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
@@ -155,7 +165,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     queryFields,
     title,
   } = useDeepEqualSelector((state) => getTGrid(state, STANDALONE_ID ?? ''));
-  const unit = useMemo(() => (n: number) => i18n.UNIT(n), []);
   useEffect(() => {
     dispatch(tGridActions.updateIsLoading({ id: STANDALONE_ID, isLoading: isQueryLoading }));
   }, [dispatch, isQueryLoading]);
@@ -216,6 +225,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     skip: !canQueryTimeline,
     data,
   });
+  setRefetch(refetch);
 
   const totalCountMinusDeleted = useMemo(
     () => (totalCount > 0 ? totalCount - deletedEventIds.length : 0),
@@ -268,71 +278,81 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
         showCheckboxes: false,
       })
     );
+    dispatch(
+      tGridActions.initializeTGridSettings({
+        footerText,
+        id: STANDALONE_ID,
+        loadingText,
+        unit,
+      })
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
-    <StyledEuiPanel data-test-subj="events-viewer-panel" $isFullScreen={false}>
-      {canQueryTimeline ? (
-        <>
-          <HeaderSection
-            id={!resolverIsShowing(graphEventId) ? STANDALONE_ID : undefined}
-            inspect={inspect}
-            loading={loading}
-            height={headerFilterGroup ? COMPACT_HEADER_HEIGHT : EVENTS_VIEWER_HEADER_HEIGHT}
-            subtitle={utilityBar ? undefined : subtitle}
-            title={justTitle}
-            // title={globalFullScreen ? titleWithExitFullScreen : justTitle}
-          >
-            {HeaderSectionContent}
-          </HeaderSection>
-          {utilityBar && !resolverIsShowing(graphEventId) && (
-            <UtilityBar>{utilityBar?.(refetch, totalCountMinusDeleted)}</UtilityBar>
-          )}
-          <EventsContainerLoading
-            data-timeline-id={STANDALONE_ID}
-            data-test-subj={`events-container-loading-${loading}`}
-          >
-            <FullWidthFlexGroup $visible={!graphEventId} gutterSize="none">
-              <ScrollableFlexItem grow={1}>
-                <StatefulBody
-                  activePage={pageInfo.activePage}
-                  browserFields={EMPTY_BROWSER_FIELDS}
-                  data={nonDeletedEvents}
-                  id={STANDALONE_ID}
-                  isEventViewer={true}
-                  onRuleChange={onRuleChange}
-                  renderCellValue={renderCellValue}
-                  rowRenderers={rowRenderers}
-                  sort={sort}
-                  tabType={TimelineTabs.query}
-                  totalPages={calculateTotalPages({
-                    itemsCount: totalCountMinusDeleted,
-                    itemsPerPage: itemsPerPageStore,
-                  })}
-                  leadingControlColumns={leadingControlColumns}
-                  trailingControlColumns={trailingControlColumns}
-                />
-                <Footer
-                  activePage={pageInfo.activePage}
-                  data-test-subj="events-viewer-footer"
-                  updatedAt={updatedAt}
-                  height={footerHeight}
-                  id={STANDALONE_ID}
-                  isLive={false}
-                  isLoading={loading}
-                  itemsCount={nonDeletedEvents.length}
-                  itemsPerPage={itemsPerPageStore}
-                  itemsPerPageOptions={itemsPerPageOptionsStore}
-                  onChangePage={loadPage}
-                  totalCount={totalCountMinusDeleted}
-                />
-              </ScrollableFlexItem>
-            </FullWidthFlexGroup>
-          </EventsContainerLoading>
-        </>
-      ) : null}
-    </StyledEuiPanel>
+    <InspectButtonContainer>
+      <StyledEuiPanel data-test-subj="events-viewer-panel" $isFullScreen={false}>
+        {canQueryTimeline ? (
+          <>
+            <HeaderSection
+              id={!resolverIsShowing(graphEventId) ? STANDALONE_ID : undefined}
+              inspect={inspect}
+              loading={loading}
+              height={headerFilterGroup ? COMPACT_HEADER_HEIGHT : EVENTS_VIEWER_HEADER_HEIGHT}
+              subtitle={utilityBar ? undefined : subtitle}
+              title={justTitle}
+              // title={globalFullScreen ? titleWithExitFullScreen : justTitle}
+            >
+              {HeaderSectionContent}
+            </HeaderSection>
+            {utilityBar && !resolverIsShowing(graphEventId) && (
+              <UtilityBar>{utilityBar?.(refetch, totalCountMinusDeleted)}</UtilityBar>
+            )}
+            <EventsContainerLoading
+              data-timeline-id={STANDALONE_ID}
+              data-test-subj={`events-container-loading-${loading}`}
+            >
+              <FullWidthFlexGroup $visible={!graphEventId} gutterSize="none">
+                <ScrollableFlexItem grow={1}>
+                  <StatefulBody
+                    activePage={pageInfo.activePage}
+                    browserFields={EMPTY_BROWSER_FIELDS}
+                    data={nonDeletedEvents}
+                    id={STANDALONE_ID}
+                    isEventViewer={true}
+                    onRuleChange={onRuleChange}
+                    renderCellValue={renderCellValue}
+                    rowRenderers={rowRenderers}
+                    sort={sort}
+                    tabType={TimelineTabs.query}
+                    totalPages={calculateTotalPages({
+                      itemsCount: totalCountMinusDeleted,
+                      itemsPerPage: itemsPerPageStore,
+                    })}
+                    leadingControlColumns={leadingControlColumns}
+                    trailingControlColumns={trailingControlColumns}
+                  />
+                  <Footer
+                    activePage={pageInfo.activePage}
+                    data-test-subj="events-viewer-footer"
+                    updatedAt={updatedAt}
+                    height={footerHeight}
+                    id={STANDALONE_ID}
+                    isLive={false}
+                    isLoading={loading}
+                    itemsCount={nonDeletedEvents.length}
+                    itemsPerPage={itemsPerPageStore}
+                    itemsPerPageOptions={itemsPerPageOptionsStore}
+                    onChangePage={loadPage}
+                    totalCount={totalCountMinusDeleted}
+                  />
+                </ScrollableFlexItem>
+              </FullWidthFlexGroup>
+            </EventsContainerLoading>
+          </>
+        ) : null}
+      </StyledEuiPanel>
+    </InspectButtonContainer>
   );
 };
 

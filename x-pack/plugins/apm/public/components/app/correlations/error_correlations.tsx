@@ -6,33 +6,32 @@
  */
 
 import {
-  ScaleType,
-  Chart,
-  LineSeries,
   Axis,
+  Chart,
   CurveType,
+  LineSeries,
   Position,
-  timeFormatter,
+  ScaleType,
   Settings,
+  timeFormatter,
 } from '@elastic/charts';
-import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
+import { useUiTracker } from '../../../../../observability/public';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useLocalStorage } from '../../../hooks/useLocalStorage';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { useTheme } from '../../../hooks/use_theme';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
-import { px } from '../../../style/variables';
+import { ChartContainer } from '../../shared/charts/chart_container';
 import {
   CorrelationsTable,
   SelectedSignificantTerm,
 } from './correlations_table';
-import { ChartContainer } from '../../shared/charts/chart_container';
-import { useTheme } from '../../../hooks/use_theme';
 import { CustomFields } from './custom_fields';
 import { useFieldNames } from './use_field_names';
-import { useLocalStorage } from '../../../hooks/useLocalStorage';
-import { useUiTracker } from '../../../../../observability/public';
 
 type OverallErrorsApiResponse = NonNullable<
   APIReturnType<'GET /api/apm/correlations/errors/overall_timeseries'>
@@ -52,7 +51,7 @@ export function ErrorCorrelations({ onClose }: Props) {
     setSelectedSignificantTerm,
   ] = useState<SelectedSignificantTerm | null>(null);
 
-  const { serviceName } = useParams<{ serviceName?: string }>();
+  const { serviceName } = useApmServiceContext();
   const { urlParams } = useUrlParams();
   const {
     environment,
@@ -221,7 +220,7 @@ function ErrorTimeseriesChart({
 
   return (
     <ChartContainer height={200} hasData={!!overallData} status={status}>
-      <Chart size={{ height: px(200), width: '100%' }}>
+      <Chart size={{ height: 200, width: '100%' }}>
         <Settings showLegend legendPosition={Position.Bottom} />
 
         <Axis

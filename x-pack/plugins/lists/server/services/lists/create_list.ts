@@ -19,8 +19,8 @@ import type {
   Type,
 } from '@kbn/securitysolution-io-ts-list-types';
 import type { Version } from '@kbn/securitysolution-io-ts-types';
+import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
 
-import { encodeHitVersion } from '../utils/encode_hit_version';
 import { IndexEsListSchema } from '../../schemas/elastic_query';
 
 export interface CreateListOptions {

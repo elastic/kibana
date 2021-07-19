@@ -9,5 +9,5 @@ Returns the final output of expression, if any error happens still wraps that er
 <b>Signature:</b>
 
 ```typescript
-getData: () => Promise<Output | ExpressionValueError>;
+getData: () => Observable<ExecutionResult<Output | ExpressionValueError>>;
 ```

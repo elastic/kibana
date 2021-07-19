@@ -49,7 +49,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
           name: (
             <FormattedMessage
               id="xpack.fleet.appNavigation.policiesLinkText"
-              defaultMessage="Agent Policies"
+              defaultMessage="Agent policies"
             />
           ),
           isSelected: section === 'agent_policies',
@@ -60,7 +60,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
           name: (
             <FormattedMessage
               id="xpack.fleet.appNavigation.enrollmentTokensText"
-              defaultMessage="Enrollment Tokens"
+              defaultMessage="Enrollment tokens"
             />
           ),
           isSelected: section === 'enrollment_tokens',

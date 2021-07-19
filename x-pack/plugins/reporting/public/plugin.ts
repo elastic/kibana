@@ -15,7 +15,6 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'src/core/public';
-import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
 import { CONTEXT_MENU_TRIGGER } from '../../../../src/plugins/embeddable/public';
 import {
   FeatureCatalogueCategory,
@@ -23,7 +22,6 @@ import {
   HomePublicPluginStart,
 } from '../../../../src/plugins/home/public';
 import { ManagementSetup, ManagementStart } from '../../../../src/plugins/management/public';
-import { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
 import { constants, getDefaultLayoutSelectors } from '../common';
 import { durationToNumber } from '../common/schema_utils';
@@ -36,6 +34,13 @@ import { ReportingCsvPanelAction } from './panel_actions/get_csv_panel_action';
 import { getSharedComponents } from './shared';
 import { ReportingCsvShareProvider } from './share_context_menu/register_csv_reporting';
 import { reportingScreenshotShareProvider } from './share_context_menu/register_pdf_png_reporting';
+
+import type {
+  SharePluginSetup,
+  SharePluginStart,
+  UiActionsSetup,
+  UiActionsStart,
+} from './shared_imports';
 
 export interface ClientConfigType {
   poll: { jobsRefresh: { interval: number; intervalErrorMultiplier: number } };
@@ -159,6 +164,7 @@ export class ReportingPublicPlugin
           license$,
           this.config.poll,
           apiClient,
+          share.url,
           params
         );
       },

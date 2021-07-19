@@ -122,7 +122,7 @@ export const ExpandableEvent = React.memo<Props>(
         <StyledEuiFlexItem grow={true}>
           <EventDetails
             browserFields={browserFields}
-            data={detailsData!}
+            data={detailsData ?? []}
             id={event.eventId!}
             isAlert={isAlert}
             timelineId={timelineId}

@@ -7,6 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiText } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { ALL_OSQUERY_VERSIONS_OPTIONS } from '../../scheduled_query_groups/queries/constants';
@@ -57,7 +58,12 @@ const SavedQueryFormComponent = () => (
           euiFieldProps={{
             noSuggestions: false,
             singleSelection: { asPlainText: true },
-            placeholder: ALL_OSQUERY_VERSIONS_OPTIONS[0].label,
+            placeholder: i18n.translate(
+              'xpack.osquery.scheduledQueryGroup.queriesTable.osqueryVersionAllLabel',
+              {
+                defaultMessage: 'ALL',
+              }
+            ),
             options: ALL_OSQUERY_VERSIONS_OPTIONS,
             onCreateOption: undefined,
           }}

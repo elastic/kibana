@@ -102,7 +102,7 @@ export const JobMessagesPane: FC<JobMessagesPaneProps> = React.memo(
 
     return (
       <>
-        <EuiSpacer />
+        {canCreateJob && showClearButton ? <EuiSpacer /> : null}
         <EuiFlexGroup direction="column">
           {canCreateJob && showClearButton ? (
             <EuiFlexItem grow={false}>

@@ -19,7 +19,6 @@ import { CaseHeaderPage } from '../components/case_header_page';
 import { WhitePageWrapper, SectionWrapper } from '../components/wrappers';
 import * as i18n from './translations';
 import { APP_ID } from '../../../common/constants';
-import { SiemNavTabKey } from '../../common/components/navigation/types';
 
 const ConfigureCasesPageComponent: React.FC = () => {
   const {
@@ -31,9 +30,9 @@ const ConfigureCasesPageComponent: React.FC = () => {
 
   const backOptions = useMemo(
     () => ({
-      href: getCaseUrl(search),
+      path: getCaseUrl(search),
       text: i18n.BACK_TO_ALL,
-      pageId: SecurityPageName.case as SiemNavTabKey,
+      pageId: SecurityPageName.case,
     }),
     [search]
   );

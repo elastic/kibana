@@ -161,6 +161,7 @@ export async function mountApp(
           embeddableId: isCopied ? undefined : embeddableEditorIncomingState.embeddableId,
           type: LENS_EMBEDDABLE_TYPE,
           input,
+          searchSessionId: data.search.session.getSessionId(),
         },
       });
     } else {
@@ -177,6 +178,10 @@ export async function mountApp(
   // we keep the filters
   if (!initialContext) {
     data.query.filterManager.setAppFilters([]);
+  }
+
+  if (embeddableEditorIncomingState?.searchSessionId) {
+    data.search.session.continue(embeddableEditorIncomingState.searchSessionId);
   }
   const { datasourceMap, visualizationMap } = instance;
 
@@ -298,6 +303,7 @@ export async function mountApp(
     params.element
   );
   return () => {
+    data.search.session.clear();
     unmountComponentAtNode(params.element);
     unlistenParentHistory();
     lensStore.dispatch(navigateAway());

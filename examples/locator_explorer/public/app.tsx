@@ -19,7 +19,7 @@ import { EuiFieldText } from '@elastic/eui';
 import { EuiPageHeader } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
 import { AppMountParameters } from '../../../src/core/public';
-import { SharePluginSetup } from '../../../src/plugins/share/public';
+import { formatSearchParams, SharePluginSetup } from '../../../src/plugins/share/public';
 import {
   HelloLocatorV1Params,
   HelloLocatorV2Params,
@@ -34,6 +34,7 @@ interface MigratedLink {
   linkText: string;
   link: string;
   version: string;
+  params: HelloLocatorV1Params | HelloLocatorV2Params;
 }
 
 const ActionsExplorer = ({ share }: Props) => {
@@ -93,6 +94,7 @@ const ActionsExplorer = ({ share }: Props) => {
             linkText: savedLink.linkText,
             link,
             version: savedLink.version,
+            params: savedLink.params,
           } as MigratedLink;
         })
       );
@@ -157,7 +159,24 @@ const ActionsExplorer = ({ share }: Props) => {
                     target="_blank"
                   >
                     {link.linkText}
+                  </EuiLink>{' '}
+                  (
+                  <EuiLink
+                    color={link.version !== '0.0.2' ? 'danger' : 'primary'}
+                    data-test-subj="linkToHelloPage"
+                    href={
+                      '/app/r?' +
+                      formatSearchParams({
+                        id: 'HELLO_LOCATOR',
+                        version: link.version,
+                        params: link.params,
+                      }).toString()
+                    }
+                    target="_blank"
+                  >
+                    through redirect app
                   </EuiLink>
+                  )
                   <br />
                 </React.Fragment>
               ))

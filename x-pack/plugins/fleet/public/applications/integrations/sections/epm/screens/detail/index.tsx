@@ -101,6 +101,8 @@ export function Detail() {
   const setPackageInstallStatus = useSetPackageInstallStatus();
   const getPackageInstallStatus = useGetPackageInstallStatus();
 
+  const CustomAssets = useUIExtension(packageInfo?.name ?? '', 'package-detail-assets');
+
   const packageInstallStatus = useMemo(() => {
     if (packageInfo === null || !packageInfo.name) {
       return undefined;
@@ -418,7 +420,7 @@ export function Detail() {
       });
     }
 
-    if (packageInstallStatus === InstallStatus.installed && packageInfo.assets) {
+    if (packageInstallStatus === InstallStatus.installed && (packageInfo.assets || CustomAssets)) {
       tabs.push({
         id: 'assets',
         name: (
@@ -471,7 +473,7 @@ export function Detail() {
     }
 
     return tabs;
-  }, [packageInfo, panel, getHref, integration, packageInstallStatus, showCustomTab]);
+  }, [packageInfo, panel, getHref, integration, packageInstallStatus, showCustomTab, CustomAssets]);
 
   return (
     <WithHeaderLayout

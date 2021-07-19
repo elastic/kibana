@@ -15,19 +15,19 @@ import {
 import { i18n } from '@kbn/i18n';
 import { keyBy } from 'lodash';
 import React from 'react';
-import { offsetPreviousPeriodCoordinates } from '../../../../../common/utils/offset_previous_period_coordinate';
-import { Coordinate } from '../../../../../typings/timeseries';
 import { getNextEnvironmentUrlParam } from '../../../../../common/environment_filter_values';
 import {
   asMillisecondDuration,
   asPercent,
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
+import { offsetPreviousPeriodCoordinates } from '../../../../../common/utils/offset_previous_period_coordinate';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ServiceDependencyItem } from '../../../../../server/lib/services/get_service_dependencies';
+import { Coordinate } from '../../../../../typings/timeseries';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { px, unit } from '../../../../style/variables';
+import { unit } from '../../../../utils/style';
 import { AgentIcon } from '../../../shared/agent_icon';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ImpactBar } from '../../../shared/ImpactBar';
@@ -156,7 +156,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
           defaultMessage: 'Latency (avg.)',
         }
       ),
-      width: px(unit * 10),
+      width: `${unit * 10}px`,
       render: (_, { latency }) => {
         return (
           <SparkPlot
@@ -177,7 +177,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
         'xpack.apm.serviceOverview.dependenciesTableColumnThroughput',
         { defaultMessage: 'Throughput' }
       ),
-      width: px(unit * 10),
+      width: `${unit * 10}px`,
       render: (_, { throughput }) => {
         return (
           <SparkPlot
@@ -203,7 +203,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
           defaultMessage: 'Error rate',
         }
       ),
-      width: px(unit * 10),
+      width: `${unit * 10}px`,
       render: (_, { errorRate }) => {
         return (
           <SparkPlot
@@ -227,7 +227,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
           defaultMessage: 'Impact',
         }
       ),
-      width: px(unit * 5),
+      width: `${unit * 5}px`,
       render: (_, { impact, previousPeriodImpact }) => {
         return (
           <EuiFlexGroup gutterSize="xs" direction="column">

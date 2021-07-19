@@ -34,6 +34,7 @@ import { useDeleteCases } from '../../containers/use_delete_cases';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { useKibana } from '../../common/lib/kibana';
 import { StatusContextMenu } from '../case_action_bar/status_context_menu';
+import { TruncatedText } from '../truncated_text';
 
 export type CasesColumns =
   | EuiTableActionsColumnType<Case>
@@ -145,10 +146,10 @@ export const useCasesColumns = ({
                 subCaseId={isSubCase(theCase) ? theCase.id : undefined}
                 title={theCase.title}
               >
-                {theCase.title}
+                <TruncatedText text={theCase.title} />
               </CaseDetailsLink>
             ) : (
-              <span>{theCase.title}</span>
+              <TruncatedText text={theCase.title} />
             );
           return theCase.status !== CaseStatuses.closed ? (
             caseDetailsLinkComponent

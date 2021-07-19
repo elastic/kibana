@@ -15,6 +15,5 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./comments/migrations'));
     loadTestFile(require.resolve('./configure/migrations'));
     loadTestFile(require.resolve('./user_actions/migrations'));
-    loadTestFile(require.resolve('./connectors/migrations'));
   });
 };

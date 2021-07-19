@@ -7,6 +7,8 @@
  */
 import { ShapeTreeNode } from '@elastic/charts';
 import { PaletteDefinition, SeriesLayer } from '../../../charts/public';
+import { dataPluginMock } from '../../../data/public/mocks';
+import type { DataPublicPluginStart } from '../../../data/public';
 import { computeColor } from './get_layers';
 import { createMockVisData, createMockBucketColumns, createMockPieParams } from '../mocks';
 
@@ -14,6 +16,20 @@ const visData = createMockVisData();
 const buckets = createMockBucketColumns();
 const visParams = createMockPieParams();
 const colors = ['color1', 'color2', 'color3', 'color4'];
+const dataMock = dataPluginMock.createStartContract();
+interface RangeProps {
+  gte: number;
+  lt: number;
+}
+
+dataMock.fieldFormats = ({
+  deserialize: jest.fn(() => ({
+    convert: jest.fn((s: RangeProps) => {
+      return `≥ ${s.gte} and < ${s.lt}`;
+    }),
+  })),
+} as unknown) as DataPublicPluginStart['fieldFormats'];
+
 export const getPaletteRegistry = () => {
   const mockPalette1: jest.Mocked<PaletteDefinition> = {
     id: 'default',
@@ -60,7 +76,8 @@ describe('computeColor', () => {
       visData.rows,
       visParams,
       getPaletteRegistry(),
-      false
+      false,
+      dataMock.fieldFormats
     );
     expect(color).toEqual(colors[0]);
   });
@@ -84,7 +101,8 @@ describe('computeColor', () => {
       visData.rows,
       visParams,
       getPaletteRegistry(),
-      false
+      false,
+      dataMock.fieldFormats
     );
     expect(color).toEqual('color3');
   });
@@ -107,8 +125,60 @@ describe('computeColor', () => {
       visData.rows,
       visParams,
       getPaletteRegistry(),
-      false
+      false,
+      dataMock.fieldFormats
     );
     expect(color).toEqual('#000028');
+  });
+
+  it('returns the overwriteColor for older visualizations with formatted values', () => {
+    const d = ({
+      dataName: {
+        gte: 1000,
+        lt: 2000,
+      },
+      depth: 1,
+      sortIndex: 0,
+      parent: {
+        children: [
+          [
+            {
+              gte: 1000,
+              lt: 2000,
+            },
+          ],
+          [
+            {
+              gte: 2000,
+              lt: 3000,
+            },
+          ],
+        ],
+        depth: 0,
+        sortIndex: 0,
+      },
+    } as unknown) as ShapeTreeNode;
+    const visParamsNew = {
+      ...visParams,
+      distinctColors: true,
+    };
+    const color = computeColor(
+      d,
+      true,
+      { '≥ 1000 and < 2000': '#3F6833' },
+      buckets,
+      visData.rows,
+      visParamsNew,
+      getPaletteRegistry(),
+      false,
+      dataMock.fieldFormats,
+      {
+        id: 'range',
+        params: {
+          id: 'number',
+        },
+      }
+    );
+    expect(color).toEqual('#3F6833');
   });
 });

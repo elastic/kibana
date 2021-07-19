@@ -2280,6 +2280,13 @@
                 "description": "Number of times the user opened one of the in-product help popovers."
               }
             },
+            "error_fix_action": {
+              "type": "long",
+              "_meta": {
+                "description":
+                  "Number of times the user used the fix action of an error displayed in the workspace."
+              }
+            },
             "open_formula_popover": {
               "type": "long",
               "_meta": {
@@ -2519,6 +2526,13 @@
               "type": "long",
               "_meta": {
                 "description": "Number of times the user opened one of the in-product help popovers."
+              }
+            },
+            "error_fix_action": {
+              "type": "long",
+              "_meta": {
+                "description":
+                  "Number of times the user used the fix action of an error displayed in the workspace."
               }
             },
             "open_formula_popover": {

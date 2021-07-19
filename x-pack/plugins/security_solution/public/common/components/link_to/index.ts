@@ -9,9 +9,9 @@ import { isEmpty } from 'lodash/fp';
 import { useCallback } from 'react';
 import { useGetUrlSearch } from '../navigation/use_get_url_search';
 import { navTabs } from '../../../app/home/home_navigations';
-import { APP_ID } from '../../../../common/constants';
-import { useKibana } from '../../lib/kibana';
-import { SiemNavTabKey } from '../navigation/types';
+import { useAppUrl } from '../../lib/kibana/hooks';
+import { SecurityNavKey } from '../navigation/types';
+import { SecurityPageName } from '../../../app/types';
 
 export { getDetectionEngineUrl, getRuleDetailsUrl } from './redirect_to_detection_engine';
 export { getAppOverviewUrl } from './redirect_to_overview';
@@ -33,9 +33,11 @@ interface FormatUrlOptions {
 
 export type FormatUrl = (path: string, options?: Partial<FormatUrlOptions>) => string;
 
-export const useFormatUrl = (page: SiemNavTabKey) => {
-  const { getUrlForApp } = useKibana().services.application;
-  const search = useGetUrlSearch(navTabs[page]);
+export const useFormatUrl = (page: SecurityPageName) => {
+  const { getAppUrl } = useAppUrl();
+  const tab = page in navTabs ? navTabs[page as SecurityNavKey] : undefined;
+  const search = useGetUrlSearch(tab);
+
   const formatUrl = useCallback<FormatUrl>(
     (path: string, { absolute = false, skipSearch = false } = {}) => {
       const pathArr = path.split('?');
@@ -48,9 +50,9 @@ export const useFormatUrl = (page: SiemNavTabKey) => {
           ? ''
           : `?${pathArr[1]}`
       }`;
-      return getUrlForApp(APP_ID, { deepLinkId: page, path: formattedPath, absolute });
+      return getAppUrl({ deepLinkId: page, path: formattedPath, absolute });
     },
-    [getUrlForApp, page, search]
+    [getAppUrl, page, search]
   );
 
   return { formatUrl, search };

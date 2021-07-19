@@ -39,7 +39,7 @@ const anomalyDetectorTypeFilter = {
   },
 };
 
-export function jobAuditMessagesProvider({ asInternalUser, asCurrentUser }, mlClient) {
+export function jobAuditMessagesProvider({ asInternalUser }, mlClient) {
   // search for audit messages,
   // jobId is optional. without it, all jobs will be listed.
   // from is optional and should be a string formatted in ES time units. e.g. 12h, 1d, 7d
@@ -310,10 +310,10 @@ export function jobAuditMessagesProvider({ asInternalUser, asCurrentUser }, mlCl
     };
 
     await Promise.all([
-      asCurrentUser.updateByQuery({
+      asInternalUser.updateByQuery({
         index: ML_NOTIFICATION_INDEX_02,
         ignore_unavailable: true,
-        refresh: true,
+        refresh: false,
         conflicts: 'proceed',
         body: {
           query,
@@ -323,7 +323,7 @@ export function jobAuditMessagesProvider({ asInternalUser, asCurrentUser }, mlCl
           },
         },
       }),
-      asCurrentUser.index({
+      asInternalUser.index({
         index: ML_NOTIFICATION_INDEX_02,
         body: newClearedMessage,
         refresh: 'wait_for',

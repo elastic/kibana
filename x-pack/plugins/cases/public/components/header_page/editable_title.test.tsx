@@ -187,4 +187,33 @@ describe('EditableTitle', () => {
     expect(submitTitle.mock.calls[0][0]).toEqual(newTitle);
     expect(wrapper.find('[data-test-subj="editable-title-edit-icon"]').first().exists()).toBe(true);
   });
+
+  test('it does not submits the title when the length is longer than 64 characters', () => {
+    const longTitle =
+      'This is a title that should not be saved as it is longer than 64 characters.';
+
+    const wrapper = mount(
+      <TestProviders>
+        <EditableTitle {...defaultProps} />
+      </TestProviders>
+    );
+
+    wrapper.find('button[data-test-subj="editable-title-edit-icon"]').simulate('click');
+    wrapper.update();
+
+    wrapper
+      .find('input[data-test-subj="editable-title-input-field"]')
+      .simulate('change', { target: { value: longTitle } });
+
+    wrapper.find('button[data-test-subj="editable-title-submit-btn"]').simulate('click');
+    wrapper.update();
+    expect(wrapper.find('.euiFormErrorText').text()).toBe(
+      'The length of the title is too long. The maximum length is 64.'
+    );
+
+    expect(submitTitle).not.toHaveBeenCalled();
+    expect(wrapper.find('[data-test-subj="editable-title-edit-icon"]').first().exists()).toBe(
+      false
+    );
+  });
 });

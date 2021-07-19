@@ -23,7 +23,7 @@ import {
   EuiBetaBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useHistory, useParams } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { MlLatencyCorrelations } from './ml_latency_correlations';
 import { ErrorCorrelations } from './error_correlations';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
@@ -39,7 +39,7 @@ import { IUrlParams } from '../../../context/url_params_context/types';
 import {
   IStickyProperty,
   StickyProperties,
-} from '../../shared/StickyProperties';
+} from '../../shared/sticky_properties';
 import {
   getEnvironmentLabel,
   getNextEnvironmentUrlParam,
@@ -49,6 +49,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 
 const errorRateTab = {
   key: 'errorRate',
@@ -70,7 +71,7 @@ export function Correlations() {
   const license = useLicenseContext();
   const hasActivePlatinumLicense = isActivePlatinumLicense(license);
   const { urlParams } = useUrlParams();
-  const { serviceName } = useParams<{ serviceName: string }>();
+  const { serviceName } = useApmServiceContext();
 
   const history = useHistory();
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
@@ -104,16 +105,7 @@ export function Correlations() {
         width: '20%',
       });
     }
-    if (urlParams.transactionName) {
-      properties.push({
-        label: i18n.translate('xpack.apm.correlations.transactionLabel', {
-          defaultMessage: 'Transaction',
-        }),
-        fieldName: TRANSACTION_NAME,
-        val: urlParams.transactionName,
-        width: '20%',
-      });
-    }
+
     if (urlParams.environment) {
       properties.push({
         label: i18n.translate('xpack.apm.correlations.environmentLabel', {
@@ -121,6 +113,17 @@ export function Correlations() {
         }),
         fieldName: SERVICE_ENVIRONMENT,
         val: getEnvironmentLabel(urlParams.environment),
+        width: '20%',
+      });
+    }
+
+    if (urlParams.transactionName) {
+      properties.push({
+        label: i18n.translate('xpack.apm.correlations.transactionLabel', {
+          defaultMessage: 'Transaction',
+        }),
+        fieldName: TRANSACTION_NAME,
+        val: urlParams.transactionName,
         width: '20%',
       });
     }

@@ -5,7 +5,7 @@ pageLoadAssetSize:
   apmOss: 18996
   bfetch: 51874
   canvas: 1066647
-  charts: 195358
+  charts: 95000
   cloud: 21076
   console: 46091
   core: 432925
@@ -16,7 +16,7 @@ pageLoadAssetSize:
   data: 900000
   dataEnhanced: 50420
   devTools: 38637
-  discover: 105145
+  discover: 99999
   discoverEnhanced: 42730
   embeddable: 312874
   embeddableEnhanced: 41145
@@ -107,8 +107,10 @@ pageLoadAssetSize:
   dataVisualizer: 27530
   banners: 17946
   mapsEms: 26072
-  timelines: 230410
+  timelines: 251886
   screenshotMode: 17856
   visTypePie: 35583
   expressionRevealImage: 25675
   cases: 144442
+  expressionError: 22127
+  userSetup: 18532

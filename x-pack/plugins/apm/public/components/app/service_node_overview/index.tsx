@@ -17,28 +17,27 @@ import {
   asInteger,
   asPercent,
 } from '../../../../common/utils/formatters';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
-import { px, truncate, unit } from '../../../style/variables';
+import { truncate, unit } from '../../../utils/style';
 import { ServiceNodeMetricOverviewLink } from '../../shared/Links/apm/ServiceNodeMetricOverviewLink';
-import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';
+import { ITableColumn, ManagedTable } from '../../shared/managed_table';
 
 const INITIAL_PAGE_SIZE = 25;
 const INITIAL_SORT_FIELD = 'cpu';
 const INITIAL_SORT_DIRECTION = 'desc';
 
 const ServiceNodeName = euiStyled.div`
-  ${truncate(px(8 * unit))}
+  ${truncate(8 * unit)}
 `;
 
-interface ServiceNodeOverviewProps {
-  serviceName: string;
-}
-
-function ServiceNodeOverview({ serviceName }: ServiceNodeOverviewProps) {
+function ServiceNodeOverview() {
   const {
     urlParams: { kuery, start, end },
   } = useUrlParams();
+
+  const { serviceName } = useApmServiceContext();
 
   const { data } = useFetcher(
     (callApmApi) => {

@@ -36,7 +36,7 @@ export async function termsEnumSuggestions(
       method: 'POST',
       path: encodeURI(`/${index}/_terms_enum`),
       body: {
-        field: field?.name ?? field,
+        field: field?.name ?? fieldName,
         string: query,
         index_filter: {
           bool: {

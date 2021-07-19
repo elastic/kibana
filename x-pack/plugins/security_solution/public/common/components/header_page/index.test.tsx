@@ -41,7 +41,7 @@ describe('HeaderPage', () => {
     const wrapper = mount(
       <TestProviders>
         <HeaderPage
-          backOptions={{ href: '#', text: 'Test link', pageId: SecurityPageName.hosts }}
+          backOptions={{ path: '#', text: 'Test link', pageId: SecurityPageName.hosts }}
           title="Test title"
         />
       </TestProviders>

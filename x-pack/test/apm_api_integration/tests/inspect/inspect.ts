@@ -49,7 +49,7 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
             },
           });
           expect(status).to.be(200);
-          expect(body._inspect?.length).to.be(1);
+          expect(body._inspect?.length).to.be(2);
 
           // @ts-expect-error
           expect(Object.keys(body._inspect[0])).to.eql([

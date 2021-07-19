@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
 import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
 import {
@@ -14,18 +13,16 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
-import {
-  environmentQuery,
-  rangeQuery,
-  kqlQuery,
-} from '../../../../server/utils/queries';
+import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
+import { kqlQuery, rangeQuery } from '../../../../../observability/server';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../../lib/helpers/aggregated_transactions';
-import { getBucketSize } from '../../../lib/helpers/get_bucket_size';
 import { Setup, SetupTimeRange } from '../../../lib/helpers/setup_request';
+import { getBucketSizeForAggregatedTransactions } from '../../helpers/get_bucket_size_for_aggregated_transactions';
 import {
   getLatencyAggregation,
   getLatencyValue,
@@ -58,7 +55,11 @@ function searchLatency({
   end: number;
 }) {
   const { apmEventClient } = setup;
-  const { intervalString } = getBucketSize({ start, end });
+  const { intervalString } = getBucketSizeForAggregatedTransactions({
+    start,
+    end,
+    searchAggregatedTransactions,
+  });
 
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
