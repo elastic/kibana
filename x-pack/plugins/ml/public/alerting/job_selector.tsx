@@ -75,7 +75,7 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
                 options: [
                   {
                     label: i18n.translate('xpack.ml.jobSelector.selectAllOptionLabel', {
-                      defaultMessage: ALL_JOBS_SELECTION,
+                      defaultMessage: '*',
                     }),
                     value: ALL_JOBS_SELECTION,
                   },
