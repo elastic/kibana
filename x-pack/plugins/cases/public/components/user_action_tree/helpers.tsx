@@ -385,6 +385,7 @@ const ActionIcon = React.memo<{
       size="m"
       shape="circle"
       color={theme.eui.euiColorLightestShade}
+      data-test-subj="endpoint-action-icon"
     />
   );
 });
