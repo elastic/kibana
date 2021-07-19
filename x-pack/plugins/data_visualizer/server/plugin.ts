@@ -12,7 +12,7 @@ import { dataVisualizerRoutes } from './routes';
 export class DataVisualizerPlugin implements Plugin {
   constructor() {}
 
-  async setup(coreSetup: CoreSetup<StartDeps, unknown>, plugins: SetupDeps) {
+  setup(coreSetup: CoreSetup<StartDeps, unknown>, plugins: SetupDeps) {
     dataVisualizerRoutes(coreSetup);
   }
 

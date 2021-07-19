@@ -82,9 +82,10 @@ connectors>> for triggering actions.
 | Monitor the generation of reports&mdash;PDF, PNG, and CSV&mdash;and download reports that you previously generated.
 A report can contain a dashboard, visualization, saved search, or Canvas workpad.
 
-| {ml-docs}/ml-jobs.html[Machine Learning Jobs]
-| View your {anomaly-jobs} and {dfanalytics-jobs}. Open the Single Metric
-Viewer or Anomaly Explorer to see your {ml} results.
+| Machine Learning Jobs
+| View your <<xpack-ml-anomalies,{anomaly-detect}>> and
+<<xpack-ml-dfanalytics,{dfanalytics}>> jobs. Open the Single Metric
+Viewer or Anomaly Explorer to see your {anomaly-detect} results.
 
 | <<watcher-ui, Watcher>>
 | Detect changes in your data by creating, managing, and monitoring alerts.
