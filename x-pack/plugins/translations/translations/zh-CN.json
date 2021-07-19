@@ -18804,8 +18804,6 @@
     "xpack.securitySolution.administration.os.windows": "Windows",
     "xpack.securitySolution.alertDetails.checkDocs": "请查看我们的文档。",
     "xpack.securitySolution.alertDetails.ifCtiNotEnabled": "如果尚未启用任何威胁情报来源，并希望更多了解此功能，",
-    "xpack.securitySolution.alertDetails.summary": "摘要",
-    "xpack.securitySolution.alertDetails.summary.investigationGuide": "调查指南",
     "xpack.securitySolution.alertDetails.summary.readLess": "阅读更少内容",
     "xpack.securitySolution.alertDetails.summary.readMore": "阅读更多内容",
     "xpack.securitySolution.alertDetails.threatIntel": "威胁情报",
