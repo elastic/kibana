@@ -13,18 +13,17 @@ import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mo
 
 describe('read_privileges route', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let { clients, context } = requestContextMock.createTools();
+  let { context } = requestContextMock.createTools();
 
   beforeEach(() => {
     server = serverMock.create();
-    ({ clients, context } = requestContextMock.createTools());
+    ({ context } = requestContextMock.createTools());
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (context.core.elasticsearch.client.asCurrentUser.transport.request as any).mockResolvedValue({
       body: getMockPrivilegesResult(),
     });
 
-    clients.clusterClient.callAsCurrentUser.mockResolvedValue(getMockPrivilegesResult());
     readPrivilegesRoute(server.router, true);
   });
 

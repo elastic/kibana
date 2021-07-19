@@ -20,7 +20,6 @@ import {
   DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL,
   DETECTION_ENGINE_RULES_BULK_ACTION,
 } from '../../../../../common/constants';
-import { ShardsResponse } from '../../../types';
 import {
   RuleAlertType,
   IRuleSavedAttributesSavedObjectAttributes,
@@ -607,14 +606,6 @@ export const getSuccessfulSignalUpdateResponse = () => ({
   requests_per_second: -1,
   throttled_until_millis: 0,
   failures: [],
-});
-
-export const getIndexName = () => 'index-name';
-export const getEmptyIndex = (): { _shards: Partial<ShardsResponse> } => ({
-  _shards: { total: 0 },
-});
-export const getNonEmptyIndex = (): { _shards: Partial<ShardsResponse> } => ({
-  _shards: { total: 1 },
 });
 
 export const getNotificationResult = (): RuleNotificationAlertType => ({

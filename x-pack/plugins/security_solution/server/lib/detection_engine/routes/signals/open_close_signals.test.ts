@@ -57,7 +57,7 @@ describe('set signal status', () => {
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
 
-    test('catches error if callAsCurrentUser throws error', async () => {
+    test('catches error if asCurrentUser throws error', async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (context.core.elasticsearch.client.asCurrentUser.updateByQuery as any).mockResolvedValue(
         elasticsearchClientMock.createErrorTransportRequestPromise(new Error('Test error'))

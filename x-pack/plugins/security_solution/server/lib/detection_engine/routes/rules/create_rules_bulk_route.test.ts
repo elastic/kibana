@@ -10,7 +10,6 @@ import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../mach
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import {
   getReadBulkRequest,
-  getNonEmptyIndex,
   getFindResultWithSingleHit,
   getEmptyFindResult,
   getAlertMock,
@@ -35,7 +34,6 @@ describe('create_rules_bulk', () => {
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
 
-    clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex()); // index exists
     clients.alertsClient.find.mockResolvedValue(getEmptyFindResult()); // no existing rules
     clients.alertsClient.create.mockResolvedValue(getAlertMock(getQueryRuleParams())); // successful creation
 

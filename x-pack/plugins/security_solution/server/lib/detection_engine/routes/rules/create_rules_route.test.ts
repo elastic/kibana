@@ -11,7 +11,6 @@ import {
   getAlertMock,
   getCreateRequest,
   getFindResultStatus,
-  getNonEmptyIndex,
   getFindResultWithSingleHit,
   createMlRuleRequest,
 } from '../__mocks__/request_responses';
@@ -37,7 +36,6 @@ describe('create_rules', () => {
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
 
-    clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex()); // index exists
     clients.alertsClient.find.mockResolvedValue(getEmptyFindResult()); // no current rules
     clients.alertsClient.create.mockResolvedValue(getAlertMock(getQueryRuleParams())); // creation succeeds
     clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus()); // needed to transform

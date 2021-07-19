@@ -12,7 +12,6 @@ import {
   getEmptyFindResult,
   getAlertMock,
   getFindResultWithSingleHit,
-  getNonEmptyIndex,
 } from '../__mocks__/request_responses';
 import { createMockConfig, requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../machine_learning/mocks';
@@ -45,7 +44,6 @@ describe('import_rules_route', () => {
     request = getImportRulesRequest(hapiStream);
     ml = mlServicesMock.createSetupContract();
 
-    clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex()); // index exists
     clients.alertsClient.find.mockResolvedValue(getEmptyFindResult()); // no extant rules
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
