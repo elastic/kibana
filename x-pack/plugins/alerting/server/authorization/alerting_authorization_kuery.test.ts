@@ -155,332 +155,799 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
 });
 
 describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
-  test('constructs ES DSL filter for single rule type with single authorized consumer', async () => {
-    expect(
-      asFiltersByRuleTypeAndConsumer(
-        new Set([
-          {
-            actionGroups: [],
-            defaultActionGroupId: 'default',
-            recoveryActionGroup: RecoveredActionGroup,
-            id: 'myAppAlertType',
-            name: 'myAppAlertType',
-            producer: 'myApp',
-            minimumLicenseRequired: 'basic',
-            isExportable: true,
-            authorizedConsumers: {
-              myApp: { read: true, all: true },
+  describe('without spaceId filter', () => {
+    test('constructs ES DSL filter for single rule type with single authorized consumer', async () => {
+      expect(
+        asFiltersByRuleTypeAndConsumer(
+          new Set([
+            {
+              actionGroups: [],
+              defaultActionGroupId: 'default',
+              recoveryActionGroup: RecoveredActionGroup,
+              id: 'myAppAlertType',
+              name: 'myAppAlertType',
+              producer: 'myApp',
+              minimumLicenseRequired: 'basic',
+              isExportable: true,
+              authorizedConsumers: {
+                myApp: { read: true, all: true },
+              },
+              enabledInLicense: true,
             },
-            enabledInLicense: true,
-          },
-        ]),
-        {
-          type: AlertingAuthorizationFilterType.ESDSL,
-          fieldNames: {
-            ruleTypeId: 'path.to.rule.id',
-            consumer: 'consumer-field',
-          },
-        }
-      )
-    ).toEqual({
-      bool: {
-        filter: [
+          ]),
           {
-            bool: {
-              should: [
-                {
-                  match: {
-                    'path.to.rule.id': 'myAppAlertType',
+            type: AlertingAuthorizationFilterType.ESDSL,
+            fieldNames: {
+              ruleTypeId: 'path.to.rule.id',
+              consumer: 'consumer-field',
+            },
+          }
+        )
+      ).toEqual({
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [
+                  {
+                    match: {
+                      'path.to.rule.id': 'myAppAlertType',
+                    },
                   },
-                },
-              ],
-              minimum_should_match: 1,
+                ],
+                minimum_should_match: 1,
+              },
             },
-          },
-          {
-            bool: {
-              should: [
-                {
-                  match: {
-                    'consumer-field': 'myApp',
+            {
+              bool: {
+                should: [
+                  {
+                    match: {
+                      'consumer-field': 'myApp',
+                    },
                   },
-                },
-              ],
-              minimum_should_match: 1,
+                ],
+                minimum_should_match: 1,
+              },
             },
-          },
-        ],
-      },
+          ],
+        },
+      });
+    });
+
+    test('constructs ES DSL filter for single rule type with multiple authorized consumers', async () => {
+      expect(
+        asFiltersByRuleTypeAndConsumer(
+          new Set([
+            {
+              actionGroups: [],
+              defaultActionGroupId: 'default',
+              minimumLicenseRequired: 'basic',
+              isExportable: true,
+              recoveryActionGroup: RecoveredActionGroup,
+              id: 'myAppAlertType',
+              name: 'myAppAlertType',
+              producer: 'myApp',
+              authorizedConsumers: {
+                alerts: { read: true, all: true },
+                myApp: { read: true, all: true },
+                myOtherApp: { read: true, all: true },
+              },
+              enabledInLicense: true,
+            },
+          ]),
+          {
+            type: AlertingAuthorizationFilterType.ESDSL,
+            fieldNames: {
+              ruleTypeId: 'path.to.rule.id',
+              consumer: 'consumer-field',
+            },
+          }
+        )
+      ).toEqual({
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [{ match: { 'path.to.rule.id': 'myAppAlertType' } }],
+                minimum_should_match: 1,
+              },
+            },
+            {
+              bool: {
+                should: [
+                  {
+                    bool: {
+                      should: [{ match: { 'consumer-field': 'alerts' } }],
+                      minimum_should_match: 1,
+                    },
+                  },
+                  {
+                    bool: {
+                      should: [{ match: { 'consumer-field': 'myApp' } }],
+                      minimum_should_match: 1,
+                    },
+                  },
+                  {
+                    bool: {
+                      should: [{ match: { 'consumer-field': 'myOtherApp' } }],
+                      minimum_should_match: 1,
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
+      });
+    });
+
+    test('constructs ES DSL filter for multiple rule types across authorized consumer', async () => {
+      expect(
+        asFiltersByRuleTypeAndConsumer(
+          new Set([
+            {
+              actionGroups: [],
+              defaultActionGroupId: 'default',
+              minimumLicenseRequired: 'basic',
+              isExportable: true,
+              recoveryActionGroup: RecoveredActionGroup,
+              id: 'myAppAlertType',
+              name: 'myAppAlertType',
+              producer: 'myApp',
+              authorizedConsumers: {
+                alerts: { read: true, all: true },
+                myApp: { read: true, all: true },
+                myOtherApp: { read: true, all: true },
+                myAppWithSubFeature: { read: true, all: true },
+              },
+              enabledInLicense: true,
+            },
+            {
+              actionGroups: [],
+              defaultActionGroupId: 'default',
+              minimumLicenseRequired: 'basic',
+              isExportable: true,
+              recoveryActionGroup: RecoveredActionGroup,
+              id: 'myOtherAppAlertType',
+              name: 'myOtherAppAlertType',
+              producer: 'alerts',
+              authorizedConsumers: {
+                alerts: { read: true, all: true },
+                myApp: { read: true, all: true },
+                myOtherApp: { read: true, all: true },
+                myAppWithSubFeature: { read: true, all: true },
+              },
+              enabledInLicense: true,
+            },
+            {
+              actionGroups: [],
+              defaultActionGroupId: 'default',
+              minimumLicenseRequired: 'basic',
+              isExportable: true,
+              recoveryActionGroup: RecoveredActionGroup,
+              id: 'mySecondAppAlertType',
+              name: 'mySecondAppAlertType',
+              producer: 'myApp',
+              authorizedConsumers: {
+                alerts: { read: true, all: true },
+                myApp: { read: true, all: true },
+                myOtherApp: { read: true, all: true },
+                myAppWithSubFeature: { read: true, all: true },
+              },
+              enabledInLicense: true,
+            },
+          ]),
+          {
+            type: AlertingAuthorizationFilterType.ESDSL,
+            fieldNames: {
+              ruleTypeId: 'path.to.rule.id',
+              consumer: 'consumer-field',
+            },
+          }
+        )
+      ).toEqual({
+        bool: {
+          should: [
+            {
+              bool: {
+                filter: [
+                  {
+                    bool: {
+                      should: [{ match: { 'path.to.rule.id': 'myAppAlertType' } }],
+                      minimum_should_match: 1,
+                    },
+                  },
+                  {
+                    bool: {
+                      should: [
+                        {
+                          bool: {
+                            should: [{ match: { 'consumer-field': 'alerts' } }],
+                            minimum_should_match: 1,
+                          },
+                        },
+                        {
+                          bool: {
+                            should: [{ match: { 'consumer-field': 'myApp' } }],
+                            minimum_should_match: 1,
+                          },
+                        },
+                        {
+                          bool: {
+                            should: [{ match: { 'consumer-field': 'myOtherApp' } }],
+                            minimum_should_match: 1,
+                          },
+                        },
+                        {
+                          bool: {
+                            should: [{ match: { 'consumer-field': 'myAppWithSubFeature' } }],
+                            minimum_should_match: 1,
+                          },
+                        },
+                      ],
+                      minimum_should_match: 1,
+                    },
+                  },
+                ],
+              },
+            },
+            {
+              bool: {
+                filter: [
+                  {
+                    bool: {
+                      should: [{ match: { 'path.to.rule.id': 'myOtherAppAlertType' } }],
+                      minimum_should_match: 1,
+                    },
+                  },
+                  {
+                    bool: {
+                      should: [
+                        {
+                          bool: {
+                            should: [{ match: { 'consumer-field': 'alerts' } }],
+                            minimum_should_match: 1,
+                          },
+                        },
+                        {
+                          bool: {
+                            should: [{ match: { 'consumer-field': 'myApp' } }],
+                            minimum_should_match: 1,
+                          },
+                        },
+                        {
+                          bool: {
+                            should: [{ match: { 'consumer-field': 'myOtherApp' } }],
+                            minimum_should_match: 1,
+                          },
+                        },
+                        {
+                          bool: {
+                            should: [{ match: { 'consumer-field': 'myAppWithSubFeature' } }],
+                            minimum_should_match: 1,
+                          },
+                        },
+                      ],
+                      minimum_should_match: 1,
+                    },
+                  },
+                ],
+              },
+            },
+            {
+              bool: {
+                filter: [
+                  {
+                    bool: {
+                      should: [{ match: { 'path.to.rule.id': 'mySecondAppAlertType' } }],
+                      minimum_should_match: 1,
+                    },
+                  },
+                  {
+                    bool: {
+                      should: [
+                        {
+                          bool: {
+                            should: [{ match: { 'consumer-field': 'alerts' } }],
+                            minimum_should_match: 1,
+                          },
+                        },
+                        {
+                          bool: {
+                            should: [{ match: { 'consumer-field': 'myApp' } }],
+                            minimum_should_match: 1,
+                          },
+                        },
+                        {
+                          bool: {
+                            should: [{ match: { 'consumer-field': 'myOtherApp' } }],
+                            minimum_should_match: 1,
+                          },
+                        },
+                        {
+                          bool: {
+                            should: [{ match: { 'consumer-field': 'myAppWithSubFeature' } }],
+                            minimum_should_match: 1,
+                          },
+                        },
+                      ],
+                      minimum_should_match: 1,
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      });
     });
   });
 
-  test('constructs ES DSL filter for single rule type with multiple authorized consumers', async () => {
-    expect(
-      asFiltersByRuleTypeAndConsumer(
-        new Set([
-          {
-            actionGroups: [],
-            defaultActionGroupId: 'default',
-            minimumLicenseRequired: 'basic',
-            isExportable: true,
-            recoveryActionGroup: RecoveredActionGroup,
-            id: 'myAppAlertType',
-            name: 'myAppAlertType',
-            producer: 'myApp',
-            authorizedConsumers: {
-              alerts: { read: true, all: true },
-              myApp: { read: true, all: true },
-              myOtherApp: { read: true, all: true },
+  describe('with spaceId filter', () => {
+    test('constructs ES DSL filter for single rule type with single authorized consumer', async () => {
+      expect(
+        asFiltersByRuleTypeAndConsumer(
+          new Set([
+            {
+              actionGroups: [],
+              defaultActionGroupId: 'default',
+              recoveryActionGroup: RecoveredActionGroup,
+              id: 'myAppAlertType',
+              name: 'myAppAlertType',
+              producer: 'myApp',
+              minimumLicenseRequired: 'basic',
+              isExportable: true,
+              authorizedConsumers: {
+                myApp: { read: true, all: true },
+              },
+              enabledInLicense: true,
             },
-            enabledInLicense: true,
-          },
-        ]),
-        {
-          type: AlertingAuthorizationFilterType.ESDSL,
-          fieldNames: {
-            ruleTypeId: 'path.to.rule.id',
-            consumer: 'consumer-field',
-          },
-        }
-      )
-    ).toEqual({
-      bool: {
-        filter: [
+          ]),
           {
-            bool: {
-              should: [{ match: { 'path.to.rule.id': 'myAppAlertType' } }],
-              minimum_should_match: 1,
+            type: AlertingAuthorizationFilterType.ESDSL,
+            fieldNames: {
+              ruleTypeId: 'path.to.rule.id',
+              consumer: 'consumer-field',
+              spaceIds: 'path.to.space.ids',
             },
           },
-          {
-            bool: {
-              should: [
-                {
-                  bool: {
-                    should: [{ match: { 'consumer-field': 'alerts' } }],
-                    minimum_should_match: 1,
-                  },
-                },
-                {
-                  bool: {
-                    should: [{ match: { 'consumer-field': 'myApp' } }],
-                    minimum_should_match: 1,
-                  },
-                },
-                {
-                  bool: {
-                    should: [{ match: { 'consumer-field': 'myOtherApp' } }],
-                    minimum_should_match: 1,
-                  },
-                },
-              ],
-              minimum_should_match: 1,
+          'space1'
+        )
+      ).toEqual({
+        bool: {
+          filter: [
+            {
+              bool: {
+                minimum_should_match: 1,
+                should: [{ match: { 'path.to.rule.id': 'myAppAlertType' } }],
+              },
             },
-          },
-        ],
-      },
+            { bool: { filter: [{ term: { 'path.to.space.ids': 'space1' } }] } },
+            {
+              bool: { minimum_should_match: 1, should: [{ match: { 'consumer-field': 'myApp' } }] },
+            },
+          ],
+        },
+      });
     });
-  });
 
-  test('constructs ES DSL filter for multiple rule types across authorized consumer', async () => {
-    expect(
-      asFiltersByRuleTypeAndConsumer(
-        new Set([
-          {
-            actionGroups: [],
-            defaultActionGroupId: 'default',
-            minimumLicenseRequired: 'basic',
-            isExportable: true,
-            recoveryActionGroup: RecoveredActionGroup,
-            id: 'myAppAlertType',
-            name: 'myAppAlertType',
-            producer: 'myApp',
-            authorizedConsumers: {
-              alerts: { read: true, all: true },
-              myApp: { read: true, all: true },
-              myOtherApp: { read: true, all: true },
-              myAppWithSubFeature: { read: true, all: true },
+    test('constructs ES DSL filter for single rule type with multiple authorized consumers', async () => {
+      expect(
+        asFiltersByRuleTypeAndConsumer(
+          new Set([
+            {
+              actionGroups: [],
+              defaultActionGroupId: 'default',
+              minimumLicenseRequired: 'basic',
+              isExportable: true,
+              recoveryActionGroup: RecoveredActionGroup,
+              id: 'myAppAlertType',
+              name: 'myAppAlertType',
+              producer: 'myApp',
+              authorizedConsumers: {
+                alerts: { read: true, all: true },
+                myApp: { read: true, all: true },
+                myOtherApp: { read: true, all: true },
+              },
+              enabledInLicense: true,
             },
-            enabledInLicense: true,
-          },
+          ]),
           {
-            actionGroups: [],
-            defaultActionGroupId: 'default',
-            minimumLicenseRequired: 'basic',
-            isExportable: true,
-            recoveryActionGroup: RecoveredActionGroup,
-            id: 'myOtherAppAlertType',
-            name: 'myOtherAppAlertType',
-            producer: 'alerts',
-            authorizedConsumers: {
-              alerts: { read: true, all: true },
-              myApp: { read: true, all: true },
-              myOtherApp: { read: true, all: true },
-              myAppWithSubFeature: { read: true, all: true },
-            },
-            enabledInLicense: true,
-          },
-          {
-            actionGroups: [],
-            defaultActionGroupId: 'default',
-            minimumLicenseRequired: 'basic',
-            isExportable: true,
-            recoveryActionGroup: RecoveredActionGroup,
-            id: 'mySecondAppAlertType',
-            name: 'mySecondAppAlertType',
-            producer: 'myApp',
-            authorizedConsumers: {
-              alerts: { read: true, all: true },
-              myApp: { read: true, all: true },
-              myOtherApp: { read: true, all: true },
-              myAppWithSubFeature: { read: true, all: true },
-            },
-            enabledInLicense: true,
-          },
-        ]),
-        {
-          type: AlertingAuthorizationFilterType.ESDSL,
-          fieldNames: {
-            ruleTypeId: 'path.to.rule.id',
-            consumer: 'consumer-field',
-          },
-        }
-      )
-    ).toEqual({
-      bool: {
-        should: [
-          {
-            bool: {
-              filter: [
-                {
-                  bool: {
-                    should: [{ match: { 'path.to.rule.id': 'myAppAlertType' } }],
-                    minimum_should_match: 1,
-                  },
-                },
-                {
-                  bool: {
-                    should: [
-                      {
-                        bool: {
-                          should: [{ match: { 'consumer-field': 'alerts' } }],
-                          minimum_should_match: 1,
-                        },
-                      },
-                      {
-                        bool: {
-                          should: [{ match: { 'consumer-field': 'myApp' } }],
-                          minimum_should_match: 1,
-                        },
-                      },
-                      {
-                        bool: {
-                          should: [{ match: { 'consumer-field': 'myOtherApp' } }],
-                          minimum_should_match: 1,
-                        },
-                      },
-                      {
-                        bool: {
-                          should: [{ match: { 'consumer-field': 'myAppWithSubFeature' } }],
-                          minimum_should_match: 1,
-                        },
-                      },
-                    ],
-                    minimum_should_match: 1,
-                  },
-                },
-              ],
+            type: AlertingAuthorizationFilterType.ESDSL,
+            fieldNames: {
+              ruleTypeId: 'path.to.rule.id',
+              consumer: 'consumer-field',
+              spaceIds: 'path.to.space.ids',
             },
           },
+          'space1'
+        )
+      ).toEqual({
+        bool: {
+          filter: [
+            {
+              bool: {
+                minimum_should_match: 1,
+                should: [{ match: { 'path.to.rule.id': 'myAppAlertType' } }],
+              },
+            },
+            { bool: { filter: [{ term: { 'path.to.space.ids': 'space1' } }] } },
+            {
+              bool: {
+                minimum_should_match: 1,
+                should: [
+                  {
+                    bool: {
+                      minimum_should_match: 1,
+                      should: [
+                        {
+                          match: {
+                            'consumer-field': 'alerts',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    bool: {
+                      minimum_should_match: 1,
+                      should: [
+                        {
+                          match: {
+                            'consumer-field': 'myApp',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    bool: {
+                      minimum_should_match: 1,
+                      should: [
+                        {
+                          match: {
+                            'consumer-field': 'myOtherApp',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      });
+    });
+
+    test('constructs ES DSL filter for multiple rule types across authorized consumer', async () => {
+      expect(
+        asFiltersByRuleTypeAndConsumer(
+          new Set([
+            {
+              actionGroups: [],
+              defaultActionGroupId: 'default',
+              minimumLicenseRequired: 'basic',
+              isExportable: true,
+              recoveryActionGroup: RecoveredActionGroup,
+              id: 'myAppAlertType',
+              name: 'myAppAlertType',
+              producer: 'myApp',
+              authorizedConsumers: {
+                alerts: { read: true, all: true },
+                myApp: { read: true, all: true },
+                myOtherApp: { read: true, all: true },
+                myAppWithSubFeature: { read: true, all: true },
+              },
+              enabledInLicense: true,
+            },
+            {
+              actionGroups: [],
+              defaultActionGroupId: 'default',
+              minimumLicenseRequired: 'basic',
+              isExportable: true,
+              recoveryActionGroup: RecoveredActionGroup,
+              id: 'myOtherAppAlertType',
+              name: 'myOtherAppAlertType',
+              producer: 'alerts',
+              authorizedConsumers: {
+                alerts: { read: true, all: true },
+                myApp: { read: true, all: true },
+                myOtherApp: { read: true, all: true },
+                myAppWithSubFeature: { read: true, all: true },
+              },
+              enabledInLicense: true,
+            },
+            {
+              actionGroups: [],
+              defaultActionGroupId: 'default',
+              minimumLicenseRequired: 'basic',
+              isExportable: true,
+              recoveryActionGroup: RecoveredActionGroup,
+              id: 'mySecondAppAlertType',
+              name: 'mySecondAppAlertType',
+              producer: 'myApp',
+              authorizedConsumers: {
+                alerts: { read: true, all: true },
+                myApp: { read: true, all: true },
+                myOtherApp: { read: true, all: true },
+                myAppWithSubFeature: { read: true, all: true },
+              },
+              enabledInLicense: true,
+            },
+          ]),
           {
-            bool: {
-              filter: [
-                {
-                  bool: {
-                    should: [{ match: { 'path.to.rule.id': 'myOtherAppAlertType' } }],
-                    minimum_should_match: 1,
-                  },
-                },
-                {
-                  bool: {
-                    should: [
-                      {
-                        bool: {
-                          should: [{ match: { 'consumer-field': 'alerts' } }],
-                          minimum_should_match: 1,
-                        },
-                      },
-                      {
-                        bool: {
-                          should: [{ match: { 'consumer-field': 'myApp' } }],
-                          minimum_should_match: 1,
-                        },
-                      },
-                      {
-                        bool: {
-                          should: [{ match: { 'consumer-field': 'myOtherApp' } }],
-                          minimum_should_match: 1,
-                        },
-                      },
-                      {
-                        bool: {
-                          should: [{ match: { 'consumer-field': 'myAppWithSubFeature' } }],
-                          minimum_should_match: 1,
-                        },
-                      },
-                    ],
-                    minimum_should_match: 1,
-                  },
-                },
-              ],
+            type: AlertingAuthorizationFilterType.ESDSL,
+            fieldNames: {
+              ruleTypeId: 'path.to.rule.id',
+              consumer: 'consumer-field',
+              spaceIds: 'path.to.space.ids',
             },
           },
-          {
-            bool: {
-              filter: [
-                {
-                  bool: {
-                    should: [{ match: { 'path.to.rule.id': 'mySecondAppAlertType' } }],
-                    minimum_should_match: 1,
+          'space1'
+        )
+      ).toEqual({
+        bool: {
+          minimum_should_match: 1,
+          should: [
+            {
+              bool: {
+                filter: [
+                  {
+                    bool: {
+                      minimum_should_match: 1,
+                      should: [
+                        {
+                          match: {
+                            'path.to.rule.id': 'myAppAlertType',
+                          },
+                        },
+                      ],
+                    },
                   },
-                },
-                {
-                  bool: {
-                    should: [
-                      {
-                        bool: {
-                          should: [{ match: { 'consumer-field': 'alerts' } }],
-                          minimum_should_match: 1,
+                  {
+                    bool: {
+                      filter: [
+                        {
+                          term: {
+                            'path.to.space.ids': 'space1',
+                          },
                         },
-                      },
-                      {
-                        bool: {
-                          should: [{ match: { 'consumer-field': 'myApp' } }],
-                          minimum_should_match: 1,
-                        },
-                      },
-                      {
-                        bool: {
-                          should: [{ match: { 'consumer-field': 'myOtherApp' } }],
-                          minimum_should_match: 1,
-                        },
-                      },
-                      {
-                        bool: {
-                          should: [{ match: { 'consumer-field': 'myAppWithSubFeature' } }],
-                          minimum_should_match: 1,
-                        },
-                      },
-                    ],
-                    minimum_should_match: 1,
+                      ],
+                    },
                   },
-                },
-              ],
+                  {
+                    bool: {
+                      minimum_should_match: 1,
+                      should: [
+                        {
+                          bool: {
+                            minimum_should_match: 1,
+                            should: [
+                              {
+                                match: {
+                                  'consumer-field': 'alerts',
+                                },
+                              },
+                            ],
+                          },
+                        },
+                        {
+                          bool: {
+                            minimum_should_match: 1,
+                            should: [
+                              {
+                                match: {
+                                  'consumer-field': 'myApp',
+                                },
+                              },
+                            ],
+                          },
+                        },
+                        {
+                          bool: {
+                            minimum_should_match: 1,
+                            should: [
+                              {
+                                match: {
+                                  'consumer-field': 'myOtherApp',
+                                },
+                              },
+                            ],
+                          },
+                        },
+                        {
+                          bool: {
+                            minimum_should_match: 1,
+                            should: [
+                              {
+                                match: {
+                                  'consumer-field': 'myAppWithSubFeature',
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
             },
-          },
-        ],
-        minimum_should_match: 1,
-      },
+            {
+              bool: {
+                filter: [
+                  {
+                    bool: {
+                      minimum_should_match: 1,
+                      should: [
+                        {
+                          match: {
+                            'path.to.rule.id': 'myOtherAppAlertType',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    bool: {
+                      filter: [
+                        {
+                          term: {
+                            'path.to.space.ids': 'space1',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    bool: {
+                      minimum_should_match: 1,
+                      should: [
+                        {
+                          bool: {
+                            minimum_should_match: 1,
+                            should: [
+                              {
+                                match: {
+                                  'consumer-field': 'alerts',
+                                },
+                              },
+                            ],
+                          },
+                        },
+                        {
+                          bool: {
+                            minimum_should_match: 1,
+                            should: [
+                              {
+                                match: {
+                                  'consumer-field': 'myApp',
+                                },
+                              },
+                            ],
+                          },
+                        },
+                        {
+                          bool: {
+                            minimum_should_match: 1,
+                            should: [
+                              {
+                                match: {
+                                  'consumer-field': 'myOtherApp',
+                                },
+                              },
+                            ],
+                          },
+                        },
+                        {
+                          bool: {
+                            minimum_should_match: 1,
+                            should: [
+                              {
+                                match: {
+                                  'consumer-field': 'myAppWithSubFeature',
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+            {
+              bool: {
+                filter: [
+                  {
+                    bool: {
+                      minimum_should_match: 1,
+                      should: [
+                        {
+                          match: {
+                            'path.to.rule.id': 'mySecondAppAlertType',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    bool: {
+                      filter: [
+                        {
+                          term: {
+                            'path.to.space.ids': 'space1',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    bool: {
+                      minimum_should_match: 1,
+                      should: [
+                        {
+                          bool: {
+                            minimum_should_match: 1,
+                            should: [
+                              {
+                                match: {
+                                  'consumer-field': 'alerts',
+                                },
+                              },
+                            ],
+                          },
+                        },
+                        {
+                          bool: {
+                            minimum_should_match: 1,
+                            should: [
+                              {
+                                match: {
+                                  'consumer-field': 'myApp',
+                                },
+                              },
+                            ],
+                          },
+                        },
+                        {
+                          bool: {
+                            minimum_should_match: 1,
+                            should: [
+                              {
+                                match: {
+                                  'consumer-field': 'myOtherApp',
+                                },
+                              },
+                            ],
+                          },
+                        },
+                        {
+                          bool: {
+                            minimum_should_match: 1,
+                            should: [
+                              {
+                                match: {
+                                  'consumer-field': 'myAppWithSubFeature',
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      });
     });
   });
 });
