@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import type { FullStoryDeps } from './fullstory';
+import type { FullStoryDeps, FullStoryApi } from './fullstory';
 
-export const initializeFullStoryMock = jest.fn<void, [FullStoryDeps]>();
+export const fullStoryApiMock: jest.Mocked<FullStoryApi> = {
+  event: jest.fn(),
+  identify: jest.fn(),
+};
+export const initializeFullStoryMock = jest.fn<FullStoryApi, [FullStoryDeps]>(
+  () => fullStoryApiMock
+);
 jest.doMock('./fullstory', () => {
   return { initializeFullStory: initializeFullStoryMock };
 });
