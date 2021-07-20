@@ -82,7 +82,9 @@ function TemplateWithContext({
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="l">
-                    <>{serviceName}</>
+                    <h1 data-test-subj="apmMainTemplateHeaderServiceName">
+                      {serviceName}
+                    </h1>
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
