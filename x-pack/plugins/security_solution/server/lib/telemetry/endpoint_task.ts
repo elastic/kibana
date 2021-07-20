@@ -250,18 +250,16 @@ export class TelemetryEndpointTask {
     };
 
     // If there is no policy responses in the 24h > now then we will continue
-    const policyResponses =
-      failedPolicyResponses.aggregations === undefined ||
-      failedPolicyResponses.aggregations === null
-        ? new Map<string, EndpointPolicyResponseDocument>()
-        : failedPolicyResponses.aggregations.policy_responses.buckets.reduce(
-            (cache, endpointAgentId) => {
-              const doc = endpointAgentId.latest_response.hits.hits[0];
-              cache.set(endpointAgentId.key, doc);
-              return cache;
-            },
-            new Map<string, EndpointPolicyResponseDocument>()
-          );
+    const policyResponses = failedPolicyResponses.aggregations
+      ? failedPolicyResponses.aggregations.policy_responses.buckets.reduce(
+          (cache, endpointAgentId) => {
+            const doc = endpointAgentId.latest_response.hits.hits[0];
+            cache.set(endpointAgentId.key, doc);
+            return cache;
+          },
+          new Map<string, EndpointPolicyResponseDocument>()
+        )
+      : new Map<string, EndpointPolicyResponseDocument>();
 
     /** STAGE 4 - Create the telemetry log records
      *
