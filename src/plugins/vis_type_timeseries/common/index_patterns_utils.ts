@@ -28,9 +28,7 @@ export const extractIndexPatternValues = (panel: Panel, defaultIndexId?: string)
     }
   };
 
-  if (panel.index_pattern) {
-    addIndex(panel.index_pattern);
-  }
+  addIndex(panel.index_pattern);
 
   panel.series.forEach((series) => {
     if (series.override_index_pattern) {
