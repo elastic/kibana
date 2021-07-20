@@ -62,7 +62,7 @@ describe('BetaNotification', () => {
     });
 
     it('passes down custom button props', () => {
-      const wrapper = shallow(<BetaNotification buttonProps={{ size: 'l' }} />);
+      const wrapper = shallow(<BetaNotification />);
       const toggleButton = getToggleButton(wrapper);
 
       expect(toggleButton.prop('size')).toEqual('l');
