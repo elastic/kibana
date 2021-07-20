@@ -748,13 +748,13 @@ const getGroupedResults = async (query: object, esClient: ElasticsearchClient) =
   return compositeGroupBuckets;
 };
 
-const createConditionsMessageForCriteria = (criteria: CountCriteria) => {
-  const parts = criteria.map((criterion, index) => {
-    const { field, comparator, value } = criterion;
-    return `${index === 0 ? '' : 'and'} ${field} ${comparator} ${value}`;
-  });
-  return parts.join(' ');
-};
+const createConditionsMessageForCriteria = (criteria: CountCriteria) =>
+  criteria
+    .map((criterion) => {
+      const { field, comparator, value } = criterion;
+      return `${field} ${comparator} ${value}`;
+    })
+    .join(' and ');
 
 // When the Alerting plugin implements support for multiple action groups, add additional
 // action groups here to send different messages, e.g. a recovery notification
