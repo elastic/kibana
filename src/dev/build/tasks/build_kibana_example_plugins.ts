@@ -26,11 +26,16 @@ export const BuildKibanaExamplePlugins: Task = {
       .map((f) => Path.resolve(REPO_ROOT, 'examples', f.name));
 
     for (const examplePlugin of folders) {
-      log.info(`Building ${examplePlugin}`);
-      await exec(log, 'node', args, {
-        cwd: examplePlugin,
-        level: 'info',
-      });
+      try {
+        Fs.accessSync(Path.join(examplePlugin, 'kibana.json'), Fs.constants.R_OK);
+        log.info(`Building ${examplePlugin}`);
+        await exec(log, 'node', args, {
+          cwd: examplePlugin,
+          level: 'info',
+        });
+      } catch (e) {
+        log.info(`Skipping ${examplePlugin}, no kibana.json`);
+      }
     }
 
     const pluginsDir = config.resolveFromTarget('example_plugins');
