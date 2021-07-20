@@ -8,20 +8,15 @@
 import { omit } from 'lodash/fp';
 import React from 'react';
 import { waitFor } from '@testing-library/react';
-
-import { mockBrowserFields } from '../../../common/containers/source/mock';
-import { TestProviders } from '../../../common/mock';
-import '../../../common/mock/match_media';
-import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
-import { DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
+import { mockBrowserFields, TestProviders } from '../../../../mock';
+import { defaultColumnHeaderType } from '../../body/column_headers/default_headers';
+import { DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../../body/constants';
 
 import { Category } from './category';
 import { getFieldColumns, getFieldItems } from './field_items';
 import { FIELDS_PANE_WIDTH } from './helpers';
-import { useMountAppended } from '../../../common/utils/use_mount_appended';
-import { ColumnHeaderOptions } from '../../../../common';
-
-jest.mock('../../../common/lib/kibana');
+import { useMountAppended } from '../../../utils/use_mount_appended';
+import { ColumnHeaderOptions } from '../../../../../common';
 
 const selectedCategoryId = 'base';
 const selectedCategoryFields = mockBrowserFields[selectedCategoryId].fields;
@@ -54,12 +49,9 @@ describe('field_items', () => {
               data-test-subj="category"
               filteredBrowserFields={mockBrowserFields}
               fieldItems={getFieldItems({
-                browserFields: mockBrowserFields,
                 category: mockBrowserFields[selectedCategoryId],
-                categoryId: selectedCategoryId,
                 columnHeaders: [],
                 highlight: '',
-                onUpdateColumns: jest.fn(),
                 timelineId,
                 toggleColumn: jest.fn(),
               })}
@@ -86,12 +78,9 @@ describe('field_items', () => {
               data-test-subj="category"
               filteredBrowserFields={mockBrowserFields}
               fieldItems={getFieldItems({
-                browserFields: mockBrowserFields,
                 category: mockBrowserFields[selectedCategoryId],
-                categoryId: selectedCategoryId,
                 columnHeaders: [],
                 highlight: '',
-                onUpdateColumns: jest.fn(),
                 timelineId,
                 toggleColumn: jest.fn(),
               })}
@@ -117,12 +106,9 @@ describe('field_items', () => {
             data-test-subj="category"
             filteredBrowserFields={mockBrowserFields}
             fieldItems={getFieldItems({
-              browserFields: mockBrowserFields,
               category: mockBrowserFields[selectedCategoryId],
-              categoryId: selectedCategoryId,
               columnHeaders,
               highlight: '',
-              onUpdateColumns: jest.fn(),
               timelineId,
               toggleColumn: jest.fn(),
             })}
@@ -148,12 +134,9 @@ describe('field_items', () => {
             data-test-subj="category"
             filteredBrowserFields={mockBrowserFields}
             fieldItems={getFieldItems({
-              browserFields: mockBrowserFields,
               category: mockBrowserFields[selectedCategoryId],
-              categoryId: selectedCategoryId,
               columnHeaders: columnHeaders.filter((header) => header.id !== timestampFieldId),
               highlight: '',
-              onUpdateColumns: jest.fn(),
               timelineId,
               toggleColumn: jest.fn(),
             })}
@@ -181,12 +164,9 @@ describe('field_items', () => {
             data-test-subj="category"
             filteredBrowserFields={mockBrowserFields}
             fieldItems={getFieldItems({
-              browserFields: mockBrowserFields,
               category: mockBrowserFields[selectedCategoryId],
-              categoryId: selectedCategoryId,
               columnHeaders: [],
               highlight: '',
-              onUpdateColumns: jest.fn(),
               timelineId,
               toggleColumn,
             })}
@@ -241,12 +221,9 @@ describe('field_items', () => {
             data-test-subj="category"
             filteredBrowserFields={mockBrowserFieldsWithSignal}
             fieldItems={getFieldItems({
-              browserFields: mockBrowserFieldsWithSignal,
               category: mockBrowserFieldsWithSignal[mockSelectedCategoryId],
-              categoryId: mockSelectedCategoryId,
               columnHeaders,
               highlight: '',
-              onUpdateColumns: jest.fn(),
               timelineId,
               toggleColumn,
             })}
@@ -281,12 +258,9 @@ describe('field_items', () => {
             data-test-subj="category"
             filteredBrowserFields={mockBrowserFields}
             fieldItems={getFieldItems({
-              browserFields: mockBrowserFields,
               category: mockBrowserFields[selectedCategoryId],
-              categoryId: selectedCategoryId,
               columnHeaders,
               highlight: '',
-              onUpdateColumns: jest.fn(),
               timelineId,
               toggleColumn: jest.fn(),
             })}
@@ -311,12 +285,9 @@ describe('field_items', () => {
             data-test-subj="category"
             filteredBrowserFields={mockBrowserFields}
             fieldItems={getFieldItems({
-              browserFields: mockBrowserFields,
               category: mockBrowserFields[selectedCategoryId],
-              categoryId: selectedCategoryId,
               columnHeaders,
               highlight: '',
-              onUpdateColumns: jest.fn(),
               timelineId,
               toggleColumn: jest.fn(),
             })}
