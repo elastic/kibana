@@ -55,7 +55,9 @@ export function RowCellActionsRender({ data }: ActionProps) {
         anchorPosition="upCenter"
         button={
           <EuiButtonIcon
-            aria-label="show actions"
+            aria-label={i18n.translate('xpack.observability.alertsTable.actionsTextAriaLabel', {
+              defaultMessage: 'show actions',
+            })}
             iconType="boxesHorizontal"
             color="text"
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
@@ -63,7 +65,11 @@ export function RowCellActionsRender({ data }: ActionProps) {
         }
         closePopover={() => setIsPopoverOpen(false)}
       >
-        <EuiPopoverTitle>Actions</EuiPopoverTitle>
+        <EuiPopoverTitle>
+          {i18n.translate('xpack.observability.alertsTable.actionsTextLabel', {
+            defaultMessage: 'Actions',
+          })}
+        </EuiPopoverTitle>
         <div style={{ width: 150 }}>
           <EuiButtonEmpty href={prepend(link ?? '')}>
             <EuiFlexGroup alignItems="center" component="span" gutterSize="s">
