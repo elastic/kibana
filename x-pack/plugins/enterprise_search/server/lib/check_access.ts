@@ -16,7 +16,7 @@ import { callEnterpriseSearchConfigAPI } from './enterprise_search_config_api';
 
 interface CheckAccess {
   request: KibanaRequest;
-  security?: SecurityPluginSetup;
+  security: SecurityPluginSetup;
   spaces: SpacesPluginStart;
   config: ConfigType;
   log: Logger;
@@ -43,7 +43,7 @@ export const checkAccess = async ({
   request,
   log,
 }: CheckAccess): Promise<ProductAccess> => {
-  const isRbacEnabled = security?.authz.mode.useRbacForRequest(request) ?? false;
+  const isRbacEnabled = security.authz.mode.useRbacForRequest(request) ?? false;
 
   // We can only retrieve the active space when either:
   // 1) security is enabled, and the request has already been authenticated

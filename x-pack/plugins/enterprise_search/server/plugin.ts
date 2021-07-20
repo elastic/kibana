@@ -52,7 +52,7 @@ import { ConfigType } from './';
 
 interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
-  security?: SecurityPluginSetup;
+  security: SecurityPluginSetup;
   features: FeaturesPluginSetup;
   infra: InfraPluginSetup;
 }
