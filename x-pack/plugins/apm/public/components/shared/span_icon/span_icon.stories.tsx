@@ -7,13 +7,12 @@
 
 import {
   EuiCard,
-  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
-  EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
+import type { Story } from '@storybook/react';
 import React from 'react';
 import { getSpanIcon, spanTypeIcons } from './get_span_icon';
 import { SpanIcon } from './index';
@@ -21,72 +20,64 @@ import { SpanIcon } from './index';
 const spanTypes = Object.keys(spanTypeIcons);
 
 export default {
-  title: 'shared/icons',
+  title: 'shared/SpanIcon',
   component: SpanIcon,
 };
 
-export function SpanIcons() {
+export const List: Story = () => {
   return (
-    <>
-      <EuiCodeBlock language="html" isCopyable paddingSize="m">
-        {'<SpanIcon type="db" subtype="cassandra" />'}
-      </EuiCodeBlock>
+    <EuiFlexGroup gutterSize="l" wrap={true}>
+      {spanTypes.map((type) => {
+        const subTypes = Object.keys(spanTypeIcons[type]);
+        return subTypes.map((subType) => {
+          const id = `${type}.${subType}`;
 
-      <EuiSpacer />
-
-      <EuiFlexGroup gutterSize="l" wrap={true}>
-        {spanTypes.map((type) => {
-          const subTypes = Object.keys(spanTypeIcons[type]);
-          return subTypes.map((subType) => {
-            const id = `${type}.${subType}`;
-
-            return (
-              <EuiFlexItem key={id}>
-                <EuiCard
-                  icon={
-                    <p>
+          return (
+            <EuiFlexItem key={id}>
+              <EuiCard
+                icon={
+                  <p>
+                    <EuiToolTip
+                      position="top"
+                      content="Icon rendered with `EuiImage`"
+                    >
+                      <EuiImage
+                        size="s"
+                        hasShadow
+                        alt={id}
+                        src={getSpanIcon(type, subType)}
+                      />
+                    </EuiToolTip>
+                  </p>
+                }
+                title={id}
+                description={
+                  <>
+                    <div>
                       <EuiToolTip
-                        position="top"
-                        content="Icon rendered with `EuiImage`"
+                        position="bottom"
+                        content="Icon rendered with `SpanIcon`"
                       >
-                        <EuiImage
-                          size="s"
-                          hasShadow
-                          alt={id}
-                          src={getSpanIcon(type, subType)}
-                        />
+                        <SpanIcon type={type} subType={subType} />
                       </EuiToolTip>
-                    </p>
-                  }
-                  title={id}
-                  description={
-                    <>
-                      <div>
-                        <EuiToolTip
-                          position="bottom"
-                          content="Icon rendered with `SpanIcon`"
-                        >
-                          <SpanIcon type={type} subType={subType} />
-                        </EuiToolTip>
-                      </div>
+                    </div>
 
-                      <code
-                        style={{
-                          textAlign: 'left',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        <div>span.type: {type}</div>
-                        <div>span.subtype: {subType}</div>
-                      </code>
-                    </>
-                  }
-                />
-              </EuiFlexItem>
-            );
-          });
-        })}
-      </EuiFlexGroup>
-    </>
+                    <code
+                      style={{
+                        textAlign: 'left',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      <div>span.type: {type}</div>
+                      <div>span.subtype: {subType}</div>
+                    </code>
+                  </>
+                }
+              />
+            </EuiFlexItem>
+          );
+        });
+      })}
+    </EuiFlexGroup>
   );
-}
+};
