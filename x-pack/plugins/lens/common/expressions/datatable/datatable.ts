@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common';
 import type { DatatableTransformerResult, DatatableTransformerArgs } from './datatable_transformer';
 
-export type DatatableProps = Omit<DatatableTransformerResult, 'type'> & {
+export type DatatableProps = Omit<DatatableTransformerResult, 'type' | 'columns'> & {
   args: DatatableArgs;
 };
 
