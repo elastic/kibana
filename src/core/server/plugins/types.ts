@@ -318,7 +318,15 @@ export interface InternalPluginInfo {
 }
 
 /**
- * The interface that should be returned by a `PluginInitializer` for a `preboot` plugin.
+ * The type describes a minimally required properties of the Kibana plugin of any type.
+ * @internal
+ */
+export interface OpaquePlugin {
+  setup: Function;
+}
+
+/**
+ * The interface that should be returned by a `PrebootPluginInitializer` for a `preboot` plugin.
  *
  * @public
  */
@@ -491,7 +499,24 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
 }
 
 /**
- * The `plugin` export at the root of a plugin's `server` directory should conform
+ * The `plugin` export at the root of any Kibana plugin's `server` directory should conform
+ * to this interface.
+ * @internal
+ */
+export type OpaquePluginInitializer = (core: PluginInitializerContext) => OpaquePlugin;
+
+/**
+ * The `plugin` export at the root of a `preboot` plugin's `server` directory should conform
+ * to this interface.
+ *
+ * @public
+ */
+export type PrebootPluginInitializer<TSetup, TPluginsSetup extends object = object> = (
+  core: PluginInitializerContext
+) => PrebootPlugin<TSetup, TPluginsSetup>;
+
+/**
+ * The `plugin` export at the root of a `standard` plugin's `server` directory should conform
  * to this interface.
  *
  * @public
@@ -505,5 +530,4 @@ export type PluginInitializer<
   core: PluginInitializerContext
 ) =>
   | Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
-  | PrebootPlugin<TSetup, TPluginsSetup>
   | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;

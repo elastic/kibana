@@ -18,7 +18,7 @@ import {
 import { PluginInitializerContext, PluginManifest, PluginOpaqueId } from './types';
 import { IRouter, RequestHandlerContextProvider } from '../http';
 import { getGlobalConfig, getGlobalConfig$ } from './legacy_config';
-import { CorePreboot, CoreSetup, CoreStart } from '..';
+import { CorePreboot, CoreSetup, CoreStart, PluginType } from '..';
 
 export interface InstanceInfo {
   uuid: string;
@@ -138,10 +138,10 @@ export function createPluginPrebootSetupContext(
  * @param deps Dependencies that Plugins services gets during setup.
  * @internal
  */
-export function createPluginSetupContext<TPlugin, TPluginDependencies>(
+export function createPluginSetupContext(
   coreContext: CoreContext,
   deps: PluginsServiceSetupDeps,
-  plugin: PluginWrapper<TPlugin, TPluginDependencies>
+  plugin: PluginWrapper
 ): CoreSetup {
   const router = deps.http.createRouter('', plugin.opaqueId);
 
@@ -206,7 +206,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     uiSettings: {
       register: deps.uiSettings.register,
     },
-    getStartServices: () => plugin.startDependencies,
+    getStartServices: () => plugin.getInstance<PluginType.standard>().startDependencies,
     deprecations: deps.deprecations.getRegistry(plugin.name),
   };
 }
@@ -223,10 +223,10 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
  * @param deps Dependencies that Plugins services gets during start.
  * @internal
  */
-export function createPluginStartContext<TPlugin, TPluginDependencies>(
+export function createPluginStartContext(
   coreContext: CoreContext,
   deps: PluginsServiceStartDeps,
-  plugin: PluginWrapper<TPlugin, TPluginDependencies>
+  plugin: PluginWrapper
 ): CoreStart {
   return {
     capabilities: {

@@ -110,23 +110,36 @@ export class PluginsSystem<T extends PluginType> {
         return depContracts;
       }, {} as Record<PluginName, unknown>);
 
-      let pluginSetupContext;
+      let contractOrPromise;
       if (this.type === PluginType.preboot) {
-        pluginSetupContext = createPluginPrebootSetupContext(
+        const setupContext = createPluginPrebootSetupContext(
           this.coreContext,
           deps as PluginsServicePrebootSetupDeps,
           plugin
         );
+        contractOrPromise = plugin
+          .getInstance<PluginType.preboot>()
+          .setup(setupContext, pluginDepContracts);
       } else {
-        pluginSetupContext = createPluginSetupContext(
+        const setupContext = createPluginSetupContext(
           this.coreContext,
           deps as PluginsServiceSetupDeps,
           plugin
         );
+        contractOrPromise = plugin
+          .getInstance<PluginType.standard>()
+          .setup(setupContext, pluginDepContracts);
       }
 
+    if (this.type === PluginType.preboot) {
+      const setupContext = createPluginPrebootSetupContext(....);
+      plugin.asPreboot().setup(setupContext, pluginDepContracts);
+    } else {
+      const setupContext = createPluginSetupContext(....);
+      plugin.asStandard().setup(setupContext, pluginDepContracts);
+    }
+
       let contract: unknown;
-      const contractOrPromise = plugin.setup(pluginSetupContext, pluginDepContracts);
       if (isPromise(contractOrPromise)) {
         if (this.coreContext.env.mode.dev) {
           this.log.warn(
@@ -183,10 +196,9 @@ export class PluginsSystem<T extends PluginType> {
       }, {} as Record<PluginName, unknown>);
 
       let contract: unknown;
-      const contractOrPromise = plugin.start(
-        createPluginStartContext(this.coreContext, deps, plugin),
-        pluginDepContracts
-      );
+      const contractOrPromise = plugin
+        .getInstance<PluginType.standard>()
+        .start(createPluginStartContext(this.coreContext, deps, plugin), pluginDepContracts);
       if (isPromise(contractOrPromise)) {
         if (this.coreContext.env.mode.dev) {
           this.log.warn(
@@ -229,7 +241,7 @@ export class PluginsSystem<T extends PluginType> {
       this.log.debug(`Stopping plugin "${pluginName}"...`);
 
       const resultMaybe = await withTimeout({
-        promise: this.plugins.get(pluginName)!.stop(),
+        promise: this.plugins.get(pluginName)!.getInstance().stop(),
         timeoutMs: 30 * Sec,
       });
 

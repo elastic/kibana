@@ -276,6 +276,7 @@ export type {
   AsyncPlugin,
   PluginConfigDescriptor,
   PluginConfigSchema,
+  PrebootPluginInitializer,
   PluginInitializer,
   PluginInitializerContext,
   PluginManifest,

@@ -8,24 +8,26 @@
 
 import { join } from 'path';
 import typeDetect from 'type-detect';
-import { Subject } from 'rxjs';
-import { first } from 'rxjs/operators';
-import { isPromise } from '@kbn/std';
 import { isConfigSchema } from '@kbn/config-schema';
 
 import { Logger } from '../logging';
 import {
-  AsyncPlugin,
-  Plugin,
+  OpaquePlugin,
+  OpaquePluginInitializer,
   PluginConfigDescriptor,
-  PluginInitializer,
   PluginInitializerContext,
   PluginManifest,
   PluginOpaqueId,
   PluginType,
   PrebootPlugin,
+  Plugin,
 } from './types';
-import { CorePreboot, CoreSetup, CoreStart } from '..';
+import { PrebootPluginInstance } from './preboot_plugin_instance';
+import { StandardPluginInstance } from './standard_plugin_instance';
+
+type PluginInstance<T> = T extends PluginType.preboot
+  ? PrebootPluginInstance
+  : StandardPluginInstance;
 
 /**
  * Lightweight wrapper around discovered plugin that is responsible for instantiating
@@ -33,12 +35,7 @@ import { CorePreboot, CoreSetup, CoreStart } from '..';
  *
  * @internal
  */
-export class PluginWrapper<
-  TSetup = unknown,
-  TStart = unknown,
-  TPluginsSetup extends object = object,
-  TPluginsStart extends object = object
-> {
+export class PluginWrapper {
   public readonly path: string;
   public readonly manifest: PluginManifest;
   public readonly opaqueId: PluginOpaqueId;
@@ -53,13 +50,7 @@ export class PluginWrapper<
   private readonly log: Logger;
   private readonly initializerContext: PluginInitializerContext;
 
-  private instance?:
-    | Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
-    | PrebootPlugin<TSetup, TPluginsSetup>
-    | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
-
-  private readonly startDependencies$ = new Subject<[CoreStart, TPluginsStart, TStart]>();
-  public readonly startDependencies = this.startDependencies$.pipe(first()).toPromise();
+  private instance?: OpaquePlugin;
 
   constructor(
     public readonly params: {
@@ -83,67 +74,12 @@ export class PluginWrapper<
     this.includesUiPlugin = params.manifest.ui;
   }
 
-  /**
-   * Instantiates plugin and calls `setup` function exposed by the plugin initializer.
-   * @param setupContext Context that consists of various core services tailored specifically
-   * for the `setup` lifecycle event.
-   * @param plugins The dictionary where the key is the dependency name and the value
-   * is the contract returned by the dependency's `setup` function.
-   */
-  public setup(
-    setupContext: CoreSetup<TPluginsStart> | CorePreboot,
-    plugins: TPluginsSetup
-  ): TSetup | Promise<TSetup> {
-    this.instance = this.createPluginInstance();
-
-    if (this.isPrebootPluginInstance(this.instance)) {
-      return this.instance.setup(setupContext as CorePreboot, plugins);
-    }
-
-    return this.instance.setup(setupContext as CoreSetup, plugins);
-  }
-
-  /**
-   * Calls `start` function exposed by the initialized plugin.
-   * @param startContext Context that consists of various core services tailored specifically
-   * for the `start` lifecycle event.
-   * @param plugins The dictionary where the key is the dependency name and the value
-   * is the contract returned by the dependency's `start` function.
-   */
-  public start(startContext: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart> {
+  public getInstance<T extends PluginType>(): PluginInstance<T> {
     if (this.instance === undefined) {
-      throw new Error(`Plugin "${this.name}" can't be started since it isn't set up.`);
+      this.instance = this.createPluginInstance();
     }
 
-    if (this.isPrebootPluginInstance(this.instance)) {
-      throw new Error(`Plugin "${this.name}" is a preboot plugin and cannot be started.`);
-    }
-
-    const startContract = this.instance.start(startContext, plugins);
-    if (isPromise(startContract)) {
-      return startContract.then((resolvedContract) => {
-        this.startDependencies$.next([startContext, plugins, resolvedContract]);
-        return resolvedContract;
-      });
-    } else {
-      this.startDependencies$.next([startContext, plugins, startContract]);
-      return startContract;
-    }
-  }
-
-  /**
-   * Calls optional `stop` function exposed by the plugin initializer.
-   */
-  public async stop() {
-    if (this.instance === undefined) {
-      throw new Error(`Plugin "${this.name}" can't be stopped since it isn't set up.`);
-    }
-
-    if (typeof this.instance.stop === 'function') {
-      await this.instance.stop();
-    }
-
-    this.instance = undefined;
+    return this.instance as PluginInstance<T>;
   }
 
   public getConfigDescriptor(): PluginConfigDescriptor | null {
@@ -175,9 +111,7 @@ export class PluginWrapper<
       throw new Error(`Plugin "${this.name}" does not export "plugin" definition (${this.path}).`);
     }
 
-    const { plugin: initializer } = pluginDefinition as {
-      plugin: PluginInitializer<TSetup, TStart, TPluginsSetup, TPluginsStart>;
-    };
+    const { plugin: initializer } = pluginDefinition as { plugin: OpaquePluginInitializer };
     if (!initializer || typeof initializer !== 'function') {
       throw new Error(`Definition of plugin "${this.name}" should be a function (${this.path}).`);
     }
@@ -195,12 +129,8 @@ export class PluginWrapper<
       throw new Error(`Instance of plugin "${this.name}" does not define "setup" function.`);
     }
 
-    return instance;
-  }
-
-  private isPrebootPluginInstance(
-    instance: PluginWrapper['instance']
-  ): instance is PrebootPlugin<TSetup, TPluginsSetup> {
-    return this.manifest.type === PluginType.preboot;
+    return this.manifest.type === PluginType.preboot
+      ? new PrebootPluginInstance(this.instance as PrebootPlugin)
+      : new StandardPluginInstance(this.name, this.instance as Plugin);
   }
 }

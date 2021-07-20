@@ -41,8 +41,8 @@ function createPlugin(
     ui?: boolean;
     type?: PluginType;
   } = {}
-): PluginWrapper<any, any> {
-  return new PluginWrapper<any, any>({
+): PluginWrapper {
+  return new PluginWrapper({
     path: 'some-path',
     manifest: {
       id,
