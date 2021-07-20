@@ -18555,8 +18555,6 @@
     "xpack.securitySolution.administration.os.windows": "Windows",
     "xpack.securitySolution.alertDetails.checkDocs": "マニュアルをご確認ください。",
     "xpack.securitySolution.alertDetails.ifCtiNotEnabled": "脅威インテリジェンスソースを有効にしていない場合で、この機能について関心がある場合は、",
-    "xpack.securitySolution.alertDetails.summary": "まとめ",
-    "xpack.securitySolution.alertDetails.summary.investigationGuide": "調査ガイド",
     "xpack.securitySolution.alertDetails.summary.readLess": "表示を減らす",
     "xpack.securitySolution.alertDetails.summary.readMore": "続きを読む",
     "xpack.securitySolution.alertDetails.threatIntel": "Threat Intel",
