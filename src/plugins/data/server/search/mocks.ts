@@ -23,7 +23,7 @@ export function createSearchSetupMock(): jest.Mocked<ISearchSetup> {
 export function createSearchStartMock(): jest.Mocked<ISearchStart> {
   return {
     aggs: searchAggsStartMock(),
-    searchAsInternalUser: jest.fn().mockReturnValue(createSearchRequestHandlerContext()),
+    searchAsInternalUser: createSearchRequestHandlerContext(),
     getSearchStrategy: jest.fn(),
     asScoped: jest.fn().mockReturnValue(createSearchRequestHandlerContext()),
     searchSource: searchSourceMock.createStartContract(),
