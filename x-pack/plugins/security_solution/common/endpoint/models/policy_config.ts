@@ -121,6 +121,10 @@ export const policyFactoryWithoutPaidFeatures = (
         mode: ProtectionModes.off,
         supported: false,
       },
+      behavior_protection: {
+        mode: ProtectionModes.off,
+        supported: false,
+      },
       popup: {
         ...policy.windows.popup,
         malware: {
@@ -132,6 +136,10 @@ export const policyFactoryWithoutPaidFeatures = (
           enabled: false,
         },
         memory_protection: {
+          message: '',
+          enabled: false,
+        },
+        behavior_protection: {
           message: '',
           enabled: false,
         },
@@ -175,6 +183,10 @@ export const policyFactoryWithSupportedFeatures = (
         supported: true,
       },
       memory_protection: {
+        ...policy.windows.memory_protection,
+        supported: true,
+      },
+      behavior_protection: {
         ...policy.windows.memory_protection,
         supported: true,
       },

@@ -17,13 +17,20 @@ import {
 function isEndpointPolicyValidForPlatinumLicense(policy: PolicyConfig): boolean {
   const defaults = policyFactoryWithSupportedFeatures();
 
-  // only platinum or higher may enable ransomware
+  // only platinum or higher may enable ransomware protection
   if (policy.windows.ransomware.supported !== defaults.windows.ransomware.supported) {
     return false;
   }
 
-  // only platinum or higher may enable ransomware
+  // only platinum or higher may enable memory protection
   if (policy.windows.memory_protection.supported !== defaults.windows.memory_protection.supported) {
+    return false;
+  }
+
+  // only platinum or higher may enable behavior protection
+  if (
+    policy.windows.behavior_protection.supported !== defaults.windows.behavior_protection.supported
+  ) {
     return false;
   }
 
@@ -116,6 +123,39 @@ function isEndpointPolicyValidForMemoryProtection(policy: PolicyConfig): boolean
   return true;
 }
 
+function isEndpointPolicyValidForBehaviorProtection(policy: PolicyConfig): boolean {
+  const defaults = policyFactoryWithoutPaidFeatures();
+
+  // only platinum or higher may enable behavior_protection
+  if (policy.windows.behavior_protection.mode !== defaults.windows.behavior_protection.mode) {
+    return false;
+  }
+
+  // only platinum or higher may enable behavior_protection notification
+  if (
+    policy.windows.popup.behavior_protection.enabled !==
+    defaults.windows.popup.behavior_protection.enabled
+  ) {
+    return false;
+  }
+
+  // Only Platinum or higher may change the behavior_protection message (which can be blank or what Endpoint defaults)
+  if (
+    policy.windows.popup.behavior_protection.message !== '' &&
+    policy.windows.popup.behavior_protection.message !== DefaultPolicyNotificationMessage
+  ) {
+    return false;
+  }
+
+  // only platinum or higher may enable behavior_protection
+  if (
+    policy.windows.behavior_protection.supported !== defaults.windows.behavior_protection.supported
+  ) {
+    return false;
+  }
+  return true;
+}
+
 function isEndpointPolicyValidForNonPlatinumLicense(policy: PolicyConfig): boolean {
   if (!isEndpointPolicyValidForMalware(policy)) {
     return false;
@@ -126,6 +166,10 @@ function isEndpointPolicyValidForNonPlatinumLicense(policy: PolicyConfig): boole
   }
 
   if (!isEndpointPolicyValidForMemoryProtection(policy)) {
+    return false;
+  }
+
+  if (!isEndpointPolicyValidForBehaviorProtection(policy)) {
     return false;
   }
 
