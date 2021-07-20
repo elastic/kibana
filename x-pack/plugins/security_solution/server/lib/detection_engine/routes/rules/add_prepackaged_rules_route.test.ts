@@ -304,6 +304,7 @@ describe('add_prepackaged_rules_route', () => {
         clients.alertsClient,
         {} as FrameworkRequest,
         1200,
+        createMockConfig(),
         mockExceptionsClient
       );
 
@@ -320,6 +321,7 @@ describe('add_prepackaged_rules_route', () => {
         clients.alertsClient,
         {} as FrameworkRequest,
         1200,
+        createMockConfig(),
         mockExceptionsClient
       );
 
