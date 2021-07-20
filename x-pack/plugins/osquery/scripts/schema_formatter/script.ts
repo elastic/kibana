@@ -37,7 +37,7 @@ run(
     const mapFunc = pullFields.bind(null, { name: true });
     const formattedSchema = schemaData.map(mapFunc);
     await fs.writeFile(
-      path.join(schemaPath, `${flags.schema_version}-formatted`),
+      path.join(schemaPath, `${flags.schema_version}-formatted.json`),
       JSON.stringify(formattedSchema)
     );
   },

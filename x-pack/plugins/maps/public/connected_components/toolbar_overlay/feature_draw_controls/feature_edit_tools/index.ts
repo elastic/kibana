@@ -14,9 +14,9 @@ import {
   ReduxStateProps,
   OwnProps,
 } from './feature_edit_tools';
-import { setDrawMode, updateEditShape } from '../../../../actions';
+import { updateEditShape } from '../../../../actions';
 import { MapStoreState } from '../../../../reducers/store';
-import { DRAW_MODE, DRAW_SHAPE } from '../../../../../common';
+import { DRAW_SHAPE } from '../../../../../common';
 import { getEditState } from '../../../../selectors/map_selectors';
 
 function mapStateToProps(state: MapStoreState): ReduxStateProps {
@@ -32,9 +32,6 @@ function mapDispatchToProps(
   return {
     setDrawShape: (shapeToDraw: DRAW_SHAPE) => {
       dispatch(updateEditShape(shapeToDraw));
-    },
-    cancelEditing: () => {
-      dispatch(setDrawMode(DRAW_MODE.NONE));
     },
   };
 }

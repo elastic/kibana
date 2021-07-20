@@ -642,8 +642,11 @@ class AgentPolicyService {
       data: (fullPolicy as unknown) as FleetServerPolicy['data'],
       policy_id: fullPolicy.id,
       default_fleet_server: policy.is_default_fleet_server === true,
-      unenroll_timeout: policy.unenroll_timeout,
     };
+
+    if (policy.unenroll_timeout) {
+      fleetServerPolicy.unenroll_timeout = policy.unenroll_timeout;
+    }
 
     await esClient.create({
       index: AGENT_POLICY_INDEX,
@@ -770,10 +773,10 @@ class AgentPolicyService {
     ) {
       const names: string[] = [];
       if (fullAgentPolicy.agent.monitoring.logs) {
-        names.push(`logs-elastic_agent.*-${monitoringNamespace}`);
+        names.push(`logs-elastic_agent*-${monitoringNamespace}`);
       }
       if (fullAgentPolicy.agent.monitoring.metrics) {
-        names.push(`metrics-elastic_agent.*-${monitoringNamespace}`);
+        names.push(`metrics-elastic_agent*-${monitoringNamespace}`);
       }
 
       permissions._elastic_agent_checks.indices = [

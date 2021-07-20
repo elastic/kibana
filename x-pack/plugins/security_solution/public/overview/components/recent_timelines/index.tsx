@@ -60,7 +60,9 @@ const StatefulRecentTimelinesComponent: React.FC<Props> = ({ filterBy }) => {
   const goToTimelines = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(`${APP_ID}:${SecurityPageName.timelines}`);
+      navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.timelines,
+      });
     },
     [navigateToApp]
   );

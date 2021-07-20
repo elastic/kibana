@@ -56,9 +56,10 @@ const transactionGroupsRoute = createApmServerRoute({
     const { serviceName } = params.path;
     const { environment, kuery, transactionType } = params.query;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
-      setup
-    );
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      ...setup,
+      kuery,
+    });
 
     return getTransactionGroupList(
       {
@@ -95,15 +96,15 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
   handler: async (resources) => {
     const { params } = resources;
     const setup = await setupRequest(resources);
-
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
-      setup
-    );
-
     const {
       path: { serviceName },
       query: { environment, kuery, latencyAggregationType, transactionType },
     } = params;
+
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      ...setup,
+      kuery,
+    });
 
     return getServiceTransactionGroups({
       environment,
@@ -140,11 +141,6 @@ const transactionGroupsDetailedStatisticsRoute = createApmServerRoute({
   },
   handler: async (resources) => {
     const setup = await setupRequest(resources);
-
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
-      setup
-    );
-
     const { params } = resources;
 
     const {
@@ -160,6 +156,11 @@ const transactionGroupsDetailedStatisticsRoute = createApmServerRoute({
         comparisonEnd,
       },
     } = params;
+
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      ...setup,
+      kuery,
+    });
 
     return await getServiceTransactionGroupDetailedStatisticsPeriods({
       environment,
@@ -208,9 +209,10 @@ const transactionLatencyChartsRoute = createApmServerRoute({
       comparisonEnd,
     } = params.query;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
-      setup
-    );
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      ...setup,
+      kuery,
+    });
 
     const options = {
       environment,
@@ -276,9 +278,10 @@ const transactionThroughputChartsRoute = createApmServerRoute({
       transactionName,
     } = params.query;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
-      setup
-    );
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      ...setup,
+      kuery,
+    });
 
     return await getThroughputCharts({
       environment,
@@ -327,9 +330,10 @@ const transactionChartsDistributionRoute = createApmServerRoute({
       traceId = '',
     } = params.query;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
-      setup
-    );
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      ...setup,
+      kuery,
+    });
 
     return getTransactionDistribution({
       environment,
@@ -411,9 +415,10 @@ const transactionChartsErrorRateRoute = createApmServerRoute({
       comparisonEnd,
     } = params.query;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
-      setup
-    );
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      ...setup,
+      kuery,
+    });
 
     return getErrorRatePeriods({
       environment,

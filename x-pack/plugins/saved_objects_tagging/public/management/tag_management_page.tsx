@@ -11,6 +11,7 @@ import useMount from 'react-use/lib/useMount';
 import { Query } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ChromeBreadcrumb, CoreStart } from 'src/core/public';
+import { EuiSpacer } from '@elastic/eui';
 import { TagWithRelations, TagsCapabilities } from '../../common';
 import { getCreateModalOpener } from '../components/edition_modal';
 import { ITagInternalClient, ITagAssignmentService, ITagsCache } from '../services';
@@ -194,6 +195,7 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
   return (
     <>
       <Header canCreate={capabilities.create} onCreate={openCreateModal} />
+      <EuiSpacer size="l" />
       <TagTable
         loading={loading}
         tags={filteredTags}

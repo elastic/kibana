@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { IFieldType, IndexPatternBase } from '../..';
+import { IndexPatternFieldBase, IndexPatternBase } from '../..';
+
 import {
   Filter,
   FILTERS,
@@ -20,7 +21,7 @@ import {
 
 export function buildFilter(
   indexPattern: IndexPatternBase,
-  field: IFieldType,
+  field: IndexPatternFieldBase,
   type: FILTERS,
   negate: boolean,
   disabled: boolean,
@@ -60,7 +61,7 @@ export function buildCustomFilter(
 
 function buildBaseFilter(
   indexPattern: IndexPatternBase,
-  field: IFieldType,
+  field: IndexPatternFieldBase,
   type: FILTERS,
   params: any
 ): Filter {

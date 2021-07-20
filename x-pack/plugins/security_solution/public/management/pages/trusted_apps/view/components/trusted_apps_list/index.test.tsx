@@ -92,7 +92,9 @@ describe('TrustedAppsList', () => {
         createListLoadedResourceState({ pageSize: 20 }, now)
       )
     );
-    store.dispatch(createUserChangedUrlAction('/trusted_apps', '?page_index=2&page_size=50'));
+    store.dispatch(
+      createUserChangedUrlAction('/administration/trusted_apps', '?page_index=2&page_size=50')
+    );
 
     expect(renderList(store).container).toMatchSnapshot();
   });

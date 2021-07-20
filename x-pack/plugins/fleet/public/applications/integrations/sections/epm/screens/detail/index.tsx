@@ -6,7 +6,7 @@
  */
 import type { ReactEventHandler } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Redirect, Route, Switch, useLocation, useParams } from 'react-router-dom';
+import { Redirect, Route, Switch, useLocation, useParams, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   EuiBetaBadge,
@@ -31,7 +31,12 @@ import {
   useBreadcrumbs,
   useStartServices,
 } from '../../../../hooks';
-import { PLUGIN_ID, INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from '../../../../constants';
+import {
+  PLUGIN_ID,
+  INTEGRATIONS_PLUGIN_ID,
+  INTEGRATIONS_ROUTING_PATHS,
+  pagePathGetters,
+} from '../../../../constants';
 import {
   useCapabilities,
   useGetPackageInfoByKey,
@@ -39,7 +44,11 @@ import {
   useAgentPolicyContext,
 } from '../../../../hooks';
 import { pkgKeyFromPackageInfo } from '../../../../services';
-import type { DetailViewPanelName, PackageInfo } from '../../../../types';
+import type {
+  CreatePackagePolicyRouteState,
+  DetailViewPanelName,
+  PackageInfo,
+} from '../../../../types';
 import { InstallStatus } from '../../../../types';
 import { Error, Loading } from '../../../../components';
 import type { WithHeaderLayoutProps } from '../../../../layouts';
@@ -80,7 +89,8 @@ export function Detail() {
   const { pkgkey, panel } = useParams<DetailParams>();
   const { getHref } = useLink();
   const hasWriteCapabilites = useCapabilities().write;
-  const { search } = useLocation();
+  const history = useHistory();
+  const { pathname, search, hash } = useLocation();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
   const services = useStartServices();
@@ -90,6 +100,8 @@ export function Detail() {
   const [packageInfo, setPackageInfo] = useState<PackageInfo | null>(null);
   const setPackageInstallStatus = useSetPackageInstallStatus();
   const getPackageInstallStatus = useGetPackageInstallStatus();
+
+  const CustomAssets = useUIExtension(packageInfo?.name ?? '', 'package-detail-assets');
 
   const packageInstallStatus = useMemo(() => {
     if (packageInfo === null || !packageInfo.name) {
@@ -202,19 +214,75 @@ export function Detail() {
     (ev) => {
       ev.preventDefault();
 
+      // The object below, given to `createHref` is explicitly accessing keys of `location` in order
+      // to ensure that dependencies to this `useCallback` is set correctly (because `location` is mutable)
+      const currentPath = history.createHref({
+        pathname,
+        search,
+        hash,
+      });
+
       const path = pagePathGetters.add_integration_to_policy({
         pkgkey,
         ...(integration ? { integration } : {}),
         ...(agentPolicyIdFromContext ? { agentPolicyId: agentPolicyIdFromContext } : {}),
       })[1];
 
+      let redirectToPath: CreatePackagePolicyRouteState['onSaveNavigateTo'] &
+        CreatePackagePolicyRouteState['onCancelNavigateTo'];
+
+      if (agentPolicyIdFromContext) {
+        redirectToPath = [
+          PLUGIN_ID,
+          {
+            path: `#${
+              pagePathGetters.policy_details({
+                policyId: agentPolicyIdFromContext,
+              })[1]
+            }`,
+          },
+        ];
+      } else {
+        redirectToPath = [
+          INTEGRATIONS_PLUGIN_ID,
+          {
+            path: `#${
+              pagePathGetters.integration_details_policies({
+                pkgkey,
+              })[1]
+            }`,
+          },
+        ];
+      }
+
+      const redirectBackRouteState: CreatePackagePolicyRouteState = {
+        onSaveNavigateTo: redirectToPath,
+        onCancelNavigateTo: [
+          INTEGRATIONS_PLUGIN_ID,
+          {
+            path: currentPath,
+          },
+        ],
+        onCancelUrl: currentPath,
+      };
+
       services.application.navigateToApp(PLUGIN_ID, {
         // Necessary because of Fleet's HashRouter. Can be changed when
         // https://github.com/elastic/kibana/issues/96134 is resolved
         path: `#${path}`,
+        state: redirectBackRouteState,
       });
     },
-    [pkgkey, integration, services.application, agentPolicyIdFromContext]
+    [
+      history,
+      hash,
+      pathname,
+      search,
+      pkgkey,
+      integration,
+      services.application,
+      agentPolicyIdFromContext,
+    ]
   );
 
   const headerRightContent = useMemo(
@@ -352,7 +420,7 @@ export function Detail() {
       });
     }
 
-    if (packageInstallStatus === InstallStatus.installed && packageInfo.assets) {
+    if (packageInstallStatus === InstallStatus.installed && (packageInfo.assets || CustomAssets)) {
       tabs.push({
         id: 'assets',
         name: (
@@ -405,7 +473,7 @@ export function Detail() {
     }
 
     return tabs;
-  }, [packageInfo, panel, getHref, integration, packageInstallStatus, showCustomTab]);
+  }, [packageInfo, panel, getHref, integration, packageInstallStatus, showCustomTab, CustomAssets]);
 
   return (
     <WithHeaderLayout

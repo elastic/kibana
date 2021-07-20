@@ -26,12 +26,14 @@ export const OPEN_TELEMETRY_AGENT_NAMES: AgentName[] = [
   'opentelemetry/php',
   'opentelemetry/python',
   'opentelemetry/ruby',
+  'opentelemetry/swift',
   'opentelemetry/webjs',
 ];
 
 export const AGENT_NAMES: AgentName[] = [
   'dotnet',
   'go',
+  'iOS/swift',
   'java',
   'js-base',
   'nodejs',
@@ -62,7 +64,9 @@ export function isRumAgentName(
   return RUM_AGENT_NAMES.includes(agentName! as AgentName);
 }
 
-export function normalizeAgentName(agentName: string | undefined) {
+export function normalizeAgentName<T extends string | undefined>(
+  agentName: T
+): T | string {
   if (isRumAgentName(agentName)) {
     return 'rum-js';
   }
@@ -71,5 +75,14 @@ export function normalizeAgentName(agentName: string | undefined) {
     return 'java';
   }
 
+  if (isIosAgentName(agentName)) {
+    return 'ios';
+  }
+
   return agentName;
+}
+
+export function isIosAgentName(agentName?: string) {
+  const lowercased = agentName && agentName.toLowerCase();
+  return lowercased === 'ios/swift' || lowercased === 'opentelemetry/swift';
 }

@@ -116,7 +116,7 @@ export class TOCEntryButton extends Component<Props, State> {
         footnotes.push({
           icon: <EuiIcon color="subdued" type="filter" size="s" />,
           message: i18n.translate('xpack.maps.layer.isUsingSearchMsg', {
-            defaultMessage: 'Results narrowed by search bar',
+            defaultMessage: 'Results narrowed by query and filters',
           }),
         });
       }

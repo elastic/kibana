@@ -6,9 +6,9 @@
  */
 
 import React, { useState, useEffect, createContext, Dispatch, SetStateAction } from 'react';
-import { useFindWorkpadsOnMount } from './../hooks';
+import { useFindWorkpads } from './../hooks';
 import { FoundWorkpad } from '../../../services/workpad';
-import { Loading } from './loading';
+import { Loading } from '../loading';
 import { MyWorkpads as Component } from './my_workpads.component';
 
 interface Context {
@@ -19,12 +19,18 @@ interface Context {
 export const WorkpadsContext = createContext<Context | null>(null);
 
 export const MyWorkpads = () => {
-  const [isMounted, workpadResponse] = useFindWorkpadsOnMount();
-  const [workpads, setWorkpads] = useState(workpadResponse.workpads);
+  const findWorkpads = useFindWorkpads();
+  const [isMounted, setIsMounted] = useState(false);
+  const [workpads, setWorkpads] = useState<FoundWorkpad[]>([]);
 
   useEffect(() => {
-    setWorkpads(workpadResponse.workpads);
-  }, [workpadResponse]);
+    const mount = async () => {
+      const response = await findWorkpads('');
+      setIsMounted(true);
+      setWorkpads(response?.workpads || []);
+    };
+    mount();
+  }, [setIsMounted, findWorkpads]);
 
   if (!isMounted) {
     return <Loading />;

@@ -6,7 +6,7 @@
  */
 
 import type { ReactEventHandler } from 'react';
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useRouteMatch, useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
@@ -271,6 +271,14 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     setFormState('SUBMITTED');
     return result;
   }, [packagePolicy]);
+  const doOnSaveNavigation = useRef<boolean>(true);
+
+  // Detect if user left page
+  useEffect(() => {
+    return () => {
+      doOnSaveNavigation.current = false;
+    };
+  }, []);
 
   const onSubmit = useCallback(async () => {
     if (formState === 'VALID' && hasErrors) {
@@ -283,18 +291,20 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     }
     const { error, data } = await savePackagePolicy();
     if (!error) {
-      if (routeState && routeState.onSaveNavigateTo) {
-        handleNavigateTo(
-          typeof routeState.onSaveNavigateTo === 'function'
-            ? routeState.onSaveNavigateTo(data!.item)
-            : routeState.onSaveNavigateTo
-        );
-      } else {
-        history.push(
-          getPath('policy_details', {
-            policyId: agentPolicy?.id || (params as AddFromPolicyParams).policyId,
-          })
-        );
+      if (doOnSaveNavigation.current) {
+        if (routeState && routeState.onSaveNavigateTo) {
+          handleNavigateTo(
+            typeof routeState.onSaveNavigateTo === 'function'
+              ? routeState.onSaveNavigateTo(data!.item)
+              : routeState.onSaveNavigateTo
+          );
+        } else {
+          history.push(
+            getPath('policy_details', {
+              policyId: agentPolicy?.id || (params as AddFromPolicyParams).policyId,
+            })
+          );
+        }
       }
 
       const fromPolicyWithoutAgentsAssigned = from === 'policy' && agentPolicy && agentCount === 0;
@@ -361,21 +371,22 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       setFormState('VALID');
     }
   }, [
-    getHref,
-    from,
-    packageInfo,
-    agentCount,
-    agentPolicy,
     formState,
-    getPath,
-    handleNavigateTo,
     hasErrors,
-    history,
+    agentCount,
+    savePackagePolicy,
+    doOnSaveNavigation,
+    from,
+    agentPolicy,
+    packageInfo,
     notifications.toasts,
     packagePolicy.name,
-    params,
+    getHref,
     routeState,
-    savePackagePolicy,
+    handleNavigateTo,
+    history,
+    getPath,
+    params,
   ]);
 
   const integrationInfo = useMemo(
@@ -414,7 +425,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     [params, updatePackageInfo, agentPolicy, updateAgentPolicy, queryParamsPolicyId]
   );
 
-  const ExtensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-create');
+  const extensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-create');
 
   const stepConfigurePackagePolicy = useMemo(
     () =>
@@ -433,7 +444,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
           />
 
           {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
-          {!ExtensionView && (
+          {!extensionView && (
             <StepConfigurePackagePolicy
               packageInfo={packageInfo}
               showOnlyIntegration={integrationInfo?.name}
@@ -445,9 +456,12 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
           )}
 
           {/* If an Agent Policy and a package has been selected, then show UI extension (if any) */}
-          {ExtensionView && packagePolicy.policy_id && packagePolicy.package?.name && (
+          {extensionView && packagePolicy.policy_id && packagePolicy.package?.name && (
             <ExtensionWrapper>
-              <ExtensionView newPolicy={packagePolicy} onChange={handleExtensionViewOnChange} />
+              <extensionView.Component
+                newPolicy={packagePolicy}
+                onChange={handleExtensionViewOnChange}
+              />
             </ExtensionWrapper>
           )}
         </>
@@ -463,7 +477,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       validationResults,
       formState,
       integrationInfo?.name,
-      ExtensionView,
+      extensionView,
       handleExtensionViewOnChange,
     ]
   );

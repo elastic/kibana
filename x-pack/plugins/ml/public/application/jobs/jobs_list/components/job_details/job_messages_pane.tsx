@@ -6,25 +6,38 @@
  */
 
 import React, { FC, useCallback, useEffect, useState } from 'react';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { ml } from '../../../../services/ml_api_service';
 import { JobMessages } from '../../../../components/job_messages';
 import { JobMessage } from '../../../../../../common/types/audit_message';
 import { extractErrorMessage } from '../../../../../../common/util/errors';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
+import { useMlApiContext } from '../../../../contexts/kibana';
+import { checkPermission } from '../../../../capabilities/check_capabilities';
 interface JobMessagesPaneProps {
   jobId: string;
+  showClearButton?: boolean;
   start?: string;
   end?: string;
   actionHandler?: (message: JobMessage) => void;
+  refreshJobList?: () => void;
 }
 
 export const JobMessagesPane: FC<JobMessagesPaneProps> = React.memo(
-  ({ jobId, start, end, actionHandler }) => {
+  ({ jobId, start, end, actionHandler, refreshJobList, showClearButton }) => {
+    const canCreateJob = checkPermission('canCreateJob');
+
     const [messages, setMessages] = useState<JobMessage[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
+    const [isClearing, setIsClearing] = useState<boolean>(false);
+
     const toastNotificationService = useToastNotificationService();
+    const {
+      jobs: { clearJobAuditMessages },
+    } = useMlApiContext();
 
     const fetchMessages = async () => {
       setIsLoading(true);
@@ -46,18 +59,89 @@ export const JobMessagesPane: FC<JobMessagesPaneProps> = React.memo(
 
     const refreshMessage = useCallback(fetchMessages, [jobId]);
 
+    // Clear messages for last 24hrs and refresh jobs list
+    const clearMessages = useCallback(async () => {
+      setIsClearing(true);
+      try {
+        await clearJobAuditMessages(jobId);
+        setIsClearing(false);
+        if (typeof refreshJobList === 'function') {
+          refreshJobList();
+        }
+      } catch (e) {
+        setIsClearing(false);
+        toastNotificationService.displayErrorToast(
+          e,
+          i18n.translate('xpack.ml.jobMessages.clearJobAuditMessagesErrorTitle', {
+            defaultMessage: 'Error clearing job message warnings and errors',
+          })
+        );
+      }
+    }, [jobId]);
+
     useEffect(() => {
       fetchMessages();
     }, []);
 
+    const disabled = messages.length > 0 && messages[0].clearable === false;
+
+    const clearButton = (
+      <EuiButton
+        size="s"
+        isLoading={isClearing}
+        isDisabled={disabled}
+        onClick={clearMessages}
+        data-test-subj="mlJobMessagesClearButton"
+      >
+        <FormattedMessage
+          id="xpack.ml.jobMessages.clearMessagesLabel"
+          defaultMessage="Clear notifications"
+        />
+      </EuiButton>
+    );
+
     return (
-      <JobMessages
-        refreshMessage={refreshMessage}
-        messages={messages}
-        loading={isLoading}
-        error={errorMessage}
-        actionHandler={actionHandler}
-      />
+      <>
+        {canCreateJob && showClearButton ? <EuiSpacer /> : null}
+        <EuiFlexGroup direction="column">
+          {canCreateJob && showClearButton ? (
+            <EuiFlexItem grow={false}>
+              <div>
+                {disabled === true ? (
+                  <EuiToolTip
+                    content={i18n.translate(
+                      'xpack.ml.jobMessages.clearJobAuditMessagesDisabledTooltip',
+                      {
+                        defaultMessage: 'Notification clearing not supported.',
+                      }
+                    )}
+                  >
+                    {clearButton}
+                  </EuiToolTip>
+                ) : (
+                  <EuiToolTip
+                    content={i18n.translate('xpack.ml.jobMessages.clearJobAuditMessagesTooltip', {
+                      defaultMessage:
+                        'Clears warning icon from jobs list for messages produced in the last 24 hours.',
+                    })}
+                  >
+                    {clearButton}
+                  </EuiToolTip>
+                )}
+              </div>
+            </EuiFlexItem>
+          ) : null}
+          <EuiFlexItem grow={false}>
+            <JobMessages
+              refreshMessage={refreshMessage}
+              messages={messages}
+              loading={isLoading}
+              error={errorMessage}
+              actionHandler={actionHandler}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </>
     );
   }
 );

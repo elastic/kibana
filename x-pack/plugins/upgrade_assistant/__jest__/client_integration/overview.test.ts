@@ -38,7 +38,6 @@ describe('Overview page', () => {
           details:
             'translog retention settings [index.translog.retention.size] and [index.translog.retention.age] are ignored because translog is no longer used in peer recoveries with soft-deletes enabled (default in 7.0 or later)',
           index: 'settings',
-          reindex: false,
         },
       ],
     };

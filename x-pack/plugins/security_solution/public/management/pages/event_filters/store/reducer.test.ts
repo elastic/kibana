@@ -128,7 +128,7 @@ describe('event filters reducer', () => {
   describe('UserChangedUrl', () => {
     const userChangedUrlAction = (
       search: string = '',
-      pathname = '/event_filters'
+      pathname = '/administration/event_filters'
     ): UserChangedUrl => ({
       type: 'userChangedUrl',
       payload: { search, pathname, hash: '' },

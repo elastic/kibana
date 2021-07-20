@@ -59,6 +59,7 @@ export function UrlStorageContextProvider({
     convertAllShortSeries(storage.get(allSeriesKey) ?? {})
   );
   const [firstSeriesId, setFirstSeriesId] = useState('');
+  const [firstSeries, setFirstSeries] = useState<SeriesUrl>();
 
   useEffect(() => {
     const allSeriesIds = Object.keys(allShortSeries);
@@ -66,6 +67,7 @@ export function UrlStorageContextProvider({
 
     setAllSeries(allSeriesN);
     setFirstSeriesId(allSeriesIds?.[0]);
+    setFirstSeries(allSeriesN?.[allSeriesIds?.[0]]);
     (storage as IKbnUrlStateStorage).set(allSeriesKey, allShortSeries);
   }, [allShortSeries, storage]);
 
@@ -100,7 +102,7 @@ export function UrlStorageContextProvider({
     firstSeriesId,
     allSeries,
     allSeriesIds,
-    firstSeries: allSeries?.[firstSeriesId],
+    firstSeries: firstSeries!,
   };
   return <UrlStorageContext.Provider value={value}>{children}</UrlStorageContext.Provider>;
 }

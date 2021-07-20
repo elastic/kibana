@@ -110,7 +110,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(response.status).to.be(200);
           const latencyChartReturn = response.body as LatencyChartReturnType;
           expect(latencyChartReturn.currentPeriod.overallAvgDuration).not.to.be(null);
-          expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be.eql(61);
+          expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be.eql(31);
         });
       });
 
@@ -134,7 +134,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(response.status).to.be(200);
           const latencyChartReturn = response.body as LatencyChartReturnType;
           expect(latencyChartReturn.currentPeriod.overallAvgDuration).not.to.be(null);
-          expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be.eql(61);
+          expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be.eql(31);
         });
       });
 
@@ -157,8 +157,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         it('returns average duration and timeseries', async () => {
           expect(response.status).to.be(200);
           const latencyChartReturn = response.body as LatencyChartReturnType;
+
           expect(latencyChartReturn.currentPeriod.overallAvgDuration).not.to.be(null);
-          expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be.eql(61);
+          expectSnapshot(latencyChartReturn.currentPeriod.overallAvgDuration).toMatchInline(
+            `24989.3157894737`
+          );
+
+          expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be.eql(31);
         });
       });
 
@@ -200,6 +205,36 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(latencyChartReturn.currentPeriod.latencyTimeseries.map(({ x }) => x)).to.be.eql(
             latencyChartReturn.previousPeriod.latencyTimeseries.map(({ x }) => x)
           );
+        });
+      });
+
+      describe('with a non-existing environment', () => {
+        before(async () => {
+          response = await supertest.get(
+            url.format({
+              pathname: `/api/apm/services/opbeans-node/transactions/charts/latency`,
+              query: {
+                start,
+                end,
+                latencyAggregationType: 'avg',
+                transactionType: 'request',
+                environment: 'does-not-exist',
+              },
+            })
+          );
+        });
+
+        it('returns average duration and timeseries', async () => {
+          expect(response.status).to.be(200);
+          const latencyChartReturn = response.body as LatencyChartReturnType;
+
+          expect(latencyChartReturn.currentPeriod.overallAvgDuration).to.be(null);
+
+          const currentPeriodNonNullDataPoints = latencyChartReturn.currentPeriod.latencyTimeseries.filter(
+            ({ y }) => y !== null
+          );
+
+          expect(currentPeriodNonNullDataPoints).to.be.empty();
         });
       });
     }

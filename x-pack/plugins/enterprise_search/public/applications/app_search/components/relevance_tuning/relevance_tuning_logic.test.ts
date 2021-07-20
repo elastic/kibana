@@ -229,7 +229,7 @@ describe('RelevanceTuningLogic', () => {
     });
 
     describe('updatePrecision', () => {
-      it('should set precision inside search settings', () => {
+      it('should set precision inside search settings and set unsavedChanges to true', () => {
         mount();
         RelevanceTuningLogic.actions.updatePrecision(9);
 
@@ -239,6 +239,7 @@ describe('RelevanceTuningLogic', () => {
             ...DEFAULT_VALUES.searchSettings,
             precision: 9,
           },
+          unsavedChanges: true,
         });
       });
     });
@@ -387,15 +388,12 @@ describe('RelevanceTuningLogic', () => {
         await nextTick();
 
         expect(RelevanceTuningLogic.actions.setResultsLoading).toHaveBeenCalledWith(true);
-        expect(http.post).toHaveBeenCalledWith(
-          '/api/app_search/engines/test-engine/search_settings_search',
-          {
-            body: JSON.stringify(searchSettingsWithoutNewBoostProp),
-            query: {
-              query: 'foo',
-            },
-          }
-        );
+        expect(http.post).toHaveBeenCalledWith('/api/app_search/engines/test-engine/search', {
+          body: JSON.stringify(searchSettingsWithoutNewBoostProp),
+          query: {
+            query: 'foo',
+          },
+        });
         expect(RelevanceTuningLogic.actions.setSearchResults).toHaveBeenCalledWith(searchResults);
         expect(clearFlashMessages).toHaveBeenCalled();
       });
@@ -420,15 +418,12 @@ describe('RelevanceTuningLogic', () => {
         jest.runAllTimers();
         await nextTick();
 
-        expect(http.post).toHaveBeenCalledWith(
-          '/api/app_search/engines/test-engine/search_settings_search',
-          {
-            body: '{}',
-            query: {
-              query: 'foo',
-            },
-          }
-        );
+        expect(http.post).toHaveBeenCalledWith('/api/app_search/engines/test-engine/search', {
+          body: '{}',
+          query: {
+            query: 'foo',
+          },
+        });
       });
 
       it('will call clearSearchResults if there is no query', async () => {

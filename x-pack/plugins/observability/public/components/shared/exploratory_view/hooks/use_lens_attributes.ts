@@ -14,14 +14,17 @@ import { getDefaultConfigs } from '../configurations/default_configs';
 
 import { SeriesUrl, UrlFilter } from '../types';
 import { useAppIndexPatternContext } from './use_app_index_pattern';
+import { ALL_VALUES_SELECTED } from '../../field_value_suggestions/field_value_combobox';
 
 export const getFiltersFromDefs = (reportDefinitions: SeriesUrl['reportDefinitions']) => {
-  return Object.entries(reportDefinitions ?? {}).map(([field, value]) => {
-    return {
-      field,
-      values: value,
-    };
-  }) as UrlFilter[];
+  return Object.entries(reportDefinitions ?? {})
+    .map(([field, value]) => {
+      return {
+        field,
+        values: value,
+      };
+    })
+    .filter(({ values }) => !values.includes(ALL_VALUES_SELECTED)) as UrlFilter[];
 };
 
 export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null => {

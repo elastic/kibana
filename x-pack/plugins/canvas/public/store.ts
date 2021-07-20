@@ -17,17 +17,16 @@ import { getInitialState } from './state/initial_state';
 
 import { CoreSetup } from '../../../../src/core/public';
 import { API_ROUTE_FUNCTIONS } from '../common/lib/constants';
-import { CanvasSetupDeps } from './plugin';
 
-export async function createStore(core: CoreSetup, plugins: CanvasSetupDeps) {
+export async function createStore(core: CoreSetup) {
   if (getStore()) {
     return cloneStore();
   }
 
-  return createFreshStore(core, plugins);
+  return createFreshStore(core);
 }
 
-export async function createFreshStore(core: CoreSetup, plugins: CanvasSetupDeps) {
+export async function createFreshStore(core: CoreSetup) {
   const initialState = getInitialState();
 
   const basePath = core.http.basePath.get();

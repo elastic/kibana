@@ -24,9 +24,10 @@ import { ConfirmPackageInstall } from './confirm_package_install';
 type InstallationButtonProps = Pick<PackageInfo, 'assets' | 'name' | 'title' | 'version'> & {
   disabled?: boolean;
   isUpdate?: boolean;
+  latestVersion?: string;
 };
 export function InstallationButton(props: InstallationButtonProps) {
-  const { assets, name, title, version, disabled = true, isUpdate = false } = props;
+  const { assets, name, title, version, disabled = true, isUpdate = false, latestVersion } = props;
   const hasWriteCapabilites = useCapabilities().write;
   const installPackage = useInstallPackage();
   const uninstallPackage = useUninstallPackage();
@@ -52,9 +53,9 @@ export function InstallationButton(props: InstallationButtonProps) {
   }, [installPackage, name, title, version]);
 
   const handleClickUninstall = useCallback(() => {
-    uninstallPackage({ name, version, title });
+    uninstallPackage({ name, version, title, redirectToVersion: latestVersion ?? version });
     toggleModal();
-  }, [uninstallPackage, name, title, toggleModal, version]);
+  }, [uninstallPackage, name, title, toggleModal, version, latestVersion]);
 
   // counts the number of assets in the package
   const numOfAssets = useMemo(

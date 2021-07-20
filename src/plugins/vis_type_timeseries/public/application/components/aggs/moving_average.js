@@ -26,6 +26,7 @@ import {
   EuiFieldNumber,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
 
 const DEFAULTS = {
   model_type: MODEL_TYPES.UNWEIGHTED,
@@ -141,7 +142,7 @@ export const MovingAverageAgg = (props) => {
               onChange={handleSelectChange('field')}
               metrics={siblings}
               metric={model}
-              fields={fields[indexPattern]}
+              fields={fields[getIndexPatternKey(indexPattern)]}
               value={model.field}
               exclude={[METRIC_TYPES.TOP_HIT]}
             />

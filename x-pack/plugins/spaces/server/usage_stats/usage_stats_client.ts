@@ -21,6 +21,7 @@ export type IncrementResolveCopySavedObjectsErrorsOptions = BaseIncrementOptions
 
 export const COPY_STATS_PREFIX = 'apiCalls.copySavedObjects';
 export const RESOLVE_COPY_STATS_PREFIX = 'apiCalls.resolveCopySavedObjectsErrors';
+export const DISABLE_LEGACY_URL_ALIASES_STATS_PREFIX = 'apiCalls.disableLegacyUrlAliases';
 const ALL_COUNTER_FIELDS = [
   `${COPY_STATS_PREFIX}.total`,
   `${COPY_STATS_PREFIX}.kibanaRequest.yes`,
@@ -34,6 +35,7 @@ const ALL_COUNTER_FIELDS = [
   `${RESOLVE_COPY_STATS_PREFIX}.kibanaRequest.no`,
   `${RESOLVE_COPY_STATS_PREFIX}.createNewCopiesEnabled.yes`,
   `${RESOLVE_COPY_STATS_PREFIX}.createNewCopiesEnabled.no`,
+  `${DISABLE_LEGACY_URL_ALIASES_STATS_PREFIX}.total`,
 ];
 export class UsageStatsClient {
   constructor(
@@ -85,6 +87,11 @@ export class UsageStatsClient {
       `createNewCopiesEnabled.${createNewCopies ? 'yes' : 'no'}`,
     ];
     await this.updateUsageStats(counterFieldNames, RESOLVE_COPY_STATS_PREFIX);
+  }
+
+  public async incrementDisableLegacyUrlAliases() {
+    const counterFieldNames = ['total'];
+    await this.updateUsageStats(counterFieldNames, DISABLE_LEGACY_URL_ALIASES_STATS_PREFIX);
   }
 
   private async updateUsageStats(counterFieldNames: string[], prefix: string) {

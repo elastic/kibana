@@ -17,7 +17,11 @@ import {
   getEnvironmentLabel,
 } from '../../../common/environment_filter_values';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
-import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
+import {
+  AlertType,
+  ALERT_TYPES_CONFIG,
+  APM_SERVER_FEATURE_ID,
+} from '../../../common/alert_types';
 import {
   EVENT_OUTCOME,
   PROCESSOR_EVENT,
@@ -28,7 +32,7 @@ import {
 import { EventOutcome } from '../../../common/event_outcome';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { asDecimalOrInteger } from '../../../common/utils/formatters';
-import { environmentQuery } from '../../../server/utils/queries';
+import { environmentQuery } from '../../../common/utils/environment_query';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
@@ -75,8 +79,9 @@ export function registerTransactionErrorRateAlertType({
           apmActionVariables.interval,
         ],
       },
-      producer: 'apm',
+      producer: APM_SERVER_FEATURE_ID,
       minimumLicenseRequired: 'basic',
+      isExportable: true,
       executor: async ({ services, params: alertParams }) => {
         const config = await config$.pipe(take(1)).toPromise();
         const indices = await getApmIndices({

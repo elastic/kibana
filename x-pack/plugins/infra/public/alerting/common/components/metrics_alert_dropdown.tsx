@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback, useMemo } from 'react';
 import {
   EuiPopover,
-  EuiButtonEmpty,
+  EuiHeaderLink,
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
@@ -40,7 +40,7 @@ export const MetricsAlertDropdown = () => {
       }),
       items: [
         {
-          name: i18n.translate('xpack.infra.alerting.createInventoryAlertButton', {
+          name: i18n.translate('xpack.infra.alerting.createInventoryRuleButton', {
             defaultMessage: 'Create inventory rule',
           }),
           onClick: () => setVisibleFlyoutType('inventory'),
@@ -58,7 +58,7 @@ export const MetricsAlertDropdown = () => {
       }),
       items: [
         {
-          name: i18n.translate('xpack.infra.alerting.createThresholdAlertButton', {
+          name: i18n.translate('xpack.infra.alerting.createThresholdRuleButton', {
             defaultMessage: 'Create threshold rule',
           }),
           onClick: () => setVisibleFlyoutType('threshold'),
@@ -75,7 +75,7 @@ export const MetricsAlertDropdown = () => {
 
   const manageAlertsMenuItem = useMemo(
     () => ({
-      name: i18n.translate('xpack.infra.alerting.manageAlerts', {
+      name: i18n.translate('xpack.infra.alerting.manageRules', {
         defaultMessage: 'Manage rules',
       }),
       icon: 'tableOfContents',
@@ -134,15 +134,17 @@ export const MetricsAlertDropdown = () => {
         panelPaddingSize="none"
         anchorPosition="downLeft"
         button={
-          <EuiButtonEmpty
-            size="xs"
+          <EuiHeaderLink
             color="text"
             iconSide={'right'}
             iconType={'arrowDown'}
             onClick={openPopover}
           >
-            <FormattedMessage id="xpack.infra.alerting.alertsButton" defaultMessage="Alerts" />
-          </EuiButtonEmpty>
+            <FormattedMessage
+              id="xpack.infra.alerting.alertsButton"
+              defaultMessage="Alerts and rules"
+            />
+          </EuiHeaderLink>
         }
         isOpen={popoverOpen}
         closePopover={closePopover}

@@ -38,10 +38,11 @@ function createRule() {
       });
       nextAlerts = [];
     },
-    id: 'test_type',
+    id: 'ruleTypeId',
     minimumLicenseRequired: 'basic',
-    name: 'Test type',
-    producer: 'test',
+    isExportable: true,
+    name: 'ruleTypeName',
+    producer: 'producer',
     actionVariables: {
       context: [],
       params: [],
@@ -125,6 +126,25 @@ describe('createLifecycleRuleTypeFactory', () => {
       helpers = createRule();
     });
 
+    describe('when writing is disabled', () => {
+      beforeEach(() => {
+        helpers.ruleDataClientMock.isWriteEnabled.mockReturnValue(false);
+      });
+
+      it("doesn't persist anything", async () => {
+        await helpers.alertWithLifecycle([
+          {
+            id: 'opbeans-java',
+            fields: {
+              'service.name': 'opbeans-java',
+            },
+          },
+        ]);
+
+        expect(helpers.ruleDataClientMock.getWriter().bulk).toHaveBeenCalledTimes(0);
+      });
+    });
+
     describe('when alerts are new', () => {
       beforeEach(async () => {
         await helpers.alertWithLifecycle([
@@ -153,7 +173,7 @@ describe('createLifecycleRuleTypeFactory', () => {
         const evaluationDocuments = documents.filter((doc) => doc['event.kind'] === 'event');
         const alertDocuments = documents.filter((doc) => doc['event.kind'] === 'signal');
 
-        expect(evaluationDocuments.length).toBe(2);
+        expect(evaluationDocuments.length).toBe(0);
         expect(alertDocuments.length).toBe(2);
 
         expect(
@@ -171,50 +191,18 @@ describe('createLifecycleRuleTypeFactory', () => {
             Object {
               "@timestamp": "2021-06-16T09:01:00.000Z",
               "event.action": "open",
-              "event.kind": "event",
-              "kibana.rac.alert.duration.us": 0,
-              "kibana.rac.alert.id": "opbeans-java",
-              "kibana.rac.alert.producer": "test",
-              "kibana.rac.alert.start": "2021-06-16T09:01:00.000Z",
-              "kibana.rac.alert.status": "open",
-              "rule.category": "Test type",
-              "rule.id": "test_type",
-              "rule.name": "name",
-              "rule.uuid": "alertId",
-              "service.name": "opbeans-java",
-              "tags": Array [
-                "tags",
-              ],
-            },
-            Object {
-              "@timestamp": "2021-06-16T09:01:00.000Z",
-              "event.action": "open",
-              "event.kind": "event",
-              "kibana.rac.alert.duration.us": 0,
-              "kibana.rac.alert.id": "opbeans-node",
-              "kibana.rac.alert.producer": "test",
-              "kibana.rac.alert.start": "2021-06-16T09:01:00.000Z",
-              "kibana.rac.alert.status": "open",
-              "rule.category": "Test type",
-              "rule.id": "test_type",
-              "rule.name": "name",
-              "rule.uuid": "alertId",
-              "service.name": "opbeans-node",
-              "tags": Array [
-                "tags",
-              ],
-            },
-            Object {
-              "@timestamp": "2021-06-16T09:01:00.000Z",
-              "event.action": "open",
               "event.kind": "signal",
               "kibana.rac.alert.duration.us": 0,
               "kibana.rac.alert.id": "opbeans-java",
-              "kibana.rac.alert.producer": "test",
+              "kibana.rac.alert.owner": "consumer",
+              "kibana.rac.alert.producer": "producer",
               "kibana.rac.alert.start": "2021-06-16T09:01:00.000Z",
               "kibana.rac.alert.status": "open",
-              "rule.category": "Test type",
-              "rule.id": "test_type",
+              "kibana.space_ids": Array [
+                "spaceId",
+              ],
+              "rule.category": "ruleTypeName",
+              "rule.id": "ruleTypeId",
               "rule.name": "name",
               "rule.uuid": "alertId",
               "service.name": "opbeans-java",
@@ -228,11 +216,15 @@ describe('createLifecycleRuleTypeFactory', () => {
               "event.kind": "signal",
               "kibana.rac.alert.duration.us": 0,
               "kibana.rac.alert.id": "opbeans-node",
-              "kibana.rac.alert.producer": "test",
+              "kibana.rac.alert.owner": "consumer",
+              "kibana.rac.alert.producer": "producer",
               "kibana.rac.alert.start": "2021-06-16T09:01:00.000Z",
               "kibana.rac.alert.status": "open",
-              "rule.category": "Test type",
-              "rule.id": "test_type",
+              "kibana.space_ids": Array [
+                "spaceId",
+              ],
+              "rule.category": "ruleTypeName",
+              "rule.id": "ruleTypeId",
               "rule.name": "name",
               "rule.uuid": "alertId",
               "service.name": "opbeans-node",
@@ -288,7 +280,7 @@ describe('createLifecycleRuleTypeFactory', () => {
         const evaluationDocuments = documents.filter((doc) => doc['event.kind'] === 'event');
         const alertDocuments = documents.filter((doc) => doc['event.kind'] === 'signal');
 
-        expect(evaluationDocuments.length).toBe(2);
+        expect(evaluationDocuments.length).toBe(0);
         expect(alertDocuments.length).toBe(2);
 
         expect(

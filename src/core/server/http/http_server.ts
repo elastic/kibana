@@ -22,6 +22,7 @@ import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { Logger, LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';
+import type { InternalExecutionContextSetup } from '../execution_context';
 import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';
 import { adoptToHapiOnPreAuth, OnPreAuthHandler } from './lifecycle/on_pre_auth';
 import { adoptToHapiOnPostAuthFormat, OnPostAuthHandler } from './lifecycle/on_post_auth';
@@ -133,18 +134,23 @@ export class HttpServer {
     }
   }
 
-  public async setup(config: HttpConfig): Promise<HttpServerSetup> {
+  public async setup(
+    config: HttpConfig,
+    executionContext?: InternalExecutionContextSetup
+  ): Promise<HttpServerSetup> {
     const serverOptions = getServerOptions(config);
     const listenerOptions = getListenerOptions(config);
     this.server = createServer(serverOptions, listenerOptions);
     await this.server.register([HapiStaticFiles]);
     this.config = config;
 
+    // It's important to have setupRequestStateAssignment call the very first, otherwise context passing will be broken.
+    // That's the only reason why context initialization exists in this method.
+    this.setupRequestStateAssignment(config, executionContext);
     const basePathService = new BasePath(config.basePath, config.publicBaseUrl);
     this.setupBasePathRewrite(config, basePathService);
     this.setupConditionalCompression(config);
     this.setupResponseLogging();
-    this.setupRequestStateAssignment(config);
     this.setupGracefulShutdownHandlers();
 
     return {
@@ -323,11 +329,22 @@ export class HttpServer {
     this.server.events.on('response', this.handleServerResponseEvent);
   }
 
-  private setupRequestStateAssignment(config: HttpConfig) {
+  private setupRequestStateAssignment(
+    config: HttpConfig,
+    executionContext?: InternalExecutionContextSetup
+  ) {
     this.server!.ext('onRequest', (request, responseToolkit) => {
+      const requestId = getRequestId(request, config.requestId);
+
+      const parentContext = executionContext?.getParentContextFrom(request.headers);
+      executionContext?.set({
+        ...parentContext,
+        requestId,
+      });
+
       request.app = {
         ...(request.app ?? {}),
-        requestId: getRequestId(request, config.requestId),
+        requestId,
         requestUuid: uuid.v4(),
       } as KibanaRequestState;
       return responseToolkit.continue;

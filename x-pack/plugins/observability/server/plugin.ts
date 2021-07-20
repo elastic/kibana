@@ -12,7 +12,6 @@ import {
   CoreSetup,
   DEFAULT_APP_CATEGORIES,
 } from '../../../../src/core/server';
-import { RuleDataClient } from '../../rule_registry/server';
 import { ObservabilityConfig } from '.';
 import {
   bootstrapAnnotations,
@@ -39,47 +38,49 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
   }
 
   public setup(core: CoreSetup, plugins: PluginSetup) {
-    plugins.features.registerKibanaFeature({
-      id: casesFeatureId,
-      name: i18n.translate('xpack.observability.featureRegistry.linkObservabilityTitle', {
-        defaultMessage: 'Cases',
-      }),
-      order: 1100,
-      category: DEFAULT_APP_CATEGORIES.observability,
-      app: [casesFeatureId, 'kibana'],
-      catalogue: [observabilityFeatureId],
-      cases: [observabilityFeatureId],
-      privileges: {
-        all: {
-          app: [casesFeatureId, 'kibana'],
-          catalogue: [observabilityFeatureId],
-          cases: {
-            all: [observabilityFeatureId],
-          },
-          api: [],
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          ui: ['crud_cases', 'read_cases'], // uiCapabilities[casesFeatureId].crud_cases or read_cases
-        },
-        read: {
-          app: [casesFeatureId, 'kibana'],
-          catalogue: [observabilityFeatureId],
-          cases: {
-            read: [observabilityFeatureId],
-          },
-          api: [],
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          ui: ['read_cases'], // uiCapabilities[uiCapabilities[casesFeatureId]].read_cases
-        },
-      },
-    });
-
     const config = this.initContext.config.get<ObservabilityConfig>();
+
+    if (config.unsafe.cases.enabled) {
+      plugins.features.registerKibanaFeature({
+        id: casesFeatureId,
+        name: i18n.translate('xpack.observability.featureRegistry.linkObservabilityTitle', {
+          defaultMessage: 'Cases',
+        }),
+        order: 1100,
+        category: DEFAULT_APP_CATEGORIES.observability,
+        app: [casesFeatureId, 'kibana'],
+        catalogue: [observabilityFeatureId],
+        cases: [observabilityFeatureId],
+        privileges: {
+          all: {
+            app: [casesFeatureId, 'kibana'],
+            catalogue: [observabilityFeatureId],
+            cases: {
+              all: [observabilityFeatureId],
+            },
+            api: [],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: ['crud_cases', 'read_cases'], // uiCapabilities[casesFeatureId].crud_cases or read_cases
+          },
+          read: {
+            app: [casesFeatureId, 'kibana'],
+            catalogue: [observabilityFeatureId],
+            cases: {
+              read: [observabilityFeatureId],
+            },
+            api: [],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: ['read_cases'], // uiCapabilities[uiCapabilities[casesFeatureId]].read_cases
+          },
+        },
+      });
+    }
 
     let annotationsApiPromise: Promise<AnnotationsAPI> | undefined;
 
@@ -99,14 +100,11 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
 
     const start = () => core.getStartServices().then(([coreStart]) => coreStart);
 
-    const ruleDataClient = new RuleDataClient({
-      getClusterClient: async () => {
-        const coreStart = await start();
-        return coreStart.elasticsearch.client.asInternalUser;
-      },
-      ready: () => Promise.resolve(),
-      alias: plugins.ruleRegistry.ruleDataService.getFullAssetName(),
-    });
+    const ruleDataClient = plugins.ruleRegistry.ruleDataService.getRuleDataClient(
+      'observability',
+      plugins.ruleRegistry.ruleDataService.getFullAssetName(),
+      () => Promise.resolve()
+    );
 
     registerRoutes({
       core: {

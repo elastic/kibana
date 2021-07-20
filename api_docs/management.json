@@ -73,7 +73,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/management/public/types.ts",
-                  "lineNumber": 56
+                  "lineNumber": 59
                 },
                 "deprecated": false
               }
@@ -382,7 +382,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/management/public/types.ts",
-          "lineNumber": 17
+          "lineNumber": 20
         },
         "deprecated": false,
         "children": [
@@ -404,7 +404,7 @@
             ],
             "source": {
               "path": "src/plugins/management/public/types.ts",
-              "lineNumber": 18
+              "lineNumber": 21
             },
             "deprecated": false
           },
@@ -426,7 +426,7 @@
             ],
             "source": {
               "path": "src/plugins/management/public/types.ts",
-              "lineNumber": 19
+              "lineNumber": 22
             },
             "deprecated": false
           },
@@ -448,7 +448,7 @@
             ],
             "source": {
               "path": "src/plugins/management/public/types.ts",
-              "lineNumber": 20
+              "lineNumber": 23
             },
             "deprecated": false
           },
@@ -470,7 +470,7 @@
             ],
             "source": {
               "path": "src/plugins/management/public/types.ts",
-              "lineNumber": 21
+              "lineNumber": 24
             },
             "deprecated": false
           },
@@ -492,7 +492,7 @@
             ],
             "source": {
               "path": "src/plugins/management/public/types.ts",
-              "lineNumber": 22
+              "lineNumber": 25
             },
             "deprecated": false
           },
@@ -514,7 +514,7 @@
             ],
             "source": {
               "path": "src/plugins/management/public/types.ts",
-              "lineNumber": 23
+              "lineNumber": 26
             },
             "deprecated": false
           }
@@ -530,7 +530,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/management/public/types.ts",
-          "lineNumber": 58
+          "lineNumber": 61
         },
         "deprecated": false,
         "children": [
@@ -543,7 +543,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/management/public/types.ts",
-              "lineNumber": 59
+              "lineNumber": 62
             },
             "deprecated": false
           },
@@ -559,7 +559,7 @@
             ],
             "source": {
               "path": "src/plugins/management/public/types.ts",
-              "lineNumber": 60
+              "lineNumber": 63
             },
             "deprecated": false
           },
@@ -577,7 +577,7 @@
             ],
             "source": {
               "path": "src/plugins/management/public/types.ts",
-              "lineNumber": 61
+              "lineNumber": 64
             },
             "deprecated": false,
             "returnComment": [],
@@ -595,7 +595,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/management/public/types.ts",
-                  "lineNumber": 61
+                  "lineNumber": 64
                 },
                 "deprecated": false
               }
@@ -620,7 +620,7 @@
             ],
             "source": {
               "path": "src/plugins/management/public/types.ts",
-              "lineNumber": 62
+              "lineNumber": 65
             },
             "deprecated": false
           }
@@ -698,7 +698,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/management/public/types.ts",
-                  "lineNumber": 56
+                  "lineNumber": 59
                 },
                 "deprecated": false
               }
@@ -767,7 +767,7 @@
       "description": [],
       "source": {
         "path": "src/plugins/management/public/types.ts",
-        "lineNumber": 13
+        "lineNumber": 15
       },
       "deprecated": false,
       "children": [
@@ -783,7 +783,32 @@
           ],
           "source": {
             "path": "src/plugins/management/public/types.ts",
-            "lineNumber": 14
+            "lineNumber": 16
+          },
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "management",
+          "id": "def-public.ManagementSetup.locator",
+          "type": "Object",
+          "tags": [],
+          "label": "locator",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "share",
+              "scope": "common",
+              "docId": "kibSharePluginApi",
+              "section": "def-common.LocatorPublic",
+              "text": "LocatorPublic"
+            },
+            "<",
+            "ManagementAppLocatorParams",
+            ">"
+          ],
+          "source": {
+            "path": "src/plugins/management/public/types.ts",
+            "lineNumber": 17
           },
           "deprecated": false
         }
@@ -800,7 +825,7 @@
       "description": [],
       "source": {
         "path": "src/plugins/management/public/types.ts",
-        "lineNumber": 27
+        "lineNumber": 30
       },
       "deprecated": false,
       "children": [],
@@ -821,7 +846,34 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "management",
+        "id": "def-common.ManagementAppLocator",
+        "type": "Type",
+        "tags": [],
+        "label": "ManagementAppLocator",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorPublic",
+            "text": "LocatorPublic"
+          },
+          "<",
+          "ManagementAppLocatorParams",
+          ">"
+        ],
+        "source": {
+          "path": "src/plugins/management/common/locator.ts",
+          "lineNumber": 20
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }
