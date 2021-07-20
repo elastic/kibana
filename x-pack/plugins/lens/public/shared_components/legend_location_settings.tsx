@@ -164,7 +164,7 @@ const FloatingColumnsInput = ({
       data-test-subj="lens-legend-location-columns-input"
       value={inputValue}
       min={1}
-      max={10}
+      max={5}
       compressed
       disabled={isDisabled}
       onChange={(e) => {
