@@ -242,6 +242,8 @@ export const useAlertsActions = ({
     handleOpenExceptionModal('endpoint');
   }, [closePopover, handleOpenExceptionModal]);
 
+  const disabledAddEndpointException = !canUserCRUD || !hasIndexWrite || !isEndpointAlert;
+
   const addEndpointExceptionComponent = useMemo(() => {
     return (
       <EuiContextMenuItem
@@ -250,17 +252,19 @@ export const useAlertsActions = ({
         data-test-subj="add-endpoint-exception-menu-item"
         id="addEndpointException"
         onClick={handleAddEndpointExceptionClick}
-        disabled={!canUserCRUD || !hasIndexWrite || !isEndpointAlert}
+        disabled={disabledAddEndpointException}
       >
         <EuiText size="m">{i18n.ACTION_ADD_ENDPOINT_EXCEPTION}</EuiText>
       </EuiContextMenuItem>
     );
-  }, [canUserCRUD, hasIndexWrite, isEndpointAlert, handleAddEndpointExceptionClick]);
+  }, [handleAddEndpointExceptionClick, disabledAddEndpointException]);
 
   const handleAddExceptionClick = useCallback((): void => {
     closePopover();
     handleOpenExceptionModal('detection');
   }, [closePopover, handleOpenExceptionModal]);
+
+  const disabledAddException = !canUserCRUD || !hasIndexWrite;
 
   const addExceptionComponent = useMemo(() => {
     return (
@@ -270,14 +274,14 @@ export const useAlertsActions = ({
         data-test-subj="add-exception-menu-item"
         id="addException"
         onClick={handleAddExceptionClick}
-        disabled={!canUserCRUD || !hasIndexWrite}
+        disabled={disabledAddException}
       >
         <EuiText data-test-subj="addExceptionButton" size="m">
           {i18n.ACTION_ADD_EXCEPTION}
         </EuiText>
       </EuiContextMenuItem>
     );
-  }, [handleAddExceptionClick, canUserCRUD, hasIndexWrite]);
+  }, [handleAddExceptionClick, disabledAddException]);
 
   const handleAddEventFilterClick = useCallback((): void => {
     closePopover();
@@ -328,16 +332,21 @@ export const useAlertsActions = ({
       return [];
     }
 
+    const disableInProgressAlert = !canUserCRUD || !hasIndexUpdateDelete;
+    const disableOpenCloseAlert = !hasIndexUpdateDelete && !hasIndexMaintenance;
+
     switch (alertStatus) {
       case 'open':
         return [
           {
             name: i18n.ACTION_IN_PROGRESS_ALERT,
             onClick: inProgressAlertActionClick,
+            disabled: disableInProgressAlert,
           },
           {
             name: i18n.ACTION_CLOSE_ALERT,
             onClick: closeAlertActionClick,
+            disabled: disableOpenCloseAlert,
           },
         ];
       case 'in-progress':
@@ -345,10 +354,12 @@ export const useAlertsActions = ({
           {
             name: i18n.ACTION_OPEN_ALERT,
             onClick: openAlertActionOnClick,
+            disabled: disableOpenCloseAlert,
           },
           {
             name: i18n.ACTION_CLOSE_ALERT,
             onClick: closeAlertActionClick,
+            disabled: disableOpenCloseAlert,
           },
         ];
       case 'closed':
@@ -356,16 +367,26 @@ export const useAlertsActions = ({
           {
             name: i18n.ACTION_OPEN_ALERT,
             onClick: openAlertActionOnClick,
+            disabled: disableOpenCloseAlert,
           },
           {
             name: i18n.ACTION_IN_PROGRESS_ALERT,
             onClick: inProgressAlertActionClick,
+            disabled: !canUserCRUD || !hasIndexUpdateDelete,
           },
         ];
       default:
         return [];
     }
-  }, [alertStatus, inProgressAlertActionClick, closeAlertActionClick, openAlertActionOnClick]);
+  }, [
+    alertStatus,
+    canUserCRUD,
+    hasIndexUpdateDelete,
+    hasIndexMaintenance,
+    inProgressAlertActionClick,
+    closeAlertActionClick,
+    openAlertActionOnClick,
+  ]);
 
   const showStatusFilter = !isEvent && ruleId;
   const items = useMemo(
@@ -383,6 +404,8 @@ export const useAlertsActions = ({
   );
 
   return {
+    disabledAddException,
+    disabledAddEndpointException,
     items,
     showStatusFilter,
     statusFiltersActions,

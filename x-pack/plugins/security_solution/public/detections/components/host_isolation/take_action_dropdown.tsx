@@ -114,6 +114,8 @@ export const TakeActionDropdown = React.memo(
     });
 
     const {
+      disabledAddException,
+      disabledAddEndpointException,
       showStatusFilter,
       statusFiltersActions,
       handleAddEventFilterClick,
@@ -146,10 +148,12 @@ export const TakeActionDropdown = React.memo(
                   {
                     name: ACTION_ADD_ENDPOINT_EXCEPTION,
                     onClick: handleAddEndpointExceptionClick,
+                    disabled: disabledAddEndpointException,
                   },
                   {
                     name: ACTION_ADD_EXCEPTION,
                     onClick: handleAddExceptionClick,
+                    disabled: disabledAddException,
                   },
                 ]
               : [
@@ -191,6 +195,8 @@ export const TakeActionDropdown = React.memo(
       ],
       [
         agentStatus,
+        disabledAddEndpointException,
+        disabledAddException,
         ecsData,
         eventType,
         handleAddEndpointExceptionClick,
