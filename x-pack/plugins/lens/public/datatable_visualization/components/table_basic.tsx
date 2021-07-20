@@ -335,7 +335,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         reportTitle={props.args.title}
         reportDescription={props.args.description}
       >
-        <EmptyPlaceholder icon={LensIconChartDatatable} />;
+        <EmptyPlaceholder icon={LensIconChartDatatable} />
       </VisualizationContainer>
     );
   }
