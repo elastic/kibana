@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from 'src/core/server/http';
+import { IRouter } from 'src/core/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { License, Mapper } from './services';
 

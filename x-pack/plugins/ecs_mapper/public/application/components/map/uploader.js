@@ -71,11 +71,14 @@ export class EcsMapperUploadView extends Component {
           fileName: file.name,
           fileSize: file.size,
           loading: true,
-        });    
-        const result = this.props.mapper.fetchPipelineFromMapping(fileContents, FieldRenameAction.Copy);
+        });
+        this.props.mapper.fetchPipelineFromMapping(
+          fileContents,
+          FieldRenameAction.Copy
+        );
         this.setState({
           loading: false,
-          loaded: true
+          loaded: true,
         });
       } catch (error) {
         this.setState({

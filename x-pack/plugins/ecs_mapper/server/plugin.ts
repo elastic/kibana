@@ -6,13 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  CoreSetup,
-  PluginInitializerContext,
-  Plugin,
-  Logger,
-} from '../../../../src/core/server';
 import { schema } from '@kbn/config-schema';
+import { CoreSetup, PluginInitializerContext, Plugin, Logger } from '../../../../src/core/server';
 import { PLUGIN } from '../common/constants';
 import { License } from './services';
 import { EcsMapperPluginDependencies } from './types';

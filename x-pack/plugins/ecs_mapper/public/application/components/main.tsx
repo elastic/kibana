@@ -16,7 +16,7 @@ export const EcsMapperMainUi: FC = () => {
   const { fileUpload, mapper } = getPluginsStart();
   const services = {
     fileUpload,
-    mapper
+    mapper,
   };
 
   return (

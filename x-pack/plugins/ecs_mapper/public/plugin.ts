@@ -19,7 +19,7 @@ import { MapperClient } from './application/mapper_api';
 /**
  * Publicly exposed APIs from the Mapper Service
  */
- export interface MapperServicePublicApis {
+export interface MapperServicePublicApis {
   /** description todo */
   mapToIngestPipeline: (file: string, renanmeAction: FieldRenameAction) => object;
 }
@@ -45,7 +45,6 @@ export class EcsMapperPlugin
       EcsMapperSetupDependencies,
       EcsMapperStartDependencies
     > {
-
   private mapper?: MapperClient;
 
   public setup(core: CoreSetup, plugins: EcsMapperSetupDependencies) {
@@ -59,7 +58,7 @@ export class EcsMapperPlugin
     registerDevTool(plugins, core);
 
     return {
-      mapper: this.getMapperServicePublicApis()
+      mapper: this.getMapperServicePublicApis(),
     };
   }
 
@@ -72,14 +71,15 @@ export class EcsMapperPlugin
     setStartServices(core, plugins);
 
     return {
-      mapper: this.getMapperServicePublicApis()
+      mapper: this.getMapperServicePublicApis(),
     };
   }
 
   private getMapperServicePublicApis(): MapperServicePublicApis {
     const mapperClient = this.mapper!;
     return {
-      mapToIngestPipeline: (file: string, renameAction: FieldRenameAction) => mapperClient.fetchPipelineFromMapping(file, renameAction)
+      mapToIngestPipeline: (file: string, renameAction: FieldRenameAction) =>
+        mapperClient.fetchPipelineFromMapping(file, renameAction),
     };
   }
 }
