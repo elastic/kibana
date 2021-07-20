@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticLogo } from '../../../../../../../src/plugins/presentation_util/common/lib';
+import { getElasticLogo } from '../../../../../../../src/plugins/presentation_util/common/lib';
 
 export const fontStyle = {
   type: 'style',
@@ -23,16 +23,19 @@ export const fontStyle = {
     'font-family:Chalkboard, serif;font-weight:bolder;font-style:normal;text-decoration:underline;color:pink;text-align:center;font-size:14px;line-height:21px',
 };
 
-export const containerStyle = {
-  type: 'containerStyle',
-  border: '3px dotted blue',
-  borderRadius: '5px',
-  padding: '10px',
-  backgroundColor: 'red',
-  backgroundImage: `url(${elasticLogo})`,
-  opacity: 0.5,
-  backgroundSize: 'contain',
-  backgroundRepeat: 'no-repeat',
+export const getContainerStyle = async () => {
+  const { elasticLogo } = await getElasticLogo();
+  return {
+    type: 'containerStyle',
+    border: '3px dotted blue',
+    borderRadius: '5px',
+    padding: '10px',
+    backgroundColor: 'red',
+    backgroundImage: `url(${elasticLogo})`,
+    opacity: 0.5,
+    backgroundSize: 'contain',
+    backgroundRepeat: 'no-repeat',
+  };
 };
 
 export const defaultStyle = {
