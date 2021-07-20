@@ -11,6 +11,7 @@ import type {
   SavedObjectUnsanitizedDoc,
 } from 'src/core/server';
 
+import { EncryptionError } from './crypto';
 import type { EncryptedSavedObjectsService, EncryptedSavedObjectTypeRegistration } from './crypto';
 import { normalizeNamespace } from './saved_objects';
 
@@ -90,25 +91,23 @@ export const getCreateMigration = (
     // an un-decrypted document
     const documentToMigrate = mapAttributes(encryptedDoc, (inputAttributes) => {
       try {
-        const decryptedDoc = inputService.decryptAttributesSync<any>(
+        const decryptedAttributes = inputService.decryptAttributesSync<any>(
           decryptDescriptor,
           inputAttributes,
-          {
-            convertToMultiNamespaceType,
-          }
+          { convertToMultiNamespaceType }
         );
         shouldEncrypt = true;
-        return decryptedDoc;
+        return decryptedAttributes;
       } catch (err) {
-        if (!shouldMigrateIfDecryptionFails) {
+        if (!shouldMigrateIfDecryptionFails || !(err instanceof EncryptionError)) {
           throw err;
         }
 
-        context.log.warning(
-          `decryption failed for encryptedSavedObject ${encryptedDoc.id} of type ${encryptedDoc.type} with error: ${err.message}. Migration will be applied to the un-decrypted document but this may cause decryption errors later on.`
+        context.log.warn(
+          `Decryption failed for encrypted Saved Object "${encryptedDoc.id}" of type "${encryptedDoc.type}" with error: ${err.message}. Migration will be applied to the original encrypted document but this may cause decryption errors later on.`
         );
         shouldEncrypt = false;
-        return encryptedDoc.attributes;
+        return inputAttributes;
       }
     });
 
