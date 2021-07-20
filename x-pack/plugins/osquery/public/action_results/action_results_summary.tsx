@@ -53,6 +53,18 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     sortField: '@timestamp',
     isLive,
   });
+  if (expired) {
+    // @ts-expect-error update types
+    edges.forEach((edge) => {
+      if (!edge.fields.completed_at) {
+        edge.fields['error.keyword'] = edge.fields.error = [
+          i18n.translate('xpack.osquery.liveQueryActionResults.table.expiredErrorText', {
+            defaultMessage: 'The action request timed out.',
+          }),
+        ];
+      }
+    });
+  }
 
   const { data: logsResults } = useAllResults({
     actionId,
