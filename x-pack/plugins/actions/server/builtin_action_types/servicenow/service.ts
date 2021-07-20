@@ -16,6 +16,7 @@ import {
   ImportSetApiResponseError,
   ServiceNowIncident,
   Incident,
+  GetApplicationInfoResponse,
 } from './types';
 
 import * as i18n from './translations';
@@ -61,6 +62,8 @@ export const createExternalService = (
   const tableApiIncidentUrl = `${urlWithoutTrailingSlash}/api/now/table/${table}`;
   const fieldsUrl = `${urlWithoutTrailingSlash}/${SYS_DICTIONARY}?sysparm_query=name=task^ORname=${table}^internal_type=string&active=true&array=false&read_only=false&sysparm_fields=max_length,element,column_label,mandatory`;
   const choicesUrl = `${urlWithoutTrailingSlash}/api/now/table/sys_choice`;
+  // TODO: Change it to production when the app is ready
+  const getVersionUrl = `${urlWithoutTrailingSlash}/api/x_463134_elastic/elastic/health`;
 
   const axiosInstance = axios.create({
     auth: { username, password },
@@ -98,11 +101,11 @@ export const createExternalService = (
 
   const createErrorMessage = (errorResponse: ResponseError): string => {
     if (errorResponse == null) {
-      return '';
+      return 'unknown';
     }
 
     const { error } = errorResponse;
-    return error != null ? `${error?.message}: ${error?.detail}` : '';
+    return error != null ? `${error?.message}: ${error?.detail}` : 'unknown';
   };
 
   const isImportSetApiResponseAnError = (
@@ -119,6 +122,34 @@ export const createExternalService = (
     // Create ResponseError message?
     if (isImportSetApiResponseAnError(data)) {
       throw new Error(data.error_message);
+    }
+  };
+
+  /**
+   * Gets the Elastic SN Application information including the current version.
+   * It should not be used on legacy connectors.
+   */
+  const getApplicationInformation = async (): Promise<GetApplicationInfoResponse> => {
+    try {
+      const res = await request({
+        axios: axiosInstance,
+        url: getVersionUrl,
+        logger,
+        configurationUtilities,
+      });
+
+      checkInstance(res);
+
+      return { ...res.data.result };
+    } catch (error) {
+      throw new Error(
+        getErrorMessage(
+          i18n.SERVICENOW,
+          `Unable to get application version. Error: ${error.message} Reason: ${createErrorMessage(
+            error.response?.data
+          )}`
+        )
+      );
     }
   };
 
@@ -171,6 +202,11 @@ export const createExternalService = (
 
   const createIncident = async ({ incident }: ExternalServiceParamsCreate) => {
     try {
+      if (!useOldApi) {
+        const { version } = await getApplicationInformation();
+        logger.debug(`Create incident: Current elastic application version: ${version}`);
+      }
+
       const res = await request({
         axios: axiosInstance,
         url: getCreateIncidentUrl(),
@@ -209,6 +245,11 @@ export const createExternalService = (
 
   const updateIncident = async ({ incidentId, incident }: ExternalServiceParamsUpdate) => {
     try {
+      if (!useOldApi) {
+        const { version } = await getApplicationInformation();
+        logger.debug(`Create incident: Current elastic application version: ${version}`);
+      }
+
       const res = await request({
         axios: axiosInstance,
         url: getUpdateIncidentUrl(incidentId),

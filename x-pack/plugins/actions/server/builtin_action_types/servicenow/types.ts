@@ -219,3 +219,9 @@ export interface ImportSetApiResponseError {
 }
 
 export type ImportSetApiResponse = ImportSetApiResponseSuccess | ImportSetApiResponseError;
+export interface GetApplicationInfoResponse {
+  id: string;
+  name: string;
+  scope: string;
+  version: string;
+}
