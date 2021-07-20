@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useCallback } from 'react';
+import React, { memo, useMemo, useCallback, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import { useLocation } from 'react-router-dom';
@@ -26,6 +26,7 @@ import {
   entriesExist,
   getCurrentLocation,
   getListTotalItemsCount,
+  listOfPolicies,
 } from '../store/selectors';
 import { useTrustedAppsNavigateCallback, useTrustedAppsSelector } from './hooks';
 import { AdministrationListPage } from '../../../components/administration_list_page';
@@ -41,6 +42,7 @@ import { EmptyState } from './components/empty_state';
 import { SearchBar } from '../../../components/search_bar';
 import { BackToExternalAppButton } from '../../../components/back_to_external_app_button';
 import { ListPageRouteState } from '../../../../../common/endpoint/types';
+import { PoliciesSelector } from '../../../components/policies_selector';
 
 export const TrustedAppsPage = memo(() => {
   const dispatch = useDispatch<Dispatch<AppAction>>();
@@ -48,8 +50,14 @@ export const TrustedAppsPage = memo(() => {
   const location = useTrustedAppsSelector(getCurrentLocation);
   const totalItemsCount = useTrustedAppsSelector(getListTotalItemsCount);
   const isCheckingIfEntriesExists = useTrustedAppsSelector(checkingIfEntriesExist);
+  const policyList = useTrustedAppsSelector(listOfPolicies);
   const doEntriesExist = useTrustedAppsSelector(entriesExist) === true;
-  const navigationCallback = useTrustedAppsNavigateCallback((query: string) => ({ filter: query }));
+  const navigationCallbackQuery = useTrustedAppsNavigateCallback((query: string) => ({
+    filter: query,
+  }));
+  const navigationCallbackPolicies = useTrustedAppsNavigateCallback(
+    (includedPolicies: string, excludedPolicies: string) => ({ includedPolicies, excludedPolicies })
+  );
   const handleAddButtonClick = useTrustedAppsNavigateCallback(() => ({
     show: 'create',
     id: undefined,
@@ -64,9 +72,9 @@ export const TrustedAppsPage = memo(() => {
   const handleOnSearch = useCallback(
     (query: string) => {
       dispatch({ type: 'trustedAppForceRefresh', payload: { forceRefresh: true } });
-      navigationCallback(query);
+      navigationCallbackQuery(query);
     },
-    [dispatch, navigationCallback]
+    [dispatch, navigationCallbackQuery]
   );
 
   const showCreateFlyout = !!location.show;
@@ -107,11 +115,37 @@ export const TrustedAppsPage = memo(() => {
 
       {doEntriesExist ? (
         <>
-          <SearchBar
-            defaultValue={location.filter}
-            onSearch={handleOnSearch}
-            placeholder={SEARCH_TRUSTED_APP_PLACEHOLDER}
-          />
+          <EuiFlexGroup
+            direction="row"
+            gutterSize="m"
+            data-test-subj="trustedAppsListFilterSection"
+          >
+            <EuiFlexItem>
+              <SearchBar
+                defaultValue={location.filter}
+                onSearch={handleOnSearch}
+                placeholder={SEARCH_TRUSTED_APP_PLACEHOLDER}
+              />
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <PoliciesSelector
+                policies={policyList}
+                onChangeSelection={(items) => {
+                  navigationCallbackPolicies(
+                    items
+                      .filter((item) => item.checked === 'on')
+                      .map((item) => item.id)
+                      .join(','),
+                    items
+                      .filter((item) => item.checked === 'off')
+                      .map((item) => item.id)
+                      .join(',')
+                  );
+                }}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <EuiFlexGroup
             direction="column"
             gutterSize="none"

@@ -26,6 +26,7 @@ import {
   isLoadedResourceState,
   isLoadingResourceState,
   isStaleResourceState,
+  isUninitialisedResourceState,
   StaleResourceState,
   TrustedAppsListData,
   TrustedAppsListPageState,
@@ -311,8 +312,9 @@ export const retrieveListOfPoliciesIfNeeded = async (
   const isLoading = isLoadingResourceState(currentPoliciesState);
   const isPageActive = trustedAppsListPageActive(currentState);
   const isCreateFlow = isCreationDialogLocation(currentState);
+  const isUninitialized = isUninitialisedResourceState(currentPoliciesState);
 
-  if (isPageActive && isCreateFlow && !isLoading) {
+  if (isPageActive && ((isCreateFlow && !isLoading) || isUninitialized)) {
     dispatch({
       type: 'trustedAppsPoliciesStateChanged',
       payload: {

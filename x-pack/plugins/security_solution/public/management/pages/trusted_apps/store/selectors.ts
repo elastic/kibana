@@ -74,6 +74,18 @@ export const getCurrentLocationFilter = (state: Immutable<TrustedAppsListPageSta
   return state.location.filter;
 };
 
+export const getCurrentLocationIncludedPolicies = (
+  state: Immutable<TrustedAppsListPageState>
+): string => {
+  return state.location.includedPolicies;
+};
+
+export const getCurrentLocationExcludedPolicies = (
+  state: Immutable<TrustedAppsListPageState>
+): string => {
+  return state.location.excludedPolicies;
+};
+
 export const getListTotalItemsCount = (state: Immutable<TrustedAppsListPageState>): number => {
   return getLastLoadedResourceState(state.listView.listResourceState)?.data.totalItemsCount || 0;
 };

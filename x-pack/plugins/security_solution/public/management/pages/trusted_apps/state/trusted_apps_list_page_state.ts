@@ -35,6 +35,8 @@ export interface TrustedAppsListPageLocation {
   /** Used for editing. The ID of the selected trusted app */
   id?: string;
   filter: string;
+  includedPolicies: string;
+  excludedPolicies: string;
 }
 
 export interface TrustedAppsListPageState {

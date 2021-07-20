@@ -140,6 +140,12 @@ const normalizeTrustedAppsPageLocation = (
       ...(!isDefaultOrMissing(location.show, undefined) ? { show: location.show } : {}),
       ...(!isDefaultOrMissing(location.id, undefined) ? { id: location.id } : {}),
       ...(!isDefaultOrMissing(location.filter, '') ? { filter: location.filter } : ''),
+      ...(!isDefaultOrMissing(location.includedPolicies, '')
+        ? { includedPolicies: location.includedPolicies }
+        : ''),
+      ...(!isDefaultOrMissing(location.excludedPolicies, '')
+        ? { excludedPolicies: location.excludedPolicies }
+        : ''),
     };
   } else {
     return {};
@@ -196,10 +202,20 @@ const extractFilter = (query: querystring.ParsedUrlQuery): string => {
   return extractFirstParamValue(query, 'filter') || '';
 };
 
+const extractIncludedPolicies = (query: querystring.ParsedUrlQuery): string => {
+  return extractFirstParamValue(query, 'includedPolicies') || '';
+};
+
+const extractExcludedPolicies = (query: querystring.ParsedUrlQuery): string => {
+  return extractFirstParamValue(query, 'excludedPolicies') || '';
+};
+
 export const extractListPaginationParams = (query: querystring.ParsedUrlQuery) => ({
   page_index: extractPageIndex(query),
   page_size: extractPageSize(query),
   filter: extractFilter(query),
+  includedPolicies: extractIncludedPolicies(query),
+  excludedPolicies: extractExcludedPolicies(query),
 });
 
 export const extractTrustedAppsListPageLocation = (
