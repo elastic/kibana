@@ -78,8 +78,8 @@ export function createSharedServices(
   getInternalSavedObjectsClient: () => SavedObjectsClientContract | null,
   isMlReady: () => Promise<void>
 ): {
-  shared: SharedServices;
-  mlServicesProviders: MlServicesProviders;
+  sharedServicesProviders: SharedServices;
+  internalServicesProviders: MlServicesProviders;
 } {
   const { isFullLicense, isMinimumLicense } = licenseChecks(mlLicense);
   function getGuards(
@@ -128,9 +128,9 @@ export function createSharedServices(
 
   return {
     /**
-     * Exposed shared services for other plugins
+     * Exposed providers for shared services used by other plugins
      */
-    shared: {
+    sharedServicesProviders: {
       ...getJobServiceProvider(getGuards),
       ...getAnomalyDetectorsProvider(getGuards),
       ...getModulesProvider(getGuards),
@@ -139,9 +139,9 @@ export function createSharedServices(
       ...getAlertingServiceProvider(getGuards),
     },
     /**
-     * Services for ML internal usage
+     * Services providers for ML internal usage
      */
-    mlServicesProviders: {
+    internalServicesProviders: {
       ...getJobsHealthServiceProvider(getGuards),
     },
   };
