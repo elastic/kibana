@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+/* eslint-disable max-classes-per-file */
+
+import { i18n } from '@kbn/i18n';
 import { ClusterMetric, Metric } from '../classes';
 import { SMALL_FLOAT, LARGE_FLOAT, LARGE_BYTES } from '../../../../common/formatting';
 import { NORMALIZED_DERIVATIVE_UNIT } from '../../../../common/constants';
-import { i18n } from '@kbn/i18n';
 
 const perSecondUnitLabel = i18n.translate('xpack.monitoring.metrics.beats.perSecondUnitLabel', {
   defaultMessage: '/s',

@@ -7,7 +7,7 @@
 
 export { ElasticsearchMetric } from './elasticsearch/classes';
 export { KibanaClusterMetric, KibanaMetric } from './kibana/classes';
-export { ApmMetric, ApmClusterMetric } from './apm/classes';
+export { ApmMetric, ApmClusterMetric, ApmMetricFields } from './apm/classes';
 export { LogstashClusterMetric, LogstashMetric } from './logstash/classes';
 export { BeatsClusterMetric, BeatsMetric, BeatsMetricFields } from './beats/classes';
 export { metrics } from './metrics';

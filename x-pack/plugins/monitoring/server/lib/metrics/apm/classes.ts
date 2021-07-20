@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+/* eslint-disable max-classes-per-file */
+
+import { i18n } from '@kbn/i18n';
 import { ClusterMetric, Metric } from '../classes';
 import { SMALL_FLOAT, LARGE_FLOAT } from '../../../../common/formatting';
-import { i18n } from '@kbn/i18n';
 import { NORMALIZED_DERIVATIVE_UNIT } from '../../../../common/constants';
 
 export class ApmClusterMetric extends ClusterMetric {
@@ -43,6 +45,8 @@ export class ApmMetric extends Metric {
     };
   }
 }
+
+export type ApmMetricFields = ReturnType<ApmMetric.getMetricFields>;
 
 export class ApmCpuUtilizationMetric extends ApmMetric {
   constructor(opts) {

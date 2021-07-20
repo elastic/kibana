@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { defaults } from 'lodash';
-import { ApmMetric } from '../metrics';
+import { ApmMetric, ApmMetricFields } from '../metrics';
 import { createQuery } from '../create_query';
 
 /**
@@ -14,14 +13,23 @@ import { createQuery } from '../create_query';
  *
  * @param {Object} options The options to pass to {@code createQuery}
  */
-export function createApmQuery(options = {}) {
-  options = defaults(options, {
-    filters: [],
+export function createApmQuery(options: {
+  filters?: any[];
+  types?: string[];
+  metric?: ApmMetricFields;
+  uuid?: string;
+  clusterUuid: string;
+  start?: Date | number;
+  end?: Date | number;
+}) {
+  const opts = {
+    filters: [] as any[],
     metric: ApmMetric.getMetricFields(),
     types: ['stats', 'beats_stats'],
-  });
+    ...(options ?? {}),
+  };
 
-  options.filters.push({
+  opts.filters.push({
     bool: {
       must: {
         term: {
@@ -31,5 +39,5 @@ export function createApmQuery(options = {}) {
     },
   });
 
-  return createQuery(options);
+  return createQuery(opts);
 }
