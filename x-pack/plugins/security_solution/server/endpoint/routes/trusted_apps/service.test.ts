@@ -10,11 +10,11 @@ import { listMock } from '../../../../../lists/server/mocks';
 import { createPackagePolicyServiceMock } from '../../../../../fleet/server/mocks';
 import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
 import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
-import { PackagePolicy } from '../../../../../fleet/common';
 import type { SavedObjectsClientContract } from 'kibana/server';
 import { ExceptionListClient } from '../../../../../lists/server';
 import {
   ConditionEntryField,
+  MaybeImmutable,
   OperatingSystem,
   TrustedApp,
 } from '../../../../common/endpoint/types';
@@ -35,6 +35,7 @@ import {
 import { toUpdateTrustedApp } from '../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
 import { updateExceptionListItemImplementationMock } from './test_utils';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { getPackagePoliciesResponse, getTrustedAppByPolicy } from './mocks';
 
 const exceptionsListClient = listMock.getExceptionListClient() as jest.Mocked<ExceptionListClient>;
 const packagePolicyClient = createPackagePolicyServiceMock() as jest.Mocked<PackagePolicyServiceInterface>;
@@ -80,49 +81,6 @@ const TRUSTED_APP: TrustedApp = {
     createConditionEntry(ConditionEntryField.PATH, 'match', '/bin/malware'),
   ],
 };
-
-const TRUSTED_APP_BY_POLICY: TrustedApp = {
-  id: '123',
-  version: 'abc123',
-  created_at: '11/11/2011T11:11:11.111',
-  created_by: 'admin',
-  updated_at: '11/11/2011T11:11:11.111',
-  updated_by: 'admin',
-  name: 'linux trusted app 1',
-  description: 'Linux trusted app 1',
-  os: OperatingSystem.LINUX,
-  effectScope: {
-    type: 'policy',
-    policies: ['e5cbb9cf-98aa-4303-a04b-6a1165915079', '9da95be9-9bee-4761-a8c4-28d6d9bd8c71'],
-  },
-  entries: [
-    createConditionEntry(ConditionEntryField.HASH, 'match', '1234234659af249ddf3e40864e9fb241'),
-    createConditionEntry(ConditionEntryField.PATH, 'match', '/bin/malware'),
-  ],
-};
-
-const PACKAGE_POLICIES_RESPONSE: PackagePolicy[] = [
-  // Next line is ts-ignored as this is the response when the policy doesn't exists but the type is complaining about it.
-  // @ts-ignore
-  { id: '9da95be9-9bee-4761-a8c4-28d6d9bd8c71', version: undefined },
-  {
-    id: 'e5cbb9cf-98aa-4303-a04b-6a1165915079',
-    version: 'Wzc0NDk5LDFd',
-    name: 'EI 2',
-    description: '',
-    namespace: 'default',
-    policy_id: '9fd2ac50-e86f-11eb-a87f-51e16104076a',
-    enabled: true,
-    output_id: '',
-    inputs: [],
-    package: { name: 'endpoint', title: 'Endpoint Security', version: '0.20.1' },
-    revision: 3,
-    created_at: '2021-07-19T09:00:45.608Z',
-    created_by: 'elastic',
-    updated_at: '2021-07-19T09:02:47.193Z',
-    updated_by: 'system',
-  },
-];
 
 describe('service', () => {
   beforeEach(() => {
@@ -213,7 +171,7 @@ describe('service', () => {
 
     it("should throw wrong policy error if some policy doesn't exists", async () => {
       packagePolicyClient.getByIDs.mockReset();
-      packagePolicyClient.getByIDs.mockResolvedValueOnce(PACKAGE_POLICIES_RESPONSE);
+      packagePolicyClient.getByIDs.mockResolvedValueOnce(getPackagePoliciesResponse());
       await expect(
         createTrustedApp(exceptionsListClient, savedObjectClient, packagePolicyClient, {
           name: 'linux trusted app 1',
@@ -427,15 +385,15 @@ describe('service', () => {
 
     it("should throw wrong policy error if some policy doesn't exists", async () => {
       packagePolicyClient.getByIDs.mockReset();
-      packagePolicyClient.getByIDs.mockResolvedValueOnce(PACKAGE_POLICIES_RESPONSE);
-
+      packagePolicyClient.getByIDs.mockResolvedValueOnce(getPackagePoliciesResponse());
+      const trustedAppByPolicy = getTrustedAppByPolicy();
       await expect(
         updateTrustedApp(
           exceptionsListClient,
           savedObjectClient,
           packagePolicyClient,
-          TRUSTED_APP_BY_POLICY.id,
-          toUpdateTrustedApp(TRUSTED_APP_BY_POLICY)
+          trustedAppByPolicy.id,
+          toUpdateTrustedApp(trustedAppByPolicy as MaybeImmutable<TrustedApp>)
         )
       ).rejects.toBeInstanceOf(TrustedAppPolicyNotExistsError);
     });

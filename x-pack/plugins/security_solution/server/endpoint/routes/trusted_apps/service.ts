@@ -130,9 +130,6 @@ export const createTrustedApp = async (
   // Ensure list is created if it does not exist
   await exceptionsListClient.createTrustedAppsList();
 
-  // Validate update TA entry - error if not valid
-  // TODO: implement validations
-
   const unexistingPolicies = await getUnexistingPoliciesFromTrustedApp(
     savedObjectClient,
     packagePolicyClient,
@@ -169,9 +166,6 @@ export const updateTrustedApp = async (
   if (!currentTrustedApp) {
     throw new TrustedAppNotFoundError(id);
   }
-
-  // Validate update TA entry - error if not valid
-  // TODO: implement validations
 
   const unexistingPolicies = await getUnexistingPoliciesFromTrustedApp(
     savedObjectClient,
