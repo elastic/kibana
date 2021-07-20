@@ -23,7 +23,7 @@ POST ds/_doc
 
 ## Index templates tab
 
-### Quick steps for texting
+### Quick steps for testing
 
 By default, **legacy index templates** are not shown in the UI. Make them appear by creating one in Console:
 
