@@ -16,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
+import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '../../../../src/core/public';
 import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
@@ -158,6 +158,21 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
           unmount();
           teardownFleet(startServices);
         };
+      },
+    });
+
+    // BWC < 7.11 redirect /app/ingestManager to /app/fleet
+    core.application.register({
+      id: 'ingestManager',
+      category: DEFAULT_APP_CATEGORIES.management,
+      navLinkStatus: AppNavLinkStatus.hidden,
+      title: i18n.translate('xpack.fleet.oldAppTitle', { defaultMessage: 'Ingest Manager' }),
+      async mount(params: AppMountParameters) {
+        const [coreStart] = await core.getStartServices();
+        coreStart.application.navigateToApp('fleet', {
+          path: params.history.location.hash,
+        });
+        return () => {};
       },
     });
 
