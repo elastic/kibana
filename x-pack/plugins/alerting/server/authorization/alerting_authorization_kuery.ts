@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { JsonObject } from '@kbn/common-utils';
 import { remove } from 'lodash';
 
 import { nodeBuilder } from '../../../../../src/plugins/data/common';
@@ -15,6 +14,14 @@ import { RegistryAlertTypeWithAuth } from './alerting_authorization';
 export enum AlertingAuthorizationFilterType {
   KQL = 'kql',
   ESDSL = 'dsl',
+}
+
+export interface BooleanFilter {
+  bool: {
+    should?: unknown[];
+    filter?: unknown | unknown[];
+    minimum_should_match?: number;
+  };
 }
 
 export interface AlertingAuthorizationFilterOpts {
@@ -32,7 +39,7 @@ export function asFiltersByRuleTypeAndConsumer(
   ruleTypes: Set<RegistryAlertTypeWithAuth>,
   opts: AlertingAuthorizationFilterOpts,
   alertSpaceId?: string
-): KueryNode | JsonObject {
+): KueryNode | BooleanFilter {
   if (opts.type === AlertingAuthorizationFilterType.ESDSL) {
     return buildRuleTypeFilter(ruleTypes, opts, alertSpaceId);
   } else {
@@ -92,11 +99,7 @@ export const buildRuleTypeFilter = (
     };
     const spaceIdFilter =
       alertSpaceId != null && opts.fieldNames.spaceIds != null
-        ? {
-            bool: {
-              filter: [{ term: { [opts.fieldNames.spaceIds]: alertSpaceId } }],
-            },
-          }
+        ? { term: { [opts.fieldNames.spaceIds]: alertSpaceId } }
         : {};
     const consumersFilter = {
       bool: {

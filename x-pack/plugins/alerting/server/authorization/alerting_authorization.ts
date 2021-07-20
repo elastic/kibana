@@ -8,7 +8,6 @@
 import Boom from '@hapi/boom';
 import { map, mapValues, fromPairs, has } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
-import { JsonObject } from '@kbn/common-utils';
 import { AlertTypeRegistry } from '../types';
 import { SecurityPluginSetup } from '../../../security/server';
 import { RegistryAlertType } from '../alert_type_registry';
@@ -18,6 +17,7 @@ import { Space } from '../../../spaces/server';
 import {
   asFiltersByRuleTypeAndConsumer,
   AlertingAuthorizationFilterOpts,
+  BooleanFilter,
 } from './alerting_authorization_kuery';
 import { KueryNode } from '../../../../../src/plugins/data/server';
 
@@ -279,7 +279,7 @@ export class AlertingAuthorization {
     authorizationEntity: AlertingAuthorizationEntity,
     filterOpts: AlertingAuthorizationFilterOpts
   ): Promise<{
-    filter?: KueryNode | JsonObject;
+    filter?: KueryNode | BooleanFilter;
     ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void;
     logSuccessfulAuthorization: () => void;
   }> {
