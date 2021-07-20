@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-// stub
+export { PrebootService } from './preboot_service';
+export type { InternalPrebootServicePreboot, PrebootServicePreboot } from './types';
