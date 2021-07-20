@@ -10,7 +10,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Router, Route, Switch } from 'react-router-dom';
 import { ScopedHistory } from 'kibana/public';
 
-import { EuiErrorBoundary, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiErrorBoundary } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -43,27 +43,20 @@ export const App: FC<{ history: ScopedHistory }> = ({ history }) => {
     );
   }
 
-  // min-width: 0 is needed to ensure the source index and preview data grids do not
-  // overflow into the management page side nav when the page width is reduced
-  // see https://github.com/elastic/eui/issues/4941
   return (
-    <EuiFlexGroup justifyContent="spaceAround" data-test-subj="transformApp">
-      <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
-        <Router history={history}>
-          <Switch>
-            <Route
-              path={`/${SECTION_SLUG.CLONE_TRANSFORM}/:transformId`}
-              component={CloneTransformSection}
-            />
-            <Route
-              path={`/${SECTION_SLUG.CREATE_TRANSFORM}/:savedObjectId`}
-              component={CreateTransformSection}
-            />
-            <Route path={`/`} component={TransformManagementSection} />
-          </Switch>
-        </Router>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <Router history={history}>
+      <Switch>
+        <Route
+          path={`/${SECTION_SLUG.CLONE_TRANSFORM}/:transformId`}
+          component={CloneTransformSection}
+        />
+        <Route
+          path={`/${SECTION_SLUG.CREATE_TRANSFORM}/:savedObjectId`}
+          component={CreateTransformSection}
+        />
+        <Route path={`/`} component={TransformManagementSection} />
+      </Switch>
+    </Router>
   );
 };
 
