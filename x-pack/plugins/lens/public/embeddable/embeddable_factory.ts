@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { Capabilities, HttpSetup, SavedObjectReference } from 'kibana/public';
+import type {
+  Capabilities,
+  HttpSetup,
+  SavedObjectReference,
+  ExecutionContextServiceStart,
+} from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { Ast } from '@kbn/interpreter/target/common';
@@ -33,6 +38,7 @@ export interface LensEmbeddableStartServices {
   indexPatternService: IndexPatternsContract;
   uiActions?: UiActionsStart;
   usageCollection?: UsageCollectionSetup;
+  executionContext: ExecutionContextServiceStart;
   documentToExpression: (
     doc: Document
   ) => Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }>;
@@ -87,6 +93,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
       indexPatternService,
       capabilities,
       usageCollection,
+      executionContext,
     } = await this.getStartServices();
 
     const { Embeddable } = await import('../async_services');
@@ -106,6 +113,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
           canSaveVisualizations: Boolean(capabilities.visualize.save),
         },
         usageCollection,
+        executionContext,
       },
       input,
       parent
