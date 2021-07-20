@@ -190,7 +190,7 @@ it('calculates the bytes of the content', async () => {
     Rx.of({
       rawResponse: {
         hits: {
-          hits: range(0, HITS_TOTAL).map(() => ({
+          hits: range(0, HITS_TOTAL).map((hit, i) => ({
             fields: {
               message: ['this is a great message'],
             },
@@ -240,7 +240,7 @@ it('warns if max size was reached', async () => {
     Rx.of({
       rawResponse: {
         hits: {
-          hits: range(0, HITS_TOTAL).map(() => ({
+          hits: range(0, HITS_TOTAL).map((hit, i) => ({
             fields: {
               date: ['2020-12-31T00:14:28.000Z'],
               ip: ['110.135.176.89'],
@@ -280,7 +280,7 @@ it('uses the scrollId to page all the data', async () => {
       rawResponse: {
         _scroll_id: 'awesome-scroll-hero',
         hits: {
-          hits: range(0, HITS_TOTAL / 10).map(() => ({
+          hits: range(0, HITS_TOTAL / 10).map((hit, i) => ({
             fields: {
               date: ['2020-12-31T00:14:28.000Z'],
               ip: ['110.135.176.89'],
@@ -295,7 +295,7 @@ it('uses the scrollId to page all the data', async () => {
   mockEsClient.asCurrentUser.scroll = jest.fn().mockResolvedValue({
     body: {
       hits: {
-        hits: range(0, HITS_TOTAL / 10).map(() => ({
+        hits: range(0, HITS_TOTAL / 10).map((hit, i) => ({
           fields: {
             date: ['2020-12-31T00:14:28.000Z'],
             ip: ['110.135.176.89'],
