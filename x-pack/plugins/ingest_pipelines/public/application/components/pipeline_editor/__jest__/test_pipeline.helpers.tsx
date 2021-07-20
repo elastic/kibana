@@ -102,6 +102,13 @@ const createActions = (testBed: TestBed<TestSubject>) => {
       component.update();
     },
 
+    async clickProcessorConfigurationTab() {
+      await act(async () => {
+        find('configurationTab').simulate('click');
+      });
+      component.update();
+    },
+
     async clickProcessorOutputTab() {
       await act(async () => {
         find('outputTab').simulate('click');
