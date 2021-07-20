@@ -121,7 +121,7 @@ export type MlAnomalyDetectionJobsHealthRuleParams = {
   excludeJobs?: {
     jobIds?: string[];
     groupIds?: string[];
-  };
+  } | null;
   testsConfig?: {
     datafeed?: CommonHealthCheckConfig | null;
     mml?: CommonHealthCheckConfig | null;

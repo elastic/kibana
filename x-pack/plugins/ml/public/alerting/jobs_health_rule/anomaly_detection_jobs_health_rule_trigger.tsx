@@ -15,6 +15,7 @@ import { jobsApiProvider } from '../../application/services/ml_api_service/jobs'
 import { HttpService } from '../../application/services/http_service';
 import { useMlKibana } from '../../application/contexts/kibana';
 import { TestsSelectionControl } from './tests_selection_control';
+import { isPopulatedObject } from '../../../common';
 
 export type MlAnomalyAlertTriggerProps = AlertTypeParamsExpressionProps<MlAnomalyDetectionJobsHealthRuleParams>;
 
@@ -76,7 +77,14 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
       <JobSelectorControl
         jobsAndGroupIds={excludeJobsAndGroupIds}
         adJobsApiService={adJobsApiService}
-        onChange={useCallback(onAlertParamChange('excludeJobs'), [])}
+        onChange={useCallback((update) => {
+          const callback = onAlertParamChange('excludeJobs');
+          if (isPopulatedObject(update)) {
+            callback(update);
+          } else {
+            callback(null);
+          }
+        }, [])}
         errors={Array.isArray(errors.excludeJobs) ? errors.excludeJobs : []}
         multiSelect
         label={
