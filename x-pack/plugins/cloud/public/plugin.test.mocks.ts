@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import type { FullStoryDeps, FullStoryApi } from './fullstory';
+import { sha256 } from 'js-sha256';
+import type { FullStoryDeps, FullStoryApi, FullStoryService } from './fullstory';
 
 export const fullStoryApiMock: jest.Mocked<FullStoryApi> = {
   event: jest.fn(),
   identify: jest.fn(),
 };
-export const initializeFullStoryMock = jest.fn<FullStoryApi, [FullStoryDeps]>(
-  () => fullStoryApiMock
-);
+export const initializeFullStoryMock = jest.fn<FullStoryService, [FullStoryDeps]>(() => ({
+  fullStory: fullStoryApiMock,
+  sha256,
+}));
 jest.doMock('./fullstory', () => {
   return { initializeFullStory: initializeFullStoryMock };
 });

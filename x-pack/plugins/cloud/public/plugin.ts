@@ -14,7 +14,6 @@ import {
   IBasePath,
 } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
-import { sha256 } from 'js-sha256';
 import type {
   AuthenticatedUser,
   SecurityPluginSetup,
@@ -178,7 +177,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       userIdPromise,
     ]);
 
-    const fullStory = initializeFullStory({
+    const { fullStory, sha256 } = initializeFullStory({
       basePath,
       orgId,
       packageInfo: this.initializerContext.env.packageInfo,

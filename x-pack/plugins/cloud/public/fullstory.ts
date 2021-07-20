@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { sha256 } from 'js-sha256'; // loaded here to reduce page load bundle size when FullStory is disabled
 import type { IBasePath, PackageInfo } from '../../../../src/core/public';
 
 export interface FullStoryDeps {
@@ -18,11 +19,16 @@ export interface FullStoryApi {
   event(eventName: string, eventProperties: Record<string, any>): void;
 }
 
+export interface FullStoryService {
+  fullStory: FullStoryApi;
+  sha256: typeof sha256;
+}
+
 export const initializeFullStory = ({
   basePath,
   orgId,
   packageInfo,
-}: FullStoryDeps): FullStoryApi => {
+}: FullStoryDeps): FullStoryService => {
   // @ts-expect-error
   window._fs_debug = false;
   // @ts-expect-error
@@ -72,5 +78,8 @@ export const initializeFullStory = ({
   // @ts-expect-error
   const fullStory: FullStoryApi = window.FSKibana;
 
-  return fullStory;
+  return {
+    fullStory,
+    sha256,
+  };
 };
