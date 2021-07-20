@@ -335,7 +335,6 @@ export const useDashboardAppState = ({
       if (refreshInterval) timefilter.setRefreshInterval(refreshInterval);
     }
     dispatchDashboardStateChange(setDashboardState(lastSavedState));
-    // setDashboardAppState((s) => ({ ...s, hasUnsavedChanges: false }));
   }, [lastSavedState, dashboardAppState, data.query.timefilter, dispatchDashboardStateChange]);
 
   /**
