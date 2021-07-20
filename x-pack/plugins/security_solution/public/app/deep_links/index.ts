@@ -165,7 +165,7 @@ const nestedDeepLinks: SecurityDeepLinks = {
         navLinkStatus: AppNavLinkStatus.hidden,
         keywords: [
           i18n.translate('xpack.securitySolution.search.exceptions', {
-            defaultMessage: 'Exception list',
+            defaultMessage: 'Exceptions',
           }),
         ],
         searchable: true,
