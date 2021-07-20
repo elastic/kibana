@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { get, partition } from 'lodash';
-import { calculateNodeType } from '../nodes';
+import { partition } from 'lodash';
+import { calculateNodeType, Node } from '../nodes';
 
 /*
  * Reducer function for a set of nodes to key the array by nodeId, summarize
@@ -14,8 +14,28 @@ import { calculateNodeType } from '../nodes';
  * @param masterNode = nodeId of master node
  * @return reducer function for set of nodes
  */
-export function normalizeNodeShards(masterNode) {
-  return (nodes, node) => {
+
+type NodeShard = Node & {
+  key: string;
+  node_ids: { buckets: Array<{ key: string }> };
+  node_names: { buckets: Array<{ key: string }> };
+  index_count: { value: number };
+  doc_count: number;
+};
+
+interface ShardBucket {
+  key: string;
+  primary: {
+    buckets: Array<{
+      key: string;
+      key_as_string: string;
+      doc_count: number;
+    }>;
+  };
+}
+
+export function normalizeNodeShards(masterNode: string) {
+  return (nodes: NodeShard[], node: NodeShard) => {
     if (node.key && node.node_ids) {
       const nodeIds = node.node_ids.buckets.map((b) => b.key);
       const _node = {
@@ -27,8 +47,8 @@ export function normalizeNodeShards(masterNode) {
         ...nodes,
         [node.key]: {
           shardCount: node.doc_count,
-          indexCount: get(node, 'index_count.value'),
-          name: get(node, 'node_names.buckets[0].key'),
+          indexCount: node.index_count.value,
+          name: node.node_names.buckets[0].key,
           node_ids: nodeIds,
           type: calculateNodeType(_node, masterNode), // put the "star" icon on the node link in the shard allocator
         },
@@ -38,12 +58,12 @@ export function normalizeNodeShards(masterNode) {
   };
 }
 
-const countShards = (shardBuckets) => {
+const countShards = (shardBuckets: ShardBucket[]) => {
   let primaryShards = 0;
   let replicaShards = 0;
 
   shardBuckets.forEach((shard) => {
-    const primaryMap = get(shard, 'primary.buckets', []);
+    const primaryMap = shard.primary.buckets ?? [];
 
     const primaryBucket = primaryMap.find((b) => b.key_as_string === 'true');
     if (primaryBucket !== undefined) {
@@ -62,13 +82,18 @@ const countShards = (shardBuckets) => {
   };
 };
 
+interface Index {
+  key: string;
+  states?: { buckets?: ShardBucket[] };
+}
+
 /*
  * Reducer function for a set of indices to key the array by index name, and
  * summarize the shard data.
  * @return reducer function for set of indices
  */
-export function normalizeIndexShards(indices, index) {
-  const stateBuckets = get(index, 'states.buckets', []);
+export function normalizeIndexShards(indices: Index[], index: Index) {
+  const stateBuckets = index.states?.buckets ?? [];
   const [assignedShardBuckets, unassignedShardBuckets] = partition(stateBuckets, (b) => {
     return b.key === 'STARTED' || b.key === 'RELOCATING';
   });

@@ -15,7 +15,7 @@
 import { isUndefined } from 'lodash';
 import { ElasticsearchLegacySource } from '../../../../common/types/es';
 
-type Node = ElasticsearchLegacySource['source_node'] & {
+export type Node = ElasticsearchLegacySource['source_node'] & {
   attributes?: Record<string, any>;
   node_ids?: Array<string | boolean | undefined>;
 };

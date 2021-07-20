@@ -9,7 +9,14 @@
  * @param {Object} config - Kibana config service
  * @param {Boolean} includeNodes - whether to add the aggs for node shards
  */
-export function getShardAggs(config, includeNodes, includeIndices) {
+
+import { LegacyServer } from '../../../types';
+
+export function getShardAggs(
+  config: ReturnType<LegacyServer['config']>,
+  includeNodes: boolean,
+  includeIndices: boolean
+) {
   const maxBucketSize = config.get('monitoring.ui.max_bucket_size');
   const aggSize = 10;
   const indicesAgg = {

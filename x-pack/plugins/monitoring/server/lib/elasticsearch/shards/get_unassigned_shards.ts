@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
-
 // Methods for calculating metrics for
 // - Number of Primary Shards
 // - Number of Replica Shards
 // - Unassigned Primary Shards
 // - Unassigned Replica Shards
-export function getUnassignedShards(indexShardStats) {
+export function getUnassignedShards(indexShardStats: {
+  unassigned: { primary: number; replica: number };
+}) {
   let unassignedShards = 0;
 
-  unassignedShards += get(indexShardStats, 'unassigned.primary');
-  unassignedShards += get(indexShardStats, 'unassigned.replica');
+  unassignedShards += indexShardStats.unassigned.primary;
+  unassignedShards += indexShardStats.unassigned.replica;
 
   return unassignedShards;
 }

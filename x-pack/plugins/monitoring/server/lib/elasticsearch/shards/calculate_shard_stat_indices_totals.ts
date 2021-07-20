@@ -8,7 +8,16 @@
 /*
  * Calculate totals from mapped indices data
  */
-export function calculateIndicesTotals(indices) {
+export function calculateIndicesTotals(
+  indices: Record<
+    string,
+    {
+      primary: number;
+      replica: number;
+      unassigned: { primary: number; replica: number };
+    }
+  >
+) {
   // create datasets for each index
   const metrics = Object.keys(indices).map((i) => {
     const index = indices[i];
