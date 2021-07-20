@@ -9,16 +9,11 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 
-import '../../../common/mock/match_media';
-import '../../../common/mock/react_beautiful_dnd';
-import { mockBrowserFields } from '../../../common/containers/source/mock';
-import { TestProviders } from '../../../common/mock';
+import { mockBrowserFields, TestProviders } from '../../../../mock';
 
 import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from './helpers';
 
 import { StatefulFieldsBrowserComponent } from '.';
-
-jest.mock('../../../common/lib/kibana');
 
 describe('StatefulFieldsBrowser', () => {
   const timelineId = 'test';

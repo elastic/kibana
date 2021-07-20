@@ -10,12 +10,12 @@ import { noop } from 'lodash/fp';
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { BrowserFields } from '../../../common/containers/source';
-import { DEFAULT_CATEGORY_NAME } from '../timeline/body/column_headers/default_headers';
+import type { BrowserFields } from '../../../../../common/search_strategy/index_fields';
+import { DEFAULT_CATEGORY_NAME } from '../../body/column_headers/default_headers';
 import { FieldsBrowser } from './field_browser';
 import { filterBrowserFieldsByFieldName, mergeBrowserFieldsWithDefaultCategory } from './helpers';
 import * as i18n from './translations';
-import { FieldBrowserProps } from './types';
+import type { FieldBrowserProps } from './types';
 
 const fieldsButtonClassName = 'fields-button';
 
@@ -23,6 +23,7 @@ const fieldsButtonClassName = 'fields-button';
 export const INPUT_TIMEOUT = 250;
 
 const FieldsBrowserButtonContainer = styled.div`
+  display: inline-block;
   position: relative;
   width: 24px;
 `;
@@ -125,13 +126,13 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
 
   return (
     <FieldsBrowserButtonContainer data-test-subj="fields-browser-button-container">
-      <EuiToolTip content={i18n.CUSTOMIZE_COLUMNS}>
+      <EuiToolTip content={i18n.FIELDS_BROWSER}>
         <EuiButtonIcon
-          aria-label={i18n.CUSTOMIZE_COLUMNS}
+          aria-label={i18n.FIELDS_BROWSER}
           buttonRef={customizeColumnsButtonRef}
           className={fieldsButtonClassName}
           data-test-subj="show-field-browser"
-          iconType="list"
+          iconType="listAdd"
           onClick={toggleShow}
         >
           {i18n.FIELDS}

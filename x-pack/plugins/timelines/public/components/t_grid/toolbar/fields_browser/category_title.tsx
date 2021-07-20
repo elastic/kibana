@@ -8,10 +8,8 @@
 import { EuiFlexGroup, EuiFlexItem, EuiScreenReaderOnly, EuiTitle } from '@elastic/eui';
 import React from 'react';
 
-import { BrowserFields } from '../../../common/containers/source';
-import { getFieldBrowserCategoryTitleClassName, getFieldCount } from './helpers';
-import { CountBadge } from '../../../common/components/page';
-import { OnUpdateColumns } from '../timeline/events';
+import { CountBadge, getFieldBrowserCategoryTitleClassName, getFieldCount } from './helpers';
+import type { BrowserFields, OnUpdateColumns } from '../../../../../common';
 
 import { ViewAllButton } from './category_columns';
 import * as i18n from './translations';

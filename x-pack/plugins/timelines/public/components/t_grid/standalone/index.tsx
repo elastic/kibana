@@ -41,13 +41,12 @@ import { Footer, footerHeight } from '../footer';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from '../styles';
 import * as i18n from './translations';
 import { InspectButtonContainer } from '../../inspect';
+import { useFetchIndex } from '../../../container/source';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
 const UTILITY_BAR_HEIGHT = 19; // px
 const COMPACT_HEADER_HEIGHT = EVENTS_VIEWER_HEADER_HEIGHT - UTILITY_BAR_HEIGHT; // px
 const STANDALONE_ID = 'standalone-t-grid';
-const EMPTY_BROWSER_FIELDS = {};
-const EMPTY_INDEX_PATTERN = { title: '', fields: [] };
 const EMPTY_DATA_PROVIDERS: DataProvider[] = [];
 
 const UtilityBar = styled.div`
@@ -157,6 +156,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const { uiSettings } = useKibana<CoreStart>().services;
   const [isQueryLoading, setIsQueryLoading] = useState(false);
+  const [indexPatternsLoading, { browserFields, indexPatterns }] = useFetchIndex(indexNames);
 
   const getTGrid = useMemo(() => tGridSelectors.getTGridByIdSelector(), []);
   const {
@@ -171,20 +171,24 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
 
   const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);
 
-  const combinedQueries = combineQueries({
-    config: esQuery.getEsQueryConfig(uiSettings),
-    dataProviders: EMPTY_DATA_PROVIDERS,
-    indexPattern: EMPTY_INDEX_PATTERN,
-    browserFields: EMPTY_BROWSER_FIELDS,
-    filters,
-    kqlQuery: query,
-    kqlMode: 'search',
-    isEventViewer: true,
-  });
+  const combinedQueries = useMemo(
+    () =>
+      combineQueries({
+        config: esQuery.getEsQueryConfig(uiSettings),
+        dataProviders: EMPTY_DATA_PROVIDERS,
+        indexPattern: indexPatterns,
+        browserFields,
+        filters,
+        kqlQuery: query,
+        kqlMode: 'search',
+        isEventViewer: true,
+      }),
+    [uiSettings, indexPatterns, browserFields, filters, query]
+  );
 
   const canQueryTimeline = useMemo(
-    () => combinedQueries != null && !isEmpty(start) && !isEmpty(end),
-    [combinedQueries, start, end]
+    () => !indexPatternsLoading && combinedQueries != null && !isEmpty(start) && !isEmpty(end),
+    [indexPatternsLoading, combinedQueries, start, end]
   );
 
   const fields = useMemo(
@@ -280,8 +284,9 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     );
     dispatch(
       tGridActions.initializeTGridSettings({
-        footerText,
         id: STANDALONE_ID,
+        defaultColumns: columns,
+        footerText,
         loadingText,
         unit,
       })
@@ -316,7 +321,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                 <ScrollableFlexItem grow={1}>
                   <StatefulBody
                     activePage={pageInfo.activePage}
-                    browserFields={EMPTY_BROWSER_FIELDS}
+                    browserFields={browserFields}
                     data={nonDeletedEvents}
                     id={STANDALONE_ID}
                     isEventViewer={true}
