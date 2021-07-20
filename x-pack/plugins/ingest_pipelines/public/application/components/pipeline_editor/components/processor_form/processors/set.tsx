@@ -128,7 +128,12 @@ const getValueConfig: (
         {
           validator: ({ value, path, formData }) => {
             if (isEmpty(value) && isEmpty(formData['fields.copy_from'])) {
-              return { path, message: 'A field value is required.' };
+              return {
+                path,
+                message: i18n.translate('xpack.ingestPipelines.pipelineEditor.requiredField', {
+                  defaultMessage: 'A field value is required.',
+                }),
+              };
             }
           },
         },
@@ -137,7 +142,7 @@ const getValueConfig: (
     labelAppend: (
       <EuiButtonEmpty size="xs" onClick={toggleCustom} data-test-subj="toggleCustomField">
         {i18n.translate('xpack.ingestPipelines.pipelineEditor.useCopyFromLabel', {
-          defaultMessage: 'Use copy_from field',
+          defaultMessage: 'Use copy from field',
         })}
       </EuiButtonEmpty>
     ),
@@ -156,7 +161,12 @@ const getValueConfig: (
         {
           validator: ({ value, path, formData }) => {
             if (isEmpty(value) && isEmpty(formData['fields.value'])) {
-              return { path, message: 'A field value is required.' };
+              return {
+                path,
+                message: i18n.translate('xpack.ingestPipelines.pipelineEditor.requiredField', {
+                  defaultMessage: 'A field value is required.',
+                }),
+              };
             }
           },
         },
@@ -167,9 +177,9 @@ const getValueConfig: (
       helpText: (
         <FormattedMessage
           id="xpack.ingestPipelines.pipelineEditor.setForm.copyFromFieldHelpText"
-          defaultMessage="The origin field which will be copied to {field}."
+          defaultMessage="Field to copy into {field}."
           values={{
-            field: <EuiCode>{'field'}</EuiCode>,
+            field: <EuiCode>{'Field'}</EuiCode>,
           }}
         />
       ),
