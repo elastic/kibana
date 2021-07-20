@@ -28,6 +28,7 @@ import * as i18n from './translations';
 import { sourcererActions, sourcererModel } from '../../store/sourcerer';
 import { State } from '../../store';
 import { getSourcererScopeSelector, SourcererScopeSelector } from './selectors';
+import { getPatternList } from '../../store/sourcerer/helpers';
 
 const PopoverContent = styled.div`
   width: 600px;
@@ -43,10 +44,10 @@ interface SourcererComponentProps {
 export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }) => {
   const dispatch = useDispatch();
   const sourcererScopeSelector = useMemo(getSourcererScopeSelector, []);
-  const { kibanaIndexPatterns, sourcererScope } = useSelector<State, SourcererScopeSelector>(
-    (state) => sourcererScopeSelector(state, scopeId),
-    deepEqual
-  );
+  const { defaultIndexPattern, kibanaIndexPatterns, sourcererScope } = useSelector<
+    State,
+    SourcererScopeSelector
+  >((state) => sourcererScopeSelector(state, scopeId), deepEqual);
   const { selectedPatterns, loading } = sourcererScope;
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
@@ -89,13 +90,12 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
 
   const resetDataSources = useCallback(() => {
     setSelectedOptions(
-      // TODO: Steph/sourcerer get new default KIP to be selected by default
-      [].map((indexSelected) => ({
+      getPatternList(defaultIndexPattern).map((indexSelected: string) => ({
         label: indexSelected,
         value: indexSelected,
       }))
     );
-  }, []);
+  }, [defaultIndexPattern]);
 
   const handleSaveIndices = useCallback(() => {
     onChangeIndexPattern(selectedOptions.map((so) => so.label));

@@ -9,7 +9,6 @@ import { isEmpty } from 'lodash/fp';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import {
-  setIndexPatternsList,
   setSourcererScopeLoading,
   setSelectedIndexPatterns,
   setSignalIndexName,
@@ -17,15 +16,21 @@ import {
   initTimelineIndexPatterns,
 } from './actions';
 import { initialSourcererState, SourcererModel } from './model';
-import { createDefaultIndexPatterns, defaultIndexPatternByEventType } from './helpers';
+import {
+  createDefaultIndexPatterns,
+  defaultIndexPatternByEventType,
+  getPatternList,
+} from './helpers';
 
 export type SourcererState = SourcererModel;
 
 export const sourcererReducer = reducerWithInitialState(initialSourcererState)
-  .case(setIndexPatternsList, (state, { kibanaIndexPatterns }) => ({
-    ...state,
-    kibanaIndexPatterns,
-  }))
+  // TODO: Steph/sourcerer this is unused?
+  // .case(setIndexPatternsList, (state, { defaultIndexPattern, kibanaIndexPatterns }) => ({
+  //   ...state,
+  //   defaultIndexPattern,
+  //   kibanaIndexPatterns,
+  // }))
   .case(setSignalIndexName, (state, { signalIndexName }) => ({
     ...state,
     signalIndexName,
@@ -77,7 +82,7 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
           ...state.sourcererScopes[id],
           ...sourcererScopes,
           ...(state.sourcererScopes[id].selectedPatterns.length === 0
-            ? { selectedPatterns: [] } // TODO: Steph/sourcerer get new default KIP to be selected by default
+            ? { selectedPatterns: getPatternList(state.defaultIndexPattern) }
             : {}),
         },
       },

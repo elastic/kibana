@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { parseExperimentalConfigValue } from '../../..//common/experimental_features';
+import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 import { createInitialState } from './reducer';
+import { DEFAULT_INDEX_PATTERN_ID } from '../../../common/constants';
 
 jest.mock('../lib/kibana', () => ({
   KibanaServices: {
@@ -16,16 +17,17 @@ jest.mock('../lib/kibana', () => ({
 
 describe('createInitialState', () => {
   describe('sourcerer -> default -> indicesExist', () => {
+    const defaultState = {
+      defaultIndexPattern: {
+        id: DEFAULT_INDEX_PATTERN_ID,
+        title: `mock-${DEFAULT_INDEX_PATTERN_ID}}`,
+      },
+      enableExperimental: parseExperimentalConfigValue([]),
+      kibanaIndexPatterns: [{ id: '1234567890987654321', title: 'mock-kibana' }],
+      signalIndexName: 'siem-signals-default',
+    };
     test('indicesExist should be TRUE if configIndexPatterns is NOT empty', () => {
-      const initState = createInitialState(
-        {},
-        {
-          kibanaIndexPatterns: [{ id: '1234567890987654321', title: 'mock-kibana' }],
-          configIndexPatterns: ['auditbeat-*', 'filebeat'],
-          signalIndexName: 'siem-signals-default',
-          enableExperimental: parseExperimentalConfigValue([]),
-        }
-      );
+      const initState = createInitialState({}, defaultState);
 
       expect(initState.sourcerer?.sourcererScopes.default.indicesExist).toEqual(true);
     });
@@ -34,10 +36,8 @@ describe('createInitialState', () => {
       const initState = createInitialState(
         {},
         {
-          kibanaIndexPatterns: [{ id: '1234567890987654321', title: 'mock-kibana' }],
-          configIndexPatterns: [],
-          signalIndexName: 'siem-signals-default',
-          enableExperimental: parseExperimentalConfigValue([]),
+          ...defaultState,
+          defaultIndexPattern: { id: '', title: '' },
         }
       );
 

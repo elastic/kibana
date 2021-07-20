@@ -29,9 +29,10 @@ import styled from 'styled-components';
 
 import { State } from '../../../../common/store';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { TimelineEventsType } from '../../../../../common/types/timeline';
+import { TimelineEventsType } from '../../../../../common';
 import { getSourcererScopeSelector, SourcererScopeSelector } from './selectors';
 import * as i18n from './translations';
+import { getPatternList } from '../../../../common/store/sourcerer/helpers';
 
 const PopoverContent = styled.div`
   width: 600px;
@@ -126,7 +127,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   const [showAdvanceSettings, setAdvanceSettings] = useState(eventType === 'custom');
   const [filterEventType, setFilterEventType] = useState<TimelineEventsType>(eventType);
   const sourcererScopeSelector = useMemo(getSourcererScopeSelector, []);
-  const { kibanaIndexPatterns, signalIndexName, sourcererScope } = useSelector<
+  const { defaultIndexPattern, kibanaIndexPatterns, signalIndexName, sourcererScope } = useSelector<
     State,
     SourcererScopeSelector
   >((state) => sourcererScopeSelector(state, SourcererScopeName.timeline), deepEqual);
@@ -168,12 +169,12 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   const onChangeCombo = useCallback(
     (newSelectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
       const localSelectedPatterns = newSelectedOptions.map((nso) => nso.label);
+      const defaultPatterns = getPatternList(defaultIndexPattern);
       if (
-        localSelectedPatterns.sort().join() === [...[], signalIndexName].sort().join() // TODO: Steph/sourcerer get new default KIP to be selected by default
+        localSelectedPatterns.sort().join() === [...defaultPatterns, signalIndexName].sort().join()
       ) {
         setFilterEventType('all');
-        // TODO: Steph/sourcerer get new default KIP to be selected by default
-      } else if (localSelectedPatterns.sort().join() === [].sort().join()) {
+      } else if (localSelectedPatterns.sort().join() === defaultPatterns.sort().join()) {
         setFilterEventType('raw');
       } else if (localSelectedPatterns.sort().join() === signalIndexName) {
         setFilterEventType('alert');
@@ -183,24 +184,24 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
 
       setSelectedOptions(newSelectedOptions);
     },
-    [signalIndexName]
+    [defaultIndexPattern, signalIndexName]
   );
 
   const onChangeFilter = useCallback(
     (filter) => {
       setFilterEventType(filter);
+      const defaultPatterns = getPatternList(defaultIndexPattern);
       if (filter === 'all') {
         setSelectedOptions(
-          [...[], signalIndexName ?? ''].map((indexSelected) => ({
-            // TODO: Steph/sourcerer get new default KIP to be selected by default
+          [...defaultPatterns, signalIndexName ?? ''].map((indexSelected) => ({
             label: indexSelected,
             value: indexSelected,
           }))
         );
       } else if (filter === 'raw') {
+        // TODO: Steph/sourcerer double check this
         setSelectedOptions(
-          [].map((indexSelected) => ({
-            // TODO: Steph/sourcerer get new default KIP to be selected by default
+          defaultPatterns.map((indexSelected) => ({
             label: indexSelected,
             value: indexSelected,
           }))
@@ -221,7 +222,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
         );
       }
     },
-    [kibanaIndexPatterns, signalIndexName]
+    [defaultIndexPattern, kibanaIndexPatterns, signalIndexName]
   );
 
   const togglePopover = useCallback(

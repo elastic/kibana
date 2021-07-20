@@ -20,7 +20,7 @@ import { SecuritySubPlugins } from '../../app/types';
 import { ManagementPluginReducer } from '../../management';
 import { State } from './types';
 import { AppAction } from './actions';
-import { KibanaIndexPatterns } from './sourcerer/model';
+import { KibanaIndexPattern, KibanaIndexPatterns } from './sourcerer/model';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 
 export type SubPluginsInitReducer = HostsPluginReducer &
@@ -34,10 +34,12 @@ export type SubPluginsInitReducer = HostsPluginReducer &
 export const createInitialState = (
   pluginsInitState: SecuritySubPlugins['store']['initialState'],
   {
+    defaultIndexPattern,
     kibanaIndexPatterns,
     signalIndexName,
     enableExperimental,
   }: {
+    defaultIndexPattern: KibanaIndexPattern;
     kibanaIndexPatterns: KibanaIndexPatterns;
     signalIndexName: string | null;
     enableExperimental: ExperimentalFeatures;
@@ -54,9 +56,10 @@ export const createInitialState = (
         ...sourcererModel.initialSourcererState.sourcererScopes,
         default: {
           ...sourcererModel.initialSourcererState.sourcererScopes.default,
-          indicesExist: [].length > 0, // TODO: Steph/sourcerer get new default KIP to be selected by default
+          indicesExist: defaultIndexPattern.title.length > 0,
         },
       },
+      defaultIndexPattern,
       kibanaIndexPatterns,
       signalIndexName,
     },

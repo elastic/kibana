@@ -7,26 +7,33 @@
 
 import { State } from '../../store';
 import { sourcererSelectors } from '../../store/sourcerer';
-import { KibanaIndexPatterns, ManageScope, SourcererScopeName } from '../../store/sourcerer/model';
+import {
+  KibanaIndexPattern,
+  KibanaIndexPatterns,
+  ManageScope,
+  SourcererScopeName,
+} from '../../store/sourcerer/model';
 
 export interface SourcererScopeSelector {
+  defaultIndexPattern: KibanaIndexPattern;
   kibanaIndexPatterns: KibanaIndexPatterns;
   sourcererScope: ManageScope;
 }
 
 export const getSourcererScopeSelector = () => {
   const getKibanaIndexPatternsSelector = sourcererSelectors.kibanaIndexPatternsSelector();
+  const getDefaultIndexPatternSelector = sourcererSelectors.defaultIndexPatternSelector();
   const getScopesSelector = sourcererSelectors.scopesSelector();
 
-  const mapStateToProps = (state: State, scopeId: SourcererScopeName): SourcererScopeSelector => {
+  return (state: State, scopeId: SourcererScopeName): SourcererScopeSelector => {
     const kibanaIndexPatterns = getKibanaIndexPatternsSelector(state);
+    const defaultIndexPattern = getDefaultIndexPatternSelector(state);
     const scope = getScopesSelector(state)[scopeId];
 
     return {
+      defaultIndexPattern,
       kibanaIndexPatterns,
       sourcererScope: scope,
     };
   };
-
-  return mapStateToProps;
 };

@@ -50,10 +50,6 @@ import {
 
 import { getDeepLinks, updateGlobalNavigation } from './app/deep_links';
 import { manageOldSiemRoutes } from './helpers';
-import {
-  IndexFieldsStrategyRequest,
-  IndexFieldsStrategyResponse,
-} from '../common/search_strategy/index_fields';
 import { SecurityAppStore } from './common/store/store';
 import { licenseService } from './common/hooks/use_license';
 import { SecuritySolutionUiConfigType } from './common/types';
@@ -64,7 +60,8 @@ import { getLazyEndpointPackageCustomExtension } from './management/pages/policy
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import type { TimelineState } from '../../timelines/public';
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
-import { IndexPattern, IndexPatternsContract } from '../../../../src/plugins/data/common';
+import { IndexPatternsContract } from '../../../../src/plugins/data/common';
+import { KibanaIndexPattern } from './common/store/sourcerer/model';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;
@@ -332,16 +329,18 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private async getKibanaIndexPattern(
     indexPatternsService: IndexPatternsContract,
     defaultIndicesName: string[]
-  ): Promise<IndexPattern | undefined> {
-    let indexPattern;
+  ): Promise<KibanaIndexPattern> {
+    let indexPattern: KibanaIndexPattern;
     try {
-      indexPattern = await indexPatternsService.get(DEFAULT_INDEX_PATTERN_ID);
+      indexPattern = (await indexPatternsService.get(
+        DEFAULT_INDEX_PATTERN_ID
+      )) as KibanaIndexPattern; // types are messy here, this is cleanest see property on IndexPatternsService.savedObjectsCache
     } catch (e) {
-      indexPattern = await indexPatternsService.createAndSave({
+      indexPattern = (await indexPatternsService.createAndSave({
         id: DEFAULT_INDEX_PATTERN_ID,
         title: [...DEFAULT_INDEX_PATTERN, ...defaultIndicesName].join(','),
         timeFieldName: DEFAULT_TIME_FIELD,
-      });
+      })) as KibanaIndexPattern; // types are messy here ^^
     }
     return indexPattern;
   }
@@ -359,12 +358,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         this.config.enableExperimental || []
       );
       const defaultIndicesName = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
-      const [{ createStore, createInitialState }, kip, kibanaIndexPatterns] = await Promise.all([
+      const [
+        { createStore, createInitialState },
+        defaultIndexPattern,
+        kibanaIndexPatterns,
+      ] = await Promise.all([
         this.lazyApplicationDependencies(),
         this.getKibanaIndexPattern(startPlugins.data.indexPatterns, defaultIndicesName),
         startPlugins.data.indexPatterns.getIdsWithTitle(),
       ]);
-      console.log('kip', { kip, kibanaIndexPatterns });
 
       let signal: { name: string | null } = { name: null };
       try {
@@ -414,6 +416,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             ...subPlugins.management.store.initialState,
           },
           {
+            defaultIndexPattern,
             kibanaIndexPatterns,
             signalIndexName: signal.name,
             enableExperimental: experimentalFeatures,

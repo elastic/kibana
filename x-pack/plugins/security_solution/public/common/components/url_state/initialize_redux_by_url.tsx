@@ -46,14 +46,14 @@ export const dispatchSetInitialStateFromUrl = (
         const activeScopes: SourcererScopeName[] = Object.keys(sourcererState).filter(
           (key) => !(key === SourcererScopeName.default && isDetectionsPages(pageName))
         ) as SourcererScopeName[];
-        activeScopes.forEach((scope) =>
+        activeScopes.forEach((scope) => {
           dispatch(
             sourcererActions.setSelectedIndexPatterns({
               id: scope,
               selectedPatterns: sourcererState[scope] ?? [],
             })
-          )
-        );
+          );
+        });
       }
     }
 

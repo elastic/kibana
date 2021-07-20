@@ -14,7 +14,6 @@ let defaultArgs: Args = {
   selectedPatterns: ['auditbeat-*', 'packetbeat-*'],
   state: {
     ...initialSourcererState,
-    configIndexPatterns: ['filebeat-*', 'auditbeat-*', 'packetbeat-*'],
     kibanaIndexPatterns: [{ id: '123', title: 'journalbeat-*' }],
     signalIndexName: 'signals-*',
   },

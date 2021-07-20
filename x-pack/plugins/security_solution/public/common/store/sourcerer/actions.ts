@@ -8,7 +8,7 @@
 import actionCreatorFactory from 'typescript-fsa';
 import { TimelineEventsType } from '../../../../common/types/timeline';
 
-import { KibanaIndexPatterns, ManageScopeInit, SourcererScopeName } from './model';
+import { ManageScopeInit, SourcererScopeName } from './model';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/sourcerer');
 
@@ -17,9 +17,10 @@ export const setSource = actionCreator<{
   payload: ManageScopeInit;
 }>('SET_SOURCE');
 
-export const setIndexPatternsList = actionCreator<{
-  kibanaIndexPatterns: KibanaIndexPatterns;
-}>('SET_INDEX_PATTERNS_LIST');
+// TODO: Steph/sourcerer this is unused?
+// export const setIndexPatternsList = actionCreator<{
+//   kibanaIndexPatterns: KibanaIndexPatterns;
+// }>('SET_INDEX_PATTERNS_LIST');
 
 export const setSignalIndexName = actionCreator<{ signalIndexName: string }>(
   'SET_SIGNAL_INDEX_NAME'

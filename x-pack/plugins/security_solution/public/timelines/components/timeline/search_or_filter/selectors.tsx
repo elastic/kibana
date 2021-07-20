@@ -8,33 +8,36 @@
 import { State } from '../../../../common/store';
 import { sourcererSelectors } from '../../../../common/store/selectors';
 import {
+  KibanaIndexPattern,
   KibanaIndexPatterns,
   ManageScope,
   SourcererScopeName,
 } from '../../../../common/store/sourcerer/model';
 
 export interface SourcererScopeSelector {
+  defaultIndexPattern: KibanaIndexPattern;
   kibanaIndexPatterns: KibanaIndexPatterns;
   signalIndexName: string | null;
   sourcererScope: ManageScope;
 }
 
 export const getSourcererScopeSelector = () => {
-  const getkibanaIndexPatternsSelector = sourcererSelectors.kibanaIndexPatternsSelector();
+  const getKibanaIndexPatternsSelector = sourcererSelectors.kibanaIndexPatternsSelector();
+  const getDefaultIndexPatternSelector = sourcererSelectors.defaultIndexPatternSelector();
   const getScopeIdSelector = sourcererSelectors.scopeIdSelector();
   const getSignalIndexNameSelector = sourcererSelectors.signalIndexNameSelector();
 
-  const mapStateToProps = (state: State, scopeId: SourcererScopeName): SourcererScopeSelector => {
-    const kibanaIndexPatterns = getkibanaIndexPatternsSelector(state);
+  return (state: State, scopeId: SourcererScopeName): SourcererScopeSelector => {
+    const kibanaIndexPatterns = getKibanaIndexPatternsSelector(state);
+    const defaultIndexPattern = getDefaultIndexPatternSelector(state);
     const scope = getScopeIdSelector(state, scopeId);
     const signalIndexName = getSignalIndexNameSelector(state);
 
     return {
+      defaultIndexPattern,
       kibanaIndexPatterns,
       signalIndexName,
       sourcererScope: scope,
     };
   };
-
-  return mapStateToProps;
 };

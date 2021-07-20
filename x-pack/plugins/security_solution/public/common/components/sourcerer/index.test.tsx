@@ -132,7 +132,6 @@ describe('Sourcerer component', () => {
         sourcerer: {
           ...state.sourcerer,
           kibanaIndexPatterns: [{ id: '1234', title: 'auditbeat-*' }],
-          configIndexPatterns: ['packetbeat-*'],
         },
       },
       SUB_PLUGINS_REDUCER,
@@ -185,7 +184,6 @@ describe('Sourcerer component', () => {
         sourcerer: {
           ...state.sourcerer,
           kibanaIndexPatterns: [{ id: '1234', title: 'auditbeat-*' }],
-          configIndexPatterns: ['packetbeat-*'],
         },
       },
       SUB_PLUGINS_REDUCER,
@@ -226,7 +224,6 @@ describe('Sourcerer component', () => {
             { id: '1234', title: 'auditbeat-*' },
             { id: '5678', title: 'packetbeat-*' },
           ],
-          configIndexPatterns: ['packetbeat-*'],
         },
       },
       SUB_PLUGINS_REDUCER,

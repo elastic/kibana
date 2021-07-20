@@ -41,10 +41,16 @@ export type SourcererScopeById = {
   [id in SourcererScopeName]: ManageScope;
 };
 
-export type KibanaIndexPatterns = Array<{ id: string; title: string }>;
+export interface KibanaIndexPattern {
+  id: string;
+  title: string;
+}
+
+export type KibanaIndexPatterns = KibanaIndexPattern[];
 
 // ManageSourcerer
 export interface SourcererModel {
+  defaultIndexPattern: KibanaIndexPattern;
   kibanaIndexPatterns: KibanaIndexPatterns;
   signalIndexName: string | null;
   sourcererScopes: SourcererScopeById;
@@ -61,6 +67,7 @@ export const initSourcererScope = {
 };
 
 export const initialSourcererState: SourcererModel = {
+  defaultIndexPattern: { id: '', title: '' }, // instantiated in plugin.tsx `getKibanaIndexPattern`
   kibanaIndexPatterns: [],
   signalIndexName: null,
   sourcererScopes: {

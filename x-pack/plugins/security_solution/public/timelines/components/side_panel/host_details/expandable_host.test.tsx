@@ -24,7 +24,6 @@ describe('Expandable Host Component', () => {
     ...mockGlobalState,
     sourcerer: {
       ...mockGlobalState.sourcerer,
-      configIndexPatterns: ['IShouldBeUsed'],
     },
   };
 

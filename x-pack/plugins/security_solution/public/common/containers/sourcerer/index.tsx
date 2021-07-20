@@ -15,8 +15,9 @@ import { useIndexFields } from '../source';
 import { useUserInfo } from '../../../detections/components/user_info';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { ALERTS_PATH, RULES_PATH } from '../../../../common/constants';
-import { TimelineId } from '../../../../common/types/timeline';
+import { TimelineId } from '../../../../common';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
+import { getPatternList } from '../../store/sourcerer/helpers';
 
 export const useInitSourcerer = (
   scopeId: SourcererScopeName.default | SourcererScopeName.detections = SourcererScopeName.default
@@ -25,7 +26,14 @@ export const useInitSourcerer = (
   const initialTimelineSourcerer = useRef(true);
   const initialDetectionSourcerer = useRef(true);
   const { loading: loadingSignalIndex, isSignalIndexExists, signalIndexName } = useUserInfo();
-
+  const getDefaultIndexPatternSelector = useMemo(
+    () => sourcererSelectors.defaultIndexPatternSelector(),
+    []
+  );
+  const defaultIndexPattern = useDeepEqualSelector(getDefaultIndexPatternSelector);
+  const defaultIndexPatternSelection = useMemo(() => getPatternList(defaultIndexPattern), [
+    defaultIndexPattern,
+  ]);
   const getSignalIndexNameSelector = useMemo(
     () => sourcererSelectors.signalIndexNameSelector(),
     []
@@ -52,32 +60,37 @@ export const useInitSourcerer = (
       !loadingSignalIndex &&
       signalIndexName != null &&
       signalIndexNameSelector == null &&
-      (activeTimeline == null ||
-        (activeTimeline != null && activeTimeline.savedObjectId == null)) &&
+      (activeTimeline == null || activeTimeline.savedObjectId == null) &&
       initialTimelineSourcerer.current
     ) {
       initialTimelineSourcerer.current = false;
       dispatch(
         sourcererActions.setSelectedIndexPatterns({
           id: SourcererScopeName.timeline,
-          selectedPatterns: [...[], signalIndexName], // TODO: Steph/sourcerer get new default KIP to be selected by default
+          selectedPatterns: [...defaultIndexPatternSelection, signalIndexName],
         })
       );
     } else if (
       signalIndexNameSelector != null &&
-      (activeTimeline == null ||
-        (activeTimeline != null && activeTimeline.savedObjectId == null)) &&
+      (activeTimeline == null || activeTimeline.savedObjectId == null) &&
       initialTimelineSourcerer.current
     ) {
       initialTimelineSourcerer.current = false;
       dispatch(
         sourcererActions.setSelectedIndexPatterns({
           id: SourcererScopeName.timeline,
-          selectedPatterns: [...[], signalIndexNameSelector], // TODO: Steph/sourcerer get new default KIP to be selected by default
+          selectedPatterns: [...defaultIndexPatternSelection, signalIndexNameSelector],
         })
       );
     }
-  }, [activeTimeline, dispatch, loadingSignalIndex, signalIndexName, signalIndexNameSelector]);
+  }, [
+    activeTimeline,
+    defaultIndexPatternSelection,
+    dispatch,
+    loadingSignalIndex,
+    signalIndexName,
+    signalIndexNameSelector,
+  ]);
 
   // Related to the detection page
   useEffect(() => {
@@ -90,7 +103,7 @@ export const useInitSourcerer = (
       initialDetectionSourcerer.current = false;
       dispatch(
         sourcererActions.setSelectedIndexPatterns({
-          id: scopeId,
+          id: SourcererScopeName.detections,
           selectedPatterns: [signalIndexName],
         })
       );
@@ -102,7 +115,7 @@ export const useInitSourcerer = (
       initialDetectionSourcerer.current = false;
       dispatch(
         sourcererActions.setSelectedIndexPatterns({
-          id: scopeId,
+          id: SourcererScopeName.detections,
           selectedPatterns: [signalIndexNameSelector],
         })
       );
@@ -112,8 +125,7 @@ export const useInitSourcerer = (
 
 export const useSourcererScope = (scope: SourcererScopeName = SourcererScopeName.default) => {
   const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
-  const SourcererScope = useDeepEqualSelector((state) => sourcererScopeSelector(state, scope));
-  return SourcererScope;
+  return useDeepEqualSelector((state) => sourcererScopeSelector(state, scope));
 };
 
 export const getScopeFromPath = (

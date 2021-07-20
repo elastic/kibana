@@ -8,13 +8,23 @@
 import memoizeOne from 'memoize-one';
 import { createSelector } from 'reselect';
 import { State } from '../types';
-import { SourcererScopeById, ManageScope, KibanaIndexPatterns, SourcererScopeName } from './model';
+import {
+  KibanaIndexPattern,
+  KibanaIndexPatterns,
+  ManageScope,
+  SourcererScopeById,
+  SourcererScopeName,
+} from './model';
+import { getPatternList } from './helpers';
 
 export const sourcererKibanaIndexPatternsSelector = ({ sourcerer }: State): KibanaIndexPatterns =>
   sourcerer.kibanaIndexPatterns;
 
 export const sourcererSignalIndexNameSelector = ({ sourcerer }: State): string | null =>
   sourcerer.signalIndexName;
+
+export const sourcererDefaultIndexPatternSelector = ({ sourcerer }: State): KibanaIndexPattern =>
+  sourcerer.defaultIndexPattern;
 
 export const sourcererScopeIdSelector = (
   { sourcerer }: State,
@@ -29,41 +39,45 @@ export const sourcererScopesSelector = ({ sourcerer }: State): SourcererScopeByI
 export const scopesSelector = () => createSelector(sourcererScopesSelector, (scopes) => scopes);
 
 export const kibanaIndexPatternsSelector = () =>
-  createSelector(
-    sourcererKibanaIndexPatternsSelector,
-    (kibanaIndexPatterns) => kibanaIndexPatterns
-  );
+  createSelector(sourcererKibanaIndexPatternsSelector, (patterns) => patterns);
 
 export const signalIndexNameSelector = () =>
   createSelector(sourcererSignalIndexNameSelector, (signalIndexName) => signalIndexName);
 
+export const defaultIndexPatternSelector = () =>
+  createSelector(sourcererDefaultIndexPatternSelector, (patterns) => patterns);
+
 export const getIndexNamesSelectedSelector = () => {
   const getScopeSelector = scopeIdSelector();
+  const getDefaultIndexPatternSelector = defaultIndexPatternSelector();
 
-  const mapStateToProps = (
+  return (
     state: State,
     scopeId: SourcererScopeName
   ): { indexNames: string[]; previousIndexNames: string } => {
     const scope = getScopeSelector(state, scopeId);
+    const defaultIndexPattern = getDefaultIndexPatternSelector(state);
     return {
-      indexNames: scope.selectedPatterns.length === 0 ? [] : scope.selectedPatterns, // TODO: Steph/sourcerer get new default KIP to be selected by default
+      indexNames:
+        scope.selectedPatterns.length === 0
+          ? getPatternList(defaultIndexPattern)
+          : scope.selectedPatterns,
       previousIndexNames: scope.indexPattern.title,
     };
   };
-  return mapStateToProps;
 };
 
 export const getAllExistingIndexNamesSelector = () => {
   const getSignalIndexNameSelector = signalIndexNameSelector();
+  const getDefaultIndexPatternSelector = defaultIndexPatternSelector();
 
-  const mapStateToProps = (state: State): string[] => {
+  return (state: State): string[] => {
     const signalIndexName = getSignalIndexNameSelector(state);
+    const defaultIndexPattern = getPatternList(getDefaultIndexPatternSelector(state));
     return signalIndexName != null
-      ? [...[], signalIndexName] // TODO: Steph/sourcerer get new default KIP to be selected by default
-      : [];
+      ? [...defaultIndexPattern, signalIndexName]
+      : defaultIndexPattern;
   };
-
-  return mapStateToProps;
 };
 
 const EXCLUDE_ELASTIC_CLOUD_INDEX = '-*elastic-cloud-logs-*';
@@ -85,7 +99,7 @@ export const getSourcererScopeSelector = () => {
     (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
   );
 
-  const mapStateToProps = (state: State, scopeId: SourcererScopeName): ManageScope => {
+  return (state: State, scopeId: SourcererScopeName): ManageScope => {
     const scope = getScopeIdSelector(state, scopeId);
     const selectedPatterns = getSelectedPatterns(scope.selectedPatterns.sort().join());
     const indexPattern = getIndexPattern(scope.indexPattern, selectedPatterns.join());
@@ -96,5 +110,4 @@ export const getSourcererScopeSelector = () => {
       indexPattern,
     };
   };
-  return mapStateToProps;
 };
