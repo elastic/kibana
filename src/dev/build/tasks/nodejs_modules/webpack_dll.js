@@ -21,6 +21,7 @@ import { deleteAll, read, write } from '../../lib';
 import { dirname, sep, relative } from 'path';
 import pkgUp from 'pkg-up';
 import globby from 'globby';
+import normalizePosixPath from 'normalize-path';
 
 export async function getDllEntries(manifestPath, whiteListedModules) {
   const manifest = JSON.parse(await read(manifestPath));
@@ -53,7 +54,7 @@ export async function getDllEntries(manifestPath, whiteListedModules) {
 export async function cleanDllModuleFromEntryPath(logger, entryPath) {
   const modulePkgPath = await pkgUp(entryPath);
   const modulePkg = JSON.parse(await read(modulePkgPath));
-  const moduleDir = dirname(modulePkgPath);
+  const moduleDir = normalizePosixPath(dirname(modulePkgPath));
 
   // Cancel the cleanup for this module as it
   // was already done.
