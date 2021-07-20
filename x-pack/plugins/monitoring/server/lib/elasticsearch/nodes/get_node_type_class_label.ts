@@ -6,6 +6,10 @@
  */
 
 import { nodeTypeLabel, nodeTypeClass } from './lookups';
+import {
+  ElasticsearchLegacySource,
+  ElasticsearchMetricbeatNode,
+} from '../../../../common/types/es';
 
 /*
  * Note: currently only `node` and `master` are supported due to
@@ -13,8 +17,11 @@ import { nodeTypeLabel, nodeTypeClass } from './lookups';
  * @param {Object} node - a node object from getNodes / getNodeSummary
  * @param {Object} type - the node type calculated from `calculateNodeType`
  */
-export function getNodeTypeClassLabel(node, type) {
-  const nodeType = node.master ? 'master' : type;
+export function getNodeTypeClassLabel(
+  node: ElasticsearchLegacySource['source_node'] | ElasticsearchMetricbeatNode,
+  type: keyof typeof nodeTypeLabel
+) {
+  const nodeType = node && 'master' in node ? 'master' : type;
   const returnObj = {
     nodeType,
     nodeTypeLabel: nodeTypeLabel[nodeType],

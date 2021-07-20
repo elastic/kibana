@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { checkParam } from '../../error_missing_required';
@@ -14,7 +13,7 @@ import { createQuery } from '../../create_query';
 // @ts-ignore
 import { ElasticsearchMetric } from '../../metrics';
 // @ts-ignore
-import { getDefaultNodeFromId } from './get_default_node_from_id';
+import { getDefaultNodeFromId, isDefaultNode } from './get_default_node_from_id';
 // @ts-ignore
 import { calculateNodeType } from './calculate_node_type';
 // @ts-ignore
@@ -23,7 +22,6 @@ import {
   ElasticsearchSource,
   ElasticsearchResponse,
   ElasticsearchLegacySource,
-  ElasticsearchMetricbeatNode,
 } from '../../../../common/types/es';
 import { LegacyRequest } from '../../../types';
 
@@ -35,9 +33,9 @@ export function handleResponse(
   return (response: ElasticsearchResponse) => {
     let nodeSummary = {};
     const nodeStatsHits = response.hits?.hits ?? [];
-    const nodes: Array<
-      ElasticsearchLegacySource['source_node'] | ElasticsearchMetricbeatNode
-    > = nodeStatsHits.map((hit) => hit._source.elasticsearch?.node || hit._source.source_node); // using [0] value because query results are sorted desc per timestamp
+    const nodes: Array<ElasticsearchLegacySource['source_node']> = nodeStatsHits.map(
+      (hit) => hit._source.elasticsearch?.node || hit._source.source_node
+    ); // using [0] value because query results are sorted desc per timestamp
     const node = nodes[0] || getDefaultNodeFromId(nodeUuid);
     const sourceStats =
       response.hits?.hits[0]?._source.elasticsearch?.node?.stats ||
@@ -46,7 +44,7 @@ export function handleResponse(
       clusterState && clusterState.nodes ? clusterState.nodes[nodeUuid] : undefined;
     const stats = {
       resolver: nodeUuid,
-      node_ids: nodes.map((_node) => node.id || node.uuid),
+      node_ids: nodes.map((_node) => (isDefaultNode(node) ? node.id : node.id || node.uuid)),
       attributes: node.attributes,
       transport_address: response.hits?.hits[0]?._source.service?.address || node.transport_address,
       name: node.name,
@@ -54,8 +52,10 @@ export function handleResponse(
     };
 
     if (clusterNode) {
-      const _shardStats = get(shardStats, ['nodes', nodeUuid], {});
-      const calculatedNodeType = calculateNodeType(stats, get(clusterState, 'master_node')); // set type for labeling / iconography
+      const _shardStats = shardStats.nodes[nodeUuid] ?? {};
+      // FIX: clusterState.master_node is a boolean but being passed as a string?
+      // @ts-ignore
+      const calculatedNodeType = calculateNodeType(stats, clusterState?.master_node); // set type for labeling / iconography
       const { nodeType, nodeTypeLabel, nodeTypeClass } = getNodeTypeClassLabel(
         node,
         calculatedNodeType

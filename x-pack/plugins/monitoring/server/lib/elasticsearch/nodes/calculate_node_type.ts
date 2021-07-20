@@ -12,16 +12,22 @@
  *  - client only node: --node.data=false --node.master=false
  *  https://www.elastic.co/guide/en/elasticsearch/reference/2.x/modules-node.html
  */
-import { includes, isUndefined } from 'lodash';
+import { isUndefined } from 'lodash';
+import { ElasticsearchLegacySource } from '../../../../common/types/es';
 
-export function calculateNodeType(node, masterNodeId) {
+type Node = ElasticsearchLegacySource['source_node'] & {
+  attributes?: Record<string, any>;
+  node_ids: Array<string | undefined>;
+};
+
+export function calculateNodeType(node: Node, masterNodeId?: string) {
   const attrs = node.attributes || {};
 
-  function mightBe(attr) {
+  function mightBe(attr?: string) {
     return attr === 'true' || isUndefined(attr);
   }
 
-  function isNot(attr) {
+  function isNot(attr?: string) {
     return attr === 'false';
   }
 
@@ -30,7 +36,7 @@ export function calculateNodeType(node, masterNodeId) {
   if (uuid !== undefined && uuid === masterNodeId) {
     return 'master';
   }
-  if (includes(node.node_ids, masterNodeId)) {
+  if (node.node_ids.includes(masterNodeId)) {
     return 'master';
   }
   if (isNot(attrs.data) && isNot(attrs.master)) {

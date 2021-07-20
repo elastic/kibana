@@ -10,7 +10,7 @@
  * If node information can't be retrieved, we call this function
  * that provides some usable defaults
  */
-export function getDefaultNodeFromId(nodeId) {
+export function getDefaultNodeFromId(nodeId: string) {
   return {
     id: nodeId,
     name: nodeId,
@@ -19,4 +19,8 @@ export function getDefaultNodeFromId(nodeId) {
     type: 'node',
     attributes: {},
   };
+}
+
+export function isDefaultNode(node: any): node is ReturnType<typeof getDefaultNodeFromId> {
+  return !node.uuid;
 }
