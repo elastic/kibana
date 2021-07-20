@@ -58,7 +58,7 @@ interface PluginsSetup {
 }
 
 interface PluginsStart {
-  spaces?: SpacesPluginStart;
+  spaces: SpacesPluginStart;
 }
 
 export interface RouteDependencies {
