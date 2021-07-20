@@ -61,8 +61,8 @@ export const datatable: ExpressionFunctionDefinition<
       help: '',
     },
   },
-  fn(data, args, context) {
-    const [firstTable] = Object.values(data.data.tables);
+  fn({ data, untransposedData, columns }, args, context) {
+    const [firstTable] = Object.values(data.tables);
     const { sortingColumnId: sortBy, sortingDirection: sortDirection } = args;
 
     if (
@@ -77,10 +77,11 @@ export const datatable: ExpressionFunctionDefinition<
       type: 'render',
       as: 'lens_datatable_renderer',
       value: {
-        ...data,
+        data,
+        untransposedData,
         args: {
           ...args,
-          columns: data.columns,
+          columns,
         },
       },
     };
