@@ -546,7 +546,7 @@ export const INITIAL_PROMPT_TEXT = i18n.translate(
 export const OVERWRITE_WITH_SAME_NAME = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.importRuleModal.overwriteDescription',
   {
-    defaultMessage: 'Overwrite existing Rules with conflicting Rule ID',
+    defaultMessage: 'Overwrite existing detection rules with conflicting Rule ID',
   }
 );
 
