@@ -44,7 +44,7 @@ type LifecycleAlertService<
   ActionGroupIds extends string = never
 > = (alert: {
   id: string;
-  fields: Record<string, unknown>;
+  fields: Record<string, unknown> & Partial<Omit<ParsedTechnicalFields, typeof ALERT_ID>>;
 }) => AlertInstance<InstanceState, InstanceContext, ActionGroupIds>;
 
 export interface LifecycleAlertServices<
@@ -141,7 +141,7 @@ export const createLifecycleExecutor = (
     })
   )(wrappedStateRt<State>().decode(previousState));
 
-  const currentAlerts: Record<string, { [ALERT_ID]: string }> = {};
+  const currentAlerts: Record<string, Partial<ParsedTechnicalFields>> = {};
 
   const timestamp = options.startedAt.toISOString();
 
@@ -182,12 +182,7 @@ export const createLifecycleExecutor = (
     `Tracking ${allAlertIds.length} alerts (${newAlertIds.length} new, ${trackedAlertStatesOfRecovered.length} recovered)`
   );
 
-  const alertsDataMap: Record<
-    string,
-    {
-      [ALERT_ID]: string;
-    }
-  > = {
+  const alertsDataMap: Record<string, Partial<ParsedTechnicalFields>> = {
     ...currentAlerts,
   };
 
