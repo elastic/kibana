@@ -15,7 +15,7 @@ describe('kql syntax errors', () => {
     expect(() => {
       fromKueryExpression('response:');
     }).toThrow(
-      'Expected whitespace, , whitespace, , value, whitespace, , whitespace, , value, whitespace, , whitespace, , value, whitespace, , whitespace, , value but end of input found.\n' +
+      'Expected "(", "{", value, whitespace but end of input found.\n' +
         'response:\n' +
         '---------^'
     );
@@ -25,7 +25,7 @@ describe('kql syntax errors', () => {
     expect(() => {
       fromKueryExpression('response:200 or ');
     }).toThrow(
-      'Expected NOT, , field name, field name, field name, value, NOT, , field name, field name, field name, value but end of input found.\n' +
+      'Expected "(", NOT, field name, value but end of input found.\n' +
         'response:200 or \n' +
         '----------------^'
     );
@@ -35,9 +35,7 @@ describe('kql syntax errors', () => {
     expect(() => {
       fromKueryExpression('response:(200 or )');
     }).toThrow(
-      'Expected NOT, , value, NOT, , value, NOT, , value, NOT, , value, NOT, , value, NOT, , value, NOT, , value, NOT, , value but ")" found.\n' +
-        'response:(200 or )\n' +
-        '-----------------^'
+      'Expected "(", NOT, value but ")" found.\n' + 'response:(200 or )\n' + '-----------------^'
     );
   });
 
@@ -45,17 +43,17 @@ describe('kql syntax errors', () => {
     expect(() => {
       fromKueryExpression('response:200 and not ');
     }).toThrow(
-      'Expected , field name, field name, field name, value, , field name, field name, field name, value but end of input found.\n' +
+      'Expected "(", field name, value but end of input found.\n' +
         'response:200 and not \n' +
         '---------------------^'
     );
   });
 
-  it('should throw an error for a NOT list missing a sub-query', () => {
+  it('should throw an error for a "missing a sub-query', () => {
     expect(() => {
       fromKueryExpression('response:(200 and not )');
     }).toThrow(
-      'Expected , value, , value, , value, , value, , value, , value, , value, , value but ")" found.\n' +
+      'Expected "(", value but ")" found.\n' +
         'response:(200 and not )\n' +
         '----------------------^'
     );
@@ -64,42 +62,36 @@ describe('kql syntax errors', () => {
   it('should throw an error for unbalanced quotes', () => {
     expect(() => {
       fromKueryExpression('foo:"ba ');
-    }).toThrow(
-      'Expected whitespace, , whitespace, , value, whitespace, , whitespace, , value, whitespace, , whitespace, , value, whitespace, , whitespace, , value but """ found.\n' +
-        'foo:"ba \n' +
-        '----^'
-    );
+    }).toThrow('Expected "(", "{", value, whitespace but """ found.\n' + 'foo:"ba \n' + '----^');
   });
 
   it('should throw an error for unescaped quotes in a quoted string', () => {
     expect(() => {
       fromKueryExpression('foo:"ba "r"');
     }).toThrow(
-      'Expected AND, OR, AND, whitespace,  but "r" found.\n' + 'foo:"ba "r"\n' + '---------^'
+      'Expected AND, OR, end of input, whitespace but "r" found.\n' + 'foo:"ba "r"\n' + '---------^'
     );
   });
 
   it('should throw an error for unescaped special characters in literals', () => {
     expect(() => {
       fromKueryExpression('foo:ba:r');
-    }).toThrow('Expected AND, OR, AND, whitespace,  but ":" found.\n' + 'foo:ba:r\n' + '------^');
+    }).toThrow(
+      'Expected AND, OR, end of input, whitespace but ":" found.\n' + 'foo:ba:r\n' + '------^'
+    );
   });
 
   it('should throw an error for range queries missing a value', () => {
     expect(() => {
       fromKueryExpression('foo > ');
-    }).toThrow(
-      'Expected whitespace, literal, whitespace, literal, whitespace, literal, whitespace, literal but end of input found.\n' +
-        'foo > \n' +
-        '------^'
-    );
+    }).toThrow('Expected literal, whitespace but end of input found.\n' + 'foo > \n' + '------^');
   });
 
   it('should throw an error for range queries missing a field', () => {
     expect(() => {
       fromKueryExpression('< 1000');
     }).toThrow(
-      'Expected whitespace, NOT, , field name, field name, field name, value, NOT, , field name, field name, field name, value, NOT, , field name, field name, field name, value, NOT, , field name, field name, field name, value, whitespace,  but "<" found.\n' +
+      'Expected "(", NOT, end of input, field name, value, whitespace but "<" found.\n' +
         '< 1000\n' +
         '^'
     );
