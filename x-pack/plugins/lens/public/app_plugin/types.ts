@@ -114,6 +114,10 @@ export interface LensAppServices {
   dashboardFeatureFlag: DashboardFeatureFlagConfig;
 }
 
+export interface LensTopNavTooltips {
+  showExportWarning: () => string | undefined;
+}
+
 export interface LensTopNavActions {
   saveAndReturn: () => void;
   showSaveModal: () => void;

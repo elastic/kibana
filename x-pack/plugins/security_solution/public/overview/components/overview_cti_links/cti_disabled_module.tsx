@@ -21,11 +21,11 @@ export const CtiDisabledModuleComponent = () => {
   const danger = useMemo(
     () => (
       <CtiInnerPanel
-        color={'danger'}
+        color={'warning'}
         title={i18n.DANGER_TITLE}
         body={i18n.DANGER_BODY}
         button={
-          <EuiButton href={threatIntelDocLink} color={'danger'} fill>
+          <EuiButton href={threatIntelDocLink} color={'warning'} target="_blank">
             {i18n.DANGER_BUTTON}
           </EuiButton>
         }
@@ -36,7 +36,12 @@ export const CtiDisabledModuleComponent = () => {
   );
 
   return (
-    <ThreatIntelPanelView totalEventCount={0} splitPanel={danger} listItems={EMPTY_LIST_ITEMS} />
+    <ThreatIntelPanelView
+      totalEventCount={0}
+      splitPanel={danger}
+      listItems={EMPTY_LIST_ITEMS}
+      isInspectEnabled={false}
+    />
   );
 };
 
