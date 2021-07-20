@@ -34,10 +34,11 @@ import { Sort } from './sort';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
 import { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import { OnRowSelected, OnSelectAll } from '../types';
-import { tGridActions } from '../../../';
+import { StatefulFieldsBrowser, tGridActions } from '../../../';
 import { TGridModel, tGridSelectors, TimelineState } from '../../../store/t_grid';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { RowAction } from './row_action';
+import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from '../toolbar/fields_browser/helpers';
 import * as i18n from './translations';
 
 interface OwnProps {
@@ -145,6 +146,7 @@ export type StatefulBodyProps = OwnProps & PropsFromRedux;
  * The Body component is used everywhere timeline is used within the security application. It is the highest level component
  * that is shared across all implementations of the timeline.
  */
+// eslint-disable-next-line react/display-name
 export const BodyComponent = React.memo<StatefulBodyProps>(
   ({
     activePage,
@@ -214,11 +216,25 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
 
     const toolbarVisibility: EuiDataGridToolBarVisibilityOptions = useMemo(
       () => ({
-        additionalControls,
+        additionalControls: (
+          <>
+            {additionalControls ?? null}
+            {
+              <StatefulFieldsBrowser
+                data-test-subj="field-browser"
+                height={FIELD_BROWSER_HEIGHT}
+                width={FIELD_BROWSER_WIDTH}
+                browserFields={browserFields}
+                timelineId={id}
+                columnHeaders={columnHeaders}
+              />
+            }
+          </>
+        ),
         showColumnSelector: { allowHide: false, allowReorder: true },
         showStyleSelector: false,
       }),
-      [additionalControls]
+      [additionalControls, browserFields, columnHeaders, id]
     );
 
     const [sortingColumns, setSortingColumns] = useState([]);
@@ -325,8 +341,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     );
   }
 );
-
-BodyComponent.displayName = 'BodyComponent';
 
 const makeMapStateToProps = () => {
   const memoizedColumnHeaders: (
