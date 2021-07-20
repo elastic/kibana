@@ -17,6 +17,7 @@ const createAlertingAuthorizationMock = () => {
     filterByRuleTypeAuthorization: jest.fn(),
     getFindAuthorizationFilter: jest.fn(),
     getAugmentedRuleTypesWithAuthorization: jest.fn(),
+    getSpaceId: jest.fn(),
   };
   return mocked;
 };

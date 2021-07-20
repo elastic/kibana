@@ -14,6 +14,7 @@ import {
   ReactExpressionRendererType,
   ReactExpressionRendererProps,
 } from 'src/plugins/expressions/public';
+import type { IExecutionContextContainer } from 'src/core/public';
 import { ExecutionContextSearch } from 'src/plugins/data/public';
 import { DefaultInspectorAdapters, RenderMode } from 'src/plugins/expressions';
 import classNames from 'classnames';
@@ -39,6 +40,7 @@ export interface ExpressionWrapperProps {
   className?: string;
   canEdit: boolean;
   onRuntimeError: () => void;
+  executionContext?: IExecutionContextContainer;
 }
 
 interface VisualizationErrorProps {
@@ -108,6 +110,7 @@ export function ExpressionWrapper({
   errors,
   canEdit,
   onRuntimeError,
+  executionContext,
 }: ExpressionWrapperProps) {
   return (
     <I18nProvider>
@@ -125,6 +128,7 @@ export function ExpressionWrapper({
             onData$={onData$}
             renderMode={renderMode}
             syncColors={syncColors}
+            executionContext={executionContext}
             renderError={(errorMessage, error) => {
               onRuntimeError();
               return (

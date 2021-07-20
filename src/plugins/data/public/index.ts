@@ -209,10 +209,12 @@ export {
  * Exporters (CSV)
  */
 
-import { datatableToCSV, CSV_MIME_TYPE } from '../common';
+import { datatableToCSV, CSV_MIME_TYPE, cellHasFormulas, tableHasFormulas } from '../common';
 export const exporters = {
   datatableToCSV,
   CSV_MIME_TYPE,
+  cellHasFormulas,
+  tableHasFormulas,
 };
 
 /*
@@ -269,6 +271,7 @@ export {
   IndexPatternLoadExpressionFunctionDefinition,
   fieldList,
   INDEX_PATTERN_SAVED_OBJECT_TYPE,
+  IndexPatternType,
 } from '../common';
 
 export { DuplicateIndexPatternError } from '../common/index_patterns/errors';

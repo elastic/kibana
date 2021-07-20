@@ -104,7 +104,7 @@ export const RenderWithFn: FC<Props> = ({
     try {
       render();
       firstRender.current = false;
-    } catch (err) {
+    } catch (err: any) {
       onError(err, { title: strings.getRenderErrorMessage(functionName) });
     }
   }, [domNode, functionName, onError, render, resetRenderTarget, reuseNode]);

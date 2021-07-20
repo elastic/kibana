@@ -30,9 +30,13 @@ export interface UseFieldValueAutocompleteProps {
   query: string;
   indexPattern: IIndexPattern | undefined;
 }
+
 /**
  * Hook for using the field value autocomplete service
+ * There is a copy within:
+ * x-pack/plugins/lists/public/exceptions/components/autocomplete/hooks.ts
  *
+ * TODO: This should be in its own packaged and not copied, https://github.com/elastic/kibana/issues/105378
  */
 export const useFieldValueAutocomplete = ({
   selectedField,
