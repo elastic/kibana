@@ -291,6 +291,7 @@ export function DiscoverLayout({
                 hasShadow={false}
                 className={classNames('dscPageContent', {
                   'dscPageContent--centered': contentCentered,
+                  'dscPageContent--emptyPrompt': resultState === 'none',
                 })}
               >
                 {resultState === 'none' && (

@@ -40,21 +40,21 @@ export function DiscoverNoResults({
 }: DiscoverNoResultsProps) {
   const callOut = !error ? (
     <EuiFlexItem grow={false} className="dscNoResults">
+      <EuiTitle className="dscNoResults__title">
+        <h2 data-test-subj="discoverNoResults">
+          <FormattedMessage
+            id="discover.noResults.searchExamples.noResultsMatchSearchCriteriaTitle"
+            defaultMessage="No results match your search criteria"
+          />
+        </h2>
+      </EuiTitle>
+      <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="xl" alignItems="center" direction="rowReverse" wrap>
-        <EuiFlexItem grow={1}>
+        <EuiFlexItem className="dscNoResults__illustration" grow={1}>
           <NoResultsIllustration />
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
-          <EuiTitle>
-            <h2 data-test-subj="discoverNoResults">
-              <FormattedMessage
-                id="discover.noResults.searchExamples.noResultsMatchSearchCriteriaTitle"
-                defaultMessage="No results match your search criteria"
-              />
-            </h2>
-          </EuiTitle>
           {!!timeFieldName && getTimeFieldMessage()}
-          {timeFieldName && (hasFilters || hasQuery) && <EuiSpacer size="m" />}
           {(hasFilters || hasQuery) && (
             <AdjustSearch
               hasFilters={hasFilters}

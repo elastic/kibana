@@ -19,7 +19,7 @@ import {
 export function getTimeFieldMessage() {
   return (
     <Fragment>
-      <EuiDescriptionList>
+      <EuiDescriptionList compressed>
         <EuiDescriptionListTitle data-test-subj="discoverNoResultsTimefilter">
           <FormattedMessage
             id="discover.noResults.expandYourTimeRangeTitle"
@@ -29,7 +29,7 @@ export function getTimeFieldMessage() {
         <EuiDescriptionListDescription>
           <FormattedMessage
             id="discover.noResults.queryMayNotMatchTitle"
-            defaultMessage="You are searching time series data and no matches were found in the specified time range. Try searching over a larger period of time."
+            defaultMessage="Try searching over a larger period of time."
           />
         </EuiDescriptionListDescription>
       </EuiDescriptionList>
@@ -48,8 +48,8 @@ export function AdjustSearch({ hasFilters, hasQuery, onDisableFilters }: AdjustS
     <Fragment>
       {hasQuery && (
         <>
-          <EuiSpacer size="m" />
-          <EuiDescriptionList>
+          <EuiSpacer size="s" />
+          <EuiDescriptionList compressed>
             <EuiDescriptionListTitle data-test-subj="discoverNoResultsAdjustSearch">
               <FormattedMessage
                 id="discover.noResults.adjustSearch"
@@ -64,8 +64,8 @@ export function AdjustSearch({ hasFilters, hasQuery, onDisableFilters }: AdjustS
       )}
       {hasFilters && (
         <>
-          <EuiSpacer size="m" />
-          <EuiDescriptionList>
+          <EuiSpacer size="s" />
+          <EuiDescriptionList compressed>
             <EuiDescriptionListTitle data-test-subj="discoverNoResultsAdjustFilters">
               <FormattedMessage
                 id="discover.noResults.adjustFilters"
