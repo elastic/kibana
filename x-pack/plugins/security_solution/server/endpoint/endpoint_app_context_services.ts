@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  KibanaRequest,
-  Logger,
-  SavedObjectsServiceStart,
-  SavedObjectsClientContract,
-} from 'src/core/server';
+import { KibanaRequest, Logger, SavedObjectsServiceStart } from 'src/core/server';
 import { ExceptionListClient } from '../../../lists/server';
 import {
   CasesClient,
@@ -128,13 +123,6 @@ export class EndpointAppContextService {
 
   public getManifestManager(): ManifestManager | undefined {
     return this.manifestManager;
-  }
-
-  public getScopedSavedObjectsClient(req: KibanaRequest): SavedObjectsClientContract {
-    if (!this.savedObjectsStart) {
-      throw new Error(`must call start on ${EndpointAppContextService.name} to call getter`);
-    }
-    return this.savedObjectsStart.getScopedClient(req, { excludedWrappers: ['security'] });
   }
 
   public getLicenseService(): LicenseService {
