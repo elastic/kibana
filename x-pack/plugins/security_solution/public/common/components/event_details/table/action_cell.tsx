@@ -20,7 +20,8 @@ interface Props {
   disabled?: boolean;
   eventId: string;
   fieldFromBrowserField: Readonly<Record<string, Partial<BrowserField>>>;
-  getLinkValue: (field: string) => string | null;
+  getLinkValue?: (field: string) => string | null;
+  linkValue?: string | null | undefined;
   onFilterAdded?: () => void;
   timelineId?: string;
   toggleColumn?: (column: ColumnHeaderOptions) => void;
@@ -34,6 +35,7 @@ export const ActionCell: React.FC<Props> = React.memo(
     eventId,
     fieldFromBrowserField,
     getLinkValue,
+    linkValue,
     onFilterAdded,
     timelineId,
     toggleColumn,
@@ -47,7 +49,7 @@ export const ActionCell: React.FC<Props> = React.memo(
       fieldFromBrowserField,
       fieldType: data.type,
       isObjectArray: data.isObjectArray,
-      linkValue: getLinkValue(data.field),
+      linkValue: (getLinkValue && getLinkValue(data.field)) ?? linkValue,
       values,
     });
 

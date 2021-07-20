@@ -11,7 +11,6 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import * as i18n from './translations';
-import { FormattedFieldValue } from '../../../timelines/components/timeline/body/renderers/formatted_field';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import {
@@ -36,6 +35,8 @@ import { MarkdownRenderer } from '../markdown_editor';
 import { LineClamp } from '../line_clamp';
 import { endpointAlertCheck } from '../../utils/endpoint_alert_check';
 import { getEmptyValue } from '../empty_value';
+import { ActionCell } from './table/action_cell';
+import { FieldValueCell } from './table/field_value_cell';
 
 export const Indent = styled.div`
   padding: 0 8px;
@@ -77,25 +78,36 @@ const networkFields = [
 ];
 
 const getDescription = ({
-  contextId,
+  data,
   eventId,
-  fieldName,
-  value,
-  fieldType = '',
+  fieldFromBrowserField,
   linkValue,
+  timelineId,
+  values,
 }: AlertSummaryRow['description']) => {
-  if (isEmpty(value)) {
+  if (isEmpty(values)) {
     return <>{getEmptyValue()}</>;
   }
   return (
-    <FormattedFieldValue
-      contextId={`alert-details-value-formatted-field-value-${contextId}-${eventId}-${fieldName}-${value}`}
-      eventId={eventId}
-      fieldName={fieldName}
-      fieldType={fieldType}
-      value={value}
-      linkValue={linkValue}
-    />
+    <>
+      <FieldValueCell
+        contextId={timelineId}
+        data={data}
+        eventId={eventId}
+        fieldFromBrowserField={fieldFromBrowserField}
+        linkValue={linkValue}
+        values={values}
+      />
+      <ActionCell
+        contextId={timelineId}
+        data={data}
+        eventId={eventId}
+        fieldFromBrowserField={fieldFromBrowserField}
+        linkValue={linkValue}
+        timelineId={timelineId}
+        values={values}
+      />
+    </>
   );
 };
 
@@ -127,15 +139,13 @@ const getSummaryRows = ({
   return data != null
     ? tableFields.reduce<SummaryRow[]>((acc, item) => {
         const initialDescription = {
-          title: item.label ?? item.id,
-          description: {
-            contextId: timelineId,
-            eventId,
-            fieldName: item.id,
-            value: null,
-            fieldType: 'string',
-            linkValue: undefined,
-          },
+          contextId: timelineId,
+          eventId,
+          fieldName: item.id,
+          value: null,
+          fieldType: 'string',
+          linkValue: undefined,
+          timelineId,
         };
         const field = data.find((d) => d.field === item.id);
         if (!field) {
@@ -155,9 +165,12 @@ const getSummaryRows = ({
         const fieldType = get(`${category}.fields.${field.field}.type`, browserFields) as string;
         const description = {
           ...initialDescription,
+          data: field,
           value,
+          values: field.originalValue,
           fieldType: item.fieldType ?? fieldType,
           linkValue: linkValue ?? undefined,
+          fieldFromBrowserField: get(`${category}.fields.${field.field}`, browserFields),
         };
 
         if (item.id === 'signal.threshold_result.terms') {

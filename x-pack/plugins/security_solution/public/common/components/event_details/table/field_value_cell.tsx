@@ -18,7 +18,8 @@ export interface FieldValueCellProps {
   data: EventFieldsData;
   eventId: string;
   fieldFromBrowserField: Readonly<Record<string, Partial<BrowserField>>>;
-  getLinkValue: (field: string) => string | null;
+  getLinkValue?: (field: string) => string | null;
+  linkValue?: string | null | undefined;
   values: string[] | null | undefined;
 }
 
@@ -29,6 +30,7 @@ export const FieldValueCell = React.memo(
     eventId,
     fieldFromBrowserField,
     getLinkValue,
+    linkValue,
     values,
   }: FieldValueCellProps) => {
     return (
@@ -55,7 +57,7 @@ export const FieldValueCell = React.memo(
                     fieldType={data.type}
                     isObjectArray={data.isObjectArray}
                     value={value}
-                    linkValue={getLinkValue(data.field)}
+                    linkValue={(getLinkValue && getLinkValue(data.field)) ?? linkValue}
                   />
                 )}
               </div>

@@ -24,6 +24,7 @@ import {
 
 import * as i18n from './translations';
 import { ColumnHeaderOptions } from '../../../../common';
+import { EventFieldsData } from './types';
 
 /**
  * Defines the behavior of the search input that appears above the table of data
@@ -56,11 +57,14 @@ export interface AlertSummaryRow {
   title: string;
   description: {
     contextId: string;
+    data: EventFieldsData;
     eventId: string;
+    fieldFromBrowserField: Readonly<Record<string, Partial<BrowserField>>>;
     fieldName: string;
-    value: string;
     fieldType: string;
     linkValue: string | undefined;
+    timelineId: string;
+    values: string[] | null | undefined;
   };
 }
 
