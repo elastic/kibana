@@ -1,9 +1,16 @@
 [[tsvb]]
 === TSVB
 
-*TSVB* enables you to visualize the data from multiple data series, supports <<aggregation-reference, 
-most {es} metric aggregations>>, multiple visualization types, custom functions, and some math. 
-To create *TSVB* visualization panels, your data must have a time field. 
+*TSVB* is a set of visualization types that you configure and display on dashboards.
+
+With *TSVB*, you can:
+
+* Combine an infinite number of <<aggregation-reference,aggregations>> to display your data.
+* Annotate time series data with timestamped events from an {es} index.
+* View the data in several types of visualizations, including charts, data tables, and markdown panels.
+* Display multiple <<index-patterns, index patterns>> in each visualization.
+* Use custom functions and some math on aggregations.
+* Customize the data with labels and colors.
 
 [role="screenshot"]
 image::visualize/images/tsvb-screenshot.png[TSVB overview]

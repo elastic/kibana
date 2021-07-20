@@ -1,10 +1,26 @@
 [[vega]]
 === Vega
 
-*Vega* and *Vega-Lite* are both grammars for creating custom visualizations.
-They are recommended for advanced users who are comfortable writing {es} queries manually.
-*Vega-Lite* is a good starting point for users who are new to both grammars, but they are
-not compatible.
+*Vega* and *Vega-Lite* are both grammars for creating custom visualizations. They are recommended for advanced users who are comfortable writing {es} queries manually.
+*Vega-Lite* is a good starting point for users who are new to both grammars, but they are not compatible.
+
+*Vega* and *Vega-Lite* panels can display one or more data sources, including {es}, Elastic Map Service,
+URL, or static data, and support <<reference-for-kibana-extensions,{kib} extensions>> that allow you to embed the panels on your dashboard and add interactive tools.
+
+Use *Vega* or *Vega-Lite* when you want to create visualizations with:
+
+* Aggregations that use `nested` or `parent/child` mapping
+* Aggregations without an index pattern
+* Queries that use custom time filters
+* Complex calculations
+* Extracted data from _source instead of aggregations
+* Scatter charts, sankey charts, and custom maps
+* An unsupported visual theme
+
+These grammars have some limitations: they do not support tables, and can't run queries conditionally.
+
+[role="screenshot"]
+image::images/vega.png[Vega UI]
 
 Both *Vega* and *Vega-Lite* use JSON, but {kib} has made this simpler to type by integrating
 https://hjson.github.io/[HJSON]. HJSON supports the following:

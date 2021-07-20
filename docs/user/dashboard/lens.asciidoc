@@ -1,11 +1,14 @@
 [[lens]]
 === Lens
 
-*Lens* let's you drag and drop the data fields you want to visualize, then uses heuristics to apply each field and create a visualization for you. If you already know how you want to display the fields in the visualization, you can drag and drop the fields directly onto the *Vertical axis*, *Hortizontal axis*, or other visualization-specific field grouping.
+To create visualization panels with *Lens*, you drag the data fields you want to visualize to the workspace, then *Lens* uses heuristics to apply each field and create a visualization for you. 
 
-Area, bar, and line charts allow you to visualize the data using multiple layers. Each layer can display a different index pattern and visualization type, which allows you to display multiple index patterns and visualization types in a single visualization. For each layer, you can choose the fields, bucket and metrics aggregation functions, and display options. The fields are grouped by *Vertical axis*, *Hortizontal axis*, and *Break down by*, and the *Vertical axis* and *Hortizontal axis* groups support multiple fields.
+With *Lens*, you can:
 
-All other visualization types support a single layer. The field groups are different for each visualization type, but also include the aggregation functions and display options.
+* Create area, line, and bar charts with multiple layers, indices, and visualization types.
+* Change the aggregation function and labels to customize the data.
+* Perform math on aggregations using *Formula*.
+* Use time shifts to compare data for two time intervals, such as month over month.
 
 ++++
 <script type="text/javascript" async 
@@ -25,73 +28,44 @@ data-type="inline"
 [[create-the-visualization-panel]]
 ==== Create visualizations
 
-Each time you create a visualization, you click *Create visualization* on the dashboard, then use the following process:
+If you're unsure about the visualization type you want to use, or how you want to display the data, drag the fields you want to visualize onto the workspace, then let *Lens* choose for you. 
 
-* *Choose the visualization type.* If you know the type of visualization you'd like to use, open the *Visualization type* menu, then select the visualization type before you drag and drop any fields. If you're unsure, drag and drop the fields you want to visualize onto the workspace, then let *Lens* choose the visualization type for you. 
+If you already know the visualization type you want to use, and how you want to display the data, use the following process:
+
+* *Choose the visualization type.* Open the *Chart type* dropdown, then select the visualization type before you drag any fields.  
 +
-To view the visualizations that *Lens* automatically created for the data, click the *Suggestions*. If one of the *Suggestions* meets your visualization needs, click *Save and return* to add it to the dashboard.
+To view more visualizations that *Lens* automatically created for the fields, click the *Suggestions*. If one of the *Suggestions* meets your visualization needs, click *Save and return* to add it to the dashboard.
 
-* *Choose the data you want to visualize.* If you know how you want to display each field, drag and drop the fields directly onto the *Vertical axis*, *Hortizontal axis*, or other visualization-specific field grouping, then use the automatically selected aggregation function. If you're unsure, drag and drop the fields onto the workspace. When you use the *Filters* function, you can skip this step.
+* *Choose the data you want to visualize.* Drag the fields directly to the layer pane. *Lens* automatically selects the aggregation function.
 +
 If you want to learn more about the data a field contains, click *i* next to the field.
 
-* *Edit and delete.* To change the function and display options, click the field name in the layer or visualization pane. To delete a field, close the configuration options, then click
-*Delete*. To reset the layer or visualization options, click *Reset*.
+* *Edit and delete.* To change the *Quick function* and display options, click the field in the layer pane. To delete a field, close the configuration options, then click *X* next to the field.
 
 [float]
-[[lens-required-choices]]
-==== Change the fields
+[[change-the-fields]]
+==== Change the fields list
 
-Change the list of fields you can use to drag and drop onto the workspace.
+Change the fields list to display a different index pattern, different time range, or add your own fields.
 
-* If you want to visualize the fields in a different index pattern, open the *Index pattern* menu, then select a new one. 
+* To create a visualization with fields in a different index pattern, open the *Change index pattern* dropdown, then select the index pattern. 
 
-* If the list of fields is empty, change the <<set-time-filter,time filter>>.
+* If the fields list is empty, change the <<set-time-filter,time filter>>.
 
-* To add fields, click *...*, then select *Add field to index pattern*.
+* To add fields, open the action menu (*...*) next to the *Change index pattern* dropdown, then select *Add field to index pattern*.
 +
 [role="screenshot"]
 image:images/runtime-field-menu.png[Dropdown menu located next to index pattern field with items for adding and managing fields, width=50%]
 +
-For more information about adding fields to index patterns and Painless scripting language examples, refer to <<runtime-fields,Runtime fields>>.
-
-[float]
-[[drag-and-drop-keyboard-navigation]]
-==== Create visualizations with keyboard navigation
-
-*Lens* has a fully accessible, continuously improved drag and drop system, which allows you to use a keyboard instead of a mouse.
-
-[role="screenshot"]
-image::images/lens_drag_drop_1.gif[Presented Lens drag and drop]
-
-. Set a focus on the chosen item. Most of the draggable elements have two focus states. The inner focus state opens a panel with detailed information or options. 
-The outer focus state allows you to drag an item. Tab through the page until you get the outer focus state on the chosen item:
-+
-[role="screenshot"]
-image::images/lens_drag_drop_2.png[Lens drag and drop focus state]
-
-. Complete the following actions:
-
-* To start dragging an item, press Space bar.
-
-* To select where you want to drop the item, use the Left and Right arrows.
-
-* To reorder the fields in the group, use Up and Down arrows.
-
-* To duplicate an operation, use the Left and Right arrows to select the `Drop a field or click to add` in the same group.
-+
-[role="screenshot"]
-image::images/lens_drag_drop_3.gif[Using drag and drop to reorder]
-
-. Press Space bar to confirm, or to cancel, press Esc.
+For more information about adding fields to index patterns and examples, refer to <<runtime-fields>>.
 
 [float]
 [[lens-formulas]]
 ==== Use formulas to perform math
 
-Formulas let you perform math on aggregated data. The most common formulas are dividing two values to produce a percent.
+Formulas allow you to perform math on aggregated data. The most common formulas divide two values to produce a percent.
 
-. In the editor, click a dimension.
+. In the layer pane, click a field.
 
 . Click *Formula*, then enter the formula. 
 +
@@ -119,19 +93,21 @@ sum(products.base_price) / overall_sum(sum(products.base_price))
 +
 TIP: For detailed information on formulas, click image:dashboard/images/formula_reference.png[Formula reference icon].
 
-. To accurately display formulas in your visualization, select *Percent* from the *Value format* dropdown.
+. To accurately display the formula, select *Percent* from the *Value format* dropdown.
 
 [float]
 [[compare-data-with-time-offsets]]
 ==== Compare differences over time
 
-Compare your real-time data set to the results offset by a time increment. For example, you can compare the real-time percentage of a user CPU time spent to the results offset by one hour. 
+Compare your real-time data set to the results that are offset by a time increment. For example, you can compare the real-time percentage of a user CPU time spent to the results offset by one hour. 
 
-. In the editor, click the dimension you want to offset.
+. In the layer pane, click the field you want to offset.
 
 . From the *Add advanced options* dropdown, select *Time shift*.
 
 . Select the time offset increment. 
+
+For a time shift example, refer to <<compare-time-ranges>>.
 
 [float]
 [[create-custom-tables]]
@@ -141,41 +117,68 @@ Compare your real-time data set to the results offset by a time increment. For e
 
 . From the *Chart type* dropdown, select *Table*. 
 
-. Drag and drop the fields you want to visualize onto the workspace. 
+. Drag the fields you want to visualize to the workspace. 
 
 . To sort or hide the columns, click the arrow next to the column heading, then select an option.
++
+All columns that belong to the same layer pane group are sorted in the table.
 
-. To change the display options, click a *Metrics* dimension, then configure the following options:
+. To change the display options, click a *Metrics* field, then configure the following options:
 
-* *Display name* &mdash; Specifies the dimension name. 
+* *Display name* &mdash; Specifies the field display name. 
 
-* *Value format* &mdash; Specifies how the dimension value displays in the table. 
+* *Value format* &mdash; Specifies how the field value displays in the table. 
 
 * *Text alignment* &mdash; Aligns the values in the cell to the *Left*, *Center*, or *Right*.
 
-* *Hide column* &mdash; Hides the dimension column.
+* *Hide column* &mdash; Hides the column for the field.
 
-* *Summary row* &mdash; Adds a row that displays the specified summary value. When specified, allows you to enter a *Summary label*.
+* *Summary row* &mdash; Adds a row that displays the summary value. When specified, allows you to enter a *Summary label*.
 
 * *Color by value* &mdash; Applies color to the cell or text values. To change the color, click *Edit*. 
+
+[float]
+[[drag-and-drop-keyboard-navigation]]
+==== Create visualizations with keyboard navigation
+
+To use a keyboard instead of a mouse, use the *Lens* fully accessible and continuously improved drag system.
+
+[role="screenshot"]
+image::images/lens_drag_drop_1.gif[Presented Lens drag and drop]
+
+. Select the field in the fields list or layer pane. Most fields have an inner and outer select state. The inner state opens a panel with detailed information or options. 
+The outer state allows you to drag the field. Tab through the fields until you get the outer state on the field.
++
+[role="screenshot"]
+image::images/lens_drag_drop_2.png[Lens drag and drop focus state]
+
+. Complete the following actions:
+
+* To select a field, press Space bar.
+
+* To select where you want to drop the field, use the Left and Right arrows.
+
+* To reorder the fields on the layer pane, use the Up and Down arrows.
+
+* To duplicate an action, use the Left and Right arrows, then select the *Drop a field or click to add* field you want to use.
++
+[role="screenshot"]
+image::images/lens_drag_drop_3.gif[Using drag and drop to reorder]
+
+. To confirm the action, press Space bar. To cancel, press Esc.
 
 [float]
 [[configure-the-visualization-components]]
 ==== Configure the visualization components
 
-The components you can configure include the data labels, legend, axes, and other visual options. The options differ depending on the visualization type.
+Each visualiztion type comes with a set of components that you can configure, such as data labels, legend, axes, and more.
 
-[role="screenshot"]
-image:images/lens_dropdown_menus.gif[Dropdown menus in Lens for configuring the visualization components, width=50%]
-
-For example, to add data labels to bar and horizontal bar charts, use the *Values* dropdown.
+For example, to add data labels to bar and horizontal bar charts, use the *Values* menu.
 
 [role="screenshot"]
 image::images/lens_value_labels_xychart_toggle.png[Lens Bar chart value labels menu]
 
-NOTE: In bar charts, you are unable to move the label positions.
-
-To add data labels to pie charts, donut charts, or treemaps, use the *Labels* dropdown.
+To add data labels to pie charts, donut charts, or treemaps, use the *Labels* menu.
 
 [role="screenshot"]
 image::images/lens_value_labels_partition_toggle.png[Lens Pie chart value labels menu]
@@ -184,15 +187,15 @@ image::images/lens_value_labels_partition_toggle.png[Lens Pie chart value labels
 [[filter-the-data]]
 ==== Filter the data
 
-Apply filters to visualizations based on the dimensions in the legend. Only *Bar*, *Line and area*, and *Proportion* visualizations support legend filters.
+Apply filters to visualizations directly from the values in the legend. Only *Bar*, *Line and area*, and *Proportion* visualizations support legend filters.
 
-. In the legend, open the filter menu for the dimension.
+. In the legend, click the field.
 
 . Choose one of the following options:
 
-* *Filter for value* &mdash; Applies a filter for the dimension value to the visualization.
+* *Filter for value* &mdash; Applies a filter that displays only the field data in the visualization.
 
-* *Filter out value* &mdash; Applies a filter that removes the dimension value from the visualization.
+* *Filter out value* &mdash; Applies a filter that removes the field data from the visualization.
 
 [float]
 [[lens-faq]]
@@ -201,25 +204,23 @@ Apply filters to visualizations based on the dimensions in the legend. Only *Bar
 For the answers to common *Lens* questions, review the following. 
 
 [discrete]
-[[kql-]]
-.When should I use the top filter bar, filters function, or "Filter by"?
+[[kql]]
+.When should I use KQL filters, the Filters function, or the Filter by option?
 [%collapsible]
 ====
-Using the top <<semi-structured-search>> bar is best when you want to focus on a known set of
-data for all the visualization results. These top level filters are combined with other filters
-using AND logic.
+To focus on a known set of data for all the visualization results, use the <<semi-structured-search, KQL *Search*>> field.
 
-Use the *Filters* function in the following scenarios:
+Use the *Filters* function to apply:
 
-* When you want to apply more than one KQL filter to the visualization.
+* More than one KQL filter.
 
-* When you want to apply the KQL filter to a single layer, which allows you to visualize filtered and unfiltered data.
+* The KQL filter to a single layer, which allows you to visualize filtered and unfiltered data.
 
-Use the *Filter by* advanced option in the following scenarios:
+Use the *Filter by* advanced option to:
 
-* When you want to assign a custom color to each filter in a bar, line, or area chart.
+* Assign a custom color to each filter group in a bar, line, or area chart.
 
-* When you want to build a complex table, such as showing both failure rate and overall.
+* Build a complex table. For example, to display the failure rate and overall data.
 ====
 
 [discrete]
@@ -227,13 +228,13 @@ Use the *Filter by* advanced option in the following scenarios:
 .When should I normalize the data by unit or use a custom interval?
 [%collapsible]
 ====
-* *Normalize by unit* &mdash; Calculates the average for the specified interval. When you normalize the data by unit, the data appears less granular, but *Lens* is able to calculate the data faster. 
+* *Normalize by unit* &mdash; Calculates the average for the interval. When you normalize the data by unit, the data appears less granular, but *Lens* is able to calculate the data faster. 
 
-* *Customize time interval* &mdash; Creates a bucket for each specified interval. When you customize the time interval, you can use a large time range, but *Lens* calculates the data slower.
+* *Customize time interval* &mdash; Creates a bucket for each interval. When you customize the time interval, you can use a large time range, but *Lens* calculates the data slower.
 
 To normalize the interval: 
 
-. In the layer, click a field.
+. In the layer pane, click a field.
 
 . Click *Add advanced options > Normalize by unit*. 
 
@@ -241,7 +242,7 @@ To normalize the interval:
 
 To create a custom interval:
 
-. In the layer, click a field.
+. In the layer pane, click a field.
 
 . Select *Customize time interval*.
 
@@ -255,55 +256,39 @@ To create a custom interval:
 ====
 The *Other* category contains all of the documents that do not match the specified criteria or filters. 
 Use *Other* when you want to compare a value, or multiple values, to a whole.
-By default, *Group other values as "Other"* is enabled when you select the *Top values* function. 
 
-To disable *Group other values as "Other"*:
+By default, *Group other values as "Other"* is enabled when you use the *Top values* function. 
 
-. In the layer, click a field. 
-
-. Click *Advanced*, then deselect *Group other values as "Other"*.
+To disable *Group other values as "Other"*, click a field in the layer pane, click *Advanced*, then deselect *Group other values as "Other"*.
 ====
 
 [discrete]
 [[how-can-i-include-documents-without-the-field-in-the-operation]]
-.How can I include documents without the field?
+.How do I add documents without a field?
 [%collapsible]
 ====
-By default, *Lens* retrieves only the documents from the specified field. 
-For bucket aggregations, such as *Top values*, you can choose to include documents that do not contain the specified field, 
-which is helpful when you want to compare to the whole documentation set.
+By default, *Lens* retrieves only the documents from the fields. 
+For bucket aggregations, such as *Top values*, you can add documents that do not contain the fields, 
+which is helpful when you want to make a comparison to the whole documentation set.
 
-. In the layer, click a field. 
+. In the layer pane, click a field. 
 
 . Click *Advanced*, then select *Include documents without this field*.
-+
-[role="screenshot"]
-image::images/lens_bucketed_aggregation_advanced_dropdown.png[Lens Advanced options for bucketed aggregations]
-====
-
-[discrete]
-[[is-it-possible-to-select-color-for-specific-bar-or-point]]
-.How do I change the color for a single data point?
-[%collapsible]
-====
-*Lens* provides you with color pallettes that you can apply to the entire visualization, but you are unable to change the color for a single data point, such as a bar or line.
 ====
 
 [discrete]
 [[is-it-possible-to-have-more-than-one-Y-axis-scale]]
-.Is it possible to have more than one y-axis scale in visualizations?
+.Can I add more than one y-axis scale to a visualization?
 [%collapsible]
 ====
-*Lens* lets you pick, for each y-axis, up to two distinct axess: *left* and *right*. Each axis can have a different scale.
+For each y-axis, you can select *Left* and *Right*, and configure a different scale.
 ====
 
 [discrete]
 [[why-is-my-value-with-the-right-color-using-value-based-coloring]]
-.Why is my value with the incorrect color when using value-based coloring?
+.Why is my value the incorrect color when I use value-based coloring?
 [%collapsible]
 ====
-There could be various reasons for a specific value in the table to have a different color than expected.
-
 Here's a short list of few different aspects to check:
 * Make sure the value falls within the desired color stop value defined in the panel. Color stop values are "inclusive".
 
@@ -318,7 +303,13 @@ Here's a short list of few different aspects to check:
 ** If a `Percent` configuration is used, and the data range changes, the colors displayed are affected.
 ====
 
-When do I use runtime fields vs. formula?
+[discrete]
+[[when-do-i-use-runtime-fields-vs-formula]]
+.When do I use runtime fields vs. formula?
+[%collapsible]
+====
+TBD
+====
 
 [discrete]
 [[can-i-sort-by-multiple-columns]]
@@ -327,20 +318,6 @@ When do I use runtime fields vs. formula?
 ====
 Multiple column sorting is unsupported, but is supported in *Discover*. For information on how to sort multiple columns in *Discover*, 
 refer to <<explore-fields-in-your-data,Explore the fields in your data>>.
-====
-
-[discrete]
-[[is-it-possible-to-sort-dimensions-in-a-chart]]
-.How do I sort the fields in layers?
-[%collapsible]
-====
-Sorting the fields in charts, treemap, and heatmap is unsupported, but you can sort the fields for a single data table column.
-
-. Click the column header.
-
-. Select the sorting criteria you want to use.
-+
-If you use the group as `Columns`, then all the columns that belong to the same group are sorted in the table.
 ====
 
 [discrete]
@@ -369,23 +346,21 @@ Full-text fields are unsupported and do not appear in data summaries.
 
 [discrete]
 [[how-to-handle-gaps-in-time-series-visualizations]]
-.How do I handle gaps in time series visualizations?
+.What do I do with gaps in time series visualizations?
 [%collapsible]
 ====
-When you create *Area* and *Line* charts, and the time series data is sparse, open the *Visual options* menu, then select how to handle missing values. The default is to hide the missing values.
-
-[role="screenshot"]
-image::images/lens_missing_values_strategy.png[Lens Missing values strategies menu]
+When you create *Area* and *Line* charts with sparse time series data, open *Visual options* in the editor toolbar, then select a *Missing values* option.
 ====
 
 [discrete]
 [[is-it-possible-to-change-the-scale-of-Y-axis]]
-.Is it possible to statically define the scale of the y-axis in a visualization?
+.Can I statically define the y-axis scale?
 [%collapsible]
 ====
-You can set the bounds on area, bar, and line charts, unless you are using percentage mode. Bar
-and area charts must have 0 in the bounds. Logarithmic scales are unsupported.
-To set the y-axis bounds, click the icon representing the axis you want to customize.
+
+You can set the scale, or _bounds_, for area, bar, and line charts. You can configure the bounds for all functions, except *Percentile*. Logarithmic scales are unsupported.
+
+To configure the bounds, use the menus in the editor toolbar. Bar and area charts required 0 in the scale between *Lower bound* and *Upper bound*. 
 ====
 
 [discrete]
@@ -393,7 +368,15 @@ To set the y-axis bounds, click the icon representing the axis you want to custo
 .Is it possible to have pagination in a data table?
 [%collapsible]
 ====
-Pagination in a data table is unsupported. To use pagination in data tables, refer to <<types-of-visualizations,aggregation-based data table>>.
+Pagination in a data table is unsupported. To use pagination in data tables, create an <<types-of-visualizations,aggregation-based data table>>.
+====
+
+[discrete]
+[[is-it-possible-to-select-color-for-specific-bar-or-point]]
+.How do I change the color for a single data point?
+[%collapsible]
+====
+Specifying the color for a single data point, such as a single bar or line, is unsupported.
 ====
 
 

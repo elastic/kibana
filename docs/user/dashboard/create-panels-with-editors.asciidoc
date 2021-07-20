@@ -1,118 +1,11 @@
-[[create-panels-with-editors]]
+[[aggregation-reference]]
 == Create panels with editors
 
-{kib} provides several editors that you can use to create panels of your data.
-
-[float]
-[[lens-editor]]
-=== Lens
-
-*Lens* is the drag and drop editor that creates visualizations of your data, and is recommended for most
-users.
-
-With *Lens*, you can:
-
-* Create visualizations with multiple layers, indices, and visualization types.
-* Change the aggregation and labels to customize the data.
-* Perform math on aggregations using *Formula*.
-* Use time shifts to compare data for two time intervals, such as month over month.
-
-[role="screenshot"]
-image:dashboard/images/lens_advanced_1_1.png[Lens]
-
-[float]
-[[tsvb-editor]]
-=== TSVB
-
-*TSVB* is a time series data visualization editor that allows you to use the full power of the {es} aggregation framework. 
-
-With *TSVB*, you can:
-
-* Combine an infinite number of <<aggregation-reference,aggregations>> to display your data.
-* Annotate time series data with timestamped events from an {es} index.
-* View the data in several types of visualizations, including charts, data tables, and markdown panels.
-* Display multiple <<index-patterns, index patterns>> in each visualization.
-* Customize the data with labels and colors.
-
-[role="screenshot"]
-image::images/tsvb.png[TSVB UI]
-
-[float]
-[[custom-visualizations]]
-=== Custom visualizations
-
-*Vega* and *Vega-Lite* are visualization grammars that are integrated into {kib} for custom visualizations.
-
-* *Vega-Lite* &mdash; A high-level grammar for rapid analysis.
-
-* *Vega* &mdash; A declarative language with support for interactivity.
-
-*Vega* and *Vega-Lite* panels can display one or more data sources, including {es}, Elastic Map Service,
-URL, or static data, and support <<reference-for-kibana-extensions,{kib} extensions>> that allow you to embed the panels on your dashboard and add interactive tools.
-
-Use *Vega* or *Vega-Lite* when you want to create visualizations with:
-
-* Aggregations that use `nested` or `parent/child` mapping
-* Aggregations without an index pattern
-* Queries that use custom time filters
-* Complex calculations
-* Extracted data from _source instead of aggregations
-* Scatter charts, sankey charts, and custom maps
-* An unsupported visual theme
-
-These grammars have some limitations: they do not support tables, and can't run queries conditionally.
-
-[role="screenshot"]
-image::images/vega.png[Vega UI]
-
-For detailed *Vega* and *Vega-Lite* information and examples, refer to <<resources-and-examples,Resources and examples>>. 
-
-[float]
-[[aggregation-based]]
-=== Aggregation-based
-
-With aggregation-based visualizations, you can:
-
-* Create heat map, tag cloud, gauge, and goal visualizations
-* Split charts up to three aggregation levels, which is more than *Lens* and *TSVB*
-* Time series data is not required
-* Use a <<save-open-search,saved search>> as an input
-* Sort data tables and use the summary row and percentage column features
-* Assign colors to series
-* Extend features with plugins
-
-[role="screenshot"]
-image:dashboard/images/aggregation_based.png[Aggregation-based editor]
-
-Aggregation-based visualizations include the following limitations:
-
-* Limited styling options
-* Math is unsupported
-* Multiple indices is unsupported
-
-[float]
-[[timelion-editor]]
-=== Timelion
-
-*Timelion* is driven by a simple expression language that you use to:
-
-* Retrieve time series data from one or more indices
-* Perform math across two or more time series
-* Visualize the results
-
-[role="screenshot"]
-image:dashboard/images/timelion.png[Timelion]
-
-[float]
-[[aggregation-reference]]
-=== Supported editor features and aggregations
-
-Each editor supports different features and {ref}/search-aggregations.html[{es} aggregations].
-To help you choose the right editor, review the tables.
+{kib} provides several editors that you can use to create panels of your data. Each editor supports different features and {ref}/search-aggregations.html[{es} aggregations]. To choose the best editor for your data, review the following information.
 
 [float]
 [[chart-types]]
-==== Supported panel types
+=== Supported panel types
 
 [options="header"]
 |===
@@ -200,7 +93,7 @@ To help you choose the right editor, review the tables.
 
 [float]
 [[xy-features]]
-==== Bar, line, and area chart features
+=== Bar, line, and area chart features
 
 [options="header"]
 |===
@@ -252,39 +145,8 @@ To help you choose the right editor, review the tables.
 |===
 
 [float]
-[[table-features]]
-==== Table features
-
-[options="header"]
-|===
-
-| Feature | *Lens* | *TSVB* | *Aggregation-based*
-
-| Summary row
-| &check;
-|
-| &check;
-
-| Pivot table
-| &check;
-|
-|
-
-| Calculated column
-| Formula
-| &check;
-| Percent only
-
-| Color by value
-| &check;
-| &check;
-|
-
-|===
-
-[float]
 [[other-features]]
-==== Advanced features
+=== Advanced features
 
 [options="header"]
 |===
@@ -327,11 +189,54 @@ To help you choose the right editor, review the tables.
 |
 |
 
+| Automatically generated suggestions
+| &check;
+| 
+|
+|
+
+| Annotations
+| 
+| &check;
+|
+|
+
+|===
+
+[float]
+[[table-features]]
+=== Table features
+
+[options="header"]
+|===
+
+| Feature | *Lens* | *TSVB* | *Aggregation-based*
+
+| Summary row
+| &check;
+|
+| &check;
+
+| Pivot table
+| &check;
+|
+|
+
+| Calculated column
+| Formula
+| &check;
+| Percent only
+
+| Color by value
+| &check;
+| &check;
+|
+
 |===
 
 [float]
 [[custom-functions]]
-==== Functions
+=== Functions
 
 [options="header"]
 |===
@@ -362,7 +267,7 @@ To help you choose the right editor, review the tables.
 
 [float]
 [[metrics-aggregations]]
-==== Metrics aggregations
+=== Metrics aggregations
 
 Metric aggregations are calculated from the values in the aggregated documents. The values are extracted from the document fields.
 
@@ -437,7 +342,7 @@ For information about {es} metrics aggregations, refer to {ref}/search-aggregati
 
 [float]
 [[bucket-aggregations]]
-==== Bucket aggregations
+=== Bucket aggregations
 
 Bucket aggregations group, or bucket, documents based on the aggregation type. To define the document buckets, bucket aggregations compute and return the number of documents for each bucket.
 
@@ -511,7 +416,7 @@ For information about {es} bucket aggregations, refer to {ref}/search-aggregatio
 
 [float]
 [[pipeline-aggregations]]
-==== Pipeline aggregations
+=== Pipeline aggregations
 
 Pipeline aggregations are dependent on the outputs calculated from other aggregations. Parent pipeline aggregations are provided with the output of the parent aggregation, and compute new buckets or aggregations that are added to existing buckets. Sibling pipeline aggregations are provided with the output of a sibling aggregation, and compute new aggregations for the same level as the sibling aggregation.
 
