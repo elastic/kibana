@@ -178,7 +178,6 @@ export const HoverActions: React.FC<Props> = React.memo(
         // eslint-disable-next-line react-hooks/rules-of-hooks
         return useGetHandleStartDragToTimeline({ draggableId, field });
       });
-      console.log(handleStartDragToTimelineFns); // eslint-disable-line
       return () => handleStartDragToTimelineFns?.forEach((dragFn) => dragFn());
     })();
 
