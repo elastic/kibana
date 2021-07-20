@@ -85,7 +85,8 @@ describe('migration v2', () => {
 
     const startEsPromise = startES().then((es) => (esServer = es));
     const startKibanaPromise = root
-      .setup()
+      .preboot()
+      .then(() => root.setup())
       .then(() => root.start())
       .then((start) => {
         coreStart = start;

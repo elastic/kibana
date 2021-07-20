@@ -336,7 +336,8 @@ export const ExceptionListsTable = React.memo(() => {
     <>
       <DetectionEngineHeaderPage
         title={i18n.ALL_EXCEPTIONS}
-        subtitle={timelines.getLastUpdated({ showUpdating: loading, updatedAt: lastUpdated })}
+        subtitle={i18n.ALL_EXCEPTIONS_DESCRIPTION}
+        subtitle2={timelines.getLastUpdated({ showUpdating: loading, updatedAt: lastUpdated })}
       />
       <Panel loading={!initLoading && loadingTableInfo} data-test-subj="allExceptionListsPanel">
         <>
