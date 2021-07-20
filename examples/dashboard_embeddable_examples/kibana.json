@@ -4,7 +4,7 @@
   "kibanaVersion": "kibana",
   "server": false,
   "ui": true,
-  "requiredPlugins": ["embeddable", "embeddableExamples", "dashboard", "developerExamples"],
+  "requiredPlugins": ["embeddable", "embeddableExamples", "dashboard", "developerExamples", "kibanaReact"],
   "optionalPlugins": [],
-  "requiredBundles": ["esUiShared", "kibanaReact"]
+  "requiredBundles": ["esUiShared"]
 }
