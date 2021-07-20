@@ -190,7 +190,7 @@
     "getos": "^3.1.0",
     "glob": "^7.1.2",
     "glob-all": "^3.1.0",
-    "globby": "^8.0.1",
+    "globby": "^11.0.4",
     "handlebars": "4.7.7",
     "hjson": "3.1.0",
     "http-proxy-agent": "^2.1.0",

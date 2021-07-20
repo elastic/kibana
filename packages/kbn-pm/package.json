@@ -45,7 +45,7 @@
     "execa": "^1.0.0",
     "getopts": "^2.0.0",
     "glob": "^7.1.2",
-    "globby": "^8.0.1",
+    "globby": "^11.0.4",
     "has-ansi": "^3.0.0",
     "indent-string": "^3.2.0",
     "lodash.clonedeepwith": "^4.5.0",
