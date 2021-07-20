@@ -182,7 +182,6 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       basePath,
       orgId,
       packageInfo: this.initializerContext.env.packageInfo,
-      userId,
     });
 
     // Very defensive try/catch to avoid any UnhandledPromiseRejections
