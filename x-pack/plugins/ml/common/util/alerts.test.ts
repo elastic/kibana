@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { getLookbackInterval, resolveLookbackInterval } from './alerts';
+import {
+  getLookbackInterval,
+  getResultJobsHealthRuleConfig,
+  resolveLookbackInterval,
+} from './alerts';
 import type { CombinedJobWithStats, Datafeed, Job } from '../types/anomaly_detection_jobs';
 
 describe('resolveLookbackInterval', () => {
@@ -74,5 +78,51 @@ describe('getLookbackInterval', () => {
     ] as CombinedJobWithStats[];
 
     expect(getLookbackInterval(testJobs)).toBe('32m');
+  });
+});
+
+describe('getResultJobsHealthRuleConfig', () => {
+  test('returns default config for empty configuration', () => {
+    expect(getResultJobsHealthRuleConfig(null)).toEqual({
+      dataFeed: {
+        enabled: true,
+      },
+      mml: {
+        enabled: true,
+      },
+      delayedData: {
+        enabled: true,
+      },
+      behindRealtime: {
+        enabled: true,
+      },
+      errorMessages: {
+        enabled: true,
+      },
+    });
+  });
+  test('returns config with overridden values based on provided configuration', () => {
+    expect(
+      getResultJobsHealthRuleConfig({
+        mml: { enabled: false },
+        errorMessages: { enabled: true },
+      })
+    ).toEqual({
+      dataFeed: {
+        enabled: true,
+      },
+      mml: {
+        enabled: false,
+      },
+      delayedData: {
+        enabled: true,
+      },
+      behindRealtime: {
+        enabled: true,
+      },
+      errorMessages: {
+        enabled: true,
+      },
+    });
   });
 });
