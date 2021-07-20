@@ -309,6 +309,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
 
     return (
       <EuiDataGrid
+        data-test-subj="body-data-grid"
         aria-label={i18n.TGRID_BODY_ARIA_LABEL}
         columns={columnHeaders}
         columnVisibility={{ visibleColumns, setVisibleColumns }}
