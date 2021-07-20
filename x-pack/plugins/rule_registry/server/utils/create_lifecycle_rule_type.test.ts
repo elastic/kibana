@@ -173,7 +173,7 @@ describe('createLifecycleRuleTypeFactory', () => {
         const evaluationDocuments = documents.filter((doc) => doc['event.kind'] === 'event');
         const alertDocuments = documents.filter((doc) => doc['event.kind'] === 'signal');
 
-        expect(evaluationDocuments.length).toBe(2);
+        expect(evaluationDocuments.length).toBe(0);
         expect(alertDocuments.length).toBe(2);
 
         expect(
@@ -188,50 +188,6 @@ describe('createLifecycleRuleTypeFactory', () => {
 
         expect(documents.map((doc) => omit(doc, 'kibana.rac.alert.uuid'))).toMatchInlineSnapshot(`
           Array [
-            Object {
-              "@timestamp": "2021-06-16T09:01:00.000Z",
-              "event.action": "open",
-              "event.kind": "event",
-              "kibana.rac.alert.duration.us": 0,
-              "kibana.rac.alert.id": "opbeans-java",
-              "kibana.rac.alert.owner": "consumer",
-              "kibana.rac.alert.producer": "producer",
-              "kibana.rac.alert.start": "2021-06-16T09:01:00.000Z",
-              "kibana.rac.alert.status": "open",
-              "kibana.space_ids": Array [
-                "spaceId",
-              ],
-              "rule.category": "ruleTypeName",
-              "rule.id": "ruleTypeId",
-              "rule.name": "name",
-              "rule.uuid": "alertId",
-              "service.name": "opbeans-java",
-              "tags": Array [
-                "tags",
-              ],
-            },
-            Object {
-              "@timestamp": "2021-06-16T09:01:00.000Z",
-              "event.action": "open",
-              "event.kind": "event",
-              "kibana.rac.alert.duration.us": 0,
-              "kibana.rac.alert.id": "opbeans-node",
-              "kibana.rac.alert.owner": "consumer",
-              "kibana.rac.alert.producer": "producer",
-              "kibana.rac.alert.start": "2021-06-16T09:01:00.000Z",
-              "kibana.rac.alert.status": "open",
-              "kibana.space_ids": Array [
-                "spaceId",
-              ],
-              "rule.category": "ruleTypeName",
-              "rule.id": "ruleTypeId",
-              "rule.name": "name",
-              "rule.uuid": "alertId",
-              "service.name": "opbeans-node",
-              "tags": Array [
-                "tags",
-              ],
-            },
             Object {
               "@timestamp": "2021-06-16T09:01:00.000Z",
               "event.action": "open",
@@ -324,7 +280,7 @@ describe('createLifecycleRuleTypeFactory', () => {
         const evaluationDocuments = documents.filter((doc) => doc['event.kind'] === 'event');
         const alertDocuments = documents.filter((doc) => doc['event.kind'] === 'signal');
 
-        expect(evaluationDocuments.length).toBe(2);
+        expect(evaluationDocuments.length).toBe(0);
         expect(alertDocuments.length).toBe(2);
 
         expect(
