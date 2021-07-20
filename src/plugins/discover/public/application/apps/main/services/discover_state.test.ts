@@ -202,5 +202,16 @@ describe('createSearchSessionRestorationDataProvider', () => {
       expect(initialState.timeRange).toBe(relativeTime);
       expect(restoreState.timeRange).toBe(absoluteTime);
     });
+
+    test('restoreState clears refreshInterval', async () => {
+      const { initialState, restoreState } = await searchSessionInfoProvider.getUrlGeneratorData();
+      expect(initialState.refreshInterval).toBeUndefined();
+      expect(restoreState.refreshInterval).toMatchInlineSnapshot(`
+        Object {
+          "pause": true,
+          "value": 0,
+        }
+      `);
+    });
   });
 });
