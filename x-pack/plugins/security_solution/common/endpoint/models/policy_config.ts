@@ -33,6 +33,10 @@ export const policyFactory = (): PolicyConfig => {
         mode: ProtectionModes.prevent,
         supported: true,
       },
+      behavior_protection: {
+        mode: ProtectionModes.prevent,
+        supported: true,
+      },
       popup: {
         malware: {
           message: '',
@@ -43,6 +47,10 @@ export const policyFactory = (): PolicyConfig => {
           enabled: true,
         },
         memory_protection: {
+          message: '',
+          enabled: true,
+        },
+        behavior_protection: {
           message: '',
           enabled: true,
         },
