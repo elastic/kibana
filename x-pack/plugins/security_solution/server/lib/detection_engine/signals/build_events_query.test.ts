@@ -489,65 +489,7 @@ describe('create_signals', () => {
       timestampOverride: undefined,
       trackTotalHits: false,
     });
-    expect(query).toEqual({
-      allow_no_indices: true,
-      index: ['auditbeat-*'],
-      size: 100,
-      ignore_unavailable: true,
-      track_total_hits: false,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {},
-              {
-                bool: {
-                  filter: [
-                    {
-                      bool: {
-                        minimum_should_match: 1,
-                        should: [
-                          {
-                            range: {
-                              '@timestamp': {
-                                gte: 'now-5m',
-                                lte: 'today',
-                                format: 'strict_date_optional_time',
-                              },
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  ],
-                },
-              },
-              {
-                match_all: {},
-              },
-            ],
-          },
-        },
-        fields: [
-          {
-            field: '*',
-            include_unmapped: true,
-          },
-          {
-            field: '@timestamp',
-            format: 'strict_date_optional_time',
-          },
-        ],
-        sort: [
-          {
-            '@timestamp': {
-              order: 'asc',
-              unmapped_type: 'date',
-            },
-          },
-        ],
-      },
-    });
+    expect(query.track_total_hits).toEqual(false);
   });
 
   test('if sortOrder is provided it should be included', () => {
@@ -562,63 +504,10 @@ describe('create_signals', () => {
       sortOrder: 'desc',
       trackTotalHits: false,
     });
-    expect(query).toEqual({
-      allow_no_indices: true,
-      index: ['auditbeat-*'],
-      size: 100,
-      ignore_unavailable: true,
-      track_total_hits: false,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {},
-              {
-                bool: {
-                  filter: [
-                    {
-                      bool: {
-                        minimum_should_match: 1,
-                        should: [
-                          {
-                            range: {
-                              '@timestamp': {
-                                gte: 'now-5m',
-                                lte: 'today',
-                                format: 'strict_date_optional_time',
-                              },
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  ],
-                },
-              },
-              {
-                match_all: {},
-              },
-            ],
-          },
-        },
-        fields: [
-          {
-            field: '*',
-            include_unmapped: true,
-          },
-          {
-            field: '@timestamp',
-            format: 'strict_date_optional_time',
-          },
-        ],
-        sort: [
-          {
-            '@timestamp': {
-              order: 'desc',
-              unmapped_type: 'date',
-            },
-          },
-        ],
+    expect(query.body.sort[0]).toEqual({
+      '@timestamp': {
+        order: 'desc',
+        unmapped_type: 'date',
       },
     });
   });
@@ -634,96 +523,10 @@ describe('create_signals', () => {
       timestampOverride: 'event.ingested',
       sortOrder: 'desc',
     });
-    expect(query).toEqual({
-      allow_no_indices: true,
-      index: ['auditbeat-*'],
-      size: 100,
-      ignore_unavailable: true,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {},
-              {
-                bool: {
-                  filter: [
-                    {
-                      bool: {
-                        should: [
-                          {
-                            range: {
-                              'event.ingested': {
-                                gte: 'now-5m',
-                                lte: 'today',
-                                format: 'strict_date_optional_time',
-                              },
-                            },
-                          },
-                          {
-                            bool: {
-                              filter: [
-                                {
-                                  range: {
-                                    '@timestamp': {
-                                      gte: 'now-5m',
-                                      lte: 'today',
-                                      format: 'strict_date_optional_time',
-                                    },
-                                  },
-                                },
-                                {
-                                  bool: {
-                                    must_not: {
-                                      exists: {
-                                        field: 'event.ingested',
-                                      },
-                                    },
-                                  },
-                                },
-                              ],
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
-                      },
-                    },
-                  ],
-                },
-              },
-              {
-                match_all: {},
-              },
-            ],
-          },
-        },
-        fields: [
-          {
-            field: '*',
-            include_unmapped: true,
-          },
-          {
-            field: 'event.ingested',
-            format: 'strict_date_optional_time',
-          },
-          {
-            field: '@timestamp',
-            format: 'strict_date_optional_time',
-          },
-        ],
-        sort: [
-          {
-            'event.ingested': {
-              order: 'desc',
-              unmapped_type: 'date',
-            },
-          },
-          {
-            '@timestamp': {
-              order: 'desc',
-              unmapped_type: 'date',
-            },
-          },
-        ],
+    expect(query.body.sort[0]).toEqual({
+      'event.ingested': {
+        order: 'desc',
+        unmapped_type: 'date',
       },
     });
   });
