@@ -18,7 +18,7 @@ const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
 describe('successful migrations', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    encryptedSavedObjectsSetup.createMigration.mockImplementation((_, migration) => migration);
+    encryptedSavedObjectsSetup.createMigration.mockImplementation(({ migration }) => migration);
   });
 
   describe('7.10.0', () => {

@@ -150,11 +150,13 @@ function defineTypeWithMigration(core: CoreSetup<PluginsStart>, deps: PluginsSet
     },
     migrations: {
       // in this version we migrated a non encrypted field and type didnt change
-      '7.8.0': deps.encryptedSavedObjects.createMigration<MigratedTypePre790, MigratedTypePre790>(
-        function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<MigratedTypePre790> {
+      '7.8.0': deps.encryptedSavedObjects.createMigration<MigratedTypePre790, MigratedTypePre790>({
+        isMigrationNeededPredicate: function shouldBeMigrated(
+          doc
+        ): doc is SavedObjectUnsanitizedDoc<MigratedTypePre790> {
           return true;
         },
-        (
+        migration: (
           doc: SavedObjectUnsanitizedDoc<MigratedTypePre790>
         ): SavedObjectUnsanitizedDoc<MigratedTypePre790> => {
           const {
@@ -168,17 +170,18 @@ function defineTypeWithMigration(core: CoreSetup<PluginsStart>, deps: PluginsSet
             },
           };
         },
-        false,
         // type hasn't changed as the field we're updating is not an encrypted one
-        typePriorTo790,
-        typePriorTo790
-      ),
+        inputType: typePriorTo790,
+        migratedType: typePriorTo790,
+      }),
       // in this version we encrypted an existing non encrypted field
-      '7.9.0': deps.encryptedSavedObjects.createMigration<MigratedTypePre790, MigratedType>(
-        function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<MigratedTypePre790> {
+      '7.9.0': deps.encryptedSavedObjects.createMigration<MigratedTypePre790, MigratedType>({
+        isMigrationNeededPredicate: function shouldBeMigrated(
+          doc
+        ): doc is SavedObjectUnsanitizedDoc<MigratedTypePre790> {
           return true;
         },
-        (
+        migration: (
           doc: SavedObjectUnsanitizedDoc<MigratedTypePre790>
         ): SavedObjectUnsanitizedDoc<MigratedType> => {
           const {
@@ -194,9 +197,8 @@ function defineTypeWithMigration(core: CoreSetup<PluginsStart>, deps: PluginsSet
             },
           };
         },
-        false,
-        typePriorTo790
-      ),
+        inputType: typePriorTo790,
+      }),
     },
   });
 }

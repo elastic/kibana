@@ -16,6 +16,7 @@ import {
 } from '../../../../../src/core/server';
 import { RawAlert, RawAlertAction } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
+import type { IsMigrationNeededPredicate } from '../../../encrypted_saved_objects/server';
 
 const SIEM_APP_ID = 'securitySolution';
 const SIEM_SERVER_APP_ID = 'siem';
@@ -29,20 +30,16 @@ type AlertMigration = (
   doc: SavedObjectUnsanitizedDoc<RawAlert>
 ) => SavedObjectUnsanitizedDoc<RawAlert>;
 
-type IsMigrationNeededPredicate<InputAttributes> = (
-  doc: SavedObjectUnsanitizedDoc<InputAttributes>
-) => doc is SavedObjectUnsanitizedDoc<InputAttributes>;
-
 function createEsoMigration(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
-  isMigrationNeededPredicate: IsMigrationNeededPredicate<RawAlert>,
+  isMigrationNeededPredicate: IsMigrationNeededPredicate<RawAlert, RawAlert>,
   migrationFunc: AlertMigration
 ) {
-  return encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
+  return encryptedSavedObjects.createMigration<RawAlert, RawAlert>({
     isMigrationNeededPredicate,
-    migrationFunc,
-    true // shouldMigrateIfDecryptionFails flag that applies the migration to undecrypted document if decryption fails
-  );
+    migration: migrationFunc,
+    shouldMigrateIfDecryptionFails: true, // shouldMigrateIfDecryptionFails flag that applies the migration to undecrypted document if decryption fails
+  });
 }
 
 const SUPPORT_INCIDENTS_ACTION_TYPES = ['.servicenow', '.jira', '.resilient'];

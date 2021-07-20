@@ -14,6 +14,7 @@ import {
 } from '../../../../../src/core/server';
 import { RawAction } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
+import type { IsMigrationNeededPredicate } from '../../../encrypted_saved_objects/server';
 
 interface ActionsLogMeta extends LogMeta {
   migrations: { actionDocument: SavedObjectUnsanitizedDoc<RawAction> };
@@ -23,20 +24,16 @@ type ActionMigration = (
   doc: SavedObjectUnsanitizedDoc<RawAction>
 ) => SavedObjectUnsanitizedDoc<RawAction>;
 
-type IsMigrationNeededPredicate<InputAttributes> = (
-  doc: SavedObjectUnsanitizedDoc<InputAttributes>
-) => doc is SavedObjectUnsanitizedDoc<InputAttributes>;
-
 function createEsoMigration(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
-  isMigrationNeededPredicate: IsMigrationNeededPredicate<RawAction>,
+  isMigrationNeededPredicate: IsMigrationNeededPredicate<RawAction, RawAction>,
   migrationFunc: ActionMigration
 ) {
-  return encryptedSavedObjects.createMigration<RawAction, RawAction>(
+  return encryptedSavedObjects.createMigration<RawAction, RawAction>({
     isMigrationNeededPredicate,
-    migrationFunc,
-    true // shouldMigrateIfDecryptionFails flag that applies the migration to undecrypted document if decryption fails
-  );
+    migration: migrationFunc,
+    shouldMigrateIfDecryptionFails: true, // shouldMigrateIfDecryptionFails flag that applies the migration to undecrypted document if decryption fails
+  });
 }
 
 export function getMigrations(

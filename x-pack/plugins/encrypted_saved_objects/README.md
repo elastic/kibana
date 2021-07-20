@@ -124,11 +124,11 @@ encryptedSavedObjects.registerType({
   attributesToExcludeFromAAD: new Set(['mutedInstanceIds', 'updatedBy']),
 });
 
-const migration790 = encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
-  function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<RawAlert> {
+const migration790 = encryptedSavedObjects.createMigration<RawAlert, RawAlert>({
+  isMigrationNeededPredicate: function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<RawAlert> {
     return doc.consumer === 'alerting' || doc.consumer === undefined;
   },
-  (doc: SavedObjectUnsanitizedDoc<RawAlert>): SavedObjectUnsanitizedDoc<RawAlert> => {
+  migration: (doc: SavedObjectUnsanitizedDoc<RawAlert>): SavedObjectUnsanitizedDoc<RawAlert> => {
     const {
       attributes: { consumer },
     } = doc;
@@ -140,7 +140,7 @@ const migration790 = encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
       },
     };
   }
-);
+});
 ```
 
 In the above example you can see thwe following:
@@ -175,11 +175,11 @@ encryptedSavedObjects.registerType({
   attributesToExcludeFromAAD: new Set(['mutedInstanceIds', 'updatedBy']),
 });
 
-const migration790 = encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
-  function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<RawAlert> {
+const migration790 = encryptedSavedObjects.createMigration<RawAlert, RawAlert>({
+  isMigrationNeededPredicate: function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<RawAlert> {
     return doc.consumer === 'alerting' || doc.consumer === undefined;
   },
-  (doc: SavedObjectUnsanitizedDoc<RawAlert>): SavedObjectUnsanitizedDoc<RawAlert> => {
+  migration: (doc: SavedObjectUnsanitizedDoc<RawAlert>): SavedObjectUnsanitizedDoc<RawAlert> => {
     const {
       attributes: { legacyEncryptedField, ...attributes },
     } = doc;
@@ -190,12 +190,12 @@ const migration790 = encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
       },
     };
   },
-  {
+  inputType: {
     type: 'alert',
     attributesToEncrypt: new Set(['apiKey', 'legacyEncryptedField']),
     attributesToExcludeFromAAD: new Set(['mutedInstanceIds', 'updatedBy']),
   }
-);
+});
 ```
 
 As you can see in this example we provide a legacy type which describes the _input_ which needs to be decrypted.
@@ -210,26 +210,26 @@ encryptedSavedObjects.registerType({
   attributesToExcludeFromAAD: new Set(['mutedInstanceIds', 'updatedBy']),
 });
 
-const migration780 = encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
-  function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<RawAlert> {
+const migration780 = encryptedSavedObjects.createMigration<RawAlert, RawAlert>({
+  isMigrationNeededPredicate: function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<RawAlert> {
     // ...
   },
-  (doc: SavedObjectUnsanitizedDoc<RawAlert>): SavedObjectUnsanitizedDoc<RawAlert> => {
+  migration: (doc: SavedObjectUnsanitizedDoc<RawAlert>): SavedObjectUnsanitizedDoc<RawAlert> => {
     // ...
   },
   // legacy input type
-  {
+  inputType: {
     type: 'alert',
     attributesToEncrypt: new Set(['apiKey', 'legacyEncryptedField']),
     attributesToExcludeFromAAD: new Set(['mutedInstanceIds', 'updatedBy']),
   },
   // legacy migration type
-  {
+  migratedType: {
     type: 'alert',
     attributesToEncrypt: new Set(['apiKey', 'legacyEncryptedField']),
     attributesToExcludeFromAAD: new Set(['mutedInstanceIds', 'updatedBy', 'legacyEncryptedField']),
   }
-);
+});
 ```
 
 ## Testing

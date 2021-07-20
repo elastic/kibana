@@ -20,21 +20,28 @@ type SavedObjectOptionalMigrationFn<InputAttributes, MigratedAttributes> = (
   context: SavedObjectMigrationContext
 ) => SavedObjectUnsanitizedDoc<MigratedAttributes>;
 
-type IsMigrationNeededPredicate<InputAttributes, MigratedAttributes> = (
+export type IsMigrationNeededPredicate<InputAttributes, MigratedAttributes> = (
   encryptedDoc:
     | SavedObjectUnsanitizedDoc<InputAttributes>
     | SavedObjectUnsanitizedDoc<MigratedAttributes>
 ) => encryptedDoc is SavedObjectUnsanitizedDoc<InputAttributes>;
 
+export interface CreateEncryptedSavedObjectsMigrationFnOpts<
+  InputAttributes = unknown,
+  MigratedAttributes = InputAttributes
+> {
+  isMigrationNeededPredicate: IsMigrationNeededPredicate<InputAttributes, MigratedAttributes>;
+  migration: SavedObjectMigrationFn<InputAttributes, MigratedAttributes>;
+  shouldMigrateIfDecryptionFails?: boolean;
+  inputType?: EncryptedSavedObjectTypeRegistration;
+  migratedType?: EncryptedSavedObjectTypeRegistration;
+}
+
 export type CreateEncryptedSavedObjectsMigrationFn = <
   InputAttributes = unknown,
   MigratedAttributes = InputAttributes
 >(
-  isMigrationNeededPredicate: IsMigrationNeededPredicate<InputAttributes, MigratedAttributes>,
-  migration: SavedObjectMigrationFn<InputAttributes, MigratedAttributes>,
-  shouldMigrateIfDecryptionFails?: boolean,
-  inputType?: EncryptedSavedObjectTypeRegistration,
-  migratedType?: EncryptedSavedObjectTypeRegistration
+  opts: CreateEncryptedSavedObjectsMigrationFnOpts<InputAttributes, MigratedAttributes>
 ) => SavedObjectOptionalMigrationFn<InputAttributes, MigratedAttributes>;
 
 export const getCreateMigration = (
@@ -42,13 +49,15 @@ export const getCreateMigration = (
   instantiateServiceWithLegacyType: (
     typeRegistration: EncryptedSavedObjectTypeRegistration
   ) => EncryptedSavedObjectsService
-): CreateEncryptedSavedObjectsMigrationFn => (
-  isMigrationNeededPredicate,
-  migration,
-  shouldMigrateIfDecryptionFails,
-  inputType,
-  migratedType
-) => {
+): CreateEncryptedSavedObjectsMigrationFn => (opts) => {
+  const {
+    isMigrationNeededPredicate,
+    migration,
+    shouldMigrateIfDecryptionFails,
+    inputType,
+    migratedType,
+  } = opts;
+
   if (inputType && migratedType && inputType.type !== migratedType.type) {
     throw new Error(
       `An Invalid Encrypted Saved Objects migration is trying to migrate across types ("${inputType.type}" => "${migratedType.type}"), which isn't permitted`

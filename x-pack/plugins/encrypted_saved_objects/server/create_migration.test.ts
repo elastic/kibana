@@ -40,21 +40,20 @@ describe('createMigration()', () => {
       encryptedSavedObjectsServiceMock.create()
     );
     expect(() =>
-      migrationCreator(
-        function (doc): doc is SavedObjectUnsanitizedDoc {
+      migrationCreator({
+        isMigrationNeededPredicate(doc): doc is SavedObjectUnsanitizedDoc {
           return true;
         },
-        (doc) => doc,
-        false,
-        {
+        migration: (doc) => doc,
+        inputType: {
           type: 'known-type-1',
           attributesToEncrypt: new Set(),
         },
-        {
+        migratedType: {
           type: 'known-type-2',
           attributesToEncrypt: new Set(),
-        }
-      )
+        },
+      })
     ).toThrowErrorMatchingInlineSnapshot(
       `"An Invalid Encrypted Saved Objects migration is trying to migrate across types (\\"known-type-1\\" => \\"known-type-2\\"), which isn't permitted"`
     );
@@ -70,12 +69,12 @@ describe('createMigration()', () => {
         encryptionSavedObjectService,
         instantiateServiceWithLegacyType
       );
-      const noopMigration = migrationCreator<InputType, MigrationType>(
-        function (doc): doc is SavedObjectUnsanitizedDoc<InputType> {
+      const noopMigration = migrationCreator<InputType, MigrationType>({
+        isMigrationNeededPredicate(doc): doc is SavedObjectUnsanitizedDoc<InputType> {
           return true;
         },
-        (doc) => doc
-      );
+        migration: (doc) => doc,
+      });
 
       const attributes = {
         firstAttr: 'first_attr',
@@ -124,12 +123,12 @@ describe('createMigration()', () => {
         encryptionSavedObjectService,
         instantiateServiceWithLegacyType
       );
-      const noopMigration = migrationCreator<InputType, MigrationType>(function (
-        doc
-      ): doc is SavedObjectUnsanitizedDoc<InputType> {
-        return true;
-      },
-      migrationFunc);
+      const noopMigration = migrationCreator<InputType, MigrationType>({
+        isMigrationNeededPredicate(doc): doc is SavedObjectUnsanitizedDoc<InputType> {
+          return true;
+        },
+        migration: migrationFunc,
+      });
 
       const attributes = {
         firstAttr: 'first_attr',
@@ -175,13 +174,13 @@ describe('createMigration()', () => {
         encryptionSavedObjectService,
         instantiateServiceWithLegacyType
       );
-      const noopMigration = migrationCreator<InputType, MigrationType>(
-        function (doc): doc is SavedObjectUnsanitizedDoc<InputType> {
+      const noopMigration = migrationCreator<InputType, MigrationType>({
+        isMigrationNeededPredicate(doc): doc is SavedObjectUnsanitizedDoc<InputType> {
           return true;
         },
-        migrationFunc,
-        true
-      );
+        migration: migrationFunc,
+        shouldMigrateIfDecryptionFails: true,
+      });
 
       const attributes = {
         firstAttr: 'first_attr',
@@ -227,13 +226,13 @@ describe('createMigration()', () => {
         encryptionSavedObjectService,
         instantiateServiceWithLegacyType
       );
-      const noopMigration = migrationCreator<InputType, MigrationType>(
-        function (doc): doc is SavedObjectUnsanitizedDoc<InputType> {
+      const noopMigration = migrationCreator<InputType, MigrationType>({
+        isMigrationNeededPredicate(doc): doc is SavedObjectUnsanitizedDoc<InputType> {
           return true;
         },
-        migrationFunc,
-        true
-      );
+        migration: migrationFunc,
+        shouldMigrateIfDecryptionFails: true,
+      });
 
       const attributes = {
         firstAttr: 'first_attr',
@@ -284,12 +283,12 @@ describe('createMigration()', () => {
         encryptionSavedObjectService,
         instantiateServiceWithLegacyType
       );
-      const noopMigration = migrationCreator<InputType, MigrationType>(function (
-        doc
-      ): doc is SavedObjectUnsanitizedDoc<InputType> {
-        return true;
-      },
-      migrationFunc);
+      const noopMigration = migrationCreator<InputType, MigrationType>({
+        isMigrationNeededPredicate(doc): doc is SavedObjectUnsanitizedDoc<InputType> {
+          return true;
+        },
+        migration: migrationFunc,
+      });
 
       const attributes = {
         firstAttr: 'first_attr',
@@ -335,13 +334,13 @@ describe('createMigration()', () => {
         encryptionSavedObjectService,
         instantiateServiceWithLegacyType
       );
-      const noopMigration = migrationCreator<InputType, MigrationType>(
-        function (doc): doc is SavedObjectUnsanitizedDoc<InputType> {
+      const noopMigration = migrationCreator<InputType, MigrationType>({
+        isMigrationNeededPredicate(doc): doc is SavedObjectUnsanitizedDoc<InputType> {
           return true;
         },
-        migrationFunc,
-        true
-      );
+        migration: migrationFunc,
+        shouldMigrateIfDecryptionFails: true,
+      });
 
       const attributes = {
         firstAttr: 'first_attr',
@@ -385,12 +384,12 @@ describe('createMigration()', () => {
         encryptionSavedObjectService,
         instantiateServiceWithLegacyType
       );
-      const noopMigration = migrationCreator<InputType, MigrationType>(function (
-        doc
-      ): doc is SavedObjectUnsanitizedDoc<InputType> {
-        return true;
-      },
-      migrationFunc);
+      const noopMigration = migrationCreator<InputType, MigrationType>({
+        isMigrationNeededPredicate(doc): doc is SavedObjectUnsanitizedDoc<InputType> {
+          return true;
+        },
+        migration: migrationFunc,
+      });
 
       const attributes = {
         firstAttr: 'first_attr',
@@ -444,13 +443,13 @@ describe('createMigration()', () => {
         encryptionSavedObjectService,
         instantiateServiceWithLegacyType
       );
-      const noopMigration = migrationCreator<InputType, MigrationType>(
-        function (doc): doc is SavedObjectUnsanitizedDoc<InputType> {
+      const noopMigration = migrationCreator<InputType, MigrationType>({
+        isMigrationNeededPredicate(doc): doc is SavedObjectUnsanitizedDoc<InputType> {
           return true;
         },
-        migrationFunc,
-        true
-      );
+        migration: migrationFunc,
+        shouldMigrateIfDecryptionFails: true,
+      });
 
       const attributes = {
         firstAttr: 'first_attr',
@@ -504,14 +503,13 @@ describe('createMigration()', () => {
         encryptionSavedObjectService,
         instantiateServiceWithLegacyType
       );
-      const noopMigration = migrationCreator<InputType, MigrationType>(
-        function (doc): doc is SavedObjectUnsanitizedDoc<InputType> {
+      const noopMigration = migrationCreator<InputType, MigrationType>({
+        isMigrationNeededPredicate(doc): doc is SavedObjectUnsanitizedDoc<InputType> {
           return true;
         },
-        (doc) => doc,
-        false,
-        inputType
-      );
+        migration: (doc) => doc,
+        inputType,
+      });
 
       const attributes = {
         firstAttr: 'first_attr',
@@ -566,12 +564,12 @@ describe('createMigration()', () => {
           encryptionSavedObjectService,
           instantiateServiceWithLegacyType
         );
-        const noopMigration = migrationCreator<InputType, MigrationType>(
-          function (doc): doc is SavedObjectUnsanitizedDoc<InputType> {
+        const noopMigration = migrationCreator<InputType, MigrationType>({
+          isMigrationNeededPredicate(doc): doc is SavedObjectUnsanitizedDoc<InputType> {
             return true;
           },
-          (doc) => doc
-        );
+          migration: (doc) => doc,
+        });
 
         const attributes = {
           firstAttr: 'first_attr',
@@ -640,15 +638,15 @@ describe('createMigration()', () => {
         encryptionSavedObjectService,
         instantiateServiceWithLegacyType
       );
-      return migrationCreator<InputType, MigrationType>(
-        function (doc): doc is SavedObjectUnsanitizedDoc<InputType> {
+      return migrationCreator<InputType, MigrationType>({
+        isMigrationNeededPredicate(doc): doc is SavedObjectUnsanitizedDoc<InputType> {
           // migrate doc that have the second field
           return (
             typeof (doc as SavedObjectUnsanitizedDoc<InputType>).attributes.nonEncryptedAttr ===
             'string'
           );
         },
-        ({ attributes: { firstAttr, nonEncryptedAttr }, ...doc }) => ({
+        migration: ({ attributes: { firstAttr, nonEncryptedAttr }, ...doc }) => ({
           attributes: {
             // modify an encrypted field
             firstAttr: `~~${firstAttr}~~`,
@@ -657,10 +655,9 @@ describe('createMigration()', () => {
           },
           ...doc,
         }),
-        false,
         inputType,
-        migrationType
-      );
+        migratedType: migrationType,
+      });
     }
 
     it('doesnt decrypt saved objects that dont need to be migrated', async () => {
