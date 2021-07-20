@@ -19,6 +19,7 @@ import { MlJobsResponse } from '../../../common/types/job_service';
 import { DatafeedStats } from '../../../common/types/anomaly_detection_jobs';
 import { GetGuards } from '../../shared_services/shared_services';
 import { AnomalyDetectionJobsHealthAlertContext } from './register_jobs_monitoring_rule_type';
+import { getResultJobsHealthRuleConfig } from '../../../common/util/alerts';
 
 interface TestResult {
   name: string;
@@ -113,23 +114,7 @@ export function jobsHealthServiceProvider(
       includeJobs,
       excludeJobs,
     }: AnomalyDetectionJobsHealthRuleParams): Promise<TestsResults> {
-      const config = {
-        dataFeed: {
-          enabled: testsConfig?.dataFeed?.enabled ?? true,
-        },
-        mml: {
-          enabled: testsConfig?.mml?.enabled ?? true,
-        },
-        delayedData: {
-          enabled: testsConfig?.delayedData?.enabled ?? true,
-        },
-        behindRealtime: {
-          enabled: testsConfig?.behindRealtime?.enabled ?? true,
-        },
-        errorMessages: {
-          enabled: testsConfig?.errorMessages?.enabled ?? true,
-        },
-      };
+      const config = getResultJobsHealthRuleConfig(testsConfig);
 
       const results: TestsResults = [];
 

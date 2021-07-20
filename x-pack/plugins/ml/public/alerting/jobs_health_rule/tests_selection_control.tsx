@@ -8,37 +8,20 @@
 import React, { FC, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFormFieldset, EuiSwitch, EuiSpacer } from '@elastic/eui';
-import { MlAnomalyDetectionJobsHealthRuleParams } from '../../../common/types/alerts';
-
-type TestsConfig = MlAnomalyDetectionJobsHealthRuleParams['testsConfig'];
+import { EuiFormFieldset, EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { JobsHealthRuleTestsConfig } from '../../../common/types/alerts';
+import { getResultJobsHealthRuleConfig } from '../../../common/util/alerts';
 
 interface TestsSelectionControlProps {
-  config: TestsConfig;
-  onChange: (update: TestsConfig) => void;
+  config: JobsHealthRuleTestsConfig;
+  onChange: (update: JobsHealthRuleTestsConfig) => void;
 }
 
 export const TestsSelectionControl: FC<TestsSelectionControlProps> = ({ config, onChange }) => {
-  const uiConfig: Required<Exclude<TestsConfig, undefined>> = {
-    dataFeed: {
-      enabled: config?.dataFeed?.enabled ?? true,
-    },
-    mml: {
-      enabled: config?.mml?.enabled ?? true,
-    },
-    delayedData: {
-      enabled: config?.delayedData?.enabled ?? true,
-    },
-    behindRealtime: {
-      enabled: config?.behindRealtime?.enabled ?? true,
-    },
-    errorMessages: {
-      enabled: config?.errorMessages?.enabled ?? true,
-    },
-  };
+  const uiConfig = getResultJobsHealthRuleConfig(config);
 
   const updateCallback = useCallback(
-    (update: Partial<Exclude<TestsConfig, undefined>>) => {
+    (update: Partial<Exclude<JobsHealthRuleTestsConfig, undefined>>) => {
       onChange({
         ...(config ?? {}),
         ...update,

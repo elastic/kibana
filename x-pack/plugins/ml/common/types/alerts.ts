@@ -123,15 +123,21 @@ export type MlAnomalyDetectionJobsHealthRuleParams = {
     groupIds?: string[];
   };
   testsConfig?: {
-    dataFeed?: CommonHealthCheckConfig;
-    mml?: CommonHealthCheckConfig;
-    delayedData?: CommonHealthCheckConfig & {
-      docsCount?: number;
-      timeInterval?: string;
-    };
-    behindRealtime?: CommonHealthCheckConfig & {
-      timeInterval?: string;
-    };
-    errorMessages?: CommonHealthCheckConfig;
-  };
+    dataFeed?: CommonHealthCheckConfig | null;
+    mml?: CommonHealthCheckConfig | null;
+    delayedData?:
+      | (CommonHealthCheckConfig & {
+          docsCount?: number | null;
+          timeInterval?: string | null;
+        })
+      | null;
+    behindRealtime?:
+      | (CommonHealthCheckConfig & {
+          timeInterval?: string | null;
+        })
+      | null;
+    errorMessages?: CommonHealthCheckConfig | null;
+  } | null;
 } & AlertTypeParams;
+
+export type JobsHealthRuleTestsConfig = MlAnomalyDetectionJobsHealthRuleParams['testsConfig'];

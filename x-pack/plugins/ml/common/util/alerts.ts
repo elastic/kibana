@@ -9,6 +9,7 @@ import { CombinedJobWithStats, Datafeed, Job } from '../types/anomaly_detection_
 import { resolveMaxTimeInterval } from './job_utils';
 import { isDefined } from '../types/guards';
 import { parseInterval } from './parse_interval';
+import { JobsHealthRuleTestsConfig } from '../types/alerts';
 
 const narrowBucketLength = 60;
 
@@ -50,4 +51,28 @@ export function getTopNBuckets(job: Job): number {
   }
 
   return Math.ceil(narrowBucketLength / bucketSpan.asSeconds());
+}
+
+/**
+ * Returns tests configuration combined with default values.
+ * @param config
+ */
+export function getResultJobsHealthRuleConfig(config: JobsHealthRuleTestsConfig) {
+  return {
+    dataFeed: {
+      enabled: config?.dataFeed?.enabled ?? true,
+    },
+    mml: {
+      enabled: config?.mml?.enabled ?? true,
+    },
+    delayedData: {
+      enabled: config?.delayedData?.enabled ?? true,
+    },
+    behindRealtime: {
+      enabled: config?.behindRealtime?.enabled ?? true,
+    },
+    errorMessages: {
+      enabled: config?.errorMessages?.enabled ?? true,
+    },
+  };
 }
