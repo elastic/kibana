@@ -29,9 +29,14 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   const mlHttpService = useMemo(() => new HttpService(http), [http]);
   const adJobsApiService = useMemo(() => jobsApiProvider(mlHttpService), [mlHttpService]);
 
-  const jobsAndGroupIds: string[] = useMemo(
+  const includeJobsAndGroupIds: string[] = useMemo(
     () => (Object.values(alertParams.includeJobs ?? {}) as string[][]).flat(),
     [alertParams.includeJobs]
+  );
+
+  const excludeJobsAndGroupIds: string[] = useMemo(
+    () => (Object.values(alertParams.excludeJobs ?? {}) as string[][]).flat(),
+    [alertParams.excludeJobs]
   );
 
   const onAlertParamChange = useCallback(
@@ -46,7 +51,7 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   return (
     <EuiForm data-test-subj={'mlJobsHealthAlertingRuleForm'}>
       <JobSelectorControl
-        jobsAndGroupIds={jobsAndGroupIds}
+        jobsAndGroupIds={includeJobsAndGroupIds}
         adJobsApiService={adJobsApiService}
         onChange={useCallback(onAlertParamChange('includeJobs'), [])}
         errors={Array.isArray(errors.includeJobs) ? errors.includeJobs : []}
@@ -55,6 +60,22 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
           <FormattedMessage
             id="xpack.ml.alertTypes.jobsHealthAlertingRule.includeJobs.label"
             defaultMessage="Include jobs or groups"
+          />
+        }
+      />
+
+      <EuiSpacer size="m" />
+
+      <JobSelectorControl
+        jobsAndGroupIds={excludeJobsAndGroupIds}
+        adJobsApiService={adJobsApiService}
+        onChange={useCallback(onAlertParamChange('excludeJobs'), [])}
+        errors={Array.isArray(errors.excludeJobs) ? errors.excludeJobs : []}
+        multiSelect
+        label={
+          <FormattedMessage
+            id="xpack.ml.alertTypes.jobsHealthAlertingRule.excludeJobs.label"
+            defaultMessage="Exclude jobs or groups"
           />
         }
       />
