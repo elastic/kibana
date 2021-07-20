@@ -13,7 +13,7 @@ import { State } from '../../../common/store/types';
 import { TimelineModel } from './model';
 import { AutoSavedWarningMsg, TimelineById } from './types';
 
-export const { getManageTimelineById } = tGridSelectors;
+export const { getManageTimelineById, selectInsertTimeline } = tGridSelectors;
 
 const selectTimelineById = (state: State): TimelineById => state.timeline.timelineById;
 

@@ -27,7 +27,7 @@ import { SERVER_APP_ID } from '../../../../../../common/constants';
 import * as i18n from '../translations';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
-import { AddToCaseAction } from '../../../../../cases/components/timeline_actions/add_to_case_action';
+// import { AddToCaseAction } from '../../../../../cases/components/timeline_actions/add_to_case_action';
 import { TimelineId, ActionProps, OnPinEvent } from '../../../../../../common/types/timeline';
 import { timelineActions, timelineSelectors } from '../../../../store/timeline';
 import { timelineDefaults } from '../../../../store/timeline/defaults';

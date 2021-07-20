@@ -9,11 +9,8 @@ import { isEmpty } from 'lodash/fp';
 
 import type { Ecs } from '../../../../common/ecs';
 import type { TimelineItem, TimelineNonEcsData } from '../../../../common/search_strategy';
-import type {
-  TimelineEventsType,
-  TimelineTypeLiteral,
-  TimelineType,
-} from '../../../../common/types/timeline';
+import { TimelineType } from '../../../../common/types/timeline';
+import type { TimelineEventsType, TimelineTypeLiteral } from '../../../../common/types/timeline';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const omitTypenameAndEmpty = (k: string, v: any): any | undefined =>
