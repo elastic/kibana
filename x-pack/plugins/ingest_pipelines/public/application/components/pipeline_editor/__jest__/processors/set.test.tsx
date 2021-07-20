@@ -78,7 +78,7 @@ describe('Processor: Set', () => {
     });
   });
 
-  test('allows to set just internal_networks_field or internal_networks', async () => {
+  test('allows to set just value or copy_from', async () => {
     const {
       actions: { saveNewProcessor },
       form,
