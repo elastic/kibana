@@ -68,6 +68,7 @@ jest.mock('../../../../common/lib/helpers/scheduler', () => ({
 
 describe('Body', () => {
   const mount = useMountAppended();
+  const mockRefetch = jest.fn();
   const props: StatefulBodyProps = {
     activePage: 0,
     browserFields: mockBrowserFields,
@@ -80,7 +81,7 @@ describe('Body', () => {
     isSelectAllChecked: false,
     loadingEventIds: [],
     pinnedEventIds: {},
-    refetch: jest.fn(),
+    refetch: mockRefetch,
     renderCellValue: DefaultCellRenderer,
     rowRenderers: defaultRowRenderers,
     selectedEventIds: {},
@@ -234,6 +235,35 @@ describe('Body', () => {
   });
 
   describe('event details', () => {
+    const ecsData = {
+      _id: '1',
+      timestamp: '2018-11-05T19:03:25.937Z',
+      host: { name: ['apache'], ip: ['192.168.0.1'] },
+      event: {
+        id: ['1'],
+        action: ['Action'],
+        category: ['Access'],
+        module: ['nginx'],
+        severity: [3],
+      },
+      source: { ip: ['192.168.0.1'], port: [80] },
+      destination: { ip: ['192.168.0.3'], port: [6343] },
+      user: { id: ['1'], name: ['john.dee'] },
+      geo: { region_name: ['xx'], country_iso_code: ['xx'] },
+    };
+
+    const nonEcsData = [
+      { field: '@timestamp', value: ['2018-11-05T19:03:25.937Z'] },
+      { field: 'event.severity', value: ['3'] },
+      { field: 'event.category', value: ['Access'] },
+      { field: 'event.action', value: ['Action'] },
+      { field: 'host.name', value: ['apache'] },
+      { field: 'source.ip', value: ['192.168.0.1'] },
+      { field: 'destination.ip', value: ['192.168.0.3'] },
+      { field: 'destination.bytes', value: ['123456'] },
+      { field: 'user.name', value: ['john.dee'] },
+    ];
+
     beforeEach(() => {
       mockDispatch.mockReset();
     });
@@ -253,6 +283,9 @@ describe('Body', () => {
           params: {
             eventId: '1',
             indexName: undefined,
+            ecsData,
+            nonEcsData,
+            refetch: mockRefetch,
           },
           tabType: 'query',
           timelineId: 'timeline-test',
@@ -277,6 +310,9 @@ describe('Body', () => {
           params: {
             eventId: '1',
             indexName: undefined,
+            ecsData,
+            nonEcsData,
+            refetch: mockRefetch,
           },
           tabType: 'pinned',
           timelineId: 'timeline-test',
@@ -301,6 +337,9 @@ describe('Body', () => {
           params: {
             eventId: '1',
             indexName: undefined,
+            ecsData,
+            nonEcsData,
+            refetch: mockRefetch,
           },
           tabType: 'notes',
           timelineId: 'timeline-test',
