@@ -9,15 +9,17 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
-import { getCoreStart } from '../../services';
+import { useKibana } from '../../../../kibana_react/public';
+import { VisualizeServices } from '../types';
 
 export const LEGACY_CHARTS_LIBRARY = 'visualization:visualize:legacyChartsLibrary';
 
 export const DeprecationWarning = () => {
-  const canEditAdvancedSettings = getCoreStart().application.capabilities.advancedSettings.save;
-  const advancedSettingsLink = getCoreStart().http.basePath.prepend(
-    `/app/management/kibana/settings?query=${LEGACY_CHARTS_LIBRARY}`
-  );
+  const { services } = useKibana<VisualizeServices>();
+  const canEditAdvancedSettings = services.application.capabilities.advancedSettings.save;
+  const advancedSettingsLink = services.application.getUrlForApp('management', {
+    path: `/kibana/settings?query=${LEGACY_CHARTS_LIBRARY}`,
+  });
 
   return (
     <EuiCallOut

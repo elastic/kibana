@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { CoreStart } from 'src/core/public';
 import { createGetterSetter } from '../../../plugins/kibana_utils/public';
 
 import type { IUiSettingsClient } from '../../../core/public';
@@ -17,8 +16,6 @@ export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClie
 export const [getUsageCollector, setUsageCollector] = createGetterSetter<UsageCollectionStart>(
   'UsageCollection'
 );
-
-export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');
 
 export const [
   getVisEditorsRegistry,

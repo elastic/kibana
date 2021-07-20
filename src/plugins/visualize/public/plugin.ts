@@ -45,7 +45,7 @@ import type { DashboardStart } from '../../dashboard/public';
 import type { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public';
 import type { UsageCollectionStart } from '../../usage_collection/public';
 
-import { setVisEditorsRegistry, setUISettings, setUsageCollector, setCoreStart } from './services';
+import { setVisEditorsRegistry, setUISettings, setUsageCollector } from './services';
 import { createVisEditorsRegistry, VisEditorsRegistry } from './vis_editors_registry';
 
 export interface VisualizePluginStartDependencies {
@@ -247,7 +247,6 @@ export class VisualizePlugin
 
   public start(core: CoreStart, { usageCollection }: VisualizePluginStartDependencies) {
     setVisEditorsRegistry(this.visEditorsRegistry);
-    setCoreStart(core);
 
     if (usageCollection) {
       setUsageCollector(usageCollection);
