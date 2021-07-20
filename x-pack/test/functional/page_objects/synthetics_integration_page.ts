@@ -24,25 +24,17 @@ export function SyntheticsIntegrationPageProvider({
      *
      */
     async navigateToPackagePage(packageVersion: string) {
-      await pageObjects.common.navigateToUrl(
+      await pageObjects.common.navigateToUrlWithBrowserHistory(
         'fleet',
-        `/integrations/synthetics-${packageVersion}/add-integration`,
-        {
-          shouldUseHashForSubUrl: false,
-          useActualUrl: true,
-        }
+        `/integrations/synthetics-${packageVersion}/add-integration`
       );
       await pageObjects.header.waitUntilLoadingHasFinished();
     },
 
     async navigateToPackageEditPage(packageId: string, agentId: string) {
-      await pageObjects.common.navigateToUrl(
+      await pageObjects.common.navigateToUrlWithBrowserHistory(
         'fleet',
-        `/policies/${agentId}/edit-integration/${packageId}`,
-        {
-          shouldUseHashForSubUrl: false,
-          useActualUrl: true,
-        }
+        `/policies/${agentId}/edit-integration/${packageId}`
       );
       await pageObjects.header.waitUntilLoadingHasFinished();
     },

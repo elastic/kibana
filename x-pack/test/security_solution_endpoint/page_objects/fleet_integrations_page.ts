@@ -17,7 +17,7 @@ export function FleetIntegrations({ getService, getPageObjects }: FtrProviderCon
 
   return {
     async navigateToIntegrationDetails(pkgkey: string) {
-      await pageObjects.common.navigateToUrl(
+      await pageObjects.common.navigateToUrlWithBrowserHistory(
         INTEGRATIONS_PLUGIN_ID,
         pagePathGetters.integration_details_overview({ pkgkey })[1]
       );
