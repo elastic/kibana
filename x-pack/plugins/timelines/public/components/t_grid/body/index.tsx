@@ -146,7 +146,7 @@ export type StatefulBodyProps = OwnProps & PropsFromRedux;
  * The Body component is used everywhere timeline is used within the security application. It is the highest level component
  * that is shared across all implementations of the timeline.
  */
-// eslint-disable-next-line react/display-name
+
 export const BodyComponent = React.memo<StatefulBodyProps>(
   ({
     activePage,
@@ -341,6 +341,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     );
   }
 );
+
+BodyComponent.displayName = 'BodyComponent';
 
 const makeMapStateToProps = () => {
   const memoizedColumnHeaders: (
