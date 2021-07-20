@@ -150,7 +150,7 @@ export const buildExpression = (
                       ? [state.legend.verticalAlignment]
                       : [],
                     floatingColumns: state.legend.floatingColumns
-                      ? [state.legend.floatingColumns]
+                      ? [Math.min(5, state.legend.floatingColumns)]
                       : [],
                   },
                 },

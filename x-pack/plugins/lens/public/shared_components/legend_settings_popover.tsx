@@ -172,6 +172,7 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
             condition={mode === 'hide'}
             position="top"
             delay="regular"
+            display="block"
           >
             <EuiSwitch
               compressed
@@ -201,6 +202,7 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
             condition={mode === 'hide'}
             position="top"
             delay="regular"
+            display="block"
           >
             <EuiSwitch
               compressed

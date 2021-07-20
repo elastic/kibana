@@ -149,6 +149,9 @@ const locationAlignmentButtonsIcons: Array<{
   },
 ];
 
+const MIN_COLUMNS_VALUE = 1;
+const MAX_COLUMNS_VALUE = 5;
+
 const FloatingColumnsInput = ({
   value,
   setValue,
@@ -163,12 +166,12 @@ const FloatingColumnsInput = ({
     <EuiFieldNumber
       data-test-subj="lens-legend-location-columns-input"
       value={inputValue}
-      min={1}
-      max={5}
+      min={MIN_COLUMNS_VALUE}
+      max={MAX_COLUMNS_VALUE}
       compressed
       disabled={isDisabled}
       onChange={(e) => {
-        handleInputChange(Number(e.currentTarget.value));
+        handleInputChange(Number(e.target.value));
       }}
     />
   );
@@ -205,6 +208,7 @@ export const LegendLocationSettings: React.FunctionComponent<LegendLocationSetti
             condition={isDisabled}
             position="top"
             delay="regular"
+            display="block"
           >
             <EuiButtonGroup
               isFullWidth
@@ -240,6 +244,7 @@ export const LegendLocationSettings: React.FunctionComponent<LegendLocationSetti
               condition={isDisabled}
               position="top"
               delay="regular"
+              display="block"
             >
               <EuiButtonGroup
                 legend={i18n.translate('xpack.lens.shared.legendAlignmentLabel', {
@@ -264,6 +269,7 @@ export const LegendLocationSettings: React.FunctionComponent<LegendLocationSetti
               condition={isDisabled}
               position="top"
               delay="regular"
+              display="block"
             >
               <EuiButtonGroup
                 legend={i18n.translate('xpack.lens.shared.legendInsideLocationAlignmentLabel', {
@@ -311,6 +317,7 @@ export const LegendLocationSettings: React.FunctionComponent<LegendLocationSetti
             condition={isDisabled || location === 'outside'}
             position="top"
             delay="regular"
+            display="block"
           >
             <FloatingColumnsInput
               value={floatingColumns ?? DEFAULT_FLOATING_COLUMNS}
