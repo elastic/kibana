@@ -12,7 +12,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
-  const esArchiver = getService('esArchiver');
   const log = getService('log');
   const inspector = getService('inspector');
   const retry = getService('retry');
@@ -126,12 +125,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('switch index patterns', () => {
-      before(async () => {
-        await esArchiver.loadIfNeeded(
-          'test/functional/fixtures/es_archiver/index_pattern_without_timefield'
-        );
-      });
-
       beforeEach(async () => {
         await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickMetric();
@@ -141,40 +134,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualBuilder.setDropLastBucket(true);
         await PageObjects.visualBuilder.clickDataTab('metric');
         await PageObjects.timePicker.setAbsoluteRange(
-          'Sep 22, 2019 @ 00:00:00.000',
-          'Sep 23, 2019 @ 00:00:00.000'
+          'Sep 19, 2015 @ 06:31:44.000',
+          'Sep 22, 2015 @ 18:31:44.000'
         );
-      });
-
-      after(async () => {
-        await security.testUser.restoreDefaults();
-        await esArchiver.load('test/functional/fixtures/es_archiver/empty_kibana');
-        await PageObjects.visualize.initTests();
       });
 
       const switchIndexTest = async (useKibanaIndexes: boolean) => {
         await PageObjects.visualBuilder.clickPanelOptions('metric');
         await PageObjects.visualBuilder.setIndexPatternValue('', false);
 
-        const value = await PageObjects.visualBuilder.getMetricValue();
-        expect(value).to.eql('0');
-
         // Sometimes popovers take some time to appear in Firefox (#71979)
         await retry.tryForTime(20000, async () => {
-          await PageObjects.visualBuilder.setIndexPatternValue('with-timefield', useKibanaIndexes);
+          await PageObjects.visualBuilder.setIndexPatternValue('logstash-*', useKibanaIndexes);
           await PageObjects.visualBuilder.waitForIndexPatternTimeFieldOptionsLoaded();
-          await PageObjects.visualBuilder.selectIndexPatternTimeField('timestamp');
+          await PageObjects.visualBuilder.selectIndexPatternTimeField('@timestamp');
         });
         const newValue = await PageObjects.visualBuilder.getMetricValue();
-        expect(newValue).to.eql('1');
+        expect(newValue).to.eql('156');
       };
-
-      it('should be able to switch using text mode selection', async () => {
-        await switchIndexTest(false);
-      });
 
       it('should be able to switch combo box mode selection', async () => {
         await switchIndexTest(true);
+      });
+
+      it('should be able to switch using text mode selection', async () => {
+        await switchIndexTest(false);
       });
     });
 
