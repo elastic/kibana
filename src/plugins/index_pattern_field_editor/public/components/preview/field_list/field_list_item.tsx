@@ -63,7 +63,7 @@ export const PreviewListItem: React.FC<Props> = ({
 
     return (
       <span className="indexPatternFieldEditor__previewFieldList__item__value__wrapper">
-        {value}
+        {JSON.stringify(value)}
       </span>
     );
   };

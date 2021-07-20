@@ -25,10 +25,12 @@ export const FieldPreviewError = () => {
       })}
       color="danger"
       iconType="cross"
-      data-test-subj="formFormatError"
+      data-test-subj="previewError"
     >
-      <p>{error.error.message}</p>
-      {error.code === 'PAINLESS_SCRIPT_ERROR' && <p>{error.error.reason}</p>}
+      <p data-test-subj="title">{error.error.message}</p>
+      {error.code === 'PAINLESS_SCRIPT_ERROR' && (
+        <p data-test-subj="reason">{error.error.reason}</p>
+      )}
     </EuiCallOut>
   );
 };

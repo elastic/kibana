@@ -14,6 +14,7 @@ import {
   setIndexPatternFields,
   FieldEditorFlyoutContentTestBed,
 } from './field_editor_flyout_content.helpers';
+import { createPreviewError } from './helpers/mocks';
 
 describe('<FieldEditorFlyoutContent />', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
@@ -388,17 +389,45 @@ describe('<FieldEditorFlyoutContent />', () => {
         expect(getRenderedFieldsPreview()).toEqual([{ key: 'myRuntimeField', value: '-' }]);
       });
 
-      test('should display the _source value when no script is provided and the name matched one of the fields in _source', async () => {
-        const {
-          actions: { toggleFormRow, fields, getRenderedFieldsPreview },
-        } = testBed;
+      describe('read from _source', () => {
+        test('should display the _source value when no script is provided and the name matched one of the fields in _source', async () => {
+          const {
+            actions: { toggleFormRow, fields, getRenderedFieldsPreview },
+          } = testBed;
 
-        await toggleFormRow('value');
-        await fields.updateName('subTitle');
+          await toggleFormRow('value');
+          await fields.updateName('subTitle');
 
-        expect(getRenderedFieldsPreview()).toEqual([
-          { key: 'subTitle', value: 'First doc - subTitle' },
-        ]);
+          expect(getRenderedFieldsPreview()).toEqual([
+            { key: 'subTitle', value: 'First doc - subTitle' },
+          ]);
+        });
+
+        test('should display the value returned by the _execute API and fallback to _source if "Set value" is turned off', async () => {
+          httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['valueFromExecuteAPI'] });
+
+          const {
+            actions: { toggleFormRow, fields, waitForPreviewUpdate, getRenderedFieldsPreview },
+          } = testBed;
+
+          await toggleFormRow('value');
+          await fields.updateName('description'); // Field name is a field in _source
+          await fields.updateScript('echo("hello")');
+          await waitForPreviewUpdate();
+
+          // We render the value from the _execute API
+          expect(getRenderedFieldsPreview()).toEqual([
+            { key: 'description', value: 'valueFromExecuteAPI' },
+          ]);
+
+          await toggleFormRow('format', 'on');
+          await toggleFormRow('value', 'off');
+
+          // Fallback to _source value when "Set value" is turned off and we have a format
+          expect(getRenderedFieldsPreview()).toEqual([
+            { key: 'description', value: 'First doc - description' },
+          ]);
+        });
       });
 
       test('should set the value returned by the painless _execute API', async () => {
@@ -441,16 +470,54 @@ describe('<FieldEditorFlyoutContent />', () => {
           { key: 'myRuntimeField', value: scriptEmitResponse },
         ]);
       });
+
+      test('should display an updating indicator while fetching the preview', async () => {
+        httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['ok'] });
+
+        const {
+          exists,
+          actions: { toggleFormRow, fields, waitForPreviewUpdate },
+        } = testBed;
+
+        await toggleFormRow('value');
+        expect(exists('isUpdatingIndicator')).toBe(false);
+
+        await fields.updateScript('echo("hello")');
+        expect(exists('isUpdatingIndicator')).toBe(true);
+
+        await waitForPreviewUpdate();
+        expect(exists('isUpdatingIndicator')).toBe(false);
+      });
+
+      test('should not display the updating indicator when neither the type nor the script has changed', async () => {
+        httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['ok'] });
+
+        const {
+          exists,
+          actions: { toggleFormRow, fields, waitForPreviewUpdate },
+        } = testBed;
+
+        await toggleFormRow('value');
+        await fields.updateName('myRuntimeField');
+        await fields.updateScript('echo("hello")');
+        expect(exists('isUpdatingIndicator')).toBe(true);
+        await waitForPreviewUpdate();
+        expect(exists('isUpdatingIndicator')).toBe(false);
+
+        await fields.updateName('nameChanged');
+        // We haven't changed the type nor the script so there should not be any updating indicator
+        expect(exists('isUpdatingIndicator')).toBe(false);
+      });
     });
 
     describe('format', () => {
       test('should apply the format to the value', async () => {
         /**
-         * Each of the formatter has already its own test. Here we are basically
+         * Each of the formatter has already its own test. Here we are simply
          * doing a smoke test to make sure that the preview panel applies the formatter
          * to the runtime field value.
          * We do that by mocking (in "setup_environment.tsx") the implementation of the
-         * the fieldFormats getInstance() handler.
+         * the fieldFormats.getInstance() handler.
          */
         const scriptEmitResponse = 'hello';
         httpRequestsMockHelpers.setFieldPreviewResponse({ values: [scriptEmitResponse] });
@@ -469,9 +536,41 @@ describe('<FieldEditorFlyoutContent />', () => {
 
         // after
         await toggleFormRow('format');
-        await fields.updateFormat(fieldFormatsOptions[0].id);
+        await fields.updateFormat(fieldFormatsOptions[0].id); // select 'upper' format
         await waitForPreviewUpdate();
         expect(getRenderedFieldsPreview()).toEqual([{ key: 'myRuntimeField', value: 'HELLO' }]);
+      });
+    });
+
+    describe('error handling', () => {
+      test('should display the error returned by the Painless _execute API', async () => {
+        const error = createPreviewError({ reason: 'Houston we got a problem' });
+        httpRequestsMockHelpers.setFieldPreviewResponse({ values: [], error, status: 400 });
+
+        const {
+          exists,
+          find,
+          actions: { toggleFormRow, fields, waitForPreviewUpdate, getRenderedFieldsPreview },
+        } = testBed;
+
+        await fields.updateName('myRuntimeField');
+        await toggleFormRow('value');
+        await fields.updateScript('bad()');
+        await waitForPreviewUpdate();
+
+        expect(exists('fieldPreviewItem')).toBe(false);
+        expect(exists('indexPatternFieldList')).toBe(false);
+        expect(exists('previewError')).toBe(true);
+        expect(find('previewError.title').text()).toBe('Error compiling the painless script');
+        expect(find('previewError.reason').text()).toBe(error.caused_by.reason);
+
+        httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['ok'] });
+        await fields.updateScript('echo("ok")');
+        await waitForPreviewUpdate();
+
+        expect(exists('fieldPreviewItem')).toBe(true);
+        expect(find('indexPatternFieldList.listItem').length).toBeGreaterThan(0);
+        expect(getRenderedFieldsPreview()).toEqual([{ key: 'myRuntimeField', value: 'ok' }]);
       });
     });
   });

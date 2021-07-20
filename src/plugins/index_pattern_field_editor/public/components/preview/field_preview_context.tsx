@@ -50,7 +50,7 @@ interface Params {
 
 export interface FieldPreview {
   key: string;
-  value: string;
+  value: unknown;
   formattedValue?: string;
 }
 
@@ -103,6 +103,16 @@ export const defaultValueFormatter = (value: unknown) =>
 
 export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   const previewCount = useRef(0);
+  const lastExecutePainlessRequestParams = useRef<{
+    type: Params['type'];
+    script: string | undefined;
+    documentId: string | undefined;
+  }>({
+    type: null,
+    script: undefined,
+    documentId: undefined,
+  });
+
   const {
     indexPattern,
     fieldTypeToProcess,
@@ -142,8 +152,9 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   ]);
 
   const currentDocIndex = currentDocument?._index;
+  const currentDocId = currentDocument?._id;
   const totalDocs = documents.length;
-  const { name, document, script, format } = params;
+  const { name, document, script, format, type } = params;
 
   const updateParams: Context['params']['update'] = useCallback((updated) => {
     setParams((prev) => ({ ...prev, ...updated }));
@@ -157,6 +168,20 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
         .every(([_, value]) => Boolean(value)),
     [params]
   );
+
+  const hasSomePreviewRequestParamChanged = useCallback(() => {
+    return (
+      lastExecutePainlessRequestParams.current.type !== type ||
+      lastExecutePainlessRequestParams.current.script !== script?.source ||
+      lastExecutePainlessRequestParams.current.documentId !== currentDocId
+    );
+  }, [type, script, currentDocId]);
+
+  const doExecuteScript = useCallback(() => {
+    return (
+      fieldTypeToProcess === 'runtime' && allParamsDefined() && hasSomePreviewRequestParamChanged()
+    );
+  }, [fieldTypeToProcess, allParamsDefined, hasSomePreviewRequestParamChanged]);
 
   const valueFormatter = useCallback(
     (value: unknown) => {
@@ -268,9 +293,15 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   );
 
   const updatePreview = useCallback(async () => {
-    if (fieldTypeToProcess !== 'runtime' || !allParamsDefined()) {
+    if (!doExecuteScript()) {
       return;
     }
+
+    lastExecutePainlessRequestParams.current = {
+      type: params.type,
+      script: params.script?.source,
+      documentId: currentDocId,
+    };
 
     const currentApiCall = ++previewCount.current;
 
@@ -320,15 +351,15 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       const formattedValue = valueFormatter(value);
 
       setPreviewResponse({
-        fields: [{ key: params.name!, value: JSON.stringify(value), formattedValue }],
+        fields: [{ key: params.name!, value, formattedValue }],
         error: null,
       });
     }
   }, [
-    fieldTypeToProcess,
-    allParamsDefined,
+    doExecuteScript,
     params,
     currentDocIndex,
+    currentDocId,
     getFieldPreview,
     notifications.toasts,
     valueFormatter,
@@ -429,10 +460,10 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
    * the 500ms of the debounce, we set the loading state in this effect
    */
   useEffect(() => {
-    if (fieldTypeToProcess === 'runtime' && allParamsDefined()) {
+    if (doExecuteScript()) {
       setIsLoadingPreview(true);
     }
-  }, [fieldTypeToProcess, allParamsDefined]);
+  }, [doExecuteScript]);
 
   /**
    * When the component mounts, if we are creating/editing a runtime field
@@ -458,26 +489,41 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
 
   useEffect(() => {
     if (document) {
-      // We have a field name, a document loaded but no script (the set value toggle is
-      // either turned off or we have a blank script). If we have a format then we'll
-      // preview the field with the format by reading the value from _source
-      if (name && script === null) {
-        const nextValue = get(document, name);
-        const formattedValue = valueFormatter(nextValue);
+      const willExecuteScript = doExecuteScript();
 
-        setPreviewResponse({
-          fields: [{ key: name, value: nextValue, formattedValue }],
-          error: null,
-        });
-      } else {
-        // We immediately update the field preview whenever the name changes
+      if (willExecuteScript) {
+        // We'll update the field "value" after executing the Painless script
+        // Here we want to immediately update the field "key" whenever the name changes
         setPreviewResponse(({ fields: { 0: field } }) => ({
           fields: [{ ...field, key: name ?? '' }],
           error: null,
         }));
+
+        return;
       }
+
+      // As we won't execute the Painless script we will immediately update
+      // the preview, reading the value from _source if needed and applying
+      // any formatter to the value.
+      setPreviewResponse((prev) => {
+        const {
+          fields: { 0: field },
+        } = prev;
+
+        const nextValue =
+          name && script === null
+            ? get(document, name) // When there is no script we read the value from _source
+            : field?.value;
+
+        const formattedValue = valueFormatter(nextValue);
+
+        return {
+          fields: [{ key: name ?? '', value: nextValue, formattedValue }],
+          error: null,
+        };
+      });
     }
-  }, [name, document, script, format, valueFormatter]);
+  }, [name, document, script, valueFormatter, doExecuteScript]);
 
   return <fieldPreviewContext.Provider value={ctx}>{children}</fieldPreviewContext.Provider>;
 };

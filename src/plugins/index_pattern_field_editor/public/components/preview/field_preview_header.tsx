@@ -52,7 +52,7 @@ export const FieldPreviewHeader = () => {
         </EuiFlexItem>
 
         {isUpdating && (
-          <EuiFlexItem>
+          <EuiFlexItem data-test-subj="isUpdatingIndicator">
             <EuiFlexGroup gutterSize="xs">
               <EuiFlexItem grow={false}>
                 <EuiLoadingSpinner size="m" />

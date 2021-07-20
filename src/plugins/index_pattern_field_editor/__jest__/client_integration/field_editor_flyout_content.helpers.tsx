@@ -10,6 +10,7 @@ import { ReactWrapper } from 'enzyme';
 import { SinonFakeServer } from 'sinon';
 import { registerTestBed, TestBed } from '@kbn/test/jest';
 
+import { API_BASE_PATH } from '../../common/constants';
 import { Context } from '../../public/components/field_editor_context';
 import {
   FieldEditorFlyoutContent,
@@ -84,10 +85,7 @@ const getActions = (testBed: TestBed) => {
 
     while (i >= 0) {
       const request = server.requests[i];
-      if (
-        request.method === 'POST' &&
-        request.url === '/api/index_pattern_field_editor/field_preview'
-      ) {
+      if (request.method === 'POST' && request.url === `${API_BASE_PATH}/field_preview`) {
         return {
           ...request,
           requestBody: JSON.parse(JSON.parse(request.requestBody).body),
@@ -96,7 +94,7 @@ const getActions = (testBed: TestBed) => {
       i--;
     }
 
-    throw new Error(`Can't access the latest preview http request as it hasn't been called.`);
+    throw new Error(`Can't access the latest preview HTTP request as it hasn't been called.`);
   };
 
   return {

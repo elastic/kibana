@@ -66,11 +66,11 @@ export const WithFieldEditorDependencies = <T extends object = { [key: string]: 
     if (id === 'upper') {
       return {
         convertObject: {
-          html(value) {
+          html(value: string) {
             return `<span>${value.toUpperCase()}</span>`;
           },
         },
-      };
+      } as any;
     }
   });
 
