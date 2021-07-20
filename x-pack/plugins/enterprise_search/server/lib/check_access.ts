@@ -51,7 +51,7 @@ export const checkAccess = async ({
   }
 
   // We can only retrieve the active space when security is enabled and the request has already been authenticated
-  const attemptSpaceRetrieval = isRbacEnabled && request.auth.isAuthenticated;
+  const attemptSpaceRetrieval = request.auth.isAuthenticated;
   let allowedAtSpace = false;
 
   if (attemptSpaceRetrieval) {
