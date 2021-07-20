@@ -52,7 +52,7 @@ export function registerJobsMonitoringRuleType({
   >({
     id: ML_ALERT_TYPES.AD_JOBS_HEALTH,
     name: i18n.translate('xpack.ml.jobsHealthAlertingRule.name', {
-      defaultMessage: 'Jobs health monitoring',
+      defaultMessage: 'Anomaly detection jobs health monitoring',
     }),
     actionGroups: [REALTIME_ISSUE_DETECTED],
     defaultActionGroupId: ANOMALY_DETECTION_JOB_REALTIME_ISSUE,
