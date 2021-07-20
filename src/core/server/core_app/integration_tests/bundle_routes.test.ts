@@ -26,12 +26,13 @@ describe('bundle routes', () => {
   let logger: ReturnType<typeof loggingSystemMock.create>;
   let fileHashCache: FileHashCache;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     contextSetup = contextServiceMock.createSetupContract();
     logger = loggingSystemMock.create();
     fileHashCache = new FileHashCache();
 
     server = createHttpServer({ logger });
+    await server.preboot({ context: contextServiceMock.createPrebootContract() });
   });
 
   afterEach(async () => {
