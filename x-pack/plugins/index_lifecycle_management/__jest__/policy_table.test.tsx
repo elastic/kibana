@@ -140,7 +140,7 @@ describe('policy table', () => {
   test('should sort when modified date header is clicked', () => {
     testSort('modifiedDate');
   });
-  test('should sort when indices header is clicked', () => {
+  test('should sort when linked indices header is clicked', () => {
     testSort('indices');
   });
   test('should have proper actions in context menu when there are linked indices', () => {

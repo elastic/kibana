@@ -106,7 +106,7 @@ exports[`policy table should show empty state when there are not any policies 1`
 </div>
 `;
 
-exports[`policy table should sort when indices header is clicked 1`] = `
+exports[`policy table should sort when linked indices header is clicked 1`] = `
 Array [
   "testy1",
   "testy3",
@@ -121,7 +121,7 @@ Array [
 ]
 `;
 
-exports[`policy table should sort when indices header is clicked 2`] = `
+exports[`policy table should sort when linked indices header is clicked 2`] = `
 Array [
   "testy104",
   "testy102",
