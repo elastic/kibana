@@ -99,7 +99,7 @@ export function registerJobsMonitoringRuleType({
       );
       const executionResult = await getTestsResults(params);
 
-      if (executionResult) {
+      if (executionResult.length > 0) {
         logger.info(
           `Scheduling actions for tests: ${executionResult.map((v) => v.name).join(', ')}`
         );
