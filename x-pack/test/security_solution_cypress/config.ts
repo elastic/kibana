@@ -39,7 +39,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
         // retrieve rules from the filesystem but not from fleet for Cypress tests
         '--xpack.securitySolution.prebuiltRulesFromFileSystem=true',
-        '--xpack.securitySolution.prebuiltRulesFromSavedObjects=true',
+        '--xpack.securitySolution.prebuiltRulesFromSavedObjects=false',
       ],
     },
   };

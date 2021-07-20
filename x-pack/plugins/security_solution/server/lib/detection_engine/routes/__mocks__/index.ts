@@ -27,7 +27,7 @@ export const createMockConfig = (): ConfigType => ({
   packagerTaskInterval: '60s',
   alertMergeStrategy: 'missingFields',
   prebuiltRulesFromFileSystem: true,
-  prebuiltRulesFromSavedObjects: true,
+  prebuiltRulesFromSavedObjects: false,
 });
 
 export const mockGetCurrentUser = {
