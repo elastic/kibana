@@ -23,7 +23,7 @@ const ActionGroupId = 'threshold met';
 export function getAlertType(
   logger: Logger,
   data: Promise<StackAlertsStartDeps['triggersActionsUi']['data']>
-): AlertType<Params, {}, {}, ActionContext, typeof ActionGroupId> {
+): AlertType<Params, never, {}, {}, ActionContext, typeof ActionGroupId> {
   const alertTypeName = i18n.translate('xpack.stackAlerts.indexThreshold.alertTypeTitle', {
     defaultMessage: 'Index threshold',
   });
