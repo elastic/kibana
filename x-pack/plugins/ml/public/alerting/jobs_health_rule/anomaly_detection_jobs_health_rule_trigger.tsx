@@ -48,8 +48,15 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
     []
   );
 
+  const formErrors = Object.values(errors).flat();
+  const isFormInvalid = formErrors.length > 0;
+
   return (
-    <EuiForm data-test-subj={'mlJobsHealthAlertingRuleForm'}>
+    <EuiForm
+      data-test-subj={'mlJobsHealthAlertingRuleForm'}
+      error={formErrors}
+      isInvalid={isFormInvalid}
+    >
       <JobSelectorControl
         jobsAndGroupIds={includeJobsAndGroupIds}
         adJobsApiService={adJobsApiService}
@@ -85,6 +92,7 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
       <TestsSelectionControl
         config={alertParams.testsConfig}
         onChange={useCallback(onAlertParamChange('testsConfig'), [])}
+        errors={Array.isArray(errors.testsConfig) ? errors.testsConfig : []}
       />
     </EuiForm>
   );

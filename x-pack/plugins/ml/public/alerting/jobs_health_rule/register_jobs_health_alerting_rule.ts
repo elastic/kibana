@@ -30,6 +30,7 @@ export function registerJobsHealthAlertingRule(
       const validationResult = {
         errors: {
           includeJobs: new Array<string>(),
+          testsConfig: new Array<string>(),
         } as Record<keyof MlAnomalyDetectionJobsHealthRuleParams, string[]>,
       };
 
@@ -37,6 +38,17 @@ export function registerJobsHealthAlertingRule(
         validationResult.errors.includeJobs.push(
           i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.includeJobs.errorMessage', {
             defaultMessage: 'Job selection is required',
+          })
+        );
+      }
+
+      if (
+        alertParams.testsConfig &&
+        Object.values(alertParams.testsConfig).every((v) => v?.enabled === false)
+      ) {
+        validationResult.errors.testsConfig.push(
+          i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.testsConfig.errorMessage', {
+            defaultMessage: 'At least one health check has to enabled',
           })
         );
       }

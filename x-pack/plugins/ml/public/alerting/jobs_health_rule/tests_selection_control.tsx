@@ -15,6 +15,7 @@ import { getResultJobsHealthRuleConfig } from '../../../common/util/alerts';
 interface TestsSelectionControlProps {
   config: JobsHealthRuleTestsConfig;
   onChange: (update: JobsHealthRuleTestsConfig) => void;
+  errors?: string[];
 }
 
 export const TestsSelectionControl: FC<TestsSelectionControlProps> = ({ config, onChange }) => {
