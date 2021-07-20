@@ -78,10 +78,11 @@ export const initializeFullStory = async ({
   try {
     // This needs to be called syncronously to be sure that we populate the user ID soon enough to make sessions merging
     // across domains work
-    if (!userId) return;
-    // Do the hashing here to keep it at clear as possible in our source code that we do not send literal user IDs
-    const hashedId = sha256(userId.toString());
-    fullStory.identify(hashedId);
+    if (userId) {
+      // Do the hashing here to keep it at clear as possible in our source code that we do not send literal user IDs
+      const hashedId = sha256(userId.toString());
+      fullStory.identify(hashedId);
+    }
   } catch (e) {
     // eslint-disable-next-line no-console
     console.error(`[cloud.full_story] Could not call FS.identify due to error: ${e.toString()}`, e);
