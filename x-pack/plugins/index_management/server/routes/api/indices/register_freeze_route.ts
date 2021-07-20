@@ -23,7 +23,7 @@ export function registerFreezeRoute({ router, lib: { handleEsError } }: RouteDep
 
       try {
         await client.asCurrentUser.indices.freeze({
-          index: encodeURIComponent(indices.join(',')),
+          index: indices.join(','),
         });
         return response.ok();
       } catch (error) {

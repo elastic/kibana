@@ -14,7 +14,10 @@ const paramsSchema = schema.object({
   names: schema.string(),
 });
 
-export const registerDeleteRoute = ({ router, lib: { handleEsError } }: RouteDependencies): void => {
+export const registerDeleteRoute = ({
+  router,
+  lib: { handleEsError },
+}: RouteDependencies): void => {
   router.delete(
     {
       path: addBasePath('/component_templates/{names}'),
@@ -33,17 +36,19 @@ export const registerDeleteRoute = ({ router, lib: { handleEsError } }: RouteDep
       };
 
       await Promise.all(
-        componentNames.map((componentName) => {
-          return client.asCurrentUser.cluster.deleteComponentTemplate({
-            name: componentName,
-          })
-            .then(() => responseBody.itemsDeleted.push(componentName))
-            .catch((error) =>
-            responseBody.errors.push({
-                name: componentName,
-                error: handleEsError({ error, response }),
-              })
-            );
+        componentNames.map(async (componentName) => {
+          try {
+            await client.asCurrentUser.cluster.deleteComponentTemplate({
+              name: componentName,
+            });
+
+            return responseBody.itemsDeleted.push(componentName);
+          } catch (error) {
+            return responseBody.errors.push({
+              name: componentName,
+              error: handleEsError({ error, response }),
+            });
+          }
         })
       );
 

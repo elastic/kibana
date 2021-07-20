@@ -12,7 +12,10 @@ import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 import { componentTemplateSchema } from './schema_validation';
 
-export const registerCreateRoute = ({ router, lib: { handleEsError } }: RouteDependencies): void => {
+export const registerCreateRoute = ({
+  router,
+  lib: { handleEsError },
+}: RouteDependencies): void => {
   router.post(
     {
       path: addBasePath('/component_templates'),
@@ -29,7 +32,9 @@ export const registerCreateRoute = ({ router, lib: { handleEsError } }: RouteDep
 
       try {
         // Check that a component template with the same name doesn't already exist
-        const { body : { component_templates: componentTemplates } } = await client.asCurrentUser.cluster.getComponentTemplate({
+        const {
+          body: { component_templates: componentTemplates },
+        } = await client.asCurrentUser.cluster.getComponentTemplate({
           name,
         });
 
@@ -57,7 +62,7 @@ export const registerCreateRoute = ({ router, lib: { handleEsError } }: RouteDep
 
         return response.ok({ body: responseBody });
       } catch (error) {
-        return handleEsError({ error, response });;
+        return handleEsError({ error, response });
       }
     }
   );

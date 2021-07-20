@@ -56,7 +56,6 @@ export const registerPrivilegesRoute = ({
         }
 
         privilegesResult.hasAllPrivileges = hasAllPrivileges;
-
         return response.ok({ body: privilegesResult });
       } catch (error) {
         return handleEsError({ error, response });

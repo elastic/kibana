@@ -23,8 +23,14 @@ export function registerSimulateRoute({ router, lib: { handleEsError } }: RouteD
       const template = request.body as TypeOf<typeof bodySchema>;
 
       try {
-        const { body: templatePreview } = await client.asCurrentUser.indices.simulateIndexTemplate({
-          body: template,
+        const { body: templatePreview } = await client.asCurrentUser.indices.simulateTemplate({
+          body: {
+            ...template,
+            // Until ES fixes a bug on their side we need to send a fake index pattern
+            // that won't match any indices.
+            // Issue: https://github.com/elastic/elasticsearch/issues/59152
+            index_patterns: ['a_fake_index_pattern_that_wont_match_any_indices'],
+          },
         });
 
         return response.ok({ body: templatePreview });

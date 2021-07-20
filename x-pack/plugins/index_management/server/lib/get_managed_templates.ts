@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 
 // Cloud has its own system for managing templates and we want to make
 // this clear in the UI when a template is used in a Cloud deployment.
 export const getCloudManagedTemplatePrefix = async (
-  client: ElasticsearchClient
+  client: IScopedClusterClient
 ): Promise<string | undefined> => {
   try {
     const {

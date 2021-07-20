@@ -20,3 +20,16 @@ POST ds/_doc
   "@timestamp": "2020-01-27"
 }
 ```
+
+## Index templates tab
+
+### Quick steps for texting
+
+By default, **legacy index templates** are not shown in the UI. Make them appear by creating one in Console:
+
+```
+PUT _template/template_1
+{
+  "index_patterns": ["foo*"]
+}
+```

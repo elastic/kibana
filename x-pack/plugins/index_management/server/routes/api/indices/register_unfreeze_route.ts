@@ -23,7 +23,7 @@ export function registerUnfreezeRoute({ router, lib: { handleEsError } }: RouteD
 
       try {
         await client.asCurrentUser.indices.unfreeze({
-          index: encodeURIComponent(indices.join(',')),
+          index: indices.join(','),
         });
         return response.ok();
       } catch (error) {

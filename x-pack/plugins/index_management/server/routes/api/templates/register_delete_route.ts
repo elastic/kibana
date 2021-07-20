@@ -9,7 +9,6 @@ import { schema, TypeOf } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
-import { wrapEsError } from '../../helpers';
 
 import { TemplateDeserialized } from '../../../../common';
 
@@ -54,7 +53,10 @@ export function registerDeleteRoute({ router, lib: { handleEsError } }: RouteDep
 
             return responseBody.templatesDeleted.push(name);
           } catch (error) {
-            return response.errors.push(handleEsError({ error, response: res }));
+            return responseBody.errors.push({
+              name,
+              error: handleEsError({ error, response }),
+            });
           }
         })
       );

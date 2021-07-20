@@ -5,40 +5,9 @@
  * 2.0.
  */
 
-import { CatIndicesParams } from 'elasticsearch';
 import { IScopedClusterClient } from 'kibana/server';
 import { IndexDataEnricher } from '../services';
 import { Index } from '../index';
-
-interface Hit {
-  health: string;
-  status: string;
-  index: string;
-  uuid: string;
-  pri: string;
-  rep: string;
-  'docs.count': any;
-  'store.size': any;
-  sth: 'true' | 'false';
-  hidden: boolean;
-}
-
-interface IndexInfo {
-  aliases: { [aliasName: string]: unknown };
-  mappings: unknown;
-  data_stream?: string;
-  settings: {
-    index: {
-      hidden: 'true' | 'false';
-    };
-  };
-}
-
-interface GetIndicesResponse {
-  body: {
-    [indexName: string]: IndexInfo;
-  };
-}
 
 async function fetchIndicesCall(
   client: IScopedClusterClient,
@@ -47,18 +16,8 @@ async function fetchIndicesCall(
   const indexNamesString = indexNames && indexNames.length ? indexNames.join(',') : '*';
 
   // This call retrieves alias and settings (incl. hidden status) information about indices
-  // const indices: GetIndicesResponse = await callAsCurrentUser('transport.request', {
-  //   method: 'GET',
-  //   // transport.request doesn't do any URI encoding, unlike other JS client APIs. This enables
-  //   // working with Logstash indices with names like %{[@metadata][beat]}-%{[@metadata][version]}.
-  //   path: `/${encodeURIComponent(indexNamesString)}`,
-  //   query: {
-  //     expand_wildcards: 'hidden,all',
-  //   },
-  // });
-
-  const { body: indices }: GetIndicesResponse = await client.asCurrentUser.indices.get({
-    index: encodeURIComponent(indexNamesString),
+  const { body: indices } = await client.asCurrentUser.indices.get({
+    index: indexNamesString,
     expand_wildcards: 'hidden,all',
   });
 
@@ -66,14 +25,7 @@ async function fetchIndicesCall(
     return [];
   }
 
-  // This call retrieves health and other high-level information about indices.
-  // const catHits: Hit[] = await callAsCurrentUser('transport.request', {
-  //   method: 'GET',
-  //   path: '/_cat/indices',
-  //   query: catQuery,
-  // });
-
-  const { body: catHits }: Hit[] = await client.asCurrentUser.cat.indices({
+  const { body: catHits } = await client.asCurrentUser.cat.indices({
     format: 'json',
     h: 'health,status,index,uuid,pri,rep,docs.count,sth,store.size',
     expand_wildcards: 'hidden,all',

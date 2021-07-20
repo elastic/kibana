@@ -9,13 +9,12 @@ import { schema, TypeOf } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
-import { wrapEsError } from '../../helpers';
 
 const bodySchema = schema.object({
   dataStreams: schema.arrayOf(schema.string()),
 });
 
-export function registerDeleteRoute({ router }: RouteDependencies) {
+export function registerDeleteRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.post(
     {
       path: addBasePath('/delete_data_streams'),
@@ -38,10 +37,10 @@ export function registerDeleteRoute({ router }: RouteDependencies) {
             });
 
             return responseBody.dataStreamsDeleted.push(name);
-          } catch (e) {
+          } catch (error) {
             return responseBody.errors.push({
               name,
-              error: wrapEsError(e),
+              error: handleEsError({ error, response }),
             });
           }
         })

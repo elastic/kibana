@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { Index } from '../index';
 
-export type Enricher = (indices: Index[], client: ElasticsearchClient) => Promise<Index[]>;
+export type Enricher = (indices: Index[], client: IScopedClusterClient) => Promise<Index[]>;
 
 export class IndexDataEnricher {
   private readonly _enrichers: Enricher[] = [];
@@ -19,7 +19,7 @@ export class IndexDataEnricher {
 
   public enrichIndices = async (
     indices: Index[],
-    client: ElasticsearchClient
+    client: IScopedClusterClient
   ): Promise<Index[]> => {
     let enrichedIndices = indices;
 
