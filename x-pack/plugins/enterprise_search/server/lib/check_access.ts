@@ -83,9 +83,9 @@ export const checkAccess = async ({
   // If the user is a "superuser" or has the base Kibana all privilege globally, always show the plugin
   const isSuperUser = async (): Promise<boolean> => {
     try {
-      const { hasAllRequested } = await security!.authz
+      const { hasAllRequested } = await security.authz
         .checkPrivilegesWithRequest(request)
-        .globally({ kibana: security!.authz.actions.ui.get('enterpriseSearch', 'all') });
+        .globally({ kibana: security.authz.actions.ui.get('enterpriseSearch', 'all') });
       return hasAllRequested;
     } catch (err) {
       if (err.statusCode === 401 || err.statusCode === 403) {
