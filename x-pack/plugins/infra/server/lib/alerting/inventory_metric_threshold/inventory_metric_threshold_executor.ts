@@ -45,9 +45,6 @@ type InventoryMetricThresholdAllowedActionGroups = ActionGroupIdsOf<
   typeof FIRED_ACTIONS | typeof WARNING_ACTIONS
 >;
 
-export type InventoryMetricThresholdActionGroups = ActionGroupIdsOf<
-  typeof FIRED_ACTIONS | typeof WARNING_ACTIONS
->;
 export type InventoryMetricThresholdAlertTypeParams = Record<string, any>;
 export type InventoryMetricThresholdAlertTypeState = AlertTypeState; // no specific state used
 export type InventoryMetricThresholdAlertInstanceState = AlertInstanceState; // no specific state used
