@@ -157,6 +157,7 @@ describe('migration v2', () => {
       hosts: esServer.hosts,
     });
 
+    await root.preboot();
     const setup = await root.setup();
     setup.savedObjects.registerType({
       name: 'foo',
