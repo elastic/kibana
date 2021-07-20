@@ -38,6 +38,7 @@ import {
   ActionConnectorTableItem,
   ActionTypeIndex,
   EditConectorTabs,
+  UserConfiguredActionConnector,
 } from '../../../../types';
 import { EmptyConnectorsPrompt } from '../../../components/prompts/empty_connectors_prompt';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -190,6 +191,18 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
                 position="right"
               />
             ) : null}
+            {(item as UserConfiguredActionConnector<
+              Record<string, unknown>,
+              Record<string, unknown>
+            >).config.isLegacy && (
+              <EuiIconTip
+                aria-label="Warning"
+                size="m"
+                type="alert"
+                color="warning"
+                content="Deprecated connector. Please create a new one."
+              />
+            )}
           </>
         );
 
