@@ -141,7 +141,7 @@ describe('ThreatIntelPanelView', () => {
     );
 
     expect(wrapper.find('[data-test-subj="cti-total-event-count"]').text()).toEqual(
-      `Showing: ${mockThreatIntelPanelViewProps.totalEventCount} events`
+      `Showing: ${mockThreatIntelPanelViewProps.totalEventCount} indicators`
     );
   });
 
