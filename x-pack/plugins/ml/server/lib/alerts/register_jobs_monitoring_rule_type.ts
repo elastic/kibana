@@ -62,28 +62,22 @@ export function registerJobsMonitoringRuleType({
     actionVariables: {
       context: [
         {
-          name: 'timestamp',
-          description: i18n.translate('xpack.ml.alertContext.timestampDescription', {
-            defaultMessage: 'The bucket timestamp of the anomaly',
-          }),
-        },
-        {
-          name: 'timestampIso8601',
-          description: i18n.translate('xpack.ml.alertContext.timestampIso8601Description', {
-            defaultMessage: 'The bucket time of the anomaly in ISO8601 format',
-          }),
-        },
-        {
           name: 'jobIds',
-          description: i18n.translate('xpack.ml.alertContext.jobIdsDescription', {
-            defaultMessage: 'List of job IDs that triggered the alert instance',
-          }),
+          description: i18n.translate(
+            'xpack.ml.alertTypes.jobsHealthAlertingRule.alertContext.jobIdsDescription',
+            {
+              defaultMessage: 'List of job IDs that triggered the alert instance',
+            }
+          ),
         },
         {
           name: 'message',
-          description: i18n.translate('xpack.ml.alertContext.messageDescription', {
-            defaultMessage: 'Alert info message',
-          }),
+          description: i18n.translate(
+            'xpack.ml.alertTypes.jobsHealthAlertingRule.alertContext.messageDescription',
+            {
+              defaultMessage: 'Alert info message',
+            }
+          ),
         },
       ],
     },
