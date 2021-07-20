@@ -337,6 +337,7 @@ describe('myPlugin', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
     beforeAll(async () => {
       root = kbnTestServer.createRoot();
+      await root.preboot();
       await root.setup();
       await root.start();
     }, 30000);
@@ -382,6 +383,7 @@ describe('myPlugin', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
     beforeAll(async () => {
       root = kbnTestServer.createRoot();
+      await root.preboot();
       await root.setup();
       await root.start();
     }, 30000);
