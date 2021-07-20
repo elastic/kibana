@@ -191,4 +191,5 @@ type TestSubject =
   | 'seedField.input'
   | 'copyFromField'
   | 'copyFromField.input'
+  | 'copyFromInput'
   | 'trimSwitch.input';

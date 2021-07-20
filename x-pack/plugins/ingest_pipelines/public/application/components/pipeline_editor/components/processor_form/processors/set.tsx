@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import { EuiCode } from '@elastic/eui';
+import { EuiCode, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
@@ -18,6 +18,9 @@ import {
   ToggleField,
   UseField,
   Field,
+  FieldHook,
+  FieldConfig,
+  useFormContext,
 } from '../../../../../../shared_imports';
 import { hasTemplateSnippet } from '../../../utils';
 
@@ -25,78 +28,16 @@ import { FieldsConfig, to, from } from './shared';
 
 import { FieldNameField } from './common_fields/field_name_field';
 
+interface ValueToggleTypes {
+  value: string;
+  copy_from: string;
+}
+
+type ValueToggleFields = {
+  [K in keyof ValueToggleTypes]: FieldHook<ValueToggleTypes[K]>;
+};
+
 const fieldsConfig: FieldsConfig = {
-  /* Required fields config */
-  // This is a required field, but we exclude validation because we accept empty values as ''
-  value: {
-    type: FIELD_TYPES.TEXT,
-    serializer: from.emptyStringToUndefined,
-    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.setForm.valueFieldLabel', {
-      defaultMessage: 'Value',
-    }),
-    helpText: (
-      <FormattedMessage
-        id="xpack.ingestPipelines.pipelineEditor.setForm.valueFieldHelpText"
-        defaultMessage="Value for the field. Used only when {field} is not specified."
-        values={{
-          field: <EuiCode>{'copy_from'}</EuiCode>,
-        }}
-      />
-    ),
-    fieldsToValidateOnChange: ['fields.copy_from', 'fields.value'],
-    validations: [
-      {
-        validator: ({ value, path, formData }) => {
-          if (isEmpty(value) && isEmpty(formData['fields.copy_from'])) {
-            return {
-              path,
-              message: i18n.translate(
-                'xpack.ingestPipelines.pipelineEditor.setForm.valueFieldError',
-                {
-                  defaultMessage: 'Either this field or copy_from should be specified.',
-                }
-              ),
-            };
-          }
-        },
-      },
-    ],
-  },
-  copy_from: {
-    type: FIELD_TYPES.TEXT,
-    serializer: from.emptyStringToUndefined,
-    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.setForm.copyFromFieldLabel', {
-      defaultMessage: 'Copy from',
-    }),
-    helpText: (
-      <FormattedMessage
-        id="xpack.ingestPipelines.pipelineEditor.setForm.copyFromFieldHelpText"
-        defaultMessage="The origin field which will be copied to {field}. Used only when {value} is not specified."
-        values={{
-          field: <EuiCode>{'field'}</EuiCode>,
-          value: <EuiCode>{'value'}</EuiCode>,
-        }}
-      />
-    ),
-    fieldsToValidateOnChange: ['fields.copy_from', 'fields.value'],
-    validations: [
-      {
-        validator: ({ value, path, formData }) => {
-          if (isEmpty(value) && isEmpty(formData['fields.value'])) {
-            return {
-              path,
-              message: i18n.translate(
-                'xpack.ingestPipelines.pipelineEditor.setForm.copyFromFieldError',
-                {
-                  defaultMessage: 'Either this field or value should be specified.',
-                }
-              ),
-            };
-          }
-        },
-      },
-    ],
-  },
   mediaType: {
     type: FIELD_TYPES.SELECT,
     defaultValue: 'application/json',
@@ -111,7 +52,6 @@ const fieldsConfig: FieldsConfig = {
       />
     ),
   },
-  /* Optional fields config */
   override: {
     type: FIELD_TYPES.TOGGLE,
     defaultValue: true,
@@ -155,11 +95,114 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
+const getValueConfig: (
+  toggleCustom: () => void
+) => Record<
+  keyof ValueToggleFields,
+  {
+    path: string;
+    config?: FieldConfig<any>;
+    euiFieldProps?: Record<string, any>;
+    labelAppend: JSX.Element;
+  }
+> = (toggleCustom: () => void) => ({
+  value: {
+    path: 'fields.value',
+    euiFieldProps: {
+      'data-test-subj': 'valueFieldInput',
+    },
+    config: {
+      type: FIELD_TYPES.TEXT,
+      serializer: from.emptyStringToUndefined,
+      label: i18n.translate('xpack.ingestPipelines.pipelineEditor.setForm.valueFieldLabel', {
+        defaultMessage: 'Value',
+      }),
+      helpText: (
+        <FormattedMessage
+          id="xpack.ingestPipelines.pipelineEditor.setForm.valueFieldHelpText"
+          defaultMessage="Value for the field"
+        />
+      ),
+      fieldsToValidateOnChange: ['fields.value', 'fields.copy_from'],
+      validations: [
+        {
+          validator: ({ value, path, formData }) => {
+            if (isEmpty(value) && isEmpty(formData['fields.copy_from'])) {
+              return { path, message: 'A field value is required.' };
+            }
+          },
+        },
+      ],
+    },
+    labelAppend: (
+      <EuiButtonEmpty size="xs" onClick={toggleCustom} data-test-subj="toggleCustomField">
+        {i18n.translate('xpack.ingestPipelines.pipelineEditor.useCopyFromLabel', {
+          defaultMessage: 'Use copy_from field',
+        })}
+      </EuiButtonEmpty>
+    ),
+    key: 'value',
+  },
+  copy_from: {
+    path: 'fields.copy_from',
+    euiFieldProps: {
+      'data-test-subj': 'copyFromInput',
+    },
+    config: {
+      type: FIELD_TYPES.TEXT,
+      serializer: from.emptyStringToUndefined,
+      fieldsToValidateOnChange: ['fields.value', 'fields.copy_from'],
+      validations: [
+        {
+          validator: ({ value, path, formData }) => {
+            if (isEmpty(value) && isEmpty(formData['fields.value'])) {
+              return { path, message: 'A field value is required.' };
+            }
+          },
+        },
+      ],
+      label: i18n.translate('xpack.ingestPipelines.pipelineEditor.setForm.copyFromFieldLabel', {
+        defaultMessage: 'Copy from',
+      }),
+      helpText: (
+        <FormattedMessage
+          id="xpack.ingestPipelines.pipelineEditor.setForm.copyFromFieldHelpText"
+          defaultMessage="The origin field which will be copied to {field}."
+          values={{
+            field: <EuiCode>{'field'}</EuiCode>,
+          }}
+        />
+      ),
+    },
+    labelAppend: (
+      <EuiButtonEmpty size="xs" onClick={toggleCustom} data-test-subj="toggleCustomField">
+        {i18n.translate('xpack.ingestPipelines.pipelineEditor.useValueLabel', {
+          defaultMessage: 'Use value field',
+        })}
+      </EuiButtonEmpty>
+    ),
+    key: 'copy_from',
+  },
+});
+
 /**
  * Disambiguate name from the Set data structure
  */
 export const SetProcessor: FunctionComponent = () => {
+  const { getFieldDefaultValue } = useFormContext();
   const [{ fields }] = useFormData({ watch: ['fields.value', 'fields.copy_from'] });
+
+  const isCopyFromDefined = getFieldDefaultValue('fields.copy_from') !== undefined;
+  const [isCustom, setIsCustom] = useState<boolean>(isCopyFromDefined);
+
+  const toggleCustom = useCallback(() => {
+    setIsCustom((prev) => !prev);
+  }, []);
+
+  const valueFieldProps = useMemo(
+    () => (isCustom ? getValueConfig(toggleCustom).copy_from : getValueConfig(toggleCustom).value),
+    [isCustom, toggleCustom]
+  );
 
   return (
     <>
@@ -169,17 +212,7 @@ export const SetProcessor: FunctionComponent = () => {
         })}
       />
 
-      <UseField
-        config={fieldsConfig.value}
-        component={Field}
-        componentProps={{
-          euiFieldProps: {
-            'data-test-subj': 'valueFieldInput',
-            disabled: !!fields?.copy_from,
-          },
-        }}
-        path="fields.value"
-      />
+      <UseField {...valueFieldProps} component={Field} data-test-subj="valueField" />
 
       {hasTemplateSnippet(fields?.value) && (
         <UseField
@@ -207,18 +240,6 @@ export const SetProcessor: FunctionComponent = () => {
           path="fields.media_type"
         />
       )}
-
-      <UseField
-        config={fieldsConfig.copy_from}
-        component={Field}
-        path="fields.copy_from"
-        componentProps={{
-          euiFieldProps: {
-            disabled: !!fields?.value,
-          },
-        }}
-        data-test-subj="copyFromField"
-      />
 
       <UseField
         config={fieldsConfig.override}

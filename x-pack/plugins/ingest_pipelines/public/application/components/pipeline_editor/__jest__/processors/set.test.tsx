@@ -54,8 +54,7 @@ describe('Processor: Set', () => {
 
     // Expect form error as "field" is required parameter
     expect(form.getErrorsMessages()).toEqual([
-      'Either this field or copy_from should be specified.',
-      'Either this field or value should be specified.',
+      'A field value is required.',
       'A field value is required.',
     ]);
   });
@@ -79,19 +78,33 @@ describe('Processor: Set', () => {
     });
   });
 
-  test('allows to set either value or copy_from', async () => {
-    const { find, form } = testBed;
+  test('allows to set just internal_networks_field or internal_networks', async () => {
+    const {
+      actions: { saveNewProcessor },
+      form,
+      find,
+    } = testBed;
 
-    expect(find('valueFieldInput').exists()).toBe(true);
-    expect(find('copyFromField.input').exists()).toBe(true);
+    // Add required fields
+    form.setInputValue('fieldNameField.input', 'field_1');
 
+    // Set value field
     form.setInputValue('valueFieldInput', 'value');
-    expect(find('copyFromField.input').props().disabled).toBe(true);
 
-    form.setInputValue('valueFieldInput', '');
-    form.setInputValue('copyFromField.input', 'copy_from');
-    expect(find('valueFieldInput').props().disabled).toBe(true);
+    // Toggle to copy_from field and set a random value
+    find('toggleCustomField').simulate('click');
+    form.setInputValue('copyFromInput', 'copy_from');
+
+    // Save the field with new changes
+    await saveNewProcessor();
+
+    const processors = getProcessorValue(onUpdate, SET_TYPE);
+    expect(processors[0][SET_TYPE]).toEqual({
+      field: 'field_1',
+      copy_from: 'copy_from',
+    });
   });
+
   test('should allow to set mediaType when value is a template snippet', async () => {
     const {
       actions: { saveNewProcessor },
