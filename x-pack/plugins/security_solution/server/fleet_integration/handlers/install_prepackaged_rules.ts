@@ -70,6 +70,8 @@ export const installPrepackagedRules = async ({
       alerts.getAlertsClientWithRequest(request),
       frameworkRequest,
       maxTimelineImportExportSize,
+      /* prebuiltRulesFromFileSystem: */ true,
+      /* prebuiltRulesFromSavedObjects: */ false,
       exceptionsClient
     );
   } catch (err) {
