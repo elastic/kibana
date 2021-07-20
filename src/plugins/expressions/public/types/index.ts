@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { IExecutionContextContainer } from 'src/core/public';
 import { Adapters } from '../../../inspector/public';
 import {
   IInterpreterRenderHandlers,
@@ -48,7 +48,19 @@ export interface IExpressionLoaderParams {
   renderMode?: RenderMode;
   syncColors?: boolean;
   hasCompatibleActions?: ExpressionRenderHandlerParams['hasCompatibleActions'];
+  executionContext?: IExecutionContextContainer;
+
+  /**
+   * The flag to toggle on emitting partial results.
+   * By default, the partial results are disabled.
+   */
   partial?: boolean;
+
+  /**
+   * Throttling of partial results in milliseconds. 0 is disabling the throttling.
+   * By default, it equals 1000.
+   */
+  throttle?: number;
 }
 
 export interface ExpressionRenderError extends Error {
