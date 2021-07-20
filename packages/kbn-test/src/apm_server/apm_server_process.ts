@@ -19,13 +19,8 @@ export class ApmServerProcess {
   toPromise() {
     return new Promise<void>((resolve, reject) => {
       const subscription = new Rx.Subscription();
-
-      const state$ = this.state$.isStopped
-        ? Rx.defer(() => Rx.of(this.getCurrentState()))
-        : this.getState$();
-
       subscription.add(
-        state$.subscribe({
+        this.getState$().subscribe({
           next: (state) => {
             switch (state.type) {
               case 'ready':
@@ -70,7 +65,9 @@ export class ApmServerProcess {
   }
 
   getState$() {
-    return this.state$.asObservable();
+    return this.state$.isStopped
+      ? Rx.defer(() => Rx.of(this.getCurrentState()))
+      : this.state$.asObservable();
   }
 
   stop(signal?: StopSignal) {
