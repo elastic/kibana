@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isArray } from 'lodash';
+import { isArray, xor } from 'lodash';
 import uuid from 'uuid';
 import { produce } from 'immer';
 
@@ -13,12 +13,11 @@ import { useMemo } from 'react';
 import { FormConfig, useForm } from '../../shared_imports';
 import { OsqueryManagerPackagePolicyConfigRecord } from '../../../common/types';
 import { createFormSchema } from './schema';
-import { useScheduledQueryGroup } from '../use_scheduled_query_group';
 
 const FORM_ID = 'editQueryFlyoutForm';
 
 export interface UseScheduledQueryGroupQueryFormProps {
-  scheduledQueryGroupId: string;
+  uniqueQueryIds: string[];
   defaultValue?: OsqueryManagerPackagePolicyConfigRecord | undefined;
   handleSubmit: FormConfig<
     OsqueryManagerPackagePolicyConfigRecord,
@@ -35,28 +34,19 @@ export interface ScheduledQueryGroupFormData {
 }
 
 export const useScheduledQueryGroupQueryForm = ({
-  scheduledQueryGroupId,
+  uniqueQueryIds,
   defaultValue,
   handleSubmit,
 }: UseScheduledQueryGroupQueryFormProps) => {
-  const { data } = useScheduledQueryGroup({ scheduledQueryGroupId });
-  const ids = useMemo<string[]>(
+  const idSet = useMemo<Set<string>>(
     () =>
-      data?.inputs
-        .map((input) => input.streams.map((stream) => stream.compiled_stream.id))
-        .flat() ?? [],
-    [data]
+      new Set<string>(xor(uniqueQueryIds, defaultValue?.id.value ? [defaultValue.id.value] : [])),
+    [uniqueQueryIds, defaultValue]
   );
-  const idSet = useMemo<Set<string>>(() => {
-    const res = new Set<string>(ids);
-    if (defaultValue && defaultValue.id.value) {
-      res.delete(defaultValue.id.value);
-    }
-    return res;
-  }, [ids, defaultValue]);
   const formSchema = useMemo<ReturnType<typeof createFormSchema>>(() => createFormSchema(idSet), [
     idSet,
   ]);
+
   return useForm<OsqueryManagerPackagePolicyConfigRecord, ScheduledQueryGroupFormData>({
     id: FORM_ID + uuid.v4(),
     onSubmit: async (formData, isValid) => {

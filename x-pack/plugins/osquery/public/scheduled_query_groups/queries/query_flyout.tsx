@@ -40,7 +40,7 @@ import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown
 const CommonUseField = getUseField({ component: Field });
 
 interface QueryFlyoutProps {
-  scheduledQueryGroupId: string;
+  uniqueQueryIds: string[];
   defaultValue?: UseScheduledQueryGroupQueryFormProps['defaultValue'] | undefined;
   integrationPackageVersion?: string | undefined;
   onSave: (payload: OsqueryManagerPackagePolicyConfigRecord) => Promise<void>;
@@ -48,7 +48,7 @@ interface QueryFlyoutProps {
 }
 
 const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
-  scheduledQueryGroupId,
+  uniqueQueryIds,
   defaultValue,
   integrationPackageVersion,
   onSave,
@@ -56,7 +56,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
 }) => {
   const [isEditMode] = useState(!!defaultValue);
   const { form } = useScheduledQueryGroupQueryForm({
-    scheduledQueryGroupId,
+    uniqueQueryIds,
     defaultValue,
     handleSubmit: (payload, isValid) =>
       new Promise((resolve) => {

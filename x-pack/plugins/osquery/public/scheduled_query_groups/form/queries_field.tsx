@@ -216,6 +216,20 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
     field.value,
   ]);
 
+  const uniqueQueryIds = useMemo<string[]>(
+    () =>
+      field.value && field.value[0].streams.length
+        ? field.value[0].streams.reduce((acc, stream) => {
+            if (stream.vars?.id.value) {
+              acc.push(stream.vars?.id.value);
+            }
+
+            return acc;
+          }, [] as string[])
+        : [],
+    [field.value]
+  );
+
   return (
     <>
       <EuiFlexGroup justifyContent="flexEnd">
@@ -256,7 +270,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
       {<OsqueryPackUploader onChange={handlePackUpload} />}
       {showAddQueryFlyout && (
         <QueryFlyout
-          scheduledQueryGroupId={scheduledQueryGroupId}
+          uniqueQueryIds={uniqueQueryIds}
           integrationPackageVersion={integrationPackageVersion}
           onSave={handleAddQuery}
           onClose={handleHideAddFlyout}
@@ -264,7 +278,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
       )}
       {showEditQueryFlyout != null && showEditQueryFlyout >= 0 && (
         <QueryFlyout
-          scheduledQueryGroupId={scheduledQueryGroupId}
+          uniqueQueryIds={uniqueQueryIds}
           defaultValue={field.value[0].streams[showEditQueryFlyout]?.vars}
           integrationPackageVersion={integrationPackageVersion}
           onSave={handleEditQuery}
