@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo } from 'react';
-import { EuiForm, EuiSpacer } from '@elastic/eui';
+import React, { FC, useCallback, useMemo, useState } from 'react';
+import { EuiComboBoxOptionOption, EuiForm, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import useDebounce from 'react-use/lib/useDebounce';
 import { AlertTypeParamsExpressionProps } from '../../../../triggers_actions_ui/public';
 import { MlAnomalyDetectionJobsHealthRuleParams } from '../../../common/types/alerts';
 import { JobSelectorControl } from '../job_selector';
@@ -16,6 +18,7 @@ import { HttpService } from '../../application/services/http_service';
 import { useMlKibana } from '../../application/contexts/kibana';
 import { TestsSelectionControl } from './tests_selection_control';
 import { isPopulatedObject } from '../../../common';
+import { ALL_JOBS_SELECTION } from '../../../common/constants/alerts';
 
 export type MlAnomalyAlertTriggerProps = AlertTypeParamsExpressionProps<MlAnomalyDetectionJobsHealthRuleParams>;
 
@@ -29,6 +32,9 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   } = useMlKibana();
   const mlHttpService = useMemo(() => new HttpService(http), [http]);
   const adJobsApiService = useMemo(() => jobsApiProvider(mlHttpService), [mlHttpService]);
+  const [excludeJobsOptions, setExcludeJobsOptions] = useState<
+    Array<EuiComboBoxOptionOption<string>>
+  >([]);
 
   const includeJobsAndGroupIds: string[] = useMemo(
     () => (Object.values(alertParams.includeJobs ?? {}) as string[][]).flat(),
@@ -51,6 +57,33 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
 
   const formErrors = Object.values(errors).flat();
   const isFormInvalid = formErrors.length > 0;
+
+  useDebounce(
+    function updateExcludeJobsOptions() {
+      const areAllJobsSelected = alertParams.includeJobs?.jobIds?.[0] === ALL_JOBS_SELECTION;
+
+      if (!areAllJobsSelected && !alertParams.includeJobs?.groupIds?.length) {
+        // It only makes sense to suggest excluded jobs options when at least one group or all jobs are selected
+        setExcludeJobsOptions([]);
+        return;
+      }
+
+      adJobsApiService
+        .jobs(areAllJobsSelected ? [] : (alertParams.includeJobs.groupIds as string[]))
+        .then((jobs) => {
+          setExcludeJobsOptions([
+            {
+              label: i18n.translate('xpack.ml.jobSelector.jobOptionsLabel', {
+                defaultMessage: 'Jobs',
+              }),
+              options: jobs.map((v) => ({ label: v.job_id })),
+            },
+          ]);
+        });
+    },
+    500,
+    [alertParams.includeJobs]
+  );
 
   return (
     <EuiForm
@@ -94,6 +127,7 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
             defaultMessage="Exclude jobs or groups"
           />
         }
+        options={excludeJobsOptions}
       />
 
       <EuiSpacer size="m" />

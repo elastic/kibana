@@ -103,11 +103,10 @@ export function jobsHealthServiceProvider(
     /**
      * Retrieves report grouped by test.
      */
-    async getTestsResults({
-      testsConfig,
-      includeJobs,
-      excludeJobs,
-    }: AnomalyDetectionJobsHealthRuleParams): Promise<TestsResults> {
+    async getTestsResults(
+      ruleInstanceName: string,
+      { testsConfig, includeJobs, excludeJobs }: AnomalyDetectionJobsHealthRuleParams
+    ): Promise<TestsResults> {
       const config = getResultJobsHealthRuleConfig(testsConfig);
 
       const results: TestsResults = [];
@@ -115,7 +114,8 @@ export function jobsHealthServiceProvider(
       const jobIds = await getResultJobIds(includeJobs, excludeJobs);
 
       if (jobIds.length === 0) {
-        throw new Error('Rule does not have associated jobs.');
+        logger.warn(`Rule "${ruleInstanceName}" does not have associated jobs.`);
+        return results;
       }
 
       logger.debug(`Performing health checks for job ids: ${jobIds.join(', ')}`);

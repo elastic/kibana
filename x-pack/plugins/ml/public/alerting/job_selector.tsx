@@ -33,6 +33,10 @@ export interface JobSelectorControlProps {
    * Allows selecting all jobs, even those created afterward.
    */
   allowSelectAll?: boolean;
+  /**
+   * Available options to select. By default suggest all existing jobs.
+   */
+  options?: Array<EuiComboBoxOptionOption<string>>;
 }
 
 export const JobSelectorControl: FC<JobSelectorControlProps> = ({
@@ -43,6 +47,7 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
   multiSelect = false,
   label,
   allowSelectAll = false,
+  options: defaultOptions,
 }) => {
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const jobIds = useMemo(() => new Set(), []);
@@ -124,6 +129,8 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
           selectedJobIds.push(selectedLabel);
         } else if (groupIds.has(selectedLabel)) {
           selectedGroupIds.push(selectedLabel);
+        } else if (defaultOptions?.some((v) => v.options?.some((o) => o.label === selectedLabel))) {
+          selectedJobIds.push(selectedLabel);
         }
       });
       onChange({
@@ -131,10 +138,11 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
         ...(selectedGroupIds.length > 0 ? { groupIds: selectedGroupIds } : {}),
       });
     }) as Exclude<EuiComboBoxProps<string>['onChange'], undefined>,
-    [jobIds, groupIds]
+    [jobIds, groupIds, defaultOptions]
   );
 
   useEffect(() => {
+    if (defaultOptions) return;
     fetchOptions();
   }, []);
 
@@ -155,7 +163,7 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
       <EuiComboBox<string>
         singleSelection={!multiSelect}
         selectedOptions={selectedOptions}
-        options={options}
+        options={defaultOptions ?? options}
         onChange={onSelectionChange}
         fullWidth
         data-test-subj={'mlAnomalyAlertJobSelection'}

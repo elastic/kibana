@@ -84,14 +84,14 @@ export function registerJobsMonitoringRuleType({
     producer: PLUGIN_ID,
     minimumLicenseRequired: MINIMUM_FULL_LICENSE,
     isExportable: true,
-    async executor({ services, params, alertId, state, previousStartedAt, startedAt }) {
+    async executor({ services, params, alertId, state, previousStartedAt, startedAt, name }) {
       const fakeRequest = {} as KibanaRequest;
       const { getTestsResults } = mlServicesProviders.jobsHealthServiceProvider(
         services.savedObjectsClient,
         fakeRequest,
         logger
       );
-      const executionResult = await getTestsResults(params);
+      const executionResult = await getTestsResults(name, params);
 
       if (executionResult.length > 0) {
         logger.info(
