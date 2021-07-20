@@ -353,21 +353,14 @@ export function DiscoverLayout({
                           />
                         </h2>
                         <DataVisualizerGridMemoized
+                          savedSearch={savedSearch}
                           services={services}
-                          columns={columns}
                           indexPattern={indexPattern}
-                          rows={rows}
-                          sort={state.sort || []}
                           searchDescription={savedSearch.description}
                           searchTitle={savedSearch.lastSavedTitle}
-                          onAddColumn={onAddColumn}
-                          onBackToTop={onBackToTop}
-                          onFilter={onAddFilter}
-                          onMoveColumn={onMoveColumn}
-                          onRemoveColumn={onRemoveColumn}
-                          onSort={onSort}
                           sampleSize={sampleSize}
-                          useNewFieldsApi={useNewFieldsApi}
+                          query={state.query}
+                          columns={columns}
                         />
                         {isLegacy && rows && rows.length && (
                           <DocTableLegacyMemoized

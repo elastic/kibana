@@ -53,41 +53,8 @@ export class DataVisualizerGridEmbeddableFactory
     });
   }
 
-  public async getExplicitInput(): Promise<Partial<DataVisualizerGridEmbeddableInput>> {
-    // const [coreStart] = await this.getServices();
-    //
-    // try {
-    //   const { resolveEmbeddableDataVisualizerGridUserInput } = await import(
-    //     './anomaly_charts_setup_flyout'
-    //   );
-    //   return await resolveEmbeddableDataVisualizerGridUserInput(coreStart);
-    // } catch (e) {
-    //   return Promise.reject();
-    // }
-  }
-
   private async getServices(): Promise<DataVisualizerGridEmbeddableServices> {
     const [coreStart, pluginsStart] = await this.getStartServices();
-    console.log('getServices', pluginsStart);
-
-    //
-    // const { AnomalyDetectorService } = await import(
-    //   '../../application/services/anomaly_detector_service'
-    // );
-    // const { mlApiServicesProvider } = await import('../../application/services/ml_api_service');
-    // const { mlResultsServiceProvider } = await import('../../application/services/results_service');
-    //
-    // const httpService = new HttpService(coreStart.http);
-    // const anomalyDetectorService = new AnomalyDetectorService(httpService);
-    // const mlApiServices = mlApiServicesProvider(httpService);
-    // const mlResultsService = mlResultsServiceProvider(mlApiServices);
-    //
-    // const anomalyExplorerService = new AnomalyExplorerChartsService(
-    //   pluginsStart.data.query.timefilter.timefilter,
-    //   mlApiServices,
-    //   mlResultsService
-    // );
-    //
     return [coreStart, pluginsStart];
   }
 

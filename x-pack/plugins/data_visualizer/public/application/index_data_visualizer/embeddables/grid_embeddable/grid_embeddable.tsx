@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { CoreStart } from 'kibana/public';
 import ReactDOM from 'react-dom';
 import React, { Suspense } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import {
   Embeddable,
   EmbeddableInput,
@@ -18,18 +19,31 @@ import {
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from './constants';
 import { EmbeddableLoading } from './embeddable_loading_fallback';
-import { IndexDataVisualizerView } from '../../components/index_data_visualizer_view';
-import { DataVisualizerUrlStateContextProvider } from '../../index_data_visualizer';
-import { DataVisualizerPluginStart } from '../../../../plugin';
-
-export type DataVisualizerGridEmbeddableServices = [CoreStart, DataVisualizerPluginStart];
+import { DataVisualizerStartDependencies } from '../../../../plugin';
+import { IndexPattern, Query } from '../../../../../../../../src/plugins/data/common';
+import { SavedSearch } from '../../../../../../../../src/plugins/discover/public';
+export type DataVisualizerGridEmbeddableServices = [CoreStart, DataVisualizerStartDependencies];
 export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
-  id: string;
+  indexPattern?: IndexPattern;
+  savedSearch?: SavedSearch;
+  query?: Query;
 }
 export type DataVisualizerGridEmbeddableOutput = EmbeddableOutput;
 
 export type IDataVisualizerGridEmbeddable = typeof DataVisualizerGridEmbeddable;
 
+export const IndexDataVisualizerViewWrapper = (props: {
+  id: string;
+  embeddableContext: InstanceType<IDataVisualizerGridEmbeddable>;
+  embeddableInput: Readonly<Observable<DataVisualizerGridEmbeddableInput>>;
+  // refresh: Observable<any>;
+}) => {
+  const { embeddableInput } = props;
+
+  const data = useObservable(embeddableInput);
+
+  return <div>Hello world 2</div>;
+};
 export class DataVisualizerGridEmbeddable extends Embeddable<
   DataVisualizerGridEmbeddableInput,
   DataVisualizerGridEmbeddableOutput
@@ -68,10 +82,12 @@ export class DataVisualizerGridEmbeddable extends Embeddable<
         <KibanaContextProvider services={{ ...this.services[0], ...this.services[1] }}>
           <Suspense fallback={<EmbeddableLoading />}>
             Hello World
-            {/* <DataVisualizerUrlStateContextProvider*/}
-            {/*  IndexDataVisualizerComponent={IndexDataVisualizerView}*/}
-            {/*  additionalLinks={[]}*/}
-            {/* />*/}
+            <IndexDataVisualizerViewWrapper
+              id={this.input.id}
+              embeddableContext={this}
+              embeddableInput={this.getInput$()}
+              // refresh={this.reload$.asObservable()}
+            />
           </Suspense>
         </KibanaContextProvider>
       </I18nContext>,
