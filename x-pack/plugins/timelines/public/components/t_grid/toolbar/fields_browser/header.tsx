@@ -15,11 +15,9 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-
-import { BrowserFields } from '../../../common/containers/source';
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { timelineSelectors } from '../../store/timeline';
-import { OnUpdateColumns } from '../timeline/events';
+import type { BrowserFields, OnUpdateColumns } from '../../../../../common';
+import { useDeepEqualSelector } from '../../../../hooks/use_selector';
+import { tGridSelectors } from '../../../../store/t_grid';
 
 import {
   getFieldBrowserSearchInputClassName,
@@ -102,7 +100,7 @@ const TitleRow = React.memo<{
   onOutsideClick: () => void;
   onUpdateColumns: OnUpdateColumns;
 }>(({ id, onOutsideClick, onUpdateColumns }) => {
-  const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
+  const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
   const { defaultColumns } = useDeepEqualSelector((state) => getManageTimeline(state, id));
 
   const handleResetColumns = useCallback(() => {
@@ -119,7 +117,7 @@ const TitleRow = React.memo<{
     >
       <EuiFlexItem grow={false}>
         <EuiTitle data-test-subj="field-browser-title" size="s">
-          <h2>{i18n.CUSTOMIZE_COLUMNS}</h2>
+          <h2>{i18n.FIELDS_BROWSER}</h2>
         </EuiTitle>
       </EuiFlexItem>
 

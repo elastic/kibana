@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiBadge, EuiLoadingSpinner } from '@elastic/eui';
 import { filter, get, pickBy } from 'lodash/fp';
 import styled from 'styled-components';
 
@@ -13,14 +13,11 @@ import {
   elementOrChildrenHasFocus,
   skipFocusInContainerTo,
   stopPropagationAndPreventDefault,
-} from '../../../../../timelines/public';
-import { TimelineId } from '../../../../common/types/timeline';
-import { BrowserField, BrowserFields } from '../../../common/containers/source';
-import { alertsHeaders } from '../../../common/components/alerts_viewer/default_headers';
-import {
-  DEFAULT_CATEGORY_NAME,
-  defaultHeaders,
-} from '../timeline/body/column_headers/default_headers';
+} from '../../../../../public';
+import { TimelineId } from '../../../../../public/types';
+import type { BrowserField, BrowserFields } from '../../../../../common';
+import { defaultHeaders } from '../../../../store/t_grid/defaults';
+import { DEFAULT_CATEGORY_NAME } from '../../body/column_headers/default_headers';
 
 export const LoadingSpinner = styled(EuiLoadingSpinner)`
   cursor: pointer;
@@ -126,15 +123,23 @@ export const createVirtualCategory = ({
   browserFields: BrowserFields;
   fieldIds: string[];
 }): Partial<BrowserField> => ({
-  fields: fieldIds.reduce<Readonly<Record<string, Partial<BrowserField>>>>((fields, fieldId) => {
+  fields: fieldIds.reduce<Readonly<BrowserFields>>((fields, fieldId) => {
     const splitId = fieldId.split('.'); // source.geo.city_name -> [source, geo, city_name]
+    const browserField = get(
+      [splitId.length > 1 ? splitId[0] : 'base', 'fields', fieldId],
+      browserFields
+    );
 
     return {
       ...fields,
-      [fieldId]: {
-        ...get([splitId.length > 1 ? splitId[0] : 'base', 'fields', fieldId], browserFields),
-        name: fieldId,
-      },
+      ...(browserField
+        ? {
+            [fieldId]: {
+              ...browserField,
+              name: fieldId,
+            },
+          }
+        : {}),
     };
   }, {}),
 });
@@ -152,7 +157,7 @@ export const mergeBrowserFieldsWithDefaultCategory = (
 
 export const getAlertColumnHeader = (timelineId: string, fieldId: string) =>
   timelineId === TimelineId.detectionsPage || timelineId === TimelineId.detectionsRulesDetailsPage
-    ? alertsHeaders.find((c) => c.id === fieldId) ?? {}
+    ? defaultHeaders.find((c) => c.id === fieldId) ?? {}
     : {};
 
 export const CATEGORIES_PANE_CLASS_NAME = 'categories-pane';
@@ -393,3 +398,9 @@ export const onFieldsBrowserTabPressed = ({
     });
   }
 };
+
+export const CountBadge = (styled(EuiBadge)`
+  margin-left: 5px;
+` as unknown) as typeof EuiBadge;
+
+CountBadge.displayName = 'CountBadge';

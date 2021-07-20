@@ -170,10 +170,10 @@ export const ThreatIntelPanelView: React.FC<ThreatIntelPanelViewProps> = ({
                           alignItems="center"
                           justifyContent="flexEnd"
                         >
-                          <DashboardRightSideElement key={`${title}-count`}>
+                          <DashboardRightSideElement key={`${title}-count`} grow={false}>
                             {count}
                           </DashboardRightSideElement>
-                          <DashboardRightSideElement key={`${title}-source`}>
+                          <DashboardRightSideElement key={`${title}-source`} grow={false}>
                             {path ? (
                               <RightSideLink href={path} target="_blank">
                                 {linkCopy}
