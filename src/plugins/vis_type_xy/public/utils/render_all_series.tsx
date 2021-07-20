@@ -131,6 +131,8 @@ export const renderAllSeries = (
               displayValueSettings={{
                 showValueLabel,
                 hideClippedValue: true,
+                isValueContainedInElement: true,
+                isAlternatingValueLabel: false,
               }}
             />
           );
