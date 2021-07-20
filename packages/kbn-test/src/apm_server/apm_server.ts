@@ -14,7 +14,7 @@ import { firstValueFrom } from '@kbn/std';
 import { ArchiveArtifact } from './archive_artifact';
 import { ApmServerInstallation, ApmServerConfig } from './apm_server_installation';
 
-interface ExecuteOptions {
+interface StartOptions {
   name?: string;
   branch?: string;
   staging?: boolean;
@@ -24,7 +24,7 @@ interface ExecuteOptions {
 export class ApmServer {
   constructor(private readonly log: ToolingLog) {}
 
-  async start(options: ExecuteOptions) {
+  async start(options: StartOptions) {
     const branch = options.branch || kibanaPackageJson.branch;
     const staging = !!options.staging;
 
