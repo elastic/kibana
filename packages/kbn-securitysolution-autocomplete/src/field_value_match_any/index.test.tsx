@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -10,18 +11,18 @@ import { ReactWrapper, mount } from 'enzyme';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { act } from '@testing-library/react';
 
-import {
-  fields,
-  getField,
-} from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
-import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
+import { AutocompleteFieldMatchAnyComponent } from '.';
+import { getField, fields } from '../fields/index.mock';
+import { useFieldValueAutocomplete } from '../hooks/use_field_value_autocomplete';
+import { autocompleteStartMock } from '../autocomplete/index.mock';
 
-import { AutocompleteFieldMatchAnyComponent } from './field_value_match_any';
-import { useFieldValueAutocomplete } from './hooks/use_field_value_autocomplete';
-
-const { autocomplete: autocompleteStartMock } = dataPluginMock.createStartContract();
-
-jest.mock('./hooks/use_field_value_autocomplete');
+jest.mock('../hooks/use_field_value_autocomplete', () => {
+  const actual = jest.requireActual('../hooks/use_field_value_autocomplete');
+  return {
+    ...actual,
+    useFieldValueAutocomplete: jest.fn(),
+  };
+});
 
 describe('AutocompleteFieldMatchAnyComponent', () => {
   let wrapper: ReactWrapper;

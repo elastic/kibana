@@ -10,11 +10,11 @@ import { useEffect, useRef, useState } from 'react';
 import { debounce } from 'lodash';
 import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
-// TODO: I have to use any here for now, but once this is available below, we should use the correct types
+// TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/100715
 // import { AutocompleteStart } from '../../../../../../../../src/plugins/data/public';
 type AutocompleteStart = any;
 
-// TODO: I have to use any here for now, but once this is available below, we should use the correct types
+// TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/105731
 // import { IFieldType, IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 type IFieldType = any;
 type IIndexPattern = any;

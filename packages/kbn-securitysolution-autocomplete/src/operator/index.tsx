@@ -1,19 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { OperatorOption } from '@kbn/securitysolution-list-utils';
-import { getGenericComboBoxProps } from '@kbn/securitysolution-autocomplete';
 
-import { IFieldType } from '../../../../../../../src/plugins/data/common';
+// TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/105731
+// import { IFieldType } from '../../../../../../../src/plugins/data/common';
+type IFieldType = any;
 
-import { getOperators } from './helpers';
-import { GetGenericComboBoxPropsReturn } from './types';
+import { getOperators } from '../get_operators';
+import {
+  getGenericComboBoxProps,
+  GetGenericComboBoxPropsReturn,
+} from '../get_generic_combo_box_props';
 
 const AS_PLAIN_TEXT = { asPlainText: true };
 

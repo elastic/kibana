@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -10,11 +11,10 @@ import { mount } from 'enzyme';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { isNotOperator, isOperator } from '@kbn/securitysolution-list-utils';
 
-import { getField } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
+import { OperatorComponent } from '.';
+import { getField } from '../fields/index.mock';
 
-import { OperatorComponent } from './operator';
-
-describe('OperatorComponent', () => {
+describe('operator', () => {
   test('it renders disabled if "isDisabled" is true', () => {
     const wrapper = mount(
       <OperatorComponent

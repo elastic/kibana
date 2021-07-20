@@ -15,3 +15,15 @@ export const LOADING = i18n.translate('autocomplete.loadingDescription', {
 export const SELECT_FIELD_FIRST = i18n.translate('autocomplete.selectField', {
   defaultMessage: 'Please select a field first...',
 });
+
+export const FIELD_REQUIRED_ERR = i18n.translate('autocomplete.fieldRequiredError', {
+  defaultMessage: 'Value cannot be empty',
+});
+
+export const NUMBER_ERR = i18n.translate('autocomplete.invalidNumberError', {
+  defaultMessage: 'Not a valid number',
+});
+
+export const DATE_ERR = i18n.translate('autocomplete.invalidDateError', {
+  defaultMessage: 'Not a valid date',
+});

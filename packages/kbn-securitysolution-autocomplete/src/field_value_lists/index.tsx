@@ -1,21 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
-import { HttpStart } from 'kibana/public';
 import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { useFindLists } from '@kbn/securitysolution-list-hooks';
-import { getGenericComboBoxProps } from '@kbn/securitysolution-autocomplete';
 
-import { IFieldType } from '../../../../../../../src/plugins/data/common';
+import { filterFieldToList } from '../filter_field_to_list';
+import { getGenericComboBoxProps } from '../get_generic_combo_box_props';
 
-import { filterFieldToList } from './helpers';
-import * as i18n from './translations';
+// TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/105731
+// import { IFieldType } from '../../../../../../../src/plugins/data/common';
+type IFieldType = any;
+
+// TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/100715
+// import { HttpStart } from 'kibana/public';
+type HttpStart = any;
+
+import * as i18n from '../translations';
 
 const SINGLE_SELECTION = { asPlainText: true };
 

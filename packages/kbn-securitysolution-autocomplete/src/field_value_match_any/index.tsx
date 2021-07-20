@@ -1,22 +1,32 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { uniq } from 'lodash';
 import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import { getGenericComboBoxProps, paramIsValid } from '@kbn/securitysolution-autocomplete';
 
-import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/common';
-import { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
+// TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/100715
+// import { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
+type AutocompleteStart = any;
 
-import { useFieldValueAutocomplete } from './hooks/use_field_value_autocomplete';
-import { GetGenericComboBoxPropsReturn } from './types';
-import * as i18n from './translations';
+// TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/105731
+// import { IFieldType, IIndexPattern } from '../../../../../../../../src/plugins/data/common';
+type IFieldType = any;
+type IIndexPattern = any;
+
+import * as i18n from '../translations';
+import {
+  getGenericComboBoxProps,
+  GetGenericComboBoxPropsReturn,
+} from '../get_generic_combo_box_props';
+import { useFieldValueAutocomplete } from '../hooks/use_field_value_autocomplete';
+import { paramIsValid } from '../param_is_valid';
 
 interface AutocompleteFieldMatchAnyProps {
   placeholder: string;

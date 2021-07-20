@@ -6,9 +6,44 @@
  * Side Public License, v 1.
  */
 
-describe('use_field_value_autocomplete', () => {
-  test('Tests should be ported', () => {
-    // TODO: Port all the tests from: x-pack/plugins/lists/public/exceptions/components/autocomplete/helpers.ts here once mocks are figured out and kbn package mocks are figured out
-    expect(true).toBe(true);
+import { checkEmptyValue } from '.';
+import { getField } from '../fields/index.mock';
+import * as i18n from '../translations';
+
+describe('check_empty_value', () => {
+  test('returns no errors if no field has been selected', () => {
+    const isValid = checkEmptyValue('', undefined, true, false);
+
+    expect(isValid).toBeUndefined();
+  });
+
+  test('returns error string if user has touched a required input and left empty', () => {
+    const isValid = checkEmptyValue(undefined, getField('@timestamp'), true, true);
+
+    expect(isValid).toEqual(i18n.FIELD_REQUIRED_ERR);
+  });
+
+  test('returns no errors if required input is empty but user has not yet touched it', () => {
+    const isValid = checkEmptyValue(undefined, getField('@timestamp'), true, false);
+
+    expect(isValid).toBeUndefined();
+  });
+
+  test('returns no errors if user has touched an input that is not required and left empty', () => {
+    const isValid = checkEmptyValue(undefined, getField('@timestamp'), false, true);
+
+    expect(isValid).toBeUndefined();
+  });
+
+  test('returns no errors if user has touched an input that is not required and left empty string', () => {
+    const isValid = checkEmptyValue('', getField('@timestamp'), false, true);
+
+    expect(isValid).toBeUndefined();
+  });
+
+  test('returns null if input value is not empty string or undefined', () => {
+    const isValid = checkEmptyValue('hellooo', getField('@timestamp'), false, true);
+
+    expect(isValid).toBeNull();
   });
 });

@@ -9,11 +9,11 @@
 import dateMath from '@elastic/datemath';
 import { checkEmptyValue } from '../check_empty_value';
 
-// TODO: I have to use any here for now, but once this is available below, we should use the correct types
+// TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/105731
 // import { IFieldType } from '../../../../../../../src/plugins/data/common';
 type IFieldType = any;
 
-import * as i18n from './translations';
+import * as i18n from '../translations';
 
 /**
  * Very basic validation for values

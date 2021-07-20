@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -11,15 +12,20 @@ import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { waitFor } from '@testing-library/react';
 import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { getField } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
-import { getFoundListSchemaMock } from '../../../../../lists/common/schemas/response/found_list_schema.mock';
-import { getListResponseMock } from '../../../../../lists/common/schemas/response/list_schema.mock';
-import { DATE_NOW, IMMUTABLE, VERSION } from '../../../../../lists/common/constants.mock';
+import { getField } from '../fields/index.mock';
+import { AutocompleteFieldListsComponent } from '.';
+import {
+  getListResponseMock,
+  getFoundListSchemaMock,
+  DATE_NOW,
+  IMMUTABLE,
+  VERSION,
+} from '../list_schema/index.mock';
 
-import { AutocompleteFieldListsComponent } from './field_value_lists';
-
-const mockKibanaHttpService = coreMock.createStart().http;
+// TODO: Once these mocks are available, use them instead of hand mocking, https://github.com/elastic/kibana/issues/100715
+// const mockKibanaHttpService = coreMock.createStart().http;
+// import { coreMock } from '../../../../../../../src/core/public/mocks';
+const mockKibanaHttpService = jest.fn();
 
 const mockStart = jest.fn();
 const mockKeywordList: ListSchema = {
@@ -35,7 +41,6 @@ jest.mock('@kbn/securitysolution-list-hooks', () => {
 
   return {
     ...originalModule,
-    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     useFindLists: () => ({
       error: undefined,
       loading: false,

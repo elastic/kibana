@@ -9,7 +9,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
-// TODO: I have to use any here for now, but once this is available below, we should use the correct types
+// TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/105731
 // import { IFieldType, IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 type IFieldType = any;
 type IIndexPattern = any;

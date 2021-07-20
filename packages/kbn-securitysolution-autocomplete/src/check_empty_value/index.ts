@@ -6,18 +6,14 @@
  * Side Public License, v 1.
  */
 
-import * as i18n from './translations';
+import * as i18n from '../translations';
 
-// TODO: I have to use any here for now, but once this is available below, we should use the correct types
+// TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/105731
 // import { IFieldType } from '../../../../../../../src/plugins/data/common';
 type IFieldType = any;
 
 /**
  * Determines if empty value is ok
- * There is a copy within:
- * x-pack/plugins/lists/public/exceptions/components/autocomplete/helpers.ts
- *
- * TODO: This should be in its own packaged and not copied, https://github.com/elastic/kibana/issues/105378
  */
 export const checkEmptyValue = (
   param: string | undefined,
