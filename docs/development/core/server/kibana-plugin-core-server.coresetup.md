@@ -4,7 +4,7 @@
 
 ## CoreSetup interface
 
-Context passed to the plugins `setup` method.
+Context passed to the `setup` method of `standard` plugins.
 
 <b>Signature:</b>
 

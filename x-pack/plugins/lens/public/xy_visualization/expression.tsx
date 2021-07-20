@@ -27,6 +27,7 @@ import {
   BrushEndListener,
   CurveType,
   LegendPositionConfig,
+  LabelOverflowConstraint,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
@@ -919,7 +920,7 @@ export function XYChart({
                   showValueLabel: shouldShowValueLabels && valueLabels !== 'hide',
                   isAlternatingValueLabel: false,
                   isValueContainedInElement: true,
-                  hideClippedValue: true,
+                  overflowConstraints: [LabelOverflowConstraint.ChartEdges],
                 },
               };
               return <BarSeries key={index} {...seriesProps} {...valueLabelsSettings} />;
