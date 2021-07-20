@@ -501,6 +501,19 @@ instanceStateValue: true
               })
             );
 
+          // Enqueue non ephemerically so we the latter code can query properly
+          const enqueueResponse = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerts_fixture/${createdAction.id}/enqueue_action`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: {
+                reference,
+                index: ES_TEST_INDEX_NAME,
+                retryAt: retryDate.getTime(),
+              },
+            });
+          expect(enqueueResponse.status).to.eql(204);
+
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'global_read at space1':
