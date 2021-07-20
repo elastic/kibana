@@ -79,7 +79,8 @@ describe('migration from 7.7.2-xpack with 100k objects', () => {
 
     const startEsPromise = startES().then((es) => (esServer = es));
     const startKibanaPromise = root
-      .setup()
+      .preboot()
+      .then(() => root.setup())
       .then(() => root.start())
       .then((start) => {
         coreStart = start;
