@@ -52,7 +52,7 @@ export function jobsHealthServiceProvider(
       })
     ).body.jobs;
 
-    const resultJobIds = jobsResponse.map((v) => v.job_id);
+    let resultJobIds = jobsResponse.map((v) => v.job_id);
 
     if (excludeJobs && (!!excludeJobs.jobIds.length || !!excludeJobs?.groupIds.length)) {
       const excludedJobAndGroupIds = [
@@ -67,7 +67,7 @@ export function jobsHealthServiceProvider(
 
       const excludedJobsIds: Set<string> = new Set(excludedJobsResponse.map((v) => v.job_id));
 
-      resultJobIds.filter((v) => excludedJobsIds.has(v));
+      resultJobIds = resultJobIds.filter((v) => !excludedJobsIds.has(v));
     }
 
     return resultJobIds;
