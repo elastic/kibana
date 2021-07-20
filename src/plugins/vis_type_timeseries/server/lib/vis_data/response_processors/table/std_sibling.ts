@@ -26,7 +26,7 @@ export const stdSibling: TableResponseProcessorsFunction = ({
   const fakeResp = { aggregations: bucket };
   (await getSplits(fakeResp, panel, series, meta, extractFields)).forEach((split) => {
     const data: PanelDataArray[] = split.timeseries.buckets.map((b) => {
-      return [Number(b.key), getSiblingAggValue(split, metric)];
+      return [b.key, getSiblingAggValue(split, metric)];
     });
 
     results.push({

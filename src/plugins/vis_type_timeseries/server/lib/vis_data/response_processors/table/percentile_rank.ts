@@ -12,7 +12,7 @@ import { toPercentileNumber } from '../../../../../common/to_percentile_number';
 import { METRIC_TYPES } from '../../../../../common/enums';
 
 import type { TableResponseProcessorsFunction } from './types';
-import { PanelDataArray } from '../../../../../common/types/vis_data';
+import type { PanelDataArray } from '../../../../../common/types/vis_data';
 
 export const percentileRank: TableResponseProcessorsFunction = ({
   bucket,
@@ -37,7 +37,7 @@ export const percentileRank: TableResponseProcessorsFunction = ({
     const lastPercentileNumber = toPercentileNumber(lastRankValue);
 
     const data = split.timeseries.buckets.map((b) => [
-      Number(b.key),
+      b.key,
       getAggValue(b, {
         ...metric,
         value: lastPercentileNumber,

@@ -38,7 +38,7 @@ export function getLastSeriesTimestamp(seriesGroup: Array<PanelSeries['series']>
       if (lastValue) {
         const [dataLastTimestamp] = lastValue;
 
-        if (typeof dataLastTimestamp !== 'undefined') {
+        if (typeof dataLastTimestamp === 'number') {
           lastTimestamp = Math.max(dataLastTimestamp, lastTimestamp ?? dataLastTimestamp);
         }
       }

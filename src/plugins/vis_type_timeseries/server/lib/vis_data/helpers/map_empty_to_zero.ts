@@ -10,15 +10,16 @@
 import { getAggValue } from './get_agg_value';
 import { METRIC_TYPES } from '../../../../../data/common';
 import type { Metric } from '../../../../common/types';
+import type { PanelDataArray } from '../../../../common/types/vis_data';
 
 export const mapEmptyToZero = (
   metric: Metric,
   buckets: Array<
     {
-      key: number;
+      key: number | string;
     } & Record<string, unknown>
   >
-) => {
+): PanelDataArray[] => {
   // Metric types where an empty set equals `zero`
   const isSettableToZero = [
     METRIC_TYPES.COUNT,

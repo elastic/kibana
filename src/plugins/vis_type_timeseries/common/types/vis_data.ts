@@ -46,7 +46,7 @@ export interface PanelData {
   error?: string;
 }
 
-export type PanelDataArray = [number | undefined, number | string | null];
+export type PanelDataArray = [number | undefined | string, number | string | null];
 
 export interface Annotation {
   key: number;

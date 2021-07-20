@@ -27,7 +27,14 @@ interface SplittedData<TMeta extends BaseMeta = BaseMeta> {
   color: string;
   meta: TMeta;
   timeseries: {
-    buckets: Array<Record<string, unknown> & { key: string }>;
+    buckets: [
+      {
+        [s: string]: {
+          // should be typed
+          values: Record<string, unknown>;
+        };
+      } & { key: string | number }
+    ];
   };
 }
 
