@@ -29,6 +29,10 @@ export interface JobSelectorControlProps {
   /** Enables multiple selection of jobs and groups */
   multiSelect?: boolean;
   label?: ReactNode;
+  /**
+   * Allows selecting all jobs, even those created afterward.
+   */
+  allowSelectAll?: boolean;
 }
 
 export const JobSelectorControl: FC<JobSelectorControlProps> = ({
@@ -38,6 +42,7 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
   errors,
   multiSelect = false,
   label,
+  allowSelectAll = false,
 }) => {
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const jobIds = useMemo(() => new Set(), []);
@@ -66,7 +71,7 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
       });
 
       setOptions([
-        ...(multiSelect
+        ...(allowSelectAll
           ? [
               {
                 label: i18n.translate('xpack.ml.jobSelector.selectAllGroupLabel', {

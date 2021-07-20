@@ -64,6 +64,7 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
         onChange={useCallback(onAlertParamChange('includeJobs'), [])}
         errors={Array.isArray(errors.includeJobs) ? errors.includeJobs : []}
         multiSelect
+        allowSelectAll
         label={
           <FormattedMessage
             id="xpack.ml.alertTypes.jobsHealthAlertingRule.includeJobs.label"
