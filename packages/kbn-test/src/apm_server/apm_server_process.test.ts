@@ -136,5 +136,39 @@ describe('#getState()', () => {
 });
 
 describe('#toPromise()', () => {
-  it('resolves when the process exists as intended', () => {});
+  it('resolves when the process exists as intended and stops observing state', async () => {
+    const state$ = new MockState();
+    const proc = new ApmServerProcess(state$, new Rx.Subject());
+    state$.mockKilled();
+    await expect(proc.toPromise()).resolves.toMatchInlineSnapshot(`undefined`);
+    expect(state$.observers).toHaveLength(0);
+  });
+
+  it('rejects when the process exits with 0 and stops observing state', async () => {
+    const state$ = new MockState();
+    const proc = new ApmServerProcess(state$, new Rx.Subject());
+    state$.mockExitted(0);
+    await expect(proc.toPromise()).rejects.toMatchInlineSnapshot(
+      `[Error: apm-server unexpectedly exitted with code [0]]`
+    );
+    expect(state$.observers).toHaveLength(0);
+  });
+
+  it('rejects when the process exits with 1 and stops observing state', async () => {
+    const state$ = new MockState();
+    const proc = new ApmServerProcess(state$, new Rx.Subject());
+    state$.mockExitted(1);
+    await expect(proc.toPromise()).rejects.toMatchInlineSnapshot(
+      `[Error: apm-server unexpectedly exitted with code [1]]`
+    );
+    expect(state$.observers).toHaveLength(0);
+  });
+
+  it('rejects when the process throws an error and stops observing state', async () => {
+    const state$ = new MockState();
+    const proc = new ApmServerProcess(state$, new Rx.Subject());
+    state$.mockError();
+    await expect(proc.toPromise()).rejects.toMatchInlineSnapshot(`[Error: mocked error]`);
+    expect(state$.observers).toHaveLength(0);
+  });
 });

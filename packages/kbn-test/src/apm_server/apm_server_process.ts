@@ -20,8 +20,13 @@ export class ApmServerProcess {
   toPromise() {
     return new Promise<void>((resolve, reject) => {
       const subscription = new Rx.Subscription();
+
+      const state$ = this.state$.isStopped
+        ? Rx.defer(() => Rx.of(this.state$.getValue()))
+        : this.getState$();
+
       subscription.add(
-        this.getState$().subscribe({
+        state$.subscribe({
           next: (state) => {
             switch (state.type) {
               case 'ready':
@@ -46,6 +51,7 @@ export class ApmServerProcess {
 
               default:
                 reject(new Error('unexpected state'));
+                subscription.unsubscribe();
                 break;
             }
           },
