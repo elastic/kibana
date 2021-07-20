@@ -8,6 +8,12 @@
 
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import {
+  fromKueryExpression,
+  toElasticsearchQuery,
+  luceneStringToDsl,
+  decorateQuery,
+} from '@kbn/es-query';
 import { showOpenSearchPanel } from './show_open_search_panel';
 import { getSharingData, showPublicUrlSwitch } from '../../utils/get_sharing_data';
 import { unhashUrl } from '../../../../../../../kibana_utils/public';
@@ -17,6 +23,8 @@ import { onSaveSearch } from './on_save_search';
 import { GetStateReturn } from '../../services/discover_state';
 import { IndexPattern, ISearchSource } from '../../../../../kibana_services';
 import { openOptionsPopover } from './open_options_popover';
+import { RefreshInterval, UI_SETTINGS } from '../../../../../../../data/public';
+import { SerializableState } from '../../../../../../../kibana_utils/common';
 
 /**
  * Helper function to build the top nav links
@@ -149,6 +157,59 @@ export const getTopNavLinks = ({
     },
   };
 
+  const dataVisualizer = {
+    id: 'dataVisualizer',
+    label: i18n.translate('discover.localMenu.dataVisualizerTitle', {
+      defaultMessage: 'Data visualizer',
+    }),
+    description: i18n.translate('discover.localMenu.dataVisualizerDescription', {
+      defaultMessage: 'Open in Data visualizer',
+    }),
+    testId: 'dataVisualizerTopNavButton',
+    run: async () => {
+      if (!services?.share?.url.locators) {
+        return;
+      }
+      const dvUrlGenerator = services.share.url.locators.get('DATA_VISUALIZER_APP_LOCATOR');
+      const extractedQuery = state.appStateContainer.getState().query;
+      const timeRange = services.timefilter.getTime();
+      const refreshInterval = services.timefilter.getRefreshInterval() as RefreshInterval &
+        SerializableState;
+
+      const params: SerializableState = {
+        indexPatternId: indexPattern.id,
+        savedSearchId: savedSearch.id,
+        timeRange,
+        refreshInterval,
+      };
+      if (extractedQuery) {
+        const queryLanguage = extractedQuery.language;
+        const qryString = extractedQuery.query;
+        let qry;
+        if (queryLanguage === 'kuery') {
+          const ast = fromKueryExpression(qryString);
+          qry = toElasticsearchQuery(ast, indexPattern);
+        } else {
+          qry = luceneStringToDsl(qryString);
+          decorateQuery(qry, services.uiSettings.get(UI_SETTINGS.QUERY_STRING_OPTIONS));
+        }
+
+        params.query = {
+          searchQuery: qry as SerializableState,
+          searchString: qryString,
+          searchQueryLanguage: queryLanguage,
+        };
+      }
+
+      const url = await dvUrlGenerator?.getUrl(params, { absolute: true });
+
+      // We want to open the Data visualizer in a new tab
+      if (url !== undefined) {
+        window.open(url, '_blank');
+      }
+    },
+  };
+
   return [
     ...(services.capabilities.advancedSettings.save ? [options] : []),
     newSearch,
@@ -156,5 +217,6 @@ export const getTopNavLinks = ({
     openSearch,
     shareSearch,
     inspectSearch,
+    dataVisualizer,
   ];
 };

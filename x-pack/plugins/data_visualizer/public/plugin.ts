@@ -21,8 +21,14 @@ import type { IndexPatternFieldEditorStart } from '../../../../src/plugins/index
 import { getFileDataVisualizerComponent, getIndexDataVisualizerComponent } from './api';
 import { getMaxBytesFormatted } from './application/common/util/get_max_bytes';
 import { registerHomeAddData, registerHomeFeatureCatalogue } from './register_home';
+import {
+  IndexDataVisualizerLocator,
+  IndexDataVisualizerLocatorDefinition,
+} from './application/index_data_visualizer/locator';
+import { SharePluginSetup } from '../../../../src/plugins/share/public';
 
 export interface DataVisualizerSetupDependencies {
+  share?: SharePluginSetup;
   home?: HomePublicPluginSetup;
 }
 export interface DataVisualizerStartDependencies {
@@ -47,10 +53,16 @@ export class DataVisualizerPlugin
       DataVisualizerSetupDependencies,
       DataVisualizerStartDependencies
     > {
+  private locator?: IndexDataVisualizerLocator;
+
   public setup(core: CoreSetup, plugins: DataVisualizerSetupDependencies) {
     if (plugins.home) {
       registerHomeAddData(plugins.home);
       registerHomeFeatureCatalogue(plugins.home);
+    }
+
+    if (plugins.share) {
+      this.locator = plugins.share.url.locators.create(new IndexDataVisualizerLocatorDefinition());
     }
   }
 
@@ -60,6 +72,7 @@ export class DataVisualizerPlugin
       getFileDataVisualizerComponent,
       getIndexDataVisualizerComponent,
       getMaxBytesFormatted,
+      locator: this.locator,
     };
   }
 }
