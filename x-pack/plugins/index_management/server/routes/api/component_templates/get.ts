@@ -28,13 +28,12 @@ export function registerGetAllRoute({ router, lib: { handleEsError } }: RouteDep
 
       try {
         const {
-          body: {
-            component_templates: componentTemplates,
-          },
+          body: { component_templates: componentTemplates },
         } = await client.asCurrentUser.cluster.getComponentTemplate();
 
-
-        const { body: { index_templates: indexTemplates } } = await client.asCurrentUser.indices.getIndexTemplate();
+        const {
+          body: { index_templates: indexTemplates },
+        } = await client.asCurrentUser.indices.getIndexTemplate();
 
         const body = componentTemplates.map((componentTemplate: ComponentTemplateFromEs) => {
           const deserializedComponentTemplateListItem = deserializeComponentTemplateList(
@@ -46,7 +45,7 @@ export function registerGetAllRoute({ router, lib: { handleEsError } }: RouteDep
 
         return response.ok({ body });
       } catch (error) {
-        return handleEsError({ error, response });;
+        return handleEsError({ error, response });
       }
     }
   );
@@ -64,17 +63,21 @@ export function registerGetAllRoute({ router, lib: { handleEsError } }: RouteDep
       const { name } = request.params;
 
       try {
-        const { body: { component_templates: componentTemplates } } = await client.asCurrentUser.cluster.getComponentTemplate({
+        const {
+          body: { component_templates: componentTemplates },
+        } = await client.asCurrentUser.cluster.getComponentTemplate({
           name,
         });
 
-        const { body: { index_templates: indexTemplates } } = await client.asCurrentUser.indices.getIndexTemplate();
+        const {
+          body: { index_templates: indexTemplates },
+        } = await client.asCurrentUser.indices.getIndexTemplate();
 
         return response.ok({
           body: deserializeComponentTemplate(componentTemplates[0], indexTemplates),
         });
       } catch (error) {
-        return handleEsError({ error, response });;
+        return handleEsError({ error, response });
       }
     }
   );

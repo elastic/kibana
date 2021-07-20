@@ -11,7 +11,7 @@ import { IScopedClusterClient } from 'kibana/server';
 
 import { Index as IndexWithoutIlm } from '../../index_management/common/types';
 import { PLUGIN } from '../common/constants';
-import { Index, IndexLifecyclePolicy } from '../common/types';
+import { Index } from '../common/types';
 import { Dependencies } from './types';
 import { registerApiRoutes } from './routes';
 import { License } from './services';
@@ -35,6 +35,7 @@ const indexLifecycleDataEnricher = async (
   return indicesList.map((index: IndexWithoutIlm) => {
     return {
       ...index,
+      // @ts-expect-error Element implicitly has an 'any' type
       ilm: { ...(ilmIndicesData[index.name] || {}) },
     };
   });

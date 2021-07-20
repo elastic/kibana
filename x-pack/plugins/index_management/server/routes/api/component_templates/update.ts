@@ -15,7 +15,10 @@ const paramsSchema = schema.object({
   name: schema.string(),
 });
 
-export const registerUpdateRoute = ({ router, lib: { handleEsError } }: RouteDependencies): void => {
+export const registerUpdateRoute = ({
+  router,
+  lib: { handleEsError },
+}: RouteDependencies): void => {
   router.put(
     {
       path: addBasePath('/component_templates/{name}'),
@@ -36,6 +39,7 @@ export const registerUpdateRoute = ({ router, lib: { handleEsError } }: RouteDep
         const { body: responseBody } = await client.asCurrentUser.cluster.putComponentTemplate({
           name,
           body: {
+            // @ts-expect-error Not assignable to type 'IndicesIndexState'
             template,
             version,
             _meta,

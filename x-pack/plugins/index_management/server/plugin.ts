@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  CoreSetup,
-  Plugin,
-  PluginInitializerContext,
-} from 'src/core/server';
+import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/server';
 
 import { PLUGIN } from '../common/constants/plugin';
 import { Dependencies } from './types';
@@ -36,7 +32,6 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
     { http, getStartServices }: CoreSetup,
     { features, security }: Dependencies
   ): IndexManagementPluginSetup {
-
     features.registerElasticsearchFeature({
       id: PLUGIN.id,
       management: {

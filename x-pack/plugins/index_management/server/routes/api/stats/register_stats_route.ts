@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { IndicesStatsResponse } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
@@ -15,9 +15,14 @@ const paramsSchema = schema.object({
   indexName: schema.string(),
 });
 
-function formatHit(hit: IndicesStatsResponse, indexName: string) {
+interface Hit {
+  _shards: unknown;
+  indices?: Record<string, estypes.IndicesStatsIndicesStats>;
+}
+
+function formatHit(hit: Hit, indexName: string) {
   const { _shards, indices } = hit;
-  const stats = indices[indexName];
+  const stats = indices![indexName];
   return {
     _shards,
     stats,
@@ -37,6 +42,7 @@ export function registerStatsRoute({ router, lib: { handleEsError } }: RouteDepe
 
       try {
         const { body: hit } = await client.asCurrentUser.indices.stats(params);
+
         return response.ok({ body: formatHit(hit, indexName) });
       } catch (error) {
         return handleEsError({ error, response });
