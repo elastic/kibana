@@ -103,6 +103,10 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       { defaultMessage: 'Service Map' }
     );
 
+    const backendsTitle = i18n.translate('xpack.apm.navigation.backendsTitle', {
+      defaultMessage: 'Backends',
+    });
+
     // register observability nav if user has access to plugin
     plugins.observability.navigation.registerSections(
       from(core.getStartServices()).pipe(
@@ -117,6 +121,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                   { label: servicesTitle, app: 'apm', path: '/services' },
                   { label: tracesTitle, app: 'apm', path: '/traces' },
                   { label: serviceMapTitle, app: 'apm', path: '/service-map' },
+                  { label: backendsTitle, app: 'apm', path: '/backends' },
                 ],
               },
 
