@@ -115,18 +115,39 @@ describe('request utils', () => {
 
   describe('getDefaultAsyncGetParams', () => {
     test('Uses `wait_for_completion_timeout`', async () => {
-      const params = getDefaultAsyncGetParams({});
+      const mockConfig = getMockSearchSessionsConfig({
+        defaultExpiration: moment.duration(3, 'd'),
+        enabled: true,
+      });
+      const params = getDefaultAsyncGetParams(mockConfig, {});
       expect(params).toHaveProperty('wait_for_completion_timeout');
     });
 
     test('Uses `keep_alive` if `sessionId` is not provided', async () => {
-      const params = getDefaultAsyncGetParams({});
+      const mockConfig = getMockSearchSessionsConfig({
+        defaultExpiration: moment.duration(3, 'd'),
+        enabled: true,
+      });
+      const params = getDefaultAsyncGetParams(mockConfig, {});
       expect(params).toHaveProperty('keep_alive', '1m');
     });
 
     test('Has no `keep_alive` if `sessionId` is provided', async () => {
-      const params = getDefaultAsyncGetParams({ sessionId: 'foo' });
+      const mockConfig = getMockSearchSessionsConfig({
+        defaultExpiration: moment.duration(3, 'd'),
+        enabled: true,
+      });
+      const params = getDefaultAsyncGetParams(mockConfig, { sessionId: 'foo' });
       expect(params).not.toHaveProperty('keep_alive');
+    });
+
+    test('Uses `keep_alive` if `sessionId` is provided but sessions disabled', async () => {
+      const mockConfig = getMockSearchSessionsConfig({
+        defaultExpiration: moment.duration(3, 'd'),
+        enabled: false,
+      });
+      const params = getDefaultAsyncGetParams(mockConfig, { sessionId: 'foo' });
+      expect(params).toHaveProperty('keep_alive', '1m');
     });
   });
 });
