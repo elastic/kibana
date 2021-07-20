@@ -17,7 +17,6 @@
     "@types/execa": "^0.9.0",
     "@types/getopts": "^2.0.0",
     "@types/glob": "^5.0.35",
-    "@types/globby": "^6.1.0",
     "@types/has-ansi": "^3.0.0",
     "@types/indent-string": "^3.0.0",
     "@types/jest": "^23.3.1",

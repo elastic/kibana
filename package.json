@@ -315,7 +315,6 @@
     "@types/fetch-mock": "7.2.1",
     "@types/getopts": "^2.0.0",
     "@types/glob": "^5.0.35",
-    "@types/globby": "^8.0.0",
     "@types/graphql": "^0.13.1",
     "@types/has-ansi": "^3.0.0",
     "@types/humps": "^1.1.2",
