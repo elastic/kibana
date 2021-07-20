@@ -213,7 +213,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await visualBuilder.setColorPickerValue('#AD7DE6', 1);
 
           const backGroundStyle = await visualBuilder.getBackgroundStyle();
-          const gaugeInnerColor = await visualBuilder.getGaugeColor('Inner');
+          const gaugeInnerColor = await visualBuilder.getGaugeColor(true);
 
           expect(backGroundStyle).to.eql('background-color: rgb(255, 207, 223);');
           expect(gaugeInnerColor).to.eql('rgba(173,125,230,1)');

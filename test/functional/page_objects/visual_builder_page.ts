@@ -349,18 +349,18 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async getGaugeLabel() {
-    const gaugeLabel = await this.find.byCssSelector('.tvbVisGauge__label');
+    const gaugeLabel = await this.testSubjects.find('gaugeLabel');
     return await gaugeLabel.getVisibleText();
   }
 
   public async getGaugeCount() {
-    const gaugeCount = await this.find.byCssSelector('.tvbVisGauge__value');
+    const gaugeCount = await this.testSubjects.find('gaugeValue');
     return await gaugeCount.getVisibleText();
   }
 
-  public async getGaugeColor(type: undefined | 'Inner' = undefined): Promise<string> {
+  public async getGaugeColor(isInner = false): Promise<string> {
     await this.visChart.waitForVisualizationRenderingStabilized();
-    const gaugeColoredCircle = await this.testSubjects.find(`gaugeCircle${type ?? ''}`);
+    const gaugeColoredCircle = await this.testSubjects.find(`gaugeCircle${isInner ? 'Inner' : ''}`);
     return await gaugeColoredCircle.getAttribute('stroke');
   }
 
@@ -380,7 +380,7 @@ export class VisualBuilderPageObject extends FtrService {
 
   public async getTopNBarStyle(nth: number = 0): Promise<string> {
     await this.visChart.waitForVisualizationRenderingStabilized();
-    const topNBars = await this.find.allByCssSelector('.tvbVisTopN__innerBar div');
+    const topNBars = await this.testSubjects.findAll('topNInnerBar');
     return await topNBars[nth].getAttribute('style');
   }
 
@@ -619,13 +619,13 @@ export class VisualBuilderPageObject extends FtrService {
 
   public async getMetricValueStyle(): Promise<string> {
     await this.visChart.waitForVisualizationRenderingStabilized();
-    const metricValue = await this.find.byCssSelector('[data-test-subj="tsvbMetricValue"]');
+    const metricValue = await this.testSubjects.find('tsvbMetricValue');
     return await metricValue.getAttribute('style');
   }
 
   public async getGaugeValueStyle(): Promise<string> {
     await this.visChart.waitForVisualizationRenderingStabilized();
-    const metricValue = await this.find.byCssSelector('.tvbVisGauge__value');
+    const metricValue = await this.testSubjects.find('gaugeValue');
     return await metricValue.getAttribute('style');
   }
 
