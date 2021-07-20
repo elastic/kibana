@@ -335,9 +335,11 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     }
     displayValueSettings={
       Object {
-        "hideClippedValue": true,
         "isAlternatingValueLabel": false,
         "isValueContainedInElement": true,
+        "overflowConstraints": Array [
+          "chartEdges",
+        ],
         "showValueLabel": false,
         "valueFormatter": [Function],
       }
@@ -399,9 +401,11 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     }
     displayValueSettings={
       Object {
-        "hideClippedValue": true,
         "isAlternatingValueLabel": false,
         "isValueContainedInElement": true,
+        "overflowConstraints": Array [
+          "chartEdges",
+        ],
         "showValueLabel": false,
         "valueFormatter": [Function],
       }
@@ -558,9 +562,11 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     }
     displayValueSettings={
       Object {
-        "hideClippedValue": true,
         "isAlternatingValueLabel": false,
         "isValueContainedInElement": true,
+        "overflowConstraints": Array [
+          "chartEdges",
+        ],
         "showValueLabel": false,
         "valueFormatter": [Function],
       }
@@ -622,9 +628,11 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     }
     displayValueSettings={
       Object {
-        "hideClippedValue": true,
         "isAlternatingValueLabel": false,
         "isValueContainedInElement": true,
+        "overflowConstraints": Array [
+          "chartEdges",
+        ],
         "showValueLabel": false,
         "valueFormatter": [Function],
       }
@@ -1219,9 +1227,11 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     }
     displayValueSettings={
       Object {
-        "hideClippedValue": true,
         "isAlternatingValueLabel": false,
         "isValueContainedInElement": true,
+        "overflowConstraints": Array [
+          "chartEdges",
+        ],
         "showValueLabel": false,
         "valueFormatter": [Function],
       }
@@ -1287,9 +1297,11 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     }
     displayValueSettings={
       Object {
-        "hideClippedValue": true,
         "isAlternatingValueLabel": false,
         "isValueContainedInElement": true,
+        "overflowConstraints": Array [
+          "chartEdges",
+        ],
         "showValueLabel": false,
         "valueFormatter": [Function],
       }
@@ -1450,9 +1462,11 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     }
     displayValueSettings={
       Object {
-        "hideClippedValue": true,
         "isAlternatingValueLabel": false,
         "isValueContainedInElement": true,
+        "overflowConstraints": Array [
+          "chartEdges",
+        ],
         "showValueLabel": false,
         "valueFormatter": [Function],
       }
@@ -1518,9 +1532,11 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     }
     displayValueSettings={
       Object {
-        "hideClippedValue": true,
         "isAlternatingValueLabel": false,
         "isValueContainedInElement": true,
+        "overflowConstraints": Array [
+          "chartEdges",
+        ],
         "showValueLabel": false,
         "valueFormatter": [Function],
       }
