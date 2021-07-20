@@ -187,42 +187,40 @@ export const IntegrationsAppContext: React.FC<{
   kibanaVersion: string;
   extensions: UIExtensionsStorage;
   /** For testing purposes only */
-  routerHistory?: History<any>;
-}> = memo(
-  ({ children, startServices, config, history, kibanaVersion, extensions, routerHistory }) => {
-    const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
+  routerHistory?: History<any>; // TODO remove
+}> = memo(({ children, startServices, config, history, kibanaVersion, extensions }) => {
+  const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
 
-    return (
-      <RedirectAppLinks application={startServices.application}>
-        <startServices.i18n.Context>
-          <KibanaContextProvider services={{ ...startServices }}>
-            <EuiErrorBoundary>
-              <ConfigContext.Provider value={config}>
-                <KibanaVersionContext.Provider value={kibanaVersion}>
-                  <EuiThemeProvider darkMode={isDarkMode}>
-                    <UIExtensionsContext.Provider value={extensions}>
-                      <FleetStatusProvider>
-                        <IntraAppStateProvider kibanaScopedHistory={history}>
-                          <Router history={history}>
-                            <AgentPolicyContextProvider>
-                              <PackageInstallProvider notifications={startServices.notifications}>
-                                {children}
-                              </PackageInstallProvider>
-                            </AgentPolicyContextProvider>
-                          </Router>
-                        </IntraAppStateProvider>
-                      </FleetStatusProvider>
-                    </UIExtensionsContext.Provider>
-                  </EuiThemeProvider>
-                </KibanaVersionContext.Provider>
-              </ConfigContext.Provider>
-            </EuiErrorBoundary>
-          </KibanaContextProvider>
-        </startServices.i18n.Context>
-      </RedirectAppLinks>
-    );
-  }
-);
+  return (
+    <RedirectAppLinks application={startServices.application}>
+      <startServices.i18n.Context>
+        <KibanaContextProvider services={{ ...startServices }}>
+          <EuiErrorBoundary>
+            <ConfigContext.Provider value={config}>
+              <KibanaVersionContext.Provider value={kibanaVersion}>
+                <EuiThemeProvider darkMode={isDarkMode}>
+                  <UIExtensionsContext.Provider value={extensions}>
+                    <FleetStatusProvider>
+                      <IntraAppStateProvider kibanaScopedHistory={history}>
+                        <Router history={history}>
+                          <AgentPolicyContextProvider>
+                            <PackageInstallProvider notifications={startServices.notifications}>
+                              {children}
+                            </PackageInstallProvider>
+                          </AgentPolicyContextProvider>
+                        </Router>
+                      </IntraAppStateProvider>
+                    </FleetStatusProvider>
+                  </UIExtensionsContext.Provider>
+                </EuiThemeProvider>
+              </KibanaVersionContext.Provider>
+            </ConfigContext.Provider>
+          </EuiErrorBoundary>
+        </KibanaContextProvider>
+      </startServices.i18n.Context>
+    </RedirectAppLinks>
+  );
+});
 
 export const AppRoutes = memo(() => {
   const { modal, setModal } = useUrlModal();

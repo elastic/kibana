@@ -17,9 +17,10 @@ export function FleetIntegrations({ getService, getPageObjects }: FtrProviderCon
 
   return {
     async navigateToIntegrationDetails(pkgkey: string) {
-      await pageObjects.common.navigateToApp(INTEGRATIONS_PLUGIN_ID, {
-        hash: pagePathGetters.integration_details_overview({ pkgkey })[1],
-      });
+      await pageObjects.common.navigateToUrl(
+        INTEGRATIONS_PLUGIN_ID,
+        pagePathGetters.integration_details_overview({ pkgkey })[1]
+      );
     },
 
     async integrationDetailCustomTabExistsOrFail() {
