@@ -10,25 +10,38 @@ import { withTimeout, isPromise } from '@kbn/std';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { PluginWrapper } from './plugin';
-import { DiscoveredPlugin, PluginName } from './types';
-import { createPluginSetupContext, createPluginStartContext } from './plugin_context';
-import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
-import { PluginDependencies } from '.';
+import { DiscoveredPlugin, PluginDependencies, PluginName, PluginType } from './types';
+import {
+  createPluginPrebootSetupContext,
+  createPluginSetupContext,
+  createPluginStartContext,
+} from './plugin_context';
+import {
+  PluginsServicePrebootSetupDeps,
+  PluginsServiceSetupDeps,
+  PluginsServiceStartDeps,
+} from './plugins_service';
 
 const Sec = 1000;
 
 /** @internal */
-export class PluginsSystem {
+export class PluginsSystem<T extends PluginType> {
   private readonly plugins = new Map<PluginName, PluginWrapper>();
   private readonly log: Logger;
   // `satup`, the past-tense version of the noun `setup`.
   private readonly satupPlugins: PluginName[] = [];
 
-  constructor(private readonly coreContext: CoreContext) {
-    this.log = coreContext.logger.get('plugins-system');
+  constructor(private readonly coreContext: CoreContext, public readonly type: T) {
+    this.log = coreContext.logger.get('plugins-system', this.type);
   }
 
   public addPlugin(plugin: PluginWrapper) {
+    if (plugin.manifest.type !== this.type) {
+      throw new Error(
+        `Cannot add plugin with type "${plugin.manifest.type}" to plugin system with type "${this.type}".`
+      );
+    }
+
     this.plugins.set(plugin.name, plugin);
   }
 
@@ -67,7 +80,9 @@ export class PluginsSystem {
     return { asNames, asOpaqueIds };
   }
 
-  public async setupPlugins(deps: PluginsServiceSetupDeps) {
+  public async setupPlugins(
+    deps: T extends PluginType.preboot ? PluginsServicePrebootSetupDeps : PluginsServiceSetupDeps
+  ): Promise<Map<string, unknown>> {
     const contracts = new Map<PluginName, unknown>();
     if (this.plugins.size === 0) {
       return contracts;
@@ -95,11 +110,23 @@ export class PluginsSystem {
         return depContracts;
       }, {} as Record<PluginName, unknown>);
 
+      let pluginSetupContext;
+      if (this.type === PluginType.preboot) {
+        pluginSetupContext = createPluginPrebootSetupContext(
+          this.coreContext,
+          deps as PluginsServicePrebootSetupDeps,
+          plugin
+        );
+      } else {
+        pluginSetupContext = createPluginSetupContext(
+          this.coreContext,
+          deps as PluginsServiceSetupDeps,
+          plugin
+        );
+      }
+
       let contract: unknown;
-      const contractOrPromise = plugin.setup(
-        createPluginSetupContext(this.coreContext, deps, plugin),
-        pluginDepContracts
-      );
+      const contractOrPromise = plugin.setup(pluginSetupContext, pluginDepContracts);
       if (isPromise(contractOrPromise)) {
         if (this.coreContext.env.mode.dev) {
           this.log.warn(
@@ -130,6 +157,10 @@ export class PluginsSystem {
   }
 
   public async startPlugins(deps: PluginsServiceStartDeps) {
+    if (this.type === PluginType.preboot) {
+      throw new Error('Preboot plugins cannot be started.');
+    }
+
     const contracts = new Map<PluginName, unknown>();
     if (this.satupPlugins.length === 0) {
       return contracts;
@@ -222,6 +253,7 @@ export class PluginsSystem {
           pluginName,
           {
             id: pluginName,
+            type: plugin.manifest.type,
             configPath: plugin.manifest.configPath,
             requiredPlugins: plugin.manifest.requiredPlugins.filter((p) =>
               uiPluginNames.includes(p)
