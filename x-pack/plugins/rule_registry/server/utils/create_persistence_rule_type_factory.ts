@@ -79,8 +79,7 @@ export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory 
                 return {
                   ...event,
                   'event.kind': 'signal',
-                  'rule.id': 'siem.customRule',
-                  'kibana.rac.alert.id': v4(),
+                  'kibana.rac.alert.id': '???',
                   'kibana.rac.alert.status': 'open',
                   'kibana.rac.alert.uuid': v4(),
                   'kibana.rac.alert.ancestors': isAlert
