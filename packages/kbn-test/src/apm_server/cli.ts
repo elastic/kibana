@@ -11,7 +11,7 @@ import Readline from 'readline';
 import { RunWithCommands, kibanaPackageJson, createFlagError, ToolingLog } from '@kbn/dev-utils';
 
 import { ApmServer } from './apm_server';
-import { ApmServerConfig } from './apm_server_install';
+import { ApmServerConfig } from './apm_server_installation';
 import { SnapshotBuild } from './snapshot_build';
 import { Staging } from './staging';
 
@@ -90,7 +90,7 @@ export function runApmServerCli() {
             ? parseEsUrl(flags['es-url'])
             : undefined;
 
-        await new ApmServer(log).run({
+        const proc = await new ApmServer(log).start({
           name,
           branch,
           staging,
@@ -99,6 +99,8 @@ export function runApmServerCli() {
             elasticsearch: esConfig,
           },
         });
+
+        await proc.toPromise();
       },
     })
     .command({

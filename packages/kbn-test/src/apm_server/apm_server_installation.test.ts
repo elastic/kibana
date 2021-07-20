@@ -8,7 +8,7 @@
 
 import { EventEmitter } from 'events';
 
-import { ApmServerInstall } from './apm_server_install';
+import { ApmServerInstallation } from './apm_server_installation';
 import { ArchiveArtifact } from './archive_artifact';
 import { MAC_PLATFORM } from './platforms';
 
@@ -85,7 +85,7 @@ const log = new ToolingLog();
 log.setWriters([logCollector]);
 
 const archive = new ArchiveArtifact(log, MAC_PLATFORM, '/artifacts/bar.tar.gz');
-const node = new ApmServerInstall(log, 'foo', archive);
+const node = new ApmServerInstallation(log, 'foo', archive);
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 expect.addSnapshotSerializer(createStripAnsiSerializer());

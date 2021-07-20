@@ -6,20 +6,25 @@
  * Side Public License, v 1.
  */
 
+import { filter } from 'rxjs/operators';
+
 import { ToolingLog, kibanaPackageJson } from '@kbn/dev-utils';
+import { firstValueFrom } from '@kbn/std';
 
 import { ArchiveArtifact } from './archive_artifact';
-import { ApmServerInstall, ApmServerConfig } from './apm_server_install';
+import { ApmServerInstallation, ApmServerConfig } from './apm_server_installation';
+
+interface ExecuteOptions {
+  name?: string;
+  branch?: string;
+  staging?: boolean;
+  config?: ApmServerConfig;
+}
 
 export class ApmServer {
   constructor(private readonly log: ToolingLog) {}
 
-  async run(options: {
-    name?: string;
-    branch?: string;
-    staging?: boolean;
-    config?: ApmServerConfig;
-  }) {
+  async start(options: ExecuteOptions) {
     const branch = options.branch || kibanaPackageJson.branch;
     const staging = !!options.staging;
 
@@ -33,16 +38,27 @@ export class ApmServer {
     this.log.success('artifact downloaded to', artifact.path);
     this.log.indent(-4);
 
-    const node = new ApmServerInstall(this.log, options.name ?? 'apm-server', artifact);
+    const installation = new ApmServerInstallation(
+      this.log,
+      options.name ?? 'apm-server',
+      artifact
+    );
     this.log.info('installing apm-server');
     this.log.indent(4);
-    await node.extract();
-    await node.configureInstall(options.config);
-    this.log.success('apm-server installed to', node.dir);
+    await installation.extract();
+    await installation.configureInstall(options.config);
+    this.log.success('apm-server installed to', installation.dir);
     this.log.indent(-4);
 
-    this.log.info('running apm-server');
+    this.log.info('starting apm-server');
     this.log.indent(4);
-    await node.run();
+    const proc = installation.run({
+      shouldRunForever: true,
+    });
+
+    // wait for the running install to be ready and then return the process object
+    await firstValueFrom(proc.getState$().pipe(filter((s) => s.type === 'ready')));
+
+    return proc;
   }
 }

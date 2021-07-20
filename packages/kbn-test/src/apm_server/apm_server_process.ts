@@ -7,52 +7,75 @@
  */
 
 import * as Rx from 'rxjs';
-import { take, mapTo, map, filter, takeUntil } from 'rxjs/operators';
 
-const READY_STATE = Object.freeze({
-  type: 'ready',
-});
-
-const STARTING_STATE = Object.freeze({
-  type: 'starting',
-});
-
-type State = typeof READY_STATE | typeof STARTING_STATE;
+import { ExecState, StopSignal, StopSubject } from './apm_server_installation';
 
 export class ApmServerProcess {
-  private readonly state$: Rx.BehaviorSubject<State>;
-
   constructor(
-    error$: Rx.Observable<Error>,
-    ready$: Rx.Observable<void>,
-    private readonly stop$: Rx.Subject<void>
-  ) {
-    this.state$ = new Rx.BehaviorSubject<State>(STARTING_STATE);
+    private readonly state$: Rx.BehaviorSubject<ExecState>,
+    private readonly stop$: StopSubject
+  ) {}
 
-    Rx.merge(
-      ready$.pipe(take(1), mapTo(READY_STATE)),
-      error$.pipe(
-        map((error) => {
-          throw error;
+  toPromise() {
+    return new Promise<void>((resolve, reject) => {
+      const subscription = new Rx.Subscription();
+      subscription.add(
+        this.state$.subscribe({
+          next: (state) => {
+            switch (state.type) {
+              case 'ready':
+              case 'starting':
+                // noop;
+                break;
+
+              case 'error':
+                reject(state.error);
+                subscription.unsubscribe();
+                break;
+
+              case 'killed':
+                resolve();
+                subscription.unsubscribe();
+                break;
+
+              case 'exitted':
+                if (state.shouldRunForever) {
+                  reject(
+                    new Error(`apm-server unexpectedly exitted with code [${state.exitCode}]`)
+                  );
+                } else if (state.exitCode > 0) {
+                  reject(new Error(`apm-server exitted with code [${state.exitCode}]`));
+                } else {
+                  resolve();
+                }
+                subscription.unsubscribe();
+                break;
+
+              default:
+                reject(new Error('unexpected state'));
+                break;
+            }
+          },
+          error: (error) => {
+            reject(error);
+          },
+          complete: () => {
+            reject(new Error('ApmServerInstall state$ completed unexpectedly'));
+          },
         })
-      )
-    )
-      .pipe(takeUntil(this.stop$))
-      .subscribe(this.state$);
+      );
+    });
+  }
+
+  getCurrentState() {
+    return this.state$.getValue();
   }
 
   getState$() {
     return this.state$.asObservable();
   }
 
-  isReady$(): Rx.Observable<void> {
-    return this.state$.pipe(
-      filter((state) => state.type === 'ready'),
-      mapTo(undefined)
-    );
-  }
-
-  stop() {
-    this.stop$.next();
+  stop(signal?: StopSignal) {
+    this.stop$.next(signal);
   }
 }
