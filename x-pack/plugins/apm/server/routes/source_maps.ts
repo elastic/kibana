@@ -13,6 +13,7 @@ import {
   deleteApmArtifact,
   listArtifacts,
   updateSourceMapsOnFleetPolicies,
+  getCleanedBundleFilePath,
 } from '../lib/fleet/source_maps';
 import { getInternalSavedObjectsClient } from '../lib/helpers/get_internal_saved_objects_client';
 import { createApmServerRoute } from './create_apm_server_route';
@@ -78,6 +79,7 @@ const uploadSourceMapRoute = createApmServerRoute({
       bundle_filepath: bundleFilepath,
       sourcemap: sourceMap,
     } = params.body;
+    const cleanedBundleFilepath = getCleanedBundleFilePath(bundleFilepath);
     const fleetPluginStart = await plugins.fleet?.start();
     const coreStart = await core.start();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
@@ -89,7 +91,7 @@ const uploadSourceMapRoute = createApmServerRoute({
           apmArtifactBody: {
             serviceName,
             serviceVersion,
-            bundleFilepath,
+            bundleFilepath: cleanedBundleFilepath,
             sourceMap,
           },
         });

@@ -37,7 +37,7 @@ export function getFunctionDefinition({
 }) {
   return (): EsaggsExpressionFunctionDefinition => ({
     ...getEsaggsMeta(),
-    fn(input, args, { inspectorAdapters, abortSignal, getSearchSessionId }) {
+    fn(input, args, { inspectorAdapters, abortSignal, getSearchSessionId, getExecutionContext }) {
       return defer(async () => {
         const { aggs, indexPatterns, searchSource, getNow } = await getStartDependencies();
 
@@ -64,6 +64,7 @@ export function getFunctionDefinition({
             timeFields: args.timeFields,
             timeRange: get(input, 'timeRange', undefined),
             getNow,
+            executionContext: getExecutionContext()?.toJSON(),
           })
         )
       );

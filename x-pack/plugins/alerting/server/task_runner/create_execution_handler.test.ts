@@ -98,6 +98,8 @@ const createExecutionHandlerParams: jest.Mocked<
     contextVal: 'My other {{context.value}} goes here',
     stateVal: 'My other {{state.value}} goes here',
   },
+  supportsEphemeralTasks: false,
+  maxEphemeralActionsPerAlert: Promise.resolve(10),
 };
 
 beforeEach(() => {

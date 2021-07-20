@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
+import type { PublicContract } from '@kbn/utility-types';
 import { getOrElse } from 'fp-ts/lib/Either';
 import * as rt from 'io-ts';
 import { Mutable } from 'utility-types';
@@ -98,7 +99,10 @@ export type WrappedLifecycleRuleState<State extends AlertTypeState> = AlertTypeS
   trackedAlerts: Record<string, TrackedLifecycleAlertState>;
 };
 
-export const createLifecycleExecutor = (logger: Logger, ruleDataClient: RuleDataClient) => <
+export const createLifecycleExecutor = (
+  logger: Logger,
+  ruleDataClient: PublicContract<RuleDataClient>
+) => <
   Params extends AlertTypeParams = never,
   State extends AlertTypeState = never,
   InstanceState extends AlertInstanceState = never,
@@ -242,7 +246,7 @@ export const createLifecycleExecutor = (logger: Logger, ruleDataClient: RuleData
       ...alertData,
       ...ruleExecutorData,
       [TIMESTAMP]: timestamp,
-      [EVENT_KIND]: 'event',
+      [EVENT_KIND]: 'signal',
       [OWNER]: rule.consumer,
       [ALERT_ID]: alertId,
     };
@@ -311,14 +315,7 @@ export const createLifecycleExecutor = (logger: Logger, ruleDataClient: RuleData
 
     if (ruleDataClient.isWriteEnabled()) {
       await ruleDataClient.getWriter().bulk({
-        body: eventsToIndex
-          .flatMap((event) => [{ index: {} }, event])
-          .concat(
-            Array.from(alertEvents.values()).flatMap((event) => [
-              { index: { _id: event[ALERT_UUID]! } },
-              event,
-            ])
-          ),
+        body: eventsToIndex.flatMap((event) => [{ index: { _id: event[ALERT_UUID]! } }, event]),
       });
     }
   }

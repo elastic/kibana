@@ -11,7 +11,7 @@ import { IRouter } from 'kibana/server';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { getRequestAbortedSignal } from '../lib';
-import { getKbnServerError } from '../../../kibana_utils/server';
+import { getKbnServerError, reportServerError } from '../../../kibana_utils/server';
 import type { ConfigSchema } from '../../config';
 import { termsEnumSuggestions } from './terms_enum';
 import { termsAggSuggestions } from './terms_agg';
@@ -65,7 +65,8 @@ export function registerValueSuggestionsRoute(router: IRouter, config$: Observab
         );
         return response.ok({ body });
       } catch (e) {
-        throw getKbnServerError(e);
+        const kbnErr = getKbnServerError(e);
+        return reportServerError(response, kbnErr);
       }
     }
   );
