@@ -29,6 +29,14 @@ Object {
       "metric_0": 1,
       "timestamp": 1577836920000,
     },
+    Object {
+      "metric_0": 1,
+      "timestamp": 1577836980000,
+    },
+    Object {
+      "metric_0": 1,
+      "timestamp": 1577837040000,
+    },
   ],
 }
 `;
@@ -63,8 +71,16 @@ Object {
       "timestamp": 1577836920000,
     },
     Object {
+      "metric_0": 1,
+      "timestamp": 1577836980000,
+    },
+    Object {
+      "metric_0": 1,
+      "timestamp": 1577837040000,
+    },
+    Object {
       "metric_0": null,
-      "timestamp": 1577836920000,
+      "timestamp": 1577837100000,
     },
   ],
 }
@@ -81,7 +97,7 @@ Object {
 }
 `;
 
-exports[`convertHistogramBucketsToTimeseies(keys, options, buckets) should tranform top_metric aggregations 1`] = `
+exports[`convertHistogramBucketsToTimeseies(keys, options, buckets) should transform top_metric aggregations 1`] = `
 Object {
   "columns": Array [
     Object {
@@ -152,7 +168,15 @@ Object {
     },
     Object {
       "metric_0": 4,
-      "timestamp": 1577836920000,
+      "timestamp": 1577836980000,
+    },
+    Object {
+      "metric_0": 4,
+      "timestamp": 1577837040000,
+    },
+    Object {
+      "metric_0": 4,
+      "timestamp": 1577837100000,
     },
   ],
 }
@@ -188,8 +212,16 @@ Object {
       "timestamp": 1577836920000,
     },
     Object {
+      "metric_0": 2,
+      "timestamp": 1577836980000,
+    },
+    Object {
+      "metric_0": 2,
+      "timestamp": 1577837040000,
+    },
+    Object {
       "metric_0": null,
-      "timestamp": 1577836920000,
+      "timestamp": 1577837100000,
     },
   ],
 }
@@ -226,7 +258,15 @@ Object {
     },
     Object {
       "metric_0": 3,
-      "timestamp": 1577836920000,
+      "timestamp": 1577836980000,
+    },
+    Object {
+      "metric_0": 3,
+      "timestamp": 1577837040000,
+    },
+    Object {
+      "metric_0": 3,
+      "timestamp": 1577837100000,
     },
   ],
 }
