@@ -322,3 +322,8 @@ This content has moved. Refer to <<install-reporting-packages>>.
 == Create a graph
 
 This content has moved. Refer to <<xpack-graph>>.
+
+[role="exclude",id="graph-limitations"]
+== Graph limitations
+
+This content has moved. Refer to <<graph-troubleshooting>>.

@@ -73,7 +73,7 @@ Use *Graph* to reveal the relationships in your data.
 
 . Open the main menu, and then click *Graph*.
 +
-If you're new to {kib}, and don't yet have any data, follow the links to add sample data.
+If you're new to {kib}, and don't yet have any data, follow the link to add sample data.
 This example uses the {kib} sample web logs data set.
 
 . Select the data source that you want to explore.
@@ -83,7 +83,7 @@ This example uses the {kib} sample web logs data set.
 [role="screenshot"]
 image::user/graph/images/graph-url-connections.png["URL connections"]
 
-. Add more fields, or click an existing field filter to edit, disable or deselect it.
+. Add more fields, or click an existing field to edit, disable or deselect it.
 +
 [role="screenshot"]
 image::user/graph/images/graph-menu.png["menu for editing, disabling, or removing a field from the graph", width=75%]
@@ -93,17 +93,17 @@ image::user/graph/images/graph-menu.png["menu for editing, disabling, or removin
 fields.
 +
 For example,
-to generate a graph of the successful requests to
-particular pages from different locations, search for the 200
-response code. The weight of the connection between two vertices indicates how strongly they
+to generate a graph of the successful requests to a
+particular location, search for the `geo.src`
+field. The weight of the connection between two vertices indicates how strongly they
 are related.
 
 . To view more information about a relationship, click any connection or vertex.
 +
 [role="screenshot"]
-image::user/graph/images/graph-control-bar.png["Graph control bar", width=50%]
+image::user/graph/images/graph-control-bar.png["Graph toolbar", width=50%]
 
-. Use the toolbar in the *Selections* pane to display additional connections:
+. Use the graph toolbar to display additional connections:
 +
 * To display additional vertices that connect to your graph, click the expand icon
 image:user/graph/images/graph-expand-button.png[Expand Selection].
@@ -133,7 +133,7 @@ a search adds to the graph, block terms, and more.
 
 Each vertex has a color, icon, and label. To change
 the color or icon of all vertices
-of a certain field, click it's filter, and then
+of a certain field, click it's field, and then
 select *Edit settings*.
 
 To change the color and label of selected vertices,
@@ -164,7 +164,7 @@ Documents that match a blocked term are not allowed in the graph.
 To block a term, select its vertex and click
 the block icon
 image:user/graph/images/graph-block-button.png[Block selection]
-in the *Selection* pane.
+in the graph toolbar.
 For a list of blocked terms, open *Settings > Blocked terms*.
 
 [float]
@@ -175,7 +175,7 @@ selected vertex in a new browser window. For example, you might
 configure a drilldown URL to perform a web search for the selected vertex term.
 
 Use the drilldown icon image:user/graph/images/graph-info-icon.png[Drilldown selection]
-in the control panel to show the drilldown buttons for the selected vertices.
+in the graph toolbar to show the drilldown buttons for the selected vertices.
 To configure drilldowns, go to *Settings > Drilldowns*. See also
 <<disable-drill-down, Disabling drilldown configuration>>.
 
@@ -188,12 +188,10 @@ the graph, all vertices begin moving. In some cases, the movement might
 go on for some time. To freeze the current vertex position,
 click the pause icon
 image:user/graph/images/graph-pause-button.png[Block selection]
-in the control panel.
+in the graph toolbar.
 
 --
 
 include::configuring-graph.asciidoc[]
 
 include::troubleshooting.asciidoc[]
-
-include::limitations.asciidoc[]
