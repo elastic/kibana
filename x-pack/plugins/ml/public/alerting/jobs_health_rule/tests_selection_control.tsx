@@ -54,63 +54,67 @@ export const TestsSelectionControl: FC<TestsSelectionControlProps> = ({ config, 
 
       <EuiSpacer size="s" />
 
-      <EuiSwitch
-        label={
-          <FormattedMessage
-            id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.mmlCheck.label"
-            defaultMessage="Model memory limit monitoring"
+      {false && (
+        <>
+          <EuiSwitch
+            label={
+              <FormattedMessage
+                id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.mmlCheck.label"
+                defaultMessage="Model memory limit monitoring"
+              />
+            }
+            onChange={updateCallback.bind(null, { mml: { enabled: !uiConfig.mml.enabled } })}
+            checked={uiConfig.mml.enabled}
           />
-        }
-        onChange={updateCallback.bind(null, { mml: { enabled: !uiConfig.mml.enabled } })}
-        checked={uiConfig.mml.enabled}
-      />
 
-      <EuiSpacer size="s" />
+          <EuiSpacer size="s" />
 
-      <EuiSwitch
-        label={
-          <FormattedMessage
-            id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.delayedDataCheck.label"
-            defaultMessage="Delayed data"
+          <EuiSwitch
+            label={
+              <FormattedMessage
+                id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.delayedDataCheck.label"
+                defaultMessage="Delayed data"
+              />
+            }
+            onChange={updateCallback.bind(null, {
+              delayedData: { enabled: !uiConfig.delayedData.enabled },
+            })}
+            checked={uiConfig.delayedData.enabled}
           />
-        }
-        onChange={updateCallback.bind(null, {
-          delayedData: { enabled: !uiConfig.delayedData.enabled },
-        })}
-        checked={uiConfig.delayedData.enabled}
-      />
 
-      <EuiSpacer size="s" />
+          <EuiSpacer size="s" />
 
-      <EuiSwitch
-        label={
-          <FormattedMessage
-            id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.jobBehindRealtimeCheck.label"
-            defaultMessage="Job is running behind real-time"
+          <EuiSwitch
+            label={
+              <FormattedMessage
+                id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.jobBehindRealtimeCheck.label"
+                defaultMessage="Job is running behind real-time"
+              />
+            }
+            onChange={updateCallback.bind(null, {
+              behindRealtime: { enabled: !uiConfig.behindRealtime.enabled },
+            })}
+            checked={uiConfig.behindRealtime.enabled}
           />
-        }
-        onChange={updateCallback.bind(null, {
-          behindRealtime: { enabled: !uiConfig.behindRealtime.enabled },
-        })}
-        checked={uiConfig.behindRealtime.enabled}
-      />
 
-      <EuiSpacer size="s" />
+          <EuiSpacer size="s" />
 
-      <EuiSwitch
-        label={
-          <FormattedMessage
-            id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.errorMessagesCheck.label"
-            defaultMessage="There are errors in job messages"
+          <EuiSwitch
+            label={
+              <FormattedMessage
+                id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.errorMessagesCheck.label"
+                defaultMessage="There are errors in job messages"
+              />
+            }
+            onChange={updateCallback.bind(null, {
+              errorMessages: { enabled: !uiConfig.errorMessages.enabled },
+            })}
+            checked={uiConfig.errorMessages.enabled}
           />
-        }
-        onChange={updateCallback.bind(null, {
-          errorMessages: { enabled: !uiConfig.errorMessages.enabled },
-        })}
-        checked={uiConfig.errorMessages.enabled}
-      />
 
-      <EuiSpacer size="s" />
+          <EuiSpacer size="s" />
+        </>
+      )}
     </EuiFormFieldset>
   );
 };
