@@ -36,8 +36,8 @@ const policies: PolicyFromES[] = [];
 for (let i = 0; i < 105; i++) {
   policies.push({
     version: i,
-    modified_date: moment().subtract(i, 'days').toISOString(),
-    linkedIndices: i % 2 === 0 ? [`index${i}`] : undefined,
+    modifiedDate: moment().subtract(i, 'days').toISOString(),
+    indices: i % 2 === 0 ? [`index${i}`] : [],
     name: `testy${i}`,
     policy: {
       name: `testy${i}`,
@@ -138,10 +138,10 @@ describe('policy table', () => {
     testSort('version');
   });
   test('should sort when modified date header is clicked', () => {
-    testSort('modified_date');
+    testSort('modifiedDate');
   });
-  test('should sort when linked indices header is clicked', () => {
-    testSort('linkedIndices');
+  test('should sort when indices header is clicked', () => {
+    testSort('indices');
   });
   test('should have proper actions in context menu when there are linked indices', () => {
     const rendered = openContextMenu(0);
