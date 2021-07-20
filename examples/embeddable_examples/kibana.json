@@ -7,5 +7,5 @@
   "requiredPlugins": ["embeddable", "uiActions", "savedObjects", "dashboard"],
   "optionalPlugins": [],
   "extraPublicDirs": ["public/todo", "public/hello_world", "public/todo/todo_ref_embeddable"],
-  "requiredBundles": ["kibanaReact"]
+  "requiredBundles": ["kibanaReact", "dashboard"]
 }
