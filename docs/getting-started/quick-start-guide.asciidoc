@@ -7,7 +7,7 @@ When you've finished, you'll know how to:
 
 * <<explore-the-data,Explore the data with *Discover*.>>
 
-* <<view-and-analyze-the-data,Gain insight into the data with *Dashboard*.>>
+* <<view-and-analyze-the-data,Analyze the data with *Dashboard*.>>
 
 [float]
 === Required privileges
@@ -24,93 +24,66 @@ include::{docs-root}/shared/cloud/ess-getting-started.asciidoc[]
 [[gs-get-data-into-kibana]]
 == Add the sample data
 
-Sample data sets come with sample visualizations, dashboards, and more to help you explore {kib} without adding your own data.
+Sample data sets come with sample visualizations, dashboards, and more to help you explore {kib} before you ingest or add your own data.
 
-. From the home page, click *Try our sample data*.
+. On the home page, click *Try our sample data*.
 
 . On the *Sample eCommerce orders* card, click *Add data*.
 +
 [role="screenshot"]
-image::getting-started/images/add-sample-data.png[Add data UI]
+image::images/add-sample-data.png[Add data UI for the sample data sets]
 
 [float]
 [[explore-the-data]]
 == Explore the data
 
-*Discover* displays an interactive histogram that shows the distribution of of data, or documents, over time, and a table that lists the fields for each document that matches the index. By default, all fields are shown for each matching document.
+*Discover* displays the data in an interactive histogram that shows the distribution of data, or documents, over time, and a table that lists the fields for each document that matches the index pattern. To view a subset of the documents, you can apply filters to the data, and customize the table to display only the fields you want to explore.
 
 . Open the main menu, then click *Discover*.
 
 . Change the <<set-time-filter, time filter>> to *Last 7 days*.
 +
 [role="screenshot"]
-image::images/tutorial-discover-2.png[]
+image::images/tutorial-discover-2.png[Time filter menu with Last 7 days filter configured]
 
-. To focus in on the documents you want to view, use the <<kuery-query,{kib} Query Language>>. In the *KQL* search field, enter:
+. To view the sales orders for women's clothing that are $60 or more, use the <<kuery-query,*KQL*>> search field:
 +
 [source,text]
-products.taxless_price >= 60 AND category : Women's Clothing
-+
-The query returns the women's clothing orders for $60 and more.
+products.taxless_price >= 60 and category : Women's Clothing
 +
 [role="screenshot"]
-image::images/tutorial-discover-4.png[]
+image::images/tutorial-discover-4.png[Discover tables that displays only the orders for women's clothing that are $60 or more]
 
-. Hover over the list of *Available fields*, then click *+* next to the fields you want to view in the table.
-+
-For example, when you add the *category* field, the table displays the product categories for the orders.
+. To view only the product categories that contain sales orders, hover over the *category* field, then click *+*.
 +
 [role="screenshot"]
-image::images/tutorial-discover-3.png[]
-+
-For more information, refer to <<discover, *Discover*>>.
+image::images/tutorial-discover-3.png[Discover table that displays only the product categories that contain orders]
 
 [float]
 [[view-and-analyze-the-data]]
 == View and analyze the data
 
-A dashboard is a collection of panels that you can use to view and analyze the data. Panels contain visualizations, interactive controls, Markdown, and more.
+A dashboard is a collection of panels that you can use to view and analyze the data. Panels contain visualizations, interactive controls, text, and more.
 
 . Open the main menu, then click *Dashboard*. 
 
 . Click *[eCommerce] Revenue Dashboard*.
 +
 [role="screenshot"]
-image::getting-started/images/tutorial-sample-dashboard.png[]
-
-[float]
-[[filter-and-query-the-data]]
-=== Filter the data
-
-To focus in on the data you want to view on the dashboard, use filters. 
-
-. From the *[eCommerce] Controls* panel, make a selection from the *Manufacturer* and *Category* dropdowns, then click *Apply changes*.
-+
-For example, the following dashboard shows the data for women's clothing from Gnomehouse. 
-+
-[role="screenshot"]
-image::getting-started/images/tutorial-sample-filter.png[]
-
-. To manually add a filter, click *Add filter*, then specify the options.
-+
-For example, to view the orders for Wednesday, select *day_of_week* from the *Field* dropdown, select *is* from the *Operator* dropdown, then select *Wednesday* from the *Value* dropdown.
-+
-[role="screenshot"]
-image::getting-started/images/tutorial-sample-filter2.png[]
-
-. When you are done, remove the filters.
-+
-For more information, refer to <<dashboard,*Dashboard*>>.
+image::getting-started/images/tutorial-sample-dashboard.png[The [eCommerce] Revenue Dashboard that comes with the Sample eCommerce order data set]
 
 [float]
 [[create-a-visualization]]
 === Create a visualization panel
 
-Create a treemap panel that shows the top regions and manufacturers, then add the panel to the dashboard.
+Create a treemap panel that shows the top sales regions and manufacturers, then add the panel to the dashboard.
 
-. From the toolbar, click *Edit*, then click *Create new*.
+. From the toolbar, click *Edit*, then click *Create visualzation*.
 
-. On the *New Visualization* window, click *Lens*.
+. Open the *Chart type* menu, then select *Treemap*.
++
+[role="screenshot"]
+image::getting-started/images/tutorial-visualization-dropdown.png[Chart type menu with Treemap selected]
 
 . From the *Available fields* list, drag and drop the following fields onto the workspace:
 
@@ -118,31 +91,58 @@ Create a treemap panel that shows the top regions and manufacturers, then add th
 
 * *manufacturer.keyword*
 +
-. From the visualization dropdown, select *Treemap*.
-+
 [role="screenshot"]
-image::getting-started/images/tutorial-visualization-dropdown.png[Visualization dropdown with Treemap selected]
+image::getting-started/images/tutorial-visualization-treemap.png[Treemap that displays Top values of geoip.city_name and Top values or manufacturer.keyword fields]
 
-. Click *Save*.
-
-. On the *Save Lens visualization*, enter a title and make sure *Add to Dashboard after saving* is selected, then click *Save and return*.
+. Click *Save and return*.
 +
 The treemap appears as the last visualization panel on the dashboard.
 +
 [role="screenshot"]
 image::getting-started/images/tutorial-final-dashboard.gif[Final dashboard with new treemap visualization]
+
+[float]
+[[interact-with-the-data]]
+=== Interact with the data
+
+You can interact with the dashboard data using controls that allow you to apply dashboard-level filters. Interact with the *[eCommerce] Controls* panel to view the women's clothing data from the Gnomehouse manufacturer. 
+
+. From the *Manufacturer* dropdown, select *Gnomehouse*.
+
+. From the *Category* dropdown, select *Women's Clothing*.
+
+. Click *Apply changes*.
 +
-For more information, refer to <<dashboard,Dashboard>>.
+[role="screenshot"]
+image::getting-started/images/tutorial-sample-filter.png[The [eCommerce] Revenue Dashboard that shows only the women's clothing data from the Gnomehouse manufacturer]
+
+[float]
+[[filter-and-query-the-data]]
+=== Filter the data
+
+To view a subset of the data, you can apply filters to the dashboard panels. Apply a filter to view the women's clothing data generated on Wednesday from the Gnomehouse manufacturer.
+
+. Click *Add filter*.
+
+. From the *Field* dropdown, select *day_of_week*.
+
+. From the *Operator* dropdown, select *is*.
+
+. From the *Value* dropdown, select *Wednesday*.
+
+. Click *Save*.
++
+[role="screenshot"]
+image::getting-started/images/tutorial-sample-filter2.png[The [eCommerce] Revenue Dashboard that shows only the women's clothing data generated on Wednesday from the Gnomehouse manufacturer]
 
 [float]
 [[quick-start-whats-next]]
 == What's next?
 
-If you are you ready to add your own data, refer to <<connect-to-elasticsearch,Add data to {kib}>>.
+*Add your own data.* Ready to add your own data? Go to {fleet-guide}/fleet-quick-start.html[Quick start: Get logs and metrics into the Elastic Stack] to learn how to ingest your data, or go to <<connect-to-elasticsearch,Add data to {kib}>> and learn about all the other ways you can add data.
 
-If you want to ingest your data, refer to {fleet-guide}/fleet-quick-start.html[Quick start: Get logs and metrics into the Elastic Stack].
+*Explore your own data in Discover.* Ready to learn more about exploring your data in *Discover*? Go to <<discover, Discover>>.
 
-If you want to secure access to your data, refer to our guide on <<tutorial-secure-access-to-kibana, securing {kib}>>
+*Create a dashboard with your own data.* Ready to learn more about analyzing your data in *Dashboard*? Go to <<dashboard, Dashboard>>.
 
-If you want to try out {ml-features} with the sample data sets, refer to
-{ml-docs}/ml-getting-started.html[Getting started with {ml}].
+*Try out the {ml-features}.* Ready to analyze the sample data sets and generate models for its patterns of behavior? Go to {ml-docs}/ml-getting-started.html[Getting started with {ml}].

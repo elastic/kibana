@@ -575,6 +575,42 @@ export class VisualBuilderPageObject extends FtrService {
     await this.testSubjects.existOrFail('euiColorPickerPopover', { timeout: 5000 });
   }
 
+  public async setColorPickerValue(colorHex: string, nth: number = 0): Promise<void> {
+    const picker = await this.find.allByCssSelector('.tvbColorPicker button');
+    await picker[nth].clickMouseButton();
+    await this.checkColorPickerPopUpIsPresent();
+    await this.find.setValue('.euiColorPicker input', colorHex);
+    await this.visChart.waitForVisualizationRenderingStabilized();
+  }
+
+  public async setColorRuleOperator(condition: string): Promise<void> {
+    await this.retry.try(async () => {
+      await this.comboBox.clearInputField('colorRuleOperator');
+      await this.comboBox.set('colorRuleOperator', condition);
+    });
+  }
+
+  public async setColorRuleValue(value: number): Promise<void> {
+    await this.retry.try(async () => {
+      const colorRuleValueInput = await this.find.byCssSelector(
+        '[data-test-subj="colorRuleValue"]'
+      );
+      await colorRuleValueInput.type(value.toString());
+    });
+  }
+
+  public async getBackgroundStyle(): Promise<string> {
+    await this.visChart.waitForVisualizationRenderingStabilized();
+    const visualization = await this.find.byClassName('tvbVis');
+    return await visualization.getAttribute('style');
+  }
+
+  public async getMetricValueStyle(): Promise<string> {
+    await this.visChart.waitForVisualizationRenderingStabilized();
+    const metricValue = await this.find.byCssSelector('[data-test-subj="tsvbMetricValue"]');
+    return await metricValue.getAttribute('style');
+  }
+
   public async changePanelPreview(nth: number = 0): Promise<void> {
     const prevRenderingCount = await this.visChart.getVisualizationRenderingCount();
     const changePreviewBtnArray = await this.testSubjects.findAll('AddActivatePanelBtn');
@@ -679,5 +715,21 @@ export class VisualBuilderPageObject extends FtrService {
   public async checkSelectedDataTimerangeMode(value: string) {
     const dataTimeRangeMode = await this.testSubjects.find('dataTimeRangeMode');
     return await this.comboBox.isOptionSelected(dataTimeRangeMode, value);
+  }
+
+  public async setTopHitAggregateWithOption(option: string): Promise<void> {
+    await this.comboBox.set('topHitAggregateWithComboBox', option);
+  }
+
+  public async setTopHitOrderByField(timeField: string) {
+    await this.retry.try(async () => {
+      await this.comboBox.clearInputField('topHitOrderByFieldSelect');
+      await this.comboBox.set('topHitOrderByFieldSelect', timeField);
+    });
+  }
+
+  public async setFilterRatioOption(optionType: 'Numerator' | 'Denominator', query: string) {
+    const optionInput = await this.testSubjects.find(`filterRatio${optionType}Input`);
+    await optionInput.type(query);
   }
 }

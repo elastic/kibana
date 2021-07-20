@@ -7,7 +7,13 @@
  */
 
 import React, { memo, useState, useCallback } from 'react';
-import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopover,
+  EuiToolTip,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
@@ -39,6 +45,8 @@ export const TableVisControls = memo(
       services: { uiSettings },
     } = useKibana<CoreStart>();
 
+    const detectedFormulasInTable = exporters.tableHasFormulas(columns, rows);
+
     const onClickExport = useCallback(
       (formatted: boolean) => {
         const csvSeparator = uiSettings.get(CSV_SEPARATOR_SETTING);
@@ -55,6 +63,7 @@ export const TableVisControls = memo(
             quoteValues,
             formatFactory: getFormatService().deserialize,
             raw: !formatted,
+            escapeFormulaValues: false,
           }
         );
         downloadFileAs(`${filename || 'unsaved'}.csv`, { content, type: exporters.CSV_MIME_TYPE });
@@ -85,6 +94,20 @@ export const TableVisControls = memo(
       </EuiButtonEmpty>
     );
 
+    const downloadButton = detectedFormulasInTable ? (
+      <EuiToolTip
+        position="top"
+        content={i18n.translate('visTypeTable.vis.controls.exportButtonFormulasWarning', {
+          defaultMessage:
+            'Your CSV contains characters which spreadsheet applications can interpret as formulas',
+        })}
+      >
+        {button}
+      </EuiToolTip>
+    ) : (
+      button
+    );
+
     const items = [
       <EuiContextMenuItem key="rawCsv" onClick={() => onClickExport(false)}>
         <FormattedMessage id="visTypeTable.vis.controls.rawCSVButtonLabel" defaultMessage="Raw" />
@@ -100,7 +123,7 @@ export const TableVisControls = memo(
     return (
       <EuiPopover
         id="dataTableExportData"
-        button={button}
+        button={downloadButton}
         isOpen={isPopoverOpen}
         closePopover={closePopover}
         panelPaddingSize="none"

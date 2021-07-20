@@ -29,14 +29,13 @@ import {
   useTimelineFullScreen,
 } from '../../../../../common/containers/use_full_screen';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
-import { StatefulFieldsBrowser } from '../../../fields_browser';
 import { StatefulRowRenderersBrowser } from '../../../row_renderers_browser';
-import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from '../../../fields_browser/helpers';
 import { EventsTh, EventsThContent } from '../../styles';
 import { EventsSelect } from '../column_headers/events_select';
 import * as i18n from '../column_headers/translations';
 import { timelineActions } from '../../../../store/timeline';
 import { isFullScreen } from '../column_headers';
+import { useKibana } from '../../../../../common/lib/kibana';
 
 const SortingColumnsContainer = styled.div`
   button {
@@ -65,6 +64,7 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
   tabType,
   timelineId,
 }) => {
+  const { timelines: timelinesUi } = useKibana().services;
   const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
   const dispatch = useDispatch();
@@ -154,14 +154,11 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
       )}
 
       <EventsTh role="button">
-        <StatefulFieldsBrowser
-          browserFields={browserFields}
-          columnHeaders={columnHeaders}
-          data-test-subj="field-browser"
-          height={FIELD_BROWSER_HEIGHT}
-          timelineId={timelineId}
-          width={FIELD_BROWSER_WIDTH}
-        />
+        {timelinesUi.getFieldBrowser({
+          browserFields,
+          columnHeaders,
+          timelineId,
+        })}
       </EventsTh>
 
       <EventsTh role="button">

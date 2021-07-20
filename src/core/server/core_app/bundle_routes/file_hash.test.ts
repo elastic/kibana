@@ -67,6 +67,8 @@ describe('getFileHash', () => {
     await getFileHash(cache, sampleFilePath, stats, fd);
 
     expect(cache.set).toHaveBeenCalledTimes(1);
-    expect(cache.set).toHaveBeenCalledWith(`${sampleFilePath}-${stats.ino}`, computedHashPromise);
+    expect(cache.set).toHaveBeenCalledWith(`${sampleFilePath}-${stats.ino}`, expect.any(Promise));
+    const promiseValue = await cache.set.mock.calls[0][1];
+    expect(promiseValue).toEqual('computed-hash');
   });
 });

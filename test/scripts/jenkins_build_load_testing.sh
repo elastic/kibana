@@ -53,6 +53,9 @@ echo "cloud.auth: ${USER_FROM_VAULT}:${PASS_FROM_VAULT}" >> cfg/metricbeat/metri
 cp cfg/metricbeat/metricbeat.yml $KIBANA_DIR/metricbeat-install/metricbeat.yml
 # Disable system monitoring: enabled for now to have more data
 #mv $KIBANA_DIR/metricbeat-install/modules.d/system.yml $KIBANA_DIR/metricbeat-install/modules.d/system.yml.disabled
+echo " -> Building puppeteer project"
+cd puppeteer
+yarn install && yarn build
 popd
 
 # doesn't persist, also set in kibanaPipeline.groovy

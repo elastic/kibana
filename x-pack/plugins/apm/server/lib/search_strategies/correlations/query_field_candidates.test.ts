@@ -16,7 +16,7 @@ import {
   shouldBeExcluded,
 } from './query_field_candidates';
 
-const params = { index: 'apm-*' };
+const params = { index: 'apm-*', start: '2020', end: '2021' };
 
 describe('query_field_candidates', () => {
   describe('shouldBeExcluded', () => {
@@ -59,6 +59,15 @@ describe('query_field_candidates', () => {
                     {
                       term: {
                         'processor.event': 'transaction',
+                      },
+                    },
+                    {
+                      range: {
+                        '@timestamp': {
+                          format: 'epoch_millis',
+                          gte: 1577836800000,
+                          lte: 1609459200000,
+                        },
                       },
                     },
                   ],

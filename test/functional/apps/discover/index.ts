@@ -50,5 +50,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_indexpattern_with_unmapped_fields'));
     loadTestFile(require.resolve('./_runtime_fields_editor'));
     loadTestFile(require.resolve('./_huge_fields'));
+    loadTestFile(require.resolve('./_date_nested'));
   });
 }

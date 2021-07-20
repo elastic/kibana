@@ -14,6 +14,7 @@ import {
   isOnEndpointPage,
   hasSelectedEndpoint,
   uiQueryParams,
+  getIsOnEndpointDetailsActivityLog,
   getCurrentIsolationRequestState,
 } from './selectors';
 import { EndpointState } from '../types';
@@ -89,7 +90,6 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
       total,
       request_page_size: pageSize,
       request_page_index: pageIndex,
-      query_strategy_version: queryStrategyVersion,
       policy_info: policyVersionInfo,
     } = action.payload;
     return {
@@ -98,7 +98,6 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
       total,
       pageSize,
       pageIndex,
-      queryStrategyVersion,
       policyVersionInfo,
       loading: false,
       error: undefined,
@@ -192,14 +191,6 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
         },
       },
     };
-  } else if (action.type === 'endpointDetailsFlyoutTabChanged') {
-    return {
-      ...state,
-      endpointDetails: {
-        ...state.endpointDetails!,
-        flyoutView: action.payload.flyoutView,
-      },
-    };
   } else if (action.type === 'endpointDetailsActivityLogChanged') {
     return handleEndpointDetailsActivityLogChanged(state, action);
   } else if (action.type === 'endpointPendingActionsStateChanged') {
@@ -291,6 +282,19 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
     const wasPreviouslyOnListPage = isOnEndpointPage(state) && !hasSelectedEndpoint(state);
     const isCurrentlyOnDetailsPage = isOnEndpointPage(newState) && hasSelectedEndpoint(newState);
     const wasPreviouslyOnDetailsPage = isOnEndpointPage(state) && hasSelectedEndpoint(state);
+    const wasPreviouslyOnActivityLogPage =
+      isOnEndpointPage(state) &&
+      hasSelectedEndpoint(state) &&
+      getIsOnEndpointDetailsActivityLog(state);
+    const isCurrentlyOnActivityLogPage =
+      isOnEndpointPage(newState) &&
+      hasSelectedEndpoint(newState) &&
+      getIsOnEndpointDetailsActivityLog(newState);
+
+    const isNotLoadingDetails =
+      isCurrentlyOnActivityLogPage ||
+      (wasPreviouslyOnActivityLogPage &&
+        uiQueryParams(state).selected_endpoint === uiQueryParams(newState).selected_endpoint);
 
     const stateUpdates: Partial<EndpointState> = {
       location: action.payload,
@@ -345,7 +349,7 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
             activityLog,
             hostDetails: {
               ...state.endpointDetails.hostDetails,
-              detailsLoading: true,
+              detailsLoading: !isNotLoadingDetails,
               detailsError: undefined,
             },
           },

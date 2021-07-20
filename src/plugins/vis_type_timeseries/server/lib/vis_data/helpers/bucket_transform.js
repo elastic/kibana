@@ -111,7 +111,7 @@ export const bucketTransform = {
         docs: {
           top_hits: {
             size: bucket.size,
-            _source: { includes: [bucket.field] },
+            fields: [bucket.field],
           },
         },
       },

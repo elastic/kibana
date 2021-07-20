@@ -219,10 +219,10 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
             <EuiFlexGroup justifyContent="flexEnd" wrap responsive={false} gutterSize="m">
               <EuiFlexItem grow={false}>
                 <EuiSwitch
-                  name="disable"
+                  name="enable"
                   disabled={!canSaveAlert || !alertType.enabledInLicense}
-                  checked={!isEnabled}
-                  data-test-subj="disableSwitch"
+                  checked={isEnabled}
+                  data-test-subj="enableSwitch"
                   onChange={async () => {
                     if (isEnabled) {
                       setIsEnabled(false);
@@ -237,8 +237,8 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                   }}
                   label={
                     <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.alertDetails.collapsedItemActons.disableTitle"
-                      defaultMessage="Disable"
+                      id="xpack.triggersActionsUI.sections.alertDetails.collapsedItemActons.enableTitle"
+                      defaultMessage="Enable"
                     />
                   }
                 />
