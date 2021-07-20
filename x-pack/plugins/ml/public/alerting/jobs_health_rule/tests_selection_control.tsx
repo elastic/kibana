@@ -45,7 +45,7 @@ export const TestsSelectionControl: FC<TestsSelectionControlProps> = ({ config, 
         label={
           <FormattedMessage
             id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.datafeedCheck.label"
-            defaultMessage="Datefeed is not started"
+            defaultMessage="Datafeed is not started"
           />
         }
         onChange={updateCallback.bind(null, { datafeed: { enabled: !uiConfig.datafeed.enabled } })}
@@ -71,7 +71,7 @@ export const TestsSelectionControl: FC<TestsSelectionControlProps> = ({ config, 
         label={
           <FormattedMessage
             id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.delayedDataCheck.label"
-            defaultMessage="Delayed data has occurred"
+            defaultMessage="Delayed data"
           />
         }
         onChange={updateCallback.bind(null, {
