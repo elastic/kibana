@@ -20,9 +20,10 @@ import { DatafeedStats } from '../../../common/types/anomaly_detection_jobs';
 import { GetGuards } from '../../shared_services/shared_services';
 import { AnomalyDetectionJobsHealthAlertContext } from './register_jobs_monitoring_rule_type';
 import { getResultJobsHealthRuleConfig } from '../../../common/util/alerts';
+import { JobsHealthTests } from '../../../common/types/alerts';
 
 interface TestResult {
-  name: string;
+  name: JobsHealthTests;
   context: AnomalyDetectionJobsHealthAlertContext;
 }
 
@@ -79,13 +80,13 @@ export function jobsHealthServiceProvider(
      * @param jobIds
      */
     async getNotStartedDatafeeds(jobIds: string[]): Promise<NotStartedDatafeedResponse | void> {
-      const dataFeeds = await datafeedsService.getDatafeedByJobId(jobIds);
+      const datafeeds = await datafeedsService.getDatafeedByJobId(jobIds);
 
-      if (dataFeeds) {
+      if (datafeeds) {
         const {
           body: { datafeeds: datafeedsStats },
         } = await mlClient.getDatafeedStats({
-          datafeed_id: dataFeeds.map((d) => d.datafeed_id).join(','),
+          datafeed_id: datafeeds.map((d) => d.datafeed_id).join(','),
         });
 
         // match datafeed stats with the job ids
@@ -94,7 +95,7 @@ export function jobsHealthServiceProvider(
           .map((datafeedStats) => {
             return {
               ...datafeedStats,
-              job_id: dataFeeds.find((d) => d.datafeed_id === datafeedStats.datafeed_id)!.job_id,
+              job_id: datafeeds.find((d) => d.datafeed_id === datafeedStats.datafeed_id)!.job_id,
             };
           });
       }
@@ -119,15 +120,15 @@ export function jobsHealthServiceProvider(
 
       logger.debug(`Performing health checks for job ids: ${jobIds.join(', ')}`);
 
-      if (config.dataFeed.enabled) {
+      if (config.datafeed.enabled) {
         const response = await this.getNotStartedDatafeeds(jobIds);
         if (response && response.length > 0) {
           results.push({
-            name: 'dataFeed',
+            name: 'datafeed',
             context: {
               jobIds: [...new Set(response.map((v) => v.job_id))],
               message: i18n.translate(
-                'xpack.ml.alertTypes.jobsHealthAlertingRule.dataFeedStateMessage',
+                'xpack.ml.alertTypes.jobsHealthAlertingRule.datafeedStateMessage',
                 {
                   defaultMessage: 'Datafeed is not started for the following jobs:',
                 }

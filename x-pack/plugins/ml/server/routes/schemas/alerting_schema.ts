@@ -66,7 +66,7 @@ export const anomalyDetectionJobsHealthRuleParams = schema.object({
   excludeJobs: schema.nullable(jobsSelectionSchema),
   testsConfig: schema.nullable(
     schema.object({
-      dataFeed: schema.nullable(
+      datafeed: schema.nullable(
         schema.object({
           enabled: schema.boolean({ defaultValue: true }),
         })

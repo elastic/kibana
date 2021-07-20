@@ -84,7 +84,7 @@ describe('getLookbackInterval', () => {
 describe('getResultJobsHealthRuleConfig', () => {
   test('returns default config for empty configuration', () => {
     expect(getResultJobsHealthRuleConfig(null)).toEqual({
-      dataFeed: {
+      datafeed: {
         enabled: true,
       },
       mml: {
@@ -108,7 +108,7 @@ describe('getResultJobsHealthRuleConfig', () => {
         errorMessages: { enabled: true },
       })
     ).toEqual({
-      dataFeed: {
+      datafeed: {
         enabled: true,
       },
       mml: {

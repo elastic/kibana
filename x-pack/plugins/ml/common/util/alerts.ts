@@ -59,8 +59,8 @@ export function getTopNBuckets(job: Job): number {
  */
 export function getResultJobsHealthRuleConfig(config: JobsHealthRuleTestsConfig) {
   return {
-    dataFeed: {
-      enabled: config?.dataFeed?.enabled ?? true,
+    datafeed: {
+      enabled: config?.datafeed?.enabled ?? true,
     },
     mml: {
       enabled: config?.mml?.enabled ?? true,

@@ -48,8 +48,8 @@ export const TestsSelectionControl: FC<TestsSelectionControlProps> = ({ config, 
             defaultMessage="Datefeed is not started"
           />
         }
-        onChange={updateCallback.bind(null, { dataFeed: { enabled: !uiConfig.dataFeed.enabled } })}
-        checked={uiConfig.dataFeed.enabled}
+        onChange={updateCallback.bind(null, { datafeed: { enabled: !uiConfig.datafeed.enabled } })}
+        checked={uiConfig.datafeed.enabled}
       />
 
       <EuiSpacer size="s" />

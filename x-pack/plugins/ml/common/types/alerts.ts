@@ -123,7 +123,7 @@ export type MlAnomalyDetectionJobsHealthRuleParams = {
     groupIds?: string[];
   };
   testsConfig?: {
-    dataFeed?: CommonHealthCheckConfig | null;
+    datafeed?: CommonHealthCheckConfig | null;
     mml?: CommonHealthCheckConfig | null;
     delayedData?:
       | (CommonHealthCheckConfig & {
@@ -141,3 +141,5 @@ export type MlAnomalyDetectionJobsHealthRuleParams = {
 } & AlertTypeParams;
 
 export type JobsHealthRuleTestsConfig = MlAnomalyDetectionJobsHealthRuleParams['testsConfig'];
+
+export type JobsHealthTests = keyof Exclude<JobsHealthRuleTestsConfig, null | undefined>;
