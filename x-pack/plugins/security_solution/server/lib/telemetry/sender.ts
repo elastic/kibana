@@ -48,7 +48,6 @@ export class TelemetryEventsSender {
   private readonly checkIntervalMs = 60 * 1000;
   private readonly max_records = 10_000;
   private readonly logger: Logger;
-  private core?: CoreStart;
   private maxQueueSize = 100;
   private telemetryStart?: TelemetryPluginStart;
   private telemetrySetup?: TelemetryPluginSetup;
@@ -83,7 +82,6 @@ export class TelemetryEventsSender {
     endpointContextService?: EndpointAppContextService
   ) {
     this.telemetryStart = telemetryStart;
-    this.core = core;
     this.esClient = core?.elasticsearch.client.asInternalUser;
     this.agentService = endpointContextService?.getAgentService();
     this.agentPolicyService = endpointContextService?.getAgentPolicyService();
@@ -133,11 +131,11 @@ export class TelemetryEventsSender {
       },
     };
 
-    if (!this.core) {
-      throw Error('could not fetch diagnostic alerts. core is not available');
+    if (this.esClient === undefined) {
+      throw Error('could not fetch diagnostic alerts. es client is not available');
     }
-    const esClient = this.core.elasticsearch.client;
-    return (await esClient.asInternalUser.search<TelemetryEvent>(query)).body;
+
+    return (await this.esClient.search<TelemetryEvent>(query)).body;
   }
 
   public async fetchEndpointMetrics(executeFrom: string, executeTo: string) {
@@ -374,11 +372,10 @@ export class TelemetryEventsSender {
   }
 
   private async fetchClusterInfo(): Promise<ESClusterInfo> {
-    if (!this.core) {
-      throw Error("Couldn't fetch cluster info because core is not available");
+    if (this.esClient === undefined) {
+      throw Error("Couldn't fetch cluster info. es client is not available");
     }
-    const esClient = this.core.elasticsearch.client.asInternalUser;
-    return getClusterInfo(esClient);
+    return getClusterInfo(this.esClient);
   }
 
   private async fetchTelemetryUrl(channel: string): Promise<string> {
@@ -390,12 +387,11 @@ export class TelemetryEventsSender {
   }
 
   private async fetchLicenseInfo(): Promise<ESLicense | undefined> {
-    if (!this.core) {
+    if (!this.esClient) {
       return undefined;
     }
     try {
-      const esClient = this.core.elasticsearch.client.asInternalUser;
-      const ret = await getLicense(esClient, true);
+      const ret = await getLicense(this.esClient, true);
       return ret.license;
     } catch (err) {
       this.logger.warn(`Error retrieving license: ${err}`);
