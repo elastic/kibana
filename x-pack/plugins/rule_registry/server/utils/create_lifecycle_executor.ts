@@ -297,27 +297,12 @@ export const createLifecycleExecutor = (
     return event;
   });
 
-  if (eventsToIndex.length) {
-    const alertEvents: Map<string, ParsedTechnicalFields> = new Map();
-
-    for (const event of eventsToIndex) {
-      const uuid = event[ALERT_UUID]!;
-      let storedEvent = alertEvents.get(uuid);
-      if (!storedEvent) {
-        storedEvent = event;
-      }
-      alertEvents.set(uuid, {
-        ...storedEvent,
-        [EVENT_KIND]: 'signal',
-      });
-    }
+  if (eventsToIndex.length > 0 && ruleDataClient.isWriteEnabled()) {
     logger.debug(`Preparing to index ${eventsToIndex.length} alerts.`);
 
-    if (ruleDataClient.isWriteEnabled()) {
-      await ruleDataClient.getWriter().bulk({
-        body: eventsToIndex.flatMap((event) => [{ index: { _id: event[ALERT_UUID]! } }, event]),
-      });
-    }
+    await ruleDataClient.getWriter().bulk({
+      body: eventsToIndex.flatMap((event) => [{ index: { _id: event[ALERT_UUID]! } }, event]),
+    });
   }
 
   const nextTrackedAlerts = Object.fromEntries(
