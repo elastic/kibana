@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
-import { compose, withPropsOnChange, withHandlers } from 'recompose';
+import React, { useState, useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { EuiSelect, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { sortBy } from 'lodash';
 import { getType } from '@kbn/interpreter/common';
-import { createStatefulPropHoc } from '../../../../public/components/enhance/stateful_prop';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { ArgumentStrings } from '../../../../i18n';
 import { SimpleMathFunction } from './simple_math_function';
@@ -21,18 +19,35 @@ const { DataColumn: strings } = ArgumentStrings;
 const maybeQuoteValue = (val) => (val.match(/\s/) ? `'${val}'` : val);
 const valueNotSet = (val) => !val || val.length === 0;
 
+const getMathValue = (argValue, columns) => {
+  if (getType(argValue) !== 'string') {
+    return { error: 'argValue is not a string type' };
+  }
+  try {
+    const matchedCol = columns.find(({ name }) => argValue === name);
+    const val = matchedCol ? maybeQuoteValue(matchedCol.name) : argValue;
+    return getFormObject(val);
+  } catch (e) {
+    return { error: e.message };
+  }
+};
+
 // TODO: Garbage, we could make a much nicer math form that can handle way more.
 const DatacolumnArgInput = ({
   onValueChange,
   columns,
-  mathValue,
-  setMathFunction,
+  argValue,
   renderError,
   argId,
   typeInstance,
 }) => {
+  const [mathValue, setMathValue] = useState(getMathValue(argValue, columns));
   const [fn, setFn] = useState();
   const [column, setColumn] = useState();
+
+  useEffect(() => {
+    setMathValue(getMathValue(argValue, columns));
+  }, [argValue, columns]);
 
   const allowedTypes = typeInstance.options.allowedTypes || false;
   const onlyShowMathFunctions = typeInstance.options.onlyMath || false;
@@ -46,7 +61,7 @@ const DatacolumnArgInput = ({
       }
 
       // if there is no column value, do nothing
-      if (valueNotSet(column)) return setMathFunction(fn);
+      if (valueNotSet(column)) return setMathValue({ ...mathValue, fn });
 
       // if fn is not set, just use the value input
       if (valueNotSet(fn)) return onValueChange(column);
@@ -54,7 +69,7 @@ const DatacolumnArgInput = ({
       // fn has a value, so use it as a math.js expression
       onValueChange(`${fn}(${maybeQuoteValue(column)})`);
     },
-    [setMathFunction, onValueChange, columns]
+    [mathValue, onValueChange, columns]
   );
 
   const onChangeFn = useCallback(
@@ -80,8 +95,7 @@ const DatacolumnArgInput = ({
     return null;
   }
 
-  const selectedColumn =
-    columns.map((col) => col.name).find((colName) => colName === mathValue.column) || '';
+  const selectedColumn = columns.find(({ name }) => name === mathValue.column)?.name || '';
 
   const firstColumnOption = { value: '', text: 'select column', disabled: true };
   const options = sortBy(columns, 'name')
@@ -113,37 +127,10 @@ const DatacolumnArgInput = ({
 DatacolumnArgInput.propTypes = {
   columns: PropTypes.array.isRequired,
   onValueChange: PropTypes.func.isRequired,
-  mathValue: PropTypes.object.isRequired,
-  setMathFunction: PropTypes.func.isRequired,
   typeInstance: PropTypes.object.isRequired,
   renderError: PropTypes.func.isRequired,
   argId: PropTypes.string.isRequired,
-};
-
-const EnhancedDatacolumnArgInput = compose(
-  withPropsOnChange(['argValue', 'columns'], ({ argValue, columns }) => ({
-    mathValue: ((argValue) => {
-      if (getType(argValue) !== 'string') {
-        return { error: 'argValue is not a string type' };
-      }
-      try {
-        const matchedCol = columns.find(({ name }) => argValue === name);
-        const val = matchedCol ? maybeQuoteValue(matchedCol.name) : argValue;
-        return getFormObject(val);
-      } catch (e) {
-        return { error: e.message };
-      }
-    })(argValue),
-  })),
-  createStatefulPropHoc('mathValue', 'setMathValue'),
-  withHandlers({
-    setMathFunction: ({ mathValue, setMathValue }) => (fn) => setMathValue({ ...mathValue, fn }),
-  })
-)(DatacolumnArgInput);
-
-EnhancedDatacolumnArgInput.propTypes = {
   argValue: PropTypes.oneOfType([PropTypes.string, PropTypes.object]).isRequired,
-  columns: PropTypes.array.isRequired,
 };
 
 export const datacolumn = () => ({
@@ -151,5 +138,5 @@ export const datacolumn = () => ({
   displayName: strings.getDisplayName(),
   help: strings.getHelp(),
   default: '""',
-  simpleTemplate: templateFromReactComponent(EnhancedDatacolumnArgInput),
+  simpleTemplate: templateFromReactComponent(DatacolumnArgInput),
 });
