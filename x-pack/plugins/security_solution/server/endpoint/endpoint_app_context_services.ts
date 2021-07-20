@@ -31,6 +31,7 @@ import {
   ExperimentalFeatures,
   parseExperimentalConfigValue,
 } from '../../common/experimental_features';
+import { EndpointMetadataService } from './services/metadata';
 
 export type EndpointAppContextServiceStartContract = Partial<
   Pick<
@@ -39,6 +40,7 @@ export type EndpointAppContextServiceStartContract = Partial<
   >
 > & {
   logger: Logger;
+  endpointMetadataService: EndpointMetadataService;
   manifestManager?: ManifestManager;
   appClientFactory: AppClientFactory;
   security: SecurityPluginStart;

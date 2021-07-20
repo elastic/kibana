@@ -6,3 +6,4 @@
  */
 
 export * from './endpoint_metadata_service';
+export * from './errors';
