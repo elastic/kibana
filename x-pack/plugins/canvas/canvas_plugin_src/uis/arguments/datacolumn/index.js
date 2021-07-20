@@ -16,6 +16,7 @@ import { SimpleMathFunction } from './simple_math_function';
 import { getFormObject } from './get_form_object';
 
 const { DataColumn: strings } = ArgumentStrings;
+
 const maybeQuoteValue = (val) => (val.match(/\s/) ? `'${val}'` : val);
 const valueNotSet = (val) => !val || val.length === 0;
 
@@ -26,7 +27,8 @@ const getMathValue = (argValue, columns) => {
   try {
     const matchedCol = columns.find(({ name }) => argValue === name);
     const val = matchedCol ? maybeQuoteValue(matchedCol.name) : argValue;
-    return getFormObject(val);
+    const mathValue = getFormObject(val);
+    return { ...mathValue, column: mathValue.column || '' };
   } catch (e) {
     return { error: e.message };
   }
@@ -42,8 +44,6 @@ const DatacolumnArgInput = ({
   typeInstance,
 }) => {
   const [mathValue, setMathValue] = useState(getMathValue(argValue, columns));
-  const [fn, setFn] = useState();
-  const [column, setColumn] = useState();
 
   useEffect(() => {
     setMathValue(getMathValue(argValue, columns));
@@ -56,7 +56,7 @@ const DatacolumnArgInput = ({
     (fn, column) => {
       // if setting size, auto-select the first column if no column is already set
       if (fn === 'size') {
-        const col = column || (columns[0] && columns[0].name);
+        const col = column || (columns[0] && columns[0].name) || '';
         if (col) return onValueChange(`${fn}(${maybeQuoteValue(col)})`);
       }
 
@@ -73,29 +73,19 @@ const DatacolumnArgInput = ({
   );
 
   const onChangeFn = useCallback(
-    (ev) => {
-      const newFn = ev.target.value;
-      setFn(newFn);
-      updateFunctionValue(newFn, column);
-    },
-    [column, updateFunctionValue]
+    ({ target: { value } }) => updateFunctionValue(value, mathValue.column),
+    [mathValue.column, updateFunctionValue]
   );
 
   const onChangeColumn = useCallback(
-    (ev) => {
-      const newColumn = ev.target.value;
-      setColumn(newColumn);
-      updateFunctionValue(fn, newColumn);
-    },
-    [fn, updateFunctionValue]
+    ({ target: { value } }) => updateFunctionValue(mathValue.fn, value),
+    [mathValue.fn, updateFunctionValue]
   );
 
   if (mathValue.error) {
     renderError();
     return null;
   }
-
-  const selectedColumn = columns.find(({ name }) => name === mathValue.column)?.name || '';
 
   const firstColumnOption = { value: '', text: 'select column', disabled: true };
   const options = sortBy(columns, 'name')
@@ -116,7 +106,7 @@ const DatacolumnArgInput = ({
         <EuiSelect
           compressed
           options={[firstColumnOption, ...options]}
-          value={selectedColumn}
+          value={mathValue.column}
           onChange={onChangeColumn}
         />
       </EuiFlexItem>
