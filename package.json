@@ -174,7 +174,7 @@
     "color": "1.0.3",
     "commander": "2.8.1",
     "compare-versions": "3.1.0",
-    "css-loader": "1.0.0",
+    "css-loader": "^2.1.1",
     "custom-event-polyfill": "^0.3.0",
     "d3": "3.5.6",
     "d3-cloud": "1.2.1",
