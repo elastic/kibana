@@ -8,7 +8,7 @@
 
 import { IInterpreterRenderHandlers } from '../../../../../../src/plugins/expressions';
 import { ShapeRendererConfig } from '../../../common/types';
-import { ShapeDrawerProps } from '../reusable';
+import { ShapeDrawerProps } from '../reusable/types';
 
 export interface ShapeComponentProps extends ShapeRendererConfig {
   onLoaded: IInterpreterRenderHandlers['done'];

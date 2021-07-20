@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { createShape, SvgElementTypes } from '../../reusable';
+import { createShape } from '../../reusable/shape_factory';
+import { SvgElementTypes } from '../../reusable/types';
 
 export const Semicircle = createShape({
   viewBox: {

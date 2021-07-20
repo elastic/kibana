@@ -18,7 +18,7 @@ import {
 } from '../reusable';
 import { Dimensions, ShapeComponentProps } from './types';
 import { getViewBox } from '../../../common/lib';
-import { LazyShapeDrawer } from '../../index';
+import { LazyShapeDrawer } from '../..';
 
 const ShapeDrawer = withSuspense(LazyShapeDrawer);
 

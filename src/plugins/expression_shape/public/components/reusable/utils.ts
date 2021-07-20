@@ -6,6 +6,14 @@
  * Side Public License, v 1.
  */
 
-export * from './shape_drawer';
-export * from './utils';
-export * from './types';
+import { SvgConfig } from './types';
+
+export const getDefaultShapeData = (): SvgConfig => ({
+  viewBox: {
+    minX: 0,
+    minY: 0,
+    width: 0,
+    height: 0,
+  },
+  shapeProps: {},
+});

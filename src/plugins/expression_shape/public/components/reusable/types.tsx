@@ -8,7 +8,7 @@
 
 import { Ref, SVGProps } from 'react';
 import { ViewBoxParams } from '../../../common/types';
-import { createShape } from './shape_factory';
+import type { ShapeType } from './shape_factory';
 
 export interface ShapeProps {
   shapeAttributes?: ShapeAttributes;
@@ -80,4 +80,4 @@ export interface ShapeRef {
   getData: () => SvgConfig;
 }
 
-export type ShapeType = ReturnType<typeof createShape>;
+export type { ShapeType };
