@@ -83,7 +83,7 @@ export function registerAnomalyDetectionAlertType({
         {
           name: 'jobIds',
           description: i18n.translate('xpack.ml.alertContext.jobIdsDescription', {
-            defaultMessage: 'List of job IDs that triggered the alert instance',
+            defaultMessage: 'List of job IDs that triggered the alert',
           }),
         },
         {

@@ -66,7 +66,7 @@ export function registerJobsMonitoringRuleType({
           description: i18n.translate(
             'xpack.ml.alertTypes.jobsHealthAlertingRule.alertContext.jobIdsDescription',
             {
-              defaultMessage: 'List of job IDs that triggered the alert instance',
+              defaultMessage: 'List of job IDs that triggered the alert',
             }
           ),
         },
