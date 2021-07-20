@@ -399,11 +399,11 @@ describe('alerts_list component with items', () => {
       wrapper.update();
     });
 
-    expect(loadAlerts).toHaveBeenCalledWith(
+    expect(loadAlerts).toHaveBeenLastCalledWith(
       expect.objectContaining({
         sort: {
           field: 'enabled',
-          direction: 'desc',
+          direction: 'asc',
         },
       })
     );

@@ -8,7 +8,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import { i18n } from '@kbn/i18n';
-import { asyncScheduler } from 'rxjs';
 import { capitalize, sortBy } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useEffect, useState } from 'react';
@@ -49,7 +48,6 @@ import {
   disableAlert,
   enableAlert,
   deleteAlerts,
-  muteAlert,
 } from '../../../lib/alert_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
 import { hasExecuteActionsCapability } from '../../../lib/capabilities';
@@ -469,48 +467,36 @@ export const AlertsList: React.FunctionComponent = () => {
             <EuiFlexItem grow={false} className="alertSidebarItem">
               <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip
-                    position="bottom"
-                    content={
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.editButtonTooltip"
-                        defaultMessage="Edit"
-                      />
-                    }
-                  >
-                    <EuiButtonIcon
-                      color={'primary'}
-                      className="alertSidebarItem__action"
-                      onClick={() => onRuleEdit(item)}
-                      iconType={'pencil'}
-                      aria-label={i18n.translate(
-                        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.editAriaLabel',
-                        { defaultMessage: 'Edit' }
-                      )}
-                    />
-                  </EuiToolTip>
+                  <EuiButtonIcon
+                    color={'primary'}
+                    title={i18n.translate(
+                      'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.editButtonTooltip',
+                      { defaultMessage: 'Edit' }
+                    )}
+                    className="alertSidebarItem__action"
+                    onClick={() => onRuleEdit(item)}
+                    iconType={'pencil'}
+                    aria-label={i18n.translate(
+                      'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.editAriaLabel',
+                      { defaultMessage: 'Edit' }
+                    )}
+                  />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip
-                    position="bottom"
-                    content={
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.deleteButtonTooltip"
-                        defaultMessage="Delete"
-                      />
-                    }
-                  >
-                    <EuiButtonIcon
-                      color={'danger'}
-                      className="alertSidebarItem__action"
-                      onClick={() => setAlertsToDelete([item.id])}
-                      iconType={'trash'}
-                      aria-label={i18n.translate(
-                        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.deleteAriaLabel',
-                        { defaultMessage: 'Delete' }
-                      )}
-                    />
-                  </EuiToolTip>
+                  <EuiButtonIcon
+                    color={'danger'}
+                    title={i18n.translate(
+                      'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.deleteButtonTooltip',
+                      { defaultMessage: 'Delete' }
+                    )}
+                    className="alertSidebarItem__action"
+                    onClick={() => setAlertsToDelete([item.id])}
+                    iconType={'trash'}
+                    aria-label={i18n.translate(
+                      'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.deleteAriaLabel',
+                      { defaultMessage: 'Delete' }
+                    )}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
