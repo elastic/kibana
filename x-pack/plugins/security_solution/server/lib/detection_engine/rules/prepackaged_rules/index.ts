@@ -567,9 +567,9 @@ import rule554 from './privilege_escalation_printspooler_malicious_registry_modi
 import rule555 from './privilege_escalation_printspooler_suspicious_file_deletion.json';
 import rule556 from './privilege_escalation_unusual_printspooler_childprocess.json';
 import rule557 from './defense_evasion_disabling_windows_defender_powershell.json';
-import rule558 from './defense_evasion_enable_network_discovery_with_netsh.json';
-import rule559 from './defense_evasion_execution_windefend_unusual_path.json';
-import rule560 from './persistence_via_bits_job_notify_command.json';
+// import rule558 from './defense_evasion_enable_network_discovery_with_netsh.json';
+// import rule559 from './defense_evasion_execution_windefend_unusual_path.json';
+// import rule560 from './persistence_via_bits_job_notify_command.json';
 
 export const rawRules = [
   rule1,
