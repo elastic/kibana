@@ -111,8 +111,7 @@ The `createMigration` function takes four arguments:
 |---|---|---|
 |isMigrationNeededPredicate|A predicate which is called for each document, prior to being decrypted, which confirms whether a document requires migration or not. This predicate is important as the decryption step is costly and we would rather not decrypt and re-encrypt a document if we can avoid it.|function| 
 |migration|A migration function which will migrate each decrypted document from the old shape to the new one.|function| 
-|shouldMigrateIfDecryptionFails|Optional. A boolean flag which indicates whether to proceed with migration if a document fails to decrypt. If this is not set or
-if it is set to `false`, decryption errors will be thrown. If set to `true`, a warning will be logged and the migration function will be applied to the un-decrypted document. Set this to `true` if you don't want decryption failures to block Kibana upgrades. |boolean|
+|shouldMigrateIfDecryptionFails|Optional. A boolean flag which indicates whether to proceed with migration if a document fails to decrypt. If this is not set or if it is set to `false`, decryption errors will be thrown. If set to `true`, a warning will be logged and the migration function will be applied to the original encrypted document. Set this to `true` if you don't want decryption failures to block Kibana upgrades. |boolean| 
 |inputType|Optional. An `EncryptedSavedObjectTypeRegistration` which describes the ESOType of the input (the document prior to migration). If this type isn't provided, we'll assume the input doc follows the registered type. |object| 
 |migratedType| Optional. An `EncryptedSavedObjectTypeRegistration` which describes the ESOType of the output (the document after migration). If this type isn't provided, we'll assume the migrated doc follows the registered type.|object| 
 
