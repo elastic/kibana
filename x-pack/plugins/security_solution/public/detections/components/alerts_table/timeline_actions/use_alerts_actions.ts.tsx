@@ -323,9 +323,54 @@ export const useAlertsActions = ({
     alertStatus,
   ]);
 
+  const statusFiltersActions = useMemo(() => {
+    if (!alertStatus) {
+      return [];
+    }
+
+    switch (alertStatus) {
+      case 'open':
+        return [
+          {
+            name: i18n.ACTION_IN_PROGRESS_ALERT,
+            onClick: inProgressAlertActionClick,
+          },
+          {
+            name: i18n.ACTION_CLOSE_ALERT,
+            onClick: closeAlertActionClick,
+          },
+        ];
+      case 'in-progress':
+        return [
+          {
+            name: i18n.ACTION_OPEN_ALERT,
+            onClick: openAlertActionOnClick,
+          },
+          {
+            name: i18n.ACTION_CLOSE_ALERT,
+            onClick: closeAlertActionClick,
+          },
+        ];
+      case 'closed':
+        return [
+          {
+            name: i18n.ACTION_OPEN_ALERT,
+            onClick: openAlertActionOnClick,
+          },
+          {
+            name: i18n.ACTION_IN_PROGRESS_ALERT,
+            onClick: inProgressAlertActionClick,
+          },
+        ];
+      default:
+        return [];
+    }
+  }, [alertStatus, inProgressAlertActionClick, closeAlertActionClick, openAlertActionOnClick]);
+
+  const showStatusFilter = !isEvent && ruleId;
   const items = useMemo(
     () =>
-      !isEvent && ruleId
+      showStatusFilter
         ? [...statusFilters, addEndpointExceptionComponent, addExceptionComponent]
         : [addEventFilterComponent],
     [
@@ -333,12 +378,18 @@ export const useAlertsActions = ({
       addExceptionComponent,
       addEventFilterComponent,
       statusFilters,
-      ruleId,
-      isEvent,
+      showStatusFilter,
     ]
   );
 
   return {
     items,
+    showStatusFilter,
+    statusFiltersActions,
+    closeAlertActionClick,
+    inProgressAlertActionClick,
+    handleAddExceptionClick,
+    handleAddEventFilterClick,
+    handleAddEndpointExceptionClick,
   };
 };

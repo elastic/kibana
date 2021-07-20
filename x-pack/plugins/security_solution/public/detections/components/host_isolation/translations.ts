@@ -7,6 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const CHANGE_ALERT_STATUS = i18n.translate(
+  'xpack.securitySolution.endpoint.hostIsolation.changeAlertStatus',
+  {
+    defaultMessage: 'Change alert status',
+  }
+);
+
 export const ISOLATE_HOST = i18n.translate(
   'xpack.securitySolution.endpoint.hostIsolation.isolateHost',
   {

@@ -6,21 +6,28 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { EuiContextMenuItem, EuiContextMenuPanel, EuiButton, EuiPopover } from '@elastic/eui';
+import { EuiContextMenu, EuiButton, EuiPopover } from '@elastic/eui';
 import { noop } from 'lodash';
-import { ISOLATE_HOST, UNISOLATE_HOST } from './translations';
+import { ISOLATE_HOST, UNISOLATE_HOST, CHANGE_ALERT_STATUS } from './translations';
 import { TAKE_ACTION } from '../alerts_table/alerts_utility_bar/translations';
 import { useHostIsolationStatus } from '../../containers/detection_engine/alerts/use_host_isolation_status';
 import { HostStatus } from '../../../../common/endpoint/types';
 import { useIsolationPrivileges } from '../../../common/hooks/endpoint/use_isolate_privileges';
 
 import { getEventType } from '../../../timelines/components/timeline/body/helpers';
-import { InvestigateInTimelineAction } from '../alerts_table/timeline_actions/investigate_in_timeline_action';
 import { TimelineNonEcsData } from '../../../../common';
 import { Ecs } from '../../../../common/ecs';
 import { useExceptionModal } from '../alerts_table/timeline_actions/use_add_exception_modal';
 import { useAlertsActions } from '../alerts_table/timeline_actions/use_alerts_actions.ts';
 import { AddExceptionModalWrapper } from '../alerts_table/timeline_actions/alert_context_menu';
+import { EventFiltersModal } from '../../../management/pages/event_filters/view/components/modal';
+import { useInvestigateInTimeline } from '../alerts_table/timeline_actions/use_investigate_in_timeline';
+import {
+  ACTION_ADD_ENDPOINT_EXCEPTION,
+  ACTION_ADD_EVENT_FILTER,
+  ACTION_ADD_EXCEPTION,
+  ACTION_INVESTIGATE_IN_TIMELINE,
+} from '../alerts_table/translations';
 
 export const TakeActionDropdown = React.memo(
   ({
@@ -59,6 +66,11 @@ export const TakeActionDropdown = React.memo(
     const { isAllowed: isIsolationAllowed } = useIsolationPrivileges();
 
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+    const [isAddEventFilterModalOpen, setIsAddEventFilterModalOpen] = useState<boolean>(false);
+
+    const closeAddEventFilterModal = useCallback((): void => {
+      setIsAddEventFilterModalOpen(false);
+    }, []);
 
     const togglePopoverHandler = useCallback(() => {
       setIsPopoverOpen(!isPopoverOpen);
@@ -101,7 +113,13 @@ export const TakeActionDropdown = React.memo(
       timelineId,
     });
 
-    const { items: alertStatusActionsItems } = useAlertsActions({
+    const {
+      showStatusFilter,
+      statusFiltersActions,
+      handleAddEventFilterClick,
+      handleAddExceptionClick,
+      handleAddEndpointExceptionClick,
+    } = useAlertsActions({
       ecsRowData: ecsData!,
       timelineId,
       closePopover: closePopOverAndFlyout,
@@ -109,48 +127,85 @@ export const TakeActionDropdown = React.memo(
       openAddEventFilterModal: noop,
     });
 
-    const items = useMemo(
+    const { handleInvestigateInTimelineAlertClick } = useInvestigateInTimeline({
+      ecsRowData: ecsData ?? null,
+      nonEcsRowData: nonEcsData ?? [],
+    });
+
+    const panels = useMemo(
       () => [
-        ...alertStatusActionsItems,
-        ...(isIsolationAllowed &&
-        isEndpointAlert &&
-        isolationSupported &&
-        isHostIsolationPanelOpen === false
-          ? [
-              <EuiContextMenuItem
-                key={isolateHostKey}
-                onClick={isolateHostHandler}
-                disabled={loading || agentStatus === HostStatus.UNENROLLED}
-              >
-                {isolateHostTitle}
-              </EuiContextMenuItem>,
-            ]
-          : []),
-        ...(eventType === 'signal' && ecsData != null
-          ? [
-              <InvestigateInTimelineAction
-                key="investigate-in-timeline"
-                ecsRowData={ecsData}
-                nonEcsRowData={nonEcsData ?? []}
-                buttonType="text"
-              />,
-            ]
-          : []),
+        {
+          id: 0,
+          items: [
+            ...(showStatusFilter
+              ? [
+                  {
+                    name: CHANGE_ALERT_STATUS,
+                    panel: 1,
+                  },
+                  {
+                    name: ACTION_ADD_ENDPOINT_EXCEPTION,
+                    onClick: handleAddEndpointExceptionClick,
+                  },
+                  {
+                    name: ACTION_ADD_EXCEPTION,
+                    onClick: handleAddExceptionClick,
+                  },
+                ]
+              : [
+                  {
+                    name: ACTION_ADD_EVENT_FILTER,
+                    onClick: handleAddEventFilterClick,
+                  },
+                ]),
+            // ...(ecsData != null
+            //   ? [<AddToCaseAction key="attach-to-case" ecsRowData={ecsData} type="text" />]
+            //   : []),
+            ...(isIsolationAllowed &&
+            isEndpointAlert &&
+            isolationSupported &&
+            isHostIsolationPanelOpen === false
+              ? [
+                  {
+                    name: isolateHostTitle,
+                    onClick: isolateHostHandler,
+                    disabled: loading || agentStatus === HostStatus.UNENROLLED,
+                  },
+                ]
+              : []),
+            ...(eventType === 'signal' && ecsData != null
+              ? [
+                  {
+                    name: ACTION_INVESTIGATE_IN_TIMELINE,
+                    onClick: handleInvestigateInTimelineAlertClick,
+                  },
+                ]
+              : []),
+          ],
+        },
+        {
+          id: 1,
+          title: CHANGE_ALERT_STATUS,
+          items: [...(showStatusFilter ? statusFiltersActions : [])],
+        },
       ],
       [
         agentStatus,
-        alertStatusActionsItems,
         ecsData,
         eventType,
+        handleAddEndpointExceptionClick,
+        handleAddEventFilterClick,
+        handleAddExceptionClick,
+        handleInvestigateInTimelineAlertClick,
         isEndpointAlert,
         isHostIsolationPanelOpen,
         isIsolationAllowed,
         isolateHostHandler,
-        isolateHostKey,
         isolateHostTitle,
         isolationSupported,
         loading,
-        nonEcsData,
+        showStatusFilter,
+        statusFiltersActions,
       ]
     );
 
@@ -162,7 +217,7 @@ export const TakeActionDropdown = React.memo(
       );
     }, [togglePopoverHandler]);
 
-    return items.length > 0 && !loadingEventDetails ? (
+    return panels[0].items.length > 0 && !loadingEventDetails ? (
       <>
         <EuiPopover
           id="hostIsolationTakeActionPanel"
@@ -172,7 +227,7 @@ export const TakeActionDropdown = React.memo(
           panelPaddingSize="none"
           anchorPosition="downLeft"
         >
-          <EuiContextMenuPanel size="s" items={items} />
+          <EuiContextMenu size="s" initialPanelId={0} panels={panels} />
         </EuiPopover>
         {exceptionModalType != null && ruleId != null && ecsData != null && (
           <AddExceptionModalWrapper
@@ -185,6 +240,9 @@ export const TakeActionDropdown = React.memo(
             onConfirm={onAddExceptionConfirm}
             alertStatus={alertStatus}
           />
+        )}
+        {isAddEventFilterModalOpen && ecsData != null && (
+          <EventFiltersModal data={ecsData} onCancel={closeAddEventFilterModal} />
         )}
       </>
     ) : null;
