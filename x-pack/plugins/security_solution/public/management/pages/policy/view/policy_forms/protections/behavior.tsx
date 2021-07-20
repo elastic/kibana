@@ -7,13 +7,17 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { Immutable, OperatingSystem } from '../../../../../../../common/endpoint/types';
 import { BehaviorProtectionOSes, OS } from '../../../types';
 import { ConfigForm } from '../../components/config_form';
 import { RadioButtons } from '../components/radio_buttons';
 import { UserNotification } from '../components/user_notification';
 import { ProtectionSwitch } from '../components/protection_switch';
+import { APP_ID } from '../../../../../../../common/constants';
+import { LinkToApp } from '../../../../../../common/components/endpoint/link_to_app';
+import { SecurityPageName } from '../../../../../../app/types';
 
 /** The Behavior Protections form for policy details
  *  which will configure for all relevant OSes.
@@ -33,6 +37,22 @@ export const BehaviorProtection = React.memo(() => {
       <RadioButtons protection={protection} osList={OSes} />
       <UserNotification protection={protection} osList={OSes} />
       <EuiSpacer size="m" />
+      <EuiCallOut iconType="iInCircle">
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.policy.details.detectionRulesMessage"
+          defaultMessage="View {detectionRulesLink}. Prebuilt rules are tagged “Elastic” on the Detection Rules page."
+          values={{
+            detectionRulesLink: (
+              <LinkToApp appId={`${APP_ID}:${SecurityPageName.detections}`} appPath={`/rules`}>
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.policy.details.detectionRulesLink"
+                  defaultMessage="related detection rules"
+                />
+              </LinkToApp>
+            ),
+          }}
+        />
+      </EuiCallOut>
     </ConfigForm>
   );
 });

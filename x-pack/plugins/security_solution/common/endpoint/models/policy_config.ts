@@ -187,7 +187,7 @@ export const policyFactoryWithSupportedFeatures = (
         supported: true,
       },
       behavior_protection: {
-        ...policy.windows.memory_protection,
+        ...policy.windows.behavior_protection,
         supported: true,
       },
     },
