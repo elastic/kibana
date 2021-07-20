@@ -37,8 +37,8 @@ import { CannotReadFileCallout } from './cannot_read_file_callout';
 import { isJobIdValid } from '../../../../../common/util/job_utils';
 import { JOB_ID_MAX_LENGTH } from '../../../../../common/constants/validation';
 import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
-import { JobImportService } from './jobs_export_service';
-import type { ImportedAdJob, JobIdObject, SkippedJobs } from './jobs_export_service';
+import { JobImportService } from './jobs_import_service';
+import type { ImportedAdJob, JobIdObject, SkippedJobs } from './jobs_import_service';
 
 interface Props {
   isDisabled: boolean;
