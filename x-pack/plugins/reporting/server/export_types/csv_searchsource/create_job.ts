@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CSV_JOB_TYPE, CSV_SEARCHSOURCE_VERSION } from '../../../common/constants';
+import { CSV_JOB_TYPE } from '../../../common/constants';
 import { cryptoFactory } from '../../lib';
 import { CreateJobFn, CreateJobFnFactory } from '../../types';
 import { JobParamsCSV, TaskPayloadCSV } from './types';
@@ -25,7 +25,7 @@ export const createJobFnFactory: CreateJobFnFactory<
       logger.debug(`Using SearchSource v${jobParams.version}`);
     } else {
       logger.warning(
-        `No version provided for SearchSource version. Assuming ${CSV_SEARCHSOURCE_VERSION}`
+        `No version provided for SearchSource version. Assuming ${reporting.getKibanaVersion()}`
       );
     }
 

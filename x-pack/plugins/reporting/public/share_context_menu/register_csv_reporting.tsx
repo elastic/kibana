@@ -14,27 +14,31 @@ import { CoreStart } from 'src/core/public';
 import type { SearchSourceFields } from 'src/plugins/data/common';
 import type { ShareContext } from '../../../../../src/plugins/share/public';
 import type { LicensingPluginSetup } from '../../../licensing/public';
-import { CSV_JOB_TYPE, CSV_SEARCHSOURCE_VERSION } from '../../common/constants';
+import { CSV_JOB_TYPE } from '../../common/constants';
 import type { JobParamsCSV } from '../../server/export_types/csv_searchsource/types';
 import { checkLicense } from '../lib/license_check';
 import type { ReportingAPIClient } from '../lib/reporting_api_client';
 import { ReportingPanelContent } from './reporting_panel_content_lazy';
 
-export const ReportingCsvShareProvider = ({
-  apiClient,
-  toasts,
-  license$,
-  startServices$,
-  uiSettings,
-  usesUiCapabilities,
-}: {
+interface ShareOpts {
+  kibanaVersion: string;
   apiClient: ReportingAPIClient;
   toasts: ToastsSetup;
   license$: LicensingPluginSetup['license$'];
   startServices$: Rx.Observable<[CoreStart, object, unknown]>;
   uiSettings: IUiSettingsClient;
   usesUiCapabilities: boolean;
-}) => {
+}
+
+export const ReportingCsvShareProvider = ({
+  kibanaVersion,
+  apiClient,
+  toasts,
+  license$,
+  startServices$,
+  uiSettings,
+  usesUiCapabilities,
+}: ShareOpts) => {
   let licenseToolTipContent = '';
   let licenseHasCsvReporting = false;
   let licenseDisabled = true;
@@ -76,7 +80,7 @@ export const ReportingCsvShareProvider = ({
       objectType,
       searchSource: sharingData.searchSource as SearchSourceFields,
       columns: sharingData.columns as string[] | undefined,
-      version: CSV_SEARCHSOURCE_VERSION,
+      version: kibanaVersion,
     };
 
     const getJobParams = () => jobParams;

@@ -89,6 +89,7 @@ export class ReportingPublicPlugin
       ReportingPublicPluginSetupDendencies,
       ReportingPublicPluginStartDendencies
     > {
+  private kibanaVersion: string;
   private readonly stop$ = new Rx.ReplaySubject(1);
   private readonly title = i18n.translate('xpack.reporting.management.reportingTitle', {
     defaultMessage: 'Reporting',
@@ -101,6 +102,7 @@ export class ReportingPublicPlugin
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ClientConfigType>();
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
   private getContract(core?: CoreSetup) {
@@ -176,10 +178,12 @@ export class ReportingPublicPlugin
     );
 
     const reportingStart = this.getContract(core);
+    const kibanaVersion = this.kibanaVersion;
     const { toasts } = core.notifications;
 
     share.register(
       ReportingCsvShareProvider({
+        kibanaVersion,
         apiClient,
         toasts,
         license$,
