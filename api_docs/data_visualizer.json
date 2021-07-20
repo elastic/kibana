@@ -13,7 +13,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
-          "lineNumber": 119
+          "lineNumber": 120
         },
         "deprecated": false,
         "children": [
@@ -35,7 +35,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
-              "lineNumber": 120
+              "lineNumber": 121
             },
             "deprecated": false
           },
@@ -58,7 +58,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
-              "lineNumber": 121
+              "lineNumber": 122
             },
             "deprecated": false
           }
@@ -81,7 +81,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/data_visualizer/public/plugin.ts",
-        "lineNumber": 38
+        "lineNumber": 40
       },
       "deprecated": false,
       "lifecycle": "start",

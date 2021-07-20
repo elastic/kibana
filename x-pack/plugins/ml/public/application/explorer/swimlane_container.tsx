@@ -38,18 +38,17 @@ import { ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../../../common';
 import { TimeBuckets as TimeBucketsClass } from '../util/time_buckets';
 import { SWIMLANE_TYPE, SwimlaneType } from './explorer_constants';
 import { mlEscape } from '../util/string_utils';
-import { FormattedTooltip, MlTooltipComponent } from '../components/chart_tooltip/chart_tooltip';
+import { FormattedTooltip } from '../components/chart_tooltip/chart_tooltip';
 import { formatHumanReadableDateTime } from '../../../common/util/date_utils';
-import { getFormattedSeverityScore } from '../../../common/util/anomaly_utils';
 
 import './_explorer.scss';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
 import { useUiSettings } from '../contexts/kibana';
 import {
-  SwimlaneAnnotationContainer,
   Y_AXIS_LABEL_WIDTH,
   Y_AXIS_LABEL_PADDING,
   Y_AXIS_LABEL_FONT_COLOR,
+  X_AXIS_RIGHT_OVERFLOW,
 } from './swimlane_annotation_container';
 import { AnnotationsTable } from '../../../common/types/annotations';
 
@@ -62,6 +61,9 @@ declare global {
   }
 }
 
+function getFormattedSeverityScore(score: number): string {
+  return String(parseInt(String(score), 10));
+}
 /**
  * Ignore insignificant resize, e.g. browser scrollbar appearance.
  */
@@ -122,7 +124,7 @@ const SwimLaneTooltip = (fieldName?: string): FC<{ values: TooltipValue[] }> => 
       label: i18n.translate('xpack.ml.explorer.swimlane.maxAnomalyScoreLabel', {
         defaultMessage: 'Max anomaly score',
       }),
-      value: cell.formattedValue,
+      value: cell.formattedValue === '0' ? ' < 1' : cell.formattedValue,
       color: cell.color,
       // @ts-ignore
       seriesIdentifier: {
@@ -331,6 +333,8 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
           return moment(v).format(scaledDateFormat);
         },
         fontSize: 12,
+        // Required to calculate where the swimlane ends
+        width: X_AXIS_RIGHT_OVERFLOW * 2,
       },
       brushMask: {
         fill: isDarkTheme ? 'rgb(30,31,35,80%)' : 'rgb(247,247,247,50%)',
@@ -408,89 +412,76 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
             grow={false}
           >
             <>
-              <div style={{ height: `${containerHeight}px`, position: 'relative' }}>
-                {showSwimlane && !isLoading && (
-                  <Chart className={'mlSwimLaneContainer'}>
-                    <Settings
-                      onElementClick={onElementClick}
-                      showLegend={showLegend}
-                      legendPosition={Position.Top}
-                      xDomain={xDomain}
-                      tooltip={tooltipOptions}
-                      debugState={window._echDebugStateFlag ?? false}
-                    />
-
-                    <Heatmap
-                      id={id}
-                      colorScale={ScaleType.Threshold}
-                      ranges={[
-                        ANOMALY_THRESHOLD.LOW,
-                        ANOMALY_THRESHOLD.WARNING,
-                        ANOMALY_THRESHOLD.MINOR,
-                        ANOMALY_THRESHOLD.MAJOR,
-                        ANOMALY_THRESHOLD.CRITICAL,
-                      ]}
-                      colors={[
-                        SEVERITY_COLORS.BLANK,
-                        SEVERITY_COLORS.LOW,
-                        SEVERITY_COLORS.WARNING,
-                        SEVERITY_COLORS.MINOR,
-                        SEVERITY_COLORS.MAJOR,
-                        SEVERITY_COLORS.CRITICAL,
-                      ]}
-                      data={swimLanePoints}
-                      xAccessor="time"
-                      yAccessor="laneLabel"
-                      valueAccessor="value"
-                      highlightedData={highlightedData}
-                      valueFormatter={getFormattedSeverityScore}
-                      xScaleType={ScaleType.Time}
-                      ySortPredicate="dataIndex"
-                      config={swimLaneConfig}
-                    />
-                  </Chart>
-                )}
-
-                {isLoading && (
-                  <EuiText
-                    textAlign={'center'}
-                    style={{
-                      position: 'absolute',
-                      top: '50%',
-                      left: '50%',
-                      transform: 'translate(-50%,-50%)',
-                    }}
-                  >
-                    <EuiLoadingChart
-                      size="xl"
-                      mono={true}
-                      data-test-subj="mlSwimLaneLoadingIndicator"
-                    />
-                  </EuiText>
-                )}
-                {!isLoading && !showSwimlane && (
-                  <EuiEmptyPrompt
-                    titleSize="xxs"
-                    style={{ padding: 0 }}
-                    title={<h2>{noDataWarning}</h2>}
-                  />
-                )}
-              </div>
-              {swimlaneType === SWIMLANE_TYPE.OVERALL &&
-                showSwimlane &&
-                xDomain !== undefined &&
-                !isLoading && (
-                  <MlTooltipComponent>
-                    {(tooltipService) => (
-                      <SwimlaneAnnotationContainer
-                        chartWidth={chartWidth}
-                        domain={xDomain}
-                        annotationsData={annotationsData}
-                        tooltipService={tooltipService}
+              <div>
+                <div style={{ height: `${containerHeight}px`, position: 'relative' }}>
+                  {showSwimlane && !isLoading && (
+                    <Chart className={'mlSwimLaneContainer'}>
+                      <Settings
+                        onElementClick={onElementClick}
+                        showLegend={showLegend}
+                        legendPosition={Position.Top}
+                        xDomain={xDomain}
+                        tooltip={tooltipOptions}
+                        debugState={window._echDebugStateFlag ?? false}
                       />
-                    )}
-                  </MlTooltipComponent>
-                )}
+
+                      <Heatmap
+                        id={id}
+                        colorScale={ScaleType.Threshold}
+                        ranges={[
+                          ANOMALY_THRESHOLD.LOW,
+                          ANOMALY_THRESHOLD.WARNING,
+                          ANOMALY_THRESHOLD.MINOR,
+                          ANOMALY_THRESHOLD.MAJOR,
+                          ANOMALY_THRESHOLD.CRITICAL,
+                        ]}
+                        colors={[
+                          SEVERITY_COLORS.BLANK,
+                          SEVERITY_COLORS.LOW,
+                          SEVERITY_COLORS.WARNING,
+                          SEVERITY_COLORS.MINOR,
+                          SEVERITY_COLORS.MAJOR,
+                          SEVERITY_COLORS.CRITICAL,
+                        ]}
+                        data={swimLanePoints}
+                        xAccessor="time"
+                        yAccessor="laneLabel"
+                        valueAccessor="value"
+                        highlightedData={highlightedData}
+                        valueFormatter={getFormattedSeverityScore}
+                        xScaleType={ScaleType.Time}
+                        ySortPredicate="dataIndex"
+                        config={swimLaneConfig}
+                      />
+                    </Chart>
+                  )}
+
+                  {isLoading && (
+                    <EuiText
+                      textAlign={'center'}
+                      style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%,-50%)',
+                      }}
+                    >
+                      <EuiLoadingChart
+                        size="xl"
+                        mono={true}
+                        data-test-subj="mlSwimLaneLoadingIndicator"
+                      />
+                    </EuiText>
+                  )}
+                  {!isLoading && !showSwimlane && (
+                    <EuiEmptyPrompt
+                      titleSize="xxs"
+                      style={{ padding: 0 }}
+                      title={<h2>{noDataWarning}</h2>}
+                    />
+                  )}
+                </div>
+              </div>
             </>
           </EuiFlexItem>
 

@@ -63,7 +63,7 @@ export const CrawlerLanding: React.FC = () => (
           iconType="popout"
           fill
           color="primary"
-          href={getAppSearchUrl(generateEnginePath(ENGINE_CRAWLER_PATH))}
+          href={getAppSearchUrl(`#${generateEnginePath(ENGINE_CRAWLER_PATH)}`)}
           target="_blank"
           data-test-subj="CrawlerStandaloneLink"
         >

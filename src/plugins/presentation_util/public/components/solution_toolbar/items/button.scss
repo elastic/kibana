@@ -6,7 +6,9 @@
   border-color: $euiBorderColor !important; // sass-lint:disable-line no-important
 
   @include kbnThemeStyle('v8') {
-    border-width: $euiBorderWidthThin;
-    border-style: solid;
+    &[class*='--text'] {
+      border-width: $euiBorderWidthThin;
+      border-style: solid;
+    }
   }
 }

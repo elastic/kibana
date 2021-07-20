@@ -6,4 +6,5 @@
  */
 
 export * from './artifacts';
-export { getAgentIDsForEndpoints } from './lookup_agent';
+export { getMetadataForEndpoints } from './metadata';
+export * from './actions';

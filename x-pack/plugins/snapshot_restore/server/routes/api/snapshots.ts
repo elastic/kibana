@@ -6,7 +6,8 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import type { SnapshotDetails, SnapshotDetailsEs } from '../../../common/types';
+import type { SnapshotDetailsEs } from '../../../common/types';
+import { SNAPSHOT_LIST_MAX_SIZE } from '../../../common/constants';
 import { deserializeSnapshotDetails } from '../../../common/lib';
 import type { RouteDependencies } from '../../types';
 import { getManagedRepositoryName } from '../../lib';
@@ -36,12 +37,7 @@ export function registerSnapshotsRoutes({
         // Silently swallow error as policy names aren't required in UI
       }
 
-      /*
-       * TODO: For 8.0, replace the logic in this handler with one call to `GET /_snapshot/_all/_all`
-       * when no repositories bug is fixed: https://github.com/elastic/elasticsearch/issues/43547
-       */
-
-      let repositoryNames: string[];
+      let repositories: string[] = [];
 
       try {
         const {
@@ -49,63 +45,48 @@ export function registerSnapshotsRoutes({
         } = await clusterClient.asCurrentUser.snapshot.getRepository({
           repository: '_all',
         });
-        repositoryNames = Object.keys(repositoriesByName);
+        repositories = Object.keys(repositoriesByName);
 
-        if (repositoryNames.length === 0) {
+        if (repositories.length === 0) {
           return res.ok({
-            body: { snapshots: [], errors: [], repositories: [], policies },
+            body: { snapshots: [], repositories: [], policies },
           });
         }
       } catch (e) {
         return handleEsError({ error: e, response: res });
       }
 
-      const snapshots: SnapshotDetails[] = [];
-      const errors: any = {};
-      const repositories: string[] = [];
+      try {
+        // If any of these repositories 504 they will cost the request significant time.
+        const { body: fetchedSnapshots } = await clusterClient.asCurrentUser.snapshot.get({
+          repository: '_all',
+          snapshot: '_all',
+          ignore_unavailable: true, // Allow request to succeed even if some snapshots are unavailable.
+          // @ts-expect-error @elastic/elasticsearch "desc" is a new param
+          order: 'desc',
+          // TODO We are temporarily hard-coding the maximum number of snapshots returned
+          // in order to prevent an unusable UI for users with large number of snapshots
+          // In the near future, this will be resolved with server-side pagination
+          size: SNAPSHOT_LIST_MAX_SIZE,
+        });
 
-      const fetchSnapshotsForRepository = async (repository: string) => {
-        try {
-          // If any of these repositories 504 they will cost the request significant time.
-          const response = await clusterClient.asCurrentUser.snapshot.get({
-            repository,
-            snapshot: '_all',
-            ignore_unavailable: true, // Allow request to succeed even if some snapshots are unavailable.
-          });
+        // Decorate each snapshot with the repository with which it's associated.
+        const snapshots = fetchedSnapshots?.snapshots?.map((snapshot) => {
+          return deserializeSnapshotDetails(snapshot as SnapshotDetailsEs, managedRepository);
+        });
 
-          const { responses: fetchedResponses = [] } = response.body;
-
-          // Decorate each snapshot with the repository with which it's associated.
-          fetchedResponses.forEach(({ snapshots: fetchedSnapshots = [] }) => {
-            fetchedSnapshots.forEach((snapshot) => {
-              snapshots.push(
-                deserializeSnapshotDetails(
-                  repository,
-                  snapshot as SnapshotDetailsEs,
-                  managedRepository
-                )
-              );
-            });
-          });
-
-          repositories.push(repository);
-        } catch (error) {
-          // These errors are commonly due to a misconfiguration in the repository or plugin errors,
-          // which can result in a variety of 400, 404, and 500 errors.
-          errors[repository] = error;
-        }
-      };
-
-      await Promise.all(repositoryNames.map(fetchSnapshotsForRepository));
-
-      return res.ok({
-        body: {
-          snapshots,
-          policies,
-          repositories,
-          errors,
-        },
-      });
+        return res.ok({
+          body: {
+            snapshots: snapshots || [],
+            policies,
+            repositories,
+            // @ts-expect-error @elastic/elasticsearch "failures" is a new field in the response
+            errors: fetchedSnapshots?.failures,
+          },
+        });
+      } catch (e) {
+        return handleEsError({ error: e, response: res });
+      }
     })
   );
 
@@ -132,13 +113,12 @@ export function registerSnapshotsRoutes({
           ignore_unavailable: true,
         });
 
-        const { responses: snapshotsResponse } = response.body;
+        const { snapshots: snapshotsList } = response.body;
 
-        const snapshotsList =
-          snapshotsResponse && snapshotsResponse[0] && snapshotsResponse[0].snapshots;
         if (!snapshotsList || snapshotsList.length === 0) {
           return res.notFound({ body: 'Snapshot not found' });
         }
+
         const selectedSnapshot = snapshotsList.find(
           ({ snapshot: snapshotName }) => snapshot === snapshotName
         ) as SnapshotDetailsEs;
@@ -156,7 +136,6 @@ export function registerSnapshotsRoutes({
 
         return res.ok({
           body: deserializeSnapshotDetails(
-            repository,
             selectedSnapshot,
             managedRepository,
             successfulSnapshots

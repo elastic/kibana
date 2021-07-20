@@ -52,6 +52,10 @@
   }
 }
 
+.mapToolbarOverlay__buttonGroupAnimated {
+  animation: mapAnimationHeadShake 1.2s ease-in-out;
+}
+
 .mapToolbarOverlay__button__exit {
   .euiButtonIcon {
     color: $euiColorDangerText !important;

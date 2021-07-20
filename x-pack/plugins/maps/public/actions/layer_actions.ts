@@ -47,6 +47,7 @@ import {
   JoinDescriptor,
   LayerDescriptor,
   StyleDescriptor,
+  TileMetaFeature,
 } from '../../common/descriptor_types';
 import { ILayer } from '../classes/layers/layer';
 import { IVectorLayer } from '../classes/layers/vector_layer';
@@ -256,9 +257,10 @@ export function setSelectedLayer(layerId: string | null) {
     }
     if (layerId) {
       dispatch(trackCurrentLayerState(layerId));
-    }
-    if (getDrawMode(getState()) !== DRAW_MODE.NONE) {
-      dispatch(setDrawMode(DRAW_MODE.NONE));
+      // Reset draw mode only if setting a new selected layer
+      if (getDrawMode(getState()) !== DRAW_MODE.NONE) {
+        dispatch(setDrawMode(DRAW_MODE.NONE));
+      }
     }
     dispatch({
       type: SET_SELECTED_LAYER,
@@ -588,5 +590,25 @@ export function setAreTilesLoaded(layerId: string, areTilesLoaded: boolean) {
     id: layerId,
     propName: '__areTilesLoaded',
     newValue: areTilesLoaded,
+  };
+}
+
+export function updateMetaFromTiles(layerId: string, mbMetaFeatures: TileMetaFeature[]) {
+  return async (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    const layer = getLayerById(layerId, getState());
+    if (!layer) {
+      return;
+    }
+
+    dispatch({
+      type: UPDATE_LAYER_PROP,
+      id: layerId,
+      propName: '__metaFromTiles',
+      newValue: mbMetaFeatures,
+    });
+    await dispatch(updateStyleMeta(layerId));
   };
 }

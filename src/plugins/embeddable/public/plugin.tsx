@@ -49,6 +49,7 @@ import {
   getMigrateFunction,
   getTelemetryFunction,
 } from '../common/lib';
+import { getAllMigrations } from '../common/lib/get_all_migrations';
 
 export interface EmbeddableSetupDependencies {
   uiActions: UiActionsSetup;
@@ -205,7 +206,12 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       telemetry: getTelemetryFunction(commonContract),
       extract: getExtractFunction(commonContract),
       inject: getInjectFunction(commonContract),
-      migrate: getMigrateFunction(commonContract),
+      getAllMigrations: () =>
+        getAllMigrations(
+          Array.from(this.embeddableFactories.values()),
+          Array.from(this.enhancements.values()),
+          getMigrateFunction(commonContract)
+        ),
     };
   }
 

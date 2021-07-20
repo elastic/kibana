@@ -19,7 +19,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
-import { px, units } from '../../../style/variables';
 
 interface KeyValue {
   key: string;
@@ -34,7 +33,8 @@ const StyledEuiAccordion = styled(EuiAccordion)`
 `;
 
 const StyledEuiDescriptionList = styled(EuiDescriptionList)`
-  margin: ${px(units.half)} ${px(units.half)} 0 ${px(units.half)};
+  margin: ${({ theme }) =>
+    `${theme.eui.euiSizeS} ${theme.eui.euiSizeS} 0 ${theme.eui.euiSizeS}`};
   .descriptionList__title,
   .descriptionList__description {
     border-bottom: ${({ theme }) => theme.eui.euiBorderThin};

@@ -99,6 +99,13 @@ const createActions = (testBed: TestBed<TestSubject>) => {
       component.update();
     },
 
+    async setProcessorType(type: string) {
+      await act(async () => {
+        find('processorTypeSelector.input').simulate('change', [{ value: type }]);
+      });
+      component.update();
+    },
+
     removeProcessor(processorSelector: string) {
       find(`${processorSelector}.moreMenu.button`).simulate('click');
       find(`${processorSelector}.moreMenu.deleteButton`).simulate('click');

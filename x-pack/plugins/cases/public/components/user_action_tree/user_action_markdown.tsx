@@ -14,7 +14,7 @@ import { Form, useForm, UseField } from '../../common/shared_imports';
 import { schema, Content } from './schema';
 import { MarkdownRenderer, MarkdownEditorForm } from '../markdown_editor';
 
-const ContentWrapper = styled.div`
+export const ContentWrapper = styled.div`
   padding: ${({ theme }) => `${theme.eui.euiSizeM} ${theme.eui.euiSizeL}`};
 `;
 
@@ -56,7 +56,7 @@ export const UserActionMarkdown = ({
 
   const renderButtons = useCallback(
     ({ cancelAction, saveAction }) => (
-      <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             data-test-subj="user-action-cancel-markdown"

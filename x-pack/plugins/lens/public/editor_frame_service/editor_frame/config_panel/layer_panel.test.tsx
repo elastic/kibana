@@ -19,7 +19,7 @@ import {
   createMockFramePublicAPI,
   createMockDatasource,
   DatasourceMock,
-} from '../../mocks';
+} from '../../../mocks';
 
 jest.mock('../../../id_generator');
 

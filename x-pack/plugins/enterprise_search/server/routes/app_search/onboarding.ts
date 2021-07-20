@@ -24,6 +24,7 @@ export function registerOnboardingRoutes({
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/as/onboarding/complete',
+      hasJsonResponse: false,
     })
   );
 }

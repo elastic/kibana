@@ -31,6 +31,30 @@ By default, *TSVB* drops the last bucket because the time filter intersects the 
 .. In the *Panel filter* field, enter <<kuery-query, KQL filters>> to view specific documents.
 
 [float]
+[[tsvb-index-pattern-mode]]
+==== Index pattern mode
+Create *TSVB* visualizations with {kib} index patterns. 
+
+IMPORTANT: Creating *TSVB* visualizations with an {es} index string is deprecated and will be removed in a future release.
+It is the default one for new visualizations but it can also be switched for the old implementations:
+
+. Click *Panel options*, then click the gear icon to open the *Index pattern selection mode* options.
+. Select *Use only Kibana index patterns*.
+. Reselect the index pattern from the dropdown, then select the *Time field*.
+
+image::images/tsvb_index_pattern_selection_mode.png[Change index pattern selection mode action]
+
+The index pattern mode unlocks many new features, such as:
+
+* Runtime fields
+
+* URL drilldowns
+
+* Interactive filters for time series visualizations
+
+* Better performance
+
+[float]
 [[configure-the-data-series]]
 ==== Configure the series
 
@@ -123,6 +147,27 @@ The *Markdown* visualization supports Markdown with Handlebar (mustache) syntax 
 ==== Frequently asked questions
 
 For answers to frequently asked *TSVB* question, review the following. 
+
+[float]
+===== How do I create dashboard drilldowns for Top N and Table visualizations?
+
+You can create dashboard drilldowns that include the specified time range for *Top N* and *Table* visualizations.
+
+. Open the dashboard that you want to link to, then copy the URL.
+
+. Open the dashboard with the *Top N* and *Table* visualization panel, then click *Edit* in the toolbar. 
+
+. Open the *Top N* or *Table* panel menu, then select *Edit visualization*.
+
+. Click *Panel options*. 
+
+. In the *Item URL* field, enter the URL. 
++
+For example `dashboards#/view/f193ca90-c9f4-11eb-b038-dd3270053a27`.
+
+. Click *Save and return*.
+
+. In the toolbar, cick *Save as*, then make sure *Store time with dashboard* is deselected. 
 
 [float]
 ===== Why is my TSVB visualization missing data?

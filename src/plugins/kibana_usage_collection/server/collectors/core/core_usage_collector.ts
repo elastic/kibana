@@ -377,6 +377,34 @@ export function getCoreUsageCollector(
               },
             },
           },
+          legacyUrlAliases: {
+            inactiveCount: {
+              type: 'long',
+              _meta: {
+                description:
+                  'Count of legacy URL aliases that are inactive; they are not disabled, but they have not been resolved.',
+              },
+            },
+            activeCount: {
+              type: 'long',
+              _meta: {
+                description:
+                  'Count of legacy URL aliases that are active; they are not disabled, and they have been resolved at least once.',
+              },
+            },
+            disabledCount: {
+              type: 'long',
+              _meta: {
+                description: 'Count of legacy URL aliases that are disabled.',
+              },
+            },
+            totalCount: {
+              type: 'long',
+              _meta: {
+                description: 'Total count of legacy URL aliases.',
+              },
+            },
+          },
         },
       },
       // Saved Objects Client APIs
@@ -912,6 +940,38 @@ export function getCoreUsageCollector(
         type: 'long',
         _meta: {
           description: 'How many times this API has been called without all types selected.',
+        },
+      },
+      // Saved Objects Repository counters
+      'savedObjectsRepository.resolvedOutcome.exactMatch': {
+        type: 'long',
+        _meta: {
+          description: 'How many times a saved object has resolved with an exact match outcome.',
+        },
+      },
+      'savedObjectsRepository.resolvedOutcome.aliasMatch': {
+        type: 'long',
+        _meta: {
+          description: 'How many times a saved object has resolved with an alias match outcome.',
+        },
+      },
+      'savedObjectsRepository.resolvedOutcome.conflict': {
+        type: 'long',
+        _meta: {
+          description: 'How many times a saved object has resolved with a conflict outcome.',
+        },
+      },
+      'savedObjectsRepository.resolvedOutcome.notFound': {
+        type: 'long',
+        _meta: {
+          description: 'How many times a saved object has resolved with a not found outcome.',
+        },
+      },
+      'savedObjectsRepository.resolvedOutcome.total': {
+        type: 'long',
+        _meta: {
+          description:
+            'How many times a saved object has resolved with any of the four possible outcomes.',
         },
       },
     },

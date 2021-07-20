@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { render } from '../../../lib/helper/rtl_helpers';
 import { withResponsiveWrapper } from './responsive_wrapper';
 
 interface Prop {
@@ -20,12 +20,12 @@ describe('ResponsiveWrapper HOC', () => {
   });
 
   it('renders a responsive wrapper', () => {
-    const component = shallowWithIntl(<WrappedByHOC isResponsive={true} />);
-    expect(component).toMatchSnapshot();
+    const { getByTestId } = render(<WrappedByHOC isResponsive={true} />);
+    expect(getByTestId('uptimeWithResponsiveWrapper--wrapper')).toBeInTheDocument();
   });
 
   it('is not responsive when prop is false', () => {
-    const component = shallowWithIntl(<WrappedByHOC isResponsive={false} />);
-    expect(component).toMatchSnapshot();
+    const { getByTestId } = render(<WrappedByHOC isResponsive={false} />);
+    expect(getByTestId('uptimeWithResponsiveWrapper--panel')).toBeInTheDocument();
   });
 });

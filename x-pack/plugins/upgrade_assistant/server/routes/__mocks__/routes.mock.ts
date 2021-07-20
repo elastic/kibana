@@ -49,6 +49,7 @@ export const createMockRouter = () => {
     post: assign('post'),
     put: assign('put'),
     patch: assign('patch'),
+    delete: assign('delete'),
   };
 };
 

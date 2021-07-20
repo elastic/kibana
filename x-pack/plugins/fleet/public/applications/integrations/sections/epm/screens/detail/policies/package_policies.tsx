@@ -5,9 +5,13 @@
  * 2.0.
  */
 import { stringify, parse } from 'query-string';
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Redirect, useLocation, useHistory } from 'react-router-dom';
-import type { CriteriaWithPagination, EuiTableFieldDataColumnType } from '@elastic/eui';
+import type {
+  CriteriaWithPagination,
+  EuiStepProps,
+  EuiTableFieldDataColumnType,
+} from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiBasicTable,
@@ -29,6 +33,7 @@ import {
   useUrlPagination,
   useGetPackageInstallStatus,
   AgentPolicyRefreshContext,
+  useUIExtension,
 } from '../../../../../hooks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
 import {
@@ -88,6 +93,23 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: ${name}`,
   });
 
+  const agentEnrollmentFlyoutExtension = useUIExtension(name, 'agent-enrollment-flyout');
+
+  // Handle the "add agent" link displayed in post-installation toast notifications in the case
+  // where a user is clicking the link while on the package policies listing page
+  useEffect(() => {
+    const unlisten = history.listen((location) => {
+      const params = new URLSearchParams(location.search);
+      const addAgentToPolicyId = params.get('addAgentToPolicyId');
+
+      if (addAgentToPolicyId) {
+        setFlyoutOpenForPolicyId(addAgentToPolicyId);
+      }
+    });
+
+    return () => unlisten();
+  }, [history]);
+
   const handleTableOnChange = useCallback(
     ({ page }: CriteriaWithPagination<PackagePolicyAndAgentPolicy>) => {
       setPagination({
@@ -98,35 +120,49 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
     [setPagination]
   );
 
-  const renderViewDataStepContent = useCallback(
-    () => (
-      <>
-        <EuiText>
-          <FormattedMessage
-            id="xpack.fleet.agentEnrollment.viewDataDescription"
-            defaultMessage="After your agent starts, you can view your data in Kibana by using the integration's installed assets. {pleaseNote}: it may take a few minutes for the initial data to arrive."
-            values={{
-              pleaseNote: (
-                <strong>
-                  {i18n.translate(
-                    'xpack.fleet.epm.agentEnrollment.viewDataDescription.pleaseNoteLabel',
-                    { defaultMessage: 'Please note' }
-                  )}
-                </strong>
-              ),
-            }}
-          />
-        </EuiText>
-        <EuiSpacer size="l" />
-        <EuiButton href={getHref('integration_details_assets', { pkgkey: `${name}-${version}` })}>
-          {i18n.translate('xpack.fleet.epm.agentEnrollment.viewDataAssetsLabel', {
-            defaultMessage: 'View assets',
-          })}
-        </EuiButton>
-      </>
-    ),
-    [name, version, getHref]
-  );
+  const viewDataStep = useMemo<EuiStepProps>(() => {
+    if (agentEnrollmentFlyoutExtension) {
+      return {
+        title: agentEnrollmentFlyoutExtension.title,
+        children: <agentEnrollmentFlyoutExtension.Component />,
+      };
+    }
+
+    return {
+      title: i18n.translate('xpack.fleet.agentEnrollment.stepViewDataTitle', {
+        defaultMessage: 'View your data',
+      }),
+      children: (
+        <>
+          <EuiText>
+            <FormattedMessage
+              id="xpack.fleet.agentEnrollment.viewDataDescription"
+              defaultMessage="After your agent starts, you can view your data in Kibana by using the integration's installed assets. {pleaseNote}: it may take a few minutes for the initial data to arrive."
+              values={{
+                pleaseNote: (
+                  <strong>
+                    {i18n.translate(
+                      'xpack.fleet.epm.agentEnrollment.viewDataDescription.pleaseNoteLabel',
+                      { defaultMessage: 'Please note' }
+                    )}
+                  </strong>
+                ),
+              }}
+            />
+          </EuiText>
+          <EuiSpacer size="l" />
+          <EuiButton
+            fill
+            href={getHref('integration_details_assets', { pkgkey: `${name}-${version}` })}
+          >
+            {i18n.translate('xpack.fleet.epm.agentEnrollment.viewDataAssetsLabel', {
+              defaultMessage: 'View assets',
+            })}
+          </EuiButton>
+        </>
+      ),
+    };
+  }, [name, version, getHref, agentEnrollmentFlyoutExtension]);
 
   const columns: Array<EuiTableFieldDataColumnType<PackagePolicyAndAgentPolicy>> = useMemo(
     () => [
@@ -187,6 +223,12 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
                     iconType="plusInCircle"
                     onClick={() => setFlyoutOpenForPolicyId(agentPolicy.id)}
                     data-test-subj="addAgentButton"
+                    aria-label={i18n.translate(
+                      'xpack.fleet.epm.packageDetails.integrationList.addAgent',
+                      {
+                        defaultMessage: 'Add Agent',
+                      }
+                    )}
                   />
                 </EuiToolTip>
               )}
@@ -230,13 +272,13 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
             <PackagePolicyActionsMenu
               agentPolicy={agentPolicy}
               packagePolicy={packagePolicy}
-              viewDataStepContent={renderViewDataStepContent()}
+              viewDataStep={viewDataStep}
             />
           );
         },
       },
     ],
-    [renderViewDataStepContent]
+    [viewDataStep]
   );
 
   const noItemsMessage = useMemo(() => {
@@ -292,7 +334,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
             data?.items.find(({ agentPolicy }) => agentPolicy.id === flyoutOpenForPolicyId)
               ?.agentPolicy
           }
-          viewDataStepContent={renderViewDataStepContent()}
+          viewDataStep={viewDataStep}
         />
       )}
     </AgentPolicyRefreshContext.Provider>

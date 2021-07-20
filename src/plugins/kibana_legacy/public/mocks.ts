@@ -22,6 +22,7 @@ const createStartContract = (): Start => ({
     getHideWriteControls: jest.fn(),
   },
   loadFontAwesome: jest.fn(),
+  loadAngularBootstrap: jest.fn(),
 });
 
 export const kibanaLegacyPluginMock = {

@@ -63,17 +63,17 @@
     "objects": [],
     "setup": {
       "parentPluginId": "screenshotMode",
-      "id": "def-public.ScreenshotModePluginSetup",
+      "id": "def-public.ScreenshotModePluginStart",
       "type": "Type",
       "tags": [],
-      "label": "ScreenshotModePluginSetup",
+      "label": "ScreenshotModePluginStart",
       "description": [],
       "signature": [
         "IScreenshotModeService"
       ],
       "source": {
         "path": "src/plugins/screenshot_mode/public/types.ts",
-        "lineNumber": 17
+        "lineNumber": 18
       },
       "deprecated": false,
       "lifecycle": "setup",

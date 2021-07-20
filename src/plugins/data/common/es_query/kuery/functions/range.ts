@@ -13,7 +13,7 @@ import { getRangeScript, RangeFilterParams } from '../../filters';
 import { getFields } from './utils/get_fields';
 import { getTimeZoneFromSettings } from '../../utils';
 import { getFullFieldNameNode } from './utils/get_full_field_name_node';
-import { IndexPatternBase, KueryNode, IFieldType } from '../../..';
+import { IndexPatternBase, KueryNode } from '../../..';
 
 export function buildNodeParams(fieldName: string, params: RangeFilterParams) {
   const paramsToMap = _.pick(params, 'gt', 'lt', 'gte', 'lte', 'format');
@@ -62,7 +62,7 @@ export function toElasticsearchQuery(
     });
   }
 
-  const queries = fields!.map((field: IFieldType) => {
+  const queries = fields!.map((field) => {
     const wrapWithNestedQuery = (query: any) => {
       // Wildcards can easily include nested and non-nested fields. There isn't a good way to let
       // users handle this themselves so we automatically add nested queries in this scenario.

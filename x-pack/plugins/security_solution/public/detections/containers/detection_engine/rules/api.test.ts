@@ -215,6 +215,32 @@ describe('Detections Rules API', () => {
       });
     });
 
+    test('check parameter url, passed sort field is snake case', async () => {
+      await fetchRules({
+        filterOptions: {
+          filter: '',
+          sortField: 'updated_at',
+          sortOrder: 'desc',
+          showCustomRules: false,
+          showElasticRules: false,
+          tags: ['hello', 'world'],
+        },
+        signal: abortCtrl.signal,
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_find', {
+        method: 'GET',
+        query: {
+          filter: 'alert.attributes.tags: "hello" AND alert.attributes.tags: "world"',
+          page: 1,
+          per_page: 20,
+          sort_field: 'updatedAt',
+          sort_order: 'desc',
+        },
+        signal: abortCtrl.signal,
+      });
+    });
+
     test('query with tags KQL parses without errors when tags contain characters such as left parenthesis (', async () => {
       await fetchRules({
         filterOptions: {

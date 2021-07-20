@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { ElasticsearchClient } from 'kibana/server';
 import sinon from 'sinon';
 import { getLicenses, handleLicenses, fetchLicenses } from './get_licenses';
 
 describe('get_licenses', () => {
-  const callWith = sinon.stub();
-  const response = {
+  const searchMock = sinon.stub();
+  const client = ({ search: searchMock } as unknown) as ElasticsearchClient;
+  const body = {
     hits: {
       hits: [
         { _id: 'abc', _source: { cluster_uuid: 'abc', license: { type: 'basic' } } },
@@ -19,7 +21,7 @@ describe('get_licenses', () => {
       ],
     },
   };
-  const expectedClusters = response.hits.hits.map((hit) => hit._source);
+  const expectedClusters = body.hits.hits.map((hit) => hit._source);
   const clusterUuids = expectedClusters.map((cluster) => cluster.cluster_uuid);
   const expectedLicenses = {
     abc: { type: 'basic' },
@@ -29,22 +31,22 @@ describe('get_licenses', () => {
 
   describe('getLicenses', () => {
     it('returns clusters', async () => {
-      callWith.withArgs('search').returns(Promise.resolve(response));
+      searchMock.returns(Promise.resolve({ body }));
 
-      expect(await getLicenses(clusterUuids, callWith, 1)).toStrictEqual(expectedLicenses);
+      expect(await getLicenses(clusterUuids, client, 1)).toStrictEqual(expectedLicenses);
     });
   });
 
   describe('fetchLicenses', () => {
     it('searches for clusters', async () => {
-      callWith.returns(response);
+      searchMock.returns({ body });
 
-      expect(await fetchLicenses(callWith, clusterUuids, 1)).toStrictEqual(response);
+      expect(await fetchLicenses(client, clusterUuids, 1)).toStrictEqual(body);
     });
   });
 
   describe('handleLicenses', () => {
-    // filterPath makes it easy to ignore anything unexpected because it will come back empty
+    // filter_path makes it easy to ignore anything unexpected because it will come back empty
     it('handles unexpected response', () => {
       const clusters = handleLicenses({} as any);
 
@@ -52,7 +54,7 @@ describe('get_licenses', () => {
     });
 
     it('handles valid response', () => {
-      const clusters = handleLicenses(response as any);
+      const clusters = handleLicenses(body as any);
 
       expect(clusters).toStrictEqual(expectedLicenses);
     });

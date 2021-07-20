@@ -16,6 +16,7 @@ jest.mock('../../../../../share/public', () => ({
 }));
 jest.mock('../../../../common', () => ({
   datatableToCSV: jest.fn().mockReturnValue('csv'),
+  tableHasFormulas: jest.fn().mockReturnValue(false),
 }));
 
 describe('Inspector Data View', () => {

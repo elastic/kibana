@@ -6,7 +6,7 @@
  */
 
 import { useContext, useState } from 'react';
-
+import { i18n } from '@kbn/i18n';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { EVENT_RATE_FIELD_ID } from '../../../../../../../../../common/types/fields';
 import { BucketSpanEstimatorData } from '../../../../../../../../../common/types/job_service';
@@ -14,6 +14,7 @@ import {
   isMultiMetricJobCreator,
   isPopulationJobCreator,
   isAdvancedJobCreator,
+  isRareJobCreator,
 } from '../../../../../common/job_creator';
 import { ml } from '../../../../../../../services/ml_api_service';
 import { useMlContext } from '../../../../../../../contexts/ml';
@@ -45,11 +46,17 @@ export function useEstimateBucketSpan() {
     indicesOptions: jobCreator.datafeedConfig.indices_options,
   };
 
-  if (
-    (isMultiMetricJobCreator(jobCreator) || isPopulationJobCreator(jobCreator)) &&
-    jobCreator.splitField !== null
-  ) {
+  if (isMultiMetricJobCreator(jobCreator) && jobCreator.splitField !== null) {
     data.splitField = jobCreator.splitField.id;
+  } else if (isPopulationJobCreator(jobCreator) && jobCreator.populationField !== null) {
+    data.splitField = jobCreator.populationField.id;
+  } else if (isRareJobCreator(jobCreator)) {
+    data.fields = [null];
+    if (jobCreator.populationField) {
+      data.splitField = jobCreator.populationField.id;
+    } else {
+      data.splitField = jobCreator.rareField?.id;
+    }
   } else if (isAdvancedJobCreator(jobCreator)) {
     jobCreator.richDetectors.some((d) => {
       if (d.partitionField !== null) {
@@ -69,10 +76,16 @@ export function useEstimateBucketSpan() {
 
   async function estimateBucketSpan() {
     setStatus(ESTIMATE_STATUS.RUNNING);
-    const { name, error, message } = await ml.estimateBucketSpan(data);
+    const { name, error, message: text } = await ml.estimateBucketSpan(data);
     setStatus(ESTIMATE_STATUS.NOT_RUNNING);
     if (error === true) {
-      getToastNotificationService().displayErrorToast(message);
+      const title = i18n.translate(
+        'xpack.ml.newJob.wizard.pickFieldsStep.bucketSpanEstimator.errorTitle',
+        {
+          defaultMessage: 'Bucket span could not be estimated',
+        }
+      );
+      getToastNotificationService().displayWarningToast({ title, text });
     } else {
       jobCreator.bucketSpan = name;
       jobCreatorUpdate();

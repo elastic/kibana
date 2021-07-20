@@ -45,11 +45,11 @@ const FixedWidthLastUpdatedContainer = React.memo<FixedWidthLastUpdatedContainer
     const width = useEventDetailsWidthContext();
     const compact = useMemo(() => isCompactFooter(width), [width]);
 
-    return (
+    return updatedAt > 0 ? (
       <FixedWidthLastUpdated data-test-subj="fixed-width-last-updated" compact={compact}>
         {timelines.getLastUpdated({ updatedAt, compact })}
       </FixedWidthLastUpdated>
-    );
+    ) : null;
   }
 );
 
@@ -130,7 +130,7 @@ export const EventsCountComponent = ({
   itemsCount: number;
   onClick: () => void;
   serverSideEventCount: number;
-  footerText: string;
+  footerText: string | React.ReactNode;
 }) => {
   const totalCount = useMemo(() => (serverSideEventCount > 0 ? serverSideEventCount : 0), [
     serverSideEventCount,
@@ -164,7 +164,13 @@ export const EventsCountComponent = ({
       >
         <EuiContextMenuPanel items={items} data-test-subj="timelinePickSizeRow" />
       </PopoverRowItems>
-      <EuiToolTip content={`${totalCount} ${footerText}`}>
+      <EuiToolTip
+        content={
+          <>
+            {totalCount} {footerText}
+          </>
+        }
+      >
         <ServerSideEventCount>
           <EuiBadge color="hollow" data-test-subj="server-side-event-count">
             {totalCount}

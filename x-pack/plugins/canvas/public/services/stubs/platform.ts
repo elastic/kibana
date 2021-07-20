@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { PlatformService } from '../platform';
+import { PluginServiceFactory } from '../../../../../../src/plugins/presentation_util/public';
+
+import { CanvasPlatformService } from '../platform';
+
+type CanvasPlatformServiceFactory = PluginServiceFactory<CanvasPlatformService>;
 
 const noop = (..._args: any[]): any => {};
 
@@ -15,7 +19,7 @@ const uiSettings: Record<string, any> = {
 
 const getUISetting = (setting: string) => uiSettings[setting];
 
-export const platformService: PlatformService = {
+export const platformServiceFactory: CanvasPlatformServiceFactory = () => ({
   getBasePath: () => '/base/path',
   getBasePathInterface: noop,
   getDocLinkVersion: () => 'dockLinkVersion',
@@ -28,4 +32,4 @@ export const platformService: PlatformService = {
   getSavedObjectsClient: noop,
   getUISettings: noop,
   setFullscreen: noop,
-};
+});

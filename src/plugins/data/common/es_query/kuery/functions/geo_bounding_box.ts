@@ -9,7 +9,7 @@
 import _ from 'lodash';
 import { nodeTypes } from '../node_types';
 import * as ast from '../ast';
-import { IndexPatternBase, KueryNode, IFieldType, LatLon } from '../../..';
+import { IndexPatternBase, KueryNode, LatLon } from '../../..';
 
 export function buildNodeParams(fieldName: string, params: any) {
   params = _.pick(params, 'topLeft', 'bottomRight');
@@ -36,8 +36,8 @@ export function toElasticsearchQuery(
     value: context?.nested ? `${context.nested.path}.${fieldNameArg.value}` : fieldNameArg.value,
   };
   const fieldName = nodeTypes.literal.toElasticsearchQuery(fullFieldNameArg) as string;
-  const fieldList: IFieldType[] = indexPattern?.fields ?? [];
-  const field = fieldList.find((fld: IFieldType) => fld.name === fieldName);
+  const fieldList = indexPattern?.fields ?? [];
+  const field = fieldList.find((fld) => fld.name === fieldName);
 
   const queryParams = args.reduce((acc: any, arg: any) => {
     const snakeArgName = _.snakeCase(arg.name);

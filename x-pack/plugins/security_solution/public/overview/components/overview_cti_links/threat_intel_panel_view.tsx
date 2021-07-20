@@ -22,10 +22,10 @@ import { InspectButtonContainer } from '../../../common/components/inspect';
 import { HeaderSection } from '../../../common/components/header_section';
 import { ID as CTIEventCountQueryId } from '../../containers/overview_cti_links/use_cti_event_counts';
 import { CtiListItem } from '../../containers/overview_cti_links/helpers';
-import { LinkButton } from '../../../common/components/links';
 import { useKibana } from '../../../common/lib/kibana';
 import { CtiInnerPanel } from './cti_inner_panel';
 import * as i18n from './translations';
+import { shortenCountIntoString } from '../../../common/utils/shorten_count_into_string';
 
 const DashboardLink = styled.li`
   margin: 0 ${({ theme }) => theme.eui.paddingSizes.s} 0 ${({ theme }) => theme.eui.paddingSizes.m};
@@ -36,7 +36,7 @@ const DashboardLinkItems = styled(EuiFlexGroup)`
 `;
 
 const Title = styled(EuiFlexItem)`
-  min-width: 140px;
+  min-width: 110px;
 `;
 
 const List = styled.ul`
@@ -45,17 +45,17 @@ const List = styled.ul`
 
 const DashboardRightSideElement = styled(EuiFlexItem)`
   align-items: flex-end;
-  max-width: 160px;
 `;
 
 const RightSideLink = styled(EuiLink)`
   text-align: right;
-  min-width: 140px;
+  min-width: 180px;
 `;
 
 interface ThreatIntelPanelViewProps {
   buttonHref?: string;
   isDashboardPluginDisabled?: boolean;
+  isInspectEnabled?: boolean;
   listItems: CtiListItem[];
   splitPanel?: JSX.Element;
   totalEventCount: number;
@@ -78,6 +78,7 @@ const panelTitle = (
 export const ThreatIntelPanelView: React.FC<ThreatIntelPanelViewProps> = ({
   buttonHref = '',
   isDashboardPluginDisabled,
+  isInspectEnabled = true,
   listItems,
   splitPanel,
   totalEventCount,
@@ -86,7 +87,7 @@ export const ThreatIntelPanelView: React.FC<ThreatIntelPanelViewProps> = ({
     () => (
       <FormattedMessage
         data-test-subj="cti-total-event-count"
-        defaultMessage="Showing: {totalEventCount} {totalEventCount, plural, one {event} other {events}}"
+        defaultMessage="Showing: {totalEventCount} {totalEventCount, plural, one {indicator} other {indicators}}"
         id="xpack.securitySolution.overview.ctiDashboardSubtitle"
         values={{ totalEventCount }}
       />
@@ -96,12 +97,17 @@ export const ThreatIntelPanelView: React.FC<ThreatIntelPanelViewProps> = ({
 
   const button = useMemo(
     () => (
-      <LinkButton href={buttonHref} disabled={!buttonHref}>
+      <EuiButton
+        href={buttonHref}
+        isDisabled={!buttonHref}
+        data-test-subj="cti-view-dashboard-button"
+        target="_blank"
+      >
         <FormattedMessage
           id="xpack.securitySolution.overview.ctiViewDasboard"
           defaultMessage="View dashboard"
         />
-      </LinkButton>
+      </EuiButton>
     ),
     [buttonHref]
   );
@@ -113,11 +119,15 @@ export const ThreatIntelPanelView: React.FC<ThreatIntelPanelViewProps> = ({
     () =>
       isDashboardPluginDisabled ? (
         <CtiInnerPanel
-          data-test-subj="cti-inner-panel-info"
+          dataTestSubj="cti-inner-panel-info"
           color={'primary'}
           title={i18n.INFO_TITLE}
           body={i18n.INFO_BODY}
-          button={<EuiButton href={threatIntelDashboardDocLink}>{i18n.INFO_BUTTON}</EuiButton>}
+          button={
+            <EuiButton href={threatIntelDashboardDocLink} target="_blank">
+              {i18n.INFO_BUTTON}
+            </EuiButton>
+          }
         />
       ) : null,
     [isDashboardPluginDisabled, threatIntelDashboardDocLink]
@@ -133,8 +143,12 @@ export const ThreatIntelPanelView: React.FC<ThreatIntelPanelViewProps> = ({
       >
         <EuiFlexItem grow={1}>
           <InspectButtonContainer>
-            <EuiPanel>
-              <HeaderSection id={CTIEventCountQueryId} subtitle={subtitle} title={panelTitle}>
+            <EuiPanel hasBorder>
+              <HeaderSection
+                id={isInspectEnabled ? CTIEventCountQueryId : undefined}
+                subtitle={subtitle}
+                title={panelTitle}
+              >
                 <>{button}</>
               </HeaderSection>
               {splitPanel}
@@ -149,9 +163,7 @@ export const ThreatIntelPanelView: React.FC<ThreatIntelPanelViewProps> = ({
                         gutterSize="l"
                         justifyContent="spaceBetween"
                       >
-                        <Title key={`${title}-link`} grow={3}>
-                          {title}
-                        </Title>
+                        <Title key={`${title}-link`}>{title}</Title>
                         <EuiFlexGroup
                           gutterSize="s"
                           key={`${title}-divider`}
@@ -159,12 +171,14 @@ export const ThreatIntelPanelView: React.FC<ThreatIntelPanelViewProps> = ({
                           alignItems="center"
                           justifyContent="flexEnd"
                         >
-                          <DashboardRightSideElement key={`${title}-count`} grow={1}>
-                            {count}
+                          <DashboardRightSideElement key={`${title}-count`} grow={false}>
+                            {shortenCountIntoString(count)}
                           </DashboardRightSideElement>
-                          <DashboardRightSideElement key={`${title}-source`} grow={3}>
+                          <DashboardRightSideElement key={`${title}-source`} grow={false}>
                             {path ? (
-                              <RightSideLink href={path}>{linkCopy}</RightSideLink>
+                              <RightSideLink href={path} target="_blank">
+                                {linkCopy}
+                              </RightSideLink>
                             ) : (
                               <EuiText color={'subdued'} size={'s'}>
                                 {linkCopy}

@@ -46,8 +46,8 @@ export function getApmsForClusters(req, apmIndexPattern, clusters) {
       const params = {
         index: apmIndexPattern,
         size: 0,
-        ignoreUnavailable: true,
-        filterPath: apmAggFilterPath,
+        ignore_unavailable: true,
+        filter_path: apmAggFilterPath,
         body: {
           query: createApmQuery({
             start,

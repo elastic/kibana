@@ -21,6 +21,7 @@ import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
 
+import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { CellValueElementProps } from '../cell_rendering';
 import { Direction, TimelineItem } from '../../../../../common/search_strategy';
@@ -197,7 +198,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const kqlQuery: {
     query: string;
     language: KueryFilterQueryKind;
-  } = { query: kqlQueryExpression, language: 'kuery' };
+  } = useMemo(() => ({ query: kqlQueryExpression, language: 'kuery' }), [kqlQueryExpression]);
 
   const combinedQueries = combineQueries({
     config: esQueryConfig,
@@ -209,15 +210,31 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     kqlMode,
   });
 
-  const isBlankTimeline: boolean =
-    isEmpty(dataProviders) && isEmpty(filters) && isEmpty(kqlQuery.query);
+  useInvalidFilterQuery({
+    id: timelineId,
+    filterQuery: combinedQueries?.filterQuery,
+    kqlError: combinedQueries?.kqlError,
+    query: kqlQuery,
+    startDate: start,
+    endDate: end,
+  });
 
-  const canQueryTimeline = () =>
-    combinedQueries != null &&
-    loadingSourcerer != null &&
-    !loadingSourcerer &&
-    !isEmpty(start) &&
-    !isEmpty(end);
+  const isBlankTimeline: boolean =
+    isEmpty(dataProviders) &&
+    isEmpty(filters) &&
+    isEmpty(kqlQuery.query) &&
+    combinedQueries?.filterQuery === undefined;
+
+  const canQueryTimeline = useMemo(
+    () =>
+      combinedQueries != null &&
+      loadingSourcerer != null &&
+      !loadingSourcerer &&
+      !isEmpty(start) &&
+      !isEmpty(end) &&
+      combinedQueries?.filterQuery !== undefined,
+    [combinedQueries, end, loadingSourcerer, start]
+  );
 
   const getTimelineQueryFields = () => {
     const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
@@ -252,9 +269,9 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     fields: getTimelineQueryFields(),
     language: kqlQuery.language,
     limit: itemsPerPage,
-    filterQuery: combinedQueries?.filterQuery ?? '',
+    filterQuery: combinedQueries?.filterQuery,
     startDate: start,
-    skip: !canQueryTimeline(),
+    skip: !canQueryTimeline,
     sort: timelineQuerySortField,
     timerangeKind,
   });
@@ -280,6 +297,10 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     );
   }, [loadingSourcerer, timelineId, isQueryLoading, dispatch]);
 
+  const isDatePickerDisabled = useMemo(() => {
+    return (combinedQueries && combinedQueries.kqlError != null) || false;
+  }, [combinedQueries]);
+
   const leadingControlColumns: ControlColumnProps[] = [defaultControlColumn];
   const trailingControlColumns: ControlColumnProps[] = [];
 
@@ -294,6 +315,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         inspect={inspect}
         loading={isQueryLoading}
         refetch={refetch}
+        skip={!canQueryTimeline}
       />
       <FullWidthFlexGroup gutterSize="none">
         <ScrollableFlexItem grow={2}>
@@ -313,7 +335,11 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 />
               )}
               <DatePicker grow={1}>
-                <SuperDatePicker id="timeline" timelineId={timelineId} />
+                <SuperDatePicker
+                  id="timeline"
+                  timelineId={timelineId}
+                  disabled={isDatePickerDisabled}
+                />
               </DatePicker>
               <EuiFlexItem grow={false}>
                 <TimelineDatePickerLock />

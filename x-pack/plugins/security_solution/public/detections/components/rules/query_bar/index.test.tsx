@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mount, shallow } from 'enzyme';
+import { mount } from 'enzyme';
 
 import { QueryBarDefineRule } from './index';
 import {
@@ -17,7 +17,26 @@ import {
 import { useGetAllTimeline, getAllTimeline } from '../../../../timelines/containers/all';
 import { mockHistory, Router } from '../../../../common/mock/router';
 
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../common/lib/kibana', () => {
+  const actual = jest.requireActual('../../../../common/lib/kibana');
+  return {
+    ...actual,
+    KibanaServices: {
+      get: jest.fn(() => ({
+        http: {
+          post: jest.fn().mockReturnValue({
+            success: true,
+            success_count: 0,
+            timelines_installed: 0,
+            timelines_updated: 0,
+            errors: [],
+          }),
+          fetch: jest.fn(),
+        },
+      })),
+    },
+  };
+});
 
 jest.mock('../../../../timelines/containers/all', () => {
   const originalModule = jest.requireActual('../../../../timelines/containers/all');
@@ -55,8 +74,14 @@ describe('QueryBarDefineRule', () => {
         />
       );
     };
-    const wrapper = shallow(<Component />);
-    expect(wrapper.dive().find('[data-test-subj="query-bar-define-rule"]')).toHaveLength(1);
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <Component />
+        </Router>
+      </TestProviders>
+    );
+    expect(wrapper.find('[data-test-subj="query-bar-define-rule"]').exists()).toBeTruthy();
   });
 
   it('renders import query from saved timeline modal actions hidden correctly', () => {

@@ -19,7 +19,6 @@ import { Group } from '../../../types';
 import { MAX_NAME_LENGTH } from '../group_logic';
 
 import { GroupSources } from './group_sources';
-import { GroupUsers } from './group_users';
 
 const DAYS_CUTOFF = 8;
 export const NO_SOURCES_MESSAGE = i18n.translate(
@@ -40,14 +39,7 @@ const dateDisplay = (date: string) =>
     ? moment(date).fromNow()
     : moment(date).format('MMMM D, YYYY');
 
-export const GroupRow: React.FC<Group> = ({
-  id,
-  name,
-  updatedAt,
-  contentSources,
-  users,
-  usersCount,
-}) => {
+export const GroupRow: React.FC<Group> = ({ id, name, updatedAt, contentSources }) => {
   const GROUP_UPDATED_TEXT = i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.groups.groupUpdatedText',
     {
@@ -73,15 +65,6 @@ export const GroupRow: React.FC<Group> = ({
             <GroupSources groupSources={contentSources} />
           ) : (
             NO_SOURCES_MESSAGE
-          )}
-        </div>
-      </EuiTableRowCell>
-      <EuiTableRowCell>
-        <div className="user-group__accounts">
-          {usersCount > 0 ? (
-            <GroupUsers groupUsers={users} usersCount={usersCount} groupId={id} />
-          ) : (
-            NO_USERS_MESSAGE
           )}
         </div>
       </EuiTableRowCell>

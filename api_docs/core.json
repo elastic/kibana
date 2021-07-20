@@ -1112,7 +1112,7 @@
         ],
         "source": {
           "path": "src/core/public/index.ts",
-          "lineNumber": 204
+          "lineNumber": 206
         },
         "deprecated": false,
         "children": [
@@ -1136,7 +1136,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 206
+              "lineNumber": 208
             },
             "deprecated": false
           },
@@ -1160,7 +1160,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 208
+              "lineNumber": 210
             },
             "deprecated": false
           },
@@ -1184,7 +1184,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 210
+              "lineNumber": 212
             },
             "deprecated": false
           },
@@ -1208,7 +1208,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 212
+              "lineNumber": 214
             },
             "deprecated": false
           },
@@ -1232,7 +1232,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 214
+              "lineNumber": 216
             },
             "deprecated": false
           },
@@ -1252,7 +1252,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 221
+              "lineNumber": 223
             },
             "deprecated": true,
             "references": []
@@ -1279,7 +1279,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 225
+              "lineNumber": 227
             },
             "deprecated": false,
             "returnComment": [],
@@ -1299,7 +1299,7 @@
         ],
         "source": {
           "path": "src/core/public/index.ts",
-          "lineNumber": 249
+          "lineNumber": 251
         },
         "deprecated": false,
         "children": [
@@ -1323,7 +1323,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 251
+              "lineNumber": 253
             },
             "deprecated": false
           },
@@ -1347,7 +1347,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 253
+              "lineNumber": 255
             },
             "deprecated": false
           },
@@ -1371,7 +1371,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 255
+              "lineNumber": 257
             },
             "deprecated": false
           },
@@ -1395,7 +1395,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 257
+              "lineNumber": 259
             },
             "deprecated": false
           },
@@ -1419,7 +1419,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 259
+              "lineNumber": 261
             },
             "deprecated": false
           },
@@ -1443,7 +1443,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 261
+              "lineNumber": 263
             },
             "deprecated": false
           },
@@ -1467,7 +1467,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 263
+              "lineNumber": 265
             },
             "deprecated": false
           },
@@ -1491,7 +1491,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 265
+              "lineNumber": 267
             },
             "deprecated": false
           },
@@ -1515,7 +1515,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 267
+              "lineNumber": 269
             },
             "deprecated": false
           },
@@ -1539,7 +1539,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 269
+              "lineNumber": 271
             },
             "deprecated": false
           },
@@ -1563,7 +1563,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 271
+              "lineNumber": 273
             },
             "deprecated": false
           },
@@ -1583,7 +1583,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 278
+              "lineNumber": 280
             },
             "deprecated": true,
             "references": [
@@ -1770,7 +1770,7 @@
         "description": [],
         "source": {
           "path": "src/core/public/doc_links/doc_links_service.ts",
-          "lineNumber": 409
+          "lineNumber": 426
         },
         "deprecated": false,
         "children": [
@@ -1783,7 +1783,7 @@
             "description": [],
             "source": {
               "path": "src/core/public/doc_links/doc_links_service.ts",
-              "lineNumber": 410
+              "lineNumber": 427
             },
             "deprecated": false
           },
@@ -1796,7 +1796,7 @@
             "description": [],
             "source": {
               "path": "src/core/public/doc_links/doc_links_service.ts",
-              "lineNumber": 411
+              "lineNumber": 428
             },
             "deprecated": false
           },
@@ -1808,11 +1808,11 @@
             "label": "links",
             "description": [],
             "signature": [
-              "{ readonly canvas: { readonly guide: string; }; readonly dashboard: { readonly guide: string; readonly drilldowns: string; readonly drilldownsTriggerPicker: string; readonly urlDrilldownTemplateSyntax: string; readonly urlDrilldownVariables: string; }; readonly discover: Record<string, string>; readonly filebeat: { readonly base: string; readonly installation: string; readonly configuration: string; readonly elasticsearchOutput: string; readonly elasticsearchModule: string; readonly startup: string; readonly exportedFields: string; }; readonly auditbeat: { readonly base: string; }; readonly metricbeat: { readonly base: string; readonly configure: string; readonly httpEndpoint: string; readonly install: string; readonly start: string; }; readonly enterpriseSearch: { readonly base: string; readonly appSearchBase: string; readonly workplaceSearchBase: string; }; readonly heartbeat: { readonly base: string; }; readonly logstash: { readonly base: string; }; readonly functionbeat: { readonly base: string; }; readonly winlogbeat: { readonly base: string; }; readonly aggs: { readonly composite: string; readonly composite_missing_bucket: string; readonly date_histogram: string; readonly date_range: string; readonly date_format_pattern: string; readonly filter: string; readonly filters: string; readonly geohash_grid: string; readonly histogram: string; readonly ip_range: string; readonly range: string; readonly significant_terms: string; readonly terms: string; readonly avg: string; readonly avg_bucket: string; readonly max_bucket: string; readonly min_bucket: string; readonly sum_bucket: string; readonly cardinality: string; readonly count: string; readonly cumulative_sum: string; readonly derivative: string; readonly geo_bounds: string; readonly geo_centroid: string; readonly max: string; readonly median: string; readonly min: string; readonly moving_avg: string; readonly percentile_ranks: string; readonly serial_diff: string; readonly std_dev: string; readonly sum: string; readonly top_hits: string; }; readonly runtimeFields: { readonly overview: string; readonly mapping: string; }; readonly scriptedFields: { readonly scriptFields: string; readonly scriptAggs: string; readonly painless: string; readonly painlessApi: string; readonly painlessLangSpec: string; readonly painlessSyntax: string; readonly painlessWalkthrough: string; readonly luceneExpressions: string; }; readonly search: { readonly sessions: string; }; readonly indexPatterns: { readonly introduction: string; readonly fieldFormattersNumber: string; readonly fieldFormattersString: string; readonly runtimeFields: string; }; readonly addData: string; readonly kibana: string; readonly upgradeAssistant: string; readonly elasticsearch: Record<string, string>; readonly siem: { readonly guide: string; readonly gettingStarted: string; }; readonly query: { readonly eql: string; readonly kueryQuerySyntax: string; readonly luceneQuerySyntax: string; readonly percolate: string; readonly queryDsl: string; }; readonly date: { readonly dateMath: string; readonly dateMathIndexNames: string; }; readonly management: Record<string, string>; readonly ml: Record<string, string>; readonly transforms: Record<string, string>; readonly visualize: Record<string, string>; readonly apis: Readonly<{ bulkIndexAlias: string; byteSizeUnits: string; createAutoFollowPattern: string; createFollower: string; createIndex: string; createSnapshotLifecyclePolicy: string; createRoleMapping: string; createRoleMappingTemplates: string; createRollupJobsRequest: string; createApiKey: string; createPipeline: string; createTransformRequest: string; cronExpressions: string; executeWatchActionModes: string; indexExists: string; openIndex: string; putComponentTemplate: string; painlessExecute: string; painlessExecuteAPIContexts: string; putComponentTemplateMetadata: string; putSnapshotLifecyclePolicy: string; putIndexTemplateV1: string; putWatch: string; simulatePipeline: string; timeUnits: string; updateTransform: string; }>; readonly observability: Record<string, string>; readonly alerting: Record<string, string>; readonly maps: Record<string, string>; readonly monitoring: Record<string, string>; readonly security: Readonly<{ apiKeyServiceSettings: string; clusterPrivileges: string; elasticsearchSettings: string; elasticsearchEnableSecurity: string; indicesPrivileges: string; kibanaTLS: string; kibanaPrivileges: string; mappingRoles: string; mappingRolesFieldRules: string; runAsPrivilege: string; }>; readonly watcher: Record<string, string>; readonly ccs: Record<string, string>; readonly plugins: Record<string, string>; readonly snapshotRestore: Record<string, string>; readonly ingest: Record<string, string>; }"
+              "{ readonly settings: string; readonly canvas: { readonly guide: string; }; readonly dashboard: { readonly guide: string; readonly drilldowns: string; readonly drilldownsTriggerPicker: string; readonly urlDrilldownTemplateSyntax: string; readonly urlDrilldownVariables: string; }; readonly discover: Record<string, string>; readonly filebeat: { readonly base: string; readonly installation: string; readonly configuration: string; readonly elasticsearchOutput: string; readonly elasticsearchModule: string; readonly startup: string; readonly exportedFields: string; }; readonly auditbeat: { readonly base: string; }; readonly metricbeat: { readonly base: string; readonly configure: string; readonly httpEndpoint: string; readonly install: string; readonly start: string; }; readonly enterpriseSearch: { readonly base: string; readonly appSearchBase: string; readonly workplaceSearchBase: string; }; readonly heartbeat: { readonly base: string; }; readonly logstash: { readonly base: string; }; readonly functionbeat: { readonly base: string; }; readonly winlogbeat: { readonly base: string; }; readonly aggs: { readonly composite: string; readonly composite_missing_bucket: string; readonly date_histogram: string; readonly date_range: string; readonly date_format_pattern: string; readonly filter: string; readonly filters: string; readonly geohash_grid: string; readonly histogram: string; readonly ip_range: string; readonly range: string; readonly significant_terms: string; readonly terms: string; readonly avg: string; readonly avg_bucket: string; readonly max_bucket: string; readonly min_bucket: string; readonly sum_bucket: string; readonly cardinality: string; readonly count: string; readonly cumulative_sum: string; readonly derivative: string; readonly geo_bounds: string; readonly geo_centroid: string; readonly max: string; readonly median: string; readonly min: string; readonly moving_avg: string; readonly percentile_ranks: string; readonly serial_diff: string; readonly std_dev: string; readonly sum: string; readonly top_hits: string; }; readonly runtimeFields: { readonly overview: string; readonly mapping: string; }; readonly scriptedFields: { readonly scriptFields: string; readonly scriptAggs: string; readonly painless: string; readonly painlessApi: string; readonly painlessLangSpec: string; readonly painlessSyntax: string; readonly painlessWalkthrough: string; readonly luceneExpressions: string; }; readonly search: { readonly sessions: string; readonly sessionLimits: string; }; readonly indexPatterns: { readonly introduction: string; readonly fieldFormattersNumber: string; readonly fieldFormattersString: string; readonly runtimeFields: string; }; readonly addData: string; readonly kibana: string; readonly upgradeAssistant: string; readonly rollupJobs: string; readonly elasticsearch: Record<string, string>; readonly siem: { readonly guide: string; readonly gettingStarted: string; }; readonly query: { readonly eql: string; readonly kueryQuerySyntax: string; readonly luceneQuerySyntax: string; readonly percolate: string; readonly queryDsl: string; }; readonly date: { readonly dateMath: string; readonly dateMathIndexNames: string; }; readonly management: Record<string, string>; readonly ml: Record<string, string>; readonly transforms: Record<string, string>; readonly visualize: Record<string, string>; readonly apis: Readonly<{ bulkIndexAlias: string; byteSizeUnits: string; createAutoFollowPattern: string; createFollower: string; createIndex: string; createSnapshotLifecyclePolicy: string; createRoleMapping: string; createRoleMappingTemplates: string; createRollupJobsRequest: string; createApiKey: string; createPipeline: string; createTransformRequest: string; cronExpressions: string; executeWatchActionModes: string; indexExists: string; openIndex: string; putComponentTemplate: string; painlessExecute: string; painlessExecuteAPIContexts: string; putComponentTemplateMetadata: string; putSnapshotLifecyclePolicy: string; putIndexTemplateV1: string; putWatch: string; simulatePipeline: string; timeUnits: string; updateTransform: string; }>; readonly observability: Record<string, string>; readonly alerting: Record<string, string>; readonly maps: Record<string, string>; readonly monitoring: Record<string, string>; readonly security: Readonly<{ apiKeyServiceSettings: string; clusterPrivileges: string; elasticsearchSettings: string; elasticsearchEnableSecurity: string; indicesPrivileges: string; kibanaTLS: string; kibanaPrivileges: string; mappingRoles: string; mappingRolesFieldRules: string; runAsPrivilege: string; }>; readonly watcher: Record<string, string>; readonly ccs: Record<string, string>; readonly plugins: Record<string, string>; readonly snapshotRestore: Record<string, string>; readonly ingest: Record<string, string>; readonly fleet: Readonly<{ guide: string; fleetServer: string; fleetServerAddFleetServer: string; settings: string; settingsFleetServerHostSettings: string; troubleshooting: string; elasticAgent: string; datastreams: string; datastreamsNamingScheme: string; upgradeElasticAgent: string; upgradeElasticAgent712lower: string; }>; }"
             ],
             "source": {
               "path": "src/core/public/doc_links/doc_links_service.ts",
-              "lineNumber": 412
+              "lineNumber": 429
             },
             "deprecated": false
           }
@@ -3632,7 +3632,7 @@
             "label": "buttonColor",
             "description": [],
             "signature": [
-              "\"warning\" | \"text\" | \"primary\" | \"danger\" | \"secondary\" | \"ghost\" | undefined"
+              "\"warning\" | \"text\" | \"primary\" | \"success\" | \"danger\" | \"accent\" | \"secondary\" | \"ghost\" | undefined"
             ],
             "source": {
               "path": "src/core/public/overlays/modal/modal_service.tsx",
@@ -4827,14 +4827,14 @@
             "tags": [],
             "label": "namespaces",
             "description": [
-              "Namespace(s) that this saved object exists in. This attribute is only used for multi-namespace saved object types."
+              "\nSpace(s) that this saved object exists in. This attribute is not used for \"global\" saved object types which are registered with\n`namespaceType: 'agnostic'`."
             ],
             "signature": [
               "string[] | undefined"
             ],
             "source": {
               "path": "src/core/types/saved_objects.ts",
-              "lineNumber": 88
+              "lineNumber": 91
             },
             "deprecated": false
           },
@@ -4852,7 +4852,7 @@
             ],
             "source": {
               "path": "src/core/types/saved_objects.ts",
-              "lineNumber": 95
+              "lineNumber": 98
             },
             "deprecated": false
           }
@@ -4902,7 +4902,7 @@
         "description": [],
         "source": {
           "path": "src/core/types/saved_objects.ts",
-          "lineNumber": 98
+          "lineNumber": 101
         },
         "deprecated": false,
         "children": [
@@ -4915,7 +4915,7 @@
             "description": [],
             "source": {
               "path": "src/core/types/saved_objects.ts",
-              "lineNumber": 99
+              "lineNumber": 102
             },
             "deprecated": false
           },
@@ -4928,7 +4928,7 @@
             "description": [],
             "source": {
               "path": "src/core/types/saved_objects.ts",
-              "lineNumber": 100
+              "lineNumber": 103
             },
             "deprecated": false
           },
@@ -4941,7 +4941,7 @@
             "description": [],
             "source": {
               "path": "src/core/types/saved_objects.ts",
-              "lineNumber": 101
+              "lineNumber": 104
             },
             "deprecated": false
           },
@@ -4957,7 +4957,7 @@
             ],
             "source": {
               "path": "src/core/types/saved_objects.ts",
-              "lineNumber": 102
+              "lineNumber": 105
             },
             "deprecated": false
           }
@@ -6564,6 +6564,89 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-public.SavedObjectsResolveResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsResolveResponse",
+        "description": [
+          "\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-server.SavedObjectsResolveResponse",
+            "text": "SavedObjectsResolveResponse"
+          },
+          "<T>"
+        ],
+        "source": {
+          "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
+          "lineNumber": 313
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.SavedObjectsResolveResponse.saved_object",
+            "type": "Object",
+            "tags": [],
+            "label": "saved_object",
+            "description": [
+              "\nThe saved object that was found."
+            ],
+            "signature": [
+              "SavedObject",
+              "<T>"
+            ],
+            "source": {
+              "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
+              "lineNumber": 317
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.SavedObjectsResolveResponse.outcome",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "outcome",
+            "description": [
+              "\nThe outcome for a successful `resolve` call is one of the following values:\n\n * `'exactMatch'` -- One document exactly matched the given ID.\n * `'aliasMatch'` -- One document with a legacy URL alias matched the given ID; in this case the `saved_object.id` field is different\n   than the given ID.\n * `'conflict'` -- Two documents matched the given ID, one was an exact match and another with a legacy URL alias; in this case the\n   `saved_object` object is the exact match, and the `saved_object.id` field is the same as the given ID."
+            ],
+            "signature": [
+              "\"conflict\" | \"exactMatch\" | \"aliasMatch\""
+            ],
+            "source": {
+              "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
+              "lineNumber": 327
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.SavedObjectsResolveResponse.aliasTargetId",
+            "type": "string",
+            "tags": [],
+            "label": "aliasTargetId",
+            "description": [
+              "\nThe ID of the object that the legacy URL alias points to. This is only defined when the outcome is `'aliasMatch'` or `'conflict'`."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
+              "lineNumber": 331
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-public.ToastOptions",
         "type": "Interface",
         "tags": [],
@@ -6789,7 +6872,7 @@
               "defines a type of UI element {@link UiSettingsType}"
             ],
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"select\" | \"array\" | \"markdown\" | undefined"
+              "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"markdown\" | \"select\" | \"array\" | undefined"
             ],
             "source": {
               "path": "src/core/types/ui_settings.ts",
@@ -7279,7 +7362,7 @@
           "\nA sub-set of {@link UiSettingsParams} exposed to the client-side."
         ],
         "signature": [
-          "{ type?: \"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"select\" | \"array\" | \"markdown\" | undefined; options?: string[] | undefined; description?: string | undefined; name?: string | undefined; order?: number | undefined; value?: unknown; category?: string[] | undefined; metric?: { type: ",
+          "{ type?: \"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"markdown\" | \"select\" | \"array\" | undefined; options?: string[] | undefined; description?: string | undefined; name?: string | undefined; order?: number | undefined; value?: unknown; category?: string[] | undefined; metric?: { type: ",
           "UiCounterMetricType",
           "; name: string; } | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
           "DeprecationSettings",
@@ -7427,7 +7510,7 @@
         ],
         "source": {
           "path": "src/core/public/index.ts",
-          "lineNumber": 235
+          "lineNumber": 237
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -7870,7 +7953,7 @@
           "\nUI element type to represent the settings."
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"select\" | \"array\" | \"markdown\""
+          "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"markdown\" | \"select\" | \"array\""
         ],
         "source": {
           "path": "src/core/types/ui_settings.ts",
@@ -7950,7 +8033,7 @@
         ],
         "source": {
           "path": "src/core/server/csp/csp_config.ts",
-          "lineNumber": 52
+          "lineNumber": 53
         },
         "deprecated": false,
         "children": [
@@ -7972,7 +8055,23 @@
             ],
             "source": {
               "path": "src/core/server/csp/csp_config.ts",
-              "lineNumber": 53
+              "lineNumber": 54
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CspConfig.directives",
+            "type": "Object",
+            "tags": [],
+            "label": "#directives",
+            "description": [],
+            "signature": [
+              "CspDirectives"
+            ],
+            "source": {
+              "path": "src/core/server/csp/csp_config.ts",
+              "lineNumber": 56
             },
             "deprecated": false
           },
@@ -7988,7 +8087,7 @@
             ],
             "source": {
               "path": "src/core/server/csp/csp_config.ts",
-              "lineNumber": 55
+              "lineNumber": 57
             },
             "deprecated": false
           },
@@ -8001,7 +8100,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/csp/csp_config.ts",
-              "lineNumber": 56
+              "lineNumber": 58
             },
             "deprecated": false
           },
@@ -8014,7 +8113,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/csp/csp_config.ts",
-              "lineNumber": 57
+              "lineNumber": 59
             },
             "deprecated": false
           },
@@ -8027,7 +8126,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/csp/csp_config.ts",
-              "lineNumber": 58
+              "lineNumber": 60
             },
             "deprecated": false
           },
@@ -8040,7 +8139,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/csp/csp_config.ts",
-              "lineNumber": 59
+              "lineNumber": 61
             },
             "deprecated": false
           }
@@ -8527,21 +8626,21 @@
                 "plugin": "licensing",
                 "link": {
                   "path": "x-pack/plugins/licensing/server/plugin.ts",
-                  "lineNumber": 106
+                  "lineNumber": 107
                 }
               },
               {
                 "plugin": "licensing",
                 "link": {
                   "path": "x-pack/plugins/licensing/server/plugin.ts",
-                  "lineNumber": 110
+                  "lineNumber": 111
                 }
               },
               {
                 "plugin": "licensing",
                 "link": {
                   "path": "x-pack/plugins/licensing/server/plugin.ts",
-                  "lineNumber": 182
+                  "lineNumber": 185
                 }
               },
               {
@@ -9236,13 +9335,6 @@
                 "plugin": "licensing",
                 "link": {
                   "path": "x-pack/plugins/licensing/server/plugin.ts",
-                  "lineNumber": 102
-                }
-              },
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.ts",
                   "lineNumber": 103
                 }
               },
@@ -9250,7 +9342,14 @@
                 "plugin": "licensing",
                 "link": {
                   "path": "x-pack/plugins/licensing/server/plugin.ts",
-                  "lineNumber": 120
+                  "lineNumber": 104
+                }
+              },
+              {
+                "plugin": "licensing",
+                "link": {
+                  "path": "x-pack/plugins/licensing/server/plugin.ts",
+                  "lineNumber": 121
                 }
               }
             ],
@@ -9355,13 +9454,6 @@
                 "plugin": "licensing",
                 "link": {
                   "path": "x-pack/plugins/licensing/server/plugin.ts",
-                  "lineNumber": 113
-                }
-              },
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.ts",
                   "lineNumber": 114
                 }
               },
@@ -9376,7 +9468,14 @@
                 "plugin": "licensing",
                 "link": {
                   "path": "x-pack/plugins/licensing/server/plugin.ts",
-                  "lineNumber": 118
+                  "lineNumber": 116
+                }
+              },
+              {
+                "plugin": "licensing",
+                "link": {
+                  "path": "x-pack/plugins/licensing/server/plugin.ts",
+                  "lineNumber": 119
                 }
               },
               {
@@ -9384,20 +9483,6 @@
                 "link": {
                   "path": "src/plugins/data/server/autocomplete/value_suggestions_route.ts",
                   "lineNumber": 65
-                }
-              },
-              {
-                "plugin": "canvas",
-                "link": {
-                  "path": "x-pack/plugins/canvas/server/routes/es_fields/es_fields.ts",
-                  "lineNumber": 31
-                }
-              },
-              {
-                "plugin": "canvas",
-                "link": {
-                  "path": "x-pack/plugins/canvas/server/routes/functions/functions.ts",
-                  "lineNumber": 64
                 }
               },
               {
@@ -9495,7 +9580,7 @@
                 "plugin": "indexManagement",
                 "link": {
                   "path": "x-pack/plugins/index_management/server/routes/api/templates/register_get_routes.ts",
-                  "lineNumber": 62
+                  "lineNumber": 74
                 }
               },
               {
@@ -9657,34 +9742,6 @@
                 "link": {
                   "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/privileges/read_privileges_route.ts",
                   "lineNumber": 41
-                }
-              },
-              {
-                "plugin": "canvas",
-                "link": {
-                  "path": "x-pack/plugins/canvas/server/routes/es_fields/es_fields.test.ts",
-                  "lineNumber": 70
-                }
-              },
-              {
-                "plugin": "canvas",
-                "link": {
-                  "path": "x-pack/plugins/canvas/server/routes/es_fields/es_fields.test.ts",
-                  "lineNumber": 98
-                }
-              },
-              {
-                "plugin": "canvas",
-                "link": {
-                  "path": "x-pack/plugins/canvas/server/routes/es_fields/es_fields.test.ts",
-                  "lineNumber": 126
-                }
-              },
-              {
-                "plugin": "canvas",
-                "link": {
-                  "path": "x-pack/plugins/canvas/server/routes/es_fields/es_fields.test.ts",
-                  "lineNumber": 146
                 }
               },
               {
@@ -10113,7 +10170,7 @@
         ],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 301
+          "lineNumber": 322
         },
         "deprecated": true,
         "references": [
@@ -10167,7 +10224,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 307
+              "lineNumber": 328
             },
             "deprecated": false,
             "children": [
@@ -10190,7 +10247,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 307
+                  "lineNumber": 328
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -10207,7 +10264,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 307
+                  "lineNumber": 328
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -10235,7 +10292,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 309
+              "lineNumber": 330
             },
             "deprecated": false,
             "children": [
@@ -10257,7 +10314,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 309
+                  "lineNumber": 330
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -10274,7 +10331,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 309
+                  "lineNumber": 330
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -10294,7 +10351,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 311
+              "lineNumber": 332
             },
             "deprecated": false,
             "children": [],
@@ -10981,7 +11038,7 @@
         ],
         "source": {
           "path": "src/core/server/index.ts",
-          "lineNumber": 470
+          "lineNumber": 471
         },
         "deprecated": false,
         "children": [
@@ -11005,7 +11062,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 472
+              "lineNumber": 473
             },
             "deprecated": false
           },
@@ -11029,7 +11086,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 474
+              "lineNumber": 475
             },
             "deprecated": false
           },
@@ -11053,7 +11110,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 476
+              "lineNumber": 477
             },
             "deprecated": false
           },
@@ -11086,7 +11143,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 478
+              "lineNumber": 479
             },
             "deprecated": false
           },
@@ -11110,7 +11167,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 483
+              "lineNumber": 484
             },
             "deprecated": false
           },
@@ -11134,7 +11191,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 485
+              "lineNumber": 486
             },
             "deprecated": false
           },
@@ -11158,7 +11215,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 487
+              "lineNumber": 488
             },
             "deprecated": false
           },
@@ -11182,7 +11239,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 489
+              "lineNumber": 490
             },
             "deprecated": false
           },
@@ -11206,7 +11263,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 491
+              "lineNumber": 492
             },
             "deprecated": false
           },
@@ -11230,7 +11287,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 493
+              "lineNumber": 494
             },
             "deprecated": false
           },
@@ -11254,7 +11311,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 495
+              "lineNumber": 496
             },
             "deprecated": false
           },
@@ -11280,7 +11337,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 497
+              "lineNumber": 498
             },
             "deprecated": false,
             "returnComment": [],
@@ -11300,7 +11357,7 @@
         ],
         "source": {
           "path": "src/core/server/index.ts",
-          "lineNumber": 518
+          "lineNumber": 519
         },
         "deprecated": false,
         "children": [
@@ -11324,7 +11381,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 520
+              "lineNumber": 521
             },
             "deprecated": false
           },
@@ -11348,7 +11405,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 522
+              "lineNumber": 523
             },
             "deprecated": false
           },
@@ -11372,7 +11429,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 524
+              "lineNumber": 525
             },
             "deprecated": false
           },
@@ -11396,7 +11453,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 526
+              "lineNumber": 527
             },
             "deprecated": false
           },
@@ -11420,7 +11477,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 528
+              "lineNumber": 529
             },
             "deprecated": false
           },
@@ -11444,7 +11501,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 530
+              "lineNumber": 531
             },
             "deprecated": false
           }
@@ -12175,7 +12232,7 @@
         ],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 218
+          "lineNumber": 239
         },
         "deprecated": false,
         "children": [
@@ -12190,7 +12247,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 222
+              "lineNumber": 243
             },
             "deprecated": false
           },
@@ -12208,7 +12265,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 227
+              "lineNumber": 248
             },
             "deprecated": false
           },
@@ -12226,7 +12283,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 233
+              "lineNumber": 254
             },
             "deprecated": false
           },
@@ -12244,7 +12301,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 240
+              "lineNumber": 261
             },
             "deprecated": false
           },
@@ -12262,7 +12319,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 252
+              "lineNumber": 273
             },
             "deprecated": false
           }
@@ -12334,13 +12391,6 @@
             },
             "deprecated": true,
             "references": [
-              {
-                "plugin": "canvas",
-                "link": {
-                  "path": "x-pack/plugins/canvas/server/routes/functions/functions.ts",
-                  "lineNumber": 64
-                }
-              },
               {
                 "plugin": "console",
                 "link": {
@@ -12537,14 +12587,14 @@
                 "plugin": "licensing",
                 "link": {
                   "path": "x-pack/plugins/licensing/server/plugin.ts",
-                  "lineNumber": 105
+                  "lineNumber": 106
                 }
               },
               {
                 "plugin": "licensing",
                 "link": {
                   "path": "x-pack/plugins/licensing/server/plugin.ts",
-                  "lineNumber": 117
+                  "lineNumber": 118
                 }
               },
               {
@@ -15007,7 +15057,7 @@
         ],
         "source": {
           "path": "src/core/server/csp/csp_config.ts",
-          "lineNumber": 17
+          "lineNumber": 18
         },
         "deprecated": false,
         "children": [
@@ -15025,7 +15075,7 @@
             ],
             "source": {
               "path": "src/core/server/csp/csp_config.ts",
-              "lineNumber": 21
+              "lineNumber": 22
             },
             "deprecated": false
           },
@@ -15040,7 +15090,7 @@
             ],
             "source": {
               "path": "src/core/server/csp/csp_config.ts",
-              "lineNumber": 27
+              "lineNumber": 28
             },
             "deprecated": false
           },
@@ -15055,7 +15105,7 @@
             ],
             "source": {
               "path": "src/core/server/csp/csp_config.ts",
-              "lineNumber": 33
+              "lineNumber": 34
             },
             "deprecated": false
           },
@@ -15070,7 +15120,7 @@
             ],
             "source": {
               "path": "src/core/server/csp/csp_config.ts",
-              "lineNumber": 39
+              "lineNumber": 40
             },
             "deprecated": false
           },
@@ -15085,7 +15135,7 @@
             ],
             "source": {
               "path": "src/core/server/csp/csp_config.ts",
-              "lineNumber": 45
+              "lineNumber": 46
             },
             "deprecated": false
           }
@@ -15304,7 +15354,7 @@
         "description": [],
         "source": {
           "path": "src/core/server/rendering/types.ts",
-          "lineNumber": 68
+          "lineNumber": 69
         },
         "deprecated": false,
         "children": [
@@ -15322,7 +15372,7 @@
             ],
             "source": {
               "path": "src/core/server/rendering/types.ts",
-              "lineNumber": 73
+              "lineNumber": 74
             },
             "deprecated": false
           }
@@ -15762,34 +15812,6 @@
         "removeBy": "7.16",
         "references": [
           {
-            "plugin": "canvas",
-            "link": {
-              "path": "x-pack/plugins/canvas/server/lib/query_es_sql.ts",
-              "lineNumber": 12
-            }
-          },
-          {
-            "plugin": "canvas",
-            "link": {
-              "path": "x-pack/plugins/canvas/server/lib/query_es_sql.ts",
-              "lineNumber": 37
-            }
-          },
-          {
-            "plugin": "canvas",
-            "link": {
-              "path": "x-pack/plugins/canvas/server/routes/functions/functions.ts",
-              "lineNumber": 8
-            }
-          },
-          {
-            "plugin": "canvas",
-            "link": {
-              "path": "x-pack/plugins/canvas/server/routes/functions/functions.ts",
-              "lineNumber": 40
-            }
-          },
-          {
             "plugin": "crossClusterReplication",
             "link": {
               "path": "x-pack/plugins/cross_cluster_replication/server/plugin.ts",
@@ -16059,14 +16081,14 @@
             "plugin": "securitySolution",
             "link": {
               "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
-              "lineNumber": 457
+              "lineNumber": 462
             }
           },
           {
             "plugin": "securitySolution",
             "link": {
               "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
-              "lineNumber": 476
+              "lineNumber": 481
             }
           },
           {
@@ -19790,7 +19812,7 @@
         ],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 282
+          "lineNumber": 303
         },
         "deprecated": false,
         "children": [
@@ -19814,7 +19836,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 288
+              "lineNumber": 309
             },
             "deprecated": false,
             "children": [
@@ -19837,7 +19859,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 288
+                  "lineNumber": 309
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -19854,7 +19876,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 288
+                  "lineNumber": 309
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -19882,7 +19904,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 290
+              "lineNumber": 311
             },
             "deprecated": false,
             "children": [
@@ -19904,7 +19926,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 290
+                  "lineNumber": 311
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -19921,7 +19943,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 290
+                  "lineNumber": 311
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -19941,7 +19963,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 292
+              "lineNumber": 313
             },
             "deprecated": false,
             "children": [],
@@ -20080,7 +20102,7 @@
         ],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 337
+          "lineNumber": 358
         },
         "deprecated": false,
         "children": [
@@ -20096,7 +20118,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 338
+              "lineNumber": 359
             },
             "deprecated": false
           },
@@ -20116,7 +20138,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 339
+              "lineNumber": 360
             },
             "deprecated": false
           },
@@ -20134,7 +20156,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 362
+              "lineNumber": 383
             },
             "deprecated": false
           },
@@ -20168,7 +20190,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 366
+              "lineNumber": 387
             },
             "deprecated": false
           }
@@ -20375,6 +20397,42 @@
               "lineNumber": 210
             },
             "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.PluginManifest.owner",
+            "type": "Object",
+            "tags": [],
+            "label": "owner",
+            "description": [
+              "\nTODO: make required once all internal plugins have this specified."
+            ],
+            "signature": [
+              "{ readonly name: string; readonly githubTeam?: string | undefined; } | undefined"
+            ],
+            "source": {
+              "path": "src/core/server/plugins/types.ts",
+              "lineNumber": 215
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.PluginManifest.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [
+              "\nTODO: make required once all plugins specify this.\nA brief description of what this plugin does and any capabilities it provides."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/core/server/plugins/types.ts",
+              "lineNumber": 231
+            },
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -20463,7 +20521,7 @@
         ],
         "source": {
           "path": "src/core/server/index.ts",
-          "lineNumber": 437
+          "lineNumber": 438
         },
         "deprecated": false,
         "children": [
@@ -20567,7 +20625,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 438
+              "lineNumber": 439
             },
             "deprecated": false
           }
@@ -20788,14 +20846,14 @@
             "tags": [],
             "label": "namespaces",
             "description": [
-              "Namespace(s) that this saved object exists in. This attribute is only used for multi-namespace saved object types."
+              "\nSpace(s) that this saved object exists in. This attribute is not used for \"global\" saved object types which are registered with\n`namespaceType: 'agnostic'`."
             ],
             "signature": [
               "string[] | undefined"
             ],
             "source": {
               "path": "src/core/types/saved_objects.ts",
-              "lineNumber": 88
+              "lineNumber": 91
             },
             "deprecated": false
           },
@@ -20813,7 +20871,7 @@
             ],
             "source": {
               "path": "src/core/types/saved_objects.ts",
-              "lineNumber": 95
+              "lineNumber": 98
             },
             "deprecated": false
           }
@@ -21431,7 +21489,7 @@
             ],
             "source": {
               "path": "src/core/server/status/types.ts",
-              "lineNumber": 202
+              "lineNumber": 205
             },
             "deprecated": false,
             "children": [
@@ -21456,7 +21514,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/status/types.ts",
-                  "lineNumber": 202
+                  "lineNumber": 205
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -21487,7 +21545,7 @@
             ],
             "source": {
               "path": "src/core/server/status/types.ts",
-              "lineNumber": 208
+              "lineNumber": 211
             },
             "deprecated": false
           },
@@ -21514,7 +21572,7 @@
             ],
             "source": {
               "path": "src/core/server/status/types.ts",
-              "lineNumber": 220
+              "lineNumber": 223
             },
             "deprecated": false
           },
@@ -21532,7 +21590,7 @@
             ],
             "source": {
               "path": "src/core/server/status/types.ts",
-              "lineNumber": 226
+              "lineNumber": 229
             },
             "deprecated": false,
             "returnComment": [],
@@ -21732,7 +21790,7 @@
               "defines a type of UI element {@link UiSettingsType}"
             ],
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"select\" | \"array\" | \"markdown\" | undefined"
+              "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"markdown\" | \"select\" | \"array\" | undefined"
             ],
             "source": {
               "path": "src/core/types/ui_settings.ts",
@@ -22271,7 +22329,7 @@
         "label": "EcsEventCategory",
         "description": [],
         "signature": [
-          "\"host\" | \"database\" | \"package\" | \"session\" | \"registry\" | \"network\" | \"web\" | \"file\" | \"process\" | \"authentication\" | \"configuration\" | \"driver\" | \"iam\" | \"intrusion_detection\" | \"malware\""
+          "\"host\" | \"database\" | \"package\" | \"session\" | \"file\" | \"registry\" | \"network\" | \"web\" | \"process\" | \"authentication\" | \"configuration\" | \"driver\" | \"iam\" | \"intrusion_detection\" | \"malware\""
         ],
         "source": {
           "path": "node_modules/@kbn/logging/target/ecs/event.d.ts",
@@ -22288,7 +22346,7 @@
         "label": "EcsEventKind",
         "description": [],
         "signature": [
-          "\"alert\" | \"event\" | \"state\" | \"metric\" | \"signal\" | \"pipeline_error\""
+          "\"alert\" | \"metric\" | \"event\" | \"state\" | \"signal\" | \"pipeline_error\""
         ],
         "source": {
           "path": "node_modules/@kbn/logging/target/ecs/event.d.ts",
@@ -22998,21 +23056,21 @@
             "plugin": "licensing",
             "link": {
               "path": "x-pack/plugins/licensing/server/plugin.ts",
-              "lineNumber": 109
+              "lineNumber": 110
             }
           },
           {
             "plugin": "licensing",
             "link": {
               "path": "x-pack/plugins/licensing/server/plugin.ts",
-              "lineNumber": 151
+              "lineNumber": 154
             }
           },
           {
             "plugin": "licensing",
             "link": {
               "path": "x-pack/plugins/licensing/server/plugin.ts",
-              "lineNumber": 180
+              "lineNumber": 183
             }
           },
           {
@@ -23452,13 +23510,6 @@
             "plugin": "licensing",
             "link": {
               "path": "x-pack/plugins/licensing/server/plugin.ts",
-              "lineNumber": 102
-            }
-          },
-          {
-            "plugin": "licensing",
-            "link": {
-              "path": "x-pack/plugins/licensing/server/plugin.ts",
               "lineNumber": 103
             }
           },
@@ -23466,14 +23517,14 @@
             "plugin": "licensing",
             "link": {
               "path": "x-pack/plugins/licensing/server/plugin.ts",
-              "lineNumber": 111
+              "lineNumber": 104
             }
           },
           {
             "plugin": "licensing",
             "link": {
               "path": "x-pack/plugins/licensing/server/plugin.ts",
-              "lineNumber": 114
+              "lineNumber": 112
             }
           },
           {
@@ -23481,6 +23532,13 @@
             "link": {
               "path": "x-pack/plugins/licensing/server/plugin.ts",
               "lineNumber": 115
+            }
+          },
+          {
+            "plugin": "licensing",
+            "link": {
+              "path": "x-pack/plugins/licensing/server/plugin.ts",
+              "lineNumber": 116
             }
           },
           {
@@ -23843,7 +23901,7 @@
         ],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 444
+          "lineNumber": 465
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -23894,7 +23952,7 @@
           "\nA sub-set of {@link UiSettingsParams} exposed to the client-side."
         ],
         "signature": [
-          "{ type?: \"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"select\" | \"array\" | \"markdown\" | undefined; options?: string[] | undefined; description?: string | undefined; name?: string | undefined; order?: number | undefined; value?: unknown; category?: string[] | undefined; metric?: { type: ",
+          "{ type?: \"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"markdown\" | \"select\" | \"array\" | undefined; options?: string[] | undefined; description?: string | undefined; name?: string | undefined; order?: number | undefined; value?: unknown; category?: string[] | undefined; metric?: { type: ",
           "UiCounterMetricType",
           "; name: string; } | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
           "DeprecationSettings",
@@ -24029,7 +24087,7 @@
         ],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 325
+          "lineNumber": 346
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -24056,7 +24114,7 @@
         ],
         "source": {
           "path": "src/core/server/index.ts",
-          "lineNumber": 508
+          "lineNumber": 509
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -24071,7 +24129,7 @@
           "\nUI element type to represent the settings."
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"select\" | \"array\" | \"markdown\""
+          "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"markdown\" | \"select\" | \"array\""
         ],
         "source": {
           "path": "src/core/types/ui_settings.ts",

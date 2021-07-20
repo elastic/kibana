@@ -12,7 +12,6 @@ describe('config validation', () => {
     const config: Record<string, unknown> = {};
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
-        "enableImportExport": false,
         "healthCheck": Object {
           "interval": "60m",
         },

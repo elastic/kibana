@@ -16,36 +16,38 @@ import { useKibana } from '../../../common/lib/kibana';
 export const useRequestEventCounts = (to: string, from: string) => {
   const { uiSettings } = useKibana().services;
 
+  const [filterQuery] = convertToBuildEsQuery({
+    config: esQuery.getEsQueryConfig(uiSettings),
+    indexPattern: {
+      fields: [
+        {
+          name: 'event.kind',
+          aggregatable: true,
+          searchable: true,
+          type: 'string',
+          esTypes: ['keyword'],
+        },
+      ],
+      title: 'filebeat-*',
+    },
+    queries: [{ query: 'event.type:indicator', language: 'kuery' }],
+    filters: [],
+  });
+
   const matrixHistogramRequest = useMemo(() => {
     return {
       endDate: to,
       errorMessage: i18n.translate('xpack.securitySolution.overview.errorFetchingEvents', {
         defaultMessage: 'Error fetching events',
       }),
-      filterQuery: convertToBuildEsQuery({
-        config: esQuery.getEsQueryConfig(uiSettings),
-        indexPattern: {
-          fields: [
-            {
-              name: 'event.kind',
-              aggregatable: true,
-              searchable: true,
-              type: 'string',
-              esTypes: ['keyword'],
-            },
-          ],
-          title: 'filebeat-*',
-        },
-        queries: [{ query: 'event.type:indicator', language: 'kuery' }],
-        filters: [],
-      }),
+      filterQuery,
       histogramType: MatrixHistogramType.events,
       indexNames: DEFAULT_CTI_SOURCE_INDEX,
       stackByField: EVENT_DATASET,
       startDate: from,
       size: 0,
     };
-  }, [to, from, uiSettings]);
+  }, [to, from, filterQuery]);
 
   const results = useMatrixHistogram(matrixHistogramRequest);
 

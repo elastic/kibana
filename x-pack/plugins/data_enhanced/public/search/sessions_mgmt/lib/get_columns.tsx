@@ -243,6 +243,7 @@ export const getColumns = (
                   api={api}
                   key={`popkey-${session.id}`}
                   session={session}
+                  core={core}
                   onActionComplete={onActionComplete}
                 />
               </EuiFlexItem>

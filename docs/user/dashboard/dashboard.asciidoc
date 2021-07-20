@@ -27,12 +27,12 @@ Panels display your data in charts, tables, maps, and more, which allow you to c
 | Display the results from machine learning anomaly detection jobs.
 
 | <<xpack-ml-anomalies,Anomaly chart>>
-| Display an anomaly chart from the *Anomaly Explorer.
+| Display an anomaly chart from the *Anomaly Explorer*.
 
 | <<logs-app,Log stream>>
 | Display a table of live streaming logs.
 
-| <<enhance-dashboards,Tools>>
+| <<add-controls,Tools>>
 | Add context to your panels with <<add-text,text>>, or add dynamic filters with <<add-controls,*Controls*>>.
 
 |===
@@ -130,6 +130,38 @@ If you change your mind and want to add the panel to the *Visualize Library*:
 . Open the panel menu, then select *More > Save to library*.
 
 . Enter the panel title, then click *Save*.
+
+[float]
+[[add-text]]
+== Add context to panels
+
+To provide context to your dashboard panels, add *Text* panels that display important information, instructions, images, and more.
+
+You create *Text* panels using GitHub-flavored Markdown text. For information about GitHub-flavored Markdown text, click *Help*.
+
+. From the dashboard, click *All types*, then select *Text*.
+
+. In the *Markdown* field, enter the text, then click *Update*.
+
+For example, when you enter:
+
+[role="screenshot"]
+image::images/markdown_example_1.png[]
+
+The following instructions are displayed:
+
+[role="screenshot"]
+image::images/markdown_example_2.png[]
+
+Or when you enter:
+
+[role="screenshot"]
+image::images/markdown_example_3.png[]
+
+The following image is displayed:
+
+[role="screenshot"]
+image::images/markdown_example_4.png[]
 
 [float]
 [[edit-panels]]
@@ -301,7 +333,7 @@ image:images/Dashboard_inspect.png[Inspect in dashboard]
 [[share-the-dashboard]]
 == Share dashboards
 
-To share the dashboard with a larger audience, click *Share* in the toolbar. For detailed information, refer to <<reporting-getting-started,Reporting>>.
+To share the dashboard with a larger audience, click *Share* in the toolbar. For detailed information about the sharing options, refer to <<reporting-getting-started,Reporting>>.
 
 [float]
 [[import-dashboards]]
@@ -316,8 +348,6 @@ include::lens-advanced.asciidoc[]
 
 include::create-panels-with-editors.asciidoc[]
 
-include::enhance-dashboards.asciidoc[]
-
-include::drilldowns.asciidoc[]
+include::make-dashboards-interactive.asciidoc[]
 
 include::aggregation-reference.asciidoc[]

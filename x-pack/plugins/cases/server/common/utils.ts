@@ -318,6 +318,15 @@ export const isCommentRequestTypeUser = (
 };
 
 /**
+ * A type narrowing function for actions comments. Exporting so integration tests can use it.
+ */
+export const isCommentRequestTypeActions = (
+  context: CommentRequest
+): context is CommentRequestUserType => {
+  return context.type === CommentType.actions;
+};
+
+/**
  * A type narrowing function for alert comments. Exporting so integration tests can use it.
  */
 export const isCommentRequestTypeAlertOrGenAlert = (

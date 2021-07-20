@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { SavedObjectsResolveResponse } from 'src/core/server';
+
 import { SavedObjectsClient } from './saved_objects_client';
 import { SimpleSavedObject } from './simple_saved_object';
 import { httpServiceMock } from '../http/http_service.mock';
@@ -144,6 +146,62 @@ describe('SavedObjectsClient', () => {
       const result = await response;
       expect(result.type).toBe('config');
       expect(result.get('title')).toBe('Example title');
+    });
+  });
+
+  describe('#resolve', () => {
+    beforeEach(() => {
+      beforeEach(() => {
+        http.fetch.mockResolvedValue({
+          saved_object: doc,
+          outcome: 'conflict',
+          aliasTargetId: 'another-id',
+        } as SavedObjectsResolveResponse);
+      });
+    });
+
+    test('rejects if `type` is undefined', async () => {
+      expect(savedObjectsClient.resolve(undefined as any, doc.id)).rejects.toMatchInlineSnapshot(
+        `[Error: requires type and id]`
+      );
+    });
+
+    test('rejects if `id` is undefined', async () => {
+      expect(savedObjectsClient.resolve(doc.type, undefined as any)).rejects.toMatchInlineSnapshot(
+        `[Error: requires type and id]`
+      );
+    });
+
+    test('makes HTTP call', () => {
+      savedObjectsClient.resolve(doc.type, doc.id);
+      expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "/api/saved_objects/resolve/config/AVwSwFxtcMV38qjDZoQg",
+            Object {
+              "body": undefined,
+              "method": undefined,
+              "query": undefined,
+            },
+          ],
+        ]
+      `);
+    });
+
+    test('rejects when HTTP call fails', async () => {
+      http.fetch.mockRejectedValueOnce(new Error('Request failed'));
+      await expect(savedObjectsClient.resolve(doc.type, doc.id)).rejects.toMatchInlineSnapshot(
+        `[Error: Request failed]`
+      );
+    });
+
+    test('resolves with ResolvedSimpleSavedObject instance', async () => {
+      const result = await savedObjectsClient.resolve(doc.type, doc.id);
+      expect(result.savedObject).toBeInstanceOf(SimpleSavedObject);
+      expect(result.savedObject.type).toBe(doc.type);
+      expect(result.savedObject.get('title')).toBe('Example title');
+      expect(result.outcome).toBe('conflict');
+      expect(result.aliasTargetId).toBe('another-id');
     });
   });
 

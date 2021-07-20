@@ -13,7 +13,7 @@ import { Observable } from 'rxjs';
 import { ExecutorState, ExecutorContainer } from './container';
 import { createExecutorContainer } from './container';
 import { AnyExpressionFunctionDefinition, ExpressionFunction } from '../expression_functions';
-import { Execution, ExecutionParams } from '../execution/execution';
+import { Execution, ExecutionParams, ExecutionResult } from '../execution/execution';
 import { IRegistry } from '../types';
 import { ExpressionType } from '../expression_types/expression_type';
 import { AnyExpressionTypeDefinition } from '../expression_types/types';
@@ -160,7 +160,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     ast: string | ExpressionAstExpression,
     input: Input,
     params: ExpressionExecutionParams = {}
-  ): Observable<Output | ExpressionValueError> {
+  ): Observable<ExecutionResult<Output | ExpressionValueError>> {
     return this.createExecution<Input, Output>(ast, params).start(input);
   }
 
