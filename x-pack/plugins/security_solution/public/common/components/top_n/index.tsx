@@ -26,7 +26,7 @@ import { combineQueries } from '../../../timelines/components/timeline/helpers';
 import { getOptions } from './helpers';
 import { TopN } from './top_n';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
-import { AlertsStackByField } from '../../../detections/components/kpis/common/types';
+import { AlertsStackByField } from '../../../detections/components/alerts_kpis/common/types';
 
 const EMPTY_FILTERS: Filter[] = [];
 const EMPTY_QUERY: Query = { query: '', language: 'kuery' };
@@ -76,7 +76,7 @@ const connector = connect(makeMapStateToProps);
 //    to the index pattern.
 export interface OwnProps {
   browserFields: BrowserFields;
-  field: AlertsStackByField;
+  field: string;
   indexPattern: IIndexPattern;
   timelineId?: string;
   toggleTopN: () => void;
@@ -154,7 +154,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
       data-test-subj="top-n"
       defaultView={defaultView}
       deleteQuery={timelineId === TimelineId.active ? undefined : deleteQuery}
-      field={field}
+      field={field as AlertsStackByField}
       filters={timelineId === TimelineId.active ? EMPTY_FILTERS : globalFilters}
       from={timelineId === TimelineId.active ? activeTimelineFrom : from}
       indexPattern={indexPattern}

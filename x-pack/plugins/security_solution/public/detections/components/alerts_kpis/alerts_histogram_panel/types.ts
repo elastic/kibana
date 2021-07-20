@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { inputsModel } from '../../../../common/store';
+import type { inputsModel } from '../../../../common/store';
 
 export interface HistogramData {
   x: number;

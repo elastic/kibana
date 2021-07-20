@@ -54,7 +54,7 @@ import { useListsConfig } from '../../../../containers/detection_engine/lists/us
 import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
 import { StepAboutRuleToggleDetails } from '../../../../components/rules/step_about_rule_details';
 import { DetectionEngineHeaderPage } from '../../../../components/detection_engine_header_page';
-import { AlertsHistogramPanel } from '../../../../components/kpis/alerts_histogram_panel';
+import { AlertsHistogramPanel } from '../../../../components/alerts_kpis/alerts_histogram_panel';
 import { AlertsTable } from '../../../../components/alerts_table';
 import { useUserData } from '../../../../components/user_info';
 import { OverviewEmpty } from '../../../../../overview/components/overview_empty';
@@ -117,8 +117,7 @@ import { getRuleStatusText } from '../../../../../../common/detection_engine/uti
 import { MissingPrivilegesCallOut } from '../../../../components/callouts/missing_privileges_callout';
 import { useRuleWithFallback } from '../../../../containers/detection_engine/rules/use_rule_with_fallback';
 import { BadgeOptions } from '../../../../../common/components/header_page/types';
-import { alertsStackByOptions } from '../../../../components/kpis/common/config';
-import { AlertsStackByOption } from '../../../../components/kpis/common/types';
+import { AlertsStackByField } from '../../../../components/alerts_kpis/common/types';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -173,7 +172,7 @@ const RuleDetailsPageComponent = () => {
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
-  const { to, from, deleteQuery, setQuery } = useGlobalTime();
+  const { to, from } = useGlobalTime();
   const [
     {
       loading: userInfoLoading,
@@ -572,10 +571,7 @@ const RuleDetailsPageComponent = () => {
     return null;
   }
 
-  const defaultRuleStackByOption: AlertsStackByOption = {
-    text: 'event.category',
-    value: 'event.category',
-  };
+  const defaultRuleStackByOption: AlertsStackByField = 'event.category';
 
   return (
     <>
@@ -711,15 +707,10 @@ const RuleDetailsPageComponent = () => {
               <>
                 <Display show={!globalFullScreen}>
                   <AlertsHistogramPanel
-                    deleteQuery={deleteQuery}
                     filters={alertMergedFilters}
                     query={query}
-                    from={from}
                     signalIndexName={signalIndexName}
-                    setQuery={setQuery}
-                    stackByOptions={alertsStackByOptions}
                     defaultStackByOption={defaultRuleStackByOption}
-                    to={to}
                     updateDateRange={updateDateRangeCallback}
                   />
                   <EuiSpacer />

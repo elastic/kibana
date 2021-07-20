@@ -8,7 +8,6 @@
 import React from 'react';
 import { shallow, mount } from 'enzyme';
 
-import '../../../common/mock/match_media';
 import { AlertsCount } from './alerts_count';
 import { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
 import { TestProviders } from '../../../../common/mock';
@@ -16,7 +15,7 @@ import { DragDropContextWrapper } from '../../../../common/components/drag_and_d
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { AlertsCountAggregation } from './types';
 
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../../../common/lib/kibana');
 const mockDispatch = jest.fn();
 
 jest.mock('react-redux', () => {
@@ -29,10 +28,9 @@ jest.mock('react-redux', () => {
 
 describe('AlertsCount', () => {
   it('renders correctly', () => {
-    const alertsMock = {};
     const wrapper = shallow(
       <AlertsCount
-        data={alertsMock as AlertSearchResponse<{}, AlertsCountAggregation>}
+        data={{} as AlertSearchResponse<{}, AlertsCountAggregation>}
         loading={false}
         selectedStackByOption={'test_selected_field'}
       />
@@ -45,7 +43,23 @@ describe('AlertsCount', () => {
     const alertFiedlKey = 'test_stack_by_test_key';
     const alertFiedlCount = 999;
     const alertData = {
-      ...alertsMock,
+      took: 0,
+      timeout: false,
+      hits: {
+        hits: [],
+        sequences: [],
+        events: [],
+        total: {
+          relation: 'eq',
+          value: 0,
+        },
+      },
+      _shards: {
+        failed: 0,
+        skipped: 0,
+        successful: 1,
+        total: 1,
+      },
       aggregations: {
         alertsByGroupingCount: {
           buckets: [

@@ -22,7 +22,7 @@ import { TopNOption } from './helpers';
 import * as i18n from './translations';
 import { getIndicesSelector, IndicesSelector } from './selectors';
 import { State } from '../../store';
-import { AlertsStackByField } from '../../../detections/components/kpis/common/types';
+import { AlertsStackByField } from '../../../detections/components/alerts_kpis/common/types';
 
 const TopNContainer = styled.div`
   width: 600px;
@@ -138,14 +138,11 @@ const TopNComponent: React.FC<Props> = ({
           <SignalsByCategory
             combinedQueries={combinedQueries}
             filters={filters}
-            from={from}
             headerChildren={headerChildren}
             onlyField={field}
             query={query}
             setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
-            setQuery={setQuery}
             timelineId={timelineId}
-            to={to}
           />
         )}
       </TopNContent>

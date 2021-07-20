@@ -7,10 +7,11 @@
 
 import moment from 'moment';
 
-import { showAllOthersBucket } from '../../../../../common/constants';
-import { HistogramData, AlertsAggregation, AlertsBucket, AlertsGroupBucket } from './types';
-import { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
-import * as i18n from './translations';
+import { isEmpty } from 'lodash/fp';
+import type { HistogramData, AlertsAggregation, AlertsBucket, AlertsGroupBucket } from './types';
+import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
+import { getMissingFields } from '../common/helpers';
+import type { AlertsStackByField } from '../common/types';
 
 const EMPTY_ALERTS_DATA: HistogramData[] = [];
 
@@ -33,18 +34,14 @@ export const formatAlertsData = (alertsData: AlertSearchResponse<{}, AlertsAggre
 };
 
 export const getAlertsHistogramQuery = (
-  stackByField: string,
+  stackByField: AlertsStackByField,
   from: string,
   to: string,
   additionalFilters: Array<{
     bool: { filter: unknown[]; should: unknown[]; must_not: unknown[]; must: unknown[] };
   }>
 ) => {
-  const missing = showAllOthersBucket.includes(stackByField)
-    ? {
-        missing: stackByField.endsWith('.ip') ? '0.0.0.0' : i18n.ALL_OTHERS,
-      }
-    : {};
+  const missing = getMissingFields(stackByField);
 
   return {
     aggs: {
@@ -103,3 +100,19 @@ export const showInitialLoadingSpinner = ({
   isInitialLoading: boolean;
   isLoadingAlerts: boolean;
 }): boolean => isInitialLoading && isLoadingAlerts;
+
+export const parseCombinedQueries = (query?: string) => {
+  try {
+    return query != null && !isEmpty(query) ? JSON.parse(query) : {};
+  } catch {
+    return {};
+  }
+};
+
+export const buildCombinedQueries = (query?: string) => {
+  try {
+    return isEmpty(query) ? [] : [parseCombinedQueries(query)];
+  } catch {
+    return [];
+  }
+};

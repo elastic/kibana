@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertsStackByOption } from './types';
+import type { AlertsStackByOption } from './types';
 
 export const alertsStackByOptions: AlertsStackByOption[] = [
   { text: 'signal.rule.risk_score', value: 'signal.rule.risk_score' },
@@ -21,7 +21,8 @@ export const alertsStackByOptions: AlertsStackByOption[] = [
   { text: 'user.name', value: 'user.name' },
 ];
 
-export const DEFAULT_STACK_BY = 'signal.rule.name';
+export const DEFAULT_STACK_BY_FIELD = 'signal.rule.name';
 
 export const PANEL_HEIGHT = 300;
+export const MOBILE_PANEL_HEIGHT = 500;
 export const DATA_HEIGHT = 200;

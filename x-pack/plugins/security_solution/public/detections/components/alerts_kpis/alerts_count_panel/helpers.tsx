@@ -5,22 +5,19 @@
  * 2.0.
  */
 
-import { DEFAULT_MAX_TABLE_QUERY_SIZE, showAllOthersBucket } from '../../../../../common/constants';
-import * as i18n from './translations';
+import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../common/constants';
+import { getMissingFields } from '../common/helpers';
+import type { AlertsStackByField } from '../common/types';
 
 export const getAlertsCountQuery = (
-  stackByField: string,
+  stackByField: AlertsStackByField,
   from: string,
   to: string,
   additionalFilters: Array<{
     bool: { filter: unknown[]; should: unknown[]; must_not: unknown[]; must: unknown[] };
-  }>
+  }> = []
 ) => {
-  const missing = showAllOthersBucket.includes(stackByField)
-    ? {
-        missing: stackByField.endsWith('.ip') ? '0.0.0.0' : i18n.ALL_OTHERS,
-      }
-    : {};
+  const missing = getMissingFields(stackByField);
 
   return {
     size: 0,

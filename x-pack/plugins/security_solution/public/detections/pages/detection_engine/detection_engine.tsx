@@ -26,7 +26,7 @@ import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions
 import { useAlertInfo } from '../../components/alerts_info';
 import { AlertsTable } from '../../components/alerts_table';
 import { NoApiIntegrationKeyCallOut } from '../../components/callouts/no_api_integration_callout';
-import { AlertsHistogramPanel } from '../../components/kpis/alerts_histogram_panel';
+import { AlertsHistogramPanel } from '../../components/alerts_kpis/alerts_histogram_panel';
 import { useUserData } from '../../components/user_info';
 import { OverviewEmpty } from '../../../overview/components/overview_empty';
 import { DetectionEngineNoIndex } from './detection_engine_no_index';
@@ -56,8 +56,8 @@ import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { NeedAdminForUpdateRulesCallOut } from '../../components/callouts/need_admin_for_update_callout';
 import { MissingPrivilegesCallOut } from '../../components/callouts/missing_privileges_callout';
 import { useKibana } from '../../../common/lib/kibana';
-import { AlertsCountPanel } from '../../components/kpis/alerts_count_panel';
-import { alertsStackByOptions, DATA_HEIGHT } from '../../components/kpis/common/config';
+import { AlertsCountPanel } from '../../components/alerts_kpis/alerts_count_panel';
+import { DATA_HEIGHT } from '../../components/alerts_kpis/common/config';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -85,7 +85,7 @@ const DetectionEnginePageComponent = () => {
   // TODO: Once we are past experimental phase this code should be removed
   const ruleRegistryEnabled = useIsExperimentalFeatureEnabled('ruleRegistryEnabled');
 
-  const { to, from, deleteQuery, setQuery } = useGlobalTime();
+  const { to, from } = useGlobalTime();
   const { globalFullScreen } = useGlobalFullScreen();
   const [
     {
@@ -255,30 +255,20 @@ const DetectionEnginePageComponent = () => {
                 <EuiFlexItem grow={2}>
                   <AlertsHistogramPanel
                     chartHeight={DATA_HEIGHT}
-                    deleteQuery={deleteQuery}
                     filters={alertsHistogramDefaultFilters}
-                    from={from}
                     query={query}
-                    setQuery={setQuery}
                     showTotalAlertsCount={false}
                     titleSize={'s'}
                     signalIndexName={signalIndexName}
-                    stackByOptions={alertsStackByOptions}
-                    to={to}
                     updateDateRange={updateDateRangeCallback}
                   />
                 </EuiFlexItem>
 
                 <EuiFlexItem grow={1}>
                   <AlertsCountPanel
-                    deleteQuery={deleteQuery}
                     filters={alertsHistogramDefaultFilters}
-                    from={from}
                     query={query}
-                    setQuery={setQuery}
                     signalIndexName={signalIndexName}
-                    stackByOptions={alertsStackByOptions}
-                    to={to}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
