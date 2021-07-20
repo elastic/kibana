@@ -21,7 +21,7 @@ export class ApmServerProcess {
       const subscription = new Rx.Subscription();
 
       const state$ = this.state$.isStopped
-        ? Rx.defer(() => Rx.of(this.state$.getValue()))
+        ? Rx.defer(() => Rx.of(this.getCurrentState()))
         : this.getState$();
 
       subscription.add(
