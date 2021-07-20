@@ -10,7 +10,7 @@ import { EventEmitter } from 'events';
 
 import * as Rx from 'rxjs';
 import { firstValueFrom } from '@kbn/std';
-import { take, toArray } from 'rxjs/operators';
+import { toArray } from 'rxjs/operators';
 
 import { ApmServerInstallation } from './apm_server_installation';
 import { ArchiveArtifact } from './archive_artifact';
