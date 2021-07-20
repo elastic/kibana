@@ -71,6 +71,7 @@ const MONITORING_LOG_DATASETS = [
   'elastic_agent.metricbeat',
   'elastic_agent.osquerybeat',
   'elastic_agent.packetbeat',
+  'elastic_agent.endpoint_security',
 ];
 const MONITORING_METRICS_DATASETS = [
   'elastic_agent',
@@ -81,6 +82,7 @@ const MONITORING_METRICS_DATASETS = [
   'elastic_agent.metricbeat',
   'elastic_agent.osquerybeat',
   'elastic_agent.packetbeat',
+  'elastic_agent.endpoint_security',
 ];
 
 class AgentPolicyService {
@@ -782,7 +784,7 @@ class AgentPolicyService {
       cluster: DEFAULT_PERMISSIONS.cluster,
     };
 
-    // TODO fetch this from the elastic agent package
+    // TODO: fetch this from the elastic agent package
     const monitoringOutput = fullAgentPolicy.agent?.monitoring.use_output;
     const monitoringNamespace = fullAgentPolicy.agent?.monitoring.namespace;
     if (
