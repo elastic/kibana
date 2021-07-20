@@ -28,7 +28,7 @@ export function SyntheticsIntegrationPageProvider({
         'fleet',
         `/integrations/synthetics-${packageVersion}/add-integration`,
         {
-          shouldUseHashForSubUrl: true,
+          shouldUseHashForSubUrl: false,
           useActualUrl: true,
         }
       );
@@ -40,7 +40,7 @@ export function SyntheticsIntegrationPageProvider({
         'fleet',
         `/policies/${agentId}/edit-integration/${packageId}`,
         {
-          shouldUseHashForSubUrl: true,
+          shouldUseHashForSubUrl: false,
           useActualUrl: true,
         }
       );
