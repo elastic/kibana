@@ -62,7 +62,7 @@ export const setSignalsStatusRoute = (router: SecuritySolutionPluginRouter) => {
           conflicts: conflicts ?? 'abort',
           // https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update-by-query.html#_refreshing_shards_2
           // Note: Before we tried to use "refresh: wait_for" but I do not think that was available and instead it defaulted to "refresh: true"
-          // but the tests do not pass with "refresh: false". If t some point a "refresh: wait_for" is implemented, we should use that instead.
+          // but the tests do not pass with "refresh: false". If at some point a "refresh: wait_for" is implemented, we should use that instead.
           refresh: true,
           body: {
             script: {
