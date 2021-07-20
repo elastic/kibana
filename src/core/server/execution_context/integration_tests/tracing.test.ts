@@ -41,6 +41,7 @@ describe('trace', () => {
         },
       },
     });
+    await root.preboot();
   }, 30000);
 
   afterEach(async () => {
@@ -167,6 +168,7 @@ describe('trace', () => {
             },
           },
         });
+        await rootExecutionContextDisabled.preboot();
       }, 30000);
 
       afterEach(async () => {
