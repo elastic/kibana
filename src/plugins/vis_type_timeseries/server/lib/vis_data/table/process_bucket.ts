@@ -14,14 +14,16 @@ import { createFieldsFetcher } from '../../search_strategies/lib/fields_fetcher'
 
 import type { Panel } from '../../../../common/types';
 import type { TableSearchRequestMeta } from '../request_processors/table/types';
+import { PanelDataArray } from '../../../../common/types/vis_data';
 
-function trendSinceLastBucket(data: any[]) {
+function trendSinceLastBucket(data: PanelDataArray[]) {
   if (data.length < 2) {
     return 0;
   }
   const currentBucket = data[data.length - 1];
   const prevBucket = data[data.length - 2];
-  const trend = (currentBucket[1] - prevBucket[1]) / currentBucket[1];
+
+  const trend = (Number(currentBucket[1]) - Number(prevBucket[1])) / Number(currentBucket[1]);
   return Number.isNaN(trend) ? 0 : trend;
 }
 
@@ -58,7 +60,7 @@ export function processBucket({ panel, extractFields }: ProcessTableBucketParams
         });
 
         if (!result) return null;
-        const data = get(result, 'data', []) as any[];
+        const data = result?.data ?? [];
         result.slope = trendSinceLastBucket(data);
         result.last = getLastValue(data);
         return result;

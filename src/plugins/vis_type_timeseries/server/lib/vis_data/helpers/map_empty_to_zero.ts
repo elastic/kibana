@@ -13,8 +13,12 @@ import type { Metric } from '../../../../common/types';
 
 export const mapEmptyToZero = (
   metric: Metric,
-  buckets: any[]
-): Array<[number | undefined, number]> => {
+  buckets: Array<
+    {
+      key: number;
+    } & Record<string, unknown>
+  >
+) => {
   // Metric types where an empty set equals `zero`
   const isSettableToZero = [
     METRIC_TYPES.COUNT,

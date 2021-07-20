@@ -27,13 +27,7 @@ interface SplittedData<TMeta extends BaseMeta = BaseMeta> {
   color: string;
   meta: TMeta;
   timeseries: {
-    buckets: [
-      {
-        [s: string]: {
-          values: Record<string, unknown>;
-        };
-      } & { key: string }
-    ];
+    buckets: Array<Record<string, unknown> & { key: string }>;
   };
 }
 
@@ -81,7 +75,7 @@ export async function getSplits<TRawResponse = unknown, TMeta extends BaseMeta =
     }
   }
 
-  const timeseries = getTimeSeries<TRawResponse>(resp, series);
+  const timeseries: SplittedData<TMeta>['timeseries'] = getTimeSeries<TRawResponse>(resp, series);
 
   const mergeObj = {
     timeseries,
