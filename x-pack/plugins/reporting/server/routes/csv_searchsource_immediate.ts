@@ -55,13 +55,14 @@ export function registerGenerateCsvFromSavedObjectImmediate(
           searchSource: schema.object({}, { unknowns: 'allow' }),
           browserTimezone: schema.string({ defaultValue: 'UTC' }),
           title: schema.string(),
+          version: schema.maybe(schema.string()),
         }),
       },
       options: {
         tags: kibanaAccessControlTags,
       },
     },
-    userHandler(async (user, context, req: CsvFromSavedObjectRequest, res) => {
+    userHandler(async (_user, context, req: CsvFromSavedObjectRequest, res) => {
       const logger = parentLogger.clone(['csv_searchsource_immediate']);
       const runTaskFn = runTaskFnFactory(reporting, logger);
 
