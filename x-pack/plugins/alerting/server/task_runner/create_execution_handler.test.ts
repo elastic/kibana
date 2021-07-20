@@ -30,6 +30,7 @@ jest.mock('./inject_action_params', () => ({
 
 const alertType: NormalizedAlertType<
   AlertTypeParams,
+  AlertTypeParams,
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
@@ -59,6 +60,7 @@ const mockActionsPlugin = actionsMock.createStart();
 const mockEventLogger = eventLoggerMock.create();
 const createExecutionHandlerParams: jest.Mocked<
   CreateExecutionHandlerOptions<
+    AlertTypeParams,
     AlertTypeParams,
     AlertTypeState,
     AlertInstanceState,

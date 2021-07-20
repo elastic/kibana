@@ -28,6 +28,7 @@ export type {
   AlertInstanceState,
   AlertInstanceContext,
   AlertingApiRequestHandlerContext,
+  RuleParamsAndRefs,
 } from './types';
 export { PluginSetupContract, PluginStartContract } from './plugin';
 export { FindResult } from './alerts_client';

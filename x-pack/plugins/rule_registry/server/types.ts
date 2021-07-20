@@ -16,7 +16,15 @@ import { AlertType } from '../../alerting/server';
 type SimpleAlertType<
   TParams extends AlertTypeParams = {},
   TAlertInstanceContext extends AlertInstanceContext = {}
-> = AlertType<TParams, AlertTypeState, AlertInstanceState, TAlertInstanceContext, string, string>;
+> = AlertType<
+  TParams,
+  TParams,
+  AlertTypeState,
+  AlertInstanceState,
+  TAlertInstanceContext,
+  string,
+  string
+>;
 
 export type AlertTypeExecutor<
   TParams extends AlertTypeParams = {},
@@ -33,7 +41,15 @@ export type AlertTypeWithExecutor<
   TAlertInstanceContext extends AlertInstanceContext = {},
   TServices extends Record<string, any> = {}
 > = Omit<
-  AlertType<TParams, AlertTypeState, AlertInstanceState, TAlertInstanceContext, string, string>,
+  AlertType<
+    TParams,
+    TParams,
+    AlertTypeState,
+    AlertInstanceState,
+    TAlertInstanceContext,
+    string,
+    string
+  >,
   'executor'
 > & {
   executor: AlertTypeExecutor<TParams, TAlertInstanceContext, TServices>;
