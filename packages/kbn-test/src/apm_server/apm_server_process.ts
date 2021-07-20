@@ -7,7 +7,6 @@
  */
 
 import * as Rx from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
 
 import { ExecState, StopSignal, StopSubject } from './apm_server_installation';
 
@@ -71,7 +70,7 @@ export class ApmServerProcess {
   }
 
   getState$() {
-    return this.state$.pipe(takeUntil(this.stop$));
+    return this.state$.asObservable();
   }
 
   stop(signal?: StopSignal) {

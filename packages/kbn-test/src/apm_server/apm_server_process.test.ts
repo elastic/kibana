@@ -38,6 +38,8 @@ class MockState extends Rx.BehaviorSubject<ExecState> {
   }
 }
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 const record = (obs: Rx.Observable<ExecState>): { history: string[]; sub: Rx.Subscription } => {
   const history: string[] = [];
   const sub = obs.subscribe(
@@ -133,6 +135,30 @@ describe('#getState()', () => {
       ]
     `);
   });
+
+  it('completes after "killed" when calling stop', async () => {
+    const state$ = new MockState();
+    const proc = new ApmServerProcess(state$, new Rx.Subject());
+
+    const { history } = record(proc.getState$());
+    expect(history).toMatchInlineSnapshot(`
+      Array [
+        "next: { type: 'starting' }",
+      ]
+    `);
+
+    proc.stop();
+    await sleep(10);
+    state$.mockKilled();
+
+    expect(history).toMatchInlineSnapshot(`
+      Array [
+        "next: { type: 'starting' }",
+        "next: { type: 'killed', signal: 'MOCKED' }",
+        "complete",
+      ]
+    `);
+  });
 });
 
 describe('#toPromise()', () => {
@@ -169,6 +195,17 @@ describe('#toPromise()', () => {
     const proc = new ApmServerProcess(state$, new Rx.Subject());
     state$.mockError();
     await expect(proc.toPromise()).rejects.toMatchInlineSnapshot(`[Error: mocked error]`);
+    expect(state$.observers).toHaveLength(0);
+  });
+
+  it('resolves with the killed state after calling stop', async () => {
+    const state$ = new MockState();
+    const proc = new ApmServerProcess(state$, new Rx.Subject());
+    const promise = proc.toPromise();
+    proc.stop();
+    await sleep(10);
+    state$.mockKilled();
+    await expect(promise).resolves.toMatchInlineSnapshot(`undefined`);
     expect(state$.observers).toHaveLength(0);
   });
 });
