@@ -302,7 +302,7 @@ export const getXyChartRenderer = (dependencies: {
 });
 
 function getValueLabelsStyling(isHorizontal: boolean) {
-  const VALUE_LABELS_MAX_FONTSIZE = 15;
+  const VALUE_LABELS_MAX_FONTSIZE = 12;
   const VALUE_LABELS_MIN_FONTSIZE = 10;
   const VALUE_LABELS_VERTICAL_OFFSET = -10;
   const VALUE_LABELS_HORIZONTAL_OFFSET = 10;
@@ -310,7 +310,7 @@ function getValueLabelsStyling(isHorizontal: boolean) {
   return {
     displayValue: {
       fontSize: { min: VALUE_LABELS_MIN_FONTSIZE, max: VALUE_LABELS_MAX_FONTSIZE },
-      fill: { textInverted: true, textBorder: 2 },
+      fill: { textContrast: true, textInverted: false, textBorder: 0 },
       alignment: isHorizontal
         ? {
             vertical: VerticalAlignment.Middle,
@@ -908,9 +908,12 @@ export function XYChart({
                   // * in some scenarios value labels are not strings, and this breaks the elastic-chart lib
                   valueFormatter: (d: unknown) => yAxis?.formatter?.convert(d) || '',
                   showValueLabel: shouldShowValueLabels && valueLabels !== 'hide',
+                  isValueContainedInElement: false,
                   isAlternatingValueLabel: false,
-                  isValueContainedInElement: true,
-                  overflowConstraints: [LabelOverflowConstraint.ChartEdges],
+                  overflowConstraints: [
+                    LabelOverflowConstraint.ChartEdges,
+                    LabelOverflowConstraint.BarGeometry,
+                  ],
                 },
               };
               return <BarSeries key={index} {...seriesProps} {...valueLabelsSettings} />;
