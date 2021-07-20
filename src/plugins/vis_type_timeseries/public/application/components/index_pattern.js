@@ -323,7 +323,7 @@ export const IndexPattern = ({
                     content={
                       <FormattedMessage
                         id="visTypeTimeseries.indexPattern.detailLevelHelpText"
-                        defaultMessage="Controls the auto interval based on the time range. The default interval is affected by the advanced settings {histogramTargetBars} and {histogramMaxBars}."
+                        defaultMessage="Controls the auto and gte intervals based on the time range. The default interval is affected by the advanced settings {histogramTargetBars} and {histogramMaxBars}."
                         values={{
                           histogramTargetBars: UI_SETTINGS.HISTOGRAM_MAX_BARS,
                           histogramMaxBars: UI_SETTINGS.HISTOGRAM_BAR_TARGET,
