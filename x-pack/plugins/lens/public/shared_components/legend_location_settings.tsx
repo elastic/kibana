@@ -149,9 +149,6 @@ const locationAlignmentButtonsIcons: Array<{
   },
 ];
 
-const MIN_COLUMNS_VALUE = 1;
-const MAX_COLUMNS_VALUE = 5;
-
 const FloatingColumnsInput = ({
   value,
   setValue,
@@ -166,8 +163,8 @@ const FloatingColumnsInput = ({
     <EuiFieldNumber
       data-test-subj="lens-legend-location-columns-input"
       value={inputValue}
-      min={MIN_COLUMNS_VALUE}
-      max={MAX_COLUMNS_VALUE}
+      min={1}
+      max={5}
       compressed
       disabled={isDisabled}
       onChange={(e) => {
