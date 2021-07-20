@@ -125,6 +125,11 @@ export interface Router<TRoutes extends Route[]> {
     path: TPath,
     location: Location
   ): OutputOf<TRoutes, TPath>;
+  getParams<TPath extends PathsOf<TRoutes>, TOptional extends boolean>(
+    path: TPath,
+    location: Location,
+    optional: TOptional
+  ): TOptional extends true ? OutputOf<TRoutes, TPath> | undefined : OutputOf<TRoutes, TPath>;
   link<TPath extends PathsOf<TRoutes>>(
     path: TPath,
     ...args: TypeAsArgs<TypeOf<TRoutes, TPath>>

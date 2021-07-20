@@ -5,48 +5,36 @@
  * 2.0.
  */
 
-import {
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiPortal,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlyoutBody, EuiFlyoutHeader, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Component, Fragment } from 'react';
+import React, { Fragment } from 'react';
+import { CoreStart } from 'kibana/public';
 import { UISession } from '../../types';
-import { TableText } from '..';
-import { CodeEditor } from '../../../../../../../../src/plugins/kibana_react/public';
+import { IClickActionDescriptor } from '..';
+import {
+  CodeEditor,
+  createKibanaReactContext,
+  toMountPoint,
+} from '../../../../../../../../src/plugins/kibana_react/public';
 import './inspect_button.scss';
+import { SearchSessionsMgmtAPI } from '../../lib/api';
 
-interface Props {
+interface InspectFlyoutProps {
   searchSession: UISession;
+  uiSettings: CoreStart['uiSettings'];
 }
 
-interface State {
-  isFlyoutVisible: boolean;
-}
+const InspectFlyout = ({ uiSettings, searchSession }: InspectFlyoutProps) => {
+  const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
+    uiSettings,
+  });
 
-export class InspectButton extends Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-
-    this.state = {
-      isFlyoutVisible: false,
-    };
-
-    this.closeFlyout = this.closeFlyout.bind(this);
-    this.showFlyout = this.showFlyout.bind(this);
-  }
-
-  public renderInfo() {
+  const renderInfo = () => {
     return (
       <Fragment>
         <CodeEditor
           languageId="json"
-          value={JSON.stringify(this.props.searchSession.initialState, null, 2)}
+          value={JSON.stringify(searchSession.initialState, null, 2)}
           onChange={() => {}}
           options={{
             readOnly: true,
@@ -63,72 +51,54 @@ export class InspectButton extends Component<Props, State> {
         />
       </Fragment>
     );
-  }
-
-  public render() {
-    let flyout;
-
-    if (this.state.isFlyoutVisible) {
-      flyout = (
-        <EuiPortal>
-          <EuiFlyout
-            ownFocus
-            onClose={this.closeFlyout}
-            size="s"
-            aria-labelledby="flyoutTitle"
-            data-test-subj="searchSessionsFlyout"
-            className="searchSessionsFlyout"
-          >
-            <EuiFlyoutHeader hasBorder>
-              <EuiTitle size="m">
-                <h2 id="flyoutTitle">
-                  <FormattedMessage
-                    id="xpack.data.sessions.management.flyoutTitle"
-                    defaultMessage="Inspect search session"
-                  />
-                </h2>
-              </EuiTitle>
-            </EuiFlyoutHeader>
-            <EuiFlyoutBody>
-              <EuiText>
-                <EuiText size="xs">
-                  <p>
-                    <FormattedMessage
-                      id="xpack.data.sessions.management.flyoutText"
-                      defaultMessage="Configuration for this search session"
-                    />
-                  </p>
-                </EuiText>
-                <EuiSpacer />
-                {this.renderInfo()}
-              </EuiText>
-            </EuiFlyoutBody>
-          </EuiFlyout>
-        </EuiPortal>
-      );
-    }
-
-    return (
-      <Fragment>
-        <TableText onClick={this.showFlyout}>
-          <FormattedMessage
-            id="xpack.data.mgmt.searchSessions.flyoutTitle"
-            aria-label="Inspect"
-            defaultMessage="Inspect"
-          />
-        </TableText>
-        {flyout}
-      </Fragment>
-    );
-  }
-
-  private closeFlyout = () => {
-    this.setState({
-      isFlyoutVisible: false,
-    });
   };
 
-  private showFlyout = () => {
-    this.setState({ isFlyoutVisible: true });
-  };
-}
+  return (
+    <KibanaReactContextProvider>
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="m">
+          <h2 id="flyoutTitle">
+            <FormattedMessage
+              id="xpack.data.sessions.management.flyoutTitle"
+              defaultMessage="Inspect search session"
+            />
+          </h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody className="searchSessionsFlyout" data-test-subj="searchSessionsFlyout">
+        <EuiText>
+          <EuiText size="xs">
+            <p>
+              <FormattedMessage
+                id="xpack.data.sessions.management.flyoutText"
+                defaultMessage="Configuration for this search session"
+              />
+            </p>
+          </EuiText>
+          <EuiSpacer />
+          {renderInfo()}
+        </EuiText>
+      </EuiFlyoutBody>
+    </KibanaReactContextProvider>
+  );
+};
+
+export const createInspectActionDescriptor = (
+  api: SearchSessionsMgmtAPI,
+  uiSession: UISession,
+  core: CoreStart
+): IClickActionDescriptor => ({
+  iconType: 'document',
+  label: (
+    <FormattedMessage
+      id="xpack.data.mgmt.searchSessions.flyoutTitle"
+      aria-label="Inspect"
+      defaultMessage="Inspect"
+    />
+  ),
+  onClick: async () => {
+    const flyout = <InspectFlyout uiSettings={core.uiSettings} searchSession={uiSession} />;
+    const overlay = core.overlays.openFlyout(toMountPoint(flyout));
+    await overlay.onClose;
+  },
+});
