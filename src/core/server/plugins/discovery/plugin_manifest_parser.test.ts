@@ -226,6 +226,29 @@ test('return error when manifest contains unrecognized properties', async () => 
   });
 });
 
+test('returns error when manifest contains unrecognized `type`', async () => {
+  mockReadFile.mockImplementation((path, cb) => {
+    cb(
+      null,
+      Buffer.from(
+        JSON.stringify({
+          id: 'someId',
+          version: '7.0.0',
+          kibanaVersion: '7.0.0',
+          type: 'unknown',
+          server: true,
+        })
+      )
+    );
+  });
+
+  await expect(parseManifest(pluginPath, packageInfo)).rejects.toMatchObject({
+    message: `The "type" in manifest for plugin "someId" is set to "unknown", but it should either be "standard" or "preboot". (invalid-manifest, ${pluginManifestPath})`,
+    type: PluginDiscoveryErrorType.InvalidManifest,
+    path: pluginManifestPath,
+  });
+});
+
 describe('configPath', () => {
   test('falls back to plugin id if not specified', async () => {
     mockReadFile.mockImplementation((path, cb) => {
@@ -284,6 +307,7 @@ test('set defaults for all missing optional fields', async () => {
     configPath: 'some_id',
     version: '7.0.0',
     kibanaVersion: '7.0.0',
+    type: 'standard',
     optionalPlugins: [],
     requiredPlugins: [],
     requiredBundles: [],
@@ -302,6 +326,7 @@ test('return all set optional fields as they are in manifest', async () => {
           configPath: ['some', 'path'],
           version: 'some-version',
           kibanaVersion: '7.0.0',
+          type: 'preboot',
           requiredPlugins: ['some-required-plugin', 'some-required-plugin-2'],
           optionalPlugins: ['some-optional-plugin'],
           ui: true,
@@ -315,6 +340,7 @@ test('return all set optional fields as they are in manifest', async () => {
     configPath: ['some', 'path'],
     version: 'some-version',
     kibanaVersion: '7.0.0',
+    type: 'preboot',
     optionalPlugins: ['some-optional-plugin'],
     requiredBundles: [],
     requiredPlugins: ['some-required-plugin', 'some-required-plugin-2'],
@@ -345,6 +371,7 @@ test('return manifest when plugin expected Kibana version matches actual version
     configPath: 'some-path',
     version: 'some-version',
     kibanaVersion: '7.0.0-alpha2',
+    type: 'standard',
     optionalPlugins: [],
     requiredPlugins: ['some-required-plugin'],
     requiredBundles: [],
@@ -375,6 +402,7 @@ test('return manifest when plugin expected Kibana version is `kibana`', async ()
     configPath: 'some_id',
     version: 'some-version',
     kibanaVersion: 'kibana',
+    type: 'standard',
     optionalPlugins: [],
     requiredPlugins: ['some-required-plugin'],
     requiredBundles: [],
