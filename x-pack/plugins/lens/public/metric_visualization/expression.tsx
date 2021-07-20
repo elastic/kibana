@@ -12,13 +12,72 @@ import ReactDOM from 'react-dom';
 import type {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
+  ExpressionFunctionDefinition,
 } from '../../../../../src/plugins/expressions/public';
 import { AutoScale } from './auto_scale';
 import { VisualizationContainer } from '../visualization_container';
 import { EmptyPlaceholder } from '../shared_components';
 import { LensIconChartMetric } from '../assets/chart_metric';
-import type { FormatFactory } from '../../common';
-import type { MetricChartProps } from '../../common/expressions';
+import type { FormatFactory, LensMultiTable } from '../../common';
+import type { MetricConfig } from '../../common/expressions';
+
+export interface MetricChartProps {
+  data: LensMultiTable;
+  args: MetricConfig;
+}
+
+export interface MetricRender {
+  type: 'render';
+  as: 'lens_metric_chart_renderer';
+  value: MetricChartProps;
+}
+
+export const metricChart: ExpressionFunctionDefinition<
+  'lens_metric_chart',
+  LensMultiTable,
+  Omit<MetricConfig, 'layerId'>,
+  MetricRender
+> = {
+  name: 'lens_metric_chart',
+  type: 'render',
+  help: 'A metric chart',
+  args: {
+    title: {
+      types: ['string'],
+      help: 'The chart title.',
+    },
+    description: {
+      types: ['string'],
+      help: '',
+    },
+    metricTitle: {
+      types: ['string'],
+      help: 'The title of the metric shown.',
+    },
+    accessor: {
+      types: ['string'],
+      help: 'The column whose value is being displayed',
+    },
+    mode: {
+      types: ['string'],
+      options: ['reduced', 'full'],
+      default: 'full',
+      help:
+        'The display mode of the chart - reduced will only show the metric itself without min size',
+    },
+  },
+  inputTypes: ['lens_multitable'],
+  fn(data, args) {
+    return {
+      type: 'render',
+      as: 'lens_metric_chart_renderer',
+      value: {
+        data,
+        args,
+      },
+    } as MetricRender;
+  },
+};
 
 export const getMetricChartRenderer = (
   formatFactory: Promise<FormatFactory>

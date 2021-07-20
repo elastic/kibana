@@ -6,4 +6,3 @@
  */
 
 export * from './types';
-export * from './pie_chart';

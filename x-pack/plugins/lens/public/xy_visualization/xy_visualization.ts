@@ -13,7 +13,6 @@ export {
   axisTitlesVisibilityConfig,
   axisExtentConfig,
   layerConfig,
-  xyChart,
 } from '../../common/expressions';
 export * from './expression';
 export * from './types';

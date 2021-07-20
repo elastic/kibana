@@ -19,16 +19,20 @@ import {
   Fit,
 } from '@elastic/charts';
 import { PaletteOutput } from 'src/plugins/charts/public';
-import { calculateMinInterval, XYChart, XYChartRenderProps } from './expression';
+import {
+  calculateMinInterval,
+  XYChart,
+  XYChartRenderProps,
+  xyChart,
+  XYChartProps,
+} from './expression';
 import type { LensMultiTable } from '../../common';
 import {
-  xyChart,
   layerConfig,
   legendConfig,
   tickLabelsConfig,
   gridlinesConfig,
   XYArgs,
-  XYChartProps,
   LegendConfig,
   LayerArgs,
   AxesSettingsConfig,

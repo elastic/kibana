@@ -32,17 +32,23 @@ import type {
   ExpressionRenderDefinition,
   Datatable,
   DatatableRow,
+  ExpressionFunctionDefinition,
 } from 'src/plugins/expressions/public';
 import { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RenderMode } from 'src/plugins/expressions';
 import type { ILensInterpreterRenderHandlers, LensFilterEvent, LensBrushEvent } from '../types';
 import type { LensMultiTable, FormatFactory } from '../../common';
-import type { LayerArgs, SeriesType, XYChartProps } from '../../common/expressions';
+import {
+  fittingFunctionDefinitions,
+  LayerArgs,
+  SeriesType,
+  XYArgs,
+} from '../../common/expressions';
 import { visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart, getSeriesColor } from './state_helpers';
-import { search } from '../../../../../src/plugins/data/public';
+import { ExpressionValueSearchContext, search } from '../../../../../src/plugins/data/public';
 import {
   ChartsPluginSetup,
   PaletteRegistry,
@@ -68,6 +74,150 @@ type InferPropType<T> = T extends React.FunctionComponent<infer P> ? P : T;
 type SeriesSpec = InferPropType<typeof LineSeries> &
   InferPropType<typeof BarSeries> &
   InferPropType<typeof AreaSeries>;
+
+export interface XYChartProps {
+  data: LensMultiTable;
+  args: XYArgs;
+}
+
+export interface XYRender {
+  type: 'render';
+  as: 'lens_xy_chart_renderer';
+  value: XYChartProps;
+}
+
+export const xyChart: ExpressionFunctionDefinition<
+  'lens_xy_chart',
+  LensMultiTable | ExpressionValueSearchContext | null,
+  XYArgs,
+  XYRender
+> = {
+  name: 'lens_xy_chart',
+  type: 'render',
+  inputTypes: ['lens_multitable', 'kibana_context', 'null'],
+  help: i18n.translate('xpack.lens.xyChart.help', {
+    defaultMessage: 'An X/Y chart',
+  }),
+  args: {
+    title: {
+      types: ['string'],
+      help: 'The chart title.',
+    },
+    description: {
+      types: ['string'],
+      help: '',
+    },
+    xTitle: {
+      types: ['string'],
+      help: i18n.translate('xpack.lens.xyChart.xTitle.help', {
+        defaultMessage: 'X axis title',
+      }),
+    },
+    yTitle: {
+      types: ['string'],
+      help: i18n.translate('xpack.lens.xyChart.yLeftTitle.help', {
+        defaultMessage: 'Y left axis title',
+      }),
+    },
+    yRightTitle: {
+      types: ['string'],
+      help: i18n.translate('xpack.lens.xyChart.yRightTitle.help', {
+        defaultMessage: 'Y right axis title',
+      }),
+    },
+    yLeftExtent: {
+      types: ['lens_xy_axisExtentConfig'],
+      help: i18n.translate('xpack.lens.xyChart.yLeftExtent.help', {
+        defaultMessage: 'Y left axis extents',
+      }),
+    },
+    yRightExtent: {
+      types: ['lens_xy_axisExtentConfig'],
+      help: i18n.translate('xpack.lens.xyChart.yRightExtent.help', {
+        defaultMessage: 'Y right axis extents',
+      }),
+    },
+    legend: {
+      types: ['lens_xy_legendConfig'],
+      help: i18n.translate('xpack.lens.xyChart.legend.help', {
+        defaultMessage: 'Configure the chart legend.',
+      }),
+    },
+    fittingFunction: {
+      types: ['string'],
+      options: [...fittingFunctionDefinitions.map(({ id }) => id)],
+      help: i18n.translate('xpack.lens.xyChart.fittingFunction.help', {
+        defaultMessage: 'Define how missing values are treated',
+      }),
+    },
+    valueLabels: {
+      types: ['string'],
+      options: ['hide', 'inside'],
+      help: '',
+    },
+    tickLabelsVisibilitySettings: {
+      types: ['lens_xy_tickLabelsConfig'],
+      help: i18n.translate('xpack.lens.xyChart.tickLabelsSettings.help', {
+        defaultMessage: 'Show x and y axes tick labels',
+      }),
+    },
+    gridlinesVisibilitySettings: {
+      types: ['lens_xy_gridlinesConfig'],
+      help: i18n.translate('xpack.lens.xyChart.gridlinesSettings.help', {
+        defaultMessage: 'Show x and y axes gridlines',
+      }),
+    },
+    axisTitlesVisibilitySettings: {
+      types: ['lens_xy_axisTitlesVisibilityConfig'],
+      help: i18n.translate('xpack.lens.xyChart.axisTitlesSettings.help', {
+        defaultMessage: 'Show x and y axes titles',
+      }),
+    },
+    layers: {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      types: ['lens_xy_layer'] as any,
+      help: 'Layers of visual series',
+      multi: true,
+    },
+    curveType: {
+      types: ['string'],
+      options: ['LINEAR', 'CURVE_MONOTONE_X'],
+      help: i18n.translate('xpack.lens.xyChart.curveType.help', {
+        defaultMessage: 'Define how curve type is rendered for a line chart',
+      }),
+    },
+    fillOpacity: {
+      types: ['number'],
+      help: i18n.translate('xpack.lens.xyChart.fillOpacity.help', {
+        defaultMessage: 'Define the area chart fill opacity',
+      }),
+    },
+    hideEndzones: {
+      types: ['boolean'],
+      default: false,
+      help: i18n.translate('xpack.lens.xyChart.hideEndzones.help', {
+        defaultMessage: 'Hide endzone markers for partial data',
+      }),
+    },
+    valuesInLegend: {
+      types: ['boolean'],
+      default: false,
+      help: i18n.translate('xpack.lens.xyChart.valuesInLegend.help', {
+        defaultMessage: 'Show values in legend',
+      }),
+    },
+  },
+  fn(data: LensMultiTable, args: XYArgs) {
+    return {
+      type: 'render',
+      as: 'lens_xy_chart_renderer',
+      value: {
+        data,
+        args,
+      },
+    };
+  },
+};
 
 export type XYChartRenderProps = XYChartProps & {
   chartsThemeService: ChartsPluginSetup['theme'];
