@@ -8,6 +8,7 @@
 /* eslint-disable max-classes-per-file */
 
 import { i18n } from '@kbn/i18n';
+// @ts-ignore
 import { ClusterMetric, Metric } from '../classes';
 import { SMALL_FLOAT, LARGE_FLOAT, LARGE_BYTES } from '../../../../common/formatting';
 import { NORMALIZED_DERIVATIVE_UNIT } from '../../../../common/constants';
@@ -17,6 +18,7 @@ const perSecondUnitLabel = i18n.translate('xpack.monitoring.metrics.beats.perSec
 });
 
 export class BeatsClusterMetric extends ClusterMetric {
+  // @ts-ignore
   constructor(opts) {
     super({
       ...opts,
@@ -34,6 +36,7 @@ export class BeatsClusterMetric extends ClusterMetric {
 }
 
 export class BeatsEventsRateClusterMetric extends BeatsClusterMetric {
+  // @ts-ignore
   constructor(opts) {
     super({
       ...opts,
@@ -42,6 +45,7 @@ export class BeatsEventsRateClusterMetric extends BeatsClusterMetric {
       metricAgg: 'max',
       units: perSecondUnitLabel,
     });
+    // @ts-ignore
 
     this.aggs = {
       beats_uuids: {
@@ -52,6 +56,7 @@ export class BeatsEventsRateClusterMetric extends BeatsClusterMetric {
         aggs: {
           event_rate_per_beat: {
             max: {
+              // @ts-ignore
               field: this.field,
             },
           },
@@ -75,6 +80,7 @@ export class BeatsEventsRateClusterMetric extends BeatsClusterMetric {
 }
 
 export class BeatsMetric extends Metric {
+  // @ts-ignore
   constructor(opts) {
     super({
       ...opts,
@@ -91,9 +97,10 @@ export class BeatsMetric extends Metric {
   }
 }
 
-export type BeatsMetricFields = ReturnType<BeatsMetric.getMetricFields>;
+export type BeatsMetricFields = ReturnType<typeof BeatsMetric.getMetricFields>;
 
 export class BeatsByteRateClusterMetric extends BeatsEventsRateClusterMetric {
+  // @ts-ignore
   constructor(opts) {
     super({
       ...opts,
@@ -103,6 +110,7 @@ export class BeatsByteRateClusterMetric extends BeatsEventsRateClusterMetric {
 }
 
 export class BeatsEventsRateMetric extends BeatsMetric {
+  // @ts-ignore
   constructor(opts) {
     super({
       ...opts,
@@ -115,6 +123,7 @@ export class BeatsEventsRateMetric extends BeatsMetric {
 }
 
 export class BeatsByteRateMetric extends BeatsMetric {
+  // @ts-ignore
   constructor(opts) {
     super({
       ...opts,
@@ -127,6 +136,7 @@ export class BeatsByteRateMetric extends BeatsMetric {
 }
 
 export class BeatsCpuUtilizationMetric extends BeatsMetric {
+  // @ts-ignore
   constructor(opts) {
     super({
       ...opts,
@@ -139,6 +149,7 @@ export class BeatsCpuUtilizationMetric extends BeatsMetric {
     /*
      * Convert a counter of milliseconds of utilization time into a percentage of the bucket size
      */
+    // @ts-ignore
     this.calculation = ({ metric_deriv: metricDeriv } = {}, _key, _metric, bucketSizeInSeconds) => {
       if (metricDeriv) {
         const { value } = metricDeriv;

@@ -11,8 +11,9 @@ import { createApmQuery } from './create_apm_query';
 import { ApmMetric } from '../metrics';
 import { apmAggResponseHandler, apmUuidsAgg, apmAggFilterPath } from './_apm_stats';
 import { getTimeOfLastEvent } from './_get_time_of_last_event';
+import { ElasticsearchResponse } from '../../../common/types/es';
 
-export function handleResponse(clusterUuid: string, response) {
+export function handleResponse(clusterUuid: string, response: ElasticsearchResponse) {
   const { apmTotal, totalEvents, memRss, versions } = apmAggResponseHandler(response);
 
   // combine stats

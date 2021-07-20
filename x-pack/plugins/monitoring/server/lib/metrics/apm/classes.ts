@@ -8,11 +8,13 @@
 /* eslint-disable max-classes-per-file */
 
 import { i18n } from '@kbn/i18n';
+// @ts-ignore
 import { ClusterMetric, Metric } from '../classes';
 import { SMALL_FLOAT, LARGE_FLOAT } from '../../../../common/formatting';
 import { NORMALIZED_DERIVATIVE_UNIT } from '../../../../common/constants';
 
 export class ApmClusterMetric extends ClusterMetric {
+  // @ts-ignore
   constructor(opts) {
     super({
       ...opts,
@@ -30,6 +32,7 @@ export class ApmClusterMetric extends ClusterMetric {
 }
 
 export class ApmMetric extends Metric {
+  // @ts-ignore
   constructor(opts) {
     super({
       ...opts,
@@ -46,9 +49,10 @@ export class ApmMetric extends Metric {
   }
 }
 
-export type ApmMetricFields = ReturnType<ApmMetric.getMetricFields>;
+export type ApmMetricFields = ReturnType<typeof ApmMetric.getMetricFields>;
 
 export class ApmCpuUtilizationMetric extends ApmMetric {
+  // @ts-ignore
   constructor(opts) {
     super({
       ...opts,
@@ -61,6 +65,7 @@ export class ApmCpuUtilizationMetric extends ApmMetric {
     /*
      * Convert a counter of milliseconds of utilization time into a percentage of the bucket size
      */
+    // @ts-ignore
     this.calculation = ({ metric_deriv: metricDeriv } = {}, _key, _metric, bucketSizeInSeconds) => {
       if (metricDeriv) {
         const { value: metricDerivValue } = metricDeriv;
@@ -76,6 +81,7 @@ export class ApmCpuUtilizationMetric extends ApmMetric {
 }
 
 export class ApmEventsRateClusterMetric extends ApmClusterMetric {
+  // @ts-ignore
   constructor(opts) {
     super({
       ...opts,
@@ -87,6 +93,7 @@ export class ApmEventsRateClusterMetric extends ApmClusterMetric {
       }),
     });
 
+    // @ts-ignore
     this.aggs = {
       beats_uuids: {
         terms: {
@@ -96,6 +103,7 @@ export class ApmEventsRateClusterMetric extends ApmClusterMetric {
         aggs: {
           event_rate_per_beat: {
             max: {
+              // @ts-ignore
               field: this.field,
             },
           },

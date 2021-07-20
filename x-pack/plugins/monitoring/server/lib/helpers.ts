@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { ElasticsearchResponse, ElasticsearchResponseHit } from '../../common/types/es';
+
 export const response = {
   hits: {
     hits: [
@@ -83,20 +85,22 @@ export const response = {
   },
 };
 
-export const defaultResponseSort = (handleResponse) => {
-  const responseMulti = { hits: { hits: [] } };
+export const defaultResponseSort = (
+  handleResponse: (r: ElasticsearchResponse, n1: number, n2: number) => any
+) => {
+  const responseMulti = { hits: { hits: [] as ElasticsearchResponseHit[] } };
   const hit = response.hits.hits[0];
   const version = ['6.6.2', '7.0.0-rc1', '6.7.1'];
 
   for (let i = 0, l = version.length; i < l; ++i) {
     // Deep clone the object to preserve the original
-    const newBeat = JSON.parse(JSON.stringify({ ...hit }));
+    const newBeat: ElasticsearchResponseHit = JSON.parse(JSON.stringify({ ...hit }));
     const { beats_stats: beatsStats } = newBeat._source;
-    beatsStats.timestamp = `2019-01-0${i + 1}T05:00:00.000Z`;
-    beatsStats.beat.version = version[i];
-    beatsStats.beat.uuid = `${i}${beatsStats.beat.uuid}`;
+    beatsStats!.timestamp = `2019-01-0${i + 1}T05:00:00.000Z`;
+    beatsStats!.beat!.version = version[i];
+    beatsStats!.beat!.uuid = `${i}${beatsStats!.beat!.uuid}`;
     responseMulti.hits.hits.push(newBeat);
   }
 
-  return { beats: handleResponse(responseMulti, 0, 0), version };
+  return { beats: handleResponse(responseMulti as ElasticsearchResponse, 0, 0), version };
 };

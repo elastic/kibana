@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export async function getTimezone(req) {
+import { LegacyRequest } from '../types';
+
+export async function getTimezone(req: LegacyRequest) {
   return await req.getUiSettingsService().get('dateFormat:tz');
 }

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { LegacyServer } from '../../types';
 import { prefixIndexPattern } from '../ccs_utils';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
@@ -14,7 +15,11 @@ import {
   INDEX_ALERTS,
 } from '../../../common/constants';
 
-export function getIndexPatterns(server, additionalPatterns = {}, ccs = '*') {
+export function getIndexPatterns(
+  server: LegacyServer,
+  additionalPatterns: Record<string, string> = {},
+  cc: string = '*'
+) {
   const config = server.config();
   const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
   const kbnIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_KIBANA, ccs);

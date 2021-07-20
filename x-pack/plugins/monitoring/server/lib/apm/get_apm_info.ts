@@ -66,7 +66,7 @@ export function handleResponse(
     eventsTotal: getDiffCalculation(eventsTotalLast, eventsTotalFirst),
     eventsEmitted: getDiffCalculation(eventsEmittedLast, eventsEmittedFirst),
     eventsDropped: getDiffCalculation(eventsDroppedLast, eventsDroppedFirst),
-    bytesWritten: getDiffCalculation(bytesWrittenLast, bytesWrittenFirst),
+    bytesWritten: getDiffCalculation(Number(bytesWrittenLast), Number(bytesWrittenFirst)),
     config: {
       container: config.get('monitoring.ui.container.apm.enabled'),
     },
