@@ -34,7 +34,7 @@ const i18nTexts = {
 export const MaxIndexSizeField: FunctionComponent = () => {
   return (
     <EuiFlexGroup alignItems="flexStart" gutterSize="s">
-      <EuiFlexItem>
+      <EuiFlexItem style={{ maxWidth: 400 }}>
         <UseField
           path={ROLLOVER_FORM_PATHS.maxSize}
           component={NumericField}
