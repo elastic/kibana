@@ -78,15 +78,19 @@ export interface PushToServiceResponse extends ExternalServiceIncidentResponse {
   comments?: ExternalServiceCommentResponse[];
 }
 
-export type ExternalServiceParams = Record<string, unknown>;
+export interface ExternalServiceParamsCreate {
+  incident: Incident & Record<string, unknown>;
+}
+
+export type ExternalServiceParamsUpdate = ExternalServiceParamsCreate & { incidentId: string };
 
 export interface ExternalService {
   getChoices: (fields: string[]) => Promise<GetChoicesResponse>;
-  getIncident: (id: string) => Promise<ExternalServiceParams | undefined>;
+  getIncident: (id: string) => Promise<ServiceNowIncident>;
   getFields: () => Promise<GetCommonFieldsResponse>;
-  createIncident: (params: ExternalServiceParams) => Promise<ExternalServiceIncidentResponse>;
-  updateIncident: (params: ExternalServiceParams) => Promise<ExternalServiceIncidentResponse>;
-  findIncidents: (params?: Record<string, string>) => Promise<ExternalServiceParams[] | undefined>;
+  createIncident: (params: ExternalServiceParamsCreate) => Promise<ExternalServiceIncidentResponse>;
+  updateIncident: (params: ExternalServiceParamsUpdate) => Promise<ExternalServiceIncidentResponse>;
+  findIncidents: (params?: Record<string, string>) => Promise<ServiceNowIncident>;
 }
 
 export type PushToServiceApiParams = ExecutorSubActionPushParams;

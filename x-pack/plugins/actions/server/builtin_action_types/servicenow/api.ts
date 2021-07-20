@@ -19,7 +19,11 @@ import {
 } from './types';
 
 const handshakeHandler = async ({ externalService, params }: HandshakeApiHandlerArgs) => {};
-const getIncidentHandler = async ({ externalService, params }: GetIncidentApiHandlerArgs) => {};
+const getIncidentHandler = async ({ externalService, params }: GetIncidentApiHandlerArgs) => {
+  const { externalId: id } = params;
+  const res = await externalService.getIncident(id);
+  return res;
+};
 
 const pushToServiceHandler = async ({
   externalService,
@@ -41,6 +45,7 @@ const pushToServiceHandler = async ({
     res = await externalService.createIncident({
       incident: {
         ...incident,
+        caller_id: secrets.username,
         opened_by: secrets.username,
       },
     });

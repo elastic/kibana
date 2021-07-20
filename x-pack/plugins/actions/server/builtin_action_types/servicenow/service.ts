@@ -10,10 +10,12 @@ import axios, { AxiosResponse } from 'axios';
 import {
   ExternalServiceCredentials,
   ExternalService,
-  ExternalServiceParams,
+  ExternalServiceParamsCreate,
+  ExternalServiceParamsUpdate,
   ImportSetApiResponse,
   ImportSetApiResponseError,
   ServiceNowIncident,
+  Incident,
 } from './types';
 
 import * as i18n from './translations';
@@ -23,19 +25,21 @@ import {
   ServiceNowSecretConfigurationType,
   ResponseError,
 } from './types';
-import { request, getErrorMessage, addTimeZoneToDate, patch } from '../lib/axios_utils';
+import { request, getErrorMessage, addTimeZoneToDate } from '../lib/axios_utils';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 
-const API_VERSION = 'v2';
-const SYS_DICTIONARY = `api/now/${API_VERSION}/table/sys_dictionary`;
+const SYS_DICTIONARY = `api/now/table/sys_dictionary`;
+// TODO: Change it to production when the app is ready
 const IMPORTATION_SET_TABLE = 'x_463134_elastic_import_set_web_service';
 const FIELD_PREFIX = 'u_';
 
-const prefixFields = (incident: ExternalServiceParams['incident']) =>
-  Object.entries(incident).reduce(
-    (acc, [key, value]) => ({ ...acc, [`${FIELD_PREFIX}${key}`]: value }),
-    {}
-  );
+const prepareIncident = (isLegacy: boolean, incident: Incident): Incident =>
+  isLegacy
+    ? incident
+    : Object.entries(incident).reduce(
+        (acc, [key, value]) => ({ ...acc, [`${FIELD_PREFIX}${key}`]: value }),
+        {} as Incident
+      );
 
 export const createExternalService = (
   table: string,
@@ -43,7 +47,7 @@ export const createExternalService = (
   logger: Logger,
   configurationUtilities: ActionsConfigurationUtilities
 ): ExternalService => {
-  const { apiUrl: url } = config as ServiceNowPublicConfigurationType;
+  const { apiUrl: url, isLegacy } = config as ServiceNowPublicConfigurationType;
   const { username, password } = secrets as ServiceNowSecretConfigurationType;
 
   if (!url || !username || !password) {
@@ -52,12 +56,17 @@ export const createExternalService = (
 
   const urlWithoutTrailingSlash = url.endsWith('/') ? url.slice(0, -1) : url;
   const importSetTableUrl = `${urlWithoutTrailingSlash}/api/now/import/${IMPORTATION_SET_TABLE}`;
-  const incidentUrl = `${urlWithoutTrailingSlash}/api/now/${API_VERSION}/table/${table}`;
+  const tableApiIncidentUrl = `${urlWithoutTrailingSlash}/api/now/table/${table}`;
   const fieldsUrl = `${urlWithoutTrailingSlash}/${SYS_DICTIONARY}?sysparm_query=name=task^ORname=${table}^internal_type=string&active=true&array=false&read_only=false&sysparm_fields=max_length,element,column_label,mandatory`;
-  const choicesUrl = `${urlWithoutTrailingSlash}/api/now/${API_VERSION}/table/sys_choice`;
+  const choicesUrl = `${urlWithoutTrailingSlash}/api/now/table/sys_choice`;
+
   const axiosInstance = axios.create({
     auth: { username, password },
   });
+
+  const getCreateIncidentUrl = () => (isLegacy ? tableApiIncidentUrl : importSetTableUrl);
+  const getUpdateIncidentUrl = (incidentId: string) =>
+    isLegacy ? `${tableApiIncidentUrl}/${incidentId}` : importSetTableUrl;
 
   const getIncidentViewURL = (id: string) => {
     // Based on: https://docs.servicenow.com/bundle/orlando-platform-user-interface/page/use/navigation/reference/r_NavigatingByURLExamples.html
@@ -112,7 +121,7 @@ export const createExternalService = (
     try {
       const res = await request({
         axios: axiosInstance,
-        url: `${incidentUrl}/${id}`,
+        url: `${tableApiIncidentUrl}/${id}`,
         logger,
         configurationUtilities,
       });
@@ -136,7 +145,7 @@ export const createExternalService = (
     try {
       const res = await request({
         axios: axiosInstance,
-        url: incidentUrl,
+        url: tableApiIncidentUrl,
         logger,
         params,
         configurationUtilities,
@@ -155,20 +164,25 @@ export const createExternalService = (
     }
   };
 
-  const createIncident = async ({ incident }: ExternalServiceParams) => {
+  const createIncident = async ({ incident }: ExternalServiceParamsCreate) => {
     try {
       const res = await request({
         axios: axiosInstance,
-        url: importSetTableUrl,
+        url: getCreateIncidentUrl(),
         logger,
         method: 'post',
-        data: prefixFields(incident),
+        data: prepareIncident(isLegacy, incident),
         configurationUtilities,
       });
 
       checkInstance(res);
-      throwIfImportSetApiResponseIsAnError(res.data);
-      const insertedIncident = await getIncident(res.data.result[0].sys_id);
+
+      if (!isLegacy) {
+        throwIfImportSetApiResponseIsAnError(res.data);
+      }
+
+      const incidentId = isLegacy ? res.data.result.sys_id : res.data.result[0].sys_id;
+      const insertedIncident = await getIncident(incidentId);
 
       return {
         title: insertedIncident.number,
@@ -188,26 +202,36 @@ export const createExternalService = (
     }
   };
 
-  const updateIncident = async ({ incidentId, incident }: ExternalServiceParams) => {
+  const updateIncident = async ({ incidentId, incident }: ExternalServiceParamsUpdate) => {
     try {
       const res = await request({
         axios: axiosInstance,
-        url: importSetTableUrl,
-        method: 'post',
+        url: getUpdateIncidentUrl(incidentId),
+        // Import Set API supports only POST.
+        method: isLegacy ? 'patch' : 'post',
         logger,
-        data: { ...prefixFields(incident), u_incident_id: incidentId },
+        data: {
+          ...prepareIncident(isLegacy, incident),
+          // u_incident_id is used to update the incident when using the Import Set API.
+          ...(isLegacy ? {} : { u_incident_id: incidentId }),
+        },
         configurationUtilities,
       });
 
       checkInstance(res);
-      throwIfImportSetApiResponseIsAnError(res.data);
-      const insertedIncident = await getIncident(res.data.result[0].sys_id);
+
+      if (!isLegacy) {
+        throwIfImportSetApiResponseIsAnError(res.data);
+      }
+
+      const id = isLegacy ? res.data.result.sys_id : res.data.result[0].sys_id;
+      const updatedIncident = await getIncident(id);
 
       return {
-        title: insertedIncident.number,
-        id: insertedIncident.sys_id,
-        pushedDate: new Date(addTimeZoneToDate(insertedIncident.sys_updated_on)).toISOString(),
-        url: getIncidentViewURL(insertedIncident.sys_id),
+        title: updatedIncident.number,
+        id: updatedIncident.sys_id,
+        pushedDate: new Date(addTimeZoneToDate(updatedIncident.sys_updated_on)).toISOString(),
+        url: getIncidentViewURL(updatedIncident.sys_id),
       };
     } catch (error) {
       throw new Error(
