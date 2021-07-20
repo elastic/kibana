@@ -251,7 +251,8 @@ export class TelemetryEndpointTask {
 
     // If there is no policy responses in the 24h > now then we will continue
     const policyResponses =
-      failedPolicyResponses.aggregations === undefined
+      failedPolicyResponses.aggregations === undefined ||
+      failedPolicyResponses.aggregations === null
         ? new Map<string, EndpointPolicyResponseDocument>()
         : failedPolicyResponses.aggregations.policy_responses.buckets.reduce(
             (cache, endpointAgentId) => {
