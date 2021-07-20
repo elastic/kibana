@@ -711,7 +711,18 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       value: true,
       description: i18n.translate('data.advancedSettings.autocompleteIgnoreTimerangeText', {
         defaultMessage:
-          'Disable this property to get autocomplete suggestions from your full dataset, rather than from the current time range.',
+          'Disable this property to get autocomplete suggestions from your full dataset, rather than from the current time range. Only applies when `autocomplete:useTermsEnum` is `false`.',
+      }),
+      schema: schema.boolean(),
+    },
+    [UI_SETTINGS.AUTOCOMPLETE_USE_TERMS_ENUM]: {
+      name: i18n.translate('data.advancedSettings.autocompleteUseTermsEnum', {
+        defaultMessage: 'Use terms enum API',
+      }),
+      value: true,
+      description: i18n.translate('data.advancedSettings.autocompleteUseTermsEnumText', {
+        defaultMessage:
+          'Use the Elasticsearch terms enum API for improved autocomplete suggestion performance. Results will not completely reflect the selected time range, and will not be sorted by popularity.',
       }),
       schema: schema.boolean(),
     },

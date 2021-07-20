@@ -88,8 +88,14 @@ Sets the file size limit when importing files. The default
 value is `100MB`. The highest supported value for this setting is `1GB`.
 
 [[filtereditor-suggestvalues]]`filterEditor:suggestValues`::
-Set this property to `false` to prevent the filter editor from suggesting values
-for fields.
+Set this property to `false` to prevent the filter editor and KQL autocomplete
+from suggesting values for fields.
+
+[[autocomplete-usetimerange]]`autocomplete:useTimeRange`::
+Disable this property to get autocomplete suggestions from your full dataset, rather than from the current time range. Only applies when `autocomplete:useTermsEnum` is `false`.
+
+[[autocomplete-usetermsenum]]`autocomplete:useTermsEnum`::
+Use the Elasticsearch terms enum API for improved autocomplete suggestion performance. Results will not completely reflect the selected time range, and will not be sorted by popularity.
 
 [[filters-pinnedbydefault]]`filters:pinnedByDefault`::
 Set this property to `true` to make filters have a global state (be pinned) by

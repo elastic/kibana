@@ -67,7 +67,11 @@ export const setupValueSuggestionProvider = (
       query: string,
       filters: any = [],
       signal?: AbortSignal,
-      method?: ValueSuggestionsMethod
+      method: ValueSuggestionsMethod = core.uiSettings.get<boolean>(
+        UI_SETTINGS.AUTOCOMPLETE_USE_TERMS_ENUM
+      )
+        ? 'terms_enum'
+        : 'terms_agg'
     ) => {
       usageCollector?.trackRequest();
       return core.http
