@@ -9,137 +9,132 @@
 import { inspect } from 'util';
 
 import * as Rx from 'rxjs';
-import { toArray, take } from 'rxjs/operators';
-import { lastValueFrom } from '@kbn/std';
 
+import { ExecState } from './apm_server_installation';
 import { ApmServerProcess } from './apm_server_process';
 
-const record = <T>(obs: Rx.Observable<T>): { history: string[]; sub: Rx.Subscription } => {
+class MockState extends Rx.BehaviorSubject<ExecState> {
+  constructor() {
+    super({ type: 'starting' });
+  }
+
+  mockReady() {
+    this.next({ type: 'ready' });
+  }
+
+  mockError() {
+    this.next({ type: 'error', error: new Error('mocked error') });
+    this.complete();
+  }
+
+  mockKilled() {
+    this.next({ type: 'killed', signal: 'MOCKED' });
+    this.complete();
+  }
+
+  mockExitted(code: number = 0) {
+    this.next({ type: 'exitted', exitCode: code });
+    this.complete();
+  }
+}
+
+const record = (obs: Rx.Observable<ExecState>): { history: string[]; sub: Rx.Subscription } => {
   const history: string[] = [];
   const sub = obs.subscribe(
-    (v) => history.push(v === undefined ? `next` : `next: ${inspect(v)}`),
+    (v) => {
+      if (v.type === 'error') {
+        history.push(`next: { type: 'error', error: ${v.error.message} }`);
+      } else {
+        history.push(`next: ${inspect(v)}`);
+      }
+    },
     (e) => history.push(`error: ${e.stack.split('\n')[0]}`),
     () => history.push(`complete`)
   );
   return { history, sub };
 };
 
-const collect = async <T>(obs: Rx.Observable<T>): Promise<T[]> => {
-  return await lastValueFrom(obs.pipe(toArray()));
-};
+describe('#getCurrentState()', () => {
+  it('returns current value of State behavior subject', () => {
+    const state$ = new MockState();
+    const proc = new ApmServerProcess(state$, new Rx.Subject());
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+    expect(proc.getCurrentState()).toMatchInlineSnapshot(`
+      Object {
+        "type": "starting",
+      }
+    `);
 
-describe('#getReady$()', () => {
-  it('does not produce a value until server is ready', async () => {
-    const ready$ = new Rx.Subject<void>();
-    const proc = new ApmServerProcess(Rx.NEVER, ready$, new Rx.Subject());
+    state$.mockReady();
+    expect(proc.getCurrentState()).toMatchInlineSnapshot(`
+      Object {
+        "type": "ready",
+      }
+    `);
 
-    const { history } = record(proc.isReady$().pipe(take(1)));
+    state$.mockExitted();
+    expect(proc.getCurrentState()).toMatchInlineSnapshot(`
+      Object {
+        "exitCode": 0,
+        "type": "exitted",
+      }
+    `);
+  });
+});
 
-    // sleep for a sec to make sure it doesn't produce a value
-    await sleep(10);
-    expect(history).toHaveLength(0);
+describe('#getState()', () => {
+  it('returns starting state on subscription, ready when ready, and completes process is killed', () => {
+    const state$ = new MockState();
+    const proc = new ApmServerProcess(state$, new Rx.Subject());
 
-    ready$.next();
+    const { history } = record(proc.getState$());
     expect(history).toMatchInlineSnapshot(`
       Array [
-        "next",
+        "next: { type: 'starting' }",
+      ]
+    `);
+
+    state$.mockReady();
+    expect(history).toMatchInlineSnapshot(`
+      Array [
+        "next: { type: 'starting' }",
+        "next: { type: 'ready' }",
+      ]
+    `);
+
+    state$.mockKilled();
+    expect(history).toMatchInlineSnapshot(`
+      Array [
+        "next: { type: 'starting' }",
+        "next: { type: 'ready' }",
+        "next: { type: 'killed', signal: 'MOCKED' }",
         "complete",
       ]
     `);
-
-    proc.stop();
   });
 
-  it('produces a value if server is already ready before subscription', async () => {
-    const ready$ = new Rx.Subject<void>();
-    const proc = new ApmServerProcess(Rx.NEVER, ready$, new Rx.Subject());
-    ready$.next();
+  it('produces error state', () => {
+    const state$ = new MockState();
+    const proc = new ApmServerProcess(state$, new Rx.Subject());
 
-    const values = await collect(proc.isReady$().pipe(take(1)));
-    expect(values).toMatchInlineSnapshot(`
+    const { history } = record(proc.getState$());
+    expect(history).toMatchInlineSnapshot(`
       Array [
-        undefined,
+        "next: { type: 'starting' }",
       ]
     `);
 
-    proc.stop();
-  });
-
-  it('completes when the process is stopped', () => {
-    const proc = new ApmServerProcess(Rx.NEVER, Rx.of(undefined), new Rx.Subject());
-    const { history } = record(proc.isReady$());
+    state$.mockError();
     expect(history).toMatchInlineSnapshot(`
       Array [
-        "next",
-      ]
-    `);
-    proc.stop();
-    expect(history).toMatchInlineSnapshot(`
-      Array [
-        "next",
+        "next: { type: 'starting' }",
+        "next: { type: 'error', error: mocked error }",
         "complete",
       ]
     `);
   });
 });
 
-describe('#getState()', () => {
-  it('returns starting state on subscription, ready when ready, and completes when stopped', () => {
-    const ready$ = new Rx.Subject<void>();
-    const proc = new ApmServerProcess(Rx.NEVER, ready$, new Rx.Subject());
-
-    const { history } = record(proc.getState$());
-    expect(history).toMatchInlineSnapshot(`
-      Array [
-        "next: { type: 'starting' }",
-      ]
-    `);
-
-    ready$.next();
-    expect(history).toMatchInlineSnapshot(`
-      Array [
-        "next: { type: 'starting' }",
-        "next: { type: 'ready' }",
-      ]
-    `);
-
-    proc.stop();
-    expect(history).toMatchInlineSnapshot(`
-      Array [
-        "next: { type: 'starting' }",
-        "next: { type: 'ready' }",
-        "complete",
-      ]
-    `);
-  });
-
-  it('errors if process encounters an error', () => {
-    const error$ = new Rx.Subject<Error>();
-    const proc = new ApmServerProcess(error$, Rx.NEVER, new Rx.Subject());
-
-    const { history } = record(proc.getState$());
-    expect(history).toMatchInlineSnapshot(`
-      Array [
-        "next: { type: 'starting' }",
-      ]
-    `);
-
-    error$.next(new Error('something went wrong'));
-    expect(history).toMatchInlineSnapshot(`
-      Array [
-        "next: { type: 'starting' }",
-        "error: Error: something went wrong",
-      ]
-    `);
-
-    proc.stop();
-    expect(history).toMatchInlineSnapshot(`
-      Array [
-        "next: { type: 'starting' }",
-        "error: Error: something went wrong",
-      ]
-    `);
-  });
+describe('#toPromise()', () => {
+  it('resolves when the process exists as intended', () => {});
 });

@@ -52,9 +52,7 @@ export class ApmServer {
 
     this.log.info('starting apm-server');
     this.log.indent(4);
-    const proc = installation.run({
-      shouldRunForever: true,
-    });
+    const proc = installation.run();
 
     // wait for the running install to be ready and then return the process object
     await firstValueFrom(proc.getState$().pipe(filter((s) => s.type === 'ready')));

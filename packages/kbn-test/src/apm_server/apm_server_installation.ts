@@ -33,7 +33,7 @@ export type ExecState =
   | { readonly type: 'starting' }
   | { readonly type: 'ready' }
   | { readonly type: 'error'; error: Error }
-  | { readonly type: 'exitted'; exitCode: number; shouldRunForever: boolean }
+  | { readonly type: 'exitted'; exitCode: number }
   | { readonly type: 'killed'; signal: string };
 
 const READY_STATE: ExecState = Object.freeze({
@@ -105,7 +105,7 @@ export class ApmServerInstallation {
     );
   }
 
-  run(options: { shouldRunForever?: boolean }) {
+  run() {
     const state$ = new Rx.BehaviorSubject<ExecState>(STARTING_STATE);
     const stop$: StopSubject = new Rx.Subject();
 
@@ -124,12 +124,14 @@ export class ApmServerInstallation {
           const signal = reason[1] ?? signalSent!;
           this.log.info(`[${this.name}] process exitted because signal`, signal, 'was sent');
           state$.next({ type: 'killed', signal });
+          state$.complete();
           return;
         }
 
         const exitCode = reason[0];
         this.log.info(`[${this.name}] process exitted with code`, exitCode);
-        state$.next({ type: 'exitted', exitCode, shouldRunForever: !!options.shouldRunForever });
+        state$.next({ type: 'exitted', exitCode });
+        state$.complete();
       }),
       take(1),
       share()
@@ -194,6 +196,7 @@ export class ApmServerInstallation {
       .subscribe({
         error: (error) => {
           state$.next({ type: 'error', error });
+          state$.complete();
         },
       });
 

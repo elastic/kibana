@@ -7,6 +7,7 @@
  */
 
 import * as Rx from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 import { ExecState, StopSignal, StopSubject } from './apm_server_installation';
 
@@ -20,7 +21,7 @@ export class ApmServerProcess {
     return new Promise<void>((resolve, reject) => {
       const subscription = new Rx.Subscription();
       subscription.add(
-        this.state$.subscribe({
+        this.getState$().subscribe({
           next: (state) => {
             switch (state.type) {
               case 'ready':
@@ -39,15 +40,7 @@ export class ApmServerProcess {
                 break;
 
               case 'exitted':
-                if (state.shouldRunForever) {
-                  reject(
-                    new Error(`apm-server unexpectedly exitted with code [${state.exitCode}]`)
-                  );
-                } else if (state.exitCode > 0) {
-                  reject(new Error(`apm-server exitted with code [${state.exitCode}]`));
-                } else {
-                  resolve();
-                }
+                reject(new Error(`apm-server unexpectedly exitted with code [${state.exitCode}]`));
                 subscription.unsubscribe();
                 break;
 
@@ -72,7 +65,7 @@ export class ApmServerProcess {
   }
 
   getState$() {
-    return this.state$.asObservable();
+    return this.state$.pipe(takeUntil(this.stop$));
   }
 
   stop(signal?: StopSignal) {

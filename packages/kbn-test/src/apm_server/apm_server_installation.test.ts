@@ -8,6 +8,10 @@
 
 import { EventEmitter } from 'events';
 
+import * as Rx from 'rxjs';
+import { firstValueFrom } from '@kbn/std';
+import { take, toArray } from 'rxjs/operators';
+
 import { ApmServerInstallation } from './apm_server_installation';
 import { ArchiveArtifact } from './archive_artifact';
 import { MAC_PLATFORM } from './platforms';
@@ -20,6 +24,8 @@ const Fs = jest.requireMock('fs/promises');
 
 jest.mock('execa');
 const execa = jest.requireMock('execa');
+
+const collect = <T>(rx: Rx.Observable<T>): Promise<T[]> => firstValueFrom(rx.pipe(toArray()));
 
 class MockApmServerProc extends EventEmitter {
   private static implementations: Array<(proc: MockApmServerProc) => void> = [];
@@ -44,12 +50,12 @@ class MockApmServerProc extends EventEmitter {
     }, 1);
   }
 
-  mockEcsLogLine(level: 'info' | 'debug' | 'error', message: string) {
+  mockEcsLogLine(level: 'info' | 'debug' | 'error', message: string, logger: string = 'mock') {
     this.stdout.emit(
       'data',
       `${JSON.stringify({
         'service.name': 'apm-server',
-        'log.logger': 'mock',
+        'log.logger': logger,
         'log.level': level,
         message,
       })}\n`
@@ -202,15 +208,22 @@ describe('#configureInstall()', () => {
   });
 });
 
-describe('#run()', () => {
+describe('#run().toPromise()', () => {
   it('runs apm-server with expected args/cwd and rejects if process unexpectedly exits', async () => {
-    await expect(() => node.run()).rejects.toMatchInlineSnapshot(
+    const proc = node.run();
+    await expect(() => proc.toPromise()).rejects.toMatchInlineSnapshot(
       `[Error: apm-server unexpectedly exitted with code [0]]`
     );
+    expect(proc.getCurrentState()).toMatchInlineSnapshot(`
+      Object {
+        "exitCode": 0,
+        "type": "exitted",
+      }
+    `);
 
     expect(logCollector.messages).toMatchInlineSnapshot(`
       Array [
-        " info apm-server exitted with code 0",
+        " info [foo] process exitted with code 0",
       ]
     `);
 
@@ -244,9 +257,16 @@ describe('#run()', () => {
       proc.mockExit(0);
     });
 
-    await expect(() => node.run()).rejects.toMatchInlineSnapshot(
+    const proc = node.run();
+    await expect(() => proc.toPromise()).rejects.toMatchInlineSnapshot(
       `[Error: apm-server unexpectedly exitted with code [0]]`
     );
+    expect(proc.getCurrentState()).toMatchInlineSnapshot(`
+      Object {
+        "exitCode": 0,
+        "type": "exitted",
+      }
+    `);
 
     expect(logCollector.messages).toMatchInlineSnapshot(`
       Array [
@@ -254,7 +274,52 @@ describe('#run()', () => {
         "ERROR [foo] [mock] SOMETHING went wrong!",
         " debg [foo] [mock] something that might be helpful for debugging",
         " info [foo] plain-text log line",
-        " info apm-server exitted with code 0",
+        " info [foo] process exitted with code 0",
+      ]
+    `);
+  });
+
+  it('routes errors emitted by execa', async () => {
+    MockApmServerProc.nextImplementation((proc) => {
+      proc.emit('error', new Error('foo'));
+    });
+
+    const proc = node.run();
+    await expect(() => proc.toPromise()).rejects.toMatchInlineSnapshot(`[Error: foo]`);
+    expect(proc.getCurrentState()).toMatchInlineSnapshot(`
+      Object {
+        "error": [Error: foo],
+        "type": "error",
+      }
+    `);
+  });
+
+  it('is ready when server logs about listening, only goes ready once', async () => {
+    MockApmServerProc.nextImplementation((proc) => {
+      proc.mockEcsLogLine('info', 'Listening on: localhost:1234', 'beater');
+      proc.mockEcsLogLine('info', 'Listening on: localhost:1234', 'beater');
+      proc.mockEcsLogLine('info', 'Listening on: localhost:1234', 'beater');
+      proc.mockEcsLogLine('info', 'Listening on: localhost:1234', 'beater');
+      proc.mockEcsLogLine('info', 'Listening on: localhost:1234', 'beater');
+      proc.mockExit(0);
+      proc.mockEcsLogLine('info', 'Listening on: localhost:1234', 'beater');
+    });
+
+    const proc = node.run();
+    const states = await collect(proc.getState$());
+
+    expect(states).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "type": "starting",
+        },
+        Object {
+          "type": "ready",
+        },
+        Object {
+          "exitCode": 0,
+          "type": "exitted",
+        },
       ]
     `);
   });
