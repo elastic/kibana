@@ -5,13 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { lazy } from 'react';
+import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { i18n } from '@kbn/i18n';
 import { withSuspense } from '../../../presentation_util/public';
 import { ShapeRendererConfig } from '../../common/types';
+import { LazyShapeComponent } from '../components';
 
 const strings = {
   getDisplayName: () =>
@@ -24,8 +25,7 @@ const strings = {
     }),
 };
 
-const LazyShapeComponent = lazy(() => import('../components/shape_component'));
-const ShapeComponent = withSuspense(LazyShapeComponent, null);
+const ShapeComponent = withSuspense(LazyShapeComponent);
 
 export const shapeRenderer = (): ExpressionRenderDefinition<ShapeRendererConfig> => ({
   name: 'shape',

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { lazy } from 'react';
+import { shapeFunction } from '../common';
+import { ExpressionFunction } from '../../../../src/plugins/expressions';
 
-export const LazyShapeComponent = lazy(() => import('./shape_component'));
-export const LazyShapeDrawer = lazy(() => import('./shape_drawer'));
+export const functionSpecs = [shapeFunction].map((fn) => new ExpressionFunction(fn()));

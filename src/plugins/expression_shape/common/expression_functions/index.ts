@@ -6,8 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { shapeFunction } from './shape_function';
-
-export const functions = [shapeFunction];
-
-export { shapeFunction };
+export { shapeFunction } from './shape_function';
