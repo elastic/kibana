@@ -14,7 +14,6 @@ import {
   Settings,
 } from '@elastic/charts';
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
 import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getDurationFormatter } from '../../../../common/utils/formatters';
@@ -31,6 +30,7 @@ import { CustomFields, PercentileOption } from './custom_fields';
 import { useFieldNames } from './use_field_names';
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
 import { useUiTracker } from '../../../../../observability/public';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 
 type OverallLatencyApiResponse = NonNullable<
   APIReturnType<'GET /api/apm/correlations/latency/overall_distribution'>
@@ -50,7 +50,7 @@ export function LatencyCorrelations({ onClose }: Props) {
     setSelectedSignificantTerm,
   ] = useState<SelectedSignificantTerm | null>(null);
 
-  const { serviceName } = useParams<{ serviceName?: string }>();
+  const { serviceName } = useApmServiceContext();
   const { urlParams } = useUrlParams();
   const {
     environment,
