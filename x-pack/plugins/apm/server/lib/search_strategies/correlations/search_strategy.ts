@@ -19,6 +19,8 @@ import type {
   SearchServiceValue,
 } from '../../../../common/search_strategies/correlations/types';
 
+import type { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
+
 import { asyncSearchServiceProvider } from './async_search_service';
 
 export type PartialSearchRequest = IKibanaSearchRequest<SearchServiceParams>;
@@ -26,10 +28,10 @@ export type PartialSearchResponse = IKibanaSearchResponse<{
   values: SearchServiceValue[];
 }>;
 
-export const apmCorrelationsSearchStrategyProvider = (): ISearchStrategy<
-  PartialSearchRequest,
-  PartialSearchResponse
-> => {
+export const apmCorrelationsSearchStrategyProvider = (
+  getApmIndices: () => Promise<ApmIndicesConfig>,
+  includeFrozen: boolean
+): ISearchStrategy<PartialSearchRequest, PartialSearchResponse> => {
   const asyncSearchServiceMap = new Map<
     string,
     ReturnType<typeof asyncSearchServiceProvider>
@@ -41,14 +43,43 @@ export const apmCorrelationsSearchStrategyProvider = (): ISearchStrategy<
         throw new Error('Invalid request parameters.');
       }
 
+      // The function to fetch the current state of the async search service.
+      // This will be either an existing service for a follow up fetch or a new one for new requests.
+      let getAsyncSearchServiceState: ReturnType<
+        typeof asyncSearchServiceProvider
+      >;
+
+      // If the request includes an ID, we require that the async search service already exists
+      // otherwise we throw an error. The client should never poll a service that's been cancelled or finished.
+      // This also avoids instantiating async search services when the service gets called with random IDs.
+      if (typeof request.id === 'string') {
+        const existingGetAsyncSearchServiceState = asyncSearchServiceMap.get(
+          request.id
+        );
+
+        if (typeof existingGetAsyncSearchServiceState === 'undefined') {
+          throw new Error(
+            `AsyncSearchService with ID '${request.id}' does not exist.`
+          );
+        }
+
+        getAsyncSearchServiceState = existingGetAsyncSearchServiceState;
+      } else {
+        getAsyncSearchServiceState = asyncSearchServiceProvider(
+          deps.esClient.asCurrentUser,
+          getApmIndices,
+          request.params,
+          includeFrozen
+        );
+      }
+
+      // Reuse the request's id or create a new one.
       const id = request.id ?? uuid();
 
-      const getAsyncSearchServiceState =
-        asyncSearchServiceMap.get(id) ??
-        asyncSearchServiceProvider(deps.esClient.asCurrentUser, request.params);
-
       const {
+        ccsWarning,
         error,
+        log,
         isRunning,
         loaded,
         started,
@@ -76,6 +107,8 @@ export const apmCorrelationsSearchStrategyProvider = (): ISearchStrategy<
         isRunning,
         isPartial: isRunning,
         rawResponse: {
+          ccsWarning,
+          log,
           took,
           values,
           percentileThresholdValue,

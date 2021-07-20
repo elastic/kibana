@@ -14,6 +14,7 @@ export const createMockExecutionContext = <ExtraContext extends object = object>
   const executionContext: ExecutionContext = {
     getSearchContext: jest.fn(),
     getSearchSessionId: jest.fn(),
+    getExecutionContext: jest.fn(),
     variables: {},
     types: {},
     abortSignal: {

@@ -137,7 +137,7 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
               <p>
                 <FormattedMessage
                   id="xpack.fleet.unenrollAgents.unenrollFleetServerDescription"
-                  defaultMessage="Unenrolling this agent will disconnect a Fleet Server and prevent agents from sendind data if no other Fleet Servers exist."
+                  defaultMessage="Unenrolling this agent will disconnect a Fleet Server and prevent agents from sending data if no other Fleet Servers exist."
                 />
               </p>
             </EuiCallOut>
