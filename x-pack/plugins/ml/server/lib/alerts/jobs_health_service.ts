@@ -37,7 +37,7 @@ export function jobsHealthServiceProvider(
   logger: Logger
 ) {
   /**
-   * Extract result list of job ids based on included and excluded selection of jobs and groups.
+   * Extracts result list of job ids based on included and excluded selection of jobs and groups.
    * @param includeJobs
    * @param excludeJobs
    */
@@ -49,7 +49,7 @@ export function jobsHealthServiceProvider(
     // Extract jobs from group ids and make sure provided jobs assigned to a current space
     const jobsResponse = (
       await mlClient.getJobs<MlJobsResponse>({
-        ...(includeAllJobs ? {} : { job_id: jobAndGroupIds.join(',') }),
+        ...(includeAllJobs ? {} : { job_id: jobAndGroupIds }),
       })
     ).body.jobs;
 
@@ -62,7 +62,7 @@ export function jobsHealthServiceProvider(
       ];
       const excludedJobsResponse = (
         await mlClient.getJobs<MlJobsResponse>({
-          job_id: excludedJobAndGroupIds.join(','),
+          job_id: excludedJobAndGroupIds,
         })
       ).body.jobs;
 
