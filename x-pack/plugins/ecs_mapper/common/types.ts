@@ -10,3 +10,8 @@ export interface LicenseStatus {
   valid: boolean;
   message?: string;
 }
+
+export enum FieldRenameAction {
+  Copy = 'copy',
+  Rename = 'rename',
+}

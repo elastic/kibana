@@ -9,7 +9,7 @@ import React, { Component } from 'react';
 
 import { AboutPanel, LoadingPanel, ResultsPanel } from './upload_panel';
 import { readFile } from '../util/utils';
-import { FieldRenameAction } from '../../../../server/types';
+import { FieldRenameAction } from '../../../../common';
 
 export class EcsMapperUploadView extends Component {
   constructor(props) {
@@ -71,8 +71,8 @@ export class EcsMapperUploadView extends Component {
           fileName: file.name,
           fileSize: file.size,
           loading: true,
-        }); 
-        const result = this.props.mapperService.mapToIngestPipeline(file, FieldRenameAction.Copy);
+        });    
+        const result = this.props.mapper.fetchPipelineFromMapping(fileContents, FieldRenameAction.Copy);
         this.setState({
           loading: false,
           loaded: true

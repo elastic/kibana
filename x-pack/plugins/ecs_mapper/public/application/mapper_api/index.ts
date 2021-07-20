@@ -6,9 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { FieldRenameAction } from "../../common";
-
-export async function mapToIngestPipeline(file: string, renameAction: FieldRenameAction) {
-  console.log("Time to do some mapping!")
-  return true;
-}
+export { MapperClient } from './mapper_client';

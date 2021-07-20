@@ -9,11 +9,6 @@ import { IRouter } from 'src/core/server/http';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { License, Mapper } from './services';
 
-export enum FieldRenameAction {
-  Copy = 'copy',
-  Rename = 'rename',
-}
-
 export interface EcsMapperPluginDependencies {
   licensing: LicensingPluginSetup;
 }

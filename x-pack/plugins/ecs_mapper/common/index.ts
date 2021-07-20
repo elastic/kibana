@@ -6,5 +6,6 @@
  */
 
 export { PLUGIN } from './constants';
+export { FieldRenameAction } from './types';
 
 export { LicenseStatus } from './types';

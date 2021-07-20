@@ -6,9 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { FieldRenameAction } from "../../common";
+import { IRouter } from 'kibana/server';
+import { registerMapToIndexPipelineRoute } from './mapper_ingest_pipeline';
 
-export async function mapToIngestPipeline(file: string, renameAction: FieldRenameAction) {
-  console.log("Time to do some mapping!")
-  return true;
+interface RegisterRoutesParams {
+  router: IRouter;
+}
+
+export function registerRoutes(options: RegisterRoutesParams) {
+  const { router } = options;
+  registerMapToIndexPipelineRoute(router);
 }

@@ -21,7 +21,7 @@ export const EcsMapperMainUi: FC = () => {
 
   return (
     <KibanaContextProvider services={{ ...services }}>
-      <EcsMapperUploadView fileUpload={fileUpload} mapperService={mapper} />
+      <EcsMapperUploadView fileUpload={fileUpload} mapper={mapper} />
     </KibanaContextProvider>
   );
 };

@@ -16,6 +16,7 @@ import { schema } from '@kbn/config-schema';
 import { PLUGIN } from '../common/constants';
 import { License } from './services';
 import { EcsMapperPluginDependencies } from './types';
+import { registerRoutes } from './routes';
 
 export const config = {
   schema: schema.object({
@@ -33,6 +34,7 @@ export class EcsMapperServerPlugin implements Plugin {
   }
 
   setup({ http }: CoreSetup, { licensing }: EcsMapperPluginDependencies) {
+    const router = http.createRouter();
     this.license.setup(
       {
         pluginId: PLUGIN.id,
@@ -46,6 +48,8 @@ export class EcsMapperServerPlugin implements Plugin {
         logger: this.logger,
       }
     );
+
+    registerRoutes({ router });
   }
 
   start() {}

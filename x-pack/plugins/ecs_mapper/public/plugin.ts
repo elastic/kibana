@@ -13,26 +13,25 @@ import { Plugin, CoreSetup, CoreStart } from '../../../../src/core/public';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { registerDevTool, registerHomeFeatureCatalogue } from './registration';
 import { setStartServices } from './kibana_services';
-import { Mapper } from '../server/services';
-import { FieldRenameAction } from '../server/types';
+import { FieldRenameAction } from '../common';
+import { MapperClient } from './application/mapper_api';
 
 /**
  * Publicly exposed APIs from the Mapper Service
  */
  export interface MapperServicePublicApis {
   /** description todo */
-  mapToIngestPipeline: (file: string, renanmeAction?: FieldRenameAction) => object;
+  mapToIngestPipeline: (file: string, renanmeAction: FieldRenameAction) => object;
 }
 
 export interface EcsMapperSetupDependencies {
   home?: HomePublicPluginSetup;
   devTools: DevToolsSetup;
   licensing: LicensingPluginSetup;
-  mapper: MapperServicePublicApis;
 }
 export interface EcsMapperStartDependencies {
   fileUpload: FileUploadPluginStart;
-  mapper: MapperServicePublicApis;
+  mapper: MapperClient;
 }
 
 export type EcsMapperPluginSetup = ReturnType<EcsMapperPlugin['setup']>;
@@ -47,11 +46,12 @@ export class EcsMapperPlugin
       EcsMapperStartDependencies
     > {
 
-  private mapper?: Mapper;
+  private mapper?: MapperClient;
 
   public setup(core: CoreSetup, plugins: EcsMapperSetupDependencies) {
     const http = core.http;
-    this.mapper = new Mapper({http});
+    const notifications = core.notifications;
+    this.mapper = new MapperClient({ http, notifications });
 
     if (plugins.home) {
       registerHomeFeatureCatalogue(plugins.home);
@@ -77,9 +77,9 @@ export class EcsMapperPlugin
   }
 
   private getMapperServicePublicApis(): MapperServicePublicApis {
-    const mapperService = this.mapper!;
+    const mapperClient = this.mapper!;
     return {
-      mapToIngestPipeline: (file: string, renameAction?: FieldRenameAction) => mapperService.mapToIngestPipeline(file, renameAction)
+      mapToIngestPipeline: (file: string, renameAction: FieldRenameAction) => mapperClient.fetchPipelineFromMapping(file, renameAction)
     };
   }
 }
