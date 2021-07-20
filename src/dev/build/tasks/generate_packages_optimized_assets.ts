@@ -21,10 +21,19 @@ import terser from 'terser';
 import vfs from 'vinyl-fs';
 
 import { ToolingLog } from '@kbn/dev-utils';
-import { Task, Build, write } from '../lib';
+import { Task, Build, write, deleteAll } from '../lib';
 
 const asyncPipeline = promisify(pipeline);
 const asyncStat = promisify(fs.stat);
+
+const removePreMinifySourceMaps = async (log: ToolingLog, build: Build) => {
+  log.debug('Remove Pre Minify Sourcemaps');
+
+  await deleteAll(
+    [build.resolvePath('node_modules/@kbn/ui-shared-deps/shared_built_assets', '**', '*.map')],
+    log
+  );
+};
 
 const minifyKbnUiSharedDepsCSS = async (log: ToolingLog, build: Build) => {
   const buildRoot = build.resolvePath();
@@ -173,6 +182,7 @@ const createKbnUiSharedDepsBundleMetrics = async (log: ToolingLog, build: Build)
 
 const generateKbnUiSharedDepsOptimizedAssets = async (log: ToolingLog, build: Build) => {
   log.info('Creating optimized assets for @kbn/ui-shared-deps');
+  await removePreMinifySourceMaps(log, build);
   await minifyKbnUiSharedDepsCSS(log, build);
   await minifyKbnUiSharedDepsJS(log, build);
   await createKbnUiSharedDepsBundleMetrics(log, build);
