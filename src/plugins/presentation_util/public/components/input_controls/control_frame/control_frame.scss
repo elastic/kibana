@@ -1,0 +1,90 @@
+.optionsList--anchorOverride {
+  display:block;
+}
+
+.optionsList--buttonContentOverride {
+  padding: 0 !important;
+}
+
+.optionsList--buttonOverride {
+  height: auto !important;
+  width: 100%;
+
+  &:disabled {
+    color: $euiButtonColorDisabledText;
+    pointer-events: none;
+
+    .optionsList--notification {
+      opacity: .5;
+    }
+  }
+
+  &:hover:not(:disabled),
+  &:focus:not(:disabled) {
+    // Remove underline from whole button so notifications don't get the underline
+    text-decoration: none;
+
+    .optionsList--title {
+      // Add put it only on the actual text part
+      text-decoration: underline;
+    }
+  }
+}
+
+.optionsList--items {
+  @include euiScrollBar;
+
+  overflow-y: auto;
+  max-height: $euiSize * 30;
+  width: $euiSize * 25;
+  max-width: 100%;
+}
+
+.optionsList--twoLine {
+  flex-direction: column;
+}
+
+.optionsList {
+  background-color: $euiFormBackgroundColor;
+  border: 1px solid $euiFormBorderColor;
+  border-radius: $euiBorderRadius;
+  display: flex;
+  align-items: stretch;
+  font-size: $euiFontSizeS;
+  width: 100%;
+
+  .optionsList--title {
+    background-color: $euiFormBorderColor;
+    padding: $euiSizeXS $euiSizeS;
+    display: flex;
+    align-items: center;
+    font-weight: $euiFontWeightBold;
+  }
+
+  .optionsList--control {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: row;
+    height: $euiFormControlHeight;
+    align-items: center;
+
+    .optionsList--selections {
+      flex: 1;
+      width: 0;
+      margin: $euiSizeXS $euiSizeXS 0 $euiSizeS;
+      text-align: left;
+      min-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .optionsList--selectionsEmpty {
+      color: $euiButtonColorDisabledText
+    }
+
+    .optionsList--notification {
+      padding: $euiSizeXS;
+    }
+  }
+}

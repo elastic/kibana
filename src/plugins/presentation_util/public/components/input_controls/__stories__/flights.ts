@@ -14,9 +14,9 @@ import { flights } from '../../fixtures/flights';
 export type Flight = typeof flights[number];
 export type FlightField = keyof Flight;
 
-export const getOptions = <T extends FlightField>(field: T) => uniq(map(flights, field)).sort();
+export const getOptions = (field: string) => uniq(map(flights, field)).sort();
 
-export const getEuiSelectableOptions = <T extends FlightField>(field: T): EuiSelectableOption[] =>
+export const getEuiSelectableOptions = (field: string): EuiSelectableOption[] =>
   getOptions(field).map((option) => ({
     label: option + '',
     searchableLabel: option + '',

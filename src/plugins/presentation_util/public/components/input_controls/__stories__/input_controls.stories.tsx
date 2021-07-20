@@ -6,13 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
+import { startCase } from 'lodash';
 import { decorators } from './decorators';
-import { getEuiSelectableOptions, FlightField, flightFields } from './flights';
-import { OptionsListControl } from '../options_list/options_list_control';
+import { getEuiSelectableOptions, flightFields } from './flights';
+import { OptionsListEmbeddableFactory } from '../control_types/options_list_embeddable_factory';
+import { ControlFrame } from '../control_frame/control_frame';
+import { OptionsListEmbeddable } from '../control_types/options_list_embeddable';
 
 export default {
   title: 'Input Controls',
@@ -21,7 +24,7 @@ export default {
 };
 
 interface OptionsListStorybookArgs {
-  fields: FlightField[];
+  fields: string[];
   twoLine: boolean;
 }
 
@@ -42,18 +45,44 @@ const storybookArgTypes = {
   },
 };
 
+const OptionsListStoryComponent = ({ fields, twoLine }: OptionsListStorybookArgs) => {
+  const [embeddables, setEmbeddables] = useState<OptionsListEmbeddable[]>([]);
+
+  const optionsListEmbeddableFactory = useMemo(
+    () =>
+      new OptionsListEmbeddableFactory(
+        ({ field }) =>
+          new Promise((r) => setTimeout(() => r(getEuiSelectableOptions(field) as string[]), 10000))
+      ),
+    []
+  );
+
+  useEffect(() => {
+    const embeddableCreatePromises = fields.map((field) => {
+      return optionsListEmbeddableFactory.create({
+        field,
+        title: startCase(field),
+        indexPattern: '',
+        id: '',
+        multiSelect: true,
+      });
+    });
+    Promise.all(embeddableCreatePromises).then((newEmbeddables) => setEmbeddables(newEmbeddables));
+  }, [fields, optionsListEmbeddableFactory]);
+
+  return (
+    <EuiFlexGroup alignItems="center" wrap={true} gutterSize={'s'}>
+      {embeddables.map((embeddable) => (
+        <EuiFlexItem key={embeddable.getInput().field}>
+          <ControlFrame twoLine={twoLine} embeddable={embeddable} />
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
+  );
+};
+
 export const OptionsListStory = ({ fields, twoLine }: OptionsListStorybookArgs) => (
-  <EuiFlexGroup alignItems="center" wrap={true} gutterSize={'s'}>
-    {fields.map((field) => (
-      <EuiFlexItem key={field}>
-        <OptionsListControl
-          twoLine={twoLine}
-          title={field}
-          options={getEuiSelectableOptions(field)}
-        />
-      </EuiFlexItem>
-    ))}
-  </EuiFlexGroup>
+  <OptionsListStoryComponent fields={fields} twoLine={twoLine} />
 );
 
 OptionsListStory.args = storybookArgs;
