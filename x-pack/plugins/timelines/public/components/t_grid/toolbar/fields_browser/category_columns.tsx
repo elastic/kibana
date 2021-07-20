@@ -18,19 +18,18 @@ import {
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { BrowserFields } from '../../../common/containers/source';
-import { getColumnsWithTimestamp } from '../../../common/components/event_details/helpers';
-import { CountBadge } from '../../../common/components/page';
-import { OnUpdateColumns } from '../timeline/events';
+import { useDeepEqualSelector } from '../../../../hooks/use_selector';
 import {
   LoadingSpinner,
   getCategoryPaneCategoryClassName,
   getFieldCount,
   VIEW_ALL_BUTTON_CLASS_NAME,
+  CountBadge,
 } from './helpers';
 import * as i18n from './translations';
-import { timelineSelectors } from '../../store/timeline';
+import { tGridSelectors } from '../../../../store/t_grid';
+import { getColumnsWithTimestamp } from '../../../utils/helpers';
+import type { OnUpdateColumns, BrowserFields } from '../../../../../common';
 
 const CategoryName = styled.span<{ bold: boolean }>`
   .euiText {
@@ -68,7 +67,7 @@ interface ViewAllButtonProps {
 
 export const ViewAllButton = React.memo<ViewAllButtonProps>(
   ({ categoryId, browserFields, onUpdateColumns, timelineId }) => {
-    const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
+    const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
     const { isLoading } = useDeepEqualSelector((state) =>
       getManageTimeline(state, timelineId ?? '')
     );

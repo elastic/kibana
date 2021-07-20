@@ -19,8 +19,9 @@ import { noop } from 'lodash/fp';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
-import { isEscape, isTab, stopPropagationAndPreventDefault } from '../../../../../timelines/public';
-import { BrowserFields } from '../../../common/containers/source';
+import type { BrowserFields, ColumnHeaderOptions } from '../../../../../common';
+// eslint-disable-next-line no-duplicate-imports
+import { isEscape, isTab, stopPropagationAndPreventDefault } from '../../../../../common';
 import { CategoriesPane } from './categories_pane';
 import { FieldsPane } from './fields_pane';
 import { Header } from './header';
@@ -33,11 +34,10 @@ import {
   PANES_FLEX_GROUP_WIDTH,
   scrollCategoriesPane,
 } from './helpers';
-import { FieldBrowserProps, OnHideFieldBrowser } from './types';
-import { timelineActions } from '../../store/timeline';
+import type { FieldBrowserProps, OnHideFieldBrowser } from './types';
+import { tGridActions } from '../../../../store/t_grid';
 
 import * as i18n from './translations';
-import { ColumnHeaderOptions } from '../../../../common';
 
 const FieldsBrowserContainer = styled.div<{ width: number }>`
   background-color: ${({ theme }) => theme.eui.euiColorLightestShade};
@@ -116,7 +116,6 @@ type Props = Pick<
  * set focus to the search input, scroll to the selected category, etc
  */
 const FieldsBrowserComponent: React.FC<Props> = ({
-  browserFields,
   columnHeaders,
   filteredBrowserFields,
   isSearching,
@@ -135,7 +134,7 @@ const FieldsBrowserComponent: React.FC<Props> = ({
   const containerElement = useRef<HTMLDivElement | null>(null);
 
   const onUpdateColumns = useCallback(
-    (columns) => dispatch(timelineActions.updateColumns({ id: timelineId, columns })),
+    (columns) => dispatch(tGridActions.updateColumns({ id: timelineId, columns })),
     [dispatch, timelineId]
   );
 

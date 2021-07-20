@@ -7,8 +7,7 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { mockBrowserFields } from '../../../common/containers/source/mock';
-import { TestProviders } from '../../../common/mock';
+import { mockBrowserFields, TestProviders } from '../../../../mock';
 import { Header } from './header';
 
 const timelineId = 'test';
@@ -29,9 +28,7 @@ describe('Header', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="field-browser-title"]').first().text()).toEqual(
-      'Customize Columns'
-    );
+    expect(wrapper.find('[data-test-subj="field-browser-title"]').first().text()).toEqual('Fields');
   });
 
   test('it renders the Reset Fields button', () => {

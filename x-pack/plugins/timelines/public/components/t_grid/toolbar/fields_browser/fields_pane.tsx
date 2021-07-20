@@ -10,16 +10,14 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
-import { BrowserFields } from '../../../common/containers/source';
-import { timelineActions } from '../../../timelines/store/timeline';
-import { OnUpdateColumns } from '../timeline/events';
 import { Category } from './category';
-import { FieldBrowserProps } from './types';
+import type { FieldBrowserProps } from './types';
 import { getFieldItems } from './field_items';
 import { FIELDS_PANE_WIDTH, TABLE_HEIGHT } from './helpers';
 
 import * as i18n from './translations';
-import { ColumnHeaderOptions } from '../../../../common';
+import type { BrowserFields, ColumnHeaderOptions, OnUpdateColumns } from '../../../../../common';
+import { tGridActions } from '../../../../store/t_grid';
 
 const NoFieldsPanel = styled.div`
   background-color: ${(props) => props.theme.eui.euiColorLightestShade};
@@ -76,14 +74,14 @@ export const FieldsPane = React.memo<Props>(
       (column: ColumnHeaderOptions) => {
         if (columnHeaders.some((c) => c.id === column.id)) {
           dispatch(
-            timelineActions.removeColumn({
+            tGridActions.removeColumn({
               columnId: column.id,
               id: timelineId,
             })
           );
         } else {
           dispatch(
-            timelineActions.upsertColumn({
+            tGridActions.upsertColumn({
               column,
               id: timelineId,
               index: 1,
@@ -106,12 +104,9 @@ export const FieldsPane = React.memo<Props>(
           data-test-subj="category"
           filteredBrowserFields={filteredBrowserFields}
           fieldItems={getFieldItems({
-            browserFields: filteredBrowserFields,
             category: filteredBrowserFields[selectedCategoryId],
-            categoryId: selectedCategoryId,
             columnHeaders,
             highlight: searchInput,
-            onUpdateColumns,
             timelineId,
             toggleColumn,
           })}
