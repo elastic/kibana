@@ -272,7 +272,7 @@ describe('policy_config and licenses', () => {
     it('does not change any behavior fields with a Platinum license', () => {
       const policy = policyFactory();
       const popupMessage = 'WOOP WOOP';
-      policy.windows.memory_protection.mode = ProtectionModes.detect;
+      policy.windows.behavior_protection.mode = ProtectionModes.detect;
       policy.windows.popup.behavior_protection.enabled = false;
       policy.windows.popup.behavior_protection.message = popupMessage;
 
