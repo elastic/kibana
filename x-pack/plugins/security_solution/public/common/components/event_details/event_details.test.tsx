@@ -82,7 +82,7 @@ describe('EventDetails', () => {
   });
 
   describe('alerts tabs', () => {
-    ['Summary', 'Threat Intel', 'Table', 'JSON View'].forEach((tab) => {
+    ['Overview', 'Threat Intel', 'Table', 'JSON View'].forEach((tab) => {
       test(`it renders the ${tab} tab`, () => {
         const expectedCopy = tab === 'Threat Intel' ? `${tab} (1)` : tab;
         expect(
@@ -94,14 +94,14 @@ describe('EventDetails', () => {
       });
     });
 
-    test('the Summary tab is selected by default', () => {
+    test('the Overview tab is selected by default', () => {
       expect(
         alertsWrapper
           .find('[data-test-subj="eventDetails"]')
           .find('.euiTab-isSelected')
           .first()
           .text()
-      ).toEqual('Summary');
+      ).toEqual('Overview');
     });
   });
 
