@@ -336,9 +336,10 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     displayValueSettings={
       Object {
         "isAlternatingValueLabel": false,
-        "isValueContainedInElement": true,
+        "isValueContainedInElement": false,
         "overflowConstraints": Array [
           "chartEdges",
+          "barGeometry",
         ],
         "showValueLabel": false,
         "valueFormatter": [Function],
@@ -402,9 +403,10 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     displayValueSettings={
       Object {
         "isAlternatingValueLabel": false,
-        "isValueContainedInElement": true,
+        "isValueContainedInElement": false,
         "overflowConstraints": Array [
           "chartEdges",
+          "barGeometry",
         ],
         "showValueLabel": false,
         "valueFormatter": [Function],
@@ -563,9 +565,10 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     displayValueSettings={
       Object {
         "isAlternatingValueLabel": false,
-        "isValueContainedInElement": true,
+        "isValueContainedInElement": false,
         "overflowConstraints": Array [
           "chartEdges",
+          "barGeometry",
         ],
         "showValueLabel": false,
         "valueFormatter": [Function],
@@ -629,9 +632,10 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     displayValueSettings={
       Object {
         "isAlternatingValueLabel": false,
-        "isValueContainedInElement": true,
+        "isValueContainedInElement": false,
         "overflowConstraints": Array [
           "chartEdges",
+          "barGeometry",
         ],
         "showValueLabel": false,
         "valueFormatter": [Function],
@@ -1228,9 +1232,10 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     displayValueSettings={
       Object {
         "isAlternatingValueLabel": false,
-        "isValueContainedInElement": true,
+        "isValueContainedInElement": false,
         "overflowConstraints": Array [
           "chartEdges",
+          "barGeometry",
         ],
         "showValueLabel": false,
         "valueFormatter": [Function],
@@ -1298,9 +1303,10 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     displayValueSettings={
       Object {
         "isAlternatingValueLabel": false,
-        "isValueContainedInElement": true,
+        "isValueContainedInElement": false,
         "overflowConstraints": Array [
           "chartEdges",
+          "barGeometry",
         ],
         "showValueLabel": false,
         "valueFormatter": [Function],
@@ -1463,9 +1469,10 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     displayValueSettings={
       Object {
         "isAlternatingValueLabel": false,
-        "isValueContainedInElement": true,
+        "isValueContainedInElement": false,
         "overflowConstraints": Array [
           "chartEdges",
+          "barGeometry",
         ],
         "showValueLabel": false,
         "valueFormatter": [Function],
@@ -1533,9 +1540,10 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     displayValueSettings={
       Object {
         "isAlternatingValueLabel": false,
-        "isValueContainedInElement": true,
+        "isValueContainedInElement": false,
         "overflowConstraints": Array [
           "chartEdges",
+          "barGeometry",
         ],
         "showValueLabel": false,
         "valueFormatter": [Function],
