@@ -46,14 +46,4 @@ export const createShape = (props: SvgConfig) => {
   };
 };
 
-export const getDefaultShapeData = (): SvgConfig => ({
-  viewBox: {
-    minX: 0,
-    minY: 0,
-    width: 0,
-    height: 0,
-  },
-  shapeProps: {},
-});
-
 export type ShapeType = ReturnType<typeof createShape>;
