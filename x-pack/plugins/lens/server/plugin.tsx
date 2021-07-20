@@ -20,33 +20,6 @@ import {
 import { setupSavedObjects } from './saved_objects';
 import { EmbeddableSetup } from '../../../../src/plugins/embeddable/server';
 import { lensEmbeddableFactory } from './embeddable/lens_embeddable_factory';
-import {
-  counterRate,
-  formatColumn,
-  renameColumns,
-  timeScale,
-  axisTitlesVisibilityConfig,
-  gridlinesConfig,
-  layerConfig,
-  legendConfig,
-  tickLabelsConfig,
-  mergeTables,
-  datatableColumn,
-} from '../common/expressions';
-
-const expressions = [
-  counterRate,
-  formatColumn,
-  renameColumns,
-  mergeTables,
-  timeScale,
-  axisTitlesVisibilityConfig,
-  gridlinesConfig,
-  layerConfig,
-  legendConfig,
-  tickLabelsConfig,
-  datatableColumn,
-];
 
 export interface PluginSetupContract {
   usageCollection?: UsageCollectionSetup;
@@ -86,9 +59,6 @@ export class LensServerPlugin implements Plugin<{}, {}, {}, {}> {
       );
     }
     plugins.embeddable.registerEmbeddableFactory(lensEmbeddableFactory());
-    for (const expression of expressions) {
-      plugins.expressions.registerFunction(() => expression);
-    }
     return {};
   }
 

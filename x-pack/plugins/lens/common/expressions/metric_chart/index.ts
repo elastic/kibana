@@ -6,4 +6,3 @@
  */
 
 export * from './types';
-export * from './metric_chart';

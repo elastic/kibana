@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { MetricChart } from './expression';
-import { metricChart, MetricConfig } from '../../common/expressions';
+import { MetricChart, metricChart } from './expression';
+import { MetricConfig } from '../../common/expressions';
 import React from 'react';
 import { shallow } from 'enzyme';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
