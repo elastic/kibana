@@ -8,7 +8,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexItem, EuiFlexGroup, EuiFieldText, EuiButton } from '@elastic/eui';
-import { get } from 'lodash';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 import { ArgumentStrings } from '../../../i18n';
 
@@ -16,7 +15,7 @@ const { String: strings } = ArgumentStrings;
 
 const StringArgInput = ({ argValue, typeInstance, onValueChange, argId }) => {
   const [value, setValue] = useState(argValue);
-  const confirm = get(typeInstance, 'options.confirm');
+  const confirm = typeInstance?.options?.confirm;
 
   useEffect(() => {
     setValue(argValue);
