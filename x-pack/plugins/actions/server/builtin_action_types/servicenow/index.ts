@@ -31,6 +31,19 @@ import {
   ServiceNowExecutorResultData,
   ExecutorSubActionGetChoicesParams,
 } from './types';
+import {
+  ServiceNowITSMActionTypeId,
+  serviceNowITSMTable,
+  ServiceNowSIRActionTypeId,
+  serviceNowSIRTable,
+} from './config';
+
+export {
+  ServiceNowITSMActionTypeId,
+  serviceNowITSMTable,
+  ServiceNowSIRActionTypeId,
+  serviceNowSIRTable,
+};
 
 export type ActionParamsType =
   | TypeOf<typeof ExecutorParamsSchemaITSM>
@@ -40,12 +53,6 @@ interface GetActionTypeParams {
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
 }
-
-const serviceNowITSMTable = 'incident';
-const serviceNowSIRTable = 'sn_si_incident';
-
-export const ServiceNowITSMActionTypeId = '.servicenow';
-export const ServiceNowSIRActionTypeId = '.servicenow-sir';
 
 export type ServiceNowActionType = ActionType<
   ServiceNowPublicConfigurationType,
@@ -81,6 +88,7 @@ export function getServiceNowITSMActionType(params: GetActionTypeParams): Servic
       configurationUtilities,
       table: serviceNowITSMTable,
       commentFieldKey: 'work_notes',
+      actionTypeId: ServiceNowITSMActionTypeId,
     }),
   };
 }
@@ -105,6 +113,7 @@ export function getServiceNowSIRActionType(params: GetActionTypeParams): Service
       configurationUtilities,
       table: serviceNowSIRTable,
       commentFieldKey: 'work_notes',
+      actionTypeId: ServiceNowSIRActionTypeId,
     }),
   };
 }
@@ -116,11 +125,13 @@ async function executor(
     logger,
     configurationUtilities,
     table,
+    actionTypeId,
     commentFieldKey = 'comments',
   }: {
     logger: Logger;
     configurationUtilities: ActionsConfigurationUtilities;
     table: string;
+    actionTypeId: string;
     commentFieldKey?: string;
   },
   execOptions: ServiceNowActionTypeExecutorOptions
@@ -136,7 +147,8 @@ async function executor(
       secrets,
     },
     logger,
-    configurationUtilities
+    configurationUtilities,
+    actionTypeId
   );
 
   if (!api[subAction]) {

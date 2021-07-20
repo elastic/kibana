@@ -27,14 +27,15 @@ import {
 } from './types';
 import { request, getErrorMessage, addTimeZoneToDate } from '../lib/axios_utils';
 import { ActionsConfigurationUtilities } from '../../actions_config';
+import { ServiceNowSIRActionTypeId } from './config';
 
 const SYS_DICTIONARY = `api/now/table/sys_dictionary`;
 // TODO: Change it to production when the app is ready
 const IMPORTATION_SET_TABLE = 'x_463134_elastic_import_set_web_service';
 const FIELD_PREFIX = 'u_';
 
-const prepareIncident = (isLegacy: boolean, incident: Incident): Incident =>
-  isLegacy
+const prepareIncident = (useOldApi: boolean, incident: Incident): Incident =>
+  useOldApi
     ? incident
     : Object.entries(incident).reduce(
         (acc, [key, value]) => ({ ...acc, [`${FIELD_PREFIX}${key}`]: value }),
@@ -45,7 +46,8 @@ export const createExternalService = (
   table: string,
   { config, secrets }: ExternalServiceCredentials,
   logger: Logger,
-  configurationUtilities: ActionsConfigurationUtilities
+  configurationUtilities: ActionsConfigurationUtilities,
+  actionTypeId: string
 ): ExternalService => {
   const { apiUrl: url, isLegacy } = config as ServiceNowPublicConfigurationType;
   const { username, password } = secrets as ServiceNowSecretConfigurationType;
@@ -64,9 +66,12 @@ export const createExternalService = (
     auth: { username, password },
   });
 
-  const getCreateIncidentUrl = () => (isLegacy ? tableApiIncidentUrl : importSetTableUrl);
+  // TODO: Remove ServiceNow SIR check when there is a SN Store app for SIR.
+  const useOldApi = isLegacy || actionTypeId === ServiceNowSIRActionTypeId;
+
+  const getCreateIncidentUrl = () => (useOldApi ? tableApiIncidentUrl : importSetTableUrl);
   const getUpdateIncidentUrl = (incidentId: string) =>
-    isLegacy ? `${tableApiIncidentUrl}/${incidentId}` : importSetTableUrl;
+    useOldApi ? `${tableApiIncidentUrl}/${incidentId}` : importSetTableUrl;
 
   const getIncidentViewURL = (id: string) => {
     // Based on: https://docs.servicenow.com/bundle/orlando-platform-user-interface/page/use/navigation/reference/r_NavigatingByURLExamples.html
@@ -171,17 +176,17 @@ export const createExternalService = (
         url: getCreateIncidentUrl(),
         logger,
         method: 'post',
-        data: prepareIncident(isLegacy, incident),
+        data: prepareIncident(useOldApi, incident),
         configurationUtilities,
       });
 
       checkInstance(res);
 
-      if (!isLegacy) {
+      if (!useOldApi) {
         throwIfImportSetApiResponseIsAnError(res.data);
       }
 
-      const incidentId = isLegacy ? res.data.result.sys_id : res.data.result[0].sys_id;
+      const incidentId = useOldApi ? res.data.result.sys_id : res.data.result[0].sys_id;
       const insertedIncident = await getIncident(incidentId);
 
       return {
@@ -208,23 +213,23 @@ export const createExternalService = (
         axios: axiosInstance,
         url: getUpdateIncidentUrl(incidentId),
         // Import Set API supports only POST.
-        method: isLegacy ? 'patch' : 'post',
+        method: useOldApi ? 'patch' : 'post',
         logger,
         data: {
-          ...prepareIncident(isLegacy, incident),
+          ...prepareIncident(useOldApi, incident),
           // u_incident_id is used to update the incident when using the Import Set API.
-          ...(isLegacy ? {} : { u_incident_id: incidentId }),
+          ...(useOldApi ? {} : { u_incident_id: incidentId }),
         },
         configurationUtilities,
       });
 
       checkInstance(res);
 
-      if (!isLegacy) {
+      if (!useOldApi) {
         throwIfImportSetApiResponseIsAnError(res.data);
       }
 
-      const id = isLegacy ? res.data.result.sys_id : res.data.result[0].sys_id;
+      const id = useOldApi ? res.data.result.sys_id : res.data.result[0].sys_id;
       const updatedIncident = await getIncident(id);
 
       return {
