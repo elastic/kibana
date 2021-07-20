@@ -7,7 +7,6 @@
 
 import { CoreSetup, SavedObjectsClient } from '../../../../../src/core/server';
 import { CollectorFetchContext } from '../../../../../src/plugins/usage_collection/server';
-import { createMetricObjects } from '../routes/usage';
 import { getBeatUsage, getLiveQueryUsage, getPolicyLevelUsage } from './fetchers';
 import { CollectorDependencies, usageSchema, UsageData } from './types';
 
@@ -25,10 +24,7 @@ export const registerCollector: RegisterCollector = ({ core, osqueryContext, usa
   const collector = usageCollection.makeUsageCollector<UsageData>({
     type: 'osquery',
     schema: usageSchema,
-    isReady: async () => {
-      const savedObjectsClient = new SavedObjectsClient(await getInternalSavedObjectsClient(core));
-      return await createMetricObjects(savedObjectsClient);
-    },
+    isReady: () => true,
     fetch: async ({ esClient }: CollectorFetchContext): Promise<UsageData> => {
       const savedObjectsClient = new SavedObjectsClient(await getInternalSavedObjectsClient(core));
       return {
