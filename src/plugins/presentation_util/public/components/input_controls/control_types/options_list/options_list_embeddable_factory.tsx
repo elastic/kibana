@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EmbeddableFactoryDefinition } from '../../../../../embeddable/public';
+import { EmbeddableFactoryDefinition } from '../../../../../../embeddable/public';
 import {
   OptionsListDataFetcher,
   OptionsListEmbeddable,

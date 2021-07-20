@@ -6,21 +6,17 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiFieldSearch,
-  EuiFilterSelectItem,
-  EuiIcon,
-  EuiLoadingChart,
-  EuiNotificationBadge,
-  EuiPopoverTitle,
-  EuiSpacer,
-  FilterChecked,
-} from '@elastic/eui';
+import { EuiIcon, EuiNotificationBadge, EuiSelectableOption } from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Embeddable } from '../../../../../embeddable/public';
-import { InputControlEmbeddable, InputControlInput, InputControlOutput } from '../embeddable/types';
+import { Embeddable } from '../../../../../../embeddable/public';
+import {
+  InputControlEmbeddable,
+  InputControlInput,
+  InputControlOutput,
+} from '../../embeddable/types';
+import { OptionsListPopover } from './options_list_popover_component';
 
 export type OptionsListDataFetcher = (props: {
   field: string;
@@ -28,12 +24,7 @@ export type OptionsListDataFetcher = (props: {
   filters: InputControlInput['filters'];
   query: InputControlInput['query'];
   timeRange: InputControlInput['timeRange'];
-}) => Promise<string[]>;
-
-interface OptionsListAvailableItem {
-  checked?: FilterChecked;
-  label: string;
-}
+}) => Promise<EuiSelectableOption[]>;
 
 export const OPTIONS_LIST_CONTROL = 'optionsListControl';
 
@@ -50,7 +41,7 @@ export class OptionsListEmbeddable
   public readonly type = OPTIONS_LIST_CONTROL;
 
   private node?: HTMLElement;
-  private availableOptions: OptionsListAvailableItem[] = [];
+  private availableOptions: EuiSelectableOption[] = [];
 
   constructor(
     input: OptionsListEmbeddableInput,
@@ -66,7 +57,7 @@ export class OptionsListEmbeddable
       timeRange,
       filters,
       query,
-    }).then((newData) => (this.availableOptions = newData.map((label) => ({ label }))));
+    }).then((newData) => (this.availableOptions = newData));
     // TODO: Refetch whenever filters, query, or timeRange changes.
   }
 
@@ -82,36 +73,7 @@ export class OptionsListEmbeddable
   }
 
   public getPopover = () => {
-    const loading = (
-      <div className="euiFilterSelect__note">
-        <div className="euiFilterSelect__noteContent">
-          <EuiLoadingChart size="m" />
-          <EuiSpacer size="xs" />
-          <p>Loading filters</p>
-        </div>
-      </div>
-    );
-
-    const searchBar = (
-      <EuiPopoverTitle paddingSize="s">
-        <EuiFieldSearch compressed />
-      </EuiPopoverTitle>
-    );
-
-    return this.availableOptions ? (
-      <>
-        {searchBar}
-        <div className="optionsList--items">
-          {this.availableOptions.map((item, index) => (
-            <EuiFilterSelectItem checked={item.checked} key={index} onClick={() => {}}>
-              {item.label}
-            </EuiFilterSelectItem>
-          ))}
-        </div>
-      </>
-    ) : (
-      loading
-    );
+    return <OptionsListPopover availableOptions={this.availableOptions} />;
   };
 
   public render = (node: HTMLElement) => {

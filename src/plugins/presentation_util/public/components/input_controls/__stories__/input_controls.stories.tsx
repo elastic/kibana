@@ -13,9 +13,8 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { startCase } from 'lodash';
 import { decorators } from './decorators';
 import { getEuiSelectableOptions, flightFields } from './flights';
-import { OptionsListEmbeddableFactory } from '../control_types/options_list_embeddable_factory';
+import { OptionsListEmbeddableFactory, OptionsListEmbeddable } from '../control_types/options_list';
 import { ControlFrame } from '../control_frame/control_frame';
-import { OptionsListEmbeddable } from '../control_types/options_list_embeddable';
 
 export default {
   title: 'Input Controls',
@@ -51,8 +50,7 @@ const OptionsListStoryComponent = ({ fields, twoLine }: OptionsListStorybookArgs
   const optionsListEmbeddableFactory = useMemo(
     () =>
       new OptionsListEmbeddableFactory(
-        ({ field }) =>
-          new Promise((r) => setTimeout(() => r(getEuiSelectableOptions(field) as string[]), 10000))
+        ({ field }) => new Promise((r) => setTimeout(() => r(getEuiSelectableOptions(field)), 1000))
       ),
     []
   );
