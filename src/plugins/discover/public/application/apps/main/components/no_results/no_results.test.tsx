@@ -37,6 +37,7 @@ function mountAndFindSubjects(props: Omit<DiscoverNoResultsProps, 'onDisableFilt
     timeFieldMsg: findTestSubject(component, 'discoverNoResultsTimefilter').exists(),
     errorMsg: findTestSubject(component, 'discoverNoResultsError').exists(),
     adjustSearch: findTestSubject(component, 'discoverNoResultsAdjustSearch').exists(),
+    adjustFilters: findTestSubject(component, 'discoverNoResultsAdjustFilters').exists(),
     disableFiltersButton: findTestSubject(component, 'discoverNoResultsDisableFilters').exists(),
   };
 }
@@ -48,6 +49,7 @@ describe('DiscoverNoResults', () => {
         const result = mountAndFindSubjects({});
         expect(result).toMatchInlineSnapshot(`
           Object {
+            "adjustFilters": false,
             "adjustSearch": false,
             "disableFiltersButton": false,
             "errorMsg": false,
@@ -64,6 +66,7 @@ describe('DiscoverNoResults', () => {
         });
         expect(result).toMatchInlineSnapshot(`
           Object {
+            "adjustFilters": false,
             "adjustSearch": false,
             "disableFiltersButton": false,
             "errorMsg": false,
@@ -78,12 +81,11 @@ describe('DiscoverNoResults', () => {
       test('shows "adjust search" message when having query', () => {
         const result = mountAndFindSubjects({ hasQuery: true });
         expect(result).toHaveProperty('adjustSearch', true);
-        expect(result).toHaveProperty('disableFiltersButton', false);
       });
 
-      test('shows "adjust search" message when having filters', () => {
+      test('shows "adjust filters" message when having filters', () => {
         const result = mountAndFindSubjects({ hasFilters: true });
-        expect(result).toHaveProperty('adjustSearch', true);
+        expect(result).toHaveProperty('adjustFilters', true);
         expect(result).toHaveProperty('disableFiltersButton', true);
       });
     });
@@ -97,6 +99,7 @@ describe('DiscoverNoResults', () => {
         });
         expect(result).toMatchInlineSnapshot(`
           Object {
+            "adjustFilters": false,
             "adjustSearch": false,
             "disableFiltersButton": false,
             "errorMsg": true,

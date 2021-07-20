@@ -40,7 +40,7 @@ export function DiscoverNoResults({
 }: DiscoverNoResultsProps) {
   const callOut = !error ? (
     <EuiFlexItem grow={false} className="dscNoResults">
-      <EuiFlexGroup gutterSize="xl" alignItems="stretch" direction="rowReverse" wrap>
+      <EuiFlexGroup gutterSize="xl" alignItems="center" direction="rowReverse" wrap>
         <EuiFlexItem grow={1}>
           <NoResultsIllustration />
         </EuiFlexItem>
@@ -53,7 +53,6 @@ export function DiscoverNoResults({
               />
             </h2>
           </EuiTitle>
-          <EuiSpacer />
           {!!timeFieldName && getTimeFieldMessage()}
           {timeFieldName && (hasFilters || hasQuery) && <EuiSpacer size="m" />}
           {(hasFilters || hasQuery) && (

@@ -6,17 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment, ReactNode } from 'react';
+import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  // EuiButton,
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiLink,
-  // EuiSpacer,
-  // EuiText,
   EuiDescriptionListDescription,
-  // EuiTitle,
+  EuiSpacer,
 } from '@elastic/eui';
 
 export function getTimeFieldMessage() {
@@ -47,60 +44,47 @@ interface AdjustSearchProps {
 }
 
 export function AdjustSearch({ hasFilters, hasQuery, onDisableFilters }: AdjustSearchProps) {
-  let content: ReactNode;
-  if (hasFilters) {
-    if (hasQuery) {
-      content = (
-        <EuiDescriptionListDescription>
-          You have entered a query and have narrowed your search results. Try searching for a
-          different combination of terms or{' '}
-          <EuiLink onClick={onDisableFilters}>
-            <FormattedMessage
-              id="discover.noResults.disableFilters"
-              defaultMessage="temporarily disabling filters"
-            />
-          </EuiLink>{' '}
-          to reveal more matches.
-        </EuiDescriptionListDescription>
-      );
-    } else {
-      content = (
-        <EuiDescriptionListDescription>
-          You have narrowed your search results. Try{' '}
-          <EuiLink data-test-subj="discoverNoResultsDisableFilters" onClick={onDisableFilters}>
-            <FormattedMessage
-              id="discover.noResults.disableFilters"
-              defaultMessage="temporarily disabling filters"
-            />
-          </EuiLink>{' '}
-          to reveal more matches.
-        </EuiDescriptionListDescription>
-      );
-    }
-  } else {
-    content = (
-      <EuiDescriptionListDescription>
-        <p>
-          <FormattedMessage
-            id="discover.noResults.queryOnlyDescription"
-            defaultMessage="Try searching for a different combination of terms
-            to reveal more matches."
-          />
-        </p>
-      </EuiDescriptionListDescription>
-    );
-  }
   return (
     <Fragment>
-      <EuiDescriptionList>
-        <EuiDescriptionListTitle data-test-subj="discoverNoResultsAdjustSearch">
-          <FormattedMessage
-            id="discover.noResults.adjustSearch"
-            defaultMessage="Adjust your search"
-          />
-        </EuiDescriptionListTitle>
-        {content}
-      </EuiDescriptionList>
+      {hasQuery && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiDescriptionList>
+            <EuiDescriptionListTitle data-test-subj="discoverNoResultsAdjustSearch">
+              <FormattedMessage
+                id="discover.noResults.adjustSearch"
+                defaultMessage="Adjust your query"
+              />
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              Try searching for a different combination of terms.
+            </EuiDescriptionListDescription>
+          </EuiDescriptionList>
+        </>
+      )}
+      {hasFilters && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiDescriptionList>
+            <EuiDescriptionListTitle data-test-subj="discoverNoResultsAdjustFilters">
+              <FormattedMessage
+                id="discover.noResults.adjustFilters"
+                defaultMessage="Adjust your filters"
+              />
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              Try removing or{' '}
+              <EuiLink data-test-subj="discoverNoResultsDisableFilters" onClick={onDisableFilters}>
+                <FormattedMessage
+                  id="discover.noResults.disableFilters"
+                  defaultMessage="temporarily disabling filters"
+                />
+              </EuiLink>
+              .
+            </EuiDescriptionListDescription>
+          </EuiDescriptionList>
+        </>
+      )}
     </Fragment>
   );
 }
