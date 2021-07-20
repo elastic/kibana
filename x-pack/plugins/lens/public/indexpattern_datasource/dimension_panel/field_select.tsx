@@ -7,7 +7,7 @@
 
 import './field_select.scss';
 import { partition } from 'lodash';
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiComboBox,
@@ -26,6 +26,15 @@ import { IndexPattern, IndexPatternPrivateState } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { fieldExists } from '../pure_helpers';
 
+const truncate = function (label: string, length: number, separator = '...') {
+  if (label.length <= length) return label;
+
+  const charsToShow = length - separator.length;
+  const frontChars = Math.ceil(charsToShow / 2);
+  const backChars = Math.floor(charsToShow / 2);
+
+  return label.substr(0, frontChars) + separator + label.substr(label.length - backChars);
+};
 export interface FieldChoice {
   type: 'field';
   field: string;
@@ -168,46 +177,49 @@ export function FieldSelect({
     existingFields,
     markAllFieldsCompatible,
   ]);
+  const comboBoxRef = useRef<HTMLInputElement>(null);
+  const labelWidth = (comboBoxRef.current?.clientWidth || 305) - 70; // subtracting paddings
+  const labelLength = Math.round(labelWidth * 7.7); // dividing the width by the approximate space of a single letter, depends on the font size and spacing
 
   return (
-    <EuiComboBox
-      fullWidth
-      compressed
-      isClearable={false}
-      data-test-subj="indexPattern-dimension-field"
-      placeholder={i18n.translate('xpack.lens.indexPattern.fieldPlaceholder', {
-        defaultMessage: 'Field',
-      })}
-      options={(memoizedFieldOptions as unknown) as EuiComboBoxOptionOption[]}
-      isInvalid={Boolean(incompleteOperation || fieldIsInvalid)}
-      selectedOptions={
-        ((selectedOperationType && selectedField
-          ? [
-              {
-                label: fieldIsInvalid
-                  ? selectedField
-                  : currentIndexPattern.getFieldByName(selectedField)?.displayName,
-                value: { type: 'field', field: selectedField },
-              },
-            ]
-          : []) as unknown) as EuiComboBoxOptionOption[]
-      }
-      singleSelection={{ asPlainText: true }}
-      onChange={(choices) => {
-        if (choices.length === 0) {
-          onDeleteColumn?.();
-          return;
+    <div ref={comboBoxRef}>
+      <EuiComboBox
+        fullWidth
+        compressed
+        isClearable={false}
+        data-test-subj="indexPattern-dimension-field"
+        placeholder={i18n.translate('xpack.lens.indexPattern.fieldPlaceholder', {
+          defaultMessage: 'Field',
+        })}
+        options={(memoizedFieldOptions as unknown) as EuiComboBoxOptionOption[]}
+        isInvalid={Boolean(incompleteOperation || fieldIsInvalid)}
+        selectedOptions={
+          ((selectedOperationType && selectedField
+            ? [
+                {
+                  label: fieldIsInvalid
+                    ? selectedField
+                    : currentIndexPattern.getFieldByName(selectedField)?.displayName,
+                  value: { type: 'field', field: selectedField },
+                },
+              ]
+            : []) as unknown) as EuiComboBoxOptionOption[]
         }
+        singleSelection={{ asPlainText: true }}
+        onChange={(choices) => {
+          if (choices.length === 0) {
+            onDeleteColumn?.();
+            return;
+          }
 
-        const choice = (choices[0].value as unknown) as FieldChoice;
+          const choice = (choices[0].value as unknown) as FieldChoice;
 
-        if (choice.field !== selectedField) {
-          trackUiEvent('indexpattern_dimension_field_changed');
-          onChoose(choice);
-        }
-      }}
-      renderOption={(option, searchValue) => {
-        return (
+          if (choice.field !== selectedField) {
+            trackUiEvent('indexpattern_dimension_field_changed');
+            onChoose(choice);
+          }
+        }}
+        renderOption={(option, searchValue) => (
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={null}>
               <LensFieldIcon
@@ -216,12 +228,14 @@ export function FieldSelect({
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+              <EuiHighlight search={searchValue}>
+                {truncate(option.label, labelLength)}
+              </EuiHighlight>
             </EuiFlexItem>
           </EuiFlexGroup>
-        );
-      }}
-      {...rest}
-    />
+        )}
+        {...rest}
+      />
+    </div>
   );
 }
