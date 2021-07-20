@@ -135,7 +135,7 @@ export function registerAccountCreateSourceRoute({
           login: schema.maybe(schema.string()),
           password: schema.maybe(schema.string()),
           organizations: schema.maybe(schema.arrayOf(schema.string())),
-          indexPermissions: schema.boolean(),
+          indexPermissions: schema.maybe(schema.boolean()),
         }),
       },
     },
@@ -400,6 +400,7 @@ export function registerAccountSourceDownloadDiagnosticsRoute({
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/ws/sources/:sourceId/download_diagnostics',
+      hasJsonResponse: false,
     })
   );
 }
@@ -748,6 +749,7 @@ export function registerOrgSourceDownloadDiagnosticsRoute({
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/ws/org/sources/:sourceId/download_diagnostics',
+      hasJsonResponse: false,
     })
   );
 }

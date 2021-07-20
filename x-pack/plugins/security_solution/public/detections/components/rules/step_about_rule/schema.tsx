@@ -13,6 +13,7 @@ import {
   FormSchema,
   ValidationFunc,
   ERROR_CODE,
+  VALIDATION_TYPES,
 } from '../../../../shared_imports';
 import { AboutStepRule } from '../../../pages/detection_engine/rules/types';
 import { OptionalFieldLabel } from '../optional_field_label';
@@ -38,6 +39,20 @@ export const schema: FormSchema<AboutStepRule> = {
       }
     ),
     labelAppend: OptionalFieldLabel,
+    validations: [
+      {
+        validator: emptyField(
+          i18n.translate(
+            'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.authorFieldEmptyError',
+            {
+              defaultMessage: 'An author must not be empty',
+            }
+          )
+        ),
+        type: VALIDATION_TYPES.ARRAY_ITEM,
+        isBlocking: false,
+      },
+    ],
   },
   name: {
     type: FIELD_TYPES.TEXT,
@@ -243,6 +258,20 @@ export const schema: FormSchema<AboutStepRule> = {
       }
     ),
     labelAppend: OptionalFieldLabel,
+    validations: [
+      {
+        validator: emptyField(
+          i18n.translate(
+            'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.tagFieldEmptyError',
+            {
+              defaultMessage: 'A tag must not be empty',
+            }
+          )
+        ),
+        type: VALIDATION_TYPES.ARRAY_ITEM,
+        isBlocking: false,
+      },
+    ],
   },
   note: {
     type: FIELD_TYPES.TEXTAREA,

@@ -12,7 +12,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
-  const esArchiver = getService('esArchiver');
   const log = getService('log');
   const inspector = getService('inspector');
   const retry = getService('retry');
@@ -24,6 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
     'visChart',
     'common',
+    'settings',
   ]);
 
   describe('visual builder', function describeIndexTests() {
@@ -44,14 +44,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('metric', () => {
+      const { visualBuilder } = PageObjects;
+
       beforeEach(async () => {
-        await PageObjects.visualBuilder.resetPage();
-        await PageObjects.visualBuilder.clickMetric();
-        await PageObjects.visualBuilder.checkMetricTabIsPresent();
-        await PageObjects.visualBuilder.clickPanelOptions('metric');
-        await PageObjects.visualBuilder.setMetricsDataTimerangeMode('Last value');
-        await PageObjects.visualBuilder.setDropLastBucket(true);
-        await PageObjects.visualBuilder.clickDataTab('metric');
+        await visualBuilder.resetPage();
+        await visualBuilder.clickMetric();
+        await visualBuilder.checkMetricTabIsPresent();
+        await visualBuilder.clickPanelOptions('metric');
+        await visualBuilder.setMetricsDataTimerangeMode('Last value');
+        await visualBuilder.setDropLastBucket(true);
+        await visualBuilder.clickDataTab('metric');
       });
 
       it('should not have inspector enabled', async () => {
@@ -59,27 +61,97 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show correct data', async () => {
-        const value = await PageObjects.visualBuilder.getMetricValue();
+        const value = await visualBuilder.getMetricValue();
         expect(value).to.eql('156');
       });
 
       it('should show correct data with Math Aggregation', async () => {
-        await PageObjects.visualBuilder.createNewAgg();
-        await PageObjects.visualBuilder.selectAggType('math', 1);
-        await PageObjects.visualBuilder.fillInVariable();
-        await PageObjects.visualBuilder.fillInExpression('params.test + 1');
-        const value = await PageObjects.visualBuilder.getMetricValue();
+        await visualBuilder.createNewAgg();
+        await visualBuilder.selectAggType('math', 1);
+        await visualBuilder.fillInVariable();
+        await visualBuilder.fillInExpression('params.test + 1');
+        const value = await visualBuilder.getMetricValue();
         expect(value).to.eql('157');
       });
 
       it('should populate fields for basic functions', async () => {
-        const { visualBuilder } = PageObjects;
-
         await visualBuilder.selectAggType('Average');
         await visualBuilder.setFieldForAggregation('machine.ram');
         const isFieldForAggregationValid = await visualBuilder.checkFieldForAggregationValidity();
 
         expect(isFieldForAggregationValid).to.be(true);
+      });
+
+      it('should show correct data for Value Count with Entire time range mode', async () => {
+        await visualBuilder.selectAggType('Value Count');
+        await visualBuilder.setFieldForAggregation('machine.ram');
+
+        await visualBuilder.clickPanelOptions('metric');
+        await visualBuilder.setMetricsDataTimerangeMode('Entire time range');
+
+        const value = await visualBuilder.getMetricValue();
+        expect(value).to.eql('13,492');
+      });
+
+      it('should show same data for kibana and string index pattern modes', async () => {
+        await visualBuilder.selectAggType('Max');
+        await visualBuilder.setFieldForAggregation('machine.ram');
+        const kibanaIndexPatternModeValue = await visualBuilder.getMetricValue();
+
+        await visualBuilder.clickPanelOptions('metric');
+        await visualBuilder.switchIndexPatternSelectionMode(false);
+        const stringIndexPatternModeValue = await visualBuilder.getMetricValue();
+
+        expect(kibanaIndexPatternModeValue).to.eql(stringIndexPatternModeValue);
+        expect(kibanaIndexPatternModeValue).to.eql('32,212,254,720');
+      });
+
+      describe('Color rules', () => {
+        beforeEach(async () => {
+          await visualBuilder.selectAggType('Min');
+          await visualBuilder.setFieldForAggregation('machine.ram');
+
+          await visualBuilder.clickPanelOptions('metric');
+          await visualBuilder.setColorRuleOperator('>= greater than or equal');
+          await visualBuilder.setColorRuleValue(0);
+        });
+
+        it('should apply color rules to visualization background', async () => {
+          await visualBuilder.setColorPickerValue('#FFCFDF');
+
+          const backGroundStyle = await visualBuilder.getBackgroundStyle();
+          expect(backGroundStyle).to.eql('background-color: rgb(255, 207, 223);');
+        });
+
+        it('should apply color rules to metric value', async () => {
+          await visualBuilder.setColorPickerValue('#AD7DE6', 1);
+
+          const backGroundStyle = await visualBuilder.getMetricValueStyle();
+          expect(backGroundStyle).to.eql('color: rgb(173, 125, 230);');
+        });
+      });
+
+      describe('Top Hit aggregation', () => {
+        beforeEach(async () => {
+          await visualBuilder.selectAggType('Top Hit');
+          await visualBuilder.setTopHitOrderByField('@timestamp');
+        });
+
+        it('should show correct data for string type field', async () => {
+          await visualBuilder.setFieldForAggregation('machine.os.raw');
+          await visualBuilder.setTopHitAggregateWithOption('Concatenate');
+
+          const value = await visualBuilder.getMetricValue();
+          expect(value).to.eql('win 7');
+        });
+
+        it('should show correct data for runtime field', async () => {
+          await visualBuilder.setFieldForAggregation('hello_world_runtime_field');
+          await visualBuilder.setTopHitAggregateWithOption('Concatenate');
+
+          const value = await visualBuilder.getMetricValue();
+          expect(value).to.eql('hello world');
+        });
       });
     });
 
@@ -125,14 +197,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/103252
-    describe.skip('switch index patterns', () => {
-      before(async () => {
-        await esArchiver.loadIfNeeded(
-          'test/functional/fixtures/es_archiver/index_pattern_without_timefield'
-        );
-      });
-
+    describe('switch index pattern mode', () => {
       beforeEach(async () => {
         await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickMetric();
@@ -142,40 +207,64 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualBuilder.setDropLastBucket(true);
         await PageObjects.visualBuilder.clickDataTab('metric');
         await PageObjects.timePicker.setAbsoluteRange(
-          'Sep 22, 2019 @ 00:00:00.000',
-          'Sep 23, 2019 @ 00:00:00.000'
+          'Sep 19, 2015 @ 06:31:44.000',
+          'Sep 22, 2015 @ 18:31:44.000'
         );
-      });
-
-      after(async () => {
-        await security.testUser.restoreDefaults();
-        await esArchiver.load('test/functional/fixtures/es_archiver/empty_kibana');
-        await PageObjects.visualize.initTests();
       });
 
       const switchIndexTest = async (useKibanaIndexes: boolean) => {
         await PageObjects.visualBuilder.clickPanelOptions('metric');
         await PageObjects.visualBuilder.setIndexPatternValue('', false);
 
-        const value = await PageObjects.visualBuilder.getMetricValue();
-        expect(value).to.eql('0');
-
         // Sometimes popovers take some time to appear in Firefox (#71979)
         await retry.tryForTime(20000, async () => {
-          await PageObjects.visualBuilder.setIndexPatternValue('with-timefield', useKibanaIndexes);
+          await PageObjects.visualBuilder.setIndexPatternValue('logstash-*', useKibanaIndexes);
           await PageObjects.visualBuilder.waitForIndexPatternTimeFieldOptionsLoaded();
-          await PageObjects.visualBuilder.selectIndexPatternTimeField('timestamp');
+          await PageObjects.visualBuilder.selectIndexPatternTimeField('@timestamp');
         });
         const newValue = await PageObjects.visualBuilder.getMetricValue();
-        expect(newValue).to.eql('1');
+        expect(newValue).to.eql('156');
       };
+
+      it('should be able to switch combo box mode selection', async () => {
+        await switchIndexTest(true);
+      });
 
       it('should be able to switch using text mode selection', async () => {
         await switchIndexTest(false);
       });
+    });
 
-      it('should be able to switch combo box mode selection', async () => {
-        await switchIndexTest(true);
+    describe('switch panel interval test', () => {
+      beforeEach(async () => {
+        await PageObjects.visualBuilder.resetPage();
+        await PageObjects.visualBuilder.clickMetric();
+        await PageObjects.visualBuilder.checkMetricTabIsPresent();
+        await PageObjects.visualBuilder.clickPanelOptions('metric');
+        await PageObjects.visualBuilder.setMetricsDataTimerangeMode('Last value');
+        await PageObjects.visualBuilder.setDropLastBucket(true);
+        await PageObjects.timePicker.setAbsoluteRange(
+          'Sep 19, 2015 @ 06:31:44.000',
+          'Sep 22, 2015 @ 18:31:44.000'
+        );
+      });
+
+      it('should be able to switch to gte interval (>=2d)', async () => {
+        await PageObjects.visualBuilder.setIntervalValue('>=2d');
+        const newValue = await PageObjects.visualBuilder.getMetricValue();
+        expect(newValue).to.eql('9,371');
+      });
+
+      it('should be able to switch to fixed interval (1d)', async () => {
+        await PageObjects.visualBuilder.setIntervalValue('1d');
+        const newValue = await PageObjects.visualBuilder.getMetricValue();
+        expect(newValue).to.eql('4,614');
+      });
+
+      it('should be able to switch to auto interval', async () => {
+        await PageObjects.visualBuilder.setIntervalValue('auto');
+        const newValue = await PageObjects.visualBuilder.getMetricValue();
+        expect(newValue).to.eql('156');
       });
     });
 

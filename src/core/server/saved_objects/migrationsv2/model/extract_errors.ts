@@ -38,15 +38,16 @@ export function extractTransformFailuresReason(
 
 export function extractUnknownDocFailureReason(
   unknownDocs: CheckForUnknownDocsFoundDoc[],
-  sourceIndex: string
+  targetIndex: string
 ): string {
   return (
-    `Migration failed because documents were found for unknown saved object types. ` +
-    `To proceed with the migration, please delete these documents from the "${sourceIndex}" index.\n` +
+    `Upgrades will fail for 8.0+ because documents were found for unknown saved object types. ` +
+    `To ensure that upgrades will succeed in the future, either re-enable plugins or delete these documents from the ` +
+    `"${targetIndex}" index after the current upgrade completes.\n` +
     `The documents with unknown types are:\n` +
     unknownDocs.map((doc) => `- "${doc.id}" (type: "${doc.type}")\n`).join('') +
     `You can delete them using the following command:\n` +
-    `curl -X POST "{elasticsearch}/${sourceIndex}/_bulk?pretty" -H 'Content-Type: application/json' -d'\n` +
+    `curl -X POST "{elasticsearch}/${targetIndex}/_bulk?pretty" -H 'Content-Type: application/json' -d'\n` +
     unknownDocs.map((doc) => `{ "delete" : { "_id" : "${doc.id}" } }\n`).join('') +
     `'`
   );

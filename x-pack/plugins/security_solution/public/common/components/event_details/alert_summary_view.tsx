@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiBasicTableColumn,
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiBasicTableColumn, EuiSpacer, EuiHorizontalRule, EuiTitle, EuiText } from '@elastic/eui';
 import { get, getOr, find } from 'lodash/fp';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
@@ -27,6 +21,8 @@ import {
   ALERTS_HEADERS_THRESHOLD_CARDINALITY,
   ALERTS_HEADERS_THRESHOLD_COUNT,
   ALERTS_HEADERS_THRESHOLD_TERMS,
+  SIGNAL_STATUS,
+  TIMESTAMP,
 } from '../../../detections/components/alerts_table/translations';
 import {
   IP_FIELD_TYPE,
@@ -40,14 +36,14 @@ import { MarkdownRenderer } from '../markdown_editor';
 import { LineClamp } from '../line_clamp';
 import { endpointAlertCheck } from '../../utils/endpoint_alert_check';
 
-const StyledEuiDescriptionList = styled(EuiDescriptionList)`
-  padding: 24px 4px 4px;
+export const Indent = styled.div`
+  padding: 0 8px;
   word-break: break-word;
 `;
 
 const fields = [
-  { id: 'signal.status' },
-  { id: '@timestamp' },
+  { id: 'signal.status', label: SIGNAL_STATUS },
+  { id: '@timestamp', label: TIMESTAMP },
   {
     id: SIGNAL_RULE_NAME_FIELD_NAME,
     linkField: 'signal.rule.id',
@@ -63,6 +59,20 @@ const fields = [
   { id: 'signal.threshold_result.count', label: ALERTS_HEADERS_THRESHOLD_COUNT },
   { id: 'signal.threshold_result.terms', label: ALERTS_HEADERS_THRESHOLD_TERMS },
   { id: 'signal.threshold_result.cardinality', label: ALERTS_HEADERS_THRESHOLD_CARDINALITY },
+];
+
+const processFields = [
+  ...fields,
+  { id: 'process.name' },
+  { id: 'process.parent.name' },
+  { id: 'process.args' },
+];
+
+const networkFields = [
+  ...fields,
+  { id: 'destination.address' },
+  { id: 'destination.port' },
+  { id: 'process.name' },
 ];
 
 const getDescription = ({
@@ -94,8 +104,22 @@ const getSummaryRows = ({
   timelineId: string;
   eventId: string;
 }) => {
+  const categoryField = find({ category: 'event', field: 'event.category' }, data) as
+    | TimelineEventsDetailsItem
+    | undefined;
+  const eventCategory = Array.isArray(categoryField?.originalValue)
+    ? categoryField?.originalValue[0]
+    : categoryField?.originalValue;
+
+  const tableFields =
+    eventCategory === 'network'
+      ? networkFields
+      : eventCategory === 'process'
+      ? processFields
+      : fields;
+
   return data != null
-    ? fields.reduce<SummaryRow[]>((acc, item) => {
+    ? tableFields.reduce<SummaryRow[]>((acc, item) => {
         const field = data.find((d) => d.field === item.id);
         if (!field) {
           return acc;
@@ -220,14 +244,20 @@ const AlertSummaryViewComponent: React.FC<{
         title={title}
       />
       {maybeRule?.note && (
-        <StyledEuiDescriptionList data-test-subj={`summary-view-guide`} compressed>
-          <EuiDescriptionListTitle>{i18n.INVESTIGATION_GUIDE}</EuiDescriptionListTitle>
-          <EuiDescriptionListDescription>
-            <LineClamp>
-              <MarkdownRenderer>{maybeRule.note}</MarkdownRenderer>
-            </LineClamp>
-          </EuiDescriptionListDescription>
-        </StyledEuiDescriptionList>
+        <>
+          <EuiHorizontalRule />
+          <EuiTitle size="xxxs" data-test-subj="summary-view-guide">
+            <h5>{i18n.INVESTIGATION_GUIDE}</h5>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <Indent>
+            <EuiText size="xs">
+              <LineClamp lineClampHeight={4.5}>
+                <MarkdownRenderer>{maybeRule.note}</MarkdownRenderer>
+              </LineClamp>
+            </EuiText>
+          </Indent>
+        </>
       )}
     </>
   );

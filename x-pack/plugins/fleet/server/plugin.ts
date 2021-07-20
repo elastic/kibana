@@ -218,7 +218,7 @@ export class FleetPlugin
     if (deps.features) {
       deps.features.registerKibanaFeature({
         id: PLUGIN_ID,
-        name: 'Fleet',
+        name: 'Fleet and Integrations',
         category: DEFAULT_APP_CATEGORIES.management,
         app: [PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, 'kibana'],
         catalogue: ['fleet'],

@@ -85,7 +85,6 @@ export function modelSnapshotProvider(client: IScopedClusterClient, mlClient: Ml
           ),
           events: calendarEvents.map((s) => ({
             calendar_id: calendarId,
-            event_id: '',
             description: s.description,
             start_time: `${s.start}`,
             end_time: `${s.end}`,

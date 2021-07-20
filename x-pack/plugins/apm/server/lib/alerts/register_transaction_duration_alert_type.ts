@@ -17,7 +17,11 @@ import {
   getEnvironmentLabel,
   getEnvironmentEsField,
 } from '../../../common/environment_filter_values';
-import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
+import {
+  AlertType,
+  APM_SERVER_FEATURE_ID,
+  ALERT_TYPES_CONFIG,
+} from '../../../common/alert_types';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
@@ -26,7 +30,7 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { getDurationFormatter } from '../../../common/utils/formatters';
-import { environmentQuery } from '../../../server/utils/queries';
+import { environmentQuery } from '../../../common/utils/environment_query';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
@@ -77,7 +81,7 @@ export function registerTransactionDurationAlertType({
         apmActionVariables.interval,
       ],
     },
-    producer: 'apm',
+    producer: APM_SERVER_FEATURE_ID,
     minimumLicenseRequired: 'basic',
     isExportable: true,
     executor: async ({ services, params }) => {

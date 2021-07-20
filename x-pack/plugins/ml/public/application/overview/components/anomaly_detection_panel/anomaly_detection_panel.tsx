@@ -17,13 +17,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { useMlKibana, useMlUrlGenerator, useNavigateToPath } from '../../../contexts/kibana';
+import { useMlKibana, useMlLocator, useNavigateToPath } from '../../../contexts/kibana';
 import { AnomalyDetectionTable } from './table';
 import { ml } from '../../../services/ml_api_service';
 import { getGroupsFromJobs, getStatsBarData, getJobsWithTimerange } from './utils';
 import { Dictionary } from '../../../../../common/types/common';
 import { MlSummaryJobs, MlSummaryJob } from '../../../../../common/types/anomaly_detection_jobs';
-import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../../../common/constants/locator';
 
 export type GroupsDictionary = Dictionary<Group>;
 
@@ -59,18 +59,20 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled, setLazyJ
   const {
     services: { notifications },
   } = useMlKibana();
-  const mlUrlGenerator = useMlUrlGenerator();
+  const mlLocator = useMlLocator();
   const navigateToPath = useNavigateToPath();
 
   const redirectToJobsManagementPage = async () => {
-    const path = await mlUrlGenerator.createUrl({
+    if (!mlLocator) return;
+    const path = await mlLocator.getUrl({
       page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
     });
     await navigateToPath(path, true);
   };
 
   const redirectToCreateJobSelectIndexPage = async () => {
-    const path = await mlUrlGenerator.createUrl({
+    if (!mlLocator) return;
+    const path = await mlLocator.getUrl({
       page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX,
     });
     await navigateToPath(path, true);

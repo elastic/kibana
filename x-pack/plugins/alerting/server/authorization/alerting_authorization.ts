@@ -81,6 +81,7 @@ export class AlertingAuthorization {
   private readonly featuresIds: Promise<Set<string>>;
   private readonly allPossibleConsumers: Promise<AuthorizedConsumers>;
   private readonly exemptConsumerIds: string[];
+  private readonly spaceId: Promise<string | undefined>;
 
   constructor({
     alertTypeRegistry,
@@ -100,6 +101,8 @@ export class AlertingAuthorization {
     // An example of this is the Rules Management `consumer` as we don't want to have to
     // manually authorize each rule type in the management UI.
     this.exemptConsumerIds = exemptConsumerIds;
+
+    this.spaceId = getSpace(request).then((maybeSpace) => maybeSpace?.id);
 
     this.featuresIds = getSpace(request)
       .then((maybeSpace) => new Set(maybeSpace?.disabledFeatures ?? []))
@@ -124,18 +127,43 @@ export class AlertingAuthorization {
         return new Set();
       });
 
-    this.allPossibleConsumers = this.featuresIds.then((featuresIds) =>
-      featuresIds.size
+    this.allPossibleConsumers = this.featuresIds.then((featuresIds) => {
+      return featuresIds.size
         ? asAuthorizedConsumers([...this.exemptConsumerIds, ...featuresIds], {
             read: true,
             all: true,
           })
-        : {}
-    );
+        : {};
+    });
   }
 
   private shouldCheckAuthorization(): boolean {
     return this.authorization?.mode?.useRbacForRequest(this.request) ?? false;
+  }
+
+  public async getSpaceId(): Promise<string | undefined> {
+    return this.spaceId;
+  }
+
+  /*
+   * This method exposes the private 'augmentRuleTypesWithAuthorization' to be
+   * used by the RAC/Alerts client
+   */
+  public async getAugmentedRuleTypesWithAuthorization(
+    featureIds: readonly string[],
+    operations: Array<ReadOperations | WriteOperations>,
+    authorizationEntity: AlertingAuthorizationEntity
+  ): Promise<{
+    username?: string;
+    hasAllRequested: boolean;
+    authorizedRuleTypes: Set<RegistryAlertTypeWithAuth>;
+  }> {
+    return this.augmentRuleTypesWithAuthorization(
+      this.alertTypeRegistry.list(),
+      operations,
+      authorizationEntity,
+      new Set(featureIds)
+    );
   }
 
   public async ensureAuthorized({ ruleTypeId, consumer, operation, entity }: EnsureAuthorizedOpts) {
@@ -339,13 +367,14 @@ export class AlertingAuthorization {
   private async augmentRuleTypesWithAuthorization(
     ruleTypes: Set<RegistryAlertType>,
     operations: Array<ReadOperations | WriteOperations>,
-    authorizationEntity: AlertingAuthorizationEntity
+    authorizationEntity: AlertingAuthorizationEntity,
+    featuresIds?: Set<string>
   ): Promise<{
     username?: string;
     hasAllRequested: boolean;
     authorizedRuleTypes: Set<RegistryAlertTypeWithAuth>;
   }> {
-    const featuresIds = await this.featuresIds;
+    const fIds = featuresIds ?? (await this.featuresIds);
     if (this.authorization && this.shouldCheckAuthorization()) {
       const checkPrivileges = this.authorization.checkPrivilegesDynamicallyWithRequest(
         this.request
@@ -363,7 +392,7 @@ export class AlertingAuthorization {
       // as we can't ask ES for the user's individual privileges we need to ask for each feature
       // and ruleType in the system whether this user has this privilege
       for (const ruleType of ruleTypesWithAuthorization) {
-        for (const feature of featuresIds) {
+        for (const feature of fIds) {
           for (const operation of operations) {
             privilegeToRuleType.set(
               this.authorization!.actions.alerting.get(
@@ -420,7 +449,7 @@ export class AlertingAuthorization {
       return {
         hasAllRequested: true,
         authorizedRuleTypes: this.augmentWithAuthorizedConsumers(
-          new Set([...ruleTypes].filter((ruleType) => featuresIds.has(ruleType.producer))),
+          new Set([...ruleTypes].filter((ruleType) => fIds.has(ruleType.producer))),
           await this.allPossibleConsumers
         ),
       };
