@@ -11,7 +11,7 @@ import { tGridSelectors } from '../../../../../timelines/public';
 import { State } from '../../../common/store/types';
 
 import { TimelineModel } from './model';
-import { AutoSavedWarningMsg, InsertTimeline, TimelineById } from './types';
+import { AutoSavedWarningMsg, TimelineById } from './types';
 
 export const { getManageTimelineById } = tGridSelectors;
 
@@ -24,9 +24,6 @@ const selectCallOutUnauthorizedMsg = (state: State): boolean =>
 
 export const selectTimeline = (state: State, timelineId: string): TimelineModel =>
   state.timeline.timelineById[timelineId];
-
-export const selectInsertTimeline = (state: State): InsertTimeline | null =>
-  state.timeline.insertTimeline;
 
 export const autoSaveMsgSelector = createSelector(selectAutoSaveMsg, (autoSaveMsg) => autoSaveMsg);
 

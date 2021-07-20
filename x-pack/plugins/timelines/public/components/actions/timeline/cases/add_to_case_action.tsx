@@ -16,27 +16,72 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { Case, CaseStatuses, StatusAll } from '../../../../../cases/common';
-import { APP_ID } from '../../../../common/constants';
-import { Ecs } from '../../../../common/ecs';
-import { SecurityPageName } from '../../../app/types';
-import {
-  getCaseDetailsUrl,
-  getCreateCaseUrl,
-  useFormatUrl,
-} from '../../../common/components/link_to';
-import { useStateToaster } from '../../../common/components/toasters';
-import { useControl } from '../../../common/hooks/use_control';
-import { useGetUserCasesPermissions, useKibana } from '../../../common/lib/kibana';
-import { ActionIconItem } from '../../../timelines/components/timeline/body/actions/action_icon_item';
-import { CreateCaseFlyout } from '../create/flyout';
+import { Case, CaseStatuses, StatusAll } from '../../../../../../cases/common';
+import { Ecs } from '../../../../../common/ecs';
+import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { TimelinesStartServices } from '../../../../types';
+import { ActionIconItem } from '../../action_icon_item';
+import { CreateCaseFlyout } from './create/flyout';
 import { createUpdateSuccessToaster } from './helpers';
 import * as i18n from './translations';
 
-interface AddToCaseActionProps {
+export interface AddToCaseActionProps {
   ariaLabel?: string;
   ecsRowData: Ecs;
+  appId: string;
 }
+// FIXME: DEDUPE
+export const APP_ID = 'securitySolution';
+export enum SecurityPageName {
+  overview = 'overview',
+  detections = 'detections',
+  alerts = 'alerts',
+  rules = 'rules',
+  exceptions = 'exceptions',
+  hosts = 'hosts',
+  network = 'network',
+  timelines = 'timelines',
+  case = 'case',
+  administration = 'administration',
+  endpoints = 'endpoints',
+  policies = 'policies',
+  trustedApps = 'trusted_apps',
+  eventFilters = 'event_filters',
+}
+interface UseControlsReturn {
+  isControlOpen: boolean;
+  openControl: () => void;
+  closeControl: () => void;
+}
+
+export const appendSearch = (search?: string) =>
+  isEmpty(search) ? '' : `${search?.startsWith('?') ? search : `?${search}`}`;
+
+export const getCaseUrl = (search?: string | null) => `${appendSearch(search ?? undefined)}`;
+
+export const getCreateCaseUrl = (search?: string | null) =>
+  `/create${appendSearch(search ?? undefined)}`;
+
+export const getCaseDetailsUrl = ({
+  id,
+  search,
+  subCaseId,
+}: {
+  id: string;
+  search?: string | null;
+  subCaseId?: string;
+}) => {
+  if (subCaseId) {
+    return `/${encodeURIComponent(id)}/sub-cases/${encodeURIComponent(subCaseId)}${appendSearch(
+      search ?? undefined
+    )}`;
+  }
+  return `/${encodeURIComponent(id)}${appendSearch(search ?? undefined)}`;
+};
+
+// FIXME DEDUPE END
+
 interface PostCommentArg {
   caseId: string;
   data: {
@@ -53,21 +98,29 @@ interface PostCommentArg {
 const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   ariaLabel = i18n.ACTION_ADD_TO_CASE_ARIA_LABEL,
   ecsRowData,
+  appId,
 }) => {
   const eventId = ecsRowData._id;
   const eventIndex = ecsRowData._index;
   const rule = ecsRowData.signal?.rule;
 
   const {
-    application: { navigateToApp },
+    application: { navigateToApp, getUrlForApp },
     cases,
-  } = useKibana().services;
-  const [, dispatchToaster] = useStateToaster();
+    notifications: { toasts },
+  } = useKibana<TimelinesStartServices>().services;
+
+  const useControl = (): UseControlsReturn => {
+    const [isControlOpen, setIsControlOpen] = useState<boolean>(false);
+    const openControl = useCallback(() => setIsControlOpen(true), []);
+    const closeControl = useCallback(() => setIsControlOpen(false), []);
+
+    return { isControlOpen, openControl, closeControl };
+  };
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const openPopover = useCallback(() => setIsPopoverOpen(true), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
-  const userPermissions = useGetUserCasesPermissions();
-
+  const userPermissions = useGetUserCasesPermissions(appId);
   const isEventSupported = !isEmpty(ecsRowData.signal?.rule?.id);
   const userCanCrud = userPermissions?.crud ?? false;
   const isDisabled = !userCanCrud || !isEventSupported;
@@ -86,6 +139,12 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
     },
     [navigateToApp]
   );
+  const currentSearch = window.location.search;
+  const urlSearch = useMemo(() => currentSearch, [currentSearch]);
+  const createCaseUrl = useMemo(() => getUrlForApp('cases') + getCreateCaseUrl(urlSearch), [
+    getUrlForApp,
+    urlSearch,
+  ]);
 
   const {
     isControlOpen: isCreateCaseFlyoutOpen,
@@ -111,7 +170,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
               id: rule?.id != null ? rule.id[0] : null,
               name: rule?.name != null ? rule.name[0] : null,
             },
-            owner: APP_ID,
+            owner: 'securitySolution',
           },
           updateCase,
         });
@@ -122,19 +181,15 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   const onCaseSuccess = useCallback(
     async (theCase: Case) => {
       closeCaseFlyoutOpen();
-      return dispatchToaster({
-        type: 'addToaster',
-        toast: createUpdateSuccessToaster(theCase, onViewCaseClick),
-      });
+      return createUpdateSuccessToaster(toasts, theCase, onViewCaseClick);
     },
-    [closeCaseFlyoutOpen, dispatchToaster, onViewCaseClick]
+    [closeCaseFlyoutOpen, onViewCaseClick, toasts]
   );
 
-  const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.case);
   const goToCreateCase = useCallback(
     async (ev) => {
       ev.preventDefault();
-      return navigateToApp(APP_ID, {
+      return navigateToApp('securitySolution', {
         deepLinkId: SecurityPageName.case,
         path: getCreateCaseUrl(urlSearch),
       });
@@ -243,7 +298,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
             owner: APP_ID,
           },
           createCaseNavigation: {
-            href: formatUrl(getCreateCaseUrl()),
+            href: createCaseUrl,
             onClick: goToCreateCase,
           },
           hiddenStatuses: [CaseStatuses.closed, StatusAll],
@@ -257,3 +312,6 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
 };
 
 export const AddToCaseAction = memo(AddToCaseActionComponent);
+
+// eslint-disable-next-line import/no-default-export
+export default AddToCaseAction;

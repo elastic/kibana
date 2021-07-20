@@ -23,6 +23,7 @@
      { "path": "../../../src/plugins/home/tsconfig.json" },
      { "path": "../data_enhanced/tsconfig.json" },
      { "path": "../features/tsconfig.json" },
+     { "path": "../cases/tsconfig.json" },
      { "path": "../licensing/tsconfig.json" },
      { "path": "../spaces/tsconfig.json" }
     ]

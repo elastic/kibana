@@ -23,7 +23,6 @@ import {
   TimelinePersistInput,
   SerializedFilterQuery,
 } from '../../../../common/types/timeline';
-import { InsertTimeline } from './types';
 import { tGridActions } from '../../../../../timelines/public';
 export const {
   applyDeltaToColumnWidth,
@@ -43,6 +42,8 @@ export const {
   updateItemsPerPageOptions,
   updateSort,
   upsertColumn,
+  setInsertTimeline,
+  showTimeline,
 } = tGridActions;
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/timeline');
@@ -69,8 +70,6 @@ export const removeProvider = actionCreator<{
   andProviderId?: string;
 }>('REMOVE_PROVIDER');
 
-export const showTimeline = actionCreator<{ id: string; show: boolean }>('SHOW_TIMELINE');
-
 export const updateTimelineGraphEventId = actionCreator<{ id: string; graphEventId: string }>(
   'UPDATE_TIMELINE_GRAPH_EVENT_ID'
 );
@@ -87,8 +86,6 @@ export const addTimeline = actionCreator<{
   timeline: TimelineModel;
   savedTimeline?: boolean;
 }>('ADD_TIMELINE');
-
-export const setInsertTimeline = actionCreator<InsertTimeline | null>('SET_INSERT_TIMELINE');
 
 export const startTimelineSaving = actionCreator<{
   id: string;

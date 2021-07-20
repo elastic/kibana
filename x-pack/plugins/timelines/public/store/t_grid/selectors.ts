@@ -8,6 +8,7 @@ import { getOr } from 'lodash/fp';
 import { createSelector } from 'reselect';
 import { TGridModel } from '.';
 import { tGridDefaults, getTGridManageDefaults } from './defaults';
+import type { InsertTimeline } from './types';
 
 const getDefaultTgrid = (id: string) => ({ ...tGridDefaults, ...getTGridManageDefaults(id) });
 
@@ -18,6 +19,9 @@ export const selectTGridById = (state: unknown, timelineId: string): TGridModel 
     state
   );
 };
+
+export const selectInsertTimeline = (state: unknown): InsertTimeline | null =>
+  state.timeline.insertTimeline;
 
 export const getTGridByIdSelector = () => createSelector(selectTGridById, (tGrid) => tGrid);
 

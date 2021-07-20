@@ -25,6 +25,8 @@ import {
   updateItemsPerPageOptions,
   updateSort,
   upsertColumn,
+  setInsertTimeline,
+  showTimeline,
 } from './actions';
 
 import {
@@ -41,6 +43,7 @@ import {
   updateTimelineSort,
   upsertTimelineColumn,
   updateTimelineDetailsPanel,
+  updateTimelineShowTimeline,
 } from './helpers';
 
 import { TimelineState, EMPTY_TIMELINE_BY_ID } from './types';
@@ -208,5 +211,13 @@ export const tGridReducer = reducerWithInitialState(initialTGridState)
         selectAll,
       },
     },
+  }))
+  .case(setInsertTimeline, (state, insertTimeline) => ({
+    ...state,
+    insertTimeline,
+  }))
+  .case(showTimeline, (state, { id, show }) => ({
+    ...state,
+    timelineById: updateTimelineShowTimeline({ id, show, timelineById: state.timelineById }),
   }))
   .build();

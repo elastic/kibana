@@ -132,10 +132,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       timelineById: state.timelineById,
     }),
   }))
-  .case(showTimeline, (state, { id, show }) => ({
-    ...state,
-    timelineById: updateTimelineShowTimeline({ id, show, timelineById: state.timelineById }),
-  }))
   .case(updateTimelineGraphEventId, (state, { id, graphEventId }) => ({
     ...state,
     timelineById: updateGraphEventId({ id, graphEventId, timelineById: state.timelineById }),
@@ -315,10 +311,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       filters,
       timelineById: state.timelineById,
     }),
-  }))
-  .case(setInsertTimeline, (state, insertTimeline) => ({
-    ...state,
-    insertTimeline,
   }))
   .case(updateIndexNames, (state, { id, indexNames }) => ({
     ...state,

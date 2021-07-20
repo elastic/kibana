@@ -22,6 +22,8 @@ import { InvestigateInTimelineAction } from '../../../../../detections/component
 import { AddEventNoteAction } from '../actions/add_note_icon_item';
 import { PinEventAction } from '../actions/pin_event_action';
 import { EventsTdContent } from '../../styles';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { SERVER_APP_ID } from '../../../../../../common/constants';
 import * as i18n from '../translations';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
@@ -59,6 +61,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
   const dispatch = useDispatch();
   const emptyNotes: string[] = [];
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const { timelines: timelinesUi } = useKibana().services;
 
   const onPinEvent: OnPinEvent = useCallback(
     (evtId) => dispatch(timelineActions.pinEvent({ id: timelineId, eventId: evtId })),
@@ -169,13 +172,25 @@ const ActionsComponent: React.FC<ActionProps> = ({
           TimelineId.detectionsPage,
           TimelineId.detectionsRulesDetailsPage,
           TimelineId.active,
+        ].includes(timelineId as TimelineId) &&
+          timelinesUi.getAddToCaseAction({
+            ariaLabel: i18n.ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues }),
+            ecsRowData: ecsData,
+            appId: SERVER_APP_ID,
+          })}
+        {/* {[
+          TimelineId.detectionsPage,
+          TimelineId.detectionsRulesDetailsPage,
+          TimelineId.active,
         ].includes(timelineId as TimelineId) && (
-          <AddToCaseAction
-            ariaLabel={i18n.ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues })}
-            key="attach-to-case"
-            ecsRowData={ecsData}
-          />
-        )}
+          <div style={{ display: 'none' }}>
+            <AddToCaseAction
+              ariaLabel={i18n.ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues })}
+              key="attach-to-case"
+              ecsRowData={ecsData}
+            />
+          </div>
+        )} */}
         <AlertContextMenu
           ariaLabel={i18n.MORE_ACTIONS_FOR_ROW({ ariaRowindex, columnValues })}
           key="alert-context-menu"
