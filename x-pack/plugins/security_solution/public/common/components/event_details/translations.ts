@@ -85,7 +85,7 @@ export const MULTI_FIELD_TOOLTIP = i18n.translate(
 );
 
 export const MULTI_FIELD_BADGE = i18n.translate(
-  'xpack.securitySolution.eventDetails.multiFieldTooltipContent',
+  'xpack.securitySolution.eventDetails.multiFieldBadge',
   {
     defaultMessage: 'multi-field',
   }

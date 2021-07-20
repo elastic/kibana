@@ -52,8 +52,9 @@ export const useActionCellDataProvider = ({
   if (values === null || values === undefined) return null;
 
   const stringifiedValues: string[] = [];
+  const arrayValues = Array.isArray(values) ? values : [values];
 
-  const idList: string[] = values
+  const idList: string[] = arrayValues
     .map((value, index) => {
       // if (fieldFromBrowserField) return '';
       let id = null;

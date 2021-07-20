@@ -308,6 +308,7 @@ export const HoverActions: React.FC<Props> = React.memo(
           {showFilters && (
             <>
               <FilterForValueButton
+                data-test-subj="hover-actions-filter-for"
                 defaultFocusedButtonRef={defaultFocusedButtonRef}
                 field={field}
                 onClick={handleFilterForValue}
@@ -316,6 +317,7 @@ export const HoverActions: React.FC<Props> = React.memo(
                 value={values}
               />
               <FilterOutValueButton
+                data-test-subj="hover-actions-filter-out"
                 field={field}
                 onClick={handleFilterOutValue}
                 ownFocus={ownFocus}
@@ -326,6 +328,7 @@ export const HoverActions: React.FC<Props> = React.memo(
           )}
           {toggleColumn && (
             <ColumnToggleButton
+              data-test-subj="hover-actions-toggle-column"
               field={field}
               isDisabled={isObjectArray && dataType !== 'geo_point'}
               isObjectArray={isObjectArray}
@@ -337,6 +340,7 @@ export const HoverActions: React.FC<Props> = React.memo(
 
           {showFilters && draggableIds != null && (
             <AddToTimelineButton
+              data-test-subj="hover-actions-add-timeline"
               field={field}
               onClick={handleStartDragToTimeline}
               ownFocus={ownFocus}
@@ -349,6 +353,7 @@ export const HoverActions: React.FC<Props> = React.memo(
             fieldName: field,
           }) && (
             <ShowTopNButton
+              data-test-subj="hover-actions-show-top-n"
               field={field}
               onClick={toggleTopN}
               onFilterAdded={onFilterAdded}
@@ -360,6 +365,7 @@ export const HoverActions: React.FC<Props> = React.memo(
           )}
           {!showTopN && (
             <CopyButton
+              data-test-subj="hover-actions-copy-button"
               field={field}
               isHoverAction
               ownFocus={ownFocus}
