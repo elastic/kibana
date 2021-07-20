@@ -103,7 +103,7 @@ const errorHandler = <E extends Error>(
 
   if (error instanceof TrustedAppPolicyNotExistsError) {
     logger.error(error);
-    return res.notFound({ body: error });
+    return res.badRequest({ body: error });
   }
 
   if (error instanceof TrustedAppVersionConflictError) {

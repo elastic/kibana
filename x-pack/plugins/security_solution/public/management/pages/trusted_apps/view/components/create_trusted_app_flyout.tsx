@@ -66,14 +66,6 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
 
     const dataTestSubj = flyoutProps['data-test-subj'];
 
-    const creationErrorsMessage = useMemo<string | undefined>(
-      () =>
-        creationErrors
-          ? CREATE_TRUSTED_APP_ERROR[creationErrors.message.replace(/(\[(.*)\]\: )/, '')] ||
-            creationErrors.message
-          : undefined,
-      [creationErrors]
-    );
     const policies = useMemo<CreateTrustedAppFormProps['policies']>(() => {
       return {
         // Casting is needed due to the use of `Immutable<>` on the return value from the selector above
@@ -81,6 +73,20 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
         isLoading: isLoadingPolicies,
       };
     }, [isLoadingPolicies, policyList]);
+
+    const creationErrorsMessage = useMemo<string | undefined>(() => {
+      let errorMessage = creationErrors
+        ? CREATE_TRUSTED_APP_ERROR[creationErrors.message.replace(/(\[(.*)\]\: )/, '')] ||
+          creationErrors.message
+        : undefined;
+
+      if (errorMessage && errorMessage.match('has one or more removed policies')) {
+        policies.options.forEach((policy) => {
+          errorMessage = errorMessage?.replace(policy.id, policy.name);
+        });
+      }
+      return errorMessage;
+    }, [creationErrors, policies]);
 
     const getTestId = useTestIdGenerator(dataTestSubj);
 

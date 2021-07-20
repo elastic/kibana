@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { KibanaResponseFactory } from 'kibana/server';
+import { KibanaResponseFactory, SavedObjectsClientContract } from 'kibana/server';
 
 import { xpackMocks } from '../../../fixtures';
-import { loggingSystemMock, httpServerMock } from '../../../../../../../src/core/server/mocks';
+import {
+  loggingSystemMock,
+  httpServerMock,
+  savedObjectsClientMock,
+} from '../../../../../../../src/core/server/mocks';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { listMock } from '../../../../../lists/server/mocks';
 import { ExceptionListClient } from '../../../../../lists/server';
@@ -32,9 +36,16 @@ import {
   getTrustedAppsUpdateRouteHandler,
 } from './handlers';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
-import { TrustedAppNotFoundError, TrustedAppVersionConflictError } from './errors';
+import {
+  TrustedAppNotFoundError,
+  TrustedAppVersionConflictError,
+  TrustedAppPolicyNotExistsError,
+} from './errors';
 import { updateExceptionListItemImplementationMock } from './test_utils';
 import { Logger } from '@kbn/logging';
+import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
+import { createPackagePolicyServiceMock } from '../../../../../fleet/server/mocks';
+import { PackagePolicy } from '../../../../../fleet/common';
 
 const EXCEPTION_LIST_ITEM: ExceptionListItemSchema = {
   _version: 'abc123',
@@ -88,7 +99,57 @@ const TRUSTED_APP: TrustedApp = {
   ],
 };
 
+const TRUSTED_APP_BY_POLICY: TrustedApp = {
+  id: '123',
+  version: 'abc123',
+  created_at: '11/11/2011T11:11:11.111',
+  created_by: 'admin',
+  updated_at: '2021-01-04T13:55:00.561Z',
+  updated_by: 'me',
+  name: 'linux trusted app 1',
+  description: 'Linux trusted app 1',
+  os: OperatingSystem.LINUX,
+  effectScope: {
+    type: 'policy',
+    policies: ['e5cbb9cf-98aa-4303-a04b-6a1165915079', '9da95be9-9bee-4761-a8c4-28d6d9bd8c71'],
+  },
+  entries: [
+    createConditionEntry(ConditionEntryField.HASH, 'match', '1234234659af249ddf3e40864e9fb241'),
+    createConditionEntry(ConditionEntryField.PATH, 'match', '/bin/malware'),
+  ],
+};
+
+const PACKAGE_POLICIES_RESPONSE: PackagePolicy[] = [
+  // Next line is ts-ignored as this is the response when the policy doesn't exists but the type is complaining about it.
+  // @ts-ignore
+  { id: '9da95be9-9bee-4761-a8c4-28d6d9bd8c71', version: undefined },
+  {
+    id: 'e5cbb9cf-98aa-4303-a04b-6a1165915079',
+    version: 'Wzc0NDk5LDFd',
+    name: 'EI 2',
+    description: '',
+    namespace: 'default',
+    policy_id: '9fd2ac50-e86f-11eb-a87f-51e16104076a',
+    enabled: true,
+    output_id: '',
+    inputs: [],
+    package: { name: 'endpoint', title: 'Endpoint Security', version: '0.20.1' },
+    revision: 3,
+    created_at: '2021-07-19T09:00:45.608Z',
+    created_by: 'elastic',
+    updated_at: '2021-07-19T09:02:47.193Z',
+    updated_by: 'system',
+  },
+];
+
+const packagePolicyClient = createPackagePolicyServiceMock() as jest.Mocked<PackagePolicyServiceInterface>;
+const savedObjectClient = savedObjectsClientMock.create() as jest.Mocked<SavedObjectsClientContract>;
+
 describe('handlers', () => {
+  beforeEach(() => {
+    packagePolicyClient.getByIDs.mockReset();
+  });
+
   const createAppContextMock = () => {
     const context = {
       logFactory: loggingSystemMock.create(),
@@ -96,6 +157,9 @@ describe('handlers', () => {
       config: () => Promise.resolve(createMockConfig()),
       experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
     };
+
+    context.service.getPackagePolicyService = () => packagePolicyClient;
+    context.service.getScopedSavedObjectsClient = () => savedObjectClient;
 
     // Ensure that `logFactory.get()` always returns the same instance for the same given prefix
     const instances = new Map<string, ReturnType<typeof context.logFactory.get>>();
@@ -223,6 +287,24 @@ describe('handlers', () => {
           mockResponse
         )
       ).rejects.toThrowError(error);
+    });
+
+    it("should return error when policy doesn't exists", async () => {
+      const mockResponse = httpServerMock.createResponseFactory();
+      packagePolicyClient.getByIDs.mockReset();
+      packagePolicyClient.getByIDs.mockResolvedValueOnce(PACKAGE_POLICIES_RESPONSE);
+
+      await createTrustedAppHandler(
+        createHandlerContextMock(),
+        httpServerMock.createKibanaRequest({ body: TRUSTED_APP_BY_POLICY }),
+        mockResponse
+      );
+
+      expect(appContextMock.logFactory.get('trusted_apps').error).toHaveBeenCalledWith(
+        new TrustedAppPolicyNotExistsError(TRUSTED_APP_BY_POLICY.name, [
+          '9da95be9-9bee-4761-a8c4-28d6d9bd8c71',
+        ])
+      );
     });
   });
 
@@ -507,6 +589,23 @@ describe('handlers', () => {
       expect(mockResponse.conflict).toHaveBeenCalledWith({
         body: expect.any(TrustedAppVersionConflictError),
       });
+    });
+
+    it("should return error when policy doesn't exists", async () => {
+      packagePolicyClient.getByIDs.mockReset();
+      packagePolicyClient.getByIDs.mockResolvedValueOnce(PACKAGE_POLICIES_RESPONSE);
+
+      await updateHandler(
+        createHandlerContextMock(),
+        httpServerMock.createKibanaRequest({ body: TRUSTED_APP_BY_POLICY }),
+        mockResponse
+      );
+
+      expect(appContextMock.logFactory.get('trusted_apps').error).toHaveBeenCalledWith(
+        new TrustedAppPolicyNotExistsError(TRUSTED_APP_BY_POLICY.name, [
+          '9da95be9-9bee-4761-a8c4-28d6d9bd8c71',
+        ])
+      );
     });
   });
 });
