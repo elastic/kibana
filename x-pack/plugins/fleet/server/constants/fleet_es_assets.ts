@@ -120,10 +120,12 @@ processors:
       params:
         # List of users responsible for creating Fleet output API keys.
         trusted_users:
-          - username: elastic
-            realm: reserved
+          - username: elastic/fleet-server
+            realm: _service_account
           - username: cloud-internal-agent-server
             realm: found
+          - username: elastic
+            realm: reserved
   - remove:
       field: _security
       ignore_missing: true
