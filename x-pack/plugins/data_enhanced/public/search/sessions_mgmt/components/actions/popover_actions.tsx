@@ -9,11 +9,7 @@ import {
   EuiButtonIcon,
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
   EuiPopover,
-  EuiTextProps,
   EuiToolTip,
 } from '@elastic/eui';
 import {
@@ -22,19 +18,11 @@ import {
 } from '@elastic/eui/src/components/context_menu/context_menu';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'kibana/public';
-import React, { ReactElement, useState } from 'react';
-import { TableText } from '../';
+import React, { useState } from 'react';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { UISession } from '../../types';
 import { getAction } from './get_action';
 import { ACTION, OnActionComplete } from './types';
-
-// interfaces
-interface PopoverActionProps {
-  textColor?: EuiTextProps['color'];
-  iconType: string;
-  children: string | ReactElement;
-}
 
 interface PopoverActionItemsProps {
   session: UISession;
@@ -42,18 +30,6 @@ interface PopoverActionItemsProps {
   onActionComplete: OnActionComplete;
   core: CoreStart;
 }
-
-// helper
-const PopoverAction = ({ textColor, iconType, children, ...props }: PopoverActionProps) => (
-  <EuiFlexGroup gutterSize="s" alignItems="center" component="span" {...props}>
-    <EuiFlexItem grow={false} component="span">
-      <EuiIcon color={textColor} type={iconType} />
-    </EuiFlexItem>
-    <EuiFlexItem grow={true} component="span">
-      <TableText color={textColor}>{children}</TableText>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
 
 export const PopoverActionsMenu = ({
   api,
@@ -69,10 +45,6 @@ export const PopoverActionsMenu = ({
 
   const closePopover = () => {
     setPopover(false);
-  };
-
-  const onActionClick = () => {
-    closePopover();
   };
 
   const renderPopoverButton = () => (
@@ -95,9 +67,9 @@ export const PopoverActionsMenu = ({
   const actions = session.actions || [];
   // Generic set of actions - up to the API to return what is available
   const items = actions.reduce((itemSet, actionType) => {
-    const actionDef = getAction(api, actionType, session, core, onActionClick, onActionComplete);
+    const actionDef = getAction(api, actionType, session, core);
     if (actionDef) {
-      const { label, textColor, iconType } = actionDef;
+      const { label, iconType, onClick } = actionDef;
 
       // add a line above the delete action (when there are multiple)
       // NOTE: Delete action MUST be the final action[] item
@@ -109,16 +81,15 @@ export const PopoverActionsMenu = ({
         ...itemSet,
         {
           key: `action-${actionType}`,
-          name: (
-            <PopoverAction
-              textColor={textColor}
-              iconType={iconType}
-              data-test-subj={`sessionManagementPopoverAction-${actionType}`}
-            >
-              {label}
-            </PopoverAction>
-          ),
-        },
+          name: label,
+          icon: iconType,
+          'data-test-subj': `sessionManagementPopoverAction-${actionType}`,
+          onClick: async () => {
+            closePopover();
+            await onClick();
+            onActionComplete();
+          },
+        } as EuiContextMenuPanelItemDescriptorEntry,
       ];
     }
     return itemSet;
@@ -126,20 +97,16 @@ export const PopoverActionsMenu = ({
 
   const panels: EuiContextMenuPanelDescriptor[] = [{ id: 0, items }];
 
-  return (
-    <>
-      {actions.length ? (
-        <EuiPopover
-          id={`popover-${session.id}`}
-          button={renderPopoverButton()}
-          isOpen={isPopoverOpen}
-          closePopover={closePopover}
-          anchorPosition="downLeft"
-          panelPaddingSize={'s'}
-        >
-          <EuiContextMenu initialPanelId={0} panels={panels} />
-        </EuiPopover>
-      ) : null}
-    </>
-  );
+  return actions.length ? (
+    <EuiPopover
+      id={`popover-${session.id}`}
+      button={renderPopoverButton()}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      anchorPosition="downLeft"
+      panelPaddingSize={'s'}
+    >
+      <EuiContextMenu initialPanelId={0} panels={panels} />
+    </EuiPopover>
+  ) : null;
 };
