@@ -131,9 +131,12 @@ export const renderAllSeries = (
               minBarHeight={2}
               displayValueSettings={{
                 showValueLabel,
-                isValueContainedInElement: true,
+                isValueContainedInElement: false,
                 isAlternatingValueLabel: false,
-                overflowConstraints: [LabelOverflowConstraint.ChartEdges],
+                overflowConstraints: [
+                  LabelOverflowConstraint.ChartEdges,
+                  LabelOverflowConstraint.BarGeometry,
+                ],
               }}
             />
           );
