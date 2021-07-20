@@ -63,17 +63,7 @@ import { appContextService } from './app_context';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
-const MONITORING_LOG_DATASETS = [
-  'elastic_agent',
-  'elastic_agent.elastic_agent',
-  'elastic_agent.filebeat',
-  'elastic_agent.fleet_server',
-  'elastic_agent.metricbeat',
-  'elastic_agent.osquerybeat',
-  'elastic_agent.packetbeat',
-  'elastic_agent.endpoint_security',
-];
-const MONITORING_METRICS_DATASETS = [
+const MONITORING_DATASETS = [
   'elastic_agent',
   'elastic_agent.elastic_agent',
   'elastic_agent.apm_server',
@@ -83,6 +73,7 @@ const MONITORING_METRICS_DATASETS = [
   'elastic_agent.osquerybeat',
   'elastic_agent.packetbeat',
   'elastic_agent.endpoint_security',
+  'elastic_agent.auditbeat',
 ];
 
 class AgentPolicyService {
@@ -796,12 +787,12 @@ class AgentPolicyService {
       let names: string[] = [];
       if (fullAgentPolicy.agent.monitoring.logs) {
         names = names.concat(
-          MONITORING_LOG_DATASETS.map((dataset) => `logs-${dataset}-${monitoringNamespace}`)
+          MONITORING_DATASETS.map((dataset) => `logs-${dataset}-${monitoringNamespace}`)
         );
       }
       if (fullAgentPolicy.agent.monitoring.metrics) {
         names = names.concat(
-          MONITORING_METRICS_DATASETS.map((dataset) => `metrics-${dataset}-${monitoringNamespace}`)
+          MONITORING_DATASETS.map((dataset) => `metrics-${dataset}-${monitoringNamespace}`)
         );
       }
 
