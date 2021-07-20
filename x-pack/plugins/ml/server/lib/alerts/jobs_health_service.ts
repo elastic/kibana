@@ -76,15 +76,9 @@ export function jobsHealthServiceProvider(
   return {
     /**
      * Gets not started datafeeds for provided jobs selection.
-     * @param includeJobs
-     * @param excludeJobs
+     * @param jobIds
      */
-    async getNotStartedDatafeed(
-      includeJobs: JobSelection,
-      excludeJobs?: JobSelection | null
-    ): Promise<NotStartedDatafeedResponse | void> {
-      const jobIds = await getResultJobIds(includeJobs, excludeJobs);
-      logger.debug(`Performing health checks for job ids: ${jobIds.join(', ')}`);
+    async getNotStartedDatafeeds(jobIds: string[]): Promise<NotStartedDatafeedResponse | void> {
       const dataFeeds = await datafeedsService.getDatafeedByJobId(jobIds);
 
       if (dataFeeds) {
@@ -95,7 +89,6 @@ export function jobsHealthServiceProvider(
         });
 
         // match datafeed stats with the job ids
-
         return (datafeedsStats as DatafeedStats[])
           .filter((datafeedStat) => datafeedStat.state !== 'started')
           .map((datafeedStats) => {
@@ -118,8 +111,16 @@ export function jobsHealthServiceProvider(
 
       const results: TestsResults = [];
 
+      const jobIds = await getResultJobIds(includeJobs, excludeJobs);
+
+      if (jobIds.length === 0) {
+        throw new Error('Rule does not have associated jobs.');
+      }
+
+      logger.debug(`Performing health checks for job ids: ${jobIds.join(', ')}`);
+
       if (config.dataFeed.enabled) {
-        const response = await this.getNotStartedDatafeed(includeJobs, excludeJobs);
+        const response = await this.getNotStartedDatafeeds(jobIds);
         if (response && response.length > 0) {
           results.push({
             name: 'dataFeed',
