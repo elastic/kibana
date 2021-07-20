@@ -7,7 +7,7 @@
 
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import {
-  elasticOutline,
+  getElasticOutline,
   resolveWithMissingImage,
 } from '../../../../../../src/plugins/presentation_util/common/lib';
 import { Render } from '../../../types';
@@ -32,10 +32,9 @@ export function repeatImage(): ExpressionFunctionDefinition<
   'repeatImage',
   number,
   Arguments,
-  Render<Arguments>
+  Promise<Render<Arguments>>
 > {
   const { help, args: argHelp } = getFunctionHelp().repeatImage;
-
   return {
     name: 'repeatImage',
     aliases: [],
@@ -51,7 +50,7 @@ export function repeatImage(): ExpressionFunctionDefinition<
       image: {
         types: ['string', 'null'],
         help: argHelp.image,
-        default: elasticOutline,
+        default: null,
       },
       max: {
         types: ['number'],
@@ -64,7 +63,12 @@ export function repeatImage(): ExpressionFunctionDefinition<
         help: argHelp.size,
       },
     },
-    fn: (count, args) => {
+    fn: async (count, args) => {
+      const { elasticOutline } = await getElasticOutline();
+      if (args.image === null) {
+        args.image = elasticOutline;
+      }
+
       return {
         type: 'render',
         as: 'repeatImage',
