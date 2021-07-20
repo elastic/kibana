@@ -7,31 +7,11 @@
 
 import React from 'react';
 
-import { BodyRow } from './body_row';
-
-import { Column } from './types';
-
 export interface BodyRowsProps<Item> {
-  columns: Array<Column<Item>>;
   items: Item[];
-  rowProps?: (item: Item) => object;
+  renderItem: (item: Item, itemIndex: number) => React.ReactNode;
 }
 
-export const BodyRows = <Item extends object>({
-  columns,
-  items,
-  rowProps = () => ({}),
-}: BodyRowsProps<Item>) => {
-  return (
-    <div>
-      {items.map((item, itemIndex) => (
-        <BodyRow
-          key={`table_draggable_row_${itemIndex}`}
-          columns={columns}
-          item={item}
-          additionalProps={rowProps(item)}
-        />
-      ))}
-    </div>
-  );
+export const BodyRows = <Item extends object>({ items, renderItem }: BodyRowsProps<Item>) => {
+  return <div>{items.map(renderItem)}</div>;
 };

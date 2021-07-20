@@ -17,18 +17,22 @@ interface Foo {
 }
 
 describe('HeaderRow', () => {
+  const columns = [
+    { name: 'ID', render: (item: Foo) => <div>{item.id}</div> },
+    { name: 'Whatever', render: () => 'Whatever' },
+  ];
+
   it('renders a table header row from the provided column names', () => {
-    const wrapper = shallow(
-      <HeaderRow
-        columns={[
-          { name: 'ID', render: (item: Foo) => <div>{item.id}</div> },
-          { name: 'Whatever', render: () => 'Whatever' },
-        ]}
-      />
-    );
+    const wrapper = shallow(<HeaderRow columns={columns} />);
     const cells = wrapper.find(Cell);
     expect(cells.length).toBe(2);
     expect(cells.at(0).children().dive().text()).toEqual('ID');
     expect(cells.at(1).children().dive().text()).toEqual('Whatever');
+  });
+
+  it('will render an additional cell in the first column if one is provided', () => {
+    const wrapper = shallow(<HeaderRow columns={columns} firstCell={<Cell />} />);
+    const cells = wrapper.find(Cell);
+    expect(cells.length).toBe(3);
   });
 });

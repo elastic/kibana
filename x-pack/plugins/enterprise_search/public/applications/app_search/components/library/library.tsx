@@ -269,6 +269,35 @@ export const Library: React.FC = () => {
               { name: 'Whatever', render: (item) => <div>Whatever</div> },
             ]}
           />
+          <EuiSpacer />
+
+          <EuiTitle size="s">
+            <h3>With reordering disabled</h3>
+          </EuiTitle>
+          <EuiSpacer />
+          <ReorderableTable
+            disableReordering
+            items={[{ id: 1 }, { id: 2 }, { id: 3 }]}
+            columns={[
+              { name: 'ID', render: (item) => <div>{item.id}</div> },
+              { name: 'Whatever', render: (item) => <div>Whatever</div> },
+            ]}
+          />
+          <EuiSpacer />
+
+          <EuiTitle size="s">
+            <h3>With reordering enabled, but dragging disabled</h3>
+          </EuiTitle>
+          <EuiSpacer />
+          <ReorderableTable
+            disableDragging
+            items={[{ id: 1 }, { id: 2 }, { id: 3 }]}
+            columns={[
+              { name: 'ID', render: (item) => <div>{item.id}</div> },
+              { name: 'Whatever', render: (item) => <div>Whatever</div> },
+            ]}
+          />
+          <EuiSpacer />
 
           <EuiTitle size="s">
             <h3>Using the rowProps prop to apply dynamic properties to each row</h3>

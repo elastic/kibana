@@ -12,22 +12,26 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Cell } from './cell';
 import { Column } from './types';
 
-interface BodyRowProps<Item> {
+export interface BodyRowProps<Item> {
   columns: Array<Column<Item>>;
   item: Item;
   additionalProps?: object;
+  // Cell to put in first column before other columns
+  firstCell?: React.ReactNode;
 }
 
 export const BodyRow = <Item extends object>({
   columns,
   item,
   additionalProps,
+  firstCell,
 }: BodyRowProps<Item>) => {
   return (
     <div className="reorderable-table-row">
       <EuiFlexGroup data-test-subj="row" alignItems="center" {...(additionalProps || {})}>
         <EuiFlexItem>
           <EuiFlexGroup alignItems="flexStart">
+            {!!firstCell && firstCell}
             {columns.map((column, columnIndex) => (
               <Cell
                 key={`table_row_cell_${columnIndex}`}

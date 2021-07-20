@@ -14,14 +14,17 @@ import { Column } from './types';
 
 interface HeaderRowProps<Item> {
   columns: Array<Column<Item>>;
+  // Cell to put in first column before other columns
+  firstCell?: React.ReactNode;
 }
 
-export const HeaderRow = <Item extends object>({ columns }: HeaderRowProps<Item>) => {
+export const HeaderRow = <Item extends object>({ columns, firstCell }: HeaderRowProps<Item>) => {
   return (
     <div className="reorderable-table-header">
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFlexGroup>
+            {!!firstCell && firstCell}
             {columns.map((column, columnIndex) => (
               <Cell key={`table_header_cell_${columnIndex}`} {...column}>
                 <EuiText size="s">

@@ -64,4 +64,10 @@ describe('BodyRow', () => {
 
     expect(wrapper.find('[data-test-subj="row"]').hasClass('some_class_name')).toBe(true);
   });
+
+  it('will render an additional cell in the first column if one is provided', () => {
+    const wrapper = shallow(<BodyRow columns={columns} item={item} firstCell={<Cell />} />);
+    const cells = wrapper.find(Cell);
+    expect(cells.length).toBe(3);
+  });
 });
