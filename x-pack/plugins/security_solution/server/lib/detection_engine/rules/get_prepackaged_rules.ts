@@ -105,17 +105,15 @@ export const getPrepackagedRules = (
 
 export const getLatestPrepackagedRules = async (
   client: RuleAssetSavedObjectsClient,
-  config: ConfigType
+  prebuiltRulesFromFileSystem: ConfigType['prebuiltRulesFromFileSystem'],
+  prebuiltRulesFromSavedObjects: ConfigType['prebuiltRulesFromSavedObjects']
 ): Promise<AddPrepackagedRulesSchemaDecoded[]> => {
   // build a map of the most recent version of each rule
-  const fromFS = config.prebuiltRulesFromFileSystem;
-  const fromFleet = config.prebuiltRulesFromSavedObjects;
-
-  const prepackaged = fromFS ? getPrepackagedRules() : [];
+  const prepackaged = prebuiltRulesFromFileSystem ? getPrepackagedRules() : [];
   const ruleMap = new Map(prepackaged.map((r) => [r.rule_id, r]));
 
   // check the rules installed via fleet and create/update if the version is newer
-  if (fromFleet) {
+  if (prebuiltRulesFromSavedObjects) {
     const fleetRules = await getFleetInstalledRules(client);
     const fleetUpdates = fleetRules.filter((r) => {
       const rule = ruleMap.get(r.rule_id);

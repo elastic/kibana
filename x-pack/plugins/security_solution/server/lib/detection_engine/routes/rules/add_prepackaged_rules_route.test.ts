@@ -297,6 +297,7 @@ describe('add_prepackaged_rules_route', () => {
         getExceptionListClient: jest.fn(),
         getListClient: jest.fn(),
       };
+      const config = createMockConfig();
 
       await createPrepackagedRules(
         context,
@@ -304,7 +305,8 @@ describe('add_prepackaged_rules_route', () => {
         clients.alertsClient,
         {} as FrameworkRequest,
         1200,
-        createMockConfig(),
+        config.prebuiltRulesFromFileSystem,
+        config.prebuiltRulesFromSavedObjects,
         mockExceptionsClient
       );
 
@@ -314,6 +316,7 @@ describe('add_prepackaged_rules_route', () => {
 
     test('uses passed in exceptions list client when lists client not available in context', async () => {
       const { lists, ...myContext } = context;
+      const config = createMockConfig();
 
       await createPrepackagedRules(
         myContext,
@@ -321,7 +324,8 @@ describe('add_prepackaged_rules_route', () => {
         clients.alertsClient,
         {} as FrameworkRequest,
         1200,
-        createMockConfig(),
+        config.prebuiltRulesFromFileSystem,
+        config.prebuiltRulesFromSavedObjects,
         mockExceptionsClient
       );
 
